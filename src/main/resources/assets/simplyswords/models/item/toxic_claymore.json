@@ -2,9 +2,9 @@
 	"credit": "Made by Sweenus using Blockbench",
 	"texture_size": [32, 32],
 	"textures": {
-		"0": "simplyswords:item/sword_claymore_electric",
-		"1": "simplyswords:item/sword_claymore_electric_effect_anim",
-		"particle": "simplyswords:item/sword_claymore_electric"
+		"0": "simplyswords:item/toxic_claymore",
+		"1": "simplyswords:item/effect_toxin_drip2",
+		"particle": "simplyswords:item/toxic_claymore"
 	},
 	"elements": [
 		{
@@ -157,7 +157,7 @@
 			"faces": {
 				"north": {"uv": [0, 0, 2.75, 11.5], "texture": "#1"},
 				"east": {"uv": [7, 0, 7.75, 11.5], "texture": "#1"},
-				"south": {"uv": [0, 0, 2.75, 11.5], "texture": "#1"},
+				"south": {"uv": [5.6, 0, 2.85, 11.5], "texture": "#1"},
 				"west": {"uv": [7, 0, 7.75, 11.5], "texture": "#1"},
 				"up": {"uv": [10.75, 0.75, 8, 0], "texture": "#1"},
 				"down": {"uv": [10.75, 1, 8, 1.75], "texture": "#1"}

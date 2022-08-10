@@ -1,5 +1,5 @@
 {
-	"credit": "Made with Blockbench by Sweenus",
+	"credit": "Made by Sweenus using Blockbench",
 	"texture_size": [32, 32],
 	"textures": {
 		"0": "simplyswords:item/sword_electric",
@@ -138,12 +138,12 @@
 			"translation": [-0.5, 1.75, 1.75]
 		},
 		"firstperson_righthand": {
-			"rotation": [15, 91, -10],
-			"translation": [1.5, 1.75, -2.25]
+			"rotation": [-9, 78, -8],
+			"translation": [3.75, 1.75, -2.25]
 		},
 		"firstperson_lefthand": {
-			"rotation": [15, 91, -10],
-			"translation": [1.5, 1.75, -2.25]
+			"rotation": [-9, 78, -8],
+			"translation": [4.75, 1.75, -2.25]
 		},
 		"ground": {
 			"scale": [0.46, 0.47, 0.44]
@@ -169,6 +169,8 @@
 			"name": "base",
 			"origin": [8, 8, 8],
 			"color": 0,
+			"nbt": "{}",
+			"armAnimationEnabled": false,
 			"children": [0, 1, 2, 3, 4, 5, 6, 7, 8]
 		},
 		{

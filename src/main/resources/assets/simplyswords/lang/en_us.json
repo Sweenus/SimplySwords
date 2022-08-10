@@ -2,7 +2,9 @@
   "item.simplyswords.mythril_ingot": "Mythril Ingot",
   "item.simplyswords.mythril_nugget": "Mythril Nugget",
   "item.simplyswords.electric_sword": "Electrite Sword",
+  "item.simplyswords.toxic_sword": "Toxinite Sword",
   "item.simplyswords.rdiamond_sword": "Reinforced Diamond Sword",
   "item.simplyswords.rdiamond_claymore": "Reinforced Diamond Claymore",
+  "item.simplyswords.toxin_claymore": "Toxinite Claymore",
   "item.simplyswords.electric_claymore": "Electrite Claymore"
 }

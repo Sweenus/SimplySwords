@@ -8,6 +8,7 @@ import net.minecraft.item.ItemGroup;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 import net.sweenus.simplyswords.item.custom.LevitationSwordItem;
+import net.sweenus.simplyswords.item.custom.PoisonSwordItem;
 import net.sweenus.simplyswords.item.custom.SpeedSwordItem;
 
 public class ModItems {
@@ -18,19 +19,27 @@ public class ModItems {
             new Item(new FabricItemSettings().group(ItemGroup.MISC)));
 
     public static final Item ELECTRIC_SWORD = registerItem( "electric_sword",
-            new SpeedSwordItem(ModToolMaterial.ELEMENTITE, 8, 1.4f,
+            new SpeedSwordItem(ModToolMaterial.ELEMENTITE, 3, -1.4f,
+                    new FabricItemSettings().group(ItemGroup.COMBAT)));
+
+    public static final Item TOXIC_SWORD = registerItem( "toxic_sword",
+            new PoisonSwordItem(ModToolMaterial.ELEMENTITE, -1, -2.0f,
                     new FabricItemSettings().group(ItemGroup.COMBAT)));
 
     public static final Item RDIAMOND_SWORD = registerItem( "rdiamond_sword",
-            new SpeedSwordItem(ModToolMaterial.ELEMENTITE, 7, 1.5f,
+            new SpeedSwordItem(ModToolMaterial.ELEMENTITE, 2, -1.5f,
                     new FabricItemSettings().group(ItemGroup.COMBAT)));
 
     public static final Item RDIAMOND_CLAYMORE = registerItem( "rdiamond_claymore",
-            new SpeedSwordItem(ModToolMaterial.ELEMENTITE, 10, 1.9f,
+            new SpeedSwordItem(ModToolMaterial.ELEMENTITE, 4, -2.6f,
                     new FabricItemSettings().group(ItemGroup.COMBAT)));
 
     public static final Item ELECTRIC_CLAYMORE = registerItem( "electric_claymore",
-            new SpeedSwordItem(ModToolMaterial.ELEMENTITE, 11, 1.8f,
+            new SpeedSwordItem(ModToolMaterial.ELEMENTITE, 5, -2.5f,
+                    new FabricItemSettings().group(ItemGroup.COMBAT)));
+
+    public static final Item TOXIC_CLAYMORE = registerItem( "toxic_claymore",
+            new PoisonSwordItem(ModToolMaterial.ELEMENTITE, 1, -2.8f,
                     new FabricItemSettings().group(ItemGroup.COMBAT)));
 
     private static Item registerItem(String name, Item item) {
