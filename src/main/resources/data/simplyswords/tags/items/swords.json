@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "simplyswords:electric_sword",
+    "simplyswords:rdiamond_sword",
+    "simplyswords:rdiamond_claymore",
+    "simplyswords:electric_claymore"
+  ]
+}

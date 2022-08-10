@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "#": {
+      "item": "simplyswords:rdiamond_claymore"
+    },
+    "X": {
+      "item": "minecraft:redstone_block"
+    }
+  },
+  "pattern": [
+    "X",
+    "X",
+    "#"
+  ],
+  "result": {
+    "item": "simplyswords:electric_claymore"
+  }
+}
