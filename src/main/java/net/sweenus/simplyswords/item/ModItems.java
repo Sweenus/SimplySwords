@@ -7,35 +7,33 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
+import net.sweenus.simplyswords.item.custom.FreezeSwordItem;
 import net.sweenus.simplyswords.item.custom.LevitationSwordItem;
 import net.sweenus.simplyswords.item.custom.PoisonSwordItem;
 import net.sweenus.simplyswords.item.custom.SpeedSwordItem;
 
 public class ModItems {
-    public static final Item MYTHRIL_INGOT = registerItem( "mythril_ingot",
-        new Item(new FabricItemSettings().group(ItemGroup.MISC)));
-
-    public static final Item MYTHRIL_NUGGET = registerItem( "mythril_nugget",
-            new Item(new FabricItemSettings().group(ItemGroup.MISC)));
+   // public static final Item ITEMNAMEHERE = registerItem( "item_name",
+        //new Item(new FabricItemSettings().group(ItemGroup.MISC)));
 
     public static final Item ELECTRIC_SWORD = registerItem( "electric_sword",
-            new SpeedSwordItem(ModToolMaterial.ELEMENTITE, 3, -1.4f,
+            new SpeedSwordItem(ModToolMaterial.ELEMENTITE, 3, -1.8f,
                     new FabricItemSettings().group(ItemGroup.COMBAT)));
 
     public static final Item TOXIC_SWORD = registerItem( "toxic_sword",
-            new PoisonSwordItem(ModToolMaterial.ELEMENTITE, -1, -2.0f,
+            new PoisonSwordItem(ModToolMaterial.ELEMENTITE, -1, -2.5f,
                     new FabricItemSettings().group(ItemGroup.COMBAT)));
 
     public static final Item RDIAMOND_SWORD = registerItem( "rdiamond_sword",
-            new SpeedSwordItem(ModToolMaterial.ELEMENTITE, 2, -1.5f,
+            new SpeedSwordItem(ModToolMaterial.ELEMENTITE, 2, -2f,
                     new FabricItemSettings().group(ItemGroup.COMBAT)));
 
     public static final Item CURVED_SWORD = registerItem( "curved_sword",
-            new SpeedSwordItem(ModToolMaterial.ELEMENTITE, 0, -1.5f,
+            new SpeedSwordItem(ModToolMaterial.ELEMENTITE, 0, -2f,
                     new FabricItemSettings().group(ItemGroup.COMBAT)));
 
     public static final Item RUNIC_SWORD = registerItem( "runic_sword",
-            new SpeedSwordItem(ModToolMaterial.ELEMENTITE, 1, -1.5f,
+            new FreezeSwordItem(ModToolMaterial.ELEMENTITE, 1, -2f,
                     new FabricItemSettings().group(ItemGroup.COMBAT)));
 
     public static final Item RDIAMOND_CLAYMORE = registerItem( "rdiamond_claymore",

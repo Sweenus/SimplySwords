@@ -1,6 +1,4 @@
 {
-  "item.simplyswords.mythril_ingot": "Mythril Ingot",
-  "item.simplyswords.mythril_nugget": "Mythril Nugget",
   "item.simplyswords.electric_sword": "Electrite Sword",
   "item.simplyswords.curved_sword": "Curved Sword",
   "item.simplyswords.runic_sword": "Runic Sword",
@@ -8,5 +6,8 @@
   "item.simplyswords.rdiamond_sword": "Reinforced Diamond Sword",
   "item.simplyswords.rdiamond_claymore": "Reinforced Diamond Claymore",
   "item.simplyswords.toxic_claymore": "Toxinite Claymore",
-  "item.simplyswords.electric_claymore": "Electrite Claymore"
+  "item.simplyswords.electric_claymore": "Electrite Claymore",
+
+
+  "effect.simplyswords.freeze": "Freeze"
 }

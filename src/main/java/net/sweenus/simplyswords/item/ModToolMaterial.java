@@ -11,7 +11,7 @@ import java.util.function.Supplier;
 
 public enum ModToolMaterial implements ToolMaterial {
     OTHERENTITE(MiningLevels.WOOD, 59, 2.0f, 0.0f, 15, () -> Ingredient.fromTag(ItemTags.PLANKS)),
-    ELEMENTITE(MiningLevels.NETHERITE, 2031, 9.0f, 5.0f, 15, () -> Ingredient.ofItems(ModItems.MYTHRIL_INGOT));
+    ELEMENTITE(MiningLevels.NETHERITE, 2031, 9.0f, 5.0f, 15, () -> Ingredient.fromTag(ItemTags.DIAMOND_ORES));
 
     private final int miningLevel;
     private final int itemDurability;

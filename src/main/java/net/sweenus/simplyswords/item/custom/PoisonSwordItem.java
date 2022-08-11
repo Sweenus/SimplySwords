@@ -7,6 +7,7 @@ import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.SwordItem;
 import net.minecraft.item.ToolMaterial;
+import net.sweenus.simplyswords.config.SimplySwordsConfig;
 
 public class PoisonSwordItem extends SwordItem {
     public PoisonSwordItem(ToolMaterial toolMaterial, int attackDamage, float attackSpeed, Settings settings) {
@@ -15,8 +16,16 @@ public class PoisonSwordItem extends SwordItem {
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        target.addStatusEffect(new StatusEffectInstance(StatusEffects.WITHER, 200, 2), attacker);
+
+        int phitchance = SimplySwordsConfig.getIntValue("toxin_chance");
+        int pduration = SimplySwordsConfig.getIntValue("toxin_duration");
+
+        if (attacker.getRandom().nextInt(100) <= phitchance) {
+            target.addStatusEffect(new StatusEffectInstance(StatusEffects.WITHER, pduration, 3), attacker);
+        }
+
         return super.postHit(stack, target, attacker);
+
     }
 
 }

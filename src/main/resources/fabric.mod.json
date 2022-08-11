@@ -4,13 +4,13 @@
   "version": "${version}",
 
   "name": "Simply Swords",
-  "description": "This is an example description! Tell everyone what your mod is about!",
+  "description": "Additional swords with unique effects",
   "authors": [
     "Sweenus"
   ],
   "contact": {
     "homepage": "https://fabricmc.net/",
-    "sources": "https://github.com/FabricMC/fabric-example-mod"
+    "sources": "https://github.com/Sweenus/SimplySwords-1.19"
   },
 
   "license": "MIT",
@@ -34,5 +34,13 @@
   },
   "suggests": {
     "another-mod": "*"
+  },
+
+  "custom": {
+    "modmenu": {
+      "links": {
+
+      }
+    }
   }
 }
