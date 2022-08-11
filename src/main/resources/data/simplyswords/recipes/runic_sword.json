@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "#": {
+      "item": "simplyswords:curved_sword"
+    },
+    "X": {
+      "item": "minecraft:lapis_block"
+    }
+  },
+  "pattern": [
+    "X",
+    "X",
+    "#"
+  ],
+  "result": {
+    "item": "simplyswords:runic_sword"
+  }
+}

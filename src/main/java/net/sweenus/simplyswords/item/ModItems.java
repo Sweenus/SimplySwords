@@ -30,6 +30,14 @@ public class ModItems {
             new SpeedSwordItem(ModToolMaterial.ELEMENTITE, 2, -1.5f,
                     new FabricItemSettings().group(ItemGroup.COMBAT)));
 
+    public static final Item CURVED_SWORD = registerItem( "curved_sword",
+            new SpeedSwordItem(ModToolMaterial.ELEMENTITE, 0, -1.5f,
+                    new FabricItemSettings().group(ItemGroup.COMBAT)));
+
+    public static final Item RUNIC_SWORD = registerItem( "runic_sword",
+            new SpeedSwordItem(ModToolMaterial.ELEMENTITE, 1, -1.5f,
+                    new FabricItemSettings().group(ItemGroup.COMBAT)));
+
     public static final Item RDIAMOND_CLAYMORE = registerItem( "rdiamond_claymore",
             new SpeedSwordItem(ModToolMaterial.ELEMENTITE, 4, -2.6f,
                     new FabricItemSettings().group(ItemGroup.COMBAT)));
