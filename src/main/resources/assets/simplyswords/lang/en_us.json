@@ -12,7 +12,12 @@
   "item.simplyswords.emerald_runic_sword": "Emerald Runic Sword",
   "item.simplyswords.toxic_sword": "Toxinite Sword",
   "item.simplyswords.rdiamond_sword": "Reinforced Diamond Sword",
-  "item.simplyswords.rdiamond_claymore": "Diamond Claymore",
+  "item.simplyswords.diamond_claymore": "Diamond Claymore",
+  "item.simplyswords.runic_diamond_claymore": "Runic Diamond Claymore",
+  "item.simplyswords.toxic_diamond_claymore": "Toxic Diamond Claymore",
+  "item.simplyswords.brimstone_claymore": "Brimstone Claymore",
+  "item.simplyswords.gold_claymore": "Gold Claymore",
+  "item.simplyswords.iron_claymore": "Iron Claymore",
   "item.simplyswords.toxic_claymore": "Toxinite Claymore",
   "item.simplyswords.electric_claymore": "Electrite Claymore",
 

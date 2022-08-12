@@ -53,7 +53,7 @@ public class ModLootTableModifiers {
                         .with(ItemEntry.builder(ModItems.CURVED_SWORD))
                         .with(ItemEntry.builder(ModItems.DIAMOND_RAPIER))
                         .with(ItemEntry.builder(ModItems.RDIAMOND_SWORD))
-                        .with(ItemEntry.builder(ModItems.RDIAMOND_CLAYMORE))
+                        .with(ItemEntry.builder(ModItems.DIAMOND_CLAYMORE))
                         .with(ItemEntry.builder(ModItems.ELECTRIC_SWORD));
                 tableBuilder.pool(pool);
             }
