@@ -5,15 +5,15 @@
       "item": "minecraft:stick"
     },
     "X": {
-      "item": "minecraft:iron_ingot"
+      "item": "minecraft:diamond"
     }
   },
   "pattern": [
-    " X",
-    "XX",
-    "# "
+    "  X",
+    " X ",
+    "#  "
   ],
   "result": {
-    "item": "simplyswords:curved_sword"
+    "item": "simplyswords:diamond_rapier"
   }
 }

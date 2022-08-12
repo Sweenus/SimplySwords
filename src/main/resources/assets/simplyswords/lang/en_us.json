@@ -1,12 +1,23 @@
 {
   "item.simplyswords.electric_sword": "Electrite Sword",
-  "item.simplyswords.curved_sword": "Curved Sword",
+  "item.simplyswords.curved_sword": "Iron Curved Sword",
+  "item.simplyswords.gold_curved_sword": "Gold Curved Sword",
+  "item.simplyswords.diamond_curved_sword": "Diamond Curved Sword",
+  "item.simplyswords.diamond_rapier": "Diamond Rapier",
+  "item.simplyswords.gold_rapier": "Gold Rapier",
+  "item.simplyswords.iron_rapier": "Iron Rapier",
   "item.simplyswords.runic_sword": "Runic Sword",
+  "item.simplyswords.gold_runic_sword": "Gold Runic Sword",
+  "item.simplyswords.diamond_runic_sword": "Diamond Runic Sword",
+  "item.simplyswords.emerald_runic_sword": "Emerald Runic Sword",
   "item.simplyswords.toxic_sword": "Toxinite Sword",
   "item.simplyswords.rdiamond_sword": "Reinforced Diamond Sword",
-  "item.simplyswords.rdiamond_claymore": "Reinforced Diamond Claymore",
+  "item.simplyswords.rdiamond_claymore": "Diamond Claymore",
   "item.simplyswords.toxic_claymore": "Toxinite Claymore",
   "item.simplyswords.electric_claymore": "Electrite Claymore",
+
+
+  "itemGroup.simplyswords.simplyswords": "Simply Swords",
 
 
   "effect.simplyswords.freeze": "Freeze"
