@@ -25,5 +25,6 @@
   "itemGroup.simplyswords.simplyswords": "Simply Swords",
 
 
-  "effect.simplyswords.freeze": "Freeze"
+  "effect.simplyswords.freeze": "Freeze",
+  "effect.simplyswords.burn": "Burn"
 }

@@ -2,36 +2,35 @@
 	"credit": "Made by Sweenus using Blockbench",
 	"texture_size": [64, 64],
 	"textures": {
-		"0": "simplyswords:item/diamond_claymore",
-		"1": "simplyswords:item/lava_blade",
-		"2": "simplyswords:item/brimstone_effect",
-		"particle": "simplyswords:item/diamond_claymore"
+		"0": "simplyswords:item/brimstone_claymore",
+		"1": "simplyswords:item/brimstone_effect",
+		"particle": "simplyswords:item/brimstone_claymore"
 	},
 	"elements": [
 		{
-			"from": [6, 30.75, 8],
-			"to": [9, 31.75, 9],
+			"from": [6, 30.75, 8.25],
+			"to": [9, 31.75, 8.75],
 			"rotation": {"angle": 0, "axis": "y", "origin": [7.5, 15.5, 8.5]},
 			"faces": {
-				"north": {"uv": [4.4375, 4.5625, 5.1875, 4.8125], "rotation": 180, "texture": "#1"},
-				"east": {"uv": [6.8125, 2.375, 7.0625, 2.625], "rotation": 180, "texture": "#1"},
-				"south": {"uv": [8.375, 1.75, 9.125, 2], "rotation": 180, "texture": "#1", "cullface": "south"},
-				"west": {"uv": [6.625, 2.5, 6.875, 2.75], "rotation": 180, "texture": "#1"},
-				"up": {"uv": [7, 2.25, 7.75, 2.5], "rotation": 180, "texture": "#1"},
-				"down": {"uv": [1.5, 13.75, 2.25, 14], "rotation": 180, "texture": "#1"}
+				"north": {"uv": [4.4375, 4.5625, 5.1875, 4.8125], "rotation": 180, "texture": "#0"},
+				"east": {"uv": [6.8125, 2.375, 7.0625, 2.625], "rotation": 180, "texture": "#0"},
+				"south": {"uv": [8.375, 1.75, 9.125, 2], "rotation": 180, "texture": "#0", "cullface": "south"},
+				"west": {"uv": [6.625, 2.5, 6.875, 2.75], "rotation": 180, "texture": "#0"},
+				"up": {"uv": [7, 2.25, 7.75, 2.5], "rotation": 180, "texture": "#0"},
+				"down": {"uv": [1.5, 13.75, 2.25, 14], "rotation": 180, "texture": "#0"}
 			}
 		},
 		{
-			"from": [5, 8.75, 8],
-			"to": [10, 30.75, 9],
+			"from": [5, 8.75, 8.25],
+			"to": [10, 30.75, 8.75],
 			"rotation": {"angle": 0, "axis": "y", "origin": [7.5, 15.5, 8.5]},
 			"faces": {
-				"north": {"uv": [6.5, 8.125, 5.25, 2.625], "rotation": 180, "texture": "#1"},
-				"east": {"uv": [5.1875, 8.125, 4.9375, 2.625], "rotation": 180, "texture": "#1"},
-				"south": {"uv": [6.5625, 8.125, 5.3125, 2.625], "rotation": 180, "texture": "#1", "cullface": "south"},
-				"west": {"uv": [5.1875, 8.125, 4.9375, 2.625], "rotation": 180, "texture": "#1"},
-				"up": {"uv": [6.625, 2.8125, 5.375, 2.5625], "rotation": 180, "texture": "#1"},
-				"down": {"uv": [5.4375, 8.1875, 6.1875, 8.4375], "rotation": 180, "texture": "#1"}
+				"north": {"uv": [6.5, 8.125, 5.25, 2.625], "rotation": 180, "texture": "#0"},
+				"east": {"uv": [5.1875, 8.125, 4.9375, 2.625], "rotation": 180, "texture": "#0"},
+				"south": {"uv": [6.5625, 8.125, 5.3125, 2.625], "rotation": 180, "texture": "#0", "cullface": "south"},
+				"west": {"uv": [5.1875, 8.125, 4.9375, 2.625], "rotation": 180, "texture": "#0"},
+				"up": {"uv": [6.625, 2.8125, 5.375, 2.5625], "rotation": 180, "texture": "#0"},
+				"down": {"uv": [5.4375, 8.1875, 6.1875, 8.4375], "rotation": 180, "texture": "#0"}
 			}
 		},
 		{
@@ -178,27 +177,15 @@
 			}
 		},
 		{
-			"from": [5, 10, 7.75],
-			"to": [10, 30.75, 7.75],
+			"from": [4.75, 8.75, 8],
+			"to": [10.25, 30.75, 9],
 			"faces": {
-				"north": {"uv": [8.875, 14.25, 13.375, 0], "texture": "#2"},
-				"east": {"uv": [0, 0, 0, 5.25], "texture": "#2"},
-				"south": {"uv": [8.875, 14.125, 13.375, 0], "texture": "#2"},
-				"west": {"uv": [0, 0, 0, 5.25], "texture": "#2"},
-				"up": {"uv": [0, 0, 0.75, 0], "texture": "#2"},
-				"down": {"uv": [0, 0, 0.75, 0], "texture": "#2"}
-			}
-		},
-		{
-			"from": [5, 10, 9.25],
-			"to": [10, 30.75, 9.25],
-			"faces": {
-				"north": {"uv": [8.875, 14.25, 13.375, 0], "texture": "#2"},
-				"east": {"uv": [0, 0, 0, 5.25], "texture": "#2"},
-				"south": {"uv": [8.875, 14.125, 13.375, 0], "texture": "#2"},
-				"west": {"uv": [0, 0, 0, 5.25], "texture": "#2"},
-				"up": {"uv": [0, 0, 0.75, 0], "texture": "#2"},
-				"down": {"uv": [0, 0, 0.75, 0], "texture": "#2"}
+				"north": {"uv": [5.9375, 0.875, 8.4375, 8.5], "texture": "#1"},
+				"east": {"uv": [8.5, 0.875, 8.875, 8.5], "texture": "#1"},
+				"south": {"uv": [5.9375, 0.875, 8.4375, 8.5], "texture": "#1"},
+				"west": {"uv": [8.5, 0.875, 8.875, 8.5], "texture": "#1"},
+				"up": {"uv": [8.4375, 0.875, 5.9375, 0.5], "texture": "#1"},
+				"down": {"uv": [5.9375, 8.5, 8.4375, 8.875], "texture": "#1"}
 			}
 		}
 	],
@@ -247,6 +234,8 @@
 			"name": "Body",
 			"origin": [8, 8, 8],
 			"color": 0,
+			"nbt": "{}",
+			"armAnimationEnabled": false,
 			"children": [
 				{
 					"name": "Blade",
@@ -270,7 +259,9 @@
 			"name": "Effect",
 			"origin": [8, 8, 8],
 			"color": 0,
-			"children": [13, 14]
+			"nbt": "{}",
+			"armAnimationEnabled": false,
+			"children": [13]
 		}
 	]
 }

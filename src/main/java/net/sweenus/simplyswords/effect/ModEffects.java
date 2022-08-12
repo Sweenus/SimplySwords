@@ -18,4 +18,6 @@ public class ModEffects {
         FREEZE = registerStatusEffect("freeze");
     }
 
+    public static final StatusEffect BURN = new BurnEffect(StatusEffectCategory.HARMFUL, 2124687);
+
 }

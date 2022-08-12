@@ -2,8 +2,13 @@ package net.sweenus.simplyswords;
 
 import com.google.gson.JsonObject;
 import net.fabricmc.api.ModInitializer;
+import net.minecraft.entity.effect.StatusEffect;
+import net.minecraft.entity.effect.StatusEffectCategory;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.Registry;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
+import net.sweenus.simplyswords.effect.BurnEffect;
 import net.sweenus.simplyswords.effect.ModEffects;
 import net.sweenus.simplyswords.item.ModItems;
 import net.sweenus.simplyswords.util.ModLootTableModifiers;
@@ -22,6 +27,7 @@ public class SimplySwords implements ModInitializer {
 		ModItems.registerModItems();
 
 		ModEffects.registerEffects();
+		Registry.register(Registry.STATUS_EFFECT, new Identifier("tutorial", "exp"), ModEffects.BURN);
 
 		ModLootTableModifiers.modifyLootTables();
 

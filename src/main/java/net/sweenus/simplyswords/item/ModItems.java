@@ -7,10 +7,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
-import net.sweenus.simplyswords.item.custom.FreezeSwordItem;
-import net.sweenus.simplyswords.item.custom.LevitationSwordItem;
-import net.sweenus.simplyswords.item.custom.PoisonSwordItem;
-import net.sweenus.simplyswords.item.custom.SpeedSwordItem;
+import net.sweenus.simplyswords.item.custom.*;
 
 public class ModItems {
    // public static final Item ITEMNAMEHERE = registerItem( "item_name",
@@ -81,7 +78,7 @@ public class ModItems {
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
 
     public static final Item BRIMSTONE_CLAYMORE = registerItem( "brimstone_claymore",
-            new SwordItem(ModToolMaterial.ELEMENTITE, 4, -2.8f,
+            new FireSwordItem(ModToolMaterial.ELEMENTITE, 4, -2.8f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
 
     public static final Item GOLD_CLAYMORE = registerItem( "gold_claymore",
