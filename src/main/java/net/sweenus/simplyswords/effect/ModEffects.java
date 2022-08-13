@@ -19,5 +19,7 @@ public class ModEffects {
     }
 
     public static final StatusEffect BURN = new BurnEffect(StatusEffectCategory.HARMFUL, 2124687);
+    public static final StatusEffect ELECTRIC = new ElectricEffect(StatusEffectCategory.HARMFUL, 2184187);
+    public static final StatusEffect WILDFIRE = new WildfireEffect(StatusEffectCategory.HARMFUL, 1124687);
 
 }

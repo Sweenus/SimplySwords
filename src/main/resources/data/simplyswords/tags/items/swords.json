@@ -2,6 +2,8 @@
   "replace": false,
   "values": [
     "simplyswords:runic_longsword",
+    "simplyswords:runic_rapier",
+    "simplyswords:netherite_rapier",
     "simplyswords:diamond_rapier",
     "simplyswords:gold_rapier",
     "simplyswords:iron_rapier",
@@ -18,6 +20,8 @@
     "simplyswords:iron_claymore",
     "simplyswords:runic_diamond_claymore",
     "simplyswords:toxic_diamond_claymore",
-    "simplyswords:brimstone_claymore"
+    "simplyswords:brimstone_claymore",
+    "simplyswords:runic_twinblade",
+    "simplyswords:toxic_longsword"
   ]
 }

@@ -2,9 +2,9 @@
 	"credit": "Made by Sweenus using Blockbench",
 	"texture_size": [64, 64],
 	"textures": {
-		"0": "simplyswords:item/diamond_claymore",
+		"0": "simplyswords:item/iron_claymore",
 		"1": "simplyswords:item/sword_claymore_electric_effect_anim",
-		"particle": "simplyswords:item/diamond_claymore"
+		"particle": "simplyswords:item/iron_claymore"
 	},
 	"elements": [
 		{

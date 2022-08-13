@@ -1,7 +1,7 @@
 {
 	"credit": "Made by Sweenus using Blockbench",
 	"textures": {
-		"0": "simplyswords:item/blade",
+		"0": "simplyswords:item/blade_netherite",
 		"1": "simplyswords:item/hilt",
 		"particle": "simplyswords:item/hilt"
 	},

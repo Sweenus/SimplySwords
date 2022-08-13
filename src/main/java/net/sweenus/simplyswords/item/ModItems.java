@@ -2,6 +2,7 @@ package net.sweenus.simplyswords.item;
 
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.minecraft.item.SwordItem;
+import net.minecraft.util.Rarity;
 import net.sweenus.simplyswords.SimplySwords;
 import net.minecraft.item.Item;
 import net.minecraft.util.Identifier;
@@ -13,8 +14,16 @@ public class ModItems {
         //new Item(new FabricItemSettings().group(ItemGroup.MISC)));
 
     public static final Item RUNIC_LONGSWORD = registerItem( "runic_longsword",
-            new FreezeSwordItem(ModToolMaterial.ELEMENTITE, 3, -2.4f,
-                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+            new ElectricSwordItem(ModToolMaterial.ELEMENTITE, 3, -2.4f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+
+    public static final Item RUNIC_TWINBLADE = registerItem( "runic_twinblade",
+            new WildfireSwordItem(ModToolMaterial.ELEMENTITE, 2, -1.7f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+
+    public static final Item TOXIC_LONGSWORD = registerItem( "toxic_longsword",
+            new PoisonSwordItem(ModToolMaterial.ELEMENTITE, 3, -2.4f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
     public static final Item IRON_LONGSWORD = registerItem( "iron_longsword",
             new FreezeSwordItem(ModToolMaterial.ELEMENTITE, 0, -2.4f,
@@ -30,6 +39,14 @@ public class ModItems {
 
     public static final Item NETHERITE_LONGSWORD = registerItem( "netherite_longsword",
             new FreezeSwordItem(ModToolMaterial.ELEMENTITE, 2, -2.4f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+
+    public static final Item RUNIC_RAPIER = registerItem( "runic_rapier",
+            new SpeedSwordItem(ModToolMaterial.ELEMENTITE, 1, -1.6f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+
+    public static final Item NETHERITE_RAPIER = registerItem( "netherite_rapier",
+            new SwordItem(ModToolMaterial.ELEMENTITE, 1, -1.6f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
     public static final Item DIAMOND_RAPIER = registerItem( "diamond_rapier",
             new SwordItem(ModToolMaterial.ELEMENTITE, 0, -1.6f,
@@ -60,27 +77,23 @@ public class ModItems {
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
 
     public static final Item DIAMOND_CLAYMORE = registerItem( "diamond_claymore",
-            new SwordItem(ModToolMaterial.ELEMENTITE, 4, -2.8f,
+            new SwordItem(ModToolMaterial.ELEMENTITE, 3, -2.8f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
 
-    public static final Item RUNIC_DIAMOND_CLAYMORE = registerItem( "runic_diamond_claymore",
+    public static final Item RUNIC_CLAYMORE = registerItem( "runic_claymore",
             new FreezeSwordItem(ModToolMaterial.ELEMENTITE, 4, -2.8f,
-                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
-
-    public static final Item TOXIC_DIAMOND_CLAYMORE = registerItem( "toxic_diamond_claymore",
-            new PoisonSwordItem(ModToolMaterial.ELEMENTITE, 4, -2.8f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
 
     public static final Item BRIMSTONE_CLAYMORE = registerItem( "brimstone_claymore",
             new FireSwordItem(ModToolMaterial.ELEMENTITE, 4, -2.8f,
-                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
     public static final Item GOLD_CLAYMORE = registerItem( "gold_claymore",
-            new SwordItem(ModToolMaterial.ELEMENTITE, 2, -2.8f,
+            new SwordItem(ModToolMaterial.ELEMENTITE, 1, -2.8f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
 
     public static final Item IRON_CLAYMORE = registerItem( "iron_claymore",
-            new SwordItem(ModToolMaterial.ELEMENTITE, 3, -2.8f,
+            new SwordItem(ModToolMaterial.ELEMENTITE, 2, -2.8f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
 
     private static Item registerItem(String name, Item item) {

@@ -48,7 +48,23 @@ public class ModLootTableModifiers {
                         .conditionally(RandomChanceLootCondition.builder(SimplySwordsConfig.getFloatValue("loot_table_weight"))) // 1 = 100% of the time
                         .with(ItemEntry.builder(ModItems.RUNIC_SWORD))
                         .with(ItemEntry.builder(ModItems.CURVED_SWORD))
+                        .with(ItemEntry.builder(ModItems.GOLD_RAPIER))
+                        .with(ItemEntry.builder(ModItems.IRON_RAPIER))
                         .with(ItemEntry.builder(ModItems.DIAMOND_RAPIER))
+                        .with(ItemEntry.builder(ModItems.NETHERITE_RAPIER))
+                        .with(ItemEntry.builder(ModItems.RUNIC_RAPIER))
+                        .with(ItemEntry.builder(ModItems.DIAMOND_LONGSWORD))
+                        .with(ItemEntry.builder(ModItems.RUNIC_TWINBLADE))
+                        .with(ItemEntry.builder(ModItems.TOXIC_LONGSWORD))
+                        .with(ItemEntry.builder(ModItems.GOLD_LONGSWORD))
+                        .with(ItemEntry.builder(ModItems.IRON_LONGSWORD))
+                        .with(ItemEntry.builder(ModItems.RUNIC_LONGSWORD))
+                        .with(ItemEntry.builder(ModItems.RUNIC_CLAYMORE))
+                        .with(ItemEntry.builder(ModItems.BRIMSTONE_CLAYMORE))
+                        .with(ItemEntry.builder(ModItems.IRON_CLAYMORE))
+                        .with(ItemEntry.builder(ModItems.GOLD_CLAYMORE))
+                        .with(ItemEntry.builder(ModItems.GOLD_CURVED_SWORD))
+                        .with(ItemEntry.builder(ModItems.DIAMOND_CURVED_SWORD))
                         .with(ItemEntry.builder(ModItems.DIAMOND_CLAYMORE));
                 tableBuilder.pool(pool);
             }

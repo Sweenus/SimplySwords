@@ -40,17 +40,21 @@ public class SimplySwordsConfig {
 
         INT_OPTIONS.put("speed_chance", 15);
         INT_OPTIONS.put("slowness_chance", 50);
-        INT_OPTIONS.put("toxin_chance", 25);
-        INT_OPTIONS.put("freeze_chance", 25);
-        INT_OPTIONS.put("levitation_chance", 25);
+        INT_OPTIONS.put("toxin_chance", 15);
+        INT_OPTIONS.put("freeze_chance", 15);
+        INT_OPTIONS.put("brimstone_chance", 15);
+        INT_OPTIONS.put("wildfire_chance", 20);
+        INT_OPTIONS.put("lightning_chance", 10);
+        INT_OPTIONS.put("levitation_chance", 15);
         INT_OPTIONS.put("freeze_duration", 120);
         INT_OPTIONS.put("levitation_duration", 50);
         INT_OPTIONS.put("speed_duration", 300);
         INT_OPTIONS.put("slowness_duration", 50);
         INT_OPTIONS.put("toxin_duration", 150);
+        INT_OPTIONS.put("wildfire_duration", 8);
 
 
-        FLOAT_OPTIONS.put("loot_table_weight", 0.1f);
+        FLOAT_OPTIONS.put("loot_table_weight", 0.3f);
     }
 
     public static void loadConfig() {
