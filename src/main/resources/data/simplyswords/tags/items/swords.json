@@ -1,9 +1,7 @@
 {
   "replace": false,
   "values": [
-    "simplyswords:electric_sword",
-    "simplyswords:toxic_sword",
-    "simplyswords:rdiamond_sword",
+    "simplyswords:runic_longsword",
     "simplyswords:diamond_rapier",
     "simplyswords:gold_rapier",
     "simplyswords:iron_rapier",
@@ -11,16 +9,15 @@
     "simplyswords:gold_curved_sword",
     "simplyswords:diamond_curved_sword",
     "simplyswords:runic_sword",
-    "simplyswords:gold_runic_sword",
-    "simplyswords:diamond_runic_sword",
-    "simplyswords:emerald_runic_sword",
+    "simplyswords:iron_longsword",
+    "simplyswords:diamond_longsword",
+    "simplyswords:gold_longsword",
+    "simplyswords:netherite_longsword",
     "simplyswords:diamond_claymore",
     "simplyswords:gold_claymore",
     "simplyswords:iron_claymore",
     "simplyswords:runic_diamond_claymore",
     "simplyswords:toxic_diamond_claymore",
-    "simplyswords:brimstone_claymore",
-    "simplyswords:toxic_claymore",
-    "simplyswords:electric_claymore"
+    "simplyswords:brimstone_claymore"
   ]
 }

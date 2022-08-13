@@ -8,5 +8,5 @@ import net.sweenus.simplyswords.SimplySwords;
 
 public class ModItemGroup {
     public static final ItemGroup SIMPLYSWORDS = FabricItemGroupBuilder.build(new Identifier(SimplySwords.MOD_ID, "simplyswords"),
-            () -> new ItemStack(ModItems.RDIAMOND_SWORD));
+            () -> new ItemStack(ModItems.RUNIC_SWORD));
 }

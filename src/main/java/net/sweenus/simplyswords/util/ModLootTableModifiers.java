@@ -47,14 +47,9 @@ public class ModLootTableModifiers {
                         .rolls(ConstantLootNumberProvider.create(1))
                         .conditionally(RandomChanceLootCondition.builder(SimplySwordsConfig.getFloatValue("loot_table_weight"))) // 1 = 100% of the time
                         .with(ItemEntry.builder(ModItems.RUNIC_SWORD))
-                        .with(ItemEntry.builder(ModItems.TOXIC_SWORD))
-                        .with(ItemEntry.builder(ModItems.TOXIC_CLAYMORE))
-                        .with(ItemEntry.builder(ModItems.ELECTRIC_CLAYMORE))
                         .with(ItemEntry.builder(ModItems.CURVED_SWORD))
                         .with(ItemEntry.builder(ModItems.DIAMOND_RAPIER))
-                        .with(ItemEntry.builder(ModItems.RDIAMOND_SWORD))
-                        .with(ItemEntry.builder(ModItems.DIAMOND_CLAYMORE))
-                        .with(ItemEntry.builder(ModItems.ELECTRIC_SWORD));
+                        .with(ItemEntry.builder(ModItems.DIAMOND_CLAYMORE));
                 tableBuilder.pool(pool);
             }
 

@@ -20,6 +20,11 @@
   "item.simplyswords.iron_claymore": "Iron Claymore",
   "item.simplyswords.toxic_claymore": "Toxinite Claymore",
   "item.simplyswords.electric_claymore": "Electrite Claymore",
+  "item.simplyswords.runic_longsword": "Runic Longsword",
+  "item.simplyswords.iron_longsword": "Iron Longsword",
+  "item.simplyswords.gold_longsword": "Gold Longsword",
+  "item.simplyswords.diamond_longsword": "Diamond Longsword",
+  "item.simplyswords.netherite_longsword": "Netherite Longsword",
 
 
   "itemGroup.simplyswords.simplyswords": "Simply Swords",
