@@ -60,11 +60,14 @@ public class ModLootTableModifiers {
                         .with(ItemEntry.builder(ModItems.IRON_LONGSWORD))
                         .with(ItemEntry.builder(ModItems.RUNIC_LONGSWORD))
                         .with(ItemEntry.builder(ModItems.RUNIC_CLAYMORE))
+                        .with(ItemEntry.builder(ModItems.WATCHER_CLAYMORE))
                         .with(ItemEntry.builder(ModItems.BRIMSTONE_CLAYMORE))
                         .with(ItemEntry.builder(ModItems.IRON_CLAYMORE))
                         .with(ItemEntry.builder(ModItems.GOLD_CLAYMORE))
+                        .with(ItemEntry.builder(ModItems.WATCHER_CLAYMORE))
                         .with(ItemEntry.builder(ModItems.GOLD_CUTLASS))
                         .with(ItemEntry.builder(ModItems.NETHERITE_CUTLASS))
+                        .with(ItemEntry.builder(ModItems.RUNIC_CUTLASS))
                         .with(ItemEntry.builder(ModItems.DIAMOND_CUTLASS))
                         .with(ItemEntry.builder(ModItems.DIAMOND_CLAYMORE));
                 tableBuilder.pool(pool);
