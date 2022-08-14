@@ -9,9 +9,9 @@
     }
   },
   "pattern": [
-    "X  ",
+    "#  ",
     " X ",
-    "  #"
+    "  X"
   ],
   "result": {
     "item": "simplyswords:gold_longsword"

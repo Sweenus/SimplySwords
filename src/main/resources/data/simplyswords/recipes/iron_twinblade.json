@@ -9,11 +9,11 @@
     }
   },
   "pattern": [
-    "#  ",
-    " X ",
-    "  X"
+    "  X",
+    " # ",
+    "X  "
   ],
   "result": {
-    "item": "simplyswords:iron_longsword"
+    "item": "simplyswords:iron_twinblade"
   }
 }

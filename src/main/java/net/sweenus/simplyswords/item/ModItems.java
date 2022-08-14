@@ -21,6 +21,22 @@ public class ModItems {
             new WildfireSwordItem(ModToolMaterial.ELEMENTITE, 2, -1.7f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
+    public static final Item IRON_TWINBLADE = registerItem( "iron_twinblade",
+            new SwordItem(ModToolMaterial.ELEMENTITE, 0, -1.7f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+
+    public static final Item GOLD_TWINBLADE = registerItem( "gold_twinblade",
+            new SwordItem(ModToolMaterial.ELEMENTITE, -1, -1.7f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+
+    public static final Item DIAMOND_TWINBLADE = registerItem( "diamond_twinblade",
+            new SwordItem(ModToolMaterial.ELEMENTITE, 1, -1.7f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+
+    public static final Item NETHERITE_TWINBLADE = registerItem( "netherite_twinblade",
+            new SwordItem(ModToolMaterial.ELEMENTITE, 2, -1.7f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+
     public static final Item TOXIC_LONGSWORD = registerItem( "toxic_longsword",
             new PoisonSwordItem(ModToolMaterial.ELEMENTITE, 3, -2.4f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
@@ -60,15 +76,19 @@ public class ModItems {
             new SwordItem(ModToolMaterial.ELEMENTITE, -1, -1.6f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
 
-    public static final Item CURVED_SWORD = registerItem( "curved_sword",
+    public static final Item IRON_CUTLASS = registerItem( "iron_cutlass",
             new SwordItem(ModToolMaterial.ELEMENTITE, 0, -2f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
 
-    public static final Item GOLD_CURVED_SWORD = registerItem( "gold_curved_sword",
+    public static final Item GOLD_CUTLASS = registerItem( "gold_cutlass",
             new SwordItem(ModToolMaterial.ELEMENTITE, -1, -2f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
 
-    public static final Item DIAMOND_CURVED_SWORD = registerItem( "diamond_curved_sword",
+    public static final Item DIAMOND_CUTLASS = registerItem( "diamond_cutlass",
+            new SwordItem(ModToolMaterial.ELEMENTITE, 1, -2f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+
+    public static final Item NETHERITE_CUTLASS = registerItem( "netherite_cutlass",
             new SwordItem(ModToolMaterial.ELEMENTITE, 1, -2f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
 

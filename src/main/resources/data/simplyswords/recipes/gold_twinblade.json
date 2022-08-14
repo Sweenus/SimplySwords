@@ -5,15 +5,15 @@
       "item": "minecraft:stick"
     },
     "X": {
-      "item": "minecraft:iron_ingot"
+      "item": "minecraft:gold_ingot"
     }
   },
   "pattern": [
-    "#  ",
-    " X ",
-    "  X"
+    "  X",
+    " # ",
+    "X  "
   ],
   "result": {
-    "item": "simplyswords:iron_longsword"
+    "item": "simplyswords:gold_twinblade"
   }
 }
