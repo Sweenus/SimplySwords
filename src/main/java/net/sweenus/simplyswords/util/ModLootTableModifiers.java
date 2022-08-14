@@ -43,34 +43,52 @@ public class ModLootTableModifiers {
 
             if (SimplySwordsConfig.getBooleanValue("add_weapons_to_loot_tables") && id.getPath().contains("chests") && !id.getPath().contains("village")) {
 
+                //STANDARD POOL
                 LootPool.Builder pool = LootPool.builder()
                         .rolls(ConstantLootNumberProvider.create(1))
-                        .conditionally(RandomChanceLootCondition.builder(SimplySwordsConfig.getFloatValue("loot_table_weight"))) // 1 = 100% of the time
-                        .with(ItemEntry.builder(ModItems.RUNIC_SWORD))
-                        .with(ItemEntry.builder(ModItems.IRON_CUTLASS))
-                        .with(ItemEntry.builder(ModItems.GOLD_RAPIER))
-                        .with(ItemEntry.builder(ModItems.IRON_RAPIER))
-                        .with(ItemEntry.builder(ModItems.DIAMOND_RAPIER))
-                        .with(ItemEntry.builder(ModItems.NETHERITE_RAPIER))
-                        .with(ItemEntry.builder(ModItems.RUNIC_RAPIER))
-                        .with(ItemEntry.builder(ModItems.DIAMOND_LONGSWORD))
-                        .with(ItemEntry.builder(ModItems.RUNIC_TWINBLADE))
-                        .with(ItemEntry.builder(ModItems.TOXIC_LONGSWORD))
-                        .with(ItemEntry.builder(ModItems.GOLD_LONGSWORD))
+                        .conditionally(RandomChanceLootCondition.builder(SimplySwordsConfig.getFloatValue("standard_loot_table_weight"))) // 1 = 100% of the time
                         .with(ItemEntry.builder(ModItems.IRON_LONGSWORD))
-                        .with(ItemEntry.builder(ModItems.RUNIC_LONGSWORD))
-                        .with(ItemEntry.builder(ModItems.RUNIC_CLAYMORE))
-                        .with(ItemEntry.builder(ModItems.WATCHER_CLAYMORE))
-                        .with(ItemEntry.builder(ModItems.BRIMSTONE_CLAYMORE))
+                        .with(ItemEntry.builder(ModItems.IRON_TWINBLADE))
+                        .with(ItemEntry.builder(ModItems.IRON_RAPIER))
+                        .with(ItemEntry.builder(ModItems.IRON_CUTLASS))
                         .with(ItemEntry.builder(ModItems.IRON_CLAYMORE))
-                        .with(ItemEntry.builder(ModItems.GOLD_CLAYMORE))
-                        .with(ItemEntry.builder(ModItems.WATCHER_CLAYMORE))
+                        .with(ItemEntry.builder(ModItems.GOLD_LONGSWORD))
+                        .with(ItemEntry.builder(ModItems.GOLD_TWINBLADE))
+                        .with(ItemEntry.builder(ModItems.GOLD_RAPIER))
                         .with(ItemEntry.builder(ModItems.GOLD_CUTLASS))
-                        .with(ItemEntry.builder(ModItems.NETHERITE_CUTLASS))
-                        .with(ItemEntry.builder(ModItems.RUNIC_CUTLASS))
+                        .with(ItemEntry.builder(ModItems.GOLD_CLAYMORE))
+                        .with(ItemEntry.builder(ModItems.DIAMOND_LONGSWORD))
+                        .with(ItemEntry.builder(ModItems.DIAMOND_TWINBLADE))
+                        .with(ItemEntry.builder(ModItems.DIAMOND_RAPIER))
                         .with(ItemEntry.builder(ModItems.DIAMOND_CUTLASS))
-                        .with(ItemEntry.builder(ModItems.DIAMOND_CLAYMORE));
+                        .with(ItemEntry.builder(ModItems.DIAMOND_CLAYMORE))
+                        .with(ItemEntry.builder(ModItems.NETHERITE_LONGSWORD))
+                        .with(ItemEntry.builder(ModItems.NETHERITE_TWINBLADE))
+                        .with(ItemEntry.builder(ModItems.NETHERITE_RAPIER))
+                        .with(ItemEntry.builder(ModItems.NETHERITE_CUTLASS))
+                        .with(ItemEntry.builder(ModItems.NETHERITE_CLAYMORE));
                 tableBuilder.pool(pool);
+
+                //RARE POOL
+                LootPool.Builder rpool = LootPool.builder()
+                        .rolls(ConstantLootNumberProvider.create(1))
+                        .conditionally(RandomChanceLootCondition.builder(SimplySwordsConfig.getFloatValue("rare_loot_table_weight"))) // 1 = 100% of the time
+                        .with(ItemEntry.builder(ModItems.RUNIC_CLAYMORE))
+                        .with(ItemEntry.builder(ModItems.RUNIC_TWINBLADE))
+                        .with(ItemEntry.builder(ModItems.RUNIC_LONGSWORD))
+                        .with(ItemEntry.builder(ModItems.RUNIC_RAPIER))
+                        .with(ItemEntry.builder(ModItems.RUNIC_CUTLASS));
+                tableBuilder.pool(rpool);
+
+                //UNIQUE POOL
+                LootPool.Builder upool = LootPool.builder()
+                        .rolls(ConstantLootNumberProvider.create(1))
+                        .conditionally(RandomChanceLootCondition.builder(SimplySwordsConfig.getFloatValue("unique_loot_table_weight"))) // 1 = 100% of the time
+                        .with(ItemEntry.builder(ModItems.WATCHER_CLAYMORE))
+                        .with(ItemEntry.builder(ModItems.TOXIC_LONGSWORD))
+                        .with(ItemEntry.builder(ModItems.BRIMSTONE_CLAYMORE));
+                tableBuilder.pool(upool);
+
             }
 
         });
