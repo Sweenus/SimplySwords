@@ -35,8 +35,6 @@ public class SimplySwordsConfig {
 
     public static void init() {
         SWORDS.put("add_weapons_to_loot_tables", true);
-        SWORDS.put("electrite_sword", true);
-        SWORDS.put("runic_sword", true);
 
         INT_OPTIONS.put("speed_chance", 15);
         INT_OPTIONS.put("slowness_chance", 50);
@@ -53,6 +51,7 @@ public class SimplySwordsConfig {
         INT_OPTIONS.put("levitation_duration", 50);
         INT_OPTIONS.put("speed_duration", 300);
         INT_OPTIONS.put("slowness_duration", 50);
+        INT_OPTIONS.put("wildfire_duration", 8);
         INT_OPTIONS.put("toxin_duration", 150);
 
 
