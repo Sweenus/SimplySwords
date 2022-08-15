@@ -33,5 +33,9 @@
 
 
   "effect.simplyswords.freeze": "Freeze",
-  "effect.simplyswords.burn": "Burn"
+  "effect.simplyswords.burn": "Brimstone",
+  "effect.simplyswords.omen": "Omen",
+  "effect.simplyswords.watcher": "Watcher",
+  "effect.simplyswords.electric": "Lightning",
+  "effect.simplyswords.wildfire": "Wildfire"
 }

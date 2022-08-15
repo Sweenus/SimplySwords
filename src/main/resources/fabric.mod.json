@@ -4,7 +4,7 @@
   "version": "${version}",
 
   "name": "Simply Swords",
-  "description": "Additional swords with unique effects",
+  "description": "A variety of unique swords to add to your minecraft repertoire",
   "authors": [
     "Sweenus"
   ],
@@ -13,7 +13,7 @@
     "sources": "https://github.com/Sweenus/SimplySwords-1.19"
   },
 
-  "license": "MIT",
+  "license": "GNU LESSER GENERAL PUBLIC LICENSE",
   "icon": "assets/modid/icon.png",
 
   "environment": "*",

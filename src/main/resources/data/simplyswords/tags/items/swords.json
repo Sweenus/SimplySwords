@@ -1,8 +1,6 @@
 {
   "replace": false,
   "values": [
-    "simplyswords:runic_longsword",
-    "simplyswords:runic_rapier",
     "simplyswords:netherite_rapier",
     "simplyswords:diamond_rapier",
     "simplyswords:gold_rapier",
@@ -12,9 +10,10 @@
     "simplyswords:diamond_cutlass",
     "simplyswords:netherite_cutlass",
     "simplyswords:iron_longsword",
-    "simplyswords:diamond_longsword",
     "simplyswords:gold_longsword",
+    "simplyswords:diamond_longsword",
     "simplyswords:netherite_longsword",
+    "simplyswords:netherite_claymore",
     "simplyswords:diamond_claymore",
     "simplyswords:gold_claymore",
     "simplyswords:iron_claymore",
@@ -22,9 +21,13 @@
     "simplyswords:gold_twinblade",
     "simplyswords:diamond_twinblade",
     "simplyswords:netherite_twinblade",
+    "simplyswords:watcher_claymore",
     "simplyswords:brimstone_claymore",
     "simplyswords:runic_twinblade",
+    "simplyswords:runic_claymore",
     "simplyswords:runic_cutlass",
+    "simplyswords:runic_longsword",
+    "simplyswords:runic_rapier",
     "simplyswords:toxic_longsword"
   ]
 }
