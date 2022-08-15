@@ -55,9 +55,9 @@ public class SimplySwordsConfig {
         INT_OPTIONS.put("toxin_duration", 150);
 
 
-        FLOAT_OPTIONS.put("standard_loot_table_weight", 0.5f);
-        FLOAT_OPTIONS.put("rare_loot_table_weight", 0.3f);
-        FLOAT_OPTIONS.put("unique_loot_table_weight", 0.2f);
+        FLOAT_OPTIONS.put("standard_loot_table_weight", 0.2f);
+        FLOAT_OPTIONS.put("rare_loot_table_weight", 0.1f);
+        FLOAT_OPTIONS.put("unique_loot_table_weight", 0.05f);
         FLOAT_OPTIONS.put("omen_absorption_amount", 1f);
         FLOAT_OPTIONS.put("watcher_restore_amount", 1f);
     }
