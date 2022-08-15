@@ -56,17 +56,7 @@ public class ModLootTableModifiers {
                         .with(ItemEntry.builder(ModItems.GOLD_TWINBLADE))
                         .with(ItemEntry.builder(ModItems.GOLD_RAPIER))
                         .with(ItemEntry.builder(ModItems.GOLD_CUTLASS))
-                        .with(ItemEntry.builder(ModItems.GOLD_CLAYMORE))
-                        .with(ItemEntry.builder(ModItems.DIAMOND_LONGSWORD))
-                        .with(ItemEntry.builder(ModItems.DIAMOND_TWINBLADE))
-                        .with(ItemEntry.builder(ModItems.DIAMOND_RAPIER))
-                        .with(ItemEntry.builder(ModItems.DIAMOND_CUTLASS))
-                        .with(ItemEntry.builder(ModItems.DIAMOND_CLAYMORE))
-                        .with(ItemEntry.builder(ModItems.NETHERITE_LONGSWORD))
-                        .with(ItemEntry.builder(ModItems.NETHERITE_TWINBLADE))
-                        .with(ItemEntry.builder(ModItems.NETHERITE_RAPIER))
-                        .with(ItemEntry.builder(ModItems.NETHERITE_CUTLASS))
-                        .with(ItemEntry.builder(ModItems.NETHERITE_CLAYMORE));
+                        .with(ItemEntry.builder(ModItems.GOLD_CLAYMORE));
                 tableBuilder.pool(pool);
 
                 //RARE POOL
@@ -77,7 +67,12 @@ public class ModLootTableModifiers {
                         .with(ItemEntry.builder(ModItems.RUNIC_TWINBLADE))
                         .with(ItemEntry.builder(ModItems.RUNIC_LONGSWORD))
                         .with(ItemEntry.builder(ModItems.RUNIC_RAPIER))
-                        .with(ItemEntry.builder(ModItems.RUNIC_CUTLASS));
+                        .with(ItemEntry.builder(ModItems.RUNIC_CUTLASS))
+                        .with(ItemEntry.builder(ModItems.DIAMOND_LONGSWORD))
+                        .with(ItemEntry.builder(ModItems.DIAMOND_TWINBLADE))
+                        .with(ItemEntry.builder(ModItems.DIAMOND_RAPIER))
+                        .with(ItemEntry.builder(ModItems.DIAMOND_CUTLASS))
+                        .with(ItemEntry.builder(ModItems.DIAMOND_CLAYMORE));
                 tableBuilder.pool(rpool);
 
                 //UNIQUE POOL
