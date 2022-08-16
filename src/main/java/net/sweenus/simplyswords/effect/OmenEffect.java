@@ -32,7 +32,7 @@ public class OmenEffect extends StatusEffect {
                 pLivingEntity.kill();
                 if (pPlayer.getAbsorptionAmount() < 6f) {
                     pPlayer.setAbsorptionAmount(pPlayer.getAbsorptionAmount() + absAmount);
-                    world.playSound(null, position, SoundEvents.BLOCK_ANVIL_LAND, SoundCategory.BLOCKS, 1f, 1f);
+                    world.playSound(null, position, SoundEvents.BLOCK_ANVIL_LAND, SoundCategory.BLOCKS, 0.6f, 1f);
                 }
             }
 

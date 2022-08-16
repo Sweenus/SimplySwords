@@ -122,6 +122,10 @@ public class ModItems {
             new StormSwordItem(ToolMaterials.NETHERITE, 3, -1.7f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
+    public static final Item SWORD_ON_A_STICK = registerItem( "sword_on_a_stick",
+            new SwordItem(ToolMaterials.WOOD, 5, -1.9f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+
     public static final Item TOXIC_LONGSWORD = registerItem( "toxic_longsword",
             new PoisonSwordItem(ToolMaterials.NETHERITE, 3, -2.4f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));

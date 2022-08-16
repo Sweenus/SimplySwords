@@ -81,6 +81,8 @@ public class ModLootTableModifiers {
                         .conditionally(RandomChanceLootCondition.builder(SimplySwordsConfig.getFloatValue("unique_loot_table_weight"))) // 1 = 100% of the time
                         .with(ItemEntry.builder(ModItems.WATCHER_CLAYMORE))
                         .with(ItemEntry.builder(ModItems.TOXIC_LONGSWORD))
+                        .with(ItemEntry.builder(ModItems.SWORD_ON_A_STICK))
+                        .with(ItemEntry.builder(ModItems.STORMS_EDGE))
                         .with(ItemEntry.builder(ModItems.BRIMSTONE_CLAYMORE));
                 tableBuilder.pool(upool);
 

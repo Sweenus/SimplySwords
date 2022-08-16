@@ -37,7 +37,7 @@ public class WatcherEffect extends StatusEffect {
                 if (e != null && pPlayer != null){
                     e.damage(DamageSource.FREEZE, rAmount);
                     pPlayer.setHealth(pPlayer.getHealth() + rAmount);
-                    world.playSound(null, position, SoundEvents.BLOCK_ENDER_CHEST_OPEN, SoundCategory.BLOCKS, 1f, 1f);
+                    world.playSound(null, position, SoundEvents.BLOCK_ENDER_CHEST_OPEN, SoundCategory.BLOCKS, 0.2f, 1f);
                 }
             }
 

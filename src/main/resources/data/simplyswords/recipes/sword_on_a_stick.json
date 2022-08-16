@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "#": {
+      "item": "minecraft:stick"
+    },
+    "X": {
+      "item": "simplyswords:iron_longsword"
+    },
+    "Y": {
+      "item": "minecraft:string"
+    }
+  },
+  "pattern": [
+    " X ",
+    " Y ",
+    " # "
+  ],
+  "result": {
+    "item": "simplyswords:sword_on_a_stick"
+  }
+}
