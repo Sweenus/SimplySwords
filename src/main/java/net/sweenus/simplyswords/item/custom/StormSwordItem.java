@@ -6,26 +6,24 @@ import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.SwordItem;
 import net.minecraft.item.ToolMaterial;
+import net.minecraft.world.World;
+import net.minecraft.world.biome.Biome;
+import net.minecraft.world.gen.structure.OceanRuinStructure;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
 import net.sweenus.simplyswords.effect.ModEffects;
 
-public class WatcherSwordItem extends SwordItem {
-    public WatcherSwordItem(ToolMaterial toolMaterial, int attackDamage, float attackSpeed, Settings settings) {
+public class StormSwordItem extends SwordItem {
+    public StormSwordItem(ToolMaterial toolMaterial, int attackDamage, float attackSpeed, Settings settings) {
         super(toolMaterial, attackDamage, attackSpeed, settings);
     }
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
 
-        int phitchance = SimplySwordsConfig.getIntValue("watcher_chance");
-        int thitchance = SimplySwordsConfig.getIntValue("omen_chance");
-
-        if (attacker.getRandom().nextInt(100) <= thitchance) {
-            target.addStatusEffect(new StatusEffectInstance(ModEffects.WATCHER, 1, 1), attacker);
-        }
+        int phitchance = SimplySwordsConfig.getIntValue("storm_chance");
 
         if (attacker.getRandom().nextInt(100) <= phitchance) {
-            target.addStatusEffect(new StatusEffectInstance(ModEffects.OMEN, 1, 1), attacker);
+                target.addStatusEffect(new StatusEffectInstance(ModEffects.STORM, 1, 1), attacker);
         }
 
         return super.postHit(stack, target, attacker);

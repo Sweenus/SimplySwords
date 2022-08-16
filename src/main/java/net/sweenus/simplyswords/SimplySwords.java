@@ -29,6 +29,7 @@ public class SimplySwords implements ModInitializer {
 		ModEffects.registerEffects();
 		Registry.register(Registry.STATUS_EFFECT, new Identifier("simplyswords", "burn"), ModEffects.BURN);
 		Registry.register(Registry.STATUS_EFFECT, new Identifier("simplyswords", "wildfire"), ModEffects.WILDFIRE);
+		Registry.register(Registry.STATUS_EFFECT, new Identifier("simplyswords", "storm"), ModEffects.STORM);
 		Registry.register(Registry.STATUS_EFFECT, new Identifier("simplyswords", "electric"), ModEffects.ELECTRIC);
 		Registry.register(Registry.STATUS_EFFECT, new Identifier("simplyswords", "omen"), ModEffects.OMEN);
 		Registry.register(Registry.STATUS_EFFECT, new Identifier("simplyswords", "watcher"), ModEffects.WATCHER);

@@ -41,7 +41,8 @@ public class SimplySwordsConfig {
         INT_OPTIONS.put("toxin_chance", 15);
         INT_OPTIONS.put("freeze_chance", 15);
         INT_OPTIONS.put("brimstone_chance", 15);
-        INT_OPTIONS.put("wildfire_chance", 20);
+        INT_OPTIONS.put("wildfire_chance", 10);
+        INT_OPTIONS.put("storm_chance", 15);
         INT_OPTIONS.put("watcher_chance", 15);
         INT_OPTIONS.put("omen_chance", 25);
         INT_OPTIONS.put("lightning_chance", 10);
@@ -59,7 +60,7 @@ public class SimplySwordsConfig {
         FLOAT_OPTIONS.put("rare_loot_table_weight", 0.05f);
         FLOAT_OPTIONS.put("unique_loot_table_weight", 0.005f);
         FLOAT_OPTIONS.put("omen_absorption_amount", 1f);
-        FLOAT_OPTIONS.put("watcher_restore_amount", 1f);
+        FLOAT_OPTIONS.put("watcher_restore_amount", 0.5f);
     }
 
     public static void loadConfig() {

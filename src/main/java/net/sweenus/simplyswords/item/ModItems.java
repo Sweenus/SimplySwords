@@ -118,6 +118,10 @@ public class ModItems {
             new WatcherSwordItem(ToolMaterials.NETHERITE, 6, -2.7f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
+    public static final Item STORMS_EDGE = registerItem( "storms_edge",
+            new StormSwordItem(ToolMaterials.NETHERITE, 3, -1.7f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+
     public static final Item TOXIC_LONGSWORD = registerItem( "toxic_longsword",
             new PoisonSwordItem(ToolMaterials.NETHERITE, 3, -2.4f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
