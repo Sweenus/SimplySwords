@@ -92,7 +92,7 @@ public class ModItems {
 
     //RUNIC
     public static final Item RUNIC_LONGSWORD = registerItem( "runic_longsword",
-            new ElectricSwordItem(ToolMaterials.NETHERITE, 3, -2.4f,
+            new PoisonSwordItem(ToolMaterials.NETHERITE, 3, -2.4f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
     public static final Item RUNIC_TWINBLADE = registerItem( "runic_twinblade",
@@ -123,11 +123,15 @@ public class ModItems {
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
     public static final Item SWORD_ON_A_STICK = registerItem( "sword_on_a_stick",
-            new SwordItem(ToolMaterials.WOOD, 5, -1.9f,
+            new SwordItem(ToolMaterials.WOOD, 5, -2.2f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+
+    public static final Item BRAMBLETHORN = registerItem( "bramblethorn",
+            new BrambleSwordItem(ToolMaterials.WOOD, 6, -1.6f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
     public static final Item TOXIC_LONGSWORD = registerItem( "toxic_longsword",
-            new PoisonSwordItem(ToolMaterials.NETHERITE, 3, -2.4f,
+            new PlagueSwordItem(ToolMaterials.NETHERITE, 3, -2.4f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
     private static Item registerItem(String name, Item item) {

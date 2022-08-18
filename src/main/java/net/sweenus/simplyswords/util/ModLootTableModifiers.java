@@ -82,6 +82,7 @@ public class ModLootTableModifiers {
                         .with(ItemEntry.builder(ModItems.WATCHER_CLAYMORE))
                         .with(ItemEntry.builder(ModItems.TOXIC_LONGSWORD))
                         .with(ItemEntry.builder(ModItems.SWORD_ON_A_STICK))
+                        .with(ItemEntry.builder(ModItems.BRAMBLETHORN))
                         .with(ItemEntry.builder(ModItems.STORMS_EDGE))
                         .with(ItemEntry.builder(ModItems.BRIMSTONE_CLAYMORE));
                 tableBuilder.pool(upool);

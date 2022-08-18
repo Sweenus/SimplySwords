@@ -1,19 +1,20 @@
 package net.sweenus.simplyswords.effect;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectCategory;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
+import net.sweenus.simplyswords.item.custom.PlagueSwordItem;
 
-public class StormEffect extends StatusEffect {
-    public StormEffect(StatusEffectCategory statusEffectCategory, int color) {super (statusEffectCategory, color); }
+public class PlagueEffect extends StatusEffect {
+    public PlagueEffect(StatusEffectCategory statusEffectCategory, int color) {super (statusEffectCategory, color); }
 
     @Override
     public void applyUpdateEffect(LivingEntity pLivingEntity, int pAmplifier) {
@@ -23,17 +24,16 @@ public class StormEffect extends StatusEffect {
             double x = pLivingEntity.getX();
             double y = pLivingEntity.getY();
             double z = pLivingEntity.getZ();
-            var pPlayer = pLivingEntity.getAttacker();
-            Box box = new Box(x + 10, y +5, z + 10, x - 10, y - 5, z - 10);
+            var attacker = pLivingEntity.getAttacker();
+            //int spreadchance = SimplySwordsConfig.getIntValue("plague_spread_chance");
 
-            //for(Entity e: world.getEntitiesByType(pLivingEntity.getType(), box, EntityPredicates.VALID_ENTITY))
-            for(Entity e: world.getOtherEntities(pPlayer, box, EntityPredicates.VALID_ENTITY))
-            {
-                if (e != null) {
-                    if (e.isTouchingWaterOrRain()) {
-                        var stormtarget = e.getBlockPos();
-                        Entity storm = EntityType.LIGHTNING_BOLT.spawn(world, null, null, null, stormtarget, SpawnReason.TRIGGERED, true, true);
-                    }
+            if (pLivingEntity.getRandom().nextInt(100) <= 10) {
+                    Box box = new Box(x + 10, y + 5, z + 10, x - 10, y - 5, z - 10);
+
+                    for(Entity e: world.getOtherEntities(attacker, box, EntityPredicates.VALID_ENTITY)) {
+                        if (e != null) {
+                            //end me
+                        }
                 }
             }
 

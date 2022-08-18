@@ -54,6 +54,8 @@ public class SimplySwordsConfig {
         INT_OPTIONS.put("slowness_duration", 50);
         INT_OPTIONS.put("wildfire_duration", 8);
         INT_OPTIONS.put("toxin_duration", 150);
+        INT_OPTIONS.put("plague_duration", 300);
+        INT_OPTIONS.put("plague_chance", 15);
 
 
         FLOAT_OPTIONS.put("standard_loot_table_weight", 0.1f);
