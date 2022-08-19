@@ -2,6 +2,9 @@ package net.sweenus.simplyswords.util;
 
 import net.fabricmc.fabric.api.loot.v2.LootTableEvents;
 import net.minecraft.loot.LootPool;
+import net.minecraft.loot.function.EnchantRandomlyLootFunction;
+import net.minecraft.loot.function.EnchantWithLevelsLootFunction;
+import net.minecraft.loot.function.LootFunction;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
 import net.sweenus.simplyswords.item.ModItems;
 import net.minecraft.loot.condition.RandomChanceLootCondition;
@@ -47,6 +50,7 @@ public class ModLootTableModifiers {
                 LootPool.Builder pool = LootPool.builder()
                         .rolls(ConstantLootNumberProvider.create(1))
                         .conditionally(RandomChanceLootCondition.builder(SimplySwordsConfig.getFloatValue("standard_loot_table_weight"))) // 1 = 100% of the time
+                        .apply(EnchantRandomlyLootFunction.builder())
                         .with(ItemEntry.builder(ModItems.IRON_LONGSWORD))
                         .with(ItemEntry.builder(ModItems.IRON_TWINBLADE))
                         .with(ItemEntry.builder(ModItems.IRON_RAPIER))

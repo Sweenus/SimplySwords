@@ -58,9 +58,9 @@ public class SimplySwordsConfig {
         INT_OPTIONS.put("plague_chance", 15);
 
 
-        FLOAT_OPTIONS.put("standard_loot_table_weight", 0.1f);
-        FLOAT_OPTIONS.put("rare_loot_table_weight", 0.05f);
-        FLOAT_OPTIONS.put("unique_loot_table_weight", 0.005f);
+        FLOAT_OPTIONS.put("standard_loot_table_weight", 0.08f);
+        FLOAT_OPTIONS.put("rare_loot_table_weight", 0.008f);
+        FLOAT_OPTIONS.put("unique_loot_table_weight", 0.002f);
         FLOAT_OPTIONS.put("omen_absorption_amount", 1f);
         FLOAT_OPTIONS.put("watcher_restore_amount", 0.5f);
     }

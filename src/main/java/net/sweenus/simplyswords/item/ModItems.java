@@ -115,7 +115,7 @@ public class ModItems {
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
     public static final Item WATCHER_CLAYMORE = registerItem( "watcher_claymore",
-            new WatcherSwordItem(ToolMaterials.NETHERITE, 6, -2.7f,
+            new WatcherSwordItem(ToolMaterials.NETHERITE, 6, -2.8f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
     public static final Item STORMS_EDGE = registerItem( "storms_edge",

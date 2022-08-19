@@ -21,7 +21,7 @@ public class SpeedSwordItem extends SwordItem {
         int sduration = SimplySwordsConfig.getIntValue("speed_duration");
 
         if (attacker.getRandom().nextInt(100) <= shitchance) {
-            attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, sduration, 3), attacker);
+            attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, sduration, 1), attacker);
         }
 
         return super.postHit(stack, target, attacker);
