@@ -99,6 +99,18 @@ public class ModItems {
             new WildfireSwordItem(ToolMaterials.NETHERITE, 3, -1.7f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
+    public static final Item RUNIC_KATANA = registerItem( "runic_katana",
+            new WildfireSwordItem(ToolMaterials.NETHERITE, 3, -2.2f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+
+    public static final Item RUNIC_GLAIVE = registerItem( "runic_glaive",
+            new WildfireSwordItem(ToolMaterials.NETHERITE, 3, -2.4f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+
+    public static final Item RUNIC_WARGLAIVE = registerItem( "runic_warglaive",
+            new SpeedSwordItem(ToolMaterials.NETHERITE, 3, -2.2f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+
     public static final Item RUNIC_RAPIER = registerItem( "runic_rapier",
             new SpeedSwordItem(ToolMaterials.NETHERITE, 2, -1.6f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));

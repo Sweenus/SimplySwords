@@ -1,0 +1,7 @@
+{
+  "attributes": {
+    "attack_range": 3.2,
+    "two_handed": true,
+    "pose": "simplyswords:pose_two_handed_polearm_test"
+  }
+}

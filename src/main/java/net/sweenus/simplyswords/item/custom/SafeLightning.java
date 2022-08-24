@@ -42,7 +42,7 @@ public class SafeLightning extends Entity {
         var equips = getItemsEquipped();
         if (equips == ModItems.STORMS_EDGE) {
             this.damage(DamageSource.LIGHTNING_BOLT, 0.0F);
-            this.sendMessage(Text.translatable("message.simplyswords.testlightning"));
+            //this.sendMessage(Text.translatable("message.simplyswords.testlightning"));
         }
     }
 
