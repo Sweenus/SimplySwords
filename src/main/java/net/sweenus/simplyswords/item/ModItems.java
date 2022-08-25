@@ -27,6 +27,14 @@ public class ModItems {
     public static final Item IRON_RAPIER = registerItem( "iron_rapier",
             new SwordItem(ToolMaterials.IRON, 2, -1.6f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+
+    public static final Item IRON_KATANA = registerItem( "iron_katana",
+            new SwordItem(ToolMaterials.IRON, 3, -2f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+
+    public static final Item IRON_SAI = registerItem( "iron_sai",
+            new SwordItem(ToolMaterials.IRON, 1, -0.5f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
     public static final Item IRON_CUTLASS = registerItem( "iron_cutlass",
             new SwordItem(ToolMaterials.IRON, 3, -2f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
@@ -44,6 +52,12 @@ public class ModItems {
     public static final Item GOLD_RAPIER = registerItem( "gold_rapier",
             new SwordItem(ToolMaterials.GOLD, 1, -1.6f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+    public static final Item GOLD_KATANA = registerItem( "gold_katana",
+            new SwordItem(ToolMaterials.GOLD, 2, -2f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+    public static final Item GOLD_SAI = registerItem( "gold_sai",
+            new SwordItem(ToolMaterials.GOLD, 0, -0.5f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
     public static final Item GOLD_CUTLASS = registerItem( "gold_cutlass",
             new SwordItem(ToolMaterials.GOLD, 2, -2f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
@@ -60,6 +74,12 @@ public class ModItems {
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
     public static final Item DIAMOND_RAPIER = registerItem( "diamond_rapier",
             new SwordItem(ToolMaterials.DIAMOND, 2, -1.6f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+    public static final Item DIAMOND_KATANA = registerItem( "diamond_katana",
+            new SwordItem(ToolMaterials.DIAMOND, 3, -2f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+    public static final Item DIAMOND_SAI = registerItem( "diamond_sai",
+            new SwordItem(ToolMaterials.DIAMOND, 1, -0.5f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
     public static final Item DIAMOND_CUTLASS = registerItem( "diamond_cutlass",
             new SwordItem(ToolMaterials.DIAMOND, 3, -2f,
@@ -79,6 +99,12 @@ public class ModItems {
 
     public static final Item NETHERITE_RAPIER = registerItem( "netherite_rapier",
             new SwordItem(ToolMaterials.NETHERITE, 2, -1.6f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+    public static final Item NETHERITE_KATANA = registerItem( "netherite_katana",
+            new SwordItem(ToolMaterials.NETHERITE, 3, -2f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+    public static final Item NETHERITE_SAI = registerItem( "netherite_sai",
+            new SwordItem(ToolMaterials.NETHERITE, 1, -0.5f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
 
     public static final Item NETHERITE_CUTLASS = registerItem( "netherite_cutlass",
