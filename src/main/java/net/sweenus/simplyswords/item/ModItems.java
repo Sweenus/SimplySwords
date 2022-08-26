@@ -33,7 +33,7 @@ public class ModItems {
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
 
     public static final Item IRON_SAI = registerItem( "iron_sai",
-            new SwordItem(ToolMaterials.IRON, 1, -0.5f,
+            new SwordItem(ToolMaterials.IRON, 0, -1.1f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
 
     public static final Item IRON_SPEAR = registerItem( "iron_spear",
@@ -65,7 +65,7 @@ public class ModItems {
             new SwordItem(ToolMaterials.GOLD, 2, -2f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
     public static final Item GOLD_SAI = registerItem( "gold_sai",
-            new SwordItem(ToolMaterials.GOLD, 0, -0.5f,
+            new SwordItem(ToolMaterials.GOLD, 0, -1.1f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
 
     public static final Item GOLD_SPEAR = registerItem( "gold_spear",
@@ -96,7 +96,7 @@ public class ModItems {
             new SwordItem(ToolMaterials.DIAMOND, 3, -2f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
     public static final Item DIAMOND_SAI = registerItem( "diamond_sai",
-            new SwordItem(ToolMaterials.DIAMOND, 1, -0.5f,
+            new SwordItem(ToolMaterials.DIAMOND, 0, -1.1f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
 
     public static final Item DIAMOND_SPEAR = registerItem( "diamond_spear",
@@ -129,7 +129,7 @@ public class ModItems {
             new SwordItem(ToolMaterials.NETHERITE, 3, -2f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
     public static final Item NETHERITE_SAI = registerItem( "netherite_sai",
-            new SwordItem(ToolMaterials.NETHERITE, 1, -0.5f,
+            new SwordItem(ToolMaterials.NETHERITE, 0, -1.1f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
 
     public static final Item NETHERITE_SPEAR = registerItem( "netherite_spear",
@@ -162,12 +162,12 @@ public class ModItems {
             new WildfireSwordItem(ToolMaterials.NETHERITE, 3, -2.2f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
+    public static final Item RUNIC_SAI = registerItem( "runic_sai",
+            new SwordItem(ToolMaterials.NETHERITE, 0, -1.1f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+
     public static final Item RUNIC_GLAIVE = registerItem( "runic_glaive",
             new WildfireSwordItem(ToolMaterials.NETHERITE, 3, -2.4f,
-                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
-
-    public static final Item RUNIC_WARGLAIVE = registerItem( "runic_warglaive",
-            new SpeedSwordItem(ToolMaterials.NETHERITE, 3, -2.2f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
     public static final Item RUNIC_RAPIER = registerItem( "runic_rapier",
@@ -203,6 +203,10 @@ public class ModItems {
 
     public static final Item BRAMBLETHORN = registerItem( "bramblethorn",
             new BrambleSwordItem(ToolMaterials.WOOD, 6, -1.6f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+
+    public static final Item WATCHING_WARGLAIVE = registerItem( "watching_warglaive",
+            new SpeedSwordItem(ToolMaterials.NETHERITE, 3, -2.2f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
     public static final Item TOXIC_LONGSWORD = registerItem( "toxic_longsword",
