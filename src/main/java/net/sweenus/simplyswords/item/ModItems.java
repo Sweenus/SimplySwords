@@ -35,6 +35,15 @@ public class ModItems {
     public static final Item IRON_SAI = registerItem( "iron_sai",
             new SwordItem(ToolMaterials.IRON, 1, -0.5f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+
+    public static final Item IRON_SPEAR = registerItem( "iron_spear",
+            new SwordItem(ToolMaterials.IRON, 3, -2.8f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+
+    public static final Item IRON_WARGLAIVE = registerItem( "iron_warglaive",
+            new SwordItem(ToolMaterials.IRON, 3, -2f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+
     public static final Item IRON_CUTLASS = registerItem( "iron_cutlass",
             new SwordItem(ToolMaterials.IRON, 3, -2f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
@@ -58,6 +67,14 @@ public class ModItems {
     public static final Item GOLD_SAI = registerItem( "gold_sai",
             new SwordItem(ToolMaterials.GOLD, 0, -0.5f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+
+    public static final Item GOLD_SPEAR = registerItem( "gold_spear",
+            new SwordItem(ToolMaterials.GOLD, 2, -2.8f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+
+    public static final Item GOLD_WARGLAIVE = registerItem( "gold_warglaive",
+            new SwordItem(ToolMaterials.GOLD, 2, -2f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
     public static final Item GOLD_CUTLASS = registerItem( "gold_cutlass",
             new SwordItem(ToolMaterials.GOLD, 2, -2f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
@@ -80,6 +97,14 @@ public class ModItems {
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
     public static final Item DIAMOND_SAI = registerItem( "diamond_sai",
             new SwordItem(ToolMaterials.DIAMOND, 1, -0.5f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+
+    public static final Item DIAMOND_SPEAR = registerItem( "diamond_spear",
+            new SwordItem(ToolMaterials.DIAMOND, 3, -2.8f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+
+    public static final Item DIAMOND_WARGLAIVE = registerItem( "diamond_warglaive",
+            new SwordItem(ToolMaterials.DIAMOND, 3, -2f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
     public static final Item DIAMOND_CUTLASS = registerItem( "diamond_cutlass",
             new SwordItem(ToolMaterials.DIAMOND, 3, -2f,
@@ -105,6 +130,14 @@ public class ModItems {
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
     public static final Item NETHERITE_SAI = registerItem( "netherite_sai",
             new SwordItem(ToolMaterials.NETHERITE, 1, -0.5f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+
+    public static final Item NETHERITE_SPEAR = registerItem( "netherite_spear",
+            new SwordItem(ToolMaterials.NETHERITE, 3, -2.8f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+
+    public static final Item NETHERITE_WARGLAIVE = registerItem( "netherite_warglaive",
+            new SwordItem(ToolMaterials.NETHERITE, 3, -2f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
 
     public static final Item NETHERITE_CUTLASS = registerItem( "netherite_cutlass",
@@ -158,6 +191,10 @@ public class ModItems {
 
     public static final Item STORMS_EDGE = registerItem( "storms_edge",
             new StormSwordItem(ToolMaterials.NETHERITE, 3, -1.7f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+
+    public static final Item STORMBRINGER = registerItem( "stormbringer",
+            new StormSwordItem(ToolMaterials.NETHERITE, 3, -2.4f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
     public static final Item SWORD_ON_A_STICK = registerItem( "sword_on_a_stick",
