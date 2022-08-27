@@ -55,11 +55,21 @@ public class ModLootTableModifiers {
                         .with(ItemEntry.builder(ModItems.IRON_TWINBLADE))
                         .with(ItemEntry.builder(ModItems.IRON_RAPIER))
                         .with(ItemEntry.builder(ModItems.IRON_CUTLASS))
+                        .with(ItemEntry.builder(ModItems.IRON_KATANA))
+                        .with(ItemEntry.builder(ModItems.IRON_GLAIVE))
+                        .with(ItemEntry.builder(ModItems.IRON_WARGLAIVE))
+                        .with(ItemEntry.builder(ModItems.IRON_SPEAR))
+                        .with(ItemEntry.builder(ModItems.IRON_SAI))
                         .with(ItemEntry.builder(ModItems.IRON_CLAYMORE))
                         .with(ItemEntry.builder(ModItems.GOLD_LONGSWORD))
                         .with(ItemEntry.builder(ModItems.GOLD_TWINBLADE))
                         .with(ItemEntry.builder(ModItems.GOLD_RAPIER))
                         .with(ItemEntry.builder(ModItems.GOLD_CUTLASS))
+                        .with(ItemEntry.builder(ModItems.GOLD_KATANA))
+                        .with(ItemEntry.builder(ModItems.GOLD_GLAIVE))
+                        .with(ItemEntry.builder(ModItems.GOLD_WARGLAIVE))
+                        .with(ItemEntry.builder(ModItems.GOLD_SPEAR))
+                        .with(ItemEntry.builder(ModItems.GOLD_SAI))
                         .with(ItemEntry.builder(ModItems.GOLD_CLAYMORE));
                 tableBuilder.pool(pool);
 
@@ -67,15 +77,24 @@ public class ModLootTableModifiers {
                 LootPool.Builder rpool = LootPool.builder()
                         .rolls(ConstantLootNumberProvider.create(1))
                         .conditionally(RandomChanceLootCondition.builder(SimplySwordsConfig.getFloatValue("rare_loot_table_weight"))) // 1 = 100% of the time
+                        .apply(EnchantRandomlyLootFunction.builder())
                         .with(ItemEntry.builder(ModItems.RUNIC_CLAYMORE))
                         .with(ItemEntry.builder(ModItems.RUNIC_TWINBLADE))
                         .with(ItemEntry.builder(ModItems.RUNIC_LONGSWORD))
                         .with(ItemEntry.builder(ModItems.RUNIC_RAPIER))
                         .with(ItemEntry.builder(ModItems.RUNIC_CUTLASS))
+                        .with(ItemEntry.builder(ModItems.RUNIC_KATANA))
+                        .with(ItemEntry.builder(ModItems.RUNIC_GLAIVE))
+                        .with(ItemEntry.builder(ModItems.RUNIC_SAI))
                         .with(ItemEntry.builder(ModItems.DIAMOND_LONGSWORD))
                         .with(ItemEntry.builder(ModItems.DIAMOND_TWINBLADE))
                         .with(ItemEntry.builder(ModItems.DIAMOND_RAPIER))
                         .with(ItemEntry.builder(ModItems.DIAMOND_CUTLASS))
+                        .with(ItemEntry.builder(ModItems.DIAMOND_KATANA))
+                        .with(ItemEntry.builder(ModItems.DIAMOND_SPEAR))
+                        .with(ItemEntry.builder(ModItems.DIAMOND_GLAIVE))
+                        .with(ItemEntry.builder(ModItems.DIAMOND_WARGLAIVE))
+                        .with(ItemEntry.builder(ModItems.DIAMOND_SAI))
                         .with(ItemEntry.builder(ModItems.DIAMOND_CLAYMORE));
                 tableBuilder.pool(rpool);
 
@@ -88,6 +107,7 @@ public class ModLootTableModifiers {
                         .with(ItemEntry.builder(ModItems.SWORD_ON_A_STICK))
                         .with(ItemEntry.builder(ModItems.BRAMBLETHORN))
                         .with(ItemEntry.builder(ModItems.STORMS_EDGE))
+                        .with(ItemEntry.builder(ModItems.STORMBRINGER))
                         .with(ItemEntry.builder(ModItems.BRIMSTONE_CLAYMORE));
                 tableBuilder.pool(upool);
 
