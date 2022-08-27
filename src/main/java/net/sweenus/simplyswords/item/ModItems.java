@@ -40,6 +40,10 @@ public class ModItems {
             new SwordItem(ToolMaterials.IRON, 3, -2.8f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
 
+    public static final Item IRON_GLAIVE = registerItem( "iron_glaive",
+            new SwordItem(ToolMaterials.IRON, 3, -2.8f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+
     public static final Item IRON_WARGLAIVE = registerItem( "iron_warglaive",
             new SwordItem(ToolMaterials.IRON, 3, -2f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
@@ -69,6 +73,10 @@ public class ModItems {
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
 
     public static final Item GOLD_SPEAR = registerItem( "gold_spear",
+            new SwordItem(ToolMaterials.GOLD, 2, -2.8f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+
+    public static final Item GOLD_GLAIVE = registerItem( "gold_glaive",
             new SwordItem(ToolMaterials.GOLD, 2, -2.8f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
 
@@ -103,6 +111,10 @@ public class ModItems {
             new SwordItem(ToolMaterials.DIAMOND, 3, -2.8f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
 
+    public static final Item DIAMOND_GLAIVE = registerItem( "diamond_glaive",
+            new SwordItem(ToolMaterials.DIAMOND, 3, -2.8f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+
     public static final Item DIAMOND_WARGLAIVE = registerItem( "diamond_warglaive",
             new SwordItem(ToolMaterials.DIAMOND, 3, -2f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
@@ -133,6 +145,10 @@ public class ModItems {
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
 
     public static final Item NETHERITE_SPEAR = registerItem( "netherite_spear",
+            new SwordItem(ToolMaterials.NETHERITE, 3, -2.8f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+
+    public static final Item NETHERITE_GLAIVE = registerItem( "netherite_glaive",
             new SwordItem(ToolMaterials.NETHERITE, 3, -2.8f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
 
