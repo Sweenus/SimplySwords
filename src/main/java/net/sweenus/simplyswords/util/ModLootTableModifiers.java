@@ -85,6 +85,7 @@ public class ModLootTableModifiers {
                         .with(ItemEntry.builder(ModItems.RUNIC_CUTLASS))
                         .with(ItemEntry.builder(ModItems.RUNIC_KATANA))
                         .with(ItemEntry.builder(ModItems.RUNIC_GLAIVE))
+                        .with(ItemEntry.builder(ModItems.RUNIC_SPEAR))
                         .with(ItemEntry.builder(ModItems.RUNIC_SAI))
                         .with(ItemEntry.builder(ModItems.DIAMOND_LONGSWORD))
                         .with(ItemEntry.builder(ModItems.DIAMOND_TWINBLADE))
