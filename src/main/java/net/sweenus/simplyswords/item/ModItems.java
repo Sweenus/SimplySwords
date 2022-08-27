@@ -45,7 +45,7 @@ public class ModItems {
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
 
     public static final Item IRON_WARGLAIVE = registerItem( "iron_warglaive",
-            new SwordItem(ToolMaterials.IRON, 3, -2f,
+            new SwordItem(ToolMaterials.IRON, 3, -2.2f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
 
     public static final Item IRON_CUTLASS = registerItem( "iron_cutlass",
@@ -81,7 +81,7 @@ public class ModItems {
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
 
     public static final Item GOLD_WARGLAIVE = registerItem( "gold_warglaive",
-            new SwordItem(ToolMaterials.GOLD, 2, -2f,
+            new SwordItem(ToolMaterials.GOLD, 2, -2.2f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
     public static final Item GOLD_CUTLASS = registerItem( "gold_cutlass",
             new SwordItem(ToolMaterials.GOLD, 2, -2f,
@@ -116,7 +116,7 @@ public class ModItems {
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
 
     public static final Item DIAMOND_WARGLAIVE = registerItem( "diamond_warglaive",
-            new SwordItem(ToolMaterials.DIAMOND, 3, -2f,
+            new SwordItem(ToolMaterials.DIAMOND, 3, -2.2f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
     public static final Item DIAMOND_CUTLASS = registerItem( "diamond_cutlass",
             new SwordItem(ToolMaterials.DIAMOND, 3, -2f,
@@ -153,7 +153,7 @@ public class ModItems {
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
 
     public static final Item NETHERITE_WARGLAIVE = registerItem( "netherite_warglaive",
-            new SwordItem(ToolMaterials.NETHERITE, 3, -2f,
+            new SwordItem(ToolMaterials.NETHERITE, 3, -2.2f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
 
     public static final Item NETHERITE_CUTLASS = registerItem( "netherite_cutlass",
@@ -179,7 +179,7 @@ public class ModItems {
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
     public static final Item RUNIC_KATANA = registerItem( "runic_katana",
-            new WildfireSwordItem(ToolMaterials.NETHERITE, 3, -2.2f,
+            new WildfireSwordItem(ToolMaterials.NETHERITE, 3, -2f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
     public static final Item RUNIC_SAI = registerItem( "runic_sai",
