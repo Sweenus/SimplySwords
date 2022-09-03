@@ -1,6 +1,7 @@
 package net.sweenus.simplyswords.item;
 
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.item.SwordItem;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.item.ToolMaterials;
@@ -237,6 +238,7 @@ public class ModItems {
     private static Item registerItem(String name, Item item) {
         return Registry.register(Registry.ITEM, new Identifier(SimplySwords.MOD_ID, name), item);
     }
+
 
     public static void registerModItems() {
         SimplySwords.LOGGER.info("Registering Mod Items for " + SimplySwords.MOD_ID);
