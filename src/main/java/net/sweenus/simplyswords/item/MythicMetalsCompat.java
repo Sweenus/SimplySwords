@@ -1,16 +1,10 @@
 package net.sweenus.simplyswords.item;
 
-import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.minecraft.item.Item;
-import net.minecraft.item.SwordItem;
-import net.minecraft.item.ToolMaterial;
 import net.minecraft.item.ToolMaterials;
-import net.minecraft.recipe.Ingredient;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.Rarity;
 import net.minecraft.util.registry.Registry;
 import net.sweenus.simplyswords.SimplySwords;
-import net.sweenus.simplyswords.item.custom.*;
 
 public class MythicMetalsCompat {
 
