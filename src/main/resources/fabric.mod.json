@@ -34,7 +34,7 @@
     "java": ">=17"
   },
   "suggests": {
-    "another-mod": "*"
+    "mythicmetals": "mythicmetals"
   },
 
   "custom": {

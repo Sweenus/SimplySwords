@@ -16,7 +16,6 @@ public class ModItems {
    // public static final Item ITEMNAMEHERE = registerItem( "item_name",
         //new Item(new FabricItemSettings().group(ItemGroup.MISC)));
 
-
     //IRON
     public static final Item IRON_LONGSWORD = registerItem( "iron_longsword",
             new SwordItem(ToolMaterials.IRON, 3, -2.4f,

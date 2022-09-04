@@ -20,43 +20,43 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 
 public class SimplySwords implements ModInitializer {
-	public static final String MOD_ID = "simplyswords";
-	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
+    public static final String MOD_ID = "simplyswords";
+    public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
-	@Override
-	public void onInitialize() {
+    @Override
+    public void onInitialize() {
 
-		ModItems.registerModItems();
+        ModItems.registerModItems();
 
 		if (FabricLoader.getInstance().isModLoaded("mythicmetals")) {
 			MythicMetalsCompat.registerModItems();
 		}
 
-		ModEffects.registerEffects();
-		Registry.register(Registry.STATUS_EFFECT, new Identifier("simplyswords", "burn"), ModEffects.BURN);
-		Registry.register(Registry.STATUS_EFFECT, new Identifier("simplyswords", "plague"), ModEffects.PLAGUE);
-		Registry.register(Registry.STATUS_EFFECT, new Identifier("simplyswords", "wildfire"), ModEffects.WILDFIRE);
-		Registry.register(Registry.STATUS_EFFECT, new Identifier("simplyswords", "storm"), ModEffects.STORM);
-		Registry.register(Registry.STATUS_EFFECT, new Identifier("simplyswords", "electric"), ModEffects.ELECTRIC);
-		Registry.register(Registry.STATUS_EFFECT, new Identifier("simplyswords", "omen"), ModEffects.OMEN);
-		Registry.register(Registry.STATUS_EFFECT, new Identifier("simplyswords", "watcher"), ModEffects.WATCHER);
+        ModEffects.registerEffects();
+        Registry.register(Registry.STATUS_EFFECT, new Identifier("simplyswords", "burn"), ModEffects.BURN);
+        Registry.register(Registry.STATUS_EFFECT, new Identifier("simplyswords", "plague"), ModEffects.PLAGUE);
+        Registry.register(Registry.STATUS_EFFECT, new Identifier("simplyswords", "wildfire"), ModEffects.WILDFIRE);
+        Registry.register(Registry.STATUS_EFFECT, new Identifier("simplyswords", "storm"), ModEffects.STORM);
+        Registry.register(Registry.STATUS_EFFECT, new Identifier("simplyswords", "electric"), ModEffects.ELECTRIC);
+        Registry.register(Registry.STATUS_EFFECT, new Identifier("simplyswords", "omen"), ModEffects.OMEN);
+        Registry.register(Registry.STATUS_EFFECT, new Identifier("simplyswords", "watcher"), ModEffects.WATCHER);
 
-		ModLootTableModifiers.modifyLootTables();
-
-
-
-	//CONFIG
-
-		SimplySwordsConfig.init();
-
-		String defaultConfig = "{\n" + "  \"regen_simplyswords_config_file\": false\n" + "}";
-
-		File configFile = Config.createFile("config/simplyswords/backupconfig.json", defaultConfig, false);
-		JsonObject json = Config.getJsonObject(Config.readFile(configFile));
-
-		SimplySwordsConfig.generateConfigs(json == null || !json.has("regen_simplyswords_config_file") || json.get("regen_simplyswords_config_file").getAsBoolean());
-		SimplySwordsConfig.loadConfig();
+        ModLootTableModifiers.modifyLootTables();
 
 
-	}
+
+        //CONFIG
+
+        SimplySwordsConfig.init();
+
+        String defaultConfig = "{\n" + "  \"regen_simplyswords_config_file\": false\n" + "}";
+
+        File configFile = Config.createFile("config/simplyswords/backupconfig.json", defaultConfig, false);
+        JsonObject json = Config.getJsonObject(Config.readFile(configFile));
+
+        SimplySwordsConfig.generateConfigs(json == null || !json.has("regen_simplyswords_config_file") || json.get("regen_simplyswords_config_file").getAsBoolean());
+        SimplySwordsConfig.loadConfig();
+
+
+    }
 }

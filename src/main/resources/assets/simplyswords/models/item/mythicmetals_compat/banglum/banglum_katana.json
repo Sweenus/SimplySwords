@@ -1,11 +1,8 @@
 {
 	"credit": "Made by Sweenus using Blockbench",
 	"textures": {
-		"3": "simplyswords:item/blade",
+		"3": "simplyswords:mythicmetals_compat/blade_banglum",
 		"4": "simplyswords:item/hilt",
-		"5": "simplyswords:item/sword_claymore_electric_effect_anim",
-		"6": "simplyswords:item/ribbon_wrap",
-		"7": "simplyswords:item/ribbon_effect",
 		"particle": "simplyswords:item/hilt"
 	},
 	"elements": [
@@ -203,58 +200,6 @@
 				"up": {"uv": [11, 10, 9, 8], "texture": "#4"},
 				"down": {"uv": [12, 0, 10, 2], "texture": "#4"}
 			}
-		},
-		{
-			"from": [6.75, 3, 7.75],
-			"to": [8.25, 4, 9.25],
-			"rotation": {"angle": 0, "axis": "y", "origin": [7.5, 15.5, 8.5]},
-			"faces": {
-				"north": {"uv": [3, 8, 5, 10], "texture": "#6"},
-				"east": {"uv": [5, 8, 7, 10], "texture": "#6"},
-				"south": {"uv": [8, 6, 10, 8], "texture": "#6"},
-				"west": {"uv": [7, 8, 9, 10], "texture": "#6"},
-				"up": {"uv": [11, 10, 9, 8], "texture": "#6"},
-				"down": {"uv": [12, 0, 10, 2], "texture": "#6"}
-			}
-		},
-		{
-			"from": [6.75, 6.25, 8],
-			"to": [7.75, 19.25, 9],
-			"rotation": {"angle": 0, "axis": "y", "origin": [0, -3, 0]},
-			"faces": {
-				"north": {"uv": [6.75, 0.25, 8, 16], "texture": "#5"},
-				"east": {"uv": [13, 1.5, 15.5, 2.5], "texture": "#5"},
-				"south": {"uv": [6.75, 0.25, 8.0625, 16], "texture": "#5"},
-				"west": {"uv": [12.5, 3.25, 15, 4.25], "texture": "#5"},
-				"up": {"uv": [13.25, 7.25, 14.25, 9.75], "texture": "#5"},
-				"down": {"uv": [10.5, 2.25, 11.5, 4.75], "texture": "#5"}
-			}
-		},
-		{
-			"from": [7, 15.5, 8],
-			"to": [8, 28.5, 9],
-			"rotation": {"angle": 0, "axis": "y", "origin": [0, -3, 0]},
-			"faces": {
-				"north": {"uv": [0, 0.25, 1.25, 16], "texture": "#5"},
-				"east": {"uv": [13, 1.5, 15.5, 2.5], "texture": "#5"},
-				"south": {"uv": [0, 0.25, 1.3125, 16], "texture": "#5"},
-				"west": {"uv": [12.5, 3.25, 15, 4.25], "texture": "#5"},
-				"up": {"uv": [13.25, 7.25, 14.25, 9.75], "texture": "#5"},
-				"down": {"uv": [10.5, 2.25, 11.5, 4.75], "texture": "#5"}
-			}
-		},
-		{
-			"from": [1.75, 2.5, 8.5],
-			"to": [6.75, 5, 8.5],
-			"rotation": {"angle": 0, "axis": "y", "origin": [7.5, 15.5, 8.5]},
-			"faces": {
-				"north": {"uv": [2, 0, 14, 7.5], "texture": "#7"},
-				"east": {"uv": [3, 13, 5, 15], "texture": "#7"},
-				"south": {"uv": [14, 0, 2, 7.5], "texture": "#7"},
-				"west": {"uv": [5, 13.5, 7, 15.5], "texture": "#7"},
-				"up": {"uv": [10, 15.5, 8, 13.5], "texture": "#7"},
-				"down": {"uv": [3, 13.5, 1, 15.5], "texture": "#7"}
-			}
 		}
 	],
 	"display": {
@@ -288,8 +233,9 @@
 			"scale": [0.6, 0.6, 0.6]
 		},
 		"head": {
-			"rotation": [0, 180, 38],
-			"translation": [0, -13.75, 7]
+			"rotation": [0, 0, 129],
+			"translation": [6.75, -8.75, 5.25],
+			"scale": [1.5, 1.5, 1.5]
 		},
 		"fixed": {
 			"rotation": [-2, 180, 44],
@@ -319,17 +265,9 @@
 					"color": 0,
 					"nbt": "{}",
 					"armAnimationEnabled": false,
-					"children": [10, 11, 12, 13, 14, 15]
+					"children": [10, 11, 12, 13, 14]
 				}
 			]
-		},
-		{
-			"name": "Effect",
-			"origin": [8, 8, 8],
-			"color": 0,
-			"nbt": "{}",
-			"armAnimationEnabled": false,
-			"children": [16, 17, 18]
 		}
 	]
 }

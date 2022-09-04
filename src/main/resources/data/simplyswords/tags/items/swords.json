@@ -70,6 +70,28 @@
     "simplyswords:adamantite_sai",
     "simplyswords:adamantite_spear",
     "simplyswords:adamantite_twinblade",
-    "simplyswords:adamantite_warglaive"
+    "simplyswords:adamantite_warglaive",
+
+    "simplyswords:aquarium_claymore",
+    "simplyswords:aquarium_cutlass",
+    "simplyswords:aquarium_glaive",
+    "simplyswords:aquarium_katana",
+    "simplyswords:aquarium_longsword",
+    "simplyswords:aquarium_rapier",
+    "simplyswords:aquarium_sai",
+    "simplyswords:aquarium_spear",
+    "simplyswords:aquarium_twinblade",
+    "simplyswords:aquarium_warglaive",
+
+    "simplyswords:banglum_claymore",
+    "simplyswords:banglum_cutlass",
+    "simplyswords:banglum_glaive",
+    "simplyswords:banglum_katana",
+    "simplyswords:banglum_longsword",
+    "simplyswords:banglum_rapier",
+    "simplyswords:banglum_sai",
+    "simplyswords:banglum_spear",
+    "simplyswords:banglum_twinblade",
+    "simplyswords:banglum_warglaive"
   ]
 }
