@@ -92,6 +92,29 @@
     "simplyswords:banglum_sai",
     "simplyswords:banglum_spear",
     "simplyswords:banglum_twinblade",
-    "simplyswords:banglum_warglaive"
+    "simplyswords:banglum_warglaive",
+
+    "simplyswords:carmot_claymore",
+    "simplyswords:carmot_cutlass",
+    "simplyswords:carmot_glaive",
+    "simplyswords:carmot_katana",
+    "simplyswords:carmot_longsword",
+    "simplyswords:carmot_rapier",
+    "simplyswords:carmot_sai",
+    "simplyswords:carmot_spear",
+    "simplyswords:carmot_twinblade",
+    "simplyswords:carmot_warglaive",
+
+    "simplyswords:kyber_claymore",
+    "simplyswords:kyber_cutlass",
+    "simplyswords:kyber_glaive",
+    "simplyswords:kyber_katana",
+    "simplyswords:kyber_longsword",
+    "simplyswords:kyber_rapier",
+    "simplyswords:kyber_sai",
+    "simplyswords:kyber_spear",
+    "simplyswords:kyber_twinblade",
+    "simplyswords:kyber_warglaive"
+
   ]
 }

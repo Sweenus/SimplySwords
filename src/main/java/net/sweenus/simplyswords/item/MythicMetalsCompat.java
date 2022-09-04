@@ -21,6 +21,8 @@ public class MythicMetalsCompat {
     static int adamantite_modifier = 5;
     static int aquarium_modifier = 2;
     static int banglum_modifier = 2;
+    static int carmot_modifier = 3;
+    static int kyber_modifier = 2;
 
 
     //ADAMANTITE
@@ -145,6 +147,86 @@ public class MythicMetalsCompat {
             new SwordItem(ToolMaterials.DIAMOND, banglum_modifier + claymore_modifier, -2.8f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
 
+
+    //CARMOT
+    public static final Item CARMOT_LONGSWORD = registerItem( "mythicmetals_compat/carmot/carmot_longsword",
+            new SwordItem(ToolMaterials.DIAMOND, carmot_modifier, -2.4f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+
+    public static final Item CARMOT_TWINBLADE = registerItem( "mythicmetals_compat/carmot/carmot_twinblade",
+            new SwordItem(ToolMaterials.DIAMOND, carmot_modifier, -1.7f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+    public static final Item CARMOT_RAPIER = registerItem( "mythicmetals_compat/carmot/carmot_rapier",
+            new SwordItem(ToolMaterials.DIAMOND, carmot_modifier - rapier_modifier, -1.6f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+
+    public static final Item CARMOT_KATANA = registerItem( "mythicmetals_compat/carmot/carmot_katana",
+            new SwordItem(ToolMaterials.DIAMOND, carmot_modifier, -2f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+
+    public static final Item CARMOT_SAI = registerItem( "mythicmetals_compat/carmot/carmot_sai",
+            new SwordItem(ToolMaterials.DIAMOND, carmot_modifier - sai_modifier, -1.1f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+
+    public static final Item CARMOT_SPEAR = registerItem( "mythicmetals_compat/carmot/carmot_spear",
+            new SwordItem(ToolMaterials.DIAMOND, carmot_modifier, -2.7f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+
+    public static final Item CARMOT_GLAIVE = registerItem( "mythicmetals_compat/carmot/carmot_glaive",
+            new SwordItem(ToolMaterials.DIAMOND, carmot_modifier, -2.6f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+
+    public static final Item CARMOT_WARGLAIVE = registerItem( "mythicmetals_compat/carmot/carmot_warglaive",
+            new SwordItem(ToolMaterials.DIAMOND, carmot_modifier, -2.2f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+
+    public static final Item CARMOT_CUTLASS = registerItem( "mythicmetals_compat/carmot/carmot_cutlass",
+            new SwordItem(ToolMaterials.DIAMOND, carmot_modifier, -2f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+
+    public static final Item CARMOT_CLAYMORE = registerItem( "mythicmetals_compat/carmot/carmot_claymore",
+            new SwordItem(ToolMaterials.DIAMOND, carmot_modifier + claymore_modifier, -2.8f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+
+    //KYBER
+    public static final Item KYBER_LONGSWORD = registerItem( "mythicmetals_compat/kyber/kyber_longsword",
+            new SwordItem(ToolMaterials.DIAMOND, kyber_modifier, -2.4f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+
+    public static final Item KYBER_TWINBLADE = registerItem( "mythicmetals_compat/kyber/kyber_twinblade",
+            new SwordItem(ToolMaterials.DIAMOND, kyber_modifier, -1.7f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+    public static final Item KYBER_RAPIER = registerItem( "mythicmetals_compat/kyber/kyber_rapier",
+            new SwordItem(ToolMaterials.DIAMOND, kyber_modifier - rapier_modifier, -1.6f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+
+    public static final Item KYBER_KATANA = registerItem( "mythicmetals_compat/kyber/kyber_katana",
+            new SwordItem(ToolMaterials.DIAMOND, kyber_modifier, -2f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+
+    public static final Item KYBER_SAI = registerItem( "mythicmetals_compat/kyber/kyber_sai",
+            new SwordItem(ToolMaterials.DIAMOND, kyber_modifier - sai_modifier, -1.1f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+
+    public static final Item KYBER_SPEAR = registerItem( "mythicmetals_compat/kyber/kyber_spear",
+            new SwordItem(ToolMaterials.DIAMOND, kyber_modifier, -2.7f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+
+    public static final Item KYBER_GLAIVE = registerItem( "mythicmetals_compat/kyber/kyber_glaive",
+            new SwordItem(ToolMaterials.DIAMOND, kyber_modifier, -2.6f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+
+    public static final Item KYBER_WARGLAIVE = registerItem( "mythicmetals_compat/kyber/kyber_warglaive",
+            new SwordItem(ToolMaterials.DIAMOND, kyber_modifier, -2.2f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+
+    public static final Item KYBER_CUTLASS = registerItem( "mythicmetals_compat/kyber/kyber_cutlass",
+            new SwordItem(ToolMaterials.DIAMOND, kyber_modifier, -2f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+
+    public static final Item KYBER_CLAYMORE = registerItem( "mythicmetals_compat/kyber/kyber_claymore",
+            new SwordItem(ToolMaterials.DIAMOND, kyber_modifier + claymore_modifier, -2.8f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
 
 
     private static Item registerItem(String name, Item item) {
