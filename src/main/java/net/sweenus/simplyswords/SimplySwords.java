@@ -3,13 +3,10 @@ package net.sweenus.simplyswords;
 import com.google.gson.JsonObject;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.entity.effect.StatusEffect;
-import net.minecraft.entity.effect.StatusEffectCategory;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
-import net.sweenus.simplyswords.effect.BurnEffect;
 import net.sweenus.simplyswords.effect.ModEffects;
 import net.sweenus.simplyswords.item.ModItems;
 import net.sweenus.simplyswords.item.MythicMetalsCompat;
@@ -49,7 +46,10 @@ public class SimplySwords implements ModInitializer {
 
         SimplySwordsConfig.init();
 
-        String defaultConfig = "{\n" + "  \"regen_simplyswords_config_file\": false\n" + "}";
+        String defaultConfig = """
+                {
+                  "regen_simplyswords_config_file": false
+                }""";
 
         File configFile = Config.createFile("config/simplyswords/backupconfig.json", defaultConfig, false);
         JsonObject json = Config.getJsonObject(Config.readFile(configFile));

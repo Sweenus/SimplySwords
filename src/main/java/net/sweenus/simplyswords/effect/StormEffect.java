@@ -1,16 +1,15 @@
 package net.sweenus.simplyswords.effect;
 
-import net.minecraft.client.render.entity.LightningEntityRenderer;
-import net.minecraft.entity.*;
-import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectCategory;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Vec3d;
-import net.sweenus.simplyswords.config.SimplySwordsConfig;
 
 public class StormEffect extends StatusEffect {
     public StormEffect(StatusEffectCategory statusEffectCategory, int color) {super (statusEffectCategory, color); }
