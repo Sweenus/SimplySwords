@@ -46,7 +46,10 @@ public class SimplySwords implements ModInitializer {
 
         SimplySwordsConfig.init();
 
-        String defaultConfig = "{\n" + "  \"regen_simplyswords_config_file\": false\n" + "}";
+        String defaultConfig = """
+                {
+                  "regen_simplyswords_config_file": false
+                }""";
 
         File configFile = Config.createFile("config/simplyswords/backupconfig.json", defaultConfig, false);
         JsonObject json = Config.getJsonObject(Config.readFile(configFile));
