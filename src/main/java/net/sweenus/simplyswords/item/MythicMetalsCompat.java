@@ -15,42 +15,42 @@ public class MythicMetalsCompat {
     //Compat for Mythic Metals
 
 
-    //IRON
-    public static final Item ADAMANTITE_LONGSWORD = registerItem( "adamantite_longsword",
+    //ADAMANTITE
+    public static final Item ADAMANTITE_LONGSWORD = registerItem( "mythicmetals_compat/adamantite_longsword",
             new SwordItem(ToolMaterials.IRON, 3, -2.4f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
 
-    public static final Item ADAMANTITE_TWINBLADE = registerItem( "adamantite_twinblade",
+    public static final Item ADAMANTITE_TWINBLADE = registerItem( "mythicmetals_compat/adamantite_twinblade",
             new SwordItem(ToolMaterials.IRON, 3, -1.7f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
-    public static final Item ADAMANTITE_RAPIER = registerItem( "adamantite_rapier",
+    public static final Item ADAMANTITE_RAPIER = registerItem( "mythicmetals_compat/adamantite_rapier",
             new SwordItem(ToolMaterials.IRON, 2, -1.6f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
 
-    public static final Item ADAMANTITE_KATANA = registerItem( "adamantite_katana",
+    public static final Item ADAMANTITE_KATANA = registerItem( "mythicmetals_compat/adamantite_katana",
             new SwordItem(ToolMaterials.IRON, 3, -2f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
 
-    public static final Item ADAMANTITE_SAI = registerItem( "adamantite_sai",
+    public static final Item ADAMANTITE_SAI = registerItem( "mythicmetals_compat/adamantite_sai",
             new SwordItem(ToolMaterials.IRON, 0, -1.1f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
 
-    public static final Item ADAMANTITE_SPEAR = registerItem( "adamantite_spear",
+    public static final Item ADAMANTITE_SPEAR = registerItem( "mythicmetals_compat/adamantite_spear",
             new SwordItem(ToolMaterials.IRON, 3, -2.7f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
 
-    public static final Item ADAMANTITE_GLAIVE = registerItem( "adamantite_glaive",
+    public static final Item ADAMANTITE_GLAIVE = registerItem( "mythicmetals_compat/adamantite_glaive",
             new SwordItem(ToolMaterials.IRON, 3, -2.6f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
 
-    public static final Item ADAMANTITE_WARGLAIVE = registerItem( "adamantite_warglaive",
+    public static final Item ADAMANTITE_WARGLAIVE = registerItem( "mythicmetals_compat/adamantite_warglaive",
             new SwordItem(ToolMaterials.IRON, 3, -2.2f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
 
-    public static final Item ADAMANTITE_CUTLASS = registerItem( "adamantite_cutlass",
+    public static final Item ADAMANTITE_CUTLASS = registerItem( "mythicmetals_compat/adamantite_cutlass",
             new SwordItem(ToolMaterials.IRON, 3, -2f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
-    public static final Item ADAMANTITE_CLAYMORE = registerItem( "adamantite_claymore",
+    public static final Item ADAMANTITE_CLAYMORE = registerItem( "mythicmetals_compat/adamantite_claymore",
             new SwordItem(ToolMaterials.IRON, 5, -2.8f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
 
@@ -61,7 +61,7 @@ public class MythicMetalsCompat {
 
 
     public static void registerModItems() {
-        SimplySwords.LOGGER.info("Registering Mod Items for " + SimplySwords.MOD_ID);
+        SimplySwords.LOGGER.info("Registering Mythic Metals compat Items for " + SimplySwords.MOD_ID);
     }
 
 }

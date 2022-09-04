@@ -28,6 +28,10 @@ public class SimplySwords implements ModInitializer {
 
 		ModItems.registerModItems();
 
+		if (FabricLoader.getInstance().isModLoaded("mythicmetals")) {
+			MythicMetalsCompat.registerModItems();
+		}
+
 		ModEffects.registerEffects();
 		Registry.register(Registry.STATUS_EFFECT, new Identifier("simplyswords", "burn"), ModEffects.BURN);
 		Registry.register(Registry.STATUS_EFFECT, new Identifier("simplyswords", "plague"), ModEffects.PLAGUE);
@@ -52,10 +56,6 @@ public class SimplySwords implements ModInitializer {
 
 		SimplySwordsConfig.generateConfigs(json == null || !json.has("regen_simplyswords_config_file") || json.get("regen_simplyswords_config_file").getAsBoolean());
 		SimplySwordsConfig.loadConfig();
-
-		if (FabricLoader.getInstance().isModLoaded("mythicmetals")) {
-			MythicMetalsCompat.registerModItems();
-		}
 
 
 	}

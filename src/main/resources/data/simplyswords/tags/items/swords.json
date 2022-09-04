@@ -57,6 +57,19 @@
     "simplyswords:runic_glaive",
     "simplyswords:runic_longsword",
     "simplyswords:runic_rapier",
-    "simplyswords:toxic_longsword"
+    "simplyswords:toxic_longsword",
+
+
+
+    "simplyswords:adamantite_claymore",
+    "simplyswords:adamantite_cutlass",
+    "simplyswords:adamantite_glaive",
+    "simplyswords:adamantite_katana",
+    "simplyswords:adamantite_longsword",
+    "simplyswords:adamantite_rapier",
+    "simplyswords:adamantite_sai",
+    "simplyswords:adamantite_spear",
+    "simplyswords:adamantite_twinblade",
+    "simplyswords:adamantite_warglaive"
   ]
 }
