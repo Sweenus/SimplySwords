@@ -18,152 +18,271 @@ public class ModItems {
 
     //IRON
     public static final Item IRON_LONGSWORD = registerItem( "iron_longsword",
-            new SwordItem(ToolMaterials.IRON, 3, -2.4f,
-                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+            new SimplySwordsSwordItem(
+                    ToolMaterials.IRON,
+                    3,
+                    -2.4f,
+                    "minecraft:iron_ingot"));
 
     public static final Item IRON_TWINBLADE = registerItem( "iron_twinblade",
-            new SwordItem(ToolMaterials.IRON, 3, -1.7f,
-                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+            new SimplySwordsSwordItem(
+                    ToolMaterials.IRON,
+                    3,
+                    -1.7f,
+                    "minecraft:iron_ingot"));
     public static final Item IRON_RAPIER = registerItem( "iron_rapier",
-            new SwordItem(ToolMaterials.IRON, 2, -1.6f,
-                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+            new SimplySwordsSwordItem(
+                    ToolMaterials.IRON,
+                    2,
+                    -1.6f,
+                    "minecraft:iron_ingot"));
 
     public static final Item IRON_KATANA = registerItem( "iron_katana",
-            new SwordItem(ToolMaterials.IRON, 3, -2f,
-                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+            new SimplySwordsSwordItem(
+                    ToolMaterials.IRON,
+                    3,
+                    -2f,
+                    "minecraft:iron_ingot"));
 
     public static final Item IRON_SAI = registerItem( "iron_sai",
-            new SwordItem(ToolMaterials.IRON, 0, -1.1f,
-                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+            new SimplySwordsSwordItem(
+                    ToolMaterials.IRON,
+                    0,
+                    -1.1f,
+                    "minecraft:iron_ingot"));
 
     public static final Item IRON_SPEAR = registerItem( "iron_spear",
-            new SwordItem(ToolMaterials.IRON, 3, -2.7f,
-                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+            new SimplySwordsSwordItem(
+                    ToolMaterials.IRON,
+                    3,
+                    -2.7f,
+                    "minecraft:iron_ingot"));
 
     public static final Item IRON_GLAIVE = registerItem( "iron_glaive",
-            new SwordItem(ToolMaterials.IRON, 3, -2.6f,
-                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+            new SimplySwordsSwordItem(
+                    ToolMaterials.IRON,
+                    3,
+                    -2.6f,
+                    "minecraft:iron_ingot"));
 
     public static final Item IRON_WARGLAIVE = registerItem( "iron_warglaive",
-            new SwordItem(ToolMaterials.IRON, 3, -2.2f,
-                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+            new SimplySwordsSwordItem(
+                    ToolMaterials.IRON,
+                    3,
+                    -2.2f,
+                    "minecraft:iron_ingot"));
 
     public static final Item IRON_CUTLASS = registerItem( "iron_cutlass",
-            new SwordItem(ToolMaterials.IRON, 3, -2f,
-                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+            new SimplySwordsSwordItem(
+                    ToolMaterials.IRON,
+                    3,
+                    -2f,
+                    "minecraft:iron_ingot"));
     public static final Item IRON_CLAYMORE = registerItem( "iron_claymore",
-            new SwordItem(ToolMaterials.IRON, 5, -2.8f,
-                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+            new SimplySwordsSwordItem(
+                    ToolMaterials.IRON,
+                    5,
+                    -2.8f,
+                    "minecraft:iron_ingot"));
     //GOLD
     public static final Item GOLD_LONGSWORD = registerItem( "gold_longsword",
-            new SwordItem(ToolMaterials.GOLD, 2, -2.4f,
-                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+            new SimplySwordsSwordItem(
+                    ToolMaterials.GOLD,
+                    2,
+                    -2.4f,
+                    "minecraft:gold_ingot"));
 
     public static final Item GOLD_TWINBLADE = registerItem( "gold_twinblade",
-            new SwordItem(ToolMaterials.GOLD, 2, -1.7f,
-                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+            new SimplySwordsSwordItem(
+                    ToolMaterials.GOLD,
+                    2,
+                    -1.7f,
+                    "minecraft:gold_ingot"));
     public static final Item GOLD_RAPIER = registerItem( "gold_rapier",
-            new SwordItem(ToolMaterials.GOLD, 1, -1.6f,
-                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+            new SimplySwordsSwordItem(
+                    ToolMaterials.GOLD,
+                    1,
+                    -1.6f,
+                    "minecraft:gold_ingot"));
     public static final Item GOLD_KATANA = registerItem( "gold_katana",
-            new SwordItem(ToolMaterials.GOLD, 2, -2f,
-                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+            new SimplySwordsSwordItem(
+                    ToolMaterials.GOLD,
+                    2,
+                    -2f,
+                    "minecraft:gold_ingot"));
     public static final Item GOLD_SAI = registerItem( "gold_sai",
-            new SwordItem(ToolMaterials.GOLD, 0, -1.1f,
-                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+            new SimplySwordsSwordItem(
+                    ToolMaterials.GOLD,
+                    0,
+                    -1.1f,
+                    "minecraft:gold_ingot"));
 
     public static final Item GOLD_SPEAR = registerItem( "gold_spear",
-            new SwordItem(ToolMaterials.GOLD, 2, -2.7f,
-                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+            new SimplySwordsSwordItem(
+                    ToolMaterials.GOLD,
+                    2,
+                    -2.7f,
+                    "minecraft:gold_ingot"));
 
     public static final Item GOLD_GLAIVE = registerItem( "gold_glaive",
-            new SwordItem(ToolMaterials.GOLD, 2, -2.6f,
-                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+            new SimplySwordsSwordItem(
+                    ToolMaterials.GOLD,
+                    2,
+                    -2.6f,
+                    "minecraft:gold_ingot"));
 
     public static final Item GOLD_WARGLAIVE = registerItem( "gold_warglaive",
-            new SwordItem(ToolMaterials.GOLD, 2, -2.2f,
-                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+            new SimplySwordsSwordItem(
+                    ToolMaterials.GOLD,
+                    2,
+                    -2.2f,
+                    "minecraft:gold_ingot"));
     public static final Item GOLD_CUTLASS = registerItem( "gold_cutlass",
-            new SwordItem(ToolMaterials.GOLD, 2, -2f,
-                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+            new SimplySwordsSwordItem(
+                    ToolMaterials.GOLD,
+                    2,
+                    -2f,
+                    "minecraft:gold_ingot"));
     public static final Item GOLD_CLAYMORE = registerItem( "gold_claymore",
-            new SwordItem(ToolMaterials.GOLD, 4, -2.8f,
-                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+            new SimplySwordsSwordItem(
+                    ToolMaterials.GOLD,
+                    4,
+                    -2.8f,
+                    "minecraft:gold_ingot"));
     //DIAMOND
     public static final Item DIAMOND_LONGSWORD = registerItem( "diamond_longsword",
-            new SwordItem(ToolMaterials.DIAMOND, 3, -2.4f,
-                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+            new SimplySwordsSwordItem(
+                    ToolMaterials.DIAMOND,
+                    3,
+                    -2.4f,
+                    "minecraft:diamond"));
 
     public static final Item DIAMOND_TWINBLADE = registerItem( "diamond_twinblade",
-            new SwordItem(ToolMaterials.DIAMOND, 3, -1.7f,
-                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+            new SimplySwordsSwordItem(
+                    ToolMaterials.DIAMOND,
+                    3,
+                    -1.7f,
+                    "minecraft:diamond"));
     public static final Item DIAMOND_RAPIER = registerItem( "diamond_rapier",
-            new SwordItem(ToolMaterials.DIAMOND, 2, -1.6f,
-                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+            new SimplySwordsSwordItem(
+                    ToolMaterials.DIAMOND,
+                    2,
+                    -1.6f,
+                    "minecraft:diamond"));
     public static final Item DIAMOND_KATANA = registerItem( "diamond_katana",
-            new SwordItem(ToolMaterials.DIAMOND, 3, -2f,
-                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+            new SimplySwordsSwordItem(
+                    ToolMaterials.DIAMOND,
+                    3,
+                    -2f,
+                    "minecraft:diamond"));
     public static final Item DIAMOND_SAI = registerItem( "diamond_sai",
-            new SwordItem(ToolMaterials.DIAMOND, 0, -1.1f,
-                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+            new SimplySwordsSwordItem(
+                    ToolMaterials.DIAMOND,
+                    0,
+                    -1.1f,
+                    "minecraft:diamond"));
 
     public static final Item DIAMOND_SPEAR = registerItem( "diamond_spear",
-            new SwordItem(ToolMaterials.DIAMOND, 3, -2.7f,
-                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+            new SimplySwordsSwordItem(
+                    ToolMaterials.DIAMOND,
+                    3,
+                    -2.7f,
+                    "minecraft:diamond"));
 
     public static final Item DIAMOND_GLAIVE = registerItem( "diamond_glaive",
-            new SwordItem(ToolMaterials.DIAMOND, 3, -2.6f,
-                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+            new SimplySwordsSwordItem(
+                    ToolMaterials.DIAMOND,
+                    3,
+                    -2.6f,
+                    "minecraft:diamond"));
 
     public static final Item DIAMOND_WARGLAIVE = registerItem( "diamond_warglaive",
-            new SwordItem(ToolMaterials.DIAMOND, 3, -2.2f,
-                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+            new SimplySwordsSwordItem(
+                    ToolMaterials.DIAMOND,
+                    3,
+                    -2.2f,
+                    "minecraft:diamond"));
     public static final Item DIAMOND_CUTLASS = registerItem( "diamond_cutlass",
-            new SwordItem(ToolMaterials.DIAMOND, 3, -2f,
-                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+            new SimplySwordsSwordItem(
+                    ToolMaterials.DIAMOND,
+                    3,
+                    -2f,
+                    "minecraft:diamond"));
     public static final Item DIAMOND_CLAYMORE = registerItem( "diamond_claymore",
-            new SwordItem(ToolMaterials.DIAMOND, 5, -2.8f,
-                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+            new SimplySwordsSwordItem(
+                    ToolMaterials.DIAMOND,
+                    5,
+                    -2.8f,
+                    "minecraft:diamond"));
     //NETHERITE
 
     public static final Item NETHERITE_LONGSWORD = registerItem( "netherite_longsword",
-            new SwordItem(ToolMaterials.NETHERITE, 3, -2.4f,
-                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+            new SimplySwordsSwordItem(ToolMaterials.NETHERITE,
+                    3,
+                    -2.4f,
+                    "minecraft:netherite_ingot"));
 
     public static final Item NETHERITE_TWINBLADE = registerItem( "netherite_twinblade",
-            new SwordItem(ToolMaterials.NETHERITE, 3, -1.7f,
-                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+            new SimplySwordsSwordItem(
+                    ToolMaterials.NETHERITE,
+                    3,
+                    -1.7f,
+                    "minecraft:netherite_ingot"));
 
     public static final Item NETHERITE_RAPIER = registerItem( "netherite_rapier",
-            new SwordItem(ToolMaterials.NETHERITE, 2, -1.6f,
-                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+            new SimplySwordsSwordItem(
+                    ToolMaterials.NETHERITE,
+                    2,
+                    -1.6f,
+                    "minecraft:netherite_ingot"));
     public static final Item NETHERITE_KATANA = registerItem( "netherite_katana",
-            new SwordItem(ToolMaterials.NETHERITE, 3, -2f,
-                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+            new SimplySwordsSwordItem(
+                    ToolMaterials.NETHERITE,
+                    3,
+                    -2f,
+                    "minecraft:netherite_ingot"));
     public static final Item NETHERITE_SAI = registerItem( "netherite_sai",
-            new SwordItem(ToolMaterials.NETHERITE, 0, -1.1f,
-                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+            new SimplySwordsSwordItem(
+                    ToolMaterials.NETHERITE,
+                    0,
+                    -1.1f,
+                    "minecraft:netherite_ingot"));
 
     public static final Item NETHERITE_SPEAR = registerItem( "netherite_spear",
-            new SwordItem(ToolMaterials.NETHERITE, 3, -2.7f,
-                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+            new SimplySwordsSwordItem(
+                    ToolMaterials.NETHERITE,
+                    3,
+                    -2.7f,
+                    "minecraft:netherite_ingot"));
 
     public static final Item NETHERITE_GLAIVE = registerItem( "netherite_glaive",
-            new SwordItem(ToolMaterials.NETHERITE, 3, -2.6f,
-                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+            new SimplySwordsSwordItem(
+                    ToolMaterials.NETHERITE,
+                    3,
+                    -2.6f,
+                    "minecraft:netherite_ingot"));
 
     public static final Item NETHERITE_WARGLAIVE = registerItem( "netherite_warglaive",
-            new SwordItem(ToolMaterials.NETHERITE, 3, -2.2f,
-                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+            new SimplySwordsSwordItem(
+                    ToolMaterials.NETHERITE,
+                    3,
+                    -2.2f,
+                    "minecraft:netherite_ingot"));
 
     public static final Item NETHERITE_CUTLASS = registerItem( "netherite_cutlass",
-            new SwordItem(ToolMaterials.NETHERITE, 3, -2f,
-                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+            new SimplySwordsSwordItem(
+                    ToolMaterials.NETHERITE,
+                    3,
+                    -2f,
+                    "minecraft:netherite_ingot"));
 
 
     public static final Item NETHERITE_CLAYMORE = registerItem( "netherite_claymore",
-            new SwordItem(ToolMaterials.NETHERITE, 6, -2.8f,
-                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+            new SimplySwordsSwordItem(
+                    ToolMaterials.NETHERITE,
+                    6,
+                    -2.8f,
+                    "minecraft:netherite_ingot"));
 
     //RUNIC
     public static final Item RUNIC_LONGSWORD = registerItem( "runic_longsword",
