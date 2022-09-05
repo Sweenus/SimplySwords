@@ -41,6 +41,14 @@
     "simplyswords:gold_twinblade",
     "simplyswords:diamond_twinblade",
     "simplyswords:netherite_twinblade",
+    "simplyswords:netherite_greathammer",
+    "simplyswords:diamond_greathammer",
+    "simplyswords:gold_greathammer",
+    "simplyswords:iron_greathammer",
+    "simplyswords:netherite_greataxe",
+    "simplyswords:diamond_greataxe",
+    "simplyswords:gold_greataxe",
+    "simplyswords:iron_greataxe",
     "simplyswords:watcher_claymore",
     "simplyswords:brimstone_claymore",
     "simplyswords:storms_edge",
@@ -202,7 +210,8 @@
     "simplyswords:mythicmetals_compat/bronze/bronze_sai",
     "simplyswords:mythicmetals_compat/bronze/bronze_spear",
     "simplyswords:mythicmetals_compat/bronze/bronze_twinblade",
-    "simplyswords:mythicmetals_compat/bronze/bronze_warglaive"
+    "simplyswords:mythicmetals_compat/bronze/bronze_warglaive",
 
+    "simplyswords:mythicmetals_compat/copper/copper_longsword"
   ]
 }

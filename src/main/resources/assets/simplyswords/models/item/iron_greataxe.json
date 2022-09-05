@@ -1,10 +1,10 @@
 {
 	"credit": "Made by Sweenus using Blockbench",
 	"textures": {
-		"3": "blade",
-		"4": "hilt",
-		"5": "blade_axe",
-		"particle": "hilt"
+		"3": "simplyswords:item/blade",
+		"4": "simplyswords:item/hilt",
+		"5": "simplyswords:item/blade_axe",
+		"particle": "simplyswords:item/hilt"
 	},
 	"elements": [
 		{

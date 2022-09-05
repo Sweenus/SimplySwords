@@ -1,9 +1,9 @@
 {
 	"credit": "Made by Sweenus using Blockbench",
 	"textures": {
-		"3": "blade",
-		"4": "hilt",
-		"particle": "hilt"
+		"3": "simplyswords:mythicmetals_compat/blade_copper",
+		"4": "simplyswords:item/hilt",
+		"particle": "simplyswords:item/hilt"
 	},
 	"elements": [
 		{

@@ -82,6 +82,21 @@ public class ModItems {
                     5,
                     -2.8f,
                     "minecraft:iron_ingot"));
+
+    public static final Item IRON_GREATHAMMER = registerItem( "iron_greathammer",
+            new SimplySwordsSwordItem(
+                    ToolMaterials.IRON,
+                    7,
+                    -3.3f,
+                    "minecraft:iron_ingot"));
+
+    public static final Item IRON_GREATAXE = registerItem( "iron_greataxe",
+            new SimplySwordsSwordItem(
+                    ToolMaterials.IRON,
+                    6,
+                    -3.2f,
+                    "minecraft:iron_ingot"));
+
     //GOLD
     public static final Item GOLD_LONGSWORD = registerItem( "gold_longsword",
             new SimplySwordsSwordItem(
@@ -147,6 +162,21 @@ public class ModItems {
                     4,
                     -2.8f,
                     "minecraft:gold_ingot"));
+
+    public static final Item GOLD_GREATHAMMER = registerItem( "gold_greathammer",
+            new SimplySwordsSwordItem(
+                    ToolMaterials.GOLD,
+                    6,
+                    -3.3f,
+                    "minecraft:gold_ingot"));
+
+    public static final Item GOLD_GREATAXE = registerItem( "gold_greataxe",
+            new SimplySwordsSwordItem(
+                    ToolMaterials.GOLD,
+                    5,
+                    -3.2f,
+                    "minecraft:gold_ingot"));
+
     //DIAMOND
     public static final Item DIAMOND_LONGSWORD = registerItem( "diamond_longsword",
             new SimplySwordsSwordItem(
@@ -212,6 +242,20 @@ public class ModItems {
                     5,
                     -2.8f,
                     "minecraft:diamond"));
+
+    public static final Item DIAMOND_GREATHAMMER = registerItem( "diamond_greathammer",
+            new SimplySwordsSwordItem(
+                    ToolMaterials.DIAMOND,
+                    7,
+                    -3.3f,
+                    "minecraft:diamond"));
+
+    public static final Item DIAMOND_GREATAXE = registerItem( "diamond_greataxe",
+            new SimplySwordsSwordItem(
+                    ToolMaterials.DIAMOND,
+                    6,
+                    -3.2f,
+                    "minecraft:diamond"));
     //NETHERITE
 
     public static final Item NETHERITE_LONGSWORD = registerItem( "netherite_longsword",
@@ -274,12 +318,25 @@ public class ModItems {
                     -2f,
                     "minecraft:netherite_ingot"));
 
-
     public static final Item NETHERITE_CLAYMORE = registerItem( "netherite_claymore",
             new SimplySwordsSwordItem(
                     ToolMaterials.NETHERITE,
                     6,
                     -2.8f,
+                    "minecraft:netherite_ingot"));
+
+    public static final Item NETHERITE_GREATHAMMER = registerItem( "netherite_greathammer",
+            new SimplySwordsSwordItem(
+                    ToolMaterials.NETHERITE,
+                    8,
+                    -3.3f,
+                    "minecraft:netherite_ingot"));
+
+    public static final Item NETHERITE_GREATAXE = registerItem( "netherite_greataxe",
+            new SimplySwordsSwordItem(
+                    ToolMaterials.NETHERITE,
+                    7,
+                    -3.2f,
                     "minecraft:netherite_ingot"));
 
     //RUNIC

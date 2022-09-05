@@ -52,6 +52,14 @@
   "item.simplyswords.gold_twinblade": "Gold Twinblade",
   "item.simplyswords.diamond_twinblade": "Diamond Twinblade",
   "item.simplyswords.netherite_twinblade": "Netherite Twinblade",
+  "item.simplyswords.iron_greathammer": "Iron Greathammer",
+  "item.simplyswords.gold_greathammer": "Gold Greathammer",
+  "item.simplyswords.diamond_greathammer": "Diamond Greathammer",
+  "item.simplyswords.netherite_greathammer": "Netherite Greathammer",
+  "item.simplyswords.iron_greataxe": "Iron Greataxe",
+  "item.simplyswords.gold_greataxe": "Gold Greataxe",
+  "item.simplyswords.diamond_greataxe": "Diamond Greataxe",
+  "item.simplyswords.netherite_greataxe": "Netherite Greataxe",
   "item.simplyswords.storms_edge": "Storm's Edge",
   "item.simplyswords.stormbringer": "Stormbringer",
   "item.simplyswords.sword_on_a_stick": "Sword on a Stick",
@@ -200,6 +208,8 @@
   "item.simplyswords.mythicmetals_compat.bronze.bronze_spear": "Bronze Spear",
   "item.simplyswords.mythicmetals_compat.bronze.bronze_twinblade": "Bronze Twinblade",
   "item.simplyswords.mythicmetals_compat.bronze.bronze_warglaive": "Bronze Warglaive",
+
+  "item.simplyswords.mythicmetals_compat.copper.copper_longsword": "Copper Longsword",
 
 
 

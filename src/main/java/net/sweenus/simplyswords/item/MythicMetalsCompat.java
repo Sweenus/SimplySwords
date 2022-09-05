@@ -25,6 +25,7 @@ public class MythicMetalsCompat {
     static int runite_modifier = 3;
     static int star_platinum_modifier = 3;
     static int bronze_modifier = 3;
+    static int copper_modifier = 3;
 
 
     //ADAMANTITE
@@ -569,6 +570,11 @@ public class MythicMetalsCompat {
     public static final Item BRONZE_CLAYMORE = registerItem( "mythicmetals_compat/bronze/bronze_claymore",
             new SimplySwordsSwordItem(ModToolMaterial.BRONZE, bronze_modifier + claymore_modifier, -2.8f,
                     "mythicmetals:bronze_ingot"));
+
+    //COPPER
+    public static final Item COPPER_LONGSWORD = registerItem( "mythicmetals_compat/copper/copper_longsword",
+            new SimplySwordsSwordItem(ModToolMaterial.BRONZE, copper_modifier, -2.4f,
+                    "mythicmetals:copper_ingot"));
 
 
     private static Item registerItem(String name, Item item) {
