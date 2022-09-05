@@ -212,6 +212,7 @@
     "simplyswords:mythicmetals_compat/bronze/bronze_twinblade",
     "simplyswords:mythicmetals_compat/bronze/bronze_warglaive",
 
-    "simplyswords:mythicmetals_compat/copper/copper_longsword"
+    "simplyswords:mythicmetals_compat/copper/copper_longsword",
+    "simplyswords:mythicmetals_compat/durasteel/durasteel_longsword"
   ]
 }

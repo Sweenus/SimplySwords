@@ -573,8 +573,13 @@ public class MythicMetalsCompat {
 
     //COPPER
     public static final Item COPPER_LONGSWORD = registerItem( "mythicmetals_compat/copper/copper_longsword",
-            new SimplySwordsSwordItem(ModToolMaterial.BRONZE, copper_modifier, -2.4f,
+            new SimplySwordsSwordItem(ModToolMaterial.COPPER, copper_modifier, -2.4f,
                     "mythicmetals:copper_ingot"));
+
+    //DURASTEEL
+    public static final Item DURASTEEL_GREATHAMMER = registerItem( "mythicmetals_compat/durasteel/durasteel_greathammer",
+            new SimplySwordsSwordItem(ModToolMaterial.DURASTEEL, copper_modifier, -3.4f,
+                    "mythicmetals:durasteel_ingot"));
 
 
     private static Item registerItem(String name, Item item) {
