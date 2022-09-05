@@ -24,6 +24,7 @@ public class MythicMetalsCompat {
     static int quadrillum_modifier = 3;
     static int runite_modifier = 3;
     static int star_platinum_modifier = 3;
+    static int bronze_modifier = 3;
 
 
     //ADAMANTITE
@@ -526,6 +527,48 @@ public class MythicMetalsCompat {
     public static final Item STAR_PLATINUM_CLAYMORE = registerItem( "mythicmetals_compat/star_platinum/star_platinum_claymore",
             new SimplySwordsSwordItem(ModToolMaterial.STAR_PLATINUM, star_platinum_modifier + claymore_modifier, -2.8f,
                     "mythicmetals:star_platinum_ingot"));
+
+
+    //BRONZE
+    public static final Item BRONZE_LONGSWORD = registerItem( "mythicmetals_compat/bronze/bronze_longsword",
+            new SimplySwordsSwordItem(ModToolMaterial.BRONZE, bronze_modifier, -2.4f,
+                    "mythicmetals:bronze_ingot"));
+
+    public static final Item BRONZE_TWINBLADE = registerItem( "mythicmetals_compat/bronze/bronze_twinblade",
+            new SimplySwordsSwordItem(ModToolMaterial.BRONZE, bronze_modifier, -1.7f,
+                    "mythicmetals:bronze_ingot"));
+
+    public static final Item BRONZE_RAPIER = registerItem( "mythicmetals_compat/bronze/bronze_rapier",
+            new SimplySwordsSwordItem(ModToolMaterial.BRONZE, bronze_modifier - rapier_modifier, -1.6f,
+                    "mythicmetals:bronze_ingot"));
+
+    public static final Item BRONZE_KATANA = registerItem( "mythicmetals_compat/bronze/bronze_katana",
+            new SimplySwordsSwordItem(ModToolMaterial.BRONZE, bronze_modifier, -2f,
+                    "mythicmetals:bronze_ingot"));
+
+    public static final Item BRONZE_SAI = registerItem( "mythicmetals_compat/bronze/bronze_sai",
+            new SimplySwordsSwordItem(ModToolMaterial.BRONZE, bronze_modifier - sai_modifier, -1.1f,
+                    "mythicmetals:bronze_ingot"));
+
+    public static final Item BRONZE_SPEAR = registerItem( "mythicmetals_compat/bronze/bronze_spear",
+            new SimplySwordsSwordItem(ModToolMaterial.BRONZE, bronze_modifier, -2.7f,
+                    "mythicmetals:bronze_ingot"));
+
+    public static final Item BRONZE_GLAIVE = registerItem( "mythicmetals_compat/bronze/bronze_glaive",
+            new SimplySwordsSwordItem(ModToolMaterial.BRONZE, bronze_modifier, -2.6f,
+                    "mythicmetals:bronze_ingot"));
+
+    public static final Item BRONZE_WARGLAIVE = registerItem( "mythicmetals_compat/bronze/bronze_warglaive",
+            new SimplySwordsSwordItem(ModToolMaterial.BRONZE, bronze_modifier, -2.2f,
+                    "mythicmetals:bronze_ingot"));
+
+    public static final Item BRONZE_CUTLASS = registerItem( "mythicmetals_compat/bronze/bronze_cutlass",
+            new SimplySwordsSwordItem(ModToolMaterial.BRONZE, bronze_modifier, -2f,
+                    "mythicmetals:bronze_ingot"));
+
+    public static final Item BRONZE_CLAYMORE = registerItem( "mythicmetals_compat/bronze/bronze_claymore",
+            new SimplySwordsSwordItem(ModToolMaterial.BRONZE, bronze_modifier + claymore_modifier, -2.8f,
+                    "mythicmetals:bronze_ingot"));
 
 
     private static Item registerItem(String name, Item item) {
