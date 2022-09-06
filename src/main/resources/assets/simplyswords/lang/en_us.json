@@ -76,6 +76,7 @@
   "item.simplyswords.mythicmetals_compat.adamantite.adamantite_spear": "Adamantite Spear",
   "item.simplyswords.mythicmetals_compat.adamantite.adamantite_twinblade": "Adamantite Twinblade",
   "item.simplyswords.mythicmetals_compat.adamantite.adamantite_warglaive": "Adamantite Warglaive",
+  "item.simplyswords.mythicmetals_compat.adamantite.adamantite_greathammer": "Adamantite Greathammer",
 
   "item.simplyswords.mythicmetals_compat.aquarium.aquarium_claymore": "Aquarium Claymore",
   "item.simplyswords.mythicmetals_compat.aquarium.aquarium_cutlass": "Aquarium Cutlass",
@@ -87,6 +88,7 @@
   "item.simplyswords.mythicmetals_compat.aquarium.aquarium_spear": "Aquarium Spear",
   "item.simplyswords.mythicmetals_compat.aquarium.aquarium_twinblade": "Aquarium Twinblade",
   "item.simplyswords.mythicmetals_compat.aquarium.aquarium_warglaive": "Aquarium Warglaive",
+  "item.simplyswords.mythicmetals_compat.aquarium.aquarium_greathammer": "Aquarium Greathammer",
 
   "item.simplyswords.mythicmetals_compat.banglum.banglum_claymore": "Banglum Claymore",
   "item.simplyswords.mythicmetals_compat.banglum.banglum_cutlass": "Banglum Cutlass",
@@ -98,6 +100,7 @@
   "item.simplyswords.mythicmetals_compat.banglum.banglum_spear": "Banglum Spear",
   "item.simplyswords.mythicmetals_compat.banglum.banglum_twinblade": "Banglum Twinblade",
   "item.simplyswords.mythicmetals_compat.banglum.banglum_warglaive": "Banglum Warglaive",
+  "item.simplyswords.mythicmetals_compat.banglum.banglum_greathammer": "Banglum Greathammer",
 
   "item.simplyswords.mythicmetals_compat.carmot.carmot_claymore": "Carmot Claymore",
   "item.simplyswords.mythicmetals_compat.carmot.carmot_cutlass": "Carmot Cutlass",
@@ -109,6 +112,7 @@
   "item.simplyswords.mythicmetals_compat.carmot.carmot_spear": "Carmot Spear",
   "item.simplyswords.mythicmetals_compat.carmot.carmot_twinblade": "Carmot Twinblade",
   "item.simplyswords.mythicmetals_compat.carmot.carmot_warglaive": "Carmot Warglaive",
+  "item.simplyswords.mythicmetals_compat.carmot.carmot_greathammer": "Carmot Greathammer",
 
   "item.simplyswords.mythicmetals_compat.kyber.kyber_claymore": "Kyber Claymore",
   "item.simplyswords.mythicmetals_compat.kyber.kyber_cutlass": "Kyber Cutlass",
@@ -120,6 +124,7 @@
   "item.simplyswords.mythicmetals_compat.kyber.kyber_spear": "Kyber Spear",
   "item.simplyswords.mythicmetals_compat.kyber.kyber_twinblade": "Kyber Twinblade",
   "item.simplyswords.mythicmetals_compat.kyber.kyber_warglaive": "Kyber Warglaive",
+  "item.simplyswords.mythicmetals_compat.kyber.kyber_greathammer": "Kyber Greathammer",
 
   "item.simplyswords.mythicmetals_compat.mythril.mythril_claymore": "Mythril Claymore",
   "item.simplyswords.mythicmetals_compat.mythril.mythril_cutlass": "Mythril Cutlass",
@@ -131,6 +136,7 @@
   "item.simplyswords.mythicmetals_compat.mythril.mythril_spear": "Mythril Spear",
   "item.simplyswords.mythicmetals_compat.mythril.mythril_twinblade": "Mythril Twinblade",
   "item.simplyswords.mythicmetals_compat.mythril.mythril_warglaive": "Mythril Warglaive",
+  "item.simplyswords.mythicmetals_compat.mythril.mythril_greathammer": "Mythril Greathammer",
 
   "item.simplyswords.mythicmetals_compat.orichalcum.orichalcum_claymore": "Orichalcum Claymore",
   "item.simplyswords.mythicmetals_compat.orichalcum.orichalcum_cutlass": "Orichalcum Cutlass",
@@ -142,6 +148,7 @@
   "item.simplyswords.mythicmetals_compat.orichalcum.orichalcum_spear": "Orichalcum Spear",
   "item.simplyswords.mythicmetals_compat.orichalcum.orichalcum_twinblade": "Orichalcum Twinblade",
   "item.simplyswords.mythicmetals_compat.orichalcum.orichalcum_warglaive": "Orichalcum Warglaive",
+  "item.simplyswords.mythicmetals_compat.orichalcum.orichalcum_greathammer": "Orichalcum Greathammer",
 
   "item.simplyswords.mythicmetals_compat.osmium.osmium_claymore": "Osmium Claymore",
   "item.simplyswords.mythicmetals_compat.osmium.osmium_cutlass": "Osmium Cutlass",
@@ -153,6 +160,7 @@
   "item.simplyswords.mythicmetals_compat.osmium.osmium_spear": "Osmium Spear",
   "item.simplyswords.mythicmetals_compat.osmium.osmium_twinblade": "Osmium Twinblade",
   "item.simplyswords.mythicmetals_compat.osmium.osmium_warglaive": "Osmium Warglaive",
+  "item.simplyswords.mythicmetals_compat.osmium.osmium_greathammer": "Osmium Greathammer",
 
   "item.simplyswords.mythicmetals_compat.prometheum.prometheum_claymore": "Prometheum Claymore",
   "item.simplyswords.mythicmetals_compat.prometheum.prometheum_cutlass": "Prometheum Cutlass",
@@ -164,6 +172,7 @@
   "item.simplyswords.mythicmetals_compat.prometheum.prometheum_spear": "Prometheum Spear",
   "item.simplyswords.mythicmetals_compat.prometheum.prometheum_twinblade": "Prometheum Twinblade",
   "item.simplyswords.mythicmetals_compat.prometheum.prometheum_warglaive": "Prometheum Warglaive",
+  "item.simplyswords.mythicmetals_compat.prometheum.prometheum_greathammer": "Prometheum Greathammer",
 
   "item.simplyswords.mythicmetals_compat.quadrillum.quadrillum_claymore": "Quadrillum Claymore",
   "item.simplyswords.mythicmetals_compat.quadrillum.quadrillum_cutlass": "Quadrillum Cutlass",
@@ -175,6 +184,7 @@
   "item.simplyswords.mythicmetals_compat.quadrillum.quadrillum_spear": "Quadrillum Spear",
   "item.simplyswords.mythicmetals_compat.quadrillum.quadrillum_twinblade": "Quadrillum Twinblade",
   "item.simplyswords.mythicmetals_compat.quadrillum.quadrillum_warglaive": "Quadrillum Warglaive",
+  "item.simplyswords.mythicmetals_compat.quadrillum.quadrillum_greathammer": "Quadrillum Greathammer",
 
   "item.simplyswords.mythicmetals_compat.runite.runite_claymore": "Runite Claymore",
   "item.simplyswords.mythicmetals_compat.runite.runite_cutlass": "Runite Cutlass",
@@ -186,6 +196,7 @@
   "item.simplyswords.mythicmetals_compat.runite.runite_spear": "Runite Spear",
   "item.simplyswords.mythicmetals_compat.runite.runite_twinblade": "Runite Twinblade",
   "item.simplyswords.mythicmetals_compat.runite.runite_warglaive": "Runite Warglaive",
+  "item.simplyswords.mythicmetals_compat.runite.runite_greathammer": "Runite Greathammer",
 
   "item.simplyswords.mythicmetals_compat.star_platinum.star_platinum_claymore": "Star Platinum Claymore",
   "item.simplyswords.mythicmetals_compat.star_platinum.star_platinum_cutlass": "Star Platinum Cutlass",
@@ -197,6 +208,7 @@
   "item.simplyswords.mythicmetals_compat.star_platinum.star_platinum_spear": "Star Platinum Spear",
   "item.simplyswords.mythicmetals_compat.star_platinum.star_platinum_twinblade": "Star Platinum Twinblade",
   "item.simplyswords.mythicmetals_compat.star_platinum.star_platinum_warglaive": "Star Platinum Warglaive",
+  "item.simplyswords.mythicmetals_compat.star_platinum.star_platinum_greathammer": "Star Platinum Greathammer",
 
   "item.simplyswords.mythicmetals_compat.bronze.bronze_claymore": "Bronze Claymore",
   "item.simplyswords.mythicmetals_compat.bronze.bronze_cutlass": "Bronze Cutlass",
@@ -208,6 +220,7 @@
   "item.simplyswords.mythicmetals_compat.bronze.bronze_spear": "Bronze Spear",
   "item.simplyswords.mythicmetals_compat.bronze.bronze_twinblade": "Bronze Twinblade",
   "item.simplyswords.mythicmetals_compat.bronze.bronze_warglaive": "Bronze Warglaive",
+  "item.simplyswords.mythicmetals_compat.bronze.bronze_greathammer": "Bronze Greathammer",
 
   "item.simplyswords.mythicmetals_compat.palladium.palladium_claymore": "Palladium Claymore",
   "item.simplyswords.mythicmetals_compat.palladium.palladium_cutlass": "Palladium Cutlass",
@@ -219,6 +232,7 @@
   "item.simplyswords.mythicmetals_compat.palladium.palladium_spear": "Palladium Spear",
   "item.simplyswords.mythicmetals_compat.palladium.palladium_twinblade": "Palladium Twinblade",
   "item.simplyswords.mythicmetals_compat.palladium.palladium_warglaive": "Palladium Warglaive",
+  "item.simplyswords.mythicmetals_compat.palladium.palladium_greathammer": "Palladium Greathammer",
 
   "item.simplyswords.mythicmetals_compat.stormyx.stormyx_claymore": "Stormyx Claymore",
   "item.simplyswords.mythicmetals_compat.stormyx.stormyx_cutlass": "Stormyx Cutlass",
@@ -230,6 +244,7 @@
   "item.simplyswords.mythicmetals_compat.stormyx.stormyx_spear": "Stormyx Spear",
   "item.simplyswords.mythicmetals_compat.stormyx.stormyx_twinblade": "Stormyx Twinblade",
   "item.simplyswords.mythicmetals_compat.stormyx.stormyx_warglaive": "Stormyx Warglaive",
+  "item.simplyswords.mythicmetals_compat.stormyx.stormyx_greathammer": "Stormyx Greathammer",
 
   "item.simplyswords.mythicmetals_compat.steel.steel_claymore": "Steel Claymore",
   "item.simplyswords.mythicmetals_compat.steel.steel_cutlass": "Steel Cutlass",
@@ -241,6 +256,7 @@
   "item.simplyswords.mythicmetals_compat.steel.steel_spear": "Steel Spear",
   "item.simplyswords.mythicmetals_compat.steel.steel_twinblade": "Steel Twinblade",
   "item.simplyswords.mythicmetals_compat.steel.steel_warglaive": "Steel Warglaive",
+  "item.simplyswords.mythicmetals_compat.steel.steel_greathammer": "Steel Greathammer",
 
   "item.simplyswords.mythicmetals_compat.celestium.celestium_claymore": "Celestium Claymore",
   "item.simplyswords.mythicmetals_compat.celestium.celestium_cutlass": "Celestium Cutlass",
@@ -252,6 +268,7 @@
   "item.simplyswords.mythicmetals_compat.celestium.celestium_spear": "Celestium Spear",
   "item.simplyswords.mythicmetals_compat.celestium.celestium_twinblade": "Celestium Twinblade",
   "item.simplyswords.mythicmetals_compat.celestium.celestium_warglaive": "Celestium Warglaive",
+  "item.simplyswords.mythicmetals_compat.celestium.celestium_greathammer": "Celestium Greathammer",
 
   "item.simplyswords.mythicmetals_compat.metallurgium.metallurgium_claymore": "Metallurgium Claymore",
   "item.simplyswords.mythicmetals_compat.metallurgium.metallurgium_cutlass": "Metallurgium Cutlass",
@@ -263,6 +280,7 @@
   "item.simplyswords.mythicmetals_compat.metallurgium.metallurgium_spear": "Metallurgium Spear",
   "item.simplyswords.mythicmetals_compat.metallurgium.metallurgium_twinblade": "Metallurgium Twinblade",
   "item.simplyswords.mythicmetals_compat.metallurgium.metallurgium_warglaive": "Metallurgium Warglaive",
+  "item.simplyswords.mythicmetals_compat.metallurgium.metallurgium_greathammer": "Metallurgium Greathammer",
 
   "item.simplyswords.mythicmetals_compat.copper.copper_longsword": "Copper Longsword",
   "item.simplyswords.mythicmetals_compat.durasteel.durasteel_greathammer": "Durasteel Greathammer",
