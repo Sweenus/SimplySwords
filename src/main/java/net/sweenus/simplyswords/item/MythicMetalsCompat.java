@@ -26,6 +26,11 @@ public class MythicMetalsCompat {
     static int star_platinum_modifier = 3;
     static int bronze_modifier = 3;
     static int copper_modifier = 3;
+    static int steel_modifier = 3;
+    static int palladium_modifier = 3;
+    static int stormyx_modifier = 3;
+    static int celestium_modifier = 3;
+    static int metallurgium_modifier = 3;
 
 
     //ADAMANTITE
@@ -570,6 +575,220 @@ public class MythicMetalsCompat {
     public static final Item BRONZE_CLAYMORE = registerItem( "mythicmetals_compat/bronze/bronze_claymore",
             new SimplySwordsSwordItem(ModToolMaterial.BRONZE, bronze_modifier + claymore_modifier, -2.8f,
                     "mythicmetals:bronze_ingot"));
+
+
+    //STEEL
+    public static final Item STEEL_LONGSWORD = registerItem( "mythicmetals_compat/steel/steel_longsword",
+            new SimplySwordsSwordItem(ModToolMaterial.STEEL, steel_modifier, -2.4f,
+                    "mythicmetals:steel_ingot"));
+
+    public static final Item STEEL_TWINBLADE = registerItem( "mythicmetals_compat/steel/steel_twinblade",
+            new SimplySwordsSwordItem(ModToolMaterial.STEEL, steel_modifier, -1.7f,
+                    "mythicmetals:steel_ingot"));
+
+    public static final Item STEEL_RAPIER = registerItem( "mythicmetals_compat/steel/steel_rapier",
+            new SimplySwordsSwordItem(ModToolMaterial.STEEL, steel_modifier - rapier_modifier, -1.6f,
+                    "mythicmetals:steel_ingot"));
+
+    public static final Item STEEL_KATANA = registerItem( "mythicmetals_compat/steel/steel_katana",
+            new SimplySwordsSwordItem(ModToolMaterial.STEEL, steel_modifier, -2f,
+                    "mythicmetals:steel_ingot"));
+
+    public static final Item STEEL_SAI = registerItem( "mythicmetals_compat/steel/steel_sai",
+            new SimplySwordsSwordItem(ModToolMaterial.STEEL, steel_modifier - sai_modifier, -1.1f,
+                    "mythicmetals:steel_ingot"));
+
+    public static final Item STEEL_SPEAR = registerItem( "mythicmetals_compat/steel/steel_spear",
+            new SimplySwordsSwordItem(ModToolMaterial.STEEL, steel_modifier, -2.7f,
+                    "mythicmetals:steel_ingot"));
+
+    public static final Item STEEL_GLAIVE = registerItem( "mythicmetals_compat/steel/steel_glaive",
+            new SimplySwordsSwordItem(ModToolMaterial.STEEL, steel_modifier, -2.6f,
+                    "mythicmetals:steel_ingot"));
+
+    public static final Item STEEL_WARGLAIVE = registerItem( "mythicmetals_compat/steel/steel_warglaive",
+            new SimplySwordsSwordItem(ModToolMaterial.STEEL, steel_modifier, -2.2f,
+                    "mythicmetals:steel_ingot"));
+
+    public static final Item STEEL_CUTLASS = registerItem( "mythicmetals_compat/steel/steel_cutlass",
+            new SimplySwordsSwordItem(ModToolMaterial.STEEL, steel_modifier, -2f,
+                    "mythicmetals:steel_ingot"));
+
+    public static final Item STEEL_CLAYMORE = registerItem( "mythicmetals_compat/steel/steel_claymore",
+            new SimplySwordsSwordItem(ModToolMaterial.STEEL, steel_modifier + claymore_modifier, -2.8f,
+                    "mythicmetals:steel_ingot"));
+
+
+    //STORMYX
+    public static final Item STORMYX_LONGSWORD = registerItem( "mythicmetals_compat/stormyx/stormyx_longsword",
+            new SimplySwordsSwordItem(ModToolMaterial.STORMYX, stormyx_modifier, -2.4f,
+                    "mythicmetals:stormyx_ingot"));
+
+    public static final Item STORMYX_TWINBLADE = registerItem( "mythicmetals_compat/stormyx/stormyx_twinblade",
+            new SimplySwordsSwordItem(ModToolMaterial.STORMYX, stormyx_modifier, -1.7f,
+                    "mythicmetals:stormyx_ingot"));
+
+    public static final Item STORMYX_RAPIER = registerItem( "mythicmetals_compat/stormyx/stormyx_rapier",
+            new SimplySwordsSwordItem(ModToolMaterial.STORMYX, stormyx_modifier - rapier_modifier, -1.6f,
+                    "mythicmetals:stormyx_ingot"));
+
+    public static final Item STORMYX_KATANA = registerItem( "mythicmetals_compat/stormyx/stormyx_katana",
+            new SimplySwordsSwordItem(ModToolMaterial.STORMYX, stormyx_modifier, -2f,
+                    "mythicmetals:stormyx_ingot"));
+
+    public static final Item STORMYX_SAI = registerItem( "mythicmetals_compat/stormyx/stormyx_sai",
+            new SimplySwordsSwordItem(ModToolMaterial.STORMYX, stormyx_modifier - sai_modifier, -1.1f,
+                    "mythicmetals:stormyx_ingot"));
+
+    public static final Item STORMYX_SPEAR = registerItem( "mythicmetals_compat/stormyx/stormyx_spear",
+            new SimplySwordsSwordItem(ModToolMaterial.STORMYX, stormyx_modifier, -2.7f,
+                    "mythicmetals:stormyx_ingot"));
+
+    public static final Item STORMYX_GLAIVE = registerItem( "mythicmetals_compat/stormyx/stormyx_glaive",
+            new SimplySwordsSwordItem(ModToolMaterial.STORMYX, stormyx_modifier, -2.6f,
+                    "mythicmetals:stormyx_ingot"));
+
+    public static final Item STORMYX_WARGLAIVE = registerItem( "mythicmetals_compat/stormyx/stormyx_warglaive",
+            new SimplySwordsSwordItem(ModToolMaterial.STORMYX, stormyx_modifier, -2.2f,
+                    "mythicmetals:stormyx_ingot"));
+
+    public static final Item STORMYX_CUTLASS = registerItem( "mythicmetals_compat/stormyx/stormyx_cutlass",
+            new SimplySwordsSwordItem(ModToolMaterial.STORMYX, stormyx_modifier, -2f,
+                    "mythicmetals:stormyx_ingot"));
+
+    public static final Item STORMYX_CLAYMORE = registerItem( "mythicmetals_compat/stormyx/stormyx_claymore",
+            new SimplySwordsSwordItem(ModToolMaterial.STORMYX, stormyx_modifier + claymore_modifier, -2.8f,
+                    "mythicmetals:stormyx_ingot"));
+
+
+    //PALLADIUM
+    public static final Item PALLADIUM_LONGSWORD = registerItem( "mythicmetals_compat/palladium/palladium_longsword",
+            new SimplySwordsSwordItem(ModToolMaterial.PALLADIUM, palladium_modifier, -2.4f,
+                    "mythicmetals:palladium_ingot"));
+
+    public static final Item PALLADIUM_TWINBLADE = registerItem( "mythicmetals_compat/palladium/palladium_twinblade",
+            new SimplySwordsSwordItem(ModToolMaterial.PALLADIUM, palladium_modifier, -1.7f,
+                    "mythicmetals:palladium_ingot"));
+
+    public static final Item PALLADIUM_RAPIER = registerItem( "mythicmetals_compat/palladium/palladium_rapier",
+            new SimplySwordsSwordItem(ModToolMaterial.PALLADIUM, palladium_modifier - rapier_modifier, -1.6f,
+                    "mythicmetals:palladium_ingot"));
+
+    public static final Item PALLADIUM_KATANA = registerItem( "mythicmetals_compat/palladium/palladium_katana",
+            new SimplySwordsSwordItem(ModToolMaterial.PALLADIUM, palladium_modifier, -2f,
+                    "mythicmetals:palladium_ingot"));
+
+    public static final Item PALLADIUM_SAI = registerItem( "mythicmetals_compat/palladium/palladium_sai",
+            new SimplySwordsSwordItem(ModToolMaterial.PALLADIUM, palladium_modifier - sai_modifier, -1.1f,
+                    "mythicmetals:palladium_ingot"));
+
+    public static final Item PALLADIUM_SPEAR = registerItem( "mythicmetals_compat/palladium/palladium_spear",
+            new SimplySwordsSwordItem(ModToolMaterial.PALLADIUM, palladium_modifier, -2.7f,
+                    "mythicmetals:palladium_ingot"));
+
+    public static final Item PALLADIUM_GLAIVE = registerItem( "mythicmetals_compat/palladium/palladium_glaive",
+            new SimplySwordsSwordItem(ModToolMaterial.PALLADIUM, palladium_modifier, -2.6f,
+                    "mythicmetals:palladium_ingot"));
+
+    public static final Item PALLADIUM_WARGLAIVE = registerItem( "mythicmetals_compat/palladium/palladium_warglaive",
+            new SimplySwordsSwordItem(ModToolMaterial.PALLADIUM, palladium_modifier, -2.2f,
+                    "mythicmetals:palladium_ingot"));
+
+    public static final Item PALLADIUM_CUTLASS = registerItem( "mythicmetals_compat/palladium/palladium_cutlass",
+            new SimplySwordsSwordItem(ModToolMaterial.PALLADIUM, palladium_modifier, -2f,
+                    "mythicmetals:palladium_ingot"));
+
+    public static final Item PALLADIUM_CLAYMORE = registerItem( "mythicmetals_compat/palladium/palladium_claymore",
+            new SimplySwordsSwordItem(ModToolMaterial.PALLADIUM, palladium_modifier + claymore_modifier, -2.8f,
+                    "mythicmetals:palladium_ingot"));
+
+
+    //METALLURGIUM
+    public static final Item METALLURGIUM_LONGSWORD = registerItem( "mythicmetals_compat/metallurgium/metallurgium_longsword",
+            new SimplySwordsSwordItem(ModToolMaterial.METALLURGIUM, metallurgium_modifier, -2.4f,
+                    "mythicmetals:metallurgium_ingot"));
+
+    public static final Item METALLURGIUM_TWINBLADE = registerItem( "mythicmetals_compat/metallurgium/metallurgium_twinblade",
+            new SimplySwordsSwordItem(ModToolMaterial.METALLURGIUM, metallurgium_modifier, -1.7f,
+                    "mythicmetals:metallurgium_ingot"));
+
+    public static final Item METALLURGIUM_RAPIER = registerItem( "mythicmetals_compat/metallurgium/metallurgium_rapier",
+            new SimplySwordsSwordItem(ModToolMaterial.METALLURGIUM, metallurgium_modifier - rapier_modifier, -1.6f,
+                    "mythicmetals:metallurgium_ingot"));
+
+    public static final Item METALLURGIUM_KATANA = registerItem( "mythicmetals_compat/metallurgium/metallurgium_katana",
+            new SimplySwordsSwordItem(ModToolMaterial.METALLURGIUM, metallurgium_modifier, -2f,
+                    "mythicmetals:metallurgium_ingot"));
+
+    public static final Item METALLURGIUM_SAI = registerItem( "mythicmetals_compat/metallurgium/metallurgium_sai",
+            new SimplySwordsSwordItem(ModToolMaterial.METALLURGIUM, metallurgium_modifier - sai_modifier, -1.1f,
+                    "mythicmetals:metallurgium_ingot"));
+
+    public static final Item METALLURGIUM_SPEAR = registerItem( "mythicmetals_compat/metallurgium/metallurgium_spear",
+            new SimplySwordsSwordItem(ModToolMaterial.METALLURGIUM, metallurgium_modifier, -2.7f,
+                    "mythicmetals:metallurgium_ingot"));
+
+    public static final Item METALLURGIUM_GLAIVE = registerItem( "mythicmetals_compat/metallurgium/metallurgium_glaive",
+            new SimplySwordsSwordItem(ModToolMaterial.METALLURGIUM, metallurgium_modifier, -2.6f,
+                    "mythicmetals:metallurgium_ingot"));
+
+    public static final Item METALLURGIUM_WARGLAIVE = registerItem( "mythicmetals_compat/metallurgium/metallurgium_warglaive",
+            new SimplySwordsSwordItem(ModToolMaterial.METALLURGIUM, metallurgium_modifier, -2.2f,
+                    "mythicmetals:metallurgium_ingot"));
+
+    public static final Item METALLURGIUM_CUTLASS = registerItem( "mythicmetals_compat/metallurgium/metallurgium_cutlass",
+            new SimplySwordsSwordItem(ModToolMaterial.METALLURGIUM, metallurgium_modifier, -2f,
+                    "mythicmetals:metallurgium_ingot"));
+
+    public static final Item METALLURGIUM_CLAYMORE = registerItem( "mythicmetals_compat/metallurgium/metallurgium_claymore",
+            new SimplySwordsSwordItem(ModToolMaterial.METALLURGIUM, metallurgium_modifier + claymore_modifier, -2.8f,
+                    "mythicmetals:metallurgium_ingot"));
+
+
+    //CELESTIUM
+    public static final Item CELESTIUM_LONGSWORD = registerItem( "mythicmetals_compat/celestium/celestium_longsword",
+            new SimplySwordsSwordItem(ModToolMaterial.CELESTIUM, celestium_modifier, -2.4f,
+                    "mythicmetals:celestium_ingot"));
+
+    public static final Item CELESTIUM_TWINBLADE = registerItem( "mythicmetals_compat/celestium/celestium_twinblade",
+            new SimplySwordsSwordItem(ModToolMaterial.CELESTIUM, celestium_modifier, -1.7f,
+                    "mythicmetals:celestium_ingot"));
+
+    public static final Item CELESTIUM_RAPIER = registerItem( "mythicmetals_compat/celestium/celestium_rapier",
+            new SimplySwordsSwordItem(ModToolMaterial.CELESTIUM, celestium_modifier - rapier_modifier, -1.6f,
+                    "mythicmetals:celestium_ingot"));
+
+    public static final Item CELESTIUM_KATANA = registerItem( "mythicmetals_compat/celestium/celestium_katana",
+            new SimplySwordsSwordItem(ModToolMaterial.CELESTIUM, celestium_modifier, -2f,
+                    "mythicmetals:celestium_ingot"));
+
+    public static final Item CELESTIUM_SAI = registerItem( "mythicmetals_compat/celestium/celestium_sai",
+            new SimplySwordsSwordItem(ModToolMaterial.CELESTIUM, celestium_modifier - sai_modifier, -1.1f,
+                    "mythicmetals:celestium_ingot"));
+
+    public static final Item CELESTIUM_SPEAR = registerItem( "mythicmetals_compat/celestium/celestium_spear",
+            new SimplySwordsSwordItem(ModToolMaterial.CELESTIUM, celestium_modifier, -2.7f,
+                    "mythicmetals:celestium_ingot"));
+
+    public static final Item CELESTIUM_GLAIVE = registerItem( "mythicmetals_compat/celestium/celestium_glaive",
+            new SimplySwordsSwordItem(ModToolMaterial.CELESTIUM, celestium_modifier, -2.6f,
+                    "mythicmetals:celestium_ingot"));
+
+    public static final Item CELESTIUM_WARGLAIVE = registerItem( "mythicmetals_compat/celestium/celestium_warglaive",
+            new SimplySwordsSwordItem(ModToolMaterial.CELESTIUM, celestium_modifier, -2.2f,
+                    "mythicmetals:celestium_ingot"));
+
+    public static final Item CELESTIUM_CUTLASS = registerItem( "mythicmetals_compat/celestium/celestium_cutlass",
+            new SimplySwordsSwordItem(ModToolMaterial.CELESTIUM, celestium_modifier, -2f,
+                    "mythicmetals:celestium_ingot"));
+
+    public static final Item CELESTIUM_CLAYMORE = registerItem( "mythicmetals_compat/celestium/celestium_claymore",
+            new SimplySwordsSwordItem(ModToolMaterial.CELESTIUM, celestium_modifier + claymore_modifier, -2.8f,
+                    "mythicmetals:celestium_ingot"));
+
+
+
+
 
     //COPPER
     public static final Item COPPER_LONGSWORD = registerItem( "mythicmetals_compat/copper/copper_longsword",
