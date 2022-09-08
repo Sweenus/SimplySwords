@@ -1,7 +1,7 @@
 {
 	"credit": "Made by Sweenus using Blockbench",
 	"textures": {
-		"3": "simplyswords:mythicmetals_compat/blade_prometheum",
+		"3": "simplyswords:item/blade_netherite",
 		"4": "simplyswords:item/hilt",
 		"5": "simplyswords:mythicmetals_compat/blade_axe_prometheum",
 		"particle": "simplyswords:item/hilt"

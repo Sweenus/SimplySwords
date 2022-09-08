@@ -22,6 +22,7 @@ public class MythicMetalsCompat {
     static int kyber_modifier = 3;
     static int mythril_modifier = 3;
     static int orichalcum_modifier = 3;
+    static int durasteel_modifier = 3;
     static int osmium_modifier = 3;
     static int prometheum_modifier = 3;
     static int quadrillum_modifier = 3;
@@ -1016,7 +1017,7 @@ public class MythicMetalsCompat {
 
     //DURASTEEL
     public static final Item DURASTEEL_GREATHAMMER = registerItem( "mythicmetals_compat/durasteel/durasteel_greathammer",
-            new SimplySwordsSwordItem(ModToolMaterial.DURASTEEL, copper_modifier, -3.4f,
+            new SimplySwordsSwordItem(ModToolMaterial.DURASTEEL, durasteel_modifier + greathammer_modifier, -3.3f,
                     "mythicmetals:durasteel_ingot"));
 
 
