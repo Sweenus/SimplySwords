@@ -184,6 +184,13 @@ public class ModItems {
                     -3.2f,
                     "minecraft:gold_ingot"));
 
+    public static final Item GOLD_CHAKRAM = registerItem( "gold_chakram",
+            new SimplySwordsSwordItem(
+                    ToolMaterials.GOLD,
+                    2,
+                    -3f,
+                    "minecraft:gold_ingot"));
+
     //DIAMOND
     public static final Item DIAMOND_LONGSWORD = registerItem( "diamond_longsword",
             new SimplySwordsSwordItem(
@@ -263,6 +270,13 @@ public class ModItems {
                     6,
                     -3.2f,
                     "minecraft:diamond"));
+
+    public static final Item DIAMOND_CHAKRAM = registerItem( "diamond_chakram",
+            new SimplySwordsSwordItem(
+                    ToolMaterials.DIAMOND,
+                    2,
+                    -3f,
+                    "minecraft:diamond_ingot"));
     //NETHERITE
 
     public static final Item NETHERITE_LONGSWORD = registerItem( "netherite_longsword",
@@ -344,6 +358,13 @@ public class ModItems {
                     ToolMaterials.NETHERITE,
                     7,
                     -3.2f,
+                    "minecraft:netherite_ingot"));
+
+    public static final Item NETHERITE_CHAKRAM = registerItem( "netherite_chakram",
+            new SimplySwordsSwordItem(
+                    ToolMaterials.NETHERITE,
+                    2,
+                    -3f,
                     "minecraft:netherite_ingot"));
 
     //RUNIC
