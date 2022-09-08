@@ -56,6 +56,9 @@ public class ModLootTableModifiers {
                         .with(ItemEntry.builder(ModItems.IRON_SPEAR))
                         .with(ItemEntry.builder(ModItems.IRON_SAI))
                         .with(ItemEntry.builder(ModItems.IRON_CLAYMORE))
+                        .with(ItemEntry.builder(ModItems.IRON_CHAKRAM))
+                        .with(ItemEntry.builder(ModItems.IRON_GREATAXE))
+                        .with(ItemEntry.builder(ModItems.IRON_GREATHAMMER))
                         .with(ItemEntry.builder(ModItems.GOLD_LONGSWORD))
                         .with(ItemEntry.builder(ModItems.GOLD_TWINBLADE))
                         .with(ItemEntry.builder(ModItems.GOLD_RAPIER))
@@ -65,7 +68,10 @@ public class ModLootTableModifiers {
                         .with(ItemEntry.builder(ModItems.GOLD_WARGLAIVE))
                         .with(ItemEntry.builder(ModItems.GOLD_SPEAR))
                         .with(ItemEntry.builder(ModItems.GOLD_SAI))
-                        .with(ItemEntry.builder(ModItems.GOLD_CLAYMORE));
+                        .with(ItemEntry.builder(ModItems.GOLD_CLAYMORE))
+                        .with(ItemEntry.builder(ModItems.GOLD_GREATHAMMER))
+                        .with(ItemEntry.builder(ModItems.GOLD_CHAKRAM))
+                        .with(ItemEntry.builder(ModItems.GOLD_GREATAXE));
                 tableBuilder.pool(pool);
 
                 //RARE POOL
@@ -91,7 +97,10 @@ public class ModLootTableModifiers {
                         .with(ItemEntry.builder(ModItems.DIAMOND_GLAIVE))
                         .with(ItemEntry.builder(ModItems.DIAMOND_WARGLAIVE))
                         .with(ItemEntry.builder(ModItems.DIAMOND_SAI))
-                        .with(ItemEntry.builder(ModItems.DIAMOND_CLAYMORE));
+                        .with(ItemEntry.builder(ModItems.DIAMOND_CLAYMORE))
+                        .with(ItemEntry.builder(ModItems.DIAMOND_GREATHAMMER))
+                        .with(ItemEntry.builder(ModItems.DIAMOND_CHAKRAM))
+                        .with(ItemEntry.builder(ModItems.DIAMOND_GREATAXE));
                 tableBuilder.pool(rpool);
 
                 //UNIQUE POOL

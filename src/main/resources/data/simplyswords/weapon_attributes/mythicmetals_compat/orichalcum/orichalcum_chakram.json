@@ -11,7 +11,7 @@
         "upswing": 0.5,
         "animation": "simplyswords:one_handed_chakram_throw_left",
         "swing_sound": {
-          "id": "bettercombat:dagger_slash",
+          "id": "bettercombat:sickle_slash",
           "pitch": 1.2
         }
       },
@@ -23,7 +23,7 @@
         "upswing": 0.5,
         "animation": "simplyswords:chakram_spin",
         "swing_sound": {
-          "id": "bettercombat:dagger_slash",
+          "id": "bettercombat:sickle_slash",
           "pitch": 1.2
         }
       },
@@ -35,7 +35,7 @@
         "upswing": 0.5,
         "animation": "simplyswords:chakram_spin_long_grounded",
         "swing_sound": {
-          "id": "bettercombat:dagger_slash",
+          "id": "bettercombat:glaive_slash_quick",
           "pitch": 1.2
         }
       }
