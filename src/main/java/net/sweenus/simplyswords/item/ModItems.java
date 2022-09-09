@@ -447,9 +447,9 @@ public class ModItems {
             new PlagueSwordItem(ToolMaterials.NETHERITE, 3, -2.4f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
-    public static final Item MAGIC_ESTOC = registerItem( "magic_estoc",
-            new SwordItem(ToolMaterials.NETHERITE, 3, -2.4f,
-                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+    //public static final Item MAGIC_ESTOC = registerItem( "magic_estoc",
+            //new SwordItem(ToolMaterials.NETHERITE, 3, -2.4f,
+                    //new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
     public static final Item MJOLNIR = registerItem( "mjolnir",
             new StormSwordItem(ToolMaterials.NETHERITE, 3, -3f,
