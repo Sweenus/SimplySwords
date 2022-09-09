@@ -288,8 +288,9 @@
 			"scale": [0.6, 0.6, 0.6]
 		},
 		"head": {
-			"rotation": [0, 180, 38],
-			"translation": [0, -13.75, 7]
+			"rotation": [-180, 180, 134],
+			"translation": [-4, 1.25, 0],
+			"scale": [0.65, 0.65, 0.65]
 		},
 		"fixed": {
 			"rotation": [-2, 180, 44],

@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "#": {
+      "item": "minecraft:stick"
+    },
+    "X": {
+      "item": "mythicmetals:orichalcum_ingot"
+    }
+  },
+  "pattern": [
+    "X X",
+    "X#X",
+    "   "
+  ],
+  "result": {
+    "item": "simplyswords:mythicmetals_compat/orichalcum/orichalcum_warglaive"
+  }
+}

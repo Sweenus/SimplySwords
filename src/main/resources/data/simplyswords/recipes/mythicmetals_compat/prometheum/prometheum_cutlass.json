@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "#": {
+      "item": "minecraft:stick"
+    },
+    "X": {
+      "item": "mythicmetals:prometheum_ingot"
+    }
+  },
+  "pattern": [
+    " X",
+    "XX",
+    "# "
+  ],
+  "result": {
+    "item": "simplyswords:mythicmetals_compat/prometheum/prometheum_cutlass"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "#": {
+      "item": "minecraft:stick"
+    },
+    "X": {
+      "item": "mythicmetals:banglum_ingot"
+    }
+  },
+  "pattern": [
+    "XXX",
+    "XXX",
+    " # "
+  ],
+  "result": {
+    "item": "simplyswords:mythicmetals_compat/banglum/banglum_greathammer"
+  }
+}

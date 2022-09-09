@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "#": {
+      "item": "minecraft:stick"
+    },
+    "X": {
+      "item": "mythicmetals:quadrillum_ingot"
+    }
+  },
+  "pattern": [
+    "  ",
+    " X",
+    "# "
+  ],
+  "result": {
+    "item": "simplyswords:mythicmetals_compat/quadrillum/quadrillum_sai"
+  }
+}

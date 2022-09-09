@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "#": {
+      "item": "minecraft:stick"
+    },
+    "X": {
+      "item": "mythicmetals:kyber_ingot"
+    }
+  },
+  "pattern": [
+    "  X",
+    " # ",
+    "X  "
+  ],
+  "result": {
+    "item": "simplyswords:mythicmetals_compat/kyber/kyber_twinblade"
+  }
+}

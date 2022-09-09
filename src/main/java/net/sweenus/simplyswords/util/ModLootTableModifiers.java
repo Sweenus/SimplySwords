@@ -88,6 +88,9 @@ public class ModLootTableModifiers {
                         .with(ItemEntry.builder(ModItems.RUNIC_GLAIVE))
                         .with(ItemEntry.builder(ModItems.RUNIC_SPEAR))
                         .with(ItemEntry.builder(ModItems.RUNIC_SAI))
+                        .with(ItemEntry.builder(ModItems.RUNIC_GREATHAMMER))
+                        .with(ItemEntry.builder(ModItems.RUNIC_GREATAXE))
+                        .with(ItemEntry.builder(ModItems.RUNIC_CHAKRAM))
                         .with(ItemEntry.builder(ModItems.DIAMOND_LONGSWORD))
                         .with(ItemEntry.builder(ModItems.DIAMOND_TWINBLADE))
                         .with(ItemEntry.builder(ModItems.DIAMOND_RAPIER))
@@ -113,6 +116,7 @@ public class ModLootTableModifiers {
                         .with(ItemEntry.builder(ModItems.BRAMBLETHORN))
                         .with(ItemEntry.builder(ModItems.STORMS_EDGE))
                         .with(ItemEntry.builder(ModItems.STORMBRINGER))
+                        .with(ItemEntry.builder(ModItems.MJOLNIR))
                         .with(ItemEntry.builder(ModItems.BRIMSTONE_CLAYMORE));
                 tableBuilder.pool(upool);
 

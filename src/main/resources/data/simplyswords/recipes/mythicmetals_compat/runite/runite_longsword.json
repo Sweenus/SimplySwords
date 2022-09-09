@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "#": {
+      "item": "minecraft:stick"
+    },
+    "X": {
+      "item": "mythicmetals:runite_ingot"
+    }
+  },
+  "pattern": [
+    "#  ",
+    " X ",
+    "  X"
+  ],
+  "result": {
+    "item": "simplyswords:mythicmetals_compat/runite/runite_longsword"
+  }
+}

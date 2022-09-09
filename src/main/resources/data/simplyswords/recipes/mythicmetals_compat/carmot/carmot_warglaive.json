@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "#": {
+      "item": "minecraft:stick"
+    },
+    "X": {
+      "item": "mythicmetals:carmot_ingot"
+    }
+  },
+  "pattern": [
+    "X X",
+    "X#X",
+    "   "
+  ],
+  "result": {
+    "item": "simplyswords:mythicmetals_compat/carmot/carmot_warglaive"
+  }
+}

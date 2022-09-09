@@ -404,7 +404,15 @@ public class ModItems {
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
 
     public static final Item RUNIC_CHAKRAM = registerItem( "runic_chakram",
-            new FreezeSwordItem(ToolMaterials.NETHERITE, 3, -3f,
+            new SpeedSwordItem(ToolMaterials.NETHERITE, 3, -3f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+
+    public static final Item RUNIC_GREATAXE = registerItem( "runic_greataxe",
+            new FreezeSwordItem(ToolMaterials.NETHERITE, 7, -3.2f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+
+    public static final Item RUNIC_GREATHAMMER = registerItem( "runic_greathammer",
+            new WildfireSwordItem(ToolMaterials.NETHERITE, 8, -3.3f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
 
 //SPECIAL
