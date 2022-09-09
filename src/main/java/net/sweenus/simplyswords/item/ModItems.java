@@ -403,6 +403,10 @@ public class ModItems {
             new FreezeSwordItem(ToolMaterials.NETHERITE, 6, -2.8f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
 
+    public static final Item RUNIC_CHAKRAM = registerItem( "runic_chakram",
+            new FreezeSwordItem(ToolMaterials.NETHERITE, 3, -3f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS)));
+
 //SPECIAL
     public static final Item BRIMSTONE_CLAYMORE = registerItem( "brimstone_claymore",
             new FireSwordItem(ToolMaterials.NETHERITE, 6, -2.8f,
@@ -431,9 +435,16 @@ public class ModItems {
     public static final Item WATCHING_WARGLAIVE = registerItem( "watching_warglaive",
             new WatcherSwordItem(ToolMaterials.NETHERITE, 3, -2.2f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
-
     public static final Item TOXIC_LONGSWORD = registerItem( "toxic_longsword",
             new PlagueSwordItem(ToolMaterials.NETHERITE, 3, -2.4f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+
+    public static final Item MAGIC_ESTOC = registerItem( "magic_estoc",
+            new SwordItem(ToolMaterials.NETHERITE, 3, -2.4f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+
+    public static final Item MJOLNIR = registerItem( "mjolnir",
+            new StormSwordItem(ToolMaterials.NETHERITE, 3, -3f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
     private static Item registerItem(String name, Item item) {

@@ -12,6 +12,7 @@ import net.sweenus.simplyswords.effect.ModEffects;
 import net.sweenus.simplyswords.item.ModItems;
 import net.sweenus.simplyswords.item.MythicMetalsCompat;
 import net.sweenus.simplyswords.util.ModLootTableModifiers;
+import net.sweenus.simplyswords.util.SoundRegister;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,6 +58,11 @@ public class SimplySwords implements ModInitializer {
 
         SimplySwordsConfig.generateConfigs(json == null || !json.has("regen_simplyswords_config_file") || json.get("regen_simplyswords_config_file").getAsBoolean());
         SimplySwordsConfig.loadConfig();
+
+        //SOUND
+
+        SoundRegister.registerSounds();
+
 
 
     }
