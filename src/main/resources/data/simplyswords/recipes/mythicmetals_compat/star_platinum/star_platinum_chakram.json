@@ -15,5 +15,13 @@
   ],
   "result": {
     "item": "simplyswords:mythicmetals_compat/star_platinum/star_platinum_chakram"
-  }
+  },
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "mythicmetals"
+      ]
+    }
+  ]
 }

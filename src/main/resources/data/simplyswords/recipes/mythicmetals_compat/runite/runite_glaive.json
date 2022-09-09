@@ -15,5 +15,13 @@
   ],
   "result": {
     "item": "simplyswords:mythicmetals_compat/runite/runite_glaive"
-  }
+  },
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "mythicmetals"
+      ]
+    }
+  ]
 }

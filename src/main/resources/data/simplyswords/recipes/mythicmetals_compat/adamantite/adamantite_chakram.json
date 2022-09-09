@@ -5,7 +5,7 @@
       "item": "minecraft:stick"
     },
     "X": {
-      "item": "mythicmetals:adamantite_ingot"
+      "tag": "c:adamantite_ingots"
     }
   },
   "pattern": [
@@ -15,5 +15,13 @@
   ],
   "result": {
     "item": "simplyswords:mythicmetals_compat/adamantite/adamantite_chakram"
-  }
+  },
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "mythicmetals"
+      ]
+    }
+  ]
 }

@@ -15,5 +15,13 @@
   ],
   "result": {
     "item": "simplyswords:mythicmetals_compat/orichalcum/orichalcum_cutlass"
-  }
+  },
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "mythicmetals"
+      ]
+    }
+  ]
 }
