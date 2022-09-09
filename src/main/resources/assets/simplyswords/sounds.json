@@ -1,0 +1,37 @@
+{
+  "swing_normal": {
+    "sounds": [
+      "simplyswords:swing_normal"
+    ]
+  },
+  "swing_scifi": {
+    "sounds": [
+      "simplyswords:swing_scifi"
+    ]
+  },
+  "swing_small": {
+    "sounds": [
+      "simplyswords:swing_small"
+    ]
+  },
+  "swing_woosh": {
+    "sounds": [
+      "simplyswords:swing_woosh"
+    ]
+  },
+  "throw_mjolnir": {
+    "sounds": [
+      "simplyswords:throw_mjolnir"
+    ]
+  },
+  "throw_mjolnir_short": {
+    "sounds": [
+      "simplyswords:throw_mjolnir_short"
+    ]
+  },
+  "throw_mjolnir_long": {
+    "sounds": [
+      "simplyswords:throw_mjolnir_long"
+    ]
+  }
+}

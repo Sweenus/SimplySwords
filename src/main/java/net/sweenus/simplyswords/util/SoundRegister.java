@@ -12,8 +12,13 @@ import java.util.List;
 
 public class SoundRegister {
     public static List<String> soundKeys = List.of(
-            "sound_name",
-            "sound_name2"
+            "swing_small",
+            "swing_scifi",
+            "swing_normal",
+            "swing_woosh",
+            "throw_mjolnir",
+            "throw_mjolnir_short",
+            "throw_mjolnir_long"
     );
 
     public static void registerSounds() {
