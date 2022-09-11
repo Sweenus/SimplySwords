@@ -2,6 +2,7 @@ package net.sweenus.simplyswords.item;
 
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.minecraft.item.Item;
+import net.minecraft.item.ShieldItem;
 import net.minecraft.item.SwordItem;
 import net.minecraft.item.ToolMaterials;
 import net.minecraft.util.Identifier;
@@ -446,6 +447,25 @@ public class ModItems {
     public static final Item TOXIC_LONGSWORD = registerItem( "toxic_longsword",
             new PlagueSwordItem(ToolMaterials.NETHERITE, 3, -2.4f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+
+
+
+    //SHIELDS
+
+    public static final Item MYSTICAL_TOWERSHIELD = registerItem( "shields/overgrown_plank_shield",
+            new ShieldItem( new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+
+    public static final Item FORTIFIED_TOWERSHIELD = registerItem( "shields/tower_shield",
+            new ShieldItem( new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+
+    public static final Item PLANK_TOWERSHIELD = registerItem( "shields/plank_shield",
+            new ShieldItem( new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+
+    public static final Item ANCIENT_TABLET = registerItem( "shields/shield_slab",
+            new ShieldItem( new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+
+    public static final Item FORTIFIED_ROUNDSHIELD = registerItem( "shields/round_shield",
+            new ShieldItem( new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
     //public static final Item MAGIC_ESTOC = registerItem( "magic_estoc",
             //new SwordItem(ToolMaterials.NETHERITE, 3, -2.4f,
