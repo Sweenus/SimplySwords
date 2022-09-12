@@ -174,33 +174,25 @@
 		}
 	],
 	"gui_light": "front",
-	"overrides": [
-		{
-			"predicate": {
-				"blocking": 1
-			},
-			"model": "simplyswords:item/shields/plank_shield_blocking"
-		}
-	],
 	"display": {
 		"thirdperson_righthand": {
-			"rotation": [-98, -90, 55],
+			"rotation": [-30, -90, 55],
 			"translation": [0.75, -8.5, 2],
 			"scale": [0.85, 0.85, 0.85]
 		},
 		"thirdperson_lefthand": {
-			"rotation": [-98, -90, 55],
+			"rotation": [-30, -90, 55],
 			"translation": [0.75, -8.5, 2],
 			"scale": [0.85, 0.85, 0.85]
 		},
 		"firstperson_righthand": {
 			"rotation": [1, -113, 17],
-			"translation": [0.25, 2.5, 4.75],
+			"translation": [0.25, 5, 4.75],
 			"scale": [0.68, 0.68, 0.68]
 		},
 		"firstperson_lefthand": {
 			"rotation": [0, -117, -25],
-			"translation": [1.13, 0.45, 3.13],
+			"translation": [1.13, 5, 3.13],
 			"scale": [0.68, 0.68, 0.68]
 		},
 		"ground": {

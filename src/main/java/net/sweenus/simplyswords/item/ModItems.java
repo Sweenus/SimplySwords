@@ -105,6 +105,13 @@ public class ModItems {
                     -3f,
                     "minecraft:iron_ingot"));
 
+    public static final Item IRON_SCYTHE = registerItem( "iron_scythe",
+            new SimplySwordsSwordItem(
+                    ToolMaterials.IRON,
+                    4,
+                    -2.7f,
+                    "minecraft:iron_ingot"));
+
     //GOLD
     public static final Item GOLD_LONGSWORD = registerItem( "gold_longsword",
             new SimplySwordsSwordItem(
