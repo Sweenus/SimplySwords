@@ -1,6 +1,7 @@
 package net.sweenus.simplyswords.item.custom;
 
 
+import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
@@ -10,7 +11,12 @@ import net.minecraft.item.SwordItem;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.math.Box;
+import net.minecraft.world.World;
+
+import java.util.List;
 
 public class BrambleSwordItem extends SwordItem {
     public BrambleSwordItem(ToolMaterial toolMaterial, int attackDamage, float attackSpeed, Settings settings) {
@@ -42,6 +48,16 @@ public class BrambleSwordItem extends SwordItem {
 
         return super.postHit(stack, target, attacker);
 
+    }
+
+    @Override
+    public void appendTooltip(ItemStack itemStack, World world, List<Text> tooltip, TooltipContext tooltipContext) {
+
+        // default white text
+        tooltip.add(Text.translatable("item.simplyswords.bramblesworditem.tooltip1").formatted(Formatting.GOLD));
+
+        // formatted red text
+        tooltip.add(Text.translatable("item.simplyswords.bramblesworditem.tooltip2"));
     }
 
 }

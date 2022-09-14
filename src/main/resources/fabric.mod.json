@@ -36,6 +36,9 @@
   "suggests": {
     "mythicmetals": "mythicmetals"
   },
+  "recommends": {
+    "mythicmetals": "bettercombat"
+  },
 
   "custom": {
     "modmenu": {

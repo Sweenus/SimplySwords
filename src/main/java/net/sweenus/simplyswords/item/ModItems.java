@@ -199,6 +199,13 @@ public class ModItems {
                     -3f,
                     "minecraft:gold_ingot"));
 
+    public static final Item GOLD_SCYTHE = registerItem( "gold_scythe",
+            new SimplySwordsSwordItem(
+                    ToolMaterials.GOLD,
+                    4,
+                    -2.7f,
+                    "minecraft:gold_ingot"));
+
     //DIAMOND
     public static final Item DIAMOND_LONGSWORD = registerItem( "diamond_longsword",
             new SimplySwordsSwordItem(
@@ -285,6 +292,14 @@ public class ModItems {
                     2,
                     -3f,
                     "minecraft:diamond_ingot"));
+
+    public static final Item DIAMOND_SCYTHE = registerItem( "diamond_scythe",
+            new SimplySwordsSwordItem(
+                    ToolMaterials.DIAMOND,
+                    4,
+                    -2.7f,
+                    "minecraft:diamond_ingot"));
+
     //NETHERITE
 
     public static final Item NETHERITE_LONGSWORD = registerItem( "netherite_longsword",
@@ -374,6 +389,14 @@ public class ModItems {
                     2,
                     -3f,
                     "minecraft:netherite_ingot"));
+
+    public static final Item NETHERITE_SCYTHE = registerItem( "netherite_scythe",
+            new SimplySwordsSwordItem(
+                    ToolMaterials.NETHERITE,
+                    4,
+                    -2.7f,
+                    "minecraft:netherite_ingot"));
+
 
     //RUNIC
     public static final Item RUNIC_LONGSWORD = registerItem( "runic_longsword",

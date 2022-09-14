@@ -66,6 +66,10 @@
   "item.simplyswords.gold_chakram": "Gold Chakram",
   "item.simplyswords.diamond_chakram": "Diamond Chakram",
   "item.simplyswords.netherite_chakram": "Netherite Chakram",
+  "item.simplyswords.iron_scythe": "Iron Scythe",
+  "item.simplyswords.gold_scythe": "Gold Scythe",
+  "item.simplyswords.diamond_scythe": "Diamond Scythe",
+  "item.simplyswords.netherite_scythe": "Netherite Scythe",
   "item.simplyswords.runic_chakram": "Runic Chakram",
   "item.simplyswords.storms_edge": "Storm's Edge",
   "item.simplyswords.stormbringer": "Stormbringer",
@@ -347,6 +351,26 @@
   "effect.simplyswords.wildfire": "Wildfire",
 
   "item.simplyswords.firesworditem.tooltip1": "Unique Effect: Brimstone",
-  "item.simplyswords.firesworditem.tooltip2": "Chance on hit to spew forth explosive brimstone"
+  "item.simplyswords.firesworditem.tooltip2": "Chance on hit to spew forth explosive brimstone",
+  "item.simplyswords.bramblesworditem.tooltip1": "Unique Effect: Bramblethorn",
+  "item.simplyswords.bramblesworditem.tooltip2": "Chance on hit to release a blanket of toxic spores, slowing and poisoning anything nearby",
+  "item.simplyswords.stormsworditem.tooltip1": "Unique Effect: Storm",
+  "item.simplyswords.stormsworditem.tooltip2": "When raining/wet: Chance on hit to bring lightning down from the sky upon your foes",
+  "item.simplyswords.watchersworditem.tooltip1": "Unique Effect: Omen",
+  "item.simplyswords.watchersworditem.tooltip2": "Chance on hit to rip the life from an injured target and grant it as absorption to the wielder",
+  "item.simplyswords.watchersworditem.tooltip3": "Unique Effect: Watcher",
+  "item.simplyswords.watchersworditem.tooltip4": "Chance on hit to siphon the health of nearby enemies, healing the wielder",
+  "item.simplyswords.plaguesworditem.tooltip1": "Unique Effect: Plague",
+  "item.simplyswords.plaguesworditem.tooltip2": "Chance on hit to inflict the target with a lethal illness",
 
+  "item.simplyswords.levitationsworditem.tooltip1": "Runic Power: Float",
+  "item.simplyswords.levitationsworditem.tooltip2": "Chance on hit to reverse the effects of gravity on your target",
+  "item.simplyswords.speedsworditem.tooltip1": "Runic Power: Swiftness",
+  "item.simplyswords.speedsworditem.tooltip2": "Chance on hit to increase the wielders movespeed for a duration",
+  "item.simplyswords.slownesssworditem.tooltip1": "Runic Power: Slow",
+  "item.simplyswords.slownesssworditem.tooltip2": "Chance on hit to slow the target for a duration",
+  "item.simplyswords.freezesworditem.tooltip1": "Runic Power: Freeze",
+  "item.simplyswords.freezesworditem.tooltip2": "Chance on hit to chill or freeze your target",
+  "item.simplyswords.wildfiresworditem.tooltip1": "Runic Power: Wildfire",
+  "item.simplyswords.wildfiresworditem.tooltip2": "Chance on hit to ignite all nearby entities of the same type as your target"
 }
