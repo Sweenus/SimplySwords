@@ -455,24 +455,11 @@ public class ModItems {
             new PlagueSwordItem(ToolMaterials.NETHERITE, 3, -2.4f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
+    public static final Item EMBERBLADE = registerItem( "emberblade",
+            new FireSwordItem(ToolMaterials.NETHERITE, 3, -2.4f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
 
-    //SHIELDS
-
-    public static final Item MYSTICAL_TOWERSHIELD = registerItem( "shields/overgrown_plank_shield",
-            new ShieldItem( new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
-
-    public static final Item FORTIFIED_TOWERSHIELD = registerItem( "shields/tower_shield",
-            new ShieldItem( new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
-
-    public static final Item PLANK_TOWERSHIELD = registerItem( "shields/plank_shield",
-            new ShieldItem( new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
-
-    public static final Item ANCIENT_TABLET = registerItem( "shields/shield_slab",
-            new ShieldItem( new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
-
-    public static final Item FORTIFIED_ROUNDSHIELD = registerItem( "shields/round_shield",
-            new ShieldItem( new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
     //public static final Item MAGIC_ESTOC = registerItem( "magic_estoc",
             //new SwordItem(ToolMaterials.NETHERITE, 3, -2.4f,

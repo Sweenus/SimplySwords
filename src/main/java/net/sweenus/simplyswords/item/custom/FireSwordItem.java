@@ -1,13 +1,19 @@
 package net.sweenus.simplyswords.item.custom;
 
 
+import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.SwordItem;
 import net.minecraft.item.ToolMaterial;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
+import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
 import net.sweenus.simplyswords.effect.ModEffects;
+
+import java.util.List;
 
 public class FireSwordItem extends SwordItem {
     public FireSwordItem(ToolMaterial toolMaterial, int attackDamage, float attackSpeed, Settings settings) {
@@ -25,6 +31,16 @@ public class FireSwordItem extends SwordItem {
 
         return super.postHit(stack, target, attacker);
 
+    }
+
+    @Override
+    public void appendTooltip(ItemStack itemStack, World world, List<Text> tooltip, TooltipContext tooltipContext) {
+
+        // default white text
+        tooltip.add(Text.translatable("item.simplyswords.firesworditem.tooltip1").formatted(Formatting.GOLD));
+
+        // formatted red text
+        tooltip.add(Text.translatable("item.simplyswords.firesworditem.tooltip2"));
     }
 
 }

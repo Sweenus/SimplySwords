@@ -73,6 +73,7 @@
   "item.simplyswords.bramblethorn": "Bramblethorn",
   "item.simplyswords.magic_estoc": "Enchanted Estoc",
   "item.simplyswords.mjolnir": "Mjolnir",
+  "item.simplyswords.emberblade": "Emberblade",
 
 
   "item.simplyswords.mythicmetals_compat.adamantite.adamantite_claymore": "Adamantite Claymore",
@@ -343,5 +344,9 @@
   "effect.simplyswords.omen": "Omen",
   "effect.simplyswords.watcher": "Watcher",
   "effect.simplyswords.electric": "Lightning",
-  "effect.simplyswords.wildfire": "Wildfire"
+  "effect.simplyswords.wildfire": "Wildfire",
+
+  "item.simplyswords.firesworditem.tooltip1": "Unique Effect: Brimstone",
+  "item.simplyswords.firesworditem.tooltip2": "Chance on hit to spew forth explosive brimstone"
+
 }
