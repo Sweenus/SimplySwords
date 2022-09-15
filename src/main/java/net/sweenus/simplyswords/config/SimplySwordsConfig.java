@@ -56,6 +56,9 @@ public class SimplySwordsConfig {
         INT_OPTIONS.put("toxin_duration", 150);
         INT_OPTIONS.put("plague_duration", 300);
         INT_OPTIONS.put("plague_chance", 15);
+        INT_OPTIONS.put("ember_ire_duration", 150);
+        INT_OPTIONS.put("volcanic_fury_chance", 25);
+        INT_OPTIONS.put("ember_ire_chance", 5);
 
 
         FLOAT_OPTIONS.put("standard_loot_table_weight", 0.08f);

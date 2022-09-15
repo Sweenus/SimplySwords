@@ -78,6 +78,7 @@
   "item.simplyswords.magic_estoc": "Enchanted Estoc",
   "item.simplyswords.mjolnir": "Mjolnir",
   "item.simplyswords.emberblade": "Emberblade",
+  "item.simplyswords.hearthflame": "Hearthflame",
 
 
   "item.simplyswords.mythicmetals_compat.adamantite.adamantite_claymore": "Adamantite Claymore",
@@ -362,6 +363,10 @@
   "item.simplyswords.watchersworditem.tooltip4": "Chance on hit to siphon the health of nearby enemies, healing the wielder",
   "item.simplyswords.plaguesworditem.tooltip1": "Unique Effect: Plague",
   "item.simplyswords.plaguesworditem.tooltip2": "Chance on hit to inflict the target with a lethal illness",
+  "item.simplyswords.emberiresworditem.tooltip1": "Unique Effect: Ember Ire",
+  "item.simplyswords.emberiresworditem.tooltip2": "Chance on hit to cloak the wielder in flames, damaging them while granting strength",
+  "item.simplyswords.volcanicfurysworditem.tooltip1": "Unique Effect: Volcanic Fury",
+  "item.simplyswords.volcanicfurysworditem.tooltip2": "Chance on hit ignite your target and send them flying",
 
   "item.simplyswords.levitationsworditem.tooltip1": "Runic Power: Float",
   "item.simplyswords.levitationsworditem.tooltip2": "Chance on hit to reverse the effects of gravity on your target",
