@@ -33,5 +33,15 @@
     "sounds": [
       "simplyswords:throw_mjolnir_long"
     ]
+  },
+  "swing_omen_one": {
+    "sounds": [
+      "simplyswords:swing_omen_one"
+    ]
+  },
+  "swing_omen_two": {
+    "sounds": [
+      "simplyswords:swing_omen_two"
+    ]
   }
 }

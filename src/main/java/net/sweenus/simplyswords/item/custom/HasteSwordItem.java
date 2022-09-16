@@ -66,8 +66,8 @@ public class HasteSwordItem extends SwordItem {
     public void appendTooltip(ItemStack itemStack, World world, List<Text> tooltip, TooltipContext tooltipContext) {
 
         tooltip.add(Text.translatable("item.simplyswords.ferocitysworditem.tooltip1").formatted(Formatting.GOLD));
-
         tooltip.add(Text.translatable("item.simplyswords.ferocitysworditem.tooltip2"));
+        tooltip.add(Text.translatable("item.simplyswords.onrightclick").formatted(Formatting.BOLD, Formatting.GREEN));
         tooltip.add(Text.translatable("item.simplyswords.ferocitysworditem.tooltip3"));
     }
 

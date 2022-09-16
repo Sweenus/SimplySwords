@@ -117,6 +117,9 @@ public class ModLootTableModifiers {
                         .with(ItemEntry.builder(ModItems.STORMS_EDGE))
                         .with(ItemEntry.builder(ModItems.STORMBRINGER))
                         .with(ItemEntry.builder(ModItems.MJOLNIR))
+                        .with(ItemEntry.builder(ModItems.EMBERBLADE))
+                        .with(ItemEntry.builder(ModItems.HEARTHFLAME))
+                        .with(ItemEntry.builder(ModItems.TWISTED_BLADE))
                         .with(ItemEntry.builder(ModItems.BRIMSTONE_CLAYMORE));
                 tableBuilder.pool(upool);
 

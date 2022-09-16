@@ -352,6 +352,7 @@
   "effect.simplyswords.electric": "Lightning",
   "effect.simplyswords.wildfire": "Wildfire",
 
+  "item.simplyswords.onrightclick": "On Right Click:",
   "item.simplyswords.firesworditem.tooltip1": "Unique Effect: Brimstone",
   "item.simplyswords.firesworditem.tooltip2": "Chance on hit to spew forth explosive brimstone",
   "item.simplyswords.bramblesworditem.tooltip1": "Unique Effect: Bramblethorn",
@@ -366,11 +367,12 @@
   "item.simplyswords.plaguesworditem.tooltip2": "Chance on hit to inflict the target with a lethal illness",
   "item.simplyswords.emberiresworditem.tooltip1": "Unique Effect: Ember Ire",
   "item.simplyswords.emberiresworditem.tooltip2": "Chance on hit to cloak the wielder in flames, damaging them while granting strength",
+  "item.simplyswords.emberiresworditem.tooltip3": "Consume the flames, losing strength and summoning forth a fireball",
   "item.simplyswords.volcanicfurysworditem.tooltip1": "Unique Effect: Volcanic Fury",
   "item.simplyswords.volcanicfurysworditem.tooltip2": "Chance on hit ignite your target and send them flying",
   "item.simplyswords.ferocitysworditem.tooltip1": "Unique Effect: Ferocity",
   "item.simplyswords.ferocitysworditem.tooltip2": "Chance on hit to increase your attack speed, stacking up to 20 times",
-  "item.simplyswords.ferocitysworditem.tooltip3": "Right click to consume all stacks gaining strength for a duration equal to the amount of stacks consumed",
+  "item.simplyswords.ferocitysworditem.tooltip3": "Consume all stacks gaining strength for a duration equal to the amount of stacks consumed",
 
   "item.simplyswords.levitationsworditem.tooltip1": "Runic Power: Float",
   "item.simplyswords.levitationsworditem.tooltip2": "Chance on hit to reverse the effects of gravity on your target",

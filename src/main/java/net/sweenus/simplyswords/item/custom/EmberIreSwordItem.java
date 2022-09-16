@@ -57,11 +57,13 @@ public class EmberIreSwordItem extends SwordItem {
                 Vec3d newPos = user.getPos().add(rotation);
 
                 //Entity fireball = EntityType.FIREBALL.spawn((ServerWorld) world, null, null, null, newPos, SpawnReason.TRIGGERED, true, true);
-                Entity fireball = new FireballEntity(EntityType.FIREBALL, (ServerWorld) world);
-                fireball.updatePosition(newPos.getX(), user.getY() + 2, newPos.getZ());
+                FireballEntity fireball = new FireballEntity(EntityType.FIREBALL, (ServerWorld) world);
+                fireball.updatePosition(newPos.getX(), (user.getY()), newPos.getZ());
+                fireball.setOwner(user);
                 sworld.spawnEntity(fireball);
-                fireball.setVelocity(user.getX(), 0.0, user.getZ());
+                fireball.setVelocity(rotation);
                 user.removeStatusEffect(StatusEffects.STRENGTH);
+                user.extinguish();
             }
         }
         return super.use(world,user,hand);
@@ -70,11 +72,10 @@ public class EmberIreSwordItem extends SwordItem {
     @Override
     public void appendTooltip(ItemStack itemStack, World world, List<Text> tooltip, TooltipContext tooltipContext) {
 
-        // default white text
         tooltip.add(Text.translatable("item.simplyswords.emberiresworditem.tooltip1").formatted(Formatting.GOLD));
-
-        // formatted red text
         tooltip.add(Text.translatable("item.simplyswords.emberiresworditem.tooltip2"));
+        tooltip.add(Text.translatable("item.simplyswords.onrightclick").formatted(Formatting.BOLD, Formatting.GREEN));
+        tooltip.add(Text.translatable("item.simplyswords.emberiresworditem.tooltip3"));
     }
 
 }
