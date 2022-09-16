@@ -483,7 +483,11 @@ public class ModItems {
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
     public static final Item HEARTHFLAME = registerItem( "hearthflame",
-            new VolcanicFurySwordItem(ToolMaterials.NETHERITE, 3, -2.4f,
+            new VolcanicFurySwordItem(ToolMaterials.NETHERITE, 8, -3.3f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+
+    public static final Item TWISTED_BLADE = registerItem( "twisted_blade",
+            new HasteSwordItem(ToolMaterials.NETHERITE, 3, -2.8f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
 

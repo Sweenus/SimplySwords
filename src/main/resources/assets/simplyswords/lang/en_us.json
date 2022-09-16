@@ -79,6 +79,7 @@
   "item.simplyswords.mjolnir": "Mjolnir",
   "item.simplyswords.emberblade": "Emberblade",
   "item.simplyswords.hearthflame": "Hearthflame",
+  "item.simplyswords.twisted_blade": "Twisted Blade",
 
 
   "item.simplyswords.mythicmetals_compat.adamantite.adamantite_claymore": "Adamantite Claymore",
@@ -367,6 +368,9 @@
   "item.simplyswords.emberiresworditem.tooltip2": "Chance on hit to cloak the wielder in flames, damaging them while granting strength",
   "item.simplyswords.volcanicfurysworditem.tooltip1": "Unique Effect: Volcanic Fury",
   "item.simplyswords.volcanicfurysworditem.tooltip2": "Chance on hit ignite your target and send them flying",
+  "item.simplyswords.ferocitysworditem.tooltip1": "Unique Effect: Ferocity",
+  "item.simplyswords.ferocitysworditem.tooltip2": "Chance on hit to increase your attack speed, stacking up to 20 times",
+  "item.simplyswords.ferocitysworditem.tooltip3": "Right click to consume all stacks gaining strength for a duration equal to the amount of stacks consumed",
 
   "item.simplyswords.levitationsworditem.tooltip1": "Runic Power: Float",
   "item.simplyswords.levitationsworditem.tooltip2": "Chance on hit to reverse the effects of gravity on your target",

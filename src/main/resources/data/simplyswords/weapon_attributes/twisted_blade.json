@@ -1,0 +1,67 @@
+{
+  "parent": "bettercombat:claymore",
+  "attributes" : {
+    "pose": "bettercombat:pose_two_handed_sword",
+    "attack_range": 3.5,
+    "category": "claymore",
+    "two_handed": true,
+    "attacks": [
+      {
+
+        "hitbox": "HORIZONTAL_PLANE",
+        "damage_multiplier": 0.75,
+        "angle": 150,
+        "upswing": 0.5,
+        "animation": "bettercombat:two_handed_slash_horizontal_left",
+        "swing_sound": {
+          "id": "bettercombat:claymore_swing"
+        }
+      },
+      {
+        "hitbox": "HORIZONTAL_PLANE",
+        "damage_multiplier": 0.75,
+        "angle": 150,
+        "upswing": 0.5,
+        "animation": "bettercombat:two_handed_slash_horizontal_right",
+        "swing_sound": {
+          "id": "bettercombat:claymore_swing"
+        }
+      },
+      {
+        "hitbox": "FORWARD_BOX",
+        "damage_multiplier": 1,
+        "angle": 0,
+        "upswing": 0.5,
+        "animation": "bettercombat:two_handed_stab_left",
+        "swing_sound": {
+          "id": "bettercombat:claymore_stab"
+        }
+      },
+      {
+        "hitbox": "FORWARD_BOX",
+        "damage_multiplier": 1.2,
+        "angle": 0,
+        "upswing": 0.5,
+        "animation": "bettercombat:two_handed_stab_left",
+        "swing_sound": {
+          "id": "bettercombat:claymore_stab"
+        }
+      },
+      {
+        "hitbox": "FORWARD_BOX",
+        "damage_multiplier": 1.4,
+        "angle": 0,
+        "upswing": 0.5,
+        "animation": "bettercombat:two_handed_stab_left",
+        "swing_sound": {
+          "id": "bettercombat:claymore_stab"
+        }
+      }
+    ]
+  }
+}
+
+
+
+
+
