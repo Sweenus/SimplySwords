@@ -1,11 +1,12 @@
 {
 	"credit": "Made by Sweenus using Blockbench",
 	"textures": {
-		"3": "simplyswords:item/blade_netherite",
+		"3": "simplyswords:item/blade_dark",
 		"4": "simplyswords:item/skull",
+		"5": "simplyswords:item/eye",
 		"7": "simplyswords:item/shield_base_woodgrain_2",
-		"8": "simplyswords:item/blade_axe_netherite",
-		"particle": "simplyswords:item/blade_netherite"
+		"8": "simplyswords:item/glow_blue_strip",
+		"particle": "simplyswords:item/blade_dark"
 	},
 	"elements": [
 		{
@@ -101,10 +102,10 @@
 			"from": [3.5, 20.25, 8],
 			"to": [7, 20.75, 9],
 			"faces": {
-				"north": {"uv": [14.78516, 1.25, 14.09505, 0.5], "rotation": 270, "texture": "#8"},
-				"east": {"uv": [14.75911, 1.25, 13.96484, 0.5], "rotation": 270, "texture": "#8"},
-				"south": {"uv": [15.15495, 1.25, 14.46484, 0.5], "rotation": 270, "texture": "#8"},
-				"west": {"uv": [14.78516, 1.25, 13.99089, 0.5], "rotation": 270, "texture": "#8"},
+				"north": {"uv": [13.41016, 6.625, 7.47005, 1.375], "rotation": 270, "texture": "#8"},
+				"east": {"uv": [13.38411, 6.625, 7.33984, 1.375], "rotation": 270, "texture": "#8"},
+				"south": {"uv": [13.77995, 6.625, 7.83984, 1.375], "rotation": 270, "texture": "#8"},
+				"west": {"uv": [13.41016, 6.625, 7.36589, 1.375], "rotation": 270, "texture": "#8"},
 				"up": {"uv": [1.52344, 5.09459, 1.50781, 4.8125], "texture": "#8"},
 				"down": {"uv": [0.83594, 7.13682, 0.75781, 6.79223], "texture": "#8"}
 			}
@@ -179,10 +180,10 @@
 			"to": [3.07989, 18.57786, 8.75],
 			"rotation": {"angle": 22.5, "axis": "z", "origin": [-2.29511, 21.82786, 9]},
 			"faces": {
-				"north": {"uv": [16, 10.75, 15.83333, 10.5], "rotation": 270, "texture": "#8"},
-				"east": {"uv": [15.95313, 10.75, 15.79167, 10.5], "rotation": 270, "texture": "#8"},
-				"south": {"uv": [15.91667, 10.75, 15.75, 10.5], "rotation": 270, "texture": "#8"},
-				"west": {"uv": [15.95833, 10.75, 15.79688, 10.5], "rotation": 270, "texture": "#8"},
+				"north": {"uv": [14.625, 14.875, 9.20833, 11.375], "rotation": 270, "texture": "#8"},
+				"east": {"uv": [14.57813, 14.875, 9.16667, 11.375], "rotation": 270, "texture": "#8"},
+				"south": {"uv": [14.54167, 14.875, 9.125, 11.375], "rotation": 270, "texture": "#8"},
+				"west": {"uv": [14.58333, 14.875, 9.17188, 11.375], "rotation": 270, "texture": "#8"},
 				"up": {"uv": [1.4375, 5.09966, 1.25, 4.80743], "texture": "#8"},
 				"down": {"uv": [0.75, 7.14189, 0.5, 6.78716], "texture": "#8"}
 			}
@@ -231,10 +232,10 @@
 			"to": [-4.53133, 17.754, 8.5],
 			"rotation": {"angle": 45, "axis": "z", "origin": [-4.03133, 19.129, 8.75]},
 			"faces": {
-				"north": {"uv": [15, 1.25, 14.16667, 0.5], "rotation": 270, "texture": "#8"},
-				"east": {"uv": [14.77214, 1.25, 13.95182, 0.5], "rotation": 270, "texture": "#8"},
-				"south": {"uv": [14.58333, 1.25, 13.75, 0.5], "rotation": 270, "texture": "#8"},
-				"west": {"uv": [14.79818, 1.25, 13.97786, 0.5], "rotation": 270, "texture": "#8"},
+				"north": {"uv": [13.625, 6.625, 7.54167, 1.375], "rotation": 270, "texture": "#8"},
+				"east": {"uv": [13.39714, 6.625, 7.32682, 1.375], "rotation": 270, "texture": "#8"},
+				"south": {"uv": [13.20833, 6.625, 7.125, 1.375], "rotation": 270, "texture": "#8"},
+				"west": {"uv": [13.42318, 6.625, 7.35286, 1.375], "rotation": 270, "texture": "#8"},
 				"up": {"uv": [1.4375, 5.10473, 1.25, 4.80236], "texture": "#8"},
 				"down": {"uv": [0.75, 7.14696, 0.5, 6.78209], "texture": "#8"}
 			}
@@ -283,10 +284,10 @@
 			"to": [-7.78133, 17.504, 8.5],
 			"rotation": {"angle": 45, "axis": "z", "origin": [-4.03133, 19.129, 8.75]},
 			"faces": {
-				"north": {"uv": [15, 1.25, 14.16667, 0.5], "rotation": 270, "texture": "#8"},
-				"east": {"uv": [14.77214, 1.25, 13.95182, 0.5], "rotation": 270, "texture": "#8"},
-				"south": {"uv": [14.58333, 1.25, 13.75, 0.5], "rotation": 270, "texture": "#8"},
-				"west": {"uv": [14.79818, 1.25, 13.97786, 0.5], "rotation": 270, "texture": "#8"},
+				"north": {"uv": [13.625, 6.625, 7.54167, 1.375], "rotation": 270, "texture": "#8"},
+				"east": {"uv": [13.39714, 6.625, 7.32682, 1.375], "rotation": 270, "texture": "#8"},
+				"south": {"uv": [13.20833, 6.625, 7.125, 1.375], "rotation": 270, "texture": "#8"},
+				"west": {"uv": [13.42318, 6.625, 7.35286, 1.375], "rotation": 270, "texture": "#8"},
 				"up": {"uv": [1.4375, 5.10473, 1.25, 4.80236], "texture": "#8"},
 				"down": {"uv": [0.75, 7.14696, 0.5, 6.78209], "texture": "#8"}
 			}
@@ -3608,6 +3609,45 @@
 				"up": {"uv": [4.25, 0.5, 4.5, 0.75], "texture": "#3"},
 				"down": {"uv": [4.25, 0.5, 4.5, 0.75], "texture": "#3"}
 			}
+		},
+		{
+			"from": [7, 20, 5.75],
+			"to": [7.5, 20.5, 6.25],
+			"rotation": {"angle": -22.5, "axis": "x", "origin": [7.75, 20, 6.5]},
+			"faces": {
+				"north": {"uv": [1.5, 3, 4, 5.5], "texture": "#5"},
+				"east": {"uv": [6, 1, 8, 2], "texture": "#5"},
+				"south": {"uv": [4, 12, 4.5, 13], "texture": "#5"},
+				"west": {"uv": [6, 0, 8, 1], "texture": "#5"},
+				"up": {"uv": [7.5, 7, 7, 5], "rotation": 180, "texture": "#5"},
+				"down": {"uv": [6.5, 7, 6, 9], "rotation": 180, "texture": "#5"}
+			}
+		},
+		{
+			"from": [11, 20.25, 9.75],
+			"to": [11.5, 20.75, 10.25],
+			"rotation": {"angle": 22.5, "axis": "y", "origin": [11.75, 20.25, 9.5]},
+			"faces": {
+				"north": {"uv": [4, 12, 4.5, 13], "texture": "#5"},
+				"east": {"uv": [6, 0, 8, 1], "texture": "#5"},
+				"south": {"uv": [1.5, 3, 4, 5.5], "texture": "#5"},
+				"west": {"uv": [6, 1, 8, 2], "texture": "#5"},
+				"up": {"uv": [7.5, 7, 7, 5], "texture": "#5"},
+				"down": {"uv": [6.5, 7, 6, 9], "texture": "#5"}
+			}
+		},
+		{
+			"from": [12, 20.25, 9.75],
+			"to": [12.5, 20.75, 10.25],
+			"rotation": {"angle": 22.5, "axis": "y", "origin": [11.75, 20.25, 9.5]},
+			"faces": {
+				"north": {"uv": [4, 12, 4.5, 13], "texture": "#5"},
+				"east": {"uv": [6, 0, 8, 1], "texture": "#5"},
+				"south": {"uv": [1.5, 3, 4, 5.5], "texture": "#5"},
+				"west": {"uv": [6, 1, 8, 2], "texture": "#5"},
+				"up": {"uv": [7.5, 7, 7, 5], "texture": "#5"},
+				"down": {"uv": [6.5, 7, 6, 9], "texture": "#5"}
+			}
 		}
 	],
 	"display": {
@@ -4090,6 +4130,14 @@
 									"children": [274, 275, 276, 277]
 								}
 							]
+						},
+						{
+							"name": "eyeball",
+							"origin": [8, 8, 8],
+							"color": 0,
+							"nbt": "{}",
+							"armAnimationEnabled": false,
+							"children": [278, 279, 280]
 						}
 					]
 				}

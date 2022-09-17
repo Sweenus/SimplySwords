@@ -51,7 +51,7 @@ public class EmberIreSwordItem extends SwordItem {
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
 
         if (!user.world.isClient()) {
-            if (user.hasStatusEffect(StatusEffects.STRENGTH)) {
+            if (user.hasStatusEffect(StatusEffects.STRENGTH) && user.isOnFire()) {
 
                 ServerWorld sworld = (ServerWorld)user.world;
                 BlockPos position = (user.getBlockPos());

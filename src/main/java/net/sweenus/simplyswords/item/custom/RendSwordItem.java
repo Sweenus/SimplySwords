@@ -43,11 +43,22 @@ public class RendSwordItem extends SwordItem {
 
                 int a = (target.getStatusEffect(StatusEffects.WEAKNESS).getAmplifier() + 1);
 
-                if ((target.getStatusEffect(StatusEffects.WEAKNESS).getAmplifier() <= 9)) {
+                if ((target.getStatusEffect(StatusEffects.WEAKNESS).getAmplifier() <= 0)) {
                     target.addStatusEffect(new StatusEffectInstance(StatusEffects.WEAKNESS, fduration, a), attacker);
                 }
             } else {
                 target.addStatusEffect(new StatusEffectInstance(StatusEffects.WEAKNESS, fduration, 1), attacker);
+            }
+
+            if (target.hasStatusEffect(StatusEffects.SLOWNESS)) {
+
+                int a = (target.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier() + 1);
+
+                if ((target.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier() <= 7)) {
+                    target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, fduration, a), attacker);
+                }
+            } else {
+                target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, fduration, 1), attacker);
             }
         }
 
@@ -70,12 +81,12 @@ public class RendSwordItem extends SwordItem {
                     if (ee instanceof LivingEntity) {
                         LivingEntity le = (LivingEntity) ee;
 
-                         if (le.hasStatusEffect(StatusEffects.WEAKNESS)) {
-                             user.heal(le.getStatusEffect(StatusEffects.WEAKNESS).getAmplifier());
-                             le.damage(DamageSource.FREEZE, le.getStatusEffect(StatusEffects.WEAKNESS).getAmplifier());
-                            le.removeStatusEffect(StatusEffects.WEAKNESS);
+                         if (le.hasStatusEffect(StatusEffects.SLOWNESS) && le.hasStatusEffect(StatusEffects.WEAKNESS)) {
+                             user.heal(le.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier() / 2);
+                             le.damage(DamageSource.FREEZE, le.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier() * 2);
+                             le.removeStatusEffect(StatusEffects.WEAKNESS);
+                             le.removeStatusEffect(StatusEffects.SLOWNESS);
                              world.playSoundFromEntity (null, ee, SimplySwords.EVENT_OMEN_ONE , SoundCategory.BLOCKS, 0.1f, 2f);
-                             //world.playSound(null, ee.getBlockPos(), SimplySwords.EVENT_OMEN_TWO , SoundCategory.BLOCKS, 0.05f, 1f);
                          }
                     }
                 }

@@ -5,7 +5,7 @@
       "item": "minecraft:stick"
     },
     "X": {
-      "item": "minecraft:copper_ingot"
+      "item": "mythicmetals:copper_ingot"
     }
   },
   "pattern": [

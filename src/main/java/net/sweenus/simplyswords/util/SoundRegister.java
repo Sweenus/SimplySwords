@@ -18,9 +18,7 @@ public class SoundRegister {
             "swing_woosh",
             "throw_mjolnir",
             "throw_mjolnir_short",
-            "throw_mjolnir_long",
-            "swing_omen_one",
-            "swing_omen_two"
+            "throw_mjolnir_long"
     );
 
     public static void registerSounds() {

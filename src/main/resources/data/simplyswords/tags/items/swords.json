@@ -76,6 +76,7 @@
     "simplyswords:runic_greathammer",
     "simplyswords:runic_greataxe",
     "simplyswords:runic_rapier",
+    "simplyswords:runic_scythe",
     "simplyswords:toxic_longsword",
     "simplyswords:emberblade",
     "simplyswords:hearthflame",
@@ -112,6 +113,7 @@
     "simplyswords:mythicmetals_compat/aquarium/aquarium_greathammer",
     "simplyswords:mythicmetals_compat/aquarium/aquarium_greataxe",
     "simplyswords:mythicmetals_compat/aquarium/aquarium_chakram",
+    "simplyswords:mythicmetals_compat/aquarium/aquarium_scythe",
 
     "simplyswords:mythicmetals_compat/banglum/banglum_claymore",
     "simplyswords:mythicmetals_compat/banglum/banglum_cutlass",
@@ -126,6 +128,7 @@
     "simplyswords:mythicmetals_compat/banglum/banglum_greathammer",
     "simplyswords:mythicmetals_compat/banglum/banglum_greataxe",
     "simplyswords:mythicmetals_compat/banglum/banglum_chakram",
+    "simplyswords:mythicmetals_compat/banglum/banglum_scythe",
 
     "simplyswords:mythicmetals_compat/carmot/carmot_claymore",
     "simplyswords:mythicmetals_compat/carmot/carmot_cutlass",
@@ -140,6 +143,7 @@
     "simplyswords:mythicmetals_compat/carmot/carmot_greathammer",
     "simplyswords:mythicmetals_compat/carmot/carmot_greataxe",
     "simplyswords:mythicmetals_compat/carmot/carmot_chakram",
+    "simplyswords:mythicmetals_compat/carmot/carmot_scythe",
 
     "simplyswords:mythicmetals_compat/kyber/kyber_claymore",
     "simplyswords:mythicmetals_compat/kyber/kyber_cutlass",
@@ -154,6 +158,7 @@
     "simplyswords:mythicmetals_compat/kyber/kyber_greathammer",
     "simplyswords:mythicmetals_compat/kyber/kyber_greataxe",
     "simplyswords:mythicmetals_compat/kyber/kyber_chakram",
+    "simplyswords:mythicmetals_compat/kyber/kyber_scythe",
 
     "simplyswords:mythicmetals_compat/mythril/mythril_claymore",
     "simplyswords:mythicmetals_compat/mythril/mythril_cutlass",
@@ -168,6 +173,7 @@
     "simplyswords:mythicmetals_compat/mythril/mythril_greathammer",
     "simplyswords:mythicmetals_compat/mythril/mythril_greataxe",
     "simplyswords:mythicmetals_compat/mythril/mythril_chakram",
+    "simplyswords:mythicmetals_compat/mythril/mythril_scythe",
 
     "simplyswords:mythicmetals_compat/orichalcum/orichalcum_claymore",
     "simplyswords:mythicmetals_compat/orichalcum/orichalcum_cutlass",
@@ -182,6 +188,7 @@
     "simplyswords:mythicmetals_compat/orichalcum/orichalcum_greathammer",
     "simplyswords:mythicmetals_compat/orichalcum/orichalcum_greataxe",
     "simplyswords:mythicmetals_compat/orichalcum/orichalcum_chakram",
+    "simplyswords:mythicmetals_compat/orichalcum/orichalcum_scythe",
 
     "simplyswords:mythicmetals_compat/osmium/osmium_claymore",
     "simplyswords:mythicmetals_compat/osmium/osmium_cutlass",
@@ -196,6 +203,7 @@
     "simplyswords:mythicmetals_compat/osmium/osmium_greathammer",
     "simplyswords:mythicmetals_compat/osmium/osmium_greataxe",
     "simplyswords:mythicmetals_compat/osmium/osmium_chakram",
+    "simplyswords:mythicmetals_compat/osmium/osmium_scythe",
 
     "simplyswords:mythicmetals_compat/prometheum/prometheum_claymore",
     "simplyswords:mythicmetals_compat/prometheum/prometheum_cutlass",
@@ -210,6 +218,7 @@
     "simplyswords:mythicmetals_compat/prometheum/prometheum_greathammer",
     "simplyswords:mythicmetals_compat/prometheum/prometheum_greataxe",
     "simplyswords:mythicmetals_compat/prometheum/prometheum_chakram",
+    "simplyswords:mythicmetals_compat/prometheum/prometheum_scythe",
 
     "simplyswords:mythicmetals_compat/quadrillum/quadrillum_claymore",
     "simplyswords:mythicmetals_compat/quadrillum/quadrillum_cutlass",
@@ -224,6 +233,7 @@
     "simplyswords:mythicmetals_compat/quadrillum/quadrillum_greathammer",
     "simplyswords:mythicmetals_compat/quadrillum/quadrillum_greataxe",
     "simplyswords:mythicmetals_compat/quadrillum/quadrillum_chakram",
+    "simplyswords:mythicmetals_compat/quadrillum/quadrillum_scythe",
 
     "simplyswords:mythicmetals_compat/runite/runite_claymore",
     "simplyswords:mythicmetals_compat/runite/runite_cutlass",
@@ -238,6 +248,7 @@
     "simplyswords:mythicmetals_compat/runite/runite_greathammer",
     "simplyswords:mythicmetals_compat/runite/runite_greataxe",
     "simplyswords:mythicmetals_compat/runite/runite_chakram",
+    "simplyswords:mythicmetals_compat/runite/runite_scythe",
 
     "simplyswords:mythicmetals_compat/star_platinum/star_platinum_claymore",
     "simplyswords:mythicmetals_compat/star_platinum/star_platinum_cutlass",
@@ -252,6 +263,7 @@
     "simplyswords:mythicmetals_compat/star_platinum/star_platinum_greathammer",
     "simplyswords:mythicmetals_compat/star_platinum/star_platinum_greataxe",
     "simplyswords:mythicmetals_compat/star_platinum/star_platinum_chakram",
+    "simplyswords:mythicmetals_compat/star_platinum/star_platinum_scythe",
 
     "simplyswords:mythicmetals_compat/bronze/bronze_claymore",
     "simplyswords:mythicmetals_compat/bronze/bronze_cutlass",
@@ -266,6 +278,7 @@
     "simplyswords:mythicmetals_compat/bronze/bronze_greathammer",
     "simplyswords:mythicmetals_compat/bronze/bronze_greataxe",
     "simplyswords:mythicmetals_compat/bronze/bronze_chakram",
+    "simplyswords:mythicmetals_compat/bronze/bronze_scythe",
 
     "simplyswords:mythicmetals_compat/steel/steel_claymore",
     "simplyswords:mythicmetals_compat/steel/steel_cutlass",
@@ -280,6 +293,7 @@
     "simplyswords:mythicmetals_compat/steel/steel_greathammer",
     "simplyswords:mythicmetals_compat/steel/steel_greataxe",
     "simplyswords:mythicmetals_compat/steel/steel_chakram",
+    "simplyswords:mythicmetals_compat/steel/steel_scythe",
 
     "simplyswords:mythicmetals_compat/palladium/palladium_claymore",
     "simplyswords:mythicmetals_compat/palladium/palladium_cutlass",
@@ -294,6 +308,7 @@
     "simplyswords:mythicmetals_compat/palladium/palladium_greathammer",
     "simplyswords:mythicmetals_compat/palladium/palladium_greataxe",
     "simplyswords:mythicmetals_compat/palladium/palladium_chakram",
+    "simplyswords:mythicmetals_compat/palladium/palladium_scythe",
 
     "simplyswords:mythicmetals_compat/stormyx/stormyx_claymore",
     "simplyswords:mythicmetals_compat/stormyx/stormyx_cutlass",
@@ -308,6 +323,7 @@
     "simplyswords:mythicmetals_compat/stormyx/stormyx_greathammer",
     "simplyswords:mythicmetals_compat/stormyx/stormyx_greataxe",
     "simplyswords:mythicmetals_compat/stormyx/stormyx_chakram",
+    "simplyswords:mythicmetals_compat/stormyx/stormyx_scythe",
 
     "simplyswords:mythicmetals_compat/celestium/celestium_claymore",
     "simplyswords:mythicmetals_compat/celestium/celestium_cutlass",
@@ -322,6 +338,7 @@
     "simplyswords:mythicmetals_compat/celestium/celestium_greathammer",
     "simplyswords:mythicmetals_compat/celestium/celestium_greataxe",
     "simplyswords:mythicmetals_compat/celestium/celestium_chakram",
+    "simplyswords:mythicmetals_compat/celestium/celestium_scythe",
 
     "simplyswords:mythicmetals_compat/metallurgium/metallurgium_claymore",
     "simplyswords:mythicmetals_compat/metallurgium/metallurgium_cutlass",
@@ -336,6 +353,7 @@
     "simplyswords:mythicmetals_compat/metallurgium/metallurgium_greathammer",
     "simplyswords:mythicmetals_compat/metallurgium/metallurgium_greataxe",
     "simplyswords:mythicmetals_compat/metallurgium/metallurgium_chakram",
+    "simplyswords:mythicmetals_compat/metallurgium/metallurgium_scythe",
 
     "simplyswords:mythicmetals_compat/copper/copper_longsword",
     "simplyswords:mythicmetals_compat/durasteel/durasteel_longsword"

@@ -445,6 +445,10 @@ public class ModItems {
             new WildfireSwordItem(ToolMaterials.NETHERITE, 8, -3.3f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
+    public static final Item RUNIC_SCYTHE = registerItem( "runic_scythe",
+            new LevitationSwordItem(ToolMaterials.NETHERITE, 4, -2.7f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+
 //SPECIAL
     public static final Item BRIMSTONE_CLAYMORE = registerItem( "brimstone_claymore",
             new FireSwordItem(ToolMaterials.NETHERITE, 6, -2.8f,

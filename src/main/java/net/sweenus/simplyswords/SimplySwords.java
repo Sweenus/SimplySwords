@@ -69,6 +69,8 @@ public class SimplySwords implements ModInitializer {
 
         SoundRegister.registerSounds();
 
+        Registry.register(Registry.SOUND_EVENT, SimplySwords.SWING_OMEN_ONE, EVENT_OMEN_ONE);
+        Registry.register(Registry.SOUND_EVENT, SimplySwords.SWING_OMEN_TWO, EVENT_OMEN_TWO);
 
 
 
