@@ -80,7 +80,7 @@
     "simplyswords:toxic_longsword",
     "simplyswords:emberblade",
     "simplyswords:hearthflame",
-    "simplyswords:jagged_blade",
+    "simplyswords:twisted_blade",
     "simplyswords:soulrender",
     "simplyswords:mjolnir",
 
@@ -356,6 +356,6 @@
     "simplyswords:mythicmetals_compat/metallurgium/metallurgium_scythe",
 
     "simplyswords:mythicmetals_compat/copper/copper_longsword",
-    "simplyswords:mythicmetals_compat/durasteel/durasteel_longsword"
+    "simplyswords:mythicmetals_compat/durasteel/durasteel_greathammer"
   ]
 }
