@@ -22,6 +22,12 @@ public class SimplySwords implements ModInitializer {
     public static final String MOD_ID = "simplyswords";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
+    //Sound
+    public static final Identifier SWING_OMEN_ONE = new Identifier("simplyswords:swing_omen_one");
+    public static SoundEvent EVENT_OMEN_ONE = new SoundEvent(SWING_OMEN_ONE);
+    public static final Identifier SWING_OMEN_TWO = new Identifier("simplyswords:swing_omen_two");
+    public static SoundEvent EVENT_OMEN_TWO = new SoundEvent(SWING_OMEN_TWO);
+
     @Override
     public void onInitialize() {
 
@@ -62,6 +68,8 @@ public class SimplySwords implements ModInitializer {
         //SOUND
 
         SoundRegister.registerSounds();
+
+
 
 
 

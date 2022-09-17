@@ -14,6 +14,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.SwordItem;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
@@ -60,9 +62,12 @@ public class EmberIreSwordItem extends SwordItem {
                 FireballEntity fireball = new FireballEntity(EntityType.FIREBALL, (ServerWorld) world);
                 fireball.updatePosition(newPos.getX(), (user.getY()), newPos.getZ());
                 fireball.setOwner(user);
+                user.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, 20, 4), user);
+                user.addStatusEffect(new StatusEffectInstance(StatusEffects.FIRE_RESISTANCE, 60, 2), user);
                 sworld.spawnEntity(fireball);
                 fireball.setVelocity(rotation);
                 user.removeStatusEffect(StatusEffects.STRENGTH);
+                world.playSound(null, position, SoundEvents.BLOCK_LAVA_POP, SoundCategory.BLOCKS, 0.2f, 1.5f);
                 user.extinguish();
             }
         }

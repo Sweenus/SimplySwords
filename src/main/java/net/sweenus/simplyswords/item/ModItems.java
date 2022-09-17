@@ -2,7 +2,6 @@ package net.sweenus.simplyswords.item;
 
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.minecraft.item.Item;
-import net.minecraft.item.ShieldItem;
 import net.minecraft.item.SwordItem;
 import net.minecraft.item.ToolMaterials;
 import net.minecraft.util.Identifier;
@@ -487,7 +486,11 @@ public class ModItems {
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
     public static final Item TWISTED_BLADE = registerItem( "twisted_blade",
-            new HasteSwordItem(ToolMaterials.NETHERITE, 3, -2.8f,
+            new HasteSwordItem(ToolMaterials.NETHERITE, 4, -2.6f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+
+    public static final Item SOULRENDER = registerItem( "soulrender",
+            new RendSwordItem(ToolMaterials.NETHERITE, 4, -2.4f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
 

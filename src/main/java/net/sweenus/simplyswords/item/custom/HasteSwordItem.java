@@ -10,6 +10,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
 import net.minecraft.item.SwordItem;
 import net.minecraft.item.ToolMaterial;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
@@ -33,13 +35,14 @@ public class HasteSwordItem extends SwordItem {
 
 
         if (attacker.getRandom().nextInt(100) <= fhitchance) {
-            attacker.setOnFireFor(fduration / 20);
             if (attacker.hasStatusEffect(StatusEffects.HASTE)) {
 
                 int a = (attacker.getStatusEffect(StatusEffects.HASTE).getAmplifier() + 1);
 
-                if ((attacker.getStatusEffect(StatusEffects.HASTE).getAmplifier() <= 19)) {
+                if ((attacker.getStatusEffect(StatusEffects.HASTE).getAmplifier() <= 14)) {
                     attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, fduration, a), attacker);
+                } else {
+                    attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, fduration, a - 1), attacker);
                 }
             } else {
                 attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, fduration, 1), attacker);
@@ -57,6 +60,7 @@ public class HasteSwordItem extends SwordItem {
             int a = (user.getStatusEffect(StatusEffects.HASTE).getAmplifier() * 20);
             user.addStatusEffect(new StatusEffectInstance(StatusEffects.STRENGTH, a, 1), user);
             user.removeStatusEffect(StatusEffects.HASTE);
+            world.playSound(null, user.getBlockPos(), SoundEvents.BLOCK_MEDIUM_AMETHYST_BUD_BREAK, SoundCategory.BLOCKS, 1f, 1.5f);
         }
         return super.use(world,user,hand);
     }

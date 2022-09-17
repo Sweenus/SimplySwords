@@ -80,6 +80,7 @@
   "item.simplyswords.emberblade": "Emberblade",
   "item.simplyswords.hearthflame": "Hearthflame",
   "item.simplyswords.twisted_blade": "Twisted Blade",
+  "item.simplyswords.soulrender": "Soulrender",
 
 
   "item.simplyswords.mythicmetals_compat.adamantite.adamantite_claymore": "Adamantite Claymore",
@@ -371,8 +372,12 @@
   "item.simplyswords.volcanicfurysworditem.tooltip1": "Unique Effect: Volcanic Fury",
   "item.simplyswords.volcanicfurysworditem.tooltip2": "Chance on hit ignite your target and send them flying",
   "item.simplyswords.ferocitysworditem.tooltip1": "Unique Effect: Ferocity",
-  "item.simplyswords.ferocitysworditem.tooltip2": "Chance on hit to increase your attack speed, stacking up to 20 times",
-  "item.simplyswords.ferocitysworditem.tooltip3": "Consume all stacks gaining strength for a duration equal to the amount of stacks consumed",
+  "item.simplyswords.ferocitysworditem.tooltip2": "Chance on hit to increase your attack speed, stacking up to 15 times",
+  "item.simplyswords.ferocitysworditem.tooltip3": "Consume all stacks, gaining strength for a duration equal to the amount of stacks consumed",
+  "item.simplyswords.rendsworditem.tooltip1": "Unique Effect: Soul Rend",
+  "item.simplyswords.rendsworditem.tooltip2": "Chance on hit to inflict stacking weakness",
+  "item.simplyswords.rendsworditem.tooltip3": "Consume all stacks of weakness from surrounding foes, damaging them and healing you equal to the stacks",
+
 
   "item.simplyswords.levitationsworditem.tooltip1": "Runic Power: Float",
   "item.simplyswords.levitationsworditem.tooltip2": "Chance on hit to reverse the effects of gravity on your target",

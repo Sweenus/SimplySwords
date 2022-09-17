@@ -59,8 +59,10 @@ public class SimplySwordsConfig {
         INT_OPTIONS.put("volcanic_fury_chance", 25);
         INT_OPTIONS.put("ember_ire_duration", 150);
         INT_OPTIONS.put("ember_ire_chance", 5);
-        INT_OPTIONS.put("ferocity_duration", 150);
-        INT_OPTIONS.put("ferocity_chance", 35);
+        INT_OPTIONS.put("ferocity_duration", 100);
+        INT_OPTIONS.put("ferocity_chance", 75);
+        INT_OPTIONS.put("soulrend_duration", 500);
+        INT_OPTIONS.put("soulrend_chance", 85);
 
 
         FLOAT_OPTIONS.put("standard_loot_table_weight", 0.08f);
