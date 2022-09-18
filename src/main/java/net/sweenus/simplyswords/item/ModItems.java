@@ -490,7 +490,7 @@ public class ModItems {
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
     public static final Item SOULKEEPER = registerItem( "soulkeeper",
-            new VolcanicFurySwordItem(ToolMaterials.NETHERITE, 8, -2f,
+            new SoulSwordItem(ToolMaterials.NETHERITE, 8, -2.9f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
     public static final Item TWISTED_BLADE = registerItem( "twisted_blade",

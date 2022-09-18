@@ -416,6 +416,9 @@
   "item.simplyswords.rendsworditem.tooltip1": "Unique Effect: Soul Rend",
   "item.simplyswords.rendsworditem.tooltip2": "Chance on hit to inflict stacking weakening effects",
   "item.simplyswords.rendsworditem.tooltip3": "Consume all stacks from surrounding foes, damaging them and healing you relative to the stacks",
+  "item.simplyswords.soulsworditem.tooltip1": "Unique Effect: Soul Meld",
+  "item.simplyswords.soulsworditem.tooltip2": "Chance on hit to absorb nearby souls, toughening and slowing the attack speed of the wielder",
+  "item.simplyswords.soulsworditem.tooltip3": "Realease the souls, transferring the attack speed debuff to nearby foes and regenerating the wielder",
 
 
   "item.simplyswords.levitationsworditem.tooltip1": "Runic Power: Float",

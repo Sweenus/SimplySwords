@@ -63,6 +63,8 @@ public class SimplySwordsConfig {
         INT_OPTIONS.put("ferocity_chance", 75);
         INT_OPTIONS.put("soulrend_duration", 500);
         INT_OPTIONS.put("soulrend_chance", 85);
+        INT_OPTIONS.put("soulmeld_duration", 250);
+        INT_OPTIONS.put("soulmeld_chance", 75);
 
 
         FLOAT_OPTIONS.put("standard_loot_table_weight", 0.08f);
