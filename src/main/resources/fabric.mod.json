@@ -34,10 +34,10 @@
     "java": ">=17"
   },
   "suggests": {
-    "mythicmetals": "mythicmetals"
+    "mythicmetals": ">=0.15.2"
   },
   "recommends": {
-    "bettercombat": "bettercombat"
+    "bettercombat": ">=1.3.2"
   },
 
   "custom": {
