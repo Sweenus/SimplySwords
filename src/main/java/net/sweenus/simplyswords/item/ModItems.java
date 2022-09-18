@@ -489,8 +489,16 @@ public class ModItems {
             new VolcanicFurySwordItem(ToolMaterials.NETHERITE, 8, -3.3f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
+    public static final Item SOULKEEPER = registerItem( "soulkeeper",
+            new VolcanicFurySwordItem(ToolMaterials.NETHERITE, 8, -2f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+
     public static final Item TWISTED_BLADE = registerItem( "twisted_blade",
             new HasteSwordItem(ToolMaterials.NETHERITE, 4, -2.6f,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+
+    public static final Item TWILIGHT = registerItem( "twilight",
+            new HasteSwordItem(ToolMaterials.NETHERITE, 4, -3.2f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
     public static final Item SOULRENDER = registerItem( "soulrender",

@@ -36,10 +36,8 @@ public class FireSwordItem extends SwordItem {
     @Override
     public void appendTooltip(ItemStack itemStack, World world, List<Text> tooltip, TooltipContext tooltipContext) {
 
-        // default white text
         tooltip.add(Text.translatable("item.simplyswords.firesworditem.tooltip1").formatted(Formatting.GOLD));
 
-        // formatted red text
         tooltip.add(Text.translatable("item.simplyswords.firesworditem.tooltip2"));
     }
 

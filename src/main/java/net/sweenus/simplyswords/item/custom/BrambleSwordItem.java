@@ -53,10 +53,8 @@ public class BrambleSwordItem extends SwordItem {
     @Override
     public void appendTooltip(ItemStack itemStack, World world, List<Text> tooltip, TooltipContext tooltipContext) {
 
-        // default white text
         tooltip.add(Text.translatable("item.simplyswords.bramblesworditem.tooltip1").formatted(Formatting.GOLD));
 
-        // formatted red text
         tooltip.add(Text.translatable("item.simplyswords.bramblesworditem.tooltip2"));
     }
 

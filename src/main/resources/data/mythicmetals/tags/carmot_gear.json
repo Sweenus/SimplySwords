@@ -1,0 +1,21 @@
+{
+  "replace": false,
+  "values": [
+
+    "mythicmetals:mythicmetals_compat/carmot/carmot_claymore",
+    "mythicmetals:mythicmetals_compat/carmot/carmot_cutlass",
+    "mythicmetals:mythicmetals_compat/carmot/carmot_glaive",
+    "mythicmetals:mythicmetals_compat/carmot/carmot_katana",
+    "mythicmetals:mythicmetals_compat/carmot/carmot_longsword",
+    "mythicmetals:mythicmetals_compat/carmot/carmot_rapier",
+    "mythicmetals:mythicmetals_compat/carmot/carmot_sai",
+    "mythicmetals:mythicmetals_compat/carmot/carmot_spear",
+    "mythicmetals:mythicmetals_compat/carmot/carmot_twinblade",
+    "mythicmetals:mythicmetals_compat/carmot/carmot_warglaive",
+    "mythicmetals:mythicmetals_compat/carmot/carmot_greathammer",
+    "mythicmetals:mythicmetals_compat/carmot/carmot_greataxe",
+    "mythicmetals:mythicmetals_compat/carmot/carmot_chakram",
+    "mythicmetals:mythicmetals_compat/carmot/carmot_scythe"
+
+  ]
+}

@@ -121,6 +121,8 @@ public class ModLootTableModifiers {
                         .with(ItemEntry.builder(ModItems.HEARTHFLAME))
                         .with(ItemEntry.builder(ModItems.TWISTED_BLADE))
                         .with(ItemEntry.builder(ModItems.SOULRENDER))
+                        .with(ItemEntry.builder(ModItems.TWILIGHT))
+                        .with(ItemEntry.builder(ModItems.SOULKEEPER))
                         .with(ItemEntry.builder(ModItems.BRIMSTONE_CLAYMORE));
                 tableBuilder.pool(upool);
 

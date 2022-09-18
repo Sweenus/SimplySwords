@@ -37,7 +37,7 @@
     "mythicmetals": "mythicmetals"
   },
   "recommends": {
-    "mythicmetals": "bettercombat"
+    "bettercombat": "bettercombat"
   },
 
   "custom": {
