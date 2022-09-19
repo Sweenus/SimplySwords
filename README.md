@@ -1,4 +1,4 @@
-![enter image description here](https://img.shields.io/badge/FABRIC-REQUIRED-orange?style=for-the-badge&logo=)![enter image description here](https://img.shields.io/badge/ENVIRONMENT-CLIENT%20&%20SERVER-orange?style=for-the-badge&logo=)
+![enter image description here](https://img.shields.io/badge/ENVIRONMENT-CLIENT%20&%20SERVER-orange?style=for-the-badge&logo=)
 ![Discord](https://img.shields.io/discord/1020119045925773382?color=5865f2&label=%20&logo=Discord&logoColor=ffffff&style=for-the-badge)
 
 ![enter image description here](https://cdn.modrinth.com/data/bK3Ubu9p/images/0dd3d1284fa65eace85ee94c69306b6ce2d70437.png)
@@ -12,21 +12,21 @@
 </div>
 
 
-![enter image description here](https://media.forgecdn.net/attachments/497/383/weapon_types.png)
+![enter image description here](https://cdn.modrinth.com/data/bK3Ubu9p/images/fe3bcc2e75c3addfb586dda284caf3d761ca5867.png)
 
-![enter image description here](https://media.forgecdn.net/attachments/497/390/runic_variants_frame.gif)
+![enter image description here](https://cdn.modrinth.com/data/bK3Ubu9p/images/5bef27477683de3b0957ebb1b02ca0d12a58973b.png)
 
-![enter image description here](https://cdn.modrinth.com/data/bK3Ubu9p/images/81a6fb78cbddd92d45c67885ea258e907f369b4a.png)
+![enter image description here](https://cdn.modrinth.com/data/bK3Ubu9p/images/89c7cd515b834a0dcd6bcfd1d25a02bd7397ea12.png)
 
-![enter image description here](https://media.forgecdn.net/attachments/497/385/storms_edge_frame.gif)
+![enter image description here](https://cdn.modrinth.com/data/bK3Ubu9p/images/4c6012de8437af9056e7b9921cb6452ce045de82.gif)
 
-![enter image description here](https://media.forgecdn.net/attachments/497/388/soulrend_frame.jpg)
+![enter image description here](https://cdn.modrinth.com/data/bK3Ubu9p/images/01bcec1ea6fc975e6ca31a2e04de3bf5e9ff2339.jpeg)
 
-![enter image description here](https://media.forgecdn.net/attachments/497/405/emberblade_frame.jpg)
+![enter image description here](https://cdn.modrinth.com/data/bK3Ubu9p/images/085e6143d0749caf803b3cca794aea54f80fea0c.jpeg)
 
-![enter image description here](https://media.forgecdn.net/attachments/497/406/bramblethorn_frame.gif)
+![enter image description here](https://cdn.modrinth.com/data/bK3Ubu9p/images/15fd24f913da9bac5e408a3b1c8e56456f0864e6.gif)
 
-![enter image description here](https://media.forgecdn.net/attachments/497/409/mjolnir_frame.jpg)
+![enter image description here](https://cdn.modrinth.com/data/bK3Ubu9p/images/7f8412146b3b5792c9c9aaecb0d43849a04ef977.jpeg)
 
 
 
