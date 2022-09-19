@@ -7,9 +7,6 @@
 
 ## Built-in support for  [Better Combat by Daedelus](https://modrinth.com/mod/better-combat).
 
-<div style="text-align: center;">
-<iframe width="560" height="315" src="https://www.youtube.com/embed/5aGU8j2wqM8" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-</div>
 
 
 ![enter image description here](https://cdn.modrinth.com/data/bK3Ubu9p/images/fe3bcc2e75c3addfb586dda284caf3d761ca5867.png)
