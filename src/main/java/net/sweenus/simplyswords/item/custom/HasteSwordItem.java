@@ -59,6 +59,7 @@ public class HasteSwordItem extends SwordItem {
 
             int a = (user.getStatusEffect(StatusEffects.HASTE).getAmplifier() * 20);
             user.addStatusEffect(new StatusEffectInstance(StatusEffects.STRENGTH, a, 1), user);
+            user.swingHand(hand);
             user.removeStatusEffect(StatusEffects.HASTE);
             world.playSound(null, user.getBlockPos(), SoundEvents.BLOCK_MEDIUM_AMETHYST_BUD_BREAK, SoundCategory.BLOCKS, 1f, 1.5f);
         }
