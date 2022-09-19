@@ -498,7 +498,7 @@ public class ModItems {
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
     public static final Item TWILIGHT = registerItem( "twilight",
-            new GravSwordItem(ToolMaterials.NETHERITE, 4, -3.2f,
+            new GravSwordItem(ToolMaterials.NETHERITE, 4, -2.7f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
     public static final Item SOULRENDER = registerItem( "soulrender",

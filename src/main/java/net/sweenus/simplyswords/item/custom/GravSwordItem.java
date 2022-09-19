@@ -1,6 +1,7 @@
 package net.sweenus.simplyswords.item.custom;
 
 
+import net.minecraft.block.BlockState;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -18,7 +19,9 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
@@ -34,33 +37,35 @@ public class GravSwordItem extends SwordItem {
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         int fhitchance = SimplySwordsConfig.getIntValue("gravity_chance");
         int fduration = SimplySwordsConfig.getIntValue("gravity_duration");
+        attacker.setVelocity(attacker.getRotationVector().multiply(+1));
+        attacker.velocityModified = true;
 
 
         if (attacker.getRandom().nextInt(100) <= fhitchance) {
 
-            attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, fduration, 3), attacker);
+            attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, fduration, 5), attacker);
 
         }
 
+        target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 40, 3), attacker);
         if (!attacker.world.isClient()) {
             double x = attacker.getX();
             double y = attacker.getY();
             double z = attacker.getZ();
             ServerWorld sworld = (ServerWorld) attacker.world;
             Box box = new Box(x + 10, y + 5, z + 10, x - 10, y - 5, z - 10);
-
             for(Entity ee: sworld.getOtherEntities(attacker, box, EntityPredicates.VALID_LIVING_ENTITY)) {
 
                 if (ee != null) {
                     if (ee instanceof LivingEntity) {
                         LivingEntity le = (LivingEntity) ee;
 
-                        if (attacker.hasStatusEffect(StatusEffects.HASTE) && le.distanceTo(attacker) > 1){ //can we check target here?
-                            le.setVelocity(le.getRotationVector().multiply(+1));
+                        if (attacker.hasStatusEffect(StatusEffects.HASTE) && le.distanceTo(attacker) > 3){ //can we check target here?
+                            le.setVelocity(le.getRotationVector().multiply(+0.3));
                             sworld.playSoundFromEntity (null, le, SimplySwords.EVENT_OMEN_ONE , SoundCategory.BLOCKS, 0.1f, 2f);
                         }
-                        if (attacker.hasStatusEffect(StatusEffects.HASTE) && le.distanceTo(attacker) <= 1){
-                            le.setVelocity(le.getRotationVector().multiply(-1));
+                        if (attacker.hasStatusEffect(StatusEffects.HASTE) && le.distanceTo(attacker) <= 3){
+                            le.setVelocity(le.getRotationVector().multiply(-0.1));
                             //sworld.playSoundFromEntity (null, ee, SimplySwords.EVENT_OMEN_ONE , SoundCategory.BLOCKS, 0.1f, 2f);
                         }
                     }
@@ -75,6 +80,10 @@ public class GravSwordItem extends SwordItem {
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
 
         return super.use(world,user,hand);
+    }
+
+    public boolean postMine(ItemStack stack, World world, BlockState state, BlockPos pos, LivingEntity miner) {
+        return false;
     }
 
 
