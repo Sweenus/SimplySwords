@@ -83,6 +83,7 @@
   "item.simplyswords.twisted_blade": "Twisted Blade",
   "item.simplyswords.twilight": "Twilight",
   "item.simplyswords.soulkeeper": "Soulkeeper",
+  "item.simplyswords.soulstealer": "Soulstealer",
   "item.simplyswords.soulrender": "Soulrender",
 
 
@@ -419,6 +420,16 @@
   "item.simplyswords.soulsworditem.tooltip1": "Unique Effect: Soul Meld",
   "item.simplyswords.soulsworditem.tooltip2": "Chance on hit to absorb nearby souls, toughening and slowing the attack speed of the wielder",
   "item.simplyswords.soulsworditem.tooltip3": "Realease the souls, transferring the attack speed debuff to nearby foes and regenerating the wielder",
+  "item.simplyswords.stealsworditem.tooltip1": "Unique Effect: Soul Steal",
+  "item.simplyswords.stealsworditem.tooltip2": "Chance on hit to absorb your opponents soul,",
+  "item.simplyswords.stealsworditem.tooltip3": "hastening you while slowing and marking your",
+  "item.simplyswords.stealsworditem.tooltip4": "target for death.",
+  "item.simplyswords.stealsworditem.tooltip5": "If within 5 blocks of a soulless target, ",
+  "item.simplyswords.stealsworditem.tooltip6": "return their soul, leap forward, and gain",
+  "item.simplyswords.stealsworditem.tooltip7": "invisibility.",
+  "item.simplyswords.stealsworditem.tooltip8": "If more than 5 blocks from a soulless target,",
+  "item.simplyswords.stealsworditem.tooltip9": "blink to their location, returning their soul",
+  "item.simplyswords.stealsworditem.tooltip10": "with force, blinding and damaging them.",
 
 
   "item.simplyswords.levitationsworditem.tooltip1": "Runic Power: Float",

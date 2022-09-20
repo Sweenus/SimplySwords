@@ -67,6 +67,8 @@ public class SimplySwordsConfig {
         INT_OPTIONS.put("soulmeld_chance", 75);
         INT_OPTIONS.put("gravity_duration", 250);
         INT_OPTIONS.put("gravity_chance", 35);
+        INT_OPTIONS.put("steal_duration", 400);
+        INT_OPTIONS.put("steal_chance", 25);
 
 
         FLOAT_OPTIONS.put("standard_loot_table_weight", 0.08f);
