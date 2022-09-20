@@ -41,7 +41,7 @@ public class SoulSwordItem extends SwordItem {
 
                 int a = (attacker.getStatusEffect(StatusEffects.MINING_FATIGUE).getAmplifier() + 1);
 
-                if ((attacker.getStatusEffect(StatusEffects.MINING_FATIGUE).getAmplifier() <= 3)) {
+                if ((attacker.getStatusEffect(StatusEffects.MINING_FATIGUE).getAmplifier() <= 2)) {
                     attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.MINING_FATIGUE, fduration, a), attacker);
                     attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, fduration, a), attacker);
                 }
@@ -67,7 +67,7 @@ public class SoulSwordItem extends SwordItem {
             for(Entity ee: sworld.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY)) {
 
                 if (ee != null) {
-                    if (ee instanceof LivingEntity) {
+                    if (ee instanceof LivingEntity && user.hasStatusEffect(StatusEffects.MINING_FATIGUE)){
                         LivingEntity le = (LivingEntity) ee;
                         le.addStatusEffect(new StatusEffectInstance(StatusEffects.MINING_FATIGUE, 250, user.getStatusEffect(StatusEffects.MINING_FATIGUE).getAmplifier()) , user);
                         world.playSoundFromEntity (null, ee, SimplySwords.EVENT_OMEN_TWO , SoundCategory.BLOCKS, 0.2f, 2f);
@@ -75,10 +75,10 @@ public class SoulSwordItem extends SwordItem {
                 }
             }
 
-            if (user.hasStatusEffect(StatusEffects.MINING_FATIGUE)) {
+            if (user.hasStatusEffect(StatusEffects.MINING_FATIGUE) && user.hasStatusEffect(StatusEffects.RESISTANCE)) {
 
                 user.addStatusEffect(new StatusEffectInstance(StatusEffects.REGENERATION,
-                        user.getStatusEffect(StatusEffects.MINING_FATIGUE).getAmplifier() * 20, 2), user);
+                        user.getStatusEffect(StatusEffects.MINING_FATIGUE).getAmplifier() * 40, 2), user);
 
                 user.removeStatusEffect(StatusEffects.MINING_FATIGUE);
                 user.removeStatusEffect(StatusEffects.RESISTANCE);
@@ -92,10 +92,15 @@ public class SoulSwordItem extends SwordItem {
     @Override
     public void appendTooltip(ItemStack itemStack, World world, List<Text> tooltip, TooltipContext tooltipContext) {
 
-        tooltip.add(Text.translatable("item.simplyswords.soulsworditem.tooltip1").formatted(Formatting.GOLD));
+        tooltip.add(Text.literal(""));
+        tooltip.add(Text.translatable("item.simplyswords.soulsworditem.tooltip1").formatted(Formatting.GOLD, Formatting.BOLD));
         tooltip.add(Text.translatable("item.simplyswords.soulsworditem.tooltip2"));
-        tooltip.add(Text.translatable("item.simplyswords.onrightclick").formatted(Formatting.BOLD, Formatting.GREEN));
         tooltip.add(Text.translatable("item.simplyswords.soulsworditem.tooltip3"));
+        tooltip.add(Text.literal(""));
+        tooltip.add(Text.translatable("item.simplyswords.onrightclick").formatted(Formatting.BOLD, Formatting.GREEN));
+        tooltip.add(Text.translatable("item.simplyswords.soulsworditem.tooltip4"));
+        tooltip.add(Text.translatable("item.simplyswords.soulsworditem.tooltip5"));
+        tooltip.add(Text.translatable("item.simplyswords.soulsworditem.tooltip6"));
     }
 
 }

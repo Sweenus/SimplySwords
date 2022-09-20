@@ -99,10 +99,15 @@ public class RendSwordItem extends SwordItem {
     @Override
     public void appendTooltip(ItemStack itemStack, World world, List<Text> tooltip, TooltipContext tooltipContext) {
 
-        tooltip.add(Text.translatable("item.simplyswords.rendsworditem.tooltip1").formatted(Formatting.GOLD));
+        tooltip.add(Text.literal(""));
+        tooltip.add(Text.translatable("item.simplyswords.rendsworditem.tooltip1").formatted(Formatting.GOLD, Formatting.BOLD));
         tooltip.add(Text.translatable("item.simplyswords.rendsworditem.tooltip2"));
-        tooltip.add(Text.translatable("item.simplyswords.onrightclick").formatted(Formatting.BOLD, Formatting.GREEN));
         tooltip.add(Text.translatable("item.simplyswords.rendsworditem.tooltip3"));
+        tooltip.add(Text.literal(""));
+        tooltip.add(Text.translatable("item.simplyswords.onrightclick").formatted(Formatting.BOLD, Formatting.GREEN));
+        tooltip.add(Text.translatable("item.simplyswords.rendsworditem.tooltip4"));
+        tooltip.add(Text.translatable("item.simplyswords.rendsworditem.tooltip5"));
+        tooltip.add(Text.translatable("item.simplyswords.rendsworditem.tooltip6"));
     }
 
 }

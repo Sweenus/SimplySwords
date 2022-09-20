@@ -22,9 +22,8 @@ public class StormEffect extends StatusEffect {
             double y = pLivingEntity.getY();
             double z = pLivingEntity.getZ();
             var pPlayer = pLivingEntity.getAttacker();
-            Box box = new Box(x + 15, y +5, z + 15, x - 15, y - 5, z - 15);
+            Box box = new Box(x + 10, y +5, z + 10, x - 10, y - 5, z - 10);
 
-            //for(Entity e: world.getEntitiesByType(pLivingEntity.getType(), box, EntityPredicates.VALID_ENTITY))
             for(Entity e: world.getOtherEntities(pPlayer, box, EntityPredicates.VALID_LIVING_ENTITY))
             {
                 if (e != null) {
@@ -33,7 +32,6 @@ public class StormEffect extends StatusEffect {
                         if (e.distanceTo(pPlayer) >= 5 ){
                             Entity storm = EntityType.LIGHTNING_BOLT.spawn(world, null, null, null, stormtarget, SpawnReason.TRIGGERED, true, true);
                         }
-                        //e.damage(DamageSource.LIGHTNING_BOLT, 5f);
 
 
                     }

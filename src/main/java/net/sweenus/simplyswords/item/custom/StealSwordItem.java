@@ -34,22 +34,25 @@ public class StealSwordItem extends SwordItem {
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        int fhitchance = SimplySwordsConfig.getIntValue("steal_chance");
-        int fduration = SimplySwordsConfig.getIntValue("steal_duration");
-        attacker.setVelocity(attacker.getRotationVector().multiply(+1));
-        attacker.velocityModified = true;
+        if (!attacker.world.isClient()) {
+            ServerWorld sworld = (ServerWorld) attacker.world;
+            int fhitchance = SimplySwordsConfig.getIntValue("steal_chance");
+            int fduration = SimplySwordsConfig.getIntValue("steal_duration");
+            attacker.setVelocity(attacker.getRotationVector().multiply(+1));
+            attacker.velocityModified = true;
 
 
-        if (attacker.getRandom().nextInt(100) <= fhitchance) {
+            if (attacker.getRandom().nextInt(100) <= fhitchance) {
 
-            attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, fduration, 2), attacker);
-            target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, fduration, 1), attacker);
-            target.addStatusEffect(new StatusEffectInstance(StatusEffects.GLOWING, fduration, 1), attacker);
+                sworld.playSoundFromEntity (null, target, SimplySwords.EVENT_OMEN_ONE , SoundCategory.BLOCKS, 0.4f, 3f);
+                attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, fduration, 2), attacker);
+                target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, fduration, 1), attacker);
+                target.addStatusEffect(new StatusEffectInstance(StatusEffects.GLOWING, fduration, 1), attacker);
 
+            }
         }
 
-        return super.postHit(stack, target, attacker);
-
+            return super.postHit(stack, target, attacker);
     }
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {

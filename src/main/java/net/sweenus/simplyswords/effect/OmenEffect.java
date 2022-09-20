@@ -1,6 +1,7 @@
 package net.sweenus.simplyswords.effect;
 
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectCategory;
 import net.minecraft.server.world.ServerWorld;
@@ -24,14 +25,15 @@ public class OmenEffect extends StatusEffect {
             var pPlayer = pLivingEntity.getAttacker();
             float absAmount = SimplySwordsConfig.getFloatValue("omen_absorption_amount");
             int pduration = 5;
-            int pthreshold = SimplySwordsConfig.getIntValue("omen_instantkill_threshold");
+            float pthreshold = (SimplySwordsConfig.getFloatValue("omen_instantkill_threshold") * pLivingEntity.getMaxHealth());
             Box box = new Box(x + 20, y +10, z + 20, x - 20, y - 10, z - 20);
+
             if (pLivingEntity.getHealth() <= pthreshold && pPlayer != null) {
-                pLivingEntity.kill();
                 if (pPlayer.getAbsorptionAmount() < 6f) {
                     pPlayer.setAbsorptionAmount(pPlayer.getAbsorptionAmount() + absAmount);
                     world.playSound(null, position, SoundEvents.BLOCK_ANVIL_LAND, SoundCategory.BLOCKS, 0.6f, 1f);
                 }
+                pLivingEntity.damage(DamageSource.GENERIC, 1000);
             }
 
         }

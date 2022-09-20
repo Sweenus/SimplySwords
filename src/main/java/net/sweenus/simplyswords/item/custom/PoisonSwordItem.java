@@ -27,7 +27,7 @@ public class PoisonSwordItem extends SwordItem {
         int pduration = SimplySwordsConfig.getIntValue("toxin_duration");
 
         if (attacker.getRandom().nextInt(100) <= phitchance) {
-            target.addStatusEffect(new StatusEffectInstance(StatusEffects.WITHER, pduration, 3), attacker);
+            target.addStatusEffect(new StatusEffectInstance(StatusEffects.WITHER, pduration, 2), attacker);
         }
 
         return super.postHit(stack, target, attacker);
@@ -37,8 +37,8 @@ public class PoisonSwordItem extends SwordItem {
     @Override
     public void appendTooltip(ItemStack itemStack, World world, List<Text> tooltip, TooltipContext tooltipContext) {
 
-        tooltip.add(Text.translatable("item.simplyswords.plaguesworditem.tooltip1").formatted(Formatting.GOLD));
-        tooltip.add(Text.translatable("item.simplyswords.plaguesworditem.tooltip2"));
+        tooltip.add(Text.translatable("item.simplyswords.freezesworditem.tooltip1").formatted(Formatting.GOLD));
+        tooltip.add(Text.translatable("item.simplyswords.freezesworditem.tooltip2"));
     }
 
 }

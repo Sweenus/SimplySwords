@@ -23,8 +23,8 @@ public class WatcherSwordItem extends SwordItem {
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
 
-        int phitchance = SimplySwordsConfig.getIntValue("watcher_chance");
-        int thitchance = SimplySwordsConfig.getIntValue("omen_chance");
+        int thitchance = SimplySwordsConfig.getIntValue("watcher_chance");
+        int phitchance = SimplySwordsConfig.getIntValue("omen_chance");
 
         if (attacker.getRandom().nextInt(100) <= thitchance) {
             target.addStatusEffect(new StatusEffectInstance(ModEffects.WATCHER, 1, 1), attacker);
@@ -41,10 +41,16 @@ public class WatcherSwordItem extends SwordItem {
     @Override
     public void appendTooltip(ItemStack itemStack, World world, List<Text> tooltip, TooltipContext tooltipContext) {
 
-        tooltip.add(Text.translatable("item.simplyswords.watchersworditem.tooltip1").formatted(Formatting.GOLD));
+        tooltip.add(Text.literal(""));
+        tooltip.add(Text.translatable("item.simplyswords.watchersworditem.tooltip1").formatted(Formatting.GOLD, Formatting.BOLD));
         tooltip.add(Text.translatable("item.simplyswords.watchersworditem.tooltip2"));
-        tooltip.add(Text.translatable("item.simplyswords.watchersworditem.tooltip3").formatted(Formatting.GOLD));
+        tooltip.add(Text.translatable("item.simplyswords.watchersworditem.tooltip3",
+                (SimplySwordsConfig.getFloatValue("omen_instantkill_threshold") * 100)));
         tooltip.add(Text.translatable("item.simplyswords.watchersworditem.tooltip4"));
+        tooltip.add(Text.literal(""));
+        tooltip.add(Text.translatable("item.simplyswords.watchersworditem.tooltip5").formatted(Formatting.GOLD, Formatting.BOLD));
+        tooltip.add(Text.translatable("item.simplyswords.watchersworditem.tooltip6"));
+        tooltip.add(Text.translatable("item.simplyswords.watchersworditem.tooltip7"));
     }
 
 }

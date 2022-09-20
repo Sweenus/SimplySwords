@@ -80,11 +80,11 @@ public class MythicMetalsCompat {
                     "mythicmetals:adamantite_ingot"));
 
     public static final Item ADAMANTITE_GREATHAMMER = registerItem( "mythicmetals_compat/adamantite/adamantite_greathammer",
-            new SimplySwordsSwordItem(ModToolMaterial.ADAMANTITE, adamantite_modifier + greathammer_modifier, -3.3f,
+            new SimplySwordsSwordItem(ModToolMaterial.ADAMANTITE, adamantite_modifier + greathammer_modifier, -3.2f,
                     "mythicmetals:adamantite_ingot"));
 
     public static final Item ADAMANTITE_GREATAXE = registerItem( "mythicmetals_compat/adamantite/adamantite_greataxe",
-            new SimplySwordsSwordItem(ModToolMaterial.ADAMANTITE, adamantite_modifier + greataxe_modifier, -3.3f,
+            new SimplySwordsSwordItem(ModToolMaterial.ADAMANTITE, adamantite_modifier + greataxe_modifier, -3.2f,
                     "mythicmetals:adamantite_ingot"));
 
     public static final Item ADAMANTITE_CHAKRAM = registerItem( "mythicmetals_compat/adamantite/adamantite_chakram",
@@ -137,11 +137,11 @@ public class MythicMetalsCompat {
                     "mythicmetals:aquarium_ingot"));
 
     public static final Item AQUARIUM_GREATHAMMER = registerItem( "mythicmetals_compat/aquarium/aquarium_greathammer",
-            new SimplySwordsSwordItem(ModToolMaterial.AQUARIUM, aquarium_modifier + greathammer_modifier, -3.3f,
+            new SimplySwordsSwordItem(ModToolMaterial.AQUARIUM, aquarium_modifier + greathammer_modifier, -3.2f,
                     "mythicmetals:aquarium_ingot"));
 
     public static final Item AQUARIUM_GREATAXE = registerItem( "mythicmetals_compat/aquarium/aquarium_greataxe",
-            new SimplySwordsSwordItem(ModToolMaterial.AQUARIUM, aquarium_modifier + greataxe_modifier, -3.2f,
+            new SimplySwordsSwordItem(ModToolMaterial.AQUARIUM, aquarium_modifier + greataxe_modifier, -3.1f,
                     "mythicmetals:aquarium_ingot"));
 
     public static final Item AQUARIUM_CHAKRAM = registerItem( "mythicmetals_compat/aquarium/aquarium_chakram",
@@ -195,11 +195,11 @@ public class MythicMetalsCompat {
                     "mythicmetals:banglum_ingot"));
 
     public static final Item BANGLUM_GREATHAMMER = registerItem( "mythicmetals_compat/banglum/banglum_greathammer",
-            new SimplySwordsSwordItem(ModToolMaterial.BANGLUM, banglum_modifier + greathammer_modifier, -3.3f,
+            new SimplySwordsSwordItem(ModToolMaterial.BANGLUM, banglum_modifier + greathammer_modifier, -3.2f,
                     "mythicmetals:banglum_ingot"));
 
     public static final Item BANGLUM_GREATAXE = registerItem( "mythicmetals_compat/banglum/banglum_greataxe",
-            new SimplySwordsSwordItem(ModToolMaterial.BANGLUM, banglum_modifier + greataxe_modifier, -3.2f,
+            new SimplySwordsSwordItem(ModToolMaterial.BANGLUM, banglum_modifier + greataxe_modifier, -3.1f,
                     "mythicmetals:banglum_ingot"));
 
     public static final Item BANGLUM_CHAKRAM = registerItem( "mythicmetals_compat/banglum/banglum_chakram",
@@ -253,11 +253,11 @@ public class MythicMetalsCompat {
                     "mythicmetals:carmot_ingot"));
 
     public static final Item CARMOT_GREATHAMMER = registerItem( "mythicmetals_compat/carmot/carmot_greathammer",
-            new SimplySwordsSwordItem(ModToolMaterial.CARMOT, carmot_modifier + greathammer_modifier, -3.3f,
+            new SimplySwordsSwordItem(ModToolMaterial.CARMOT, carmot_modifier + greathammer_modifier, -3.2f,
                     "mythicmetals:carmot_ingot"));
 
     public static final Item CARMOT_GREATAXE = registerItem( "mythicmetals_compat/carmot/carmot_greataxe",
-            new SimplySwordsSwordItem(ModToolMaterial.CARMOT, carmot_modifier + greataxe_modifier, -3.2f,
+            new SimplySwordsSwordItem(ModToolMaterial.CARMOT, carmot_modifier + greataxe_modifier, -3.1f,
                     "mythicmetals:carmot_ingot"));
 
     public static final Item CARMOT_CHAKRAM = registerItem( "mythicmetals_compat/carmot/carmot_chakram",
@@ -310,11 +310,11 @@ public class MythicMetalsCompat {
                     "mythicmetals:kyber_ingot"));
 
     public static final Item KYBER_GREATHAMMER = registerItem( "mythicmetals_compat/kyber/kyber_greathammer",
-            new SimplySwordsSwordItem(ModToolMaterial.KYBER, kyber_modifier + greathammer_modifier, -3.3f,
+            new SimplySwordsSwordItem(ModToolMaterial.KYBER, kyber_modifier + greathammer_modifier, -3.2f,
                     "mythicmetals:kyber_ingot"));
 
     public static final Item KYBER_GREATAXE = registerItem( "mythicmetals_compat/kyber/kyber_greataxe",
-            new SimplySwordsSwordItem(ModToolMaterial.KYBER, kyber_modifier + greataxe_modifier, -3.2f,
+            new SimplySwordsSwordItem(ModToolMaterial.KYBER, kyber_modifier + greataxe_modifier, -3.1f,
                     "mythicmetals:kyber_ingot"));
 
     public static final Item KYBER_CHAKRAM = registerItem( "mythicmetals_compat/kyber/kyber_chakram",
@@ -368,11 +368,11 @@ public class MythicMetalsCompat {
                     "mythicmetals:mythril_ingot"));
 
     public static final Item MYTHRIL_GREATHAMMER = registerItem( "mythicmetals_compat/mythril/mythril_greathammer",
-            new SimplySwordsSwordItem(ModToolMaterial.MYTHRIL, mythril_modifier + greathammer_modifier, -3.3f,
+            new SimplySwordsSwordItem(ModToolMaterial.MYTHRIL, mythril_modifier + greathammer_modifier, -3.2f,
                     "mythicmetals:mythril_ingot"));
 
     public static final Item MYTHRIL_GREATAXE = registerItem( "mythicmetals_compat/mythril/mythril_greataxe",
-            new SimplySwordsSwordItem(ModToolMaterial.MYTHRIL, mythril_modifier + greataxe_modifier, -3.2f,
+            new SimplySwordsSwordItem(ModToolMaterial.MYTHRIL, mythril_modifier + greataxe_modifier, -3.1f,
                     "mythicmetals:mythril_ingot"));
 
     public static final Item MYTHRIL_CHAKRAM = registerItem( "mythicmetals_compat/mythril/mythril_chakram",
@@ -426,11 +426,11 @@ public class MythicMetalsCompat {
                     "mythicmetals:orichalcum_ingot"));
 
     public static final Item ORICHALCUM_GREATHAMMER = registerItem( "mythicmetals_compat/orichalcum/orichalcum_greathammer",
-            new SimplySwordsSwordItem(ModToolMaterial.ORICHALCUM, orichalcum_modifier + greathammer_modifier, -3.3f,
+            new SimplySwordsSwordItem(ModToolMaterial.ORICHALCUM, orichalcum_modifier + greathammer_modifier, -3.2f,
                     "mythicmetals:orichalcum_ingot"));
 
     public static final Item ORICHALCUM_GREATAXE = registerItem( "mythicmetals_compat/orichalcum/orichalcum_greataxe",
-            new SimplySwordsSwordItem(ModToolMaterial.ORICHALCUM, orichalcum_modifier + greataxe_modifier, -3.2f,
+            new SimplySwordsSwordItem(ModToolMaterial.ORICHALCUM, orichalcum_modifier + greataxe_modifier, -3.1f,
                     "mythicmetals:orichalcum_ingot"));
 
     public static final Item ORICHALCUM_CHAKRAM = registerItem( "mythicmetals_compat/orichalcum/orichalcum_chakram",
@@ -484,11 +484,11 @@ public class MythicMetalsCompat {
                     "mythicmetals:osmium_ingot"));
 
     public static final Item OSMIUM_GREATHAMMER = registerItem( "mythicmetals_compat/osmium/osmium_greathammer",
-            new SimplySwordsSwordItem(ModToolMaterial.OSMIUM, osmium_modifier + greathammer_modifier, -3.3f,
+            new SimplySwordsSwordItem(ModToolMaterial.OSMIUM, osmium_modifier + greathammer_modifier, -3.2f,
                     "mythicmetals:osmium_ingot"));
 
     public static final Item OSMIUM_GREATAXE = registerItem( "mythicmetals_compat/osmium/osmium_greataxe",
-            new SimplySwordsSwordItem(ModToolMaterial.OSMIUM, osmium_modifier + greataxe_modifier, -3.2f,
+            new SimplySwordsSwordItem(ModToolMaterial.OSMIUM, osmium_modifier + greataxe_modifier, -3.1f,
                     "mythicmetals:osmium_ingot"));
 
     public static final Item OSMIUM_CHAKRAM = registerItem( "mythicmetals_compat/osmium/osmium_chakram",
@@ -542,11 +542,11 @@ public class MythicMetalsCompat {
                     "mythicmetals:prometheum_ingot"));
 
     public static final Item PROMETHEUM_GREATHAMMER = registerItem( "mythicmetals_compat/prometheum/prometheum_greathammer",
-            new SimplySwordsSwordItem(ModToolMaterial.PROMETHEUM, prometheum_modifier + greathammer_modifier, -3.3f,
+            new SimplySwordsSwordItem(ModToolMaterial.PROMETHEUM, prometheum_modifier + greathammer_modifier, -3.2f,
                     "mythicmetals:prometheum_ingot"));
 
     public static final Item PROMETHEUM_GREATAXE = registerItem( "mythicmetals_compat/prometheum/prometheum_greataxe",
-            new SimplySwordsSwordItem(ModToolMaterial.PROMETHEUM, prometheum_modifier + greataxe_modifier, -3.2f,
+            new SimplySwordsSwordItem(ModToolMaterial.PROMETHEUM, prometheum_modifier + greataxe_modifier, -3.1f,
                     "mythicmetals:prometheum_ingot"));
 
     public static final Item PROMETHEUM_CHAKRAM = registerItem( "mythicmetals_compat/prometheum/prometheum_chakram",
@@ -600,11 +600,11 @@ public class MythicMetalsCompat {
                     "mythicmetals:quadrillum_ingot"));
 
     public static final Item QUADRILLUM_GREATHAMMER = registerItem( "mythicmetals_compat/quadrillum/quadrillum_greathammer",
-            new SimplySwordsSwordItem(ModToolMaterial.QUADRILLUM, quadrillum_modifier + greathammer_modifier, -3.3f,
+            new SimplySwordsSwordItem(ModToolMaterial.QUADRILLUM, quadrillum_modifier + greathammer_modifier, -3.2f,
                     "mythicmetals:quadrillum_ingot"));
 
     public static final Item QUADRILLUM_GREATAXE = registerItem( "mythicmetals_compat/quadrillum/quadrillum_greataxe",
-            new SimplySwordsSwordItem(ModToolMaterial.QUADRILLUM, quadrillum_modifier + greataxe_modifier, -3.2f,
+            new SimplySwordsSwordItem(ModToolMaterial.QUADRILLUM, quadrillum_modifier + greataxe_modifier, -3.1f,
                     "mythicmetals:quadrillum_ingot"));
 
     public static final Item QUADRILLUM_CHAKRAM = registerItem( "mythicmetals_compat/quadrillum/quadrillum_chakram",
@@ -658,11 +658,11 @@ public class MythicMetalsCompat {
                     "mythicmetals:runite_ingot"));
 
     public static final Item RUNITE_GREATHAMMER = registerItem( "mythicmetals_compat/runite/runite_greathammer",
-            new SimplySwordsSwordItem(ModToolMaterial.RUNITE, runite_modifier + greathammer_modifier, -3.3f,
+            new SimplySwordsSwordItem(ModToolMaterial.RUNITE, runite_modifier + greathammer_modifier, -3.2f,
                     "mythicmetals:runite_ingot"));
 
     public static final Item RUNITE_GREATAXE = registerItem( "mythicmetals_compat/runite/runite_greataxe",
-            new SimplySwordsSwordItem(ModToolMaterial.RUNITE, runite_modifier + greataxe_modifier, -3.2f,
+            new SimplySwordsSwordItem(ModToolMaterial.RUNITE, runite_modifier + greataxe_modifier, -3.1f,
                     "mythicmetals:runite_ingot"));
 
     public static final Item RUNITE_CHAKRAM = registerItem( "mythicmetals_compat/runite/runite_chakram",
@@ -716,11 +716,11 @@ public class MythicMetalsCompat {
                     "mythicmetals:star_platinum"));
 
     public static final Item STAR_PLATINUM_GREATHAMMER = registerItem( "mythicmetals_compat/star_platinum/star_platinum_greathammer",
-            new SimplySwordsSwordItem(ModToolMaterial.STAR_PLATINUM, star_platinum_modifier + greathammer_modifier, -3.3f,
+            new SimplySwordsSwordItem(ModToolMaterial.STAR_PLATINUM, star_platinum_modifier + greathammer_modifier, -3.2f,
                     "mythicmetals:star_platinum"));
 
     public static final Item STAR_PLATINUM_GREATAXE = registerItem( "mythicmetals_compat/star_platinum/star_platinum_greataxe",
-            new SimplySwordsSwordItem(ModToolMaterial.STAR_PLATINUM, star_platinum_modifier + greataxe_modifier, -3.2f,
+            new SimplySwordsSwordItem(ModToolMaterial.STAR_PLATINUM, star_platinum_modifier + greataxe_modifier, -3.1f,
                     "mythicmetals:star_platinum"));
 
     public static final Item STAR_PLATINUM_CHAKRAM = registerItem( "mythicmetals_compat/star_platinum/star_platinum_chakram",
@@ -774,11 +774,11 @@ public class MythicMetalsCompat {
                     "mythicmetals:bronze_ingot"));
 
     public static final Item BRONZE_GREATHAMMER = registerItem( "mythicmetals_compat/bronze/bronze_greathammer",
-            new SimplySwordsSwordItem(ModToolMaterial.BRONZE, bronze_modifier + greathammer_modifier, -3.3f,
+            new SimplySwordsSwordItem(ModToolMaterial.BRONZE, bronze_modifier + greathammer_modifier, -3.2f,
                     "mythicmetals:bronze_ingot"));
 
     public static final Item BRONZE_GREATAXE = registerItem( "mythicmetals_compat/bronze/bronze_greataxe",
-            new SimplySwordsSwordItem(ModToolMaterial.BRONZE, bronze_modifier + greataxe_modifier, -3.2f,
+            new SimplySwordsSwordItem(ModToolMaterial.BRONZE, bronze_modifier + greataxe_modifier, -3.1f,
                     "mythicmetals:bronze_ingot"));
 
     public static final Item BRONZE_CHAKRAM = registerItem( "mythicmetals_compat/bronze/bronze_chakram",
@@ -832,11 +832,11 @@ public class MythicMetalsCompat {
                     "mythicmetals:steel_ingot"));
 
     public static final Item STEEL_GREATHAMMER = registerItem( "mythicmetals_compat/steel/steel_greathammer",
-            new SimplySwordsSwordItem(ModToolMaterial.STEEL, steel_modifier + greathammer_modifier, -3.3f,
+            new SimplySwordsSwordItem(ModToolMaterial.STEEL, steel_modifier + greathammer_modifier, -3.2f,
                     "mythicmetals:steel_ingot"));
 
     public static final Item STEEL_GREATAXE = registerItem( "mythicmetals_compat/steel/steel_greataxe",
-            new SimplySwordsSwordItem(ModToolMaterial.STEEL, steel_modifier + greataxe_modifier, -3.2f,
+            new SimplySwordsSwordItem(ModToolMaterial.STEEL, steel_modifier + greataxe_modifier, -3.1f,
                     "mythicmetals:steel_ingot"));
 
     public static final Item STEEL_CHAKRAM = registerItem( "mythicmetals_compat/steel/steel_chakram",
@@ -890,11 +890,11 @@ public class MythicMetalsCompat {
                     "mythicmetals:stormyx_ingot"));
 
     public static final Item STORMYX_GREATHAMMER = registerItem( "mythicmetals_compat/stormyx/stormyx_greathammer",
-            new SimplySwordsSwordItem(ModToolMaterial.STORMYX, stormyx_modifier + greathammer_modifier, -3.3f,
+            new SimplySwordsSwordItem(ModToolMaterial.STORMYX, stormyx_modifier + greathammer_modifier, -3.2f,
                     "mythicmetals:stormyx_ingot"));
 
     public static final Item STORMYX_GREATAXE = registerItem( "mythicmetals_compat/stormyx/stormyx_greataxe",
-            new SimplySwordsSwordItem(ModToolMaterial.STORMYX, stormyx_modifier + greataxe_modifier, -3.2f,
+            new SimplySwordsSwordItem(ModToolMaterial.STORMYX, stormyx_modifier + greataxe_modifier, -3.1f,
                     "mythicmetals:stormyx_ingot"));
 
     public static final Item STORMYX_CHAKRAM = registerItem( "mythicmetals_compat/stormyx/stormyx_chakram",
@@ -948,11 +948,11 @@ public class MythicMetalsCompat {
                     "mythicmetals:palladium_ingot"));
 
     public static final Item PALLADIUM_GREATHAMMER = registerItem( "mythicmetals_compat/palladium/palladium_greathammer",
-            new SimplySwordsSwordItem(ModToolMaterial.PALLADIUM, palladium_modifier + greathammer_modifier, -3.3f,
+            new SimplySwordsSwordItem(ModToolMaterial.PALLADIUM, palladium_modifier + greathammer_modifier, -3.2f,
                     "mythicmetals:palladium_ingot"));
 
     public static final Item PALLADIUM_GREATAXE = registerItem( "mythicmetals_compat/palladium/palladium_greataxe",
-            new SimplySwordsSwordItem(ModToolMaterial.PALLADIUM, palladium_modifier + greataxe_modifier, -3.2f,
+            new SimplySwordsSwordItem(ModToolMaterial.PALLADIUM, palladium_modifier + greataxe_modifier, -3.1f,
                     "mythicmetals:palladium_ingot"));
 
     public static final Item PALLADIUM_CHAKRAM = registerItem( "mythicmetals_compat/palladium/palladium_chakram",
@@ -1006,11 +1006,11 @@ public class MythicMetalsCompat {
                     "mythicmetals:metallurgium_ingot"));
 
     public static final Item METALLURGIUM_GREATHAMMER = registerItem( "mythicmetals_compat/metallurgium/metallurgium_greathammer",
-            new SimplySwordsSwordItem(ModToolMaterial.METALLURGIUM, metallurgium_modifier + greathammer_modifier, -3.3f,
+            new SimplySwordsSwordItem(ModToolMaterial.METALLURGIUM, metallurgium_modifier + greathammer_modifier, -3.2f,
                     "mythicmetals:metallurgium_ingot"));
 
     public static final Item METALLURGIUM_GREATAXE = registerItem( "mythicmetals_compat/metallurgium/metallurgium_greataxe",
-            new SimplySwordsSwordItem(ModToolMaterial.METALLURGIUM, metallurgium_modifier + greataxe_modifier, -3.2f,
+            new SimplySwordsSwordItem(ModToolMaterial.METALLURGIUM, metallurgium_modifier + greataxe_modifier, -3.1f,
                     "mythicmetals:metallurgium_ingot"));
 
     public static final Item METALLURGIUM_CHAKRAM = registerItem( "mythicmetals_compat/metallurgium/metallurgium_chakram",
@@ -1064,11 +1064,11 @@ public class MythicMetalsCompat {
                     "mythicmetals:celestium_ingot"));
 
     public static final Item CELESTIUM_GREATHAMMER = registerItem( "mythicmetals_compat/celestium/celestium_greathammer",
-            new SimplySwordsSwordItem(ModToolMaterial.CELESTIUM, celestium_modifier + greathammer_modifier, -3.3f,
+            new SimplySwordsSwordItem(ModToolMaterial.CELESTIUM, celestium_modifier + greathammer_modifier, -3.2f,
                     "mythicmetals:celestium_ingot"));
 
     public static final Item CELESTIUM_GREATAXE = registerItem( "mythicmetals_compat/celestium/celestium_greataxe",
-            new SimplySwordsSwordItem(ModToolMaterial.CELESTIUM, celestium_modifier + greataxe_modifier, -3.2f,
+            new SimplySwordsSwordItem(ModToolMaterial.CELESTIUM, celestium_modifier + greataxe_modifier, -3.1f,
                     "mythicmetals:celestium_ingot"));
 
     public static final Item CELESTIUM_CHAKRAM = registerItem( "mythicmetals_compat/celestium/celestium_chakram",
@@ -1090,7 +1090,7 @@ public class MythicMetalsCompat {
 
     //DURASTEEL
     public static final Item DURASTEEL_GREATHAMMER = registerItem( "mythicmetals_compat/durasteel/durasteel_greathammer",
-            new SimplySwordsSwordItem(ModToolMaterial.DURASTEEL, durasteel_modifier + greathammer_modifier, -3.3f,
+            new SimplySwordsSwordItem(ModToolMaterial.DURASTEEL, durasteel_modifier + greathammer_modifier, -3.2f,
                     "mythicmetals:durasteel_ingot"));
 
 

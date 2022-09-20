@@ -42,11 +42,10 @@ public class VolcanicFurySwordItem extends SwordItem {
     @Override
     public void appendTooltip(ItemStack itemStack, World world, List<Text> tooltip, TooltipContext tooltipContext) {
 
-        // default white text
-        tooltip.add(Text.translatable("item.simplyswords.volcanicfurysworditem.tooltip1").formatted(Formatting.GOLD));
-
-        // formatted red text
+        tooltip.add(Text.literal(""));
+        tooltip.add(Text.translatable("item.simplyswords.volcanicfurysworditem.tooltip1").formatted(Formatting.GOLD, Formatting.BOLD));
         tooltip.add(Text.translatable("item.simplyswords.volcanicfurysworditem.tooltip2"));
+        tooltip.add(Text.translatable("item.simplyswords.volcanicfurysworditem.tooltip3"));
     }
 
 }

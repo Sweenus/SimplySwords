@@ -26,7 +26,7 @@ public class WatcherEffect extends StatusEffect {
             double z = pLivingEntity.getZ();
             int pduration = 1;
             float rAmount = SimplySwordsConfig.getFloatValue("watcher_restore_amount");
-            Box box = new Box(x + 10, y +10, z + 10, x - 10, y - 10, z - 10);
+            Box box = new Box(x + 8, y +8, z + 8, x - 8, y - 8, z - 8);
             var pPlayer = pLivingEntity.getAttacker();
 
             //for(Entity e: world.getEntitiesByType(pLivingEntity.getType(), box, EntityPredicates.VALID_ENTITY))

@@ -87,14 +87,14 @@ public class ModItems {
             new SimplySwordsSwordItem(
                     ToolMaterials.IRON,
                     7,
-                    -3.3f,
+                    -3.2f,
                     "minecraft:iron_ingot"));
 
     public static final Item IRON_GREATAXE = registerItem( "iron_greataxe",
             new SimplySwordsSwordItem(
                     ToolMaterials.IRON,
                     6,
-                    -3.2f,
+                    -3.1f,
                     "minecraft:iron_ingot"));
 
     public static final Item IRON_CHAKRAM = registerItem( "iron_chakram",
@@ -181,14 +181,14 @@ public class ModItems {
             new SimplySwordsSwordItem(
                     ToolMaterials.GOLD,
                     6,
-                    -3.3f,
+                    -3.2f,
                     "minecraft:gold_ingot"));
 
     public static final Item GOLD_GREATAXE = registerItem( "gold_greataxe",
             new SimplySwordsSwordItem(
                     ToolMaterials.GOLD,
                     5,
-                    -3.2f,
+                    -3.1f,
                     "minecraft:gold_ingot"));
 
     public static final Item GOLD_CHAKRAM = registerItem( "gold_chakram",
@@ -275,14 +275,14 @@ public class ModItems {
             new SimplySwordsSwordItem(
                     ToolMaterials.DIAMOND,
                     7,
-                    -3.3f,
+                    -3.2f,
                     "minecraft:diamond"));
 
     public static final Item DIAMOND_GREATAXE = registerItem( "diamond_greataxe",
             new SimplySwordsSwordItem(
                     ToolMaterials.DIAMOND,
                     6,
-                    -3.2f,
+                    -3.1f,
                     "minecraft:diamond"));
 
     public static final Item DIAMOND_CHAKRAM = registerItem( "diamond_chakram",
@@ -372,14 +372,14 @@ public class ModItems {
             new SimplySwordsSwordItem(
                     ToolMaterials.NETHERITE,
                     8,
-                    -3.3f,
+                    -3.2f,
                     "minecraft:netherite_ingot"));
 
     public static final Item NETHERITE_GREATAXE = registerItem( "netherite_greataxe",
             new SimplySwordsSwordItem(
                     ToolMaterials.NETHERITE,
                     7,
-                    -3.2f,
+                    -3.1f,
                     "minecraft:netherite_ingot"));
 
     public static final Item NETHERITE_CHAKRAM = registerItem( "netherite_chakram",
@@ -399,7 +399,7 @@ public class ModItems {
 
     //RUNIC
     public static final Item RUNIC_LONGSWORD = registerItem( "runic_longsword",
-            new PoisonSwordItem(ToolMaterials.NETHERITE, 3, -2.4f,
+            new FreezeSwordItem(ToolMaterials.NETHERITE, 3, -2.4f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
     public static final Item RUNIC_TWINBLADE = registerItem( "runic_twinblade",
@@ -438,11 +438,11 @@ public class ModItems {
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
     public static final Item RUNIC_GREATAXE = registerItem( "runic_greataxe",
-            new FreezeSwordItem(ToolMaterials.NETHERITE, 7, -3.2f,
+            new FreezeSwordItem(ToolMaterials.NETHERITE, 7, -3.1f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
     public static final Item RUNIC_GREATHAMMER = registerItem( "runic_greathammer",
-            new WildfireSwordItem(ToolMaterials.NETHERITE, 8, -3.3f,
+            new WildfireSwordItem(ToolMaterials.NETHERITE, 8, -3.2f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
     public static final Item RUNIC_SCYTHE = registerItem( "runic_scythe",
@@ -486,7 +486,7 @@ public class ModItems {
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
     public static final Item HEARTHFLAME = registerItem( "hearthflame",
-            new VolcanicFurySwordItem(ToolMaterials.NETHERITE, 8, -3.3f,
+            new VolcanicFurySwordItem(ToolMaterials.NETHERITE, 8, -3.2f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
     public static final Item SOULKEEPER = registerItem( "soulkeeper",
