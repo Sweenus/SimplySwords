@@ -2,7 +2,6 @@ package net.sweenus.simplyswords.item.custom;
 
 
 import net.minecraft.client.item.TooltipContext;
-import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
@@ -13,7 +12,6 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
-import net.sweenus.simplyswords.effect.ModEffects;
 
 import java.util.List;
 
@@ -42,10 +40,22 @@ public class VolcanicFurySwordItem extends SwordItem {
     @Override
     public void appendTooltip(ItemStack itemStack, World world, List<Text> tooltip, TooltipContext tooltipContext) {
 
+        //1.19
+
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.volcanicfurysworditem.tooltip1").formatted(Formatting.GOLD, Formatting.BOLD));
         tooltip.add(Text.translatable("item.simplyswords.volcanicfurysworditem.tooltip2"));
         tooltip.add(Text.translatable("item.simplyswords.volcanicfurysworditem.tooltip3"));
+
+        /*
+
+        //1.18.2
+        tooltip.add(new LiteralText(""));
+        tooltip.add(new TranslatableText("item.simplyswords.volcanicfurysworditem.tooltip1").formatted(Formatting.GOLD, Formatting.BOLD));
+        tooltip.add(new TranslatableText("item.simplyswords.volcanicfurysworditem.tooltip2"));
+        tooltip.add(new TranslatableText("item.simplyswords.volcanicfurysworditem.tooltip3"));
+
+         */
     }
 
 }

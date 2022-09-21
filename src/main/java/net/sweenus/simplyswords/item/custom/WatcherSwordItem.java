@@ -41,6 +41,8 @@ public class WatcherSwordItem extends SwordItem {
     @Override
     public void appendTooltip(ItemStack itemStack, World world, List<Text> tooltip, TooltipContext tooltipContext) {
 
+        //1.19
+
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.watchersworditem.tooltip1").formatted(Formatting.GOLD, Formatting.BOLD));
         tooltip.add(Text.translatable("item.simplyswords.watchersworditem.tooltip2"));
@@ -51,6 +53,23 @@ public class WatcherSwordItem extends SwordItem {
         tooltip.add(Text.translatable("item.simplyswords.watchersworditem.tooltip5").formatted(Formatting.GOLD, Formatting.BOLD));
         tooltip.add(Text.translatable("item.simplyswords.watchersworditem.tooltip6"));
         tooltip.add(Text.translatable("item.simplyswords.watchersworditem.tooltip7"));
+
+
+
+        //1.18.2
+                /*
+        tooltip.add(new LiteralText(""));
+        tooltip.add(new TranslatableText("item.simplyswords.watchersworditem.tooltip1").formatted(Formatting.GOLD, Formatting.BOLD));
+        tooltip.add(new TranslatableText("item.simplyswords.watchersworditem.tooltip2"));
+        tooltip.add(new TranslatableText("item.simplyswords.watchersworditem.tooltip3",
+                (SimplySwordsConfig.getFloatValue("omen_instantkill_threshold") * 100)));
+        tooltip.add(new TranslatableText("item.simplyswords.watchersworditem.tooltip4"));
+        tooltip.add(new LiteralText(""));
+        tooltip.add(new TranslatableText("item.simplyswords.watchersworditem.tooltip5").formatted(Formatting.GOLD, Formatting.BOLD));
+        tooltip.add(new TranslatableText("item.simplyswords.watchersworditem.tooltip6"));
+        tooltip.add(new TranslatableText("item.simplyswords.watchersworditem.tooltip7"));
+
+                 */
     }
 
 }

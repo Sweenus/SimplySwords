@@ -7,7 +7,6 @@ import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemUsageContext;
 import net.minecraft.item.SwordItem;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.sound.SoundCategory;
@@ -16,10 +15,8 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
-import net.minecraft.util.UseAction;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
-import org.spongepowered.asm.mixin.injection.Inject;
 
 import java.util.List;
 
@@ -70,6 +67,7 @@ public class HasteSwordItem extends SwordItem {
     @Override
     public void appendTooltip(ItemStack itemStack, World world, List<Text> tooltip, TooltipContext tooltipContext) {
 
+        //1.19
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.ferocitysworditem.tooltip1").formatted(Formatting.GOLD, Formatting.BOLD));
         tooltip.add(Text.translatable("item.simplyswords.ferocitysworditem.tooltip2"));
@@ -79,6 +77,21 @@ public class HasteSwordItem extends SwordItem {
         tooltip.add(Text.translatable("item.simplyswords.ferocitysworditem.tooltip4"));
         tooltip.add(Text.translatable("item.simplyswords.ferocitysworditem.tooltip5"));
         tooltip.add(Text.translatable("item.simplyswords.ferocitysworditem.tooltip6"));
+
+        /*
+
+        //1.18.2
+        tooltip.add(new LiteralText(""));
+        tooltip.add(new TranslatableText("item.simplyswords.ferocitysworditem.tooltip1").formatted(Formatting.GOLD, Formatting.BOLD));
+        tooltip.add(new TranslatableText("item.simplyswords.ferocitysworditem.tooltip2"));
+        tooltip.add(new TranslatableText("item.simplyswords.ferocitysworditem.tooltip3"));
+        tooltip.add(new LiteralText(""));
+        tooltip.add(new TranslatableText("item.simplyswords.onrightclick").formatted(Formatting.BOLD, Formatting.GREEN));
+        tooltip.add(new TranslatableText("item.simplyswords.ferocitysworditem.tooltip4"));
+        tooltip.add(new TranslatableText("item.simplyswords.ferocitysworditem.tooltip5"));
+        tooltip.add(new TranslatableText("item.simplyswords.ferocitysworditem.tooltip6"));
+
+         */
     }
 
 }

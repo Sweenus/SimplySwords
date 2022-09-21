@@ -1,0 +1,19 @@
+{
+  "replace": false,
+  "values": [
+    "simplyswords:mythicmetals_compat/mythril/mythril_claymore",
+    "simplyswords:mythicmetals_compat/mythril/mythril_cutlass",
+    "simplyswords:mythicmetals_compat/mythril/mythril_glaive",
+    "simplyswords:mythicmetals_compat/mythril/mythril_katana",
+    "simplyswords:mythicmetals_compat/mythril/mythril_longsword",
+    "simplyswords:mythicmetals_compat/mythril/mythril_rapier",
+    "simplyswords:mythicmetals_compat/mythril/mythril_sai",
+    "simplyswords:mythicmetals_compat/mythril/mythril_spear",
+    "simplyswords:mythicmetals_compat/mythril/mythril_twinblade",
+    "simplyswords:mythicmetals_compat/mythril/mythril_warglaive",
+    "simplyswords:mythicmetals_compat/mythril/mythril_greathammer",
+    "simplyswords:mythicmetals_compat/mythril/mythril_greataxe",
+    "simplyswords:mythicmetals_compat/mythril/mythril_chakram",
+    "simplyswords:mythicmetals_compat/mythril/mythril_scythe"
+  ]
+}

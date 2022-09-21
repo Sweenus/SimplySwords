@@ -36,10 +36,20 @@ public class StormSwordItem extends SwordItem {
     @Override
     public void appendTooltip(ItemStack itemStack, World world, List<Text> tooltip, TooltipContext tooltipContext) {
 
+        //1.19
+
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.stormsworditem.tooltip1").formatted(Formatting.GOLD, Formatting.BOLD));
         tooltip.add(Text.translatable("item.simplyswords.stormsworditem.tooltip2"));
         tooltip.add(Text.translatable("item.simplyswords.stormsworditem.tooltip3"));
+
+        //1.18.2
+        /*
+        tooltip.add(new LiteralText(""));
+        tooltip.add(new TranslatableText("item.simplyswords.stormsworditem.tooltip1").formatted(Formatting.GOLD, Formatting.BOLD));
+        tooltip.add(new TranslatableText("item.simplyswords.stormsworditem.tooltip2"));
+        tooltip.add(new TranslatableText("item.simplyswords.stormsworditem.tooltip3"));
+         */
     }
 
 }

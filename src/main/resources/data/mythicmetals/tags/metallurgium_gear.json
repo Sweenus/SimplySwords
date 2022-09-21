@@ -1,0 +1,19 @@
+{
+  "replace": false,
+  "values": [
+    "simplyswords:mythicmetals_compat/metallurgium/metallurgium_claymore",
+    "simplyswords:mythicmetals_compat/metallurgium/metallurgium_cutlass",
+    "simplyswords:mythicmetals_compat/metallurgium/metallurgium_glaive",
+    "simplyswords:mythicmetals_compat/metallurgium/metallurgium_katana",
+    "simplyswords:mythicmetals_compat/metallurgium/metallurgium_longsword",
+    "simplyswords:mythicmetals_compat/metallurgium/metallurgium_rapier",
+    "simplyswords:mythicmetals_compat/metallurgium/metallurgium_sai",
+    "simplyswords:mythicmetals_compat/metallurgium/metallurgium_spear",
+    "simplyswords:mythicmetals_compat/metallurgium/metallurgium_twinblade",
+    "simplyswords:mythicmetals_compat/metallurgium/metallurgium_warglaive",
+    "simplyswords:mythicmetals_compat/metallurgium/metallurgium_greathammer",
+    "simplyswords:mythicmetals_compat/metallurgium/metallurgium_greataxe",
+    "simplyswords:mythicmetals_compat/metallurgium/metallurgium_chakram",
+    "simplyswords:mythicmetals_compat/metallurgium/metallurgium_scythe"
+  ]
+}

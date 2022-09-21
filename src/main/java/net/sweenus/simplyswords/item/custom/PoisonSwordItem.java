@@ -37,8 +37,19 @@ public class PoisonSwordItem extends SwordItem {
     @Override
     public void appendTooltip(ItemStack itemStack, World world, List<Text> tooltip, TooltipContext tooltipContext) {
 
+        //1.19
+
         tooltip.add(Text.translatable("item.simplyswords.freezesworditem.tooltip1").formatted(Formatting.GOLD));
         tooltip.add(Text.translatable("item.simplyswords.freezesworditem.tooltip2"));
+
+        /*
+
+        //1.18.2
+        tooltip.add(new LiteralText(""));
+        tooltip.add(new TranslatableText("item.simplyswords.freezesworditem.tooltip1").formatted(Formatting.GOLD));
+        tooltip.add(new TranslatableText("item.simplyswords.freezesworditem.tooltip2"));
+
+         */
     }
 
 }

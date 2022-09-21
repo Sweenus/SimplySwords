@@ -88,10 +88,21 @@ public class GravSwordItem extends SwordItem {
     @Override
     public void appendTooltip(ItemStack itemStack, World world, List<Text> tooltip, TooltipContext tooltipContext) {
 
+        //1.19
         tooltip.add(Text.translatable("item.simplyswords.rendsworditem.tooltip1").formatted(Formatting.GOLD));
         tooltip.add(Text.translatable("item.simplyswords.rendsworditem.tooltip2"));
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").formatted(Formatting.BOLD, Formatting.GREEN));
         tooltip.add(Text.translatable("item.simplyswords.rendsworditem.tooltip3"));
+        /*
+
+        //1.18.2
+        tooltip.add(new LiteralText(""));
+        tooltip.add(new TranslatableText("item.simplyswords.rendsworditem.tooltip1").formatted(Formatting.GOLD));
+        tooltip.add(new TranslatableText("item.simplyswords.rendsworditem.tooltip2"));
+        tooltip.add(new TranslatableText("item.simplyswords.onrightclick").formatted(Formatting.BOLD, Formatting.GREEN));
+        tooltip.add(new TranslatableText("item.simplyswords.rendsworditem.tooltip3"));
+
+         */
     }
 
 }

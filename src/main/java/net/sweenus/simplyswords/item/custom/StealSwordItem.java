@@ -102,6 +102,8 @@ public class StealSwordItem extends SwordItem {
     @Override
     public void appendTooltip(ItemStack itemStack, World world, List<Text> tooltip, TooltipContext tooltipContext) {
 
+        //1.19
+
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.stealsworditem.tooltip1").formatted(Formatting.GOLD, Formatting.BOLD));
         tooltip.add(Text.translatable("item.simplyswords.stealsworditem.tooltip2"));
@@ -116,6 +118,26 @@ public class StealSwordItem extends SwordItem {
         tooltip.add(Text.translatable("item.simplyswords.stealsworditem.tooltip8"));
         tooltip.add(Text.translatable("item.simplyswords.stealsworditem.tooltip9"));
         tooltip.add(Text.translatable("item.simplyswords.stealsworditem.tooltip10"));
+
+
+/*
+        //1.18.2
+        tooltip.add(new LiteralText(""));
+        tooltip.add(new TranslatableText("item.simplyswords.stealsworditem.tooltip1").formatted(Formatting.GOLD, Formatting.BOLD));
+        tooltip.add(new TranslatableText("item.simplyswords.stealsworditem.tooltip2"));
+        tooltip.add(new TranslatableText("item.simplyswords.stealsworditem.tooltip3"));
+        tooltip.add(new TranslatableText("item.simplyswords.stealsworditem.tooltip4"));
+        tooltip.add(new LiteralText(""));
+        tooltip.add(new TranslatableText("item.simplyswords.onrightclick").formatted(Formatting.BOLD, Formatting.GREEN));
+        tooltip.add(new TranslatableText("item.simplyswords.stealsworditem.tooltip5"));
+        tooltip.add(new TranslatableText("item.simplyswords.stealsworditem.tooltip6"));
+        tooltip.add(new TranslatableText("item.simplyswords.stealsworditem.tooltip7"));
+        tooltip.add(new LiteralText(""));
+        tooltip.add(new TranslatableText("item.simplyswords.stealsworditem.tooltip8"));
+        tooltip.add(new TranslatableText("item.simplyswords.stealsworditem.tooltip9"));
+        tooltip.add(new TranslatableText("item.simplyswords.stealsworditem.tooltip10"));
+
+ */
     }
 
 }

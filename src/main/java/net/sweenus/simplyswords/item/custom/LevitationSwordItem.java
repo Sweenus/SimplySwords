@@ -36,10 +36,21 @@ public class LevitationSwordItem extends SwordItem {
     @Override
     public void appendTooltip(ItemStack itemStack, World world, List<Text> tooltip, TooltipContext tooltipContext) {
 
+        //1.19
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.levitationsworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
         tooltip.add(Text.translatable("item.simplyswords.levitationsworditem.tooltip2"));
         tooltip.add(Text.translatable("item.simplyswords.levitationsworditem.tooltip3"));
+
+        /*
+
+        //1.18.2
+        tooltip.add(new LiteralText(""));
+        tooltip.add(new TranslatableText("item.simplyswords.levitationsworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
+        tooltip.add(new TranslatableText("item.simplyswords.levitationsworditem.tooltip2"));
+        tooltip.add(new TranslatableText("item.simplyswords.levitationsworditem.tooltip3"));
+
+         */
     }
 
 }
