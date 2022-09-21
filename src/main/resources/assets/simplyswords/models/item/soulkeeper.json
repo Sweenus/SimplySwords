@@ -1,7 +1,7 @@
 {
 	"credit": "Made by Sweenus using Blockbench",
 	"textures": {
-		"2": "simplyswords:item/glow_blue_strip",
+		"2": "simplyswords:item/soulwell_strip",
 		"4": "simplyswords:item/hilt",
 		"5": "simplyswords:item/stone",
 		"6": "simplyswords:item/grass",
@@ -871,9 +871,9 @@
 			"to": [11, 25, 6.75],
 			"rotation": {"angle": 0, "axis": "y", "origin": [0, 11, 0]},
 			"faces": {
-				"north": {"uv": [5.375, 3.125, 7.35227, 6.5625], "texture": "#2"},
+				"north": {"uv": [0, 0, 16, 16], "texture": "#2"},
 				"east": {"uv": [9.32955, 3.125, 9.65909, 6.5625], "texture": "#2"},
-				"south": {"uv": [7.35227, 3.125, 9.32955, 6.5625], "texture": "#2"},
+				"south": {"uv": [14.02273, 7.485, 16, 10.9225], "texture": "#2"},
 				"west": {"uv": [9.98864, 3.125, 10.31818, 6.5625], "texture": "#2"},
 				"up": {"uv": [12.625, 3.63176, 10.64773, 3.53041], "texture": "#2"},
 				"down": {"uv": [12.625, 3.73311, 10.64773, 3.83446], "texture": "#2"}
@@ -884,12 +884,12 @@
 			"to": [11, 25, 10.5],
 			"rotation": {"angle": 0, "axis": "y", "origin": [0, 11, 0]},
 			"faces": {
-				"north": {"uv": [5.375, 3.125, 7.35227, 6.5625], "texture": "#2"},
-				"east": {"uv": [9.32955, 3.125, 9.65909, 6.5625], "texture": "#2"},
-				"south": {"uv": [7.35227, 3.125, 9.32955, 6.5625], "texture": "#2"},
-				"west": {"uv": [9.98864, 3.125, 10.31818, 6.5625], "texture": "#2"},
-				"up": {"uv": [12.625, 3.63176, 10.64773, 3.53041], "texture": "#2"},
-				"down": {"uv": [12.625, 3.73311, 10.64773, 3.83446], "texture": "#2"}
+				"north": {"uv": [13.93, 12.5625, 15.90727, 16], "texture": "#2"},
+				"east": {"uv": [15.67045, 12.5625, 16, 16], "texture": "#2"},
+				"south": {"uv": [0, 0, 16, 15.96], "texture": "#2"},
+				"west": {"uv": [15.67045, 12.5625, 16, 16], "texture": "#2"},
+				"up": {"uv": [16, 16, 14.02273, 15.89865], "texture": "#2"},
+				"down": {"uv": [16, 15.89865, 14.02273, 16], "texture": "#2"}
 			}
 		},
 		{
@@ -1267,17 +1267,18 @@
 			"scale": [0.46, 0.47, 0.44]
 		},
 		"gui": {
-			"rotation": [-2, 180, 44],
+			"rotation": [175.16, 3.17, -145.75],
 			"translation": [-0.5, -0.75, 0],
 			"scale": [0.45, 0.45, 0.45]
 		},
 		"head": {
-			"rotation": [0, 180, 0],
-			"translation": [0, 13, 7]
+			"rotation": [-180, 180, 134],
+			"translation": [-4, 1.25, 0],
+			"scale": [0.65, 0.65, 0.65]
 		},
 		"fixed": {
-			"rotation": [-2, 180, 44],
-			"translation": [-1.25, -1.25, 0],
+			"rotation": [-1.79, -1.43, 21.83],
+			"translation": [0, -0.5, -0.75],
 			"scale": [0.5, 0.5, 0.5]
 		}
 	},
