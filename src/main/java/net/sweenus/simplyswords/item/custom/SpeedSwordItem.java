@@ -37,8 +37,10 @@ public class SpeedSwordItem extends SwordItem {
     @Override
     public void appendTooltip(ItemStack itemStack, World world, List<Text> tooltip, TooltipContext tooltipContext) {
 
-        tooltip.add(Text.translatable("item.simplyswords.speedsworditem.tooltip1").formatted(Formatting.AQUA));
+        tooltip.add(Text.literal(""));
+        tooltip.add(Text.translatable("item.simplyswords.speedsworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
         tooltip.add(Text.translatable("item.simplyswords.speedsworditem.tooltip2"));
+        tooltip.add(Text.translatable("item.simplyswords.speedsworditem.tooltip3"));
     }
 
 }

@@ -53,9 +53,10 @@ public class BrambleSwordItem extends SwordItem {
     @Override
     public void appendTooltip(ItemStack itemStack, World world, List<Text> tooltip, TooltipContext tooltipContext) {
 
-        tooltip.add(Text.translatable("item.simplyswords.bramblesworditem.tooltip1").formatted(Formatting.GOLD));
-
+        tooltip.add(Text.literal(""));
+        tooltip.add(Text.translatable("item.simplyswords.bramblesworditem.tooltip1").formatted(Formatting.GOLD, Formatting.BOLD));
         tooltip.add(Text.translatable("item.simplyswords.bramblesworditem.tooltip2"));
+        tooltip.add(Text.translatable("item.simplyswords.bramblesworditem.tooltip3"));
     }
 
 }

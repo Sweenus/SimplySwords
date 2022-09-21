@@ -400,54 +400,54 @@ public class ModItems {
     //RUNIC
     public static final Item RUNIC_LONGSWORD = registerItem( "runic_longsword",
             new FreezeSwordItem(ToolMaterials.NETHERITE, 3, -2.4f,
-                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.RARE)));
 
     public static final Item RUNIC_TWINBLADE = registerItem( "runic_twinblade",
             new WildfireSwordItem(ToolMaterials.NETHERITE, 3, -1.7f,
-                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.RARE)));
 
     public static final Item RUNIC_RAPIER = registerItem( "runic_rapier",
             new SpeedSwordItem(ToolMaterials.NETHERITE, 2, -1.6f,
-                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.RARE)));
 
     public static final Item RUNIC_KATANA = registerItem( "runic_katana",
             new WildfireSwordItem(ToolMaterials.NETHERITE, 3, -2f,
-                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.RARE)));
 
     public static final Item RUNIC_SAI = registerItem( "runic_sai",
             new SlownessSwordItem(ToolMaterials.NETHERITE, 0, -1.1f,
-                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.RARE)));
 
     public static final Item RUNIC_SPEAR = registerItem( "runic_spear",
             new FreezeSwordItem(ToolMaterials.NETHERITE, 3, -2.6f,
-                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.RARE)));
 
     public static final Item RUNIC_GLAIVE = registerItem( "runic_glaive",
             new WildfireSwordItem(ToolMaterials.NETHERITE, 3, -2.6f,
-                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.RARE)));
 
     public static final Item RUNIC_CUTLASS = registerItem( "runic_cutlass",
             new LevitationSwordItem(ToolMaterials.NETHERITE, 3, -2f,
-                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.RARE)));
     public static final Item RUNIC_CLAYMORE = registerItem( "runic_claymore",
             new FreezeSwordItem(ToolMaterials.NETHERITE, 6, -2.8f,
-                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.RARE)));
 
     public static final Item RUNIC_CHAKRAM = registerItem( "runic_chakram",
             new SpeedSwordItem(ToolMaterials.NETHERITE, 3, -3f,
-                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.RARE)));
 
     public static final Item RUNIC_GREATAXE = registerItem( "runic_greataxe",
             new FreezeSwordItem(ToolMaterials.NETHERITE, 7, -3.1f,
-                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.RARE)));
 
     public static final Item RUNIC_GREATHAMMER = registerItem( "runic_greathammer",
             new WildfireSwordItem(ToolMaterials.NETHERITE, 8, -3.2f,
-                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.RARE)));
 
     public static final Item RUNIC_SCYTHE = registerItem( "runic_scythe",
             new LevitationSwordItem(ToolMaterials.NETHERITE, 4, -2.7f,
-                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.RARE)));
 
 //SPECIAL
     public static final Item BRIMSTONE_CLAYMORE = registerItem( "brimstone_claymore",
@@ -497,9 +497,9 @@ public class ModItems {
             new HasteSwordItem(ToolMaterials.NETHERITE, 4, -2.6f,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
-    public static final Item TWILIGHT = registerItem( "twilight",
-            new GravSwordItem(ToolMaterials.NETHERITE, 4, -3.7f,
-                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+    //public static final Item TWILIGHT = registerItem( "twilight",
+            //new GravSwordItem(ToolMaterials.NETHERITE, 4, -3.7f,
+                    //new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
     public static final Item SOULSTEALER = registerItem( "soulstealer",
             new StealSwordItem(ToolMaterials.NETHERITE, 0, -1.1f,

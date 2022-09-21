@@ -395,11 +395,15 @@
 
   "item.simplyswords.onrightclick": "On Right Click:",
   "item.simplyswords.firesworditem.tooltip1": "Unique Effect: Brimstone",
-  "item.simplyswords.firesworditem.tooltip2": "Chance on hit to spew forth explosive brimstone",
+  "item.simplyswords.firesworditem.tooltip2": "Chance on hit to spew forth explosive brimstone.",
+
   "item.simplyswords.bramblesworditem.tooltip1": "Unique Effect: Bramblethorn",
-  "item.simplyswords.bramblesworditem.tooltip2": "Chance on hit to release a blanket of toxic spores, slowing and poisoning anything nearby",
+  "item.simplyswords.bramblesworditem.tooltip2": "Chance on hit to release a blanket of toxic",
+  "item.simplyswords.bramblesworditem.tooltip3": "spores, slowing and poisoning anything nearby.",
+
   "item.simplyswords.stormsworditem.tooltip1": "Unique Effect: Storm",
-  "item.simplyswords.stormsworditem.tooltip2": "When raining/wet: Chance on hit to bring lightning down from the sky upon your foes",
+  "item.simplyswords.stormsworditem.tooltip2": "When raining/wet: Chance on hit to bring",
+  "item.simplyswords.stormsworditem.tooltip3": "lightning down from the sky upon your foes.",
 
   "item.simplyswords.watchersworditem.tooltip1": "Unique Effect: Omen",
   "item.simplyswords.watchersworditem.tooltip2": "Chance on hit to rip the life from a",
@@ -411,7 +415,7 @@
 
   "item.simplyswords.plaguesworditem.tooltip1": "Unique Effect: Plague",
   "item.simplyswords.plaguesworditem.tooltip2": "Chance on hit to convert positive effects",
-  "item.simplyswords.plaguesworditem.tooltip3": "into their negative counterpart",
+  "item.simplyswords.plaguesworditem.tooltip3": "into their negative counterpart.",
 
   "item.simplyswords.emberiresworditem.tooltip1": "Unique Effect: Ember Ire",
   "item.simplyswords.emberiresworditem.tooltip2": "Chance on hit to cloak the wielder in",
@@ -457,13 +461,17 @@
 
 
   "item.simplyswords.levitationsworditem.tooltip1": "Runic Power: Float",
-  "item.simplyswords.levitationsworditem.tooltip2": "Chance on hit to reverse the effects of gravity on your target",
+  "item.simplyswords.levitationsworditem.tooltip2": "Chance on hit to reverse the effects",
+  "item.simplyswords.levitationsworditem.tooltip3": "of gravity on your target.",
   "item.simplyswords.speedsworditem.tooltip1": "Runic Power: Swiftness",
-  "item.simplyswords.speedsworditem.tooltip2": "Chance on hit to increase the wielders movespeed for a duration",
+  "item.simplyswords.speedsworditem.tooltip2": "Chance on hit to increase the wielders",
+  "item.simplyswords.speedsworditem.tooltip3": "movespeed for a duration.",
   "item.simplyswords.slownesssworditem.tooltip1": "Runic Power: Slow",
-  "item.simplyswords.slownesssworditem.tooltip2": "Chance on hit to slow the target for a duration",
+  "item.simplyswords.slownesssworditem.tooltip2": "Chance on hit to slow the target",
+  "item.simplyswords.slownesssworditem.tooltip3": "for a duration.",
   "item.simplyswords.freezesworditem.tooltip1": "Runic Power: Freeze",
-  "item.simplyswords.freezesworditem.tooltip2": "Chance on hit to chill or freeze your target",
+  "item.simplyswords.freezesworditem.tooltip2": "Chance on hit to chill or freeze your target.",
   "item.simplyswords.wildfiresworditem.tooltip1": "Runic Power: Wildfire",
-  "item.simplyswords.wildfiresworditem.tooltip2": "Chance on hit to ignite all nearby entities of the same type as your target"
+  "item.simplyswords.wildfiresworditem.tooltip2": "Chance on hit to ignite all nearby ",
+  "item.simplyswords.wildfiresworditem.tooltip3": "entities of the same type as your target."
 }

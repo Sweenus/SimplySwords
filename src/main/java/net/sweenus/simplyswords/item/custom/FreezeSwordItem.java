@@ -14,6 +14,7 @@ import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
 import net.sweenus.simplyswords.effect.ModEffects;
 
+import java.text.Format;
 import java.util.List;
 
 public class FreezeSwordItem extends SwordItem {
@@ -40,7 +41,8 @@ public class FreezeSwordItem extends SwordItem {
     @Override
     public void appendTooltip(ItemStack itemStack, World world, List<Text> tooltip, TooltipContext tooltipContext) {
 
-        tooltip.add(Text.translatable("item.simplyswords.freezesworditem.tooltip1").formatted(Formatting.AQUA));
+        tooltip.add(Text.literal(""));
+        tooltip.add(Text.translatable("item.simplyswords.freezesworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
         tooltip.add(Text.translatable("item.simplyswords.freezesworditem.tooltip2"));
     }
 

@@ -4,6 +4,8 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectCategory;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
@@ -29,8 +31,8 @@ public class OmenEffect extends StatusEffect {
             Box box = new Box(x + 20, y +10, z + 20, x - 20, y - 10, z - 20);
 
             if (pLivingEntity.getHealth() <= pthreshold && pPlayer != null) {
-                if (pPlayer.getAbsorptionAmount() < 6f) {
-                    pPlayer.setAbsorptionAmount(pPlayer.getAbsorptionAmount() + absAmount);
+                if (!pPlayer.hasStatusEffect(StatusEffects.REGENERATION)) {
+                    pPlayer.addStatusEffect(new StatusEffectInstance(StatusEffects.REGENERATION, 40, (int) absAmount), pPlayer);
                     world.playSound(null, position, SoundEvents.BLOCK_ANVIL_LAND, SoundCategory.BLOCKS, 0.6f, 1f);
                 }
                 pLivingEntity.damage(DamageSource.GENERIC, 1000);
