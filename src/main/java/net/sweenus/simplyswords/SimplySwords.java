@@ -32,28 +32,6 @@ public class SimplySwords implements ModInitializer {
     @Override
     public void onInitialize() {
 
-        ModItems.registerModItems();
-
-		if (FabricLoader.getInstance().isModLoaded("mythicmetals")) {
-			MythicMetalsCompat.registerModItems();
-		}
-        if (FabricLoader.getInstance().isModLoaded("gobber2")) {
-            GobberCompat.registerModItems();
-        }
-
-        ModEffects.registerEffects();
-        Registry.register(Registry.STATUS_EFFECT, new Identifier("simplyswords", "burn"), ModEffects.BURN);
-        Registry.register(Registry.STATUS_EFFECT, new Identifier("simplyswords", "plague"), ModEffects.PLAGUE);
-        Registry.register(Registry.STATUS_EFFECT, new Identifier("simplyswords", "wildfire"), ModEffects.WILDFIRE);
-        Registry.register(Registry.STATUS_EFFECT, new Identifier("simplyswords", "storm"), ModEffects.STORM);
-        Registry.register(Registry.STATUS_EFFECT, new Identifier("simplyswords", "electric"), ModEffects.ELECTRIC);
-        Registry.register(Registry.STATUS_EFFECT, new Identifier("simplyswords", "omen"), ModEffects.OMEN);
-        Registry.register(Registry.STATUS_EFFECT, new Identifier("simplyswords", "watcher"), ModEffects.WATCHER);
-
-        ModLootTableModifiers.modifyLootTables();
-
-
-
         //CONFIG
 
         SimplySwordsConfig.init();
@@ -68,6 +46,28 @@ public class SimplySwords implements ModInitializer {
 
         SimplySwordsConfig.generateConfigs(json == null || !json.has("regen_simplyswords_config_file") || json.get("regen_simplyswords_config_file").getAsBoolean());
         SimplySwordsConfig.loadConfig();
+
+        ModItems.registerModItems();
+
+        if (FabricLoader.getInstance().isModLoaded("mythicmetals")) {
+            MythicMetalsCompat.registerModItems();
+        }
+        if (FabricLoader.getInstance().isModLoaded("gobber2")) {
+            GobberCompat.registerModItems();
+        }
+
+        //REGISTER
+
+        ModEffects.registerEffects();
+        Registry.register(Registry.STATUS_EFFECT, new Identifier("simplyswords", "burn"), ModEffects.BURN);
+        Registry.register(Registry.STATUS_EFFECT, new Identifier("simplyswords", "plague"), ModEffects.PLAGUE);
+        Registry.register(Registry.STATUS_EFFECT, new Identifier("simplyswords", "wildfire"), ModEffects.WILDFIRE);
+        Registry.register(Registry.STATUS_EFFECT, new Identifier("simplyswords", "storm"), ModEffects.STORM);
+        Registry.register(Registry.STATUS_EFFECT, new Identifier("simplyswords", "electric"), ModEffects.ELECTRIC);
+        Registry.register(Registry.STATUS_EFFECT, new Identifier("simplyswords", "omen"), ModEffects.OMEN);
+        Registry.register(Registry.STATUS_EFFECT, new Identifier("simplyswords", "watcher"), ModEffects.WATCHER);
+
+        ModLootTableModifiers.modifyLootTables();
 
         //SOUND
 

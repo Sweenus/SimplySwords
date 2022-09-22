@@ -36,7 +36,6 @@ public class GobberEndSwordItem extends SwordItem {
     }
 
     //Unbreakable weapon support for Gobber
-    /*
     static boolean unbreakable = SimplySwordsConfig.getBooleanValue("compat_gobber_end_weapons_unbreakable");
 
     @Override
@@ -49,7 +48,5 @@ public class GobberEndSwordItem extends SwordItem {
             stack.getOrCreateNbt().putBoolean("Unbreakable", true);
         }
     }
-     */
-
 
 }

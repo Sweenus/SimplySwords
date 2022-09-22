@@ -84,7 +84,7 @@ public class MythicMetalsCompat {
                     "mythicmetals:adamantite_ingot"));
 
     public static final Item ADAMANTITE_GREATAXE = registerItem( "mythicmetals_compat/adamantite/adamantite_greataxe",
-            new SimplySwordsSwordItem(ModToolMaterial.ADAMANTITE, adamantite_modifier + greataxe_modifier, -3.2f,
+            new SimplySwordsSwordItem(ModToolMaterial.ADAMANTITE, adamantite_modifier + greataxe_modifier, -3.1f,
                     "mythicmetals:adamantite_ingot"));
 
     public static final Item ADAMANTITE_CHAKRAM = registerItem( "mythicmetals_compat/adamantite/adamantite_chakram",
