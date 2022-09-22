@@ -35,6 +35,7 @@ public class SimplySwordsConfig {
 
     public static void init() {
         SWORDS.put("add_weapons_to_loot_tables", true);
+        SWORDS.put("compat_gobber_end_weapons_unbreakable", true);
 
         INT_OPTIONS.put("speed_chance", 15);
         INT_OPTIONS.put("slowness_chance", 50);

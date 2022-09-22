@@ -9,6 +9,7 @@ import net.minecraft.util.registry.Registry;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
 import net.sweenus.simplyswords.effect.ModEffects;
+import net.sweenus.simplyswords.item.GobberCompat;
 import net.sweenus.simplyswords.item.ModItems;
 import net.sweenus.simplyswords.item.MythicMetalsCompat;
 import net.sweenus.simplyswords.util.ModLootTableModifiers;
@@ -36,6 +37,9 @@ public class SimplySwords implements ModInitializer {
 		if (FabricLoader.getInstance().isModLoaded("mythicmetals")) {
 			MythicMetalsCompat.registerModItems();
 		}
+        if (FabricLoader.getInstance().isModLoaded("gobber2")) {
+            GobberCompat.registerModItems();
+        }
 
         ModEffects.registerEffects();
         Registry.register(Registry.STATUS_EFFECT, new Identifier("simplyswords", "burn"), ModEffects.BURN);

@@ -12,6 +12,8 @@ import java.util.function.Supplier;
 public enum ModToolMaterial implements ToolMaterial {
     OTHERENTITE(MiningLevels.WOOD, 59, 2.0f, 0.0f, 15, () -> Ingredient.fromTag(ItemTags.PLANKS)),
     ELEMENTITE(MiningLevels.NETHERITE, 2031, 9.0f, 5.0f, 15, () -> Ingredient.fromTag(ItemTags.DIAMOND_ORES)),
+
+    //MYTHIC METALS
     ADAMANTITE(4, 1024, 7.0F, 5F, 16, () -> Ingredient.ofItems(Items.DIAMOND)),
     AEGIS_RED(4, 2170, 8.0F, 6.0F, 25, () -> Ingredient.ofItems(Items.DIAMOND)),
     AEGIS_WHITE(4, 2070, 10.0F, 5.0F, 25, () -> Ingredient.ofItems(Items.DIAMOND)),
@@ -37,7 +39,13 @@ public enum ModToolMaterial implements ToolMaterial {
     RUNITE(3, 1337, 8.9F, 3.3F, 17, () -> Ingredient.ofItems(Items.DIAMOND)),
     STAR_PLATINUM(4, 1300, 9.0F, 4.0F, 18, () -> Ingredient.ofItems(Items.DIAMOND)),
     STEEL(2, 600, 6.5F, 2.5F, 12, () -> Ingredient.ofItems(Items.DIAMOND)),
-    STORMYX(3, 1305, 8.0F, 3.5F, 20, () -> Ingredient.ofItems(Items.DIAMOND));
+    STORMYX(3, 1305, 8.0F, 3.5F, 20, () -> Ingredient.ofItems(Items.DIAMOND)),
+
+
+    //GOBBER
+    GOBBER(5, 3800, 9.0F, 9.0F, 20, () -> Ingredient.ofItems(Items.DIAMOND)),
+    GOBBER_NETHER(6, 5200, 12.0F, 9.0F, 25, () -> Ingredient.ofItems(Items.DIAMOND)),
+    GOBBER_END(7, 8000, 14.0F, 9.0F, 30, () -> Ingredient.ofItems(Items.DIAMOND));
 
     private final int miningLevel;
     private final int itemDurability;

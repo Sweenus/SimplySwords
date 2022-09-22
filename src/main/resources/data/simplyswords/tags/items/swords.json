@@ -84,6 +84,179 @@
     "simplyswords:soulrender",
     "simplyswords:soulkeeper",
     "simplyswords:soulstealer",
-    "simplyswords:mjolnir"
+    "simplyswords:mjolnir",
+
+    {
+      "id": "simplyswords:gobber_compat/gobber/gobber_chakram",
+      "required": false
+    },
+    {
+      "id": "simplyswords:gobber_compat/gobber/gobber_claymore",
+      "required": false
+    },
+    {
+      "id": "simplyswords:gobber_compat/gobber/gobber_cutlass",
+      "required": false
+    },
+    {
+      "id": "simplyswords:gobber_compat/gobber/gobber_glaive",
+      "required": false
+    },
+    {
+      "id": "simplyswords:gobber_compat/gobber/gobber_greataxe",
+      "required": false
+    },
+    {
+      "id": "simplyswords:gobber_compat/gobber/gobber_greathammer",
+      "required": false
+    },
+    {
+      "id": "simplyswords:gobber_compat/gobber/gobber_katana",
+      "required": false
+    },
+    {
+      "id": "simplyswords:gobber_compat/gobber/gobber_longsword",
+      "required": false
+    },
+    {
+      "id": "simplyswords:gobber_compat/gobber/gobber_rapier",
+      "required": false
+    },
+    {
+      "id": "simplyswords:gobber_compat/gobber/gobber_sai",
+      "required": false
+    },
+    {
+      "id": "simplyswords:gobber_compat/gobber/gobber_scythe",
+      "required": false
+    },
+    {
+      "id": "simplyswords:gobber_compat/gobber/gobber_spear",
+      "required": false
+    },
+    {
+      "id": "simplyswords:gobber_compat/gobber/gobber_twinblade",
+      "required": false
+    },
+    {
+      "id": "simplyswords:gobber_compat/gobber/gobber_warglaive",
+      "required": false
+    },
+
+
+    {
+      "id": "simplyswords:gobber_compat/gobber_nether/gobber_nether_chakram",
+      "required": false
+    },
+    {
+      "id": "simplyswords:gobber_compat/gobber_nether/gobber_nether_claymore",
+      "required": false
+    },
+    {
+      "id": "simplyswords:gobber_compat/gobber_nether/gobber_nether_cutlass",
+      "required": false
+    },
+    {
+      "id": "simplyswords:gobber_compat/gobber_nether/gobber_nether_glaive",
+      "required": false
+    },
+    {
+      "id": "simplyswords:gobber_compat/gobber_nether/gobber_nether_greataxe",
+      "required": false
+    },
+    {
+      "id": "simplyswords:gobber_compat/gobber_nether/gobber_nether_greathammer",
+      "required": false
+    },
+    {
+      "id": "simplyswords:gobber_compat/gobber_nether/gobber_nether_katana",
+      "required": false
+    },
+    {
+      "id": "simplyswords:gobber_compat/gobber_nether/gobber_nether_longsword",
+      "required": false
+    },
+    {
+      "id": "simplyswords:gobber_compat/gobber_nether/gobber_nether_rapier",
+      "required": false
+    },
+    {
+      "id": "simplyswords:gobber_compat/gobber_nether/gobber_nether_sai",
+      "required": false
+    },
+    {
+      "id": "simplyswords:gobber_compat/gobber_nether/gobber_nether_scythe",
+      "required": false
+    },
+    {
+      "id": "simplyswords:gobber_compat/gobber_nether/gobber_nether_spear",
+      "required": false
+    },
+    {
+      "id": "simplyswords:gobber_compat/gobber_nether/gobber_nether_twinblade",
+      "required": false
+    },
+    {
+      "id": "simplyswords:gobber_compat/gobber_nether/gobber_nether_warglaive",
+      "required": false
+    },
+
+
+    {
+      "id": "simplyswords:gobber_compat/gobber_end/gobber_end_chakram",
+      "required": false
+    },
+    {
+      "id": "simplyswords:gobber_compat/gobber_end/gobber_end_claymore",
+      "required": false
+    },
+    {
+      "id": "simplyswords:gobber_compat/gobber_end/gobber_end_cutlass",
+      "required": false
+    },
+    {
+      "id": "simplyswords:gobber_compat/gobber_end/gobber_end_glaive",
+      "required": false
+    },
+    {
+      "id": "simplyswords:gobber_compat/gobber_end/gobber_end_greataxe",
+      "required": false
+    },
+    {
+      "id": "simplyswords:gobber_compat/gobber_end/gobber_end_greathammer",
+      "required": false
+    },
+    {
+      "id": "simplyswords:gobber_compat/gobber_end/gobber_end_katana",
+      "required": false
+    },
+    {
+      "id": "simplyswords:gobber_compat/gobber_end/gobber_end_longsword",
+      "required": false
+    },
+    {
+      "id": "simplyswords:gobber_compat/gobber_end/gobber_end_rapier",
+      "required": false
+    },
+    {
+      "id": "simplyswords:gobber_compat/gobber_end/gobber_end_sai",
+      "required": false
+    },
+    {
+      "id": "simplyswords:gobber_compat/gobber_end/gobber_end_scythe",
+      "required": false
+    },
+    {
+      "id": "simplyswords:gobber_compat/gobber_end/gobber_end_spear",
+      "required": false
+    },
+    {
+      "id": "simplyswords:gobber_compat/gobber_end/gobber_end_twinblade",
+      "required": false
+    },
+    {
+      "id": "simplyswords:gobber_compat/gobber_end/gobber_end_warglaive",
+      "required": false
+    }
   ]
 }
