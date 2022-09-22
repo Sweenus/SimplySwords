@@ -1,5 +1,6 @@
 ![enter image description here](https://img.shields.io/badge/ENVIRONMENT-CLIENT%20&%20SERVER-orange?style=for-the-badge&logo=)
 ![Discord](https://img.shields.io/discord/1020119045925773382?color=5865f2&label=%20&logo=Discord&logoColor=ffffff&style=for-the-badge)
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/F1F1F6QOG)
 
 ![enter image description here](https://cdn.modrinth.com/data/bK3Ubu9p/images/0dd3d1284fa65eace85ee94c69306b6ce2d70437.png)
 
