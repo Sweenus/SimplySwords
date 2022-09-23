@@ -15,6 +15,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
+import net.sweenus.simplyswords.config.SimplySwordsConfig;
 
 import java.util.List;
 
@@ -25,11 +26,13 @@ public class BrambleSwordItem extends SwordItem {
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        int fhitchance = 50; //SimplySwordsConfig.getFloatValue("brimstone_chance");
+        int fhitchance = (int) SimplySwordsConfig.getFloatValue("bramble_chance");
 
 
         if (attacker.getRandom().nextInt(100) <= fhitchance) {
             if (!target.world.isClient()) {
+                int sradius = (int) SimplySwordsConfig.getFloatValue("bramble_radius");
+                int vradius = (int) (SimplySwordsConfig.getFloatValue("bramble_radius") / 2);
                 double x = target.getX();
                 double y = target.getY();
                 double z = target.getZ();

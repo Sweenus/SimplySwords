@@ -35,6 +35,8 @@ public class GravSwordItem extends SwordItem {
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         int fhitchance = (int) SimplySwordsConfig.getFloatValue("gravity_chance");
         int fduration = (int) SimplySwordsConfig.getFloatValue("gravity_duration");
+        int hradius = (int) SimplySwordsConfig.getFloatValue("gravity_radius");
+        int vradius = (int) (SimplySwordsConfig.getFloatValue("gravity_radius") / 2);
         attacker.setVelocity(attacker.getRotationVector().multiply(+1));
         attacker.velocityModified = true;
 
@@ -51,7 +53,7 @@ public class GravSwordItem extends SwordItem {
             double y = attacker.getY();
             double z = attacker.getZ();
             ServerWorld sworld = (ServerWorld) attacker.world;
-            Box box = new Box(x + 10, y + 5, z + 10, x - 10, y - 5, z - 10);
+            Box box = new Box(x + hradius, y + vradius, z + hradius, x - hradius, y - vradius, z - hradius);
             for(Entity ee: sworld.getOtherEntities(attacker, box, EntityPredicates.VALID_LIVING_ENTITY)) {
 
                 if (ee != null) {

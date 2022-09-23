@@ -29,6 +29,7 @@ public class HasteSwordItem extends SwordItem {
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         int fhitchance = (int) SimplySwordsConfig.getFloatValue("ferocity_chance");
         int fduration = (int) SimplySwordsConfig.getFloatValue("ferocity_duration");
+        int maximum_stacks = (int) (SimplySwordsConfig.getFloatValue("ferocity_max_stacks"));
 
 
         if (attacker.getRandom().nextInt(100) <= fhitchance) {
@@ -36,7 +37,7 @@ public class HasteSwordItem extends SwordItem {
 
                 int a = (attacker.getStatusEffect(StatusEffects.HASTE).getAmplifier() + 1);
 
-                if ((attacker.getStatusEffect(StatusEffects.HASTE).getAmplifier() <= 14)) {
+                if ((attacker.getStatusEffect(StatusEffects.HASTE).getAmplifier() < maximum_stacks)) {
                     attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, fduration, a), attacker);
                 } else {
                     attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, fduration, a - 1), attacker);
@@ -54,8 +55,10 @@ public class HasteSwordItem extends SwordItem {
 
         if (user.hasStatusEffect(StatusEffects.HASTE)) {
 
+            int strength_tier = (int) SimplySwordsConfig.getFloatValue("ferocity_strength_tier");
+
             int a = (user.getStatusEffect(StatusEffects.HASTE).getAmplifier() * 20);
-            user.addStatusEffect(new StatusEffectInstance(StatusEffects.STRENGTH, a, 1), user);
+            user.addStatusEffect(new StatusEffectInstance(StatusEffects.STRENGTH, a, strength_tier), user);
             user.swingHand(hand);
             user.removeStatusEffect(StatusEffects.HASTE);
             world.playSound(null, user.getBlockPos(), SoundEvents.BLOCK_MEDIUM_AMETHYST_BUD_BREAK, SoundCategory.BLOCKS, 1f, 1.5f);

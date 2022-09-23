@@ -18,11 +18,13 @@ public class WildfireEffect extends StatusEffect {
         if (!pLivingEntity.world.isClient()) {
             ServerWorld world = (ServerWorld)pLivingEntity.world;
             BlockPos position = pLivingEntity.getBlockPos();
+            int hradius = (int) (SimplySwordsConfig.getFloatValue("wildfire_radius"));
+            int vradius = (int) (SimplySwordsConfig.getFloatValue("wildfire_radius") / 2);
             double x = pLivingEntity.getX();
             double y = pLivingEntity.getY();
             double z = pLivingEntity.getZ();
-            int pduration = (int) SimplySwordsConfig.getFloatValue("wildfire_duration");
-            Box box = new Box(x + 10, y +5, z + 10, x - 10, y - 5, z - 10);
+            int pduration = (int) SimplySwordsConfig.getFloatValue("wildfire_duration") / 20;
+            Box box = new Box(x + hradius, y +vradius, z + hradius, x - hradius, y - vradius, z - hradius);
 
             for(Entity e: world.getEntitiesByType(pLivingEntity.getType(), box, EntityPredicates.VALID_ENTITY))
             {

@@ -34,6 +34,7 @@ public class RendSwordItem extends SwordItem {
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         int fhitchance = (int) SimplySwordsConfig.getFloatValue("soulrend_chance");
         int fduration = (int) SimplySwordsConfig.getFloatValue("soulrend_duration");
+        int maxstacks = (int) SimplySwordsConfig.getFloatValue("soulrend_max_stacks");
 
 
         if (attacker.getRandom().nextInt(100) <= fhitchance) {
@@ -52,7 +53,7 @@ public class RendSwordItem extends SwordItem {
 
                 int a = (target.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier() + 1);
 
-                if ((target.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier() <= 7)) {
+                if ((target.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier() < maxstacks)) {
                     target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, fduration, a), attacker);
                 }
             } else {
@@ -67,11 +68,15 @@ public class RendSwordItem extends SwordItem {
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
 
         if (!user.world.isClient()) {
+            int rend_damage = (int) (SimplySwordsConfig.getFloatValue("soulrend_rend_damage_multiplier"));
+            int heal_amount = (int) (SimplySwordsConfig.getFloatValue("soulrend_rend_heal_multiplier"));
+            int hradius = (int) (SimplySwordsConfig.getFloatValue("soulrend_radius"));
+            int vradius = (int) (SimplySwordsConfig.getFloatValue("soulrend_radius") / 2);
             double x = user.getX();
             double y = user.getY();
             double z = user.getZ();
             ServerWorld sworld = (ServerWorld) user.world;
-            Box box = new Box(x + 10, y + 5, z + 10, x - 10, y - 5, z - 10);
+            Box box = new Box(x + hradius, y + vradius, z + hradius, x - hradius, y - vradius, z - hradius);
 
             for(Entity ee: sworld.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY)) {
 
@@ -80,8 +85,8 @@ public class RendSwordItem extends SwordItem {
                         LivingEntity le = (LivingEntity) ee;
 
                          if (le.hasStatusEffect(StatusEffects.SLOWNESS) && le.hasStatusEffect(StatusEffects.WEAKNESS)) {
-                             user.heal(le.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier() / 2);
-                             le.damage(DamageSource.FREEZE, le.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier() * 2);
+                             user.heal(le.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier() * heal_amount);
+                             le.damage(DamageSource.FREEZE, le.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier() * rend_damage);
                              le.removeStatusEffect(StatusEffects.WEAKNESS);
                              le.removeStatusEffect(StatusEffects.SLOWNESS);
                              world.playSoundFromEntity (null, ee, SimplySwords.EVENT_OMEN_ONE , SoundCategory.BLOCKS, 0.1f, 2f);

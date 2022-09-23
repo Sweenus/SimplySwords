@@ -21,15 +21,15 @@ public class WatcherEffect extends StatusEffect {
         if (!pLivingEntity.world.isClient()) {
             ServerWorld world = (ServerWorld)pLivingEntity.world;
             BlockPos position = pLivingEntity.getBlockPos();
+            int hradius = (int) (SimplySwordsConfig.getFloatValue("watcher_radius"));
+            int vradius = (int) (SimplySwordsConfig.getFloatValue("watcher_radius") / 2);
             double x = pLivingEntity.getX();
             double y = pLivingEntity.getY();
             double z = pLivingEntity.getZ();
-            int pduration = 1;
             float rAmount = SimplySwordsConfig.getFloatValue("watcher_restore_amount");
-            Box box = new Box(x + 8, y +8, z + 8, x - 8, y - 8, z - 8);
+            Box box = new Box(x + hradius, y +vradius, z + hradius, x - hradius, y - vradius, z - hradius);
             var pPlayer = pLivingEntity.getAttacker();
 
-            //for(Entity e: world.getEntitiesByType(pLivingEntity.getType(), box, EntityPredicates.VALID_ENTITY))
             for(Entity e: world.getOtherEntities(pPlayer, box, EntityPredicates.VALID_ENTITY))
             {
                 if (e != null && pPlayer != null){

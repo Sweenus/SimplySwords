@@ -21,7 +21,6 @@ public class PlagueEffect extends StatusEffect {
             double y = pLivingEntity.getY();
             double z = pLivingEntity.getZ();
             var attacker = pLivingEntity.getAttacker();
-            //int spreadchance = SimplySwordsConfig.getIntValue("plague_spread_chance");
 
             if (pLivingEntity.getRandom().nextInt(100) <= 10) {
                     Box box = new Box(x + 10, y + 5, z + 10, x - 10, y - 5, z - 10);

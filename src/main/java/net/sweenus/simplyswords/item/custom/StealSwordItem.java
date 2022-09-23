@@ -59,19 +59,23 @@ public class StealSwordItem extends SwordItem {
 
 
         if (!user.world.isClient()) {
+            int sradius = (int) SimplySwordsConfig.getFloatValue("steal_radius");
+            int vradius = (int) (SimplySwordsConfig.getFloatValue("steal_radius") / 2);
             double x = user.getX();
             double y = user.getY();
             double z = user.getZ();
             ServerWorld sworld = (ServerWorld) user.world;
-            Box box = new Box(x + 30, y + 5, z + 30, x - 30, y - 5, z - 30);
+            Box box = new Box(x + sradius, y + vradius, z + sradius, x - sradius, y - vradius, z - sradius);
             for(Entity ee: sworld.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY)) {
 
                 if (ee != null) {
                     if (ee instanceof LivingEntity) {
                         LivingEntity le = (LivingEntity) ee;
+                        int iduration = (int) SimplySwordsConfig.getFloatValue("steal_invis_duration");
+                        int bduration = (int) SimplySwordsConfig.getFloatValue("steal_blind_duration");
 
                         if (le.hasStatusEffect(StatusEffects.SLOWNESS) && le.hasStatusEffect(StatusEffects.GLOWING) && le.distanceTo(user) > 5){ //can we check target here?
-                            le.addStatusEffect(new StatusEffectInstance(StatusEffects.BLINDNESS, 200, 1), user);
+                            le.addStatusEffect(new StatusEffectInstance(StatusEffects.BLINDNESS, bduration, 1), user);
                             user.teleport(le.getX(), le.getY(), le.getZ());
                             sworld.playSoundFromEntity (null, le, SimplySwords.EVENT_OMEN_TWO , SoundCategory.BLOCKS, 0.3f, 1.5f);
                             le.damage(DamageSource.FREEZE, 5f);
@@ -79,7 +83,7 @@ public class StealSwordItem extends SwordItem {
                             le.removeStatusEffect(StatusEffects.GLOWING);
                         }
                         if (le.hasStatusEffect(StatusEffects.SLOWNESS) && le.hasStatusEffect(StatusEffects.GLOWING) && le.distanceTo(user) <= 5){
-                            user.addStatusEffect(new StatusEffectInstance(StatusEffects.INVISIBILITY, 120, 1), user);
+                            user.addStatusEffect(new StatusEffectInstance(StatusEffects.INVISIBILITY, iduration, 1), user);
                             user.setVelocity(user.getRotationVector().multiply(+2));
                             user.velocityModified = true;
                             sworld.playSoundFromEntity (null, ee, SimplySwords.EVENT_OMEN_TWO , SoundCategory.BLOCKS, 0.3f, 1.5f);

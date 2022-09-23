@@ -58,18 +58,20 @@ public class SoulSwordItem extends SwordItem {
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
 
         if (!user.world.isClient()) {
+            int hradius = (int) SimplySwordsConfig.getFloatValue("soulmeld_radius");
+            int vradius = (int) (SimplySwordsConfig.getFloatValue("soulmeld_radius") / 2);
             double x = user.getX();
             double y = user.getY();
             double z = user.getZ();
             ServerWorld sworld = (ServerWorld) user.world;
-            Box box = new Box(x + 5, y + 5, z + 5, x - 5, y - 5, z - 5);
+            Box box = new Box(x + hradius, y + vradius, z + hradius, x - hradius, y - vradius, z - hradius);
 
             for(Entity ee: sworld.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY)) {
 
                 if (ee != null) {
                     if (ee instanceof LivingEntity && user.hasStatusEffect(StatusEffects.MINING_FATIGUE)){
                         LivingEntity le = (LivingEntity) ee;
-                        le.addStatusEffect(new StatusEffectInstance(StatusEffects.MINING_FATIGUE, 250, user.getStatusEffect(StatusEffects.MINING_FATIGUE).getAmplifier()) , user);
+                        le.addStatusEffect(new StatusEffectInstance(StatusEffects.MINING_FATIGUE, user.getStatusEffect(StatusEffects.MINING_FATIGUE).getDuration(), user.getStatusEffect(StatusEffects.MINING_FATIGUE).getAmplifier()) , user);
                         world.playSoundFromEntity (null, ee, SimplySwords.EVENT_OMEN_TWO , SoundCategory.BLOCKS, 0.2f, 2f);
                     }
                 }
