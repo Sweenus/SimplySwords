@@ -403,6 +403,7 @@ public class SimplySwordsConfig {
         for (String item : WEAPON_OPTIONS.keySet()) {
             if (i == 0) {
                 config.append("// -- WEAPON ATTRIBUTES CONFIGURATION -- \n");
+                config.append("// These values should be THE SAME ON BOTH CLIENT AND SERVER, otherwise damage tooltips will display incorrect on the client \n");
                 config.append("// The damage values of weapons can be modified by adjusting their weights \n");
                 config.append("// This is not the outputted damage value you see in game, but it affects it directly \n");
                 config.append("// Calculation: vanilla tool material damage + base_modifier + positive_modifier - negative_modifier = actual modifier \n");
