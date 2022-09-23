@@ -34,7 +34,8 @@
     "java": ">=17"
   },
   "suggests": {
-    "mythicmetals": ">=0.15.2"
+    "mythicmetals": ">=0.15.2",
+    "gobber2": ">=2.6.43"
   },
   "recommends": {
     "bettercombat": ">=1.3.2"
