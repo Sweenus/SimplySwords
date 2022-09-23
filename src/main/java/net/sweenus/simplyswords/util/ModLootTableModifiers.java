@@ -44,7 +44,7 @@ public class ModLootTableModifiers {
                 //STANDARD POOL
                 LootPool.Builder pool = LootPool.builder()
                         .rolls(ConstantLootNumberProvider.create(1))
-                        .conditionally(RandomChanceLootCondition.builder(SimplySwordsConfig.getFloatValue("standard_loot_table_weight"))) // 1 = 100% of the time
+                        .conditionally(RandomChanceLootCondition.builder(SimplySwordsConfig.getGeneralSettings("standard_loot_table_weight"))) // 1 = 100% of the time
                         .apply(EnchantRandomlyLootFunction.builder())
                         .with(ItemEntry.builder(ModItems.IRON_LONGSWORD))
                         .with(ItemEntry.builder(ModItems.IRON_TWINBLADE))
@@ -77,7 +77,7 @@ public class ModLootTableModifiers {
                 //RARE POOL
                 LootPool.Builder rpool = LootPool.builder()
                         .rolls(ConstantLootNumberProvider.create(1))
-                        .conditionally(RandomChanceLootCondition.builder(SimplySwordsConfig.getFloatValue("rare_loot_table_weight"))) // 1 = 100% of the time
+                        .conditionally(RandomChanceLootCondition.builder(SimplySwordsConfig.getGeneralSettings("rare_loot_table_weight"))) // 1 = 100% of the time
                         .apply(EnchantRandomlyLootFunction.builder())
                         .with(ItemEntry.builder(ModItems.RUNIC_CLAYMORE))
                         .with(ItemEntry.builder(ModItems.RUNIC_TWINBLADE))
@@ -109,7 +109,7 @@ public class ModLootTableModifiers {
                 //UNIQUE POOL
                 LootPool.Builder upool = LootPool.builder()
                         .rolls(ConstantLootNumberProvider.create(1))
-                        .conditionally(RandomChanceLootCondition.builder(SimplySwordsConfig.getFloatValue("unique_loot_table_weight"))) // 1 = 100% of the time
+                        .conditionally(RandomChanceLootCondition.builder(SimplySwordsConfig.getGeneralSettings("unique_loot_table_weight"))) // 1 = 100% of the time
                         .with(ItemEntry.builder(ModItems.WATCHER_CLAYMORE))
                         .with(ItemEntry.builder(ModItems.TOXIC_LONGSWORD))
                         .with(ItemEntry.builder(ModItems.SWORD_ON_A_STICK))

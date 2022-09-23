@@ -24,7 +24,7 @@ public class VolcanicFurySwordItem extends SwordItem {
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        int fhitchance = SimplySwordsConfig.getIntValue("volcanic_fury_chance");
+        int fhitchance = (int) SimplySwordsConfig.getFloatValue("volcanic_fury_chance");
 
 
         if (attacker.getRandom().nextInt(100) <= fhitchance) {

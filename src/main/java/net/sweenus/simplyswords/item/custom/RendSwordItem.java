@@ -32,8 +32,8 @@ public class RendSwordItem extends SwordItem {
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        int fhitchance = SimplySwordsConfig.getIntValue("soulrend_chance");
-        int fduration = SimplySwordsConfig.getIntValue("soulrend_duration");
+        int fhitchance = (int) SimplySwordsConfig.getFloatValue("soulrend_chance");
+        int fduration = (int) SimplySwordsConfig.getFloatValue("soulrend_duration");
 
 
         if (attacker.getRandom().nextInt(100) <= fhitchance) {

@@ -23,8 +23,8 @@ public class PoisonSwordItem extends SwordItem {
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
 
-        int phitchance = SimplySwordsConfig.getIntValue("toxin_chance");
-        int pduration = SimplySwordsConfig.getIntValue("toxin_duration");
+        int phitchance = (int) SimplySwordsConfig.getFloatValue("toxin_chance");
+        int pduration = (int) SimplySwordsConfig.getFloatValue("toxin_duration");
 
         if (attacker.getRandom().nextInt(100) <= phitchance) {
             target.addStatusEffect(new StatusEffectInstance(StatusEffects.WITHER, pduration, 2), attacker);

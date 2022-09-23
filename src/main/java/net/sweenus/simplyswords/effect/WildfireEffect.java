@@ -21,7 +21,7 @@ public class WildfireEffect extends StatusEffect {
             double x = pLivingEntity.getX();
             double y = pLivingEntity.getY();
             double z = pLivingEntity.getZ();
-            int pduration = SimplySwordsConfig.getIntValue("wildfire_duration");
+            int pduration = (int) SimplySwordsConfig.getFloatValue("wildfire_duration");
             Box box = new Box(x + 10, y +5, z + 10, x - 10, y - 5, z - 10);
 
             for(Entity e: world.getEntitiesByType(pLivingEntity.getType(), box, EntityPredicates.VALID_ENTITY))

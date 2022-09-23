@@ -23,8 +23,8 @@ public class WildfireSwordItem extends SwordItem {
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
 
-        int phitchance = SimplySwordsConfig.getIntValue("wildfire_chance");
-        int pduration = SimplySwordsConfig.getIntValue("wildfire_duration");
+        int phitchance = (int) SimplySwordsConfig.getFloatValue("wildfire_chance");
+        int pduration = (int) SimplySwordsConfig.getFloatValue("wildfire_duration");
 
         if (attacker.getRandom().nextInt(100) <= phitchance) {
             target.addStatusEffect(new StatusEffectInstance(ModEffects.WILDFIRE, pduration, 3), attacker);

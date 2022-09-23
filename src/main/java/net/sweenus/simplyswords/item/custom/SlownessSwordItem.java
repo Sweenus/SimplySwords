@@ -23,8 +23,8 @@ public class SlownessSwordItem extends SwordItem {
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
 
-        int shitchance = SimplySwordsConfig.getIntValue("slowness_chance");
-        int sduration = SimplySwordsConfig.getIntValue("slowness_duration");
+        int shitchance = (int) SimplySwordsConfig.getFloatValue("slowness_chance");
+        int sduration = (int) SimplySwordsConfig.getFloatValue("slowness_duration");
 
         if (attacker.getRandom().nextInt(100) <= shitchance) {
             target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, sduration, 3), attacker);

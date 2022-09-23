@@ -24,9 +24,9 @@ public class FreezeSwordItem extends SwordItem {
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        int fhitchance = SimplySwordsConfig.getIntValue("freeze_chance");
-        int fduration = SimplySwordsConfig.getIntValue("freeze_duration");
-        int sduration = SimplySwordsConfig.getIntValue("slowness_duration");
+        int fhitchance = (int) SimplySwordsConfig.getFloatValue("freeze_chance");
+        int fduration = (int) SimplySwordsConfig.getFloatValue("freeze_duration");
+        int sduration = (int) SimplySwordsConfig.getFloatValue("slowness_duration");
 
         target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, sduration, 1), attacker);
 

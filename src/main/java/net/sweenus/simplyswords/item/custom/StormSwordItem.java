@@ -23,7 +23,7 @@ public class StormSwordItem extends SwordItem {
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
 
-        int phitchance = SimplySwordsConfig.getIntValue("storm_chance");
+        int phitchance = (int) SimplySwordsConfig.getFloatValue("storm_chance");
 
         if (attacker.getRandom().nextInt(100) <= phitchance) {
                 target.addStatusEffect(new StatusEffectInstance(ModEffects.STORM, 2, 1), attacker);

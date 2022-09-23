@@ -32,8 +32,8 @@ public class SoulSwordItem extends SwordItem {
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        int fhitchance = SimplySwordsConfig.getIntValue("soulmeld_chance");
-        int fduration = SimplySwordsConfig.getIntValue("soulmeld_duration");
+        int fhitchance = (int) SimplySwordsConfig.getFloatValue("soulmeld_chance");
+        int fduration = (int) SimplySwordsConfig.getFloatValue("soulmeld_duration");
 
 
         if (attacker.getRandom().nextInt(100) <= fhitchance) {

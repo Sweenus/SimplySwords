@@ -23,8 +23,8 @@ public class LevitationSwordItem extends SwordItem {
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
 
-        int lhitchance = SimplySwordsConfig.getIntValue("levitation_chance");
-        int lduration = SimplySwordsConfig.getIntValue("levitation_duration");
+        int lhitchance = (int) SimplySwordsConfig.getFloatValue("levitation_chance");
+        int lduration = (int) SimplySwordsConfig.getFloatValue("levitation_duration");
 
         if (attacker.getRandom().nextInt(100) <= lhitchance) {
             target.addStatusEffect(new StatusEffectInstance(StatusEffects.LEVITATION, lduration, 3), attacker);

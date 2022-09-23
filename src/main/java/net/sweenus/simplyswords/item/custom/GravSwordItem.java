@@ -33,8 +33,8 @@ public class GravSwordItem extends SwordItem {
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        int fhitchance = SimplySwordsConfig.getIntValue("gravity_chance");
-        int fduration = SimplySwordsConfig.getIntValue("gravity_duration");
+        int fhitchance = (int) SimplySwordsConfig.getFloatValue("gravity_chance");
+        int fduration = (int) SimplySwordsConfig.getFloatValue("gravity_duration");
         attacker.setVelocity(attacker.getRotationVector().multiply(+1));
         attacker.velocityModified = true;
 

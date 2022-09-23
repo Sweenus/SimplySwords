@@ -27,8 +27,8 @@ public class HasteSwordItem extends SwordItem {
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        int fhitchance = SimplySwordsConfig.getIntValue("ferocity_chance");
-        int fduration = SimplySwordsConfig.getIntValue("ferocity_duration");
+        int fhitchance = (int) SimplySwordsConfig.getFloatValue("ferocity_chance");
+        int fduration = (int) SimplySwordsConfig.getFloatValue("ferocity_duration");
 
 
         if (attacker.getRandom().nextInt(100) <= fhitchance) {

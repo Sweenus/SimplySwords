@@ -23,8 +23,8 @@ public class WatcherSwordItem extends SwordItem {
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
 
-        int thitchance = SimplySwordsConfig.getIntValue("watcher_chance");
-        int phitchance = SimplySwordsConfig.getIntValue("omen_chance");
+        int thitchance = (int) SimplySwordsConfig.getFloatValue("watcher_chance");
+        int phitchance = (int) SimplySwordsConfig.getFloatValue("omen_chance");
 
         if (attacker.getRandom().nextInt(100) <= thitchance) {
             target.addStatusEffect(new StatusEffectInstance(ModEffects.WATCHER, 1, 1), attacker);

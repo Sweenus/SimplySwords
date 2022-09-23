@@ -19,6 +19,7 @@ public class ModItems {
     static float gold_modifier = (int)SimplySwordsConfig.getWeaponAttributes("gold_damage_modifier");
     static float diamond_modifier = (int)SimplySwordsConfig.getWeaponAttributes("diamond_damage_modifier");
     static float netherite_modifier = (int)SimplySwordsConfig.getWeaponAttributes("netherite_damage_modifier");
+    static float runic_modifier = (int)SimplySwordsConfig.getWeaponAttributes("runic_damage_modifier");
 
 
     static float longsword_positive_modifier = SimplySwordsConfig.getWeaponAttributes("longsword_positive_damage_modifier");
@@ -53,7 +54,7 @@ public class ModItems {
 
     static float longsword_attackspeed = SimplySwordsConfig.getWeaponAttributes("longsword_attackspeed");
     static float twinblade_attackspeed = SimplySwordsConfig.getWeaponAttributes("twinblade_attackspeed");
-    static float rapier_attackspeed = SimplySwordsConfig.getWeaponAttributes("twinblade_attackspeed");
+    static float rapier_attackspeed = SimplySwordsConfig.getWeaponAttributes("rapier_attackspeed");
     static float sai_attackspeed = SimplySwordsConfig.getWeaponAttributes("sai_attackspeed");
     static float spear_attackspeed = SimplySwordsConfig.getWeaponAttributes("spear_attackspeed");
     static float katana_attackspeed = SimplySwordsConfig.getWeaponAttributes("katana_attackspeed");
@@ -65,6 +66,38 @@ public class ModItems {
     static float greathammer_attackspeed = SimplySwordsConfig.getWeaponAttributes("greathammer_attackspeed");
     static float chakram_attackspeed = SimplySwordsConfig.getWeaponAttributes("chakram_attackspeed");
     static float scythe_attackspeed = SimplySwordsConfig.getWeaponAttributes("scythe_attackspeed");
+
+    static float brimstone_attackspeed = SimplySwordsConfig.getWeaponAttributes("brimstone_attackspeed");
+    static float thewatcher_attackspeed = SimplySwordsConfig.getWeaponAttributes("thewatcher_attackspeed");
+    static float stormsedge_attackspeed = SimplySwordsConfig.getWeaponAttributes("stormsedge_attackspeed");
+    static float stormbringer_attackspeed = SimplySwordsConfig.getWeaponAttributes("stormbringer_attackspeed");
+    static float swordonastick_attackspeed = SimplySwordsConfig.getWeaponAttributes("swordonastick_attackspeed");
+    static float bramblethorn_attackspeed = SimplySwordsConfig.getWeaponAttributes("bramblethorn_attackspeed");
+    static float watchingwarglaive_attackspeed = SimplySwordsConfig.getWeaponAttributes("watchingwarglaive_attackspeed");
+    static float longswordofplague_attackspeed = SimplySwordsConfig.getWeaponAttributes("longswordofplague_attackspeed");
+    static float emberblade_attackspeed = SimplySwordsConfig.getWeaponAttributes("emberblade_attackspeed");
+    static float hearthflame_attackspeed = SimplySwordsConfig.getWeaponAttributes("hearthflame_attackspeed");
+    static float soulkeeper_attackspeed = SimplySwordsConfig.getWeaponAttributes("soulkeeper_attackspeed");
+    static float twistedblade_attackspeed = SimplySwordsConfig.getWeaponAttributes("twistedblade_attackspeed");
+    static float soulstealer_attackspeed = SimplySwordsConfig.getWeaponAttributes("soulstealer_attackspeed");
+    static float soulrender_attackspeed = SimplySwordsConfig.getWeaponAttributes("soulrender_attackspeed");
+    static float mjolnir_attackspeed = SimplySwordsConfig.getWeaponAttributes("mjolnir_attackspeed");
+
+    static float brimstone_damage_modifier = SimplySwordsConfig.getWeaponAttributes("brimstone_damage_modifier");
+    static float thewatcher_damage_modifier = SimplySwordsConfig.getWeaponAttributes("thewatcher_damage_modifier");
+    static float stormsedge_damage_modifier = SimplySwordsConfig.getWeaponAttributes("stormsedge_damage_modifier");
+    static float stormbringer_damage_modifier = SimplySwordsConfig.getWeaponAttributes("stormbringer_damage_modifier");
+    static float swordonastick_damage_modifier = SimplySwordsConfig.getWeaponAttributes("swordonastick_damage_modifier");
+    static float bramblethorn_damage_modifier = SimplySwordsConfig.getWeaponAttributes("bramblethorn_damage_modifier");
+    static float watchingwarglaive_damage_modifier = SimplySwordsConfig.getWeaponAttributes("watchingwarglaive_damage_modifier");
+    static float longswordofplague_damage_modifier = SimplySwordsConfig.getWeaponAttributes("longswordofplague_damage_modifier");
+    static float emberblade_damage_modifier = SimplySwordsConfig.getWeaponAttributes("emberblade_damage_modifier");
+    static float hearthflame_damage_modifier = SimplySwordsConfig.getWeaponAttributes("hearthflame_damage_modifier");
+    static float soulkeeper_damage_modifier = SimplySwordsConfig.getWeaponAttributes("soulkeeper_damage_modifier");
+    static float twistedblade_damage_modifier = SimplySwordsConfig.getWeaponAttributes("twistedblade_damage_modifier");
+    static float soulstealer_damage_modifier = SimplySwordsConfig.getWeaponAttributes("soulstealer_damage_modifier");
+    static float soulrender_damage_modifier = SimplySwordsConfig.getWeaponAttributes("soulrender_damage_modifier");
+    static float mjolnir_damage_modifier = SimplySwordsConfig.getWeaponAttributes("mjolnir_damage_modifier");
 
 
     //IRON
@@ -452,102 +485,152 @@ public class ModItems {
 
     //RUNIC
     public static final Item RUNIC_LONGSWORD = registerItem( "runic_longsword",
-            new FreezeSwordItem(ToolMaterials.NETHERITE, 3, -2.4f,
+            new FreezeSwordItem(ToolMaterials.NETHERITE,
+                    (int) (runic_modifier + longsword_positive_modifier - longsword_negative_modifier),
+                    longsword_attackspeed,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.RARE)));
 
     public static final Item RUNIC_TWINBLADE = registerItem( "runic_twinblade",
-            new WildfireSwordItem(ToolMaterials.NETHERITE, 3, -1.7f,
+            new WildfireSwordItem(ToolMaterials.NETHERITE,
+                    (int) (runic_modifier + twinblade_positive_modifier - twinblade_negative_modifier),
+                    twinblade_attackspeed,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.RARE)));
 
     public static final Item RUNIC_RAPIER = registerItem( "runic_rapier",
-            new SpeedSwordItem(ToolMaterials.NETHERITE, 2, -1.6f,
+            new SpeedSwordItem(ToolMaterials.NETHERITE,
+                    (int) (runic_modifier + rapier_positive_modifier - rapier_negative_modifier),
+                    rapier_attackspeed,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.RARE)));
 
     public static final Item RUNIC_KATANA = registerItem( "runic_katana",
-            new WildfireSwordItem(ToolMaterials.NETHERITE, 3, -2f,
+            new WildfireSwordItem(ToolMaterials.NETHERITE,
+                    (int) (runic_modifier + katana_positive_modifier - katana_negative_modifier),
+                    katana_attackspeed,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.RARE)));
 
     public static final Item RUNIC_SAI = registerItem( "runic_sai",
-            new SlownessSwordItem(ToolMaterials.NETHERITE, 0, -1.1f,
+            new SlownessSwordItem(ToolMaterials.NETHERITE,
+                    (int) (runic_modifier + sai_positive_modifier - sai_negative_modifier),
+                    sai_attackspeed,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.RARE)));
 
     public static final Item RUNIC_SPEAR = registerItem( "runic_spear",
-            new FreezeSwordItem(ToolMaterials.NETHERITE, 3, -2.6f,
+            new FreezeSwordItem(ToolMaterials.NETHERITE,
+                    (int) (runic_modifier + spear_positive_modifier - spear_negative_modifier),
+                    spear_attackspeed,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.RARE)));
 
     public static final Item RUNIC_GLAIVE = registerItem( "runic_glaive",
-            new WildfireSwordItem(ToolMaterials.NETHERITE, 3, -2.6f,
+            new WildfireSwordItem(ToolMaterials.NETHERITE,
+                    (int) (runic_modifier + glaive_positive_modifier - glaive_negative_modifier),
+                    glaive_attackspeed,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.RARE)));
 
     public static final Item RUNIC_CUTLASS = registerItem( "runic_cutlass",
-            new LevitationSwordItem(ToolMaterials.NETHERITE, 3, -2f,
+            new LevitationSwordItem(ToolMaterials.NETHERITE,
+                    (int) (runic_modifier + cutlass_positive_modifier - cutlass_negative_modifier),
+                    cutlass_attackspeed,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.RARE)));
     public static final Item RUNIC_CLAYMORE = registerItem( "runic_claymore",
-            new FreezeSwordItem(ToolMaterials.NETHERITE, 6, -2.8f,
+            new FreezeSwordItem(ToolMaterials.NETHERITE,
+                    (int) (runic_modifier + claymore_positive_modifier - claymore_negative_modifier),
+                    claymore_attackspeed,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.RARE)));
 
     public static final Item RUNIC_CHAKRAM = registerItem( "runic_chakram",
-            new SpeedSwordItem(ToolMaterials.NETHERITE, 3, -3f,
+            new SpeedSwordItem(ToolMaterials.NETHERITE,
+                    (int) (runic_modifier + chakram_positive_modifier - chakram_negative_modifier),
+                    chakram_attackspeed,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.RARE)));
 
     public static final Item RUNIC_GREATAXE = registerItem( "runic_greataxe",
-            new FreezeSwordItem(ToolMaterials.NETHERITE, 7, -3.1f,
+            new FreezeSwordItem(ToolMaterials.NETHERITE,
+                    (int) (runic_modifier + greataxe_positive_modifier - greataxe_negative_modifier),
+                    greataxe_attackspeed,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.RARE)));
 
     public static final Item RUNIC_GREATHAMMER = registerItem( "runic_greathammer",
-            new WildfireSwordItem(ToolMaterials.NETHERITE, 8, -3.2f,
+            new WildfireSwordItem(ToolMaterials.NETHERITE,
+                    (int) (runic_modifier + greathammer_positive_modifier - greathammer_negative_modifier),
+                    greathammer_attackspeed,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.RARE)));
 
     public static final Item RUNIC_SCYTHE = registerItem( "runic_scythe",
-            new LevitationSwordItem(ToolMaterials.NETHERITE, 4, -2.7f,
+            new LevitationSwordItem(ToolMaterials.NETHERITE,
+                    (int) (runic_modifier + scythe_positive_modifier - scythe_negative_modifier),
+                    scythe_attackspeed,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.RARE)));
 
 //SPECIAL
     public static final Item BRIMSTONE_CLAYMORE = registerItem( "brimstone_claymore",
-            new FireSwordItem(ToolMaterials.NETHERITE, 6, -2.8f,
+            new FireSwordItem(ToolMaterials.NETHERITE,
+                    (int) (brimstone_damage_modifier),
+                    brimstone_attackspeed,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
     public static final Item WATCHER_CLAYMORE = registerItem( "watcher_claymore",
-            new WatcherSwordItem(ToolMaterials.NETHERITE, 6, -2.8f,
+            new WatcherSwordItem(ToolMaterials.NETHERITE,
+                    (int) (thewatcher_damage_modifier),
+                    thewatcher_attackspeed,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
     public static final Item STORMS_EDGE = registerItem( "storms_edge",
-            new StormSwordItem(ToolMaterials.NETHERITE, 3, -1.7f,
+            new StormSwordItem(ToolMaterials.NETHERITE,
+                    (int) (stormsedge_damage_modifier),
+                    stormsedge_attackspeed,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
     public static final Item STORMBRINGER = registerItem( "stormbringer",
-            new StormSwordItem(ToolMaterials.NETHERITE, 3, -2.4f,
+            new StormSwordItem(ToolMaterials.NETHERITE,
+                    (int) (stormbringer_damage_modifier),
+                    stormbringer_attackspeed,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
     public static final Item SWORD_ON_A_STICK = registerItem( "sword_on_a_stick",
-            new SwordItem(ToolMaterials.WOOD, 5, -2.6f,
+            new SwordItem(ToolMaterials.WOOD,
+                    (int) (swordonastick_damage_modifier),
+                    swordonastick_attackspeed,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
     public static final Item BRAMBLETHORN = registerItem( "bramblethorn",
-            new BrambleSwordItem(ToolMaterials.WOOD, 6, -1.6f,
+            new BrambleSwordItem(ToolMaterials.WOOD,
+                    (int) (bramblethorn_damage_modifier),
+                    bramblethorn_attackspeed,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
     public static final Item WATCHING_WARGLAIVE = registerItem( "watching_warglaive",
-            new WatcherSwordItem(ToolMaterials.NETHERITE, 3, -2.2f,
+            new WatcherSwordItem(ToolMaterials.NETHERITE,
+                    (int) (watchingwarglaive_damage_modifier),
+                    watchingwarglaive_attackspeed,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
     public static final Item TOXIC_LONGSWORD = registerItem( "toxic_longsword",
-            new PlagueSwordItem(ToolMaterials.NETHERITE, 3, -2.4f,
+            new PlagueSwordItem(ToolMaterials.NETHERITE,
+                    (int) (longswordofplague_damage_modifier),
+                    longswordofplague_attackspeed,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
     public static final Item EMBERBLADE = registerItem( "emberblade",
-            new EmberIreSwordItem(ToolMaterials.NETHERITE, 3, -2.4f,
+            new EmberIreSwordItem(ToolMaterials.NETHERITE,
+                    (int) (emberblade_damage_modifier),
+                    emberblade_attackspeed,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
     public static final Item HEARTHFLAME = registerItem( "hearthflame",
-            new VolcanicFurySwordItem(ToolMaterials.NETHERITE, 8, -3.2f,
+            new VolcanicFurySwordItem(ToolMaterials.NETHERITE,
+                    (int) (hearthflame_damage_modifier),
+                    hearthflame_attackspeed,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
     public static final Item SOULKEEPER = registerItem( "soulkeeper",
-            new SoulSwordItem(ToolMaterials.NETHERITE, 8, -2.9f,
+            new SoulSwordItem(ToolMaterials.NETHERITE,
+                    (int) (soulkeeper_damage_modifier),
+                    soulkeeper_attackspeed,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
     public static final Item TWISTED_BLADE = registerItem( "twisted_blade",
-            new HasteSwordItem(ToolMaterials.NETHERITE, 4, -2.6f,
+            new HasteSwordItem(ToolMaterials.NETHERITE,
+                    (int) (twistedblade_damage_modifier),
+                    twistedblade_attackspeed,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
     //public static final Item TWILIGHT = registerItem( "twilight",
@@ -555,11 +638,15 @@ public class ModItems {
                     //new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
     public static final Item SOULSTEALER = registerItem( "soulstealer",
-            new StealSwordItem(ToolMaterials.NETHERITE, 0, -1.1f,
+            new StealSwordItem(ToolMaterials.NETHERITE,
+                    (int) (soulstealer_damage_modifier),
+                    soulstealer_attackspeed,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
     public static final Item SOULRENDER = registerItem( "soulrender",
-            new RendSwordItem(ToolMaterials.NETHERITE, 4, -2.4f,
+            new RendSwordItem(ToolMaterials.NETHERITE,
+                    (int) (soulrender_damage_modifier),
+                    soulrender_attackspeed,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
 
@@ -569,7 +656,9 @@ public class ModItems {
                     //new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
     public static final Item MJOLNIR = registerItem( "mjolnir",
-            new StormSwordItem(ToolMaterials.NETHERITE, 3, -3f,
+            new StormSwordItem(ToolMaterials.NETHERITE,
+                    (int) (mjolnir_damage_modifier),
+                    mjolnir_attackspeed,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
     private static Item registerItem(String name, Item item) {

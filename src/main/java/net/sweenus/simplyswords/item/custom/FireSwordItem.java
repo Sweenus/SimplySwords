@@ -22,7 +22,7 @@ public class FireSwordItem extends SwordItem {
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        int fhitchance = SimplySwordsConfig.getIntValue("brimstone_chance");
+        int fhitchance = (int) SimplySwordsConfig.getFloatValue("brimstone_chance");
 
 
         if (attacker.getRandom().nextInt(100) <= fhitchance) {

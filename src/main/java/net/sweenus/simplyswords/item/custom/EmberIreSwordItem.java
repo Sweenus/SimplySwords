@@ -34,8 +34,8 @@ public class EmberIreSwordItem extends SwordItem {
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        int fhitchance = SimplySwordsConfig.getIntValue("ember_ire_chance");
-        int fduration = SimplySwordsConfig.getIntValue("ember_ire_duration");
+        int fhitchance = (int) SimplySwordsConfig.getFloatValue("ember_ire_chance");
+        int fduration = (int) SimplySwordsConfig.getFloatValue("ember_ire_duration");
 
 
         if (attacker.getRandom().nextInt(100) <= fhitchance) {

@@ -25,7 +25,7 @@ public class BrambleSwordItem extends SwordItem {
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        int fhitchance = 50; //SimplySwordsConfig.getIntValue("brimstone_chance");
+        int fhitchance = 50; //SimplySwordsConfig.getFloatValue("brimstone_chance");
 
 
         if (attacker.getRandom().nextInt(100) <= fhitchance) {

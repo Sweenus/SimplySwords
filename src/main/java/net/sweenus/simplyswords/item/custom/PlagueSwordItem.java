@@ -23,7 +23,7 @@ public class PlagueSwordItem extends SwordItem {
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
 
-        int phitchance = SimplySwordsConfig.getIntValue("plague_chance");
+        int phitchance = (int) SimplySwordsConfig.getFloatValue("plague_chance");
 
         if (attacker.getRandom().nextInt(100) <= phitchance) {
 

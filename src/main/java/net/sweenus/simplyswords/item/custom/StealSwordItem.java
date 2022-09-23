@@ -36,8 +36,8 @@ public class StealSwordItem extends SwordItem {
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         if (!attacker.world.isClient()) {
             ServerWorld sworld = (ServerWorld) attacker.world;
-            int fhitchance = SimplySwordsConfig.getIntValue("steal_chance");
-            int fduration = SimplySwordsConfig.getIntValue("steal_duration");
+            int fhitchance = (int) SimplySwordsConfig.getFloatValue("steal_chance");
+            int fduration = (int) SimplySwordsConfig.getFloatValue("steal_duration");
             attacker.setVelocity(attacker.getRotationVector().multiply(+1));
             attacker.velocityModified = true;
 
