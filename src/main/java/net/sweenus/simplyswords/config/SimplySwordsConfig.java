@@ -193,6 +193,7 @@ public class SimplySwordsConfig {
         WEAPON_OPTIONS.put("soulstealer_damage_modifier", 0f);
         WEAPON_OPTIONS.put("soulrender_damage_modifier", 4f);
         WEAPON_OPTIONS.put("mjolnir_damage_modifier", 3f);
+        WEAPON_OPTIONS.put("thedispatcher_damage_modifier", 4f);
 
         WEAPON_OPTIONS.put("brimstone_attackspeed", -2.8f);
         WEAPON_OPTIONS.put("thewatcher_attackspeed", -2.8f);
@@ -209,7 +210,7 @@ public class SimplySwordsConfig {
         WEAPON_OPTIONS.put("soulstealer_attackspeed", -1.1f);
         WEAPON_OPTIONS.put("soulrender_attackspeed", -2.4f);
         WEAPON_OPTIONS.put("mjolnir_attackspeed", -3.0f);
-
+        WEAPON_OPTIONS.put("thedispatcher_attackspeed", -2.0f);
 
     }
 
@@ -442,7 +443,7 @@ public class SimplySwordsConfig {
                 config.append("// Example use-case: Adding 3 to a value below will INCREASE the in-game damage of that weapon by 3 \n");
                 config.append("// ---------------------- \n");
             }
-            if (i == 62) {
+            if (i == 63) {
                 config.append("\n");
                 config.append("// -- Attack Speed Modifiers -- \n");
                 config.append("// Recommended range: -1.0 to -3.7, with -1.0 being fast and -3.7 being slow \n");

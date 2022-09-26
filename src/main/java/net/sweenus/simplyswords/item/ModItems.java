@@ -81,6 +81,7 @@ public class ModItems {
     static float twistedblade_attackspeed = SimplySwordsConfig.getWeaponAttributes("twistedblade_attackspeed");
     static float soulstealer_attackspeed = SimplySwordsConfig.getWeaponAttributes("soulstealer_attackspeed");
     static float soulrender_attackspeed = SimplySwordsConfig.getWeaponAttributes("soulrender_attackspeed");
+    static float thedispatcher_attackspeed = SimplySwordsConfig.getWeaponAttributes("thedispatcher_attackspeed");
     static float mjolnir_attackspeed = SimplySwordsConfig.getWeaponAttributes("mjolnir_attackspeed");
 
     static float brimstone_damage_modifier = SimplySwordsConfig.getWeaponAttributes("brimstone_damage_modifier");
@@ -97,6 +98,7 @@ public class ModItems {
     static float twistedblade_damage_modifier = SimplySwordsConfig.getWeaponAttributes("twistedblade_damage_modifier");
     static float soulstealer_damage_modifier = SimplySwordsConfig.getWeaponAttributes("soulstealer_damage_modifier");
     static float soulrender_damage_modifier = SimplySwordsConfig.getWeaponAttributes("soulrender_damage_modifier");
+    static float thedispatcher_damage_modifier = SimplySwordsConfig.getWeaponAttributes("thedispatcher_damage_modifier");
     static float mjolnir_damage_modifier = SimplySwordsConfig.getWeaponAttributes("mjolnir_damage_modifier");
 
 
@@ -647,6 +649,11 @@ public class ModItems {
             new RendSwordItem(ToolMaterials.NETHERITE,
                     (int) (soulrender_damage_modifier),
                     soulrender_attackspeed,
+                    new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+    public static final Item THE_DISPATCHER = registerItem( "the_dispatcher",
+            new RendSwordItem(ToolMaterials.NETHERITE,
+                    (int) (thedispatcher_damage_modifier),
+                    thedispatcher_attackspeed,
                     new FabricItemSettings().group(ModItemGroup.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
 
