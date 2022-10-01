@@ -81,192 +81,180 @@ public class GobberCompat {
     static int gobber_nether_modifier = 3;
     static int gobber_end_modifier = 6;
 
+    //GOBBER
 
     public static final DeferredRegister<Item> GOBBER_ITEM = DeferredRegister.create(ForgeRegistries.ITEMS, SimplySwords.MOD_ID);
-    public static final RegistryObject<SimplySwordsSwordItem> GOBBER_LONGSWORD = GOBBER_ITEM.register("gobber_longsword", () ->
-            new SimplySwordsSwordItem(
-                    ToolMaterials.IRON,
-                    (int) (gobber_modifier + longsword_positive_modifier - longsword_negative_modifier),
-                    longsword_attackspeed,
-                    "gobber2:gobber2_ingot"));
-    //GOBBER
-    /*
-    public static final Item GOBBER_LONGSWORD = registerItem( "gobber_compat/gobber/gobber_longsword",
+    
+    public static final RegistryObject<SimplySwordsSwordItem> GOBBER_LONGSWORD = GOBBER_ITEM.register("gobber_compat/gobber/gobber_longsword", () ->
             new SimplySwordsSwordItem(ModToolMaterial.GOBBER, gobber_modifier + longsword_modifier, longsword_attackspeed,
                     "gobber2:gobber2_ingot"));
 
-    public static final Item GOBBER_TWINBLADE = registerItem( "gobber_compat/gobber/gobber_twinblade",
+    public static final RegistryObject<SimplySwordsSwordItem> GOBBER_TWINBLADE = GOBBER_ITEM.register( "gobber_compat/gobber/gobber_twinblade", () ->
             new SimplySwordsSwordItem(ModToolMaterial.GOBBER, gobber_modifier + twinblade_modifier, twinblade_attackspeed,
                     "gobber2:gobber2_ingot"));
 
-    public static final Item GOBBER_RAPIER = registerItem( "gobber_compat/gobber/gobber_rapier",
+    public static final RegistryObject<SimplySwordsSwordItem> GOBBER_RAPIER = GOBBER_ITEM.register( "gobber_compat/gobber/gobber_rapier", () ->
             new SimplySwordsSwordItem(ModToolMaterial.GOBBER, gobber_modifier + rapier_modifier, rapier_attackspeed,
                     "gobber2:gobber2_ingot"));
 
-    public static final Item GOBBER_KATANA = registerItem( "gobber_compat/gobber/gobber_katana",
+    public static final RegistryObject<SimplySwordsSwordItem> GOBBER_KATANA = GOBBER_ITEM.register( "gobber_compat/gobber/gobber_katana", () ->
             new SimplySwordsSwordItem(ModToolMaterial.GOBBER, gobber_modifier + katana_modifier, katana_attackspeed,
                     "gobber2:gobber2_ingot"));
 
-    public static final Item GOBBER_SAI = registerItem( "gobber_compat/gobber/gobber_sai",
+    public static final RegistryObject<SimplySwordsSwordItem> GOBBER_SAI = GOBBER_ITEM.register( "gobber_compat/gobber/gobber_sai", () ->
             new SimplySwordsSwordItem(ModToolMaterial.GOBBER, gobber_modifier + sai_modifier, sai_attackspeed,
                     "gobber2:gobber2_ingot"));
 
-    public static final Item GOBBER_SPEAR = registerItem( "gobber_compat/gobber/gobber_spear",
+    public static final RegistryObject<SimplySwordsSwordItem> GOBBER_SPEAR = GOBBER_ITEM.register( "gobber_compat/gobber/gobber_spear", () ->
             new SimplySwordsSwordItem(ModToolMaterial.GOBBER, gobber_modifier + spear_modifier, spear_attackspeed,
                     "gobber2:gobber2_ingot"));
 
-    public static final Item GOBBER_GLAIVE = registerItem( "gobber_compat/gobber/gobber_glaive",
+    public static final RegistryObject<SimplySwordsSwordItem> GOBBER_GLAIVE = GOBBER_ITEM.register( "gobber_compat/gobber/gobber_glaive", () ->
             new SimplySwordsSwordItem(ModToolMaterial.GOBBER, gobber_modifier + glaive_modifier, glaive_attackspeed,
                     "gobber2:gobber2_ingot"));
 
-    public static final Item GOBBER_WARGLAIVE = registerItem( "gobber_compat/gobber/gobber_warglaive",
+    public static final RegistryObject<SimplySwordsSwordItem> GOBBER_WARGLAIVE = GOBBER_ITEM.register( "gobber_compat/gobber/gobber_warglaive", () ->
             new SimplySwordsSwordItem(ModToolMaterial.GOBBER, gobber_modifier + warglaive_modifier, warglaive_attackspeed,
                     "gobber2:gobber2_ingot"));
 
-    public static final Item GOBBER_CUTLASS = registerItem( "gobber_compat/gobber/gobber_cutlass",
+    public static final RegistryObject<SimplySwordsSwordItem> GOBBER_CUTLASS = GOBBER_ITEM.register( "gobber_compat/gobber/gobber_cutlass", () ->
             new SimplySwordsSwordItem(ModToolMaterial.GOBBER, gobber_modifier + cutlass_modifier, cutlass_attackspeed,
                     "gobber2:gobber2_ingot"));
 
-    public static final Item GOBBER_CLAYMORE = registerItem( "gobber_compat/gobber/gobber_claymore",
+    public static final RegistryObject<SimplySwordsSwordItem> GOBBER_CLAYMORE = GOBBER_ITEM.register( "gobber_compat/gobber/gobber_claymore", () ->
             new SimplySwordsSwordItem(ModToolMaterial.GOBBER, gobber_modifier + claymore_modifier, claymore_attackspeed,
                     "gobber2:gobber2_ingot"));
 
-    public static final Item GOBBER_GREATHAMMER = registerItem( "gobber_compat/gobber/gobber_greathammer",
+    public static final RegistryObject<SimplySwordsSwordItem> GOBBER_GREATHAMMER = GOBBER_ITEM.register( "gobber_compat/gobber/gobber_greathammer", () ->
             new SimplySwordsSwordItem(ModToolMaterial.GOBBER, gobber_modifier + greathammer_modifier, greathammer_attackspeed,
                     "gobber2:gobber2_ingot"));
 
-    public static final Item GOBBER_GREATAXE = registerItem( "gobber_compat/gobber/gobber_greataxe",
+    public static final RegistryObject<SimplySwordsSwordItem> GOBBER_GREATAXE = GOBBER_ITEM.register( "gobber_compat/gobber/gobber_greataxe", () ->
             new SimplySwordsSwordItem(ModToolMaterial.GOBBER, gobber_modifier + greataxe_modifier, greataxe_attackspeed,
                     "gobber2:gobber2_ingot"));
 
-    public static final Item GOBBER_CHAKRAM = registerItem( "gobber_compat/gobber/gobber_chakram",
+    public static final RegistryObject<SimplySwordsSwordItem> GOBBER_CHAKRAM = GOBBER_ITEM.register( "gobber_compat/gobber/gobber_chakram", () ->
             new SimplySwordsSwordItem(ModToolMaterial.GOBBER, gobber_modifier + chakram_modifier, chakram_attackspeed,
                     "gobber2:gobber2_ingot"));
 
-    public static final Item GOBBER_SCYTHE = registerItem( "gobber_compat/gobber/gobber_scythe",
+    public static final RegistryObject<SimplySwordsSwordItem> GOBBER_SCYTHE = GOBBER_ITEM.register( "gobber_compat/gobber/gobber_scythe", () ->
             new SimplySwordsSwordItem(ModToolMaterial.GOBBER, gobber_modifier + scythe_modifier, scythe_attackspeed,
                     "gobber2:gobber2_ingot"));
 
 
     //GOBBER_NETHER
-    public static final Item GOBBER_NETHER_LONGSWORD = registerItem( "gobber_compat/gobber_nether/gobber_nether_longsword",
+    public static final RegistryObject<GobberNetherSwordItem> GOBBER_NETHER_LONGSWORD = GOBBER_ITEM.register( "gobber_compat/gobber_nether/gobber_nether_longsword", () ->
             new GobberNetherSwordItem(ModToolMaterial.GOBBER_NETHER, gobber_nether_modifier + longsword_modifier, longsword_attackspeed,
                     "gobber2:gobber2_ingot_nether"));
 
-    public static final Item GOBBER_NETHER_TWINBLADE = registerItem( "gobber_compat/gobber_nether/gobber_nether_twinblade",
+    public static final RegistryObject<GobberNetherSwordItem> GOBBER_NETHER_TWINBLADE = GOBBER_ITEM.register( "gobber_compat/gobber_nether/gobber_nether_twinblade", () ->
             new GobberNetherSwordItem(ModToolMaterial.GOBBER_NETHER, gobber_nether_modifier + twinblade_modifier, twinblade_attackspeed,
                     "gobber2:gobber2_ingot_nether"));
-    public static final Item GOBBER_NETHER_RAPIER = registerItem( "gobber_compat/gobber_nether/gobber_nether_rapier",
+    public static final RegistryObject<GobberNetherSwordItem> GOBBER_NETHER_RAPIER = GOBBER_ITEM.register( "gobber_compat/gobber_nether/gobber_nether_rapier", () ->
             new GobberNetherSwordItem(ModToolMaterial.GOBBER_NETHER, gobber_nether_modifier + rapier_modifier, rapier_attackspeed,
                     "gobber2:gobber2_ingot_nether"));
 
-    public static final Item GOBBER_NETHER_KATANA = registerItem( "gobber_compat/gobber_nether/gobber_nether_katana",
+    public static final RegistryObject<GobberNetherSwordItem> GOBBER_NETHER_KATANA = GOBBER_ITEM.register( "gobber_compat/gobber_nether/gobber_nether_katana", () ->
             new GobberNetherSwordItem(ModToolMaterial.GOBBER_NETHER, gobber_nether_modifier + katana_modifier, katana_attackspeed,
                     "gobber2:gobber2_ingot_nether"));
 
-    public static final Item GOBBER_NETHER_SAI = registerItem( "gobber_compat/gobber_nether/gobber_nether_sai",
+    public static final RegistryObject<GobberNetherSwordItem> GOBBER_NETHER_SAI = GOBBER_ITEM.register( "gobber_compat/gobber_nether/gobber_nether_sai", () ->
             new GobberNetherSwordItem(ModToolMaterial.GOBBER_NETHER, gobber_nether_modifier + sai_modifier, sai_attackspeed,
                     "gobber2:gobber2_ingot_nether"));
 
-    public static final Item GOBBER_NETHER_SPEAR = registerItem( "gobber_compat/gobber_nether/gobber_nether_spear",
+    public static final RegistryObject<GobberNetherSwordItem> GOBBER_NETHER_SPEAR = GOBBER_ITEM.register( "gobber_compat/gobber_nether/gobber_nether_spear", () ->
             new GobberNetherSwordItem(ModToolMaterial.GOBBER_NETHER, gobber_nether_modifier + spear_modifier, spear_attackspeed,
                     "gobber2:gobber2_ingot_nether"));
 
-    public static final Item GOBBER_NETHER_GLAIVE = registerItem( "gobber_compat/gobber_nether/gobber_nether_glaive",
+    public static final RegistryObject<GobberNetherSwordItem> GOBBER_NETHER_GLAIVE = GOBBER_ITEM.register( "gobber_compat/gobber_nether/gobber_nether_glaive", () ->
             new GobberNetherSwordItem(ModToolMaterial.GOBBER_NETHER, gobber_nether_modifier + glaive_modifier, glaive_attackspeed,
                     "gobber2:gobber2_ingot_nether"));
 
-    public static final Item GOBBER_NETHER_WARGLAIVE = registerItem( "gobber_compat/gobber_nether/gobber_nether_warglaive",
+    public static final RegistryObject<GobberNetherSwordItem> GOBBER_NETHER_WARGLAIVE = GOBBER_ITEM.register( "gobber_compat/gobber_nether/gobber_nether_warglaive", () ->
             new GobberNetherSwordItem(ModToolMaterial.GOBBER_NETHER, gobber_nether_modifier + warglaive_modifier, warglaive_attackspeed,
                     "gobber2:gobber2_ingot_nether"));
 
-    public static final Item GOBBER_NETHER_CUTLASS = registerItem( "gobber_compat/gobber_nether/gobber_nether_cutlass",
+    public static final RegistryObject<GobberNetherSwordItem> GOBBER_NETHER_CUTLASS = GOBBER_ITEM.register( "gobber_compat/gobber_nether/gobber_nether_cutlass", () ->
             new GobberNetherSwordItem(ModToolMaterial.GOBBER_NETHER, gobber_nether_modifier + cutlass_modifier, cutlass_attackspeed,
                     "gobber2:gobber2_ingot_nether"));
 
-    public static final Item GOBBER_NETHER_CLAYMORE = registerItem( "gobber_compat/gobber_nether/gobber_nether_claymore",
+    public static final RegistryObject<GobberNetherSwordItem> GOBBER_NETHER_CLAYMORE = GOBBER_ITEM.register( "gobber_compat/gobber_nether/gobber_nether_claymore", () ->
             new GobberNetherSwordItem(ModToolMaterial.GOBBER_NETHER, gobber_nether_modifier + claymore_modifier, claymore_attackspeed,
                     "gobber2:gobber2_ingot_nether"));
 
-    public static final Item GOBBER_NETHER_GREATHAMMER = registerItem( "gobber_compat/gobber_nether/gobber_nether_greathammer",
+    public static final RegistryObject<GobberNetherSwordItem> GOBBER_NETHER_GREATHAMMER = GOBBER_ITEM.register( "gobber_compat/gobber_nether/gobber_nether_greathammer", () ->
             new GobberNetherSwordItem(ModToolMaterial.GOBBER_NETHER, gobber_nether_modifier + greathammer_modifier, greathammer_attackspeed,
                     "gobber2:gobber2_ingot_nether"));
 
-    public static final Item GOBBER_NETHER_GREATAXE = registerItem( "gobber_compat/gobber_nether/gobber_nether_greataxe",
+    public static final RegistryObject<GobberNetherSwordItem> GOBBER_NETHER_GREATAXE = GOBBER_ITEM.register( "gobber_compat/gobber_nether/gobber_nether_greataxe", () ->
             new GobberNetherSwordItem(ModToolMaterial.GOBBER_NETHER, gobber_nether_modifier + greataxe_modifier, greataxe_attackspeed,
                     "gobber2:gobber2_ingot_nether"));
 
-    public static final Item GOBBER_NETHER_CHAKRAM = registerItem( "gobber_compat/gobber_nether/gobber_nether_chakram",
+    public static final RegistryObject<GobberNetherSwordItem> GOBBER_NETHER_CHAKRAM = GOBBER_ITEM.register( "gobber_compat/gobber_nether/gobber_nether_chakram", () ->
             new GobberNetherSwordItem(ModToolMaterial.GOBBER_NETHER, gobber_nether_modifier + chakram_modifier, chakram_attackspeed,
                     "gobber2:gobber2_ingot_nether"));
 
-    public static final Item GOBBER_NETHER_SCYTHE = registerItem( "gobber_compat/gobber_nether/gobber_nether_scythe",
+    public static final RegistryObject<GobberNetherSwordItem> GOBBER_NETHER_SCYTHE = GOBBER_ITEM.register( "gobber_compat/gobber_nether/gobber_nether_scythe", () ->
             new GobberNetherSwordItem(ModToolMaterial.GOBBER_NETHER, gobber_nether_modifier + scythe_modifier, scythe_attackspeed,
                     "gobber2:gobber2_ingot_nether"));
 
 
     //GOBBER_END
-    public static final Item GOBBER_END_LONGSWORD = registerItem( "gobber_compat/gobber_end/gobber_end_longsword",
+    public static final RegistryObject<GobberEndSwordItem> GOBBER_END_LONGSWORD = GOBBER_ITEM.register( "gobber_compat/gobber_end/gobber_end_longsword", () ->
             new GobberEndSwordItem(ModToolMaterial.GOBBER_END, gobber_end_modifier + longsword_modifier, longsword_attackspeed,
                     "gobber2:gobber2_ingot_end"));
 
-    public static final Item GOBBER_END_TWINBLADE = registerItem( "gobber_compat/gobber_end/gobber_end_twinblade",
+    public static final RegistryObject<GobberEndSwordItem> GOBBER_END_TWINBLADE = GOBBER_ITEM.register( "gobber_compat/gobber_end/gobber_end_twinblade", () ->
             new GobberEndSwordItem(ModToolMaterial.GOBBER_END, gobber_end_modifier + twinblade_modifier, twinblade_attackspeed,
                     "gobber2:gobber2_ingot_end"));
 
-    public static final Item GOBBER_END_RAPIER = registerItem( "gobber_compat/gobber_end/gobber_end_rapier",
+    public static final RegistryObject<GobberEndSwordItem> GOBBER_END_RAPIER = GOBBER_ITEM.register( "gobber_compat/gobber_end/gobber_end_rapier", () ->
             new GobberEndSwordItem(ModToolMaterial.GOBBER_END, gobber_end_modifier + rapier_modifier, rapier_attackspeed,
                     "gobber2:gobber2_ingot_end"));
 
-    public static final Item GOBBER_END_KATANA = registerItem( "gobber_compat/gobber_end/gobber_end_katana",
+    public static final RegistryObject<GobberEndSwordItem> GOBBER_END_KATANA = GOBBER_ITEM.register( "gobber_compat/gobber_end/gobber_end_katana", () ->
             new GobberEndSwordItem(ModToolMaterial.GOBBER_END, gobber_end_modifier + katana_modifier, katana_attackspeed,
                     "gobber2:gobber2_ingot_end"));
 
-    public static final Item GOBBER_END_SAI = registerItem( "gobber_compat/gobber_end/gobber_end_sai",
+    public static final RegistryObject<GobberEndSwordItem> GOBBER_END_SAI = GOBBER_ITEM.register( "gobber_compat/gobber_end/gobber_end_sai", () ->
             new GobberEndSwordItem(ModToolMaterial.GOBBER_END, gobber_end_modifier + sai_modifier, sai_attackspeed,
                     "gobber2:gobber2_ingot_end"));
 
-    public static final Item GOBBER_END_SPEAR = registerItem( "gobber_compat/gobber_end/gobber_end_spear",
+    public static final RegistryObject<GobberEndSwordItem> GOBBER_END_SPEAR = GOBBER_ITEM.register( "gobber_compat/gobber_end/gobber_end_spear", () ->
             new GobberEndSwordItem(ModToolMaterial.GOBBER_END, gobber_end_modifier + spear_modifier, spear_attackspeed,
                     "gobber2:gobber2_ingot_end"));
 
-    public static final Item GOBBER_END_GLAIVE = registerItem( "gobber_compat/gobber_end/gobber_end_glaive",
+    public static final RegistryObject<GobberEndSwordItem> GOBBER_END_GLAIVE = GOBBER_ITEM.register( "gobber_compat/gobber_end/gobber_end_glaive", () ->
             new GobberEndSwordItem(ModToolMaterial.GOBBER_END, gobber_end_modifier + glaive_modifier, glaive_attackspeed,
                     "gobber2:gobber2_ingot_end"));
 
-    public static final Item GOBBER_END_WARGLAIVE = registerItem( "gobber_compat/gobber_end/gobber_end_warglaive",
+    public static final RegistryObject<GobberEndSwordItem> GOBBER_END_WARGLAIVE = GOBBER_ITEM.register( "gobber_compat/gobber_end/gobber_end_warglaive", () ->
             new GobberEndSwordItem(ModToolMaterial.GOBBER_END, gobber_end_modifier + warglaive_modifier, warglaive_attackspeed,
                     "gobber2:gobber2_ingot_end"));
 
-    public static final Item GOBBER_END_CUTLASS = registerItem( "gobber_compat/gobber_end/gobber_end_cutlass",
+    public static final RegistryObject<GobberEndSwordItem> GOBBER_END_CUTLASS = GOBBER_ITEM.register( "gobber_compat/gobber_end/gobber_end_cutlass", () ->
             new GobberEndSwordItem(ModToolMaterial.GOBBER_END, gobber_end_modifier + cutlass_modifier, cutlass_attackspeed,
                     "gobber2:gobber2_ingot_end"));
 
-    public static final Item GOBBER_END_CLAYMORE = registerItem( "gobber_compat/gobber_end/gobber_end_claymore",
+    public static final RegistryObject<GobberEndSwordItem> GOBBER_END_CLAYMORE = GOBBER_ITEM.register( "gobber_compat/gobber_end/gobber_end_claymore", () ->
             new GobberEndSwordItem(ModToolMaterial.GOBBER_END, gobber_end_modifier + claymore_modifier, claymore_attackspeed,
                     "gobber2:gobber2_ingot_end"));
 
-    public static final Item GOBBER_END_GREATHAMMER = registerItem( "gobber_compat/gobber_end/gobber_end_greathammer",
+    public static final RegistryObject<GobberEndSwordItem> GOBBER_END_GREATHAMMER = GOBBER_ITEM.register( "gobber_compat/gobber_end/gobber_end_greathammer", () ->
             new GobberEndSwordItem(ModToolMaterial.GOBBER_END, gobber_end_modifier + greathammer_modifier, greathammer_attackspeed,
                     "gobber2:gobber2_ingot_end"));
 
-    public static final Item GOBBER_END_GREATAXE = registerItem( "gobber_compat/gobber_end/gobber_end_greataxe",
+    public static final RegistryObject<GobberEndSwordItem> GOBBER_END_GREATAXE = GOBBER_ITEM.register( "gobber_compat/gobber_end/gobber_end_greataxe", () ->
             new GobberEndSwordItem(ModToolMaterial.GOBBER_END, gobber_end_modifier + greataxe_modifier, greataxe_attackspeed,
                     "gobber2:gobber2_ingot_end"));
 
-    public static final Item GOBBER_END_CHAKRAM = registerItem( "gobber_compat/gobber_end/gobber_end_chakram",
+    public static final RegistryObject<GobberEndSwordItem> GOBBER_END_CHAKRAM = GOBBER_ITEM.register( "gobber_compat/gobber_end/gobber_end_chakram", () ->
             new GobberEndSwordItem(ModToolMaterial.GOBBER_END, gobber_end_modifier + chakram_modifier, chakram_attackspeed,
                     "gobber2:gobber2_ingot_end"));
 
-    public static final Item GOBBER_END_SCYTHE = registerItem( "gobber_compat/gobber_end/gobber_end_scythe",
+    public static final RegistryObject<GobberEndSwordItem> GOBBER_END_SCYTHE = GOBBER_ITEM.register( "gobber_compat/gobber_end/gobber_end_scythe", () ->
             new GobberEndSwordItem(ModToolMaterial.GOBBER_END, gobber_end_modifier + scythe_modifier, scythe_attackspeed,
-                    "gobber2:gobber2_ingot_end")); */
-    
-
-    private static Item registerItem(String name, Item item) {
-        return Registry.register(Registry.ITEM, new Identifier(SimplySwords.MOD_ID, name), item);
-    }
-
+                    "gobber2:gobber2_ingot_end"));
 
 
     public static void registerModItems() {

@@ -1,7 +1,7 @@
 modLoader = "javafml"
 loaderVersion = "[43,)"
-#issueTrackerURL = ""
-license = "Insert License Here"
+issueTrackerURL = "https://github.com/Sweenus/SimplySwords/issues"
+license = "GNU LGPLv3"
 
 [[mods]]
 modId = "simplyswords"
@@ -9,9 +9,9 @@ version = "${version}"
 displayName = "Simply Swords"
 authors = "Sweenus"
 description = '''
-This is an example description! Tell everyone what your mod is about!
+A variety of unique weapons to add to your minecraft repertoire
 '''
-#logoFile = ""
+logoFile = "SimplySwordsLogoFinal2.gif"
 
 [[dependencies.simplyswords]]
 modId = "forge"

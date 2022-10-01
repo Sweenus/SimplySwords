@@ -13,9 +13,6 @@ public class SimplySwordsForge {
         // Submit our event bus to let architectury register our content on the right time
         EventBuses.registerModEventBus(SimplySwords.MOD_ID, FMLJavaModLoadingContext.get().getModEventBus());
 
-        //if (ModList.get().isLoaded("gobber2"))
-            //GobberCompat.registerModItems();
-
         SimplySwords.init();
 
         if (ModList.get().isLoaded("gobber2"))

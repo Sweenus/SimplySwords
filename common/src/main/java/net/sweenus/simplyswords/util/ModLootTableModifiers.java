@@ -13,111 +13,107 @@ import net.sweenus.simplyswords.registry.ItemsRegistry;
 public class ModLootTableModifiers {
 
     public static void init() {
+
+
+        //STANDARD
         LootEvent.MODIFY_LOOT_TABLE.register(((lootTables, id, context, builtin) -> {
             if (SimplySwordsConfig.getBooleanValue("add_weapons_to_loot_tables") && id.getPath().contains("chests") && !id.getPath().contains("village")) {
                 LootPool.Builder pool = LootPool.builder()
                         .rolls(ConstantLootNumberProvider.create(1))
                         .conditionally(RandomChanceLootCondition.builder(SimplySwordsConfig.getGeneralSettings("standard_loot_table_weight"))) // 1 = 100% of the time
                         .apply(EnchantRandomlyLootFunction.builder())
-                        .with(ItemEntry.builder(ItemsRegistry.IRON_LONGSWORD.get()));
+                        .with(ItemEntry.builder(ItemsRegistry.IRON_LONGSWORD.get()))
+                        .with(ItemEntry.builder(ItemsRegistry.IRON_TWINBLADE.get()))
+                        .with(ItemEntry.builder(ItemsRegistry.IRON_RAPIER.get()))
+                        .with(ItemEntry.builder(ItemsRegistry.IRON_CUTLASS.get()))
+                        .with(ItemEntry.builder(ItemsRegistry.IRON_KATANA.get()))
+                        .with(ItemEntry.builder(ItemsRegistry.IRON_GLAIVE.get()))
+                        .with(ItemEntry.builder(ItemsRegistry.IRON_WARGLAIVE.get()))
+                        .with(ItemEntry.builder(ItemsRegistry.IRON_SPEAR.get()))
+                        .with(ItemEntry.builder(ItemsRegistry.IRON_SAI.get()))
+                        .with(ItemEntry.builder(ItemsRegistry.IRON_CLAYMORE.get()))
+                        .with(ItemEntry.builder(ItemsRegistry.IRON_CHAKRAM.get()))
+                        .with(ItemEntry.builder(ItemsRegistry.IRON_GREATAXE.get()))
+                        .with(ItemEntry.builder(ItemsRegistry.IRON_GREATHAMMER.get()))
+                        .with(ItemEntry.builder(ItemsRegistry.GOLD_LONGSWORD.get()))
+                        .with(ItemEntry.builder(ItemsRegistry.GOLD_TWINBLADE.get()))
+                        .with(ItemEntry.builder(ItemsRegistry.GOLD_RAPIER.get()))
+                        .with(ItemEntry.builder(ItemsRegistry.GOLD_CUTLASS.get()))
+                        .with(ItemEntry.builder(ItemsRegistry.GOLD_KATANA.get()))
+                        .with(ItemEntry.builder(ItemsRegistry.GOLD_GLAIVE.get()))
+                        .with(ItemEntry.builder(ItemsRegistry.GOLD_WARGLAIVE.get()))
+                        .with(ItemEntry.builder(ItemsRegistry.GOLD_SPEAR.get()))
+                        .with(ItemEntry.builder(ItemsRegistry.GOLD_SAI.get()))
+                        .with(ItemEntry.builder(ItemsRegistry.GOLD_CLAYMORE.get()))
+                        .with(ItemEntry.builder(ItemsRegistry.GOLD_GREATHAMMER.get()))
+                        .with(ItemEntry.builder(ItemsRegistry.GOLD_CHAKRAM.get()))
+                        .with(ItemEntry.builder(ItemsRegistry.GOLD_GREATAXE.get()));
+
+                context.addPool(pool);
+            }
+        }));
+
+        //RARE
+        LootEvent.MODIFY_LOOT_TABLE.register(((lootTables, id, context, builtin) -> {
+            if (SimplySwordsConfig.getBooleanValue("add_weapons_to_loot_tables") && id.getPath().contains("chests") && !id.getPath().contains("village")) {
+                LootPool.Builder pool = LootPool.builder()
+                        .rolls(ConstantLootNumberProvider.create(1))
+                        .conditionally(RandomChanceLootCondition.builder(SimplySwordsConfig.getGeneralSettings("rare_loot_table_weight"))) // 1 = 100% of the time
+                        .apply(EnchantRandomlyLootFunction.builder())
+                        .with(ItemEntry.builder(ItemsRegistry.RUNIC_CLAYMORE.get()))
+                        .with(ItemEntry.builder(ItemsRegistry.RUNIC_TWINBLADE.get()))
+                        .with(ItemEntry.builder(ItemsRegistry.RUNIC_LONGSWORD.get()))
+                        .with(ItemEntry.builder(ItemsRegistry.RUNIC_RAPIER.get()))
+                        .with(ItemEntry.builder(ItemsRegistry.RUNIC_CUTLASS.get()))
+                        .with(ItemEntry.builder(ItemsRegistry.RUNIC_KATANA.get()))
+                        .with(ItemEntry.builder(ItemsRegistry.RUNIC_GLAIVE.get()))
+                        .with(ItemEntry.builder(ItemsRegistry.RUNIC_SPEAR.get()))
+                        .with(ItemEntry.builder(ItemsRegistry.RUNIC_SAI.get()))
+                        .with(ItemEntry.builder(ItemsRegistry.RUNIC_GREATHAMMER.get()))
+                        .with(ItemEntry.builder(ItemsRegistry.RUNIC_GREATAXE.get()))
+                        .with(ItemEntry.builder(ItemsRegistry.RUNIC_CHAKRAM.get()))
+                        .with(ItemEntry.builder(ItemsRegistry.DIAMOND_LONGSWORD.get()))
+                        .with(ItemEntry.builder(ItemsRegistry.DIAMOND_TWINBLADE.get()))
+                        .with(ItemEntry.builder(ItemsRegistry.DIAMOND_RAPIER.get()))
+                        .with(ItemEntry.builder(ItemsRegistry.DIAMOND_CUTLASS.get()))
+                        .with(ItemEntry.builder(ItemsRegistry.DIAMOND_KATANA.get()))
+                        .with(ItemEntry.builder(ItemsRegistry.DIAMOND_SPEAR.get()))
+                        .with(ItemEntry.builder(ItemsRegistry.DIAMOND_GLAIVE.get()))
+                        .with(ItemEntry.builder(ItemsRegistry.DIAMOND_WARGLAIVE.get()))
+                        .with(ItemEntry.builder(ItemsRegistry.DIAMOND_SAI.get()))
+                        .with(ItemEntry.builder(ItemsRegistry.DIAMOND_CLAYMORE.get()))
+                        .with(ItemEntry.builder(ItemsRegistry.DIAMOND_GREATHAMMER.get()))
+                        .with(ItemEntry.builder(ItemsRegistry.DIAMOND_CHAKRAM.get()))
+                        .with(ItemEntry.builder(ItemsRegistry.DIAMOND_GREATAXE.get()));
+
+                context.addPool(pool);
+            }
+        }));
+
+        //UNIQUE
+        LootEvent.MODIFY_LOOT_TABLE.register(((lootTables, id, context, builtin) -> {
+            if (SimplySwordsConfig.getBooleanValue("add_weapons_to_loot_tables") && id.getPath().contains("chests") && !id.getPath().contains("village")) {
+                LootPool.Builder pool = LootPool.builder()
+                        .rolls(ConstantLootNumberProvider.create(1))
+                        .conditionally(RandomChanceLootCondition.builder(SimplySwordsConfig.getGeneralSettings("unique_loot_table_weight"))) // 1 = 100% of the time
+                        .with(ItemEntry.builder(ItemsRegistry.WATCHER_CLAYMORE.get()))
+                        .with(ItemEntry.builder(ItemsRegistry.TOXIC_LONGSWORD.get()))
+                        .with(ItemEntry.builder(ItemsRegistry.SWORD_ON_A_STICK.get()))
+                        .with(ItemEntry.builder(ItemsRegistry.BRAMBLETHORN.get()))
+                        .with(ItemEntry.builder(ItemsRegistry.STORMS_EDGE.get()))
+                        .with(ItemEntry.builder(ItemsRegistry.STORMBRINGER.get()))
+                        .with(ItemEntry.builder(ItemsRegistry.MJOLNIR.get()))
+                        .with(ItemEntry.builder(ItemsRegistry.EMBERBLADE.get()))
+                        .with(ItemEntry.builder(ItemsRegistry.HEARTHFLAME.get()))
+                        .with(ItemEntry.builder(ItemsRegistry.TWISTED_BLADE.get()))
+                        .with(ItemEntry.builder(ItemsRegistry.SOULRENDER.get()))
+                        .with(ItemEntry.builder(ItemsRegistry.SOULKEEPER.get()))
+                        .with(ItemEntry.builder(ItemsRegistry.SOULSTEALER.get()))
+                        .with(ItemEntry.builder(ItemsRegistry.BRIMSTONE_CLAYMORE.get()));
 
                 context.addPool(pool);
             }
         }));
 
     }
-
-/*
-            if (SimplySwordsConfig.getBooleanValue("add_weapons_to_loot_tables") && id.getPath().contains("chests") && !id.getPath().contains("village")) {
-
-                //STANDARD POOL
-                LootPool.Builder pool = LootPool.builder()
-                        .rolls(ConstantLootNumberProvider.create(1))
-                        .conditionally(RandomChanceLootCondition.builder(SimplySwordsConfig.getGeneralSettings("standard_loot_table_weight"))) // 1 = 100% of the time
-                        .apply(EnchantRandomlyLootFunction.builder())
-                        .with(ItemEntry.builder(ModItems.IRON_LONGSWORD))
-                        .with(ItemEntry.builder(ModItems.IRON_TWINBLADE))
-                        .with(ItemEntry.builder(ModItems.IRON_RAPIER))
-                        .with(ItemEntry.builder(ModItems.IRON_CUTLASS))
-                        .with(ItemEntry.builder(ModItems.IRON_KATANA))
-                        .with(ItemEntry.builder(ModItems.IRON_GLAIVE))
-                        .with(ItemEntry.builder(ModItems.IRON_WARGLAIVE))
-                        .with(ItemEntry.builder(ModItems.IRON_SPEAR))
-                        .with(ItemEntry.builder(ModItems.IRON_SAI))
-                        .with(ItemEntry.builder(ModItems.IRON_CLAYMORE))
-                        .with(ItemEntry.builder(ModItems.IRON_CHAKRAM))
-                        .with(ItemEntry.builder(ModItems.IRON_GREATAXE))
-                        .with(ItemEntry.builder(ModItems.IRON_GREATHAMMER))
-                        .with(ItemEntry.builder(ModItems.GOLD_LONGSWORD))
-                        .with(ItemEntry.builder(ModItems.GOLD_TWINBLADE))
-                        .with(ItemEntry.builder(ModItems.GOLD_RAPIER))
-                        .with(ItemEntry.builder(ModItems.GOLD_CUTLASS))
-                        .with(ItemEntry.builder(ModItems.GOLD_KATANA))
-                        .with(ItemEntry.builder(ModItems.GOLD_GLAIVE))
-                        .with(ItemEntry.builder(ModItems.GOLD_WARGLAIVE))
-                        .with(ItemEntry.builder(ModItems.GOLD_SPEAR))
-                        .with(ItemEntry.builder(ModItems.GOLD_SAI))
-                        .with(ItemEntry.builder(ModItems.GOLD_CLAYMORE))
-                        .with(ItemEntry.builder(ModItems.GOLD_GREATHAMMER))
-                        .with(ItemEntry.builder(ModItems.GOLD_CHAKRAM))
-                        .with(ItemEntry.builder(ModItems.GOLD_GREATAXE));
-                tableBuilder.pool(pool);
-
-                //RARE POOL
-                LootPool.Builder rpool = LootPool.builder()
-                        .rolls(ConstantLootNumberProvider.create(1))
-                        .conditionally(RandomChanceLootCondition.builder(SimplySwordsConfig.getGeneralSettings("rare_loot_table_weight"))) // 1 = 100% of the time
-                        .apply(EnchantRandomlyLootFunction.builder())
-                        .with(ItemEntry.builder(ModItems.RUNIC_CLAYMORE))
-                        .with(ItemEntry.builder(ModItems.RUNIC_TWINBLADE))
-                        .with(ItemEntry.builder(ModItems.RUNIC_LONGSWORD))
-                        .with(ItemEntry.builder(ModItems.RUNIC_RAPIER))
-                        .with(ItemEntry.builder(ModItems.RUNIC_CUTLASS))
-                        .with(ItemEntry.builder(ModItems.RUNIC_KATANA))
-                        .with(ItemEntry.builder(ModItems.RUNIC_GLAIVE))
-                        .with(ItemEntry.builder(ModItems.RUNIC_SPEAR))
-                        .with(ItemEntry.builder(ModItems.RUNIC_SAI))
-                        .with(ItemEntry.builder(ModItems.RUNIC_GREATHAMMER))
-                        .with(ItemEntry.builder(ModItems.RUNIC_GREATAXE))
-                        .with(ItemEntry.builder(ModItems.RUNIC_CHAKRAM))
-                        .with(ItemEntry.builder(ModItems.DIAMOND_LONGSWORD))
-                        .with(ItemEntry.builder(ModItems.DIAMOND_TWINBLADE))
-                        .with(ItemEntry.builder(ModItems.DIAMOND_RAPIER))
-                        .with(ItemEntry.builder(ModItems.DIAMOND_CUTLASS))
-                        .with(ItemEntry.builder(ModItems.DIAMOND_KATANA))
-                        .with(ItemEntry.builder(ModItems.DIAMOND_SPEAR))
-                        .with(ItemEntry.builder(ModItems.DIAMOND_GLAIVE))
-                        .with(ItemEntry.builder(ModItems.DIAMOND_WARGLAIVE))
-                        .with(ItemEntry.builder(ModItems.DIAMOND_SAI))
-                        .with(ItemEntry.builder(ModItems.DIAMOND_CLAYMORE))
-                        .with(ItemEntry.builder(ModItems.DIAMOND_GREATHAMMER))
-                        .with(ItemEntry.builder(ModItems.DIAMOND_CHAKRAM))
-                        .with(ItemEntry.builder(ModItems.DIAMOND_GREATAXE));
-                tableBuilder.pool(rpool);
-
-                //UNIQUE POOL
-                LootPool.Builder upool = LootPool.builder()
-                        .rolls(ConstantLootNumberProvider.create(1))
-                        .conditionally(RandomChanceLootCondition.builder(SimplySwordsConfig.getGeneralSettings("unique_loot_table_weight"))) // 1 = 100% of the time
-                        .with(ItemEntry.builder(ModItems.WATCHER_CLAYMORE))
-                        .with(ItemEntry.builder(ModItems.TOXIC_LONGSWORD))
-                        .with(ItemEntry.builder(ModItems.SWORD_ON_A_STICK))
-                        .with(ItemEntry.builder(ModItems.BRAMBLETHORN))
-                        .with(ItemEntry.builder(ModItems.STORMS_EDGE))
-                        .with(ItemEntry.builder(ModItems.STORMBRINGER))
-                        .with(ItemEntry.builder(ModItems.MJOLNIR))
-                        .with(ItemEntry.builder(ModItems.EMBERBLADE))
-                        .with(ItemEntry.builder(ModItems.HEARTHFLAME))
-                        .with(ItemEntry.builder(ModItems.TWISTED_BLADE))
-                        .with(ItemEntry.builder(ModItems.SOULRENDER))
-                        .with(ItemEntry.builder(ModItems.SOULKEEPER))
-                        .with(ItemEntry.builder(ModItems.SOULSTEALER))
-                        .with(ItemEntry.builder(ModItems.BRIMSTONE_CLAYMORE));
-                tableBuilder.pool(upool);
-
-            }
-
-        });
-    }
-    */
 }
