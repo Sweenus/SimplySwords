@@ -12,6 +12,7 @@ import net.minecraft.util.Formatting;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
 import net.sweenus.simplyswords.effect.ModEffects;
+import net.sweenus.simplyswords.registry.EffectRegistry;
 
 import java.util.List;
 
@@ -26,7 +27,7 @@ public class FireSwordItem extends SwordItem {
 
 
         if (attacker.getRandom().nextInt(100) <= fhitchance) {
-            target.addStatusEffect(new StatusEffectInstance(ModEffects.BURN, 5, 1), attacker);
+            target.addStatusEffect(new StatusEffectInstance(EffectRegistry.BURN.get(), 5, 1), attacker);
         }
 
         return super.postHit(stack, target, attacker);

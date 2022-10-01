@@ -12,6 +12,7 @@ import net.minecraft.util.Formatting;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
 import net.sweenus.simplyswords.effect.ModEffects;
+import net.sweenus.simplyswords.registry.EffectRegistry;
 
 import java.util.List;
 
@@ -27,7 +28,7 @@ public class WildfireSwordItem extends SwordItem {
         int pduration = (int) SimplySwordsConfig.getFloatValue("wildfire_duration");
 
         if (attacker.getRandom().nextInt(100) <= phitchance) {
-            target.addStatusEffect(new StatusEffectInstance(ModEffects.WILDFIRE, pduration, 3), attacker);
+            target.addStatusEffect(new StatusEffectInstance(EffectRegistry.WILDFIRE.get(), pduration, 3), attacker);
         }
 
         return super.postHit(stack, target, attacker);

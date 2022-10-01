@@ -12,6 +12,7 @@ import net.minecraft.util.Formatting;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
 import net.sweenus.simplyswords.effect.ModEffects;
+import net.sweenus.simplyswords.registry.EffectRegistry;
 
 import java.util.List;
 
@@ -26,7 +27,7 @@ public class StormSwordItem extends SwordItem {
         int phitchance = (int) SimplySwordsConfig.getFloatValue("storm_chance");
 
         if (attacker.getRandom().nextInt(100) <= phitchance) {
-                target.addStatusEffect(new StatusEffectInstance(ModEffects.STORM, 2, 1), attacker);
+                target.addStatusEffect(new StatusEffectInstance(EffectRegistry.STORM.get(), 2, 1), attacker);
         }
 
         return super.postHit(stack, target, attacker);

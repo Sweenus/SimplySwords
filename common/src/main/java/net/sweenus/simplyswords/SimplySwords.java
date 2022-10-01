@@ -15,6 +15,7 @@ import net.minecraft.util.registry.Registry;
 import net.sweenus.simplyswords.compat.GobberCompat;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
+import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.ModLootTableModifiers;
@@ -33,8 +34,8 @@ public class SimplySwords {
             new ItemStack(ItemsRegistry.IRON_LONGSWORD.get()));
     
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(MOD_ID, Registry.ITEM_KEY);
-    public static final RegistrySupplier<Item> EXAMPLE_ITEM = ITEMS.register("example_item", () ->
-            new Item(new Item.Settings().group(SimplySwords.SIMPLYSWORDS)));
+    //public static final RegistrySupplier<Item> EXAMPLE_ITEM = ITEMS.register("example_item", () ->
+            //new Item(new Item.Settings().group(SimplySwords.SIMPLYSWORDS)));
 
     public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
 
@@ -58,6 +59,7 @@ public class SimplySwords {
 
         ItemsRegistry.ITEM.register();
         SoundRegistry.SOUND.register();
+        EffectRegistry.EFFECT.register();
         ModLootTableModifiers.init();
         
         System.out.println(SimplySwordsExpectPlatform.getConfigDirectory().toAbsolutePath().normalize().toString());

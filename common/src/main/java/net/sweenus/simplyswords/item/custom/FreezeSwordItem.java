@@ -13,6 +13,7 @@ import net.minecraft.util.Formatting;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
 import net.sweenus.simplyswords.effect.ModEffects;
+import net.sweenus.simplyswords.registry.EffectRegistry;
 
 import java.util.List;
 
@@ -30,7 +31,7 @@ public class FreezeSwordItem extends SwordItem {
         target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, sduration, 1), attacker);
 
         if (attacker.getRandom().nextInt(100) <= fhitchance) {
-            target.addStatusEffect(new StatusEffectInstance(ModEffects.FREEZE, fduration, 1), attacker);
+            target.addStatusEffect(new StatusEffectInstance(EffectRegistry.FREEZE.get(), fduration, 1), attacker);
         }
 
         return super.postHit(stack, target, attacker);

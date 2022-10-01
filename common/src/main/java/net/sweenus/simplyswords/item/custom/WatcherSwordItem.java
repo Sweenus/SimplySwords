@@ -12,6 +12,7 @@ import net.minecraft.util.Formatting;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
 import net.sweenus.simplyswords.effect.ModEffects;
+import net.sweenus.simplyswords.registry.EffectRegistry;
 
 import java.util.List;
 
@@ -27,11 +28,11 @@ public class WatcherSwordItem extends SwordItem {
         int phitchance = (int) SimplySwordsConfig.getFloatValue("omen_chance");
 
         if (attacker.getRandom().nextInt(100) <= thitchance) {
-            target.addStatusEffect(new StatusEffectInstance(ModEffects.WATCHER, 1, 1), attacker);
+            target.addStatusEffect(new StatusEffectInstance(EffectRegistry.WATCHER.get(), 1, 1), attacker);
         }
 
         if (attacker.getRandom().nextInt(100) <= phitchance) {
-            target.addStatusEffect(new StatusEffectInstance(ModEffects.OMEN, 1, 1), attacker);
+            target.addStatusEffect(new StatusEffectInstance(EffectRegistry.OMEN.get(), 1, 1), attacker);
         }
 
         return super.postHit(stack, target, attacker);
