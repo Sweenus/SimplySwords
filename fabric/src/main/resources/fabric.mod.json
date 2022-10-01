@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "simplyswords",
+  "version": "${version}",
+  "name": "Simply Swords",
+  "description": "This is an example description! Tell everyone what your mod is about!",
+  "authors": [
+    "Me!"
+  ],
+  "contact": {
+    "homepage": "https://fabricmc.net/",
+    "sources": "https://github.com/FabricMC/fabric-example-mod"
+  },
+  "license": "Insert License Here",
+  "icon": "assets/simplyswords/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "net.sweenus.simplyswords.fabric.SimplySwordsFabric"
+    ]
+  },
+  "mixins": [
+    "simplyswords.mixins.json",
+    "simplyswords-common.mixins.json"
+  ],
+  "depends": {
+    "fabric": "*",
+    "minecraft": ">=1.19.0",
+    "architectury": ">=6.2.43"
+  }
+}

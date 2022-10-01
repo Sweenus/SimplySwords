@@ -1,0 +1,35 @@
+modLoader = "javafml"
+loaderVersion = "[43,)"
+#issueTrackerURL = ""
+license = "Insert License Here"
+
+[[mods]]
+modId = "simplyswords"
+version = "${version}"
+displayName = "Simply Swords"
+authors = "Sweenus"
+description = '''
+This is an example description! Tell everyone what your mod is about!
+'''
+#logoFile = ""
+
+[[dependencies.simplyswords]]
+modId = "forge"
+mandatory = true
+versionRange = "[43,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.simplyswords]]
+modId = "minecraft"
+mandatory = true
+versionRange = "[1.19,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.simplyswords]]
+modId = "architectury"
+mandatory = true
+versionRange = "[6.2.43,)"
+ordering = "AFTER"
+side = "BOTH"
