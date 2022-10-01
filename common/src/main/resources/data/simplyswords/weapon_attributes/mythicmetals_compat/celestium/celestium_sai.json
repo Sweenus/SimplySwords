@@ -1,0 +1,19 @@
+{
+  "attributes": {
+    "attack_range": 1.8,
+    "category": "soul_knife",
+    "attacks": [
+      {
+        "hitbox": "FORWARD_BOX",
+        "damage_multiplier": 1,
+        "angle": 0,
+        "upswing": 0.5,
+        "animation": "bettercombat:one_handed_stab",
+        "swing_sound": {
+          "id": "bettercombat:dagger_slash",
+          "pitch": 1.2
+        }
+      }
+    ]
+  }
+}

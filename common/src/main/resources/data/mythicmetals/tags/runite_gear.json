@@ -1,0 +1,19 @@
+{
+  "replace": false,
+  "values": [
+    "simplyswords:mythicmetals_compat/runite/runite_claymore",
+    "simplyswords:mythicmetals_compat/runite/runite_cutlass",
+    "simplyswords:mythicmetals_compat/runite/runite_glaive",
+    "simplyswords:mythicmetals_compat/runite/runite_katana",
+    "simplyswords:mythicmetals_compat/runite/runite_longsword",
+    "simplyswords:mythicmetals_compat/runite/runite_rapier",
+    "simplyswords:mythicmetals_compat/runite/runite_sai",
+    "simplyswords:mythicmetals_compat/runite/runite_spear",
+    "simplyswords:mythicmetals_compat/runite/runite_twinblade",
+    "simplyswords:mythicmetals_compat/runite/runite_warglaive",
+    "simplyswords:mythicmetals_compat/runite/runite_greathammer",
+    "simplyswords:mythicmetals_compat/runite/runite_greataxe",
+    "simplyswords:mythicmetals_compat/runite/runite_chakram",
+    "simplyswords:mythicmetals_compat/runite/runite_scythe"
+  ]
+}

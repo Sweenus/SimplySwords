@@ -1,0 +1,19 @@
+{
+  "replace": false,
+  "values": [
+    "simplyswords:mythicmetals_compat/banglum/banglum_claymore",
+    "simplyswords:mythicmetals_compat/banglum/banglum_cutlass",
+    "simplyswords:mythicmetals_compat/banglum/banglum_glaive",
+    "simplyswords:mythicmetals_compat/banglum/banglum_katana",
+    "simplyswords:mythicmetals_compat/banglum/banglum_longsword",
+    "simplyswords:mythicmetals_compat/banglum/banglum_rapier",
+    "simplyswords:mythicmetals_compat/banglum/banglum_sai",
+    "simplyswords:mythicmetals_compat/banglum/banglum_spear",
+    "simplyswords:mythicmetals_compat/banglum/banglum_twinblade",
+    "simplyswords:mythicmetals_compat/banglum/banglum_warglaive",
+    "simplyswords:mythicmetals_compat/banglum/banglum_greathammer",
+    "simplyswords:mythicmetals_compat/banglum/banglum_greataxe",
+    "simplyswords:mythicmetals_compat/banglum/banglum_chakram",
+    "simplyswords:mythicmetals_compat/banglum/banglum_scythe"
+  ]
+}

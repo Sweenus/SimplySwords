@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "#": {
+      "item": "gobber2:gobber2_rod_nether"
+    },
+    "X": {
+      "item": "gobber2:gobber2_ingot_nether"
+    }
+  },
+  "pattern": [
+    "XXX",
+    "X X",
+    "X#X"
+  ],
+  "result": {
+    "item": "simplyswords:gobber_compat/gobber_nether/gobber_nether_chakram"
+  },
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "gobber2"
+      ]
+    }
+  ]
+}
