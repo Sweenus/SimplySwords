@@ -27,7 +27,7 @@
   "depends": {
     "fabric": "*",
     "minecraft": ">=1.19.0",
-    "architectury": ">=6.2.43"
+    "architectury": ">=5.12.42"
   },
   "suggests": {
     "mythicmetals": ">=0.15.2",

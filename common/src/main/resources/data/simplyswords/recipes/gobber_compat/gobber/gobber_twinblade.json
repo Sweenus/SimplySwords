@@ -3,14 +3,14 @@
     {
       "condition": "fabric:all_mods_loaded",
       "values": [
-        "mythicmetals"
+        "gobber2"
       ]
     }
   ],
   "conditions": [
     {
       "type": "forge:mod_loaded",
-      "modid": "mythicmetals"
+      "modid": "gobber2"
     }
   ],
   "type": "minecraft:crafting_shaped",

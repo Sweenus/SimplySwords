@@ -646,12 +646,14 @@ public class ItemsRegistry {
                     (int) (soulrender_damage_modifier),
                     soulrender_attackspeed,
                     new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
-    
+    /*
     public static final RegistrySupplier<RendSwordItem> THE_DISPATCHER = ITEM.register( "the_dispatcher", () ->
             new RendSwordItem(ToolMaterials.NETHERITE,
                     (int) (thedispatcher_damage_modifier),
                     thedispatcher_attackspeed,
                     new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+
+     */
 
     public static final RegistrySupplier<StormSwordItem> MJOLNIR = ITEM.register( "mjolnir", () ->
             new StormSwordItem(ToolMaterials.NETHERITE,
