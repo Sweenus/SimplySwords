@@ -1,4 +1,18 @@
 {
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "mythicmetals"
+      ]
+    }
+  ],
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "mythicmetals"
+    }
+  ],
   "type": "minecraft:crafting_shaped",
   "key": {
     "#": {
@@ -15,13 +29,5 @@
   ],
   "result": {
     "item": "simplyswords:mythicmetals_compat/banglum/banglum_sai"
-  },
-  "fabric:load_conditions": [
-    {
-      "condition": "fabric:all_mods_loaded",
-      "values": [
-        "mythicmetals"
-      ]
-    }
-  ]
+  }
 }

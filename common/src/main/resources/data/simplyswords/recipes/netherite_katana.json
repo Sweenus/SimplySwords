@@ -1,18 +1,11 @@
 {
-  "type": "minecraft:crafting_shaped",
-  "key": {
-    "#": {
-      "item": "minecraft:stick"
-    },
-    "X": {
-      "item": "minecraft:netherite_ingot"
-    }
+  "type": "minecraft:smithing",
+  "base": {
+    "item": "simplyswords:diamond_katana"
   },
-  "pattern": [
-    "   ",
-    "#XX",
-    "   "
-  ],
+  "addition": {
+    "item": "minecraft:netherite_ingot"
+  },
   "result": {
     "item": "simplyswords:netherite_katana"
   }
