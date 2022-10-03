@@ -6,7 +6,6 @@ import net.minecraft.loot.condition.RandomChanceLootCondition;
 import net.minecraft.loot.entry.ItemEntry;
 import net.minecraft.loot.function.EnchantRandomlyLootFunction;
 import net.minecraft.loot.provider.number.ConstantLootNumberProvider;
-import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 
