@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:smithing",
+  "base": {
+    "item": "simplyswords:soulstealer"
+  },
+  "addition": {
+    "item": "simplyswords:awakened_essence"
+  },
+  "result": {
+    "item": "simplyswords:soulstealer"
+  }
+}

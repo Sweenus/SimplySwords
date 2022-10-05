@@ -102,6 +102,10 @@ public class ItemsRegistry {
 
     public static final DeferredRegister<Item> ITEM = DeferredRegister.create(SimplySwords.MOD_ID, Registry.ITEM_KEY);
 
+    public static final RegistrySupplier<Item> AWAKENED_ESSENCE = ITEM.register("awakened_essence", () ->
+            new Item(new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+
+
     public static final RegistrySupplier<SimplySwordsSwordItem> IRON_LONGSWORD = ITEM.register("iron_longsword", () ->
             new SimplySwordsSwordItem(
                     ToolMaterials.IRON,

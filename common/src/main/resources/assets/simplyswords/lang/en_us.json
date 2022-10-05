@@ -425,10 +425,11 @@
   "item.simplyswords.gobber_compat.gobber_end.gobber_end_scythe": "End Gobber Scythe",
 
 
-
   "itemGroup.simplyswords.simplyswords": "Simply Swords",
+  "item.simplyswords.awakening": "Awakening LV: %d ",
+  "item.simplyswords.awakening.exp": "Awakening XP: %d%% ",
+  "item.simplyswords.awakening.powers": "Awakened Powers:",
 
-  "message.simplyswords.testlightning": "We have not been damaged",
 
 
   "effect.simplyswords.freeze": "Freeze",

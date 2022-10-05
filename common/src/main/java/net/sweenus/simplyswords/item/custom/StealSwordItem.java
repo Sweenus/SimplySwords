@@ -50,6 +50,18 @@ public class StealSwordItem extends SwordItem {
                 target.addStatusEffect(new StatusEffectInstance(StatusEffects.GLOWING, fduration, 1), attacker);
 
             }
+
+            //Awakening
+            if(stack.getOrCreateNbt().getInt("awakening_exp") < 100 && stack.getOrCreateNbt().getInt("awakening") < 5) {
+                stack.getOrCreateNbt().putInt("awakening_exp", stack.getOrCreateNbt().getInt("awakening_exp") + 10);
+            }
+            else if(stack.getOrCreateNbt().getInt("awakening_exp") >= 100) {
+                stack.getOrCreateNbt().putInt("awakening_exp", 0);
+                if(stack.getOrCreateNbt().getInt("awakening") < 5) {
+                    stack.getOrCreateNbt().putInt("awakening", stack.getOrCreateNbt().getInt("awakening") +1);
+                }
+            }
+
         }
 
             return super.postHit(stack, target, attacker);
@@ -100,7 +112,18 @@ public class StealSwordItem extends SwordItem {
     public boolean postMine(ItemStack stack, World world, BlockState state, BlockPos pos, LivingEntity miner) {
         return false;
     }
+/*
+    @Override
+    public void onCraft(ItemStack stack, World world, PlayerEntity player)
+    {
+        if(world.isClient) return;
 
+        if(stack.getOrCreateNbt().getInt("awakening") < 5)
+        {
+            stack.getOrCreateNbt().putInt("awakening", stack.getOrCreateNbt().getInt("awakening") + 1);
+        }
+    }
+*/
 
     @Override
     public void appendTooltip(ItemStack itemStack, World world, List<Text> tooltip, TooltipContext tooltipContext) {
@@ -121,6 +144,21 @@ public class StealSwordItem extends SwordItem {
         tooltip.add(Text.translatable("item.simplyswords.stealsworditem.tooltip8"));
         tooltip.add(Text.translatable("item.simplyswords.stealsworditem.tooltip9"));
         tooltip.add(Text.translatable("item.simplyswords.stealsworditem.tooltip10"));
+        tooltip.add(Text.literal(""));
+
+        if(itemStack.getOrCreateNbt().getInt("awakening") < 5) {
+
+            tooltip.add(Text.translatable("item.simplyswords.awakening",
+                    (itemStack.getOrCreateNbt().getInt("awakening"))).formatted(Formatting.GOLD));
+
+            tooltip.add(Text.translatable("item.simplyswords.awakening.exp",
+                    (itemStack.getOrCreateNbt().getInt("awakening_exp"))).formatted(Formatting.GREEN));
+
+        } else if(itemStack.getOrCreateNbt().getInt("awakening") == 5) {
+            tooltip.add(Text.translatable("item.simplyswords.awakening",
+                    (itemStack.getOrCreateNbt().getInt("awakening"))).formatted(Formatting.RED));
+        }
+        tooltip.add(Text.translatable("item.simplyswords.awakening.powers"));
 
 
 /*
