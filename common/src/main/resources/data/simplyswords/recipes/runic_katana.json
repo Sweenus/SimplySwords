@@ -1,12 +1,12 @@
 {
   "type": "minecraft:smithing",
   "base": {
-    "item": "simplyswords:soulstealer"
+    "item": "simplyswords:netherite_katana"
   },
   "addition": {
     "item": "simplyswords:awakened_essence"
   },
   "result": {
-    "item": "simplyswords:soulstealer"
+    "item": "simplyswords:runic_katana"
   }
 }

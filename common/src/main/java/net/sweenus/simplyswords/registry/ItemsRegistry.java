@@ -9,6 +9,7 @@ import net.minecraft.util.Rarity;
 import net.minecraft.util.registry.Registry;
 import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
+import net.sweenus.simplyswords.item.RunicSwordItem;
 import net.sweenus.simplyswords.item.SimplySwordsSwordItem;
 import net.sweenus.simplyswords.item.custom.*;
 
@@ -508,8 +509,8 @@ public class ItemsRegistry {
                     rapier_attackspeed,
                     new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.RARE)));
 
-    public static final RegistrySupplier<WildfireSwordItem> RUNIC_KATANA = ITEM.register( "runic_katana", () ->
-            new WildfireSwordItem(ToolMaterials.NETHERITE,
+    public static final RegistrySupplier<RunicSwordItem> RUNIC_KATANA = ITEM.register( "runic_katana", () ->
+            new RunicSwordItem(ToolMaterials.NETHERITE,
                     (int) (runic_modifier + katana_positive_modifier - katana_negative_modifier),
                     katana_attackspeed,
                     new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.RARE)));
