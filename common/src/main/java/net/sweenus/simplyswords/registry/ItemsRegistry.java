@@ -491,20 +491,20 @@ public class ItemsRegistry {
 
 
     //RUNIC
-    public static final RegistrySupplier<FreezeSwordItem> RUNIC_LONGSWORD = ITEM.register( "runic_longsword", () ->
-            new FreezeSwordItem(ToolMaterials.NETHERITE,
+    public static final RegistrySupplier<RunicSwordItem> RUNIC_LONGSWORD = ITEM.register( "runic_longsword", () ->
+            new RunicSwordItem(ToolMaterials.NETHERITE,
                     (int) (runic_modifier + longsword_positive_modifier - longsword_negative_modifier),
                     longsword_attackspeed,
                     new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.RARE)));
 
-    public static final RegistrySupplier<WildfireSwordItem> RUNIC_TWINBLADE = ITEM.register( "runic_twinblade", () ->
-            new WildfireSwordItem(ToolMaterials.NETHERITE,
+    public static final RegistrySupplier<RunicSwordItem> RUNIC_TWINBLADE = ITEM.register( "runic_twinblade", () ->
+            new RunicSwordItem(ToolMaterials.NETHERITE,
                     (int) (runic_modifier + twinblade_positive_modifier - twinblade_negative_modifier),
                     twinblade_attackspeed,
                     new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.RARE)));
 
-    public static final RegistrySupplier<SpeedSwordItem> RUNIC_RAPIER = ITEM.register( "runic_rapier", () ->
-            new SpeedSwordItem(ToolMaterials.NETHERITE,
+    public static final RegistrySupplier<RunicSwordItem> RUNIC_RAPIER = ITEM.register( "runic_rapier", () ->
+            new RunicSwordItem(ToolMaterials.NETHERITE,
                     (int) (runic_modifier + rapier_positive_modifier - rapier_negative_modifier),
                     rapier_attackspeed,
                     new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.RARE)));
@@ -515,55 +515,55 @@ public class ItemsRegistry {
                     katana_attackspeed,
                     new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.RARE)));
 
-    public static final RegistrySupplier<SlownessSwordItem> RUNIC_SAI = ITEM.register( "runic_sai", () ->
-            new SlownessSwordItem(ToolMaterials.NETHERITE,
+    public static final RegistrySupplier<RunicSwordItem> RUNIC_SAI = ITEM.register( "runic_sai", () ->
+            new RunicSwordItem(ToolMaterials.NETHERITE,
                     (int) (runic_modifier + sai_positive_modifier - sai_negative_modifier),
                     sai_attackspeed,
                     new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.RARE)));
 
-    public static final RegistrySupplier<FreezeSwordItem> RUNIC_SPEAR = ITEM.register( "runic_spear", () ->
-            new FreezeSwordItem(ToolMaterials.NETHERITE,
+    public static final RegistrySupplier<RunicSwordItem> RUNIC_SPEAR = ITEM.register( "runic_spear", () ->
+            new RunicSwordItem(ToolMaterials.NETHERITE,
                     (int) (runic_modifier + spear_positive_modifier - spear_negative_modifier),
                     spear_attackspeed,
                     new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.RARE)));
 
-    public static final RegistrySupplier<WildfireSwordItem> RUNIC_GLAIVE = ITEM.register( "runic_glaive", () ->
-            new WildfireSwordItem(ToolMaterials.NETHERITE,
+    public static final RegistrySupplier<RunicSwordItem> RUNIC_GLAIVE = ITEM.register( "runic_glaive", () ->
+            new RunicSwordItem(ToolMaterials.NETHERITE,
                     (int) (runic_modifier + glaive_positive_modifier - glaive_negative_modifier),
                     glaive_attackspeed,
                     new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.RARE)));
 
-    public static final RegistrySupplier<LevitationSwordItem> RUNIC_CUTLASS = ITEM.register( "runic_cutlass", () ->
-            new LevitationSwordItem(ToolMaterials.NETHERITE,
+    public static final RegistrySupplier<RunicSwordItem> RUNIC_CUTLASS = ITEM.register( "runic_cutlass", () ->
+            new RunicSwordItem(ToolMaterials.NETHERITE,
                     (int) (runic_modifier + cutlass_positive_modifier - cutlass_negative_modifier),
                     cutlass_attackspeed,
                     new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.RARE)));
-    public static final RegistrySupplier<FreezeSwordItem> RUNIC_CLAYMORE = ITEM.register( "runic_claymore", () ->
-            new FreezeSwordItem(ToolMaterials.NETHERITE,
+    public static final RegistrySupplier<RunicSwordItem> RUNIC_CLAYMORE = ITEM.register( "runic_claymore", () ->
+            new RunicSwordItem(ToolMaterials.NETHERITE,
                     (int) (runic_modifier + claymore_positive_modifier - claymore_negative_modifier),
                     claymore_attackspeed,
                     new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.RARE)));
 
-    public static final RegistrySupplier<SpeedSwordItem> RUNIC_CHAKRAM = ITEM.register( "runic_chakram", () ->
-            new SpeedSwordItem(ToolMaterials.NETHERITE,
+    public static final RegistrySupplier<RunicSwordItem> RUNIC_CHAKRAM = ITEM.register( "runic_chakram", () ->
+            new RunicSwordItem(ToolMaterials.NETHERITE,
                     (int) (runic_modifier + chakram_positive_modifier - chakram_negative_modifier),
                     chakram_attackspeed,
                     new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.RARE)));
 
-    public static final RegistrySupplier<FreezeSwordItem> RUNIC_GREATAXE = ITEM.register( "runic_greataxe", () ->
-            new FreezeSwordItem(ToolMaterials.NETHERITE,
+    public static final RegistrySupplier<RunicSwordItem> RUNIC_GREATAXE = ITEM.register( "runic_greataxe", () ->
+            new RunicSwordItem(ToolMaterials.NETHERITE,
                     (int) (runic_modifier + greataxe_positive_modifier - greataxe_negative_modifier),
                     greataxe_attackspeed,
                     new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.RARE)));
 
-    public static final RegistrySupplier<WildfireSwordItem> RUNIC_GREATHAMMER = ITEM.register( "runic_greathammer", () ->
-            new WildfireSwordItem(ToolMaterials.NETHERITE,
+    public static final RegistrySupplier<RunicSwordItem> RUNIC_GREATHAMMER = ITEM.register( "runic_greathammer", () ->
+            new RunicSwordItem(ToolMaterials.NETHERITE,
                     (int) (runic_modifier + greathammer_positive_modifier - greathammer_negative_modifier),
                     greathammer_attackspeed,
                     new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.RARE)));
 
-    public static final RegistrySupplier<LevitationSwordItem> RUNIC_SCYTHE = ITEM.register( "runic_scythe", () ->
-            new LevitationSwordItem(ToolMaterials.NETHERITE,
+    public static final RegistrySupplier<RunicSwordItem> RUNIC_SCYTHE = ITEM.register( "runic_scythe", () ->
+            new RunicSwordItem(ToolMaterials.NETHERITE,
                     (int) (runic_modifier + scythe_positive_modifier - scythe_negative_modifier),
                     scythe_attackspeed,
                     new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.RARE)));

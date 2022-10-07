@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:smithing",
+  "base": {
+    "item": "simplyswords:netherite_warglaive"
+  },
+  "addition": {
+    "item": "simplyswords:awakened_essence"
+  },
+  "result": {
+    "item": "simplyswords:runic_warglaive"
+  }
+}
