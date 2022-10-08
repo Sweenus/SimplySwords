@@ -31,7 +31,7 @@ public class RunicSwordItem extends SwordItem {
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
 
         //FREEZE
-        if(stack.getOrCreateNbt().getInt("runic_power") <= 25 && stack.getOrCreateNbt().getInt("runic_power") >= 1) {
+        if(stack.getOrCreateNbt().getInt("runic_power") <= 10 && stack.getOrCreateNbt().getInt("runic_power") >= 0) {
 
             int fhitchance = (int) SimplySwordsConfig.getFloatValue("freeze_chance");
             int fduration = (int) SimplySwordsConfig.getFloatValue("freeze_duration");
@@ -44,7 +44,7 @@ public class RunicSwordItem extends SwordItem {
             }
         }
         //WILDFIRE
-        if(stack.getOrCreateNbt().getInt("runic_power") > 25 && stack.getOrCreateNbt().getInt("runic_power") <= 40) {
+        if(stack.getOrCreateNbt().getInt("runic_power") > 10 && stack.getOrCreateNbt().getInt("runic_power") <= 20) {
             int phitchance = (int) SimplySwordsConfig.getFloatValue("wildfire_chance");
             int pduration = (int) SimplySwordsConfig.getFloatValue("wildfire_duration");
 
@@ -53,7 +53,7 @@ public class RunicSwordItem extends SwordItem {
             }
         }
         //SLOW
-        if(stack.getOrCreateNbt().getInt("runic_power") > 40 && stack.getOrCreateNbt().getInt("runic_power") <= 60) {
+        if(stack.getOrCreateNbt().getInt("runic_power") > 20 && stack.getOrCreateNbt().getInt("runic_power") <= 30) {
             int shitchance = (int) SimplySwordsConfig.getFloatValue("slowness_chance");
             int sduration = (int) SimplySwordsConfig.getFloatValue("slowness_duration");
 
@@ -62,7 +62,7 @@ public class RunicSwordItem extends SwordItem {
             }
         }
         //SPEED
-        if(stack.getOrCreateNbt().getInt("runic_power") > 60 && stack.getOrCreateNbt().getInt("runic_power") <= 80) {
+        if(stack.getOrCreateNbt().getInt("runic_power") > 30 && stack.getOrCreateNbt().getInt("runic_power") <= 40) {
             int shitchance = (int) SimplySwordsConfig.getFloatValue("speed_chance");
             int sduration = (int) SimplySwordsConfig.getFloatValue("speed_duration");
 
@@ -71,12 +71,63 @@ public class RunicSwordItem extends SwordItem {
             }
         }
         //LEVITATION
-        if(stack.getOrCreateNbt().getInt("runic_power") > 80 && stack.getOrCreateNbt().getInt("runic_power") <= 100) {
+        if(stack.getOrCreateNbt().getInt("runic_power") > 40 && stack.getOrCreateNbt().getInt("runic_power") <= 50) {
             int lhitchance = (int) SimplySwordsConfig.getFloatValue("levitation_chance");
             int lduration = (int) SimplySwordsConfig.getFloatValue("levitation_duration");
 
             if (attacker.getRandom().nextInt(100) <= lhitchance) {
                 target.addStatusEffect(new StatusEffectInstance(StatusEffects.LEVITATION, lduration, 3), attacker);
+            }
+        }
+        //ZEPHYR
+        if(stack.getOrCreateNbt().getInt("runic_power") > 50 && stack.getOrCreateNbt().getInt("runic_power") <= 60) {
+            int lhitchance = (int) SimplySwordsConfig.getFloatValue("zephyr_chance");
+            int lduration = (int) SimplySwordsConfig.getFloatValue("zephyr_duration");
+
+            if (attacker.getRandom().nextInt(100) <= lhitchance) {
+                attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, lduration, 3), attacker);
+                attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, lduration, 1), attacker);
+            }
+        }
+        //SHIELDING
+        if(stack.getOrCreateNbt().getInt("runic_power") > 60 && stack.getOrCreateNbt().getInt("runic_power") <= 70) {
+            int lhitchance = (int) SimplySwordsConfig.getFloatValue("shielding_chance");
+            int lduration = (int) SimplySwordsConfig.getFloatValue("shielding_duration");
+
+            if (attacker.getRandom().nextInt(100) <= lhitchance) {
+                attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.ABSORPTION, lduration, 1), attacker);
+            }
+        }
+        //STONESKIN
+        if(stack.getOrCreateNbt().getInt("runic_power") > 70 && stack.getOrCreateNbt().getInt("runic_power") <= 80) {
+            int lhitchance = (int) SimplySwordsConfig.getFloatValue("stoneskin_chance");
+            int lduration = (int) SimplySwordsConfig.getFloatValue("stoneskin_duration");
+
+            if (attacker.getRandom().nextInt(100) <= lhitchance) {
+                attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, lduration, 2), attacker);
+                attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.FIRE_RESISTANCE, lduration, 1), attacker);
+                attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, lduration, 1), attacker);
+            }
+        }
+        //TRAILBLAZE
+        if(stack.getOrCreateNbt().getInt("runic_power") > 80 && stack.getOrCreateNbt().getInt("runic_power") <= 90) {
+            int lhitchance = (int) SimplySwordsConfig.getFloatValue("trailblaze_chance");
+            int lduration = (int) SimplySwordsConfig.getFloatValue("trailblaze_duration");
+
+            if (attacker.getRandom().nextInt(100) <= lhitchance) {
+                attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, lduration, 3), attacker);
+                attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.FIRE_RESISTANCE, lduration, 1), attacker);
+                attacker.setOnFireFor(lduration / 20);
+            }
+        }
+        //WEAKEN
+        if(stack.getOrCreateNbt().getInt("runic_power") > 90 && stack.getOrCreateNbt().getInt("runic_power") <= 100) {
+            int lhitchance = (int) SimplySwordsConfig.getFloatValue("weaken_chance");
+            int lduration = (int) SimplySwordsConfig.getFloatValue("weaken_duration");
+
+            if (attacker.getRandom().nextInt(100) <= lhitchance) {
+                target.addStatusEffect(new StatusEffectInstance(StatusEffects.WEAKNESS, lduration, 1), attacker);
+                target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, lduration, 1), attacker);
             }
         }
 
@@ -99,14 +150,14 @@ public class RunicSwordItem extends SwordItem {
     @Override
     public void appendTooltip(ItemStack itemStack, World world, List<Text> tooltip, TooltipContext tooltipContext) {
 
-        if(itemStack.getOrCreateNbt().getInt("runic_power") <= 25 && itemStack.getOrCreateNbt().getInt("runic_power") >= 0) {
+        if(itemStack.getOrCreateNbt().getInt("runic_power") <= 10 && itemStack.getOrCreateNbt().getInt("runic_power") >= 0) {
 
             tooltip.add(Text.literal(""));
             tooltip.add(Text.translatable("item.simplyswords.freezesworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
             tooltip.add(Text.translatable("item.simplyswords.freezesworditem.tooltip2"));
 
         }
-        if(itemStack.getOrCreateNbt().getInt("runic_power") > 25 && itemStack.getOrCreateNbt().getInt("runic_power") <= 40) {
+        if(itemStack.getOrCreateNbt().getInt("runic_power") > 10 && itemStack.getOrCreateNbt().getInt("runic_power") <= 20) {
 
             tooltip.add(Text.literal(""));
             tooltip.add(Text.translatable("item.simplyswords.wildfiresworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
@@ -114,7 +165,7 @@ public class RunicSwordItem extends SwordItem {
             tooltip.add(Text.translatable("item.simplyswords.wildfiresworditem.tooltip3"));
 
         }
-        if(itemStack.getOrCreateNbt().getInt("runic_power") > 40 && itemStack.getOrCreateNbt().getInt("runic_power") <= 60) {
+        if(itemStack.getOrCreateNbt().getInt("runic_power") > 20 && itemStack.getOrCreateNbt().getInt("runic_power") <= 30) {
 
             tooltip.add(Text.literal(""));
             tooltip.add(Text.translatable("item.simplyswords.slownesssworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
@@ -122,7 +173,7 @@ public class RunicSwordItem extends SwordItem {
             tooltip.add(Text.translatable("item.simplyswords.slownesssworditem.tooltip3"));
 
         }
-        if(itemStack.getOrCreateNbt().getInt("runic_power") > 60 && itemStack.getOrCreateNbt().getInt("runic_power") <= 80) {
+        if(itemStack.getOrCreateNbt().getInt("runic_power") > 30 && itemStack.getOrCreateNbt().getInt("runic_power") <= 40) {
 
             tooltip.add(Text.literal(""));
             tooltip.add(Text.translatable("item.simplyswords.speedsworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
@@ -130,12 +181,52 @@ public class RunicSwordItem extends SwordItem {
             tooltip.add(Text.translatable("item.simplyswords.speedsworditem.tooltip3"));
 
         }
-        if(itemStack.getOrCreateNbt().getInt("runic_power") > 80 && itemStack.getOrCreateNbt().getInt("runic_power") <= 100) {
+        if(itemStack.getOrCreateNbt().getInt("runic_power") > 40 && itemStack.getOrCreateNbt().getInt("runic_power") <= 50) {
 
             tooltip.add(Text.literal(""));
             tooltip.add(Text.translatable("item.simplyswords.levitationsworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
             tooltip.add(Text.translatable("item.simplyswords.levitationsworditem.tooltip2"));
             tooltip.add(Text.translatable("item.simplyswords.levitationsworditem.tooltip3"));
+
+        }
+        if(itemStack.getOrCreateNbt().getInt("runic_power") > 50 && itemStack.getOrCreateNbt().getInt("runic_power") <= 60) {
+
+            tooltip.add(Text.literal(""));
+            tooltip.add(Text.translatable("item.simplyswords.zephyrsworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
+            tooltip.add(Text.translatable("item.simplyswords.zephyrsworditem.tooltip2"));
+            tooltip.add(Text.translatable("item.simplyswords.zephyrsworditem.tooltip3"));
+
+        }
+        if(itemStack.getOrCreateNbt().getInt("runic_power") > 60 && itemStack.getOrCreateNbt().getInt("runic_power") <= 70) {
+
+            tooltip.add(Text.literal(""));
+            tooltip.add(Text.translatable("item.simplyswords.shieldingsworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
+            tooltip.add(Text.translatable("item.simplyswords.shieldingsworditem.tooltip2"));
+            tooltip.add(Text.translatable("item.simplyswords.shieldingsworditem.tooltip3"));
+
+        }
+        if(itemStack.getOrCreateNbt().getInt("runic_power") > 70 && itemStack.getOrCreateNbt().getInt("runic_power") <= 80) {
+
+            tooltip.add(Text.literal(""));
+            tooltip.add(Text.translatable("item.simplyswords.stoneskinsworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
+            tooltip.add(Text.translatable("item.simplyswords.stoneskinsworditem.tooltip2"));
+            tooltip.add(Text.translatable("item.simplyswords.stoneskinsworditem.tooltip3"));
+
+        }
+        if(itemStack.getOrCreateNbt().getInt("runic_power") > 80 && itemStack.getOrCreateNbt().getInt("runic_power") <= 90) {
+
+            tooltip.add(Text.literal(""));
+            tooltip.add(Text.translatable("item.simplyswords.trailblazesworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
+            tooltip.add(Text.translatable("item.simplyswords.trailblazesworditem.tooltip2"));
+            tooltip.add(Text.translatable("item.simplyswords.trailblazesworditem.tooltip3"));
+
+        }
+        if(itemStack.getOrCreateNbt().getInt("runic_power") > 90 && itemStack.getOrCreateNbt().getInt("runic_power") <= 100) {
+
+            tooltip.add(Text.literal(""));
+            tooltip.add(Text.translatable("item.simplyswords.weakensworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
+            tooltip.add(Text.translatable("item.simplyswords.weakensworditem.tooltip2"));
+            tooltip.add(Text.translatable("item.simplyswords.weakensworditem.tooltip3"));
 
         }
 

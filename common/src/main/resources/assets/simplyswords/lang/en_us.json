@@ -519,5 +519,20 @@
   "item.simplyswords.freezesworditem.tooltip2": "Chance on hit to chill or freeze your target.",
   "item.simplyswords.wildfiresworditem.tooltip1": "Runic Power: Wildfire",
   "item.simplyswords.wildfiresworditem.tooltip2": "Chance on hit to ignite all nearby ",
-  "item.simplyswords.wildfiresworditem.tooltip3": "entities of the same type as your target."
+  "item.simplyswords.wildfiresworditem.tooltip3": "entities of the same type as your target.",
+  "item.simplyswords.zephyrsworditem.tooltip1": "Runic Power: Zephyr",
+  "item.simplyswords.zephyrsworditem.tooltip2": "Chance on hit to gain attack and move",
+  "item.simplyswords.zephyrsworditem.tooltip3": "speed.",
+  "item.simplyswords.shieldingsworditem.tooltip1": "Runic Power: Shielding",
+  "item.simplyswords.shieldingsworditem.tooltip2": "Chance on hit to gain",
+  "item.simplyswords.shieldingsworditem.tooltip3": "absorption.",
+  "item.simplyswords.stoneskinsworditem.tooltip1": "Runic Power: Stoneskin",
+  "item.simplyswords.stoneskinsworditem.tooltip2": "Chance on hit to increase your",
+  "item.simplyswords.stoneskinsworditem.tooltip3": "resistance at the cost of speed.",
+  "item.simplyswords.trailblazesworditem.tooltip1": "Runic Power: Trailblaze",
+  "item.simplyswords.trailblazesworditem.tooltip2": "Chance on hit to gain fire resistance ",
+  "item.simplyswords.trailblazesworditem.tooltip3": "and speed while igniting yourself.",
+  "item.simplyswords.weakensworditem.tooltip1": "Runic Power: Weaken",
+  "item.simplyswords.weakensworditem.tooltip2": "Chance on hit to slow and",
+  "item.simplyswords.weakensworditem.tooltip3": "weaken your target."
 }
