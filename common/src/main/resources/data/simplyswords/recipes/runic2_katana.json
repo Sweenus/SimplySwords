@@ -1,7 +1,7 @@
 {
   "type": "minecraft:smithing",
   "base": {
-    "item": "simplyswords:netherite_katana"
+    "item": "simplyswords:runic_katana"
   },
   "addition": {
     "item": "simplyswords:runic_tablet"

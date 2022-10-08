@@ -51,6 +51,7 @@ public class StealSwordItem extends SwordItem {
 
             }
 
+            /*
             //Awakening
             if(stack.getOrCreateNbt().getInt("awakening_exp") < 100 && stack.getOrCreateNbt().getInt("awakening") < 5) {
                 stack.getOrCreateNbt().putInt("awakening_exp", stack.getOrCreateNbt().getInt("awakening_exp") + 10);
@@ -61,6 +62,7 @@ public class StealSwordItem extends SwordItem {
                     stack.getOrCreateNbt().putInt("awakening", stack.getOrCreateNbt().getInt("awakening") +1);
                 }
             }
+             */
 
         }
 
@@ -146,6 +148,7 @@ public class StealSwordItem extends SwordItem {
         tooltip.add(Text.translatable("item.simplyswords.stealsworditem.tooltip10"));
         tooltip.add(Text.literal(""));
 
+        /*
         if(itemStack.getOrCreateNbt().getInt("awakening") < 5) {
 
             tooltip.add(Text.translatable("item.simplyswords.awakening",
@@ -159,6 +162,7 @@ public class StealSwordItem extends SwordItem {
                     (itemStack.getOrCreateNbt().getInt("awakening"))).formatted(Formatting.RED));
         }
         tooltip.add(Text.translatable("item.simplyswords.awakening.powers"));
+         */
 
 
 /*

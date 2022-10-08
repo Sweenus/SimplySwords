@@ -61,6 +61,7 @@ public class ModLootTableModifiers {
                         .rolls(ConstantLootNumberProvider.create(1))
                         .conditionally(RandomChanceLootCondition.builder(SimplySwordsConfig.getGeneralSettings("rare_loot_table_weight"))) // 1 = 100% of the time
                         .apply(EnchantRandomlyLootFunction.builder())
+                        .with(ItemEntry.builder(ItemsRegistry.RUNIC_TABLET.get()))
                         .with(ItemEntry.builder(ItemsRegistry.RUNIC_CLAYMORE.get()))
                         .with(ItemEntry.builder(ItemsRegistry.RUNIC_TWINBLADE.get()))
                         .with(ItemEntry.builder(ItemsRegistry.RUNIC_LONGSWORD.get()))

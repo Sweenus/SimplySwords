@@ -5,11 +5,15 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.StackReference;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.SwordItem;
 import net.minecraft.item.ToolMaterial;
+import net.minecraft.screen.slot.Slot;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
+import net.minecraft.util.ClickType;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
@@ -28,10 +32,22 @@ public class RunicSwordItem extends SwordItem {
     }
 
     @Override
+    public boolean onClicked(ItemStack stack, ItemStack otherStack, Slot slot, ClickType clickType, PlayerEntity player, StackReference cursorStackReference) {
+
+        if(stack.getOrCreateNbt().getInt("runic_power") == 0) {
+
+            int choose = (int) (Math.random() * 100);
+            stack.getOrCreateNbt().putInt("runic_power", choose);
+        }
+
+        return false;
+    }
+
+    @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
 
         //FREEZE
-        if(stack.getOrCreateNbt().getInt("runic_power") <= 10 && stack.getOrCreateNbt().getInt("runic_power") >= 0) {
+        if(stack.getOrCreateNbt().getInt("runic_power") <= 10 && stack.getOrCreateNbt().getInt("runic_power") >= 1) {
 
             int fhitchance = (int) SimplySwordsConfig.getFloatValue("freeze_chance");
             int fduration = (int) SimplySwordsConfig.getFloatValue("freeze_duration");
@@ -140,17 +156,21 @@ public class RunicSwordItem extends SwordItem {
     {
         if(world.isClient) return;
 
-        if(stack.getOrCreateNbt().getInt("runic_power") < 1)
-        {
             int choose = (int) (Math.random() * 100);
             stack.getOrCreateNbt().putInt("runic_power", choose);
-        }
     }
 
     @Override
     public void appendTooltip(ItemStack itemStack, World world, List<Text> tooltip, TooltipContext tooltipContext) {
 
-        if(itemStack.getOrCreateNbt().getInt("runic_power") <= 10 && itemStack.getOrCreateNbt().getInt("runic_power") >= 0) {
+        if(itemStack.getOrCreateNbt().getInt("runic_power") == 0) {
+
+            tooltip.add(Text.literal(""));
+            tooltip.add(Text.translatable("item.simplyswords.unidentifiedsworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
+            tooltip.add(Text.translatable("item.simplyswords.unidentifiedsworditem.tooltip2"));
+
+        }
+        if(itemStack.getOrCreateNbt().getInt("runic_power") <= 10 && itemStack.getOrCreateNbt().getInt("runic_power") >= 1) {
 
             tooltip.add(Text.literal(""));
             tooltip.add(Text.translatable("item.simplyswords.freezesworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));

@@ -86,6 +86,8 @@
   "item.simplyswords.soulstealer": "Soulstealer",
   "item.simplyswords.soulrender": "Soulrender",
 
+  "item.simplyswords.runic_tablet": "Runic Tablet",
+
 
   "item.simplyswords.mythicmetals_compat.adamantite.adamantite_claymore": "Adamantite Claymore",
   "item.simplyswords.mythicmetals_compat.adamantite.adamantite_cutlass": "Adamantite Cutlass",
@@ -534,5 +536,7 @@
   "item.simplyswords.trailblazesworditem.tooltip3": "and speed while igniting yourself.",
   "item.simplyswords.weakensworditem.tooltip1": "Runic Power: Weaken",
   "item.simplyswords.weakensworditem.tooltip2": "Chance on hit to slow and",
-  "item.simplyswords.weakensworditem.tooltip3": "weaken your target."
+  "item.simplyswords.weakensworditem.tooltip3": "weaken your target.",
+  "item.simplyswords.unidentifiedsworditem.tooltip1": "Runic Power: ????",
+  "item.simplyswords.unidentifiedsworditem.tooltip2": "Click to identify."
 }

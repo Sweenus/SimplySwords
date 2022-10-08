@@ -103,7 +103,7 @@ public class ItemsRegistry {
 
     public static final DeferredRegister<Item> ITEM = DeferredRegister.create(SimplySwords.MOD_ID, Registry.ITEM_KEY);
 
-    public static final RegistrySupplier<Item> AWAKENED_ESSENCE = ITEM.register("awakened_essence", () ->
+    public static final RegistrySupplier<Item> RUNIC_TABLET = ITEM.register("runic_tablet", () ->
             new Item(new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
 

@@ -67,6 +67,21 @@ public class SimplySwordsConfig {
         FLOAT_OPTIONS.put("levitation_chance", 15f);
         FLOAT_OPTIONS.put("levitation_duration", 50f);
 
+        FLOAT_OPTIONS.put("zephyr_chance", 15f);
+        FLOAT_OPTIONS.put("zephyr_duration", 180f);
+
+        FLOAT_OPTIONS.put("shielding_chance", 15f);
+        FLOAT_OPTIONS.put("shielding_duration", 60f);
+
+        FLOAT_OPTIONS.put("stoneskin_chance", 15f);
+        FLOAT_OPTIONS.put("stoneskin_duration", 120f);
+
+        FLOAT_OPTIONS.put("trailblaze_chance", 15f);
+        FLOAT_OPTIONS.put("trailblaze_duration", 120f);
+
+        FLOAT_OPTIONS.put("weaken_chance", 15f);
+        FLOAT_OPTIONS.put("weaken_duration", 120f);
+
         FLOAT_OPTIONS.put("watcher_chance", 5f);
         FLOAT_OPTIONS.put("watcher_restore_amount", 0.5f);
         FLOAT_OPTIONS.put("watcher_radius", 8f);
@@ -119,8 +134,8 @@ public class SimplySwordsConfig {
 
 
         GENERAL_OPTIONS.put("standard_loot_table_weight", 0.08f);
-        GENERAL_OPTIONS.put("rare_loot_table_weight", 0.008f);
-        GENERAL_OPTIONS.put("unique_loot_table_weight", 0.002f);
+        GENERAL_OPTIONS.put("rare_loot_table_weight", 0.01f);
+        GENERAL_OPTIONS.put("unique_loot_table_weight", 0.003f);
 
 
         BOOLEAN_OPTIONS.put("add_weapons_to_loot_tables", true);
@@ -326,65 +341,90 @@ public class SimplySwordsConfig {
             }
             if (i == 13) {
                 config.append("\n");
+                config.append("// -- Runic Power: Zephyr -- \n");
+                config.append("// ------------------------ \n");
+            }
+            if (i == 15) {
+                config.append("\n");
+                config.append("// -- Runic Power: Shielding -- \n");
+                config.append("// ------------------------ \n");
+            }
+            if (i == 17) {
+                config.append("\n");
+                config.append("// -- Runic Power: Stoneskin -- \n");
+                config.append("// ------------------------ \n");
+            }
+            if (i == 19) {
+                config.append("\n");
+                config.append("// -- Runic Power: Trailblaze -- \n");
+                config.append("// ------------------------ \n");
+            }
+            if (i == 21) {
+                config.append("\n");
+                config.append("// -- Runic Power: Weaken -- \n");
+                config.append("// ------------------------ \n");
+            }
+            if (i == 23) {
+                config.append("\n");
                 config.append("// -- Unique Effect: Watcher -- \n");
                 config.append("// -- Restore amount refers to health gained from each enemy in range -- \n");
                 config.append("// ---------------------------- \n");
             }
-            if (i == 16) {
+            if (i == 26) {
                 config.append("\n");
                 config.append("// -- Unique Effect: Omen -- \n");
                 config.append("// -- Absorption amount refers to the tier of regeneration gained on proc -- \n");
                 config.append("// -- Instantkill Threshold refers to the % of maxhealth an enemy must be UNDER in order for the effect to proc. Where 1 = 100% -- \n");
                 config.append("// ---------------------------- \n");
             }
-            if (i == 19) {
+            if (i == 29) {
                 config.append("\n");
                 config.append("// -- Unique Effect: Soul Steal -- \n");
                 config.append("// Duration refers to the haste, slow, and glow effects \n");
                 config.append("// ------------------------------- \n");
             }
-            if (i == 24) {
+            if (i == 34) {
                 config.append("\n");
                 config.append("// -- Unique Effect: Gravity -- \n");
                 config.append("// NOT YET IMPLEMENTED \n");
                 config.append("// ---------------------------- \n");
             }
-            if (i == 27) {
+            if (i == 37) {
                 config.append("\n");
                 config.append("// -- Unique Effect: Soul Meld -- \n");
                 config.append("// ----------------------------- \n");
             }
-            if (i == 30) {
+            if (i == 40) {
                 config.append("\n");
                 config.append("// -- Unique Effect: Soul Rend -- \n");
                 config.append("// ----------------------------- \n");
             }
-            if (i == 36) {
+            if (i == 46) {
                 config.append("\n");
                 config.append("// -- Unique Effect: Ferocity -- \n");
                 config.append("// ----------------------------- \n");
             }
-            if (i == 40) {
+            if (i == 50) {
                 config.append("\n");
                 config.append("// -- Unique Effect: Ember Ire -- \n");
                 config.append("// ------------------------------ \n");
             }
-            if (i == 42) {
+            if (i == 52) {
                 config.append("\n");
                 config.append("// -- Unique Effect: Volcanic Fury -- \n");
                 config.append("// ---------------------------------- \n");
             }
-            if (i == 43) {
+            if (i == 53) {
                 config.append("\n");
                 config.append("// -- Unique Effect: Storm -- \n");
                 config.append("// -------------------------- \n");
             }
-            if (i == 45) {
+            if (i == 55) {
                 config.append("\n");
                 config.append("// -- Unique Effect: Plague -- \n");
                 config.append("// --------------------------- \n");
             }
-            if (i == 46) {
+            if (i == 56) {
                 config.append("\n");
                 config.append("// -- Unique Effect: Brimstone -- \n");
                 config.append("// ------------------------------ \n");
