@@ -82,7 +82,7 @@ public class SimplySwordsConfig {
         FLOAT_OPTIONS.put("weaken_chance", 15f);
         FLOAT_OPTIONS.put("weaken_duration", 120f);
 
-        FLOAT_OPTIONS.put("unstable_frequency", 100f);
+        FLOAT_OPTIONS.put("unstable_frequency", 140f);
         FLOAT_OPTIONS.put("unstable_duration", 140f);
 
         FLOAT_OPTIONS.put("active_defence_frequency", 20f);
@@ -90,7 +90,7 @@ public class SimplySwordsConfig {
 
         FLOAT_OPTIONS.put("frostward_frequency", 20f);
         FLOAT_OPTIONS.put("frostward_radius", 5f);
-        FLOAT_OPTIONS.put("frostward_slow_duration", 5f);
+        FLOAT_OPTIONS.put("frostward_slow_duration", 60f);
 
         FLOAT_OPTIONS.put("watcher_chance", 5f);
         FLOAT_OPTIONS.put("watcher_restore_amount", 0.5f);

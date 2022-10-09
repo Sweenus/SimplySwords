@@ -396,7 +396,7 @@ public class RunicSwordItem extends SwordItem {
                                         SnowballEntity snowball = new SnowballEntity(EntityType.SNOWBALL, (ServerWorld) world);
                                         snowball.updatePosition(player.getX(), (player.getY() + 1.5), player.getZ());
                                         snowball.setOwner(player);
-                                        le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 60));
+                                        le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, lduration));
                                         snowball.setVelocity( le.getX() - player.getX(), (le.getY() - player.getY()) - 1, le.getZ() - player.getZ());
                                         sworld.spawnEntity(snowball);
                                     }
