@@ -61,7 +61,6 @@ public class ModLootTableModifiers {
                         .rolls(ConstantLootNumberProvider.create(1))
                         .conditionally(RandomChanceLootCondition.builder(SimplySwordsConfig.getGeneralSettings("rare_loot_table_weight"))) // 1 = 100% of the time
                         .apply(EnchantRandomlyLootFunction.builder())
-                        .with(ItemEntry.builder(ItemsRegistry.RUNIC_TABLET.get()))
                         .with(ItemEntry.builder(ItemsRegistry.RUNIC_CLAYMORE.get()))
                         .with(ItemEntry.builder(ItemsRegistry.RUNIC_TWINBLADE.get()))
                         .with(ItemEntry.builder(ItemsRegistry.RUNIC_LONGSWORD.get()))
@@ -88,6 +87,16 @@ public class ModLootTableModifiers {
                         .with(ItemEntry.builder(ItemsRegistry.DIAMOND_CHAKRAM.get()))
                         .with(ItemEntry.builder(ItemsRegistry.DIAMOND_GREATAXE.get()));
 
+                context.addPool(pool);
+            }
+        }));
+        //RARE 2
+        LootEvent.MODIFY_LOOT_TABLE.register(((lootTables, id, context, builtin) -> {
+            if (SimplySwordsConfig.getBooleanValue("add_weapons_to_loot_tables") && id.getPath().contains("chests") && !id.getPath().contains("village")) {
+                LootPool.Builder pool = LootPool.builder()
+                        .rolls(ConstantLootNumberProvider.create(1))
+                        .conditionally(RandomChanceLootCondition.builder(SimplySwordsConfig.getGeneralSettings("standard_loot_table_weight"))) // 1 = 100% of the time
+                        .with(ItemEntry.builder(ItemsRegistry.RUNIC_TABLET.get()));
                 context.addPool(pool);
             }
         }));

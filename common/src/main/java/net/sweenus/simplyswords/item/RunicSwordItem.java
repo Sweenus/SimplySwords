@@ -1,26 +1,37 @@
 package net.sweenus.simplyswords.item;
 
 import net.minecraft.client.item.TooltipContext;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.projectile.ArrowEntity;
+import net.minecraft.entity.projectile.FireballEntity;
+import net.minecraft.entity.projectile.thrown.SnowballEntity;
 import net.minecraft.inventory.StackReference;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.SwordItem;
-import net.minecraft.item.ToolMaterial;
+import net.minecraft.item.*;
+import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.SoundCategory;
 import net.minecraft.text.Text;
 import net.minecraft.util.ClickType;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
 import net.sweenus.simplyswords.registry.EffectRegistry;
+import net.sweenus.simplyswords.registry.SoundRegistry;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -115,7 +126,7 @@ public class RunicSwordItem extends SwordItem {
             }
         }
         //STONESKIN
-        if(stack.getOrCreateNbt().getInt("runic_power") > 70 && stack.getOrCreateNbt().getInt("runic_power") <= 80) {
+        if(stack.getOrCreateNbt().getInt("runic_power") > 70 && stack.getOrCreateNbt().getInt("runic_power") <= 75) {
             int lhitchance = (int) SimplySwordsConfig.getFloatValue("stoneskin_chance");
             int lduration = (int) SimplySwordsConfig.getFloatValue("stoneskin_duration");
 
@@ -126,7 +137,7 @@ public class RunicSwordItem extends SwordItem {
             }
         }
         //TRAILBLAZE
-        if(stack.getOrCreateNbt().getInt("runic_power") > 80 && stack.getOrCreateNbt().getInt("runic_power") <= 90) {
+        if(stack.getOrCreateNbt().getInt("runic_power") > 80 && stack.getOrCreateNbt().getInt("runic_power") <= 85) {
             int lhitchance = (int) SimplySwordsConfig.getFloatValue("trailblaze_chance");
             int lduration = (int) SimplySwordsConfig.getFloatValue("trailblaze_duration");
 
@@ -137,7 +148,7 @@ public class RunicSwordItem extends SwordItem {
             }
         }
         //WEAKEN
-        if(stack.getOrCreateNbt().getInt("runic_power") > 90 && stack.getOrCreateNbt().getInt("runic_power") <= 100) {
+        if(stack.getOrCreateNbt().getInt("runic_power") > 90 && stack.getOrCreateNbt().getInt("runic_power") <= 95) {
             int lhitchance = (int) SimplySwordsConfig.getFloatValue("weaken_chance");
             int lduration = (int) SimplySwordsConfig.getFloatValue("weaken_duration");
 
@@ -225,7 +236,7 @@ public class RunicSwordItem extends SwordItem {
             tooltip.add(Text.translatable("item.simplyswords.shieldingsworditem.tooltip3"));
 
         }
-        if(itemStack.getOrCreateNbt().getInt("runic_power") > 70 && itemStack.getOrCreateNbt().getInt("runic_power") <= 80) {
+        if(itemStack.getOrCreateNbt().getInt("runic_power") > 70 && itemStack.getOrCreateNbt().getInt("runic_power") <= 75) {
 
             tooltip.add(Text.literal(""));
             tooltip.add(Text.translatable("item.simplyswords.stoneskinsworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
@@ -233,7 +244,15 @@ public class RunicSwordItem extends SwordItem {
             tooltip.add(Text.translatable("item.simplyswords.stoneskinsworditem.tooltip3"));
 
         }
-        if(itemStack.getOrCreateNbt().getInt("runic_power") > 80 && itemStack.getOrCreateNbt().getInt("runic_power") <= 90) {
+        if(itemStack.getOrCreateNbt().getInt("runic_power") > 75 && itemStack.getOrCreateNbt().getInt("runic_power") <= 80) {
+
+            tooltip.add(Text.literal(""));
+            tooltip.add(Text.translatable("item.simplyswords.frostwardsworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
+            tooltip.add(Text.translatable("item.simplyswords.frostwardsworditem.tooltip2"));
+            tooltip.add(Text.translatable("item.simplyswords.frostwardsworditem.tooltip3"));
+
+        }
+        if(itemStack.getOrCreateNbt().getInt("runic_power") > 80 && itemStack.getOrCreateNbt().getInt("runic_power") <= 85) {
 
             tooltip.add(Text.literal(""));
             tooltip.add(Text.translatable("item.simplyswords.trailblazesworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
@@ -241,7 +260,15 @@ public class RunicSwordItem extends SwordItem {
             tooltip.add(Text.translatable("item.simplyswords.trailblazesworditem.tooltip3"));
 
         }
-        if(itemStack.getOrCreateNbt().getInt("runic_power") > 90 && itemStack.getOrCreateNbt().getInt("runic_power") <= 100) {
+        if(itemStack.getOrCreateNbt().getInt("runic_power") > 85 && itemStack.getOrCreateNbt().getInt("runic_power") <= 90) {
+
+            tooltip.add(Text.literal(""));
+            tooltip.add(Text.translatable("item.simplyswords.activedefencesworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
+            tooltip.add(Text.translatable("item.simplyswords.activedefencesworditem.tooltip2"));
+            tooltip.add(Text.translatable("item.simplyswords.activedefencesworditem.tooltip3"));
+
+        }
+        if(itemStack.getOrCreateNbt().getInt("runic_power") > 90 && itemStack.getOrCreateNbt().getInt("runic_power") <= 95) {
 
             tooltip.add(Text.literal(""));
             tooltip.add(Text.translatable("item.simplyswords.weakensworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
@@ -249,6 +276,140 @@ public class RunicSwordItem extends SwordItem {
             tooltip.add(Text.translatable("item.simplyswords.weakensworditem.tooltip3"));
 
         }
+        if(itemStack.getOrCreateNbt().getInt("runic_power") > 95 && itemStack.getOrCreateNbt().getInt("runic_power") <= 100) {
+
+            tooltip.add(Text.literal(""));
+            tooltip.add(Text.translatable("item.simplyswords.unstablesworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
+            tooltip.add(Text.translatable("item.simplyswords.unstablesworditem.tooltip2"));
+            tooltip.add(Text.translatable("item.simplyswords.unstablesworditem.tooltip3"));
+
+        }
 
     }
+
+    @Override
+    public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
+        if (!world.isClient && (entity instanceof PlayerEntity player)) {
+
+            //UNSTABLE
+            if(stack.getOrCreateNbt().getInt("runic_power") > 95 && stack.getOrCreateNbt().getInt("runic_power") <= 100) {
+                if (player.getEquippedStack(EquipmentSlot.MAINHAND) == stack || player.getEquippedStack(EquipmentSlot.OFFHAND) == stack) {
+                    int lduration = (int) SimplySwordsConfig.getFloatValue("unstable_duration");
+                    int lfrequency = (int) SimplySwordsConfig.getFloatValue("unstable_frequency");
+                    if (player.age % lfrequency == 0) {
+                        int random = (int) (Math.random() * 100);
+                        if (random >= 0 && random < 10)
+                            player.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, lduration));
+                        if (random >= 10 && random < 20)
+                            player.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, lduration));
+                        if (random >= 20 && random < 30)
+                            player.addStatusEffect(new StatusEffectInstance(StatusEffects.REGENERATION, lduration));
+                        if (random >= 30 && random < 40)
+                            player.addStatusEffect(new StatusEffectInstance(StatusEffects.ABSORPTION, lduration));
+                        if (random >= 40 && random < 50)
+                            player.addStatusEffect(new StatusEffectInstance(StatusEffects.FIRE_RESISTANCE, lduration));
+                        if (random >= 50 && random < 60)
+                            player.addStatusEffect(new StatusEffectInstance(StatusEffects.JUMP_BOOST, lduration));
+                        if (random >= 60 && random < 70)
+                            player.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, lduration));
+                        if (random >= 70 && random < 80)
+                            player.addStatusEffect(new StatusEffectInstance(StatusEffects.DOLPHINS_GRACE, lduration));
+                        if (random >= 80 && random < 90)
+                            player.addStatusEffect(new StatusEffectInstance(StatusEffects.DOLPHINS_GRACE, lduration));
+                        if (random >= 90 && random < 95)
+                            player.addStatusEffect(new StatusEffectInstance(StatusEffects.LEVITATION, lduration));
+                        if (random >= 95 && random < 100)
+                            player.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOW_FALLING, lduration));
+                    }
+                }
+            }
+            //ACTIVE DEFENCE
+            if(stack.getOrCreateNbt().getInt("runic_power") > 85 && stack.getOrCreateNbt().getInt("runic_power") <= 90) {
+                if (player.getEquippedStack(EquipmentSlot.MAINHAND) == stack || player.getEquippedStack(EquipmentSlot.OFFHAND) == stack) {
+                    int lfrequency = (int) SimplySwordsConfig.getFloatValue("active_defence_frequency");
+                    if (player.age % lfrequency == 0) {
+                        int sradius = (int) SimplySwordsConfig.getFloatValue("active_defence_radius");
+                        int vradius = (int) (SimplySwordsConfig.getFloatValue("active_defence_radius") / 2);
+                        double x = player.getX();
+                        double y = player.getY();
+                        double z = player.getZ();
+                        ServerWorld sworld = (ServerWorld) player.world;
+                        Box box = new Box(x + sradius, y + vradius, z + sradius, x - sradius, y - vradius, z - sradius);
+                        for (Entity entities : sworld.getOtherEntities(player, box, EntityPredicates.VALID_LIVING_ENTITY)) {
+
+                            if (entities != null) {
+                                if (entities instanceof LivingEntity le && player.getInventory().contains(Items.ARROW.getDefaultStack())) {
+
+                                    var arrowstack = player.getInventory().getSlotWithStack(Items.ARROW.getDefaultStack());
+                                    var astack = player.getInventory().getStack(arrowstack);
+                                    int randomc = (int) (Math.random() * 100);
+                                    if (randomc < 15)
+                                        astack.setCount(astack.getCount()-1);
+
+                                    if (le.distanceTo(player) < sradius) {
+                                        double ex = le.getX();
+                                        double ey = le.getY();
+                                        double ez = le.getZ();
+                                        BlockPos position = (player.getBlockPos());
+                                        Vec3d rotation = le.getRotationVec(1f);
+                                        Vec3d newPos = player.getPos().add(rotation);
+
+                                        ArrowEntity arrow = new ArrowEntity(EntityType.ARROW, (ServerWorld) world);
+                                        arrow.updatePosition(player.getX(), (player.getY() + 1.5), player.getZ());
+                                        arrow.setOwner(player);
+                                        arrow.setVelocity( le.getX() - player.getX(), (le.getY() - player.getY()) - 1, le.getZ() - player.getZ());
+                                        sworld.spawnEntity(arrow);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            //FROST WARD
+            if(stack.getOrCreateNbt().getInt("runic_power") > 75 && stack.getOrCreateNbt().getInt("runic_power") <= 80) {
+                if (player.getEquippedStack(EquipmentSlot.MAINHAND) == stack || player.getEquippedStack(EquipmentSlot.OFFHAND) == stack) {
+                    int lfrequency = (int) SimplySwordsConfig.getFloatValue("frostward_frequency");
+                    int lduration = (int) SimplySwordsConfig.getFloatValue("frostward_slow_duration");
+                    if (player.age % lfrequency == 0) {
+                        int sradius = (int) SimplySwordsConfig.getFloatValue("frostward_radius");
+                        int vradius = (int) (SimplySwordsConfig.getFloatValue("frostward_radius") / 2);
+                        double x = player.getX();
+                        double y = player.getY();
+                        double z = player.getZ();
+                        ServerWorld sworld = (ServerWorld) player.world;
+                        Box box = new Box(x + sradius, y + vradius, z + sradius, x - sradius, y - vradius, z - sradius);
+                        for (Entity entities : sworld.getOtherEntities(player, box, EntityPredicates.VALID_LIVING_ENTITY)) {
+
+                            if (entities != null) {
+                                if (entities instanceof LivingEntity le) {
+
+                                    if (le.distanceTo(player) < sradius) {
+                                        double ex = le.getX();
+                                        double ey = le.getY();
+                                        double ez = le.getZ();
+                                        BlockPos position = (player.getBlockPos());
+                                        Vec3d rotation = le.getRotationVec(1f);
+                                        Vec3d newPos = player.getPos().add(rotation);
+
+                                        SnowballEntity snowball = new SnowballEntity(EntityType.SNOWBALL, (ServerWorld) world);
+                                        snowball.updatePosition(player.getX(), (player.getY() + 1.5), player.getZ());
+                                        snowball.setOwner(player);
+                                        le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 60));
+                                        snowball.setVelocity( le.getX() - player.getX(), (le.getY() - player.getY()) - 1, le.getZ() - player.getZ());
+                                        sworld.spawnEntity(snowball);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            super.inventoryTick(stack, world, entity, slot, selected);
+        }
+    }
+
+
 }

@@ -104,7 +104,7 @@ public class ItemsRegistry {
     public static final DeferredRegister<Item> ITEM = DeferredRegister.create(SimplySwords.MOD_ID, Registry.ITEM_KEY);
 
     public static final RegistrySupplier<Item> RUNIC_TABLET = ITEM.register("runic_tablet", () ->
-            new Item(new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+            new Item(new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.RARE)));
 
 
     public static final RegistrySupplier<SimplySwordsSwordItem> IRON_LONGSWORD = ITEM.register("iron_longsword", () ->

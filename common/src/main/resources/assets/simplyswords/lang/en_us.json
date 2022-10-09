@@ -537,6 +537,15 @@
   "item.simplyswords.weakensworditem.tooltip1": "Runic Power: Weaken",
   "item.simplyswords.weakensworditem.tooltip2": "Chance on hit to slow and",
   "item.simplyswords.weakensworditem.tooltip3": "weaken your target.",
+  "item.simplyswords.unstablesworditem.tooltip1": "Runic Power: Unstable",
+  "item.simplyswords.unstablesworditem.tooltip2": "Regularly apply random effects",
+  "item.simplyswords.unstablesworditem.tooltip3": "to the wielder.",
+  "item.simplyswords.activedefencesworditem.tooltip1": "Runic Power: Active Defence",
+  "item.simplyswords.activedefencesworditem.tooltip2": "Regularly fires arrows at nearby",
+  "item.simplyswords.activedefencesworditem.tooltip3": "enemies (Requires Arrows).",
+  "item.simplyswords.frostwardsworditem.tooltip1": "Runic Power: Frost Ward",
+  "item.simplyswords.frostwardsworditem.tooltip2": "Regularly fires movement impairing",
+  "item.simplyswords.frostwardsworditem.tooltip3": "snowballs at all nearby enemies.",
   "item.simplyswords.unidentifiedsworditem.tooltip1": "Runic Power: ????",
   "item.simplyswords.unidentifiedsworditem.tooltip2": "Click to identify."
 }
