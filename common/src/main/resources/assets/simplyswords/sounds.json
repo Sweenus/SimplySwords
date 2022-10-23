@@ -43,5 +43,680 @@
     "sounds": [
       "simplyswords:swing_omen_two"
     ]
+  },
+  "dark_sword_attack_01": {
+    "sounds": [
+      "simplyswords:dark_sword_attack_01"
+    ]
+  },
+  "dark_sword_attack_02": {
+    "sounds": [
+      "simplyswords:dark_sword_attack_02"
+    ]
+  },
+  "dark_sword_attack_03": {
+    "sounds": [
+      "simplyswords:dark_sword_attack_03"
+    ]
+  },
+  "dark_sword_attack_with_blood_01": {
+    "sounds": [
+      "simplyswords:dark_sword_attack_with_blood_01"
+    ]
+  },
+  "dark_sword_attack_with_blood_02": {
+    "sounds": [
+      "simplyswords:dark_sword_attack_with_blood_02"
+    ]
+  },
+  "dark_sword_attack_with_blood_03": {
+    "sounds": [
+      "simplyswords:dark_sword_attack_with_blood_03"
+    ]
+  },
+  "dark_sword_block": {
+    "sounds": [
+      "simplyswords:dark_sword_block"
+    ]
+  },
+  "dark_sword_breaks": {
+    "sounds": [
+      "simplyswords:dark_sword_breaks"
+    ]
+  },
+  "dark_sword_enchant": {
+    "sounds": [
+      "simplyswords:dark_sword_enchant"
+    ]
+  },
+  "dark_sword_parry": {
+    "sounds": [
+      "simplyswords:dark_sword_parry"
+    ]
+  },
+  "dark_sword_spell": {
+    "sounds": [
+      "simplyswords:dark_sword_spell"
+    ]
+  },
+  "dark_sword_unfold": {
+    "sounds": [
+      "simplyswords:dark_sword_unfold"
+    ]
+  },
+  "dark_sword_whoosh_01": {
+    "sounds": [
+      "simplyswords:dark_sword_whoosh_01"
+    ]
+  },
+  "dark_sword_whoosh_02": {
+    "sounds": [
+      "simplyswords:dark_sword_whoosh_02"
+    ]
+  },
+  "dark_sword_whoosh_03": {
+    "sounds": [
+      "simplyswords:dark_sword_whoosh_03"
+    ]
+  },
+  "dark_sword_whoosh_04": {
+    "sounds": [
+      "simplyswords:dark_sword_whoosh_04"
+    ]
+  },
+  "elemental_bow_earth_shoot_flyby_01": {
+    "sounds": [
+      "simplyswords:elemental_bow_earth_shoot_flyby_01"
+    ]
+  },
+  "elemental_bow_earth_shoot_flyby_02": {
+    "sounds": [
+      "simplyswords:elemental_bow_earth_shoot_flyby_02"
+    ]
+  },
+  "elemental_bow_earth_shoot_flyby_03": {
+    "sounds": [
+      "simplyswords:elemental_bow_earth_shoot_flyby_03"
+    ]
+  },
+  "elemental_bow_earth_shoot_impact_01": {
+    "sounds": [
+      "simplyswords:elemental_bow_earth_shoot_impact_01"
+    ]
+  },
+  "elemental_bow_earth_shoot_impact_02": {
+    "sounds": [
+      "simplyswords:elemental_bow_earth_shoot_impact_02"
+    ]
+  },
+  "elemental_bow_earth_shoot_impact_03": {
+    "sounds": [
+      "simplyswords:elemental_bow_earth_shoot_impact_03"
+    ]
+  },
+  "elemental_bow_fire_shoot_flyby_01": {
+    "sounds": [
+      "simplyswords:elemental_bow_fire_shoot_flyby_01"
+    ]
+  },
+  "elemental_bow_fire_shoot_flyby_02": {
+    "sounds": [
+      "simplyswords:elemental_bow_fire_shoot_flyby_02"
+    ]
+  },
+  "elemental_bow_fire_shoot_flyby_03": {
+    "sounds": [
+      "simplyswords:elemental_bow_fire_shoot_flyby_03"
+    ]
+  },
+  "elemental_bow_fire_shoot_impact_01": {
+    "sounds": [
+      "simplyswords:elemental_bow_fire_shoot_impact_01"
+    ]
+  },
+  "elemental_bow_fire_shoot_impact_02": {
+    "sounds": [
+      "simplyswords:elemental_bow_fire_shoot_impact_02"
+    ]
+  },
+  "elemental_bow_fire_shoot_impact_03": {
+    "sounds": [
+      "simplyswords:elemental_bow_fire_shoot_impact_03"
+    ]
+  },
+  "elemental_bow_holy_shoot_flyby_01": {
+    "sounds": [
+      "simplyswords:elemental_bow_holy_shoot_flyby_01"
+    ]
+  },
+  "elemental_bow_holy_shoot_flyby_02": {
+    "sounds": [
+      "simplyswords:elemental_bow_holy_shoot_flyby_02"
+    ]
+  },
+  "elemental_bow_holy_shoot_flyby_03": {
+    "sounds": [
+      "simplyswords:elemental_bow_holy_shoot_flyby_03"
+    ]
+  },
+  "elemental_bow_holy_shoot_impact_01": {
+    "sounds": [
+      "simplyswords:elemental_bow_holy_shoot_impact_01"
+    ]
+  },
+  "elemental_bow_holy_shoot_impact_02": {
+    "sounds": [
+      "simplyswords:elemental_bow_holy_shoot_impact_02"
+    ]
+  },
+  "elemental_bow_holy_shoot_impact_03": {
+    "sounds": [
+      "simplyswords:elemental_bow_holy_shoot_impact_03"
+    ]
+  },
+  "elemental_bow_ice_shoot_flyby_01": {
+    "sounds": [
+      "simplyswords:elemental_bow_ice_shoot_flyby_01"
+    ]
+  },
+  "elemental_bow_ice_shoot_flyby_02": {
+    "sounds": [
+      "simplyswords:elemental_bow_ice_shoot_flyby_02"
+    ]
+  },
+  "elemental_bow_ice_shoot_flyby_03": {
+    "sounds": [
+      "simplyswords:elemental_bow_ice_shoot_flyby_03"
+    ]
+  },
+  "elemental_bow_ice_shoot_impact_01": {
+    "sounds": [
+      "simplyswords:elemental_bow_ice_shoot_impact_01"
+    ]
+  },
+  "elemental_bow_ice_shoot_impact_02": {
+    "sounds": [
+      "simplyswords:elemental_bow_ice_shoot_impact_02"
+    ]
+  },
+  "elemental_bow_ice_shoot_impact_03": {
+    "sounds": [
+      "simplyswords:elemental_bow_ice_shoot_impact_03"
+    ]
+  },
+  "elemental_bow_poison_attack_01": {
+    "sounds": [
+      "simplyswords:elemental_bow_poison_attack_01"
+    ]
+  },
+  "elemental_bow_poison_attack_02": {
+    "sounds": [
+      "simplyswords:elemental_bow_poison_attack_02"
+    ]
+  },
+  "elemental_bow_poison_attack_03": {
+    "sounds": [
+      "simplyswords:elemental_bow_poison_attack_03"
+    ]
+  },
+  "elemental_bow_recharge": {
+    "sounds": [
+      "simplyswords:elemental_bow_recharge"
+    ]
+  },
+  "elemental_bow_sci-fi_shoot_flyby_01": {
+    "sounds": [
+      "simplyswords:elemental_bow_sci-fi_shoot_flyby_01"
+    ]
+  },
+  "elemental_bow_sci-fi_shoot_flyby_02": {
+    "sounds": [
+      "simplyswords:elemental_bow_sci-fi_shoot_flyby_02"
+    ]
+  },
+  "elemental_bow_sci-fi_shoot_flyby_03": {
+    "sounds": [
+      "simplyswords:elemental_bow_sci-fi_shoot_flyby_03"
+    ]
+  },
+  "elemental_bow_sci-fi_shoot_impact_01": {
+    "sounds": [
+      "simplyswords:elemental_bow_sci-fi_shoot_impact_01"
+    ]
+  },
+  "elemental_bow_sci-fi_shoot_impact_02": {
+    "sounds": [
+      "simplyswords:elemental_bow_sci-fi_shoot_impact_02"
+    ]
+  },
+  "elemental_bow_sci-fi_shoot_impact_03": {
+    "sounds": [
+      "simplyswords:elemental_bow_sci-fi_shoot_impact_03"
+    ]
+  },
+  "elemental_bow_thunder_shoot_flyby_01": {
+    "sounds": [
+      "simplyswords:elemental_bow_thunder_shoot_flyby_01"
+    ]
+  },
+  "elemental_bow_thunder_shoot_flyby_02": {
+    "sounds": [
+      "simplyswords:elemental_bow_thunder_shoot_flyby_02"
+    ]
+  },
+  "elemental_bow_thunder_shoot_flyby_03": {
+    "sounds": [
+      "simplyswords:elemental_bow_thunder_shoot_flyby_03"
+    ]
+  },
+  "elemental_bow_thunder_shoot_impact_01": {
+    "sounds": [
+      "simplyswords:elemental_bow_thunder_shoot_impact_01"
+    ]
+  },
+  "elemental_bow_thunder_shoot_impact_02": {
+    "sounds": [
+      "simplyswords:elemental_bow_thunder_shoot_impact_02"
+    ]
+  },
+  "elemental_bow_thunder_shoot_impact_03": {
+    "sounds": [
+      "simplyswords:elemental_bow_thunder_shoot_impact_03"
+    ]
+  },
+  "elemental_bow_water_shoot_flyby_01": {
+    "sounds": [
+      "simplyswords:elemental_bow_water_shoot_flyby_01"
+    ]
+  },
+  "elemental_bow_water_shoot_flyby_02": {
+    "sounds": [
+      "simplyswords:elemental_bow_water_shoot_flyby_02"
+    ]
+  },
+  "elemental_bow_water_shoot_flyby_03": {
+    "sounds": [
+      "simplyswords:elemental_bow_water_shoot_flyby_03"
+    ]
+  },
+  "elemental_bow_water_shoot_impact_01": {
+    "sounds": [
+      "simplyswords:elemental_bow_water_shoot_impact_01"
+    ]
+  },
+  "elemental_bow_water_shoot_impact_02": {
+    "sounds": [
+      "simplyswords:elemental_bow_water_shoot_impact_02"
+    ]
+  },
+  "elemental_bow_water_shoot_impact_03": {
+    "sounds": [
+      "simplyswords:elemental_bow_water_shoot_impact_03"
+    ]
+  },
+  "elemental_bow_wind_shoot_flyby_01": {
+    "sounds": [
+      "simplyswords:elemental_bow_wind_shoot_flyby_01"
+    ]
+  },
+  "elemental_bow_wind_shoot_flyby_02": {
+    "sounds": [
+      "simplyswords:elemental_bow_wind_shoot_flyby_02"
+    ]
+  },
+  "elemental_bow_wind_shoot_flyby_03": {
+    "sounds": [
+      "simplyswords:elemental_bow_wind_shoot_flyby_03"
+    ]
+  },
+  "elemental_bow_wind_shoot_impact_01": {
+    "sounds": [
+      "simplyswords:elemental_bow_wind_shoot_impact_01"
+    ]
+  },
+  "elemental_bow_wind_shoot_impact_02": {
+    "sounds": [
+      "simplyswords:elemental_bow_wind_shoot_impact_02"
+    ]
+  },
+  "elemental_bow_wind_shoot_impact_03": {
+    "sounds": [
+      "simplyswords:elemental_bow_wind_shoot_impact_03"
+    ]
+  },
+  "elemental_sword_earth_attack_01": {
+    "sounds": [
+      "simplyswords:elemental_sword_earth_attack_01"
+    ]
+  },
+  "elemental_sword_earth_attack_02": {
+    "sounds": [
+      "simplyswords:elemental_sword_earth_attack_02"
+    ]
+  },
+  "elemental_sword_earth_attack_03": {
+    "sounds": [
+      "simplyswords:elemental_sword_earth_attack_03"
+    ]
+  },
+  "elemental_sword_fire_attack_01": {
+    "sounds": [
+      "simplyswords:elemental_sword_fire_attack_01"
+    ]
+  },
+  "elemental_sword_fire_attack_02": {
+    "sounds": [
+      "simplyswords:elemental_sword_fire_attack_02"
+    ]
+  },
+  "elemental_sword_fire_attack_03": {
+    "sounds": [
+      "simplyswords:elemental_sword_fire_attack_03"
+    ]
+  },
+  "elemental_sword_holy_attack_01": {
+    "sounds": [
+      "simplyswords:elemental_sword_holy_attack_01"
+    ]
+  },
+  "elemental_sword_holy_attack_02": {
+    "sounds": [
+      "simplyswords:elemental_sword_holy_attack_02"
+    ]
+  },
+  "elemental_sword_holy_attack_03": {
+    "sounds": [
+      "simplyswords:elemental_sword_holy_attack_03"
+    ]
+  },
+  "elemental_sword_ice_attack_01": {
+    "sounds": [
+      "simplyswords:elemental_sword_ice_attack_01"
+    ]
+  },
+  "elemental_sword_ice_attack_02": {
+    "sounds": [
+      "simplyswords:elemental_sword_ice_attack_02"
+    ]
+  },
+  "elemental_sword_ice_attack_03": {
+    "sounds": [
+      "simplyswords:elemental_sword_ice_attack_03"
+    ]
+  },
+  "elemental_sword_sci-fi_attack_01": {
+    "sounds": [
+      "simplyswords:elemental_sword_sci-fi_attack_01"
+    ]
+  },
+  "elemental_sword_sci-fi_attack_02": {
+    "sounds": [
+      "simplyswords:elemental_sword_sci-fi_attack_02"
+    ]
+  },
+  "elemental_sword_sci-fi_attack_03": {
+    "sounds": [
+      "simplyswords:elemental_sword_sci-fi_attack_03"
+    ]
+  },
+  "elemental_sword_thunder_attack_01": {
+    "sounds": [
+      "simplyswords:elemental_sword_thunder_attack_01"
+    ]
+  },
+  "elemental_sword_thunder_attack_02": {
+    "sounds": [
+      "simplyswords:elemental_sword_thunder_attack_02"
+    ]
+  },
+  "elemental_sword_thunder_attack_03": {
+    "sounds": [
+      "simplyswords:elemental_sword_thunder_attack_03"
+    ]
+  },
+  "elemental_sword_water_attack_01": {
+    "sounds": [
+      "simplyswords:elemental_sword_water_attack_01"
+    ]
+  },
+  "elemental_sword_water_attack_02": {
+    "sounds": [
+      "simplyswords:elemental_sword_water_attack_02"
+    ]
+  },
+  "elemental_sword_water_attack_03": {
+    "sounds": [
+      "simplyswords:elemental_sword_water_attack_03"
+    ]
+  },
+  "elemental_sword_wind_attack_01": {
+    "sounds": [
+      "simplyswords:elemental_sword_wind_attack_01"
+    ]
+  },
+  "elemental_sword_wind_attack_02": {
+    "sounds": [
+      "simplyswords:elemental_sword_wind_attack_02"
+    ]
+  },
+  "elemental_sword_wind_attack_03": {
+    "sounds": [
+      "simplyswords:elemental_sword_wind_attack_03"
+    ]
+  },
+  "magic_bow_charge_long_version": {
+    "sounds": [
+      "simplyswords:magic_bow_charge_long_version"
+    ]
+  },
+  "magic_bow_charge_short_version": {
+    "sounds": [
+      "simplyswords:magic_bow_charge_short_version"
+    ]
+  },
+  "magic_bow_pull_back_long_version_01": {
+    "sounds": [
+      "simplyswords:magic_bow_pull_back_long_version_01"
+    ]
+  },
+  "magic_bow_pull_back_long_version_02": {
+    "sounds": [
+      "simplyswords:magic_bow_pull_back_long_version_02"
+    ]
+  },
+  "magic_bow_pull_back_long_version_03": {
+    "sounds": [
+      "simplyswords:magic_bow_pull_back_long_version_03"
+    ]
+  },
+  "magic_bow_pull_back_short_version_01": {
+    "sounds": [
+      "simplyswords:magic_bow_pull_back_short_version_01"
+    ]
+  },
+  "magic_bow_pull_back_short_version_02": {
+    "sounds": [
+      "simplyswords:magic_bow_pull_back_short_version_02"
+    ]
+  },
+  "magic_bow_pull_back_short_version_03": {
+    "sounds": [
+      "simplyswords:magic_bow_pull_back_short_version_03"
+    ]
+  },
+  "magic_bow_shoot_flyby_01": {
+    "sounds": [
+      "simplyswords:magic_bow_shoot_flyby_01"
+    ]
+  },
+  "magic_bow_shoot_flyby_02": {
+    "sounds": [
+      "simplyswords:magic_bow_shoot_flyby_02"
+    ]
+  },
+  "magic_bow_shoot_flyby_03": {
+    "sounds": [
+      "simplyswords:magic_bow_shoot_flyby_03"
+    ]
+  },
+  "magic_bow_shoot_impact_01": {
+    "sounds": [
+      "simplyswords:magic_bow_shoot_impact_01"
+    ]
+  },
+  "magic_bow_shoot_impact_02": {
+    "sounds": [
+      "simplyswords:magic_bow_shoot_impact_02"
+    ]
+  },
+  "magic_bow_shoot_impact_03": {
+    "sounds": [
+      "simplyswords:magic_bow_shoot_impact_03"
+    ]
+  },
+  "magic_bow_shoot_miss_01": {
+    "sounds": [
+      "simplyswords:magic_bow_shoot_miss_01"
+    ]
+  },
+  "magic_bow_shoot_miss_02": {
+    "sounds": [
+      "simplyswords:magic_bow_shoot_miss_02"
+    ]
+  },
+  "magic_bow_shoot_miss_03": {
+    "sounds": [
+      "simplyswords:magic_bow_shoot_miss_03"
+    ]
+  },
+  "magic_sword_attack_01": {
+    "sounds": [
+      "simplyswords:magic_sword_attack_01"
+    ]
+  },
+  "magic_sword_attack_02": {
+    "sounds": [
+      "simplyswords:magic_sword_attack_02"
+    ]
+  },
+  "magic_sword_attack_03": {
+    "sounds": [
+      "simplyswords:magic_sword_attack_03"
+    ]
+  },
+  "magic_sword_attack_04": {
+    "sounds": [
+      "simplyswords:magic_sword_attack_04"
+    ]
+  },
+  "magic_sword_attack_with_blood_01": {
+    "sounds": [
+      "simplyswords:magic_sword_attack_with_blood_01"
+    ]
+  },
+  "magic_sword_attack_with_blood_02": {
+    "sounds": [
+      "simplyswords:magic_sword_attack_with_blood_02"
+    ]
+  },
+  "magic_sword_attack_with_blood_03": {
+    "sounds": [
+      "simplyswords:magic_sword_attack_with_blood_03"
+    ]
+  },
+  "magic_sword_attack_with_blood_04": {
+    "sounds": [
+      "simplyswords:magic_sword_attack_with_blood_04"
+    ]
+  },
+  "magic_sword_block_01": {
+    "sounds": [
+      "simplyswords:magic_sword_block_01"
+    ]
+  },
+  "magic_sword_block_02": {
+    "sounds": [
+      "simplyswords:magic_sword_block_02"
+    ]
+  },
+  "magic_sword_breaks": {
+    "sounds": [
+      "simplyswords:magic_sword_breaks"
+    ]
+  },
+  "magic_sword_parry_01": {
+    "sounds": [
+      "simplyswords:magic_sword_parry_01"
+    ]
+  },
+  "magic_sword_parry_02": {
+    "sounds": [
+      "simplyswords:magic_sword_parry_02"
+    ]
+  },
+  "magic_sword_parry_03": {
+    "sounds": [
+      "simplyswords:magic_sword_parry_03"
+    ]
+  },
+  "magic_sword_parry_04": {
+    "sounds": [
+      "simplyswords:magic_sword_parry_04"
+    ]
+  },
+  "magic_sword_parry_various_hits": {
+    "sounds": [
+      "simplyswords:magic_sword_parry_various_hits"
+    ]
+  },
+  "magic_sword_spell_01": {
+    "sounds": [
+      "simplyswords:magic_sword_spell_01"
+    ]
+  },
+  "magic_sword_spell_02": {
+    "sounds": [
+      "simplyswords:magic_sword_spell_02"
+    ]
+  },
+  "magic_sword_spell_03": {
+    "sounds": [
+      "simplyswords:magic_sword_spell_03"
+    ]
+  },
+  "magic_sword_whoosh_01": {
+    "sounds": [
+      "simplyswords:magic_sword_whoosh_01"
+    ]
+  },
+  "magic_sword_whoosh_02": {
+    "sounds": [
+      "simplyswords:magic_sword_whoosh_02"
+    ]
+  },
+  "magic_sword_whoosh_03": {
+    "sounds": [
+      "simplyswords:magic_sword_whoosh_03"
+    ]
+  },
+  "magic_sword_whoosh_04": {
+    "sounds": [
+      "simplyswords:magic_sword_whoosh_04"
+    ]
+  },
+  "magic_sword_whoosh_05": {
+    "sounds": [
+      "simplyswords:magic_sword_whoosh_05"
+    ]
+  },
+  "magic_sword_whoosh_06": {
+    "sounds": [
+      "simplyswords:magic_sword_whoosh_06"
+    ]
+  },
+  "magic_sword_whoosh_07": {
+    "sounds": [
+      "simplyswords:magic_sword_whoosh_07"
+    ]
   }
 }
