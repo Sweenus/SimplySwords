@@ -12,7 +12,9 @@
         "upswing": 0.5,
         "animation": "simplyswords:warglaive_slash_horizontal_right",
         "swing_sound": {
-          "id": "bettercombat:sickle_slash"
+          "id": "simplyswords:magic_sword_attack_02",
+          "volume": 0.7,
+          "pitch": 1.5
         }
       },
       {
@@ -23,7 +25,9 @@
         "upswing": 0.5,
         "animation": "simplyswords:warglaive_slash_horizontal_left",
         "swing_sound": {
-          "id": "bettercombat:sickle_slash"
+          "id": "simplyswords:magic_sword_attack_02",
+          "volume": 0.7,
+          "pitch": 1.7
         }
       },
       {
@@ -34,7 +38,9 @@
         "upswing": 0.5,
         "animation": "simplyswords:warglaive_spin",
         "swing_sound": {
-          "id": "bettercombat:glaive_slash_quick"
+          "id": "simplyswords:magic_sword_attack_01",
+          "volume": 0.7,
+          "pitch": 1.5
         }
       }
     ]

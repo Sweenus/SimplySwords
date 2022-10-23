@@ -31,22 +31,41 @@ public class SoulSwordItem extends SwordItem {
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        int fhitchance = (int) SimplySwordsConfig.getFloatValue("soulmeld_chance");
-        int fduration = (int) SimplySwordsConfig.getFloatValue("soulmeld_duration");
+        if (!attacker.world.isClient()) {
+            ServerWorld world = (ServerWorld) attacker.world;
+            int fhitchance = (int) SimplySwordsConfig.getFloatValue("soulmeld_chance");
+            int fduration = (int) SimplySwordsConfig.getFloatValue("soulmeld_duration");
+
+            boolean impactsounds_enabled = (SimplySwordsConfig.getBooleanValue("enable_weapon_impact_sounds"));
+
+            if (impactsounds_enabled) {
+                int choose_sound = (int) (Math.random() * 30);
+                float choose_pitch = (float) Math.random() * 2;
+                if (choose_sound <= 10)
+                    world.playSoundFromEntity(null, target, SoundRegistry.MAGIC_SWORD_ATTACK_WITH_BLOOD_01.get(), SoundCategory.PLAYERS, 0.5f, 1.1f + choose_pitch);
+                if (choose_sound <= 20 && choose_sound > 10)
+                    world.playSoundFromEntity(null, target, SoundRegistry.MAGIC_SWORD_ATTACK_WITH_BLOOD_02.get(), SoundCategory.PLAYERS, 0.5f, 1.1f + choose_pitch);
+                if (choose_sound <= 30 && choose_sound > 20)
+                    world.playSoundFromEntity(null, target, SoundRegistry.MAGIC_SWORD_ATTACK_WITH_BLOOD_03.get(), SoundCategory.PLAYERS, 0.5f, 1.1f + choose_pitch);
+                if (choose_sound <= 40 && choose_sound > 30)
+                    world.playSoundFromEntity(null, target, SoundRegistry.MAGIC_SWORD_ATTACK_WITH_BLOOD_04.get(), SoundCategory.PLAYERS, 0.5f, 1.1f + choose_pitch);
+            }
 
 
-        if (attacker.getRandom().nextInt(100) <= fhitchance) {
-            if (attacker.hasStatusEffect(StatusEffects.MINING_FATIGUE) && attacker.hasStatusEffect(StatusEffects.RESISTANCE)) {
+            if (attacker.getRandom().nextInt(100) <= fhitchance) {
+                //world.playSoundFromEntity(null, target, SoundRegistry.MAGIC_BOW_CHARGE_SHORT_VERSION.get(), SoundCategory.PLAYERS, 0.3f, 1.2f);
+                if (attacker.hasStatusEffect(StatusEffects.MINING_FATIGUE) && attacker.hasStatusEffect(StatusEffects.RESISTANCE)) {
 
-                int a = (attacker.getStatusEffect(StatusEffects.MINING_FATIGUE).getAmplifier() + 1);
+                    int a = (attacker.getStatusEffect(StatusEffects.MINING_FATIGUE).getAmplifier() + 1);
 
-                if ((attacker.getStatusEffect(StatusEffects.MINING_FATIGUE).getAmplifier() <= 2)) {
-                    attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.MINING_FATIGUE, fduration, a), attacker);
-                    attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, fduration, a), attacker);
+                    if ((attacker.getStatusEffect(StatusEffects.MINING_FATIGUE).getAmplifier() <= 2)) {
+                        attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.MINING_FATIGUE, fduration, a), attacker);
+                        attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, fduration, a), attacker);
+                    }
+                } else {
+                    attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.MINING_FATIGUE, fduration, 1), attacker);
+                    attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, fduration, 1), attacker);
                 }
-            } else {
-                attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.MINING_FATIGUE, fduration, 1), attacker);
-                attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, fduration, 1), attacker);
             }
         }
 
@@ -71,7 +90,7 @@ public class SoulSwordItem extends SwordItem {
                     if (ee instanceof LivingEntity && user.hasStatusEffect(StatusEffects.MINING_FATIGUE)){
                         LivingEntity le = (LivingEntity) ee;
                         le.addStatusEffect(new StatusEffectInstance(StatusEffects.MINING_FATIGUE, user.getStatusEffect(StatusEffects.MINING_FATIGUE).getDuration(), user.getStatusEffect(StatusEffects.MINING_FATIGUE).getAmplifier()) , user);
-                        world.playSoundFromEntity (null, ee, SoundRegistry.SWING_OMEN_TWO.get() , SoundCategory.BLOCKS, 0.2f, 2f);
+                        world.playSoundFromEntity (null, ee, SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_IMPACT_03.get() , SoundCategory.BLOCKS, 0.1f, 1f);
                     }
                 }
             }

@@ -12,6 +12,7 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
+import net.sweenus.simplyswords.registry.SoundRegistry;
 
 public class OmenEffect extends StatusEffect {
     public OmenEffect(StatusEffectCategory statusEffectCategory, int color) {super (statusEffectCategory, color); }
@@ -33,7 +34,7 @@ public class OmenEffect extends StatusEffect {
             if (pLivingEntity.getHealth() <= pthreshold && pPlayer != null) {
                 if (!pPlayer.hasStatusEffect(StatusEffects.REGENERATION)) {
                     pPlayer.addStatusEffect(new StatusEffectInstance(StatusEffects.REGENERATION, 40, (int) absAmount), pPlayer);
-                    world.playSound(null, position, SoundEvents.BLOCK_ANVIL_LAND, SoundCategory.BLOCKS, 0.6f, 1f);
+                    world.playSound(null, position, SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_IMPACT_03.get(), SoundCategory.PLAYERS, 0.7f, 1.2f);
                 }
                 pLivingEntity.damage(DamageSource.GENERIC, 1000);
             }

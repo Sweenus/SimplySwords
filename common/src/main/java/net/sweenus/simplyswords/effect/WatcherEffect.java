@@ -12,6 +12,7 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
+import net.sweenus.simplyswords.registry.SoundRegistry;
 
 public class WatcherEffect extends StatusEffect {
     public WatcherEffect(StatusEffectCategory statusEffectCategory, int color) {super (statusEffectCategory, color); }
@@ -35,7 +36,8 @@ public class WatcherEffect extends StatusEffect {
                 if (e != null && pPlayer != null){
                     e.damage(DamageSource.FREEZE, rAmount);
                     pPlayer.setHealth(pPlayer.getHealth() + rAmount);
-                    world.playSound(null, position, SoundEvents.BLOCK_ENDER_CHEST_OPEN, SoundCategory.BLOCKS, 0.2f, 1f);
+                    BlockPos position2 = e.getBlockPos();
+                    world.playSound(null, position2, SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_IMPACT_02.get(), SoundCategory.PLAYERS, 0.05f, 1.2f);
                 }
             }
 

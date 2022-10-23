@@ -41,10 +41,32 @@ public class StealSwordItem extends SwordItem {
             attacker.setVelocity(attacker.getRotationVector().multiply(+1));
             attacker.velocityModified = true;
 
+            boolean impactsounds_enabled = (SimplySwordsConfig.getBooleanValue("enable_weapon_impact_sounds"));
+
+            if (impactsounds_enabled) {
+                int choose_sound = (int) (Math.random() * 30);
+                float choose_pitch = (float) Math.random() * 2;
+                if (choose_sound <= 10)
+                    sworld.playSoundFromEntity(null, target, SoundRegistry.MAGIC_SWORD_ATTACK_WITH_BLOOD_01.get(), SoundCategory.PLAYERS, 0.5f, 1.1f + choose_pitch);
+                if (choose_sound <= 20 && choose_sound > 10)
+                    sworld.playSoundFromEntity(null, target, SoundRegistry.MAGIC_SWORD_ATTACK_WITH_BLOOD_02.get(), SoundCategory.PLAYERS, 0.5f, 1.1f + choose_pitch);
+                if (choose_sound <= 30 && choose_sound > 20)
+                    sworld.playSoundFromEntity(null, target, SoundRegistry.MAGIC_SWORD_ATTACK_WITH_BLOOD_03.get(), SoundCategory.PLAYERS, 0.5f, 1.1f + choose_pitch);
+                if (choose_sound <= 40 && choose_sound > 30)
+                    sworld.playSoundFromEntity(null, target, SoundRegistry.MAGIC_SWORD_ATTACK_WITH_BLOOD_04.get(), SoundCategory.PLAYERS, 0.5f, 1.1f + choose_pitch);
+            }
+
 
             if (attacker.getRandom().nextInt(100) <= fhitchance) {
 
-                sworld.playSoundFromEntity (null, target, SoundRegistry.SWING_OMEN_ONE.get() , SoundCategory.BLOCKS, 0.4f, 3f);
+                int choose_sound = (int) (Math.random() * 30);
+                if (choose_sound <= 10)
+                    sworld.playSoundFromEntity(null, target, SoundRegistry.MAGIC_SWORD_ATTACK_WITH_BLOOD_01.get(), SoundCategory.PLAYERS, 0.5f, 2f);
+                if (choose_sound <= 20 && choose_sound > 10)
+                    sworld.playSoundFromEntity(null, target, SoundRegistry.MAGIC_SWORD_ATTACK_WITH_BLOOD_02.get(), SoundCategory.PLAYERS, 0.5f, 2f);
+                if (choose_sound <= 30 && choose_sound > 20)
+                    sworld.playSoundFromEntity(null, target, SoundRegistry.MAGIC_SWORD_ATTACK_WITH_BLOOD_03.get(), SoundCategory.PLAYERS, 0.5f, 2f);
+
                 attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, fduration, 2), attacker);
                 target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, fduration, 1), attacker);
                 target.addStatusEffect(new StatusEffectInstance(StatusEffects.GLOWING, fduration, 1), attacker);
@@ -75,6 +97,7 @@ public class StealSwordItem extends SwordItem {
         if (!user.world.isClient()) {
             int sradius = (int) SimplySwordsConfig.getFloatValue("steal_radius");
             int vradius = (int) (SimplySwordsConfig.getFloatValue("steal_radius") / 2);
+
             double x = user.getX();
             double y = user.getY();
             double z = user.getZ();
@@ -90,7 +113,7 @@ public class StealSwordItem extends SwordItem {
                         if (le.hasStatusEffect(StatusEffects.SLOWNESS) && le.hasStatusEffect(StatusEffects.GLOWING) && le.distanceTo(user) > 5){ //can we check target here?
                             le.addStatusEffect(new StatusEffectInstance(StatusEffects.BLINDNESS, bduration, 1), user);
                             user.teleport(le.getX(), le.getY(), le.getZ());
-                            sworld.playSoundFromEntity (null, le, SoundRegistry.SWING_OMEN_ONE.get() , SoundCategory.BLOCKS, 0.3f, 1.5f);
+                            sworld.playSoundFromEntity (null, le, SoundRegistry.ELEMENTAL_SWORD_SCIFI_ATTACK_03.get() , SoundCategory.PLAYERS, 0.3f, 1.5f);
                             le.damage(DamageSource.FREEZE, 5f);
                             le.removeStatusEffect(StatusEffects.SLOWNESS);
                             le.removeStatusEffect(StatusEffects.GLOWING);
@@ -99,7 +122,7 @@ public class StealSwordItem extends SwordItem {
                             user.addStatusEffect(new StatusEffectInstance(StatusEffects.INVISIBILITY, iduration, 1), user);
                             user.setVelocity(user.getRotationVector().multiply(+2));
                             user.velocityModified = true;
-                            sworld.playSoundFromEntity (null, entities, SoundRegistry.SWING_OMEN_TWO.get() , SoundCategory.BLOCKS, 0.3f, 1.5f);
+                            sworld.playSoundFromEntity (null, entities, SoundRegistry.MAGIC_BOW_SHOOT_MISS_01.get(), SoundCategory.PLAYERS, 0.3f, 1.5f);
                             le.removeStatusEffect(StatusEffects.SLOWNESS);
                             le.removeStatusEffect(StatusEffects.GLOWING);
                         }

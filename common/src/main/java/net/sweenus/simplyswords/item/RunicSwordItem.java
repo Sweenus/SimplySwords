@@ -56,105 +56,122 @@ public class RunicSwordItem extends SwordItem {
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        if (!attacker.world.isClient()) {
+            ServerWorld world = (ServerWorld) attacker.world;
+            boolean impactsounds_enabled = (SimplySwordsConfig.getBooleanValue("enable_weapon_impact_sounds"));
 
-        //FREEZE
-        if(stack.getOrCreateNbt().getInt("runic_power") <= 10 && stack.getOrCreateNbt().getInt("runic_power") >= 1) {
-
-            int fhitchance = (int) SimplySwordsConfig.getFloatValue("freeze_chance");
-            int fduration = (int) SimplySwordsConfig.getFloatValue("freeze_duration");
-            int sduration = (int) SimplySwordsConfig.getFloatValue("slowness_duration");
-
-            target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, sduration, 1), attacker);
-
-            if (attacker.getRandom().nextInt(100) <= fhitchance) {
-                target.addStatusEffect(new StatusEffectInstance(EffectRegistry.FREEZE.get(), fduration, 1), attacker);
+            if (impactsounds_enabled) {
+                int choose_sound = (int) (Math.random() * 30);
+                float choose_pitch = (float) Math.random() * 2;
+                if (choose_sound <= 10)
+                    world.playSoundFromEntity(null, target, SoundRegistry.MAGIC_SWORD_ATTACK_WITH_BLOOD_01.get(), SoundCategory.PLAYERS, 0.5f, 1.1f + choose_pitch);
+                if (choose_sound <= 20 && choose_sound > 10)
+                    world.playSoundFromEntity(null, target, SoundRegistry.MAGIC_SWORD_ATTACK_WITH_BLOOD_02.get(), SoundCategory.PLAYERS, 0.5f, 1.1f + choose_pitch);
+                if (choose_sound <= 30 && choose_sound > 20)
+                    world.playSoundFromEntity(null, target, SoundRegistry.MAGIC_SWORD_ATTACK_WITH_BLOOD_03.get(), SoundCategory.PLAYERS, 0.5f, 1.1f + choose_pitch);
+                if (choose_sound <= 40 && choose_sound > 30)
+                    world.playSoundFromEntity(null, target, SoundRegistry.MAGIC_SWORD_ATTACK_WITH_BLOOD_04.get(), SoundCategory.PLAYERS, 0.5f, 1.1f + choose_pitch);
             }
-        }
-        //WILDFIRE
-        if(stack.getOrCreateNbt().getInt("runic_power") > 10 && stack.getOrCreateNbt().getInt("runic_power") <= 20) {
-            int phitchance = (int) SimplySwordsConfig.getFloatValue("wildfire_chance");
-            int pduration = (int) SimplySwordsConfig.getFloatValue("wildfire_duration");
 
-            if (attacker.getRandom().nextInt(100) <= phitchance) {
-                target.addStatusEffect(new StatusEffectInstance(EffectRegistry.WILDFIRE.get(), pduration, 3), attacker);
+            //FREEZE
+            if (stack.getOrCreateNbt().getInt("runic_power") <= 10 && stack.getOrCreateNbt().getInt("runic_power") >= 1) {
+
+                int fhitchance = (int) SimplySwordsConfig.getFloatValue("freeze_chance");
+                int fduration = (int) SimplySwordsConfig.getFloatValue("freeze_duration");
+                int sduration = (int) SimplySwordsConfig.getFloatValue("slowness_duration");
+
+                target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, sduration, 1), attacker);
+
+                if (attacker.getRandom().nextInt(100) <= fhitchance) {
+                    target.addStatusEffect(new StatusEffectInstance(EffectRegistry.FREEZE.get(), fduration, 1), attacker);
+                }
             }
-        }
-        //SLOW
-        if(stack.getOrCreateNbt().getInt("runic_power") > 20 && stack.getOrCreateNbt().getInt("runic_power") <= 30) {
-            int shitchance = (int) SimplySwordsConfig.getFloatValue("slowness_chance");
-            int sduration = (int) SimplySwordsConfig.getFloatValue("slowness_duration");
+            //WILDFIRE
+            if (stack.getOrCreateNbt().getInt("runic_power") > 10 && stack.getOrCreateNbt().getInt("runic_power") <= 20) {
+                int phitchance = (int) SimplySwordsConfig.getFloatValue("wildfire_chance");
+                int pduration = (int) SimplySwordsConfig.getFloatValue("wildfire_duration");
 
-            if (attacker.getRandom().nextInt(100) <= shitchance) {
-                target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, sduration, 3), attacker);
+                if (attacker.getRandom().nextInt(100) <= phitchance) {
+                    target.addStatusEffect(new StatusEffectInstance(EffectRegistry.WILDFIRE.get(), pduration, 3), attacker);
+                }
             }
-        }
-        //SPEED
-        if(stack.getOrCreateNbt().getInt("runic_power") > 30 && stack.getOrCreateNbt().getInt("runic_power") <= 40) {
-            int shitchance = (int) SimplySwordsConfig.getFloatValue("speed_chance");
-            int sduration = (int) SimplySwordsConfig.getFloatValue("speed_duration");
+            //SLOW
+            if (stack.getOrCreateNbt().getInt("runic_power") > 20 && stack.getOrCreateNbt().getInt("runic_power") <= 30) {
+                int shitchance = (int) SimplySwordsConfig.getFloatValue("slowness_chance");
+                int sduration = (int) SimplySwordsConfig.getFloatValue("slowness_duration");
 
-            if (attacker.getRandom().nextInt(100) <= shitchance) {
-                attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, sduration, 1), attacker);
+                if (attacker.getRandom().nextInt(100) <= shitchance) {
+                    target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, sduration, 3), attacker);
+                }
             }
-        }
-        //LEVITATION
-        if(stack.getOrCreateNbt().getInt("runic_power") > 40 && stack.getOrCreateNbt().getInt("runic_power") <= 50) {
-            int lhitchance = (int) SimplySwordsConfig.getFloatValue("levitation_chance");
-            int lduration = (int) SimplySwordsConfig.getFloatValue("levitation_duration");
+            //SPEED
+            if (stack.getOrCreateNbt().getInt("runic_power") > 30 && stack.getOrCreateNbt().getInt("runic_power") <= 40) {
+                int shitchance = (int) SimplySwordsConfig.getFloatValue("speed_chance");
+                int sduration = (int) SimplySwordsConfig.getFloatValue("speed_duration");
 
-            if (attacker.getRandom().nextInt(100) <= lhitchance) {
-                target.addStatusEffect(new StatusEffectInstance(StatusEffects.LEVITATION, lduration, 3), attacker);
+                if (attacker.getRandom().nextInt(100) <= shitchance) {
+                    attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, sduration, 1), attacker);
+                }
             }
-        }
-        //ZEPHYR
-        if(stack.getOrCreateNbt().getInt("runic_power") > 50 && stack.getOrCreateNbt().getInt("runic_power") <= 60) {
-            int lhitchance = (int) SimplySwordsConfig.getFloatValue("zephyr_chance");
-            int lduration = (int) SimplySwordsConfig.getFloatValue("zephyr_duration");
+            //LEVITATION
+            if (stack.getOrCreateNbt().getInt("runic_power") > 40 && stack.getOrCreateNbt().getInt("runic_power") <= 50) {
+                int lhitchance = (int) SimplySwordsConfig.getFloatValue("levitation_chance");
+                int lduration = (int) SimplySwordsConfig.getFloatValue("levitation_duration");
 
-            if (attacker.getRandom().nextInt(100) <= lhitchance) {
-                attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, lduration, 3), attacker);
-                attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, lduration, 1), attacker);
+                if (attacker.getRandom().nextInt(100) <= lhitchance) {
+                    target.addStatusEffect(new StatusEffectInstance(StatusEffects.LEVITATION, lduration, 3), attacker);
+                }
             }
-        }
-        //SHIELDING
-        if(stack.getOrCreateNbt().getInt("runic_power") > 60 && stack.getOrCreateNbt().getInt("runic_power") <= 70) {
-            int lhitchance = (int) SimplySwordsConfig.getFloatValue("shielding_chance");
-            int lduration = (int) SimplySwordsConfig.getFloatValue("shielding_duration");
+            //ZEPHYR
+            if (stack.getOrCreateNbt().getInt("runic_power") > 50 && stack.getOrCreateNbt().getInt("runic_power") <= 60) {
+                int lhitchance = (int) SimplySwordsConfig.getFloatValue("zephyr_chance");
+                int lduration = (int) SimplySwordsConfig.getFloatValue("zephyr_duration");
 
-            if (attacker.getRandom().nextInt(100) <= lhitchance) {
-                attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.ABSORPTION, lduration, 1), attacker);
+                if (attacker.getRandom().nextInt(100) <= lhitchance) {
+                    attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, lduration, 3), attacker);
+                    attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, lduration, 1), attacker);
+                }
             }
-        }
-        //STONESKIN
-        if(stack.getOrCreateNbt().getInt("runic_power") > 70 && stack.getOrCreateNbt().getInt("runic_power") <= 75) {
-            int lhitchance = (int) SimplySwordsConfig.getFloatValue("stoneskin_chance");
-            int lduration = (int) SimplySwordsConfig.getFloatValue("stoneskin_duration");
+            //SHIELDING
+            if (stack.getOrCreateNbt().getInt("runic_power") > 60 && stack.getOrCreateNbt().getInt("runic_power") <= 70) {
+                int lhitchance = (int) SimplySwordsConfig.getFloatValue("shielding_chance");
+                int lduration = (int) SimplySwordsConfig.getFloatValue("shielding_duration");
 
-            if (attacker.getRandom().nextInt(100) <= lhitchance) {
-                attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, lduration, 2), attacker);
-                attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.FIRE_RESISTANCE, lduration, 1), attacker);
-                attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, lduration, 1), attacker);
+                if (attacker.getRandom().nextInt(100) <= lhitchance) {
+                    attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.ABSORPTION, lduration, 1), attacker);
+                }
             }
-        }
-        //TRAILBLAZE
-        if(stack.getOrCreateNbt().getInt("runic_power") > 80 && stack.getOrCreateNbt().getInt("runic_power") <= 85) {
-            int lhitchance = (int) SimplySwordsConfig.getFloatValue("trailblaze_chance");
-            int lduration = (int) SimplySwordsConfig.getFloatValue("trailblaze_duration");
+            //STONESKIN
+            if (stack.getOrCreateNbt().getInt("runic_power") > 70 && stack.getOrCreateNbt().getInt("runic_power") <= 75) {
+                int lhitchance = (int) SimplySwordsConfig.getFloatValue("stoneskin_chance");
+                int lduration = (int) SimplySwordsConfig.getFloatValue("stoneskin_duration");
 
-            if (attacker.getRandom().nextInt(100) <= lhitchance) {
-                attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, lduration, 3), attacker);
-                attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.FIRE_RESISTANCE, lduration, 1), attacker);
-                attacker.setOnFireFor(lduration / 20);
+                if (attacker.getRandom().nextInt(100) <= lhitchance) {
+                    attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, lduration, 2), attacker);
+                    attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.FIRE_RESISTANCE, lduration, 1), attacker);
+                    attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, lduration, 1), attacker);
+                }
             }
-        }
-        //WEAKEN
-        if(stack.getOrCreateNbt().getInt("runic_power") > 90 && stack.getOrCreateNbt().getInt("runic_power") <= 95) {
-            int lhitchance = (int) SimplySwordsConfig.getFloatValue("weaken_chance");
-            int lduration = (int) SimplySwordsConfig.getFloatValue("weaken_duration");
+            //TRAILBLAZE
+            if (stack.getOrCreateNbt().getInt("runic_power") > 80 && stack.getOrCreateNbt().getInt("runic_power") <= 85) {
+                int lhitchance = (int) SimplySwordsConfig.getFloatValue("trailblaze_chance");
+                int lduration = (int) SimplySwordsConfig.getFloatValue("trailblaze_duration");
 
-            if (attacker.getRandom().nextInt(100) <= lhitchance) {
-                target.addStatusEffect(new StatusEffectInstance(StatusEffects.WEAKNESS, lduration, 1), attacker);
-                target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, lduration, 1), attacker);
+                if (attacker.getRandom().nextInt(100) <= lhitchance) {
+                    attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, lduration, 3), attacker);
+                    attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.FIRE_RESISTANCE, lduration, 1), attacker);
+                    attacker.setOnFireFor(lduration / 20);
+                }
+            }
+            //WEAKEN
+            if (stack.getOrCreateNbt().getInt("runic_power") > 90 && stack.getOrCreateNbt().getInt("runic_power") <= 95) {
+                int lhitchance = (int) SimplySwordsConfig.getFloatValue("weaken_chance");
+                int lduration = (int) SimplySwordsConfig.getFloatValue("weaken_duration");
+
+                if (attacker.getRandom().nextInt(100) <= lhitchance) {
+                    target.addStatusEffect(new StatusEffectInstance(StatusEffects.WEAKNESS, lduration, 1), attacker);
+                    target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, lduration, 1), attacker);
+                }
             }
         }
 

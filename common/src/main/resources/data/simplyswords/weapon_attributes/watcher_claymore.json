@@ -1,8 +1,46 @@
 {
-  "parent": "bettercombat:claymore",
   "attributes": {
     "attack_range": 3.5,
     "two_handed": true,
-    "category": "claymore"
+    "category": "claymore",
+    "attacks": [
+      {
+        "hitbox": "HORIZONTAL_PLANE",
+        "damage_multiplier": 0.75,
+        "angle": 150,
+        "upswing": 0.5,
+        "animation": "bettercombat:two_handed_slash_horizontal_right",
+        "swing_sound": {
+          "id": "simplyswords:magic_sword_attack_01",
+          "volume": 0.7,
+          "pitch": 1.1
+        }
+      },
+      {
+        "hitbox": "FORWARD_BOX",
+        "damage_multiplier": 1,
+        "angle": 0,
+        "upswing": 0.5,
+        "animation": "bettercombat:two_handed_stab_left",
+        "swing_sound": {
+          "id": "simplyswords:magic_sword_attack_02",
+          "volume": 0.7,
+          "pitch": 1.3
+        }
+      },
+      {
+        "hitbox": "VERTICAL_PLANE",
+        "damage_multiplier": 1.45,
+        "angle": 150,
+        "upswing": 0.5,
+        "animation": "bettercombat:two_handed_slam",
+        "swing_sound": {
+          "id": "simplyswords:magic_sword_attack_03",
+          "volume": 0.7,
+          "pitch": 1.5,
+          "randomness": 0
+        }
+      }
+    ]
   }
 }

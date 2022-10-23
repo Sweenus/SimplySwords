@@ -14,7 +14,9 @@
         "upswing": 0.5,
         "animation": "bettercombat:two_handed_slash_horizontal_left",
         "swing_sound": {
-          "id": "bettercombat:claymore_swing"
+          "id": "simplyswords:elemental_sword_fire_attack_03",
+          "volume": 0.5,
+          "pitch": 1.4
         }
       },
       {
@@ -24,7 +26,9 @@
         "upswing": 0.5,
         "animation": "bettercombat:two_handed_slash_horizontal_right",
         "swing_sound": {
-          "id": "bettercombat:claymore_swing"
+          "id": "simplyswords:elemental_sword_fire_attack_03",
+          "volume": 0.5,
+          "pitch": 1.2
         }
       },
       {
@@ -34,7 +38,8 @@
         "upswing": 0.5,
         "animation": "bettercombat:two_handed_spin",
         "swing_sound": {
-          "id": "bettercombat:claymore_swing",
+          "id": "simplyswords:elemental_sword_fire_attack_02",
+          "volume": 0.5,
           "pitch": 1.1
         }
       }

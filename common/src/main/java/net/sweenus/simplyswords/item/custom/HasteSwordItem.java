@@ -9,6 +9,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.SwordItem;
 import net.minecraft.item.ToolMaterial;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
@@ -17,6 +18,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
+import net.sweenus.simplyswords.registry.SoundRegistry;
 
 import java.util.List;
 
@@ -27,23 +29,42 @@ public class HasteSwordItem extends SwordItem {
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        int fhitchance = (int) SimplySwordsConfig.getFloatValue("ferocity_chance");
-        int fduration = (int) SimplySwordsConfig.getFloatValue("ferocity_duration");
-        int maximum_stacks = (int) (SimplySwordsConfig.getFloatValue("ferocity_max_stacks"));
+        if (!attacker.world.isClient()) {
+            ServerWorld world = (ServerWorld) attacker.world;
+            int fhitchance = (int) SimplySwordsConfig.getFloatValue("ferocity_chance");
+            int fduration = (int) SimplySwordsConfig.getFloatValue("ferocity_duration");
+            int maximum_stacks = (int) (SimplySwordsConfig.getFloatValue("ferocity_max_stacks"));
+
+            boolean impactsounds_enabled = (SimplySwordsConfig.getBooleanValue("enable_weapon_impact_sounds"));
+
+            if (impactsounds_enabled) {
+                int choose_sound = (int) (Math.random() * 30);
+                float choose_pitch = (float) Math.random() * 2;
+                if (choose_sound <= 10)
+                    world.playSoundFromEntity(null, target, SoundRegistry.MAGIC_SWORD_ATTACK_WITH_BLOOD_01.get(), SoundCategory.PLAYERS, 0.5f, 1.1f + choose_pitch);
+                if (choose_sound <= 20 && choose_sound > 10)
+                    world.playSoundFromEntity(null, target, SoundRegistry.MAGIC_SWORD_ATTACK_WITH_BLOOD_02.get(), SoundCategory.PLAYERS, 0.5f, 1.1f + choose_pitch);
+                if (choose_sound <= 30 && choose_sound > 20)
+                    world.playSoundFromEntity(null, target, SoundRegistry.MAGIC_SWORD_ATTACK_WITH_BLOOD_03.get(), SoundCategory.PLAYERS, 0.5f, 1.1f + choose_pitch);
+                if (choose_sound <= 40 && choose_sound > 30)
+                    world.playSoundFromEntity(null, target, SoundRegistry.MAGIC_SWORD_ATTACK_WITH_BLOOD_04.get(), SoundCategory.PLAYERS, 0.5f, 1.1f + choose_pitch);
+            }
 
 
-        if (attacker.getRandom().nextInt(100) <= fhitchance) {
-            if (attacker.hasStatusEffect(StatusEffects.HASTE)) {
+            if (attacker.getRandom().nextInt(100) <= fhitchance) {
+                if (attacker.hasStatusEffect(StatusEffects.HASTE)) {
 
-                int a = (attacker.getStatusEffect(StatusEffects.HASTE).getAmplifier() + 1);
+                    int a = (attacker.getStatusEffect(StatusEffects.HASTE).getAmplifier() + 1);
+                    world.playSoundFromEntity(null, attacker, SoundRegistry.ELEMENTAL_BOW_HOLY_SHOOT_IMPACT_02.get(), SoundCategory.PLAYERS, 0.3f, 1f + ( a / 10f));
 
-                if ((attacker.getStatusEffect(StatusEffects.HASTE).getAmplifier() < maximum_stacks)) {
-                    attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, fduration, a), attacker);
+                    if ((attacker.getStatusEffect(StatusEffects.HASTE).getAmplifier() < maximum_stacks)) {
+                        attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, fduration, a), attacker);
+                    } else {
+                        attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, fduration, a - 1), attacker);
+                    }
                 } else {
-                    attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, fduration, a - 1), attacker);
+                    attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, fduration, 1), attacker);
                 }
-            } else {
-                attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, fduration, 1), attacker);
             }
         }
 
@@ -61,7 +82,7 @@ public class HasteSwordItem extends SwordItem {
             user.addStatusEffect(new StatusEffectInstance(StatusEffects.STRENGTH, a, strength_tier), user);
             user.swingHand(hand);
             user.removeStatusEffect(StatusEffects.HASTE);
-            world.playSound(null, user.getBlockPos(), SoundEvents.BLOCK_MEDIUM_AMETHYST_BUD_BREAK, SoundCategory.BLOCKS, 1f, 1.5f);
+            world.playSound(null, user.getBlockPos(), SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_IMPACT_03.get(), SoundCategory.PLAYERS, 0.5f, 1.5f);
         }
         return super.use(world,user,hand);
     }

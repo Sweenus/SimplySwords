@@ -10,8 +10,9 @@
         "upswing": 0.5,
         "animation": "bettercombat:one_handed_stab",
         "swing_sound": {
-          "id": "bettercombat:dagger_slash",
-          "pitch": 1.2
+          "id": "simplyswords:magic_sword_whoosh_01",
+          "pitch": 1.2,
+          "volume": 0.7
         }
       }
     ]

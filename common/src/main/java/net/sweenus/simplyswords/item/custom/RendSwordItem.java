@@ -32,32 +32,44 @@ public class RendSwordItem extends SwordItem {
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        int fhitchance = (int) SimplySwordsConfig.getFloatValue("soulrend_chance");
-        int fduration = (int) SimplySwordsConfig.getFloatValue("soulrend_duration");
-        int maxstacks = (int) SimplySwordsConfig.getFloatValue("soulrend_max_stacks");
+        if (!attacker.world.isClient()) {
+            ServerWorld world = (ServerWorld) attacker.world;
+            int fhitchance = (int) SimplySwordsConfig.getFloatValue("soulrend_chance");
+            int fduration = (int) SimplySwordsConfig.getFloatValue("soulrend_duration");
+            int maxstacks = (int) SimplySwordsConfig.getFloatValue("soulrend_max_stacks");
 
 
-        if (attacker.getRandom().nextInt(100) <= fhitchance) {
-            if (target.hasStatusEffect(StatusEffects.WEAKNESS)) {
+            if (attacker.getRandom().nextInt(100) <= fhitchance) {
 
-                int a = (target.getStatusEffect(StatusEffects.WEAKNESS).getAmplifier() + 1);
+                int choose_sound = (int) (Math.random() * 30);
+                if (choose_sound <= 10)
+                    world.playSoundFromEntity(null, target, SoundRegistry.DARK_SWORD_ATTACK_WITH_BLOOD_01.get(), SoundCategory.PLAYERS, 0.4f, 1.5f);
+                if (choose_sound <= 20 && choose_sound > 10)
+                    world.playSoundFromEntity(null, target, SoundRegistry.DARK_SWORD_ATTACK_WITH_BLOOD_02.get(), SoundCategory.PLAYERS, 0.4f, 1.5f);
+                if (choose_sound <= 30 && choose_sound > 20)
+                    world.playSoundFromEntity(null, target, SoundRegistry.DARK_SWORD_ATTACK_WITH_BLOOD_03.get(), SoundCategory.PLAYERS, 0.4f, 1.5f);
 
-                if ((target.getStatusEffect(StatusEffects.WEAKNESS).getAmplifier() <= 0)) {
-                    target.addStatusEffect(new StatusEffectInstance(StatusEffects.WEAKNESS, fduration, a), attacker);
+                if (target.hasStatusEffect(StatusEffects.WEAKNESS)) {
+
+                    int a = (target.getStatusEffect(StatusEffects.WEAKNESS).getAmplifier() + 1);
+
+                    if ((target.getStatusEffect(StatusEffects.WEAKNESS).getAmplifier() <= 0)) {
+                        target.addStatusEffect(new StatusEffectInstance(StatusEffects.WEAKNESS, fduration, a), attacker);
+                    }
+                } else {
+                    target.addStatusEffect(new StatusEffectInstance(StatusEffects.WEAKNESS, fduration, 0), attacker);
                 }
-            } else {
-                target.addStatusEffect(new StatusEffectInstance(StatusEffects.WEAKNESS, fduration, 1), attacker);
-            }
 
-            if (target.hasStatusEffect(StatusEffects.SLOWNESS)) {
+                if (target.hasStatusEffect(StatusEffects.SLOWNESS)) {
 
-                int a = (target.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier() + 1);
+                    int a = (target.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier() + 1);
 
-                if ((target.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier() < maxstacks)) {
-                    target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, fduration, a), attacker);
+                    if ((target.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier() < maxstacks)) {
+                        target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, fduration, a), attacker);
+                    }
+                } else {
+                    target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, fduration, 0), attacker);
                 }
-            } else {
-                target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, fduration, 1), attacker);
             }
         }
 
@@ -69,7 +81,9 @@ public class RendSwordItem extends SwordItem {
 
         if (!user.world.isClient()) {
             int rend_damage = (int) (SimplySwordsConfig.getFloatValue("soulrend_rend_damage_multiplier"));
-            int heal_amount = (int) (SimplySwordsConfig.getFloatValue("soulrend_rend_heal_multiplier"));
+            float heal_amount = (SimplySwordsConfig.getFloatValue("soulrend_rend_heal_multiplier"));
+            int healamp = 0;
+            boolean cantrigger = false;
             int hradius = (int) (SimplySwordsConfig.getFloatValue("soulrend_radius"));
             int vradius = (int) (SimplySwordsConfig.getFloatValue("soulrend_radius") / 2);
             double x = user.getX();
@@ -85,14 +99,25 @@ public class RendSwordItem extends SwordItem {
                         LivingEntity le = (LivingEntity) ee;
 
                          if (le.hasStatusEffect(StatusEffects.SLOWNESS) && le.hasStatusEffect(StatusEffects.WEAKNESS)) {
-                             user.heal(le.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier() * heal_amount);
+                             healamp += (le.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier());
+                             cantrigger = true;
                              le.damage(DamageSource.FREEZE, le.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier() * rend_damage);
                              le.removeStatusEffect(StatusEffects.WEAKNESS);
                              le.removeStatusEffect(StatusEffects.SLOWNESS);
-                             world.playSoundFromEntity (null, ee, SoundRegistry.SWING_OMEN_TWO.get(), SoundCategory.BLOCKS, 0.1f, 2f);
+                             world.playSoundFromEntity (null, ee, SoundRegistry.DARK_SWORD_SPELL.get(), SoundCategory.PLAYERS, 0.1f, 2f);
                          }
                     }
                 }
+            }
+            if (cantrigger) {
+                healamp = (int) (healamp * heal_amount);
+                if (healamp < 1)
+                    healamp = 1;
+                if (healamp > 6)
+                    healamp = 6;
+                user.heal(healamp);
+                healamp = 0;
+                cantrigger = false;
             }
         }
         return super.use(world,user,hand);

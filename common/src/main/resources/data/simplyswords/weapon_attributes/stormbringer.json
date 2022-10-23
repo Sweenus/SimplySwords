@@ -1,0 +1,44 @@
+{
+  "attributes": {
+    "attack_range": 2.5,
+    "category": "sword",
+    "attacks": [
+      {
+        "hitbox": "HORIZONTAL_PLANE",
+        "damage_multiplier": 1,
+        "angle": 120,
+        "upswing": 0.5,
+        "animation": "bettercombat:one_handed_slash_horizontal_right",
+        "swing_sound": {
+          "id": "simplyswords:elemental_sword_thunder_attack_02",
+          "volume": 0.5,
+          "pitch": 1.0
+        }
+      },
+      {
+        "hitbox": "HORIZONTAL_PLANE",
+        "damage_multiplier": 1,
+        "angle": 120,
+        "upswing": 0.5,
+        "animation": "bettercombat:one_handed_slash_horizontal_left",
+        "swing_sound": {
+          "id": "simplyswords:elemental_sword_thunder_attack_02",
+          "volume": 0.5,
+          "pitch": 1.3
+        }
+      },
+      {
+        "hitbox": "FORWARD_BOX",
+        "damage_multiplier": 1,
+        "angle": 0,
+        "upswing": 0.5,
+        "animation": "bettercombat:one_handed_stab",
+        "swing_sound": {
+          "id": "simplyswords:elemental_sword_thunder_attack_03",
+          "volume": 0.5,
+          "pitch": 1.2
+        }
+      }
+    ]
+  }
+}

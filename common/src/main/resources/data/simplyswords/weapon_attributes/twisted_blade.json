@@ -14,7 +14,9 @@
         "upswing": 0.5,
         "animation": "bettercombat:two_handed_slash_horizontal_left",
         "swing_sound": {
-          "id": "bettercombat:claymore_swing"
+          "id": "simplyswords:magic_sword_attack_02",
+          "volume": 0.7,
+          "pitch": 1.2
         }
       },
       {
@@ -24,7 +26,9 @@
         "upswing": 0.5,
         "animation": "bettercombat:two_handed_slash_horizontal_right",
         "swing_sound": {
-          "id": "bettercombat:claymore_swing"
+          "id": "simplyswords:magic_sword_attack_02",
+          "volume": 0.7,
+          "pitch": 1.4
         }
       },
       {
@@ -34,7 +38,9 @@
         "upswing": 0.5,
         "animation": "bettercombat:two_handed_slam",
         "swing_sound": {
-          "id": "bettercombat:claymore_slam",
+          "id": "simplyswords:magic_sword_attack_02",
+          "volume": 0.7,
+          "pitch": 1.6,
           "randomness": 0
         }
       }

@@ -7,11 +7,14 @@ import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.SwordItem;
 import net.minecraft.item.ToolMaterial;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.SoundCategory;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
 import net.sweenus.simplyswords.registry.EffectRegistry;
+import net.sweenus.simplyswords.registry.SoundRegistry;
 
 import java.util.List;
 
@@ -22,16 +25,34 @@ public class WatcherSwordItem extends SwordItem {
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        if (!attacker.world.isClient()) {
+            ServerWorld world = (ServerWorld) attacker.world;
 
-        int thitchance = (int) SimplySwordsConfig.getFloatValue("watcher_chance");
-        int phitchance = (int) SimplySwordsConfig.getFloatValue("omen_chance");
+            int thitchance = (int) SimplySwordsConfig.getFloatValue("watcher_chance");
+            int phitchance = (int) SimplySwordsConfig.getFloatValue("omen_chance");
 
-        if (attacker.getRandom().nextInt(100) <= thitchance) {
-            target.addStatusEffect(new StatusEffectInstance(EffectRegistry.WATCHER.get(), 1, 1), attacker);
-        }
+            boolean impactsounds_enabled = (SimplySwordsConfig.getBooleanValue("enable_weapon_impact_sounds"));
 
-        if (attacker.getRandom().nextInt(100) <= phitchance) {
-            target.addStatusEffect(new StatusEffectInstance(EffectRegistry.OMEN.get(), 1, 1), attacker);
+            if (impactsounds_enabled) {
+                int choose_sound = (int) (Math.random() * 30);
+                float choose_pitch = (float) Math.random() * 2;
+                if (choose_sound <= 10)
+                    world.playSoundFromEntity(null, target, SoundRegistry.MAGIC_SWORD_ATTACK_WITH_BLOOD_01.get(), SoundCategory.PLAYERS, 0.5f, 1.1f + choose_pitch);
+                if (choose_sound <= 20 && choose_sound > 10)
+                    world.playSoundFromEntity(null, target, SoundRegistry.MAGIC_SWORD_ATTACK_WITH_BLOOD_02.get(), SoundCategory.PLAYERS, 0.5f, 1.1f + choose_pitch);
+                if (choose_sound <= 30 && choose_sound > 20)
+                    world.playSoundFromEntity(null, target, SoundRegistry.MAGIC_SWORD_ATTACK_WITH_BLOOD_03.get(), SoundCategory.PLAYERS, 0.5f, 1.1f + choose_pitch);
+                if (choose_sound <= 40 && choose_sound > 30)
+                    world.playSoundFromEntity(null, target, SoundRegistry.MAGIC_SWORD_ATTACK_WITH_BLOOD_04.get(), SoundCategory.PLAYERS, 0.5f, 1.1f + choose_pitch);
+            }
+
+            if (attacker.getRandom().nextInt(100) <= thitchance) {
+                target.addStatusEffect(new StatusEffectInstance(EffectRegistry.WATCHER.get(), 1, 1), attacker);
+            }
+
+            if (attacker.getRandom().nextInt(100) <= phitchance) {
+                target.addStatusEffect(new StatusEffectInstance(EffectRegistry.OMEN.get(), 1, 1), attacker);
+            }
         }
 
         return super.postHit(stack, target, attacker);

@@ -126,7 +126,7 @@ public class SimplySwordsConfig {
         FLOAT_OPTIONS.put("ferocity_max_stacks", 15f);
         FLOAT_OPTIONS.put("ferocity_strength_tier", 2f);
 
-        FLOAT_OPTIONS.put("ember_ire_chance", 5f);
+        FLOAT_OPTIONS.put("ember_ire_chance", 15f);
         FLOAT_OPTIONS.put("ember_ire_duration", 150f);
 
         FLOAT_OPTIONS.put("volcanic_fury_chance", 25f);
@@ -149,6 +149,7 @@ public class SimplySwordsConfig {
 
 
         BOOLEAN_OPTIONS.put("add_weapons_to_loot_tables", true);
+        BOOLEAN_OPTIONS.put("enable_weapon_impact_sounds", true);
         BOOLEAN_OPTIONS.put("compat_gobber_end_weapons_unbreakable", true);
 
 
