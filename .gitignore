@@ -34,4 +34,5 @@ run/
 
 # Licensed files - not for redistribution
 
-.ogg
+*.ogg
+sounds/
