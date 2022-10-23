@@ -36,3 +36,4 @@ run/
 
 *.ogg
 sounds/
+/common/src/main/resources/assets/simplyswords/sounds/
