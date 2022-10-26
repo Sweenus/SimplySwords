@@ -88,7 +88,7 @@ public class SoulPyreSwordItem extends SwordItem {
                 user.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, resistance_duration, 0), user);
                 user.addStatusEffect(new StatusEffectInstance(StatusEffects.FIRE_RESISTANCE, resistance_duration, 0), user);
                 user.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, relocationDuration, 3), user);
-                target.addStatusEffect(new StatusEffectInstance(EffectRegistry.FREEZE.get(), 120, 0), user);
+                target.addStatusEffect(new StatusEffectInstance(EffectRegistry.FREEZE.get(), relocationDuration - 10, 0), user);
                 canRelocate = true;
                 relocationTimer = relocationDuration;
 
