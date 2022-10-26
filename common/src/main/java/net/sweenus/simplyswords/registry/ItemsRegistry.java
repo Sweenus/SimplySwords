@@ -83,6 +83,7 @@ public class ItemsRegistry {
     static float soulrender_attackspeed = SimplySwordsConfig.getWeaponAttributes("soulrender_attackspeed");
     static float thedispatcher_attackspeed = SimplySwordsConfig.getWeaponAttributes("thedispatcher_attackspeed");
     static float mjolnir_attackspeed = SimplySwordsConfig.getWeaponAttributes("mjolnir_attackspeed");
+    static float soulpyre_attackspeed = SimplySwordsConfig.getWeaponAttributes("soulpyre_attackspeed");
 
     static float brimstone_damage_modifier = SimplySwordsConfig.getWeaponAttributes("brimstone_damage_modifier");
     static float thewatcher_damage_modifier = SimplySwordsConfig.getWeaponAttributes("thewatcher_damage_modifier");
@@ -100,6 +101,7 @@ public class ItemsRegistry {
     static float soulrender_damage_modifier = SimplySwordsConfig.getWeaponAttributes("soulrender_damage_modifier");
     static float thedispatcher_damage_modifier = SimplySwordsConfig.getWeaponAttributes("thedispatcher_damage_modifier");
     static float mjolnir_damage_modifier = SimplySwordsConfig.getWeaponAttributes("mjolnir_damage_modifier");
+    static float soulpyre_damage_modifier = SimplySwordsConfig.getWeaponAttributes("soulpyre_damage_modifier");
 
     public static final DeferredRegister<Item> ITEM = DeferredRegister.create(SimplySwords.MOD_ID, Registry.ITEM_KEY);
 
@@ -650,6 +652,12 @@ public class ItemsRegistry {
             new RendSwordItem(ToolMaterials.NETHERITE,
                     (int) (soulrender_damage_modifier),
                     soulrender_attackspeed,
+                    new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+
+    public static final RegistrySupplier<SoulPyreSwordItem> SOULPYRE = ITEM.register( "soulpyre", () ->
+            new SoulPyreSwordItem(ToolMaterials.NETHERITE,
+                    (int) (soulpyre_damage_modifier),
+                    soulpyre_attackspeed,
                     new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
     /*
     public static final RegistrySupplier<RendSwordItem> THE_DISPATCHER = ITEM.register( "the_dispatcher", () ->

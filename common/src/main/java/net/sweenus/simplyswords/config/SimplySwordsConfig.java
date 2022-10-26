@@ -141,6 +141,12 @@ public class SimplySwordsConfig {
         FLOAT_OPTIONS.put("bramble_chance", 45f);
         FLOAT_OPTIONS.put("bramble_radius", 10f);
 
+        FLOAT_OPTIONS.put("soultether_range", 32f);
+        FLOAT_OPTIONS.put("soultether_radius", 8f);
+        FLOAT_OPTIONS.put("soultether_duration", 120f);
+        FLOAT_OPTIONS.put("soultether_ignite_duration", 120f);
+        FLOAT_OPTIONS.put("soultether_resistance_duration", 60f);
+
 
 
         GENERAL_OPTIONS.put("standard_loot_table_weight", 0.08f);
@@ -220,6 +226,7 @@ public class SimplySwordsConfig {
         WEAPON_OPTIONS.put("soulrender_damage_modifier", 4f);
         WEAPON_OPTIONS.put("mjolnir_damage_modifier", 3f);
         WEAPON_OPTIONS.put("thedispatcher_damage_modifier", 4f);
+        WEAPON_OPTIONS.put("soulpyre_damage_modifier", 7f);
 
         WEAPON_OPTIONS.put("brimstone_attackspeed", -2.8f);
         WEAPON_OPTIONS.put("thewatcher_attackspeed", -2.8f);
@@ -237,6 +244,7 @@ public class SimplySwordsConfig {
         WEAPON_OPTIONS.put("soulrender_attackspeed", -2.4f);
         WEAPON_OPTIONS.put("mjolnir_attackspeed", -3.0f);
         WEAPON_OPTIONS.put("thedispatcher_attackspeed", -2.0f);
+        WEAPON_OPTIONS.put("soulpyre_attackspeed", -3.0f);
 
     }
 
@@ -322,138 +330,176 @@ public class SimplySwordsConfig {
                 config.append("//Radius is measured in blocks\n");
                 config.append("//Duration in ticks, where 20 is equivalent to one second \n");
                 config.append("\n");
+                config.append("// ---------------------------- \n");
                 config.append("// -- Runic Power: Swiftness -- \n");
                 config.append("// ---------------------------- \n");
             }
             if (i == 2) {
                 config.append("\n");
+                config.append("// ----------------------- \n");
                 config.append("// -- Runic Power: Slow -- \n");
                 config.append("// ----------------------- \n");
             }
             if (i == 4) {
                 config.append("\n");
+                config.append("// ------------------------- \n");
                 config.append("// -- Runic Power: Poison -- \n");
                 config.append("// ------------------------- \n");
             }
             if (i == 6) {
                 config.append("\n");
+                config.append("// ------------------------- \n");
                 config.append("// -- Runic Power: Freeze -- \n");
                 config.append("// ------------------------- \n");
             }
             if (i == 8) {
                 config.append("\n");
+                config.append("// --------------------------- \n");
                 config.append("// -- Runic Power: Wildfire -- \n");
                 config.append("// --------------------------- \n");
             }
             if (i == 11) {
                 config.append("\n");
+                config.append("// ------------------------ \n");
                 config.append("// -- Runic Power: Float -- \n");
                 config.append("// ------------------------ \n");
             }
             if (i == 13) {
                 config.append("\n");
+                config.append("// ------------------------- \n");
                 config.append("// -- Runic Power: Zephyr -- \n");
-                config.append("// ------------------------ \n");
+                config.append("// ------------------------- \n");
             }
             if (i == 15) {
                 config.append("\n");
+                config.append("// ---------------------------- \n");
                 config.append("// -- Runic Power: Shielding -- \n");
-                config.append("// ------------------------ \n");
+                config.append("// ---------------------------- \n");
             }
             if (i == 17) {
                 config.append("\n");
+                config.append("// ---------------------------- \n");
                 config.append("// -- Runic Power: Stoneskin -- \n");
-                config.append("// ------------------------ \n");
+                config.append("// ---------------------------- \n");
             }
             if (i == 19) {
                 config.append("\n");
+                config.append("// ----------------------------- \n");
                 config.append("// -- Runic Power: Trailblaze -- \n");
-                config.append("// ------------------------ \n");
+                config.append("// ----------------------------- \n");
             }
             if (i == 21) {
                 config.append("\n");
+                config.append("// ------------------------- \n");
                 config.append("// -- Runic Power: Weaken -- \n");
-                config.append("// ------------------------ \n");
+                config.append("// ------------------------- \n");
             }
             if (i == 23) {
                 config.append("\n");
+                config.append("// --------------------------- \n");
                 config.append("// -- Runic Power: Unstable -- \n");
-                config.append("// ------------------------ \n");
+                config.append("// --------------------------- \n");
             }
             if (i == 25) {
                 config.append("\n");
+                config.append("// --------------------------------- \n");
                 config.append("// -- Runic Power: Active Defence -- \n");
-                config.append("// ------------------------ \n");
+                config.append("// --------------------------------- \n");
             }
             if (i == 27) {
                 config.append("\n");
+                config.append("// ----------------------------- \n");
                 config.append("// -- Runic Power: Frost Ward -- \n");
-                config.append("// ------------------------ \n");
+                config.append("// ----------------------------- \n");
             }
             if (i == 30) {
                 config.append("\n");
+                config.append("// ---------------------------- \n");
                 config.append("// -- Unique Effect: Watcher -- \n");
                 config.append("// -- Restore amount refers to health gained from each enemy in range -- \n");
                 config.append("// ---------------------------- \n");
             }
             if (i == 33) {
                 config.append("\n");
+                config.append("// ------------------------- \n");
                 config.append("// -- Unique Effect: Omen -- \n");
                 config.append("// -- Absorption amount refers to the tier of regeneration gained on proc -- \n");
                 config.append("// -- Instantkill Threshold refers to the % of maxhealth an enemy must be UNDER in order for the effect to proc. Where 1 = 100% -- \n");
-                config.append("// ---------------------------- \n");
+                config.append("// ------------------------- \n");
             }
             if (i == 36) {
                 config.append("\n");
+                config.append("// ------------------------------- \n");
                 config.append("// -- Unique Effect: Soul Steal -- \n");
                 config.append("// Duration refers to the haste, slow, and glow effects \n");
                 config.append("// ------------------------------- \n");
             }
             if (i == 41) {
                 config.append("\n");
+                config.append("// ---------------------------- \n");
                 config.append("// -- Unique Effect: Gravity -- \n");
                 config.append("// NOT YET IMPLEMENTED \n");
                 config.append("// ---------------------------- \n");
             }
             if (i == 44) {
                 config.append("\n");
+                config.append("// ------------------------------ \n");
                 config.append("// -- Unique Effect: Soul Meld -- \n");
-                config.append("// ----------------------------- \n");
+                config.append("// ------------------------------ \n");
             }
             if (i == 47) {
                 config.append("\n");
+                config.append("// ------------------------------ \n");
                 config.append("// -- Unique Effect: Soul Rend -- \n");
-                config.append("// ----------------------------- \n");
+                config.append("// ------------------------------ \n");
             }
             if (i == 53) {
                 config.append("\n");
+                config.append("// ----------------------------- \n");
                 config.append("// -- Unique Effect: Ferocity -- \n");
                 config.append("// ----------------------------- \n");
             }
             if (i == 57) {
                 config.append("\n");
+                config.append("// ------------------------------ \n");
                 config.append("// -- Unique Effect: Ember Ire -- \n");
                 config.append("// ------------------------------ \n");
             }
             if (i == 59) {
                 config.append("\n");
+                config.append("// ---------------------------------- \n");
                 config.append("// -- Unique Effect: Volcanic Fury -- \n");
                 config.append("// ---------------------------------- \n");
             }
             if (i == 60) {
                 config.append("\n");
+                config.append("// -------------------------- \n");
                 config.append("// -- Unique Effect: Storm -- \n");
                 config.append("// -------------------------- \n");
             }
             if (i == 62) {
                 config.append("\n");
+                config.append("// --------------------------- \n");
                 config.append("// -- Unique Effect: Plague -- \n");
                 config.append("// --------------------------- \n");
             }
             if (i == 63) {
                 config.append("\n");
+                config.append("// ------------------------------ \n");
                 config.append("// -- Unique Effect: Brimstone -- \n");
                 config.append("// ------------------------------ \n");
+            }
+            if (i == 64) {
+                config.append("\n");
+                config.append("// ---------------------------- \n");
+                config.append("// -- Unique Effect: Bramble -- \n");
+                config.append("// ---------------------------- \n");
+            }
+            if (i == 66) {
+                config.append("\n");
+                config.append("// -------------------------------- \n");
+                config.append("// -- Unique Effect: Soul Tether -- \n");
+                config.append("// -------------------------------- \n");
             }
             config.append("  \"").append(item).append("\": ").append(FLOAT_OPTIONS.get(item));
             ++i;
@@ -509,7 +555,7 @@ public class SimplySwordsConfig {
                 config.append("// Example use-case: Adding 3 to a value below will INCREASE the in-game damage of that weapon by 3 \n");
                 config.append("// ---------------------- \n");
             }
-            if (i == 63) {
+            if (i == 64) {
                 config.append("\n");
                 config.append("// -- Attack Speed Modifiers -- \n");
                 config.append("// Recommended range: -1.0 to -3.7, with -1.0 being fast and -3.7 being slow \n");

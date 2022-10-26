@@ -85,6 +85,7 @@
   "item.simplyswords.soulkeeper": "Soulkeeper",
   "item.simplyswords.soulstealer": "Soulstealer",
   "item.simplyswords.soulrender": "Soulrender",
+  "item.simplyswords.soulpyre": "Soul Pyre",
 
   "item.simplyswords.runic_tablet": "Runic Tablet",
 
@@ -506,6 +507,16 @@
   "item.simplyswords.stealsworditem.tooltip8": "If more than 5 blocks from a soulless target,",
   "item.simplyswords.stealsworditem.tooltip9": "blink to their location, returning their soul",
   "item.simplyswords.stealsworditem.tooltip10": "with force, blinding and damaging them.",
+
+  "item.simplyswords.soulpyresworditem.tooltip1": "Unique Effect: Soul Tether",
+  "item.simplyswords.soulpyresworditem.tooltip2": "Instigate a tethering of souls, trading places",
+  "item.simplyswords.soulpyresworditem.tooltip3": "with and freezing your target while gaining",
+  "item.simplyswords.soulpyresworditem.tooltip4": "haste and resistances.",
+  "item.simplyswords.soulpyresworditem.tooltip5": "Upon reaching your destination, ignite nearby",
+  "item.simplyswords.soulpyresworditem.tooltip6": "enemies and pull them closer to you.",
+  "item.simplyswords.soulpyresworditem.tooltip7": "After %ds your soul tether is severed",
+  "item.simplyswords.soulpyresworditem.tooltip8": "causing you to trade places with your target",
+  "item.simplyswords.soulpyresworditem.tooltip9": "a second time.",
 
 
   "item.simplyswords.levitationsworditem.tooltip1": "Runic Power: Float",

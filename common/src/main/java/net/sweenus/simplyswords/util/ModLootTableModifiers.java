@@ -118,6 +118,7 @@ public class ModLootTableModifiers {
                         .with(ItemEntry.builder(ItemsRegistry.HEARTHFLAME.get()))
                         .with(ItemEntry.builder(ItemsRegistry.TWISTED_BLADE.get()))
                         .with(ItemEntry.builder(ItemsRegistry.SOULRENDER.get()))
+                        .with(ItemEntry.builder(ItemsRegistry.SOULPYRE.get()))
                         .with(ItemEntry.builder(ItemsRegistry.SOULKEEPER.get()))
                         .with(ItemEntry.builder(ItemsRegistry.SOULSTEALER.get()))
                         .with(ItemEntry.builder(ItemsRegistry.BRIMSTONE_CLAYMORE.get()));
