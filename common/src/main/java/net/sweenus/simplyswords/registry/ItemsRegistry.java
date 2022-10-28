@@ -659,6 +659,12 @@ public class ItemsRegistry {
                     (int) (soulpyre_damage_modifier),
                     soulpyre_attackspeed,
                     new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+
+    public static final RegistrySupplier<FrostfallSwordItem> FROSTFALL = ITEM.register( "frostfall", () ->
+            new FrostfallSwordItem(ToolMaterials.NETHERITE,
+                    (int) (soulpyre_damage_modifier),
+                    soulpyre_attackspeed,
+                    new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
     /*
     public static final RegistrySupplier<RendSwordItem> THE_DISPATCHER = ITEM.register( "the_dispatcher", () ->
             new RendSwordItem(ToolMaterials.NETHERITE,
