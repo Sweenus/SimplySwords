@@ -6,6 +6,7 @@ import net.minecraft.block.Blocks;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
@@ -34,10 +35,11 @@ public class FrostfallSwordItem extends SwordItem {
         super(toolMaterial, attackDamage, attackSpeed, settings);
     }
 
-    private final int abilityCooldown = (int) SimplySwordsConfig.getFloatValue("soultether_duration");
-    int radius = (int) (SimplySwordsConfig.getFloatValue("soultether_radius"));
-    int proc_chance = 50;
-    int shatter_timer_max = 80; //(int) (SimplySwordsConfig.getFloatValue("soultether_radius"));
+    private final int abilityCooldown = (int) SimplySwordsConfig.getFloatValue("frostfury_cooldown");
+    int radius = (int) (SimplySwordsConfig.getFloatValue("frostfury_radius"));
+    int shatterDamage = (int) (SimplySwordsConfig.getFloatValue("frostfury_damage"));
+    int proc_chance = (int) (SimplySwordsConfig.getFloatValue("frostfury_chance"));
+    int shatter_timer_max = (int) (SimplySwordsConfig.getFloatValue("frostfury_duration"));
     int shatter_timer;
     int player_shatter_timer;
     double lastX;
@@ -73,8 +75,8 @@ public class FrostfallSwordItem extends SwordItem {
 
                     if (entities != null) {
                         if (entities instanceof LivingEntity le) {
-                            le.addStatusEffect(new StatusEffectInstance(EffectRegistry.FREEZE.get(), 90, 0), attacker);
-                            le.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, 80, 4), attacker);
+                            le.addStatusEffect(new StatusEffectInstance(EffectRegistry.FREEZE.get(), shatter_timer_max + 10, 0), attacker);
+                            le.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, shatter_timer_max - 10, 4), attacker);
                             world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_BOW_ICE_SHOOT_IMPACT_01.get(), SoundCategory.PLAYERS, 0.1f, 3f);
                             BlockPos pos = new BlockPos(le.getX(), le.getY(), le.getZ());
                             BlockPos pos2 = new BlockPos(le.getX(), le.getY() + 1, le.getZ());
@@ -102,17 +104,16 @@ public class FrostfallSwordItem extends SwordItem {
             lastY = user.getY();
             lastZ = user.getZ();
 
-            user.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 80, 4), user);
-            user.addStatusEffect(new StatusEffectInstance(StatusEffects.MINING_FATIGUE, 80, 4), user);
-            user.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, 80, 4), user);
-            user.addStatusEffect(new StatusEffectInstance(StatusEffects.REGENERATION, 80, 2), user);
+            user.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, shatter_timer_max, 4), user);
+            user.addStatusEffect(new StatusEffectInstance(StatusEffects.MINING_FATIGUE, shatter_timer_max, 4), user);
+            user.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, shatter_timer_max, 4), user);
+            user.addStatusEffect(new StatusEffectInstance(StatusEffects.REGENERATION, shatter_timer_max, 2), user);
 
             world.playSoundFromEntity(null, user, SoundRegistry.ELEMENTAL_BOW_ICE_SHOOT_IMPACT_03.get(), SoundCategory.PLAYERS, 0.6f, 2f);
 
             double xpos = user.getX() -2;
             double ypos = user.getY();
             double zpos = user.getZ() -2;
-            BlockPos playerPos = new BlockPos(lastX, lastY, lastZ);
             user.teleport(lastX, lastY, lastZ);
 
             for (int i = 3; i > 0; i--) {
@@ -128,14 +129,14 @@ public class FrostfallSwordItem extends SwordItem {
                     BlockState currentState4 = world.getBlockState(poscheck4);
                     BlockState state = Blocks.ICE.getDefaultState();
                     if (i + j != 4) {
-                        if (currentState == Blocks.AIR.getDefaultState() || currentState == Blocks.GRASS.getDefaultState() || currentState == Blocks.FERN.getDefaultState())
+                        if (currentState == Blocks.AIR.getDefaultState() || currentState == Blocks.GRASS.getDefaultState() || currentState == Blocks.LARGE_FERN.getDefaultState() || currentState == Blocks.FERN.getDefaultState())
                             world.setBlockState(poscheck, state);
-                        if (currentState2 == Blocks.AIR.getDefaultState() || currentState == Blocks.GRASS.getDefaultState() || currentState == Blocks.FERN.getDefaultState())
+                        if (currentState2 == Blocks.AIR.getDefaultState() || currentState2 == Blocks.GRASS.getDefaultState() || currentState2 == Blocks.LARGE_FERN.getDefaultState() || currentState2 == Blocks.FERN.getDefaultState())
                             world.setBlockState(poscheck2, state);
                     }
-                    if (currentState3 == Blocks.AIR.getDefaultState() || currentState == Blocks.GRASS.getDefaultState() || currentState == Blocks.FERN.getDefaultState())
+                    if (currentState3 == Blocks.AIR.getDefaultState() || currentState3 == Blocks.GRASS.getDefaultState() || currentState3 == Blocks.LARGE_FERN.getDefaultState() || currentState3 == Blocks.FERN.getDefaultState())
                         world.setBlockState(poscheck3, state);
-                    if (currentState4 == Blocks.AIR.getDefaultState() || currentState == Blocks.GRASS.getDefaultState() || currentState == Blocks.FERN.getDefaultState())
+                    if (currentState4 == Blocks.AIR.getDefaultState() || currentState4 == Blocks.GRASS.getDefaultState() || currentState4 == Blocks.LARGE_FERN.getDefaultState() || currentState4 == Blocks.FERN.getDefaultState())
                         world.setBlockState(poscheck4, state);
                 }
             }
@@ -144,19 +145,6 @@ public class FrostfallSwordItem extends SwordItem {
             player_shatter_timer = shatter_timer_max;
             user.getItemCooldownManager().set(this, abilityCooldown);
 
-
-            /*
-            BlockPos pos = new BlockPos(user.getX(), user.getY(), user.getZ());
-            BlockPos pos2 = new BlockPos(user.getX(), user.getY() + 1, user.getZ());
-            BlockState state = Blocks.ICE.getDefaultState();
-            BlockState currentState = world.getBlockState(pos);
-            if (currentState == Blocks.AIR.getDefaultState()) {
-                world.setBlockState(pos, state);
-                world.setBlockState(pos2, state);
-                player_shatter_timer = shatter_timer_max;
-
-                user.getItemCooldownManager().set(this, abilityCooldown);
-            } */
         }
         return super.use(world, user, hand);
     }
@@ -176,23 +164,38 @@ public class FrostfallSwordItem extends SwordItem {
                         //Ice shatter
                         if (entities != null) {
                             if (entities instanceof LivingEntity le) {
-                                double xpos = le.getX() -3;
+
+                                if (le.hasStatusEffect(EffectRegistry.FREEZE.get())) {
+                                    world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_BOW_ICE_SHOOT_IMPACT_02.get(), SoundCategory.PLAYERS, 0.2f, 3f);
+                                    le.damage(DamageSource.FREEZE, shatterDamage);
+                                }
+
+
+                                double xpos = le.getX() -2;
                                 double ypos = le.getY();
-                                double zpos = le.getZ() -3;
+                                double zpos = le.getZ() -2;
 
 
-                                for (int i = 6; i > 0; i--) {
-                                    for (int j = 6; j > 0; j--) {
+                                for (int i = 4; i > 0; i--) {
+                                    for (int j = 4; j > 0; j--) {
                                         BlockPos poscheck = new BlockPos(xpos+i, ypos, zpos+j);
                                         BlockPos poscheck2 = new BlockPos(xpos+i, ypos + 1, zpos+j);
+                                        BlockPos poscheck3 = new BlockPos(xpos+i, ypos + 2, zpos+j);
+                                        BlockPos poscheck4 = new BlockPos(xpos+i, ypos - 1, zpos+j);
 
                                         BlockState currentState = world.getBlockState(poscheck);
-                                        if (currentState == Blocks.ICE.getDefaultState()) {
-                                            BlockState state = Blocks.AIR.getDefaultState();
+                                        BlockState currentState2 = world.getBlockState(poscheck2);
+                                        BlockState currentState3 = world.getBlockState(poscheck3);
+                                        BlockState currentState4 = world.getBlockState(poscheck4);
+                                        BlockState state = Blocks.AIR.getDefaultState();
+                                        if (currentState == Blocks.ICE.getDefaultState())
                                             world.setBlockState(poscheck, state);
+                                        if (currentState2 == Blocks.ICE.getDefaultState())
                                             world.setBlockState(poscheck2, state);
-                                            world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_BOW_ICE_SHOOT_IMPACT_02.get(), SoundCategory.PLAYERS, 0.3f, 3f);
-                                        }
+                                        if (currentState3 == Blocks.ICE.getDefaultState())
+                                            world.setBlockState(poscheck3, state);
+                                        if (currentState4 == Blocks.ICE.getDefaultState())
+                                            world.setBlockState(poscheck4, state);
                                     }
                                 }
                             }
@@ -219,13 +222,18 @@ public class FrostfallSwordItem extends SwordItem {
                         BlockPos poscheck4 = new BlockPos(xpos+i, ypos - 1, zpos+j);
 
                         BlockState currentState = world.getBlockState(poscheck);
-                        if (currentState == Blocks.ICE.getDefaultState()) {
-                            BlockState state = Blocks.AIR.getDefaultState();
+                        BlockState currentState2 = world.getBlockState(poscheck2);
+                        BlockState currentState3 = world.getBlockState(poscheck3);
+                        BlockState currentState4 = world.getBlockState(poscheck4);
+                        BlockState state = Blocks.AIR.getDefaultState();
+                        if (currentState == Blocks.ICE.getDefaultState())
                             world.setBlockState(poscheck, state);
+                        if (currentState2 == Blocks.ICE.getDefaultState())
                             world.setBlockState(poscheck2, state);
+                        if (currentState3 == Blocks.ICE.getDefaultState())
                             world.setBlockState(poscheck3, state);
+                        if (currentState4 == Blocks.ICE.getDefaultState())
                             world.setBlockState(poscheck4, state);
-                        }
                     }
                 }
             }
@@ -243,18 +251,15 @@ public class FrostfallSwordItem extends SwordItem {
         //1.19
 
         tooltip.add(Text.literal(""));
-        tooltip.add(Text.translatable("item.simplyswords.soulpyresworditem.tooltip1").formatted(Formatting.GOLD, Formatting.BOLD));
+        tooltip.add(Text.translatable("item.simplyswords.frostfallsworditem.tooltip1").formatted(Formatting.GOLD, Formatting.BOLD));
+        tooltip.add(Text.literal(""));
+        tooltip.add(Text.translatable("item.simplyswords.frostfallsworditem.tooltip2"));
+        tooltip.add(Text.translatable("item.simplyswords.frostfallsworditem.tooltip3"));
+        tooltip.add(Text.translatable("item.simplyswords.frostfallsworditem.tooltip4", shatter_timer_max /20, shatterDamage));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").formatted(Formatting.BOLD, Formatting.GREEN));
-        tooltip.add(Text.translatable("item.simplyswords.soulpyresworditem.tooltip2"));
-        tooltip.add(Text.translatable("item.simplyswords.soulpyresworditem.tooltip3"));
-        tooltip.add(Text.translatable("item.simplyswords.soulpyresworditem.tooltip4"));
-        tooltip.add(Text.translatable("item.simplyswords.soulpyresworditem.tooltip5"));
-        tooltip.add(Text.translatable("item.simplyswords.soulpyresworditem.tooltip6"));
-        tooltip.add(Text.literal(""));
-        tooltip.add(Text.translatable("item.simplyswords.soulpyresworditem.tooltip7", abilityCooldown / 20));
-        tooltip.add(Text.translatable("item.simplyswords.soulpyresworditem.tooltip8"));
-        tooltip.add(Text.translatable("item.simplyswords.soulpyresworditem.tooltip9"));
+        tooltip.add(Text.translatable("item.simplyswords.frostfallsworditem.tooltip5", shatter_timer_max /20));
+        tooltip.add(Text.translatable("item.simplyswords.frostfallsworditem.tooltip6"));
         tooltip.add(Text.literal(""));
 
         /*

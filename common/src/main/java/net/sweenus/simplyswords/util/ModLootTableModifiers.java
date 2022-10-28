@@ -121,6 +121,7 @@ public class ModLootTableModifiers {
                         .with(ItemEntry.builder(ItemsRegistry.SOULPYRE.get()))
                         .with(ItemEntry.builder(ItemsRegistry.SOULKEEPER.get()))
                         .with(ItemEntry.builder(ItemsRegistry.SOULSTEALER.get()))
+                        .with(ItemEntry.builder(ItemsRegistry.FROSTFALL.get()))
                         .with(ItemEntry.builder(ItemsRegistry.BRIMSTONE_CLAYMORE.get()));
 
                 context.addPool(pool);

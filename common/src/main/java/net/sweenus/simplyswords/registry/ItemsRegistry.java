@@ -84,6 +84,7 @@ public class ItemsRegistry {
     static float thedispatcher_attackspeed = SimplySwordsConfig.getWeaponAttributes("thedispatcher_attackspeed");
     static float mjolnir_attackspeed = SimplySwordsConfig.getWeaponAttributes("mjolnir_attackspeed");
     static float soulpyre_attackspeed = SimplySwordsConfig.getWeaponAttributes("soulpyre_attackspeed");
+    static float frostfall_attackspeed = SimplySwordsConfig.getWeaponAttributes("frostfall_attackspeed");
 
     static float brimstone_damage_modifier = SimplySwordsConfig.getWeaponAttributes("brimstone_damage_modifier");
     static float thewatcher_damage_modifier = SimplySwordsConfig.getWeaponAttributes("thewatcher_damage_modifier");
@@ -102,6 +103,7 @@ public class ItemsRegistry {
     static float thedispatcher_damage_modifier = SimplySwordsConfig.getWeaponAttributes("thedispatcher_damage_modifier");
     static float mjolnir_damage_modifier = SimplySwordsConfig.getWeaponAttributes("mjolnir_damage_modifier");
     static float soulpyre_damage_modifier = SimplySwordsConfig.getWeaponAttributes("soulpyre_damage_modifier");
+    static float frostfall_damage_modifier = SimplySwordsConfig.getWeaponAttributes("frostfall_damage_modifier");
 
     public static final DeferredRegister<Item> ITEM = DeferredRegister.create(SimplySwords.MOD_ID, Registry.ITEM_KEY);
 
@@ -662,8 +664,8 @@ public class ItemsRegistry {
 
     public static final RegistrySupplier<FrostfallSwordItem> FROSTFALL = ITEM.register( "frostfall", () ->
             new FrostfallSwordItem(ToolMaterials.NETHERITE,
-                    (int) (soulpyre_damage_modifier),
-                    soulpyre_attackspeed,
+                    (int) (frostfall_damage_modifier),
+                    frostfall_attackspeed,
                     new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
     /*
     public static final RegistrySupplier<RendSwordItem> THE_DISPATCHER = ITEM.register( "the_dispatcher", () ->

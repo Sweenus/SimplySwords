@@ -147,6 +147,12 @@ public class SimplySwordsConfig {
         FLOAT_OPTIONS.put("soultether_ignite_duration", 120f);
         FLOAT_OPTIONS.put("soultether_resistance_duration", 60f);
 
+        FLOAT_OPTIONS.put("frostfury_cooldown", 220f);
+        FLOAT_OPTIONS.put("frostfury_radius", 3f);
+        FLOAT_OPTIONS.put("frostfury_damage", 18f);
+        FLOAT_OPTIONS.put("frostfury_chance", 15f);
+        FLOAT_OPTIONS.put("frostfury_duration", 80f);
+
 
 
         GENERAL_OPTIONS.put("standard_loot_table_weight", 0.08f);
@@ -227,6 +233,7 @@ public class SimplySwordsConfig {
         WEAPON_OPTIONS.put("mjolnir_damage_modifier", 3f);
         WEAPON_OPTIONS.put("thedispatcher_damage_modifier", 4f);
         WEAPON_OPTIONS.put("soulpyre_damage_modifier", 7f);
+        WEAPON_OPTIONS.put("frostfall_damage_modifier", 5f);
 
         WEAPON_OPTIONS.put("brimstone_attackspeed", -2.8f);
         WEAPON_OPTIONS.put("thewatcher_attackspeed", -2.8f);
@@ -245,6 +252,7 @@ public class SimplySwordsConfig {
         WEAPON_OPTIONS.put("mjolnir_attackspeed", -3.0f);
         WEAPON_OPTIONS.put("thedispatcher_attackspeed", -2.0f);
         WEAPON_OPTIONS.put("soulpyre_attackspeed", -3.0f);
+        WEAPON_OPTIONS.put("frostfall_attackspeed", -2.5f);
 
     }
 
@@ -501,6 +509,12 @@ public class SimplySwordsConfig {
                 config.append("// -- Unique Effect: Soul Tether -- \n");
                 config.append("// -------------------------------- \n");
             }
+            if (i == 71) {
+                config.append("\n");
+                config.append("// -------------------------------- \n");
+                config.append("// -- Unique Effect: Frost Fury -- \n");
+                config.append("// -------------------------------- \n");
+            }
             config.append("  \"").append(item).append("\": ").append(FLOAT_OPTIONS.get(item));
             ++i;
             if (i < FLOAT_OPTIONS.size()) {
@@ -555,7 +569,7 @@ public class SimplySwordsConfig {
                 config.append("// Example use-case: Adding 3 to a value below will INCREASE the in-game damage of that weapon by 3 \n");
                 config.append("// ---------------------- \n");
             }
-            if (i == 64) {
+            if (i == 65) {
                 config.append("\n");
                 config.append("// -- Attack Speed Modifiers -- \n");
                 config.append("// Recommended range: -1.0 to -3.7, with -1.0 being fast and -3.7 being slow \n");

@@ -86,6 +86,7 @@
   "item.simplyswords.soulstealer": "Soulstealer",
   "item.simplyswords.soulrender": "Soulrender",
   "item.simplyswords.soulpyre": "Soul Pyre",
+  "item.simplyswords.frostfall": "Frostfall",
 
   "item.simplyswords.runic_tablet": "Runic Tablet",
 
@@ -517,6 +518,13 @@
   "item.simplyswords.soulpyresworditem.tooltip7": "After %ds your soul tether is severed",
   "item.simplyswords.soulpyresworditem.tooltip8": "causing you to trade places with your target",
   "item.simplyswords.soulpyresworditem.tooltip9": "a second time.",
+
+  "item.simplyswords.frostfallsworditem.tooltip1": "Unique Effect: Frost Fury",
+  "item.simplyswords.frostfallsworditem.tooltip2": "Chance on hit to encase nearby enemies in",
+  "item.simplyswords.frostfallsworditem.tooltip3": "ice, causing them to take no damage.",
+  "item.simplyswords.frostfallsworditem.tooltip4": "After %ds the ice shatters causing %d damage.",
+  "item.simplyswords.frostfallsworditem.tooltip5": "Encase yourself in ice for %ds, rendering you",
+  "item.simplyswords.frostfallsworditem.tooltip6": "immune and granting you regeneration.",
 
 
   "item.simplyswords.levitationsworditem.tooltip1": "Runic Power: Float",
