@@ -116,7 +116,7 @@ public class SimplySwordsConfig {
 
         FLOAT_OPTIONS.put("soulrend_chance", 85f);
         FLOAT_OPTIONS.put("soulrend_duration", 500f);
-        FLOAT_OPTIONS.put("soulrend_rend_damage_multiplier", 2f);
+        FLOAT_OPTIONS.put("soulrend_rend_damage_multiplier", 3f);
         FLOAT_OPTIONS.put("soulrend_rend_heal_multiplier", 0.5f);
         FLOAT_OPTIONS.put("soulrend_radius", 10f);
         FLOAT_OPTIONS.put("soulrend_max_stacks", 8f);
@@ -147,11 +147,17 @@ public class SimplySwordsConfig {
         FLOAT_OPTIONS.put("soultether_ignite_duration", 120f);
         FLOAT_OPTIONS.put("soultether_resistance_duration", 60f);
 
-        FLOAT_OPTIONS.put("frostfury_cooldown", 220f);
+        FLOAT_OPTIONS.put("frostfury_cooldown", 380f);
         FLOAT_OPTIONS.put("frostfury_radius", 3f);
         FLOAT_OPTIONS.put("frostfury_damage", 18f);
         FLOAT_OPTIONS.put("frostfury_chance", 15f);
         FLOAT_OPTIONS.put("frostfury_duration", 80f);
+
+        FLOAT_OPTIONS.put("moltenroar_cooldown", 320f);
+        FLOAT_OPTIONS.put("moltenroar_radius", 5f);
+        FLOAT_OPTIONS.put("moltenroar_knockback_strength", 5f);
+        FLOAT_OPTIONS.put("moltenroar_chance", 15f);
+        FLOAT_OPTIONS.put("moltenroar_duration", 100f);
 
 
 
@@ -234,6 +240,7 @@ public class SimplySwordsConfig {
         WEAPON_OPTIONS.put("thedispatcher_damage_modifier", 4f);
         WEAPON_OPTIONS.put("soulpyre_damage_modifier", 7f);
         WEAPON_OPTIONS.put("frostfall_damage_modifier", 5f);
+        WEAPON_OPTIONS.put("moltenedge_damage_modifier", 4f);
 
         WEAPON_OPTIONS.put("brimstone_attackspeed", -2.8f);
         WEAPON_OPTIONS.put("thewatcher_attackspeed", -2.8f);
@@ -253,6 +260,7 @@ public class SimplySwordsConfig {
         WEAPON_OPTIONS.put("thedispatcher_attackspeed", -2.0f);
         WEAPON_OPTIONS.put("soulpyre_attackspeed", -3.0f);
         WEAPON_OPTIONS.put("frostfall_attackspeed", -2.5f);
+        WEAPON_OPTIONS.put("moltenedge_attackspeed", -2.1f);
 
     }
 
@@ -515,6 +523,12 @@ public class SimplySwordsConfig {
                 config.append("// -- Unique Effect: Frost Fury -- \n");
                 config.append("// -------------------------------- \n");
             }
+            if (i == 76) {
+                config.append("\n");
+                config.append("// -------------------------------- \n");
+                config.append("// -- Unique Effect: Molten Roar -- \n");
+                config.append("// -------------------------------- \n");
+            }
             config.append("  \"").append(item).append("\": ").append(FLOAT_OPTIONS.get(item));
             ++i;
             if (i < FLOAT_OPTIONS.size()) {
@@ -569,7 +583,7 @@ public class SimplySwordsConfig {
                 config.append("// Example use-case: Adding 3 to a value below will INCREASE the in-game damage of that weapon by 3 \n");
                 config.append("// ---------------------- \n");
             }
-            if (i == 65) {
+            if (i == 66) {
                 config.append("\n");
                 config.append("// -- Attack Speed Modifiers -- \n");
                 config.append("// Recommended range: -1.0 to -3.7, with -1.0 being fast and -3.7 being slow \n");

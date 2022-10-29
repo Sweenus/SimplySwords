@@ -87,6 +87,7 @@
   "item.simplyswords.soulrender": "Soulrender",
   "item.simplyswords.soulpyre": "Soul Pyre",
   "item.simplyswords.frostfall": "Frostfall",
+  "item.simplyswords.molten_edge": "Molten Edge",
 
   "item.simplyswords.runic_tablet": "Runic Tablet",
 
@@ -525,6 +526,14 @@
   "item.simplyswords.frostfallsworditem.tooltip4": "After %ds the ice shatters causing %d damage.",
   "item.simplyswords.frostfallsworditem.tooltip5": "Encase yourself in ice for %ds, rendering you",
   "item.simplyswords.frostfallsworditem.tooltip6": "immune and granting you regeneration.",
+
+  "item.simplyswords.moltenedgesworditem.tooltip1": "Unique Effect: Molten Roar",
+  "item.simplyswords.moltenedgesworditem.tooltip2": "Chance on hit to ignite your enemy or yourself.",
+  "item.simplyswords.moltenedgesworditem.tooltip3": "If low HP, gain regeneration instead.",
+  "item.simplyswords.moltenedgesworditem.tooltip4": "Gain strength and speed relative to missing HP.",
+  "item.simplyswords.moltenedgesworditem.tooltip5": "Release a powerful roar, knocking back and",
+  "item.simplyswords.moltenedgesworditem.tooltip6": "igniting nearby enemies. Gain a stack of absorption",
+  "item.simplyswords.moltenedgesworditem.tooltip7": "and haste for each enemy hit for %ds.",
 
 
   "item.simplyswords.levitationsworditem.tooltip1": "Runic Power: Float",
