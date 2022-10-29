@@ -129,14 +129,14 @@ public class FrostfallSwordItem extends SwordItem {
                     BlockState currentState4 = world.getBlockState(poscheck4);
                     BlockState state = Blocks.ICE.getDefaultState();
                     if (i + j != 4) {
-                        if (currentState == Blocks.AIR.getDefaultState() || currentState == Blocks.GRASS.getDefaultState() || currentState == Blocks.LARGE_FERN.getDefaultState() || currentState == Blocks.FERN.getDefaultState())
+                        if (currentState == Blocks.AIR.getDefaultState() || currentState == Blocks.SNOW.getDefaultState() || currentState == Blocks.GRASS.getDefaultState() || currentState == Blocks.LARGE_FERN.getDefaultState() || currentState == Blocks.FERN.getDefaultState())
                             world.setBlockState(poscheck, state);
-                        if (currentState2 == Blocks.AIR.getDefaultState() || currentState2 == Blocks.GRASS.getDefaultState() || currentState2 == Blocks.LARGE_FERN.getDefaultState() || currentState2 == Blocks.FERN.getDefaultState())
+                        if (currentState2 == Blocks.AIR.getDefaultState() || currentState2 == Blocks.SNOW.getDefaultState() || currentState2 == Blocks.GRASS.getDefaultState() || currentState2 == Blocks.LARGE_FERN.getDefaultState() || currentState2 == Blocks.FERN.getDefaultState())
                             world.setBlockState(poscheck2, state);
                     }
-                    if (currentState3 == Blocks.AIR.getDefaultState() || currentState3 == Blocks.GRASS.getDefaultState() || currentState3 == Blocks.LARGE_FERN.getDefaultState() || currentState3 == Blocks.FERN.getDefaultState())
+                    if (currentState3 == Blocks.AIR.getDefaultState() || currentState3 == Blocks.SNOW.getDefaultState() || currentState3 == Blocks.GRASS.getDefaultState() || currentState3 == Blocks.LARGE_FERN.getDefaultState() || currentState3 == Blocks.FERN.getDefaultState())
                         world.setBlockState(poscheck3, state);
-                    if (currentState4 == Blocks.AIR.getDefaultState() || currentState4 == Blocks.GRASS.getDefaultState() || currentState4 == Blocks.LARGE_FERN.getDefaultState() || currentState4 == Blocks.FERN.getDefaultState())
+                    if (currentState4 == Blocks.AIR.getDefaultState() || currentState4 == Blocks.SNOW.getDefaultState() || currentState4 == Blocks.GRASS.getDefaultState() || currentState4 == Blocks.LARGE_FERN.getDefaultState() || currentState4 == Blocks.FERN.getDefaultState())
                         world.setBlockState(poscheck4, state);
                 }
             }
@@ -176,8 +176,8 @@ public class FrostfallSwordItem extends SwordItem {
                                 double zpos = le.getZ() -2;
 
 
-                                for (int i = 4; i > 0; i--) {
-                                    for (int j = 4; j > 0; j--) {
+                                for (int i = 3; i > 0; i--) {
+                                    for (int j = 3; j > 0; j--) {
                                         BlockPos poscheck = new BlockPos(xpos+i, ypos, zpos+j);
                                         BlockPos poscheck2 = new BlockPos(xpos+i, ypos + 1, zpos+j);
                                         BlockPos poscheck3 = new BlockPos(xpos+i, ypos + 2, zpos+j);
@@ -188,13 +188,13 @@ public class FrostfallSwordItem extends SwordItem {
                                         BlockState currentState3 = world.getBlockState(poscheck3);
                                         BlockState currentState4 = world.getBlockState(poscheck4);
                                         BlockState state = Blocks.AIR.getDefaultState();
-                                        if (currentState == Blocks.ICE.getDefaultState())
+                                        if (currentState == Blocks.ICE.getDefaultState() || currentState == Blocks.WATER.getDefaultState())
                                             world.setBlockState(poscheck, state);
-                                        if (currentState2 == Blocks.ICE.getDefaultState())
+                                        if (currentState2 == Blocks.ICE.getDefaultState() || currentState2 == Blocks.WATER.getDefaultState())
                                             world.setBlockState(poscheck2, state);
-                                        if (currentState3 == Blocks.ICE.getDefaultState())
+                                        if (currentState3 == Blocks.ICE.getDefaultState() || currentState3 == Blocks.WATER.getDefaultState())
                                             world.setBlockState(poscheck3, state);
-                                        if (currentState4 == Blocks.ICE.getDefaultState())
+                                        if (currentState4 == Blocks.ICE.getDefaultState() || currentState4 == Blocks.WATER.getDefaultState())
                                             world.setBlockState(poscheck4, state);
                                     }
                                 }
@@ -209,13 +209,13 @@ public class FrostfallSwordItem extends SwordItem {
 
             if (player_shatter_timer == 1) {
                 world.playSoundFromEntity(null, player, SoundRegistry.ELEMENTAL_BOW_ICE_SHOOT_IMPACT_02.get(), SoundCategory.PLAYERS, 0.6f, 3f);
-                double xpos = lastX -4;
+                double xpos = lastX -2;
                 double ypos = lastY;
-                double zpos = lastZ -4;
+                double zpos = lastZ -2;
 
 
-                for (int i = 8; i > 0; i--) {
-                    for (int j = 8; j > 0; j--) {
+                for (int i = 3; i > 0; i--) {
+                    for (int j = 3; j > 0; j--) {
                         BlockPos poscheck = new BlockPos(xpos+i, ypos, zpos+j);
                         BlockPos poscheck2 = new BlockPos(xpos+i, ypos + 1, zpos+j);
                         BlockPos poscheck3 = new BlockPos(xpos+i, ypos + 2, zpos+j);
@@ -226,13 +226,13 @@ public class FrostfallSwordItem extends SwordItem {
                         BlockState currentState3 = world.getBlockState(poscheck3);
                         BlockState currentState4 = world.getBlockState(poscheck4);
                         BlockState state = Blocks.AIR.getDefaultState();
-                        if (currentState == Blocks.ICE.getDefaultState())
+                        if (currentState == Blocks.ICE.getDefaultState() || currentState == Blocks.WATER.getDefaultState())
                             world.setBlockState(poscheck, state);
-                        if (currentState2 == Blocks.ICE.getDefaultState())
+                        if (currentState2 == Blocks.ICE.getDefaultState() || currentState2 == Blocks.WATER.getDefaultState())
                             world.setBlockState(poscheck2, state);
-                        if (currentState3 == Blocks.ICE.getDefaultState())
+                        if (currentState3 == Blocks.ICE.getDefaultState() || currentState3 == Blocks.WATER.getDefaultState())
                             world.setBlockState(poscheck3, state);
-                        if (currentState4 == Blocks.ICE.getDefaultState())
+                        if (currentState4 == Blocks.ICE.getDefaultState() || currentState4 == Blocks.WATER.getDefaultState())
                             world.setBlockState(poscheck4, state);
                     }
                 }
