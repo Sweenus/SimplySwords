@@ -33,7 +33,3 @@ bin/
 run/
 
 # Licensed files - not for redistribution
-
-*.ogg
-sounds/
-/common/src/main/resources/assets/simplyswords/sounds/
