@@ -4,6 +4,7 @@ package net.sweenus.simplyswords.item.custom;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffectInstance;
@@ -13,6 +14,7 @@ import net.minecraft.entity.projectile.FireballEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.SwordItem;
 import net.minecraft.item.ToolMaterial;
+import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
@@ -29,6 +31,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.explosion.Explosion;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
 import net.sweenus.simplyswords.registry.SoundRegistry;
+import net.sweenus.simplyswords.util.HelperMethods;
 
 import java.util.List;
 
@@ -36,6 +39,8 @@ public class EmberIreSwordItem extends SwordItem {
     public EmberIreSwordItem(ToolMaterial toolMaterial, int attackDamage, float attackSpeed, Settings settings) {
         super(toolMaterial, attackDamage, attackSpeed, settings);
     }
+
+    private static int stepMod = 0;
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
@@ -120,6 +125,18 @@ public class EmberIreSwordItem extends SwordItem {
         }
         return super.use(world,user,hand);
     }
+
+    @Override
+    public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
+
+        if (stepMod > 0)
+            stepMod --;
+        if (stepMod <= 0)
+            stepMod = 7;
+        HelperMethods.createFootfalls(entity, stack, world, stepMod, ParticleTypes.FALLING_LAVA, ParticleTypes.LAVA, ParticleTypes.LARGE_SMOKE, true);
+
+        super.inventoryTick(stack, world, entity, slot, selected);
+}
 
     @Override
     public void appendTooltip(ItemStack itemStack, World world, List<Text> tooltip, TooltipContext tooltipContext) {

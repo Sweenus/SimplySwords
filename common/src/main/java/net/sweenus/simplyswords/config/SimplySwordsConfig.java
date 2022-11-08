@@ -169,6 +169,8 @@ public class SimplySwordsConfig {
         BOOLEAN_OPTIONS.put("add_weapons_to_loot_tables", true);
         BOOLEAN_OPTIONS.put("loot_can_be_found_in_villages", true);
         BOOLEAN_OPTIONS.put("enable_weapon_impact_sounds", true);
+        BOOLEAN_OPTIONS.put("enable_weapon_footfalls", true);
+        BOOLEAN_OPTIONS.put("enable_passive_particles", true);
         BOOLEAN_OPTIONS.put("compat_gobber_end_weapons_unbreakable", true);
 
 
