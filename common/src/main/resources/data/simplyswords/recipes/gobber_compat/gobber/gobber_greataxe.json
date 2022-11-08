@@ -24,8 +24,8 @@
   },
   "pattern": [
     "XXX",
-    "X#X",
-    " # "
+    "X# ",
+    "X# "
   ],
   "result": {
     "item": "simplyswords:gobber_compat/gobber/gobber_greataxe"

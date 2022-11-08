@@ -1,7 +1,7 @@
 modLoader = "javafml"
 loaderVersion = "[41,)"
 issueTrackerURL = "https://github.com/Sweenus/SimplySwords/issues"
-license = "All Rights Reserved"
+license = "Timefall Development License"
 
 [[mods]]
 modId = "simplyswords"
