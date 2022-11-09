@@ -8,7 +8,6 @@ import net.minecraft.entity.effect.StatusEffectCategory;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;

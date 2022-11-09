@@ -4,9 +4,7 @@ package net.sweenus.simplyswords.item.custom;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
@@ -14,11 +12,11 @@ import net.minecraft.entity.projectile.FireballEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.SwordItem;
 import net.minecraft.item.ToolMaterial;
+import net.minecraft.particle.DefaultParticleType;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
@@ -41,6 +39,9 @@ public class EmberIreSwordItem extends SwordItem {
     }
 
     private static int stepMod = 0;
+    private static DefaultParticleType particleWalk = ParticleTypes.FALLING_LAVA;
+    private static DefaultParticleType particleSprint = ParticleTypes.FALLING_LAVA;
+    private static DefaultParticleType particlePassive = ParticleTypes.SMOKE;
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
@@ -71,6 +72,9 @@ public class EmberIreSwordItem extends SwordItem {
                 attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, fduration, 1), attacker);
                 attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, fduration, 1), attacker);
                 world.playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_01.get(), SoundCategory.PLAYERS, 0.5f, 2f);
+                particlePassive = ParticleTypes.LAVA;
+                particleWalk = ParticleTypes.CAMPFIRE_COSY_SMOKE;
+                particleSprint = ParticleTypes.CAMPFIRE_COSY_SMOKE;
             }
         }
 
@@ -129,11 +133,20 @@ public class EmberIreSwordItem extends SwordItem {
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
 
-        if (stepMod > 0)
-            stepMod --;
-        if (stepMod <= 0)
-            stepMod = 7;
-        HelperMethods.createFootfalls(entity, stack, world, stepMod, ParticleTypes.FALLING_LAVA, ParticleTypes.LAVA, ParticleTypes.LARGE_SMOKE, true);
+        if ((entity instanceof PlayerEntity player)) {
+            if (!player.hasStatusEffect(StatusEffects.STRENGTH) && !player.isOnFire()) {
+                particlePassive = ParticleTypes.SMOKE;
+                particleWalk = ParticleTypes.FALLING_LAVA;
+                particleSprint = ParticleTypes.FALLING_LAVA;
+            }
+        }
+
+
+                if (stepMod > 0)
+                    stepMod--;
+                if (stepMod <= 0)
+                    stepMod = 7;
+                HelperMethods.createFootfalls(entity, stack, world, stepMod, particleWalk, particleSprint, particlePassive, true);
 
         super.inventoryTick(stack, world, entity, slot, selected);
 }

@@ -2,11 +2,13 @@ package net.sweenus.simplyswords.item.custom;
 
 
 import net.minecraft.client.item.TooltipContext;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.SwordItem;
 import net.minecraft.item.ToolMaterial;
+import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.text.Text;
@@ -15,6 +17,7 @@ import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
+import net.sweenus.simplyswords.util.HelperMethods;
 
 import java.util.List;
 
@@ -22,6 +25,7 @@ public class StormSwordItem extends SwordItem {
     public StormSwordItem(ToolMaterial toolMaterial, int attackDamage, float attackSpeed, Settings settings) {
         super(toolMaterial, attackDamage, attackSpeed, settings);
     }
+    private static int stepMod = 0;
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
@@ -52,6 +56,18 @@ public class StormSwordItem extends SwordItem {
 
         return super.postHit(stack, target, attacker);
 
+    }
+
+    @Override
+    public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
+
+        if (stepMod > 0)
+            stepMod --;
+        if (stepMod <= 0)
+            stepMod = 7;
+        HelperMethods.createFootfalls(entity, stack, world, stepMod, ParticleTypes.FIREWORK, ParticleTypes.FIREWORK, ParticleTypes.ELECTRIC_SPARK, false);
+
+        super.inventoryTick(stack, world, entity, slot, selected);
     }
 
     @Override

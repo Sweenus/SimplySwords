@@ -7,7 +7,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileUtil;
 import net.minecraft.item.ItemStack;
 import net.minecraft.particle.DefaultParticleType;
-import net.minecraft.particle.ParticleTypes;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
@@ -81,7 +80,7 @@ public class HelperMethods {
             }
             if (player.getEquippedStack(EquipmentSlot.MAINHAND) == stack && passiveParticles && SimplySwordsConfig.getBooleanValue("enable_passive_particles")) {
                 float randomy = (float) (Math.random());
-                if (stepMod == 1 || stepMod == 3 || stepMod == 5) {
+                if (stepMod == 1) {
                     world.addParticle(passiveParticle, player.getX() - player.getHandPosOffset(stack.getItem()).getX(),
                             player.getY() + player.getHandPosOffset(stack.getItem()).getY() + 0.4 + randomy,
                             player.getZ() - player.getHandPosOffset(stack.getItem()).getZ(),
@@ -91,7 +90,7 @@ public class HelperMethods {
                             player.getZ() - player.getHandPosOffset(stack.getItem()).getZ() - 0.1,
                             0, 0.0, 0);
                 }
-                else {
+                else if (stepMod == 4) {
                     world.addParticle(passiveParticle, player.getX() + player.getHandPosOffset(stack.getItem()).getX(),
                             player.getY() + player.getHandPosOffset(stack.getItem()).getY() + 0.4 + randomy,
                             player.getZ() + player.getHandPosOffset(stack.getItem()).getZ(),

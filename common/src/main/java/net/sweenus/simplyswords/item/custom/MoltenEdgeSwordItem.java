@@ -1,19 +1,18 @@
 package net.sweenus.simplyswords.item.custom;
 
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.SwordItem;
 import net.minecraft.item.ToolMaterial;
+import net.minecraft.particle.DefaultParticleType;
+import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
@@ -21,13 +20,11 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
-import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
+import net.sweenus.simplyswords.util.HelperMethods;
 
 import java.util.List;
 
@@ -35,6 +32,10 @@ public class MoltenEdgeSwordItem extends SwordItem {
     public MoltenEdgeSwordItem(ToolMaterial toolMaterial, int attackDamage, float attackSpeed, Settings settings) {
         super(toolMaterial, attackDamage, attackSpeed, settings);
     }
+    private static int stepMod = 0;
+    private static DefaultParticleType particleWalk = ParticleTypes.FALLING_LAVA;
+    private static DefaultParticleType particleSprint = ParticleTypes.FALLING_LAVA;
+    private static DefaultParticleType particlePassive = ParticleTypes.SMOKE;
 
     private final int abilityCooldown = (int) SimplySwordsConfig.getFloatValue("moltenroar_cooldown");
     int radius = (int) (SimplySwordsConfig.getFloatValue("moltenroar_radius"));
@@ -105,6 +106,9 @@ public class MoltenEdgeSwordItem extends SwordItem {
             user.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, roar_timer_max, amp), user);
             user.addStatusEffect(new StatusEffectInstance(StatusEffects.ABSORPTION, roar_timer_max, amp), user);
             user.getItemCooldownManager().set(this, abilityCooldown);
+            particlePassive = ParticleTypes.LARGE_SMOKE;
+            particleWalk = ParticleTypes.LAVA;
+            particleSprint = ParticleTypes.LAVA;
 
         }
         return super.use(world, user, hand);
@@ -115,21 +119,42 @@ public class MoltenEdgeSwordItem extends SwordItem {
         if (!world.isClient && (entity instanceof PlayerEntity player)) {
             if (player.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
                 int amp = 0;
-                if (player.age % 40 == 0 && player.getHealth() < player.getMaxHealth()) {
-                    if (player.getHealth() < player.getMaxHealth() / 2 && player.getHealth() > player.getMaxHealth() / 4) {
+                if (player.age % 40 == 0) {
+                    if (player.getHealth() < player.getMaxHealth() / 2 && player.getHealth() > player.getMaxHealth() / 3) {
                         amp = 1;
+                        particlePassive = ParticleTypes.LARGE_SMOKE;
+                        particleWalk = ParticleTypes.FALLING_LAVA;
+                        particleSprint = ParticleTypes.FALLING_LAVA;
                     }
-                    if (player.getHealth() < player.getMaxHealth() / 4 && player.getHealth() > 2) {
+                    else if (player.getHealth() < player.getMaxHealth() / 3 && player.getHealth() > 2) {
                         amp = 2;
+                        particlePassive = ParticleTypes.LARGE_SMOKE;
+                        particleWalk = ParticleTypes.FALLING_LAVA;
+                        particleSprint = ParticleTypes.FALLING_LAVA;
                     }
-                    if (player.getHealth() <= 2) {
+                    else if (player.getHealth() <= 2) {
                         amp = 3;
+                        particlePassive = ParticleTypes.LARGE_SMOKE;
+                        particleWalk = ParticleTypes.LAVA;
+                        particleSprint = ParticleTypes.LAVA;
+                    }
+                    else {
+                        particlePassive = ParticleTypes.SMOKE;
+                        particleWalk = ParticleTypes.FALLING_LAVA;
+                        particleSprint = ParticleTypes.FALLING_LAVA;
                     }
                     player.addStatusEffect(new StatusEffectInstance(StatusEffects.STRENGTH, 40, amp), player);
                     player.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, 40, amp -1), player);
                 }
             }
         }
+        if (stepMod > 0)
+            stepMod --;
+        if (stepMod <= 0)
+            stepMod = 7;
+        HelperMethods.createFootfalls(entity, stack, world, stepMod, particleWalk, particleSprint, particlePassive, true);
+
+        super.inventoryTick(stack, world, entity, slot, selected);
     }
 
     @Override

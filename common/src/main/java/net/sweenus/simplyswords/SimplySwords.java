@@ -4,7 +4,6 @@ import com.google.gson.JsonObject;
 import dev.architectury.event.events.client.ClientPlayerEvent;
 import dev.architectury.registry.CreativeTabRegistry;
 import net.fabricmc.loader.api.FabricLoader;
-import net.fabricmc.loader.api.Version;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;

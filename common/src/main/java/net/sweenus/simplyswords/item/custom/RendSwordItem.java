@@ -139,7 +139,7 @@ public class RendSwordItem extends SwordItem {
             stepMod --;
         if (stepMod <= 0)
             stepMod = 7;
-        HelperMethods.createFootfalls(entity, stack, world, stepMod, ParticleTypes.SOUL, ParticleTypes.SCULK_SOUL, ParticleTypes.FALLING_OBSIDIAN_TEAR, true);
+        HelperMethods.createFootfalls(entity, stack, world, stepMod, ParticleTypes.SOUL, ParticleTypes.SCULK_SOUL, ParticleTypes.WARPED_SPORE, true);
 
         super.inventoryTick(stack, world, entity, slot, selected);
     }
