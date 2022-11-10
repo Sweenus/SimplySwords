@@ -15,7 +15,9 @@ import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
+import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
@@ -129,7 +131,7 @@ public class RendSwordItem extends SwordItem {
 
     @Override
     public Text getName(ItemStack stack) {
-        return Text.translatable(this.getTranslationKey(stack)).formatted(Formatting.GOLD, Formatting.BOLD, Formatting.UNDERLINE);
+        return new TranslatableText(this.getTranslationKey(stack)).formatted(Formatting.GOLD, Formatting.BOLD, Formatting.UNDERLINE);
     }
 
     @Override
@@ -139,7 +141,7 @@ public class RendSwordItem extends SwordItem {
             stepMod --;
         if (stepMod <= 0)
             stepMod = 7;
-        HelperMethods.createFootfalls(entity, stack, world, stepMod, ParticleTypes.SOUL, ParticleTypes.SCULK_SOUL, ParticleTypes.WARPED_SPORE, true);
+        HelperMethods.createFootfalls(entity, stack, world, stepMod, ParticleTypes.SOUL, ParticleTypes.SOUL, ParticleTypes.WARPED_SPORE, true);
 
         super.inventoryTick(stack, world, entity, slot, selected);
     }
@@ -149,15 +151,15 @@ public class RendSwordItem extends SwordItem {
     public void appendTooltip(ItemStack itemStack, World world, List<Text> tooltip, TooltipContext tooltipContext) {
 
         //1.19
-        tooltip.add(Text.literal(""));
-        tooltip.add(Text.translatable("item.simplyswords.rendsworditem.tooltip1").formatted(Formatting.GOLD, Formatting.BOLD));
-        tooltip.add(Text.translatable("item.simplyswords.rendsworditem.tooltip2"));
-        tooltip.add(Text.translatable("item.simplyswords.rendsworditem.tooltip3"));
-        tooltip.add(Text.literal(""));
-        tooltip.add(Text.translatable("item.simplyswords.onrightclick").formatted(Formatting.BOLD, Formatting.GREEN));
-        tooltip.add(Text.translatable("item.simplyswords.rendsworditem.tooltip4"));
-        tooltip.add(Text.translatable("item.simplyswords.rendsworditem.tooltip5"));
-        tooltip.add(Text.translatable("item.simplyswords.rendsworditem.tooltip6"));
+        tooltip.add(new LiteralText(""));
+        tooltip.add(new TranslatableText("item.simplyswords.rendsworditem.tooltip1").formatted(Formatting.GOLD, Formatting.BOLD));
+        tooltip.add(new TranslatableText("item.simplyswords.rendsworditem.tooltip2"));
+        tooltip.add(new TranslatableText("item.simplyswords.rendsworditem.tooltip3"));
+        tooltip.add(new LiteralText(""));
+        tooltip.add(new TranslatableText("item.simplyswords.onrightclick").formatted(Formatting.BOLD, Formatting.GREEN));
+        tooltip.add(new TranslatableText("item.simplyswords.rendsworditem.tooltip4"));
+        tooltip.add(new TranslatableText("item.simplyswords.rendsworditem.tooltip5"));
+        tooltip.add(new TranslatableText("item.simplyswords.rendsworditem.tooltip6"));
 
         /*
 

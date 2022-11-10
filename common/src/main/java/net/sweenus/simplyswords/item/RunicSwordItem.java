@@ -20,7 +20,9 @@ import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
+import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.ClickType;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
@@ -189,112 +191,112 @@ public class RunicSwordItem extends SwordItem {
 
         if(itemStack.getOrCreateNbt().getInt("runic_power") == 0) {
 
-            tooltip.add(Text.literal(""));
-            tooltip.add(Text.translatable("item.simplyswords.unidentifiedsworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
-            tooltip.add(Text.translatable("item.simplyswords.unidentifiedsworditem.tooltip2"));
+            tooltip.add(new LiteralText(""));
+            tooltip.add(new TranslatableText("item.simplyswords.unidentifiedsworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
+            tooltip.add(new TranslatableText("item.simplyswords.unidentifiedsworditem.tooltip2"));
 
         }
         if(itemStack.getOrCreateNbt().getInt("runic_power") <= 10 && itemStack.getOrCreateNbt().getInt("runic_power") >= 1) {
 
-            tooltip.add(Text.literal(""));
-            tooltip.add(Text.translatable("item.simplyswords.freezesworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
-            tooltip.add(Text.translatable("item.simplyswords.freezesworditem.tooltip2"));
+            tooltip.add(new LiteralText(""));
+            tooltip.add(new TranslatableText("item.simplyswords.freezesworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
+            tooltip.add(new TranslatableText("item.simplyswords.freezesworditem.tooltip2"));
 
         }
         if(itemStack.getOrCreateNbt().getInt("runic_power") > 10 && itemStack.getOrCreateNbt().getInt("runic_power") <= 20) {
 
-            tooltip.add(Text.literal(""));
-            tooltip.add(Text.translatable("item.simplyswords.wildfiresworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
-            tooltip.add(Text.translatable("item.simplyswords.wildfiresworditem.tooltip2"));
-            tooltip.add(Text.translatable("item.simplyswords.wildfiresworditem.tooltip3"));
+            tooltip.add(new LiteralText(""));
+            tooltip.add(new TranslatableText("item.simplyswords.wildfiresworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
+            tooltip.add(new TranslatableText("item.simplyswords.wildfiresworditem.tooltip2"));
+            tooltip.add(new TranslatableText("item.simplyswords.wildfiresworditem.tooltip3"));
 
         }
         if(itemStack.getOrCreateNbt().getInt("runic_power") > 20 && itemStack.getOrCreateNbt().getInt("runic_power") <= 30) {
 
-            tooltip.add(Text.literal(""));
-            tooltip.add(Text.translatable("item.simplyswords.slownesssworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
-            tooltip.add(Text.translatable("item.simplyswords.slownesssworditem.tooltip2"));
-            tooltip.add(Text.translatable("item.simplyswords.slownesssworditem.tooltip3"));
+            tooltip.add(new LiteralText(""));
+            tooltip.add(new TranslatableText("item.simplyswords.slownesssworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
+            tooltip.add(new TranslatableText("item.simplyswords.slownesssworditem.tooltip2"));
+            tooltip.add(new TranslatableText("item.simplyswords.slownesssworditem.tooltip3"));
 
         }
         if(itemStack.getOrCreateNbt().getInt("runic_power") > 30 && itemStack.getOrCreateNbt().getInt("runic_power") <= 40) {
 
-            tooltip.add(Text.literal(""));
-            tooltip.add(Text.translatable("item.simplyswords.speedsworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
-            tooltip.add(Text.translatable("item.simplyswords.speedsworditem.tooltip2"));
-            tooltip.add(Text.translatable("item.simplyswords.speedsworditem.tooltip3"));
+            tooltip.add(new LiteralText(""));
+            tooltip.add(new TranslatableText("item.simplyswords.speedsworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
+            tooltip.add(new TranslatableText("item.simplyswords.speedsworditem.tooltip2"));
+            tooltip.add(new TranslatableText("item.simplyswords.speedsworditem.tooltip3"));
 
         }
         if(itemStack.getOrCreateNbt().getInt("runic_power") > 40 && itemStack.getOrCreateNbt().getInt("runic_power") <= 50) {
 
-            tooltip.add(Text.literal(""));
-            tooltip.add(Text.translatable("item.simplyswords.levitationsworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
-            tooltip.add(Text.translatable("item.simplyswords.levitationsworditem.tooltip2"));
-            tooltip.add(Text.translatable("item.simplyswords.levitationsworditem.tooltip3"));
+            tooltip.add(new LiteralText(""));
+            tooltip.add(new TranslatableText("item.simplyswords.levitationsworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
+            tooltip.add(new TranslatableText("item.simplyswords.levitationsworditem.tooltip2"));
+            tooltip.add(new TranslatableText("item.simplyswords.levitationsworditem.tooltip3"));
 
         }
         if(itemStack.getOrCreateNbt().getInt("runic_power") > 50 && itemStack.getOrCreateNbt().getInt("runic_power") <= 60) {
 
-            tooltip.add(Text.literal(""));
-            tooltip.add(Text.translatable("item.simplyswords.zephyrsworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
-            tooltip.add(Text.translatable("item.simplyswords.zephyrsworditem.tooltip2"));
-            tooltip.add(Text.translatable("item.simplyswords.zephyrsworditem.tooltip3"));
+            tooltip.add(new LiteralText(""));
+            tooltip.add(new TranslatableText("item.simplyswords.zephyrsworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
+            tooltip.add(new TranslatableText("item.simplyswords.zephyrsworditem.tooltip2"));
+            tooltip.add(new TranslatableText("item.simplyswords.zephyrsworditem.tooltip3"));
 
         }
         if(itemStack.getOrCreateNbt().getInt("runic_power") > 60 && itemStack.getOrCreateNbt().getInt("runic_power") <= 70) {
 
-            tooltip.add(Text.literal(""));
-            tooltip.add(Text.translatable("item.simplyswords.shieldingsworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
-            tooltip.add(Text.translatable("item.simplyswords.shieldingsworditem.tooltip2"));
-            tooltip.add(Text.translatable("item.simplyswords.shieldingsworditem.tooltip3"));
+            tooltip.add(new LiteralText(""));
+            tooltip.add(new TranslatableText("item.simplyswords.shieldingsworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
+            tooltip.add(new TranslatableText("item.simplyswords.shieldingsworditem.tooltip2"));
+            tooltip.add(new TranslatableText("item.simplyswords.shieldingsworditem.tooltip3"));
 
         }
         if(itemStack.getOrCreateNbt().getInt("runic_power") > 70 && itemStack.getOrCreateNbt().getInt("runic_power") <= 75) {
 
-            tooltip.add(Text.literal(""));
-            tooltip.add(Text.translatable("item.simplyswords.stoneskinsworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
-            tooltip.add(Text.translatable("item.simplyswords.stoneskinsworditem.tooltip2"));
-            tooltip.add(Text.translatable("item.simplyswords.stoneskinsworditem.tooltip3"));
+            tooltip.add(new LiteralText(""));
+            tooltip.add(new TranslatableText("item.simplyswords.stoneskinsworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
+            tooltip.add(new TranslatableText("item.simplyswords.stoneskinsworditem.tooltip2"));
+            tooltip.add(new TranslatableText("item.simplyswords.stoneskinsworditem.tooltip3"));
 
         }
         if(itemStack.getOrCreateNbt().getInt("runic_power") > 75 && itemStack.getOrCreateNbt().getInt("runic_power") <= 80) {
 
-            tooltip.add(Text.literal(""));
-            tooltip.add(Text.translatable("item.simplyswords.frostwardsworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
-            tooltip.add(Text.translatable("item.simplyswords.frostwardsworditem.tooltip2"));
-            tooltip.add(Text.translatable("item.simplyswords.frostwardsworditem.tooltip3"));
+            tooltip.add(new LiteralText(""));
+            tooltip.add(new TranslatableText("item.simplyswords.frostwardsworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
+            tooltip.add(new TranslatableText("item.simplyswords.frostwardsworditem.tooltip2"));
+            tooltip.add(new TranslatableText("item.simplyswords.frostwardsworditem.tooltip3"));
 
         }
         if(itemStack.getOrCreateNbt().getInt("runic_power") > 80 && itemStack.getOrCreateNbt().getInt("runic_power") <= 85) {
 
-            tooltip.add(Text.literal(""));
-            tooltip.add(Text.translatable("item.simplyswords.trailblazesworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
-            tooltip.add(Text.translatable("item.simplyswords.trailblazesworditem.tooltip2"));
-            tooltip.add(Text.translatable("item.simplyswords.trailblazesworditem.tooltip3"));
+            tooltip.add(new LiteralText(""));
+            tooltip.add(new TranslatableText("item.simplyswords.trailblazesworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
+            tooltip.add(new TranslatableText("item.simplyswords.trailblazesworditem.tooltip2"));
+            tooltip.add(new TranslatableText("item.simplyswords.trailblazesworditem.tooltip3"));
 
         }
         if(itemStack.getOrCreateNbt().getInt("runic_power") > 85 && itemStack.getOrCreateNbt().getInt("runic_power") <= 90) {
 
-            tooltip.add(Text.literal(""));
-            tooltip.add(Text.translatable("item.simplyswords.activedefencesworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
-            tooltip.add(Text.translatable("item.simplyswords.activedefencesworditem.tooltip2"));
-            tooltip.add(Text.translatable("item.simplyswords.activedefencesworditem.tooltip3"));
+            tooltip.add(new LiteralText(""));
+            tooltip.add(new TranslatableText("item.simplyswords.activedefencesworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
+            tooltip.add(new TranslatableText("item.simplyswords.activedefencesworditem.tooltip2"));
+            tooltip.add(new TranslatableText("item.simplyswords.activedefencesworditem.tooltip3"));
 
         }
         if(itemStack.getOrCreateNbt().getInt("runic_power") > 90 && itemStack.getOrCreateNbt().getInt("runic_power") <= 95) {
 
-            tooltip.add(Text.literal(""));
-            tooltip.add(Text.translatable("item.simplyswords.weakensworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
-            tooltip.add(Text.translatable("item.simplyswords.weakensworditem.tooltip2"));
-            tooltip.add(Text.translatable("item.simplyswords.weakensworditem.tooltip3"));
+            tooltip.add(new LiteralText(""));
+            tooltip.add(new TranslatableText("item.simplyswords.weakensworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
+            tooltip.add(new TranslatableText("item.simplyswords.weakensworditem.tooltip2"));
+            tooltip.add(new TranslatableText("item.simplyswords.weakensworditem.tooltip3"));
 
         }
         if(itemStack.getOrCreateNbt().getInt("runic_power") > 95 && itemStack.getOrCreateNbt().getInt("runic_power") <= 100) {
 
-            tooltip.add(Text.literal(""));
-            tooltip.add(Text.translatable("item.simplyswords.unstablesworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
-            tooltip.add(Text.translatable("item.simplyswords.unstablesworditem.tooltip2"));
-            tooltip.add(Text.translatable("item.simplyswords.unstablesworditem.tooltip3"));
+            tooltip.add(new LiteralText(""));
+            tooltip.add(new TranslatableText("item.simplyswords.unstablesworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
+            tooltip.add(new TranslatableText("item.simplyswords.unstablesworditem.tooltip2"));
+            tooltip.add(new TranslatableText("item.simplyswords.unstablesworditem.tooltip3"));
 
         }
 

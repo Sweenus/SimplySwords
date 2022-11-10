@@ -9,6 +9,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.SwordItem;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
@@ -39,8 +40,8 @@ public class PoisonSwordItem extends SwordItem {
 
         //1.19
 
-        tooltip.add(Text.translatable("item.simplyswords.freezesworditem.tooltip1").formatted(Formatting.GOLD));
-        tooltip.add(Text.translatable("item.simplyswords.freezesworditem.tooltip2"));
+        tooltip.add(new TranslatableText("item.simplyswords.freezesworditem.tooltip1").formatted(Formatting.GOLD));
+        tooltip.add(new TranslatableText("item.simplyswords.freezesworditem.tooltip2"));
 
         /*
 

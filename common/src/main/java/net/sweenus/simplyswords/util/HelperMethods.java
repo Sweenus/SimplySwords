@@ -25,7 +25,7 @@ public class HelperMethods {
         Vec3d rayCastEnd = rayCastOrigin.add(userView);
         Box searchBox = user.getBoundingBox().expand(range, range, range);
         EntityHitResult hitResult = ProjectileUtil.raycast(user, rayCastOrigin, rayCastEnd, searchBox,
-                (target) -> !target.isSpectator() && target.canHit() && target instanceof LivingEntity, range * range);
+                (target) -> !target.isSpectator() && target instanceof LivingEntity, range * range);
         if (hitResult != null) {
             return hitResult.getEntity();
         }

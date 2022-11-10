@@ -14,7 +14,9 @@ import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
+import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
@@ -147,7 +149,7 @@ public class SoulPyreSwordItem extends SwordItem {
 
     @Override
     public Text getName(ItemStack stack) {
-        return Text.translatable(this.getTranslationKey(stack)).formatted(Formatting.GOLD, Formatting.BOLD, Formatting.UNDERLINE);
+        return new TranslatableText(this.getTranslationKey(stack)).formatted(Formatting.GOLD, Formatting.BOLD, Formatting.UNDERLINE);
     }
 
     @Override
@@ -155,20 +157,20 @@ public class SoulPyreSwordItem extends SwordItem {
 
         //1.19
 
-        tooltip.add(Text.literal(""));
-        tooltip.add(Text.translatable("item.simplyswords.soulpyresworditem.tooltip1").formatted(Formatting.GOLD, Formatting.BOLD));
-        tooltip.add(Text.literal(""));
-        tooltip.add(Text.translatable("item.simplyswords.onrightclick").formatted(Formatting.BOLD, Formatting.GREEN));
-        tooltip.add(Text.translatable("item.simplyswords.soulpyresworditem.tooltip2"));
-        tooltip.add(Text.translatable("item.simplyswords.soulpyresworditem.tooltip3"));
-        tooltip.add(Text.translatable("item.simplyswords.soulpyresworditem.tooltip4"));
-        tooltip.add(Text.translatable("item.simplyswords.soulpyresworditem.tooltip5"));
-        tooltip.add(Text.translatable("item.simplyswords.soulpyresworditem.tooltip6"));
-        tooltip.add(Text.literal(""));
-        tooltip.add(Text.translatable("item.simplyswords.soulpyresworditem.tooltip7", relocationDuration / 20));
-        tooltip.add(Text.translatable("item.simplyswords.soulpyresworditem.tooltip8"));
-        tooltip.add(Text.translatable("item.simplyswords.soulpyresworditem.tooltip9"));
-        tooltip.add(Text.literal(""));
+        tooltip.add(new LiteralText(""));
+        tooltip.add(new TranslatableText("item.simplyswords.soulpyresworditem.tooltip1").formatted(Formatting.GOLD, Formatting.BOLD));
+        tooltip.add(new LiteralText(""));
+        tooltip.add(new TranslatableText("item.simplyswords.onrightclick").formatted(Formatting.BOLD, Formatting.GREEN));
+        tooltip.add(new TranslatableText("item.simplyswords.soulpyresworditem.tooltip2"));
+        tooltip.add(new TranslatableText("item.simplyswords.soulpyresworditem.tooltip3"));
+        tooltip.add(new TranslatableText("item.simplyswords.soulpyresworditem.tooltip4"));
+        tooltip.add(new TranslatableText("item.simplyswords.soulpyresworditem.tooltip5"));
+        tooltip.add(new TranslatableText("item.simplyswords.soulpyresworditem.tooltip6"));
+        tooltip.add(new LiteralText(""));
+        tooltip.add(new TranslatableText("item.simplyswords.soulpyresworditem.tooltip7", relocationDuration / 20));
+        tooltip.add(new TranslatableText("item.simplyswords.soulpyresworditem.tooltip8"));
+        tooltip.add(new TranslatableText("item.simplyswords.soulpyresworditem.tooltip9"));
+        tooltip.add(new LiteralText(""));
 
         /*
         //1.18.2
