@@ -53,13 +53,13 @@ public class SimplySwords {
             else {
                 isConfigOutdated = true;
                 System.out.println("SimplySwords: It looks like you've updated from a previous version. Please regenerate the Simply Swords configs to get the latest features.");
-                System.out.println(version.substring(0, 4));
+                //System.out.println(version.substring(0, 4));
             }
         }
         else {
             isConfigOutdated = true;
             System.out.println("SimplySwords: It looks like you've updated from a previous version. Please regenerate the Simply Swords configs to get the latest features.");
-            System.out.println(version.substring(0, 4));
+            //System.out.println(version.substring(0, 4));
         }
 
         SimplySwordsConfig.generateConfigs(json == null || !json.has("regen_simplyswords_config_file") || json.get("regen_simplyswords_config_file").getAsBoolean());

@@ -166,6 +166,7 @@ public class SimplySwordsConfig {
         GENERAL_OPTIONS.put("unique_loot_table_weight", 0.004f);
 
 
+        BOOLEAN_OPTIONS.put("display_config_outdated_warning", true);
         BOOLEAN_OPTIONS.put("add_weapons_to_loot_tables", true);
         BOOLEAN_OPTIONS.put("loot_can_be_found_in_villages", true);
         BOOLEAN_OPTIONS.put("enable_weapon_impact_sounds", true);
