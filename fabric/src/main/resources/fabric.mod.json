@@ -16,6 +16,9 @@
   "icon": "assets/simplyswords/SimplySwordsLogoFinal2.gif",
   "environment": "*",
   "entrypoints": {
+    "client": [
+      "net.sweenus.simplyswords.fabric.client.SimplySwordsClientFabric"
+    ],
     "main": [
       "net.sweenus.simplyswords.fabric.SimplySwordsFabric"
     ]

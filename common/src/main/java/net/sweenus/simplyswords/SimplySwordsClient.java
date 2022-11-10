@@ -10,7 +10,7 @@ public class SimplySwordsClient {
 
     public static void init() {
 
-        //ClientPlayerEvent.CLIENT_PLAYER_JOIN.register(new EventGameStart());
+        ClientPlayerEvent.CLIENT_PLAYER_JOIN.register(new EventGameStart());
 
     }
 }

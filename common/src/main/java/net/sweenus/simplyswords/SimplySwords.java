@@ -70,7 +70,7 @@ public class SimplySwords {
         SoundRegistry.SOUND.register();
         EffectRegistry.EFFECT.register();
         ModLootTableModifiers.init();
-        ClientPlayerEvent.CLIENT_PLAYER_JOIN.register(new EventGameStart());
+        //ClientPlayerEvent.CLIENT_PLAYER_JOIN.register(new EventGameStart());
         
         System.out.println(SimplySwordsExpectPlatform.getConfigDirectory().toAbsolutePath().normalize().toString());
 
