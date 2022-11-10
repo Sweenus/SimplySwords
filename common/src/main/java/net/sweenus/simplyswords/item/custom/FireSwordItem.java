@@ -14,7 +14,9 @@ import net.minecraft.item.ToolMaterial;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
+import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -78,25 +80,25 @@ public class FireSwordItem extends SwordItem {
 
     @Override
     public Text getName(ItemStack stack) {
-        return Text.translatable(this.getTranslationKey(stack)).formatted(Formatting.GOLD, Formatting.BOLD, Formatting.UNDERLINE);
+        return new TranslatableText(this.getTranslationKey(stack)).formatted(Formatting.GOLD, Formatting.BOLD, Formatting.UNDERLINE);
     }
 
     @Override
     public void appendTooltip(ItemStack itemStack, World world, List<Text> tooltip, TooltipContext tooltipContext) {
 
         //1.19
+/*
+        tooltip.add(new LiteralText(""));
+        tooltip.add(new TranslatableText("item.simplyswords.firesworditem.tooltip1").formatted(Formatting.GOLD, Formatting.BOLD));
+        tooltip.add(new TranslatableText("item.simplyswords.firesworditem.tooltip2"));
 
-        tooltip.add(Text.literal(""));
-        tooltip.add(Text.translatable("item.simplyswords.firesworditem.tooltip1").formatted(Formatting.GOLD, Formatting.BOLD));
-        tooltip.add(Text.translatable("item.simplyswords.firesworditem.tooltip2"));
-
-        /*
+        */
         //1.18.2
         tooltip.add(new LiteralText(""));
         tooltip.add(new TranslatableText("item.simplyswords.firesworditem.tooltip1").formatted(Formatting.GOLD, Formatting.BOLD));
         tooltip.add(new TranslatableText("item.simplyswords.firesworditem.tooltip2"));
 
-         */
+
     }
 
 }

@@ -16,7 +16,9 @@ import net.minecraft.particle.DefaultParticleType;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
+import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
@@ -80,7 +82,7 @@ public class EmberIreSwordItem extends SwordItem {
 
     @Override
     public Text getName(ItemStack stack) {
-        return Text.translatable(this.getTranslationKey(stack)).formatted(Formatting.GOLD, Formatting.BOLD, Formatting.UNDERLINE);
+        return new TranslatableText(this.getTranslationKey(stack)).formatted(Formatting.GOLD, Formatting.BOLD, Formatting.UNDERLINE);
     }
 
     @Override
@@ -138,16 +140,16 @@ public class EmberIreSwordItem extends SwordItem {
     public void appendTooltip(ItemStack itemStack, World world, List<Text> tooltip, TooltipContext tooltipContext) {
 
         //1.19.x
-
-        tooltip.add(Text.literal(""));
-        tooltip.add(Text.translatable("item.simplyswords.emberiresworditem.tooltip1").formatted(Formatting.GOLD, Formatting.BOLD));
-        tooltip.add(Text.translatable("item.simplyswords.emberiresworditem.tooltip2"));
-        tooltip.add(Text.translatable("item.simplyswords.emberiresworditem.tooltip3"));
-        tooltip.add(Text.literal(""));
-        tooltip.add(Text.translatable("item.simplyswords.onrightclick").formatted(Formatting.BOLD, Formatting.GREEN));
-        tooltip.add(Text.translatable("item.simplyswords.emberiresworditem.tooltip4"));
-        tooltip.add(Text.translatable("item.simplyswords.emberiresworditem.tooltip5"));
-        /*
+/*
+        tooltip.add(new LiteralText(""));
+        tooltip.add(new TranslatableText("item.simplyswords.emberiresworditem.tooltip1").formatted(Formatting.GOLD, Formatting.BOLD));
+        tooltip.add(new TranslatableText("item.simplyswords.emberiresworditem.tooltip2"));
+        tooltip.add(new TranslatableText("item.simplyswords.emberiresworditem.tooltip3"));
+        tooltip.add(new LiteralText(""));
+        tooltip.add(new TranslatableText("item.simplyswords.onrightclick").formatted(Formatting.BOLD, Formatting.GREEN));
+        tooltip.add(new TranslatableText("item.simplyswords.emberiresworditem.tooltip4"));
+        tooltip.add(new TranslatableText("item.simplyswords.emberiresworditem.tooltip5"));
+        */
 
         //1.18.2
         tooltip.add(new LiteralText(""));
@@ -159,7 +161,7 @@ public class EmberIreSwordItem extends SwordItem {
         tooltip.add(new TranslatableText("item.simplyswords.emberiresworditem.tooltip4"));
         tooltip.add(new TranslatableText("item.simplyswords.emberiresworditem.tooltip5"));
 
-         */
+
     }
 
 }
