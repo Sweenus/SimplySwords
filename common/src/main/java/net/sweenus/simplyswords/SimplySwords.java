@@ -3,6 +3,8 @@ package net.sweenus.simplyswords;
 import com.google.gson.JsonObject;
 import dev.architectury.event.events.client.ClientPlayerEvent;
 import dev.architectury.registry.CreativeTabRegistry;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
@@ -35,7 +37,7 @@ public class SimplySwords {
 
         SimplySwordsConfig.init();
 
-        String version = FabricLoader.getInstance().getModContainer(MOD_ID).get().getMetadata().getVersion().toString();
+        String version = SimplySwordsExpectPlatform.getVersion();
         String defaultConfig = String.format("""
                 {
                   "regen_simplyswords_config_file": false,
@@ -51,11 +53,13 @@ public class SimplySwords {
             else {
                 isConfigOutdated = true;
                 System.out.println("SimplySwords: It looks like you've updated from a previous version. Please regenerate the Simply Swords configs to get the latest features.");
+                System.out.println(version.substring(0, 4));
             }
         }
         else {
             isConfigOutdated = true;
             System.out.println("SimplySwords: It looks like you've updated from a previous version. Please regenerate the Simply Swords configs to get the latest features.");
+            System.out.println(version.substring(0, 4));
         }
 
         SimplySwordsConfig.generateConfigs(json == null || !json.has("regen_simplyswords_config_file") || json.get("regen_simplyswords_config_file").getAsBoolean());

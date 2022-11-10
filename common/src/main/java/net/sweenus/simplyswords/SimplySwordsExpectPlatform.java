@@ -24,4 +24,9 @@ public class SimplySwordsExpectPlatform {
         // Just throw an error, the content should get replaced at runtime.
         throw new AssertionError();
     }
+    @ExpectPlatform
+    public static String getVersion() {
+        // Just throw an error, the content should get replaced at runtime.
+        throw new AssertionError();
+    }
 }
