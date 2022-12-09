@@ -675,6 +675,12 @@ public class ItemsRegistry {
                     (int) (moltenedge_damage_modifier),
                     moltenedge_attackspeed,
                     new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+
+    public static final RegistrySupplier<LivyatanSwordItem> LIVYATAN = ITEM.register( "livyatan", () ->
+            new LivyatanSwordItem(ToolMaterials.NETHERITE,
+                    (int) (moltenedge_damage_modifier),
+                    moltenedge_attackspeed,
+                    new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
     /*
     public static final RegistrySupplier<RendSwordItem> THE_DISPATCHER = ITEM.register( "the_dispatcher", () ->
             new RendSwordItem(ToolMaterials.NETHERITE,
