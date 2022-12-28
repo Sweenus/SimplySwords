@@ -88,6 +88,7 @@
   "item.simplyswords.soulpyre": "Soul Pyre",
   "item.simplyswords.frostfall": "Frostfall",
   "item.simplyswords.molten_edge": "Molten Edge",
+  "item.simplyswords.livyatan": "Livyatan",
 
   "item.simplyswords.runic_tablet": "Runic Tablet",
 
@@ -534,6 +535,13 @@
   "item.simplyswords.moltenedgesworditem.tooltip5": "Release a powerful roar, knocking back and",
   "item.simplyswords.moltenedgesworditem.tooltip6": "igniting nearby enemies. Gain a stack of absorption",
   "item.simplyswords.moltenedgesworditem.tooltip7": "and haste for each enemy hit for %ds.",
+
+  "item.simplyswords.livyatansworditem.tooltip1": "Unique Effect: Frost Shatter",
+  "item.simplyswords.livyatansworditem.tooltip2": "Chance on hit to encase nearby enemies in",
+  "item.simplyswords.livyatansworditem.tooltip3": "ice, causing them to take no damage.",
+  "item.simplyswords.livyatansworditem.tooltip4": "After %ds the ice shatters causing %d damage.",
+  "item.simplyswords.livyatansworditem.tooltip5": "Preemptively shatter the ice encasing your",
+  "item.simplyswords.livyatansworditem.tooltip6": "enemies, dealing more damage the earlier you shatter.",
 
 
   "item.simplyswords.levitationsworditem.tooltip1": "Runic Power: Float",
