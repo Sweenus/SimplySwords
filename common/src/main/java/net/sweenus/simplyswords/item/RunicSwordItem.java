@@ -302,7 +302,7 @@ public class RunicSwordItem extends SwordItem {
 
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
-        if (entity.age % 4 == 0 && (entity instanceof PlayerEntity player)) {
+        if (entity.age % 4 == 0 && SimplySwordsConfig.getBooleanValue("enable_passive_particles") && (entity instanceof PlayerEntity player)) {
             if (player.getEquippedStack(EquipmentSlot.MAINHAND) == stack || player.getEquippedStack(EquipmentSlot.OFFHAND) == stack) {
                 float randomx = (float) (Math.random() * 6);
                 float randomz = (float) (Math.random() * 6);
