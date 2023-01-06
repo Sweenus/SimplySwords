@@ -80,6 +80,7 @@ public class ModLootTableModifiers {
                             .with(ItemEntry.builder(ItemsRegistry.RUNIC_GREATHAMMER.get()))
                             .with(ItemEntry.builder(ItemsRegistry.RUNIC_GREATAXE.get()))
                             .with(ItemEntry.builder(ItemsRegistry.RUNIC_CHAKRAM.get()))
+                            .with(ItemEntry.builder(ItemsRegistry.RUNIC_WARGLAIVE.get()))
                             .with(ItemEntry.builder(ItemsRegistry.DIAMOND_LONGSWORD.get()))
                             .with(ItemEntry.builder(ItemsRegistry.DIAMOND_TWINBLADE.get()))
                             .with(ItemEntry.builder(ItemsRegistry.DIAMOND_RAPIER.get()))

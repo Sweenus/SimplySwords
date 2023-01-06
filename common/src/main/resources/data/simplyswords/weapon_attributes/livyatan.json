@@ -16,6 +16,30 @@
         }
       },
       {
+        "hitbox": "HORIZONTAL_PLANE",
+        "damage_multiplier": 1,
+        "angle": 120,
+        "upswing": 0.5,
+        "animation": "bettercombat:one_handed_slash_horizontal_left",
+        "swing_sound": {
+          "id": "simplyswords:elemental_sword_ice_attack_01",
+          "volume": 0.5,
+          "pitch": 1.3
+        }
+      },
+      {
+        "hitbox": "VERTICAL_PLANE",
+        "damage_multiplier": 1.6,
+        "angle": 90,
+        "upswing": 0.5,
+        "animation": "bettercombat:one_handed_slam",
+        "swing_sound": {
+          "id": "simplyswords:elemental_sword_ice_attack_03",
+          "volume": 0.5,
+          "pitch": 1.2
+        }
+      },
+      {
         "hitbox": "FORWARD_BOX",
         "conditions": ["DUAL_WIELDING_SAME_CATEGORY", "MAIN_HAND_ONLY"],
         "damage_multiplier": 1.1,
@@ -36,7 +60,7 @@
         "upswing": 0.5,
         "animation": "bettercombat:dual_handed_slash_uncross",
         "swing_sound": {
-          "id": "simplyswords:elemental_sword_ice_attack_02",
+          "id": "simplyswords:elemental_sword_ice_attack_03",
           "volume": 0.5,
           "pitch": 2
         }

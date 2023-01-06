@@ -571,6 +571,11 @@ public class ItemsRegistry {
                     (int) (runic_modifier + greathammer_positive_modifier - greathammer_negative_modifier),
                     greathammer_attackspeed,
                     new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.RARE)));
+    public static final RegistrySupplier<RunicSwordItem> RUNIC_WARGLAIVE = ITEM.register( "runic_warglaive", () ->
+            new RunicSwordItem(ToolMaterials.NETHERITE,
+                    (int) (runic_modifier + warglaive_positive_modifier - warglaive_negative_modifier),
+                    warglaive_attackspeed,
+                    new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.RARE)));
 
     public static final RegistrySupplier<RunicSwordItem> RUNIC_SCYTHE = ITEM.register( "runic_scythe", () ->
             new RunicSwordItem(ToolMaterials.NETHERITE,

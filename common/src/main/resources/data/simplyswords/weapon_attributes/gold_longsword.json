@@ -10,9 +10,7 @@
         "upswing": 0.5,
         "animation": "bettercombat:one_handed_slash_horizontal_right",
         "swing_sound": {
-          "id": "simplyswords:elemental_sword_fire_attack_03",
-          "volume": 0.5,
-          "pitch": 2.5
+          "id": "bettercombat:sword_slash"
         }
       },
       {
@@ -22,21 +20,18 @@
         "upswing": 0.5,
         "animation": "bettercombat:one_handed_slash_horizontal_left",
         "swing_sound": {
-          "id": "simplyswords:elemental_sword_fire_attack_03",
-          "volume": 0.5,
-          "pitch": 1.7
+          "id": "bettercombat:sword_slash"
         }
       },
       {
         "hitbox": "FORWARD_BOX",
-        "damage_multiplier": 1,
+        "damage_multiplier": 1.4,
         "angle": 0,
         "upswing": 0.5,
         "animation": "bettercombat:one_handed_stab",
         "swing_sound": {
-          "id": "simplyswords:elemental_sword_fire_attack_01",
-          "volume": 0.5,
-          "pitch": 1.7
+          "id": "bettercombat:sword_slash",
+          "pitch": 1.2
         }
       }
     ]

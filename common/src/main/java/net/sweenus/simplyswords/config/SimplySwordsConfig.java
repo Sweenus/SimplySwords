@@ -166,7 +166,7 @@ public class SimplySwordsConfig {
 
         FLOAT_OPTIONS.put("permafrost_radius", 4f);
         FLOAT_OPTIONS.put("permafrost_damage", 1f);
-        FLOAT_OPTIONS.put("permafrost_cooldown", 400f);
+        FLOAT_OPTIONS.put("permafrost_cooldown", 600f);
         FLOAT_OPTIONS.put("permafrost_duration", 200f);
 
 
@@ -222,10 +222,10 @@ public class SimplySwordsConfig {
         WEAPON_OPTIONS.put("runic_damage_modifier", 3f);
 
         WEAPON_OPTIONS.put("longsword_attackspeed", -2.4f);
-        WEAPON_OPTIONS.put("twinblade_attackspeed", -1.7f);
-        WEAPON_OPTIONS.put("rapier_attackspeed", -1.6f);
+        WEAPON_OPTIONS.put("twinblade_attackspeed", -2f);
+        WEAPON_OPTIONS.put("rapier_attackspeed", -1.8f);
         WEAPON_OPTIONS.put("katana_attackspeed", -2f);
-        WEAPON_OPTIONS.put("sai_attackspeed", -1.1f);
+        WEAPON_OPTIONS.put("sai_attackspeed", -1.5f);
         WEAPON_OPTIONS.put("spear_attackspeed", -2.7f);
         WEAPON_OPTIONS.put("glaive_attackspeed", -2.6f);
         WEAPON_OPTIONS.put("warglaive_attackspeed", -2.2f);
@@ -260,17 +260,17 @@ public class SimplySwordsConfig {
 
         WEAPON_OPTIONS.put("brimstone_attackspeed", -2.8f);
         WEAPON_OPTIONS.put("thewatcher_attackspeed", -2.8f);
-        WEAPON_OPTIONS.put("stormsedge_attackspeed", -1.7f);
+        WEAPON_OPTIONS.put("stormsedge_attackspeed", -2f);
         WEAPON_OPTIONS.put("stormbringer_attackspeed", -2.4f);
         WEAPON_OPTIONS.put("swordonastick_attackspeed", -2.6f);
-        WEAPON_OPTIONS.put("bramblethorn_attackspeed", -1.6f);
+        WEAPON_OPTIONS.put("bramblethorn_attackspeed", -1.8f);
         WEAPON_OPTIONS.put("watchingwarglaive_attackspeed", -2.2f);
         WEAPON_OPTIONS.put("longswordofplague_attackspeed", -2.4f);
         WEAPON_OPTIONS.put("emberblade_attackspeed", -2.4f);
         WEAPON_OPTIONS.put("hearthflame_attackspeed", -3.2f);
         WEAPON_OPTIONS.put("soulkeeper_attackspeed", -2.9f);
         WEAPON_OPTIONS.put("twistedblade_attackspeed", -2.6f);
-        WEAPON_OPTIONS.put("soulstealer_attackspeed", -1.1f);
+        WEAPON_OPTIONS.put("soulstealer_attackspeed", -1.5f);
         WEAPON_OPTIONS.put("soulrender_attackspeed", -2.4f);
         WEAPON_OPTIONS.put("mjolnir_attackspeed", -3.0f);
         WEAPON_OPTIONS.put("thedispatcher_attackspeed", -2.0f);
