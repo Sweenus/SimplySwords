@@ -164,6 +164,11 @@ public class SimplySwordsConfig {
         FLOAT_OPTIONS.put("frostshatter_chance", 15f);
         FLOAT_OPTIONS.put("frostshatter_duration", 80f);
 
+        FLOAT_OPTIONS.put("permafrost_radius", 4f);
+        FLOAT_OPTIONS.put("permafrost_damage", 1f);
+        FLOAT_OPTIONS.put("permafrost_cooldown", 400f);
+        FLOAT_OPTIONS.put("permafrost_duration", 200f);
+
 
 
         GENERAL_OPTIONS.put("standard_loot_table_weight", 0.08f);
@@ -251,6 +256,7 @@ public class SimplySwordsConfig {
         WEAPON_OPTIONS.put("frostfall_damage_modifier", 5f);
         WEAPON_OPTIONS.put("moltenedge_damage_modifier", 4f);
         WEAPON_OPTIONS.put("livyatan_damage_modifier", 4f);
+        WEAPON_OPTIONS.put("icewhisper_damage_modifier", 7f);
 
         WEAPON_OPTIONS.put("brimstone_attackspeed", -2.8f);
         WEAPON_OPTIONS.put("thewatcher_attackspeed", -2.8f);
@@ -272,6 +278,7 @@ public class SimplySwordsConfig {
         WEAPON_OPTIONS.put("frostfall_attackspeed", -2.5f);
         WEAPON_OPTIONS.put("moltenedge_attackspeed", -2.1f);
         WEAPON_OPTIONS.put("livyatan_attackspeed", -2.1f);
+        WEAPON_OPTIONS.put("icewhisper_attackspeed", -3.1f);
 
     }
 
@@ -546,6 +553,12 @@ public class SimplySwordsConfig {
                 config.append("// -- Unique Effect: Frost Shatter -- \n");
                 config.append("// ---------------------------------- \n");
             }
+            if (i == 85) {
+                config.append("\n");
+                config.append("// ------------------------------- \n");
+                config.append("// -- Unique Effect: Permafrost -- \n");
+                config.append("// ------------------------------- \n");
+            }
             config.append("  \"").append(item).append("\": ").append(FLOAT_OPTIONS.get(item));
             ++i;
             if (i < FLOAT_OPTIONS.size()) {
@@ -600,7 +613,7 @@ public class SimplySwordsConfig {
                 config.append("// Example use-case: Adding 3 to a value below will INCREASE the in-game damage of that weapon by 3 \n");
                 config.append("// ---------------------- \n");
             }
-            if (i == 67) {
+            if (i == 68) {
                 config.append("\n");
                 config.append("// -- Attack Speed Modifiers -- \n");
                 config.append("// Recommended range: -1.0 to -3.7, with -1.0 being fast and -3.7 being slow \n");

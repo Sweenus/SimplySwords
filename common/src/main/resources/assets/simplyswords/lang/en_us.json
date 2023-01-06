@@ -89,6 +89,7 @@
   "item.simplyswords.frostfall": "Frostfall",
   "item.simplyswords.molten_edge": "Molten Edge",
   "item.simplyswords.livyatan": "Livyatan",
+  "item.simplyswords.icewhisper": "Icewhisper",
 
   "item.simplyswords.runic_tablet": "Runic Tablet",
 
@@ -542,6 +543,13 @@
   "item.simplyswords.livyatansworditem.tooltip4": "After %ds the ice shatters causing %d damage.",
   "item.simplyswords.livyatansworditem.tooltip5": "Preemptively shatter the ice encasing your",
   "item.simplyswords.livyatansworditem.tooltip6": "enemies, dealing more damage the earlier you shatter.",
+
+  "item.simplyswords.icewhispersworditem.tooltip1": "Unique Effect: Permafrost",
+  "item.simplyswords.icewhispersworditem.tooltip2": "While wielded, gain a frost aura that deals",
+  "item.simplyswords.icewhispersworditem.tooltip3": "damage and slows enemies within %d blocks.",
+  "item.simplyswords.icewhispersworditem.tooltip4": "Relinquish your frost aura, and instead, summon",
+  "item.simplyswords.icewhispersworditem.tooltip5": "a blizzard at your location, slowing and dealing",
+  "item.simplyswords.icewhispersworditem.tooltip6": "increased damage to enemies within %d blocks.",
 
 
   "item.simplyswords.levitationsworditem.tooltip1": "Runic Power: Float",
