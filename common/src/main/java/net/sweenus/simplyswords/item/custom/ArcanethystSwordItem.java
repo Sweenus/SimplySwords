@@ -4,6 +4,7 @@ package net.sweenus.simplyswords.item.custom;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.LightningEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffectInstance;
@@ -28,15 +29,17 @@ import net.sweenus.simplyswords.util.HelperMethods;
 
 import java.util.List;
 
-public class IcewhisperSwordItem extends SwordItem {
-    public IcewhisperSwordItem(ToolMaterial toolMaterial, int attackDamage, float attackSpeed, Settings settings) {
+public class ArcanethystSwordItem extends SwordItem {
+    public ArcanethystSwordItem(ToolMaterial toolMaterial, int attackDamage, float attackSpeed, Settings settings) {
         super(toolMaterial, attackDamage, attackSpeed, settings);
     }
     private static int stepMod = 0;
     int radius = (int) (SimplySwordsConfig.getFloatValue("permafrost_radius"));
-    int frostDamage = (int) (SimplySwordsConfig.getFloatValue("permafrost_damage"));
-    int blizzard_timer_max = (int) (SimplySwordsConfig.getFloatValue("permafrost_duration"));
-    int skillCooldown = (int) (SimplySwordsConfig.getFloatValue("permafrost_cooldown"));
+    int frostDamage = 2; //(int) (SimplySwordsConfig.getFloatValue("permafrost_damage"));
+    int blizzard_timer_max = 120; //(int) (SimplySwordsConfig.getFloatValue("permafrost_duration"));
+    int skillCooldown = 120;//(int) (SimplySwordsConfig.getFloatValue("permafrost_cooldown"));
+    int chargeChance = 100;
+    int chargeCount;
     int blizzard_timer;
     double lastX;
     double lastY;
@@ -63,6 +66,12 @@ public class IcewhisperSwordItem extends SwordItem {
                     world.playSoundFromEntity(null, target, SoundRegistry.MAGIC_SWORD_ATTACK_WITH_BLOOD_04.get(), SoundCategory.PLAYERS, 0.5f, 1.1f + choose_pitch);
             }
 
+            if (attacker.getRandom().nextInt(100) <= chargeChance) {
+                if (chargeCount < 3) {
+                    chargeCount++;
+                    world.playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_BOW_SHOOT_IMPACT_01.get(), SoundCategory.PLAYERS, 0.5f, 1.2f);
+                }
+            }
 
         }
 
@@ -73,11 +82,14 @@ public class IcewhisperSwordItem extends SwordItem {
 
         if (!user.world.isClient()) {
 
-            blizzard_timer = blizzard_timer_max;
-            user.getItemCooldownManager().set(this, skillCooldown);
-            lastX = user.getX();
-            lastY = user.getY();
-            lastZ = user.getZ();
+            if (chargeCount > 0 && blizzard_timer < 1) {
+                blizzard_timer = blizzard_timer_max;
+                world.playSoundFromEntity(null, user, SoundRegistry.MAGIC_BOW_SHOOT_IMPACT_02.get(), SoundCategory.PLAYERS, 0.4f, 1.2f);
+                user.getItemCooldownManager().set(this, skillCooldown);
+                lastX = user.getX();
+                lastY = user.getY();
+                lastZ = user.getZ();
+            }
 
         }
         return super.use(world, user, hand);
@@ -85,41 +97,44 @@ public class IcewhisperSwordItem extends SwordItem {
 
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
-        if (blizzard_timer < 1) {
+        if (chargeCount < 0)
+            chargeCount = 0;
+        if (blizzard_timer > 0 && chargeCount > 0) {
             if (!world.isClient && (entity instanceof PlayerEntity player)) {
+                blizzard_timer --;
+                if (blizzard_timer < 2)
+                    chargeCount = 0;
 
-                //AOE Aura
-                if (player.age % 35 == 0 && player.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
-                    Box box = new Box(player.getX() + radius, player.getY() + radius, player.getZ() + radius, player.getX() - radius, player.getY() - radius, player.getZ() - radius);
+                //AOE Lift - 1 charge
+                if (player.age % 20 == 0 && player.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
+                    Box box = new Box(player.getX() + radius, player.getY() + radius * 2, player.getZ() + radius, player.getX() - radius, player.getY() - radius, player.getZ() - radius);
                     for (Entity entities : world.getOtherEntities(player, box, EntityPredicates.VALID_LIVING_ENTITY)) {
 
                         if (entities != null) {
                             if (entities instanceof LivingEntity le) {
-                                if (le.hasStatusEffect(StatusEffects.SLOWNESS)) {
 
-                                    int a = (le.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier() + 1);
-
-                                    if (a < 4) {
-                                        le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 120, a), player);
-                                    } else {
-                                        le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 120, a - 1), player);
-                                    }
-                                } else {
-                                    le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 120, 0), player);
-                                }
                                 float choose = (float) (Math.random() * 1);
-                                world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_BOW_ICE_SHOOT_IMPACT_03.get(), SoundCategory.PLAYERS, 0.1f, choose);
-                                le.damage(DamageSource.FREEZE, frostDamage);
+
+                                if (!le.hasStatusEffect(StatusEffects.LEVITATION) && blizzard_timer > 30) {
+                                    le.addStatusEffect(new StatusEffectInstance(StatusEffects.LEVITATION, 20, 0), player);
+                                    world.playSoundFromEntity(null, le, SoundRegistry.MAGIC_BOW_SHOOT_IMPACT_03.get(), SoundCategory.PLAYERS, 0.1f, choose);
+                                }
+                                if (chargeCount > 1) // DOT - 2 charges
+                                    le.damage(DamageSource.MAGIC, frostDamage);
+                                if (chargeCount > 2 && blizzard_timer < 20) { //Ground Slam - 3 Charges
+                                    le.removeStatusEffect(StatusEffects.LEVITATION);
+                                    le.damage(DamageSource.MAGIC, frostDamage * 10);
+                                    le.setVelocity(0, -10, 0);
+                                    world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_SWORD_SCIFI_ATTACK_03.get(), SoundCategory.PLAYERS, 0.3f, choose);
+                                }
                             }
                         }
                     }
                 }
-
-
             }
             if (entity instanceof PlayerEntity player) {
-                if (player.age % 35 == 0 && player.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
-                    world.playSoundFromEntity(null, player, SoundRegistry.ELEMENTAL_SWORD_ICE_ATTACK_02.get(), SoundCategory.PLAYERS, 0.1f, 0.6f);
+                if (player.age % 20 == 0 && player.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
+                    world.playSoundFromEntity(null, player, SoundRegistry.MAGIC_BOW_CHARGE_SHORT_VERSION.get(), SoundCategory.PLAYERS, 0.1f, 0.6f);
                     double xpos = player.getX() - (radius + 1);
                     double ypos = player.getY();
                     double zpos = player.getZ() - (radius + 1);
@@ -127,76 +142,18 @@ public class IcewhisperSwordItem extends SwordItem {
                     for (int i = radius * 2; i > 0; i--) {
                         for (int j = radius * 2; j > 0; j--) {
                             float choose = (float) (Math.random() * 1);
-                            world.addParticle(ParticleTypes.SNOWFLAKE, xpos + i + choose,
+                            world.addParticle(ParticleTypes.DRAGON_BREATH, xpos + i + choose,
                                     ypos + 0.4,
                                     zpos + j + choose,
                                     0, 0.1, 0);
-                            world.addParticle(ParticleTypes.CLOUD, xpos + i + choose,
+                            world.addParticle(ParticleTypes.PORTAL, xpos + i + choose,
                                     ypos + 0.1,
                                     zpos + j + choose,
                                     0, 0, 0);
-                            world.addParticle(ParticleTypes.WHITE_ASH, xpos + i + choose,
-                                    ypos + 2,
+                            world.addParticle(ParticleTypes.REVERSE_PORTAL, xpos + i + choose,
+                                    ypos + 1,
                                     zpos + j + choose,
-                                    0, 0, 0);
-                        }
-                    }
-                }
-            }
-        }
-        else {
-            int rradius = radius *2;
-            blizzard_timer --;
-            if (!world.isClient && (entity instanceof PlayerEntity player)) {
-
-                //AOE Blizzard
-                if (player.age % 10 == 0 && player.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
-                    Box box = new Box(player.getX() + rradius, player.getY() + radius, player.getZ() + rradius, player.getX() - rradius, player.getY() - radius, player.getZ() - rradius);
-                    for (Entity entities : world.getOtherEntities(player, box, EntityPredicates.VALID_LIVING_ENTITY)) {
-
-                        if (entities != null) {
-                            if (entities instanceof LivingEntity le) {
-                                if (le.hasStatusEffect(StatusEffects.SLOWNESS)) {
-
-                                    int a = (le.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier() + 1);
-
-                                    if (a < 4) {
-                                        le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 120, a), player);
-                                    } else {
-                                        le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 120, a - 1), player);
-                                    }
-                                } else {
-                                    le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 120, 0), player);
-                                }
-                                float choose = (float) (Math.random() * 1);
-                                world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_BOW_ICE_SHOOT_IMPACT_03.get(), SoundCategory.PLAYERS, 0.1f, choose);
-                                le.damage(DamageSource.FREEZE, frostDamage * 3);
-                            }
-                        }
-                    }
-                }
-
-
-            }
-            if (entity instanceof PlayerEntity player) {
-                if (player.age % 10 == 0 && player.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
-                    double xpos = lastX - (rradius + 1);
-                    double ypos = lastY;
-                    double zpos = lastZ - (rradius + 1);
-                    world.playSound(xpos, ypos, zpos, SoundRegistry.ELEMENTAL_BOW_ICE_SHOOT_IMPACT_03.get(), SoundCategory.PLAYERS, 0.1f, 0.2f, true);
-
-                    for (int i = rradius * 2; i > 0; i--) {
-                        for (int j = rradius * 2; j > 0; j--) {
-                            float choose = (float) (Math.random() * 1);
-                            world.addParticle(ParticleTypes.SNOWFLAKE, xpos + i + choose,
-                                    ypos + 6,
-                                    zpos + j + choose,
-                                    choose / 3, -0.3, choose / 3);
-                            choose = (float) (Math.random() * 1);
-                            world.addParticle(ParticleTypes.WHITE_ASH, xpos + i + choose,
-                                    ypos + 6,
-                                    zpos + j + choose,
-                                    choose / 3, 0, choose / 3);
+                                    0, 0.1, 0);
                         }
                     }
                 }

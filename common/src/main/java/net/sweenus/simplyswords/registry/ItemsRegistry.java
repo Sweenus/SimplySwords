@@ -696,6 +696,11 @@ public class ItemsRegistry {
                     (int) (icewhisper_damage_modifier),
                     icewhisper_attackspeed,
                     new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+    public static final RegistrySupplier<ArcanethystSwordItem> ARCANETHYST = ITEM.register( "arcanethyst", () ->
+            new ArcanethystSwordItem(ToolMaterials.NETHERITE,
+                    (int) (icewhisper_damage_modifier),
+                    icewhisper_attackspeed,
+                    new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
     /*
     public static final RegistrySupplier<RendSwordItem> THE_DISPATCHER = ITEM.register( "the_dispatcher", () ->
             new RendSwordItem(ToolMaterials.NETHERITE,
