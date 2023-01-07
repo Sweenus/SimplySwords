@@ -34,16 +34,13 @@ public class ArcanethystSwordItem extends SwordItem {
         super(toolMaterial, attackDamage, attackSpeed, settings);
     }
     private static int stepMod = 0;
-    int radius = (int) (SimplySwordsConfig.getFloatValue("permafrost_radius"));
-    int frostDamage = 2; //(int) (SimplySwordsConfig.getFloatValue("permafrost_damage"));
-    int blizzard_timer_max = 120; //(int) (SimplySwordsConfig.getFloatValue("permafrost_duration"));
-    int skillCooldown = 120;//(int) (SimplySwordsConfig.getFloatValue("permafrost_cooldown"));
-    int chargeChance = 100;
+    int radius = (int) (SimplySwordsConfig.getFloatValue("arcaneassault_radius"));
+    int arcaneDamage = (int) (SimplySwordsConfig.getFloatValue("arcaneassault_damage"));
+    int arcane_timer_max = (int) (SimplySwordsConfig.getFloatValue("arcaneassault_duration"));
+    int skillCooldown = (int) (SimplySwordsConfig.getFloatValue("arcaneassault_cooldown"));
+    int chargeChance =  (int) (SimplySwordsConfig.getFloatValue("arcaneassault_chance"));
     int chargeCount;
-    int blizzard_timer;
-    double lastX;
-    double lastY;
-    double lastZ;
+    int arcane_timer;
 
 
 
@@ -82,13 +79,10 @@ public class ArcanethystSwordItem extends SwordItem {
 
         if (!user.world.isClient()) {
 
-            if (chargeCount > 0 && blizzard_timer < 1) {
-                blizzard_timer = blizzard_timer_max;
+            if (chargeCount > 0 && arcane_timer < 1) {
+                arcane_timer = arcane_timer_max;
                 world.playSoundFromEntity(null, user, SoundRegistry.MAGIC_BOW_SHOOT_IMPACT_02.get(), SoundCategory.PLAYERS, 0.4f, 1.2f);
                 user.getItemCooldownManager().set(this, skillCooldown);
-                lastX = user.getX();
-                lastY = user.getY();
-                lastZ = user.getZ();
             }
 
         }
@@ -99,14 +93,14 @@ public class ArcanethystSwordItem extends SwordItem {
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
         if (chargeCount < 0)
             chargeCount = 0;
-        if (blizzard_timer > 0 && chargeCount > 0) {
+        if (arcane_timer > 0 && chargeCount > 0) {
             if (!world.isClient && (entity instanceof PlayerEntity player)) {
-                blizzard_timer --;
-                if (blizzard_timer < 2)
+                arcane_timer --;
+                if (arcane_timer < 2)
                     chargeCount = 0;
 
                 //AOE Lift - 1 charge
-                if (player.age % 20 == 0 && player.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
+                if (player.age % 10 == 0 && player.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
                     Box box = new Box(player.getX() + radius, player.getY() + radius * 2, player.getZ() + radius, player.getX() - radius, player.getY() - radius, player.getZ() - radius);
                     for (Entity entities : world.getOtherEntities(player, box, EntityPredicates.VALID_LIVING_ENTITY)) {
 
@@ -115,15 +109,15 @@ public class ArcanethystSwordItem extends SwordItem {
 
                                 float choose = (float) (Math.random() * 1);
 
-                                if (!le.hasStatusEffect(StatusEffects.LEVITATION) && blizzard_timer > 30) {
-                                    le.addStatusEffect(new StatusEffectInstance(StatusEffects.LEVITATION, 20, 0), player);
+                                if (!le.hasStatusEffect(StatusEffects.LEVITATION) && arcane_timer > 30) {
+                                    le.addStatusEffect(new StatusEffectInstance(StatusEffects.LEVITATION, 20, 1), player);
                                     world.playSoundFromEntity(null, le, SoundRegistry.MAGIC_BOW_SHOOT_IMPACT_03.get(), SoundCategory.PLAYERS, 0.1f, choose);
                                 }
                                 if (chargeCount > 1) // DOT - 2 charges
-                                    le.damage(DamageSource.MAGIC, frostDamage);
-                                if (chargeCount > 2 && blizzard_timer < 20) { //Ground Slam - 3 Charges
+                                    le.damage(DamageSource.MAGIC, arcaneDamage);
+                                if (chargeCount > 2 && arcane_timer < 20) { //Ground Slam - 3 Charges
                                     le.removeStatusEffect(StatusEffects.LEVITATION);
-                                    le.damage(DamageSource.MAGIC, frostDamage * 10);
+                                    le.damage(DamageSource.MAGIC, arcaneDamage * 10);
                                     le.setVelocity(0, -10, 0);
                                     world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_SWORD_SCIFI_ATTACK_03.get(), SoundCategory.PLAYERS, 0.3f, choose);
                                 }
@@ -133,7 +127,7 @@ public class ArcanethystSwordItem extends SwordItem {
                 }
             }
             if (entity instanceof PlayerEntity player) {
-                if (player.age % 20 == 0 && player.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
+                if (player.age % 10 == 0 && player.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
                     world.playSoundFromEntity(null, player, SoundRegistry.MAGIC_BOW_CHARGE_SHORT_VERSION.get(), SoundCategory.PLAYERS, 0.1f, 0.6f);
                     double xpos = player.getX() - (radius + 1);
                     double ypos = player.getY();
@@ -160,18 +154,19 @@ public class ArcanethystSwordItem extends SwordItem {
             }
         }
 
+
         if (stepMod > 0)
             stepMod --;
         if (stepMod <= 0)
             stepMod = 7;
-        HelperMethods.createFootfalls(entity, stack, world, stepMod, ParticleTypes.SNOWFLAKE, ParticleTypes.SNOWFLAKE, ParticleTypes.WHITE_ASH, true);
+        HelperMethods.createFootfalls(entity, stack, world, stepMod, ParticleTypes.DRAGON_BREATH, ParticleTypes.DRAGON_BREATH, ParticleTypes.REVERSE_PORTAL, true);
 
         super.inventoryTick(stack, world, entity, slot, selected);
     }
 
     @Override
     public Text getName(ItemStack stack) {
-        return Text.translatable(this.getTranslationKey(stack)).formatted(Formatting.GOLD, Formatting.BOLD, Formatting.UNDERLINE);
+        return Text.translatable(this.getTranslationKey(stack), chargeCount).formatted(Formatting.GOLD, Formatting.BOLD, Formatting.UNDERLINE);
     }
 
     @Override
@@ -180,15 +175,17 @@ public class ArcanethystSwordItem extends SwordItem {
         //1.19
 
         tooltip.add(Text.literal(""));
-        tooltip.add(Text.translatable("item.simplyswords.icewhispersworditem.tooltip1").formatted(Formatting.GOLD, Formatting.BOLD));
+        tooltip.add(Text.translatable("item.simplyswords.arcanethystsworditem.tooltip1").formatted(Formatting.GOLD, Formatting.BOLD));
         tooltip.add(Text.literal(""));
-        tooltip.add(Text.translatable("item.simplyswords.icewhispersworditem.tooltip2"));
-        tooltip.add(Text.translatable("item.simplyswords.icewhispersworditem.tooltip3", radius));
+        tooltip.add(Text.translatable("item.simplyswords.arcanethystsworditem.tooltip2"));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").formatted(Formatting.BOLD, Formatting.GREEN));
-        tooltip.add(Text.translatable("item.simplyswords.icewhispersworditem.tooltip4"));
-        tooltip.add(Text.translatable("item.simplyswords.icewhispersworditem.tooltip5"));
-        tooltip.add(Text.translatable("item.simplyswords.icewhispersworditem.tooltip6", radius * 2));
+        tooltip.add(Text.translatable("item.simplyswords.arcanethystsworditem.tooltip3"));
+        tooltip.add(Text.translatable("item.simplyswords.arcanethystsworditem.tooltip4"));
+        tooltip.add(Text.literal(""));
+        tooltip.add(Text.translatable("item.simplyswords.arcanethystsworditem.tooltip5"));
+        tooltip.add(Text.translatable("item.simplyswords.arcanethystsworditem.tooltip6"));
+        tooltip.add(Text.translatable("item.simplyswords.arcanethystsworditem.tooltip7"));
         tooltip.add(Text.literal(""));
 
     }

@@ -91,7 +91,7 @@
   "item.simplyswords.molten_edge": "Molten Edge",
   "item.simplyswords.livyatan": "Livyatan",
   "item.simplyswords.icewhisper": "Icewhisper",
-  "item.simplyswords.arcanethyst": "Arcanethyst",
+  "item.simplyswords.arcanethyst": "Arcanethyst (%d / 3)",
 
   "item.simplyswords.runic_tablet": "Runic Tablet",
 
@@ -552,6 +552,14 @@
   "item.simplyswords.icewhispersworditem.tooltip4": "Relinquish your frost aura, and instead, summon",
   "item.simplyswords.icewhispersworditem.tooltip5": "a blizzard at your location, slowing and dealing",
   "item.simplyswords.icewhispersworditem.tooltip6": "increased damage to enemies within %d blocks.",
+
+  "item.simplyswords.arcanethystsworditem.tooltip1": "Unique Effect: Arcane Assault",
+  "item.simplyswords.arcanethystsworditem.tooltip2": "Chance on hit to gain an arcane charge.",
+  "item.simplyswords.arcanethystsworditem.tooltip3": "Consume your arcane charges to assault",
+  "item.simplyswords.arcanethystsworditem.tooltip4": "nearby enemies, strengthening with each charge.",
+  "item.simplyswords.arcanethystsworditem.tooltip5": "1 Charge:  Lifts enemies into the air.",
+  "item.simplyswords.arcanethystsworditem.tooltip6": "2 Charges: Deals damage over time.",
+  "item.simplyswords.arcanethystsworditem.tooltip7": "3 Charges: Slams enemies into the ground.",
 
 
   "item.simplyswords.levitationsworditem.tooltip1": "Runic Power: Float",
