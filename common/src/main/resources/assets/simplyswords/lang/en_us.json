@@ -562,6 +562,14 @@
   "item.simplyswords.arcanethystsworditem.tooltip6": "2 Charges: Deals damage over time.",
   "item.simplyswords.arcanethystsworditem.tooltip7": "3 Charges: Slams enemies into the ground.",
 
+  "item.simplyswords.thunderbrandsworditem.tooltip1": "Unique Effect: Thunder Blitz",
+  "item.simplyswords.thunderbrandsworditem.tooltip2": "Chance on hit to refresh ability cooldown.",
+  "item.simplyswords.thunderbrandsworditem.tooltip3": "Momentarily slow yourself and charge your",
+  "item.simplyswords.thunderbrandsworditem.tooltip4": "weapon, dealing area damage to nearby foes.",
+  "item.simplyswords.thunderbrandsworditem.tooltip5": "Once charged, dash forward, gaining haste",
+  "item.simplyswords.thunderbrandsworditem.tooltip6": "and dealing enormous damage to enemies in",
+  "item.simplyswords.thunderbrandsworditem.tooltip7": "your path.",
+
 
   "item.simplyswords.levitationsworditem.tooltip1": "Runic Power: Float",
   "item.simplyswords.levitationsworditem.tooltip2": "Chance on hit to reverse the effects",
