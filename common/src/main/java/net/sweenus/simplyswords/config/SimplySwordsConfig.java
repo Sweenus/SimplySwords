@@ -184,7 +184,7 @@ public class SimplySwordsConfig {
 
         GENERAL_OPTIONS.put("standard_loot_table_weight", 0.08f);
         GENERAL_OPTIONS.put("rare_loot_table_weight", 0.01f);
-        GENERAL_OPTIONS.put("unique_loot_table_weight", 0.004f);
+        GENERAL_OPTIONS.put("unique_loot_table_weight", 0.008f);
 
 
         BOOLEAN_OPTIONS.put("display_config_outdated_warning", true);
