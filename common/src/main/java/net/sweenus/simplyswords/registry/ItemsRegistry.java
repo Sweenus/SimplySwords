@@ -88,6 +88,7 @@ public class ItemsRegistry {
     static float moltenedge_attackspeed = SimplySwordsConfig.getWeaponAttributes("moltenedge_attackspeed");
     static float livyatan_attackspeed = SimplySwordsConfig.getWeaponAttributes("livyatan_attackspeed");
     static float icewhisper_attackspeed = SimplySwordsConfig.getWeaponAttributes("icewhisper_attackspeed");
+    static float arcanethyst_attackspeed = SimplySwordsConfig.getWeaponAttributes("arcanethyst_attackspeed");
 
     static float brimstone_damage_modifier = SimplySwordsConfig.getWeaponAttributes("brimstone_damage_modifier");
     static float thewatcher_damage_modifier = SimplySwordsConfig.getWeaponAttributes("thewatcher_damage_modifier");
@@ -110,6 +111,7 @@ public class ItemsRegistry {
     static float moltenedge_damage_modifier = SimplySwordsConfig.getWeaponAttributes("moltenedge_damage_modifier");
     static float livyatan_damage_modifier = SimplySwordsConfig.getWeaponAttributes("livyatan_damage_modifier");
     static float icewhisper_damage_modifier = SimplySwordsConfig.getWeaponAttributes("icewhisper_damage_modifier");
+    static float arcanethyst_damage_modifier = SimplySwordsConfig.getWeaponAttributes("arcanethyst_damage_modifier");
 
     public static final DeferredRegister<Item> ITEM = DeferredRegister.create(SimplySwords.MOD_ID, Registry.ITEM_KEY);
 
@@ -698,6 +700,12 @@ public class ItemsRegistry {
                     new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
     public static final RegistrySupplier<ArcanethystSwordItem> ARCANETHYST = ITEM.register( "arcanethyst", () ->
             new ArcanethystSwordItem(ToolMaterials.NETHERITE,
+                    (int) (arcanethyst_damage_modifier),
+                    arcanethyst_attackspeed,
+                    new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+
+    public static final RegistrySupplier<ThunderbrandSwordItem> THUNDERBRAND = ITEM.register( "thunderbrand", () ->
+            new ThunderbrandSwordItem(ToolMaterials.NETHERITE,
                     (int) (icewhisper_damage_modifier),
                     icewhisper_attackspeed,
                     new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
