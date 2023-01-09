@@ -570,6 +570,12 @@
   "item.simplyswords.thunderbrandsworditem.tooltip6": "and dealing enormous damage to enemies in",
   "item.simplyswords.thunderbrandsworditem.tooltip7": "your path.",
 
+  "item.simplyswords.stormsedgesworditem.tooltip1": "Unique Effect: Storm Jolt",
+  "item.simplyswords.stormsedgesworditem.tooltip2": "Chance on hit to refresh ability cooldown.",
+  "item.simplyswords.stormsedgesworditem.tooltip3": "Jolt forward like lightning, gaining",
+  "item.simplyswords.stormsedgesworditem.tooltip4": "momentary invulnerability as well",
+  "item.simplyswords.stormsedgesworditem.tooltip5": "as lingering speed and haste.",
+
 
   "item.simplyswords.levitationsworditem.tooltip1": "Runic Power: Float",
   "item.simplyswords.levitationsworditem.tooltip2": "Chance on hit to reverse the effects",

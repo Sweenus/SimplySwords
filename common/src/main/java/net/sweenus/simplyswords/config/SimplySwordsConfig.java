@@ -180,6 +180,9 @@ public class SimplySwordsConfig {
         FLOAT_OPTIONS.put("thunderblitz_cooldown", 250f);
         FLOAT_OPTIONS.put("thunderblitz_chance", 15f);
 
+        FLOAT_OPTIONS.put("stormjolt_cooldown", 100f);
+        FLOAT_OPTIONS.put("stormjolt_chance", 15f);
+
 
 
         GENERAL_OPTIONS.put("standard_loot_table_weight", 0.08f);
@@ -585,6 +588,12 @@ public class SimplySwordsConfig {
                 config.append("// ---------------------------------- \n");
                 config.append("// -- Unique Effect: Thunder Blitz -- \n");
                 config.append("// ---------------------------------- \n");
+            }
+            if (i == 98) {
+                config.append("\n");
+                config.append("// ------------------------------- \n");
+                config.append("// -- Unique Effect: Storm Jolt -- \n");
+                config.append("// ------------------------------- \n");
             }
             config.append("  \"").append(item).append("\": ").append(FLOAT_OPTIONS.get(item));
             ++i;

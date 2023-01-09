@@ -600,8 +600,8 @@ public class ItemsRegistry {
                     thewatcher_attackspeed,
                     new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
-    public static final RegistrySupplier<StormSwordItem> STORMS_EDGE = ITEM.register( "storms_edge", () ->
-            new StormSwordItem(ToolMaterials.NETHERITE,
+    public static final RegistrySupplier<StormsEdgeSwordItem> STORMS_EDGE = ITEM.register( "storms_edge", () ->
+            new StormsEdgeSwordItem(ToolMaterials.NETHERITE,
                     (int) (stormsedge_damage_modifier),
                     stormsedge_attackspeed,
                     new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
