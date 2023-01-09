@@ -113,12 +113,7 @@ public class IcewhisperSwordItem extends SwordItem {
                             }
                         }
                     }
-                }
 
-
-            }
-            if (entity instanceof PlayerEntity player) {
-                if (player.age % 35 == 0 && player.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
                     world.playSoundFromEntity(null, player, SoundRegistry.ELEMENTAL_SWORD_ICE_ATTACK_02.get(), SoundCategory.PLAYERS, 0.1f, 0.6f);
                     double xpos = player.getX() - (radius + 1);
                     double ypos = player.getY();
@@ -127,15 +122,15 @@ public class IcewhisperSwordItem extends SwordItem {
                     for (int i = radius * 2; i > 0; i--) {
                         for (int j = radius * 2; j > 0; j--) {
                             float choose = (float) (Math.random() * 1);
-                            world.addParticle(ParticleTypes.SNOWFLAKE, xpos + i + choose,
+                            HelperMethods.spawnParticle(world, ParticleTypes.SNOWFLAKE, xpos + i + choose,
                                     ypos + 0.4,
                                     zpos + j + choose,
                                     0, 0.1, 0);
-                            world.addParticle(ParticleTypes.CLOUD, xpos + i + choose,
+                            HelperMethods.spawnParticle(world, ParticleTypes.CLOUD, xpos + i + choose,
                                     ypos + 0.1,
                                     zpos + j + choose,
                                     0, 0, 0);
-                            world.addParticle(ParticleTypes.WHITE_ASH, xpos + i + choose,
+                            HelperMethods.spawnParticle(world, ParticleTypes.WHITE_ASH, xpos + i + choose,
                                     ypos + 2,
                                     zpos + j + choose,
                                     0, 0, 0);
@@ -174,12 +169,7 @@ public class IcewhisperSwordItem extends SwordItem {
                             }
                         }
                     }
-                }
 
-
-            }
-            if (entity instanceof PlayerEntity player) {
-                if (player.age % 10 == 0 && player.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
                     double xpos = lastX - (rradius + 1);
                     double ypos = lastY;
                     double zpos = lastZ - (rradius + 1);
@@ -188,12 +178,12 @@ public class IcewhisperSwordItem extends SwordItem {
                     for (int i = rradius * 2; i > 0; i--) {
                         for (int j = rradius * 2; j > 0; j--) {
                             float choose = (float) (Math.random() * 1);
-                            world.addParticle(ParticleTypes.SNOWFLAKE, xpos + i + choose,
+                            HelperMethods.spawnParticle(world, ParticleTypes.SNOWFLAKE, xpos + i + choose,
                                     ypos + 6,
                                     zpos + j + choose,
                                     choose / 3, -0.3, choose / 3);
                             choose = (float) (Math.random() * 1);
-                            world.addParticle(ParticleTypes.WHITE_ASH, xpos + i + choose,
+                            HelperMethods.spawnParticle(world, ParticleTypes.WHITE_ASH, xpos + i + choose,
                                     ypos + 6,
                                     zpos + j + choose,
                                     choose / 3, 0, choose / 3);

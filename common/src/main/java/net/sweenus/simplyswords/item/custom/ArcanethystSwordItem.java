@@ -124,10 +124,7 @@ public class ArcanethystSwordItem extends SwordItem {
                             }
                         }
                     }
-                }
-            }
-            if (entity instanceof PlayerEntity player) {
-                if (player.age % 10 == 0 && player.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
+
                     world.playSoundFromEntity(null, player, SoundRegistry.MAGIC_BOW_CHARGE_SHORT_VERSION.get(), SoundCategory.PLAYERS, 0.1f, 0.6f);
                     double xpos = player.getX() - (radius + 1);
                     double ypos = player.getY();
@@ -136,15 +133,15 @@ public class ArcanethystSwordItem extends SwordItem {
                     for (int i = radius * 2; i > 0; i--) {
                         for (int j = radius * 2; j > 0; j--) {
                             float choose = (float) (Math.random() * 1);
-                            world.addParticle(ParticleTypes.DRAGON_BREATH, xpos + i + choose,
+                            HelperMethods.spawnParticle(world, ParticleTypes.DRAGON_BREATH, xpos + i + choose,
                                     ypos + 0.4,
                                     zpos + j + choose,
                                     0, 0.1, 0);
-                            world.addParticle(ParticleTypes.PORTAL, xpos + i + choose,
+                            HelperMethods.spawnParticle(world, ParticleTypes.PORTAL, xpos + i + choose,
                                     ypos + 0.1,
                                     zpos + j + choose,
                                     0, 0, 0);
-                            world.addParticle(ParticleTypes.REVERSE_PORTAL, xpos + i + choose,
+                            HelperMethods.spawnParticle(world, ParticleTypes.REVERSE_PORTAL, xpos + i + choose,
                                     ypos + 1,
                                     zpos + j + choose,
                                     0, 0.1, 0);
@@ -166,7 +163,8 @@ public class ArcanethystSwordItem extends SwordItem {
 
     @Override
     public Text getName(ItemStack stack) {
-        return Text.translatable(this.getTranslationKey(stack), chargeCount).formatted(Formatting.GOLD, Formatting.BOLD, Formatting.UNDERLINE);
+        return Text.translatable(this.getTranslationKey(stack)).formatted(Formatting.GOLD, Formatting.BOLD, Formatting.UNDERLINE);
+
     }
 
     @Override

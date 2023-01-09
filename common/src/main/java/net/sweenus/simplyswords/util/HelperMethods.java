@@ -1,5 +1,6 @@
 package net.sweenus.simplyswords.util;
 
+import net.minecraft.client.util.math.Vector3d;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
@@ -7,6 +8,8 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileUtil;
 import net.minecraft.item.ItemStack;
 import net.minecraft.particle.DefaultParticleType;
+import net.minecraft.particle.ParticleEffect;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
@@ -16,7 +19,7 @@ import net.sweenus.simplyswords.config.SimplySwordsConfig;
 public class HelperMethods {
 
     /*
-     * Taken heavily from ZsoltMolnarrr's CombatSpells
+     * getTargetedEntity taken heavily from ZsoltMolnarrr's CombatSpells
      * https://github.com/ZsoltMolnarrr/CombatSpells/blob/main/common/src/main/java/net/combatspells/utils/TargetHelper.java#L72
      */
     public static Entity getTargetedEntity(Entity user, int range) {
@@ -39,6 +42,21 @@ public class HelperMethods {
         else return false;
     }
 
+    //spawnParticle - spawns particles across both client & server
+    public static void spawnParticle(World world, ParticleEffect particle,double  xpos, double ypos, double zpos,
+                              double xvelocity, double yvelocity, double zvelocity) {
+
+        if (world.isClient) {
+            world.addParticle(particle, xpos, ypos, zpos, xvelocity, yvelocity, zvelocity);
+        } else {
+            if (world instanceof ServerWorld) {
+                ServerWorld sw = (ServerWorld) world;
+                sw.spawnParticles(particle, xpos, ypos, zpos, 1, xvelocity, yvelocity, zvelocity, 0.1);
+            }
+        }
+    }
+
+    //createFootfalls - creates weapon footfall particle effects (footsteps)
     public static void createFootfalls(Entity entity,
                                        ItemStack stack,
                                        World world,

@@ -135,10 +135,7 @@ public class ThunderbrandSwordItem extends SwordItem {
                             }
                         }
                     }
-                }
-            }
-            if (entity instanceof PlayerEntity player) {
-                if (player.age % 3 == 0 && player.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
+
                     //world.playSoundFromEntity(null, player, SoundRegistry.MAGIC_BOW_CHARGE_SHORT_VERSION.get(), SoundCategory.PLAYERS, 0.1f, 0.6f);
                     double xpos = player.getX() - (radius + 1);
                     double ypos = player.getY();
@@ -147,15 +144,15 @@ public class ThunderbrandSwordItem extends SwordItem {
                     for (int i = radius * 2; i > 0; i--) {
                         for (int j = radius * 2; j > 0; j--) {
                             float choose = (float) (Math.random() * 1);
-                            world.addParticle(ParticleTypes.ELECTRIC_SPARK, xpos + i + choose,
+                            HelperMethods.spawnParticle(world, ParticleTypes.ELECTRIC_SPARK, xpos + i + choose,
                                     ypos + 0.4,
                                     zpos + j + choose,
                                     0, 0.1, 0);
-                            world.addParticle(ParticleTypes.CLOUD, xpos + i + choose,
+                            HelperMethods.spawnParticle(world, ParticleTypes.CLOUD, xpos + i + choose,
                                     ypos + 0.1,
                                     zpos + j + choose,
                                     0, 0, 0);
-                            world.addParticle(ParticleTypes.WARPED_SPORE, xpos + i + choose,
+                            HelperMethods.spawnParticle(world, ParticleTypes.WARPED_SPORE, xpos + i + choose,
                                     ypos,
                                     zpos + j + choose,
                                     0, 0.1, 0);
