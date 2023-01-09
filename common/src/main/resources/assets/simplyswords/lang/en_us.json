@@ -482,6 +482,12 @@
   "item.simplyswords.volcanicfurysworditem.tooltip1": "Unique Effect: Volcanic Fury",
   "item.simplyswords.volcanicfurysworditem.tooltip2": "Chance on hit to ignite your target",
   "item.simplyswords.volcanicfurysworditem.tooltip3": "and send them flying.",
+  "item.simplyswords.volcanicfurysworditem.tooltip4": "Channel your fury, exchanging health to",
+  "item.simplyswords.volcanicfurysworditem.tooltip5": "gain resistance, whilst causing tremors",
+  "item.simplyswords.volcanicfurysworditem.tooltip6": "that pull enemies towards you.",
+  "item.simplyswords.volcanicfurysworditem.tooltip7": "Activate again to unleash your fury,",
+  "item.simplyswords.volcanicfurysworditem.tooltip8": "launching, igniting, and dealing more",
+  "item.simplyswords.volcanicfurysworditem.tooltip9": "damage the longer the channel.",
 
   "item.simplyswords.ferocitysworditem.tooltip1": "Unique Effect: Ferocity",
   "item.simplyswords.ferocitysworditem.tooltip2": "Chance on hit to increase your attack",

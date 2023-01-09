@@ -130,6 +130,9 @@ public class SimplySwordsConfig {
         FLOAT_OPTIONS.put("ember_ire_duration", 150f);
 
         FLOAT_OPTIONS.put("volcanic_fury_chance", 25f);
+        FLOAT_OPTIONS.put("volcanic_fury_radius", 3f);
+        FLOAT_OPTIONS.put("volcanic_fury_cooldown", 300f);
+        FLOAT_OPTIONS.put("volcanic_fury_damage", 3f);
 
         FLOAT_OPTIONS.put("storm_chance", 15f);
         FLOAT_OPTIONS.put("storm_radius", 10f);
@@ -523,73 +526,73 @@ public class SimplySwordsConfig {
                 config.append("// -- Unique Effect: Volcanic Fury -- \n");
                 config.append("// ---------------------------------- \n");
             }
-            if (i == 60) {
+            if (i == 63) {
                 config.append("\n");
                 config.append("// -------------------------- \n");
                 config.append("// -- Unique Effect: Storm -- \n");
                 config.append("// -------------------------- \n");
             }
-            if (i == 62) {
+            if (i == 65) {
                 config.append("\n");
                 config.append("// --------------------------- \n");
                 config.append("// -- Unique Effect: Plague -- \n");
                 config.append("// --------------------------- \n");
             }
-            if (i == 63) {
+            if (i == 66) {
                 config.append("\n");
                 config.append("// ------------------------------ \n");
                 config.append("// -- Unique Effect: Brimstone -- \n");
                 config.append("// ------------------------------ \n");
             }
-            if (i == 64) {
+            if (i == 67) {
                 config.append("\n");
                 config.append("// ---------------------------- \n");
                 config.append("// -- Unique Effect: Bramble -- \n");
                 config.append("// ---------------------------- \n");
             }
-            if (i == 66) {
+            if (i == 69) {
                 config.append("\n");
                 config.append("// -------------------------------- \n");
                 config.append("// -- Unique Effect: Soul Tether -- \n");
                 config.append("// -------------------------------- \n");
             }
-            if (i == 71) {
+            if (i == 74) {
                 config.append("\n");
                 config.append("// ------------------------------- \n");
                 config.append("// -- Unique Effect: Frost Fury -- \n");
                 config.append("// ------------------------------- \n");
             }
-            if (i == 76) {
+            if (i == 79) {
                 config.append("\n");
                 config.append("// -------------------------------- \n");
                 config.append("// -- Unique Effect: Molten Roar -- \n");
                 config.append("// -------------------------------- \n");
             }
-            if (i == 81) {
+            if (i == 84) {
                 config.append("\n");
                 config.append("// ---------------------------------- \n");
                 config.append("// -- Unique Effect: Frost Shatter -- \n");
                 config.append("// ---------------------------------- \n");
             }
-            if (i == 85) {
+            if (i == 88) {
                 config.append("\n");
                 config.append("// ------------------------------- \n");
                 config.append("// -- Unique Effect: Permafrost -- \n");
                 config.append("// ------------------------------- \n");
             }
-            if (i == 89) {
+            if (i == 92) {
                 config.append("\n");
                 config.append("// ----------------------------------- \n");
                 config.append("// -- Unique Effect: Arcane Assault -- \n");
                 config.append("// ----------------------------------- \n");
             }
-            if (i == 94) {
+            if (i == 97) {
                 config.append("\n");
                 config.append("// ---------------------------------- \n");
                 config.append("// -- Unique Effect: Thunder Blitz -- \n");
                 config.append("// ---------------------------------- \n");
             }
-            if (i == 98) {
+            if (i == 101) {
                 config.append("\n");
                 config.append("// ------------------------------- \n");
                 config.append("// -- Unique Effect: Storm Jolt -- \n");
