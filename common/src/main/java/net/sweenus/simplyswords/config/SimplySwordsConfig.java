@@ -173,9 +173,9 @@ public class SimplySwordsConfig {
         FLOAT_OPTIONS.put("permafrost_duration", 200f);
 
         FLOAT_OPTIONS.put("arcaneassault_radius", 6f);
-        FLOAT_OPTIONS.put("arcaneassault_damage", 2f);
-        FLOAT_OPTIONS.put("arcaneassault_cooldown", 120f);
-        FLOAT_OPTIONS.put("arcaneassault_chance", 45f);
+        FLOAT_OPTIONS.put("arcaneassault_damage", 1f);
+        FLOAT_OPTIONS.put("arcaneassault_cooldown", 220f);
+        FLOAT_OPTIONS.put("arcaneassault_chance", 25f);
         FLOAT_OPTIONS.put("arcaneassault_duration", 120f);
 
         FLOAT_OPTIONS.put("thunderblitz_radius", 2f);
