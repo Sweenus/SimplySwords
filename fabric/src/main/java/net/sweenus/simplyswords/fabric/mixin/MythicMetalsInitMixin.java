@@ -12,8 +12,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-// Mixin to Mythic Metals Abilities.class to add our weapons and gain the special effects
-// https://github.com/Noaaan/MythicMetals/blob/cbbb15b9f3dae18b8575e77f52b0fb5cff2f9e5f/src/main/java/nourl/mythicmetals/abilities/Abilities.java
+// Inject our init into MythicMetals onInitialize to prevent load order issues
+// https://github.com/Noaaan/MythicMetals/blob/1.19.2/src/main/java/nourl/mythicmetals/MythicMetals.java
 
 
 @Mixin(MythicMetals.class)

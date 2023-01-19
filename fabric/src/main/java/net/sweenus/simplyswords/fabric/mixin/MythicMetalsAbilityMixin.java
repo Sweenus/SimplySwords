@@ -18,7 +18,7 @@ public class MythicMetalsAbilityMixin {
     @Inject(at = @At("HEAD"), method = "init", remap = false)
     private static void init(CallbackInfo info) {
 
-        System.out.println("Adding Simply Swords weapons to Mythic Metals Ability list.");
+        //System.out.println("Adding Simply Swords weapons to Mythic Metals Ability list.");
 
         //Carmot
         Abilities.BONUS_LOOTING.addItem(MythicMetalsCompat.CARMOT_CHAKRAM, Style.EMPTY.withColor(0xE63E73));
