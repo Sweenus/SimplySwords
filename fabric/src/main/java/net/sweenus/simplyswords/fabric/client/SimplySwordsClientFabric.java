@@ -17,8 +17,8 @@ public class SimplySwordsClientFabric implements ClientModInitializer {
     public void onInitializeClient() {
         SimplySwordsClient.init();
         FabricLoader.getInstance().getModContainer(MOD_ID).ifPresent(modContainer -> {
-            ResourceManagerHelper.registerBuiltinResourcePack(new Identifier(MOD_ID, "vanillastyle"), modContainer, ResourcePackActivationType.DEFAULT_ENABLED);
-            System.out.println("Registering Vanilla Style resourcepack for Simply Swords");
+            ResourceManagerHelper.registerBuiltinResourcePack(new Identifier(MOD_ID, "classic"), modContainer, ResourcePackActivationType.DEFAULT_ENABLED);
+            System.out.println("Registering Classic style resourcepack for Simply Swords");
         });
     }
 }

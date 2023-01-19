@@ -24,7 +24,7 @@ public class SimplySwordsClientEvents {
     @SubscribeEvent
     public static void addPackFinders(AddPackFindersEvent event) {
         if (event.getPackType() == ResourceType.CLIENT_RESOURCES) {
-            registerResourcePack(event, new Identifier("simplyswords", "vanillastyle"), false);
+            registerResourcePack(event, new Identifier("simplyswords", "classic"), false);
         }
     }
 

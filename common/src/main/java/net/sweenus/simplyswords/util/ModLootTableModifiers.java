@@ -81,6 +81,7 @@ public class ModLootTableModifiers {
                             .with(ItemEntry.builder(ItemsRegistry.RUNIC_GREATAXE.get()))
                             .with(ItemEntry.builder(ItemsRegistry.RUNIC_CHAKRAM.get()))
                             .with(ItemEntry.builder(ItemsRegistry.RUNIC_WARGLAIVE.get()))
+                            .with(ItemEntry.builder(ItemsRegistry.RUNIC_SCYTHE.get()))
                             .with(ItemEntry.builder(ItemsRegistry.DIAMOND_LONGSWORD.get()))
                             .with(ItemEntry.builder(ItemsRegistry.DIAMOND_TWINBLADE.get()))
                             .with(ItemEntry.builder(ItemsRegistry.DIAMOND_RAPIER.get()))
@@ -108,7 +109,7 @@ public class ModLootTableModifiers {
                 else {
                     LootPool.Builder pool = LootPool.builder()
                             .rolls(ConstantLootNumberProvider.create(1))
-                            .conditionally(RandomChanceLootCondition.builder(SimplySwordsConfig.getGeneralSettings("standard_loot_table_weight"))) // 1 = 100% of the time
+                            .conditionally(RandomChanceLootCondition.builder(SimplySwordsConfig.getGeneralSettings("rare_loot_table_weight"))) // 1 = 100% of the time
                             .with(ItemEntry.builder(ItemsRegistry.RUNIC_TABLET.get()));
                     context.addPool(pool);
                 }

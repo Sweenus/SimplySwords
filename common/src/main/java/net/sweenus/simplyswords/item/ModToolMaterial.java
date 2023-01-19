@@ -6,12 +6,13 @@ import net.minecraft.item.ToolMaterial;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.tag.ItemTags;
 import net.minecraft.util.Lazy;
+import net.sweenus.simplyswords.registry.ItemsRegistry;
 
 import java.util.function.Supplier;
 
 public enum ModToolMaterial implements ToolMaterial {
-    OTHERENTITE(MiningLevels.WOOD, 59, 2.0f, 0.0f, 15, () -> Ingredient.fromTag(ItemTags.PLANKS)),
-    ELEMENTITE(MiningLevels.NETHERITE, 2031, 9.0f, 5.0f, 15, () -> Ingredient.fromTag(ItemTags.DIAMOND_ORES)),
+    RUNIC(MiningLevels.NETHERITE, 2031, 9.0f, 5.0f, 25, () -> Ingredient.ofItems(Items.NETHERITE_INGOT)),
+    UNIQUE(MiningLevels.NETHERITE, 3270, 15.0f, 5.0f, 30, () -> Ingredient.ofItems(ItemsRegistry.RUNIC_TABLET.get())),
 
     //MYTHIC METALS
     ADAMANTITE(4, 1024, 7.0F, 5F, 16, () -> Ingredient.ofItems(Items.DIAMOND)),
