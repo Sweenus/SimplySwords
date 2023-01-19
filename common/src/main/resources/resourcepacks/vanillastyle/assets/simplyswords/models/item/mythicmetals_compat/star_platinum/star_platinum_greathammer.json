@@ -1,0 +1,6 @@
+{
+	"parent": "simplyswords:item/template_reworked_greathammer",
+	"textures": {
+		"texture": "simplyswords:item/mythicmetals_compat/greathammer/greathammer_star_platinum"
+	}
+}

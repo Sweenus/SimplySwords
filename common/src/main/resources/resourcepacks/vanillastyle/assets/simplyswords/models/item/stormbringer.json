@@ -1,0 +1,7 @@
+{
+	"parent": "simplyswords:item/template_longsword",
+	"textures": {
+		"layer0": "simplyswords:item/stormbringer",
+		"layer1": "simplyswords:item/stormbringer_layer"
+	}
+}

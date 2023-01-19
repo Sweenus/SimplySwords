@@ -1,0 +1,6 @@
+{
+	"parent": "simplyswords:item/template_warglaive",
+	"textures": {
+		"layer0": "simplyswords:item/gold_warglaive"
+	}
+}

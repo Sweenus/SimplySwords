@@ -1,0 +1,6 @@
+{
+	"parent": "simplyswords:item/template_chakram",
+	"textures": {
+		"layer0": "simplyswords:item/iron_chakram"
+	}
+}

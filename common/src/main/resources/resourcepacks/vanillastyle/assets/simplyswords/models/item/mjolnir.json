@@ -1,0 +1,7 @@
+{
+	"parent": "simplyswords:item/template_greathammer",
+	"textures": {
+		"texture": "simplyswords:item/mjolnir",
+		"layer": "simplyswords:item/mjolnir_layer"
+	}
+}

@@ -39,10 +39,12 @@ public class SimplySwordsConfig {
         if (!WEAPON_OPTIONS.containsKey(key)) {
             System.out.println(key);
         }
-        return WEAPON_OPTIONS.getOrDefault(key, null);
+        return WEAPON_OPTIONS.get(key);
     }
 
     public static void init() {
+
+        //System.out.println("Initialising common Simply Swords config");
 
         FLOAT_OPTIONS.put("speed_chance", 15f);
         FLOAT_OPTIONS.put("speed_duration", 300f);
@@ -304,6 +306,7 @@ public class SimplySwordsConfig {
     }
 
     public static void loadConfig() {
+        //System.out.println("Loading common Simply Swords config");
         JsonObject json;
         json = Config.getJsonObject(Config.readFile(new File("config/simplyswords/booleans.json5")));
         for (Map.Entry<String, JsonElement> entry : json.entrySet()) {
@@ -329,6 +332,7 @@ public class SimplySwordsConfig {
 
 
     public static void generateConfigs(boolean overwrite) {
+        //System.out.println("Generating common Simply Swords config");
         StringBuilder config = new StringBuilder("{\n");
         int i = 0;
         for (String key : BOOLEAN_OPTIONS.keySet()) {

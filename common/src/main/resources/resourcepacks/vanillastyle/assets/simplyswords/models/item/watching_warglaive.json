@@ -1,0 +1,7 @@
+{
+	"parent": "simplyswords:item/template_warglaive",
+	"textures": {
+		"layer0": "simplyswords:item/watching_warglaive",
+		"layer1": "simplyswords:item/watching_warglaive_eyes"
+	}
+}

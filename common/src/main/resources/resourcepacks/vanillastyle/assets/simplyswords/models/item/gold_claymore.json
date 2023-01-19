@@ -1,0 +1,6 @@
+{
+	"parent": "simplyswords:item/template_claymore",
+	"textures": {
+		"layer0": "simplyswords:item/gold_claymore"
+	}
+}

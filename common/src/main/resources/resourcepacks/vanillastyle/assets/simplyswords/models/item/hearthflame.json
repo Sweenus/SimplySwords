@@ -1,0 +1,7 @@
+{
+	"parent": "simplyswords:item/template_reworked_greathammer",
+	"textures": {
+		"texture": "simplyswords:item/hearthflame_real",
+		"layer": "simplyswords:item/hearthflame_layer"
+	}
+}

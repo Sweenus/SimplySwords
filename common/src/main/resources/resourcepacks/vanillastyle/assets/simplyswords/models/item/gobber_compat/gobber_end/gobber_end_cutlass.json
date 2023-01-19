@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/handheld",
+  "textures": {
+    "layer0": "simplyswords:item/gobber_compat/end_gobber/cutlass_end_gobber"
+  }
+}

@@ -622,5 +622,7 @@
   "item.simplyswords.frostwardsworditem.tooltip2": "Regularly fires movement impairing",
   "item.simplyswords.frostwardsworditem.tooltip3": "snowballs at all nearby enemies.",
   "item.simplyswords.unidentifiedsworditem.tooltip1": "Runic Power: ????",
-  "item.simplyswords.unidentifiedsworditem.tooltip2": "Click to identify."
+  "item.simplyswords.unidentifiedsworditem.tooltip2": "Click to identify.",
+
+  "item.simplyswords.common.blacklisteffect": "ABILITY DISABLED"
 }

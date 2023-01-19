@@ -1,0 +1,7 @@
+{
+	"parent": "simplyswords:item/template_warglaive",
+	"textures": {
+		"layer0": "simplyswords:item/runic_warglaive",
+		"layer1": "simplyswords:item/runic_warglaive_layer"
+	}
+}

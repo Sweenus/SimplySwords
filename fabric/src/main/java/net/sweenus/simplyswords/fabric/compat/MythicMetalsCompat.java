@@ -42,6 +42,7 @@ public class MythicMetalsCompat {
     static float chakram_negative_modifier = SimplySwordsConfig.getWeaponAttributes("chakram_negative_damage_modifier");
     static float scythe_negative_modifier = SimplySwordsConfig.getWeaponAttributes("scythe_negative_damage_modifier");
 
+
     static float longsword_attackspeed = SimplySwordsConfig.getWeaponAttributes("longsword_attackspeed");
     static float twinblade_attackspeed = SimplySwordsConfig.getWeaponAttributes("twinblade_attackspeed");
     static float rapier_attackspeed = SimplySwordsConfig.getWeaponAttributes("rapier_attackspeed");
@@ -56,6 +57,7 @@ public class MythicMetalsCompat {
     static float greathammer_attackspeed = SimplySwordsConfig.getWeaponAttributes("greathammer_attackspeed");
     static float chakram_attackspeed = SimplySwordsConfig.getWeaponAttributes("chakram_attackspeed");
     static float scythe_attackspeed = SimplySwordsConfig.getWeaponAttributes("scythe_attackspeed");
+
     
     static int longsword_modifier = (int) (longsword_positive_modifier - longsword_negative_modifier);
     static int twinblade_modifier = (int) (twinblade_positive_modifier - twinblade_negative_modifier);

@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/handheld",
+  "textures": {
+    "layer0": "simplyswords:item/soulstealer",
+	"layer1": "simplyswords:item/soulstealer_layer"
+  }
+}

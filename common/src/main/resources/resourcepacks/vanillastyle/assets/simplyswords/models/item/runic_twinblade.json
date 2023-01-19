@@ -1,0 +1,7 @@
+{
+	"parent": "simplyswords:item/template_twinblade",
+	"textures": {
+		"layer0": "simplyswords:item/runic_twinblade",
+		"layer1": "simplyswords:item/runic_twinblade_layer"
+	}
+}

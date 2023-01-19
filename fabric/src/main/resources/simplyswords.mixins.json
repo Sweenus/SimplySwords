@@ -1,11 +1,14 @@
 {
   "required": false,
   "minVersion": "0.8",
-  "package": "net.sweenus.simplyswords.mixin.fabric",
+  "package": "net.sweenus.simplyswords.fabric.mixin",
   "compatibilityLevel": "JAVA_17",
+  "plugin": "net.sweenus.simplyswords.fabric.mixin.SimplySwordsMixinPlugin",
   "client": [
   ],
   "mixins": [
+    "MythicMetalsAbilityMixin",
+    "MythicMetalsInitMixin"
   ],
   "injectors": {
     "defaultRequire": 1

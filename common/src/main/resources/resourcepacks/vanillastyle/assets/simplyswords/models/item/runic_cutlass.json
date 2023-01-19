@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/handheld",
+  "textures": {
+    "layer0": "simplyswords:item/runic_cutlass",
+    "layer1": "simplyswords:item/runic_cutlass_layer"
+  }
+}

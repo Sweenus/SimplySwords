@@ -1,0 +1,7 @@
+{
+	"parent": "simplyswords:item/big_handheld",
+	"textures": {
+		"layer0": "simplyswords:item/icewhisper",
+		"layer1": "simplyswords:item/icewhisper_layer"
+	}
+}

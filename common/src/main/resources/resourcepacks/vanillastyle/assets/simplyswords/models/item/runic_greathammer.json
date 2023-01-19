@@ -1,0 +1,7 @@
+{
+	"parent": "simplyswords:item/template_reworked_greathammer",
+	"textures": {
+		"texture": "simplyswords:item/runic_greathammer",
+		"layer": "simplyswords:item/runic_greathammer_layer"
+	}
+}

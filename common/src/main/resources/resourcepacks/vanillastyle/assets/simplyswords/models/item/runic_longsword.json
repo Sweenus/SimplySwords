@@ -1,0 +1,7 @@
+{
+	"parent": "simplyswords:item/template_longsword",
+	"textures": {
+		"layer0": "simplyswords:item/runic_longsword",
+		"layer1": "simplyswords:item/runic_longsword_layer"
+	}
+}

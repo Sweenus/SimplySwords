@@ -1,0 +1,6 @@
+{
+	"parent": "simplyswords:item/template_longsword",
+	"textures": {
+		"layer0": "simplyswords:item/gobber_compat/end_gobber/longsword_end_gobber"
+	}
+}

@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/handheld",
+  "textures": {
+    "layer0": "simplyswords:item/gobber_compat/nether_gobber/sai_nether_gobber"
+  }
+}
