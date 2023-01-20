@@ -1,6 +1,0 @@
-{
-	"parent": "simplyswords:item/template_longsword",
-	"textures": {
-		"layer0": "simplyswords:item/mythicmetals_compat/longsword/longsword_mythril"
-	}
-}

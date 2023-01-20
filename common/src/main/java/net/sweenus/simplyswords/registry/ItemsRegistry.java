@@ -712,6 +712,7 @@ public class ItemsRegistry {
                     (int) (thunderbrand_damage_modifier),
                     thunderbrand_attackspeed,
                     new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+
     /*
     public static final RegistrySupplier<RendSwordItem> THE_DISPATCHER = ITEM.register( "the_dispatcher", () ->
             new RendSwordItem(ModToolMaterial.UNIQUE,
@@ -726,5 +727,24 @@ public class ItemsRegistry {
                     (int) (mjolnir_damage_modifier),
                     mjolnir_attackspeed,
                     new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+
+    public static final RegistrySupplier<LichbladeSwordItem> SLUMBERING_LICHBLADE = ITEM.register( "slumbering_lichblade", () ->
+            new LichbladeSwordItem(ModToolMaterial.UNIQUE,
+                    (int) (thunderbrand_damage_modifier),
+                    thunderbrand_attackspeed,
+                    new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+
+    public static final RegistrySupplier<LichbladeSwordItem> WAKING_LICHBLADE = ITEM.register( "waking_lichblade", () ->
+            new LichbladeSwordItem(ModToolMaterial.UNIQUE,
+                    (int) (thunderbrand_damage_modifier),
+                    thunderbrand_attackspeed,
+                    new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+
+    public static final RegistrySupplier<LichbladeSwordItem> AWAKENED_LICHBLADE = ITEM.register( "awakened_lichblade", () ->
+            new LichbladeSwordItem(ModToolMaterial.UNIQUE,
+                    (int) (thunderbrand_damage_modifier),
+                    thunderbrand_attackspeed,
+                    new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+
 
 }

@@ -1,7 +1,0 @@
-{
-	"parent": "simplyswords:item/template_longsword",
-	"textures": {
-		"layer0": "simplyswords:item/toxic_blade",
-		"layer1": "simplyswords:item/toxic_blade_layer"
-	}
-}

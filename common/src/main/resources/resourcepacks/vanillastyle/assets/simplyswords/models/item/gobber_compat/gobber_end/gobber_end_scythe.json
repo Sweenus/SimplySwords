@@ -1,6 +1,0 @@
-{
-	"parent": "simplyswords:item/big_handheld",
-	"textures": {
-		"layer0": "simplyswords:item/gobber_compat/end_gobber/scythe_end_gobber"
-	}
-}

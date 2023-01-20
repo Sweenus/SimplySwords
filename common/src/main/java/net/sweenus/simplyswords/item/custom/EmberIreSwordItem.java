@@ -2,9 +2,8 @@ package net.sweenus.simplyswords.item.custom;
 
 
 import net.minecraft.client.item.TooltipContext;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.*;
+import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
@@ -39,6 +38,12 @@ public class EmberIreSwordItem extends SwordItem {
     }
 
     private static int stepMod = 0;
+
+    private final int radius = 8;
+    private final int abilityTimerMax = 80;
+    private final int abilityDamage = 1;
+    private final int abilityChance = 5;
+    private static int abilityTimer;
     private static DefaultParticleType particleWalk = ParticleTypes.FALLING_LAVA;
     private static DefaultParticleType particleSprint = ParticleTypes.FALLING_LAVA;
     private static DefaultParticleType particlePassive = ParticleTypes.SMOKE;
@@ -68,9 +73,9 @@ public class EmberIreSwordItem extends SwordItem {
 
             if (attacker.getRandom().nextInt(100) <= fhitchance) {
                 attacker.setOnFireFor(fduration / 20);
-                attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.STRENGTH, fduration, 2), attacker);
-                attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, fduration, 1), attacker);
-                attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, fduration, 1), attacker);
+                attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.STRENGTH, fduration, 0), attacker);
+                attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, fduration, 0), attacker);
+                attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, fduration, 0), attacker);
                 world.playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_01.get(), SoundCategory.PLAYERS, 0.5f, 2f);
                 particlePassive = ParticleTypes.LAVA;
                 particleWalk = ParticleTypes.CAMPFIRE_COSY_SMOKE;
@@ -91,37 +96,13 @@ public class EmberIreSwordItem extends SwordItem {
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
 
         if (!user.world.isClient()) {
-            if (user.hasStatusEffect(StatusEffects.STRENGTH) && user.isOnFire()) {
+            if (user.hasStatusEffect(StatusEffects.STRENGTH) && user.hasStatusEffect(StatusEffects.HASTE) && abilityTimer < 1) {
 
-                Box box = new Box(user.getX() + 40, user.getY() +40, user.getZ() + 40, user.getX() - 40, user.getY() - 40, user.getZ() - 40);
-                for(Entity e: world.getOtherEntities(user, box, EntityPredicates.VALID_ENTITY))
-                {
-                    if (e != null && user != null){
-                        if (e instanceof FireballEntity){
-                            boolean bl = e.world.getGameRules().getBoolean(GameRules.DO_MOB_GRIEFING);
-                            e.world.createExplosion(null, e.getX(), e.getY(), e.getZ(), 1f, bl, bl ? Explosion.DestructionType.DESTROY : Explosion.DestructionType.NONE);
-                            e.discard();
-                        }
-                    }
-                }
-
-                ServerWorld sworld = (ServerWorld)user.world;
-                BlockPos position = (user.getBlockPos());
-                Vec3d rotation = user.getRotationVec(1f);
-                Vec3d newPos = user.getPos().add(rotation);
-
-                //Entity fireball = EntityType.FIREBALL.spawn((ServerWorld) world, null, null, null, newPos, SpawnReason.TRIGGERED, true, true);
-                FireballEntity fireball = new FireballEntity(EntityType.FIREBALL, (ServerWorld) world);
-                fireball.updatePosition(newPos.getX(), (user.getY()) +1.5, newPos.getZ());
-                fireball.setOwner(user);
-                user.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, 20, 4), user);
-                user.addStatusEffect(new StatusEffectInstance(StatusEffects.FIRE_RESISTANCE, 60, 2), user);
-                sworld.spawnEntity(fireball);
-                fireball.setVelocity(rotation);
-                user.removeStatusEffect(StatusEffects.STRENGTH);
-                user.removeStatusEffect(StatusEffects.SPEED);
+                abilityTimer = abilityTimerMax;
+                world.playSound(null, user.getBlockPos(), SoundRegistry.ELEMENTAL_BOW_FIRE_SHOOT_IMPACT_03.get(), SoundCategory.PLAYERS, 0.3f, 2f);
                 user.removeStatusEffect(StatusEffects.HASTE);
-                world.playSound(null, position, SoundRegistry.ELEMENTAL_BOW_FIRE_SHOOT_IMPACT_03.get(), SoundCategory.PLAYERS, 0.3f, 2f);
+                user.removeStatusEffect(StatusEffects.SPEED);
+                user.removeStatusEffect(StatusEffects.STRENGTH);
                 user.extinguish();
 
 
@@ -132,6 +113,66 @@ public class EmberIreSwordItem extends SwordItem {
 
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
+        if ((entity instanceof PlayerEntity player)) {
+            if (player.getEquippedStack(EquipmentSlot.MAINHAND) == stack || player.getEquippedStack(EquipmentSlot.OFFHAND) == stack) {
+                if (abilityTimer > 0)
+                    abilityTimer--;
+                if (abilityTimer > 1) {
+                    if (!world.isClient) {
+
+                        //AOE Aura
+                        if (player.age % 15 == 0) {
+                            world.playSoundFromEntity(null, player, SoundRegistry.ELEMENTAL_BOW_FIRE_SHOOT_IMPACT_02.get(), SoundCategory.PLAYERS, 0.1f, 2);
+                            Box box = new Box(player.getX() + radius, player.getY() + radius, player.getZ() + radius, player.getX() - radius, player.getY() - radius, player.getZ() - radius);
+                            for (Entity entities : world.getOtherEntities(player, box, EntityPredicates.VALID_LIVING_ENTITY)) {
+
+                                if (entities != null) {
+                                    if (entities instanceof LivingEntity le) {
+                                        float choose = (float) (Math.random() * 1);
+                                        le.damage(DamageSource.IN_FIRE, abilityDamage);
+
+                                        if (le.getRandom().nextInt(100) <= abilityChance) {
+
+                                            FireballEntity fireball = new FireballEntity(world, player, 1.2, -2, 1.2, 1);
+                                            fireball.setPosition(le.getX()-7, le.getY()+10, le.getZ()-7);
+                                            world.spawnEntity(fireball);
+                                            //fireball.setVelocity(0, -5, 0);
+
+
+                                            int choose_sound = (int) (Math.random() * 30);
+                                            if (choose_sound <= 10)
+                                                world.playSound(le.getX()-7, le.getY()+10, le.getZ()-7, SoundRegistry.ELEMENTAL_BOW_FIRE_SHOOT_IMPACT_01.get(), SoundCategory.HOSTILE, 0.8f, 1f, true);
+                                            if (choose_sound <= 20 && choose_sound > 10)
+                                                world.playSound(le.getX()-7, le.getY()+10, le.getZ()-7, SoundRegistry.ELEMENTAL_BOW_FIRE_SHOOT_IMPACT_02.get(), SoundCategory.HOSTILE, 0.8f, 1f, true);
+                                            if (choose_sound <= 30 && choose_sound > 20)
+                                                world.playSound(le.getX()-7, le.getY()+10, le.getZ()-7, SoundRegistry.ELEMENTAL_BOW_FIRE_SHOOT_IMPACT_03.get(), SoundCategory.HOSTILE, 0.8f, 1f, true);
+                                        }
+
+
+                                    }
+                                }
+                            }
+
+                            world.playSoundFromEntity(null, player, SoundRegistry.ELEMENTAL_SWORD_ICE_ATTACK_02.get(), SoundCategory.PLAYERS, 0.1f, 0.6f);
+                            double xpos = player.getX() - (radius + 1);
+                            double ypos = player.getY();
+                            double zpos = player.getZ() - (radius + 1);
+
+                            for (int i = radius * 2; i > 0; i--) {
+                                for (int j = radius * 2; j > 0; j--) {
+                                    float choose = (float) (Math.random() * 1);
+                                    HelperMethods.spawnParticle(world, ParticleTypes.CAMPFIRE_COSY_SMOKE, xpos + i + choose,
+                                            ypos,
+                                            zpos + j + choose,
+                                            0, 0, 0);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
 
         if ((entity instanceof PlayerEntity player)) {
             if (!player.hasStatusEffect(StatusEffects.STRENGTH) && !player.isOnFire()) {

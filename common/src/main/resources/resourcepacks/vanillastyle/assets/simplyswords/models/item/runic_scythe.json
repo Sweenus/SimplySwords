@@ -1,7 +1,0 @@
-{
-	"parent": "simplyswords:item/big_handheld",
-	"textures": {
-		"layer0": "simplyswords:item/runic_scythe",
-		"layer1": "simplyswords:item/runic_scythe_layer"
-	}
-}

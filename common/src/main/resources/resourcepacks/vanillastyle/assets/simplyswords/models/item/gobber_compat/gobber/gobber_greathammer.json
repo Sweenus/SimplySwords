@@ -1,6 +1,0 @@
-{
-	"parent": "simplyswords:item/template_reworked_greathammer",
-	"textures": {
-		"texture": "simplyswords:item/gobber_compat/gobber/greathammer_gobber"
-	}
-}

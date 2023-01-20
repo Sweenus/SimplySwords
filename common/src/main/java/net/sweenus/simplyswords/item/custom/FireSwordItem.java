@@ -3,8 +3,11 @@ package net.sweenus.simplyswords.item.custom;
 
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.SwordItem;
 import net.minecraft.item.ToolMaterial;
@@ -13,6 +16,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
 import net.sweenus.simplyswords.registry.EffectRegistry;
@@ -49,8 +53,15 @@ public class FireSwordItem extends SwordItem {
             }
 
 
-            if (attacker.getRandom().nextInt(100) <= fhitchance) {
-                target.addStatusEffect(new StatusEffectInstance(EffectRegistry.BURN.get(), 5, 1), attacker);
+            if (attacker.getRandom().nextInt(100) <= fhitchance && (attacker instanceof PlayerEntity player)) {
+
+                BlockPos position = target.getBlockPos();
+
+                Entity fireball = EntityType.FIREBALL.spawn(world, null, null, player, position, SpawnReason.TRIGGERED, true, true);
+                assert fireball != null;
+                fireball.setVelocity(0, 5, 0);
+
+
                 int choose_sound = (int) (Math.random() * 30);
                 if (choose_sound <= 10)
                     world.playSoundFromEntity(null, target, SoundRegistry.ELEMENTAL_BOW_FIRE_SHOOT_IMPACT_01.get(), SoundCategory.PLAYERS, 0.5f, 1.2f);

@@ -1,6 +1,0 @@
-{
-	"parent": "simplyswords:item/template_twinblade",
-	"textures": {
-		"layer0": "simplyswords:item/gobber_compat/end_gobber/twinblade_end_gobber"
-	}
-}

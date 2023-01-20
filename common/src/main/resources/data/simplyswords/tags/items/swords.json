@@ -93,6 +93,9 @@
     "simplyswords:soulkeeper",
     "simplyswords:soulstealer",
     "simplyswords:mjolnir",
+    "simplyswords:slumbering_lichblade",
+    "simplyswords:waking_lichblade",
+    "simplyswords:awakened_lichblade",
 
     {
       "id": "simplyswords:gobber_compat/gobber/gobber_chakram",

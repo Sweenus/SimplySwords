@@ -1,7 +1,0 @@
-{
-	"parent": "simplyswords:item/big_handheld",
-	"textures": {
-		"layer0": "simplyswords:item/arcanethyst",
-		"layer1": "simplyswords:item/arcanethyst_layer"
-	}
-}

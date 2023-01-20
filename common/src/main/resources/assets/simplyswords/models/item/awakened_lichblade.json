@@ -1,0 +1,8 @@
+{
+	"parent": "simplyswords:item/template_claymore",
+	"textures": {
+		"layer0": "simplyswords:item/lichblade",
+		"layer1": "simplyswords:item/lichblade_edge",
+		"layer2": "simplyswords:item/lichblade_eyes"
+	}
+}

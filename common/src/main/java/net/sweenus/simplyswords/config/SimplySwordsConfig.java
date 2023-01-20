@@ -188,6 +188,13 @@ public class SimplySwordsConfig {
         FLOAT_OPTIONS.put("stormjolt_cooldown", 100f);
         FLOAT_OPTIONS.put("stormjolt_chance", 15f);
 
+        FLOAT_OPTIONS.put("soulanguish_radius", 3f);
+        FLOAT_OPTIONS.put("soulanguish_damage", 1f);
+        FLOAT_OPTIONS.put("soulanguish_cooldown", 700f);
+        FLOAT_OPTIONS.put("soulanguish_duration", 500f);
+        FLOAT_OPTIONS.put("soulanguish_heal", 0.5f);
+        FLOAT_OPTIONS.put("soulanguish_range", 22f);
+
 
 
         GENERAL_OPTIONS.put("standard_loot_table_weight", 0.08f);
@@ -601,6 +608,12 @@ public class SimplySwordsConfig {
                 config.append("// ------------------------------- \n");
                 config.append("// -- Unique Effect: Storm Jolt -- \n");
                 config.append("// ------------------------------- \n");
+            }
+            if (i == 103) {
+                config.append("\n");
+                config.append("// --------------------------------- \n");
+                config.append("// -- Unique Effect: Soul Anguish -- \n");
+                config.append("// --------------------------------- \n");
             }
             config.append("  \"").append(item).append("\": ").append(FLOAT_OPTIONS.get(item));
             ++i;

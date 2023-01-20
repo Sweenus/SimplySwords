@@ -1,7 +1,0 @@
-{
-	"parent": "minecraft:item/generated",
-	"textures": {
-		"layer0": "simplyswords:item/runic_tablet_empty",
-		"layer1": "simplyswords:item/runic_tablet_layer"
-	}
-}

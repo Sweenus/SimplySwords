@@ -1,8 +1,0 @@
-{
-	"parent": "simplyswords:item/template_claymore",
-	"textures": {
-		"layer0": "simplyswords:item/watcher_claymore",
-		"layer1": "simplyswords:item/watcher_layer",
-		"layer2": "simplyswords:item/watcher_eyes"
-	}
-}

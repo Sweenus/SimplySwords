@@ -1,7 +1,0 @@
-{
-	"parent": "simplyswords:item/template_reworked_greathammer",
-	"textures": {
-		"texture": "simplyswords:item/soulkeeper",
-		"layer": "simplyswords:item/soulkeeper_layer"
-	}
-}

@@ -1,6 +1,0 @@
-{
-	"parent": "simplyswords:item/big_handheld",
-	"textures": {
-		"layer0": "simplyswords:item/gold_scythe"
-	}
-}

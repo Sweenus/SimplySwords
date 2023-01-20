@@ -1,6 +1,0 @@
-{
-	"parent": "simplyswords:item/template_warglaive",
-	"textures": {
-		"layer0": "simplyswords:item/mythicmetals_compat/warglaive/warglaive_aquarium"
-	}
-}

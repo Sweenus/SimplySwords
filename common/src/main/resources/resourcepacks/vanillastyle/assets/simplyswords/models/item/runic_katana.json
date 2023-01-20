@@ -1,7 +1,0 @@
-{
-	"parent": "simplyswords:item/template_katana",
-	"textures": {
-		"layer0": "simplyswords:item/runic_katana",
-		"layer1": "simplyswords:item/runic_katana_layer"
-	}
-}

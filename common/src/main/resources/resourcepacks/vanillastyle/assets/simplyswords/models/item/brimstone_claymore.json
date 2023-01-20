@@ -1,7 +1,0 @@
-{
-	"parent": "simplyswords:item/template_claymore",
-	"textures": {
-		"layer0": "simplyswords:item/brimstone_claymore",
-		"layer1": "simplyswords:item/brimstone_layer"
-	}
-}

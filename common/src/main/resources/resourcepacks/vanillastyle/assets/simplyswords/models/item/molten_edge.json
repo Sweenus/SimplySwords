@@ -1,7 +1,0 @@
-{
-	"parent": "simplyswords:item/template_longsword",
-	"textures": {
-		"layer0": "simplyswords:item/molten_edge",
-		"layer1": "simplyswords:item/molten_edge_layer"
-	}
-}

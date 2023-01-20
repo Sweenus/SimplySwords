@@ -1,6 +1,0 @@
-{
-	"parent": "simplyswords:item/template_greathammer",
-	"textures": {
-		"texture": "simplyswords:item/frostfall_alt"
-	}
-}
