@@ -25,7 +25,7 @@ public class SimplySwords {
     public static final String MOD_ID = "simplyswords";
     // Registering a new creative tab
     public static final ItemGroup SIMPLYSWORDS = CreativeTabRegistry.create(new Identifier(MOD_ID, "simplyswords"), () ->
-            new ItemStack(ItemsRegistry.SOULSTEALER.get()));
+            new ItemStack(ItemsRegistry.RUNIC_TABLET.get()));
 
     public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
 

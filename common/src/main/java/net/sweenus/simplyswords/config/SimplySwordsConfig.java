@@ -285,6 +285,7 @@ public class SimplySwordsConfig {
         WEAPON_OPTIONS.put("icewhisper_damage_modifier", 7f);
         WEAPON_OPTIONS.put("arcanethyst_damage_modifier", 7f);
         WEAPON_OPTIONS.put("thunderbrand_damage_modifier", 7f);
+        WEAPON_OPTIONS.put("lichblade_damage_modifier", 7f);
 
         WEAPON_OPTIONS.put("brimstone_attackspeed", -2.8f);
         WEAPON_OPTIONS.put("thewatcher_attackspeed", -2.8f);
@@ -309,6 +310,7 @@ public class SimplySwordsConfig {
         WEAPON_OPTIONS.put("icewhisper_attackspeed", -3.1f);
         WEAPON_OPTIONS.put("arcanethyst_attackspeed", -3.1f);
         WEAPON_OPTIONS.put("thunderbrand_attackspeed", -3.1f);
+        WEAPON_OPTIONS.put("lichblade_attackspeed", -3.1f);
 
     }
 
@@ -669,7 +671,7 @@ public class SimplySwordsConfig {
                 config.append("// Example use-case: Adding 3 to a value below will INCREASE the in-game damage of that weapon by 3 \n");
                 config.append("// ---------------------- \n");
             }
-            if (i == 70) {
+            if (i == 71) {
                 config.append("\n");
                 config.append("// -- Attack Speed Modifiers -- \n");
                 config.append("// Recommended range: -1.0 to -3.7, with -1.0 being fast and -3.7 being slow \n");

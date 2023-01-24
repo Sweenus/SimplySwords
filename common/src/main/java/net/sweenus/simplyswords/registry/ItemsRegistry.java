@@ -91,6 +91,7 @@ public class ItemsRegistry {
     static float icewhisper_attackspeed = SimplySwordsConfig.getWeaponAttributes("icewhisper_attackspeed");
     static float arcanethyst_attackspeed = SimplySwordsConfig.getWeaponAttributes("arcanethyst_attackspeed");
     static float thunderbrand_attackspeed = SimplySwordsConfig.getWeaponAttributes("thunderbrand_attackspeed");
+    static float lichblade_attackspeed = SimplySwordsConfig.getWeaponAttributes("lichblade_attackspeed");
 
     static float brimstone_damage_modifier = SimplySwordsConfig.getWeaponAttributes("brimstone_damage_modifier");
     static float thewatcher_damage_modifier = SimplySwordsConfig.getWeaponAttributes("thewatcher_damage_modifier");
@@ -115,8 +116,10 @@ public class ItemsRegistry {
     static float icewhisper_damage_modifier = SimplySwordsConfig.getWeaponAttributes("icewhisper_damage_modifier");
     static float arcanethyst_damage_modifier = SimplySwordsConfig.getWeaponAttributes("arcanethyst_damage_modifier");
     static float thunderbrand_damage_modifier = SimplySwordsConfig.getWeaponAttributes("thunderbrand_damage_modifier");
+    static float lichblade_damage_modifier = SimplySwordsConfig.getWeaponAttributes("lichblade_damage_modifier");
 
     public static final DeferredRegister<Item> ITEM = DeferredRegister.create(SimplySwords.MOD_ID, Registry.ITEM_KEY);
+
 
     public static final RegistrySupplier<Item> RUNIC_TABLET = ITEM.register("runic_tablet", () ->
             new Item(new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.RARE)));
@@ -730,20 +733,20 @@ public class ItemsRegistry {
 
     public static final RegistrySupplier<LichbladeSwordItem> SLUMBERING_LICHBLADE = ITEM.register( "slumbering_lichblade", () ->
             new LichbladeSwordItem(ModToolMaterial.UNIQUE,
-                    (int) (thunderbrand_damage_modifier),
-                    thunderbrand_attackspeed,
+                    (int) (lichblade_damage_modifier),
+                    lichblade_attackspeed,
                     new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
     public static final RegistrySupplier<LichbladeSwordItem> WAKING_LICHBLADE = ITEM.register( "waking_lichblade", () ->
             new LichbladeSwordItem(ModToolMaterial.UNIQUE,
-                    (int) (thunderbrand_damage_modifier),
-                    thunderbrand_attackspeed,
+                    (int) (lichblade_damage_modifier),
+                    lichblade_attackspeed,
                     new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
     public static final RegistrySupplier<LichbladeSwordItem> AWAKENED_LICHBLADE = ITEM.register( "awakened_lichblade", () ->
             new LichbladeSwordItem(ModToolMaterial.UNIQUE,
-                    (int) (thunderbrand_damage_modifier),
-                    thunderbrand_attackspeed,
+                    (int) (lichblade_damage_modifier),
+                    lichblade_attackspeed,
                     new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
 

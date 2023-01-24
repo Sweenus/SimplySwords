@@ -20,7 +20,7 @@ public class SimplySwordsForge {
 
         if (ModList.get().isLoaded("gobber2"))
             GobberCompat.GOBBER_ITEM.register(FMLJavaModLoadingContext.get().getModEventBus());
-
+//
     }
     private void onClientSetup(FMLClientSetupEvent event) {
         SimplySwordsClient.init();

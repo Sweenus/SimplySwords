@@ -153,7 +153,7 @@ public class LichbladeSwordItem extends SwordItem {
                                 player.addStatusEffect(new StatusEffectInstance(StatusEffects.ABSORPTION, damageTracker, 1), player);
                             damageTracker = 0;
                             blizzard_timer = 0;
-                            world.playSoundFromEntity(null, player, SoundRegistry.DARK_SWORD_SPELL.get(), SoundCategory.PLAYERS, 0.02f, 0.5f);
+                            world.playSoundFromEntity(null, player, SoundRegistry.DARK_SWORD_SPELL.get(), SoundCategory.PLAYERS, 0.04f, 0.5f);
                         }
                     }
                     else {
@@ -245,7 +245,10 @@ public class LichbladeSwordItem extends SwordItem {
 
     @Override
     public Text getName(ItemStack stack) {
-        return Text.translatable(this.getTranslationKey(stack)).formatted(Formatting.GOLD, Formatting.BOLD, Formatting.UNDERLINE);
+        if (this.getDefaultStack().isOf(ItemsRegistry.AWAKENED_LICHBLADE.get()))
+            return Text.translatable(this.getTranslationKey(stack)).formatted(Formatting.DARK_RED, Formatting.BOLD, Formatting.UNDERLINE);
+        else
+            return Text.translatable(this.getTranslationKey(stack)).formatted(Formatting.GOLD, Formatting.BOLD, Formatting.UNDERLINE);
     }
 
     @Override

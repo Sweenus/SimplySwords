@@ -16,7 +16,7 @@
   "type": "minecraft:crafting_shaped",
   "key": {
     "#": {
-      "item": "minecraft:stick"
+      "tag": "c:wood_sticks"
     },
     "X": {
       "item": "minecraft:copper_ingot"
