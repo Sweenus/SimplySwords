@@ -1,0 +1,17 @@
+{
+  "name": "Livyatan",
+  "icon": "simplyswords:livyatan",
+  "advancement": "simplyswords:livyatan",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:livyatan",
+      "text": "The Livyatan is a fearsome axe that is capable of freezing its enemies and shattering them for incredible damage. With each strike, the axe may send out a wave of freezing energy that engulfs nearby targets, preventing them from moving completely."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "If the wielder wills it, the axe shatters them into pieces, dealing devastating damage. The axe is said to be forged from the heart of a legendary creature and it glows with a cold blue light. This weapon is perfect for warriors who want to deal massive damage and control the battlefield by freezing and shattering their enemies."
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "name": "Soul Pyre",
+  "icon": "simplyswords:soulpyre",
+  "advancement": "simplyswords:soulpyre",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:soulpyre",
+      "text": "The Soul Pyre is a powerful and ancient axe that is said to contain the power of souls, transposition, and fire. The axe is said to be forged from a rare and mystical metal that is infused with the energy of countless souls."
+
+    },
+    {
+      "type": "patchouli:text",
+      "text": "The axe has the ability to transpose the souls of its victims, allowing the wielder to switch their location with that of their enemies. It also has the power to unleash the souls trapped within it, unleashing a devastating wave of fiery energy that can incinerate an entire battlefield."
+    }
+  ]
+}

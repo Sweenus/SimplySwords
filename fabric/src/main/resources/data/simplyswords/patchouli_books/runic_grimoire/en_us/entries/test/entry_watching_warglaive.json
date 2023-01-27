@@ -1,0 +1,17 @@
+{
+  "name": "Watching Warglaive",
+  "icon": "simplyswords:watching_warglaive",
+  "advancement": "simplyswords:watching_warglaive",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:watching_warglaive",
+      "text": "The Watching Warglaive is a powerful and deadly weapon that is made to be wielded by skilled and fierce warriors. Boasting two blinking eyes on the center, the blades are made of a dark, almost black metal that seems to absorb the light around it"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "The Watching Warglaive has the power to siphon health from nearby enemies and transfer it to its wielder, keeping them in the fight longer. The Warglaive also has a chance to immediately execute its opponents, dealing a powerful and critical blow that can end the fight instantly."
+    }
+  ]
+}

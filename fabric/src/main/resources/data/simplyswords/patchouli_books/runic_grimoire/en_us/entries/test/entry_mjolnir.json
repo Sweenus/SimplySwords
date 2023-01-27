@@ -1,0 +1,17 @@
+{
+  "name": "Mjolnir",
+  "icon": "simplyswords:mjolnir",
+  "advancement": "simplyswords:mjolnir",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:mjolnir",
+      "text": "Forged by the dwarves, Brokkr and Eitri, and gifted to the god of thunder, Thor. Mjolnir is a weapon of incredible power, able to level entire mountains in a single strike when wielded by one who is worthy."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "In lesser hands it is still capable of summoning lightning when the rain is out, and returning to its wielder, though at a significantly reduced range and velocity. Perhaps it's best you returned it to it's true owner, no?"
+    }
+  ]
+}

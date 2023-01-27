@@ -1,0 +1,17 @@
+{
+  "name": "Soulstealer",
+  "icon": "simplyswords:soulstealer",
+  "advancement": "simplyswords:soulstealer",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:soulstealer",
+      "text": "The Soulstealer is a powerful and mysterious weapon that is said to have the ability to steal the souls of its victims and manipulate their perceptions. It is believed to be a powerful tool of manipulation and relocation, able to fog the minds of those it targets to become blind to the presence of its wielder."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "The exact nature and capabilities of the Soulstealer are scarcely understood, as it is a highly sought-after and elusive weapon that is said to be wielded only by the most powerful and sinister individuals."
+    }
+  ]
+}

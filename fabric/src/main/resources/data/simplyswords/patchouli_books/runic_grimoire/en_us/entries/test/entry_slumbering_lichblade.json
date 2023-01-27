@@ -1,0 +1,17 @@
+{
+  "name": "Slumbering Lichblade",
+  "icon": "simplyswords:slumbering_lichblade",
+  "advancement": "simplyswords:slumbering_lichblade",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:slumbering_lichblade",
+      "text": "The Slumbering Lichblade is a greatsword that exudes an aura of tormented souls that damages enemies that come too close. The sword is said to be crafted from the remains of a powerful Lich, and imbued with the power of the souls it consumed. Sometimes, a sinister whisper can be heard emanating from the blade."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "The sword, however, is currently in a dormant state and its true power is locked away. Through a special ritual or crafting process, the wielder can awaken the sword and unlock its greater abilities. Once awakened, the sword's aura can be commanded to attack an enemy, siphoning their lifeforce and granting it to the wielder. It is a weapon of great power and should be used with caution."
+    }
+  ]
+}

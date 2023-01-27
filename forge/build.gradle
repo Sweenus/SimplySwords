@@ -4,6 +4,7 @@ plugins {
 
 repositories {
     maven {url "https://cursemaven.com"}
+    maven { url "https://maven.blamejared.com" }
 
 }
 
@@ -36,6 +37,9 @@ dependencies {
     forge "net.minecraftforge:forge:${rootProject.forge_version}"
     // Remove the next line if you don't want to depend on the API
     modApi "dev.architectury:architectury-forge:${rootProject.architectury_version}"
+
+    //Patchouli
+    modImplementation ("vazkii.patchouli:Patchouli:1.19.2-77")
 
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }

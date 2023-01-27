@@ -1,0 +1,17 @@
+{
+  "name": "Icewhisper",
+  "icon": "simplyswords:icewhisper",
+  "advancement": "simplyswords:icewhisper",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:icewhisper",
+      "text": "Icewhisper is a deadly halberd that radiates a debilitating frost aura around the wielder. This aura slows the movements of enemies, making them easier to strike and leaving them vulnerable to follow-up attacks."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "In addition to its chilling presence, the halberd also has the ability to summon a blizzard, enveloping the battlefield in a tempest of ice and snow. This blizzard not only deals damage to foes, but also makes it harder for them to see and move, providing the wielder with a tactical advantage. The halberd is said to be forged from the purest ice and it shimmers with a cool blue light."
+    }
+  ]
+}

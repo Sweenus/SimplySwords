@@ -1,0 +1,17 @@
+{
+  "name": "Thunderbrand",
+  "icon": "simplyswords:thunderbrand",
+  "advancement": "simplyswords:thunderbrand",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:thunderbrand",
+      "text": "The Thunderbrand is a legendary halberd that harnesses the power of thunder. The halberd is crafted from a rare metal that is able to conduct electricity with ease, while the handle is wrapped in a special insulating material that allows the wielder to hold the halberd safely."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "The halberd's ability to dash forward with incredible speed, allows the wielder to close the distance and strike with deadly precision. The Thunderbrand is also able to release a powerful surge of electricity that can strike multiple enemies at once, making it a formidable weapon on the battlefield."
+    }
+  ]
+}

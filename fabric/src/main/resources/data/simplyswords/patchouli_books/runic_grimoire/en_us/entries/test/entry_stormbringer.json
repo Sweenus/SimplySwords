@@ -1,0 +1,17 @@
+{
+  "name": "Stormbringer",
+  "icon": "simplyswords:stormbringer",
+  "advancement": "simplyswords:stormbringer",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:stormbringer",
+      "text": "The sword's split blade is imbued with a powerful electrical energy that crackles and arcs with each strike. The sword is said to be particularly effective when used in battle during a storm, where the wielder can harness the full power of the lightning."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "The sword is said to be extremely powerful but also unpredictable, as its electric charge been known to arc towards the user, often in a most fatal fashion."
+    }
+  ]
+}

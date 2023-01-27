@@ -26,6 +26,7 @@ repositories {
             includeGroup "curse.maven"
         }
     }
+    maven { url 'https://maven.blamejared.com' }
 }
 
 dependencies {
@@ -37,6 +38,9 @@ dependencies {
     // Mythic Metals
     modImplementation "curse.maven:mythicmetals-410127:4118479"
     // slug / curseforge project ID / file ID "check url"
+
+    // Patchouli
+    modImplementation "vazkii.patchouli:Patchouli:1.19.2-77-FABRIC"
 
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }

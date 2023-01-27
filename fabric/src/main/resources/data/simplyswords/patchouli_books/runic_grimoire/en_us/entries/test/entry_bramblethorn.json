@@ -1,0 +1,17 @@
+{
+  "name": "Bramblethorn",
+  "icon": "simplyswords:bramblethorn",
+  "advancement": "simplyswords:bramblethorn",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:bramblethorn",
+      "text": "The Bramblethorn is a unique and deadly rapier that appears to be nothing more than a simple twig, but holds a powerful secret within. Crafted from a rare and enchanted wood that is both lightweight and durable, the Bramblethorn is capable of delivering swift and deadly strikes."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "The rapier's ability to release a cloud of toxic spores with a flick of the wrist, can poison and incapacitate any enemies that dare to step within its reach. Aside from it's wielder, the spores know no discrimination, so be careful when wielding it near those whose lives you value."
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "name": "Sword on a Stick",
+  "icon": "simplyswords:sword_on_a_stick",
+  "advancement": "simplyswords:sword_on_a_stick",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:sword_on_a_stick",
+      "text": "The Sword on a Stick is a weapon of legend, said to be passed down from generation to generation of a family of great warriors. Tales of its deeds have spread far and wide throughout the lands, and all whom lend an ear can't help but be in awe at its power."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "On second thought though, this is probably just a stick with a sword strapped on the end."
+    }
+  ]
+}

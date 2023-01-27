@@ -1,0 +1,17 @@
+{
+  "name": "Arcanethyst",
+  "icon": "simplyswords:arcanethyst",
+  "advancement": "simplyswords:arcanethyst",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:arcanethyst",
+      "text": "The Arcanethyst is a powerful halberd that harnesses the power of arcane magic to manipulate its enemies, akin to that of telekinesis. The halberd is crafted from enchanted amethyst, a rare and valuable gemstone known for its ability to channel magical energy."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "The halberd's unique ability to lift enemies off the ground with a wave of arcane energy, leaves them vulnerable to follow-up attacks. This halberd is considered a powerful tool of destruction, but it requires the absorption of power from the flesh of its enemies in order to reach its greatest potential."
+    }
+  ]
+}

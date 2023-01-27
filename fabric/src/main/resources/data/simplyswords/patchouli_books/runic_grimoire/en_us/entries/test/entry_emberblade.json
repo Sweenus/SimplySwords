@@ -1,0 +1,17 @@
+{
+  "name": "Emberblade",
+  "icon": "simplyswords:emberblade",
+  "advancement": "simplyswords:emberblade",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:emberblade",
+      "text": "The Emberblade is a powerful longsword that is imbued with the power of fire. The blade is forged from a rare metal that is able to withstand the intense heat of the flames that surround it. Known to engulf its wielder in flames, The Emberblade can grant increased strength and speed."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "It's said that the sword chooses its wielder and that only those who are worthy of it can wield it. However, it has been said that using the sword's abilities for too long can cause the wielder to lose control and become overwhelmed by the flames, resulting in a most horrifying demise."
+    }
+  ]
+}

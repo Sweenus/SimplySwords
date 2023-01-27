@@ -1,0 +1,17 @@
+{
+  "name": "Soulkeeper",
+  "icon": "simplyswords:soulkeeper",
+  "advancement": "simplyswords:soulkeeper",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:soulkeeper",
+      "text": "The Soulkeeper is said to be crafted from a mysterious material that is able to absorb the souls of the fallen, creating a bond between the wielder and the souls. The souls that are absorbed by the hammer act as a protective shield, absorbing some of the damage dealt to the wielder."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "The hammer also has the ability to send these souls out to weaken and slow nearby enemies. The hammer itself is massive and imposing, with a peering window into a well of souls. The hammer has a eerie aura that surrounds it and it is said to be the weapon of choice for those who want to harness the power of souls and use it to their advantage in battle."
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "name": "Longsword of the Plague",
+  "icon": "simplyswords:toxic_longsword",
+  "advancement": "simplyswords:longsword_plague",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:toxic_longsword",
+      "text": "The Longsword of the Plague is a cursed weapon that is capable of transforming boons, such as regeneration or resistance, upon its enemies into debilitating effects. This can leave enemies weakened and vulnerable, giving the wielder an upper hand in combat."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "The sword is said to be forged from the remains of victims of a great plague and imbued with a dark magic. Radiating with a ominous aura of decay, this weapon is perfect for warriors who want to disrupt their enemies and turn the tide of battle."
+    }
+  ]
+}

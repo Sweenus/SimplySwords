@@ -1,0 +1,17 @@
+{
+  "name": "The Watcher",
+  "icon": "simplyswords:watcher_claymore",
+  "advancement": "simplyswords:the_watcher",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:watcher_claymore",
+      "text": "The Watcher is a greatsword that boasts an eerie blinking eye on its hilt, which is said to be the source of its power. Its blade is made of a dark, almost black metal that seems to absorb the light around it."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "The Watcher is known to be capable of instantly felling any enemy in a single strike, but it's said to only happen when the wielder is in a state of pure focus, and when the enemy is at a critical state. It is said that only a true warrior, one with a strong will and a lust for power, can wield The Watcher and harness its full potential."
+    }
+  ]
+}

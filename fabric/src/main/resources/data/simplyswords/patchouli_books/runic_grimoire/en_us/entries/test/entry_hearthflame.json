@@ -1,0 +1,17 @@
+{
+  "name": "Hearthflame",
+  "icon": "simplyswords:hearthflame",
+  "advancement": "simplyswords:hearthflame",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:hearthflame",
+      "text": "Hearthflame is a powerful greathammer imbued with the ability to cause devastating tremors. When swung, it sends out ripples of force that pull enemies towards it before igniting them in a fiery blast."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "The resulting explosion not only deals massive damage, but also launches foes away from the wielder, providing an opportunity to reposition or pursue other targets. The hammer is said to be forged from the hottest flames of the earth and it radiates with an aura of heat. This weapon is perfect for warriors who want to deal massive damage and control the battlefield."
+    }
+  ]
+}

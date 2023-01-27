@@ -1,0 +1,17 @@
+{
+  "name": "Brimstone Claymore",
+  "icon": "simplyswords:brimstone_claymore",
+  "advancement": "simplyswords:brimstone",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:brimstone_claymore",
+      "text": "The Brimstone Claymore is a fearsome weapon that harnesses the power of molten brimstone to deal devastating damage to its enemies. The blade of the claymore is imbued with the power of brimstone, allowing it a chance to spew forth molten lava with every strike."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "This weapon is extremely heavy and requires a strong wielder to handle it properly, and it should be used with caution as its power can cause severe damage to the environment and anyone close to it. Only the most skilled and powerful warriors are able to wield the Brimstone Claymore effectively."
+    }
+  ]
+}

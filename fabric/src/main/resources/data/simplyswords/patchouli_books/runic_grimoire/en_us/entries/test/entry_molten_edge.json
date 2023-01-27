@@ -1,0 +1,17 @@
+{
+  "name": "Molten Edge",
+  "icon": "simplyswords:molten_edge",
+  "advancement": "simplyswords:molten_edge",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:molten_edge",
+      "text": "Molten Edge is a fierce axe that grants its wielder increased strength and haste when they are injured. As the wielder takes damage, the axe becomes more powerful, allowing them to strike harder and faster in battle."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Additionally, the axe has the ability to let out a powerful warcry when used, greatly hastening the wielder's movements and allowing them to quickly close in on their enemies. The axe is said to be forged from molten lava, and it exudes a fiery aura. This weapon is perfect for warriors who want to fight fiercely in battle and overcome any adversity."
+    }
+  ]
+}

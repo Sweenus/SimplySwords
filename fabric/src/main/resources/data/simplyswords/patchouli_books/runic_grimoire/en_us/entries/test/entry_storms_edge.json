@@ -1,0 +1,17 @@
+{
+  "name": "Storm's Edge",
+  "icon": "simplyswords:storms_edge",
+  "advancement": "simplyswords:storms_edge",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:storms_edge",
+      "text": "The Storm's Edge is said to be forged from a rare metal that is able to channel and harness the power of electricity. The hilt is made of a dark wood and are wrapped in protective leather."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "The twinblade has the ability to store electricity, and with a command word or willpower, the wielder can release it to propel themselves forward, quickly closing the distance with their enemies and becoming temporarily invulnerable to all attacks."
+    }
+  ]
+}

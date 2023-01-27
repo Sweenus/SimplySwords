@@ -1,0 +1,17 @@
+{
+  "name": "Frostfall",
+  "icon": "simplyswords:frostfall",
+  "advancement": "simplyswords:frostfall",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:frostfall",
+      "text": "Frostfall is a powerful hammer that harnesses the power of ice to freeze its enemies solid. The hammer is crafted from a rare metal that is able to withstand the intense cold of the ice. The hammer head is imbued with the power of ice, allowing it to freeze anything it strikes."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "The hammer's unique ability is the ability to encase its wielder in a protective layer of ice, granting them increased regeneration and resistance. It's said that the hammer was created by a powerful wizard who imbued it with the power of the winter, making it a fearsome weapon on the battlefield."
+    }
+  ]
+}
