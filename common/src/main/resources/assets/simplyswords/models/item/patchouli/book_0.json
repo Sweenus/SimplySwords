@@ -1,0 +1,21 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "simplyswords:item/patchouli/strip_book_2",
+    "layer1": "simplyswords:item/patchouli/strip_rune_2"
+  },
+  "overrides": [
+    {
+      "predicate": { "completion": 0 },
+      "model": "simplyswords:item/patchouli/book_0"
+    },
+    {
+      "predicate": { "completion": 0.35 },
+      "model": "simplyswords:item/patchouli/book_1"
+    },
+    {
+      "predicate": { "completion": 0.75 },
+      "model": "simplyswords:item/patchouli/book_2"
+    }
+  ]
+}

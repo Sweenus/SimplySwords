@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "simplyswords:item/patchouli/book_1",
+    "layer1": "simplyswords:item/patchouli/strip_rune_1"
+  }
+}

@@ -3,7 +3,7 @@
   "version": 1,
   "landing_text": "A Guide to weapon crafting, rune etching, and unique weaponry.$(br2)$(br2)(Entries created with the help of OpenAI's ChatGPT)",
   "book_texture": "patchouli:textures/gui/book_red.png",
-  "model": "patchouli:book_red",
+  "model": "simplyswords:patchouli/book_0",
   "advancements_tab": "simplyswords",
   "progress_bar_color": "0384fc",
   "index_icon": "minecraft:spyglass"
