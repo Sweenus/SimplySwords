@@ -20,12 +20,15 @@
     },
     "X": {
       "item": "mythicmetals:quadrillum_ingot"
+    },
+    "Y": {
+      "item": "minecraft:iron_nugget"
     }
   },
   "pattern": [
-    "XXX",
-    "X X",
-    "X#X"
+    "YXY",
+    "Y Y",
+    "Y#Y"
   ],
   "result": {
     "item": "simplyswords:mythicmetals_compat/quadrillum/quadrillum_chakram"

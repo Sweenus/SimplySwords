@@ -20,12 +20,15 @@
     },
     "X": {
       "item": "mythicmetals:star_platinum"
+    },
+    "Y": {
+      "item": "minecraft:iron_nugget"
     }
   },
   "pattern": [
-    " XX",
-    "XXX",
-    "#X "
+    " YX",
+    "YXY",
+    "#Y "
   ],
   "result": {
     "item": "simplyswords:mythicmetals_compat/star_platinum/star_platinum_claymore"

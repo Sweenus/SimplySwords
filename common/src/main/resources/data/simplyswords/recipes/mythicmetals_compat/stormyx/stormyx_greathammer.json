@@ -20,11 +20,14 @@
     },
     "X": {
       "item": "mythicmetals:stormyx_ingot"
+    },
+    "Y": {
+      "item": "minecraft:iron_nugget"
     }
   },
   "pattern": [
     "XXX",
-    "XXX",
+    "YYY",
     " # "
   ],
   "result": {

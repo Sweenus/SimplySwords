@@ -10,10 +10,10 @@
   },
   "pattern": [
     "  X",
-    " #X",
+    " # ",
     "#  "
   ],
   "result": {
-    "item": "simplyswords:gold_glaive"
+    "item": "simplyswords:gold_spear"
   }
 }

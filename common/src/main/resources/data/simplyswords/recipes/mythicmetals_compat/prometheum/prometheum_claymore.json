@@ -20,12 +20,15 @@
     },
     "X": {
       "item": "mythicmetals:prometheum_ingot"
+    },
+    "Y": {
+      "item": "minecraft:iron_nugget"
     }
   },
   "pattern": [
-    " XX",
-    "XXX",
-    "#X "
+    " YX",
+    "YXY",
+    "#Y "
   ],
   "result": {
     "item": "simplyswords:mythicmetals_compat/prometheum/prometheum_claymore"

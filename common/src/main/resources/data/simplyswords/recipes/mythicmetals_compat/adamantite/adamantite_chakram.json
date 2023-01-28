@@ -20,12 +20,15 @@
     },
     "X": {
       "tag": "c:adamantite_ingots"
+    },
+    "Y": {
+      "item": "minecraft:iron_nugget"
     }
   },
   "pattern": [
-    "XXX",
-    "X X",
-    "X#X"
+    "YXY",
+    "Y Y",
+    "Y#Y"
   ],
   "result": {
     "item": "simplyswords:mythicmetals_compat/adamantite/adamantite_chakram"

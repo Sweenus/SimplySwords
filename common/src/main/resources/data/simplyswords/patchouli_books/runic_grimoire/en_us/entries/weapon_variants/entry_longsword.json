@@ -11,7 +11,16 @@
     {
       "type": "patchouli:crafting",
       "recipe": "simplyswords:iron_longsword",
-      "recipe2": "simplyswords:diamond_longsword"
+      "recipe2": "simplyswords:gold_longsword"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:diamond_longsword"
+    },
+    {
+      "type": "patchouli:smithing",
+      "recipe": "simplyswords:netherite_longsword",
+      "recipe2": "simplyswords:runic_longsword"
     }
   ]
 }

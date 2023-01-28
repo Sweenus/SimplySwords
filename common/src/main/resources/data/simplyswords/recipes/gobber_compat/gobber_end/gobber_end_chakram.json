@@ -20,12 +20,15 @@
     },
     "X": {
       "item": "gobber2:gobber2_ingot_end"
+    },
+    "Y": {
+      "item": "minecraft:iron_nugget"
     }
   },
   "pattern": [
-    "XXX",
-    "X X",
-    "X#X"
+    "YXY",
+    "Y Y",
+    "Y#Y"
   ],
   "result": {
     "item": "simplyswords:gobber_compat/gobber_end/gobber_end_chakram"

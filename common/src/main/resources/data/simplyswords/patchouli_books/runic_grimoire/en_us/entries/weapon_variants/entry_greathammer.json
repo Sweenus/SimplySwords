@@ -11,7 +11,16 @@
     {
       "type": "patchouli:crafting",
       "recipe": "simplyswords:iron_greathammer",
-      "recipe2": "simplyswords:diamond_greathammer"
+      "recipe2": "simplyswords:gold_greathammer"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:diamond_greathammer"
+    },
+    {
+      "type": "patchouli:smithing",
+      "recipe": "simplyswords:netherite_greathammer",
+      "recipe2": "simplyswords:runic_greathammer"
     }
   ]
 }

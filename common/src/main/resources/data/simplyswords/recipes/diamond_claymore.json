@@ -6,12 +6,15 @@
     },
     "X": {
       "item": "minecraft:diamond"
+    },
+    "Y": {
+      "item": "minecraft:iron_nugget"
     }
   },
   "pattern": [
-    " XX",
-    "XXX",
-    "#X "
+    " YX",
+    "YXY",
+    "#Y "
   ],
   "result": {
     "item": "simplyswords:diamond_claymore"

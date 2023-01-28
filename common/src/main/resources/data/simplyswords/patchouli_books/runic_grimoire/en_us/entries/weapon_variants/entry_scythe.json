@@ -11,7 +11,16 @@
     {
       "type": "patchouli:crafting",
       "recipe": "simplyswords:iron_scythe",
-      "recipe2": "simplyswords:diamond_scythe"
+      "recipe2": "simplyswords:gold_scythe"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:diamond_scythe"
+    },
+    {
+      "type": "patchouli:smithing",
+      "recipe": "simplyswords:netherite_scythe",
+      "recipe2": "simplyswords:runic_scythe"
     }
   ]
 }

@@ -11,7 +11,16 @@
     {
       "type": "patchouli:crafting",
       "recipe": "simplyswords:iron_chakram",
-      "recipe2": "simplyswords:diamond_chakram"
+      "recipe2": "simplyswords:gold_chakram"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:diamond_chakram"
+    },
+    {
+      "type": "patchouli:smithing",
+      "recipe": "simplyswords:netherite_chakram",
+      "recipe2": "simplyswords:runic_chakram"
     }
   ]
 }

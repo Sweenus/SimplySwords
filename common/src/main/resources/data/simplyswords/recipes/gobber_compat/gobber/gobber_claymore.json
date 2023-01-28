@@ -20,12 +20,15 @@
     },
     "X": {
       "item": "gobber2:gobber2_ingot"
+    },
+    "Y": {
+      "item": "minecraft:iron_nugget"
     }
   },
   "pattern": [
-    " XX",
-    "XXX",
-    "#X "
+    " YX",
+    "YXY",
+    "#Y "
   ],
   "result": {
     "item": "simplyswords:gobber_compat/gobber/gobber_claymore"

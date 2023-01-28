@@ -11,7 +11,16 @@
     {
       "type": "patchouli:crafting",
       "recipe": "simplyswords:iron_greataxe",
-      "recipe2": "simplyswords:diamond_greataxe"
+      "recipe2": "simplyswords:gold_greataxe"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:diamond_greataxe"
+    },
+    {
+      "type": "patchouli:smithing",
+      "recipe": "simplyswords:netherite_greataxe",
+      "recipe2": "simplyswords:runic_greataxe"
     }
   ]
 }

@@ -11,7 +11,16 @@
     {
       "type": "patchouli:crafting",
       "recipe": "simplyswords:iron_rapier",
-      "recipe2": "simplyswords:diamond_rapier"
+      "recipe2": "simplyswords:gold_rapier"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:diamond_rapier"
+    },
+    {
+      "type": "patchouli:smithing",
+      "recipe": "simplyswords:netherite_rapier",
+      "recipe2": "simplyswords:runic_rapier"
     }
   ]
 }

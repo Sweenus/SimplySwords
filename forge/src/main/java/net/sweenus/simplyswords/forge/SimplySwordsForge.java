@@ -12,7 +12,7 @@ import net.sweenus.simplyswords.forge.compat.GobberCompat;
 @Mod(SimplySwords.MOD_ID)
 public class SimplySwordsForge {
     public SimplySwordsForge() {
-        // Submit our event bus to let architectury register our content on the right time
+        // Submit our event bus to let architectury register our content on the right time -
         EventBuses.registerModEventBus(SimplySwords.MOD_ID, FMLJavaModLoadingContext.get().getModEventBus());
 
         SimplySwords.init();

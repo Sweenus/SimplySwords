@@ -11,7 +11,16 @@
     {
       "type": "patchouli:crafting",
       "recipe": "simplyswords:iron_glaive",
-      "recipe2": "simplyswords:diamond_glaive"
+      "recipe2": "simplyswords:gold_glaive"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:diamond_glaive"
+    },
+    {
+      "type": "patchouli:smithing",
+      "recipe": "simplyswords:netherite_glaive",
+      "recipe2": "simplyswords:runic_glaive"
     }
   ]
 }

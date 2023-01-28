@@ -11,7 +11,16 @@
     {
       "type": "patchouli:crafting",
       "recipe": "simplyswords:iron_twinblade",
-      "recipe2": "simplyswords:diamond_twinblade"
+      "recipe2": "simplyswords:gold_twinblade"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:diamond_twinblade"
+    },
+    {
+      "type": "patchouli:smithing",
+      "recipe": "simplyswords:netherite_twinblade",
+      "recipe2": "simplyswords:runic_twinblade"
     }
   ]
 }

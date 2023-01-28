@@ -20,12 +20,15 @@
     },
     "X": {
       "item": "mythicmetals:steel_ingot"
+    },
+    "Y": {
+      "item": "minecraft:iron_nugget"
     }
   },
   "pattern": [
-    "XXX",
-    "X X",
-    "X#X"
+    "YXY",
+    "Y Y",
+    "Y#Y"
   ],
   "result": {
     "item": "simplyswords:mythicmetals_compat/steel/steel_chakram"

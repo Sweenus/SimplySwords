@@ -20,12 +20,15 @@
     },
     "X": {
       "item": "mythicmetals:stormyx_ingot"
+    },
+    "Y": {
+      "item": "minecraft:iron_nugget"
     }
   },
   "pattern": [
-    " XX",
-    "XXX",
-    "#X "
+    " YX",
+    "YXY",
+    "#Y "
   ],
   "result": {
     "item": "simplyswords:mythicmetals_compat/stormyx/stormyx_claymore"

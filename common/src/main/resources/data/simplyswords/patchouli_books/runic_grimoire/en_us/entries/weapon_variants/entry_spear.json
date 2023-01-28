@@ -11,7 +11,16 @@
     {
       "type": "patchouli:crafting",
       "recipe": "simplyswords:iron_spear",
-      "recipe2": "simplyswords:diamond_spear"
+      "recipe2": "simplyswords:gold_spear"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:diamond_spear"
+    },
+    {
+      "type": "patchouli:smithing",
+      "recipe": "simplyswords:netherite_spear",
+      "recipe2": "simplyswords:runic_spear"
     }
   ]
 }

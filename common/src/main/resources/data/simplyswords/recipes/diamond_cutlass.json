@@ -6,10 +6,13 @@
     },
     "X": {
       "item": "minecraft:diamond"
+    },
+    "Y": {
+      "item": "minecraft:iron_nugget"
     }
   },
   "pattern": [
-    " X",
+    " Y",
     "XX",
     "# "
   ],

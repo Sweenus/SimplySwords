@@ -20,11 +20,14 @@
     },
     "X": {
       "item": "mythicmetals:star_platinum"
+    },
+    "Y": {
+      "item": "minecraft:iron_nugget"
     }
   },
   "pattern": [
     "XXX",
-    "XXX",
+    "YYY",
     " # "
   ],
   "result": {
