@@ -1,0 +1,17 @@
+{
+  "name": "Cutlass",
+  "icon": "simplyswords:iron_cutlass",
+  "category": "simplyswords:category_weapon_variants",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:iron_cutlass",
+      "text": "The Cutlass is designed for both cutting and thrusting attacks, and it was widely used in close-quarters combat on ships and boats, making it a formidable weapon for naval warfare. Its curved shape allows for powerful, slicing attacks, making it effective against both flesh and rope."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:iron_cutlass",
+      "recipe2": "simplyswords:diamond_cutlass"
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "name": "Glaive",
+  "icon": "simplyswords:iron_glaive",
+  "category": "simplyswords:category_weapon_variants",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:iron_glaive",
+      "text": "A glaive is a type of polearm weapon that consists of a single-edged blade mounted on the end of a long pole or shaft, ideal for slicing or cutting. The design of the glaive allows for long reach in combat, making it useful for both attacking and defending."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:iron_glaive",
+      "recipe2": "simplyswords:diamond_glaive"
+    }
+  ]
+}

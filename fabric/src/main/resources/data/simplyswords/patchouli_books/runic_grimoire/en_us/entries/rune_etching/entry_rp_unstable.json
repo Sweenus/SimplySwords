@@ -1,0 +1,17 @@
+{
+  "name": "Unstable",
+  "icon": "simplyswords:runic_tablet",
+  "category": "simplyswords:category_rune_etching",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:runic_tablet",
+      "title": "Unstable",
+      "text": "Unstable is a runic power that imbues the wielder's weapon with the $(#9243a3)$(l)essence of chaos$(). $(br2)It grants the wielder a chance to periodically apply random effects to themselves."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Keep in mind that this power is highly unpredictable, as it can also have negative effects. $(br2)It's ideal for players that enjoy taking risks and being surprised by the outcome, but it's not recommended for players that prefer consistency in battle."
+    }
+  ]
+}

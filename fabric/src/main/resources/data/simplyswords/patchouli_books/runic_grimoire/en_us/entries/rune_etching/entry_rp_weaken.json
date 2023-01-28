@@ -1,0 +1,17 @@
+{
+  "name": "Weaken",
+  "icon": "simplyswords:runic_tablet",
+  "category": "simplyswords:category_rune_etching",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:runic_tablet",
+      "title": "Weaken",
+      "text": "Weaken is a runic power that imbues the wielder's weapon with the $(#87185d)$(l)essence of decay$(). $(br2)It grants the wielder a chance to slow and weaken their target with each successful strike."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Weaken is a powerful runic power that can give the wielder an edge in battle by slowing and weakening their target. $(br2)It's ideal for characters that are focused on close quarters combat, as it allows them to land more attacks and make the target's attacks less effective."
+    }
+  ]
+}

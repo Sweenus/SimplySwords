@@ -1,0 +1,17 @@
+{
+  "name": "Wildfire",
+  "icon": "simplyswords:runic_tablet",
+  "category": "simplyswords:category_rune_etching",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:runic_tablet",
+      "title": "Wildfire",
+      "text": "Wildfire is a runic power that imbues the wielder's weapon with the $(#d1422c)$(l)essence of fire and combustion$(). $(br2)It grants the wielder a chance to combust all nearby enemies of the same type into flames with each successful hit."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Wildfire is a powerful runic power that can disrupt the flow of battle and give the wielder a strategic advantage. $(br2)It's ideal for characters that are focused on dealing large amount of damage over time, such as pyromancers, warlocks, and summoners."
+    }
+  ]
+}

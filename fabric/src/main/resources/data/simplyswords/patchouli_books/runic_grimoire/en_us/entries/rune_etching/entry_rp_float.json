@@ -1,0 +1,17 @@
+{
+  "name": "Float",
+  "icon": "simplyswords:runic_tablet",
+  "category": "simplyswords:category_rune_etching",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:runic_tablet",
+      "title": "Float",
+      "text": "Float is a runic power that harnesses the power of levitation, allowing the wielder to manipulate gravity and reverse its effects on their targets. $(br2)It grants the wielder a chance to lift their enemies off the ground, making them temporarily unable to move or act."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Float is a powerful runic power that can disrupt the flow of battle and give the wielder a strategic advantage. $(br2)It's ideal for characters that are focused on crowd control and support, such as mages, warlocks, and summoners, who can use the power to immobilize their enemies and give their allies an opening to strike."
+    }
+  ]
+}

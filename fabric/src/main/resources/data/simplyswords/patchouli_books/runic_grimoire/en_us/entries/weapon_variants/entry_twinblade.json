@@ -1,0 +1,17 @@
+{
+  "name": "Twinblade",
+  "icon": "simplyswords:iron_twinblade",
+  "category": "simplyswords:category_weapon_variants",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:iron_twinblade",
+      "text": "Twinblade is a weapon that requires a high level of skill and dexterity to wield effectively. With its dual blade design, it is known for its speed and precision in battle, making it a formidable weapon in the right hands."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:iron_twinblade",
+      "recipe2": "simplyswords:diamond_twinblade"
+    }
+  ]
+}

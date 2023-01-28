@@ -1,0 +1,17 @@
+{
+  "name": "Spear",
+  "icon": "simplyswords:iron_spear",
+  "category": "simplyswords:category_weapon_variants",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:iron_spear",
+      "text": "Spears have been used throughout history as a weapon for hunting and warfare. They are known for their versatility and range, and are primarily used for thrusting. They are also relatively simple to make and maintain, making them a popular weapon among ancient and primitive cultures."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:iron_spear",
+      "recipe2": "simplyswords:diamond_spear"
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "name": "Active Defence",
+  "icon": "simplyswords:runic_tablet",
+  "category": "simplyswords:category_rune_etching",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:runic_tablet",
+      "title": "Active Defence",
+      "text": "Active Defence is a runic power that imbues the wielder's weapon with the $(#389fff)$(l)essence of protection$(). $(br2)It grants the wielder a chance to periodically fire arrows at nearby enemies, as long as the wielder has arrows in their inventory."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Keep in mind that this power requires the wielder to have arrows in their inventory, if the wielder runs out of arrows, the power will deactivate and the wielder will have to restock before they can use it again. $(br2)It's ideal for characters that rely on kiting and crowd control, as the arrows can keep enemies at bay while the wielder repositions."
+    }
+  ]
+}

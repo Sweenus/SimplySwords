@@ -1,0 +1,17 @@
+{
+  "name": "Greathammer",
+  "icon": "simplyswords:iron_greathammer",
+  "category": "simplyswords:category_weapon_variants",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:iron_greathammer",
+      "text": "The Greathammer is known for its ability to deliver devastating damage with each strike, due to its weight and size. It was traditionally used by infantry and heavy cavalry in medieval warfare, and it was also used by blacksmiths, masons, and other laborers for heavy-duty striking."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:iron_greathammer",
+      "recipe2": "simplyswords:diamond_greathammer"
+    }
+  ]
+}

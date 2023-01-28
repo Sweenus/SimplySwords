@@ -1,0 +1,17 @@
+{
+  "name": "Rapier",
+  "icon": "simplyswords:iron_rapier",
+  "category": "simplyswords:category_weapon_variants",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:iron_rapier",
+      "text": "Rapiers were popular among the upper class during the 16th and 17th centuries, and were used in duels and civilian self-defense. Rapiers are known for their speed, precision, and elegance in combat. Due to the thin and long blade, it requires a high level of skill and finesse to wield effectively."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:iron_rapier",
+      "recipe2": "simplyswords:diamond_rapier"
+    }
+  ]
+}

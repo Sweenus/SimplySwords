@@ -1,0 +1,17 @@
+{
+  "name": "Freeze",
+  "icon": "simplyswords:runic_tablet",
+  "category": "simplyswords:category_rune_etching",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:runic_tablet",
+      "title": "Freeze",
+      "text": "Freeze is a runic power that imbues the wielder's weapon with the $(#38caff)$(l)essence of cold and ice$(). $(br2)It grants the wielder a chance to chill or freeze their targets with each successful hit."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Freeze is a powerful runic power that can greatly disrupt the flow of battle and give the wielder a strategic advantage. $(br2)It's ideal for characters that are focused on crowd control and support, such as mages, warlocks, and summoners, who can use the power to immobilize their enemies and give their allies an opening to strike."
+    }
+  ]
+}

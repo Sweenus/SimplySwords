@@ -1,0 +1,17 @@
+{
+  "name": "Frost Ward",
+  "icon": "simplyswords:runic_tablet",
+  "category": "simplyswords:category_rune_etching",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:runic_tablet",
+      "title": "Frost Ward",
+      "text": "Frost Ward is a runic power that imbues the wielder's weapon with the $(#38caff)$(l)essence of cold and frost$(). $(br2)It creates a ward that periodically fires movement impairing snowballs at nearby enemies."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Frost Ward is an ideal choice for those who prefer a more defensive playstyle, as it allows them to control the battlefield with ease."
+    }
+  ]
+}

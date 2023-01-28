@@ -1,0 +1,17 @@
+{
+  "name": "Zephyr",
+  "icon": "simplyswords:runic_tablet",
+  "category": "simplyswords:category_rune_etching",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:runic_tablet",
+      "title": "Zephyr",
+      "text": "Zephyr is a runic power that imbues the wielder's weapon with the $(#85a0ab)$(l)essence of the wind element$(). $(br2)It grants the wielder a chance to gain increased attack speed and movement speed with each successful hit."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "It's ideal for characters that are focused on dealing high damage, such as warriors, barbarians, and rogues, who can take advantage of the increased attack speed and movement speed to strike quickly and evade enemy attacks."
+    }
+  ]
+}

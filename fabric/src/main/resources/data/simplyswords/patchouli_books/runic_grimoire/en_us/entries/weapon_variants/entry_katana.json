@@ -1,0 +1,17 @@
+{
+  "name": "Katana",
+  "icon": "simplyswords:iron_katana",
+  "category": "simplyswords:category_weapon_variants",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:iron_katana",
+      "text": "The Katana is known for its sharpness, strength, and ability to be wielded with great speed and precision. It was traditionally used by the samurai class of feudal Japan and it was considered one of the most important weapons of the samurai."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:iron_katana",
+      "recipe2": "simplyswords:diamond_katana"
+    }
+  ]
+}

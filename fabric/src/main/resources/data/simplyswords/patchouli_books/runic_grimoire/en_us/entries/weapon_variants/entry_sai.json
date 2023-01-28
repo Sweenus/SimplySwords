@@ -1,0 +1,17 @@
+{
+  "name": "Sai",
+  "icon": "simplyswords:iron_sai",
+  "category": "simplyswords:category_weapon_variants",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:iron_sai",
+      "text": "The sai is a versatile weapon that requires a high level of skill and training to wield effectively. It's known for its ability to deflect and trap an opponent's weapon, allowing the wielder to gain an advantage in combat. Because of its small size and easy handling it can be used in tight spaces and close-quarters."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:iron_sai",
+      "recipe2": "simplyswords:diamond_sai"
+    }
+  ]
+}

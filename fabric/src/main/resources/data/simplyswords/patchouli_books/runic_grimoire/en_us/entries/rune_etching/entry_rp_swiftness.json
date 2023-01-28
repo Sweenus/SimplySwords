@@ -1,0 +1,17 @@
+{
+  "name": "Swiftness",
+  "icon": "simplyswords:runic_tablet",
+  "category": "simplyswords:category_rune_etching",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:runic_tablet",
+      "title": "Swiftness",
+      "text": "Swiftness is a runic power that imbues the wielder's weapon with the $(#389fff)$(l)essence of speed and agility$(). $(br2)It grants the wielder a chance to increase their movement speed with each successful hit."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Swiftness is a powerful runic power that can give the wielder a significant advantage in battle. $(br2)It's ideal for characters that rely on mobility and speed, such as rogue, ranger, and monks, who can use the power to outmaneuver their enemies and strike quickly."
+    }
+  ]
+}

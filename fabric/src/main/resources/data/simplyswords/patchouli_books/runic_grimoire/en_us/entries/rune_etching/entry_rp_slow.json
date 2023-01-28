@@ -1,0 +1,17 @@
+{
+  "name": "Slow",
+  "icon": "simplyswords:runic_tablet",
+  "category": "simplyswords:category_rune_etching",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:runic_tablet",
+      "title": "Slow",
+      "text": "Slow is a runic power that imbues the wielder's weapon with the $(#87185d)$(l)essence of sloth and torpor$(). $(br2)It grants the wielder a chance to slow down the movement speed of their targets with each successful hit."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Slow is a powerful runic power that can disrupt the flow of battle and give the wielder a strategic advantage. $(br2)It's ideal for characters that rely on hit-and-run tactics, as it allows them to slow down the chase and make a quick getaway."
+    }
+  ]
+}

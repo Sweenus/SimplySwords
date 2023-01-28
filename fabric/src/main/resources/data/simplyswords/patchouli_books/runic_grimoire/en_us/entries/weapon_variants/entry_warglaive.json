@@ -1,0 +1,17 @@
+{
+  "name": "Warglaive",
+  "icon": "simplyswords:iron_warglaive",
+  "category": "simplyswords:category_weapon_variants",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:iron_warglaive",
+      "text": "Warglaives are known for their speed and agility and with their razor-sharp edges, they can deliver swift and deadly strikes. They require a high level of dexterity and skill to wield effectively, but when used correctly they can be very effective in battle."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:iron_warglaive",
+      "recipe2": "simplyswords:diamond_warglaive"
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "name": "Greataxe",
+  "icon": "simplyswords:iron_greataxe",
+  "category": "simplyswords:category_weapon_variants",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:iron_greataxe",
+      "text": "The greataxe requires a high level of strength and skill to wield effectively. It is a two-handed weapon, which means that the wielder uses both hands to hold and swing the weapon. It's also known for its versatility as it can be used for chopping, slicing, and crushing attacks."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:iron_greataxe",
+      "recipe2": "simplyswords:diamond_greataxe"
+    }
+  ]
+}

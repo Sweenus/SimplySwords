@@ -1,0 +1,17 @@
+{
+  "name": "Chakram",
+  "icon": "simplyswords:iron_chakram",
+  "category": "simplyswords:category_weapon_variants",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:iron_chakram",
+      "text": "The Chakram is a circular throwing weapon that is typically made of metal and has a sharp outer edge. When duel wielded, the Chakram has the ability to launch an area attack, meaning that it can hit multiple enemies at once around the wielder."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:iron_chakram",
+      "recipe2": "simplyswords:diamond_chakram"
+    }
+  ]
+}

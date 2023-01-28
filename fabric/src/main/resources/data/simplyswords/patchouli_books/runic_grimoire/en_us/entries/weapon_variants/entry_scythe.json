@@ -1,0 +1,17 @@
+{
+  "name": "Scythe",
+  "icon": "simplyswords:iron_scythe",
+  "category": "simplyswords:category_weapon_variants",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:iron_scythe",
+      "text": "The Scythe is known for its ability to deliver devastating damage with each strike, due to its weight and sharpened blade. The Scythe can be used for cutting and slicing attacks in a wide radius, thanks to its particularly large curved blade and long handle."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:iron_scythe",
+      "recipe2": "simplyswords:diamond_scythe"
+    }
+  ]
+}

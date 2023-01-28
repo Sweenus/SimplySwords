@@ -1,0 +1,17 @@
+{
+  "name": "Stoneskin",
+  "icon": "simplyswords:runic_tablet",
+  "category": "simplyswords:category_rune_etching",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:runic_tablet",
+      "title": "Stoneskin",
+      "text": "Stoneskin is a runic power that imbues the wielder's weapon with the $(#916f49)$(l)essence of earth and stone$(). $(br2)It grants the wielder a chance to increase their resistance to damage at the cost of speed with each successful strike."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Stoneskin is a powerful runic power that can give the wielder an edge in battle by increasing their durability. $(br2)The decreased speed can be a drawback for characters that rely on speed and mobility, but the increased resistance can make up for it in certain situations."
+    }
+  ]
+}
