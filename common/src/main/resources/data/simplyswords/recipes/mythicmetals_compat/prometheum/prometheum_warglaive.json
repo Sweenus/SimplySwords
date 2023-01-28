@@ -20,10 +20,13 @@
     },
     "X": {
       "item": "mythicmetals:prometheum_ingot"
+    },
+    "Y": {
+      "item": "minecraft:iron_nugget"
     }
   },
   "pattern": [
-    " X ",
+    " Y ",
     "X#X",
     "   "
   ],
