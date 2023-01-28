@@ -1,18 +1,17 @@
 {
   "parent": "bettercombat:heavy_axe",
   "attributes" : {
-    "pose": "bettercombat:pose_two_handed_sword",
+    "pose": "simplyswords:pose_greatsword",
     "attack_range": 3.6,
     "category": "claymore",
     "two_handed": true,
     "attacks": [
       {
-
         "hitbox": "HORIZONTAL_PLANE",
         "damage_multiplier": 0.95,
         "angle": 150,
         "upswing": 0.5,
-        "animation": "bettercombat:two_handed_slash_horizontal_left",
+        "animation": "bettercombat:two_handed_slash_horizontal_right",
         "swing_sound": {
           "id": "simplyswords:dark_sword_attack_03",
           "volume": 0.5,
@@ -24,11 +23,23 @@
         "damage_multiplier": 0.95,
         "angle": 150,
         "upswing": 0.5,
-        "animation": "bettercombat:two_handed_slash_horizontal_right",
+        "animation": "bettercombat:two_handed_slash_horizontal_left",
         "swing_sound": {
           "id": "simplyswords:dark_sword_attack_03",
           "volume": 0.5,
           "pitch": 0.8
+        }
+      },
+      {
+        "hitbox": "HORIZONTAL_PLANE",
+        "damage_multiplier": 0.95,
+        "angle": 150,
+        "upswing": 0.5,
+        "animation": "bettercombat:two_handed_slash_horizontal_right",
+        "swing_sound": {
+          "id": "simplyswords:dark_sword_attack_03",
+          "volume": 0.5,
+          "pitch": 0.9
         }
       },
       {

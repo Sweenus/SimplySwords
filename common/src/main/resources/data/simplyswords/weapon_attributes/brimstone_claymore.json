@@ -1,7 +1,7 @@
 {
   "parent": "bettercombat:heavy_axe",
   "attributes" : {
-    "pose": "bettercombat:pose_two_handed_sword",
+    "pose": "simplyswords:pose_greatsword",
     "attack_range": 3.5,
     "category": "claymore",
     "two_handed": true,

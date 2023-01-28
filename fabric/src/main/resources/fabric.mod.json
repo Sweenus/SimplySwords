@@ -39,6 +39,6 @@
   },
   "recommends": {
     "bettercombat": ">=1.3.2",
-    "patchouli": ">=77"
+    "patchouli": ">=1.19.2-77-FABRIC"
   }
 }
