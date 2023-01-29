@@ -35,11 +35,10 @@ public class StormsEdgeSwordItem extends SwordItem {
     }
     private static int stepMod = 0;
     int radius = 1;
-    PlayerEntity playerEntity;
     int ability_timer_max = 13;
     int skillCooldown = (int) (SimplySwordsConfig.getFloatValue("stormjolt_cooldown"));
     int chargeChance =  (int) (SimplySwordsConfig.getFloatValue("stormjolt_chance"));
-    private static int ability_timer;
+    int ability_timer;
 
 
 
@@ -87,9 +86,9 @@ public class StormsEdgeSwordItem extends SwordItem {
 
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
-        if (ability_timer > 0) {
+        if (ability_timer > 0 && selected) {
+            ability_timer --;
             if (!entity.world.isClient && (entity instanceof PlayerEntity player)) {
-                ability_timer --;
                 //Player dash forward
                 if (ability_timer == 12 && player.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
                     player.setVelocity(player.getRotationVector().multiply(+4));
