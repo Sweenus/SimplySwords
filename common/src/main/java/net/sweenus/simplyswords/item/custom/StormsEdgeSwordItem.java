@@ -88,10 +88,10 @@ public class StormsEdgeSwordItem extends SwordItem {
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
         if (ability_timer > 0) {
-            if (!entity.world.isClient && (entity instanceof ServerPlayerEntity player)) {
+            if (!entity.world.isClient && (entity instanceof PlayerEntity player)) {
                 ability_timer --;
                 //Player dash forward
-                if (ability_timer == 12) {
+                if (ability_timer == 12 && player.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
                     player.setVelocity(player.getRotationVector().multiply(+4));
                     player.setVelocity(player.getVelocity().x, 0, player.getVelocity().z); // Prevent player flying to the heavens
                     player.velocityModified = true;
@@ -102,7 +102,7 @@ public class StormsEdgeSwordItem extends SwordItem {
                 }
 
                 //Player dash end
-                if (ability_timer < 5) {
+                if (ability_timer < 5 && player.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
                     player.setVelocity(0, 0, 0); // Stop player at end of charge
                     player.velocityModified = true;
                     player.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, 80, 1), player);
