@@ -1,7 +1,6 @@
 package net.sweenus.simplyswords.item.custom;
 
 
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
@@ -87,51 +86,49 @@ public class StormsEdgeSwordItem extends SwordItem {
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
         if (ability_timer > 0) {
-            if (!world.isClient && (entity instanceof PlayerEntity player)) {
-                if (MinecraftClient.getInstance().player == player) {
-                    ability_timer--;
+            if (!entity.world.isClient && (entity instanceof PlayerEntity player)) {
+                ability_timer --;
 
-                    //Player dash forward
-                    if (ability_timer == 12) {
-                        player.setVelocity(player.getRotationVector().multiply(+4));
-                        player.setVelocity(player.getVelocity().x, 0, player.getVelocity().z); // Prevent player flying to the heavens
-                        player.velocityModified = true;
-                        world.playSoundFromEntity(null, player, SoundRegistry.ELEMENTAL_BOW_THUNDER_SHOOT_FLYBY_03.get(), SoundCategory.PLAYERS, 0.3f, 1.6f);
-                        player.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, 80, 1), player);
-                        player.addStatusEffect(new StatusEffectInstance(StatusEffects.MINING_FATIGUE, 10, 5), player);
-                        player.getItemCooldownManager().set(this, skillCooldown);
-                    }
+                //Player dash forward
+                if (ability_timer == 12) {
+                    player.setVelocity(player.getRotationVector().multiply(+4));
+                    player.setVelocity(player.getVelocity().x, 0, player.getVelocity().z); // Prevent player flying to the heavens
+                    player.velocityModified = true;
+                    world.playSoundFromEntity(null, player, SoundRegistry.ELEMENTAL_BOW_THUNDER_SHOOT_FLYBY_03.get(), SoundCategory.PLAYERS, 0.3f, 1.6f);
+                    player.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, 80, 1), player);
+                    player.addStatusEffect(new StatusEffectInstance(StatusEffects.MINING_FATIGUE, 10, 5), player);
+                    player.getItemCooldownManager().set(this, skillCooldown);
+                }
 
-                    //Player dash end
-                    if (ability_timer < 5) {
-                        player.setVelocity(0, 0, 0); // Stop player at end of charge
-                        player.velocityModified = true;
-                        player.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, 80, 1), player);
+                //Player dash end
+                if (ability_timer < 5) {
+                    player.setVelocity(0, 0, 0); // Stop player at end of charge
+                    player.velocityModified = true;
+                    player.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, 80, 1), player);
 
-                    }
+                }
 
-                    if (player.age % 2 == 0 && player.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
-                        //world.playSoundFromEntity(null, player, SoundRegistry.MAGIC_BOW_CHARGE_SHORT_VERSION.get(), SoundCategory.PLAYERS, 0.1f, 0.6f);
-                        double xpos = player.getX() - (radius + 1);
-                        double ypos = player.getY();
-                        double zpos = player.getZ() - (radius + 1);
+                if (player.age % 2 == 0 && player.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
+                    //world.playSoundFromEntity(null, player, SoundRegistry.MAGIC_BOW_CHARGE_SHORT_VERSION.get(), SoundCategory.PLAYERS, 0.1f, 0.6f);
+                    double xpos = player.getX() - (radius + 1);
+                    double ypos = player.getY();
+                    double zpos = player.getZ() - (radius + 1);
 
-                        for (int i = radius * 2; i > 0; i--) {
-                            for (int j = radius * 2; j > 0; j--) {
-                                float choose = (float) (Math.random() * 1);
-                                HelperMethods.spawnParticle(world, ParticleTypes.ELECTRIC_SPARK, xpos + i + choose,
-                                        ypos + 0.4,
-                                        zpos + j + choose,
-                                        0, 0.1, 0);
-                                HelperMethods.spawnParticle(world, ParticleTypes.CLOUD, xpos + i + choose,
-                                        ypos + 0.1,
-                                        zpos + j + choose,
-                                        0, 0, 0);
-                                HelperMethods.spawnParticle(world, ParticleTypes.WARPED_SPORE, xpos + i + choose,
-                                        ypos,
-                                        zpos + j + choose,
-                                        0, 0.1, 0);
-                            }
+                    for (int i = radius * 2; i > 0; i--) {
+                        for (int j = radius * 2; j > 0; j--) {
+                            float choose = (float) (Math.random() * 1);
+                            HelperMethods.spawnParticle(world, ParticleTypes.ELECTRIC_SPARK, xpos + i + choose,
+                                    ypos + 0.4,
+                                    zpos + j + choose,
+                                    0, 0.1, 0);
+                            HelperMethods.spawnParticle(world, ParticleTypes.CLOUD, xpos + i + choose,
+                                    ypos + 0.1,
+                                    zpos + j + choose,
+                                    0, 0, 0);
+                            HelperMethods.spawnParticle(world, ParticleTypes.WARPED_SPORE, xpos + i + choose,
+                                    ypos,
+                                    zpos + j + choose,
+                                    0, 0.1, 0);
                         }
                     }
                 }
