@@ -39,7 +39,7 @@ public class StormsEdgeSwordItem extends SwordItem {
     int ability_timer_max = 13;
     int skillCooldown = (int) (SimplySwordsConfig.getFloatValue("stormjolt_cooldown"));
     int chargeChance =  (int) (SimplySwordsConfig.getFloatValue("stormjolt_chance"));
-    int ability_timer;
+    private static int ability_timer;
 
 
 
