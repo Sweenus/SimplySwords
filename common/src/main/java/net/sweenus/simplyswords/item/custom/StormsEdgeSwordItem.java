@@ -34,6 +34,7 @@ public class StormsEdgeSwordItem extends SwordItem {
     }
     private static int stepMod = 0;
     int radius = 1;
+    PlayerEntity playerEntity;
     int ability_timer_max = 13;
     int skillCooldown = (int) (SimplySwordsConfig.getFloatValue("stormjolt_cooldown"));
     int chargeChance =  (int) (SimplySwordsConfig.getFloatValue("stormjolt_chance"));
@@ -60,6 +61,8 @@ public class StormsEdgeSwordItem extends SwordItem {
                     world.playSoundFromEntity(null, target, SoundRegistry.MAGIC_SWORD_ATTACK_WITH_BLOOD_04.get(), SoundCategory.PLAYERS, 0.5f, 1.1f + choose_pitch);
             }
 
+            playerEntity = (PlayerEntity) attacker;
+
             if (attacker.getRandom().nextInt(100) <= chargeChance && (attacker instanceof PlayerEntity player) && player.getItemCooldownManager().getCooldownProgress(this, 1f) > 0) {
                 player.getItemCooldownManager().set(this, 0);
                 world.playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_BLOCK_01.get(), SoundCategory.PLAYERS, 0.7f, 1f);
@@ -73,6 +76,7 @@ public class StormsEdgeSwordItem extends SwordItem {
 
         if (!user.world.isClient()) {
 
+            //playerEntity = (PlayerEntity) user;
             if (ability_timer < 1 && user.isOnGround()) {
                 ability_timer = ability_timer_max;
                 world.playSoundFromEntity(null, user, SoundRegistry.MAGIC_BOW_CHARGE_SHORT_VERSION.get(), SoundCategory.PLAYERS, 0.4f, 1.2f);
@@ -86,8 +90,9 @@ public class StormsEdgeSwordItem extends SwordItem {
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
         if (ability_timer > 0) {
-            if (!entity.world.isClient && (entity instanceof PlayerEntity player)) {
+            if (!entity.world.isClient && playerEntity != null) {
                 ability_timer --;
+                PlayerEntity player = playerEntity;
 
                 //Player dash forward
                 if (ability_timer == 12) {
