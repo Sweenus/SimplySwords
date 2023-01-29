@@ -1,0 +1,8 @@
+{
+  "required": false,
+  "replace": false,
+  "skill": "strength",
+  "level": 17,
+  "item": "minecraft:custom_item",
+  "object": "simplyswords:mythicmetals_compat/runite/runite_spear"
+}

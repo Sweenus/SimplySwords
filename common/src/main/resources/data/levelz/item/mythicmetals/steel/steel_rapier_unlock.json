@@ -1,0 +1,8 @@
+{
+  "required": false,
+  "replace": false,
+  "skill": "agility",
+  "level": 9,
+  "item": "minecraft:custom_item",
+  "object": "simplyswords:mythicmetals_compat/steel/steel_rapier"
+}

@@ -1,0 +1,8 @@
+{
+  "required": false,
+"replace": false,
+  "skill": "agility",
+  "level": 20,
+  "item": "minecraft:custom_item",
+  "object": "simplyswords:gobber_compat/gobber/gobber_sai"
+}

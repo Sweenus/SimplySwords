@@ -1,0 +1,8 @@
+{
+  "required": false,
+  "replace": false,
+  "skill": "strength",
+  "level": 5,
+  "item": "minecraft:custom_item",
+  "object": "simplyswords:sword_on_a_stick"
+}

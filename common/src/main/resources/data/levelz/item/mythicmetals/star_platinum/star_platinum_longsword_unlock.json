@@ -1,0 +1,8 @@
+{
+  "required": false,
+  "replace": false,
+  "skill": "strength",
+  "level": 20,
+  "item": "minecraft:custom_item",
+  "object": "simplyswords:mythicmetals_compat/star_platinum/star_platinum_longsword"
+}
