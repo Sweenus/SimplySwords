@@ -88,7 +88,7 @@ public class StormsEdgeSwordItem extends SwordItem {
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
         if (ability_timer > 0 && selected) {
             ability_timer --;
-            if (!entity.world.isClient && (entity instanceof PlayerEntity player)) {
+            if (!entity.world.isClient() && (entity instanceof PlayerEntity player)) {
                 //Player dash forward
                 if (ability_timer == 12 && player.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
                     player.setVelocity(player.getRotationVector().multiply(+4));
@@ -109,7 +109,6 @@ public class StormsEdgeSwordItem extends SwordItem {
                 }
 
                 if (player.age % 2 == 0 && player.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
-                    //world.playSoundFromEntity(null, player, SoundRegistry.MAGIC_BOW_CHARGE_SHORT_VERSION.get(), SoundCategory.PLAYERS, 0.1f, 0.6f);
                     double xpos = player.getX() - (radius + 1);
                     double ypos = player.getY();
                     double zpos = player.getZ() - (radius + 1);
