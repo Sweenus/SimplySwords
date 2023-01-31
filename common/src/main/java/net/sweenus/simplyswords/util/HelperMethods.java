@@ -1,6 +1,5 @@
 package net.sweenus.simplyswords.util;
 
-import net.minecraft.client.util.math.Vector3d;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
@@ -49,9 +48,8 @@ public class HelperMethods {
         if (world.isClient) {
             world.addParticle(particle, xpos, ypos, zpos, xvelocity, yvelocity, zvelocity);
         } else {
-            if (world instanceof ServerWorld) {
-                ServerWorld sw = (ServerWorld) world;
-                sw.spawnParticles(particle, xpos, ypos, zpos, 1, xvelocity, yvelocity, zvelocity, 0.1);
+            if (world instanceof ServerWorld serverWorld) {
+                serverWorld.spawnParticles(particle, xpos, ypos, zpos, 1, xvelocity, yvelocity, zvelocity, 0.1);
             }
         }
     }

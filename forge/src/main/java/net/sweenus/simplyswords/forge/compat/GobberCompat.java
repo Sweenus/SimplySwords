@@ -1,10 +1,6 @@
 package net.sweenus.simplyswords.forge.compat;
 
-import dev.architectury.registry.registries.RegistrySupplier;
 import net.minecraft.item.Item;
-import net.minecraft.item.ToolMaterials;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;

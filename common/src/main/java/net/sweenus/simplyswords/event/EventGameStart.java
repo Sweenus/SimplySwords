@@ -2,10 +2,6 @@ package net.sweenus.simplyswords.event;
 
 import dev.architectury.event.events.client.ClientPlayerEvent;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.sweenus.simplyswords.SimplySwords;
-import net.sweenus.simplyswords.config.SimplySwordsConfig;
 
 public class EventGameStart implements ClientPlayerEvent.ClientPlayerJoin {
     @Override
