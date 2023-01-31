@@ -84,10 +84,10 @@ public class SoulSwordItem extends SwordItem {
             double x = user.getX();
             double y = user.getY();
             double z = user.getZ();
-            ServerWorld sworld = (ServerWorld) user.world;
+            ServerWorld serverWorld = (ServerWorld) user.world;
             Box box = new Box(x + hradius, y + vradius, z + hradius, x - hradius, y - vradius, z - hradius);
 
-            for(Entity ee: sworld.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY)) {
+            for(Entity ee: serverWorld.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY)) {
 
                 if (ee != null) {
                     if (ee instanceof LivingEntity && user.hasStatusEffect(StatusEffects.MINING_FATIGUE)){

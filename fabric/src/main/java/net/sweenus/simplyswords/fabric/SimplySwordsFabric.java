@@ -4,9 +4,6 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.compat.GobberCompat;
-import net.sweenus.simplyswords.config.SimplySwordsConfig;
-import net.sweenus.simplyswords.fabric.compat.MythicMetalsCompat;
-import nourl.mythicmetals.abilities.Abilities;
 
 public class SimplySwordsFabric implements ModInitializer {
     @Override

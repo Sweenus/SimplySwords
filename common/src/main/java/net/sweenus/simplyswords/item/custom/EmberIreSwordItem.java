@@ -2,7 +2,9 @@ package net.sweenus.simplyswords.item.custom;
 
 
 import net.minecraft.client.item.TooltipContext;
-import net.minecraft.entity.*;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
@@ -12,7 +14,6 @@ import net.minecraft.item.SwordItem;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.particle.DefaultParticleType;
 import net.minecraft.particle.ParticleTypes;
-import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.text.Text;
@@ -20,11 +21,8 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
-import net.minecraft.world.explosion.Explosion;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -91,17 +89,17 @@ public class EmberIreSwordItem extends SwordItem {
         if (!user.world.isClient()) {
             if (user.hasStatusEffect(StatusEffects.STRENGTH) && user.hasStatusEffect(StatusEffects.HASTE) && user.hasStatusEffect(StatusEffects.SPEED)) {
 
-                ServerWorld sworld = (ServerWorld)user.world;
+                ServerWorld sWorld = (ServerWorld)user.world;
                 BlockPos position = (user.getBlockPos());
                 Vec3d rotation = user.getRotationVec(1f);
                 Vec3d newPos = user.getPos().add(rotation);
 
-                FireballEntity fireball = new FireballEntity(EntityType.FIREBALL, (ServerWorld) world);
+                FireballEntity fireball = new FireballEntity(EntityType.FIREBALL, world);
                 fireball.updatePosition(newPos.getX(), (user.getY()) +1.5, newPos.getZ());
                 fireball.setOwner(user);
                 user.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, 20, 4), user);
                 user.addStatusEffect(new StatusEffectInstance(StatusEffects.FIRE_RESISTANCE, 60, 2), user);
-                sworld.spawnEntity(fireball);
+                sWorld.spawnEntity(fireball);
                 fireball.setVelocity(rotation);
                 user.removeStatusEffect(StatusEffects.STRENGTH);
                 user.removeStatusEffect(StatusEffects.SPEED);
