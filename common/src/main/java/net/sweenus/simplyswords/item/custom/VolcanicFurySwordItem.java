@@ -20,10 +20,12 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
+import net.minecraft.util.UseAction;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
 import net.sweenus.simplyswords.registry.SoundRegistry;
+import net.sweenus.simplyswords.util.AbilityMethods;
 import net.sweenus.simplyswords.util.HelperMethods;
 
 import java.util.List;
@@ -48,20 +50,8 @@ public class VolcanicFurySwordItem extends SwordItem {
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         if (!attacker.world.isClient()) {
             ServerWorld world = (ServerWorld) attacker.world;
-            boolean impactsounds_enabled = (SimplySwordsConfig.getBooleanValue("enable_weapon_impact_sounds"));
+            HelperMethods.playHitSounds(attacker, target);
 
-            if (impactsounds_enabled) {
-                int choose_sound = (int) (Math.random() * 30);
-                float choose_pitch = (float) Math.random() * 2;
-                if (choose_sound <= 10)
-                    world.playSoundFromEntity(null, target, SoundRegistry.MAGIC_SWORD_ATTACK_WITH_BLOOD_01.get(), SoundCategory.PLAYERS, 0.5f, 1.1f + choose_pitch);
-                if (choose_sound <= 20 && choose_sound > 10)
-                    world.playSoundFromEntity(null, target, SoundRegistry.MAGIC_SWORD_ATTACK_WITH_BLOOD_02.get(), SoundCategory.PLAYERS, 0.5f, 1.1f + choose_pitch);
-                if (choose_sound <= 30 && choose_sound > 20)
-                    world.playSoundFromEntity(null, target, SoundRegistry.MAGIC_SWORD_ATTACK_WITH_BLOOD_03.get(), SoundCategory.PLAYERS, 0.5f, 1.1f + choose_pitch);
-                if (choose_sound <= 40 && choose_sound > 30)
-                    world.playSoundFromEntity(null, target, SoundRegistry.MAGIC_SWORD_ATTACK_WITH_BLOOD_04.get(), SoundCategory.PLAYERS, 0.5f, 1.1f + choose_pitch);
-            }
 
             if (attacker.getRandom().nextInt(100) <= chargeChance) {
                 target.addStatusEffect(new StatusEffectInstance(StatusEffects.LEVITATION, 10, 1), attacker);
@@ -69,11 +59,14 @@ public class VolcanicFurySwordItem extends SwordItem {
                 target.setOnFireFor(5);
                 int choose_sound = (int) (Math.random() * 30);
                 if (choose_sound <= 10)
-                    world.playSoundFromEntity(null, target, SoundRegistry.ELEMENTAL_BOW_FIRE_SHOOT_IMPACT_01.get(), SoundCategory.PLAYERS, 0.5f, 1.2f);
+                    world.playSoundFromEntity(null, target, SoundRegistry.ELEMENTAL_BOW_FIRE_SHOOT_IMPACT_01.get(),
+                            SoundCategory.PLAYERS, 0.5f, 1.2f);
                 if (choose_sound <= 20 && choose_sound > 10)
-                    world.playSoundFromEntity(null, target, SoundRegistry.ELEMENTAL_BOW_FIRE_SHOOT_IMPACT_02.get(), SoundCategory.PLAYERS, 0.5f, 1.2f);
+                    world.playSoundFromEntity(null, target, SoundRegistry.ELEMENTAL_BOW_FIRE_SHOOT_IMPACT_02.get(),
+                            SoundCategory.PLAYERS, 0.5f, 1.2f);
                 if (choose_sound <= 30 && choose_sound > 20)
-                    world.playSoundFromEntity(null, target, SoundRegistry.ELEMENTAL_BOW_FIRE_SHOOT_IMPACT_03.get(), SoundCategory.PLAYERS, 0.5f, 1.2f);
+                    world.playSoundFromEntity(null, target, SoundRegistry.ELEMENTAL_BOW_FIRE_SHOOT_IMPACT_03.get(),
+                            SoundCategory.PLAYERS, 0.5f, 1.2f);
             }
 
         }
@@ -83,124 +76,81 @@ public class VolcanicFurySwordItem extends SwordItem {
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
 
-        if (!user.world.isClient()) {
+            user.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 20, 5), user);
+            user.addStatusEffect(new StatusEffectInstance(StatusEffects.MINING_FATIGUE, 20, 8), user);
+            user.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, 20, 5), user);
 
-            if (ability_timer < 1) {
-                ability_timer = ability_timer_max;
-                lastY = user.getY();
-                user.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 20, 5), user);
-                user.addStatusEffect(new StatusEffectInstance(StatusEffects.MINING_FATIGUE, 20, 8), user);
-                user.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, 20, 5), user);
-            } else if (ability_timer > 12) {
-                ability_timer = 12;
+            ItemStack itemStack = user.getStackInHand(hand);
+            if (itemStack.getDamage() >= itemStack.getMaxDamage() - 1) {
+                return TypedActionResult.fail(itemStack);
+            }
+            user.setCurrentHand(hand);
+            return TypedActionResult.consume(itemStack);
+    }
+
+    @Override
+    public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
+
+        if (user.getEquippedStack(EquipmentSlot.MAINHAND) == stack && (user instanceof PlayerEntity player)) {
+
+            AbilityMethods.tickAbilityVolcanicFury(stack, world, user, remainingUseTicks, ability_timer_max,
+                    abilityDamage, skillCooldown, radius, chargePower);
+            if (player.age % 20 == 0 && player.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
+                chargePower += 2;
             }
 
         }
-        return super.use(world, user, hand);
+    }
+
+    @Override
+    public int getMaxUseTime(ItemStack stack) {
+        return ability_timer_max;
+    }
+    @Override
+    public UseAction getUseAction(ItemStack stack) {
+        return UseAction.CROSSBOW;
+    }
+
+    @Override
+    public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
+        if (!world.isClient && (user instanceof PlayerEntity player)) {
+
+            player.getItemCooldownManager().set(this, skillCooldown);
+            int choose_sound = (int) (Math.random() * 30);
+            if (choose_sound <= 10)
+                world.playSoundFromEntity(null, player, SoundRegistry.ELEMENTAL_BOW_FIRE_SHOOT_IMPACT_01.get(),
+                        SoundCategory.PLAYERS, 0.6f, 1.2f);
+            if (choose_sound <= 20 && choose_sound > 10)
+                world.playSoundFromEntity(null, player, SoundRegistry.ELEMENTAL_BOW_FIRE_SHOOT_IMPACT_02.get(),
+                        SoundCategory.PLAYERS, 0.6f, 1.2f);
+            if (choose_sound <= 30 && choose_sound > 20)
+                world.playSoundFromEntity(null, player, SoundRegistry.ELEMENTAL_BOW_FIRE_SHOOT_IMPACT_03.get(),
+                        SoundCategory.PLAYERS, 0.6f, 1.2f);
+
+            //Damage
+            Box box = new Box(player.getX() + radius, player.getY() + radius, player.getZ() + radius,
+                    player.getX() - radius, player.getY() - radius, player.getZ() - radius);
+            for (Entity entities : world.getOtherEntities(player, box, EntityPredicates.VALID_LIVING_ENTITY)) {
+
+                if (entities != null) {
+                    if (entities instanceof LivingEntity le) {
+
+                        float choose = (float) (Math.random() * 1);
+                        le.damage(DamageSource.MAGIC, abilityDamage * chargePower);
+                        le.setOnFireFor(6);
+                        world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_BOW_POISON_ATTACK_01.get(), SoundCategory.PLAYERS, 0.1f, choose);
+                        chargePower = 0;
+                        le.addStatusEffect(new StatusEffectInstance(StatusEffects.LEVITATION, 10, 1), player);
+                        le.setVelocity(le.getX() - player.getX(), 0.5, le.getZ() - player.getZ());
+                        le.setOnFireFor(5);
+                    }
+                }
+            }
+        }
     }
 
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
-        if (ability_timer > 0) {
-            if (!world.isClient && (entity instanceof PlayerEntity player)) {
-                ability_timer --;
-
-
-                //Player dash control
-                if (ability_timer == 10) {
-                    player.getItemCooldownManager().set(this, skillCooldown);
-                    int choose_sound = (int) (Math.random() * 30);
-                    if (choose_sound <= 10)
-                        world.playSoundFromEntity(null, player, SoundRegistry.ELEMENTAL_BOW_FIRE_SHOOT_IMPACT_01.get(), SoundCategory.PLAYERS, 0.6f, 1.2f);
-                    if (choose_sound <= 20 && choose_sound > 10)
-                        world.playSoundFromEntity(null, player, SoundRegistry.ELEMENTAL_BOW_FIRE_SHOOT_IMPACT_02.get(), SoundCategory.PLAYERS, 0.6f, 1.2f);
-                    if (choose_sound <= 30 && choose_sound > 20)
-                        world.playSoundFromEntity(null, player, SoundRegistry.ELEMENTAL_BOW_FIRE_SHOOT_IMPACT_03.get(), SoundCategory.PLAYERS, 0.6f, 1.2f);
-
-                    //Damage
-                    Box box = new Box(player.getX() + radius, player.getY() + radius, player.getZ() + radius, player.getX() - radius, player.getY() - radius, player.getZ() - radius);
-                    for (Entity entities : world.getOtherEntities(player, box, EntityPredicates.VALID_LIVING_ENTITY)) {
-
-                        if (entities != null) {
-                            if (entities instanceof LivingEntity le) {
-
-                                float choose = (float) (Math.random() * 1);
-                                le.damage(DamageSource.MAGIC, abilityDamage * chargePower);
-                                le.setOnFireFor(6);
-                                world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_BOW_POISON_ATTACK_01.get(), SoundCategory.PLAYERS, 0.1f, choose);
-                                chargePower = 0;
-                                le.addStatusEffect(new StatusEffectInstance(StatusEffects.LEVITATION, 10, 1), player);
-                                le.setVelocity(le.getX() - player.getX(), 0.5, le.getZ() - player.getZ());
-                                le.setOnFireFor(5);
-                            }
-                        }
-                    }
-
-                }
-                //Player dash end
-                if (ability_timer < 5) {
-                    player.setVelocity(0, 0, 0); // Stop player at end of charge
-                    player.velocityModified = true;
-
-                }
-
-                //AOE Damage & charge control
-                if (player.age % 20 == 0 && player.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
-
-                    //Player charge control
-                    if (ability_timer > 10) {
-                        player.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 20, 5), player);
-                        player.addStatusEffect(new StatusEffectInstance(StatusEffects.MINING_FATIGUE, 20, 5), player);
-                        player.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, 20, 5), player);
-                        world.playSoundFromEntity(null, player, SoundRegistry.ELEMENTAL_BOW_EARTH_SHOOT_IMPACT_02.get(), SoundCategory.PLAYERS, 0.8f, 0.1f * chargePower);
-                        chargePower += 2;
-                        if (player.getHealth() > 2 && !player.isCreative())
-                            player.setHealth(player.getHealth() - 1);
-                    }
-
-                    Box box = new Box(player.getX() + radius * 8, player.getY() + radius, player.getZ() + radius * 8, player.getX() - radius * 8, player.getY() - radius, player.getZ() - radius * 8);
-                    for (Entity entities : world.getOtherEntities(player, box, EntityPredicates.VALID_LIVING_ENTITY)) {
-
-                        if (entities != null) {
-                            if (entities instanceof LivingEntity le) {
-
-                                float choose = (float) (Math.random() * 1);
-
-                                if (ability_timer > 12) {
-                                    le.damage(DamageSource.MAGIC, abilityDamage);
-                                    le.setVelocity((player.getX() - le.getX()) /10,  (player.getY() - le.getY()) /10, (player.getZ() - le.getZ()) /10);
-                                    le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 40, 3), player);
-
-                                }
-                            }
-                        }
-                    }
-
-                    double xpos = player.getX() - (radius + 1);
-                    double ypos = player.getY();
-                    double zpos = player.getZ() - (radius + 1);
-
-                    for (int i = radius * 2; i > 0; i--) {
-                        for (int j = radius * 2; j > 0; j--) {
-                            float choose = (float) (Math.random() * 1);
-                            HelperMethods.spawnParticle(world, ParticleTypes.WARPED_SPORE, xpos + i + choose,
-                                    ypos + 0.4,
-                                    zpos + j + choose,
-                                    0, 0.1, 0);
-                            HelperMethods.spawnParticle(world, ParticleTypes.CAMPFIRE_COSY_SMOKE, xpos + i + choose,
-                                    ypos + 0.1,
-                                    zpos + j + choose,
-                                    0, 0, 0);
-                            HelperMethods.spawnParticle(world, ParticleTypes.LAVA, xpos + i + choose,
-                                    ypos,
-                                    zpos + j + choose,
-                                    0, 0.1, 0);
-                        }
-                    }
-                }
-            }
-        }
-
 
         if (stepMod > 0)
             stepMod --;

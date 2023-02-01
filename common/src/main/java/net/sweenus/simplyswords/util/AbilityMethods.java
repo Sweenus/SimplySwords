@@ -328,4 +328,66 @@ public class AbilityMethods {
         }
     }
 
+    //Thunder Brand - Thunder Blitz
+    public static void tickAbilityVolcanicFury(ItemStack stack, World world, Entity entity,
+                                               int ability_timer, int ability_timer_max, int abilityDamage,
+                                               int skillCooldown, int radius, int chargePower) {
+        if (!entity.world.isClient() && (entity instanceof PlayerEntity player)) {
+
+            if (ability_timer < 5)
+                player.stopUsingItem();
+
+            //AOE Damage
+            if (player.age % 20 == 0 && player.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
+
+
+                if (ability_timer > 10) {
+                    player.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 20, 5), player);
+                    player.addStatusEffect(new StatusEffectInstance(StatusEffects.MINING_FATIGUE, 20, 5), player);
+                    player.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, 20, 5), player);
+                    world.playSoundFromEntity(null, player, SoundRegistry.ELEMENTAL_BOW_EARTH_SHOOT_IMPACT_02.get(), SoundCategory.PLAYERS, 0.8f, 0.1f * chargePower);
+                    if (player.getHealth() > 2 && !player.isCreative())
+                        player.setHealth(player.getHealth() - 1);
+                }
+
+                Box box = new Box(player.getX() + radius * 8, player.getY() + radius, player.getZ() + radius * 8, player.getX() - radius * 8, player.getY() - radius, player.getZ() - radius * 8);
+                for (Entity entities : world.getOtherEntities(player, box, EntityPredicates.VALID_LIVING_ENTITY)) {
+
+                    if (entities != null) {
+                        if (entities instanceof LivingEntity le) {
+
+                            if (ability_timer > 12) {
+                                le.damage(DamageSource.MAGIC, abilityDamage);
+                                le.setVelocity((player.getX() - le.getX()) /10,  (player.getY() - le.getY()) /10, (player.getZ() - le.getZ()) /10);
+                                le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 40, 3), player);
+
+                            }
+                        }
+                    }
+                }
+
+                double xpos = player.getX() - (radius + 1);
+                double ypos = player.getY();
+                double zpos = player.getZ() - (radius + 1);
+
+                for (int i = radius * 2; i > 0; i--) {
+                    for (int j = radius * 2; j > 0; j--) {
+                        float choose = (float) (Math.random() * 1);
+                        HelperMethods.spawnParticle(world, ParticleTypes.WARPED_SPORE, xpos + i + choose,
+                                ypos + 0.4,
+                                zpos + j + choose,
+                                0, 0.1, 0);
+                        HelperMethods.spawnParticle(world, ParticleTypes.CAMPFIRE_COSY_SMOKE, xpos + i + choose,
+                                ypos + 0.1,
+                                zpos + j + choose,
+                                0, 0, 0);
+                        HelperMethods.spawnParticle(world, ParticleTypes.LAVA, xpos + i + choose,
+                                ypos,
+                                zpos + j + choose,
+                                0, 0.1, 0);
+                    }
+                }
+            }
+        }
+    }
 }
