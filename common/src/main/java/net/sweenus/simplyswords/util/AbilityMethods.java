@@ -209,6 +209,8 @@ public class AbilityMethods {
 
         if (!entity.world.isClient() && (entity instanceof PlayerEntity player)) {
             int rradius = radius *2;
+            if (ability_timer < 5)
+                player.stopUsingItem();
             //AOE Blizzard
             if (player.age % 10 == 0 && player.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
                 player.getHungerManager().addExhaustion(0.8f);
@@ -253,6 +255,73 @@ public class AbilityMethods {
                                 ypos + 6,
                                 zpos + j + choose,
                                 choose / 3, 0, choose / 3);
+                    }
+                }
+            }
+        }
+    }
+
+    //Arcanethyst - Arcane Assault
+    public static void tickAbilityArcaneAssault(ItemStack stack, World world, Entity entity,
+                                             int ability_timer, int ability_timer_max, int abilityDamage,
+                                             int skillCooldown, int radius, int chargeCount) {
+
+        if (!entity.world.isClient() && (entity instanceof PlayerEntity player)) {
+
+            if (ability_timer < 5)
+                player.stopUsingItem();
+
+            //AOE Lift - 1 charge
+            if (player.age % 10 == 0 && player.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
+                Box box = new Box(player.getX() + radius, player.getY() + radius * 2, player.getZ() + radius,
+                        player.getX() - radius, player.getY() - radius, player.getZ() - radius);
+                for (Entity entities : world.getOtherEntities(player, box, EntityPredicates.VALID_LIVING_ENTITY)) {
+
+                    if (entities != null) {
+                        if (entities instanceof LivingEntity le) {
+
+                            float choose = (float) (Math.random() * 1);
+
+                            if (!le.hasStatusEffect(StatusEffects.LEVITATION) && ability_timer > 30) {
+                                le.addStatusEffect(new StatusEffectInstance(StatusEffects.LEVITATION, 20, 1), player);
+                                world.playSoundFromEntity(null, le, SoundRegistry.MAGIC_BOW_SHOOT_IMPACT_03.get(),
+                                        SoundCategory.PLAYERS, 0.1f, choose);
+                            }
+                            if (chargeCount > 1) // DOT - 2 charges
+                                le.damage(DamageSource.MAGIC, abilityDamage);
+                            if (chargeCount > 2 && ability_timer < 10) { //Ground Slam - 3 Charges
+                                le.removeStatusEffect(StatusEffects.LEVITATION);
+                                le.damage(DamageSource.MAGIC, abilityDamage * 10);
+                                le.setVelocity(0, -10, 0);
+                                player.stopUsingItem();
+                                world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_SWORD_SCIFI_ATTACK_03.get(),
+                                        SoundCategory.PLAYERS, 0.3f, choose);
+                            }
+                        }
+                    }
+                }
+
+                world.playSoundFromEntity(null, player, SoundRegistry.MAGIC_BOW_CHARGE_SHORT_VERSION.get(),
+                        SoundCategory.PLAYERS, 0.1f, 0.6f);
+                double xpos = player.getX() - (radius + 1);
+                double ypos = player.getY();
+                double zpos = player.getZ() - (radius + 1);
+
+                for (int i = radius * 2; i > 0; i--) {
+                    for (int j = radius * 2; j > 0; j--) {
+                        float choose = (float) (Math.random() * 1);
+                        HelperMethods.spawnParticle(world, ParticleTypes.DRAGON_BREATH, xpos + i + choose,
+                                ypos + 0.4,
+                                zpos + j + choose,
+                                0, 0.1, 0);
+                        HelperMethods.spawnParticle(world, ParticleTypes.PORTAL, xpos + i + choose,
+                                ypos + 0.1,
+                                zpos + j + choose,
+                                0, 0, 0);
+                        HelperMethods.spawnParticle(world, ParticleTypes.REVERSE_PORTAL, xpos + i + choose,
+                                ypos + 1,
+                                zpos + j + choose,
+                                0, 0.1, 0);
                     }
                 }
             }

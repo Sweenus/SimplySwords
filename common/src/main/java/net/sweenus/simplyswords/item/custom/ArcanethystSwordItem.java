@@ -20,10 +20,12 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
+import net.minecraft.util.UseAction;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
 import net.sweenus.simplyswords.registry.SoundRegistry;
+import net.sweenus.simplyswords.util.AbilityMethods;
 import net.sweenus.simplyswords.util.HelperMethods;
 
 import java.util.List;
@@ -46,29 +48,14 @@ public class ArcanethystSwordItem extends SwordItem {
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         if (!attacker.world.isClient()) {
-            ServerWorld world = (ServerWorld) attacker.world;
-            boolean impactsounds_enabled = (SimplySwordsConfig.getBooleanValue("enable_weapon_impact_sounds"));
-
-            if (impactsounds_enabled) {
-                int choose_sound = (int) (Math.random() * 30);
-                float choose_pitch = (float) Math.random() * 2;
-                if (choose_sound <= 10)
-                    world.playSoundFromEntity(null, target, SoundRegistry.MAGIC_SWORD_ATTACK_WITH_BLOOD_01.get(), SoundCategory.PLAYERS, 0.5f, 1.1f + choose_pitch);
-                if (choose_sound <= 20 && choose_sound > 10)
-                    world.playSoundFromEntity(null, target, SoundRegistry.MAGIC_SWORD_ATTACK_WITH_BLOOD_02.get(), SoundCategory.PLAYERS, 0.5f, 1.1f + choose_pitch);
-                if (choose_sound <= 30 && choose_sound > 20)
-                    world.playSoundFromEntity(null, target, SoundRegistry.MAGIC_SWORD_ATTACK_WITH_BLOOD_03.get(), SoundCategory.PLAYERS, 0.5f, 1.1f + choose_pitch);
-                if (choose_sound <= 40 && choose_sound > 30)
-                    world.playSoundFromEntity(null, target, SoundRegistry.MAGIC_SWORD_ATTACK_WITH_BLOOD_04.get(), SoundCategory.PLAYERS, 0.5f, 1.1f + choose_pitch);
-            }
+            HelperMethods.playHitSounds(attacker, target);
 
             if (attacker.getRandom().nextInt(100) <= chargeChance) {
                 if (chargeCount < 3) {
                     chargeCount++;
-                    world.playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_BOW_SHOOT_IMPACT_01.get(), SoundCategory.PLAYERS, 0.5f, 1.2f);
+                    attacker.world.playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_BOW_SHOOT_IMPACT_01.get(), SoundCategory.PLAYERS, 0.5f, 1.2f);
                 }
             }
-
         }
 
             return super.postHit(stack, target, attacker);
@@ -78,78 +65,51 @@ public class ArcanethystSwordItem extends SwordItem {
 
         if (!user.world.isClient()) {
 
-            if (chargeCount > 0 && arcane_timer < 1) {
-                arcane_timer = arcane_timer_max;
-                world.playSoundFromEntity(null, user, SoundRegistry.MAGIC_BOW_SHOOT_IMPACT_02.get(), SoundCategory.PLAYERS, 0.4f, 1.2f);
-                user.getItemCooldownManager().set(this, skillCooldown);
-            }
+            if (chargeCount > 0) {
+                ItemStack itemStack = user.getStackInHand(hand);
+                if (itemStack.getDamage() >= itemStack.getMaxDamage() - 1) {
+                    return TypedActionResult.fail(itemStack);
+                }
 
+                world.playSoundFromEntity(null, user, SoundRegistry.MAGIC_BOW_SHOOT_IMPACT_02.get(), SoundCategory.PLAYERS, 0.4f, 1.2f);
+                user.setCurrentHand(hand);
+                return TypedActionResult.consume(itemStack);
+            }
         }
         return super.use(world, user, hand);
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
-        if (chargeCount < 0)
-            chargeCount = 0;
-        if (arcane_timer > 0 && chargeCount > 0) {
-            if (!world.isClient && (entity instanceof PlayerEntity player)) {
-                arcane_timer --;
-                if (arcane_timer < 2)
-                    chargeCount = 0;
+    public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
 
-                //AOE Lift - 1 charge
-                if (player.age % 10 == 0 && player.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
-                    Box box = new Box(player.getX() + radius, player.getY() + radius * 2, player.getZ() + radius, player.getX() - radius, player.getY() - radius, player.getZ() - radius);
-                    for (Entity entities : world.getOtherEntities(player, box, EntityPredicates.VALID_LIVING_ENTITY)) {
+        if (user.getEquippedStack(EquipmentSlot.MAINHAND) == stack && (user instanceof PlayerEntity player)) {
 
-                        if (entities != null) {
-                            if (entities instanceof LivingEntity le) {
+            AbilityMethods.tickAbilityArcaneAssault(stack, world, user, remainingUseTicks, arcane_timer_max, arcaneDamage,
+                    skillCooldown, radius, chargeCount);
 
-                                float choose = (float) (Math.random() * 1);
-
-                                if (!le.hasStatusEffect(StatusEffects.LEVITATION) && arcane_timer > 30) {
-                                    le.addStatusEffect(new StatusEffectInstance(StatusEffects.LEVITATION, 20, 1), player);
-                                    world.playSoundFromEntity(null, le, SoundRegistry.MAGIC_BOW_SHOOT_IMPACT_03.get(), SoundCategory.PLAYERS, 0.1f, choose);
-                                }
-                                if (chargeCount > 1) // DOT - 2 charges
-                                    le.damage(DamageSource.MAGIC, arcaneDamage);
-                                if (chargeCount > 2 && arcane_timer < 20) { //Ground Slam - 3 Charges
-                                    le.removeStatusEffect(StatusEffects.LEVITATION);
-                                    le.damage(DamageSource.MAGIC, arcaneDamage * 10);
-                                    le.setVelocity(0, -10, 0);
-                                    world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_SWORD_SCIFI_ATTACK_03.get(), SoundCategory.PLAYERS, 0.3f, choose);
-                                }
-                            }
-                        }
-                    }
-
-                    world.playSoundFromEntity(null, player, SoundRegistry.MAGIC_BOW_CHARGE_SHORT_VERSION.get(), SoundCategory.PLAYERS, 0.1f, 0.6f);
-                    double xpos = player.getX() - (radius + 1);
-                    double ypos = player.getY();
-                    double zpos = player.getZ() - (radius + 1);
-
-                    for (int i = radius * 2; i > 0; i--) {
-                        for (int j = radius * 2; j > 0; j--) {
-                            float choose = (float) (Math.random() * 1);
-                            HelperMethods.spawnParticle(world, ParticleTypes.DRAGON_BREATH, xpos + i + choose,
-                                    ypos + 0.4,
-                                    zpos + j + choose,
-                                    0, 0.1, 0);
-                            HelperMethods.spawnParticle(world, ParticleTypes.PORTAL, xpos + i + choose,
-                                    ypos + 0.1,
-                                    zpos + j + choose,
-                                    0, 0, 0);
-                            HelperMethods.spawnParticle(world, ParticleTypes.REVERSE_PORTAL, xpos + i + choose,
-                                    ypos + 1,
-                                    zpos + j + choose,
-                                    0, 0.1, 0);
-                        }
-                    }
-                }
-            }
         }
+    }
 
+
+    @Override
+    public int getMaxUseTime(ItemStack stack) {
+        return arcane_timer_max;
+    }
+    @Override
+    public UseAction getUseAction(ItemStack stack) {
+        return UseAction.CROSSBOW;
+    }
+
+    @Override
+    public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
+        if (!world.isClient && (user instanceof PlayerEntity player)) {
+            player.getItemCooldownManager().set(stack.getItem(), skillCooldown);
+            chargeCount = 0;
+        }
+    }
+
+    @Override
+    public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
 
         if (stepMod > 0)
             stepMod --;

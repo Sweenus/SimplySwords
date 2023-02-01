@@ -74,7 +74,7 @@ public class IcewhisperSwordItem extends SwordItem {
 
         if (user.getEquippedStack(EquipmentSlot.MAINHAND) == stack && (user instanceof PlayerEntity player)) {
 
-            AbilityMethods.tickAbilityPermafrost(stack, world, user, blizzard_timer, blizzard_timer_max, frostDamage,
+            AbilityMethods.tickAbilityPermafrost(stack, world, user, remainingUseTicks, blizzard_timer_max, frostDamage,
                     skillCooldown, radius, lastX, lastY, lastZ);
 
         }

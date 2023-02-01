@@ -89,11 +89,6 @@ public class StormsEdgeSwordItem extends SwordItem {
         }
     }
 
-    //@Override
-    //public boolean isUsedOnRelease(ItemStack stack) {
-    //    return stack.isOf(this);
-    //}
-
     @Override
     public int getMaxUseTime(ItemStack stack) {
             return ability_timer_max;
