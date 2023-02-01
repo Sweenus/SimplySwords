@@ -14,7 +14,7 @@ import net.sweenus.simplyswords.registry.SoundRegistry;
 public class AbilityMethods {
 
     //Storm's Edge - Jolt
-    public static void tickAbilityStormJolt(ItemStack stack, World world, Entity entity, int slot, boolean selected,
+    public static void tickAbilityStormJolt(ItemStack stack, World world, Entity entity,
                                             int ability_timer, int skillCooldown, int radius) {
         if (!entity.world.isClient() && (entity instanceof PlayerEntity player)) {
 

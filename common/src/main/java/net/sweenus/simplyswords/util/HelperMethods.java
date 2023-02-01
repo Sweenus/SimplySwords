@@ -9,11 +9,13 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.particle.DefaultParticleType;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.SoundCategory;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
+import net.sweenus.simplyswords.registry.SoundRegistry;
 
 public class HelperMethods {
 
@@ -50,6 +52,27 @@ public class HelperMethods {
         } else {
             if (world instanceof ServerWorld serverWorld) {
                 serverWorld.spawnParticles(particle, xpos, ypos, zpos, 1, xvelocity, yvelocity, zvelocity, 0.1);
+            }
+        }
+    }
+
+    //playHitSounds
+    public static void playHitSounds(LivingEntity attacker, LivingEntity target) {
+        if (!attacker.world.isClient()) {
+            ServerWorld world = (ServerWorld) attacker.world;
+            boolean impactsounds_enabled = (SimplySwordsConfig.getBooleanValue("enable_weapon_impact_sounds"));
+
+            if (impactsounds_enabled) {
+                int choose_sound = (int) (Math.random() * 30);
+                float choose_pitch = (float) Math.random() * 2;
+                if (choose_sound <= 10)
+                    world.playSoundFromEntity(null, target, SoundRegistry.MAGIC_SWORD_ATTACK_WITH_BLOOD_01.get(), SoundCategory.PLAYERS, 0.5f, 1.1f + choose_pitch);
+                if (choose_sound <= 20 && choose_sound > 10)
+                    world.playSoundFromEntity(null, target, SoundRegistry.MAGIC_SWORD_ATTACK_WITH_BLOOD_02.get(), SoundCategory.PLAYERS, 0.5f, 1.1f + choose_pitch);
+                if (choose_sound <= 30 && choose_sound > 20)
+                    world.playSoundFromEntity(null, target, SoundRegistry.MAGIC_SWORD_ATTACK_WITH_BLOOD_03.get(), SoundCategory.PLAYERS, 0.5f, 1.1f + choose_pitch);
+                if (choose_sound <= 40 && choose_sound > 30)
+                    world.playSoundFromEntity(null, target, SoundRegistry.MAGIC_SWORD_ATTACK_WITH_BLOOD_04.get(), SoundCategory.PLAYERS, 0.5f, 1.1f + choose_pitch);
             }
         }
     }
