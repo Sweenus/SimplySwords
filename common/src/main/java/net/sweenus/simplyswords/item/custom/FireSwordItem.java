@@ -6,6 +6,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.SpawnReason;
+import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.SwordItem;
@@ -17,6 +18,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraft.world.explosion.Explosion;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -34,39 +36,27 @@ public class FireSwordItem extends SwordItem {
         if (!attacker.world.isClient()) {
             ServerWorld world = (ServerWorld) attacker.world;
             int fhitchance = (int) SimplySwordsConfig.getFloatValue("brimstone_chance");
-
-            boolean impactsounds_enabled = (SimplySwordsConfig.getBooleanValue("enable_weapon_impact_sounds"));
-
-            if (impactsounds_enabled) {
-                int choose_sound = (int) (Math.random() * 30);
-                float choose_pitch = (float) Math.random() * 2;
-                if (choose_sound <= 10)
-                    world.playSoundFromEntity(null, target, SoundRegistry.MAGIC_SWORD_ATTACK_WITH_BLOOD_01.get(), SoundCategory.PLAYERS, 0.5f, 1.1f + choose_pitch);
-                if (choose_sound <= 20 && choose_sound > 10)
-                    world.playSoundFromEntity(null, target, SoundRegistry.MAGIC_SWORD_ATTACK_WITH_BLOOD_02.get(), SoundCategory.PLAYERS, 0.5f, 1.1f + choose_pitch);
-                if (choose_sound <= 30 && choose_sound > 20)
-                    world.playSoundFromEntity(null, target, SoundRegistry.MAGIC_SWORD_ATTACK_WITH_BLOOD_03.get(), SoundCategory.PLAYERS, 0.5f, 1.1f + choose_pitch);
-                if (choose_sound <= 40 && choose_sound > 30)
-                    world.playSoundFromEntity(null, target, SoundRegistry.MAGIC_SWORD_ATTACK_WITH_BLOOD_04.get(), SoundCategory.PLAYERS, 0.5f, 1.1f + choose_pitch);
-            }
+            HelperMethods.playHitSounds(attacker, target);
 
 
             if (attacker.getRandom().nextInt(100) <= fhitchance && (attacker instanceof PlayerEntity player)) {
+                int choose_sound = (int) (Math.random() * 3);
 
                 BlockPos position = target.getBlockPos();
+                for (int i = 0; i < 5 * choose_sound; i++) {
+                    HelperMethods.spawnParticle(world, ParticleTypes.LAVA, position.getX(), position.getY()+0.5, position.getZ(), choose_sound, 0.5 + choose_sound, choose_sound);
+                    HelperMethods.spawnParticle(world, ParticleTypes.SMOKE, position.getX(), position.getY()+0.5, position.getZ(), 0, 0, 0);
+                }
 
-                Entity fireball = EntityType.FIREBALL.spawn(world, null, null, player, position, SpawnReason.TRIGGERED, true, true);
-                assert fireball != null;
-                fireball.setVelocity(0, 5, 0);
+                world.createExplosion(attacker, target.getX(), target.getY(), target.getZ(), choose_sound, Explosion.DestructionType.NONE);
+                target.setOnFireFor(3);
 
-
-                int choose_sound = (int) (Math.random() * 30);
-                if (choose_sound <= 10)
+                if (choose_sound <= 1)
                     world.playSoundFromEntity(null, target, SoundRegistry.ELEMENTAL_BOW_FIRE_SHOOT_IMPACT_01.get(), SoundCategory.PLAYERS, 0.5f, 1.2f);
-                if (choose_sound <= 20 && choose_sound > 10)
-                    world.playSoundFromEntity(null, target, SoundRegistry.ELEMENTAL_BOW_FIRE_SHOOT_IMPACT_02.get(), SoundCategory.PLAYERS, 0.5f, 1.2f);
-                if (choose_sound <= 30 && choose_sound > 20)
-                    world.playSoundFromEntity(null, target, SoundRegistry.ELEMENTAL_BOW_FIRE_SHOOT_IMPACT_03.get(), SoundCategory.PLAYERS, 0.5f, 1.2f);
+                if (choose_sound <= 2 && choose_sound > 1)
+                    world.playSoundFromEntity(null, target, SoundRegistry.ELEMENTAL_BOW_FIRE_SHOOT_IMPACT_02.get(), SoundCategory.PLAYERS, 0.7f, 1.1f);
+                if (choose_sound <= 3 && choose_sound > 2)
+                    world.playSoundFromEntity(null, target, SoundRegistry.ELEMENTAL_BOW_FIRE_SHOOT_IMPACT_03.get(), SoundCategory.PLAYERS, 0.9f, 1f);
             }
         }
 

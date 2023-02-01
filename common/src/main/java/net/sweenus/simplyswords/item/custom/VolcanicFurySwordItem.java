@@ -40,8 +40,6 @@ public class VolcanicFurySwordItem extends SwordItem {
     int ability_timer_max = 120;
     int skillCooldown = (int) (SimplySwordsConfig.getFloatValue("volcanic_fury_cooldown"));
     int chargeChance =  (int) (SimplySwordsConfig.getFloatValue("volcanic_fury_chance"));
-    double lastY;
-    int ability_timer;
     int chargePower;
 
 
