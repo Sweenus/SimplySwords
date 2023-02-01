@@ -595,8 +595,7 @@
   "item.simplyswords.lichbladesworditem.tooltip6": "damage. Chance to siphon health.",
   "item.simplyswords.lichbladesworditem.tooltip7": "After the attack subsides, your souls",
   "item.simplyswords.lichbladesworditem.tooltip8": "return to you and, when reaching you,",
-  "item.simplyswords.lichbladesworditem.tooltip9": "grant absorption with a duration",
-  "item.simplyswords.lichbladesworditem.tooltip10": "relative to the attack damage dealt.",
+  "item.simplyswords.lichbladesworditem.tooltip9": "grant you absorption.",
 
 
   "item.simplyswords.levitationsworditem.tooltip1": "Runic Power: Float",

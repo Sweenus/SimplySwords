@@ -20,10 +20,12 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
+import net.minecraft.util.UseAction;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
 import net.sweenus.simplyswords.registry.SoundRegistry;
+import net.sweenus.simplyswords.util.AbilityMethods;
 import net.sweenus.simplyswords.util.HelperMethods;
 
 import java.util.List;
@@ -38,33 +40,18 @@ public class ThunderbrandSwordItem extends SwordItem {
     int ability_timer_max = 50;
     int skillCooldown = (int) (SimplySwordsConfig.getFloatValue("thunderblitz_cooldown"));
     int chargeChance =  (int) (SimplySwordsConfig.getFloatValue("thunderblitz_chance"));
-    double lastY;
-    int ability_timer;
 
 
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+
+        HelperMethods.playHitSounds(attacker, target);
+
         if (!attacker.world.isClient()) {
-            ServerWorld world = (ServerWorld) attacker.world;
-            boolean impactsounds_enabled = (SimplySwordsConfig.getBooleanValue("enable_weapon_impact_sounds"));
-
-            if (impactsounds_enabled) {
-                int choose_sound = (int) (Math.random() * 30);
-                float choose_pitch = (float) Math.random() * 2;
-                if (choose_sound <= 10)
-                    world.playSoundFromEntity(null, target, SoundRegistry.MAGIC_SWORD_ATTACK_WITH_BLOOD_01.get(), SoundCategory.PLAYERS, 0.5f, 1.1f + choose_pitch);
-                if (choose_sound <= 20 && choose_sound > 10)
-                    world.playSoundFromEntity(null, target, SoundRegistry.MAGIC_SWORD_ATTACK_WITH_BLOOD_02.get(), SoundCategory.PLAYERS, 0.5f, 1.1f + choose_pitch);
-                if (choose_sound <= 30 && choose_sound > 20)
-                    world.playSoundFromEntity(null, target, SoundRegistry.MAGIC_SWORD_ATTACK_WITH_BLOOD_03.get(), SoundCategory.PLAYERS, 0.5f, 1.1f + choose_pitch);
-                if (choose_sound <= 40 && choose_sound > 30)
-                    world.playSoundFromEntity(null, target, SoundRegistry.MAGIC_SWORD_ATTACK_WITH_BLOOD_04.get(), SoundCategory.PLAYERS, 0.5f, 1.1f + choose_pitch);
-            }
-
             if (attacker.getRandom().nextInt(100) <= chargeChance && (attacker instanceof PlayerEntity player) && player.getItemCooldownManager().getCooldownProgress(this, 1f) > 0) {
                 player.getItemCooldownManager().set(this, 0);
-                world.playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_BLOCK_01.get(), SoundCategory.PLAYERS, 0.7f, 1f);
+                attacker.world.playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_BLOCK_01.get(), SoundCategory.PLAYERS, 0.7f, 1f);
             }
         }
 
@@ -73,93 +60,51 @@ public class ThunderbrandSwordItem extends SwordItem {
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
 
-        if (!user.world.isClient()) {
-
-            if (ability_timer < 1) {
-                ability_timer = ability_timer_max;
-                world.playSoundFromEntity(null, user, SoundRegistry.MAGIC_BOW_CHARGE_LONG_VERSION.get(), SoundCategory.PLAYERS, 0.4f, 0.6f);
-                lastY = user.getY();
-                user.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 40, 3), user);
-                user.addStatusEffect(new StatusEffectInstance(StatusEffects.MINING_FATIGUE, 40, 3), user);
-                user.getItemCooldownManager().set(this, skillCooldown);
-            }
-
+        ItemStack itemStack = user.getStackInHand(hand);
+        if (itemStack.getDamage() >= itemStack.getMaxDamage() - 1) {
+            return TypedActionResult.fail(itemStack);
         }
-        return super.use(world, user, hand);
+
+        world.playSoundFromEntity(null, user, SoundRegistry.MAGIC_BOW_CHARGE_LONG_VERSION.get(), SoundCategory.PLAYERS, 0.4f, 0.6f);
+        user.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 40, 3), user);
+        user.addStatusEffect(new StatusEffectInstance(StatusEffects.MINING_FATIGUE, 40, 3), user);
+        user.setCurrentHand(hand);
+        return TypedActionResult.consume(itemStack);
+    }
+
+    @Override
+    public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
+        if (!world.isClient) {
+            if (user.getEquippedStack(EquipmentSlot.MAINHAND) == stack && user.isOnGround()) {
+                AbilityMethods.tickAbilityThunderBlitz(stack, world, user, remainingUseTicks, ability_timer_max, abilityDamage, skillCooldown, radius);
+            }
+        }
+    }
+
+    @Override
+    public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
+        if (!world.isClient) {
+            //Player dash end
+            if (user.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
+                user.setVelocity(0, 0, 0); // Stop player at end of charge
+                user.velocityModified = true;
+                user.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, 80, 2), user);
+
+            }
+        }
+    }
+
+    @Override
+    public int getMaxUseTime(ItemStack stack) {
+        return ability_timer_max;
+    }
+    @Override
+    public UseAction getUseAction(ItemStack stack) {
+        return UseAction.NONE;
     }
 
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
-        if (ability_timer > 0) {
-            if (!world.isClient && (entity instanceof PlayerEntity player)) {
-                ability_timer --;
-
-                //Player dash control
-                if (ability_timer > (ability_timer_max - 42) && ability_timer < (ability_timer_max - 40)) {
-                    player.setVelocity(player.getRotationVector().multiply(+6));
-                    player.setVelocity(player.getVelocity().x, 0, player.getVelocity().z); // Prevent player flying to the heavens
-                    player.velocityModified = true;
-                    world.playSoundFromEntity(null, player, SoundRegistry.ELEMENTAL_BOW_THUNDER_SHOOT_IMPACT_02.get(), SoundCategory.PLAYERS, 0.3f, 1.6f);
-                }
-                //Player dash end
-                if (ability_timer < 5) {
-                    player.setVelocity(0, 0, 0); // Stop player at end of charge
-                    player.velocityModified = true;
-                    player.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, 80, 2), player);
-
-                }
-
-                //AOE Damage & charge control
-                if (player.age % 3 == 0 && player.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
-                    Box box = new Box(player.getX() + radius, player.getY() + radius * 2, player.getZ() + radius, player.getX() - radius, player.getY() - radius, player.getZ() - radius);
-                    for (Entity entities : world.getOtherEntities(player, box, EntityPredicates.VALID_LIVING_ENTITY)) {
-
-                        if (entities != null) {
-                            if (entities instanceof LivingEntity le) {
-
-                                float choose = (float) (Math.random() * 1);
-
-                                if (ability_timer > (ability_timer_max - 40)) {
-                                    le.damage(DamageSource.MAGIC, abilityDamage);
-                                    world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_BOW_POISON_ATTACK_02.get(), SoundCategory.PLAYERS, 0.1f, choose);
-
-                                }
-
-                                if (ability_timer < (ability_timer_max - 40)) {
-                                    le.damage(DamageSource.MAGIC, abilityDamage * 10);
-                                    world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_BOW_POISON_ATTACK_01.get(), SoundCategory.PLAYERS, 0.1f, choose);
-                                }
-
-                            }
-                        }
-                    }
-
-                    //world.playSoundFromEntity(null, player, SoundRegistry.MAGIC_BOW_CHARGE_SHORT_VERSION.get(), SoundCategory.PLAYERS, 0.1f, 0.6f);
-                    double xpos = player.getX() - (radius + 1);
-                    double ypos = player.getY();
-                    double zpos = player.getZ() - (radius + 1);
-
-                    for (int i = radius * 2; i > 0; i--) {
-                        for (int j = radius * 2; j > 0; j--) {
-                            float choose = (float) (Math.random() * 1);
-                            HelperMethods.spawnParticle(world, ParticleTypes.ELECTRIC_SPARK, xpos + i + choose,
-                                    ypos + 0.4,
-                                    zpos + j + choose,
-                                    0, 0.1, 0);
-                            HelperMethods.spawnParticle(world, ParticleTypes.CLOUD, xpos + i + choose,
-                                    ypos + 0.1,
-                                    zpos + j + choose,
-                                    0, 0, 0);
-                            HelperMethods.spawnParticle(world, ParticleTypes.WARPED_SPORE, xpos + i + choose,
-                                    ypos,
-                                    zpos + j + choose,
-                                    0, 0.1, 0);
-                        }
-                    }
-                }
-            }
-        }
-
 
         if (stepMod > 0)
             stepMod --;
