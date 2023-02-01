@@ -98,8 +98,8 @@ public class PlagueSwordItem extends SwordItem {
             //Convert Absorption
             if (target.hasStatusEffect(StatusEffects.ABSORPTION)) {
                 var statdur = (target.getStatusEffect(StatusEffects.ABSORPTION).getDuration());
-                var statamp = (target.getStatusEffect(StatusEffects.ABSORPTION).getAmplifier());
-                target.addStatusEffect(new StatusEffectInstance(StatusEffects.INSTANT_DAMAGE, 1, statamp), attacker);
+                var statamp = (target.getStatusEffect(StatusEffects.ABSORPTION).getAmplifier() / 2);
+                target.addStatusEffect(new StatusEffectInstance(StatusEffects.INSTANT_DAMAGE, 0, statamp), attacker);
                 target.removeStatusEffect(StatusEffects.ABSORPTION);
             }
 

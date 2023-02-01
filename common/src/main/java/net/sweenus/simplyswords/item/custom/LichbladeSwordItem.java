@@ -42,7 +42,6 @@ public class LichbladeSwordItem extends SwordItem {
     int skillCooldown = (int) (SimplySwordsConfig.getFloatValue("soulanguish_cooldown"));
     float healAmount = (SimplySwordsConfig.getFloatValue("soulanguish_heal"));
     int range = (int) (SimplySwordsConfig.getFloatValue("soulanguish_range"));
-    int ability_timer;
     int damageTracker;
     int chanceReduce;
     double lastX;

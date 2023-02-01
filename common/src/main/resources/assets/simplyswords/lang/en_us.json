@@ -559,8 +559,8 @@
   "item.simplyswords.icewhispersworditem.tooltip1": "Unique Effect: Permafrost",
   "item.simplyswords.icewhispersworditem.tooltip2": "While wielded, gain a frost aura that deals",
   "item.simplyswords.icewhispersworditem.tooltip3": "damage and slows enemies within %d blocks.",
-  "item.simplyswords.icewhispersworditem.tooltip4": "Relinquish your frost aura, and instead, summon",
-  "item.simplyswords.icewhispersworditem.tooltip5": "a blizzard at your location, slowing and dealing",
+  "item.simplyswords.icewhispersworditem.tooltip4": "Drain your hunger in order to summon a",
+  "item.simplyswords.icewhispersworditem.tooltip5": "blizzard at your location, slowing and dealing",
   "item.simplyswords.icewhispersworditem.tooltip6": "increased damage to enemies within %d blocks.",
 
   "item.simplyswords.arcanethystsworditem.tooltip1": "Unique Effect: Arcane Assault",

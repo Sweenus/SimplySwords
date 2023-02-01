@@ -200,4 +200,63 @@ public class AbilityMethods {
             }
         }
     }
+
+    //Icewhisper - Permafrost
+    public static void tickAbilityPermafrost(ItemStack stack, World world, Entity entity,
+                                              int ability_timer, int ability_timer_max, int abilityDamage,
+                                              int skillCooldown, int radius,
+                                              double lastX, double lastY, double lastZ) {
+
+        if (!entity.world.isClient() && (entity instanceof PlayerEntity player)) {
+            int rradius = radius *2;
+            //AOE Blizzard
+            if (player.age % 10 == 0 && player.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
+                player.getHungerManager().addExhaustion(0.8f);
+                Box box = new Box(player.getX() + rradius, player.getY() + radius, player.getZ() + rradius, player.getX() - rradius, player.getY() - radius, player.getZ() - rradius);
+                for (Entity entities : world.getOtherEntities(player, box, EntityPredicates.VALID_LIVING_ENTITY)) {
+
+                    if (entities != null) {
+                        if (entities instanceof LivingEntity le) {
+                            if (le.hasStatusEffect(StatusEffects.SLOWNESS)) {
+
+                                int a = (le.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier() + 1);
+
+                                if (a < 4) {
+                                    le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 120, a), player);
+                                } else {
+                                    le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 120, a - 1), player);
+                                }
+                            } else {
+                                le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 120, 0), player);
+                            }
+                            float choose = (float) (Math.random() * 1);
+                            world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_BOW_ICE_SHOOT_IMPACT_03.get(), SoundCategory.PLAYERS, 0.1f, choose);
+                            le.damage(DamageSource.FREEZE, abilityDamage * 3);
+                        }
+                    }
+                }
+
+                double xpos = lastX - (rradius + 1);
+                double ypos = lastY;
+                double zpos = lastZ - (rradius + 1);
+                world.playSound(xpos, ypos, zpos, SoundRegistry.ELEMENTAL_BOW_ICE_SHOOT_IMPACT_03.get(), SoundCategory.PLAYERS, 0.1f, 0.2f, true);
+
+                for (int i = rradius * 2; i > 0; i--) {
+                    for (int j = rradius * 2; j > 0; j--) {
+                        float choose = (float) (Math.random() * 1);
+                        HelperMethods.spawnParticle(world, ParticleTypes.SNOWFLAKE, xpos + i + choose,
+                                ypos + 6,
+                                zpos + j + choose,
+                                choose / 3, -0.3, choose / 3);
+                        choose = (float) (Math.random() * 1);
+                        HelperMethods.spawnParticle(world, ParticleTypes.WHITE_ASH, xpos + i + choose,
+                                ypos + 6,
+                                zpos + j + choose,
+                                choose / 3, 0, choose / 3);
+                    }
+                }
+            }
+        }
+    }
+
 }
