@@ -8,7 +8,7 @@ modId = "simplyswords"
 version = "${version}"
 displayName = "Simply Swords"
 authors = "Sweenus"
-credits="Konsyliarz42 (Artist)"
+credits="Konsyliarz42 (Art)"
 description = '''
 A variety of unique weapons to add to your minecraft repertoire
 '''
@@ -24,7 +24,7 @@ side = "BOTH"
 [[dependencies.simplyswords]]
 modId = "minecraft"
 mandatory = true
-versionRange = "[1.19,)"
+versionRange = "[1.19, 1.19.2)"
 ordering = "NONE"
 side = "BOTH"
 
