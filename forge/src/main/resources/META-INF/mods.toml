@@ -8,6 +8,7 @@ modId = "simplyswords"
 version = "${version}"
 displayName = "Simply Swords"
 authors = "Sweenus"
+credits="Konsyliarz42 (Artist)"
 description = '''
 A variety of unique weapons to add to your minecraft repertoire
 '''
