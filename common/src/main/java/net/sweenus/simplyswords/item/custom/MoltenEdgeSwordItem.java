@@ -95,7 +95,7 @@ public class MoltenEdgeSwordItem extends SwordItem {
             for (Entity entities : world.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY)) {
 
                 if (entities != null) {
-                    if (entities instanceof LivingEntity le) {
+                    if ((entities instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, user)) {
                         amp ++;
                         le.setVelocity((le.getX() - user.getX()) / knockbackStrength, 0.6, (le.getZ() - user.getZ()) / knockbackStrength);
                         le.setOnFireFor(3);

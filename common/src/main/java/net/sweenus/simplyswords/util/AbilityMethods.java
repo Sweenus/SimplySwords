@@ -96,7 +96,7 @@ public class AbilityMethods {
                 for (Entity entities : world.getOtherEntities(player, box, EntityPredicates.VALID_LIVING_ENTITY)) {
 
                     if (entities != null) {
-                        if (entities instanceof LivingEntity le) {
+                        if ((entities instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, player)) {
 
                             float choose = (float) (Math.random() * 1);
 
@@ -160,7 +160,7 @@ public class AbilityMethods {
                 for (Entity entities : world.getOtherEntities(player, box, EntityPredicates.VALID_LIVING_ENTITY)) {
 
                     if (entities != null) {
-                        if (entities instanceof LivingEntity le) {
+                        if ((entities instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, player)) {
 
                             //Heal effect
                             float choose = (float) (Math.random() * 1);
@@ -218,7 +218,7 @@ public class AbilityMethods {
                 for (Entity entities : world.getOtherEntities(player, box, EntityPredicates.VALID_LIVING_ENTITY)) {
 
                     if (entities != null) {
-                        if (entities instanceof LivingEntity le) {
+                        if ((entities instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, player)) {
                             if (le.hasStatusEffect(StatusEffects.SLOWNESS)) {
 
                                 int a = (le.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier() + 1);
@@ -278,7 +278,7 @@ public class AbilityMethods {
                 for (Entity entities : world.getOtherEntities(player, box, EntityPredicates.VALID_LIVING_ENTITY)) {
 
                     if (entities != null) {
-                        if (entities instanceof LivingEntity le) {
+                        if ((entities instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, player)) {
 
                             float choose = (float) (Math.random() * 1);
 
@@ -354,7 +354,7 @@ public class AbilityMethods {
                 for (Entity entities : world.getOtherEntities(player, box, EntityPredicates.VALID_LIVING_ENTITY)) {
 
                     if (entities != null) {
-                        if (entities instanceof LivingEntity le) {
+                        if ((entities instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, player)) {
 
                             if (ability_timer > 12) {
                                 le.damage(DamageSource.MAGIC, abilityDamage);

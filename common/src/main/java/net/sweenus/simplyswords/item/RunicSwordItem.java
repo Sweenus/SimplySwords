@@ -30,6 +30,7 @@ import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
+import net.sweenus.simplyswords.util.HelperMethods;
 
 import java.util.List;
 
@@ -363,7 +364,7 @@ public class RunicSwordItem extends SwordItem {
                         for (Entity entities : sworld.getOtherEntities(player, box, EntityPredicates.VALID_LIVING_ENTITY)) {
 
                             if (entities != null) {
-                                if (entities instanceof LivingEntity le && player.getInventory().contains(Items.ARROW.getDefaultStack())) {
+                                if (entities instanceof LivingEntity le && player.getInventory().contains(Items.ARROW.getDefaultStack()) && HelperMethods.checkFriendlyFire(le, player)) {
 
                                     var arrowstack = player.getInventory().getSlotWithStack(Items.ARROW.getDefaultStack());
                                     var astack = player.getInventory().getStack(arrowstack);
@@ -408,7 +409,7 @@ public class RunicSwordItem extends SwordItem {
                         for (Entity entities : sworld.getOtherEntities(player, box, EntityPredicates.VALID_LIVING_ENTITY)) {
 
                             if (entities != null) {
-                                if (entities instanceof LivingEntity le) {
+                                if (entities instanceof LivingEntity le && HelperMethods.checkFriendlyFire(le, player)) {
 
                                     if (le.distanceTo(player) < sradius) {
                                         double ex = le.getX();

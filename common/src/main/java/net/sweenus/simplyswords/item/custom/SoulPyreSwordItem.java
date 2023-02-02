@@ -75,7 +75,7 @@ public class SoulPyreSwordItem extends SwordItem {
 
             //Position swap target & player
             LivingEntity target = (LivingEntity) HelperMethods.getTargetedEntity(user, range);
-            if (target != null) {
+            if (target != null && HelperMethods.checkFriendlyFire(target, user)) {
                 relocateX = user.getX();
                 relocateY = user.getY();
                 relocateZ = user.getZ();
@@ -98,7 +98,7 @@ public class SoulPyreSwordItem extends SwordItem {
                 for(Entity entities: world.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY)) {
 
                     if (entities != null) {
-                        if (entities instanceof LivingEntity le) {
+                        if ((entities instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, user)) {
                             le.setVelocity((rememberx - le.getX()) /4,  (remembery - le.getY()) /4, (rememberz - le.getZ()) /4);
                             le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 40, 3), user);
                             world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_BOW_FIRE_SHOOT_IMPACT_03.get(), SoundCategory.PLAYERS, 0.1f, 3f);

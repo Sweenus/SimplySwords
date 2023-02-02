@@ -43,6 +43,13 @@ public class HelperMethods {
         else return false;
     }
 
+    public static boolean checkFriendlyFire (LivingEntity livingEntity, PlayerEntity player) {
+        if (livingEntity instanceof PlayerEntity playerEntity) {
+            return playerEntity.shouldDamagePlayer(player);
+        } else {return true;}
+    }
+
+
     //spawnParticle - spawns particles across both client & server
     public static void spawnParticle(World world, ParticleEffect particle,double  xpos, double ypos, double zpos,
                               double xvelocity, double yvelocity, double zvelocity) {

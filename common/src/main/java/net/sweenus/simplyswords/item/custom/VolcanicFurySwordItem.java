@@ -131,7 +131,7 @@ public class VolcanicFurySwordItem extends SwordItem {
             for (Entity entities : world.getOtherEntities(player, box, EntityPredicates.VALID_LIVING_ENTITY)) {
 
                 if (entities != null) {
-                    if (entities instanceof LivingEntity le) {
+                    if ((entities instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, player)){
 
                         float choose = (float) (Math.random() * 1);
                         le.damage(DamageSource.MAGIC, abilityDamage * chargePower);

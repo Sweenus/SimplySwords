@@ -90,7 +90,7 @@ public class SoulSwordItem extends SwordItem {
             for(Entity ee: serverWorld.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY)) {
 
                 if (ee != null) {
-                    if (ee instanceof LivingEntity && user.hasStatusEffect(StatusEffects.MINING_FATIGUE)){
+                    if (ee instanceof LivingEntity && user.hasStatusEffect(StatusEffects.MINING_FATIGUE) && HelperMethods.checkFriendlyFire((LivingEntity) ee, user)){
                         LivingEntity le = (LivingEntity) ee;
                         le.addStatusEffect(new StatusEffectInstance(StatusEffects.MINING_FATIGUE, user.getStatusEffect(StatusEffects.MINING_FATIGUE).getDuration(), user.getStatusEffect(StatusEffects.MINING_FATIGUE).getAmplifier()) , user);
                         world.playSoundFromEntity (null, ee, SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_IMPACT_03.get() , SoundCategory.BLOCKS, 0.1f, 1f);

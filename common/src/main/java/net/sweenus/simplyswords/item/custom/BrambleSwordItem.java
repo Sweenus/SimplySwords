@@ -6,6 +6,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.SwordItem;
 import net.minecraft.item.ToolMaterial;
@@ -60,7 +61,7 @@ public class BrambleSwordItem extends SwordItem {
                     Box box = new Box(x + 10, y + 5, z + 10, x - 10, y - 5, z - 10);
 
                     for (Entity e : world.getOtherEntities(attacker, box, EntityPredicates.VALID_LIVING_ENTITY)) {
-                        if (e != null) {
+                        if (e != null && HelperMethods.checkFriendlyFire((LivingEntity) e, (PlayerEntity) attacker)) {
                             target = (LivingEntity) e;
                             target.addStatusEffect(new StatusEffectInstance(StatusEffects.POISON, 300, 1), attacker);
                             target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 150, 1), attacker);

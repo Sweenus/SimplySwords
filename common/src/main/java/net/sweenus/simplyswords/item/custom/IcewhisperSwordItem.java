@@ -107,7 +107,7 @@ public class IcewhisperSwordItem extends SwordItem {
                     for (Entity entities : world.getOtherEntities(player, box, EntityPredicates.VALID_LIVING_ENTITY)) {
 
                         if (entities != null) {
-                            if (entities instanceof LivingEntity le) {
+                            if ((entities instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, player)) {
                                 if (le.hasStatusEffect(StatusEffects.SLOWNESS)) {
 
                                     int a = (le.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier() + 1);

@@ -4,11 +4,13 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectCategory;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
+import net.sweenus.simplyswords.util.HelperMethods;
 
 public class WildfireEffect extends StatusEffect {
     public WildfireEffect(StatusEffectCategory statusEffectCategory, int color) {super (statusEffectCategory, color); }
@@ -24,12 +26,14 @@ public class WildfireEffect extends StatusEffect {
             double y = pLivingEntity.getY();
             double z = pLivingEntity.getZ();
             int pduration = (int) SimplySwordsConfig.getFloatValue("wildfire_duration") / 20;
+            LivingEntity pPlayer = pLivingEntity.getAttacker();
             Box box = new Box(x + hradius, y +vradius, z + hradius, x - hradius, y - vradius, z - hradius);
 
             for(Entity e: world.getEntitiesByType(pLivingEntity.getType(), box, EntityPredicates.VALID_ENTITY))
             {
-                if (e != null) {
-                    e.setOnFireFor(pduration);
+                if (e instanceof LivingEntity) {
+                    if (HelperMethods.checkFriendlyFire((LivingEntity) e, (PlayerEntity) pPlayer))
+                        e.setOnFireFor(pduration);
                 }
             }
 

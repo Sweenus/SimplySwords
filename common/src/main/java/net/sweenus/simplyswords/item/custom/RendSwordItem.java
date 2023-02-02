@@ -102,7 +102,7 @@ public class RendSwordItem extends SwordItem {
                     if (ee instanceof LivingEntity) {
                         LivingEntity le = (LivingEntity) ee;
 
-                         if (le.hasStatusEffect(StatusEffects.SLOWNESS) && le.hasStatusEffect(StatusEffects.WEAKNESS)) {
+                         if (le.hasStatusEffect(StatusEffects.SLOWNESS) && le.hasStatusEffect(StatusEffects.WEAKNESS) && HelperMethods.checkFriendlyFire(le, user)) {
                              healamp += (le.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier());
                              cantrigger = true;
                              le.damage(DamageSource.FREEZE, le.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier() * rend_damage);

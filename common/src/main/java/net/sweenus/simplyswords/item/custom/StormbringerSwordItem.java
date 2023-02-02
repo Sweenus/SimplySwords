@@ -77,7 +77,7 @@ public class StormbringerSwordItem extends SwordItem {
 
                 //Parry attack
                 if (entities != null) {
-                    if (entities instanceof LivingEntity le) {
+                    if ((entities instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, (PlayerEntity) user)) {
                         if (le.handSwinging && remainingUseTicks > getMaxUseTime(stack) - perfectParryWindow) {
                             parrySuccess = true;
                             if (parrySuccession < 20)
@@ -104,7 +104,7 @@ public class StormbringerSwordItem extends SwordItem {
 
                     //damage & knockback
                     if (entities != null) {
-                        if (entities instanceof LivingEntity le) {
+                        if ((entities instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, (PlayerEntity) user)) {
 
                             float choose = (float) (Math.random() * 1);
                             le.damage(DamageSource.MAGIC, abilityDamage + parrySuccession);

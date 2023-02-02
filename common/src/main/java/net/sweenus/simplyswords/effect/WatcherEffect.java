@@ -5,6 +5,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectCategory;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
@@ -12,6 +13,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
 import net.sweenus.simplyswords.registry.SoundRegistry;
+import net.sweenus.simplyswords.util.HelperMethods;
 
 public class WatcherEffect extends StatusEffect {
     public WatcherEffect(StatusEffectCategory statusEffectCategory, int color) {super (statusEffectCategory, color); }
@@ -32,14 +34,15 @@ public class WatcherEffect extends StatusEffect {
 
             for(Entity e: world.getOtherEntities(pPlayer, box, EntityPredicates.VALID_ENTITY))
             {
-                if (e != null && pPlayer != null){
-                    e.damage(DamageSource.FREEZE, rAmount);
-                    pPlayer.setHealth(pPlayer.getHealth() + rAmount);
-                    BlockPos position2 = e.getBlockPos();
-                    world.playSound(null, position2, SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_IMPACT_02.get(), SoundCategory.PLAYERS, 0.05f, 1.2f);
+                if ( e instanceof LivingEntity && (pPlayer instanceof PlayerEntity player)) {
+                    if (HelperMethods.checkFriendlyFire((LivingEntity) e, player)) {
+                        e.damage(DamageSource.FREEZE, rAmount);
+                        pPlayer.setHealth(pPlayer.getHealth() + rAmount);
+                        BlockPos position2 = e.getBlockPos();
+                        world.playSound(null, position2, SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_IMPACT_02.get(), SoundCategory.PLAYERS, 0.05f, 1.2f);
+                    }
                 }
             }
-
         }
 
         super.applyUpdateEffect(pLivingEntity, pAmplifier);

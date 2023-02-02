@@ -109,7 +109,7 @@ public class StealSwordItem extends SwordItem {
             for(Entity entities: sworld.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY)) {
 
                 if (entities != null) {
-                    if (entities instanceof LivingEntity le) {
+                    if ((entities instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, user)) {
                         int iduration = (int) SimplySwordsConfig.getFloatValue("steal_invis_duration");
                         int bduration = (int) SimplySwordsConfig.getFloatValue("steal_blind_duration");
 
