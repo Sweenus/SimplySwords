@@ -95,7 +95,7 @@ public class StormsEdgeSwordItem extends SwordItem {
     }
     @Override
     public UseAction getUseAction(ItemStack stack) {
-        return UseAction.CROSSBOW;
+        return UseAction.BLOCK;
     }
 
     @Override

@@ -195,6 +195,10 @@ public class SimplySwordsConfig {
         FLOAT_OPTIONS.put("soulanguish_heal", 0.5f);
         FLOAT_OPTIONS.put("soulanguish_range", 22f);
 
+        FLOAT_OPTIONS.put("shockdeflect_block_duration", 35f);
+        FLOAT_OPTIONS.put("shockdeflect_damage", 12f);
+        FLOAT_OPTIONS.put("shockdeflect_cooldown", 90f);
+        FLOAT_OPTIONS.put("shockdeflect_parry_duration", 10f);
 
 
         GENERAL_OPTIONS.put("standard_loot_table_weight", 0.08f);
@@ -616,6 +620,12 @@ public class SimplySwordsConfig {
                 config.append("// --------------------------------- \n");
                 config.append("// -- Unique Effect: Soul Anguish -- \n");
                 config.append("// --------------------------------- \n");
+            }
+            if (i == 109) {
+                config.append("\n");
+                config.append("// ---------------------------------- \n");
+                config.append("// -- Unique Effect: Shock Deflect -- \n");
+                config.append("// ---------------------------------- \n");
             }
             config.append("  \"").append(item).append("\": ").append(FLOAT_OPTIONS.get(item));
             ++i;

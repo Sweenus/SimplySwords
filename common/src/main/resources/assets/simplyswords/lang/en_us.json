@@ -597,6 +597,18 @@
   "item.simplyswords.lichbladesworditem.tooltip8": "return to you and, when reaching you,",
   "item.simplyswords.lichbladesworditem.tooltip9": "grant you absorption.",
 
+  "item.simplyswords.stormbringersworditem.tooltip1": "Unique Effect: Shock Deflect",
+  "item.simplyswords.stormbringersworditem.tooltip2": "Focus energy to a single point of your",
+  "item.simplyswords.stormbringersworditem.tooltip3": "blade, allowing you to momentarily block",
+  "item.simplyswords.stormbringersworditem.tooltip4": "incoming attacks.",
+  "item.simplyswords.stormbringersworditem.tooltip5": "When successfully timing this ability",
+  "item.simplyswords.stormbringersworditem.tooltip6": "with an enemy melee swing you will",
+  "item.simplyswords.stormbringersworditem.tooltip7": "perform a parry, dealing damage and",
+  "item.simplyswords.stormbringersworditem.tooltip8": "launching your opponent while also",
+  "item.simplyswords.stormbringersworditem.tooltip9": "reducing the ability cooldown.",
+  "item.simplyswords.stormbringersworditem.tooltip10": "Performing parries in succession will",
+  "item.simplyswords.stormbringersworditem.tooltip11": "increase the ability damage and cooldown.",
+
 
   "item.simplyswords.levitationsworditem.tooltip1": "Runic Power: Float",
   "item.simplyswords.levitationsworditem.tooltip2": "Chance on hit to reverse the effects",

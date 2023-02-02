@@ -610,8 +610,8 @@ public class ItemsRegistry {
                     stormsedge_attackspeed,
                     new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
-    public static final RegistrySupplier<StormSwordItem> STORMBRINGER = ITEM.register( "stormbringer", () ->
-            new StormSwordItem(ModToolMaterial.UNIQUE,
+    public static final RegistrySupplier<StormbringerSwordItem> STORMBRINGER = ITEM.register( "stormbringer", () ->
+            new StormbringerSwordItem(ModToolMaterial.UNIQUE,
                     (int) (stormbringer_damage_modifier),
                     stormbringer_attackspeed,
                     new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
