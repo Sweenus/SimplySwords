@@ -1,5 +1,5 @@
 {
-  "required": true,
+  "required": false,
   "replace": false,
   "skill": "strength",
   "level": 20,

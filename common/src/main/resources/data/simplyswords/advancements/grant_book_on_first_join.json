@@ -13,14 +13,14 @@
       "modid": "patchouli"
     }
   ],
-  "type": "patchouli:shapeless_book_recipe",
-  "ingredients": [
-    {
-      "item": "minecraft:book"
-    },
-    {
-      "item": "simplyswords:runic_tablet"
+  "criteria": {
+    "tick": {
+      "trigger": "minecraft:tick"
     }
-  ],
-  "book": "simplyswords:runic_grimoire"
+  },
+  "rewards": {
+    "loot": [
+      "simplyswords:grant_book_on_first_join"
+    ]
+  }
 }
