@@ -15,7 +15,9 @@ import net.minecraft.item.ToolMaterial;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.sound.SoundCategory;
+import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
@@ -152,33 +154,29 @@ public class StormbringerSwordItem extends SwordItem {
         super.inventoryTick(stack, world, entity, slot, selected);
     }
 
-    @Override
-    public Text getName(ItemStack stack) {
-        return Text.translatable(this.getTranslationKey(stack)).formatted(Formatting.GOLD, Formatting.BOLD, Formatting.UNDERLINE);
-    }
 
     @Override
     public void appendTooltip(ItemStack itemStack, World world, List<Text> tooltip, TooltipContext tooltipContext) {
 
         //1.19
 
-        tooltip.add(Text.literal(""));
-        tooltip.add(Text.translatable("item.simplyswords.stormbringersworditem.tooltip1").formatted(Formatting.GOLD, Formatting.BOLD));
-        tooltip.add(Text.literal(""));
-        tooltip.add(Text.translatable("item.simplyswords.onrightclick").formatted(Formatting.BOLD, Formatting.GREEN));
-        tooltip.add(Text.literal(""));
-        tooltip.add(Text.translatable("item.simplyswords.stormbringersworditem.tooltip2"));
-        tooltip.add(Text.translatable("item.simplyswords.stormbringersworditem.tooltip3"));
-        tooltip.add(Text.translatable("item.simplyswords.stormbringersworditem.tooltip4"));
-        tooltip.add(Text.literal(""));
-        tooltip.add(Text.translatable("item.simplyswords.stormbringersworditem.tooltip5"));
-        tooltip.add(Text.translatable("item.simplyswords.stormbringersworditem.tooltip6"));
-        tooltip.add(Text.translatable("item.simplyswords.stormbringersworditem.tooltip7"));
-        tooltip.add(Text.translatable("item.simplyswords.stormbringersworditem.tooltip8"));
-        tooltip.add(Text.translatable("item.simplyswords.stormbringersworditem.tooltip9"));
-        tooltip.add(Text.literal(""));
-        tooltip.add(Text.translatable("item.simplyswords.stormbringersworditem.tooltip10"));
-        tooltip.add(Text.translatable("item.simplyswords.stormbringersworditem.tooltip11"));
+        tooltip.add(new LiteralText(""));
+        tooltip.add(new TranslatableText("item.simplyswords.stormbringersworditem.tooltip1").formatted(Formatting.GOLD, Formatting.BOLD));
+        tooltip.add(new LiteralText(""));
+        tooltip.add(new TranslatableText("item.simplyswords.onrightclick").formatted(Formatting.BOLD, Formatting.GREEN));
+        tooltip.add(new LiteralText(""));
+        tooltip.add(new TranslatableText("item.simplyswords.stormbringersworditem.tooltip2"));
+        tooltip.add(new TranslatableText("item.simplyswords.stormbringersworditem.tooltip3"));
+        tooltip.add(new TranslatableText("item.simplyswords.stormbringersworditem.tooltip4"));
+        tooltip.add(new LiteralText(""));
+        tooltip.add(new TranslatableText("item.simplyswords.stormbringersworditem.tooltip5"));
+        tooltip.add(new TranslatableText("item.simplyswords.stormbringersworditem.tooltip6"));
+        tooltip.add(new TranslatableText("item.simplyswords.stormbringersworditem.tooltip7"));
+        tooltip.add(new TranslatableText("item.simplyswords.stormbringersworditem.tooltip8"));
+        tooltip.add(new TranslatableText("item.simplyswords.stormbringersworditem.tooltip9"));
+        tooltip.add(new LiteralText(""));
+        tooltip.add(new TranslatableText("item.simplyswords.stormbringersworditem.tooltip10"));
+        tooltip.add(new TranslatableText("item.simplyswords.stormbringersworditem.tooltip11"));
 
     }
 

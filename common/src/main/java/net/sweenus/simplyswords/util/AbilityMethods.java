@@ -176,7 +176,7 @@ public class AbilityMethods {
                     }
                 }
 
-                world.playSound(null, lastX, lastY, lastZ, SoundRegistry.DARK_SWORD_BLOCK.get(), SoundCategory.PLAYERS, soundDistance, 0.3f, 100);
+                world.playSound(null, lastX, lastY, lastZ, SoundRegistry.DARK_SWORD_BLOCK.get(), SoundCategory.PLAYERS, soundDistance, 0.3f);
 
                 double xpos = lastX - (radius + 1);
                 double ypos = lastY;

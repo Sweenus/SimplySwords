@@ -31,14 +31,14 @@
   "depends": {
     "fabric": "*",
     "minecraft": ">=1.18.0",
-    "architectury": ">=4.9.84"
+    "architectury": ">=4.10.88"
   },
   "suggests": {
-    "mythicmetals": ">=0.16.4",
-    "gobber2": ">=2.6.43"
+    "mythicmetals": ">=0.14.4",
+    "gobber2": ">=2.5.81"
   },
   "recommends": {
-    "bettercombat": ">=1.3.2",
-    "patchouli": ">=1.19.2-77-FABRIC"
+    "bettercombat": ">=1.5.5",
+    "patchouli": ">=1.18.2-71.1-FABRIC"
   }
 }

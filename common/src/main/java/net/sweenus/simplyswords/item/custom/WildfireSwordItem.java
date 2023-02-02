@@ -41,19 +41,20 @@ public class WildfireSwordItem extends SwordItem {
 
         //1.19
 
+        /*
         tooltip.add(new LiteralText(""));
         tooltip.add(new TranslatableText("item.simplyswords.wildfiresworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
         tooltip.add(new TranslatableText("item.simplyswords.wildfiresworditem.tooltip2"));
         tooltip.add(new TranslatableText("item.simplyswords.wildfiresworditem.tooltip3"));
 
 
-        /*
+        */
         //1.18.2
         tooltip.add(new LiteralText(""));
         tooltip.add(new TranslatableText("item.simplyswords.wildfiresworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
         tooltip.add(new TranslatableText("item.simplyswords.wildfiresworditem.tooltip2"));
         tooltip.add(new TranslatableText("item.simplyswords.wildfiresworditem.tooltip3"));
-         */
+         
     }
 
 }

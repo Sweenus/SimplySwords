@@ -159,10 +159,7 @@ public class MoltenEdgeSwordItem extends SwordItem {
         super.inventoryTick(stack, world, entity, slot, selected);
     }
 
-    @Override
-    public Text getName(ItemStack stack) {
-        return new TranslatableText(this.getTranslationKey(stack)).formatted(Formatting.GOLD, Formatting.BOLD, Formatting.UNDERLINE);
-    }
+
 
     @Override
     public void appendTooltip(ItemStack itemStack, World world, List<Text> tooltip, TooltipContext tooltipContext) {

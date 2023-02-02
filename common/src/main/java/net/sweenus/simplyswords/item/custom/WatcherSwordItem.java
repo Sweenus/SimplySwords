@@ -76,17 +76,13 @@ public class WatcherSwordItem extends SwordItem {
         super.inventoryTick(stack, world, entity, slot, selected);
     }
 
-    @Override
-    public Text getName(ItemStack stack) {
-        return new TranslatableText(this.getTranslationKey(stack)).formatted(Formatting.GOLD, Formatting.BOLD, Formatting.UNDERLINE);
-
-    }
 
     @Override
     public void appendTooltip(ItemStack itemStack, World world, List<Text> tooltip, TooltipContext tooltipContext) {
 
         //1.19
 
+        /*
         tooltip.add(new LiteralText(""));
         tooltip.add(new TranslatableText("item.simplyswords.watchersworditem.tooltip1").formatted(Formatting.GOLD, Formatting.BOLD));
         tooltip.add(new TranslatableText("item.simplyswords.watchersworditem.tooltip2"));
@@ -98,10 +94,10 @@ public class WatcherSwordItem extends SwordItem {
         tooltip.add(new TranslatableText("item.simplyswords.watchersworditem.tooltip6"));
         tooltip.add(new TranslatableText("item.simplyswords.watchersworditem.tooltip7"));
 
-
+*/
 
         //1.18.2
-                /*
+                
         tooltip.add(new LiteralText(""));
         tooltip.add(new TranslatableText("item.simplyswords.watchersworditem.tooltip1").formatted(Formatting.GOLD, Formatting.BOLD));
         tooltip.add(new TranslatableText("item.simplyswords.watchersworditem.tooltip2"));
@@ -113,7 +109,7 @@ public class WatcherSwordItem extends SwordItem {
         tooltip.add(new TranslatableText("item.simplyswords.watchersworditem.tooltip6"));
         tooltip.add(new TranslatableText("item.simplyswords.watchersworditem.tooltip7"));
 
-                 */
+                 
     }
 
 }

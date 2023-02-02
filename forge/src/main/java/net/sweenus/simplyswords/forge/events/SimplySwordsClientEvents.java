@@ -13,7 +13,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.forgespi.locating.IModFile;
-import net.minecraftforge.resource.PathPackResources;
+import net.minecraftforge.resource.PathResourcePack;
 import net.sweenus.simplyswords.SimplySwords;
 
 import java.io.IOException;
@@ -30,7 +30,7 @@ public class SimplySwordsClientEvents {
     private static void simplySwords$registerResourcePack(AddPackFindersEvent event, Identifier identifier, boolean alwaysEnabled) {
         event.addRepositorySource(((profileAdder, factory) -> {
             IModFile file = ModList.get().getModFileById(identifier.getNamespace()).getFile();
-            try (PathPackResources packResources = new PathPackResources(
+            try (PathResourcePack packResources = new PathResourcePack(
                     identifier.toString(),
                     file.findResource("resourcepacks/" + identifier.getPath()))) {
                 profileAdder.accept(new ResourcePackProfile(

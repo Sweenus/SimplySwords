@@ -1,5 +1,5 @@
 modLoader = "javafml"
-loaderVersion = "[39,)"
+loaderVersion = "[40,)"
 issueTrackerURL = "https://github.com/Sweenus/SimplySwords/issues"
 license = "Timefall Development License"
 
@@ -16,20 +16,20 @@ logoFile = "SimplySwordsLogoFinal2.gif"
 [[dependencies.simplyswords]]
 modId = "forge"
 mandatory = true
-versionRange = "[39,)"
+versionRange = "[40,)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.simplyswords]]
 modId = "minecraft"
 mandatory = true
-versionRange = "[1.18,1.18.3)"
+versionRange = "[1.18,)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.simplyswords]]
 modId = "architectury"
 mandatory = true
-versionRange = "[4.9.84,)"
+versionRange = "[4.10.88,)"
 ordering = "AFTER"
 side = "BOTH"

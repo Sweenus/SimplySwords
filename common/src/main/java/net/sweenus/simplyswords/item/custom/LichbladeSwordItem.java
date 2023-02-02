@@ -14,7 +14,9 @@ import net.minecraft.item.SwordItem;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
-import net.minecraft.server.world.ServerWorld;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -181,7 +183,7 @@ public class LichbladeSwordItem extends SwordItem {
                 for (int i = radius * 2; i > 0; i--) {
                     for (int j = radius * 2; j > 0; j--) {
                         float choose = (float) (Math.random() * 1);
-                        HelperMethods.spawnParticle(world, ParticleTypes.SCULK_SOUL, xpos + i + choose,
+                        HelperMethods.spawnParticle(world, ParticleTypes.SOUL, xpos + i + choose,
                                 ypos,
                                 zpos + j + choose,
                                 0, 0.1, 0);
@@ -207,42 +209,35 @@ public class LichbladeSwordItem extends SwordItem {
         super.inventoryTick(stack, world, entity, slot, selected);
     }
 
-    @Override
-    public Text getName(ItemStack stack) {
-        if (this.getDefaultStack().isOf(ItemsRegistry.AWAKENED_LICHBLADE.get()))
-            return Text.translatable(this.getTranslationKey(stack)).formatted(Formatting.DARK_RED, Formatting.BOLD, Formatting.UNDERLINE);
-        else
-            return Text.translatable(this.getTranslationKey(stack)).formatted(Formatting.GOLD, Formatting.BOLD, Formatting.UNDERLINE);
-    }
 
     @Override
     public void appendTooltip(ItemStack itemStack, World world, List<Text> tooltip, TooltipContext tooltipContext) {
 
         //1.19
 
-        tooltip.add(Text.literal(""));
+        tooltip.add(new LiteralText(""));
         if (this.getDefaultStack().isOf(ItemsRegistry.SLUMBERING_LICHBLADE.get()))
-            tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip1").formatted(Formatting.GOLD, Formatting.BOLD));
+            tooltip.add(new TranslatableText("item.simplyswords.lichbladesworditem.tooltip1").formatted(Formatting.GOLD, Formatting.BOLD));
         if (this.getDefaultStack().isOf(ItemsRegistry.WAKING_LICHBLADE.get()))
-            tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip1.2").formatted(Formatting.GOLD, Formatting.BOLD));
+            tooltip.add(new TranslatableText("item.simplyswords.lichbladesworditem.tooltip1.2").formatted(Formatting.GOLD, Formatting.BOLD));
         if (this.getDefaultStack().isOf(ItemsRegistry.AWAKENED_LICHBLADE.get()))
-            tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip1.3").formatted(Formatting.GOLD, Formatting.BOLD));
-        tooltip.add(Text.literal(""));
-        tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip2"));
-        tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip3", radius));
-        tooltip.add(Text.literal(""));
+            tooltip.add(new TranslatableText("item.simplyswords.lichbladesworditem.tooltip1.3").formatted(Formatting.GOLD, Formatting.BOLD));
+        tooltip.add(new LiteralText(""));
+        tooltip.add(new TranslatableText("item.simplyswords.lichbladesworditem.tooltip2"));
+        tooltip.add(new TranslatableText("item.simplyswords.lichbladesworditem.tooltip3", radius));
+        tooltip.add(new LiteralText(""));
         if (this.getDefaultStack().isOf(ItemsRegistry.WAKING_LICHBLADE.get()) || this.getDefaultStack().isOf(ItemsRegistry.AWAKENED_LICHBLADE.get())) {
-            tooltip.add(Text.translatable("item.simplyswords.onrightclick").formatted(Formatting.BOLD, Formatting.GREEN));
-            tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip4"));
-            tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip5"));
-            tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip6"));
-            tooltip.add(Text.literal(""));
+            tooltip.add(new TranslatableText("item.simplyswords.onrightclick").formatted(Formatting.BOLD, Formatting.GREEN));
+            tooltip.add(new TranslatableText("item.simplyswords.lichbladesworditem.tooltip4"));
+            tooltip.add(new TranslatableText("item.simplyswords.lichbladesworditem.tooltip5"));
+            tooltip.add(new TranslatableText("item.simplyswords.lichbladesworditem.tooltip6"));
+            tooltip.add(new LiteralText(""));
         }
         if (this.getDefaultStack().isOf(ItemsRegistry.AWAKENED_LICHBLADE.get())) {
-            tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip7"));
-            tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip8"));
-            tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip9"));
-            tooltip.add(Text.literal(""));
+            tooltip.add(new TranslatableText("item.simplyswords.lichbladesworditem.tooltip7"));
+            tooltip.add(new TranslatableText("item.simplyswords.lichbladesworditem.tooltip8"));
+            tooltip.add(new TranslatableText("item.simplyswords.lichbladesworditem.tooltip9"));
+            tooltip.add(new LiteralText(""));
         }
 
     }

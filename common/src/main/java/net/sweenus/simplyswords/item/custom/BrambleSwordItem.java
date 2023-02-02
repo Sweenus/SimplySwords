@@ -88,26 +88,25 @@ public class BrambleSwordItem extends SwordItem {
         super.inventoryTick(stack, world, entity, slot, selected);
     }
 
-    @Override
-    public Text getName(ItemStack stack) {
-        return new TranslatableText(this.getTranslationKey(stack)).formatted(Formatting.GOLD, Formatting.BOLD, Formatting.UNDERLINE);
-    }
+
 
     @Override
     public void appendTooltip(ItemStack itemStack, World world, List<Text> tooltip, TooltipContext tooltipContext) {
 
         //1.19.x
-/*
+
         tooltip.add(new LiteralText(""));
         tooltip.add(new TranslatableText("item.simplyswords.bramblesworditem.tooltip1").formatted(Formatting.GOLD, Formatting.BOLD));
         tooltip.add(new TranslatableText("item.simplyswords.bramblesworditem.tooltip2"));
         tooltip.add(new TranslatableText("item.simplyswords.bramblesworditem.tooltip3"));
-        */
+        /*
         //1.18.2
         tooltip.add(new LiteralText(""));
         tooltip.add(new TranslatableText("item.simplyswords.bramblesworditem.tooltip1").formatted(Formatting.GOLD, Formatting.BOLD));
         tooltip.add(new TranslatableText("item.simplyswords.bramblesworditem.tooltip2"));
         tooltip.add(new TranslatableText("item.simplyswords.bramblesworditem.tooltip3"));
+
+         */
 
     }
 
