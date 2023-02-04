@@ -311,9 +311,9 @@ public class SimplySwordsConfig {
         WEAPON_OPTIONS.put("frostfall_attackspeed", -2.5f);
         WEAPON_OPTIONS.put("moltenedge_attackspeed", -2.1f);
         WEAPON_OPTIONS.put("livyatan_attackspeed", -2.1f);
-        WEAPON_OPTIONS.put("icewhisper_attackspeed", -3.1f);
-        WEAPON_OPTIONS.put("arcanethyst_attackspeed", -3.1f);
-        WEAPON_OPTIONS.put("thunderbrand_attackspeed", -3.1f);
+        WEAPON_OPTIONS.put("icewhisper_attackspeed", -2.7f);
+        WEAPON_OPTIONS.put("arcanethyst_attackspeed", -2.7f);
+        WEAPON_OPTIONS.put("thunderbrand_attackspeed", -2.7f);
         WEAPON_OPTIONS.put("lichblade_attackspeed", -3.1f);
 
     }

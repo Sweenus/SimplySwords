@@ -2,55 +2,55 @@
   "attributes": {
     "attack_range": 4,
     "category": "halberd",
-    "pose": "bettercombat:pose_two_handed_heavy",
+    "pose": "simplyswords:pose_halberd",
     "two_handed": true,
     "attacks": [
       {
         "hitbox": "HORIZONTAL_PLANE",
         "damage_multiplier": 1,
-        "angle": 200,
+        "angle": 120,
         "upswing": 0.5,
-        "animation": "bettercombat:two_handed_slash_horizontal_left",
-        "swing_sound": {
-          "id": "simplyswords:elemental_sword_wind_attack_01",
-          "volume": 0.5,
-          "pitch": 2.8
-        }
-      },
-      {
-        "hitbox": "HORIZONTAL_PLANE",
-        "damage_multiplier": 1,
-        "angle": 200,
-        "upswing": 0.5,
-        "animation": "bettercombat:two_handed_slash_horizontal_right",
-        "swing_sound": {
-          "id": "simplyswords:elemental_sword_wind_attack_01",
-          "volume": 0.5,
-          "pitch": 3.1
-        }
-      },
-      {
-        "hitbox": "VERTICAL_PLANE",
-        "damage_multiplier": 1.6,
-        "angle": 90,
-        "upswing": 0.5,
-        "animation": "bettercombat:two_handed_slam",
+        "animation": "simplyswords:halberd_slash_vertical_right",
         "swing_sound": {
           "id": "simplyswords:elemental_sword_wind_attack_03",
           "volume": 0.5,
-          "pitch": 2.8
+          "pitch": 0.8
         }
       },
       {
         "hitbox": "FORWARD_BOX",
-        "damage_multiplier": 2,
+        "damage_multiplier": 1,
         "angle": 0,
         "upswing": 0.5,
-        "animation": "bettercombat:two_handed_stab_left",
+        "animation": "simplyswords:halberd_stab_right",
+        "swing_sound": {
+          "id": "simplyswords:elemental_sword_wind_attack_01",
+          "volume": 0.5,
+          "pitch": 1.8
+        }
+      },
+      {
+        "hitbox": "FORWARD_BOX",
+        "damage_multiplier": 1,
+        "angle": 0,
+        "upswing": 0.5,
+        "animation": "simplyswords:halberd_stab_right",
         "swing_sound": {
           "id": "simplyswords:elemental_sword_wind_attack_02",
           "volume": 0.5,
-          "pitch": 2.8
+          "pitch": 1.5
+        }
+      },
+      {
+        "hitbox": "VERTICAL_PLANE",
+        "damage_multiplier": 2,
+        "angle": 150,
+        "upswing": 0.5,
+        "animation": "bettercombat:two_handed_slash_vertical_right",
+        "swing_sound": {
+          "id": "simplyswords:elemental_sword_wind_attack_01",
+          "volume": 0.5,
+          "pitch": 1.8
         }
       }
     ]

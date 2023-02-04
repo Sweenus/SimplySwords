@@ -156,7 +156,6 @@ public class RunicSwordItem extends SwordItem {
 
                 if (attacker.getRandom().nextInt(100) <= lhitchance) {
                     attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, lduration, 3), attacker);
-                    attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.FIRE_RESISTANCE, lduration, 1), attacker);
                     attacker.setOnFireFor(lduration / 20);
                 }
             }
