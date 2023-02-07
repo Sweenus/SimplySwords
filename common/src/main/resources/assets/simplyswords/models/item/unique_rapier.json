@@ -1,0 +1,7 @@
+{
+	"parent": "simplyswords:item/template_longsword",
+	"textures": {
+		"layer0": "simplyswords:item/unique_rapier",
+		"layer1": "simplyswords:item/unique_rapier_layer_32x32"
+	}
+}

@@ -1,0 +1,7 @@
+{
+	"parent": "simplyswords:item/template_longsword",
+	"textures": {
+		"layer1": "simplyswords:item/unique_longsword_tainted_layer_32x32",
+		"layer0": "simplyswords:item/unique_longsword_tainted_whole_32x32"
+	}
+}

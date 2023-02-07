@@ -749,5 +749,41 @@ public class ItemsRegistry {
                     lichblade_attackspeed,
                     new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
+    public static final RegistrySupplier<PlaceholderSwordItem> UNIQUERAPIER = ITEM.register( "unique_rapier", () ->
+            new PlaceholderSwordItem(ModToolMaterial.UNIQUE,
+                    (int) (emberblade_damage_modifier),
+                    emberblade_attackspeed,
+                    new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+
+    public static final RegistrySupplier<EmberIreSwordItem> UNIQUELONGSWORDHOLY = ITEM.register( "unique_longsword_holy", () ->
+            new EmberIreSwordItem(ModToolMaterial.UNIQUE,
+                    (int) (emberblade_damage_modifier),
+                    emberblade_attackspeed,
+                    new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+
+    public static final RegistrySupplier<EmberIreSwordItem> UNIQUELONGSWORDTAINTED = ITEM.register( "unique_longsword_tainted", () ->
+            new EmberIreSwordItem(ModToolMaterial.UNIQUE,
+                    (int) (emberblade_damage_modifier),
+                    emberblade_attackspeed,
+                    new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+
+    public static final RegistrySupplier<EmberIreSwordItem> UNIQUELONGSWORDDULL = ITEM.register( "unique_longsword_dull", () ->
+            new EmberIreSwordItem(ModToolMaterial.UNIQUE,
+                    (int) (emberblade_damage_modifier),
+                    emberblade_attackspeed,
+                    new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+
+    public static final RegistrySupplier<EmberIreSwordItem> UNIQUELONGSWORDDULLHOLY = ITEM.register( "unique_longsword_holy_dull", () ->
+            new EmberIreSwordItem(ModToolMaterial.UNIQUE,
+                    (int) (emberblade_damage_modifier),
+                    emberblade_attackspeed,
+                    new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+
+    public static final RegistrySupplier<EmberIreSwordItem> UNIQUELONGSWORDDULLTAINTED = ITEM.register( "unique_longsword_tainted_dull", () ->
+            new EmberIreSwordItem(ModToolMaterial.UNIQUE,
+                    (int) (emberblade_damage_modifier),
+                    emberblade_attackspeed,
+                    new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+
 
 }
