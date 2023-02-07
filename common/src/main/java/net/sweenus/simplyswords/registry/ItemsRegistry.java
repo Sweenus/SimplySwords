@@ -37,6 +37,7 @@ public class ItemsRegistry {
     static float greathammer_positive_modifier = SimplySwordsConfig.getWeaponAttributes("greathammer_positive_damage_modifier");
     static float chakram_positive_modifier = SimplySwordsConfig.getWeaponAttributes("chakram_positive_damage_modifier");
     static float scythe_positive_modifier = SimplySwordsConfig.getWeaponAttributes("scythe_positive_damage_modifier");
+    static float halberd_positive_modifier = SimplySwordsConfig.getWeaponAttributes("halberd_positive_damage_modifier");
 
     static float longsword_negative_modifier = SimplySwordsConfig.getWeaponAttributes("longsword_negative_damage_modifier");
     static float twinblade_negative_modifier = SimplySwordsConfig.getWeaponAttributes("twinblade_negative_damage_modifier");
@@ -52,6 +53,7 @@ public class ItemsRegistry {
     static float greathammer_negative_modifier = SimplySwordsConfig.getWeaponAttributes("greathammer_negative_damage_modifier");
     static float chakram_negative_modifier = SimplySwordsConfig.getWeaponAttributes("chakram_negative_damage_modifier");
     static float scythe_negative_modifier = SimplySwordsConfig.getWeaponAttributes("scythe_negative_damage_modifier");
+    static float halberd_negative_modifier = SimplySwordsConfig.getWeaponAttributes("halberd_negative_damage_modifier");
 
     static float longsword_attackspeed = SimplySwordsConfig.getWeaponAttributes("longsword_attackspeed");
     static float twinblade_attackspeed = SimplySwordsConfig.getWeaponAttributes("twinblade_attackspeed");
@@ -67,6 +69,7 @@ public class ItemsRegistry {
     static float greathammer_attackspeed = SimplySwordsConfig.getWeaponAttributes("greathammer_attackspeed");
     static float chakram_attackspeed = SimplySwordsConfig.getWeaponAttributes("chakram_attackspeed");
     static float scythe_attackspeed = SimplySwordsConfig.getWeaponAttributes("scythe_attackspeed");
+    static float halberd_attackspeed = SimplySwordsConfig.getWeaponAttributes("halberd_attackspeed");
 
     static float brimstone_attackspeed = SimplySwordsConfig.getWeaponAttributes("brimstone_attackspeed");
     static float thewatcher_attackspeed = SimplySwordsConfig.getWeaponAttributes("thewatcher_attackspeed");
@@ -222,6 +225,13 @@ public class ItemsRegistry {
                     scythe_attackspeed,
                     "minecraft:iron_ingot"));
 
+    public static final RegistrySupplier<SimplySwordsSwordItem> IRON_HALBERD = ITEM.register( "iron_halberd", () ->
+            new SimplySwordsSwordItem(
+                    ToolMaterials.GOLD,
+                    (int) (iron_modifier + halberd_positive_modifier - halberd_negative_modifier),
+                    halberd_attackspeed,
+                    "minecraft:iron_ingot"));
+
     //GOLD
     public static final RegistrySupplier<SimplySwordsSwordItem> GOLD_LONGSWORD = ITEM.register( "gold_longsword", () ->
             new SimplySwordsSwordItem(
@@ -316,6 +326,13 @@ public class ItemsRegistry {
                     scythe_attackspeed,
                     "minecraft:gold_ingot"));
 
+    public static final RegistrySupplier<SimplySwordsSwordItem> GOLD_HALBERD = ITEM.register( "gold_halberd", () ->
+            new SimplySwordsSwordItem(
+                    ToolMaterials.GOLD,
+                    (int) (gold_modifier + halberd_positive_modifier - halberd_negative_modifier),
+                    halberd_attackspeed,
+                    "minecraft:gold_ingot"));
+
     //DIAMOND
     public static final RegistrySupplier<SimplySwordsSwordItem> DIAMOND_LONGSWORD = ITEM.register( "diamond_longsword", () ->
             new SimplySwordsSwordItem(
@@ -408,6 +425,13 @@ public class ItemsRegistry {
                     ToolMaterials.DIAMOND,
                     (int) (diamond_modifier + scythe_positive_modifier - scythe_negative_modifier),
                     scythe_attackspeed,
+                    "minecraft:diamond_ingot"));
+
+    public static final RegistrySupplier<SimplySwordsSwordItem> DIAMOND_HALBERD = ITEM.register( "diamond_halberd", () ->
+            new SimplySwordsSwordItem(
+                    ToolMaterials.DIAMOND,
+                    (int) (diamond_modifier + halberd_positive_modifier - halberd_negative_modifier),
+                    halberd_attackspeed,
                     "minecraft:diamond_ingot"));
 
     //NETHERITE
@@ -507,6 +531,13 @@ public class ItemsRegistry {
                     scythe_attackspeed,
                     "minecraft:netherite_ingot"));
 
+    public static final RegistrySupplier<SimplySwordsSwordItem> NETHERITE_HALBERD = ITEM.register( "netherite_halberd", () ->
+            new SimplySwordsSwordItem(
+                    ToolMaterials.NETHERITE,
+                    (int) (netherite_modifier + halberd_positive_modifier - halberd_negative_modifier),
+                    halberd_attackspeed,
+                    "minecraft:netherite_ingot"));
+
 
     //RUNIC
     public static final RegistrySupplier<RunicSwordItem> RUNIC_LONGSWORD = ITEM.register( "runic_longsword", () ->
@@ -589,6 +620,12 @@ public class ItemsRegistry {
             new RunicSwordItem(ModToolMaterial.RUNIC,
                     (int) (runic_modifier + scythe_positive_modifier - scythe_negative_modifier),
                     scythe_attackspeed,
+                    new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.RARE)));
+
+    public static final RegistrySupplier<RunicSwordItem> RUNIC_HALBERD = ITEM.register( "runic_halberd", () ->
+            new RunicSwordItem(ModToolMaterial.RUNIC,
+                    (int) (runic_modifier + halberd_positive_modifier - halberd_negative_modifier),
+                    halberd_attackspeed,
                     new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.RARE)));
 
     //SPECIAL

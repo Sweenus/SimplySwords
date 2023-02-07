@@ -229,6 +229,7 @@ public class SimplySwordsConfig {
         WEAPON_OPTIONS.put("greathammer_positive_damage_modifier", 4f);
         WEAPON_OPTIONS.put("chakram_positive_damage_modifier", 0f);
         WEAPON_OPTIONS.put("scythe_positive_damage_modifier", 1f);
+        WEAPON_OPTIONS.put("halberd_positive_damage_modifier", 3f);
 
         WEAPON_OPTIONS.put("longsword_negative_damage_modifier", 0f);
         WEAPON_OPTIONS.put("twinblade_negative_damage_modifier", 0f);
@@ -244,6 +245,7 @@ public class SimplySwordsConfig {
         WEAPON_OPTIONS.put("greathammer_negative_damage_modifier", 0f);
         WEAPON_OPTIONS.put("chakram_negative_damage_modifier", 1f);
         WEAPON_OPTIONS.put("scythe_negative_damage_modifier", 0f);
+        WEAPON_OPTIONS.put("halberd_negative_damage_modifier", 0f);
 
         WEAPON_OPTIONS.put("iron_damage_modifier", 3f);
         WEAPON_OPTIONS.put("gold_damage_modifier", 2f);
@@ -265,6 +267,7 @@ public class SimplySwordsConfig {
         WEAPON_OPTIONS.put("greathammer_attackspeed", -3.2f);
         WEAPON_OPTIONS.put("chakram_attackspeed", -3.0f);
         WEAPON_OPTIONS.put("scythe_attackspeed", -2.7f);
+        WEAPON_OPTIONS.put("halberd_attackspeed", -2.7f);
 
         WEAPON_OPTIONS.put("brimstone_damage_modifier", 6f);
         WEAPON_OPTIONS.put("thewatcher_damage_modifier", 6f);
@@ -651,25 +654,25 @@ public class SimplySwordsConfig {
                 config.append("// Example use-case: Adding 3 to a value below will INCREASE the in-game damage of that weapon type by 3 \n");
                 config.append("// ------------------------------- \n");
             }
-            if (i == 14) {
+            if (i == 15) {
                 config.append("\n");
                 config.append("// -- Negative Damage Modifiers -- \n");
                 config.append("// Example use-case: Adding 3 to a value below will DECREASE the in-game damage of that weapon type by 3 \n");
                 config.append("// ------------------------------- \n");
             }
-            if (i == 28) {
+            if (i == 30) {
                 config.append("\n");
                 config.append("// -- Base Damage Modifiers -- \n");
                 config.append("// Positive & Negative damage modifiers scale off these base values \n");
                 config.append("// --------------------------- \n");
             }
-            if (i == 33) {
+            if (i == 35) {
                 config.append("\n");
                 config.append("// -- Attack Speed Modifiers -- \n");
                 config.append("// Recommended range: -1.0 to -3.7, with -1.0 being fast and -3.7 being slow \n");
                 config.append("// ---------------------------- \n");
             }
-            if (i == 47) {
+            if (i == 50) {
                 config.append("\n");
                 config.append("\n");
                 config.append("// -- UNIQUE ATTRIBUTES CONFIGURATION -- \n");
@@ -681,7 +684,7 @@ public class SimplySwordsConfig {
                 config.append("// Example use-case: Adding 3 to a value below will INCREASE the in-game damage of that weapon by 3 \n");
                 config.append("// ---------------------- \n");
             }
-            if (i == 71) {
+            if (i == 74) {
                 config.append("\n");
                 config.append("// -- Attack Speed Modifiers -- \n");
                 config.append("// Recommended range: -1.0 to -3.7, with -1.0 being fast and -3.7 being slow \n");
