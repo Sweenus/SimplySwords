@@ -27,6 +27,7 @@ public class GobberCompat {
     static float greathammer_positive_modifier = SimplySwordsConfig.getWeaponAttributes("greathammer_positive_damage_modifier");
     static float chakram_positive_modifier = SimplySwordsConfig.getWeaponAttributes("chakram_positive_damage_modifier");
     static float scythe_positive_modifier = SimplySwordsConfig.getWeaponAttributes("scythe_positive_damage_modifier");
+    static float halberd_positive_modifier = SimplySwordsConfig.getWeaponAttributes("halberd_positive_damage_modifier");
 
     static float longsword_negative_modifier = SimplySwordsConfig.getWeaponAttributes("longsword_negative_damage_modifier");
     static float twinblade_negative_modifier = SimplySwordsConfig.getWeaponAttributes("twinblade_negative_damage_modifier");
@@ -42,6 +43,7 @@ public class GobberCompat {
     static float greathammer_negative_modifier = SimplySwordsConfig.getWeaponAttributes("greathammer_negative_damage_modifier");
     static float chakram_negative_modifier = SimplySwordsConfig.getWeaponAttributes("chakram_negative_damage_modifier");
     static float scythe_negative_modifier = SimplySwordsConfig.getWeaponAttributes("scythe_negative_damage_modifier");
+    static float halberd_negative_modifier = SimplySwordsConfig.getWeaponAttributes("halberd_negative_damage_modifier");
 
     static float longsword_attackspeed = SimplySwordsConfig.getWeaponAttributes("longsword_attackspeed");
     static float twinblade_attackspeed = SimplySwordsConfig.getWeaponAttributes("twinblade_attackspeed");
@@ -57,6 +59,7 @@ public class GobberCompat {
     static float greathammer_attackspeed = SimplySwordsConfig.getWeaponAttributes("greathammer_attackspeed");
     static float chakram_attackspeed = SimplySwordsConfig.getWeaponAttributes("chakram_attackspeed");
     static float scythe_attackspeed = SimplySwordsConfig.getWeaponAttributes("scythe_attackspeed");
+    static float halberd_attackspeed = SimplySwordsConfig.getWeaponAttributes("halberd_attackspeed");
 
     static int longsword_modifier = (int) (longsword_positive_modifier - longsword_negative_modifier);
     static int twinblade_modifier = (int) (twinblade_positive_modifier - twinblade_negative_modifier);
@@ -72,9 +75,10 @@ public class GobberCompat {
     static int claymore_modifier = (int) (claymore_positive_modifier - claymore_negative_modifier);
     static int greathammer_modifier = (int) (greathammer_positive_modifier - greathammer_negative_modifier);
     static int greataxe_modifier = (int) (greataxe_positive_modifier - greataxe_negative_modifier);
-    static int gobber_modifier = 1;
-    static int gobber_nether_modifier = 3;
-    static int gobber_end_modifier = 6;
+    static int halberd_modifier = (int) (halberd_positive_modifier - halberd_negative_modifier);
+    static int gobber_modifier = (int) SimplySwordsConfig.getWeaponAttributes("gobber_damage_modifier");
+    static int gobber_nether_modifier = (int) SimplySwordsConfig.getWeaponAttributes("gobber_nether_damage_modifier");
+    static int gobber_end_modifier = (int) SimplySwordsConfig.getWeaponAttributes("gobber_end_damage_modifier");
 
 
     //GOBBER
@@ -134,6 +138,10 @@ public class GobberCompat {
             new SimplySwordsSwordItem(ModToolMaterial.GOBBER, gobber_modifier + scythe_modifier, scythe_attackspeed,
                     "gobber2:gobber2_ingot"));
 
+    public static final Item GOBBER_HALBERD = registerItem( "gobber_compat/gobber/gobber_halberd",
+            new SimplySwordsSwordItem(ModToolMaterial.GOBBER, gobber_modifier + halberd_modifier, halberd_attackspeed,
+                    "gobber2:gobber2_ingot"));
+
 
     //GOBBER_NETHER
     public static final Item GOBBER_NETHER_LONGSWORD = registerItem( "gobber_compat/gobber_nether/gobber_nether_longsword",
@@ -189,6 +197,10 @@ public class GobberCompat {
 
     public static final Item GOBBER_NETHER_SCYTHE = registerItem( "gobber_compat/gobber_nether/gobber_nether_scythe",
             new GobberNetherSwordItem(ModToolMaterial.GOBBER_NETHER, gobber_nether_modifier + scythe_modifier, scythe_attackspeed,
+                    "gobber2:gobber2_ingot_nether"));
+
+    public static final Item GOBBER_NETHER_HALBERD = registerItem( "gobber_compat/gobber_nether/gobber_nether_halberd",
+            new GobberNetherSwordItem(ModToolMaterial.GOBBER_NETHER, gobber_nether_modifier + halberd_modifier, halberd_attackspeed,
                     "gobber2:gobber2_ingot_nether"));
 
 
@@ -247,6 +259,10 @@ public class GobberCompat {
 
     public static final Item GOBBER_END_SCYTHE = registerItem( "gobber_compat/gobber_end/gobber_end_scythe",
             new GobberEndSwordItem(ModToolMaterial.GOBBER_END, gobber_end_modifier + scythe_modifier, scythe_attackspeed,
+                    "gobber2:gobber2_ingot_end"));
+
+    public static final Item GOBBER_END_HALBERD = registerItem( "gobber_compat/gobber_end/gobber_end_halberd",
+            new GobberEndSwordItem(ModToolMaterial.GOBBER_END, gobber_end_modifier + halberd_modifier, halberd_attackspeed,
                     "gobber2:gobber2_ingot_end"));
     
 

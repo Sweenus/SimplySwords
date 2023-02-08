@@ -38,6 +38,8 @@ public class ModLootTableModifiers {
                             .with(ItemEntry.builder(ItemsRegistry.IRON_CHAKRAM.get()))
                             .with(ItemEntry.builder(ItemsRegistry.IRON_GREATAXE.get()))
                             .with(ItemEntry.builder(ItemsRegistry.IRON_GREATHAMMER.get()))
+                            .with(ItemEntry.builder(ItemsRegistry.IRON_SCYTHE.get()))
+                            .with(ItemEntry.builder(ItemsRegistry.IRON_HALBERD.get()))
                             .with(ItemEntry.builder(ItemsRegistry.GOLD_LONGSWORD.get()))
                             .with(ItemEntry.builder(ItemsRegistry.GOLD_TWINBLADE.get()))
                             .with(ItemEntry.builder(ItemsRegistry.GOLD_RAPIER.get()))
@@ -50,7 +52,9 @@ public class ModLootTableModifiers {
                             .with(ItemEntry.builder(ItemsRegistry.GOLD_CLAYMORE.get()))
                             .with(ItemEntry.builder(ItemsRegistry.GOLD_GREATHAMMER.get()))
                             .with(ItemEntry.builder(ItemsRegistry.GOLD_CHAKRAM.get()))
-                            .with(ItemEntry.builder(ItemsRegistry.GOLD_GREATAXE.get()));
+                            .with(ItemEntry.builder(ItemsRegistry.GOLD_GREATAXE.get()))
+                            .with(ItemEntry.builder(ItemsRegistry.GOLD_SCYTHE.get()))
+                            .with(ItemEntry.builder(ItemsRegistry.GOLD_HALBERD.get()));
 
                     context.addPool(pool);
                 }
@@ -68,20 +72,6 @@ public class ModLootTableModifiers {
                             .rolls(ConstantLootNumberProvider.create(1))
                             .conditionally(RandomChanceLootCondition.builder(SimplySwordsConfig.getGeneralSettings("rare_loot_table_weight"))) // 1 = 100% of the time
                             .apply(EnchantRandomlyLootFunction.builder())
-                            .with(ItemEntry.builder(ItemsRegistry.RUNIC_CLAYMORE.get()))
-                            .with(ItemEntry.builder(ItemsRegistry.RUNIC_TWINBLADE.get()))
-                            .with(ItemEntry.builder(ItemsRegistry.RUNIC_LONGSWORD.get()))
-                            .with(ItemEntry.builder(ItemsRegistry.RUNIC_RAPIER.get()))
-                            .with(ItemEntry.builder(ItemsRegistry.RUNIC_CUTLASS.get()))
-                            .with(ItemEntry.builder(ItemsRegistry.RUNIC_KATANA.get()))
-                            .with(ItemEntry.builder(ItemsRegistry.RUNIC_GLAIVE.get()))
-                            .with(ItemEntry.builder(ItemsRegistry.RUNIC_SPEAR.get()))
-                            .with(ItemEntry.builder(ItemsRegistry.RUNIC_SAI.get()))
-                            .with(ItemEntry.builder(ItemsRegistry.RUNIC_GREATHAMMER.get()))
-                            .with(ItemEntry.builder(ItemsRegistry.RUNIC_GREATAXE.get()))
-                            .with(ItemEntry.builder(ItemsRegistry.RUNIC_CHAKRAM.get()))
-                            .with(ItemEntry.builder(ItemsRegistry.RUNIC_WARGLAIVE.get()))
-                            .with(ItemEntry.builder(ItemsRegistry.RUNIC_SCYTHE.get()))
                             .with(ItemEntry.builder(ItemsRegistry.DIAMOND_LONGSWORD.get()))
                             .with(ItemEntry.builder(ItemsRegistry.DIAMOND_TWINBLADE.get()))
                             .with(ItemEntry.builder(ItemsRegistry.DIAMOND_RAPIER.get()))
@@ -94,7 +84,9 @@ public class ModLootTableModifiers {
                             .with(ItemEntry.builder(ItemsRegistry.DIAMOND_CLAYMORE.get()))
                             .with(ItemEntry.builder(ItemsRegistry.DIAMOND_GREATHAMMER.get()))
                             .with(ItemEntry.builder(ItemsRegistry.DIAMOND_CHAKRAM.get()))
-                            .with(ItemEntry.builder(ItemsRegistry.DIAMOND_GREATAXE.get()));
+                            .with(ItemEntry.builder(ItemsRegistry.DIAMOND_GREATAXE.get()))
+                            .with(ItemEntry.builder(ItemsRegistry.DIAMOND_SCYTHE.get()))
+                            .with(ItemEntry.builder(ItemsRegistry.DIAMOND_HALBERD.get()));
 
                     context.addPool(pool);
                 }

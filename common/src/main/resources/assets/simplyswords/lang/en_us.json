@@ -73,6 +73,11 @@
   "item.simplyswords.netherite_scythe": "Netherite Scythe",
   "item.simplyswords.runic_chakram": "Runic Chakram",
   "item.simplyswords.runic_scythe": "Runic Scythe",
+  "item.simplyswords.iron_halberd": "Iron Halberd",
+  "item.simplyswords.gold_halberd": "Gold Halberd",
+  "item.simplyswords.diamond_halberd": "Diamond Halberd",
+  "item.simplyswords.netherite_halberd": "Netherite Halberd",
+  "item.simplyswords.runic_halberd": "Runic Halberd",
   "item.simplyswords.storms_edge": "Storm's Edge",
   "item.simplyswords.stormbringer": "Stormbringer",
   "item.simplyswords.sword_on_a_stick": "Sword on a Stick",
@@ -114,6 +119,7 @@
   "item.simplyswords.mythicmetals_compat.adamantite.adamantite_greataxe": "Adamantite Greataxe",
   "item.simplyswords.mythicmetals_compat.adamantite.adamantite_chakram": "Adamantite Chakram",
   "item.simplyswords.mythicmetals_compat.adamantite.adamantite_scythe": "Adamantite Scythe",
+  "item.simplyswords.mythicmetals_compat.adamantite.adamantite_halberd": "Adamantite Halberd",
 
 
   "item.simplyswords.mythicmetals_compat.aquarium.aquarium_claymore": "Aquarium Claymore",
@@ -130,6 +136,7 @@
   "item.simplyswords.mythicmetals_compat.aquarium.aquarium_greataxe": "Aquarium Greataxe",
   "item.simplyswords.mythicmetals_compat.aquarium.aquarium_chakram": "Aquarium Chakram",
   "item.simplyswords.mythicmetals_compat.aquarium.aquarium_scythe": "Aquarium Scythe",
+  "item.simplyswords.mythicmetals_compat.aquarium.aquarium_halberd": "Aquarium Halberd",
 
 
   "item.simplyswords.mythicmetals_compat.banglum.banglum_claymore": "Banglum Claymore",
@@ -146,6 +153,7 @@
   "item.simplyswords.mythicmetals_compat.banglum.banglum_greataxe": "Banglum Greataxe",
   "item.simplyswords.mythicmetals_compat.banglum.banglum_chakram": "Banglum Chakram",
   "item.simplyswords.mythicmetals_compat.banglum.banglum_scythe": "Banglum Scythe",
+  "item.simplyswords.mythicmetals_compat.banglum.banglum_halberd": "Banglum Halberd",
 
 
   "item.simplyswords.mythicmetals_compat.carmot.carmot_claymore": "Carmot Claymore",
@@ -162,6 +170,7 @@
   "item.simplyswords.mythicmetals_compat.carmot.carmot_greataxe": "Carmot Greataxe",
   "item.simplyswords.mythicmetals_compat.carmot.carmot_chakram": "Carmot Chakram",
   "item.simplyswords.mythicmetals_compat.carmot.carmot_scythe": "Carmot Scythe",
+  "item.simplyswords.mythicmetals_compat.carmot.carmot_halberd": "Carmot Halberd",
 
 
   "item.simplyswords.mythicmetals_compat.kyber.kyber_claymore": "Kyber Claymore",
@@ -178,6 +187,7 @@
   "item.simplyswords.mythicmetals_compat.kyber.kyber_greataxe": "Kyber Greataxe",
   "item.simplyswords.mythicmetals_compat.kyber.kyber_chakram": "Kyber Chakram",
   "item.simplyswords.mythicmetals_compat.kyber.kyber_scythe": "Kyber Scythe",
+  "item.simplyswords.mythicmetals_compat.kyber.kyber_halberd": "Kyber Halberd",
 
 
   "item.simplyswords.mythicmetals_compat.mythril.mythril_claymore": "Mythril Claymore",
@@ -194,6 +204,7 @@
   "item.simplyswords.mythicmetals_compat.mythril.mythril_greataxe": "Mythril Greataxe",
   "item.simplyswords.mythicmetals_compat.mythril.mythril_chakram": "Mythril Chakram",
   "item.simplyswords.mythicmetals_compat.mythril.mythril_scythe": "Mythril Scythe",
+  "item.simplyswords.mythicmetals_compat.mythril.mythril_halberd": "Mythril Halberd",
 
 
   "item.simplyswords.mythicmetals_compat.orichalcum.orichalcum_claymore": "Orichalcum Claymore",
@@ -210,6 +221,7 @@
   "item.simplyswords.mythicmetals_compat.orichalcum.orichalcum_greataxe": "Orichalcum Greataxe",
   "item.simplyswords.mythicmetals_compat.orichalcum.orichalcum_chakram": "Orichalcum Chakram",
   "item.simplyswords.mythicmetals_compat.orichalcum.orichalcum_scythe": "Orichalcum Scythe",
+  "item.simplyswords.mythicmetals_compat.orichalcum.orichalcum_halberd": "Orichalcum Halberd",
 
 
   "item.simplyswords.mythicmetals_compat.osmium.osmium_claymore": "Osmium Claymore",
@@ -226,6 +238,7 @@
   "item.simplyswords.mythicmetals_compat.osmium.osmium_greataxe": "Osmium Greataxe",
   "item.simplyswords.mythicmetals_compat.osmium.osmium_chakram": "Osmium Chakram",
   "item.simplyswords.mythicmetals_compat.osmium.osmium_scythe": "Osmium Scythe",
+  "item.simplyswords.mythicmetals_compat.osmium.osmium_halberd": "Osmium Halberd",
 
 
   "item.simplyswords.mythicmetals_compat.prometheum.prometheum_claymore": "Prometheum Claymore",
@@ -242,6 +255,7 @@
   "item.simplyswords.mythicmetals_compat.prometheum.prometheum_greataxe": "Prometheum Greataxe",
   "item.simplyswords.mythicmetals_compat.prometheum.prometheum_chakram": "Prometheum Chakram",
   "item.simplyswords.mythicmetals_compat.prometheum.prometheum_scythe": "Prometheum Scythe",
+  "item.simplyswords.mythicmetals_compat.prometheum.prometheum_halberd": "Prometheum Halberd",
 
 
   "item.simplyswords.mythicmetals_compat.quadrillum.quadrillum_claymore": "Quadrillum Claymore",
@@ -258,6 +272,7 @@
   "item.simplyswords.mythicmetals_compat.quadrillum.quadrillum_greataxe": "Quadrillum Greataxe",
   "item.simplyswords.mythicmetals_compat.quadrillum.quadrillum_chakram": "Quadrillum Chakram",
   "item.simplyswords.mythicmetals_compat.quadrillum.quadrillum_scythe": "Quadrillum Scythe",
+  "item.simplyswords.mythicmetals_compat.quadrillum.quadrillum_halberd": "Quadrillum Halberd",
 
 
   "item.simplyswords.mythicmetals_compat.runite.runite_claymore": "Runite Claymore",
@@ -274,6 +289,7 @@
   "item.simplyswords.mythicmetals_compat.runite.runite_greataxe": "Runite Greataxe",
   "item.simplyswords.mythicmetals_compat.runite.runite_chakram": "Runite Chakram",
   "item.simplyswords.mythicmetals_compat.runite.runite_scythe": "Runite Scythe",
+  "item.simplyswords.mythicmetals_compat.runite.runite_halberd": "Runite Halberd",
 
 
   "item.simplyswords.mythicmetals_compat.star_platinum.star_platinum_claymore": "Star Platinum Claymore",
@@ -290,6 +306,7 @@
   "item.simplyswords.mythicmetals_compat.star_platinum.star_platinum_greataxe": "Star Platinum Greataxe",
   "item.simplyswords.mythicmetals_compat.star_platinum.star_platinum_chakram": "Star Platinum Chakram",
   "item.simplyswords.mythicmetals_compat.star_platinum.star_platinum_scythe": "Star Platinum Scythe",
+  "item.simplyswords.mythicmetals_compat.star_platinum.star_platinum_halberd": "Star Platinum Halberd",
 
 
   "item.simplyswords.mythicmetals_compat.bronze.bronze_claymore": "Bronze Claymore",
@@ -306,6 +323,7 @@
   "item.simplyswords.mythicmetals_compat.bronze.bronze_greataxe": "Bronze Greataxe",
   "item.simplyswords.mythicmetals_compat.bronze.bronze_chakram": "Bronze Chakram",
   "item.simplyswords.mythicmetals_compat.bronze.bronze_scythe": "Bronze Scythe",
+  "item.simplyswords.mythicmetals_compat.bronze.bronze_halberd": "Bronze Halberd",
 
 
   "item.simplyswords.mythicmetals_compat.palladium.palladium_claymore": "Palladium Claymore",
@@ -322,6 +340,7 @@
   "item.simplyswords.mythicmetals_compat.palladium.palladium_greataxe": "Palladium Greataxe",
   "item.simplyswords.mythicmetals_compat.palladium.palladium_chakram": "Palladium Chakram",
   "item.simplyswords.mythicmetals_compat.palladium.palladium_scythe": "Palladium Scythe",
+  "item.simplyswords.mythicmetals_compat.palladium.palladium_halberd": "Palladium Halberd",
 
 
   "item.simplyswords.mythicmetals_compat.stormyx.stormyx_claymore": "Stormyx Claymore",
@@ -338,6 +357,7 @@
   "item.simplyswords.mythicmetals_compat.stormyx.stormyx_greataxe": "Stormyx Greataxe",
   "item.simplyswords.mythicmetals_compat.stormyx.stormyx_chakram": "Stormyx Chakram",
   "item.simplyswords.mythicmetals_compat.stormyx.stormyx_scythe": "Stormyx Scythe",
+  "item.simplyswords.mythicmetals_compat.stormyx.stormyx_halberd": "Stormyx Halberd",
 
 
   "item.simplyswords.mythicmetals_compat.steel.steel_claymore": "Steel Claymore",
@@ -354,6 +374,7 @@
   "item.simplyswords.mythicmetals_compat.steel.steel_greataxe": "Steel Greataxe",
   "item.simplyswords.mythicmetals_compat.steel.steel_chakram": "Steel Chakram",
   "item.simplyswords.mythicmetals_compat.steel.steel_scythe": "Steel Scythe",
+  "item.simplyswords.mythicmetals_compat.steel.steel_halberd": "Steel Halberd",
 
 
   "item.simplyswords.mythicmetals_compat.celestium.celestium_claymore": "Celestium Claymore",
@@ -370,6 +391,7 @@
   "item.simplyswords.mythicmetals_compat.celestium.celestium_greataxe": "Celestium Greataxe",
   "item.simplyswords.mythicmetals_compat.celestium.celestium_chakram": "Celestium Chakram",
   "item.simplyswords.mythicmetals_compat.celestium.celestium_scythe": "Celestium Scythe",
+  "item.simplyswords.mythicmetals_compat.celestium.celestium_halberd": "Celestium Halberd",
 
 
   "item.simplyswords.mythicmetals_compat.metallurgium.metallurgium_claymore": "Metallurgium Claymore",
@@ -386,6 +408,7 @@
   "item.simplyswords.mythicmetals_compat.metallurgium.metallurgium_greataxe": "Metallurgium Greataxe",
   "item.simplyswords.mythicmetals_compat.metallurgium.metallurgium_chakram": "Metallurgium Chakram",
   "item.simplyswords.mythicmetals_compat.metallurgium.metallurgium_scythe": "Metallurgium Scythe",
+  "item.simplyswords.mythicmetals_compat.metallurgium.metallurgium_halberd": "Metallurgium Halberd",
 
 
   "item.simplyswords.mythicmetals_compat.copper.copper_longsword": "Copper Longsword",
@@ -406,6 +429,7 @@
   "item.simplyswords.gobber_compat.gobber.gobber_greataxe": "Gobber Greataxe",
   "item.simplyswords.gobber_compat.gobber.gobber_chakram": "Gobber Chakram",
   "item.simplyswords.gobber_compat.gobber.gobber_scythe": "Gobber Scythe",
+  "item.simplyswords.gobber_compat.gobber.gobber_halberd": "Gobber Halberd",
 
   "item.simplyswords.gobber_compat.gobber_nether.gobber_nether_claymore": "Nether Claymore",
   "item.simplyswords.gobber_compat.gobber_nether.gobber_nether_cutlass": "Nether Cutlass",
@@ -421,6 +445,7 @@
   "item.simplyswords.gobber_compat.gobber_nether.gobber_nether_greataxe": "Nether Greataxe",
   "item.simplyswords.gobber_compat.gobber_nether.gobber_nether_chakram": "Nether Chakram",
   "item.simplyswords.gobber_compat.gobber_nether.gobber_nether_scythe": "Nether Scythe",
+  "item.simplyswords.gobber_compat.gobber_nether.gobber_nether_halberd": "Nether Halberd",
 
   "item.simplyswords.gobber_compat.gobber_end.gobber_end_claymore": "End Gobber Claymore",
   "item.simplyswords.gobber_compat.gobber_end.gobber_end_cutlass": "End Gobber Cutlass",
@@ -436,6 +461,7 @@
   "item.simplyswords.gobber_compat.gobber_end.gobber_end_greataxe": "End Gobber Greataxe",
   "item.simplyswords.gobber_compat.gobber_end.gobber_end_chakram": "End Gobber Chakram",
   "item.simplyswords.gobber_compat.gobber_end.gobber_end_scythe": "End Gobber Scythe",
+  "item.simplyswords.gobber_compat.gobber_end.gobber_end_halberd": "End Gobber Halberd",
 
 
   "itemGroup.simplyswords.simplyswords": "Simply Swords",

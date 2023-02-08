@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "#": {
+      "tag": "c:wood_sticks"
+    },
+    "X": {
+      "item": "minecraft:iron_ingot"
+    },
+    "Y": {
+      "item": "minecraft:iron_nugget"
+    }
+  },
+  "pattern": [
+    " XY",
+    "X#X",
+    "#  "
+  ],
+  "result": {
+    "item": "simplyswords:iron_halberd"
+  }
+}

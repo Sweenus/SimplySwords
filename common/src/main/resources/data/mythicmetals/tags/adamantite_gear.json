@@ -1,7 +1,6 @@
 {
   "replace": false,
   "values": [
-
     "simplyswords:mythicmetals_compat/adamantite/adamantite_claymore",
     "simplyswords:mythicmetals_compat/adamantite/adamantite_cutlass",
     "simplyswords:mythicmetals_compat/adamantite/adamantite_glaive",
@@ -14,6 +13,8 @@
     "simplyswords:mythicmetals_compat/adamantite/adamantite_warglaive",
     "simplyswords:mythicmetals_compat/adamantite/adamantite_greathammer",
     "simplyswords:mythicmetals_compat/adamantite/adamantite_greataxe",
-    "simplyswords:mythicmetals_compat/adamantite/adamantite_chakram"
+    "simplyswords:mythicmetals_compat/adamantite/adamantite_chakram",
+    "simplyswords:mythicmetals_compat/adamantite/adamantite_scythe",
+    "simplyswords:mythicmetals_compat/adamantite/adamantite_halberd"
   ]
 }

@@ -26,6 +26,7 @@ public class MythicMetalsCompat {
     static float greathammer_positive_modifier = SimplySwordsConfig.getWeaponAttributes("greathammer_positive_damage_modifier");
     static float chakram_positive_modifier = SimplySwordsConfig.getWeaponAttributes("chakram_positive_damage_modifier");
     static float scythe_positive_modifier = SimplySwordsConfig.getWeaponAttributes("scythe_positive_damage_modifier");
+    static float halberd_positive_modifier = SimplySwordsConfig.getWeaponAttributes("halberd_positive_damage_modifier");
 
     static float longsword_negative_modifier = SimplySwordsConfig.getWeaponAttributes("longsword_negative_damage_modifier");
     static float twinblade_negative_modifier = SimplySwordsConfig.getWeaponAttributes("twinblade_negative_damage_modifier");
@@ -41,6 +42,7 @@ public class MythicMetalsCompat {
     static float greathammer_negative_modifier = SimplySwordsConfig.getWeaponAttributes("greathammer_negative_damage_modifier");
     static float chakram_negative_modifier = SimplySwordsConfig.getWeaponAttributes("chakram_negative_damage_modifier");
     static float scythe_negative_modifier = SimplySwordsConfig.getWeaponAttributes("scythe_negative_damage_modifier");
+    static float halberd_negative_modifier = SimplySwordsConfig.getWeaponAttributes("halberd_negative_damage_modifier");
 
 
     static float longsword_attackspeed = SimplySwordsConfig.getWeaponAttributes("longsword_attackspeed");
@@ -57,6 +59,7 @@ public class MythicMetalsCompat {
     static float greathammer_attackspeed = SimplySwordsConfig.getWeaponAttributes("greathammer_attackspeed");
     static float chakram_attackspeed = SimplySwordsConfig.getWeaponAttributes("chakram_attackspeed");
     static float scythe_attackspeed = SimplySwordsConfig.getWeaponAttributes("scythe_attackspeed");
+    static float halberd_attackspeed = SimplySwordsConfig.getWeaponAttributes("halberd_attackspeed");
 
     
     static int longsword_modifier = (int) (longsword_positive_modifier - longsword_negative_modifier);
@@ -73,26 +76,27 @@ public class MythicMetalsCompat {
     static int claymore_modifier = (int) (claymore_positive_modifier - claymore_negative_modifier);
     static int greathammer_modifier = (int) (greathammer_positive_modifier - greathammer_negative_modifier);
     static int greataxe_modifier = (int) (greataxe_positive_modifier - greataxe_negative_modifier);
-    static int adamantite_modifier = 3;
-    static int aquarium_modifier = 3;
-    static int banglum_modifier = 3;
-    static int carmot_modifier = 3;
-    static int kyber_modifier = 3;
-    static int mythril_modifier = 3;
-    static int orichalcum_modifier = 3;
-    static int durasteel_modifier = 3;
-    static int osmium_modifier = 3;
-    static int prometheum_modifier = 3;
-    static int quadrillum_modifier = 3;
-    static int runite_modifier = 3;
-    static int star_platinum_modifier = 3;
-    static int bronze_modifier = 3;
-    static int copper_modifier = 3;
-    static int steel_modifier = 3;
-    static int palladium_modifier = 3;
-    static int stormyx_modifier = 3;
-    static int celestium_modifier = 3;
-    static int metallurgium_modifier = 3;
+    static int halberd_modifier = (int) (halberd_positive_modifier - halberd_negative_modifier);
+    static int adamantite_modifier = (int) SimplySwordsConfig.getWeaponAttributes("adamantite_damage_modifier");
+    static int aquarium_modifier = (int) SimplySwordsConfig.getWeaponAttributes("aquarium_damage_modifier");
+    static int banglum_modifier = (int) SimplySwordsConfig.getWeaponAttributes("banglum_damage_modifier");
+    static int carmot_modifier = (int) SimplySwordsConfig.getWeaponAttributes("carmot_damage_modifier");
+    static int kyber_modifier = (int) SimplySwordsConfig.getWeaponAttributes("kyber_damage_modifier");
+    static int mythril_modifier = (int) SimplySwordsConfig.getWeaponAttributes("mythril_damage_modifier");
+    static int orichalcum_modifier = (int) SimplySwordsConfig.getWeaponAttributes("orichalcum_damage_modifier");
+    static int durasteel_modifier = (int) SimplySwordsConfig.getWeaponAttributes("durasteel_damage_modifier");
+    static int osmium_modifier = (int) SimplySwordsConfig.getWeaponAttributes("osmium_damage_modifier");
+    static int prometheum_modifier = (int) SimplySwordsConfig.getWeaponAttributes("prometheum_damage_modifier");
+    static int quadrillum_modifier = (int) SimplySwordsConfig.getWeaponAttributes("quadrillum_damage_modifier");
+    static int runite_modifier = (int) SimplySwordsConfig.getWeaponAttributes("runite_damage_modifier");
+    static int star_platinum_modifier = (int) SimplySwordsConfig.getWeaponAttributes("star_platinum_damage_modifier");
+    static int bronze_modifier = (int) SimplySwordsConfig.getWeaponAttributes("bronze_damage_modifier");
+    static int copper_modifier = (int) SimplySwordsConfig.getWeaponAttributes("copper_damage_modifier");
+    static int steel_modifier = (int) SimplySwordsConfig.getWeaponAttributes("steel_damage_modifier");
+    static int palladium_modifier = (int) SimplySwordsConfig.getWeaponAttributes("palladium_damage_modifier");
+    static int stormyx_modifier = (int) SimplySwordsConfig.getWeaponAttributes("stormyx_damage_modifier");
+    static int celestium_modifier = (int) SimplySwordsConfig.getWeaponAttributes("celestium_damage_modifier");
+    static int metallurgium_modifier = (int) SimplySwordsConfig.getWeaponAttributes("metallurgium_damage_modifier");
 
 
     //ADAMANTITE
@@ -152,6 +156,10 @@ public class MythicMetalsCompat {
             new SimplySwordsSwordItem(ModToolMaterial.ADAMANTITE, adamantite_modifier + scythe_modifier, scythe_attackspeed,
                     "mythicmetals:adamantite_ingot"));
 
+    public static final Item ADAMANTITE_HALBERD = registerItem( "mythicmetals_compat/adamantite/adamantite_halberd",
+            new SimplySwordsSwordItem(ModToolMaterial.ADAMANTITE, adamantite_modifier + halberd_modifier, halberd_attackspeed,
+                    "mythicmetals:adamantite_ingot"));
+
 
     //AQUARIUM
     public static final Item AQUARIUM_LONGSWORD = registerItem( "mythicmetals_compat/aquarium/aquarium_longsword",
@@ -207,6 +215,10 @@ public class MythicMetalsCompat {
 
     public static final Item AQUARIUM_SCYTHE = registerItem( "mythicmetals_compat/aquarium/aquarium_scythe",
             new SimplySwordsSwordItem(ModToolMaterial.AQUARIUM, aquarium_modifier + scythe_modifier, scythe_attackspeed,
+                    "mythicmetals:aquarium_ingot"));
+
+    public static final Item AQUARIUM_HALBERD = registerItem( "mythicmetals_compat/aquarium/aquarium_halberd",
+            new SimplySwordsSwordItem(ModToolMaterial.AQUARIUM, aquarium_modifier + halberd_modifier, halberd_attackspeed,
                     "mythicmetals:aquarium_ingot"));
 
 
@@ -267,6 +279,10 @@ public class MythicMetalsCompat {
             new SimplySwordsSwordItem(ModToolMaterial.BANGLUM, banglum_modifier + scythe_modifier, scythe_attackspeed,
                     "mythicmetals:banglum_ingot"));
 
+    public static final Item BANGLUM_HALBERD = registerItem( "mythicmetals_compat/banglum/banglum_halberd",
+            new SimplySwordsSwordItem(ModToolMaterial.BANGLUM, banglum_modifier + halberd_modifier, halberd_attackspeed,
+                    "mythicmetals:banglum_ingot"));
+
 
     //CARMOT
     public static final Item CARMOT_LONGSWORD = registerItem( "mythicmetals_compat/carmot/carmot_longsword",
@@ -325,6 +341,10 @@ public class MythicMetalsCompat {
             new SimplySwordsSwordItem(ModToolMaterial.CARMOT, carmot_modifier + scythe_modifier, scythe_attackspeed,
                     "mythicmetals:carmot_ingot"));
 
+    public static final Item CARMOT_HALBERD = registerItem( "mythicmetals_compat/carmot/carmot_halberd",
+            new SimplySwordsSwordItem(ModToolMaterial.CARMOT, carmot_modifier + halberd_modifier, halberd_attackspeed,
+                    "mythicmetals:carmot_ingot"));
+
     //KYBER
     public static final Item KYBER_LONGSWORD = registerItem( "mythicmetals_compat/kyber/kyber_longsword",
             new SimplySwordsSwordItem(ModToolMaterial.KYBER, kyber_modifier + longsword_modifier, longsword_attackspeed,
@@ -380,6 +400,10 @@ public class MythicMetalsCompat {
 
     public static final Item KYBER_SCYTHE = registerItem( "mythicmetals_compat/kyber/kyber_scythe",
             new SimplySwordsSwordItem(ModToolMaterial.KYBER, kyber_modifier + scythe_modifier, scythe_attackspeed,
+                    "mythicmetals:kyber_ingot"));
+
+    public static final Item KYBER_HALBERD = registerItem( "mythicmetals_compat/kyber/kyber_halberd",
+            new SimplySwordsSwordItem(ModToolMaterial.KYBER, kyber_modifier + halberd_modifier, halberd_attackspeed,
                     "mythicmetals:kyber_ingot"));
 
 
@@ -440,6 +464,10 @@ public class MythicMetalsCompat {
             new SimplySwordsSwordItem(ModToolMaterial.MYTHRIL, mythril_modifier + scythe_modifier, scythe_attackspeed,
                     "mythicmetals:mythril_ingot"));
 
+    public static final Item MYTHRIL_HALBERD = registerItem( "mythicmetals_compat/mythril/mythril_halberd",
+            new SimplySwordsSwordItem(ModToolMaterial.MYTHRIL, mythril_modifier + halberd_modifier, halberd_attackspeed,
+                    "mythicmetals:mythril_ingot"));
+
 
     //ORICHALCUM
     public static final Item ORICHALCUM_LONGSWORD = registerItem( "mythicmetals_compat/orichalcum/orichalcum_longsword",
@@ -496,6 +524,10 @@ public class MythicMetalsCompat {
 
     public static final Item ORICHALCUM_SCYTHE = registerItem( "mythicmetals_compat/orichalcum/orichalcum_scythe",
             new SimplySwordsSwordItem(ModToolMaterial.ORICHALCUM, orichalcum_modifier + scythe_modifier, scythe_attackspeed,
+                    "mythicmetals:orichalcum_ingot"));
+
+    public static final Item ORICHALCUM_HALBERD = registerItem( "mythicmetals_compat/orichalcum/orichalcum_halberd",
+            new SimplySwordsSwordItem(ModToolMaterial.ORICHALCUM, orichalcum_modifier + halberd_modifier, halberd_attackspeed,
                     "mythicmetals:orichalcum_ingot"));
 
 
@@ -556,6 +588,10 @@ public class MythicMetalsCompat {
             new SimplySwordsSwordItem(ModToolMaterial.OSMIUM, osmium_modifier + scythe_modifier, scythe_attackspeed,
                     "mythicmetals:osmium_ingot"));
 
+    public static final Item OSMIUM_HALBERD = registerItem( "mythicmetals_compat/osmium/osmium_halberd",
+            new SimplySwordsSwordItem(ModToolMaterial.OSMIUM, osmium_modifier + halberd_modifier, halberd_attackspeed,
+                    "mythicmetals:osmium_ingot"));
+
 
     //PROMETHEUM
     public static final Item PROMETHEUM_LONGSWORD = registerItem( "mythicmetals_compat/prometheum/prometheum_longsword",
@@ -612,6 +648,10 @@ public class MythicMetalsCompat {
 
     public static final Item PROMETHEUM_SCYTHE = registerItem( "mythicmetals_compat/prometheum/prometheum_scythe",
             new SimplySwordsSwordItem(ModToolMaterial.PROMETHEUM, prometheum_modifier + scythe_modifier, scythe_attackspeed,
+                    "mythicmetals:prometheum_ingot"));
+
+    public static final Item PROMETHEUM_HALBERD = registerItem( "mythicmetals_compat/prometheum/prometheum_halberd",
+            new SimplySwordsSwordItem(ModToolMaterial.PROMETHEUM, prometheum_modifier + halberd_modifier, halberd_attackspeed,
                     "mythicmetals:prometheum_ingot"));
 
 
@@ -672,6 +712,10 @@ public class MythicMetalsCompat {
             new SimplySwordsSwordItem(ModToolMaterial.QUADRILLUM, quadrillum_modifier + scythe_modifier, scythe_attackspeed,
                     "mythicmetals:quadrillum_ingot"));
 
+    public static final Item QUADRILLUM_HALBERD = registerItem( "mythicmetals_compat/quadrillum/quadrillum_halberd",
+            new SimplySwordsSwordItem(ModToolMaterial.QUADRILLUM, quadrillum_modifier + halberd_modifier, halberd_attackspeed,
+                    "mythicmetals:quadrillum_ingot"));
+
 
     //RUNITE
     public static final Item RUNITE_LONGSWORD = registerItem( "mythicmetals_compat/runite/runite_longsword",
@@ -728,6 +772,10 @@ public class MythicMetalsCompat {
 
     public static final Item RUNITE_SCYTHE = registerItem( "mythicmetals_compat/runite/runite_scythe",
             new SimplySwordsSwordItem(ModToolMaterial.RUNITE, runite_modifier + scythe_modifier, scythe_attackspeed,
+                    "mythicmetals:runite_ingot"));
+
+    public static final Item RUNITE_HALBERD = registerItem( "mythicmetals_compat/runite/runite_halberd",
+            new SimplySwordsSwordItem(ModToolMaterial.RUNITE, runite_modifier + halberd_modifier, halberd_attackspeed,
                     "mythicmetals:runite_ingot"));
 
 
@@ -788,6 +836,10 @@ public class MythicMetalsCompat {
             new SimplySwordsSwordItem(ModToolMaterial.STAR_PLATINUM, star_platinum_modifier + scythe_modifier, scythe_attackspeed,
                     "mythicmetals:star_platinum"));
 
+    public static final Item STAR_PLATINUM_HALBERD = registerItem( "mythicmetals_compat/star_platinum/star_platinum_halberd",
+            new SimplySwordsSwordItem(ModToolMaterial.STAR_PLATINUM, star_platinum_modifier + halberd_modifier, halberd_attackspeed,
+                    "mythicmetals:star_platinum"));
+
 
     //BRONZE
     public static final Item BRONZE_LONGSWORD = registerItem( "mythicmetals_compat/bronze/bronze_longsword",
@@ -844,6 +896,10 @@ public class MythicMetalsCompat {
 
     public static final Item BRONZE_SCYTHE = registerItem( "mythicmetals_compat/bronze/bronze_scythe",
             new SimplySwordsSwordItem(ModToolMaterial.BRONZE, bronze_modifier + scythe_modifier, scythe_attackspeed,
+                    "mythicmetals:bronze_ingot"));
+
+    public static final Item BRONZE_HALBERD = registerItem( "mythicmetals_compat/bronze/bronze_halberd",
+            new SimplySwordsSwordItem(ModToolMaterial.BRONZE, bronze_modifier + halberd_modifier, halberd_attackspeed,
                     "mythicmetals:bronze_ingot"));
 
 
@@ -904,6 +960,10 @@ public class MythicMetalsCompat {
             new SimplySwordsSwordItem(ModToolMaterial.STEEL, steel_modifier + scythe_modifier, scythe_attackspeed,
                     "mythicmetals:steel_ingot"));
 
+    public static final Item STEEL_HALBERD = registerItem( "mythicmetals_compat/steel/steel_halberd",
+            new SimplySwordsSwordItem(ModToolMaterial.STEEL, steel_modifier + halberd_modifier, halberd_attackspeed,
+                    "mythicmetals:steel_ingot"));
+
 
     //STORMYX
     public static final Item STORMYX_LONGSWORD = registerItem( "mythicmetals_compat/stormyx/stormyx_longsword",
@@ -960,6 +1020,10 @@ public class MythicMetalsCompat {
 
     public static final Item STORMYX_SCYTHE = registerItem( "mythicmetals_compat/stormyx/stormyx_scythe",
             new SimplySwordsSwordItem(ModToolMaterial.STORMYX, stormyx_modifier + scythe_modifier, scythe_attackspeed,
+                    "mythicmetals:stormyx_ingot"));
+
+    public static final Item STORMYX_HALBERD = registerItem( "mythicmetals_compat/stormyx/stormyx_halberd",
+            new SimplySwordsSwordItem(ModToolMaterial.STORMYX, stormyx_modifier + halberd_modifier, halberd_attackspeed,
                     "mythicmetals:stormyx_ingot"));
 
 
@@ -1020,6 +1084,10 @@ public class MythicMetalsCompat {
             new SimplySwordsSwordItem(ModToolMaterial.PALLADIUM, palladium_modifier + scythe_modifier, scythe_attackspeed,
                     "mythicmetals:palladium_ingot"));
 
+    public static final Item PALLADIUM_HALBERD = registerItem( "mythicmetals_compat/palladium/palladium_halberd",
+            new SimplySwordsSwordItem(ModToolMaterial.PALLADIUM, palladium_modifier + halberd_modifier, halberd_attackspeed,
+                    "mythicmetals:palladium_ingot"));
+
 
     //METALLURGIUM
     public static final Item METALLURGIUM_LONGSWORD = registerItem( "mythicmetals_compat/metallurgium/metallurgium_longsword",
@@ -1078,6 +1146,10 @@ public class MythicMetalsCompat {
             new SimplySwordsSwordItem(ModToolMaterial.METALLURGIUM, metallurgium_modifier + scythe_modifier, scythe_attackspeed,
                     "mythicmetals:metallurgium_ingot"));
 
+    public static final Item METALLURGIUM_HALBERD = registerItem( "mythicmetals_compat/metallurgium/metallurgium_halberd",
+            new SimplySwordsSwordItem(ModToolMaterial.METALLURGIUM, metallurgium_modifier + halberd_modifier, halberd_attackspeed,
+                    "mythicmetals:metallurgium_ingot"));
+
 
     //CELESTIUM
     public static final Item CELESTIUM_LONGSWORD = registerItem( "mythicmetals_compat/celestium/celestium_longsword",
@@ -1134,6 +1206,10 @@ public class MythicMetalsCompat {
 
     public static final Item CELESTIUM_SCYTHE = registerItem( "mythicmetals_compat/celestium/celestium_scythe",
             new SimplySwordsSwordItem(ModToolMaterial.CELESTIUM, celestium_modifier + scythe_modifier, scythe_attackspeed,
+                    "mythicmetals:celestium_ingot"));
+
+    public static final Item CELESTIUM_HALBERD = registerItem( "mythicmetals_compat/celestium/celestium_halberd",
+            new SimplySwordsSwordItem(ModToolMaterial.CELESTIUM, celestium_modifier + halberd_modifier, halberd_attackspeed,
                     "mythicmetals:celestium_ingot"));
 
 

@@ -35,6 +35,7 @@ public class MythicMetalsAbilityMixin {
         Abilities.BONUS_LOOTING.addItem(MythicMetalsCompat.CARMOT_TWINBLADE, Style.EMPTY.withColor(0xE63E73));
         Abilities.BONUS_LOOTING.addItem(MythicMetalsCompat.CARMOT_WARGLAIVE, Style.EMPTY.withColor(0xE63E73));
         Abilities.BONUS_LOOTING.addItem(MythicMetalsCompat.CARMOT_SCYTHE, Style.EMPTY.withColor(0xE63E73));
+        Abilities.BONUS_LOOTING.addItem(MythicMetalsCompat.CARMOT_HALBERD, Style.EMPTY.withColor(0xE63E73));
         //Aquarium
         Abilities.AQUA_AFFINITY.addItem(MythicMetalsCompat.AQUARIUM_CHAKRAM, Style.EMPTY.withColor(0xE63E73));
         Abilities.AQUA_AFFINITY.addItem(MythicMetalsCompat.AQUARIUM_CLAYMORE, Style.EMPTY.withColor(0xE63E73));
@@ -50,6 +51,7 @@ public class MythicMetalsAbilityMixin {
         Abilities.AQUA_AFFINITY.addItem(MythicMetalsCompat.AQUARIUM_TWINBLADE, Style.EMPTY.withColor(0xE63E73));
         Abilities.AQUA_AFFINITY.addItem(MythicMetalsCompat.AQUARIUM_WARGLAIVE, Style.EMPTY.withColor(0xE63E73));
         Abilities.AQUA_AFFINITY.addItem(MythicMetalsCompat.AQUARIUM_SCYTHE, Style.EMPTY.withColor(0xE63E73));
+        Abilities.AQUA_AFFINITY.addItem(MythicMetalsCompat.AQUARIUM_HALBERD, Style.EMPTY.withColor(0xE63E73));
         //Prometheum
         Abilities.MENDING.addItem(MythicMetalsCompat.PROMETHEUM_CHAKRAM, Style.EMPTY.withColor(0xE63E73));
         Abilities.MENDING.addItem(MythicMetalsCompat.PROMETHEUM_CLAYMORE, Style.EMPTY.withColor(0xE63E73));
@@ -65,6 +67,7 @@ public class MythicMetalsAbilityMixin {
         Abilities.MENDING.addItem(MythicMetalsCompat.PROMETHEUM_TWINBLADE, Style.EMPTY.withColor(0xE63E73));
         Abilities.MENDING.addItem(MythicMetalsCompat.PROMETHEUM_WARGLAIVE, Style.EMPTY.withColor(0xE63E73));
         Abilities.MENDING.addItem(MythicMetalsCompat.PROMETHEUM_SCYTHE, Style.EMPTY.withColor(0xE63E73));
+        Abilities.MENDING.addItem(MythicMetalsCompat.PROMETHEUM_HALBERD, Style.EMPTY.withColor(0xE63E73));
 
 
     }

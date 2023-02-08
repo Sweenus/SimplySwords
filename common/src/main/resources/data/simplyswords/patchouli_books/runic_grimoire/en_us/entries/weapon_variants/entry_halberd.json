@@ -1,0 +1,26 @@
+{
+  "name": "Halberd",
+  "icon": "simplyswords:iron_halberd",
+  "category": "simplyswords:category_weapon_variants",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:iron_halberd",
+      "text": "A Halberd is a type of pole weapon that features a long shaft with a sharp, hooked blade on one end and a axe head on the other. With its versatility and reach, the halberd is a formidable weapon in the hands of a skilled warrior."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:iron_halberd",
+      "recipe2": "simplyswords:gold_halberd"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:diamond_halberd"
+    },
+    {
+      "type": "patchouli:smithing",
+      "recipe": "simplyswords:netherite_halberd",
+      "recipe2": "simplyswords:runic_halberd"
+    }
+  ]
+}

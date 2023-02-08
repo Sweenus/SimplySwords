@@ -15,7 +15,8 @@
     "mythicmetals:mythicmetals_compat/carmot/carmot_greathammer",
     "mythicmetals:mythicmetals_compat/carmot/carmot_greataxe",
     "mythicmetals:mythicmetals_compat/carmot/carmot_chakram",
-    "mythicmetals:mythicmetals_compat/carmot/carmot_scythe"
+    "mythicmetals:mythicmetals_compat/carmot/carmot_scythe",
+    "mythicmetals:mythicmetals_compat/carmot/carmot_halberd"
 
   ]
 }

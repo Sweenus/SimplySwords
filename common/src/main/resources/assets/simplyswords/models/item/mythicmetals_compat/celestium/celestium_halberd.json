@@ -1,0 +1,6 @@
+{
+	"parent": "simplyswords:item/long_handheld",
+	"textures": {
+		"layer0": "simplyswords:item/mythicmetals_compat/halberd/halberd_celestium"
+	}
+}

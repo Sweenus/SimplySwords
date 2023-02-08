@@ -57,6 +57,10 @@
     "simplyswords:diamond_greataxe",
     "simplyswords:gold_greataxe",
     "simplyswords:iron_greataxe",
+    "simplyswords:iron_halberd",
+    "simplyswords:gold_halberd",
+    "simplyswords:diamond_halberd",
+    "simplyswords:netherite_halberd",
     "simplyswords:watcher_claymore",
     "simplyswords:brimstone_claymore",
     "simplyswords:storms_edge",
@@ -77,6 +81,7 @@
     "simplyswords:runic_greataxe",
     "simplyswords:runic_rapier",
     "simplyswords:runic_scythe",
+    "simplyswords:runic_halberd",
     "simplyswords:runic_warglaive",
     "simplyswords:toxic_longsword",
     "simplyswords:emberblade",
@@ -153,6 +158,10 @@
       "id": "simplyswords:gobber_compat/gobber/gobber_warglaive",
       "required": false
     },
+    {
+      "id": "simplyswords:gobber_compat/gobber/gobber_halberd",
+      "required": false
+    },
 
 
     {
@@ -211,6 +220,10 @@
       "id": "simplyswords:gobber_compat/gobber_nether/gobber_nether_warglaive",
       "required": false
     },
+    {
+      "id": "simplyswords:gobber_compat/gobber_nether/gobber_nether_halberd",
+      "required": false
+    },
 
 
     {
@@ -267,6 +280,10 @@
     },
     {
       "id": "simplyswords:gobber_compat/gobber_end/gobber_end_warglaive",
+      "required": false
+    },
+    {
+      "id": "simplyswords:gobber_compat/gobber_end/gobber_end_halberd",
       "required": false
     }
   ]

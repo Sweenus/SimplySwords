@@ -248,10 +248,35 @@ public class SimplySwordsConfig {
         WEAPON_OPTIONS.put("halberd_negative_damage_modifier", 0f);
 
         WEAPON_OPTIONS.put("iron_damage_modifier", 3f);
-        WEAPON_OPTIONS.put("gold_damage_modifier", 2f);
+        WEAPON_OPTIONS.put("gold_damage_modifier", 3f);
         WEAPON_OPTIONS.put("diamond_damage_modifier", 3f);
         WEAPON_OPTIONS.put("netherite_damage_modifier", 3f);
         WEAPON_OPTIONS.put("runic_damage_modifier", 3f);
+
+        WEAPON_OPTIONS.put("adamantite_damage_modifier", 3f);
+        WEAPON_OPTIONS.put("aquarium_damage_modifier", 3f);
+        WEAPON_OPTIONS.put("banglum_damage_modifier", 3f);
+        WEAPON_OPTIONS.put("carmot_damage_modifier", 3f);
+        WEAPON_OPTIONS.put("kyber_damage_modifier", 3f);
+        WEAPON_OPTIONS.put("mythril_damage_modifier", 3f);
+        WEAPON_OPTIONS.put("orichalcum_damage_modifier", 3f);
+        WEAPON_OPTIONS.put("durasteel_damage_modifier", 3f);
+        WEAPON_OPTIONS.put("osmium_damage_modifier", 3f);
+        WEAPON_OPTIONS.put("prometheum_damage_modifier", 3f);
+        WEAPON_OPTIONS.put("quadrillum_damage_modifier", 3f);
+        WEAPON_OPTIONS.put("runite_damage_modifier", 3f);
+        WEAPON_OPTIONS.put("star_platinum_damage_modifier", 3f);
+        WEAPON_OPTIONS.put("bronze_damage_modifier", 3f);
+        WEAPON_OPTIONS.put("copper_damage_modifier", 3f);
+        WEAPON_OPTIONS.put("steel_damage_modifier", 3f);
+        WEAPON_OPTIONS.put("palladium_damage_modifier", 3f);
+        WEAPON_OPTIONS.put("stormyx_damage_modifier", 3f);
+        WEAPON_OPTIONS.put("celestium_damage_modifier", 3f);
+        WEAPON_OPTIONS.put("metallurgium_damage_modifier", 3f);
+
+        WEAPON_OPTIONS.put("gobber_damage_modifier", 1f);
+        WEAPON_OPTIONS.put("gobber_nether_damage_modifier", 3f);
+        WEAPON_OPTIONS.put("gobber_end_damage_modifier", 6f);
 
         WEAPON_OPTIONS.put("longsword_attackspeed", -2.4f);
         WEAPON_OPTIONS.put("twinblade_attackspeed", -2f);
@@ -666,13 +691,13 @@ public class SimplySwordsConfig {
                 config.append("// Positive & Negative damage modifiers scale off these base values \n");
                 config.append("// --------------------------- \n");
             }
-            if (i == 35) {
+            if (i == 58) {
                 config.append("\n");
                 config.append("// -- Attack Speed Modifiers -- \n");
                 config.append("// Recommended range: -1.0 to -3.7, with -1.0 being fast and -3.7 being slow \n");
                 config.append("// ---------------------------- \n");
             }
-            if (i == 50) {
+            if (i == 73) {
                 config.append("\n");
                 config.append("\n");
                 config.append("// -- UNIQUE ATTRIBUTES CONFIGURATION -- \n");
@@ -684,7 +709,7 @@ public class SimplySwordsConfig {
                 config.append("// Example use-case: Adding 3 to a value below will INCREASE the in-game damage of that weapon by 3 \n");
                 config.append("// ---------------------- \n");
             }
-            if (i == 74) {
+            if (i == 97) {
                 config.append("\n");
                 config.append("// -- Attack Speed Modifiers -- \n");
                 config.append("// Recommended range: -1.0 to -3.7, with -1.0 being fast and -3.7 being slow \n");
