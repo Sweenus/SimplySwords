@@ -402,31 +402,25 @@ public class AbilityMethods {
             if (player.distanceTo(seekerTarget) <= range && player.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
 
                 //Player teleport to random position around target
-                if (    ability_timer == 19 || ability_timer == 20 ||
-                        ability_timer == 39 || ability_timer == 40 ||
-                        ability_timer == 59 || ability_timer == 60 ||
-                        ability_timer == 79 || ability_timer == 80 ||
-                        ability_timer == 99 || ability_timer == 100) {
+                if (    ability_timer == 11 || ability_timer == 12 ||
+                        ability_timer == 17 || ability_timer == 18 ||
+                        ability_timer == 28 || ability_timer == 29 ||
+                        ability_timer == 35 || ability_timer == 36 ||
+                        ability_timer == 41 || ability_timer == 42) {
 
                     double chooseX = Math.random() * 6; double chooseZ = Math.random() * 6;
                     player.teleport((seekerTarget.getX() -3) + chooseX, seekerTarget.getY(), (seekerTarget.getZ() -3) + chooseZ);
                     world.playSoundFromEntity(null, player, SoundRegistry.ELEMENTAL_BOW_EARTH_SHOOT_FLYBY_01.get(),
                             SoundCategory.PLAYERS, 0.3f, 1.0f);
-
-                    Vec3d vec3d = player.getCameraPosVec(1f);
-                    //player.refreshPositionAfterTeleport(vec3d.rotateX(40));
-                    entity.applyRotation(BlockRotation.CLOCKWISE_90);
-                    entity.refreshPositionAndAngles(entity.getBlockPos(), 130, 130);
-                    entity.updatePositionAndAngles(entity.getBlockPos().getX(), entity.getBlockPos().getY(), entity.getBlockPos().getZ(), 130, 130);
                 }
 
                 //Player dash through target and damage
                 if (    ability_timer == 9 || ability_timer == 10 ||
-                        ability_timer == 29 || ability_timer == 30 ||
-                        ability_timer == 49 || ability_timer == 50 ||
-                        ability_timer == 69 || ability_timer == 70 ||
-                        ability_timer == 89 || ability_timer == 90) {
-                    player.setVelocity(seekerTarget.getX() - player.getX(), 0, seekerTarget.getZ() - player.getZ());
+                        ability_timer == 16 || ability_timer == 15 ||
+                        ability_timer == 26 || ability_timer == 27 ||
+                        ability_timer == 33 || ability_timer == 34 ||
+                        ability_timer == 39 || ability_timer == 40) {
+                    player.setVelocity((seekerTarget.getX() - player.getX()) * 6, 0, (seekerTarget.getZ() - player.getZ()) * 6);
                     player.velocityModified = true;
                     seekerTarget.damage(DamageSource.MAGIC, 5 + seekerTarget.getArmor());
                     world.playSoundFromEntity(null, player, SoundRegistry.ELEMENTAL_BOW_THUNDER_SHOOT_FLYBY_03.get(),
@@ -434,17 +428,17 @@ public class AbilityMethods {
                 }
 
                 //Player dash end
-                if (    ability_timer == 4 || ability_timer == 5 ||
+                if (    ability_timer == 1 || ability_timer == 2 ||
+                        ability_timer == 13 || ability_timer == 14 ||
                         ability_timer == 24 || ability_timer == 25 ||
-                        ability_timer == 44 || ability_timer == 45 ||
-                        ability_timer == 64 || ability_timer == 65 ||
-                        ability_timer == 84 || ability_timer == 85) {
+                        ability_timer == 31 || ability_timer == 32 ||
+                        ability_timer == 37 || ability_timer == 38) {
                     player.setVelocity(0, 0, 0); // Stop player at end of charge
                     player.velocityModified = true;
                     player.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, 80, 1), player);
 
                     if (ability_timer < 5) {
-                        player.getItemCooldownManager().set(stack.getItem(), skillCooldown);
+                        //player.getItemCooldownManager().set(stack.getItem(), skillCooldown);
                     }
                 }
 
@@ -470,22 +464,6 @@ public class AbilityMethods {
                                     0, 0.1, 0);
                         }
                     }
-                }
-            }
-        }
-        if (world.isClient()) {
-            if (    ability_timer == 19 || ability_timer == 20 ||
-                    ability_timer == 39 || ability_timer == 40 ||
-                    ability_timer == 59 || ability_timer == 60 ||
-                    ability_timer == 79 || ability_timer == 80 ||
-                    ability_timer == 99 || ability_timer == 100) {
-                Camera camera = MinecraftClient.getInstance().gameRenderer.getCamera();
-                //MinecraftClient.getInstance().cameraEntity
-                entity.applyRotation(BlockRotation.CLOCKWISE_90);
-                entity.refreshPositionAndAngles(entity.getBlockPos(), 130, 130);
-                entity.updatePositionAndAngles(entity.getBlockPos().getX(), entity.getBlockPos().getY(), entity.getBlockPos().getZ(), 130, 130);
-                if (camera.isReady()) {
-                    camera.getRotation().set(300, 300, 300, 1);
                 }
             }
         }

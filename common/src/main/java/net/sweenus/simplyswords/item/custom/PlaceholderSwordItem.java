@@ -30,7 +30,7 @@ import java.util.List;
 public class PlaceholderSwordItem extends SwordItem {
 
     private static int stepMod = 0;
-    int ability_timer_max = 100;
+    int ability_timer_max = 43;
     int skillCooldown = (int) (SimplySwordsConfig.getFloatValue("stormjolt_cooldown"));
     int chargeChance =  (int) (SimplySwordsConfig.getFloatValue("stormjolt_chance"));
     int range = 15;
@@ -70,6 +70,8 @@ public class PlaceholderSwordItem extends SwordItem {
         }
         world.playSoundFromEntity(null, user, SoundRegistry.MAGIC_BOW_CHARGE_SHORT_VERSION.get(), SoundCategory.PLAYERS, 0.4f, 1.2f);
         user.setCurrentHand(hand);
+        user.addStatusEffect(new StatusEffectInstance(StatusEffects.DARKNESS, ability_timer_max, 1), user);
+        user.getItemCooldownManager().set(this.getDefaultStack().getItem(), skillCooldown);
         return TypedActionResult.consume(itemStack);
 
     }
