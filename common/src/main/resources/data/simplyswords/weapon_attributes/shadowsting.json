@@ -1,0 +1,56 @@
+{
+  "attributes": {
+    "attack_range": 3,
+    "category": "rapier",
+    "attacks": [
+      {
+        "hitbox": "HORIZONTAL_PLANE",
+        "damage_multiplier": 0.9,
+        "angle": 90,
+        "upswing": 0.5,
+        "animation": "bettercombat:one_handed_slash_horizontal_left",
+        "swing_sound": {
+          "id": "simplyswords:elemental_sword_sci-fi_attack_01",
+          "volume": 0.5,
+          "pitch": 1.6
+        }
+      },
+      {
+        "hitbox": "FORWARD_BOX",
+        "damage_multiplier": 1.1,
+        "angle": 0,
+        "upswing": 0.5,
+        "animation": "bettercombat:one_handed_stab",
+        "swing_sound": {
+          "id": "simplyswords:elemental_sword_sci-fi_attack_02",
+          "volume": 0.5,
+          "pitch": 1.8
+        }
+      },
+      {
+        "hitbox": "FORWARD_BOX",
+        "damage_multiplier": 1.2,
+        "angle": 0,
+        "upswing": 0.5,
+        "animation": "bettercombat:one_handed_stab",
+        "swing_sound": {
+          "id": "simplyswords:elemental_sword_sci-fi_attack_02",
+          "volume": 0.5,
+          "pitch": 1.9
+        }
+      },
+      {
+        "hitbox": "FORWARD_BOX",
+        "damage_multiplier": 1.4,
+        "angle": 0,
+        "upswing": 0.5,
+        "animation": "bettercombat:one_handed_stab",
+        "swing_sound": {
+          "id": "simplyswords:elemental_sword_sci-fi_attack_03",
+          "volume": 0.5,
+          "pitch": 1.8
+        }
+      }
+    ]
+  }
+}

@@ -101,6 +101,7 @@
   "item.simplyswords.slumbering_lichblade": "Slumbering Lichblade",
   "item.simplyswords.waking_lichblade": "Waking Lichblade",
   "item.simplyswords.awakened_lichblade": "Awakened Lichblade",
+  "item.simplyswords.shadowsting": "Shadowsting",
 
   "item.simplyswords.runic_tablet": "Runic Tablet",
 
@@ -634,6 +635,12 @@
   "item.simplyswords.stormbringersworditem.tooltip9": "reducing the ability cooldown.",
   "item.simplyswords.stormbringersworditem.tooltip10": "Performing parries in succession will",
   "item.simplyswords.stormbringersworditem.tooltip11": "increase the ability damage and cooldown.",
+
+  "item.simplyswords.shadowmistsworditem.tooltip1": "Unique Effect: Shadowmist",
+  "item.simplyswords.shadowmistsworditem.tooltip2": "Chance on hit to deal magic damage that",
+  "item.simplyswords.shadowmistsworditem.tooltip3": "scales with your targets armor value.",
+  "item.simplyswords.shadowmistsworditem.tooltip4": "Create a blinding shadowy mist at your feet",
+  "item.simplyswords.shadowmistsworditem.tooltip5": "and shadowstep to a nearby location.",
 
 
   "item.simplyswords.levitationsworditem.tooltip1": "Runic Power: Float",

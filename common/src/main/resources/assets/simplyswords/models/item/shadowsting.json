@@ -1,0 +1,7 @@
+{
+	"parent": "simplyswords:item/template_longsword",
+	"textures": {
+		"layer0": "simplyswords:item/shadowsting",
+		"layer1": "simplyswords:item/shadowsting_layer_32x32"
+	}
+}

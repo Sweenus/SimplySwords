@@ -200,6 +200,12 @@ public class SimplySwordsConfig {
         FLOAT_OPTIONS.put("shockdeflect_cooldown", 90f);
         FLOAT_OPTIONS.put("shockdeflect_parry_duration", 10f);
 
+        FLOAT_OPTIONS.put("shadowmist_cooldown", 200f);
+        FLOAT_OPTIONS.put("shadowmist_chance", 50f);
+        FLOAT_OPTIONS.put("shadowmist_damage_multiplier", 1f);
+        FLOAT_OPTIONS.put("shadowmist_blind_duration", 60f);
+        FLOAT_OPTIONS.put("shadowmist_radius", 4f);
+
 
         GENERAL_OPTIONS.put("standard_loot_table_weight", 0.08f);
         GENERAL_OPTIONS.put("rare_loot_table_weight", 0.01f);
@@ -318,6 +324,7 @@ public class SimplySwordsConfig {
         WEAPON_OPTIONS.put("arcanethyst_damage_modifier", 7f);
         WEAPON_OPTIONS.put("thunderbrand_damage_modifier", 7f);
         WEAPON_OPTIONS.put("lichblade_damage_modifier", 7f);
+        WEAPON_OPTIONS.put("shadowsting_damage_modifier", -2f);
 
         WEAPON_OPTIONS.put("brimstone_attackspeed", -2.8f);
         WEAPON_OPTIONS.put("thewatcher_attackspeed", -2.8f);
@@ -343,6 +350,7 @@ public class SimplySwordsConfig {
         WEAPON_OPTIONS.put("arcanethyst_attackspeed", -2.7f);
         WEAPON_OPTIONS.put("thunderbrand_attackspeed", -2.7f);
         WEAPON_OPTIONS.put("lichblade_attackspeed", -3.1f);
+        WEAPON_OPTIONS.put("shadowsting_attackspeed", -1.7f);
 
     }
 
@@ -655,6 +663,12 @@ public class SimplySwordsConfig {
                 config.append("// -- Unique Effect: Shock Deflect -- \n");
                 config.append("// ---------------------------------- \n");
             }
+            if (i == 113) {
+                config.append("\n");
+                config.append("// ------------------------------- \n");
+                config.append("// -- Unique Effect: Shadowmist -- \n");
+                config.append("// ------------------------------- \n");
+            }
             config.append("  \"").append(item).append("\": ").append(FLOAT_OPTIONS.get(item));
             ++i;
             if (i < FLOAT_OPTIONS.size()) {
@@ -709,7 +723,7 @@ public class SimplySwordsConfig {
                 config.append("// Example use-case: Adding 3 to a value below will INCREASE the in-game damage of that weapon by 3 \n");
                 config.append("// ---------------------- \n");
             }
-            if (i == 97) {
+            if (i == 98) {
                 config.append("\n");
                 config.append("// -- Attack Speed Modifiers -- \n");
                 config.append("// Recommended range: -1.0 to -3.7, with -1.0 being fast and -3.7 being slow \n");

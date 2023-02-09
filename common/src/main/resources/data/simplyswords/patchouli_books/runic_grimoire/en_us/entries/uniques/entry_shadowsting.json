@@ -1,0 +1,17 @@
+{
+  "name": "Shadowsting",
+  "icon": "simplyswords:shadowsting",
+  "advancement": "simplyswords:shadowsting",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:shadowsting",
+      "text": "Shadowsting is a slender rapier that is imbued with the power of shadows. The rapier's unique ability is allows it the chance to deal armor-scaling magic damage to enemies, allowing it to penetrate even the toughest armor."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "The rapier also has the ability to create a shadowy mist that clouds the vision of its enemies, this ability is referred to as Shadowmist. The wielder can use the mist to create confusion and disorientation among their enemies, providing a strategic advantage in combat."
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "required": false,
+  "replace": false,
+  "skill": "agility",
+  "level": 19,
+  "item": "minecraft:custom_item",
+  "object": "simplyswords:shadowsting"
+}

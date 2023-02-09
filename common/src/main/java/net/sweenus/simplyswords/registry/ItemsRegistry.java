@@ -95,6 +95,7 @@ public class ItemsRegistry {
     static float arcanethyst_attackspeed = SimplySwordsConfig.getWeaponAttributes("arcanethyst_attackspeed");
     static float thunderbrand_attackspeed = SimplySwordsConfig.getWeaponAttributes("thunderbrand_attackspeed");
     static float lichblade_attackspeed = SimplySwordsConfig.getWeaponAttributes("lichblade_attackspeed");
+    static float shadowsting_attackspeed = SimplySwordsConfig.getWeaponAttributes("shadowsting_attackspeed");
 
     static float brimstone_damage_modifier = SimplySwordsConfig.getWeaponAttributes("brimstone_damage_modifier");
     static float thewatcher_damage_modifier = SimplySwordsConfig.getWeaponAttributes("thewatcher_damage_modifier");
@@ -120,6 +121,7 @@ public class ItemsRegistry {
     static float arcanethyst_damage_modifier = SimplySwordsConfig.getWeaponAttributes("arcanethyst_damage_modifier");
     static float thunderbrand_damage_modifier = SimplySwordsConfig.getWeaponAttributes("thunderbrand_damage_modifier");
     static float lichblade_damage_modifier = SimplySwordsConfig.getWeaponAttributes("lichblade_damage_modifier");
+    static float shadowsting_damage_modifier = SimplySwordsConfig.getWeaponAttributes("shadowsting_damage_modifier");
 
     public static final DeferredRegister<Item> ITEM = DeferredRegister.create(SimplySwords.MOD_ID, Registry.ITEM_KEY);
 
@@ -786,10 +788,10 @@ public class ItemsRegistry {
                     lichblade_attackspeed,
                     new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
-    public static final RegistrySupplier<PlaceholderSwordItem> UNIQUERAPIER = ITEM.register( "unique_rapier", () ->
-            new PlaceholderSwordItem(ModToolMaterial.UNIQUE,
-                    (int) (emberblade_damage_modifier),
-                    emberblade_attackspeed,
+    public static final RegistrySupplier<ShadowstingSwordItem> SHADOWSTING = ITEM.register( "shadowsting", () ->
+            new ShadowstingSwordItem(ModToolMaterial.UNIQUE,
+                    (int) (shadowsting_damage_modifier),
+                    shadowsting_attackspeed,
                     new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
 
     public static final RegistrySupplier<EmberIreSwordItem> UNIQUELONGSWORDHOLY = ITEM.register( "unique_longsword_holy", () ->
