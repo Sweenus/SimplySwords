@@ -139,7 +139,8 @@ public class ModLootTableModifiers {
                             .with(ItemEntry.builder(ItemsRegistry.ARCANETHYST.get()))
                             .with(ItemEntry.builder(ItemsRegistry.THUNDERBRAND.get()))
                             .with(ItemEntry.builder(ItemsRegistry.BRIMSTONE_CLAYMORE.get()))
-                            .with(ItemEntry.builder(ItemsRegistry.SLUMBERING_LICHBLADE.get()));
+                            .with(ItemEntry.builder(ItemsRegistry.SLUMBERING_LICHBLADE.get()))
+                            .with(ItemEntry.builder(ItemsRegistry.SHADOWSTING.get()));
 
                     context.addPool(pool);
                 }
