@@ -210,6 +210,7 @@ public class SimplySwordsConfig {
         GENERAL_OPTIONS.put("standard_loot_table_weight", 0.08f);
         GENERAL_OPTIONS.put("rare_loot_table_weight", 0.01f);
         GENERAL_OPTIONS.put("unique_loot_table_weight", 0.008f);
+        GENERAL_OPTIONS.put("impact_sound_effect_volume", 0.3f);
 
 
         BOOLEAN_OPTIONS.put("display_config_outdated_warning", true);
@@ -298,7 +299,7 @@ public class SimplySwordsConfig {
         WEAPON_OPTIONS.put("greathammer_attackspeed", -3.2f);
         WEAPON_OPTIONS.put("chakram_attackspeed", -3.0f);
         WEAPON_OPTIONS.put("scythe_attackspeed", -2.7f);
-        WEAPON_OPTIONS.put("halberd_attackspeed", -2.7f);
+        WEAPON_OPTIONS.put("halberd_attackspeed", -2.8f);
 
         WEAPON_OPTIONS.put("brimstone_damage_modifier", 6f);
         WEAPON_OPTIONS.put("thewatcher_damage_modifier", 6f);
@@ -417,6 +418,10 @@ public class SimplySwordsConfig {
             if (i == 2) {
                 config.append("\n");
                 config.append("// Unique Loot: Unique Weapons. Default: 0.002 \n");
+            }
+            if (i == 3) {
+                config.append("\n");
+                config.append("// -- General Options -- \n");
             }
             config.append("  \"").append(item).append("\": ").append(GENERAL_OPTIONS.get(item));
             ++i;

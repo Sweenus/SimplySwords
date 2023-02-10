@@ -793,7 +793,7 @@ public class ItemsRegistry {
                     (int) (shadowsting_damage_modifier),
                     shadowsting_attackspeed,
                     new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
-
+/*
     public static final RegistrySupplier<EmberIreSwordItem> UNIQUELONGSWORDHOLY = ITEM.register( "unique_longsword_holy", () ->
             new EmberIreSwordItem(ModToolMaterial.UNIQUE,
                     (int) (emberblade_damage_modifier),
@@ -823,6 +823,7 @@ public class ItemsRegistry {
                     (int) (emberblade_damage_modifier),
                     emberblade_attackspeed,
                     new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+ */
 
 
 }

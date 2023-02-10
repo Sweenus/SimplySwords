@@ -1,6 +1,8 @@
 package net.sweenus.simplyswords.item.custom;
 
 
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -18,6 +20,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
@@ -97,7 +100,19 @@ public class ShadowstingSwordItem extends SwordItem {
         }
 
         double chooseX = Math.random() * (radius * 2); double chooseZ = Math.random() * (radius * 2);
-        user.teleport((user.getX() -radius) + chooseX, user.getY(), (user.getZ() -radius) + chooseZ);
+
+        BlockPos poscheck = new BlockPos(xpos + chooseX, ypos, zpos + chooseX);
+        BlockPos poscheck2 = new BlockPos(xpos + chooseX, ypos + 1, zpos + chooseX);
+        BlockState currentState = world.getBlockState(poscheck);
+        BlockState currentState2 = world.getBlockState(poscheck2);
+
+        if (currentState == Blocks.AIR.getDefaultState() && currentState2 == Blocks.AIR.getDefaultState())  {
+            user.teleport((user.getX() -radius) + chooseX, user.getY(), (user.getZ() -radius) + chooseZ);
+        } else {
+            chooseX = Math.random() * (radius * 2);
+            chooseZ = Math.random() * (radius * 2);
+            user.teleport((user.getX() -radius) + chooseX, user.getY(), (user.getZ() -radius) + chooseZ);
+        }
 
         return super.use(world, user, hand);
     }

@@ -1,6 +1,7 @@
 {
 	"parent": "simplyswords:item/long_handheld",
 	"textures": {
-		"layer0": "simplyswords:item/runic_halberd"
+		"layer0": "simplyswords:item/runic_halberd",
+		"layer1": "simplyswords:item/runic_halberd_layer"
 	}
 }

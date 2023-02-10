@@ -28,6 +28,7 @@ public class PlagueSwordItem extends SwordItem {
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
 
         int phitchance = (int) SimplySwordsConfig.getFloatValue("plague_chance");
+        HelperMethods.playHitSounds(attacker, target);
 
         if (attacker.getRandom().nextInt(100) <= phitchance) {
 

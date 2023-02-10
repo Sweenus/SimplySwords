@@ -1,6 +1,6 @@
 {
 	"parent": "simplyswords:item/long_handheld",
 	"textures": {
-		"layer0": "simplyswords:item/gobber_compat/gobber/halberd_nether_gobber"
+		"layer0": "simplyswords:item/gobber_compat/nether_gobber/halberd_nether_gobber"
 	}
 }
