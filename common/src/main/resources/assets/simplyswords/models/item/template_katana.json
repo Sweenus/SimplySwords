@@ -12,6 +12,16 @@
 			"translation": [1, 5, 1],
 			"scale": [1.36, 1.36, 0.68]
 		},
+		"thirdperson_lefthand": {
+			"rotation": [0, 90, -55],
+			"translation": [0, 6.5, 0],
+			"scale": [1.7, 1.7, 0.85]
+		},
+		"firstperson_lefthand": {
+			"rotation": [0, 90, -25],
+			"translation": [1, 5, 1],
+			"scale": [1.36, 1.36, 0.68]
+		},
 		"ground": {
 			"translation": [0, 4, 0],
 			"scale": [1, 1, 0.5]
