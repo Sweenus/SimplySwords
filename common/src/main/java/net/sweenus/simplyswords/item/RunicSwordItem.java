@@ -36,7 +36,7 @@ import java.util.List;
 
 public class RunicSwordItem extends SwordItem {
     public RunicSwordItem(ToolMaterial toolMaterial, int attackDamage, float attackSpeed, Settings settings) {
-        super(toolMaterial, attackDamage, attackSpeed, settings);
+        super(toolMaterial, attackDamage, attackSpeed, settings.fireproof());
     }
 
     @Override

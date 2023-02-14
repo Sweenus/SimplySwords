@@ -14,6 +14,7 @@ import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
 import net.sweenus.simplyswords.item.ModToolMaterial;
 import net.sweenus.simplyswords.item.RunicSwordItem;
+import net.sweenus.simplyswords.item.SimplySwordsNetheriteSwordItem;
 import net.sweenus.simplyswords.item.SimplySwordsSwordItem;
 import net.sweenus.simplyswords.item.custom.*;
 public class ItemsRegistry {
@@ -129,7 +130,7 @@ public class ItemsRegistry {
 
 
     public static final RegistrySupplier<Item> RUNIC_TABLET = ITEM.register("runic_tablet", () ->
-            new Item(new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.RARE)));
+            new Item(new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.RARE).fireproof()));
 
 
     public static final RegistrySupplier<SimplySwordsSwordItem> IRON_LONGSWORD = ITEM.register("iron_longsword", () ->
@@ -440,103 +441,103 @@ public class ItemsRegistry {
 
     //NETHERITE
 
-    public static final RegistrySupplier<SimplySwordsSwordItem> NETHERITE_LONGSWORD = ITEM.register( "netherite_longsword", () ->
-            new SimplySwordsSwordItem(ToolMaterials.NETHERITE,
+    public static final RegistrySupplier<SimplySwordsNetheriteSwordItem> NETHERITE_LONGSWORD = ITEM.register( "netherite_longsword", () ->
+            new SimplySwordsNetheriteSwordItem(ToolMaterials.NETHERITE,
                     (int) (netherite_modifier + longsword_positive_modifier - longsword_negative_modifier),
                     longsword_attackspeed,
                     "minecraft:netherite_ingot"));
 
-    public static final RegistrySupplier<SimplySwordsSwordItem> NETHERITE_TWINBLADE = ITEM.register( "netherite_twinblade", () ->
-            new SimplySwordsSwordItem(
+    public static final RegistrySupplier<SimplySwordsNetheriteSwordItem> NETHERITE_TWINBLADE = ITEM.register( "netherite_twinblade", () ->
+            new SimplySwordsNetheriteSwordItem(
                     ToolMaterials.NETHERITE,
                     (int) (netherite_modifier + twinblade_positive_modifier - twinblade_negative_modifier),
                     twinblade_attackspeed,
                     "minecraft:netherite_ingot"));
 
-    public static final RegistrySupplier<SimplySwordsSwordItem> NETHERITE_RAPIER = ITEM.register( "netherite_rapier", () ->
-            new SimplySwordsSwordItem(
+    public static final RegistrySupplier<SimplySwordsNetheriteSwordItem> NETHERITE_RAPIER = ITEM.register( "netherite_rapier", () ->
+            new SimplySwordsNetheriteSwordItem(
                     ToolMaterials.NETHERITE,
                     (int) (iron_modifier + rapier_positive_modifier - rapier_negative_modifier),
                     rapier_attackspeed,
                     "minecraft:netherite_ingot"));
-    public static final RegistrySupplier<SimplySwordsSwordItem> NETHERITE_KATANA = ITEM.register( "netherite_katana", () ->
-            new SimplySwordsSwordItem(
+    public static final RegistrySupplier<SimplySwordsNetheriteSwordItem> NETHERITE_KATANA = ITEM.register( "netherite_katana", () ->
+            new SimplySwordsNetheriteSwordItem(
                     ToolMaterials.NETHERITE,
                     (int) (netherite_modifier + katana_positive_modifier - katana_negative_modifier),
                     katana_attackspeed,
                     "minecraft:netherite_ingot"));
-    public static final RegistrySupplier<SimplySwordsSwordItem> NETHERITE_SAI = ITEM.register( "netherite_sai", () ->
-            new SimplySwordsSwordItem(
+    public static final RegistrySupplier<SimplySwordsNetheriteSwordItem> NETHERITE_SAI = ITEM.register( "netherite_sai", () ->
+            new SimplySwordsNetheriteSwordItem(
                     ToolMaterials.NETHERITE,
                     (int) (netherite_modifier + sai_positive_modifier - sai_negative_modifier),
                     sai_attackspeed,
                     "minecraft:netherite_ingot"));
 
-    public static final RegistrySupplier<SimplySwordsSwordItem> NETHERITE_SPEAR = ITEM.register( "netherite_spear", () ->
-            new SimplySwordsSwordItem(
+    public static final RegistrySupplier<SimplySwordsNetheriteSwordItem> NETHERITE_SPEAR = ITEM.register( "netherite_spear", () ->
+            new SimplySwordsNetheriteSwordItem(
                     ToolMaterials.NETHERITE,
                     (int) (netherite_modifier + spear_positive_modifier - spear_negative_modifier),
                     spear_attackspeed,
                     "minecraft:netherite_ingot"));
 
-    public static final RegistrySupplier<SimplySwordsSwordItem> NETHERITE_GLAIVE = ITEM.register( "netherite_glaive", () ->
-            new SimplySwordsSwordItem(
+    public static final RegistrySupplier<SimplySwordsNetheriteSwordItem> NETHERITE_GLAIVE = ITEM.register( "netherite_glaive", () ->
+            new SimplySwordsNetheriteSwordItem(
                     ToolMaterials.NETHERITE,
                     (int) (netherite_modifier + glaive_positive_modifier - glaive_negative_modifier),
                     glaive_attackspeed,
                     "minecraft:netherite_ingot"));
 
-    public static final RegistrySupplier<SimplySwordsSwordItem> NETHERITE_WARGLAIVE = ITEM.register( "netherite_warglaive", () ->
-            new SimplySwordsSwordItem(
+    public static final RegistrySupplier<SimplySwordsNetheriteSwordItem> NETHERITE_WARGLAIVE = ITEM.register( "netherite_warglaive", () ->
+            new SimplySwordsNetheriteSwordItem(
                     ToolMaterials.NETHERITE,
                     (int) (netherite_modifier + warglaive_positive_modifier - warglaive_negative_modifier),
                     warglaive_attackspeed,
                     "minecraft:netherite_ingot"));
 
-    public static final RegistrySupplier<SimplySwordsSwordItem> NETHERITE_CUTLASS = ITEM.register( "netherite_cutlass", () ->
-            new SimplySwordsSwordItem(
+    public static final RegistrySupplier<SimplySwordsNetheriteSwordItem> NETHERITE_CUTLASS = ITEM.register( "netherite_cutlass", () ->
+            new SimplySwordsNetheriteSwordItem(
                     ToolMaterials.NETHERITE,
                     (int) (netherite_modifier + cutlass_positive_modifier - cutlass_negative_modifier),
                     cutlass_attackspeed,
                     "minecraft:netherite_ingot"));
 
-    public static final RegistrySupplier<SimplySwordsSwordItem> NETHERITE_CLAYMORE = ITEM.register( "netherite_claymore", () ->
-            new SimplySwordsSwordItem(
+    public static final RegistrySupplier<SimplySwordsNetheriteSwordItem> NETHERITE_CLAYMORE = ITEM.register( "netherite_claymore", () ->
+            new SimplySwordsNetheriteSwordItem(
                     ToolMaterials.NETHERITE,
                     (int) (netherite_modifier + claymore_positive_modifier - claymore_negative_modifier),
                     claymore_attackspeed,
                     "minecraft:netherite_ingot"));
 
-    public static final RegistrySupplier<SimplySwordsSwordItem> NETHERITE_GREATHAMMER = ITEM.register( "netherite_greathammer", () ->
-            new SimplySwordsSwordItem(
+    public static final RegistrySupplier<SimplySwordsNetheriteSwordItem> NETHERITE_GREATHAMMER = ITEM.register( "netherite_greathammer", () ->
+            new SimplySwordsNetheriteSwordItem(
                     ToolMaterials.NETHERITE,
                     (int) (netherite_modifier + greathammer_positive_modifier - greathammer_negative_modifier),
                     greathammer_attackspeed,
                     "minecraft:netherite_ingot"));
 
-    public static final RegistrySupplier<SimplySwordsSwordItem> NETHERITE_GREATAXE = ITEM.register( "netherite_greataxe", () ->
-            new SimplySwordsSwordItem(
+    public static final RegistrySupplier<SimplySwordsNetheriteSwordItem> NETHERITE_GREATAXE = ITEM.register( "netherite_greataxe", () ->
+            new SimplySwordsNetheriteSwordItem(
                     ToolMaterials.NETHERITE,
                     (int) (netherite_modifier + greataxe_positive_modifier - greataxe_negative_modifier),
                     greataxe_attackspeed,
                     "minecraft:netherite_ingot"));
 
-    public static final RegistrySupplier<SimplySwordsSwordItem> NETHERITE_CHAKRAM = ITEM.register( "netherite_chakram", () ->
-            new SimplySwordsSwordItem(
+    public static final RegistrySupplier<SimplySwordsNetheriteSwordItem> NETHERITE_CHAKRAM = ITEM.register( "netherite_chakram", () ->
+            new SimplySwordsNetheriteSwordItem(
                     ToolMaterials.NETHERITE,
                     (int) (netherite_modifier + chakram_positive_modifier - chakram_negative_modifier),
                     chakram_attackspeed,
                     "minecraft:netherite_ingot"));
 
-    public static final RegistrySupplier<SimplySwordsSwordItem> NETHERITE_SCYTHE = ITEM.register( "netherite_scythe", () ->
-            new SimplySwordsSwordItem(
+    public static final RegistrySupplier<SimplySwordsNetheriteSwordItem> NETHERITE_SCYTHE = ITEM.register( "netherite_scythe", () ->
+            new SimplySwordsNetheriteSwordItem(
                     ToolMaterials.NETHERITE,
                     (int) (netherite_modifier + scythe_positive_modifier - scythe_negative_modifier),
                     scythe_attackspeed,
                     "minecraft:netherite_ingot"));
 
-    public static final RegistrySupplier<SimplySwordsSwordItem> NETHERITE_HALBERD = ITEM.register( "netherite_halberd", () ->
-            new SimplySwordsSwordItem(
+    public static final RegistrySupplier<SimplySwordsNetheriteSwordItem> NETHERITE_HALBERD = ITEM.register( "netherite_halberd", () ->
+            new SimplySwordsNetheriteSwordItem(
                     ToolMaterials.NETHERITE,
                     (int) (netherite_modifier + halberd_positive_modifier - halberd_negative_modifier),
                     halberd_attackspeed,
@@ -637,25 +638,25 @@ public class ItemsRegistry {
             new FireSwordItem(ModToolMaterial.UNIQUE,
                     (int) (brimstone_damage_modifier),
                     brimstone_attackspeed,
-                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof()));
 
     public static final RegistrySupplier<WatcherSwordItem> WATCHER_CLAYMORE = ITEM.register( "watcher_claymore", () ->
             new WatcherSwordItem(ModToolMaterial.UNIQUE,
                     (int) (thewatcher_damage_modifier),
                     thewatcher_attackspeed,
-                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof()));
 
     public static final RegistrySupplier<StormsEdgeSwordItem> STORMS_EDGE = ITEM.register( "storms_edge", () ->
             new StormsEdgeSwordItem(ModToolMaterial.UNIQUE,
                     (int) (stormsedge_damage_modifier),
                     stormsedge_attackspeed,
-                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof()));
 
     public static final RegistrySupplier<StormbringerSwordItem> STORMBRINGER = ITEM.register( "stormbringer", () ->
             new StormbringerSwordItem(ModToolMaterial.UNIQUE,
                     (int) (stormbringer_damage_modifier),
                     stormbringer_attackspeed,
-                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof()));
 
     public static final RegistrySupplier<SwordItem> SWORD_ON_A_STICK = ITEM.register( "sword_on_a_stick", () ->
             new SwordItem(ToolMaterials.WOOD,
@@ -673,96 +674,96 @@ public class ItemsRegistry {
             new WatcherSwordItem(ModToolMaterial.UNIQUE,
                     (int) (watchingwarglaive_damage_modifier),
                     watchingwarglaive_attackspeed,
-                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof()));
     public static final RegistrySupplier<PlagueSwordItem> TOXIC_LONGSWORD = ITEM.register( "toxic_longsword", () ->
             new PlagueSwordItem(ModToolMaterial.UNIQUE,
                     (int) (longswordofplague_damage_modifier),
                     longswordofplague_attackspeed,
-                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof()));
 
     public static final RegistrySupplier<EmberIreSwordItem> EMBERBLADE = ITEM.register( "emberblade", () ->
             new EmberIreSwordItem(ModToolMaterial.UNIQUE,
                     (int) (emberblade_damage_modifier),
                     emberblade_attackspeed,
-                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof()));
 
     public static final RegistrySupplier<VolcanicFurySwordItem> HEARTHFLAME = ITEM.register( "hearthflame", () ->
             new VolcanicFurySwordItem(ModToolMaterial.UNIQUE,
                     (int) (hearthflame_damage_modifier),
                     hearthflame_attackspeed,
-                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof()));
 
     public static final RegistrySupplier<SoulSwordItem> SOULKEEPER = ITEM.register( "soulkeeper", () ->
             new SoulSwordItem(ModToolMaterial.UNIQUE,
                     (int) (soulkeeper_damage_modifier),
                     soulkeeper_attackspeed,
-                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof()));
 
     public static final RegistrySupplier<HasteSwordItem> TWISTED_BLADE = ITEM.register( "twisted_blade", () ->
             new HasteSwordItem(ModToolMaterial.UNIQUE,
                     (int) (twistedblade_damage_modifier),
                     twistedblade_attackspeed,
-                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof()));
 
     public static final RegistrySupplier<StealSwordItem> SOULSTEALER = ITEM.register("soulstealer", () ->
             new StealSwordItem(ModToolMaterial.UNIQUE,
                     (int) (soulstealer_damage_modifier),
                     soulstealer_attackspeed,
-                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof()));
 
     public static final RegistrySupplier<RendSwordItem> SOULRENDER = ITEM.register( "soulrender", () ->
             new RendSwordItem(ModToolMaterial.UNIQUE,
                     (int) (soulrender_damage_modifier),
                     soulrender_attackspeed,
-                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof()));
 
     public static final RegistrySupplier<SoulPyreSwordItem> SOULPYRE = ITEM.register( "soulpyre", () ->
             new SoulPyreSwordItem(ModToolMaterial.UNIQUE,
                     (int) (soulpyre_damage_modifier),
                     soulpyre_attackspeed,
-                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof()));
 
     public static final RegistrySupplier<FrostfallSwordItem> FROSTFALL = ITEM.register( "frostfall", () ->
             new FrostfallSwordItem(ModToolMaterial.UNIQUE,
                     (int) (frostfall_damage_modifier),
                     frostfall_attackspeed,
-                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof()));
 
     public static final RegistrySupplier<MoltenEdgeSwordItem> MOLTEN_EDGE = ITEM.register( "molten_edge", () ->
             new MoltenEdgeSwordItem(ModToolMaterial.UNIQUE,
                     (int) (moltenedge_damage_modifier),
                     moltenedge_attackspeed,
-                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof()));
 
     public static final RegistrySupplier<LivyatanSwordItem> LIVYATAN = ITEM.register( "livyatan", () ->
             new LivyatanSwordItem(ModToolMaterial.UNIQUE,
                     (int) (livyatan_damage_modifier),
                     livyatan_attackspeed,
-                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof()));
 
     public static final RegistrySupplier<IcewhisperSwordItem> ICEWHISPER = ITEM.register( "icewhisper", () ->
             new IcewhisperSwordItem(ModToolMaterial.UNIQUE,
                     (int) (icewhisper_damage_modifier),
                     icewhisper_attackspeed,
-                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof()));
     public static final RegistrySupplier<ArcanethystSwordItem> ARCANETHYST = ITEM.register( "arcanethyst", () ->
             new ArcanethystSwordItem(ModToolMaterial.UNIQUE,
                     (int) (arcanethyst_damage_modifier),
                     arcanethyst_attackspeed,
-                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof()));
 
     public static final RegistrySupplier<ThunderbrandSwordItem> THUNDERBRAND = ITEM.register( "thunderbrand", () ->
             new ThunderbrandSwordItem(ModToolMaterial.UNIQUE,
                     (int) (thunderbrand_damage_modifier),
                     thunderbrand_attackspeed,
-                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof()));
 
     /*
     public static final RegistrySupplier<RendSwordItem> THE_DISPATCHER = ITEM.register( "the_dispatcher", () ->
             new RendSwordItem(ModToolMaterial.UNIQUE,
                     (int) (thedispatcher_damage_modifier),
                     thedispatcher_attackspeed,
-                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof()));
 
      */
 
@@ -770,61 +771,61 @@ public class ItemsRegistry {
             new StormSwordItem(ModToolMaterial.UNIQUE,
                     (int) (mjolnir_damage_modifier),
                     mjolnir_attackspeed,
-                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof()));
 
     public static final RegistrySupplier<LichbladeSwordItem> SLUMBERING_LICHBLADE = ITEM.register( "slumbering_lichblade", () ->
             new LichbladeSwordItem(ModToolMaterial.UNIQUE,
                     (int) (lichblade_damage_modifier),
                     lichblade_attackspeed,
-                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof()));
 
     public static final RegistrySupplier<LichbladeSwordItem> WAKING_LICHBLADE = ITEM.register( "waking_lichblade", () ->
             new LichbladeSwordItem(ModToolMaterial.UNIQUE,
                     (int) (lichblade_damage_modifier),
                     lichblade_attackspeed,
-                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof()));
 
     public static final RegistrySupplier<LichbladeSwordItem> AWAKENED_LICHBLADE = ITEM.register( "awakened_lichblade", () ->
             new LichbladeSwordItem(ModToolMaterial.UNIQUE,
                     (int) (lichblade_damage_modifier),
                     lichblade_attackspeed,
-                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof()));
 
     public static final RegistrySupplier<ShadowstingSwordItem> SHADOWSTING = ITEM.register( "shadowsting", () ->
             new ShadowstingSwordItem(ModToolMaterial.UNIQUE,
                     (int) (shadowsting_damage_modifier),
                     shadowsting_attackspeed,
-                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof()));
 /*
     public static final RegistrySupplier<EmberIreSwordItem> UNIQUELONGSWORDHOLY = ITEM.register( "unique_longsword_holy", () ->
             new EmberIreSwordItem(ModToolMaterial.UNIQUE,
                     (int) (emberblade_damage_modifier),
                     emberblade_attackspeed,
-                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof()));
 
     public static final RegistrySupplier<EmberIreSwordItem> UNIQUELONGSWORDTAINTED = ITEM.register( "unique_longsword_tainted", () ->
             new EmberIreSwordItem(ModToolMaterial.UNIQUE,
                     (int) (emberblade_damage_modifier),
                     emberblade_attackspeed,
-                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof()));
 
     public static final RegistrySupplier<EmberIreSwordItem> UNIQUELONGSWORDDULL = ITEM.register( "unique_longsword_dull", () ->
             new EmberIreSwordItem(ModToolMaterial.UNIQUE,
                     (int) (emberblade_damage_modifier),
                     emberblade_attackspeed,
-                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof()));
 
     public static final RegistrySupplier<EmberIreSwordItem> UNIQUELONGSWORDDULLHOLY = ITEM.register( "unique_longsword_holy_dull", () ->
             new EmberIreSwordItem(ModToolMaterial.UNIQUE,
                     (int) (emberblade_damage_modifier),
                     emberblade_attackspeed,
-                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof()));
 
     public static final RegistrySupplier<EmberIreSwordItem> UNIQUELONGSWORDDULLTAINTED = ITEM.register( "unique_longsword_tainted_dull", () ->
             new EmberIreSwordItem(ModToolMaterial.UNIQUE,
                     (int) (emberblade_damage_modifier),
                     emberblade_attackspeed,
-                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC)));
+                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof()));
  */
 
 
