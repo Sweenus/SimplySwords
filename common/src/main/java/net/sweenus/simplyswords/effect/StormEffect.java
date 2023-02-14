@@ -35,7 +35,7 @@ public class StormEffect extends StatusEffect {
                     if (ee.isTouchingWaterOrRain() && HelperMethods.checkFriendlyFire( ee, player)) {
                         var stormtarget = ee.getBlockPos();
                         if (ee.distanceTo(pPlayer) >= 5 ){
-                            Entity storm = EntityType.LIGHTNING_BOLT.spawn(world, null, null, null, stormtarget, SpawnReason.TRIGGERED, true, true);
+                            Entity storm = EntityType.LIGHTNING_BOLT.spawn(world, stormtarget, SpawnReason.TRIGGERED);
                         }
 
 

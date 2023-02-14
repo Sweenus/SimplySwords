@@ -48,7 +48,7 @@ public class FireSwordItem extends SwordItem {
                     HelperMethods.spawnParticle(world, ParticleTypes.SMOKE, position.getX(), position.getY()+0.5, position.getZ(), 0, 0, 0);
                 }
 
-                world.createExplosion(attacker, target.getX(), target.getY(), target.getZ(), choose_sound, Explosion.DestructionType.NONE);
+                world.createExplosion(attacker, target.getX(), target.getY(), target.getZ(), choose_sound, World.ExplosionSourceType.NONE);
                 target.setOnFireFor(3);
 
                 if (choose_sound <= 1)

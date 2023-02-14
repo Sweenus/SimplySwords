@@ -5,8 +5,8 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.SwordItem;
 import net.minecraft.item.ToolMaterial;
+import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
 import net.sweenus.simplyswords.SimplySwords;
 
 import java.util.ArrayList;
@@ -18,7 +18,7 @@ public class GobberNetherSwordItem extends SwordItem {
 
     public GobberNetherSwordItem(ToolMaterial toolMaterial, int attackDamage, float attackSpeed, String... repairIngredient) {
         super(toolMaterial, attackDamage, attackSpeed,
-                new Item.Settings().group(SimplySwords.SIMPLYSWORDS));
+                new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS));
         this.repairIngredient = repairIngredient;
     }
 
@@ -27,7 +27,7 @@ public class GobberNetherSwordItem extends SwordItem {
         List<Item> potentialIngredients = new ArrayList<>(List.of());
         Arrays.stream(repairIngredient).toList().forEach(repIngredient ->
                 potentialIngredients.add(
-                        Registry.ITEM.get(new Identifier(repIngredient))));
+                        Registries.ITEM.get(new Identifier(repIngredient))));
 
 
         return potentialIngredients.contains(ingredient.getItem());
