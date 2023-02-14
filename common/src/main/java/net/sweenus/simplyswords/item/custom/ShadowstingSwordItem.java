@@ -67,7 +67,7 @@ public class ShadowstingSwordItem extends SwordItem {
         world.playSoundFromEntity(null, user, SoundRegistry.ELEMENTAL_SWORD_EARTH_ATTACK_01.get(), SoundCategory.PLAYERS, 0.4f, 1.6f);
         user.getItemCooldownManager().set(this.getDefaultStack().getItem(), skillCooldown);
 
-        Box box = new Box(user.getX() + radius * 8, user.getY() + radius, user.getZ() + radius * 8, user.getX() - radius * 8, user.getY() - radius, user.getZ() - radius * 8);
+        Box box = new Box(user.getX() + radius, user.getY() + radius, user.getZ() + radius, user.getX() - radius, user.getY() - radius, user.getZ() - radius);
         for (Entity entities : world.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY)) {
 
             if (entities != null) {
