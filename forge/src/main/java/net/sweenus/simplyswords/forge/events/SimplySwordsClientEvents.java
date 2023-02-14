@@ -28,27 +28,21 @@ public class SimplySwordsClientEvents {
     }
 
     private static void simplySwords$registerResourcePack(AddPackFindersEvent event, Identifier identifier, boolean alwaysEnabled) {
-        event.addRepositorySource(((profileAdder, factory) -> {
+        event.addRepositorySource((profileAdder -> {
             IModFile file = ModList.get().getModFileById(identifier.getNamespace()).getFile();
             try (PathPackResources packResources = new PathPackResources(
                     identifier.toString(),
+                    true,
                     file.findResource("resourcepacks/" + identifier.getPath()))) {
-                profileAdder.accept(new ResourcePackProfile(
+                profileAdder.accept(ResourcePackProfile.create(
                         identifier.toString(),
+                        Text.of(identifier.getNamespace()+"/"+identifier.getPath()),
                         alwaysEnabled,
-                        () -> packResources,
-                        Text.of(identifier.getNamespace() + "/" + identifier.getPath()),
-                        packResources
-                                .parseMetadata(PackResourceMetadata.READER)
-                                .getDescription()
-                                .copy()
-                                .append(" §7(Classic)"),
-                        ResourcePackCompatibility.COMPATIBLE,
+                        a -> packResources,
+                        ResourceType.CLIENT_RESOURCES,
                         ResourcePackProfile.InsertionPosition.TOP,
-                        false,
-                        ResourcePackSource.PACK_SOURCE_BUILTIN,
-                        false));
-            } catch (IOException | NullPointerException e) {e.printStackTrace();}
+                        ResourcePackSource.BUILTIN));
+            } catch (NullPointerException e) {e.printStackTrace();}
         }));
     }
 }

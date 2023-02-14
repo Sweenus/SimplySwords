@@ -5,15 +5,16 @@ import dev.architectury.registry.registries.RegistrySupplier;
 import net.minecraft.item.Item;
 import net.minecraft.item.SwordItem;
 import net.minecraft.item.ToolMaterials;
+import net.minecraft.registry.BuiltinRegistries;
+import net.minecraft.registry.tag.TagKey;
 import net.minecraft.util.Rarity;
-import net.minecraft.util.registry.Registry;
+import net.minecraft.registry.Registries;
 import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
 import net.sweenus.simplyswords.item.ModToolMaterial;
 import net.sweenus.simplyswords.item.RunicSwordItem;
 import net.sweenus.simplyswords.item.SimplySwordsSwordItem;
 import net.sweenus.simplyswords.item.custom.*;
-
 public class ItemsRegistry {
 
     static float iron_modifier = (int) SimplySwordsConfig.getWeaponAttributes("iron_damage_modifier");
@@ -123,11 +124,11 @@ public class ItemsRegistry {
     static float lichblade_damage_modifier = SimplySwordsConfig.getWeaponAttributes("lichblade_damage_modifier");
     static float shadowsting_damage_modifier = SimplySwordsConfig.getWeaponAttributes("shadowsting_damage_modifier");
 
-    public static final DeferredRegister<Item> ITEM = DeferredRegister.create(SimplySwords.MOD_ID, Registry.ITEM_KEY);
+    public static final DeferredRegister<Item> ITEM = DeferredRegister.create(SimplySwords.MOD_ID, Registries.ITEM);
 
 
     public static final RegistrySupplier<Item> RUNIC_TABLET = ITEM.register("runic_tablet", () ->
-            new Item(new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.RARE)));
+            new Item(new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.RARE)));
 
 
     public static final RegistrySupplier<SimplySwordsSwordItem> IRON_LONGSWORD = ITEM.register("iron_longsword", () ->
