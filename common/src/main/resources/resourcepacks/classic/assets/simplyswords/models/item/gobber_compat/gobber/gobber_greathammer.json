@@ -1,7 +1,7 @@
 {
 	"credit": "Made by Sweenus using Blockbench",
 	"textures": {
-		"3": "simplyswords:gobber_compat/blade_gobber",
+		"3": "simplyswords:item/gobber_compat/blade_gobber",
 		"4": "simplyswords:item/hilt",
 		"particle": "simplyswords:item/hilt"
 	},

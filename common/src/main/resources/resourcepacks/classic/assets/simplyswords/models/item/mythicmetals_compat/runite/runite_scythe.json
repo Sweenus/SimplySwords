@@ -1,10 +1,10 @@
 {
 	"credit": "Made by Sweenus using Blockbench",
 	"textures": {
-		"3": "simplyswords:mythicmetals_compat/blade_runite",
+		"3": "simplyswords:item/mythicmetals_compat/blade_runite",
 		"7": "simplyswords:item/shield_base_woodgrain_2",
-		"8": "simplyswords:mythicmetals_compat/blade_axe_runite",
-		"particle": "simplyswords:mythicmetals_compat/blade_runite"
+		"8": "simplyswords:item/mythicmetals_compat/blade_axe_runite",
+		"particle": "simplyswords:item/mythicmetals_compat/blade_runite"
 	},
 	"elements": [
 		{

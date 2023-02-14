@@ -1,10 +1,10 @@
 {
 	"credit": "Made by Sweenus using Blockbench",
 	"textures": {
-		"3": "simplyswords:gobber_compat/blade_gobber_end",
+		"3": "simplyswords:item/gobber_compat/blade_gobber_end",
 		"7": "simplyswords:item/shield_base_woodgrain_2",
-		"8": "simplyswords:gobber_compat/blade_axe_gobber_end",
-		"particle": "simplyswords:gobber_compat/blade_gobber_end"
+		"8": "simplyswords:item/gobber_compat/blade_axe_gobber_end",
+		"particle": "simplyswords:item/gobber_compat/blade_gobber_end"
 	},
 	"elements": [
 		{

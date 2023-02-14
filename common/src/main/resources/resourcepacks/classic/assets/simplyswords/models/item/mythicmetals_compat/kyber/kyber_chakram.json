@@ -1,7 +1,7 @@
 {
 	"credit": "Made by Sweenus using Blockbench",
 	"textures": {
-		"5": "simplyswords:mythicmetals_compat/blade_axe_kyber",
+		"5": "simplyswords:item/mythicmetals_compat/blade_axe_kyber",
 		"4": "simplyswords:item/hilt",
 		"particle": "simplyswords:item/hilt"
 	},

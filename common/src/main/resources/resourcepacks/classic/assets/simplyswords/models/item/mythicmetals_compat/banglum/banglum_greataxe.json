@@ -3,7 +3,7 @@
 	"textures": {
 		"3": "simplyswords:item/blade_netherite",
 		"4": "simplyswords:item/hilt",
-		"5": "simplyswords:mythicmetals_compat/blade_axe_banglum",
+		"5": "simplyswords:item/mythicmetals_compat/blade_axe_banglum",
 		"particle": "simplyswords:item/hilt"
 	},
 	"elements": [

@@ -1,7 +1,7 @@
 {
 	"credit": "Made by Sweenus using Blockbench",
 	"textures": {
-		"0": "simplyswords:mythicmetals_compat/blade_osmium",
+		"0": "simplyswords:item/mythicmetals_compat/blade_osmium",
 		"1": "simplyswords:item/hilt",
 		"particle": "simplyswords:item/hilt"
 	},

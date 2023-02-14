@@ -3,7 +3,7 @@
 	"textures": {
 		"3": "simplyswords:item/blade_netherite",
 		"4": "simplyswords:item/hilt",
-		"5": "simplyswords:gobber_compat/blade_axe_gobber",
+		"5": "simplyswords:item/gobber_compat/blade_axe_gobber",
 		"particle": "simplyswords:item/hilt"
 	},
 	"elements": [
