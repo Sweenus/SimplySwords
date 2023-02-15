@@ -1,6 +1,8 @@
 package net.sweenus.simplyswords.fabric.mixin;
 
+import net.fabricmc.loader.api.FabricLoader;
 import net.sweenus.simplyswords.SimplySwords;
+import net.sweenus.simplyswords.compat.GobberCompat;
 import net.sweenus.simplyswords.fabric.compat.MythicMetalsCompat;
 import nourl.mythicmetals.MythicMetals;
 import org.spongepowered.asm.mixin.Mixin;
@@ -21,5 +23,9 @@ public class MythicMetalsInitMixin {
         System.out.println("SimplySwords: Detected Mythic Metals - injecting compatibility init");
         SimplySwords.init();
         MythicMetalsCompat.registerModItems();
+
+        if (FabricLoader.getInstance().isModLoaded("quilt_loader") && FabricLoader.getInstance().isModLoaded("gobber2") && FabricLoader.getInstance().isModLoaded("mythicmetals")) {
+            GobberCompat.registerModItems();
+        }
     }
 }
