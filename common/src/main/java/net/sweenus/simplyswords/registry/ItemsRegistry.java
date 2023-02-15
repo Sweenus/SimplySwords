@@ -230,7 +230,7 @@ public class ItemsRegistry {
 
     public static final RegistrySupplier<SimplySwordsSwordItem> IRON_HALBERD = ITEM.register( "iron_halberd", () ->
             new SimplySwordsSwordItem(
-                    ToolMaterials.GOLD,
+                    ToolMaterials.IRON,
                     (int) (iron_modifier + halberd_positive_modifier - halberd_negative_modifier),
                     halberd_attackspeed,
                     "minecraft:iron_ingot"));
