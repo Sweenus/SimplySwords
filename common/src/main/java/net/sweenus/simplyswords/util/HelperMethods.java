@@ -44,6 +44,9 @@ public class HelperMethods {
     }
 
     public static boolean checkFriendlyFire (LivingEntity livingEntity, PlayerEntity player) {
+        if (livingEntity == null || player == null) {
+            return false;
+        }
         if (livingEntity instanceof PlayerEntity playerEntity) {
             return playerEntity.shouldDamagePlayer(player);
         } else {return true;}
