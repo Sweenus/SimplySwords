@@ -45,7 +45,7 @@ public class SimplySwordsConfig {
 
     public static float getLootModifiers(String key) {
         if (!LOOT_OPTIONS.containsKey(key)) {
-            System.out.println(key);
+            //System.out.println(key);
             return 0f;
         }
         return LOOT_OPTIONS.get(key);
@@ -53,7 +53,7 @@ public class SimplySwordsConfig {
 
     public static boolean getLootList (String id) {
         if (!LOOT_OPTIONS.isEmpty()) {
-            System.out.println(id);
+            //System.out.println(id);
             return LOOT_OPTIONS.toString().contains(id);
         }
         return false;
