@@ -40,6 +40,8 @@ public class RunicMethods {
 
         if (attacker.getRandom().nextInt(100) <= fhitchance) {
             target.addStatusEffect(new StatusEffectInstance(EffectRegistry.FREEZE.get(), fduration, 1), attacker);
+            attacker.world.playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
+                    SoundCategory.PLAYERS, 0.1f, 1.8f);
         }
     }
 
@@ -50,6 +52,8 @@ public class RunicMethods {
 
         if (attacker.getRandom().nextInt(100) <= phitchance) {
            target.addStatusEffect(new StatusEffectInstance(EffectRegistry.WILDFIRE.get(), pduration, 3), attacker);
+            attacker.world.playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
+                    SoundCategory.PLAYERS, 0.1f, 1.8f);
         }
     }
 
@@ -69,6 +73,8 @@ public class RunicMethods {
 
         if (attacker.getRandom().nextInt(100) <= shitchance) {
             target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, sduration, 2), attacker);
+            attacker.world.playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
+                    SoundCategory.PLAYERS, 0.1f, 1.8f);
         }
     }
 
@@ -79,6 +85,8 @@ public class RunicMethods {
 
         if (attacker.getRandom().nextInt(100) <= shitchance) {
             attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, sduration, 0), attacker);
+            attacker.world.playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
+                    SoundCategory.PLAYERS, 0.1f, 1.8f);
         }
     }
 
@@ -89,6 +97,8 @@ public class RunicMethods {
 
         if (attacker.getRandom().nextInt(100) <= shitchance) {
             attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, sduration, 1), attacker);
+            attacker.world.playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
+                    SoundCategory.PLAYERS, 0.1f, 1.8f);
         }
     }
 
@@ -99,6 +109,8 @@ public class RunicMethods {
 
         if (attacker.getRandom().nextInt(100) <= lhitchance) {
             target.addStatusEffect(new StatusEffectInstance(StatusEffects.LEVITATION, lduration, 2), attacker);
+            attacker.world.playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
+                    SoundCategory.PLAYERS, 0.1f, 1.8f);
         }
     }
 
@@ -109,6 +121,8 @@ public class RunicMethods {
 
         if (attacker.getRandom().nextInt(100) <= lhitchance) {
             target.addStatusEffect(new StatusEffectInstance(StatusEffects.LEVITATION, lduration, 3), attacker);
+            attacker.world.playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
+                    SoundCategory.PLAYERS, 0.1f, 1.8f);
         }
     }
 
@@ -120,6 +134,8 @@ public class RunicMethods {
         if (attacker.getRandom().nextInt(100) <= lhitchance) {
             attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, lduration, 0), attacker);
             attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, lduration, 0), attacker);
+            attacker.world.playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
+                    SoundCategory.PLAYERS, 0.1f, 1.8f);
         }
     }
 
@@ -131,6 +147,8 @@ public class RunicMethods {
         if (attacker.getRandom().nextInt(100) <= lhitchance) {
             attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, lduration, 1), attacker);
             attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, lduration, 1), attacker);
+            attacker.world.playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
+                    SoundCategory.PLAYERS, 0.1f, 1.8f);
         }
     }
 
@@ -141,6 +159,8 @@ public class RunicMethods {
 
         if (attacker.getRandom().nextInt(100) <= lhitchance) {
             attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.ABSORPTION, lduration, 0), attacker);
+            attacker.world.playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
+                    SoundCategory.PLAYERS, 0.1f, 1.8f);
         }
     }
 
@@ -151,6 +171,8 @@ public class RunicMethods {
 
         if (attacker.getRandom().nextInt(100) <= lhitchance) {
             attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.ABSORPTION, lduration, 1), attacker);
+            attacker.world.playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
+                    SoundCategory.PLAYERS, 0.1f, 1.8f);
         }
     }
 
@@ -163,6 +185,8 @@ public class RunicMethods {
             attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, lduration, 1), attacker);
             attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.FIRE_RESISTANCE, lduration, 0), attacker);
             attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, lduration, 0), attacker);
+            attacker.world.playSoundFromEntity(null, attacker, SoundRegistry.ELEMENTAL_SWORD_EARTH_ATTACK_02.get(),
+                    SoundCategory.PLAYERS, 0.3f, 1.3f);
         }
     }
 
@@ -175,6 +199,8 @@ public class RunicMethods {
             attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, lduration, 2), attacker);
             attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.FIRE_RESISTANCE, lduration, 0), attacker);
             attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, lduration, 1), attacker);
+            attacker.world.playSoundFromEntity(null, attacker, SoundRegistry.ELEMENTAL_SWORD_EARTH_ATTACK_02.get(),
+                    SoundCategory.PLAYERS, 0.3f, 1.1f);
         }
     }
 
@@ -184,8 +210,10 @@ public class RunicMethods {
         int lduration = (int) SimplySwordsConfig.getFloatValue("trailblaze_duration");
 
         if (attacker.getRandom().nextInt(100) <= lhitchance) {
-            attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, lduration, 2), attacker);
+            attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, lduration, 1), attacker);
             attacker.setOnFireFor(lduration / 20);
+            attacker.world.playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
+                    SoundCategory.PLAYERS, 0.1f, 1.8f);
         }
     }
 
@@ -195,8 +223,10 @@ public class RunicMethods {
         int lduration = (int) SimplySwordsConfig.getFloatValue("trailblaze_duration");
 
         if (attacker.getRandom().nextInt(100) <= lhitchance) {
-            attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, lduration, 3), attacker);
+            attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, lduration, 2), attacker);
             attacker.setOnFireFor(lduration / 20);
+            attacker.world.playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
+                    SoundCategory.PLAYERS, 0.1f, 1.8f);
         }
     }
 
@@ -208,6 +238,8 @@ public class RunicMethods {
         if (attacker.getRandom().nextInt(100) <= lhitchance) {
             target.addStatusEffect(new StatusEffectInstance(StatusEffects.WEAKNESS, lduration, 0), attacker);
             target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, lduration, 1), attacker);
+            attacker.world.playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
+                    SoundCategory.PLAYERS, 0.1f, 1.8f);
         }
     }
 
@@ -219,6 +251,8 @@ public class RunicMethods {
         if (attacker.getRandom().nextInt(100) <= lhitchance) {
             target.addStatusEffect(new StatusEffectInstance(StatusEffects.WEAKNESS, lduration, 1), attacker);
             target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, lduration, 2), attacker);
+            attacker.world.playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
+                    SoundCategory.PLAYERS, 0.1f, 1.8f);
         }
     }
 
@@ -231,7 +265,31 @@ public class RunicMethods {
 
     }
 
+    // ------- ON STOPPED USING ------- //
 
+    public static void stoppedUsingRunicMomentum(ItemStack stack, World world,  LivingEntity user, int remainingUseTicks) {
+        //Player dash end
+        if (user.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
+            user.setVelocity(0, 0, 0); // Stop player at end of charge
+            user.velocityModified = true;
+        }
+    }
+
+
+    // ------- USAGE TICK ------- //
+
+    public static void usageTickRunicMomentum(ItemStack stack, World world,  LivingEntity user, int remainingUseTicks) {
+        int skillCooldown = (int) SimplySwordsConfig.getFloatValue("momentum_cooldown");
+        if (user.getEquippedStack(EquipmentSlot.MAINHAND) == stack && user.isOnGround() && (user instanceof PlayerEntity player)) {
+            //Player dash forward
+            if (remainingUseTicks == 12 || remainingUseTicks == 13 && player.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
+                player.setVelocity(player.getRotationVector().multiply(+3));
+                player.setVelocity(player.getVelocity().x, 0, player.getVelocity().z); // Prevent player flying to the heavens
+                player.velocityModified = true;
+                player.getItemCooldownManager().set(stack.getItem(), skillCooldown);
+            }
+        }
+    }
 
     // ------- INVENTORY TICK ------- //
 

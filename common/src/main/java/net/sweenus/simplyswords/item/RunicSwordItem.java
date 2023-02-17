@@ -21,8 +21,7 @@ import net.minecraft.screen.slot.Slot;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.text.Text;
-import net.minecraft.util.ClickType;
-import net.minecraft.util.Formatting;
+import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
@@ -30,12 +29,16 @@ import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
+import net.sweenus.simplyswords.util.AbilityMethods;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.RunicMethods;
 
 import java.util.List;
 
 public class RunicSwordItem extends SwordItem {
+
+    public static int maxUseTime;
+
     public RunicSwordItem(ToolMaterial toolMaterial, int attackDamage, float attackSpeed, Settings settings) {
         super(toolMaterial, attackDamage, attackSpeed, settings.fireproof());
     }
@@ -136,6 +139,52 @@ public class RunicSwordItem extends SwordItem {
         return super.postHit(stack, target, attacker);
 
     }
+
+    @Override
+    public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
+        if (!world.isClient) {
+            if (stack.getOrCreateNbt().getString("runic_power").equals("momentum"))
+                RunicMethods.stoppedUsingRunicMomentum(stack, world, user, remainingUseTicks);
+        }
+    }
+
+    @Override
+    public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
+        if (!world.isClient) {
+            if (stack.getOrCreateNbt().getString("runic_power").equals("momentum"))
+                RunicMethods.usageTickRunicMomentum(stack, world, user, remainingUseTicks);
+        }
+    }
+
+    @Override
+    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
+        ItemStack itemStack = user.getStackInHand(hand);
+
+        if (itemStack.getOrCreateNbt().getString("runic_power").equals("momentum")) {
+
+            if (itemStack.getDamage() >= itemStack.getMaxDamage() - 1) {
+                return TypedActionResult.fail(itemStack);
+            }
+            user.setCurrentHand(hand);
+            world.playSoundFromEntity(null, user, SoundRegistry.ELEMENTAL_BOW_WIND_SHOOT_FLYBY_02.get(),
+                    SoundCategory.PLAYERS, 0.3f, 1.2f);
+            return TypedActionResult.consume(itemStack);
+        }
+        return TypedActionResult.fail(itemStack);
+    }
+
+    @Override
+    public int getMaxUseTime(ItemStack stack) {
+        if (stack.getOrCreateNbt().getString("runic_power").equals("momentum"))
+            maxUseTime = 15;
+
+        return maxUseTime;
+    }
+    @Override
+    public UseAction getUseAction(ItemStack stack) {
+        return UseAction.BLOCK;
+    }
+
 
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
@@ -287,6 +336,13 @@ public class RunicSwordItem extends SwordItem {
             tooltip.add(Text.translatable("item.simplyswords.unstablesworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
             tooltip.add(Text.translatable("item.simplyswords.unstablesworditem.tooltip2"));
             tooltip.add(Text.translatable("item.simplyswords.unstablesworditem.tooltip3"));
+
+        }
+        if (itemStack.getOrCreateNbt().getString("runic_power").equals("momentum")) {
+
+            tooltip.add(Text.translatable("item.simplyswords.momentumsworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
+            tooltip.add(Text.translatable("item.simplyswords.momentumsworditem.tooltip2"));
+            tooltip.add(Text.translatable("item.simplyswords.momentumsworditem.tooltip3"));
 
         }
 

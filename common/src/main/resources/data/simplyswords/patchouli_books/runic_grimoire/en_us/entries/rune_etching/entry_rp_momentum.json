@@ -1,0 +1,17 @@
+{
+  "name": "Momentum",
+  "icon": "simplyswords:runic_tablet",
+  "category": "simplyswords:category_rune_etching",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:runic_tablet",
+      "title": "Momentum",
+      "text": "Momentum is a runic power that imbues the wielder's weapon with the $(#389fff)$(l)essence of mass and velocity$(). $(br2)It generates forward momentum, swiftly propelling the wielder forward."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "The surge of energy created by Momentum can be used to great effect in combat, allowing the wielder to cover ground quickly and move in for the kill."
+    }
+  ]
+}

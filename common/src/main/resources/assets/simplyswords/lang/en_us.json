@@ -682,6 +682,9 @@
   "item.simplyswords.frostwardsworditem.tooltip1": "Runic Power: Frost Ward",
   "item.simplyswords.frostwardsworditem.tooltip2": "Regularly fires movement impairing",
   "item.simplyswords.frostwardsworditem.tooltip3": "snowballs at all nearby enemies.",
+  "item.simplyswords.momentumsworditem.tooltip1": "Runic Power: Momentum",
+  "item.simplyswords.momentumsworditem.tooltip2": "Gain a brief moment of strong",
+  "item.simplyswords.momentumsworditem.tooltip3": "forward momentum.",
   "item.simplyswords.unidentifiedsworditem.tooltip1": "Runic Power: ????",
   "item.simplyswords.unidentifiedsworditem.tooltip2": "Click to identify.",
 

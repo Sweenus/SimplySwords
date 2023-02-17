@@ -70,7 +70,7 @@ public class StormsEdgeSwordItem extends SwordItem {
     @Override
     public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
         if (!world.isClient) {
-            if (user.getEquippedStack(EquipmentSlot.MAINHAND) == stack && user.isOnGround()) {
+            if (user.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
                 AbilityMethods.tickAbilityStormJolt(stack, world, user, remainingUseTicks, skillCooldown, radius);
             }
         }
