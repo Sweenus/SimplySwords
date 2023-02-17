@@ -71,33 +71,65 @@ public class RunicSwordItem extends SwordItem {
             if (stack.getOrCreateNbt().getString("runic_power").equals("slow")) {
                 RunicMethods.postHitRunicSlow(stack, target, attacker);
             }
-            //SPEED
-            if (stack.getOrCreateNbt().getString("runic_power").equals("speed")) {
-                RunicMethods.postHitRunicSpeed(stack, target, attacker);
+            //GREATER SLOW
+            if (stack.getOrCreateNbt().getString("runic_power").equals("greater_slow")) {
+                RunicMethods.postHitRunicGreaterSlow(stack, target, attacker);
             }
-            //LEVITATION
-            if (stack.getOrCreateNbt().getString("runic_power").equals("levitation")) {
-                RunicMethods.postHitRunicLevitation(stack, target, attacker);
+            //SWIFTNESS
+            if (stack.getOrCreateNbt().getString("runic_power").equals("swiftness")) {
+                RunicMethods.postHitRunicSwiftness(stack, target, attacker);
+            }
+            //GREATER SWIFTNESS
+            if (stack.getOrCreateNbt().getString("runic_power").equals("greater_swiftness")) {
+                RunicMethods.postHitRunicGreaterSwiftness(stack, target, attacker);
+            }
+            //FLOAT
+            if (stack.getOrCreateNbt().getString("runic_power").equals("float")) {
+                RunicMethods.postHitRunicFloat(stack, target, attacker);
+            }
+            //GREATER FLOAT
+            if (stack.getOrCreateNbt().getString("runic_power").equals("greater_float")) {
+                RunicMethods.postHitRunicGreaterFloat(stack, target, attacker);
             }
             //ZEPHYR
             if (stack.getOrCreateNbt().getString("runic_power").equals("zephyr")) {
                 RunicMethods.postHitRunicZephyr(stack, target, attacker);
             }
+            //GREATER ZEPHYR
+            if (stack.getOrCreateNbt().getString("runic_power").equals("greater_zephyr")) {
+                RunicMethods.postHitRunicGreaterZephyr(stack, target, attacker);
+            }
             //SHIELDING
             if (stack.getOrCreateNbt().getString("runic_power").equals("shielding")) {
                 RunicMethods.postHitRunicShielding(stack, target, attacker);
+            }
+            //GREATER SHIELDING
+            if (stack.getOrCreateNbt().getString("runic_power").equals("greater_shielding")) {
+                RunicMethods.postHitRunicGreaterShielding(stack, target, attacker);
             }
             //STONESKIN
             if (stack.getOrCreateNbt().getString("runic_power").equals("stoneskin")) {
                 RunicMethods.postHitRunicStoneskin(stack, target, attacker);
             }
+            //GREATER STONESKIN
+            if (stack.getOrCreateNbt().getString("runic_power").equals("greater_stoneskin")) {
+                RunicMethods.postHitRunicGreaterStoneskin(stack, target, attacker);
+            }
             //TRAILBLAZE
             if (stack.getOrCreateNbt().getString("runic_power").equals("trailblaze")) {
                 RunicMethods.postHitRunicTrailblaze(stack, target, attacker);
             }
+            //GREATER TRAILBLAZE
+            if (stack.getOrCreateNbt().getString("runic_power").equals("greater_trailblaze")) {
+                RunicMethods.postHitRunicGreaterTrailblaze(stack, target, attacker);
+            }
             //WEAKEN
             if (stack.getOrCreateNbt().getString("runic_power").equals("weaken")) {
                 RunicMethods.postHitRunicWeaken(stack, target, attacker);
+            }
+            //GREATER WEAKEN
+            if (stack.getOrCreateNbt().getString("runic_power").equals("greater_weaken")) {
+                RunicMethods.postHitRunicGreaterWeaken(stack, target, attacker);
             }
         }
 
@@ -157,71 +189,66 @@ public class RunicSwordItem extends SwordItem {
     @Override
     public void appendTooltip(ItemStack itemStack, World world, List<Text> tooltip, TooltipContext tooltipContext) {
 
+        tooltip.add(Text.literal(""));
+        if (itemStack.getOrCreateNbt().getString("runic_power").contains("greater"))
+            tooltip.add(Text.translatable("item.simplyswords.greater_runic_power").formatted(Formatting.DARK_AQUA, Formatting.BOLD));
+
         if (itemStack.getOrCreateNbt().getString("runic_power").isEmpty()) {
 
-            tooltip.add(Text.literal(""));
             tooltip.add(Text.translatable("item.simplyswords.unidentifiedsworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
             tooltip.add(Text.translatable("item.simplyswords.unidentifiedsworditem.tooltip2"));
 
         }
         if (itemStack.getOrCreateNbt().getString("runic_power").equals("freeze")) {
 
-            tooltip.add(Text.literal(""));
             tooltip.add(Text.translatable("item.simplyswords.freezesworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
             tooltip.add(Text.translatable("item.simplyswords.freezesworditem.tooltip2"));
 
         }
         if (itemStack.getOrCreateNbt().getString("runic_power").equals("wildfire")) {
 
-            tooltip.add(Text.literal(""));
             tooltip.add(Text.translatable("item.simplyswords.wildfiresworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
             tooltip.add(Text.translatable("item.simplyswords.wildfiresworditem.tooltip2"));
             tooltip.add(Text.translatable("item.simplyswords.wildfiresworditem.tooltip3"));
 
         }
-        if (itemStack.getOrCreateNbt().getString("runic_power").equals("slow")) {
+        if (itemStack.getOrCreateNbt().getString("runic_power").contains("slow")) {
 
-            tooltip.add(Text.literal(""));
             tooltip.add(Text.translatable("item.simplyswords.slownesssworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
             tooltip.add(Text.translatable("item.simplyswords.slownesssworditem.tooltip2"));
             tooltip.add(Text.translatable("item.simplyswords.slownesssworditem.tooltip3"));
 
         }
-        if (itemStack.getOrCreateNbt().getString("runic_power").equals("speed")) {
+        if (itemStack.getOrCreateNbt().getString("runic_power").contains("swiftness")) {
 
-            tooltip.add(Text.literal(""));
             tooltip.add(Text.translatable("item.simplyswords.speedsworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
             tooltip.add(Text.translatable("item.simplyswords.speedsworditem.tooltip2"));
             tooltip.add(Text.translatable("item.simplyswords.speedsworditem.tooltip3"));
 
         }
-        if (itemStack.getOrCreateNbt().getString("runic_power").equals("levitation")) {
+        if (itemStack.getOrCreateNbt().getString("runic_power").contains("float")) {
 
-            tooltip.add(Text.literal(""));
             tooltip.add(Text.translatable("item.simplyswords.levitationsworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
             tooltip.add(Text.translatable("item.simplyswords.levitationsworditem.tooltip2"));
             tooltip.add(Text.translatable("item.simplyswords.levitationsworditem.tooltip3"));
 
         }
-        if (itemStack.getOrCreateNbt().getString("runic_power").equals("zephyr")) {
+        if (itemStack.getOrCreateNbt().getString("runic_power").contains("zephyr")) {
 
-            tooltip.add(Text.literal(""));
             tooltip.add(Text.translatable("item.simplyswords.zephyrsworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
             tooltip.add(Text.translatable("item.simplyswords.zephyrsworditem.tooltip2"));
             tooltip.add(Text.translatable("item.simplyswords.zephyrsworditem.tooltip3"));
 
         }
-        if (itemStack.getOrCreateNbt().getString("runic_power").equals("shielding")) {
+        if (itemStack.getOrCreateNbt().getString("runic_power").contains("shielding")) {
 
-            tooltip.add(Text.literal(""));
             tooltip.add(Text.translatable("item.simplyswords.shieldingsworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
             tooltip.add(Text.translatable("item.simplyswords.shieldingsworditem.tooltip2"));
             tooltip.add(Text.translatable("item.simplyswords.shieldingsworditem.tooltip3"));
 
         }
-        if (itemStack.getOrCreateNbt().getString("runic_power").equals("stoneskin")) {
+        if (itemStack.getOrCreateNbt().getString("runic_power").contains("stoneskin")) {
 
-            tooltip.add(Text.literal(""));
             tooltip.add(Text.translatable("item.simplyswords.stoneskinsworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
             tooltip.add(Text.translatable("item.simplyswords.stoneskinsworditem.tooltip2"));
             tooltip.add(Text.translatable("item.simplyswords.stoneskinsworditem.tooltip3"));
@@ -229,15 +256,13 @@ public class RunicSwordItem extends SwordItem {
         }
         if (itemStack.getOrCreateNbt().getString("runic_power").equals("frost_ward")) {
 
-            tooltip.add(Text.literal(""));
             tooltip.add(Text.translatable("item.simplyswords.frostwardsworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
             tooltip.add(Text.translatable("item.simplyswords.frostwardsworditem.tooltip2"));
             tooltip.add(Text.translatable("item.simplyswords.frostwardsworditem.tooltip3"));
 
         }
-        if (itemStack.getOrCreateNbt().getString("runic_power").equals("trailblaze")) {
+        if (itemStack.getOrCreateNbt().getString("runic_power").contains("trailblaze")) {
 
-            tooltip.add(Text.literal(""));
             tooltip.add(Text.translatable("item.simplyswords.trailblazesworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
             tooltip.add(Text.translatable("item.simplyswords.trailblazesworditem.tooltip2"));
             tooltip.add(Text.translatable("item.simplyswords.trailblazesworditem.tooltip3"));
@@ -245,15 +270,13 @@ public class RunicSwordItem extends SwordItem {
         }
         if (itemStack.getOrCreateNbt().getString("runic_power").equals("active_defence")) {
 
-            tooltip.add(Text.literal(""));
             tooltip.add(Text.translatable("item.simplyswords.activedefencesworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
             tooltip.add(Text.translatable("item.simplyswords.activedefencesworditem.tooltip2"));
             tooltip.add(Text.translatable("item.simplyswords.activedefencesworditem.tooltip3"));
 
         }
-        if (itemStack.getOrCreateNbt().getString("runic_power").equals("weaken")) {
+        if (itemStack.getOrCreateNbt().getString("runic_power").contains("weaken")) {
 
-            tooltip.add(Text.literal(""));
             tooltip.add(Text.translatable("item.simplyswords.weakensworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
             tooltip.add(Text.translatable("item.simplyswords.weakensworditem.tooltip2"));
             tooltip.add(Text.translatable("item.simplyswords.weakensworditem.tooltip3"));
@@ -261,7 +284,6 @@ public class RunicSwordItem extends SwordItem {
         }
         if (itemStack.getOrCreateNbt().getString("runic_power").equals("unstable")) {
 
-            tooltip.add(Text.literal(""));
             tooltip.add(Text.translatable("item.simplyswords.unstablesworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
             tooltip.add(Text.translatable("item.simplyswords.unstablesworditem.tooltip2"));
             tooltip.add(Text.translatable("item.simplyswords.unstablesworditem.tooltip3"));

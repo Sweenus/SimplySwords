@@ -264,14 +264,22 @@ public class SimplySwordsConfig {
 
         BOOLEAN_OPTIONS.put("active_defence", true);
         BOOLEAN_OPTIONS.put("float", true);
+        BOOLEAN_OPTIONS.put("greater_float", true);
         BOOLEAN_OPTIONS.put("freeze", true);
         BOOLEAN_OPTIONS.put("shielding", true);
+        BOOLEAN_OPTIONS.put("greater_shielding", true);
         BOOLEAN_OPTIONS.put("slow", true);
+        BOOLEAN_OPTIONS.put("greater_slow", true);
         BOOLEAN_OPTIONS.put("stoneskin", true);
+        BOOLEAN_OPTIONS.put("greater_stoneskin", true);
         BOOLEAN_OPTIONS.put("swiftness", true);
+        BOOLEAN_OPTIONS.put("greater_swiftness", true);
         BOOLEAN_OPTIONS.put("trailblaze", true);
+        BOOLEAN_OPTIONS.put("greater_trailblaze", true);
         BOOLEAN_OPTIONS.put("weaken", true);
+        BOOLEAN_OPTIONS.put("greater_weaken", true);
         BOOLEAN_OPTIONS.put("zephyr", true);
+        BOOLEAN_OPTIONS.put("greater_zephyr", true);
         BOOLEAN_OPTIONS.put("frost_ward", true);
         BOOLEAN_OPTIONS.put("wildfire", true);
         BOOLEAN_OPTIONS.put("unstable", true);
