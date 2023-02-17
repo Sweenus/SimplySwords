@@ -238,6 +238,31 @@ public class SimplySwordsConfig {
         BOOLEAN_OPTIONS.put("enable_passive_particles", true);
         BOOLEAN_OPTIONS.put("compat_gobber_end_weapons_unbreakable", true);
 
+        BOOLEAN_OPTIONS.put("the_watcher", true);
+        BOOLEAN_OPTIONS.put("longsword_of_the_plague", true);
+        BOOLEAN_OPTIONS.put("sword_on_a_stick", true);
+        BOOLEAN_OPTIONS.put("bramblethorn", true);
+        BOOLEAN_OPTIONS.put("storms_edge", true);
+        BOOLEAN_OPTIONS.put("stormbringer", true);
+        BOOLEAN_OPTIONS.put("mjolnir", true);
+        BOOLEAN_OPTIONS.put("emberblade", true);
+        BOOLEAN_OPTIONS.put("hearthflame", true);
+        BOOLEAN_OPTIONS.put("twisted_blade", true);
+        BOOLEAN_OPTIONS.put("soulrender", true);
+        BOOLEAN_OPTIONS.put("soulpyre", true);
+        BOOLEAN_OPTIONS.put("soulkeeper", true);
+        BOOLEAN_OPTIONS.put("soulstealer", true);
+        BOOLEAN_OPTIONS.put("frostfall", true);
+        BOOLEAN_OPTIONS.put("molten_edge", true);
+        BOOLEAN_OPTIONS.put("livyatan", true);
+        BOOLEAN_OPTIONS.put("icewhisper", true);
+        BOOLEAN_OPTIONS.put("arcanethyst", true);
+        BOOLEAN_OPTIONS.put("thunderbrand", true);
+        BOOLEAN_OPTIONS.put("brimstone_claymore", true);
+        BOOLEAN_OPTIONS.put("slumbering_lichblade", true);
+        BOOLEAN_OPTIONS.put("shadowsting", true);
+
+
         LOOT_OPTIONS.put("minecraft:entities/wither", 0.05f);
         LOOT_OPTIONS.put("minecraft:chests/ruined_portal", 0f);
         LOOT_OPTIONS.put("minecraft:chests/village/village_armorer", 0f);
@@ -426,6 +451,14 @@ public class SimplySwordsConfig {
         StringBuilder config = new StringBuilder("{\n");
         int i = 0;
         for (String key : BOOLEAN_OPTIONS.keySet()) {
+            if (i == 7) {
+                config.append("\n");
+                config.append("// --------------------------------------------- LOOT BLACKLISTING ----------------------------------------------------------------- \n");
+                config.append("// Setting any of the below values to false will prevent that item from generating in loot. \n");
+                config.append("// The item will still exist in the creative menu, but will be unobtainable through ordinary survival gameplay.  \n");
+                config.append("// --------------------------------------------------------------------------------------------------------------------------------- \n");
+                config.append("\n");
+            }
             config.append("  \"").append(key).append("\": ").append(BOOLEAN_OPTIONS.get(key));
             ++i;
             if (i < BOOLEAN_OPTIONS.size()) {
