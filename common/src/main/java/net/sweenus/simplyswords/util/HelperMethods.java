@@ -17,6 +17,10 @@ import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
+
 public class HelperMethods {
 
     /*
@@ -66,7 +70,7 @@ public class HelperMethods {
         }
     }
 
-    //playHitSounds
+    // playHitSounds
     public static void playHitSounds(LivingEntity attacker, LivingEntity target) {
         if (!attacker.world.isClient()) {
             ServerWorld world = (ServerWorld) attacker.world;
@@ -88,7 +92,27 @@ public class HelperMethods {
         }
     }
 
-    //createFootfalls - creates weapon footfall particle effects (footsteps)
+    // chooseRunicPower
+    public static String chooseRunicPower() {
+        List<String> runicList = Arrays.asList(
+                "active_defence", "float", "freeze", "shielding", "slow", "stoneskin", "swiftness", "trailblaze",
+                "weaken", "zephyr", "frost_ward", "wildfire", "unstable");
+
+        // Keep rolling up to 100 times to receive a runic power that isn't blacklisted
+        // I'm sure there's a smarter way to do this, but I didn't choose to be born with a smol brain
+        for (int i = 0; i < 100; i++) {
+            Random choose = new Random();
+            int randomIndex = choose.nextInt(runicList.size());
+            String runicSelection = runicList.get(randomIndex);
+
+            if (SimplySwordsConfig.getBooleanValue(runicSelection))
+                return runicSelection;
+        }
+
+        return "";
+    }
+
+    // createFootfalls - creates weapon footfall particle effects (footsteps)
     public static void createFootfalls(Entity entity,
                                        ItemStack stack,
                                        World world,

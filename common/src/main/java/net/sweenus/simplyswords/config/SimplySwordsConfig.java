@@ -262,6 +262,20 @@ public class SimplySwordsConfig {
         BOOLEAN_OPTIONS.put("slumbering_lichblade", true);
         BOOLEAN_OPTIONS.put("shadowsting", true);
 
+        BOOLEAN_OPTIONS.put("active_defence", true);
+        BOOLEAN_OPTIONS.put("float", true);
+        BOOLEAN_OPTIONS.put("freeze", true);
+        BOOLEAN_OPTIONS.put("shielding", true);
+        BOOLEAN_OPTIONS.put("slow", true);
+        BOOLEAN_OPTIONS.put("stoneskin", true);
+        BOOLEAN_OPTIONS.put("swiftness", true);
+        BOOLEAN_OPTIONS.put("trailblaze", true);
+        BOOLEAN_OPTIONS.put("weaken", true);
+        BOOLEAN_OPTIONS.put("zephyr", true);
+        BOOLEAN_OPTIONS.put("frost_ward", true);
+        BOOLEAN_OPTIONS.put("wildfire", true);
+        BOOLEAN_OPTIONS.put("unstable", true);
+
 
         LOOT_OPTIONS.put("minecraft:entities/wither", 0.05f);
         LOOT_OPTIONS.put("minecraft:chests/ruined_portal", 0f);
@@ -457,6 +471,14 @@ public class SimplySwordsConfig {
                 config.append("// Setting any of the below values to false will prevent that item from generating in loot. \n");
                 config.append("// The item will still exist in the creative menu, but will be unobtainable through ordinary survival gameplay.  \n");
                 config.append("// --------------------------------------------------------------------------------------------------------------------------------- \n");
+                config.append("\n");
+            }
+            if (i == 30) {
+                config.append("\n");
+                config.append("// --------------------------------------------- RUNIC BLACKLISTING ----------------------------------------------------------------- \n");
+                config.append("// Setting any of the below values to false will prevent that runic power from being obtainable. \n");
+                config.append("// The power will be completely removed from the pool of Runic powers, but will still be visible in the RUNIC GRIMOIRE if Patchouli is installed.  \n");
+                config.append("// ---------------------------------------------------------------------------------------------------------------------------------- \n");
                 config.append("\n");
             }
             config.append("  \"").append(key).append("\": ").append(BOOLEAN_OPTIONS.get(key));
