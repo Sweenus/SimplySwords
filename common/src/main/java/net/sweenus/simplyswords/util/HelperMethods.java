@@ -17,6 +17,10 @@ import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
+
 public class HelperMethods {
 
     /*
@@ -47,17 +51,15 @@ public class HelperMethods {
         if (livingEntity == null || player == null) {
             return false;
         }
-            if (livingEntity instanceof PlayerEntity playerEntity) {
-                return playerEntity.shouldDamagePlayer(player);
-            } else {
-                return true;
-            }
+        if (livingEntity instanceof PlayerEntity playerEntity) {
+            return playerEntity.shouldDamagePlayer(player);
+        } else {return true;}
     }
 
 
     //spawnParticle - spawns particles across both client & server
     public static void spawnParticle(World world, ParticleEffect particle,double  xpos, double ypos, double zpos,
-                              double xvelocity, double yvelocity, double zvelocity) {
+                                     double xvelocity, double yvelocity, double zvelocity) {
 
         if (world.isClient) {
             world.addParticle(particle, xpos, ypos, zpos, xvelocity, yvelocity, zvelocity);
@@ -68,7 +70,7 @@ public class HelperMethods {
         }
     }
 
-    //playHitSounds
+    // playHitSounds
     public static void playHitSounds(LivingEntity attacker, LivingEntity target) {
         if (!attacker.world.isClient()) {
             ServerWorld world = (ServerWorld) attacker.world;
@@ -90,7 +92,29 @@ public class HelperMethods {
         }
     }
 
-    //createFootfalls - creates weapon footfall particle effects (footsteps)
+    // chooseRunicPower
+    public static String chooseRunicPower() {
+        List<String> runicList = Arrays.asList(
+                "active_defence", "float", "greater_float", "freeze", "shielding", "greater_shielding", "slow",
+                "greater_slow", "stoneskin", "greater_stoneskin", "swiftness", "greater_swiftness", "trailblaze",
+                "greater_trailblaze", "weaken", "greater_weaken", "zephyr", "greater_zephyr", "frost_ward",
+                "wildfire", "unstable", "momentum");
+
+        // Keep rolling up to 100 times to receive a runic power that isn't blacklisted
+        // I'm sure there's a smarter way to do this, but I didn't choose to be born with a smol brain
+        for (int i = 0; i < 100; i++) {
+            Random choose = new Random();
+            int randomIndex = choose.nextInt(runicList.size());
+            String runicSelection = runicList.get(randomIndex);
+
+            if (SimplySwordsConfig.getBooleanValue(runicSelection))
+                return runicSelection;
+        }
+
+        return "";
+    }
+
+    // createFootfalls - creates weapon footfall particle effects (footsteps)
     public static void createFootfalls(Entity entity,
                                        ItemStack stack,
                                        World world,
@@ -127,7 +151,7 @@ public class HelperMethods {
                                 player.getY() + player.getHandPosOffset(stack.getItem()).getY() + 0.2,
                                 player.getZ() - player.getHandPosOffset(stack.getItem()).getZ(),
                                 0, 0.0, 0);
-                        }
+                    }
                 }
             }
             if (player.getEquippedStack(EquipmentSlot.MAINHAND) == stack && passiveParticles && SimplySwordsConfig.getBooleanValue("enable_passive_particles")) {

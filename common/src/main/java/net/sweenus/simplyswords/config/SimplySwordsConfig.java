@@ -13,6 +13,8 @@ public class SimplySwordsConfig {
     private static final HashMap<String, Float> GENERAL_OPTIONS = new LinkedHashMap<>();
     private static final HashMap<String, Float> FLOAT_OPTIONS = new LinkedHashMap<>();
     private static final HashMap<String, Float> WEAPON_OPTIONS = new LinkedHashMap<>();
+    private static final HashMap<String, Float> LOOT_OPTIONS = new LinkedHashMap<>();
+    private static final int runicOptionsCount = 31;
 
     public static boolean getBooleanValue(String key) {
         if (!BOOLEAN_OPTIONS.containsKey(key)) {
@@ -42,9 +44,25 @@ public class SimplySwordsConfig {
         return WEAPON_OPTIONS.get(key);
     }
 
+    public static float getLootModifiers(String key) {
+        if (!LOOT_OPTIONS.containsKey(key)) {
+            //System.out.println(key);
+            return 0f;
+        }
+        return LOOT_OPTIONS.get(key);
+    }
+
+    public static boolean getLootList (String id) {
+        if (!LOOT_OPTIONS.isEmpty()) {
+            //System.out.println(id);
+            return LOOT_OPTIONS.toString().contains(id);
+        }
+        return false;
+    }
+
     public static void init() {
 
-        //System.out.println("Initialising common Simply Swords config");
+        //When changing these increment the runicOptions int
 
         FLOAT_OPTIONS.put("speed_chance", 15f);
         FLOAT_OPTIONS.put("speed_duration", 300f);
@@ -93,6 +111,8 @@ public class SimplySwordsConfig {
         FLOAT_OPTIONS.put("frostward_frequency", 20f);
         FLOAT_OPTIONS.put("frostward_radius", 5f);
         FLOAT_OPTIONS.put("frostward_slow_duration", 60f);
+
+        FLOAT_OPTIONS.put("momentum_cooldown", 140f);
 
         FLOAT_OPTIONS.put("watcher_chance", 5f);
         FLOAT_OPTIONS.put("watcher_restore_amount", 0.5f);
@@ -221,6 +241,72 @@ public class SimplySwordsConfig {
         BOOLEAN_OPTIONS.put("enable_passive_particles", true);
         BOOLEAN_OPTIONS.put("compat_gobber_end_weapons_unbreakable", true);
 
+        BOOLEAN_OPTIONS.put("the_watcher", true);
+        BOOLEAN_OPTIONS.put("longsword_of_the_plague", true);
+        BOOLEAN_OPTIONS.put("sword_on_a_stick", true);
+        BOOLEAN_OPTIONS.put("bramblethorn", true);
+        BOOLEAN_OPTIONS.put("storms_edge", true);
+        BOOLEAN_OPTIONS.put("stormbringer", true);
+        BOOLEAN_OPTIONS.put("mjolnir", true);
+        BOOLEAN_OPTIONS.put("emberblade", true);
+        BOOLEAN_OPTIONS.put("hearthflame", true);
+        BOOLEAN_OPTIONS.put("twisted_blade", true);
+        BOOLEAN_OPTIONS.put("soulrender", true);
+        BOOLEAN_OPTIONS.put("soulpyre", true);
+        BOOLEAN_OPTIONS.put("soulkeeper", true);
+        BOOLEAN_OPTIONS.put("soulstealer", true);
+        BOOLEAN_OPTIONS.put("frostfall", true);
+        BOOLEAN_OPTIONS.put("molten_edge", true);
+        BOOLEAN_OPTIONS.put("livyatan", true);
+        BOOLEAN_OPTIONS.put("icewhisper", true);
+        BOOLEAN_OPTIONS.put("arcanethyst", true);
+        BOOLEAN_OPTIONS.put("thunderbrand", true);
+        BOOLEAN_OPTIONS.put("brimstone_claymore", true);
+        BOOLEAN_OPTIONS.put("slumbering_lichblade", true);
+        BOOLEAN_OPTIONS.put("shadowsting", true);
+
+        BOOLEAN_OPTIONS.put("active_defence", true);
+        BOOLEAN_OPTIONS.put("float", true);
+        BOOLEAN_OPTIONS.put("greater_float", true);
+        BOOLEAN_OPTIONS.put("freeze", true);
+        BOOLEAN_OPTIONS.put("shielding", true);
+        BOOLEAN_OPTIONS.put("greater_shielding", true);
+        BOOLEAN_OPTIONS.put("slow", true);
+        BOOLEAN_OPTIONS.put("greater_slow", true);
+        BOOLEAN_OPTIONS.put("stoneskin", true);
+        BOOLEAN_OPTIONS.put("greater_stoneskin", true);
+        BOOLEAN_OPTIONS.put("swiftness", true);
+        BOOLEAN_OPTIONS.put("greater_swiftness", true);
+        BOOLEAN_OPTIONS.put("trailblaze", true);
+        BOOLEAN_OPTIONS.put("greater_trailblaze", true);
+        BOOLEAN_OPTIONS.put("weaken", true);
+        BOOLEAN_OPTIONS.put("greater_weaken", true);
+        BOOLEAN_OPTIONS.put("zephyr", true);
+        BOOLEAN_OPTIONS.put("greater_zephyr", true);
+        BOOLEAN_OPTIONS.put("frost_ward", true);
+        BOOLEAN_OPTIONS.put("wildfire", true);
+        BOOLEAN_OPTIONS.put("unstable", true);
+        BOOLEAN_OPTIONS.put("momentum", true);
+
+
+        LOOT_OPTIONS.put("minecraft:entities/wither", 0.05f);
+        LOOT_OPTIONS.put("minecraft:chests/ruined_portal", 0f);
+        LOOT_OPTIONS.put("minecraft:chests/village/village_armorer", 0f);
+        LOOT_OPTIONS.put("minecraft:chests/village/village_butcher", 0f);
+        LOOT_OPTIONS.put("minecraft:chests/village/village_cartographer", 0f);
+        LOOT_OPTIONS.put("minecraft:chests/village/village_desert_house", 0f);
+        LOOT_OPTIONS.put("minecraft:chests/village/village_fisher", 0f);
+        LOOT_OPTIONS.put("minecraft:chests/village/village_fletcher", 0f);
+        LOOT_OPTIONS.put("minecraft:chests/village/village_mason", 0f);
+        LOOT_OPTIONS.put("minecraft:chests/village/village_plains_house", 0f);
+        LOOT_OPTIONS.put("minecraft:chests/village/village_savanna_house", 0f);
+        LOOT_OPTIONS.put("minecraft:chests/village/village_shepard", 0f);
+        LOOT_OPTIONS.put("minecraft:chests/village/village_snowy_house", 0f);
+        LOOT_OPTIONS.put("minecraft:chests/village/village_taiga_house", 0f);
+        LOOT_OPTIONS.put("minecraft:chests/village/village_tannery", 0f);
+        LOOT_OPTIONS.put("minecraft:chests/village/village_temple", 0f);
+        LOOT_OPTIONS.put("minecraft:chests/village/village_toolsmith", 0f);
+        LOOT_OPTIONS.put("minecraft:chests/village/village_weaponsmith", 0f);
 
         WEAPON_OPTIONS.put("longsword_positive_damage_modifier", 0f);
         WEAPON_OPTIONS.put("twinblade_positive_damage_modifier", 0f);
@@ -363,6 +449,11 @@ public class SimplySwordsConfig {
             BOOLEAN_OPTIONS.put(entry.getKey(), entry.getValue().getAsBoolean());
         }
 
+        json = Config.getJsonObject(Config.readFile(new File("config/simplyswords/loot_config.json5")));
+        for (Map.Entry<String, JsonElement> entry : json.entrySet()) {
+            LOOT_OPTIONS.put(entry.getKey(), entry.getValue().getAsFloat());
+        }
+
         json = Config.getJsonObject(Config.readFile(new File("config/simplyswords/general_config.json5")));
         for (Map.Entry<String, JsonElement> entry : json.entrySet()) {
             GENERAL_OPTIONS.put(entry.getKey(), entry.getValue().getAsFloat());
@@ -386,6 +477,22 @@ public class SimplySwordsConfig {
         StringBuilder config = new StringBuilder("{\n");
         int i = 0;
         for (String key : BOOLEAN_OPTIONS.keySet()) {
+            if (i == 7) {
+                config.append("\n");
+                config.append("// --------------------------------------------- LOOT BLACKLISTING ----------------------------------------------------------------- \n");
+                config.append("// Setting any of the below values to false will prevent that item from generating in loot. \n");
+                config.append("// The item will still exist in the creative menu, but will be unobtainable through ordinary survival gameplay.  \n");
+                config.append("// --------------------------------------------------------------------------------------------------------------------------------- \n");
+                config.append("\n");
+            }
+            if (i == 30) {
+                config.append("\n");
+                config.append("// --------------------------------------------- RUNIC BLACKLISTING ----------------------------------------------------------------- \n");
+                config.append("// Setting any of the below values to false will prevent that runic power from being obtainable. \n");
+                config.append("// The power will be completely removed from the pool of Runic powers, but will still be visible in the RUNIC GRIMOIRE if Patchouli is installed.  \n");
+                config.append("// ---------------------------------------------------------------------------------------------------------------------------------- \n");
+                config.append("\n");
+            }
             config.append("  \"").append(key).append("\": ").append(BOOLEAN_OPTIONS.get(key));
             ++i;
             if (i < BOOLEAN_OPTIONS.size()) {
@@ -395,6 +502,37 @@ public class SimplySwordsConfig {
         }
         config.append("}");
         Config.createFile("config/simplyswords/booleans.json5", config.toString(), overwrite);
+
+        config = new StringBuilder("{\n");
+        i = 0;
+        for (String key : LOOT_OPTIONS.keySet()) {
+            if (i == 0) {
+                config.append("// --------------------------------------------- LOOT CONFIGURATION ----------------------------------------------------------------- \n");
+                config.append("// This config allows for the tweaking of loot injection for UNIQUE weapons. \n");
+                config.append("// Standard iron > diamond gear, and Runic Tablets, are controlled by the loot modifiers in the general_config, not here.  \n");
+                config.append("// ---------------------------------------------------------------------------------------------------------------------------------- \n");
+                config.append("// --------------------------------------------- How does it work? ------------------------------------------------------------------ \n");
+                config.append("// If 'add_weapons_to_loot_tables' is enabled in the boolean config, Simply Swords will attempt to inject its loot into    \n");
+                config.append("// any loot table that contains 'chests' in its filepath. This includes loot tables from other mods.\n");
+                config.append("// Any values provided in this config will override the aforementioned process, acting as both a whitelist, and a blacklist.\n");
+                config.append("\n");
+                config.append("// Each line must be made up of a string containing the namespace, path, and filename, in addition to a float value.        \n");
+                config.append("// The float value provided will determine the chance of the loot appearing in the loot table. Where 0.0 is %0, and 1.0 is %100.\n");
+                config.append("// If the float value provided is 0.0 the items will be blacklisted from this loot table and skipped entirely by the loot injection.\n");
+                config.append("\n");
+                config.append("// Items can also be injected into entity loot tables, as seen in the Wither example below.\n");
+                config.append("// ---------------------------------------------------------------------------------------------------------------------------------- \n");
+                config.append("\n");
+            }
+            config.append("  \"").append(key).append("\": ").append(LOOT_OPTIONS.get(key));
+            ++i;
+            if (i < LOOT_OPTIONS.size()) {
+                config.append(",");
+            }
+            config.append("\n");
+        }
+        config.append("}");
+        Config.createFile("config/simplyswords/loot_config.json5", config.toString(), overwrite);
 
         config = new StringBuilder("{\n");
         i = 0;
@@ -527,12 +665,18 @@ public class SimplySwordsConfig {
             }
             if (i == 30) {
                 config.append("\n");
+                config.append("// --------------------------- \n");
+                config.append("// -- Runic Power: Momentum -- \n");
+                config.append("// --------------------------- \n");
+            }
+            if (i == 31) {
+                config.append("\n");
                 config.append("// ---------------------------- \n");
                 config.append("// -- Unique Effect: Watcher -- \n");
                 config.append("// -- Restore amount refers to health gained from each enemy in range -- \n");
                 config.append("// ---------------------------- \n");
             }
-            if (i == 33) {
+            if (i == 34) {
                 config.append("\n");
                 config.append("// ------------------------- \n");
                 config.append("// -- Unique Effect: Omen -- \n");
@@ -540,135 +684,135 @@ public class SimplySwordsConfig {
                 config.append("// -- Instantkill Threshold refers to the % of maxhealth an enemy must be UNDER in order for the effect to proc. Where 1 = 100% -- \n");
                 config.append("// ------------------------- \n");
             }
-            if (i == 36) {
+            if (i == 35) {
                 config.append("\n");
                 config.append("// ------------------------------- \n");
                 config.append("// -- Unique Effect: Soul Steal -- \n");
                 config.append("// Duration refers to the haste, slow, and glow effects \n");
                 config.append("// ------------------------------- \n");
             }
-            if (i == 41) {
+            if (i == 42) {
                 config.append("\n");
                 config.append("// ---------------------------- \n");
                 config.append("// -- Unique Effect: Gravity -- \n");
                 config.append("// NOT YET IMPLEMENTED \n");
                 config.append("// ---------------------------- \n");
             }
-            if (i == 44) {
+            if (i == 45) {
                 config.append("\n");
                 config.append("// ------------------------------ \n");
                 config.append("// -- Unique Effect: Soul Meld -- \n");
                 config.append("// ------------------------------ \n");
             }
-            if (i == 47) {
+            if (i == 48) {
                 config.append("\n");
                 config.append("// ------------------------------ \n");
                 config.append("// -- Unique Effect: Soul Rend -- \n");
                 config.append("// ------------------------------ \n");
             }
-            if (i == 53) {
+            if (i == 54) {
                 config.append("\n");
                 config.append("// ----------------------------- \n");
                 config.append("// -- Unique Effect: Ferocity -- \n");
                 config.append("// ----------------------------- \n");
             }
-            if (i == 57) {
+            if (i == 58) {
                 config.append("\n");
                 config.append("// ------------------------------ \n");
                 config.append("// -- Unique Effect: Ember Ire -- \n");
                 config.append("// ------------------------------ \n");
             }
-            if (i == 59) {
+            if (i == 60) {
                 config.append("\n");
                 config.append("// ---------------------------------- \n");
                 config.append("// -- Unique Effect: Volcanic Fury -- \n");
                 config.append("// ---------------------------------- \n");
             }
-            if (i == 63) {
+            if (i == 64) {
                 config.append("\n");
                 config.append("// -------------------------- \n");
                 config.append("// -- Unique Effect: Storm -- \n");
                 config.append("// -------------------------- \n");
             }
-            if (i == 65) {
+            if (i == 66) {
                 config.append("\n");
                 config.append("// --------------------------- \n");
                 config.append("// -- Unique Effect: Plague -- \n");
                 config.append("// --------------------------- \n");
             }
-            if (i == 66) {
+            if (i == 67) {
                 config.append("\n");
                 config.append("// ------------------------------ \n");
                 config.append("// -- Unique Effect: Brimstone -- \n");
                 config.append("// ------------------------------ \n");
             }
-            if (i == 67) {
+            if (i == 68) {
                 config.append("\n");
                 config.append("// ---------------------------- \n");
                 config.append("// -- Unique Effect: Bramble -- \n");
                 config.append("// ---------------------------- \n");
             }
-            if (i == 69) {
+            if (i == 70) {
                 config.append("\n");
                 config.append("// -------------------------------- \n");
                 config.append("// -- Unique Effect: Soul Tether -- \n");
                 config.append("// -------------------------------- \n");
             }
-            if (i == 74) {
+            if (i == 75) {
                 config.append("\n");
                 config.append("// ------------------------------- \n");
                 config.append("// -- Unique Effect: Frost Fury -- \n");
                 config.append("// ------------------------------- \n");
             }
-            if (i == 79) {
+            if (i == 80) {
                 config.append("\n");
                 config.append("// -------------------------------- \n");
                 config.append("// -- Unique Effect: Molten Roar -- \n");
                 config.append("// -------------------------------- \n");
             }
-            if (i == 84) {
+            if (i == 85) {
                 config.append("\n");
                 config.append("// ---------------------------------- \n");
                 config.append("// -- Unique Effect: Frost Shatter -- \n");
                 config.append("// ---------------------------------- \n");
             }
-            if (i == 88) {
+            if (i == 89) {
                 config.append("\n");
                 config.append("// ------------------------------- \n");
                 config.append("// -- Unique Effect: Permafrost -- \n");
                 config.append("// ------------------------------- \n");
             }
-            if (i == 92) {
+            if (i == 93) {
                 config.append("\n");
                 config.append("// ----------------------------------- \n");
                 config.append("// -- Unique Effect: Arcane Assault -- \n");
                 config.append("// ----------------------------------- \n");
             }
-            if (i == 97) {
+            if (i == 98) {
                 config.append("\n");
                 config.append("// ---------------------------------- \n");
                 config.append("// -- Unique Effect: Thunder Blitz -- \n");
                 config.append("// ---------------------------------- \n");
             }
-            if (i == 101) {
+            if (i == 102) {
                 config.append("\n");
                 config.append("// ------------------------------- \n");
                 config.append("// -- Unique Effect: Storm Jolt -- \n");
                 config.append("// ------------------------------- \n");
             }
-            if (i == 103) {
+            if (i == 104) {
                 config.append("\n");
                 config.append("// --------------------------------- \n");
                 config.append("// -- Unique Effect: Soul Anguish -- \n");
                 config.append("// --------------------------------- \n");
             }
-            if (i == 109) {
+            if (i == 110) {
                 config.append("\n");
                 config.append("// ---------------------------------- \n");
                 config.append("// -- Unique Effect: Shock Deflect -- \n");
                 config.append("// ---------------------------------- \n");
             }
-            if (i == 113) {
+            if (i == 114) {
                 config.append("\n");
                 config.append("// ------------------------------- \n");
                 config.append("// -- Unique Effect: Shadowmist -- \n");
