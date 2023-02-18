@@ -98,7 +98,7 @@ public class HelperMethods {
                 "active_defence", "float", "greater_float", "freeze", "shielding", "greater_shielding", "slow",
                 "greater_slow", "stoneskin", "greater_stoneskin", "swiftness", "greater_swiftness", "trailblaze",
                 "greater_trailblaze", "weaken", "greater_weaken", "zephyr", "greater_zephyr", "frost_ward",
-                "wildfire", "unstable", "momentum");
+                "wildfire", "unstable", "momentum", "greater_momentum", "imbued", "greater_imbued", "pincushion", "greater_pincushion");
 
         // Keep rolling up to 100 times to receive a runic power that isn't blacklisted
         // I'm sure there's a smarter way to do this, but I didn't choose to be born with a smol brain

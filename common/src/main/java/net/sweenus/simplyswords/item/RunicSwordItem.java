@@ -134,6 +134,23 @@ public class RunicSwordItem extends SwordItem {
             if (stack.getOrCreateNbt().getString("runic_power").equals("greater_weaken")) {
                 RunicMethods.postHitRunicGreaterWeaken(stack, target, attacker);
             }
+            //IMBUED
+            if (stack.getOrCreateNbt().getString("runic_power").equals("imbued")) {
+                RunicMethods.postHitRunicImbued(stack, target, attacker);
+            }
+            //GREATER IMBUED
+            if (stack.getOrCreateNbt().getString("runic_power").equals("greater_imbued")) {
+                RunicMethods.postHitRunicGreaterImbued(stack, target, attacker);
+            }
+            //PINCUSHION
+            if (stack.getOrCreateNbt().getString("runic_power").equals("pincushion")) {
+                RunicMethods.postHitRunicPinCushion(stack, target, attacker);
+            }
+            //PINCUSHION
+            if (stack.getOrCreateNbt().getString("runic_power").equals("greater_pincushion")) {
+                RunicMethods.postHitRunicGreaterPinCushion(stack, target, attacker);
+            }
+
         }
 
         return super.postHit(stack, target, attacker);
@@ -143,7 +160,7 @@ public class RunicSwordItem extends SwordItem {
     @Override
     public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
         if (!world.isClient) {
-            if (stack.getOrCreateNbt().getString("runic_power").equals("momentum"))
+            if (stack.getOrCreateNbt().getString("runic_power").contains("momentum"))
                 RunicMethods.stoppedUsingRunicMomentum(stack, world, user, remainingUseTicks);
         }
     }
@@ -153,6 +170,8 @@ public class RunicSwordItem extends SwordItem {
         if (!world.isClient) {
             if (stack.getOrCreateNbt().getString("runic_power").equals("momentum"))
                 RunicMethods.usageTickRunicMomentum(stack, world, user, remainingUseTicks);
+            if (stack.getOrCreateNbt().getString("runic_power").equals("greater_momentum"))
+                RunicMethods.usageTickRunicGreaterMomentum(stack, world, user, remainingUseTicks);
         }
     }
 
@@ -160,7 +179,7 @@ public class RunicSwordItem extends SwordItem {
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         ItemStack itemStack = user.getStackInHand(hand);
 
-        if (itemStack.getOrCreateNbt().getString("runic_power").equals("momentum")) {
+        if (itemStack.getOrCreateNbt().getString("runic_power").contains("momentum")) {
 
             if (itemStack.getDamage() >= itemStack.getMaxDamage() - 1) {
                 return TypedActionResult.fail(itemStack);
@@ -175,7 +194,7 @@ public class RunicSwordItem extends SwordItem {
 
     @Override
     public int getMaxUseTime(ItemStack stack) {
-        if (stack.getOrCreateNbt().getString("runic_power").equals("momentum"))
+        if (stack.getOrCreateNbt().getString("runic_power").contains("momentum"))
             maxUseTime = 15;
 
         return maxUseTime;
@@ -338,11 +357,25 @@ public class RunicSwordItem extends SwordItem {
             tooltip.add(Text.translatable("item.simplyswords.unstablesworditem.tooltip3"));
 
         }
-        if (itemStack.getOrCreateNbt().getString("runic_power").equals("momentum")) {
+        if (itemStack.getOrCreateNbt().getString("runic_power").contains("momentum")) {
 
             tooltip.add(Text.translatable("item.simplyswords.momentumsworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
             tooltip.add(Text.translatable("item.simplyswords.momentumsworditem.tooltip2"));
             tooltip.add(Text.translatable("item.simplyswords.momentumsworditem.tooltip3"));
+
+        }
+        if (itemStack.getOrCreateNbt().getString("runic_power").contains("imbued")) {
+
+            tooltip.add(Text.translatable("item.simplyswords.imbuedsworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
+            tooltip.add(Text.translatable("item.simplyswords.imbuedsworditem.tooltip2"));
+            tooltip.add(Text.translatable("item.simplyswords.imbuedsworditem.tooltip3"));
+
+        }
+        if (itemStack.getOrCreateNbt().getString("runic_power").contains("pincushion")) {
+
+            tooltip.add(Text.translatable("item.simplyswords.pincushionsworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
+            tooltip.add(Text.translatable("item.simplyswords.pincushionsworditem.tooltip2"));
+            tooltip.add(Text.translatable("item.simplyswords.pincushionsworditem.tooltip3"));
 
         }
 

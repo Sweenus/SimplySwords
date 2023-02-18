@@ -1,0 +1,17 @@
+{
+  "name": "Imbued",
+  "icon": "simplyswords:runic_tablet",
+  "category": "simplyswords:category_rune_etching",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:runic_tablet",
+      "title": "Imbued",
+      "text": "Imbued is a runic power that imbues the wielder's weapon with the $(#389fff)$(l)essence of magic$(). $(br2)It provides a weapon with the ability to lash out with a potent magical energy when hitting enemies."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "The magical damage dealt by Imbued is often unpredictable, and tends to wane as the weapon suffers durability damage. Keeping the Imbued weapon repaired would be wise."
+    }
+  ]
+}

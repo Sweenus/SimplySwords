@@ -685,6 +685,12 @@
   "item.simplyswords.momentumsworditem.tooltip1": "Runic Power: Momentum",
   "item.simplyswords.momentumsworditem.tooltip2": "Gain a brief moment of strong",
   "item.simplyswords.momentumsworditem.tooltip3": "forward momentum.",
+  "item.simplyswords.imbuedsworditem.tooltip1": "Runic Power: Imbued",
+  "item.simplyswords.imbuedsworditem.tooltip2": "Chance on hit to deal additional",
+  "item.simplyswords.imbuedsworditem.tooltip3": "magic damage, scaling with durability.",
+  "item.simplyswords.pincushionsworditem.tooltip1": "Runic Power: Pincushion",
+  "item.simplyswords.pincushionsworditem.tooltip2": "Deal additional damage for each",
+  "item.simplyswords.pincushionsworditem.tooltip3": "arrow stuck in your body.",
   "item.simplyswords.unidentifiedsworditem.tooltip1": "Runic Power: ????",
   "item.simplyswords.unidentifiedsworditem.tooltip2": "Click to identify.",
 

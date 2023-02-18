@@ -1,0 +1,17 @@
+{
+  "name": "Pincushion",
+  "icon": "simplyswords:runic_tablet",
+  "category": "simplyswords:category_rune_etching",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:runic_tablet",
+      "title": "Pincushion",
+      "text": "Pincushion is a runic power that imbues the wielder's weapon with the $(#d1422c)$(l)essence of retaliation$(). $(br2)It provides a weapon with the ability to deal additional damage to enemies based on the number of arrows stuck in the wielder's body."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "With Pincushion, the wielder becomes a deadly pincushion for their enemies, encouraging ranged attackers to think twice before firing at them. The more arrows that hit the wielder, the more powerful their strikes become, making them an even greater threat in combat. "
+    }
+  ]
+}
