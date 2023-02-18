@@ -114,6 +114,8 @@ public class SimplySwordsConfig {
 
         FLOAT_OPTIONS.put("momentum_cooldown", 140f);
 
+        FLOAT_OPTIONS.put("imbued_chance", 15f);
+
         FLOAT_OPTIONS.put("watcher_chance", 5f);
         FLOAT_OPTIONS.put("watcher_restore_amount", 0.5f);
         FLOAT_OPTIONS.put("watcher_radius", 8f);
@@ -287,6 +289,11 @@ public class SimplySwordsConfig {
         BOOLEAN_OPTIONS.put("wildfire", true);
         BOOLEAN_OPTIONS.put("unstable", true);
         BOOLEAN_OPTIONS.put("momentum", true);
+        BOOLEAN_OPTIONS.put("greater_momentum", true);
+        BOOLEAN_OPTIONS.put("imbued", true);
+        BOOLEAN_OPTIONS.put("greater_imbued", true);
+        BOOLEAN_OPTIONS.put("pincushion", true);
+        BOOLEAN_OPTIONS.put("greater_pincushion", true);
 
 
         LOOT_OPTIONS.put("minecraft:entities/wither", 0.05f);
@@ -671,12 +678,18 @@ public class SimplySwordsConfig {
             }
             if (i == 31) {
                 config.append("\n");
+                config.append("// ------------------------- \n");
+                config.append("// -- Runic Power: Imbued -- \n");
+                config.append("// ------------------------- \n");
+            }
+            if (i == 32) {
+                config.append("\n");
                 config.append("// ---------------------------- \n");
                 config.append("// -- Unique Effect: Watcher -- \n");
                 config.append("// -- Restore amount refers to health gained from each enemy in range -- \n");
                 config.append("// ---------------------------- \n");
             }
-            if (i == 34) {
+            if (i == 35) {
                 config.append("\n");
                 config.append("// ------------------------- \n");
                 config.append("// -- Unique Effect: Omen -- \n");
@@ -684,135 +697,135 @@ public class SimplySwordsConfig {
                 config.append("// -- Instantkill Threshold refers to the % of maxhealth an enemy must be UNDER in order for the effect to proc. Where 1 = 100% -- \n");
                 config.append("// ------------------------- \n");
             }
-            if (i == 35) {
+            if (i == 36) {
                 config.append("\n");
                 config.append("// ------------------------------- \n");
                 config.append("// -- Unique Effect: Soul Steal -- \n");
                 config.append("// Duration refers to the haste, slow, and glow effects \n");
                 config.append("// ------------------------------- \n");
             }
-            if (i == 42) {
+            if (i == 43) {
                 config.append("\n");
                 config.append("// ---------------------------- \n");
                 config.append("// -- Unique Effect: Gravity -- \n");
                 config.append("// NOT YET IMPLEMENTED \n");
                 config.append("// ---------------------------- \n");
             }
-            if (i == 45) {
+            if (i == 46) {
                 config.append("\n");
                 config.append("// ------------------------------ \n");
                 config.append("// -- Unique Effect: Soul Meld -- \n");
                 config.append("// ------------------------------ \n");
             }
-            if (i == 48) {
+            if (i == 49) {
                 config.append("\n");
                 config.append("// ------------------------------ \n");
                 config.append("// -- Unique Effect: Soul Rend -- \n");
                 config.append("// ------------------------------ \n");
             }
-            if (i == 54) {
+            if (i == 55) {
                 config.append("\n");
                 config.append("// ----------------------------- \n");
                 config.append("// -- Unique Effect: Ferocity -- \n");
                 config.append("// ----------------------------- \n");
             }
-            if (i == 58) {
+            if (i == 59) {
                 config.append("\n");
                 config.append("// ------------------------------ \n");
                 config.append("// -- Unique Effect: Ember Ire -- \n");
                 config.append("// ------------------------------ \n");
             }
-            if (i == 60) {
+            if (i == 61) {
                 config.append("\n");
                 config.append("// ---------------------------------- \n");
                 config.append("// -- Unique Effect: Volcanic Fury -- \n");
                 config.append("// ---------------------------------- \n");
             }
-            if (i == 64) {
+            if (i == 65) {
                 config.append("\n");
                 config.append("// -------------------------- \n");
                 config.append("// -- Unique Effect: Storm -- \n");
                 config.append("// -------------------------- \n");
             }
-            if (i == 66) {
+            if (i == 67) {
                 config.append("\n");
                 config.append("// --------------------------- \n");
                 config.append("// -- Unique Effect: Plague -- \n");
                 config.append("// --------------------------- \n");
             }
-            if (i == 67) {
+            if (i == 68) {
                 config.append("\n");
                 config.append("// ------------------------------ \n");
                 config.append("// -- Unique Effect: Brimstone -- \n");
                 config.append("// ------------------------------ \n");
             }
-            if (i == 68) {
+            if (i == 69) {
                 config.append("\n");
                 config.append("// ---------------------------- \n");
                 config.append("// -- Unique Effect: Bramble -- \n");
                 config.append("// ---------------------------- \n");
             }
-            if (i == 70) {
+            if (i == 71) {
                 config.append("\n");
                 config.append("// -------------------------------- \n");
                 config.append("// -- Unique Effect: Soul Tether -- \n");
                 config.append("// -------------------------------- \n");
             }
-            if (i == 75) {
+            if (i == 76) {
                 config.append("\n");
                 config.append("// ------------------------------- \n");
                 config.append("// -- Unique Effect: Frost Fury -- \n");
                 config.append("// ------------------------------- \n");
             }
-            if (i == 80) {
+            if (i == 81) {
                 config.append("\n");
                 config.append("// -------------------------------- \n");
                 config.append("// -- Unique Effect: Molten Roar -- \n");
                 config.append("// -------------------------------- \n");
             }
-            if (i == 85) {
+            if (i == 86) {
                 config.append("\n");
                 config.append("// ---------------------------------- \n");
                 config.append("// -- Unique Effect: Frost Shatter -- \n");
                 config.append("// ---------------------------------- \n");
             }
-            if (i == 89) {
+            if (i == 90) {
                 config.append("\n");
                 config.append("// ------------------------------- \n");
                 config.append("// -- Unique Effect: Permafrost -- \n");
                 config.append("// ------------------------------- \n");
             }
-            if (i == 93) {
+            if (i == 94) {
                 config.append("\n");
                 config.append("// ----------------------------------- \n");
                 config.append("// -- Unique Effect: Arcane Assault -- \n");
                 config.append("// ----------------------------------- \n");
             }
-            if (i == 98) {
+            if (i == 99) {
                 config.append("\n");
                 config.append("// ---------------------------------- \n");
                 config.append("// -- Unique Effect: Thunder Blitz -- \n");
                 config.append("// ---------------------------------- \n");
             }
-            if (i == 102) {
+            if (i == 103) {
                 config.append("\n");
                 config.append("// ------------------------------- \n");
                 config.append("// -- Unique Effect: Storm Jolt -- \n");
                 config.append("// ------------------------------- \n");
             }
-            if (i == 104) {
+            if (i == 105) {
                 config.append("\n");
                 config.append("// --------------------------------- \n");
                 config.append("// -- Unique Effect: Soul Anguish -- \n");
                 config.append("// --------------------------------- \n");
             }
-            if (i == 110) {
+            if (i == 111) {
                 config.append("\n");
                 config.append("// ---------------------------------- \n");
                 config.append("// -- Unique Effect: Shock Deflect -- \n");
                 config.append("// ---------------------------------- \n");
             }
-            if (i == 114) {
+            if (i == 115) {
                 config.append("\n");
                 config.append("// ------------------------------- \n");
                 config.append("// -- Unique Effect: Shadowmist -- \n");

@@ -24,6 +24,8 @@ import net.sweenus.simplyswords.config.SimplySwordsConfig;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 
+import static java.lang.Math.round;
+
 public class RunicMethods {
 
 
@@ -256,6 +258,44 @@ public class RunicMethods {
         }
     }
 
+    // Runic Power - IMBUED
+    public static void postHitRunicImbued(ItemStack stack,  LivingEntity target, LivingEntity attacker) {
+        int hitchance = (int) SimplySwordsConfig.getFloatValue("imbued_chance");
+        int damage = 6 - ((stack.getDamage() / stack.getMaxDamage()) * 100) / 20;
+
+        if (attacker.getRandom().nextInt(100) <= hitchance) {
+            target.damage(DamageSource.MAGIC, damage);
+            attacker.world.playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
+                    SoundCategory.PLAYERS, 0.2f, 1.8f);
+        }
+    }
+
+    // Runic Power - GREATER IMBUED
+    public static void postHitRunicGreaterImbued(ItemStack stack,  LivingEntity target, LivingEntity attacker) {
+        int hitchance = (int) SimplySwordsConfig.getFloatValue("imbued_chance");
+        int damage = 10 - ((stack.getDamage() / stack.getMaxDamage()) * 100) / 10;
+
+        if (attacker.getRandom().nextInt(100) <= hitchance) {
+            target.damage(DamageSource.MAGIC, damage);
+            attacker.world.playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
+                    SoundCategory.PLAYERS, 0.2f, 1.8f);
+        }
+    }
+
+    // Runic Power - PinCushion
+    public static void postHitRunicPinCushion(ItemStack stack,  LivingEntity target, LivingEntity attacker) {
+        int stuckArrows = attacker.getStuckArrowCount();
+        target.damage(DamageSource.GENERIC, stuckArrows);
+        attacker.world.playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
+                SoundCategory.PLAYERS, 0.1f, 1.8f);
+    }
+    // Runic Power - Greater PinCushion
+    public static void postHitRunicGreaterPinCushion(ItemStack stack,  LivingEntity target, LivingEntity attacker) {
+        int stuckArrows = attacker.getStuckArrowCount();
+        target.damage(DamageSource.GENERIC, stuckArrows * 2);
+        attacker.world.playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
+                SoundCategory.PLAYERS, 0.1f, 1.8f);
+    }
 
 
 
@@ -278,11 +318,27 @@ public class RunicMethods {
 
     // ------- USAGE TICK ------- //
 
+
+    //Runic Power - MOMENTUM
     public static void usageTickRunicMomentum(ItemStack stack, World world,  LivingEntity user, int remainingUseTicks) {
         int skillCooldown = (int) SimplySwordsConfig.getFloatValue("momentum_cooldown");
         if (user.getEquippedStack(EquipmentSlot.MAINHAND) == stack && user.isOnGround() && (user instanceof PlayerEntity player)) {
             //Player dash forward
             if (remainingUseTicks == 12 || remainingUseTicks == 13 && player.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
+                player.setVelocity(player.getRotationVector().multiply(+3));
+                player.setVelocity(player.getVelocity().x, 0, player.getVelocity().z); // Prevent player flying to the heavens
+                player.velocityModified = true;
+                player.getItemCooldownManager().set(stack.getItem(), skillCooldown);
+            }
+        }
+    }
+
+    //Runic Power - GREATER MOMENTUM
+    public static void usageTickRunicGreaterMomentum(ItemStack stack, World world,  LivingEntity user, int remainingUseTicks) {
+        int skillCooldown = (int) SimplySwordsConfig.getFloatValue("momentum_cooldown");
+        if (user.getEquippedStack(EquipmentSlot.MAINHAND) == stack && user.isOnGround() && (user instanceof PlayerEntity player)) {
+            //Player dash forward
+            if (remainingUseTicks == 10 || remainingUseTicks == 13 && player.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
                 player.setVelocity(player.getRotationVector().multiply(+3));
                 player.setVelocity(player.getVelocity().x, 0, player.getVelocity().z); // Prevent player flying to the heavens
                 player.velocityModified = true;
