@@ -2,7 +2,6 @@ package net.sweenus.simplyswords;
 
 import com.google.gson.JsonObject;
 import dev.architectury.registry.CreativeTabRegistry;
-import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.config.Config;
@@ -74,4 +73,24 @@ public class SimplySwords {
         System.out.println(SimplySwordsExpectPlatform.getConfigDirectory().toAbsolutePath().normalize().toString());
 
     }
+
+    static void loadConfig() {
+        //Check if config files exist. If not, run the config init
+        File configFile1 = new File("config/simplyswords/booleans.json");
+        File configFile2 = new File("config/simplyswords/weapon_attributes.json");
+        File configFile3 = new File("config/simplyswords/effects_config.json");
+        File configFile4 = new File("config/simplyswords/general_config.json");
+        File configFile5 = new File("config/simplyswords/loot_config.json");
+        boolean config_booleans = configFile1.exists();
+        boolean config_weapon_attributes = configFile2.exists();
+        boolean config_effects = configFile3.exists();
+        boolean config_general = configFile4.exists();
+        boolean config_loot = configFile5.exists();
+
+        if (!config_booleans || !config_weapon_attributes || !config_effects || !config_general || !config_loot) {
+            SimplySwordsConfig.init();
+            //SimplySwordsConfig.loadConfig();
+        } else {/*SimplySwordsConfig.loadConfig();*/}
+    }
+
 }
