@@ -519,4 +519,205 @@
   "item.simplyswords.wildfiresworditem.tooltip1": "符文之力：野火",
   "item.simplyswords.wildfiresworditem.tooltip2": "击中时有概率点燃附近所有和攻击目标",
   "item.simplyswords.wildfiresworditem.tooltip3": "同类的实体。"
+
+
+  "item.simplyswords.runic_tablet": "符文石板",
+
+
+  "item.simplyswords.awakening": "觉醒等级：%d ",
+  "item.simplyswords.awakening.exp": "觉醒经验：%d%% ",
+  "item.simplyswords.awakening.powers": "觉醒能力：",
+  "item.simplyswords.greater_runic_power": "强化",
+
+
+  "item.simplyswords.runic_warglaive": "符文战刃",
+  "item.simplyswords.iron_halberd": "铁戟",
+  "item.simplyswords.gold_halberd": "金戟",
+  "item.simplyswords.diamond_halberd": "钻石戟",
+  "item.simplyswords.netherite_halberd": "下界合金戟",
+  "item.simplyswords.runic_halberd": "符文戟",
+  "item.simplyswords.soulpyre": "葬魂",
+  "item.simplyswords.frostfall": "霜降",
+  "item.simplyswords.molten_edge": "熔火",
+  "item.simplyswords.livyatan": "海兽利维坦",
+  "item.simplyswords.icewhisper": "冰语",
+  "item.simplyswords.arcanethyst": "奥术斧钺",
+  "item.simplyswords.thunderbrand": "纵雷",
+  "item.simplyswords.slumbering_lichblade": "沉眠的巫妖之刃",
+  "item.simplyswords.waking_lichblade": "苏醒的巫妖之刃",
+  "item.simplyswords.awakened_lichblade": "觉醒的巫妖之刃",
+  "item.simplyswords.shadowsting": "暗影之刺",
+
+
+  "item.simplyswords.mythicmetals_compat.adamantite.adamantite_halberd": "精金戟",
+  "item.simplyswords.mythicmetals_compat.aquarium.aquarium_halberd": "激水戟",
+  "item.simplyswords.mythicmetals_compat.banglum.banglum_halberd": "聚爆石戟",
+  "item.simplyswords.mythicmetals_compat.carmot.carmot_halberd": "点金石戟",
+  "item.simplyswords.mythicmetals_compat.kyber.kyber_halberd": "凯伯戟",
+  "item.simplyswords.mythicmetals_compat.mythril.mythril_halberd": "秘银戟",
+  "item.simplyswords.mythicmetals_compat.orichalcum.orichalcum_halberd": "山铜戟",
+  "item.simplyswords.mythicmetals_compat.osmium.osmium_halberd": "锇戟",
+  "item.simplyswords.mythicmetals_compat.prometheum.prometheum_halberd": "钷戟",
+  "item.simplyswords.mythicmetals_compat.quadrillum.quadrillum_halberd": "兆金戟",
+  "item.simplyswords.mythicmetals_compat.runite.runite_halberd": "符石戟",
+  "item.simplyswords.mythicmetals_compat.star_platinum.star_platinum_halberd": "星辰戟",
+  "item.simplyswords.mythicmetals_compat.bronze.bronze_halberd": "青铜戟",
+  "item.simplyswords.mythicmetals_compat.palladium.palladium_halberd": "钯金戟",
+  "item.simplyswords.mythicmetals_compat.stormyx.stormyx_halberd": "飓霆戟",
+  "item.simplyswords.mythicmetals_compat.steel.steel_halberd": "钢戟",
+  "item.simplyswords.mythicmetals_compat.celestium.celestium_halberd": "倚天戟",
+  "item.simplyswords.mythicmetals_compat.metallurgium.metallurgium_halberd": "炼金戟",
+  "item.simplyswords.gobber_compat.gobber.gobber_halberd": "戈伯戟",
+
+  "item.simplyswords.gobber_compat.gobber_nether.gobber_nether_halberd": "下界戟",
+
+
+  "item.simplyswords.volcanicfurysworditem.tooltip4": "释放怒火，消耗持有者",
+  "item.simplyswords.volcanicfurysworditem.tooltip5": "的生命值以获得抗性提",
+  "item.simplyswords.volcanicfurysworditem.tooltip6": "升，同时牵引周边目标。",
+  "item.simplyswords.volcanicfurysworditem.tooltip7": "停止怒火释放，轰飞并",
+  "item.simplyswords.volcanicfurysworditem.tooltip8": "点燃目标，造成基于先",
+  "item.simplyswords.volcanicfurysworditem.tooltip9": "前怒火释放时长的伤害。",
+
+  "item.simplyswords.soulpyresworditem.tooltip1": "独特效果：束魂",
+  "item.simplyswords.soulpyresworditem.tooltip2": "释放受束的灵魂，转移",
+  "item.simplyswords.soulpyresworditem.tooltip3": "熵值，冻结目标，自身",
+  "item.simplyswords.soulpyresworditem.tooltip4": "获得则急迫与抗性提升。",
+  "item.simplyswords.soulpyresworditem.tooltip5": "与指定目标换位，点燃",
+  "item.simplyswords.soulpyresworditem.tooltip6": "周围目标，并拉向自己。",
+  "item.simplyswords.soulpyresworditem.tooltip7": "%d 秒后与目标的之间",
+  "item.simplyswords.soulpyresworditem.tooltip8": "灵魂连接将断开，再次",
+  "item.simplyswords.soulpyresworditem.tooltip9": "交换与目标之间的位置。",
+
+  "item.simplyswords.frostfallsworditem.tooltip1": "独特效果：霜怒",
+  "item.simplyswords.frostfallsworditem.tooltip2": "击中有概率冰封持有者周围",
+  "item.simplyswords.frostfallsworditem.tooltip3": "的目标，使之丧失攻击能力。",
+  "item.simplyswords.frostfallsworditem.tooltip4": "%d秒后解冻，造成%d点伤害。",
+  "item.simplyswords.frostfallsworditem.tooltip5": "将自己冰封%d 秒，给予自身",
+  "item.simplyswords.frostfallsworditem.tooltip6": "无敌效果并逐渐回复生命值。",
+
+  "item.simplyswords.moltenedgesworditem.tooltip1": "独特效果：狂咆之炎",
+  "item.simplyswords.moltenedgesworditem.tooltip2": "击中概率点燃敌人或持有者。",
+  "item.simplyswords.moltenedgesworditem.tooltip3": "生命值低时，燃烧转为治疗。",
+  "item.simplyswords.moltenedgesworditem.tooltip4": "获得基于已损生命值的速度与力量。",
+  "item.simplyswords.moltenedgesworditem.tooltip5": "释放强大的冲击波，击退并点燃周",
+  "item.simplyswords.moltenedgesworditem.tooltip6": "围目标。获得基于命中单位数量的",
+  "item.simplyswords.moltenedgesworditem.tooltip7": "伤害吸收与急迫效果%d秒。",
+
+  "item.simplyswords.livyatansworditem.tooltip1": "独特效果：冰解",
+  "item.simplyswords.livyatansworditem.tooltip2": "击中目标有概率冰封持有者周围",
+  "item.simplyswords.livyatansworditem.tooltip3": "的目标，并使目标无法造成伤害。",
+  "item.simplyswords.livyatansworditem.tooltip4": "%d秒后目标解冻，造成%d点伤害。",
+  "item.simplyswords.livyatansworditem.tooltip5": "主动解除自身周围目标的封冻态，",
+  "item.simplyswords.livyatansworditem.tooltip6": "解除越早，造成的额外伤害越高。",
+
+  "item.simplyswords.icewhispersworditem.tooltip1": "独特效果：永冻",
+  "item.simplyswords.icewhispersworditem.tooltip2": "手持时，获得冰冻光环，减速",
+  "item.simplyswords.icewhispersworditem.tooltip3": "%d格内敌人，并持续造成伤害。",
+  "item.simplyswords.icewhispersworditem.tooltip4": "损失饥饿值，在自身位置",
+  "item.simplyswords.icewhispersworditem.tooltip5": "召唤暴风雪，减速%d范围内",
+  "item.simplyswords.icewhispersworditem.tooltip6": "的生物并造成递增的伤害。",
+
+  "item.simplyswords.arcanethystsworditem.tooltip1": "独特效果：奥术之力",
+  "item.simplyswords.arcanethystsworditem.tooltip2": "击中概率获得奥术能量。",
+  "item.simplyswords.arcanethystsworditem.tooltip3": "消耗之以发动强化攻击，",
+  "item.simplyswords.arcanethystsworditem.tooltip4": "并获得基于能量的强化。",
+  "item.simplyswords.arcanethystsworditem.tooltip5": "一段充能：将目标轰至空中。",
+  "item.simplyswords.arcanethystsworditem.tooltip6": "二段充能：造成持续的伤害。",
+  "item.simplyswords.arcanethystsworditem.tooltip7": "三段充能：将目标砸入地面。",
+
+  "item.simplyswords.thunderbrandsworditem.tooltip1": "独特效果：雷暴突进",
+  "item.simplyswords.thunderbrandsworditem.tooltip2": "击中概率刷新能力冷却。",
+  "item.simplyswords.thunderbrandsworditem.tooltip3": "短暂减速自身并充能",
+  "item.simplyswords.thunderbrandsworditem.tooltip4": "武器，伤害周围敌人。",
+  "item.simplyswords.thunderbrandsworditem.tooltip5": "充能完成后，向前冲",
+  "item.simplyswords.thunderbrandsworditem.tooltip6": "刺，伤害沿途的目标，",
+  "item.simplyswords.thunderbrandsworditem.tooltip7": "提升持有者攻击速度。",
+
+  "item.simplyswords.stormsedgesworditem.tooltip1": "独特效果：霆闪",
+  "item.simplyswords.stormsedgesworditem.tooltip2": "击中概率刷新能力冷却时间。",
+  "item.simplyswords.stormsedgesworditem.tooltip3": "如闪电般向前闪烁位移，期",
+  "item.simplyswords.stormsedgesworditem.tooltip4": "间短暂无敌，自身获得持续",
+  "item.simplyswords.stormsedgesworditem.tooltip5": "一段时间的速度与急迫效果。",
+
+  "item.simplyswords.lichbladesworditem.tooltip1": "独特效果：悲魂I",
+  "item.simplyswords.lichbladesworditem.tooltip1.2": "独特效果：悲魂II",
+  "item.simplyswords.lichbladesworditem.tooltip1.3": "独特效果：悲魂III",
+  "item.simplyswords.lichbladesworditem.tooltip2": "痛苦的灵魂散溢而",
+  "item.simplyswords.lichbladesworditem.tooltip3": "出，伤害周围目标。",
+  "item.simplyswords.lichbladesworditem.tooltip4": "命令灵魂攻击远处",
+  "item.simplyswords.lichbladesworditem.tooltip5": "目标，快速伤害之。",
+  "item.simplyswords.lichbladesworditem.tooltip6": "有概率汲取生命值。",
+  "item.simplyswords.lichbladesworditem.tooltip7": "攻击完成后，灵魂",
+  "item.simplyswords.lichbladesworditem.tooltip8": "归位，灵魂接触时",
+  "item.simplyswords.lichbladesworditem.tooltip9": "使提升持有者抗性。",
+
+  "item.simplyswords.stormbringersworditem.tooltip1": "独特效果：冲震",
+  "item.simplyswords.stormbringersworditem.tooltip2": "暂时汇聚能量于剑身一",
+  "item.simplyswords.stormbringersworditem.tooltip3": "点以准备发动防守反击。",
+  "item.simplyswords.stormbringersworditem.tooltip4": "",
+  "item.simplyswords.stormbringersworditem.tooltip5": "在恰当的时机使用此能",
+  "item.simplyswords.stormbringersworditem.tooltip6": "力，你将能够格挡下此",
+  "item.simplyswords.stormbringersworditem.tooltip7": "次攻击，在造成伤害的",
+  "item.simplyswords.stormbringersworditem.tooltip8": "同时，将目标轰至高空",
+  "item.simplyswords.stormbringersworditem.tooltip9": "并减少能力的冷却时间。",
+  "item.simplyswords.stormbringersworditem.tooltip10": "完美时机的格挡将额外",
+  "item.simplyswords.stormbringersworditem.tooltip11": "地降低冷却并增加伤害。",
+
+  "item.simplyswords.shadowmistsworditem.tooltip1": "独特效果：遮影",
+  "item.simplyswords.shadowmistsworditem.tooltip2": "概率附加基于目标护",
+  "item.simplyswords.shadowmistsworditem.tooltip3": "甲值的额外魔法伤害。",
+  "item.simplyswords.shadowmistsworditem.tooltip4": "在脚下生成能够致盲的暗影迷雾，",
+  "item.simplyswords.shadowmistsworditem.tooltip5": "并使用遮影步行动至附近的地点。",
+
+
+  "item.simplyswords.zephyrsworditem.tooltip1": "符文之力：微风",
+  "item.simplyswords.zephyrsworditem.tooltip2": "击中目标有概率",
+  "item.simplyswords.zephyrsworditem.tooltip3": "提升攻速与移速。",
+
+  "item.simplyswords.shieldingsworditem.tooltip1": "符文之力：庇佑",
+  "item.simplyswords.shieldingsworditem.tooltip2": "击中目标有小概率",
+  "item.simplyswords.shieldingsworditem.tooltip3": "获得伤害吸收效果。",
+
+  "item.simplyswords.stoneskinsworditem.tooltip1": "符文之力：石肤",
+  "item.simplyswords.stoneskinsworditem.tooltip2": "击中目标概率以速度",
+  "item.simplyswords.stoneskinsworditem.tooltip3": "为代价获得移速提升。",
+
+  "item.simplyswords.trailblazesworditem.tooltip1": "符文之力：焰痕",
+  "item.simplyswords.trailblazesworditem.tooltip2": "击中目标概率在获得火焰抗",
+  "item.simplyswords.trailblazesworditem.tooltip3": "性与速度的同时，点燃自身。",
+
+  "item.simplyswords.weakensworditem.tooltip1": "符文之力：弱化",
+  "item.simplyswords.weakensworditem.tooltip2": "击中概率使目标",
+  "item.simplyswords.weakensworditem.tooltip3": "获得虚弱与缓慢。",
+
+  "item.simplyswords.unstablesworditem.tooltip1": "符文之力：不稳定",
+  "item.simplyswords.unstablesworditem.tooltip2": "周期性给予持有者",
+  "item.simplyswords.unstablesworditem.tooltip3": "不稳定的状态效果。",
+
+  "item.simplyswords.activedefencesworditem.tooltip1": "符文之力：主动防御",
+  "item.simplyswords.activedefencesworditem.tooltip2": "周期性向周围敌对生物射箭",
+  "item.simplyswords.activedefencesworditem.tooltip3": "（发动需要拥有箭矢）。",
+
+  "item.simplyswords.frostwardsworditem.tooltip1": "符文之力：霜卫",
+  "item.simplyswords.frostwardsworditem.tooltip2": "周期性向周围敌对生物",
+  "item.simplyswords.frostwardsworditem.tooltip3": "发射能致使缓慢的雪球。",
+
+  "item.simplyswords.momentumsworditem.tooltip1": "符文之力：动能",
+  "item.simplyswords.momentumsworditem.tooltip2": "暂时获得强大的前推力。",
+  "item.simplyswords.momentumsworditem.tooltip3": "",
+
+  "item.simplyswords.imbuedsworditem.tooltip1": "符文之力：淬魔",
+  "item.simplyswords.imbuedsworditem.tooltip2": "击中概率附加基于自",
+  "item.simplyswords.imbuedsworditem.tooltip3": "身耐久度的魔法伤害。",
+
+  "item.simplyswords.pincushionsworditem.tooltip1": "符文之力：针垫",
+  "item.simplyswords.pincushionsworditem.tooltip2": "造成基于使用者身上残",
+  "item.simplyswords.pincushionsworditem.tooltip3": "留箭矢数量的额外伤害。",
+
+  "item.simplyswords.unidentifiedsworditem.tooltip1": "符文之力：????",
+  "item.simplyswords.unidentifiedsworditem.tooltip2": "点击以揭示能力",
+
+
+  "item.simplyswords.common.blacklisteffect": "能力已被禁用"
 }
