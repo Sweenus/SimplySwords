@@ -25,5 +25,7 @@ public class EffectRegistry {
             new FreezeEffect(StatusEffectCategory.HARMFUL, 1124687));
     public static final RegistrySupplier<StatusEffect> WARD = EFFECT.register("ward", () ->
             new WardEffect(StatusEffectCategory.BENEFICIAL, 1124687));
+    public static final RegistrySupplier<StatusEffect> IMMOLATION = EFFECT.register("immolation", () ->
+            new ImmolationEffect(StatusEffectCategory.BENEFICIAL, 1124687));
 
 }

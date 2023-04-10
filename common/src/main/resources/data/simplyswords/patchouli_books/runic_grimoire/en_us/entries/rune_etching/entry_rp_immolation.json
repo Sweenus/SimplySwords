@@ -1,0 +1,17 @@
+{
+  "name": "Immolation",
+  "icon": "simplyswords:runic_tablet",
+  "category": "simplyswords:category_rune_etching",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:runic_tablet",
+      "title": "Immolation",
+      "text": "Immolation provides a powerful aura of holy fire. While active, this aura periodically damages nearby enemies, incinerating them with righteous flames. This damage scales based on the wielder's current health."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "However, this potent ability comes at a cost - the wielder also takes lesser damage from the holy fire."
+    }
+  ]
+}
