@@ -1,0 +1,17 @@
+{
+  "name": "Ward",
+  "icon": "simplyswords:runic_tablet",
+  "category": "simplyswords:category_rune_etching",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:runic_tablet",
+      "title": "Ward",
+      "text": "Ward is a powerful but risky ability that provides the wielder with a temporary shield to protect against incoming attacks. When activated, the wielder sacrifices half of their current health to create a pulsing barrier of energy around them that absorbs incoming damage."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "The shield lasts for six seconds and pulses periodically, providing a new layer of absorption with each pulse. The strength of the shield scales with the amount of health remaining, making it a powerful defensive option for those willing to take the risk."
+    }
+  ]
+}

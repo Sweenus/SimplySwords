@@ -691,6 +691,10 @@
   "item.simplyswords.pincushionsworditem.tooltip1": "Runic Power: Pincushion",
   "item.simplyswords.pincushionsworditem.tooltip2": "Deal additional damage for each",
   "item.simplyswords.pincushionsworditem.tooltip3": "arrow stuck in your body.",
+  "item.simplyswords.wardsworditem.tooltip1": "Runic Power: Ward",
+  "item.simplyswords.wardsworditem.tooltip2": "Sacrifice half your current HP to gain",
+  "item.simplyswords.wardsworditem.tooltip3": "pulsing absorption relative to your",
+  "item.simplyswords.wardsworditem.tooltip4": "remaining HP for 6 seconds.",
   "item.simplyswords.unidentifiedsworditem.tooltip1": "Runic Power: ????",
   "item.simplyswords.unidentifiedsworditem.tooltip2": "Click to identify.",
 

@@ -244,6 +244,7 @@ public class SimplySwordsConfig {
         BOOLEAN_OPTIONS.put("compat_gobber_end_weapons_unbreakable", true);
 
         BOOLEAN_OPTIONS.put("the_watcher", true);
+        BOOLEAN_OPTIONS.put("watching_warglaive", true);
         BOOLEAN_OPTIONS.put("longsword_of_the_plague", true);
         BOOLEAN_OPTIONS.put("sword_on_a_stick", true);
         BOOLEAN_OPTIONS.put("bramblethorn", true);
@@ -294,6 +295,7 @@ public class SimplySwordsConfig {
         BOOLEAN_OPTIONS.put("greater_imbued", true);
         BOOLEAN_OPTIONS.put("pincushion", true);
         BOOLEAN_OPTIONS.put("greater_pincushion", true);
+        BOOLEAN_OPTIONS.put("ward", true);
 
 
         LOOT_OPTIONS.put("minecraft:entities/wither", 0.05f);

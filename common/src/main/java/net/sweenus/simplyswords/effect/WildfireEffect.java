@@ -20,23 +20,24 @@ public class WildfireEffect extends StatusEffect {
         if (!pLivingEntity.world.isClient()) {
             LivingEntity pPlayer = pLivingEntity.getAttacker();
             if (pPlayer != null){
-                ServerWorld world = (ServerWorld) pLivingEntity.world;
-                BlockPos position = pLivingEntity.getBlockPos();
-                int hradius = (int) (SimplySwordsConfig.getFloatValue("wildfire_radius"));
-                int vradius = (int) (SimplySwordsConfig.getFloatValue("wildfire_radius") / 2);
-                double x = pLivingEntity.getX();
-                double y = pLivingEntity.getY();
-                double z = pLivingEntity.getZ();
-                int pduration = (int) SimplySwordsConfig.getFloatValue("wildfire_duration") / 20;
-                Box box = new Box(x + hradius, y + vradius, z + hradius, x - hradius, y - vradius, z - hradius);
+                if (pPlayer instanceof PlayerEntity) {
+                    ServerWorld world = (ServerWorld) pLivingEntity.world;
+                    BlockPos position = pLivingEntity.getBlockPos();
+                    int hradius = (int) (SimplySwordsConfig.getFloatValue("wildfire_radius"));
+                    int vradius = (int) (SimplySwordsConfig.getFloatValue("wildfire_radius") / 2);
+                    double x = pLivingEntity.getX();
+                    double y = pLivingEntity.getY();
+                    double z = pLivingEntity.getZ();
+                    int pduration = (int) SimplySwordsConfig.getFloatValue("wildfire_duration") / 20;
+                    Box box = new Box(x + hradius, y + vradius, z + hradius, x - hradius, y - vradius, z - hradius);
 
-                for (Entity e : world.getEntitiesByType(pLivingEntity.getType(), box, EntityPredicates.VALID_ENTITY)) {
-                    if (e instanceof LivingEntity) {
-                        if (HelperMethods.checkFriendlyFire((LivingEntity) e, (PlayerEntity) pPlayer))
-                            e.setOnFireFor(pduration);
+                    for (Entity e : world.getEntitiesByType(pLivingEntity.getType(), box, EntityPredicates.VALID_ENTITY)) {
+                        if (e instanceof LivingEntity) {
+                            if (HelperMethods.checkFriendlyFire((LivingEntity) e, (PlayerEntity) pPlayer))
+                                e.setOnFireFor(pduration);
+                        }
                     }
                 }
-
             }
         }
 
