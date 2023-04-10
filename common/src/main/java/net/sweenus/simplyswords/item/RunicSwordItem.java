@@ -207,6 +207,19 @@ public class RunicSwordItem extends SwordItem {
             return TypedActionResult.consume(itemStack);
         }
 
+        if (itemStack.getOrCreateNbt().getString("runic_power").equals("immolation")) {
+
+            if (itemStack.getDamage() >= itemStack.getMaxDamage() - 1) {
+                return TypedActionResult.fail(itemStack);
+            }
+            user.setCurrentHand(hand);
+            user.addStatusEffect(new StatusEffectInstance(EffectRegistry.IMMOLATION.get(), 36000, 0), user);
+            user.getItemCooldownManager().set(itemStack.getItem(), 40);
+            world.playSoundFromEntity(null, user, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
+                    SoundCategory.PLAYERS, 0.3f, 0.6f);
+            return TypedActionResult.consume(itemStack);
+        }
+
         return TypedActionResult.fail(itemStack);
     }
 
@@ -215,6 +228,8 @@ public class RunicSwordItem extends SwordItem {
         if (stack.getOrCreateNbt().getString("runic_power").contains("momentum"))
             maxUseTime = 15;
         if (stack.getOrCreateNbt().getString("runic_power").equals("ward"))
+            maxUseTime = 1;
+        if (stack.getOrCreateNbt().getString("runic_power").equals("immolation"))
             maxUseTime = 1;
 
         return maxUseTime;
@@ -406,6 +421,16 @@ public class RunicSwordItem extends SwordItem {
             tooltip.add(Text.translatable("item.simplyswords.wardsworditem.tooltip2"));
             tooltip.add(Text.translatable("item.simplyswords.wardsworditem.tooltip3"));
             tooltip.add(Text.translatable("item.simplyswords.wardsworditem.tooltip4"));
+
+        }
+        if (itemStack.getOrCreateNbt().getString("runic_power").equals("immolation")) {
+
+            tooltip.add(Text.translatable("item.simplyswords.immolationsworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
+            tooltip.add(Text.literal(""));
+            tooltip.add(Text.translatable("item.simplyswords.onrightclick").formatted(Formatting.BOLD, Formatting.GREEN));
+            tooltip.add(Text.translatable("item.simplyswords.immolationsworditem.tooltip2"));
+            tooltip.add(Text.translatable("item.simplyswords.immolationsworditem.tooltip3"));
+            tooltip.add(Text.translatable("item.simplyswords.immolationsworditem.tooltip4"));
 
         }
 

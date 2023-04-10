@@ -296,6 +296,7 @@ public class SimplySwordsConfig {
         BOOLEAN_OPTIONS.put("pincushion", true);
         BOOLEAN_OPTIONS.put("greater_pincushion", true);
         BOOLEAN_OPTIONS.put("ward", true);
+        BOOLEAN_OPTIONS.put("immolation", true);
 
 
         LOOT_OPTIONS.put("minecraft:entities/wither", 0.05f);
