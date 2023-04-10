@@ -20,13 +20,10 @@ public class EffectRegistry {
             new WildfireEffect(StatusEffectCategory.HARMFUL, 1124687));
     public static final RegistrySupplier<StatusEffect> STORM = EFFECT.register("storm", () ->
             new StormEffect(StatusEffectCategory.HARMFUL, 1124687));
-    public static final RegistrySupplier<StatusEffect> PLAGUE = EFFECT.register("plague", () ->
-            new PlagueEffect(StatusEffectCategory.HARMFUL, 1124687));
-    public static final RegistrySupplier<StatusEffect> GRAVITY = EFFECT.register("gravity", () ->
-            new GravEffect(StatusEffectCategory.HARMFUL, 1124687));
+
     public static final RegistrySupplier<StatusEffect> FREEZE = EFFECT.register("freeze", () ->
             new FreezeEffect(StatusEffectCategory.HARMFUL, 1124687));
-    public static final RegistrySupplier<StatusEffect> BURN = EFFECT.register("burn", () ->
-            new BurnEffect(StatusEffectCategory.HARMFUL, 1124687));
+    public static final RegistrySupplier<StatusEffect> WARD = EFFECT.register("ward", () ->
+            new WardEffect(StatusEffectCategory.BENEFICIAL, 1124687));
 
 }

@@ -122,6 +122,8 @@ public class ModLootTableModifiers {
 
                         if (SimplySwordsConfig.getBooleanValue("the_watcher"))
                             pool.with(ItemEntry.builder(ItemsRegistry.WATCHER_CLAYMORE.get()));
+                        if (SimplySwordsConfig.getBooleanValue("watching_warglaive"))
+                            pool.with(ItemEntry.builder(ItemsRegistry.WATCHING_WARGLAIVE.get()));
                         if (SimplySwordsConfig.getBooleanValue("longsword_of_the_plague"))
                             pool.with(ItemEntry.builder(ItemsRegistry.TOXIC_LONGSWORD.get()));
                         if (SimplySwordsConfig.getBooleanValue("sword_on_a_stick"))
@@ -177,6 +179,8 @@ public class ModLootTableModifiers {
                                 .conditionally(RandomChanceLootCondition.builder(SimplySwordsConfig.getGeneralSettings("unique_loot_table_weight"))); // 1 = 100% of the time
                         if (SimplySwordsConfig.getBooleanValue("the_watcher"))
                             pool.with(ItemEntry.builder(ItemsRegistry.WATCHER_CLAYMORE.get()));
+                        if (SimplySwordsConfig.getBooleanValue("watching_warglaive"))
+                            pool.with(ItemEntry.builder(ItemsRegistry.WATCHING_WARGLAIVE.get()));
                         if (SimplySwordsConfig.getBooleanValue("longsword_of_the_plague"))
                             pool.with(ItemEntry.builder(ItemsRegistry.TOXIC_LONGSWORD.get()));
                         if (SimplySwordsConfig.getBooleanValue("sword_on_a_stick"))

@@ -7,6 +7,7 @@ import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.entity.player.ItemCooldownManager;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ArrowEntity;
 import net.minecraft.entity.projectile.thrown.SnowballEntity;
@@ -34,6 +35,8 @@ import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.RunicMethods;
 
 import java.util.List;
+
+import static java.lang.Math.round;
 
 public class RunicSwordItem extends SwordItem {
 
@@ -189,6 +192,21 @@ public class RunicSwordItem extends SwordItem {
                     SoundCategory.PLAYERS, 0.3f, 1.2f);
             return TypedActionResult.consume(itemStack);
         }
+
+        if (itemStack.getOrCreateNbt().getString("runic_power").equals("ward")) {
+
+            if (itemStack.getDamage() >= itemStack.getMaxDamage() - 1) {
+                return TypedActionResult.fail(itemStack);
+            }
+            user.setCurrentHand(hand);
+            user.addStatusEffect(new StatusEffectInstance(EffectRegistry.WARD.get(), 120, 0), user);
+            user.getItemCooldownManager().set(itemStack.getItem(), 120);
+            user.setHealth(user.getHealth() / 2);
+            world.playSoundFromEntity(null, user, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
+                    SoundCategory.PLAYERS, 0.3f, 1.2f);
+            return TypedActionResult.consume(itemStack);
+        }
+
         return TypedActionResult.fail(itemStack);
     }
 
@@ -196,6 +214,8 @@ public class RunicSwordItem extends SwordItem {
     public int getMaxUseTime(ItemStack stack) {
         if (stack.getOrCreateNbt().getString("runic_power").contains("momentum"))
             maxUseTime = 15;
+        if (stack.getOrCreateNbt().getString("runic_power").equals("ward"))
+            maxUseTime = 1;
 
         return maxUseTime;
     }
@@ -376,6 +396,16 @@ public class RunicSwordItem extends SwordItem {
             tooltip.add(Text.translatable("item.simplyswords.pincushionsworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
             tooltip.add(Text.translatable("item.simplyswords.pincushionsworditem.tooltip2"));
             tooltip.add(Text.translatable("item.simplyswords.pincushionsworditem.tooltip3"));
+
+        }
+        if (itemStack.getOrCreateNbt().getString("runic_power").equals("ward")) {
+
+            tooltip.add(Text.translatable("item.simplyswords.wardsworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
+            tooltip.add(Text.literal(""));
+            tooltip.add(Text.translatable("item.simplyswords.onrightclick").formatted(Formatting.BOLD, Formatting.GREEN));
+            tooltip.add(Text.translatable("item.simplyswords.wardsworditem.tooltip2"));
+            tooltip.add(Text.translatable("item.simplyswords.wardsworditem.tooltip3"));
+            tooltip.add(Text.translatable("item.simplyswords.wardsworditem.tooltip4"));
 
         }
 

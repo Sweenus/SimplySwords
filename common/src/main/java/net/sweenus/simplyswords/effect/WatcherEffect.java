@@ -23,23 +23,25 @@ public class WatcherEffect extends StatusEffect {
         if (!pLivingEntity.world.isClient()) {
             LivingEntity pPlayer = pLivingEntity.getAttacker();
             if (pPlayer != null) {
-                ServerWorld world = (ServerWorld) pLivingEntity.world;
-                BlockPos position = pLivingEntity.getBlockPos();
-                int hradius = (int) (SimplySwordsConfig.getFloatValue("watcher_radius"));
-                int vradius = (int) (SimplySwordsConfig.getFloatValue("watcher_radius") / 2);
-                double x = pLivingEntity.getX();
-                double y = pLivingEntity.getY();
-                double z = pLivingEntity.getZ();
-                float rAmount = SimplySwordsConfig.getFloatValue("watcher_restore_amount");
-                Box box = new Box(x + hradius, y + vradius, z + hradius, x - hradius, y - vradius, z - hradius);
+                if (pPlayer instanceof PlayerEntity) {
+                    ServerWorld world = (ServerWorld) pLivingEntity.world;
+                    BlockPos position = pLivingEntity.getBlockPos();
+                    int hradius = (int) (SimplySwordsConfig.getFloatValue("watcher_radius"));
+                    int vradius = (int) (SimplySwordsConfig.getFloatValue("watcher_radius") / 2);
+                    double x = pLivingEntity.getX();
+                    double y = pLivingEntity.getY();
+                    double z = pLivingEntity.getZ();
+                    float rAmount = SimplySwordsConfig.getFloatValue("watcher_restore_amount");
+                    Box box = new Box(x + hradius, y + vradius, z + hradius, x - hradius, y - vradius, z - hradius);
 
-                for (Entity e : world.getOtherEntities(pPlayer, box, EntityPredicates.VALID_ENTITY)) {
-                    if (e instanceof LivingEntity && (pPlayer instanceof PlayerEntity player)) {
-                        if (HelperMethods.checkFriendlyFire((LivingEntity) e, player)) {
-                            e.damage(DamageSource.FREEZE, rAmount);
-                            pPlayer.setHealth(pPlayer.getHealth() + rAmount);
-                            BlockPos position2 = e.getBlockPos();
-                            world.playSound(null, position2, SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_IMPACT_02.get(), SoundCategory.PLAYERS, 0.05f, 1.2f);
+                    for (Entity e : world.getOtherEntities(pPlayer, box, EntityPredicates.VALID_ENTITY)) {
+                        if (e instanceof LivingEntity && (pPlayer instanceof PlayerEntity player)) {
+                            if (HelperMethods.checkFriendlyFire((LivingEntity) e, player)) {
+                                e.damage(DamageSource.FREEZE, rAmount);
+                                pPlayer.setHealth(pPlayer.getHealth() + rAmount);
+                                BlockPos position2 = e.getBlockPos();
+                                world.playSound(null, position2, SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_IMPACT_02.get(), SoundCategory.PLAYERS, 0.05f, 1.2f);
+                            }
                         }
                     }
                 }
