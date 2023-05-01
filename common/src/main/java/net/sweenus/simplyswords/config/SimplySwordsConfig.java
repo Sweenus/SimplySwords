@@ -229,9 +229,10 @@ public class SimplySwordsConfig {
         FLOAT_OPTIONS.put("shadowmist_radius", 4f);
 
 
-        GENERAL_OPTIONS.put("standard_loot_table_weight", 0.08f);
-        GENERAL_OPTIONS.put("rare_loot_table_weight", 0.01f);
-        GENERAL_OPTIONS.put("unique_loot_table_weight", 0.008f);
+        GENERAL_OPTIONS.put("standard_loot_table_weight", 0.01f);
+        GENERAL_OPTIONS.put("rare_loot_table_weight", 0.008f);
+        GENERAL_OPTIONS.put("runic_loot_table_weight", 0.008f);
+        GENERAL_OPTIONS.put("unique_loot_table_weight", 0.002f);
         GENERAL_OPTIONS.put("impact_sound_effect_volume", 0.3f);
 
 
@@ -300,6 +301,7 @@ public class SimplySwordsConfig {
 
 
         LOOT_OPTIONS.put("minecraft:entities/wither", 0.05f);
+        LOOT_OPTIONS.put("minecraft:entities/ender_dragon", 0.5f);
         LOOT_OPTIONS.put("minecraft:chests/ruined_portal", 0f);
         LOOT_OPTIONS.put("minecraft:chests/village/village_armorer", 0f);
         LOOT_OPTIONS.put("minecraft:chests/village/village_butcher", 0f);
@@ -557,17 +559,21 @@ public class SimplySwordsConfig {
                 config.append("// Simply Swords loot has a chance to appear in any chest vanilla or modded, except villager chests \n");
                 config.append("// ------------------------ \n");
                 config.append("\n");
-                config.append("// Standard Loot: Iron > Gold Weapons. Default: 0.08 \n");
+                config.append("// Standard Loot: Iron > Gold Weapons. Default: 0.01 \n");
             }
             if (i == 1) {
                 config.append("\n");
-                config.append("// Rare Loot: Diamond & Runic Weapons. Default: 0.008 \n");
+                config.append("// Rare Loot: Diamond Weapons. Default: 0.008 \n");
             }
             if (i == 2) {
                 config.append("\n");
-                config.append("// Unique Loot: Unique Weapons. Default: 0.002 \n");
+                config.append("// Runic Loot: Runic Tablets. Default: 0.008 \n");
             }
             if (i == 3) {
+                config.append("\n");
+                config.append("// Unique Loot: Unique Weapons. Default: 0.002 \n");
+            }
+            if (i == 4) {
                 config.append("\n");
                 config.append("// -- General Options -- \n");
             }

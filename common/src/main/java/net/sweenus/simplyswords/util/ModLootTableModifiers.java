@@ -101,7 +101,7 @@ public class ModLootTableModifiers {
                 else {
                     LootPool.Builder pool = LootPool.builder()
                             .rolls(ConstantLootNumberProvider.create(1))
-                            .conditionally(RandomChanceLootCondition.builder(SimplySwordsConfig.getGeneralSettings("rare_loot_table_weight"))) // 1 = 100% of the time
+                            .conditionally(RandomChanceLootCondition.builder(SimplySwordsConfig.getGeneralSettings("runic_loot_table_weight"))) // 1 = 100% of the time
                             .with(ItemEntry.builder(ItemsRegistry.RUNIC_TABLET.get()));
                     context.addPool(pool);
                 }
