@@ -115,6 +115,27 @@ public class HelperMethods {
         return "";
     }
 
+    public static String chooseRunefusedPower() {
+        List<String> runicList = Arrays.asList(
+                "float", "greater_float", "freeze", "shielding", "greater_shielding", "slow",
+                "greater_slow", "stoneskin", "greater_stoneskin", "swiftness", "greater_swiftness", "trailblaze",
+                "greater_trailblaze", "weaken", "greater_weaken", "zephyr", "greater_zephyr", "wildfire",
+                "imbued", "greater_imbued", "pincushion", "greater_pincushion");
+
+        // Keep rolling up to 100 times to receive a runic power that isn't blacklisted
+        // I'm sure there's a smarter way to do this, but I didn't choose to be born with a smol brain
+        for (int i = 0; i < 100; i++) {
+            Random choose = new Random();
+            int randomIndex = choose.nextInt(runicList.size());
+            String runicSelection = runicList.get(randomIndex);
+
+            if (SimplySwordsConfig.getBooleanValue(runicSelection))
+                return runicSelection;
+        }
+
+        return "";
+    }
+
     // createFootfalls - creates weapon footfall particle effects (footsteps)
     public static void createFootfalls(Entity entity,
                                        ItemStack stack,

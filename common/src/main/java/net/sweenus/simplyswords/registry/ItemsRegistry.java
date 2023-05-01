@@ -9,10 +9,7 @@ import net.minecraft.util.Rarity;
 import net.minecraft.util.registry.Registry;
 import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
-import net.sweenus.simplyswords.item.ModToolMaterial;
-import net.sweenus.simplyswords.item.RunicSwordItem;
-import net.sweenus.simplyswords.item.SimplySwordsNetheriteSwordItem;
-import net.sweenus.simplyswords.item.SimplySwordsSwordItem;
+import net.sweenus.simplyswords.item.*;
 import net.sweenus.simplyswords.item.custom.*;
 
 public class ItemsRegistry {
@@ -130,6 +127,8 @@ public class ItemsRegistry {
     public static final RegistrySupplier<Item> RUNIC_TABLET = ITEM.register("runic_tablet", () ->
             new Item(new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.RARE).fireproof()));
 
+    public static final RegistrySupplier<RunefusedGemItem> RUNEFUSED_GEM = ITEM.register("runefused_gem", RunefusedGemItem::new);
+    public static final RegistrySupplier<EmpoweredRemnantItem> EMPOWERED_REMNANT = ITEM.register("empowered_remnant", EmpoweredRemnantItem::new);
 
     public static final RegistrySupplier<SimplySwordsSwordItem> IRON_LONGSWORD = ITEM.register("iron_longsword", () ->
             new SimplySwordsSwordItem(

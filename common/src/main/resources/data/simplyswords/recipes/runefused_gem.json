@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:smithing",
+  "base": {
+    "item": "simplyswords:empowered_remnant"
+  },
+  "addition": {
+    "item": "simplyswords:runic_tablet"
+  },
+  "result": {
+    "item": "simplyswords:runefused_gem"
+  }
+}

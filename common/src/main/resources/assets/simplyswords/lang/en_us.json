@@ -104,6 +104,8 @@
   "item.simplyswords.shadowsting": "Shadowsting",
 
   "item.simplyswords.runic_tablet": "Runic Tablet",
+  "item.simplyswords.runefused_gem": "Runefused Gem",
+  "item.simplyswords.empowered_remnant": "Empowered Remnant",
 
 
   "item.simplyswords.mythicmetals_compat.adamantite.adamantite_claymore": "Adamantite Claymore",
@@ -470,6 +472,11 @@
   "item.simplyswords.awakening.exp": "Awakening XP: %d%% ",
   "item.simplyswords.awakening.powers": "Awakened Powers:",
   "item.simplyswords.greater_runic_power": "Greater",
+  "item.simplyswords.runefused_power": "Runefused Power:",
+  "item.simplyswords.gem_description": "Can be socketed into a matching",
+  "item.simplyswords.gem_description2": "gem socket on a unique weapon.",
+  "item.simplyswords.empty_runic_slot": "[ empty rune slot ]",
+  "item.simplyswords.filled_runic_slot": "[ runefused gem ]",
 
 
 
@@ -481,6 +488,7 @@
   "effect.simplyswords.wildfire": "Wildfire",
 
   "item.simplyswords.onrightclick": "On Right Click:",
+  "item.simplyswords.onrightclickheld": "Hold Right Click:",
   "item.simplyswords.firesworditem.tooltip1": "Unique Effect: Brimstone",
   "item.simplyswords.firesworditem.tooltip2": "Chance on hit to spew forth explosive brimstone.",
 

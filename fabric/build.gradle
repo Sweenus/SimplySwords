@@ -39,6 +39,9 @@ dependencies {
     modImplementation "curse.maven:mythicmetals-410127:4118479"
     // slug / curseforge project ID / file ID "check url"
 
+    // Amethyst Imbuement
+    //modImplementation "curse.maven:amethyst-imbuement-608261:4514358"
+
     // Patchouli
     modImplementation "vazkii.patchouli:Patchouli:1.19.2-77-FABRIC"
 

@@ -1,0 +1,30 @@
+{
+  "replace": false,
+  "values": [
+    "simplyswords:watcher_claymore",
+    "simplyswords:brimstone_claymore",
+    "simplyswords:storms_edge",
+    "simplyswords:stormbringer",
+    "simplyswords:bramblethorn",
+    "simplyswords:watching_warglaive",
+    "simplyswords:toxic_longsword",
+    "simplyswords:emberblade",
+    "simplyswords:frostfall",
+    "simplyswords:soulpyre",
+    "simplyswords:molten_edge",
+    "simplyswords:livyatan",
+    "simplyswords:icewhisper",
+    "simplyswords:arcanethyst",
+    "simplyswords:thunderbrand",
+    "simplyswords:hearthflame",
+    "simplyswords:twisted_blade",
+    "simplyswords:soulrender",
+    "simplyswords:soulkeeper",
+    "simplyswords:soulstealer",
+    "simplyswords:mjolnir",
+    "simplyswords:slumbering_lichblade",
+    "simplyswords:waking_lichblade",
+    "simplyswords:awakened_lichblade",
+    "simplyswords:shadowsting"
+  ]
+}
