@@ -211,7 +211,7 @@ public class SimplySwordsConfig {
         FLOAT_OPTIONS.put("stormjolt_chance", 15f);
 
         FLOAT_OPTIONS.put("soulanguish_radius", 3f);
-        FLOAT_OPTIONS.put("soulanguish_damage", 1f);
+        FLOAT_OPTIONS.put("soulanguish_damage", 4f);
         FLOAT_OPTIONS.put("soulanguish_cooldown", 700f);
         FLOAT_OPTIONS.put("soulanguish_duration", 500f);
         FLOAT_OPTIONS.put("soulanguish_heal", 0.5f);
@@ -238,7 +238,7 @@ public class SimplySwordsConfig {
 
         BOOLEAN_OPTIONS.put("display_config_outdated_warning", true);
         BOOLEAN_OPTIONS.put("add_weapons_to_loot_tables", true);
-        BOOLEAN_OPTIONS.put("loot_can_be_found_in_villages", true);
+        BOOLEAN_OPTIONS.put("loot_can_be_found_in_villages", false);
         BOOLEAN_OPTIONS.put("enable_weapon_impact_sounds", true);
         BOOLEAN_OPTIONS.put("enable_weapon_footfalls", true);
         BOOLEAN_OPTIONS.put("enable_passive_particles", true);

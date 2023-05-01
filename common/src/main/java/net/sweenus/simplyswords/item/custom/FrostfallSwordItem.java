@@ -98,7 +98,9 @@ public class FrostfallSwordItem extends SwordItem {
             double xpos = user.getX() -2;
             double ypos = user.getY();
             double zpos = user.getZ() -2;
-            user.teleport(lastX, lastY, lastZ);
+            user.setVelocity(0, 0, 0); // Stop player in place
+            user.velocityModified = true;
+            user.teleport(lastX, lastY, lastZ); //Ensure they don't end up stuck inside a block
 
             for (int i = 3; i > 0; i--) {
                 for (int j = 3; j > 0; j--) {
@@ -190,10 +192,6 @@ public class FrostfallSwordItem extends SwordItem {
                         }
                     }
                 }
-
-            //Ice shatter - player edition
-            if (player_shatter_timer == 75) //failsafe
-                player.teleport(lastX, lastY, lastZ);
 
             if (player_shatter_timer == 1) {
                 world.playSoundFromEntity(null, player, SoundRegistry.ELEMENTAL_BOW_ICE_SHOOT_IMPACT_02.get(), SoundCategory.PLAYERS, 0.6f, 3f);
