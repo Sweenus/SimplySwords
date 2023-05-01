@@ -12,10 +12,11 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
+import net.sweenus.simplyswords.item.UniqueSwordItem;
 
 import java.util.List;
 
-public class LevitationSwordItem extends SwordItem {
+public class LevitationSwordItem extends UniqueSwordItem {
     public LevitationSwordItem(ToolMaterial toolMaterial, int attackDamage, float attackSpeed, Settings settings) {
         super(toolMaterial, attackDamage, attackSpeed, settings);
     }
@@ -51,6 +52,7 @@ public class LevitationSwordItem extends SwordItem {
         tooltip.add(new TranslatableText("item.simplyswords.levitationsworditem.tooltip3"));
 
          */
+        super.appendTooltip(itemStack,world, tooltip, tooltipContext);
     }
 
 }

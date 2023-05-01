@@ -157,130 +157,128 @@ public class UniqueSwordItem extends SwordItem {
 
         tooltip.add(Text.literal(""));
         if (itemStack.getOrCreateNbt().getString("runic_power").contains("greater"))
-            tooltip.add(Text.translatable("item.simplyswords.greater_runic_power").formatted(Formatting.DARK_AQUA, Formatting.BOLD));
+            tooltip.add(Text.translatable("item.simplyswords.greater_runic_power").formatted(Formatting.DARK_AQUA));
 
         if (itemStack.getOrCreateNbt().getString("runic_power").isEmpty()) {
 
-            //tooltip.add(Text.translatable("item.simplyswords.unidentifiedsworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
-            tooltip.add(Text.translatable("item.simplyswords.empty_runic_slot").formatted(Formatting.DARK_GRAY));
+            //tooltip.add(Text.translatable("item.simplyswords.unidentifiedsworditem.tooltip1").formatted(Formatting.AQUA));
+            tooltip.add(Text.translatable("item.simplyswords.empty_runic_slot").formatted(Formatting.GRAY));
 
-        } else {
-            tooltip.add(Text.translatable("item.simplyswords.filled_runic_slot").formatted(Formatting.GRAY));
         }
         if (itemStack.getOrCreateNbt().getString("runic_power").equals("freeze")) {
 
-            tooltip.add(Text.translatable("item.simplyswords.freezesworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.runefused_power.freeze").formatted(Formatting.AQUA));
             tooltip.add(Text.translatable("item.simplyswords.freezesworditem.tooltip2"));
 
         }
         if (itemStack.getOrCreateNbt().getString("runic_power").equals("wildfire")) {
 
-            tooltip.add(Text.translatable("item.simplyswords.wildfiresworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.runefused_power.wildfire").formatted(Formatting.AQUA));
             tooltip.add(Text.translatable("item.simplyswords.wildfiresworditem.tooltip2"));
             tooltip.add(Text.translatable("item.simplyswords.wildfiresworditem.tooltip3"));
 
         }
         if (itemStack.getOrCreateNbt().getString("runic_power").contains("slow")) {
 
-            tooltip.add(Text.translatable("item.simplyswords.slownesssworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.runefused_power.slow").formatted(Formatting.AQUA));
             tooltip.add(Text.translatable("item.simplyswords.slownesssworditem.tooltip2"));
             tooltip.add(Text.translatable("item.simplyswords.slownesssworditem.tooltip3"));
 
         }
         if (itemStack.getOrCreateNbt().getString("runic_power").contains("swiftness")) {
 
-            tooltip.add(Text.translatable("item.simplyswords.speedsworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.runefused_power.swiftness").formatted(Formatting.AQUA));
             tooltip.add(Text.translatable("item.simplyswords.speedsworditem.tooltip2"));
             tooltip.add(Text.translatable("item.simplyswords.speedsworditem.tooltip3"));
 
         }
         if (itemStack.getOrCreateNbt().getString("runic_power").contains("float")) {
 
-            tooltip.add(Text.translatable("item.simplyswords.levitationsworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.runefused_power.float").formatted(Formatting.AQUA));
             tooltip.add(Text.translatable("item.simplyswords.levitationsworditem.tooltip2"));
             tooltip.add(Text.translatable("item.simplyswords.levitationsworditem.tooltip3"));
 
         }
         if (itemStack.getOrCreateNbt().getString("runic_power").contains("zephyr")) {
 
-            tooltip.add(Text.translatable("item.simplyswords.zephyrsworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.runefused_power.zephyr").formatted(Formatting.AQUA));
             tooltip.add(Text.translatable("item.simplyswords.zephyrsworditem.tooltip2"));
             tooltip.add(Text.translatable("item.simplyswords.zephyrsworditem.tooltip3"));
 
         }
         if (itemStack.getOrCreateNbt().getString("runic_power").contains("shielding")) {
 
-            tooltip.add(Text.translatable("item.simplyswords.shieldingsworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.runefused_power.shielding").formatted(Formatting.AQUA));
             tooltip.add(Text.translatable("item.simplyswords.shieldingsworditem.tooltip2"));
             tooltip.add(Text.translatable("item.simplyswords.shieldingsworditem.tooltip3"));
 
         }
         if (itemStack.getOrCreateNbt().getString("runic_power").contains("stoneskin")) {
 
-            tooltip.add(Text.translatable("item.simplyswords.stoneskinsworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.runefused_power.stoneskin").formatted(Formatting.AQUA));
             tooltip.add(Text.translatable("item.simplyswords.stoneskinsworditem.tooltip2"));
             tooltip.add(Text.translatable("item.simplyswords.stoneskinsworditem.tooltip3"));
 
         }
         if (itemStack.getOrCreateNbt().getString("runic_power").equals("frost_ward")) {
 
-            tooltip.add(Text.translatable("item.simplyswords.frostwardsworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.runefused_power.frost_ward").formatted(Formatting.AQUA));
             tooltip.add(Text.translatable("item.simplyswords.frostwardsworditem.tooltip2"));
             tooltip.add(Text.translatable("item.simplyswords.frostwardsworditem.tooltip3"));
 
         }
         if (itemStack.getOrCreateNbt().getString("runic_power").contains("trailblaze")) {
 
-            tooltip.add(Text.translatable("item.simplyswords.trailblazesworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.runefused_power.trailblaze").formatted(Formatting.AQUA));
             tooltip.add(Text.translatable("item.simplyswords.trailblazesworditem.tooltip2"));
             tooltip.add(Text.translatable("item.simplyswords.trailblazesworditem.tooltip3"));
 
         }
         if (itemStack.getOrCreateNbt().getString("runic_power").equals("active_defence")) {
 
-            tooltip.add(Text.translatable("item.simplyswords.activedefencesworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.runefused_power.active_defence").formatted(Formatting.AQUA));
             tooltip.add(Text.translatable("item.simplyswords.activedefencesworditem.tooltip2"));
             tooltip.add(Text.translatable("item.simplyswords.activedefencesworditem.tooltip3"));
 
         }
         if (itemStack.getOrCreateNbt().getString("runic_power").contains("weaken")) {
 
-            tooltip.add(Text.translatable("item.simplyswords.weakensworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.runefused_power.weaken").formatted(Formatting.AQUA));
             tooltip.add(Text.translatable("item.simplyswords.weakensworditem.tooltip2"));
             tooltip.add(Text.translatable("item.simplyswords.weakensworditem.tooltip3"));
 
         }
         if (itemStack.getOrCreateNbt().getString("runic_power").equals("unstable")) {
 
-            tooltip.add(Text.translatable("item.simplyswords.unstablesworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.runefused_power.unstable").formatted(Formatting.AQUA));
             tooltip.add(Text.translatable("item.simplyswords.unstablesworditem.tooltip2"));
             tooltip.add(Text.translatable("item.simplyswords.unstablesworditem.tooltip3"));
 
         }
         if (itemStack.getOrCreateNbt().getString("runic_power").contains("momentum")) {
 
-            tooltip.add(Text.translatable("item.simplyswords.momentumsworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.runefused_power.momentum").formatted(Formatting.AQUA));
             tooltip.add(Text.translatable("item.simplyswords.momentumsworditem.tooltip2"));
             tooltip.add(Text.translatable("item.simplyswords.momentumsworditem.tooltip3"));
 
         }
         if (itemStack.getOrCreateNbt().getString("runic_power").contains("imbued")) {
 
-            tooltip.add(Text.translatable("item.simplyswords.imbuedsworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.runefused_power.imbued").formatted(Formatting.AQUA));
             tooltip.add(Text.translatable("item.simplyswords.imbuedsworditem.tooltip2"));
             tooltip.add(Text.translatable("item.simplyswords.imbuedsworditem.tooltip3"));
 
         }
         if (itemStack.getOrCreateNbt().getString("runic_power").contains("pincushion")) {
 
-            tooltip.add(Text.translatable("item.simplyswords.pincushionsworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.runefused_power.pincushion").formatted(Formatting.AQUA));
             tooltip.add(Text.translatable("item.simplyswords.pincushionsworditem.tooltip2"));
             tooltip.add(Text.translatable("item.simplyswords.pincushionsworditem.tooltip3"));
 
         }
         if (itemStack.getOrCreateNbt().getString("runic_power").equals("ward")) {
 
-            tooltip.add(Text.translatable("item.simplyswords.wardsworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.runefused_power.ward").formatted(Formatting.AQUA));
             tooltip.add(Text.literal(""));
             tooltip.add(Text.translatable("item.simplyswords.onrightclick").formatted(Formatting.BOLD, Formatting.GREEN));
             tooltip.add(Text.translatable("item.simplyswords.wardsworditem.tooltip2"));
@@ -290,7 +288,7 @@ public class UniqueSwordItem extends SwordItem {
         }
         if (itemStack.getOrCreateNbt().getString("runic_power").equals("immolation")) {
 
-            tooltip.add(Text.translatable("item.simplyswords.immolationsworditem.tooltip1").formatted(Formatting.AQUA, Formatting.BOLD));
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.runefused_power.immolation").formatted(Formatting.AQUA));
             tooltip.add(Text.literal(""));
             tooltip.add(Text.translatable("item.simplyswords.onrightclick").formatted(Formatting.BOLD, Formatting.GREEN));
             tooltip.add(Text.translatable("item.simplyswords.immolationsworditem.tooltip2"));

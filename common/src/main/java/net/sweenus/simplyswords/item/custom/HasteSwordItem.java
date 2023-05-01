@@ -19,12 +19,13 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
+import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 
 import java.util.List;
 
-public class HasteSwordItem extends SwordItem {
+public class HasteSwordItem extends UniqueSwordItem {
     public HasteSwordItem(ToolMaterial toolMaterial, int attackDamage, float attackSpeed, Settings settings) {
         super(toolMaterial, attackDamage, attackSpeed, settings);
     }
@@ -122,6 +123,7 @@ public class HasteSwordItem extends SwordItem {
         tooltip.add(new TranslatableText("item.simplyswords.ferocitysworditem.tooltip6"));
 
          */
+        super.appendTooltip(itemStack,world, tooltip, tooltipContext);
     }
 
 }

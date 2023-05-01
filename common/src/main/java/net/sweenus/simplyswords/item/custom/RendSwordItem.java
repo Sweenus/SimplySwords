@@ -22,12 +22,13 @@ import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
+import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 
 import java.util.List;
 
-public class RendSwordItem extends SwordItem {
+public class RendSwordItem extends UniqueSwordItem {
     public RendSwordItem(ToolMaterial toolMaterial, int attackDamage, float attackSpeed, Settings settings) {
         super(toolMaterial, attackDamage, attackSpeed, settings);
     }
@@ -173,6 +174,7 @@ public class RendSwordItem extends SwordItem {
         tooltip.add(new TranslatableText("item.simplyswords.rendsworditem.tooltip6"));
 
          */
+        super.appendTooltip(itemStack,world, tooltip, tooltipContext);
     }
 
 }

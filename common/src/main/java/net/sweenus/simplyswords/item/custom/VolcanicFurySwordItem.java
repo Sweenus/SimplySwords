@@ -24,13 +24,14 @@ import net.minecraft.util.UseAction;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
+import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.AbilityMethods;
 import net.sweenus.simplyswords.util.HelperMethods;
 
 import java.util.List;
 
-public class VolcanicFurySwordItem extends SwordItem {
+public class VolcanicFurySwordItem extends UniqueSwordItem {
     public VolcanicFurySwordItem(ToolMaterial toolMaterial, int attackDamage, float attackSpeed, Settings settings) {
         super(toolMaterial, attackDamage, attackSpeed, settings);
     }
@@ -183,6 +184,8 @@ public class VolcanicFurySwordItem extends SwordItem {
         tooltip.add(Text.translatable("item.simplyswords.volcanicfurysworditem.tooltip7"));
         tooltip.add(Text.translatable("item.simplyswords.volcanicfurysworditem.tooltip8"));
         tooltip.add(Text.translatable("item.simplyswords.volcanicfurysworditem.tooltip9"));
+
+        super.appendTooltip(itemStack,world, tooltip, tooltipContext);
     }
 
 }

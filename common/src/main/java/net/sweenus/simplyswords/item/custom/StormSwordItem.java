@@ -15,13 +15,14 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
+import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 
 import java.util.List;
 
-public class StormSwordItem extends SwordItem {
+public class StormSwordItem extends UniqueSwordItem {
     public StormSwordItem(ToolMaterial toolMaterial, int attackDamage, float attackSpeed, Settings settings) {
         super(toolMaterial, attackDamage, attackSpeed, settings);
     }
@@ -79,6 +80,7 @@ public class StormSwordItem extends SwordItem {
         tooltip.add(new TranslatableText("item.simplyswords.stormsworditem.tooltip2"));
         tooltip.add(new TranslatableText("item.simplyswords.stormsworditem.tooltip3"));
          */
+        super.appendTooltip(itemStack,world, tooltip, tooltipContext);
     }
 
 }

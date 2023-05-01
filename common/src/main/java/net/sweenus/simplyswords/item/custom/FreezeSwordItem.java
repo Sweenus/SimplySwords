@@ -12,11 +12,12 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
+import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 
 import java.util.List;
 
-public class FreezeSwordItem extends SwordItem {
+public class FreezeSwordItem extends UniqueSwordItem {
     public FreezeSwordItem(ToolMaterial toolMaterial, int attackDamage, float attackSpeed, Settings settings) {
         super(toolMaterial, attackDamage, attackSpeed, settings);
     }
@@ -53,6 +54,7 @@ public class FreezeSwordItem extends SwordItem {
         tooltip.add(new TranslatableText("item.simplyswords.freezesworditem.tooltip2"));
 
                  */
+        super.appendTooltip(itemStack,world, tooltip, tooltipContext);
     }
 
 }

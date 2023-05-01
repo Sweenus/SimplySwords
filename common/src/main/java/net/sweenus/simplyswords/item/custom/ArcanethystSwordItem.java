@@ -24,13 +24,14 @@ import net.minecraft.util.UseAction;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
+import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.AbilityMethods;
 import net.sweenus.simplyswords.util.HelperMethods;
 
 import java.util.List;
 
-public class ArcanethystSwordItem extends SwordItem {
+public class ArcanethystSwordItem extends UniqueSwordItem {
     public ArcanethystSwordItem(ToolMaterial toolMaterial, int attackDamage, float attackSpeed, Settings settings) {
         super(toolMaterial, attackDamage, attackSpeed, settings);
     }
@@ -144,6 +145,8 @@ public class ArcanethystSwordItem extends SwordItem {
         tooltip.add(Text.translatable("item.simplyswords.arcanethystsworditem.tooltip6"));
         tooltip.add(Text.translatable("item.simplyswords.arcanethystsworditem.tooltip7"));
         tooltip.add(Text.literal(""));
+
+        super.appendTooltip(itemStack,world, tooltip, tooltipContext);
 
     }
 

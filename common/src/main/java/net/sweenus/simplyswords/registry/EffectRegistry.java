@@ -27,5 +27,7 @@ public class EffectRegistry {
             new WardEffect(StatusEffectCategory.BENEFICIAL, 1124687));
     public static final RegistrySupplier<StatusEffect> IMMOLATION = EFFECT.register("immolation", () ->
             new ImmolationEffect(StatusEffectCategory.BENEFICIAL, 1124687));
+    public static final RegistrySupplier<StatusEffect> ECHO = EFFECT.register("echo", () ->
+            new EchoEffect(StatusEffectCategory.HARMFUL, 1124687));
 
 }

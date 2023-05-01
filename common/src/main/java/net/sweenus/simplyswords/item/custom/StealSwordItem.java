@@ -24,12 +24,13 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
+import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 
 import java.util.List;
 
-public class StealSwordItem extends SwordItem {
+public class StealSwordItem extends UniqueSwordItem {
     public StealSwordItem(ToolMaterial toolMaterial, int attackDamage, float attackSpeed, Settings settings) {
         super(toolMaterial, attackDamage, attackSpeed, settings);
     }
@@ -213,6 +214,7 @@ public class StealSwordItem extends SwordItem {
         tooltip.add(new TranslatableText("item.simplyswords.stealsworditem.tooltip10"));
 
  */
+        super.appendTooltip(itemStack,world, tooltip, tooltipContext);
     }
 
 }

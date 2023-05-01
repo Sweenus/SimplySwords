@@ -15,13 +15,14 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
+import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 
 import java.util.List;
 
-public class WatcherSwordItem extends SwordItem {
+public class WatcherSwordItem extends UniqueSwordItem {
     public WatcherSwordItem(ToolMaterial toolMaterial, int attackDamage, float attackSpeed, Settings settings) {
         super(toolMaterial, attackDamage, attackSpeed, settings);
     }
@@ -99,6 +100,7 @@ public class WatcherSwordItem extends SwordItem {
         tooltip.add(new TranslatableText("item.simplyswords.watchersworditem.tooltip7"));
 
                  */
+        super.appendTooltip(itemStack,world, tooltip, tooltipContext);
     }
 
 }

@@ -23,6 +23,7 @@ import net.minecraft.util.UseAction;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
+import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.AbilityMethods;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -30,7 +31,7 @@ import net.sweenus.simplyswords.util.HelperMethods;
 import java.util.List;
 import java.util.Objects;
 
-public class StormbringerSwordItem extends SwordItem {
+public class StormbringerSwordItem extends UniqueSwordItem {
 
     private static int stepMod = 0;
     int radius = 3;
@@ -180,6 +181,7 @@ public class StormbringerSwordItem extends SwordItem {
         tooltip.add(Text.translatable("item.simplyswords.stormbringersworditem.tooltip10"));
         tooltip.add(Text.translatable("item.simplyswords.stormbringersworditem.tooltip11"));
 
+        super.appendTooltip(itemStack,world, tooltip, tooltipContext);
     }
 
 }

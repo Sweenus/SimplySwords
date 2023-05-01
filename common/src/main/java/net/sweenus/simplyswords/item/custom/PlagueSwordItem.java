@@ -14,11 +14,12 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
+import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.util.HelperMethods;
 
 import java.util.List;
 
-public class PlagueSwordItem extends SwordItem {
+public class PlagueSwordItem extends UniqueSwordItem {
     public PlagueSwordItem(ToolMaterial toolMaterial, int attackDamage, float attackSpeed, Settings settings) {
         super(toolMaterial, attackDamage, attackSpeed, settings);
     }
@@ -147,6 +148,8 @@ public class PlagueSwordItem extends SwordItem {
         tooltip.add(new TranslatableText("item.simplyswords.plaguesworditem.tooltip3"));
 
          */
+
+        super.appendTooltip(itemStack,world, tooltip, tooltipContext);
     }
 
 }

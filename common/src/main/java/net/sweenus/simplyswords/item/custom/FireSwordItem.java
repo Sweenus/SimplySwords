@@ -20,12 +20,13 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.explosion.Explosion;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
+import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 
 import java.util.List;
 
-public class FireSwordItem extends SwordItem {
+public class FireSwordItem extends UniqueSwordItem {
     public FireSwordItem(ToolMaterial toolMaterial, int attackDamage, float attackSpeed, Settings settings) {
         super(toolMaterial, attackDamage, attackSpeed, settings);
     }
@@ -97,6 +98,7 @@ public class FireSwordItem extends SwordItem {
         tooltip.add(new TranslatableText("item.simplyswords.firesworditem.tooltip2"));
 
          */
+        super.appendTooltip(itemStack,world, tooltip, tooltipContext);
     }
 
 }
