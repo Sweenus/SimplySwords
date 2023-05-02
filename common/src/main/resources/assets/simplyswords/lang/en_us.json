@@ -741,5 +741,10 @@
   "item.simplyswords.uniquesworditem.netherfused_power.echo.description2": "additional unmitigated damage ",
   "item.simplyswords.uniquesworditem.netherfused_power.echo.description3": "after a short delay.",
 
+  "item.simplyswords.uniquesworditem.netherfused_power.berserk": "[ Netherfused: Berserk ]",
+  "item.simplyswords.uniquesworditem.netherfused_power.berserk.description": "When you have an armour value less",
+  "item.simplyswords.uniquesworditem.netherfused_power.berserk.description2": "than 10, your weapon swings siphon ",
+  "item.simplyswords.uniquesworditem.netherfused_power.berserk.description3": "health from the target.",
+
   "item.simplyswords.common.blacklisteffect": "ABILITY DISABLED"
 }

@@ -300,7 +300,7 @@ public class RunicMethods {
                 SoundCategory.PLAYERS, 0.1f, 1.8f);
     }
 
-    // Runic Power - SLOW
+    // Nether Power - ECHO
     public static void postHitNetherEcho(ItemStack stack,  LivingEntity target, LivingEntity attacker) {
         int amp = 0;
         //increase damage if 2H wep
@@ -320,6 +320,31 @@ public class RunicMethods {
         )
             amp = 2;
         target.addStatusEffect(new StatusEffectInstance(EffectRegistry.ECHO.get(), 20, amp), attacker);
+    }
+
+    // Nether Power - ECHO
+    public static void postHitNetherBerserk(ItemStack stack,  LivingEntity target, LivingEntity attacker) {
+        int amp = 2;
+        //increase damage if 2H wep
+        if (stack.isOf(ItemsRegistry.SOULPYRE.get()) ||
+                stack.isOf(ItemsRegistry.SOULKEEPER.get()) ||
+                stack.isOf(ItemsRegistry.TWISTED_BLADE.get()) ||
+                stack.isOf(ItemsRegistry.HEARTHFLAME.get()) ||
+                stack.isOf(ItemsRegistry.SOULRENDER.get()) ||
+                stack.isOf(ItemsRegistry.SLUMBERING_LICHBLADE.get()) ||
+                stack.isOf(ItemsRegistry.WAKING_LICHBLADE.get()) ||
+                stack.isOf(ItemsRegistry.AWAKENED_LICHBLADE.get()) ||
+                stack.isOf(ItemsRegistry.BRIMSTONE_CLAYMORE.get()) ||
+                stack.isOf(ItemsRegistry.ICEWHISPER.get()) ||
+                stack.isOf(ItemsRegistry.ARCANETHYST.get()) ||
+                stack.isOf(ItemsRegistry.THUNDERBRAND.get()) ||
+                stack.isOf(ItemsRegistry.WATCHER_CLAYMORE.get())
+        )
+            amp = 4;
+        if (attacker.getArmor() < 10) {
+            target.setHealth(target.getHealth() - amp);
+            attacker.heal((float) amp / 2);
+        }
     }
 
 

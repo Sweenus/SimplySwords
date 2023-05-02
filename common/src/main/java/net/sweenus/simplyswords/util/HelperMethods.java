@@ -136,7 +136,7 @@ public class HelperMethods {
 
     public static String chooseNetherfusedPower() {
         List<String> runicList = Arrays.asList(
-                "echo", "echo");
+                "echo", "berserk");
 
         for (int i = 0; i < 100; i++) {
             Random choose = new Random();

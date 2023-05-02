@@ -71,6 +71,14 @@ public class NetherfusedGemItem extends Item {
             tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.echo.description3"));
 
         }
+        if (itemStack.getOrCreateNbt().getString("nether_power").equals("berserk")) {
+
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.berserk").formatted(Formatting.RED));
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.berserk.description"));
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.berserk.description2"));
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.berserk.description3"));
+
+        }
 
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.gem_description").formatted(Formatting.GRAY, Formatting.ITALIC));

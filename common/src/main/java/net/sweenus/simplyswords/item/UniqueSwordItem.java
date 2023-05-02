@@ -179,6 +179,10 @@ public class UniqueSwordItem extends SwordItem {
             if (stack.getOrCreateNbt().getString("nether_power").equals("echo")) {
                 RunicMethods.postHitNetherEcho(stack, target, attacker);
             }
+            //BERSERK
+            if (stack.getOrCreateNbt().getString("nether_power").equals("berserk")) {
+                RunicMethods.postHitNetherBerserk(stack, target, attacker);
+            }
 
         }
 
@@ -343,6 +347,14 @@ public class UniqueSwordItem extends SwordItem {
             tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.echo.description"));
             tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.echo.description2"));
             tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.echo.description3"));
+
+        }
+        if (itemStack.getOrCreateNbt().getString("nether_power").equals("berserk")) {
+
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.berserk").formatted(Formatting.RED));
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.berserk.description"));
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.berserk.description2"));
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.berserk.description3"));
 
         }
 
