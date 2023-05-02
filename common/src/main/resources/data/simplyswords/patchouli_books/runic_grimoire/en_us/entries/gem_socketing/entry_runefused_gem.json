@@ -1,0 +1,20 @@
+{
+  "name": "Runefused Gem",
+  "icon": "simplyswords:runefused_gem",
+  "category": "simplyswords:category_gem_socketing",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:runefused_gem",
+      "text": "Runefused Gems can be obtained by combining an Empowered Remnant and a Runic Tablet within a smithing table. Once identified, these gems will reveal a random runic power housed within the gem."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Runefused Gems can be socketed onto Unique weapons that contain an empty [ runefused socket ]. These gems are only capable of housing Runic Powers of the 'On hit' variety."
+    },
+    {
+      "type": "patchouli:smithing",
+      "recipe": "simplyswords:runefused_gem"
+    }
+  ]
+}

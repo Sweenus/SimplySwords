@@ -1,0 +1,20 @@
+{
+  "name": "Netherfused Gem",
+  "icon": "simplyswords:netherfused_gem",
+  "category": "simplyswords:category_gem_socketing",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:netherfused_gem",
+      "text": "Netherfused Gems can be obtained by combining an Empowered Remnant and a Netherite Ingot within a smithing table. Once identified, these gems will reveal a random power housed within the gem."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Netherfused Gems can be socketed onto Unique weapons that contain an empty [ netherfused socket ]."
+    },
+    {
+      "type": "patchouli:smithing",
+      "recipe": "simplyswords:netherfused_gem"
+    }
+  ]
+}

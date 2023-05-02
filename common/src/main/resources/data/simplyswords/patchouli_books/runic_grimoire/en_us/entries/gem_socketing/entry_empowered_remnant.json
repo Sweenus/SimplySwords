@@ -1,0 +1,20 @@
+{
+  "name": "Empowered Remnant",
+  "icon": "simplyswords:empowered_remnant",
+  "category": "simplyswords:category_gem_socketing",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:empowered_remnant",
+      "text": "Empowered Remnants can be obtained my melting down unique weapons in a furnace. The weapon is destroyed and a small portion of its power will remain in the form of an Empowered Remnant."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "When this item is combined in a smithing table with a catalyst, such as a Runic Tablet or a Netherite Ingot, a gem can be formed. These gems can be then be socketed into matching sockets on unique weapons, allowing you to empower them in various ways."
+    },
+    {
+      "type": "patchouli:smelting",
+      "recipe": "simplyswords:soulrender"
+    }
+  ]
+}
