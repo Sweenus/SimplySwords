@@ -57,7 +57,8 @@ public class UniqueSwordItem extends SwordItem {
     public boolean onClicked(ItemStack stack, ItemStack otherStack, Slot slot, ClickType clickType, PlayerEntity player,
                              StackReference cursorStackReference) {
         if (stack.getOrCreateNbt().getString("runic_power").equals("socket_empty") ||
-                (stack.getOrCreateNbt().getString("nether_power").equals("socket_empty"))) {
+                (stack.getOrCreateNbt().getString("nether_power").equals("socket_empty")) &&
+                        SimplySwordsConfig.getBooleanValue("enable_unique_gem_sockets")) {
 
             if (otherStack.isOf(ItemsRegistry.RUNEFUSED_GEM.get())) {
                 //When clicked on with a Runefused Gem, copy the runic power and delete the gem
