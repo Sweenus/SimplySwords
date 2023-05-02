@@ -19,11 +19,10 @@ public class EchoEffect extends StatusEffect {
     @Override
     public void applyUpdateEffect(LivingEntity pLivingEntity, int pAmplifier) {
         if (!pLivingEntity.world.isClient()) {
-            if (pLivingEntity instanceof PlayerEntity) {
-                if (pLivingEntity.age % 10 == 0) {
-                    pLivingEntity.damage(DamageSource.MAGIC, 3f + pAmplifier);
-                    pLivingEntity.removeStatusEffect(EffectRegistry.ECHO.get());
-                }
+            if (pLivingEntity.age % 15 == 0) {
+                //Subtracting health to ignore iframes
+                pLivingEntity.setHealth(pLivingEntity.getHealth() - (2+pAmplifier));
+                pLivingEntity.removeStatusEffect(EffectRegistry.ECHO.get());
             }
         }
 

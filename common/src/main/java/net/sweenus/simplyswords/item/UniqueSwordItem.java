@@ -1,11 +1,9 @@
 package net.sweenus.simplyswords.item;
 
 import net.minecraft.client.item.TooltipContext;
-import net.minecraft.client.sound.SoundManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.StackReference;
 import net.minecraft.item.ItemStack;
@@ -20,9 +18,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.*;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
-import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
-import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.RunicMethods;
 
@@ -37,15 +33,46 @@ public class UniqueSwordItem extends SwordItem {
     }
 
     @Override
+    public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
+
+        //Socket rolling
+        if (stack.getOrCreateNbt().getString("runic_power").isEmpty() || stack.getOrCreateNbt().getString("nether_power").isEmpty()) {
+            float socketChance = (float) (Math.random() * 100);
+            float socketChance2 = (float) (Math.random() * 100);
+            if (socketChance > 49)
+                stack.getOrCreateNbt().putString("runic_power", "socket_empty");
+            else if (socketChance < 50)
+                stack.getOrCreateNbt().putString("runic_power", "no_socket");
+            if (socketChance2 > 49)
+                stack.getOrCreateNbt().putString("nether_power", "socket_empty");
+            else if (socketChance2 < 50)
+                stack.getOrCreateNbt().putString("nether_power", "no_socket");
+        }
+
+
+        super.inventoryTick(stack, world, entity, slot, selected);
+    }
+
+    @Override
     public boolean onClicked(ItemStack stack, ItemStack otherStack, Slot slot, ClickType clickType, PlayerEntity player,
                              StackReference cursorStackReference) {
-        if (stack.getOrCreateNbt().getString("runic_power").isEmpty() && otherStack.isOf(ItemsRegistry.RUNEFUSED_GEM.get())) {
+        if (stack.getOrCreateNbt().getString("runic_power").equals("socket_empty") ||
+                (stack.getOrCreateNbt().getString("nether_power").equals("socket_empty"))) {
 
-            //When clicked on with a Runefused Gem, copy the runic power and delete the gem
-            String runicPowerSelection = otherStack.getOrCreateNbt().getString("runic_power");
-            stack.getOrCreateNbt().putString("runic_power", runicPowerSelection);
-            player.world.playSoundFromEntity(null, player, SoundEvents.BLOCK_ANVIL_USE, SoundCategory.BLOCKS, 1, 1);
-            otherStack.decrement(1);
+            if (otherStack.isOf(ItemsRegistry.RUNEFUSED_GEM.get())) {
+                //When clicked on with a Runefused Gem, copy the runic power and delete the gem
+                String runicPowerSelection = otherStack.getOrCreateNbt().getString("runic_power");
+                stack.getOrCreateNbt().putString("runic_power", runicPowerSelection);
+                player.world.playSoundFromEntity(null, player, SoundEvents.BLOCK_ANVIL_USE, SoundCategory.BLOCKS, 1, 1);
+                otherStack.decrement(1);
+            }
+            else if (otherStack.isOf(ItemsRegistry.NETHERFUSED_GEM.get())) {
+                //When clicked on with a Netherfused Gem, copy the nether power and delete the gem
+                String netherPowerSelection = otherStack.getOrCreateNbt().getString("nether_power");
+                stack.getOrCreateNbt().putString("nether_power", netherPowerSelection);
+                player.world.playSoundFromEntity(null, player, SoundEvents.BLOCK_ANVIL_USE, SoundCategory.BLOCKS, 1, 1);
+                otherStack.decrement(1);
+            }
         }
 
         return false;
@@ -146,6 +173,13 @@ public class UniqueSwordItem extends SwordItem {
                 RunicMethods.postHitRunicGreaterPinCushion(stack, target, attacker);
             }
 
+
+
+            //ECHO
+            if (stack.getOrCreateNbt().getString("nether_power").equals("echo")) {
+                RunicMethods.postHitNetherEcho(stack, target, attacker);
+            }
+
         }
 
         return super.postHit(stack, target, attacker);
@@ -159,9 +193,8 @@ public class UniqueSwordItem extends SwordItem {
         if (itemStack.getOrCreateNbt().getString("runic_power").contains("greater"))
             tooltip.add(Text.translatable("item.simplyswords.greater_runic_power").formatted(Formatting.DARK_AQUA));
 
-        if (itemStack.getOrCreateNbt().getString("runic_power").isEmpty()) {
+        if (itemStack.getOrCreateNbt().getString("runic_power").contains("socket_empty")) {
 
-            //tooltip.add(Text.translatable("item.simplyswords.unidentifiedsworditem.tooltip1").formatted(Formatting.AQUA));
             tooltip.add(Text.translatable("item.simplyswords.empty_runic_slot").formatted(Formatting.GRAY));
 
         }
@@ -294,6 +327,22 @@ public class UniqueSwordItem extends SwordItem {
             tooltip.add(Text.translatable("item.simplyswords.immolationsworditem.tooltip2"));
             tooltip.add(Text.translatable("item.simplyswords.immolationsworditem.tooltip3"));
             tooltip.add(Text.translatable("item.simplyswords.immolationsworditem.tooltip4"));
+
+        }
+
+        tooltip.add(Text.literal(""));
+        if (itemStack.getOrCreateNbt().getString("nether_power").contains("socket_empty")) {
+
+            tooltip.add(Text.translatable("item.simplyswords.empty_nether_slot").formatted(Formatting.GRAY));
+
+        }
+
+        if (itemStack.getOrCreateNbt().getString("nether_power").equals("echo")) {
+
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.echo").formatted(Formatting.RED));
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.echo.description"));
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.echo.description2"));
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.echo.description3"));
 
         }
 

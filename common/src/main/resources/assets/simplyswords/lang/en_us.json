@@ -105,6 +105,7 @@
 
   "item.simplyswords.runic_tablet": "Runic Tablet",
   "item.simplyswords.runefused_gem": "Runefused Gem",
+  "item.simplyswords.netherfused_gem": "Netherfused Gem",
   "item.simplyswords.empowered_remnant": "Empowered Remnant",
 
 
@@ -475,7 +476,12 @@
   "item.simplyswords.runefused_power": "Runefused Power:",
   "item.simplyswords.gem_description": "Can be socketed into a matching",
   "item.simplyswords.gem_description2": "gem socket on a unique weapon.",
-  "item.simplyswords.empty_runic_slot": "[ empty rune slot ]",
+  "item.simplyswords.remnant_description": "Smith with a Runic Tablet or",
+  "item.simplyswords.remnant_description2": "Netherite Ingot to create a gem",
+  "item.simplyswords.remnant_description3": "that can be socketed into unique",
+  "item.simplyswords.remnant_description4": "weapons.",
+  "item.simplyswords.empty_runic_slot": "[ empty rune socket ]",
+  "item.simplyswords.empty_nether_slot": "[ empty nether socket ]",
   "item.simplyswords.filled_runic_slot": "[ runefused gem ]",
 
 
@@ -727,6 +733,13 @@
   "item.simplyswords.immolationsworditem.tooltip4": "damage scales with your current HP.",
   "item.simplyswords.unidentifiedsworditem.tooltip1": "Runic Power: ????",
   "item.simplyswords.unidentifiedsworditem.tooltip2": "Click to identify.",
+
+
+
+  "item.simplyswords.uniquesworditem.netherfused_power.echo": "[ Netherfused: Echo ]",
+  "item.simplyswords.uniquesworditem.netherfused_power.echo.description": "Your weapon swings echo, dealing",
+  "item.simplyswords.uniquesworditem.netherfused_power.echo.description2": "additional unmitigated damage ",
+  "item.simplyswords.uniquesworditem.netherfused_power.echo.description3": "after a short delay.",
 
   "item.simplyswords.common.blacklisteffect": "ABILITY DISABLED"
 }

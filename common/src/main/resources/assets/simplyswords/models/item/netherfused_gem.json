@@ -1,0 +1,7 @@
+{
+	"parent": "minecraft:item/generated",
+	"textures": {
+		"layer0": "simplyswords:item/gem",
+		"layer1": "simplyswords:item/runefused_gem_bg"
+	}
+}

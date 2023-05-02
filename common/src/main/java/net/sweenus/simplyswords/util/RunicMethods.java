@@ -16,12 +16,14 @@ import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
 import net.sweenus.simplyswords.registry.EffectRegistry;
+import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 
 import static java.lang.Math.round;
@@ -282,6 +284,7 @@ public class RunicMethods {
         }
     }
 
+
     // Runic Power - PinCushion
     public static void postHitRunicPinCushion(ItemStack stack,  LivingEntity target, LivingEntity attacker) {
         int stuckArrows = attacker.getStuckArrowCount();
@@ -295,6 +298,28 @@ public class RunicMethods {
         target.damage(DamageSource.GENERIC, stuckArrows * 2);
         attacker.world.playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
                 SoundCategory.PLAYERS, 0.1f, 1.8f);
+    }
+
+    // Runic Power - SLOW
+    public static void postHitNetherEcho(ItemStack stack,  LivingEntity target, LivingEntity attacker) {
+        int amp = 0;
+        //increase damage if 2H wep
+        if (stack.isOf(ItemsRegistry.SOULPYRE.get()) ||
+                stack.isOf(ItemsRegistry.SOULKEEPER.get()) ||
+                stack.isOf(ItemsRegistry.TWISTED_BLADE.get()) ||
+                stack.isOf(ItemsRegistry.HEARTHFLAME.get()) ||
+                stack.isOf(ItemsRegistry.SOULRENDER.get()) ||
+                stack.isOf(ItemsRegistry.SLUMBERING_LICHBLADE.get()) ||
+                stack.isOf(ItemsRegistry.WAKING_LICHBLADE.get()) ||
+                stack.isOf(ItemsRegistry.AWAKENED_LICHBLADE.get()) ||
+                stack.isOf(ItemsRegistry.BRIMSTONE_CLAYMORE.get()) ||
+                stack.isOf(ItemsRegistry.ICEWHISPER.get()) ||
+                stack.isOf(ItemsRegistry.ARCANETHYST.get()) ||
+                stack.isOf(ItemsRegistry.THUNDERBRAND.get()) ||
+                stack.isOf(ItemsRegistry.WATCHER_CLAYMORE.get())
+        )
+            amp = 2;
+        target.addStatusEffect(new StatusEffectInstance(EffectRegistry.ECHO.get(), 20, amp), attacker);
     }
 
 

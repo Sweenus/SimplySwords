@@ -256,28 +256,28 @@ public class RunicSwordItem extends SwordItem {
         }
         if (!world.isClient && (entity instanceof PlayerEntity player)) {
 
-            //UNSTABLE
-            if (stack.getOrCreateNbt().getString("runic_power").equals("unstable")) {
-                if (player.getEquippedStack(EquipmentSlot.MAINHAND) == stack || player.getEquippedStack(EquipmentSlot.OFFHAND) == stack) {
-                    RunicMethods.inventoryTickRunicUnstable(stack, world, player, slot, selected);
-                }
+        //UNSTABLE
+        if (stack.getOrCreateNbt().getString("runic_power").equals("unstable")) {
+            if (player.getEquippedStack(EquipmentSlot.MAINHAND) == stack || player.getEquippedStack(EquipmentSlot.OFFHAND) == stack) {
+                RunicMethods.inventoryTickRunicUnstable(stack, world, player, slot, selected);
             }
-            //ACTIVE DEFENCE
-            if (stack.getOrCreateNbt().getString("runic_power").equals("active_defence")) {
-                if (player.getEquippedStack(EquipmentSlot.MAINHAND) == stack || player.getEquippedStack(EquipmentSlot.OFFHAND) == stack) {
-                    RunicMethods.inventoryTickRunicActiveDefence(stack, world, player, slot, selected);
-                }
-            }
-            //FROST WARD
-            if (stack.getOrCreateNbt().getString("runic_power").equals("frost_ward")) {
-                if (player.getEquippedStack(EquipmentSlot.MAINHAND) == stack || player.getEquippedStack(EquipmentSlot.OFFHAND) == stack) {
-                    RunicMethods.inventoryTickRunicFrostWard(stack, world, player, slot, selected);
-                }
-            }
-
-            super.inventoryTick(stack, world, entity, slot, selected);
         }
+        //ACTIVE DEFENCE
+        if (stack.getOrCreateNbt().getString("runic_power").equals("active_defence")) {
+            if (player.getEquippedStack(EquipmentSlot.MAINHAND) == stack || player.getEquippedStack(EquipmentSlot.OFFHAND) == stack) {
+                RunicMethods.inventoryTickRunicActiveDefence(stack, world, player, slot, selected);
+            }
+        }
+        //FROST WARD
+        if (stack.getOrCreateNbt().getString("runic_power").equals("frost_ward")) {
+            if (player.getEquippedStack(EquipmentSlot.MAINHAND) == stack || player.getEquippedStack(EquipmentSlot.OFFHAND) == stack) {
+                RunicMethods.inventoryTickRunicFrostWard(stack, world, player, slot, selected);
+            }
+        }
+
+        super.inventoryTick(stack, world, entity, slot, selected);
     }
+}
 
     @Override
     public void onCraft(ItemStack stack, World world, PlayerEntity player)
