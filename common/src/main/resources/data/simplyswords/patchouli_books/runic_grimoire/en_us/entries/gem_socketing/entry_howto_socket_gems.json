@@ -1,0 +1,16 @@
+{
+  "name": "Socketing Gems",
+  "icon": "simplyswords:netherfused_gem",
+  "category": "simplyswords:category_gem_socketing",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:netherfused_gem",
+      "text": "To socket a gem you must have within your inventory both the gem and a unique weapon with an empty socket of the same type (runefused / netherfused)."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "With your inventory open, left click on the gem so that it anchors to your cursor. Then, simply left click on the weapon you would like to socket. The gem will disappear from your cursor and your unique weapon will be socketed."
+    }
+  ]
+}
