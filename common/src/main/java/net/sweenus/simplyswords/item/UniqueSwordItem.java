@@ -184,6 +184,14 @@ public class UniqueSwordItem extends SwordItem {
             if (stack.getOrCreateNbt().getString("nether_power").equals("berserk")) {
                 RunicMethods.postHitNetherBerserk(stack, target, attacker);
             }
+            //RADIANCE
+            if (stack.getOrCreateNbt().getString("nether_power").equals("radiance")) {
+                RunicMethods.postHitNetherRadiance(stack, target, attacker);
+            }
+            //ONSLAUGHT
+            if (stack.getOrCreateNbt().getString("nether_power").equals("onslaught")) {
+                RunicMethods.postHitNetherOnslaught(stack, target, attacker);
+            }
 
         }
 
@@ -356,6 +364,25 @@ public class UniqueSwordItem extends SwordItem {
             tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.berserk.description"));
             tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.berserk.description2"));
             tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.berserk.description3"));
+
+        }
+        if (itemStack.getOrCreateNbt().getString("nether_power").equals("radiance")) {
+
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.radiance").formatted(Formatting.RED));
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.radiance.description"));
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.radiance.description2"));
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.radiance.description3"));
+
+        }
+        if (itemStack.getOrCreateNbt().getString("nether_power").equals("onslaught")) {
+
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.onslaught").formatted(Formatting.RED));
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.onslaught.description"));
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.onslaught.description2"));
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.onslaught.description3"));
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.onslaught.description4"));
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.onslaught.description5"));
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.onslaught.description6"));
 
         }
 

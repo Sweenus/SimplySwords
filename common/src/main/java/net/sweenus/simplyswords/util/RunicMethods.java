@@ -304,46 +304,34 @@ public class RunicMethods {
     public static void postHitNetherEcho(ItemStack stack,  LivingEntity target, LivingEntity attacker) {
         int amp = 0;
         //increase damage if 2H wep
-        if (stack.isOf(ItemsRegistry.SOULPYRE.get()) ||
-                stack.isOf(ItemsRegistry.SOULKEEPER.get()) ||
-                stack.isOf(ItemsRegistry.TWISTED_BLADE.get()) ||
-                stack.isOf(ItemsRegistry.HEARTHFLAME.get()) ||
-                stack.isOf(ItemsRegistry.SOULRENDER.get()) ||
-                stack.isOf(ItemsRegistry.SLUMBERING_LICHBLADE.get()) ||
-                stack.isOf(ItemsRegistry.WAKING_LICHBLADE.get()) ||
-                stack.isOf(ItemsRegistry.AWAKENED_LICHBLADE.get()) ||
-                stack.isOf(ItemsRegistry.BRIMSTONE_CLAYMORE.get()) ||
-                stack.isOf(ItemsRegistry.ICEWHISPER.get()) ||
-                stack.isOf(ItemsRegistry.ARCANETHYST.get()) ||
-                stack.isOf(ItemsRegistry.THUNDERBRAND.get()) ||
-                stack.isOf(ItemsRegistry.WATCHER_CLAYMORE.get())
-        )
+        if (HelperMethods.isUniqueTwohanded(stack))
             amp = 2;
         target.addStatusEffect(new StatusEffectInstance(EffectRegistry.ECHO.get(), 20, amp), attacker);
     }
 
-    // Nether Power - ECHO
+    // Nether Power - BERSERK
     public static void postHitNetherBerserk(ItemStack stack,  LivingEntity target, LivingEntity attacker) {
         int amp = 2;
         //increase damage if 2H wep
-        if (stack.isOf(ItemsRegistry.SOULPYRE.get()) ||
-                stack.isOf(ItemsRegistry.SOULKEEPER.get()) ||
-                stack.isOf(ItemsRegistry.TWISTED_BLADE.get()) ||
-                stack.isOf(ItemsRegistry.HEARTHFLAME.get()) ||
-                stack.isOf(ItemsRegistry.SOULRENDER.get()) ||
-                stack.isOf(ItemsRegistry.SLUMBERING_LICHBLADE.get()) ||
-                stack.isOf(ItemsRegistry.WAKING_LICHBLADE.get()) ||
-                stack.isOf(ItemsRegistry.AWAKENED_LICHBLADE.get()) ||
-                stack.isOf(ItemsRegistry.BRIMSTONE_CLAYMORE.get()) ||
-                stack.isOf(ItemsRegistry.ICEWHISPER.get()) ||
-                stack.isOf(ItemsRegistry.ARCANETHYST.get()) ||
-                stack.isOf(ItemsRegistry.THUNDERBRAND.get()) ||
-                stack.isOf(ItemsRegistry.WATCHER_CLAYMORE.get())
-        )
+        if (HelperMethods.isUniqueTwohanded(stack))
             amp = 4;
         if (attacker.getArmor() < 10) {
             target.setHealth(target.getHealth() - amp);
             attacker.heal((float) amp / 2);
+        }
+    }
+
+    // Nether Power - RADIANCE
+    public static void postHitNetherRadiance(ItemStack stack,  LivingEntity target, LivingEntity attacker) {
+        if (target.hasStatusEffect(StatusEffects.WEAKNESS)) {
+            attacker.addStatusEffect(new StatusEffectInstance(EffectRegistry.IMMOLATION.get(), 100, 0), attacker);
+        }
+    }
+
+    // Nether Power - ONSLAUGHT
+    public static void postHitNetherOnslaught(ItemStack stack,  LivingEntity target, LivingEntity attacker) {
+        if (target.hasStatusEffect(StatusEffects.SLOWNESS) && !attacker.hasStatusEffect(StatusEffects.WEAKNESS)) {
+            attacker.addStatusEffect(new StatusEffectInstance(EffectRegistry.ONSLAUGHT.get(), 80, 0), attacker);
         }
     }
 

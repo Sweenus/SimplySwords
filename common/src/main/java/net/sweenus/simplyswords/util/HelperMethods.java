@@ -3,6 +3,8 @@ package net.sweenus.simplyswords.util;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.decoration.ArmorStandEntity;
+import net.minecraft.entity.passive.VillagerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileUtil;
 import net.minecraft.item.ItemStack;
@@ -15,6 +17,7 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
+import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 
 import java.util.Arrays;
@@ -47,13 +50,24 @@ public class HelperMethods {
         else return false;
     }
 
+    //Check if we should be able to hit the target
     public static boolean checkFriendlyFire (LivingEntity livingEntity, PlayerEntity player) {
-        if (livingEntity == null || player == null) {
+        if (livingEntity == null || player == null)
             return false;
-        }
+        if (!checkEntityBlacklist(livingEntity, player))
+            return false;
         if (livingEntity instanceof PlayerEntity playerEntity) {
             return playerEntity.shouldDamagePlayer(player);
         } else {return true;}
+    }
+
+    //Check if the target matches blacklisted entities (expand this to be configurable if there is demand)
+    public static boolean checkEntityBlacklist (LivingEntity livingEntity, PlayerEntity player) {
+        if (livingEntity == null || player == null) {
+            return false;
+        }
+        return !(livingEntity instanceof ArmorStandEntity)
+                && !(livingEntity instanceof VillagerEntity);
     }
 
 
@@ -92,7 +106,7 @@ public class HelperMethods {
         }
     }
 
-    // chooseRunicPower
+    // choose Powers from provided list
     public static String chooseRunicPower() {
         List<String> runicList = Arrays.asList(
                 "active_defence", "float", "greater_float", "freeze", "shielding", "greater_shielding", "slow",
@@ -136,17 +150,28 @@ public class HelperMethods {
 
     public static String chooseNetherfusedPower() {
         List<String> runicList = Arrays.asList(
-                "echo", "berserk");
+            "echo", "berserk", "radiance", "onslaught");
 
-        for (int i = 0; i < 100; i++) {
-            Random choose = new Random();
-            int randomIndex = choose.nextInt(runicList.size());
-            String runicSelection = runicList.get(randomIndex);
+        Random choose = new Random();
+        int randomIndex = choose.nextInt(runicList.size());
+        return runicList.get(randomIndex);
+    }
 
-            return runicSelection;
-        }
-
-        return "";
+    //Check if item is a unique 2H weapon
+    public static boolean isUniqueTwohanded(ItemStack stack) {
+        return stack.isOf(ItemsRegistry.SOULPYRE.get()) ||
+                stack.isOf(ItemsRegistry.SOULKEEPER.get()) ||
+                stack.isOf(ItemsRegistry.TWISTED_BLADE.get()) ||
+                stack.isOf(ItemsRegistry.HEARTHFLAME.get()) ||
+                stack.isOf(ItemsRegistry.SOULRENDER.get()) ||
+                stack.isOf(ItemsRegistry.SLUMBERING_LICHBLADE.get()) ||
+                stack.isOf(ItemsRegistry.WAKING_LICHBLADE.get()) ||
+                stack.isOf(ItemsRegistry.AWAKENED_LICHBLADE.get()) ||
+                stack.isOf(ItemsRegistry.BRIMSTONE_CLAYMORE.get()) ||
+                stack.isOf(ItemsRegistry.ICEWHISPER.get()) ||
+                stack.isOf(ItemsRegistry.ARCANETHYST.get()) ||
+                stack.isOf(ItemsRegistry.THUNDERBRAND.get()) ||
+                stack.isOf(ItemsRegistry.WATCHER_CLAYMORE.get());
     }
 
     // createFootfalls - creates weapon footfall particle effects (footsteps)

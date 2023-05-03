@@ -492,6 +492,9 @@
   "effect.simplyswords.watcher": "Watcher",
   "effect.simplyswords.electric": "Lightning",
   "effect.simplyswords.wildfire": "Wildfire",
+  "effect.simplyswords.ward": "Ward",
+  "effect.simplyswords.immolation": "Immolation",
+  "effect.simplyswords.Onslaught": "Onslaught",
 
   "item.simplyswords.onrightclick": "On Right Click:",
   "item.simplyswords.onrightclickheld": "Hold Right Click:",
@@ -745,6 +748,19 @@
   "item.simplyswords.uniquesworditem.netherfused_power.berserk.description": "When you have an armour value less",
   "item.simplyswords.uniquesworditem.netherfused_power.berserk.description2": "than 10, your weapon swings siphon ",
   "item.simplyswords.uniquesworditem.netherfused_power.berserk.description3": "health from the target.",
+
+  "item.simplyswords.uniquesworditem.netherfused_power.radiance": "[ Netherfused: Radiance ]",
+  "item.simplyswords.uniquesworditem.netherfused_power.radiance.description": "When hitting a target afflicted",
+  "item.simplyswords.uniquesworditem.netherfused_power.radiance.description2": "with weakness, gain Immolation",
+  "item.simplyswords.uniquesworditem.netherfused_power.radiance.description3": "for a short duration.",
+
+  "item.simplyswords.uniquesworditem.netherfused_power.onslaught": "[ Netherfused: Onslaught ]",
+  "item.simplyswords.uniquesworditem.netherfused_power.onslaught.description": "When hitting a target afflicted",
+  "item.simplyswords.uniquesworditem.netherfused_power.onslaught.description2": "with slowness, gain Onslaught",
+  "item.simplyswords.uniquesworditem.netherfused_power.onslaught.description3": "for a short duration.",
+  "item.simplyswords.uniquesworditem.netherfused_power.onslaught.description4": "(Onslaught grants you pulsing",
+  "item.simplyswords.uniquesworditem.netherfused_power.onslaught.description5": "haste, but inflicts you with",
+  "item.simplyswords.uniquesworditem.netherfused_power.onslaught.description6": "weakness when it expires).",
 
   "item.simplyswords.common.blacklisteffect": "ABILITY DISABLED"
 }

@@ -79,6 +79,25 @@ public class NetherfusedGemItem extends Item {
             tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.berserk.description3"));
 
         }
+        if (itemStack.getOrCreateNbt().getString("nether_power").equals("radiance")) {
+
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.radiance").formatted(Formatting.RED));
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.radiance.description"));
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.radiance.description2"));
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.radiance.description3"));
+
+        }
+        if (itemStack.getOrCreateNbt().getString("nether_power").equals("onslaught")) {
+
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.onslaught").formatted(Formatting.RED));
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.onslaught.description"));
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.onslaught.description2"));
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.onslaught.description3"));
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.onslaught.description4"));
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.onslaught.description5"));
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.onslaught.description6"));
+
+        }
 
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.gem_description").formatted(Formatting.GRAY, Formatting.ITALIC));

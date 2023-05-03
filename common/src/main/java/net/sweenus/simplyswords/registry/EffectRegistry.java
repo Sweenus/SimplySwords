@@ -29,5 +29,7 @@ public class EffectRegistry {
             new ImmolationEffect(StatusEffectCategory.BENEFICIAL, 1124687));
     public static final RegistrySupplier<StatusEffect> ECHO = EFFECT.register("echo", () ->
             new EchoEffect(StatusEffectCategory.HARMFUL, 1124687));
+    public static final RegistrySupplier<StatusEffect> ONSLAUGHT = EFFECT.register("onslaught", () ->
+            new OnslaughtEffect(StatusEffectCategory.BENEFICIAL, 1124687));
 
 }

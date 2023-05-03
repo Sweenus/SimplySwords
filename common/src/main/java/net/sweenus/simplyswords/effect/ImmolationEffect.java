@@ -11,6 +11,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.SwordItem;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.util.math.Box;
@@ -30,11 +31,18 @@ public class ImmolationEffect extends StatusEffect {
     @Override
     public void applyUpdateEffect(LivingEntity pLivingEntity, int pAmplifier) {
         if (!pLivingEntity.world.isClient()) {
-            if (pLivingEntity instanceof PlayerEntity) {
+            if (pLivingEntity instanceof PlayerEntity player) {
                 if (pLivingEntity.age % 40 == 0) {
-                    pLivingEntity.damage(DamageSource.ON_FIRE, 1f);
+                    if (!player.isCreative())
+                        pLivingEntity.setHealth(pLivingEntity.getHealth() - 0.5f);
 
-                    PlayerEntity player = (PlayerEntity) pLivingEntity;
+                    player.world.playSoundFromEntity(null, player, SoundRegistry.ELEMENTAL_BOW_FIRE_SHOOT_IMPACT_02.get(),
+                            SoundCategory.PLAYERS, 0.3f, 1f);
+                    HelperMethods.spawnParticle(player.world, ParticleTypes.LAVA, player.getX(), player.getY()+0.5, player.getZ(), 0.3, 0.8, 0.2);
+                    HelperMethods.spawnParticle(player.world, ParticleTypes.LAVA, player.getX(), player.getY()+0.5, player.getZ(), -0.2, 0.6, 0.3);
+                    HelperMethods.spawnParticle(player.world, ParticleTypes.LAVA, player.getX(), player.getY()+0.5, player.getZ(), 0.5, 0.3, -0.2);
+                    HelperMethods.spawnParticle(player.world, ParticleTypes.SMOKE, player.getX(), player.getY()+0.5, player.getZ(), 0, 0, 0);
+
                     int radius = 3;
                     float abilityDamage = (player.getHealth() / 6);
 
@@ -47,7 +55,8 @@ public class ImmolationEffect extends StatusEffect {
                         if (player.getMainHandStack().hasNbt()) {
                             NbtCompound rpnbt = player.getMainHandStack().getNbt();
                             if (rpnbt != null) {
-                                if (!player.getMainHandStack().getNbt().getString("runic_power").equals("immolation")) {
+                                if (!player.getMainHandStack().getNbt().getString("runic_power").equals("immolation")
+                                        && !player.getMainHandStack().getNbt().getString("nether_power").equals("radiance")) {
                                     player.removeStatusEffect(EffectRegistry.IMMOLATION.get());
                                 }
                             }
@@ -56,7 +65,8 @@ public class ImmolationEffect extends StatusEffect {
                         if (player.getMainHandStack().hasNbt()) {
                             NbtCompound rpnbt = player.getOffHandStack().getNbt();
                             if (rpnbt != null) {
-                                if (!player.getOffHandStack().getNbt().getString("runic_power").equals("immolation")) {
+                                if (!player.getOffHandStack().getNbt().getString("runic_power").equals("immolation")
+                                        && !player.getOffHandStack().getNbt().getString("nether_power").equals("radiance")) {
                                     player.removeStatusEffect(EffectRegistry.IMMOLATION.get());
                                 }
                             }
