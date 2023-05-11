@@ -20,8 +20,8 @@ public class EchoEffect extends StatusEffect {
     public void applyUpdateEffect(LivingEntity pLivingEntity, int pAmplifier) {
         if (!pLivingEntity.world.isClient()) {
             if (pLivingEntity.age % 15 == 0) {
-                //Subtracting health to ignore iframes
-                pLivingEntity.setHealth(pLivingEntity.getHealth() - (2+pAmplifier));
+                pLivingEntity.timeUntilRegen = 0;
+                pLivingEntity.damage(DamageSource.MAGIC, 2+pAmplifier);
                 pLivingEntity.removeStatusEffect(EffectRegistry.ECHO.get());
             }
         }

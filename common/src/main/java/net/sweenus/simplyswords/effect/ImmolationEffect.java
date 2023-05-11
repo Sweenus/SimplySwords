@@ -33,7 +33,7 @@ public class ImmolationEffect extends StatusEffect {
         if (!pLivingEntity.world.isClient()) {
             if (pLivingEntity instanceof PlayerEntity player) {
                 if (pLivingEntity.age % 40 == 0) {
-                    if (!player.isCreative())
+                    if (!player.isCreative() && player.getHealth() > 4f)
                         pLivingEntity.setHealth(pLivingEntity.getHealth() - 0.5f);
 
                     player.world.playSoundFromEntity(null, player, SoundRegistry.ELEMENTAL_BOW_FIRE_SHOOT_IMPACT_02.get(),
@@ -75,7 +75,7 @@ public class ImmolationEffect extends StatusEffect {
                     else {player.removeStatusEffect(EffectRegistry.IMMOLATION.get());}
 
                     //Check low HP. Remove effect if close to death
-                    if (player.getHealth() < 2f)
+                    if (player.getHealth() < 4f)
                         player.removeStatusEffect(EffectRegistry.IMMOLATION.get());
 
 

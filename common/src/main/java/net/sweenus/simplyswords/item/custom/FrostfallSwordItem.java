@@ -71,8 +71,10 @@ public class FrostfallSwordItem extends UniqueSwordItem {
                             BlockPos pos = new BlockPos(le.getX(), le.getY(), le.getZ());
                             BlockPos pos2 = new BlockPos(le.getX(), le.getY() + 1, le.getZ());
                             BlockState state = Blocks.ICE.getDefaultState();
-                            world.setBlockState(pos, state);
-                            world.setBlockState(pos2, state);
+                            if (world.getBlockState(pos) == Blocks.AIR.getDefaultState())
+                                world.setBlockState(pos, state);
+                            if (world.getBlockState(pos2) == Blocks.AIR.getDefaultState())
+                                world.setBlockState(pos2, state);
                         }
                     }
                 }
