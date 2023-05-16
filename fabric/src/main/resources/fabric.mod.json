@@ -22,6 +22,9 @@
     ],
     "main": [
       "net.sweenus.simplyswords.fabric.SimplySwordsFabric"
+    ],
+    "preLaunch": [
+      "net.sweenus.simplyswords.fabric.SimplySwordsPreLaunch"
     ]
   },
   "mixins": [
