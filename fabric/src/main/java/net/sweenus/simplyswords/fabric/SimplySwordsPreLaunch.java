@@ -22,5 +22,5 @@ public class SimplySwordsPreLaunch implements PreLaunchEntrypoint {
     public void onPreLaunch() {
         configDetect();
     }
-
+//
 }
