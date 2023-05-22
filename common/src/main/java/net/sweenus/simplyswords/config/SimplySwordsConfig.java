@@ -228,6 +228,14 @@ public class SimplySwordsConfig {
         FLOAT_OPTIONS.put("shadowmist_blind_duration", 60f);
         FLOAT_OPTIONS.put("shadowmist_radius", 4f);
 
+        FLOAT_OPTIONS.put("abyssalstandard_cooldown", 700f);
+        FLOAT_OPTIONS.put("abyssalstandard_chance", 15f);
+        FLOAT_OPTIONS.put("abyssalstandard_damage", 3f);
+
+        FLOAT_OPTIONS.put("righteousstandard_cooldown", 700f);
+        FLOAT_OPTIONS.put("righteousstandard_chance", 15f);
+        FLOAT_OPTIONS.put("righteousstandard_damage", 3f);
+
 
         GENERAL_OPTIONS.put("standard_loot_table_weight", 0.01f);
         GENERAL_OPTIONS.put("rare_loot_table_weight", 0.008f);
@@ -269,6 +277,7 @@ public class SimplySwordsConfig {
         BOOLEAN_OPTIONS.put("brimstone_claymore", true);
         BOOLEAN_OPTIONS.put("slumbering_lichblade", true);
         BOOLEAN_OPTIONS.put("shadowsting", true);
+        BOOLEAN_OPTIONS.put("dormant_relic", true);
 
         BOOLEAN_OPTIONS.put("active_defence", true);
         BOOLEAN_OPTIONS.put("float", true);
@@ -498,7 +507,7 @@ public class SimplySwordsConfig {
                 config.append("// --------------------------------------------------------------------------------------------------------------------------------- \n");
                 config.append("\n");
             }
-            if (i == 31) {
+            if (i == 32) {
                 config.append("\n");
                 config.append("// --------------------------------------------- RUNIC BLACKLISTING ----------------------------------------------------------------- \n");
                 config.append("// Setting any of the below values to false will prevent that runic power from being obtainable. \n");
@@ -841,6 +850,18 @@ public class SimplySwordsConfig {
                 config.append("// -- Unique Effect: Shadowmist -- \n");
                 config.append("// ------------------------------- \n");
             }
+            if (i == 118) {
+                config.append("\n");
+                config.append("// ------------------------------------- \n");
+                config.append("// -- Unique Effect: Abyssal Standard -- \n");
+                config.append("// ------------------------------------- \n");
+            }
+            if (i == 121) {
+                config.append("\n");
+                config.append("// --------------------------------------- \n");
+                config.append("// -- Unique Effect: Righteous Standard -- \n");
+                config.append("// --------------------------------------- \n");
+            }
             config.append("  \"").append(item).append("\": ").append(FLOAT_OPTIONS.get(item));
             ++i;
             if (i < FLOAT_OPTIONS.size()) {
@@ -895,7 +916,7 @@ public class SimplySwordsConfig {
                 config.append("// Example use-case: Adding 3 to a value below will INCREASE the in-game damage of that weapon by 3 \n");
                 config.append("// ---------------------- \n");
             }
-            if (i == 98) {
+            if (i ==101) {
                 config.append("\n");
                 config.append("// -- Attack Speed Modifiers -- \n");
                 config.append("// Recommended range: -1.0 to -3.7, with -1.0 being fast and -3.7 being slow \n");

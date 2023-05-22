@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "#": {
+      "item": "minecraft:eye_of_ender"
+    },
+    "X": {
+      "item": "simplyswords:tainted_relic"
+    },
+    "O": {
+      "item": "simplyswords:runic_tablet"
+    },
+    "S": {
+      "item": "minecraft:skulk_catalyst"
+    }
+  },
+  "pattern": [
+    "#O#",
+    "OXO",
+    "#S#"
+  ],
+  "result": {
+    "item": "simplyswords:harbinger"
+  }
+}

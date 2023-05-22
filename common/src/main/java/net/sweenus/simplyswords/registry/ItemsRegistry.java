@@ -94,6 +94,10 @@ public class ItemsRegistry {
     static float thunderbrand_attackspeed = SimplySwordsConfig.getWeaponAttributes("thunderbrand_attackspeed");
     static float lichblade_attackspeed = SimplySwordsConfig.getWeaponAttributes("lichblade_attackspeed");
     static float shadowsting_attackspeed = SimplySwordsConfig.getWeaponAttributes("shadowsting_attackspeed");
+    static float sunfire_attackspeed = SimplySwordsConfig.getWeaponAttributes("sunfire_attackspeed");
+    static float harbinger_attackspeed = SimplySwordsConfig.getWeaponAttributes("harbinger_attackspeed");
+
+
 
     static float brimstone_damage_modifier = SimplySwordsConfig.getWeaponAttributes("brimstone_damage_modifier");
     static float thewatcher_damage_modifier = SimplySwordsConfig.getWeaponAttributes("thewatcher_damage_modifier");
@@ -120,6 +124,9 @@ public class ItemsRegistry {
     static float thunderbrand_damage_modifier = SimplySwordsConfig.getWeaponAttributes("thunderbrand_damage_modifier");
     static float lichblade_damage_modifier = SimplySwordsConfig.getWeaponAttributes("lichblade_damage_modifier");
     static float shadowsting_damage_modifier = SimplySwordsConfig.getWeaponAttributes("shadowsting_damage_modifier");
+    static float sunfire_damage_modifier = SimplySwordsConfig.getWeaponAttributes("sunfire_damage_modifier");
+    static float harbinger_damage_modifier = SimplySwordsConfig.getWeaponAttributes("harbinger_damage_modifier");
+
 
     public static final DeferredRegister<Item> ITEM = DeferredRegister.create(SimplySwords.MOD_ID, Registry.ITEM_KEY);
 
@@ -795,36 +802,36 @@ public class ItemsRegistry {
                     shadowsting_attackspeed,
                     new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof()));
 
-    public static final RegistrySupplier<HolySwordItem> UNIQUELONGSWORDHOLY = ITEM.register( "unique_longsword_holy", () ->
-            new HolySwordItem(ModToolMaterial.UNIQUE,
-                    (int) (emberblade_damage_modifier),
-                    emberblade_attackspeed,
+    public static final RegistrySupplier<SunfireSwordItem> SUNFIRE = ITEM.register( "sunfire", () ->
+            new SunfireSwordItem(ModToolMaterial.UNIQUE,
+                    (int) (sunfire_damage_modifier),
+                    sunfire_attackspeed,
                     new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof()));
 
-    public static final RegistrySupplier<HarbingerSwordItem> UNIQUELONGSWORDTAINTED = ITEM.register( "unique_longsword_tainted", () ->
+    public static final RegistrySupplier<HarbingerSwordItem> HARBINGER = ITEM.register( "harbinger", () ->
             new HarbingerSwordItem(ModToolMaterial.UNIQUE,
-                    (int) (emberblade_damage_modifier),
-                    emberblade_attackspeed,
-                    new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof()));
-/*
-    public static final RegistrySupplier<EmberIreSwordItem> UNIQUELONGSWORDDULL = ITEM.register( "unique_longsword_dull", () ->
-            new EmberIreSwordItem(ModToolMaterial.UNIQUE,
-                    (int) (emberblade_damage_modifier),
-                    emberblade_attackspeed,
+                    (int) (harbinger_damage_modifier),
+                    harbinger_attackspeed,
                     new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof()));
 
-    public static final RegistrySupplier<EmberIreSwordItem> UNIQUELONGSWORDDULLHOLY = ITEM.register( "unique_longsword_holy_dull", () ->
-            new EmberIreSwordItem(ModToolMaterial.UNIQUE,
-                    (int) (emberblade_damage_modifier),
-                    emberblade_attackspeed,
+    public static final RegistrySupplier<DormantRelicSwordItem> DORMANT_RELIC = ITEM.register( "dormant_relic", () ->
+            new DormantRelicSwordItem(ModToolMaterial.UNIQUE,
+                    (int) (sunfire_damage_modifier),
+                    sunfire_attackspeed,
                     new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof()));
 
-    public static final RegistrySupplier<EmberIreSwordItem> UNIQUELONGSWORDDULLTAINTED = ITEM.register( "unique_longsword_tainted_dull", () ->
-            new EmberIreSwordItem(ModToolMaterial.UNIQUE,
-                    (int) (emberblade_damage_modifier),
-                    emberblade_attackspeed,
+    public static final RegistrySupplier<RighteousRelicSwordItem> RIGHTEOUS_RELIC = ITEM.register( "righteous_relic", () ->
+            new RighteousRelicSwordItem(ModToolMaterial.UNIQUE,
+                    (int) (sunfire_damage_modifier),
+                    sunfire_attackspeed,
                     new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof()));
- */
+
+    public static final RegistrySupplier<TaintedRelicSwordItem> TAINTED_RELIC = ITEM.register( "tainted_relic", () ->
+            new TaintedRelicSwordItem(ModToolMaterial.UNIQUE,
+                    (int) (harbinger_damage_modifier),
+                    harbinger_attackspeed,
+                    new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof()));
+
 
 
 }

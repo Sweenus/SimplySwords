@@ -8,6 +8,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
@@ -27,16 +29,13 @@ import net.sweenus.simplyswords.util.HelperMethods;
 
 import java.util.List;
 
-public class HolySwordItem extends UniqueSwordItem {
+public class SunfireSwordItem extends UniqueSwordItem {
 
     private static int stepMod = 0;
-    int skillCooldown = (int) (SimplySwordsConfig.getFloatValue("shadowmist_cooldown"));
-    int abilityChance =  (int) (SimplySwordsConfig.getFloatValue("shadowmist_chance"));
-    int damageArmorMultiplier = (int) (SimplySwordsConfig.getFloatValue("shadowmist_damage_multiplier"));
-    int blindDuration = (int) (SimplySwordsConfig.getFloatValue("shadowmist_blind_duration"));
-    int radius = (int) (SimplySwordsConfig.getFloatValue("shadowmist_radius"));
+    int skillCooldown = (int) (SimplySwordsConfig.getFloatValue("righteousstandard_cooldown"));
+    int abilityChance =  (int) (SimplySwordsConfig.getFloatValue("righteousstandard_chance"));
 
-    public HolySwordItem(ToolMaterial toolMaterial, int attackDamage, float attackSpeed, Settings settings) {
+    public SunfireSwordItem(ToolMaterial toolMaterial, int attackDamage, float attackSpeed, Settings settings) {
         super(toolMaterial, attackDamage, attackSpeed, settings);
     }
 
@@ -50,9 +49,9 @@ public class HolySwordItem extends UniqueSwordItem {
         if (!attacker.world.isClient()) {
 
             if (attacker.getRandom().nextInt(100) <= abilityChance && (attacker instanceof PlayerEntity player)) {
-                attacker.world.playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(), SoundCategory.PLAYERS, 0.3f, 1.8f);
-                int extraDamage = target.getArmor() * damageArmorMultiplier;
-                target.damage(DamageSource.MAGIC,  extraDamage);
+                attacker.world.playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(), SoundCategory.PLAYERS, 0.3f, 1.7f);
+                attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.REGENERATION, 40, 0), attacker);
+
             }
         }
 
@@ -93,23 +92,22 @@ public class HolySwordItem extends UniqueSwordItem {
 
     @Override
     public Text getName(ItemStack stack) {
-        return Text.translatable(this.getTranslationKey(stack)).formatted(Formatting.GOLD, Formatting.BOLD, Formatting.UNDERLINE);
+        return Text.translatable(this.getTranslationKey(stack)).formatted(Formatting.DARK_RED, Formatting.BOLD, Formatting.UNDERLINE);
     }
 
     @Override
     public void appendTooltip(ItemStack itemStack, World world, List<Text> tooltip, TooltipContext tooltipContext) {
 
-        //1.19
-
         tooltip.add(Text.literal(""));
-        tooltip.add(Text.translatable("item.simplyswords.shadowmistsworditem.tooltip1").formatted(Formatting.GOLD, Formatting.BOLD));
+        tooltip.add(Text.translatable("item.simplyswords.sunfiresworditem.tooltip1").formatted(Formatting.GOLD, Formatting.BOLD));
         tooltip.add(Text.literal(""));
-        tooltip.add(Text.translatable("item.simplyswords.shadowmistsworditem.tooltip2"));
-        tooltip.add(Text.translatable("item.simplyswords.shadowmistsworditem.tooltip3"));
+        tooltip.add(Text.translatable("item.simplyswords.sunfiresworditem.tooltip2"));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").formatted(Formatting.BOLD, Formatting.GREEN));
-        tooltip.add(Text.translatable("item.simplyswords.shadowmistsworditem.tooltip4"));
-        tooltip.add(Text.translatable("item.simplyswords.shadowmistsworditem.tooltip5"));
+        tooltip.add(Text.translatable("item.simplyswords.sunfiresworditem.tooltip3"));
+        tooltip.add(Text.translatable("item.simplyswords.sunfiresworditem.tooltip4"));
+        tooltip.add(Text.translatable("item.simplyswords.sunfiresworditem.tooltip5"));
+        tooltip.add(Text.translatable("item.simplyswords.sunfiresworditem.tooltip6"));
 
         super.appendTooltip(itemStack,world, tooltip, tooltipContext);
     }

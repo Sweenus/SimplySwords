@@ -19,12 +19,13 @@ import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
+import net.sweenus.simplyswords.config.SimplySwordsConfig;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 
 public class BattleStandardEntity extends PathAwareEntity {
     public static final Supplier<EntityType<BattleStandardEntity>> TYPE = Suppliers.memoize(() -> EntityType.Builder.create(BattleStandardEntity::new, SpawnGroup.MISC).build("battlestandard"));
-    public static PlayerEntity ownerEntity;
+    int abilityDamage =  (int) (SimplySwordsConfig.getFloatValue("abyssalstandard_damage"));
 
     public static DefaultAttributeContainer.Builder createBattleStandardAttributes() {
         return MobEntity.createMobAttributes().add(EntityAttributes.GENERIC_MAX_HEALTH, 150.0).add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.0f)
@@ -34,12 +35,6 @@ public class BattleStandardEntity extends PathAwareEntity {
     public BattleStandardEntity(EntityType<? extends PathAwareEntity> entityType, World world) {
         super(entityType, world);
     }
-
-    public void setOwner(PlayerEntity playerEntity) {
-        ownerEntity = playerEntity;
-        this.setOwner(ownerEntity);
-    }
-
 
     @Override
     public void baseTick() {
