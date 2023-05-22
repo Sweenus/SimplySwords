@@ -2,7 +2,10 @@ package net.sweenus.simplyswords.entity;
 
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
-import net.minecraft.entity.*;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.SpawnGroup;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
@@ -10,14 +13,12 @@ import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.mob.PathAwareEntity;
-import net.minecraft.entity.passive.CowEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
-import net.sweenus.simplyswords.registry.EntityRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 
@@ -69,8 +70,8 @@ public class BattleStandardEntity extends PathAwareEntity {
             }
 
 
-            if (this.age % 90 == 0) {
-                world.playSoundFromEntity(null, this, SoundRegistry.DARK_SWORD_BLOCK.get(), SoundCategory.PLAYERS, 0.1f, 0.2f);
+            if (this.age % 80 == 0) {
+                world.playSoundFromEntity(null, this, SoundRegistry.ELEMENTAL_BOW_EARTH_SHOOT_IMPACT_02.get(), SoundCategory.PLAYERS, 0.1f, 0.6f);
                 double xpos = this.getX() - (radius + 1);
                 double ypos = this.getY();
                 double zpos = this.getZ() - (radius + 1);
@@ -78,14 +79,14 @@ public class BattleStandardEntity extends PathAwareEntity {
                 for (int i = radius * 2; i > 0; i--) {
                     for (int j = radius * 2; j > 0; j--) {
                             float choose = (float) (Math.random() * 1);
-                            HelperMethods.spawnParticle(world, ParticleTypes.CAMPFIRE_SIGNAL_SMOKE, xpos + i + choose,
+                            HelperMethods.spawnParticle(world, ParticleTypes.CAMPFIRE_COSY_SMOKE, xpos + i + choose,
                                     ypos + 0.1,
                                     zpos + j + choose,
-                                    0, 0, 0);
-                            HelperMethods.spawnParticle(world, ParticleTypes.CAMPFIRE_SIGNAL_SMOKE, xpos + i + choose,
+                                    0, -0.1, 0);
+                            HelperMethods.spawnParticle(world, ParticleTypes.CAMPFIRE_COSY_SMOKE, xpos + i + choose,
                                     ypos + 0.1,
                                     zpos + j + choose,
-                                    0, 0, 0);
+                                    0, -0.1, 0);
                         }
                     }
             }

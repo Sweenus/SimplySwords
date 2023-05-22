@@ -5,33 +5,25 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.particle.ParticleTypes;
-import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.registry.EntityRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
-import org.apache.logging.log4j.core.jmx.Server;
 
 import java.util.List;
 
@@ -72,11 +64,14 @@ public class HolySwordItem extends UniqueSwordItem {
         ItemStack itemStack = user.getStackInHand(hand);
         if (!user.world.isClient()) {
             ServerWorld serverWorld = (ServerWorld) user.world;
-            world.playSoundFromEntity(null, user, SoundRegistry.ELEMENTAL_SWORD_EARTH_ATTACK_01.get(), SoundCategory.PLAYERS, 0.4f, 1.6f);
-            BlockState currentState = world.getBlockState(user.getBlockPos().up(3).offset(user.getMovementDirection(), 3));
+            BlockState currentState = world.getBlockState(user.getBlockPos().up(4).offset(user.getMovementDirection(), 3));
             BlockState state = Blocks.AIR.getDefaultState();
             if (currentState == state ) {
-                Entity banner = EntityRegistry.BATTLESTANDARD.get().spawn(serverWorld, null, Text.translatable( "entity.simplyswords.battlestandard.name",user.getName()), user, user.getBlockPos().up(3).offset(user.getMovementDirection(), 3), SpawnReason.MOB_SUMMONED, true, true);
+                world.playSoundFromEntity(null, user, SoundRegistry.ELEMENTAL_SWORD_EARTH_ATTACK_01.get(), SoundCategory.PLAYERS, 0.4f, 0.8f);
+                Entity banner = EntityRegistry.BATTLESTANDARD.get().spawn(serverWorld, null, Text.translatable( "entity.simplyswords.battlestandard.name",user.getName()), user, user.getBlockPos().up(4).offset(user.getMovementDirection(), 3), SpawnReason.MOB_SUMMONED, true, true);
+                if (banner != null) {
+                    banner.setVelocity(0, -1, 0);
+                }
                 user.getItemCooldownManager().set(this.getDefaultStack().getItem(), skillCooldown);
             }
         }

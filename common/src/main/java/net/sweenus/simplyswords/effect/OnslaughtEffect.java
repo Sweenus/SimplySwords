@@ -1,20 +1,12 @@
 package net.sweenus.simplyswords.effect;
 
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectCategory;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.SwordItem;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.predicate.entity.EntityPredicates;
-import net.minecraft.util.math.Box;
 import net.sweenus.simplyswords.registry.EffectRegistry;
-import net.sweenus.simplyswords.util.HelperMethods;
 
 public class OnslaughtEffect extends StatusEffect {
     public OnslaughtEffect(StatusEffectCategory statusEffectCategory, int color) {

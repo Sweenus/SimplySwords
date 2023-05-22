@@ -1,10 +1,8 @@
 package net.sweenus.simplyswords.fabric;
 
-import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.entrypoint.PreLaunchEntrypoint;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
 
-import javax.naming.spi.DirectoryManager;
 import java.io.File;
 
 public class SimplySwordsPreLaunch implements PreLaunchEntrypoint {
