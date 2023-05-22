@@ -2,12 +2,25 @@ package net.sweenus.simplyswords;
 
 import com.google.gson.JsonObject;
 import dev.architectury.registry.CreativeTabRegistry;
+import dev.architectury.registry.client.level.entity.EntityModelLayerRegistry;
+import dev.architectury.registry.client.level.entity.EntityRendererRegistry;
+import dev.architectury.registry.level.entity.EntityAttributeRegistry;
+import net.minecraft.client.render.entity.model.EntityModelLayer;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.attribute.DefaultAttributeContainer;
+import net.minecraft.entity.passive.CowEntity;
+import net.minecraft.client.render.entity.CowEntityRenderer;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
+import net.sweenus.simplyswords.client.renderer.BattleStandardRenderer;
+import net.sweenus.simplyswords.client.renderer.model.BattleStandardModel;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
+import net.sweenus.simplyswords.entity.BattleStandardEntity;
 import net.sweenus.simplyswords.registry.EffectRegistry;
+import net.sweenus.simplyswords.registry.EntityRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.ModLootTableModifiers;
@@ -15,6 +28,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
+import java.util.function.Supplier;
 
 public class SimplySwords {
     public static final String MOD_ID = "simplyswords";
@@ -26,6 +40,7 @@ public class SimplySwords {
 
     public static boolean isConfigOutdated;
 
+    public static final EntityModelLayer BATTLESTANDARD_MODEL = new EntityModelLayer(new Identifier("battlestandard", "cube"), "main");
     public static void init() {
 
         //CONFIG
@@ -64,7 +79,12 @@ public class SimplySwords {
         ItemsRegistry.ITEM.register();
         SoundRegistry.SOUND.register();
         EffectRegistry.EFFECT.register();
+        EntityRegistry.ENTITIES.register();
+        EntityAttributeRegistry.register(EntityRegistry.BATTLESTANDARD, BattleStandardEntity::createBattleStandardAttributes);
+        EntityRendererRegistry.register(EntityRegistry.BATTLESTANDARD, BattleStandardRenderer::new);
+        EntityModelLayerRegistry.register(BATTLESTANDARD_MODEL, BattleStandardModel::getTexturedModelData);
         ModLootTableModifiers.init();
+
         //Don't announce via in-game chat because that's kinda annoying
         //ClientPlayerEvent.CLIENT_PLAYER_JOIN.register(new EventGameStart());
         

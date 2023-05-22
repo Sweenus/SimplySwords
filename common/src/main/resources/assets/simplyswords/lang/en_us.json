@@ -762,5 +762,7 @@
   "item.simplyswords.uniquesworditem.netherfused_power.onslaught.description5": "haste, but inflicts you with",
   "item.simplyswords.uniquesworditem.netherfused_power.onslaught.description6": "weakness when it expires).",
 
-  "item.simplyswords.common.blacklisteffect": "ABILITY DISABLED"
+  "item.simplyswords.common.blacklisteffect": "ABILITY DISABLED",
+
+  "entity.simplyswords.battlestandard.name": "%d's Battle Standard"
 }
