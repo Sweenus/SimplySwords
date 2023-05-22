@@ -434,6 +434,8 @@ public class SimplySwordsConfig {
         WEAPON_OPTIONS.put("thunderbrand_damage_modifier", 7f);
         WEAPON_OPTIONS.put("lichblade_damage_modifier", 7f);
         WEAPON_OPTIONS.put("shadowsting_damage_modifier", -2f);
+        WEAPON_OPTIONS.put("sunfire_damage_modifier", 3f);
+        WEAPON_OPTIONS.put("harbinger_damage_modifier", 3f);
 
         WEAPON_OPTIONS.put("brimstone_attackspeed", -2.8f);
         WEAPON_OPTIONS.put("thewatcher_attackspeed", -2.8f);
@@ -460,6 +462,8 @@ public class SimplySwordsConfig {
         WEAPON_OPTIONS.put("thunderbrand_attackspeed", -2.7f);
         WEAPON_OPTIONS.put("lichblade_attackspeed", -3.1f);
         WEAPON_OPTIONS.put("shadowsting_attackspeed", -1.7f);
+        WEAPON_OPTIONS.put("sunfire_attackspeed", -2.4f);
+        WEAPON_OPTIONS.put("harbinger_attackspeed", -2.4f);
 
     }
 

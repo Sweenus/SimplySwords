@@ -71,9 +71,7 @@ public class DormantRelicSwordItem extends UniqueSwordItem {
     public void appendTooltip(ItemStack itemStack, World world, List<Text> tooltip, TooltipContext tooltipContext) {
 
         tooltip.add(Text.literal(""));
-        tooltip.add(Text.translatable("item.simplyswords.sunfiresworditem.tooltip1").formatted(Formatting.GOLD, Formatting.BOLD));
-        tooltip.add(Text.literal(""));
-        tooltip.add(Text.translatable("item.simplyswords.dormantrelicworditem.tooltip2"));
+        tooltip.add(Text.translatable("item.simplyswords.dormantrelicsworditem.tooltip2"));
 
         super.appendTooltip(itemStack,world, tooltip, tooltipContext);
     }

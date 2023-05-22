@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "key": {
     "#": {
-      "item": "minecraft:eye_of_ender"
+      "item": "minecraft:ender_eye"
     },
     "X": {
       "item": "simplyswords:tainted_relic"
@@ -11,7 +11,7 @@
       "item": "simplyswords:runic_tablet"
     },
     "S": {
-      "item": "minecraft:skulk_catalyst"
+      "item": "minecraft:sculk_catalyst"
     }
   },
   "pattern": [

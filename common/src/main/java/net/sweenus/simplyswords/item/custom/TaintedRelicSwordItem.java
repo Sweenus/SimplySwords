@@ -77,11 +77,11 @@ public class TaintedRelicSwordItem extends UniqueSwordItem {
     public void appendTooltip(ItemStack itemStack, World world, List<Text> tooltip, TooltipContext tooltipContext) {
 
         tooltip.add(Text.literal(""));
-        tooltip.add(Text.translatable("item.simplyswords.sunfiresworditem.tooltip1").formatted(Formatting.GOLD, Formatting.BOLD));
+        tooltip.add(Text.translatable("item.simplyswords.harbingersworditem.tooltip1").formatted(Formatting.GOLD, Formatting.BOLD));
         tooltip.add(Text.literal(""));
-        tooltip.add(Text.translatable("item.simplyswords.sunfiresworditem.tooltip2"));
+        tooltip.add(Text.translatable("item.simplyswords.harbingersworditem.tooltip2"));
         tooltip.add(Text.literal(""));
-        tooltip.add(Text.translatable("item.simplyswords.poweredrelicworditem.tooltip2"));
+        tooltip.add(Text.translatable("item.simplyswords.poweredrelicsworditem.tooltip2"));
 
         super.appendTooltip(itemStack,world, tooltip, tooltipContext);
     }
