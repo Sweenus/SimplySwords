@@ -800,13 +800,13 @@ public class ItemsRegistry {
                     (int) (emberblade_damage_modifier),
                     emberblade_attackspeed,
                     new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof()));
-/*
-    public static final RegistrySupplier<EmberIreSwordItem> UNIQUELONGSWORDTAINTED = ITEM.register( "unique_longsword_tainted", () ->
-            new EmberIreSwordItem(ModToolMaterial.UNIQUE,
+
+    public static final RegistrySupplier<DarkSwordItem> UNIQUELONGSWORDTAINTED = ITEM.register( "unique_longsword_tainted", () ->
+            new DarkSwordItem(ModToolMaterial.UNIQUE,
                     (int) (emberblade_damage_modifier),
                     emberblade_attackspeed,
                     new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof()));
-
+/*
     public static final RegistrySupplier<EmberIreSwordItem> UNIQUELONGSWORDDULL = ITEM.register( "unique_longsword_dull", () ->
             new EmberIreSwordItem(ModToolMaterial.UNIQUE,
                     (int) (emberblade_damage_modifier),

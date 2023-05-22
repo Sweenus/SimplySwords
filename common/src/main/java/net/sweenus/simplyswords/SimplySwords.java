@@ -10,9 +10,12 @@ import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.client.renderer.BattleStandardRenderer;
+import net.sweenus.simplyswords.client.renderer.BattleStandardDarkRenderer;
+import net.sweenus.simplyswords.client.renderer.model.BattleStandardDarkModel;
 import net.sweenus.simplyswords.client.renderer.model.BattleStandardModel;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
+import net.sweenus.simplyswords.entity.BattleStandardDarkEntity;
 import net.sweenus.simplyswords.entity.BattleStandardEntity;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.EntityRegistry;
@@ -35,6 +38,7 @@ public class SimplySwords {
     public static boolean isConfigOutdated;
 
     public static final EntityModelLayer BATTLESTANDARD_MODEL = new EntityModelLayer(new Identifier("battlestandard", "cube"), "main");
+    public static final EntityModelLayer BATTLESTANDARD_DARK_MODEL = new EntityModelLayer(new Identifier("battlestandarddark", "cube"), "main");
     public static void init() {
 
         //CONFIG
@@ -75,8 +79,11 @@ public class SimplySwords {
         EffectRegistry.EFFECT.register();
         EntityRegistry.ENTITIES.register();
         EntityAttributeRegistry.register(EntityRegistry.BATTLESTANDARD, BattleStandardEntity::createBattleStandardAttributes);
+        EntityAttributeRegistry.register(EntityRegistry.BATTLESTANDARDDARK, BattleStandardDarkEntity::createBattleStandardDarkAttributes);
         EntityRendererRegistry.register(EntityRegistry.BATTLESTANDARD, BattleStandardRenderer::new);
         EntityModelLayerRegistry.register(BATTLESTANDARD_MODEL, BattleStandardModel::getTexturedModelData);
+        EntityRendererRegistry.register(EntityRegistry.BATTLESTANDARDDARK, BattleStandardDarkRenderer::new);
+        EntityModelLayerRegistry.register(BATTLESTANDARD_DARK_MODEL, BattleStandardDarkModel::getTexturedModelData);
         ModLootTableModifiers.init();
 
         //Don't announce via in-game chat because that's kinda annoying

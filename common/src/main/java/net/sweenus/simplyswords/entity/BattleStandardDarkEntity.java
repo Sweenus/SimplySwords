@@ -22,24 +22,18 @@ import net.minecraft.world.World;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 
-public class BattleStandardEntity extends PathAwareEntity {
-    public static final Supplier<EntityType<BattleStandardEntity>> TYPE = Suppliers.memoize(() -> EntityType.Builder.create(BattleStandardEntity::new, SpawnGroup.MISC).build("battlestandard"));
+public class BattleStandardDarkEntity extends PathAwareEntity {
+    public static final Supplier<EntityType<BattleStandardDarkEntity>> TYPE = Suppliers.memoize(() -> EntityType.Builder.create(BattleStandardDarkEntity::new, SpawnGroup.MISC).build("battlestandarddark"));
     public static PlayerEntity ownerEntity;
 
-    public static DefaultAttributeContainer.Builder createBattleStandardAttributes() {
+    public static DefaultAttributeContainer.Builder createBattleStandardDarkAttributes() {
         return MobEntity.createMobAttributes().add(EntityAttributes.GENERIC_MAX_HEALTH, 150.0).add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.0f)
                 .add(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE, 100.0f);
     }
 
-    public BattleStandardEntity(EntityType<? extends PathAwareEntity> entityType, World world) {
+    public BattleStandardDarkEntity(EntityType<? extends PathAwareEntity> entityType, World world) {
         super(entityType, world);
     }
-
-    public void setOwner(PlayerEntity playerEntity) {
-        ownerEntity = playerEntity;
-        this.setOwner(ownerEntity);
-    }
-
 
     @Override
     public void baseTick() {
@@ -57,13 +51,14 @@ public class BattleStandardEntity extends PathAwareEntity {
                         if ((entities instanceof LivingEntity le)) {
                             if (!(le instanceof PlayerEntity)) {
                                 le.damage(DamageSource.MAGIC, abilityDamage);
-                                le.setOnFireFor(1);
-                                le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 120, 1), this);
+                                if (le.distanceTo(this) > radius -2)
+                                    le.setVelocity((this.getX() - le.getX()) /4,  (this.getY() - le.getY()) /4, (this.getZ() - le.getZ()) /4);
+                                le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 120, 0), this);
                             }
                         }
                     }
                 }
-                HelperMethods.spawnParticle(world, ParticleTypes.LAVA, this.getX(),
+                HelperMethods.spawnParticle(world, ParticleTypes.SCULK_SOUL, this.getX(),
                         this.getY(),
                         this.getZ(),
                         0, 0, 0);
@@ -79,13 +74,12 @@ public class BattleStandardEntity extends PathAwareEntity {
 
                     if (entities != null) {
                         if ((entities instanceof PlayerEntity pe)) {
-                            pe.heal(3);
-                            pe.addStatusEffect(new StatusEffectInstance(StatusEffects.STRENGTH, 90, 1), this);
+                            pe.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, 90, 1), this);
                         }
                     }
                 }
 
-                world.playSoundFromEntity(null, this, SoundRegistry.ELEMENTAL_BOW_EARTH_SHOOT_IMPACT_02.get(), SoundCategory.PLAYERS, 0.1f, 0.6f);
+                world.playSoundFromEntity(null, this, SoundRegistry.DARK_SWORD_WHOOSH_01.get(), SoundCategory.PLAYERS, 0.1f, 0.6f);
                 double xpos = this.getX() - (radius + 1);
                 double ypos = this.getY();
                 double zpos = this.getZ() - (radius + 1);
@@ -93,7 +87,7 @@ public class BattleStandardEntity extends PathAwareEntity {
                 for (int i = radius * 2; i > 0; i--) {
                     for (int j = radius * 2; j > 0; j--) {
                             float choose = (float) (Math.random() * 1);
-                            HelperMethods.spawnParticle(world, ParticleTypes.CAMPFIRE_COSY_SMOKE, xpos + i + choose,
+                            HelperMethods.spawnParticle(world, ParticleTypes.SOUL, xpos + i + choose,
                                     ypos + 0.1,
                                     zpos + j + choose,
                                     0, -0.1, 0);
