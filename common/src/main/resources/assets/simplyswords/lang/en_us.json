@@ -102,6 +102,7 @@
   "item.simplyswords.waking_lichblade": "Waking Lichblade",
   "item.simplyswords.awakened_lichblade": "Awakened Lichblade",
   "item.simplyswords.shadowsting": "Shadowsting",
+  "item.simplyswords.harbinger": "Harbinger",
 
   "item.simplyswords.runic_tablet": "Runic Tablet",
   "item.simplyswords.runefused_gem": "Runefused Gem",
@@ -659,6 +660,12 @@
   "item.simplyswords.shadowmistsworditem.tooltip3": "scales with your targets armor value.",
   "item.simplyswords.shadowmistsworditem.tooltip4": "Create a blinding shadowy mist at your feet",
   "item.simplyswords.shadowmistsworditem.tooltip5": "and shadowstep to a nearby location.",
+
+  "item.simplyswords.harbingersworditem.tooltip1": "Unique Effect: Abyssal Standard",
+  "item.simplyswords.harbingersworditem.tooltip2": "Summons an Abyssal Battle Standard that",
+  "item.simplyswords.harbingersworditem.tooltip3": "pulls, damages, and slows enemies whilst",
+  "item.simplyswords.harbingersworditem.tooltip4": "periodically granting haste to players",
+  "item.simplyswords.harbingersworditem.tooltip5": "within its vicinity.",
 
 
   "item.simplyswords.levitationsworditem.tooltip1": "Runic Power: Float",

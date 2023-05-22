@@ -801,8 +801,8 @@ public class ItemsRegistry {
                     emberblade_attackspeed,
                     new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof()));
 
-    public static final RegistrySupplier<DarkSwordItem> UNIQUELONGSWORDTAINTED = ITEM.register( "unique_longsword_tainted", () ->
-            new DarkSwordItem(ModToolMaterial.UNIQUE,
+    public static final RegistrySupplier<HarbingerSwordItem> UNIQUELONGSWORDTAINTED = ITEM.register( "unique_longsword_tainted", () ->
+            new HarbingerSwordItem(ModToolMaterial.UNIQUE,
                     (int) (emberblade_damage_modifier),
                     emberblade_attackspeed,
                     new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof()));

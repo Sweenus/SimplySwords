@@ -27,7 +27,7 @@ import net.sweenus.simplyswords.util.HelperMethods;
 
 import java.util.List;
 
-public class DarkSwordItem extends UniqueSwordItem {
+public class HarbingerSwordItem extends UniqueSwordItem {
 
     private static int stepMod = 0;
     int skillCooldown = (int) (SimplySwordsConfig.getFloatValue("shadowmist_cooldown"));
@@ -36,7 +36,7 @@ public class DarkSwordItem extends UniqueSwordItem {
     int blindDuration = (int) (SimplySwordsConfig.getFloatValue("shadowmist_blind_duration"));
     int radius = (int) (SimplySwordsConfig.getFloatValue("shadowmist_radius"));
 
-    public DarkSwordItem(ToolMaterial toolMaterial, int attackDamage, float attackSpeed, Settings settings) {
+    public HarbingerSwordItem(ToolMaterial toolMaterial, int attackDamage, float attackSpeed, Settings settings) {
         super(toolMaterial, attackDamage, attackSpeed, settings);
     }
 
@@ -102,14 +102,14 @@ public class DarkSwordItem extends UniqueSwordItem {
         //1.19
 
         tooltip.add(Text.literal(""));
-        tooltip.add(Text.translatable("item.simplyswords.shadowmistsworditem.tooltip1").formatted(Formatting.GOLD, Formatting.BOLD));
+        tooltip.add(Text.translatable("item.simplyswords.harbingersworditem.tooltip1").formatted(Formatting.GOLD, Formatting.BOLD));
         tooltip.add(Text.literal(""));
-        tooltip.add(Text.translatable("item.simplyswords.shadowmistsworditem.tooltip2"));
-        tooltip.add(Text.translatable("item.simplyswords.shadowmistsworditem.tooltip3"));
+        tooltip.add(Text.translatable("item.simplyswords.harbingersworditem.tooltip2"));
+        tooltip.add(Text.translatable("item.simplyswords.harbingersworditem.tooltip3"));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").formatted(Formatting.BOLD, Formatting.GREEN));
-        tooltip.add(Text.translatable("item.simplyswords.shadowmistsworditem.tooltip4"));
-        tooltip.add(Text.translatable("item.simplyswords.shadowmistsworditem.tooltip5"));
+        tooltip.add(Text.translatable("item.simplyswords.harbingersworditem.tooltip4"));
+        tooltip.add(Text.translatable("item.simplyswords.harbingersworditem.tooltip5"));
 
         super.appendTooltip(itemStack,world, tooltip, tooltipContext);
     }

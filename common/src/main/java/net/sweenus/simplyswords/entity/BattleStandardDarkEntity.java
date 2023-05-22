@@ -74,7 +74,7 @@ public class BattleStandardDarkEntity extends PathAwareEntity {
 
                     if (entities != null) {
                         if ((entities instanceof PlayerEntity pe)) {
-                            pe.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, 90, 1), this);
+                            pe.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, 90, 2), this);
                         }
                     }
                 }
