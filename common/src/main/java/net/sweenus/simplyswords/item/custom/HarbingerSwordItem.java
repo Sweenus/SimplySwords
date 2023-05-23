@@ -22,6 +22,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
+import net.sweenus.simplyswords.entity.BattleStandardDarkEntity;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.registry.EntityRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
@@ -65,10 +66,15 @@ public class HarbingerSwordItem extends UniqueSwordItem {
             BlockState currentState = world.getBlockState(user.getBlockPos().up(4).offset(user.getMovementDirection(), 3));
             BlockState state = Blocks.AIR.getDefaultState();
             if (currentState == state ) {
-                world.playSoundFromEntity(null, user, SoundRegistry.DARK_SWORD_ATTACK_WITH_BLOOD_02.get(), SoundCategory.PLAYERS, 0.4f, 0.8f);
-                Entity banner = EntityRegistry.BATTLESTANDARDDARK.get().spawn(serverWorld, null, Text.translatable( "entity.simplyswords.battlestandard.name",user.getName()), user, user.getBlockPos().up(4).offset(user.getMovementDirection(), 3), SpawnReason.MOB_SUMMONED, true, true);
+                world.playSoundFromEntity(null, user, SoundRegistry.DARK_SWORD_ATTACK_WITH_BLOOD_02.get(),
+                        SoundCategory.PLAYERS, 0.4f, 0.8f);
+                BattleStandardDarkEntity banner = EntityRegistry.BATTLESTANDARDDARK.get().spawn(serverWorld, null,
+                        Text.translatable( "entity.simplyswords.battlestandard.name",user.getName()), user,
+                        user.getBlockPos().up(4).offset(user.getMovementDirection(), 3),
+                        SpawnReason.MOB_SUMMONED, true, true);
                 if (banner != null) {
                     banner.setVelocity(0, -1, 0);
+                    banner.ownerEntity = user;
                 }
                 user.getItemCooldownManager().set(this.getDefaultStack().getItem(), skillCooldown);
             }

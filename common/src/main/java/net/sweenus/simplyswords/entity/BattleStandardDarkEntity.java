@@ -26,78 +26,123 @@ import net.sweenus.simplyswords.util.HelperMethods;
 public class BattleStandardDarkEntity extends PathAwareEntity {
     public static final Supplier<EntityType<BattleStandardDarkEntity>> TYPE = Suppliers.memoize(() -> EntityType.Builder.create(BattleStandardDarkEntity::new, SpawnGroup.MISC).build("battlestandarddark"));
     int abilityDamage =  (int) (SimplySwordsConfig.getFloatValue("abyssalstandard_damage"));
+    public PlayerEntity ownerEntity;
 
     public static DefaultAttributeContainer.Builder createBattleStandardDarkAttributes() {
         return MobEntity.createMobAttributes().add(EntityAttributes.GENERIC_MAX_HEALTH, 150.0).add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.0f)
                 .add(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE, 100.0f);
     }
 
+
     public BattleStandardDarkEntity(EntityType<? extends PathAwareEntity> entityType, World world) {
         super(entityType, world);
+    }
+
+    @Override
+    protected boolean isImmobile() {
+        return true;
+    }
+
+    @Override
+    public boolean isPushable() {
+        return false;
+    }
+    @Override
+    public boolean damage(DamageSource source, float amount) {
+        return ownerEntity == null;
     }
 
     @Override
     public void baseTick() {
 
         if (!this.world.isClient()) {
-            int radius = 6;
-            int abilityDamage = 2;
-            //AOE Aura
             if (this.age % 10 == 0) {
-                Box box = new Box(this.getX() + radius, this.getY() + (float) radius / 3, this.getZ() + radius, this.getX() - radius, this.getY() - (float) radius / 3, this.getZ() - radius);
-                this.setHealth(this.getHealth()-3);
-                for (Entity entities : world.getOtherEntities(this, box, EntityPredicates.VALID_LIVING_ENTITY)) {
+                this.setHealth(this.getHealth() - 3);
+                if (ownerEntity == null)
+                    this.setHealth(this.getHealth() - 1000);
+            }
+            if (ownerEntity != null) {
+                int radius = 6;
+                int abilityDamage = 2;
+                //AOE Aura
+                if (this.age % 10 == 0) {
+                    Box box = new Box(this.getX() + radius, this.getY() + (float) radius / 3, this.getZ() + radius, this.getX() - radius, this.getY() - (float) radius / 3, this.getZ() - radius);
+                    for (Entity entities : world.getOtherEntities(this, box, EntityPredicates.VALID_LIVING_ENTITY)) {
 
-                    if (entities != null) {
-                        if ((entities instanceof LivingEntity le)) {
-                            if (!(le instanceof PlayerEntity)) {
+                        if (entities != null) {
+                            if ((entities instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, ownerEntity) && le != ownerEntity) {
                                 le.damage(DamageSource.MAGIC, abilityDamage);
-                                if (le.distanceTo(this) > radius -2)
-                                    le.setVelocity((this.getX() - le.getX()) /4,  (this.getY() - le.getY()) /4, (this.getZ() - le.getZ()) /4);
+                                if (le.distanceTo(this) > radius - 2)
+                                    le.setVelocity((this.getX() - le.getX()) / 4, (this.getY() - le.getY()) / 4, (this.getZ() - le.getZ()) / 4);
                                 le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 120, 0), this);
                             }
                         }
                     }
+                    HelperMethods.spawnParticle(world, ParticleTypes.SCULK_SOUL, this.getX(),
+                            this.getY(),
+                            this.getZ(),
+                            0, 0, 0);
                 }
-                HelperMethods.spawnParticle(world, ParticleTypes.SCULK_SOUL, this.getX(),
-                        this.getY(),
-                        this.getZ(),
-                        0, 0, 0);
-            }
 
+                //Landing effects
+                if (this.getHealth() > this.getMaxHealth() - 2 && this.isOnGround()) {
 
-            if (this.age % 80 == 0) {
+                    HelperMethods.spawnParticle(world, ParticleTypes.SOUL_FIRE_FLAME, this.getX(),
+                            this.getY(),
+                            this.getZ(),
+                            0, 0.3, 0);
+                    HelperMethods.spawnParticle(world, ParticleTypes.CAMPFIRE_COSY_SMOKE, this.getX(),
+                            this.getY(),
+                            this.getZ(),
+                            0, 0, 0);
 
-                //AOE Heal
-                Box box = new Box(this.getX() + radius, this.getY() + (float) radius / 3, this.getZ() + radius, this.getX() - radius, this.getY() - (float) radius / 3, this.getZ() - radius);
-                this.setHealth(this.getHealth()-3);
-                for (Entity entities : world.getOtherEntities(this, box, EntityPredicates.VALID_LIVING_ENTITY)) {
+                    //Launch nearby entities on land
+                    Box box = new Box(this.getX() + 1, this.getY() + 1, this.getZ() + 1, this.getX()
+                            - 1, this.getY() - (float) 1, this.getZ() - 1);
+                    for (Entity entities : world.getOtherEntities(this, box, EntityPredicates.VALID_LIVING_ENTITY)) {
 
-                    if (entities != null) {
-                        if ((entities instanceof PlayerEntity pe)) {
-                            pe.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, 90, 2), this);
+                        if (entities != null) {
+                            if ((entities instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, ownerEntity) && le != ownerEntity) {
+                                le.damage(DamageSource.MAGIC, abilityDamage * 3);
+                                le.setVelocity((le.getX() - this.getX()) / 4, 0.5, (le.getZ() - this.getZ()) / 4);
+                            }
                         }
                     }
+
+
                 }
 
-                world.playSoundFromEntity(null, this, SoundRegistry.DARK_SWORD_WHOOSH_01.get(), SoundCategory.PLAYERS, 0.1f, 0.6f);
-                double xpos = this.getX() - (radius + 1);
-                double ypos = this.getY();
-                double zpos = this.getZ() - (radius + 1);
 
-                for (int i = radius * 2; i > 0; i--) {
-                    for (int j = radius * 2; j > 0; j--) {
+                if (this.age % 80 == 0) {
+
+                    //AOE Heal
+                    Box box = new Box(this.getX() + radius, this.getY() + (float) radius / 3, this.getZ() + radius, this.getX() - radius, this.getY() - (float) radius / 3, this.getZ() - radius);
+                    this.setHealth(this.getHealth() - 3);
+                    for (Entity entities : world.getOtherEntities(this, box, EntityPredicates.VALID_LIVING_ENTITY)) {
+
+                        if (entities != null) {
+                            if ((entities instanceof LivingEntity le) && !HelperMethods.checkFriendlyFire(le, ownerEntity)) {
+                                le.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, 90, 2), this);
+                            }
+                        }
+                    }
+
+                    world.playSoundFromEntity(null, this, SoundRegistry.DARK_SWORD_WHOOSH_01.get(), SoundCategory.PLAYERS, 0.1f, 0.6f);
+                    double xpos = this.getX() - (radius + 1);
+                    double ypos = this.getY();
+                    double zpos = this.getZ() - (radius + 1);
+
+                    for (int i = radius * 2; i > 0; i--) {
+                        for (int j = radius * 2; j > 0; j--) {
                             float choose = (float) (Math.random() * 1);
-                            HelperMethods.spawnParticle(world, ParticleTypes.SOUL, xpos + i + choose,
-                                    ypos + 0.1,
-                                    zpos + j + choose,
-                                    0, -0.1, 0);
-                            HelperMethods.spawnParticle(world, ParticleTypes.CAMPFIRE_COSY_SMOKE, xpos + i + choose,
-                                    ypos + 0.1,
-                                    zpos + j + choose,
-                                    0, -0.1, 0);
+                            if (choose > 0.5)
+                                HelperMethods.spawnParticle(world, ParticleTypes.SOUL, xpos + i + choose,
+                                        ypos + 0.1,
+                                        zpos + j + choose,
+                                        0, -0.1, 0);
                         }
                     }
+                }
             }
         }
 

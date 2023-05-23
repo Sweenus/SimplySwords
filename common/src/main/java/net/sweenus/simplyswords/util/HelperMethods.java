@@ -4,6 +4,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.decoration.ArmorStandEntity;
+import net.minecraft.entity.passive.PassiveEntity;
 import net.minecraft.entity.passive.VillagerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileUtil;
@@ -57,8 +58,11 @@ public class HelperMethods {
         if (!checkEntityBlacklist(livingEntity, player))
             return false;
         if (livingEntity instanceof PlayerEntity playerEntity) {
+            if (playerEntity == player)
+                return false;
             return playerEntity.shouldDamagePlayer(player);
-        } else {return true;}
+        }
+        return true;
     }
 
     //Check if the target matches blacklisted entities (expand this to be configurable if there is demand)

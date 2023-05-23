@@ -22,6 +22,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
+import net.sweenus.simplyswords.entity.BattleStandardEntity;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.registry.EntityRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
@@ -50,7 +51,7 @@ public class SunfireSwordItem extends UniqueSwordItem {
 
             if (attacker.getRandom().nextInt(100) <= abilityChance && (attacker instanceof PlayerEntity player)) {
                 attacker.world.playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(), SoundCategory.PLAYERS, 0.3f, 1.7f);
-                attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.REGENERATION, 40, 0), attacker);
+                attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.REGENERATION, 40, 1), attacker);
 
             }
         }
@@ -66,10 +67,15 @@ public class SunfireSwordItem extends UniqueSwordItem {
             BlockState currentState = world.getBlockState(user.getBlockPos().up(4).offset(user.getMovementDirection(), 3));
             BlockState state = Blocks.AIR.getDefaultState();
             if (currentState == state ) {
-                world.playSoundFromEntity(null, user, SoundRegistry.ELEMENTAL_SWORD_EARTH_ATTACK_01.get(), SoundCategory.PLAYERS, 0.4f, 0.8f);
-                Entity banner = EntityRegistry.BATTLESTANDARD.get().spawn(serverWorld, null, Text.translatable( "entity.simplyswords.battlestandard.name",user.getName()), user, user.getBlockPos().up(4).offset(user.getMovementDirection(), 3), SpawnReason.MOB_SUMMONED, true, true);
+                world.playSoundFromEntity(null, user, SoundRegistry.ELEMENTAL_SWORD_EARTH_ATTACK_01.get(),
+                        SoundCategory.PLAYERS, 0.4f, 0.8f);
+                BattleStandardEntity banner = EntityRegistry.BATTLESTANDARD.get().spawn(serverWorld, null,
+                        Text.translatable( "entity.simplyswords.battlestandard.name",user.getName()),
+                        user, user.getBlockPos().up(4).offset(user.getMovementDirection(),
+                                3), SpawnReason.MOB_SUMMONED, true, true);
                 if (banner != null) {
                     banner.setVelocity(0, -1, 0);
+                    banner.ownerEntity = user;
                 }
                 user.getItemCooldownManager().set(this.getDefaultStack().getItem(), skillCooldown);
             }
