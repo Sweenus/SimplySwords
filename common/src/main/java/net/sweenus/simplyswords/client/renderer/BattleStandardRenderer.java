@@ -16,7 +16,7 @@ public class BattleStandardRenderer extends MobEntityRenderer<BattleStandardEnti
      private static final Identifier TEXTURE = new Identifier("simplyswords","textures/entity/battlestandard/battlestandard_texture.png");
 
      public BattleStandardRenderer(EntityRendererFactory.Context context) {
-         super(context, new BattleStandardModel(context.getPart(SimplySwords.BATTLESTANDARD_MODEL)), 0.1f);
+         super(context, new BattleStandardModel(context.getPart(SimplySwords.Client.BATTLESTANDARD_MODEL)), 0.1f);
      }
 
     @Override

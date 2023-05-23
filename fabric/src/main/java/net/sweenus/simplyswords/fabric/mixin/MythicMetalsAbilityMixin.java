@@ -69,6 +69,5 @@ public class MythicMetalsAbilityMixin {
         Abilities.MENDING.addItem(MythicMetalsCompat.PROMETHEUM_SCYTHE, Style.EMPTY.withColor(0xE63E73));
         Abilities.MENDING.addItem(MythicMetalsCompat.PROMETHEUM_HALBERD, Style.EMPTY.withColor(0xE63E73));
 
-
     }
 }

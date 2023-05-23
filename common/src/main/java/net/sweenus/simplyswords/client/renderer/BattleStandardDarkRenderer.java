@@ -18,7 +18,7 @@ public class BattleStandardDarkRenderer extends MobEntityRenderer<BattleStandard
      private static final Identifier TEXTURE = new Identifier("simplyswords","textures/entity/battlestandard/battlestandarddark_texture.png");
 
      public BattleStandardDarkRenderer(EntityRendererFactory.Context context) {
-         super(context, new BattleStandardDarkModel(context.getPart(SimplySwords.BATTLESTANDARD_DARK_MODEL)), 0.1f);
+         super(context, new BattleStandardDarkModel(context.getPart(SimplySwords.Client.BATTLESTANDARD_DARK_MODEL)), 0.1f);
      }
 
     @Override
