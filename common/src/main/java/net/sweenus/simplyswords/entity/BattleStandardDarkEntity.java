@@ -70,7 +70,9 @@ public class BattleStandardDarkEntity extends PathAwareEntity {
                     for (Entity entities : world.getOtherEntities(this, box, EntityPredicates.VALID_LIVING_ENTITY)) {
 
                         if (entities != null) {
-                            if ((entities instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, ownerEntity) && le != ownerEntity) {
+                            if ((entities instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, ownerEntity)
+                                    && le != ownerEntity && !(le instanceof BattleStandardEntity)
+                                    && !(le instanceof BattleStandardDarkEntity)) {
                                 le.damage(DamageSource.MAGIC, abilityDamage);
                                 if (le.distanceTo(this) > radius - 2)
                                     le.setVelocity((this.getX() - le.getX()) / 4, (this.getY() - le.getY()) / 4, (this.getZ() - le.getZ()) / 4);

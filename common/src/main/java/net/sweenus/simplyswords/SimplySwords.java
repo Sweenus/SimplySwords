@@ -99,9 +99,6 @@ public class SimplySwords {
         public static final EntityModelLayer BATTLESTANDARD_DARK_MODEL = new EntityModelLayer(new Identifier("battlestandarddark", "cube"), "main");
         @Environment(EnvType.CLIENT)
         public static void initializeClient() {
-            //ClientLifecycleEvent.CLIENT_STARTED.register((client) -> SINK.accept("Client started!"));
-            //ClientLifecycleEvent.CLIENT_STOPPING.register((client) -> SINK.accept("Client stopping!"));
-            //TestModNet.initializeClient();
             EntityRendererRegistry.register(EntityRegistry.BATTLESTANDARD, BattleStandardRenderer::new);
             EntityModelLayerRegistry.register(BATTLESTANDARD_MODEL, BattleStandardModel::getTexturedModelData);
             EntityRendererRegistry.register(EntityRegistry.BATTLESTANDARDDARK, BattleStandardDarkRenderer::new);

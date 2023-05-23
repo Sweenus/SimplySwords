@@ -511,7 +511,7 @@ public class SimplySwordsConfig {
                 config.append("// --------------------------------------------------------------------------------------------------------------------------------- \n");
                 config.append("\n");
             }
-            if (i == 32) {
+            if (i == 33) {
                 config.append("\n");
                 config.append("// --------------------------------------------- RUNIC BLACKLISTING ----------------------------------------------------------------- \n");
                 config.append("// Setting any of the below values to false will prevent that runic power from being obtainable. \n");
@@ -854,13 +854,13 @@ public class SimplySwordsConfig {
                 config.append("// -- Unique Effect: Shadowmist -- \n");
                 config.append("// ------------------------------- \n");
             }
-            if (i == 118) {
+            if (i == 120) {
                 config.append("\n");
                 config.append("// ------------------------------------- \n");
                 config.append("// -- Unique Effect: Abyssal Standard -- \n");
                 config.append("// ------------------------------------- \n");
             }
-            if (i == 121) {
+            if (i == 123) {
                 config.append("\n");
                 config.append("// --------------------------------------- \n");
                 config.append("// -- Unique Effect: Righteous Standard -- \n");
@@ -920,7 +920,7 @@ public class SimplySwordsConfig {
                 config.append("// Example use-case: Adding 3 to a value below will INCREASE the in-game damage of that weapon by 3 \n");
                 config.append("// ---------------------- \n");
             }
-            if (i ==101) {
+            if (i ==100) {
                 config.append("\n");
                 config.append("// -- Attack Speed Modifiers -- \n");
                 config.append("// Recommended range: -1.0 to -3.7, with -1.0 being fast and -3.7 being slow \n");

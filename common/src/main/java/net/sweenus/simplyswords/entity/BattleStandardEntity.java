@@ -2,6 +2,7 @@ package net.sweenus.simplyswords.entity;
 
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
+import net.minecraft.block.entity.BannerBlockEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -72,7 +73,9 @@ public class BattleStandardEntity extends PathAwareEntity {
                     for (Entity entities : world.getOtherEntities(this, box, EntityPredicates.VALID_LIVING_ENTITY)) {
 
                         if (entities != null) {
-                            if ((entities instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, ownerEntity) && le != ownerEntity) {
+                            if ((entities instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, ownerEntity)
+                                    && le != ownerEntity && !(le instanceof BattleStandardEntity)
+                                    && !(le instanceof BattleStandardDarkEntity)) {
                                 le.damage(DamageSource.MAGIC, abilityDamage);
                                 le.setOnFireFor(1);
                                 le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 120, 1), this);
