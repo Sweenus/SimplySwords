@@ -34,7 +34,7 @@ public class ShadowstingSwordItem extends UniqueSwordItem {
     private static int stepMod = 0;
     int skillCooldown = (int) (SimplySwordsConfig.getFloatValue("shadowmist_cooldown"));
     int abilityChance =  (int) (SimplySwordsConfig.getFloatValue("shadowmist_chance"));
-    int damageArmorMultiplier = (int) (SimplySwordsConfig.getFloatValue("shadowmist_damage_multiplier"));
+    int damageArmorMultiplier = (int) (SimplySwordsConfig.getFloatValue("shadowmist_damage_multiplier") * 2);
     int blindDuration = (int) (SimplySwordsConfig.getFloatValue("shadowmist_blind_duration"));
     int radius = (int) (SimplySwordsConfig.getFloatValue("shadowmist_radius"));
 
@@ -53,7 +53,7 @@ public class ShadowstingSwordItem extends UniqueSwordItem {
 
             if (attacker.getRandom().nextInt(100) <= abilityChance && (attacker instanceof PlayerEntity player)) {
                 attacker.world.playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(), SoundCategory.PLAYERS, 0.3f, 1.8f);
-                int extraDamage = target.getArmor() * damageArmorMultiplier;
+                int extraDamage = (target.getArmor() * damageArmorMultiplier) / 2;
                 target.damage(DamageSource.MAGIC,  extraDamage);
             }
         }
@@ -99,19 +99,14 @@ public class ShadowstingSwordItem extends UniqueSwordItem {
             }
         }
 
-        double chooseX = Math.random() * (radius * 2); double chooseZ = Math.random() * (radius * 2);
-
-        BlockPos poscheck = new BlockPos(xpos + chooseX, ypos, zpos + chooseX);
-        BlockPos poscheck2 = new BlockPos(xpos + chooseX, ypos + 1, zpos + chooseX);
-        BlockState currentState = world.getBlockState(poscheck);
-        BlockState currentState2 = world.getBlockState(poscheck2);
-
-        if (currentState == Blocks.AIR.getDefaultState() && currentState2 == Blocks.AIR.getDefaultState())  {
-            user.teleport((user.getX() -radius) + chooseX, user.getY(), (user.getZ() -radius) + chooseZ);
-        } else {
-            chooseX = Math.random() * (radius * 2);
-            chooseZ = Math.random() * (radius * 2);
-            user.teleport((user.getX() -radius) + chooseX, user.getY(), (user.getZ() -radius) + chooseZ);
+        BlockState currentStateLow = world.getBlockState(user.getBlockPos().offset(user.getMovementDirection(), 5));
+        double targetPositionX = user.getBlockPos().offset(user.getMovementDirection(), 5).getX();
+        double targetPositionY = user.getBlockPos().offset(user.getMovementDirection(), 5).getY();
+        double targetPositionZ = user.getBlockPos().offset(user.getMovementDirection(), 5).getZ();
+        BlockState currentStateHigh = world.getBlockState(user.getBlockPos().up(1).offset(user.getMovementDirection(), 5));
+        BlockState state = Blocks.AIR.getDefaultState();
+        if (currentStateLow == state && currentStateHigh == state ) {
+            user.teleport(targetPositionX, targetPositionY, targetPositionZ);
         }
 
         return super.use(world, user, hand);

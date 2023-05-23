@@ -223,8 +223,8 @@ public class SimplySwordsConfig {
         FLOAT_OPTIONS.put("shockdeflect_parry_duration", 10f);
 
         FLOAT_OPTIONS.put("shadowmist_cooldown", 200f);
-        FLOAT_OPTIONS.put("shadowmist_chance", 50f);
-        FLOAT_OPTIONS.put("shadowmist_damage_multiplier", 1f);
+        FLOAT_OPTIONS.put("shadowmist_chance", 25f);
+        FLOAT_OPTIONS.put("shadowmist_damage_multiplier", 0.8f);
         FLOAT_OPTIONS.put("shadowmist_blind_duration", 60f);
         FLOAT_OPTIONS.put("shadowmist_radius", 4f);
 
