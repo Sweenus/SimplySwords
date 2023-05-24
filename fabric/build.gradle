@@ -36,7 +36,7 @@ dependencies {
     modApi "dev.architectury:architectury-fabric:${rootProject.architectury_version}"
 
     // Mythic Metals
-    modImplementation "curse.maven:mythicmetals-410127:4118479"
+    modImplementation "curse.maven:mythicmetals-410127:4441526"
     // slug / curseforge project ID / file ID "check url"
 
     // Amethyst Imbuement

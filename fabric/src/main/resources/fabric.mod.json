@@ -37,7 +37,7 @@
     "architectury": ">=5.12.42"
   },
   "suggests": {
-    "mythicmetals": ">=0.16.4",
+    "mythicmetals": ">=0.17.3",
     "gobber2": ">=2.6.43"
   },
   "recommends": {
