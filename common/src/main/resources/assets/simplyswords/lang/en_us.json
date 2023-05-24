@@ -618,12 +618,11 @@
   "item.simplyswords.icewhispersworditem.tooltip6": "increased damage to enemies within %d blocks.",
 
   "item.simplyswords.arcanethystsworditem.tooltip1": "Unique Effect: Arcane Assault",
-  "item.simplyswords.arcanethystsworditem.tooltip2": "Chance on hit to gain an arcane charge.",
-  "item.simplyswords.arcanethystsworditem.tooltip3": "Consume your arcane charges to assault",
-  "item.simplyswords.arcanethystsworditem.tooltip4": "nearby enemies, strengthening with each charge.",
-  "item.simplyswords.arcanethystsworditem.tooltip5": "1 Charge:  Lifts enemies into the air.",
-  "item.simplyswords.arcanethystsworditem.tooltip6": "2 Charges: Deals damage over time.",
-  "item.simplyswords.arcanethystsworditem.tooltip7": "3 Charges: Slams enemies into the ground.",
+  "item.simplyswords.arcanethystsworditem.tooltip2": "Chance on hit to levitate your target.",
+  "item.simplyswords.arcanethystsworditem.tooltip3": "Channel your arcane energy to assault",
+  "item.simplyswords.arcanethystsworditem.tooltip4": "nearby enemies, lifting them into the",
+  "item.simplyswords.arcanethystsworditem.tooltip5": "air while dealing damage over time,",
+  "item.simplyswords.arcanethystsworditem.tooltip6": "then slamming them into the ground.",
 
   "item.simplyswords.thunderbrandsworditem.tooltip1": "Unique Effect: Thunder Blitz",
   "item.simplyswords.thunderbrandsworditem.tooltip2": "Chance on hit to refresh ability cooldown.",

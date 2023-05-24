@@ -314,7 +314,7 @@ public class AbilityMethods {
     //Arcanethyst - Arcane Assault
     public static void tickAbilityArcaneAssault(ItemStack stack, World world, Entity entity,
                                              int ability_timer, int ability_timer_max, int abilityDamage,
-                                             int skillCooldown, int radius, int chargeCount) {
+                                             int skillCooldown, int radius) {
 
         if (!entity.world.isClient() && (entity instanceof PlayerEntity player)) {
 
@@ -337,9 +337,8 @@ public class AbilityMethods {
                                 world.playSoundFromEntity(null, le, SoundRegistry.MAGIC_BOW_SHOOT_IMPACT_03.get(),
                                         SoundCategory.PLAYERS, 0.1f, choose);
                             }
-                            if (chargeCount > 1) // DOT - 2 charges
-                                le.damage(DamageSource.MAGIC, abilityDamage);
-                            if (chargeCount > 2 && ability_timer < 10) { //Ground Slam - 3 Charges
+                            le.damage(DamageSource.MAGIC, abilityDamage);
+                            if (ability_timer < 10) { //Ground Slam - 3 Charges
                                 le.removeStatusEffect(StatusEffects.LEVITATION);
                                 le.damage(DamageSource.MAGIC, abilityDamage * 10);
                                 le.setVelocity(0, -10, 0);

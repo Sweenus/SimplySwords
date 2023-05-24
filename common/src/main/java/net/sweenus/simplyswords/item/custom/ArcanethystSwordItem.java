@@ -5,6 +5,8 @@ import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
@@ -34,8 +36,6 @@ public class ArcanethystSwordItem extends UniqueSwordItem {
     int arcane_timer_max = (int) (SimplySwordsConfig.getFloatValue("arcaneassault_duration"));
     int skillCooldown = (int) (SimplySwordsConfig.getFloatValue("arcaneassault_cooldown"));
     int chargeChance =  (int) (SimplySwordsConfig.getFloatValue("arcaneassault_chance"));
-    int chargeCount;
-    int arcane_timer;
 
 
 
@@ -45,10 +45,8 @@ public class ArcanethystSwordItem extends UniqueSwordItem {
             HelperMethods.playHitSounds(attacker, target);
 
             if (attacker.getRandom().nextInt(100) <= chargeChance) {
-                if (chargeCount < 3) {
-                    chargeCount++;
-                    attacker.world.playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_BOW_SHOOT_IMPACT_01.get(), SoundCategory.PLAYERS, 0.5f, 1.2f);
-                }
+                target.addStatusEffect(new StatusEffectInstance(StatusEffects.LEVITATION, 60, 1), attacker);
+                attacker.world.playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_BOW_SHOOT_IMPACT_01.get(), SoundCategory.PLAYERS, 0.5f, 1.2f);
             }
         }
 
@@ -59,16 +57,14 @@ public class ArcanethystSwordItem extends UniqueSwordItem {
 
         if (!user.world.isClient()) {
 
-            if (chargeCount > 0) {
-                ItemStack itemStack = user.getStackInHand(hand);
-                if (itemStack.getDamage() >= itemStack.getMaxDamage() - 1) {
-                    return TypedActionResult.fail(itemStack);
-                }
-
-                world.playSoundFromEntity(null, user, SoundRegistry.MAGIC_BOW_SHOOT_IMPACT_02.get(), SoundCategory.PLAYERS, 0.4f, 1.2f);
-                user.setCurrentHand(hand);
-                return TypedActionResult.consume(itemStack);
+            ItemStack itemStack = user.getStackInHand(hand);
+            if (itemStack.getDamage() >= itemStack.getMaxDamage() - 1) {
+                return TypedActionResult.fail(itemStack);
             }
+
+            world.playSoundFromEntity(null, user, SoundRegistry.MAGIC_BOW_SHOOT_IMPACT_02.get(), SoundCategory.PLAYERS, 0.4f, 1.2f);
+            user.setCurrentHand(hand);
+            return TypedActionResult.consume(itemStack);
         }
         return super.use(world, user, hand);
     }
@@ -79,7 +75,7 @@ public class ArcanethystSwordItem extends UniqueSwordItem {
         if (user.getEquippedStack(EquipmentSlot.MAINHAND) == stack && (user instanceof PlayerEntity player)) {
 
             AbilityMethods.tickAbilityArcaneAssault(stack, world, user, remainingUseTicks, arcane_timer_max, arcaneDamage,
-                    skillCooldown, radius, chargeCount);
+                    skillCooldown, radius);
 
         }
     }
@@ -98,7 +94,6 @@ public class ArcanethystSwordItem extends UniqueSwordItem {
     public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
         if (!world.isClient && (user instanceof PlayerEntity player)) {
             player.getItemCooldownManager().set(stack.getItem(), skillCooldown);
-            chargeCount = 0;
         }
     }
 
@@ -133,10 +128,8 @@ public class ArcanethystSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").formatted(Formatting.BOLD, Formatting.GREEN));
         tooltip.add(Text.translatable("item.simplyswords.arcanethystsworditem.tooltip3"));
         tooltip.add(Text.translatable("item.simplyswords.arcanethystsworditem.tooltip4"));
-        tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.arcanethystsworditem.tooltip5"));
         tooltip.add(Text.translatable("item.simplyswords.arcanethystsworditem.tooltip6"));
-        tooltip.add(Text.translatable("item.simplyswords.arcanethystsworditem.tooltip7"));
         tooltip.add(Text.literal(""));
 
         super.appendTooltip(itemStack,world, tooltip, tooltipContext);

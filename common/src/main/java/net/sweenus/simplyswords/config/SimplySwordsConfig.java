@@ -150,7 +150,7 @@ public class SimplySwordsConfig {
         FLOAT_OPTIONS.put("ferocity_max_stacks", 15f);
         FLOAT_OPTIONS.put("ferocity_strength_tier", 2f);
 
-        FLOAT_OPTIONS.put("ember_ire_chance", 15f);
+        FLOAT_OPTIONS.put("ember_ire_chance", 30f);
         FLOAT_OPTIONS.put("ember_ire_duration", 150f);
 
         FLOAT_OPTIONS.put("volcanic_fury_chance", 25f);
