@@ -261,6 +261,7 @@ public class RunicMethods {
         int damage = 6 - ((stack.getDamage() / stack.getMaxDamage()) * 100) / 20;
 
         if (attacker.getRandom().nextInt(100) <= hitchance) {
+            target.timeUntilRegen = 0;
             target.damage(DamageSource.MAGIC, damage);
             attacker.world.playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
                     SoundCategory.PLAYERS, 0.2f, 1.8f);
@@ -273,6 +274,7 @@ public class RunicMethods {
         int damage = 10 - ((stack.getDamage() / stack.getMaxDamage()) * 100) / 10;
 
         if (attacker.getRandom().nextInt(100) <= hitchance) {
+            target.timeUntilRegen = 0;
             target.damage(DamageSource.MAGIC, damage);
             attacker.world.playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
                     SoundCategory.PLAYERS, 0.2f, 1.8f);

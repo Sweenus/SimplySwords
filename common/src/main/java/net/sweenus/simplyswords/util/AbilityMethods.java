@@ -1,18 +1,20 @@
 package net.sweenus.simplyswords.util;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.*;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.entity.mob.CreeperEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
+import net.sweenus.simplyswords.config.SimplySwordsConfig;
+import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 
 public class AbilityMethods {
@@ -62,6 +64,55 @@ public class AbilityMethods {
                                 ypos,
                                 zpos + j + choose,
                                 0, 0.1, 0);
+                    }
+                }
+            }
+        }
+    }
+
+    //Mjolnir - Storm
+    public static void tickAbilityStorm(ItemStack stack, World world, Entity entity,
+                                            int ability_timer, int skillCooldown, int radius) {
+        if (!entity.world.isClient() && (entity instanceof PlayerEntity player)) {
+
+
+            if (player.age % 10 == 0) {
+                double x = player.getX();
+                double y = player.getY();
+                double z = player.getZ();
+                player.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, 15, 5), player);
+                Box box = new Box(x + radius, y +radius, z + radius, x - radius, y - radius, z - radius);
+                ServerWorld sworld = (ServerWorld)player.world;
+
+                for(Entity e: world.getOtherEntities(player, box, EntityPredicates.VALID_LIVING_ENTITY))
+                {
+                    float choose = (float) (Math.random() * 1);
+                    if ((e instanceof LivingEntity ee)) {
+                        if (HelperMethods.checkFriendlyFire( ee, player) && choose > 0.7) {
+                            var stormtarget = ee.getBlockPos();
+                            ee.addStatusEffect(new StatusEffectInstance(EffectRegistry.FREEZE.get(), 10, 0), player);
+                            LightningEntity storm = EntityType.LIGHTNING_BOLT.spawn(sworld, null, null, player, stormtarget, SpawnReason.TRIGGERED, true, true);
+                                if (storm != null) {
+                                    storm.setCosmetic(true);
+                                }
+                                ee.damage(DamageSource.MAGIC, 5);
+                        }
+                    }
+                }
+            }
+
+            if (player.age % 5 == 0) {
+                double xpos = player.getX() - (radius + 1);
+                double ypos = player.getY();
+                double zpos = player.getZ() - (radius + 1);
+
+                for (int i = radius * 2; i > 0; i--) {
+                    for (int j = radius * 2; j > 0; j--) {
+                        float choose = (float) (Math.random() * 1);
+                        HelperMethods.spawnParticle(world, ParticleTypes.CLOUD, xpos + i + choose,
+                                ypos + 10,
+                                zpos + j + choose,
+                                0, 0, 0);
                     }
                 }
             }

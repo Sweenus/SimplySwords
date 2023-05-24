@@ -493,14 +493,14 @@
 
 
   "effect.simplyswords.freeze": "Freeze",
-  "effect.simplyswords.burn": "Brimstone",
   "effect.simplyswords.omen": "Omen",
   "effect.simplyswords.watcher": "Watcher",
-  "effect.simplyswords.electric": "Lightning",
+  "effect.simplyswords.storm": "Storm",
   "effect.simplyswords.wildfire": "Wildfire",
+  "effect.simplyswords.echo": "Echo",
   "effect.simplyswords.ward": "Ward",
   "effect.simplyswords.immolation": "Immolation",
-  "effect.simplyswords.Onslaught": "Onslaught",
+  "effect.simplyswords.onslaught": "Onslaught",
 
   "item.simplyswords.onrightclick": "On Right Click:",
   "item.simplyswords.onrightclickheld": "Hold Right Click:",
@@ -514,6 +514,9 @@
   "item.simplyswords.stormsworditem.tooltip1": "Unique Effect: Storm",
   "item.simplyswords.stormsworditem.tooltip2": "When raining/wet: Chance on hit to bring",
   "item.simplyswords.stormsworditem.tooltip3": "lightning down from the sky upon your foes.",
+  "item.simplyswords.stormsworditem.tooltip4": "While channelled, gain resistance and create",
+  "item.simplyswords.stormsworditem.tooltip5": "a localised storm that rains lightning down",
+  "item.simplyswords.stormsworditem.tooltip6": "on nearby enemies.",
 
   "item.simplyswords.watchersworditem.tooltip1": "Unique Effect: Omen",
   "item.simplyswords.watchersworditem.tooltip2": "Chance on hit to rip the life from a",
