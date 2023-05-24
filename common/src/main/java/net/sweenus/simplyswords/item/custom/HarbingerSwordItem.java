@@ -75,6 +75,8 @@ public class HarbingerSwordItem extends UniqueSwordItem {
                 if (banner != null) {
                     banner.setVelocity(0, -1, 0);
                     banner.ownerEntity = user;
+                    banner.decayRate = 3;
+                    banner.standardType = "harbinger";
                 }
                 user.getItemCooldownManager().set(this.getDefaultStack().getItem(), skillCooldown);
             }

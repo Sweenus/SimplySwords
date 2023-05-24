@@ -27,6 +27,8 @@ public class BattleStandardDarkEntity extends PathAwareEntity {
     public static final Supplier<EntityType<BattleStandardDarkEntity>> TYPE = Suppliers.memoize(() -> EntityType.Builder.create(BattleStandardDarkEntity::new, SpawnGroup.MISC).build("battlestandarddark"));
     int abilityDamage =  (int) (SimplySwordsConfig.getFloatValue("abyssalstandard_damage"));
     public PlayerEntity ownerEntity;
+    public String standardType;
+    public int decayRate;
 
     public static DefaultAttributeContainer.Builder createBattleStandardDarkAttributes() {
         return MobEntity.createMobAttributes().add(EntityAttributes.GENERIC_MAX_HEALTH, 150.0).add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.0f)
@@ -57,11 +59,11 @@ public class BattleStandardDarkEntity extends PathAwareEntity {
 
         if (!this.world.isClient()) {
             if (this.age % 10 == 0) {
-                this.setHealth(this.getHealth() - 3);
+                this.setHealth(this.getHealth() - decayRate);
                 if (ownerEntity == null)
                     this.setHealth(this.getHealth() - 1000);
             }
-            if (ownerEntity != null) {
+            if (ownerEntity != null && standardType != null) {
                 int radius = 6;
                 int abilityDamage = 2;
                 //AOE Aura
@@ -119,7 +121,6 @@ public class BattleStandardDarkEntity extends PathAwareEntity {
 
                     //AOE Heal
                     Box box = new Box(this.getX() + radius, this.getY() + (float) radius / 3, this.getZ() + radius, this.getX() - radius, this.getY() - (float) radius / 3, this.getZ() - radius);
-                    this.setHealth(this.getHealth() - 3);
                     for (Entity entities : world.getOtherEntities(this, box, EntityPredicates.VALID_LIVING_ENTITY)) {
 
                         if (entities != null) {
