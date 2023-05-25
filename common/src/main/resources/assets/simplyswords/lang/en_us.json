@@ -600,8 +600,8 @@
   "item.simplyswords.moltenedgesworditem.tooltip3": "If low HP, gain regeneration instead.",
   "item.simplyswords.moltenedgesworditem.tooltip4": "Gain strength and speed relative to missing HP.",
   "item.simplyswords.moltenedgesworditem.tooltip5": "Release a powerful roar, knocking back and",
-  "item.simplyswords.moltenedgesworditem.tooltip6": "igniting nearby enemies. Gain a stack of absorption",
-  "item.simplyswords.moltenedgesworditem.tooltip7": "and haste for each enemy hit for %ds.",
+  "item.simplyswords.moltenedgesworditem.tooltip6": "igniting nearby enemies. Gain resistance and",
+  "item.simplyswords.moltenedgesworditem.tooltip7": "onslaught with a duration relative to enemies hit.",
 
   "item.simplyswords.livyatansworditem.tooltip1": "Unique Effect: Frost Shatter",
   "item.simplyswords.livyatansworditem.tooltip2": "Chance on hit to encase nearby enemies in",

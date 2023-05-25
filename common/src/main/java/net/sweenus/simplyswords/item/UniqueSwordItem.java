@@ -35,7 +35,7 @@ public class UniqueSwordItem extends SwordItem {
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
 
         //Socket rolling
-        if (stack.getOrCreateNbt().getString("runic_power").isEmpty() || stack.getOrCreateNbt().getString("nether_power").isEmpty()) {
+        if (stack.getOrCreateNbt().getString("runic_power").isEmpty() && stack.getOrCreateNbt().getString("nether_power").isEmpty()) {
             float socketChance = (float) (Math.random() * 100);
             float socketChance2 = (float) (Math.random() * 100);
             if (socketChance > 49)

@@ -23,6 +23,7 @@ import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
+import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 
@@ -90,8 +91,9 @@ public class MoltenEdgeSwordItem extends UniqueSwordItem {
                 }
             }
             world.playSoundFromEntity(null, user, SoundRegistry.DARK_SWORD_ENCHANT.get(), SoundCategory.PLAYERS, 0.7f, 1.5f);
-            user.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, roar_timer_max, amp), user);
-            user.addStatusEffect(new StatusEffectInstance(StatusEffects.ABSORPTION, roar_timer_max, amp), user);
+            int duration = roar_timer_max * amp / 2;
+            user.addStatusEffect(new StatusEffectInstance(EffectRegistry.ONSLAUGHT.get(), duration, 0), user);
+            user.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, duration, 3), user);
             user.getItemCooldownManager().set(this, abilityCooldown);
             particlePassive = ParticleTypes.LARGE_SMOKE;
             particleWalk = ParticleTypes.LAVA;
