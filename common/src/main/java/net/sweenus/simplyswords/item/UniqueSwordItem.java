@@ -191,6 +191,10 @@ public class UniqueSwordItem extends SwordItem {
             if (stack.getOrCreateNbt().getString("nether_power").equals("onslaught")) {
                 RunicMethods.postHitNetherOnslaught(stack, target, attacker);
             }
+            //NULLIFICATION
+            if (stack.getOrCreateNbt().getString("nether_power").equals("nullification")) {
+                RunicMethods.postHitNetherNullification(stack, target, attacker);
+            }
 
         }
 
@@ -382,6 +386,16 @@ public class UniqueSwordItem extends SwordItem {
             tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.onslaught.description4"));
             tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.onslaught.description5"));
             tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.onslaught.description6"));
+
+        }
+        if (itemStack.getOrCreateNbt().getString("nether_power").equals("nullification")) {
+
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.nullification").formatted(Formatting.RED));
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.nullification.description"));
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.nullification.description2"));
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.nullification.description3"));
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.nullification.description4"));
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.nullification.description5"));
 
         }
 

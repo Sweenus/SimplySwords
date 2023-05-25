@@ -98,6 +98,16 @@ public class NetherfusedGemItem extends Item {
             tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.onslaught.description6"));
 
         }
+        if (itemStack.getOrCreateNbt().getString("nether_power").equals("nullification")) {
+
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.nullification").formatted(Formatting.RED));
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.nullification.description"));
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.nullification.description2"));
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.nullification.description3"));
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.nullification.description4"));
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.nullification.description5"));
+
+        }
 
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.gem_description").formatted(Formatting.GRAY, Formatting.ITALIC));

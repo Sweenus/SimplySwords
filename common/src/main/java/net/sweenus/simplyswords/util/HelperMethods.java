@@ -18,6 +18,8 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
+import net.sweenus.simplyswords.entity.BattleStandardDarkEntity;
+import net.sweenus.simplyswords.entity.BattleStandardEntity;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 
@@ -71,7 +73,9 @@ public class HelperMethods {
             return false;
         }
         return !(livingEntity instanceof ArmorStandEntity)
-                && !(livingEntity instanceof VillagerEntity);
+                && !(livingEntity instanceof VillagerEntity)
+                && !(livingEntity instanceof BattleStandardEntity)
+                && !(livingEntity instanceof BattleStandardDarkEntity);
     }
 
 
@@ -154,7 +158,7 @@ public class HelperMethods {
 
     public static String chooseNetherfusedPower() {
         List<String> runicList = Arrays.asList(
-            "echo", "berserk", "radiance", "onslaught");
+            "echo", "berserk", "radiance", "onslaught", "nullification");
 
         Random choose = new Random();
         int randomIndex = choose.nextInt(runicList.size());

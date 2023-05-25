@@ -1,9 +1,8 @@
 package net.sweenus.simplyswords.util;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.entity.*;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
@@ -15,12 +14,15 @@ import net.minecraft.item.Items;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
+import net.sweenus.simplyswords.entity.BattleStandardEntity;
 import net.sweenus.simplyswords.registry.EffectRegistry;
+import net.sweenus.simplyswords.registry.EntityRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 
 public class RunicMethods {
@@ -329,6 +331,32 @@ public class RunicMethods {
     public static void postHitNetherOnslaught(ItemStack stack,  LivingEntity target, LivingEntity attacker) {
         if (target.hasStatusEffect(StatusEffects.SLOWNESS) && !attacker.hasStatusEffect(StatusEffects.WEAKNESS)) {
             attacker.addStatusEffect(new StatusEffectInstance(EffectRegistry.ONSLAUGHT.get(), 80, 0), attacker);
+        }
+    }
+
+    // Nether Power - NULLIFICATION
+    public static void postHitNetherNullification(ItemStack stack,  LivingEntity target, LivingEntity attacker) {
+        if (!attacker.hasStatusEffect(EffectRegistry.BATTLE_FATIGUE.get()) && (attacker instanceof PlayerEntity user)) {
+            if (!user.world.isClient()) {
+                ServerWorld serverWorld = (ServerWorld) user.world;
+                BlockState currentState = serverWorld.getBlockState(user.getBlockPos().up(4).offset(user.getMovementDirection(), 3));
+                BlockState state = Blocks.AIR.getDefaultState();
+                if (currentState == state ) {
+                    serverWorld.playSoundFromEntity(null, user, SoundRegistry.ELEMENTAL_SWORD_EARTH_ATTACK_01.get(),
+                            SoundCategory.PLAYERS, 0.4f, 0.8f);
+                    BattleStandardEntity banner = EntityRegistry.BATTLESTANDARD.get().spawn(serverWorld, null,
+                            Text.translatable( "entity.simplyswords.battlestandard.name",user.getName()),
+                            user, user.getBlockPos().up(4).offset(user.getMovementDirection(),
+                                    3), SpawnReason.MOB_SUMMONED, true, true);
+                    if (banner != null) {
+                        banner.setVelocity(0, -1, 0);
+                        banner.ownerEntity = user;
+                        banner.decayRate = 3;
+                        banner.standardType = "nullification";
+                    }
+                    attacker.addStatusEffect(new StatusEffectInstance(EffectRegistry.BATTLE_FATIGUE.get(), 800, 0), attacker);
+                }
+            }
         }
     }
 

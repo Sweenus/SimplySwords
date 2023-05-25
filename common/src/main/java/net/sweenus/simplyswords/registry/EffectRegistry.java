@@ -31,5 +31,7 @@ public class EffectRegistry {
             new EchoEffect(StatusEffectCategory.HARMFUL, 1124687));
     public static final RegistrySupplier<StatusEffect> ONSLAUGHT = EFFECT.register("onslaught", () ->
             new OnslaughtEffect(StatusEffectCategory.BENEFICIAL, 1124687));
+    public static final RegistrySupplier<StatusEffect> BATTLE_FATIGUE = EFFECT.register("battle_fatigue", () ->
+            new BattleFatigueEffect(StatusEffectCategory.HARMFUL, 1124687));
 
 }

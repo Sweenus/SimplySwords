@@ -788,6 +788,13 @@
   "item.simplyswords.uniquesworditem.netherfused_power.onslaught.description5": "haste, but inflicts you with",
   "item.simplyswords.uniquesworditem.netherfused_power.onslaught.description6": "weakness when it expires).",
 
+  "item.simplyswords.uniquesworditem.netherfused_power.nullification": "[ Netherfused: Nullification ]",
+  "item.simplyswords.uniquesworditem.netherfused_power.nullification.description": "Summons a Battle Standard on hit",
+  "item.simplyswords.uniquesworditem.netherfused_power.nullification.description2": "that periodically cleanses",
+  "item.simplyswords.uniquesworditem.netherfused_power.nullification.description3": "debuffs from allied players,",
+  "item.simplyswords.uniquesworditem.netherfused_power.nullification.description4": "while stripping buffs from",
+  "item.simplyswords.uniquesworditem.netherfused_power.nullification.description5": "enemies within its vicinity.",
+
   "item.simplyswords.common.blacklisteffect": "ABILITY DISABLED",
 
   "entity.simplyswords.battlestandard.name": "%d's Battle Standard"

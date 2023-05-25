@@ -22,6 +22,7 @@ import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
+import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import org.jetbrains.annotations.NotNull;
@@ -87,8 +88,8 @@ public class BattleStandardEntity extends PathAwareEntity {
                                     le.setOnFireFor(1);
                                     le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 120, 1), this);
                                 }
-                                //Other negative effects
-                                if (Objects.equals(standardType, "other")) {
+                                //Nullification negative effects
+                                if (Objects.equals(standardType, "nullification")) {
                                     for (StatusEffectInstance statusEffect : le.getStatusEffects()) {
                                         if (statusEffect != null && statusEffect.getEffectType().isBeneficial()) {
                                             le.removeStatusEffect(statusEffect.getEffectType());
@@ -138,7 +139,6 @@ public class BattleStandardEntity extends PathAwareEntity {
 
                 if (this.age % 80 == 0) {
 
-                    //AOE Heal
                     Box box = new Box(this.getX() + radius, this.getY() + (float) radius / 3, this.getZ() + radius, this.getX() - radius, this.getY() - (float) radius / 3, this.getZ() - radius);
                     for (Entity entities : world.getOtherEntities(this, box, EntityPredicates.VALID_LIVING_ENTITY)) {
 
@@ -150,10 +150,10 @@ public class BattleStandardEntity extends PathAwareEntity {
                                     le.addStatusEffect(new StatusEffectInstance(StatusEffects.STRENGTH, 90, 1), this);
                                 }
 
-                                //Other positive effects
-                                if (Objects.equals(standardType, "other")) {
+                                //Nullification positive effects
+                                if (Objects.equals(standardType, "nullification")) {
                                     for (StatusEffectInstance statusEffect : le.getStatusEffects()) {
-                                        if (statusEffect != null && !statusEffect.getEffectType().isBeneficial()) {
+                                        if (statusEffect != null && !statusEffect.getEffectType().isBeneficial() && !Objects.equals(statusEffect.getEffectType(), EffectRegistry.BATTLE_FATIGUE.get())) {
                                             le.removeStatusEffect(statusEffect.getEffectType());
                                             break;
                                         }
