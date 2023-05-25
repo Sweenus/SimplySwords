@@ -14,7 +14,7 @@
         "animation": "bettercombat:one_handed_slash_horizontal_right",
         "swing_sound": {
           "id": "simplyswords:dark_sword_whoosh_02",
-          "volume": 0.7,
+          "volume": 0.3,
           "pitch": 1.5
         }
       },
@@ -27,7 +27,7 @@
         "animation": "bettercombat:two_handed_slash_horizontal_left",
         "swing_sound": {
           "id": "simplyswords:dark_sword_whoosh_03",
-          "volume": 0.7,
+          "volume": 0.3,
           "pitch": 1.2
         }
       },
@@ -40,7 +40,7 @@
         "animation": "bettercombat:two_handed_slash_horizontal_right",
         "swing_sound": {
           "id": "simplyswords:dark_sword_whoosh_04",
-          "volume": 0.7,
+          "volume": 0.3,
           "pitch": 1
         }
       }

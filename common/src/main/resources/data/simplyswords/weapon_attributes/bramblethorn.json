@@ -11,7 +11,7 @@
         "animation": "bettercombat:one_handed_slash_horizontal_left",
         "swing_sound": {
           "id": "simplyswords:magic_sword_whoosh_06",
-          "volume": 0.5,
+          "volume": 0.3,
           "pitch": 1.2
         }
       },
@@ -23,7 +23,7 @@
         "animation": "bettercombat:one_handed_stab",
         "swing_sound": {
           "id": "simplyswords:magic_sword_whoosh_07",
-          "volume": 0.5,
+          "volume": 0.3,
           "pitch": 1.2
         }
       }

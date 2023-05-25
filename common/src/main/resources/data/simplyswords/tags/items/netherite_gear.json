@@ -1,0 +1,20 @@
+{
+  "replace": false,
+  "values": [
+    "simplyswords:netherite_chakram",
+    "simplyswords:netherite_scythe",
+    "simplyswords:netherite_rapier",
+    "simplyswords:netherite_glaive",
+    "simplyswords:netherite_warglaive",
+    "simplyswords:netherite_spear",
+    "simplyswords:netherite_sai",
+    "simplyswords:netherite_katana",
+    "simplyswords:netherite_cutlass",
+    "simplyswords:netherite_longsword",
+    "simplyswords:netherite_claymore",
+    "simplyswords:netherite_twinblade",
+    "simplyswords:netherite_greathammer",
+    "simplyswords:netherite_greataxe",
+    "simplyswords:netherite_halberd"
+  ]
+}

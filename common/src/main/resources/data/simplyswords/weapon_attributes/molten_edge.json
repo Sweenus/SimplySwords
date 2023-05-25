@@ -11,7 +11,7 @@
         "animation": "bettercombat:one_handed_slash_horizontal_right",
         "swing_sound": {
           "id": "simplyswords:elemental_sword_fire_attack_02",
-          "volume": 0.5,
+          "volume": 0.2,
           "pitch": 1.5
         }
       },
@@ -24,7 +24,7 @@
         "animation": "bettercombat:dual_handed_slash_cross",
         "swing_sound": {
           "id": "simplyswords:elemental_sword_fire_attack_01",
-          "volume": 0.5,
+          "volume": 0.2,
           "pitch": 1.7
         }
       },
@@ -37,7 +37,7 @@
         "animation": "bettercombat:dual_handed_slash_uncross",
         "swing_sound": {
           "id": "simplyswords:elemental_sword_fire_attack_03",
-          "volume": 0.5,
+          "volume": 0.2,
           "pitch": 2
         }
       }

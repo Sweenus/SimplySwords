@@ -11,7 +11,7 @@
         "animation": "bettercombat:one_handed_slash_horizontal_right",
         "swing_sound": {
           "id": "simplyswords:elemental_sword_ice_attack_01",
-          "volume": 0.5,
+          "volume": 0.3,
           "pitch": 1.1
         }
       },
@@ -23,7 +23,7 @@
         "animation": "bettercombat:one_handed_slash_horizontal_left",
         "swing_sound": {
           "id": "simplyswords:elemental_sword_ice_attack_01",
-          "volume": 0.5,
+          "volume": 0.3,
           "pitch": 1.3
         }
       },
@@ -35,7 +35,7 @@
         "animation": "bettercombat:one_handed_slam",
         "swing_sound": {
           "id": "simplyswords:elemental_bow_ice_shoot_impact_02",
-          "volume": 0.5,
+          "volume": 0.3,
           "pitch": 1.2
         }
       }

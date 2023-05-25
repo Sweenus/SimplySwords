@@ -1,0 +1,20 @@
+{
+  "replace": false,
+  "values": [
+    "simplyswords:iron_chakram",
+    "simplyswords:iron_scythe",
+    "simplyswords:iron_rapier",
+    "simplyswords:iron_glaive",
+    "simplyswords:iron_warglaive",
+    "simplyswords:iron_spear",
+    "simplyswords:iron_sai",
+    "simplyswords:iron_katana",
+    "simplyswords:iron_cutlass",
+    "simplyswords:iron_longsword",
+    "simplyswords:iron_claymore",
+    "simplyswords:iron_twinblade",
+    "simplyswords:iron_greathammer",
+    "simplyswords:iron_greataxe",
+    "simplyswords:iron_halberd"
+  ]
+}

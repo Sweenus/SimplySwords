@@ -13,7 +13,7 @@
         "animation": "simplyswords:warglaive_slash_horizontal_right",
         "swing_sound": {
           "id": "simplyswords:magic_sword_attack_02",
-          "volume": 0.7,
+          "volume": 0.3,
           "pitch": 1.5
         }
       },
@@ -26,7 +26,7 @@
         "animation": "simplyswords:warglaive_slash_horizontal_left",
         "swing_sound": {
           "id": "simplyswords:magic_sword_attack_02",
-          "volume": 0.7,
+          "volume": 0.3,
           "pitch": 1.7
         }
       },
@@ -39,7 +39,7 @@
         "animation": "simplyswords:warglaive_spin",
         "swing_sound": {
           "id": "simplyswords:magic_sword_attack_01",
-          "volume": 0.7,
+          "volume": 0.3,
           "pitch": 1.5
         }
       }

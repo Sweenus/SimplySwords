@@ -13,7 +13,7 @@
         "animation": "simplyswords:halberd_slash_vertical_right",
         "swing_sound": {
           "id": "simplyswords:elemental_sword_ice_attack_01",
-          "volume": 0.5,
+          "volume": 0.3,
           "pitch": 0.8
         }
       },
@@ -25,7 +25,7 @@
         "animation": "simplyswords:halberd_stab_right",
         "swing_sound": {
           "id": "simplyswords:elemental_sword_ice_attack_03",
-          "volume": 0.5,
+          "volume": 0.3,
           "pitch": 1.8
         }
       },
@@ -37,7 +37,7 @@
         "animation": "simplyswords:halberd_stab_right",
         "swing_sound": {
           "id": "simplyswords:elemental_sword_ice_attack_03",
-          "volume": 0.5,
+          "volume": 0.3,
           "pitch": 1.5
         }
       },
@@ -49,7 +49,7 @@
         "animation": "bettercombat:two_handed_slash_vertical_right",
         "swing_sound": {
           "id": "simplyswords:elemental_sword_ice_attack_02",
-          "volume": 0.5,
+          "volume": 0.3,
           "pitch": 1.8
         }
       }

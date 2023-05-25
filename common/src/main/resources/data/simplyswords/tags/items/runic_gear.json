@@ -1,0 +1,20 @@
+{
+  "replace": false,
+  "values": [
+    "simplyswords:runic_chakram",
+    "simplyswords:runic_scythe",
+    "simplyswords:runic_rapier",
+    "simplyswords:runic_glaive",
+    "simplyswords:runic_warglaive",
+    "simplyswords:runic_spear",
+    "simplyswords:runic_sai",
+    "simplyswords:runic_katana",
+    "simplyswords:runic_cutlass",
+    "simplyswords:runic_longsword",
+    "simplyswords:runic_claymore",
+    "simplyswords:runic_twinblade",
+    "simplyswords:runic_greathammer",
+    "simplyswords:runic_greataxe",
+    "simplyswords:runic_halberd"
+  ]
+}

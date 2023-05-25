@@ -11,7 +11,7 @@
         "animation": "bettercombat:one_handed_slash_horizontal_right",
         "swing_sound": {
           "id": "simplyswords:elemental_sword_holy_attack_03",
-          "volume": 0.5,
+          "volume": 0.3,
           "pitch": 1.0
         }
       },
@@ -23,7 +23,7 @@
         "animation": "bettercombat:one_handed_slash_horizontal_left",
         "swing_sound": {
           "id": "simplyswords:elemental_sword_holy_attack_03",
-          "volume": 0.5,
+          "volume": 0.3,
           "pitch": 1.2
         }
       },
@@ -35,7 +35,7 @@
         "animation": "bettercombat:one_handed_stab",
         "swing_sound": {
           "id": "simplyswords:elemental_sword_holy_attack_01",
-          "volume": 0.5,
+          "volume": 0.3,
           "pitch": 1.1
         }
       },
@@ -47,7 +47,7 @@
         "animation": "bettercombat:one_handed_stab",
         "swing_sound": {
           "id": "simplyswords:elemental_sword_holy_attack_01",
-          "volume": 0.5,
+          "volume": 0.3,
           "pitch": 1.2
         }
       }

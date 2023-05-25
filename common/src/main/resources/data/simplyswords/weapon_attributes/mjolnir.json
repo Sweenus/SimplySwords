@@ -8,7 +8,7 @@
         "hitbox": "FORWARD_BOX",
         "damage_multiplier": 1,
         "angle": 0,
-        "upswing": 0.5,
+        "upswing": 0.3,
         "animation": "simplyswords:one_handed_chakram_throw_left",
         "swing_sound": {
           "id": "simplyswords:throw_mjolnir_short",
@@ -20,7 +20,7 @@
         "conditions": ["DUAL_WIELDING_SAME_CATEGORY", "MAIN_HAND_ONLY"],
         "damage_multiplier": 1,
         "angle": 360,
-        "upswing": 0.5,
+        "upswing": 0.3,
         "animation": "simplyswords:chakram_spin",
         "swing_sound": {
           "id": "simplyswords:throw_mjolnir_long",
@@ -32,7 +32,7 @@
         "conditions": ["DUAL_WIELDING_SAME_CATEGORY", "OFF_HAND_ONLY"],
         "damage_multiplier": 1,
         "angle": 360,
-        "upswing": 0.5,
+        "upswing": 0.3,
         "animation": "simplyswords:chakram_spin_long_grounded",
         "swing_sound": {
           "id": "simplyswords:throw_mjolnir_long",

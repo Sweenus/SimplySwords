@@ -1,0 +1,20 @@
+{
+  "replace": false,
+  "values": [
+    "simplyswords:diamond_chakram",
+    "simplyswords:diamond_scythe",
+    "simplyswords:diamond_rapier",
+    "simplyswords:diamond_glaive",
+    "simplyswords:diamond_warglaive",
+    "simplyswords:diamond_spear",
+    "simplyswords:diamond_sai",
+    "simplyswords:diamond_katana",
+    "simplyswords:diamond_cutlass",
+    "simplyswords:diamond_longsword",
+    "simplyswords:diamond_claymore",
+    "simplyswords:diamond_twinblade",
+    "simplyswords:diamond_greathammer",
+    "simplyswords:diamond_greataxe",
+    "simplyswords:diamond_halberd"
+  ]
+}

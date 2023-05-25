@@ -15,7 +15,7 @@
         "animation": "bettercombat:two_handed_slash_horizontal_left",
         "swing_sound": {
           "id": "simplyswords:dark_sword_attack_03",
-          "volume": 0.5,
+          "volume": 0.3,
           "pitch": 1.4
         }
       },
@@ -27,7 +27,7 @@
         "animation": "bettercombat:two_handed_slash_horizontal_right",
         "swing_sound": {
           "id": "simplyswords:dark_sword_attack_03",
-          "volume": 0.5,
+          "volume": 0.3,
           "pitch": 1.2
         }
       },
@@ -39,7 +39,7 @@
         "animation": "bettercombat:two_handed_spin",
         "swing_sound": {
           "id": "simplyswords:dark_sword_attack_01",
-          "volume": 0.5,
+          "volume": 0.3,
           "pitch": 1.1
         }
       },
@@ -51,7 +51,7 @@
         "animation": "bettercombat:two_handed_stab_left",
         "swing_sound": {
           "id": "simplyswords:dark_sword_attack_02",
-          "volume": 0.7,
+          "volume": 0.4,
           "pitch": 1.3
         }
       }
