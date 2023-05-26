@@ -16,7 +16,7 @@ public class ModLootTableModifiers {
 
         //STANDARD
         LootEvent.MODIFY_LOOT_TABLE.register(((lootTables, id, context, builtin) -> {
-            if (SimplySwordsConfig.getBooleanValue("add_weapons_to_loot_tables") && id.getPath().contains("chests")) {
+            if (SimplySwordsConfig.getBooleanValue("add_weapons_to_loot_tables") && id.getPath().contains("chests") && !id.getPath().contains("spectrum")) {
                 if (!SimplySwordsConfig.getBooleanValue("loot_can_be_found_in_villages") && id.getPath().contains("village")) {
                     //Do nothing
                 }
@@ -63,7 +63,7 @@ public class ModLootTableModifiers {
 
         //RARE
         LootEvent.MODIFY_LOOT_TABLE.register(((lootTables, id, context, builtin) -> {
-            if (SimplySwordsConfig.getBooleanValue("add_weapons_to_loot_tables") && id.getPath().contains("chests")) {
+            if (SimplySwordsConfig.getBooleanValue("add_weapons_to_loot_tables") && id.getPath().contains("chests") && !id.getPath().contains("spectrum")) {
                 if (!SimplySwordsConfig.getBooleanValue("loot_can_be_found_in_villages") && id.getPath().contains("village")) {
                     //Do nothing
                 }
@@ -94,7 +94,7 @@ public class ModLootTableModifiers {
         }));
         //RARE 2
         LootEvent.MODIFY_LOOT_TABLE.register(((lootTables, id, context, builtin) -> {
-            if (SimplySwordsConfig.getBooleanValue("add_weapons_to_loot_tables") && id.getPath().contains("chests")) {
+            if (SimplySwordsConfig.getBooleanValue("add_weapons_to_loot_tables") && id.getPath().contains("chests") && !id.getPath().contains("spectrum")) {
                 if (!SimplySwordsConfig.getBooleanValue("loot_can_be_found_in_villages") && id.getPath().contains("village")) {
                     //Do nothing
                 }
@@ -175,7 +175,7 @@ public class ModLootTableModifiers {
                     }
                 }
                 else {
-                    if (id.getPath().contains("chests")) {
+                    if (id.getPath().contains("chests") && !id.getPath().contains("spectrum")) {
                         LootPool.Builder pool = LootPool.builder()
                                 .rolls(ConstantLootNumberProvider.create(1))
                                 .conditionally(RandomChanceLootCondition.builder(SimplySwordsConfig.getGeneralSettings("unique_loot_table_weight"))); // 1 = 100% of the time

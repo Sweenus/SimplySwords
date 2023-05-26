@@ -802,18 +802,6 @@ public class ItemsRegistry {
                     shadowsting_attackspeed,
                     new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof()));
 
-    public static final RegistrySupplier<SunfireSwordItem> SUNFIRE = ITEM.register( "sunfire", () ->
-            new SunfireSwordItem(ModToolMaterial.UNIQUE,
-                    (int) (sunfire_damage_modifier),
-                    sunfire_attackspeed,
-                    new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof()));
-
-    public static final RegistrySupplier<HarbingerSwordItem> HARBINGER = ITEM.register( "harbinger", () ->
-            new HarbingerSwordItem(ModToolMaterial.UNIQUE,
-                    (int) (harbinger_damage_modifier),
-                    harbinger_attackspeed,
-                    new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof()));
-
     public static final RegistrySupplier<DormantRelicSwordItem> DORMANT_RELIC = ITEM.register( "dormant_relic", () ->
             new DormantRelicSwordItem(ModToolMaterial.UNIQUE,
                     (int) (sunfire_damage_modifier),
@@ -832,6 +820,25 @@ public class ItemsRegistry {
                     harbinger_attackspeed,
                     new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof()));
 
+    public static final RegistrySupplier<SunfireSwordItem> SUNFIRE = ITEM.register( "sunfire", () ->
+            new SunfireSwordItem(ModToolMaterial.UNIQUE,
+                    (int) (sunfire_damage_modifier),
+                    sunfire_attackspeed,
+                    new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof()));
 
+    public static final RegistrySupplier<HarbingerSwordItem> HARBINGER = ITEM.register( "harbinger", () ->
+            new HarbingerSwordItem(ModToolMaterial.UNIQUE,
+                    (int) (harbinger_damage_modifier),
+                    harbinger_attackspeed,
+                    new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof()));
+
+/*
+    public static final RegistrySupplier<TaintedRelicSwordItem> STORMSCALE = ITEM.register( "stormscale", () ->
+            new TaintedRelicSwordItem(ModToolMaterial.UNIQUE,
+                    (int) (harbinger_damage_modifier),
+                    harbinger_attackspeed,
+                    new Item.Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof()));
+
+*/
 
 }
