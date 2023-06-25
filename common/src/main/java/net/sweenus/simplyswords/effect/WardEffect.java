@@ -16,7 +16,7 @@ public class WardEffect extends StatusEffect {
 
     @Override
     public void applyUpdateEffect(LivingEntity pLivingEntity, int pAmplifier) {
-        if (!pLivingEntity.world.isClient()) {
+        if (!pLivingEntity.getWorld().isClient()) {
             if (pLivingEntity instanceof PlayerEntity) {
                 if (pLivingEntity.age % 20 == 0) {
                     pLivingEntity.addStatusEffect(new StatusEffectInstance(StatusEffects.ABSORPTION, 20, round(pLivingEntity.getHealth() / 4 )), pLivingEntity);

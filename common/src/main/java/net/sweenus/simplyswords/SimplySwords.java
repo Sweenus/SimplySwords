@@ -6,6 +6,8 @@ import dev.architectury.registry.CreativeTabRegistry;
 import dev.architectury.registry.client.level.entity.EntityModelLayerRegistry;
 import dev.architectury.registry.client.level.entity.EntityRendererRegistry;
 import dev.architectury.registry.level.entity.EntityAttributeRegistry;
+import dev.architectury.registry.registries.DeferredRegister;
+import dev.architectury.registry.registries.RegistrySupplier;
 import dev.architectury.utils.Env;
 import dev.architectury.utils.EnvExecutor;
 import net.fabricmc.api.EnvType;
@@ -13,6 +15,9 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.render.entity.model.EntityModelLayer;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.client.renderer.BattleStandardRenderer;
 import net.sweenus.simplyswords.client.renderer.BattleStandardDarkRenderer;
@@ -34,9 +39,24 @@ import java.io.File;
 
 public class SimplySwords {
     public static final String MOD_ID = "simplyswords";
-    // Registering a new creative tab
-    public static final ItemGroup SIMPLYSWORDS = CreativeTabRegistry.create(new Identifier(MOD_ID, "simplyswords"), () ->
-            new ItemStack(ItemsRegistry.RUNIC_TABLET.get()));
+    //public static final CreativeTabRegistry.TabSupplier SIMPLYSWORDS = CreativeTabRegistry.create(new Identifier(MOD_ID, "simplyswords"),
+    //        () -> new ItemStack(ItemsRegistry.RUNIC_TABLET.get()));
+
+
+
+    //Copied straight from the API docs and it doesn't work. Very cool
+    public static final DeferredRegister<ItemGroup> TABS =
+            DeferredRegister.create("modid", RegistryKeys.ITEM_GROUP);
+
+    public static final RegistrySupplier<ItemGroup> MY_TAB = TABS.register(
+            "test_tab", // Tab ID
+            () -> CreativeTabRegistry.create(
+                    Text.translatable("category.architectury_test"), // Tab Name
+                    () -> new ItemStack(ItemsRegistry.RUNIC_TABLET.get()) // Icon
+            )
+    );
+
+
 
     public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
 

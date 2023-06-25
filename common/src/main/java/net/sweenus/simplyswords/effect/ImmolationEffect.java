@@ -24,18 +24,18 @@ public class ImmolationEffect extends StatusEffect {
 
     @Override
     public void applyUpdateEffect(LivingEntity pLivingEntity, int pAmplifier) {
-        if (!pLivingEntity.world.isClient()) {
+        if (!pLivingEntity.getWorld().isClient()) {
             if (pLivingEntity instanceof PlayerEntity player) {
                 if (pLivingEntity.age % 40 == 0) {
                     if (!player.isCreative() && player.getHealth() > 4f)
                         pLivingEntity.setHealth(pLivingEntity.getHealth() - 0.5f);
 
-                    player.world.playSoundFromEntity(null, player, SoundRegistry.ELEMENTAL_BOW_FIRE_SHOOT_IMPACT_02.get(),
+                    player.getWorld().playSoundFromEntity(null, player, SoundRegistry.ELEMENTAL_BOW_FIRE_SHOOT_IMPACT_02.get(),
                             SoundCategory.PLAYERS, 0.3f, 1f);
-                    HelperMethods.spawnParticle(player.world, ParticleTypes.LAVA, player.getX(), player.getY()+0.5, player.getZ(), 0.3, 0.8, 0.2);
-                    HelperMethods.spawnParticle(player.world, ParticleTypes.LAVA, player.getX(), player.getY()+0.5, player.getZ(), -0.2, 0.6, 0.3);
-                    HelperMethods.spawnParticle(player.world, ParticleTypes.LAVA, player.getX(), player.getY()+0.5, player.getZ(), 0.5, 0.3, -0.2);
-                    HelperMethods.spawnParticle(player.world, ParticleTypes.SMOKE, player.getX(), player.getY()+0.5, player.getZ(), 0, 0, 0);
+                    HelperMethods.spawnParticle(player.getWorld(), ParticleTypes.LAVA, player.getX(), player.getY()+0.5, player.getZ(), 0.3, 0.8, 0.2);
+                    HelperMethods.spawnParticle(player.getWorld(), ParticleTypes.LAVA, player.getX(), player.getY()+0.5, player.getZ(), -0.2, 0.6, 0.3);
+                    HelperMethods.spawnParticle(player.getWorld(), ParticleTypes.LAVA, player.getX(), player.getY()+0.5, player.getZ(), 0.5, 0.3, -0.2);
+                    HelperMethods.spawnParticle(player.getWorld(), ParticleTypes.SMOKE, player.getX(), player.getY()+0.5, player.getZ(), 0, 0, 0);
 
                     int radius = 3;
                     float abilityDamage = (player.getHealth() / 6);
@@ -77,7 +77,7 @@ public class ImmolationEffect extends StatusEffect {
                     //Damage
                     Box box = new Box(player.getX() + radius, player.getY() + radius, player.getZ() + radius,
                             player.getX() - radius, player.getY() - radius, player.getZ() - radius);
-                    for (Entity entities : player.world.getOtherEntities(player, box, EntityPredicates.VALID_LIVING_ENTITY)) {
+                    for (Entity entities : player.getWorld().getOtherEntities(player, box, EntityPredicates.VALID_LIVING_ENTITY)) {
 
                         if (entities != null) {
                             if ((entities instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, player)){

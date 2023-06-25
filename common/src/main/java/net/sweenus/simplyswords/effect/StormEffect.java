@@ -8,7 +8,7 @@ import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectCategory;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.predicate.entity.EntityPredicates;
-import net.minecraft.server.world.ServerWorld;
+import net.minecraft.server.getWorld().ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
@@ -18,8 +18,8 @@ public class StormEffect extends StatusEffect {
     public StormEffect(StatusEffectCategory statusEffectCategory, int color) {super (statusEffectCategory, color); }
     @Override
     public void applyUpdateEffect(LivingEntity pLivingEntity, int pAmplifier) {
-        if (!pLivingEntity.world.isClient()) {
-            ServerWorld world = (ServerWorld)pLivingEntity.world;
+        if (!pLivingEntity.getWorld().isClient()) {
+            ServerWorld world = (ServerWorld)pLivingEntity.getWorld();
             BlockPos position = pLivingEntity.getBlockPos();
             int hradius = (int) (SimplySwordsConfig.getFloatValue("storm_radius"));
             int vradius = (int) (SimplySwordsConfig.getFloatValue("storm_radius") / 2);

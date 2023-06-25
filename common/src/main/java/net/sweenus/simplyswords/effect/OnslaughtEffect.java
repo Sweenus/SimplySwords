@@ -15,7 +15,7 @@ public class OnslaughtEffect extends StatusEffect {
 
     @Override
     public void applyUpdateEffect(LivingEntity pLivingEntity, int pAmplifier) {
-        if (!pLivingEntity.world.isClient()) {
+        if (!pLivingEntity.getWorld().isClient()) {
             if (pLivingEntity instanceof PlayerEntity) {
 
                 //Grant pulsing haste

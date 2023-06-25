@@ -6,7 +6,7 @@ import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectCategory;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.server.world.ServerWorld;
+import net.minecraft.server.getWorld().ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
@@ -18,8 +18,8 @@ public class OmenEffect extends StatusEffect {
 
     @Override
     public void applyUpdateEffect(LivingEntity pLivingEntity, int pAmplifier) {
-        if (!pLivingEntity.world.isClient()) {
-            ServerWorld world = (ServerWorld)pLivingEntity.world;
+        if (!pLivingEntity.getWorld().isClient()) {
+            ServerWorld world = (ServerWorld)pLivingEntity.getWorld();
             BlockPos position = pLivingEntity.getBlockPos();
             double x = pLivingEntity.getX();
             double y = pLivingEntity.getY();

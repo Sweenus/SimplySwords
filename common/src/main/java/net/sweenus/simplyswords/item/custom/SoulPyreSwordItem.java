@@ -54,7 +54,7 @@ public class SoulPyreSwordItem extends UniqueSwordItem {
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
 
 
-        if (!user.world.isClient()) {
+        if (!user.getWorld().isClient()) {
             int range = (int) SimplySwordsConfig.getFloatValue("soultether_range");
             int radius = (int) (SimplySwordsConfig.getFloatValue("soultether_radius"));
             int ignite_duration = (int) (SimplySwordsConfig.getFloatValue("soultether_ignite_duration")) / 20;
