@@ -37,8 +37,8 @@ public class StealSwordItem extends UniqueSwordItem {
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        if (!attacker.world.isClient()) {
-            ServerWorld sworld = (ServerWorld) attacker.world;
+        if (!attacker.getWorld().isClient()) {
+            ServerWorld sworld = (ServerWorld) attacker.getWorld();
             int fhitchance = (int) SimplySwordsConfig.getFloatValue("steal_chance");
             int fduration = (int) SimplySwordsConfig.getFloatValue("steal_duration");
             attacker.setVelocity(attacker.getRotationVector().multiply(+1));
@@ -84,14 +84,14 @@ public class StealSwordItem extends UniqueSwordItem {
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
 
 
-        if (!user.world.isClient()) {
+        if (!user.getWorld().isClient()) {
             int sradius = (int) SimplySwordsConfig.getFloatValue("steal_radius");
             int vradius = (int) (SimplySwordsConfig.getFloatValue("steal_radius") / 2);
 
             double x = user.getX();
             double y = user.getY();
             double z = user.getZ();
-            ServerWorld sworld = (ServerWorld) user.world;
+            ServerWorld sworld = (ServerWorld) user.getWorld();
             Box box = new Box(x + sradius, y + vradius, z + sradius, x - sradius, y - vradius, z - sradius);
             for(Entity entities: sworld.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY)) {
 
@@ -104,7 +104,7 @@ public class StealSwordItem extends UniqueSwordItem {
                             le.addStatusEffect(new StatusEffectInstance(StatusEffects.BLINDNESS, bduration, 1), user);
                             user.teleport(le.getX(), le.getY(), le.getZ());
                             sworld.playSoundFromEntity (null, le, SoundRegistry.ELEMENTAL_SWORD_SCIFI_ATTACK_03.get() , SoundCategory.PLAYERS, 0.3f, 1.5f);
-                            le.damage(DamageSource.FREEZE, 5f);
+                            le.damage(user.getDamageSources().freeze(), 5f);
                             le.removeStatusEffect(StatusEffects.SLOWNESS);
                             le.removeStatusEffect(StatusEffects.GLOWING);
                         }

@@ -104,7 +104,7 @@ public class StormbringerSwordItem extends UniqueSwordItem {
                         if ((entities instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, (PlayerEntity) user)) {
 
                             float choose = (float) (Math.random() * 1);
-                            le.damage(DamageSource.MAGIC, abilityDamage + parrySuccession);
+                            le.damage(user.getDamageSources().magic(), abilityDamage + parrySuccession);
                             world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_BOW_POISON_ATTACK_01.get(), SoundCategory.PLAYERS, 0.3f, choose);
                             le.setVelocity(le.getX() - user.getX(), 0.1, le.getZ() - user.getZ());
 

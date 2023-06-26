@@ -30,8 +30,8 @@ public class BrambleSwordItem extends UniqueSwordItem {
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        if (!attacker.world.isClient()) {
-            ServerWorld world = (ServerWorld) attacker.world;
+        if (!attacker.getWorld().isClient()) {
+            ServerWorld world = (ServerWorld) attacker.getWorld();
             int fhitchance = (int) SimplySwordsConfig.getFloatValue("bramble_chance");
             HelperMethods.playHitSounds(attacker, target);
 

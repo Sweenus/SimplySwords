@@ -41,12 +41,12 @@ public class ArcanethystSwordItem extends UniqueSwordItem {
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        if (!attacker.world.isClient()) {
+        if (!attacker.getWorld().isClient()) {
             HelperMethods.playHitSounds(attacker, target);
 
             if (attacker.getRandom().nextInt(100) <= chargeChance) {
                 target.addStatusEffect(new StatusEffectInstance(StatusEffects.LEVITATION, 60, 1), attacker);
-                attacker.world.playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_BOW_SHOOT_IMPACT_01.get(), SoundCategory.PLAYERS, 0.5f, 1.2f);
+                attacker.getWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_BOW_SHOOT_IMPACT_01.get(), SoundCategory.PLAYERS, 0.5f, 1.2f);
             }
         }
 
@@ -55,7 +55,7 @@ public class ArcanethystSwordItem extends UniqueSwordItem {
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
 
-        if (!user.world.isClient()) {
+        if (!user.getWorld().isClient()) {
 
             ItemStack itemStack = user.getStackInHand(hand);
             if (itemStack.getDamage() >= itemStack.getMaxDamage() - 1) {

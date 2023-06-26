@@ -14,7 +14,7 @@ import java.util.List;
 public class EmpoweredRemnantItem extends Item {
 
     public EmpoweredRemnantItem() {
-        super( new Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof());
+        super( new Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof());
     }
 
 

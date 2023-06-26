@@ -41,8 +41,8 @@ public class EmberIreSwordItem extends UniqueSwordItem {
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        if (!attacker.world.isClient()) {
-            ServerWorld world = (ServerWorld) attacker.world;
+        if (!attacker.getWorld().isClient()) {
+            ServerWorld world = (ServerWorld) attacker.getWorld();
             int fhitchance = (int) SimplySwordsConfig.getFloatValue("ember_ire_chance");
             int fduration = (int) SimplySwordsConfig.getFloatValue("ember_ire_duration");
             HelperMethods.playHitSounds(attacker, target);
@@ -72,10 +72,10 @@ public class EmberIreSwordItem extends UniqueSwordItem {
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
 
-        if (!user.world.isClient()) {
+        if (!user.getWorld().isClient()) {
             if (user.hasStatusEffect(StatusEffects.STRENGTH) && user.hasStatusEffect(StatusEffects.HASTE) && user.hasStatusEffect(StatusEffects.SPEED)) {
 
-                ServerWorld sWorld = (ServerWorld)user.world;
+                ServerWorld sWorld = (ServerWorld)user.getWorld();
                 BlockPos position = (user.getBlockPos());
                 Vec3d rotation = user.getRotationVec(1f);
                 Vec3d newPos = user.getPos().add(rotation);

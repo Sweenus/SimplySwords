@@ -94,8 +94,8 @@ public class HelperMethods {
 
     // playHitSounds
     public static void playHitSounds(LivingEntity attacker, LivingEntity target) {
-        if (!attacker.world.isClient()) {
-            ServerWorld world = (ServerWorld) attacker.world;
+        if (!attacker.getWorld().isClient()) {
+            ServerWorld world = (ServerWorld) attacker.getWorld();
             boolean impactsounds_enabled = (SimplySwordsConfig.getBooleanValue("enable_weapon_impact_sounds"));
             float impactsounds_volume = (SimplySwordsConfig.getGeneralSettings("impact_sound_effect_volume"));
 

@@ -47,10 +47,10 @@ public class HarbingerSwordItem extends UniqueSwordItem {
 
 
         HelperMethods.playHitSounds(attacker, target);
-        if (!attacker.world.isClient()) {
+        if (!attacker.getWorld().isClient()) {
 
             if (attacker.getRandom().nextInt(100) <= abilityChance && (attacker instanceof PlayerEntity player)) {
-                attacker.world.playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(), SoundCategory.PLAYERS, 0.3f, 1.6f);
+                attacker.getWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(), SoundCategory.PLAYERS, 0.3f, 1.6f);
                 target.addStatusEffect(new StatusEffectInstance(StatusEffects.WEAKNESS, 160, 0), attacker);
             }
         }
@@ -61,8 +61,8 @@ public class HarbingerSwordItem extends UniqueSwordItem {
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
 
         ItemStack itemStack = user.getStackInHand(hand);
-        if (!user.world.isClient()) {
-            ServerWorld serverWorld = (ServerWorld) user.world;
+        if (!user.getWorld().isClient()) {
+            ServerWorld serverWorld = (ServerWorld) user.getWorld();
             BlockState currentState = world.getBlockState(user.getBlockPos().up(4).offset(user.getMovementDirection(), 3));
             BlockState state = Blocks.AIR.getDefaultState();
             if (currentState == state ) {

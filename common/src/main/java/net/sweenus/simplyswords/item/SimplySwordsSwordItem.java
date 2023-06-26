@@ -5,8 +5,8 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.SwordItem;
 import net.minecraft.item.ToolMaterial;
+import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
 import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.util.HelperMethods;
 
@@ -19,7 +19,7 @@ public class SimplySwordsSwordItem extends SwordItem {
 
     public SimplySwordsSwordItem(ToolMaterial toolMaterial, int attackDamage, float attackSpeed, String... repairIngredient) {
         super(toolMaterial, attackDamage, attackSpeed,
-                new Item.Settings().group(SimplySwords.SIMPLYSWORDS));
+                new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS));
         this.repairIngredient = repairIngredient;
     }
 
@@ -28,7 +28,7 @@ public class SimplySwordsSwordItem extends SwordItem {
         List<Item> potentialIngredients = new ArrayList<>(List.of());
         Arrays.stream(repairIngredient).toList().forEach(repIngredient ->
             potentialIngredients.add(
-                    Registry.ITEM.get(new Identifier(repIngredient))));
+                    Registries.ITEM.get(new Identifier(repIngredient))));
 
 
         return potentialIngredients.contains(ingredient.getItem());
@@ -36,7 +36,7 @@ public class SimplySwordsSwordItem extends SwordItem {
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        if (!attacker.world.isClient()) {
+        if (!attacker.getWorld().isClient()) {
             HelperMethods.playHitSounds(attacker, target);
         }
         return super.postHit(stack, target, attacker);

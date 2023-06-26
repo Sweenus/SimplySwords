@@ -63,14 +63,14 @@ public class UniqueSwordItem extends SwordItem {
                 //When clicked on with a Runefused Gem, copy the runic power and delete the gem
                 String runicPowerSelection = otherStack.getOrCreateNbt().getString("runic_power");
                 stack.getOrCreateNbt().putString("runic_power", runicPowerSelection);
-                player.world.playSoundFromEntity(null, player, SoundEvents.BLOCK_ANVIL_USE, SoundCategory.BLOCKS, 1, 1);
+                player.getWorld().playSoundFromEntity(null, player, SoundEvents.BLOCK_ANVIL_USE, SoundCategory.BLOCKS, 1, 1);
                 otherStack.decrement(1);
             }
             else if (otherStack.isOf(ItemsRegistry.NETHERFUSED_GEM.get())) {
                 //When clicked on with a Netherfused Gem, copy the nether power and delete the gem
                 String netherPowerSelection = otherStack.getOrCreateNbt().getString("nether_power");
                 stack.getOrCreateNbt().putString("nether_power", netherPowerSelection);
-                player.world.playSoundFromEntity(null, player, SoundEvents.BLOCK_ANVIL_USE, SoundCategory.BLOCKS, 1, 1);
+                player.getWorld().playSoundFromEntity(null, player, SoundEvents.BLOCK_ANVIL_USE, SoundCategory.BLOCKS, 1, 1);
                 otherStack.decrement(1);
             }
         }
@@ -80,8 +80,8 @@ public class UniqueSwordItem extends SwordItem {
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        if (!attacker.world.isClient()) {
-            ServerWorld world = (ServerWorld) attacker.world;
+        if (!attacker.getWorld().isClient()) {
+            ServerWorld world = (ServerWorld) attacker.getWorld();
             HelperMethods.playHitSounds(attacker, target);
 
             //FREEZE

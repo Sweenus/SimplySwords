@@ -48,8 +48,8 @@ public class RunicSwordItem extends SwordItem {
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        if (!attacker.world.isClient()) {
-            ServerWorld world = (ServerWorld) attacker.world;
+        if (!attacker.getWorld().isClient()) {
+            ServerWorld world = (ServerWorld) attacker.getWorld();
             HelperMethods.playHitSounds(attacker, target);
 
             //FREEZE

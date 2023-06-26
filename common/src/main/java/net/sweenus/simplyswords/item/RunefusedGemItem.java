@@ -19,7 +19,7 @@ import java.util.List;
 public class RunefusedGemItem extends Item {
 
     public RunefusedGemItem() {
-        super( new Settings().group(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof().maxCount(1));
+        super( new Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof().maxCount(1));
     }
 
     @Override

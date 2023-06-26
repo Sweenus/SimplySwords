@@ -22,7 +22,7 @@ public class AbilityMethods {
     //Storm's Edge - Storm Jolt
     public static void tickAbilityStormJolt(ItemStack stack, World world, Entity entity,
                                             int ability_timer, int skillCooldown, int radius) {
-        if (!entity.world.isClient() && (entity instanceof PlayerEntity player)) {
+        if (!entity.getWorld().isClient() && (entity instanceof PlayerEntity player)) {
 
             //Player dash forward
             if (ability_timer == 12 || ability_timer == 13 && player.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
@@ -73,7 +73,7 @@ public class AbilityMethods {
     //Mjolnir - Storm
     public static void tickAbilityStorm(ItemStack stack, World world, Entity entity,
                                             int ability_timer, int skillCooldown, int radius) {
-        if (!entity.world.isClient() && (entity instanceof PlayerEntity player)) {
+        if (!entity.getWorld().isClient() && (entity instanceof PlayerEntity player)) {
 
 
             if (player.age % 10 == 0) {
@@ -82,7 +82,7 @@ public class AbilityMethods {
                 double z = player.getZ();
                 player.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, 15, 5), player);
                 Box box = new Box(x + radius, y +radius, z + radius, x - radius, y - radius, z - radius);
-                ServerWorld sworld = (ServerWorld)player.world;
+                ServerWorld sworld = (ServerWorld)player.getWorld();
 
                 for(Entity e: world.getOtherEntities(player, box, EntityPredicates.VALID_LIVING_ENTITY))
                 {
@@ -95,7 +95,7 @@ public class AbilityMethods {
                                 if (storm != null) {
                                     storm.setCosmetic(true);
                                 }
-                                ee.damage(DamageSource.MAGIC, 5);
+                                ee.damage(player.getDamageSources().magic(), 5);
                         }
                     }
                 }
@@ -122,7 +122,7 @@ public class AbilityMethods {
     //Thunder Brand - Thunder Blitz
     public static void tickAbilityThunderBlitz(ItemStack stack, World world, Entity entity,
                                                int ability_timer, int ability_timer_max, int abilityDamage, int skillCooldown, int radius) {
-        if (!entity.world.isClient() && (entity instanceof PlayerEntity player)) {
+        if (!entity.getWorld().isClient() && (entity instanceof PlayerEntity player)) {
 
             //Player dash control
             if (ability_timer > (ability_timer_max - 42) && ability_timer < (ability_timer_max - 40)) {
@@ -151,13 +151,13 @@ public class AbilityMethods {
                             float choose = (float) (Math.random() * 1);
 
                             if (ability_timer > (ability_timer_max - 40)) {
-                                le.damage(DamageSource.MAGIC, abilityDamage);
+                                le.damage(world.getDamageSources().magic(), abilityDamage);
                                 world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_BOW_POISON_ATTACK_02.get(), SoundCategory.PLAYERS, 0.1f, choose);
 
                             }
 
                             if (ability_timer < (ability_timer_max - 40)) {
-                                le.damage(DamageSource.MAGIC, abilityDamage * 10);
+                                le.damage(world.getDamageSources().magic(), abilityDamage * 10);
                                 world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_BOW_POISON_ATTACK_01.get(), SoundCategory.PLAYERS, 0.1f, choose);
                             }
 
@@ -199,7 +199,7 @@ public class AbilityMethods {
                                               double targetX, double targetY, double targetZ,
                                               int range, float healAmount, LivingEntity abilityTarget) {
 
-    if (!entity.world.isClient() && (entity instanceof PlayerEntity player) && abilityTarget != null) {
+    if (!entity.getWorld().isClient() && (entity instanceof PlayerEntity player) && abilityTarget != null) {
 
             //3D sound control
             float soundDistance = 0.2f - (float) player.squaredDistanceTo(lastX, lastY, lastZ) / 800;
@@ -219,7 +219,7 @@ public class AbilityMethods {
                                 player.heal(healAmount);
                                 chanceReduce++;
                             }
-                            le.damage(DamageSource.MAGIC, abilityDamage);
+                            le.damage(world.getDamageSources().magic(), abilityDamage);
                             damageTracker += abilityDamage * 3;
 
                         }
@@ -257,7 +257,7 @@ public class AbilityMethods {
                                               int skillCooldown, int radius,
                                               double lastX, double lastY, double lastZ) {
 
-        if (!entity.world.isClient() && (entity instanceof PlayerEntity player)) {
+        if (!entity.getWorld().isClient() && (entity instanceof PlayerEntity player)) {
             int rradius = radius *2;
             if (ability_timer < 5)
                 player.stopUsingItem();
@@ -283,7 +283,7 @@ public class AbilityMethods {
                             }
                             float choose = (float) (Math.random() * 1);
                             world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_BOW_ICE_SHOOT_IMPACT_03.get(), SoundCategory.PLAYERS, 0.1f, choose);
-                            le.damage(DamageSource.FREEZE, abilityDamage * 3);
+                            le.damage(world.getDamageSources().magic(), abilityDamage * 3);
                         }
                     }
                 }
@@ -316,7 +316,7 @@ public class AbilityMethods {
                                              int ability_timer, int ability_timer_max, int abilityDamage,
                                              int skillCooldown, int radius) {
 
-        if (!entity.world.isClient() && (entity instanceof PlayerEntity player)) {
+        if (!entity.getWorld().isClient() && (entity instanceof PlayerEntity player)) {
 
             if (ability_timer < 5)
                 player.stopUsingItem();
@@ -337,10 +337,10 @@ public class AbilityMethods {
                                 world.playSoundFromEntity(null, le, SoundRegistry.MAGIC_BOW_SHOOT_IMPACT_03.get(),
                                         SoundCategory.PLAYERS, 0.1f, choose);
                             }
-                            le.damage(DamageSource.MAGIC, abilityDamage);
+                            le.damage(world.getDamageSources().magic(), abilityDamage);
                             if (ability_timer < 10) { //Ground Slam - 3 Charges
                                 le.removeStatusEffect(StatusEffects.LEVITATION);
-                                le.damage(DamageSource.MAGIC, abilityDamage * 10);
+                                le.damage(world.getDamageSources().magic(), abilityDamage * 10);
                                 le.setVelocity(0, -10, 0);
                                 player.stopUsingItem();
                                 world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_SWORD_SCIFI_ATTACK_03.get(),
@@ -381,7 +381,7 @@ public class AbilityMethods {
     public static void tickAbilityVolcanicFury(ItemStack stack, World world, Entity entity,
                                                int ability_timer, int ability_timer_max, int abilityDamage,
                                                int skillCooldown, int radius, int chargePower) {
-        if (!entity.world.isClient() && (entity instanceof PlayerEntity player)) {
+        if (!entity.getWorld().isClient() && (entity instanceof PlayerEntity player)) {
 
             if (ability_timer < 5)
                 player.stopUsingItem();
@@ -406,7 +406,7 @@ public class AbilityMethods {
                         if ((entities instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, player)) {
 
                             if (ability_timer > 12) {
-                                le.damage(DamageSource.MAGIC, abilityDamage);
+                                le.damage(world.getDamageSources().magic(), abilityDamage);
                                 le.setVelocity((player.getX() - le.getX()) /10,  (player.getY() - le.getY()) /10, (player.getZ() - le.getZ()) /10);
                                 le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 40, 3), player);
 

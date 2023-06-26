@@ -39,19 +39,14 @@ import java.io.File;
 
 public class SimplySwords {
     public static final String MOD_ID = "simplyswords";
-    //public static final CreativeTabRegistry.TabSupplier SIMPLYSWORDS = CreativeTabRegistry.create(new Identifier(MOD_ID, "simplyswords"),
-    //        () -> new ItemStack(ItemsRegistry.RUNIC_TABLET.get()));
 
-
-
-    //Copied straight from the API docs and it doesn't work. Very cool
     public static final DeferredRegister<ItemGroup> TABS =
             DeferredRegister.create("modid", RegistryKeys.ITEM_GROUP);
 
-    public static final RegistrySupplier<ItemGroup> MY_TAB = TABS.register(
-            "test_tab", // Tab ID
+    public static final RegistrySupplier<ItemGroup> SIMPLYSWORDS = TABS.register(
+            "simply_swords", // Tab ID
             () -> CreativeTabRegistry.create(
-                    Text.translatable("category.architectury_test"), // Tab Name
+                    Text.translatable("category.simply_swords"), // Tab Name
                     () -> new ItemStack(ItemsRegistry.RUNIC_TABLET.get()) // Icon
             )
     );

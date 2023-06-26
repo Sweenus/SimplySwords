@@ -34,8 +34,8 @@ public class SoulSwordItem extends UniqueSwordItem {
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        if (!attacker.world.isClient()) {
-            ServerWorld world = (ServerWorld) attacker.world;
+        if (!attacker.getWorld().isClient()) {
+            ServerWorld world = (ServerWorld) attacker.getWorld();
             int fhitchance = (int) SimplySwordsConfig.getFloatValue("soulmeld_chance");
             int fduration = (int) SimplySwordsConfig.getFloatValue("soulmeld_duration");
             HelperMethods.playHitSounds(attacker, target);
@@ -64,13 +64,13 @@ public class SoulSwordItem extends UniqueSwordItem {
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
 
-        if (!user.world.isClient()) {
+        if (!user.getWorld().isClient()) {
             int hradius = (int) SimplySwordsConfig.getFloatValue("soulmeld_radius");
             int vradius = (int) (SimplySwordsConfig.getFloatValue("soulmeld_radius") / 2);
             double x = user.getX();
             double y = user.getY();
             double z = user.getZ();
-            ServerWorld serverWorld = (ServerWorld) user.world;
+            ServerWorld serverWorld = (ServerWorld) user.getWorld();
             Box box = new Box(x + hradius, y + vradius, z + hradius, x - hradius, y - vradius, z - hradius);
 
             for(Entity ee: serverWorld.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY)) {

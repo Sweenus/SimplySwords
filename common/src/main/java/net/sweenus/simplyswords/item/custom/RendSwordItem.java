@@ -36,8 +36,8 @@ public class RendSwordItem extends UniqueSwordItem {
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        if (!attacker.world.isClient()) {
-            ServerWorld world = (ServerWorld) attacker.world;
+        if (!attacker.getWorld().isClient()) {
+            ServerWorld world = (ServerWorld) attacker.getWorld();
             int fhitchance = (int) SimplySwordsConfig.getFloatValue("soulrend_chance");
             int fduration = (int) SimplySwordsConfig.getFloatValue("soulrend_duration");
             int maxstacks = (int) SimplySwordsConfig.getFloatValue("soulrend_max_stacks");
@@ -83,7 +83,7 @@ public class RendSwordItem extends UniqueSwordItem {
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
 
-        if (!user.world.isClient()) {
+        if (!user.getWorld().isClient()) {
             int rend_damage = (int) (SimplySwordsConfig.getFloatValue("soulrend_rend_damage_multiplier"));
             float heal_amount = (SimplySwordsConfig.getFloatValue("soulrend_rend_heal_multiplier"));
             int healamp = 0;
@@ -93,7 +93,7 @@ public class RendSwordItem extends UniqueSwordItem {
             double x = user.getX();
             double y = user.getY();
             double z = user.getZ();
-            ServerWorld sworld = (ServerWorld) user.world;
+            ServerWorld sworld = (ServerWorld) user.getWorld();
             Box box = new Box(x + hradius, y + vradius, z + hradius, x - hradius, y - vradius, z - hradius);
 
             for(Entity ee: sworld.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY)) {
@@ -105,7 +105,7 @@ public class RendSwordItem extends UniqueSwordItem {
                          if (le.hasStatusEffect(StatusEffects.SLOWNESS) && le.hasStatusEffect(StatusEffects.WEAKNESS) && HelperMethods.checkFriendlyFire(le, user)) {
                              healamp += (le.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier());
                              cantrigger = true;
-                             le.damage(DamageSource.FREEZE, le.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier() * rend_damage);
+                             le.damage(user.getDamageSources().freeze(), le.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier() * rend_damage);
                              le.removeStatusEffect(StatusEffects.WEAKNESS);
                              le.removeStatusEffect(StatusEffects.SLOWNESS);
                              world.playSoundFromEntity (null, ee, SoundRegistry.DARK_SWORD_SPELL.get(), SoundCategory.PLAYERS, 0.1f, 2f);

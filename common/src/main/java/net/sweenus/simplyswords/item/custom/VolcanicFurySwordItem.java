@@ -46,8 +46,8 @@ public class VolcanicFurySwordItem extends UniqueSwordItem {
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        if (!attacker.world.isClient()) {
-            ServerWorld world = (ServerWorld) attacker.world;
+        if (!attacker.getWorld().isClient()) {
+            ServerWorld world = (ServerWorld) attacker.getWorld();
             HelperMethods.playHitSounds(attacker, target);
 
 
@@ -134,7 +134,7 @@ public class VolcanicFurySwordItem extends UniqueSwordItem {
                     if ((entities instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, player)){
 
                         float choose = (float) (Math.random() * 1);
-                        le.damage(DamageSource.MAGIC, abilityDamage * chargePower);
+                        le.damage(player.getDamageSources().magic(), abilityDamage * chargePower);
                         le.setOnFireFor(6);
                         world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_BOW_POISON_ATTACK_01.get(), SoundCategory.PLAYERS, 0.1f, choose);
                         chargePower = 0;

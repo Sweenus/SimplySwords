@@ -36,7 +36,7 @@ public class StormSwordItem extends UniqueSwordItem {
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        if (!attacker.world.isClient()) {
+        if (!attacker.getWorld().isClient()) {
 
             HelperMethods.playHitSounds(attacker, target);
 

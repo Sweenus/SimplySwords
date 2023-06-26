@@ -159,7 +159,7 @@ public class LichbladeSwordItem extends UniqueSwordItem {
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
 
-        if (!entity.world.isClient() && (entity instanceof PlayerEntity player)) {
+        if (!entity.getWorld().isClient() && (entity instanceof PlayerEntity player)) {
             //AOE Aura
             if (player.age % 35 == 0 && player.getEquippedStack(EquipmentSlot.MAINHAND) == stack && !player.isUsingItem()) {
                 Box box = new Box(player.getX() + radius, player.getY() + radius, player.getZ() + radius, player.getX() - radius, player.getY() - radius, player.getZ() - radius);
@@ -167,7 +167,7 @@ public class LichbladeSwordItem extends UniqueSwordItem {
 
                     if (entities != null) {
                         if ((entities instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, player)) {
-                            le.damage(DamageSource.MAGIC, abilityDamage);
+                            le.damage(player.getDamageSources().magic(), abilityDamage);
                         }
                     }
                 }

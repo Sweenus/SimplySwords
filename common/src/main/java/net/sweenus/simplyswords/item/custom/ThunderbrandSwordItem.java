@@ -44,10 +44,10 @@ public class ThunderbrandSwordItem extends UniqueSwordItem {
 
         HelperMethods.playHitSounds(attacker, target);
 
-        if (!attacker.world.isClient()) {
+        if (!attacker.getWorld().isClient()) {
             if (attacker.getRandom().nextInt(100) <= chargeChance && (attacker instanceof PlayerEntity player) && player.getItemCooldownManager().getCooldownProgress(this, 1f) > 0) {
                 player.getItemCooldownManager().set(this, 0);
-                attacker.world.playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_BLOCK_01.get(), SoundCategory.PLAYERS, 0.7f, 1f);
+                attacker.getWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_BLOCK_01.get(), SoundCategory.PLAYERS, 0.7f, 1f);
             }
         }
 

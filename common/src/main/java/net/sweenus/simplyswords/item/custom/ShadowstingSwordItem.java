@@ -49,12 +49,12 @@ public class ShadowstingSwordItem extends UniqueSwordItem {
 
 
         HelperMethods.playHitSounds(attacker, target);
-        if (!attacker.world.isClient()) {
+        if (!attacker.getWorld().isClient()) {
 
             if (attacker.getRandom().nextInt(100) <= abilityChance && (attacker instanceof PlayerEntity player)) {
-                attacker.world.playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(), SoundCategory.PLAYERS, 0.3f, 1.8f);
+                attacker.getWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(), SoundCategory.PLAYERS, 0.3f, 1.8f);
                 int extraDamage = (target.getArmor() * damageArmorMultiplier) / 2;
-                target.damage(DamageSource.MAGIC,  extraDamage);
+                target.damage(attacker.getDamageSources().magic(),  extraDamage);
             }
         }
 

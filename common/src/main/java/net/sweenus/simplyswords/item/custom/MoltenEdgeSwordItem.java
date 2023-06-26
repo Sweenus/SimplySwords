@@ -48,8 +48,8 @@ public class MoltenEdgeSwordItem extends UniqueSwordItem {
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        if (!attacker.world.isClient()) {
-            ServerWorld world = (ServerWorld) attacker.world;
+        if (!attacker.getWorld().isClient()) {
+            ServerWorld world = (ServerWorld) attacker.getWorld();
             HelperMethods.playHitSounds(attacker, target);
 
 
@@ -77,7 +77,7 @@ public class MoltenEdgeSwordItem extends UniqueSwordItem {
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
 
 
-        if (!user.world.isClient()) {
+        if (!user.getWorld().isClient()) {
             int amp = 0;
             Box box = new Box(user.getX() + radius , user.getY() + radius, user.getZ() + radius, user.getX() - radius, user.getY() - radius, user.getZ() - radius);
             for (Entity entities : world.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY)) {

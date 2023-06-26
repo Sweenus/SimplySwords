@@ -42,8 +42,8 @@ public class SoulPyreSwordItem extends UniqueSwordItem {
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        if (!attacker.world.isClient()) {
-            ServerWorld sworld = (ServerWorld) attacker.world;
+        if (!attacker.getWorld().isClient()) {
+            ServerWorld sworld = (ServerWorld) attacker.getWorld();
             HelperMethods.playHitSounds(attacker, target);
 
         }

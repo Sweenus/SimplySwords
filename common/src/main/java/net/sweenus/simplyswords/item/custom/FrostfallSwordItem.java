@@ -52,8 +52,8 @@ public class FrostfallSwordItem extends UniqueSwordItem {
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        if (!attacker.world.isClient()) {
-            ServerWorld world = (ServerWorld) attacker.world;
+        if (!attacker.getWorld().isClient()) {
+            ServerWorld world = (ServerWorld) attacker.getWorld();
             HelperMethods.playHitSounds(attacker, target);
 
 
@@ -89,7 +89,7 @@ public class FrostfallSwordItem extends UniqueSwordItem {
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
 
 
-        if (!user.world.isClient()) {
+        if (!user.getWorld().isClient()) {
 
             lastX = user.getX();
             lastY = user.getY();
