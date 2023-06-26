@@ -238,9 +238,9 @@ public class SimplySwordsConfig {
 
         FLOAT_OPTIONS.put("fatalflicker_cooldown", 300f);
         FLOAT_OPTIONS.put("fatalflicker_chance", 15f);
-        FLOAT_OPTIONS.put("fatalflicker_radius", 2f);
+        FLOAT_OPTIONS.put("fatalflicker_radius", 3f);
         FLOAT_OPTIONS.put("fatalflicker_max_echo_stacks", 99f);
-        FLOAT_OPTIONS.put("fatalflicker_dash_velocity", 4f);
+        FLOAT_OPTIONS.put("fatalflicker_dash_velocity", 3f);
 
 
         GENERAL_OPTIONS.put("standard_loot_table_weight", 0.01f);

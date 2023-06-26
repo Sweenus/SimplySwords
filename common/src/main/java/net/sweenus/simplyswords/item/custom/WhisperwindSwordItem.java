@@ -1,8 +1,6 @@
 package net.sweenus.simplyswords.item.custom;
 
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -12,13 +10,11 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.particle.ParticleTypes;
-import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
-import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
@@ -51,9 +47,6 @@ public class WhisperwindSwordItem extends UniqueSwordItem {
             if (attacker.getRandom().nextInt(100) <= abilityChance && (attacker instanceof PlayerEntity player)) {
                 attacker.getWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(), SoundCategory.PLAYERS, 0.3f, 1.8f);
                 player.getItemCooldownManager().set(this.getDefaultStack().getItem(), 0);
-                player.setVelocity(player.getRotationVector().negate().multiply(+dodgeDistance));
-                player.setVelocity(player.getVelocity().x, 0, player.getVelocity().z);
-                player.velocityModified = true;
             }
         }
 
@@ -62,8 +55,12 @@ public class WhisperwindSwordItem extends UniqueSwordItem {
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
 
-        world.playSoundFromEntity(null, user, SoundRegistry.ELEMENTAL_SWORD_EARTH_ATTACK_01.get(), SoundCategory.PLAYERS, 0.4f, 1.6f);
-        user.addStatusEffect(new StatusEffectInstance(EffectRegistry.FATAL_FLICKER.get(), 30));
+        world.playSoundFromEntity(null, user, SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_IMPACT_01.get(), SoundCategory.PLAYERS, 0.6f, 1.0f);
+        user.setVelocity(user.getRotationVector().negate().multiply(+1.5));
+        user.setVelocity(user.getVelocity().x, 0, user.getVelocity().z);
+        user.velocityModified = true;
+        user.addStatusEffect(new StatusEffectInstance(EffectRegistry.FATAL_FLICKER.get(), 14));
+        HelperMethods.incrementStatusEffect(user, StatusEffects.ABSORPTION, 30, 2, 4);
         user.getItemCooldownManager().set(this.getDefaultStack().getItem(), skillCooldown);
 
         return super.use(world, user, hand);

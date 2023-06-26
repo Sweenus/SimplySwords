@@ -34,6 +34,6 @@ public class EffectRegistry {
     public static final RegistrySupplier<StatusEffect> BATTLE_FATIGUE = EFFECT.register("battle_fatigue", () ->
             new BattleFatigueEffect(StatusEffectCategory.HARMFUL, 1124687));
     public static final RegistrySupplier<StatusEffect> FATAL_FLICKER = EFFECT.register("fatal_flicker", () ->
-            new BattleFatigueEffect(StatusEffectCategory.BENEFICIAL, 1124687));
+            new FatalFlickerEffect(StatusEffectCategory.BENEFICIAL, 1124687));
 
 }
