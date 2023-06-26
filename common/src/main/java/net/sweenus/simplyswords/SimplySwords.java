@@ -1,7 +1,6 @@
 package net.sweenus.simplyswords;
 
 import com.google.gson.JsonObject;
-import dev.architectury.event.events.client.ClientLifecycleEvent;
 import dev.architectury.registry.CreativeTabRegistry;
 import dev.architectury.registry.client.level.entity.EntityModelLayerRegistry;
 import dev.architectury.registry.client.level.entity.EntityRendererRegistry;
@@ -15,12 +14,11 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.render.entity.model.EntityModelLayer;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
-import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import net.sweenus.simplyswords.client.renderer.BattleStandardRenderer;
 import net.sweenus.simplyswords.client.renderer.BattleStandardDarkRenderer;
+import net.sweenus.simplyswords.client.renderer.BattleStandardRenderer;
 import net.sweenus.simplyswords.client.renderer.model.BattleStandardDarkModel;
 import net.sweenus.simplyswords.client.renderer.model.BattleStandardModel;
 import net.sweenus.simplyswords.config.Config;
@@ -44,9 +42,9 @@ public class SimplySwords {
             DeferredRegister.create("modid", RegistryKeys.ITEM_GROUP);
 
     public static final RegistrySupplier<ItemGroup> SIMPLYSWORDS = TABS.register(
-            "simply_swords", // Tab ID
+            "simplyswords", // Tab ID
             () -> CreativeTabRegistry.create(
-                    Text.translatable("category.simply_swords"), // Tab Name
+                    Text.translatable("itemGroup.simplyswords.simplyswords"), // Tab Name
                     () -> new ItemStack(ItemsRegistry.RUNIC_TABLET.get()) // Icon
             )
     );
@@ -92,6 +90,7 @@ public class SimplySwords {
         SimplySwordsConfig.loadConfig();
 
 
+        SimplySwords.TABS.register();
         ItemsRegistry.ITEM.register();
         SoundRegistry.SOUND.register();
         EffectRegistry.EFFECT.register();

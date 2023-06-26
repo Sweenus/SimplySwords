@@ -5,8 +5,8 @@ import dev.architectury.registry.registries.RegistrySupplier;
 import net.minecraft.item.Item;
 import net.minecraft.item.SwordItem;
 import net.minecraft.item.ToolMaterials;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.util.Rarity;
-import net.minecraft.util.registry.Registry;
 import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
 import net.sweenus.simplyswords.item.*;
@@ -128,7 +128,7 @@ public class ItemsRegistry {
     static float harbinger_damage_modifier = SimplySwordsConfig.getWeaponAttributes("harbinger_damage_modifier");
 
 
-    public static final DeferredRegister<Item> ITEM = DeferredRegister.create(SimplySwords.MOD_ID, Registry.ITEM_KEY);
+    public static final DeferredRegister<Item> ITEM = DeferredRegister.create(SimplySwords.MOD_ID, RegistryKeys.ITEM);
 
 
     public static final RegistrySupplier<Item> RUNIC_TABLET = ITEM.register("runic_tablet", () ->

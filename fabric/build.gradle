@@ -43,14 +43,14 @@ dependencies {
     modApi "dev.architectury:architectury-fabric:${rootProject.architectury_version}"
 
     // Mythic Metals
-    modImplementation "curse.maven:mythicmetals-410127:4441526"
+    modImplementation "curse.maven:mythicmetals-410127:4578567"
     // slug / curseforge project ID / file ID "check url"
 
     // Amethyst Imbuement
     //modImplementation "curse.maven:amethyst-imbuement-608261:4514358"
 
     // Patchouli
-    modImplementation "vazkii.patchouli:Patchouli:1.19.2-77-FABRIC"
+    //modImplementation "vazkii.patchouli:Patchouli:1.19.2-77-FABRIC"
 
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }

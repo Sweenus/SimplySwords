@@ -1,10 +1,8 @@
 package net.sweenus.simplyswords.forge.events;
 
-import net.minecraft.resource.ResourcePackCompatibility;
 import net.minecraft.resource.ResourcePackProfile;
 import net.minecraft.resource.ResourcePackSource;
 import net.minecraft.resource.ResourceType;
-import net.minecraft.resource.metadata.PackResourceMetadata;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraftforge.api.distmarker.Dist;
@@ -16,8 +14,6 @@ import net.minecraftforge.forgespi.locating.IModFile;
 import net.minecraftforge.resource.PathPackResources;
 import net.sweenus.simplyswords.SimplySwords;
 
-import java.io.IOException;
-
 @Mod.EventBusSubscriber(modid = SimplySwords.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class SimplySwordsClientEvents {
     @SubscribeEvent
@@ -28,27 +24,21 @@ public class SimplySwordsClientEvents {
     }
 
     private static void simplySwords$registerResourcePack(AddPackFindersEvent event, Identifier identifier, boolean alwaysEnabled) {
-        event.addRepositorySource(((profileAdder, factory) -> {
+        event.addRepositorySource((profileAdder -> {
             IModFile file = ModList.get().getModFileById(identifier.getNamespace()).getFile();
             try (PathPackResources packResources = new PathPackResources(
                     identifier.toString(),
+                    true,
                     file.findResource("resourcepacks/" + identifier.getPath()))) {
-                profileAdder.accept(new ResourcePackProfile(
+                profileAdder.accept(ResourcePackProfile.create(
                         identifier.toString(),
+                        Text.of(identifier.getNamespace()+"/"+identifier.getPath()),
                         alwaysEnabled,
-                        () -> packResources,
-                        Text.of(identifier.getNamespace() + "/" + identifier.getPath()),
-                        packResources
-                                .parseMetadata(PackResourceMetadata.READER)
-                                .getDescription()
-                                .copy()
-                                .append(" §7(Classic)"),
-                        ResourcePackCompatibility.COMPATIBLE,
+                        a -> packResources,
+                        ResourceType.CLIENT_RESOURCES,
                         ResourcePackProfile.InsertionPosition.TOP,
-                        false,
-                        ResourcePackSource.PACK_SOURCE_BUILTIN,
-                        false));
-            } catch (IOException | NullPointerException e) {e.printStackTrace();}
+                        ResourcePackSource.BUILTIN));
+            } catch (NullPointerException e) {e.printStackTrace();}
         }));
     }
 }

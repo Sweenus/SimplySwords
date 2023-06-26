@@ -57,7 +57,7 @@ public class BattleStandardDarkEntity extends PathAwareEntity {
     @Override
     public void baseTick() {
 
-        if (!this.world.isClient()) {
+        if (!this.getWorld().isClient()) {
             if (this.age % 10 == 0) {
                 this.setHealth(this.getHealth() - decayRate);
                 if (ownerEntity == null)
@@ -69,20 +69,20 @@ public class BattleStandardDarkEntity extends PathAwareEntity {
                 //AOE Aura
                 if (this.age % 10 == 0) {
                     Box box = new Box(this.getX() + radius, this.getY() + (float) radius / 3, this.getZ() + radius, this.getX() - radius, this.getY() - (float) radius / 3, this.getZ() - radius);
-                    for (Entity entities : world.getOtherEntities(this, box, EntityPredicates.VALID_LIVING_ENTITY)) {
+                    for (Entity entities : this.getWorld().getOtherEntities(this, box, EntityPredicates.VALID_LIVING_ENTITY)) {
 
                         if (entities != null) {
                             if ((entities instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, ownerEntity)
                                     && le != ownerEntity && !(le instanceof BattleStandardEntity)
                                     && !(le instanceof BattleStandardDarkEntity)) {
-                                le.damage(DamageSource.MAGIC, abilityDamage);
+                                le.damage(this.getDamageSources().magic(), abilityDamage);
                                 if (le.distanceTo(this) > radius - 2)
                                     le.setVelocity((this.getX() - le.getX()) / 4, (this.getY() - le.getY()) / 4, (this.getZ() - le.getZ()) / 4);
                                 le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 120, 0), this);
                             }
                         }
                     }
-                    HelperMethods.spawnParticle(world, ParticleTypes.SCULK_SOUL, this.getX(),
+                    HelperMethods.spawnParticle(this.getWorld(), ParticleTypes.SCULK_SOUL, this.getX(),
                             this.getY(),
                             this.getZ(),
                             0, 0, 0);
@@ -91,11 +91,11 @@ public class BattleStandardDarkEntity extends PathAwareEntity {
                 //Landing effects
                 if (this.getHealth() > this.getMaxHealth() - 2 && this.isOnGround()) {
 
-                    HelperMethods.spawnParticle(world, ParticleTypes.SOUL_FIRE_FLAME, this.getX(),
+                    HelperMethods.spawnParticle(this.getWorld(), ParticleTypes.SOUL_FIRE_FLAME, this.getX(),
                             this.getY(),
                             this.getZ(),
                             0, 0.3, 0);
-                    HelperMethods.spawnParticle(world, ParticleTypes.CAMPFIRE_COSY_SMOKE, this.getX(),
+                    HelperMethods.spawnParticle(this.getWorld(), ParticleTypes.CAMPFIRE_COSY_SMOKE, this.getX(),
                             this.getY(),
                             this.getZ(),
                             0, 0, 0);
@@ -103,11 +103,11 @@ public class BattleStandardDarkEntity extends PathAwareEntity {
                     //Launch nearby entities on land
                     Box box = new Box(this.getX() + 1, this.getY() + 1, this.getZ() + 1, this.getX()
                             - 1, this.getY() - (float) 1, this.getZ() - 1);
-                    for (Entity entities : world.getOtherEntities(this, box, EntityPredicates.VALID_LIVING_ENTITY)) {
+                    for (Entity entities : this.getWorld().getOtherEntities(this, box, EntityPredicates.VALID_LIVING_ENTITY)) {
 
                         if (entities != null) {
                             if ((entities instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, ownerEntity) && le != ownerEntity) {
-                                le.damage(DamageSource.MAGIC, abilityDamage * 3);
+                                le.damage(this.getDamageSources().magic(), abilityDamage * 3);
                                 le.setVelocity((le.getX() - this.getX()) / 4, 0.5, (le.getZ() - this.getZ()) / 4);
                             }
                         }
@@ -121,7 +121,7 @@ public class BattleStandardDarkEntity extends PathAwareEntity {
 
                     //AOE Heal
                     Box box = new Box(this.getX() + radius, this.getY() + (float) radius / 3, this.getZ() + radius, this.getX() - radius, this.getY() - (float) radius / 3, this.getZ() - radius);
-                    for (Entity entities : world.getOtherEntities(this, box, EntityPredicates.VALID_LIVING_ENTITY)) {
+                    for (Entity entities : this.getWorld().getOtherEntities(this, box, EntityPredicates.VALID_LIVING_ENTITY)) {
 
                         if (entities != null) {
                             if ((entities instanceof LivingEntity le) && !HelperMethods.checkFriendlyFire(le, ownerEntity)) {
@@ -130,7 +130,7 @@ public class BattleStandardDarkEntity extends PathAwareEntity {
                         }
                     }
 
-                    world.playSoundFromEntity(null, this, SoundRegistry.DARK_SWORD_WHOOSH_01.get(), SoundCategory.PLAYERS, 0.1f, 0.6f);
+                    this.getWorld().playSoundFromEntity(null, this, SoundRegistry.DARK_SWORD_WHOOSH_01.get(), SoundCategory.PLAYERS, 0.1f, 0.6f);
                     double xpos = this.getX() - (radius + 1);
                     double ypos = this.getY();
                     double zpos = this.getZ() - (radius + 1);
@@ -139,7 +139,7 @@ public class BattleStandardDarkEntity extends PathAwareEntity {
                         for (int j = radius * 2; j > 0; j--) {
                             float choose = (float) (Math.random() * 1);
                             if (choose > 0.5)
-                                HelperMethods.spawnParticle(world, ParticleTypes.SOUL, xpos + i + choose,
+                                HelperMethods.spawnParticle(this.getWorld(), ParticleTypes.SOUL, xpos + i + choose,
                                         ypos + 0.1,
                                         zpos + j + choose,
                                         0, -0.1, 0);

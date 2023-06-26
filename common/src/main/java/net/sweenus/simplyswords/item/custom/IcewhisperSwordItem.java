@@ -5,7 +5,6 @@ import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
@@ -121,7 +120,7 @@ public class IcewhisperSwordItem extends UniqueSwordItem {
                                 }
                                 float choose = (float) (Math.random() * 1);
                                 world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_BOW_ICE_SHOOT_IMPACT_03.get(), SoundCategory.PLAYERS, 0.1f, choose);
-                                le.damage(DamageSource.FREEZE, frostDamage);
+                                le.damage(player.getDamageSources().freeze(), frostDamage);
                             }
                         }
                     }

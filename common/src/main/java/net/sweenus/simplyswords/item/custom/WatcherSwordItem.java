@@ -27,8 +27,8 @@ public class WatcherSwordItem extends UniqueSwordItem {
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        if (!attacker.world.isClient()) {
-            ServerWorld world = (ServerWorld) attacker.world;
+        if (!attacker.getWorld().isClient()) {
+            ServerWorld world = (ServerWorld) attacker.getWorld();
 
             int thitchance = (int) SimplySwordsConfig.getFloatValue("watcher_chance");
             int phitchance = (int) SimplySwordsConfig.getFloatValue("omen_chance");

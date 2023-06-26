@@ -39,10 +39,10 @@ public class TaintedRelicSwordItem extends UniqueSwordItem {
 
 
         HelperMethods.playHitSounds(attacker, target);
-        if (!attacker.world.isClient()) {
+        if (!attacker.getWorld().isClient()) {
 
             if (attacker.getRandom().nextInt(100) <= abilityChance && (attacker instanceof PlayerEntity player)) {
-                attacker.world.playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(), SoundCategory.PLAYERS, 0.3f, 1.7f);
+                attacker.getWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(), SoundCategory.PLAYERS, 0.3f, 1.7f);
                 target.addStatusEffect(new StatusEffectInstance(StatusEffects.WEAKNESS, 160, 0), attacker);
 
             }

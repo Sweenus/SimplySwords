@@ -3,7 +3,6 @@ package net.sweenus.simplyswords.util;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.*;
-import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
@@ -344,15 +343,16 @@ public class RunicMethods {
                 if (currentState == state ) {
                     serverWorld.playSoundFromEntity(null, user, SoundRegistry.ELEMENTAL_SWORD_EARTH_ATTACK_01.get(),
                             SoundCategory.PLAYERS, 0.4f, 0.8f);
-                    BattleStandardEntity banner = EntityRegistry.BATTLESTANDARD.get().spawn(serverWorld, null,
-                            Text.translatable( "entity.simplyswords.battlestandard.name",user.getName()),
-                            user, user.getBlockPos().up(4).offset(user.getMovementDirection(),
-                                    3), SpawnReason.MOB_SUMMONED, true, true);
+                    BattleStandardEntity banner = EntityRegistry.BATTLESTANDARD.get().spawn(
+                            serverWorld,
+                            user.getBlockPos().up(4).offset(user.getMovementDirection(), 3),
+                            SpawnReason.MOB_SUMMONED );
                     if (banner != null) {
                         banner.setVelocity(0, -1, 0);
                         banner.ownerEntity = user;
                         banner.decayRate = 3;
                         banner.standardType = "nullification";
+                        banner.setCustomName(Text.translatable( "entity.simplyswords.battlestandard.name",user.getName()));
                     }
                     attacker.addStatusEffect(new StatusEffectInstance(EffectRegistry.BATTLE_FATIGUE.get(), 800, 0), attacker);
                 }

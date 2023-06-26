@@ -6,7 +6,6 @@ import net.minecraft.block.Blocks;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
@@ -51,8 +50,8 @@ public class LivyatanSwordItem extends UniqueSwordItem {
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        if (!attacker.world.isClient()) {
-            ServerWorld world = (ServerWorld) attacker.world;
+        if (!attacker.getWorld().isClient()) {
+            ServerWorld world = (ServerWorld) attacker.getWorld();
             HelperMethods.playHitSounds(attacker, target);
 
 
@@ -66,8 +65,8 @@ public class LivyatanSwordItem extends UniqueSwordItem {
                             le.addStatusEffect(new StatusEffectInstance(EffectRegistry.FREEZE.get(), shatter_timer_max + 10, 0), attacker);
                             le.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, shatter_timer_max - 10, 4), attacker);
                             world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_BOW_ICE_SHOOT_IMPACT_01.get(), SoundCategory.PLAYERS, 0.1f, 3f);
-                            BlockPos pos = new BlockPos(le.getX(), le.getY(), le.getZ());
-                            BlockPos pos2 = new BlockPos(le.getX(), le.getY() + 1, le.getZ());
+                            BlockPos pos = BlockPos.ofFloored(le.getX(), le.getY(), le.getZ());
+                            BlockPos pos2 = BlockPos.ofFloored(le.getX(), le.getY() + 1, le.getZ());
                             BlockState state = Blocks.ICE.getDefaultState();
                             if (world.getBlockState(pos) == Blocks.AIR.getDefaultState())
                                 world.setBlockState(pos, state);
@@ -88,7 +87,7 @@ public class LivyatanSwordItem extends UniqueSwordItem {
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
 
 
-        if (!user.world.isClient()) {
+        if (!user.getWorld().isClient()) {
 
 
 
@@ -119,7 +118,7 @@ public class LivyatanSwordItem extends UniqueSwordItem {
                                     le.removeStatusEffect(EffectRegistry.FREEZE.get());
                                     le.removeStatusEffect(StatusEffects.RESISTANCE);
                                     world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_BOW_ICE_SHOOT_IMPACT_02.get(), SoundCategory.PLAYERS, 0.2f, 3f);
-                                    le.damage(DamageSource.FREEZE, shatterDamage + shatter_bonus);
+                                    le.damage(player.getDamageSources().freeze(), shatterDamage + shatter_bonus);
                                 }
 
 
@@ -130,10 +129,10 @@ public class LivyatanSwordItem extends UniqueSwordItem {
 
                                 for (int i = 3; i > 0; i--) {
                                     for (int j = 3; j > 0; j--) {
-                                        BlockPos poscheck = new BlockPos(xpos+i, ypos, zpos+j);
-                                        BlockPos poscheck2 = new BlockPos(xpos+i, ypos + 1, zpos+j);
-                                        BlockPos poscheck3 = new BlockPos(xpos+i, ypos + 2, zpos+j);
-                                        BlockPos poscheck4 = new BlockPos(xpos+i, ypos - 1, zpos+j);
+                                        BlockPos poscheck = BlockPos.ofFloored(xpos+i, ypos, zpos+j);
+                                        BlockPos poscheck2 = BlockPos.ofFloored(xpos+i, ypos + 1, zpos+j);
+                                        BlockPos poscheck3 = BlockPos.ofFloored(xpos+i, ypos + 2, zpos+j);
+                                        BlockPos poscheck4 = BlockPos.ofFloored(xpos+i, ypos - 1, zpos+j);
 
                                         BlockState currentState = world.getBlockState(poscheck);
                                         BlockState currentState2 = world.getBlockState(poscheck2);

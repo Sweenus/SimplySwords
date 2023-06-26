@@ -14,7 +14,6 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraft.world.explosion.Explosion;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.registry.SoundRegistry;
@@ -45,7 +44,7 @@ public class FireSwordItem extends UniqueSwordItem {
                     HelperMethods.spawnParticle(world, ParticleTypes.SMOKE, position.getX(), position.getY()+0.5, position.getZ(), 0, 0, 0);
                 }
 
-                world.createExplosion(attacker, target.getX(), target.getY(), target.getZ(), choose_sound, Explosion.DestructionType.NONE);
+                world.createExplosion(attacker, target.getX(), target.getY(), target.getZ(), choose_sound, World.ExplosionSourceType.NONE);
                 target.setOnFireFor(3);
 
                 if (choose_sound <= 1)

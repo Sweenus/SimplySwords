@@ -7,7 +7,6 @@ import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.SpawnReason;
-import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
@@ -68,15 +67,16 @@ public class HarbingerSwordItem extends UniqueSwordItem {
             if (currentState == state ) {
                 world.playSoundFromEntity(null, user, SoundRegistry.DARK_SWORD_ATTACK_WITH_BLOOD_02.get(),
                         SoundCategory.PLAYERS, 0.4f, 0.8f);
-                BattleStandardDarkEntity banner = EntityRegistry.BATTLESTANDARDDARK.get().spawn(serverWorld, null,
-                        Text.translatable( "entity.simplyswords.battlestandard.name",user.getName()), user,
+                BattleStandardDarkEntity banner = EntityRegistry.BATTLESTANDARDDARK.get().spawn(
+                        serverWorld,
                         user.getBlockPos().up(4).offset(user.getMovementDirection(), 3),
-                        SpawnReason.MOB_SUMMONED, true, true);
+                        SpawnReason.MOB_SUMMONED );
                 if (banner != null) {
                     banner.setVelocity(0, -1, 0);
                     banner.ownerEntity = user;
                     banner.decayRate = 3;
                     banner.standardType = "harbinger";
+                    banner.setCustomName(Text.translatable( "entity.simplyswords.battlestandard.name",user.getName()));
                 }
                 user.getItemCooldownManager().set(this.getDefaultStack().getItem(), skillCooldown);
             }

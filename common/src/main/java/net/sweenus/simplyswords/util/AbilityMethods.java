@@ -1,10 +1,8 @@
 package net.sweenus.simplyswords.util;
 
 import net.minecraft.entity.*;
-import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.entity.mob.CreeperEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.particle.ParticleTypes;
@@ -13,7 +11,6 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
-import net.sweenus.simplyswords.config.SimplySwordsConfig;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 
@@ -91,7 +88,7 @@ public class AbilityMethods {
                         if (HelperMethods.checkFriendlyFire( ee, player) && choose > 0.7) {
                             var stormtarget = ee.getBlockPos();
                             ee.addStatusEffect(new StatusEffectInstance(EffectRegistry.FREEZE.get(), 10, 0), player);
-                            LightningEntity storm = EntityType.LIGHTNING_BOLT.spawn(sworld, null, null, player, stormtarget, SpawnReason.TRIGGERED, true, true);
+                            LightningEntity storm = EntityType.LIGHTNING_BOLT.spawn(sworld, stormtarget, SpawnReason.TRIGGERED);
                                 if (storm != null) {
                                     storm.setCosmetic(true);
                                 }

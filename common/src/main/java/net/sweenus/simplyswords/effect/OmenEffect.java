@@ -1,12 +1,11 @@
 package net.sweenus.simplyswords.effect;
 
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectCategory;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.server.getWorld().ServerWorld;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
@@ -34,7 +33,7 @@ public class OmenEffect extends StatusEffect {
                     pPlayer.addStatusEffect(new StatusEffectInstance(StatusEffects.REGENERATION, 40, (int) absAmount), pPlayer);
                     world.playSound(null, position, SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_IMPACT_03.get(), SoundCategory.PLAYERS, 0.7f, 1.2f);
                 }
-                pLivingEntity.damage(DamageSource.GENERIC, 1000);
+                pLivingEntity.damage(pPlayer.getDamageSources().magic(), 1000);
             }
 
         }

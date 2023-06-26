@@ -2,7 +2,6 @@ package net.sweenus.simplyswords.effect;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectCategory;
 import net.minecraft.entity.player.PlayerEntity;
@@ -82,7 +81,7 @@ public class ImmolationEffect extends StatusEffect {
                         if (entities != null) {
                             if ((entities instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, player)){
 
-                                le.damage(DamageSource.MAGIC, abilityDamage);
+                                le.damage(player.getDamageSources().magic(), abilityDamage);
                                 le.setOnFireFor(1);
                             }
                         }

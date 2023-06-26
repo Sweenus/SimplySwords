@@ -32,8 +32,8 @@ public class HasteSwordItem extends UniqueSwordItem {
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        if (!attacker.world.isClient()) {
-            ServerWorld world = (ServerWorld) attacker.world;
+        if (!attacker.getWorld().isClient()) {
+            ServerWorld world = (ServerWorld) attacker.getWorld();
             int fhitchance = (int) SimplySwordsConfig.getFloatValue("ferocity_chance");
             int fduration = (int) SimplySwordsConfig.getFloatValue("ferocity_duration");
             int maximum_stacks = (int) (SimplySwordsConfig.getFloatValue("ferocity_max_stacks"));
