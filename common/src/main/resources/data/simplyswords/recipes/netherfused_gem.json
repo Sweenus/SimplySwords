@@ -1,5 +1,5 @@
 {
-  "type": "minecraft:smithing",
+  "type": "minecraft:smithing_transform",
   "base": {
     "item": "simplyswords:empowered_remnant"
   },
@@ -8,5 +8,8 @@
   },
   "result": {
     "item": "simplyswords:netherfused_gem"
+  },
+  "template": {
+    "item": "simplyswords:runic_tablet"
   }
 }

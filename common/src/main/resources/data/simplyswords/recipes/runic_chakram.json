@@ -1,12 +1,15 @@
 {
-  "type": "minecraft:smithing",
+  "type": "minecraft:smithing_transform",
   "base": {
     "item": "simplyswords:netherite_chakram"
   },
   "addition": {
-    "item": "simplyswords:runic_tablet"
+    "item": "minecraft:diamond"
   },
   "result": {
     "item": "simplyswords:runic_chakram"
+  },
+  "template": {
+    "item": "simplyswords:runic_tablet"
   }
 }

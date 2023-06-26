@@ -1,5 +1,5 @@
 {
-  "type": "minecraft:smithing",
+  "type": "minecraft:smithing_transform",
   "base": {
     "item": "simplyswords:diamond_claymore"
   },
@@ -8,5 +8,8 @@
   },
   "result": {
     "item": "simplyswords:netherite_claymore"
+  },
+  "template": {
+    "item": "minecraft:netherite_upgrade_smithing_template"
   }
 }

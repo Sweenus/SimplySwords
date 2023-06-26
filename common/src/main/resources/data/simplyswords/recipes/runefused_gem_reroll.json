@@ -1,12 +1,15 @@
 {
-  "type": "minecraft:smithing",
+  "type": "minecraft:smithing_transform",
   "base": {
     "item": "simplyswords:runefused_gem"
   },
   "addition": {
-    "item": "simplyswords:runic_tablet"
+    "item": "minecraft:crying_obsidian"
   },
   "result": {
     "item": "simplyswords:runefused_gem"
+  },
+  "template": {
+    "item": "simplyswords:runic_tablet"
   }
 }
