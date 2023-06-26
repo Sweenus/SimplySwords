@@ -179,6 +179,7 @@ public class HelperMethods {
                 stack.isOf(ItemsRegistry.ICEWHISPER.get()) ||
                 stack.isOf(ItemsRegistry.ARCANETHYST.get()) ||
                 stack.isOf(ItemsRegistry.THUNDERBRAND.get()) ||
+                stack.isOf(ItemsRegistry.WHISPERWIND.get()) ||
                 stack.isOf(ItemsRegistry.WATCHER_CLAYMORE.get());
     }
 

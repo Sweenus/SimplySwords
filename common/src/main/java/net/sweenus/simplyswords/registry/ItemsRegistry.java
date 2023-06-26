@@ -96,6 +96,7 @@ public class ItemsRegistry {
     static float shadowsting_attackspeed = SimplySwordsConfig.getWeaponAttributes("shadowsting_attackspeed");
     static float sunfire_attackspeed = SimplySwordsConfig.getWeaponAttributes("sunfire_attackspeed");
     static float harbinger_attackspeed = SimplySwordsConfig.getWeaponAttributes("harbinger_attackspeed");
+    static float whisperwind_attackspeed = SimplySwordsConfig.getWeaponAttributes("whisperwind_attackspeed");
 
 
 
@@ -126,6 +127,7 @@ public class ItemsRegistry {
     static float shadowsting_damage_modifier = SimplySwordsConfig.getWeaponAttributes("shadowsting_damage_modifier");
     static float sunfire_damage_modifier = SimplySwordsConfig.getWeaponAttributes("sunfire_damage_modifier");
     static float harbinger_damage_modifier = SimplySwordsConfig.getWeaponAttributes("harbinger_damage_modifier");
+    static float whisperwind_damage_modifier = SimplySwordsConfig.getWeaponAttributes("whisperwind_damage_modifier");
 
 
     public static final DeferredRegister<Item> ITEM = DeferredRegister.create(SimplySwords.MOD_ID, RegistryKeys.ITEM);
@@ -830,6 +832,12 @@ public class ItemsRegistry {
             new HarbingerSwordItem(ModToolMaterial.UNIQUE,
                     (int) (harbinger_damage_modifier),
                     harbinger_attackspeed,
+                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof()));
+
+    public static final RegistrySupplier<WhisperwindSwordItem> WHISPERWIND = ITEM.register( "whisperwind", () ->
+            new WhisperwindSwordItem(ModToolMaterial.UNIQUE,
+                    (int) (whisperwind_damage_modifier),
+                    whisperwind_attackspeed,
                     new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof()));
 
 /*

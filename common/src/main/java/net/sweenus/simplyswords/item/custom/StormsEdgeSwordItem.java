@@ -61,6 +61,7 @@ public class StormsEdgeSwordItem extends UniqueSwordItem {
         }
         world.playSoundFromEntity(null, user, SoundRegistry.MAGIC_BOW_CHARGE_SHORT_VERSION.get(), SoundCategory.PLAYERS, 0.4f, 1.2f);
         user.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, 20, 5), user);
+        user.timeUntilRegen = 15;
         user.setCurrentHand(hand);
         return TypedActionResult.consume(itemStack);
     }

@@ -1,0 +1,13 @@
+{
+  "name": "Whisperwind",
+  "icon": "simplyswords:whisperwind",
+  "advancement": "simplyswords:whisperwind",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:whisperwind",
+      "text": "Whisperwind, the ethereal blade that dances with the wind, grants its wielder unparalleled agility and an enigmatic power. As the katana slices through the air, a faint melody resonates, as if carried by a gentle breeze. With each swift dash, the enemy's senses are assaulted, leaving them disoriented and vulnerable."
+    }
+  ]
+}

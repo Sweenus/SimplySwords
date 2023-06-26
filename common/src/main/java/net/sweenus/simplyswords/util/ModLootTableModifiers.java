@@ -170,6 +170,8 @@ public class ModLootTableModifiers {
                             pool.with(ItemEntry.builder(ItemsRegistry.SHADOWSTING.get()));
                         if (SimplySwordsConfig.getBooleanValue("dormant_relic"))
                             pool.with(ItemEntry.builder(ItemsRegistry.DORMANT_RELIC.get()));
+                        if (SimplySwordsConfig.getBooleanValue("whisperwind"))
+                            pool.with(ItemEntry.builder(ItemsRegistry.WHISPERWIND.get()));
 
                         context.addPool(pool);
                     }
@@ -229,6 +231,8 @@ public class ModLootTableModifiers {
                             pool.with(ItemEntry.builder(ItemsRegistry.SHADOWSTING.get()));
                         if (SimplySwordsConfig.getBooleanValue("dormant_relic"))
                             pool.with(ItemEntry.builder(ItemsRegistry.DORMANT_RELIC.get()));
+                        if (SimplySwordsConfig.getBooleanValue("whisperwind"))
+                            pool.with(ItemEntry.builder(ItemsRegistry.WHISPERWIND.get()));
 
                         context.addPool(pool);
                     }

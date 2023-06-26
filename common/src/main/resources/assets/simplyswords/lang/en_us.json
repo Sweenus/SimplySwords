@@ -677,10 +677,15 @@
 
   "item.simplyswords.sunfiresworditem.tooltip1": "Unique Effect: Righteous Standard",
   "item.simplyswords.sunfiresworditem.tooltip2": "Chance on hit to regenerate health.",
-  "item.simplyswords.sunfiresworditem.tooltip3": "Summons an Righteous Battle Standard that",
+  "item.simplyswords.sunfiresworditem.tooltip3": "Summons a Righteous Battle Standard that",
   "item.simplyswords.sunfiresworditem.tooltip4": "ignites, damages, and slows enemies whilst",
   "item.simplyswords.sunfiresworditem.tooltip5": "periodically granting strength and health",
   "item.simplyswords.sunfiresworditem.tooltip6": "to friendly players within its vicinity.",
+
+  "item.simplyswords.whisperwindsworditem.tooltip1": "Unique Effect: Fatal Flicker",
+  "item.simplyswords.whisperwindsworditem.tooltip2": "Chance on hit to evade backwards and\nreset Flicker Strike's cooldown.",
+  "item.simplyswords.whisperwindsworditem.tooltip3": "Perform three forward dashes in quick\nsuccession, avoiding damage\nand inflicting enemies in your path\nwith Echo.",
+  "item.simplyswords.whisperwindsworditem.tooltip4": "For every target hit by a dash, the\n amount of Echo you inflict is\nincreased.",
 
   "item.simplyswords.dormantrelicsworditem.tooltip2": "A faint power seems to emanate from within.",
   "item.simplyswords.poweredrelicsworditem.tooltip2": "A growing power seems to emanate from within.",
