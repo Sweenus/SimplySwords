@@ -22,6 +22,7 @@ import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
+import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 
@@ -30,9 +31,9 @@ import java.util.List;
 public class WhisperwindSwordItem extends UniqueSwordItem {
 
     private static int stepMod = 0;
-    int skillCooldown = (int) (SimplySwordsConfig.getFloatValue("shadowmist_cooldown"));
-    int abilityChance =  (int) (SimplySwordsConfig.getFloatValue("shadowmist_chance"));
-    int dodgeDistance = 2; //(int) (SimplySwordsConfig.getFloatValue("shadowmist_radius"));
+    int skillCooldown = (int) (SimplySwordsConfig.getFloatValue("fatalflicker_cooldown"));
+    int abilityChance =  (int) (SimplySwordsConfig.getFloatValue("fatalflicker_chance"));
+    int dodgeDistance = (int) (SimplySwordsConfig.getFloatValue("fatalflicker_dash_velocity") * 0.5);
 
     public WhisperwindSwordItem(ToolMaterial toolMaterial, int attackDamage, float attackSpeed, Settings settings) {
         super(toolMaterial, attackDamage, attackSpeed, settings);
@@ -62,6 +63,7 @@ public class WhisperwindSwordItem extends UniqueSwordItem {
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
 
         world.playSoundFromEntity(null, user, SoundRegistry.ELEMENTAL_SWORD_EARTH_ATTACK_01.get(), SoundCategory.PLAYERS, 0.4f, 1.6f);
+        user.addStatusEffect(new StatusEffectInstance(EffectRegistry.FATAL_FLICKER.get(), 30));
         user.getItemCooldownManager().set(this.getDefaultStack().getItem(), skillCooldown);
 
         return super.use(world, user, hand);

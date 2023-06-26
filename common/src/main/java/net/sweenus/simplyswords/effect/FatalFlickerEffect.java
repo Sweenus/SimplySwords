@@ -1,5 +1,6 @@
 package net.sweenus.simplyswords.effect;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffect;
@@ -8,8 +9,11 @@ import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.sound.SoundCategory;
+import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
+import net.sweenus.simplyswords.config.SimplySwordsConfig;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -29,19 +33,40 @@ public class FatalFlickerEffect extends StatusEffect {
 
             int ability_timer = entity.getStatusEffect(EffectRegistry.FATAL_FLICKER.get()).getDuration();
             World world = entity.getWorld();
-            int radius = 2;
+            int dashDistance = (int) (SimplySwordsConfig.getFloatValue("fatalflicker_dash_velocity"));
+            int radius = (int) (SimplySwordsConfig.getFloatValue("fatalflicker_radius"));
+            int maxAmplifier = (int) (SimplySwordsConfig.getFloatValue("fatalflicker_max_echo_stacks"));
+            int amplifier = 0;
+
+
 
             //Player dash forward
             if ((ability_timer >= 25 && ability_timer <= 30) ||
                     (ability_timer >= 15 && ability_timer <=20) ||
                     (ability_timer >=5 && ability_timer <=10)) {
-                player.setVelocity(player.getRotationVector().multiply(+4));
+                player.setVelocity(player.getRotationVector().multiply(+dashDistance));
                 player.setVelocity(player.getVelocity().x, 0, player.getVelocity().z);
                 player.velocityModified = true;
                 world.playSoundFromEntity(null, player, SoundRegistry.ELEMENTAL_BOW_THUNDER_SHOOT_FLYBY_03.get(),
                         SoundCategory.PLAYERS, 0.3f, 1.6f);
                 player.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, 10, 3), player);
                 player.timeUntilRegen = 10;
+
+                if (player.age % 2 == 0) {
+                    Box box = HelperMethods.createBox(player, radius);
+                    for (Entity entities : world.getOtherEntities(player, box, EntityPredicates.VALID_LIVING_ENTITY)) {
+
+                        if (entities != null) {
+                            if ((entities instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, player)) {
+                                amplifier ++;
+                                HelperMethods.incrementStatusEffect(le, EffectRegistry.ECHO.get(), 20, amplifier,
+                                        maxAmplifier);
+                            }
+                        }
+                    }
+                }
+
+
             } else {
                 player.setVelocity(0, 0, 0); // Stop player at end of charges
                 player.velocityModified = true;

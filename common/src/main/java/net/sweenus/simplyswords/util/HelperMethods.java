@@ -4,6 +4,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.decoration.ArmorStandEntity;
+import net.minecraft.entity.effect.StatusEffect;
+import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.passive.PassiveEntity;
 import net.minecraft.entity.passive.VillagerEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -13,7 +15,9 @@ import net.minecraft.particle.DefaultParticleType;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
+import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
+import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -181,6 +185,68 @@ public class HelperMethods {
                 stack.isOf(ItemsRegistry.THUNDERBRAND.get()) ||
                 stack.isOf(ItemsRegistry.WHISPERWIND.get()) ||
                 stack.isOf(ItemsRegistry.WATCHER_CLAYMORE.get());
+    }
+
+    //Create Box
+    public static Box createBox(Entity entity, int radius) {
+        Box box = new Box(entity.getX() + radius, entity.getY() + (float) radius / 3, entity.getZ() + radius,
+                entity.getX() - radius, entity.getY() - (float) radius / 3, entity.getZ() - radius);
+
+        return box;
+    }
+
+    //Gets the blockpos we are looking at
+    public static Vec3d getPositionLookingAt(PlayerEntity player, int range) {
+        HitResult result = player.raycast(range, 0, false);
+        //System.out.println(result.getType());
+        if (!(result.getType() == HitResult.Type.BLOCK)) return null;
+
+        BlockHitResult blockResult = (BlockHitResult) result;
+        //System.out.println(blockResult.getBlockPos());
+        return blockResult.getPos();
+    }
+
+    public static void incrementStatusEffect(
+            LivingEntity livingEntity,
+            StatusEffect statusEffect,
+            int duration,
+            int amplifier,
+            int amplifierMax) {
+
+        if (livingEntity.hasStatusEffect(statusEffect)) {
+            int currentAmplifier = livingEntity.getStatusEffect(statusEffect).getAmplifier();
+
+            if (currentAmplifier >= amplifierMax) {
+                livingEntity.addStatusEffect(new StatusEffectInstance(
+                        statusEffect, duration, currentAmplifier));
+                return;
+            }
+
+            livingEntity.addStatusEffect(new StatusEffectInstance(
+                    statusEffect, duration, currentAmplifier + amplifier));
+        }
+        livingEntity.addStatusEffect(new StatusEffectInstance(
+                statusEffect, duration));
+
+    }
+
+    public static void decrementStatusEffect(
+            LivingEntity livingEntity,
+            StatusEffect statusEffect) {
+
+        if (livingEntity.hasStatusEffect(statusEffect)) {
+            int currentAmplifier = livingEntity.getStatusEffect(statusEffect).getAmplifier();
+            int currentDuration = livingEntity.getStatusEffect(statusEffect).getDuration();
+
+            if (currentAmplifier < 1 ) {
+                livingEntity.removeStatusEffect(statusEffect);
+                return;
+            }
+
+            livingEntity.removeStatusEffect(statusEffect);
+            livingEntity.addStatusEffect(new StatusEffectInstance(
+                    statusEffect, currentDuration, currentAmplifier - 1));
+        }
     }
 
     // createFootfalls - creates weapon footfall particle effects (footsteps)

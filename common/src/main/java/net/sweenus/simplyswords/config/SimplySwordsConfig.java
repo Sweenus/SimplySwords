@@ -236,6 +236,12 @@ public class SimplySwordsConfig {
         FLOAT_OPTIONS.put("righteousstandard_chance", 15f);
         FLOAT_OPTIONS.put("righteousstandard_damage", 3f);
 
+        FLOAT_OPTIONS.put("fatalflicker_cooldown", 300f);
+        FLOAT_OPTIONS.put("fatalflicker_chance", 15f);
+        FLOAT_OPTIONS.put("fatalflicker_radius", 2f);
+        FLOAT_OPTIONS.put("fatalflicker_max_echo_stacks", 99f);
+        FLOAT_OPTIONS.put("fatalflicker_dash_velocity", 4f);
+
 
         GENERAL_OPTIONS.put("standard_loot_table_weight", 0.01f);
         GENERAL_OPTIONS.put("rare_loot_table_weight", 0.008f);
@@ -278,6 +284,7 @@ public class SimplySwordsConfig {
         BOOLEAN_OPTIONS.put("slumbering_lichblade", true);
         BOOLEAN_OPTIONS.put("shadowsting", true);
         BOOLEAN_OPTIONS.put("dormant_relic", true);
+        BOOLEAN_OPTIONS.put("whisperwind", true);
 
         BOOLEAN_OPTIONS.put("active_defence", true);
         BOOLEAN_OPTIONS.put("float", true);
@@ -436,6 +443,7 @@ public class SimplySwordsConfig {
         WEAPON_OPTIONS.put("shadowsting_damage_modifier", -2f);
         WEAPON_OPTIONS.put("sunfire_damage_modifier", 3f);
         WEAPON_OPTIONS.put("harbinger_damage_modifier", 3f);
+        WEAPON_OPTIONS.put("whisperwind_damage_modifier", 3f);
 
         WEAPON_OPTIONS.put("brimstone_attackspeed", -2.8f);
         WEAPON_OPTIONS.put("thewatcher_attackspeed", -2.8f);
@@ -464,6 +472,7 @@ public class SimplySwordsConfig {
         WEAPON_OPTIONS.put("shadowsting_attackspeed", -1.7f);
         WEAPON_OPTIONS.put("sunfire_attackspeed", -2.4f);
         WEAPON_OPTIONS.put("harbinger_attackspeed", -2.4f);
+        WEAPON_OPTIONS.put("whisperwind_attackspeed", -2.0f);
 
     }
 
@@ -866,6 +875,12 @@ public class SimplySwordsConfig {
                 config.append("// -- Unique Effect: Righteous Standard -- \n");
                 config.append("// --------------------------------------- \n");
             }
+            if (i == 126) {
+                config.append("\n");
+                config.append("// ---------------------------------- \n");
+                config.append("// -- Unique Effect: Fatal Flicker -- \n");
+                config.append("// ---------------------------------- \n");
+            }
             config.append("  \"").append(item).append("\": ").append(FLOAT_OPTIONS.get(item));
             ++i;
             if (i < FLOAT_OPTIONS.size()) {
@@ -920,7 +935,7 @@ public class SimplySwordsConfig {
                 config.append("// Example use-case: Adding 3 to a value below will INCREASE the in-game damage of that weapon by 3 \n");
                 config.append("// ---------------------- \n");
             }
-            if (i ==100) {
+            if (i ==101) {
                 config.append("\n");
                 config.append("// -- Attack Speed Modifiers -- \n");
                 config.append("// Recommended range: -1.0 to -3.7, with -1.0 being fast and -3.7 being slow \n");
