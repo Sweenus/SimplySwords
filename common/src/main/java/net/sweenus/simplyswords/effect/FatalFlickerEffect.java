@@ -1,14 +1,12 @@
 package net.sweenus.simplyswords.effect;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectCategory;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.util.math.Box;
@@ -16,6 +14,8 @@ import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
+
+import java.util.Objects;
 
 public class FatalFlickerEffect extends StatusEffect {
     public FatalFlickerEffect(StatusEffectCategory statusEffectCategory, int color) {
@@ -29,7 +29,6 @@ public class FatalFlickerEffect extends StatusEffect {
         player.velocityModified = true;
         player.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, 10, 3), player);
         player.timeUntilRegen = 25;
-        ItemStack itemStack = player.getEquippedStack(EquipmentSlot.MAINHAND);
 
         Box box = HelperMethods.createBox(player, radius);
         Box boxPull = HelperMethods.createBox(player, radius * 2);
@@ -64,7 +63,7 @@ public class FatalFlickerEffect extends StatusEffect {
         if (!entity.getWorld().isClient() && (entity instanceof PlayerEntity player)) {
 
             int amplifier = 0;
-            int ability_timer = entity.getStatusEffect(EffectRegistry.FATAL_FLICKER.get()).getDuration();
+            int ability_timer = Objects.requireNonNull(entity.getStatusEffect(EffectRegistry.FATAL_FLICKER.get())).getDuration();
             World world = entity.getWorld();
             int dashDistance = (int) (SimplySwordsConfig.getFloatValue("fatalflicker_dash_velocity"));
             int radius = (int) (SimplySwordsConfig.getFloatValue("fatalflicker_radius"));

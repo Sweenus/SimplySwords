@@ -7,7 +7,6 @@ import net.minecraft.entity.effect.StatusEffectCategory;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -22,7 +21,6 @@ public class WildfireEffect extends StatusEffect {
             if (pPlayer != null){
                 if (pPlayer instanceof PlayerEntity) {
                     ServerWorld world = (ServerWorld) pLivingEntity.getWorld();
-                    BlockPos position = pLivingEntity.getBlockPos();
                     int hradius = (int) (SimplySwordsConfig.getFloatValue("wildfire_radius"));
                     int vradius = (int) (SimplySwordsConfig.getFloatValue("wildfire_radius") / 2);
                     double x = pLivingEntity.getX();

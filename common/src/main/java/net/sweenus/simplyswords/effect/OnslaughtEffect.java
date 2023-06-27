@@ -21,7 +21,6 @@ public class OnslaughtEffect extends StatusEffect {
                 //Grant pulsing haste
                 if (pLivingEntity.age % 40 == 0) {
 
-                    PlayerEntity player = (PlayerEntity) pLivingEntity;
                     pLivingEntity.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, 10, 15),
                             pLivingEntity);
                 }

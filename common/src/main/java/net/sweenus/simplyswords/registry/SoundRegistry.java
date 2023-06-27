@@ -2,9 +2,9 @@ package net.sweenus.simplyswords.registry;
 
 import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.Identifier;
-import net.minecraft.registry.RegistryKeys;
 import net.sweenus.simplyswords.SimplySwords;
 
 public class SoundRegistry {

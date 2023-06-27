@@ -14,7 +14,6 @@ public class SimplySwordsConfig {
     private static final HashMap<String, Float> FLOAT_OPTIONS = new LinkedHashMap<>();
     private static final HashMap<String, Float> WEAPON_OPTIONS = new LinkedHashMap<>();
     private static final HashMap<String, Float> LOOT_OPTIONS = new LinkedHashMap<>();
-    private static final int runicOptionsCount = 31;
 
     public static boolean getBooleanValue(String key) {
         if (!BOOLEAN_OPTIONS.containsKey(key)) {
@@ -62,7 +61,6 @@ public class SimplySwordsConfig {
 
     public static void init() {
 
-        //When changing these increment the runicOptions int
 
         FLOAT_OPTIONS.put("speed_chance", 15f);
         FLOAT_OPTIONS.put("speed_duration", 300f);
@@ -520,7 +518,7 @@ public class SimplySwordsConfig {
                 config.append("// --------------------------------------------------------------------------------------------------------------------------------- \n");
                 config.append("\n");
             }
-            if (i == 33) {
+            if (i == 34) {
                 config.append("\n");
                 config.append("// --------------------------------------------- RUNIC BLACKLISTING ----------------------------------------------------------------- \n");
                 config.append("// Setting any of the below values to false will prevent that runic power from being obtainable. \n");
@@ -729,7 +727,7 @@ public class SimplySwordsConfig {
                 config.append("// -- Instantkill Threshold refers to the % of maxhealth an enemy must be UNDER in order for the effect to proc. Where 1 = 100% -- \n");
                 config.append("// ------------------------- \n");
             }
-            if (i == 36) {
+            if (i == 38) {
                 config.append("\n");
                 config.append("// ------------------------------- \n");
                 config.append("// -- Unique Effect: Soul Steal -- \n");

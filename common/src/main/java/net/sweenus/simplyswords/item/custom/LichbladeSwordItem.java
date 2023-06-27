@@ -97,7 +97,7 @@ public class LichbladeSwordItem extends UniqueSwordItem {
                             abilityTarget = player;
                         if (player.squaredDistanceTo(lastX, lastY, lastZ) < radius) {
                             if (!player.hasStatusEffect(StatusEffects.ABSORPTION))
-                                player.addStatusEffect(new StatusEffectInstance(StatusEffects.ABSORPTION, 10, 1), player);
+                                player.addStatusEffect(new StatusEffectInstance(StatusEffects.ABSORPTION, 120, 2), player);
                             damageTracker = 0;
                             remainingUseTicks = 0;
                             player.stopUsingItem();

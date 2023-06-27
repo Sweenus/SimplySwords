@@ -7,9 +7,7 @@ import net.minecraft.client.render.entity.MobEntityRenderer;
 import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.client.renderer.model.BattleStandardDarkModel;
-import net.sweenus.simplyswords.client.renderer.model.BattleStandardModel;
 import net.sweenus.simplyswords.entity.BattleStandardDarkEntity;
-import net.sweenus.simplyswords.entity.BattleStandardEntity;
 
 @Environment(value= EnvType.CLIENT)
 public class BattleStandardDarkRenderer extends MobEntityRenderer<BattleStandardDarkEntity, BattleStandardDarkModel> {

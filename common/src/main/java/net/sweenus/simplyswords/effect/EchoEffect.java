@@ -1,10 +1,6 @@
 package net.sweenus.simplyswords.effect;
 
-import net.minecraft.entity.DamageUtil;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageEffects;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.damage.DamageSources;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectCategory;
 import net.sweenus.simplyswords.registry.EffectRegistry;
