@@ -13,27 +13,28 @@ import net.sweenus.simplyswords.util.HelperMethods;
 
 import java.util.List;
 
-public class EmpoweredRemnantItem extends Item {
+public class RunicTabletItem extends Item {
 
-    public EmpoweredRemnantItem() {
+    public RunicTabletItem() {
         super( new Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof());
     }
 
 
     @Override
     public Text getName(ItemStack stack) {
-        Style UNIQUE = HelperMethods.getStyle("unique");
-        return Text.translatable(this.getTranslationKey(stack)).setStyle(UNIQUE);
+        Style RUNIC = HelperMethods.getStyle("runic");
+        return Text.translatable(this.getTranslationKey(stack)).setStyle(RUNIC);
     }
 
     @Override
     public void appendTooltip(ItemStack itemStack, World world, List<Text> tooltip, TooltipContext tooltipContext) {
 
         tooltip.add(Text.literal(""));
-        tooltip.add(Text.translatable("item.simplyswords.remnant_description").formatted(Formatting.GRAY, Formatting.ITALIC));
-        tooltip.add(Text.translatable("item.simplyswords.remnant_description2").formatted(Formatting.GRAY, Formatting.ITALIC));
-        tooltip.add(Text.translatable("item.simplyswords.remnant_description3").formatted(Formatting.GRAY, Formatting.ITALIC));
-        tooltip.add(Text.translatable("item.simplyswords.remnant_description4").formatted(Formatting.GRAY, Formatting.ITALIC));
+        tooltip.add(Text.translatable("item.simplyswords.runic_tablet.tooltip").formatted(Formatting.GRAY, Formatting.ITALIC));
+        tooltip.add(Text.translatable("item.simplyswords.runic_tablet.tooltip2").formatted(Formatting.GRAY, Formatting.ITALIC));
+        tooltip.add(Text.literal(""));
+        tooltip.add(Text.translatable("item.simplyswords.runic_tablet.tooltip3").formatted(Formatting.GRAY, Formatting.ITALIC));
+        tooltip.add(Text.translatable("item.simplyswords.runic_tablet.tooltip4").formatted(Formatting.GRAY, Formatting.ITALIC));
 
     }
 }

@@ -6,7 +6,6 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.decoration.ArmorStandEntity;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.passive.PassiveEntity;
 import net.minecraft.entity.passive.VillagerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileUtil;
@@ -15,6 +14,8 @@ import net.minecraft.particle.DefaultParticleType;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
+import net.minecraft.text.Style;
+import net.minecraft.text.TextColor;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
@@ -55,6 +56,39 @@ public class HelperMethods {
             return !player.isDead() && (player.isSwimming() || player.getVelocity().horizontalLength() > 0.1);
         }
         else return false;
+    }
+
+    public static Style getStyle(String styleType) {
+        int rgbCommon = 0xFFFFFF;
+        int rgbRunic = 0x9D62CA;
+        int rgbUnique = 0xE2A834;
+        int rgbLegendary = 0xE26234;
+        int rgbAbility = 0xE2A834;
+        int rgbRightClick = 0x20BD69;
+        int rgbText = 0xE0E0E0;
+        Style COMMON = Style.EMPTY.withColor(TextColor.fromRgb(rgbCommon));
+        Style UNIQUE = Style.EMPTY.withColor(TextColor.fromRgb(rgbUnique));
+        Style LEGENDARY = Style.EMPTY.withColor(TextColor.fromRgb(rgbLegendary));
+        Style ABILITY = Style.EMPTY.withColor(TextColor.fromRgb(rgbAbility));
+        Style RIGHTCLICK = Style.EMPTY.withColor(TextColor.fromRgb(rgbRightClick));
+        Style RUNIC = Style.EMPTY.withColor(TextColor.fromRgb(rgbRunic));
+        Style TEXT = Style.EMPTY.withColor(TextColor.fromRgb(rgbText));
+
+
+        if (styleType.equals("unique"))
+            return UNIQUE;
+        else if (styleType.equals("legendary"))
+            return LEGENDARY;
+        else if (styleType.equals("ability"))
+            return ABILITY;
+        else if (styleType.equals("rightclick"))
+            return RIGHTCLICK;
+        else if (styleType.equals("runic"))
+            return RUNIC;
+        else if (styleType.equals("text"))
+            return TEXT;
+
+        return COMMON;
     }
 
     //Check if we should be able to hit the target

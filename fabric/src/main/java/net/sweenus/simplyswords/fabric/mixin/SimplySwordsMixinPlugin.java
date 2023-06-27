@@ -1,7 +1,6 @@
 package net.sweenus.simplyswords.fabric.mixin;
 
 import com.google.common.collect.ImmutableMap;
-import net.fabricmc.loader.api.FabricLoader;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
@@ -20,8 +19,6 @@ public final class SimplySwordsMixinPlugin implements IMixinConfigPlugin {
 
     //Prevents loading of mixins without specific mods installed
     private static final Map<String, Supplier<Boolean>> CONDITIONS = ImmutableMap.of(
-            "sweenus.simplyswords.mixin.MythicMetalsAbilityMixin", () -> FabricLoader.getInstance().isModLoaded("mythicmetals"),
-            "sweenus.simplyswords.mixin.MythicMetalsInitMixin", () -> FabricLoader.getInstance().isModLoaded("mythicmetals")
     );
 
     @Override

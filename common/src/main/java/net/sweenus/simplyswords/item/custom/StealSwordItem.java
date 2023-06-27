@@ -5,7 +5,6 @@ import net.minecraft.block.BlockState;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
@@ -15,8 +14,8 @@ import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.BlockPos;
@@ -62,22 +61,7 @@ public class StealSwordItem extends UniqueSwordItem {
                 target.addStatusEffect(new StatusEffectInstance(StatusEffects.GLOWING, fduration, 1), attacker);
 
             }
-
-            /*
-            //Awakening
-            if(stack.getOrCreateNbt().getInt("awakening_exp") < 100 && stack.getOrCreateNbt().getInt("awakening") < 5) {
-                stack.getOrCreateNbt().putInt("awakening_exp", stack.getOrCreateNbt().getInt("awakening_exp") + 10);
-            }
-            else if(stack.getOrCreateNbt().getInt("awakening_exp") >= 100) {
-                stack.getOrCreateNbt().putInt("awakening_exp", 0);
-                if(stack.getOrCreateNbt().getInt("awakening") < 5) {
-                    stack.getOrCreateNbt().putInt("awakening", stack.getOrCreateNbt().getInt("awakening") +1);
-                }
-            }
-             */
-
         }
-
             return super.postHit(stack, target, attacker);
     }
     @Override
@@ -139,80 +123,29 @@ public class StealSwordItem extends UniqueSwordItem {
     public boolean postMine(ItemStack stack, World world, BlockState state, BlockPos pos, LivingEntity miner) {
         return false;
     }
-/*
-    @Override
-    public void onCraft(ItemStack stack, World world, PlayerEntity player)
-    {
-        if(world.isClient) return;
-
-        if(stack.getOrCreateNbt().getInt("awakening") < 5)
-        {
-            stack.getOrCreateNbt().putInt("awakening", stack.getOrCreateNbt().getInt("awakening") + 1);
-        }
-    }
-*/
-
-    @Override
-    public Text getName(ItemStack stack) {
-        return Text.translatable(this.getTranslationKey(stack)).formatted(Formatting.GOLD, Formatting.BOLD, Formatting.UNDERLINE);
-    }
 
     @Override
     public void appendTooltip(ItemStack itemStack, World world, List<Text> tooltip, TooltipContext tooltipContext) {
-
-        //1.19
+        Style RIGHTCLICK = HelperMethods.getStyle("rightclick");
+        Style ABILITY = HelperMethods.getStyle("ability");
+        Style TEXT = HelperMethods.getStyle("text");
 
         tooltip.add(Text.literal(""));
-        tooltip.add(Text.translatable("item.simplyswords.stealsworditem.tooltip1").formatted(Formatting.GOLD, Formatting.BOLD));
-        tooltip.add(Text.translatable("item.simplyswords.stealsworditem.tooltip2"));
-        tooltip.add(Text.translatable("item.simplyswords.stealsworditem.tooltip3"));
-        tooltip.add(Text.translatable("item.simplyswords.stealsworditem.tooltip4"));
+        tooltip.add(Text.translatable("item.simplyswords.stealsworditem.tooltip1").setStyle(ABILITY));
+        tooltip.add(Text.translatable("item.simplyswords.stealsworditem.tooltip2").setStyle(TEXT));
+        tooltip.add(Text.translatable("item.simplyswords.stealsworditem.tooltip3").setStyle(TEXT));
+        tooltip.add(Text.translatable("item.simplyswords.stealsworditem.tooltip4").setStyle(TEXT));
         tooltip.add(Text.literal(""));
-        tooltip.add(Text.translatable("item.simplyswords.onrightclick").formatted(Formatting.BOLD, Formatting.GREEN));
-        tooltip.add(Text.translatable("item.simplyswords.stealsworditem.tooltip5"));
-        tooltip.add(Text.translatable("item.simplyswords.stealsworditem.tooltip6"));
-        tooltip.add(Text.translatable("item.simplyswords.stealsworditem.tooltip7"));
+        tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(RIGHTCLICK));
+        tooltip.add(Text.translatable("item.simplyswords.stealsworditem.tooltip5").setStyle(TEXT));
+        tooltip.add(Text.translatable("item.simplyswords.stealsworditem.tooltip6").setStyle(TEXT));
+        tooltip.add(Text.translatable("item.simplyswords.stealsworditem.tooltip7").setStyle(TEXT));
         tooltip.add(Text.literal(""));
-        tooltip.add(Text.translatable("item.simplyswords.stealsworditem.tooltip8"));
-        tooltip.add(Text.translatable("item.simplyswords.stealsworditem.tooltip9"));
-        tooltip.add(Text.translatable("item.simplyswords.stealsworditem.tooltip10"));
+        tooltip.add(Text.translatable("item.simplyswords.stealsworditem.tooltip8").setStyle(TEXT));
+        tooltip.add(Text.translatable("item.simplyswords.stealsworditem.tooltip9").setStyle(TEXT));
+        tooltip.add(Text.translatable("item.simplyswords.stealsworditem.tooltip10").setStyle(TEXT));
         tooltip.add(Text.literal(""));
 
-        /*
-        if(itemStack.getOrCreateNbt().getInt("awakening") < 5) {
-
-            tooltip.add(Text.translatable("item.simplyswords.awakening",
-                    (itemStack.getOrCreateNbt().getInt("awakening"))).formatted(Formatting.GOLD));
-
-            tooltip.add(Text.translatable("item.simplyswords.awakening.exp",
-                    (itemStack.getOrCreateNbt().getInt("awakening_exp"))).formatted(Formatting.GREEN));
-
-        } else if(itemStack.getOrCreateNbt().getInt("awakening") == 5) {
-            tooltip.add(Text.translatable("item.simplyswords.awakening",
-                    (itemStack.getOrCreateNbt().getInt("awakening"))).formatted(Formatting.RED));
-        }
-        tooltip.add(Text.translatable("item.simplyswords.awakening.powers"));
-         */
-
-
-/*
-        //1.18.2
-        tooltip.add(new LiteralText(""));
-        tooltip.add(new TranslatableText("item.simplyswords.stealsworditem.tooltip1").formatted(Formatting.GOLD, Formatting.BOLD));
-        tooltip.add(new TranslatableText("item.simplyswords.stealsworditem.tooltip2"));
-        tooltip.add(new TranslatableText("item.simplyswords.stealsworditem.tooltip3"));
-        tooltip.add(new TranslatableText("item.simplyswords.stealsworditem.tooltip4"));
-        tooltip.add(new LiteralText(""));
-        tooltip.add(new TranslatableText("item.simplyswords.onrightclick").formatted(Formatting.BOLD, Formatting.GREEN));
-        tooltip.add(new TranslatableText("item.simplyswords.stealsworditem.tooltip5"));
-        tooltip.add(new TranslatableText("item.simplyswords.stealsworditem.tooltip6"));
-        tooltip.add(new TranslatableText("item.simplyswords.stealsworditem.tooltip7"));
-        tooltip.add(new LiteralText(""));
-        tooltip.add(new TranslatableText("item.simplyswords.stealsworditem.tooltip8"));
-        tooltip.add(new TranslatableText("item.simplyswords.stealsworditem.tooltip9"));
-        tooltip.add(new TranslatableText("item.simplyswords.stealsworditem.tooltip10"));
-
- */
         super.appendTooltip(itemStack,world, tooltip, tooltipContext);
     }
 

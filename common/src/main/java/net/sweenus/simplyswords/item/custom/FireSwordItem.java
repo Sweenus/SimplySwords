@@ -10,8 +10,8 @@ import net.minecraft.item.ToolMaterial;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
@@ -72,27 +72,16 @@ public class FireSwordItem extends UniqueSwordItem {
         super.inventoryTick(stack, world, entity, slot, selected);
     }
 
-    @Override
-    public Text getName(ItemStack stack) {
-        return Text.translatable(this.getTranslationKey(stack)).formatted(Formatting.GOLD, Formatting.BOLD, Formatting.UNDERLINE);
-    }
 
     @Override
     public void appendTooltip(ItemStack itemStack, World world, List<Text> tooltip, TooltipContext tooltipContext) {
-
-        //1.19
+        Style TEXT = HelperMethods.getStyle("text");
+        Style ABILITY = HelperMethods.getStyle("ability");
 
         tooltip.add(Text.literal(""));
-        tooltip.add(Text.translatable("item.simplyswords.firesworditem.tooltip1").formatted(Formatting.GOLD, Formatting.BOLD));
-        tooltip.add(Text.translatable("item.simplyswords.firesworditem.tooltip2"));
+        tooltip.add(Text.translatable("item.simplyswords.firesworditem.tooltip1").setStyle(ABILITY));
+        tooltip.add(Text.translatable("item.simplyswords.firesworditem.tooltip2").setStyle(TEXT));
 
-        /*
-        //1.18.2
-        tooltip.add(new LiteralText(""));
-        tooltip.add(new TranslatableText("item.simplyswords.firesworditem.tooltip1").formatted(Formatting.GOLD, Formatting.BOLD));
-        tooltip.add(new TranslatableText("item.simplyswords.firesworditem.tooltip2"));
-
-         */
         super.appendTooltip(itemStack,world, tooltip, tooltipContext);
     }
 

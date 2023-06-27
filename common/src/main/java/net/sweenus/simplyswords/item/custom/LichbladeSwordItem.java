@@ -5,7 +5,6 @@ import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
@@ -14,8 +13,8 @@ import net.minecraft.item.ToolMaterial;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.sound.SoundCategory;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.UseAction;
@@ -51,7 +50,6 @@ public class LichbladeSwordItem extends UniqueSwordItem {
     double targetZ;
 
     LivingEntity abilityTarget;
-
 
 
     @Override
@@ -207,40 +205,33 @@ public class LichbladeSwordItem extends UniqueSwordItem {
     }
 
     @Override
-    public Text getName(ItemStack stack) {
-        if (this.getDefaultStack().isOf(ItemsRegistry.AWAKENED_LICHBLADE.get()))
-            return Text.translatable(this.getTranslationKey(stack)).formatted(Formatting.DARK_RED, Formatting.BOLD, Formatting.UNDERLINE);
-        else
-            return Text.translatable(this.getTranslationKey(stack)).formatted(Formatting.GOLD, Formatting.BOLD, Formatting.UNDERLINE);
-    }
-
-    @Override
     public void appendTooltip(ItemStack itemStack, World world, List<Text> tooltip, TooltipContext tooltipContext) {
-
-        //1.19
+        Style RIGHTCLICK = HelperMethods.getStyle("rightclick");
+        Style ABILITY = HelperMethods.getStyle("ability");
+        Style TEXT = HelperMethods.getStyle("text");
 
         tooltip.add(Text.literal(""));
         if (this.getDefaultStack().isOf(ItemsRegistry.SLUMBERING_LICHBLADE.get()))
-            tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip1").formatted(Formatting.GOLD, Formatting.BOLD));
+            tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip1").setStyle(ABILITY));
         if (this.getDefaultStack().isOf(ItemsRegistry.WAKING_LICHBLADE.get()))
-            tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip1.2").formatted(Formatting.GOLD, Formatting.BOLD));
+            tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip1.2").setStyle(ABILITY));
         if (this.getDefaultStack().isOf(ItemsRegistry.AWAKENED_LICHBLADE.get()))
-            tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip1.3").formatted(Formatting.GOLD, Formatting.BOLD));
+            tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip1.3").setStyle(ABILITY));
         tooltip.add(Text.literal(""));
-        tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip2"));
-        tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip3", radius));
+        tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip2").setStyle(TEXT));
+        tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip3", radius).setStyle(TEXT));
         tooltip.add(Text.literal(""));
         if (this.getDefaultStack().isOf(ItemsRegistry.WAKING_LICHBLADE.get()) || this.getDefaultStack().isOf(ItemsRegistry.AWAKENED_LICHBLADE.get())) {
-            tooltip.add(Text.translatable("item.simplyswords.onrightclick").formatted(Formatting.BOLD, Formatting.GREEN));
-            tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip4"));
-            tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip5"));
-            tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip6"));
+            tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(RIGHTCLICK));
+            tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip4").setStyle(TEXT));
+            tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip5").setStyle(TEXT));
+            tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip6").setStyle(TEXT));
             tooltip.add(Text.literal(""));
         }
         if (this.getDefaultStack().isOf(ItemsRegistry.AWAKENED_LICHBLADE.get())) {
-            tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip7"));
-            tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip8"));
-            tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip9"));
+            tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip7").setStyle(TEXT));
+            tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip8").setStyle(TEXT));
+            tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip9").setStyle(TEXT));
             tooltip.add(Text.literal(""));
         }
         super.appendTooltip(itemStack,world, tooltip, tooltipContext);
