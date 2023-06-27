@@ -236,7 +236,7 @@ public class SimplySwordsConfig {
         FLOAT_OPTIONS.put("righteousstandard_chance", 15f);
         FLOAT_OPTIONS.put("righteousstandard_damage", 3f);
 
-        FLOAT_OPTIONS.put("fatalflicker_cooldown", 300f);
+        FLOAT_OPTIONS.put("fatalflicker_cooldown", 175f);
         FLOAT_OPTIONS.put("fatalflicker_chance", 15f);
         FLOAT_OPTIONS.put("fatalflicker_radius", 3f);
         FLOAT_OPTIONS.put("fatalflicker_max_echo_stacks", 99f);

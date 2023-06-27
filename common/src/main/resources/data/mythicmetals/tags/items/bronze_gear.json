@@ -1,20 +1,65 @@
 {
   "replace": false,
   "values": [
-    "simplyswords:mythicmetals_compat/bronze/bronze_claymore",
-    "simplyswords:mythicmetals_compat/bronze/bronze_cutlass",
-    "simplyswords:mythicmetals_compat/bronze/bronze_glaive",
-    "simplyswords:mythicmetals_compat/bronze/bronze_katana",
-    "simplyswords:mythicmetals_compat/bronze/bronze_longsword",
-    "simplyswords:mythicmetals_compat/bronze/bronze_rapier",
-    "simplyswords:mythicmetals_compat/bronze/bronze_sai",
-    "simplyswords:mythicmetals_compat/bronze/bronze_spear",
-    "simplyswords:mythicmetals_compat/bronze/bronze_twinblade",
-    "simplyswords:mythicmetals_compat/bronze/bronze_warglaive",
-    "simplyswords:mythicmetals_compat/bronze/bronze_greathammer",
-    "simplyswords:mythicmetals_compat/bronze/bronze_greataxe",
-    "simplyswords:mythicmetals_compat/bronze/bronze_chakram",
-    "simplyswords:mythicmetals_compat/bronze/bronze_scythe",
-    "simplyswords:mythicmetals_compat/bronze/bronze_halberd"
+        {
+          "id": "simplyswords:mythicmetals_compat/bronze/bronze_claymore",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/bronze/bronze_cutlass",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/bronze/bronze_glaive",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/bronze/bronze_katana",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/bronze/bronze_longsword",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/bronze/bronze_rapier",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/bronze/bronze_sai",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/bronze/bronze_spear",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/bronze/bronze_twinblade",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/bronze/bronze_warglaive",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/bronze/bronze_greathammer",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/bronze/bronze_greataxe",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/bronze/bronze_chakram",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/bronze/bronze_scythe",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/bronze/bronze_halberd",
+          "required": false
+        }
   ]
 }

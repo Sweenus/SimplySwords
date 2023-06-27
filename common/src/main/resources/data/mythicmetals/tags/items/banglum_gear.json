@@ -1,20 +1,65 @@
 {
   "replace": false,
   "values": [
-    "simplyswords:mythicmetals_compat/banglum/banglum_claymore",
-    "simplyswords:mythicmetals_compat/banglum/banglum_cutlass",
-    "simplyswords:mythicmetals_compat/banglum/banglum_glaive",
-    "simplyswords:mythicmetals_compat/banglum/banglum_katana",
-    "simplyswords:mythicmetals_compat/banglum/banglum_longsword",
-    "simplyswords:mythicmetals_compat/banglum/banglum_rapier",
-    "simplyswords:mythicmetals_compat/banglum/banglum_sai",
-    "simplyswords:mythicmetals_compat/banglum/banglum_spear",
-    "simplyswords:mythicmetals_compat/banglum/banglum_twinblade",
-    "simplyswords:mythicmetals_compat/banglum/banglum_warglaive",
-    "simplyswords:mythicmetals_compat/banglum/banglum_greathammer",
-    "simplyswords:mythicmetals_compat/banglum/banglum_greataxe",
-    "simplyswords:mythicmetals_compat/banglum/banglum_chakram",
-    "simplyswords:mythicmetals_compat/banglum/banglum_scythe",
-    "simplyswords:mythicmetals_compat/banglum/halberd_scythe"
+        {
+          "id": "simplyswords:mythicmetals_compat/banglum/banglum_claymore",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/banglum/banglum_cutlass",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/banglum/banglum_glaive",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/banglum/banglum_katana",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/banglum/banglum_longsword",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/banglum/banglum_rapier",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/banglum/banglum_sai",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/banglum/banglum_spear",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/banglum/banglum_twinblade",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/banglum/banglum_warglaive",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/banglum/banglum_greathammer",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/banglum/banglum_greataxe",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/banglum/banglum_chakram",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/banglum/banglum_scythe",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/banglum/halberd_scythe",
+          "required": false
+        }
   ]
 }

@@ -41,7 +41,6 @@
     "gobber2": ">=2.6.43"
   },
   "recommends": {
-    "bettercombat": ">=1.3.2",
-    "patchouli": ">=1.19.2-77-FABRIC"
+    "bettercombat": ">=1.3.2"
   }
 }

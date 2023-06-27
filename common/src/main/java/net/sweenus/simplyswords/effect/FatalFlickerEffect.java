@@ -1,12 +1,14 @@
 package net.sweenus.simplyswords.effect;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectCategory;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.util.math.Box;
@@ -22,24 +24,34 @@ public class FatalFlickerEffect extends StatusEffect {
 
     public static void performDash(PlayerEntity player, World world, int radius, int maxAmplifier, int dashDistance, int amplifier) {
 
-            player.setVelocity(player.getRotationVector().multiply(+dashDistance));
-            player.setVelocity(player.getVelocity().x, 0, player.getVelocity().z);
-            player.velocityModified = true;
-            player.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, 10, 3), player);
-            player.timeUntilRegen = 10;
+        player.setVelocity(player.getRotationVector().multiply(+dashDistance));
+        player.setVelocity(player.getVelocity().x, 0, player.getVelocity().z);
+        player.velocityModified = true;
+        player.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, 10, 3), player);
+        player.timeUntilRegen = 25;
+        ItemStack itemStack = player.getEquippedStack(EquipmentSlot.MAINHAND);
 
-            Box box = HelperMethods.createBox(player, radius);
-            for (Entity entities : world.getOtherEntities(player, box, EntityPredicates.VALID_LIVING_ENTITY)) {
+        Box box = HelperMethods.createBox(player, radius);
+        Box boxPull = HelperMethods.createBox(player, radius * 2);
+        for (Entity entities : world.getOtherEntities(player, box, EntityPredicates.VALID_LIVING_ENTITY)) {
 
-                if (entities != null) {
-                    if ((entities instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, player)) {
-                        amplifier ++;
-                        le.setVelocity((player.getX() - le.getX()) /4,  (player.getY() - le.getY()) /4, (player.getZ() - le.getZ()) /4);
-                        HelperMethods.incrementStatusEffect(le, EffectRegistry.ECHO.get(), 20, amplifier,
-                                maxAmplifier);
-                    }
+            if (entities != null) {
+                if ((entities instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, player)) {
+                    amplifier ++;
+                    HelperMethods.incrementStatusEffect(le, EffectRegistry.ECHO.get(), 20, amplifier,
+                            maxAmplifier);
                 }
             }
+        }
+        for (Entity entities : world.getOtherEntities(player, boxPull, EntityPredicates.VALID_LIVING_ENTITY)) {
+
+            if (entities != null) {
+                if ((entities instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, player)) {
+                    amplifier ++;
+                    le.setVelocity((player.getX() - le.getX()) /4,  (player.getY() - le.getY()) /4, (player.getZ() - le.getZ()) /4);
+                }
+            }
+        }
 
     }
 
@@ -71,12 +83,13 @@ public class FatalFlickerEffect extends StatusEffect {
             }
 
             if (player.age % 2 == 0) {
-                double xpos = player.getX() - (radius + 1);
+                int particleRadius = (int) (radius * 0.5);
+                double xpos = player.getX() - (particleRadius + 1);
                 double ypos = player.getY();
-                double zpos = player.getZ() - (radius + 1);
+                double zpos = player.getZ() - (particleRadius + 1);
 
-                for (int i = radius * 2; i > 0; i--) {
-                    for (int j = radius * 2; j > 0; j--) {
+                for (int i = particleRadius * 2; i > 0; i--) {
+                    for (int j = particleRadius * 2; j > 0; j--) {
                         float choose = (float) (Math.random() * 1);
                         HelperMethods.spawnParticle(world, ParticleTypes.ELECTRIC_SPARK, xpos + i + choose,
                                 ypos + 0.4,

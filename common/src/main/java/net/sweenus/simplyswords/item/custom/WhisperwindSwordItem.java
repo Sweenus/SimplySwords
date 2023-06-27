@@ -29,7 +29,6 @@ public class WhisperwindSwordItem extends UniqueSwordItem {
     private static int stepMod = 0;
     int skillCooldown = (int) (SimplySwordsConfig.getFloatValue("fatalflicker_cooldown"));
     int abilityChance =  (int) (SimplySwordsConfig.getFloatValue("fatalflicker_chance"));
-    int dodgeDistance = (int) (SimplySwordsConfig.getFloatValue("fatalflicker_dash_velocity") * 0.5);
 
     public WhisperwindSwordItem(ToolMaterial toolMaterial, int attackDamage, float attackSpeed, Settings settings) {
         super(toolMaterial, attackDamage, attackSpeed, settings);
@@ -56,11 +55,8 @@ public class WhisperwindSwordItem extends UniqueSwordItem {
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
 
         world.playSoundFromEntity(null, user, SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_IMPACT_01.get(), SoundCategory.PLAYERS, 0.6f, 1.0f);
-        user.setVelocity(user.getRotationVector().negate().multiply(+1.5));
-        user.setVelocity(user.getVelocity().x, 0, user.getVelocity().z);
-        user.velocityModified = true;
-        user.addStatusEffect(new StatusEffectInstance(EffectRegistry.FATAL_FLICKER.get(), 14));
-        HelperMethods.incrementStatusEffect(user, StatusEffects.ABSORPTION, 30, 2, 4);
+        user.addStatusEffect(new StatusEffectInstance(EffectRegistry.FATAL_FLICKER.get(), 12));
+        HelperMethods.incrementStatusEffect(user, StatusEffects.ABSORPTION, 30, 1, 4);
         user.getItemCooldownManager().set(this.getDefaultStack().getItem(), skillCooldown);
 
         return super.use(world, user, hand);
@@ -86,8 +82,6 @@ public class WhisperwindSwordItem extends UniqueSwordItem {
     @Override
     public void appendTooltip(ItemStack itemStack, World world, List<Text> tooltip, TooltipContext tooltipContext) {
 
-        //1.19
-
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.whisperwindsworditem.tooltip1").formatted(Formatting.GOLD, Formatting.BOLD));
         tooltip.add(Text.literal(""));
@@ -96,6 +90,9 @@ public class WhisperwindSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").formatted(Formatting.BOLD, Formatting.GREEN));
         tooltip.add(Text.translatable("item.simplyswords.whisperwindsworditem.tooltip3"));
         tooltip.add(Text.translatable("item.simplyswords.whisperwindsworditem.tooltip4"));
+        tooltip.add(Text.translatable("item.simplyswords.whisperwindsworditem.tooltip5"));
+        tooltip.add(Text.translatable("item.simplyswords.whisperwindsworditem.tooltip6"));
+        tooltip.add(Text.translatable("item.simplyswords.whisperwindsworditem.tooltip7"));
 
         super.appendTooltip(itemStack,world, tooltip, tooltipContext);
     }

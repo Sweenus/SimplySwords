@@ -2,20 +2,65 @@
   "replace": false,
   "values": [
 
-    "simplyswords:mythicmetals_compat/kyber/kyber_claymore",
-    "simplyswords:mythicmetals_compat/kyber/kyber_cutlass",
-    "simplyswords:mythicmetals_compat/kyber/kyber_glaive",
-    "simplyswords:mythicmetals_compat/kyber/kyber_katana",
-    "simplyswords:mythicmetals_compat/kyber/kyber_longsword",
-    "simplyswords:mythicmetals_compat/kyber/kyber_rapier",
-    "simplyswords:mythicmetals_compat/kyber/kyber_sai",
-    "simplyswords:mythicmetals_compat/kyber/kyber_spear",
-    "simplyswords:mythicmetals_compat/kyber/kyber_twinblade",
-    "simplyswords:mythicmetals_compat/kyber/kyber_warglaive",
-    "simplyswords:mythicmetals_compat/kyber/kyber_greathammer",
-    "simplyswords:mythicmetals_compat/kyber/kyber_greataxe",
-    "simplyswords:mythicmetals_compat/kyber/kyber_chakram",
-    "simplyswords:mythicmetals_compat/kyber/kyber_scythe",
-    "simplyswords:mythicmetals_compat/kyber/kyber_halberd"
-  ]
+        {
+          "id": "simplyswords:mythicmetals_compat/kyber/kyber_claymore",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/kyber/kyber_cutlass",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/kyber/kyber_glaive",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/kyber/kyber_katana",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/kyber/kyber_longsword",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/kyber/kyber_rapier",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/kyber/kyber_sai",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/kyber/kyber_spear",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/kyber/kyber_twinblade",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/kyber/kyber_warglaive",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/kyber/kyber_greathammer",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/kyber/kyber_greataxe",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/kyber/kyber_chakram",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/kyber/kyber_scythe",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/kyber/kyber_halberd",
+          "required": false
+        }
+    ]
 }

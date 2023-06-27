@@ -1,20 +1,65 @@
 {
   "replace": false,
   "values": [
-    "simplyswords:mythicmetals_compat/palladium/palladium_claymore",
-    "simplyswords:mythicmetals_compat/palladium/palladium_cutlass",
-    "simplyswords:mythicmetals_compat/palladium/palladium_glaive",
-    "simplyswords:mythicmetals_compat/palladium/palladium_katana",
-    "simplyswords:mythicmetals_compat/palladium/palladium_longsword",
-    "simplyswords:mythicmetals_compat/palladium/palladium_rapier",
-    "simplyswords:mythicmetals_compat/palladium/palladium_sai",
-    "simplyswords:mythicmetals_compat/palladium/palladium_spear",
-    "simplyswords:mythicmetals_compat/palladium/palladium_twinblade",
-    "simplyswords:mythicmetals_compat/palladium/palladium_warglaive",
-    "simplyswords:mythicmetals_compat/palladium/palladium_greathammer",
-    "simplyswords:mythicmetals_compat/palladium/palladium_greataxe",
-    "simplyswords:mythicmetals_compat/palladium/palladium_chakram",
-    "simplyswords:mythicmetals_compat/palladium/palladium_scythe",
-    "simplyswords:mythicmetals_compat/palladium/palladium_halberd"
+        {
+          "id": "simplyswords:mythicmetals_compat/palladium/palladium_claymore",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/palladium/palladium_cutlass",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/palladium/palladium_glaive",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/palladium/palladium_katana",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/palladium/palladium_longsword",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/palladium/palladium_rapier",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/palladium/palladium_sai",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/palladium/palladium_spear",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/palladium/palladium_twinblade",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/palladium/palladium_warglaive",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/palladium/palladium_greathammer",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/palladium/palladium_greataxe",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/palladium/palladium_chakram",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/palladium/palladium_scythe",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/palladium/palladium_halberd",
+          "required": false
+        }
   ]
 }

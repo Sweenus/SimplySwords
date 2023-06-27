@@ -1,20 +1,65 @@
 {
   "replace": false,
   "values": [
-    "simplyswords:mythicmetals_compat/celestium/celestium_claymore",
-    "simplyswords:mythicmetals_compat/celestium/celestium_cutlass",
-    "simplyswords:mythicmetals_compat/celestium/celestium_glaive",
-    "simplyswords:mythicmetals_compat/celestium/celestium_katana",
-    "simplyswords:mythicmetals_compat/celestium/celestium_longsword",
-    "simplyswords:mythicmetals_compat/celestium/celestium_rapier",
-    "simplyswords:mythicmetals_compat/celestium/celestium_sai",
-    "simplyswords:mythicmetals_compat/celestium/celestium_spear",
-    "simplyswords:mythicmetals_compat/celestium/celestium_twinblade",
-    "simplyswords:mythicmetals_compat/celestium/celestium_warglaive",
-    "simplyswords:mythicmetals_compat/celestium/celestium_greathammer",
-    "simplyswords:mythicmetals_compat/celestium/celestium_greataxe",
-    "simplyswords:mythicmetals_compat/celestium/celestium_chakram",
-    "simplyswords:mythicmetals_compat/celestium/celestium_scythe",
-    "simplyswords:mythicmetals_compat/celestium/celestium_halberd"
+        {
+          "id": "simplyswords:mythicmetals_compat/celestium/celestium_claymore",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/celestium/celestium_cutlass",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/celestium/celestium_glaive",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/celestium/celestium_katana",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/celestium/celestium_longsword",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/celestium/celestium_rapier",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/celestium/celestium_sai",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/celestium/celestium_spear",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/celestium/celestium_twinblade",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/celestium/celestium_warglaive",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/celestium/celestium_greathammer",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/celestium/celestium_greataxe",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/celestium/celestium_chakram",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/celestium/celestium_scythe",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/celestium/celestium_halberd",
+          "required": false
+        }
   ]
 }

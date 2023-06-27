@@ -1,20 +1,65 @@
 {
   "replace": false,
   "values": [
-    "simplyswords:mythicmetals_compat/orichalcum/orichalcum_claymore",
-    "simplyswords:mythicmetals_compat/orichalcum/orichalcum_cutlass",
-    "simplyswords:mythicmetals_compat/orichalcum/orichalcum_glaive",
-    "simplyswords:mythicmetals_compat/orichalcum/orichalcum_katana",
-    "simplyswords:mythicmetals_compat/orichalcum/orichalcum_longsword",
-    "simplyswords:mythicmetals_compat/orichalcum/orichalcum_rapier",
-    "simplyswords:mythicmetals_compat/orichalcum/orichalcum_sai",
-    "simplyswords:mythicmetals_compat/orichalcum/orichalcum_spear",
-    "simplyswords:mythicmetals_compat/orichalcum/orichalcum_twinblade",
-    "simplyswords:mythicmetals_compat/orichalcum/orichalcum_warglaive",
-    "simplyswords:mythicmetals_compat/orichalcum/orichalcum_greathammer",
-    "simplyswords:mythicmetals_compat/orichalcum/orichalcum_greataxe",
-    "simplyswords:mythicmetals_compat/orichalcum/orichalcum_chakram",
-    "simplyswords:mythicmetals_compat/orichalcum/orichalcum_scythe",
-    "simplyswords:mythicmetals_compat/orichalcum/orichalcum_halberd"
+        {
+          "id": "simplyswords:mythicmetals_compat/orichalcum/orichalcum_claymore",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/orichalcum/orichalcum_cutlass",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/orichalcum/orichalcum_glaive",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/orichalcum/orichalcum_katana",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/orichalcum/orichalcum_longsword",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/orichalcum/orichalcum_rapier",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/orichalcum/orichalcum_sai",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/orichalcum/orichalcum_spear",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/orichalcum/orichalcum_twinblade",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/orichalcum/orichalcum_warglaive",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/orichalcum/orichalcum_greathammer",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/orichalcum/orichalcum_greataxe",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/orichalcum/orichalcum_chakram",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/orichalcum/orichalcum_scythe",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/orichalcum/orichalcum_halberd",
+          "required": false
+        }
   ]
 }

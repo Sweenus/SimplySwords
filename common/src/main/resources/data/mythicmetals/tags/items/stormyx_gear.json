@@ -1,20 +1,65 @@
 {
   "replace": false,
   "values": [
-    "simplyswords:mythicmetals_compat/stormyx/stormyx_claymore",
-    "simplyswords:mythicmetals_compat/stormyx/stormyx_cutlass",
-    "simplyswords:mythicmetals_compat/stormyx/stormyx_glaive",
-    "simplyswords:mythicmetals_compat/stormyx/stormyx_katana",
-    "simplyswords:mythicmetals_compat/stormyx/stormyx_longsword",
-    "simplyswords:mythicmetals_compat/stormyx/stormyx_rapier",
-    "simplyswords:mythicmetals_compat/stormyx/stormyx_sai",
-    "simplyswords:mythicmetals_compat/stormyx/stormyx_spear",
-    "simplyswords:mythicmetals_compat/stormyx/stormyx_twinblade",
-    "simplyswords:mythicmetals_compat/stormyx/stormyx_warglaive",
-    "simplyswords:mythicmetals_compat/stormyx/stormyx_greathammer",
-    "simplyswords:mythicmetals_compat/stormyx/stormyx_greataxe",
-    "simplyswords:mythicmetals_compat/stormyx/stormyx_chakram",
-    "simplyswords:mythicmetals_compat/stormyx/stormyx_scythe",
-    "simplyswords:mythicmetals_compat/stormyx/stormyx_halberd"
+        {
+          "id": "simplyswords:mythicmetals_compat/stormyx/stormyx_claymore",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/stormyx/stormyx_cutlass",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/stormyx/stormyx_glaive",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/stormyx/stormyx_katana",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/stormyx/stormyx_longsword",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/stormyx/stormyx_rapier",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/stormyx/stormyx_sai",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/stormyx/stormyx_spear",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/stormyx/stormyx_twinblade",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/stormyx/stormyx_warglaive",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/stormyx/stormyx_greathammer",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/stormyx/stormyx_greataxe",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/stormyx/stormyx_chakram",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/stormyx/stormyx_scythe",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/stormyx/stormyx_halberd",
+          "required": false
+        }
   ]
 }

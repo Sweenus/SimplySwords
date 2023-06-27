@@ -39,7 +39,7 @@ public class SimplySwords {
     public static final String MOD_ID = "simplyswords";
 
     public static final DeferredRegister<ItemGroup> TABS =
-            DeferredRegister.create("modid", RegistryKeys.ITEM_GROUP);
+            DeferredRegister.create(SimplySwords.MOD_ID, RegistryKeys.ITEM_GROUP);
 
     public static final RegistrySupplier<ItemGroup> SIMPLYSWORDS = TABS.register(
             "simplyswords", // Tab ID

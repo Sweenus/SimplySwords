@@ -1,20 +1,65 @@
 {
   "replace": false,
   "values": [
-    "simplyswords:mythicmetals_compat/quadrillum/quadrillum_claymore",
-    "simplyswords:mythicmetals_compat/quadrillum/quadrillum_cutlass",
-    "simplyswords:mythicmetals_compat/quadrillum/quadrillum_glaive",
-    "simplyswords:mythicmetals_compat/quadrillum/quadrillum_katana",
-    "simplyswords:mythicmetals_compat/quadrillum/quadrillum_longsword",
-    "simplyswords:mythicmetals_compat/quadrillum/quadrillum_rapier",
-    "simplyswords:mythicmetals_compat/quadrillum/quadrillum_sai",
-    "simplyswords:mythicmetals_compat/quadrillum/quadrillum_spear",
-    "simplyswords:mythicmetals_compat/quadrillum/quadrillum_twinblade",
-    "simplyswords:mythicmetals_compat/quadrillum/quadrillum_warglaive",
-    "simplyswords:mythicmetals_compat/quadrillum/quadrillum_greathammer",
-    "simplyswords:mythicmetals_compat/quadrillum/quadrillum_greataxe",
-    "simplyswords:mythicmetals_compat/quadrillum/quadrillum_chakram",
-    "simplyswords:mythicmetals_compat/quadrillum/quadrillum_scythe",
-    "simplyswords:mythicmetals_compat/quadrillum/quadrillum_halberd"
+        {
+          "id": "simplyswords:mythicmetals_compat/quadrillum/quadrillum_claymore",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/quadrillum/quadrillum_cutlass",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/quadrillum/quadrillum_glaive",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/quadrillum/quadrillum_katana",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/quadrillum/quadrillum_longsword",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/quadrillum/quadrillum_rapier",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/quadrillum/quadrillum_sai",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/quadrillum/quadrillum_spear",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/quadrillum/quadrillum_twinblade",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/quadrillum/quadrillum_warglaive",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/quadrillum/quadrillum_greathammer",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/quadrillum/quadrillum_greataxe",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/quadrillum/quadrillum_chakram",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/quadrillum/quadrillum_scythe",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/quadrillum/quadrillum_halberd",
+          "required": false
+        }
   ]
 }

@@ -1,20 +1,65 @@
 {
   "replace": false,
   "values": [
-    "simplyswords:mythicmetals_compat/adamantite/adamantite_claymore",
-    "simplyswords:mythicmetals_compat/adamantite/adamantite_cutlass",
-    "simplyswords:mythicmetals_compat/adamantite/adamantite_glaive",
-    "simplyswords:mythicmetals_compat/adamantite/adamantite_katana",
-    "simplyswords:mythicmetals_compat/adamantite/adamantite_longsword",
-    "simplyswords:mythicmetals_compat/adamantite/adamantite_rapier",
-    "simplyswords:mythicmetals_compat/adamantite/adamantite_sai",
-    "simplyswords:mythicmetals_compat/adamantite/adamantite_spear",
-    "simplyswords:mythicmetals_compat/adamantite/adamantite_twinblade",
-    "simplyswords:mythicmetals_compat/adamantite/adamantite_warglaive",
-    "simplyswords:mythicmetals_compat/adamantite/adamantite_greathammer",
-    "simplyswords:mythicmetals_compat/adamantite/adamantite_greataxe",
-    "simplyswords:mythicmetals_compat/adamantite/adamantite_chakram",
-    "simplyswords:mythicmetals_compat/adamantite/adamantite_scythe",
-    "simplyswords:mythicmetals_compat/adamantite/adamantite_halberd"
+        {
+          "id": "simplyswords:mythicmetals_compat/adamantite/adamantite_claymore",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/adamantite/adamantite_cutlass",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/adamantite/adamantite_glaive",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/adamantite/adamantite_katana",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/adamantite/adamantite_longsword",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/adamantite/adamantite_rapier",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/adamantite/adamantite_sai",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/adamantite/adamantite_spear",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/adamantite/adamantite_twinblade",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/adamantite/adamantite_warglaive",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/adamantite/adamantite_greathammer",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/adamantite/adamantite_greataxe",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/adamantite/adamantite_chakram",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/adamantite/adamantite_scythe",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/adamantite/adamantite_halberd",
+          "required": false
+        }
   ]
 }
