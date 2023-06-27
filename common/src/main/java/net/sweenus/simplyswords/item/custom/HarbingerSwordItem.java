@@ -106,7 +106,6 @@ public class HarbingerSwordItem extends UniqueSwordItem {
 
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.harbingersworditem.tooltip1").setStyle(ABILITY));
-        tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.harbingersworditem.tooltip2").setStyle(TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(RIGHTCLICK));

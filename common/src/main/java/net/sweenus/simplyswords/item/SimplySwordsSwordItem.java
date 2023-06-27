@@ -1,6 +1,5 @@
 package net.sweenus.simplyswords.item;
 
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.Item;
@@ -51,18 +50,16 @@ public class SimplySwordsSwordItem extends SwordItem {
     @Override
     public void appendTooltip(ItemStack itemStack, World world, List<Text> tooltip, TooltipContext tooltipContext) {
 
-        if (FabricLoader.getInstance().isModLoaded("mythicmetals")) {
 
-            int rgbPrometheum = 0x3A6A56;
-            int rgbCarmot = 0xE63E73;
-            Style PROMETHEUM = Style.EMPTY.withColor(TextColor.fromRgb(rgbPrometheum));
-            Style CARMOT = Style.EMPTY.withColor(TextColor.fromRgb(rgbCarmot));
+        int rgbPrometheum = 0x3A6A56;
+        int rgbCarmot = 0xE63E73;
+        Style PROMETHEUM = Style.EMPTY.withColor(TextColor.fromRgb(rgbPrometheum));
+        Style CARMOT = Style.EMPTY.withColor(TextColor.fromRgb(rgbCarmot));
 
-            if (this.getName(itemStack).getString().contains("Prometheum"))
-                tooltip.add(Text.translatable("item.simplyswords.compat.mythicmetals.regrowth").setStyle(PROMETHEUM));
-            else if (this.getName(itemStack).getString().contains("Carmot"))
-                tooltip.add(Text.translatable("item.simplyswords.compat.mythicmetals.looting").setStyle(CARMOT));
-        }
+        if (this.getName(itemStack).getString().contains("Prometheum"))
+            tooltip.add(Text.translatable("item.simplyswords.compat.mythicmetals.regrowth").setStyle(PROMETHEUM));
+        else if (this.getName(itemStack).getString().contains("Carmot"))
+            tooltip.add(Text.translatable("item.simplyswords.compat.mythicmetals.looting").setStyle(CARMOT));
 
         super.appendTooltip(itemStack,world, tooltip, tooltipContext);
     }

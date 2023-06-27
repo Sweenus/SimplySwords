@@ -175,7 +175,6 @@ public class LivyatanSwordItem extends UniqueSwordItem {
 
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.livyatansworditem.tooltip1").setStyle(ABILITY));
-        tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.livyatansworditem.tooltip2").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.livyatansworditem.tooltip3").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.livyatansworditem.tooltip4", shatter_timer_max /20, shatterDamage).setStyle(TEXT));

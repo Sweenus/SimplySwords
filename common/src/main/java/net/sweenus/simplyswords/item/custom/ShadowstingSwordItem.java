@@ -132,7 +132,6 @@ public class ShadowstingSwordItem extends UniqueSwordItem {
 
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.shadowmistsworditem.tooltip1").setStyle(ABILITY));
-        tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.shadowmistsworditem.tooltip2").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.shadowmistsworditem.tooltip3").setStyle(TEXT));
         tooltip.add(Text.literal(""));

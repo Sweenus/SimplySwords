@@ -810,6 +810,7 @@
   "item.simplyswords.uniquesworditem.netherfused_power.nullification.description5": "enemies within its vicinity.",
 
   "item.simplyswords.common.blacklisteffect": "ABILITY DISABLED",
+  "item.simplyswords.common.showtooltip": "- Hold §2ALT§7 to view gem sockets -",
   "item.simplyswords.compat.mythicmetals.regrowth": "Regrowth",
   "item.simplyswords.compat.mythicmetals.looting": "Bonus Looting",
 

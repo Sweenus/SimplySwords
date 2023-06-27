@@ -217,7 +217,6 @@ public class LichbladeSwordItem extends UniqueSwordItem {
             tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip1.2").setStyle(ABILITY));
         if (this.getDefaultStack().isOf(ItemsRegistry.AWAKENED_LICHBLADE.get()))
             tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip1.3").setStyle(ABILITY));
-        tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip2").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip3", radius).setStyle(TEXT));
         tooltip.add(Text.literal(""));

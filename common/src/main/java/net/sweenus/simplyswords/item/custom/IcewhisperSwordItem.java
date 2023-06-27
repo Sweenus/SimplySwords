@@ -169,7 +169,6 @@ public class IcewhisperSwordItem extends UniqueSwordItem {
 
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.icewhispersworditem.tooltip1").setStyle(ABILITY));
-        tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.icewhispersworditem.tooltip2").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.icewhispersworditem.tooltip3", radius).setStyle(TEXT));
         tooltip.add(Text.literal(""));

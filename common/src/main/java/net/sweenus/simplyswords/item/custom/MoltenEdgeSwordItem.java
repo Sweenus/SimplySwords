@@ -156,7 +156,6 @@ public class MoltenEdgeSwordItem extends UniqueSwordItem {
 
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.moltenedgesworditem.tooltip1").setStyle(ABILITY));
-        tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.moltenedgesworditem.tooltip2").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.moltenedgesworditem.tooltip3").setStyle(TEXT));
         tooltip.add(Text.literal(""));
