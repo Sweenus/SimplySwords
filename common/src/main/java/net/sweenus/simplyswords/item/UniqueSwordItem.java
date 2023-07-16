@@ -430,6 +430,9 @@ public class UniqueSwordItem extends SwordItem {
 
             }
 
-        } else {tooltip.add(Text.translatable("item.simplyswords.common.showtooltip").formatted(Formatting.GRAY));}
+        } else if (itemStack.getOrCreateNbt().getString("runic_power").contains("socket_empty") ||
+                itemStack.getOrCreateNbt().getString("nether_power").contains("socket_empty")) {
+            tooltip.add(Text.translatable("item.simplyswords.common.showtooltip").formatted(Formatting.GRAY));
+        }
     }
 }

@@ -39,7 +39,7 @@ dependencies {
     modApi "dev.architectury:architectury-forge:${rootProject.architectury_version}"
 
     //Patchouli
-    //modImplementation ("vazkii.patchouli:Patchouli:1.19.2-77")
+    modImplementation ("vazkii.patchouli:Patchouli:1.20.1-81-FORGE")
 
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
