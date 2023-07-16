@@ -6,5 +6,6 @@
   "model": "simplyswords:patchouli/book_0",
   "advancements_tab": "simplyswords",
   "progress_bar_color": "0384fc",
-  "index_icon": "minecraft:spyglass"
+  "index_icon": "minecraft:spyglass",
+  "use_resource_pack": true
 }
