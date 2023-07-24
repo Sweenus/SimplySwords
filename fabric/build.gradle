@@ -34,6 +34,7 @@ repositories {
             includeGroup 'maven.modrinth'
         }
     }
+    maven { url = "https://jitpack.io" }
 }
 
 dependencies {
@@ -43,7 +44,7 @@ dependencies {
     modApi "dev.architectury:architectury-fabric:${rootProject.architectury_version}"
 
     // Mythic Metals
-    modImplementation "curse.maven:mythicmetals-410127:4578567"
+    modImplementation "curse.maven:mythicmetals-410127:4644233"
     // slug / curseforge project ID / file ID "check url"
 
     // Amethyst Imbuement
@@ -51,6 +52,8 @@ dependencies {
 
     // Patchouli
     modImplementation "vazkii.patchouli:Patchouli:1.20.1-81-FABRIC"
+
+    include(implementation(annotationProcessor("com.github.llamalad7.mixinextras:mixinextras-fabric:${rootProject.mixin_extras_version}")))
 
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
