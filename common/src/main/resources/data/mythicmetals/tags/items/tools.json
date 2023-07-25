@@ -1,0 +1,85 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "#simplyswords:adamantite_tools",
+      "required": false
+    },
+    {
+      "id": "#simplyswords:aquarium_tools",
+      "required": false
+    },
+    {
+      "id": "#simplyswords:banglum_tools",
+      "required": false
+    },
+    {
+      "id": "#simplyswords:bronze_tools",
+      "required": false
+    },
+    {
+      "id": "#simplyswords:carmot_tools",
+      "required": false
+    },
+    {
+      "id": "#simplyswords:celestium_tools",
+      "required": false
+    },
+    {
+      "id": "#simplyswords:copper_tools",
+      "required": false
+    },
+    {
+      "id": "#simplyswords:durasteel_tools",
+      "required": false
+    },
+    {
+      "id": "#simplyswords:kyber_tools",
+      "required": false
+    },
+    {
+      "id": "#simplyswords:metallurgium_tools",
+      "required": false
+    },
+    {
+      "id": "#simplyswords:mythril_tools",
+      "required": false
+    },
+    {
+      "id": "#simplyswords:orichalcum_tools",
+      "required": false
+    },
+    {
+      "id": "#simplyswords:osmium_tools",
+      "required": false
+    },
+    {
+      "id": "#simplyswords:palladium_tools",
+      "required": false
+    },
+    {
+      "id": "#simplyswords:prometheum_tools",
+      "required": false
+    },
+    {
+      "id": "#simplyswords:quadrillum_tools",
+      "required": false
+    },
+    {
+      "id": "#simplyswords:runite_tools",
+      "required": false
+    },
+    {
+      "id": "#simplyswords:star_platinum_tools",
+      "required": false
+    },
+    {
+      "id": "#simplyswords:steel_tools",
+      "required": false
+    },
+    {
+      "id": "#simplyswords:stormyx_tools",
+      "required": false
+    }
+  ]
+}
