@@ -33,6 +33,7 @@ public class StealSwordItem extends UniqueSwordItem {
         super(toolMaterial, attackDamage, attackSpeed, settings);
     }
     private static int stepMod = 0;
+    float abilityDamage = 5;
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
@@ -88,7 +89,7 @@ public class StealSwordItem extends UniqueSwordItem {
                             le.addStatusEffect(new StatusEffectInstance(StatusEffects.BLINDNESS, bduration, 1), user);
                             user.teleport(le.getX(), le.getY(), le.getZ());
                             sworld.playSoundFromEntity (null, le, SoundRegistry.ELEMENTAL_SWORD_SCIFI_ATTACK_03.get() , SoundCategory.PLAYERS, 0.3f, 1.5f);
-                            le.damage(user.getDamageSources().freeze(), 5f);
+                            le.damage(user.getDamageSources().freeze(), abilityDamage);
                             le.removeStatusEffect(StatusEffects.SLOWNESS);
                             le.removeStatusEffect(StatusEffects.GLOWING);
                         }
@@ -110,6 +111,14 @@ public class StealSwordItem extends UniqueSwordItem {
 
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
+        if (HelperMethods.commonSpellAttributeScaling(
+                2.6f,
+                entity,
+                "soul") > 0)
+            abilityDamage = HelperMethods.commonSpellAttributeScaling(
+                    2.6f,
+                    entity,
+                    "soul");
 
         if (stepMod > 0)
             stepMod --;

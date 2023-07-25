@@ -47,6 +47,8 @@ dependencies {
     modImplementation "curse.maven:mythicmetals-410127:4644233"
     // slug / curseforge project ID / file ID "check url"
 
+    modImplementation "maven.modrinth:spell-power:${rootProject.spellpower_version}-fabric"
+
     // Amethyst Imbuement
     //modImplementation "curse.maven:amethyst-imbuement-608261:4514358"
 

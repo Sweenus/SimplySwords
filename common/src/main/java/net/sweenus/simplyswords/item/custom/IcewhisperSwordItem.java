@@ -34,7 +34,7 @@ public class IcewhisperSwordItem extends UniqueSwordItem {
     }
     private static int stepMod = 0;
     int radius = (int) (SimplySwordsConfig.getFloatValue("permafrost_radius"));
-    int frostDamage = (int) (SimplySwordsConfig.getFloatValue("permafrost_damage"));
+    float abilityDamage = (SimplySwordsConfig.getFloatValue("permafrost_damage"));
     int blizzard_timer_max = (int) (SimplySwordsConfig.getFloatValue("permafrost_duration"));
     int skillCooldown = (int) (SimplySwordsConfig.getFloatValue("permafrost_cooldown"));
     int blizzard_timer;
@@ -72,7 +72,7 @@ public class IcewhisperSwordItem extends UniqueSwordItem {
 
         if (user.getEquippedStack(EquipmentSlot.MAINHAND) == stack && (user instanceof PlayerEntity player)) {
 
-            AbilityMethods.tickAbilityPermafrost(stack, world, user, remainingUseTicks, blizzard_timer_max, frostDamage,
+            AbilityMethods.tickAbilityPermafrost(stack, world, user, remainingUseTicks, blizzard_timer_max, abilityDamage,
                     skillCooldown, radius, lastX, lastY, lastZ);
 
         }
@@ -96,59 +96,67 @@ public class IcewhisperSwordItem extends UniqueSwordItem {
 
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
+        if (HelperMethods.commonSpellAttributeScaling(
+                0.9f,
+                entity,
+                "frost") > 0)
+            abilityDamage = HelperMethods.commonSpellAttributeScaling(
+                    0.9f,
+                    entity,
+                    "frost");
 
-            if (!world.isClient && (entity instanceof PlayerEntity player)) {
+        if (!world.isClient && (entity instanceof PlayerEntity player)) {
 
-                //AOE Aura
-                if (player.age % 35 == 0 && player.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
-                    Box box = new Box(player.getX() + radius, player.getY() + radius, player.getZ() + radius, player.getX() - radius, player.getY() - radius, player.getZ() - radius);
-                    for (Entity entities : world.getOtherEntities(player, box, EntityPredicates.VALID_LIVING_ENTITY)) {
+            //AOE Aura
+            if (player.age % 35 == 0 && player.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
+                Box box = new Box(player.getX() + radius, player.getY() + radius, player.getZ() + radius, player.getX() - radius, player.getY() - radius, player.getZ() - radius);
+                for (Entity entities : world.getOtherEntities(player, box, EntityPredicates.VALID_LIVING_ENTITY)) {
 
-                        if (entities != null) {
-                            if ((entities instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, player)) {
-                                if (le.hasStatusEffect(StatusEffects.SLOWNESS)) {
+                    if (entities != null) {
+                        if ((entities instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, player)) {
+                            if (le.hasStatusEffect(StatusEffects.SLOWNESS)) {
 
-                                    int a = (le.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier() + 1);
+                                int a = (le.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier() + 1);
 
-                                    if (a < 4) {
-                                        le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 120, a), player);
-                                    } else {
-                                        le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 120, a - 1), player);
-                                    }
+                                if (a < 4) {
+                                    le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 120, a), player);
                                 } else {
-                                    le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 120, 0), player);
+                                    le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 120, a - 1), player);
                                 }
-                                float choose = (float) (Math.random() * 1);
-                                world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_BOW_ICE_SHOOT_IMPACT_03.get(), SoundCategory.PLAYERS, 0.1f, choose);
-                                le.damage(player.getDamageSources().freeze(), frostDamage);
+                            } else {
+                                le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 120, 0), player);
                             }
-                        }
-                    }
-
-                    world.playSoundFromEntity(null, player, SoundRegistry.ELEMENTAL_SWORD_ICE_ATTACK_02.get(), SoundCategory.PLAYERS, 0.1f, 0.6f);
-                    double xpos = player.getX() - (radius + 1);
-                    double ypos = player.getY();
-                    double zpos = player.getZ() - (radius + 1);
-
-                    for (int i = radius * 2; i > 0; i--) {
-                        for (int j = radius * 2; j > 0; j--) {
                             float choose = (float) (Math.random() * 1);
-                            HelperMethods.spawnParticle(world, ParticleTypes.SNOWFLAKE, xpos + i + choose,
-                                    ypos + 0.4,
-                                    zpos + j + choose,
-                                    0, 0.1, 0);
-                            HelperMethods.spawnParticle(world, ParticleTypes.CLOUD, xpos + i + choose,
-                                    ypos + 0.1,
-                                    zpos + j + choose,
-                                    0, 0, 0);
-                            HelperMethods.spawnParticle(world, ParticleTypes.WHITE_ASH, xpos + i + choose,
-                                    ypos + 2,
-                                    zpos + j + choose,
-                                    0, 0, 0);
+                            world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_BOW_ICE_SHOOT_IMPACT_03.get(), SoundCategory.PLAYERS, 0.1f, choose);
+                            le.damage(player.getDamageSources().magic(), abilityDamage);
                         }
                     }
                 }
+
+                world.playSoundFromEntity(null, player, SoundRegistry.ELEMENTAL_SWORD_ICE_ATTACK_02.get(), SoundCategory.PLAYERS, 0.1f, 0.6f);
+                double xpos = player.getX() - (radius + 1);
+                double ypos = player.getY();
+                double zpos = player.getZ() - (radius + 1);
+
+                for (int i = radius * 2; i > 0; i--) {
+                    for (int j = radius * 2; j > 0; j--) {
+                        float choose = (float) (Math.random() * 1);
+                        HelperMethods.spawnParticle(world, ParticleTypes.SNOWFLAKE, xpos + i + choose,
+                                ypos + 0.4,
+                                zpos + j + choose,
+                                0, 0.1, 0);
+                        HelperMethods.spawnParticle(world, ParticleTypes.CLOUD, xpos + i + choose,
+                                ypos + 0.1,
+                                zpos + j + choose,
+                                0, 0, 0);
+                        HelperMethods.spawnParticle(world, ParticleTypes.WHITE_ASH, xpos + i + choose,
+                                ypos + 2,
+                                zpos + j + choose,
+                                0, 0, 0);
+                    }
+                }
             }
+        }
 
         if (stepMod > 0)
             stepMod --;
@@ -172,7 +180,7 @@ public class IcewhisperSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.icewhispersworditem.tooltip2").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.icewhispersworditem.tooltip3", radius).setStyle(TEXT));
         tooltip.add(Text.literal(""));
-        tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(RIGHTCLICK));
+        tooltip.add(Text.translatable("item.simplyswords.onrightclickheld").setStyle(RIGHTCLICK));
         tooltip.add(Text.translatable("item.simplyswords.icewhispersworditem.tooltip4").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.icewhispersworditem.tooltip5").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.icewhispersworditem.tooltip6", radius * 2).setStyle(TEXT));

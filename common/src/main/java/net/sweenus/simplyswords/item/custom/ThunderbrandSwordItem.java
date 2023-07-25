@@ -32,7 +32,7 @@ public class ThunderbrandSwordItem extends UniqueSwordItem {
     }
     private static int stepMod = 0;
     int radius = (int) (SimplySwordsConfig.getFloatValue("thunderblitz_radius"));
-    int abilityDamage = (int) (SimplySwordsConfig.getFloatValue("thunderblitz_damage"));
+    float abilityDamage = (SimplySwordsConfig.getFloatValue("thunderblitz_damage"));
     int ability_timer_max = 50;
     int skillCooldown = (int) (SimplySwordsConfig.getFloatValue("thunderblitz_cooldown"));
     int chargeChance =  (int) (SimplySwordsConfig.getFloatValue("thunderblitz_chance"));
@@ -101,6 +101,14 @@ public class ThunderbrandSwordItem extends UniqueSwordItem {
 
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
+        if (HelperMethods.commonSpellAttributeScaling(
+                1.7f,
+                entity,
+                "lightning") > 0)
+            abilityDamage = HelperMethods.commonSpellAttributeScaling(
+                    1.7f,
+                    entity,
+                    "lightning");
 
         if (stepMod > 0)
             stepMod --;
@@ -123,7 +131,7 @@ public class ThunderbrandSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.thunderbrandsworditem.tooltip1").setStyle(ABILITY));
         tooltip.add(Text.translatable("item.simplyswords.thunderbrandsworditem.tooltip2").setStyle(TEXT));
         tooltip.add(Text.literal(""));
-        tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(RIGHTCLICK));
+        tooltip.add(Text.translatable("item.simplyswords.onrightclickheld").setStyle(RIGHTCLICK));
         tooltip.add(Text.translatable("item.simplyswords.thunderbrandsworditem.tooltip3").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.thunderbrandsworditem.tooltip4").setStyle(TEXT));
         tooltip.add(Text.literal(""));

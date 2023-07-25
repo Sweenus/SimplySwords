@@ -35,7 +35,7 @@ public class LichbladeSwordItem extends UniqueSwordItem {
     }
     private static int stepMod = 0;
     int radius = (int) (SimplySwordsConfig.getFloatValue("soulanguish_radius"));
-    int abilityDamage = (int) (SimplySwordsConfig.getFloatValue("soulanguish_damage"));
+    float abilityDamage = (SimplySwordsConfig.getFloatValue("soulanguish_damage"));
     int ability_timer_max = (int) (SimplySwordsConfig.getFloatValue("soulanguish_duration"));
     int skillCooldown = (int) (SimplySwordsConfig.getFloatValue("soulanguish_cooldown"));
     float healAmount = (SimplySwordsConfig.getFloatValue("soulanguish_heal"));
@@ -156,6 +156,14 @@ public class LichbladeSwordItem extends UniqueSwordItem {
 
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
+        if (HelperMethods.commonSpellAttributeScaling(
+                1.6f,
+                entity,
+                "soul") > 0)
+            abilityDamage = HelperMethods.commonSpellAttributeScaling(
+                    1.6f,
+                    entity,
+                    "soul");
 
         if (!entity.getWorld().isClient() && (entity instanceof PlayerEntity player)) {
             //AOE Aura
@@ -221,7 +229,7 @@ public class LichbladeSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip3", radius).setStyle(TEXT));
         tooltip.add(Text.literal(""));
         if (this.getDefaultStack().isOf(ItemsRegistry.WAKING_LICHBLADE.get()) || this.getDefaultStack().isOf(ItemsRegistry.AWAKENED_LICHBLADE.get())) {
-            tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(RIGHTCLICK));
+            tooltip.add(Text.translatable("item.simplyswords.onrightclickheld").setStyle(RIGHTCLICK));
             tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip4").setStyle(TEXT));
             tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip5").setStyle(TEXT));
             tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip6").setStyle(TEXT));

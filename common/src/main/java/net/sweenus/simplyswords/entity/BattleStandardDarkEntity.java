@@ -25,7 +25,7 @@ import net.sweenus.simplyswords.util.HelperMethods;
 
 public class BattleStandardDarkEntity extends PathAwareEntity {
     public static final Supplier<EntityType<BattleStandardDarkEntity>> TYPE = Suppliers.memoize(() -> EntityType.Builder.create(BattleStandardDarkEntity::new, SpawnGroup.MISC).build("battlestandarddark"));
-    int abilityDamage =  (int) (SimplySwordsConfig.getFloatValue("abyssalstandard_damage"));
+    float abilityDamage = (SimplySwordsConfig.getFloatValue("abyssalstandard_damage"));
     public PlayerEntity ownerEntity;
     public String standardType;
     public int decayRate;
@@ -65,7 +65,14 @@ public class BattleStandardDarkEntity extends PathAwareEntity {
             }
             if (ownerEntity != null && standardType != null) {
                 int radius = 6;
-                int abilityDamage = 2;
+                if (HelperMethods.commonSpellAttributeScaling(
+                        1.2f,
+                        ownerEntity,
+                        "soul") > 0)
+                    abilityDamage = HelperMethods.commonSpellAttributeScaling(
+                            1.2f,
+                            ownerEntity,
+                            "soul");
                 //AOE Aura
                 if (this.age % 10 == 0) {
                     Box box = new Box(this.getX() + radius, this.getY() + (float) radius / 3, this.getZ() + radius, this.getX() - radius, this.getY() - (float) radius / 3, this.getZ() - radius);

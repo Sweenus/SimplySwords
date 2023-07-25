@@ -30,6 +30,7 @@ public class RendSwordItem extends UniqueSwordItem {
     public RendSwordItem(ToolMaterial toolMaterial, int attackDamage, float attackSpeed, Settings settings) {
         super(toolMaterial, attackDamage, attackSpeed, settings);
     }
+    float abilityDamage = (SimplySwordsConfig.getFloatValue("soulrend_rend_damage_multiplier"));
 
     private static int stepMod = 0;
 
@@ -83,7 +84,6 @@ public class RendSwordItem extends UniqueSwordItem {
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
 
         if (!user.getWorld().isClient()) {
-            int rend_damage = (int) (SimplySwordsConfig.getFloatValue("soulrend_rend_damage_multiplier"));
             float heal_amount = (SimplySwordsConfig.getFloatValue("soulrend_rend_heal_multiplier"));
             int healamp = 0;
             boolean cantrigger = false;
@@ -104,7 +104,7 @@ public class RendSwordItem extends UniqueSwordItem {
                          if (le.hasStatusEffect(StatusEffects.SLOWNESS) && le.hasStatusEffect(StatusEffects.WEAKNESS) && HelperMethods.checkFriendlyFire(le, user)) {
                              healamp += (le.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier());
                              cantrigger = true;
-                             le.damage(user.getDamageSources().freeze(), le.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier() * rend_damage);
+                             le.damage(user.getDamageSources().magic(), le.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier() * abilityDamage);
                              le.removeStatusEffect(StatusEffects.WEAKNESS);
                              le.removeStatusEffect(StatusEffects.SLOWNESS);
                              world.playSoundFromEntity (null, ee, SoundRegistry.DARK_SWORD_SPELL.get(), SoundCategory.PLAYERS, 0.1f, 2f);
@@ -130,6 +130,14 @@ public class RendSwordItem extends UniqueSwordItem {
 
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
+        if (HelperMethods.commonSpellAttributeScaling(
+                0.4f,
+                entity,
+                "soul") > 0)
+            abilityDamage = HelperMethods.commonSpellAttributeScaling(
+                    0.4f,
+                    entity,
+                    "soul");
 
         if (stepMod > 0)
             stepMod --;

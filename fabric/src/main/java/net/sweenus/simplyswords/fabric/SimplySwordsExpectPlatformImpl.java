@@ -1,6 +1,7 @@
 package net.sweenus.simplyswords.fabric;
 
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.entity.player.PlayerEntity;
 import net.sweenus.simplyswords.SimplySwordsExpectPlatform;
 
 import java.nio.file.Path;
@@ -15,4 +16,5 @@ public class SimplySwordsExpectPlatformImpl {
         return FabricLoader.getInstance().getConfigDir();
     }
     public static String getVersion() {return FabricLoader.getInstance().getModContainer(MOD_ID).get().getMetadata().getVersion().toString();}
+    public static float getSpellPowerDamage(float damageModifier, PlayerEntity player, String magicSchool) {return FabricHelperMethods.useSpellAttributeScaling(damageModifier, player, magicSchool);}
 }

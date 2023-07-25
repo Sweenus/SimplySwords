@@ -38,7 +38,7 @@ public class FrostfallSwordItem extends UniqueSwordItem {
 
     private final int abilityCooldown = (int) SimplySwordsConfig.getFloatValue("frostfury_cooldown");
     int radius = (int) (SimplySwordsConfig.getFloatValue("frostfury_radius"));
-    int shatterDamage = (int) (SimplySwordsConfig.getFloatValue("frostfury_damage"));
+    float abilityDamage = (SimplySwordsConfig.getFloatValue("frostfury_damage"));
     int proc_chance = (int) (SimplySwordsConfig.getFloatValue("frostfury_chance"));
     int shatter_timer_max = (int) (SimplySwordsConfig.getFloatValue("frostfury_duration"));
     int shatter_timer;
@@ -158,7 +158,7 @@ public class FrostfallSwordItem extends UniqueSwordItem {
 
                                 if (le.hasStatusEffect(EffectRegistry.FREEZE.get())) {
                                     world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_BOW_ICE_SHOOT_IMPACT_02.get(), SoundCategory.PLAYERS, 0.2f, 3f);
-                                    le.damage(player.getDamageSources().freeze(), shatterDamage);
+                                    le.damage(player.getDamageSources().magic(), abilityDamage);
                                 }
 
 
@@ -226,6 +226,15 @@ public class FrostfallSwordItem extends UniqueSwordItem {
             }
         }
 
+        if (HelperMethods.commonSpellAttributeScaling(
+                1.4f,
+                entity,
+                "frost") > 0)
+            abilityDamage = HelperMethods.commonSpellAttributeScaling(
+                    1.4f,
+                    entity,
+                    "frost");
+
         if (stepMod > 0)
             stepMod --;
         if (stepMod <= 0)
@@ -247,7 +256,7 @@ public class FrostfallSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.frostfallsworditem.tooltip1").setStyle(ABILITY));
         tooltip.add(Text.translatable("item.simplyswords.frostfallsworditem.tooltip2").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.frostfallsworditem.tooltip3").setStyle(TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.frostfallsworditem.tooltip4", shatter_timer_max /20, shatterDamage).setStyle(TEXT));
+        tooltip.add(Text.translatable("item.simplyswords.frostfallsworditem.tooltip4", shatter_timer_max /20, abilityDamage).setStyle(TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(RIGHTCLICK));
         tooltip.add(Text.translatable("item.simplyswords.frostfallsworditem.tooltip5", shatter_timer_max /20).setStyle(TEXT));

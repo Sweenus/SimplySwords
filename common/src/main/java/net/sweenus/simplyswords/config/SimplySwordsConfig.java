@@ -256,6 +256,7 @@ public class SimplySwordsConfig {
         BOOLEAN_OPTIONS.put("enable_passive_particles", true);
         BOOLEAN_OPTIONS.put("compat_gobber_end_weapons_unbreakable", true);
         BOOLEAN_OPTIONS.put("enable_unique_gem_sockets", true);
+        BOOLEAN_OPTIONS.put("enable_spell_power_compatibility", true);
 
         BOOLEAN_OPTIONS.put("the_watcher", true);
         BOOLEAN_OPTIONS.put("watching_warglaive", true);
@@ -510,7 +511,7 @@ public class SimplySwordsConfig {
         StringBuilder config = new StringBuilder("{\n");
         int i = 0;
         for (String key : BOOLEAN_OPTIONS.keySet()) {
-            if (i == 8) {
+            if (i == 9) {
                 config.append("\n");
                 config.append("// --------------------------------------------- LOOT BLACKLISTING ----------------------------------------------------------------- \n");
                 config.append("// Setting any of the below values to false will prevent that item from generating in loot. \n");
@@ -518,7 +519,7 @@ public class SimplySwordsConfig {
                 config.append("// --------------------------------------------------------------------------------------------------------------------------------- \n");
                 config.append("\n");
             }
-            if (i == 34) {
+            if (i == 35) {
                 config.append("\n");
                 config.append("// --------------------------------------------- RUNIC BLACKLISTING ----------------------------------------------------------------- \n");
                 config.append("// Setting any of the below values to false will prevent that runic power from being obtainable. \n");

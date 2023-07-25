@@ -32,7 +32,7 @@ public class ArcanethystSwordItem extends UniqueSwordItem {
     }
     private static int stepMod = 0;
     int radius = (int) (SimplySwordsConfig.getFloatValue("arcaneassault_radius"));
-    int arcaneDamage = (int) (SimplySwordsConfig.getFloatValue("arcaneassault_damage"));
+    float abilityDamage = (SimplySwordsConfig.getFloatValue("arcaneassault_damage"));
     int arcane_timer_max = (int) (SimplySwordsConfig.getFloatValue("arcaneassault_duration"));
     int skillCooldown = (int) (SimplySwordsConfig.getFloatValue("arcaneassault_cooldown"));
     int chargeChance =  (int) (SimplySwordsConfig.getFloatValue("arcaneassault_chance"));
@@ -74,7 +74,7 @@ public class ArcanethystSwordItem extends UniqueSwordItem {
 
         if (user.getEquippedStack(EquipmentSlot.MAINHAND) == stack && (user instanceof PlayerEntity player)) {
 
-            AbilityMethods.tickAbilityArcaneAssault(stack, world, user, remainingUseTicks, arcane_timer_max, arcaneDamage,
+            AbilityMethods.tickAbilityArcaneAssault(stack, world, user, remainingUseTicks, arcane_timer_max, abilityDamage,
                     skillCooldown, radius);
 
         }
@@ -99,6 +99,14 @@ public class ArcanethystSwordItem extends UniqueSwordItem {
 
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
+        if (HelperMethods.commonSpellAttributeScaling(
+                1.4f,
+                entity,
+                "arcane") > 0)
+            abilityDamage = HelperMethods.commonSpellAttributeScaling(
+                    1.4f,
+                    entity,
+                    "arcane");
 
         if (stepMod > 0)
             stepMod --;
@@ -120,7 +128,7 @@ public class ArcanethystSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.arcanethystsworditem.tooltip1").setStyle(ABILITY));
         tooltip.add(Text.translatable("item.simplyswords.arcanethystsworditem.tooltip2").setStyle(TEXT));
         tooltip.add(Text.literal(""));
-        tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(RIGHTCLICK));
+        tooltip.add(Text.translatable("item.simplyswords.onrightclickheld").setStyle(RIGHTCLICK));
         tooltip.add(Text.translatable("item.simplyswords.arcanethystsworditem.tooltip3").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.arcanethystsworditem.tooltip4").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.arcanethystsworditem.tooltip5").setStyle(TEXT));

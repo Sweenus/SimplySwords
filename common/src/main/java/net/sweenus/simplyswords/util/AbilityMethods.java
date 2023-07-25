@@ -118,7 +118,7 @@ public class AbilityMethods {
 
     //Thunder Brand - Thunder Blitz
     public static void tickAbilityThunderBlitz(ItemStack stack, World world, Entity entity,
-                                               int ability_timer, int ability_timer_max, int abilityDamage, int skillCooldown, int radius) {
+                                               int ability_timer, int ability_timer_max, float abilityDamage, int skillCooldown, int radius) {
         if (!entity.getWorld().isClient() && (entity instanceof PlayerEntity player)) {
 
             //Player dash control
@@ -154,7 +154,7 @@ public class AbilityMethods {
                             }
 
                             if (ability_timer < (ability_timer_max - 40)) {
-                                le.damage(world.getDamageSources().magic(), abilityDamage * 10);
+                                le.damage(world.getDamageSources().magic(), abilityDamage * 3);
                                 world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_BOW_POISON_ATTACK_01.get(), SoundCategory.PLAYERS, 0.1f, choose);
                             }
 
@@ -190,7 +190,7 @@ public class AbilityMethods {
 
     //Lichblade - Soul Anguish
     public static void tickAbilitySoulAnguish(ItemStack stack, World world, Entity entity,
-                                              int ability_timer, int ability_timer_max, int abilityDamage,
+                                              int ability_timer, int ability_timer_max, float abilityDamage,
                                               int skillCooldown, int radius, int damageTracker, int chanceReduce,
                                               double lastX, double lastY, double lastZ,
                                               double targetX, double targetY, double targetZ,
@@ -250,7 +250,7 @@ public class AbilityMethods {
 
     //Icewhisper - Permafrost
     public static void tickAbilityPermafrost(ItemStack stack, World world, Entity entity,
-                                              int ability_timer, int ability_timer_max, int abilityDamage,
+                                              int ability_timer, int ability_timer_max, float abilityDamage,
                                               int skillCooldown, int radius,
                                               double lastX, double lastY, double lastZ) {
 
@@ -310,7 +310,7 @@ public class AbilityMethods {
 
     //Arcanethyst - Arcane Assault
     public static void tickAbilityArcaneAssault(ItemStack stack, World world, Entity entity,
-                                             int ability_timer, int ability_timer_max, int abilityDamage,
+                                             int ability_timer, int ability_timer_max, float abilityDamage,
                                              int skillCooldown, int radius) {
 
         if (!entity.getWorld().isClient() && (entity instanceof PlayerEntity player)) {
@@ -337,7 +337,7 @@ public class AbilityMethods {
                             le.damage(world.getDamageSources().magic(), abilityDamage);
                             if (ability_timer < 10) { //Ground Slam - 3 Charges
                                 le.removeStatusEffect(StatusEffects.LEVITATION);
-                                le.damage(world.getDamageSources().magic(), abilityDamage * 10);
+                                le.damage(world.getDamageSources().magic(), abilityDamage * 3);
                                 le.setVelocity(0, -10, 0);
                                 player.stopUsingItem();
                                 world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_SWORD_SCIFI_ATTACK_03.get(),
@@ -376,7 +376,7 @@ public class AbilityMethods {
 
     //Thunder Brand - Thunder Blitz
     public static void tickAbilityVolcanicFury(ItemStack stack, World world, Entity entity,
-                                               int ability_timer, int ability_timer_max, int abilityDamage,
+                                               int ability_timer, int ability_timer_max, float abilityDamage,
                                                int skillCooldown, int radius, int chargePower) {
         if (!entity.getWorld().isClient() && (entity instanceof PlayerEntity player)) {
 

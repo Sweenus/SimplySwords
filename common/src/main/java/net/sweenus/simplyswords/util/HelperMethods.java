@@ -1,11 +1,13 @@
 package net.sweenus.simplyswords.util;
 
+import dev.architectury.platform.Platform;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.decoration.ArmorStandEntity;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.passive.VillagerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileUtil;
@@ -22,6 +24,7 @@ import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.sweenus.simplyswords.SimplySwordsExpectPlatform;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
 import net.sweenus.simplyswords.entity.BattleStandardDarkEntity;
 import net.sweenus.simplyswords.entity.BattleStandardEntity;
@@ -101,6 +104,12 @@ public class HelperMethods {
             if (playerEntity == player)
                 return false;
             return playerEntity.shouldDamagePlayer(player);
+        }
+        if (livingEntity instanceof TameableEntity tameableEntity) {
+            if (tameableEntity.getOwner() != null) {
+                return tameableEntity.getOwner() != player;
+            }
+            return true;
         }
         return true;
     }
@@ -348,4 +357,13 @@ public class HelperMethods {
             }
         }
     }
+
+    public static float commonSpellAttributeScaling (float damageModifier, Entity entity, String magicSchool) {
+        if (Platform.isModLoaded("spell_power"))
+            if ((entity instanceof PlayerEntity player) && SimplySwordsConfig.getBooleanValue("enable_spell_power_compatibility"))
+                return SimplySwordsExpectPlatform.getSpellPowerDamage(damageModifier, player, magicSchool);
+
+        return 0f;
+    }
+
 }

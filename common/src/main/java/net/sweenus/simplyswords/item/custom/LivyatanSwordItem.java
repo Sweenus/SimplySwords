@@ -36,7 +36,7 @@ public class LivyatanSwordItem extends UniqueSwordItem {
     }
     private static int stepMod = 0;
     int radius = (int) (SimplySwordsConfig.getFloatValue("frostshatter_radius"));
-    int shatterDamage = (int) (SimplySwordsConfig.getFloatValue("frostshatter_damage"));
+    float abilityDamage = (SimplySwordsConfig.getFloatValue("frostshatter_damage"));
     int proc_chance = (int) (SimplySwordsConfig.getFloatValue("frostshatter_chance"));
     int shatter_timer_max = (int) (SimplySwordsConfig.getFloatValue("frostshatter_duration"));
     int shatter_timer;
@@ -102,6 +102,14 @@ public class LivyatanSwordItem extends UniqueSwordItem {
 
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
+        if (HelperMethods.commonSpellAttributeScaling(
+                1.7f,
+                entity,
+                "frost") > 0)
+            abilityDamage = HelperMethods.commonSpellAttributeScaling(
+                    1.7f,
+                    entity,
+                    "frost");
         if (!world.isClient && (entity instanceof PlayerEntity player)) {
             if (shatter_timer > 0)
                 shatter_timer --;
@@ -118,7 +126,7 @@ public class LivyatanSwordItem extends UniqueSwordItem {
                                     le.removeStatusEffect(EffectRegistry.FREEZE.get());
                                     le.removeStatusEffect(StatusEffects.RESISTANCE);
                                     world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_BOW_ICE_SHOOT_IMPACT_02.get(), SoundCategory.PLAYERS, 0.2f, 3f);
-                                    le.damage(player.getDamageSources().freeze(), shatterDamage + shatter_bonus);
+                                    le.damage(player.getDamageSources().magic(), abilityDamage + shatter_bonus);
                                 }
 
 
@@ -177,7 +185,7 @@ public class LivyatanSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.livyatansworditem.tooltip1").setStyle(ABILITY));
         tooltip.add(Text.translatable("item.simplyswords.livyatansworditem.tooltip2").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.livyatansworditem.tooltip3").setStyle(TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.livyatansworditem.tooltip4", shatter_timer_max /20, shatterDamage).setStyle(TEXT));
+        tooltip.add(Text.translatable("item.simplyswords.livyatansworditem.tooltip4", shatter_timer_max /20, abilityDamage).setStyle(TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(RIGHTCLICK));
         tooltip.add(Text.translatable("item.simplyswords.livyatansworditem.tooltip5").setStyle(TEXT));

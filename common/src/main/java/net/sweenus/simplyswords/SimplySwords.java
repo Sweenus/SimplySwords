@@ -55,6 +55,8 @@ public class SimplySwords {
 
     public static boolean isConfigOutdated;
 
+    public static float spellAttributesGlobalModifier = 0.1f;
+
     public static void init() {
 
         //CONFIG

@@ -29,7 +29,7 @@ import java.util.Objects;
 
 public class BattleStandardEntity extends PathAwareEntity {
     public static final Supplier<EntityType<BattleStandardEntity>> TYPE = Suppliers.memoize(() -> EntityType.Builder.create(BattleStandardEntity::new, SpawnGroup.MISC).build("battlestandard"));
-    int abilityDamage =  (int) (SimplySwordsConfig.getFloatValue("abyssalstandard_damage"));
+    float abilityDamage = (SimplySwordsConfig.getFloatValue("abyssalstandard_damage"));
     public PlayerEntity ownerEntity;
     public String standardType;
     public int decayRate;
@@ -68,7 +68,14 @@ public class BattleStandardEntity extends PathAwareEntity {
             }
             if (ownerEntity != null && standardType != null) {
                 int radius = 6;
-                int abilityDamage = 2;
+                if (HelperMethods.commonSpellAttributeScaling(
+                        1.1f,
+                        ownerEntity,
+                        "fire") > 0)
+                    abilityDamage = HelperMethods.commonSpellAttributeScaling(
+                            1.1f,
+                            ownerEntity,
+                            "fire");
                 //AOE Aura
                 if (this.age % 10 == 0) {
                     Box box = new Box(this.getX() + radius, this.getY() + (float) radius / 3, this.getZ() + radius, this.getX() - radius, this.getY() - (float) radius / 3, this.getZ() - radius);

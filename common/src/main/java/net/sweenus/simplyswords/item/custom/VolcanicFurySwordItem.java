@@ -35,7 +35,7 @@ public class VolcanicFurySwordItem extends UniqueSwordItem {
     }
     private static int stepMod = 0;
     int radius = (int) (SimplySwordsConfig.getFloatValue("volcanic_fury_radius"));
-    int abilityDamage = (int) (SimplySwordsConfig.getFloatValue("volcanic_fury_damage"));
+    float abilityDamage = (SimplySwordsConfig.getFloatValue("volcanic_fury_damage"));
     int ability_timer_max = 120;
     int skillCooldown = (int) (SimplySwordsConfig.getFloatValue("volcanic_fury_cooldown"));
     int chargeChance =  (int) (SimplySwordsConfig.getFloatValue("volcanic_fury_chance"));
@@ -133,7 +133,7 @@ public class VolcanicFurySwordItem extends UniqueSwordItem {
                     if ((entities instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, player)){
 
                         float choose = (float) (Math.random() * 1);
-                        le.damage(player.getDamageSources().magic(), abilityDamage * chargePower);
+                        le.damage(player.getDamageSources().magic(), abilityDamage * (chargePower * 0.3f));
                         le.setOnFireFor(6);
                         world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_BOW_POISON_ATTACK_01.get(), SoundCategory.PLAYERS, 0.1f, choose);
                         chargePower = 0;
@@ -148,6 +148,14 @@ public class VolcanicFurySwordItem extends UniqueSwordItem {
 
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
+        if (HelperMethods.commonSpellAttributeScaling(
+                1.4f,
+                entity,
+                "fire") > 0)
+            abilityDamage = HelperMethods.commonSpellAttributeScaling(
+                    1.4f,
+                    entity,
+                    "fire");
 
         if (stepMod > 0)
             stepMod --;
@@ -171,7 +179,7 @@ public class VolcanicFurySwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.volcanicfurysworditem.tooltip2").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.volcanicfurysworditem.tooltip3").setStyle(TEXT));
         tooltip.add(Text.literal(""));
-        tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(RIGHTCLICK));
+        tooltip.add(Text.translatable("item.simplyswords.onrightclickheld").setStyle(RIGHTCLICK));
         tooltip.add(Text.translatable("item.simplyswords.volcanicfurysworditem.tooltip4").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.volcanicfurysworditem.tooltip5").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.volcanicfurysworditem.tooltip6").setStyle(TEXT));

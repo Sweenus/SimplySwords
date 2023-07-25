@@ -33,7 +33,7 @@ public class StormbringerSwordItem extends UniqueSwordItem {
     int ability_timer_max = (int) (SimplySwordsConfig.getFloatValue("shockdeflect_block_duration"));
     int skillCooldown = (int) (SimplySwordsConfig.getFloatValue("shockdeflect_cooldown"));
     int perfectParryWindow = (int) (SimplySwordsConfig.getFloatValue("shockdeflect_parry_duration"));
-    int abilityDamage = (int) (SimplySwordsConfig.getFloatValue("shockdeflect_damage"));
+    float abilityDamage = (SimplySwordsConfig.getFloatValue("shockdeflect_damage"));
     boolean parrySuccess;
     int parrySuccession;
 
@@ -138,6 +138,14 @@ public class StormbringerSwordItem extends UniqueSwordItem {
 
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
+        if (HelperMethods.commonSpellAttributeScaling(
+                2.3f,
+                entity,
+                "lightning") > 0)
+            abilityDamage = HelperMethods.commonSpellAttributeScaling(
+                    2.3f,
+                    entity,
+                    "lightning");
 
         if (stepMod > 0)
             stepMod --;
@@ -159,7 +167,7 @@ public class StormbringerSwordItem extends UniqueSwordItem {
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.stormbringersworditem.tooltip1").setStyle(ABILITY));
         tooltip.add(Text.literal(""));
-        tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(RIGHTCLICK));
+        tooltip.add(Text.translatable("item.simplyswords.onrightclickheld").setStyle(RIGHTCLICK));
         tooltip.add(Text.translatable("item.simplyswords.stormbringersworditem.tooltip2").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.stormbringersworditem.tooltip3").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.stormbringersworditem.tooltip4").setStyle(TEXT));
