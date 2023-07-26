@@ -64,8 +64,6 @@ public class SimplySwords {
     public static UniqueEffectsConfig uniqueEffectsConfig;
     public static WeaponAttributesConfig weaponAttributesConfig;
 
-    public static float spellAttributesGlobalModifier = 0.1f;
-
     public static void init() {
 
         //CONFIG
@@ -88,7 +86,7 @@ public class SimplySwords {
                   "config_version": %s
                 }""", version.substring(0, 4));
 
-        File configFile = Config.createFile("config/simplyswords/backupconfig.json", defaultConfig, false);
+        File configFile = Config.createFile("config/simplyswords_extra/backupconfig.json", defaultConfig, false);
         JsonObject json = Config.getJsonObject(Config.readFile(configFile));
         if (json.has("config_version")) {
             if (version.startsWith(json.get("config_version").getAsString())) {
@@ -96,13 +94,13 @@ public class SimplySwords {
             }
             else {
                 isConfigOutdated = true;
-                System.out.println("SimplySwords: It looks like you've updated from a previous version. Please regenerate the Simply Swords configs to get the latest features.");
+                //System.out.println("SimplySwords: It looks like you've updated from a previous version. Please regenerate the Simply Swords configs to get the latest features.");
                 //System.out.println(version.substring(0, 4));
             }
         }
         else {
             isConfigOutdated = true;
-            System.out.println("SimplySwords: It looks like you've updated from a previous version. Please regenerate the Simply Swords configs to get the latest features.");
+            //System.out.println("SimplySwords: It looks like you've updated from a previous version. Please regenerate the Simply Swords configs to get the latest features.");
             //System.out.println(version.substring(0, 4));
         }
 
