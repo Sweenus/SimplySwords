@@ -14,7 +14,7 @@ import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.sweenus.simplyswords.config.SimplySwordsConfig;
+import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -31,7 +31,7 @@ public class FireSwordItem extends UniqueSwordItem {
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         if (!attacker.getWorld().isClient()) {
             ServerWorld world = (ServerWorld) attacker.getWorld();
-            int fhitchance = (int) SimplySwordsConfig.getFloatValue("brimstone_chance");
+            int fhitchance = (int) SimplySwords.uniqueEffectsConfig.brimstoneChance;
             HelperMethods.playHitSounds(attacker, target);
 
 

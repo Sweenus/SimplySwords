@@ -6,6 +6,7 @@ import net.minecraft.loot.condition.RandomChanceLootCondition;
 import net.minecraft.loot.entry.ItemEntry;
 import net.minecraft.loot.function.EnchantRandomlyLootFunction;
 import net.minecraft.loot.provider.number.ConstantLootNumberProvider;
+import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 
@@ -16,14 +17,14 @@ public class ModLootTableModifiers {
 
         //STANDARD
         LootEvent.MODIFY_LOOT_TABLE.register(((lootTables, id, context, builtin) -> {
-            if (SimplySwordsConfig.getBooleanValue("add_weapons_to_loot_tables") && id.getPath().contains("chests") && !id.getPath().contains("spectrum")) {
-                if (!SimplySwordsConfig.getBooleanValue("loot_can_be_found_in_villages") && id.getPath().contains("village")) {
+            if (SimplySwords.lootConfig.enableLootDrops && id.getPath().contains("chests") && !id.getPath().contains("spectrum")) {
+                if (!SimplySwords.lootConfig.enableLootInVillages && id.getPath().contains("village")) {
                     //Do nothing
                 }
                 else {
                     LootPool.Builder pool = LootPool.builder()
                             .rolls(ConstantLootNumberProvider.create(1))
-                            .conditionally(RandomChanceLootCondition.builder(SimplySwordsConfig.getGeneralSettings("standard_loot_table_weight"))) // 1 = 100% of the time
+                            .conditionally(RandomChanceLootCondition.builder(SimplySwords.lootConfig.standardLootTableWeight)) // 1 = 100% of the time
                             .apply(EnchantRandomlyLootFunction.builder())
                             .with(ItemEntry.builder(ItemsRegistry.IRON_LONGSWORD.get()))
                             .with(ItemEntry.builder(ItemsRegistry.IRON_TWINBLADE.get()))
@@ -63,14 +64,14 @@ public class ModLootTableModifiers {
 
         //RARE
         LootEvent.MODIFY_LOOT_TABLE.register(((lootTables, id, context, builtin) -> {
-            if (SimplySwordsConfig.getBooleanValue("add_weapons_to_loot_tables") && id.getPath().contains("chests") && !id.getPath().contains("spectrum")) {
-                if (!SimplySwordsConfig.getBooleanValue("loot_can_be_found_in_villages") && id.getPath().contains("village")) {
+            if (SimplySwords.lootConfig.enableLootDrops && id.getPath().contains("chests") && !id.getPath().contains("spectrum")) {
+                if (!SimplySwords.lootConfig.enableLootInVillages && id.getPath().contains("village")) {
                     //Do nothing
                 }
                 else {
                     LootPool.Builder pool = LootPool.builder()
                             .rolls(ConstantLootNumberProvider.create(1))
-                            .conditionally(RandomChanceLootCondition.builder(SimplySwordsConfig.getGeneralSettings("rare_loot_table_weight"))) // 1 = 100% of the time
+                            .conditionally(RandomChanceLootCondition.builder(SimplySwords.lootConfig.rareLootTableWeight)) // 1 = 100% of the time
                             .apply(EnchantRandomlyLootFunction.builder())
                             .with(ItemEntry.builder(ItemsRegistry.DIAMOND_LONGSWORD.get()))
                             .with(ItemEntry.builder(ItemsRegistry.DIAMOND_TWINBLADE.get()))
@@ -94,14 +95,14 @@ public class ModLootTableModifiers {
         }));
         //RARE 2
         LootEvent.MODIFY_LOOT_TABLE.register(((lootTables, id, context, builtin) -> {
-            if (SimplySwordsConfig.getBooleanValue("add_weapons_to_loot_tables") && id.getPath().contains("chests") && !id.getPath().contains("spectrum")) {
-                if (!SimplySwordsConfig.getBooleanValue("loot_can_be_found_in_villages") && id.getPath().contains("village")) {
+            if (SimplySwords.lootConfig.enableLootDrops && id.getPath().contains("chests") && !id.getPath().contains("spectrum")) {
+                if (!SimplySwords.lootConfig.enableLootInVillages && id.getPath().contains("village")) {
                     //Do nothing
                 }
                 else {
                     LootPool.Builder pool = LootPool.builder()
                             .rolls(ConstantLootNumberProvider.create(1))
-                            .conditionally(RandomChanceLootCondition.builder(SimplySwordsConfig.getGeneralSettings("runic_loot_table_weight"))) // 1 = 100% of the time
+                            .conditionally(RandomChanceLootCondition.builder(SimplySwords.lootConfig.runicLootTableWeight)) // 1 = 100% of the time
                             .with(ItemEntry.builder(ItemsRegistry.RUNIC_TABLET.get()));
                     context.addPool(pool);
                 }
@@ -112,7 +113,7 @@ public class ModLootTableModifiers {
         // Check each loot table against the listed namespaces in the loot_config.json, if there's a match modify the
         // table according to the config. Otherwise, use the loot global loot modifiers set in the general_config.json
         LootEvent.MODIFY_LOOT_TABLE.register(((lootTables, id, context, builtin) -> {
-            if (SimplySwordsConfig.getBooleanValue("add_weapons_to_loot_tables")) {
+            if (SimplySwords.lootConfig.enableLootDrops) {
                 if (SimplySwordsConfig.getLootList(id.toString())) {
                     float lootChance = SimplySwordsConfig.getLootModifiers(id.toString());
                     if (lootChance > 0.0) { // If chance is set to 0 treat as a blacklist and don't inject the loot at all
@@ -120,57 +121,57 @@ public class ModLootTableModifiers {
                                 .rolls(ConstantLootNumberProvider.create(1))
                                 .conditionally(RandomChanceLootCondition.builder(lootChance));
 
-                        if (SimplySwordsConfig.getBooleanValue("the_watcher"))
+                        if (SimplySwords.lootConfig.enableTheWatcher)
                             pool.with(ItemEntry.builder(ItemsRegistry.WATCHER_CLAYMORE.get()));
-                        if (SimplySwordsConfig.getBooleanValue("watching_warglaive"))
+                        if (SimplySwords.lootConfig.enableWatchingWarglaive)
                             pool.with(ItemEntry.builder(ItemsRegistry.WATCHING_WARGLAIVE.get()));
-                        if (SimplySwordsConfig.getBooleanValue("longsword_of_the_plague"))
+                        if (SimplySwords.lootConfig.enableLongswordOfThePlague)
                             pool.with(ItemEntry.builder(ItemsRegistry.TOXIC_LONGSWORD.get()));
-                        if (SimplySwordsConfig.getBooleanValue("sword_on_a_stick"))
+                        if (SimplySwords.lootConfig.enableSwordOnAStick)
                             pool.with(ItemEntry.builder(ItemsRegistry.SWORD_ON_A_STICK.get()));
-                        if (SimplySwordsConfig.getBooleanValue("bramblethorn"))
+                        if (SimplySwords.lootConfig.enableBramblethorn)
                             pool.with(ItemEntry.builder(ItemsRegistry.BRAMBLETHORN.get()));
-                        if (SimplySwordsConfig.getBooleanValue("storms_edge"))
+                        if (SimplySwords.lootConfig.enableStormsEdge)
                             pool.with(ItemEntry.builder(ItemsRegistry.STORMS_EDGE.get()));
-                        if (SimplySwordsConfig.getBooleanValue("stormbringer"))
+                        if (SimplySwords.lootConfig.enableStormbringer)
                             pool.with(ItemEntry.builder(ItemsRegistry.STORMBRINGER.get()));
-                        if (SimplySwordsConfig.getBooleanValue("mjolnir"))
+                        if (SimplySwords.lootConfig.enableMjolnir)
                             pool.with(ItemEntry.builder(ItemsRegistry.MJOLNIR.get()));
-                        if (SimplySwordsConfig.getBooleanValue("emberblade"))
+                        if (SimplySwords.lootConfig.enableEmberblade)
                             pool.with(ItemEntry.builder(ItemsRegistry.EMBERBLADE.get()));
-                        if (SimplySwordsConfig.getBooleanValue("hearthflame"))
+                        if (SimplySwords.lootConfig.enableHearthflame)
                             pool.with(ItemEntry.builder(ItemsRegistry.HEARTHFLAME.get()));
-                        if (SimplySwordsConfig.getBooleanValue("twisted_blade"))
+                        if (SimplySwords.lootConfig.enableTwistedBlade)
                             pool.with(ItemEntry.builder(ItemsRegistry.TWISTED_BLADE.get()));
-                        if (SimplySwordsConfig.getBooleanValue("soulrender"))
+                        if (SimplySwords.lootConfig.enableSoulrender)
                             pool.with(ItemEntry.builder(ItemsRegistry.SOULRENDER.get()));
-                        if (SimplySwordsConfig.getBooleanValue("soulpyre"))
+                        if (SimplySwords.lootConfig.enableSoulpyre)
                             pool.with(ItemEntry.builder(ItemsRegistry.SOULPYRE.get()));
-                        if (SimplySwordsConfig.getBooleanValue("soulkeeper"))
+                        if (SimplySwords.lootConfig.enableSoulkeeper)
                             pool.with(ItemEntry.builder(ItemsRegistry.SOULKEEPER.get()));
-                        if (SimplySwordsConfig.getBooleanValue("soulstealer"))
+                        if (SimplySwords.lootConfig.enableSoulstealer)
                             pool.with(ItemEntry.builder(ItemsRegistry.SOULSTEALER.get()));
-                        if (SimplySwordsConfig.getBooleanValue("frostfall"))
+                        if (SimplySwords.lootConfig.enableFrostfall)
                             pool.with(ItemEntry.builder(ItemsRegistry.FROSTFALL.get()));
-                        if (SimplySwordsConfig.getBooleanValue("molten_edge"))
+                        if (SimplySwords.lootConfig.enableMoltenEdge)
                             pool.with(ItemEntry.builder(ItemsRegistry.MOLTEN_EDGE.get()));
-                        if (SimplySwordsConfig.getBooleanValue("livyatan"))
+                        if (SimplySwords.lootConfig.enableLivyatan)
                             pool.with(ItemEntry.builder(ItemsRegistry.LIVYATAN.get()));
-                        if (SimplySwordsConfig.getBooleanValue("icewhisper"))
+                        if (SimplySwords.lootConfig.enableIcewhisper)
                             pool.with(ItemEntry.builder(ItemsRegistry.ICEWHISPER.get()));
-                        if (SimplySwordsConfig.getBooleanValue("arcanethyst"))
+                        if (SimplySwords.lootConfig.enableArcanethyst)
                             pool.with(ItemEntry.builder(ItemsRegistry.ARCANETHYST.get()));
-                        if (SimplySwordsConfig.getBooleanValue("thunderbrand"))
+                        if (SimplySwords.lootConfig.enableThunderbrand)
                             pool.with(ItemEntry.builder(ItemsRegistry.THUNDERBRAND.get()));
-                        if (SimplySwordsConfig.getBooleanValue("brimstone_claymore"))
+                        if (SimplySwords.lootConfig.enableBrimstone)
                             pool.with(ItemEntry.builder(ItemsRegistry.BRIMSTONE_CLAYMORE.get()));
-                        if (SimplySwordsConfig.getBooleanValue("slumbering_lichblade"))
+                        if (SimplySwords.lootConfig.enableSlumberingLichblade)
                             pool.with(ItemEntry.builder(ItemsRegistry.SLUMBERING_LICHBLADE.get()));
-                        if (SimplySwordsConfig.getBooleanValue("shadowsting"))
+                        if (SimplySwords.lootConfig.enableShadowsting)
                             pool.with(ItemEntry.builder(ItemsRegistry.SHADOWSTING.get()));
-                        if (SimplySwordsConfig.getBooleanValue("dormant_relic"))
+                        if (SimplySwords.lootConfig.enableDormantRelic)
                             pool.with(ItemEntry.builder(ItemsRegistry.DORMANT_RELIC.get()));
-                        if (SimplySwordsConfig.getBooleanValue("whisperwind"))
+                        if (SimplySwords.lootConfig.enableWhisperwind)
                             pool.with(ItemEntry.builder(ItemsRegistry.WHISPERWIND.get()));
 
                         context.addPool(pool);
@@ -180,58 +181,58 @@ public class ModLootTableModifiers {
                     if (id.getPath().contains("chests") && !id.getPath().contains("spectrum")) {
                         LootPool.Builder pool = LootPool.builder()
                                 .rolls(ConstantLootNumberProvider.create(1))
-                                .conditionally(RandomChanceLootCondition.builder(SimplySwordsConfig.getGeneralSettings("unique_loot_table_weight"))); // 1 = 100% of the time
-                        if (SimplySwordsConfig.getBooleanValue("the_watcher"))
+                                .conditionally(RandomChanceLootCondition.builder(SimplySwords.lootConfig.uniqueLootTableWeight)); // 1 = 100% of the time
+                        if (SimplySwords.lootConfig.enableTheWatcher)
                             pool.with(ItemEntry.builder(ItemsRegistry.WATCHER_CLAYMORE.get()));
-                        if (SimplySwordsConfig.getBooleanValue("watching_warglaive"))
+                        if (SimplySwords.lootConfig.enableWatchingWarglaive)
                             pool.with(ItemEntry.builder(ItemsRegistry.WATCHING_WARGLAIVE.get()));
-                        if (SimplySwordsConfig.getBooleanValue("longsword_of_the_plague"))
+                        if (SimplySwords.lootConfig.enableLongswordOfThePlague)
                             pool.with(ItemEntry.builder(ItemsRegistry.TOXIC_LONGSWORD.get()));
-                        if (SimplySwordsConfig.getBooleanValue("sword_on_a_stick"))
+                        if (SimplySwords.lootConfig.enableSwordOnAStick)
                             pool.with(ItemEntry.builder(ItemsRegistry.SWORD_ON_A_STICK.get()));
-                        if (SimplySwordsConfig.getBooleanValue("bramblethorn"))
+                        if (SimplySwords.lootConfig.enableBramblethorn)
                             pool.with(ItemEntry.builder(ItemsRegistry.BRAMBLETHORN.get()));
-                        if (SimplySwordsConfig.getBooleanValue("storms_edge"))
+                        if (SimplySwords.lootConfig.enableStormsEdge)
                             pool.with(ItemEntry.builder(ItemsRegistry.STORMS_EDGE.get()));
-                        if (SimplySwordsConfig.getBooleanValue("stormbringer"))
+                        if (SimplySwords.lootConfig.enableStormbringer)
                             pool.with(ItemEntry.builder(ItemsRegistry.STORMBRINGER.get()));
-                        if (SimplySwordsConfig.getBooleanValue("mjolnir"))
+                        if (SimplySwords.lootConfig.enableMjolnir)
                             pool.with(ItemEntry.builder(ItemsRegistry.MJOLNIR.get()));
-                        if (SimplySwordsConfig.getBooleanValue("emberblade"))
+                        if (SimplySwords.lootConfig.enableEmberblade)
                             pool.with(ItemEntry.builder(ItemsRegistry.EMBERBLADE.get()));
-                        if (SimplySwordsConfig.getBooleanValue("hearthflame"))
+                        if (SimplySwords.lootConfig.enableHearthflame)
                             pool.with(ItemEntry.builder(ItemsRegistry.HEARTHFLAME.get()));
-                        if (SimplySwordsConfig.getBooleanValue("twisted_blade"))
+                        if (SimplySwords.lootConfig.enableTwistedBlade)
                             pool.with(ItemEntry.builder(ItemsRegistry.TWISTED_BLADE.get()));
-                        if (SimplySwordsConfig.getBooleanValue("soulrender"))
+                        if (SimplySwords.lootConfig.enableSoulrender)
                             pool.with(ItemEntry.builder(ItemsRegistry.SOULRENDER.get()));
-                        if (SimplySwordsConfig.getBooleanValue("soulpyre"))
+                        if (SimplySwords.lootConfig.enableSoulpyre)
                             pool.with(ItemEntry.builder(ItemsRegistry.SOULPYRE.get()));
-                        if (SimplySwordsConfig.getBooleanValue("soulkeeper"))
+                        if (SimplySwords.lootConfig.enableSoulkeeper)
                             pool.with(ItemEntry.builder(ItemsRegistry.SOULKEEPER.get()));
-                        if (SimplySwordsConfig.getBooleanValue("soulstealer"))
+                        if (SimplySwords.lootConfig.enableSoulstealer)
                             pool.with(ItemEntry.builder(ItemsRegistry.SOULSTEALER.get()));
-                        if (SimplySwordsConfig.getBooleanValue("frostfall"))
+                        if (SimplySwords.lootConfig.enableFrostfall)
                             pool.with(ItemEntry.builder(ItemsRegistry.FROSTFALL.get()));
-                        if (SimplySwordsConfig.getBooleanValue("molten_edge"))
+                        if (SimplySwords.lootConfig.enableMoltenEdge)
                             pool.with(ItemEntry.builder(ItemsRegistry.MOLTEN_EDGE.get()));
-                        if (SimplySwordsConfig.getBooleanValue("livyatan"))
+                        if (SimplySwords.lootConfig.enableLivyatan)
                             pool.with(ItemEntry.builder(ItemsRegistry.LIVYATAN.get()));
-                        if (SimplySwordsConfig.getBooleanValue("icewhisper"))
+                        if (SimplySwords.lootConfig.enableIcewhisper)
                             pool.with(ItemEntry.builder(ItemsRegistry.ICEWHISPER.get()));
-                        if (SimplySwordsConfig.getBooleanValue("arcanethyst"))
+                        if (SimplySwords.lootConfig.enableArcanethyst)
                             pool.with(ItemEntry.builder(ItemsRegistry.ARCANETHYST.get()));
-                        if (SimplySwordsConfig.getBooleanValue("thunderbrand"))
+                        if (SimplySwords.lootConfig.enableThunderbrand)
                             pool.with(ItemEntry.builder(ItemsRegistry.THUNDERBRAND.get()));
-                        if (SimplySwordsConfig.getBooleanValue("brimstone_claymore"))
+                        if (SimplySwords.lootConfig.enableBrimstone)
                             pool.with(ItemEntry.builder(ItemsRegistry.BRIMSTONE_CLAYMORE.get()));
-                        if (SimplySwordsConfig.getBooleanValue("slumbering_lichblade"))
+                        if (SimplySwords.lootConfig.enableSlumberingLichblade)
                             pool.with(ItemEntry.builder(ItemsRegistry.SLUMBERING_LICHBLADE.get()));
-                        if (SimplySwordsConfig.getBooleanValue("shadowsting"))
+                        if (SimplySwords.lootConfig.enableShadowsting)
                             pool.with(ItemEntry.builder(ItemsRegistry.SHADOWSTING.get()));
-                        if (SimplySwordsConfig.getBooleanValue("dormant_relic"))
+                        if (SimplySwords.lootConfig.enableDormantRelic)
                             pool.with(ItemEntry.builder(ItemsRegistry.DORMANT_RELIC.get()));
-                        if (SimplySwordsConfig.getBooleanValue("whisperwind"))
+                        if (SimplySwords.lootConfig.enableWhisperwind)
                             pool.with(ItemEntry.builder(ItemsRegistry.WHISPERWIND.get()));
 
                         context.addPool(pool);

@@ -10,7 +10,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
-import net.sweenus.simplyswords.config.SimplySwordsConfig;
+import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 
@@ -25,12 +25,12 @@ public class WatcherEffect extends StatusEffect {
                 if (pPlayer instanceof PlayerEntity) {
                     ServerWorld world = (ServerWorld) pLivingEntity.getWorld();
                     BlockPos position = pLivingEntity.getBlockPos();
-                    int hradius = (int) (SimplySwordsConfig.getFloatValue("watcher_radius"));
-                    int vradius = (int) (SimplySwordsConfig.getFloatValue("watcher_radius") / 2);
+                    int hradius = (int) (SimplySwords.uniqueEffectsConfig.watcherRadius);
+                    int vradius = (int) (SimplySwords.uniqueEffectsConfig.watcherRadius / 2);
                     double x = pLivingEntity.getX();
                     double y = pLivingEntity.getY();
                     double z = pLivingEntity.getZ();
-                    float rAmount = SimplySwordsConfig.getFloatValue("watcher_restore_amount");
+                    float rAmount = SimplySwords.uniqueEffectsConfig.watcherRestoreAmount;
                     Box box = new Box(x + hradius, y + vradius, z + hradius, x - hradius, y - vradius, z - hradius);
 
                     for (Entity e : world.getOtherEntities(pPlayer, box, EntityPredicates.VALID_ENTITY)) {

@@ -11,7 +11,7 @@ import net.minecraft.particle.ParticleTypes;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.world.World;
-import net.sweenus.simplyswords.config.SimplySwordsConfig;
+import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -28,8 +28,8 @@ public class WatcherSwordItem extends UniqueSwordItem {
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         if (!attacker.getWorld().isClient()) {
 
-            int thitchance = (int) SimplySwordsConfig.getFloatValue("watcher_chance");
-            int phitchance = (int) SimplySwordsConfig.getFloatValue("omen_chance");
+            int thitchance = (int) SimplySwords.uniqueEffectsConfig.watcherChance;
+            int phitchance = (int) SimplySwords.uniqueEffectsConfig.omenChance;
 
             HelperMethods.playHitSounds(attacker, target);
 
@@ -67,7 +67,7 @@ public class WatcherSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.watchersworditem.tooltip1").setStyle(ABILITY));
         tooltip.add(Text.translatable("item.simplyswords.watchersworditem.tooltip2").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.watchersworditem.tooltip3",
-                (SimplySwordsConfig.getFloatValue("omen_instantkill_threshold") * 100)).setStyle(TEXT));
+                (SimplySwords.uniqueEffectsConfig.omenInstantKillThreshold * 100)).setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.watchersworditem.tooltip4").setStyle(TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.watchersworditem.tooltip5").setStyle(ABILITY));

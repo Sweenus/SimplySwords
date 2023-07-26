@@ -18,7 +18,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.ClickType;
 import net.minecraft.util.Formatting;
 import net.minecraft.world.World;
-import net.sweenus.simplyswords.config.SimplySwordsConfig;
+import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.RunicMethods;
@@ -60,7 +60,7 @@ public class UniqueSwordItem extends SwordItem {
                              StackReference cursorStackReference) {
         if (stack.getOrCreateNbt().getString("runic_power").equals("socket_empty") ||
                 (stack.getOrCreateNbt().getString("nether_power").equals("socket_empty")) &&
-                        SimplySwordsConfig.getBooleanValue("enable_unique_gem_sockets")) {
+                        SimplySwords.generalConfig.enableUniqueGemSockets) {
 
             if (otherStack.isOf(ItemsRegistry.RUNEFUSED_GEM.get())) {
                 //When clicked on with a Runefused Gem, copy the runic power and delete the gem

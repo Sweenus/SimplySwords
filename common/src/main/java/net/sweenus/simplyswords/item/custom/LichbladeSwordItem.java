@@ -20,7 +20,7 @@ import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.UseAction;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
-import net.sweenus.simplyswords.config.SimplySwordsConfig;
+import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
@@ -34,12 +34,12 @@ public class LichbladeSwordItem extends UniqueSwordItem {
         super(toolMaterial, attackDamage, attackSpeed, settings);
     }
     private static int stepMod = 0;
-    int radius = (int) (SimplySwordsConfig.getFloatValue("soulanguish_radius"));
-    float abilityDamage = (SimplySwordsConfig.getFloatValue("soulanguish_damage"));
-    int ability_timer_max = (int) (SimplySwordsConfig.getFloatValue("soulanguish_duration"));
-    int skillCooldown = (int) (SimplySwordsConfig.getFloatValue("soulanguish_cooldown"));
-    float healAmount = (SimplySwordsConfig.getFloatValue("soulanguish_heal"));
-    int range = (int) (SimplySwordsConfig.getFloatValue("soulanguish_range"));
+    int radius = (int) SimplySwords.uniqueEffectsConfig.soulAnguishRadius;
+    float abilityDamage = SimplySwords.uniqueEffectsConfig.soulAnguishDamage;
+    int ability_timer_max = (int) SimplySwords.uniqueEffectsConfig.soulAnguishDuration;
+    int skillCooldown = (int) SimplySwords.uniqueEffectsConfig.soulAnguishCooldown;
+    float healAmount = SimplySwords.uniqueEffectsConfig.soulAnguishHeal;
+    int range = (int) SimplySwords.uniqueEffectsConfig.soulAnguishRange;
     int damageTracker;
     int chanceReduce;
     double lastX;

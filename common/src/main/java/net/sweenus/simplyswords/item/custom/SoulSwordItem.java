@@ -19,7 +19,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
-import net.sweenus.simplyswords.config.SimplySwordsConfig;
+import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -36,8 +36,8 @@ public class SoulSwordItem extends UniqueSwordItem {
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         if (!attacker.getWorld().isClient()) {
             ServerWorld world = (ServerWorld) attacker.getWorld();
-            int fhitchance = (int) SimplySwordsConfig.getFloatValue("soulmeld_chance");
-            int fduration = (int) SimplySwordsConfig.getFloatValue("soulmeld_duration");
+            int fhitchance = (int) SimplySwords.uniqueEffectsConfig.soulMeldChance;
+            int fduration = (int) SimplySwords.uniqueEffectsConfig.soulMeldDuration;
             HelperMethods.playHitSounds(attacker, target);
 
 
@@ -65,8 +65,8 @@ public class SoulSwordItem extends UniqueSwordItem {
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
 
         if (!user.getWorld().isClient()) {
-            int hradius = (int) SimplySwordsConfig.getFloatValue("soulmeld_radius");
-            int vradius = (int) (SimplySwordsConfig.getFloatValue("soulmeld_radius") / 2);
+            int hradius = (int) SimplySwords.uniqueEffectsConfig.soulMeldRadius;
+            int vradius = (int) (SimplySwords.uniqueEffectsConfig.soulMeldRadius / 2);
             double x = user.getX();
             double y = user.getY();
             double z = user.getZ();

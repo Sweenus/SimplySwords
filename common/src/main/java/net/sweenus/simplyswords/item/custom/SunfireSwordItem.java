@@ -20,7 +20,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
-import net.sweenus.simplyswords.config.SimplySwordsConfig;
+import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.entity.BattleStandardEntity;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.registry.EntityRegistry;
@@ -32,8 +32,8 @@ import java.util.List;
 public class SunfireSwordItem extends UniqueSwordItem {
 
     private static int stepMod = 0;
-    int skillCooldown = (int) (SimplySwordsConfig.getFloatValue("righteousstandard_cooldown"));
-    int abilityChance =  (int) (SimplySwordsConfig.getFloatValue("righteousstandard_chance"));
+    int skillCooldown = (int) SimplySwords.uniqueEffectsConfig.righteousStandardCooldown;
+    int abilityChance =  (int) SimplySwords.uniqueEffectsConfig.righteousStandardChance;
 
     public SunfireSwordItem(ToolMaterial toolMaterial, int attackDamage, float attackSpeed, Settings settings) {
         super(toolMaterial, attackDamage, attackSpeed, settings);

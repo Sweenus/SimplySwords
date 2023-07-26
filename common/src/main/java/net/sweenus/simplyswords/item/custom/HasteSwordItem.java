@@ -17,7 +17,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
-import net.sweenus.simplyswords.config.SimplySwordsConfig;
+import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -34,9 +34,9 @@ public class HasteSwordItem extends UniqueSwordItem {
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         if (!attacker.getWorld().isClient()) {
             ServerWorld world = (ServerWorld) attacker.getWorld();
-            int fhitchance = (int) SimplySwordsConfig.getFloatValue("ferocity_chance");
-            int fduration = (int) SimplySwordsConfig.getFloatValue("ferocity_duration");
-            int maximum_stacks = (int) (SimplySwordsConfig.getFloatValue("ferocity_max_stacks"));
+            int fhitchance = (int) SimplySwords.uniqueEffectsConfig.ferocityChance;
+            int fduration = (int) SimplySwords.uniqueEffectsConfig.ferocityDuration;
+            int maximum_stacks = (int) SimplySwords.uniqueEffectsConfig.ferocityMaxStacks;
             HelperMethods.playHitSounds(attacker, target);
 
 
@@ -65,7 +65,7 @@ public class HasteSwordItem extends UniqueSwordItem {
 
         if (user.hasStatusEffect(StatusEffects.HASTE)) {
 
-            int strength_tier = (int) SimplySwordsConfig.getFloatValue("ferocity_strength_tier");
+            int strength_tier = (int) SimplySwords.uniqueEffectsConfig.ferocityStrengthTier;
 
             int a = (user.getStatusEffect(StatusEffects.HASTE).getAmplifier() * 20);
             user.addStatusEffect(new StatusEffectInstance(StatusEffects.STRENGTH, a, strength_tier), user);

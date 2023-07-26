@@ -19,7 +19,7 @@ import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
-import net.sweenus.simplyswords.config.SimplySwordsConfig;
+import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -29,7 +29,7 @@ import java.util.Objects;
 
 public class BattleStandardEntity extends PathAwareEntity {
     public static final Supplier<EntityType<BattleStandardEntity>> TYPE = Suppliers.memoize(() -> EntityType.Builder.create(BattleStandardEntity::new, SpawnGroup.MISC).build("battlestandard"));
-    float abilityDamage = (SimplySwordsConfig.getFloatValue("abyssalstandard_damage"));
+    float abilityDamage = (SimplySwords.uniqueEffectsConfig.righteousStandardDamage);
     public PlayerEntity ownerEntity;
     public String standardType;
     public int decayRate;

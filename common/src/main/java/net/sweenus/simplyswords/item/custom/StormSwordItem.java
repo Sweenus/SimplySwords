@@ -16,7 +16,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.UseAction;
 import net.minecraft.world.World;
-import net.sweenus.simplyswords.config.SimplySwordsConfig;
+import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.util.AbilityMethods;
@@ -36,7 +36,7 @@ public class StormSwordItem extends UniqueSwordItem {
 
             HelperMethods.playHitSounds(attacker, target);
 
-            int phitchance = (int) SimplySwordsConfig.getFloatValue("storm_chance");
+            int phitchance = (int) SimplySwords.uniqueEffectsConfig.stormChance;
 
             if (attacker.getRandom().nextInt(100) <= phitchance) {
                 target.addStatusEffect(new StatusEffectInstance(EffectRegistry.STORM.get(), 2, 1), attacker);
@@ -62,7 +62,7 @@ public class StormSwordItem extends UniqueSwordItem {
     @Override
     public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
         if (!world.isClient) {
-                int radius = (int) (SimplySwordsConfig.getFloatValue("storm_radius"));
+                int radius = (int) SimplySwords.uniqueEffectsConfig.stormRadius;
                 AbilityMethods.tickAbilityStorm(stack, world, user, remainingUseTicks, 700, radius);
         }
     }

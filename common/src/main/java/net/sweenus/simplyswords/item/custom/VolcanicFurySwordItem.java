@@ -21,7 +21,7 @@ import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.UseAction;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
-import net.sweenus.simplyswords.config.SimplySwordsConfig;
+import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.AbilityMethods;
@@ -34,11 +34,11 @@ public class VolcanicFurySwordItem extends UniqueSwordItem {
         super(toolMaterial, attackDamage, attackSpeed, settings);
     }
     private static int stepMod = 0;
-    int radius = (int) (SimplySwordsConfig.getFloatValue("volcanic_fury_radius"));
-    float abilityDamage = (SimplySwordsConfig.getFloatValue("volcanic_fury_damage"));
+    int radius = (int) SimplySwords.uniqueEffectsConfig.volcanicFuryRadius;
+    float abilityDamage = SimplySwords.uniqueEffectsConfig.volcanicFuryDamage;
     int ability_timer_max = 120;
-    int skillCooldown = (int) (SimplySwordsConfig.getFloatValue("volcanic_fury_cooldown"));
-    int chargeChance =  (int) (SimplySwordsConfig.getFloatValue("volcanic_fury_chance"));
+    int skillCooldown = (int) SimplySwords.uniqueEffectsConfig.volcanicFuryCooldown;
+    int chargeChance =  (int) SimplySwords.uniqueEffectsConfig.volcanicFuryChance;
     int chargePower;
 
 

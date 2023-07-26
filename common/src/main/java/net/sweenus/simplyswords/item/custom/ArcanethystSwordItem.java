@@ -18,7 +18,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.UseAction;
 import net.minecraft.world.World;
-import net.sweenus.simplyswords.config.SimplySwordsConfig;
+import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.AbilityMethods;
@@ -31,11 +31,11 @@ public class ArcanethystSwordItem extends UniqueSwordItem {
         super(toolMaterial, attackDamage, attackSpeed, settings);
     }
     private static int stepMod = 0;
-    int radius = (int) (SimplySwordsConfig.getFloatValue("arcaneassault_radius"));
-    float abilityDamage = (SimplySwordsConfig.getFloatValue("arcaneassault_damage"));
-    int arcane_timer_max = (int) (SimplySwordsConfig.getFloatValue("arcaneassault_duration"));
-    int skillCooldown = (int) (SimplySwordsConfig.getFloatValue("arcaneassault_cooldown"));
-    int chargeChance =  (int) (SimplySwordsConfig.getFloatValue("arcaneassault_chance"));
+    int radius = (int) SimplySwords.uniqueEffectsConfig.arcaneAssaultRadius;
+    float abilityDamage = SimplySwords.uniqueEffectsConfig.arcaneAssaultDamage;
+    int arcane_timer_max = (int) SimplySwords.uniqueEffectsConfig.arcaneAssaultDuration;
+    int skillCooldown = (int) SimplySwords.uniqueEffectsConfig.arcaneAssaultCooldown;
+    int chargeChance =  (int) SimplySwords.uniqueEffectsConfig.arcaneAssaultChance;
 
 
 

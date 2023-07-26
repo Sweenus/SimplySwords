@@ -9,6 +9,7 @@ public class GeneralConfig implements ConfigData {
 
 
     public boolean enableWeaponImpactSounds = true;
+    public float weaponImpactSoundsVolume = 0.3f;
     public boolean enableWeaponFootfalls = true;
     public boolean enablePassiveParticles = true;
     @ConfigEntry.Gui.Tooltip

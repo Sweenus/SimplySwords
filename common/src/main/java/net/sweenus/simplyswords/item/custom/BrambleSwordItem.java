@@ -16,7 +16,7 @@ import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
-import net.sweenus.simplyswords.config.SimplySwordsConfig;
+import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.util.HelperMethods;
 
@@ -32,13 +32,13 @@ public class BrambleSwordItem extends UniqueSwordItem {
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         if (!attacker.getWorld().isClient()) {
             ServerWorld world = (ServerWorld) attacker.getWorld();
-            int fhitchance = (int) SimplySwordsConfig.getFloatValue("bramble_chance");
+            int fhitchance = (int) SimplySwords.uniqueEffectsConfig.brambleChance;
             HelperMethods.playHitSounds(attacker, target);
 
 
             if (attacker.getRandom().nextInt(100) <= fhitchance) {
-                    int sradius = (int) SimplySwordsConfig.getFloatValue("bramble_radius");
-                    int vradius = (int) (SimplySwordsConfig.getFloatValue("bramble_radius") / 2);
+                    int sradius = (int) SimplySwords.uniqueEffectsConfig.brambleRadius;
+                    int vradius = (int) (SimplySwords.uniqueEffectsConfig.brambleRadius / 2);
                     double x = target.getX();
                     double y = target.getY();
                     double z = target.getZ();

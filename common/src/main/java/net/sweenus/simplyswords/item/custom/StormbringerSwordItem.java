@@ -19,7 +19,7 @@ import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.UseAction;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
-import net.sweenus.simplyswords.config.SimplySwordsConfig;
+import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -30,10 +30,10 @@ public class StormbringerSwordItem extends UniqueSwordItem {
 
     private static int stepMod = 0;
     int radius = 3;
-    int ability_timer_max = (int) (SimplySwordsConfig.getFloatValue("shockdeflect_block_duration"));
-    int skillCooldown = (int) (SimplySwordsConfig.getFloatValue("shockdeflect_cooldown"));
-    int perfectParryWindow = (int) (SimplySwordsConfig.getFloatValue("shockdeflect_parry_duration"));
-    float abilityDamage = (SimplySwordsConfig.getFloatValue("shockdeflect_damage"));
+    int ability_timer_max = (int) SimplySwords.uniqueEffectsConfig.shockDeflectBlockDuration;
+    int skillCooldown = (int) SimplySwords.uniqueEffectsConfig.shockDeflectCooldown;
+    int perfectParryWindow = (int) SimplySwords.uniqueEffectsConfig.shockDeflectParryDuration;
+    float abilityDamage = SimplySwords.uniqueEffectsConfig.shockDeflectDamage;
     boolean parrySuccess;
     int parrySuccession;
 

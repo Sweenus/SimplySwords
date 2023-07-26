@@ -18,7 +18,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import net.sweenus.simplyswords.config.SimplySwordsConfig;
+import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.entity.BattleStandardEntity;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.EntityRegistry;
@@ -32,9 +32,9 @@ public class RunicMethods {
     // Runic Power - FREEZE
     public static void postHitRunicFreeze(ItemStack stack,  LivingEntity target, LivingEntity attacker) {
 
-        int fhitchance = (int) SimplySwordsConfig.getFloatValue("freeze_chance");
-        int fduration = (int) SimplySwordsConfig.getFloatValue("freeze_duration");
-        int sduration = (int) SimplySwordsConfig.getFloatValue("slowness_duration");
+        int fhitchance = (int) SimplySwords.runicEffectsConfig.freezeChance;
+        int fduration = (int) SimplySwords.runicEffectsConfig.freezeDuration;
+        int sduration = fduration * 3;
 
         target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, sduration, 1), attacker);
 
@@ -47,8 +47,8 @@ public class RunicMethods {
 
     // Runic Power - WILDFIRE
     public static void postHitRunicWildfire(ItemStack stack,  LivingEntity target, LivingEntity attacker) {
-        int phitchance = (int) SimplySwordsConfig.getFloatValue("wildfire_chance");
-        int pduration = (int) SimplySwordsConfig.getFloatValue("wildfire_duration");
+        int phitchance = (int) SimplySwords.runicEffectsConfig.wildfireChance;
+        int pduration = (int) SimplySwords.runicEffectsConfig.wildfireDuration;
 
         if (attacker.getRandom().nextInt(100) <= phitchance) {
             target.addStatusEffect(new StatusEffectInstance(EffectRegistry.WILDFIRE.get(), pduration, 3), attacker);
@@ -59,8 +59,8 @@ public class RunicMethods {
 
     // Runic Power - SLOW
     public static void postHitRunicSlow(ItemStack stack,  LivingEntity target, LivingEntity attacker) {
-        int shitchance = (int) SimplySwordsConfig.getFloatValue("slowness_chance");
-        int sduration = (int) SimplySwordsConfig.getFloatValue("slowness_duration");
+        int shitchance = (int) SimplySwords.runicEffectsConfig.slowChance;
+        int sduration = (int) SimplySwords.runicEffectsConfig.slowDuration;
 
         if (attacker.getRandom().nextInt(100) <= shitchance) {
             target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, sduration, 1), attacker);
@@ -68,8 +68,8 @@ public class RunicMethods {
     }
     // Runic Power - GREATER SLOW
     public static void postHitRunicGreaterSlow(ItemStack stack,  LivingEntity target, LivingEntity attacker) {
-        int shitchance = (int) SimplySwordsConfig.getFloatValue("slowness_chance");
-        int sduration = (int) SimplySwordsConfig.getFloatValue("slowness_duration");
+        int shitchance = (int) SimplySwords.runicEffectsConfig.slowChance;
+        int sduration = (int) SimplySwords.runicEffectsConfig.slowDuration;
 
         if (attacker.getRandom().nextInt(100) <= shitchance) {
             target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, sduration, 2), attacker);
@@ -80,8 +80,8 @@ public class RunicMethods {
 
     // Runic Power - SWIFTNESS
     public static void postHitRunicSwiftness(ItemStack stack,  LivingEntity target, LivingEntity attacker) {
-        int shitchance = (int) SimplySwordsConfig.getFloatValue("speed_chance");
-        int sduration = (int) SimplySwordsConfig.getFloatValue("speed_duration");
+        int shitchance = (int) SimplySwords.runicEffectsConfig.swiftnessChance;
+        int sduration = (int) SimplySwords.runicEffectsConfig.swiftnessDuration;
 
         if (attacker.getRandom().nextInt(100) <= shitchance) {
             attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, sduration, 0), attacker);
@@ -92,8 +92,8 @@ public class RunicMethods {
 
     // Runic Power - GREATER SWIFTNESS
     public static void postHitRunicGreaterSwiftness(ItemStack stack,  LivingEntity target, LivingEntity attacker) {
-        int shitchance = (int) SimplySwordsConfig.getFloatValue("speed_chance");
-        int sduration = (int) SimplySwordsConfig.getFloatValue("speed_duration");
+        int shitchance = (int) SimplySwords.runicEffectsConfig.swiftnessChance;
+        int sduration = (int) SimplySwords.runicEffectsConfig.swiftnessDuration;
 
         if (attacker.getRandom().nextInt(100) <= shitchance) {
             attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, sduration, 1), attacker);
@@ -104,8 +104,8 @@ public class RunicMethods {
 
     // Runic Power - FLOAT
     public static void postHitRunicFloat(ItemStack stack,  LivingEntity target, LivingEntity attacker) {
-        int lhitchance = (int) SimplySwordsConfig.getFloatValue("levitation_chance");
-        int lduration = (int) SimplySwordsConfig.getFloatValue("levitation_duration");
+        int lhitchance = (int) SimplySwords.runicEffectsConfig.floatChance;
+        int lduration = (int) SimplySwords.runicEffectsConfig.floatDuration;
 
         if (attacker.getRandom().nextInt(100) <= lhitchance) {
             target.addStatusEffect(new StatusEffectInstance(StatusEffects.LEVITATION, lduration, 2), attacker);
@@ -116,8 +116,8 @@ public class RunicMethods {
 
     // Runic Power - GREATER FLOAT
     public static void postHitRunicGreaterFloat(ItemStack stack,  LivingEntity target, LivingEntity attacker) {
-        int lhitchance = (int) SimplySwordsConfig.getFloatValue("levitation_chance");
-        int lduration = (int) SimplySwordsConfig.getFloatValue("levitation_duration");
+        int lhitchance = (int) SimplySwords.runicEffectsConfig.floatChance;
+        int lduration = (int) SimplySwords.runicEffectsConfig.floatDuration;
 
         if (attacker.getRandom().nextInt(100) <= lhitchance) {
             target.addStatusEffect(new StatusEffectInstance(StatusEffects.LEVITATION, lduration, 3), attacker);
@@ -128,8 +128,8 @@ public class RunicMethods {
 
     // Runic Power - ZEPHYR
     public static void postHitRunicZephyr(ItemStack stack,  LivingEntity target, LivingEntity attacker) {
-        int lhitchance = (int) SimplySwordsConfig.getFloatValue("zephyr_chance");
-        int lduration = (int) SimplySwordsConfig.getFloatValue("zephyr_duration");
+        int lhitchance = (int) SimplySwords.runicEffectsConfig.zephyrChance;
+        int lduration = (int) SimplySwords.runicEffectsConfig.zephyrDuration;
 
         if (attacker.getRandom().nextInt(100) <= lhitchance) {
             attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, lduration, 0), attacker);
@@ -141,8 +141,8 @@ public class RunicMethods {
 
     // Runic Power - GREATER ZEPHYR
     public static void postHitRunicGreaterZephyr(ItemStack stack,  LivingEntity target, LivingEntity attacker) {
-        int lhitchance = (int) SimplySwordsConfig.getFloatValue("zephyr_chance");
-        int lduration = (int) SimplySwordsConfig.getFloatValue("zephyr_duration");
+        int lhitchance = (int) SimplySwords.runicEffectsConfig.zephyrChance;
+        int lduration = (int) SimplySwords.runicEffectsConfig.zephyrDuration;
 
         if (attacker.getRandom().nextInt(100) <= lhitchance) {
             attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, lduration, 1), attacker);
@@ -154,8 +154,8 @@ public class RunicMethods {
 
     // Runic Power - SHIELDING
     public static void postHitRunicShielding(ItemStack stack,  LivingEntity target, LivingEntity attacker) {
-        int lhitchance = (int) SimplySwordsConfig.getFloatValue("shielding_chance");
-        int lduration = (int) SimplySwordsConfig.getFloatValue("shielding_duration");
+        int lhitchance = (int) SimplySwords.runicEffectsConfig.shieldingChance;
+        int lduration = (int) SimplySwords.runicEffectsConfig.shieldingDuration;
 
         if (attacker.getRandom().nextInt(100) <= lhitchance) {
             attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.ABSORPTION, lduration, 0), attacker);
@@ -166,8 +166,8 @@ public class RunicMethods {
 
     // Runic Power - GREATER SHIELDING
     public static void postHitRunicGreaterShielding(ItemStack stack,  LivingEntity target, LivingEntity attacker) {
-        int lhitchance = (int) SimplySwordsConfig.getFloatValue("shielding_chance");
-        int lduration = (int) SimplySwordsConfig.getFloatValue("shielding_duration");
+        int lhitchance = (int) SimplySwords.runicEffectsConfig.shieldingChance;
+        int lduration = (int) SimplySwords.runicEffectsConfig.shieldingDuration;
 
         if (attacker.getRandom().nextInt(100) <= lhitchance) {
             attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.ABSORPTION, lduration, 1), attacker);
@@ -178,8 +178,8 @@ public class RunicMethods {
 
     // Runic Power - STONESKIN
     public static void postHitRunicStoneskin(ItemStack stack,  LivingEntity target, LivingEntity attacker) {
-        int lhitchance = (int) SimplySwordsConfig.getFloatValue("stoneskin_chance");
-        int lduration = (int) SimplySwordsConfig.getFloatValue("stoneskin_duration");
+        int lhitchance = (int) SimplySwords.runicEffectsConfig.stoneskinChance;
+        int lduration = (int) SimplySwords.runicEffectsConfig.stoneskinDuration;
 
         if (attacker.getRandom().nextInt(100) <= lhitchance) {
             attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, lduration, 1), attacker);
@@ -192,8 +192,8 @@ public class RunicMethods {
 
     // Runic Power - GREATER STONESKIN
     public static void postHitRunicGreaterStoneskin(ItemStack stack,  LivingEntity target, LivingEntity attacker) {
-        int lhitchance = (int) SimplySwordsConfig.getFloatValue("stoneskin_chance");
-        int lduration = (int) SimplySwordsConfig.getFloatValue("stoneskin_duration");
+        int lhitchance = (int) SimplySwords.runicEffectsConfig.stoneskinChance;
+        int lduration = (int) SimplySwords.runicEffectsConfig.stoneskinDuration;
 
         if (attacker.getRandom().nextInt(100) <= lhitchance) {
             attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, lduration, 2), attacker);
@@ -206,8 +206,8 @@ public class RunicMethods {
 
     // Runic Power - TRAILBLAZE
     public static void postHitRunicTrailblaze(ItemStack stack,  LivingEntity target, LivingEntity attacker) {
-        int lhitchance = (int) SimplySwordsConfig.getFloatValue("trailblaze_chance");
-        int lduration = (int) SimplySwordsConfig.getFloatValue("trailblaze_duration");
+        int lhitchance = (int) SimplySwords.runicEffectsConfig.trailblazeChance;
+        int lduration = (int) SimplySwords.runicEffectsConfig.trailblazeDuration;
 
         if (attacker.getRandom().nextInt(100) <= lhitchance) {
             attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, lduration, 1), attacker);
@@ -219,8 +219,8 @@ public class RunicMethods {
 
     // Runic Power - GREATER TRAILBLAZE
     public static void postHitRunicGreaterTrailblaze(ItemStack stack,  LivingEntity target, LivingEntity attacker) {
-        int lhitchance = (int) SimplySwordsConfig.getFloatValue("trailblaze_chance");
-        int lduration = (int) SimplySwordsConfig.getFloatValue("trailblaze_duration");
+        int lhitchance = (int) SimplySwords.runicEffectsConfig.trailblazeChance;
+        int lduration = (int) SimplySwords.runicEffectsConfig.trailblazeDuration;
 
         if (attacker.getRandom().nextInt(100) <= lhitchance) {
             attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, lduration, 2), attacker);
@@ -232,8 +232,8 @@ public class RunicMethods {
 
     // Runic Power - WEAKNESS
     public static void postHitRunicWeaken(ItemStack stack,  LivingEntity target, LivingEntity attacker) {
-        int lhitchance = (int) SimplySwordsConfig.getFloatValue("weaken_chance");
-        int lduration = (int) SimplySwordsConfig.getFloatValue("weaken_duration");
+        int lhitchance = (int) SimplySwords.runicEffectsConfig.weakenChance;
+        int lduration = (int) SimplySwords.runicEffectsConfig.weakenDuration;
 
         if (attacker.getRandom().nextInt(100) <= lhitchance) {
             target.addStatusEffect(new StatusEffectInstance(StatusEffects.WEAKNESS, lduration, 0), attacker);
@@ -245,8 +245,8 @@ public class RunicMethods {
 
     // Runic Power - GREATER WEAKNESS
     public static void postHitRunicGreaterWeaken(ItemStack stack,  LivingEntity target, LivingEntity attacker) {
-        int lhitchance = (int) SimplySwordsConfig.getFloatValue("weaken_chance");
-        int lduration = (int) SimplySwordsConfig.getFloatValue("weaken_duration");
+        int lhitchance = (int) SimplySwords.runicEffectsConfig.weakenChance;
+        int lduration = (int) SimplySwords.runicEffectsConfig.weakenDuration;
 
         if (attacker.getRandom().nextInt(100) <= lhitchance) {
             target.addStatusEffect(new StatusEffectInstance(StatusEffects.WEAKNESS, lduration, 1), attacker);
@@ -258,7 +258,7 @@ public class RunicMethods {
 
     // Runic Power - IMBUED
     public static void postHitRunicImbued(ItemStack stack,  LivingEntity target, LivingEntity attacker) {
-        int hitchance = (int) SimplySwordsConfig.getFloatValue("imbued_chance");
+        int hitchance = (int) SimplySwords.runicEffectsConfig.imbuedChance;
         int damage = 6 - ((stack.getDamage() / stack.getMaxDamage()) * 100) / 20;
 
         if (attacker.getRandom().nextInt(100) <= hitchance) {
@@ -271,7 +271,7 @@ public class RunicMethods {
 
     // Runic Power - GREATER IMBUED
     public static void postHitRunicGreaterImbued(ItemStack stack,  LivingEntity target, LivingEntity attacker) {
-        int hitchance = (int) SimplySwordsConfig.getFloatValue("imbued_chance");
+        int hitchance = (int) SimplySwords.runicEffectsConfig.imbuedChance;
         int damage = 10 - ((stack.getDamage() / stack.getMaxDamage()) * 100) / 10;
 
         if (attacker.getRandom().nextInt(100) <= hitchance) {
@@ -384,7 +384,7 @@ public class RunicMethods {
 
     //Runic Power - MOMENTUM
     public static void usageTickRunicMomentum(ItemStack stack, World world,  LivingEntity user, int remainingUseTicks) {
-        int skillCooldown = (int) SimplySwordsConfig.getFloatValue("momentum_cooldown");
+        int skillCooldown = (int) SimplySwords.runicEffectsConfig.momentumCooldown;
         if (user.getEquippedStack(EquipmentSlot.MAINHAND) == stack && user.isOnGround() && (user instanceof PlayerEntity player)) {
             //Player dash forward
             if (remainingUseTicks == 12 || remainingUseTicks == 13 && player.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
@@ -398,7 +398,7 @@ public class RunicMethods {
 
     //Runic Power - GREATER MOMENTUM
     public static void usageTickRunicGreaterMomentum(ItemStack stack, World world,  LivingEntity user, int remainingUseTicks) {
-        int skillCooldown = (int) SimplySwordsConfig.getFloatValue("momentum_cooldown");
+        int skillCooldown = (int) SimplySwords.runicEffectsConfig.momentumCooldown;
         if (user.getEquippedStack(EquipmentSlot.MAINHAND) == stack && user.isOnGround() && (user instanceof PlayerEntity player)) {
             //Player dash forward
             if (remainingUseTicks == 10 || remainingUseTicks == 13 && player.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
@@ -415,8 +415,8 @@ public class RunicMethods {
 
     // Runic Power - UNSTABLE
     public static void inventoryTickRunicUnstable(ItemStack stack,  World world, PlayerEntity player, int slot, boolean selected) {
-        int lduration = (int) SimplySwordsConfig.getFloatValue("unstable_duration");
-        int lfrequency = (int) SimplySwordsConfig.getFloatValue("unstable_frequency");
+        int lduration = (int) SimplySwords.runicEffectsConfig.unstableDuration;
+        int lfrequency = (int) SimplySwords.runicEffectsConfig.unstableFrequency;
         if (player.age % lfrequency == 0) {
             int random = (int) (Math.random() * 100);
             if (random >= 0 && random < 10)
@@ -446,10 +446,10 @@ public class RunicMethods {
 
     // Runic Power - ACTIVE DEFENCE
     public static void inventoryTickRunicActiveDefence(ItemStack stack,  World world, PlayerEntity player, int slot, boolean selected) {
-        int lfrequency = (int) SimplySwordsConfig.getFloatValue("active_defence_frequency");
+        int lfrequency = (int) SimplySwords.runicEffectsConfig.activeDefenceFrequency;
         if (player.age % lfrequency == 0) {
-            int sradius = (int) SimplySwordsConfig.getFloatValue("active_defence_radius");
-            int vradius = (int) (SimplySwordsConfig.getFloatValue("active_defence_radius") / 2);
+            int sradius = (int) SimplySwords.runicEffectsConfig.activeDefenceRadius;
+            int vradius = (int) (SimplySwords.runicEffectsConfig.activeDefenceRadius / 2);
             double x = player.getX();
             double y = player.getY();
             double z = player.getZ();
@@ -489,11 +489,11 @@ public class RunicMethods {
 
     // Runic Power - FROST WARD
     public static void inventoryTickRunicFrostWard(ItemStack stack,  World world, PlayerEntity player, int slot, boolean selected) {
-        int lfrequency = (int) SimplySwordsConfig.getFloatValue("frostward_frequency");
-        int lduration = (int) SimplySwordsConfig.getFloatValue("frostward_slow_duration");
+        int lfrequency = (int) SimplySwords.runicEffectsConfig.frostWardFrequency;;
+        int lduration = (int) SimplySwords.runicEffectsConfig.frostWardDuration;
         if (player.age % lfrequency == 0) {
-            int sradius = (int) SimplySwordsConfig.getFloatValue("frostward_radius");
-            int vradius = (int) (SimplySwordsConfig.getFloatValue("frostward_radius") / 2);
+            int sradius = (int) SimplySwords.runicEffectsConfig.frostWardRadius;
+            int vradius = (int) (SimplySwords.runicEffectsConfig.frostWardRadius / 2);
             double x = player.getX();
             double y = player.getY();
             double z = player.getZ();

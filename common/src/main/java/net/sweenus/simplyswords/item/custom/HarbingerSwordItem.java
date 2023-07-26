@@ -20,7 +20,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
-import net.sweenus.simplyswords.config.SimplySwordsConfig;
+import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.entity.BattleStandardDarkEntity;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.registry.EntityRegistry;
@@ -32,8 +32,8 @@ import java.util.List;
 public class HarbingerSwordItem extends UniqueSwordItem {
 
     private static int stepMod = 0;
-    int skillCooldown = (int) (SimplySwordsConfig.getFloatValue("abyssalstandard_cooldown"));
-    int abilityChance =  (int) (SimplySwordsConfig.getFloatValue("abyssalstandard_chance"));
+    int skillCooldown = (int) SimplySwords.uniqueEffectsConfig.abyssalStandardCooldown;
+    int abilityChance =  (int) SimplySwords.uniqueEffectsConfig.abyssalStandardChance;
 
     public HarbingerSwordItem(ToolMaterial toolMaterial, int attackDamage, float attackSpeed, Settings settings) {
         super(toolMaterial, attackDamage, attackSpeed, settings);

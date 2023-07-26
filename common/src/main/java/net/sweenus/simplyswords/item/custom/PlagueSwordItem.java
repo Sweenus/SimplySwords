@@ -12,7 +12,7 @@ import net.minecraft.particle.ParticleTypes;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.world.World;
-import net.sweenus.simplyswords.config.SimplySwordsConfig;
+import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.util.HelperMethods;
 
@@ -27,7 +27,7 @@ public class PlagueSwordItem extends UniqueSwordItem {
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
 
-        int phitchance = (int) SimplySwordsConfig.getFloatValue("plague_chance");
+        int phitchance = (int) SimplySwords.uniqueEffectsConfig.plagueChance;
         HelperMethods.playHitSounds(attacker, target);
 
         if (attacker.getRandom().nextInt(100) <= phitchance) {

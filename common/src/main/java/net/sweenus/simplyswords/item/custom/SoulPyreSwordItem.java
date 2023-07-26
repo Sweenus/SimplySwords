@@ -19,7 +19,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
-import net.sweenus.simplyswords.config.SimplySwordsConfig;
+import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
@@ -33,7 +33,7 @@ public class SoulPyreSwordItem extends UniqueSwordItem {
     }
     private int relocationTimer;
     private static int stepMod = 0;
-    private final int relocationDuration = (int) SimplySwordsConfig.getFloatValue("soultether_duration");
+    private final int relocationDuration = (int) SimplySwords.uniqueEffectsConfig.soultetherDuration;
     private boolean canRelocate;
     private LivingEntity relocateTarget;
     private double relocateX;
@@ -55,10 +55,10 @@ public class SoulPyreSwordItem extends UniqueSwordItem {
 
 
         if (!user.getWorld().isClient()) {
-            int range = (int) SimplySwordsConfig.getFloatValue("soultether_range");
-            int radius = (int) (SimplySwordsConfig.getFloatValue("soultether_radius"));
-            int ignite_duration = (int) (SimplySwordsConfig.getFloatValue("soultether_ignite_duration")) / 20;
-            int resistance_duration = (int) (SimplySwordsConfig.getFloatValue("soultether_resistance_duration"));
+            int range = (int) SimplySwords.uniqueEffectsConfig.soultetherRange;
+            int radius = (int) SimplySwords.uniqueEffectsConfig.soultetherRadius;
+            int ignite_duration = (int) (SimplySwords.uniqueEffectsConfig.soultetherIgniteDuration) / 20;
+            int resistance_duration = (int) SimplySwords.uniqueEffectsConfig.soultetherResistanceDuration;
 
             //Position swap target & player
             LivingEntity target = (LivingEntity) HelperMethods.getTargetedEntity(user, range);

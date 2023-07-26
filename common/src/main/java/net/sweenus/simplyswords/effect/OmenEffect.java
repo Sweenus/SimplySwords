@@ -8,7 +8,7 @@ import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.util.math.BlockPos;
-import net.sweenus.simplyswords.config.SimplySwordsConfig;
+import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 
 public class OmenEffect extends StatusEffect {
@@ -23,8 +23,8 @@ public class OmenEffect extends StatusEffect {
             double y = pLivingEntity.getY();
             double z = pLivingEntity.getZ();
             var pPlayer = pLivingEntity.getAttacker();
-            float absAmount = SimplySwordsConfig.getFloatValue("omen_absorption_amount");
-            float pthreshold = (SimplySwordsConfig.getFloatValue("omen_instantkill_threshold") * pLivingEntity.getMaxHealth());
+            float absAmount = SimplySwords.uniqueEffectsConfig.omenRegenerationAmount;
+            float pthreshold = (SimplySwords.uniqueEffectsConfig.omenInstantKillThreshold * pLivingEntity.getMaxHealth());
 
             if (pLivingEntity.getHealth() <= pthreshold && pPlayer != null) {
                 if (!pPlayer.hasStatusEffect(StatusEffects.REGENERATION)) {

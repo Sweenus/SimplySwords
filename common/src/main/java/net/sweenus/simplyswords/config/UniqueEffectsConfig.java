@@ -11,9 +11,9 @@ public class UniqueEffectsConfig implements ConfigData {
     public float watcherChance = 5f;
     public float watcherRestoreAmount = 0.5f;
     public float watcherRadius = 8f;
-    public float OmenChance = 5.0f;
-    public float OmenRegenerationAmount = 0.5f;
-    public float OmenInstantKillThreshold = 0.25f;
+    public float omenChance = 5.0f;
+    public float omenRegenerationAmount = 0.5f;
+    public float omenInstantKillThreshold = 0.25f;
 
     @ConfigEntry.Gui.PrefixText
     public float stealChance = 25f;
@@ -42,8 +42,8 @@ public class UniqueEffectsConfig implements ConfigData {
     public float ferocityStrengthTier = 2f;
 
     @ConfigEntry.Gui.PrefixText
-    public float EmberIreChance = 30f;
-    public float EmberIreDuration = 150f;
+    public float emberIreChance = 30f;
+    public float emberIreDuration = 150f;
 
     @ConfigEntry.Gui.PrefixText
     public float volcanicFuryChance = 25f;

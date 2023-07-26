@@ -18,7 +18,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.UseAction;
 import net.minecraft.world.World;
-import net.sweenus.simplyswords.config.SimplySwordsConfig;
+import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.AbilityMethods;
@@ -31,8 +31,8 @@ public class StormsEdgeSwordItem extends UniqueSwordItem {
     private static int stepMod = 0;
     int radius = 1;
     int ability_timer_max = 13;
-    int skillCooldown = (int) (SimplySwordsConfig.getFloatValue("stormjolt_cooldown"));
-    int chargeChance =  (int) (SimplySwordsConfig.getFloatValue("stormjolt_chance"));
+    int skillCooldown = (int) SimplySwords.uniqueEffectsConfig.stormJoltCooldown;
+    int chargeChance =  (int) SimplySwords.uniqueEffectsConfig.stormJoltChance;
 
     public StormsEdgeSwordItem(ToolMaterial toolMaterial, int attackDamage, float attackSpeed, Settings settings) {
         super(toolMaterial, attackDamage, attackSpeed, settings);

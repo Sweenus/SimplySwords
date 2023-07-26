@@ -8,7 +8,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.Box;
-import net.sweenus.simplyswords.config.SimplySwordsConfig;
+import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.util.HelperMethods;
 
 public class WildfireEffect extends StatusEffect {
@@ -21,12 +21,12 @@ public class WildfireEffect extends StatusEffect {
             if (pPlayer != null){
                 if (pPlayer instanceof PlayerEntity) {
                     ServerWorld world = (ServerWorld) pLivingEntity.getWorld();
-                    int hradius = (int) (SimplySwordsConfig.getFloatValue("wildfire_radius"));
-                    int vradius = (int) (SimplySwordsConfig.getFloatValue("wildfire_radius") / 2);
+                    int hradius = (int) (SimplySwords.runicEffectsConfig.wildfireRadius);
+                    int vradius = (int) (SimplySwords.runicEffectsConfig.wildfireRadius / 2);
                     double x = pLivingEntity.getX();
                     double y = pLivingEntity.getY();
                     double z = pLivingEntity.getZ();
-                    int pduration = (int) SimplySwordsConfig.getFloatValue("wildfire_duration") / 20;
+                    int pduration = (int) SimplySwords.runicEffectsConfig.wildfireDuration / 20;
                     Box box = new Box(x + hradius, y + vradius, z + hradius, x - hradius, y - vradius, z - hradius);
 
                     for (Entity e : world.getEntitiesByType(pLivingEntity.getType(), box, EntityPredicates.VALID_ENTITY)) {

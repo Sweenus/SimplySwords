@@ -19,7 +19,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
-import net.sweenus.simplyswords.config.SimplySwordsConfig;
+import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -30,7 +30,7 @@ public class RendSwordItem extends UniqueSwordItem {
     public RendSwordItem(ToolMaterial toolMaterial, int attackDamage, float attackSpeed, Settings settings) {
         super(toolMaterial, attackDamage, attackSpeed, settings);
     }
-    float abilityDamage = (SimplySwordsConfig.getFloatValue("soulrend_rend_damage_multiplier"));
+    float abilityDamage = SimplySwords.uniqueEffectsConfig.soulrendDamageMulti;
 
     private static int stepMod = 0;
 
@@ -38,9 +38,9 @@ public class RendSwordItem extends UniqueSwordItem {
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         if (!attacker.getWorld().isClient()) {
             ServerWorld world = (ServerWorld) attacker.getWorld();
-            int fhitchance = (int) SimplySwordsConfig.getFloatValue("soulrend_chance");
-            int fduration = (int) SimplySwordsConfig.getFloatValue("soulrend_duration");
-            int maxstacks = (int) SimplySwordsConfig.getFloatValue("soulrend_max_stacks");
+            int fhitchance = (int) SimplySwords.uniqueEffectsConfig.soulrendChance;
+            int fduration = (int) SimplySwords.uniqueEffectsConfig.soulrendDuration;
+            int maxstacks = (int) SimplySwords.uniqueEffectsConfig.soulrendMaxStacks;
 
 
             if (attacker.getRandom().nextInt(100) <= fhitchance) {
@@ -84,11 +84,11 @@ public class RendSwordItem extends UniqueSwordItem {
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
 
         if (!user.getWorld().isClient()) {
-            float heal_amount = (SimplySwordsConfig.getFloatValue("soulrend_rend_heal_multiplier"));
+            float heal_amount = SimplySwords.uniqueEffectsConfig.soulrendHealMulti;
             int healamp = 0;
             boolean cantrigger = false;
-            int hradius = (int) (SimplySwordsConfig.getFloatValue("soulrend_radius"));
-            int vradius = (int) (SimplySwordsConfig.getFloatValue("soulrend_radius") / 2);
+            int hradius = (int) SimplySwords.uniqueEffectsConfig.soulrendRadius;
+            int vradius = (int) (SimplySwords.uniqueEffectsConfig.soulrendRadius / 2);
             double x = user.getX();
             double y = user.getY();
             double z = user.getZ();

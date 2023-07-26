@@ -10,7 +10,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.Box;
-import net.sweenus.simplyswords.config.SimplySwordsConfig;
+import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.util.HelperMethods;
 
 public class StormEffect extends StatusEffect {
@@ -19,8 +19,8 @@ public class StormEffect extends StatusEffect {
     public void applyUpdateEffect(LivingEntity pLivingEntity, int pAmplifier) {
         if (!pLivingEntity.getWorld().isClient()) {
             ServerWorld world = (ServerWorld)pLivingEntity.getWorld();
-            int hradius = (int) (SimplySwordsConfig.getFloatValue("storm_radius"));
-            int vradius = (int) (SimplySwordsConfig.getFloatValue("storm_radius") / 2);
+            int hradius = (int) (SimplySwords.uniqueEffectsConfig.stormRadius);
+            int vradius = (int) (SimplySwords.uniqueEffectsConfig.stormRadius / 2);
             double x = pLivingEntity.getX();
             double y = pLivingEntity.getY();
             double z = pLivingEntity.getZ();

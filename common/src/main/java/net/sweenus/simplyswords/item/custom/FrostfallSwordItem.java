@@ -22,7 +22,7 @@ import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
-import net.sweenus.simplyswords.config.SimplySwordsConfig;
+import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
@@ -36,11 +36,11 @@ public class FrostfallSwordItem extends UniqueSwordItem {
     }
     private static int stepMod = 0;
 
-    private final int abilityCooldown = (int) SimplySwordsConfig.getFloatValue("frostfury_cooldown");
-    int radius = (int) (SimplySwordsConfig.getFloatValue("frostfury_radius"));
-    float abilityDamage = (SimplySwordsConfig.getFloatValue("frostfury_damage"));
-    int proc_chance = (int) (SimplySwordsConfig.getFloatValue("frostfury_chance"));
-    int shatter_timer_max = (int) (SimplySwordsConfig.getFloatValue("frostfury_duration"));
+    private final int abilityCooldown = (int) SimplySwords.uniqueEffectsConfig.frostFuryCooldown;
+    int radius = (int) SimplySwords.uniqueEffectsConfig.frostFuryRadius;
+    float abilityDamage = SimplySwords.uniqueEffectsConfig.frostShatterDamage;
+    int proc_chance = (int) SimplySwords.uniqueEffectsConfig.frostFuryChance;
+    int shatter_timer_max = (int) SimplySwords.uniqueEffectsConfig.frostFuryDuration;
     int shatter_timer;
     int player_shatter_timer;
     double lastX;

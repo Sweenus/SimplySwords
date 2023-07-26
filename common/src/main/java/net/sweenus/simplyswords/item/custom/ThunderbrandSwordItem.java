@@ -18,7 +18,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.UseAction;
 import net.minecraft.world.World;
-import net.sweenus.simplyswords.config.SimplySwordsConfig;
+import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.AbilityMethods;
@@ -31,11 +31,11 @@ public class ThunderbrandSwordItem extends UniqueSwordItem {
         super(toolMaterial, attackDamage, attackSpeed, settings);
     }
     private static int stepMod = 0;
-    int radius = (int) (SimplySwordsConfig.getFloatValue("thunderblitz_radius"));
-    float abilityDamage = (SimplySwordsConfig.getFloatValue("thunderblitz_damage"));
+    int radius = (int) SimplySwords.uniqueEffectsConfig.thunderBlitzRadius;
+    float abilityDamage = SimplySwords.uniqueEffectsConfig.thunderBlitzDamage;
     int ability_timer_max = 50;
-    int skillCooldown = (int) (SimplySwordsConfig.getFloatValue("thunderblitz_cooldown"));
-    int chargeChance =  (int) (SimplySwordsConfig.getFloatValue("thunderblitz_chance"));
+    int skillCooldown = (int) SimplySwords.uniqueEffectsConfig.thunderBlitzCooldown;
+    int chargeChance =  (int) SimplySwords.uniqueEffectsConfig.thunderBlitzChance;
 
 
 

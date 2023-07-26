@@ -21,7 +21,7 @@ import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
-import net.sweenus.simplyswords.config.SimplySwordsConfig;
+import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -39,8 +39,8 @@ public class StealSwordItem extends UniqueSwordItem {
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         if (!attacker.getWorld().isClient()) {
             ServerWorld sworld = (ServerWorld) attacker.getWorld();
-            int fhitchance = (int) SimplySwordsConfig.getFloatValue("steal_chance");
-            int fduration = (int) SimplySwordsConfig.getFloatValue("steal_duration");
+            int fhitchance = (int) SimplySwords.uniqueEffectsConfig.stealChance;
+            int fduration = (int) SimplySwords.uniqueEffectsConfig.stealDuration;
             attacker.setVelocity(attacker.getRotationVector().multiply(+1));
             attacker.velocityModified = true;
 
@@ -70,8 +70,8 @@ public class StealSwordItem extends UniqueSwordItem {
 
 
         if (!user.getWorld().isClient()) {
-            int sradius = (int) SimplySwordsConfig.getFloatValue("steal_radius");
-            int vradius = (int) (SimplySwordsConfig.getFloatValue("steal_radius") / 2);
+            int sradius = (int) SimplySwords.uniqueEffectsConfig.stealRadius;
+            int vradius = (int) (SimplySwords.uniqueEffectsConfig.stealRadius / 2);
 
             double x = user.getX();
             double y = user.getY();
@@ -82,8 +82,8 @@ public class StealSwordItem extends UniqueSwordItem {
 
                 if (entities != null) {
                     if ((entities instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, user)) {
-                        int iduration = (int) SimplySwordsConfig.getFloatValue("steal_invis_duration");
-                        int bduration = (int) SimplySwordsConfig.getFloatValue("steal_blind_duration");
+                        int iduration = (int) SimplySwords.uniqueEffectsConfig.stealInvisDuration;
+                        int bduration = (int) SimplySwords.uniqueEffectsConfig.stealBlindDuration;
 
                         if (le.hasStatusEffect(StatusEffects.SLOWNESS) && le.hasStatusEffect(StatusEffects.GLOWING) && le.distanceTo(user) > 5){ //can we check target here?
                             le.addStatusEffect(new StatusEffectInstance(StatusEffects.BLINDNESS, bduration, 1), user);
