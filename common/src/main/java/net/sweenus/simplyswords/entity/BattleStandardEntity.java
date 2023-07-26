@@ -30,6 +30,9 @@ import java.util.Objects;
 public class BattleStandardEntity extends PathAwareEntity {
     public static final Supplier<EntityType<BattleStandardEntity>> TYPE = Suppliers.memoize(() -> EntityType.Builder.create(BattleStandardEntity::new, SpawnGroup.MISC).build("battlestandard"));
     float abilityDamage = (SimplySwords.uniqueEffectsConfig.righteousStandardDamage);
+    float abilityHeal = 3;
+    float abilityHealScalingModifier = (SimplySwords.uniqueEffectsConfig.righteousStandardSpellScalingHeal);
+    float spellScalingModifier = (SimplySwords.uniqueEffectsConfig.righteousStandardSpellScaling);
     public PlayerEntity ownerEntity;
     public String standardType;
     public int decayRate;
@@ -69,11 +72,11 @@ public class BattleStandardEntity extends PathAwareEntity {
             if (ownerEntity != null && standardType != null) {
                 int radius = 6;
                 if (HelperMethods.commonSpellAttributeScaling(
-                        1.1f,
+                        spellScalingModifier,
                         ownerEntity,
                         "fire") > 0)
                     abilityDamage = HelperMethods.commonSpellAttributeScaling(
-                            1.1f,
+                            spellScalingModifier,
                             ownerEntity,
                             "fire");
                 //AOE Aura
@@ -148,9 +151,17 @@ public class BattleStandardEntity extends PathAwareEntity {
 
                         if (entities != null) {
                             if ((entities instanceof LivingEntity le) && !HelperMethods.checkFriendlyFire(le, ownerEntity)) {
+                                if (HelperMethods.commonSpellAttributeScaling(
+                                        abilityHealScalingModifier,
+                                        ownerEntity,
+                                        "healing") > 0)
+                                    abilityHeal = HelperMethods.commonSpellAttributeScaling(
+                                            abilityHealScalingModifier,
+                                            ownerEntity,
+                                            "healing");
                                 //Sunfire positive effects
                                 if (Objects.equals(standardType, "sunfire")) {
-                                    le.heal(3);
+                                    le.heal(abilityHeal);
                                     le.addStatusEffect(new StatusEffectInstance(StatusEffects.STRENGTH, 90, 1), this);
                                 }
 

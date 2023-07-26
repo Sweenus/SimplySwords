@@ -35,10 +35,12 @@ public class LivyatanSwordItem extends UniqueSwordItem {
         super(toolMaterial, attackDamage, attackSpeed, settings);
     }
     private static int stepMod = 0;
+    public static boolean scalesWithSpellPower;
     int radius = (int) SimplySwords.uniqueEffectsConfig.frostShatterRadius;
     float abilityDamage = SimplySwords.uniqueEffectsConfig.frostShatterDamage;
     int proc_chance = (int) SimplySwords.uniqueEffectsConfig.frostShatterChance;
     int shatter_timer_max = (int) SimplySwords.uniqueEffectsConfig.frostShatterDuration;
+    float spellScalingModifier = SimplySwords.uniqueEffectsConfig.frostShatterSpellScaling;
     int shatter_timer;
     int shatter_bonus;
     int player_shatter_timer;
@@ -103,13 +105,15 @@ public class LivyatanSwordItem extends UniqueSwordItem {
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
         if (HelperMethods.commonSpellAttributeScaling(
-                1.7f,
+                spellScalingModifier,
                 entity,
-                "frost") > 0)
+                "frost") > 0) {
             abilityDamage = HelperMethods.commonSpellAttributeScaling(
-                    1.7f,
+                    spellScalingModifier,
                     entity,
                     "frost");
+            scalesWithSpellPower = true;
+        }
         if (!world.isClient && (entity instanceof PlayerEntity player)) {
             if (shatter_timer > 0)
                 shatter_timer --;
@@ -191,6 +195,8 @@ public class LivyatanSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.livyatansworditem.tooltip5").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.livyatansworditem.tooltip6").setStyle(TEXT));
         tooltip.add(Text.literal(""));
+        if (scalesWithSpellPower)
+            tooltip.add(Text.translatable("item.simplyswords.compat.scaleFrost"));
 
         super.appendTooltip(itemStack,world, tooltip, tooltipContext);
     }

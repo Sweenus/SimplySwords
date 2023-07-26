@@ -34,12 +34,14 @@ public class LichbladeSwordItem extends UniqueSwordItem {
         super(toolMaterial, attackDamage, attackSpeed, settings);
     }
     private static int stepMod = 0;
+    public static boolean scalesWithSpellPower;
     int radius = (int) SimplySwords.uniqueEffectsConfig.soulAnguishRadius;
     float abilityDamage = SimplySwords.uniqueEffectsConfig.soulAnguishDamage;
     int ability_timer_max = (int) SimplySwords.uniqueEffectsConfig.soulAnguishDuration;
     int skillCooldown = (int) SimplySwords.uniqueEffectsConfig.soulAnguishCooldown;
     float healAmount = SimplySwords.uniqueEffectsConfig.soulAnguishHeal;
     int range = (int) SimplySwords.uniqueEffectsConfig.soulAnguishRange;
+    float spellScalingModifier = SimplySwords.uniqueEffectsConfig.soulAnguishSpellScaling;
     int damageTracker;
     int chanceReduce;
     double lastX;
@@ -157,13 +159,15 @@ public class LichbladeSwordItem extends UniqueSwordItem {
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
         if (HelperMethods.commonSpellAttributeScaling(
-                1.6f,
+                spellScalingModifier,
                 entity,
-                "soul") > 0)
+                "soul") > 0) {
             abilityDamage = HelperMethods.commonSpellAttributeScaling(
-                    1.6f,
+                    spellScalingModifier,
                     entity,
                     "soul");
+            scalesWithSpellPower = true;
+        }
 
         if (!entity.getWorld().isClient() && (entity instanceof PlayerEntity player)) {
             //AOE Aura
@@ -241,6 +245,8 @@ public class LichbladeSwordItem extends UniqueSwordItem {
             tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip9").setStyle(TEXT));
             tooltip.add(Text.literal(""));
         }
+        if (scalesWithSpellPower)
+            tooltip.add(Text.translatable("item.simplyswords.compat.scaleSoul"));
         super.appendTooltip(itemStack,world, tooltip, tooltipContext);
 
     }

@@ -31,8 +31,10 @@ public class RendSwordItem extends UniqueSwordItem {
         super(toolMaterial, attackDamage, attackSpeed, settings);
     }
     float abilityDamage = SimplySwords.uniqueEffectsConfig.soulrendDamageMulti;
+    float spellScalingModifier = SimplySwords.uniqueEffectsConfig.soulrendDamageSpellScaling;
 
     private static int stepMod = 0;
+    public static boolean scalesWithSpellPower;
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
@@ -131,13 +133,15 @@ public class RendSwordItem extends UniqueSwordItem {
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
         if (HelperMethods.commonSpellAttributeScaling(
-                0.4f,
+                spellScalingModifier,
                 entity,
-                "soul") > 0)
+                "soul") > 0) {
             abilityDamage = HelperMethods.commonSpellAttributeScaling(
-                    0.4f,
+                    spellScalingModifier,
                     entity,
                     "soul");
+            scalesWithSpellPower = true;
+        }
 
         if (stepMod > 0)
             stepMod --;
@@ -164,6 +168,9 @@ public class RendSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.rendsworditem.tooltip4").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.rendsworditem.tooltip5").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.rendsworditem.tooltip6").setStyle(TEXT));
+        tooltip.add(Text.literal(""));
+        if (scalesWithSpellPower)
+            tooltip.add(Text.translatable("item.simplyswords.compat.scaleSoul"));
 
         super.appendTooltip(itemStack,world, tooltip, tooltipContext);
     }

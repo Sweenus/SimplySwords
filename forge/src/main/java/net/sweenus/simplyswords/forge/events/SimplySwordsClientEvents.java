@@ -19,10 +19,11 @@ public class SimplySwordsClientEvents {
     @SubscribeEvent
     public static void simplySwords$addPackFinder(AddPackFindersEvent event) {
         if (event.getPackType() == ResourceType.CLIENT_RESOURCES) {
-            simplySwords$registerResourcePack(event, new Identifier("simplyswords", "classic"), false);
+            //simplySwords$registerResourcePack(event, new Identifier("simplyswords", "classic"), false);
         }
     }
 
+    //Deprecated - resourcepack no longer bundled
     private static void simplySwords$registerResourcePack(AddPackFindersEvent event, Identifier identifier, boolean alwaysEnabled) {
         event.addRepositorySource((profileAdder -> {
             IModFile file = ModList.get().getModFileById(identifier.getNamespace()).getFile();

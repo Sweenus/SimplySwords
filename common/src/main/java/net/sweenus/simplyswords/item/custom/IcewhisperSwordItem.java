@@ -33,11 +33,12 @@ public class IcewhisperSwordItem extends UniqueSwordItem {
         super(toolMaterial, attackDamage, attackSpeed, settings);
     }
     private static int stepMod = 0;
+    public static boolean scalesWithSpellPower;
     int radius = (int) SimplySwords.uniqueEffectsConfig.permafrostRadius;
     float abilityDamage = SimplySwords.uniqueEffectsConfig.permafrostDamage;
     int blizzard_timer_max = (int) SimplySwords.uniqueEffectsConfig.permafrostDuration;
     int skillCooldown = (int) SimplySwords.uniqueEffectsConfig.permafrostCooldown;
-    int blizzard_timer;
+    float spellScalingModifier = SimplySwords.uniqueEffectsConfig.permafrostSpellScaling;
     double lastX;
     double lastY;
     double lastZ;
@@ -97,13 +98,15 @@ public class IcewhisperSwordItem extends UniqueSwordItem {
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
         if (HelperMethods.commonSpellAttributeScaling(
-                0.9f,
+                spellScalingModifier,
                 entity,
-                "frost") > 0)
+                "frost") > 0) {
             abilityDamage = HelperMethods.commonSpellAttributeScaling(
-                    0.9f,
+                    spellScalingModifier,
                     entity,
                     "frost");
+            scalesWithSpellPower = true;
+        }
 
         if (!world.isClient && (entity instanceof PlayerEntity player)) {
 
@@ -185,6 +188,8 @@ public class IcewhisperSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.icewhispersworditem.tooltip5").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.icewhispersworditem.tooltip6", radius * 2).setStyle(TEXT));
         tooltip.add(Text.literal(""));
+        if (scalesWithSpellPower)
+            tooltip.add(Text.translatable("item.simplyswords.compat.scaleFrost"));
 
         super.appendTooltip(itemStack,world, tooltip, tooltipContext);
 

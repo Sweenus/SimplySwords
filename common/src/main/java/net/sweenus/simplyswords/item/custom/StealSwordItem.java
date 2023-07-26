@@ -33,7 +33,9 @@ public class StealSwordItem extends UniqueSwordItem {
         super(toolMaterial, attackDamage, attackSpeed, settings);
     }
     private static int stepMod = 0;
+    public static boolean scalesWithSpellPower;
     float abilityDamage = 5;
+    float spellScalingModifier = SimplySwords.uniqueEffectsConfig.stealSpellScaling;
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
@@ -112,13 +114,15 @@ public class StealSwordItem extends UniqueSwordItem {
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
         if (HelperMethods.commonSpellAttributeScaling(
-                2.6f,
+                spellScalingModifier,
                 entity,
-                "soul") > 0)
+                "soul") > 0) {
             abilityDamage = HelperMethods.commonSpellAttributeScaling(
-                    2.6f,
+                    spellScalingModifier,
                     entity,
                     "soul");
+            scalesWithSpellPower = true;
+        }
 
         if (stepMod > 0)
             stepMod --;
@@ -154,6 +158,8 @@ public class StealSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.stealsworditem.tooltip9").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.stealsworditem.tooltip10").setStyle(TEXT));
         tooltip.add(Text.literal(""));
+        if (scalesWithSpellPower)
+            tooltip.add(Text.translatable("item.simplyswords.compat.scaleSoul"));
 
         super.appendTooltip(itemStack,world, tooltip, tooltipContext);
     }

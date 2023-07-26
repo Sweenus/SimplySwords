@@ -35,12 +35,14 @@ public class FrostfallSwordItem extends UniqueSwordItem {
         super(toolMaterial, attackDamage, attackSpeed, settings);
     }
     private static int stepMod = 0;
+    public static boolean scalesWithSpellPower;
 
     private final int abilityCooldown = (int) SimplySwords.uniqueEffectsConfig.frostFuryCooldown;
     int radius = (int) SimplySwords.uniqueEffectsConfig.frostFuryRadius;
-    float abilityDamage = SimplySwords.uniqueEffectsConfig.frostShatterDamage;
+    float abilityDamage = SimplySwords.uniqueEffectsConfig.frostFuryDamage;
     int proc_chance = (int) SimplySwords.uniqueEffectsConfig.frostFuryChance;
     int shatter_timer_max = (int) SimplySwords.uniqueEffectsConfig.frostFuryDuration;
+    float spellScalingModifier = SimplySwords.uniqueEffectsConfig.frostFurySpellScaling;
     int shatter_timer;
     int player_shatter_timer;
     double lastX;
@@ -227,13 +229,15 @@ public class FrostfallSwordItem extends UniqueSwordItem {
         }
 
         if (HelperMethods.commonSpellAttributeScaling(
-                1.4f,
+                spellScalingModifier,
                 entity,
-                "frost") > 0)
+                "frost") > 0) {
             abilityDamage = HelperMethods.commonSpellAttributeScaling(
-                    1.4f,
+                    spellScalingModifier,
                     entity,
                     "frost");
+            scalesWithSpellPower = true;
+        }
 
         if (stepMod > 0)
             stepMod --;
@@ -262,6 +266,8 @@ public class FrostfallSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.frostfallsworditem.tooltip5", shatter_timer_max /20).setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.frostfallsworditem.tooltip6").setStyle(TEXT));
         tooltip.add(Text.literal(""));
+        if (scalesWithSpellPower)
+            tooltip.add(Text.translatable("item.simplyswords.compat.scaleFrost"));
 
         super.appendTooltip(itemStack,world, tooltip, tooltipContext);
 

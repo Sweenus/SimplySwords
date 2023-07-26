@@ -29,11 +29,13 @@ import java.util.List;
 public class StormbringerSwordItem extends UniqueSwordItem {
 
     private static int stepMod = 0;
+    public static boolean scalesWithSpellPower;
     int radius = 3;
     int ability_timer_max = (int) SimplySwords.uniqueEffectsConfig.shockDeflectBlockDuration;
     int skillCooldown = (int) SimplySwords.uniqueEffectsConfig.shockDeflectCooldown;
     int perfectParryWindow = (int) SimplySwords.uniqueEffectsConfig.shockDeflectParryDuration;
     float abilityDamage = SimplySwords.uniqueEffectsConfig.shockDeflectDamage;
+    float spellScalingModifier = SimplySwords.uniqueEffectsConfig.shockDeflectSpellScaling;
     boolean parrySuccess;
     int parrySuccession;
 
@@ -139,13 +141,15 @@ public class StormbringerSwordItem extends UniqueSwordItem {
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
         if (HelperMethods.commonSpellAttributeScaling(
-                2.3f,
+                spellScalingModifier,
                 entity,
-                "lightning") > 0)
+                "lightning") > 0) {
             abilityDamage = HelperMethods.commonSpellAttributeScaling(
-                    2.3f,
+                    spellScalingModifier,
                     entity,
                     "lightning");
+            scalesWithSpellPower = true;
+        }
 
         if (stepMod > 0)
             stepMod --;
@@ -180,6 +184,9 @@ public class StormbringerSwordItem extends UniqueSwordItem {
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.stormbringersworditem.tooltip10").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.stormbringersworditem.tooltip11").setStyle(TEXT));
+        tooltip.add(Text.literal(""));
+        if (scalesWithSpellPower)
+            tooltip.add(Text.translatable("item.simplyswords.compat.scaleLightning"));
 
         super.appendTooltip(itemStack,world, tooltip, tooltipContext);
     }

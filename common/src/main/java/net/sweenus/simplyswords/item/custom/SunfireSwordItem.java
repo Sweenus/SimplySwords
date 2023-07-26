@@ -32,6 +32,7 @@ import java.util.List;
 public class SunfireSwordItem extends UniqueSwordItem {
 
     private static int stepMod = 0;
+    public static boolean scalesWithSpellPower;
     int skillCooldown = (int) SimplySwords.uniqueEffectsConfig.righteousStandardCooldown;
     int abilityChance =  (int) SimplySwords.uniqueEffectsConfig.righteousStandardChance;
 
@@ -88,6 +89,12 @@ public class SunfireSwordItem extends UniqueSwordItem {
 
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
+        if (HelperMethods.commonSpellAttributeScaling(
+                2,
+                entity,
+                "fire") > 0) {
+            scalesWithSpellPower = true;
+        }
 
         if (stepMod > 0)
             stepMod --;
@@ -113,6 +120,11 @@ public class SunfireSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.sunfiresworditem.tooltip4").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.sunfiresworditem.tooltip5").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.sunfiresworditem.tooltip6").setStyle(TEXT));
+        tooltip.add(Text.literal(""));
+        if (scalesWithSpellPower) {
+            tooltip.add(Text.translatable("item.simplyswords.compat.scaleFire"));
+            tooltip.add(Text.translatable("item.simplyswords.compat.scaleHealing"));
+        }
 
         super.appendTooltip(itemStack,world, tooltip, tooltipContext);
     }

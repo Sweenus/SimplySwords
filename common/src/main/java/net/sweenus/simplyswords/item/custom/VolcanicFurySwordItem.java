@@ -34,11 +34,13 @@ public class VolcanicFurySwordItem extends UniqueSwordItem {
         super(toolMaterial, attackDamage, attackSpeed, settings);
     }
     private static int stepMod = 0;
+    public static boolean scalesWithSpellPower;
     int radius = (int) SimplySwords.uniqueEffectsConfig.volcanicFuryRadius;
     float abilityDamage = SimplySwords.uniqueEffectsConfig.volcanicFuryDamage;
     int ability_timer_max = 120;
     int skillCooldown = (int) SimplySwords.uniqueEffectsConfig.volcanicFuryCooldown;
     int chargeChance =  (int) SimplySwords.uniqueEffectsConfig.volcanicFuryChance;
+    float spellPowerModifier = SimplySwords.uniqueEffectsConfig.volcanicFurySpellScaling;
     int chargePower;
 
 
@@ -149,13 +151,15 @@ public class VolcanicFurySwordItem extends UniqueSwordItem {
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
         if (HelperMethods.commonSpellAttributeScaling(
-                1.4f,
+                spellPowerModifier,
                 entity,
-                "fire") > 0)
+                "fire") > 0) {
             abilityDamage = HelperMethods.commonSpellAttributeScaling(
-                    1.4f,
+                    spellPowerModifier,
                     entity,
                     "fire");
+            scalesWithSpellPower = true;
+        }
 
         if (stepMod > 0)
             stepMod --;
@@ -187,6 +191,9 @@ public class VolcanicFurySwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.volcanicfurysworditem.tooltip7").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.volcanicfurysworditem.tooltip8").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.volcanicfurysworditem.tooltip9").setStyle(TEXT));
+        tooltip.add(Text.literal(""));
+        if (scalesWithSpellPower)
+            tooltip.add(Text.translatable("item.simplyswords.compat.scaleFire"));
 
         super.appendTooltip(itemStack,world, tooltip, tooltipContext);
     }
