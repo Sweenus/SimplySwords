@@ -5,6 +5,7 @@ plugins {
 repositories {
     maven {url "https://cursemaven.com"}
     maven { url "https://maven.blamejared.com" }
+    maven { url "https://maven.shedaniel.me/" }
 
 }
 
@@ -37,6 +38,7 @@ dependencies {
     forge "net.minecraftforge:forge:${rootProject.forge_version}"
     // Remove the next line if you don't want to depend on the API
     modApi "dev.architectury:architectury-forge:${rootProject.architectury_version}"
+    modApi("me.shedaniel.cloth:cloth-config-forge:${rootProject.cloth_config_version}")
 
     //Patchouli
     modImplementation ("vazkii.patchouli:Patchouli:1.20.1-81-FORGE")

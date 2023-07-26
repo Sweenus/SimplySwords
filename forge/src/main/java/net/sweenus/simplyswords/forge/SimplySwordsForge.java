@@ -1,11 +1,15 @@
 package net.sweenus.simplyswords.forge;
 
 import dev.architectury.platform.forge.EventBuses;
+import me.shedaniel.autoconfig.AutoConfig;
+import net.minecraftforge.client.ConfigScreenHandler;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.ModList;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.sweenus.simplyswords.SimplySwords;
+import net.sweenus.simplyswords.config.ConfigWrapper;
 import net.sweenus.simplyswords.forge.compat.GobberCompat;
 import net.sweenus.simplyswords.forge.events.SimplySwordsClientEvents;
 
@@ -18,10 +22,16 @@ public class SimplySwordsForge {
         SimplySwords.init();
         MinecraftForge.EVENT_BUS.register(new SimplySwordsClientEvents());
 
+        ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class, () -> {
+            return new ConfigScreenHandler.ConfigScreenFactory((minecraft, screen) -> {
+                return AutoConfig.getConfigScreen(ConfigWrapper.class, screen).get();
+            });
+        });
+
         if (ModList.get().isLoaded("gobber2")) {
             GobberCompat.registerModItems();
             GobberCompat.GOBBER_ITEM.register(FMLJavaModLoadingContext.get().getModEventBus());
         }
-//
+
     }
 }

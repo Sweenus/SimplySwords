@@ -25,6 +25,9 @@
     ],
     "preLaunch": [
       "net.sweenus.simplyswords.fabric.SimplySwordsPreLaunch"
+    ],
+    "modmenu": [
+      "net.sweenus.simplyswords.fabric.client.ModMenuIntegration"
     ]
   },
   "mixins": [
