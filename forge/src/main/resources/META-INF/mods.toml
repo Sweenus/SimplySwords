@@ -34,3 +34,10 @@ mandatory = true
 versionRange = "[5.12.42,)"
 ordering = "AFTER"
 side = "BOTH"
+
+[[dependencies.simplyswords]]
+modId = "cloth-config"
+mandatory = true
+versionRange = "[11.1.106,)"
+ordering = "AFTER"
+side = "BOTH"

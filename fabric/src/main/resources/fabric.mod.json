@@ -31,13 +31,13 @@
     ]
   },
   "mixins": [
-    "simplyswords.mixins.json",
-    "simplyswords-common.mixins.json"
+    "simplyswords.mixins.json"
   ],
   "depends": {
     "fabric": "*",
     "minecraft": ">=1.20 <=1.20.1",
-    "architectury": ">=7.1.0"
+    "architectury": ">=7.1.0",
+    "cloth-config": ">=11.1.106"
   },
   "suggests": {
     "mythicmetals": ">=0.18.2",
