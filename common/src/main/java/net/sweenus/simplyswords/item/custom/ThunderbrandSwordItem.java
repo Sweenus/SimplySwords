@@ -31,11 +31,13 @@ public class ThunderbrandSwordItem extends UniqueSwordItem {
         super(toolMaterial, attackDamage, attackSpeed, settings);
     }
     private static int stepMod = 0;
+    public static boolean scalesWithSpellPower;
     int radius = (int) SimplySwords.uniqueEffectsConfig.thunderBlitzRadius;
     float abilityDamage = SimplySwords.uniqueEffectsConfig.thunderBlitzDamage;
     int ability_timer_max = 50;
     int skillCooldown = (int) SimplySwords.uniqueEffectsConfig.thunderBlitzCooldown;
     int chargeChance =  (int) SimplySwords.uniqueEffectsConfig.thunderBlitzChance;
+    float spellScalingModifier = SimplySwords.uniqueEffectsConfig.thunderBlitzSpellScaling;
 
 
 
@@ -102,13 +104,15 @@ public class ThunderbrandSwordItem extends UniqueSwordItem {
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
         if (HelperMethods.commonSpellAttributeScaling(
-                1.7f,
+                spellScalingModifier,
                 entity,
-                "lightning") > 0)
+                "lightning") > 0) {
             abilityDamage = HelperMethods.commonSpellAttributeScaling(
-                    1.7f,
+                    spellScalingModifier,
                     entity,
                     "lightning");
+            scalesWithSpellPower = true;
+        }
 
         if (stepMod > 0)
             stepMod --;
@@ -139,6 +143,8 @@ public class ThunderbrandSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.thunderbrandsworditem.tooltip6").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.thunderbrandsworditem.tooltip7").setStyle(TEXT));
         tooltip.add(Text.literal(""));
+        if (scalesWithSpellPower)
+            tooltip.add(Text.translatable("item.simplyswords.compat.scaleLightning"));
 
         super.appendTooltip(itemStack,world, tooltip, tooltipContext);
 

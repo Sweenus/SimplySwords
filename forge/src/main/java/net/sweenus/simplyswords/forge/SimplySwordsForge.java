@@ -3,7 +3,6 @@ package net.sweenus.simplyswords.forge;
 import dev.architectury.platform.forge.EventBuses;
 import me.shedaniel.autoconfig.AutoConfig;
 import net.minecraftforge.client.ConfigScreenHandler;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
@@ -11,7 +10,6 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.config.ConfigWrapper;
 import net.sweenus.simplyswords.forge.compat.GobberCompat;
-import net.sweenus.simplyswords.forge.events.SimplySwordsClientEvents;
 
 @Mod(SimplySwords.MOD_ID)
 public class SimplySwordsForge {
@@ -20,7 +18,7 @@ public class SimplySwordsForge {
         EventBuses.registerModEventBus(SimplySwords.MOD_ID, FMLJavaModLoadingContext.get().getModEventBus());
 
         SimplySwords.init();
-        MinecraftForge.EVENT_BUS.register(new SimplySwordsClientEvents());
+        //MinecraftForge.EVENT_BUS.register(new SimplySwordsClientEvents());
 
         ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class, () -> {
             return new ConfigScreenHandler.ConfigScreenFactory((minecraft, screen) -> {

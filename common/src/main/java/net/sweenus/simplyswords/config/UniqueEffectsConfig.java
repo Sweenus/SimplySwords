@@ -21,6 +21,7 @@ public class UniqueEffectsConfig implements ConfigData {
     public float stealInvisDuration = 120f;
     public float stealBlindDuration = 200f;
     public float stealRadius = 30f;
+    public float stealSpellScaling = 2.6f;
 
     @ConfigEntry.Gui.PrefixText
     public float soulMeldChance = 75f;
@@ -34,6 +35,7 @@ public class UniqueEffectsConfig implements ConfigData {
     public float soulrendHealMulti = 0.5f;
     public float soulrendRadius = 10f;
     public float soulrendMaxStacks = 8f;
+    public float soulrendDamageSpellScaling = 0.4f;
 
     @ConfigEntry.Gui.PrefixText
     public float ferocityChance = 75f;
@@ -50,6 +52,7 @@ public class UniqueEffectsConfig implements ConfigData {
     public float volcanicFuryRadius = 3f;
     public float volcanicFuryCooldown = 300f;
     public float volcanicFuryDamage = 3f;
+    public float volcanicFurySpellScaling = 1.4f;
 
     @ConfigEntry.Gui.PrefixText
     public float stormChance = 15f;
@@ -78,6 +81,7 @@ public class UniqueEffectsConfig implements ConfigData {
     public float frostFuryDamage = 18f;
     public float frostFuryChance = 15f;
     public float frostFuryDuration = 80f;
+    public float frostFurySpellScaling = 1.4f;
 
     @ConfigEntry.Gui.PrefixText
     public float moltenRoarCooldown = 320f;
@@ -91,12 +95,14 @@ public class UniqueEffectsConfig implements ConfigData {
     public float frostShatterDamage = 18f;
     public float frostShatterChance = 15f;
     public float frostShatterDuration = 80f;
+    public float frostShatterSpellScaling = 1.7f;
 
     @ConfigEntry.Gui.PrefixText
     public float permafrostRadius = 4f;
     public float permafrostDamage = 1f;
     public float permafrostCooldown = 600f;
     public float permafrostDuration = 200f;
+    public float permafrostSpellScaling = 0.9f;
 
     @ConfigEntry.Gui.PrefixText
     public float arcaneAssaultRadius = 6f;
@@ -104,12 +110,14 @@ public class UniqueEffectsConfig implements ConfigData {
     public float arcaneAssaultCooldown = 220;
     public float arcaneAssaultChance = 25f;
     public float arcaneAssaultDuration = 120f;
+    public float arcaneAssaultSpellScaling = 1.4f;
 
     @ConfigEntry.Gui.PrefixText
     public float thunderBlitzRadius = 2f;
     public float thunderBlitzDamage = 3f;
     public float thunderBlitzCooldown = 250;
     public float thunderBlitzChance = 15f;
+    public float thunderBlitzSpellScaling = 1.7f;
 
     @ConfigEntry.Gui.PrefixText
     public float stormJoltCooldown = 100f;
@@ -122,12 +130,14 @@ public class UniqueEffectsConfig implements ConfigData {
     public float soulAnguishDuration = 500f;
     public float soulAnguishHeal = 0.5f;
     public float soulAnguishRange = 22f;
+    public float soulAnguishSpellScaling = 1.6f;
 
     @ConfigEntry.Gui.PrefixText
     public float shockDeflectBlockDuration = 35f;
     public float shockDeflectDamage = 12f;
     public float shockDeflectCooldown = 90;
     public float shockDeflectParryDuration = 10f;
+    public float shockDeflectSpellScaling = 2.3f;
 
     @ConfigEntry.Gui.PrefixText
     public float shadowmistCooldown = 200f;
@@ -140,11 +150,14 @@ public class UniqueEffectsConfig implements ConfigData {
     public float abyssalStandardCooldown = 700;
     public float abyssalStandardChance = 15f;
     public float abyssalStandardDamage = 3f;
+    public float abyssalStandardSpellScaling = 1.2f;
 
     @ConfigEntry.Gui.PrefixText
     public float righteousStandardCooldown = 700f;
     public float righteousStandardChance = 15f;
     public float righteousStandardDamage = 3f;
+    public float righteousStandardSpellScaling = 1.1f;
+    public float righteousStandardSpellScalingHeal = 1.3f;
 
     @ConfigEntry.Gui.PrefixText
     public float fatalFlickerCooldown = 175f;

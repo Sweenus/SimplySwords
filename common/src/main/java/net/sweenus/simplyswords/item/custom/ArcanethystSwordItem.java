@@ -31,11 +31,13 @@ public class ArcanethystSwordItem extends UniqueSwordItem {
         super(toolMaterial, attackDamage, attackSpeed, settings);
     }
     private static int stepMod = 0;
+    public static boolean scalesWithSpellPower;
     int radius = (int) SimplySwords.uniqueEffectsConfig.arcaneAssaultRadius;
     float abilityDamage = SimplySwords.uniqueEffectsConfig.arcaneAssaultDamage;
     int arcane_timer_max = (int) SimplySwords.uniqueEffectsConfig.arcaneAssaultDuration;
     int skillCooldown = (int) SimplySwords.uniqueEffectsConfig.arcaneAssaultCooldown;
     int chargeChance =  (int) SimplySwords.uniqueEffectsConfig.arcaneAssaultChance;
+    int spellScalingModifier =  (int) SimplySwords.uniqueEffectsConfig.arcaneAssaultSpellScaling;
 
 
 
@@ -100,13 +102,15 @@ public class ArcanethystSwordItem extends UniqueSwordItem {
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
         if (HelperMethods.commonSpellAttributeScaling(
-                1.4f,
+                spellScalingModifier,
                 entity,
-                "arcane") > 0)
+                "arcane") > 0) {
             abilityDamage = HelperMethods.commonSpellAttributeScaling(
-                    1.4f,
+                    spellScalingModifier,
                     entity,
                     "arcane");
+            scalesWithSpellPower = true;
+        }
 
         if (stepMod > 0)
             stepMod --;
@@ -134,6 +138,8 @@ public class ArcanethystSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.arcanethystsworditem.tooltip5").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.arcanethystsworditem.tooltip6").setStyle(TEXT));
         tooltip.add(Text.literal(""));
+        if (scalesWithSpellPower)
+            tooltip.add(Text.translatable("item.simplyswords.compat.scaleArcane"));
 
         super.appendTooltip(itemStack,world, tooltip, tooltipContext);
 

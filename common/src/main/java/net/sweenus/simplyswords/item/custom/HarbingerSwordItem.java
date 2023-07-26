@@ -32,6 +32,7 @@ import java.util.List;
 public class HarbingerSwordItem extends UniqueSwordItem {
 
     private static int stepMod = 0;
+    public  static boolean scalesWithSpellPower;
     int skillCooldown = (int) SimplySwords.uniqueEffectsConfig.abyssalStandardCooldown;
     int abilityChance =  (int) SimplySwords.uniqueEffectsConfig.abyssalStandardChance;
 
@@ -87,6 +88,12 @@ public class HarbingerSwordItem extends UniqueSwordItem {
 
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
+        if (HelperMethods.commonSpellAttributeScaling(
+                2,
+                entity,
+                "soul") > 0) {
+            scalesWithSpellPower = true;
+        }
 
         if (stepMod > 0)
             stepMod --;
@@ -113,6 +120,9 @@ public class HarbingerSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.harbingersworditem.tooltip4").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.harbingersworditem.tooltip5").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.harbingersworditem.tooltip6").setStyle(TEXT));
+        tooltip.add(Text.literal(""));
+        if (scalesWithSpellPower)
+            tooltip.add(Text.translatable("item.simplyswords.compat.scaleSoul"));
 
         super.appendTooltip(itemStack,world, tooltip, tooltipContext);
     }
