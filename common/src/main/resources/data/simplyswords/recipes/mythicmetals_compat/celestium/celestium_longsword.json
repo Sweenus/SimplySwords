@@ -13,21 +13,17 @@
       "modid": "mythicmetals"
     }
   ],
-  "type": "minecraft:crafting_shaped",
-  "key": {
-    "#": {
-      "tag": "c:wood_sticks"
-    },
-    "X": {
-      "item": "mythicmetals:celestium_ingot"
-    }
+  "type": "minecraft:smithing_transform",
+  "base": {
+    "item": "simplyswords:diamond_longsword"
   },
-  "pattern": [
-    "#  ",
-    " X ",
-    "  X"
-  ],
+  "addition": {
+    "item": "mythicmetals:celestium_ingot"
+  },
   "result": {
     "item": "simplyswords:mythicmetals_compat/celestium/celestium_longsword"
+  },
+  "template": {
+    "item": "mythicmetals:unobtainium_smithing_template"
   }
 }
