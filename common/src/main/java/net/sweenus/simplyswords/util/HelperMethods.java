@@ -192,6 +192,14 @@ public class HelperMethods {
         else if (runicPower.contains("immolation") && SimplySwords.runicEffectsConfig.enableImmolate) return true;
         else return false;
     }
+    public static boolean checkNetherBlacklist(String netherPower) {
+        if (netherPower.contains("echo") && SimplySwords.gemEffectsConfig.enableEcho) return true;
+        else if (netherPower.contains("berserk") && SimplySwords.gemEffectsConfig.enableBerserk) return true;
+        else if (netherPower.contains("radiance") && SimplySwords.gemEffectsConfig.enableRadiance) return true;
+        else if (netherPower.contains("onslaught") && SimplySwords.gemEffectsConfig.enableOnslaught) return true;
+        else if (netherPower.contains("nullification") && SimplySwords.gemEffectsConfig.enableNullification) return true;
+        else return false;
+    }
 
 
     // choose Powers from provided list
@@ -238,12 +246,17 @@ public class HelperMethods {
     }
 
     public static String chooseNetherfusedPower() {
-        List<String> runicList = Arrays.asList(
+        List<String> netherList = Arrays.asList(
             "echo", "berserk", "radiance", "onslaught", "nullification");
 
-        Random choose = new Random();
-        int randomIndex = choose.nextInt(runicList.size());
-        return runicList.get(randomIndex);
+        for (int i = 0; i < 100; i++) {
+            Random choose = new Random();
+            int randomIndex = choose.nextInt(netherList.size());
+            String netherSelection = netherList.get(randomIndex);
+            if (HelperMethods.checkNetherBlacklist(netherSelection))
+                return netherSelection;
+        }
+        return "";
     }
 
     //Check if item is a unique 2H weapon

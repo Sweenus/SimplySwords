@@ -1277,5 +1277,14 @@
   "text.autoconfig.simplyswords_main.option.runic_effects.momentumCooldown":                                            "Chance",
 
   "text.autoconfig.simplyswords_main.option.runic_effects.imbuedChance.@PrefixText" :                                   "§b[Imbued]§7",
-  "text.autoconfig.simplyswords_main.option.runic_effects.imbuedChance":                                                "Chance"
+  "text.autoconfig.simplyswords_main.option.runic_effects.imbuedChance":                                                "Chance",
+
+  "text.autoconfig.simplyswords_main.option.gem_effects.enableEcho.@PrefixText" :                                       "§4[Netherfused Gem Blacklisting]§7\nSetting any of the below values to false will prevent that netherfused power from being available via gems.",
+  "text.autoconfig.simplyswords_main.option.gem_effects.enableEcho":                                                    "Enable Echo gems",
+  "text.autoconfig.simplyswords_main.option.gem_effects.enableBerserk":                                                 "Enable Berserk gems",
+  "text.autoconfig.simplyswords_main.option.gem_effects.enableRadiance":                                                "Enable Radiance gems",
+  "text.autoconfig.simplyswords_main.option.gem_effects.enableOnslaught":                                               "Enable Onslaught gems",
+  "text.autoconfig.simplyswords_main.option.gem_effects.enableNullification":                                           "Enable Nullification gems",
+
+  "text.autoconfig.simplyswords_main.option.status_effects.echoDamage":                                                 "Echo base damage"
 }

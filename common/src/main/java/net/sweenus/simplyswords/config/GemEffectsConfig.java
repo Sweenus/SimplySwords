@@ -7,12 +7,11 @@ import me.shedaniel.autoconfig.annotation.ConfigEntry;
 @Config(name = "gem_effects")
 public class GemEffectsConfig implements ConfigData {
 
-    @ConfigEntry.Gui.Tooltip
-    public boolean enablePlayerExCompatibility = false;
-    @ConfigEntry.Gui.Tooltip
-    public boolean treeResetOnDeath = false;
-
-    @ConfigEntry.Gui.Tooltip
-    public boolean removeUnlockRestrictions = false;
+    @ConfigEntry.Gui.PrefixText
+    public boolean enableEcho = true;
+    public boolean enableBerserk = true;
+    public boolean enableRadiance = true;
+    public boolean enableOnslaught = true;
+    public boolean enableNullification = true;
 
 }
