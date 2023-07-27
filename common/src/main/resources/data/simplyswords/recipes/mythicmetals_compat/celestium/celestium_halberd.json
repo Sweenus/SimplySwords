@@ -13,24 +13,17 @@
       "modid": "mythicmetals"
     }
   ],
-  "type": "minecraft:crafting_shaped",
-  "key": {
-    "#": {
-      "tag": "c:wood_sticks"
-    },
-    "X": {
-      "item": "mythicmetals:celestium_ingot"
-    },
-    "Y": {
-      "item": "minecraft:iron_nugget"
-    }
+  "type": "minecraft:smithing_transform",
+  "base": {
+    "item": "simplyswords:diamond_halberd"
   },
-  "pattern": [
-    " XY",
-    "X#X",
-    "#  "
-  ],
+  "addition": {
+    "item": "mythicmetals:celestium_ingot"
+  },
   "result": {
     "item": "simplyswords:mythicmetals_compat/celestium/celestium_halberd"
+  },
+  "template": {
+    "item": "mythicmetals:unobtainium_smithing_template"
   }
 }

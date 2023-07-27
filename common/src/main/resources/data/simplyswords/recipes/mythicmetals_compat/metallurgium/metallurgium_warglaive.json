@@ -13,24 +13,17 @@
       "modid": "mythicmetals"
     }
   ],
-  "type": "minecraft:crafting_shaped",
-  "key": {
-    "#": {
-      "tag": "c:wood_sticks"
-    },
-    "X": {
-      "item": "mythicmetals:metallurgium_ingot"
-    },
-    "Y": {
-      "item": "minecraft:iron_nugget"
-    }
+  "type": "minecraft:smithing_transform",
+  "base": {
+    "item": "simplyswords:netherite_warglaive"
   },
-  "pattern": [
-    " Y ",
-    "X#X",
-    "   "
-  ],
+  "addition": {
+    "item": "mythicmetals:metallurgium_ingot"
+  },
   "result": {
     "item": "simplyswords:mythicmetals_compat/metallurgium/metallurgium_warglaive"
+  },
+  "template": {
+    "item": "mythicmetals:unobtainium_smithing_template"
   }
 }

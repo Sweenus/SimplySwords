@@ -14,7 +14,7 @@
     },
     {
       "type": "patchouli:smelting",
-      "recipe": "simplyswords:soulrender"
+      "recipe": "simplyswords:unique_melting"
     }
   ]
 }
