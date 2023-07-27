@@ -36,7 +36,7 @@ ordering = "AFTER"
 side = "BOTH"
 
 [[dependencies.simplyswords]]
-modId = "cloth-config"
+modId = "cloth_config"
 mandatory = true
 versionRange = "[11.1.106,)"
 ordering = "AFTER"
