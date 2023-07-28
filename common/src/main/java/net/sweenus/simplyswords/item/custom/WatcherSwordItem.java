@@ -1,6 +1,5 @@
 package net.sweenus.simplyswords.item.custom;
 
-
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -22,12 +21,12 @@ public class WatcherSwordItem extends UniqueSwordItem {
     public WatcherSwordItem(ToolMaterial toolMaterial, int attackDamage, float attackSpeed, Settings settings) {
         super(toolMaterial, attackDamage, attackSpeed, settings);
     }
+
     private static int stepMod = 0;
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         if (!attacker.getWorld().isClient()) {
-
             int thitchance = (int) SimplySwords.uniqueEffectsConfig.watcherChance;
             int phitchance = (int) SimplySwords.uniqueEffectsConfig.omenChance;
 
@@ -41,19 +40,15 @@ public class WatcherSwordItem extends UniqueSwordItem {
                 target.addStatusEffect(new StatusEffectInstance(EffectRegistry.OMEN.get(), 1, 1), attacker);
             }
         }
-
         return super.postHit(stack, target, attacker);
-
     }
+
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
-
-        if (stepMod > 0)
-            stepMod --;
-        if (stepMod <= 0)
-            stepMod = 7;
-        HelperMethods.createFootfalls(entity, stack, world, stepMod, ParticleTypes.ENCHANT, ParticleTypes.ENCHANT, ParticleTypes.MYCELIUM, true);
-
+        if (stepMod > 0) stepMod--;
+        if (stepMod <= 0) stepMod = 7;
+        HelperMethods.createFootfalls(entity, stack, world, stepMod, ParticleTypes.ENCHANT, ParticleTypes.ENCHANT,
+                ParticleTypes.MYCELIUM, true);
         super.inventoryTick(stack, world, entity, slot, selected);
     }
 
@@ -74,7 +69,6 @@ public class WatcherSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.watchersworditem.tooltip6").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.watchersworditem.tooltip7").setStyle(TEXT));
 
-        super.appendTooltip(itemStack,world, tooltip, tooltipContext);
+        super.appendTooltip(itemStack, world, tooltip, tooltipContext);
     }
-
 }

@@ -1,6 +1,5 @@
 package net.sweenus.simplyswords.item.custom;
 
-
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -12,7 +11,6 @@ import net.minecraft.item.ToolMaterial;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
@@ -30,16 +28,15 @@ public class SoulSwordItem extends UniqueSwordItem {
     public SoulSwordItem(ToolMaterial toolMaterial, int attackDamage, float attackSpeed, Settings settings) {
         super(toolMaterial, attackDamage, attackSpeed, settings);
     }
+
     private static int stepMod = 0;
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         if (!attacker.getWorld().isClient()) {
-            ServerWorld world = (ServerWorld) attacker.getWorld();
             int fhitchance = (int) SimplySwords.uniqueEffectsConfig.soulMeldChance;
             int fduration = (int) SimplySwords.uniqueEffectsConfig.soulMeldDuration;
             HelperMethods.playHitSounds(attacker, target);
-
 
             if (attacker.getRandom().nextInt(100) <= fhitchance) {
                 //world.playSoundFromEntity(null, target, SoundRegistry.MAGIC_BOW_CHARGE_SHORT_VERSION.get(), SoundCategory.PLAYERS, 0.3f, 1.2f);
@@ -57,13 +54,11 @@ public class SoulSwordItem extends UniqueSwordItem {
                 }
             }
         }
-
         return super.postHit(stack, target, attacker);
-
     }
+
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
-
         if (!user.getWorld().isClient()) {
             int hradius = (int) SimplySwords.uniqueEffectsConfig.soulMeldRadius;
             int vradius = (int) (SimplySwords.uniqueEffectsConfig.soulMeldRadius / 2);
@@ -73,44 +68,33 @@ public class SoulSwordItem extends UniqueSwordItem {
             ServerWorld serverWorld = (ServerWorld) user.getWorld();
             Box box = new Box(x + hradius, y + vradius, z + hradius, x - hradius, y - vradius, z - hradius);
 
-            for(Entity ee: serverWorld.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY)) {
-
-                if (ee != null) {
-                    if (ee instanceof LivingEntity && user.hasStatusEffect(StatusEffects.MINING_FATIGUE) && HelperMethods.checkFriendlyFire((LivingEntity) ee, user)){
-                        LivingEntity le = (LivingEntity) ee;
-                        le.addStatusEffect(new StatusEffectInstance(StatusEffects.MINING_FATIGUE, user.getStatusEffect(StatusEffects.MINING_FATIGUE).getDuration(), user.getStatusEffect(StatusEffects.MINING_FATIGUE).getAmplifier()) , user);
-                        world.playSoundFromEntity (null, ee, SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_IMPACT_03.get() , SoundCategory.BLOCKS, 0.1f, 1f);
-                    }
+            for (Entity entity : serverWorld.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY)) {
+                if (entity instanceof LivingEntity le && user.hasStatusEffect(StatusEffects.MINING_FATIGUE) && HelperMethods.checkFriendlyFire((LivingEntity) entity, user)) {
+                    le.addStatusEffect(new StatusEffectInstance(StatusEffects.MINING_FATIGUE, user.getStatusEffect(StatusEffects.MINING_FATIGUE).getDuration(), user.getStatusEffect(StatusEffects.MINING_FATIGUE).getAmplifier()), user);
+                    world.playSoundFromEntity(null, entity, SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_IMPACT_03.get(),
+                            entity.getSoundCategory(), 0.1f, 1f);
                 }
             }
 
             if (user.hasStatusEffect(StatusEffects.MINING_FATIGUE) && user.hasStatusEffect(StatusEffects.RESISTANCE)) {
-
                 user.addStatusEffect(new StatusEffectInstance(StatusEffects.REGENERATION,
                         user.getStatusEffect(StatusEffects.MINING_FATIGUE).getAmplifier() * 40, 2), user);
 
                 user.removeStatusEffect(StatusEffects.MINING_FATIGUE);
                 user.removeStatusEffect(StatusEffects.RESISTANCE);
             }
-
         }
-        return super.use(world,user,hand);
+        return super.use(world, user, hand);
     }
 
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
-
-        if (stepMod > 0)
-            stepMod --;
-        if (stepMod <= 0)
-            stepMod = 7;
-        HelperMethods.createFootfalls(entity, stack, world, stepMod, ParticleTypes.SOUL, ParticleTypes.SOUL, ParticleTypes.SPORE_BLOSSOM_AIR, false);
-
+        if (stepMod > 0) stepMod--;
+        if (stepMod <= 0) stepMod = 7;
+        HelperMethods.createFootfalls(entity, stack, world, stepMod, ParticleTypes.SOUL, ParticleTypes.SOUL,
+                ParticleTypes.SPORE_BLOSSOM_AIR, false);
         super.inventoryTick(stack, world, entity, slot, selected);
     }
-
-
-
 
     @Override
     public void appendTooltip(ItemStack itemStack, World world, List<Text> tooltip, TooltipContext tooltipContext) {
@@ -128,7 +112,6 @@ public class SoulSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.soulsworditem.tooltip5").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.soulsworditem.tooltip6").setStyle(TEXT));
 
-        super.appendTooltip(itemStack,world, tooltip, tooltipContext);
+        super.appendTooltip(itemStack, world, tooltip, tooltipContext);
     }
-
 }
