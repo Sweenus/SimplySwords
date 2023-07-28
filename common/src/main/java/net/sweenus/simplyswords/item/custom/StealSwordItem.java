@@ -1,6 +1,5 @@
 package net.sweenus.simplyswords.item.custom;
 
-
 import net.minecraft.block.BlockState;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.Entity;
@@ -13,7 +12,6 @@ import net.minecraft.item.ToolMaterial;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
@@ -32,6 +30,7 @@ public class StealSwordItem extends UniqueSwordItem {
     public StealSwordItem(ToolMaterial toolMaterial, int attackDamage, float attackSpeed, Settings settings) {
         super(toolMaterial, attackDamage, attackSpeed, settings);
     }
+
     private static int stepMod = 0;
     public static boolean scalesWithSpellPower;
     float abilityDamage = 5;
@@ -48,29 +47,29 @@ public class StealSwordItem extends UniqueSwordItem {
 
             HelperMethods.playHitSounds(attacker, target);
 
-
             if (attacker.getRandom().nextInt(100) <= fhitchance) {
-
                 int choose_sound = (int) (Math.random() * 30);
-                if (choose_sound <= 10)
-                    sworld.playSoundFromEntity(null, target, SoundRegistry.MAGIC_SWORD_ATTACK_WITH_BLOOD_01.get(), SoundCategory.PLAYERS, 0.5f, 2f);
-                if (choose_sound <= 20 && choose_sound > 10)
-                    sworld.playSoundFromEntity(null, target, SoundRegistry.MAGIC_SWORD_ATTACK_WITH_BLOOD_02.get(), SoundCategory.PLAYERS, 0.5f, 2f);
-                if (choose_sound <= 30 && choose_sound > 20)
-                    sworld.playSoundFromEntity(null, target, SoundRegistry.MAGIC_SWORD_ATTACK_WITH_BLOOD_03.get(), SoundCategory.PLAYERS, 0.5f, 2f);
+                if (choose_sound <= 10) {
+                    sworld.playSoundFromEntity(null, target, SoundRegistry.MAGIC_SWORD_ATTACK_WITH_BLOOD_01.get(),
+                            target.getSoundCategory(), 0.5f, 2f);
+                } else if (choose_sound <= 20) {
+                    sworld.playSoundFromEntity(null, target, SoundRegistry.MAGIC_SWORD_ATTACK_WITH_BLOOD_02.get(),
+                            target.getSoundCategory(), 0.5f, 2f);
+                } else {
+                    sworld.playSoundFromEntity(null, target, SoundRegistry.MAGIC_SWORD_ATTACK_WITH_BLOOD_03.get(),
+                            target.getSoundCategory(), 0.5f, 2f);
+                }
 
                 attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, fduration, 2), attacker);
                 target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, fduration, 1), attacker);
                 target.addStatusEffect(new StatusEffectInstance(StatusEffects.GLOWING, fduration, 1), attacker);
-
             }
         }
-            return super.postHit(stack, target, attacker);
+        return super.postHit(stack, target, attacker);
     }
+
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
-
-
         if (!user.getWorld().isClient()) {
             int sradius = (int) SimplySwords.uniqueEffectsConfig.stealRadius;
             int vradius = (int) (SimplySwords.uniqueEffectsConfig.stealRadius / 2);
@@ -79,57 +78,46 @@ public class StealSwordItem extends UniqueSwordItem {
             double y = user.getY();
             double z = user.getZ();
             ServerWorld sworld = (ServerWorld) user.getWorld();
-            Box box = new Box(x + sradius, y + vradius, z + sradius, x - sradius, y - vradius, z - sradius);
-            for(Entity entities: sworld.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY)) {
+            Box box = new Box(x + sradius, y + vradius, z + sradius,
+                    x - sradius, y - vradius, z - sradius);
+            for (Entity entity : sworld.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY)) {
+                if ((entity instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, user)) {
+                    int iduration = (int) SimplySwords.uniqueEffectsConfig.stealInvisDuration;
+                    int bduration = (int) SimplySwords.uniqueEffectsConfig.stealBlindDuration;
 
-                if (entities != null) {
-                    if ((entities instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, user)) {
-                        int iduration = (int) SimplySwords.uniqueEffectsConfig.stealInvisDuration;
-                        int bduration = (int) SimplySwords.uniqueEffectsConfig.stealBlindDuration;
-
-                        if (le.hasStatusEffect(StatusEffects.SLOWNESS) && le.hasStatusEffect(StatusEffects.GLOWING) && le.distanceTo(user) > 5){ //can we check target here?
+                    if (le.hasStatusEffect(StatusEffects.SLOWNESS) && le.hasStatusEffect(StatusEffects.GLOWING)) {
+                        if (le.distanceTo(user) > 5) { //can we check target here?
                             le.addStatusEffect(new StatusEffectInstance(StatusEffects.BLINDNESS, bduration, 1), user);
                             user.teleport(le.getX(), le.getY(), le.getZ());
-                            sworld.playSoundFromEntity (null, le, SoundRegistry.ELEMENTAL_SWORD_SCIFI_ATTACK_03.get() , SoundCategory.PLAYERS, 0.3f, 1.5f);
+                            sworld.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_SWORD_SCIFI_ATTACK_03.get(),
+                                    le.getSoundCategory(), 0.3f, 1.5f);
                             le.damage(user.getDamageSources().freeze(), abilityDamage);
-                            le.removeStatusEffect(StatusEffects.SLOWNESS);
-                            le.removeStatusEffect(StatusEffects.GLOWING);
-                        }
-                        if (le.hasStatusEffect(StatusEffects.SLOWNESS) && le.hasStatusEffect(StatusEffects.GLOWING) && le.distanceTo(user) <= 5){
+                        } else {
                             user.addStatusEffect(new StatusEffectInstance(StatusEffects.INVISIBILITY, iduration, 1), user);
                             user.setVelocity(user.getRotationVector().multiply(+2));
                             user.velocityModified = true;
-                            sworld.playSoundFromEntity (null, entities, SoundRegistry.MAGIC_BOW_SHOOT_MISS_01.get(), SoundCategory.PLAYERS, 0.3f, 1.5f);
-                            le.removeStatusEffect(StatusEffects.SLOWNESS);
-                            le.removeStatusEffect(StatusEffects.GLOWING);
+                            sworld.playSoundFromEntity(null, entity, SoundRegistry.MAGIC_BOW_SHOOT_MISS_01.get(),
+                                    entity.getSoundCategory(), 0.3f, 1.5f);
                         }
+                        le.removeStatusEffect(StatusEffects.SLOWNESS);
+                        le.removeStatusEffect(StatusEffects.GLOWING);
                     }
                 }
             }
         }
-
-        return super.use(world,user,hand);
+        return super.use(world, user, hand);
     }
 
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
-        if (HelperMethods.commonSpellAttributeScaling(
-                spellScalingModifier,
-                entity,
-                "soul") > 0) {
-            abilityDamage = HelperMethods.commonSpellAttributeScaling(
-                    spellScalingModifier,
-                    entity,
-                    "soul");
+        if (HelperMethods.commonSpellAttributeScaling(spellScalingModifier, entity, "soul") > 0) {
+            abilityDamage = HelperMethods.commonSpellAttributeScaling(spellScalingModifier, entity, "soul");
             scalesWithSpellPower = true;
         }
-
-        if (stepMod > 0)
-            stepMod --;
-        if (stepMod <= 0)
-            stepMod = 7;
-        HelperMethods.createFootfalls(entity, stack, world, stepMod, ParticleTypes.NAUTILUS, ParticleTypes.NAUTILUS, ParticleTypes.MYCELIUM, true);
-
+        if (stepMod > 0) stepMod--;
+        if (stepMod <= 0) stepMod = 7;
+        HelperMethods.createFootfalls(entity, stack, world, stepMod, ParticleTypes.NAUTILUS, ParticleTypes.NAUTILUS,
+                ParticleTypes.MYCELIUM, true);
         super.inventoryTick(stack, world, entity, slot, selected);
     }
 
@@ -157,11 +145,10 @@ public class StealSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.stealsworditem.tooltip8").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.stealsworditem.tooltip9").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.stealsworditem.tooltip10").setStyle(TEXT));
-        tooltip.add(Text.literal(""));
-        if (scalesWithSpellPower)
+        if (scalesWithSpellPower) {
+            tooltip.add(Text.literal(""));
             tooltip.add(Text.translatable("item.simplyswords.compat.scaleSoul"));
-
-        super.appendTooltip(itemStack,world, tooltip, tooltipContext);
+        }
+        super.appendTooltip(itemStack, world, tooltip, tooltipContext);
     }
-
 }

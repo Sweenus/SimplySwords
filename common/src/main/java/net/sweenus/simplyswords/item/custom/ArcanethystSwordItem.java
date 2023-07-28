@@ -1,6 +1,5 @@
 package net.sweenus.simplyswords.item.custom;
 
-
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
@@ -11,7 +10,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.particle.ParticleTypes;
-import net.minecraft.sound.SoundCategory;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
@@ -30,41 +28,38 @@ public class ArcanethystSwordItem extends UniqueSwordItem {
     public ArcanethystSwordItem(ToolMaterial toolMaterial, int attackDamage, float attackSpeed, Settings settings) {
         super(toolMaterial, attackDamage, attackSpeed, settings);
     }
+
     private static int stepMod = 0;
     public static boolean scalesWithSpellPower;
     int radius = (int) SimplySwords.uniqueEffectsConfig.arcaneAssaultRadius;
     float abilityDamage = SimplySwords.uniqueEffectsConfig.arcaneAssaultDamage;
     int arcane_timer_max = (int) SimplySwords.uniqueEffectsConfig.arcaneAssaultDuration;
     int skillCooldown = (int) SimplySwords.uniqueEffectsConfig.arcaneAssaultCooldown;
-    int chargeChance =  (int) SimplySwords.uniqueEffectsConfig.arcaneAssaultChance;
-    int spellScalingModifier =  (int) SimplySwords.uniqueEffectsConfig.arcaneAssaultSpellScaling;
-
-
+    int chargeChance = (int) SimplySwords.uniqueEffectsConfig.arcaneAssaultChance;
+    int spellScalingModifier = (int) SimplySwords.uniqueEffectsConfig.arcaneAssaultSpellScaling;
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         if (!attacker.getWorld().isClient()) {
             HelperMethods.playHitSounds(attacker, target);
-
             if (attacker.getRandom().nextInt(100) <= chargeChance) {
                 target.addStatusEffect(new StatusEffectInstance(StatusEffects.LEVITATION, 60, 1), attacker);
-                attacker.getWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_BOW_SHOOT_IMPACT_01.get(), SoundCategory.PLAYERS, 0.5f, 1.2f);
+                attacker.getWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_BOW_SHOOT_IMPACT_01.get(),
+                        attacker.getSoundCategory(), 0.5f, 1.2f);
             }
         }
-
-            return super.postHit(stack, target, attacker);
+        return super.postHit(stack, target, attacker);
     }
+
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
-
         if (!user.getWorld().isClient()) {
-
             ItemStack itemStack = user.getStackInHand(hand);
             if (itemStack.getDamage() >= itemStack.getMaxDamage() - 1) {
                 return TypedActionResult.fail(itemStack);
             }
-
-            world.playSoundFromEntity(null, user, SoundRegistry.MAGIC_BOW_SHOOT_IMPACT_02.get(), SoundCategory.PLAYERS, 0.4f, 1.2f);
+            world.playSoundFromEntity(null, user, SoundRegistry.MAGIC_BOW_SHOOT_IMPACT_02.get(),
+                    user.getSoundCategory(), 0.4f, 1.2f);
             user.setCurrentHand(hand);
             return TypedActionResult.consume(itemStack);
         }
@@ -73,20 +68,17 @@ public class ArcanethystSwordItem extends UniqueSwordItem {
 
     @Override
     public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
-
-        if (user.getEquippedStack(EquipmentSlot.MAINHAND) == stack && (user instanceof PlayerEntity player)) {
-
+        if (user.getEquippedStack(EquipmentSlot.MAINHAND) == stack && user instanceof PlayerEntity) {
             AbilityMethods.tickAbilityArcaneAssault(stack, world, user, remainingUseTicks, arcane_timer_max, abilityDamage,
                     skillCooldown, radius);
-
         }
     }
-
 
     @Override
     public int getMaxUseTime(ItemStack stack) {
         return arcane_timer_max;
     }
+
     @Override
     public UseAction getUseAction(ItemStack stack) {
         return UseAction.CROSSBOW;
@@ -101,26 +93,16 @@ public class ArcanethystSwordItem extends UniqueSwordItem {
 
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
-        if (HelperMethods.commonSpellAttributeScaling(
-                spellScalingModifier,
-                entity,
-                "arcane") > 0) {
-            abilityDamage = HelperMethods.commonSpellAttributeScaling(
-                    spellScalingModifier,
-                    entity,
-                    "arcane");
+        if (HelperMethods.commonSpellAttributeScaling(spellScalingModifier, entity, "arcane") > 0) {
+            abilityDamage = HelperMethods.commonSpellAttributeScaling(spellScalingModifier, entity, "arcane");
             scalesWithSpellPower = true;
         }
-
-        if (stepMod > 0)
-            stepMod --;
-        if (stepMod <= 0)
-            stepMod = 7;
-        HelperMethods.createFootfalls(entity, stack, world, stepMod, ParticleTypes.DRAGON_BREATH, ParticleTypes.DRAGON_BREATH, ParticleTypes.REVERSE_PORTAL, true);
-
+        if (stepMod > 0) stepMod--;
+        if (stepMod <= 0) stepMod = 7;
+        HelperMethods.createFootfalls(entity, stack, world, stepMod, ParticleTypes.DRAGON_BREATH,
+                ParticleTypes.DRAGON_BREATH, ParticleTypes.REVERSE_PORTAL, true);
         super.inventoryTick(stack, world, entity, slot, selected);
     }
-
 
     @Override
     public void appendTooltip(ItemStack itemStack, World world, List<Text> tooltip, TooltipContext tooltipContext) {
@@ -137,12 +119,10 @@ public class ArcanethystSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.arcanethystsworditem.tooltip4").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.arcanethystsworditem.tooltip5").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.arcanethystsworditem.tooltip6").setStyle(TEXT));
-        tooltip.add(Text.literal(""));
-        if (scalesWithSpellPower)
+        if (scalesWithSpellPower) {
+            tooltip.add(Text.literal(""));
             tooltip.add(Text.translatable("item.simplyswords.compat.scaleArcane"));
-
-        super.appendTooltip(itemStack,world, tooltip, tooltipContext);
-
+        }
+        super.appendTooltip(itemStack, world, tooltip, tooltipContext);
     }
-
 }

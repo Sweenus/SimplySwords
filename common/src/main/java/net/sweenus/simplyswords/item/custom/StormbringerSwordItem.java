@@ -1,6 +1,5 @@
 package net.sweenus.simplyswords.item.custom;
 
-
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -11,7 +10,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
-import net.minecraft.sound.SoundCategory;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
@@ -43,47 +41,43 @@ public class StormbringerSwordItem extends UniqueSwordItem {
         super(toolMaterial, attackDamage, attackSpeed, settings);
     }
 
-
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-
         HelperMethods.playHitSounds(attacker, target);
-            return super.postHit(stack, target, attacker);
+        return super.postHit(stack, target, attacker);
     }
+
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
-
         ItemStack itemStack = user.getStackInHand(hand);
         if (itemStack.getDamage() >= itemStack.getMaxDamage() - 1) {
             return TypedActionResult.fail(itemStack);
         }
-        world.playSoundFromEntity(null, user, SoundRegistry.MAGIC_SWORD_PARRY_02.get(), SoundCategory.PLAYERS, 0.8f, (float) (0.8f * ( parrySuccession * 0.1)));
+        world.playSoundFromEntity(null, user, SoundRegistry.MAGIC_SWORD_PARRY_02.get(), user.getSoundCategory(), 0.8f, (float) (0.8f * (parrySuccession * 0.1)));
         user.addStatusEffect(new StatusEffectInstance(StatusEffects.ABSORPTION, ability_timer_max, 2), user);
         user.setCurrentHand(hand);
         return TypedActionResult.consume(itemStack);
     }
+
     @Override
     public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
         if (!world.isClient) {
-
             if (remainingUseTicks <= 2)
                 user.stopUsingItem();
 
             Box box = new Box(user.getX() + radius, user.getY() + radius, user.getZ() + radius,
                     user.getX() - radius, user.getY() - radius, user.getZ() - radius);
-            for (Entity entities : world.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY)) {
+            for (Entity entity : world.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY)) {
 
                 //Parry attack
-                if (entities != null) {
-                    if ((entities instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, (PlayerEntity) user)) {
-                        if (le.handSwinging && remainingUseTicks > getMaxUseTime(stack) - perfectParryWindow) {
-                            parrySuccess = true;
-                            if (parrySuccession < 20)
-                                parrySuccession +=1;
-                            user.stopUsingItem();
-                            le.handSwinging = false;
-                            world.playSoundFromEntity(null, user, SoundRegistry.MAGIC_SWORD_PARRY_01.get(), SoundCategory.PLAYERS, 1f, (float) (0.8f * ( parrySuccession * 0.1)));
-                        }
+                if ((entity instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, (PlayerEntity) user)) {
+                    if (le.handSwinging && remainingUseTicks > getMaxUseTime(stack) - perfectParryWindow) {
+                        parrySuccess = true;
+                        if (parrySuccession < 20) parrySuccession += 1;
+                        user.stopUsingItem();
+                        le.handSwinging = false;
+                        world.playSoundFromEntity(null, user, SoundRegistry.MAGIC_SWORD_PARRY_01.get(),
+                                user.getSoundCategory(), 1f, (float) (0.8f * (parrySuccession * 0.1)));
                     }
                 }
             }
@@ -93,7 +87,6 @@ public class StormbringerSwordItem extends UniqueSwordItem {
     @Override
     public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
         if (!world.isClient) {
-
             if (parrySuccess) {
                 //Damage
                 Box box = new Box(user.getX() + radius, user.getY() + radius, user.getZ() + radius,
@@ -101,23 +94,21 @@ public class StormbringerSwordItem extends UniqueSwordItem {
                 for (Entity entities : world.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY)) {
 
                     //damage & knockback
-                    if (entities != null) {
-                        if ((entities instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, (PlayerEntity) user)) {
+                    if ((entities instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, (PlayerEntity) user)) {
+                        float choose = (float) (Math.random() * 1);
+                        le.damage(user.getDamageSources().magic(), abilityDamage + parrySuccession);
+                        world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_BOW_POISON_ATTACK_01.get(),
+                                le.getSoundCategory(), 0.3f, choose);
+                        le.setVelocity(le.getX() - user.getX(), 0.1, le.getZ() - user.getZ());
 
-                            float choose = (float) (Math.random() * 1);
-                            le.damage(user.getDamageSources().magic(), abilityDamage + parrySuccession);
-                            world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_BOW_POISON_ATTACK_01.get(), SoundCategory.PLAYERS, 0.3f, choose);
-                            le.setVelocity(le.getX() - user.getX(), 0.1, le.getZ() - user.getZ());
-
-                            //player dodge backwards
-                            user.setVelocity(le.getRotationVector().multiply(+1.5));
-                            user.setVelocity(user.getVelocity().x, 0, user.getVelocity().z); // Prevent player flying to the heavens
-                            user.velocityModified = true;
-
-                        }
+                        //player dodge backwards
+                        user.setVelocity(le.getRotationVector().multiply(+1.5));
+                        user.setVelocity(user.getVelocity().x, 0, user.getVelocity().z); // Prevent player flying to the heavens
+                        user.velocityModified = true;
                     }
                 }
-                world.playSoundFromEntity(null, user, SoundRegistry.ELEMENTAL_BOW_THUNDER_SHOOT_IMPACT_01.get(), SoundCategory.PLAYERS, (float) (0.2f * ( parrySuccession * 0.04)), 0.8f);
+                world.playSoundFromEntity(null, user, SoundRegistry.ELEMENTAL_BOW_THUNDER_SHOOT_IMPACT_01.get(),
+                        user.getSoundCategory(), (float) (0.2f * (parrySuccession * 0.04)), 0.8f);
                 ((PlayerEntity) user).getItemCooldownManager().set(stack.getItem(), (skillCooldown / 2) + (parrySuccession * 2));
             }
             if (!parrySuccess) {
@@ -125,14 +116,14 @@ public class StormbringerSwordItem extends UniqueSwordItem {
                 parrySuccession = 0;
             }
             parrySuccess = false;
-
         }
     }
 
     @Override
     public int getMaxUseTime(ItemStack stack) {
-            return ability_timer_max;
+        return ability_timer_max;
     }
+
     @Override
     public UseAction getUseAction(ItemStack stack) {
         return UseAction.BLOCK;
@@ -140,27 +131,16 @@ public class StormbringerSwordItem extends UniqueSwordItem {
 
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
-        if (HelperMethods.commonSpellAttributeScaling(
-                spellScalingModifier,
-                entity,
-                "lightning") > 0) {
-            abilityDamage = HelperMethods.commonSpellAttributeScaling(
-                    spellScalingModifier,
-                    entity,
-                    "lightning");
+        if (HelperMethods.commonSpellAttributeScaling(spellScalingModifier, entity, "lightning") > 0) {
+            abilityDamage = HelperMethods.commonSpellAttributeScaling(spellScalingModifier, entity, "lightning");
             scalesWithSpellPower = true;
         }
-
-        if (stepMod > 0)
-            stepMod --;
-        if (stepMod <= 0)
-            stepMod = 7;
-        HelperMethods.createFootfalls(entity, stack, world, stepMod, ParticleTypes.MYCELIUM, ParticleTypes.MYCELIUM, ParticleTypes.MYCELIUM, true);
-
+        if (stepMod > 0) stepMod--;
+        if (stepMod <= 0) stepMod = 7;
+        HelperMethods.createFootfalls(entity, stack, world, stepMod, ParticleTypes.MYCELIUM, ParticleTypes.MYCELIUM,
+                ParticleTypes.MYCELIUM, true);
         super.inventoryTick(stack, world, entity, slot, selected);
     }
-
-
 
     @Override
     public void appendTooltip(ItemStack itemStack, World world, List<Text> tooltip, TooltipContext tooltipContext) {
@@ -184,11 +164,10 @@ public class StormbringerSwordItem extends UniqueSwordItem {
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.stormbringersworditem.tooltip10").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.stormbringersworditem.tooltip11").setStyle(TEXT));
-        tooltip.add(Text.literal(""));
-        if (scalesWithSpellPower)
+        if (scalesWithSpellPower) {
+            tooltip.add(Text.literal(""));
             tooltip.add(Text.translatable("item.simplyswords.compat.scaleLightning"));
-
-        super.appendTooltip(itemStack,world, tooltip, tooltipContext);
+        }
+        super.appendTooltip(itemStack, world, tooltip, tooltipContext);
     }
-
 }
