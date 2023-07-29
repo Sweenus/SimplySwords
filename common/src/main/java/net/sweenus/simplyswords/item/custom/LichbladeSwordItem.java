@@ -41,8 +41,6 @@ public class LichbladeSwordItem extends UniqueSwordItem {
     float healAmount = SimplySwords.uniqueEffectsConfig.soulAnguishHeal;
     int range = (int) SimplySwords.uniqueEffectsConfig.soulAnguishRange;
     float spellScalingModifier = SimplySwords.uniqueEffectsConfig.soulAnguishSpellScaling;
-    int damageTracker;
-    int chanceReduce;
     double lastX;
     double lastY;
     double lastZ;
@@ -75,7 +73,6 @@ public class LichbladeSwordItem extends UniqueSwordItem {
             lastX = user.getX();
             lastY = user.getY();
             lastZ = user.getZ();
-            chanceReduce = 0;
         }
         user.setCurrentHand(hand);
         return TypedActionResult.consume(itemStack);
@@ -92,14 +89,12 @@ public class LichbladeSwordItem extends UniqueSwordItem {
                         player.addStatusEffect(new StatusEffectInstance(StatusEffects.ABSORPTION, 600, 2), player);
                         player.getItemCooldownManager().set(stack.getItem(), skillCooldown);
                         player.stopUsingItem();
-                        damageTracker = 0;
                         world.playSoundFromEntity(null, player, SoundRegistry.DARK_SWORD_SPELL.get(),
                                 player.getSoundCategory(), 0.04f, 0.5f);
                     }
                 }
             } else if (stack.isOf(ItemsRegistry.WAKING_LICHBLADE.get()) && (abilityTarget.isDead() || remainingUseTicks < ability_timer_max)) {
                 player.stopUsingItem();
-                damageTracker = 0;
             }
             //Move aura to target
             if (player.age % 5 == 0) {
@@ -114,10 +109,8 @@ public class LichbladeSwordItem extends UniqueSwordItem {
                 if (targetY > lastY) lastY += 1;
                 if (targetY < lastY) lastY -= 1;
             }
-            AbilityMethods.tickAbilitySoulAnguish(stack, world, user, remainingUseTicks, ability_timer_max,
-                    abilityDamage, skillCooldown, radius, damageTracker, chanceReduce,
-                    lastX, lastY, lastZ, targetX, targetY, targetZ, range, healAmount,
-                    abilityTarget);
+            AbilityMethods.tickAbilitySoulAnguish(stack, world, user, abilityDamage, radius, lastX, lastY, lastZ,
+                    healAmount, abilityTarget);
         }
     }
 
