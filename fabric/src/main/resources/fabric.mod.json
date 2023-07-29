@@ -31,6 +31,9 @@
     ],
     "modmenu": [
       "net.sweenus.simplyswords.fabric.client.ModMenuIntegration"
+    ],
+    "dynamiclights": [
+      "net.sweenus.simplyswords.fabric.compat.DynamicLightsCompat"
     ]
   },
   "mixins": [

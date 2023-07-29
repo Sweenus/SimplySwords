@@ -93,7 +93,7 @@ public class StormSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.stormsworditem.tooltip2").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.stormsworditem.tooltip3").setStyle(TEXT));
         tooltip.add(Text.literal(""));
-        tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(RIGHTCLICK));
+        tooltip.add(Text.translatable("item.simplyswords.onrightclickheld").setStyle(RIGHTCLICK));
         tooltip.add(Text.translatable("item.simplyswords.stormsworditem.tooltip4").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.stormsworditem.tooltip5").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.stormsworditem.tooltip6").setStyle(TEXT));

@@ -55,9 +55,11 @@ public class UniqueSwordItem extends SwordItem {
                              StackReference cursorStackReference) {
         if (SimplySwords.generalConfig.enableUniqueGemSockets) {
             String powerType;
-            if (otherStack.isOf(ItemsRegistry.RUNEFUSED_GEM.get()) && stack.getOrCreateNbt().getString("runic_power").equals("socket_empty")) {
+            if (otherStack.isOf(ItemsRegistry.RUNEFUSED_GEM.get()) && stack.getOrCreateNbt().getString("runic_power").equals("socket_empty")
+                    && !otherStack.getOrCreateNbt().getString("runic_power").isEmpty()) {
                 powerType = "runic_power";
-            } else if (otherStack.isOf(ItemsRegistry.NETHERFUSED_GEM.get()) && stack.getOrCreateNbt().getString("nether_power").equals("socket_empty")) {
+            } else if (otherStack.isOf(ItemsRegistry.NETHERFUSED_GEM.get()) && stack.getOrCreateNbt().getString("nether_power").equals("socket_empty")
+                    && !otherStack.getOrCreateNbt().getString("nether_power").isEmpty()) {
                 powerType = "nether_power";
             } else {
                 return false;
