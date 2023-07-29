@@ -1,6 +1,5 @@
 package net.sweenus.simplyswords.item.custom;
 
-
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -22,11 +21,11 @@ public class PlagueSwordItem extends UniqueSwordItem {
     public PlagueSwordItem(ToolMaterial toolMaterial, int attackDamage, float attackSpeed, Settings settings) {
         super(toolMaterial, attackDamage, attackSpeed, settings);
     }
+
     private static int stepMod = 0;
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-
         int phitchance = (int) SimplySwords.uniqueEffectsConfig.plagueChance;
         HelperMethods.playHitSounds(attacker, target);
 
@@ -103,27 +102,18 @@ public class PlagueSwordItem extends UniqueSwordItem {
                 target.addStatusEffect(new StatusEffectInstance(StatusEffects.INSTANT_DAMAGE, 0, statamp), attacker);
                 target.removeStatusEffect(StatusEffects.ABSORPTION);
             }
-
-
         }
-
         return super.postHit(stack, target, attacker);
-
     }
 
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
-
-        if (stepMod > 0)
-            stepMod --;
-        if (stepMod <= 0)
-            stepMod = 7;
-        HelperMethods.createFootfalls(entity, stack, world, stepMod, ParticleTypes.SPORE_BLOSSOM_AIR, ParticleTypes.SPORE_BLOSSOM_AIR, ParticleTypes.FALLING_SPORE_BLOSSOM, true);
-
+        if (stepMod > 0) stepMod--;
+        if (stepMod <= 0) stepMod = 7;
+        HelperMethods.createFootfalls(entity, stack, world, stepMod, ParticleTypes.SPORE_BLOSSOM_AIR,
+                ParticleTypes.SPORE_BLOSSOM_AIR, ParticleTypes.FALLING_SPORE_BLOSSOM, true);
         super.inventoryTick(stack, world, entity, slot, selected);
     }
-
-
 
     @Override
     public void appendTooltip(ItemStack itemStack, World world, List<Text> tooltip, TooltipContext tooltipContext) {
@@ -135,8 +125,6 @@ public class PlagueSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.plaguesworditem.tooltip2").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.plaguesworditem.tooltip3").setStyle(TEXT));
 
-
-        super.appendTooltip(itemStack,world, tooltip, tooltipContext);
+        super.appendTooltip(itemStack, world, tooltip, tooltipContext);
     }
-
 }

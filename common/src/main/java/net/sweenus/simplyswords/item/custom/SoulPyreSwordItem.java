@@ -1,6 +1,5 @@
 package net.sweenus.simplyswords.item.custom;
 
-
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -11,8 +10,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
@@ -31,6 +28,7 @@ public class SoulPyreSwordItem extends UniqueSwordItem {
     public SoulPyreSwordItem(ToolMaterial toolMaterial, int attackDamage, float attackSpeed, Settings settings) {
         super(toolMaterial, attackDamage, attackSpeed, settings);
     }
+
     private int relocationTimer;
     private static int stepMod = 0;
     private final int relocationDuration = (int) SimplySwords.uniqueEffectsConfig.soultetherDuration;
@@ -43,23 +41,18 @@ public class SoulPyreSwordItem extends UniqueSwordItem {
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         if (!attacker.getWorld().isClient()) {
-            ServerWorld sworld = (ServerWorld) attacker.getWorld();
             HelperMethods.playHitSounds(attacker, target);
-
         }
-
-            return super.postHit(stack, target, attacker);
+        return super.postHit(stack, target, attacker);
     }
+
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
-
-
         if (!user.getWorld().isClient()) {
             int range = (int) SimplySwords.uniqueEffectsConfig.soultetherRange;
             int radius = (int) SimplySwords.uniqueEffectsConfig.soultetherRadius;
             int ignite_duration = (int) (SimplySwords.uniqueEffectsConfig.soultetherIgniteDuration) / 20;
             int resistance_duration = (int) SimplySwords.uniqueEffectsConfig.soultetherResistanceDuration;
-
             //Position swap target & player
             LivingEntity target = (LivingEntity) HelperMethods.getTargetedEntity(user, range);
             if (target != null && HelperMethods.checkFriendlyFire(target, user)) {
@@ -72,67 +65,59 @@ public class SoulPyreSwordItem extends UniqueSwordItem {
                 double rememberz = target.getZ();
                 target.teleport(user.getX(), user.getY(), user.getZ(), true);
                 user.teleport(rememberx, remembery, rememberz, true);
-                world.playSoundFromEntity(null, user, SoundRegistry.ELEMENTAL_SWORD_SCIFI_ATTACK_01.get(), SoundCategory.PLAYERS, 0.3f, 1f);
+                world.playSoundFromEntity(null, user, SoundRegistry.ELEMENTAL_SWORD_SCIFI_ATTACK_01.get(),
+                        user.getSoundCategory(), 0.3f, 1f);
                 user.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, resistance_duration, 0), user);
                 user.addStatusEffect(new StatusEffectInstance(StatusEffects.FIRE_RESISTANCE, resistance_duration, 0), user);
                 user.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, relocationDuration, 3), user);
                 target.addStatusEffect(new StatusEffectInstance(EffectRegistry.FREEZE.get(), relocationDuration - 10, 0), user);
                 canRelocate = true;
                 relocationTimer = relocationDuration;
-
                 //AOE ignite & pull
-                Box box = new Box(rememberx + radius, remembery + radius, rememberz + radius, rememberx - radius, remembery - radius, rememberz - radius);
-                for(Entity entities: world.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY)) {
-
-                    if (entities != null) {
-                        if ((entities instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, user)) {
-                            le.setVelocity((rememberx - le.getX()) /4,  (remembery - le.getY()) /4, (rememberz - le.getZ()) /4);
-                            le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 40, 3), user);
-                            world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_BOW_FIRE_SHOOT_IMPACT_03.get(), SoundCategory.PLAYERS, 0.1f, 3f);
-                            le.setOnFireFor(ignite_duration);
-                        }
+                Box box = new Box(rememberx + radius, remembery + radius, rememberz + radius,
+                        rememberx - radius, remembery - radius, rememberz - radius);
+                for (Entity entity : world.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY)) {
+                    if ((entity instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, user)) {
+                        le.setVelocity((rememberx - le.getX()) / 4, (remembery - le.getY()) / 4, (rememberz - le.getZ()) / 4);
+                        le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 40, 3), user);
+                        world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_BOW_FIRE_SHOOT_IMPACT_03.get(),
+                                le.getSoundCategory(), 0.1f, 3f);
+                        le.setOnFireFor(ignite_duration);
                     }
                 }
                 user.getItemCooldownManager().set(this, relocationDuration);
             }
         }
-
-        return super.use(world,user,hand);
+        return super.use(world, user, hand);
     }
 
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
-        if (!world.isClient && (entity instanceof PlayerEntity player)) {
-            if (canRelocate) {
-                relocationTimer--;
-                if (relocationTimer <= 0) {
-
-                    if (relocateTarget != null)
-                        relocateTarget.teleport(player.getX(), player.getY(), player.getZ(), true);
-
-                    player.teleport(relocateX, relocateY, relocateZ, true);
-                    world.playSoundFromEntity(null, player, SoundRegistry.ELEMENTAL_SWORD_SCIFI_ATTACK_03.get(), SoundCategory.PLAYERS, 0.3f, 1f);
-                    canRelocate = false;
-
+        if (!world.isClient && (entity instanceof PlayerEntity player) && canRelocate) {
+            relocationTimer--;
+            if (relocationTimer <= 0) {
+                if (relocateTarget != null) {
+                    relocateTarget.teleport(player.getX(), player.getY(), player.getZ(), true);
                 }
-
-                if (relocationTimer == 40)
-                    world.playSoundFromEntity(null, player, SoundRegistry.ELEMENTAL_BOW_RECHARGE.get(), SoundCategory.PLAYERS, 0.3f, 0.4f);
-
+                player.teleport(relocateX, relocateY, relocateZ, true);
+                world.playSoundFromEntity(null, player, SoundRegistry.ELEMENTAL_SWORD_SCIFI_ATTACK_03.get(),
+                        player.getSoundCategory(), 0.3f, 1f);
+                canRelocate = false;
+            } else if (relocationTimer == 40) {
+                world.playSoundFromEntity(null, player, SoundRegistry.ELEMENTAL_BOW_RECHARGE.get(),
+                        player.getSoundCategory(), 0.3f, 0.4f);
             }
         }
-            if (stepMod > 0)
-                stepMod --;
-            if (stepMod <= 0)
-                stepMod = 7;
-            HelperMethods.createFootfalls(entity, stack, world, stepMod, ParticleTypes.SOUL_FIRE_FLAME, ParticleTypes.SOUL_FIRE_FLAME, ParticleTypes.MYCELIUM, true);
-            HelperMethods.createFootfalls(entity, stack, world, stepMod, ParticleTypes.SMALL_FLAME, ParticleTypes.SMALL_FLAME, ParticleTypes.MYCELIUM, false);
-            HelperMethods.createFootfalls(entity, stack, world, stepMod, ParticleTypes.SMOKE, ParticleTypes.SMOKE, ParticleTypes.MYCELIUM, false);
-
-            super.inventoryTick(stack, world, entity, slot, selected);
+        if (stepMod > 0) stepMod--;
+        if (stepMod <= 0) stepMod = 7;
+        HelperMethods.createFootfalls(entity, stack, world, stepMod, ParticleTypes.SOUL_FIRE_FLAME,
+                ParticleTypes.SOUL_FIRE_FLAME, ParticleTypes.MYCELIUM, true);
+        HelperMethods.createFootfalls(entity, stack, world, stepMod, ParticleTypes.SMALL_FLAME,
+                ParticleTypes.SMALL_FLAME, ParticleTypes.MYCELIUM, false);
+        HelperMethods.createFootfalls(entity, stack, world, stepMod, ParticleTypes.SMOKE, ParticleTypes.SMOKE,
+                ParticleTypes.MYCELIUM, false);
+        super.inventoryTick(stack, world, entity, slot, selected);
     }
-
-
 
     @Override
     public void appendTooltip(ItemStack itemStack, World world, List<Text> tooltip, TooltipContext tooltipContext) {
@@ -153,9 +138,7 @@ public class SoulPyreSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.soulpyresworditem.tooltip7", relocationDuration / 20).setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.soulpyresworditem.tooltip8").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.soulpyresworditem.tooltip9").setStyle(TEXT));
-        tooltip.add(Text.literal(""));
 
-        super.appendTooltip(itemStack,world, tooltip, tooltipContext);
+        super.appendTooltip(itemStack, world, tooltip, tooltipContext);
     }
-
 }

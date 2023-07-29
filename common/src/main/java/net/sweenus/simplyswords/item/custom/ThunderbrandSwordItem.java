@@ -1,6 +1,5 @@
 package net.sweenus.simplyswords.item.custom;
 
-
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
@@ -11,7 +10,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.particle.ParticleTypes;
-import net.minecraft.sound.SoundCategory;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
@@ -30,40 +28,37 @@ public class ThunderbrandSwordItem extends UniqueSwordItem {
     public ThunderbrandSwordItem(ToolMaterial toolMaterial, int attackDamage, float attackSpeed, Settings settings) {
         super(toolMaterial, attackDamage, attackSpeed, settings);
     }
+
     private static int stepMod = 0;
     public static boolean scalesWithSpellPower;
     int radius = (int) SimplySwords.uniqueEffectsConfig.thunderBlitzRadius;
     float abilityDamage = SimplySwords.uniqueEffectsConfig.thunderBlitzDamage;
     int ability_timer_max = 50;
     int skillCooldown = (int) SimplySwords.uniqueEffectsConfig.thunderBlitzCooldown;
-    int chargeChance =  (int) SimplySwords.uniqueEffectsConfig.thunderBlitzChance;
+    int chargeChance = (int) SimplySwords.uniqueEffectsConfig.thunderBlitzChance;
     float spellScalingModifier = SimplySwords.uniqueEffectsConfig.thunderBlitzSpellScaling;
-
-
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-
         HelperMethods.playHitSounds(attacker, target);
-
         if (!attacker.getWorld().isClient()) {
             if (attacker.getRandom().nextInt(100) <= chargeChance && (attacker instanceof PlayerEntity player) && player.getItemCooldownManager().getCooldownProgress(this, 1f) > 0) {
                 player.getItemCooldownManager().set(this, 0);
-                attacker.getWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_BLOCK_01.get(), SoundCategory.PLAYERS, 0.7f, 1f);
+                attacker.getWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_BLOCK_01.get(),
+                        attacker.getSoundCategory(), 0.7f, 1f);
             }
         }
-
-            return super.postHit(stack, target, attacker);
+        return super.postHit(stack, target, attacker);
     }
+
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
-
         ItemStack itemStack = user.getStackInHand(hand);
         if (itemStack.getDamage() >= itemStack.getMaxDamage() - 1) {
             return TypedActionResult.fail(itemStack);
         }
-
-        world.playSoundFromEntity(null, user, SoundRegistry.MAGIC_BOW_CHARGE_LONG_VERSION.get(), SoundCategory.PLAYERS, 0.4f, 0.6f);
+        world.playSoundFromEntity(null, user, SoundRegistry.MAGIC_BOW_CHARGE_LONG_VERSION.get(),
+                user.getSoundCategory(), 0.4f, 0.6f);
         user.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 40, 3), user);
         user.addStatusEffect(new StatusEffectInstance(StatusEffects.MINING_FATIGUE, 40, 3), user);
         user.setCurrentHand(hand);
@@ -72,23 +67,19 @@ public class ThunderbrandSwordItem extends UniqueSwordItem {
 
     @Override
     public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
-        if (!world.isClient) {
-            if (user.getEquippedStack(EquipmentSlot.MAINHAND) == stack && user.isOnGround()) {
-                AbilityMethods.tickAbilityThunderBlitz(stack, world, user, remainingUseTicks, ability_timer_max, abilityDamage, skillCooldown, radius);
-            }
+        if (!world.isClient && user.getEquippedStack(EquipmentSlot.MAINHAND) == stack && user.isOnGround()) {
+            AbilityMethods.tickAbilityThunderBlitz(stack, world, user, remainingUseTicks, ability_timer_max,
+                    abilityDamage, skillCooldown, radius);
         }
     }
 
     @Override
     public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
-        if (!world.isClient) {
-            //Player dash end
-            if (user.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
-                user.setVelocity(0, 0, 0); // Stop player at end of charge
-                user.velocityModified = true;
-                user.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, 80, 2), user);
-
-            }
+        //Player dash end
+        if (!world.isClient && user.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
+            user.setVelocity(0, 0, 0); // Stop player at end of charge
+            user.velocityModified = true;
+            user.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, 80, 2), user);
         }
     }
 
@@ -96,6 +87,7 @@ public class ThunderbrandSwordItem extends UniqueSwordItem {
     public int getMaxUseTime(ItemStack stack) {
         return ability_timer_max;
     }
+
     @Override
     public UseAction getUseAction(ItemStack stack) {
         return UseAction.NONE;
@@ -103,27 +95,16 @@ public class ThunderbrandSwordItem extends UniqueSwordItem {
 
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
-        if (HelperMethods.commonSpellAttributeScaling(
-                spellScalingModifier,
-                entity,
-                "lightning") > 0) {
-            abilityDamage = HelperMethods.commonSpellAttributeScaling(
-                    spellScalingModifier,
-                    entity,
-                    "lightning");
+        if (HelperMethods.commonSpellAttributeScaling(spellScalingModifier, entity, "lightning") > 0) {
+            abilityDamage = HelperMethods.commonSpellAttributeScaling(spellScalingModifier, entity, "lightning");
             scalesWithSpellPower = true;
         }
-
-        if (stepMod > 0)
-            stepMod --;
-        if (stepMod <= 0)
-            stepMod = 7;
-        HelperMethods.createFootfalls(entity, stack, world, stepMod, ParticleTypes.MYCELIUM, ParticleTypes.MYCELIUM, ParticleTypes.MYCELIUM, true);
-
+        if (stepMod > 0) stepMod--;
+        if (stepMod <= 0) stepMod = 7;
+        HelperMethods.createFootfalls(entity, stack, world, stepMod, ParticleTypes.MYCELIUM, ParticleTypes.MYCELIUM,
+                ParticleTypes.MYCELIUM, true);
         super.inventoryTick(stack, world, entity, slot, selected);
     }
-
-
 
     @Override
     public void appendTooltip(ItemStack itemStack, World world, List<Text> tooltip, TooltipContext tooltipContext) {
@@ -142,12 +123,10 @@ public class ThunderbrandSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.thunderbrandsworditem.tooltip5").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.thunderbrandsworditem.tooltip6").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.thunderbrandsworditem.tooltip7").setStyle(TEXT));
-        tooltip.add(Text.literal(""));
-        if (scalesWithSpellPower)
+        if (scalesWithSpellPower) {
+            tooltip.add(Text.literal(""));
             tooltip.add(Text.translatable("item.simplyswords.compat.scaleLightning"));
-
-        super.appendTooltip(itemStack,world, tooltip, tooltipContext);
-
+        }
+        super.appendTooltip(itemStack, world, tooltip, tooltipContext);
     }
-
 }

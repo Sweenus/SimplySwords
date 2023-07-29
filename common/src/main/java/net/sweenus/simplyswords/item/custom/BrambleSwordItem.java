@@ -1,6 +1,5 @@
 package net.sweenus.simplyswords.item.custom;
 
-
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -26,6 +25,7 @@ public class BrambleSwordItem extends UniqueSwordItem {
     public BrambleSwordItem(ToolMaterial toolMaterial, int attackDamage, float attackSpeed, Settings settings) {
         super(toolMaterial, attackDamage, attackSpeed, settings);
     }
+
     private static int stepMod = 0;
 
     @Override
@@ -35,41 +35,34 @@ public class BrambleSwordItem extends UniqueSwordItem {
             int fhitchance = (int) SimplySwords.uniqueEffectsConfig.brambleChance;
             HelperMethods.playHitSounds(attacker, target);
 
-
             if (attacker.getRandom().nextInt(100) <= fhitchance) {
-                    int sradius = (int) SimplySwords.uniqueEffectsConfig.brambleRadius;
-                    int vradius = (int) (SimplySwords.uniqueEffectsConfig.brambleRadius / 2);
-                    double x = target.getX();
-                    double y = target.getY();
-                    double z = target.getZ();
-                    Box box = new Box(x + 10, y + 5, z + 10, x - 10, y - 5, z - 10);
+                int sradius = (int) SimplySwords.uniqueEffectsConfig.brambleRadius;
+                int vradius = (int) (SimplySwords.uniqueEffectsConfig.brambleRadius / 2);
+                double x = target.getX();
+                double y = target.getY();
+                double z = target.getZ();
+                Box box = new Box(x + 10, y + 5, z + 10, x - 10, y - 5, z - 10);
 
-                    for (Entity e : world.getOtherEntities(attacker, box, EntityPredicates.VALID_LIVING_ENTITY)) {
-                        if (e != null && HelperMethods.checkFriendlyFire((LivingEntity) e, (PlayerEntity) attacker)) {
-                            target = (LivingEntity) e;
-                            target.addStatusEffect(new StatusEffectInstance(StatusEffects.POISON, 300, 1), attacker);
-                            target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 150, 1), attacker);
-                        }
+                for (Entity e : world.getOtherEntities(attacker, box, EntityPredicates.VALID_LIVING_ENTITY)) {
+                    if (e != null && HelperMethods.checkFriendlyFire((LivingEntity) e, (PlayerEntity) attacker)) {
+                        target = (LivingEntity) e;
+                        target.addStatusEffect(new StatusEffectInstance(StatusEffects.POISON, 300, 1), attacker);
+                        target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 150, 1), attacker);
                     }
+                }
             }
         }
-
         return super.postHit(stack, target, attacker);
-
     }
 
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
-
-        if (stepMod > 0)
-            stepMod --;
-        if (stepMod <= 0)
-            stepMod = 7;
-        HelperMethods.createFootfalls(entity, stack, world, stepMod, ParticleTypes.SPORE_BLOSSOM_AIR, ParticleTypes.SPORE_BLOSSOM_AIR, ParticleTypes.MYCELIUM, true);
-
+        if (stepMod > 0) stepMod--;
+        if (stepMod <= 0) stepMod = 7;
+        HelperMethods.createFootfalls(entity, stack, world, stepMod, ParticleTypes.SPORE_BLOSSOM_AIR,
+                ParticleTypes.SPORE_BLOSSOM_AIR, ParticleTypes.MYCELIUM, true);
         super.inventoryTick(stack, world, entity, slot, selected);
     }
-
 
     @Override
     public void appendTooltip(ItemStack itemStack, World world, List<Text> tooltip, TooltipContext tooltipContext) {
@@ -81,8 +74,6 @@ public class BrambleSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.bramblesworditem.tooltip2").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.bramblesworditem.tooltip3").setStyle(TEXT));
 
-        super.appendTooltip(itemStack,world, tooltip, tooltipContext);
-
+        super.appendTooltip(itemStack, world, tooltip, tooltipContext);
     }
-
 }

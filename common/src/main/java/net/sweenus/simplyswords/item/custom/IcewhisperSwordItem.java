@@ -1,6 +1,5 @@
 package net.sweenus.simplyswords.item.custom;
 
-
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
@@ -12,7 +11,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
-import net.minecraft.sound.SoundCategory;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
@@ -32,6 +30,7 @@ public class IcewhisperSwordItem extends UniqueSwordItem {
     public IcewhisperSwordItem(ToolMaterial toolMaterial, int attackDamage, float attackSpeed, Settings settings) {
         super(toolMaterial, attackDamage, attackSpeed, settings);
     }
+
     private static int stepMod = 0;
     public static boolean scalesWithSpellPower;
     int radius = (int) SimplySwords.uniqueEffectsConfig.permafrostRadius;
@@ -43,18 +42,14 @@ public class IcewhisperSwordItem extends UniqueSwordItem {
     double lastY;
     double lastZ;
 
-
-
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-
         HelperMethods.playHitSounds(attacker, target);
         return super.postHit(stack, target, attacker);
-
     }
+
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
-
         ItemStack itemStack = user.getStackInHand(hand);
         if (itemStack.getDamage() >= itemStack.getMaxDamage() - 1) {
             return TypedActionResult.fail(itemStack);
@@ -70,12 +65,9 @@ public class IcewhisperSwordItem extends UniqueSwordItem {
 
     @Override
     public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
-
-        if (user.getEquippedStack(EquipmentSlot.MAINHAND) == stack && (user instanceof PlayerEntity player)) {
-
+        if (user.getEquippedStack(EquipmentSlot.MAINHAND) == stack && user instanceof PlayerEntity) {
             AbilityMethods.tickAbilityPermafrost(stack, world, user, remainingUseTicks, blizzard_timer_max, abilityDamage,
                     skillCooldown, radius, lastX, lastY, lastZ);
-
         }
     }
 
@@ -83,6 +75,7 @@ public class IcewhisperSwordItem extends UniqueSwordItem {
     public int getMaxUseTime(ItemStack stack) {
         return blizzard_timer_max;
     }
+
     @Override
     public UseAction getUseAction(ItemStack stack) {
         return UseAction.CROSSBOW;
@@ -97,14 +90,8 @@ public class IcewhisperSwordItem extends UniqueSwordItem {
 
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
-        if (HelperMethods.commonSpellAttributeScaling(
-                spellScalingModifier,
-                entity,
-                "frost") > 0) {
-            abilityDamage = HelperMethods.commonSpellAttributeScaling(
-                    spellScalingModifier,
-                    entity,
-                    "frost");
+        if (HelperMethods.commonSpellAttributeScaling(spellScalingModifier, entity, "frost") > 0) {
+            abilityDamage = HelperMethods.commonSpellAttributeScaling(spellScalingModifier, entity, "frost");
             scalesWithSpellPower = true;
         }
 
@@ -112,31 +99,29 @@ public class IcewhisperSwordItem extends UniqueSwordItem {
 
             //AOE Aura
             if (player.age % 35 == 0 && player.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
-                Box box = new Box(player.getX() + radius, player.getY() + radius, player.getZ() + radius, player.getX() - radius, player.getY() - radius, player.getZ() - radius);
-                for (Entity entities : world.getOtherEntities(player, box, EntityPredicates.VALID_LIVING_ENTITY)) {
+                Box box = new Box(player.getX() + radius, player.getY() + radius, player.getZ() + radius,
+                        player.getX() - radius, player.getY() - radius, player.getZ() - radius);
+                for (Entity otherEntity : world.getOtherEntities(player, box, EntityPredicates.VALID_LIVING_ENTITY)) {
+                    if ((otherEntity instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, player)) {
+                        if (le.hasStatusEffect(StatusEffects.SLOWNESS)) {
+                            int a = (le.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier() + 1);
 
-                    if (entities != null) {
-                        if ((entities instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, player)) {
-                            if (le.hasStatusEffect(StatusEffects.SLOWNESS)) {
-
-                                int a = (le.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier() + 1);
-
-                                if (a < 4) {
-                                    le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 120, a), player);
-                                } else {
-                                    le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 120, a - 1), player);
-                                }
+                            if (a < 4) {
+                                le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 120, a), player);
                             } else {
-                                le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 120, 0), player);
+                                le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 120, a - 1), player);
                             }
-                            float choose = (float) (Math.random() * 1);
-                            world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_BOW_ICE_SHOOT_IMPACT_03.get(), SoundCategory.PLAYERS, 0.1f, choose);
-                            le.damage(player.getDamageSources().magic(), abilityDamage);
+                        } else {
+                            le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 120, 0), player);
                         }
+                        float choose = (float) (Math.random() * 1);
+                        world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_BOW_ICE_SHOOT_IMPACT_03.get(),
+                                le.getSoundCategory(), 0.1f, choose);
+                        le.damage(player.getDamageSources().magic(), abilityDamage);
                     }
                 }
-
-                world.playSoundFromEntity(null, player, SoundRegistry.ELEMENTAL_SWORD_ICE_ATTACK_02.get(), SoundCategory.PLAYERS, 0.1f, 0.6f);
+                world.playSoundFromEntity(null, player, SoundRegistry.ELEMENTAL_SWORD_ICE_ATTACK_02.get(),
+                        player.getSoundCategory(), 0.1f, 0.6f);
                 double xpos = player.getX() - (radius + 1);
                 double ypos = player.getY();
                 double zpos = player.getZ() - (radius + 1);
@@ -144,33 +129,25 @@ public class IcewhisperSwordItem extends UniqueSwordItem {
                 for (int i = radius * 2; i > 0; i--) {
                     for (int j = radius * 2; j > 0; j--) {
                         float choose = (float) (Math.random() * 1);
-                        HelperMethods.spawnParticle(world, ParticleTypes.SNOWFLAKE, xpos + i + choose,
-                                ypos + 0.4,
-                                zpos + j + choose,
+                        HelperMethods.spawnParticle(world, ParticleTypes.SNOWFLAKE,
+                                xpos + i + choose, ypos + 0.4, zpos + j + choose,
                                 0, 0.1, 0);
-                        HelperMethods.spawnParticle(world, ParticleTypes.CLOUD, xpos + i + choose,
-                                ypos + 0.1,
-                                zpos + j + choose,
+                        HelperMethods.spawnParticle(world, ParticleTypes.CLOUD,
+                                xpos + i + choose, ypos + 0.1, zpos + j + choose,
                                 0, 0, 0);
-                        HelperMethods.spawnParticle(world, ParticleTypes.WHITE_ASH, xpos + i + choose,
-                                ypos + 2,
-                                zpos + j + choose,
+                        HelperMethods.spawnParticle(world, ParticleTypes.WHITE_ASH,
+                                xpos + i + choose, ypos + 2, zpos + j + choose,
                                 0, 0, 0);
                     }
                 }
             }
         }
-
-        if (stepMod > 0)
-            stepMod --;
-        if (stepMod <= 0)
-            stepMod = 7;
-        HelperMethods.createFootfalls(entity, stack, world, stepMod, ParticleTypes.SNOWFLAKE, ParticleTypes.SNOWFLAKE, ParticleTypes.WHITE_ASH, true);
-
+        if (stepMod > 0) stepMod--;
+        if (stepMod <= 0) stepMod = 7;
+        HelperMethods.createFootfalls(entity, stack, world, stepMod, ParticleTypes.SNOWFLAKE, ParticleTypes.SNOWFLAKE,
+                ParticleTypes.WHITE_ASH, true);
         super.inventoryTick(stack, world, entity, slot, selected);
     }
-
-
 
     @Override
     public void appendTooltip(ItemStack itemStack, World world, List<Text> tooltip, TooltipContext tooltipContext) {
@@ -187,12 +164,10 @@ public class IcewhisperSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.icewhispersworditem.tooltip4").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.icewhispersworditem.tooltip5").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.icewhispersworditem.tooltip6", radius * 2).setStyle(TEXT));
-        tooltip.add(Text.literal(""));
-        if (scalesWithSpellPower)
+        if (scalesWithSpellPower) {
+            tooltip.add(Text.literal(""));
             tooltip.add(Text.translatable("item.simplyswords.compat.scaleFrost"));
-
-        super.appendTooltip(itemStack,world, tooltip, tooltipContext);
-
+        }
+        super.appendTooltip(itemStack, world, tooltip, tooltipContext);
     }
-
 }

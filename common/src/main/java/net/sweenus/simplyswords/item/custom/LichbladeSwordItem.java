@@ -1,6 +1,5 @@
 package net.sweenus.simplyswords.item.custom;
 
-
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
@@ -12,7 +11,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
-import net.minecraft.sound.SoundCategory;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
@@ -33,6 +31,7 @@ public class LichbladeSwordItem extends UniqueSwordItem {
     public LichbladeSwordItem(ToolMaterial toolMaterial, int attackDamage, float attackSpeed, Settings settings) {
         super(toolMaterial, attackDamage, attackSpeed, settings);
     }
+
     private static int stepMod = 0;
     public static boolean scalesWithSpellPower;
     int radius = (int) SimplySwords.uniqueEffectsConfig.soulAnguishRadius;
@@ -53,90 +52,75 @@ public class LichbladeSwordItem extends UniqueSwordItem {
 
     LivingEntity abilityTarget;
 
-
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-
         HelperMethods.playHitSounds(attacker, target);
         return super.postHit(stack, target, attacker);
-
     }
+
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
-
         ItemStack itemStack = user.getStackInHand(hand);
         if (itemStack.getDamage() >= itemStack.getMaxDamage() - 1) {
             return TypedActionResult.fail(itemStack);
         }
-
-        if (this.getDefaultStack().isOf(ItemsRegistry.AWAKENED_LICHBLADE.get()) || this.getDefaultStack().isOf(ItemsRegistry.WAKING_LICHBLADE.get())) {
-
+        if (itemStack.isOf(ItemsRegistry.SLUMBERING_LICHBLADE.get())) {
+            return TypedActionResult.pass(itemStack);
+        } else {
             abilityTarget = (LivingEntity) HelperMethods.getTargetedEntity(user, range);
             if (abilityTarget != null) {
                 abilityTarget.addStatusEffect(new StatusEffectInstance(StatusEffects.GLOWING, 10, 0), user);
-                world.playSoundFromEntity(null, user, SoundRegistry.DARK_SWORD_ENCHANT.get(), SoundCategory.PLAYERS, 0.5f, 0.5f);
+                world.playSoundFromEntity(null, user, SoundRegistry.DARK_SWORD_ENCHANT.get(),
+                        user.getSoundCategory(), 0.5f, 0.5f);
                 lastX = user.getX();
                 lastY = user.getY();
                 lastZ = user.getZ();
                 chanceReduce = 0;
             }
-
         }
-
         user.setCurrentHand(hand);
         return TypedActionResult.consume(itemStack);
     }
 
     @Override
     public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
-
-            if (user.getEquippedStack(EquipmentSlot.MAINHAND) == stack && (user instanceof PlayerEntity player)) {
-
-                //Return to player after a duration & buff player
-                if (remainingUseTicks < 200) {
-                    if (stack.isOf(ItemsRegistry.AWAKENED_LICHBLADE.get())) {
-                        if (abilityTarget != player)
-                            abilityTarget = player;
-                        if (player.squaredDistanceTo(lastX, lastY, lastZ) < radius) {
-                            if (!player.hasStatusEffect(StatusEffects.ABSORPTION))
-                                player.addStatusEffect(new StatusEffectInstance(StatusEffects.ABSORPTION, 120, 2), player);
-                            damageTracker = 0;
-                            remainingUseTicks = 0;
-                            player.stopUsingItem();
-                            world.playSoundFromEntity(null, player, SoundRegistry.DARK_SWORD_SPELL.get(), SoundCategory.PLAYERS, 0.04f, 0.5f);
-                        }
-                    } else {
-                        remainingUseTicks = 0;
+        if (user.getEquippedStack(EquipmentSlot.MAINHAND) == stack && (user instanceof PlayerEntity player) && abilityTarget != null) {
+            //Return to player after the enemy dies & buff player
+            if (stack.isOf(ItemsRegistry.AWAKENED_LICHBLADE.get())) {
+                if (abilityTarget.isDead() || abilityTarget == player) {
+                    if (player.squaredDistanceTo(lastX, lastY, lastZ) < radius) {
+                        player.addStatusEffect(new StatusEffectInstance(StatusEffects.ABSORPTION, 600, 2), player);
+                        player.getItemCooldownManager().set(stack.getItem(), skillCooldown);
                         player.stopUsingItem();
+                        remainingUseTicks = 0;
                         damageTracker = 0;
+                        world.playSoundFromEntity(null, player, SoundRegistry.DARK_SWORD_SPELL.get(),
+                                player.getSoundCategory(), 0.04f, 0.5f);
                     }
+                    abilityTarget = player;
                 }
+            } else if (stack.isOf(ItemsRegistry.WAKING_LICHBLADE.get()) && abilityTarget.isDead()) {
+                player.stopUsingItem();
+                remainingUseTicks = 0;
+                damageTracker = 0;
+            }
+            //Move aura to target
+            if (player.age % 5 == 0) {
+                targetX = abilityTarget.getX();
+                targetY = abilityTarget.getY();
+                targetZ = abilityTarget.getZ();
 
-                //Move aura to target
-                if (abilityTarget != null && player.age % 5 == 0) {
-                    targetX = abilityTarget.getX();
-                    targetY = abilityTarget.getY();
-                    targetZ = abilityTarget.getZ();
-
-                    if (targetX > lastX)
-                        lastX += 1;
-                    if (targetX < lastX)
-                        lastX -= 1;
-                    if (targetZ > lastZ)
-                        lastZ += 1;
-                    if (targetZ < lastZ)
-                        lastZ -= 1;
-                    if (targetY > lastY)
-                        lastY += 1;
-                    if (targetY < lastY)
-                        lastY -= 1;
-                }
-
-                AbilityMethods.tickAbilitySoulAnguish(stack, world, user, remainingUseTicks, ability_timer_max,
-                        abilityDamage, skillCooldown, radius, damageTracker, chanceReduce,
-                        lastX, lastY, lastZ, targetX, targetY, targetZ, range, healAmount,
-                        abilityTarget);
-
+                if (targetX > lastX) lastX += 1;
+                if (targetX < lastX) lastX -= 1;
+                if (targetZ > lastZ) lastZ += 1;
+                if (targetZ < lastZ) lastZ -= 1;
+                if (targetY > lastY) lastY += 1;
+                if (targetY < lastY) lastY -= 1;
+            }
+            AbilityMethods.tickAbilitySoulAnguish(stack, world, user, remainingUseTicks, ability_timer_max,
+                    abilityDamage, skillCooldown, radius, damageTracker, chanceReduce,
+                    lastX, lastY, lastZ, targetX, targetY, targetZ, range, healAmount,
+                    abilityTarget);
         }
     }
 
@@ -144,6 +128,7 @@ public class LichbladeSwordItem extends UniqueSwordItem {
     public int getMaxUseTime(ItemStack stack) {
         return ability_timer_max;
     }
+
     @Override
     public UseAction getUseAction(ItemStack stack) {
         return UseAction.CROSSBOW;
@@ -158,31 +143,23 @@ public class LichbladeSwordItem extends UniqueSwordItem {
 
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
-        if (HelperMethods.commonSpellAttributeScaling(
-                spellScalingModifier,
-                entity,
-                "soul") > 0) {
-            abilityDamage = HelperMethods.commonSpellAttributeScaling(
-                    spellScalingModifier,
-                    entity,
-                    "soul");
+        if (HelperMethods.commonSpellAttributeScaling(spellScalingModifier, entity, "soul") > 0) {
+            abilityDamage = HelperMethods.commonSpellAttributeScaling(spellScalingModifier, entity, "soul");
             scalesWithSpellPower = true;
         }
 
         if (!entity.getWorld().isClient() && (entity instanceof PlayerEntity player)) {
             //AOE Aura
             if (player.age % 35 == 0 && player.getEquippedStack(EquipmentSlot.MAINHAND) == stack && !player.isUsingItem()) {
-                Box box = new Box(player.getX() + radius, player.getY() + radius, player.getZ() + radius, player.getX() - radius, player.getY() - radius, player.getZ() - radius);
-                for (Entity entities : world.getOtherEntities(player, box, EntityPredicates.VALID_LIVING_ENTITY)) {
-
-                    if (entities != null) {
-                        if ((entities instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, player)) {
-                            le.damage(player.getDamageSources().magic(), abilityDamage);
-                        }
+                Box box = new Box(player.getX() + radius, player.getY() + radius, player.getZ() + radius,
+                        player.getX() - radius, player.getY() - radius, player.getZ() - radius);
+                for (Entity otherEntity : world.getOtherEntities(player, box, EntityPredicates.VALID_LIVING_ENTITY)) {
+                    if ((otherEntity instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, player)) {
+                        le.damage(player.getDamageSources().magic(), abilityDamage);
                     }
                 }
-
-                world.playSoundFromEntity(null, player, SoundRegistry.DARK_SWORD_BLOCK.get(), SoundCategory.PLAYERS, 0.1f, 0.2f);
+                world.playSoundFromEntity(null, player, SoundRegistry.DARK_SWORD_BLOCK.get(),
+                        player.getSoundCategory(), 0.1f, 0.2f);
                 double xpos = player.getX() - (radius + 1);
                 double ypos = player.getY();
                 double zpos = player.getZ() - (radius + 1);
@@ -190,29 +167,23 @@ public class LichbladeSwordItem extends UniqueSwordItem {
                 for (int i = radius * 2; i > 0; i--) {
                     for (int j = radius * 2; j > 0; j--) {
                         float choose = (float) (Math.random() * 1);
-                        HelperMethods.spawnParticle(world, ParticleTypes.SCULK_SOUL, xpos + i + choose,
-                                ypos,
-                                zpos + j + choose,
+                        HelperMethods.spawnParticle(world, ParticleTypes.SCULK_SOUL,
+                                xpos + i + choose, ypos, zpos + j + choose,
                                 0, 0.1, 0);
-                        HelperMethods.spawnParticle(world, ParticleTypes.SOUL, xpos + i + choose,
-                                ypos + 0.1,
-                                zpos + j + choose,
+                        HelperMethods.spawnParticle(world, ParticleTypes.SOUL,
+                                xpos + i + choose, ypos + 0.1, zpos + j + choose,
                                 0, 0, 0);
-                        HelperMethods.spawnParticle(world, ParticleTypes.MYCELIUM, xpos + i + choose,
-                                ypos + 2,
-                                zpos + j + choose,
+                        HelperMethods.spawnParticle(world, ParticleTypes.MYCELIUM,
+                                xpos + i + choose, ypos + 2, zpos + j + choose,
                                 0, 0, 0);
                     }
                 }
             }
         }
-
-        if (stepMod > 0)
-            stepMod --;
-        if (stepMod <= 0)
-            stepMod = 7;
-        HelperMethods.createFootfalls(entity, stack, world, stepMod, ParticleTypes.SOUL, ParticleTypes.SOUL, ParticleTypes.MYCELIUM, true);
-
+        if (stepMod > 0) stepMod--;
+        if (stepMod <= 0) stepMod = 7;
+        HelperMethods.createFootfalls(entity, stack, world, stepMod, ParticleTypes.SOUL, ParticleTypes.SOUL,
+                ParticleTypes.MYCELIUM, true);
         super.inventoryTick(stack, world, entity, slot, selected);
     }
 
@@ -223,32 +194,33 @@ public class LichbladeSwordItem extends UniqueSwordItem {
         Style TEXT = HelperMethods.getStyle("text");
 
         tooltip.add(Text.literal(""));
-        if (this.getDefaultStack().isOf(ItemsRegistry.SLUMBERING_LICHBLADE.get()))
+        if (itemStack.isOf(ItemsRegistry.SLUMBERING_LICHBLADE.get()))
             tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip1").setStyle(ABILITY));
-        if (this.getDefaultStack().isOf(ItemsRegistry.WAKING_LICHBLADE.get()))
+        else if (itemStack.isOf(ItemsRegistry.WAKING_LICHBLADE.get()))
             tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip1.2").setStyle(ABILITY));
-        if (this.getDefaultStack().isOf(ItemsRegistry.AWAKENED_LICHBLADE.get()))
-            tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip1.3").setStyle(ABILITY));
+        else tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip1.3").setStyle(ABILITY));
+
         tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip2").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip3", radius).setStyle(TEXT));
-        tooltip.add(Text.literal(""));
-        if (this.getDefaultStack().isOf(ItemsRegistry.WAKING_LICHBLADE.get()) || this.getDefaultStack().isOf(ItemsRegistry.AWAKENED_LICHBLADE.get())) {
+
+        if (!itemStack.isOf(ItemsRegistry.SLUMBERING_LICHBLADE.get())) {
+            tooltip.add(Text.literal(""));
             tooltip.add(Text.translatable("item.simplyswords.onrightclickheld").setStyle(RIGHTCLICK));
             tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip4").setStyle(TEXT));
             tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip5").setStyle(TEXT));
             tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip6").setStyle(TEXT));
-            tooltip.add(Text.literal(""));
+
+            if (itemStack.isOf(ItemsRegistry.AWAKENED_LICHBLADE.get())) {
+                tooltip.add(Text.literal(""));
+                tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip7").setStyle(TEXT));
+                tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip8").setStyle(TEXT));
+                tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip9").setStyle(TEXT));
+            }
         }
-        if (this.getDefaultStack().isOf(ItemsRegistry.AWAKENED_LICHBLADE.get())) {
-            tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip7").setStyle(TEXT));
-            tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip8").setStyle(TEXT));
-            tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip9").setStyle(TEXT));
+        if (scalesWithSpellPower) {
             tooltip.add(Text.literal(""));
-        }
-        if (scalesWithSpellPower)
             tooltip.add(Text.translatable("item.simplyswords.compat.scaleSoul"));
-        super.appendTooltip(itemStack,world, tooltip, tooltipContext);
-
+        }
+        super.appendTooltip(itemStack, world, tooltip, tooltipContext);
     }
-
 }

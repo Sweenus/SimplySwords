@@ -1,6 +1,5 @@
 package net.sweenus.simplyswords.item.custom;
 
-
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -28,12 +27,12 @@ public class StormSwordItem extends UniqueSwordItem {
     public StormSwordItem(ToolMaterial toolMaterial, int attackDamage, float attackSpeed, Settings settings) {
         super(toolMaterial, attackDamage, attackSpeed, settings);
     }
+
     private static int stepMod = 0;
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         if (!attacker.getWorld().isClient()) {
-
             HelperMethods.playHitSounds(attacker, target);
 
             int phitchance = (int) SimplySwords.uniqueEffectsConfig.stormChance;
@@ -42,14 +41,11 @@ public class StormSwordItem extends UniqueSwordItem {
                 target.addStatusEffect(new StatusEffectInstance(EffectRegistry.STORM.get(), 2, 1), attacker);
             }
         }
-
         return super.postHit(stack, target, attacker);
-
     }
 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
-
         ItemStack itemStack = user.getStackInHand(hand);
         if (itemStack.getDamage() >= itemStack.getMaxDamage() - 1) {
             return TypedActionResult.fail(itemStack);
@@ -59,11 +55,12 @@ public class StormSwordItem extends UniqueSwordItem {
         user.getItemCooldownManager().set(this, 700);
         return TypedActionResult.consume(itemStack);
     }
+
     @Override
     public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
         if (!world.isClient) {
-                int radius = (int) SimplySwords.uniqueEffectsConfig.stormRadius;
-                AbilityMethods.tickAbilityStorm(stack, world, user, remainingUseTicks, 700, radius);
+            int radius = (int) SimplySwords.uniqueEffectsConfig.stormRadius;
+            AbilityMethods.tickAbilityStorm(stack, world, user, remainingUseTicks, 700, radius);
         }
     }
 
@@ -71,6 +68,7 @@ public class StormSwordItem extends UniqueSwordItem {
     public int getMaxUseTime(ItemStack stack) {
         return 200;
     }
+
     @Override
     public UseAction getUseAction(ItemStack stack) {
         return UseAction.BLOCK;
@@ -78,17 +76,11 @@ public class StormSwordItem extends UniqueSwordItem {
 
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
-
-        if (stepMod > 0)
-            stepMod --;
-        if (stepMod <= 0)
-            stepMod = 7;
+        if (stepMod > 0) stepMod--;
+        if (stepMod <= 0) stepMod = 7;
         HelperMethods.createFootfalls(entity, stack, world, stepMod, ParticleTypes.FIREWORK, ParticleTypes.FIREWORK, ParticleTypes.ELECTRIC_SPARK, false);
-
         super.inventoryTick(stack, world, entity, slot, selected);
     }
-
-
 
     @Override
     public void appendTooltip(ItemStack itemStack, World world, List<Text> tooltip, TooltipContext tooltipContext) {
@@ -106,7 +98,6 @@ public class StormSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.stormsworditem.tooltip5").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.stormsworditem.tooltip6").setStyle(TEXT));
 
-        super.appendTooltip(itemStack,world, tooltip, tooltipContext);
+        super.appendTooltip(itemStack, world, tooltip, tooltipContext);
     }
-
 }

@@ -1,6 +1,5 @@
 package net.sweenus.simplyswords.item.custom;
 
-
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -12,7 +11,6 @@ import net.minecraft.item.ToolMaterial;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
@@ -30,6 +28,7 @@ public class RendSwordItem extends UniqueSwordItem {
     public RendSwordItem(ToolMaterial toolMaterial, int attackDamage, float attackSpeed, Settings settings) {
         super(toolMaterial, attackDamage, attackSpeed, settings);
     }
+
     float abilityDamage = SimplySwords.uniqueEffectsConfig.soulrendDamageMulti;
     float spellScalingModifier = SimplySwords.uniqueEffectsConfig.soulrendDamageSpellScaling;
 
@@ -44,19 +43,20 @@ public class RendSwordItem extends UniqueSwordItem {
             int fduration = (int) SimplySwords.uniqueEffectsConfig.soulrendDuration;
             int maxstacks = (int) SimplySwords.uniqueEffectsConfig.soulrendMaxStacks;
 
-
             if (attacker.getRandom().nextInt(100) <= fhitchance) {
 
                 int choose_sound = (int) (Math.random() * 30);
                 if (choose_sound <= 10)
-                    world.playSoundFromEntity(null, target, SoundRegistry.DARK_SWORD_ATTACK_WITH_BLOOD_01.get(), SoundCategory.PLAYERS, 0.4f, 1.5f);
-                if (choose_sound <= 20 && choose_sound > 10)
-                    world.playSoundFromEntity(null, target, SoundRegistry.DARK_SWORD_ATTACK_WITH_BLOOD_02.get(), SoundCategory.PLAYERS, 0.4f, 1.5f);
-                if (choose_sound <= 30 && choose_sound > 20)
-                    world.playSoundFromEntity(null, target, SoundRegistry.DARK_SWORD_ATTACK_WITH_BLOOD_03.get(), SoundCategory.PLAYERS, 0.4f, 1.5f);
+                    world.playSoundFromEntity(null, target, SoundRegistry.DARK_SWORD_ATTACK_WITH_BLOOD_01.get(),
+                            target.getSoundCategory(), 0.4f, 1.5f);
+                else if (choose_sound <= 20)
+                    world.playSoundFromEntity(null, target, SoundRegistry.DARK_SWORD_ATTACK_WITH_BLOOD_02.get(),
+                            target.getSoundCategory(), 0.4f, 1.5f);
+                else if (choose_sound <= 30)
+                    world.playSoundFromEntity(null, target, SoundRegistry.DARK_SWORD_ATTACK_WITH_BLOOD_03.get(),
+                            target.getSoundCategory(), 0.4f, 1.5f);
 
                 if (target.hasStatusEffect(StatusEffects.WEAKNESS)) {
-
                     int a = (target.getStatusEffect(StatusEffects.WEAKNESS).getAmplifier() + 1);
 
                     if ((target.getStatusEffect(StatusEffects.WEAKNESS).getAmplifier() <= 0)) {
@@ -67,7 +67,6 @@ public class RendSwordItem extends UniqueSwordItem {
                 }
 
                 if (target.hasStatusEffect(StatusEffects.SLOWNESS)) {
-
                     int a = (target.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier() + 1);
 
                     if ((target.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier() < maxstacks)) {
@@ -78,13 +77,11 @@ public class RendSwordItem extends UniqueSwordItem {
                 }
             }
         }
-
         return super.postHit(stack, target, attacker);
-
     }
+
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
-
         if (!user.getWorld().isClient()) {
             float heal_amount = SimplySwords.uniqueEffectsConfig.soulrendHealMulti;
             int healamp = 0;
@@ -97,61 +94,43 @@ public class RendSwordItem extends UniqueSwordItem {
             ServerWorld sworld = (ServerWorld) user.getWorld();
             Box box = new Box(x + hradius, y + vradius, z + hradius, x - hradius, y - vradius, z - hradius);
 
-            for(Entity ee: sworld.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY)) {
+            for (Entity entity : sworld.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY)) {
+                if ((entity instanceof LivingEntity le) && le.hasStatusEffect(StatusEffects.SLOWNESS)
+                        && le.hasStatusEffect(StatusEffects.WEAKNESS) && HelperMethods.checkFriendlyFire(le, user)) {
 
-                if (ee != null) {
-                    if (ee instanceof LivingEntity) {
-                        LivingEntity le = (LivingEntity) ee;
-
-                         if (le.hasStatusEffect(StatusEffects.SLOWNESS) && le.hasStatusEffect(StatusEffects.WEAKNESS) && HelperMethods.checkFriendlyFire(le, user)) {
-                             healamp += (le.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier());
-                             cantrigger = true;
-                             le.damage(user.getDamageSources().magic(), le.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier() * abilityDamage);
-                             le.removeStatusEffect(StatusEffects.WEAKNESS);
-                             le.removeStatusEffect(StatusEffects.SLOWNESS);
-                             world.playSoundFromEntity (null, ee, SoundRegistry.DARK_SWORD_SPELL.get(), SoundCategory.PLAYERS, 0.1f, 2f);
-                         }
-                    }
+                    healamp += (le.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier());
+                    cantrigger = true;
+                    le.damage(user.getDamageSources().magic(), le.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier() * abilityDamage);
+                    le.removeStatusEffect(StatusEffects.WEAKNESS);
+                    le.removeStatusEffect(StatusEffects.SLOWNESS);
+                    world.playSoundFromEntity(null, entity, SoundRegistry.DARK_SWORD_SPELL.get(),
+                            entity.getSoundCategory(), 0.1f, 2f);
                 }
             }
             if (cantrigger) {
                 healamp = (int) (healamp * heal_amount);
-                if (healamp < 1)
-                    healamp = 1;
-                if (healamp > 6)
-                    healamp = 6;
+
+                if (healamp < 1) healamp = 1;
+                else if (healamp > 6) healamp = 6;
+
                 user.heal(healamp);
-                healamp = 0;
-                cantrigger = false;
             }
         }
-        return super.use(world,user,hand);
+        return super.use(world, user, hand);
     }
-
-
 
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
-        if (HelperMethods.commonSpellAttributeScaling(
-                spellScalingModifier,
-                entity,
-                "soul") > 0) {
-            abilityDamage = HelperMethods.commonSpellAttributeScaling(
-                    spellScalingModifier,
-                    entity,
-                    "soul");
+        if (HelperMethods.commonSpellAttributeScaling(spellScalingModifier, entity, "soul") > 0) {
+            abilityDamage = HelperMethods.commonSpellAttributeScaling(spellScalingModifier, entity, "soul");
             scalesWithSpellPower = true;
         }
-
-        if (stepMod > 0)
-            stepMod --;
-        if (stepMod <= 0)
-            stepMod = 7;
-        HelperMethods.createFootfalls(entity, stack, world, stepMod, ParticleTypes.SOUL, ParticleTypes.SCULK_SOUL, ParticleTypes.WARPED_SPORE, true);
-
+        if (stepMod > 0) stepMod--;
+        if (stepMod <= 0) stepMod = 7;
+        HelperMethods.createFootfalls(entity, stack, world, stepMod, ParticleTypes.SOUL, ParticleTypes.SCULK_SOUL,
+                ParticleTypes.WARPED_SPORE, true);
         super.inventoryTick(stack, world, entity, slot, selected);
     }
-
 
     @Override
     public void appendTooltip(ItemStack itemStack, World world, List<Text> tooltip, TooltipContext tooltipContext) {
@@ -168,11 +147,10 @@ public class RendSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.rendsworditem.tooltip4").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.rendsworditem.tooltip5").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.rendsworditem.tooltip6").setStyle(TEXT));
-        tooltip.add(Text.literal(""));
-        if (scalesWithSpellPower)
+        if (scalesWithSpellPower) {
+            tooltip.add(Text.literal(""));
             tooltip.add(Text.translatable("item.simplyswords.compat.scaleSoul"));
-
-        super.appendTooltip(itemStack,world, tooltip, tooltipContext);
+        }
+        super.appendTooltip(itemStack, world, tooltip, tooltipContext);
     }
-
 }

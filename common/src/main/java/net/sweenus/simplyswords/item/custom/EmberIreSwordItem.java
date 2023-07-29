@@ -1,6 +1,5 @@
 package net.sweenus.simplyswords.item.custom;
 
-
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -14,7 +13,6 @@ import net.minecraft.item.ToolMaterial;
 import net.minecraft.particle.DefaultParticleType;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
@@ -47,37 +45,33 @@ public class EmberIreSwordItem extends UniqueSwordItem {
             int fduration = (int) SimplySwords.uniqueEffectsConfig.emberIreDuration;
             HelperMethods.playHitSounds(attacker, target);
 
-
             if (attacker.getRandom().nextInt(100) <= fhitchance) {
                 attacker.setOnFireFor(fduration / 20);
                 attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.STRENGTH, fduration, 0), attacker);
                 attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, fduration, 1), attacker);
                 attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, fduration, 0), attacker);
-                world.playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_01.get(), SoundCategory.PLAYERS, 0.5f, 2f);
+                world.playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_01.get(),
+                        attacker.getSoundCategory(), 0.5f, 2f);
                 particlePassive = ParticleTypes.LAVA;
                 particleWalk = ParticleTypes.CAMPFIRE_COSY_SMOKE;
                 particleSprint = ParticleTypes.CAMPFIRE_COSY_SMOKE;
             }
         }
-
         return super.postHit(stack, target, attacker);
-
     }
-
 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
-
         if (!user.getWorld().isClient()) {
             if (user.hasStatusEffect(StatusEffects.STRENGTH) && user.hasStatusEffect(StatusEffects.HASTE) && user.hasStatusEffect(StatusEffects.SPEED)) {
 
-                ServerWorld sWorld = (ServerWorld)user.getWorld();
+                ServerWorld sWorld = (ServerWorld) user.getWorld();
                 BlockPos position = (user.getBlockPos());
                 Vec3d rotation = user.getRotationVec(1f);
                 Vec3d newPos = user.getPos().add(rotation);
 
                 FireballEntity fireball = new FireballEntity(EntityType.FIREBALL, world);
-                fireball.updatePosition(newPos.getX(), (user.getY()) +1.5, newPos.getZ());
+                fireball.updatePosition(newPos.getX(), (user.getY()) + 1.5, newPos.getZ());
                 fireball.setOwner(user);
                 user.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, 20, 4), user);
                 user.addStatusEffect(new StatusEffectInstance(StatusEffects.FIRE_RESISTANCE, 60, 2), user);
@@ -86,18 +80,16 @@ public class EmberIreSwordItem extends UniqueSwordItem {
                 user.removeStatusEffect(StatusEffects.STRENGTH);
                 user.removeStatusEffect(StatusEffects.SPEED);
                 user.removeStatusEffect(StatusEffects.HASTE);
-                world.playSound(null, position, SoundRegistry.ELEMENTAL_BOW_FIRE_SHOOT_IMPACT_03.get(), SoundCategory.PLAYERS, 0.3f, 2f);
+                world.playSound(null, position, SoundRegistry.ELEMENTAL_BOW_FIRE_SHOOT_IMPACT_03.get(),
+                        user.getSoundCategory(), 0.3f, 2f);
                 user.extinguish();
-
-
             }
         }
-        return super.use(world,user,hand);
+        return super.use(world, user, hand);
     }
 
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
-
         if ((entity instanceof PlayerEntity player)) {
             if (!player.hasStatusEffect(StatusEffects.STRENGTH) && !player.isOnFire()) {
                 particlePassive = ParticleTypes.SMOKE;
@@ -105,14 +97,9 @@ public class EmberIreSwordItem extends UniqueSwordItem {
                 particleSprint = ParticleTypes.FALLING_LAVA;
             }
         }
-
-
-        if (stepMod > 0)
-            stepMod--;
-        if (stepMod <= 0)
-            stepMod = 7;
+        if (stepMod > 0) stepMod--;
+        if (stepMod <= 0) stepMod = 7;
         HelperMethods.createFootfalls(entity, stack, world, stepMod, particleWalk, particleSprint, particlePassive, true);
-
         super.inventoryTick(stack, world, entity, slot, selected);
     }
 
@@ -131,7 +118,6 @@ public class EmberIreSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.emberiresworditem.tooltip4").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.emberiresworditem.tooltip5").setStyle(TEXT));
 
-        super.appendTooltip(itemStack,world, tooltip, tooltipContext);
+        super.appendTooltip(itemStack, world, tooltip, tooltipContext);
     }
-
 }
