@@ -127,7 +127,7 @@ public class UniqueEffectsConfig implements ConfigData {
     public float soulAnguishRadius = 3f;
     public float soulAnguishDamage = 4f;
     public float soulAnguishCooldown = 700;
-    public float soulAnguishDuration = 500f;
+    public float soulAnguishDuration = 200f;
     public float soulAnguishHeal = 0.5f;
     public float soulAnguishRange = 22f;
     public float soulAnguishSpellScaling = 1.6f;

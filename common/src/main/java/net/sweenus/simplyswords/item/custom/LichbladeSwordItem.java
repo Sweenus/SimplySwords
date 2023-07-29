@@ -41,8 +41,6 @@ public class LichbladeSwordItem extends UniqueSwordItem {
     float healAmount = SimplySwords.uniqueEffectsConfig.soulAnguishHeal;
     int range = (int) SimplySwords.uniqueEffectsConfig.soulAnguishRange;
     float spellScalingModifier = SimplySwords.uniqueEffectsConfig.soulAnguishSpellScaling;
-    int damageTracker;
-    int chanceReduce;
     double lastX;
     double lastY;
     double lastZ;
@@ -66,17 +64,15 @@ public class LichbladeSwordItem extends UniqueSwordItem {
         }
         if (itemStack.isOf(ItemsRegistry.SLUMBERING_LICHBLADE.get())) {
             return TypedActionResult.pass(itemStack);
-        } else {
-            abilityTarget = (LivingEntity) HelperMethods.getTargetedEntity(user, range);
-            if (abilityTarget != null) {
-                abilityTarget.addStatusEffect(new StatusEffectInstance(StatusEffects.GLOWING, 10, 0), user);
-                world.playSoundFromEntity(null, user, SoundRegistry.DARK_SWORD_ENCHANT.get(),
-                        user.getSoundCategory(), 0.5f, 0.5f);
-                lastX = user.getX();
-                lastY = user.getY();
-                lastZ = user.getZ();
-                chanceReduce = 0;
-            }
+        }
+        abilityTarget = (LivingEntity) HelperMethods.getTargetedEntity(user, range);
+        if (abilityTarget != null) {
+            abilityTarget.addStatusEffect(new StatusEffectInstance(StatusEffects.GLOWING, 10, 0), user);
+            world.playSoundFromEntity(null, user, SoundRegistry.DARK_SWORD_ENCHANT.get(),
+                    user.getSoundCategory(), 0.5f, 0.5f);
+            lastX = user.getX();
+            lastY = user.getY();
+            lastZ = user.getZ();
         }
         user.setCurrentHand(hand);
         return TypedActionResult.consume(itemStack);
@@ -85,24 +81,20 @@ public class LichbladeSwordItem extends UniqueSwordItem {
     @Override
     public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
         if (user.getEquippedStack(EquipmentSlot.MAINHAND) == stack && (user instanceof PlayerEntity player) && abilityTarget != null) {
-            //Return to player after the enemy dies & buff player
+            //Return to player after the duration or after the enemy dies & buff player
             if (stack.isOf(ItemsRegistry.AWAKENED_LICHBLADE.get())) {
-                if (abilityTarget.isDead() || abilityTarget == player) {
+                if (abilityTarget.isDead() || abilityTarget == player || remainingUseTicks < ability_timer_max) {
+                    abilityTarget = player;
                     if (player.squaredDistanceTo(lastX, lastY, lastZ) < radius) {
                         player.addStatusEffect(new StatusEffectInstance(StatusEffects.ABSORPTION, 600, 2), player);
                         player.getItemCooldownManager().set(stack.getItem(), skillCooldown);
                         player.stopUsingItem();
-                        remainingUseTicks = 0;
-                        damageTracker = 0;
                         world.playSoundFromEntity(null, player, SoundRegistry.DARK_SWORD_SPELL.get(),
                                 player.getSoundCategory(), 0.04f, 0.5f);
                     }
-                    abilityTarget = player;
                 }
-            } else if (stack.isOf(ItemsRegistry.WAKING_LICHBLADE.get()) && abilityTarget.isDead()) {
+            } else if (stack.isOf(ItemsRegistry.WAKING_LICHBLADE.get()) && (abilityTarget.isDead() || remainingUseTicks < ability_timer_max)) {
                 player.stopUsingItem();
-                remainingUseTicks = 0;
-                damageTracker = 0;
             }
             //Move aura to target
             if (player.age % 5 == 0) {
@@ -117,16 +109,14 @@ public class LichbladeSwordItem extends UniqueSwordItem {
                 if (targetY > lastY) lastY += 1;
                 if (targetY < lastY) lastY -= 1;
             }
-            AbilityMethods.tickAbilitySoulAnguish(stack, world, user, remainingUseTicks, ability_timer_max,
-                    abilityDamage, skillCooldown, radius, damageTracker, chanceReduce,
-                    lastX, lastY, lastZ, targetX, targetY, targetZ, range, healAmount,
-                    abilityTarget);
+            AbilityMethods.tickAbilitySoulAnguish(stack, world, user, abilityDamage, radius, lastX, lastY, lastZ,
+                    healAmount, abilityTarget);
         }
     }
 
     @Override
     public int getMaxUseTime(ItemStack stack) {
-        return ability_timer_max;
+        return ability_timer_max * 2;
     }
 
     @Override
