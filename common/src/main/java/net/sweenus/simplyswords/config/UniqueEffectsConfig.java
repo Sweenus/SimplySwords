@@ -128,7 +128,7 @@ public class UniqueEffectsConfig implements ConfigData {
 
     @ConfigEntry.Gui.PrefixText
     public float soulAnguishRadius = 3f;
-    public float soulAnguishAbsorptionCap = 20f;
+    public float soulAnguishAbsorptionCap = 8f;
     public float soulAnguishDamage = 4f;
     public float soulAnguishCooldown = 700;
     public float soulAnguishDuration = 200f;
