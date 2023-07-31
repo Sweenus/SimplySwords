@@ -7,7 +7,7 @@ import me.shedaniel.autoconfig.annotation.ConfigEntry;
 @Config(name = "unique_effects")
 public class UniqueEffectsConfig implements ConfigData {
 
-    @ConfigEntry.Gui.PrefixText
+    @ConfigEntry.Gui.Tooltip
     public float abilityAbsorptionCap = 20f;
 
     @ConfigEntry.Gui.PrefixText
