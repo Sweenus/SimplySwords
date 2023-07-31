@@ -70,7 +70,7 @@ public class StormbringerSwordItem extends UniqueSwordItem {
             for (Entity entity : world.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY)) {
 
                 //Parry attack
-                if ((entity instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, (PlayerEntity) user)) {
+                if ((entity instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, user)) {
                     if (le.handSwinging && remainingUseTicks > getMaxUseTime(stack) - perfectParryWindow) {
                         parrySuccess = true;
                         if (parrySuccession < 20) parrySuccession += 1;
@@ -94,7 +94,7 @@ public class StormbringerSwordItem extends UniqueSwordItem {
                 for (Entity entities : world.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY)) {
 
                     //damage & knockback
-                    if ((entities instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, (PlayerEntity) user)) {
+                    if ((entities instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, user)) {
                         float choose = (float) (Math.random() * 1);
                         le.damage(user.getDamageSources().magic(), abilityDamage + parrySuccession);
                         world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_BOW_POISON_ATTACK_01.get(),
@@ -109,10 +109,12 @@ public class StormbringerSwordItem extends UniqueSwordItem {
                 }
                 world.playSoundFromEntity(null, user, SoundRegistry.ELEMENTAL_BOW_THUNDER_SHOOT_IMPACT_01.get(),
                         user.getSoundCategory(), (float) (0.2f * (parrySuccession * 0.04)), 0.8f);
-                ((PlayerEntity) user).getItemCooldownManager().set(stack.getItem(), (skillCooldown / 2) + (parrySuccession * 2));
+                if (user instanceof PlayerEntity player) player.getItemCooldownManager().set(stack.getItem(), (skillCooldown / 2) + (parrySuccession * 2));
             }
             if (!parrySuccess) {
-                ((PlayerEntity) user).getItemCooldownManager().set(stack.getItem(), skillCooldown);
+                if (user instanceof PlayerEntity player) {
+                    player.getItemCooldownManager().set(stack.getItem(), skillCooldown);
+                }
                 parrySuccession = 0;
             }
             parrySuccess = false;

@@ -104,31 +104,33 @@ public class VolcanicFurySwordItem extends UniqueSwordItem {
 
     @Override
     public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
-        if (!world.isClient && (user instanceof PlayerEntity player)) {
-            player.getItemCooldownManager().set(this, skillCooldown);
+        if (!world.isClient) {
+            if (user instanceof PlayerEntity player) {
+                player.getItemCooldownManager().set(this, skillCooldown);
+            }
             int choose_sound = (int) (Math.random() * 30);
             if (choose_sound <= 10)
-                world.playSoundFromEntity(null, player, SoundRegistry.ELEMENTAL_BOW_FIRE_SHOOT_IMPACT_01.get(),
-                        player.getSoundCategory(), 0.6f, 1.2f);
+                world.playSoundFromEntity(null, user, SoundRegistry.ELEMENTAL_BOW_FIRE_SHOOT_IMPACT_01.get(),
+                        user.getSoundCategory(), 0.6f, 1.2f);
             else if (choose_sound <= 20)
-                world.playSoundFromEntity(null, player, SoundRegistry.ELEMENTAL_BOW_FIRE_SHOOT_IMPACT_02.get(),
-                        player.getSoundCategory(), 0.6f, 1.2f);
+                world.playSoundFromEntity(null, user, SoundRegistry.ELEMENTAL_BOW_FIRE_SHOOT_IMPACT_02.get(),
+                        user.getSoundCategory(), 0.6f, 1.2f);
             else if (choose_sound <= 30)
-                world.playSoundFromEntity(null, player, SoundRegistry.ELEMENTAL_BOW_FIRE_SHOOT_IMPACT_03.get(),
-                        player.getSoundCategory(), 0.6f, 1.2f);
+                world.playSoundFromEntity(null, user, SoundRegistry.ELEMENTAL_BOW_FIRE_SHOOT_IMPACT_03.get(),
+                        user.getSoundCategory(), 0.6f, 1.2f);
             //Damage
-            Box box = new Box(player.getX() + radius, player.getY() + radius, player.getZ() + radius,
-                    player.getX() - radius, player.getY() - radius, player.getZ() - radius);
-            for (Entity entity : world.getOtherEntities(player, box, EntityPredicates.VALID_LIVING_ENTITY)) {
-                if ((entity instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, player)) {
+            Box box = new Box(user.getX() + radius, user.getY() + radius, user.getZ() + radius,
+                    user.getX() - radius, user.getY() - radius, user.getZ() - radius);
+            for (Entity entity : world.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY)) {
+                if ((entity instanceof LivingEntity le) && HelperMethods.checkFriendlyFire((LivingEntity) entity, user)) {
                     float choose = (float) (Math.random() * 1);
-                    le.damage(player.getDamageSources().magic(), abilityDamage * (chargePower * 0.3f));
+                    le.damage(user.getDamageSources().magic(), abilityDamage * (chargePower * 0.3f));
                     le.setOnFireFor(6);
                     world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_BOW_POISON_ATTACK_01.get(),
                             le.getSoundCategory(), 0.1f, choose);
                     chargePower = 0;
-                    le.addStatusEffect(new StatusEffectInstance(StatusEffects.LEVITATION, 10, 1), player);
-                    le.setVelocity(le.getX() - player.getX(), 0.5, le.getZ() - player.getZ());
+                    le.addStatusEffect(new StatusEffectInstance(StatusEffects.LEVITATION, 10, 1), user);
+                    le.setVelocity(le.getX() - user.getX(), 0.5, le.getZ() - user.getZ());
                 }
             }
         }

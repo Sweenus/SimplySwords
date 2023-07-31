@@ -12,10 +12,6 @@ public class EffectRegistry {
 
     public static final DeferredRegister<StatusEffect> EFFECT = DeferredRegister.create(SimplySwords.MOD_ID, RegistryKeys.STATUS_EFFECT);
 
-    public static final RegistrySupplier<StatusEffect> OMEN = EFFECT.register("omen", () ->
-            new OmenEffect(StatusEffectCategory.HARMFUL, 1124687));
-    public static final RegistrySupplier<StatusEffect> WATCHER = EFFECT.register("watcher", () ->
-            new WatcherEffect(StatusEffectCategory.HARMFUL, 1124687));
     public static final RegistrySupplier<StatusEffect> WILDFIRE = EFFECT.register("wildfire", () ->
             new WildfireEffect(StatusEffectCategory.HARMFUL, 1124687));
     public static final RegistrySupplier<StatusEffect> STORM = EFFECT.register("storm", () ->

@@ -86,33 +86,32 @@ public class HelperMethods {
     }
 
     //Check if we should be able to hit the target
-    public static boolean checkFriendlyFire(LivingEntity livingEntity, PlayerEntity player) {
-        if (!checkEntityBlacklist(livingEntity, player)) {
+    public static boolean checkFriendlyFire(LivingEntity target, LivingEntity attacker) {
+        if (!checkEntityBlacklist(target, attacker)) {
             return false;
         }
-        if (livingEntity instanceof PlayerEntity playerEntity) {
-            if (playerEntity == player) {
+        if (target instanceof PlayerEntity playerTarget) {
+            if (playerTarget == attacker) {
                 return false;
             }
-            return playerEntity.shouldDamagePlayer(player);
+            return !(attacker instanceof PlayerEntity playerAttacker) || playerAttacker.shouldDamagePlayer(playerTarget);
         }
-        if (livingEntity instanceof TameableEntity tameableEntity && tameableEntity.getOwner() != null) {
-            return tameableEntity.getOwner() != player;
+        if (target instanceof TameableEntity tameableEntity && tameableEntity.getOwner() != null) {
+            return tameableEntity.getOwner() != attacker;
         }
         return true;
     }
 
     //Check if the target matches blacklisted entities (expand this to be configurable if there is demand)
-    public static boolean checkEntityBlacklist(LivingEntity livingEntity, PlayerEntity player) {
-        if (livingEntity == null || player == null) {
+    public static boolean checkEntityBlacklist(LivingEntity target, LivingEntity player) {
+        if (target == null || player == null) {
             return false;
         }
-        return !(livingEntity instanceof ArmorStandEntity)
-                && !(livingEntity instanceof VillagerEntity)
-                && !(livingEntity instanceof BattleStandardEntity)
-                && !(livingEntity instanceof BattleStandardDarkEntity);
+        return !(target instanceof ArmorStandEntity)
+                && !(target instanceof VillagerEntity)
+                && !(target instanceof BattleStandardEntity)
+                && !(target instanceof BattleStandardDarkEntity);
     }
-
 
     //spawnParticle - spawns particles across both client & server
     public static void spawnParticle(World world, ParticleEffect particle, double xpos, double ypos, double zpos,

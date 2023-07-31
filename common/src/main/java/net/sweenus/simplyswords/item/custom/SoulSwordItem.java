@@ -70,7 +70,8 @@ public class SoulSwordItem extends UniqueSwordItem {
 
             for (Entity entity : serverWorld.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY)) {
                 if (entity instanceof LivingEntity le && user.hasStatusEffect(StatusEffects.MINING_FATIGUE) && HelperMethods.checkFriendlyFire((LivingEntity) entity, user)) {
-                    le.addStatusEffect(new StatusEffectInstance(StatusEffects.MINING_FATIGUE, user.getStatusEffect(StatusEffects.MINING_FATIGUE).getDuration(), user.getStatusEffect(StatusEffects.MINING_FATIGUE).getAmplifier()), user);
+                    le.addStatusEffect(new StatusEffectInstance(StatusEffects.MINING_FATIGUE, user.getStatusEffect(StatusEffects.MINING_FATIGUE).getDuration(),
+                            user.getStatusEffect(StatusEffects.MINING_FATIGUE).getAmplifier()), user);
                     world.playSoundFromEntity(null, entity, SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_IMPACT_03.get(),
                             entity.getSoundCategory(), 0.1f, 1f);
                 }
