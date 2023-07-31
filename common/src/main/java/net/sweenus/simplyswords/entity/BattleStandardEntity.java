@@ -90,7 +90,7 @@ public class BattleStandardEntity extends PathAwareEntity {
                                 le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 120, 1), this);
                             }
                             //Nullification negative effects
-                            if (standardType.equals("nullification")) {
+                            else if (standardType.equals("nullification")) {
                                 for (StatusEffectInstance statusEffect : le.getStatusEffects()) {
                                     if (statusEffect != null && statusEffect.getEffectType().isBeneficial()) {
                                         le.removeStatusEffect(statusEffect.getEffectType());

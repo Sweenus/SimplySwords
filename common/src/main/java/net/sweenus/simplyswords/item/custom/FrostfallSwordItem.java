@@ -58,7 +58,7 @@ public class FrostfallSwordItem extends UniqueSwordItem {
                 Box box = new Box(target.getX() + radius, target.getY() + radius, target.getZ() + radius,
                         target.getX() - radius, target.getY() - radius, target.getZ() - radius);
                 for (Entity entity : world.getOtherEntities(attacker, box, EntityPredicates.VALID_LIVING_ENTITY)) {
-                    if ((entity instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, (PlayerEntity) attacker)) {
+                    if ((entity instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, attacker)) {
                         le.addStatusEffect(new StatusEffectInstance(EffectRegistry.FREEZE.get(), shatter_timer_max + 10, 0), attacker);
                         le.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, shatter_timer_max - 10, 4), attacker);
                         world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_BOW_ICE_SHOOT_IMPACT_01.get(),

@@ -8,11 +8,14 @@ import me.shedaniel.autoconfig.annotation.ConfigEntry;
 public class UniqueEffectsConfig implements ConfigData {
 
     @ConfigEntry.Gui.PrefixText
+    public float abilityAbsorptionCap = 20f;
+
+    @ConfigEntry.Gui.PrefixText
     public float watcherChance = 5f;
     public float watcherRestoreAmount = 0.5f;
     public float watcherRadius = 8f;
-    public float omenChance = 5.0f;
-    public float omenRegenerationAmount = 0.5f;
+    public float omenChance = 5f;
+    public float omenAbsorptionCap = 20f;
     public float omenInstantKillThreshold = 0.25f;
 
     @ConfigEntry.Gui.PrefixText
@@ -125,6 +128,7 @@ public class UniqueEffectsConfig implements ConfigData {
 
     @ConfigEntry.Gui.PrefixText
     public float soulAnguishRadius = 3f;
+    public float soulAnguishAbsorptionCap = 20f;
     public float soulAnguishDamage = 4f;
     public float soulAnguishCooldown = 700;
     public float soulAnguishDuration = 200f;

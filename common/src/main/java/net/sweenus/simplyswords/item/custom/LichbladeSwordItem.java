@@ -34,13 +34,16 @@ public class LichbladeSwordItem extends UniqueSwordItem {
 
     private static int stepMod = 0;
     public static boolean scalesWithSpellPower;
+    float overallAbsorptionCap = SimplySwords.uniqueEffectsConfig.abilityAbsorptionCap;
     int radius = (int) SimplySwords.uniqueEffectsConfig.soulAnguishRadius;
+    float absorptionCap = SimplySwords.uniqueEffectsConfig.soulAnguishAbsorptionCap;
     float abilityDamage = SimplySwords.uniqueEffectsConfig.soulAnguishDamage;
-    int ability_timer_max = (int) SimplySwords.uniqueEffectsConfig.soulAnguishDuration;
+    int maxDuration = (int) SimplySwords.uniqueEffectsConfig.soulAnguishDuration;
     int skillCooldown = (int) SimplySwords.uniqueEffectsConfig.soulAnguishCooldown;
     float healAmount = SimplySwords.uniqueEffectsConfig.soulAnguishHeal;
     int range = (int) SimplySwords.uniqueEffectsConfig.soulAnguishRange;
     float spellScalingModifier = SimplySwords.uniqueEffectsConfig.soulAnguishSpellScaling;
+    public int damageTracker = 0;
     double lastX;
     double lastY;
     double lastZ;
@@ -80,24 +83,23 @@ public class LichbladeSwordItem extends UniqueSwordItem {
 
     @Override
     public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
-        if (user.getEquippedStack(EquipmentSlot.MAINHAND) == stack && (user instanceof PlayerEntity player) && abilityTarget != null) {
-            //Return to player after the duration or after the enemy dies & buff player
+        if (!world.isClient() && user.getEquippedStack(EquipmentSlot.MAINHAND) == stack && abilityTarget != null) {
+            //Return to user after the duration or after the enemy dies & buff user
             if (stack.isOf(ItemsRegistry.AWAKENED_LICHBLADE.get())) {
-                if (abilityTarget.isDead() || abilityTarget == player || remainingUseTicks < ability_timer_max) {
-                    abilityTarget = player;
-                    if (player.squaredDistanceTo(lastX, lastY, lastZ) < radius) {
-                        player.addStatusEffect(new StatusEffectInstance(StatusEffects.ABSORPTION, 600, 2), player);
-                        player.getItemCooldownManager().set(stack.getItem(), skillCooldown);
-                        player.stopUsingItem();
-                        world.playSoundFromEntity(null, player, SoundRegistry.DARK_SWORD_SPELL.get(),
-                                player.getSoundCategory(), 0.04f, 0.5f);
+                if (abilityTarget.isDead() || abilityTarget == user || remainingUseTicks < maxDuration) {
+                    abilityTarget = user;
+                    if (user.squaredDistanceTo(lastX, lastY, lastZ) < radius) {
+                        user.setAbsorptionAmount(Math.min(overallAbsorptionCap, user.getAbsorptionAmount() + Math.min(damageTracker / 2f, absorptionCap)));
+                        user.stopUsingItem();
+                        world.playSoundFromEntity(null, user, SoundRegistry.DARK_SWORD_SPELL.get(),
+                                user.getSoundCategory(), 0.04f, 0.5f);
                     }
                 }
-            } else if (stack.isOf(ItemsRegistry.WAKING_LICHBLADE.get()) && (abilityTarget.isDead() || remainingUseTicks < ability_timer_max)) {
-                player.stopUsingItem();
+            } else if (stack.isOf(ItemsRegistry.WAKING_LICHBLADE.get()) && (abilityTarget.isDead() || remainingUseTicks < maxDuration)) {
+                user.stopUsingItem();
             }
             //Move aura to target
-            if (player.age % 5 == 0) {
+            if (user.age % 5 == 0) {
                 targetX = abilityTarget.getX();
                 targetY = abilityTarget.getY();
                 targetZ = abilityTarget.getZ();
@@ -116,7 +118,7 @@ public class LichbladeSwordItem extends UniqueSwordItem {
 
     @Override
     public int getMaxUseTime(ItemStack stack) {
-        return ability_timer_max * 2;
+        return maxDuration * 2;
     }
 
     @Override
@@ -126,33 +128,34 @@ public class LichbladeSwordItem extends UniqueSwordItem {
 
     @Override
     public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
+        damageTracker = 0;
         if (!world.isClient && (user instanceof PlayerEntity player) && abilityTarget != null) {
             player.getItemCooldownManager().set(stack.getItem(), skillCooldown);
         }
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
-        if (HelperMethods.commonSpellAttributeScaling(spellScalingModifier, entity, "soul") > 0) {
-            abilityDamage = HelperMethods.commonSpellAttributeScaling(spellScalingModifier, entity, "soul");
+    public void inventoryTick(ItemStack stack, World world, Entity user, int slot, boolean selected) {
+        if (HelperMethods.commonSpellAttributeScaling(spellScalingModifier, user, "soul") > 0) {
+            abilityDamage = HelperMethods.commonSpellAttributeScaling(spellScalingModifier, user, "soul");
             scalesWithSpellPower = true;
         }
 
-        if (!entity.getWorld().isClient() && (entity instanceof PlayerEntity player)) {
+        if (!user.getWorld().isClient() && user instanceof LivingEntity livingUser) {
             //AOE Aura
-            if (player.age % 35 == 0 && player.getEquippedStack(EquipmentSlot.MAINHAND) == stack && !player.isUsingItem()) {
-                Box box = new Box(player.getX() + radius, player.getY() + radius, player.getZ() + radius,
-                        player.getX() - radius, player.getY() - radius, player.getZ() - radius);
-                for (Entity otherEntity : world.getOtherEntities(player, box, EntityPredicates.VALID_LIVING_ENTITY)) {
-                    if ((otherEntity instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, player)) {
-                        le.damage(player.getDamageSources().magic(), abilityDamage);
+            if (livingUser.age % 35 == 0 && livingUser.getEquippedStack(EquipmentSlot.MAINHAND) == stack && !livingUser.isUsingItem()) {
+                Box box = new Box(livingUser.getX() + radius, livingUser.getY() + radius, livingUser.getZ() + radius,
+                        livingUser.getX() - radius, livingUser.getY() - radius, livingUser.getZ() - radius);
+                for (Entity entity : world.getOtherEntities(livingUser, box, EntityPredicates.VALID_LIVING_ENTITY)) {
+                    if ((entity instanceof LivingEntity le) && HelperMethods.checkFriendlyFire((LivingEntity) entity, livingUser)) {
+                        le.damage(livingUser.getDamageSources().magic(), abilityDamage);
                     }
                 }
-                world.playSoundFromEntity(null, player, SoundRegistry.DARK_SWORD_BLOCK.get(),
-                        player.getSoundCategory(), 0.1f, 0.2f);
-                double xpos = player.getX() - (radius + 1);
-                double ypos = player.getY();
-                double zpos = player.getZ() - (radius + 1);
+                world.playSoundFromEntity(null, livingUser, SoundRegistry.DARK_SWORD_BLOCK.get(),
+                        livingUser.getSoundCategory(), 0.1f, 0.2f);
+                double xpos = livingUser.getX() - (radius + 1);
+                double ypos = livingUser.getY();
+                double zpos = livingUser.getZ() - (radius + 1);
 
                 for (int i = radius * 2; i > 0; i--) {
                     for (int j = radius * 2; j > 0; j--) {
@@ -172,9 +175,9 @@ public class LichbladeSwordItem extends UniqueSwordItem {
         }
         if (stepMod > 0) stepMod--;
         if (stepMod <= 0) stepMod = 7;
-        HelperMethods.createFootfalls(entity, stack, world, stepMod, ParticleTypes.SOUL, ParticleTypes.SOUL,
+        HelperMethods.createFootfalls(user, stack, world, stepMod, ParticleTypes.SOUL, ParticleTypes.SOUL,
                 ParticleTypes.MYCELIUM, true);
-        super.inventoryTick(stack, world, entity, slot, selected);
+        super.inventoryTick(stack, world, user, slot, selected);
     }
 
     @Override

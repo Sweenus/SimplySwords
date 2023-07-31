@@ -1057,12 +1057,15 @@
   "text.autoconfig.simplyswords_main.option.general.compatEnableSpellPowerScaling.@Tooltip" :                           "§a[When Spell Power is installed]§7\nIf enabled, some weapon effects will scale with Spell Power attributes.",
   "text.autoconfig.simplyswords_main.option.general.compatEnableSpellPowerScaling":                                     "§a[Compat]§7 Enable Spell Power scaling",
 
+  "text.autoconfig.simplyswords_main.option.unique_effects.abilityAbsorptionCap" :                                      "Absorption cap",
+  "text.autoconfig.simplyswords_main.option.unique_effects.abilityAbsorptionCap.@Tooltip" :                             "Abilities cannot give the user more absorption than this value",
+
   "text.autoconfig.simplyswords_main.option.unique_effects.watcherChance.@PrefixText" :                                 "§6[The Watcher & Watching Warglaives]§7",
   "text.autoconfig.simplyswords_main.option.unique_effects.watcherChance":                                              "Watcher chance",
   "text.autoconfig.simplyswords_main.option.unique_effects.watcherRestoreAmount":                                       "Watcher restore amount",
   "text.autoconfig.simplyswords_main.option.unique_effects.watcherRadius":                                              "Watcher radius",
   "text.autoconfig.simplyswords_main.option.unique_effects.omenChance":                                                 "Omen chance",
-  "text.autoconfig.simplyswords_main.option.unique_effects.omenRegenerationAmount":                                     "Omen Regeneration amount",
+  "text.autoconfig.simplyswords_main.option.unique_effects.omenAbsorptionCap":                                          "Omen absorption cap",
   "text.autoconfig.simplyswords_main.option.unique_effects.omenInstantKillThreshold":                                   "Omen instant-kill threshold",
 
   "text.autoconfig.simplyswords_main.option.unique_effects.stealChance.@PrefixText" :                                   "§6[Soulstealer]§7",
@@ -1174,6 +1177,7 @@
 
   "text.autoconfig.simplyswords_main.option.unique_effects.soulAnguishRadius.@PrefixText" :                             "§6[Lichblade]§7",
   "text.autoconfig.simplyswords_main.option.unique_effects.soulAnguishRadius":                                          "Soul Anguish radius",
+  "text.autoconfig.simplyswords_main.option.unique_effects.soulAnguishAbsorptionCap":                                   "Soul Anguish absorption cap",
   "text.autoconfig.simplyswords_main.option.unique_effects.soulAnguishDamage":                                          "Soul Anguish damage",
   "text.autoconfig.simplyswords_main.option.unique_effects.soulAnguishCooldown":                                        "Soul Anguish cooldown",
   "text.autoconfig.simplyswords_main.option.unique_effects.soulAnguishDuration":                                        "Soul Anguish duration",

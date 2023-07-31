@@ -52,7 +52,6 @@ public class SimplySwords {
     );
 
 
-
     public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
 
     public static boolean isConfigOutdated;
@@ -88,17 +87,9 @@ public class SimplySwords {
 
         File configFile = Config.createFile("config/simplyswords_extra/backupconfig.json", defaultConfig, false);
         JsonObject json = Config.getJsonObject(Config.readFile(configFile));
-        if (json.has("config_version")) {
-            if (version.startsWith(json.get("config_version").getAsString())) {
-                isConfigOutdated = false;
-            }
-            else {
-                isConfigOutdated = true;
-                //System.out.println("SimplySwords: It looks like you've updated from a previous version. Please regenerate the Simply Swords configs to get the latest features.");
-                //System.out.println(version.substring(0, 4));
-            }
-        }
-        else {
+        if (json.has("config_version") && version.startsWith(json.get("config_version").getAsString())) {
+            isConfigOutdated = false;
+        } else {
             isConfigOutdated = true;
             //System.out.println("SimplySwords: It looks like you've updated from a previous version. Please regenerate the Simply Swords configs to get the latest features.");
             //System.out.println(version.substring(0, 4));
@@ -119,7 +110,7 @@ public class SimplySwords {
 
         //Don't announce via in-game chat because that's kinda annoying
         //ClientPlayerEvent.CLIENT_PLAYER_JOIN.register(new EventGameStart());
-        
+
         System.out.println(SimplySwordsExpectPlatform.getConfigDirectory().toAbsolutePath().normalize().toString());
         EnvExecutor.runInEnv(Env.CLIENT, () -> SimplySwords.Client::initializeClient);
 
@@ -129,6 +120,7 @@ public class SimplySwords {
     public static class Client {
         public static final EntityModelLayer BATTLESTANDARD_MODEL = new EntityModelLayer(new Identifier("battlestandard", "cube"), "main");
         public static final EntityModelLayer BATTLESTANDARD_DARK_MODEL = new EntityModelLayer(new Identifier("battlestandarddark", "cube"), "main");
+
         @Environment(EnvType.CLIENT)
         public static void initializeClient() {
             EntityRendererRegistry.register(EntityRegistry.BATTLESTANDARD, BattleStandardRenderer::new);
