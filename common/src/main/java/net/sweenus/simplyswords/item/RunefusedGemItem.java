@@ -26,13 +26,11 @@ public class RunefusedGemItem extends Item {
     @Override
     public boolean onClicked(ItemStack stack, ItemStack otherStack, Slot slot, ClickType clickType, PlayerEntity player,
                              StackReference cursorStackReference) {
-
         if (stack.getOrCreateNbt().getString("runic_power").isEmpty()) {
 
             String runefusedPowerSelection = HelperMethods.chooseRunefusedPower();
             stack.getOrCreateNbt().putString("runic_power", runefusedPowerSelection);
         }
-
         return false;
     }
 
@@ -42,7 +40,6 @@ public class RunefusedGemItem extends Item {
 
         String runefusedPowerSelection = HelperMethods.chooseRunefusedPower();
         stack.getOrCreateNbt().putString("runic_power", runefusedPowerSelection);
-
     }
 
     @Override
@@ -54,7 +51,6 @@ public class RunefusedGemItem extends Item {
     @Override
     public void appendTooltip(ItemStack itemStack, World world, List<Text> tooltip, TooltipContext tooltipContext) {
         Style RUNIC = HelperMethods.getStyle("runic");
-        Style RIGHTCLICK = HelperMethods.getStyle("rightclick");
         Style TEXT = HelperMethods.getStyle("text");
 
         tooltip.add(Text.literal(""));
@@ -131,11 +127,6 @@ public class RunefusedGemItem extends Item {
                     tooltip.add(Text.translatable("item.simplyswords.unstablesworditem.tooltip2").setStyle(TEXT));
                     tooltip.add(Text.translatable("item.simplyswords.unstablesworditem.tooltip3").setStyle(TEXT));
                 }
-                case "momentum", "greater_momentum" -> {
-                    tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.runefused_power.momentum").setStyle(RUNIC));
-                    tooltip.add(Text.translatable("item.simplyswords.momentumsworditem.tooltip2").setStyle(TEXT));
-                    tooltip.add(Text.translatable("item.simplyswords.momentumsworditem.tooltip3").setStyle(TEXT));
-                }
                 case "imbued", "greater_imbued" -> {
                     tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.runefused_power.imbued").setStyle(RUNIC));
                     tooltip.add(Text.translatable("item.simplyswords.imbuedsworditem.tooltip2").setStyle(TEXT));
@@ -145,22 +136,6 @@ public class RunefusedGemItem extends Item {
                     tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.runefused_power.pincushion").setStyle(RUNIC));
                     tooltip.add(Text.translatable("item.simplyswords.pincushionsworditem.tooltip2").setStyle(TEXT));
                     tooltip.add(Text.translatable("item.simplyswords.pincushionsworditem.tooltip3").setStyle(TEXT));
-                }
-                case "ward" -> {
-                    tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.runefused_power.ward").setStyle(RUNIC));
-                    tooltip.add(Text.literal(""));
-                    tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(RIGHTCLICK));
-                    tooltip.add(Text.translatable("item.simplyswords.wardsworditem.tooltip2").setStyle(TEXT));
-                    tooltip.add(Text.translatable("item.simplyswords.wardsworditem.tooltip3").setStyle(TEXT));
-                    tooltip.add(Text.translatable("item.simplyswords.wardsworditem.tooltip4").setStyle(TEXT));
-                }
-                case "immolation" -> {
-                    tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.runefused_power.immolation").setStyle(RUNIC));
-                    tooltip.add(Text.literal(""));
-                    tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(RIGHTCLICK));
-                    tooltip.add(Text.translatable("item.simplyswords.immolationsworditem.tooltip2").setStyle(TEXT));
-                    tooltip.add(Text.translatable("item.simplyswords.immolationsworditem.tooltip3").setStyle(TEXT));
-                    tooltip.add(Text.translatable("item.simplyswords.immolationsworditem.tooltip4").setStyle(TEXT));
                 }
             }
         }
