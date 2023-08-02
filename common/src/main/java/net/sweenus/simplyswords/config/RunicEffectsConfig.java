@@ -70,11 +70,11 @@ public class RunicEffectsConfig implements ConfigData {
 
     @ConfigEntry.Gui.PrefixText
     public float shieldingChance = 15f;
-    public float shieldingDuration = 60f;
+    public float shieldingDuration = 120f;
 
     @ConfigEntry.Gui.PrefixText
     public float stoneskinChance = 15f;
-    public float stoneskinDuration = 120f;
+    public float stoneskinDuration = 60f;
 
     @ConfigEntry.Gui.PrefixText
     public float trailblazeChance = 15f;

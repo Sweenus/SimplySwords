@@ -48,28 +48,28 @@ public class RunicSwordItem extends SwordItem {
             HelperMethods.playHitSounds(attacker, target);
 
             switch (stack.getOrCreateNbt().getString("runic_power")) {
-                case "freeze" -> RunicMethods.postHitRunicFreeze(stack, target, attacker);
-                case "wildfire" -> RunicMethods.postHitRunicWildfire(stack, target, attacker);
-                case "slow" -> RunicMethods.postHitRunicSlow(stack, target, attacker);
-                case "greater_slow" -> RunicMethods.postHitRunicGreaterSlow(stack, target, attacker);
-                case "swiftness" -> RunicMethods.postHitRunicSwiftness(stack, target, attacker);
-                case "greater_swiftness" -> RunicMethods.postHitRunicGreaterSwiftness(stack, target, attacker);
-                case "float" -> RunicMethods.postHitRunicFloat(stack, target, attacker);
-                case "greater_float" -> RunicMethods.postHitRunicGreaterFloat(stack, target, attacker);
-                case "zephyr" -> RunicMethods.postHitRunicZephyr(stack, target, attacker);
-                case "greater_zephyr" -> RunicMethods.postHitRunicGreaterZephyr(stack, target, attacker);
-                case "shielding" -> RunicMethods.postHitRunicShielding(stack, target, attacker);
-                case "greater_shielding" -> RunicMethods.postHitRunicGreaterShielding(stack, target, attacker);
-                case "stoneskin" -> RunicMethods.postHitRunicStoneskin(stack, target, attacker);
-                case "greater_stoneskin" -> RunicMethods.postHitRunicGreaterStoneskin(stack, target, attacker);
-                case "trailblaze" -> RunicMethods.postHitRunicTrailblaze(stack, target, attacker);
-                case "greater_trailblaze" -> RunicMethods.postHitRunicGreaterTrailblaze(stack, target, attacker);
-                case "weaken" -> RunicMethods.postHitRunicWeaken(stack, target, attacker);
-                case "greater_weaken" -> RunicMethods.postHitRunicGreaterWeaken(stack, target, attacker);
+                case "freeze" -> RunicMethods.postHitRunicFreeze(target, attacker);
+                case "wildfire" -> RunicMethods.postHitRunicWildfire(target, attacker);
+                case "slow" -> RunicMethods.postHitRunicSlow(target, attacker);
+                case "greater_slow" -> RunicMethods.postHitRunicGreaterSlow(target, attacker);
+                case "swiftness" -> RunicMethods.postHitRunicSwiftness(attacker);
+                case "greater_swiftness" -> RunicMethods.postHitRunicGreaterSwiftness(attacker);
+                case "float" -> RunicMethods.postHitRunicFloat(target, attacker);
+                case "greater_float" -> RunicMethods.postHitRunicGreaterFloat(target, attacker);
+                case "zephyr" -> RunicMethods.postHitRunicZephyr(attacker);
+                case "greater_zephyr" -> RunicMethods.postHitRunicGreaterZephyr(attacker);
+                case "shielding" -> RunicMethods.postHitRunicShielding(attacker);
+                case "greater_shielding" -> RunicMethods.postHitRunicGreaterShielding(attacker);
+                case "stoneskin" -> RunicMethods.postHitRunicStoneskin(attacker);
+                case "greater_stoneskin" -> RunicMethods.postHitRunicGreaterStoneskin(attacker);
+                case "trailblaze" -> RunicMethods.postHitRunicTrailblaze(attacker);
+                case "greater_trailblaze" -> RunicMethods.postHitRunicGreaterTrailblaze(attacker);
+                case "weaken" -> RunicMethods.postHitRunicWeaken(target, attacker);
+                case "greater_weaken" -> RunicMethods.postHitRunicGreaterWeaken(target, attacker);
                 case "imbued" -> RunicMethods.postHitRunicImbued(stack, target, attacker);
                 case "greater_imbued" -> RunicMethods.postHitRunicGreaterImbued(stack, target, attacker);
-                case "pincushion" -> RunicMethods.postHitRunicPinCushion(stack, target, attacker);
-                case "greater_pincushion" -> RunicMethods.postHitRunicGreaterPinCushion(stack, target, attacker);
+                case "pincushion" -> RunicMethods.postHitRunicPinCushion(target, attacker);
+                case "greater_pincushion" -> RunicMethods.postHitRunicGreaterPinCushion(target, attacker);
             }
         }
         return super.postHit(stack, target, attacker);
@@ -78,16 +78,16 @@ public class RunicSwordItem extends SwordItem {
     @Override
     public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
         if (!world.isClient && stack.getOrCreateNbt().getString("runic_power").contains("momentum"))
-            RunicMethods.stoppedUsingRunicMomentum(stack, world, user, remainingUseTicks);
+            RunicMethods.stoppedUsingRunicMomentum(stack, user);
     }
 
     @Override
     public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
         if (!world.isClient) {
             if (stack.getOrCreateNbt().getString("runic_power").equals("momentum"))
-                RunicMethods.usageTickRunicMomentum(stack, world, user, remainingUseTicks);
+                RunicMethods.usageTickRunicMomentum(stack, user, remainingUseTicks);
             else if (stack.getOrCreateNbt().getString("runic_power").equals("greater_momentum"))
-                RunicMethods.usageTickRunicGreaterMomentum(stack, world, user, remainingUseTicks);
+                RunicMethods.usageTickRunicGreaterMomentum(stack, user, remainingUseTicks);
         }
     }
 
@@ -142,23 +142,23 @@ public class RunicSwordItem extends SwordItem {
 
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
-        if ((entity instanceof PlayerEntity player) && (player.getEquippedStack(EquipmentSlot.MAINHAND) == stack || player.getEquippedStack(EquipmentSlot.OFFHAND) == stack)) {
+        if ((entity instanceof LivingEntity user) && (user.getEquippedStack(EquipmentSlot.MAINHAND) == stack || user.getEquippedStack(EquipmentSlot.OFFHAND) == stack)) {
             if (entity.age % 4 == 0 && SimplySwords.generalConfig.enablePassiveParticles) {
                 float randomx = (float) (Math.random() * 6);
                 float randomz = (float) (Math.random() * 6);
 
                 world.addParticle(ParticleTypes.ENCHANT,
-                        player.getX() + player.getHandPosOffset(this).getX(),
-                        player.getY() + player.getHandPosOffset(this).getY() + 1.3,
-                        player.getZ() + player.getHandPosOffset(this).getZ(),
+                        user.getX() + user.getHandPosOffset(this).getX(),
+                        user.getY() + user.getHandPosOffset(this).getY() + 1.3,
+                        user.getZ() + user.getHandPosOffset(this).getZ(),
                         -3 + randomx, 0.0, -3 + randomz);
             }
             if (!world.isClient) {
                 switch (stack.getOrCreateNbt().getString("runic_power")) {
-                    case "unstable" -> RunicMethods.inventoryTickRunicUnstable(stack, world, player, slot, selected);
+                    case "unstable" -> RunicMethods.inventoryTickRunicUnstable(user);
                     case "active_defence" ->
-                            RunicMethods.inventoryTickRunicActiveDefence(stack, world, player, slot, selected);
-                    case "frost_ward" -> RunicMethods.inventoryTickRunicFrostWard(stack, world, player, slot, selected);
+                            RunicMethods.inventoryTickRunicActiveDefence(world, user);
+                    case "frost_ward" -> RunicMethods.inventoryTickRunicFrostWard(world, user);
                 }
             }
         }

@@ -49,7 +49,7 @@ public class WhisperwindSwordItem extends UniqueSwordItem {
         world.playSoundFromEntity(null, user, SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_IMPACT_01.get(),
                 user.getSoundCategory(), 0.6f, 1.0f);
         user.addStatusEffect(new StatusEffectInstance(EffectRegistry.FATAL_FLICKER.get(), 12));
-        HelperMethods.incrementStatusEffect(user, StatusEffects.ABSORPTION, 30, 1, 4);
+        user.addStatusEffect(new StatusEffectInstance(StatusEffects.ABSORPTION, 100));
         user.getItemCooldownManager().set(this.getDefaultStack().getItem(), skillCooldown);
 
         return super.use(world, user, hand);

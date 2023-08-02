@@ -12,7 +12,6 @@ import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.mob.PathAwareEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.util.math.Box;
@@ -32,7 +31,7 @@ public class BattleStandardEntity extends PathAwareEntity {
     float abilityHeal = 3;
     float abilityHealScalingModifier = (SimplySwords.uniqueEffectsConfig.righteousStandardSpellScalingHeal);
     float spellScalingModifier = (SimplySwords.uniqueEffectsConfig.righteousStandardSpellScaling);
-    public PlayerEntity ownerEntity;
+    public LivingEntity ownerEntity;
     public String standardType;
     public int decayRate;
 

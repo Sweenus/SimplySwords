@@ -3,6 +3,7 @@ package net.sweenus.simplyswords.item;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.StackReference;
@@ -26,7 +27,6 @@ import java.util.List;
 
 public class UniqueSwordItem extends SwordItem {
 
-    public static int maxUseTime;
     String iRarity = "UNIQUE";
 
     public UniqueSwordItem(ToolMaterial toolMaterial, int attackDamage, float attackSpeed, Settings settings) {
@@ -45,6 +45,15 @@ public class UniqueSwordItem extends SwordItem {
             else if (socketChance < 50) nbt.putString("runic_power", "no_socket");
             if (socketChance2 > 49) nbt.putString("nether_power", "socket_empty");
             else if (socketChance2 < 50) nbt.putString("nether_power", "no_socket");
+        }
+        if (!world.isClient && (entity instanceof LivingEntity user) &&
+                (user.getEquippedStack(EquipmentSlot.MAINHAND) == stack || user.getEquippedStack(EquipmentSlot.OFFHAND) == stack)) {
+            switch (stack.getOrCreateNbt().getString("runic_power")) {
+                case "unstable" -> RunicMethods.inventoryTickRunicUnstable(user);
+                case "active_defence" ->
+                        RunicMethods.inventoryTickRunicActiveDefence(world, user);
+                case "frost_ward" -> RunicMethods.inventoryTickRunicFrostWard(world, user);
+            }
         }
 
         super.inventoryTick(stack, world, entity, slot, selected);
@@ -78,39 +87,38 @@ public class UniqueSwordItem extends SwordItem {
             HelperMethods.playHitSounds(attacker, target);
 
             switch (stack.getOrCreateNbt().getString("runic_power")) {
-                case "freeze" -> RunicMethods.postHitRunicFreeze(stack, target, attacker);
-                case "wildfire" -> RunicMethods.postHitRunicWildfire(stack, target, attacker);
-                case "slow" -> RunicMethods.postHitRunicSlow(stack, target, attacker);
-                case "greater_slow" -> RunicMethods.postHitRunicGreaterSlow(stack, target, attacker);
-                case "swiftness" -> RunicMethods.postHitRunicSwiftness(stack, target, attacker);
-                case "greater_swiftness" -> RunicMethods.postHitRunicGreaterSwiftness(stack, target, attacker);
-                case "float" -> RunicMethods.postHitRunicFloat(stack, target, attacker);
-                case "greater_float" -> RunicMethods.postHitRunicGreaterFloat(stack, target, attacker);
-                case "zephyr" -> RunicMethods.postHitRunicZephyr(stack, target, attacker);
-                case "greater_zephyr" -> RunicMethods.postHitRunicGreaterZephyr(stack, target, attacker);
-                case "shielding" -> RunicMethods.postHitRunicShielding(stack, target, attacker);
-                case "greater_shielding" -> RunicMethods.postHitRunicGreaterShielding(stack, target, attacker);
-                case "stoneskin" -> RunicMethods.postHitRunicStoneskin(stack, target, attacker);
-                case "greater_stoneskin" -> RunicMethods.postHitRunicGreaterStoneskin(stack, target, attacker);
-                case "trailblaze" -> RunicMethods.postHitRunicTrailblaze(stack, target, attacker);
-                case "greater_trailblaze" -> RunicMethods.postHitRunicGreaterTrailblaze(stack, target, attacker);
-                case "weaken" -> RunicMethods.postHitRunicWeaken(stack, target, attacker);
-                case "greater_weaken" -> RunicMethods.postHitRunicGreaterWeaken(stack, target, attacker);
+                case "freeze" -> RunicMethods.postHitRunicFreeze(target, attacker);
+                case "wildfire" -> RunicMethods.postHitRunicWildfire(target, attacker);
+                case "slow" -> RunicMethods.postHitRunicSlow(target, attacker);
+                case "greater_slow" -> RunicMethods.postHitRunicGreaterSlow(target, attacker);
+                case "swiftness" -> RunicMethods.postHitRunicSwiftness(attacker);
+                case "greater_swiftness" -> RunicMethods.postHitRunicGreaterSwiftness(attacker);
+                case "float" -> RunicMethods.postHitRunicFloat(target, attacker);
+                case "greater_float" -> RunicMethods.postHitRunicGreaterFloat(target, attacker);
+                case "zephyr" -> RunicMethods.postHitRunicZephyr(attacker);
+                case "greater_zephyr" -> RunicMethods.postHitRunicGreaterZephyr(attacker);
+                case "shielding" -> RunicMethods.postHitRunicShielding(attacker);
+                case "greater_shielding" -> RunicMethods.postHitRunicGreaterShielding(attacker);
+                case "stoneskin" -> RunicMethods.postHitRunicStoneskin(attacker);
+                case "greater_stoneskin" -> RunicMethods.postHitRunicGreaterStoneskin(attacker);
+                case "trailblaze" -> RunicMethods.postHitRunicTrailblaze(attacker);
+                case "greater_trailblaze" -> RunicMethods.postHitRunicGreaterTrailblaze(attacker);
+                case "weaken" -> RunicMethods.postHitRunicWeaken(target, attacker);
+                case "greater_weaken" -> RunicMethods.postHitRunicGreaterWeaken(target, attacker);
                 case "imbued" -> RunicMethods.postHitRunicImbued(stack, target, attacker);
                 case "greater_imbued" -> RunicMethods.postHitRunicGreaterImbued(stack, target, attacker);
-                case "pincushion" -> RunicMethods.postHitRunicPinCushion(stack, target, attacker);
-                case "greater_pincushion" -> RunicMethods.postHitRunicGreaterPinCushion(stack, target, attacker);
+                case "pincushion" -> RunicMethods.postHitRunicPinCushion(target, attacker);
+                case "greater_pincushion" -> RunicMethods.postHitRunicGreaterPinCushion(target, attacker);
             }
 
             switch (stack.getOrCreateNbt().getString("nether_power")) {
                 case "echo" -> RunicMethods.postHitNetherEcho(stack, target, attacker);
                 case "berserk" -> RunicMethods.postHitNetherBerserk(stack, target, attacker);
-                case "radiance" -> RunicMethods.postHitNetherRadiance(stack, target, attacker);
-                case "onslaught" -> RunicMethods.postHitNetherOnslaught(stack, target, attacker);
-                case "nullification" -> RunicMethods.postHitNetherNullification(stack, target, attacker);
+                case "radiance" -> RunicMethods.postHitNetherRadiance(target, attacker);
+                case "onslaught" -> RunicMethods.postHitNetherOnslaught(target, attacker);
+                case "nullification" -> RunicMethods.postHitNetherNullification(attacker);
             }
         }
-
         return super.postHit(stack, target, attacker);
     }
 
@@ -138,7 +146,6 @@ public class UniqueSwordItem extends SwordItem {
 
         Style RUNIC = HelperMethods.getStyle("runic");
         Style NETHERFUSED = HelperMethods.getStyle("legendary");
-        Style RIGHTCLICK = HelperMethods.getStyle("rightclick");
         Style TEXT = HelperMethods.getStyle("text");
 
         NbtCompound nbt = itemStack.getOrCreateNbt();
@@ -216,11 +223,6 @@ public class UniqueSwordItem extends SwordItem {
                     tooltip.add(Text.translatable("item.simplyswords.unstablesworditem.tooltip2").setStyle(TEXT));
                     tooltip.add(Text.translatable("item.simplyswords.unstablesworditem.tooltip3").setStyle(TEXT));
                 }
-                case "momentum", "greater_momentum" -> {
-                    tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.runefused_power.momentum").setStyle(RUNIC));
-                    tooltip.add(Text.translatable("item.simplyswords.momentumsworditem.tooltip2").setStyle(TEXT));
-                    tooltip.add(Text.translatable("item.simplyswords.momentumsworditem.tooltip3").setStyle(TEXT));
-                }
                 case "imbued", "greater_imbued" -> {
                     tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.runefused_power.imbued").setStyle(RUNIC));
                     tooltip.add(Text.translatable("item.simplyswords.imbuedsworditem.tooltip2").setStyle(TEXT));
@@ -230,22 +232,6 @@ public class UniqueSwordItem extends SwordItem {
                     tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.runefused_power.pincushion").setStyle(RUNIC));
                     tooltip.add(Text.translatable("item.simplyswords.pincushionsworditem.tooltip2").setStyle(TEXT));
                     tooltip.add(Text.translatable("item.simplyswords.pincushionsworditem.tooltip3").setStyle(TEXT));
-                }
-                case "ward" -> {
-                    tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.runefused_power.ward").setStyle(RUNIC));
-                    tooltip.add(Text.literal(""));
-                    tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(RIGHTCLICK));
-                    tooltip.add(Text.translatable("item.simplyswords.wardsworditem.tooltip2").setStyle(TEXT));
-                    tooltip.add(Text.translatable("item.simplyswords.wardsworditem.tooltip3").setStyle(TEXT));
-                    tooltip.add(Text.translatable("item.simplyswords.wardsworditem.tooltip4").setStyle(TEXT));
-                }
-                case "immolation" -> {
-                    tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.runefused_power.immolation").setStyle(RUNIC));
-                    tooltip.add(Text.literal(""));
-                    tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(RIGHTCLICK));
-                    tooltip.add(Text.translatable("item.simplyswords.immolationsworditem.tooltip2").setStyle(TEXT));
-                    tooltip.add(Text.translatable("item.simplyswords.immolationsworditem.tooltip3").setStyle(TEXT));
-                    tooltip.add(Text.translatable("item.simplyswords.immolationsworditem.tooltip4").setStyle(TEXT));
                 }
             }
 

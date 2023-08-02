@@ -211,10 +211,10 @@ public class HelperMethods {
 
     public static String chooseRunefusedPower() {
         List<String> runicList = Arrays.asList(
-                "float", "greater_float", "freeze", "shielding", "greater_shielding", "slow",
+                "active_defence", "float", "greater_float", "freeze", "shielding", "greater_shielding", "slow",
                 "greater_slow", "stoneskin", "greater_stoneskin", "swiftness", "greater_swiftness", "trailblaze",
-                "greater_trailblaze", "weaken", "greater_weaken", "zephyr", "greater_zephyr", "wildfire",
-                "imbued", "greater_imbued", "pincushion", "greater_pincushion");
+                "greater_trailblaze", "weaken", "greater_weaken", "zephyr", "greater_zephyr", "frost_ward", "wildfire",
+                "unstable", "imbued", "greater_imbued", "pincushion", "greater_pincushion");
 
         String runicSelection;
         do {
@@ -257,10 +257,8 @@ public class HelperMethods {
 
     //Create Box
     public static Box createBox(Entity entity, int radius) {
-        Box box = new Box(entity.getX() + radius, entity.getY() + (float) radius / 3, entity.getZ() + radius,
+        return new Box(entity.getX() + radius, entity.getY() + (float) radius / 3, entity.getZ() + radius,
                 entity.getX() - radius, entity.getY() - (float) radius / 3, entity.getZ() - radius);
-
-        return box;
     }
 
     //Gets the blockpos we are looking at
@@ -282,19 +280,19 @@ public class HelperMethods {
             int amplifierMax) {
 
         if (livingEntity.hasStatusEffect(statusEffect)) {
+            int currentDuration = livingEntity.getStatusEffect(statusEffect).getDuration();
             int currentAmplifier = livingEntity.getStatusEffect(statusEffect).getAmplifier();
 
             if (currentAmplifier >= amplifierMax) {
                 livingEntity.addStatusEffect(new StatusEffectInstance(
-                        statusEffect, duration, currentAmplifier));
+                        statusEffect, Math.max(currentDuration, duration), currentAmplifier));
                 return;
             }
 
             livingEntity.addStatusEffect(new StatusEffectInstance(
-                    statusEffect, duration, currentAmplifier + amplifier));
+                    statusEffect, Math.max(currentDuration, duration), Math.min(amplifierMax, currentAmplifier + amplifier)));
         }
-        livingEntity.addStatusEffect(new StatusEffectInstance(
-                statusEffect, duration));
+        livingEntity.addStatusEffect(new StatusEffectInstance(statusEffect, duration));
     }
 
     public static void decrementStatusEffect(LivingEntity livingEntity, StatusEffect statusEffect) {

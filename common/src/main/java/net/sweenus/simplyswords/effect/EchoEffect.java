@@ -12,23 +12,20 @@ public class EchoEffect extends StatusEffect {
     }
 
     @Override
-    public void applyUpdateEffect(LivingEntity pLivingEntity, int pAmplifier) {
-        if (!pLivingEntity.getWorld().isClient()) {
+    public void applyUpdateEffect(LivingEntity livingEntity, int amplifier) {
+        if (!livingEntity.getWorld().isClient()) {
             int damage = SimplySwords.statusEffectsConfig.echoDamage;
-            if (pLivingEntity.age % 15 == 0) {
-                pLivingEntity.timeUntilRegen = 0;
-                pLivingEntity.damage(pLivingEntity.getDamageSources().magic(), damage+pAmplifier);
-                pLivingEntity.removeStatusEffect(EffectRegistry.ECHO.get());
+            if (livingEntity.age % 15 == 0) {
+                livingEntity.timeUntilRegen = 0;
+                livingEntity.damage(livingEntity.getDamageSources().magic(), damage+amplifier);
+                livingEntity.removeStatusEffect(EffectRegistry.ECHO.get());
             }
         }
-
-        super.applyUpdateEffect(pLivingEntity, pAmplifier);
-
+        super.applyUpdateEffect(livingEntity, amplifier);
     }
 
     @Override
     public boolean canApplyUpdateEffect(int pDuration, int pAmplifier) {
         return true;
     }
-
 }
