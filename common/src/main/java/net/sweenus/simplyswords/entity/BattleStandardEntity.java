@@ -14,6 +14,8 @@ import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.mob.PathAwareEntity;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
+import net.minecraft.registry.Registries;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.SimplySwords;
@@ -34,6 +36,15 @@ public class BattleStandardEntity extends PathAwareEntity {
     public LivingEntity ownerEntity;
     public String standardType;
     public int decayRate;
+    public String positiveEffect;
+    public String positiveEffectSecondary;
+    public int positiveEffectAmplifier;
+    public String negativeEffect;
+    public String negativeEffectSecondary;
+    public int negativeEffectAmplifier;
+    public boolean dealsDamage = true;
+    public boolean doesHealing = true;
+    private static boolean errorLogged = false;
 
     public static DefaultAttributeContainer.Builder createBattleStandardAttributes() {
         return MobEntity.createMobAttributes()
@@ -44,6 +55,13 @@ public class BattleStandardEntity extends PathAwareEntity {
 
     public BattleStandardEntity(EntityType<? extends PathAwareEntity> entityType, World world) {
         super(entityType, world);
+    }
+
+    private static void errorCatch(String identifier) {
+        if (!errorLogged) {
+            System.out.println("ERROR: Identifier " + identifier + " does not match any registered effects.\nDestroying banner entity now.");
+            errorLogged = true;
+        }
     }
 
     @Override
@@ -83,17 +101,44 @@ public class BattleStandardEntity extends PathAwareEntity {
                                 && !(le instanceof BattleStandardDarkEntity)) {
 
                             //Sunfire negative effects
-                            if (standardType.equals("sunfire")) {
-                                le.damage(ownerEntity.getDamageSources().magic(), abilityDamage);
-                                le.setOnFireFor(1);
-                                le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 120, 1), this);
-                            }
-                            //Nullification negative effects
-                            else if (standardType.equals("nullification")) {
-                                for (StatusEffectInstance statusEffect : le.getStatusEffects()) {
-                                    if (statusEffect != null && statusEffect.getEffectType().isBeneficial()) {
-                                        le.removeStatusEffect(statusEffect.getEffectType());
-                                        break;
+                            switch (standardType) {
+                                case "sunfire" -> {
+                                    le.damage(ownerEntity.getDamageSources().magic(), abilityDamage);
+                                    le.setOnFireFor(1);
+                                    le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 120, 1), this);
+                                }
+                                //Nullification negative effects
+                                case "nullification" -> {
+                                    for (StatusEffectInstance statusEffect : le.getStatusEffects()) {
+                                        if (statusEffect != null && statusEffect.getEffectType().isBeneficial()) {
+                                            le.removeStatusEffect(statusEffect.getEffectType());
+                                            break;
+                                        }
+                                    }
+                                }
+                                // API negative effects
+                                case "api" -> {
+                                    if (dealsDamage)
+                                        le.damage(ownerEntity.getDamageSources().magic(), abilityDamage);
+                                    if (negativeEffect != null) {
+                                        try {
+                                            le.addStatusEffect(new StatusEffectInstance(
+                                                    Registries.STATUS_EFFECT.get(new Identifier(negativeEffect)),
+                                                    20, negativeEffectAmplifier), this);
+                                        } catch (Exception e) {
+                                            errorCatch(negativeEffect);
+                                            this.setHealth(this.getHealth() - 1000);
+                                        }
+                                    }
+                                    if (negativeEffectSecondary != null) {
+                                        try {
+                                            le.addStatusEffect(new StatusEffectInstance(
+                                                    Registries.STATUS_EFFECT.get(new Identifier(negativeEffectSecondary)),
+                                                    20, negativeEffectAmplifier), this);
+                                        } catch (Exception e) {
+                                            errorCatch(negativeEffectSecondary);
+                                            this.setHealth(this.getHealth() - 1000);
+                                        }
                                     }
                                 }
                             }
@@ -132,17 +177,44 @@ public class BattleStandardEntity extends PathAwareEntity {
                                 abilityHeal = HelperMethods.commonSpellAttributeScaling(abilityHealScalingModifier, ownerEntity, "healing");
                             }
                             //Sunfire positive effects
-                            if (standardType.equals("sunfire")) {
-                                le.heal(abilityHeal);
-                                le.addStatusEffect(new StatusEffectInstance(StatusEffects.STRENGTH, 90, 1), this);
-                            }
-                            //Nullification positive effects
-                            else if (standardType.equals("nullification")) {
-                                for (StatusEffectInstance statusEffect : le.getStatusEffects()) {
-                                    if (statusEffect != null && !statusEffect.getEffectType().isBeneficial()
-                                            && !Objects.equals(statusEffect.getEffectType(), EffectRegistry.BATTLE_FATIGUE.get())) {
-                                        le.removeStatusEffect(statusEffect.getEffectType());
-                                        break;
+                            switch (standardType) {
+                                case "sunfire" -> {
+                                    le.heal(abilityHeal);
+                                    le.addStatusEffect(new StatusEffectInstance(StatusEffects.STRENGTH, 90, 1), this);
+                                }
+                                //Nullification positive effects
+                                case "nullification" -> {
+                                    for (StatusEffectInstance statusEffect : le.getStatusEffects()) {
+                                        if (statusEffect != null && !statusEffect.getEffectType().isBeneficial()
+                                                && !Objects.equals(statusEffect.getEffectType(), EffectRegistry.BATTLE_FATIGUE.get())) {
+                                            le.removeStatusEffect(statusEffect.getEffectType());
+                                            break;
+                                        }
+                                    }
+                                }
+                                // API positive effects
+                                case "api" -> {
+                                    if (doesHealing)
+                                        le.heal(abilityHeal);
+                                    if (positiveEffect != null) {
+                                        try {
+                                            le.addStatusEffect(new StatusEffectInstance(
+                                                    Registries.STATUS_EFFECT.get(new Identifier(positiveEffect)),
+                                                    20, positiveEffectAmplifier), this);
+                                        } catch (Exception e) {
+                                            errorCatch(positiveEffect);
+                                            this.setHealth(this.getHealth() - 1000);
+                                        }
+                                    }
+                                    if (positiveEffectSecondary != null) {
+                                        try {
+                                            le.addStatusEffect(new StatusEffectInstance(
+                                                    Registries.STATUS_EFFECT.get(new Identifier(positiveEffectSecondary)),
+                                                    20, positiveEffectAmplifier), this);
+                                        } catch (Exception e) {
+                                            errorCatch(positiveEffectSecondary);
+                                            this.setHealth(this.getHealth() - 1000);
+                                        }
                                     }
                                 }
                             }
