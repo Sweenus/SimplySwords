@@ -807,6 +807,51 @@
   "item.simplyswords.uniquesworditem.netherfused_power.nullification.description4":                                     "while stripping buffs from",
   "item.simplyswords.uniquesworditem.netherfused_power.nullification.description5":                                     "enemies within its vicinity.",
 
+  "item.simplyswords.uniquesworditem.netherfused_power.precise":                                                        "[ Netherfused: Precise ]",
+  "item.simplyswords.uniquesworditem.netherfused_power.precise.description":                                            "Chance to gain several stacks",
+  "item.simplyswords.uniquesworditem.netherfused_power.precise.description2":                                           "of Precision when activating",
+  "item.simplyswords.uniquesworditem.netherfused_power.precise.description3":                                           "a signature ability.",
+
+  "item.simplyswords.uniquesworditem.netherfused_power.mighty":                                                         "[ Netherfused: Mighty ]",
+  "item.simplyswords.uniquesworditem.netherfused_power.mighty.description":                                             "Chance to gain several stacks",
+  "item.simplyswords.uniquesworditem.netherfused_power.mighty.description2":                                            "of Might when activating",
+  "item.simplyswords.uniquesworditem.netherfused_power.mighty.description3":                                            "a signature ability.",
+
+  "item.simplyswords.uniquesworditem.netherfused_power.stealthy":                                                       "[ Netherfused: Stealthy ]",
+  "item.simplyswords.uniquesworditem.netherfused_power.stealthy.description":                                           "Chance to gain Stealth when",
+  "item.simplyswords.uniquesworditem.netherfused_power.stealthy.description2":                                          "activating a signature ability.",
+
+  "item.simplyswords.uniquesworditem.netherfused_power.renewed":                                                        "[ Netherfused: Renewed ]",
+  "item.simplyswords.uniquesworditem.netherfused_power.renewed.description":                                            "When activating a signature",
+  "item.simplyswords.uniquesworditem.netherfused_power.renewed.description2":                                           "ability, you have a chance",
+  "item.simplyswords.uniquesworditem.netherfused_power.renewed.description3":                                           "to significantly reduce its",
+  "item.simplyswords.uniquesworditem.netherfused_power.renewed.description4":                                           "cooldown.",
+
+  "item.simplyswords.uniquesworditem.netherfused_power.accelerant":                                                     "[ Netherfused: Accelerant ]",
+  "item.simplyswords.uniquesworditem.netherfused_power.accelerant.description":                                         "Berserkers Berserking signature",
+  "item.simplyswords.uniquesworditem.netherfused_power.accelerant.description2":                                        "ability no longer grants you",
+  "item.simplyswords.uniquesworditem.netherfused_power.accelerant.description3":                                        "berserking, but its cooldown",
+  "item.simplyswords.uniquesworditem.netherfused_power.accelerant.description4":                                        "is reduced significantly.",
+
+  "item.simplyswords.uniquesworditem.netherfused_power.leaping":                                                        "[ Netherfused: Leaping ]",
+  "item.simplyswords.uniquesworditem.netherfused_power.leaping.description":                                            "When landing a Leap Slam",
+  "item.simplyswords.uniquesworditem.netherfused_power.leaping.description2":                                           "you have a chance to",
+  "item.simplyswords.uniquesworditem.netherfused_power.leaping.description3":                                           "immediately leap again.",
+
+  "item.simplyswords.uniquesworditem.netherfused_power.spellshield":                                                    "[ Netherfused: Spellshield ]",
+  "item.simplyswords.uniquesworditem.netherfused_power.spellshield.description":                                        "Chance on spell cast to gain",
+  "item.simplyswords.uniquesworditem.netherfused_power.spellshield.description2":                                       "Barrier.",
+
+  "item.simplyswords.uniquesworditem.netherfused_power.spellforged":                                                    "[ Netherfused: Spellforged ]",
+  "item.simplyswords.uniquesworditem.netherfused_power.spellforged.description":                                        "While in your mainhand, this",
+  "item.simplyswords.uniquesworditem.netherfused_power.spellforged.description2":                                       "weapon grants you increased",
+  "item.simplyswords.uniquesworditem.netherfused_power.spellforged.description3":                                       "spell power.",
+
+  "item.simplyswords.uniquesworditem.netherfused_power.soulshock":                                                      "[ Netherfused: Soulshock ]",
+  "item.simplyswords.uniquesworditem.netherfused_power.soulshock.description":                                          "While held, this weapon grants",
+  "item.simplyswords.uniquesworditem.netherfused_power.soulshock.description2":                                         "you increased Soul & Lightning",
+  "item.simplyswords.uniquesworditem.netherfused_power.soulshock.description3":                                         "spell power.",
+
   "item.simplyswords.common.blacklisteffect":                                                                           "ABILITY DISABLED",
   "item.simplyswords.common.showtooltip":                                                                               "- Hold §2ALT§7 to view gem sockets -",
   "item.simplyswords.compat.mythicmetals.regrowth":                                                                     "Regrowth",
@@ -1287,6 +1332,22 @@
   "text.autoconfig.simplyswords_main.option.gem_effects.enableRadiance":                                                "Enable Radiance gems",
   "text.autoconfig.simplyswords_main.option.gem_effects.enableOnslaught":                                               "Enable Onslaught gems",
   "text.autoconfig.simplyswords_main.option.gem_effects.enableNullification":                                           "Enable Nullification gems",
+  "text.autoconfig.simplyswords_main.option.gem_effects.enablePrecise.@PrefixText" :                                    "§6[Simply Skills Compatibility Gems]§7\nThese gems can only be acquired when Simply Skills is installed.",
+  "text.autoconfig.simplyswords_main.option.gem_effects.enablePrecise":                                                 "Enable Precise gems",
+  "text.autoconfig.simplyswords_main.option.gem_effects.preciseChance":                                                 "Precise chance",
+  "text.autoconfig.simplyswords_main.option.gem_effects.enableMighty":                                                  "Enable Mighty gems",
+  "text.autoconfig.simplyswords_main.option.gem_effects.mightyChance":                                                  "Mighty chance",
+  "text.autoconfig.simplyswords_main.option.gem_effects.enableStealthy":                                                "Enable Stealthy gems",
+  "text.autoconfig.simplyswords_main.option.gem_effects.stealthyChance":                                                "Stealthy chance",
+  "text.autoconfig.simplyswords_main.option.gem_effects.enableRenewed":                                                 "Enable Renewed gems",
+  "text.autoconfig.simplyswords_main.option.gem_effects.renewedChance":                                                 "Renewed chance",
+  "text.autoconfig.simplyswords_main.option.gem_effects.enableAccelerant":                                              "Enable Accelerant gems",
+  "text.autoconfig.simplyswords_main.option.gem_effects.enableLeaping":                                                 "Enable Leaping gems",
+  "text.autoconfig.simplyswords_main.option.gem_effects.leapingChance":                                                 "Leaping chance",
+  "text.autoconfig.simplyswords_main.option.gem_effects.enableSpellshield":                                             "Enable Spellshield gems",
+  "text.autoconfig.simplyswords_main.option.gem_effects.spellshieldChance":                                             "Spellshield chance",
+  "text.autoconfig.simplyswords_main.option.gem_effects.enableSpellforged":                                             "Enable Spellforged gems",
+  "text.autoconfig.simplyswords_main.option.gem_effects.enableSoulshock":                                               "Enable Soulshock gems",
 
   "text.autoconfig.simplyswords_main.option.status_effects.echoDamage":                                                 "Echo base damage"
 }

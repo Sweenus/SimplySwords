@@ -14,4 +14,27 @@ public class GemEffectsConfig implements ConfigData {
     public boolean enableOnslaught = true;
     public boolean enableNullification = true;
 
+    @ConfigEntry.Gui.PrefixText
+    public boolean enablePrecise = true;
+    @ConfigEntry.BoundedDiscrete(max = 100)
+    public int preciseChance = 30;
+    public boolean enableMighty = true;
+    @ConfigEntry.BoundedDiscrete(max = 100)
+    public int mightyChance = 30;
+    public boolean enableStealthy = true;
+    @ConfigEntry.BoundedDiscrete(max = 100)
+    public int stealthyChance = 30;
+    public boolean enableRenewed = true;
+    @ConfigEntry.BoundedDiscrete(max = 100)
+    public int renewedChance = 30;
+    public boolean enableAccelerant = true;
+    public boolean enableLeaping = true;
+    @ConfigEntry.BoundedDiscrete(max = 100)
+    public int leapingChance = 65;
+    public boolean enableSpellshield = true;
+    @ConfigEntry.BoundedDiscrete(max = 100)
+    public int spellshieldChance = 15;
+    public boolean enableSpellforged = true;
+    public boolean enableSoulshock = true;
+
 }

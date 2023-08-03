@@ -277,6 +277,60 @@ public class UniqueSwordItem extends SwordItem {
                     tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.nullification.description4").setStyle(TEXT));
                     tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.nullification.description5").setStyle(TEXT));
                 }
+                case "precise" -> {
+                    tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.precise").setStyle(NETHERFUSED));
+                    tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.precise.description").setStyle(TEXT));
+                    tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.precise.description2").setStyle(TEXT));
+                    tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.precise.description3").setStyle(TEXT));
+                }
+                case "mighty" -> {
+                    tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.mighty").setStyle(NETHERFUSED));
+                    tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.mighty.description").setStyle(TEXT));
+                    tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.mighty.description2").setStyle(TEXT));
+                    tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.mighty.description3").setStyle(TEXT));
+                }
+                case "stealthy" -> {
+                    tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.stealthy").setStyle(NETHERFUSED));
+                    tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.stealthy.description").setStyle(TEXT));
+                    tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.stealthy.description2").setStyle(TEXT));
+                }
+                case "renewed" -> {
+                    tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.renewed").setStyle(NETHERFUSED));
+                    tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.renewed.description").setStyle(TEXT));
+                    tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.renewed.description2").setStyle(TEXT));
+                    tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.renewed.description3").setStyle(TEXT));
+                    tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.renewed.description4").setStyle(TEXT));
+                }
+                case "accelerant" -> {
+                    tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.accelerant").setStyle(NETHERFUSED));
+                    tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.accelerant.description").setStyle(TEXT));
+                    tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.accelerant.description2").setStyle(TEXT));
+                    tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.accelerant.description3").setStyle(TEXT));
+                    tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.accelerant.description4").setStyle(TEXT));
+                }
+                case "leaping" -> {
+                    tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.leaping").setStyle(NETHERFUSED));
+                    tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.leaping.description").setStyle(TEXT));
+                    tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.leaping.description2").setStyle(TEXT));
+                    tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.leaping.description3").setStyle(TEXT));
+                }
+                case "spellshield" -> {
+                    tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.spellshield").setStyle(NETHERFUSED));
+                    tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.spellshield.description").setStyle(TEXT));
+                    tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.spellshield.description2").setStyle(TEXT));
+                }
+                case "spellforged" -> {
+                    tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.spellforged").setStyle(NETHERFUSED));
+                    tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.spellforged.description").setStyle(TEXT));
+                    tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.spellforged.description2").setStyle(TEXT));
+                    tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.spellforged.description3").setStyle(TEXT));
+                }
+                case "soulshock" -> {
+                    tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.soulshock").setStyle(NETHERFUSED));
+                    tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.soulshock.description").setStyle(TEXT));
+                    tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.soulshock.description2").setStyle(TEXT));
+                    tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.soulshock.description3").setStyle(TEXT));
+                }
             }
         } else if (!nbt.getString("runic_power").equals("no_socket") || !nbt.getString("nether_power").equals("no_socket")) {
             tooltip.add(Text.translatable("item.simplyswords.common.showtooltip").formatted(Formatting.GRAY));
