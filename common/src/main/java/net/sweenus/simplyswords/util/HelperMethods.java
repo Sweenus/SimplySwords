@@ -188,6 +188,15 @@ public class HelperMethods {
             case "radiance" -> SimplySwords.gemEffectsConfig.enableRadiance;
             case "onslaught" -> SimplySwords.gemEffectsConfig.enableOnslaught;
             case "nullification" -> SimplySwords.gemEffectsConfig.enableNullification;
+            case "precise" -> SimplySwords.gemEffectsConfig.enablePrecise;
+            case "mighty" -> SimplySwords.gemEffectsConfig.enableMighty;
+            case "stealthy" -> SimplySwords.gemEffectsConfig.enableStealthy;
+            case "renewed" -> SimplySwords.gemEffectsConfig.enableRenewed;
+            case "accelerant" -> SimplySwords.gemEffectsConfig.enableAccelerant;
+            case "leaping" -> SimplySwords.gemEffectsConfig.enableLeaping;
+            case "spellshield" -> SimplySwords.gemEffectsConfig.enableSpellshield;
+            case "spellforged" -> SimplySwords.gemEffectsConfig.enableSpellforged;
+            case "soulshock" -> SimplySwords.gemEffectsConfig.enableSoulshock;
             default -> false;
         };
     }
@@ -230,7 +239,7 @@ public class HelperMethods {
         List<String> netherList;
         if (FabricLoader.getInstance().isModLoaded("simplyskills"))
             netherList = Arrays.asList("echo", "berserk", "radiance", "onslaught", "nullification",
-                    "precise", "mighty", "stealthy", "renewed", "accelerant", "spellshield", "spellforged",
+                    "precise", "mighty", "stealthy", "renewed", "accelerant", "leaping", "spellshield", "spellforged",
                     "soulshock");
         else
             netherList = Arrays.asList("echo", "berserk", "radiance", "onslaught", "nullification");
