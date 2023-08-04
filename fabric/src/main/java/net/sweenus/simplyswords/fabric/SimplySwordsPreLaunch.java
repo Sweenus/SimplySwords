@@ -9,10 +9,10 @@ public class SimplySwordsPreLaunch implements PreLaunchEntrypoint {
 
     //Checks for config before mods initialise. When missing, create the config to prevent dependent mod crashes.
     public static void configDetect() {
-        File file = new File("config/simplyswords/booleans.json5");
+        File file = new File("config/simplyswords_extra/loot_config.json5");
         if (!file.exists()) {
             SimplySwordsConfig.init();
-            System.out.println("Simply Swords config is missing. Creating fresh config files now.");
+            System.out.println("Simply Swords loot_config is missing. Creating fresh config file now.");
         }
     }
 
