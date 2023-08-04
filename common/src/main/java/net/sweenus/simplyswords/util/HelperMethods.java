@@ -1,7 +1,6 @@
 package net.sweenus.simplyswords.util;
 
 import dev.architectury.platform.Platform;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
@@ -237,7 +236,7 @@ public class HelperMethods {
 
     public static String chooseNetherfusedPower() {
         List<String> netherList;
-        if (FabricLoader.getInstance().isModLoaded("simplyskills"))
+        if (Platform.isModLoaded("simplyskills"))
             netherList = Arrays.asList("echo", "berserk", "radiance", "onslaught", "nullification",
                     "precise", "mighty", "stealthy", "renewed", "accelerant", "leaping", "spellshield", "spellforged",
                     "soulshock");
