@@ -200,7 +200,7 @@ public class BattleStandardEntity extends PathAwareEntity {
                                         try {
                                             le.addStatusEffect(new StatusEffectInstance(
                                                     Registries.STATUS_EFFECT.get(new Identifier(positiveEffect)),
-                                                    20, positiveEffectAmplifier), this);
+                                                    85, positiveEffectAmplifier), this);
                                         } catch (Exception e) {
                                             errorCatch(positiveEffect);
                                             this.setHealth(this.getHealth() - 1000);
@@ -210,7 +210,7 @@ public class BattleStandardEntity extends PathAwareEntity {
                                         try {
                                             le.addStatusEffect(new StatusEffectInstance(
                                                     Registries.STATUS_EFFECT.get(new Identifier(positiveEffectSecondary)),
-                                                    20, positiveEffectAmplifier), this);
+                                                    85, positiveEffectAmplifier), this);
                                         } catch (Exception e) {
                                             errorCatch(positiveEffectSecondary);
                                             this.setHealth(this.getHealth() - 1000);
