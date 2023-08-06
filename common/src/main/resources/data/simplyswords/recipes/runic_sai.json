@@ -7,9 +7,9 @@
     "item": "minecraft:diamond"
   },
   "result": {
-    "item": "simplyswords:runic_tablet"
+    "item": "simplyswords:runic_sai"
   },
   "template": {
-    "item": "simplyswords:runic_sai"
+    "item": "simplyswords:runic_tablet"
   }
 }
