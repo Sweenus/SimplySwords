@@ -36,5 +36,8 @@ public class GemEffectsConfig implements ConfigData {
     public int spellshieldChance = 15;
     public boolean enableSpellforged = true;
     public boolean enableSoulshock = true;
+    public boolean enableSpellStandard = true;
+    public boolean enableWarStandard = true;
+    public boolean enableDeception = true;
 
 }

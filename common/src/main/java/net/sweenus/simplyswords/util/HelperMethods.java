@@ -197,6 +197,9 @@ public class HelperMethods {
             case "spellshield" ->           Config.getBoolean("enableSpellshield", "GemEffects",ConfigDefaultValues.enableSpellshield);
             case "spellforged" ->           Config.getBoolean("enableSpellforged", "GemEffects",ConfigDefaultValues.enableSpellforged);
             case "soulshock" ->             Config.getBoolean("enableSoulshock", "GemEffects",ConfigDefaultValues.enableSoulshock);
+            case "spellstandard" ->         Config.getBoolean("enableSpellStandard", "GemEffects",ConfigDefaultValues.enableSpellStandard);
+            case "warstandard" ->           Config.getBoolean("enableWarStandard", "GemEffects",ConfigDefaultValues.enableWarStandard);
+            case "deception" ->             Config.getBoolean("enableDeception", "GemEffects",ConfigDefaultValues.enableDeception);
             default -> false;
         };
     }
@@ -240,7 +243,7 @@ public class HelperMethods {
         if (Platform.isModLoaded("simplyskills"))
             netherList = Arrays.asList("echo", "berserk", "radiance", "onslaught", "nullification",
                     "precise", "mighty", "stealthy", "renewed", "accelerant", "leaping", "spellshield", "spellforged",
-                    "soulshock");
+                    "soulshock", "spellstandard", "warstandard", "deception");
         else
             netherList = Arrays.asList("echo", "berserk", "radiance", "onslaught", "nullification");
 
@@ -385,7 +388,7 @@ public class HelperMethods {
     }
 
     public static float commonSpellAttributeScaling(float damageModifier, Entity entity, String magicSchool) {
-        if (Platform.isModLoaded("spell_power"))
+        if (Platform.isModLoaded("spell_power") && Platform.isFabric())
             if ((entity instanceof PlayerEntity player) && Config.getBoolean("compatEnableSpellPowerScaling", "General",ConfigDefaultValues.compatEnableSpellPowerScaling))
                 return SimplySwordsExpectPlatform.getSpellPowerDamage(damageModifier, player, magicSchool);
 

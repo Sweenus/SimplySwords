@@ -490,6 +490,9 @@ public class ConfigDefaultValues {
     public static int spellshieldChance = 15;
     public static boolean enableSpellforged = true;
     public static boolean enableSoulshock = true;
+    public static boolean enableSpellStandard = true;
+    public static boolean enableWarStandard = true;
+    public static boolean enableDeception = true;
     
     
 }

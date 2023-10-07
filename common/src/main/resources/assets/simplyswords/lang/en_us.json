@@ -852,6 +852,21 @@
   "item.simplyswords.uniquesworditem.netherfused_power.soulshock.description2":                                         "you increased Soul & Lightning",
   "item.simplyswords.uniquesworditem.netherfused_power.soulshock.description3":                                         "spell power.",
 
+  "item.simplyswords.uniquesworditem.netherfused_power.spellstandard":                                                  "[ Netherfused: Spell Standard ]",
+  "item.simplyswords.uniquesworditem.netherfused_power.spellstandard.description":                                      "Chance on spell hit to drop a ",
+  "item.simplyswords.uniquesworditem.netherfused_power.spellstandard.description2":                                     "Spell Standard that grants",
+  "item.simplyswords.uniquesworditem.netherfused_power.spellstandard.description3":                                     "Precision & Spellforged.",
+
+  "item.simplyswords.uniquesworditem.netherfused_power.warstandard":                                                    "[ Netherfused: War Standard ]",
+  "item.simplyswords.uniquesworditem.netherfused_power.warstandard.description":                                        "At the end of your Bullrush,",
+  "item.simplyswords.uniquesworditem.netherfused_power.warstandard.description2":                                       "drop a War Standard that grants",
+  "item.simplyswords.uniquesworditem.netherfused_power.warstandard.description3":                                       "Might, and Reveals nearby enemies.",
+
+  "item.simplyswords.uniquesworditem.netherfused_power.deception":                                                      "[ Netherfused: Deception ]",
+  "item.simplyswords.uniquesworditem.netherfused_power.deception.description":                                          "When you evade an attack using",
+  "item.simplyswords.uniquesworditem.netherfused_power.deception.description2":                                         "Evasion Mastery, you have a",
+  "item.simplyswords.uniquesworditem.netherfused_power.deception.description3":                                         "chance to cleanse Revealed.",
+
   "item.simplyswords.common.blacklisteffect":                                                                           "ABILITY DISABLED",
   "item.simplyswords.common.showtooltip":                                                                               "- Hold §2ALT§7 to view gem sockets -",
   "item.simplyswords.compat.mythicmetals.regrowth":                                                                     "Regrowth",
@@ -1348,6 +1363,9 @@
   "text.autoconfig.simplyswords_main.option.gem_effects.spellshieldChance":                                             "Spellshield chance",
   "text.autoconfig.simplyswords_main.option.gem_effects.enableSpellforged":                                             "Enable Spellforged gems",
   "text.autoconfig.simplyswords_main.option.gem_effects.enableSoulshock":                                               "Enable Soulshock gems",
+  "text.autoconfig.simplyswords_main.option.gem_effects.enableSpellStandard":                                           "Enable Spell Standard gems",
+  "text.autoconfig.simplyswords_main.option.gem_effects.enableWarStandard":                                             "Enable War Standard gems",
+  "text.autoconfig.simplyswords_main.option.gem_effects.enableDeception":                                               "Enable Deception gems",
 
   "text.autoconfig.simplyswords_main.option.status_effects.echoDamage":                                                 "Echo base damage"
 }

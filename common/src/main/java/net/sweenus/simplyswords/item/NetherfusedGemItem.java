@@ -155,6 +155,24 @@ public class NetherfusedGemItem extends Item {
                     tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.soulshock.description2").setStyle(TEXT));
                     tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.soulshock.description3").setStyle(TEXT));
                 }
+                case "spellstandard" -> {
+                    tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.spellstandard").setStyle(LEGENDARY));
+                    tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.spellstandard.description").setStyle(TEXT));
+                    tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.spellstandard.description2").setStyle(TEXT));
+                    tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.spellstandard.description3").setStyle(TEXT));
+                }
+                case "warstandard" -> {
+                    tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.warstandard").setStyle(LEGENDARY));
+                    tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.warstandard.description").setStyle(TEXT));
+                    tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.warstandard.description2").setStyle(TEXT));
+                    tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.warstandard.description3").setStyle(TEXT));
+                }
+                case "deception" -> {
+                    tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.deception").setStyle(LEGENDARY));
+                    tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.deception.description").setStyle(TEXT));
+                    tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.deception.description2").setStyle(TEXT));
+                    tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.deception.description3").setStyle(TEXT));
+                }
             }
         }
         tooltip.add(Text.literal(""));
