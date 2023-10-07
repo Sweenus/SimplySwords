@@ -303,13 +303,13 @@ public class SimplySwordsAPI {
                     tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.soulshock.description2").setStyle(TEXT));
                     tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.soulshock.description3").setStyle(TEXT));
                 }
-                case "spellstandard" -> {
+                case "spell_standard" -> {
                     tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.spellstandard").setStyle(NETHERFUSED));
                     tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.spellstandard.description").setStyle(TEXT));
                     tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.spellstandard.description2").setStyle(TEXT));
                     tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.spellstandard.description3").setStyle(TEXT));
                 }
-                case "warstandard" -> {
+                case "war_standard" -> {
                     tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.warstandard").setStyle(NETHERFUSED));
                     tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.warstandard.description").setStyle(TEXT));
                     tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.warstandard.description2").setStyle(TEXT));
