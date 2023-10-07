@@ -8,6 +8,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -120,16 +123,20 @@ public class Config {
     }
 
     public static void safeValueFetch(String type, String parent) {
-        JsonObject json = switch (parent) {
-            case "GemEffects" ->        Config.getJsonObject(Config.readFile(new File("config/simplyswords_main/gem_effects.json5")));
-            case "General" ->           Config.getJsonObject(Config.readFile(new File("config/simplyswords_main/general.json5")));
-            case "Loot" ->              Config.getJsonObject(Config.readFile(new File("config/simplyswords_main/loot.json5")));
-            case "RunicEffects" ->      Config.getJsonObject(Config.readFile(new File("config/simplyswords_main/runic_effects.json5")));
-            case "StatusEffects" ->     Config.getJsonObject(Config.readFile(new File("config/simplyswords_main/status_effects.json5")));
-            case "UniqueEffects" ->     Config.getJsonObject(Config.readFile(new File("config/simplyswords_main/unique_effects.json5")));
-            case "WeaponAttributes" ->  Config.getJsonObject(Config.readFile(new File("config/simplyswords_main/weapon_attributes.json5")));
-            default -> null;
-        };
+        Path path = Paths.get("config/simplyswords_main/");
+        JsonObject json = null;
+        if (Files.exists(path)) {
+            json = switch (parent) {
+                case "GemEffects" -> Config.getJsonObject(Config.readFile(new File("config/simplyswords_main/gem_effects.json5")));
+                case "General" -> Config.getJsonObject(Config.readFile(new File("config/simplyswords_main/general.json5")));
+                case "Loot" -> Config.getJsonObject(Config.readFile(new File("config/simplyswords_main/loot.json5")));
+                case "RunicEffects" -> Config.getJsonObject(Config.readFile(new File("config/simplyswords_main/runic_effects.json5")));
+                case "StatusEffects" -> Config.getJsonObject(Config.readFile(new File("config/simplyswords_main/status_effects.json5")));
+                case "UniqueEffects" -> Config.getJsonObject(Config.readFile(new File("config/simplyswords_main/unique_effects.json5")));
+                case "WeaponAttributes" -> Config.getJsonObject(Config.readFile(new File("config/simplyswords_main/weapon_attributes.json5")));
+                default -> null;
+            };
+        }
 
         if (json != null) {
 
