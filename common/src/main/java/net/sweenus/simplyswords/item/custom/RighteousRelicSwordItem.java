@@ -14,7 +14,8 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
-import net.sweenus.simplyswords.SimplySwords;
+import net.sweenus.simplyswords.config.Config;
+import net.sweenus.simplyswords.config.ConfigDefaultValues;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -23,7 +24,7 @@ import java.util.List;
 
 public class RighteousRelicSwordItem extends UniqueSwordItem {
     private static int stepMod = 0;
-    int abilityChance = (int) SimplySwords.uniqueEffectsConfig.righteousStandardChance;
+    int abilityChance = (int) Config.getFloat("righteousStandardChance", "UniqueEffects", ConfigDefaultValues.righteousStandardChance);
 
     public RighteousRelicSwordItem(ToolMaterial toolMaterial, int attackDamage, float attackSpeed, Settings settings) {
         super(toolMaterial, attackDamage, attackSpeed, settings);

@@ -9,6 +9,8 @@ import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.SimplySwords;
+import net.sweenus.simplyswords.config.Config;
+import net.sweenus.simplyswords.config.ConfigDefaultValues;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,7 +37,7 @@ public class GobberEndSwordItem extends SwordItem {
     }
 
     //Unbreakable weapon support for Gobber
-    static boolean unbreakable = SimplySwords.generalConfig.compatGobberEndWeaponsUnbreakable;
+    static boolean unbreakable = Config.getBoolean("compatGobberEndWeaponsUnbreakable", "General", ConfigDefaultValues.compatGobberEndWeaponsUnbreakable);
 
     @Override
     public void onCraft(ItemStack stack, World world, PlayerEntity player)

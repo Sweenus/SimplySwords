@@ -20,7 +20,8 @@ import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import net.sweenus.simplyswords.SimplySwords;
+import net.sweenus.simplyswords.config.Config;
+import net.sweenus.simplyswords.config.ConfigDefaultValues;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -41,8 +42,8 @@ public class EmberIreSwordItem extends UniqueSwordItem {
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         if (!attacker.getWorld().isClient()) {
             ServerWorld world = (ServerWorld) attacker.getWorld();
-            int fhitchance = (int) SimplySwords.uniqueEffectsConfig.emberIreChance;
-            int fduration = (int) SimplySwords.uniqueEffectsConfig.emberIreDuration;
+            int fhitchance = (int) Config.getFloat("emberIreChance", "UniqueEffects", ConfigDefaultValues.emberIreChance);
+            int fduration = (int) Config.getFloat("emberIreDuration", "UniqueEffects", ConfigDefaultValues.emberIreDuration);
             HelperMethods.playHitSounds(attacker, target);
 
             if (attacker.getRandom().nextInt(100) <= fhitchance) {

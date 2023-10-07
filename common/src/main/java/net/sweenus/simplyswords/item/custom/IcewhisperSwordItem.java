@@ -18,7 +18,8 @@ import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.UseAction;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
-import net.sweenus.simplyswords.SimplySwords;
+import net.sweenus.simplyswords.config.Config;
+import net.sweenus.simplyswords.config.ConfigDefaultValues;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.AbilityMethods;
@@ -33,11 +34,11 @@ public class IcewhisperSwordItem extends UniqueSwordItem {
 
     private static int stepMod = 0;
     public static boolean scalesWithSpellPower;
-    int radius = (int) SimplySwords.uniqueEffectsConfig.permafrostRadius;
-    float abilityDamage = SimplySwords.uniqueEffectsConfig.permafrostDamage;
-    int blizzard_timer_max = (int) SimplySwords.uniqueEffectsConfig.permafrostDuration;
-    int skillCooldown = (int) SimplySwords.uniqueEffectsConfig.permafrostCooldown;
-    float spellScalingModifier = SimplySwords.uniqueEffectsConfig.permafrostSpellScaling;
+    int radius = (int) Config.getFloat("permafrostRadius", "UniqueEffects", ConfigDefaultValues.permafrostRadius);
+    float abilityDamage = Config.getFloat("permafrostDamage", "UniqueEffects", ConfigDefaultValues.permafrostDamage);
+    int blizzard_timer_max = (int) Config.getFloat("permafrostDuration", "UniqueEffects", ConfigDefaultValues.permafrostDuration);
+    int skillCooldown = (int) Config.getFloat("permafrostCooldown", "UniqueEffects", ConfigDefaultValues.permafrostCooldown);
+    float spellScalingModifier = Config.getFloat("permafrostSpellScaling", "UniqueEffects", ConfigDefaultValues.permafrostSpellScaling);
     double lastX;
     double lastY;
     double lastZ;

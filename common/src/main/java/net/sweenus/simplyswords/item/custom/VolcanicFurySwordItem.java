@@ -19,7 +19,8 @@ import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.UseAction;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
-import net.sweenus.simplyswords.SimplySwords;
+import net.sweenus.simplyswords.config.Config;
+import net.sweenus.simplyswords.config.ConfigDefaultValues;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.AbilityMethods;
@@ -34,12 +35,12 @@ public class VolcanicFurySwordItem extends UniqueSwordItem {
 
     private static int stepMod = 0;
     public static boolean scalesWithSpellPower;
-    int radius = (int) SimplySwords.uniqueEffectsConfig.volcanicFuryRadius;
-    float abilityDamage = SimplySwords.uniqueEffectsConfig.volcanicFuryDamage;
+    int radius = (int) Config.getFloat("volcanicFuryRadius", "UniqueEffects", ConfigDefaultValues.volcanicFuryRadius);
+    float abilityDamage = Config.getFloat("volcanicFuryDamage", "UniqueEffects", ConfigDefaultValues.volcanicFuryDamage);
     int ability_timer_max = 120;
-    int skillCooldown = (int) SimplySwords.uniqueEffectsConfig.volcanicFuryCooldown;
-    int chargeChance = (int) SimplySwords.uniqueEffectsConfig.volcanicFuryChance;
-    float spellPowerModifier = SimplySwords.uniqueEffectsConfig.volcanicFurySpellScaling;
+    int skillCooldown = (int) Config.getFloat("volcanicFuryCooldown", "UniqueEffects", ConfigDefaultValues.volcanicFuryCooldown);
+    int chargeChance = (int) Config.getFloat("volcanicFuryChance", "UniqueEffects", ConfigDefaultValues.volcanicFuryChance);
+    float spellPowerModifier = Config.getFloat("volcanicFurySpellScaling", "UniqueEffects", ConfigDefaultValues.volcanicFurySpellScaling);
     int chargePower;
 
     @Override

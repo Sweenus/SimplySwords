@@ -17,7 +17,8 @@ import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.UseAction;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
-import net.sweenus.simplyswords.SimplySwords;
+import net.sweenus.simplyswords.config.Config;
+import net.sweenus.simplyswords.config.ConfigDefaultValues;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -29,11 +30,11 @@ public class StormbringerSwordItem extends UniqueSwordItem {
     private static int stepMod = 0;
     public static boolean scalesWithSpellPower;
     int radius = 3;
-    int ability_timer_max = (int) SimplySwords.uniqueEffectsConfig.shockDeflectBlockDuration;
-    int skillCooldown = (int) SimplySwords.uniqueEffectsConfig.shockDeflectCooldown;
-    int perfectParryWindow = (int) SimplySwords.uniqueEffectsConfig.shockDeflectParryDuration;
-    float abilityDamage = SimplySwords.uniqueEffectsConfig.shockDeflectDamage;
-    float spellScalingModifier = SimplySwords.uniqueEffectsConfig.shockDeflectSpellScaling;
+    int ability_timer_max = (int) Config.getFloat("shockDeflectBlockDuration", "UniqueEffects", ConfigDefaultValues.shockDeflectBlockDuration);
+    int skillCooldown = (int) Config.getFloat("shockDeflectCooldown", "UniqueEffects", ConfigDefaultValues.shockDeflectCooldown);
+    int perfectParryWindow = (int) Config.getFloat("shockDeflectParryDuration", "UniqueEffects", ConfigDefaultValues.shockDeflectParryDuration);
+    float abilityDamage = Config.getFloat("shockDeflectDamage", "UniqueEffects", ConfigDefaultValues.shockDeflectDamage);
+    float spellScalingModifier = Config.getFloat("shockDeflectSpellScaling", "UniqueEffects", ConfigDefaultValues.shockDeflectSpellScaling);
     boolean parrySuccess;
     int parrySuccession;
 

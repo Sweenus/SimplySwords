@@ -18,7 +18,8 @@ import net.minecraft.text.Text;
 import net.minecraft.util.ClickType;
 import net.minecraft.util.Formatting;
 import net.minecraft.world.World;
-import net.sweenus.simplyswords.SimplySwords;
+import net.sweenus.simplyswords.config.Config;
+import net.sweenus.simplyswords.config.ConfigDefaultValues;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.RunicMethods;
@@ -62,7 +63,7 @@ public class UniqueSwordItem extends SwordItem {
     @Override
     public boolean onClicked(ItemStack stack, ItemStack otherStack, Slot slot, ClickType clickType, PlayerEntity player,
                              StackReference cursorStackReference) {
-        if (SimplySwords.generalConfig.enableUniqueGemSockets) {
+        if (Config.getBoolean("enableUniqueGemSockets", "General", ConfigDefaultValues.enableUniqueGemSockets)) {
             String powerType;
             if (otherStack.isOf(ItemsRegistry.RUNEFUSED_GEM.get()) && stack.getOrCreateNbt().getString("runic_power").equals("socket_empty")
                     && !otherStack.getOrCreateNbt().getString("runic_power").isEmpty()) {

@@ -10,7 +10,8 @@ import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
-import net.sweenus.simplyswords.SimplySwords;
+import net.sweenus.simplyswords.config.Config;
+import net.sweenus.simplyswords.config.ConfigDefaultValues;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 
@@ -23,8 +24,8 @@ public class FatalFlickerEffect extends StatusEffect {
     }
 
     public static void performDash(LivingEntity user, World world, int radius) {
-        int dashDistance = (int) (SimplySwords.uniqueEffectsConfig.fatalFlickerDashVelocity);
-        int maxAmplifier = (int) (SimplySwords.uniqueEffectsConfig.fatalFlickerMaxStacks);
+        int dashDistance = (int) Config.getFloat("fatalFlickerDashVelocity", "UniqueEffects", ConfigDefaultValues.fatalFlickerDashVelocity);
+        int maxAmplifier = (int) Config.getFloat("fatalFlickerMaxStacks", "UniqueEffects", ConfigDefaultValues.fatalFlickerMaxStacks);
         int amplifier = 1;
 
         user.setVelocity(user.getRotationVector().multiply(+dashDistance));
@@ -63,7 +64,7 @@ public class FatalFlickerEffect extends StatusEffect {
 
             int ability_timer = Objects.requireNonNull(user.getStatusEffect(EffectRegistry.FATAL_FLICKER.get())).getDuration();
             World world = user.getWorld();
-            int radius = (int) (SimplySwords.uniqueEffectsConfig.fatalFlickerRadius);
+            int radius = (int) Config.getFloat("fatalFlickerRadius", "UniqueEffects", ConfigDefaultValues.fatalFlickerRadius);
 
             //Player dash forward
             if (ability_timer >= 5) {

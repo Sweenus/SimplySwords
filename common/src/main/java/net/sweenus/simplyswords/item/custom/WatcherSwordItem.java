@@ -13,7 +13,8 @@ import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
-import net.sweenus.simplyswords.SimplySwords;
+import net.sweenus.simplyswords.config.Config;
+import net.sweenus.simplyswords.config.ConfigDefaultValues;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -32,18 +33,18 @@ public class WatcherSwordItem extends UniqueSwordItem {
         if (!attacker.getWorld().isClient()) {
             ServerWorld world = (ServerWorld) attacker.getWorld();
 
-            int watcherChance = (int) SimplySwords.uniqueEffectsConfig.watcherChance;
-            int omenChance = (int) SimplySwords.uniqueEffectsConfig.omenChance;
+            int watcherChance = (int) Config.getFloat("watcherChance", "UniqueEffects", ConfigDefaultValues.watcherChance);
+            int omenChance = (int) Config.getFloat("omenChance", "UniqueEffects", ConfigDefaultValues.omenChance);
 
             HelperMethods.playHitSounds(attacker, target);
 
             if (attacker.getRandom().nextInt(100) <= watcherChance) {
-                int hradius = (int) (SimplySwords.uniqueEffectsConfig.watcherRadius);
-                int vradius = (int) (SimplySwords.uniqueEffectsConfig.watcherRadius / 2);
+                int hradius = (int) (Config.getFloat("watcherRadius", "UniqueEffects", ConfigDefaultValues.watcherRadius));
+                int vradius = (int) (Config.getFloat("watcherRadius", "UniqueEffects", ConfigDefaultValues.watcherRadius) / 2);
                 double x = target.getX();
                 double y = target.getY();
                 double z = target.getZ();
-                float rAmount = SimplySwords.uniqueEffectsConfig.watcherRestoreAmount;
+                float rAmount = Config.getFloat("watcherRestoreAmount", "UniqueEffects", ConfigDefaultValues.watcherRestoreAmount);
                 Box box = new Box(x + hradius, y + vradius, z + hradius,
                         x - hradius, y - vradius, z - hradius);
 
@@ -60,9 +61,9 @@ public class WatcherSwordItem extends UniqueSwordItem {
 
             if (attacker.getRandom().nextInt(100) <= omenChance) {
                 BlockPos position = target.getBlockPos();
-                float overallAbsorptionCap = SimplySwords.uniqueEffectsConfig.abilityAbsorptionCap;
-                float absorptionCap = SimplySwords.uniqueEffectsConfig.omenAbsorptionCap;
-                float threshold = SimplySwords.uniqueEffectsConfig.omenInstantKillThreshold * target.getMaxHealth();
+                float overallAbsorptionCap = Config.getFloat("abilityAbsorptionCap", "UniqueEffects", ConfigDefaultValues.abilityAbsorptionCap);
+                float absorptionCap = Config.getFloat("omenAbsorptionCap", "UniqueEffects", ConfigDefaultValues.omenAbsorptionCap);
+                float threshold = Config.getFloat("omenInstantKillThreshold", "UniqueEffects", ConfigDefaultValues.omenInstantKillThreshold) * target.getMaxHealth();
                 float remainingHealth = Math.min(target.getHealth(), absorptionCap);
 
                 if (remainingHealth <= threshold) {
@@ -94,7 +95,7 @@ public class WatcherSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.watchersworditem.tooltip1").setStyle(ABILITY));
         tooltip.add(Text.translatable("item.simplyswords.watchersworditem.tooltip2").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.watchersworditem.tooltip3",
-                (SimplySwords.uniqueEffectsConfig.omenInstantKillThreshold * 100)).setStyle(TEXT));
+                (Config.getFloat("omenInstantKillThreshold", "UniqueEffects", ConfigDefaultValues.omenInstantKillThreshold) * 100)).setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.watchersworditem.tooltip4").setStyle(TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.watchersworditem.tooltip5").setStyle(ABILITY));

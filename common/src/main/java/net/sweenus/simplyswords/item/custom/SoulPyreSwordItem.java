@@ -16,7 +16,8 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
-import net.sweenus.simplyswords.SimplySwords;
+import net.sweenus.simplyswords.config.Config;
+import net.sweenus.simplyswords.config.ConfigDefaultValues;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
@@ -31,7 +32,7 @@ public class SoulPyreSwordItem extends UniqueSwordItem {
 
     private int relocationTimer;
     private static int stepMod = 0;
-    private final int relocationDuration = (int) SimplySwords.uniqueEffectsConfig.soultetherDuration;
+    private final int relocationDuration = (int) Config.getFloat("soultetherDuration", "UniqueEffects", ConfigDefaultValues.soultetherDuration);
     private boolean canRelocate;
     private LivingEntity relocateTarget;
     private double relocateX;
@@ -49,10 +50,10 @@ public class SoulPyreSwordItem extends UniqueSwordItem {
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         if (!user.getWorld().isClient()) {
-            int range = (int) SimplySwords.uniqueEffectsConfig.soultetherRange;
-            int radius = (int) SimplySwords.uniqueEffectsConfig.soultetherRadius;
-            int ignite_duration = (int) (SimplySwords.uniqueEffectsConfig.soultetherIgniteDuration) / 20;
-            int resistance_duration = (int) SimplySwords.uniqueEffectsConfig.soultetherResistanceDuration;
+            int range = (int) Config.getFloat("soultetherRange", "UniqueEffects", ConfigDefaultValues.soultetherRange);
+            int radius = (int) Config.getFloat("soultetherRadius", "UniqueEffects", ConfigDefaultValues.soultetherRadius);
+            int ignite_duration = (int) (Config.getFloat("soultetherIgniteDuration", "UniqueEffects", ConfigDefaultValues.soultetherIgniteDuration) / 20);
+            int resistance_duration = (int) Config.getFloat("soultetherResistanceDuration", "UniqueEffects", ConfigDefaultValues.soultetherResistanceDuration);
             //Position swap target & player
             LivingEntity target = (LivingEntity) HelperMethods.getTargetedEntity(user, range);
             if (target != null && HelperMethods.checkFriendlyFire(target, user)) {

@@ -15,7 +15,8 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
-import net.sweenus.simplyswords.SimplySwords;
+import net.sweenus.simplyswords.config.Config;
+import net.sweenus.simplyswords.config.ConfigDefaultValues;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -33,9 +34,9 @@ public class HasteSwordItem extends UniqueSwordItem {
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         if (!attacker.getWorld().isClient()) {
             ServerWorld world = (ServerWorld) attacker.getWorld();
-            int fhitchance = (int) SimplySwords.uniqueEffectsConfig.ferocityChance;
-            int fduration = (int) SimplySwords.uniqueEffectsConfig.ferocityDuration;
-            int maximum_stacks = (int) SimplySwords.uniqueEffectsConfig.ferocityMaxStacks;
+            int fhitchance = (int) Config.getFloat("ferocityChance", "UniqueEffects", ConfigDefaultValues.ferocityChance);
+            int fduration = (int) Config.getFloat("ferocityDuration", "UniqueEffects", ConfigDefaultValues.ferocityDuration);
+            int maximum_stacks = (int) Config.getFloat("ferocityMaxStacks", "UniqueEffects", ConfigDefaultValues.ferocityMaxStacks);
             HelperMethods.playHitSounds(attacker, target);
 
             if (attacker.getRandom().nextInt(100) <= fhitchance) {
@@ -61,7 +62,7 @@ public class HasteSwordItem extends UniqueSwordItem {
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         if (user.hasStatusEffect(StatusEffects.HASTE)) {
-            int strength_tier = (int) SimplySwords.uniqueEffectsConfig.ferocityStrengthTier;
+            int strength_tier = (int) Config.getFloat("ferocityStrengthTier", "UniqueEffects", ConfigDefaultValues.ferocityStrengthTier);
 
             int a = (user.getStatusEffect(StatusEffects.HASTE).getAmplifier() * 20);
             user.addStatusEffect(new StatusEffectInstance(StatusEffects.STRENGTH, a, strength_tier), user);

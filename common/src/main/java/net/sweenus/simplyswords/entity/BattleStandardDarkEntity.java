@@ -17,7 +17,8 @@ import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
-import net.sweenus.simplyswords.SimplySwords;
+import net.sweenus.simplyswords.config.Config;
+import net.sweenus.simplyswords.config.ConfigDefaultValues;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 
@@ -26,8 +27,8 @@ import java.util.function.Supplier;
 public class BattleStandardDarkEntity extends PathAwareEntity {
     public static final Supplier<EntityType<BattleStandardDarkEntity>> TYPE = Suppliers.memoize(() ->
             EntityType.Builder.create(BattleStandardDarkEntity::new, SpawnGroup.MISC).build("battlestandarddark"));
-    float abilityDamage = (SimplySwords.uniqueEffectsConfig.abyssalStandardDamage);
-    float spellScalingModifier = (SimplySwords.uniqueEffectsConfig.abyssalStandardSpellScaling);
+    float abilityDamage = Config.getFloat("abyssalStandardDamage", "UniqueEffects", ConfigDefaultValues.abyssalStandardDamage);
+    float spellScalingModifier = Config.getFloat("abyssalStandardSpellScaling", "UniqueEffects", ConfigDefaultValues.abyssalStandardSpellScaling);
     public PlayerEntity ownerEntity;
     public String standardType;
     public int decayRate;

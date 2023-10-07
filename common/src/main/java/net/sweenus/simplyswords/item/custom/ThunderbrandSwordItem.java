@@ -16,7 +16,8 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.UseAction;
 import net.minecraft.world.World;
-import net.sweenus.simplyswords.SimplySwords;
+import net.sweenus.simplyswords.config.Config;
+import net.sweenus.simplyswords.config.ConfigDefaultValues;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.AbilityMethods;
@@ -31,12 +32,12 @@ public class ThunderbrandSwordItem extends UniqueSwordItem {
 
     private static int stepMod = 0;
     public static boolean scalesWithSpellPower;
-    int radius = (int) SimplySwords.uniqueEffectsConfig.thunderBlitzRadius;
-    float abilityDamage = SimplySwords.uniqueEffectsConfig.thunderBlitzDamage;
+    int radius = (int) Config.getFloat("thunderBlitzRadius", "UniqueEffects", ConfigDefaultValues.thunderBlitzRadius);
+    float abilityDamage = Config.getFloat("thunderBlitzDamage", "UniqueEffects", ConfigDefaultValues.thunderBlitzDamage);
     int ability_timer_max = 50;
-    int skillCooldown = (int) SimplySwords.uniqueEffectsConfig.thunderBlitzCooldown;
-    int chargeChance = (int) SimplySwords.uniqueEffectsConfig.thunderBlitzChance;
-    float spellScalingModifier = SimplySwords.uniqueEffectsConfig.thunderBlitzSpellScaling;
+    int skillCooldown = (int) Config.getFloat("thunderBlitzCooldown", "UniqueEffects", ConfigDefaultValues.thunderBlitzCooldown);
+    int chargeChance = (int) Config.getFloat("thunderBlitzChance", "UniqueEffects", ConfigDefaultValues.thunderBlitzChance);
+    float spellScalingModifier = Config.getFloat("thunderBlitzSpellScaling", "UniqueEffects", ConfigDefaultValues.thunderBlitzSpellScaling);
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {

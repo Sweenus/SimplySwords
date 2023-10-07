@@ -14,7 +14,8 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
-import net.sweenus.simplyswords.SimplySwords;
+import net.sweenus.simplyswords.config.Config;
+import net.sweenus.simplyswords.config.ConfigDefaultValues;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
@@ -24,8 +25,8 @@ import java.util.List;
 
 public class WhisperwindSwordItem extends UniqueSwordItem {
     private static int stepMod = 0;
-    int skillCooldown = (int) SimplySwords.uniqueEffectsConfig.fatalFlickerCooldown;
-    int abilityChance = (int) SimplySwords.uniqueEffectsConfig.fatalFlickerChance;
+    int skillCooldown = (int) Config.getFloat("fatalFlickerCooldown", "UniqueEffects", ConfigDefaultValues.fatalFlickerCooldown);
+    int abilityChance = (int) Config.getFloat("fatalFlickerChance", "UniqueEffects", ConfigDefaultValues.fatalFlickerChance);
 
     public WhisperwindSwordItem(ToolMaterial toolMaterial, int attackDamage, float attackSpeed, Settings settings) {
         super(toolMaterial, attackDamage, attackSpeed, settings);

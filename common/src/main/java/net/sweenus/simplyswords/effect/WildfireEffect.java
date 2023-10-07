@@ -9,6 +9,8 @@ import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.Box;
 import net.sweenus.simplyswords.SimplySwords;
+import net.sweenus.simplyswords.config.Config;
+import net.sweenus.simplyswords.config.ConfigDefaultValues;
 import net.sweenus.simplyswords.util.HelperMethods;
 
 public class WildfireEffect extends StatusEffect {
@@ -21,8 +23,8 @@ public class WildfireEffect extends StatusEffect {
             if (pPlayer != null){
                 if (pPlayer instanceof PlayerEntity) {
                     ServerWorld world = (ServerWorld) pLivingEntity.getWorld();
-                    int hradius = (int) (SimplySwords.runicEffectsConfig.wildfireRadius);
-                    int vradius = (int) (SimplySwords.runicEffectsConfig.wildfireRadius / 2);
+                    int hradius = (int) Config.getFloat("wildfireRadius", "RunicEffects", ConfigDefaultValues.wildfireRadius);
+                    int vradius = (int) (Config.getFloat("wildfireRadius", "RunicEffects", ConfigDefaultValues.wildfireRadius) / 2);
                     double x = pLivingEntity.getX();
                     double y = pLivingEntity.getY();
                     double z = pLivingEntity.getZ();

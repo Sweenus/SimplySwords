@@ -16,7 +16,8 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.UseAction;
 import net.minecraft.world.World;
-import net.sweenus.simplyswords.SimplySwords;
+import net.sweenus.simplyswords.config.Config;
+import net.sweenus.simplyswords.config.ConfigDefaultValues;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.AbilityMethods;
@@ -31,12 +32,12 @@ public class ArcanethystSwordItem extends UniqueSwordItem {
 
     private static int stepMod = 0;
     public static boolean scalesWithSpellPower;
-    int radius = (int) SimplySwords.uniqueEffectsConfig.arcaneAssaultRadius;
-    float abilityDamage = SimplySwords.uniqueEffectsConfig.arcaneAssaultDamage;
-    int arcane_timer_max = (int) SimplySwords.uniqueEffectsConfig.arcaneAssaultDuration;
-    int skillCooldown = (int) SimplySwords.uniqueEffectsConfig.arcaneAssaultCooldown;
-    int chargeChance = (int) SimplySwords.uniqueEffectsConfig.arcaneAssaultChance;
-    int spellScalingModifier = (int) SimplySwords.uniqueEffectsConfig.arcaneAssaultSpellScaling;
+    int radius = (int) Config.getFloat("arcaneAssaultRadius", "UniqueEffects", ConfigDefaultValues.arcaneAssaultRadius);
+    float abilityDamage = Config.getFloat("arcaneAssaultDamage", "UniqueEffects", ConfigDefaultValues.arcaneAssaultDamage);
+    int arcane_timer_max = (int) Config.getFloat("arcaneAssaultDuration", "UniqueEffects", ConfigDefaultValues.arcaneAssaultDuration);
+    int skillCooldown = (int) Config.getFloat("arcaneAssaultCooldown", "UniqueEffects", ConfigDefaultValues.arcaneAssaultCooldown);
+    int chargeChance = (int) Config.getFloat("arcaneAssaultChance", "UniqueEffects", ConfigDefaultValues.arcaneAssaultChance);
+    int spellScalingModifier = (int) Config.getFloat("arcaneAssaultSpellScaling", "UniqueEffects", ConfigDefaultValues.arcaneAssaultSpellScaling);
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {

@@ -20,7 +20,8 @@ import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
-import net.sweenus.simplyswords.SimplySwords;
+import net.sweenus.simplyswords.config.Config;
+import net.sweenus.simplyswords.config.ConfigDefaultValues;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
@@ -35,11 +36,11 @@ public class LivyatanSwordItem extends UniqueSwordItem {
 
     private static int stepMod = 0;
     public static boolean scalesWithSpellPower;
-    int radius = (int) SimplySwords.uniqueEffectsConfig.frostShatterRadius;
-    float abilityDamage = SimplySwords.uniqueEffectsConfig.frostShatterDamage;
-    int proc_chance = (int) SimplySwords.uniqueEffectsConfig.frostShatterChance;
-    int shatter_timer_max = (int) SimplySwords.uniqueEffectsConfig.frostShatterDuration;
-    float spellScalingModifier = SimplySwords.uniqueEffectsConfig.frostShatterSpellScaling;
+    int radius = (int) Config.getFloat("frostShatterRadius", "UniqueEffects", ConfigDefaultValues.frostShatterRadius);
+    float abilityDamage = Config.getFloat("frostShatterDamage", "UniqueEffects", ConfigDefaultValues.frostShatterDamage);
+    int proc_chance = (int) Config.getFloat("frostShatterChance", "UniqueEffects", ConfigDefaultValues.frostShatterChance);
+    int shatter_timer_max = (int) Config.getFloat("frostShatterDuration", "UniqueEffects", ConfigDefaultValues.frostShatterDuration);
+    float spellScalingModifier = Config.getFloat("frostShatterSpellScaling", "UniqueEffects", ConfigDefaultValues.frostShatterSpellScaling);
     int shatter_timer;
     int shatter_bonus;
     int player_shatter_timer;

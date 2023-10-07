@@ -18,7 +18,8 @@ import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
-import net.sweenus.simplyswords.SimplySwords;
+import net.sweenus.simplyswords.config.Config;
+import net.sweenus.simplyswords.config.ConfigDefaultValues;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -29,10 +30,10 @@ import java.util.function.Supplier;
 public class BattleStandardEntity extends PathAwareEntity {
     public static final Supplier<EntityType<BattleStandardEntity>> TYPE = Suppliers.memoize(() ->
             EntityType.Builder.create(BattleStandardEntity::new, SpawnGroup.MISC).build("battlestandard"));
-    float abilityDamage = (SimplySwords.uniqueEffectsConfig.righteousStandardDamage);
+    float abilityDamage = Config.getFloat("righteousStandardDamage", "UniqueEffects", ConfigDefaultValues.righteousStandardDamage);
     float abilityHeal = 3;
-    float abilityHealScalingModifier = (SimplySwords.uniqueEffectsConfig.righteousStandardSpellScalingHeal);
-    float spellScalingModifier = (SimplySwords.uniqueEffectsConfig.righteousStandardSpellScaling);
+    float abilityHealScalingModifier = Config.getFloat("righteousStandardSpellScalingHeal", "UniqueEffects", ConfigDefaultValues.righteousStandardSpellScalingHeal);
+    float spellScalingModifier = Config.getFloat("righteousStandardSpellScaling", "UniqueEffects", ConfigDefaultValues.righteousStandardSpellScaling);
     public LivingEntity ownerEntity;
     public String standardType;
     public int decayRate;

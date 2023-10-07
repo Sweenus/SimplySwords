@@ -16,7 +16,8 @@ import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.*;
 import net.minecraft.world.World;
-import net.sweenus.simplyswords.SimplySwords;
+import net.sweenus.simplyswords.config.Config;
+import net.sweenus.simplyswords.config.ConfigDefaultValues;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -143,7 +144,7 @@ public class RunicSwordItem extends SwordItem {
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
         if ((entity instanceof LivingEntity user) && (user.getEquippedStack(EquipmentSlot.MAINHAND) == stack || user.getEquippedStack(EquipmentSlot.OFFHAND) == stack)) {
-            if (entity.age % 4 == 0 && SimplySwords.generalConfig.enablePassiveParticles) {
+            if (entity.age % 4 == 0 && Config.getBoolean("enablePassiveParticles", "General", ConfigDefaultValues.enablePassiveParticles)) {
                 float randomx = (float) (Math.random() * 6);
                 float randomz = (float) (Math.random() * 6);
 

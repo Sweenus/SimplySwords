@@ -18,7 +18,8 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
-import net.sweenus.simplyswords.SimplySwords;
+import net.sweenus.simplyswords.config.Config;
+import net.sweenus.simplyswords.config.ConfigDefaultValues;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -27,11 +28,11 @@ import java.util.List;
 
 public class ShadowstingSwordItem extends UniqueSwordItem {
     private static int stepMod = 0;
-    int skillCooldown = (int) SimplySwords.uniqueEffectsConfig.shadowmistCooldown;
-    int abilityChance = (int) SimplySwords.uniqueEffectsConfig.shadowmistChance;
-    int damageArmorMultiplier = (int) (SimplySwords.uniqueEffectsConfig.shadowmistDamageMulti * 2);
-    int blindDuration = (int) (SimplySwords.uniqueEffectsConfig.shadowmistBlindDuration);
-    int radius = (int) (SimplySwords.uniqueEffectsConfig.shadowmistRadius);
+    int skillCooldown = (int) Config.getFloat("shadowmistCooldown", "UniqueEffects", ConfigDefaultValues.shadowmistCooldown);
+    int abilityChance = (int) Config.getFloat("shadowmistChance", "UniqueEffects", ConfigDefaultValues.shadowmistChance);
+    int damageArmorMultiplier = (int) (Config.getFloat("shadowmistDamageMulti", "UniqueEffects", ConfigDefaultValues.shadowmistDamageMulti) * 2);
+    int blindDuration = (int) Config.getFloat("shadowmistBlindDuration", "UniqueEffects", ConfigDefaultValues.shadowmistBlindDuration);
+    int radius = (int) Config.getFloat("shadowmistRadius", "UniqueEffects", ConfigDefaultValues.shadowmistRadius);
 
     public ShadowstingSwordItem(ToolMaterial toolMaterial, int attackDamage, float attackSpeed, Settings settings) {
         super(toolMaterial, attackDamage, attackSpeed, settings);

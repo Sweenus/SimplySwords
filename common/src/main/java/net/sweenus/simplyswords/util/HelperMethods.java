@@ -24,8 +24,9 @@ import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.SimplySwordsExpectPlatform;
+import net.sweenus.simplyswords.config.Config;
+import net.sweenus.simplyswords.config.ConfigDefaultValues;
 import net.sweenus.simplyswords.entity.BattleStandardDarkEntity;
 import net.sweenus.simplyswords.entity.BattleStandardEntity;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
@@ -127,8 +128,8 @@ public class HelperMethods {
     public static void playHitSounds(LivingEntity attacker, LivingEntity target) {
         if (!attacker.getWorld().isClient()) {
             ServerWorld world = (ServerWorld) attacker.getWorld();
-            boolean impactsounds_enabled = (SimplySwords.generalConfig.enableWeaponImpactSounds);
-            float impactsounds_volume = (SimplySwords.generalConfig.weaponImpactSoundsVolume);
+            boolean impactsounds_enabled = Config.getBoolean("enableWeaponImpactSounds", "General",ConfigDefaultValues.enableWeaponImpactSounds);
+            float impactsounds_volume = Config.getFloat("enableWeaponImpactSounds", "General",ConfigDefaultValues.weaponImpactSoundsVolume);
 
             if (impactsounds_enabled) {
                 int choose_sound = (int) (Math.random() * 30);
@@ -147,55 +148,55 @@ public class HelperMethods {
 
     public static boolean checkRunicBlacklist(String runicPower) {
         return switch (runicPower) {
-            case "active_defence" -> SimplySwords.runicEffectsConfig.enableActiveDefence;
-            case "float" -> SimplySwords.runicEffectsConfig.enableFloat;
-            case "greater_float" -> SimplySwords.runicEffectsConfig.enableGreaterFloat;
-            case "freeze" -> SimplySwords.runicEffectsConfig.enableFreeze;
-            case "shielding" -> SimplySwords.runicEffectsConfig.enableShielding;
-            case "greater_shielding" -> SimplySwords.runicEffectsConfig.enableGreaterShielding;
-            case "slow" -> SimplySwords.runicEffectsConfig.enableSlow;
-            case "greater_slow" -> SimplySwords.runicEffectsConfig.enableGreaterSlow;
-            case "stoneskin" -> SimplySwords.runicEffectsConfig.enableStoneskin;
-            case "greater_stoneskin" -> SimplySwords.runicEffectsConfig.enableGreaterStoneskin;
-            case "swiftness" -> SimplySwords.runicEffectsConfig.enableSwiftness;
-            case "greater_swiftness" -> SimplySwords.runicEffectsConfig.enableGreaterSwiftness;
-            case "trailblaze" -> SimplySwords.runicEffectsConfig.enableTrailblaze;
-            case "greater_trailblaze" -> SimplySwords.runicEffectsConfig.enableGreaterTrailblaze;
-            case "weaken" -> SimplySwords.runicEffectsConfig.enableWeaken;
-            case "greater_weaken" -> SimplySwords.runicEffectsConfig.enableGreaterWeaken;
-            case "zephyr" -> SimplySwords.runicEffectsConfig.enableZephyr;
-            case "greater_zephyr" -> SimplySwords.runicEffectsConfig.enableGreaterZephyr;
-            case "frost_ward" -> SimplySwords.runicEffectsConfig.enableFrostWard;
-            case "wildfire" -> SimplySwords.runicEffectsConfig.enableWildfire;
-            case "unstable" -> SimplySwords.runicEffectsConfig.enableUnstable;
-            case "momentum" -> SimplySwords.runicEffectsConfig.enableMomentum;
-            case "greater_momentum" -> SimplySwords.runicEffectsConfig.enableGreaterMomentum;
-            case "imbued" -> SimplySwords.runicEffectsConfig.enableImbued;
-            case "greater_imbued" -> SimplySwords.runicEffectsConfig.enableGreaterImbued;
-            case "pincushion" -> SimplySwords.runicEffectsConfig.enablePincushion;
-            case "greater_pincushion" -> SimplySwords.runicEffectsConfig.enableGreaterPincushion;
-            case "ward" -> SimplySwords.runicEffectsConfig.enableWard;
-            case "immolation" -> SimplySwords.runicEffectsConfig.enableImmolate;
+            case "active_defence" ->        Config.getBoolean("enableActiveDefence", "RunicEffects",ConfigDefaultValues.enableActiveDefence);
+            case "float" ->                 Config.getBoolean("enableFloat", "RunicEffects",ConfigDefaultValues.enableFloat);
+            case "greater_float" ->         Config.getBoolean("enableGreaterFloat", "RunicEffects",ConfigDefaultValues.enableGreaterFloat);
+            case "freeze" ->                Config.getBoolean("enableFreeze", "RunicEffects",ConfigDefaultValues.enableFreeze);
+            case "shielding" ->             Config.getBoolean("enableShielding", "RunicEffects",ConfigDefaultValues.enableShielding);
+            case "greater_shielding" ->     Config.getBoolean("enableGreaterShielding", "RunicEffects",ConfigDefaultValues.enableGreaterShielding);
+            case "slow" ->                  Config.getBoolean("enableSlow", "RunicEffects",ConfigDefaultValues.enableSlow);
+            case "greater_slow" ->          Config.getBoolean("enableGreaterSlow", "RunicEffects",ConfigDefaultValues.enableGreaterSlow);
+            case "stoneskin" ->             Config.getBoolean("enableStoneskin", "RunicEffects",ConfigDefaultValues.enableStoneskin);
+            case "greater_stoneskin" ->     Config.getBoolean("enableGreaterStoneskin", "RunicEffects",ConfigDefaultValues.enableGreaterStoneskin);
+            case "swiftness" ->             Config.getBoolean("enableSwiftness", "RunicEffects",ConfigDefaultValues.enableSwiftness);
+            case "greater_swiftness" ->     Config.getBoolean("enableGreaterSwiftness", "RunicEffects",ConfigDefaultValues.enableGreaterSwiftness);
+            case "trailblaze" ->            Config.getBoolean("enableTrailblaze", "RunicEffects",ConfigDefaultValues.enableTrailblaze);
+            case "greater_trailblaze" ->    Config.getBoolean("enableGreaterTrailblaze", "RunicEffects",ConfigDefaultValues.enableGreaterTrailblaze);
+            case "weaken" ->                Config.getBoolean("enableWeaken", "RunicEffects",ConfigDefaultValues.enableWeaken);
+            case "greater_weaken" ->        Config.getBoolean("enableGreaterWeaken", "RunicEffects",ConfigDefaultValues.enableGreaterWeaken);
+            case "zephyr" ->                Config.getBoolean("enableZephyr", "RunicEffects",ConfigDefaultValues.enableZephyr);
+            case "greater_zephyr" ->        Config.getBoolean("enableGreaterZephyr", "RunicEffects",ConfigDefaultValues.enableGreaterZephyr);
+            case "frost_ward" ->            Config.getBoolean("enableFrostWard", "RunicEffects",ConfigDefaultValues.enableFrostWard);
+            case "wildfire" ->              Config.getBoolean("enableWildfire", "RunicEffects",ConfigDefaultValues.enableWildfire);
+            case "unstable" ->              Config.getBoolean("enableUnstable", "RunicEffects",ConfigDefaultValues.enableUnstable);
+            case "momentum" ->              Config.getBoolean("enableMomentum", "RunicEffects",ConfigDefaultValues.enableMomentum);
+            case "greater_momentum" ->      Config.getBoolean("enableGreaterMomentum", "RunicEffects",ConfigDefaultValues.enableGreaterMomentum);
+            case "imbued" ->                Config.getBoolean("enableImbued", "RunicEffects",ConfigDefaultValues.enableImbued);
+            case "greater_imbued" ->        Config.getBoolean("enableGreaterImbued", "RunicEffects",ConfigDefaultValues.enableGreaterImbued);
+            case "pincushion" ->            Config.getBoolean("enablePincushion", "RunicEffects",ConfigDefaultValues.enablePincushion);
+            case "greater_pincushion" ->    Config.getBoolean("enableGreaterPincushion", "RunicEffects",ConfigDefaultValues.enableGreaterPincushion);
+            case "ward" ->                  Config.getBoolean("enableWard", "RunicEffects",ConfigDefaultValues.enableWard);
+            case "immolation" ->            Config.getBoolean("enableImmolate", "RunicEffects",ConfigDefaultValues.enableImmolate);
             default -> false;
         };
     }
 
     public static boolean checkNetherBlacklist(String netherPower) {
         return switch (netherPower) {
-            case "echo" -> SimplySwords.gemEffectsConfig.enableEcho;
-            case "berserk" -> SimplySwords.gemEffectsConfig.enableBerserk;
-            case "radiance" -> SimplySwords.gemEffectsConfig.enableRadiance;
-            case "onslaught" -> SimplySwords.gemEffectsConfig.enableOnslaught;
-            case "nullification" -> SimplySwords.gemEffectsConfig.enableNullification;
-            case "precise" -> SimplySwords.gemEffectsConfig.enablePrecise;
-            case "mighty" -> SimplySwords.gemEffectsConfig.enableMighty;
-            case "stealthy" -> SimplySwords.gemEffectsConfig.enableStealthy;
-            case "renewed" -> SimplySwords.gemEffectsConfig.enableRenewed;
-            case "accelerant" -> SimplySwords.gemEffectsConfig.enableAccelerant;
-            case "leaping" -> SimplySwords.gemEffectsConfig.enableLeaping;
-            case "spellshield" -> SimplySwords.gemEffectsConfig.enableSpellshield;
-            case "spellforged" -> SimplySwords.gemEffectsConfig.enableSpellforged;
-            case "soulshock" -> SimplySwords.gemEffectsConfig.enableSoulshock;
+            case "echo" ->                  Config.getBoolean("enableEcho", "GemEffects",ConfigDefaultValues.enableEcho);
+            case "berserk" ->               Config.getBoolean("enableBerserk", "GemEffects",ConfigDefaultValues.enableBerserk);
+            case "radiance" ->              Config.getBoolean("enableRadiance", "GemEffects",ConfigDefaultValues.enableRadiance);
+            case "onslaught" ->             Config.getBoolean("enableOnslaught", "GemEffects",ConfigDefaultValues.enableOnslaught);
+            case "nullification" ->         Config.getBoolean("enableNullification", "GemEffects",ConfigDefaultValues.enableNullification);
+            case "precise" ->               Config.getBoolean("enablePrecise", "GemEffects",ConfigDefaultValues.enablePrecise);
+            case "mighty" ->                Config.getBoolean("enableMighty", "GemEffects",ConfigDefaultValues.enableMighty);
+            case "stealthy" ->              Config.getBoolean("enableStealthy", "GemEffects",ConfigDefaultValues.enableStealthy);
+            case "renewed" ->               Config.getBoolean("enableRenewed", "GemEffects",ConfigDefaultValues.enableRenewed);
+            case "accelerant" ->            Config.getBoolean("enableAccelerant", "GemEffects",ConfigDefaultValues.enableAccelerant);
+            case "leaping" ->               Config.getBoolean("enableLeaping", "GemEffects",ConfigDefaultValues.enableLeaping);
+            case "spellshield" ->           Config.getBoolean("enableSpellshield", "GemEffects",ConfigDefaultValues.enableSpellshield);
+            case "spellforged" ->           Config.getBoolean("enableSpellforged", "GemEffects",ConfigDefaultValues.enableSpellforged);
+            case "soulshock" ->             Config.getBoolean("enableSoulshock", "GemEffects",ConfigDefaultValues.enableSoulshock);
             default -> false;
         };
     }
@@ -330,7 +331,7 @@ public class HelperMethods {
     // createFootfalls - creates weapon footfall particle effects (footsteps)
     public static void createFootfalls(Entity entity, ItemStack stack, World world, int stepMod, DefaultParticleType particle,
                                        DefaultParticleType sprintParticle, DefaultParticleType passiveParticle, boolean passiveParticles) {
-        if ((entity instanceof PlayerEntity player) && SimplySwords.generalConfig.enableWeaponFootfalls && player.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
+        if ((entity instanceof PlayerEntity player) && Config.getBoolean("enableWeaponFootfalls", "General",ConfigDefaultValues.enableWeaponFootfalls) && player.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
             if (isWalking(player) && !player.isSwimming() && player.isOnGround()) {
                 if (stepMod == 6) {
                     if (player.isSprinting()) {
@@ -358,7 +359,7 @@ public class HelperMethods {
                     }
                 }
             }
-            if (passiveParticles && SimplySwords.generalConfig.enablePassiveParticles) {
+            if (passiveParticles && Config.getBoolean("enablePassiveParticles", "General",ConfigDefaultValues.enablePassiveParticles)) {
                 float randomy = (float) (Math.random());
                 if (stepMod == 1) {
                     world.addParticle(passiveParticle, player.getX() - player.getHandPosOffset(stack.getItem()).getX(),
@@ -385,7 +386,7 @@ public class HelperMethods {
 
     public static float commonSpellAttributeScaling(float damageModifier, Entity entity, String magicSchool) {
         if (Platform.isModLoaded("spell_power"))
-            if ((entity instanceof PlayerEntity player) && SimplySwords.generalConfig.compatEnableSpellPowerScaling)
+            if ((entity instanceof PlayerEntity player) && Config.getBoolean("compatEnableSpellPowerScaling", "General",ConfigDefaultValues.compatEnableSpellPowerScaling))
                 return SimplySwordsExpectPlatform.getSpellPowerDamage(damageModifier, player, magicSchool);
 
         return 0f;

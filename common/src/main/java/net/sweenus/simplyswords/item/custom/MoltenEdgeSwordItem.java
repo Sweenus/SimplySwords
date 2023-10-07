@@ -19,7 +19,8 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
-import net.sweenus.simplyswords.SimplySwords;
+import net.sweenus.simplyswords.config.Config;
+import net.sweenus.simplyswords.config.ConfigDefaultValues;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
@@ -37,11 +38,11 @@ public class MoltenEdgeSwordItem extends UniqueSwordItem {
     private static DefaultParticleType particleSprint = ParticleTypes.FALLING_LAVA;
     private static DefaultParticleType particlePassive = ParticleTypes.SMOKE;
 
-    private final int abilityCooldown = (int) SimplySwords.uniqueEffectsConfig.moltenRoarCooldown;
-    int radius = (int) SimplySwords.uniqueEffectsConfig.moltenRoarRadius;
-    int knockbackStrength = (int) SimplySwords.uniqueEffectsConfig.moltenRoarKnockbackStrength;
-    int proc_chance = (int) SimplySwords.uniqueEffectsConfig.moltenRoarChance;
-    int roar_timer_max = (int) SimplySwords.uniqueEffectsConfig.moltenRoarDuration;
+    private final int abilityCooldown = (int) Config.getFloat("moltenRoarCooldown", "UniqueEffects", ConfigDefaultValues.moltenRoarCooldown);
+    int radius = (int) Config.getFloat("moltenRoarRadius", "UniqueEffects", ConfigDefaultValues.moltenRoarRadius);
+    int knockbackStrength = (int) Config.getFloat("moltenRoarKnockbackStrength", "UniqueEffects", ConfigDefaultValues.moltenRoarKnockbackStrength);
+    int proc_chance = (int) Config.getFloat("moltenRoarChance", "UniqueEffects", ConfigDefaultValues.moltenRoarChance);
+    int roar_timer_max = (int) Config.getFloat("moltenRoarDuration", "UniqueEffects", ConfigDefaultValues.moltenRoarDuration);
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
