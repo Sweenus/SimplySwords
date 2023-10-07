@@ -129,7 +129,7 @@ public class HelperMethods {
         if (!attacker.getWorld().isClient()) {
             ServerWorld world = (ServerWorld) attacker.getWorld();
             boolean impactsounds_enabled = Config.getBoolean("enableWeaponImpactSounds", "General",ConfigDefaultValues.enableWeaponImpactSounds);
-            float impactsounds_volume = Config.getFloat("enableWeaponImpactSounds", "General",ConfigDefaultValues.weaponImpactSoundsVolume);
+            float impactsounds_volume = Config.getFloat("weaponImpactSoundsVolume", "General",ConfigDefaultValues.weaponImpactSoundsVolume);
 
             if (impactsounds_enabled) {
                 int choose_sound = (int) (Math.random() * 30);
