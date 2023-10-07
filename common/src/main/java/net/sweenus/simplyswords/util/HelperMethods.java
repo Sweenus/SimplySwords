@@ -197,8 +197,8 @@ public class HelperMethods {
             case "spellshield" ->           Config.getBoolean("enableSpellshield", "GemEffects",ConfigDefaultValues.enableSpellshield);
             case "spellforged" ->           Config.getBoolean("enableSpellforged", "GemEffects",ConfigDefaultValues.enableSpellforged);
             case "soulshock" ->             Config.getBoolean("enableSoulshock", "GemEffects",ConfigDefaultValues.enableSoulshock);
-            case "spellstandard" ->         Config.getBoolean("enableSpellStandard", "GemEffects",ConfigDefaultValues.enableSpellStandard);
-            case "warstandard" ->           Config.getBoolean("enableWarStandard", "GemEffects",ConfigDefaultValues.enableWarStandard);
+            case "spell_standard" ->         Config.getBoolean("enableSpellStandard", "GemEffects",ConfigDefaultValues.enableSpellStandard);
+            case "war_standard" ->           Config.getBoolean("enableWarStandard", "GemEffects",ConfigDefaultValues.enableWarStandard);
             case "deception" ->             Config.getBoolean("enableDeception", "GemEffects",ConfigDefaultValues.enableDeception);
             default -> false;
         };
@@ -243,7 +243,7 @@ public class HelperMethods {
         if (Platform.isModLoaded("simplyskills"))
             netherList = Arrays.asList("echo", "berserk", "radiance", "onslaught", "nullification",
                     "precise", "mighty", "stealthy", "renewed", "accelerant", "leaping", "spellshield", "spellforged",
-                    "soulshock", "spellstandard", "warstandard", "deception");
+                    "soulshock", "spell_standard", "war_standard", "deception");
         else
             netherList = Arrays.asList("echo", "berserk", "radiance", "onslaught", "nullification");
 
