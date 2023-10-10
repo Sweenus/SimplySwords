@@ -103,7 +103,7 @@
   "item.simplyswords.awakened_lichblade": "觉醒的巫妖之刃",
   "item.simplyswords.shadowsting": "暗影之刺",
   "item.simplyswords.harbinger": "噩兆",
-  "item.simplyswords.sunfire": "炎阳",
+  "item.simplyswords.sunfire": "阳炎",
   "item.simplyswords.dormant_relic": "沉眠的遗迹大剑",
   "item.simplyswords.tainted_relic": "堕落的遗迹大剑",
   "item.simplyswords.righteous_relic": "坚直的遗迹大剑",
@@ -983,7 +983,7 @@
   "text.autoconfig.simplyswords_main.option.weapon_attributes.thunderbrand_damageModifier":                             "§6纵雷§7 伤害调整数",
   "text.autoconfig.simplyswords_main.option.weapon_attributes.lichblade_damageModifier":                                "§6巫妖之刃§7 伤害调整数",
   "text.autoconfig.simplyswords_main.option.weapon_attributes.shadowsting_damageModifier":                              "§6暗影之刺§7 伤害调整数",
-  "text.autoconfig.simplyswords_main.option.weapon_attributes.sunfire_damageModifier":                                  "§6炎阳§7 伤害调整数",
+  "text.autoconfig.simplyswords_main.option.weapon_attributes.sunfire_damageModifier":                                  "§6阳炎§7 伤害调整数",
   "text.autoconfig.simplyswords_main.option.weapon_attributes.harbinger_damageModifier":                                "§6噩兆§7 伤害调整数",
   "text.autoconfig.simplyswords_main.option.weapon_attributes.whisperwind_damageModifier":                              "§6疾风之刃§7 伤害调整数",
 
@@ -1012,7 +1012,7 @@
   "text.autoconfig.simplyswords_main.option.weapon_attributes.thunderbrand_attackSpeed":                                "§6纵雷§7 攻速调整数",
   "text.autoconfig.simplyswords_main.option.weapon_attributes.lichblade_attackSpeed":                                   "§6巫妖之刃§7 攻速调整数",
   "text.autoconfig.simplyswords_main.option.weapon_attributes.shadowsting_attackSpeed":                                 "§6暗影之刺§7 攻速调整数",
-  "text.autoconfig.simplyswords_main.option.weapon_attributes.sunfire_attackSpeed":                                     "§6炎阳§7 攻速调整数",
+  "text.autoconfig.simplyswords_main.option.weapon_attributes.sunfire_attackSpeed":                                     "§6阳炎§7 攻速调整数",
   "text.autoconfig.simplyswords_main.option.weapon_attributes.harbinger_attackSpeed":                                   "§6噩兆§7 攻速调整数",
   "text.autoconfig.simplyswords_main.option.weapon_attributes.whisperwind_attackSpeed":                                 "§6疾风之刃§7 攻速调整数",
 
