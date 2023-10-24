@@ -1,4 +1,4 @@
-Timefall Development License 1.1
+Timefall Development License 1.2
 
 
 Copyright (c) 2020-2023 Sweeney, Timefall Development. All Rights Reserved.
@@ -19,6 +19,12 @@ Sublicensing - You may not sublicense this software.
 Selling - You may not sell this software, any part of this software, or restrict its
  access behind any paywall to monetised link.
 
+Special Cases and Commercial Usage Clarification:
+In the cases of special or commercial use, including, but not limited to the production
+of other Minecraft mods, any member of Timefall Development who are noted as the copyright
+holders of this software may provide written consent to grant you a non-exclusive,
+non-transferable, world-wide license usage of any aspect of this software. This consent
+can be revoked at any time by any member of Timefall Development.
 
 Modpack Clarification:
 Permission is granted for Modpacks to include this software as long as the copy of this
@@ -47,20 +53,19 @@ Request containing the porting code agrees that Timefall Development is free to 
 the terms for the use of the submitted code. This includes, but will often not be the case
 that, submissions are used without compensation of any kind.
 
-
 Sound Asset Clarification:
 Permission is not granted to any user or contributor of this software to use the sound
 assets of this software in any way, shape or form beyond contributing to this software.
-These assets are used, with permission, from PotionAudio and can be purchased at the following
-link: https://potion-audio.itch.io/magic-bow-sword-sounds
+These assets are used, with permission, from PotionAudio and can be purchased at the
+following link: https://potion-audio.itch.io/magic-bow-sword-sounds
 
 
 Texture Asset Clarification:
 Permission is not granted to any user or contributor of this software to use the texture
-assets within the mob_effect directory of this software in any way, shape or form beyond contributing to this software.
+assets within the mob_effect directory of this software in any way, shape or form beyond
+contributing to this software.
 These assets are used, with permission, from REXARD and can be purchased at the following
 link: https://assetstore.unity.com/packages/2d/gui/icons/flat-skills-icons-82713
-
 
 Definition of 'Our Sources' in this license:
 Our Sources in this license means a copy of this software or its associated files that
