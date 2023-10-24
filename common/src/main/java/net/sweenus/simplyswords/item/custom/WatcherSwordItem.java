@@ -50,7 +50,7 @@ public class WatcherSwordItem extends UniqueSwordItem {
 
                 for (Entity entity : world.getOtherEntities(attacker, box, EntityPredicates.VALID_ENTITY)) {
                     if (entity instanceof LivingEntity && HelperMethods.checkFriendlyFire((LivingEntity) entity, attacker)) {
-                        entity.damage(attacker.getDamageSources().magic(), rAmount);
+                        entity.damage(attacker.getDamageSources().indirectMagic(attacker, attacker), rAmount);
                         attacker.heal(rAmount);
                         BlockPos position2 = entity.getBlockPos();
                         world.playSound(null, position2, SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_IMPACT_02.get(),
@@ -64,13 +64,13 @@ public class WatcherSwordItem extends UniqueSwordItem {
                 float overallAbsorptionCap = Config.getFloat("abilityAbsorptionCap", "UniqueEffects", ConfigDefaultValues.abilityAbsorptionCap);
                 float absorptionCap = Config.getFloat("omenAbsorptionCap", "UniqueEffects", ConfigDefaultValues.omenAbsorptionCap);
                 float threshold = Config.getFloat("omenInstantKillThreshold", "UniqueEffects", ConfigDefaultValues.omenInstantKillThreshold) * target.getMaxHealth();
-                float remainingHealth = Math.min(target.getHealth(), absorptionCap);
+                float remainingHealth = target.getHealth();
 
                 if (remainingHealth <= threshold) {
                     attacker.setAbsorptionAmount(Math.min(overallAbsorptionCap, attacker.getAbsorptionAmount() + remainingHealth));
                     world.playSound(null, position, SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_IMPACT_03.get(),
                             target.getSoundCategory(), 0.7f, 1.2f);
-                    target.damage(attacker.getDamageSources().magic(), 1000);
+                    target.damage(attacker.getDamageSources().indirectMagic(attacker, attacker), 1000);
                 }
             }
         }

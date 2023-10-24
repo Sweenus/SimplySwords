@@ -153,7 +153,7 @@ public class FrostfallSwordItem extends UniqueSwordItem {
                         if (le.hasStatusEffect(EffectRegistry.FREEZE.get())) {
                             world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_BOW_ICE_SHOOT_IMPACT_02.get(),
                                     le.getSoundCategory(), 0.2f, 3f);
-                            le.damage(player.getDamageSources().magic(), abilityDamage);
+                            le.damage(player.getDamageSources().indirectMagic(entity, entity), abilityDamage);
                         }
 
                         double xpos = le.getX() - 2;

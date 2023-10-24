@@ -86,7 +86,7 @@ public class AbilityMethods {
                             if (storm != null) {
                                 storm.setCosmetic(true);
                             }
-                            ee.damage(user.getDamageSources().magic(), 5);
+                            ee.damage(user.getDamageSources().indirectMagic(user, user), 5);
                         }
                     }
                 }
@@ -143,11 +143,11 @@ public class AbilityMethods {
                         float choose = (float) (Math.random() * 1);
 
                         if (ability_timer > (ability_timer_max - 40)) {
-                            le.damage(world.getDamageSources().magic(), abilityDamage);
+                            le.damage(world.getDamageSources().indirectMagic(user, user), abilityDamage);
                             world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_BOW_POISON_ATTACK_02.get(),
                                     le.getSoundCategory(), 0.1f, choose);
                         } else if (ability_timer < (ability_timer_max - 40)) {
-                            le.damage(world.getDamageSources().magic(), abilityDamage * 3);
+                            le.damage(world.getDamageSources().indirectMagic(user, user), abilityDamage * 3);
                             world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_BOW_POISON_ATTACK_01.get(),
                                     le.getSoundCategory(), 0.1f, choose);
                         }
@@ -201,7 +201,7 @@ public class AbilityMethods {
                             user.heal(healAmount);
                         }
                         ((LichbladeSwordItem)stack.getItem()).damageTracker++;
-                        le.damage(user.getDamageSources().magic(), abilityDamage);
+                        le.damage(user.getDamageSources().indirectMagic(user, user), abilityDamage);
                     }
                 }
                 world.playSound(null, lastX, lastY, lastZ, SoundRegistry.DARK_SWORD_BLOCK.get(),
@@ -263,7 +263,7 @@ public class AbilityMethods {
                         float choose = (float) (Math.random() * 1);
                         world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_BOW_ICE_SHOOT_IMPACT_03.get(),
                                 user.getSoundCategory(), 0.1f, choose);
-                        le.damage(world.getDamageSources().magic(), abilityDamage * 3);
+                        le.damage(world.getDamageSources().indirectMagic(user, user), abilityDamage * 3);
                     }
                 }
 
@@ -312,10 +312,10 @@ public class AbilityMethods {
                             world.playSoundFromEntity(null, le, SoundRegistry.MAGIC_BOW_SHOOT_IMPACT_03.get(),
                                     le.getSoundCategory(), 0.1f, choose);
                         }
-                        le.damage(world.getDamageSources().magic(), abilityDamage);
+                        le.damage(world.getDamageSources().indirectMagic(user, user), abilityDamage);
                         if (ability_timer < 10) { //Ground Slam - 3 Charges
                             le.removeStatusEffect(StatusEffects.LEVITATION);
-                            le.damage(world.getDamageSources().magic(), abilityDamage * 3);
+                            le.damage(world.getDamageSources().indirectMagic(user, user), abilityDamage * 3);
                             le.setVelocity(0, -10, 0);
                             user.stopUsingItem();
                             world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_SWORD_SCIFI_ATTACK_03.get(),
@@ -375,7 +375,7 @@ public class AbilityMethods {
                     if ((entity instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, user)) {
 
                         if (ability_timer > 12) {
-                            le.damage(world.getDamageSources().magic(), abilityDamage);
+                            le.damage(world.getDamageSources().indirectMagic(user, user), abilityDamage);
                             le.setVelocity((user.getX() - le.getX()) / 10, (user.getY() - le.getY()) / 10, (user.getZ() - le.getZ()) / 10);
                             le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 40, 3), user);
                         }

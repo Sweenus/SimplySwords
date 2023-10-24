@@ -125,7 +125,7 @@ public class VolcanicFurySwordItem extends UniqueSwordItem {
             for (Entity entity : world.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY)) {
                 if ((entity instanceof LivingEntity le) && HelperMethods.checkFriendlyFire((LivingEntity) entity, user)) {
                     float choose = (float) (Math.random() * 1);
-                    le.damage(user.getDamageSources().magic(), abilityDamage * (chargePower * 0.3f));
+                    le.damage(user.getDamageSources().indirectMagic(user, user), abilityDamage * (chargePower * 0.3f));
                     le.setOnFireFor(6);
                     world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_BOW_POISON_ATTACK_01.get(),
                             le.getSoundCategory(), 0.1f, choose);

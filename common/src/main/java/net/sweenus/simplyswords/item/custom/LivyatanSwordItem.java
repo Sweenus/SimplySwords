@@ -106,7 +106,7 @@ public class LivyatanSwordItem extends UniqueSwordItem {
                             le.removeStatusEffect(StatusEffects.RESISTANCE);
                             world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_BOW_ICE_SHOOT_IMPACT_02.get(),
                                     le.getSoundCategory(), 0.2f, 3f);
-                            le.damage(entity.getDamageSources().magic(), abilityDamage + shatter_bonus);
+                            le.damage(entity.getDamageSources().indirectMagic(entity, entity), abilityDamage + shatter_bonus);
                         }
                         double xpos = le.getX() - 2;
                         double ypos = le.getY();

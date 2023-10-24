@@ -101,7 +101,7 @@ public class RendSwordItem extends UniqueSwordItem {
 
                     healamp += (le.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier());
                     cantrigger = true;
-                    le.damage(user.getDamageSources().magic(), le.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier() * abilityDamage);
+                    le.damage(user.getDamageSources().indirectMagic(user, user), le.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier() * abilityDamage);
                     le.removeStatusEffect(StatusEffects.WEAKNESS);
                     le.removeStatusEffect(StatusEffects.SLOWNESS);
                     world.playSoundFromEntity(null, entity, SoundRegistry.DARK_SWORD_SPELL.get(),

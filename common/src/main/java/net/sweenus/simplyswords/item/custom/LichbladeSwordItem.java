@@ -149,7 +149,7 @@ public class LichbladeSwordItem extends UniqueSwordItem {
                         livingUser.getX() - radius, livingUser.getY() - radius, livingUser.getZ() - radius);
                 for (Entity entity : world.getOtherEntities(livingUser, box, EntityPredicates.VALID_LIVING_ENTITY)) {
                     if ((entity instanceof LivingEntity le) && HelperMethods.checkFriendlyFire((LivingEntity) entity, livingUser)) {
-                        le.damage(livingUser.getDamageSources().magic(), abilityDamage);
+                        le.damage(livingUser.getDamageSources().indirectMagic(user, user), abilityDamage);
                     }
                 }
                 world.playSoundFromEntity(null, livingUser, SoundRegistry.DARK_SWORD_BLOCK.get(),

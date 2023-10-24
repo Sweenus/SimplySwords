@@ -118,7 +118,7 @@ public class IcewhisperSwordItem extends UniqueSwordItem {
                         float choose = (float) (Math.random() * 1);
                         world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_BOW_ICE_SHOOT_IMPACT_03.get(),
                                 le.getSoundCategory(), 0.1f, choose);
-                        le.damage(player.getDamageSources().magic(), abilityDamage);
+                        le.damage(player.getDamageSources().indirectMagic(entity, entity), abilityDamage);
                     }
                 }
                 world.playSoundFromEntity(null, player, SoundRegistry.ELEMENTAL_SWORD_ICE_ATTACK_02.get(),
