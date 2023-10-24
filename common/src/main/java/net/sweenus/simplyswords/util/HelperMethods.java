@@ -14,6 +14,7 @@ import net.minecraft.entity.projectile.ProjectileUtil;
 import net.minecraft.item.ItemStack;
 import net.minecraft.particle.DefaultParticleType;
 import net.minecraft.particle.ParticleEffect;
+import net.minecraft.scoreboard.AbstractTeam;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.text.Style;
@@ -91,6 +92,15 @@ public class HelperMethods {
         if (!checkEntityBlacklist(target, attacker)) {
             return false;
         }
+
+        // Check if the player and the living entity are on the same team
+        AbstractTeam playerTeam = attacker.getScoreboardTeam();
+        AbstractTeam entityTeam = target.getScoreboardTeam();
+        if (playerTeam != null && entityTeam != null && target.isTeammate(attacker)) {
+            // They are on the same team, so friendly fire should not be allowed
+            return false;
+        }
+
         if (target instanceof PlayerEntity playerTarget) {
             if (playerTarget == attacker) {
                 return false;
