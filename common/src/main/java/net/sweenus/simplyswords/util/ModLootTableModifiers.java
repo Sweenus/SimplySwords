@@ -24,6 +24,7 @@ public class ModLootTableModifiers {
         //STANDARD
         LootEvent.MODIFY_LOOT_TABLE.register(((lootTables, id, context, builtin) -> {
             if (Config.getBoolean("enableLootDrops", "Loot", ConfigDefaultValues.enableLootDrops) && id.getPath().contains("chests") && !id.getPath().contains("spectrum")) {
+                //System.out.println( id.getNamespace() + ":" + id.getPath()); PRINT POSSIBLE PATHS
                 if (!Config.getBoolean("enableLootInVillages", "Loot", ConfigDefaultValues.enableLootInVillages) && id.getPath().contains("village")) {
                     //Do nothing
                 }

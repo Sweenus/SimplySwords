@@ -16,7 +16,7 @@ import net.sweenus.simplyswords.item.custom.*;
 public class ItemsRegistry {
 
     static float iron_modifier = Config.getFloat("iron_damageModifier", "WeaponAttributes", ConfigDefaultValues.iron_damageModifier);
-    static float gold_modifier = Config.getFloat("iron_damageModifier", "WeaponAttributes", ConfigDefaultValues.gold_damageModifier);
+    static float gold_modifier = Config.getFloat("gold_damageModifier", "WeaponAttributes", ConfigDefaultValues.gold_damageModifier);
     static float diamond_modifier = Config.getFloat("diamond_damageModifier", "WeaponAttributes", ConfigDefaultValues.diamond_damageModifier);
     static float netherite_modifier = Config.getFloat("netherite_damageModifier", "WeaponAttributes", ConfigDefaultValues.netherite_damageModifier);
     static float runic_modifier = Config.getFloat("runic_damageModifier", "WeaponAttributes", ConfigDefaultValues.runic_damageModifier);
