@@ -427,21 +427,21 @@ public class ItemsRegistry {
                     ToolMaterials.DIAMOND,
                     (int) (diamond_modifier + chakram_positive_modifier - chakram_negative_modifier),
                     chakram_attackspeed,
-                    "minecraft:diamond_ingot"));
+                    "minecraft:diamond"));
 
     public static final RegistrySupplier<SimplySwordsSwordItem> DIAMOND_SCYTHE = ITEM.register( "diamond_scythe", () ->
             new SimplySwordsSwordItem(
                     ToolMaterials.DIAMOND,
                     (int) (diamond_modifier + scythe_positive_modifier - scythe_negative_modifier),
                     scythe_attackspeed,
-                    "minecraft:diamond_ingot"));
+                    "minecraft:diamond"));
 
     public static final RegistrySupplier<SimplySwordsSwordItem> DIAMOND_HALBERD = ITEM.register( "diamond_halberd", () ->
             new SimplySwordsSwordItem(
                     ToolMaterials.DIAMOND,
                     (int) (diamond_modifier + halberd_positive_modifier - halberd_negative_modifier),
                     halberd_attackspeed,
-                    "minecraft:diamond_ingot"));
+                    "minecraft:diamond"));
 
     //NETHERITE
 
