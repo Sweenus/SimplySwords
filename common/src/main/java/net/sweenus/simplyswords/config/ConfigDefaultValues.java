@@ -168,9 +168,9 @@ public class ConfigDefaultValues {
     public static float fatalFlickerDashVelocity = 3f;
 
 
-    public static float smoulderCooldown = 260f;
+    public static float smoulderCooldown = 80f;
     public static float smoulderMaxStacks = 5f;
-    public static float smoulderHeal = 25f;
+    public static float smoulderHeal = 15f;
     
     // -- WEAPON ATTRIBUTES -- //
 

@@ -718,5 +718,10 @@
     "sounds": [
       "simplyswords:magic_sword_whoosh_07"
     ]
+  },
+  "spell_fire": {
+    "sounds": [
+      "simplyswords:spell_fire"
+    ]
   }
 }

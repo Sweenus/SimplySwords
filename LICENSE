@@ -1,7 +1,7 @@
 Timefall Development License 1.2
 
 
-Copyright (c) 2020-2023 Sweeney, Timefall Development. All Rights Reserved.
+Copyright (c) 2020-2024 Sweeney, Timefall Development. All Rights Reserved.
 
 
 Permissions are hereby granted, below, to any person having
@@ -64,8 +64,9 @@ Texture Asset Clarification:
 Permission is not granted to any user or contributor of this software to use the texture
 assets within the mob_effect directory of this software in any way, shape or form beyond
 contributing to this software.
-These assets are used, with permission, from REXARD and can be purchased at the following
-link: https://assetstore.unity.com/packages/2d/gui/icons/flat-skills-icons-82713
+These assets are used, with permission, from REXARD, and ELV Games, and can be purchased at the following
+links: https://assetstore.unity.com/packages/2d/gui/icons/flat-skills-icons-82713,
+https://elv-games.itch.io/game-sounds-fx-pack-i
 
 Definition of 'Our Sources' in this license:
 Our Sources in this license means a copy of this software or its associated files that

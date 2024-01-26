@@ -1,5 +1,5 @@
 {
-	"parent": "simplyswords:item/template_longsword",
+	"parent": "simplyswords:item/template_longdagger",
 	"textures": {
 		"layer0": "simplyswords:item/emberlash",
 		"layer1": "simplyswords:item/emberlash_anim_02",

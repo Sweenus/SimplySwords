@@ -503,6 +503,7 @@
   "effect.simplyswords.ward":                                                                                           "Ward",
   "effect.simplyswords.immolation":                                                                                     "Immolation",
   "effect.simplyswords.onslaught":                                                                                      "Onslaught",
+  "effect.simplyswords.smouldering":                                                                                    "Smouldering",
 
   "item.simplyswords.onrightclick":                                                                                     "On Right Click:",
   "item.simplyswords.onrightclickheld":                                                                                 "Hold Right Click:",
@@ -696,9 +697,9 @@
   "item.simplyswords.emberlashsworditem.tooltip2":                                                                      "Your attacks inflict Smouldering.",
   "item.simplyswords.emberlashsworditem.tooltip3":                                                                      "Attacking enemies inflicted with",
   "item.simplyswords.emberlashsworditem.tooltip4":                                                                      "Smouldering causes you to deal an",
-  "item.simplyswords.emberlashsworditem.tooltip5":                                                                      "additional %d per stack.",
+  "item.simplyswords.emberlashsworditem.tooltip5":                                                                      "additional %d damage per stack.",
   "item.simplyswords.emberlashsworditem.tooltip6":                                                                      "Evade backwards while cauterising",
-  "item.simplyswords.emberlashsworditem.tooltip7":                                                                      "your wounds, healing for %d of Max HP.",
+  "item.simplyswords.emberlashsworditem.tooltip7":                                                                      "your wounds, healing for %d%% of Max HP.",
 
 
   "item.simplyswords.dormantrelicsworditem.tooltip2":                                                                   "A faint power seems to emanate from within.",
@@ -1011,6 +1012,7 @@
   "text.autoconfig.simplyswords_main.option.weapon_attributes.sunfire_damageModifier":                                  "§6Sunfire§7 damage modifier",
   "text.autoconfig.simplyswords_main.option.weapon_attributes.harbinger_damageModifier":                                "§6Harbinger§7 damage modifier",
   "text.autoconfig.simplyswords_main.option.weapon_attributes.whisperwind_damageModifier":                              "§6Whisperwind§7 damage modifier",
+  "text.autoconfig.simplyswords_main.option.weapon_attributes.emberlash_damageModifier":                                "§6Emberlash§7 damage modifier",
 
   "text.autoconfig.simplyswords_main.option.weapon_attributes.brimstone_attackSpeed.@PrefixText" :                      "§6[Attack Speed Modifiers]§7\nRecommended range: -1.0 to -3.7, with -1.0 being fast and -3.7 being slow.",
   "text.autoconfig.simplyswords_main.option.weapon_attributes.brimstone_attackSpeed":                                   "§6Brimstone§7 attack speed",
@@ -1040,6 +1042,7 @@
   "text.autoconfig.simplyswords_main.option.weapon_attributes.sunfire_attackSpeed":                                     "§6Sunfire§7 attack speed",
   "text.autoconfig.simplyswords_main.option.weapon_attributes.harbinger_attackSpeed":                                   "§6Harbinger§7 attack speed",
   "text.autoconfig.simplyswords_main.option.weapon_attributes.whisperwind_attackSpeed":                                 "§6Whisperwind§7 attack speed",
+  "text.autoconfig.simplyswords_main.option.weapon_attributes.emberlash_attackSpeed":                                   "§6Emberlash§7 attack speed",
 
 
   "text.autoconfig.simplyswords_main.option.runic_effects.enableActiveDefence.@PrefixText" :                            "§a[Runic Power Blacklisting]§7\nSetting any of the below values to false will prevent that runic power from being obtainable.",
@@ -1112,6 +1115,7 @@
   "text.autoconfig.simplyswords_main.option.loot.enableShadowsting":                                                    "Shadowsting can be looted",
   "text.autoconfig.simplyswords_main.option.loot.enableDormantRelic":                                                   "Dormant Relic can be looted",
   "text.autoconfig.simplyswords_main.option.loot.enableWhisperwind":                                                    "Whisperwind can be looted",
+  "text.autoconfig.simplyswords_main.option.loot.enableEmberlash":                                                      "Emberlash can be looted",
 
   "text.autoconfig.simplyswords_main.option.general.enableWeaponImpactSounds":                                          "Enable weapon impact sounds",
   "text.autoconfig.simplyswords_main.option.general.weaponImpactSoundsVolume":                                          "Weapon impact sounds volume",

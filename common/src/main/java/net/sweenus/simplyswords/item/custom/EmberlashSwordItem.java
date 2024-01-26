@@ -47,11 +47,11 @@ public class EmberlashSwordItem extends UniqueSwordItem {
                 target.timeUntilRegen = 0;
                 StatusEffectInstance smoulderingEffect = target.getStatusEffect(EffectRegistry.SMOULDERING.get());
                 if (smoulderingEffect != null) {
-                    float damageMultiplier = 0.25f * smoulderingEffect.getAmplifier();
+                    float damageMultiplier = 0.20f * smoulderingEffect.getAmplifier();
                     target.damage(damageSource, getAttackDamage() * damageMultiplier);
                 }
             }
-            HelperMethods.incrementStatusEffect(target, EffectRegistry.SMOULDERING.get(), 100, 1, maximum_stacks);
+            HelperMethods.incrementStatusEffect(target, EffectRegistry.SMOULDERING.get(), 100, 1, maximum_stacks+1);
 
         }
         return super.postHit(stack, target, attacker);
@@ -61,13 +61,13 @@ public class EmberlashSwordItem extends UniqueSwordItem {
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         int skillCooldown = (int) Config.getFloat("smoulderCooldown", "UniqueEffects", ConfigDefaultValues.smoulderCooldown);
         user.swingHand(hand);
-        world.playSound(null, user.getBlockPos(), SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_IMPACT_03.get(),
-                user.getSoundCategory(), 0.5f, 1.5f);
+        world.playSound(null, user.getBlockPos(), SoundRegistry.SPELL_FIRE.get(),
+                user.getSoundCategory(), 0.5f, 1.0f);
 
-        user.setVelocity(user.getRotationVector().negate().multiply(+2));
+        user.setVelocity(user.getRotationVector().negate().multiply(+1.5));
         user.setVelocity(user.getVelocity().x, 0, user.getVelocity().z); // Prevent user flying to the heavens
         user.velocityModified = true;
-        user.heal(user.getMaxHealth() / 25);
+        user.heal(user.getMaxHealth() * 0.15f);
         user.getItemCooldownManager().set(this, skillCooldown);
 
         return super.use(world, user, hand);
@@ -77,8 +77,8 @@ public class EmberlashSwordItem extends UniqueSwordItem {
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
         if (stepMod > 0) stepMod--;
         if (stepMod <= 0) stepMod = 7;
-        HelperMethods.createFootfalls(entity, stack, world, stepMod, ParticleTypes.SMOKE,
-                ParticleTypes.FALLING_LAVA, ParticleTypes.FALLING_LAVA, true);
+        HelperMethods.createFootfalls(entity, stack, world, stepMod, ParticleTypes.FALLING_LAVA,
+                ParticleTypes.SMOKE, ParticleTypes.SMOKE, true);
         super.inventoryTick(stack, world, entity, slot, selected);
     }
 
@@ -91,15 +91,14 @@ public class EmberlashSwordItem extends UniqueSwordItem {
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.emberlashsworditem.tooltip1").setStyle(ABILITY));
         tooltip.add(Text.translatable("item.simplyswords.emberlashsworditem.tooltip2").setStyle(TEXT));
+        tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.emberlashsworditem.tooltip3").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.emberlashsworditem.tooltip4").setStyle(TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.emberlashsworditem.tooltip5",
-                (Config.getFloat("smoulderMaxStacks", "UniqueEffects",ConfigDefaultValues.smoulderMaxStacks) * 100)).setStyle(TEXT));
+        tooltip.add(Text.translatable("item.simplyswords.emberlashsworditem.tooltip5", getAttackDamage() * 0.20f).setStyle(TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(RIGHTCLICK));
         tooltip.add(Text.translatable("item.simplyswords.emberlashsworditem.tooltip6").setStyle(TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.emberlashsworditem.tooltip7",
-                (Config.getFloat("smoulderHeal", "UniqueEffects",ConfigDefaultValues.smoulderHeal) * 100)).setStyle(TEXT));
+        tooltip.add(Text.translatable("item.simplyswords.emberlashsworditem.tooltip7", Config.getFloat("smoulderHeal", "UniqueEffects",ConfigDefaultValues.smoulderHeal)).setStyle(TEXT));
 
         super.appendTooltip(itemStack, world, tooltip, tooltipContext);
     }

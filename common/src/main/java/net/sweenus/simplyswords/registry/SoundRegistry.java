@@ -301,5 +301,7 @@ public class SoundRegistry {
         SoundEvent.of(new Identifier(SimplySwords.MOD_ID, "magic_sword_whoosh_06")));
     public static final RegistrySupplier<SoundEvent> MAGIC_SWORD_WHOOSH_07 = SOUND.register("magic_sword_whoosh_07", () ->
         SoundEvent.of(new Identifier(SimplySwords.MOD_ID, "magic_sword_whoosh_07")));
+    public static final RegistrySupplier<SoundEvent> SPELL_FIRE = SOUND.register("spell_fire", () ->
+            SoundEvent.of(new Identifier(SimplySwords.MOD_ID, "spell_fire")));
 
 }
