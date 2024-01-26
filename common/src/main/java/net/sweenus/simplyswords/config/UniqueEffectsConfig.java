@@ -174,6 +174,6 @@ public class UniqueEffectsConfig implements ConfigData {
     public float smoulderCooldown = 80f;
     public float smoulderMaxStacks = 5f;
     public float smoulderHeal = 15f;
-    public float smoulderSpellScaling = 1.2f;
+    public float smoulderSpellScaling = 1.0f;
 
 }

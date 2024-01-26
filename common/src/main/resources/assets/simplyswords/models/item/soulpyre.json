@@ -1,6 +1,7 @@
 {
 	"parent": "simplyswords:item/big_handheld",
 	"textures": {
-		"layer0": "simplyswords:item/soulpyre"
+		"layer0": "simplyswords:item/soulpyre",
+		"layer1": "simplyswords:item/soulpyre_anim_01"
 	}
 }
