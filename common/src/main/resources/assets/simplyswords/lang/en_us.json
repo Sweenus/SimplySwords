@@ -1293,6 +1293,7 @@
   "text.autoconfig.simplyswords_main.option.unique_effects.smoulderCooldown":                                           "Smoulder cooldown",
   "text.autoconfig.simplyswords_main.option.unique_effects.smoulderMaxStacks":                                          "Smoulder max stacks",
   "text.autoconfig.simplyswords_main.option.unique_effects.smoulderHeal":                                               "Smoulder heal percent",
+  "text.autoconfig.simplyswords_main.option.unique_effects.smoulderSpellScaling":                                       "Smoulder Spell Power DMG multi",
 
 
   "text.autoconfig.simplyswords_main.option.runic_effects.swiftnessChance.@PrefixText" :                                "§b[Swiftness]§7",

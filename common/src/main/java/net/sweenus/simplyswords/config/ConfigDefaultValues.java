@@ -171,6 +171,7 @@ public class ConfigDefaultValues {
     public static float smoulderCooldown = 80f;
     public static float smoulderMaxStacks = 5f;
     public static float smoulderHeal = 15f;
+    public static float smoulderSpellScaling = 1.2f;
     
     // -- WEAPON ATTRIBUTES -- //
 

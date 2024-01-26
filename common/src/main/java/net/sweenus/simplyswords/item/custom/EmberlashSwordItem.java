@@ -30,12 +30,19 @@ public class EmberlashSwordItem extends UniqueSwordItem {
     }
 
     private static int stepMod = 0;
+    public static boolean scalesWithSpellPower;
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         if (!attacker.getWorld().isClient()) {
             ServerWorld world = (ServerWorld) attacker.getWorld();
             DamageSource damageSource = world.getDamageSources().generic();
+            float abilityDamage = getAttackDamage();
+            float spellScalingModifier = Config.getFloat("SmoulderSpellScaling", "UniqueEffects", ConfigDefaultValues.smoulderSpellScaling);
+            if (HelperMethods.commonSpellAttributeScaling(spellScalingModifier, attacker, "fire") > getAttackDamage()) {
+                abilityDamage = HelperMethods.commonSpellAttributeScaling(spellScalingModifier, attacker, "fire");
+                scalesWithSpellPower = true;
+            }
 
             if (attacker instanceof PlayerEntity player)
                 damageSource = attacker.getDamageSources().playerAttack(player);
@@ -48,7 +55,7 @@ public class EmberlashSwordItem extends UniqueSwordItem {
                 StatusEffectInstance smoulderingEffect = target.getStatusEffect(EffectRegistry.SMOULDERING.get());
                 if (smoulderingEffect != null) {
                     float damageMultiplier = 0.20f * smoulderingEffect.getAmplifier();
-                    target.damage(damageSource, getAttackDamage() * damageMultiplier);
+                    target.damage(damageSource, abilityDamage * damageMultiplier);
                 }
             }
             HelperMethods.incrementStatusEffect(target, EffectRegistry.SMOULDERING.get(), 100, 1, maximum_stacks+1);
@@ -99,6 +106,10 @@ public class EmberlashSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(RIGHTCLICK));
         tooltip.add(Text.translatable("item.simplyswords.emberlashsworditem.tooltip6").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.emberlashsworditem.tooltip7", Config.getFloat("smoulderHeal", "UniqueEffects",ConfigDefaultValues.smoulderHeal)).setStyle(TEXT));
+        if (scalesWithSpellPower) {
+            tooltip.add(Text.literal(""));
+            tooltip.add(Text.translatable("item.simplyswords.compat.scaleFire"));
+        }
 
         super.appendTooltip(itemStack, world, tooltip, tooltipContext);
     }
