@@ -1,0 +1,8 @@
+{
+	"parent": "simplyswords:item/template_longsword",
+	"textures": {
+		"layer0": "simplyswords:item/emberlash",
+		"layer1": "simplyswords:item/emberlash_anim_02",
+		"layer2": "simplyswords:item/emberlash_anim_01"
+	}
+}

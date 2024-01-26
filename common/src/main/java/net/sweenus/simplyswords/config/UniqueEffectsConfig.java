@@ -170,4 +170,9 @@ public class UniqueEffectsConfig implements ConfigData {
     public float fatalFlickerMaxStacks = 99f;
     public float fatalFlickerDashVelocity = 3f;
 
+    @ConfigEntry.Gui.PrefixText
+    public float smoulderCooldown = 260f;
+    public float smoulderMaxStacks = 5f;
+    public float smoulderHeal = 25f;
+
 }

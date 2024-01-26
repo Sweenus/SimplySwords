@@ -32,4 +32,7 @@ public class EffectRegistry {
     public static final RegistrySupplier<StatusEffect> FATAL_FLICKER = EFFECT.register("fatal_flicker", () ->
             new FatalFlickerEffect(StatusEffectCategory.BENEFICIAL, 1124687));
 
+    public static final RegistrySupplier<StatusEffect> SMOULDERING = EFFECT.register("smouldering", () ->
+            new SmoulderingEffect(StatusEffectCategory.HARMFUL, 1124687));
+
 }

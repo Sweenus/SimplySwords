@@ -116,6 +116,7 @@ public class WeaponAttributesConfig implements ConfigData {
     public float sunfire_damageModifier = 3.0f;
     public float harbinger_damageModifier = 3.0f;
     public float whisperwind_damageModifier = 3.0f;
+    public float emberlash_damageModifier = 0.0f;
 
     @ConfigEntry.Gui.PrefixText
     public float brimstone_attackSpeed = -2.8f;
@@ -145,6 +146,6 @@ public class WeaponAttributesConfig implements ConfigData {
     public float sunfire_attackSpeed = -2.4f;
     public float harbinger_attackSpeed = -2.4f;
     public float whisperwind_attackSpeed = -2.0f;
-
+    public float emberlash_attackSpeed = -1.5f;
 
 }

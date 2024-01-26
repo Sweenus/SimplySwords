@@ -166,6 +166,11 @@ public class ConfigDefaultValues {
     public static float fatalFlickerRadius = 3f;
     public static float fatalFlickerMaxStacks = 99f;
     public static float fatalFlickerDashVelocity = 3f;
+
+
+    public static float smoulderCooldown = 260f;
+    public static float smoulderMaxStacks = 5f;
+    public static float smoulderHeal = 25f;
     
     // -- WEAPON ATTRIBUTES -- //
 
@@ -277,6 +282,7 @@ public class ConfigDefaultValues {
     public static float sunfire_damageModifier = 3.0f;
     public static float harbinger_damageModifier = 3.0f;
     public static float whisperwind_damageModifier = 3.0f;
+    public static float emberlash_damageModifier = 0.0f;
 
     
     public static float brimstone_attackSpeed = -2.8f;
@@ -306,6 +312,7 @@ public class ConfigDefaultValues {
     public static float sunfire_attackSpeed = -2.4f;
     public static float harbinger_attackSpeed = -2.4f;
     public static float whisperwind_attackSpeed = -2.0f;
+    public static float emberlash_attackSpeed = -1.5f;
     
     // -- STATUS EFFECTS --
 
@@ -447,6 +454,7 @@ public class ConfigDefaultValues {
     public static boolean enableShadowsting = true;
     public static boolean enableDormantRelic = true;
     public static boolean enableWhisperwind = true;
+    public static boolean enableEmberlash = true;
     
     // -- GENERAL CONFIG --
 

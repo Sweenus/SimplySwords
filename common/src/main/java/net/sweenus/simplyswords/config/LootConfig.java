@@ -46,6 +46,7 @@ public class LootConfig implements ConfigData {
     public boolean enableShadowsting = true;
     public boolean enableDormantRelic = true;
     public boolean enableWhisperwind = true;
+    public boolean enableEmberlash = true;
 
 
 

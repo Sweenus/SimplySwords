@@ -180,6 +180,8 @@ public class ModLootTableModifiers {
                             pool.with(ItemEntry.builder(ItemsRegistry.DORMANT_RELIC.get()));
                         if (Config.getBoolean("enableWhisperwind", "Loot", ConfigDefaultValues.enableWhisperwind))
                             pool.with(ItemEntry.builder(ItemsRegistry.WHISPERWIND.get()));
+                        if (Config.getBoolean("enableEmberlash", "Loot", ConfigDefaultValues.enableEmberlash))
+                            pool.with(ItemEntry.builder(ItemsRegistry.EMBERLASH.get()));
 
                         context.addPool(pool);
                     }
@@ -241,6 +243,8 @@ public class ModLootTableModifiers {
                             pool.with(ItemEntry.builder(ItemsRegistry.DORMANT_RELIC.get()));
                         if (Config.getBoolean("enableWhisperwind", "Loot", ConfigDefaultValues.enableWhisperwind))
                             pool.with(ItemEntry.builder(ItemsRegistry.WHISPERWIND.get()));
+                        if (Config.getBoolean("enableEmberlash", "Loot", ConfigDefaultValues.enableEmberlash))
+                            pool.with(ItemEntry.builder(ItemsRegistry.EMBERLASH.get()));
 
                         context.addPool(pool);
                     }

@@ -1,0 +1,13 @@
+{
+  "name": "Emberlash",
+  "icon": "simplyswords:emberlash",
+  "advancement": "simplyswords:emberlash",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:emberlash",
+      "text": "Emberlash is an extraordinary dagger that defies conventional weaponry, boasting a blade made of pure, controlled flame. Emberlash is not merely a visual spectacle; The incandescent blade has the unique ability to cauterize wounds, and boasts a longer reach than most blades in its weight class."
+    }
+  ]
+}

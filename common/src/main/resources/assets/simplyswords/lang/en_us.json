@@ -108,6 +108,7 @@
   "item.simplyswords.tainted_relic":                                                                                    "Tainted Relic",
   "item.simplyswords.righteous_relic":                                                                                  "Righteous Relic",
   "item.simplyswords.whisperwind":                                                                                      "Whisperwind",
+  "item.simplyswords.emberlash":                                                                                        "Emberlash",
 
 
   "item.simplyswords.runic_tablet":                                                                                     "Runic Tablet",
@@ -690,6 +691,14 @@
   "item.simplyswords.whisperwindsworditem.tooltip5":                                                                    "enemies in your path with Echo.",
   "item.simplyswords.whisperwindsworditem.tooltip6":                                                                    "For every target hit by the dash, the",
   "item.simplyswords.whisperwindsworditem.tooltip7":                                                                    "amount of Echo you inflict is increased.",
+
+  "item.simplyswords.emberlashsworditem.tooltip1":                                                                      "Unique Effect: Smoulder",
+  "item.simplyswords.emberlashsworditem.tooltip2":                                                                      "Your attacks inflict Smouldering.",
+  "item.simplyswords.emberlashsworditem.tooltip3":                                                                      "Attacking enemies inflicted with",
+  "item.simplyswords.emberlashsworditem.tooltip4":                                                                      "Smouldering causes you to deal an",
+  "item.simplyswords.emberlashsworditem.tooltip5":                                                                      "additional %d per stack.",
+  "item.simplyswords.emberlashsworditem.tooltip6":                                                                      "Evade backwards while cauterising",
+  "item.simplyswords.emberlashsworditem.tooltip7":                                                                      "your wounds, healing for %d of Max HP.",
 
 
   "item.simplyswords.dormantrelicsworditem.tooltip2":                                                                   "A faint power seems to emanate from within.",
@@ -1275,6 +1284,11 @@
   "text.autoconfig.simplyswords_main.option.unique_effects.fatalFlickerRadius":                                         "Fatal Flicker radius",
   "text.autoconfig.simplyswords_main.option.unique_effects.fatalFlickerMaxStacks":                                      "Fatal Flicker max stacks",
   "text.autoconfig.simplyswords_main.option.unique_effects.fatalFlickerDashVelocity":                                   "Fatal Flicker dash velocity",
+
+  "text.autoconfig.simplyswords_main.option.unique_effects.smoulderCooldown.@PrefixText" :                              "§6[Emberlash]§7",
+  "text.autoconfig.simplyswords_main.option.unique_effects.smoulderCooldown":                                           "Smoulder cooldown",
+  "text.autoconfig.simplyswords_main.option.unique_effects.smoulderMaxStacks":                                          "Smoulder max stacks",
+  "text.autoconfig.simplyswords_main.option.unique_effects.smoulderHeal":                                               "Smoulder heal percent",
 
 
   "text.autoconfig.simplyswords_main.option.runic_effects.swiftnessChance.@PrefixText" :                                "§b[Swiftness]§7",
