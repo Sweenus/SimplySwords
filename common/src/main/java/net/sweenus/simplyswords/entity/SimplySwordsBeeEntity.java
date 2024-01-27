@@ -50,9 +50,11 @@ public class SimplySwordsBeeEntity extends BeeEntity implements Tameable {
     public UUID getOwnerUuid() {
         return ownerUuid;
     }
+
+    //I think this is just Entity.getWorld()? What even are mappings
     @Override
     public EntityView method_48926() {
-        return null;
+        return this.getWorld();
     }
 
     public void setOwner(LivingEntity livingEntity) {
