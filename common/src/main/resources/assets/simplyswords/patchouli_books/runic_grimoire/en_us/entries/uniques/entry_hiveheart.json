@@ -1,13 +1,17 @@
 {
   "name": "Hiveheart",
   "icon": "simplyswords:hiveheart",
-  "advancement": "simplyswords:waxweaver",
+  "advancement": "simplyswords:hiveheart",
   "category": "simplyswords:category_unique_weapons",
   "pages": [
     {
       "type": "patchouli:spotlight",
       "item": "simplyswords:hiveheart",
-      "text": "WiP"
+      "text": "Hiveheart, the enigmatic two-handed hammer, appears as though a wild beehive has affixed itself to a hilt. For reasons unknown, the hive's inhabitants seem to be bound in servitude to the wielder, attacking enemies on sight."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "The swarm's allegiance extends beyond mere offensive might. At the wielder's behest, the bees produce a regenerative honey—a miraculous nectar with the capability to heal even the most grievous of wounds."
     }
   ]
 }
