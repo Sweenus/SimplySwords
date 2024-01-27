@@ -1,5 +1,6 @@
 package net.sweenus.simplyswords.entity;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.Tameable;
@@ -26,6 +27,7 @@ public class SimplySwordsBeeEntity extends BeeEntity implements Tameable {
                 .add(EntityAttributes.GENERIC_FLYING_SPEED, 1.6f)
                 .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.6f)
                 .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 10.0)
+                .add(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE, 1.0)
                 .add(EntityAttributes.GENERIC_FOLLOW_RANGE, 48.0);
     }
     @Override
@@ -35,6 +37,12 @@ public class SimplySwordsBeeEntity extends BeeEntity implements Tameable {
             this.discard();
 
         super.tick();
+    }
+
+    @Override
+    public boolean tryAttack(Entity target) {
+        target.timeUntilRegen = 0;
+        return super.tryAttack(target);
     }
 
     @Nullable

@@ -184,6 +184,10 @@ public class ModLootTableModifiers {
                             pool.with(ItemEntry.builder(ItemsRegistry.EMBERLASH.get()));
                         if (Config.getBoolean("enableWaxweaver", "Loot", ConfigDefaultValues.enableWaxweaver))
                             pool.with(ItemEntry.builder(ItemsRegistry.WAXWEAVER.get()));
+                        if (Config.getBoolean("enableHiveheart", "Loot", ConfigDefaultValues.enableHiveheart))
+                            pool.with(ItemEntry.builder(ItemsRegistry.HIVEHEART.get()));
+                        if (Config.getBoolean("enableStarsEdge", "Loot", ConfigDefaultValues.enableStarsEdge))
+                            pool.with(ItemEntry.builder(ItemsRegistry.STARS_EDGE.get()));
 
                         context.addPool(pool);
                     }
@@ -249,6 +253,10 @@ public class ModLootTableModifiers {
                             pool.with(ItemEntry.builder(ItemsRegistry.EMBERLASH.get()));
                         if (Config.getBoolean("enableWaxweaver", "Loot", ConfigDefaultValues.enableWaxweaver))
                             pool.with(ItemEntry.builder(ItemsRegistry.WAXWEAVER.get()));
+                        if (Config.getBoolean("enableHiveheart", "Loot", ConfigDefaultValues.enableHiveheart))
+                            pool.with(ItemEntry.builder(ItemsRegistry.HIVEHEART.get()));
+                        if (Config.getBoolean("enableStarsEdge", "Loot", ConfigDefaultValues.enableStarsEdge))
+                            pool.with(ItemEntry.builder(ItemsRegistry.STARS_EDGE.get()));
 
                         context.addPool(pool);
                     }

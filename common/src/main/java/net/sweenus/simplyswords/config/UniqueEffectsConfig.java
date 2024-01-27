@@ -184,4 +184,11 @@ public class UniqueEffectsConfig implements ConfigData {
     public float hivemindCooldown = 60f;
     public float hivemindDuration = 450f;
 
+    @ConfigEntry.Gui.PrefixText
+    public float celestialSurgeCooldown = 120f;
+    public float celestialSurgeDuration = 120f;
+    public float celestialSurgeStacks = 6f;
+    public float celestialSurgeDamageModifier = 0.40f;
+    public float celestialSurgeLifestealModifier = 0.10f;
+
 }

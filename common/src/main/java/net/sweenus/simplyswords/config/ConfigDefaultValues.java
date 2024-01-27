@@ -179,6 +179,12 @@ public class ConfigDefaultValues {
 
     public static float hivemindCooldown = 60f;
     public static float hivemindDuration = 450f;
+
+    public static float celestialSurgeCooldown = 120f;
+    public static float celestialSurgeDuration = 120f;
+    public static float celestialSurgeStacks = 6f;
+    public static float celestialSurgeDamageModifier = 0.40f;
+    public static float celestialSurgeLifestealModifier = 0.10f;
     
     // -- WEAPON ATTRIBUTES -- //
 
@@ -293,6 +299,7 @@ public class ConfigDefaultValues {
     public static float emberlash_damageModifier = 0.0f;
     public static float waxweaver_damageModifier = 6.0f;
     public static float hiveheart_damageModifier = 7.0f;
+    public static float starsedge_damageModifier = 3.0f;
 
     
     public static float brimstone_attackSpeed = -2.8f;
@@ -325,6 +332,7 @@ public class ConfigDefaultValues {
     public static float emberlash_attackSpeed = -1.5f;
     public static float waxweaver_attackSpeed = -2.9f;
     public static float hiveheart_attackSpeed = -3.0f;
+    public static float starsedge_attackSpeed = -2.0f;
     
     // -- STATUS EFFECTS --
 
@@ -469,6 +477,7 @@ public class ConfigDefaultValues {
     public static boolean enableEmberlash = true;
     public static boolean enableWaxweaver = true;
     public static boolean enableHiveheart = true;
+    public static boolean enableStarsEdge = true;
     
     // -- GENERAL CONFIG --
 

@@ -111,6 +111,7 @@
   "item.simplyswords.emberlash":                                                                                        "Emberlash",
   "item.simplyswords.waxweaver":                                                                                        "Waxweaver",
   "item.simplyswords.hiveheart":                                                                                        "Hiveheart",
+  "item.simplyswords.stars_edge":                                                                                       "Star's Edge",
 
 
   "item.simplyswords.runic_tablet":                                                                                     "Runic Tablet",
@@ -724,6 +725,15 @@
   "item.simplyswords.hiveheartsworditem.tooltip9":                                                                      "over time but placing the",
   "item.simplyswords.hiveheartsworditem.tooltip10":                                                                     "Hivemind ability on cooldown.",
 
+  "item.simplyswords.starsedgesworditem.tooltip1":                                                                      "Unique Effect: Star's Edge",
+  "item.simplyswords.starsedgesworditem.tooltip2":                                                                      "During the day, your attacks inflict",
+  "item.simplyswords.starsedgesworditem.tooltip3":                                                                      "%s additional damage.",
+  "item.simplyswords.starsedgesworditem.tooltip4":                                                                      "At night, your attacks gain lifesteal.",
+  "item.simplyswords.starsedgesworditem.tooltip5":                                                                      "Evade backwards while gaining Speed.",
+  "item.simplyswords.starsedgesworditem.tooltip6":                                                                      "Activate a second time to dash",
+  "item.simplyswords.starsedgesworditem.tooltip7":                                                                      "forward, gaining resistance and",
+  "item.simplyswords.starsedgesworditem.tooltip8":                                                                      "haste.",
+
 
   "item.simplyswords.dormantrelicsworditem.tooltip2":                                                                   "A faint power seems to emanate from within.",
   "item.simplyswords.poweredrelicsworditem.tooltip2":                                                                   "A growing power seems to emanate from within.",
@@ -1038,6 +1048,7 @@
   "text.autoconfig.simplyswords_main.option.weapon_attributes.emberlash_damageModifier":                                "§6Emberlash§7 damage modifier",
   "text.autoconfig.simplyswords_main.option.weapon_attributes.waxweaver_damageModifier":                                "§6Waxweaver§7 damage modifier",
   "text.autoconfig.simplyswords_main.option.weapon_attributes.hiveheart_damageModifier":                                "§6Hiveheart§7 damage modifier",
+  "text.autoconfig.simplyswords_main.option.weapon_attributes.starsedge_damageModifier":                                "§6Star's Edge§7 damage modifier",
 
   "text.autoconfig.simplyswords_main.option.weapon_attributes.brimstone_attackSpeed.@PrefixText" :                      "§6[Attack Speed Modifiers]§7\nRecommended range: -1.0 to -3.7, with -1.0 being fast and -3.7 being slow.",
   "text.autoconfig.simplyswords_main.option.weapon_attributes.brimstone_attackSpeed":                                   "§6Brimstone§7 attack speed",
@@ -1070,6 +1081,7 @@
   "text.autoconfig.simplyswords_main.option.weapon_attributes.emberlash_attackSpeed":                                   "§6Emberlash§7 attack speed",
   "text.autoconfig.simplyswords_main.option.weapon_attributes.waxweaver_attackSpeed":                                   "§6Waxweaver§7 attack speed",
   "text.autoconfig.simplyswords_main.option.weapon_attributes.hiveheart_attackSpeed":                                   "§6Hiveheart§7 attack speed",
+  "text.autoconfig.simplyswords_main.option.weapon_attributes.starsedge_attackSpeed":                                   "§6Star's Edge§7 attack speed",
 
 
   "text.autoconfig.simplyswords_main.option.runic_effects.enableActiveDefence.@PrefixText" :                            "§a[Runic Power Blacklisting]§7\nSetting any of the below values to false will prevent that runic power from being obtainable.",
@@ -1145,6 +1157,7 @@
   "text.autoconfig.simplyswords_main.option.loot.enableEmberlash":                                                      "Emberlash can be looted",
   "text.autoconfig.simplyswords_main.option.loot.enableWaxweaver":                                                      "Waxweaver can be looted",
   "text.autoconfig.simplyswords_main.option.loot.enableHiveheart":                                                      "Hiveheart can be looted",
+  "text.autoconfig.simplyswords_main.option.loot.enableStarsEdge":                                                      "Star's Edge can be looted",
 
   "text.autoconfig.simplyswords_main.option.general.enableWeaponImpactSounds":                                          "Enable weapon impact sounds",
   "text.autoconfig.simplyswords_main.option.general.weaponImpactSoundsVolume":                                          "Weapon impact sounds volume",
@@ -1331,6 +1344,13 @@
   "text.autoconfig.simplyswords_main.option.unique_effects.hivemindCooldown.@PrefixText" :                              "§6[Hiveheart]§7",
   "text.autoconfig.simplyswords_main.option.unique_effects.hivemindCooldown":                                           "Hivemind cooldown",
   "text.autoconfig.simplyswords_main.option.unique_effects.hivemindDuration":                                           "Hivemind duration",
+
+  "text.autoconfig.simplyswords_main.option.unique_effects.celestialSurgeCooldown.@PrefixText" :                        "§6[Star's Edge]§7",
+  "text.autoconfig.simplyswords_main.option.unique_effects.celestialSurgeCooldown":                                     "Celestial Surge cooldown",
+  "text.autoconfig.simplyswords_main.option.unique_effects.celestialSurgeDuration":                                     "Celestial Surge duration",
+  "text.autoconfig.simplyswords_main.option.unique_effects.celestialSurgeStacks":                                       "Celestial Surge Haste stacks",
+  "text.autoconfig.simplyswords_main.option.unique_effects.celestialSurgeDamageModifier":                               "Celestial Surge Damage modifier",
+  "text.autoconfig.simplyswords_main.option.unique_effects.celestialSurgeLifestealModifier":                            "Celestial Surge Lifesteal modifier",
 
 
   "text.autoconfig.simplyswords_main.option.runic_effects.swiftnessChance.@PrefixText" :                                "§b[Swiftness]§7",

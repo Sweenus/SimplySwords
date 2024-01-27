@@ -1,0 +1,8 @@
+{
+	"parent": "simplyswords:item/template_twinblade",
+	"textures": {
+		"layer0": "simplyswords:item/storms_edge",
+		"layer1": "simplyswords:item/stars_edge_anim_03",
+		"layer2": "simplyswords:item/stars_edge_anim_01"
+	}
+}

@@ -53,7 +53,7 @@ public class HiveheartSwordItem extends UniqueSwordItem {
                     beeEntity.shouldAngerAt(target);
                     beeEntity.setInvulnerable(true);
                     beeEntity.setOwner(attacker);
-                    double attackDamage = this.getAttackDamage();
+                    double attackDamage = (1 + 2 * this.getAttackDamage());
                     EntityAttributeInstance attackAttribute = beeEntity.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE);
                     if (attackAttribute != null)
                         attackAttribute.setBaseValue(attackDamage);

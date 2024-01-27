@@ -1,0 +1,17 @@
+{
+  "name": "Star's Edge",
+  "icon": "simplyswords:stars_edge",
+  "advancement": "simplyswords:stars_edge",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:stars_edge",
+      "text": "Star's Edge, the majestic two-handed Twinblade, resonates with the cosmic essence of a star. In the radiant embrace of daylight, Star's Edge surges with energy, allowing it to deal additional damage."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "As night descends, Star's Edge transforms once more. Bathed in the ambient glow of the moon and stars, the Twinblade exudes a calming aura. Its strikes, now imbued with lunar influence, siphon health from enemies."
+    }
+  ]
+}
