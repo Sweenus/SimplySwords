@@ -21,15 +21,12 @@ public abstract class LivingEntityMixin {
 
     @Inject(at = @At("HEAD"), method = "isDead", cancellable = true)
     public void simplyswords$tick(CallbackInfoReturnable<Boolean> cir) {
-        System.out.println("mixin is activating");
         LivingEntity livingEntity = (LivingEntity) (Object) this;
         if (livingEntity instanceof PlayerEntity player) {
             World world = player.getWorld();
             ItemStack stack = player.getMainHandStack();
-            System.out.println("mixin is activating and detecting player");
             if (player.getHealth() <= 0.0F && stack.isOf(ItemsRegistry.WAXWEAVER.get())
                     && !player.getItemCooldownManager().isCoolingDown(stack.getItem())) {
-                System.out.println("mixin is activating and detecting item & off cooldown");
                 int skillCooldown = (int) Config.getFloat("waxweaveCooldown", "UniqueEffects", ConfigDefaultValues.waxweaveCooldown);
                 player.setHealth(player.getMaxHealth());
                 HelperMethods.incrementStatusEffect(player, StatusEffects.RESISTANCE, 100, 2, 3);

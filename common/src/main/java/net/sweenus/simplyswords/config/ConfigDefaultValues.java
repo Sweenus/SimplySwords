@@ -176,6 +176,9 @@ public class ConfigDefaultValues {
 
     public static float waxweaveCooldown = 1200f;
     public static float waxweaveMaxStacks = 3f;
+
+    public static float hivemindCooldown = 60f;
+    public static float hivemindDuration = 450f;
     
     // -- WEAPON ATTRIBUTES -- //
 
@@ -289,6 +292,7 @@ public class ConfigDefaultValues {
     public static float whisperwind_damageModifier = 3.0f;
     public static float emberlash_damageModifier = 0.0f;
     public static float waxweaver_damageModifier = 6.0f;
+    public static float hiveheart_damageModifier = 7.0f;
 
     
     public static float brimstone_attackSpeed = -2.8f;
@@ -320,6 +324,7 @@ public class ConfigDefaultValues {
     public static float whisperwind_attackSpeed = -2.0f;
     public static float emberlash_attackSpeed = -1.5f;
     public static float waxweaver_attackSpeed = -2.9f;
+    public static float hiveheart_attackSpeed = -3.0f;
     
     // -- STATUS EFFECTS --
 
@@ -463,6 +468,7 @@ public class ConfigDefaultValues {
     public static boolean enableWhisperwind = true;
     public static boolean enableEmberlash = true;
     public static boolean enableWaxweaver = true;
+    public static boolean enableHiveheart = true;
     
     // -- GENERAL CONFIG --
 

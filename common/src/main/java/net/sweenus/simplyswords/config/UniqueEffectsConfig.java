@@ -180,4 +180,8 @@ public class UniqueEffectsConfig implements ConfigData {
     public float waxweaveCooldown = 1200f;
     public float waxweaveMaxStacks = 3f;
 
+    @ConfigEntry.Gui.PrefixText
+    public float hivemindCooldown = 60f;
+    public float hivemindDuration = 450f;
+
 }

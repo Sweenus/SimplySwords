@@ -110,6 +110,7 @@
   "item.simplyswords.whisperwind":                                                                                      "Whisperwind",
   "item.simplyswords.emberlash":                                                                                        "Emberlash",
   "item.simplyswords.waxweaver":                                                                                        "Waxweaver",
+  "item.simplyswords.hiveheart":                                                                                        "Hiveheart",
 
 
   "item.simplyswords.runic_tablet":                                                                                     "Runic Tablet",
@@ -712,6 +713,17 @@
   "item.simplyswords.waxweaversworditem.tooltip8":                                                                      "This effect can only occur once",
   "item.simplyswords.waxweaversworditem.tooltip9":                                                                      "every %ds.",
 
+  "item.simplyswords.hiveheartsworditem.tooltip1":                                                                      "Unique Effect: Hivemind",
+  "item.simplyswords.hiveheartsworditem.tooltip2":                                                                      "Release an angry bee on hit",
+  "item.simplyswords.hiveheartsworditem.tooltip3":                                                                      "that stings your target before",
+  "item.simplyswords.hiveheartsworditem.tooltip4":                                                                      "disappearing.",
+  "item.simplyswords.hiveheartsworditem.tooltip5":                                                                      "This effect can only occur once",
+  "item.simplyswords.hiveheartsworditem.tooltip6":                                                                      "every %ds.",
+  "item.simplyswords.hiveheartsworditem.tooltip7":                                                                      "Your bees focus on producing",
+  "item.simplyswords.hiveheartsworditem.tooltip8":                                                                      "regenerative honey, healing you",
+  "item.simplyswords.hiveheartsworditem.tooltip9":                                                                      "over time but placing the",
+  "item.simplyswords.hiveheartsworditem.tooltip10":                                                                     "Hivemind ability on cooldown.",
+
 
   "item.simplyswords.dormantrelicsworditem.tooltip2":                                                                   "A faint power seems to emanate from within.",
   "item.simplyswords.poweredrelicsworditem.tooltip2":                                                                   "A growing power seems to emanate from within.",
@@ -1025,6 +1037,7 @@
   "text.autoconfig.simplyswords_main.option.weapon_attributes.whisperwind_damageModifier":                              "§6Whisperwind§7 damage modifier",
   "text.autoconfig.simplyswords_main.option.weapon_attributes.emberlash_damageModifier":                                "§6Emberlash§7 damage modifier",
   "text.autoconfig.simplyswords_main.option.weapon_attributes.waxweaver_damageModifier":                                "§6Waxweaver§7 damage modifier",
+  "text.autoconfig.simplyswords_main.option.weapon_attributes.hiveheart_damageModifier":                                "§6Hiveheart§7 damage modifier",
 
   "text.autoconfig.simplyswords_main.option.weapon_attributes.brimstone_attackSpeed.@PrefixText" :                      "§6[Attack Speed Modifiers]§7\nRecommended range: -1.0 to -3.7, with -1.0 being fast and -3.7 being slow.",
   "text.autoconfig.simplyswords_main.option.weapon_attributes.brimstone_attackSpeed":                                   "§6Brimstone§7 attack speed",
@@ -1056,6 +1069,7 @@
   "text.autoconfig.simplyswords_main.option.weapon_attributes.whisperwind_attackSpeed":                                 "§6Whisperwind§7 attack speed",
   "text.autoconfig.simplyswords_main.option.weapon_attributes.emberlash_attackSpeed":                                   "§6Emberlash§7 attack speed",
   "text.autoconfig.simplyswords_main.option.weapon_attributes.waxweaver_attackSpeed":                                   "§6Waxweaver§7 attack speed",
+  "text.autoconfig.simplyswords_main.option.weapon_attributes.hiveheart_attackSpeed":                                   "§6Hiveheart§7 attack speed",
 
 
   "text.autoconfig.simplyswords_main.option.runic_effects.enableActiveDefence.@PrefixText" :                            "§a[Runic Power Blacklisting]§7\nSetting any of the below values to false will prevent that runic power from being obtainable.",
@@ -1130,6 +1144,7 @@
   "text.autoconfig.simplyswords_main.option.loot.enableWhisperwind":                                                    "Whisperwind can be looted",
   "text.autoconfig.simplyswords_main.option.loot.enableEmberlash":                                                      "Emberlash can be looted",
   "text.autoconfig.simplyswords_main.option.loot.enableWaxweaver":                                                      "Waxweaver can be looted",
+  "text.autoconfig.simplyswords_main.option.loot.enableHiveheart":                                                      "Hiveheart can be looted",
 
   "text.autoconfig.simplyswords_main.option.general.enableWeaponImpactSounds":                                          "Enable weapon impact sounds",
   "text.autoconfig.simplyswords_main.option.general.weaponImpactSoundsVolume":                                          "Weapon impact sounds volume",
@@ -1312,6 +1327,10 @@
   "text.autoconfig.simplyswords_main.option.unique_effects.waxweaveCooldown.@PrefixText" :                              "§6[Waxweaver]§7",
   "text.autoconfig.simplyswords_main.option.unique_effects.waxweaveCooldown":                                           "Waxweave cooldown",
   "text.autoconfig.simplyswords_main.option.unique_effects.waxweaveMaxStacks":                                          "Waxweave max stacks",
+
+  "text.autoconfig.simplyswords_main.option.unique_effects.hivemindCooldown.@PrefixText" :                              "§6[Hiveheart]§7",
+  "text.autoconfig.simplyswords_main.option.unique_effects.hivemindCooldown":                                           "Hivemind cooldown",
+  "text.autoconfig.simplyswords_main.option.unique_effects.hivemindDuration":                                           "Hivemind duration",
 
 
   "text.autoconfig.simplyswords_main.option.runic_effects.swiftnessChance.@PrefixText" :                                "§b[Swiftness]§7",

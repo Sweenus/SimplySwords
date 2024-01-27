@@ -1,10 +1,10 @@
 {
   "display": {
     "icon": {
-      "item": "simplyswords:waxweaver"
+      "item": "simplyswords:hiveheart"
     },
-    "title": "Wax On",
-    "description": "Find the unique weapon Waxweaver.",
+    "title": "NOT THE BEES!",
+    "description": "Find the unique weapon Hiveheart.",
     "hidden": true,
     "frame": "task",
     "show_toast": true,
@@ -18,7 +18,7 @@
         "items": [
           {
             "items": [
-              "simplyswords:waxweaver"
+              "simplyswords:hiveheart"
             ]
           }
         ]

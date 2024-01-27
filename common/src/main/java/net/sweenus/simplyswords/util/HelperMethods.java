@@ -4,10 +4,10 @@ import dev.architectury.platform.Platform;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.Tameable;
 import net.minecraft.entity.decoration.ArmorStandEntity;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.passive.VillagerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileUtil;
@@ -107,8 +107,14 @@ public class HelperMethods {
             }
             return !(attacker instanceof PlayerEntity playerAttacker) || playerAttacker.shouldDamagePlayer(playerTarget);
         }
-        if (target instanceof TameableEntity tameableEntity && tameableEntity.getOwner() != null) {
-            return tameableEntity.getOwner() != attacker;
+        if (target instanceof Tameable tameable && attacker instanceof PlayerEntity player) {
+            if (tameable.getOwner() != null) {
+                if (tameable.getOwner() != player
+                        && (tameable.getOwner() instanceof PlayerEntity ownerPlayer))
+                    return player.shouldDamagePlayer(ownerPlayer);
+                return tameable.getOwner() != player;
+            }
+            return true;
         }
         return true;
     }

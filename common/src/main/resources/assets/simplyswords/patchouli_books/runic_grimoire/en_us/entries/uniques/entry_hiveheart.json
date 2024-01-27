@@ -1,0 +1,13 @@
+{
+  "name": "Hiveheart",
+  "icon": "simplyswords:hiveheart",
+  "advancement": "simplyswords:waxweaver",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:hiveheart",
+      "text": "WiP"
+    }
+  ]
+}

@@ -48,6 +48,7 @@ public class LootConfig implements ConfigData {
     public boolean enableWhisperwind = true;
     public boolean enableEmberlash = true;
     public boolean enableWaxweaver = true;
+    public boolean enableHiveheart = true;
 
 
 
