@@ -109,6 +109,7 @@
   "item.simplyswords.righteous_relic":                                                                                  "Righteous Relic",
   "item.simplyswords.whisperwind":                                                                                      "Whisperwind",
   "item.simplyswords.emberlash":                                                                                        "Emberlash",
+  "item.simplyswords.waxweaver":                                                                                        "Waxweaver",
 
 
   "item.simplyswords.runic_tablet":                                                                                     "Runic Tablet",
@@ -701,6 +702,16 @@
   "item.simplyswords.emberlashsworditem.tooltip6":                                                                      "Evade backwards while cauterising",
   "item.simplyswords.emberlashsworditem.tooltip7":                                                                      "your wounds, healing for %d%% of Max HP.",
 
+  "item.simplyswords.waxweaversworditem.tooltip1":                                                                      "Unique Effect: Waxweave",
+  "item.simplyswords.waxweaversworditem.tooltip2":                                                                      "Attacking ignited enemies grants",
+  "item.simplyswords.waxweaversworditem.tooltip3":                                                                      "you Strength and Haste.",
+  "item.simplyswords.waxweaversworditem.tooltip4":                                                                      "When you would die, you are instead",
+  "item.simplyswords.waxweaversworditem.tooltip5":                                                                      "imbued with regenerative wax,",
+  "item.simplyswords.waxweaversworditem.tooltip6":                                                                      "healing you to full and granting",
+  "item.simplyswords.waxweaversworditem.tooltip7":                                                                      "resistance for a short time.",
+  "item.simplyswords.waxweaversworditem.tooltip8":                                                                      "This effect can only occur once",
+  "item.simplyswords.waxweaversworditem.tooltip9":                                                                      "every %ds.",
+
 
   "item.simplyswords.dormantrelicsworditem.tooltip2":                                                                   "A faint power seems to emanate from within.",
   "item.simplyswords.poweredrelicsworditem.tooltip2":                                                                   "A growing power seems to emanate from within.",
@@ -1013,6 +1024,7 @@
   "text.autoconfig.simplyswords_main.option.weapon_attributes.harbinger_damageModifier":                                "§6Harbinger§7 damage modifier",
   "text.autoconfig.simplyswords_main.option.weapon_attributes.whisperwind_damageModifier":                              "§6Whisperwind§7 damage modifier",
   "text.autoconfig.simplyswords_main.option.weapon_attributes.emberlash_damageModifier":                                "§6Emberlash§7 damage modifier",
+  "text.autoconfig.simplyswords_main.option.weapon_attributes.waxweaver_damageModifier":                                "§6Waxweaver§7 damage modifier",
 
   "text.autoconfig.simplyswords_main.option.weapon_attributes.brimstone_attackSpeed.@PrefixText" :                      "§6[Attack Speed Modifiers]§7\nRecommended range: -1.0 to -3.7, with -1.0 being fast and -3.7 being slow.",
   "text.autoconfig.simplyswords_main.option.weapon_attributes.brimstone_attackSpeed":                                   "§6Brimstone§7 attack speed",
@@ -1043,6 +1055,7 @@
   "text.autoconfig.simplyswords_main.option.weapon_attributes.harbinger_attackSpeed":                                   "§6Harbinger§7 attack speed",
   "text.autoconfig.simplyswords_main.option.weapon_attributes.whisperwind_attackSpeed":                                 "§6Whisperwind§7 attack speed",
   "text.autoconfig.simplyswords_main.option.weapon_attributes.emberlash_attackSpeed":                                   "§6Emberlash§7 attack speed",
+  "text.autoconfig.simplyswords_main.option.weapon_attributes.waxweaver_attackSpeed":                                   "§6Waxweaver§7 attack speed",
 
 
   "text.autoconfig.simplyswords_main.option.runic_effects.enableActiveDefence.@PrefixText" :                            "§a[Runic Power Blacklisting]§7\nSetting any of the below values to false will prevent that runic power from being obtainable.",
@@ -1116,6 +1129,7 @@
   "text.autoconfig.simplyswords_main.option.loot.enableDormantRelic":                                                   "Dormant Relic can be looted",
   "text.autoconfig.simplyswords_main.option.loot.enableWhisperwind":                                                    "Whisperwind can be looted",
   "text.autoconfig.simplyswords_main.option.loot.enableEmberlash":                                                      "Emberlash can be looted",
+  "text.autoconfig.simplyswords_main.option.loot.enableWaxweaver":                                                      "Waxweaver can be looted",
 
   "text.autoconfig.simplyswords_main.option.general.enableWeaponImpactSounds":                                          "Enable weapon impact sounds",
   "text.autoconfig.simplyswords_main.option.general.weaponImpactSoundsVolume":                                          "Weapon impact sounds volume",
@@ -1294,6 +1308,10 @@
   "text.autoconfig.simplyswords_main.option.unique_effects.smoulderMaxStacks":                                          "Smoulder max stacks",
   "text.autoconfig.simplyswords_main.option.unique_effects.smoulderHeal":                                               "Smoulder heal percent",
   "text.autoconfig.simplyswords_main.option.unique_effects.smoulderSpellScaling":                                       "Smoulder Spell Power DMG multi",
+
+  "text.autoconfig.simplyswords_main.option.unique_effects.waxweaveCooldown.@PrefixText" :                              "§6[Waxweaver]§7",
+  "text.autoconfig.simplyswords_main.option.unique_effects.waxweaveCooldown":                                           "Waxweave cooldown",
+  "text.autoconfig.simplyswords_main.option.unique_effects.waxweaveMaxStacks":                                          "Waxweave max stacks",
 
 
   "text.autoconfig.simplyswords_main.option.runic_effects.swiftnessChance.@PrefixText" :                                "§b[Swiftness]§7",

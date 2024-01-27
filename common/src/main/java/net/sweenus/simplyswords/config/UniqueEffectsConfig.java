@@ -176,4 +176,8 @@ public class UniqueEffectsConfig implements ConfigData {
     public float smoulderHeal = 15f;
     public float smoulderSpellScaling = 1.0f;
 
+    @ConfigEntry.Gui.PrefixText
+    public float waxweaveCooldown = 1200f;
+    public float waxweaveMaxStacks = 3f;
+
 }

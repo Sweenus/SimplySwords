@@ -1,0 +1,64 @@
+{
+  "parent": "bettercombat:heavy_axe",
+  "attributes" : {
+    "pose": "simplyswords:pose_greatsword",
+    "attack_range": 3.6,
+    "category": "claymore",
+    "two_handed": true,
+    "attacks": [
+      {
+        "hitbox": "HORIZONTAL_PLANE",
+        "damage_multiplier": 1,
+        "angle": 150,
+        "upswing": 0.5,
+        "animation": "bettercombat:two_handed_slash_horizontal_right",
+        "swing_sound": {
+          "id": "simplyswords:slash_01",
+          "volume": 0.3,
+          "pitch": 1.0
+        }
+      },
+      {
+        "hitbox": "HORIZONTAL_PLANE",
+        "damage_multiplier": 1,
+        "angle": 150,
+        "upswing": 0.5,
+        "animation": "bettercombat:two_handed_slash_horizontal_left",
+        "swing_sound": {
+          "id": "simplyswords:slash_01",
+          "volume": 0.3,
+          "pitch": 1.2
+        }
+      },
+      {
+        "hitbox": "VERTICAL_PLANE",
+        "damage_multiplier": 1.2,
+        "angle": 150,
+        "upswing": 0.5,
+        "animation": "bettercombat:two_handed_slam",
+        "swing_sound": {
+          "id": "simplyswords:slash_01",
+          "volume": 0.4,
+          "pitch": 1.7
+        }
+      },
+      {
+        "hitbox": "FORWARD_BOX",
+        "damage_multiplier": 1.4,
+        "angle": 0,
+        "upswing": 0.5,
+        "animation": "bettercombat:two_handed_stab_left",
+        "swing_sound": {
+          "id": "simplyswords:slash_01",
+          "volume": 0.4,
+          "pitch": 2
+        }
+      }
+    ]
+  }
+}
+
+
+
+
+

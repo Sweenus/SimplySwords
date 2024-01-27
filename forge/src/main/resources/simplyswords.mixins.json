@@ -1,7 +1,7 @@
 {
   "required": false,
   "minVersion": "0.8",
-  "package": "net.sweenus.simplyswords.mixin.forge",
+  "package": "net.sweenus.simplyswords.forge.mixin",
   "compatibilityLevel": "JAVA_17",
   "client": [
   ],

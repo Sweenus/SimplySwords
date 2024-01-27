@@ -172,6 +172,10 @@ public class ConfigDefaultValues {
     public static float smoulderMaxStacks = 5f;
     public static float smoulderHeal = 15f;
     public static float smoulderSpellScaling = 1.0f;
+
+
+    public static float waxweaveCooldown = 1200f;
+    public static float waxweaveMaxStacks = 3f;
     
     // -- WEAPON ATTRIBUTES -- //
 
@@ -284,6 +288,7 @@ public class ConfigDefaultValues {
     public static float harbinger_damageModifier = 3.0f;
     public static float whisperwind_damageModifier = 3.0f;
     public static float emberlash_damageModifier = 0.0f;
+    public static float waxweaver_damageModifier = 6.0f;
 
     
     public static float brimstone_attackSpeed = -2.8f;
@@ -314,6 +319,7 @@ public class ConfigDefaultValues {
     public static float harbinger_attackSpeed = -2.4f;
     public static float whisperwind_attackSpeed = -2.0f;
     public static float emberlash_attackSpeed = -1.5f;
+    public static float waxweaver_attackSpeed = -2.9f;
     
     // -- STATUS EFFECTS --
 
@@ -456,6 +462,7 @@ public class ConfigDefaultValues {
     public static boolean enableDormantRelic = true;
     public static boolean enableWhisperwind = true;
     public static boolean enableEmberlash = true;
+    public static boolean enableWaxweaver = true;
     
     // -- GENERAL CONFIG --
 

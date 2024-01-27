@@ -1,0 +1,8 @@
+{
+	"parent": "simplyswords:item/template_claymore",
+	"textures": {
+		"layer0": "simplyswords:item/waxweaver",
+		"layer1": "simplyswords:item/waxweaver_anim_01",
+		"layer2": "simplyswords:item/waxweaver_anim_02"
+	}
+}

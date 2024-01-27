@@ -37,6 +37,7 @@
     ]
   },
   "mixins": [
+    "simplyswords-common.mixins.json",
     "simplyswords.mixins.json"
   ],
   "depends": {

@@ -98,6 +98,7 @@ public class ItemsRegistry {
     static float harbinger_attackspeed = Config.getFloat("harbinger_attackSpeed", "WeaponAttributes", ConfigDefaultValues.harbinger_attackSpeed);
     static float whisperwind_attackspeed = Config.getFloat("whisperwind_attackSpeed", "WeaponAttributes", ConfigDefaultValues.whisperwind_attackSpeed);
     static float emberlash_attackspeed = Config.getFloat("emberlash_attackSpeed", "WeaponAttributes", ConfigDefaultValues.emberlash_attackSpeed);
+    static float waxweaver_attackspeed = Config.getFloat("waxweaver_attackSpeed", "WeaponAttributes", ConfigDefaultValues.waxweaver_attackSpeed);
 
 
 
@@ -129,6 +130,7 @@ public class ItemsRegistry {
     static float harbinger_damage_modifier = Config.getFloat("harbinger_damageModifier", "WeaponAttributes", ConfigDefaultValues.harbinger_damageModifier);
     static float whisperwind_damage_modifier = Config.getFloat("whisperwind_damageModifier", "WeaponAttributes", ConfigDefaultValues.whisperwind_damageModifier);
     static float emberlash_damage_modifier = Config.getFloat("emberlash_damageModifier", "WeaponAttributes", ConfigDefaultValues.emberlash_damageModifier);
+    static float waxweaver_damage_modifier = Config.getFloat("waxweaver_damageModifier", "WeaponAttributes", ConfigDefaultValues.waxweaver_damageModifier);
 
 
     public static final DeferredRegister<Item> ITEM = DeferredRegister.create(SimplySwords.MOD_ID, RegistryKeys.ITEM);
@@ -852,6 +854,12 @@ public class ItemsRegistry {
             new EmberlashSwordItem(ModToolMaterial.UNIQUE,
                     (int) (emberlash_damage_modifier),
                     emberlash_attackspeed,
+                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof()));
+
+    public static final RegistrySupplier<WaxweaverSwordItem> WAXWEAVER = ITEM.register( "waxweaver", () ->
+            new WaxweaverSwordItem(ModToolMaterial.UNIQUE,
+                    (int) (waxweaver_damage_modifier),
+                    waxweaver_attackspeed,
                     new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof()));
 
 }

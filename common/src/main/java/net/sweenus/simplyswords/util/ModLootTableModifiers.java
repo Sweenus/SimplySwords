@@ -182,6 +182,8 @@ public class ModLootTableModifiers {
                             pool.with(ItemEntry.builder(ItemsRegistry.WHISPERWIND.get()));
                         if (Config.getBoolean("enableEmberlash", "Loot", ConfigDefaultValues.enableEmberlash))
                             pool.with(ItemEntry.builder(ItemsRegistry.EMBERLASH.get()));
+                        if (Config.getBoolean("enableWaxweaver", "Loot", ConfigDefaultValues.enableWaxweaver))
+                            pool.with(ItemEntry.builder(ItemsRegistry.WAXWEAVER.get()));
 
                         context.addPool(pool);
                     }
@@ -245,6 +247,8 @@ public class ModLootTableModifiers {
                             pool.with(ItemEntry.builder(ItemsRegistry.WHISPERWIND.get()));
                         if (Config.getBoolean("enableEmberlash", "Loot", ConfigDefaultValues.enableEmberlash))
                             pool.with(ItemEntry.builder(ItemsRegistry.EMBERLASH.get()));
+                        if (Config.getBoolean("enableWaxweaver", "Loot", ConfigDefaultValues.enableWaxweaver))
+                            pool.with(ItemEntry.builder(ItemsRegistry.WAXWEAVER.get()));
 
                         context.addPool(pool);
                     }

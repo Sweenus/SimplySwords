@@ -723,5 +723,15 @@
     "sounds": [
       "simplyswords:spell_fire"
     ]
+  },
+  "slash_01": {
+    "sounds": [
+      "simplyswords:slash_01"
+    ]
+  },
+  "spell_misc_02": {
+    "sounds": [
+      "simplyswords:spell_misc_02"
+    ]
   }
 }

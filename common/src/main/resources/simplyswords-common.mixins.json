@@ -1,11 +1,12 @@
 {
-  "required": false,
+  "required": true,
   "minVersion": "0.8",
   "package": "net.sweenus.simplyswords.mixin",
   "compatibilityLevel": "JAVA_17",
   "client": [
   ],
   "mixins": [
+    "LivingEntityMixin"
   ],
   "injectors": {
     "defaultRequire": 1
