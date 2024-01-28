@@ -191,4 +191,9 @@ public class UniqueEffectsConfig implements ConfigData {
     public float celestialSurgeDamageModifier = 0.40f;
     public float celestialSurgeLifestealModifier = 0.10f;
 
+    @ConfigEntry.Gui.PrefixText
+    public float flickerFuryCooldown = 220f;
+    public float flickerFuryDuration = 40f;
+    public float flickerFuryDamage = 1.0f;
+
 }

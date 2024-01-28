@@ -188,6 +188,8 @@ public class ModLootTableModifiers {
                             pool.with(ItemEntry.builder(ItemsRegistry.HIVEHEART.get()));
                         if (Config.getBoolean("enableStarsEdge", "Loot", ConfigDefaultValues.enableStarsEdge))
                             pool.with(ItemEntry.builder(ItemsRegistry.STARS_EDGE.get()));
+                        if (Config.getBoolean("enableWickpiercer", "Loot", ConfigDefaultValues.enableWickpiercer))
+                            pool.with(ItemEntry.builder(ItemsRegistry.WICKPIERCER.get()));
 
                         context.addPool(pool);
                     }
@@ -257,6 +259,8 @@ public class ModLootTableModifiers {
                             pool.with(ItemEntry.builder(ItemsRegistry.HIVEHEART.get()));
                         if (Config.getBoolean("enableStarsEdge", "Loot", ConfigDefaultValues.enableStarsEdge))
                             pool.with(ItemEntry.builder(ItemsRegistry.STARS_EDGE.get()));
+                        if (Config.getBoolean("enableWickpiercer", "Loot", ConfigDefaultValues.enableWickpiercer))
+                            pool.with(ItemEntry.builder(ItemsRegistry.WICKPIERCER.get()));
 
                         context.addPool(pool);
                     }

@@ -1,0 +1,13 @@
+{
+  "name": "Wickpiercer",
+  "icon": "simplyswords:wickpiercer",
+  "advancement": "simplyswords:wickpiercer",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:wickpiercer",
+      "text": "Wickpiercer is an exquisite Spear that seamlessly melds elegance with lethality, reminiscent of an ornate candelabra. Wickpiercer has the ability to influence the mind and body of its wielder, sending them into a fit of rage and augmenting their agility."
+    }
+  ]
+}

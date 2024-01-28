@@ -112,6 +112,7 @@
   "item.simplyswords.waxweaver":                                                                                        "Waxweaver",
   "item.simplyswords.hiveheart":                                                                                        "Hiveheart",
   "item.simplyswords.stars_edge":                                                                                       "Star's Edge",
+  "item.simplyswords.wickpiercer":                                                                                      "Wickpiercer",
 
 
   "item.simplyswords.runic_tablet":                                                                                     "Runic Tablet",
@@ -507,6 +508,7 @@
   "effect.simplyswords.immolation":                                                                                     "Immolation",
   "effect.simplyswords.onslaught":                                                                                      "Onslaught",
   "effect.simplyswords.smouldering":                                                                                    "Smouldering",
+  "effect.simplyswords.frenzy":                                                                                         "Frenzy",
 
   "item.simplyswords.onrightclick":                                                                                     "On Right Click:",
   "item.simplyswords.onrightclickheld":                                                                                 "Hold Right Click:",
@@ -712,7 +714,7 @@
   "item.simplyswords.waxweaversworditem.tooltip6":                                                                      "healing you to full and granting",
   "item.simplyswords.waxweaversworditem.tooltip7":                                                                      "resistance for a short time.",
   "item.simplyswords.waxweaversworditem.tooltip8":                                                                      "This effect can only occur once",
-  "item.simplyswords.waxweaversworditem.tooltip9":                                                                      "every %ds.",
+  "item.simplyswords.waxweaversworditem.tooltip9":                                                                      "every %ds. Mainhand only.",
 
   "item.simplyswords.hiveheartsworditem.tooltip1":                                                                      "Unique Effect: Hivemind",
   "item.simplyswords.hiveheartsworditem.tooltip2":                                                                      "Release an angry bee on hit",
@@ -733,6 +735,13 @@
   "item.simplyswords.starsedgesworditem.tooltip6":                                                                      "Activate a second time to dash",
   "item.simplyswords.starsedgesworditem.tooltip7":                                                                      "forward, gaining resistance and",
   "item.simplyswords.starsedgesworditem.tooltip8":                                                                      "haste.",
+
+  "item.simplyswords.wickpiercersworditem.tooltip1":                                                                    "Unique Effect: Flicker Fury",
+  "item.simplyswords.wickpiercersworditem.tooltip2":                                                                    "Instill your mind with fury,",
+  "item.simplyswords.wickpiercersworditem.tooltip3":                                                                    "gaining a significant bonus",
+  "item.simplyswords.wickpiercersworditem.tooltip4":                                                                    "to attack speed, and allowing",
+  "item.simplyswords.wickpiercersworditem.tooltip5":                                                                    "each strike of Wickpiercer",
+  "item.simplyswords.wickpiercersworditem.tooltip6":                                                                    "to hit twice for %ds.",
 
 
   "item.simplyswords.dormantrelicsworditem.tooltip2":                                                                   "A faint power seems to emanate from within.",
@@ -1049,6 +1058,7 @@
   "text.autoconfig.simplyswords_main.option.weapon_attributes.waxweaver_damageModifier":                                "§6Waxweaver§7 damage modifier",
   "text.autoconfig.simplyswords_main.option.weapon_attributes.hiveheart_damageModifier":                                "§6Hiveheart§7 damage modifier",
   "text.autoconfig.simplyswords_main.option.weapon_attributes.starsedge_damageModifier":                                "§6Star's Edge§7 damage modifier",
+  "text.autoconfig.simplyswords_main.option.weapon_attributes.wickpiercer_damageModifier":                              "§6Wickpiercer§7 damage modifier",
 
   "text.autoconfig.simplyswords_main.option.weapon_attributes.brimstone_attackSpeed.@PrefixText" :                      "§6[Attack Speed Modifiers]§7\nRecommended range: -1.0 to -3.7, with -1.0 being fast and -3.7 being slow.",
   "text.autoconfig.simplyswords_main.option.weapon_attributes.brimstone_attackSpeed":                                   "§6Brimstone§7 attack speed",
@@ -1082,6 +1092,7 @@
   "text.autoconfig.simplyswords_main.option.weapon_attributes.waxweaver_attackSpeed":                                   "§6Waxweaver§7 attack speed",
   "text.autoconfig.simplyswords_main.option.weapon_attributes.hiveheart_attackSpeed":                                   "§6Hiveheart§7 attack speed",
   "text.autoconfig.simplyswords_main.option.weapon_attributes.starsedge_attackSpeed":                                   "§6Star's Edge§7 attack speed",
+  "text.autoconfig.simplyswords_main.option.weapon_attributes.wickpiercer_attackSpeed":                                 "§6Wickpiercer§7 attack speed",
 
 
   "text.autoconfig.simplyswords_main.option.runic_effects.enableActiveDefence.@PrefixText" :                            "§a[Runic Power Blacklisting]§7\nSetting any of the below values to false will prevent that runic power from being obtainable.",
@@ -1158,6 +1169,7 @@
   "text.autoconfig.simplyswords_main.option.loot.enableWaxweaver":                                                      "Waxweaver can be looted",
   "text.autoconfig.simplyswords_main.option.loot.enableHiveheart":                                                      "Hiveheart can be looted",
   "text.autoconfig.simplyswords_main.option.loot.enableStarsEdge":                                                      "Star's Edge can be looted",
+  "text.autoconfig.simplyswords_main.option.loot.enableWickpiercer":                                                    "Wickpiercer can be looted",
 
   "text.autoconfig.simplyswords_main.option.general.enableWeaponImpactSounds":                                          "Enable weapon impact sounds",
   "text.autoconfig.simplyswords_main.option.general.weaponImpactSoundsVolume":                                          "Weapon impact sounds volume",
@@ -1351,6 +1363,11 @@
   "text.autoconfig.simplyswords_main.option.unique_effects.celestialSurgeStacks":                                       "Celestial Surge Haste stacks",
   "text.autoconfig.simplyswords_main.option.unique_effects.celestialSurgeDamageModifier":                               "Celestial Surge Damage modifier",
   "text.autoconfig.simplyswords_main.option.unique_effects.celestialSurgeLifestealModifier":                            "Celestial Surge Lifesteal modifier",
+
+  "text.autoconfig.simplyswords_main.option.unique_effects.flickerFuryCooldown.@PrefixText" :                           "§6[Wickpiercer]§7",
+  "text.autoconfig.simplyswords_main.option.unique_effects.flickerFuryCooldown":                                        "Flicker Fury cooldown",
+  "text.autoconfig.simplyswords_main.option.unique_effects.flickerFuryDuration":                                        "Flicker Fury duration",
+  "text.autoconfig.simplyswords_main.option.unique_effects.flickerFuryDamage":                                          "Flicker Fury damage modifier",
 
 
   "text.autoconfig.simplyswords_main.option.runic_effects.swiftnessChance.@PrefixText" :                                "§b[Swiftness]§7",

@@ -2,6 +2,8 @@ package net.sweenus.simplyswords.registry;
 
 import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
+import net.minecraft.entity.attribute.EntityAttributeModifier;
+import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectCategory;
 import net.minecraft.registry.RegistryKeys;
@@ -31,8 +33,13 @@ public class EffectRegistry {
             new BattleFatigueEffect(StatusEffectCategory.HARMFUL, 1124687));
     public static final RegistrySupplier<StatusEffect> FATAL_FLICKER = EFFECT.register("fatal_flicker", () ->
             new FatalFlickerEffect(StatusEffectCategory.BENEFICIAL, 1124687));
-
     public static final RegistrySupplier<StatusEffect> SMOULDERING = EFFECT.register("smouldering", () ->
             new SmoulderingEffect(StatusEffectCategory.HARMFUL, 1124687));
+    public static final RegistrySupplier<StatusEffect> FRENZY = EFFECT.register("frenzy", () ->
+            new FrenzyEffect(StatusEffectCategory.BENEFICIAL, 1124687)
+                    .addAttributeModifier(EntityAttributes.GENERIC_ATTACK_SPEED,
+                            "54e1b9b9-6de9-49bb-a716-564b3d375892",
+                            1.1,
+                            EntityAttributeModifier.Operation.MULTIPLY_TOTAL));
 
 }

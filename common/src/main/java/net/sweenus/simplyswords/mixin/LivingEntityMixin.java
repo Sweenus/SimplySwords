@@ -25,8 +25,11 @@ public abstract class LivingEntityMixin {
         if (livingEntity instanceof PlayerEntity player) {
             World world = player.getWorld();
             ItemStack stack = player.getMainHandStack();
-            if (player.getHealth() <= 0.0F && stack.isOf(ItemsRegistry.WAXWEAVER.get())
-                    && !player.getItemCooldownManager().isCoolingDown(stack.getItem())) {
+
+            if (player.getHealth() <= 0.0F && !player.getItemCooldownManager().isCoolingDown(stack.getItem())
+                    && (stack.isOf(ItemsRegistry.WAXWEAVER.get())
+                    || stack.isOf(ItemsRegistry.WICKPIERCER.get()))) {
+
                 int skillCooldown = (int) Config.getFloat("waxweaveCooldown", "UniqueEffects", ConfigDefaultValues.waxweaveCooldown);
                 player.setHealth(player.getMaxHealth());
                 HelperMethods.incrementStatusEffect(player, StatusEffects.RESISTANCE, 100, 2, 3);

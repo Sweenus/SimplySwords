@@ -50,6 +50,7 @@ public class LootConfig implements ConfigData {
     public boolean enableWaxweaver = true;
     public boolean enableHiveheart = true;
     public boolean enableStarsEdge = true;
+    public boolean enableWickpiercer = true;
 
 
 
