@@ -39,6 +39,7 @@ public class HiveheartSwordItem extends UniqueSwordItem {
         if (!attacker.getWorld().isClient()) {
             ServerWorld serverWorld = (ServerWorld) attacker.getWorld();
             int skillCooldown = (int) Config.getFloat("hivemindCooldown", "UniqueEffects", ConfigDefaultValues.hivemindCooldown);
+            float skillDamage = Config.getFloat("hivemindDamage", "UniqueEffects", ConfigDefaultValues.hivemindDamage);
             HelperMethods.playHitSounds(attacker, target);
 
             if (attacker instanceof PlayerEntity player && !player.getItemCooldownManager().isCoolingDown(stack.getItem())) {
@@ -53,7 +54,7 @@ public class HiveheartSwordItem extends UniqueSwordItem {
                     beeEntity.shouldAngerAt(target);
                     beeEntity.setInvulnerable(true);
                     beeEntity.setOwner(attacker);
-                    double attackDamage = (1 + 2 * this.getAttackDamage());
+                    double attackDamage = (1 + skillDamage * this.getAttackDamage());
                     EntityAttributeInstance attackAttribute = beeEntity.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE);
                     if (attackAttribute != null)
                         attackAttribute.setBaseValue(attackDamage);

@@ -179,6 +179,7 @@ public class ConfigDefaultValues {
 
     public static float hivemindCooldown = 60f;
     public static float hivemindDuration = 450f;
+    public static float hivemindDamage = 1.1f;
 
     public static float celestialSurgeCooldown = 120f;
     public static float celestialSurgeDuration = 120f;

@@ -1356,6 +1356,7 @@
   "text.autoconfig.simplyswords_main.option.unique_effects.hivemindCooldown.@PrefixText" :                              "§6[Hiveheart]§7",
   "text.autoconfig.simplyswords_main.option.unique_effects.hivemindCooldown":                                           "Hivemind cooldown",
   "text.autoconfig.simplyswords_main.option.unique_effects.hivemindDuration":                                           "Hivemind duration",
+  "text.autoconfig.simplyswords_main.option.unique_effects.hivemindDamage":                                             "Hivemind damage modifier",
 
   "text.autoconfig.simplyswords_main.option.unique_effects.celestialSurgeCooldown.@PrefixText" :                        "§6[Star's Edge]§7",
   "text.autoconfig.simplyswords_main.option.unique_effects.celestialSurgeCooldown":                                     "Celestial Surge cooldown",
