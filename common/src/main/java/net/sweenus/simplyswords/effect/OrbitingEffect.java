@@ -27,12 +27,12 @@ public class OrbitingEffect extends StatusEffect {
 
             // Spawn orbits equal to the amplifier of the status effect
             for (int i = 0; i <= amplifier; i++) {
-                double radius = baseRadius + (i * 0.2); // Increment the radius for each orbit
+                double radius = baseRadius + (i * 0.05); // Increment the radius for each orbit
                 // Offset each orbit's starting angle
                 double angleOffset = i * (Math.PI / 4);
                 double verticalOffset = center.y;
                 if (amplifier > 2)
-                    verticalOffset = livingEntity.getPos().y + (i * 0.3);
+                    verticalOffset = livingEntity.getPos().y + (i * 0.4);
                 // Calculate the x and z coordinates on the orbit with the angle offset
                 double x = center.x + radius * Math.cos(currentAngle + angleOffset);
                 double z = center.z + radius * Math.sin(currentAngle + angleOffset);

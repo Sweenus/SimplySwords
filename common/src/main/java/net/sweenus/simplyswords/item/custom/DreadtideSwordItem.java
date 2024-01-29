@@ -4,7 +4,6 @@ import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
@@ -66,7 +65,7 @@ public class DreadtideSwordItem extends UniqueSwordItem {
         world.playSound(null, user.getBlockPos(), SoundRegistry.SPELL_FIRE.get(),
                 user.getSoundCategory(), 0.5f, 1.0f);
 
-        user.addStatusEffect(new StatusEffectInstance(EffectRegistry.FRENZY.get(), effectDuration, 0));
+        HelperMethods.incrementStatusEffect(user, EffectRegistry.VOIDCLOAK.get(), 400, 1, 6);
         user.getItemCooldownManager().set(this, skillCooldown);
 
         return super.use(world, user, hand);

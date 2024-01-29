@@ -2,18 +2,22 @@ package net.sweenus.simplyswords.mixin;
 
 
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.ConfigDefaultValues;
+import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(LivingEntity.class)
@@ -41,6 +45,19 @@ public abstract class LivingEntityMixin {
                 cir.setReturnValue(false);
             }
         }
+    }
+
+    @ModifyVariable(method = "modifyAppliedDamage", at = @At("HEAD"), ordinal = 0, argsOnly = true)
+    private float modifyDamageAmount(float amount, DamageSource source) {
+        LivingEntity livingEntity = (LivingEntity) (Object) this;
+        StatusEffectInstance voidcloakEffect = livingEntity.getStatusEffect(EffectRegistry.VOIDCLOAK.get());
+        if (voidcloakEffect != null) {
+            int amplifier = voidcloakEffect.getAmplifier();
+            float reductionFactor = 1 - (amplifier + 1) * 0.10f; // +1 because amplifier starts at 0
+            amount *= reductionFactor;
+            HelperMethods.decrementStatusEffect(livingEntity, EffectRegistry.VOIDCLOAK.get());
+        }
+        return amount;
     }
 
 }
