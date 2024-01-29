@@ -403,6 +403,23 @@ public class HelperMethods {
         }
     }
 
+    public static void spawnOrbitParticles(ServerWorld world, Vec3d center, ParticleEffect particleType, double radius, int particleCount) {
+        for (int i = 0; i < particleCount; i++) {
+            // Calculate the angle for this particle
+            double angle = 2 * Math.PI * i / particleCount;
+
+            // Calculate the x and z coordinates on the orbit
+            double x = center.x + radius * Math.cos(angle);
+            double z = center.z + radius * Math.sin(angle);
+            double y = center.y;
+
+            // Spawn the particle at the calculated position
+            world.spawnParticles(particleType, x, y, z, 1, 0, 0, 0, 0);
+            //spawnParticle(world, particleType, x, y, z, 0, 0, 0);
+        }
+    }
+
+
     public static float commonSpellAttributeScaling(float damageModifier, Entity entity, String magicSchool) {
         if (Platform.isModLoaded("spell_power") && Platform.isFabric())
             if ((entity instanceof PlayerEntity player) && Config.getBoolean("compatEnableSpellPowerScaling", "General",ConfigDefaultValues.compatEnableSpellPowerScaling))

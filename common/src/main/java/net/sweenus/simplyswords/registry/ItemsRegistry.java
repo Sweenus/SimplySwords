@@ -886,4 +886,10 @@ public class ItemsRegistry {
                     wickpiercer_attackspeed,
                     new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof()));
 
+    public static final RegistrySupplier<DreadtideSwordItem> DREADTIDE = ITEM.register( "dreadtide", () ->
+            new DreadtideSwordItem(ModToolMaterial.UNIQUE,
+                    (int) (wickpiercer_damage_modifier),
+                    wickpiercer_attackspeed,
+                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof()));
+
 }
