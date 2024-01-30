@@ -320,14 +320,14 @@ public class HelperMethods {
 
             if (currentAmplifier >= amplifierMax) {
                 livingEntity.addStatusEffect(new StatusEffectInstance(
-                        statusEffect, Math.max(currentDuration, duration), currentAmplifier));
+                        statusEffect, Math.max(currentDuration, duration), currentAmplifier, false, false, true));
                 return;
             }
 
             livingEntity.addStatusEffect(new StatusEffectInstance(
-                    statusEffect, Math.max(currentDuration, duration), Math.min(amplifierMax, currentAmplifier + amplifier)));
+                    statusEffect, Math.max(currentDuration, duration), Math.min(amplifierMax, currentAmplifier + amplifier), false, false, true));
         }
-        livingEntity.addStatusEffect(new StatusEffectInstance(statusEffect, duration));
+        livingEntity.addStatusEffect(new StatusEffectInstance(statusEffect, duration, 0, false, false, true));
     }
 
     public static void decrementStatusEffect(LivingEntity livingEntity, StatusEffect statusEffect) {
@@ -343,7 +343,7 @@ public class HelperMethods {
 
             livingEntity.removeStatusEffect(statusEffect);
             livingEntity.addStatusEffect(new StatusEffectInstance(
-                    statusEffect, currentDuration, currentAmplifier - 1));
+                    statusEffect, currentDuration, currentAmplifier - 1, false, false, true));
         }
     }
 

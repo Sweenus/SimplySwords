@@ -13,18 +13,28 @@ public class EldritchEndMethods {
 
     public static void generateVoidcloakStacks(LivingEntity livingEntity) {
 
-        if (livingEntity instanceof PlayerEntity player && player.age % 240 == 0) {
+        if (livingEntity instanceof PlayerEntity player) {
             ItemStack stack = player.getMainHandStack();
-            double corruption = CorruptionAPI.getTotalCorruptionLevel(livingEntity);
-            int maxStacks = 1 + ((int) corruption / 20);
+            if (player.age % 240 == 0) {
+                double corruption = CorruptionAPI.getTotalCorruptionLevel(livingEntity);
+                int maxStacks = ((int) corruption / 20);
 
-            System.out.println("trying to apply voidcloak with corruption level: " + corruption + " up to a maximum stack count of: " +maxStacks);
-            if (!stack.isEmpty() && !player.getItemCooldownManager().isCoolingDown(stack.getItem())
-                    && (stack.isOf(EldritchEndCompat.DREADTIDE))) {
-                HelperMethods.incrementStatusEffect(livingEntity, EffectRegistry.VOIDCLOAK.get(), 280, 1, maxStacks);
+                //System.out.println("trying to apply voidcloak with corruption level: " + corruption + " up to a maximum stack count of: " +maxStacks);
+                if (!stack.isEmpty() && (stack.isOf(EldritchEndCompat.DREADTIDE))) {
+                    HelperMethods.incrementStatusEffect(livingEntity, EffectRegistry.VOIDCLOAK.get(), 280, 1, maxStacks+1);
+                }
+            }
+            if (player.age % 60 == 0) {
+                generateVoidhungerStacks(player, stack);
             }
         }
+    }
 
+    public static void generateVoidhungerStacks(LivingEntity livingEntity, ItemStack stack) {
+        int upperLimit = 100;
+        if (!stack.isEmpty() && (stack.isOf(EldritchEndCompat.DREADTIDE))) {
+            HelperMethods.incrementStatusEffect(livingEntity, EldritchEndRegistry.VOIDHUNGER.get(), 1200, 1, upperLimit);
+        }
     }
 
 

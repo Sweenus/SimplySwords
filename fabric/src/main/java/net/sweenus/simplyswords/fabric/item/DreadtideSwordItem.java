@@ -40,9 +40,6 @@ public class DreadtideSwordItem extends UniqueSwordItem {
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         if (!attacker.getWorld().isClient()) {
             HelperMethods.playHitSounds(attacker, target);
-            ServerWorld world = (ServerWorld) attacker.getWorld();
-            world.playSound(null, attacker.getBlockPos(), SoundRegistry.SPELL_FIRE.get(),
-                    attacker.getSoundCategory(), 0.5f, 1.0f);
 
         }
         return super.postHit(stack, target, attacker);
@@ -51,7 +48,7 @@ public class DreadtideSwordItem extends UniqueSwordItem {
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         if (!user.getWorld().isClient() && world instanceof  ServerWorld serverWorld) {
-            int skillCooldown = 20;//(int) Config.getFloat("flickerFuryCooldown", "UniqueEffects", ConfigDefaultValues.flickerFuryCooldown);
+            int skillCooldown = 20;
 
             Box box = HelperMethods.createBox(user, 10);
             Entity closestEntity = world.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY).stream()
@@ -67,9 +64,11 @@ public class DreadtideSwordItem extends UniqueSwordItem {
                             SoundEvent soundSelect = SoundRegistry.MAGIC_SHAMANIC_VOICE_04.get();
                             List<SoundEvent> sounds = new ArrayList<>();
                             sounds.add(SoundRegistry.MAGIC_SHAMANIC_VOICE_04.get());
+                            sounds.add(SoundRegistry.MAGIC_SHAMANIC_VOICE_04.get());
                             sounds.add(SoundRegistry.MAGIC_SHAMANIC_VOICE_12.get());
                             sounds.add(SoundRegistry.MAGIC_SHAMANIC_VOICE_15.get());
                             sounds.add(SoundRegistry.MAGIC_SHAMANIC_VOICE_20.get());
+                            sounds.add(SoundRegistry.MAGIC_SHAMANIC_NORDIC_02.get());
                             sounds.add(SoundRegistry.MAGIC_SHAMANIC_NORDIC_02.get());
                             if (sounds.get(voidcloakEffect.getAmplifier()) != null)
                                 soundSelect = sounds.get(voidcloakEffect.getAmplifier());

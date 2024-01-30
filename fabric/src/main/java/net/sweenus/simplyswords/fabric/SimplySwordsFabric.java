@@ -6,6 +6,7 @@ import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.compat.GobberCompat;
 import net.sweenus.simplyswords.fabric.compat.EldritchEndCompat;
 import net.sweenus.simplyswords.fabric.compat.MythicMetalsCompat;
+import net.sweenus.simplyswords.fabric.compat.eldritch_end.EldritchEndRegistry;
 
 public class SimplySwordsFabric implements ModInitializer {
     @Override
@@ -26,6 +27,7 @@ public class SimplySwordsFabric implements ModInitializer {
         else {
             if (FabricLoader.getInstance().isModLoaded("eldritch_end")) {
                 EldritchEndCompat.registerModItems();
+                EldritchEndRegistry.EFFECT.register();
             }
             if (FabricLoader.getInstance().isModLoaded("gobber2")) {
                 GobberCompat.registerModItems();

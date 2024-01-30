@@ -2,8 +2,9 @@
 	"parent": "simplyswords:item/template_twinblade",
 	"textures": {
 		"layer0": "simplyswords:item/dreadtide_grip",
-		"layer1": "simplyswords:item/dreadtide_anim_01",
-		"layer2": "simplyswords:item/dreadtide_anim_02",
-		"layer3": "simplyswords:item/dreadtide_anim_03"
+		"layer1": "simplyswords:item/dreadtide_base_anim",
+		"layer2": "simplyswords:item/dreadtide_anim_05",
+		"layer3": "simplyswords:item/dreadtide_anim_02",
+		"layer4": "simplyswords:item/dreadtide_anim_03"
 	}
 }
