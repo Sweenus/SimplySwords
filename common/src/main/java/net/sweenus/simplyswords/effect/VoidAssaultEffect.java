@@ -35,10 +35,7 @@ public class VoidAssaultEffect extends OrbitingEffect {
             if (sourceEntity != null)
                 damageSource = livingEntity.getDamageSources().indirectMagic(livingEntity, sourceEntity);
             livingEntity.damage(damageSource, additionalData + amplifier);
-            //System.out.println("sourceEntity: " + sourceEntity);
-            //System.out.println("additionalData: " + additionalData);
         }
-
 
         super.applyUpdateEffect(livingEntity, amplifier);
     }

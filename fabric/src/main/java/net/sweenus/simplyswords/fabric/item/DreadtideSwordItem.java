@@ -79,7 +79,7 @@ public class DreadtideSwordItem extends UniqueSwordItem {
 
 
                             world.playSound(null, user.getBlockPos(), soundSelect,
-                                    user.getSoundCategory(), 0.5f, 1.3f);
+                                    user.getSoundCategory(), 0.3f, 1.3f);
 
                             SimplySwordsStatusEffectInstance voidAssaultEffect = new SimplySwordsStatusEffectInstance(
                                     EffectRegistry.VOIDASSAULT.get(), 250, voidcloakEffect.getAmplifier(), false,

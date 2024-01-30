@@ -15,8 +15,12 @@ public abstract class LivingEntityMixin {
     @Inject(at = @At("HEAD"), method = "tick")
     public void simplyswords$tick(CallbackInfo ci) {
         LivingEntity livingEntity = (LivingEntity) (Object) this;
-        if (FabricLoader.getInstance().isModLoaded("eldritch_end")) {
-            EldritchEndMethods.generateVoidcloakStacks(livingEntity);
+        if (!livingEntity.getWorld().isClient()) {
+
+            if (FabricLoader.getInstance().isModLoaded("eldritch_end")) {
+                EldritchEndMethods.generateVoidcloakStacks(livingEntity);
+            }
+
         }
 
     }

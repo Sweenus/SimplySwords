@@ -758,5 +758,25 @@
     "sounds": [
       "simplyswords:magic_shamanic_nordic_02"
     ]
+  },
+  "magic_shamanic_nordic_21": {
+    "sounds": [
+      "simplyswords:magic_shamanic_nordic_21"
+    ]
+  },
+  "magic_shamanic_nordic_22": {
+    "sounds": [
+      "simplyswords:magic_shamanic_nordic_22"
+    ]
+  },
+  "magic_shamanic_nordic_23": {
+    "sounds": [
+      "simplyswords:magic_shamanic_nordic_23"
+    ]
+  },
+  "magic_shamanic_nordic_27": {
+    "sounds": [
+      "simplyswords:magic_shamanic_nordic_27"
+    ]
   }
 }
