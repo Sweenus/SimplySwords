@@ -3,7 +3,6 @@ package net.sweenus.simplyswords.effect;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectCategory;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.world.ServerWorld;
@@ -19,7 +18,7 @@ public class OrbitingEffect extends StatusEffect {
 
     @Override
     public void applyUpdateEffect(LivingEntity livingEntity, int amplifier) {
-        if (!livingEntity.getWorld().isClient && livingEntity instanceof PlayerEntity) {
+        if (!livingEntity.getWorld().isClient) {
             ServerWorld serverWorld = (ServerWorld) livingEntity.getWorld();
             Vec3d center = livingEntity.getPos().add(0, livingEntity.getHeight() / 2.0, 0); // Center around the entity's waist
             double baseRadius = 1.0; // base radius for the first orbit

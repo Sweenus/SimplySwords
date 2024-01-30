@@ -307,5 +307,15 @@ public class SoundRegistry {
             SoundEvent.of(new Identifier(SimplySwords.MOD_ID, "slash_01")));
     public static final RegistrySupplier<SoundEvent> SPELL_MISC_02 = SOUND.register("spell_misc_02", () ->
             SoundEvent.of(new Identifier(SimplySwords.MOD_ID, "spell_misc_02")));
+    public static final RegistrySupplier<SoundEvent> MAGIC_SHAMANIC_VOICE_04 = SOUND.register("magic_shamanic_voice_04", () ->
+            SoundEvent.of(new Identifier(SimplySwords.MOD_ID, "magic_shamanic_voice_04")));
+    public static final RegistrySupplier<SoundEvent> MAGIC_SHAMANIC_VOICE_12 = SOUND.register("magic_shamanic_voice_12", () ->
+            SoundEvent.of(new Identifier(SimplySwords.MOD_ID, "magic_shamanic_voice_12")));
+    public static final RegistrySupplier<SoundEvent> MAGIC_SHAMANIC_VOICE_15 = SOUND.register("magic_shamanic_voice_15", () ->
+            SoundEvent.of(new Identifier(SimplySwords.MOD_ID, "magic_shamanic_voice_15")));
+    public static final RegistrySupplier<SoundEvent> MAGIC_SHAMANIC_VOICE_20 = SOUND.register("magic_shamanic_voice_20", () ->
+            SoundEvent.of(new Identifier(SimplySwords.MOD_ID, "magic_shamanic_voice_20")));
+    public static final RegistrySupplier<SoundEvent> MAGIC_SHAMANIC_NORDIC_02 = SOUND.register("magic_shamanic_nordic_02", () ->
+            SoundEvent.of(new Identifier(SimplySwords.MOD_ID, "magic_shamanic_nordic_02")));
 
 }

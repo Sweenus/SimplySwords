@@ -415,7 +415,28 @@ public class HelperMethods {
 
             // Spawn the particle at the calculated position
             world.spawnParticles(particleType, x, y, z, 1, 0, 0, 0, 0);
-            //spawnParticle(world, particleType, x, y, z, 0, 0, 0);
+        }
+    }
+
+    public static void spawnWaistHeightParticles(ServerWorld world, ParticleEffect particle, Entity entity1, Entity entity2, int count) {
+        Vec3d startPos = entity1.getPos().add(0, entity1.getHeight() / 2.0, 0); // Waist height of entity1
+        Vec3d endPos = entity2.getPos().add(0, entity2.getHeight() / 2.0, 0); // Waist height of entity2
+        Vec3d direction = endPos.subtract(startPos);
+        double distance = direction.length();
+        Vec3d normalizedDirection = direction.normalize();
+
+        // We'll spawn particles along the line segment, ensuring even distribution
+        for (int i = 0; i < count; i++) {
+            // Calculate the interpolation factor (0.0 to 1.0) for the current particle
+            double lerpFactor = (double) i / (count - 1);
+            // Calculate the position for this particle using linear interpolation
+            Vec3d currentPos = startPos.add(normalizedDirection.multiply(distance * lerpFactor));
+            // Spawn the particle at the calculated position
+            world.spawnParticles(particle,
+                    currentPos.x, currentPos.y, currentPos.z, // The position to spawn the particle
+                    1, // The number of particles to spawn
+                    0, 0, 0, // The particle's delta (motion) in each direction (set to 0 for no motion)
+                    0.0); // The particle's speed (set to 0 for no motion)
         }
     }
 

@@ -42,7 +42,11 @@ public class EffectRegistry {
                             1.1,
                             EntityAttributeModifier.Operation.MULTIPLY_TOTAL));
     public static final RegistrySupplier<StatusEffect> VOIDCLOAK = EFFECT.register("voidcloak", () ->
-            new VoidcloakEffect(StatusEffectCategory.BENEFICIAL, 1124687));
+            new VoidcloakEffect(StatusEffectCategory.BENEFICIAL, 1124687)
+                    .addAttributeModifier(EntityAttributes.GENERIC_ATTACK_SPEED,
+                            "d07f34ad-6367-4a86-b47a-736947e2c008",
+                            0.1,
+                            EntityAttributeModifier.Operation.MULTIPLY_TOTAL));
     public static final RegistrySupplier<StatusEffect> VOIDASSAULT = EFFECT.register("void_assault", () ->
             new VoidAssaultEffect(StatusEffectCategory.HARMFUL, 1124687));
 

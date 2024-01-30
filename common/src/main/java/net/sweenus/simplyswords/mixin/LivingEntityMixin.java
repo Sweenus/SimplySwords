@@ -48,7 +48,7 @@ public abstract class LivingEntityMixin {
     }
 
     @ModifyVariable(method = "modifyAppliedDamage", at = @At("HEAD"), ordinal = 0, argsOnly = true)
-    private float modifyDamageAmount(float amount, DamageSource source) {
+    private float simplyswords$modifyDamageAmount(float amount, DamageSource source) {
         LivingEntity livingEntity = (LivingEntity) (Object) this;
         StatusEffectInstance voidcloakEffect = livingEntity.getStatusEffect(EffectRegistry.VOIDCLOAK.get());
         if (voidcloakEffect != null) {

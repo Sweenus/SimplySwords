@@ -4,6 +4,7 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.compat.GobberCompat;
+import net.sweenus.simplyswords.fabric.compat.EldritchEndCompat;
 import net.sweenus.simplyswords.fabric.compat.MythicMetalsCompat;
 
 public class SimplySwordsFabric implements ModInitializer {
@@ -14,12 +15,18 @@ public class SimplySwordsFabric implements ModInitializer {
         SimplySwords.init();
 
         //Quilt makes the load order wierd - gobbercompat item registry needs to be injected to prevent crash
-        if (FabricLoader.getInstance().isModLoaded("quilt_loader") && FabricLoader.getInstance().isModLoaded("gobber2") && FabricLoader.getInstance().isModLoaded("mythicmetals")) {
-            System.out.println("SimplySwords: Detected Quilt Loader. Mythic Metals & Gobber compatibility fix is being applied.");
+        if (FabricLoader.getInstance().isModLoaded("quilt_loader") && FabricLoader.getInstance().isModLoaded("gobber2")
+                && FabricLoader.getInstance().isModLoaded("mythicmetals")
+                && FabricLoader.getInstance().isModLoaded("eldritch_end")) {
+            System.out.println("SimplySwords: Detected Quilt Loader. Mythic Metals, Gobber, and Eldritch End compatibility fix is being applied.");
+            EldritchEndCompat.registerModItems();
             GobberCompat.registerModItems();
             MythicMetalsCompat.registerModItems();
         }
         else {
+            if (FabricLoader.getInstance().isModLoaded("eldritch_end")) {
+                EldritchEndCompat.registerModItems();
+            }
             if (FabricLoader.getInstance().isModLoaded("gobber2")) {
                 GobberCompat.registerModItems();
             }
@@ -27,16 +34,5 @@ public class SimplySwordsFabric implements ModInitializer {
                 MythicMetalsCompat.registerModItems();
             }
         }
-
-        //We no longer need to init here as we instead inject our init into Mythic Metals to avoid a load order crash
-        /*
-        //SimplySwords.init();
-        if (FabricLoader.getInstance().isModLoaded("mythicmetals")) {
-            MythicMetalsCompat.registerModItems();
-            System.out.println("Detected Mythic Metals. Started registering Mythic Metals compat items for Simply Swords");
-            Abilities.init();
-        }
-        */
-
     }
 }

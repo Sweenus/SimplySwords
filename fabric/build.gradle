@@ -55,12 +55,15 @@ dependencies {
     modImplementation "curse.maven:mythicmetals-410127:4644233"
     // slug / curseforge project ID / file ID "check url"
 
+
+
     modImplementation "maven.modrinth:spell-power:${rootProject.spellpower_version}-fabric"
     modImplementation "curse.maven:lambdynamiclights-393442:${rootProject.lambdynlights_version}"
     include modImplementation("dev.lambdaurora:spruceui:${rootProject.spruceui_version}")
     modApi("me.shedaniel.cloth:cloth-config-fabric:${rootProject.cloth_config_version}") {
         exclude(group: "net.fabricmc.fabric-api")
     }
+    modImplementation "curse.maven:eldritch-end-877553:${rootProject.eldritch_end_version}"
 
     // Amethyst Imbuement
     //modImplementation "curse.maven:amethyst-imbuement-608261:4514358"
