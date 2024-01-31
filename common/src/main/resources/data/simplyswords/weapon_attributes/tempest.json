@@ -13,7 +13,7 @@
         "swing_sound": {
           "id": "simplyswords:elemental_sword_water_attack_01",
           "pitch": 1.5,
-          "sound": 0.2
+          "sound": 0.1
         }
       },
       {
@@ -26,7 +26,7 @@
         "swing_sound": {
           "id": "simplyswords:elemental_sword_water_attack_02",
           "pitch": 1.4,
-          "sound": 0.2
+          "sound": 0.1
         }
       },
       {
@@ -39,7 +39,7 @@
         "swing_sound": {
           "id": "simplyswords:elemental_sword_water_attack_03",
           "pitch": 1.5,
-          "sound": 0.2
+          "sound": 0.1
         }
       }
     ]

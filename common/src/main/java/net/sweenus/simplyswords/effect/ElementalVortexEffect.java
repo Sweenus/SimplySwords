@@ -9,6 +9,8 @@ import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.Box;
+import net.sweenus.simplyswords.config.Config;
+import net.sweenus.simplyswords.config.ConfigDefaultValues;
 import net.sweenus.simplyswords.effect.instance.SimplySwordsStatusEffectInstance;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
@@ -33,6 +35,8 @@ public class ElementalVortexEffect extends OrbitingEffect {
     public void applyUpdateEffect(LivingEntity livingEntity, int amplifier) {
         if (!livingEntity.getWorld().isClient()) {
             ServerWorld serverWorld = (ServerWorld) livingEntity.getWorld();
+            float abilityDamageFire = 0;
+            float abilityDamageFrost = 0;
             SoundHelper.loopSound(livingEntity, SoundRegistry.AMBIENCE_WIND_LOOP.getId(), 20);
 
             if (livingEntity.getStatusEffect(EffectRegistry.ELEMENTAL_VORTEX.get()) instanceof SimplySwordsStatusEffectInstance statusEffect) {
@@ -47,8 +51,14 @@ public class ElementalVortexEffect extends OrbitingEffect {
 
                         if (additionalData != 0) {
                             DamageSource damageSource = livingEntity.getDamageSources().indirectMagic(le, livingEntity);
+                            damageSource = livingEntity.getDamageSources().indirectMagic(livingEntity, sourceEntity);
+                            float spellScalingModifier = Config.getFloat("vortexSpellScaling", "UniqueEffects", ConfigDefaultValues.vortexSpellScaling);
+                            if (HelperMethods.commonSpellAttributeScaling(spellScalingModifier, sourceEntity, "frost") > 1)
+                                abilityDamageFrost = HelperMethods.commonSpellAttributeScaling(spellScalingModifier, sourceEntity, "frost");
+                            if (HelperMethods.commonSpellAttributeScaling(spellScalingModifier, sourceEntity, "fire") > 1)
+                                abilityDamageFire = HelperMethods.commonSpellAttributeScaling(spellScalingModifier, sourceEntity, "fire");
                             le.timeUntilRegen = 0;
-                            le.damage(damageSource, 3 + ((float) amplifier / 2));
+                            le.damage(damageSource, (3 + ((float) amplifier / 2)) + (abilityDamageFire + abilityDamageFrost));
                         }
 
                     }
