@@ -9,7 +9,7 @@ import net.minecraft.entity.effect.StatusEffectCategory;
 import net.minecraft.registry.RegistryKeys;
 import net.sweenus.simplyswords.SimplySwords;
 
-public class EldritchEndRegistry {
+public class EldritchEndCompatRegistry {
 
     public static final DeferredRegister<StatusEffect> EFFECT = DeferredRegister.create(SimplySwords.MOD_ID, RegistryKeys.STATUS_EFFECT);
 

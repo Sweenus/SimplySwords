@@ -9,7 +9,7 @@ import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 
-public class EldritchEndMethods {
+public class EldritchEndCompatMethods {
 
 
     public static void generateVoidcloakStacks(LivingEntity livingEntity) {
@@ -36,7 +36,7 @@ public class EldritchEndMethods {
     public static void generateVoidhungerStacks(LivingEntity livingEntity, ItemStack stack) {
         int upperLimit = 100;
         if (!stack.isEmpty() && (stack.isOf(EldritchEndCompat.DREADTIDE))) {
-            HelperMethods.incrementStatusEffect(livingEntity, EldritchEndRegistry.VOIDHUNGER.get(), 1200, 1, upperLimit);
+            HelperMethods.incrementStatusEffect(livingEntity, EldritchEndCompatRegistry.VOIDHUNGER.get(), 1200, 1, upperLimit);
         }
     }
 

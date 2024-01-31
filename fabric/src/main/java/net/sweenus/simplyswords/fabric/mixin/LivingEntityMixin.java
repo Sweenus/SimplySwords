@@ -3,7 +3,8 @@ package net.sweenus.simplyswords.fabric.mixin;
 
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.entity.LivingEntity;
-import net.sweenus.simplyswords.fabric.compat.eldritch_end.EldritchEndMethods;
+import net.sweenus.simplyswords.fabric.SimplySwordsFabric;
+import net.sweenus.simplyswords.fabric.compat.eldritch_end.EldritchEndCompatMethods;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -18,7 +19,8 @@ public abstract class LivingEntityMixin {
         if (!livingEntity.getWorld().isClient()) {
 
             if (FabricLoader.getInstance().isModLoaded("eldritch_end")) {
-                EldritchEndMethods.generateVoidcloakStacks(livingEntity);
+                if (SimplySwordsFabric.passVersionCheck("eldritch_end", "0.2.31"))
+                    EldritchEndCompatMethods.generateVoidcloakStacks(livingEntity);
             }
 
         }

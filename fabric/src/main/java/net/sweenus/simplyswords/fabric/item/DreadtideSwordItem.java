@@ -66,10 +66,10 @@ public class DreadtideSwordItem extends UniqueSwordItem {
                             SoundEvent soundSelect = SoundRegistry.MAGIC_SHAMANIC_VOICE_04.get();
                             List<SoundEvent> sounds = new ArrayList<>();
                             sounds.add(SoundRegistry.MAGIC_SHAMANIC_VOICE_04.get());
-                            sounds.add(SoundRegistry.MAGIC_SHAMANIC_VOICE_04.get());
                             sounds.add(SoundRegistry.MAGIC_SHAMANIC_VOICE_12.get());
                             sounds.add(SoundRegistry.MAGIC_SHAMANIC_VOICE_15.get());
                             sounds.add(SoundRegistry.MAGIC_SHAMANIC_VOICE_20.get());
+                            sounds.add(SoundRegistry.MAGIC_SHAMANIC_NORDIC_02.get());
                             sounds.add(SoundRegistry.MAGIC_SHAMANIC_NORDIC_02.get());
                             sounds.add(SoundRegistry.MAGIC_SHAMANIC_NORDIC_02.get());
                             if (sounds.get(voidcloakEffect.getAmplifier()) != null)
