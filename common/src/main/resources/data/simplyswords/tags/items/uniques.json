@@ -36,6 +36,11 @@
     "simplyswords:waxweaver",
     "simplyswords:hiveheart",
     "simplyswords:stars_edge",
-    "simplyswords:wickpiercer"
+    "simplyswords:wickpiercer",
+    "simplyswords:tempest",
+    {
+      "id": "simplyswords:dreadtide",
+      "required": false
+    }
   ]
 }

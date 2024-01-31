@@ -113,7 +113,11 @@
     "simplyswords:hiveheart",
     "simplyswords:stars_edge",
     "simplyswords:wickpiercer",
-
+    "simplyswords:tempest",
+    {
+      "id": "simplyswords:dreadtide",
+      "required": false
+    },
     {
       "id": "simplyswords:gobber_compat/gobber/gobber_chakram",
       "required": false

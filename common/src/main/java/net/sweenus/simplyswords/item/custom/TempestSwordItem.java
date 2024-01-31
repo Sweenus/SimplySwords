@@ -41,6 +41,7 @@ public class TempestSwordItem extends UniqueSwordItem {
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         if (!attacker.getWorld().isClient()) {
 
+            int vortexMaxStacks = (int) Config.getFloat("vortexMaxStacks", "UniqueEffects", ConfigDefaultValues.vortexMaxStacks);
             ServerWorld serverWorld = (ServerWorld) attacker.getWorld();
             HelperMethods.playHitSounds(attacker, target);
             SoundEvent soundSelect;
@@ -77,7 +78,7 @@ public class TempestSwordItem extends UniqueSwordItem {
                     attacker.getSoundCategory(), 0.2f, 1.3f);
 
             SimplySwordsStatusEffectInstance effect = HelperMethods.incrementSimplySwordsStatusEffect(
-                    target, statusSelect, 500, 1, 10);
+                    target, statusSelect, 500, 1, vortexMaxStacks);
 
             effect.setSourceEntity(attacker);
             effect.setAdditionalData((int) getAttackDamage() / 3);
@@ -91,6 +92,9 @@ public class TempestSwordItem extends UniqueSwordItem {
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         if (!user.getWorld().isClient() && world instanceof  ServerWorld serverWorld) {
 
+            int vortexMaxSize = (int) Config.getFloat("vortexMaxSize", "UniqueEffects", ConfigDefaultValues.vortexMaxSize);
+            int vortexDuration = (int) Config.getFloat("vortexDuration", "UniqueEffects", ConfigDefaultValues.vortexDuration);
+            int vortexSpellScaling = (int) Config.getFloat("vortexSpellScaling", "UniqueEffects", ConfigDefaultValues.vortexSpellScaling);
             int skillCooldown = 200;
             Box box = HelperMethods.createBox(user, 15);
             boolean soundHasPlayed = false;
@@ -112,7 +116,7 @@ public class TempestSwordItem extends UniqueSwordItem {
                             soundHasPlayed = true;
                         }
 
-                        SimplySwordsStatusEffectInstance status = HelperMethods.incrementSimplySwordsStatusEffect(user, EffectRegistry.ELEMENTAL_VORTEX.get(), 1200, totalAmplifier, 30);
+                        SimplySwordsStatusEffectInstance status = HelperMethods.incrementSimplySwordsStatusEffect(user, EffectRegistry.ELEMENTAL_VORTEX.get(), vortexDuration, totalAmplifier, vortexMaxSize);
                         status.setAdditionalData(Math.max(1, totalAmplifier));
                         status.setSourceEntity(user);
                         le.removeStatusEffect(EffectRegistry.FIRE_VORTEX.get());
@@ -144,21 +148,20 @@ public class TempestSwordItem extends UniqueSwordItem {
         Style TEXT = HelperMethods.getStyle("text");
 
         tooltip.add(Text.literal(""));
-        tooltip.add(Text.translatable("item.simplyswords.wickpiercersworditem.tooltip1").setStyle(ABILITY));
-        tooltip.add(Text.translatable("item.simplyswords.waxweaversworditem.tooltip4").setStyle(TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.waxweaversworditem.tooltip5").setStyle(TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.waxweaversworditem.tooltip6").setStyle(TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.waxweaversworditem.tooltip7").setStyle(TEXT));
+        tooltip.add(Text.translatable("item.simplyswords.tempestsworditem.tooltip1").setStyle(ABILITY));
+        tooltip.add(Text.translatable("item.simplyswords.tempestsworditem.tooltip2").setStyle(TEXT));
+        tooltip.add(Text.translatable("item.simplyswords.tempestsworditem.tooltip3").setStyle(TEXT));
+        tooltip.add(Text.translatable("item.simplyswords.tempestsworditem.tooltip4").setStyle(TEXT));
+        tooltip.add(Text.translatable("item.simplyswords.tempestsworditem.tooltip5").setStyle(TEXT));
         tooltip.add(Text.literal(""));
-        tooltip.add(Text.translatable("item.simplyswords.waxweaversworditem.tooltip8").setStyle(TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.waxweaversworditem.tooltip9", Config.getFloat("waxweaveCooldown", "UniqueEffects", ConfigDefaultValues.waxweaveCooldown) / 20).setStyle(TEXT));
+        tooltip.add(Text.translatable("item.simplyswords.tempestsworditem.tooltip6").setStyle(TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(RIGHTCLICK));
-        tooltip.add(Text.translatable("item.simplyswords.wickpiercersworditem.tooltip2").setStyle(TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.wickpiercersworditem.tooltip3").setStyle(TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.wickpiercersworditem.tooltip4").setStyle(TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.wickpiercersworditem.tooltip5").setStyle(TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.wickpiercersworditem.tooltip6", Config.getFloat("flickerFuryDuration", "UniqueEffects", ConfigDefaultValues.flickerFuryDuration) / 20).setStyle(TEXT));
+        tooltip.add(Text.translatable("item.simplyswords.tempestsworditem.tooltip7").setStyle(TEXT));
+        tooltip.add(Text.translatable("item.simplyswords.tempestsworditem.tooltip8").setStyle(TEXT));
+        tooltip.add(Text.translatable("item.simplyswords.tempestsworditem.tooltip9").setStyle(TEXT));
+        tooltip.add(Text.translatable("item.simplyswords.tempestsworditem.tooltip10").setStyle(TEXT));
+        tooltip.add(Text.translatable("item.simplyswords.tempestsworditem.tooltip11").setStyle(TEXT));
 
         super.appendTooltip(itemStack, world, tooltip, tooltipContext);
     }

@@ -1,0 +1,13 @@
+{
+  "name": "Tempest",
+  "icon": "simplyswords:tempest",
+  "advancement": "simplyswords:tempest",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:tempest",
+      "text": "Not yet implemented"
+    }
+  ]
+}

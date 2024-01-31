@@ -54,7 +54,7 @@ public class EmberlashSwordItem extends UniqueSwordItem {
                 target.timeUntilRegen = 0;
                 StatusEffectInstance smoulderingEffect = target.getStatusEffect(EffectRegistry.SMOULDERING.get());
                 if (smoulderingEffect != null) {
-                    float damageMultiplier = 0.20f * smoulderingEffect.getAmplifier();
+                    float damageMultiplier = 0.15f * smoulderingEffect.getAmplifier();
                     target.damage(damageSource, abilityDamage * damageMultiplier);
                 }
             }

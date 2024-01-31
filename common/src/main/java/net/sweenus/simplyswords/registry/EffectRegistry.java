@@ -39,7 +39,7 @@ public class EffectRegistry {
             new FrenzyEffect(StatusEffectCategory.BENEFICIAL, 1124687)
                     .addAttributeModifier(EntityAttributes.GENERIC_ATTACK_SPEED,
                             "54e1b9b9-6de9-49bb-a716-564b3d375892",
-                            1.1,
+                            0.8,
                             EntityAttributeModifier.Operation.MULTIPLY_TOTAL));
     public static final RegistrySupplier<StatusEffect> VOIDCLOAK = EFFECT.register("voidcloak", () ->
             new VoidcloakEffect(StatusEffectCategory.BENEFICIAL, 1124687)

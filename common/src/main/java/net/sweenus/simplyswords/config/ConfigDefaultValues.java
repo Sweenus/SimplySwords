@@ -190,6 +190,15 @@ public class ConfigDefaultValues {
     public static float flickerFuryCooldown = 220f;
     public static float flickerFuryDuration = 40f;
     public static float flickerFuryDamage = 1.0f;
+
+    public static float vortexDuration = 1200f;
+    public static float vortexMaxSize = 30f;
+    public static float vortexMaxStacks = 10f;
+    public static float vortexSpellScaling = 1.0f;
+
+    public static float voidcallerDuration = 250f;
+    public static float voidcallerStartingTickFrequency = 12f;
+    public static float voidcallerDamageModifier = 1.0f;
     
     // -- WEAPON ATTRIBUTES -- //
 
@@ -306,6 +315,8 @@ public class ConfigDefaultValues {
     public static float hiveheart_damageModifier = 7.0f;
     public static float starsedge_damageModifier = 3.0f;
     public static float wickpiercer_damageModifier = 4.0f;
+    public static float dreadtide_damageModifier = 4.0f;
+    public static float tempest_damageModifier = 0.0f;
 
     
     public static float brimstone_attackSpeed = -2.8f;
@@ -339,7 +350,9 @@ public class ConfigDefaultValues {
     public static float waxweaver_attackSpeed = -2.9f;
     public static float hiveheart_attackSpeed = -3.0f;
     public static float starsedge_attackSpeed = -2.0f;
-    public static float wickpiercer_attackSpeed = -1.7f;
+    public static float wickpiercer_attackSpeed = -2.1f;
+    public static float dreadtide_attackSpeed = -2.0f;
+    public static float tempest_attackSpeed = -2.5f;
     
     // -- STATUS EFFECTS --
 
@@ -486,6 +499,7 @@ public class ConfigDefaultValues {
     public static boolean enableHiveheart = true;
     public static boolean enableStarsEdge = true;
     public static boolean enableWickpiercer = true;
+    public static boolean enableTempest = true;
     
     // -- GENERAL CONFIG --
 

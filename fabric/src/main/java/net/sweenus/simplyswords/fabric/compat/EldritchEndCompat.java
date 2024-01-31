@@ -14,13 +14,13 @@ import net.sweenus.simplyswords.item.ModToolMaterial;
 public class EldritchEndCompat {
 
     //Compat for Eldritch End
-    static float wickpiercer_damage_modifier = Config.getFloat("wickpiercer_damageModifier", "WeaponAttributes", ConfigDefaultValues.wickpiercer_damageModifier);
-    static float wickpiercer_attackspeed = Config.getFloat("wickpiercer_attackSpeed", "WeaponAttributes", ConfigDefaultValues.wickpiercer_attackSpeed);
+    static float dreadtide_damage_modifier = Config.getFloat("dreadtide_damageModifier", "WeaponAttributes", ConfigDefaultValues.dreadtide_damageModifier);
+    static float dreadtide_attackspeed = Config.getFloat("dreadtide_attackSpeed", "WeaponAttributes", ConfigDefaultValues.dreadtide_attackSpeed);
 
     public static final Item DREADTIDE = registerItem( "dreadtide",
             new DreadtideSwordItem(ModToolMaterial.UNIQUE,
-                    (int) (wickpiercer_damage_modifier),
-                    wickpiercer_attackspeed,
+                    (int) (dreadtide_damage_modifier),
+                    dreadtide_attackspeed,
                     new Item.Settings().rarity(Rarity.EPIC).fireproof()));
 
 

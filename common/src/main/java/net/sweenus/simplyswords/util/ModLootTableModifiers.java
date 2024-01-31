@@ -190,6 +190,8 @@ public class ModLootTableModifiers {
                             pool.with(ItemEntry.builder(ItemsRegistry.STARS_EDGE.get()));
                         if (Config.getBoolean("enableWickpiercer", "Loot", ConfigDefaultValues.enableWickpiercer))
                             pool.with(ItemEntry.builder(ItemsRegistry.WICKPIERCER.get()));
+                        if (Config.getBoolean("enableTempest", "Loot", ConfigDefaultValues.enableTempest))
+                            pool.with(ItemEntry.builder(ItemsRegistry.TEMPEST.get()));
 
                         context.addPool(pool);
                     }
@@ -261,6 +263,8 @@ public class ModLootTableModifiers {
                             pool.with(ItemEntry.builder(ItemsRegistry.STARS_EDGE.get()));
                         if (Config.getBoolean("enableWickpiercer", "Loot", ConfigDefaultValues.enableWickpiercer))
                             pool.with(ItemEntry.builder(ItemsRegistry.WICKPIERCER.get()));
+                        if (Config.getBoolean("enableTempest", "Loot", ConfigDefaultValues.enableTempest))
+                            pool.with(ItemEntry.builder(ItemsRegistry.TEMPEST.get()));
 
                         context.addPool(pool);
                     }

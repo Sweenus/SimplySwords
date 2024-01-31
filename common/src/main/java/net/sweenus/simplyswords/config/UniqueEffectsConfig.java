@@ -197,4 +197,15 @@ public class UniqueEffectsConfig implements ConfigData {
     public float flickerFuryDuration = 40f;
     public float flickerFuryDamage = 1.0f;
 
+    @ConfigEntry.Gui.PrefixText
+    public float vortexDuration = 1200f;
+    public float vortexMaxSize = 30f;
+    public float vortexMaxStacks = 10f;
+    public float vortexSpellScaling = 1.0f;
+
+    @ConfigEntry.Gui.PrefixText
+    public float voidcallerDuration = 250f;
+    public float voidcallerStartingTickFrequency = 12f;
+    public float voidcallerDamageModifier = 1.0f;
+
 }

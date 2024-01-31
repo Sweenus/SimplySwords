@@ -102,6 +102,7 @@ public class ItemsRegistry {
     static float hiveheart_attackspeed = Config.getFloat("hiveheart_attackSpeed", "WeaponAttributes", ConfigDefaultValues.hiveheart_attackSpeed);
     static float starsedge_attackspeed = Config.getFloat("starsedge_attackSpeed", "WeaponAttributes", ConfigDefaultValues.starsedge_attackSpeed);
     static float wickpiercer_attackspeed = Config.getFloat("wickpiercer_attackSpeed", "WeaponAttributes", ConfigDefaultValues.wickpiercer_attackSpeed);
+    static float tempest_attackspeed = Config.getFloat("tempest_attackSpeed", "WeaponAttributes", ConfigDefaultValues.tempest_attackSpeed);
 
 
 
@@ -137,6 +138,7 @@ public class ItemsRegistry {
     static float hiveheart_damage_modifier = Config.getFloat("hiveheart_damageModifier", "WeaponAttributes", ConfigDefaultValues.hiveheart_damageModifier);
     static float starsedge_damage_modifier = Config.getFloat("starsedge_damageModifier", "WeaponAttributes", ConfigDefaultValues.starsedge_damageModifier);
     static float wickpiercer_damage_modifier = Config.getFloat("wickpiercer_damageModifier", "WeaponAttributes", ConfigDefaultValues.wickpiercer_damageModifier);
+    static float tempest_damage_modifier = Config.getFloat("tempest_damageModifier", "WeaponAttributes", ConfigDefaultValues.tempest_damageModifier);
 
 
     public static final DeferredRegister<Item> ITEM = DeferredRegister.create(SimplySwords.MOD_ID, RegistryKeys.ITEM);
@@ -888,8 +890,8 @@ public class ItemsRegistry {
 
     public static final RegistrySupplier<TempestSwordItem> TEMPEST = ITEM.register( "tempest", () ->
             new TempestSwordItem(ModToolMaterial.UNIQUE,
-                    (int) (mjolnir_damage_modifier),
-                    mjolnir_attackspeed,
+                    (int) (tempest_damage_modifier),
+                    tempest_attackspeed,
                     new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof()));
 
 

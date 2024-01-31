@@ -114,6 +114,7 @@
   "item.simplyswords.stars_edge":                                                                                       "Star's Edge",
   "item.simplyswords.wickpiercer":                                                                                      "Wickpiercer",
   "item.simplyswords.dreadtide":                                                                                        "Dreadtide",
+  "item.simplyswords.tempest":                                                                                          "Tempest",
 
 
   "item.simplyswords.runic_tablet":                                                                                     "Runic Tablet",
@@ -510,6 +511,12 @@
   "effect.simplyswords.onslaught":                                                                                      "Onslaught",
   "effect.simplyswords.smouldering":                                                                                    "Smouldering",
   "effect.simplyswords.frenzy":                                                                                         "Frenzy",
+  "effect.simplyswords.voidcloak":                                                                                      "Voidcloak",
+  "effect.simplyswords.void_assault":                                                                                   "Void Assault",
+  "effect.simplyswords.voidhunger":                                                                                     "Voidhunger",
+  "effect.simplyswords.fire_vortex":                                                                                    "Fire Vortex",
+  "effect.simplyswords.frost_vortex":                                                                                   "Frost Vortex",
+  "effect.simplyswords.elemental_vortex":                                                                               "Elemental Vortex",
 
   "item.simplyswords.onrightclick":                                                                                     "On Right Click:",
   "item.simplyswords.onrightclickheld":                                                                                 "Hold Right Click:",
@@ -743,6 +750,32 @@
   "item.simplyswords.wickpiercersworditem.tooltip4":                                                                    "to attack speed and allowing",
   "item.simplyswords.wickpiercersworditem.tooltip5":                                                                    "each strike of Wickpiercer",
   "item.simplyswords.wickpiercersworditem.tooltip6":                                                                    "to hit twice for %ds.",
+
+  "item.simplyswords.tempestsworditem.tooltip1":                                                                        "Unique Effect: Vortex",
+  "item.simplyswords.tempestsworditem.tooltip2":                                                                        "Your attacks attach elemental",
+  "item.simplyswords.tempestsworditem.tooltip3":                                                                        "energy to the target, causing",
+  "item.simplyswords.tempestsworditem.tooltip4":                                                                        "damage over time and element",
+  "item.simplyswords.tempestsworditem.tooltip5":                                                                        "specific debuffs.",
+  "item.simplyswords.tempestsworditem.tooltip6":                                                                        "This effect stacks.",
+  "item.simplyswords.tempestsworditem.tooltip7":                                                                        "Return all nearby elements to",
+  "item.simplyswords.tempestsworditem.tooltip8":                                                                        "yourself, forming a vortex of",
+  "item.simplyswords.tempestsworditem.tooltip9":                                                                        "elemental energy around you,",
+  "item.simplyswords.tempestsworditem.tooltip10":                                                                       "damaging nearby enemies and",
+  "item.simplyswords.tempestsworditem.tooltip11":                                                                       "growing in size.",
+
+  "item.simplyswords.dreadtidesworditem.tooltip1":                                                                      "Unique Effect: Voidcaller",
+  "item.simplyswords.dreadtidesworditem.tooltip2":                                                                      "Passively generate stacks of",
+  "item.simplyswords.dreadtidesworditem.tooltip3":                                                                      "Voidcloak, increasing attack",
+  "item.simplyswords.dreadtidesworditem.tooltip4":                                                                      "speed and reducing incoming",
+  "item.simplyswords.dreadtidesworditem.tooltip5":                                                                      "damage by 10% per stack.",
+  "item.simplyswords.dreadtidesworditem.tooltip6":                                                                      "Taking damage removes a stack.",
+  "item.simplyswords.dreadtidesworditem.tooltip7":                                                                      "Max 1 stack per 20 corruption.",
+  "item.simplyswords.dreadtidesworditem.tooltip8":                                                                      "Release your Voidcloak and",
+  "item.simplyswords.dreadtidesworditem.tooltip9":                                                                      "send eldritch energy toward",
+  "item.simplyswords.dreadtidesworditem.tooltip10":                                                                     "the nearest enemy, dealing",
+  "item.simplyswords.dreadtidesworditem.tooltip11":                                                                     "rapid damage.",
+  "item.simplyswords.dreadtidesworditem.tooltip12":                                                                     "Wielding this weapon inflicts",
+  "item.simplyswords.dreadtidesworditem.tooltip13":                                                                     "you with corruption over time.",
 
 
   "item.simplyswords.dormantrelicsworditem.tooltip2":                                                                   "A faint power seems to emanate from within.",
@@ -1061,6 +1094,7 @@
   "text.autoconfig.simplyswords_main.option.weapon_attributes.starsedge_damageModifier":                                "§6Star's Edge§7 damage modifier",
   "text.autoconfig.simplyswords_main.option.weapon_attributes.wickpiercer_damageModifier":                              "§6Wickpiercer§7 damage modifier",
   "text.autoconfig.simplyswords_main.option.weapon_attributes.dreadtide_damageModifier":                                "§6Dreadtide§7 damage modifier",
+  "text.autoconfig.simplyswords_main.option.weapon_attributes.tempest_damageModifier":                                  "§6Tempest§7 damage modifier",
 
   "text.autoconfig.simplyswords_main.option.weapon_attributes.brimstone_attackSpeed.@PrefixText" :                      "§6[Attack Speed Modifiers]§7\nRecommended range: -1.0 to -3.7, with -1.0 being fast and -3.7 being slow.",
   "text.autoconfig.simplyswords_main.option.weapon_attributes.brimstone_attackSpeed":                                   "§6Brimstone§7 attack speed",
@@ -1096,6 +1130,7 @@
   "text.autoconfig.simplyswords_main.option.weapon_attributes.starsedge_attackSpeed":                                   "§6Star's Edge§7 attack speed",
   "text.autoconfig.simplyswords_main.option.weapon_attributes.wickpiercer_attackSpeed":                                 "§6Wickpiercer§7 attack speed",
   "text.autoconfig.simplyswords_main.option.weapon_attributes.dreadtide_attackSpeed":                                   "§6Dreadtide§7 attack speed",
+  "text.autoconfig.simplyswords_main.option.weapon_attributes.tempest_attackSpeed":                                     "§6Tempest§7 attack speed",
 
 
   "text.autoconfig.simplyswords_main.option.runic_effects.enableActiveDefence.@PrefixText" :                            "§a[Runic Power Blacklisting]§7\nSetting any of the below values to false will prevent that runic power from being obtainable.",
@@ -1173,6 +1208,7 @@
   "text.autoconfig.simplyswords_main.option.loot.enableHiveheart":                                                      "Hiveheart can be looted",
   "text.autoconfig.simplyswords_main.option.loot.enableStarsEdge":                                                      "Star's Edge can be looted",
   "text.autoconfig.simplyswords_main.option.loot.enableWickpiercer":                                                    "Wickpiercer can be looted",
+  "text.autoconfig.simplyswords_main.option.loot.enableTempest":                                                        "Tempest can be looted",
 
   "text.autoconfig.simplyswords_main.option.general.enableWeaponImpactSounds":                                          "Enable weapon impact sounds",
   "text.autoconfig.simplyswords_main.option.general.weaponImpactSoundsVolume":                                          "Weapon impact sounds volume",
@@ -1372,6 +1408,17 @@
   "text.autoconfig.simplyswords_main.option.unique_effects.flickerFuryCooldown":                                        "Flicker Fury cooldown",
   "text.autoconfig.simplyswords_main.option.unique_effects.flickerFuryDuration":                                        "Flicker Fury duration",
   "text.autoconfig.simplyswords_main.option.unique_effects.flickerFuryDamage":                                          "Flicker Fury damage modifier",
+
+  "text.autoconfig.simplyswords_main.option.unique_effects.voidcallerDuration.@PrefixText" :                            "§6[Dreadtide]§7",
+  "text.autoconfig.simplyswords_main.option.unique_effects.voidcallerDuration":                                         "Voidcaller duration",
+  "text.autoconfig.simplyswords_main.option.unique_effects.voidcallerStartingTickFrequency":                            "Voidcaller starting tick frequency",
+  "text.autoconfig.simplyswords_main.option.unique_effects.voidcallerDamageModifier":                                   "Voidcaller damage modifier",
+
+  "text.autoconfig.simplyswords_main.option.unique_effects.vortexDuration.@PrefixText" :                                "§6[Tempest]§7",
+  "text.autoconfig.simplyswords_main.option.unique_effects.vortexDuration":                                             "Vortex duration",
+  "text.autoconfig.simplyswords_main.option.unique_effects.vortexMaxSize":                                              "Vortex max size",
+  "text.autoconfig.simplyswords_main.option.unique_effects.vortexMaxStacks":                                            "Vortex max stacks",
+  "text.autoconfig.simplyswords_main.option.unique_effects.vortexSpellScaling":                                         "Vortex Spell Power DMG multi",
 
 
   "text.autoconfig.simplyswords_main.option.runic_effects.swiftnessChance.@PrefixText" :                                "§b[Swiftness]§7",
