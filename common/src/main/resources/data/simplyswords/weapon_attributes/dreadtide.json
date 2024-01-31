@@ -11,9 +11,9 @@
         "upswing": 0.5,
         "animation": "bettercombat:two_handed_slash_horizontal_right",
         "swing_sound": {
-          "id": "simplyswords:elemental_sword_holy_attack_02",
+          "id": "simplyswords:elemental_sword_sci-fi_attack_02",
           "volume": 0.3,
-          "pitch": 1.1
+          "pitch": 1.4
         }
       },
       {
@@ -23,9 +23,9 @@
         "upswing": 0.5,
         "animation": "bettercombat:two_handed_slash_horizontal_left",
         "swing_sound": {
-          "id": "simplyswords:elemental_sword_holy_attack_02",
+          "id": "simplyswords:elemental_sword_sci-fi_attack_01",
           "volume": 0.3,
-          "pitch": 1.2
+          "pitch": 1.5
         }
       },
       {
@@ -35,21 +35,21 @@
         "upswing": 0.5,
         "animation": "bettercombat:two_handed_slash_horizontal_right",
         "swing_sound": {
-          "id": "simplyswords:elemental_sword_holy_attack_02",
+          "id": "simplyswords:elemental_sword_sci-fi_attack_02",
           "volume": 0.3,
-          "pitch": 1.1
+          "pitch": 1.6
         }
       },
       {
         "hitbox": "HORIZONTAL_PLANE",
         "damage_multiplier": 1,
         "angle": 360,
-        "upswing": 0.3,
-        "animation": "simplyswords:chakram_spin",
+        "upswing": 0.5,
+        "animation": "bettercombat:two_handed_spin",
         "swing_sound": {
-          "id": "simplyswords:elemental_sword_holy_attack_01",
+          "id": "simplyswords:elemental_sword_sci-fi_attack_03",
           "volume": 0.3,
-          "pitch": 1.3
+          "pitch": 1.7
         }
       }
     ]

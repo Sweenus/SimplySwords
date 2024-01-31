@@ -778,5 +778,10 @@
     "sounds": [
       "simplyswords:magic_shamanic_nordic_27"
     ]
+  },
+  "ambience_wind_loop": {
+    "sounds": [
+      "simplyswords:ambience_wind_loop"
+    ]
   }
 }

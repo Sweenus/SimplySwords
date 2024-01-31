@@ -325,5 +325,7 @@ public class SoundRegistry {
             SoundEvent.of(new Identifier(SimplySwords.MOD_ID, "magic_shamanic_nordic_23")));
     public static final RegistrySupplier<SoundEvent> MAGIC_SHAMANIC_NORDIC_27 = SOUND.register("magic_shamanic_nordic_27", () ->
             SoundEvent.of(new Identifier(SimplySwords.MOD_ID, "magic_shamanic_nordic_27")));
+    public static final RegistrySupplier<SoundEvent> AMBIENCE_WIND_LOOP = SOUND.register("ambience_wind_loop", () ->
+            SoundEvent.of(new Identifier(SimplySwords.MOD_ID, "ambience_wind_loop")));
 
 }

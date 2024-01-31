@@ -31,7 +31,9 @@ public class OrbitingEffect extends StatusEffect {
                 double angleOffset = i * (Math.PI / 4);
                 double verticalOffset = center.y;
                 if (amplifier > 2)
-                    verticalOffset = livingEntity.getPos().y + (i * 0.4);
+                    verticalOffset = livingEntity.getPos().y + Math.min(i * 0.4, 3);
+                if (amplifier > 2)
+                    radius = 0.3 + (i * 0.1);
                 // Calculate the x and z coordinates on the orbit with the angle offset
                 double x = center.x + radius * Math.cos(currentAngle + angleOffset);
                 double z = center.z + radius * Math.sin(currentAngle + angleOffset);

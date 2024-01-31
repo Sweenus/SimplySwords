@@ -1,0 +1,47 @@
+{
+  "attributes": {
+    "attack_range": 5.0,
+    "two_handed": false,
+    "category": "chakram",
+    "attacks": [
+      {
+        "hitbox": "FORWARD_BOX",
+        "damage_multiplier": 1,
+        "angle": 0,
+        "upswing": 0.3,
+        "animation": "simplyswords:one_handed_chakram_throw_left",
+        "swing_sound": {
+          "id": "simplyswords:elemental_sword_water_attack_01",
+          "pitch": 1.5,
+          "sound": 0.2
+        }
+      },
+      {
+        "hitbox": "HORIZONTAL_PLANE",
+        "conditions": ["DUAL_WIELDING_SAME_CATEGORY", "MAIN_HAND_ONLY"],
+        "damage_multiplier": 1,
+        "angle": 360,
+        "upswing": 0.3,
+        "animation": "simplyswords:chakram_spin",
+        "swing_sound": {
+          "id": "simplyswords:elemental_sword_water_attack_02",
+          "pitch": 1.4,
+          "sound": 0.2
+        }
+      },
+      {
+        "hitbox": "HORIZONTAL_PLANE",
+        "conditions": ["DUAL_WIELDING_SAME_CATEGORY", "OFF_HAND_ONLY"],
+        "damage_multiplier": 1,
+        "angle": 360,
+        "upswing": 0.3,
+        "animation": "simplyswords:chakram_spin_long_grounded",
+        "swing_sound": {
+          "id": "simplyswords:elemental_sword_water_attack_03",
+          "pitch": 1.5,
+          "sound": 0.2
+        }
+      }
+    ]
+  }
+}

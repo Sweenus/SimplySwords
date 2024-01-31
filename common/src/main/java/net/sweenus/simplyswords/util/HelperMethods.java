@@ -28,6 +28,7 @@ import net.minecraft.world.World;
 import net.sweenus.simplyswords.SimplySwordsExpectPlatform;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.ConfigDefaultValues;
+import net.sweenus.simplyswords.effect.instance.SimplySwordsStatusEffectInstance;
 import net.sweenus.simplyswords.entity.BattleStandardDarkEntity;
 import net.sweenus.simplyswords.entity.BattleStandardEntity;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
@@ -328,6 +329,35 @@ public class HelperMethods {
                     statusEffect, Math.max(currentDuration, duration), Math.min(amplifierMax, currentAmplifier + amplifier), false, false, true));
         }
         livingEntity.addStatusEffect(new StatusEffectInstance(statusEffect, duration, 0, false, false, true));
+    }
+
+    public static SimplySwordsStatusEffectInstance incrementSimplySwordsStatusEffect(
+            LivingEntity livingEntity,
+            StatusEffect statusEffect,
+            int duration,
+            int amplifier,
+            int amplifierMax) {
+
+        SimplySwordsStatusEffectInstance statusReturn;
+        if (livingEntity.hasStatusEffect(statusEffect)) {
+            int currentDuration = livingEntity.getStatusEffect(statusEffect).getDuration();
+            int currentAmplifier = livingEntity.getStatusEffect(statusEffect).getAmplifier();
+
+            if (currentAmplifier >= amplifierMax) {
+                statusReturn = new SimplySwordsStatusEffectInstance(statusEffect, Math.max(currentDuration, duration),
+                        currentAmplifier, false, false, true);
+                        livingEntity.addStatusEffect(statusReturn);
+                return statusReturn;
+            }
+
+            livingEntity.addStatusEffect(new StatusEffectInstance(
+                    statusEffect, Math.max(currentDuration, duration), Math.min(amplifierMax, currentAmplifier + amplifier),
+                    false, false, true));
+        }
+        statusReturn = new SimplySwordsStatusEffectInstance(statusEffect, duration, 0,
+                false, false, true);
+        livingEntity.addStatusEffect(statusReturn);
+        return statusReturn;
     }
 
     public static void decrementStatusEffect(LivingEntity livingEntity, StatusEffect statusEffect) {

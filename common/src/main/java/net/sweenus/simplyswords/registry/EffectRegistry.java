@@ -50,4 +50,21 @@ public class EffectRegistry {
     public static final RegistrySupplier<StatusEffect> VOIDASSAULT = EFFECT.register("void_assault", () ->
             new VoidAssaultEffect(StatusEffectCategory.HARMFUL, 1124687));
 
+    public static final RegistrySupplier<StatusEffect> FIRE_VORTEX = EFFECT.register("fire_vortex", () ->
+            new FireVortexEffect(StatusEffectCategory.HARMFUL, 1124687)
+                    .addAttributeModifier(EntityAttributes.GENERIC_ARMOR,
+                            "f20d79bc-5f73-49d3-9e3f-30bf9a8da15a",
+                            -0.01,
+                            EntityAttributeModifier.Operation.MULTIPLY_TOTAL));
+
+    public static final RegistrySupplier<StatusEffect> FROST_VORTEX = EFFECT.register("frost_vortex", () ->
+            new FrostVortexEffect(StatusEffectCategory.HARMFUL, 1124687)
+                    .addAttributeModifier(EntityAttributes.GENERIC_MOVEMENT_SPEED,
+                            "d0814391-9325-441e-bc7e-ace3f8f89a21",
+                            -0.01,
+                            EntityAttributeModifier.Operation.MULTIPLY_TOTAL));
+
+    public static final RegistrySupplier<StatusEffect> ELEMENTAL_VORTEX = EFFECT.register("elemental_vortex", () ->
+            new ElementalVortexEffect(StatusEffectCategory.BENEFICIAL, 1124687));
+
 }

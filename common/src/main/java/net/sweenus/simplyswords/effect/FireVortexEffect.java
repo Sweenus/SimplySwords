@@ -4,13 +4,15 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffectCategory;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.server.world.ServerWorld;
 import net.sweenus.simplyswords.effect.instance.SimplySwordsStatusEffectInstance;
 import net.sweenus.simplyswords.registry.EffectRegistry;
+import net.sweenus.simplyswords.util.HelperMethods;
 
-public class VoidAssaultEffect extends OrbitingEffect {
+public class FireVortexEffect extends OrbitingEffect {
     public LivingEntity sourceEntity; // The player who applied the effect
     public int additionalData; // Additional integer data
-    public VoidAssaultEffect(StatusEffectCategory statusEffectCategory, int color) {
+    public FireVortexEffect(StatusEffectCategory statusEffectCategory, int color) {
         super (statusEffectCategory, color);
         setParticleType(ParticleTypes.SMOKE);
     }
@@ -24,18 +26,23 @@ public class VoidAssaultEffect extends OrbitingEffect {
     @Override
     public void applyUpdateEffect(LivingEntity livingEntity, int amplifier) {
         if (!livingEntity.getWorld().isClient()) {
-
-            if (livingEntity.getStatusEffect(EffectRegistry.VOIDASSAULT.get()) instanceof SimplySwordsStatusEffectInstance statusEffect) {
+            ServerWorld serverWorld = (ServerWorld) livingEntity.getWorld();
+            if (livingEntity.getStatusEffect(EffectRegistry.FIRE_VORTEX.get()) instanceof SimplySwordsStatusEffectInstance statusEffect) {
                 sourceEntity = statusEffect.getSourceEntity();
                 additionalData = statusEffect.getAdditionalData();
             }
 
-            if (livingEntity.age % Math.max(1, (12 - (amplifier * 2))) == 0 && additionalData != 0) {
+            if (livingEntity.age % Math.max(1, (15 - (amplifier))) == 0 && additionalData != 0) {
                 DamageSource damageSource = livingEntity.getDamageSources().magic();
                 livingEntity.timeUntilRegen = 0;
                 if (sourceEntity != null)
                     damageSource = livingEntity.getDamageSources().indirectMagic(livingEntity, sourceEntity);
-                livingEntity.damage(damageSource, additionalData + amplifier);
+                livingEntity.damage(damageSource, 1 + ((float) amplifier / 4));
+            }
+
+            if (livingEntity.age % 40 == 0 && amplifier > 5) {
+                HelperMethods.spawnOrbitParticles(serverWorld, livingEntity.getPos(), ParticleTypes.LAVA, 1, 4);
+                HelperMethods.spawnOrbitParticles(serverWorld, livingEntity.getPos(), ParticleTypes.CAMPFIRE_SIGNAL_SMOKE, 2, 10);
             }
         }
         super.applyUpdateEffect(livingEntity, amplifier);

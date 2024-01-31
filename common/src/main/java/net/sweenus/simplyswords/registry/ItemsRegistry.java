@@ -886,5 +886,11 @@ public class ItemsRegistry {
                     wickpiercer_attackspeed,
                     new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof()));
 
+    public static final RegistrySupplier<TempestSwordItem> TEMPEST = ITEM.register( "tempest", () ->
+            new TempestSwordItem(ModToolMaterial.UNIQUE,
+                    (int) (mjolnir_damage_modifier),
+                    mjolnir_attackspeed,
+                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof()));
+
 
 }

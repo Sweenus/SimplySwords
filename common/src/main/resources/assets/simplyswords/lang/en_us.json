@@ -113,6 +113,7 @@
   "item.simplyswords.hiveheart":                                                                                        "Hiveheart",
   "item.simplyswords.stars_edge":                                                                                       "Star's Edge",
   "item.simplyswords.wickpiercer":                                                                                      "Wickpiercer",
+  "item.simplyswords.dreadtide":                                                                                        "Dreadtide",
 
 
   "item.simplyswords.runic_tablet":                                                                                     "Runic Tablet",
@@ -1059,6 +1060,7 @@
   "text.autoconfig.simplyswords_main.option.weapon_attributes.hiveheart_damageModifier":                                "§6Hiveheart§7 damage modifier",
   "text.autoconfig.simplyswords_main.option.weapon_attributes.starsedge_damageModifier":                                "§6Star's Edge§7 damage modifier",
   "text.autoconfig.simplyswords_main.option.weapon_attributes.wickpiercer_damageModifier":                              "§6Wickpiercer§7 damage modifier",
+  "text.autoconfig.simplyswords_main.option.weapon_attributes.dreadtide_damageModifier":                                "§6Dreadtide§7 damage modifier",
 
   "text.autoconfig.simplyswords_main.option.weapon_attributes.brimstone_attackSpeed.@PrefixText" :                      "§6[Attack Speed Modifiers]§7\nRecommended range: -1.0 to -3.7, with -1.0 being fast and -3.7 being slow.",
   "text.autoconfig.simplyswords_main.option.weapon_attributes.brimstone_attackSpeed":                                   "§6Brimstone§7 attack speed",
@@ -1093,6 +1095,7 @@
   "text.autoconfig.simplyswords_main.option.weapon_attributes.hiveheart_attackSpeed":                                   "§6Hiveheart§7 attack speed",
   "text.autoconfig.simplyswords_main.option.weapon_attributes.starsedge_attackSpeed":                                   "§6Star's Edge§7 attack speed",
   "text.autoconfig.simplyswords_main.option.weapon_attributes.wickpiercer_attackSpeed":                                 "§6Wickpiercer§7 attack speed",
+  "text.autoconfig.simplyswords_main.option.weapon_attributes.dreadtide_attackSpeed":                                   "§6Dreadtide§7 attack speed",
 
 
   "text.autoconfig.simplyswords_main.option.runic_effects.enableActiveDefence.@PrefixText" :                            "§a[Runic Power Blacklisting]§7\nSetting any of the below values to false will prevent that runic power from being obtainable.",
