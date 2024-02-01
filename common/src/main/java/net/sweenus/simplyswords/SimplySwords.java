@@ -36,11 +36,13 @@ import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.EntityRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
+import net.sweenus.simplyswords.util.FileCopier;
 import net.sweenus.simplyswords.util.ModLootTableModifiers;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
+import java.io.IOException;
 
 public class SimplySwords {
     public static final String MOD_ID = "simplyswords";
@@ -68,7 +70,7 @@ public class SimplySwords {
     public static UniqueEffectsConfig uniqueEffectsConfig;
     public static WeaponAttributesConfig weaponAttributesConfig;
 
-    public static String minimumEldritchEndVersion = "0.2.32";
+    public static String minimumEldritchEndVersion = "0.2.40";
 
     public static void init() {
 
@@ -118,6 +120,11 @@ public class SimplySwords {
         if (passVersionCheck("eldritch_end", minimumEldritchEndVersion)) {
             EldritchEndCompat.registerModItems();
             EldritchEndCompatRegistry.EFFECT.register();
+        }
+        try {
+            FileCopier.copyFileToConfigDirectory();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
 
         //Don't announce via in-game chat because that's kinda annoying

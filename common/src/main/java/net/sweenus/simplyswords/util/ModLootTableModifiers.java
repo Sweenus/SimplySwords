@@ -6,8 +6,6 @@ import net.minecraft.loot.condition.RandomChanceLootCondition;
 import net.minecraft.loot.entry.ItemEntry;
 import net.minecraft.loot.function.EnchantRandomlyLootFunction;
 import net.minecraft.loot.provider.number.ConstantLootNumberProvider;
-import net.sweenus.simplyswords.SimplySwords;
-import net.sweenus.simplyswords.compat.EldritchEndCompat;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.ConfigDefaultValues;
 import net.sweenus.simplyswords.config.SimplySwordsConfig;
@@ -271,18 +269,6 @@ public class ModLootTableModifiers {
                         context.addPool(pool);
                     }
                 }
-            }
-        }));
-
-        //Eldritch End Compat
-        LootEvent.MODIFY_LOOT_TABLE.register(((lootTables, id, context, builtin) -> {
-            if (Config.getBoolean("enableLootDrops", "Loot", ConfigDefaultValues.enableLootDrops) && id.getPath().contains("entities/aberration")
-            && SimplySwords.passVersionCheck("eldritch_end", SimplySwords.minimumEldritchEndVersion)) {
-                LootPool.Builder pool = LootPool.builder()
-                        .rolls(ConstantLootNumberProvider.create(1))
-                        .conditionally(RandomChanceLootCondition.builder(0.05f)) // 1 = 100% of the time
-                        .with(ItemEntry.builder(EldritchEndCompat.DREADTIDE.get()));
-                context.addPool(pool);
             }
         }));
 
