@@ -19,15 +19,6 @@ public class EldritchEndCompat {
 
     public static final DeferredRegister<Item> ITEM = ItemsRegistry.ITEM;
 
-    /*
-    public static final Item DREADTIDE = registerItem( "dreadtide",
-            new DreadtideSwordItem(EldritchEndCompatMaterial.ABERRATION,
-                    (int) (dreadtide_damage_modifier),
-                    dreadtide_attackspeed,
-                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof()));
-
-     */
-
     public static final RegistrySupplier<DreadtideSwordItem> DREADTIDE = ITEM.register( "dreadtide", () ->
             new DreadtideSwordItem(EldritchEndCompatMaterial.ABERRATION,
                     (int) (dreadtide_damage_modifier),
