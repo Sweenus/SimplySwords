@@ -1,4 +1,4 @@
-package net.sweenus.simplyswords.fabric.compat.eldritch_end;
+package net.sweenus.simplyswords.compat.eldritch_end;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffect;

@@ -1,4 +1,4 @@
-package net.sweenus.simplyswords.fabric.item;
+package net.sweenus.simplyswords.item.custom;
 
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.Entity;

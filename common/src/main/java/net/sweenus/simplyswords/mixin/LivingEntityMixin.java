@@ -7,7 +7,11 @@ import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.registry.Registries;
+import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
+import net.sweenus.simplyswords.SimplySwords;
+import net.sweenus.simplyswords.compat.eldritch_end.EldritchEndCompatMethods;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.ConfigDefaultValues;
 import net.sweenus.simplyswords.registry.EffectRegistry;
@@ -18,7 +22,10 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+import static net.sweenus.simplyswords.SimplySwords.minimumEldritchEndVersion;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin {
@@ -58,6 +65,17 @@ public abstract class LivingEntityMixin {
             HelperMethods.decrementStatusEffect(livingEntity, EffectRegistry.VOIDCLOAK.get());
         }
         return amount;
+    }
+
+    @Inject(at = @At("HEAD"), method = "tick")
+    public void simplyswords$tick(CallbackInfo ci) {
+        LivingEntity livingEntity = (LivingEntity) (Object) this;
+        if (!livingEntity.getWorld().isClient()) {
+
+            if (SimplySwords.passVersionCheck("eldritch_end", minimumEldritchEndVersion)
+                    && Registries.STATUS_EFFECT.get(new Identifier("simplyswords:voidhunger")) != null)
+                EldritchEndCompatMethods.generateVoidcloakStacks(livingEntity);
+        }
     }
 
 }

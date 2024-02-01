@@ -1,6 +1,7 @@
 package net.sweenus.simplyswords;
 
 import com.google.gson.JsonObject;
+import dev.architectury.platform.Platform;
 import dev.architectury.registry.CreativeTabRegistry;
 import dev.architectury.registry.client.level.entity.EntityModelLayerRegistry;
 import dev.architectury.registry.client.level.entity.EntityRendererRegistry;
@@ -25,6 +26,8 @@ import net.sweenus.simplyswords.client.renderer.BattleStandardDarkRenderer;
 import net.sweenus.simplyswords.client.renderer.BattleStandardRenderer;
 import net.sweenus.simplyswords.client.renderer.model.BattleStandardDarkModel;
 import net.sweenus.simplyswords.client.renderer.model.BattleStandardModel;
+import net.sweenus.simplyswords.compat.EldritchEndCompat;
+import net.sweenus.simplyswords.compat.eldritch_end.EldritchEndCompatRegistry;
 import net.sweenus.simplyswords.config.*;
 import net.sweenus.simplyswords.entity.BattleStandardDarkEntity;
 import net.sweenus.simplyswords.entity.BattleStandardEntity;
@@ -64,6 +67,8 @@ public class SimplySwords {
     public static StatusEffectsConfig statusEffectsConfig;
     public static UniqueEffectsConfig uniqueEffectsConfig;
     public static WeaponAttributesConfig weaponAttributesConfig;
+
+    public static String minimumEldritchEndVersion = "0.2.30";
 
     public static void init() {
 
@@ -110,6 +115,10 @@ public class SimplySwords {
         EntityAttributeRegistry.register(EntityRegistry.BATTLESTANDARDDARK, BattleStandardDarkEntity::createBattleStandardDarkAttributes);
         EntityAttributeRegistry.register(EntityRegistry.SIMPLYBEEENTITY, SimplySwordsBeeEntity::createSimplyBeeAttributes);
         ModLootTableModifiers.init();
+        if (passVersionCheck("eldritch_end", minimumEldritchEndVersion)) {
+            EldritchEndCompat.registerModItems();
+            EldritchEndCompatRegistry.EFFECT.register();
+        }
 
         //Don't announce via in-game chat because that's kinda annoying
         //ClientPlayerEvent.CLIENT_PLAYER_JOIN.register(new EventGameStart());
@@ -117,6 +126,15 @@ public class SimplySwords {
         System.out.println(SimplySwordsExpectPlatform.getConfigDirectory().toAbsolutePath().normalize().toString());
         EnvExecutor.runInEnv(Env.CLIENT, () -> SimplySwords.Client::initializeClient);
 
+    }
+
+    public static boolean passVersionCheck(String modId, String requiredVersion) {
+        if (Platform.isModLoaded(modId)) {
+            if (Platform.getMod(modId).getVersion().compareTo(requiredVersion) >= 0) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Environment(EnvType.CLIENT)
