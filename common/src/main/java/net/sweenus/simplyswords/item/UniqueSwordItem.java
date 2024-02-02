@@ -55,6 +55,7 @@ public class UniqueSwordItem extends SwordItem {
         Style COMMON = HelperMethods.getStyle("common");
         Style UNIQUE = HelperMethods.getStyle("unique");
         Style LEGENDARY = HelperMethods.getStyle("legendary");
+        Style CORRUPTED = HelperMethods.getStyle("corrupted");
 
         if (this.getDefaultStack().isOf(ItemsRegistry.AWAKENED_LICHBLADE.get())
                 || this.getDefaultStack().isOf(ItemsRegistry.HARBINGER.get())

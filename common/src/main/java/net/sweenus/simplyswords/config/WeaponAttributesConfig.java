@@ -121,7 +121,7 @@ public class WeaponAttributesConfig implements ConfigData {
     public float hiveheart_damageModifier = 7.0f;
     public float starsedge_damageModifier = 3.0f;
     public float wickpiercer_damageModifier = 4.0f;
-    public float dreadtide_damageModifier = 4.0f;
+    public float dreadtide_damageModifier = 3.0f;
     public float tempest_damageModifier = 0.0f;
 
     @ConfigEntry.Gui.PrefixText

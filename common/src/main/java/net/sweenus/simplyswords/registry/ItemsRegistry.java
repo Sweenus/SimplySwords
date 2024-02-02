@@ -103,7 +103,6 @@ public class ItemsRegistry {
     static float starsedge_attackspeed = Config.getFloat("starsedge_attackSpeed", "WeaponAttributes", ConfigDefaultValues.starsedge_attackSpeed);
     static float wickpiercer_attackspeed = Config.getFloat("wickpiercer_attackSpeed", "WeaponAttributes", ConfigDefaultValues.wickpiercer_attackSpeed);
     static float tempest_attackspeed = Config.getFloat("tempest_attackSpeed", "WeaponAttributes", ConfigDefaultValues.tempest_attackSpeed);
-    static float dreadtide_attackspeed = Config.getFloat("dreadtide_attackSpeed", "WeaponAttributes", ConfigDefaultValues.dreadtide_attackSpeed);
 
 
 
@@ -140,7 +139,6 @@ public class ItemsRegistry {
     static float starsedge_damage_modifier = Config.getFloat("starsedge_damageModifier", "WeaponAttributes", ConfigDefaultValues.starsedge_damageModifier);
     static float wickpiercer_damage_modifier = Config.getFloat("wickpiercer_damageModifier", "WeaponAttributes", ConfigDefaultValues.wickpiercer_damageModifier);
     static float tempest_damage_modifier = Config.getFloat("tempest_damageModifier", "WeaponAttributes", ConfigDefaultValues.tempest_damageModifier);
-    static float dreadtide_damage_modifier = Config.getFloat("dreadtide_damageModifier", "WeaponAttributes", ConfigDefaultValues.dreadtide_damageModifier);
 
 
     public static final DeferredRegister<Item> ITEM = DeferredRegister.create(SimplySwords.MOD_ID, RegistryKeys.ITEM);

@@ -70,7 +70,7 @@ public class SimplySwords {
     public static UniqueEffectsConfig uniqueEffectsConfig;
     public static WeaponAttributesConfig weaponAttributesConfig;
 
-    public static String minimumEldritchEndVersion = "0.2.40";
+    public static String minimumEldritchEndVersion = "0.2.31"; //0.2.40
 
     public static void init() {
 

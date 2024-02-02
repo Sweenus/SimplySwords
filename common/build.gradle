@@ -5,6 +5,30 @@ architectury {
 loom {
     accessWidenerPath = file("src/main/resources/simplyswords.accesswidener")
 }
+repositories {
+    maven {
+        url "https://www.cursemaven.com"
+        content {
+            includeGroup "curse.maven"
+        }
+    }
+    maven { url 'https://maven.blamejared.com' }
+    maven {
+        name = 'Modrinth'
+        url = 'https://api.modrinth.com/maven'
+        content {
+            includeGroup 'maven.modrinth'
+        }
+    }
+    mavenLocal()
+    maven {
+        name 'Gegy'
+        url 'https://maven.gegy.dev'
+    }
+    maven { url = "https://jitpack.io" }
+    maven { url "https://maven.shedaniel.me/" }
+    maven { url "https://maven.terraformersmc.com/releases/" }
+}
 
 dependencies {
     // We depend on fabric loader here to use the fabric @Environment annotations and get the mixin dependencies
@@ -15,6 +39,7 @@ dependencies {
     modApi("me.shedaniel.cloth:cloth-config:${rootProject.cloth_config_version}") {
         exclude(group: "net.fabricmc.fabric-api")
     }
+    modImplementation "curse.maven:necronomicon-586157:${rootProject.necronomicon_version}"
 }
 
 publishing {

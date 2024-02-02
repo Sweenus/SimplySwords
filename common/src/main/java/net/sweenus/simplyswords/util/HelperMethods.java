@@ -62,20 +62,28 @@ public class HelperMethods {
     }
 
     public static Style getStyle(String styleType) {
-        int rgbCommon = 0xFFFFFF;
-        int rgbRunic = 0x9D62CA;
-        int rgbUnique = 0xE2A834;
-        int rgbLegendary = 0xE26234;
-        int rgbAbility = 0xE2A834;
-        int rgbRightClick = 0x20BD69;
+        int rgbCommon =             0xFFFFFF;
+        int rgbRunic =              0x9D62CA;
+        int rgbUnique =             0xE2A834;
+        int rgbLegendary =          0xE26234;
+        int rgbAbility =            0xE2A834;
+        int rgbRightClick =         0x20BD69;
+        int rgbCorrupted =          0x544988;
+        int rgbCorruptedLight =     0x7140A3;
+        int rgbCorruptedAbility =   0xA987C2;
+        int rgbCorruptedText =      0x7E7883;
         int rgbText = 0xE0E0E0;
-        Style COMMON = Style.EMPTY.withColor(TextColor.fromRgb(rgbCommon));
-        Style UNIQUE = Style.EMPTY.withColor(TextColor.fromRgb(rgbUnique));
-        Style LEGENDARY = Style.EMPTY.withColor(TextColor.fromRgb(rgbLegendary));
-        Style ABILITY = Style.EMPTY.withColor(TextColor.fromRgb(rgbAbility));
-        Style RIGHTCLICK = Style.EMPTY.withColor(TextColor.fromRgb(rgbRightClick));
-        Style RUNIC = Style.EMPTY.withColor(TextColor.fromRgb(rgbRunic));
-        Style TEXT = Style.EMPTY.withColor(TextColor.fromRgb(rgbText));
+        Style COMMON =              Style.EMPTY.withColor(TextColor.fromRgb(rgbCommon));
+        Style UNIQUE =              Style.EMPTY.withColor(TextColor.fromRgb(rgbUnique));
+        Style LEGENDARY =           Style.EMPTY.withColor(TextColor.fromRgb(rgbLegendary));
+        Style ABILITY =             Style.EMPTY.withColor(TextColor.fromRgb(rgbAbility));
+        Style RIGHTCLICK =          Style.EMPTY.withColor(TextColor.fromRgb(rgbRightClick));
+        Style RUNIC =               Style.EMPTY.withColor(TextColor.fromRgb(rgbRunic));
+        Style CORRUPTED =           Style.EMPTY.withColor(TextColor.fromRgb(rgbCorrupted));
+        Style CORRUPTED_LIGHT =     Style.EMPTY.withColor(TextColor.fromRgb(rgbCorruptedLight));
+        Style CORRUPTED_ABILITY =   Style.EMPTY.withColor(TextColor.fromRgb(rgbCorruptedAbility));
+        Style CORRUPTED_TEXT =      Style.EMPTY.withColor(TextColor.fromRgb(rgbCorruptedText));
+        Style TEXT =                Style.EMPTY.withColor(TextColor.fromRgb(rgbText));
 
         return switch (styleType) {
             case "unique" -> UNIQUE;
@@ -83,6 +91,10 @@ public class HelperMethods {
             case "ability" -> ABILITY;
             case "rightclick" -> RIGHTCLICK;
             case "runic" -> RUNIC;
+            case "corrupted" -> CORRUPTED;
+            case "corrupted_light" -> CORRUPTED_LIGHT;
+            case "corrupted_ability" -> CORRUPTED_ABILITY;
+            case "corrupted_text" -> CORRUPTED_TEXT;
             case "text" -> TEXT;
             default -> COMMON;
         };

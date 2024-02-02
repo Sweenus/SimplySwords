@@ -207,5 +207,9 @@ public class UniqueEffectsConfig implements ConfigData {
     public float voidcallerDuration = 250f;
     public float voidcallerStartingTickFrequency = 12f;
     public float voidcallerDamageModifier = 1.0f;
+    public float voidcallerCorruptionFrequency = 60f;
+    public float voidcallerCorruptionPerTick = 1.0f;
+    public float voidcallerCorruptionDuration = 1200f;
+    public float voidcallerCorruptionMax = 100f;
 
 }

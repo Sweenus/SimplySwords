@@ -1,5 +1,6 @@
 package net.sweenus.simplyswords.item.custom;
 
+import elocindev.necronomicon.api.text.TextAPI;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -11,6 +12,7 @@ import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvent;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
@@ -109,15 +111,24 @@ public class DreadtideSwordItem extends UniqueSwordItem {
 
         super.inventoryTick(stack, world, entity, slot, selected);
     }
+    @Override
+    public Text getName(ItemStack stack) {
+        MutableText name = Text.translatable(stack.getTranslationKey());
+        Style bold = name.getStyle().withBold(true);
+        return TextAPI.Styles.getGradient(Text.translatable(this.getTranslationKey(stack)).setStyle(bold), 1, 6043781, 12088090, 1.0F);
+    }
 
     @Override
     public void appendTooltip(ItemStack itemStack, World world, List<Text> tooltip, TooltipContext tooltipContext) {
-        Style RIGHTCLICK = HelperMethods.getStyle("rightclick");
-        Style ABILITY = HelperMethods.getStyle("ability");
-        Style TEXT = HelperMethods.getStyle("text");
+        Style CORRUPTED_LIGHT = HelperMethods.getStyle("corrupted_light");
+        Style CORRUPTED_ABILITY = HelperMethods.getStyle("corrupted_ability");
+        Style TEXT = HelperMethods.getStyle("corrupted_text");
+        MutableText ability_icon = Text.empty().append("\uA996 ");
+        MutableText type = TextAPI.Styles.getGradient(Text.translatable("item.eldritch_end.xalarath.type"), 1, 6043781, 9326287, 1.0F);
 
+        tooltip.add(Text.literal("\uA999 ").append(type.fillStyle(type.getStyle().withUnderline(true))));
         tooltip.add(Text.literal(""));
-        tooltip.add(Text.translatable("item.simplyswords.dreadtidesworditem.tooltip1").setStyle(ABILITY));
+        tooltip.add(Text.translatable("item.simplyswords.dreadtidesworditem.tooltip1").setStyle(CORRUPTED_ABILITY));
         tooltip.add(Text.translatable("item.simplyswords.dreadtidesworditem.tooltip2").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.dreadtidesworditem.tooltip3").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.dreadtidesworditem.tooltip4").setStyle(TEXT));
@@ -126,14 +137,14 @@ public class DreadtideSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.dreadtidesworditem.tooltip6").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.dreadtidesworditem.tooltip7").setStyle(TEXT));
         tooltip.add(Text.literal(""));
-        tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(RIGHTCLICK));
+        tooltip.add(ability_icon.append(Text.translatable("item.simplyswords.onrightclick").setStyle(CORRUPTED_LIGHT)));
         tooltip.add(Text.translatable("item.simplyswords.dreadtidesworditem.tooltip8").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.dreadtidesworditem.tooltip9").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.dreadtidesworditem.tooltip10").setStyle(TEXT));
         tooltip.add(Text.translatable("item.simplyswords.dreadtidesworditem.tooltip11").setStyle(TEXT));
         tooltip.add(Text.literal(""));
-        tooltip.add(Text.translatable("item.simplyswords.dreadtidesworditem.tooltip12").setStyle(TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.dreadtidesworditem.tooltip13").setStyle(TEXT));
+        tooltip.add(Text.literal("\uA999 ").append(Text.translatable("item.simplyswords.dreadtidesworditem.tooltip12").setStyle(HelperMethods.getStyle("corrupted"))));
+        tooltip.add(Text.translatable("item.simplyswords.dreadtidesworditem.tooltip13").setStyle(HelperMethods.getStyle("corrupted")));
 
         super.appendTooltip(itemStack, world, tooltip, tooltipContext);
     }

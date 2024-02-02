@@ -1413,6 +1413,10 @@
   "text.autoconfig.simplyswords_main.option.unique_effects.voidcallerDuration":                                         "Voidcaller duration",
   "text.autoconfig.simplyswords_main.option.unique_effects.voidcallerStartingTickFrequency":                            "Voidcaller starting tick frequency",
   "text.autoconfig.simplyswords_main.option.unique_effects.voidcallerDamageModifier":                                   "Voidcaller damage modifier",
+  "text.autoconfig.simplyswords_main.option.unique_effects.voidcallerCorruptionFrequency":                              "Voidcaller Corruption frequency",
+  "text.autoconfig.simplyswords_main.option.unique_effects.voidcallerCorruptionPerTick":                                "Voidcaller Corruption per tick",
+  "text.autoconfig.simplyswords_main.option.unique_effects.voidcallerCorruptionDuration":                               "Voidcaller Corruption duration",
+  "text.autoconfig.simplyswords_main.option.unique_effects.voidcallerCorruptionMax":                                    "Voidcaller Corruption max",
 
   "text.autoconfig.simplyswords_main.option.unique_effects.vortexDuration.@PrefixText" :                                "§6[Tempest]§7",
   "text.autoconfig.simplyswords_main.option.unique_effects.vortexDuration":                                             "Vortex duration",

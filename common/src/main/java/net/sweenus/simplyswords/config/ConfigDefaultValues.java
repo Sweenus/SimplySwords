@@ -199,6 +199,10 @@ public class ConfigDefaultValues {
     public static float voidcallerDuration = 250f;
     public static float voidcallerStartingTickFrequency = 12f;
     public static float voidcallerDamageModifier = 1.0f;
+    public static float voidcallerCorruptionFrequency = 60f;
+    public static float voidcallerCorruptionPerTick = 1.0f;
+    public static float voidcallerCorruptionDuration = 1200f;
+    public static float voidcallerCorruptionMax = 100f;
     
     // -- WEAPON ATTRIBUTES -- //
 
@@ -315,7 +319,7 @@ public class ConfigDefaultValues {
     public static float hiveheart_damageModifier = 7.0f;
     public static float starsedge_damageModifier = 3.0f;
     public static float wickpiercer_damageModifier = 4.0f;
-    public static float dreadtide_damageModifier = 4.0f;
+    public static float dreadtide_damageModifier = 3.0f;
     public static float tempest_damageModifier = 0.0f;
 
     
@@ -462,13 +466,13 @@ public class ConfigDefaultValues {
     public static boolean enableLootInVillages = false;
     public static boolean enableTheWatcher = true;
     
-    public static float standardLootTableWeight = 0.03f;
+    public static float standardLootTableWeight = 0.01f;
     
-    public static float rareLootTableWeight = 0.02f;
+    public static float rareLootTableWeight = 0.008f;
     
-    public static float runicLootTableWeight = 0.02f;
+    public static float runicLootTableWeight = 0.008f;
     
-    public static float uniqueLootTableWeight = 0.01f;
+    public static float uniqueLootTableWeight = 0.005f;
     public static boolean enableWatchingWarglaive = true;
     public static boolean enableLongswordOfThePlague = true;
     public static boolean enableSwordOnAStick = true;
