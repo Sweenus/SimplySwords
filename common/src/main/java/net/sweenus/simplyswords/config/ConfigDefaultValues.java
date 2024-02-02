@@ -171,7 +171,7 @@ public class ConfigDefaultValues {
     public static float smoulderCooldown = 80f;
     public static float smoulderMaxStacks = 5f;
     public static float smoulderHeal = 15f;
-    public static float smoulderSpellScaling = 1.0f;
+    public static float smoulderSpellScaling = 0.4f;
 
 
     public static float waxweaveCooldown = 1200f;
@@ -194,7 +194,7 @@ public class ConfigDefaultValues {
     public static float vortexDuration = 1200f;
     public static float vortexMaxSize = 30f;
     public static float vortexMaxStacks = 10f;
-    public static float vortexSpellScaling = 1.0f;
+    public static float vortexSpellScaling = 0.3f;
 
     public static float voidcallerDuration = 250f;
     public static float voidcallerStartingTickFrequency = 12f;

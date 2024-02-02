@@ -75,7 +75,7 @@ public class DreadtideSwordItem extends UniqueSwordItem {
                             sounds.add(SoundRegistry.MAGIC_SHAMANIC_NORDIC_02.get());
                             sounds.add(SoundRegistry.MAGIC_SHAMANIC_NORDIC_02.get());
                             if (sounds.get(voidcloakEffect.getAmplifier()) != null)
-                                soundSelect = sounds.get(voidcloakEffect.getAmplifier());
+                                soundSelect = sounds.get(Math.min(5, voidcloakEffect.getAmplifier()));
 
                             int particleCount = 20; // Number of particles along the line
 

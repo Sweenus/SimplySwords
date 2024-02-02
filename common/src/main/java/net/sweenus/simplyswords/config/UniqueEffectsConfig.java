@@ -174,7 +174,7 @@ public class UniqueEffectsConfig implements ConfigData {
     public float smoulderCooldown = 80f;
     public float smoulderMaxStacks = 5f;
     public float smoulderHeal = 15f;
-    public float smoulderSpellScaling = 1.0f;
+    public float smoulderSpellScaling = 0.4f;
 
     @ConfigEntry.Gui.PrefixText
     public float waxweaveCooldown = 1200f;
@@ -201,7 +201,7 @@ public class UniqueEffectsConfig implements ConfigData {
     public float vortexDuration = 1200f;
     public float vortexMaxSize = 30f;
     public float vortexMaxStacks = 10f;
-    public float vortexSpellScaling = 1.0f;
+    public float vortexSpellScaling = 0.3f;
 
     @ConfigEntry.Gui.PrefixText
     public float voidcallerDuration = 250f;

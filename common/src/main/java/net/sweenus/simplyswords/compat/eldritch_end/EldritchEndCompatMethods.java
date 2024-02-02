@@ -24,7 +24,7 @@ public class EldritchEndCompatMethods {
                 int maxStacks = ((int) corruption / 20);
 
                 if (!stack.isEmpty() && (stack.isOf(EldritchEndCompat.DREADTIDE.get()))) {
-                    HelperMethods.incrementStatusEffect(livingEntity, EffectRegistry.VOIDCLOAK.get(), 280, 1, maxStacks+1);
+                    HelperMethods.incrementStatusEffect(livingEntity, EffectRegistry.VOIDCLOAK.get(), 280, 1, maxStacks-1);
                     livingEntity.getWorld().playSound(null, livingEntity.getBlockPos(), SoundRegistry.SPELL_FIRE.get(),
                             livingEntity.getSoundCategory(), 0.1f, 1.4f);
                 }
