@@ -14,13 +14,13 @@ public class LootConfig implements ConfigData {
     public boolean enableLootInVillages = false;
     public boolean enableTheWatcher = true;
     @ConfigEntry.Gui.Tooltip
-    public float standardLootTableWeight = 0.03f;
+    public float standardLootTableWeight = 0.01f;
     @ConfigEntry.Gui.Tooltip
-    public float rareLootTableWeight = 0.02f;
+    public float rareLootTableWeight = 0.004f;
     @ConfigEntry.Gui.Tooltip
-    public float runicLootTableWeight = 0.02f;
+    public float runicLootTableWeight = 0.007f;
     @ConfigEntry.Gui.Tooltip
-    public float uniqueLootTableWeight = 0.01f;
+    public float uniqueLootTableWeight = 0.001f;
     public boolean enableWatchingWarglaive = true;
     public boolean enableLongswordOfThePlague = true;
     public boolean enableSwordOnAStick = true;

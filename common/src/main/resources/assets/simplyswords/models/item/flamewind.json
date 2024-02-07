@@ -1,0 +1,10 @@
+{
+	"parent": "simplyswords:item/big_handheld",
+	"textures": {
+		"layer0": "simplyswords:item/flamewind_anim_01",
+		"layer1": "simplyswords:item/flamewind_anim_02",
+		"layer2": "simplyswords:item/flamewind_anim_03",
+		"layer3": "simplyswords:item/flamewind_anim_04",
+		"layer4": "simplyswords:item/flamewind_anim_05"
+	}
+}

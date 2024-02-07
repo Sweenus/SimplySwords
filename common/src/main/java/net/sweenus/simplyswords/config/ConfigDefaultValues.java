@@ -468,11 +468,11 @@ public class ConfigDefaultValues {
     
     public static float standardLootTableWeight = 0.01f;
     
-    public static float rareLootTableWeight = 0.008f;
+    public static float rareLootTableWeight = 0.004f;
     
-    public static float runicLootTableWeight = 0.008f;
+    public static float runicLootTableWeight = 0.007f;
     
-    public static float uniqueLootTableWeight = 0.005f;
+    public static float uniqueLootTableWeight = 0.001f;
     public static boolean enableWatchingWarglaive = true;
     public static boolean enableLongswordOfThePlague = true;
     public static boolean enableSwordOnAStick = true;
