@@ -113,6 +113,8 @@
   "item.simplyswords.hiveheart": "群蜂之心",
   "item.simplyswords.stars_edge": "星芒",
   "item.simplyswords.wickpiercer": "摇红",
+  "item.simplyswords.dreadtide": "怖潮",
+  "item.simplyswords.tempest": "烈风",
 
   
   "item.simplyswords.runic_tablet": "符文石板",
@@ -509,6 +511,12 @@
   "effect.simplyswords.onslaught": "暴起",
   "effect.simplyswords.smouldering": "阴燃",
   "effect.simplyswords.frenzy": "狂怒",
+  "effect.simplyswords.voidcloak": "虚空庇护",
+  "effect.simplyswords.void_assault": "虚空附加",
+  "effect.simplyswords.voidhunger": "虚空渴求",
+  "effect.simplyswords.fire_vortex": "炽热涡流",
+  "effect.simplyswords.frost_vortex": "极寒涡流",
+  "effect.simplyswords.elemental_vortex": "元素涡流",
 
   "item.simplyswords.onrightclick": "右键时：",
   "item.simplyswords.onrightclickheld": "长按右键时：",
@@ -742,6 +750,32 @@
   "item.simplyswords.wickpiercersworditem.tooltip4": "在此期间，每次",
   "item.simplyswords.wickpiercersworditem.tooltip5": "攻击造成两次伤",
   "item.simplyswords.wickpiercersworditem.tooltip6": "害，持续%s秒。",
+
+  "item.simplyswords.tempestsworditem.tooltip1": "独特效果：涡流",
+  "item.simplyswords.tempestsworditem.tooltip2": "你的攻击将会使",
+  "item.simplyswords.tempestsworditem.tooltip3": "标附着元素能量，",
+  "item.simplyswords.tempestsworditem.tooltip4": "附加负面效果并",
+  "item.simplyswords.tempestsworditem.tooltip5": "随时间造成伤害。",
+  "item.simplyswords.tempestsworditem.tooltip6": "此效果可以叠加。",
+  "item.simplyswords.tempestsworditem.tooltip7": "召回所有附近的",
+  "item.simplyswords.tempestsworditem.tooltip8": "元素，使它们形",
+  "item.simplyswords.tempestsworditem.tooltip9": "成围绕你的涡流，",
+  "item.simplyswords.tempestsworditem.tooltip10":"伤害周遭所有敌",
+  "item.simplyswords.tempestsworditem.tooltip11":"人，并扩大自身。",
+
+  "item.simplyswords.dreadtidesworditem.tooltip1": "独特效果：虚空召唤",
+  "item.simplyswords.dreadtidesworditem.tooltip2": "被动为使用者提供",
+  "item.simplyswords.dreadtidesworditem.tooltip3": "虚空庇护效果，每",
+  "item.simplyswords.dreadtidesworditem.tooltip4": "级削减10%所受伤",
+  "item.simplyswords.dreadtidesworditem.tooltip5": "害，并提升攻速。",
+  "item.simplyswords.dreadtidesworditem.tooltip6": "受伤将移除一层虚空庇护。",
+  "item.simplyswords.dreadtidesworditem.tooltip7": "每20点侵蚀提供1级庇护。",
+  "item.simplyswords.dreadtidesworditem.tooltip8": "倾泻你的虚空庇护",
+  "item.simplyswords.dreadtidesworditem.tooltip9": "能量，快速向最近",
+  "item.simplyswords.dreadtidesworditem.tooltip10":"一名敌人造成伤害。",
+  "item.simplyswords.dreadtidesworditem.tooltip11":"",
+  "item.simplyswords.dreadtidesworditem.tooltip12":"装备这把武器，将使",
+  "item.simplyswords.dreadtidesworditem.tooltip13":"你随时间不断被侵蚀。",
   
 
   "item.simplyswords.dormantrelicsworditem.tooltip2": "其中似乎有微弱的能量逸散而出。",
@@ -801,7 +835,6 @@
   "item.simplyswords.frostwardsworditem.tooltip2": "周期性向周围敌对生物",
   "item.simplyswords.frostwardsworditem.tooltip3": "发射能致使缓慢的雪球。",
   "item.simplyswords.momentumsworditem.tooltip1": "符文之力：动能",
-  "item.simplyswords.uniquesworditem.runefused_power.momentum": "[ 符文附加：动能 ]",
   "item.simplyswords.momentumsworditem.tooltip2": "暂时获得强大的前推力。",
   "item.simplyswords.momentumsworditem.tooltip3": "",
   "item.simplyswords.imbuedsworditem.tooltip1": "符文之力：淬魔",
@@ -813,19 +846,17 @@
   "item.simplyswords.pincushionsworditem.tooltip2": "造成基于使用者身上残",
   "item.simplyswords.pincushionsworditem.tooltip3": "留箭矢数量的额外伤害。",
   "item.simplyswords.wardsworditem.tooltip1": "符文之力：加护",
-  "item.simplyswords.uniquesworditem.runefused_power.ward": "[ 符文附加：加护 ]",
   "item.simplyswords.wardsworditem.tooltip2": "献祭一半当前生命值，获得",
   "item.simplyswords.wardsworditem.tooltip3": "六秒基于使用者当前生命值",
   "item.simplyswords.wardsworditem.tooltip4": "的，可恢复的伤害吸收效果。",
   "item.simplyswords.immolationsworditem.tooltip1": "符文之力：献祭光环",
-  "item.simplyswords.uniquesworditem.runefused_power.immolation": "[ 符文附加：献祭光环 ]",
   "item.simplyswords.immolationsworditem.tooltip2": "获得一个能够周期性地伤害使用者",
   "item.simplyswords.immolationsworditem.tooltip3": "自身和周围目标的献祭光环。输出",
   "item.simplyswords.immolationsworditem.tooltip4": "的伤害取决于使用者当前的生命值。",
   "item.simplyswords.unidentifiedsworditem.tooltip1": "符文之力：????",
   "item.simplyswords.netherfused_gem.tooltip1": "狱灵之力：????",
   "item.simplyswords.unidentifiedsworditem.tooltip2": "点击以揭示能力",
-  "item.simplyswords.runic_tablet.tooltip": "可用于制作与",
+  "item.simplyswords.runic_tablet.tooltip":  "可用于制作与",
   "item.simplyswords.runic_tablet.tooltip2": "重塑符文武器。",
   "item.simplyswords.runic_tablet.tooltip3": "也可用来修",
   "item.simplyswords.runic_tablet.tooltip4": "复独特武器。",
@@ -906,6 +937,21 @@
   "item.simplyswords.uniquesworditem.netherfused_power.soulshock.description":  "装备时，这把武",
   "item.simplyswords.uniquesworditem.netherfused_power.soulshock.description2": "器将给你更强的",
   "item.simplyswords.uniquesworditem.netherfused_power.soulshock.description3": "灵魂和雷电魔能。",
+
+  "item.simplyswords.uniquesworditem.netherfused_power.spellstandard":             "[ 狱灵附加：秘法战旗 ]",
+  "item.simplyswords.uniquesworditem.netherfused_power.spellstandard.description": "法术命中时，概率",
+  "item.simplyswords.uniquesworditem.netherfused_power.spellstandard.description2":"召唤秘法战旗，提",
+  "item.simplyswords.uniquesworditem.netherfused_power.spellstandard.description3":"供精准与法术锻融。",
+
+  "item.simplyswords.uniquesworditem.netherfused_power.warstandard":             "[ 狱灵附加：纷争战旗 ]",
+  "item.simplyswords.uniquesworditem.netherfused_power.warstandard.description": "前冲类能力命中时，召",
+  "item.simplyswords.uniquesworditem.netherfused_power.warstandard.description2":"唤纷争战旗，提供强化",
+  "item.simplyswords.uniquesworditem.netherfused_power.warstandard.description3":"效果，并高亮附近敌人。",
+
+  "item.simplyswords.uniquesworditem.netherfused_power.deception":             "[ 狱灵附加：诡诈 ]",
+  "item.simplyswords.uniquesworditem.netherfused_power.deception.description": "使用闪避能力规",
+  "item.simplyswords.uniquesworditem.netherfused_power.deception.description2":"避攻击后，有概",
+  "item.simplyswords.uniquesworditem.netherfused_power.deception.description3":"率免除高亮效果。",
   
   "item.simplyswords.common.blacklisteffect": "能力已被禁用",
   "item.simplyswords.common.showtooltip": "- 按§2ALT§7以查看宝石槽 -",
@@ -921,6 +967,7 @@
   "item.simplyswords.compat.scaleSoul": "§7此能力与§9灵魂§7法术强度相关",
   "item.simplyswords.compat.scaleHealing": "§7此能力与§a治愈§7法术强度相关",
 
+
   "text.autoconfig.simplyswords_main.title" : "简易刀剑",
   "text.autoconfig.simplyswords_main.category.general" : "整体",
   "text.autoconfig.simplyswords_main.category.gem_effects" : "宝石效果",
@@ -929,6 +976,8 @@
   "text.autoconfig.simplyswords_main.category.status_effects" : "状态效果",
   "text.autoconfig.simplyswords_main.category.unique_effects" : "独特效果",
   "text.autoconfig.simplyswords_main.category.weapon_attributes" : "武器属性",
+
+
 
   "text.autoconfig.simplyswords_main.option.weapon_attributes.longsword_positiveDamageModifier.@PrefixText" :           "§a[武器属性配置]§7\n§4客户端与服务端§7中，这些值应该一致。\n武器的伤害可通过调整它们的权重来调节。\n这会直接影响伤害，但不等于游戏中的外显数值。\n计算方式：材质伤害+基础伤害+伤害增益数-伤害削减数=外显数值\n需要重启游戏来应用更改。\n\n§a[伤害增益数]§7\n使用例：设为3将提升3点外显伤害。",
   "text.autoconfig.simplyswords_main.option.weapon_attributes.longsword_positiveDamageModifier":                        "长剑 + 伤害增益数",
@@ -1044,6 +1093,8 @@
   "text.autoconfig.simplyswords_main.option.weapon_attributes.hiveheart_damageModifier":                                "§6群蜂之心§7 伤害调整数",
   "text.autoconfig.simplyswords_main.option.weapon_attributes.starsedge_damageModifier":                                "§6星芒§7 伤害调整数",
   "text.autoconfig.simplyswords_main.option.weapon_attributes.wickpiercer_damageModifier":                              "§6摇红§7 伤害调整数",
+  "text.autoconfig.simplyswords_main.option.weapon_attributes.dreadtide_damageModifier":                                "§6怖潮§7 伤害调整数",
+  "text.autoconfig.simplyswords_main.option.weapon_attributes.tempest_damageModifier":                                  "§6烈风§7 伤害调整数",
 
   "text.autoconfig.simplyswords_main.option.weapon_attributes.brimstone_attackSpeed.@PrefixText" :                      "§a[攻速调整数]§7\n推荐范围：-1.0至-3.7，-1.0快，-3.7慢。",
   "text.autoconfig.simplyswords_main.option.weapon_attributes.brimstone_attackSpeed":                                   "§6硫磺阔剑§7 攻速调整数",
@@ -1078,6 +1129,8 @@
   "text.autoconfig.simplyswords_main.option.weapon_attributes.hiveheart_attackSpeed":                                   "§6群蜂之心§7 攻速调整数",
   "text.autoconfig.simplyswords_main.option.weapon_attributes.starsedge_attackSpeed":                                   "§6星芒§7 攻速调整数",
   "text.autoconfig.simplyswords_main.option.weapon_attributes.wickpiercer_attackSpeed":                                 "§6摇红§7 攻速调整数",
+  "text.autoconfig.simplyswords_main.option.weapon_attributes.dreadtide_attackSpeed":                                   "§6怖潮§7 攻速调整数",
+  "text.autoconfig.simplyswords_main.option.weapon_attributes.tempest_attackSpeed":                                     "§6烈风§7 攻速调整数",
 
 
   "text.autoconfig.simplyswords_main.option.runic_effects.enableActiveDefence.@PrefixText" :                            "§a[符文能力启用项]§7\n禁用符文能力将防止它被获取。",
@@ -1155,6 +1208,7 @@
   "text.autoconfig.simplyswords_main.option.loot.enableHiveheart":                                                      "群蜂之心 可通过战利品获取",
   "text.autoconfig.simplyswords_main.option.loot.enableStarsEdge":                                                      "星芒 可通过战利品获取",
   "text.autoconfig.simplyswords_main.option.loot.enableWickpiercer":                                                    "摇红 可通过战利品获取",
+  "text.autoconfig.simplyswords_main.option.loot.enableTempest":                                                        "烈风 可通过战利品获取",
 
   "text.autoconfig.simplyswords_main.option.general.enableWeaponImpactSounds":                                          "启用武器击中音效",
   "text.autoconfig.simplyswords_main.option.general.weaponImpactSoundsVolume":                                          "击中音效音量",
@@ -1244,7 +1298,6 @@
   "text.autoconfig.simplyswords_main.option.unique_effects.frostFuryChance":                                            "霜怒 概率",
   "text.autoconfig.simplyswords_main.option.unique_effects.frostFuryDuration":                                          "霜怒 时长",
   "text.autoconfig.simplyswords_main.option.unique_effects.frostFurySpellScaling":                                      "霜怒 法术强度伤害乘数",
-
   "text.autoconfig.simplyswords_main.option.unique_effects.moltenRoarCooldown.@PrefixText" :                            "§6[熔火]§7",
   "text.autoconfig.simplyswords_main.option.unique_effects.moltenRoarCooldown":                                         "狂咆之炎 冷却时间",
   "text.autoconfig.simplyswords_main.option.unique_effects.moltenRoarRadius":                                           "狂咆之炎 范围",
@@ -1342,6 +1395,7 @@
   "text.autoconfig.simplyswords_main.option.unique_effects.hivemindCooldown.@PrefixText" :                              "§6[群蜂之心]§7",
   "text.autoconfig.simplyswords_main.option.unique_effects.hivemindCooldown":                                           "蜂巢思维 冷却时间",
   "text.autoconfig.simplyswords_main.option.unique_effects.hivemindDuration":                                           "蜂巢思维 时长",
+  "text.autoconfig.simplyswords_main.option.unique_effects.hivemindDamage":                                             "蜂巢思维 伤害",
 
   "text.autoconfig.simplyswords_main.option.unique_effects.celestialSurgeCooldown.@PrefixText" :                        "§6[星芒]§7",
   "text.autoconfig.simplyswords_main.option.unique_effects.celestialSurgeCooldown":                                     "星涌 冷却时间",
@@ -1354,6 +1408,21 @@
   "text.autoconfig.simplyswords_main.option.unique_effects.flickerFuryCooldown":                                        "忿火明灭 冷却时间",
   "text.autoconfig.simplyswords_main.option.unique_effects.flickerFuryDuration":                                        "忿火明灭 时长",
   "text.autoconfig.simplyswords_main.option.unique_effects.flickerFuryDamage":                                          "忿火明灭 伤害",
+
+  "text.autoconfig.simplyswords_main.option.unique_effects.voidcallerDuration.@PrefixText" :                            "§6[怖潮]§7",
+  "text.autoconfig.simplyswords_main.option.unique_effects.voidcallerDuration":                                         "虚空召唤 时长",
+  "text.autoconfig.simplyswords_main.option.unique_effects.voidcallerStartingTickFrequency":                            "虚空召唤 起始刻检测频率",
+  "text.autoconfig.simplyswords_main.option.unique_effects.voidcallerDamageModifier":                                   "虚空召唤 伤害",
+  "text.autoconfig.simplyswords_main.option.unique_effects.voidcallerCorruptionFrequency":                              "虚空召唤 侵蚀频率",
+  "text.autoconfig.simplyswords_main.option.unique_effects.voidcallerCorruptionPerTick":                                "虚空召唤 每刻侵蚀值",
+  "text.autoconfig.simplyswords_main.option.unique_effects.voidcallerCorruptionDuration":                               "虚空召唤 侵蚀持续时间",
+  "text.autoconfig.simplyswords_main.option.unique_effects.voidcallerCorruptionMax":                                    "虚空召唤 最大侵蚀值",
+
+  "text.autoconfig.simplyswords_main.option.unique_effects.vortexDuration.@PrefixText" :                                "§6[烈风]§7",
+  "text.autoconfig.simplyswords_main.option.unique_effects.vortexDuration":                                             "涡流 时长",
+  "text.autoconfig.simplyswords_main.option.unique_effects.vortexMaxSize":                                              "涡流 最大范围",
+  "text.autoconfig.simplyswords_main.option.unique_effects.vortexMaxStacks":                                            "涡流 效果叠加上限",
+  "text.autoconfig.simplyswords_main.option.unique_effects.vortexSpellScaling":                                         "涡流 法术强度伤害乘数",
 
 
   "text.autoconfig.simplyswords_main.option.runic_effects.swiftnessChance.@PrefixText" :                                "§b[极速]§7",
@@ -1442,6 +1511,9 @@
   "text.autoconfig.simplyswords_main.option.gem_effects.spellshieldChance":                                             "法术护盾 概率",
   "text.autoconfig.simplyswords_main.option.gem_effects.enableSpellforged":                                             "启用 法术锻融宝石",
   "text.autoconfig.simplyswords_main.option.gem_effects.enableSoulshock":                                               "启用 灵魂震颤宝石",
+  "text.autoconfig.simplyswords_main.option.gem_effects.enableSpellStandard":                                           "启用 秘法战旗宝石",
+  "text.autoconfig.simplyswords_main.option.gem_effects.enableWarStandard":                                             "启用 纷争战旗宝石",
+  "text.autoconfig.simplyswords_main.option.gem_effects.enableDeception":                                               "启用 诡诈宝石",
 
   "text.autoconfig.simplyswords_main.option.status_effects.echoDamage":                                                 "共鸣基础伤害"
 }
