@@ -75,4 +75,7 @@ public class EffectRegistry {
     public static final RegistrySupplier<StatusEffect> ELEMENTAL_VORTEX = EFFECT.register("elemental_vortex", () ->
             new ElementalVortexEffect(StatusEffectCategory.BENEFICIAL, 1124687));
 
+    public static final RegistrySupplier<StatusEffect> FLAMESEED = EFFECT.register("flameseed", () ->
+            new FlameSeedEffect(StatusEffectCategory.HARMFUL, 1124687));
+
 }
