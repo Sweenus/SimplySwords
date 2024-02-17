@@ -103,6 +103,7 @@ public class ItemsRegistry {
     static float starsedge_attackspeed = Config.getFloat("starsedge_attackSpeed", "WeaponAttributes", ConfigDefaultValues.starsedge_attackSpeed);
     static float wickpiercer_attackspeed = Config.getFloat("wickpiercer_attackSpeed", "WeaponAttributes", ConfigDefaultValues.wickpiercer_attackSpeed);
     static float tempest_attackspeed = Config.getFloat("tempest_attackSpeed", "WeaponAttributes", ConfigDefaultValues.tempest_attackSpeed);
+    static float flamewind_attackspeed = Config.getFloat("flamewind_attackSpeed", "WeaponAttributes", ConfigDefaultValues.flamewind_attackSpeed);
 
 
 
@@ -139,6 +140,7 @@ public class ItemsRegistry {
     static float starsedge_damage_modifier = Config.getFloat("starsedge_damageModifier", "WeaponAttributes", ConfigDefaultValues.starsedge_damageModifier);
     static float wickpiercer_damage_modifier = Config.getFloat("wickpiercer_damageModifier", "WeaponAttributes", ConfigDefaultValues.wickpiercer_damageModifier);
     static float tempest_damage_modifier = Config.getFloat("tempest_damageModifier", "WeaponAttributes", ConfigDefaultValues.tempest_damageModifier);
+    static float flamewind_damage_modifier = Config.getFloat("flamewind_damageModifier", "WeaponAttributes", ConfigDefaultValues.flamewind_damageModifier);
 
 
     public static final DeferredRegister<Item> ITEM = DeferredRegister.create(SimplySwords.MOD_ID, RegistryKeys.ITEM);
@@ -896,8 +898,14 @@ public class ItemsRegistry {
 
     public static final RegistrySupplier<FlamewindSwordItem> FLAMEWIND = ITEM.register( "flamewind", () ->
             new FlamewindSwordItem(ModToolMaterial.UNIQUE,
-                    (int) (wickpiercer_damage_modifier),
-                    wickpiercer_attackspeed,
+                    (int) (flamewind_damage_modifier),
+                    flamewind_attackspeed,
+                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof()));
+
+    public static final RegistrySupplier<RibboncleaverSwordItem> RIBBONCLEAVER = ITEM.register( "ribboncleaver", () ->
+            new RibboncleaverSwordItem(ModToolMaterial.UNIQUE,
+                    (int) (hearthflame_damage_modifier),
+                    hearthflame_attackspeed,
                     new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof()));
 
 

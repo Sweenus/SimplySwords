@@ -1,0 +1,34 @@
+{
+  "attributes": {
+    "attack_range": 3.4,
+    "pose": "simplyswords:pose_two_handed_dragable",
+    "two_handed": true,
+    "category": "claymore",
+    "attacks": [
+      {
+        "hitbox": "FORWARD_BOX",
+        "damage_multiplier": 1.2,
+        "angle": 0,
+        "upswing": 0.5,
+        "animation": "simplyswords:dragable_slash_upward",
+        "swing_sound": {
+          "id": "simplyswords:elemental_sword_earth_attack_01",
+          "volume": 0.3,
+          "pitch": 1.2
+        }
+      },
+      {
+        "hitbox": "FORWARD_BOX",
+        "damage_multiplier": 1.8,
+        "angle": 0,
+        "upswing": 0.5,
+        "animation": "bettercombat:two_handed_slam",
+        "swing_sound": {
+          "id": "simplyswords:elemental_sword_earth_attack_02",
+          "volume": 0.4,
+          "pitch": 1
+        }
+      }
+    ]
+  }
+}

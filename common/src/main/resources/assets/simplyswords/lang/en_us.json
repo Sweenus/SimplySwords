@@ -1109,6 +1109,7 @@
   "text.autoconfig.simplyswords_main.option.weapon_attributes.wickpiercer_damageModifier":                              "§6Wickpiercer§7 damage modifier",
   "text.autoconfig.simplyswords_main.option.weapon_attributes.dreadtide_damageModifier":                                "§6Dreadtide§7 damage modifier",
   "text.autoconfig.simplyswords_main.option.weapon_attributes.tempest_damageModifier":                                  "§6Tempest§7 damage modifier",
+  "text.autoconfig.simplyswords_main.option.weapon_attributes.flamewind_damageModifier":                                "§6Flamewind§7 damage modifier",
 
   "text.autoconfig.simplyswords_main.option.weapon_attributes.brimstone_attackSpeed.@PrefixText" :                      "§6[Attack Speed Modifiers]§7\nRecommended range: -1.0 to -3.7, with -1.0 being fast and -3.7 being slow.",
   "text.autoconfig.simplyswords_main.option.weapon_attributes.brimstone_attackSpeed":                                   "§6Brimstone§7 attack speed",
@@ -1145,6 +1146,7 @@
   "text.autoconfig.simplyswords_main.option.weapon_attributes.wickpiercer_attackSpeed":                                 "§6Wickpiercer§7 attack speed",
   "text.autoconfig.simplyswords_main.option.weapon_attributes.dreadtide_attackSpeed":                                   "§6Dreadtide§7 attack speed",
   "text.autoconfig.simplyswords_main.option.weapon_attributes.tempest_attackSpeed":                                     "§6Tempest§7 attack speed",
+  "text.autoconfig.simplyswords_main.option.weapon_attributes.flamewind_attackSpeed":                                   "§6Flamewind§7 attack speed",
 
 
   "text.autoconfig.simplyswords_main.option.runic_effects.enableActiveDefence.@PrefixText" :                            "§a[Runic Power Blacklisting]§7\nSetting any of the below values to false will prevent that runic power from being obtainable.",
