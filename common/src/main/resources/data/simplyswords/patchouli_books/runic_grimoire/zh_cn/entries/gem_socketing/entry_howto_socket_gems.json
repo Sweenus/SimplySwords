@@ -1,0 +1,16 @@
+{
+  "name": "宝石镶嵌机制",
+  "icon": "simplyswords:netherfused_gem",
+  "category": "simplyswords:category_gem_socketing",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:netherfused_gem",
+      "text": "要想镶嵌宝石，您必须在物品栏中有宝石和对应的空宝石槽武器（符文宝石-符文槽，狱灵宝石-狱灵槽）"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "打开物品栏之后，左键点击宝石取出，然后点击武器即可将宝石镶嵌到武器上。宝石物品会消失，武器获得宝石的能力。"
+    }
+  ]
+}

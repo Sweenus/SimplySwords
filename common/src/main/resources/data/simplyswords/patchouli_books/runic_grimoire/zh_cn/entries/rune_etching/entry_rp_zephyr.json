@@ -1,0 +1,17 @@
+{
+  "name": "微风",
+  "icon": "simplyswords:runic_tablet",
+  "category": "simplyswords:category_rune_etching",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:runic_tablet",
+      "title": "微风",
+      "text": "微风的符文力量可以给武器注入$(#85a0ab)$(l)风元素$()的精华。$(br2)每次攻击时，都有机会提高攻速和移速。"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "对于近战高伤害玩家而言这个符文很好用，他们可以利用额外的攻击和移动速度快速输出并回避敌人。"
+    }
+  ]
+}

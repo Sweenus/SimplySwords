@@ -1,0 +1,17 @@
+{
+  "name": "硫磺阔剑",
+  "icon": "simplyswords:brimstone_claymore",
+  "advancement": "simplyswords:brimstone",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:brimstone_claymore",
+      "text": "硫磺阔剑是一把可怕的武器。它利用熔化硫磺的力量爆炸并伤害敌人。剑刃灌注的硫磺使得它每一次攻击都有可能释放出熔岩一般的火焰攻击。"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "这把武器很重，需要很大的力量使用。注意它的特殊攻击会伤害附近的所有人。只有最熟练、最强大的战士才能够最有效地使用硫磺阔剑。"
+    }
+  ]
+}

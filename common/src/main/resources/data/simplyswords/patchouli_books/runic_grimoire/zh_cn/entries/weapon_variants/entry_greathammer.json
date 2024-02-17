@@ -1,0 +1,26 @@
+{
+  "name": "巨锤",
+  "icon": "simplyswords:iron_greathammer",
+  "category": "simplyswords:category_weapon_variants",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:iron_greathammer",
+      "text": "巨锤因其重量和体积，每次攻击都能造成毁灭性的伤害而著称。历史上，多由步兵和重骑兵装备使用。在生活中，铁匠、泥瓦匠等工种也会使用锤子进行锤击操作。"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:iron_greathammer",
+      "recipe2": "simplyswords:gold_greathammer"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:diamond_greathammer"
+    },
+    {
+      "type": "patchouli:smithing",
+      "recipe": "simplyswords:netherite_greathammer",
+      "recipe2": "simplyswords:runic_greathammer"
+    }
+  ]
+}

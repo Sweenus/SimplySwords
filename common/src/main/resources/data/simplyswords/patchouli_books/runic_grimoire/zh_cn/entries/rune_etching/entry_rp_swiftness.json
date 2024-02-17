@@ -1,0 +1,17 @@
+{
+  "name": "极速",
+  "icon": "simplyswords:runic_tablet",
+  "category": "simplyswords:category_rune_etching",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:runic_tablet",
+      "title": "极速",
+      "text": "极速符文给武器注入$(#389fff)$(l)灵活$()的力量。$(br2)它能让武器攻击时有概率提高自己的速度。"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "这个符文的加速效果很强。$(br2)它非常适合那些喜欢机动性和需要速度的玩家，在战斗中快速地锁定敌人并发动攻击。"
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "name": "巨斧",
+  "icon": "simplyswords:iron_greataxe",
+  "category": "simplyswords:category_weapon_variants",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:iron_greataxe",
+      "text": "巨斧对使用者的力量和技巧要求都很高。它的重量决定了使用者必须两只手握持并挥舞，是一种典型的双手武器。巨斧的适应性很强，可以砍、劈、或者捶。"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:iron_greataxe",
+      "recipe2": "simplyswords:gold_greataxe"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:diamond_greataxe"
+    },
+    {
+      "type": "patchouli:smithing",
+      "recipe": "simplyswords:netherite_greataxe",
+      "recipe2": "simplyswords:runic_greataxe"
+    }
+  ]
+}
