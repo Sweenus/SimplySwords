@@ -1,5 +1,5 @@
 {
-  "name": "Tempest",
+  "name": "烈风",
   "icon": "simplyswords:tempest",
   "advancement": "simplyswords:tempest",
   "category": "simplyswords:category_unique_weapons",
@@ -7,7 +7,7 @@
     {
       "type": "patchouli:spotlight",
       "item": "simplyswords:tempest",
-      "text": "Not yet implemented"
+      "text": "(尚未写好)"
     }
   ]
 }
