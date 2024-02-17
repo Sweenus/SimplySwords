@@ -212,4 +212,12 @@ public class UniqueEffectsConfig implements ConfigData {
     public float voidcallerCorruptionDuration = 1200f;
     public float voidcallerCorruptionMax = 100f;
 
+    @ConfigEntry.Gui.PrefixText
+    public float emberstormSpreadCap = 6f;
+    public float emberstormDamage = 5f;
+    public float emberstormDetonationDamage = 15f;
+    public float emberstormCooldown = 980f;
+    public float emberstormMaxHaste = 10f;
+    public float emberstormSpellScaling = 0.4f;
+
 }

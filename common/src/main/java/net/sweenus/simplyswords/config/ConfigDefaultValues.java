@@ -203,6 +203,13 @@ public class ConfigDefaultValues {
     public static float voidcallerCorruptionPerTick = 1.0f;
     public static float voidcallerCorruptionDuration = 1200f;
     public static float voidcallerCorruptionMax = 100f;
+
+    public static float emberstormSpreadCap = 6f;
+    public static float emberstormDamage = 5f;
+    public static float emberstormDetonationDamage = 15f;
+    public static float emberstormCooldown = 980f;
+    public static float emberstormMaxHaste = 10f;
+    public static float emberstormSpellScaling = 0.4f;
     
     // -- WEAPON ATTRIBUTES -- //
 

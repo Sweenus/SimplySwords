@@ -115,6 +115,7 @@
   "item.simplyswords.wickpiercer":                                                                                      "Wickpiercer",
   "item.simplyswords.dreadtide":                                                                                        "Dreadtide",
   "item.simplyswords.tempest":                                                                                          "Tempest",
+  "item.simplyswords.flamewind":                                                                                        "Flamewind",
 
 
   "item.simplyswords.runic_tablet":                                                                                     "Runic Tablet",
@@ -517,6 +518,7 @@
   "effect.simplyswords.fire_vortex":                                                                                    "Fire Vortex",
   "effect.simplyswords.frost_vortex":                                                                                   "Frost Vortex",
   "effect.simplyswords.elemental_vortex":                                                                               "Elemental Vortex",
+  "effect.simplyswords.flameseed":                                                                                      "Flameseed",
 
   "item.simplyswords.onrightclick":                                                                                     "On Right Click:",
   "item.simplyswords.onrightclickheld":                                                                                 "Hold Right Click:",
@@ -776,6 +778,18 @@
   "item.simplyswords.dreadtidesworditem.tooltip11":                                                                     "rapid damage.",
   "item.simplyswords.dreadtidesworditem.tooltip12":                                                                     "Wielding this weapon inflicts",
   "item.simplyswords.dreadtidesworditem.tooltip13":                                                                     "you with corruption over time.",
+
+  "item.simplyswords.flamewindsworditem.tooltip1":                                                                      "Unique Effect: Emberstorm",
+  "item.simplyswords.flamewindsworditem.tooltip2":                                                                      "When a flame seed detonates,",
+  "item.simplyswords.flamewindsworditem.tooltip3":                                                                      "gain Haste.",
+  "item.simplyswords.flamewindsworditem.tooltip4":                                                                      "Plant a seed of flame within",
+  "item.simplyswords.flamewindsworditem.tooltip5":                                                                      "the nearest enemy, dealing",
+  "item.simplyswords.flamewindsworditem.tooltip6":                                                                      "damage over time.",
+  "item.simplyswords.flamewindsworditem.tooltip7":                                                                      "Upon expiring, the seed",
+  "item.simplyswords.flamewindsworditem.tooltip8":                                                                      "detonates, dealing area",
+  "item.simplyswords.flamewindsworditem.tooltip9":                                                                      "damage and spreading the",
+  "item.simplyswords.flamewindsworditem.tooltip10":                                                                     "effect to nearby enemies.",
+  "item.simplyswords.flamewindsworditem.tooltip11":                                                                     "Spreads up to %d times.",
 
 
   "item.simplyswords.dormantrelicsworditem.tooltip2":                                                                   "A faint power seems to emanate from within.",
@@ -1423,6 +1437,14 @@
   "text.autoconfig.simplyswords_main.option.unique_effects.vortexMaxSize":                                              "Vortex max size",
   "text.autoconfig.simplyswords_main.option.unique_effects.vortexMaxStacks":                                            "Vortex max stacks",
   "text.autoconfig.simplyswords_main.option.unique_effects.vortexSpellScaling":                                         "Vortex Spell Power DMG multi",
+
+  "text.autoconfig.simplyswords_main.option.unique_effects.emberstormSpreadCap.@PrefixText" :                           "§6[Flamewind]§7",
+  "text.autoconfig.simplyswords_main.option.unique_effects.emberstormSpreadCap":                                        "Emberstorm spread cap",
+  "text.autoconfig.simplyswords_main.option.unique_effects.emberstormDamage":                                           "Emberstorm damage",
+  "text.autoconfig.simplyswords_main.option.unique_effects.emberstormDetonationDamage":                                 "Emberstorm detonation damage",
+  "text.autoconfig.simplyswords_main.option.unique_effects.emberstormCooldown":                                         "Emberstorm cooldown",
+  "text.autoconfig.simplyswords_main.option.unique_effects.emberstormMaxHaste":                                         "Emberstorm Haste max",
+  "text.autoconfig.simplyswords_main.option.unique_effects.emberstormSpellScaling":                                     "Emberstorm Spell Power DMG multi",
 
 
   "text.autoconfig.simplyswords_main.option.runic_effects.swiftnessChance.@PrefixText" :                                "§b[Swiftness]§7",

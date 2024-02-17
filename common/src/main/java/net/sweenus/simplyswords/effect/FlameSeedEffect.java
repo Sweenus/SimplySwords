@@ -23,7 +23,7 @@ public class FlameSeedEffect extends OrbitingEffect {
     public int additionalData; // Additional integer data
     public FlameSeedEffect(StatusEffectCategory statusEffectCategory, int color) {
         super (statusEffectCategory, color);
-        setParticleType(ParticleTypes.MYCELIUM);
+        setParticleType(ParticleTypes.ASH);
     }
     public void setSourcePlayer(LivingEntity livingEntity) {
         sourceEntity = livingEntity;
@@ -37,9 +37,10 @@ public class FlameSeedEffect extends OrbitingEffect {
         int duration = 0;
         if (!livingEntity.getWorld().isClient()) {
             ServerWorld serverWorld = (ServerWorld) livingEntity.getWorld();
-            float abilityDamage = 5;
+            float abilityDamage = Config.getFloat("emberstormDamage", "UniqueEffects", ConfigDefaultValues.emberstormDamage);
             float volume = 0.3f;
             float pitch = 1.3f;
+            int frequency = 20;
             SoundEvent soundEvent = SoundEvents.ENTITY_GENERIC_BURN;
             if (livingEntity.getStatusEffect(EffectRegistry.FLAMESEED.get()) instanceof SimplySwordsStatusEffectInstance statusEffect) {
                 sourceEntity = statusEffect.getSourceEntity();
@@ -47,19 +48,25 @@ public class FlameSeedEffect extends OrbitingEffect {
                 duration = statusEffect.getDuration();
             }
 
-            if (livingEntity.age % 20 == 0 && additionalData != 0) {
+            if (livingEntity.age % frequency == 0 && additionalData != 0) {
                 DamageSource damageSource = livingEntity.getDamageSources().magic();
                 livingEntity.timeUntilRegen = 0;
 
                 if (duration < 20  && sourceEntity != null) {
                     HelperMethods.spawnOrbitParticles(serverWorld, livingEntity.getPos(), ParticleTypes.LAVA, 1, 8);
-                    HelperMethods.spawnOrbitParticles(serverWorld, livingEntity.getPos(), ParticleTypes.CAMPFIRE_SIGNAL_SMOKE, 2, 10);
-                    HelperMethods.spawnOrbitParticles(serverWorld, livingEntity.getPos(), ParticleTypes.EXPLOSION, 1, 4);
-                    abilityDamage = 15;
+                    HelperMethods.spawnOrbitParticles(serverWorld, livingEntity.getPos(), ParticleTypes.CAMPFIRE_SIGNAL_SMOKE, 2, 6);
+                    HelperMethods.spawnOrbitParticles(serverWorld, livingEntity.getPos(), ParticleTypes.POOF, 1, 10);
+                    HelperMethods.spawnOrbitParticles(serverWorld, livingEntity.getPos(), ParticleTypes.EXPLOSION, 0.5, 2);
+                    HelperMethods.spawnOrbitParticles(serverWorld, livingEntity.getPos(), ParticleTypes.WARPED_SPORE, 1, 10);
+                    abilityDamage = Config.getFloat("emberstormDetonationDamage", "UniqueEffects", ConfigDefaultValues.emberstormDetonationDamage);
                     volume = 0.6f;
                     pitch = 1.0f;
                     soundEvent = SoundRegistry.SPELL_FIRE.get();
-                    HelperMethods.incrementStatusEffect(sourceEntity, StatusEffects.HASTE, 120, 1, 10);
+                    if (livingEntity.distanceTo(sourceEntity) < 30) {
+                        int maxHaste = (int) Config.getFloat("emberstormMaxHaste", "UniqueEffects", ConfigDefaultValues.emberstormMaxHaste);
+                        HelperMethods.incrementStatusEffect(sourceEntity, StatusEffects.HASTE, 120, 1, maxHaste);
+                        //HelperMethods.spawnWaistHeightParticles(serverWorld, ParticleTypes.EFFECT, sourceEntity, livingEntity, 20);
+                    }
 
                     Box box = HelperMethods.createBox(livingEntity, 3);
                     for (Entity entity : serverWorld.getOtherEntities(livingEntity, box, EntityPredicates.VALID_LIVING_ENTITY)) {
@@ -82,15 +89,16 @@ public class FlameSeedEffect extends OrbitingEffect {
 
                 if (sourceEntity != null) {
                     damageSource = livingEntity.getDamageSources().indirectMagic(livingEntity, sourceEntity);
-                    float spellScalingModifier = Config.getFloat("vortexSpellScaling", "UniqueEffects", ConfigDefaultValues.vortexSpellScaling);
-                    if (HelperMethods.commonSpellAttributeScaling(spellScalingModifier, sourceEntity, "fire") > 1)
+                    float spellScalingModifier = Config.getFloat("emberstormSpellScaling", "UniqueEffects", ConfigDefaultValues.emberstormSpellScaling);
+                    if (HelperMethods.commonSpellAttributeScaling(spellScalingModifier, sourceEntity, "fire") > abilityDamage)
                         abilityDamage = HelperMethods.commonSpellAttributeScaling(spellScalingModifier, sourceEntity, "fire");
                 }
                 livingEntity.damage(damageSource, (additionalData + ((float) amplifier / 4) + abilityDamage));
                 serverWorld.playSound(null, livingEntity.getBlockPos(), soundEvent,
                         livingEntity.getSoundCategory(), volume, pitch);
                 HelperMethods.spawnOrbitParticles(serverWorld, livingEntity.getPos(), ParticleTypes.LAVA, 1, 4);
-                HelperMethods.spawnOrbitParticles(serverWorld, livingEntity.getPos(), ParticleTypes.CAMPFIRE_SIGNAL_SMOKE, 2, 10);
+                HelperMethods.spawnOrbitParticles(serverWorld, livingEntity.getPos(), ParticleTypes.ASH, 1, 6);
+                HelperMethods.spawnOrbitParticles(serverWorld, livingEntity.getPos(), ParticleTypes.SMOKE, 1, 6);
             }
         }
         super.applyUpdateEffect(livingEntity, amplifier);
