@@ -78,4 +78,18 @@ public class EffectRegistry {
     public static final RegistrySupplier<StatusEffect> FLAMESEED = EFFECT.register("flameseed", () ->
             new FlameSeedEffect(StatusEffectCategory.HARMFUL, 1124687));
 
+    public static final RegistrySupplier<StatusEffect> RIBBONWRATH = EFFECT.register("ribbonwrath", () ->
+            new RibbonwrathEffect(StatusEffectCategory.HARMFUL, 1124687)
+                    .addAttributeModifier(EntityAttributes.GENERIC_MOVEMENT_SPEED,
+                            "325de159-03bd-421c-8dd0-53e0090857ed",
+                            -0.05,
+                            EntityAttributeModifier.Operation.MULTIPLY_TOTAL));
+
+    public static final RegistrySupplier<StatusEffect> RIBBONCLEAVE = EFFECT.register("ribboncleave", () ->
+            new RibboncleaveEffect(StatusEffectCategory.BENEFICIAL, 1124687)
+                    .addAttributeModifier(EntityAttributes.GENERIC_ATTACK_DAMAGE,
+                            "c8fb5e9f-c446-4475-b73f-a2290196210f",
+                            2,
+                            EntityAttributeModifier.Operation.MULTIPLY_TOTAL));
+
 }

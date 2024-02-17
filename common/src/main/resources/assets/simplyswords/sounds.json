@@ -783,5 +783,20 @@
     "sounds": [
       "simplyswords:ambience_wind_loop"
     ]
+  },
+  "stone_slide_loop_03": {
+    "sounds": [
+      "simplyswords:stone_slide_loop_03"
+    ]
+  },
+  "object_impact_thud": {
+    "sounds": [
+      "simplyswords:object_impact_thud"
+    ]
+  },
+  "object_impact_thud_repeat": {
+    "sounds": [
+      "simplyswords:object_impact_thud_repeat"
+    ]
   }
 }

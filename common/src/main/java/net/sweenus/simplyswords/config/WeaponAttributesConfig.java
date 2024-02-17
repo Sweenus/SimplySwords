@@ -124,6 +124,7 @@ public class WeaponAttributesConfig implements ConfigData {
     public float dreadtide_damageModifier = 3.0f;
     public float tempest_damageModifier = 0.0f;
     public float flamewind_damageModifier = 3.0f;
+    public float ribboncleaver_damageModifier = 7.0f;
 
     @ConfigEntry.Gui.PrefixText
     public float brimstone_attackSpeed = -2.8f;
@@ -161,5 +162,6 @@ public class WeaponAttributesConfig implements ConfigData {
     public float dreadtide_attackSpeed = -2.0f;
     public float tempest_attackSpeed = -2.5f;
     public float flamewind_attackSpeed = -2.6f;
+    public float ribboncleaver_attackSpeed = -3.2f;
 
 }

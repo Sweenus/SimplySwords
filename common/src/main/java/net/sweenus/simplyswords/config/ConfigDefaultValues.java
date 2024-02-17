@@ -329,6 +329,7 @@ public class ConfigDefaultValues {
     public static float dreadtide_damageModifier = 3.0f;
     public static float tempest_damageModifier = 0.0f;
     public static float flamewind_damageModifier = 3.0f;
+    public static float ribboncleaver_damageModifier = 7.0f;
 
     
     public static float brimstone_attackSpeed = -2.8f;
@@ -366,6 +367,7 @@ public class ConfigDefaultValues {
     public static float dreadtide_attackSpeed = -2.0f;
     public static float tempest_attackSpeed = -2.5f;
     public static float flamewind_attackSpeed = -2.6f;
+    public static float ribboncleaver_attackSpeed = -3.2f;
     
     // -- STATUS EFFECTS --
 

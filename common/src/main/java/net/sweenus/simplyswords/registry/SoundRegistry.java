@@ -327,5 +327,11 @@ public class SoundRegistry {
             SoundEvent.of(new Identifier(SimplySwords.MOD_ID, "magic_shamanic_nordic_27")));
     public static final RegistrySupplier<SoundEvent> AMBIENCE_WIND_LOOP = SOUND.register("ambience_wind_loop", () ->
             SoundEvent.of(new Identifier(SimplySwords.MOD_ID, "ambience_wind_loop")));
+    public static final RegistrySupplier<SoundEvent> STONE_SLIDE_LOOP_03 = SOUND.register("stone_slide_loop_03", () ->
+            SoundEvent.of(new Identifier(SimplySwords.MOD_ID, "stone_slide_loop_03")));
+    public static final RegistrySupplier<SoundEvent> OBJECT_IMPACT_THUD = SOUND.register("object_impact_thud", () ->
+            SoundEvent.of(new Identifier(SimplySwords.MOD_ID, "object_impact_thud")));
+    public static final RegistrySupplier<SoundEvent> OBJECT_IMPACT_THUD_REPEAT = SOUND.register("object_impact_thud_repeat", () ->
+            SoundEvent.of(new Identifier(SimplySwords.MOD_ID, "object_impact_thud_repeat")));
 
 }
