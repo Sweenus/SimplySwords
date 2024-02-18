@@ -1,0 +1,17 @@
+{
+  "name": "献祭光环",
+  "icon": "simplyswords:runic_tablet",
+  "category": "simplyswords:category_rune_etching",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:runic_tablet",
+      "title": "献祭光环",
+      "text": "献祭符文会提供一个献祭光环，激活时，持续对周围敌人造成伤害，用正义的火焰烧尽他们。这个伤害与持有者的生命值有关。"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "然而，这个隐藏的能力也是有代价的：火焰也会伤害持有者，尽管对持有者的伤害较小。"
+    }
+  ]
+}

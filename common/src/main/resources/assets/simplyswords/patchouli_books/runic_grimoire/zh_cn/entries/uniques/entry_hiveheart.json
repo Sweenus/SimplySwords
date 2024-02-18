@@ -1,0 +1,17 @@
+{
+  "name": "群蜂之心",
+  "icon": "simplyswords:hiveheart",
+  "advancement": "simplyswords:hiveheart",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:hiveheart",
+      "text": "群蜂之心，这把神秘的双手使用的大锤，看起来就像是把一个蜂巢装在了柄上。不知道为什么，蜂巢里的蜜蜂似乎可以由使用者控制，在使用者战斗时发起攻击。"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "蜂群的忠诚似乎远比简单的进攻。使用者可以施放独特技能来让蜜蜂生产再生蜂蜜治疗使用者，即使是再严重的伤口也能愈合。"
+    }
+  ]
+}

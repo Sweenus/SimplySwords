@@ -1,0 +1,17 @@
+{
+  "name": "风暴使者",
+  "icon": "simplyswords:stormbringer",
+  "advancement": "simplyswords:stormbringer",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:stormbringer",
+      "text": "这把剑设计成分开的剑刃，充满电能，每次攻击都发出声音和电弧。据说这把剑在风暴中使用效果更强，可以充分利用闪电的力量。"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "据说这把剑十分强大，但难以控制。众所周知，电荷本身就难以捕捉，有时候它的独特能力使用错了会对使用者是致命的。"
+    }
+  ]
+}

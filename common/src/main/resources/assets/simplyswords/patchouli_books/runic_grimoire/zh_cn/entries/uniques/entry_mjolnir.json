@@ -1,0 +1,17 @@
+{
+  "name": "雷神之锤",
+  "icon": "simplyswords:mjolnir",
+  "advancement": "simplyswords:mjolnir",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:mjolnir",
+      "text": "传说中由矮人布洛克和伊特里所锻造，赠送给雷神托尔的战锤。它是一种威力惊人的武器，当被选中的战士使用它时，一次攻击甚至能摧毁一座山脉。"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "即使是普通人使用它时，投掷出去也能返回持有者手中。它也能在雨天攻击时召唤闪电，或是手动施放一阵闪电风暴。或许它在等待它真正的主人？"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "name": "烈风",
+  "icon": "simplyswords:tempest",
+  "advancement": "simplyswords:tempest",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:tempest",
+      "text": "(该武器故事尚未编写)"
+    }
+  ]
+}

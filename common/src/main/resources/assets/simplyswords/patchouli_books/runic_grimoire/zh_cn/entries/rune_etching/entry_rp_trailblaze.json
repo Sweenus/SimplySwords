@@ -1,0 +1,17 @@
+{
+  "name": "焰痕",
+  "icon": "simplyswords:runic_tablet",
+  "category": "simplyswords:category_rune_etching",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:runic_tablet",
+      "title": "焰痕",
+      "text": "焰痕符文是$(#bf4117)$(l)火焰$()的结晶。$(br2)它能在攻击中提高速度，但会点燃自身。"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "它可以在对抗高速的敌人时发挥作用，使自己的速度提高追上它们。$(br2)因为会点燃自己，所以要注重自己的防御。"
+    }
+  ]
+}

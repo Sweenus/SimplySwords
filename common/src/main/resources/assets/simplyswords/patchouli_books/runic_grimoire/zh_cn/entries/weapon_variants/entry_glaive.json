@@ -1,0 +1,26 @@
+{
+  "name": "长柄刀",
+  "icon": "simplyswords:iron_glaive",
+  "category": "simplyswords:category_weapon_variants",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:iron_glaive",
+      "text": "长柄刀，大刀中最常见的一种，细分可分为笔刀、掉刀、凤嘴刀、偃月刀、眉尖刀等。它是一种长兵器，由长杆末端安装单刃刀组成，非常适合横切和劈砍。长柄刀攻击距离较远，攻防兼备。"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:iron_glaive",
+      "recipe2": "simplyswords:gold_glaive"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:diamond_glaive"
+    },
+    {
+      "type": "patchouli:smithing",
+      "recipe": "simplyswords:netherite_glaive",
+      "recipe2": "simplyswords:runic_glaive"
+    }
+  ]
+}

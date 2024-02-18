@@ -1,0 +1,17 @@
+{
+  "name": "影刺",
+  "icon": "simplyswords:shadowsting",
+  "advancement": "simplyswords:shadowsting",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:shadowsting",
+      "text": "影刺是一把充满暗影力量的细剑。它的独特能力使得持有者在攻击时有一定几率对敌人造成基于护甲的魔法伤害，魔法伤害无视防御。"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "该武器拥有另一个独特效果，施放时向前短距离位移同时生成一阵暗影迷雾，阻碍敌人的视野。持有者可以利用这个能力让敌人混乱迷失方向，制造优势。"
+    }
+  ]
+}

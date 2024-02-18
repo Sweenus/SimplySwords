@@ -1,0 +1,26 @@
+{
+  "name": "三叉刺",
+  "icon": "simplyswords:iron_sai",
+  "category": "simplyswords:category_weapon_variants",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:iron_sai",
+      "text": "三叉刺是由中国的铁尺改进而成的一种短兵器，又名十手、短叉、笔架叉。它的适应性高，但需要相当的技巧和训练才能有效使用。它的设计使得持有者能够格挡甚至是锁住对方的武器，使得自己占上风。它体积小巧，在狭窄空间和近战中尤为好用。"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:iron_sai",
+      "recipe2": "simplyswords:gold_sai"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:diamond_sai"
+    },
+    {
+      "type": "patchouli:smithing",
+      "recipe": "simplyswords:netherite_sai",
+      "recipe2": "simplyswords:runic_sai"
+    }
+  ]
+}

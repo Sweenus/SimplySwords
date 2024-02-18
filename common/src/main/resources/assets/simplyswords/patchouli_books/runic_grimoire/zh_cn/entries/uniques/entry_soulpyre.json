@@ -1,0 +1,18 @@
+{
+  "name": "葬魂之斧",
+  "icon": "simplyswords:soulpyre",
+  "advancement": "simplyswords:soulpyre",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:soulpyre",
+      "text": "葬魂之斧是一把强大的上古战斧，据说它包含着灵魂、火焰、移形换位的多重力量。这把战斧据说是由一种神秘的稀有金属锻造的，注入了无数个灵魂。"
+
+    },
+    {
+      "type": "patchouli:text",
+      "text": "该武器的独特能力：施放时转移目标的灵魂，使持有者与目标交换位置。它还可以释放被困的灵魂，释放出毁灭性的炽热能量。"
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "name": "主动防御",
+  "icon": "simplyswords:runic_tablet",
+  "category": "simplyswords:category_rune_etching",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:runic_tablet",
+      "title": "主动防御",
+      "text": "主动防御符文给武器注入$(#389fff)$(l)保护$()的精华。$(br2)它可以让持有者自动向周围敌人射箭，只要物品栏中有足够的箭矢。"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "请注意，发动这个能力要求持有者物品栏中有足够的箭。如果箭用完了，这个能力将无法发动。你必须重新获得箭才能继续使用能力。$(br2)这个能力是喜欢风筝别人和群控玩家的理想选择，持有者可以通过走位自动射箭阻挡敌人。"
+    }
+  ]
+}
