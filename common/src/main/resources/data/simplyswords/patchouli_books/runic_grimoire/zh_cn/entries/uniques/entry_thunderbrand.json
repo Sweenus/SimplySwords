@@ -1,0 +1,17 @@
+{
+  "name": "纵雷",
+  "icon": "simplyswords:thunderbrand",
+  "advancement": "simplyswords:thunderbrand",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:thunderbrand",
+      "text": "纵雷是一把传奇的能驾驭雷电的戟。它由一种导电性非常好的稀有金属打造。柄上包裹一种特殊的绝缘材料，使用者可以安全地握持"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "该武器的特殊能力可以使持有者向前冲刺，拉近距离并以致命的精度进行攻击。它在蓄力施放时还能放出强大的电流，同时攻击多个敌人，使得它成为战场上的可怕杀器。"
+    }
+  ]
+}

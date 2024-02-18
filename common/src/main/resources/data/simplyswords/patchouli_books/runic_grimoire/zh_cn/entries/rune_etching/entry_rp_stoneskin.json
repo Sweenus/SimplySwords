@@ -1,0 +1,17 @@
+{
+  "name": "石肤",
+  "icon": "simplyswords:runic_tablet",
+  "category": "simplyswords:category_rune_etching",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:runic_tablet",
+      "title": "石肤",
+      "text": "石肤符文给武器注入$(#916f49)$(l)大地与岩石$()的魔法。$(br2)它使持有者在攻击时有概率提高自己的抗性，但降低速度。"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "这个符文拥有很强的防御作用。$(br2)它可能对喜欢灵活机动的玩家是一个缺点，但抗性提升的效果可以弥补这一点。"
+    }
+  ]
+}

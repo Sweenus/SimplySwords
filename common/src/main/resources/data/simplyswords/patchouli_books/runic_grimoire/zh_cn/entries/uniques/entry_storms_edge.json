@@ -1,0 +1,17 @@
+{
+  "name": "风暴之刃",
+  "icon": "simplyswords:storms_edge",
+  "advancement": "simplyswords:storms_edge",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:storms_edge",
+      "text": "据说风暴之刃是由一种能传导并能利用电力的金属锻造的。剑柄由深色木头制成，并有绝缘皮革套保护。"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "该武器可以储存电能，施放独特能力时，可以推动持有者前进，拉进与敌人的距离并且短暂无敌。"
+    }
+  ]
+}

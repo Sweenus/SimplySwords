@@ -1,0 +1,17 @@
+{
+  "name": "不稳定",
+  "icon": "simplyswords:runic_tablet",
+  "category": "simplyswords:category_rune_etching",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:runic_tablet",
+      "title": "不稳定",
+      "text": "不稳定符文包含了$(#9243a3)$(l)混乱$()的精华. $(br2)它会给予持有者随机的状态效果。"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "如同它的名字一样，这个符文的作用完全无法预测。它不仅包含正面效果，还包含负面效果。$(br2)它比较适合那些喜欢运气的玩家。(译者：为什么不多带点牛奶呢?)"
+    }
+  ]
+}

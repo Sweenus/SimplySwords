@@ -1,0 +1,20 @@
+{
+  "name": "强能结晶",
+  "icon": "simplyswords:empowered_remnant",
+  "category": "simplyswords:category_gem_socketing",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:empowered_remnant",
+      "text": "强能结晶可以在熔炉中烧炼独特武器获得。独特武器经过烧炼之后被摧毁，一部分力量形成强能结晶保留。"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "在锻造台中将强能结晶和符文石板或下界合金结晶锻造合成时，就会合成宝石。这些宝石可以镶嵌进对应的宝石槽中，用多样的方式强化你的独特武器。"
+    },
+    {
+      "type": "patchouli:smelting",
+      "recipe": "simplyswords:unique_melting"
+    }
+  ]
+}

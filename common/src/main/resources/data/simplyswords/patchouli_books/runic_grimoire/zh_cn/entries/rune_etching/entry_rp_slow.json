@@ -1,0 +1,17 @@
+{
+  "name": "缓速",
+  "icon": "simplyswords:runic_tablet",
+  "category": "simplyswords:category_rune_etching",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:runic_tablet",
+      "title": "缓速",
+      "text": "缓速符文为武器注入$(#87185d)$(l)缓慢与迟钝$()的精华。$(br2)持有者每次攻击都有概率降低目标的速度。"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "这个符文具有很强的控制和干扰作用。$(br2)它非常适合喜欢放风筝的玩家，触发减速之后立刻拉开距离拉扯敌人。"
+    }
+  ]
+}

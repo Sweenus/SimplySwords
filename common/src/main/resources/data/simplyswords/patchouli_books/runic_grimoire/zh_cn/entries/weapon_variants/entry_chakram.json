@@ -1,0 +1,26 @@
+{
+  "name": "环刃",
+  "icon": "simplyswords:iron_chakram",
+  "category": "simplyswords:category_weapon_variants",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:iron_chakram",
+      "text": "环刃是一种投掷类的武器，装有刀刃。装备两把环刃攻击时，会施展范围攻击，同时攻击身边所有敌人。"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:iron_chakram",
+      "recipe2": "simplyswords:gold_chakram"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:diamond_chakram"
+    },
+    {
+      "type": "patchouli:smithing",
+      "recipe": "simplyswords:netherite_chakram",
+      "recipe2": "simplyswords:runic_chakram"
+    }
+  ]
+}

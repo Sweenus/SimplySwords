@@ -1,0 +1,26 @@
+{
+  "name": "武士刀",
+  "icon": "simplyswords:iron_katana",
+  "category": "simplyswords:category_weapon_variants",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:iron_katana",
+      "text": "武士刀以锋利、强力、能同时具有高速度和准确度的攻击而闻名。历史上，封建时代的日本武士广泛使用这种刀。它是武士们最重要的武器，也是武士阶级的象征。"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:iron_katana",
+      "recipe2": "simplyswords:gold_katana"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:diamond_katana"
+    },
+    {
+      "type": "patchouli:smithing",
+      "recipe": "simplyswords:netherite_katana",
+      "recipe2": "simplyswords:runic_katana"
+    }
+  ]
+}

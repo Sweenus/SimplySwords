@@ -1,0 +1,17 @@
+{
+  "name": "棘刺",
+  "icon": "simplyswords:bramblethorn",
+  "advancement": "simplyswords:bramblethorn",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:bramblethorn",
+      "text": "棘刺是一把木制的细剑，独特而致命。它看起来就像一根不起眼的树枝，但它隐藏着强大的能力。它由一种稀有的木材附魔后制成，轻便耐用，并且能够进行快速而致命的攻击。"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "该武器在攻击时可以释放出一团有毒的孢子，使范围内的敌人中毒并且减缓行动能力。孢子会攻击范围内除了使用者外的所有人，所以请不要在队友或者你养的动物附近随意使用它。"
+    }
+  ]
+}

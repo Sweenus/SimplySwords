@@ -1,0 +1,26 @@
+{
+  "name": "长剑",
+  "icon": "simplyswords:iron_longsword",
+  "category": "simplyswords:category_weapon_variants",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:iron_longsword",
+      "text": "长剑用途多样，可以砍、刺、切。在中世纪，上到骑士下到普通士兵，都广泛地装备长剑。长剑是骑士的典型武器，在精度、切砍力和多用性方面非常有名。"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:iron_longsword",
+      "recipe2": "simplyswords:gold_longsword"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:diamond_longsword"
+    },
+    {
+      "type": "patchouli:smithing",
+      "recipe": "simplyswords:netherite_longsword",
+      "recipe2": "simplyswords:runic_longsword"
+    }
+  ]
+}

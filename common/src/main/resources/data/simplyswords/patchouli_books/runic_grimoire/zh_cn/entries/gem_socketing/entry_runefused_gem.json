@@ -1,0 +1,20 @@
+{
+  "name": "符文宝石",
+  "icon": "simplyswords:runefused_gem",
+  "category": "simplyswords:category_gem_socketing",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:runefused_gem",
+      "text": "符文宝石可以在锻造台中将强能结晶和符文石板锻造合成。在点击鉴定之后，它们会随机揭示一个能力。"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "符文宝石可以镶嵌进独特武器的[符文槽]。符文宝石的能力只有攻击时触发。"
+    },
+    {
+      "type": "patchouli:smithing",
+      "recipe": "simplyswords:runefused_gem"
+    }
+  ]
+}

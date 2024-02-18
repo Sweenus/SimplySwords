@@ -1,0 +1,23 @@
+{
+  "name": "沉眠的遗迹大剑",
+  "icon": "simplyswords:dormant_relic",
+  "advancement": "simplyswords:dormant_relic",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:dormant_relic",
+      "text": "沉眠的遗迹大剑是一把特殊的神秘的武器。它初看是一把普通的不起眼的剑，但它可以通过合成，逐渐解封隐藏的力量。"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:righteous_relic",
+      "recipe2": "simplyswords:tainted_relic"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:sunfire",
+      "recipe2": "simplyswords:harbinger"
+    }
+  ]
+}
