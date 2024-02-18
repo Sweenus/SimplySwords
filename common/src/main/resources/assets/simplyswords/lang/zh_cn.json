@@ -115,6 +115,8 @@
   "item.simplyswords.wickpiercer": "穿芯",
   "item.simplyswords.dreadtide": "怖潮",
   "item.simplyswords.tempest": "烈风",
+  "item.simplyswords.flamewind": "燎原",
+  "item.simplyswords.ribboncleaver": "荣缎劈刀",
 
   
   "item.simplyswords.runic_tablet": "符文石板",
@@ -517,6 +519,11 @@
   "effect.simplyswords.fire_vortex": "炽热涡流",
   "effect.simplyswords.frost_vortex": "极寒涡流",
   "effect.simplyswords.elemental_vortex": "元素涡流",
+  "effect.simplyswords.flameseed": "爆炎种子",
+  "effect.simplyswords.ribbonwrath": "荣缎加身",
+  "effect.simplyswords.ribboncleave": "披荆斩棘",
+  "effect.simplyswords.resilience": "韧性提升",
+  "effect.simplyswords.battle_fatigue": "战斗疲劳",
 
   "item.simplyswords.onrightclick": "右键时：",
   "item.simplyswords.onrightclickheld": "长按右键时：",
@@ -641,9 +648,9 @@
   "item.simplyswords.arcanethystsworditem.tooltip6": "",
 
   "item.simplyswords.thunderbrandsworditem.tooltip1": "独特效果：雷暴突进",
-  "item.simplyswords.thunderbrandsworditem.tooltip2": "击中有概率刷新能力冷",
-  "item.simplyswords.thunderbrandsworditem.tooltip3": "却。短暂减速自身并充",
-  "item.simplyswords.thunderbrandsworditem.tooltip4": "能武器，伤害周围敌人。",
+  "item.simplyswords.thunderbrandsworditem.tooltip2": "击中概率刷新能力冷却。",
+  "item.simplyswords.thunderbrandsworditem.tooltip3": "短暂减速自身，充能",
+  "item.simplyswords.thunderbrandsworditem.tooltip4": "武器，伤害周围敌人。",
   "item.simplyswords.thunderbrandsworditem.tooltip5": "充能完成之后，向前",
   "item.simplyswords.thunderbrandsworditem.tooltip6": "冲刺，伤害沿途的目",
   "item.simplyswords.thunderbrandsworditem.tooltip7": "标，提升持有者攻速。",
@@ -776,6 +783,29 @@
   "item.simplyswords.dreadtidesworditem.tooltip11":"",
   "item.simplyswords.dreadtidesworditem.tooltip12":"装备这把武器，将使",
   "item.simplyswords.dreadtidesworditem.tooltip13":"你随时间不断被侵蚀。",
+
+  "item.simplyswords.flamewindsworditem.tooltip1": "独特效果：灰烬风暴",
+  "item.simplyswords.flamewindsworditem.tooltip2": "在爆炎种子爆炸",
+  "item.simplyswords.flamewindsworditem.tooltip3": "时获得急迫效果。",
+  "item.simplyswords.flamewindsworditem.tooltip4": "将爆炎种子植入",
+  "item.simplyswords.flamewindsworditem.tooltip5": "最近的敌人体内，",
+  "item.simplyswords.flamewindsworditem.tooltip6": "随时间造成伤害。",
+  "item.simplyswords.flamewindsworditem.tooltip7": "生长结束，种子",
+  "item.simplyswords.flamewindsworditem.tooltip8": "将爆炸，造成范",
+  "item.simplyswords.flamewindsworditem.tooltip9": "围伤害，并播种",
+  "item.simplyswords.flamewindsworditem.tooltip10":"到周围敌人身上。",
+  "item.simplyswords.flamewindsworditem.tooltip11":"至多向%d名敌人播种。",
+
+  "item.simplyswords.ribboncleaversworditem.tooltip1": "独特效果：荣缎加身",
+  "item.simplyswords.ribboncleaversworditem.tooltip2": "装备荣缎劈刀将降",
+  "item.simplyswords.ribboncleaversworditem.tooltip3": "低你5%的移动速度，",
+  "item.simplyswords.ribboncleaversworditem.tooltip4": "但减免15%所受伤害。",
+  "item.simplyswords.ribboncleaversworditem.tooltip5": "向前冲刺，无视",
+  "item.simplyswords.ribboncleaversworditem.tooltip6": "接下来受到的几",
+  "item.simplyswords.ribboncleaversworditem.tooltip7": "次攻击，在获得",
+  "item.simplyswords.ribboncleaversworditem.tooltip8": "击退抗性的同时，",
+  "item.simplyswords.ribboncleaversworditem.tooltip9": "下次攻击对单目",
+  "item.simplyswords.ribboncleaversworditem.tooltip10":"标造成200%伤害。",
   
 
   "item.simplyswords.dormantrelicsworditem.tooltip2": "其中似乎有微弱的能量逸散而出。",
@@ -1095,6 +1125,8 @@
   "text.autoconfig.simplyswords_main.option.weapon_attributes.wickpiercer_damageModifier":                              "§6穿芯§7 伤害调整数",
   "text.autoconfig.simplyswords_main.option.weapon_attributes.dreadtide_damageModifier":                                "§6怖潮§7 伤害调整数",
   "text.autoconfig.simplyswords_main.option.weapon_attributes.tempest_damageModifier":                                  "§6烈风§7 伤害调整数",
+  "text.autoconfig.simplyswords_main.option.weapon_attributes.flamewind_damageModifier":                                "§6燎原§7 伤害调整数",
+  "text.autoconfig.simplyswords_main.option.weapon_attributes.ribboncleaver_damageModifier":                            "§6荣缎劈刀§7 伤害调整数",
 
   "text.autoconfig.simplyswords_main.option.weapon_attributes.brimstone_attackSpeed.@PrefixText" :                      "§a[攻速调整数]§7\n推荐范围：-1.0至-3.7，-1.0快，-3.7慢。",
   "text.autoconfig.simplyswords_main.option.weapon_attributes.brimstone_attackSpeed":                                   "§6硫磺阔剑§7 攻速调整数",
@@ -1131,6 +1163,8 @@
   "text.autoconfig.simplyswords_main.option.weapon_attributes.wickpiercer_attackSpeed":                                 "§6穿芯§7 攻速调整数",
   "text.autoconfig.simplyswords_main.option.weapon_attributes.dreadtide_attackSpeed":                                   "§6怖潮§7 攻速调整数",
   "text.autoconfig.simplyswords_main.option.weapon_attributes.tempest_attackSpeed":                                     "§6烈风§7 攻速调整数",
+  "text.autoconfig.simplyswords_main.option.weapon_attributes.flamewind_attackSpeed":                                   "§6燎原§7 攻速调整数",
+  "text.autoconfig.simplyswords_main.option.weapon_attributes.ribboncleaver_attackSpeed":                               "§6荣缎劈刀§7 攻速调整数",
 
 
   "text.autoconfig.simplyswords_main.option.runic_effects.enableActiveDefence.@PrefixText" :                            "§a[符文能力启用项]§7\n禁用符文能力将防止它被获取。",
@@ -1209,6 +1243,8 @@
   "text.autoconfig.simplyswords_main.option.loot.enableStarsEdge":                                                      "星芒 可通过战利品获取",
   "text.autoconfig.simplyswords_main.option.loot.enableWickpiercer":                                                    "穿芯 可通过战利品获取",
   "text.autoconfig.simplyswords_main.option.loot.enableTempest":                                                        "烈风 可通过战利品获取",
+  "text.autoconfig.simplyswords_main.option.loot.enableFlamewind":                                                      "燎原 可通过战利品获取",
+  "text.autoconfig.simplyswords_main.option.loot.enableRibbonwrath":                                                    "荣缎劈刀 可通过战利品获取",
 
   "text.autoconfig.simplyswords_main.option.general.enableWeaponImpactSounds":                                          "启用武器击中音效",
   "text.autoconfig.simplyswords_main.option.general.weaponImpactSoundsVolume":                                          "击中音效音量",
@@ -1423,6 +1459,18 @@
   "text.autoconfig.simplyswords_main.option.unique_effects.vortexMaxSize":                                              "涡流 最大范围",
   "text.autoconfig.simplyswords_main.option.unique_effects.vortexMaxStacks":                                            "涡流 效果叠加上限",
   "text.autoconfig.simplyswords_main.option.unique_effects.vortexSpellScaling":                                         "涡流 法术强度伤害乘数",
+
+  "text.autoconfig.simplyswords_main.option.unique_effects.emberstormSpreadCap.@PrefixText" :                           "§6[燎原]§7",
+  "text.autoconfig.simplyswords_main.option.unique_effects.emberstormSpreadCap":                                        "灰烬风暴 播种上限",
+  "text.autoconfig.simplyswords_main.option.unique_effects.emberstormDamage":                                           "灰烬风暴 持续伤害",
+  "text.autoconfig.simplyswords_main.option.unique_effects.emberstormDetonationDamage":                                 "灰烬风暴 爆炸伤害",
+  "text.autoconfig.simplyswords_main.option.unique_effects.emberstormCooldown":                                         "灰烬风暴 冷却时间",
+  "text.autoconfig.simplyswords_main.option.unique_effects.emberstormMaxHaste":                                         "灰烬风暴 急迫效果叠加上限",
+  "text.autoconfig.simplyswords_main.option.unique_effects.emberstormSpellScaling":                                     "灰烬风暴 法术强度伤害乘数",
+
+  "text.autoconfig.simplyswords_main.option.unique_effects.ribbonwrathCooldown.@PrefixText" :                           "§6[荣缎劈刀]§7",
+  "text.autoconfig.simplyswords_main.option.unique_effects.ribbonwrathCooldown":                                        "荣缎加身 冷却时间",
+  "text.autoconfig.simplyswords_main.option.unique_effects.ribbonwrathResilienceAmplifier":                             "荣缎加身 韧性提升倍率",
 
 
   "text.autoconfig.simplyswords_main.option.runic_effects.swiftnessChance.@PrefixText" :                                "§b[极速]§7",
