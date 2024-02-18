@@ -33,23 +33,25 @@ public abstract class LivingEntityMixin {
     @Inject(at = @At("HEAD"), method = "isDead", cancellable = true)
     public void simplyswords$tick(CallbackInfoReturnable<Boolean> cir) {
         LivingEntity livingEntity = (LivingEntity) (Object) this;
-        if (livingEntity instanceof PlayerEntity player) {
-            World world = player.getWorld();
-            ItemStack stack = player.getMainHandStack();
+        if (!livingEntity.getWorld().isClient()) {
+            if (livingEntity instanceof PlayerEntity player) {
+                World world = player.getWorld();
+                ItemStack stack = player.getMainHandStack();
 
-            if (player.getHealth() <= 0.0F && !player.getItemCooldownManager().isCoolingDown(stack.getItem())
-                    && (stack.isOf(ItemsRegistry.WAXWEAVER.get())
-                    || stack.isOf(ItemsRegistry.WICKPIERCER.get()))) {
+                if (player.getHealth() <= 0.0F && !player.getItemCooldownManager().isCoolingDown(stack.getItem())
+                        && (stack.isOf(ItemsRegistry.WAXWEAVER.get())
+                        || stack.isOf(ItemsRegistry.WICKPIERCER.get()))) {
 
-                int skillCooldown = (int) Config.getFloat("waxweaveCooldown", "UniqueEffects", ConfigDefaultValues.waxweaveCooldown);
-                player.setHealth(player.getMaxHealth());
-                HelperMethods.incrementStatusEffect(player, StatusEffects.RESISTANCE, 100, 2, 3);
-                player.getItemCooldownManager().set(stack.getItem(), skillCooldown);
-                world.playSound(null, player.getBlockPos(), SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
-                        player.getSoundCategory(), 0.7f, 1.0f);
-                world.playSound(null, player.getBlockPos(), SoundRegistry.SPELL_MISC_02.get(),
-                        player.getSoundCategory(), 0.8f, 1.0f);
-                cir.setReturnValue(false);
+                    int skillCooldown = (int) Config.getFloat("waxweaveCooldown", "UniqueEffects", ConfigDefaultValues.waxweaveCooldown);
+                    player.setHealth(player.getMaxHealth());
+                    HelperMethods.incrementStatusEffect(player, StatusEffects.RESISTANCE, 100, 2, 3);
+                    player.getItemCooldownManager().set(stack.getItem(), skillCooldown);
+                    world.playSound(null, player.getBlockPos(), SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
+                            player.getSoundCategory(), 0.7f, 1.0f);
+                    world.playSound(null, player.getBlockPos(), SoundRegistry.SPELL_MISC_02.get(),
+                            player.getSoundCategory(), 0.8f, 1.0f);
+                    cir.setReturnValue(false);
+                }
             }
         }
     }
@@ -57,12 +59,19 @@ public abstract class LivingEntityMixin {
     @ModifyVariable(method = "modifyAppliedDamage", at = @At("HEAD"), ordinal = 0, argsOnly = true)
     private float simplyswords$modifyDamageAmount(float amount, DamageSource source) {
         LivingEntity livingEntity = (LivingEntity) (Object) this;
-        StatusEffectInstance voidcloakEffect = livingEntity.getStatusEffect(EffectRegistry.VOIDCLOAK.get());
-        if (voidcloakEffect != null) {
-            int amplifier = voidcloakEffect.getAmplifier();
-            float reductionFactor = 1 - (amplifier + 1) * 0.10f; // +1 because amplifier starts at 0
-            amount *= reductionFactor;
-            HelperMethods.decrementStatusEffect(livingEntity, EffectRegistry.VOIDCLOAK.get());
+        if (!livingEntity.getWorld().isClient()) {
+            StatusEffectInstance voidcloakEffect = livingEntity.getStatusEffect(EffectRegistry.VOIDCLOAK.get());
+            StatusEffectInstance ribbonwrathEffect = livingEntity.getStatusEffect(EffectRegistry.RIBBONWRATH.get());
+            if (voidcloakEffect != null) {
+                int amplifier = voidcloakEffect.getAmplifier();
+                float reductionFactor = 1 - (amplifier + 1) * 0.10f; // +1 because amplifier starts at 0
+                amount *= reductionFactor;
+                HelperMethods.decrementStatusEffect(livingEntity, EffectRegistry.VOIDCLOAK.get());
+            }
+            if (ribbonwrathEffect != null) {
+                float reductionFactor = 0.85f;
+                amount *= reductionFactor;
+            }
         }
         return amount;
     }

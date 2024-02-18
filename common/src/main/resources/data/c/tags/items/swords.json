@@ -114,6 +114,8 @@
     "simplyswords:stars_edge",
     "simplyswords:wickpiercer",
     "simplyswords:tempest",
+    "simplyswords:flamewind",
+    "simplyswords:ribboncleaver",
     {
       "id": "simplyswords:dreadtide",
       "required": false

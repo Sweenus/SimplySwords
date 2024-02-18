@@ -116,6 +116,7 @@
   "item.simplyswords.dreadtide":                                                                                        "Dreadtide",
   "item.simplyswords.tempest":                                                                                          "Tempest",
   "item.simplyswords.flamewind":                                                                                        "Flamewind",
+  "item.simplyswords.ribboncleaver":                                                                                    "Ribboncleaver",
 
 
   "item.simplyswords.runic_tablet":                                                                                     "Runic Tablet",
@@ -519,6 +520,10 @@
   "effect.simplyswords.frost_vortex":                                                                                   "Frost Vortex",
   "effect.simplyswords.elemental_vortex":                                                                               "Elemental Vortex",
   "effect.simplyswords.flameseed":                                                                                      "Flameseed",
+  "effect.simplyswords.ribbonwrath":                                                                                    "Ribbonwrath",
+  "effect.simplyswords.ribboncleave":                                                                                   "Ribboncleave",
+  "effect.simplyswords.resilience":                                                                                     "Resilience",
+  "effect.simplyswords.battle_fatigue":                                                                                 "Battle Fatigue",
 
   "item.simplyswords.onrightclick":                                                                                     "On Right Click:",
   "item.simplyswords.onrightclickheld":                                                                                 "Hold Right Click:",
@@ -790,6 +795,17 @@
   "item.simplyswords.flamewindsworditem.tooltip9":                                                                      "damage and spreading the",
   "item.simplyswords.flamewindsworditem.tooltip10":                                                                     "effect to nearby enemies.",
   "item.simplyswords.flamewindsworditem.tooltip11":                                                                     "Spreads up to %d times.",
+
+  "item.simplyswords.ribboncleaversworditem.tooltip1":                                                                  "Unique Effect: Ribbonwrath",
+  "item.simplyswords.ribboncleaversworditem.tooltip2":                                                                  "Wielding Ribboncleaver causes",
+  "item.simplyswords.ribboncleaversworditem.tooltip3":                                                                  "you to move 5% slower, but",
+  "item.simplyswords.ribboncleaversworditem.tooltip4":                                                                  "take 15% less damage.",
+  "item.simplyswords.ribboncleaversworditem.tooltip5":                                                                  "Dash forward, shrugging off",
+  "item.simplyswords.ribboncleaversworditem.tooltip6":                                                                  "the next few incoming hits,",
+  "item.simplyswords.ribboncleaversworditem.tooltip7":                                                                  "gaining knockback resistance,",
+  "item.simplyswords.ribboncleaversworditem.tooltip8":                                                                  "and causing your next attack",
+  "item.simplyswords.ribboncleaversworditem.tooltip9":                                                                  "to deal 200% damage to a",
+  "item.simplyswords.ribboncleaversworditem.tooltip10":                                                                 "single target.",
 
 
   "item.simplyswords.dormantrelicsworditem.tooltip2":                                                                   "A faint power seems to emanate from within.",
@@ -1110,6 +1126,7 @@
   "text.autoconfig.simplyswords_main.option.weapon_attributes.dreadtide_damageModifier":                                "§6Dreadtide§7 damage modifier",
   "text.autoconfig.simplyswords_main.option.weapon_attributes.tempest_damageModifier":                                  "§6Tempest§7 damage modifier",
   "text.autoconfig.simplyswords_main.option.weapon_attributes.flamewind_damageModifier":                                "§6Flamewind§7 damage modifier",
+  "text.autoconfig.simplyswords_main.option.weapon_attributes.ribboncleaver_damageModifier":                            "§6Ribboncleaver§7 damage modifier",
 
   "text.autoconfig.simplyswords_main.option.weapon_attributes.brimstone_attackSpeed.@PrefixText" :                      "§6[Attack Speed Modifiers]§7\nRecommended range: -1.0 to -3.7, with -1.0 being fast and -3.7 being slow.",
   "text.autoconfig.simplyswords_main.option.weapon_attributes.brimstone_attackSpeed":                                   "§6Brimstone§7 attack speed",
@@ -1147,6 +1164,7 @@
   "text.autoconfig.simplyswords_main.option.weapon_attributes.dreadtide_attackSpeed":                                   "§6Dreadtide§7 attack speed",
   "text.autoconfig.simplyswords_main.option.weapon_attributes.tempest_attackSpeed":                                     "§6Tempest§7 attack speed",
   "text.autoconfig.simplyswords_main.option.weapon_attributes.flamewind_attackSpeed":                                   "§6Flamewind§7 attack speed",
+  "text.autoconfig.simplyswords_main.option.weapon_attributes.ribboncleaver_attackSpeed":                               "§6Ribboncleaver§7 attack speed",
 
 
   "text.autoconfig.simplyswords_main.option.runic_effects.enableActiveDefence.@PrefixText" :                            "§a[Runic Power Blacklisting]§7\nSetting any of the below values to false will prevent that runic power from being obtainable.",
@@ -1225,6 +1243,8 @@
   "text.autoconfig.simplyswords_main.option.loot.enableStarsEdge":                                                      "Star's Edge can be looted",
   "text.autoconfig.simplyswords_main.option.loot.enableWickpiercer":                                                    "Wickpiercer can be looted",
   "text.autoconfig.simplyswords_main.option.loot.enableTempest":                                                        "Tempest can be looted",
+  "text.autoconfig.simplyswords_main.option.loot.enableFlamewind":                                                      "Flamewind can be looted",
+  "text.autoconfig.simplyswords_main.option.loot.enableRibboncleaver":                                                  "Ribboncleaver can be looted",
 
   "text.autoconfig.simplyswords_main.option.general.enableWeaponImpactSounds":                                          "Enable weapon impact sounds",
   "text.autoconfig.simplyswords_main.option.general.weaponImpactSoundsVolume":                                          "Weapon impact sounds volume",
@@ -1447,6 +1467,10 @@
   "text.autoconfig.simplyswords_main.option.unique_effects.emberstormCooldown":                                         "Emberstorm cooldown",
   "text.autoconfig.simplyswords_main.option.unique_effects.emberstormMaxHaste":                                         "Emberstorm Haste max",
   "text.autoconfig.simplyswords_main.option.unique_effects.emberstormSpellScaling":                                     "Emberstorm Spell Power DMG multi",
+
+  "text.autoconfig.simplyswords_main.option.unique_effects.ribbonwrathCooldown.@PrefixText" :                           "§6[Ribboncleaver]§7",
+  "text.autoconfig.simplyswords_main.option.unique_effects.ribbonwrathCooldown":                                        "Ribbonwrath cooldown",
+  "text.autoconfig.simplyswords_main.option.unique_effects.ribbonwrathResilienceAmplifier":                             "Ribbonwrath resilience amplifier",
 
 
   "text.autoconfig.simplyswords_main.option.runic_effects.swiftnessChance.@PrefixText" :                                "§b[Swiftness]§7",

@@ -52,6 +52,8 @@ public class LootConfig implements ConfigData {
     public boolean enableStarsEdge = true;
     public boolean enableWickpiercer = true;
     public boolean enableTempest = true;
+    public boolean enableFlamewind = true;
+    public boolean enableRibboncleaver = true;
 
 
 

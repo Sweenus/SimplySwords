@@ -192,6 +192,10 @@ public class ModLootTableModifiers {
                             pool.with(ItemEntry.builder(ItemsRegistry.WICKPIERCER.get()));
                         if (Config.getBoolean("enableTempest", "Loot", ConfigDefaultValues.enableTempest))
                             pool.with(ItemEntry.builder(ItemsRegistry.TEMPEST.get()));
+                        if (Config.getBoolean("enableFlamewind", "Loot", ConfigDefaultValues.enableFlamewind))
+                            pool.with(ItemEntry.builder(ItemsRegistry.FLAMEWIND.get()));
+                        if (Config.getBoolean("enableRibboncleaver", "Loot", ConfigDefaultValues.enableRibboncleaver))
+                            pool.with(ItemEntry.builder(ItemsRegistry.RIBBONCLEAVER.get()));
 
                         context.addPool(pool);
                     }
@@ -265,6 +269,10 @@ public class ModLootTableModifiers {
                             pool.with(ItemEntry.builder(ItemsRegistry.WICKPIERCER.get()));
                         if (Config.getBoolean("enableTempest", "Loot", ConfigDefaultValues.enableTempest))
                             pool.with(ItemEntry.builder(ItemsRegistry.TEMPEST.get()));
+                        if (Config.getBoolean("enableFlamewind", "Loot", ConfigDefaultValues.enableFlamewind))
+                            pool.with(ItemEntry.builder(ItemsRegistry.FLAMEWIND.get()));
+                        if (Config.getBoolean("enableRibboncleaver", "Loot", ConfigDefaultValues.enableRibboncleaver))
+                            pool.with(ItemEntry.builder(ItemsRegistry.RIBBONCLEAVER.get()));
 
                         context.addPool(pool);
                     }

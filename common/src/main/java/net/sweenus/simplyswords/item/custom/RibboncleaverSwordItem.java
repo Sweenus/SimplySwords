@@ -47,7 +47,8 @@ public class RibboncleaverSwordItem extends UniqueSwordItem {
 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
-        int skillCooldown = 40;//(int) Config.getFloat("celestialSurgeCooldown", "UniqueEffects", ConfigDefaultValues.celestialSurgeCooldown);
+        int skillCooldown = (int) Config.getFloat("ribbonwrathCooldown", "UniqueEffects", ConfigDefaultValues.ribbonwrathCooldown);
+        int resilienceAmplifier = (int) Config.getFloat("ribbonwrathResilienceAmplifier", "UniqueEffects", ConfigDefaultValues.ribbonwrathResilienceAmplifier);
 
 
         world.playSound(null, user.getBlockPos(), SoundRegistry.ELEMENTAL_BOW_EARTH_SHOOT_IMPACT_03.get(),
@@ -60,6 +61,8 @@ public class RibboncleaverSwordItem extends UniqueSwordItem {
         user.velocityModified = true;
         user.addStatusEffect(new StatusEffectInstance(EffectRegistry.RIBBONCLEAVE.get(),
                 60, 0, false, false, true));
+        user.addStatusEffect(new StatusEffectInstance(EffectRegistry.RESILIENCE.get(),
+                60, resilienceAmplifier, false, false, true));
         user.getItemCooldownManager().set(this, skillCooldown);
 
         return super.use(world, user, hand);
@@ -115,21 +118,20 @@ public class RibboncleaverSwordItem extends UniqueSwordItem {
         Style RIGHTCLICK = HelperMethods.getStyle("rightclick");
         Style ABILITY = HelperMethods.getStyle("ability");
         Style TEXT = HelperMethods.getStyle("text");
-        float skillDamageModifier = Config.getFloat("celestialSurgeDamageModifier", "UniqueEffects", ConfigDefaultValues.celestialSurgeDamageModifier);
 
         tooltip.add(Text.literal(""));
-        tooltip.add(Text.translatable("item.simplyswords.starsedgesworditem.tooltip1").setStyle(ABILITY));
-        tooltip.add(Text.translatable("item.simplyswords.starsedgesworditem.tooltip2").setStyle(TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.starsedgesworditem.tooltip3", getAttackDamage() * skillDamageModifier).setStyle(TEXT));
-        tooltip.add(Text.literal(""));
-        tooltip.add(Text.translatable("item.simplyswords.starsedgesworditem.tooltip4").setStyle(TEXT));
+        tooltip.add(Text.translatable("item.simplyswords.ribboncleaversworditem.tooltip1").setStyle(ABILITY));
+        tooltip.add(Text.translatable("item.simplyswords.ribboncleaversworditem.tooltip2").setStyle(TEXT));
+        tooltip.add(Text.translatable("item.simplyswords.ribboncleaversworditem.tooltip3").setStyle(TEXT));
+        tooltip.add(Text.translatable("item.simplyswords.ribboncleaversworditem.tooltip4").setStyle(TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(RIGHTCLICK));
-        tooltip.add(Text.translatable("item.simplyswords.starsedgesworditem.tooltip5").setStyle(TEXT));
-        tooltip.add(Text.literal(""));
-        tooltip.add(Text.translatable("item.simplyswords.starsedgesworditem.tooltip6").setStyle(TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.starsedgesworditem.tooltip7").setStyle(TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.starsedgesworditem.tooltip8").setStyle(TEXT));
+        tooltip.add(Text.translatable("item.simplyswords.ribboncleaversworditem.tooltip5").setStyle(TEXT));
+        tooltip.add(Text.translatable("item.simplyswords.ribboncleaversworditem.tooltip6").setStyle(TEXT));
+        tooltip.add(Text.translatable("item.simplyswords.ribboncleaversworditem.tooltip7").setStyle(TEXT));
+        tooltip.add(Text.translatable("item.simplyswords.ribboncleaversworditem.tooltip8").setStyle(TEXT));
+        tooltip.add(Text.translatable("item.simplyswords.ribboncleaversworditem.tooltip9").setStyle(TEXT));
+        tooltip.add(Text.translatable("item.simplyswords.ribboncleaversworditem.tooltip10").setStyle(TEXT));
 
         super.appendTooltip(itemStack, world, tooltip, tooltipContext);
     }

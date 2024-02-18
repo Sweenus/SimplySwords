@@ -210,6 +210,9 @@ public class ConfigDefaultValues {
     public static float emberstormCooldown = 980f;
     public static float emberstormMaxHaste = 10f;
     public static float emberstormSpellScaling = 0.4f;
+
+    public static float ribbonwrathCooldown = 40f;
+    public static float ribbonwrathResilienceAmplifier = 1f;
     
     // -- WEAPON ATTRIBUTES -- //
 
@@ -515,6 +518,8 @@ public class ConfigDefaultValues {
     public static boolean enableStarsEdge = true;
     public static boolean enableWickpiercer = true;
     public static boolean enableTempest = true;
+    public static boolean enableFlamewind = true;
+    public static boolean enableRibboncleaver = true;
     
     // -- GENERAL CONFIG --
 

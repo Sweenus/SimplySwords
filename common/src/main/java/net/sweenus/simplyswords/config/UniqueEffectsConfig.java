@@ -220,4 +220,8 @@ public class UniqueEffectsConfig implements ConfigData {
     public float emberstormMaxHaste = 10f;
     public float emberstormSpellScaling = 0.4f;
 
+    @ConfigEntry.Gui.PrefixText
+    public float ribbonwrathCooldown = 40f;
+    public float ribbonwrathResilienceAmplifier = 1f;
+
 }

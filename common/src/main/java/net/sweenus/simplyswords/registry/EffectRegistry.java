@@ -90,6 +90,12 @@ public class EffectRegistry {
                     .addAttributeModifier(EntityAttributes.GENERIC_ATTACK_DAMAGE,
                             "c8fb5e9f-c446-4475-b73f-a2290196210f",
                             2,
-                            EntityAttributeModifier.Operation.MULTIPLY_TOTAL));
+                            EntityAttributeModifier.Operation.MULTIPLY_TOTAL)
+                    .addAttributeModifier(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE,
+                            "1b147b80-6598-48d4-917f-7da3032c070f",
+                            1,
+                            EntityAttributeModifier.Operation.ADDITION));
+    public static final RegistrySupplier<StatusEffect> RESILIENCE = EFFECT.register("resilience", () ->
+            new ResilienceEffect(StatusEffectCategory.BENEFICIAL, 1124687));
 
 }
