@@ -1,0 +1,13 @@
+{
+  "name": "余烬鞭挞",
+  "icon": "simplyswords:emberlash",
+  "advancement": "simplyswords:emberlash",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:emberlash",
+      "text": "这是一把非常规的匕首。它不同于传统武器的工艺，直接使用纯粹的可控的火焰作为刀刃。它不仅是外观惊艳：耀眼的刀刃可以烧灼伤口，而且它比相似重量的武器攻击范围更广。"
+    }
+  ]
+}

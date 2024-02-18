@@ -1,0 +1,17 @@
+{
+  "name": "野火",
+  "icon": "simplyswords:runic_tablet",
+  "category": "simplyswords:category_rune_etching",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:runic_tablet",
+      "title": "野火",
+      "text": "野火符文包含了$(#d1422c)$(l)烈焰$()的精华。$(br2)每次攻击时都有可能点燃附近的同类敌人。"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "这个符文拥有很强的范围伤害能力。$(br2)它很适合在范围内和一大群同类怪物作战时使用，如刷怪塔。"
+    }
+  ]
+}

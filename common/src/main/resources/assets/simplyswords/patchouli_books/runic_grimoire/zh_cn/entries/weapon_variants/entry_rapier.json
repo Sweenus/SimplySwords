@@ -1,0 +1,26 @@
+{
+  "name": "细剑",
+  "icon": "simplyswords:iron_rapier",
+  "category": "simplyswords:category_weapon_variants",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:iron_rapier",
+      "text": "细剑是流行于16~17世纪的欧洲上流社会的武器，一般用于决斗和平民的自卫。细剑以快速、精准和优雅(?)著称。由于剑身细长，细剑需要一定的技巧和策略才能驾驭。"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:iron_rapier",
+      "recipe2": "simplyswords:gold_rapier"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:diamond_rapier"
+    },
+    {
+      "type": "patchouli:smithing",
+      "recipe": "simplyswords:netherite_rapier",
+      "recipe2": "simplyswords:runic_rapier"
+    }
+  ]
+}

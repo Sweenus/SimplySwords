@@ -1,0 +1,17 @@
+{
+  "name": "窃魂之剑",
+  "icon": "simplyswords:soulstealer",
+  "advancement": "simplyswords:soulstealer",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:soulstealer",
+      "text": "窃魂之剑是一种强大又神秘的武器，据说它可以偷取目标的灵魂并操纵它们的感知。它是一种锁定并操控敌人的武器，能够干扰目标的思维，使它们对持有者视而不见。"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "这把武器的具体性质和能力几乎不为人所知，它是一种受欢迎又难以捉摸的武器，据说只有最强的邪恶力量的拥有者才能使用。"
+    }
+  ]
+}

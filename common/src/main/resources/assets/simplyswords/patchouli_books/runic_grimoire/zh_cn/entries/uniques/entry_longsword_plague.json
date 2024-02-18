@@ -1,0 +1,17 @@
+{
+  "name": "瘟疫长剑",
+  "icon": "simplyswords:toxic_longsword",
+  "advancement": "simplyswords:longsword_plague",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:toxic_longsword",
+      "text": "瘟疫长剑是一把被诅咒的武器，它在攻击时能够反转对方身上的正面效果，例如再生和抗性提升，转化为负面的效果。这可能弱化敌人，使得他们更脆弱，让自己占据优势。"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "传说中这把剑在锻造中加入了一场瘟疫中的死者遗体，并注入了黑暗魔法。这把武器散发着不祥的腐朽气息，非常适合那些想要虚弱敌人扭转战局的战士。"
+    }
+  ]
+}

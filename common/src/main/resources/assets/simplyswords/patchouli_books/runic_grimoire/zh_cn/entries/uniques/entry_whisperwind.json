@@ -1,0 +1,13 @@
+{
+  "name": "风之低语",
+  "icon": "simplyswords:whisperwind",
+  "advancement": "simplyswords:whisperwind",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:whisperwind",
+      "text": "风之低语是一把随风而舞的空灵的武士刀，能赋予持有者无与伦比的灵活性和神秘力量。这把刀的独特能力能让持有者划过战场，产生一种微弱的旋律共鸣，如同风吹过一样。每次快速的冲刺都会攻击敌人的感官，让他们迷失方向，变得脆弱。"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "name": "穿芯",
+  "icon": "simplyswords:wickpiercer",
+  "advancement": "simplyswords:wickpiercer",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:wickpiercer",
+      "text": "穿芯是一把精致的长矛，将优雅与致命融为一体，造型让人联想到华丽的烛台。它的独特能力在施放时能影响持有者的身心，使他们短时间内暴走，增加攻击速度。"
+    }
+  ]
+}

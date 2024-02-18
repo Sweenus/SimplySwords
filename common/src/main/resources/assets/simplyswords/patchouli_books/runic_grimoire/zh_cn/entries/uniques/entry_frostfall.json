@@ -1,0 +1,17 @@
+{
+  "name": "霜降|",
+  "icon": "simplyswords:frostfall",
+  "advancement": "simplyswords:frostfall",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:frostfall",
+      "text": "霜降是一把强大的锤子，它利用冰霜的力量冻结敌人。它由一种稀有金属锻造而成，能承受冰冻的严寒。锤头灌注了冰霜的力量，可以冻结攻击到的敌人。"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "该武器的独特技能是将使用者包裹在冰霜的保护层之中，获得短时间的回复效果和抗性。据说这把锤子是由一个巫师制作的，他赋予武器寒冬的力量，使得这把锤子变成了战场上可怕的武器。"
+    }
+  ]
+}

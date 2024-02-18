@@ -1,0 +1,17 @@
+{
+  "name": "裂魂之镰",
+  "icon": "simplyswords:soulrender",
+  "advancement": "simplyswords:soulrender",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:soulrender",
+      "text": "传说裂魂之镰的刀刃是由一种神秘的黑色金属制成的，散发着邪恶的能量。据说它不仅能削肉断骨，还能斩断灵魂。"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "受到灵魂撕裂状态的目标会虚弱，而且可以施放独特能力造成额外伤害。据说这把武器是一个强大的亡灵巫师使用的，他用这把镰刀收割了敌人的灵魂用作己用。它是一把强大的武器，请谨慎使用。传言它收割灵魂的能力会影响自己的灵魂。"
+    }
+  ]
+}

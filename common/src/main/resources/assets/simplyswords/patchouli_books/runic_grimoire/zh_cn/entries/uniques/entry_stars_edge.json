@@ -1,0 +1,17 @@
+{
+  "name": "星芒",
+  "icon": "simplyswords:stars_edge",
+  "advancement": "simplyswords:stars_edge",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:stars_edge",
+      "text": "星芒是一把壮观的双刃剑，它能与宇宙中恒星的力量产生共鸣。在阳光的照射下，星芒的能量涌动可以使它造成额外的攻击伤害。"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "而当夜幕降临时，星芒会改变它的特质。由于沐浴在月光和星光之下，它散发出一种令人平静的光环。它的攻击受到月亮的加持，会附加吸血效果。"
+    }
+  ]
+}

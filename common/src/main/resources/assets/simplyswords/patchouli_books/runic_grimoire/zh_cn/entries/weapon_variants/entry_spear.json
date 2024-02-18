@@ -1,0 +1,26 @@
+{
+  "name": "矛",
+  "icon": "simplyswords:iron_spear",
+  "category": "simplyswords:category_weapon_variants",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:iron_spear",
+      "text": "矛拥有非常悠久的历史，它在用于战争之前最早用于狩猎。矛的攻击范围广，多用于戳刺。矛的制造和维护简单，使得它在古代甚至原始社会都广泛流行。"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:iron_spear",
+      "recipe2": "simplyswords:gold_spear"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:diamond_spear"
+    },
+    {
+      "type": "patchouli:smithing",
+      "recipe": "simplyswords:netherite_spear",
+      "recipe2": "simplyswords:runic_spear"
+    }
+  ]
+}

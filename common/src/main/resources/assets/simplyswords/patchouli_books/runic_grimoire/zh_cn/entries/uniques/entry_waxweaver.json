@@ -1,0 +1,13 @@
+{
+  "name": "织蜡者",
+  "icon": "simplyswords:waxweaver",
+  "advancement": "simplyswords:waxweaver",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:waxweaver",
+      "text": "织蜡者是一把精致的阔剑，将优雅与致命融为一体，造型像华丽的烛台。它攻击着火的敌人时，会激发蜡烛的力量，给予持有者力量提升。"
+    }
+  ]
+}

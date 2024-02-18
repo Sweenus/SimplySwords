@@ -1,0 +1,17 @@
+{
+  "name": "紫晶魔戟",
+  "icon": "simplyswords:arcanethyst",
+  "advancement": "simplyswords:arcanethyst",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:arcanethyst",
+      "text": "紫晶魔戟使用一种类似心灵感应的魔法操控敌人。它由注入魔力的紫水晶打造而成。据说紫水晶是魔力传播的良好媒介。"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "该武器的独特能力需要按住右键施放，发出的奥术冲击能使目标飘浮，并持续造成伤害。这个技能不仅能让目标浮空从而便于追击，还可以对目标造成大量的伤害，但是需要目标尽量长时间地在武器的攻击范围内才能发挥最大效果。"
+    }
+  ]
+}
