@@ -124,7 +124,7 @@ public class DreadtideSwordItem extends UniqueSwordItem {
         Style CORRUPTED_ABILITY = HelperMethods.getStyle("corrupted_ability");
         Style TEXT = HelperMethods.getStyle("corrupted_text");
         MutableText ability_icon = Text.empty().append("\uA996 ");
-        MutableText type = TextAPI.Styles.getGradient(Text.translatable("item.eldritch_end.xalarath.type"), 1, 6043781, 9326287, 1.0F);
+        MutableText type = TextAPI.Styles.getGradient(Text.translatable("item.eldritch_end.corrupted_item.type"), 1, 6043781, 9326287, 1.0F);
 
         tooltip.add(Text.literal("\uA999 ").append(type.fillStyle(type.getStyle().withUnderline(true))));
         tooltip.add(Text.literal(""));
