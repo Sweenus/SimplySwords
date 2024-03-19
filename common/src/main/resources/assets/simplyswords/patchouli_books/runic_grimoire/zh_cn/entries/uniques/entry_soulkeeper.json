@@ -1,0 +1,17 @@
+{
+  "name": "聚魂之锤",
+  "icon": "simplyswords:soulkeeper",
+  "advancement": "simplyswords:soulkeeper",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:soulkeeper",
+      "text": "据说聚魂之锤是由一种神秘的材料制成的，能吸收死者的灵魂，在持有者和灵魂直接建立联系。这些被吸收的灵魂能保护持有者，吸收一部分伤害。"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "该武器的特殊能力施放时，放出灵魂，虚弱并减速附近敌人。这把武器本身巨大又壮观，有一个窥视灵魂之井的窗口。锤子周围有一种诡异的光环，据说这是那些想利用灵魂力量战斗的人的首选武器。"
+    }
+  ]
+}

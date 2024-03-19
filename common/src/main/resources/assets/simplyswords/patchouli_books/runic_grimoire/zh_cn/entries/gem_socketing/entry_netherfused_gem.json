@@ -1,0 +1,20 @@
+{
+  "name": "狱灵宝石",
+  "icon": "simplyswords:netherfused_gem",
+  "category": "simplyswords:category_gem_socketing",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:netherfused_gem",
+      "text": "狱灵宝石可以在锻造台中将下界合金和强能结晶锻造合成。在点击鉴定之后，它们会随机揭示一个能力。"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "狱灵宝石可以嵌入独特武器的[狱灵槽]。"
+    },
+    {
+      "type": "patchouli:smithing",
+      "recipe": "simplyswords:netherfused_gem"
+    }
+  ]
+}

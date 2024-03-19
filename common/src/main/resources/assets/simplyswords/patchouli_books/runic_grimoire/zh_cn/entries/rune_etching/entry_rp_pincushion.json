@@ -1,0 +1,17 @@
+{
+  "name": "针垫",
+  "icon": "simplyswords:runic_tablet",
+  "category": "simplyswords:category_rune_etching",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:runic_tablet",
+      "title": "针垫",
+      "text": "针垫符文为武器注入了$(#d1422c)$(l)反击$()的精华。$(br2)它能使武器根据持有者身上的箭矢数量造成额外的伤害。"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "装备了这个符文的玩家会真的如符文的名字一样变成“针垫”，弓箭手要想射击他们之前得三思了。持有者中箭越多，他就越强，战场上的威胁就越大。"
+    }
+  ]
+}

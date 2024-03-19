@@ -1,0 +1,17 @@
+{
+  "name": "利维坦",
+  "icon": "simplyswords:livyatan",
+  "advancement": "simplyswords:livyatan",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:livyatan",
+      "text": "利维坦是一把可怕的手斧，能够冻结敌人然后粉碎它们，造成大量伤害。每一次攻击都有一定几率发粗一股冰冻能量吞噬敌人，使它们完全不能移动。"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "该武器有一个主动技能，施放时会将冰冻的敌人粉碎造成大量伤害。传说这把斧头是用一头传说中的海兽的心脏锻造而成的，它发出冰冷的蓝光。这种武器非常适合那些想控制敌人并且造成很大伤害的战士。"
+    }
+  ]
+}

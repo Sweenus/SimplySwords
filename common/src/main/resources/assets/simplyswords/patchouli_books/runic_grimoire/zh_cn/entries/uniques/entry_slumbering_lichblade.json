@@ -1,0 +1,22 @@
+{
+  "name": "巫妖之刃",
+  "icon": "simplyswords:slumbering_lichblade",
+  "advancement": "simplyswords:slumbering_lichblade",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:slumbering_lichblade",
+      "text": "沉眠的巫妖之刃是一把散发痛苦灵魂的大剑，会持续对附近敌人造成伤害。据说这把剑是用一个强大的巫妖的遗骨打造而成，注入了它吞噬过的灵魂。有时候，能听到一些邪恶的低语从剑上传出。"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "然而，一开始的巫妖之刃处于沉眠状态，其真正力量尚未解封。通过特殊的合成仪式，可以逐渐解封剑的更强能力。完全觉醒的巫妖之刃可以命令灵魂攻击敌人，吸取它们的生命并回复持有者。这是一种威力巨大的武器，请小心使用。"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:waking_lichblade",
+      "recipe2": "simplyswords:awakened_lichblade"
+    }
+  ]
+}

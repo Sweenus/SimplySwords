@@ -1,0 +1,17 @@
+{
+  "name": "熔火",
+  "icon": "simplyswords:molten_edge",
+  "advancement": "simplyswords:molten_edge",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:molten_edge",
+      "text": "熔火是一把狂暴的手斧，当使用者受伤时，会增加力量和速度。持有者的生命值越低，这把武器就越强。"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "该武器的独特能力，施放时发出一声冲击波，加快持有者的速度使得持有者能快速接近敌人。据说这把斧头是由熔岩锻造的，散发着火热的气息。这把武器非常适合激烈的战斗、克服逆境的战士。"
+    }
+  ]
+}

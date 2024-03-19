@@ -1,0 +1,17 @@
+{
+  "name": "冰冻",
+  "icon": "simplyswords:runic_tablet",
+  "category": "simplyswords:category_rune_etching",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:runic_tablet",
+      "title": "冰冻",
+      "text": "冰冻可以为武器注入$(#38caff)$(l)寒冰$()的力量。$(br2)它可以让持有者在攻击时有几率冰冻目标。"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "冰冻符文能够打乱对手节奏，给自己优势。$(br2)它很适合需要团控的玩家，利用冰冻控制敌人，给队友攻击机会。"
+    }
+  ]
+}

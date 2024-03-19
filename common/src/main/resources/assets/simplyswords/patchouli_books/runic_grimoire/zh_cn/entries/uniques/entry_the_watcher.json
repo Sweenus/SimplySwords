@@ -1,0 +1,17 @@
+{
+  "name": "守望者",
+  "icon": "simplyswords:watcher_claymore",
+  "advancement": "simplyswords:the_watcher",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:watcher_claymore",
+      "text": "守望者是一把大剑，剑柄上嵌着一只诡异的在眨眼的眼睛，据说这是它力量的源头。它的剑刃是由一种深色到几乎黑色的金属制成，这种金属似乎可以吸收周围的光。"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "守望者的特殊能力可以一击击倒敌人，但据说只能在持有者非常专注或者敌人非常虚弱时才可能出现。传说只有真正的战士——那些有着坚强意志和渴望力量的战士——才能驾驭守望者并充分发挥它的潜力。"
+    }
+  ]
+}

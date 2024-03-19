@@ -1,0 +1,17 @@
+{
+  "name": "带长棍的剑",
+  "icon": "simplyswords:sword_on_a_stick",
+  "advancement": "simplyswords:sword_on_a_stick",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:sword_on_a_stick",
+      "text": "这把剑是一把究极传奇的武器，据说是一个伟大的战士家族持有并代代相传。它的事迹在整个大陆各地传颂，所有听到它的故事的人无不对它感到万分敬畏。"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "上一页的内容都是编的。细想一下，这就是一把剑然后在剑柄绑了根棍子。"
+    }
+  ]
+}

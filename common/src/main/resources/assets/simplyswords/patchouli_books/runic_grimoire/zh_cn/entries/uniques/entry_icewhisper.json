@@ -1,0 +1,17 @@
+{
+  "name": "冰语",
+  "icon": "simplyswords:icewhisper",
+  "advancement": "simplyswords:icewhisper",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:icewhisper",
+      "text": "冰语这把戟非常致命，只要手持它，就会散发弱化敌人的冰冻光环，减速周围的敌人，并且造成持续的伤害。减速效果也方便后续的攻击。"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "除了冰冻光环，该武器还可以召唤出一阵暴风雪，将战场笼罩在冰天雪地之中。暴风雪会持续造成伤害，并且减速他们，让敌人难以发现自己，为自己提供优势。据说这把戟是用最纯净的冰打造的，它闪烁着冰冷的蓝光。"
+    }
+  ]
+}

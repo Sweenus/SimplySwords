@@ -1,0 +1,26 @@
+{
+  "name": "弯刀",
+  "icon": "simplyswords:iron_cutlass",
+  "category": "simplyswords:category_weapon_variants",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:iron_cutlass",
+      "text": "弯刀适合近距离的切砍和刺击，在船上的近战攻击尤为适用。因此弯刀被海上的人们所喜爱。它的刀刃形状除了能加强砍切，还适合切肉、割绳子。"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:iron_cutlass",
+      "recipe2": "simplyswords:gold_cutlass"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:diamond_cutlass"
+    },
+    {
+      "type": "patchouli:smithing",
+      "recipe": "simplyswords:netherite_cutlass",
+      "recipe2": "simplyswords:runic_cutlass"
+    }
+  ]
+}
