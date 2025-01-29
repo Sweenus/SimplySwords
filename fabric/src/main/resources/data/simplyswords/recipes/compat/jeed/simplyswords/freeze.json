@@ -1,0 +1,22 @@
+{
+	"type": "jeed:effect_provider",
+	"effect": "simplyswords:freeze",
+	"providers": [
+		{
+			"fabric:type": "fabric:nbt",
+			"base": {
+				"item": "simplyswords:runefused_gem"
+			},
+			"nbt": "{\"runic_power\": \"freeze\"}",
+			"strict": true
+		}
+	],
+	"fabric:load_conditions": [
+		{
+			"condition": "fabric:all_mods_loaded",
+			"values": [
+				"jeed"
+			]
+		}
+	]
+}
