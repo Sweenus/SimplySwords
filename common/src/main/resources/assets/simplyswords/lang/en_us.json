@@ -541,7 +541,7 @@
   "effect.simplyswords.wildfire":                                                                                       "Wildfire",
   "effect.simplyswords.echo":                                                                                           "Echo",
   "effect.simplyswords.ward":                                                                                           "Ward",
-  "effect.simplyswords.immolation":                                                                                     "Immolation":
+  "effect.simplyswords.immolation":                                                                                     "Immolation",
   "effect.simplyswords.onslaught":                                                                                      "Onslaught",
   "effect.simplyswords.smouldering":                                                                                    "Smouldering",
   "effect.simplyswords.frenzy":                                                                                         "Frenzy",
@@ -975,7 +975,7 @@
   "item.simplyswords.uniquesworditem.runefused_power.imbued":                                                           "[ Runefused: Imbued ]",
   "item.simplyswords.imbuedsworditem.tooltip2":                                                                         "Chance on hit to deal additional",
   "item.simplyswords.imbuedsworditem.tooltip3":                                                                         "magic damage, scaling with durability.",
-  "item.simplyswords.pincushionsworditem.tooltip1":                                                                     "Runic Power: Pincushion":
+  "item.simplyswords.pincushionsworditem.tooltip1":                                                                     "Runic Power: Pincushion",
   "item.simplyswords.uniquesworditem.runefused_power.pincushion":                                                       "[ Runefused: Pincushion ]",
   "item.simplyswords.pincushionsworditem.tooltip2":                                                                     "Deal additional damage for each",
   "item.simplyswords.pincushionsworditem.tooltip3":                                                                     "arrow stuck in your body.",
@@ -983,7 +983,7 @@
   "item.simplyswords.wardsworditem.tooltip2":                                                                           "Sacrifice half your current HP to gain",
   "item.simplyswords.wardsworditem.tooltip3":                                                                           "pulsing absorption relative to your",
   "item.simplyswords.wardsworditem.tooltip4":                                                                           "remaining HP for 6 seconds.",
-  "item.simplyswords.immolationsworditem.tooltip1":                                                                     "Runic Power: Immolation":
+  "item.simplyswords.immolationsworditem.tooltip1":                                                                     "Runic Power: Immolation",
   "item.simplyswords.immolationsworditem.tooltip2":                                                                     "Gain an aura of immolation, periodically",
   "item.simplyswords.immolationsworditem.tooltip3":                                                                     "damaging you and nearby foes. Outgoing ",
   "item.simplyswords.immolationsworditem.tooltip4":                                                                     "damage scales with your current HP.",
@@ -1009,7 +1009,7 @@
 
   "item.simplyswords.uniquesworditem.netherfused_power.radiance":                                                       "[ Netherfused: Radiance ]",
   "item.simplyswords.uniquesworditem.netherfused_power.radiance.description":                                           "When hitting a target afflicted",
-  "item.simplyswords.uniquesworditem.netherfused_power.radiance.description2":                                          "with weakness, gain Immolation":
+  "item.simplyswords.uniquesworditem.netherfused_power.radiance.description2":                                          "with weakness, gain Immolation",
   "item.simplyswords.uniquesworditem.netherfused_power.radiance.description3":                                          "for a short duration.",
 
   "item.simplyswords.uniquesworditem.netherfused_power.onslaught":                                                      "[ Netherfused: Onslaught ]",
@@ -1361,8 +1361,8 @@
   "text.autoconfig.simplyswords_main.option.runic_effects.enableGreaterMomentum":                                       "Enable Greater Momentum",
   "text.autoconfig.simplyswords_main.option.runic_effects.enableImbued":                                                "Enable Imbued",
   "text.autoconfig.simplyswords_main.option.runic_effects.enableGreaterImbued":                                         "Enable Greater Imbued",
-  "text.autoconfig.simplyswords_main.option.runic_effects.enablePincushion":                                            "Enable Pincushion":
-  "text.autoconfig.simplyswords_main.option.runic_effects.enableGreaterPincushion":                                     "Enable Greater Pincushion":
+  "text.autoconfig.simplyswords_main.option.runic_effects.enablePincushion":                                            "Enable Pincushion",
+  "text.autoconfig.simplyswords_main.option.runic_effects.enableGreaterPincushion":                                     "Enable Greater Pincushion",
   "text.autoconfig.simplyswords_main.option.runic_effects.enableWard":                                                  "Enable Ward",
   "text.autoconfig.simplyswords_main.option.runic_effects.enableImmolate":                                              "Enable Immolate",
 
@@ -1440,20 +1440,20 @@
 
   "text.autoconfig.simplyswords_main.option.unique_effects.stealChance.@PrefixText" :                                   "§6[Soulstealer]§7",
   "text.autoconfig.simplyswords_main.option.unique_effects.stealChance":                                                "Steal chance",
-  "text.autoconfig.simplyswords_main.option.unique_effects.stealDuration":                                              "Steal duration":
-  "text.autoconfig.simplyswords_main.option.unique_effects.stealInvisDuration":                                         "Steal Invisible duration":
-  "text.autoconfig.simplyswords_main.option.unique_effects.stealBlindDuration":                                         "Steal Blind duration":
+  "text.autoconfig.simplyswords_main.option.unique_effects.stealDuration":                                              "Steal duration",
+  "text.autoconfig.simplyswords_main.option.unique_effects.stealInvisDuration":                                         "Steal Invisible duration",
+  "text.autoconfig.simplyswords_main.option.unique_effects.stealBlindDuration":                                         "Steal Blind duration",
   "text.autoconfig.simplyswords_main.option.unique_effects.stealRadius":                                                "Steal radius",
   "text.autoconfig.simplyswords_main.option.unique_effects.stealSpellScaling":                                          "Steal Spell Power DMG multi",
 
   "text.autoconfig.simplyswords_main.option.unique_effects.soulMeldChance.@PrefixText" :                                "§6[Soulkeeper]§7",
   "text.autoconfig.simplyswords_main.option.unique_effects.soulMeldChance":                                             "Soulmeld chance",
-  "text.autoconfig.simplyswords_main.option.unique_effects.soulMeldDuration":                                           "Soulmeld duration":
+  "text.autoconfig.simplyswords_main.option.unique_effects.soulMeldDuration":                                           "Soulmeld duration",
   "text.autoconfig.simplyswords_main.option.unique_effects.soulMeldRadius":                                             "Soulmeld Iradius",
 
   "text.autoconfig.simplyswords_main.option.unique_effects.soulrendChance.@PrefixText" :                                "§6[Soulrender]§7",
   "text.autoconfig.simplyswords_main.option.unique_effects.soulrendChance":                                             "Soulrend chance",
-  "text.autoconfig.simplyswords_main.option.unique_effects.soulrendDuration":                                           "Soulrend duration":
+  "text.autoconfig.simplyswords_main.option.unique_effects.soulrendDuration":                                           "Soulrend duration",
   "text.autoconfig.simplyswords_main.option.unique_effects.soulrendDamageMulti":                                        "Soulrend damage multiplier",
   "text.autoconfig.simplyswords_main.option.unique_effects.soulrendHealMulti":                                          "Soulrend heal multiplier",
   "text.autoconfig.simplyswords_main.option.unique_effects.soulrendRadius":                                             "Soulrend radius",
@@ -1462,13 +1462,13 @@
 
   "text.autoconfig.simplyswords_main.option.unique_effects.ferocityChance.@PrefixText" :                                "§6[Twisted Blade]§7",
   "text.autoconfig.simplyswords_main.option.unique_effects.ferocityChance":                                             "Ferocity chance",
-  "text.autoconfig.simplyswords_main.option.unique_effects.ferocityDuration":                                           "Ferocity duration":
+  "text.autoconfig.simplyswords_main.option.unique_effects.ferocityDuration":                                           "Ferocity duration",
   "text.autoconfig.simplyswords_main.option.unique_effects.ferocityMaxStacks":                                          "Ferocity max stacks",
   "text.autoconfig.simplyswords_main.option.unique_effects.ferocityStrengthTier":                                       "Ferocity strength amplifier",
 
   "text.autoconfig.simplyswords_main.option.unique_effects.emberIreChance.@PrefixText" :                                "§6[Emberblade]§7",
   "text.autoconfig.simplyswords_main.option.unique_effects.emberIreChance":                                             "Ember Ire chance",
-  "text.autoconfig.simplyswords_main.option.unique_effects.emberIreDuration":                                           "Ember Ire duration":
+  "text.autoconfig.simplyswords_main.option.unique_effects.emberIreDuration":                                           "Ember Ire duration",
 
   "text.autoconfig.simplyswords_main.option.unique_effects.volcanicFuryChance.@PrefixText" :                            "§6[Hearthflame]§7",
   "text.autoconfig.simplyswords_main.option.unique_effects.volcanicFuryChance":                                         "Volcanic Fury chance",
@@ -1482,7 +1482,7 @@
   "text.autoconfig.simplyswords_main.option.unique_effects.stormRadius":                                                "Storm radius",
   "text.autoconfig.simplyswords_main.option.unique_effects.stormCooldown":                                                "Storm cooldown",
   "text.autoconfig.simplyswords_main.option.unique_effects.stormFrequency":                                                "Storm frequency",
-  "text.autoconfig.simplyswords_main.option.unique_effects.stormDuration":                                                "Storm duration":
+  "text.autoconfig.simplyswords_main.option.unique_effects.stormDuration":                                                "Storm duration",
 
   "text.autoconfig.simplyswords_main.option.unique_effects.plagueChance.@PrefixText" :                                  "§6[Longsword of The Plague]§7",
   "text.autoconfig.simplyswords_main.option.unique_effects.plagueChance":                                               "Plague chance",
@@ -1496,16 +1496,16 @@
   "text.autoconfig.simplyswords_main.option.unique_effects.soultetherRange.@PrefixText" :                               "§6[Soulpyre]§7",
   "text.autoconfig.simplyswords_main.option.unique_effects.soultetherRange":                                            "Soultether range",
   "text.autoconfig.simplyswords_main.option.unique_effects.soultetherRadius":                                           "Soultether radius",
-  "text.autoconfig.simplyswords_main.option.unique_effects.soultetherDuration":                                         "Soultether duration":
-  "text.autoconfig.simplyswords_main.option.unique_effects.soultetherIgniteDuration":                                   "Soultether Ignite duration":
-  "text.autoconfig.simplyswords_main.option.unique_effects.soultetherResistanceDuration":                               "Soultether Resistance duration":
+  "text.autoconfig.simplyswords_main.option.unique_effects.soultetherDuration":                                         "Soultether duration",
+  "text.autoconfig.simplyswords_main.option.unique_effects.soultetherIgniteDuration":                                   "Soultether Ignite duration",
+  "text.autoconfig.simplyswords_main.option.unique_effects.soultetherResistanceDuration":                               "Soultether Resistance duration",
 
   "text.autoconfig.simplyswords_main.option.unique_effects.frostFuryCooldown.@PrefixText" :                             "§6[Frostfall]§7",
   "text.autoconfig.simplyswords_main.option.unique_effects.frostFuryCooldown":                                          "Frost Fury cooldown",
   "text.autoconfig.simplyswords_main.option.unique_effects.frostFuryRadius":                                            "Frost Fury radius",
   "text.autoconfig.simplyswords_main.option.unique_effects.frostFuryDamage":                                            "Frost Fury damage",
   "text.autoconfig.simplyswords_main.option.unique_effects.frostFuryChance":                                            "Frost Fury chance",
-  "text.autoconfig.simplyswords_main.option.unique_effects.frostFuryDuration":                                          "Frost Fury duration":
+  "text.autoconfig.simplyswords_main.option.unique_effects.frostFuryDuration":                                          "Frost Fury duration",
   "text.autoconfig.simplyswords_main.option.unique_effects.frostFurySpellScaling":                                      "Frost Fury Spell Power DMG multi",
 
   "text.autoconfig.simplyswords_main.option.unique_effects.moltenRoarCooldown.@PrefixText" :                            "§6[Molten Edge]§7",
@@ -1513,19 +1513,19 @@
   "text.autoconfig.simplyswords_main.option.unique_effects.moltenRoarRadius":                                           "Molten Roar radius",
   "text.autoconfig.simplyswords_main.option.unique_effects.moltenRoarKnockbackStrength":                                "Molten Roar Knockback strength",
   "text.autoconfig.simplyswords_main.option.unique_effects.moltenRoarChance":                                           "Molten Roar chance",
-  "text.autoconfig.simplyswords_main.option.unique_effects.moltenRoarDuration":                                         "Molten Roar duration":
+  "text.autoconfig.simplyswords_main.option.unique_effects.moltenRoarDuration":                                         "Molten Roar duration",
   "text.autoconfig.simplyswords_main.option.unique_effects.frostShatterRadius.@PrefixText" :                            "§6[Livyatan]§7",
   "text.autoconfig.simplyswords_main.option.unique_effects.frostShatterRadius":                                         "Frost Shatter radius",
   "text.autoconfig.simplyswords_main.option.unique_effects.frostShatterDamage":                                         "Frost Shatter damage",
   "text.autoconfig.simplyswords_main.option.unique_effects.frostShatterChance":                                         "Frost Shatter chance",
-  "text.autoconfig.simplyswords_main.option.unique_effects.frostShatterDuration":                                       "Frost Shatter duration":
+  "text.autoconfig.simplyswords_main.option.unique_effects.frostShatterDuration":                                       "Frost Shatter duration",
   "text.autoconfig.simplyswords_main.option.unique_effects.frostShatterSpellScaling":                                   "Frost Shatter Spell Power DMG multi",
 
   "text.autoconfig.simplyswords_main.option.unique_effects.permafrostRadius.@PrefixText" :                              "§6[Icewhisper]§7",
   "text.autoconfig.simplyswords_main.option.unique_effects.permafrostRadius":                                           "Permafrost radius",
   "text.autoconfig.simplyswords_main.option.unique_effects.permafrostDamage":                                           "Permafrost damage",
   "text.autoconfig.simplyswords_main.option.unique_effects.permafrostCooldown":                                         "Permafrost cooldown",
-  "text.autoconfig.simplyswords_main.option.unique_effects.permafrostDuration":                                         "Permafrost duration":
+  "text.autoconfig.simplyswords_main.option.unique_effects.permafrostDuration":                                         "Permafrost duration",
   "text.autoconfig.simplyswords_main.option.unique_effects.permafrostSpellScaling":                                     "Permafrost Spell Power DMG multi",
 
   "text.autoconfig.simplyswords_main.option.unique_effects.arcaneAssaultRadius.@PrefixText" :                           "§6[Arcanethyst]§7",
@@ -1533,7 +1533,7 @@
   "text.autoconfig.simplyswords_main.option.unique_effects.arcaneAssaultDamage":                                        "Arcane Assault damage",
   "text.autoconfig.simplyswords_main.option.unique_effects.arcaneAssaultCooldown":                                      "Arcane Assault cooldown",
   "text.autoconfig.simplyswords_main.option.unique_effects.arcaneAssaultChance":                                        "Arcane Assault chance",
-  "text.autoconfig.simplyswords_main.option.unique_effects.arcaneAssaultDuration":                                      "Arcane Assault duration":
+  "text.autoconfig.simplyswords_main.option.unique_effects.arcaneAssaultDuration":                                      "Arcane Assault duration",
   "text.autoconfig.simplyswords_main.option.unique_effects.arcaneAssaultSpellScaling":                                  "Arcane Assault Spell Power DMG multi",
 
   "text.autoconfig.simplyswords_main.option.unique_effects.thunderBlitzRadius.@PrefixText" :                            "§6[Thunderbrand]§7",
@@ -1552,7 +1552,7 @@
   "text.autoconfig.simplyswords_main.option.unique_effects.soulAnguishAbsorptionCap":                                   "Soul Anguish absorption cap",
   "text.autoconfig.simplyswords_main.option.unique_effects.soulAnguishDamage":                                          "Soul Anguish damage",
   "text.autoconfig.simplyswords_main.option.unique_effects.soulAnguishCooldown":                                        "Soul Anguish cooldown",
-  "text.autoconfig.simplyswords_main.option.unique_effects.soulAnguishDuration":                                        "Soul Anguish duration":
+  "text.autoconfig.simplyswords_main.option.unique_effects.soulAnguishDuration":                                        "Soul Anguish duration",
   "text.autoconfig.simplyswords_main.option.unique_effects.soulAnguishHeal":                                            "Soul Anguish heal",
   "text.autoconfig.simplyswords_main.option.unique_effects.soulAnguishRange":                                           "Soul Anguish range",
   "text.autoconfig.simplyswords_main.option.unique_effects.soulAnguishSpellScaling":                                    "Soul Anguish Spell Power DMG multi",
@@ -1568,7 +1568,7 @@
   "text.autoconfig.simplyswords_main.option.unique_effects.shadowmistCooldown":                                         "Shadowmist cooldown",
   "text.autoconfig.simplyswords_main.option.unique_effects.shadowmistChance":                                           "Shadowmist chance",
   "text.autoconfig.simplyswords_main.option.unique_effects.shadowmistDamageMulti":                                      "Shadowmist damage multiplier",
-  "text.autoconfig.simplyswords_main.option.unique_effects.shadowmistBlindDuration":                                    "Shadowmist Blind duration":
+  "text.autoconfig.simplyswords_main.option.unique_effects.shadowmistBlindDuration":                                    "Shadowmist Blind duration",
   "text.autoconfig.simplyswords_main.option.unique_effects.shadowmistRadius":                                           "Shadowmist radius",
 
   "text.autoconfig.simplyswords_main.option.unique_effects.abyssalStandardCooldown.@PrefixText" :                       "§6[Abyssal Standard]§7",
@@ -1603,32 +1603,32 @@
 
   "text.autoconfig.simplyswords_main.option.unique_effects.hivemindCooldown.@PrefixText" :                              "§6[Hiveheart]§7",
   "text.autoconfig.simplyswords_main.option.unique_effects.hivemindCooldown":                                           "Hivemind cooldown",
-  "text.autoconfig.simplyswords_main.option.unique_effects.hivemindDuration":                                           "Hivemind duration":
+  "text.autoconfig.simplyswords_main.option.unique_effects.hivemindDuration":                                           "Hivemind duration",
   "text.autoconfig.simplyswords_main.option.unique_effects.hivemindDamage":                                             "Hivemind damage modifier",
 
   "text.autoconfig.simplyswords_main.option.unique_effects.celestialSurgeCooldown.@PrefixText" :                        "§6[Star's Edge]§7",
   "text.autoconfig.simplyswords_main.option.unique_effects.celestialSurgeCooldown":                                     "Celestial Surge cooldown",
-  "text.autoconfig.simplyswords_main.option.unique_effects.celestialSurgeDuration":                                     "Celestial Surge duration":
+  "text.autoconfig.simplyswords_main.option.unique_effects.celestialSurgeDuration":                                     "Celestial Surge duration",
   "text.autoconfig.simplyswords_main.option.unique_effects.celestialSurgeStacks":                                       "Celestial Surge Haste stacks",
   "text.autoconfig.simplyswords_main.option.unique_effects.celestialSurgeDamageModifier":                               "Celestial Surge Damage modifier",
   "text.autoconfig.simplyswords_main.option.unique_effects.celestialSurgeLifestealModifier":                            "Celestial Surge Lifesteal modifier",
 
   "text.autoconfig.simplyswords_main.option.unique_effects.flickerFuryCooldown.@PrefixText" :                           "§6[Wickpiercer]§7",
   "text.autoconfig.simplyswords_main.option.unique_effects.flickerFuryCooldown":                                        "Flicker Fury cooldown",
-  "text.autoconfig.simplyswords_main.option.unique_effects.flickerFuryDuration":                                        "Flicker Fury duration":
+  "text.autoconfig.simplyswords_main.option.unique_effects.flickerFuryDuration":                                        "Flicker Fury duration",
   "text.autoconfig.simplyswords_main.option.unique_effects.flickerFuryDamage":                                          "Flicker Fury damage modifier",
 
   "text.autoconfig.simplyswords_main.option.unique_effects.voidcallerDuration.@PrefixText" :                            "§6[Dreadtide]§7",
-  "text.autoconfig.simplyswords_main.option.unique_effects.voidcallerDuration":                                         "Voidcaller duration":
+  "text.autoconfig.simplyswords_main.option.unique_effects.voidcallerDuration":                                         "Voidcaller duration",
   "text.autoconfig.simplyswords_main.option.unique_effects.voidcallerStartingTickFrequency":                            "Voidcaller starting tick frequency",
   "text.autoconfig.simplyswords_main.option.unique_effects.voidcallerDamageModifier":                                   "Voidcaller damage modifier",
   "text.autoconfig.simplyswords_main.option.unique_effects.voidcallerCorruptionFrequency":                              "Voidcaller Corruption frequency",
   "text.autoconfig.simplyswords_main.option.unique_effects.voidcallerCorruptionPerTick":                                "Voidcaller Corruption per tick",
-  "text.autoconfig.simplyswords_main.option.unique_effects.voidcallerCorruptionDuration":                               "Voidcaller Corruption duration":
+  "text.autoconfig.simplyswords_main.option.unique_effects.voidcallerCorruptionDuration":                               "Voidcaller Corruption duration",
   "text.autoconfig.simplyswords_main.option.unique_effects.voidcallerCorruptionMax":                                    "Voidcaller Corruption max",
 
   "text.autoconfig.simplyswords_main.option.unique_effects.vortexDuration.@PrefixText" :                                "§6[Tempest]§7",
-  "text.autoconfig.simplyswords_main.option.unique_effects.vortexDuration":                                             "Vortex duration":
+  "text.autoconfig.simplyswords_main.option.unique_effects.vortexDuration":                                             "Vortex duration",
   "text.autoconfig.simplyswords_main.option.unique_effects.vortexMaxSize":                                              "Vortex max size",
   "text.autoconfig.simplyswords_main.option.unique_effects.vortexMaxStacks":                                            "Vortex max stacks",
   "text.autoconfig.simplyswords_main.option.unique_effects.vortexSpellScaling":                                         "Vortex Spell Power DMG multi",
@@ -1648,7 +1648,7 @@
 
   "text.autoconfig.simplyswords_main.option.unique_effects.magistormCooldown.@PrefixText" :                           "§6[Magiscythe]§7",
   "text.autoconfig.simplyswords_main.option.unique_effects.magistormCooldown":                                                "Magiscythe cooldown",
-  "text.autoconfig.simplyswords_main.option.unique_effects.magistormDuration":                                                  "Magistorm duration":
+  "text.autoconfig.simplyswords_main.option.unique_effects.magistormDuration":                                                  "Magistorm duration",
   "text.autoconfig.simplyswords_main.option.unique_effects.magistormRadius":                                                     "Magistorm radius",
   "text.autoconfig.simplyswords_main.option.unique_effects.magistormDamage":                                                   "Magistorm damage",
   "text.autoconfig.simplyswords_main.option.unique_effects.magistormRepairChance":                                          "Magistorm repair chance",
@@ -1675,7 +1675,7 @@
 
   "text.autoconfig.simplyswords_main.option.unique_effects.astralShiftCooldown.@PrefixText" :                           "§6[Caelestis]§7",
   "text.autoconfig.simplyswords_main.option.unique_effects.astralShiftCooldown":                                                "Astral Shift cooldown",
-  "text.autoconfig.simplyswords_main.option.unique_effects.astralShiftDuration":                                                  "Astral Shift duration":
+  "text.autoconfig.simplyswords_main.option.unique_effects.astralShiftDuration":                                                  "Astral Shift duration",
   "text.autoconfig.simplyswords_main.option.unique_effects.astralShiftDamageModifier":                                      "Astral Shift damage modifier",
   "text.autoconfig.simplyswords_main.option.unique_effects.astralShiftDamageMax":                                             "Astral Shift damage max",
   "text.autoconfig.simplyswords_main.option.unique_effects.astralShiftChance":                                                    "Astral Shift avoidance chance",
@@ -1683,52 +1683,52 @@
 
   "text.autoconfig.simplyswords_main.option.runic_effects.swiftnessChance.@PrefixText" :                                "§b[Swiftness]§7",
   "text.autoconfig.simplyswords_main.option.runic_effects.swiftnessChance":                                             "Chance",
-  "text.autoconfig.simplyswords_main.option.runic_effects.swiftnessDuration":                                           "Duration":
+  "text.autoconfig.simplyswords_main.option.runic_effects.swiftnessDuration":                                           "Duration",
 
   "text.autoconfig.simplyswords_main.option.runic_effects.slowChance.@PrefixText" :                                     "§b[Slow]§7",
   "text.autoconfig.simplyswords_main.option.runic_effects.slowChance":                                                  "Chance",
-  "text.autoconfig.simplyswords_main.option.runic_effects.slowDuration":                                                "Duration":
+  "text.autoconfig.simplyswords_main.option.runic_effects.slowDuration":                                                "Duration",
 
   "text.autoconfig.simplyswords_main.option.runic_effects.poisonChance.@PrefixText" :                                   "§b[Poison]§7",
   "text.autoconfig.simplyswords_main.option.runic_effects.poisonChance":                                                "Chance",
-  "text.autoconfig.simplyswords_main.option.runic_effects.poisonDuration":                                              "Duration":
+  "text.autoconfig.simplyswords_main.option.runic_effects.poisonDuration":                                              "Duration",
 
   "text.autoconfig.simplyswords_main.option.runic_effects.freezeChance.@PrefixText" :                                   "§b[Freeze]§7",
   "text.autoconfig.simplyswords_main.option.runic_effects.freezeChance":                                                "Chance",
-  "text.autoconfig.simplyswords_main.option.runic_effects.freezeDuration":                                              "Duration":
+  "text.autoconfig.simplyswords_main.option.runic_effects.freezeDuration":                                              "Duration",
 
   "text.autoconfig.simplyswords_main.option.runic_effects.wildfireChance.@PrefixText" :                                 "§b[Wildfire]§7",
   "text.autoconfig.simplyswords_main.option.runic_effects.wildfireChance":                                              "Chance",
-  "text.autoconfig.simplyswords_main.option.runic_effects.wildfireDuration":                                            "Duration":
+  "text.autoconfig.simplyswords_main.option.runic_effects.wildfireDuration":                                            "Duration",
   "text.autoconfig.simplyswords_main.option.runic_effects.wildfireRadius":                                              "Radius",
 
   "text.autoconfig.simplyswords_main.option.runic_effects.floatChance.@PrefixText" :                                    "§b[Float]§7",
   "text.autoconfig.simplyswords_main.option.runic_effects.floatChance":                                                 "Chance",
-  "text.autoconfig.simplyswords_main.option.runic_effects.floatDuration":                                               "Duration":
+  "text.autoconfig.simplyswords_main.option.runic_effects.floatDuration":                                               "Duration",
 
   "text.autoconfig.simplyswords_main.option.runic_effects.zephyrChance.@PrefixText" :                                   "§b[Zephyr]§7",
   "text.autoconfig.simplyswords_main.option.runic_effects.zephyrChance":                                                "Chance",
-  "text.autoconfig.simplyswords_main.option.runic_effects.zephyrDuration":                                              "Duration":
+  "text.autoconfig.simplyswords_main.option.runic_effects.zephyrDuration":                                              "Duration",
 
   "text.autoconfig.simplyswords_main.option.runic_effects.shieldingChance.@PrefixText" :                                "§b[Shielding]§7",
   "text.autoconfig.simplyswords_main.option.runic_effects.shieldingChance":                                             "Chance",
-  "text.autoconfig.simplyswords_main.option.runic_effects.shieldingDuration":                                           "Duration":
+  "text.autoconfig.simplyswords_main.option.runic_effects.shieldingDuration":                                           "Duration",
 
   "text.autoconfig.simplyswords_main.option.runic_effects.stoneskinChance.@PrefixText" :                                "§b[Stoneskin]§7",
   "text.autoconfig.simplyswords_main.option.runic_effects.stoneskinChance":                                             "Chance",
-  "text.autoconfig.simplyswords_main.option.runic_effects.stoneskinDuration":                                           "Duration":
+  "text.autoconfig.simplyswords_main.option.runic_effects.stoneskinDuration":                                           "Duration",
 
   "text.autoconfig.simplyswords_main.option.runic_effects.trailblazeChance.@PrefixText" :                               "§b[Trailblaze]§7",
   "text.autoconfig.simplyswords_main.option.runic_effects.trailblazeChance":                                            "Chance",
-  "text.autoconfig.simplyswords_main.option.runic_effects.trailblazeDuration":                                          "Duration":
+  "text.autoconfig.simplyswords_main.option.runic_effects.trailblazeDuration":                                          "Duration",
 
   "text.autoconfig.simplyswords_main.option.runic_effects.weakenChance.@PrefixText" :                                   "§b[Weaken]§7",
   "text.autoconfig.simplyswords_main.option.runic_effects.weakenChance":                                                "Chance",
-  "text.autoconfig.simplyswords_main.option.runic_effects.weakenDuration":                                              "Duration":
+  "text.autoconfig.simplyswords_main.option.runic_effects.weakenDuration":                                              "Duration",
 
   "text.autoconfig.simplyswords_main.option.runic_effects.unstableFrequency.@PrefixText" :                              "§b[Unstable]§7",
   "text.autoconfig.simplyswords_main.option.runic_effects.unstableFrequency":                                           "Frequency",
-  "text.autoconfig.simplyswords_main.option.runic_effects.unstableDuration":                                            "Duration":
+  "text.autoconfig.simplyswords_main.option.runic_effects.unstableDuration":                                            "Duration",
 
   "text.autoconfig.simplyswords_main.option.runic_effects.activeDefenceFrequency.@PrefixText" :                         "§b[Active Defence]§7",
   "text.autoconfig.simplyswords_main.option.runic_effects.activeDefenceFrequency":                                      "Frequency",
@@ -1737,7 +1737,7 @@
   "text.autoconfig.simplyswords_main.option.runic_effects.frostWardFrequency.@PrefixText" :                             "§b[Frost Ward]§7",
   "text.autoconfig.simplyswords_main.option.runic_effects.frostWardFrequency":                                          "Frequency",
   "text.autoconfig.simplyswords_main.option.runic_effects.frostWardRadius":                                             "Radius",
-  "text.autoconfig.simplyswords_main.option.runic_effects.frostWardDuration":                                           "Duration":
+  "text.autoconfig.simplyswords_main.option.runic_effects.frostWardDuration":                                           "Duration",
 
   "text.autoconfig.simplyswords_main.option.runic_effects.momentumCooldown.@PrefixText" :                               "§b[Momentum]§7",
   "text.autoconfig.simplyswords_main.option.runic_effects.momentumCooldown":                                            "Chance",
