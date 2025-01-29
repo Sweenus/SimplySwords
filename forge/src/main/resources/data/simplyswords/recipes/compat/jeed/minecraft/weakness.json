@@ -1,0 +1,41 @@
+{
+	"replace": false,
+	"conditions": [
+		{
+			"modid": "jeed",
+			"type": "forge:mod_loaded"
+		}
+	],
+	"type": "jeed:effect_provider",
+	"effect": "minecraft:weakness",
+	"providers": [
+		{
+			"type": "forge:nbt",
+			"item": "simplyswords:runefused_gem",
+			"nbt": {
+				"runic_power": "unstable"
+			}
+		},
+		{
+			"type": "forge:nbt",
+			"item": "simplyswords:runefused_gem",
+			"nbt": {
+				"runic_power": "weaken"
+			}
+		},
+		{
+			"type": "forge:nbt",
+			"item": "simplyswords:runefused_gem",
+			"nbt": {
+				"runic_power": "onslaught"
+			}
+		},
+		{
+			"type": "forge:nbt",
+			"item": "simplyswords:netherfused_gem",
+			"nbt": {
+				"runic_power": "onslaught"
+			}
+		}
+	]
+}

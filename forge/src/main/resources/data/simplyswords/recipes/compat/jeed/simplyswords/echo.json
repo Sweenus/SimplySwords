@@ -1,0 +1,22 @@
+{
+	"conditions": [
+		{
+			"modid": "jeed",
+			"type": "forge:mod_loaded"
+		}
+	],
+	"type": "jeed:effect_provider",
+	"effect": "simplyswords:echo",
+	"providers": [
+		{
+			"item": "simplyswords:whisperwind"
+		},
+		{
+			"type": "forge:nbt",
+			"item": "simplyswords:netherfused_gem",
+			"nbt": {
+				"runic_power": "echo"
+			}
+		}
+	]
+}

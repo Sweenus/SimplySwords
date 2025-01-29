@@ -1,0 +1,62 @@
+{
+	"replace": false,
+	"conditions": [
+		{
+			"modid": "jeed",
+			"type": "forge:mod_loaded"
+		}
+	],
+	"type": "jeed:effect_provider",
+	"effect": "minecraft:slowness",
+	"providers": [
+		{
+			"type": "forge:nbt",
+			"item": "simplyswords:runefused",
+			"nbt": {
+				"runic_power": "frost_ward"
+			}
+		},
+		{
+			"type": "forge:nbt",
+			"item": "simplyswords:runefused",
+			"nbt": {
+				"runic_power": "slow"
+				}
+		},
+		{
+			"type": "forge:nbt",
+			"item": "simplyswords:runefused",
+			"nbt": {
+				"runic_power": "greater_slow"
+			}
+		},
+		{
+			"type": "forge:nbt",
+			"item": "simplyswords:runefused",
+			"nbt": {
+				"runic_power": "stoneskin"
+			}
+		},
+		{
+			"type": "forge:nbt",
+			"item": "simplyswords:runefused",
+			"nbt": {
+				"runic_power": "greater_stoneskin"
+			}
+		},
+		{
+			"type": "forge:nbt",
+			"item": "simplyswords:runefused",
+			"nbt": {
+				"runic_power": "weaken"
+			}
+		},
+		{
+			"type": "forge:nbt",
+			"item": "simplyswords:runefused",
+			"nbt": {
+				"runic_power": "greater_weaken"
+			}
+		}
+	]
+}

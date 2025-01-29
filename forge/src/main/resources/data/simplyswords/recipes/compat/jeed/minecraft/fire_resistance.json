@@ -1,0 +1,34 @@
+{
+	"replace": false,
+	"conditions": [
+		{
+			"modid": "jeed",
+			"type": "forge:mod_loaded"
+		}
+	],
+	"type": "jeed:effect_provider",
+	"effect": "minecraft:fire_resistance",
+	"providers": [
+		{
+			"type": "forge:nbt",
+			"item": "simplyswords:runefused_gem",
+			"nbt": {
+				"runic_power": "stoneskin"
+			}
+		},
+		{
+			"type": "forge:nbt",
+			"item": "simplyswords:runefused_gem",
+			"nbt": {
+				"runic_power": "greater_stoneskin"
+			}
+		},
+		{
+			"type": "forge:nbt",
+			"item": "simplyswords:runefused_gem",
+			"nbt": {
+				"runic_power": "unstable"
+			}
+		}
+	]
+}

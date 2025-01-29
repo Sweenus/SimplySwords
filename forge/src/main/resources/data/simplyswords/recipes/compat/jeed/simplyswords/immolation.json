@@ -1,0 +1,124 @@
+{
+	"conditions": [
+		{
+			"modid": "jeed",
+			"type": "forge:mod_loaded"
+		}
+	],
+	"type": "jeed:effect_provider",
+	"effect": "simplyswords:immolation",
+	"providers": [
+		{
+			"type": "forge:nbt",
+			"item": "simplyswords:runic_longsword",
+			"nbt": {
+				"runic_power": "immolation"
+			}
+		},
+		{
+			"type": "forge:nbt",
+			"item": "simplyswords:runic_twinblade",
+			"nbt": {
+				"runic_power": "immolation"
+			}
+		},
+		{
+			"type": "forge:nbt",
+			"item": "simplyswords:runic_rapier",
+			"nbt": {
+				"runic_power": "immolation"
+			}
+		},
+		{
+			"type": "forge:nbt",
+			"item": "simplyswords:runic_katana",
+			"nbt": {
+				"runic_power": "immolation"
+			}
+		},
+		{
+			"type": "forge:nbt",
+			"item": "simplyswords:runic_sai",
+			"nbt": {
+				"runic_power": "immolation"
+			}
+		},
+		{
+			"type": "forge:nbt",
+			"item": "simplyswords:runic_spear",
+			"nbt": {
+				"runic_power": "immolation"
+			}
+		},
+		{
+			"type": "forge:nbt",
+			"item": "simplyswords:runic_glaive",
+			"nbt": {
+				"runic_power": "immolation"
+			}
+		},
+		{
+			"type": "forge:nbt",
+			"item": "simplyswords:runic_cutlass",
+			"nbt": {
+				"runic_power": "immolation"
+			}
+		},
+		{
+			"type": "forge:nbt",
+			"item": "simplyswords:runic_claymore",
+			"nbt": {
+				"runic_power": "immolation"
+			}
+		},
+		{
+			"type": "forge:nbt",
+			"item": "simplyswords:runic_chakram",
+			"nbt": {
+				"runic_power": "immolation"
+			}
+		},
+		{
+			"type": "forge:nbt",
+			"item": "simplyswords:runic_greataxe",
+			"nbt": {
+				"runic_power": "immolation"
+			}
+		},
+		{
+			"type": "forge:nbt",
+			"item": "simplyswords:runic_greathammer",
+			"nbt": {
+				"runic_power": "immolation"
+			}
+		},
+		{
+			"type": "forge:nbt",
+			"item": "simplyswords:runic_warglaive",
+			"nbt": {
+				"runic_power": "immolation"
+			}
+		},
+		{
+			"type": "forge:nbt",
+			"item": "simplyswords:runic_scythe",
+			"nbt": {
+				"runic_power": "immolation"
+			}
+		},
+		{
+			"type": "forge:nbt",
+			"item": "simplyswords:runic_halberd",
+			"nbt": {
+				"runic_power": "immolation"
+			}
+		},
+		{
+			"type": "forge:nbt",
+			"item": "simplyswords:netherfused_gem",
+			"nbt": {
+				"runic_power": "radiance"
+			}
+		}
+	]
+}

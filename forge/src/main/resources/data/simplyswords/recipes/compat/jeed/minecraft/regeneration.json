@@ -1,0 +1,20 @@
+{
+	"replace": false,
+	"conditions": [
+		{
+			"modid": "jeed",
+			"type": "forge:mod_loaded"
+		}
+	],
+	"type": "jeed:effect_provider",
+	"effect": "minecraft:regeneration",
+	"providers": [
+		{
+			"type": "forge:nbt",
+			"item": "simplyswords:runefused_gem",
+			"nbt": {
+				"runic_power": "unstable"
+			}
+		}
+	]
+}
