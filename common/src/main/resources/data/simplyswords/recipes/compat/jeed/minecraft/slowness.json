@@ -1,0 +1,51 @@
+{
+	"replace": false,
+	"type": "jeed:effect_provider",
+	"effect": "minecraft:slowness",
+	"providers": [
+		{
+			"item": "simplyswords:hearthflame"
+		},
+		{
+			"item": "simplyswords:soulstealer"
+		},
+		{
+			"item": "simplyswords:soulrender"
+		},
+		{
+			"item": "simplyswords:soulpyre"
+		},
+		{
+			"item": "simplyswords:frostfall"
+		},
+		{
+			"item": "simplyswords:icewhisper"
+		},
+		{
+			"item": "simplyswords:thunderbrand"
+		},
+		{
+			"item": "simplyswords:sunfire"
+		},
+		{
+			"item": "simplyswords:harbinger"
+		},
+		{
+			"item": "simplyswords:enigma"
+		}
+	],
+	"conditions": [
+		{
+			"modid": "jeed",
+			"type": "forge:mod_loaded"
+		}
+	],
+	"fabric:load_conditions": [
+		{
+			"condition": "fabric:all_mods_loaded",
+			"values": [
+				"jeed"
+			]
+		}
+	]
+}

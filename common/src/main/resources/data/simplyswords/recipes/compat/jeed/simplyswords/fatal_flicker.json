@@ -1,0 +1,23 @@
+{
+	"type": "jeed:effect_provider",
+	"effect": "simplyswords:fatal_flicker",
+	"providers": [
+		{
+			"item": "simplyswords:whisperwind"
+		}
+	],
+	"conditions": [
+		{
+			"modid": "jeed",
+			"type": "forge:mod_loaded"
+		}
+	],
+	"fabric:load_conditions": [
+		{
+			"condition": "fabric:all_mods_loaded",
+			"values": [
+				"jeed"
+			]
+		}
+	]
+}

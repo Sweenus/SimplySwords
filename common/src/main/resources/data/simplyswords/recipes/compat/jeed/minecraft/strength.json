@@ -1,0 +1,36 @@
+{
+	"replace": false,
+	"type": "jeed:effect_provider",
+	"effect": "minecraft:strength",
+	"providers": [
+		{
+			"item": "simplyswords:emderblade"
+		},
+		{
+			"item": "simplyswords:twisted_blade"
+		},
+		{
+			"item": "simplyswords:molten_edge"
+		},
+		{
+			"item": "simplyswords:sunfire"
+		},
+		{
+			"item": "simplyswords:waxweaver"
+		}
+	],
+	"conditions": [
+		{
+			"modid": "jeed",
+			"type": "forge:mod_loaded"
+		}
+	],
+	"fabric:load_conditions": [
+		{
+			"condition": "fabric:all_mods_loaded",
+			"values": [
+				"jeed"
+			]
+		}
+	]
+}

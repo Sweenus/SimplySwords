@@ -1,0 +1,54 @@
+{
+	"replace": false,
+	"type": "jeed:effect_provider",
+	"effect": "minecraft:haste",
+	"providers": [
+		{
+			"item": "simplyswords:storms_edge"
+		},
+		{
+			"item": "simplyswords:emberblade"
+		},
+		{
+			"item": "simplyswords:twisted_blade"
+		},
+		{
+			"item": "simplyswords:soulstealer"
+		},
+		{
+			"item": "simplyswords:soulpyre"
+		},
+		{
+			"item": "simplyswords:thunderbrand"
+		},
+		{
+			"item": "simplyswords:harbinger"
+		},
+		{
+			"item": "simplyswords:waxweaver"
+		},
+		{
+			"item": "simplyswords:stars_edge"
+		},
+		{
+			"item": "simplyswords:flamewind"
+		},
+		{
+			"item": "simplyswords:enigma"
+		}
+	],
+	"conditions": [
+		{
+			"modid": "jeed",
+			"type": "forge:mod_loaded"
+		}
+	],
+	"fabric:load_conditions": [
+		{
+			"condition": "fabric:all_mods_loaded",
+			"values": [
+				"jeed"
+			]
+		}
+	]
+}

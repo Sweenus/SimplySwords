@@ -1,0 +1,54 @@
+{
+	"replace": false,
+	"type": "jeed:effect_provider",
+	"effect": "minecraft:resistance",
+	"providers": [
+		{
+			"item": "simplyswords:storms_edge"
+		},
+		{
+			"item": "simplyswords:soulkeeper"
+		},
+		{
+			"item": "simplyswords:soulpyre"
+		},
+		{
+			"item": "simplyswords:frostfall"
+		},
+		{
+			"item": "simplyswords:molten_edge"
+		},
+		{
+			"item": "simplyswords:livyatan"
+		},
+		{
+			"item": "simplyswords:mjolnir"
+		},
+		{
+			"item": "simplyswords:whisperwind"
+		},
+		{
+			"item": "simplyswords:waxweaver"
+		},
+		{
+			"item": "simplyswords:stars_edge"
+		},
+		{
+			"item": "simplyswords:wickpiercer"
+		}
+	],
+	"conditions": [
+		{
+			"modid": "jeed",
+			"type": "forge:mod_loaded"
+		}
+	],
+	"fabric:load_conditions": [
+		{
+			"condition": "fabric:all_mods_loaded",
+			"values": [
+				"jeed"
+			]
+		}
+	]
+}
