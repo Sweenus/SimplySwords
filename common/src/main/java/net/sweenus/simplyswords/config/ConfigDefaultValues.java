@@ -311,7 +311,12 @@ public class ConfigDefaultValues {
     public static float gobberNether_damageModifier = 3.0f;
     public static float gobberEnd_damageModifier = 6.0f;
 
-    
+    public static float netheriteIron_damageModifier = 0f; //TODO: Figure these values out
+    public static float netheriteGold_damageModifier = 0f;
+    public static float netheriteEmerald_damageModifier = 0f;
+    public static float netheriteDiamond_damageModifier = 0f;
+
+
     public static float longsword_attackSpeed = -2.4f;
     public static float twinblade_attackSpeed = -2.0f;
     public static float rapier_attackSpeed = -1.8f;

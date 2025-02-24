@@ -1,0 +1,42 @@
+{
+  "attributes": {
+    "attack_range": 2.6,
+    "pose": "simplyswords:pose_warglaive_dual_animated",
+    "two_handed": false,
+    "category": "warglaive",
+    "attacks": [
+      {
+        "hitbox": "HORIZONTAL_PLANE",
+        "damage_multiplier": 1,
+        "angle": 180,
+        "upswing": 0.5,
+        "animation": "simplyswords:warglaive_slash_horizontal_right",
+        "swing_sound": {
+          "id": "bettercombat:sickle_slash"
+        }
+      },
+      {
+        "hitbox": "HORIZONTAL_PLANE",
+        "conditions": ["NOT_DUAL_WIELDING"],
+        "damage_multiplier": 1,
+        "angle": 180,
+        "upswing": 0.5,
+        "animation": "simplyswords:warglaive_slash_horizontal_left",
+        "swing_sound": {
+          "id": "bettercombat:sickle_slash"
+        }
+      },
+      {
+        "hitbox": "HORIZONTAL_PLANE",
+        "conditions": ["DUAL_WIELDING_SAME_CATEGORY", "MAIN_HAND_ONLY"],
+        "damage_multiplier": 1.2,
+        "angle": 360,
+        "upswing": 0.5,
+        "animation": "simplyswords:warglaive_spin",
+        "swing_sound": {
+          "id": "bettercombat:glaive_slash_quick"
+        }
+      }
+    ]
+  }
+}

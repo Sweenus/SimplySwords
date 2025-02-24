@@ -46,7 +46,13 @@ public enum ModToolMaterial implements ToolMaterial {
     //GOBBER
     GOBBER(5, 3800, 9.0F, 9.0F, 20, Items.DIAMOND),
     GOBBER_NETHER(6, 5200, 12.0F, 9.0F, 25, Items.DIAMOND),
-    GOBBER_END(7, 8000, 14.0F, 9.0F, 30, Items.DIAMOND);
+    GOBBER_END(7, 8000, 14.0F, 9.0F, 30, Items.DIAMOND),
+
+    //ADVANCED NETHERITE TODO: Figure these values out
+    NETHERITE_IRON(0, 0, 0F, 0F, 0, Items.DIAMOND), //Item is placeholder
+    NETHERITE_GOLD(0, 0, 0F, 0F, 0, Items.DIAMOND),
+    NETHERITE_EMERALD(0, 0, 0F, 0F, 0, Items.DIAMOND),
+    NETHERITE_DIAMOND(0, 0, 0F, 0F, 0, Items.DIAMOND);
 
     private final int miningLevel;
     private final int itemDurability;
