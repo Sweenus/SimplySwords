@@ -1,0 +1,22 @@
+{
+	"type": "jeed:effect_provider",
+	"effect": "simplyswords:battle_fatigue",
+	"providers": [
+		{
+			"fabric:type": "fabric:nbt",
+			"base": {
+				"item": "simplyswords:netherfused_gem"
+			},
+			"nbt": "{\"nether_power\": \"nullification\"}",
+			"strict": true
+		}
+	],
+	"fabric:load_conditions": [
+		{
+			"condition": "fabric:all_mods_loaded",
+			"values": [
+				"jeed"
+			]
+		}
+	]
+}

@@ -1,0 +1,34 @@
+{
+	"replace": false,
+	"conditions": [
+		{
+			"modid": "jeed",
+			"type": "forge:mod_loaded"
+		}
+	],
+	"type": "jeed:effect_provider",
+	"effect": "minecraft:levitation",
+	"providers": [
+		{
+			"type": "forge:nbt",
+			"item": "simplyswords:runefused_gem",
+			"nbt": {
+				"runic_power": "float"
+			}
+		},
+		{
+			"type": "forge:nbt",
+			"item": "simplyswords:runefused_gem",
+			"nbt": {
+				"runic_power": "greater_float"
+			}
+		},
+		{
+			"type": "forge:nbt",
+			"item": "simplyswords:runefused_gem",
+			"nbt": {
+				"runic_power": "unstable"
+			}
+		}
+	]
+}

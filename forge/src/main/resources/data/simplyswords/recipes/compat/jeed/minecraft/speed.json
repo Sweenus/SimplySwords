@@ -1,0 +1,62 @@
+{
+	"replace": false,
+	"conditions": [
+		{
+			"modid": "jeed",
+			"type": "forge:mod_loaded"
+		}
+	],
+	"type": "jeed:effect_provider",
+	"effect": "minecraft:speed",
+	"providers": [
+		{
+			"type": "forge:nbt",
+			"item": "simplyswords:runefused_gem",
+			"nbt": {
+				"runic_power": "swiftness"
+			}
+		},
+		{
+			"type": "forge:nbt",
+			"item": "simplyswords:runefused_gem",
+			"nbt": {
+				"runic_power": "greater_swiftness"
+			}
+		},		
+		{
+			"type": "forge:nbt",
+			"item": "simplyswords:runefused_gem",
+			"nbt": {
+				"runic_power": "trailblaze"
+			}
+		},
+		{
+			"type": "forge:nbt",
+			"item": "simplyswords:runefused_gem",
+			"nbt": {
+				"runic_power": "greater_trailblaze"
+			}
+		},
+		{
+			"type": "forge:nbt",
+			"item": "simplyswords:runefused_gem",
+			"nbt": {
+				"runic_power": "unstable"
+			}
+		},
+		{
+			"type": "forge:nbt",
+			"item": "simplyswords:runefused_gem",
+			"nbt": {
+				"runic_power": "zephyr"
+			}
+		},
+		{
+			"type": "forge:nbt",
+			"item": "simplyswords:runefused_gem",
+			"nbt": {
+				"runic_power": "greater_zephyr"
+			}
+		}
+	]
+}

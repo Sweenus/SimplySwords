@@ -1,0 +1,19 @@
+{
+	"conditions": [
+		{
+			"modid": "jeed",
+			"type": "forge:mod_loaded"
+		}
+	],
+	"type": "jeed:effect_provider",
+	"effect": "simplyswords:onslaught",
+	"providers": [
+		{
+			"type": "forge:nbt",
+			"item": "simplyswords:netherfused_gem",
+			"nbt": {
+				"runic_power": "onslaught"
+			}
+		}
+	]
+}
