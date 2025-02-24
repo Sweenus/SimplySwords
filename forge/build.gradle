@@ -6,6 +6,10 @@ repositories {
     maven {url "https://cursemaven.com"}
     maven { url "https://maven.blamejared.com" }
     maven { url "https://maven.shedaniel.me/" }
+    maven {
+        name = "Sinytra"
+        url = "https://maven.su5ed.dev/releases"
+    }
 
 }
 
@@ -39,6 +43,13 @@ dependencies {
     // Remove the next line if you don't want to depend on the API
     modApi "dev.architectury:architectury-forge:${rootProject.architectury_version}"
     modApi("me.shedaniel.cloth:cloth-config-forge:${rootProject.cloth_config_version}")
+
+    // Mythic Metals
+    modImplementation "curse.maven:mythicmetals-410127:4644233"
+    // slug / curseforge project ID / file ID "check url"
+
+    // FFAPI
+    modImplementation "dev.su5ed.sinytra.fabric-api:fabric-api:0.86.1+1.7.2+1.20.1"
 
     //Patchouli
     modImplementation ("vazkii.patchouli:Patchouli:1.20.1-81-FORGE")

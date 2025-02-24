@@ -10,6 +10,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.config.ConfigWrapper;
 import net.sweenus.simplyswords.forge.compat.GobberCompat;
+import net.sweenus.simplyswords.forge.compat.MythicMetalsCompat;
 
 @Mod(SimplySwords.MOD_ID)
 public class SimplySwordsForge {
@@ -29,6 +30,11 @@ public class SimplySwordsForge {
         if (ModList.get().isLoaded("gobber2")) {
             GobberCompat.registerModItems();
             GobberCompat.GOBBER_ITEM.register(FMLJavaModLoadingContext.get().getModEventBus());
+        }
+
+        if (ModList.get().isLoaded("mythicmetals")) {
+            MythicMetalsCompat.registerModItems();
+            MythicMetalsCompat.MYTHICMETALS_ITEM.register(FMLJavaModLoadingContext.get().getModEventBus());
         }
 
     }
