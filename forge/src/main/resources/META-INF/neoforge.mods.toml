@@ -1,5 +1,5 @@
 modLoader = "javafml"
-loaderVersion = "[41,)"
+loaderVersion = "[4,)"
 issueTrackerURL = "https://github.com/Sweenus/SimplySwords/issues"
 license = "Timefall Development License"
 
@@ -15,16 +15,16 @@ A variety of unique weapons to add to your minecraft repertoire
 logoFile = "SimplySwordsLogoFinal2.gif"
 
 [[dependencies.simplyswords]]
-modId = "forge"
+modId = "neoforge"
 mandatory = true
-versionRange = "[41,)"
+versionRange = "[4,)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.simplyswords]]
 modId = "minecraft"
 mandatory = true
-versionRange = "[1.20, 1.20.2)"
+versionRange = "[1.21, 1.22)"
 ordering = "NONE"
 side = "BOTH"
 
@@ -32,12 +32,5 @@ side = "BOTH"
 modId = "architectury"
 mandatory = true
 versionRange = "[5.12.42,)"
-ordering = "AFTER"
-side = "BOTH"
-
-[[dependencies.simplyswords]]
-modId = "cloth_config"
-mandatory = true
-versionRange = "[11.1.106,)"
 ordering = "AFTER"
 side = "BOTH"

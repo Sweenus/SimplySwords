@@ -1,4 +1,4 @@
-package net.sweenus.simplyswords.forge;
+package net.sweenus.simplyswords.neoforge;
 
 
 import net.neoforged.fml.ModList;

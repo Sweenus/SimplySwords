@@ -1,6 +1,5 @@
-package net.sweenus.simplyswords.forge.compat;
+package net.sweenus.simplyswords.neoforge.compat;
 
-import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.config.Config;
 
 public class GobberCompat {
@@ -43,7 +42,7 @@ public class GobberCompat {
     static float gobber_end_modifier = Config.weaponAttribute.materialDamageModifier.gobberEnd_damageModifier.get();
 
     //GOBBER
-    /* 1.21
+    /*
 
     public static final DeferredRegister<Item> GOBBER_ITEM = DeferredRegister.create(ForgeRegistries.ITEMS, SimplySwords.MOD_ID);
 
