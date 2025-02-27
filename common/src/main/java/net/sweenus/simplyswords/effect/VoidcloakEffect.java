@@ -19,7 +19,7 @@ public class VoidcloakEffect extends OrbitingEffect {
 
     @Override
     public void onRemoved(AttributeContainer attributes) {
-
+        super.onRemoved(attributes);
     }
 
     @Override

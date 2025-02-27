@@ -47,7 +47,7 @@ public class VoidAssaultEffect extends OrbitingEffect {
 
     @Override
     public void onRemoved(AttributeContainer attributes) {
-
+        super.onRemoved(attributes);
     }
 
     @Override

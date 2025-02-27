@@ -73,7 +73,7 @@ public class MagislamEffect extends OrbitingEffect {
 
     @Override
     public void onRemoved(AttributeContainer attributes) {
-
+        super.onRemoved(attributes);
     }
 
 

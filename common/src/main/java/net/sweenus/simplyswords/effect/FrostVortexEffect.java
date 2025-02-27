@@ -60,7 +60,7 @@ public class FrostVortexEffect extends OrbitingEffect {
 
     @Override
     public void onRemoved(AttributeContainer attributes) {
-
+        super.onRemoved(attributes);
     }
 
     @Override
