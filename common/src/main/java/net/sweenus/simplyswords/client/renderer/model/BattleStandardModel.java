@@ -1,20 +1,11 @@
 package net.sweenus.simplyswords.client.renderer.model;
 
-import net.minecraft.client.model.Dilation;
-import net.minecraft.client.model.ModelData;
-import net.minecraft.client.model.ModelPart;
-import net.minecraft.client.model.ModelPartBuilder;
-import net.minecraft.client.model.ModelPartData;
-import net.minecraft.client.model.ModelTransform;
-import net.minecraft.client.model.TexturedModelData;
+import net.minecraft.client.model.*;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.entity.model.EntityModel;
 import net.minecraft.client.util.math.MatrixStack;
 import net.sweenus.simplyswords.entity.BattleStandardEntity;
 
-// Made with Blockbench 4.6.0
-// Exported for Minecraft version 1.17+ for Yarn
-// Paste this class into your mod and generate all required imports
 public class BattleStandardModel extends EntityModel<BattleStandardEntity> {
 	private final ModelPart supports;
 	private final ModelPart bb_main;
@@ -42,7 +33,8 @@ public class BattleStandardModel extends EntityModel<BattleStandardEntity> {
 	}
 
 	@Override
-	public void render(MatrixStack matrices, VertexConsumer vertices, int light, int overlay, int color) {
-
+	public void render(MatrixStack matrices, VertexConsumer vertexConsumer, int light, int overlay, int color) {
+		supports.render(matrices, vertexConsumer, light, overlay,color);
+		bb_main.render(matrices, vertexConsumer, light, overlay, color);
 	}
 }

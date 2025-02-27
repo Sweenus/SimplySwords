@@ -70,7 +70,7 @@ public class MagistormEffect extends HighOrbitingEffect {
         }
 
         super.applyUpdateEffect(livingEntity, amplifier);
-        return false;
+        return true;
     }
 
 

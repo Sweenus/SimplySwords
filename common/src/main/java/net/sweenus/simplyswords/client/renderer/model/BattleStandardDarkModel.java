@@ -12,9 +12,6 @@ import net.minecraft.client.render.entity.model.EntityModel;
 import net.minecraft.client.util.math.MatrixStack;
 import net.sweenus.simplyswords.entity.BattleStandardDarkEntity;
 
-// Made with Blockbench 4.6.0
-// Exported for Minecraft version 1.17+ for Yarn
-// Paste this class into your mod and generate all required imports
 public class BattleStandardDarkModel extends EntityModel<BattleStandardDarkEntity> {
 	private final ModelPart supports;
 	private final ModelPart bb_main;
@@ -42,7 +39,8 @@ public class BattleStandardDarkModel extends EntityModel<BattleStandardDarkEntit
 	}
 
 	@Override
-	public void render(MatrixStack matrices, VertexConsumer vertices, int light, int overlay, int color) {
-
+	public void render(MatrixStack matrices, VertexConsumer vertexConsumer, int light, int overlay, int color) {
+		supports.render(matrices, vertexConsumer, light, overlay, color);
+		bb_main.render(matrices, vertexConsumer, light, overlay, color);
 	}
 }

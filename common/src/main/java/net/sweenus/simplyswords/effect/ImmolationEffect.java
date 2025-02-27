@@ -73,6 +73,7 @@ public class ImmolationEffect extends WideOrbitingEffect {
             }
         }
 
-        return super.applyUpdateEffect(pLivingEntity, pAmplifier);
+        super.applyUpdateEffect(pLivingEntity, pAmplifier);
+        return true;
     }
 }

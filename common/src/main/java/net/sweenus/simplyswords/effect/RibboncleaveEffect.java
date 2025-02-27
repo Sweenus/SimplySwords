@@ -20,12 +20,12 @@ public class RibboncleaveEffect extends OrbitingEffect {
                 livingEntity.removeStatusEffect(EffectRegistry.getReference(EffectRegistry.RIBBONCLEAVE));
         }
         super.applyUpdateEffect(livingEntity, amplifier);
-        return false;
+        return true;
     }
 
     @Override
-    public void onRemoved(LivingEntity entity, AttributeContainer attributes) {
-
+    public void onRemoved(AttributeContainer attributes) {
+        super.onRemoved(attributes);
     }
 
     @Override

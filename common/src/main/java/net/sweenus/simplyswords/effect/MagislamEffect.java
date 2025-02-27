@@ -68,11 +68,11 @@ public class MagislamEffect extends OrbitingEffect {
             }
         }
         super.applyUpdateEffect(livingEntity, amplifier);
-        return false;
+        return true;
     }
 
     @Override
-    public void onRemoved(LivingEntity entity, AttributeContainer attributes) {
+    public void onRemoved(AttributeContainer attributes) {
 
     }
 

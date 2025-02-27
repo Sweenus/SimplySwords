@@ -53,7 +53,7 @@ public class SporeSwarmEffect extends WideOrbitingEffect {
 
         super.applyUpdateEffect(livingEntity, amplifier);
 
-        return false;
+        return true;
     }
 
 

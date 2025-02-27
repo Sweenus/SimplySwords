@@ -51,7 +51,7 @@ public class CaelestisSwordItem extends UniqueSwordItem {
         world.playSound(null, user.getBlockPos(), SoundRegistry.ACTIVATE_PLINTH_03.get(),
                 user.getSoundCategory(), 0.4f, 1.3f);
 
-        user.addStatusEffect(new StatusEffectInstance(EffectRegistry.ASTRAL_SHIFT,
+        user.addStatusEffect(new StatusEffectInstance(EffectRegistry.getReference(EffectRegistry.ASTRAL_SHIFT),
                 duration, 0, false, false, true));
         user.addStatusEffect(new StatusEffectInstance(StatusEffects.DARKNESS,
                 duration, 0, false, false, true));

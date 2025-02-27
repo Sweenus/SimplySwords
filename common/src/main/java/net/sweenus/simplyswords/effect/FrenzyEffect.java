@@ -20,11 +20,11 @@ public class FrenzyEffect extends OrbitingEffect {
                 livingEntity.removeStatusEffect(EffectRegistry.getReference(EffectRegistry.FRENZY));
         }
         super.applyUpdateEffect(livingEntity, amplifier);
-        return false;
+        return true;
     }
 
     @Override
-    public void onRemoved(LivingEntity entity, AttributeContainer attributes) {
+    public void onRemoved(AttributeContainer attributes) {
 
     }
 

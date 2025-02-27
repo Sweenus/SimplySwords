@@ -66,13 +66,13 @@ public class ElementalVortexEffect extends OrbitingEffect {
             }
         }
         super.applyUpdateEffect(livingEntity, amplifier);
-        return false;
+        return true;
     }
 
     @Override
-    public void onRemoved(LivingEntity entity, AttributeContainer attributes) {
+    public void onRemoved(AttributeContainer attributes) {
+        LivingEntity entity = getEntityFromAttributeContainer(attributes);
         SoundHelper.stopLoopingSound(entity, SoundRegistry.AMBIENCE_WIND_LOOP.getId());
-
         super.onRemoved(attributes);
     }
 

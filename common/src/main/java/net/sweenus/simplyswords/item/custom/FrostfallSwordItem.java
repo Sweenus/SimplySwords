@@ -108,18 +108,18 @@ public class FrostfallSwordItem extends UniqueSwordItem {
                 BlockState currentState4 = world.getBlockState(poscheck4);
                 BlockState state = Blocks.ICE.getDefaultState();
                 if (i + j != 4) {
-                    if (currentState == Blocks.AIR.getDefaultState() || currentState == Blocks.SNOW.getDefaultState() || currentState == Blocks.GRASS_BLOCK.getDefaultState()
-                            || currentState == Blocks.LARGE_FERN.getDefaultState() || currentState == Blocks.FERN.getDefaultState())
+                    if (currentState == Blocks.AIR.getDefaultState() || currentState == Blocks.SNOW.getDefaultState() || currentState == Blocks.SHORT_GRASS.getDefaultState()
+                            || currentState == Blocks.LARGE_FERN.getDefaultState() || currentState == Blocks.FERN.getDefaultState() || currentState4 == Blocks.TALL_GRASS.getDefaultState())
                         world.setBlockState(poscheck, state);
-                    if (currentState2 == Blocks.AIR.getDefaultState() || currentState2 == Blocks.SNOW.getDefaultState() || currentState2 == Blocks.GRASS_BLOCK.getDefaultState()
-                            || currentState2 == Blocks.LARGE_FERN.getDefaultState() || currentState2 == Blocks.FERN.getDefaultState())
+                    if (currentState2 == Blocks.AIR.getDefaultState() || currentState2 == Blocks.SNOW.getDefaultState() || currentState2 == Blocks.SHORT_GRASS.getDefaultState()
+                            || currentState2 == Blocks.LARGE_FERN.getDefaultState() || currentState2 == Blocks.FERN.getDefaultState() || currentState4 == Blocks.TALL_GRASS.getDefaultState())
                         world.setBlockState(poscheck2, state);
                 }
-                if (currentState3 == Blocks.AIR.getDefaultState() || currentState3 == Blocks.SNOW.getDefaultState() || currentState3 == Blocks.GRASS_BLOCK.getDefaultState()
-                        || currentState3 == Blocks.LARGE_FERN.getDefaultState() || currentState3 == Blocks.FERN.getDefaultState())
+                if (currentState3 == Blocks.AIR.getDefaultState() || currentState3 == Blocks.SNOW.getDefaultState() || currentState3 == Blocks.SHORT_GRASS.getDefaultState()
+                        || currentState3 == Blocks.LARGE_FERN.getDefaultState() || currentState3 == Blocks.FERN.getDefaultState() || currentState4 == Blocks.TALL_GRASS.getDefaultState())
                     world.setBlockState(poscheck3, state);
-                if (currentState4 == Blocks.AIR.getDefaultState() || currentState4 == Blocks.SNOW.getDefaultState() || currentState4 == Blocks.GRASS_BLOCK.getDefaultState()
-                        || currentState4 == Blocks.LARGE_FERN.getDefaultState() || currentState4 == Blocks.FERN.getDefaultState())
+                if (currentState4 == Blocks.AIR.getDefaultState() || currentState4 == Blocks.SNOW.getDefaultState() || currentState4 == Blocks.SHORT_GRASS.getDefaultState()
+                        || currentState4 == Blocks.LARGE_FERN.getDefaultState() || currentState4 == Blocks.FERN.getDefaultState() || currentState4 == Blocks.TALL_GRASS.getDefaultState())
                     world.setBlockState(poscheck4, state);
             }
         }

@@ -14,11 +14,11 @@ public class VoidcloakEffect extends OrbitingEffect {
     @Override
     public boolean applyUpdateEffect(LivingEntity livingEntity, int amplifier) {
         super.applyUpdateEffect(livingEntity, amplifier);
-        return false;
+        return true;
     }
 
     @Override
-    public void onRemoved(LivingEntity entity, AttributeContainer attributes) {
+    public void onRemoved(AttributeContainer attributes) {
 
     }
 

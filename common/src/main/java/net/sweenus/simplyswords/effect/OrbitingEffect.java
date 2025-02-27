@@ -9,10 +9,16 @@ import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.Vec3d;
 
+import java.util.WeakHashMap;
+
 public abstract class OrbitingEffect extends StatusEffect {
     protected ParticleEffect particleType = ParticleTypes.SMOKE; // Default particle type
+
+    // 1.21 removed LivingEntity from onRemoved, but we still need this for some effects. Using WeakHashMap for this to store and retrieve entity.
+    private static final WeakHashMap<LivingEntity, AttributeContainer> entityAttributeMap = new WeakHashMap<>();
+
     public OrbitingEffect(StatusEffectCategory statusEffectCategory, int color) {
-        super (statusEffectCategory, color);
+        super(statusEffectCategory, color);
     }
 
     private double currentAngle = 0.0;
@@ -50,7 +56,6 @@ public abstract class OrbitingEffect extends StatusEffect {
                 currentAngle -= 2 * Math.PI;
             }
         }
-        super.applyUpdateEffect(livingEntity, amplifier);
         return true;
     }
 
@@ -59,10 +64,31 @@ public abstract class OrbitingEffect extends StatusEffect {
         this.particleType = particleType;
     }
 
-    public abstract void onRemoved(LivingEntity entity, AttributeContainer attributes);
+    @Override
+    public void onRemoved(AttributeContainer attributes) {
+        super.onRemoved(attributes);
+    }
+
 
     @Override
-    public boolean canApplyUpdateEffect(int pDuration, int pAmplifier) {
-        return true;
+    public boolean canApplyUpdateEffect(int duration, int amplifier) {
+        return duration > 0;
+    }
+
+    // Store the entity and its attribute container when the effect is applied
+    @Override
+    public void onApplied(LivingEntity entity, int amplifier) {
+        super.onApplied(entity, amplifier);
+        entityAttributeMap.put(entity, entity.getAttributes());
+    }
+
+    // Retrieve the entity from the attribute container
+    protected LivingEntity getEntityFromAttributeContainer(AttributeContainer attributeContainer) {
+        for (LivingEntity entity : entityAttributeMap.keySet()) {
+            if (entity.getAttributes() == attributeContainer) {
+                return entity;
+            }
+        }
+        return null;
     }
 }

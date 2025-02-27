@@ -37,12 +37,12 @@
   "depends": {
     "fabric": "*",
     "minecraft": ">=1.21.1 <=1.21.1",
-    "architectury": ">=7.1.0",
-    "cloth-config": ">=11.1.106"
+    "architectury": ">=7.1.0"
   },
   "suggests": {
     "mythicmetals": ">=0.18.2",
-    "gobber2": ">=2.6.43"
+    "gobber2": ">=2.6.43",
+    "cloth-config": ">=11.1.106"
   },
   "recommends": {
     "bettercombat": ">=1.7.2"
