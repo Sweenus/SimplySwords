@@ -54,8 +54,17 @@ public class UpgradeUniqueRecipe extends ShapedRecipe {
 
     @Override
     public ItemStack craft(CraftingRecipeInput craftingRecipeInput, RegistryWrapper.WrapperLookup wrapperLookup) {
+        int slot = upgradableItemSlot;
+        if(raw.isMirrored()) {
+            int width = getWidth();
+            int x = slot % width;
+            int y = slot / width;
+
+            slot = (y * width) + (width - 1 - x);
+        }
+
         ItemStack result = this.result.copy();
-        result.applyComponentsFrom(craftingRecipeInput.getStackInSlot(upgradableItemSlot).getComponents());
+        result.applyComponentsFrom(craftingRecipeInput.getStackInSlot(slot).getComponents());
 
         return result;
     }

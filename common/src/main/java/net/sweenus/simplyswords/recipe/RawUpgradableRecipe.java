@@ -24,6 +24,7 @@ public class RawUpgradableRecipe {
     public static final PacketCodec<RegistryByteBuf, RawUpgradableRecipe> PACKET_CODEC;
     private final int width;
     private final int height;
+    private boolean mirrored;
 
     public int getUpgradableItemSlot() {
         return upgradableItemSlot;
@@ -108,6 +109,7 @@ public class RawUpgradableRecipe {
             }
         }
 
+        this.mirrored = mirrored;
         return true;
     }
 
@@ -206,6 +208,10 @@ public class RawUpgradableRecipe {
         defaultedList.replaceAll((ingredient) -> Ingredient.PACKET_CODEC.decode(buf));
         int slot = buf.readVarInt();
         return new RawUpgradableRecipe(i, j, slot, defaultedList, Optional.empty());
+    }
+
+    public boolean isMirrored() {
+        return mirrored;
     }
 
     public record Data(Map<Character, Pair<Ingredient, Boolean>> key, List<String> pattern) {
