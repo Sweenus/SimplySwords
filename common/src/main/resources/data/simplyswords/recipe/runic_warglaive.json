@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:smithing_transform",
+  "base": {
+    "item": "simplyswords:netherite_warglaive"
+  },
+  "addition": {
+    "item": "minecraft:diamond"
+  },
+  "result": {
+    "id": "simplyswords:runic_warglaive",
+    "count": 1
+  },
+  "template": {
+    "item": "simplyswords:runic_tablet"
+  }
+}

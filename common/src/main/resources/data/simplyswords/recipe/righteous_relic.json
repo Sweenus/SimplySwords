@@ -1,0 +1,27 @@
+{
+  "type": "simplyswords:unique_upgrade",
+  "key": {
+    "#": {
+      "item": "minecraft:gold_ingot"
+    },
+    "X": {
+      "item": "simplyswords:dormant_relic",
+      "upgradable": true
+    },
+    "O": {
+      "item": "simplyswords:runic_tablet"
+    },
+    "S": {
+      "item": "minecraft:enchanted_golden_apple"
+    }
+  },
+  "pattern": [
+    "#O#",
+    "OXO",
+    "#S#"
+  ],
+  "result": {
+    "id": "simplyswords:righteous_relic",
+    "count": 1
+  }
+}

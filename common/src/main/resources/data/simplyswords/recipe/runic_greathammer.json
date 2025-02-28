@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:smithing_transform",
+  "base": {
+    "item": "simplyswords:netherite_greathammer"
+  },
+  "addition": {
+    "item": "minecraft:diamond"
+  },
+  "result": {
+    "id": "simplyswords:runic_greathammer",
+    "count": 1
+  },
+  "template": {
+    "item": "simplyswords:runic_tablet"
+  }
+}
