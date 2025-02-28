@@ -55,7 +55,7 @@ public class TooltipSettings implements Translatable, Walkable {
 	@NotNull
 	@Override
 	public MutableText description(@Nullable String fallback) {
-		System.out.println("description");
+		//System.out.println("description");
 		if (appender == null) return Text.empty();
 		final MutableText[] desc = {null};
 		appender.get().appendTooltip(Item.TooltipContext.DEFAULT, (text) -> {
@@ -75,7 +75,7 @@ public class TooltipSettings implements Translatable, Walkable {
 
 	@Override
 	public boolean hasDescription() {
-		System.out.println("description check??");
+		//System.out.println("description check??");
 		return appender != null;
 	}
 

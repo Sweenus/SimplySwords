@@ -3,6 +3,11 @@ loaderVersion = "[4,)"
 issueTrackerURL = "https://github.com/Sweenus/SimplySwords/issues"
 license = "Timefall Development License"
 
+[[mixins]]
+config = "simplyswords.mixins.json"
+[[mixins]]
+config = "simplyswords-common.mixins.json"
+
 [[mods]]
 modId = "simplyswords"
 version = "${version}"

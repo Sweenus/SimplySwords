@@ -1,5 +1,5 @@
 {
-  "required": false,
+  "required": true,
   "minVersion": "0.8",
   "package": "net.sweenus.simplyswords.neoforge.mixin",
   "compatibilityLevel": "JAVA_21",

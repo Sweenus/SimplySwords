@@ -45,6 +45,7 @@ public class GemPowerRegistry {
 	public static Registrar<GemPower> REGISTRY = RegistrarManager.get("simplyswords")
 			.<GemPower>builder(Identifier.of(SimplySwords.MOD_ID, "gem_power"))
 			.option(new DefaultIdRegistrarOption(Identifier.of(SimplySwords.MOD_ID, "empty_power")))
+			.syncToClients()
 			.build();
 
 	private static RegistrySupplier<GemPower> register(String path, Supplier<GemPower> power) {
