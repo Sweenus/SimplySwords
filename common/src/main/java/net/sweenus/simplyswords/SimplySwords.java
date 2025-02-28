@@ -1,6 +1,5 @@
 package net.sweenus.simplyswords;
 
-import com.google.gson.JsonObject;
 import dev.architectury.platform.Platform;
 import dev.architectury.registry.CreativeTabRegistry;
 import dev.architectury.registry.client.level.entity.EntityModelLayerRegistry;
@@ -16,6 +15,7 @@ import net.minecraft.client.render.entity.BeeEntityRenderer;
 import net.minecraft.client.render.entity.model.EntityModelLayer;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
+import net.minecraft.recipe.RecipeSerializer;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -36,10 +36,10 @@ import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.FileCopier;
 import net.sweenus.simplyswords.util.ModLootTableModifiers;
+import net.sweenus.simplyswords.recipe.UpgradeUniqueRecipe;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.File;
 import java.io.IOException;
 
 public class SimplySwords {
@@ -55,6 +55,15 @@ public class SimplySwords {
                     () -> new ItemStack(ItemsRegistry.RUNIC_TABLET.get()) // Icon
             )
     );
+
+    public static final DeferredRegister<RecipeSerializer<?>> RECIPES =
+            DeferredRegister.create(SimplySwords.MOD_ID, RegistryKeys.RECIPE_SERIALIZER);
+
+    public static final RegistrySupplier<RecipeSerializer<UpgradeUniqueRecipe>> UNIQUE_UPGRADE =
+            RECIPES.register(
+                    "unique_upgrade",
+                    UpgradeUniqueRecipe.Serializer::new
+            );
 
 
     public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
@@ -73,6 +82,7 @@ public class SimplySwords {
         SoundRegistry.SOUND.register();
         EffectRegistry.EFFECT.register();
         EntityRegistry.ENTITIES.register();
+        SimplySwords.RECIPES.register();
         ComponentTypeRegistry.COMPONENT_TYPES.register();
         GemPowerRegistry.register();
         EntityAttributeRegistry.register(EntityRegistry.BATTLESTANDARD, BattleStandardEntity::createBattleStandardAttributes);
