@@ -54,24 +54,13 @@ dependencies {
     // Remove the next line if you don't want to depend on the API
     modApi "dev.architectury:architectury-fabric:${rootProject.architectury_api_version}"
     modCompileOnly("com.terraformersmc:modmenu:${rootProject.mod_menu_version}") { transitive false }
-
-    // Mythic Metals
-/* 1.21 temp
-modImplementation "curse.maven:mythicmetals-410127:5660718"
-
- */
-
+    modImplementation "curse.maven:mythicmetals-410127:6122966"
     modImplementation "maven.modrinth:spell-power:${rootProject.spellpower_version}-fabric"
     //modImplementation "curse.maven:lambdynamiclights-393442:${rootProject.lambdynlights_version}" 1.21
     //include modImplementation("dev.lambdaurora:spruceui:${rootProject.spruceui_version}") 1.21
     //modImplementation "curse.maven:eldritch-end-877553:${rootProject.eldritch_end_version}" 1.21
-
-    // Amethyst Imbuement
     //modImplementation "curse.maven:amethyst-imbuement-608261:4514358"
-
-    // Patchouli
     modImplementation "vazkii.patchouli:Patchouli:1.21-87-FABRIC"
-
     //modImplementation(annotationProcessor("com.github.llamalad7.mixinextras:mixinextras-fabric:${rootProject.mixin_extras_version}")) 1.21
 
     common(project(path: ":common", configuration: "namedElements")) { transitive false }

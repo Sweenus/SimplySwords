@@ -12,6 +12,7 @@ import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.Rarity;
 import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.config.Config;
+import net.sweenus.simplyswords.fabric.item.PrometheumSwordItem;
 import net.sweenus.simplyswords.item.ModToolMaterial;
 import net.sweenus.simplyswords.item.SimplySwordsSwordItem;
 
@@ -927,106 +928,106 @@ public class MythicMetalsCompat {
                                     (int) (osmium_modifier + halberd_modifier), halberd_attackspeed)), "mythicmetals:osmium_ingot"));
 
 
-    public static final RegistrySupplier<SimplySwordsSwordItem> PROMETHEUM_LONGSWORD = ITEM.register("mythicmetals_compat/prometheum/prometheum_longsword", () ->
-            new SimplySwordsSwordItem(
+    public static final RegistrySupplier<PrometheumSwordItem> PROMETHEUM_LONGSWORD = ITEM.register("mythicmetals_compat/prometheum/prometheum_longsword", () ->
+            new PrometheumSwordItem(
                     ModToolMaterial.PROMETHEUM,
                     new Item.Settings()
                             .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.PROMETHEUM,
                                     (int) (prometheum_modifier + longsword_modifier), longsword_attackspeed)), "mythicmetals:prometheum_ingot"));
 
-    public static final RegistrySupplier<SimplySwordsSwordItem> PROMETHEUM_TWINBLADE = ITEM.register("mythicmetals_compat/prometheum/prometheum_twinblade", () ->
-            new SimplySwordsSwordItem(
+    public static final RegistrySupplier<PrometheumSwordItem> PROMETHEUM_TWINBLADE = ITEM.register("mythicmetals_compat/prometheum/prometheum_twinblade", () ->
+            new PrometheumSwordItem(
                     ModToolMaterial.PROMETHEUM,
                     new Item.Settings()
                             .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.PROMETHEUM,
                                     (int) (prometheum_modifier + twinblade_modifier), twinblade_attackspeed)), "mythicmetals:prometheum_ingot"));
 
-    public static final RegistrySupplier<SimplySwordsSwordItem> PROMETHEUM_RAPIER = ITEM.register("mythicmetals_compat/prometheum/prometheum_rapier", () ->
-            new SimplySwordsSwordItem(
+    public static final RegistrySupplier<PrometheumSwordItem> PROMETHEUM_RAPIER = ITEM.register("mythicmetals_compat/prometheum/prometheum_rapier", () ->
+            new PrometheumSwordItem(
                     ModToolMaterial.PROMETHEUM,
                     new Item.Settings()
                             .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.PROMETHEUM,
                                     (int) (prometheum_modifier + rapier_modifier), rapier_attackspeed)), "mythicmetals:prometheum_ingot"));
 
-    public static final RegistrySupplier<SimplySwordsSwordItem> PROMETHEUM_KATANA = ITEM.register("mythicmetals_compat/prometheum/prometheum_katana", () ->
-            new SimplySwordsSwordItem(
+    public static final RegistrySupplier<PrometheumSwordItem> PROMETHEUM_KATANA = ITEM.register("mythicmetals_compat/prometheum/prometheum_katana", () ->
+            new PrometheumSwordItem(
                     ModToolMaterial.PROMETHEUM,
                     new Item.Settings()
                             .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.PROMETHEUM,
                                     (int) (prometheum_modifier + katana_modifier), katana_attackspeed)), "mythicmetals:prometheum_ingot"));
 
-    public static final RegistrySupplier<SimplySwordsSwordItem> PROMETHEUM_SAI = ITEM.register("mythicmetals_compat/prometheum/prometheum_sai", () ->
-            new SimplySwordsSwordItem(
+    public static final RegistrySupplier<PrometheumSwordItem> PROMETHEUM_SAI = ITEM.register("mythicmetals_compat/prometheum/prometheum_sai", () ->
+            new PrometheumSwordItem(
                     ModToolMaterial.PROMETHEUM,
                     new Item.Settings()
                             .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.PROMETHEUM,
                                     (int) (prometheum_modifier + sai_modifier), sai_attackspeed)), "mythicmetals:prometheum_ingot"));
 
-    public static final RegistrySupplier<SimplySwordsSwordItem> PROMETHEUM_SPEAR = ITEM.register("mythicmetals_compat/prometheum/prometheum_spear", () ->
-            new SimplySwordsSwordItem(
+    public static final RegistrySupplier<PrometheumSwordItem> PROMETHEUM_SPEAR = ITEM.register("mythicmetals_compat/prometheum/prometheum_spear", () ->
+            new PrometheumSwordItem(
                     ModToolMaterial.PROMETHEUM,
                     new Item.Settings()
                             .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.PROMETHEUM,
                                     (int) (prometheum_modifier + spear_modifier), spear_attackspeed)), "mythicmetals:prometheum_ingot"));
 
-    public static final RegistrySupplier<SimplySwordsSwordItem> PROMETHEUM_GLAIVE = ITEM.register("mythicmetals_compat/prometheum/prometheum_glaive", () ->
-            new SimplySwordsSwordItem(
+    public static final RegistrySupplier<PrometheumSwordItem> PROMETHEUM_GLAIVE = ITEM.register("mythicmetals_compat/prometheum/prometheum_glaive", () ->
+            new PrometheumSwordItem(
                     ModToolMaterial.PROMETHEUM,
                     new Item.Settings()
                             .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.PROMETHEUM,
                                     (int) (prometheum_modifier + glaive_modifier), glaive_attackspeed)), "mythicmetals:prometheum_ingot"));
 
-    public static final RegistrySupplier<SimplySwordsSwordItem> PROMETHEUM_WARGLAIVE = ITEM.register("mythicmetals_compat/prometheum/prometheum_warglaive", () ->
-            new SimplySwordsSwordItem(
+    public static final RegistrySupplier<PrometheumSwordItem> PROMETHEUM_WARGLAIVE = ITEM.register("mythicmetals_compat/prometheum/prometheum_warglaive", () ->
+            new PrometheumSwordItem(
                     ModToolMaterial.PROMETHEUM,
                     new Item.Settings()
                             .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.PROMETHEUM,
                                     (int) (prometheum_modifier + warglaive_modifier), warglaive_attackspeed)), "mythicmetals:prometheum_ingot"));
 
-    public static final RegistrySupplier<SimplySwordsSwordItem> PROMETHEUM_CUTLASS = ITEM.register("mythicmetals_compat/prometheum/prometheum_cutlass", () ->
-            new SimplySwordsSwordItem(
+    public static final RegistrySupplier<PrometheumSwordItem> PROMETHEUM_CUTLASS = ITEM.register("mythicmetals_compat/prometheum/prometheum_cutlass", () ->
+            new PrometheumSwordItem(
                     ModToolMaterial.PROMETHEUM,
                     new Item.Settings()
                             .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.PROMETHEUM,
                                     (int) (prometheum_modifier + cutlass_modifier), cutlass_attackspeed)), "mythicmetals:prometheum_ingot"));
 
-    public static final RegistrySupplier<SimplySwordsSwordItem> PROMETHEUM_CLAYMORE = ITEM.register("mythicmetals_compat/prometheum/prometheum_claymore", () ->
-            new SimplySwordsSwordItem(
+    public static final RegistrySupplier<PrometheumSwordItem> PROMETHEUM_CLAYMORE = ITEM.register("mythicmetals_compat/prometheum/prometheum_claymore", () ->
+            new PrometheumSwordItem(
                     ModToolMaterial.PROMETHEUM,
                     new Item.Settings()
                             .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.PROMETHEUM,
                                     (int) (prometheum_modifier + claymore_modifier), claymore_attackspeed)), "mythicmetals:prometheum_ingot"));
 
-    public static final RegistrySupplier<SimplySwordsSwordItem> PROMETHEUM_GREATHAMMER = ITEM.register("mythicmetals_compat/prometheum/prometheum_greathammer", () ->
-            new SimplySwordsSwordItem(
+    public static final RegistrySupplier<PrometheumSwordItem> PROMETHEUM_GREATHAMMER = ITEM.register("mythicmetals_compat/prometheum/prometheum_greathammer", () ->
+            new PrometheumSwordItem(
                     ModToolMaterial.PROMETHEUM,
                     new Item.Settings()
                             .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.PROMETHEUM,
                                     (int) (prometheum_modifier + greathammer_modifier), greathammer_attackspeed)), "mythicmetals:prometheum_ingot"));
 
-    public static final RegistrySupplier<SimplySwordsSwordItem> PROMETHEUM_GREATAXE = ITEM.register("mythicmetals_compat/prometheum/prometheum_greataxe", () ->
-            new SimplySwordsSwordItem(
+    public static final RegistrySupplier<PrometheumSwordItem> PROMETHEUM_GREATAXE = ITEM.register("mythicmetals_compat/prometheum/prometheum_greataxe", () ->
+            new PrometheumSwordItem(
                     ModToolMaterial.PROMETHEUM,
                     new Item.Settings()
                             .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.PROMETHEUM,
                                     (int) (prometheum_modifier + greataxe_modifier), greataxe_attackspeed)), "mythicmetals:prometheum_ingot"));
 
-    public static final RegistrySupplier<SimplySwordsSwordItem> PROMETHEUM_CHAKRAM = ITEM.register("mythicmetals_compat/prometheum/prometheum_chakram", () ->
-            new SimplySwordsSwordItem(
+    public static final RegistrySupplier<PrometheumSwordItem> PROMETHEUM_CHAKRAM = ITEM.register("mythicmetals_compat/prometheum/prometheum_chakram", () ->
+            new PrometheumSwordItem(
                     ModToolMaterial.PROMETHEUM,
                     new Item.Settings()
                             .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.PROMETHEUM,
                                     (int) (prometheum_modifier + chakram_modifier), chakram_attackspeed)), "mythicmetals:prometheum_ingot"));
 
-    public static final RegistrySupplier<SimplySwordsSwordItem> PROMETHEUM_SCYTHE = ITEM.register("mythicmetals_compat/prometheum/prometheum_scythe", () ->
-            new SimplySwordsSwordItem(
+    public static final RegistrySupplier<PrometheumSwordItem> PROMETHEUM_SCYTHE = ITEM.register("mythicmetals_compat/prometheum/prometheum_scythe", () ->
+            new PrometheumSwordItem(
                     ModToolMaterial.PROMETHEUM,
                     new Item.Settings()
                             .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.PROMETHEUM,
                                     (int) (prometheum_modifier + scythe_modifier), scythe_attackspeed)), "mythicmetals:prometheum_ingot"));
 
-    public static final RegistrySupplier<SimplySwordsSwordItem> PROMETHEUM_HALBERD = ITEM.register("mythicmetals_compat/prometheum/prometheum_halberd", () ->
-            new SimplySwordsSwordItem(
+    public static final RegistrySupplier<PrometheumSwordItem> PROMETHEUM_HALBERD = ITEM.register("mythicmetals_compat/prometheum/prometheum_halberd", () ->
+            new PrometheumSwordItem(
                     ModToolMaterial.PROMETHEUM,
                     new Item.Settings()
                             .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.PROMETHEUM,
