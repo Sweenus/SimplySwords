@@ -71,6 +71,11 @@ public class WeaponAttributesConfig implements ConfigData {
     public float gobberNether_damageModifier = 3.0f;
     public float gobberEnd_damageModifier = 6.0f;
 
+    public float netheriteIron_damageModifier = 3f;
+    public float netheriteGold_damageModifier = 3f;
+    public float netheriteEmerald_damageModifier = 3f;
+    public float netheriteDiamond_damageModifier = 3f;
+
     @ConfigEntry.Gui.PrefixText
     public float longsword_attackSpeed = -2.4f;
     public float twinblade_attackSpeed = -2.0f;

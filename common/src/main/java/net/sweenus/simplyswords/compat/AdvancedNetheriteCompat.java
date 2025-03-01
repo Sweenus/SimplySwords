@@ -7,10 +7,7 @@ import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.ConfigDefaultValues;
-import net.sweenus.simplyswords.item.GobberEndSwordItem;
-import net.sweenus.simplyswords.item.GobberNetherSwordItem;
-import net.sweenus.simplyswords.item.ModToolMaterial;
-import net.sweenus.simplyswords.item.SimplySwordsSwordItem;
+import net.sweenus.simplyswords.item.*;
 
 public class AdvancedNetheriteCompat {
 
@@ -86,249 +83,249 @@ public class AdvancedNetheriteCompat {
 
     //Netherite-Iron
     public static final Item NETHERITE_IRON_LONGSWORD = registerItem( "advanced_netherite_compat/netherite_iron/netherite_iron_longsword",
-            new SimplySwordsSwordItem(ModToolMaterial.NETHERITE_IRON, netherite_iron_modifier + longsword_modifier, longsword_attackspeed,
+            new AdvancedNetheriteSwordItem(ModToolMaterial.NETHERITE_IRON, netherite_iron_modifier + longsword_modifier, longsword_attackspeed,
                     "advancednetherite:netherite_iron_ingot"));
 
     public static final Item NETHERITE_IRON_TWINBLADE = registerItem( "advanced_netherite_compat/netherite_iron/netherite_iron_twinblade",
-            new SimplySwordsSwordItem(ModToolMaterial.NETHERITE_IRON, netherite_iron_modifier + twinblade_modifier, twinblade_attackspeed,
+            new AdvancedNetheriteSwordItem(ModToolMaterial.NETHERITE_IRON, netherite_iron_modifier + twinblade_modifier, twinblade_attackspeed,
                     "advancednetherite:netherite_iron_ingot"));
 
     public static final Item NETHERITE_IRON_RAPIER = registerItem( "advanced_netherite_compat/netherite_iron/netherite_iron_rapier",
-            new SimplySwordsSwordItem(ModToolMaterial.NETHERITE_IRON, netherite_iron_modifier + rapier_modifier, rapier_attackspeed,
+            new AdvancedNetheriteSwordItem(ModToolMaterial.NETHERITE_IRON, netherite_iron_modifier + rapier_modifier, rapier_attackspeed,
                     "advancednetherite:netherite_iron_ingot"));
 
     public static final Item NETHERITE_IRON_KATANA = registerItem( "advanced_netherite_compat/netherite_iron/netherite_iron_katana",
-            new SimplySwordsSwordItem(ModToolMaterial.NETHERITE_IRON, netherite_iron_modifier + katana_modifier, katana_attackspeed,
+            new AdvancedNetheriteSwordItem(ModToolMaterial.NETHERITE_IRON, netherite_iron_modifier + katana_modifier, katana_attackspeed,
                     "advancednetherite:netherite_iron_ingot"));
 
     public static final Item NETHERITE_IRON_SAI = registerItem( "advanced_netherite_compat/netherite_iron/netherite_iron_sai",
-            new SimplySwordsSwordItem(ModToolMaterial.NETHERITE_IRON, netherite_iron_modifier + sai_modifier, sai_attackspeed,
+            new AdvancedNetheriteSwordItem(ModToolMaterial.NETHERITE_IRON, netherite_iron_modifier + sai_modifier, sai_attackspeed,
                     "advancednetherite:netherite_iron_ingot"));
 
     public static final Item NETHERITE_IRON_SPEAR = registerItem( "advanced_netherite_compat/netherite_iron/netherite_iron_spear",
-            new SimplySwordsSwordItem(ModToolMaterial.NETHERITE_IRON, netherite_iron_modifier + spear_modifier, spear_attackspeed,
+            new AdvancedNetheriteSwordItem(ModToolMaterial.NETHERITE_IRON, netherite_iron_modifier + spear_modifier, spear_attackspeed,
                     "advancednetherite:netherite_iron_ingot"));
 
     public static final Item NETHERITE_IRON_GLAIVE = registerItem( "advanced_netherite_compat/netherite_iron/netherite_iron_glaive",
-            new SimplySwordsSwordItem(ModToolMaterial.NETHERITE_IRON, netherite_iron_modifier + glaive_modifier, glaive_attackspeed,
+            new AdvancedNetheriteSwordItem(ModToolMaterial.NETHERITE_IRON, netherite_iron_modifier + glaive_modifier, glaive_attackspeed,
                     "advancednetherite:netherite_iron_ingot"));
 
     public static final Item NETHERITE_IRON_WARGLAIVE = registerItem( "advanced_netherite_compat/netherite_iron/netherite_iron_warglaive",
-            new SimplySwordsSwordItem(ModToolMaterial.NETHERITE_IRON, netherite_iron_modifier + warglaive_modifier, warglaive_attackspeed,
+            new AdvancedNetheriteSwordItem(ModToolMaterial.NETHERITE_IRON, netherite_iron_modifier + warglaive_modifier, warglaive_attackspeed,
                     "advancednetherite:netherite_iron_ingot"));
 
     public static final Item NETHERITE_IRON_CUTLASS = registerItem( "advanced_netherite_compat/netherite_iron/netherite_iron_cutlass",
-            new SimplySwordsSwordItem(ModToolMaterial.NETHERITE_IRON, netherite_iron_modifier + cutlass_modifier, cutlass_attackspeed,
+            new AdvancedNetheriteSwordItem(ModToolMaterial.NETHERITE_IRON, netherite_iron_modifier + cutlass_modifier, cutlass_attackspeed,
                     "advancednetherite:netherite_iron_ingot"));
 
     public static final Item NETHERITE_IRON_CLAYMORE = registerItem( "advanced_netherite_compat/netherite_iron/netherite_iron_claymore",
-            new SimplySwordsSwordItem(ModToolMaterial.NETHERITE_IRON, netherite_iron_modifier + claymore_modifier, claymore_attackspeed,
+            new AdvancedNetheriteSwordItem(ModToolMaterial.NETHERITE_IRON, netherite_iron_modifier + claymore_modifier, claymore_attackspeed,
                     "advancednetherite:netherite_iron_ingot"));
 
     public static final Item NETHERITE_IRON_GREATHAMMER = registerItem( "advanced_netherite_compat/netherite_iron/netherite_iron_greathammer",
-            new SimplySwordsSwordItem(ModToolMaterial.NETHERITE_IRON, netherite_iron_modifier + greathammer_modifier, greathammer_attackspeed,
+            new AdvancedNetheriteSwordItem(ModToolMaterial.NETHERITE_IRON, netherite_iron_modifier + greathammer_modifier, greathammer_attackspeed,
                     "advancednetherite:netherite_iron_ingot"));
 
     public static final Item NETHERITE_IRON_GREATAXE = registerItem( "advanced_netherite_compat/netherite_iron/netherite_iron_greataxe",
-            new SimplySwordsSwordItem(ModToolMaterial.NETHERITE_IRON, netherite_iron_modifier + greataxe_modifier, greataxe_attackspeed,
+            new AdvancedNetheriteSwordItem(ModToolMaterial.NETHERITE_IRON, netherite_iron_modifier + greataxe_modifier, greataxe_attackspeed,
                     "advancednetherite:netherite_iron_ingot"));
 
     public static final Item NETHERITE_IRON_CHAKRAM = registerItem( "advanced_netherite_compat/netherite_iron/netherite_iron_chakram",
-            new SimplySwordsSwordItem(ModToolMaterial.NETHERITE_IRON, netherite_iron_modifier + chakram_modifier, chakram_attackspeed,
+            new AdvancedNetheriteSwordItem(ModToolMaterial.NETHERITE_IRON, netherite_iron_modifier + chakram_modifier, chakram_attackspeed,
                     "advancednetherite:netherite_iron_ingot"));
 
     public static final Item NETHERITE_IRON_SCYTHE = registerItem( "advanced_netherite_compat/netherite_iron/netherite_iron_scythe",
-            new SimplySwordsSwordItem(ModToolMaterial.NETHERITE_IRON, netherite_iron_modifier + scythe_modifier, scythe_attackspeed,
+            new AdvancedNetheriteSwordItem(ModToolMaterial.NETHERITE_IRON, netherite_iron_modifier + scythe_modifier, scythe_attackspeed,
                     "advancednetherite:netherite_iron_ingot"));
 
     public static final Item NETHERITE_IRON_HALBERD = registerItem( "advanced_netherite_compat/netherite_iron/netherite_iron_halberd",
-            new SimplySwordsSwordItem(ModToolMaterial.NETHERITE_IRON, netherite_iron_modifier + halberd_modifier, halberd_attackspeed,
+            new AdvancedNetheriteSwordItem(ModToolMaterial.NETHERITE_IRON, netherite_iron_modifier + halberd_modifier, halberd_attackspeed,
                     "advancednetherite:netherite_iron_ingot"));
 
 
     //Netherite-Gold
     public static final Item NETHERITE_GOLD_LONGSWORD = registerItem( "advanced_netherite_compat/netherite_gold/netherite_gold_longsword",
-            new SimplySwordsSwordItem(ModToolMaterial.NETHERITE_GOLD, netherite_gold_modifier + longsword_modifier, longsword_attackspeed,
+            new AdvancedNetheriteSwordItem(ModToolMaterial.NETHERITE_GOLD, netherite_gold_modifier + longsword_modifier, longsword_attackspeed,
                     "advancednetherite:netherite_gold_ingot"));
 
     public static final Item NETHERITE_GOLD_TWINBLADE = registerItem( "advanced_netherite_compat/netherite_gold/netherite_gold_twinblade",
-            new SimplySwordsSwordItem(ModToolMaterial.NETHERITE_GOLD, netherite_gold_modifier + twinblade_modifier, twinblade_attackspeed,
+            new AdvancedNetheriteSwordItem(ModToolMaterial.NETHERITE_GOLD, netherite_gold_modifier + twinblade_modifier, twinblade_attackspeed,
                     "advancednetherite:netherite_gold_ingot"));
 
     public static final Item NETHERITE_GOLD_RAPIER = registerItem( "advanced_netherite_compat/netherite_gold/netherite_gold_rapier",
-            new SimplySwordsSwordItem(ModToolMaterial.NETHERITE_GOLD, netherite_gold_modifier + rapier_modifier, rapier_attackspeed,
+            new AdvancedNetheriteSwordItem(ModToolMaterial.NETHERITE_GOLD, netherite_gold_modifier + rapier_modifier, rapier_attackspeed,
                     "advancednetherite:netherite_gold_ingot"));
 
     public static final Item NETHERITE_GOLD_KATANA = registerItem( "advanced_netherite_compat/netherite_gold/netherite_gold_katana",
-            new SimplySwordsSwordItem(ModToolMaterial.NETHERITE_GOLD, netherite_gold_modifier + katana_modifier, katana_attackspeed,
+            new AdvancedNetheriteSwordItem(ModToolMaterial.NETHERITE_GOLD, netherite_gold_modifier + katana_modifier, katana_attackspeed,
                     "advancednetherite:netherite_gold_ingot"));
 
     public static final Item NETHERITE_GOLD_SAI = registerItem( "advanced_netherite_compat/netherite_gold/netherite_gold_sai",
-            new SimplySwordsSwordItem(ModToolMaterial.NETHERITE_GOLD, netherite_gold_modifier + sai_modifier, sai_attackspeed,
+            new AdvancedNetheriteSwordItem(ModToolMaterial.NETHERITE_GOLD, netherite_gold_modifier + sai_modifier, sai_attackspeed,
                     "advancednetherite:netherite_gold_ingot"));
 
     public static final Item NETHERITE_GOLD_SPEAR = registerItem( "advanced_netherite_compat/netherite_gold/netherite_gold_spear",
-            new SimplySwordsSwordItem(ModToolMaterial.NETHERITE_GOLD, netherite_gold_modifier + spear_modifier, spear_attackspeed,
+            new AdvancedNetheriteSwordItem(ModToolMaterial.NETHERITE_GOLD, netherite_gold_modifier + spear_modifier, spear_attackspeed,
                     "advancednetherite:netherite_gold_ingot"));
 
     public static final Item NETHERITE_GOLD_GLAIVE = registerItem( "advanced_netherite_compat/netherite_gold/netherite_gold_glaive",
-            new SimplySwordsSwordItem(ModToolMaterial.NETHERITE_GOLD, netherite_gold_modifier + glaive_modifier, glaive_attackspeed,
+            new AdvancedNetheriteSwordItem(ModToolMaterial.NETHERITE_GOLD, netherite_gold_modifier + glaive_modifier, glaive_attackspeed,
                     "advancednetherite:netherite_gold_ingot"));
 
     public static final Item NETHERITE_GOLD_WARGLAIVE = registerItem( "advanced_netherite_compat/netherite_gold/netherite_gold_warglaive",
-            new SimplySwordsSwordItem(ModToolMaterial.NETHERITE_GOLD, netherite_gold_modifier + warglaive_modifier, warglaive_attackspeed,
+            new AdvancedNetheriteSwordItem(ModToolMaterial.NETHERITE_GOLD, netherite_gold_modifier + warglaive_modifier, warglaive_attackspeed,
                     "advancednetherite:netherite_gold_ingot"));
 
     public static final Item NETHERITE_GOLD_CUTLASS = registerItem( "advanced_netherite_compat/netherite_gold/netherite_gold_cutlass",
-            new SimplySwordsSwordItem(ModToolMaterial.NETHERITE_GOLD, netherite_gold_modifier + cutlass_modifier, cutlass_attackspeed,
+            new AdvancedNetheriteSwordItem(ModToolMaterial.NETHERITE_GOLD, netherite_gold_modifier + cutlass_modifier, cutlass_attackspeed,
                     "advancednetherite:netherite_gold_ingot"));
 
     public static final Item NETHERITE_GOLD_CLAYMORE = registerItem( "advanced_netherite_compat/netherite_gold/netherite_gold_claymore",
-            new SimplySwordsSwordItem(ModToolMaterial.NETHERITE_GOLD, netherite_gold_modifier + claymore_modifier, claymore_attackspeed,
+            new AdvancedNetheriteSwordItem(ModToolMaterial.NETHERITE_GOLD, netherite_gold_modifier + claymore_modifier, claymore_attackspeed,
                     "advancednetherite:netherite_gold_ingot"));
 
     public static final Item NETHERITE_GOLD_GREATHAMMER = registerItem( "advanced_netherite_compat/netherite_gold/netherite_gold_greathammer",
-            new SimplySwordsSwordItem(ModToolMaterial.NETHERITE_GOLD, netherite_gold_modifier + greathammer_modifier, greathammer_attackspeed,
+            new AdvancedNetheriteSwordItem(ModToolMaterial.NETHERITE_GOLD, netherite_gold_modifier + greathammer_modifier, greathammer_attackspeed,
                     "advancednetherite:netherite_gold_ingot"));
 
     public static final Item NETHERITE_GOLD_GREATAXE = registerItem( "advanced_netherite_compat/netherite_gold/netherite_gold_greataxe",
-            new SimplySwordsSwordItem(ModToolMaterial.NETHERITE_GOLD, netherite_gold_modifier + greataxe_modifier, greataxe_attackspeed,
+            new AdvancedNetheriteSwordItem(ModToolMaterial.NETHERITE_GOLD, netherite_gold_modifier + greataxe_modifier, greataxe_attackspeed,
                     "advancednetherite:netherite_gold_ingot"));
 
     public static final Item NETHERITE_GOLD_CHAKRAM = registerItem( "advanced_netherite_compat/netherite_gold/netherite_gold_chakram",
-            new SimplySwordsSwordItem(ModToolMaterial.NETHERITE_GOLD, netherite_gold_modifier + chakram_modifier, chakram_attackspeed,
+            new AdvancedNetheriteSwordItem(ModToolMaterial.NETHERITE_GOLD, netherite_gold_modifier + chakram_modifier, chakram_attackspeed,
                     "advancednetherite:netherite_gold_ingot"));
 
     public static final Item NETHERITE_GOLD_SCYTHE = registerItem( "advanced_netherite_compat/netherite_gold/netherite_gold_scythe",
-            new SimplySwordsSwordItem(ModToolMaterial.NETHERITE_GOLD, netherite_gold_modifier + scythe_modifier, scythe_attackspeed,
+            new AdvancedNetheriteSwordItem(ModToolMaterial.NETHERITE_GOLD, netherite_gold_modifier + scythe_modifier, scythe_attackspeed,
                     "advancednetherite:netherite_gold_ingot"));
 
     public static final Item NETHERITE_GOLD_HALBERD = registerItem( "advanced_netherite_compat/netherite_gold/netherite_gold_halberd",
-            new SimplySwordsSwordItem(ModToolMaterial.NETHERITE_GOLD, netherite_gold_modifier + halberd_modifier, halberd_attackspeed,
+            new AdvancedNetheriteSwordItem(ModToolMaterial.NETHERITE_GOLD, netherite_gold_modifier + halberd_modifier, halberd_attackspeed,
                     "advancednetherite:netherite_gold_ingot"));
 
 
     //Netherite-Emerald
     public static final Item NETHERITE_EMERALD_LONGSWORD = registerItem( "advanced_netherite_compat/netherite_emerald/netherite_emerald_longsword",
-            new SimplySwordsSwordItem(ModToolMaterial.NETHERITE_EMERALD, netherite_emerald_modifier + longsword_modifier, longsword_attackspeed,
+            new AdvancedNetheriteSwordItem(ModToolMaterial.NETHERITE_EMERALD, netherite_emerald_modifier + longsword_modifier, longsword_attackspeed,
                     "advancednetherite:netherite_emerald_ingot"));
 
     public static final Item NETHERITE_EMERALD_TWINBLADE = registerItem( "advanced_netherite_compat/netherite_emerald/netherite_emerald_twinblade",
-            new SimplySwordsSwordItem(ModToolMaterial.NETHERITE_EMERALD, netherite_emerald_modifier + twinblade_modifier, twinblade_attackspeed,
+            new AdvancedNetheriteSwordItem(ModToolMaterial.NETHERITE_EMERALD, netherite_emerald_modifier + twinblade_modifier, twinblade_attackspeed,
                     "advancednetherite:netherite_emerald_ingot"));
 
     public static final Item NETHERITE_EMERALD_RAPIER = registerItem( "advanced_netherite_compat/netherite_emerald/netherite_emerald_rapier",
-            new SimplySwordsSwordItem(ModToolMaterial.NETHERITE_EMERALD, netherite_emerald_modifier + rapier_modifier, rapier_attackspeed,
+            new AdvancedNetheriteSwordItem(ModToolMaterial.NETHERITE_EMERALD, netherite_emerald_modifier + rapier_modifier, rapier_attackspeed,
                     "advancednetherite:netherite_emerald_ingot"));
 
     public static final Item NETHERITE_EMERALD_KATANA = registerItem( "advanced_netherite_compat/netherite_emerald/netherite_emerald_katana",
-            new SimplySwordsSwordItem(ModToolMaterial.NETHERITE_EMERALD, netherite_emerald_modifier + katana_modifier, katana_attackspeed,
+            new AdvancedNetheriteSwordItem(ModToolMaterial.NETHERITE_EMERALD, netherite_emerald_modifier + katana_modifier, katana_attackspeed,
                     "advancednetherite:netherite_emerald_ingot"));
 
     public static final Item NETHERITE_EMERALD_SAI = registerItem( "advanced_netherite_compat/netherite_emerald/netherite_emerald_sai",
-            new SimplySwordsSwordItem(ModToolMaterial.NETHERITE_EMERALD, netherite_emerald_modifier + sai_modifier, sai_attackspeed,
+            new AdvancedNetheriteSwordItem(ModToolMaterial.NETHERITE_EMERALD, netherite_emerald_modifier + sai_modifier, sai_attackspeed,
                     "advancednetherite:netherite_emerald_ingot"));
 
     public static final Item NETHERITE_EMERALD_SPEAR = registerItem( "advanced_netherite_compat/netherite_emerald/netherite_emerald_spear",
-            new SimplySwordsSwordItem(ModToolMaterial.NETHERITE_EMERALD, netherite_emerald_modifier + spear_modifier, spear_attackspeed,
+            new AdvancedNetheriteSwordItem(ModToolMaterial.NETHERITE_EMERALD, netherite_emerald_modifier + spear_modifier, spear_attackspeed,
                     "advancednetherite:netherite_emerald_ingot"));
 
     public static final Item NETHERITE_EMERALD_GLAIVE = registerItem( "advanced_netherite_compat/netherite_emerald/netherite_emerald_glaive",
-            new SimplySwordsSwordItem(ModToolMaterial.NETHERITE_EMERALD, netherite_emerald_modifier + glaive_modifier, glaive_attackspeed,
+            new AdvancedNetheriteSwordItem(ModToolMaterial.NETHERITE_EMERALD, netherite_emerald_modifier + glaive_modifier, glaive_attackspeed,
                     "advancednetherite:netherite_emerald_ingot"));
 
     public static final Item NETHERITE_EMERALD_WARGLAIVE = registerItem( "advanced_netherite_compat/netherite_emerald/netherite_emerald_warglaive",
-            new SimplySwordsSwordItem(ModToolMaterial.NETHERITE_EMERALD, netherite_emerald_modifier + warglaive_modifier, warglaive_attackspeed,
+            new AdvancedNetheriteSwordItem(ModToolMaterial.NETHERITE_EMERALD, netherite_emerald_modifier + warglaive_modifier, warglaive_attackspeed,
                     "advancednetherite:netherite_emerald_ingot"));
 
     public static final Item NETHERITE_EMERALD_CUTLASS = registerItem( "advanced_netherite_compat/netherite_emerald/netherite_emerald_cutlass",
-            new SimplySwordsSwordItem(ModToolMaterial.NETHERITE_EMERALD, netherite_emerald_modifier + cutlass_modifier, cutlass_attackspeed,
+            new AdvancedNetheriteSwordItem(ModToolMaterial.NETHERITE_EMERALD, netherite_emerald_modifier + cutlass_modifier, cutlass_attackspeed,
                     "advancednetherite:netherite_emerald_ingot"));
 
     public static final Item NETHERITE_EMERALD_CLAYMORE = registerItem( "advanced_netherite_compat/netherite_emerald/netherite_emerald_claymore",
-            new SimplySwordsSwordItem(ModToolMaterial.NETHERITE_EMERALD, netherite_emerald_modifier + claymore_modifier, claymore_attackspeed,
+            new AdvancedNetheriteSwordItem(ModToolMaterial.NETHERITE_EMERALD, netherite_emerald_modifier + claymore_modifier, claymore_attackspeed,
                     "advancednetherite:netherite_emerald_ingot"));
 
     public static final Item NETHERITE_EMERALD_GREATHAMMER = registerItem( "advanced_netherite_compat/netherite_emerald/netherite_emerald_greathammer",
-            new SimplySwordsSwordItem(ModToolMaterial.NETHERITE_EMERALD, netherite_emerald_modifier + greathammer_modifier, greathammer_attackspeed,
+            new AdvancedNetheriteSwordItem(ModToolMaterial.NETHERITE_EMERALD, netherite_emerald_modifier + greathammer_modifier, greathammer_attackspeed,
                     "advancednetherite:netherite_emerald_ingot"));
 
     public static final Item NETHERITE_EMERALD_GREATAXE = registerItem( "advanced_netherite_compat/netherite_emerald/netherite_emerald_greataxe",
-            new SimplySwordsSwordItem(ModToolMaterial.NETHERITE_EMERALD, netherite_emerald_modifier + greataxe_modifier, greataxe_attackspeed,
+            new AdvancedNetheriteSwordItem(ModToolMaterial.NETHERITE_EMERALD, netherite_emerald_modifier + greataxe_modifier, greataxe_attackspeed,
                     "advancednetherite:netherite_emerald_ingot"));
 
     public static final Item NETHERITE_EMERALD_CHAKRAM = registerItem( "advanced_netherite_compat/netherite_emerald/netherite_emerald_chakram",
-            new SimplySwordsSwordItem(ModToolMaterial.NETHERITE_EMERALD, netherite_emerald_modifier + chakram_modifier, chakram_attackspeed,
+            new AdvancedNetheriteSwordItem(ModToolMaterial.NETHERITE_EMERALD, netherite_emerald_modifier + chakram_modifier, chakram_attackspeed,
                     "advancednetherite:netherite_emerald_ingot"));
 
     public static final Item NETHERITE_EMERALD_SCYTHE = registerItem( "advanced_netherite_compat/netherite_emerald/netherite_emerald_scythe",
-            new SimplySwordsSwordItem(ModToolMaterial.NETHERITE_EMERALD, netherite_emerald_modifier + scythe_modifier, scythe_attackspeed,
+            new AdvancedNetheriteSwordItem(ModToolMaterial.NETHERITE_EMERALD, netherite_emerald_modifier + scythe_modifier, scythe_attackspeed,
                     "advancednetherite:netherite_emerald_ingot"));
 
     public static final Item NETHERITE_EMERALD_HALBERD = registerItem( "advanced_netherite_compat/netherite_emerald/netherite_emerald_halberd",
-            new SimplySwordsSwordItem(ModToolMaterial.NETHERITE_EMERALD, netherite_emerald_modifier + halberd_modifier, halberd_attackspeed,
+            new AdvancedNetheriteSwordItem(ModToolMaterial.NETHERITE_EMERALD, netherite_emerald_modifier + halberd_modifier, halberd_attackspeed,
                     "advancednetherite:netherite_emerald_ingot"));
 
 
     //Netherite-Diamond
     public static final Item NETHERITE_DIAMOND_LONGSWORD = registerItem( "advanced_netherite_compat/netherite_diamond/netherite_diamond_longsword",
-            new SimplySwordsSwordItem(ModToolMaterial.NETHERITE_DIAMOND, netherite_diamond_modifier + longsword_modifier, longsword_attackspeed,
+            new AdvancedNetheriteSwordItem(ModToolMaterial.NETHERITE_DIAMOND, netherite_diamond_modifier + longsword_modifier, longsword_attackspeed,
                     "advancednetherite:netherite_diamond_ingot"));
 
     public static final Item NETHERITE_DIAMOND_TWINBLADE = registerItem( "advanced_netherite_compat/netherite_diamond/netherite_diamond_twinblade",
-            new SimplySwordsSwordItem(ModToolMaterial.NETHERITE_DIAMOND, netherite_diamond_modifier + twinblade_modifier, twinblade_attackspeed,
+            new AdvancedNetheriteSwordItem(ModToolMaterial.NETHERITE_DIAMOND, netherite_diamond_modifier + twinblade_modifier, twinblade_attackspeed,
                     "advancednetherite:netherite_diamond_ingot"));
 
     public static final Item NETHERITE_DIAMOND_RAPIER = registerItem( "advanced_netherite_compat/netherite_diamond/netherite_diamond_rapier",
-            new SimplySwordsSwordItem(ModToolMaterial.NETHERITE_DIAMOND, netherite_diamond_modifier + rapier_modifier, rapier_attackspeed,
+            new AdvancedNetheriteSwordItem(ModToolMaterial.NETHERITE_DIAMOND, netherite_diamond_modifier + rapier_modifier, rapier_attackspeed,
                     "advancednetherite:netherite_diamond_ingot"));
 
     public static final Item NETHERITE_DIAMOND_KATANA = registerItem( "advanced_netherite_compat/netherite_diamond/netherite_diamond_katana",
-            new SimplySwordsSwordItem(ModToolMaterial.NETHERITE_DIAMOND, netherite_diamond_modifier + katana_modifier, katana_attackspeed,
+            new AdvancedNetheriteSwordItem(ModToolMaterial.NETHERITE_DIAMOND, netherite_diamond_modifier + katana_modifier, katana_attackspeed,
                     "advancednetherite:netherite_diamond_ingot"));
 
     public static final Item NETHERITE_DIAMOND_SAI = registerItem( "advanced_netherite_compat/netherite_diamond/netherite_diamond_sai",
-            new SimplySwordsSwordItem(ModToolMaterial.NETHERITE_DIAMOND, netherite_diamond_modifier + sai_modifier, sai_attackspeed,
+            new AdvancedNetheriteSwordItem(ModToolMaterial.NETHERITE_DIAMOND, netherite_diamond_modifier + sai_modifier, sai_attackspeed,
                     "advancednetherite:netherite_diamond_ingot"));
 
     public static final Item NETHERITE_DIAMOND_SPEAR = registerItem( "advanced_netherite_compat/netherite_diamond/netherite_diamond_spear",
-            new SimplySwordsSwordItem(ModToolMaterial.NETHERITE_DIAMOND, netherite_diamond_modifier + spear_modifier, spear_attackspeed,
+            new AdvancedNetheriteSwordItem(ModToolMaterial.NETHERITE_DIAMOND, netherite_diamond_modifier + spear_modifier, spear_attackspeed,
                     "advancednetherite:netherite_diamond_ingot"));
 
     public static final Item NETHERITE_DIAMOND_GLAIVE = registerItem( "advanced_netherite_compat/netherite_diamond/netherite_diamond_glaive",
-            new SimplySwordsSwordItem(ModToolMaterial.NETHERITE_DIAMOND, netherite_diamond_modifier + glaive_modifier, glaive_attackspeed,
+            new AdvancedNetheriteSwordItem(ModToolMaterial.NETHERITE_DIAMOND, netherite_diamond_modifier + glaive_modifier, glaive_attackspeed,
                     "advancednetherite:netherite_diamond_ingot"));
 
     public static final Item NETHERITE_DIAMOND_WARGLAIVE = registerItem( "advanced_netherite_compat/netherite_diamond/netherite_diamond_warglaive",
-            new SimplySwordsSwordItem(ModToolMaterial.NETHERITE_DIAMOND, netherite_diamond_modifier + warglaive_modifier, warglaive_attackspeed,
+            new AdvancedNetheriteSwordItem(ModToolMaterial.NETHERITE_DIAMOND, netherite_diamond_modifier + warglaive_modifier, warglaive_attackspeed,
                     "advancednetherite:netherite_diamond_ingot"));
 
     public static final Item NETHERITE_DIAMOND_CUTLASS = registerItem( "advanced_netherite_compat/netherite_diamond/netherite_diamond_cutlass",
-            new SimplySwordsSwordItem(ModToolMaterial.NETHERITE_DIAMOND, netherite_diamond_modifier + cutlass_modifier, cutlass_attackspeed,
+            new AdvancedNetheriteSwordItem(ModToolMaterial.NETHERITE_DIAMOND, netherite_diamond_modifier + cutlass_modifier, cutlass_attackspeed,
                     "advancednetherite:netherite_diamond_ingot"));
 
     public static final Item NETHERITE_DIAMOND_CLAYMORE = registerItem( "advanced_netherite_compat/netherite_diamond/netherite_diamond_claymore",
-            new SimplySwordsSwordItem(ModToolMaterial.NETHERITE_DIAMOND, netherite_diamond_modifier + claymore_modifier, claymore_attackspeed,
+            new AdvancedNetheriteSwordItem(ModToolMaterial.NETHERITE_DIAMOND, netherite_diamond_modifier + claymore_modifier, claymore_attackspeed,
                     "advancednetherite:netherite_diamond_ingot"));
 
     public static final Item NETHERITE_DIAMOND_GREATHAMMER = registerItem( "advanced_netherite_compat/netherite_diamond/netherite_diamond_greathammer",
-            new SimplySwordsSwordItem(ModToolMaterial.NETHERITE_DIAMOND, netherite_diamond_modifier + greathammer_modifier, greathammer_attackspeed,
+            new AdvancedNetheriteSwordItem(ModToolMaterial.NETHERITE_DIAMOND, netherite_diamond_modifier + greathammer_modifier, greathammer_attackspeed,
                     "advancednetherite:netherite_diamond_ingot"));
 
     public static final Item NETHERITE_DIAMOND_GREATAXE = registerItem( "advanced_netherite_compat/netherite_diamond/netherite_diamond_greataxe",
-            new SimplySwordsSwordItem(ModToolMaterial.NETHERITE_DIAMOND, netherite_diamond_modifier + greataxe_modifier, greataxe_attackspeed,
+            new AdvancedNetheriteSwordItem(ModToolMaterial.NETHERITE_DIAMOND, netherite_diamond_modifier + greataxe_modifier, greataxe_attackspeed,
                     "advancednetherite:netherite_diamond_ingot"));
 
     public static final Item NETHERITE_DIAMOND_CHAKRAM = registerItem( "advanced_netherite_compat/netherite_diamond/netherite_diamond_chakram",
-            new SimplySwordsSwordItem(ModToolMaterial.NETHERITE_DIAMOND, netherite_diamond_modifier + chakram_modifier, chakram_attackspeed,
+            new AdvancedNetheriteSwordItem(ModToolMaterial.NETHERITE_DIAMOND, netherite_diamond_modifier + chakram_modifier, chakram_attackspeed,
                     "advancednetherite:netherite_diamond_ingot"));
 
     public static final Item NETHERITE_DIAMOND_SCYTHE = registerItem( "advanced_netherite_compat/netherite_diamond/netherite_diamond_scythe",
-            new SimplySwordsSwordItem(ModToolMaterial.NETHERITE_DIAMOND, netherite_diamond_modifier + scythe_modifier, scythe_attackspeed,
+            new AdvancedNetheriteSwordItem(ModToolMaterial.NETHERITE_DIAMOND, netherite_diamond_modifier + scythe_modifier, scythe_attackspeed,
                     "advancednetherite:netherite_diamond_ingot"));
 
     public static final Item NETHERITE_DIAMOND_HALBERD = registerItem( "advanced_netherite_compat/netherite_diamond/netherite_diamond_halberd",
-            new SimplySwordsSwordItem(ModToolMaterial.NETHERITE_DIAMOND, netherite_diamond_modifier + halberd_modifier, halberd_attackspeed,
+            new AdvancedNetheriteSwordItem(ModToolMaterial.NETHERITE_DIAMOND, netherite_diamond_modifier + halberd_modifier, halberd_attackspeed,
                     "advancednetherite:netherite_diamond_ingot"));
 
 
