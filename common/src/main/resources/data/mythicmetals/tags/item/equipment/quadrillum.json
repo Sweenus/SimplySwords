@@ -1,0 +1,65 @@
+{
+  "replace": false,
+  "values": [
+        {
+          "id": "simplyswords:mythicmetals_compat/quadrillum/quadrillum_claymore",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/quadrillum/quadrillum_cutlass",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/quadrillum/quadrillum_glaive",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/quadrillum/quadrillum_katana",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/quadrillum/quadrillum_longsword",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/quadrillum/quadrillum_rapier",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/quadrillum/quadrillum_sai",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/quadrillum/quadrillum_spear",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/quadrillum/quadrillum_twinblade",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/quadrillum/quadrillum_warglaive",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/quadrillum/quadrillum_greathammer",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/quadrillum/quadrillum_greataxe",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/quadrillum/quadrillum_chakram",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/quadrillum/quadrillum_scythe",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/quadrillum/quadrillum_halberd",
+          "required": false
+        }
+  ]
+}

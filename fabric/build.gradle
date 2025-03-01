@@ -67,6 +67,11 @@ dependencies {
     shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
 
     modImplementation "me.fzzyhmstrs:fzzy_config:${project.fzz_config_version}"
+
+    //For testing Mythic Metals compat (remove when not needed)
+    //modImplementation "org.ladysnake.cardinal-components-api:cardinal-components-base:6.1.0"
+    //modImplementation "org.ladysnake.cardinal-components-api:cardinal-components-entity:6.1.0"
+
 }
 
 processResources {

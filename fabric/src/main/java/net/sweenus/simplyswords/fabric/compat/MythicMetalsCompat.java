@@ -15,6 +15,8 @@ import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.fabric.item.PrometheumSwordItem;
 import net.sweenus.simplyswords.item.ModToolMaterial;
 import net.sweenus.simplyswords.item.SimplySwordsSwordItem;
+import nourl.mythicmetals.component.MythicDataComponents;
+import nourl.mythicmetals.component.PrometheumComponent;
 
 public class MythicMetalsCompat {
 
@@ -932,6 +934,7 @@ public class MythicMetalsCompat {
             new PrometheumSwordItem(
                     ModToolMaterial.PROMETHEUM,
                     new Item.Settings()
+                            .component(MythicDataComponents.PROMETHEUM, PrometheumComponent.DEFAULT)
                             .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.PROMETHEUM,
                                     (int) (prometheum_modifier + longsword_modifier), longsword_attackspeed)), "mythicmetals:prometheum_ingot"));
 
@@ -939,6 +942,7 @@ public class MythicMetalsCompat {
             new PrometheumSwordItem(
                     ModToolMaterial.PROMETHEUM,
                     new Item.Settings()
+                            .component(MythicDataComponents.PROMETHEUM, PrometheumComponent.DEFAULT)
                             .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.PROMETHEUM,
                                     (int) (prometheum_modifier + twinblade_modifier), twinblade_attackspeed)), "mythicmetals:prometheum_ingot"));
 
@@ -946,6 +950,7 @@ public class MythicMetalsCompat {
             new PrometheumSwordItem(
                     ModToolMaterial.PROMETHEUM,
                     new Item.Settings()
+                            .component(MythicDataComponents.PROMETHEUM, PrometheumComponent.DEFAULT)
                             .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.PROMETHEUM,
                                     (int) (prometheum_modifier + rapier_modifier), rapier_attackspeed)), "mythicmetals:prometheum_ingot"));
 
@@ -953,6 +958,7 @@ public class MythicMetalsCompat {
             new PrometheumSwordItem(
                     ModToolMaterial.PROMETHEUM,
                     new Item.Settings()
+                            .component(MythicDataComponents.PROMETHEUM, PrometheumComponent.DEFAULT)
                             .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.PROMETHEUM,
                                     (int) (prometheum_modifier + katana_modifier), katana_attackspeed)), "mythicmetals:prometheum_ingot"));
 
@@ -960,6 +966,7 @@ public class MythicMetalsCompat {
             new PrometheumSwordItem(
                     ModToolMaterial.PROMETHEUM,
                     new Item.Settings()
+                            .component(MythicDataComponents.PROMETHEUM, PrometheumComponent.DEFAULT)
                             .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.PROMETHEUM,
                                     (int) (prometheum_modifier + sai_modifier), sai_attackspeed)), "mythicmetals:prometheum_ingot"));
 
@@ -967,6 +974,7 @@ public class MythicMetalsCompat {
             new PrometheumSwordItem(
                     ModToolMaterial.PROMETHEUM,
                     new Item.Settings()
+                            .component(MythicDataComponents.PROMETHEUM, PrometheumComponent.DEFAULT)
                             .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.PROMETHEUM,
                                     (int) (prometheum_modifier + spear_modifier), spear_attackspeed)), "mythicmetals:prometheum_ingot"));
 
@@ -974,6 +982,7 @@ public class MythicMetalsCompat {
             new PrometheumSwordItem(
                     ModToolMaterial.PROMETHEUM,
                     new Item.Settings()
+                            .component(MythicDataComponents.PROMETHEUM, PrometheumComponent.DEFAULT)
                             .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.PROMETHEUM,
                                     (int) (prometheum_modifier + glaive_modifier), glaive_attackspeed)), "mythicmetals:prometheum_ingot"));
 
@@ -981,6 +990,7 @@ public class MythicMetalsCompat {
             new PrometheumSwordItem(
                     ModToolMaterial.PROMETHEUM,
                     new Item.Settings()
+                            .component(MythicDataComponents.PROMETHEUM, PrometheumComponent.DEFAULT)
                             .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.PROMETHEUM,
                                     (int) (prometheum_modifier + warglaive_modifier), warglaive_attackspeed)), "mythicmetals:prometheum_ingot"));
 
@@ -988,6 +998,7 @@ public class MythicMetalsCompat {
             new PrometheumSwordItem(
                     ModToolMaterial.PROMETHEUM,
                     new Item.Settings()
+                            .component(MythicDataComponents.PROMETHEUM, PrometheumComponent.DEFAULT)
                             .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.PROMETHEUM,
                                     (int) (prometheum_modifier + cutlass_modifier), cutlass_attackspeed)), "mythicmetals:prometheum_ingot"));
 
@@ -995,6 +1006,7 @@ public class MythicMetalsCompat {
             new PrometheumSwordItem(
                     ModToolMaterial.PROMETHEUM,
                     new Item.Settings()
+                            .component(MythicDataComponents.PROMETHEUM, PrometheumComponent.DEFAULT)
                             .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.PROMETHEUM,
                                     (int) (prometheum_modifier + claymore_modifier), claymore_attackspeed)), "mythicmetals:prometheum_ingot"));
 
@@ -1002,6 +1014,7 @@ public class MythicMetalsCompat {
             new PrometheumSwordItem(
                     ModToolMaterial.PROMETHEUM,
                     new Item.Settings()
+                            .component(MythicDataComponents.PROMETHEUM, PrometheumComponent.DEFAULT)
                             .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.PROMETHEUM,
                                     (int) (prometheum_modifier + greathammer_modifier), greathammer_attackspeed)), "mythicmetals:prometheum_ingot"));
 
@@ -1009,6 +1022,7 @@ public class MythicMetalsCompat {
             new PrometheumSwordItem(
                     ModToolMaterial.PROMETHEUM,
                     new Item.Settings()
+                            .component(MythicDataComponents.PROMETHEUM, PrometheumComponent.DEFAULT)
                             .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.PROMETHEUM,
                                     (int) (prometheum_modifier + greataxe_modifier), greataxe_attackspeed)), "mythicmetals:prometheum_ingot"));
 
@@ -1016,6 +1030,7 @@ public class MythicMetalsCompat {
             new PrometheumSwordItem(
                     ModToolMaterial.PROMETHEUM,
                     new Item.Settings()
+                            .component(MythicDataComponents.PROMETHEUM, PrometheumComponent.DEFAULT)
                             .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.PROMETHEUM,
                                     (int) (prometheum_modifier + chakram_modifier), chakram_attackspeed)), "mythicmetals:prometheum_ingot"));
 
@@ -1023,6 +1038,7 @@ public class MythicMetalsCompat {
             new PrometheumSwordItem(
                     ModToolMaterial.PROMETHEUM,
                     new Item.Settings()
+                            .component(MythicDataComponents.PROMETHEUM, PrometheumComponent.DEFAULT)
                             .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.PROMETHEUM,
                                     (int) (prometheum_modifier + scythe_modifier), scythe_attackspeed)), "mythicmetals:prometheum_ingot"));
 
@@ -1030,6 +1046,7 @@ public class MythicMetalsCompat {
             new PrometheumSwordItem(
                     ModToolMaterial.PROMETHEUM,
                     new Item.Settings()
+                            .component(MythicDataComponents.PROMETHEUM, PrometheumComponent.DEFAULT)
                             .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.PROMETHEUM,
                                     (int) (prometheum_modifier + halberd_modifier), halberd_attackspeed)), "mythicmetals:prometheum_ingot"));
 

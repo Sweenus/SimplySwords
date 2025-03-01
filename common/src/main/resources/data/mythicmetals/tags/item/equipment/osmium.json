@@ -1,0 +1,65 @@
+{
+  "replace": false,
+  "values": [
+        {
+          "id": "simplyswords:mythicmetals_compat/osmium/osmium_claymore",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/osmium/osmium_cutlass",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/osmium/osmium_glaive",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/osmium/osmium_katana",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/osmium/osmium_longsword",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/osmium/osmium_rapier",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/osmium/osmium_sai",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/osmium/osmium_spear",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/osmium/osmium_twinblade",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/osmium/osmium_warglaive",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/osmium/osmium_greathammer",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/osmium/osmium_greataxe",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/osmium/osmium_chakram",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/osmium/osmium_scythe",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/osmium/osmium_halberd",
+          "required": false
+        }
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "replace": false,
+  "values": [
+        {
+          "id": "simplyswords:mythicmetals_compat/celestium/celestium_claymore",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/celestium/celestium_cutlass",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/celestium/celestium_glaive",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/celestium/celestium_katana",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/celestium/celestium_longsword",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/celestium/celestium_rapier",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/celestium/celestium_sai",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/celestium/celestium_spear",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/celestium/celestium_twinblade",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/celestium/celestium_warglaive",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/celestium/celestium_greathammer",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/celestium/celestium_greataxe",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/celestium/celestium_chakram",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/celestium/celestium_scythe",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/celestium/celestium_halberd",
+          "required": false
+        }
+  ]
+}
