@@ -1,0 +1,27 @@
+{
+  "type": "simplyswords:unique_upgrade",
+  "key": {
+    "#": {
+      "item": "minecraft:phantom_membrane"
+    },
+    "X": {
+      "item": "simplyswords:dormant_relic",
+      "upgradable": true
+    },
+    "O": {
+      "item": "simplyswords:runic_tablet"
+    },
+    "S": {
+      "item": "minecraft:ender_eye"
+    }
+  },
+  "pattern": [
+    "#O#",
+    "OXO",
+    "#S#"
+  ],
+  "result": {
+    "id": "simplyswords:tainted_relic",
+    "count": 1
+  }
+}

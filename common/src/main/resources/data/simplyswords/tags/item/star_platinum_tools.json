@@ -1,0 +1,65 @@
+{
+  "replace": false,
+  "values": [
+        {
+          "id": "simplyswords:mythicmetals_compat/star_platinum/star_platinum_claymore",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/star_platinum/star_platinum_cutlass",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/star_platinum/star_platinum_glaive",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/star_platinum/star_platinum_katana",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/star_platinum/star_platinum_longsword",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/star_platinum/star_platinum_rapier",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/star_platinum/star_platinum_sai",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/star_platinum/star_platinum_spear",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/star_platinum/star_platinum_twinblade",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/star_platinum/star_platinum_warglaive",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/star_platinum/star_platinum_greathammer",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/star_platinum/star_platinum_greataxe",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/star_platinum/star_platinum_chakram",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/star_platinum/star_platinum_scythe",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/star_platinum/star_platinum_halberd",
+          "required": false
+        }
+  ]
+}

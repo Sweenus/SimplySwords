@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "#": {
+      "tag": "c:wood_sticks"
+    },
+    "X": {
+      "item": "minecraft:iron_ingot"
+    }
+  },
+  "pattern": [
+    "#  ",
+    " X ",
+    "  X"
+  ],
+  "result": {
+    "id": "simplyswords:iron_longsword",
+    "count": 1
+  }
+}

@@ -1,9 +1,0 @@
-{
-  "type": "minecraft:smelting",
-  "ingredient": {
-    "tag": "simplyswords:uniques"
-  },
-  "result": "simplyswords:empowered_remnant",
-  "experience": 35,
-  "cookingtime": 1000
-}

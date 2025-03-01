@@ -1,0 +1,65 @@
+{
+  "replace": false,
+  "values": [
+        {
+          "id": "simplyswords:mythicmetals_compat/aquarium/aquarium_claymore",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/aquarium/aquarium_cutlass",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/aquarium/aquarium_glaive",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/aquarium/aquarium_katana",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/aquarium/aquarium_longsword",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/aquarium/aquarium_rapier",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/aquarium/aquarium_sai",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/aquarium/aquarium_spear",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/aquarium/aquarium_twinblade",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/aquarium/aquarium_warglaive",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/aquarium/aquarium_greathammer",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/aquarium/aquarium_greataxe",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/aquarium/aquarium_chakram",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/aquarium/aquarium_scythe",
+          "required": false
+        },
+        {
+          "id": "simplyswords:mythicmetals_compat/aquarium/aquarium_halberd",
+          "required": false
+        }
+  ]
+}
