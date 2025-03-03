@@ -7,7 +7,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.SwordItem;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.registry.Registries;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
+import net.minecraft.text.TextColor;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.SimplySwords;
@@ -49,16 +51,7 @@ public class AdvancedNetheriteSwordItem extends SwordItem {
     @Override
     public void appendTooltip(ItemStack itemStack, World world, List<Text> tooltip, TooltipContext tooltipContext) {
 
-        //TODO: Set RGB values to proper ones as soon as I can find them via digging in AN source
-        int rgbNetheriteIron = 0x000000;
-        int rgbNetheriteGold = 0x000000;
-        int rgbNetheriteEmerald = 0x000000;
-        int rgbNetheriteDiamond = 0x000000;
-
-        //Leftover stuff from SimplySwordsSwordItem.java which I don't know what is used for
-
-        //Style PROMETHEUM = Style.EMPTY.withColor(TextColor.fromRgb(rgbPrometheum));
-        //Style CARMOT = Style.EMPTY.withColor(TextColor.fromRgb(rgbCarmot));
+        //Netherite alloys use GRAY, GOLD, DARK_GREEN, and AQUA colors
 
         if (this.getName(itemStack).getString().contains("Netherite-Iron"));
             //Add Netherite-Iron tooltip
@@ -73,4 +66,3 @@ public class AdvancedNetheriteSwordItem extends SwordItem {
     }
 
 }
-
