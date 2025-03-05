@@ -18,6 +18,10 @@ repositories {
         name = 'Kotlin for Forge'
         url = 'https://thedarkcolour.github.io/KotlinForForge/'
     }
+    maven {
+        name = "Iron's Maven - Release"
+        url = "https://code.redspace.io/releases"
+    }
 }
 
 architectury {
@@ -60,6 +64,7 @@ dependencies {
 
     modImplementation "me.fzzyhmstrs:fzzy_config:${project.fzz_config_version}+neoforge"
     //modImplementation ("curse.maven:gobber-301700:4007899")
+    modImplementation "io.redspace:irons_spellbooks:${irons_spells_version}"
 }
 
 processResources {

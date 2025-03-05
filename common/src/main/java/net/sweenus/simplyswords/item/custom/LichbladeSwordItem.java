@@ -212,7 +212,7 @@ public class LichbladeSwordItem extends UniqueSwordItem implements TwoHandedWeap
                 tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip9").setStyle(Styles.TEXT));
             }
         }
-        if (Platform.isModLoaded("spell_power")) {
+        if (Platform.isModLoaded("spell_power") || Platform.isModLoaded("irons_spellbooks")) {
             tooltip.add(Text.literal(""));
             tooltip.add(Text.translatable("item.simplyswords.compat.scaleSoul"));
         }
