@@ -23,8 +23,8 @@ public class ForgeHelperMethods {
                     attributePower = player.getAttributes().hasAttribute(AttributeRegistry.ICE_SPELL_POWER) ? player.getAttributeValue(AttributeRegistry.ICE_SPELL_POWER) : 0.f;
                 else if (magicSchool.contains("arcane"))
                     attributePower = player.getAttributes().hasAttribute(AttributeRegistry.ENDER_SPELL_POWER) ? player.getAttributeValue(AttributeRegistry.ENDER_SPELL_POWER) : 0.f;
-                else if (magicSchool.contains("soul"))
-                    attributePower = player.getAttributes().hasAttribute(AttributeRegistry.BLOOD_SPELL_POWER) ? player.getAttributeValue(AttributeRegistry.ELDRITCH_SPELL_POWER) : 0.f;
+                else if (magicSchool.contains("soul")) //there is no equivalent to soul school in spellbook, blood is closest
+                    attributePower = player.getAttributes().hasAttribute(AttributeRegistry.BLOOD_SPELL_POWER) ? player.getAttributeValue(AttributeRegistry.BLOOD_SPELL_POWER) : 0.f;
                 else if (magicSchool.contains("healing"))
                     attributePower = player.getAttributes().hasAttribute(AttributeRegistry.HOLY_SPELL_POWER) ? player.getAttributeValue(AttributeRegistry.HOLY_SPELL_POWER) : 0.f;
 
