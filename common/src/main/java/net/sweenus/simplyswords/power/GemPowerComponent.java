@@ -49,11 +49,13 @@ public record GemPowerComponent(boolean hasRunicPower, boolean hasNetherPower, R
 	);
 
 	@Override
-	public boolean equals(Object obj){
-		if (obj == null || getClass() != obj.getClass()) return false;
-		GemPowerComponent that = (GemPowerComponent) obj;
-		return (this == that);
-	};
+	public boolean equals(Object componentObject){
+		if (componentObject == null || getClass() != componentObject.getClass()) {
+			return false;
+		}
+		GemPowerComponent gemPowerComponentObject  = (GemPowerComponent) componentObject;
+		return (this == gemPowerComponentObject);
+	}
 
 	public static final GemPowerComponent DEFAULT = new GemPowerComponent(false, false, GemPowerRegistry.EMPTY, GemPowerRegistry.EMPTY);
 
