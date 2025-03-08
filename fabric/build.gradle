@@ -54,7 +54,7 @@ dependencies {
     // Remove the next line if you don't want to depend on the API
     modApi "dev.architectury:architectury-fabric:${rootProject.architectury_api_version}"
     modCompileOnly("com.terraformersmc:modmenu:${rootProject.mod_menu_version}") { transitive false }
-    modImplementation "curse.maven:mythicmetals-410127:6122966"
+    modImplementation "curse.maven:mythicmetals-410127:6257791"
     modImplementation "maven.modrinth:spell-power:${rootProject.spellpower_version}-fabric"
     //modImplementation "curse.maven:lambdynamiclights-393442:${rootProject.lambdynlights_version}" 1.21
     //include modImplementation("dev.lambdaurora:spruceui:${rootProject.spruceui_version}") 1.21

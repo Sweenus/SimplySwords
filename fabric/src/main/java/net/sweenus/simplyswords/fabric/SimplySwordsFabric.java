@@ -4,6 +4,7 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.fabric.compat.MythicMetalsCompat;
+import nourl.mythicmetals.data.MythicTags;
 
 public class SimplySwordsFabric implements ModInitializer {
     @Override
@@ -27,6 +28,7 @@ public class SimplySwordsFabric implements ModInitializer {
             if (FabricLoader.getInstance().isModLoaded("mythicmetals")) {
                 MythicMetalsCompat.ITEM.register();
                 MythicMetalsCompat.assignTab();
+                System.out.println("THE THING: " + MythicTags.BONUS_LOOTING.registry().getRegistry().toString());
             }
         }
     }

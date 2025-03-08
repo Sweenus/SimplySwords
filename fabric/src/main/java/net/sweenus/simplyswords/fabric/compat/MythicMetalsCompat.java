@@ -2,13 +2,17 @@ package net.sweenus.simplyswords.fabric.compat;
 
 import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.SwordItem;
 import net.minecraft.item.ToolMaterials;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.registry.tag.TagKey;
 import net.minecraft.util.Rarity;
 import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.config.Config;
@@ -17,6 +21,7 @@ import net.sweenus.simplyswords.item.ModToolMaterial;
 import net.sweenus.simplyswords.item.SimplySwordsSwordItem;
 import nourl.mythicmetals.component.MythicDataComponents;
 import nourl.mythicmetals.component.PrometheumComponent;
+import nourl.mythicmetals.data.MythicTags;
 
 public class MythicMetalsCompat {
 
@@ -2049,6 +2054,26 @@ public class MythicMetalsCompat {
                 System.err.println("Warning: ITEM collection is null.");
             }
         });
+    }
+
+    public static void registerEvents() {
+        ServerLifecycleEvents.SERVER_STARTING.register(server -> {
+            // Ensure all Carmot weapons are in the BONUS_LOOTING tag
+            registerCarmotWeaponsToBonusLooting();
+        });
+    }
+
+
+    public static void registerCarmotWeaponsToBonusLooting() {
+        TagKey<Item> bonusLootingTag = MythicTags.BONUS_LOOTING;
+
+        // Add Carmot weapons to the tag to gain bonus looting effects & tooltips
+        Registry.register(
+                Registries.ITEM,
+                bonusLootingTag.id(),
+                CARMOT_LONGSWORD.get()
+        );
+
     }
 
 

@@ -39,7 +39,7 @@ public class ShieldingPower extends RunefusedGemPower {
 		if (isRunic)
 			tooltip.add(Text.translatable("item.simplyswords.shieldingsworditem.tooltip1").setStyle(Styles.RUNIC));
 		else
-			tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.runefused_power.float").setStyle(Styles.RUNIC));
+			tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.runefused_power.shielding").setStyle(Styles.RUNIC));
 		tooltip.add(Text.translatable("item.simplyswords.shieldingsworditem.tooltip2").setStyle(Styles.TEXT));
 		tooltip.add(Text.translatable("item.simplyswords.shieldingsworditem.tooltip3").setStyle(Styles.TEXT));
 	}
