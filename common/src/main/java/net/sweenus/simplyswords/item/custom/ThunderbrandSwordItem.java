@@ -120,7 +120,7 @@ public class ThunderbrandSwordItem extends UniqueSwordItem implements TwoHandedW
         tooltip.add(Text.translatable("item.simplyswords.thunderbrandsworditem.tooltip5").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.thunderbrandsworditem.tooltip6").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.thunderbrandsworditem.tooltip7").setStyle(Styles.TEXT));
-        if (Platform.isModLoaded("spell_power")) {
+        if (Platform.isModLoaded("spell_power") || Platform.isModLoaded("irons_spellbooks")) {
             tooltip.add(Text.literal(""));
             tooltip.add(Text.translatable("item.simplyswords.compat.scaleLightning"));
         }

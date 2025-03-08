@@ -99,7 +99,7 @@ public class MagiscytheSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.magiscythesworditem.tooltip10").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.magiscythesworditem.tooltip11").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.magiscythesworditem.tooltip12").setStyle(Styles.TEXT));
-        if (Platform.isModLoaded("spell_power")) {
+        if (Platform.isModLoaded("spell_power") || Platform.isModLoaded("irons_spellbooks")) {
             tooltip.add(Text.literal(""));
             tooltip.add(Text.translatable("item.simplyswords.compat.scaleArcane"));
         }

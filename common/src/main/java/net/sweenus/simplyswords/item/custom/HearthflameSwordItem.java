@@ -167,7 +167,7 @@ public class HearthflameSwordItem extends UniqueSwordItem implements TwoHandedWe
         tooltip.add(Text.translatable("item.simplyswords.volcanicfurysworditem.tooltip7").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.volcanicfurysworditem.tooltip8").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.volcanicfurysworditem.tooltip9").setStyle(Styles.TEXT));
-        if (Platform.isModLoaded("spell_power")) {
+        if (Platform.isModLoaded("spell_power") || Platform.isModLoaded("irons_spellbooks")) {
             tooltip.add(Text.literal(""));
             tooltip.add(Text.translatable("item.simplyswords.compat.scaleFire"));
         }

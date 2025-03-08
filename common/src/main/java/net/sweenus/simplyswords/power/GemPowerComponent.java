@@ -48,6 +48,15 @@ public record GemPowerComponent(boolean hasRunicPower, boolean hasNetherPower, R
 			GemPowerComponent::new
 	);
 
+	@Override
+	public boolean equals(Object componentObject){
+		if (componentObject == null || getClass() != componentObject.getClass()) {
+			return false;
+		}
+		GemPowerComponent gemPowerComponentObject  = (GemPowerComponent) componentObject;
+		return (this == gemPowerComponentObject);
+	}
+
 	public static final GemPowerComponent DEFAULT = new GemPowerComponent(false, false, GemPowerRegistry.EMPTY, GemPowerRegistry.EMPTY);
 
 	public static GemPowerComponent runic(@NotNull RegistryEntry<GemPower> power) {

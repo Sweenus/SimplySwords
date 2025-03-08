@@ -10,6 +10,7 @@ import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.SimplySwords;
 
 import static net.sweenus.simplyswords.SimplySwords.minimumSpellPowerVersion;
+import static net.sweenus.simplyswords.SimplySwords.minimumSpellbookVersion;
 
 public class GeneralConfig extends Config {
 
@@ -33,7 +34,7 @@ public class GeneralConfig extends Config {
 
     public ValidatedCondition<Boolean> compatEnableSpellPowerScaling = new ValidatedBoolean(true)
             .toCondition(
-                    () -> SimplySwords.passVersionCheck("spell_power", minimumSpellPowerVersion),
+                    () -> SimplySwords.passVersionCheck("spell_power", minimumSpellPowerVersion) || SimplySwords.passVersionCheck("irons_spellbooks", minimumSpellbookVersion),
                     Text.translatable("simplyswords.general.compatEnableSpellPowerScaling.condition"),
                     () -> false
             ).withFailTitle(Text.translatable("simplyswords.general.compatEnableSpellPowerScaling.failTitle"));

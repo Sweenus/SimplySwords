@@ -1,16 +1,18 @@
 package net.sweenus.simplyswords.fabric;
 
+import dev.architectury.platform.Platform;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.entity.player.PlayerEntity;
 import net.spell_power.api.SpellPower;
 import net.spell_power.api.SpellSchools;
+import net.sweenus.simplyswords.SimplySwords;
 
 public class FabricHelperMethods {
 
 
     //Compatibility with Spell Power Attributes
     public static float useSpellAttributeScaling(float damageModifier, PlayerEntity player, String magicSchool) {
-        if (FabricLoader.getInstance().isModLoaded("spell_power")) {
+        if (Platform.isFabric() && SimplySwords.passVersionCheck("spell_power", SimplySwords.minimumSpellPowerVersion)) {
             if (player != null && !player.getWorld().isClient) {
 
                 double attributePower = 0;
