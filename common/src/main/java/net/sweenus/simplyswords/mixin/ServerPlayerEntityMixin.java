@@ -150,7 +150,7 @@ public abstract class ServerPlayerEntityMixin {
             }
 
             // Contained Remnant logic
-            int frequency = 6000; // 5m
+            int frequency = 1200; // 1m
             if (serverPlayer.age % frequency == 0) {
                 ItemStack containedRemnant = ItemsRegistry.CONTAINED_REMNANT.get().asItem().getDefaultStack();
                 ItemStack tamperedRemnant = ItemsRegistry.TAMPERED_REMNANT.get().asItem().getDefaultStack();
@@ -165,7 +165,7 @@ public abstract class ServerPlayerEntityMixin {
                     ItemStack stackInSlot = serverPlayer.getInventory().getStack(i);
 
                     if (stackInSlot.isOf(containedRemnant.getItem()) || stackInSlot.isOf(tamperedRemnant.getItem())) {
-                        if (chance < 21 && LootConfig.INSTANCE.enableContainedRemnants.get()) {
+                        if (chance < 36 && LootConfig.INSTANCE.enableContainedRemnants.get()) {
                             List<Item> itemsFromTag = Registries.ITEM.stream()
                                     .filter(item -> item.getDefaultStack().isIn(desiredItemsTag))
                                     .toList();

@@ -38,7 +38,7 @@ public class LootConfig extends Config {
     public ValidatedFloat standardLootTableWeight = new ValidatedFloat(0.01f, 1f, 0f);
     public ValidatedFloat rareLootTableWeight = new ValidatedFloat(0.004f, 1f, 0f);
     public ValidatedFloat runicLootTableWeight = new ValidatedFloat(0.007f, 1f, 0f);
-    public ValidatedFloat uniqueLootTableWeight = new ValidatedFloat(0.001f, 1f, 0f);
+    public ValidatedFloat uniqueLootTableWeight = new ValidatedFloat(0.002f, 1f, 0f);
 
     //contained remnants will be disabled by default if the unique loot chance is set to 0
     public ValidatedCondition<Boolean> enableContainedRemnants = new ValidatedBoolean()
