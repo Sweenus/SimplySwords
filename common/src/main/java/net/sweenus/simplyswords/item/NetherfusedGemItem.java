@@ -74,7 +74,7 @@ public class NetherfusedGemItem extends Item implements GemPowerFiller {
         GemPowerComponent component = SimplySwordsAPI.getComponent(itemStack);
 
         if(component.isEmpty()) {
-            tooltip.add(Text.translatable("item.simplyswords.netherfused_gem.tooltip1").setStyle(Styles.LEGENDARY));
+            tooltip.add(Text.translatable("item.simplyswords.netherfused_gem.tooltip1").setStyle(Styles.NETHERFUSED));
             tooltip.add(Text.translatable("item.simplyswords.unidentifiedsworditem.tooltip2").setStyle(Styles.TEXT));
         } else {
             component.appendTooltip(itemStack, tooltipContext, tooltip, type);

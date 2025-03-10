@@ -1,6 +1,5 @@
 package net.sweenus.simplyswords.item.custom;
 
-import dev.architectury.platform.Platform;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedDouble;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
@@ -99,10 +98,7 @@ public class MagiscytheSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.magiscythesworditem.tooltip10").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.magiscythesworditem.tooltip11").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.magiscythesworditem.tooltip12").setStyle(Styles.TEXT));
-        if (Platform.isModLoaded("spell_power") || Platform.isModLoaded("irons_spellbooks")) {
-            tooltip.add(Text.literal(""));
-            tooltip.add(Text.translatable("item.simplyswords.compat.scaleArcane"));
-        }
+        HelperMethods.appendSpellScaleTooltip(tooltip, "arcane");
 
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
     }

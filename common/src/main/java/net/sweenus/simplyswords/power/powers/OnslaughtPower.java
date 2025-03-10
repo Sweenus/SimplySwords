@@ -1,5 +1,6 @@
 package net.sweenus.simplyswords.power.powers;
 
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
@@ -29,11 +30,13 @@ public class OnslaughtPower extends NetherGemPower {
 	@Override
 	public void appendTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Text> tooltip, TooltipType type, boolean isRunic) {
 		tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.onslaught").setStyle(Styles.NETHERFUSED));
-		tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.onslaught.description").setStyle(Styles.TEXT));
-		tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.onslaught.description2").setStyle(Styles.TEXT));
-		tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.onslaught.description3").setStyle(Styles.TEXT));
-		tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.onslaught.description4").setStyle(Styles.TEXT));
-		tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.onslaught.description5").setStyle(Styles.TEXT));
-		tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.onslaught.description6").setStyle(Styles.TEXT));
+		if (Screen.hasAltDown()) {
+			tooltip.add(Text.literal("\u00A0\u00A0\u00A0").append(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.onslaught.description")).setStyle(Styles.NETHERFUSED_DESCRIPTION));
+			tooltip.add(Text.literal("\u00A0\u00A0\u00A0").append(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.onslaught.description2")).setStyle(Styles.NETHERFUSED_DESCRIPTION));
+			tooltip.add(Text.literal("\u00A0\u00A0\u00A0").append(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.onslaught.description3")).setStyle(Styles.NETHERFUSED_DESCRIPTION));
+			tooltip.add(Text.literal("\u00A0\u00A0\u00A0").append(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.onslaught.description4")).setStyle(Styles.NETHERFUSED_DESCRIPTION));
+			tooltip.add(Text.literal("\u00A0\u00A0\u00A0").append(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.onslaught.description5")).setStyle(Styles.NETHERFUSED_DESCRIPTION));
+			tooltip.add(Text.literal("\u00A0\u00A0\u00A0").append(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.onslaught.description6")).setStyle(Styles.NETHERFUSED_DESCRIPTION));
+		}
 	}
 }

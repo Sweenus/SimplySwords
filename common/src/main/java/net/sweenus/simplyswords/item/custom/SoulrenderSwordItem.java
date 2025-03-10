@@ -1,6 +1,5 @@
 package net.sweenus.simplyswords.item.custom;
 
-import dev.architectury.platform.Platform;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedDouble;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
@@ -139,10 +138,7 @@ public class SoulrenderSwordItem extends UniqueSwordItem implements TwoHandedWea
         tooltip.add(Text.translatable("item.simplyswords.rendsworditem.tooltip4").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.rendsworditem.tooltip5").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.rendsworditem.tooltip6").setStyle(Styles.TEXT));
-        if (Platform.isModLoaded("spell_power") || Platform.isModLoaded("irons_spellbooks")) {
-            tooltip.add(Text.literal(""));
-            tooltip.add(Text.translatable("item.simplyswords.compat.scaleSoul"));
-        }
+        HelperMethods.appendSpellScaleTooltip(tooltip, "soul");
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
     }
 

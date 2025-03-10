@@ -1,0 +1,52 @@
+{
+  "providers": [
+    {
+      "type": "bitmap",
+      "file": "simplyswords:icon/icon_left_mouse.png",
+      "ascent": 8, "height": 8,
+      "chars": ["\uAB39"]
+    },
+    {
+      "type": "bitmap",
+      "file": "simplyswords:icon/icon_right_mouse.png",
+      "ascent": 8, "height": 8,
+      "chars": ["\uAB40"]
+    },
+    {
+      "type": "bitmap",
+      "file": "simplyswords:icon/icon_fire_magic.png",
+      "ascent": 7, "height": 10,
+      "chars": ["\uAB42"]
+    },
+    {
+      "type": "bitmap",
+      "file": "simplyswords:icon/icon_frost_magic.png",
+      "ascent": 7, "height": 10,
+      "chars": ["\uAB43"]
+    },
+    {
+      "type": "bitmap",
+      "file": "simplyswords:icon/icon_lightning_magic.png",
+      "ascent": 7, "height": 10,
+      "chars": ["\uAB44"]
+    },
+    {
+      "type": "bitmap",
+      "file": "simplyswords:icon/icon_soul_magic.png",
+      "ascent": 7, "height": 10,
+      "chars": ["\uAB45"]
+    },
+    {
+      "type": "bitmap",
+      "file": "simplyswords:icon/icon_arcane_magic.png",
+      "ascent": 7, "height": 10,
+      "chars": ["\uAB46"]
+    },
+    {
+      "type": "bitmap",
+      "file": "simplyswords:icon/icon_healing_magic.png",
+      "ascent": 7, "height": 10,
+      "chars": ["\uAB47"]
+    }
+  ]
+}

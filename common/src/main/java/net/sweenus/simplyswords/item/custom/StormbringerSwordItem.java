@@ -1,6 +1,5 @@
 package net.sweenus.simplyswords.item.custom;
 
-import dev.architectury.platform.Platform;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.entity.Entity;
@@ -160,10 +159,7 @@ public class StormbringerSwordItem extends UniqueSwordItem {
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.stormbringersworditem.tooltip10").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.stormbringersworditem.tooltip11").setStyle(Styles.TEXT));
-        if (Platform.isModLoaded("spell_power") || Platform.isModLoaded("irons_spellbooks")) {
-            tooltip.add(Text.literal(""));
-            tooltip.add(Text.translatable("item.simplyswords.compat.scaleLightning"));
-        }
+        HelperMethods.appendSpellScaleTooltip(tooltip, "lightning");
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
     }
 

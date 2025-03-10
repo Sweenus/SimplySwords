@@ -1,6 +1,7 @@
 package net.sweenus.simplyswords.util;
 
 import dev.architectury.platform.Platform;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
@@ -20,15 +21,13 @@ import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.scoreboard.AbstractTeam;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
-import net.minecraft.text.Style;
-import net.minecraft.text.TextColor;
+import net.minecraft.text.Text;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.SimplySwordsExpectPlatform;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.effect.instance.SimplySwordsStatusEffectInstance;
@@ -41,8 +40,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
-
-import static net.sweenus.simplyswords.SimplySwords.minimumSpellPowerVersion;
 
 public class HelperMethods {
 
@@ -464,6 +461,32 @@ public class HelperMethods {
                         && HelperMethods.checkFriendlyFire(livingTarget, livingEntity)) {
                     livingTarget.damage(damageSource, damage);
                 }
+            }
+        }
+    }
+
+    public static void appendSpellScaleTooltip(List<Text> tooltip, String spellSchool) {
+        if (Platform.isModLoaded("spell_power") || Platform.isModLoaded("irons_spellbooks")) {
+            if (Screen.hasAltDown()) {
+                tooltip.add(Text.literal(""));
+                tooltip.add(Text.translatable("item.simplyswords.compat.spellScaling").setStyle(Styles.COMMON));
+                switch (spellSchool) {
+                    case "fire" ->
+                            tooltip.add(Text.literal("\uAB42").append(Text.translatable("item.simplyswords.compat.scaleFire")));
+                    case "frost" ->
+                            tooltip.add(Text.literal("\uAB43").append(Text.translatable("item.simplyswords.compat.scaleFrost")));
+                    case "lightning" ->
+                            tooltip.add(Text.literal("\uAB44").append(Text.translatable("item.simplyswords.compat.scaleLightning")));
+                    case "soul" ->
+                            tooltip.add(Text.literal("\uAB45").append(Text.translatable("item.simplyswords.compat.scaleSoul")));
+                    case "arcane" ->
+                            tooltip.add(Text.literal("\uAB46").append(Text.translatable("item.simplyswords.compat.scaleArcane")));
+                    case "frost_fire" ->
+                            tooltip.add(Text.literal("\uAB43").append(Text.translatable("item.simplyswords.compat.scaleFrost")).append(Text.literal("   \uAB42")).append(Text.translatable("item.simplyswords.compat.scaleFire")));
+                    case "healing_fire" ->
+                            tooltip.add(Text.literal("\uAB47").append(Text.translatable("item.simplyswords.compat.scaleHealing")).append(Text.literal("   \uAB42")).append(Text.translatable("item.simplyswords.compat.scaleFire")));
+                }
+                tooltip.add(Text.literal(""));
             }
         }
     }

@@ -1,6 +1,5 @@
 package net.sweenus.simplyswords.item.custom;
 
-import dev.architectury.platform.Platform;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.block.BlockState;
@@ -16,7 +15,6 @@ import net.minecraft.item.ToolMaterial;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
@@ -96,10 +94,7 @@ public class HarbingerSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.harbingersworditem.tooltip4").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.harbingersworditem.tooltip5").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.harbingersworditem.tooltip6").setStyle(Styles.TEXT));
-        if (Platform.isModLoaded("spell_power") || Platform.isModLoaded("irons_spellbooks")) {
-            tooltip.add(Text.literal(""));
-            tooltip.add(Text.translatable("item.simplyswords.compat.scaleSoul"));
-        }
+        HelperMethods.appendSpellScaleTooltip(tooltip, "soul");
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
     }
 

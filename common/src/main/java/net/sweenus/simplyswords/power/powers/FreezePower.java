@@ -1,5 +1,6 @@
 package net.sweenus.simplyswords.power.powers;
 
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
@@ -44,8 +45,9 @@ public class FreezePower extends RunefusedGemPower {
 			tooltip.add(Text.translatable("item.simplyswords.freezesworditem.tooltip1").setStyle(Styles.RUNIC));
 		else
 			tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.runefused_power.freeze").setStyle(Styles.RUNIC));
-
-		tooltip.add(Text.translatable("item.simplyswords.freezesworditem.tooltip2").setStyle(Styles.TEXT));
+		if (Screen.hasAltDown()) {
+			tooltip.add(Text.literal("\u00A0\u00A0\u00A0").append(Text.translatable("item.simplyswords.freezesworditem.tooltip2")).setStyle(Styles.RUNIC_DESCRIPTION));
+		}
 	}
 
 	public static class Settings extends ChanceDurationSettings {

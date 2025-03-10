@@ -2,6 +2,7 @@ package net.sweenus.simplyswords.power.powers;
 
 import me.fzzyhmstrs.fzzy_config.annotations.Translation;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
@@ -62,8 +63,10 @@ public class UnstablePower extends RunefusedGemPower {
 			tooltip.add(Text.translatable("item.simplyswords.unstablesworditem.tooltip1").setStyle(Styles.RUNIC));
 		else
 			tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.runefused_power.unstable").setStyle(Styles.RUNIC));
-		tooltip.add(Text.translatable("item.simplyswords.unstablesworditem.tooltip2").setStyle(Styles.TEXT));
-		tooltip.add(Text.translatable("item.simplyswords.unstablesworditem.tooltip3").setStyle(Styles.TEXT));
+		if (Screen.hasAltDown()) {
+			tooltip.add(Text.translatable("\u00A0\u00A0\u00A0item.simplyswords.unstablesworditem.tooltip2").setStyle(Styles.RUNIC_DESCRIPTION));
+			tooltip.add(Text.translatable("\u00A0\u00A0\u00A0item.simplyswords.unstablesworditem.tooltip3").setStyle(Styles.RUNIC_DESCRIPTION));
+		}
 	}
 
 	public static class Settings extends TooltipSettings {

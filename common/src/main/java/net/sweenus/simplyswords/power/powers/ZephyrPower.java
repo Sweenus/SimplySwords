@@ -1,5 +1,6 @@
 package net.sweenus.simplyswords.power.powers;
 
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
@@ -41,8 +42,10 @@ public class ZephyrPower extends RunefusedGemPower {
 			tooltip.add(Text.translatable("item.simplyswords.zephyrsworditem.tooltip1").setStyle(Styles.RUNIC));
 		else
 			tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.runefused_power.zephyr").setStyle(Styles.RUNIC));
-		tooltip.add(Text.translatable("item.simplyswords.zephyrsworditem.tooltip2").setStyle(Styles.TEXT));
-		tooltip.add(Text.translatable("item.simplyswords.zephyrsworditem.tooltip3").setStyle(Styles.TEXT));
+		if (Screen.hasAltDown()) {
+			tooltip.add(Text.literal("\u00A0\u00A0\u00A0").append(Text.translatable("item.simplyswords.zephyrsworditem.tooltip2")).setStyle(Styles.RUNIC_DESCRIPTION));
+			tooltip.add(Text.literal("\u00A0\u00A0\u00A0").append(Text.translatable("item.simplyswords.zephyrsworditem.tooltip3")).setStyle(Styles.RUNIC_DESCRIPTION));
+		}
 	}
 
 	public static class Settings extends ChanceDurationSettings {

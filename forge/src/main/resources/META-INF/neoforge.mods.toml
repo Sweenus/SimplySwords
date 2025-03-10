@@ -18,6 +18,7 @@ description = '''
 A variety of unique weapons to add to your minecraft repertoire
 '''
 logoFile = "SimplySwordsLogoFinal2.gif"
+modProperties={fzzy_config="simplyswords:loot"}
 
 [[dependencies.simplyswords]]
 modId = "neoforge"

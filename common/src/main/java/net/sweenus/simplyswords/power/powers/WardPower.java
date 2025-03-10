@@ -1,5 +1,6 @@
 package net.sweenus.simplyswords.power.powers;
 
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
@@ -43,8 +44,10 @@ public class WardPower extends RunicGemPower {
 		tooltip.add(Text.translatable("item.simplyswords.wardsworditem.tooltip1").setStyle(Styles.RUNIC));
 		tooltip.add(Text.literal(""));
 		tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
-		tooltip.add(Text.translatable("item.simplyswords.wardsworditem.tooltip2").setStyle(Styles.TEXT));
-		tooltip.add(Text.translatable("item.simplyswords.wardsworditem.tooltip3").setStyle(Styles.TEXT));
-		tooltip.add(Text.translatable("item.simplyswords.wardsworditem.tooltip4").setStyle(Styles.TEXT));
+		if (Screen.hasAltDown()) {
+			tooltip.add(Text.literal("\u00A0\u00A0\u00A0").append(Text.translatable("item.simplyswords.wardsworditem.tooltip2")).setStyle(Styles.RUNIC_DESCRIPTION));
+			tooltip.add(Text.literal("\u00A0\u00A0\u00A0").append(Text.translatable("item.simplyswords.wardsworditem.tooltip3")).setStyle(Styles.RUNIC_DESCRIPTION));
+			tooltip.add(Text.literal("\u00A0\u00A0\u00A0").append(Text.translatable("item.simplyswords.wardsworditem.tooltip4")).setStyle(Styles.RUNIC_DESCRIPTION));
+		}
 	}
 }

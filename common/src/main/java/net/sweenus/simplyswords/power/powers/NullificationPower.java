@@ -2,6 +2,7 @@ package net.sweenus.simplyswords.power.powers;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.effect.StatusEffectInstance;
@@ -55,10 +56,12 @@ public class NullificationPower extends NetherGemPower {
 	@Override
 	public void appendTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Text> tooltip, TooltipType type, boolean isRunic) {
 		tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.nullification").setStyle(Styles.NETHERFUSED));
-		tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.nullification.description").setStyle(Styles.TEXT));
-		tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.nullification.description2").setStyle(Styles.TEXT));
-		tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.nullification.description3").setStyle(Styles.TEXT));
-		tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.nullification.description4").setStyle(Styles.TEXT));
-		tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.nullification.description5").setStyle(Styles.TEXT));
+		if (Screen.hasAltDown()) {
+			tooltip.add(Text.literal("\u00A0\u00A0\u00A0").append(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.nullification.description")).setStyle(Styles.NETHERFUSED_DESCRIPTION));
+			tooltip.add(Text.literal("\u00A0\u00A0\u00A0").append(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.nullification.description2")).setStyle(Styles.NETHERFUSED_DESCRIPTION));
+			tooltip.add(Text.literal("\u00A0\u00A0\u00A0").append(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.nullification.description3")).setStyle(Styles.NETHERFUSED_DESCRIPTION));
+			tooltip.add(Text.literal("\u00A0\u00A0\u00A0").append(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.nullification.description4")).setStyle(Styles.NETHERFUSED_DESCRIPTION));
+			tooltip.add(Text.literal("\u00A0\u00A0\u00A0").append(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.nullification.description5")).setStyle(Styles.NETHERFUSED_DESCRIPTION));
+		}
 	}
 }

@@ -28,7 +28,6 @@ public class ModLootTableModifiers {
 
     public static void init() {
 
-        // 1.21 temp
         //STANDARD
         LootEvent.MODIFY_LOOT_TABLE.register(((RegistryKey<LootTable> key, LootEvent.LootTableModificationContext context, boolean builtin) -> {
             Identifier id = key.getValue();

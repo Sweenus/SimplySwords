@@ -3,7 +3,6 @@ package net.sweenus.simplyswords.api;
 import me.fzzyhmstrs.fzzy_config.util.ValidationResult;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
@@ -15,7 +14,6 @@ import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.BattleStandardEntity;
@@ -96,11 +94,15 @@ public class SimplySwordsAPI {
             tooltip.add(Text.literal(""));
         }
 
+        component.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        /* Change ALT key logic to each component
         if (Screen.hasAltDown()) {
             component.appendTooltip(itemStack, tooltipContext, tooltip, type);
         } else if (component.canBeFilled()) {
             tooltip.add(Text.translatable("item.simplyswords.common.showtooltip").formatted(Formatting.GRAY));
         }
+
+         */
     }
 
     // Allows for the socketing of gems

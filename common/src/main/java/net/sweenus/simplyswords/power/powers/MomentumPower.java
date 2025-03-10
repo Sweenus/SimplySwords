@@ -2,6 +2,7 @@ package net.sweenus.simplyswords.power.powers;
 
 import me.fzzyhmstrs.fzzy_config.annotations.Translation;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -9,11 +10,14 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.text.Text;
+import net.minecraft.util.Hand;
+import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
 import net.sweenus.simplyswords.power.RunicGemPower;
 import net.sweenus.simplyswords.registry.GemPowerRegistry;
+import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.Styles;
 
 import java.util.List;
@@ -25,13 +29,27 @@ public class MomentumPower extends RunicGemPower {
 	}
 
 	@Override
+	public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand, ItemStack itemStack) {
+
+		if (itemStack.getDamage() >= itemStack.getMaxDamage() - 1) {
+			return TypedActionResult.fail(itemStack);
+		}
+		world.playSoundFromEntity(user, user, SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_FLYBY_01.get(),
+				user.getSoundCategory(), 0.3f, 0.7f);
+		user.setCurrentHand(hand);
+		return TypedActionResult.consume(itemStack);
+	}
+
+	@Override
 	public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
 		int skillCooldown = Config.gemPowers.momentum.cooldown;
 
-		if (user.getEquippedStack(EquipmentSlot.MAINHAND) == stack && user.isOnGround()) {
+		if (user.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
 			//Player dash forward
-			if (remainingUseTicks == (this.isGreater() ? 10 : 12) || remainingUseTicks == 13 && user.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
-				user.setVelocity(user.getRotationVector().multiply(+3));
+			int velocity = 3;
+			if (!user.isOnGround()) {velocity = 1;}
+			if (remainingUseTicks >= 10 && user.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
+				user.setVelocity(user.getRotationVector().multiply(+velocity));
 				user.setVelocity(user.getVelocity().x, 0, user.getVelocity().z); // Prevent player flying to the heavens
 				user.velocityModified = true;
 				if (user instanceof PlayerEntity player) {
@@ -56,9 +74,11 @@ public class MomentumPower extends RunicGemPower {
 
 	@Override
 	public void appendTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Text> tooltip, TooltipType type, boolean isRunic) {
-		tooltip.add(Text.translatable("item.simplyswords.momentumsworditem.tooltip1").setStyle(Styles.RUNIC));
-		tooltip.add(Text.translatable("item.simplyswords.momentumsworditem.tooltip2").setStyle(Styles.TEXT));
-		tooltip.add(Text.translatable("item.simplyswords.momentumsworditem.tooltip3").setStyle(Styles.TEXT));
+		if (Screen.hasAltDown()) {
+			tooltip.add(Text.translatable("item.simplyswords.momentumsworditem.tooltip1").setStyle(Styles.RUNIC));
+			tooltip.add(Text.translatable("item.simplyswords.momentumsworditem.tooltip2").setStyle(Styles.TEXT));
+			tooltip.add(Text.translatable("item.simplyswords.momentumsworditem.tooltip3").setStyle(Styles.TEXT));
+		}
 	}
 
 	public static class Settings extends TooltipSettings {

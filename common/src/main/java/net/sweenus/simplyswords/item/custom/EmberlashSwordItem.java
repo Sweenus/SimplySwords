@@ -1,6 +1,5 @@
 package net.sweenus.simplyswords.item.custom;
 
-import dev.architectury.platform.Platform;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.entity.Entity;
@@ -51,6 +50,9 @@ public class EmberlashSwordItem extends UniqueSwordItem {
                     float abilityDamage = Math.max(HelperMethods.commonSpellAttributeScaling(Config.uniqueEffects.smoulder.spellScaling, attacker, "fire"), (float) HelperMethods.getEntityAttackDamage(attacker));
                     float damageMultiplier = 0.15f * smoulderingEffect.getAmplifier();
                     target.damage(damageSource, abilityDamage * damageMultiplier);
+                    HelperMethods.spawnOrbitParticles(world, target.getPos(), ParticleTypes.LAVA, 0.2, smoulderingEffect.getAmplifier());
+                    world.playSound(target, target.getBlockPos(), SoundRegistry.SPELL_FIRE.get(),
+                            target.getSoundCategory(), 0.1f, 1.5f);
                 }
             }
             int maximum_stacks = Config.uniqueEffects.smoulder.maxStacks;
@@ -95,10 +97,7 @@ public class EmberlashSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.emberlashsworditem.tooltip6").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.emberlashsworditem.tooltip7", Config.uniqueEffects.smoulder.heal).setStyle(Styles.TEXT));
-        if (Platform.isModLoaded("spell_power") || Platform.isModLoaded("irons_spellbooks")) {
-            tooltip.add(Text.literal(""));
-            tooltip.add(Text.translatable("item.simplyswords.compat.scaleFire"));
-        }
+        HelperMethods.appendSpellScaleTooltip(tooltip, "fire");
 
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
     }

@@ -49,5 +49,10 @@
   },
   "recommends": {
     "bettercombat": ">=1.7.2"
+  },
+  "custom": {
+    "fzzy_config": [
+      "simplyswords:loot"
+    ]
   }
 }

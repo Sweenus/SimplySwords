@@ -1,10 +1,8 @@
 package net.sweenus.simplyswords.item.custom;
 
-import dev.architectury.platform.Platform;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedDouble;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
-import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
@@ -19,7 +17,6 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.Config;
@@ -118,10 +115,6 @@ public class StealSwordItem extends UniqueSwordItem {
         super.inventoryTick(stack, world, entity, slot, selected);
     }
 
-    public boolean postMine(ItemStack stack, World world, BlockState state, BlockPos pos, LivingEntity miner) {
-        return false;
-    }
-
     @Override
     public void appendTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
         tooltip.add(Text.literal(""));
@@ -138,10 +131,7 @@ public class StealSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.stealsworditem.tooltip8").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.stealsworditem.tooltip9").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.stealsworditem.tooltip10").setStyle(Styles.TEXT));
-        if (Platform.isModLoaded("spell_power") || Platform.isModLoaded("irons_spellbooks")) {
-            tooltip.add(Text.literal(""));
-            tooltip.add(Text.translatable("item.simplyswords.compat.scaleSoul"));
-        }
+        HelperMethods.appendSpellScaleTooltip(tooltip, "soul");
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
     }
 

@@ -1,6 +1,5 @@
 package net.sweenus.simplyswords.item.custom;
 
-import dev.architectury.platform.Platform;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.entity.Entity;
@@ -167,10 +166,7 @@ public class HearthflameSwordItem extends UniqueSwordItem implements TwoHandedWe
         tooltip.add(Text.translatable("item.simplyswords.volcanicfurysworditem.tooltip7").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.volcanicfurysworditem.tooltip8").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.volcanicfurysworditem.tooltip9").setStyle(Styles.TEXT));
-        if (Platform.isModLoaded("spell_power") || Platform.isModLoaded("irons_spellbooks")) {
-            tooltip.add(Text.literal(""));
-            tooltip.add(Text.translatable("item.simplyswords.compat.scaleFire"));
-        }
+        HelperMethods.appendSpellScaleTooltip(tooltip, "fire");
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
     }
 

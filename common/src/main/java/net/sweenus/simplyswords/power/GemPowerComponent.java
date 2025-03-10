@@ -13,7 +13,6 @@ import net.minecraft.network.codec.PacketCodecs;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.entry.RegistryFixedCodec;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
@@ -145,11 +144,8 @@ public record GemPowerComponent(boolean hasRunicPower, boolean hasNetherPower, R
 		}
 		if (!runicPower.value().isEmpty()) {
 			runicPower.value().appendTooltip(itemStack, tooltipContext, tooltip, type, isRunic);
-			if (!netherPower.value().isEmpty()) {
-				tooltip.add(Text.literal(""));
-			}
 		} else if (!isRunic && hasRunicPower) {
-			tooltip.add(Text.translatable("item.simplyswords.empty_runic_slot").formatted(Formatting.GRAY));
+			tooltip.add(Text.translatable("item.simplyswords.empty_runic_slot").setStyle(Styles.RUNIC));
 		}
 
 		if (netherPower.value().isGreater()) {
@@ -158,7 +154,7 @@ public record GemPowerComponent(boolean hasRunicPower, boolean hasNetherPower, R
 		if (!netherPower.value().isEmpty()) {
 			netherPower.value().appendTooltip(itemStack, tooltipContext, tooltip, type, isRunic);
 		} else if (!isRunic && hasNetherPower) {
-			tooltip.add(Text.translatable("item.simplyswords.empty_nether_slot").formatted(Formatting.GRAY));
+			tooltip.add(Text.translatable("item.simplyswords.empty_nether_slot").setStyle(Styles.NETHERFUSED));
 		}
 	}
 }

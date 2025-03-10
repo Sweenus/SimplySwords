@@ -76,4 +76,8 @@ public class ImmolationEffect extends WideOrbitingEffect {
         super.applyUpdateEffect(pLivingEntity, pAmplifier);
         return true;
     }
+    @Override
+    public boolean canApplyUpdateEffect(int pDuration, int pAmplifier) {
+        return super.canApplyUpdateEffect(pDuration, pAmplifier);
+    }
 }
