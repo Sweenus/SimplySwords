@@ -83,6 +83,7 @@ public abstract class ServerPlayerEntityMixin {
                     ItemStack stackInSlot = serverPlayer.getInventory().getStack(i);
                     if (stackInSlot.isOf(ItemsRegistry.DECAYING_RELIC.get())) {
                         ItemStack newItemStack = new ItemStack(ItemsRegistry.MAGISCYTHE.get());
+                        newItemStack.applyComponentsFrom(stackInSlot.getComponents());
                         serverPlayer.getInventory().setStack(i, newItemStack);
                         serverPlayer.getWorld().playSoundFromEntity(null, serverPlayer, SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_IMPACT_02.get(),
                                 serverPlayer.getSoundCategory(), 0.6f, 0.6f);
@@ -215,6 +216,7 @@ public abstract class ServerPlayerEntityMixin {
                     // Magiblade trigger
                     if (chance < 15 && playerStandingBlock.isOf(Blocks.SCULK_SENSOR) && stackInSlot.isOf(decayingRelic.getItem())) {
                         ItemStack newItemStack = new ItemStack(ItemsRegistry.MAGIBLADE.get());
+                        newItemStack.applyComponentsFrom(stackInSlot.getComponents());
                         serverPlayer.getInventory().setStack(i, newItemStack);
                         serverPlayer.getWorld().playSoundFromEntity(null, serverPlayer, SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_IMPACT_02.get(),
                                 serverPlayer.getSoundCategory(), 0.6f, 0.6f);
@@ -226,6 +228,7 @@ public abstract class ServerPlayerEntityMixin {
                     if (stackInSlot.isOf(decayingRelic.getItem()) && player.hasStatusEffect(StatusEffects.DARKNESS)) {
                         if (chance < 2) {
                             ItemStack newItemStack = new ItemStack(ItemsRegistry.MAGISPEAR.get());
+                            newItemStack.applyComponentsFrom(stackInSlot.getComponents());
                             serverPlayer.getInventory().setStack(i, newItemStack);
                             serverPlayer.getWorld().playSoundFromEntity(null, serverPlayer, SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_IMPACT_02.get(),
                                     serverPlayer.getSoundCategory(), 0.6f, 0.6f);
