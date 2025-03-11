@@ -56,7 +56,7 @@ dependencies {
     modCompileOnly("com.terraformersmc:modmenu:${rootProject.mod_menu_version}") { transitive false }
     modImplementation "curse.maven:mythicmetals-410127:6257791"
     modImplementation "maven.modrinth:spell-power:${rootProject.spellpower_version}-fabric"
-    //modImplementation "curse.maven:lambdynamiclights-393442:${rootProject.lambdynlights_version}" 1.21
+    //modImplementation "curse.maven:lambdynamiclights-393442:${rootProject.lambdynlights_version}"
     //include modImplementation("dev.lambdaurora:spruceui:${rootProject.spruceui_version}") 1.21
     //modImplementation "curse.maven:eldritch-end-877553:${rootProject.eldritch_end_version}" 1.21
     //modImplementation "curse.maven:amethyst-imbuement-608261:4514358"

@@ -28,15 +28,10 @@ import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.BattleStandardDarkEntity;
 import net.sweenus.simplyswords.entity.BattleStandardEntity;
 import net.sweenus.simplyswords.entity.SimplySwordsBeeEntity;
-import net.sweenus.simplyswords.registry.ComponentTypeRegistry;
-import net.sweenus.simplyswords.registry.EffectRegistry;
-import net.sweenus.simplyswords.registry.EntityRegistry;
-import net.sweenus.simplyswords.registry.GemPowerRegistry;
-import net.sweenus.simplyswords.registry.ItemsRegistry;
-import net.sweenus.simplyswords.registry.SoundRegistry;
+import net.sweenus.simplyswords.recipe.UpgradeUniqueRecipe;
+import net.sweenus.simplyswords.registry.*;
 import net.sweenus.simplyswords.util.FileCopier;
 import net.sweenus.simplyswords.util.ModLootTableModifiers;
-import net.sweenus.simplyswords.recipe.UpgradeUniqueRecipe;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

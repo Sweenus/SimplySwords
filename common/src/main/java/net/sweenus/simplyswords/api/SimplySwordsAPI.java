@@ -95,14 +95,6 @@ public class SimplySwordsAPI {
         }
 
         component.appendTooltip(itemStack, tooltipContext, tooltip, type);
-        /* Change ALT key logic to each component
-        if (Screen.hasAltDown()) {
-            component.appendTooltip(itemStack, tooltipContext, tooltip, type);
-        } else if (component.canBeFilled()) {
-            tooltip.add(Text.translatable("item.simplyswords.common.showtooltip").formatted(Formatting.GRAY));
-        }
-
-         */
     }
 
     // Allows for the socketing of gems

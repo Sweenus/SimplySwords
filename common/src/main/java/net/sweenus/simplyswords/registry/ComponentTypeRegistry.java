@@ -5,12 +5,7 @@ import dev.architectury.registry.registries.RegistrySupplier;
 import net.minecraft.component.ComponentType;
 import net.minecraft.registry.RegistryKeys;
 import net.sweenus.simplyswords.SimplySwords;
-import net.sweenus.simplyswords.item.component.ChargedLocationComponent;
-import net.sweenus.simplyswords.item.component.MoltenParticleComponent;
-import net.sweenus.simplyswords.item.component.ParryComponent;
-import net.sweenus.simplyswords.item.component.RelocationComponent;
-import net.sweenus.simplyswords.item.component.StoredChargeComponent;
-import net.sweenus.simplyswords.item.component.TargetedLocationComponent;
+import net.sweenus.simplyswords.item.component.*;
 import net.sweenus.simplyswords.power.GemPowerComponent;
 
 public class ComponentTypeRegistry {

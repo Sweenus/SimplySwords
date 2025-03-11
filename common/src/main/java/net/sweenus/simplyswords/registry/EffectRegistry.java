@@ -11,31 +11,7 @@ import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.config.Config;
-import net.sweenus.simplyswords.effect.AstralShiftEffect;
-import net.sweenus.simplyswords.effect.BattleFatigueEffect;
-import net.sweenus.simplyswords.effect.EchoEffect;
-import net.sweenus.simplyswords.effect.ElementalVortexEffect;
-import net.sweenus.simplyswords.effect.FatalFlickerEffect;
-import net.sweenus.simplyswords.effect.FireVortexEffect;
-import net.sweenus.simplyswords.effect.FlameSeedEffect;
-import net.sweenus.simplyswords.effect.FreezeEffect;
-import net.sweenus.simplyswords.effect.FrenzyEffect;
-import net.sweenus.simplyswords.effect.FrostVortexEffect;
-import net.sweenus.simplyswords.effect.ImmolationEffect;
-import net.sweenus.simplyswords.effect.MagislamEffect;
-import net.sweenus.simplyswords.effect.MagistormEffect;
-import net.sweenus.simplyswords.effect.OnslaughtEffect;
-import net.sweenus.simplyswords.effect.PainEffect;
-import net.sweenus.simplyswords.effect.ResilienceEffect;
-import net.sweenus.simplyswords.effect.RibboncleaveEffect;
-import net.sweenus.simplyswords.effect.RibbonwrathEffect;
-import net.sweenus.simplyswords.effect.SmoulderingEffect;
-import net.sweenus.simplyswords.effect.SporeSwarmEffect;
-import net.sweenus.simplyswords.effect.StormEffect;
-import net.sweenus.simplyswords.effect.VoidAssaultEffect;
-import net.sweenus.simplyswords.effect.VoidcloakEffect;
-import net.sweenus.simplyswords.effect.WardEffect;
-import net.sweenus.simplyswords.effect.WildfireEffect;
+import net.sweenus.simplyswords.effect.*;
 
 public class EffectRegistry {
 

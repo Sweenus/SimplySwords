@@ -10,21 +10,7 @@ import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.SimplySwords;
-import net.sweenus.simplyswords.power.powers.ActiveDefencePower;
-import net.sweenus.simplyswords.power.powers.FloatPower;
-import net.sweenus.simplyswords.power.powers.FreezePower;
-import net.sweenus.simplyswords.power.powers.FrostWardPower;
-import net.sweenus.simplyswords.power.powers.ImbuedPower;
-import net.sweenus.simplyswords.power.powers.MomentumPower;
-import net.sweenus.simplyswords.power.powers.ShieldingPower;
-import net.sweenus.simplyswords.power.powers.SlowPower;
-import net.sweenus.simplyswords.power.powers.StoneskinPower;
-import net.sweenus.simplyswords.power.powers.SwiftnessPower;
-import net.sweenus.simplyswords.power.powers.TrailblazePower;
-import net.sweenus.simplyswords.power.powers.UnstablePower;
-import net.sweenus.simplyswords.power.powers.WeakenPower;
-import net.sweenus.simplyswords.power.powers.WildfirePower;
-import net.sweenus.simplyswords.power.powers.ZephyrPower;
+import net.sweenus.simplyswords.power.powers.*;
 import net.sweenus.simplyswords.registry.GemPowerRegistry;
 
 public class GemPowersConfig extends Config {

@@ -95,6 +95,7 @@ public class TooltipUtils {
             if (entry.getPath().contains("tainted_relic"))
                 entry = Identifier.of("simplyswords:uniques/entry_dormant_relic");
 
+            //ConfigApiJava.INSTANCE.openScreen("simplyswords.unique_effects.flickerfury"); Can we do this in the future :o ?
             commonPatchouli(entry);
         }
     }

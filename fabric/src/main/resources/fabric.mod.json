@@ -28,9 +28,6 @@
     ],
     "main": [
       "net.sweenus.simplyswords.fabric.SimplySwordsFabric"
-    ],
-    "dynamiclights": [
-      "net.sweenus.simplyswords.fabric.compat.DynamicLightsCompat"
     ]
   },
   "mixins": [
