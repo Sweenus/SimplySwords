@@ -3,8 +3,18 @@
     "icon": {
       "id": "simplyswords:shadowsting"
     },
-    "title": "From The Shadows",
-    "description": "Find the unique weapon Shadowsting.",
+    "title": {
+      "translate": "advancements.simplyswords.shadowsting.title",
+      "with": []
+    },
+    "description": {
+      "translate": "advancements.simplyswords.find_unique.description",
+      "with": [
+        {
+          "translate": "item.simplyswords.shadowsting"
+        }
+      ]
+    },
     "hidden": true,
     "frame": "task",
     "show_toast": true,

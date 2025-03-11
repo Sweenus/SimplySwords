@@ -3,8 +3,18 @@
     "icon": {
       "id": "simplyswords:watcher_claymore"
     },
-    "title": "Always Watching",
-    "description": "Find the unique weapon The Watcher.",
+    "title": {
+      "translate": "advancements.simplyswords.watcher_claymore.title",
+      "with": []
+    },
+    "description": {
+      "translate": "advancements.simplyswords.find_unique.description",
+      "with": [
+        {
+          "translate": "item.simplyswords.watcher_claymore"
+        }
+      ]
+    },
     "hidden": true,
     "frame": "task",
     "show_toast": true,

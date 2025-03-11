@@ -3,8 +3,18 @@
     "icon": {
       "id": "simplyswords:molten_edge"
     },
-    "title": "Not Too Hot to Handle",
-    "description": "Find the unique weapon Molten Edge.",
+    "title": {
+      "translate": "advancements.simplyswords.molten_edge.title",
+      "with": []
+    },
+    "description": {
+      "translate": "advancements.simplyswords.find_unique.description",
+      "with": [
+        {
+          "translate": "item.simplyswords.molten_edge"
+        }
+      ]
+    },
     "hidden": true,
     "frame": "task",
     "show_toast": true,

@@ -3,8 +3,18 @@
     "icon": {
       "id": "simplyswords:waxweaver"
     },
-    "title": "Wax On",
-    "description": "Find the unique weapon Waxweaver.",
+    "title": {
+      "translate": "advancements.simplyswords.waxweaver.title",
+      "with": []
+    },
+    "description": {
+      "translate": "advancements.simplyswords.find_unique.description",
+      "with": [
+        {
+          "translate": "item.simplyswords.waxweaver"
+        }
+      ]
+    },
     "hidden": true,
     "frame": "task",
     "show_toast": true,

@@ -3,8 +3,18 @@
     "icon": {
       "id": "simplyswords:harbinger"
     },
-    "title": "From The Abyss",
-    "description": "Obtain the unique weapon Harbinger.",
+    "title": {
+      "translate": "advancements.simplyswords.harbinger.title",
+      "with": []
+    },
+    "description": {
+      "translate": "advancements.simplyswords.obtain_unique.description",
+      "with": [
+        {
+          "translate": "item.simplyswords.harbinger"
+        }
+      ]
+    },
     "hidden": true,
     "frame": "task",
     "show_toast": true,

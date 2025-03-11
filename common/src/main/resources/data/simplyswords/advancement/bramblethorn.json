@@ -3,8 +3,18 @@
     "icon": {
       "id": "simplyswords:bramblethorn"
     },
-    "title": "Spore Galore",
-    "description": "Find the unique weapon Bramblethorn.",
+    "title": {
+      "translate": "advancements.simplyswords.bramblethorn.title",
+      "with": []
+    },
+    "description": {
+      "translate": "advancements.simplyswords.find_unique.description",
+      "with": [
+        {
+          "translate": "item.simplyswords.bramblethorn"
+        }
+      ]
+    },
     "hidden": true,
     "frame": "task",
     "show_toast": true,

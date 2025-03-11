@@ -3,8 +3,18 @@
     "icon": {
       "id": "simplyswords:brimstone_claymore"
     },
-    "title": "Blast Protection Not Included",
-    "description": "Find the unique weapon Brimstone Claymore.",
+    "title": {
+      "translate": "advancements.simplyswords.brimstone_claymore.title",
+      "with": []
+    },
+    "description": {
+      "translate": "advancements.simplyswords.find_unique.description",
+      "with": [
+        {
+          "translate": "item.simplyswords.brimstone_claymore"
+        }
+      ]
+    },
     "hidden": true,
     "frame": "task",
     "show_toast": true,

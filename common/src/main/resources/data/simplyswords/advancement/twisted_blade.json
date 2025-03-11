@@ -3,8 +3,18 @@
     "icon": {
       "id": "simplyswords:twisted_blade"
     },
-    "title": "Getting it Twisted",
-    "description": "Find the unique weapon Twisted Blade.",
+    "title": {
+      "translate": "advancements.simplyswords.twisted_blade.title",
+      "with": []
+    },
+    "description": {
+      "translate": "advancements.simplyswords.find_unique.description",
+      "with": [
+        {
+          "translate": "item.simplyswords.twisted_blade"
+        }
+      ]
+    },
     "hidden": true,
     "frame": "task",
     "show_toast": true,

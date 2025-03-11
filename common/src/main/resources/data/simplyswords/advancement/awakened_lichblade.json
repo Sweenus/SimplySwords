@@ -1,17 +1,17 @@
 {
   "display": {
     "icon": {
-      "id": "simplyswords:thunderbrand"
+      "id": "simplyswords:awakened_lichblade"
     },
     "title": {
-      "translate": "advancements.simplyswords.thunderbrand.title",
+      "translate": "advancements.simplyswords.awakened_lichblade.title",
       "with": []
     },
     "description": {
-      "translate": "advancements.simplyswords.find_unique.description",
+      "translate": "advancements.simplyswords.obtain_unique.description",
       "with": [
         {
-          "translate": "item.simplyswords.thunderbrand"
+          "translate": "item.simplyswords.awakened_lichblade"
         }
       ]
     },
@@ -20,7 +20,7 @@
     "show_toast": true,
     "announce_to_chat": true
   },
-  "parent": "simplyswords:runic_weapon",
+  "parent": "simplyswords:slumbering_lichblade",
   "criteria": {
     "requirement": {
       "trigger": "minecraft:inventory_changed",
@@ -28,7 +28,7 @@
         "items": [
           {
             "items": [
-              "simplyswords:thunderbrand"
+              "simplyswords:awakened_lichblade"
             ]
           }
         ]

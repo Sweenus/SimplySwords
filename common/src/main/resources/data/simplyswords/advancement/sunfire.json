@@ -3,8 +3,18 @@
     "icon": {
       "id": "simplyswords:sunfire"
     },
-    "title": "Sanctified",
-    "description": "Obtain the unique weapon Sunfire.",
+    "title": {
+      "translate": "advancements.simplyswords.sunfire.title",
+      "with": []
+    },
+    "description": {
+      "translate": "advancements.simplyswords.obtain_unique.description",
+      "with": [
+        {
+          "translate": "item.simplyswords.sunfire"
+        }
+      ]
+    },
     "hidden": true,
     "frame": "task",
     "show_toast": true,

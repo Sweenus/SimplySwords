@@ -3,8 +3,18 @@
     "icon": {
       "id": "simplyswords:tempest"
     },
-    "title": "Weather Warning",
-    "description": "Find the unique weapon Tempest.",
+    "title": {
+      "translate": "advancements.simplyswords.tempest.title",
+      "with": []
+    },
+    "description": {
+      "translate": "advancements.simplyswords.find_unique.description",
+      "with": [
+        {
+          "translate": "item.simplyswords.tempest"
+        }
+      ]
+    },
     "hidden": true,
     "frame": "task",
     "show_toast": true,
