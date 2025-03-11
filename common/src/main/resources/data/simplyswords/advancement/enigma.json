@@ -8,7 +8,7 @@
       "with": []
     },
     "description": {
-      "translate": "advancements.simplyswords.find_unique.description",
+      "translate": "advancements.simplyswords.obtain_unique.description",
       "with": [
         {
           "translate": "item.simplyswords.enigma"
