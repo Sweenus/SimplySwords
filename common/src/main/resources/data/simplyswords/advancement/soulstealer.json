@@ -3,8 +3,18 @@
     "icon": {
       "id": "simplyswords:soulstealer"
     },
-    "title": "Stealer of Souls",
-    "description": "Find the unique weapon Soulstealer.",
+    "title": {
+      "translate": "advancements.simplyswords.soulstealer.title",
+      "with": []
+    },
+    "description": {
+      "translate": "advancements.simplyswords.find_unique.description",
+      "with": [
+        {
+          "translate": "item.simplyswords.soulstealer"
+        }
+      ]
+    },
     "hidden": true,
     "frame": "task",
     "show_toast": true,

@@ -3,8 +3,14 @@
     "icon": {
       "id": "simplyswords:runic_longsword"
     },
-    "title": "Rune Etching",
-    "description": "Obtain a runic weapon.",
+    "title": {
+      "translate": "advancements.simplyswords.runic_gear.title",
+      "with": []
+    },
+    "description": {
+      "translate": "advancements.simplyswords.runic_gear.description",
+      "with": []
+    },
     "hidden": false,
     "frame": "task",
     "show_toast": true,

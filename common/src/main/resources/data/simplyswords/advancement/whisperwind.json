@@ -3,8 +3,18 @@
     "icon": {
       "id": "simplyswords:whisperwind"
     },
-    "title": "Can you hear it?",
-    "description": "Find the unique weapon Whisperwind.",
+    "title": {
+      "translate": "advancements.simplyswords.whisperwind.title",
+      "with": []
+    },
+    "description": {
+      "translate": "advancements.simplyswords.find_unique.description",
+      "with": [
+        {
+          "translate": "item.simplyswords.whisperwind"
+        }
+      ]
+    },
     "hidden": true,
     "frame": "task",
     "show_toast": true,

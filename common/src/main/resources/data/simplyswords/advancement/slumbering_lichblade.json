@@ -3,8 +3,18 @@
     "icon": {
       "id": "simplyswords:slumbering_lichblade"
     },
-    "title": "Wake Up!",
-    "description": "Obtain the Slumbering Lichblade.",
+    "title": {
+      "translate": "advancements.simplyswords.slumbering_lichblade.title",
+      "with": []
+    },
+    "description": {
+      "translate": "advancements.simplyswords.find_unique.description",
+      "with": [
+        {
+          "translate": "item.simplyswords.slumbering_lichblade"
+        }
+      ]
+    },
     "hidden": true,
     "frame": "task",
     "show_toast": true,

@@ -3,8 +3,18 @@
     "icon": {
       "id": "simplyswords:storms_edge"
     },
-    "title": "Lightning Strikes Twice",
-    "description": "Find the unique weapon Storm's Edge.",
+    "title": {
+      "translate": "advancements.simplyswords.storms_edge.title",
+      "with": []
+    },
+    "description": {
+      "translate": "advancements.simplyswords.find_unique.description",
+      "with": [
+        {
+          "translate": "item.simplyswords.storms_edge"
+        }
+      ]
+    },
     "hidden": true,
     "frame": "task",
     "show_toast": true,

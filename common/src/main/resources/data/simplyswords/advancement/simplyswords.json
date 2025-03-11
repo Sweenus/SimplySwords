@@ -3,8 +3,14 @@
     "icon": {
       "id": "simplyswords:runic_tablet"
     },
-    "title": "Simply Swords",
-    "description": "Runic powers await you.",
+    "title": {
+      "translate": "advancements.simplyswords.root.title",
+      "with": []
+    },
+    "description": {
+      "translate": "advancements.simplyswords.root.description",
+      "with": []
+    },
     "frame": "task",
     "show_toast": false,
     "announce_to_chat": false,

@@ -3,8 +3,18 @@
     "icon": {
       "id": "simplyswords:ribboncleaver"
     },
-    "title": "Biceps Required",
-    "description": "Find the unique weapon Ribboncleaver.",
+    "title": {
+      "translate": "advancements.simplyswords.ribboncleaver.title",
+      "with": []
+    },
+    "description": {
+      "translate": "advancements.simplyswords.find_unique.description",
+      "with": [
+        {
+          "translate": "item.simplyswords.ribboncleaver"
+        }
+      ]
+    },
     "hidden": true,
     "frame": "task",
     "show_toast": true,

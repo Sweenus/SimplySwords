@@ -3,8 +3,18 @@
     "icon": {
       "id": "simplyswords:emberblade"
     },
-    "title": "The Ire in Fire",
-    "description": "Find the unique weapon Emberblade.",
+    "title": {
+      "translate": "advancements.simplyswords.emberblade.title",
+      "with": []
+    },
+    "description": {
+      "translate": "advancements.simplyswords.find_unique.description",
+      "with": [
+        {
+          "translate": "item.simplyswords.emberblade"
+        }
+      ]
+    },
     "hidden": true,
     "frame": "task",
     "show_toast": true,

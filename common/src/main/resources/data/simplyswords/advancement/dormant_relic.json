@@ -3,8 +3,18 @@
     "icon": {
       "id": "simplyswords:dormant_relic"
     },
-    "title": "Batteries Not Included",
-    "description": "Obtain the Dormant Relic.",
+    "title": {
+      "translate": "advancements.simplyswords.dormant_relic.title",
+      "with": []
+    },
+    "description": {
+      "translate": "advancements.simplyswords.find_unique.description",
+      "with": [
+        {
+          "translate": "item.simplyswords.dormant_relic"
+        }
+      ]
+    },
     "hidden": true,
     "frame": "task",
     "show_toast": true,

@@ -3,8 +3,18 @@
     "icon": {
       "id": "simplyswords:decaying_relic"
     },
-    "title": "Ancient Relic",
-    "description": "Find the unique weapon Decaying Relic.",
+    "title": {
+      "translate": "advancements.simplyswords.decaying_relic.title",
+      "with": []
+    },
+    "description": {
+      "translate": "advancements.simplyswords.find_unique.description",
+      "with": [
+        {
+          "translate": "item.simplyswords.decaying_relic"
+        }
+      ]
+    },
     "hidden": true,
     "frame": "task",
     "show_toast": true,
