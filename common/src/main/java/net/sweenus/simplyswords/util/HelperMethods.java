@@ -1,7 +1,5 @@
 package net.sweenus.simplyswords.util;
 
-import dev.architectury.platform.Platform;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
@@ -17,11 +15,13 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileUtil;
 import net.minecraft.item.ItemStack;
 import net.minecraft.particle.ParticleEffect;
+import net.minecraft.registry.Registries;
 import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.registry.tag.TagKey;
 import net.minecraft.scoreboard.AbstractTeam;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
-import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
@@ -465,30 +465,13 @@ public class HelperMethods {
         }
     }
 
-    public static void appendSpellScaleTooltip(List<Text> tooltip, String spellSchool) {
-        if (Platform.isModLoaded("spell_power") || Platform.isModLoaded("irons_spellbooks")) {
-            if (Screen.hasAltDown()) {
-                tooltip.add(Text.literal(""));
-                tooltip.add(Text.translatable("item.simplyswords.compat.spellScaling").setStyle(Styles.COMMON));
-                switch (spellSchool) {
-                    case "fire" ->
-                            tooltip.add(Text.literal("\uAB42").append(Text.translatable("item.simplyswords.compat.scaleFire")));
-                    case "frost" ->
-                            tooltip.add(Text.literal("\uAB43").append(Text.translatable("item.simplyswords.compat.scaleFrost")));
-                    case "lightning" ->
-                            tooltip.add(Text.literal("\uAB44").append(Text.translatable("item.simplyswords.compat.scaleLightning")));
-                    case "soul" ->
-                            tooltip.add(Text.literal("\uAB45").append(Text.translatable("item.simplyswords.compat.scaleSoul")));
-                    case "arcane" ->
-                            tooltip.add(Text.literal("\uAB46").append(Text.translatable("item.simplyswords.compat.scaleArcane")));
-                    case "frost_fire" ->
-                            tooltip.add(Text.literal("\uAB43").append(Text.translatable("item.simplyswords.compat.scaleFrost")).append(Text.literal("   \uAB42")).append(Text.translatable("item.simplyswords.compat.scaleFire")));
-                    case "healing_fire" ->
-                            tooltip.add(Text.literal("\uAB47").append(Text.translatable("item.simplyswords.compat.scaleHealing")).append(Text.literal("   \uAB42")).append(Text.translatable("item.simplyswords.compat.scaleFire")));
-                }
-                tooltip.add(Text.literal(""));
-            }
+    public static boolean isInTag(ItemStack stack, Identifier tagId) {
+        // Check if the stack and its item registry entry exist, and if that entry is in the specified tag
+        if (stack != null && !stack.isEmpty()) {
+            var tag = TagKey.of(Registries.ITEM.getKey(), tagId);
+            return stack.getItem().getRegistryEntry().isIn(tag);
         }
+        return false;
     }
 
 }

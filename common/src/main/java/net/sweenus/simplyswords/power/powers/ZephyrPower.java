@@ -1,6 +1,5 @@
 package net.sweenus.simplyswords.power.powers;
 
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
@@ -8,6 +7,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.text.Text;
+import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ChanceDurationSettings;
 import net.sweenus.simplyswords.power.RunefusedGemPower;
@@ -42,7 +42,8 @@ public class ZephyrPower extends RunefusedGemPower {
 			tooltip.add(Text.translatable("item.simplyswords.zephyrsworditem.tooltip1").setStyle(Styles.RUNIC));
 		else
 			tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.runefused_power.zephyr").setStyle(Styles.RUNIC));
-		if (Screen.hasAltDown()) {
+
+		if (TooltipUtils.shouldDisplayTooltip(itemStack, TooltipUtils.runic_tags)) {
 			tooltip.add(Text.literal("\u00A0\u00A0\u00A0").append(Text.translatable("item.simplyswords.zephyrsworditem.tooltip2")).setStyle(Styles.RUNIC_DESCRIPTION));
 			tooltip.add(Text.literal("\u00A0\u00A0\u00A0").append(Text.translatable("item.simplyswords.zephyrsworditem.tooltip3")).setStyle(Styles.RUNIC_DESCRIPTION));
 		}

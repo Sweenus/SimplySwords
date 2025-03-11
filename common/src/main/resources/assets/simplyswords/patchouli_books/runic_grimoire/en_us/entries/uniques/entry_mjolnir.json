@@ -1,7 +1,6 @@
 {
   "name": "Mjolnir",
   "icon": "simplyswords:mjolnir",
-  "advancement": "simplyswords:mjolnir",
   "category": "simplyswords:category_unique_weapons",
   "pages": [
     {

@@ -1,7 +1,6 @@
 {
   "name": "Soulkeeper",
   "icon": "simplyswords:soulkeeper",
-  "advancement": "simplyswords:soulkeeper",
   "category": "simplyswords:category_unique_weapons",
   "pages": [
     {

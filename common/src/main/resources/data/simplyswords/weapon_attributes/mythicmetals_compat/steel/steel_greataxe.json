@@ -1,7 +1,7 @@
 {
   "parent": "bettercombat:heavy_axe",
   "attributes" : {
-    "attack_range": 3.5,
+    "range_bonus": 1,
     "category": "greataxe",
     "two_handed": true,
     "attacks": [

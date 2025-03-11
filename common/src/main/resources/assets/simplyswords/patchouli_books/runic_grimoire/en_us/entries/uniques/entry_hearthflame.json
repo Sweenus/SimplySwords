@@ -1,7 +1,6 @@
 {
   "name": "Hearthflame",
   "icon": "simplyswords:hearthflame",
-  "advancement": "simplyswords:hearthflame",
   "category": "simplyswords:category_unique_weapons",
   "pages": [
     {

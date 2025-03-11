@@ -1,7 +1,6 @@
 {
   "name": "Soulstealer",
   "icon": "simplyswords:soulstealer",
-  "advancement": "simplyswords:soulstealer",
   "category": "simplyswords:category_unique_weapons",
   "pages": [
     {

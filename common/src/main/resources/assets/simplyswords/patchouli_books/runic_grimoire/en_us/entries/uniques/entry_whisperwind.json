@@ -1,7 +1,6 @@
 {
   "name": "Whisperwind",
   "icon": "simplyswords:whisperwind",
-  "advancement": "simplyswords:whisperwind",
   "category": "simplyswords:category_unique_weapons",
   "pages": [
     {

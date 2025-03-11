@@ -2,7 +2,6 @@ package net.sweenus.simplyswords.power.powers;
 
 import me.fzzyhmstrs.fzzy_config.annotations.Translation;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
@@ -11,6 +10,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.text.Text;
 import net.minecraft.world.World;
+import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
 import net.sweenus.simplyswords.power.RunefusedGemPower;
@@ -63,9 +63,10 @@ public class UnstablePower extends RunefusedGemPower {
 			tooltip.add(Text.translatable("item.simplyswords.unstablesworditem.tooltip1").setStyle(Styles.RUNIC));
 		else
 			tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.runefused_power.unstable").setStyle(Styles.RUNIC));
-		if (Screen.hasAltDown()) {
-			tooltip.add(Text.translatable("\u00A0\u00A0\u00A0item.simplyswords.unstablesworditem.tooltip2").setStyle(Styles.RUNIC_DESCRIPTION));
-			tooltip.add(Text.translatable("\u00A0\u00A0\u00A0item.simplyswords.unstablesworditem.tooltip3").setStyle(Styles.RUNIC_DESCRIPTION));
+
+		if (TooltipUtils.shouldDisplayTooltip(itemStack, TooltipUtils.runic_tags)) {
+			tooltip.add(Text.translatable("\u00A0\u00A0\u00A0").append(Text.translatable("item.simplyswords.unstablesworditem.tooltip2").setStyle(Styles.RUNIC_DESCRIPTION)));
+			tooltip.add(Text.translatable("\u00A0\u00A0\u00A0").append(Text.translatable("item.simplyswords.unstablesworditem.tooltip3").setStyle(Styles.RUNIC_DESCRIPTION)));
 		}
 	}
 

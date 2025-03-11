@@ -1,13 +1,13 @@
 {
   "attributes": {
-    "attack_range": 3.5,
+    "range_bonus": 1,
     "pose": "simplyswords:pose_soulrender",
     "two_handed": false,
     "category": "scythe",
     "attacks": [
       {
         "hitbox": "HORIZONTAL_PLANE",
-        "conditions": ["DUAL_WIELDING"],
+        "conditions": ["DUAL_WIELDING_ANY"],
         "damage_multiplier": 0.2,
         "angle": 150,
         "upswing": 0.5,

@@ -1,7 +1,6 @@
 package net.sweenus.simplyswords.fabric;
 
 import dev.architectury.platform.Platform;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.entity.player.PlayerEntity;
 import net.spell_power.api.SpellPower;
 import net.spell_power.api.SpellSchools;
@@ -41,4 +40,5 @@ public class FabricHelperMethods {
         }
         return 0;
     }
+
 }

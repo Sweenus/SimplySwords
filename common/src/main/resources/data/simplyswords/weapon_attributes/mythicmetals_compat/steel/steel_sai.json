@@ -1,6 +1,6 @@
 {
   "attributes": {
-    "attack_range": 1.8,
+    "range_bonus": -0.7,
     "category": "soul_knife",
     "attacks": [
       {

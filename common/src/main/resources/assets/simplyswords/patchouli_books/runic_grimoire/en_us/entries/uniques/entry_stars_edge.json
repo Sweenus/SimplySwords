@@ -1,7 +1,6 @@
 {
   "name": "Star's Edge",
   "icon": "simplyswords:stars_edge",
-  "advancement": "simplyswords:stars_edge",
   "category": "simplyswords:category_unique_weapons",
   "pages": [
     {

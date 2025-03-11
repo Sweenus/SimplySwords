@@ -1,7 +1,6 @@
 {
   "name": "Ribboncleaver",
   "icon": "simplyswords:ribboncleaver",
-  "advancement": "simplyswords:ribboncleaver",
   "category": "simplyswords:category_unique_weapons",
   "pages": [
     {

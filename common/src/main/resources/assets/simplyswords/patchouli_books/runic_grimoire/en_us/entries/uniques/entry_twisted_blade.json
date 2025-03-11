@@ -1,7 +1,6 @@
 {
   "name": "Twisted Blade",
   "icon": "simplyswords:twisted_blade",
-  "advancement": "simplyswords:twisted_blade",
   "category": "simplyswords:category_unique_weapons",
   "pages": [
     {

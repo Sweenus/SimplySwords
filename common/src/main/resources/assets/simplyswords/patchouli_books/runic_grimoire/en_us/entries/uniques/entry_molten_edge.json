@@ -1,7 +1,6 @@
 {
   "name": "Molten Edge",
   "icon": "simplyswords:molten_edge",
-  "advancement": "simplyswords:molten_edge",
   "category": "simplyswords:category_unique_weapons",
   "pages": [
     {

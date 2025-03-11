@@ -1,7 +1,6 @@
 {
   "name": "Soulrender",
   "icon": "simplyswords:soulrender",
-  "advancement": "simplyswords:soulrender",
   "category": "simplyswords:category_unique_weapons",
   "pages": [
     {

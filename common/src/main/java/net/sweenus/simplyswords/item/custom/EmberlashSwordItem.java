@@ -16,6 +16,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
+import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
@@ -97,9 +98,8 @@ public class EmberlashSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.emberlashsworditem.tooltip6").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.emberlashsworditem.tooltip7", Config.uniqueEffects.smoulder.heal).setStyle(Styles.TEXT));
-        HelperMethods.appendSpellScaleTooltip(tooltip, "fire");
-
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        TooltipUtils.appendSpellScaleTooltip(tooltip, "fire");
     }
 
     public static class EffectSettings extends TooltipSettings {

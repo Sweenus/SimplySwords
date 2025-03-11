@@ -102,7 +102,7 @@ public class SoulkeeperSwordItem extends UniqueSwordItem implements TwoHandedWea
     @Override
     public void appendTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
         tooltip.add(Text.literal(""));
-        tooltip.add(Text.translatable("item.simplyswords.soulsworditem.tooltip1").setStyle(Styles.NETHERFUSED));
+        tooltip.add(Text.translatable("item.simplyswords.soulsworditem.tooltip1").setStyle(Styles.ABILITY));
         tooltip.add(Text.translatable("item.simplyswords.soulsworditem.tooltip2").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.soulsworditem.tooltip3").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));

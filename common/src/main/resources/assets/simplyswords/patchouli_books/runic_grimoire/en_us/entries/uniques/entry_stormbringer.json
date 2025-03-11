@@ -1,7 +1,6 @@
 {
   "name": "Stormbringer",
   "icon": "simplyswords:stormbringer",
-  "advancement": "simplyswords:stormbringer",
   "category": "simplyswords:category_unique_weapons",
   "pages": [
     {

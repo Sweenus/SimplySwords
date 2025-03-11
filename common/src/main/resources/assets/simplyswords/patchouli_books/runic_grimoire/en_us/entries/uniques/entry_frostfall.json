@@ -1,7 +1,6 @@
 {
   "name": "Frostfall",
   "icon": "simplyswords:frostfall",
-  "advancement": "simplyswords:frostfall",
   "category": "simplyswords:category_unique_weapons",
   "pages": [
     {

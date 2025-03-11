@@ -1,7 +1,6 @@
 {
   "name": "Dormant Relic",
   "icon": "simplyswords:dormant_relic",
-  "advancement": "simplyswords:dormant_relic",
   "category": "simplyswords:category_unique_weapons",
   "pages": [
     {

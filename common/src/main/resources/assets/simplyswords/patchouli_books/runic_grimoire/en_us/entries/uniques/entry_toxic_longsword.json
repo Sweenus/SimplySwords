@@ -1,7 +1,6 @@
 {
   "name": "Longsword of the Plague",
   "icon": "simplyswords:toxic_longsword",
-  "advancement": "simplyswords:longsword_plague",
   "category": "simplyswords:category_unique_weapons",
   "pages": [
     {

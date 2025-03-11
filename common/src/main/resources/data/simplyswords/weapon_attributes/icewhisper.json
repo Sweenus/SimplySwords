@@ -1,6 +1,6 @@
 {
   "attributes": {
-    "attack_range": 4,
+    "range_bonus": 1.5,
     "category": "halberd",
     "pose": "simplyswords:pose_halberd",
     "two_handed": true,

@@ -1,5 +1,6 @@
 package net.sweenus.simplyswords.item;
 
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -9,11 +10,12 @@ import net.minecraft.item.SwordItem;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.screen.slot.Slot;
-import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.ClickType;
+import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
+import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
@@ -75,6 +77,21 @@ public abstract class UniqueSwordItem extends SwordItem {
 
     @Override
     public void appendTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
+        tooltip.add(Text.literal(""));
+        TooltipUtils.addDynamicButtonTooltip(
+                tooltip,
+                Text.translatable("item.simplyswords.common.showtooltip.info"),
+                Text.translatable("item.simplyswords.common.showtooltip.search"),
+                Screen.hasAltDown(),
+                Screen.hasControlDown()
+        );
+        tooltip.add(Text.literal(""));
         SimplySwordsAPI.appendTooltipGemSocketLogic(itemStack, tooltipContext, tooltip, type);
+        if (Screen.hasControlDown()) {
+            final Identifier entry = Identifier.of("simplyswords:uniques/entry_" + this.getDefaultStack().getItem().getRegistryEntry().registryKey().getValue().getPath());
+            //System.out.println("Entry: " + entry.getPath());
+            TooltipUtils.openPatchouli(entry);
+        }
     }
+
 }

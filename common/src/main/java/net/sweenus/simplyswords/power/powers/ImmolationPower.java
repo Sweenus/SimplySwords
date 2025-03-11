@@ -1,6 +1,5 @@
 package net.sweenus.simplyswords.power.powers;
 
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
@@ -10,6 +9,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
+import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.power.RunicGemPower;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
@@ -41,12 +41,12 @@ public class ImmolationPower extends RunicGemPower {
 	@Override
 	public void appendTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Text> tooltip, TooltipType type, boolean isRunic) {
 		tooltip.add(Text.translatable("item.simplyswords.immolationsworditem.tooltip1").setStyle(Styles.RUNIC));
-		tooltip.add(Text.literal(""));
-		tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
-		if (Screen.hasAltDown()) {
-			tooltip.add(Text.literal("\u00A0\u00A0\u00A0").append(Text.translatable("item.simplyswords.immolationsworditem.tooltip2")).setStyle(Styles.NETHERFUSED_DESCRIPTION));
-			tooltip.add(Text.literal("\u00A0\u00A0\u00A0").append(Text.translatable("item.simplyswords.immolationsworditem.tooltip3")).setStyle(Styles.NETHERFUSED_DESCRIPTION));
-			tooltip.add(Text.literal("\u00A0\u00A0\u00A0").append(Text.translatable("item.simplyswords.immolationsworditem.tooltip4")).setStyle(Styles.NETHERFUSED_DESCRIPTION));
+
+		if (TooltipUtils.shouldDisplayTooltip(itemStack, TooltipUtils.runic_tags)) {
+			tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
+			tooltip.add(Text.literal("\u00A0\u00A0\u00A0").append(Text.translatable("item.simplyswords.immolationsworditem.tooltip2")).setStyle(Styles.RUNIC_DESCRIPTION));
+			tooltip.add(Text.literal("\u00A0\u00A0\u00A0").append(Text.translatable("item.simplyswords.immolationsworditem.tooltip3")).setStyle(Styles.RUNIC_DESCRIPTION));
+			tooltip.add(Text.literal("\u00A0\u00A0\u00A0").append(Text.translatable("item.simplyswords.immolationsworditem.tooltip4")).setStyle(Styles.RUNIC_DESCRIPTION));
 		}
 	}
 }

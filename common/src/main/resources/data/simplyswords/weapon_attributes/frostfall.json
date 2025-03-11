@@ -1,6 +1,6 @@
 {
   "attributes": {
-    "attack_range": 2.7,
+    "range_bonus": -0.2,
     "category": "mace",
     "attacks": [
       {

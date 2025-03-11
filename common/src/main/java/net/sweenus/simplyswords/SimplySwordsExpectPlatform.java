@@ -3,6 +3,7 @@ package net.sweenus.simplyswords;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import dev.architectury.platform.Platform;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.Identifier;
 
 import java.nio.file.Path;
 
@@ -32,6 +33,11 @@ public class SimplySwordsExpectPlatform {
     }
     @ExpectPlatform
     public static float getSpellPowerDamage(float damageModifier, PlayerEntity player, String magicSchool) {
+        // Just throw an error, the content should get replaced at runtime.
+        throw new AssertionError();
+    }
+    @ExpectPlatform
+    public static void openPatchouli(Identifier entry) {
         // Just throw an error, the content should get replaced at runtime.
         throw new AssertionError();
     }

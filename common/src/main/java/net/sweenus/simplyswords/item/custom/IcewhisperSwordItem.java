@@ -19,6 +19,7 @@ import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.UseAction;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
+import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
@@ -149,8 +150,8 @@ public class IcewhisperSwordItem extends UniqueSwordItem implements TwoHandedWea
         tooltip.add(Text.translatable("item.simplyswords.icewhispersworditem.tooltip4").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.icewhispersworditem.tooltip5").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.icewhispersworditem.tooltip6", radius * 2).setStyle(Styles.TEXT));
-        HelperMethods.appendSpellScaleTooltip(tooltip, "frost");
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        TooltipUtils.appendSpellScaleTooltip(tooltip, "frost");
     }
 
     public static class EffectSettings extends TooltipSettings {

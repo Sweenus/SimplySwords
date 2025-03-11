@@ -1,7 +1,6 @@
 {
   "name": "The Watcher",
   "icon": "simplyswords:watcher_claymore",
-  "advancement": "simplyswords:the_watcher",
   "category": "simplyswords:category_unique_weapons",
   "pages": [
     {

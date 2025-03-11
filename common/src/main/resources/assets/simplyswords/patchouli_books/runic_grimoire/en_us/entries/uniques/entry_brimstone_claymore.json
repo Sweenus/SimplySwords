@@ -1,7 +1,6 @@
 {
   "name": "Brimstone Claymore",
   "icon": "simplyswords:brimstone_claymore",
-  "advancement": "simplyswords:brimstone",
   "category": "simplyswords:category_unique_weapons",
   "pages": [
     {

@@ -17,6 +17,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.UseAction;
 import net.minecraft.world.World;
+import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
@@ -119,8 +120,8 @@ public class ThunderbrandSwordItem extends UniqueSwordItem implements TwoHandedW
         tooltip.add(Text.translatable("item.simplyswords.thunderbrandsworditem.tooltip5").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.thunderbrandsworditem.tooltip6").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.thunderbrandsworditem.tooltip7").setStyle(Styles.TEXT));
-        HelperMethods.appendSpellScaleTooltip(tooltip, "lightning");
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        TooltipUtils.appendSpellScaleTooltip(tooltip, "lightning");
     }
 
     public static class EffectSettings extends TooltipSettings {

@@ -14,6 +14,12 @@
     },
     {
       "type": "bitmap",
+      "file": "simplyswords:icon/icon_alt_key_extra.png",
+      "ascent": 8, "height": 10,
+      "chars": ["\uAB41"]
+    },
+    {
+      "type": "bitmap",
       "file": "simplyswords:icon/icon_fire_magic.png",
       "ascent": 7, "height": 10,
       "chars": ["\uAB42"]
@@ -47,6 +53,12 @@
       "file": "simplyswords:icon/icon_healing_magic.png",
       "ascent": 7, "height": 10,
       "chars": ["\uAB47"]
+    },
+    {
+      "type": "bitmap",
+      "file": "simplyswords:icon/icon_ctrl_key_extra.png",
+      "ascent": 8, "height": 10,
+      "chars": ["\uAB48"]
     }
   ]
 }

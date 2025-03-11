@@ -1,0 +1,12 @@
+{
+  "name": "Sunfire",
+  "icon": "simplyswords:sunfire",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:sunfire",
+      "text": "Not yet implemented."
+    }
+  ]
+}

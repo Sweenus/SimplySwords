@@ -25,6 +25,7 @@ import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
+import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
@@ -159,8 +160,8 @@ public class LivyatanSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.livyatansworditem.tooltip5").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.livyatansworditem.tooltip6").setStyle(Styles.TEXT));
-        HelperMethods.appendSpellScaleTooltip(tooltip, "frost");
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        TooltipUtils.appendSpellScaleTooltip(tooltip, "frost");
     }
 
     public static class EffectSettings extends TooltipSettings {

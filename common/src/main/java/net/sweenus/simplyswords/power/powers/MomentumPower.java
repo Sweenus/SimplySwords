@@ -2,7 +2,6 @@ package net.sweenus.simplyswords.power.powers;
 
 import me.fzzyhmstrs.fzzy_config.annotations.Translation;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -13,6 +12,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
+import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
 import net.sweenus.simplyswords.power.RunicGemPower;
@@ -49,7 +49,7 @@ public class MomentumPower extends RunicGemPower {
 			int velocity = 3;
 			if (!user.isOnGround()) {velocity = 1;}
 			if (remainingUseTicks >= 10 && user.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
-				user.setVelocity(user.getRotationVector().multiply(+velocity));
+				user.setVelocity(user.getRotationVector().multiply(velocity + (this.isGreater() ? 1 : 0)));
 				user.setVelocity(user.getVelocity().x, 0, user.getVelocity().z); // Prevent player flying to the heavens
 				user.velocityModified = true;
 				if (user instanceof PlayerEntity player) {
@@ -74,12 +74,17 @@ public class MomentumPower extends RunicGemPower {
 
 	@Override
 	public void appendTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Text> tooltip, TooltipType type, boolean isRunic) {
-		if (Screen.hasAltDown()) {
-			tooltip.add(Text.translatable("item.simplyswords.momentumsworditem.tooltip1").setStyle(Styles.RUNIC));
-			tooltip.add(Text.translatable("item.simplyswords.momentumsworditem.tooltip2").setStyle(Styles.TEXT));
-			tooltip.add(Text.translatable("item.simplyswords.momentumsworditem.tooltip3").setStyle(Styles.TEXT));
+
+		tooltip.add(Text.translatable("item.simplyswords.momentumsworditem.tooltip1").setStyle(Styles.RUNIC));
+
+		if (TooltipUtils.shouldDisplayTooltip(itemStack, TooltipUtils.runic_tags)) {
+			tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
+			tooltip.add(Text.literal("\u00A0\u00A0\u00A0").append(Text.translatable("item.simplyswords.momentumsworditem.tooltip2").setStyle(Styles.RUNIC_DESCRIPTION)));
+			tooltip.add(Text.literal("\u00A0\u00A0\u00A0").append(Text.translatable("item.simplyswords.momentumsworditem.tooltip3").setStyle(Styles.RUNIC_DESCRIPTION)));
 		}
 	}
+
+
 
 	public static class Settings extends TooltipSettings {
 

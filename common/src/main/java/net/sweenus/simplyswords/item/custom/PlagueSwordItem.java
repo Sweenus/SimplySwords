@@ -35,8 +35,8 @@ public class PlagueSwordItem extends UniqueSwordItem {
 
             //Convert Haste
             if (target.hasStatusEffect(StatusEffects.HASTE)) {
-                var statdur = (target.getStatusEffect(StatusEffects.SLOWNESS).getDuration());
-                var statamp = (target.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier());
+                var statdur = (target.getStatusEffect(StatusEffects.HASTE).getDuration());
+                var statamp = (target.getStatusEffect(StatusEffects.HASTE).getAmplifier());
                 target.addStatusEffect(new StatusEffectInstance(StatusEffects.MINING_FATIGUE, statdur, statamp), attacker);
                 target.removeStatusEffect(StatusEffects.HASTE);
             }

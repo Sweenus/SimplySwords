@@ -44,7 +44,6 @@ public class SimplySwordsSwordItem extends SwordItem {
 
     @Override
     public void appendTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
-
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
     }
 

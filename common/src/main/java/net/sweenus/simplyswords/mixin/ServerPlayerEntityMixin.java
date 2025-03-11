@@ -249,7 +249,7 @@ public abstract class ServerPlayerEntityMixin {
     public void simplyswords$attack(Entity target, CallbackInfo ci) {
         PlayerEntity player = (PlayerEntity) (Object) this;
         if (player instanceof ServerPlayerEntity serverPlayer) {
-            if (target.isAttackable()) {
+            if (target.isAttackable() && target instanceof LivingEntity) {
                 if (!target.handleAttack(player)) {
                     ServerWorld serverWorld = (ServerWorld) player.getWorld();
                     //Ribboncleaver Cleave buff

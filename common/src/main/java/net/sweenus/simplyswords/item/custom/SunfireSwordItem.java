@@ -19,6 +19,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
+import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
@@ -93,8 +94,8 @@ public class SunfireSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.sunfiresworditem.tooltip4").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.sunfiresworditem.tooltip5").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.sunfiresworditem.tooltip6").setStyle(Styles.TEXT));
-        HelperMethods.appendSpellScaleTooltip(tooltip, "healing_fire");
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        TooltipUtils.appendSpellScaleTooltip(tooltip, "healing_fire");
     }
 
     public static class EffectSettings extends TooltipSettings {

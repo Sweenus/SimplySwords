@@ -49,17 +49,13 @@ public class DormantRelicSwordItem extends UniqueSwordItem {
 
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.dormantrelicsworditem.tooltip2").setStyle(Styles.TEXT));
+        super.appendTooltip(itemStack, tooltipContext, tooltip, type);
         if (this.asItem().equals(ItemsRegistry.DECAYING_RELIC.get())) {
-            tooltip.add(Text.literal(""));
             if (Screen.hasAltDown()) {
                 tooltip.add(Text.translatable("item.simplyswords.decayingrelicsworditem.tooltip1").formatted(Formatting.GRAY));
                 tooltip.add(Text.translatable("item.simplyswords.decayingrelicsworditem.tooltip2").formatted(Formatting.GRAY));
                 tooltip.add(Text.translatable("item.simplyswords.decayingrelicsworditem.tooltip3").formatted(Formatting.GRAY));
-            } else {
-                tooltip.add(Text.translatable("item.simplyswords.common.showtooltip.info").formatted(Formatting.GRAY));
             }
         }
-
-        super.appendTooltip(itemStack, tooltipContext, tooltip, type);
     }
 }

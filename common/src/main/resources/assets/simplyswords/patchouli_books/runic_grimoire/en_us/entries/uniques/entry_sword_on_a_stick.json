@@ -1,7 +1,6 @@
 {
   "name": "Sword on a Stick",
   "icon": "simplyswords:sword_on_a_stick",
-  "advancement": "simplyswords:sword_on_a_stick",
   "category": "simplyswords:category_unique_weapons",
   "pages": [
     {
