@@ -2,6 +2,7 @@ plugins {
     id 'dev.architectury.loom' version '1.7.412' apply false
     id 'architectury-plugin' version '3.4-SNAPSHOT'
     id 'com.github.johnrengelman.shadow' version '8.1.1' apply false
+    id 'org.moddedmc.wiki.toolkit' version '0.2.7'
 }
 
 architectury {
@@ -70,4 +71,16 @@ subprojects {
             // retrieving dependencies.
         }
     }
+
+    // Sinytra Wiki
+    wiki {
+        docs {
+            // The name of the object (examplemod) should match the registered wiki project ID (if it exists).
+            simplyswords {
+                // The path to the folder containing the documentation metadata file (sinytra-wiki.json)
+                root = file('docs')
+            }
+        }
+    }
+
 }
