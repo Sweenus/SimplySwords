@@ -11,6 +11,7 @@ import net.sweenus.simplyswords.SimplySwordsExpectPlatform;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
+import rearth.oracle.ui.OracleScreen;
 
 import java.util.List;
 
@@ -97,6 +98,14 @@ public class TooltipUtils {
 
             //ConfigApiJava.INSTANCE.openScreen("simplyswords.unique_effects.flickerfury"); Can we do this in the future :o ?
             commonPatchouli(entry);
+        }
+    }
+
+    public static void openOracleIndex(Identifier identifier) {
+        if (!(MinecraftClient.getInstance().currentScreen instanceof OracleScreen)) {
+            OracleScreen.activeBook = "simplyswords";
+            OracleScreen.activeEntry = identifier;
+            MinecraftClient.getInstance().setScreen(new OracleScreen());
         }
     }
 

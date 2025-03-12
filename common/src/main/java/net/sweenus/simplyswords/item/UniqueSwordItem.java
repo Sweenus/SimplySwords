@@ -87,9 +87,10 @@ public abstract class UniqueSwordItem extends SwordItem {
         tooltip.add(Text.literal(""));
         SimplySwordsAPI.appendTooltipGemSocketLogic(itemStack, tooltipContext, tooltip, type);
         if (Screen.hasControlDown()) {
-            final Identifier entry = Identifier.of("simplyswords:uniques/entry_" + this.getDefaultStack().getItem().getRegistryEntry().registryKey().getValue().getPath());
+            //final Identifier entry = Identifier.of("simplyswords:uniques/entry_" + this.getDefaultStack().getItem().getRegistryEntry().registryKey().getValue().getPath()); Patchouli
+            final Identifier entry = Identifier.of("oracle_index:books/simplyswords/unique-weapons/" + this.getDefaultStack().getItem().getRegistryEntry().registryKey().getValue().getPath() + ".mdx");
             //System.out.println("Entry: " + entry.getPath());
-            TooltipUtils.openPatchouli(entry);
+            TooltipUtils.openOracleIndex(entry);
         }
     }
 

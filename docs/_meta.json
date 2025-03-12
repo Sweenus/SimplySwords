@@ -1,5 +1,8 @@
 {
   "weapon-types": "Weapon Types",
-  "unique-weapons": "Unique Weapons",
+  "unique-weapons": {
+    "name": "Unique Weapons",
+    "icon": "simplyswords:icons/icon_left_mouse.png"
+  },
   "introduction.mdx": "Introduction"
 }
