@@ -69,7 +69,7 @@ public class ThunderbrandSwordItem extends UniqueSwordItem implements TwoHandedW
 
     @Override
     public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
-        if (!world.isClient && user.getEquippedStack(EquipmentSlot.MAINHAND) == stack && user.isOnGround()) {
+        if (!world.isClient && HelperMethods.isHolding(stack, user) && user.isOnGround()) {
 
             float abilityDamage = HelperMethods.spellScaledDamage("lightning", user, Config.uniqueEffects.thunderBlitz.spellScaling, Config.uniqueEffects.thunderBlitz.damage);
             int skillCooldown = Config.uniqueEffects.thunderBlitz.cooldown;

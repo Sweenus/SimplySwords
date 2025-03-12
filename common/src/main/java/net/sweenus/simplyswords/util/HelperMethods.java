@@ -474,4 +474,9 @@ public class HelperMethods {
         return false;
     }
 
+    public static boolean isHolding(ItemStack stack, LivingEntity entity) {
+        return entity.getEquippedStack(EquipmentSlot.MAINHAND).equals(stack)
+                || entity.getEquippedStack(EquipmentSlot.OFFHAND).equals(stack);
+    }
+
 }

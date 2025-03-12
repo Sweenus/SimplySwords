@@ -29,7 +29,7 @@ public class AbilityMethods {
         if (!user.getWorld().isClient()) {
 
             //Player dash forward
-            if (ability_timer == 12 || ability_timer == 13 && user.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
+            if (ability_timer == 12 || ability_timer == 13 && HelperMethods.isHolding(stack, user)) {
                 user.setVelocity(user.getRotationVector().multiply(+4));
                 user.setVelocity(user.getVelocity().x, 0, user.getVelocity().z); // Prevent user flying to the heavens
                 user.velocityModified = true;
@@ -41,14 +41,14 @@ public class AbilityMethods {
             }
 
             //Player dash end
-            if (ability_timer < 5 && user.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
+            if (ability_timer < 5 && HelperMethods.isHolding(stack, user)) {
                 user.setVelocity(0, 0, 0); // Stop user at end of charge
                 user.velocityModified = true;
                 user.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, 80, 1), user);
 
             }
 
-            if (user.age % 2 == 0 && user.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
+            if (user.age % 2 == 0 && HelperMethods.isHolding(stack, user)) {
                 double xpos = user.getX() - (radius + 1);
                 double ypos = user.getY();
                 double zpos = user.getZ() - (radius + 1);
@@ -141,7 +141,7 @@ public class AbilityMethods {
             }
 
             //AOE Damage & charge control
-            if (user.age % 3 == 0 && user.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
+            if (user.age % 3 == 0 && HelperMethods.isHolding(stack, user)) {
                 Box box = new Box(user.getX() + radius, user.getY() + radius * 2, user.getZ() + radius,
                         user.getX() - radius, user.getY() - radius, user.getZ() - radius);
                 for (Entity entity : world.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY)) {
@@ -247,7 +247,7 @@ public class AbilityMethods {
         if (ability_timer < 5) user.stopUsingItem();
 
         //AOE Blizzard
-        if (user.age % 10 != 0 || user.getEquippedStack(EquipmentSlot.MAINHAND) != stack) return;
+        if (user.age % 10 != 0 || !HelperMethods.isHolding(stack, user)) return;
 
         if (user instanceof PlayerEntity player) {
             player.getHungerManager().addExhaustion(0.8f);
@@ -304,7 +304,7 @@ public class AbilityMethods {
             if (ability_timer < 5) user.stopUsingItem();
 
             //AOE Lift - 1 charge
-            if (user.age % 10 == 0 && user.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
+            if (user.age % 10 == 0 && HelperMethods.isHolding(stack, user)) {
                 Box box = new Box(user.getX() + radius, user.getY() + radius * 2, user.getZ() + radius,
                         user.getX() - radius, user.getY() - radius, user.getZ() - radius);
                 for (Entity entity : world.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY)) {

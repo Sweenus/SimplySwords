@@ -68,7 +68,7 @@ public class ArcanethystSwordItem extends UniqueSwordItem implements TwoHandedWe
 
     @Override
     public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
-        if (user.getEquippedStack(EquipmentSlot.MAINHAND) == stack && user instanceof PlayerEntity) {
+        if (HelperMethods.isHolding(stack, user) && user instanceof PlayerEntity) {
             int radius = Config.uniqueEffects.arcaneAssault.radius;
             float abilityDamage = HelperMethods.spellScaledDamage("arcane", user, Config.uniqueEffects.arcaneAssault.spellScaling, Config.uniqueEffects.arcaneAssault.damage);
             AbilityMethods.tickAbilityArcaneAssault(stack, world, user, remainingUseTicks, abilityDamage, radius);

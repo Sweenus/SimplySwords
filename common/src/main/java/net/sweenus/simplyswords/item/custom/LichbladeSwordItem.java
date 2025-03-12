@@ -54,6 +54,10 @@ public class LichbladeSwordItem extends UniqueSwordItem implements TwoHandedWeap
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         ItemStack itemStack = user.getStackInHand(hand);
+        if(hand == Hand.OFF_HAND) {
+            return TypedActionResult.fail(itemStack);
+        }
+
         if (itemStack.getDamage() >= itemStack.getMaxDamage() - 1) {
             return TypedActionResult.fail(itemStack);
         }
