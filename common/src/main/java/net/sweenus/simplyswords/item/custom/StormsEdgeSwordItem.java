@@ -66,7 +66,7 @@ public class StormsEdgeSwordItem extends UniqueSwordItem {
 
     @Override
     public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
-        if (!world.isClient && user.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
+        if (!world.isClient && HelperMethods.isHolding(stack, user)) {
             int skillCooldown = Config.uniqueEffects.stormJolt.cooldown;
             AbilityMethods.tickAbilityStormJolt(stack, world, user, remainingUseTicks, skillCooldown, radius);
         }
@@ -75,7 +75,7 @@ public class StormsEdgeSwordItem extends UniqueSwordItem {
     @Override
     public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
         //Player dash end
-        if (!world.isClient && user.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
+        if (!world.isClient && HelperMethods.isHolding(stack, user)) {
             user.setVelocity(0, 0, 0); // Stop player at end of charge
             user.velocityModified = true;
             user.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, 80, 1), user);

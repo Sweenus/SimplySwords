@@ -49,6 +49,7 @@ public class IcewhisperSwordItem extends UniqueSwordItem implements TwoHandedWea
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         ItemStack itemStack = user.getStackInHand(hand);
+
         if (itemStack.getDamage() >= itemStack.getMaxDamage() - 1) {
             return TypedActionResult.fail(itemStack);
         }
@@ -60,7 +61,7 @@ public class IcewhisperSwordItem extends UniqueSwordItem implements TwoHandedWea
 
     @Override
     public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
-        if (user.getEquippedStack(EquipmentSlot.MAINHAND) == stack && user instanceof PlayerEntity) {
+        if (HelperMethods.isHolding(stack, user) && user instanceof PlayerEntity) {
 
             ChargedLocationComponent location = stack.getOrDefault(ComponentTypeRegistry.CHARGED_LOCATION.get(), ChargedLocationComponent.DEFAULT);
             int radius = Config.uniqueEffects.permafrost.radius;
