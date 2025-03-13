@@ -26,7 +26,7 @@ public class ImmolationPower extends RunicGemPower {
 	@Override
 	public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand, ItemStack itemStack) {
 		user.setCurrentHand(hand);
-		user.addStatusEffect(new StatusEffectInstance(EffectRegistry.getReference(EffectRegistry.IMMOLATION), 36000, 0), user);
+		user.addStatusEffect(new StatusEffectInstance(EffectRegistry.getReference(EffectRegistry.IMMOLATION), 800, 3), user);
 		user.getItemCooldownManager().set(itemStack.getItem(), 40);
 		world.playSoundFromEntity(null, user, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
 				user.getSoundCategory(), 0.3f, 0.6f);

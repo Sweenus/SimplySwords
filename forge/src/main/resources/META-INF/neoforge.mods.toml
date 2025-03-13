@@ -47,3 +47,10 @@ mandatory = true
 versionRange = "[0.5.6,)"
 ordering = "AFTER"
 side = "BOTH"
+
+[[dependencies.simplyswords]]
+modId = "oracle_index"
+mandatory = true
+versionRange = "[0.2.0,)"
+ordering = "AFTER"
+side = "BOTH"

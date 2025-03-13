@@ -11,10 +11,7 @@ import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.util.math.Box;
-import net.sweenus.simplyswords.api.SimplySwordsAPI;
-import net.sweenus.simplyswords.power.GemPowerComponent;
 import net.sweenus.simplyswords.registry.EffectRegistry;
-import net.sweenus.simplyswords.registry.GemPowerRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 
@@ -42,16 +39,7 @@ public class ImmolationEffect extends WideOrbitingEffect {
                     ItemStack checkMainStack = player.getMainHandStack();
                     ItemStack checkOffStack = player.getOffHandStack();
 
-                    if (checkMainStack.getItem() instanceof SwordItem || checkOffStack.getItem() instanceof SwordItem) {
-                        GemPowerComponent mainComponent = SimplySwordsAPI.getComponent(checkMainStack);
-                        GemPowerComponent offComponent = SimplySwordsAPI.getComponent(checkOffStack);
-                        if (!(mainComponent.hasRunic(GemPowerRegistry.IMMOLATION)
-                                || offComponent.hasRunic(GemPowerRegistry.IMMOLATION)
-                                || mainComponent.hasNether(GemPowerRegistry.RADIANCE)
-                                || offComponent.hasNether(GemPowerRegistry.RADIANCE))) {
-                            player.removeStatusEffect(EffectRegistry.getReference(EffectRegistry.IMMOLATION));
-                        }
-                    } else {
+                    if (!(checkMainStack.getItem() instanceof SwordItem || checkOffStack.getItem() instanceof SwordItem)) {
                         player.removeStatusEffect(EffectRegistry.getReference(EffectRegistry.IMMOLATION));
                     }
 
