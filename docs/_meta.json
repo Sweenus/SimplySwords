@@ -1,8 +1,8 @@
 {
+  "main.mdx": "Introduction",
   "weapon-types": "Weapon Types",
   "unique-weapons": {
     "name": "Unique Weapons",
-    "icon": "simplyswords:icons/icon_left_mouse.png"
-  },
-  "introduction.mdx": "Introduction"
+    "icon": null
+  }
 }

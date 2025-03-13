@@ -103,6 +103,9 @@ public class TooltipUtils {
 
     public static void openOracleIndex(Identifier identifier) {
         if (!(MinecraftClient.getInstance().currentScreen instanceof OracleScreen)) {
+            if (identifier.getPath().contains("lichblade")) // Lichblade variants are contained within one wiki entry
+                identifier = Identifier.of("oracle_index:books/simplyswords/unique-weapons/lichblade.mdx");
+
             OracleScreen.activeBook = "simplyswords";
             OracleScreen.activeEntry = identifier;
             MinecraftClient.getInstance().setScreen(new OracleScreen());
