@@ -18,6 +18,7 @@ import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.UseAction;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
+import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.power.GemPowerComponent;
 import net.sweenus.simplyswords.power.PowerType;
@@ -129,15 +130,6 @@ public class RunicSwordItem extends SwordItem {
 
     @Override
     public void appendTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
-        tooltip.add(Text.literal("").setStyle(Styles.TEXT));
-
-        GemPowerComponent component = SimplySwordsAPI.getComponent(itemStack);
-
-        if (component.isEmpty()) {
-            tooltip.add(Text.translatable("item.simplyswords.unidentifiedsworditem.tooltip1").setStyle(Styles.RUNIC));
-            tooltip.add(Text.translatable("item.simplyswords.unidentifiedsworditem.tooltip2").setStyle(Styles.TEXT));
-        } else {
-            component.appendTooltip(itemStack, tooltipContext, tooltip, type, true);
-        }
+        TooltipUtils.generateDynamicTooltip(itemStack, tooltipContext, tooltip, type);
     }
 }

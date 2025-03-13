@@ -132,21 +132,17 @@ subprojects {
                     def key = recipeJson.key ?: [:]
                     def slots = []
 
-                    // Use a for-loop to normalize rows to a 3x3 grid
                     for (int i = 0; i < 3; i++) {
-                        // Get the current row or use a blank one if the row doesn't exist
                         String row = i < pattern.size() ? pattern[i] : "   "
 
                         // Ensure the row is exactly 3 characters long
                         row = row.padRight(3, ' ').substring(0, 3)
 
-                        // Loop through the characters of the row to process each slot
                         for (int j = 0; j < 3; j++) {
                             char currentChar = row.charAt(j)
-                            String charStr = currentChar.toString() // Convert char to String explicitly
+                            String charStr = currentChar.toString()
 
                             if (key.containsKey(charStr)) {
-                                // Process key entry
                                 def keyEntry = key[charStr]
                                 String item = ""
 

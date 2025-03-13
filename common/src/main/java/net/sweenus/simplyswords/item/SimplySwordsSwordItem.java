@@ -9,6 +9,7 @@ import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.util.HelperMethods;
 
 import java.util.ArrayList;
@@ -45,6 +46,7 @@ public class SimplySwordsSwordItem extends SwordItem {
     @Override
     public void appendTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        TooltipUtils.generateDynamicTooltip(itemStack, tooltipContext, tooltip, type);
     }
 
 }

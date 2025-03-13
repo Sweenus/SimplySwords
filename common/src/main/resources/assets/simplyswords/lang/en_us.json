@@ -1089,6 +1089,7 @@
   "item.simplyswords.common.showtooltip":                                                                                      "\uAB41     \uAB48",
   "item.simplyswords.common.showtooltip.info":                                                                               "\uAB41",
   "item.simplyswords.common.showtooltip.search":                                                                           "\uAB48",
+  "item.simplyswords.common.showtooltip.config":                                                                           "\uAB49",
   "item.simplyswords.compat.mythicmetals.regrowth":                                                                     "Regrowth",
   "item.simplyswords.compat.mythicmetals.looting":                                                                      "Bonus Looting",
 

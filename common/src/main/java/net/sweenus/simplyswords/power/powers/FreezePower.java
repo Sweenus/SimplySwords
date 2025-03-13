@@ -46,7 +46,7 @@ public class FreezePower extends RunefusedGemPower {
 		else
 			tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.runefused_power.freeze").setStyle(Styles.RUNIC));
 
-		if (TooltipUtils.shouldDisplayTooltip(itemStack, TooltipUtils.runic_tags)) {
+		if (TooltipUtils.shouldDisplayTooltip(itemStack, null)) {
 			tooltip.add(Text.literal("\u00A0\u00A0\u00A0").append(Text.translatable("item.simplyswords.freezesworditem.tooltip2")).setStyle(Styles.RUNIC_DESCRIPTION));
 		}
 	}

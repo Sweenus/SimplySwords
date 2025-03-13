@@ -43,7 +43,7 @@ public class WardPower extends RunicGemPower {
 	public void appendTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Text> tooltip, TooltipType type, boolean isRunic) {
 		tooltip.add(Text.translatable("item.simplyswords.wardsworditem.tooltip1").setStyle(Styles.RUNIC));
 
-		if (TooltipUtils.shouldDisplayTooltip(itemStack, TooltipUtils.runic_tags)) {
+		if (TooltipUtils.shouldDisplayTooltip(itemStack, null)) {
 			tooltip.add(Text.translatable("item.simplyswords.onrightclickheld").setStyle(Styles.RIGHT_CLICK));
 			tooltip.add(Text.literal("\u00A0\u00A0\u00A0").append(Text.translatable("item.simplyswords.wardsworditem.tooltip2")).setStyle(Styles.RUNIC_DESCRIPTION));
 			tooltip.add(Text.literal("\u00A0\u00A0\u00A0").append(Text.translatable("item.simplyswords.wardsworditem.tooltip3")).setStyle(Styles.RUNIC_DESCRIPTION));

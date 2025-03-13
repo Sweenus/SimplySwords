@@ -59,6 +59,12 @@
       "file": "simplyswords:icon/icon_ctrl_key_extra.png",
       "ascent": 8, "height": 10,
       "chars": ["\uAB48"]
+    },
+    {
+      "type": "bitmap",
+      "file": "simplyswords:icon/icon_ctrl_alt_key_extra.png",
+      "ascent": 8, "height": 10,
+      "chars": ["\uAB49"]
     }
   ]
 }

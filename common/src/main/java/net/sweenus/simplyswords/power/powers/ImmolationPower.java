@@ -42,7 +42,7 @@ public class ImmolationPower extends RunicGemPower {
 	public void appendTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Text> tooltip, TooltipType type, boolean isRunic) {
 		tooltip.add(Text.translatable("item.simplyswords.immolationsworditem.tooltip1").setStyle(Styles.RUNIC));
 
-		if (TooltipUtils.shouldDisplayTooltip(itemStack, TooltipUtils.runic_tags)) {
+		if (TooltipUtils.shouldDisplayTooltip(itemStack, null)) {
 			tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
 			tooltip.add(Text.literal("\u00A0\u00A0\u00A0").append(Text.translatable("item.simplyswords.immolationsworditem.tooltip2")).setStyle(Styles.RUNIC_DESCRIPTION));
 			tooltip.add(Text.literal("\u00A0\u00A0\u00A0").append(Text.translatable("item.simplyswords.immolationsworditem.tooltip3")).setStyle(Styles.RUNIC_DESCRIPTION));

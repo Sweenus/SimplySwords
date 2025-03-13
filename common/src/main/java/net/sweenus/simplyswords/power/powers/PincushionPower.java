@@ -33,7 +33,7 @@ public class PincushionPower extends RunefusedGemPower {
 		else
 			tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.runefused_power.pincushion").setStyle(Styles.RUNIC));
 
-		if (TooltipUtils.shouldDisplayTooltip(itemStack, TooltipUtils.runic_tags)) {
+		if (TooltipUtils.shouldDisplayTooltip(itemStack, null)) {
 			tooltip.add(Text.literal("\u00A0\u00A0\u00A0").append(Text.translatable("item.simplyswords.pincushionsworditem.tooltip2").setStyle(Styles.RUNIC_DESCRIPTION)));
 			tooltip.add(Text.literal("\u00A0\u00A0\u00A0").append(Text.translatable("item.simplyswords.pincushionsworditem.tooltip3").setStyle(Styles.RUNIC_DESCRIPTION)));
 		}

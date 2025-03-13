@@ -1,13 +1,20 @@
 package net.sweenus.simplyswords.client.util;
 
 import dev.architectury.platform.Platform;
+import me.fzzyhmstrs.fzzy_config.api.ConfigApiJava;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.SimplySwordsExpectPlatform;
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+import net.sweenus.simplyswords.item.RunicSwordItem;
+import net.sweenus.simplyswords.item.UniqueSwordItem;
+import net.sweenus.simplyswords.power.GemPowerComponent;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
@@ -17,6 +24,8 @@ import java.util.List;
 
 public class TooltipUtils {
     public static final Identifier runic_tags = Identifier.of(SimplySwords.MOD_ID, "runic_weapons");
+    private static long ctrlKeyPressTimestamp = 0;
+
 
     public static void centerAlignTooltip(List<Text> tooltip, Text text) {
         MinecraftClient client = MinecraftClient.getInstance();
@@ -40,22 +49,47 @@ public class TooltipUtils {
         tooltip.add(Text.literal(padding).append(text));
     }
 
-    public static void addDynamicButtonTooltip(List<Text> tooltip, Text info, Text search, boolean isAlt, boolean isCtrl) {
+    public static void addDynamicButtonTooltip(List<Text> tooltip, Text info, Text search, Text config, boolean isAlt, boolean isCtrl) {
+        boolean isAltAndCtrl = isAlt && isCtrl; // Check if both Alt and Ctrl are being held
+
         tooltip.add(
                 Text.literal("")
                         .append(
-                                info.copy().setStyle(info.getStyle().withColor(isAlt ? Styles.UNIQUE.getColor() : Styles.COMMON.getColor()))
-                        ) // "INFO" styling
+                                info.copy().setStyle(
+                                        info.getStyle().withColor(
+                                                isAltAndCtrl ? Styles.COMMON.getColor() : // Both Alt and Ctrl held
+                                                        isAlt ? Styles.UNIQUE.getColor() : // Only Alt held
+                                                                Styles.COMMON.getColor() // Default styling
+                                        )
+                                )
+                        )
                         .append("\u00A0") // Spacer
                         .append(
-                                search.copy().setStyle(search.getStyle().withColor(isCtrl ? Styles.UNIQUE.getColor() : Styles.COMMON.getColor()))
-                        ) // "SEARCH" styling
+                                search.copy().setStyle(
+                                        search.getStyle().withColor(
+                                                isAltAndCtrl ? Styles.COMMON.getColor() : // Both Alt and Ctrl held
+                                                        isCtrl ? Styles.UNIQUE.getColor() : // Only Ctrl held
+                                                                Styles.COMMON.getColor() // Default styling
+                                        )
+                                )
+                        )
+                        .append("\u00A0") // Spacer
+                        .append(
+                                config.copy().setStyle(
+                                        config.getStyle().withColor(
+                                                isAltAndCtrl ? Styles.UNIQUE.getColor() : // Both Alt and Ctrl held
+                                                        Styles.COMMON.getColor() // Default styling
+                                        )
+                                )
+                        )
         );
     }
 
+
+
     public static void appendSpellScaleTooltip(List<Text> tooltip, String spellSchool) {
         if (Platform.isModLoaded("spell_power") || Platform.isModLoaded("irons_spellbooks")) {
-            if (Screen.hasAltDown()) {
+            if (Screen.hasAltDown() && !Screen.hasControlDown()) {
                 tooltip.add(Text.literal(""));
                 tooltip.add(Text.translatable("item.simplyswords.compat.spellScaling").setStyle(Styles.COMMON));
                 switch (spellSchool) {
@@ -80,7 +114,7 @@ public class TooltipUtils {
     }
 
     public static boolean shouldDisplayTooltip(ItemStack stack, Identifier tagId) {
-        return Screen.hasAltDown() // Don't hide info on these items
+        return (Screen.hasAltDown() && !Screen.hasControlDown()) // Don't hide info on these items
                 || HelperMethods.isInTag(stack, tagId)
                 || stack.isOf(ItemsRegistry.RUNEFUSED_GEM.get())
                 || stack.isOf(ItemsRegistry.NETHERFUSED_GEM.get());
@@ -96,7 +130,6 @@ public class TooltipUtils {
             if (entry.getPath().contains("tainted_relic"))
                 entry = Identifier.of("simplyswords:uniques/entry_dormant_relic");
 
-            //ConfigApiJava.INSTANCE.openScreen("simplyswords.unique_effects.flickerfury"); Can we do this in the future :o ?
             commonPatchouli(entry);
         }
     }
@@ -109,6 +142,61 @@ public class TooltipUtils {
             OracleScreen.activeBook = "simplyswords";
             OracleScreen.activeEntry = identifier;
             MinecraftClient.getInstance().setScreen(new OracleScreen());
+        }
+    }
+
+    private static boolean isTooltipRendering = false;
+    public static void openFzzyConfig(Identifier identifier) {
+        if (isTooltipRendering) {
+            return;
+        }
+
+        isTooltipRendering = true;
+        try {
+            ConfigApiJava.INSTANCE.openScreen("simplyswords.unique_effects.flickerfury");
+        } finally {
+            isTooltipRendering = false;
+        }
+    }
+
+    public static void generateDynamicTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
+        Identifier entry = Identifier.of("oracle_index:books/simplyswords/weapon-types/" + itemStack.getItem().getRegistryEntry().registryKey().getValue().getPath() + ".mdx");
+        TooltipUtils.addDynamicButtonTooltip(
+                tooltip,
+                Text.translatable("item.simplyswords.common.showtooltip.info"),
+                Text.translatable("item.simplyswords.common.showtooltip.search"),
+                Text.translatable("item.simplyswords.common.showtooltip.config"),
+                Screen.hasAltDown(),
+                Screen.hasControlDown()
+        );
+        if (itemStack.getItem() instanceof UniqueSwordItem) {
+            tooltip.add(Text.literal(""));
+            SimplySwordsAPI.appendTooltipGemSocketLogic(itemStack, tooltipContext, tooltip, type);
+            entry = Identifier.of("oracle_index:books/simplyswords/unique-weapons/" + itemStack.getItem().getRegistryEntry().registryKey().getValue().getPath() + ".mdx");
+        }
+        else if (itemStack.getItem() instanceof RunicSwordItem) {
+            tooltip.add(Text.literal(""));
+            GemPowerComponent component = SimplySwordsAPI.getComponent(itemStack);
+            if (component.isEmpty()) {
+                tooltip.add(Text.translatable("item.simplyswords.unidentifiedsworditem.tooltip1").setStyle(Styles.RUNIC));
+                tooltip.add(Text.translatable("item.simplyswords.unidentifiedsworditem.tooltip2").setStyle(Styles.TEXT));
+            } else {
+                component.appendTooltip(itemStack, tooltipContext, tooltip, type, true);
+            }
+        }
+        if (Screen.hasControlDown()) {
+            if (ctrlKeyPressTimestamp == 0) {
+                ctrlKeyPressTimestamp = System.currentTimeMillis();
+            }
+            // Check if Control has been held for at least 500 milliseconds (0.5 seconds)
+            if ((System.currentTimeMillis() - ctrlKeyPressTimestamp) >= 500) {
+                if (Screen.hasAltDown())
+                    openFzzyConfig(entry);
+                else TooltipUtils.openOracleIndex(entry);
+                ctrlKeyPressTimestamp = 0;
+            }
+        } else {
+            ctrlKeyPressTimestamp = 0;
         }
     }
 
