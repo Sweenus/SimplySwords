@@ -95,4 +95,117 @@ subprojects {
         }
     }
 
+    // Parse all recipes and create corresponding .mdx files, along with a _meta.json.
+    // Only supports crafting grid recipes. Revise this once moddedmc.wiki supports other recipe types.
+    tasks.register('generateRecipeDocs') {
+        def recipesDir = file("$rootDir/common/src/main/resources/data/simplyswords/recipe") // Path to recipes folder
+        def outputDir = file("$rootDir/docs/generated") // Path to generate .mdx files
+
+        inputs.dir(recipesDir)
+        outputs.dir(outputDir)
+
+        doLast {
+            if (!recipesDir.exists()) {
+                println "Recipes directory does not exist: $recipesDir"
+                return
+            }
+
+            if (!outputDir.exists()) {
+                outputDir.mkdirs()
+            }
+
+            // Predefined map to convert tags to default items
+            def tagToItemMap = [
+                    "c:wood_sticks": "stick" // Add more tag mappings here as needed
+            ]
+
+            def metaContent = [:] // Map to hold meta.json content
+
+            recipesDir.listFiles().each { recipeFile ->
+                if (recipeFile.name.endsWith('.json')) {
+                    // Parse the JSON file
+                    def recipeJson = new groovy.json.JsonSlurper().parse(recipeFile)
+
+                    // Extract fields from the JSON
+                    def result = recipeJson.result?.id ?: "unknown:unknown_item"
+                    def pattern = recipeJson.pattern ?: []
+                    def key = recipeJson.key ?: [:]
+                    def slots = []
+
+                    // Use a for-loop to normalize rows to a 3x3 grid
+                    for (int i = 0; i < 3; i++) {
+                        // Get the current row or use a blank one if the row doesn't exist
+                        String row = i < pattern.size() ? pattern[i] : "   "
+
+                        // Ensure the row is exactly 3 characters long
+                        row = row.padRight(3, ' ').substring(0, 3)
+
+                        // Loop through the characters of the row to process each slot
+                        for (int j = 0; j < 3; j++) {
+                            char currentChar = row.charAt(j)
+                            String charStr = currentChar.toString() // Convert char to String explicitly
+
+                            if (key.containsKey(charStr)) {
+                                // Process key entry
+                                def keyEntry = key[charStr]
+                                String item = ""
+
+                                if (keyEntry.containsKey("item")) {
+                                    item = keyEntry.item.replace('minecraft:', '')
+                                } else if (keyEntry.containsKey("tag")) {
+                                    String tag = keyEntry.tag
+                                    item = tagToItemMap[tag] ?: "" // Substitute tag with predefined item or leave blank
+                                }
+
+                                slots.add(item)
+                            } else if (charStr == ' ') {
+                                slots.add('') // Add blank slot for spaces
+                            } else {
+                                println "Warning: Character '${charStr}' in pattern not found in key map. Adding blank slot."
+                                slots.add('') // Add an empty slot for unrecognized characters
+                            }
+                        }
+                    }
+
+                    // Generate the title by capitalising words and removing underscores
+                    def icon = result
+                    def title = result.split(':')[-1].capitalize()
+                    def cleanedTitle = title.replaceAll('_', ' ').split(' ').collect { it.capitalize() }.join(' ')
+                    def mdxFileName = "${title.toLowerCase()}.mdx"
+
+                    // Add entry to metaContent
+                    metaContent[mdxFileName] = cleanedTitle
+
+                    // Prepare and write the MDX file
+                    def mdxContent = """---
+title: ${title}
+icon: ${icon}
+---
+
+<CraftingRecipe
+slots={${slots.collect { "'$it'" }}}
+result="${result}"
+/>
+"""
+
+                    def outputFile = new File(outputDir, mdxFileName)
+                    outputFile.text = mdxContent
+                    println "Generated: ${outputFile.absolutePath}"
+                }
+            }
+
+            // Write the _meta.json file
+            def metaFile = new File(outputDir, "_meta.json")
+            metaFile.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(metaContent))
+            println "Generated: ${metaFile.absolutePath}"
+
+            println "All .mdx files and _meta.json have been generated in: $outputDir"
+        }
+    }
+
+
+
+
+
+
 }
