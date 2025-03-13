@@ -11,6 +11,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.item.tooltip.TooltipType;
+import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.server.world.ServerWorld;
@@ -44,8 +45,13 @@ public class SoulrenderSwordItem extends UniqueSwordItem implements TwoHandedWea
             int hitChance = Config.uniqueEffects.soulRend.chance;
             int duration = Config.uniqueEffects.soulRend.duration;
             int maxStacks = Config.uniqueEffects.soulRend.maxStacks;
+            ParticleEffect particleSelect  = ParticleTypes.ASH;
+            int particleCount = 8; // Number of particles along the line
 
             if (attacker.getRandom().nextInt(100) <= hitChance) {
+                particleSelect  = ParticleTypes.SMOKE;
+                HelperMethods.spawnOrbitParticles(world, target.getPos(), particleSelect, 0.5f, particleCount);
+                HelperMethods.spawnOrbitParticles(world, target.getPos().add(0,0.2,0), ParticleTypes.SOUL, 0.4f, 5);
 
                 int choose_sound = (int) (Math.random() * 30);
                 if (choose_sound <= 10)
@@ -78,6 +84,7 @@ public class SoulrenderSwordItem extends UniqueSwordItem implements TwoHandedWea
                     target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, duration, 0), attacker);
                 }
             }
+            HelperMethods.spawnWaistHeightParticles(world, particleSelect, attacker, target, particleCount);
         }
         return super.postHit(stack, target, attacker);
     }

@@ -7,11 +7,24 @@
     "attacks": [
       {
         "hitbox": "HORIZONTAL_PLANE",
-        "conditions": ["DUAL_WIELDING_ANY"],
-        "damage_multiplier": 0.2,
-        "angle": 150,
+        "conditions": ["DUAL_WIELDING_ANY", "MAIN_HAND_ONLY"],
+        "damage_multiplier": 1.0,
+        "angle": 50,
         "upswing": 0.5,
         "animation": "bettercombat:one_handed_slash_horizontal_right",
+        "swing_sound": {
+          "id": "simplyswords:dark_sword_whoosh_02",
+          "volume": 0.3,
+          "pitch": 1.4
+        }
+      },
+      {
+        "hitbox": "HORIZONTAL_PLANE",
+        "conditions": ["DUAL_WIELDING_ANY", "OFF_HAND_ONLY"],
+        "damage_multiplier": 1.0,
+        "angle": 50,
+        "upswing": 0.5,
+        "animation": "bettercombat:one_handed_slash_horizontal_left",
         "swing_sound": {
           "id": "simplyswords:dark_sword_whoosh_02",
           "volume": 0.3,
@@ -19,9 +32,35 @@
         }
       },
       {
+        "hitbox": "FORWARD_BOX",
+        "conditions": ["DUAL_WIELDING_SAME_CATEGORY", "MAIN_HAND_ONLY"],
+        "damage_multiplier": 1.1,
+        "angle": 0,
+        "upswing": 0.5,
+        "animation": "simplyswords:one_handed_chakram_throw_left",
+        "swing_sound": {
+          "id": "simplyswords:dark_sword_whoosh_03",
+          "volume": 0.2,
+          "pitch": 1.7
+        }
+      },
+      {
+        "hitbox": "FORWARD_BOX",
+        "conditions": ["DUAL_WIELDING_SAME_CATEGORY", "OFF_HAND_ONLY"],
+        "damage_multiplier": 1.1,
+        "angle": 0,
+        "upswing": 0.5,
+        "animation": "simplyswords:one_handed_chakram_throw_left",
+        "swing_sound": {
+          "id": "simplyswords:dark_sword_whoosh_04",
+          "volume": 0.2,
+          "pitch": 2
+        }
+      },
+      {
         "hitbox": "HORIZONTAL_PLANE",
         "conditions": ["NO_OFFHAND_ITEM"],
-        "damage_multiplier": 1.8,
+        "damage_multiplier": 1.2,
         "angle": 150,
         "upswing": 0.5,
         "animation": "bettercombat:two_handed_slash_horizontal_left",
@@ -34,7 +73,7 @@
       {
         "hitbox": "HORIZONTAL_PLANE",
         "conditions": ["NO_OFFHAND_ITEM"],
-        "damage_multiplier": 1,
+        "damage_multiplier": 1.2,
         "angle": 150,
         "upswing": 0.5,
         "animation": "bettercombat:two_handed_slash_horizontal_right",
