@@ -14,6 +14,17 @@ allprojects {
     version = rootProject.mod_version
 }
 
+// Sinytra Wiki
+wiki {
+    docs {
+        // The name of the object (examplemod) should match the registered wiki project ID (if it exists).
+        simplyswords {
+            // The path to the folder containing the documentation metadata file (sinytra-wiki.json)
+            root = file('docs')
+        }
+    }
+}
+
 subprojects {
     apply plugin: 'dev.architectury.loom'
     apply plugin: 'architectury-plugin'
@@ -72,16 +83,7 @@ subprojects {
         }
     }
 
-    // Sinytra Wiki
-    wiki {
-        docs {
-            // The name of the object (examplemod) should match the registered wiki project ID (if it exists).
-            simplyswords {
-                // The path to the folder containing the documentation metadata file (sinytra-wiki.json)
-                root = file('docs')
-            }
-        }
-    }
+
 
     // Oracle Index related tasks
     tasks.named('processResources') {
@@ -164,7 +166,7 @@ subprojects {
                     }
 
                     // Generate the title by capitalising words and removing underscores
-                    def icon = result
+                    def icon = result.split(':').join(':item/')
                     def title = result.split(':')[-1].capitalize()
                     def cleanedTitle = title.replaceAll('_', ' ').split(' ').collect { it.capitalize() }.join(' ')
                     def mdxFileName = "${title.toLowerCase()}.mdx"
@@ -174,7 +176,7 @@ subprojects {
 
                     // Prepare and write the MDX file
                     def mdxContent = """---
-title: ${title}
+title: ${cleanedTitle}
 icon: ${icon}
 ---
 
