@@ -353,7 +353,7 @@ public class AbilityMethods {
         }
     }
 
-    //Thunder Brand - Thunder Blitz
+    //Hearthflame - Volcanic Fury
     public static void tickAbilityVolcanicFury(ItemStack stack, World world, LivingEntity user,
                                                int ability_timer, int ability_timer_max, float abilityDamage,
                                                int skillCooldown, int radius, int chargePower) {
@@ -362,7 +362,7 @@ public class AbilityMethods {
             if (ability_timer < 5) user.stopUsingItem();
 
             //AOE Damage
-            if (user.age % 20 == 0 && user.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
+            if (user.age % 20 == 0 && HelperMethods.isHolding(stack, user)) {
 
                 if (ability_timer > 10) {
                     user.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 20, 5), user);

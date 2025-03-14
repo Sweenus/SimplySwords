@@ -84,7 +84,7 @@ public class HearthflameSwordItem extends UniqueSwordItem implements TwoHandedWe
 
     @Override
     public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
-        if (user.getEquippedStack(EquipmentSlot.MAINHAND) == stack && (user instanceof PlayerEntity player)) {
+        if (HelperMethods.isHolding(stack, user) && user instanceof PlayerEntity player) {
             int radius = Config.uniqueEffects.volcanicFury.radius;
             float spellScaling = HelperMethods.commonSpellAttributeScaling(Config.uniqueEffects.volcanicFury.spellScaling, user, "fire");
             float abilityDamage = spellScaling > 0f ? spellScaling : Config.uniqueEffects.volcanicFury.damage;
