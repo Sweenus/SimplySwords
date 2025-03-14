@@ -9,7 +9,8 @@ import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import net.sweenus.simplyswords.client.util.TooltipUtils;
+import net.sweenus.simplyswords.SimplySwords;
+import net.sweenus.simplyswords.client.api.SimplySwordsClientAPI;
 import net.sweenus.simplyswords.util.HelperMethods;
 
 import java.util.ArrayList;
@@ -46,7 +47,17 @@ public class SimplySwordsSwordItem extends SwordItem {
     @Override
     public void appendTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
-        TooltipUtils.generateDynamicTooltip(itemStack, tooltipContext, tooltip, type);
+        generateDynamicTooltip(itemStack, tooltipContext, tooltip, type);
     }
+
+    // Override this with your own id & paths
+    protected void generateDynamicTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
+        SimplySwordsClientAPI.generateDynamicTooltip(itemStack, tooltipContext, tooltip, type,
+                SimplySwords.MOD_ID,
+                "oracle_index:books/simplyswords/weapon-types",
+                "oracle_index:books/simplyswords/unique-weapons",
+                "oracle_index:books/simplyswords/runic-powers");
+    }
+
 
 }

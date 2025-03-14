@@ -7,13 +7,13 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.tooltip.TooltipType;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.SimplySwordsExpectPlatform;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
-import net.sweenus.simplyswords.item.RunicSwordItem;
-import net.sweenus.simplyswords.item.UniqueSwordItem;
+import net.sweenus.simplyswords.power.GemPower;
 import net.sweenus.simplyswords.power.GemPowerComponent;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -134,12 +134,12 @@ public class TooltipUtils {
         }
     }
 
-    public static void openOracleIndex(Identifier identifier) {
+    public static void openOracleIndex(Identifier identifier, String modId) {
         if (!(MinecraftClient.getInstance().currentScreen instanceof OracleScreen)) {
             if (identifier.getPath().contains("lichblade")) // Lichblade variants are contained within one wiki entry
                 identifier = Identifier.of("oracle_index:books/simplyswords/unique-weapons/lichblade.mdx");
 
-            OracleScreen.activeBook = "simplyswords";
+            OracleScreen.activeBook = modId;
             OracleScreen.activeEntry = identifier;
             MinecraftClient.getInstance().setScreen(new OracleScreen());
         }
@@ -159,46 +159,58 @@ public class TooltipUtils {
         }
     }
 
-    public static void generateDynamicTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
-        Identifier entry = Identifier.of("oracle_index:books/simplyswords/weapon-types/" + itemStack.getItem().getRegistryEntry().registryKey().getValue().getPath() + ".mdx");
-        TooltipUtils.addDynamicButtonTooltip(
-                tooltip,
-                Text.translatable("item.simplyswords.common.showtooltip.info"),
-                Text.translatable("item.simplyswords.common.showtooltip.search"),
-                Text.translatable("item.simplyswords.common.showtooltip.config"),
-                Screen.hasAltDown(),
-                Screen.hasControlDown()
-        );
-        if (itemStack.getItem() instanceof UniqueSwordItem) {
-            tooltip.add(Text.literal(""));
-            SimplySwordsAPI.appendTooltipGemSocketLogic(itemStack, tooltipContext, tooltip, type);
-            entry = Identifier.of("oracle_index:books/simplyswords/unique-weapons/" + itemStack.getItem().getRegistryEntry().registryKey().getValue().getPath() + ".mdx");
+    public static Identifier generateDefaultTooltipEntry(ItemStack itemStack, String itemPath) {
+        return Identifier.of(itemPath + "/" +
+                itemStack.getItem().getRegistryEntry().registryKey().getValue().getPath() + ".mdx");
+    }
+
+    public static Identifier handleUniqueSwordTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Text> tooltip, TooltipType type, String uniquePath) {
+        tooltip.add(Text.literal(""));
+
+        SimplySwordsAPI.appendTooltipGemSocketLogic(itemStack, tooltipContext, tooltip, type);
+
+        return Identifier.of(uniquePath + "/" +
+                itemStack.getItem().getRegistryEntry().registryKey().getValue().getPath() + ".mdx");
+    }
+
+    public static Identifier handleRunicSwordTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Text> tooltip, TooltipType type, String modId, String itemPath, String runicPath) {
+        tooltip.add(Text.literal(""));
+
+        GemPowerComponent component = SimplySwordsAPI.getComponent(itemStack);
+        if (component.isEmpty()) {
+            tooltip.add(Text.translatable("item.simplyswords.unidentifiedsworditem.tooltip1").setStyle(Styles.RUNIC));
+            tooltip.add(Text.translatable("item.simplyswords.unidentifiedsworditem.tooltip2").setStyle(Styles.TEXT));
+        } else {
+            component.appendTooltip(itemStack, tooltipContext, tooltip, type, true);
+
+            RegistryEntry<GemPower> mainComponent = component.runicPower();
+            String powerId = mainComponent.getIdAsString()
+                    .replace(modId + ":", "")
+                    .replace("greater_", "");
+            return Identifier.of(runicPath + "/" + powerId + ".mdx");
         }
-        else if (itemStack.getItem() instanceof RunicSwordItem) {
-            tooltip.add(Text.literal(""));
-            GemPowerComponent component = SimplySwordsAPI.getComponent(itemStack);
-            if (component.isEmpty()) {
-                tooltip.add(Text.translatable("item.simplyswords.unidentifiedsworditem.tooltip1").setStyle(Styles.RUNIC));
-                tooltip.add(Text.translatable("item.simplyswords.unidentifiedsworditem.tooltip2").setStyle(Styles.TEXT));
-            } else {
-                component.appendTooltip(itemStack, tooltipContext, tooltip, type, true);
-            }
-        }
+
+        return generateDefaultTooltipEntry(itemStack, itemPath);
+    }
+
+    public static void processCtrlAltNavigation(Identifier entry, String modId) {
         if (Screen.hasControlDown()) {
             if (ctrlKeyPressTimestamp == 0) {
                 ctrlKeyPressTimestamp = System.currentTimeMillis();
             }
-            // Check if Control has been held for at least 500 milliseconds (0.5 seconds)
             if ((System.currentTimeMillis() - ctrlKeyPressTimestamp) >= 500) {
-                if (Screen.hasAltDown())
-                    openFzzyConfig(entry);
-                else TooltipUtils.openOracleIndex(entry);
+                if (Screen.hasAltDown()) {
+                    TooltipUtils.openFzzyConfig(entry);
+                } else {
+                    TooltipUtils.openOracleIndex(entry, modId);
+                }
                 ctrlKeyPressTimestamp = 0;
             }
         } else {
             ctrlKeyPressTimestamp = 0;
         }
     }
+
 
     public static void commonPatchouli(Identifier entry) {
         SimplySwordsExpectPlatform.openPatchouli(entry);
