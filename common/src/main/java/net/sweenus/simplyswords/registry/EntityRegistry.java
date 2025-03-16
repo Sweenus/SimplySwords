@@ -10,6 +10,7 @@ import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.entity.BattleStandardDarkEntity;
 import net.sweenus.simplyswords.entity.BattleStandardEntity;
 import net.sweenus.simplyswords.entity.SimplySwordsBeeEntity;
+import net.sweenus.simplyswords.entity.ThrownSwordEntity;
 
 public class EntityRegistry {
 
@@ -22,6 +23,16 @@ public class EntityRegistry {
             () -> EntityType.Builder.create(SimplySwordsBeeEntity::new, SpawnGroup.CREATURE)
                     .build(Identifier.of(SimplySwords.MOD_ID, "simplybeeentity").toString())
     );
+
+    public static final RegistrySupplier<EntityType<ThrownSwordEntity>> THROWNSWORDENTITY = ENTITIES.register(
+            "thrown_sword",
+            () -> EntityType.Builder.<ThrownSwordEntity>create(ThrownSwordEntity::new, SpawnGroup.MISC)
+                    .dimensions(0.5f, 0.5f)
+                    .maxTrackingRange(8)
+                    .trackingTickInterval(10)
+                    .build(Identifier.of(SimplySwords.MOD_ID, "thrown_sword").toString())
+    );
+
 
 
 }

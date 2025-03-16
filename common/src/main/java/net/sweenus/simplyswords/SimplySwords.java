@@ -21,6 +21,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.client.renderer.BattleStandardDarkRenderer;
 import net.sweenus.simplyswords.client.renderer.BattleStandardRenderer;
+import net.sweenus.simplyswords.client.renderer.ThrownSwordEntityRenderer;
 import net.sweenus.simplyswords.client.renderer.model.BattleStandardDarkModel;
 import net.sweenus.simplyswords.client.renderer.model.BattleStandardModel;
 import net.sweenus.simplyswords.compat.eldritch_end.EldritchEndCompatRegistry;
@@ -84,6 +85,7 @@ public class SimplySwords {
         EntityAttributeRegistry.register(EntityRegistry.BATTLESTANDARD, BattleStandardEntity::createBattleStandardAttributes);
         EntityAttributeRegistry.register(EntityRegistry.BATTLESTANDARDDARK, BattleStandardDarkEntity::createBattleStandardDarkAttributes);
         EntityAttributeRegistry.register(EntityRegistry.SIMPLYBEEENTITY, SimplySwordsBeeEntity::createSimplyBeeAttributes);
+
         ModLootTableModifiers.init();
         if (passVersionCheck("eldritch_end", minimumEldritchEndVersion)) {
             //EldritchEndCompat.registerModItems(); 1.21
@@ -124,6 +126,8 @@ public class SimplySwords {
             EntityRendererRegistry.register(EntityRegistry.BATTLESTANDARDDARK, BattleStandardDarkRenderer::new);
             EntityModelLayerRegistry.register(BATTLESTANDARD_DARK_MODEL, BattleStandardDarkModel::getTexturedModelData);
             EntityRendererRegistry.register(EntityRegistry.SIMPLYBEEENTITY, BeeEntityRenderer::new);
+            EntityRendererRegistry.register(EntityRegistry.THROWNSWORDENTITY, ThrownSwordEntityRenderer::new);
+
         }
     }
 
