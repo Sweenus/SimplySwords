@@ -45,6 +45,7 @@ dependencies {
 
     modImplementation "me.fzzyhmstrs:fzzy_config:${project.fzz_config_version}"
     modImplementation "curse.maven:oracle-index-1206582:${rootProject.oracle_index_version}"
+    modImplementation "curse.maven:open-parties-and-claims-636608:${project.openpac_version}"
 
     modImplementation "io.wispforest:owo-lib:0.12.15.1+1.21" // Needed to use OracleScreen from oracle_index :(
 }

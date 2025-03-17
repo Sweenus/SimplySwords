@@ -1,5 +1,6 @@
 package net.sweenus.simplyswords.util;
 
+import dev.architectury.platform.Platform;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
@@ -29,6 +30,7 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.SimplySwordsExpectPlatform;
+import net.sweenus.simplyswords.compat.opac.OpacCompat;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.effect.instance.SimplySwordsStatusEffectInstance;
 import net.sweenus.simplyswords.entity.BattleStandardDarkEntity;
@@ -71,36 +73,54 @@ public class HelperMethods {
     }
 
 
-    //Check if we should be able to hit the target
-    public static boolean checkFriendlyFire(LivingEntity target, LivingEntity attacker) {
-        if (!checkEntityBlacklist(target, attacker)) {
+    // Check if we should be able to hit the target
+    public static boolean checkFriendlyFire (LivingEntity livingEntity, LivingEntity attackingEntity) {
+        if (livingEntity == null || attackingEntity == null)
             return false;
-        }
+        if (!checkEntityBlacklist(livingEntity, attackingEntity))
+            return false;
+        if (livingEntity == attackingEntity)
+            return false;
 
         // Check if the player and the living entity are on the same team
-        AbstractTeam playerTeam = attacker.getScoreboardTeam();
-        AbstractTeam entityTeam = target.getScoreboardTeam();
-        if (playerTeam != null && entityTeam != null && target.isTeammate(attacker)) {
+        AbstractTeam playerTeam = attackingEntity.getScoreboardTeam();
+        AbstractTeam entityTeam = livingEntity.getScoreboardTeam();
+        if (HelperMethods.isOpacLoaded() && livingEntity instanceof PlayerEntity
+                && attackingEntity instanceof PlayerEntity playerEntity) {
+            // Is OpenPAC loaded? And are they team/ally member?
+            return OpacCompat.checkOpacFriendlyFire(livingEntity, playerEntity);
+        }
+        if (playerTeam != null && entityTeam != null && livingEntity.isTeammate(attackingEntity)) {
             // They are on the same team, so friendly fire should not be allowed
             return false;
         }
 
-        if (target instanceof PlayerEntity playerTarget) {
-            if (playerTarget == attacker) {
+        if (livingEntity instanceof PlayerEntity playerEntity
+                && attackingEntity instanceof PlayerEntity player) {
+            if (playerEntity == attackingEntity)
                 return false;
-            }
-            return !(attacker instanceof PlayerEntity playerAttacker) || playerAttacker.shouldDamagePlayer(playerTarget);
+            return playerEntity.shouldDamagePlayer(player);
         }
-        if (target instanceof Tameable tameable && attacker instanceof PlayerEntity player) {
+        if (livingEntity instanceof Tameable tameable) {
             if (tameable.getOwner() != null) {
-                if (tameable.getOwner() != player
-                        && (tameable.getOwner() instanceof PlayerEntity ownerPlayer))
-                    return player.shouldDamagePlayer(ownerPlayer);
-                return tameable.getOwner() != player;
+                if (tameable.getOwner() != attackingEntity
+                        && (tameable.getOwner() instanceof PlayerEntity ownerPlayer)
+                && attackingEntity instanceof PlayerEntity playerEntity) {
+                    if (HelperMethods.isOpacLoaded()) {
+                        // Is OpenPAC loaded? And is the pet owner a team/ally member?
+                        return OpacCompat.checkOpacFriendlyFire(ownerPlayer, playerEntity);
+                    }
+                    return playerEntity.shouldDamagePlayer(ownerPlayer);
+                }
+                return tameable.getOwner() != attackingEntity;
             }
             return true;
         }
         return true;
+    }
+
+    public static boolean isOpacLoaded() {
+        return Platform.isModLoaded("openpartiesandclaims");
     }
 
     //Check if the target matches blacklisted entities (expand this to be configurable if there is demand)
@@ -456,7 +476,7 @@ public class HelperMethods {
         for (Entity entity : world.getOtherEntities(sourceEntity, searchBox)) {
             Box entityBox = entity.getBoundingBox().expand(entity.getTargetingMargin());
             if (entityBox.intersects(searchBox)) {
-                if ((sourceEntity instanceof LivingEntity livingEntity)
+                if ((sourceEntity instanceof PlayerEntity livingEntity)
                         && (entity instanceof LivingEntity livingTarget)
                         && HelperMethods.checkFriendlyFire(livingTarget, livingEntity)) {
                     livingTarget.damage(damageSource, damage);
