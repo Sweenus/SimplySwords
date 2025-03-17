@@ -11,7 +11,6 @@ import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.codec.PacketCodecs;
 import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.registry.entry.RegistryFixedCodec;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
@@ -30,8 +29,8 @@ public record GemPowerComponent(boolean hasRunicPower, boolean hasNetherPower, R
 				instance.group(
 						Codec.BOOL.fieldOf("has_runic_power").forGetter(GemPowerComponent::hasRunicPower),
 						Codec.BOOL.fieldOf("has_nether_power").forGetter(GemPowerComponent::hasNetherPower),
-						RegistryFixedCodec.of(GemPowerRegistry.REGISTRY.key()).fieldOf("runic_power").forGetter(GemPowerComponent::runicPower),
-						RegistryFixedCodec.of(GemPowerRegistry.REGISTRY.key()).fieldOf("nether_power").forGetter(GemPowerComponent::netherPower)
+						(new GemPower.GemPowerCodec()).fieldOf("runic_power").forGetter(GemPowerComponent::runicPower),
+						(new GemPower.GemPowerCodec()).fieldOf("nether_power").forGetter(GemPowerComponent::netherPower)
 				).apply(instance, GemPowerComponent::new)
 			);
 
@@ -48,7 +47,7 @@ public record GemPowerComponent(boolean hasRunicPower, boolean hasNetherPower, R
 	);
 
 	@Override
-	public boolean equals(Object componentObject){
+	public boolean equals(Object componentObject) {
 		if (componentObject == null || getClass() != componentObject.getClass()) {
 			return false;
 		}
