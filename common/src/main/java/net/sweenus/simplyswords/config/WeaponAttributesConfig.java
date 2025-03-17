@@ -136,7 +136,7 @@ public class WeaponAttributesConfig extends Config {
         public float shadowsting_damageModifier = -2.0f;
         public float soulkeeper_damageModifier = 8.0f;
         public float soulpyre_damageModifier = 7.0f;
-        public float soulrender_damageModifier = 4.0f;
+        public float soulrender_damageModifier = 3.0f;
         public float soulstealer_damageModifier = 0.0f;
         public float starsedge_damageModifier = 3.0f;
         public float stormsedge_damageModifier = 3.0f;

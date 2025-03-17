@@ -29,7 +29,7 @@ public class UniqueEffectsConfig extends Config {
     public TwistedBladeItem.EffectSettings       ferocity = new TwistedBladeItem.EffectSettings();
     public WickpiercerSwordItem.EffectSettings   flickerFury = new WickpiercerSwordItem.EffectSettings();
     public FrostfallSwordItem.EffectSettings     frostFury = new FrostfallSwordItem.EffectSettings();
-    public LivyatanSwordItem.EffectSettings      frostShatter = new LivyatanSwordItem.EffectSettings();
+    public LivyatanSwordItem.EffectSettings jotunnsWrath = new LivyatanSwordItem.EffectSettings();
     public HiveheartSwordItem.EffectSettings     hivemind = new HiveheartSwordItem.EffectSettings();
     public MagibladeSwordItem.EffectSettings     magiblade = new MagibladeSwordItem.EffectSettings();
     public MagispearSwordItem.EffectSettings     magislam = new MagispearSwordItem.EffectSettings();
