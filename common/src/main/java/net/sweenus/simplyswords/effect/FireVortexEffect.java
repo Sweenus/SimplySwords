@@ -41,7 +41,7 @@ public class FireVortexEffect extends OrbitingEffect {
 				float abilityDamage = 0;
 				if (sourceEntity != null) {
                     damageSource = livingEntity.getDamageSources().indirectMagic(livingEntity, sourceEntity);
-                    float spellScalingModifier = Config.uniqueEffects.vortex.spellScaling;
+                    float spellScalingModifier = Config.uniqueEffects.tempest.spellScaling;
                     abilityDamage = HelperMethods.commonSpellAttributeScaling(spellScalingModifier, sourceEntity, "fire");
                     if (livingEntity instanceof PlayerEntity && sourceEntity instanceof PlayerEntity sourcePlayer)
                         damageSource = livingEntity.getDamageSources().playerAttack(sourcePlayer);

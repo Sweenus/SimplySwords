@@ -30,7 +30,7 @@ public class RighteousRelicSwordItem extends UniqueSwordItem {
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         HelperMethods.playHitSounds(attacker, target);
-        if (!attacker.getWorld().isClient() && attacker.getRandom().nextInt(100) <= Config.uniqueEffects.righteousStandard.chance && attacker instanceof PlayerEntity) {
+        if (!attacker.getWorld().isClient() && attacker.getRandom().nextInt(100) <= Config.uniqueEffects.sunfire.chance && attacker instanceof PlayerEntity) {
             attacker.getWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
                     attacker.getSoundCategory(), 0.3f, 1.7f);
             attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.REGENERATION, 40, 0), attacker);

@@ -36,7 +36,7 @@ public class ModLootTableModifiers {
                 if (LootConfig.INSTANCE.enableLootInVillages.get() || !id.getPath().contains("village")) {
                     LootPool.Builder pool = LootPool.builder()
                             .rolls(ConstantLootNumberProvider.create(1))
-                            .conditionally(RandomChanceLootCondition.builder(LootConfig.INSTANCE.standardLootTableWeight.get())) // 1 = 100% of the time
+                            .conditionally(RandomChanceLootCondition.builder(LootConfig.INSTANCE.standardLootTableWeight.get() / 100)) // 1 = 100% of the time
                             .apply(EnchantRandomlyFromTagLootFunction.create(EnchantmentTags.ON_RANDOM_LOOT)) //This is not ideal, but forge doesn't expose the registry wrapper so...
                             .with(ItemEntry.builder(ItemsRegistry.IRON_LONGSWORD.get()))
                             .with(ItemEntry.builder(ItemsRegistry.IRON_TWINBLADE.get()))
@@ -81,7 +81,7 @@ public class ModLootTableModifiers {
                 if (LootConfig.INSTANCE.enableLootInVillages.get() || !id.getPath().contains("village")) {
                     LootPool.Builder pool = LootPool.builder()
                             .rolls(ConstantLootNumberProvider.create(1))
-                            .conditionally(RandomChanceLootCondition.builder(LootConfig.INSTANCE.rareLootTableWeight.get())) // 1 = 100% of the time
+                            .conditionally(RandomChanceLootCondition.builder(LootConfig.INSTANCE.rareLootTableWeight.get() / 100)) // 1 = 100% of the time
                             .apply(EnchantRandomlyFromTagLootFunction.create(EnchantmentTags.ON_RANDOM_LOOT)) //This is not ideal, but forge doesn't expose the registry wrapper so...
                             .with(ItemEntry.builder(ItemsRegistry.DIAMOND_LONGSWORD.get()))
                             .with(ItemEntry.builder(ItemsRegistry.DIAMOND_TWINBLADE.get()))
@@ -111,7 +111,7 @@ public class ModLootTableModifiers {
                 if (LootConfig.INSTANCE.enableLootInVillages.get() || !id.getPath().contains("village")) {
                     LootPool.Builder pool = LootPool.builder()
                             .rolls(ConstantLootNumberProvider.create(1))
-                            .conditionally(RandomChanceLootCondition.builder(LootConfig.INSTANCE.runicLootTableWeight.get())) // 1 = 100% of the time
+                            .conditionally(RandomChanceLootCondition.builder(LootConfig.INSTANCE.runicLootTableWeight.get() / 100)) // 1 = 100% of the time
                             .with(ItemEntry.builder(ItemsRegistry.RUNIC_TABLET.get()));
                     context.addPool(pool);
                 }
@@ -130,7 +130,7 @@ public class ModLootTableModifiers {
 
                     LootPool.Builder pool = LootPool.builder()
                             .rolls(ConstantLootNumberProvider.create(1))
-                            .conditionally(RandomChanceLootCondition.builder(lootChance));
+                            .conditionally(RandomChanceLootCondition.builder(lootChance / 100));
 
                     swords.get().stream().filter(it -> !LootConfig.INSTANCE.disabledUniqueWeaponLoot.contains(it)).forEach( item ->
                             pool.with(ItemEntry.builder(item))
@@ -142,7 +142,7 @@ public class ModLootTableModifiers {
                     if (id.getPath().contains("chests") && !id.getPath().contains("spectrum")) {
                         LootPool.Builder pool = LootPool.builder()
                                 .rolls(ConstantLootNumberProvider.create(1))
-                                .conditionally(RandomChanceLootCondition.builder(LootConfig.INSTANCE.uniqueLootTableWeight.get())); // 1 = 100% of the time
+                                .conditionally(RandomChanceLootCondition.builder(LootConfig.INSTANCE.uniqueLootTableWeight.get() / 100)); // 1 = 100% of the time
 
                         swords.get().stream().filter(it -> !LootConfig.INSTANCE.disabledUniqueWeaponLoot.contains(it)).forEach( item ->
                                 pool.with(ItemEntry.builder(item))

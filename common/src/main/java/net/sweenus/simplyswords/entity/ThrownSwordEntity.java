@@ -270,7 +270,7 @@ public class ThrownSwordEntity extends PersistentProjectileEntity {
 
     @Override
     public ItemStack getItemStack() {
-        System.out.println("ThrownSwordEntity: getItemStack called, stack = " + this.stack);
+        //System.out.println("ThrownSwordEntity: getItemStack called, stack = " + this.stack);
         return this.stack;
         }
 

@@ -64,8 +64,8 @@ public class IcewhisperSwordItem extends UniqueSwordItem implements TwoHandedWea
         if (HelperMethods.isHolding(stack, user) && user instanceof PlayerEntity) {
 
             ChargedLocationComponent location = stack.getOrDefault(ComponentTypeRegistry.CHARGED_LOCATION.get(), ChargedLocationComponent.DEFAULT);
-            int radius = Config.uniqueEffects.permafrost.radius;
-            float abilityDamage = HelperMethods.spellScaledDamage("frost", user, Config.uniqueEffects.permafrost.spellScaling, Config.uniqueEffects.permafrost.damage);
+            int radius = Config.uniqueEffects.icewhisper.radius;
+            float abilityDamage = HelperMethods.spellScaledDamage("frost", user, Config.uniqueEffects.icewhisper.spellScaling, Config.uniqueEffects.icewhisper.damage);
 
             AbilityMethods.tickAbilityPermafrost(stack, world, user, remainingUseTicks, abilityDamage,
                     radius, location.lastX(), location.lastY(), location.lastZ());
@@ -74,7 +74,7 @@ public class IcewhisperSwordItem extends UniqueSwordItem implements TwoHandedWea
 
     @Override
     public int getMaxUseTime(ItemStack stack, LivingEntity user) {
-        return Config.uniqueEffects.permafrost.duration;
+        return Config.uniqueEffects.icewhisper.duration;
     }
 
     @Override
@@ -85,7 +85,7 @@ public class IcewhisperSwordItem extends UniqueSwordItem implements TwoHandedWea
     @Override
     public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
         if (!world.isClient && (user instanceof PlayerEntity player)) {
-            int skillCooldown = Config.uniqueEffects.permafrost.cooldown;
+            int skillCooldown = Config.uniqueEffects.icewhisper.cooldown;
             player.getItemCooldownManager().set(stack.getItem(), skillCooldown);
         }
     }
@@ -93,7 +93,7 @@ public class IcewhisperSwordItem extends UniqueSwordItem implements TwoHandedWea
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
         if (!world.isClient && (entity instanceof PlayerEntity player)) {
-            int radius = Config.uniqueEffects.permafrost.radius;
+            int radius = Config.uniqueEffects.icewhisper.radius;
             //AOE Aura
             if (player.age % 35 == 0 && player.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
                 Box box = new Box(player.getX() + radius, player.getY() + radius, player.getZ() + radius,
@@ -108,7 +108,7 @@ public class IcewhisperSwordItem extends UniqueSwordItem implements TwoHandedWea
                         }
                         float choose = (float) (Math.random() * 1);
                         world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_BOW_ICE_SHOOT_IMPACT_03.get(), le.getSoundCategory(), 0.1f, choose);
-                        float abilityDamage = HelperMethods.spellScaledDamage("frost", entity, Config.uniqueEffects.permafrost.spellScaling, Config.uniqueEffects.permafrost.damage);
+                        float abilityDamage = HelperMethods.spellScaledDamage("frost", entity, Config.uniqueEffects.icewhisper.spellScaling, Config.uniqueEffects.icewhisper.damage);
                         le.damage(player.getDamageSources().indirectMagic(entity, entity), abilityDamage);
                     }
                 }
@@ -141,7 +141,7 @@ public class IcewhisperSwordItem extends UniqueSwordItem implements TwoHandedWea
 
     @Override
     public void appendTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
-        double radius = Config.uniqueEffects.permafrost.radius;
+        double radius = Config.uniqueEffects.icewhisper.radius;
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.icewhispersworditem.tooltip1").setStyle(Styles.ABILITY));
         tooltip.add(Text.translatable("item.simplyswords.icewhispersworditem.tooltip2").setStyle(Styles.TEXT));

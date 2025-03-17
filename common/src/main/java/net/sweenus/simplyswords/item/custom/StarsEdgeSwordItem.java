@@ -36,8 +36,8 @@ public class StarsEdgeSwordItem extends UniqueSwordItem {
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         if (!attacker.getWorld().isClient()) {
-            float skillDamageModifier = Config.uniqueEffects.celestialSurge.damageModifier;
-            float skillLifestealModifier = Config.uniqueEffects.celestialSurge.lifestealModifier;
+            float skillDamageModifier = Config.uniqueEffects.stars_edge.damageModifier;
+            float skillLifestealModifier = Config.uniqueEffects.stars_edge.lifestealModifier;
             ServerWorld world = (ServerWorld) attacker.getWorld();
             DamageSource damageSource = world.getDamageSources().generic();
             float abilityDamage = (float) HelperMethods.getEntityAttackDamage(attacker);
@@ -60,9 +60,9 @@ public class StarsEdgeSwordItem extends UniqueSwordItem {
 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
-        int skillCooldown = Config.uniqueEffects.celestialSurge.cooldown;
-        int skillDuration = Config.uniqueEffects.celestialSurge.duration;
-        int skillStacks = Config.uniqueEffects.celestialSurge.stacks;
+        int skillCooldown = Config.uniqueEffects.stars_edge.cooldown;
+        int skillDuration = Config.uniqueEffects.stars_edge.duration;
+        int skillStacks = Config.uniqueEffects.stars_edge.stacks;
 
         if (!user.hasStatusEffect(StatusEffects.SPEED)) {
             user.swingHand(hand);
@@ -101,7 +101,7 @@ public class StarsEdgeSwordItem extends UniqueSwordItem {
     @Override
     public void appendTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
 
-        float skillDamageModifier = Config.uniqueEffects.celestialSurge.damageModifier;
+        float skillDamageModifier = Config.uniqueEffects.stars_edge.damageModifier;
 
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.starsedgesworditem.tooltip1").setStyle(Styles.ABILITY));

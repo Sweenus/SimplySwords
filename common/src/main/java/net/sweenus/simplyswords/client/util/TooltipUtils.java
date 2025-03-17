@@ -145,17 +145,10 @@ public class TooltipUtils {
         }
     }
 
-    private static boolean isTooltipRendering = false;
-    public static void openFzzyConfig(Identifier identifier) {
-        if (isTooltipRendering) {
-            return;
-        }
-
-        isTooltipRendering = true;
-        try {
-            ConfigApiJava.INSTANCE.openScreen("simplyswords.unique_effects.flickerfury");
-        } finally {
-            isTooltipRendering = false;
+    public static void openFzzyConfig(String path) {
+        if (!ConfigApiJava.isScreenOpen("simplyswords.unique_effects.")) {
+            //System.out.println(path);
+            ConfigApiJava.INSTANCE.openScreen(path);
         }
     }
 
@@ -193,14 +186,21 @@ public class TooltipUtils {
         return generateDefaultTooltipEntry(itemStack, itemPath);
     }
 
-    public static void processCtrlAltNavigation(Identifier entry, String modId) {
+    public static void processCtrlAltNavigation(Identifier entry, String modId, Identifier customConfigPath) {
+        String customPath;
         if (Screen.hasControlDown()) {
             if (ctrlKeyPressTimestamp == 0) {
                 ctrlKeyPressTimestamp = System.currentTimeMillis();
             }
             if ((System.currentTimeMillis() - ctrlKeyPressTimestamp) >= 500) {
                 if (Screen.hasAltDown()) {
-                    TooltipUtils.openFzzyConfig(entry);
+                    if (customConfigPath == null) {
+                        TooltipUtils.openFzzyConfig(modId);
+                    }
+                    else {
+                        customPath = customConfigPath.getPath().replace(modId+":", "");
+                        TooltipUtils.openFzzyConfig(customPath);
+                    }
                 } else {
                     TooltipUtils.openOracleIndex(entry, modId);
                 }

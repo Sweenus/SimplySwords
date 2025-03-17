@@ -30,7 +30,7 @@ public class BrambleSwordItem extends UniqueSwordItem {
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         if (!attacker.getWorld().isClient()) {
 
-            int hitChance = Config.uniqueEffects.bramble.chance;
+            int hitChance = Config.uniqueEffects.bramblethorn.chance;
             HelperMethods.playHitSounds(attacker, target);
             if (attacker.getRandom().nextInt(100) <= hitChance) {
                 if (!attacker.hasStatusEffect(EffectRegistry.getReference(EffectRegistry.SPORE_SWARM)))

@@ -49,11 +49,11 @@ public class SoulPyreSwordItem extends UniqueSwordItem implements TwoHandedWeapo
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         if (!user.getWorld().isClient()) {
-            double range = Config.uniqueEffects.soultether.range;
-            double radius = Config.uniqueEffects.soultether.radius;
-            int ignite_duration = Config.uniqueEffects.soultether.igniteDuration / 20;
-            int resistance_duration = Config.uniqueEffects.soultether.resistanceDuration;
-            int relocationDuration = Config.uniqueEffects.soultether.duration;
+            double range = Config.uniqueEffects.soulpyre.range;
+            double radius = Config.uniqueEffects.soulpyre.radius;
+            int ignite_duration = Config.uniqueEffects.soulpyre.igniteDuration / 20;
+            int resistance_duration = Config.uniqueEffects.soulpyre.resistanceDuration;
+            int relocationDuration = Config.uniqueEffects.soulpyre.duration;
             //Position swap target & player
             LivingEntity target = (LivingEntity) HelperMethods.getTargetedEntity(user, range);
             if (target != null && HelperMethods.checkFriendlyFire(target, user)) {
@@ -129,7 +129,7 @@ public class SoulPyreSwordItem extends UniqueSwordItem implements TwoHandedWeapo
         tooltip.add(Text.translatable("item.simplyswords.soulpyresworditem.tooltip5").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.soulpyresworditem.tooltip6").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
-        tooltip.add(Text.translatable("item.simplyswords.soulpyresworditem.tooltip7", Config.uniqueEffects.soultether.duration / 20).setStyle(Styles.TEXT));
+        tooltip.add(Text.translatable("item.simplyswords.soulpyresworditem.tooltip7", Config.uniqueEffects.soulpyre.duration / 20).setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.soulpyresworditem.tooltip8").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.soulpyresworditem.tooltip9").setStyle(Styles.TEXT));
 

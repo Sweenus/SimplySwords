@@ -42,9 +42,9 @@ public class SoulrenderSwordItem extends UniqueSwordItem implements TwoHandedWea
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         if (!attacker.getWorld().isClient()) {
             ServerWorld world = (ServerWorld) attacker.getWorld();
-            int hitChance = Config.uniqueEffects.soulRend.chance;
-            int duration = Config.uniqueEffects.soulRend.duration;
-            int maxStacks = Config.uniqueEffects.soulRend.maxStacks;
+            int hitChance = Config.uniqueEffects.soulrender.chance;
+            int duration = Config.uniqueEffects.soulrender.duration;
+            int maxStacks = Config.uniqueEffects.soulrender.maxStacks;
             ParticleEffect particleSelect  = ParticleTypes.ASH;
             int particleCount = 8; // Number of particles along the line
 
@@ -92,10 +92,10 @@ public class SoulrenderSwordItem extends UniqueSwordItem implements TwoHandedWea
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         if (!user.getWorld().isClient()) {
-            float heal_amount = Config.uniqueEffects.soulRend.healMulti;
+            float heal_amount = Config.uniqueEffects.soulrender.healMulti;
             int healamp = 0;
-            double hradius = Config.uniqueEffects.soulRend.radius;
-            double vradius = Config.uniqueEffects.soulRend.radius / 2.0;
+            double hradius = Config.uniqueEffects.soulrender.radius;
+            double vradius = Config.uniqueEffects.soulrender.radius / 2.0;
             double x = user.getX();
             double y = user.getY();
             double z = user.getZ();
@@ -107,8 +107,8 @@ public class SoulrenderSwordItem extends UniqueSwordItem implements TwoHandedWea
                         && le.hasStatusEffect(StatusEffects.WEAKNESS) && HelperMethods.checkFriendlyFire(le, user)) {
 
                     healamp += (le.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier());
-                    float scaling = HelperMethods.commonSpellAttributeScaling(Config.uniqueEffects.soulRend.spellScaling, entity, "soul");
-                    float multiplier = scaling > 0f ? scaling : Config.uniqueEffects.soulRend.damageMulti;
+                    float scaling = HelperMethods.commonSpellAttributeScaling(Config.uniqueEffects.soulrender.spellScaling, entity, "soul");
+                    float multiplier = scaling > 0f ? scaling : Config.uniqueEffects.soulrender.damageMulti;
                     le.damage(user.getDamageSources().indirectMagic(user, user), le.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier() * multiplier);
                     le.removeStatusEffect(StatusEffects.WEAKNESS);
                     le.removeStatusEffect(StatusEffects.SLOWNESS);

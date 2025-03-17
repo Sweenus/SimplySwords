@@ -110,8 +110,8 @@ public class EmberIreSwordItem extends UniqueSwordItem {
                 user.setVelocity(user.getVelocity().x, 0, user.getVelocity().z);
                 user.velocityModified = true;
 
-                int hitChance = Config.uniqueEffects.emberIre.chance;
-                int duration = Config.uniqueEffects.emberIre.duration;
+                int hitChance = Config.uniqueEffects.emberblade.chance;
+                int duration = Config.uniqueEffects.emberblade.duration;
 
                 if (user.getRandom().nextInt((int) (250 - (chargeRatio * 100))) <= hitChance) {
                     user.addStatusEffect(new StatusEffectInstance(StatusEffects.STRENGTH, duration, 0), user);

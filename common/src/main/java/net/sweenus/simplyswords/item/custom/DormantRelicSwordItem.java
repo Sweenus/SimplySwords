@@ -11,6 +11,7 @@ import net.minecraft.particle.ParticleTypes;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
@@ -42,6 +43,10 @@ public class DormantRelicSwordItem extends UniqueSwordItem {
         HelperMethods.createFootfalls(entity, stack, world, ParticleTypes.MYCELIUM, ParticleTypes.MYCELIUM,
                 ParticleTypes.MYCELIUM, true);
         super.inventoryTick(stack, world, entity, slot, selected);
+    }
+    @Override
+    protected Identifier getConfigPath() {
+        return Identifier.of("simplyswords.unique_effects");
     }
 
     @Override

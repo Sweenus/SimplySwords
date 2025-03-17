@@ -98,7 +98,7 @@ public class EffectRegistry {
             new RibboncleaveEffect(StatusEffectCategory.BENEFICIAL, 1124687)
                     .addAttributeModifier(EntityAttributes.GENERIC_ATTACK_DAMAGE,
                             Identifier.of("c8fb5e9f-c446-4475-b73f-a2290196210f"),
-                            Config.uniqueEffects.ribbonwrath.damageBonusPercent,
+                            Config.uniqueEffects.ribboncleaver.damageBonusPercent,
                             EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL)
                     .addAttributeModifier(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE,
                             Identifier.of("1b147b80-6598-48d4-917f-7da3032c070f"),

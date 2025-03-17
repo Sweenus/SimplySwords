@@ -43,7 +43,7 @@ public class MoltenEdgeSwordItem extends UniqueSwordItem {
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         if (attacker.getWorld().isClient()) return super.postHit(stack, target, attacker);
 
-        int proc_chance = Config.uniqueEffects.moltenRoar.chance;
+        int proc_chance = Config.uniqueEffects.molten_edge.chance;
 
         ServerWorld world = (ServerWorld) attacker.getWorld();
         HelperMethods.playHitSounds(attacker, target);
@@ -67,9 +67,9 @@ public class MoltenEdgeSwordItem extends UniqueSwordItem {
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         if (user.getWorld().isClient()) return super.use(world, user, hand);
 
-        double radius = Config.uniqueEffects.moltenRoar.radius;
-        double knockbackStrength = Config.uniqueEffects.moltenRoar.knockbackStrength;
-        int abilityCooldown = Config.uniqueEffects.moltenRoar.cooldown;
+        double radius = Config.uniqueEffects.molten_edge.radius;
+        double knockbackStrength = Config.uniqueEffects.molten_edge.knockbackStrength;
+        int abilityCooldown = Config.uniqueEffects.molten_edge.cooldown;
 
         int amp = 0;
         Box box = new Box(user.getX() + radius, user.getY() + radius, user.getZ() + radius,
@@ -83,7 +83,7 @@ public class MoltenEdgeSwordItem extends UniqueSwordItem {
         }
         world.playSoundFromEntity(null, user, SoundRegistry.DARK_SWORD_ENCHANT.get(),
                 user.getSoundCategory(), 0.7f, 1.5f);
-        int duration = Config.uniqueEffects.moltenRoar.duration * amp / 2;
+        int duration = Config.uniqueEffects.molten_edge.duration * amp / 2;
         user.addStatusEffect(new StatusEffectInstance(EffectRegistry.getReference(EffectRegistry.ONSLAUGHT), duration, 0), user);
         user.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, duration, 3), user);
         user.getItemCooldownManager().set(this, abilityCooldown);

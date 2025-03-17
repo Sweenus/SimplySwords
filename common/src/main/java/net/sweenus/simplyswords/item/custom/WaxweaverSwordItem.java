@@ -31,7 +31,7 @@ public class WaxweaverSwordItem extends UniqueSwordItem {
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         if (!attacker.getWorld().isClient()) {
-            int maximum_stacks = Config.uniqueEffects.waxweave.maxStacks;
+            int maximum_stacks = Config.uniqueEffects.waxweaver.maxStacks;
             HelperMethods.playHitSounds(attacker, target);
 
             if (target.isOnFire()) {
@@ -69,7 +69,7 @@ public class WaxweaverSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.waxweaversworditem.tooltip7").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.waxweaversworditem.tooltip8").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.waxweaversworditem.tooltip9", Config.uniqueEffects.waxweave.cooldown / 20).setStyle(Styles.TEXT));
+        tooltip.add(Text.translatable("item.simplyswords.waxweaversworditem.tooltip9", Config.uniqueEffects.waxweaver.cooldown / 20).setStyle(Styles.TEXT));
 
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
     }

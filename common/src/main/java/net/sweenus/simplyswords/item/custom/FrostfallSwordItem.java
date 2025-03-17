@@ -53,9 +53,9 @@ public class FrostfallSwordItem extends UniqueSwordItem {
         ServerWorld world = (ServerWorld) attacker.getWorld();
         HelperMethods.playHitSounds(attacker, target);
         //AOE freeze
-        int proc_chance = Config.uniqueEffects.frostFury.chance;
-        double radius = Config.uniqueEffects.frostFury.radius;
-        int shatter_timer_max = Config.uniqueEffects.frostFury.duration;
+        int proc_chance = Config.uniqueEffects.frostfall.chance;
+        double radius = Config.uniqueEffects.frostfall.radius;
+        int shatter_timer_max = Config.uniqueEffects.frostfall.duration;
         if (attacker.getRandom().nextInt(100) <= proc_chance) {
             Box box = new Box(target.getX() + radius, target.getY() + radius, target.getZ() + radius,
                     target.getX() - radius, target.getY() - radius, target.getZ() - radius);
@@ -126,14 +126,14 @@ public class FrostfallSwordItem extends UniqueSwordItem {
             }
         }
         user.teleport(lastX, lastY, lastZ, false);
-        int shatter_timer_max = Config.uniqueEffects.frostFury.duration;
+        int shatter_timer_max = Config.uniqueEffects.frostfall.duration;
         user.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, shatter_timer_max, 4), user);
         user.addStatusEffect(new StatusEffectInstance(StatusEffects.MINING_FATIGUE, shatter_timer_max, 4), user);
         user.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, shatter_timer_max, 4), user);
         user.addStatusEffect(new StatusEffectInstance(StatusEffects.REGENERATION, shatter_timer_max, 2), user);
         ItemStack stack = user.getStackInHand(hand);
         stack.set(ComponentTypeRegistry.CHARGED_LOCATION.get(), new ChargedLocationComponent(shatter_timer_max, lastX, lastY, lastZ));
-        user.getItemCooldownManager().set(this, Config.uniqueEffects.frostFury.cooldown);
+        user.getItemCooldownManager().set(this, Config.uniqueEffects.frostfall.cooldown);
         return super.use(world, user, hand);
     }
 
@@ -143,14 +143,14 @@ public class FrostfallSwordItem extends UniqueSwordItem {
             StoredChargeComponent shatterComponent = stack.apply(ComponentTypeRegistry.STORED_CHARGE.get(), StoredChargeComponent.DEFAULT, StoredChargeComponent::decrement);
             ChargedLocationComponent chargedLocationComponent = stack.apply(ComponentTypeRegistry.CHARGED_LOCATION.get(), ChargedLocationComponent.DEFAULT, ChargedLocationComponent::decrement);
             if (shatterComponent != null && shatterComponent.charge() == 1) {
-                double radius = Config.uniqueEffects.frostFury.radius;
+                double radius = Config.uniqueEffects.frostfall.radius;
                 Box box = new Box(player.getX() + radius + 10, player.getY() + radius + 10, player.getZ() + radius + 10,
                         player.getX() - radius - 10, player.getY() - radius - 10, player.getZ() - radius - 10);
                 for (Entity otherEntity : world.getOtherEntities(player, box, EntityPredicates.VALID_LIVING_ENTITY)) {
                     //Ice shatter
                     if (otherEntity instanceof LivingEntity le) {
                         if (le.hasStatusEffect(EffectRegistry.getReference(EffectRegistry.FREEZE))) {
-                            float abilityDamage = HelperMethods.spellScaledDamage("frost", player, Config.uniqueEffects.frostFury.spellScaling, Config.uniqueEffects.frostFury.damage);
+                            float abilityDamage = HelperMethods.spellScaledDamage("frost", player, Config.uniqueEffects.frostfall.spellScaling, Config.uniqueEffects.frostfall.damage);
                             world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_BOW_ICE_SHOOT_IMPACT_02.get(),
                                     le.getSoundCategory(), 0.2f, 3f);
                             le.damage(player.getDamageSources().indirectMagic(entity, entity), abilityDamage);
@@ -229,11 +229,11 @@ public class FrostfallSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.frostfallsworditem.tooltip1").setStyle(Styles.ABILITY));
         tooltip.add(Text.translatable("item.simplyswords.frostfallsworditem.tooltip2").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.frostfallsworditem.tooltip3").setStyle(Styles.TEXT));
-        float abilityDamage = HelperMethods.spellScaledDamage("frost", MinecraftClient.getInstance().player, Config.uniqueEffects.frostFury.spellScaling, Config.uniqueEffects.frostFury.damage);
-        tooltip.add(Text.translatable("item.simplyswords.frostfallsworditem.tooltip4", Config.uniqueEffects.frostFury.duration / 20, abilityDamage).setStyle(Styles.TEXT));
+        float abilityDamage = HelperMethods.spellScaledDamage("frost", MinecraftClient.getInstance().player, Config.uniqueEffects.frostfall.spellScaling, Config.uniqueEffects.frostfall.damage);
+        tooltip.add(Text.translatable("item.simplyswords.frostfallsworditem.tooltip4", Config.uniqueEffects.frostfall.duration / 20, abilityDamage).setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
-        tooltip.add(Text.translatable("item.simplyswords.frostfallsworditem.tooltip5", Config.uniqueEffects.frostFury.duration / 20).setStyle(Styles.TEXT));
+        tooltip.add(Text.translatable("item.simplyswords.frostfallsworditem.tooltip5", Config.uniqueEffects.frostfall.duration / 20).setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.frostfallsworditem.tooltip6").setStyle(Styles.TEXT));
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
         TooltipUtils.appendSpellScaleTooltip(tooltip, "frost");

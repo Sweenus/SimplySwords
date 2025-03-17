@@ -2,7 +2,6 @@ package net.sweenus.simplyswords.item.custom;
 
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
@@ -40,7 +39,7 @@ public class StormsEdgeSwordItem extends UniqueSwordItem {
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         HelperMethods.playHitSounds(attacker, target);
-        int chargeChance = Config.uniqueEffects.stormJolt.chance;
+        int chargeChance = Config.uniqueEffects.storms_edge.chance;
         if (!attacker.getWorld().isClient() && attacker.getRandom().nextInt(100) <= chargeChance && (attacker instanceof PlayerEntity player)
                 && player.getItemCooldownManager().getCooldownProgress(this, 1f) > 0) {
             player.getItemCooldownManager().set(this, 0);
@@ -67,7 +66,7 @@ public class StormsEdgeSwordItem extends UniqueSwordItem {
     @Override
     public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
         if (!world.isClient && HelperMethods.isHolding(stack, user)) {
-            int skillCooldown = Config.uniqueEffects.stormJolt.cooldown;
+            int skillCooldown = Config.uniqueEffects.storms_edge.cooldown;
             AbilityMethods.tickAbilityStormJolt(stack, world, user, remainingUseTicks, skillCooldown, radius);
         }
     }

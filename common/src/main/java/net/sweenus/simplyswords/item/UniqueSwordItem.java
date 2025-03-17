@@ -11,6 +11,7 @@ import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.text.Text;
 import net.minecraft.util.ClickType;
+import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
@@ -78,13 +79,18 @@ public abstract class UniqueSwordItem extends SwordItem {
         generateDynamicTooltip(itemStack, tooltipContext, tooltip, type);
     }
 
+    protected Identifier getConfigPath() {
+        return Identifier.of("simplyswords.unique_effects."+ this.asItem().getRegistryEntry().registryKey().getValue().getPath());
+    }
+
     // Override this with your own id & paths
     protected void generateDynamicTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
         SimplySwordsClientAPI.generateDynamicTooltip(itemStack, tooltipContext, tooltip, type,
                 SimplySwords.MOD_ID,
                 "oracle_index:books/simplyswords/weapon-types",
                 "oracle_index:books/simplyswords/unique-weapons",
-                "oracle_index:books/simplyswords/runic-powers");
+                "oracle_index:books/simplyswords/runic-powers",
+                getConfigPath());
     }
 
 }

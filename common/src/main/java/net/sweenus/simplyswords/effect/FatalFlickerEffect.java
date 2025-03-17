@@ -23,8 +23,8 @@ public class FatalFlickerEffect extends StatusEffect {
     }
 
     public static void performDash(LivingEntity user, World world, int radius) {
-        float dashDistance = Config.uniqueEffects.fatalFlicker.dashVelocity;
-        int maxAmplifier = Config.uniqueEffects.fatalFlicker.maxStacks;
+        float dashDistance = Config.uniqueEffects.whisperwind.dashVelocity;
+        int maxAmplifier = Config.uniqueEffects.whisperwind.maxStacks;
         int amplifier = 1;
 
         user.setVelocity(user.getRotationVector().multiply(+dashDistance));
@@ -63,7 +63,7 @@ public class FatalFlickerEffect extends StatusEffect {
 
             int ability_timer = Objects.requireNonNull(user.getStatusEffect(EffectRegistry.getReference(EffectRegistry.FATAL_FLICKER))).getDuration();
             World world = user.getWorld();
-            int radius = Config.uniqueEffects.fatalFlicker.radius;
+            int radius = Config.uniqueEffects.whisperwind.radius;
 
             //Player dash forward
             if (ability_timer >= 5) {

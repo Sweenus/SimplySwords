@@ -42,7 +42,7 @@ public class SunfireSwordItem extends UniqueSwordItem {
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         HelperMethods.playHitSounds(attacker, target);
-        if (!attacker.getWorld().isClient() && attacker.getRandom().nextInt(100) <= Config.uniqueEffects.righteousStandard.chance) {
+        if (!attacker.getWorld().isClient() && attacker.getRandom().nextInt(100) <= Config.uniqueEffects.sunfire.chance) {
             attacker.getWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
                     attacker.getSoundCategory(), 0.3f, 1.7f);
             attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.REGENERATION, 40, 1), attacker);
@@ -70,7 +70,7 @@ public class SunfireSwordItem extends UniqueSwordItem {
                     banner.standardType = "sunfire";
                     banner.setCustomName(Text.translatable("entity.simplyswords.battlestandard.name", user.getName()));
                 }
-                user.getItemCooldownManager().set(this.getDefaultStack().getItem(), Config.uniqueEffects.righteousStandard.cooldown);
+                user.getItemCooldownManager().set(this.getDefaultStack().getItem(), Config.uniqueEffects.sunfire.cooldown);
             }
         }
         return super.use(world, user, hand);

@@ -54,7 +54,7 @@ public class StormbringerSwordItem extends UniqueSwordItem {
         if (itemStack.getDamage() >= itemStack.getMaxDamage() - 1) {
             return TypedActionResult.fail(itemStack);
         }
-        int ability_timer_max = Config.uniqueEffects.shockDeflect.blockDuration;
+        int ability_timer_max = Config.uniqueEffects.stormbringer.blockDuration;
         ParryComponent parryComponent = itemStack.getOrDefault(ComponentTypeRegistry.PARRY.get(), ParryComponent.DEFAULT);
         world.playSoundFromEntity(null, user, SoundRegistry.MAGIC_SWORD_PARRY_02.get(), user.getSoundCategory(), 0.8f, (float) (0.8f * (parryComponent.parrySuccession() * 0.1)));
         user.addStatusEffect(new StatusEffectInstance(StatusEffects.ABSORPTION, ability_timer_max, 2), user);
@@ -74,7 +74,7 @@ public class StormbringerSwordItem extends UniqueSwordItem {
 
                 //Parry attack
                 if ((entity instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, user)) {
-                    if (le.handSwinging && remainingUseTicks > getMaxUseTime(stack, user) - Config.uniqueEffects.shockDeflect.parryDuration) {
+                    if (le.handSwinging && remainingUseTicks > getMaxUseTime(stack, user) - Config.uniqueEffects.stormbringer.parryDuration) {
                         ParryComponent parryComponent = stack.apply(ComponentTypeRegistry.PARRY.get(), ParryComponent.DEFAULT, ParryComponent::success);
                         user.stopUsingItem();
                         le.handSwinging = false;
@@ -89,7 +89,7 @@ public class StormbringerSwordItem extends UniqueSwordItem {
     @Override
     public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
         if (!world.isClient) {
-            int skillCooldown = Config.uniqueEffects.shockDeflect.cooldown;
+            int skillCooldown = Config.uniqueEffects.stormbringer.cooldown;
             ParryComponent parryComponent = stack.getOrDefault(ComponentTypeRegistry.PARRY.get(), ParryComponent.DEFAULT);
             if (parryComponent.parried()) {
                 //Damage
@@ -100,7 +100,7 @@ public class StormbringerSwordItem extends UniqueSwordItem {
                     //damage & knockback
                     if ((entities instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, user)) {
                         float choose = (float) (Math.random() * 1);
-                        float abilityDamage = HelperMethods.spellScaledDamage("lightning", user, Config.uniqueEffects.shockDeflect.spellScaling, Config.uniqueEffects.shockDeflect.damage);
+                        float abilityDamage = HelperMethods.spellScaledDamage("lightning", user, Config.uniqueEffects.stormbringer.spellScaling, Config.uniqueEffects.stormbringer.damage);
                         le.damage(user.getDamageSources().indirectMagic(user, user), abilityDamage + parryComponent.parrySuccession());
                         world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_BOW_POISON_ATTACK_01.get(),
                                 le.getSoundCategory(), 0.3f, choose);
@@ -127,7 +127,7 @@ public class StormbringerSwordItem extends UniqueSwordItem {
 
     @Override
     public int getMaxUseTime(ItemStack stack, LivingEntity user) {
-        return Config.uniqueEffects.shockDeflect.cooldown;
+        return Config.uniqueEffects.stormbringer.cooldown;
     }
 
     @Override

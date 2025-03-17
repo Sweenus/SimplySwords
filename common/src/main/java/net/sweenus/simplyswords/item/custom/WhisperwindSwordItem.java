@@ -38,7 +38,7 @@ public class WhisperwindSwordItem extends UniqueSwordItem implements TwoHandedWe
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         HelperMethods.playHitSounds(attacker, target);
         if (!attacker.getWorld().isClient()) {
-            if (attacker.getRandom().nextInt(100) <= Config.uniqueEffects.fatalFlicker.chance && (attacker instanceof PlayerEntity player)) {
+            if (attacker.getRandom().nextInt(100) <= Config.uniqueEffects.whisperwind.chance && (attacker instanceof PlayerEntity player)) {
                 attacker.getWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
                         attacker.getSoundCategory(), 0.3f, 1.8f);
                 player.getItemCooldownManager().set(this.getDefaultStack().getItem(), 0);
@@ -53,7 +53,7 @@ public class WhisperwindSwordItem extends UniqueSwordItem implements TwoHandedWe
                 user.getSoundCategory(), 0.6f, 1.0f);
         user.addStatusEffect(new StatusEffectInstance(EffectRegistry.getReference(EffectRegistry.FATAL_FLICKER), 12));
         user.addStatusEffect(new StatusEffectInstance(StatusEffects.ABSORPTION, 100));
-        user.getItemCooldownManager().set(this.getDefaultStack().getItem(), Config.uniqueEffects.fatalFlicker.cooldown);
+        user.getItemCooldownManager().set(this.getDefaultStack().getItem(), Config.uniqueEffects.whisperwind.cooldown);
 
         return super.use(world, user, hand);
     }

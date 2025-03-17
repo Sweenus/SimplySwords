@@ -45,7 +45,7 @@ public class TempestSwordItem extends UniqueSwordItem {
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         if (!attacker.getWorld().isClient()) {
 
-            int vortexMaxStacks = Config.uniqueEffects.vortex.maxStacks;
+            int vortexMaxStacks = Config.uniqueEffects.tempest.maxStacks;
             ServerWorld serverWorld = (ServerWorld) attacker.getWorld();
             HelperMethods.playHitSounds(attacker, target);
             SoundEvent soundSelect;
@@ -96,8 +96,8 @@ public class TempestSwordItem extends UniqueSwordItem {
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         if (!user.getWorld().isClient() && world instanceof  ServerWorld serverWorld) {
 
-            int vortexMaxSize = Config.uniqueEffects.vortex.maxSize;
-            int vortexDuration = Config.uniqueEffects.vortex.duration;
+            int vortexMaxSize = Config.uniqueEffects.tempest.maxSize;
+            int vortexDuration = Config.uniqueEffects.tempest.duration;
             int skillCooldown = 200;
             Box box = HelperMethods.createBox(user, 15);
             boolean soundHasPlayed = false;

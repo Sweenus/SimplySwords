@@ -33,7 +33,7 @@ public class BrimstoneClaymoreItem extends UniqueSwordItem implements TwoHandedW
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         if (!attacker.getWorld().isClient()) {
             ServerWorld world = (ServerWorld) attacker.getWorld();
-            int fhitchance = Config.uniqueEffects.brimstone.chance;
+            int fhitchance = Config.uniqueEffects.brimstone_claymore.chance;
             HelperMethods.playHitSounds(attacker, target);
 
             if (attacker.getRandom().nextInt(100) <= fhitchance && attacker instanceof PlayerEntity player) {

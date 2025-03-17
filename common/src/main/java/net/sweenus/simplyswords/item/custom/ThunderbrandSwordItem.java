@@ -43,7 +43,7 @@ public class ThunderbrandSwordItem extends UniqueSwordItem implements TwoHandedW
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         HelperMethods.playHitSounds(attacker, target);
         if (!attacker.getWorld().isClient()) {
-            int chargeChance = Config.uniqueEffects.thunderBlitz.chance;
+            int chargeChance = Config.uniqueEffects.thunderbrand.chance;
             if (attacker.getRandom().nextInt(100) <= chargeChance && (attacker instanceof PlayerEntity player) && player.getItemCooldownManager().getCooldownProgress(this, 1f) > 0) {
                 player.getItemCooldownManager().set(this, 0);
                 attacker.getWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_BLOCK_01.get(),
@@ -71,9 +71,9 @@ public class ThunderbrandSwordItem extends UniqueSwordItem implements TwoHandedW
     public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
         if (!world.isClient && HelperMethods.isHolding(stack, user) && user.isOnGround()) {
 
-            float abilityDamage = HelperMethods.spellScaledDamage("lightning", user, Config.uniqueEffects.thunderBlitz.spellScaling, Config.uniqueEffects.thunderBlitz.damage);
-            int skillCooldown = Config.uniqueEffects.thunderBlitz.cooldown;
-            int radius = Config.uniqueEffects.thunderBlitz.radius;
+            float abilityDamage = HelperMethods.spellScaledDamage("lightning", user, Config.uniqueEffects.thunderbrand.spellScaling, Config.uniqueEffects.thunderbrand.damage);
+            int skillCooldown = Config.uniqueEffects.thunderbrand.cooldown;
+            int radius = Config.uniqueEffects.thunderbrand.radius;
 
             AbilityMethods.tickAbilityThunderBlitz(stack, world, user, remainingUseTicks, ability_timer_max,
                     abilityDamage, skillCooldown, radius);

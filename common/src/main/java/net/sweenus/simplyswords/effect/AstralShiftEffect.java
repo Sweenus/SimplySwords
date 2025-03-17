@@ -35,8 +35,8 @@ public class AstralShiftEffect extends StatusEffect {
                         double x = entity.getX();
                         double y = entity.getY();
                         double z = entity.getZ();
-                        float damageMulti = Config.uniqueEffects.astralShift.damageModifier;
-                        float damageMax = Config.uniqueEffects.astralShift.damageMax;
+                        float damageMulti = Config.uniqueEffects.caelestis.damageModifier;
+                        float damageMax = Config.uniqueEffects.caelestis.damageMax;
                         double radius = 8;
 
                         float damage = Math.min((amplifier) * damageMulti, damageMax);

@@ -44,8 +44,8 @@ public class CaelestisSwordItem extends UniqueSwordItem {
 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
-        int skillCooldown = Config.uniqueEffects.astralShift.cooldown;
-        int duration = Config.uniqueEffects.astralShift.duration;
+        int skillCooldown = Config.uniqueEffects.caelestis.cooldown;
+        int duration = Config.uniqueEffects.caelestis.duration;
 
 
         world.playSound(null, user.getBlockPos(), SoundRegistry.ACTIVATE_PLINTH_03.get(),
@@ -80,7 +80,7 @@ public class CaelestisSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.caelestissworditem.tooltip5").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.caelestissworditem.tooltip6").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.caelestissworditem.tooltip7", Config.uniqueEffects.astralShift.duration / 20).setStyle(Styles.TEXT));
+        tooltip.add(Text.translatable("item.simplyswords.caelestissworditem.tooltip7", Config.uniqueEffects.caelestis.duration / 20).setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.caelestissworditem.tooltip8").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.caelestissworditem.tooltip9").setStyle(Styles.TEXT));

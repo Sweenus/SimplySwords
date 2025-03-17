@@ -40,10 +40,10 @@ public class ShadowstingSwordItem extends UniqueSwordItem {
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         HelperMethods.playHitSounds(attacker, target);
         if (!attacker.getWorld().isClient()) {
-            if (attacker.getRandom().nextInt(100) <= Config.uniqueEffects.shadowmist.chance && attacker instanceof PlayerEntity) {
+            if (attacker.getRandom().nextInt(100) <= Config.uniqueEffects.shadowsting.chance && attacker instanceof PlayerEntity) {
                 attacker.getWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
                         attacker.getSoundCategory(), 0.3f, 1.8f);
-                float extraDamage = (target.getArmor() * Config.uniqueEffects.shadowmist.damageMulti) / 2;
+                float extraDamage = (target.getArmor() * Config.uniqueEffects.shadowsting.damageMulti) / 2;
                 target.damage(attacker.getDamageSources().indirectMagic(attacker, attacker), extraDamage);
             }
         }
@@ -54,14 +54,14 @@ public class ShadowstingSwordItem extends UniqueSwordItem {
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         world.playSoundFromEntity(null, user, SoundRegistry.ELEMENTAL_SWORD_EARTH_ATTACK_01.get(),
                 user.getSoundCategory(), 0.4f, 1.6f);
-        user.getItemCooldownManager().set(this.getDefaultStack().getItem(), Config.uniqueEffects.shadowmist.cooldown);
+        user.getItemCooldownManager().set(this.getDefaultStack().getItem(), Config.uniqueEffects.shadowsting.cooldown);
 
-        int radius = Config.uniqueEffects.shadowmist.radius;
+        int radius = Config.uniqueEffects.shadowsting.radius;
         Box box = new Box(user.getX() + radius, user.getY() + radius, user.getZ() + radius,
                 user.getX() - radius, user.getY() - radius, user.getZ() - radius);
         for (Entity entity : world.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY)) {
             if ((entity instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, user)) {
-                le.addStatusEffect(new StatusEffectInstance(StatusEffects.BLINDNESS, Config.uniqueEffects.shadowmist.blindDuration, 3), user);
+                le.addStatusEffect(new StatusEffectInstance(StatusEffects.BLINDNESS, Config.uniqueEffects.shadowsting.blindDuration, 3), user);
             }
         }
 

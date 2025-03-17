@@ -36,7 +36,7 @@ public class WickpiercerSwordItem extends UniqueSwordItem {
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         if (!attacker.getWorld().isClient()) {
-            float damageModifier = Config.uniqueEffects.flickerFury.damage;
+            float damageModifier = Config.uniqueEffects.wickpiercer.damage;
             HelperMethods.playHitSounds(attacker, target);
 
             ServerWorld world = (ServerWorld) attacker.getWorld();
@@ -57,8 +57,8 @@ public class WickpiercerSwordItem extends UniqueSwordItem {
 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
-        int skillCooldown = Config.uniqueEffects.flickerFury.cooldown;
-        int baseEffectDuration = Config.uniqueEffects.flickerFury.duration;
+        int skillCooldown = Config.uniqueEffects.wickpiercer.cooldown;
+        int baseEffectDuration = Config.uniqueEffects.wickpiercer.duration;
         int effectDuration = baseEffectDuration;
         ItemStack mainhand = user.getMainHandStack();
         ItemStack offhand  = user.getOffHandStack();
@@ -91,14 +91,14 @@ public class WickpiercerSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.waxweaversworditem.tooltip7").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.waxweaversworditem.tooltip8").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.waxweaversworditem.tooltip9", Config.uniqueEffects.waxweave.cooldown / 20).setStyle(Styles.TEXT));
+        tooltip.add(Text.translatable("item.simplyswords.waxweaversworditem.tooltip9", Config.uniqueEffects.waxweaver.cooldown / 20).setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.wickpiercersworditem.tooltip2").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.wickpiercersworditem.tooltip3").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.wickpiercersworditem.tooltip4").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.wickpiercersworditem.tooltip5").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.wickpiercersworditem.tooltip6", Config.uniqueEffects.flickerFury.duration / 20).setStyle(Styles.TEXT));
+        tooltip.add(Text.translatable("item.simplyswords.wickpiercersworditem.tooltip6", Config.uniqueEffects.wickpiercer.duration / 20).setStyle(Styles.TEXT));
 
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
     }

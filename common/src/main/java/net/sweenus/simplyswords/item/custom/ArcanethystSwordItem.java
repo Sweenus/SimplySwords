@@ -5,7 +5,6 @@ import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
@@ -42,7 +41,7 @@ public class ArcanethystSwordItem extends UniqueSwordItem implements TwoHandedWe
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         if (!attacker.getWorld().isClient()) {
             HelperMethods.playHitSounds(attacker, target);
-            if (attacker.getRandom().nextInt(100) <= Config.uniqueEffects.arcaneAssault.chance) {
+            if (attacker.getRandom().nextInt(100) <= Config.uniqueEffects.arcanethyst.chance) {
                 target.addStatusEffect(new StatusEffectInstance(StatusEffects.LEVITATION, 60, 1), attacker);
                 attacker.getWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_BOW_SHOOT_IMPACT_01.get(),
                         attacker.getSoundCategory(), 0.5f, 1.2f);
@@ -69,15 +68,15 @@ public class ArcanethystSwordItem extends UniqueSwordItem implements TwoHandedWe
     @Override
     public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
         if (HelperMethods.isHolding(stack, user) && user instanceof PlayerEntity) {
-            int radius = Config.uniqueEffects.arcaneAssault.radius;
-            float abilityDamage = HelperMethods.spellScaledDamage("arcane", user, Config.uniqueEffects.arcaneAssault.spellScaling, Config.uniqueEffects.arcaneAssault.damage);
+            int radius = Config.uniqueEffects.arcanethyst.radius;
+            float abilityDamage = HelperMethods.spellScaledDamage("arcane", user, Config.uniqueEffects.arcanethyst.spellScaling, Config.uniqueEffects.arcanethyst.damage);
             AbilityMethods.tickAbilityArcaneAssault(stack, world, user, remainingUseTicks, abilityDamage, radius);
         }
     }
 
     @Override
     public int getMaxUseTime(ItemStack stack, LivingEntity user) {
-        return Config.uniqueEffects.arcaneAssault.duration;
+        return Config.uniqueEffects.arcanethyst.duration;
     }
 
     @Override
@@ -88,7 +87,7 @@ public class ArcanethystSwordItem extends UniqueSwordItem implements TwoHandedWe
     @Override
     public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
         if (!world.isClient && (user instanceof PlayerEntity player)) {
-            player.getItemCooldownManager().set(stack.getItem(), Config.uniqueEffects.arcaneAssault.cooldown);
+            player.getItemCooldownManager().set(stack.getItem(), Config.uniqueEffects.arcanethyst.cooldown);
         }
     }
 

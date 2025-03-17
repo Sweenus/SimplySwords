@@ -52,8 +52,8 @@ public class FlamewindSwordItem extends UniqueSwordItem {
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         if (!user.getWorld().isClient() && world instanceof  ServerWorld serverWorld) {
             int flameSeedDuration = 101;
-            int flameSeedSpreadCap = Config.uniqueEffects.emberstorm.spreadCap;
-            int skillCooldown = Config.uniqueEffects.emberstorm.cooldown;
+            int flameSeedSpreadCap = Config.uniqueEffects.flamewind.spreadCap;
+            int skillCooldown = Config.uniqueEffects.flamewind.cooldown;
 
             Box box = HelperMethods.createBox(user, 10);
             Entity closestEntity = world.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY).stream()
@@ -108,7 +108,7 @@ public class FlamewindSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.flamewindsworditem.tooltip8").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.flamewindsworditem.tooltip9").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.flamewindsworditem.tooltip10").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.flamewindsworditem.tooltip11", Config.uniqueEffects.emberstorm.spreadCap).setStyle(Styles.TEXT));
+        tooltip.add(Text.translatable("item.simplyswords.flamewindsworditem.tooltip11", Config.uniqueEffects.flamewind.spreadCap).setStyle(Styles.TEXT));
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
         TooltipUtils.appendSpellScaleTooltip(tooltip, "fire");
     }

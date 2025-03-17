@@ -56,7 +56,8 @@ public class SimplySwordsSwordItem extends SwordItem {
                 SimplySwords.MOD_ID,
                 "oracle_index:books/simplyswords/weapon-types",
                 "oracle_index:books/simplyswords/unique-weapons",
-                "oracle_index:books/simplyswords/runic-powers");
+                "oracle_index:books/simplyswords/runic-powers",
+                null);
     }
 
 

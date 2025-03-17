@@ -12,6 +12,7 @@ import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
@@ -100,6 +101,11 @@ public class WatcherSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.watchersworditem.tooltip7").setStyle(Styles.TEXT));
 
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+    }
+
+    @Override
+    protected Identifier getConfigPath() {
+        return Identifier.of("simplyswords.unique_effects.watcher");
     }
 
     public static class EffectSettings extends TooltipSettings {

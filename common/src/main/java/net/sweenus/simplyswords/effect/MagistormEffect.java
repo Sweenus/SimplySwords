@@ -35,13 +35,13 @@ public class MagistormEffect extends HighOrbitingEffect {
             double x = livingEntity.getX();
             double y = livingEntity.getY();
             double z = livingEntity.getZ();
-            double radius = Config.uniqueEffects.magistorm.radius;
-            float duration = Config.uniqueEffects.magistorm.duration;
+            double radius = Config.uniqueEffects.magiscythe.radius;
+            float duration = Config.uniqueEffects.magiscythe.duration;
             int frequency = Math.max(3, 10 - amplifier);
 
-            float spellScalingModifier = Config.uniqueEffects.magistorm.spellScaling;
+            float spellScalingModifier = Config.uniqueEffects.magiscythe.spellScaling;
 
-            float damage = Math.max(Config.uniqueEffects.magistorm.damage, HelperMethods.commonSpellAttributeScaling(spellScalingModifier, livingEntity, "arcane"));
+            float damage = Math.max(Config.uniqueEffects.magiscythe.damage, HelperMethods.commonSpellAttributeScaling(spellScalingModifier, livingEntity, "arcane"));
 
             DamageSource damageSource =  livingEntity.getDamageSources().indirectMagic(livingEntity, livingEntity);
             if (livingEntity.age % frequency == 0 && livingEntity instanceof  PlayerEntity player) {

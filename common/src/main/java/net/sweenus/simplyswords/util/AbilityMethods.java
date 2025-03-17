@@ -75,7 +75,7 @@ public class AbilityMethods {
     public static void tickAbilityStorm(ItemStack stack, World world, LivingEntity user,
                                         int ability_timer, int skillCooldown, int radius) {
         if (!user.getWorld().isClient()) {
-            int frequency = Config.uniqueEffects.storm.frequency;
+            int frequency = Config.uniqueEffects.mjolnir.frequency;
             if (user.age % frequency == 0) {
                 double x = user.getX();
                 double y = user.getY();
@@ -424,7 +424,7 @@ public class AbilityMethods {
     }
 
     public static boolean astralShiftPassive(ServerPlayerEntity serverPlayer) {
-        return (serverPlayer.getRandom().nextInt(100) < Config.uniqueEffects.astralShift.chance);
+        return (serverPlayer.getRandom().nextInt(100) < Config.uniqueEffects.caelestis.chance);
     }
 
 

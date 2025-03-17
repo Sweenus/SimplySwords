@@ -41,7 +41,7 @@ public abstract class LivingEntityMixin {
                         && (stack.isOf(ItemsRegistry.WAXWEAVER.get())
                         || stack.isOf(ItemsRegistry.WICKPIERCER.get()))) {
 
-                    int skillCooldown = Config.uniqueEffects.waxweave.cooldown;
+                    int skillCooldown = Config.uniqueEffects.waxweaver.cooldown;
                     player.setHealth(player.getMaxHealth());
                     HelperMethods.incrementStatusEffect(player, StatusEffects.RESISTANCE, 100, 2, 3);
                     player.getItemCooldownManager().set(stack.getItem(), skillCooldown);

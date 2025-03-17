@@ -43,10 +43,10 @@ public class LivyatanSwordItem extends UniqueSwordItem {
 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
-        float abilityDamage = HelperMethods.spellScaledDamage("frost", user, Config.uniqueEffects.jotunnsWrath.spellScaling, Config.uniqueEffects.jotunnsWrath.damage);
-        int duration = Config.uniqueEffects.jotunnsWrath.duration;
-        float returnDamage = Config.uniqueEffects.jotunnsWrath.returnDamage;
-        double radius = Config.uniqueEffects.jotunnsWrath.radius;
+        float abilityDamage = HelperMethods.spellScaledDamage("frost", user, Config.uniqueEffects.livyatan.spellScaling, Config.uniqueEffects.livyatan.damage);
+        int duration = Config.uniqueEffects.livyatan.duration;
+        float returnDamage = Config.uniqueEffects.livyatan.returnDamage;
+        double radius = Config.uniqueEffects.livyatan.radius;
         ItemStack itemStack = user.getStackInHand(hand);
         if (!world.isClient) {
             itemStack = user.getStackInHand(hand);

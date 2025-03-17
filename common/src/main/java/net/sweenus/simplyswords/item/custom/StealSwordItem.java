@@ -40,8 +40,8 @@ public class StealSwordItem extends UniqueSwordItem {
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         if (!attacker.getWorld().isClient()) {
             ServerWorld sworld = (ServerWorld) attacker.getWorld();
-            int hitChance = Config.uniqueEffects.steal.chance;
-            int duration = Config.uniqueEffects.steal.duration;
+            int hitChance = Config.uniqueEffects.soulstealer.chance;
+            int duration = Config.uniqueEffects.soulstealer.duration;
             attacker.setVelocity(attacker.getRotationVector().multiply(+1));
             attacker.velocityModified = true;
 
@@ -71,8 +71,8 @@ public class StealSwordItem extends UniqueSwordItem {
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         if (!user.getWorld().isClient()) {
-            double sradius = Config.uniqueEffects.steal.radius;
-            double vradius = Config.uniqueEffects.steal.radius / 2.0;
+            double sradius = Config.uniqueEffects.soulstealer.radius;
+            double vradius = Config.uniqueEffects.soulstealer.radius / 2.0;
 
             double x = user.getX();
             double y = user.getY();
@@ -82,8 +82,8 @@ public class StealSwordItem extends UniqueSwordItem {
                     x - sradius, y - vradius, z - sradius);
             for (Entity entity : sworld.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY)) {
                 if ((entity instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, user)) {
-                    int iduration = Config.uniqueEffects.steal.invisDuration;
-                    int bduration = Config.uniqueEffects.steal.blindDuration;
+                    int iduration = Config.uniqueEffects.soulstealer.invisDuration;
+                    int bduration = Config.uniqueEffects.soulstealer.blindDuration;
 
                     if (le.hasStatusEffect(StatusEffects.SLOWNESS) && le.hasStatusEffect(StatusEffects.GLOWING)) {
                         if (le.distanceTo(user) > 5) { //can we check target here?
@@ -91,7 +91,7 @@ public class StealSwordItem extends UniqueSwordItem {
                             user.teleport(le.getX(), le.getY(), le.getZ(), false);
                             sworld.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_SWORD_SCIFI_ATTACK_03.get(),
                                     le.getSoundCategory(), 0.3f, 1.5f);
-                            float abilityDamage = HelperMethods.spellScaledDamage("soul", user, Config.uniqueEffects.steal.spellScaling, 5);
+                            float abilityDamage = HelperMethods.spellScaledDamage("soul", user, Config.uniqueEffects.soulstealer.spellScaling, 5);
                             le.damage(user.getDamageSources().freeze(), abilityDamage);
                         } else {
                             user.addStatusEffect(new StatusEffectInstance(StatusEffects.INVISIBILITY, iduration, 1), user);

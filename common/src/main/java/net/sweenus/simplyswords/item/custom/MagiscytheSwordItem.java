@@ -46,7 +46,7 @@ public class MagiscytheSwordItem extends UniqueSwordItem {
                 world.playSound(null, attacker.getBlockPos(), SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_IMPACT_03.get(),
                         attacker.getSoundCategory(), 0.1f, 1.9f);
 
-                float repairChance = Config.uniqueEffects.magistorm.repairChance;
+                float repairChance = Config.uniqueEffects.magiscythe.repairChance;
                 Random random = new Random();
                 for (EquipmentSlot slot : EquipmentSlot.values()) {
                     if (slot.getType() == EquipmentSlot.Type.HUMANOID_ARMOR || slot == EquipmentSlot.MAINHAND || slot == EquipmentSlot.OFFHAND) {
@@ -64,8 +64,8 @@ public class MagiscytheSwordItem extends UniqueSwordItem {
 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
-        int skillCooldown = Config.uniqueEffects.magistorm.cooldown;
-        int baseEffectDuration = Config.uniqueEffects.magistorm.duration;
+        int skillCooldown = Config.uniqueEffects.magiscythe.cooldown;
+        int baseEffectDuration = Config.uniqueEffects.magiscythe.duration;
 
         world.playSound(null, user.getBlockPos(), SoundRegistry.MAGIC_SHAMANIC_NORDIC_22.get(),
                 user.getSoundCategory(), 0.2f, 1.1f);

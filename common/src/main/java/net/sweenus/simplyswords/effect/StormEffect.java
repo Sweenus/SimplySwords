@@ -19,8 +19,8 @@ public class StormEffect extends StatusEffect {
     public boolean applyUpdateEffect(LivingEntity pLivingEntity, int pAmplifier) {
         if (!pLivingEntity.getWorld().isClient()) {
             ServerWorld world = (ServerWorld)pLivingEntity.getWorld();
-            double hRadius = Config.uniqueEffects.storm.radius;
-            double vRadius = Config.uniqueEffects.storm.radius / 2f;
+            double hRadius = Config.uniqueEffects.mjolnir.radius;
+            double vRadius = Config.uniqueEffects.mjolnir.radius / 2f;
             double x = pLivingEntity.getX();
             double y = pLivingEntity.getY();
             double z = pLivingEntity.getZ();

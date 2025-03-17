@@ -40,8 +40,8 @@ public class HiveheartSwordItem extends UniqueSwordItem {
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         if (!attacker.getWorld().isClient()) {
             ServerWorld serverWorld = (ServerWorld) attacker.getWorld();
-            int skillCooldown = Config.uniqueEffects.hivemind.cooldown;
-            float skillDamage = Config.uniqueEffects.hivemind.damage;
+            int skillCooldown = Config.uniqueEffects.hiveheart.cooldown;
+            float skillDamage = Config.uniqueEffects.hiveheart.damage;
             HelperMethods.playHitSounds(attacker, target);
 
             if (attacker instanceof PlayerEntity player && !player.getItemCooldownManager().isCoolingDown(stack.getItem())) {
@@ -70,8 +70,8 @@ public class HiveheartSwordItem extends UniqueSwordItem {
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
 
-        int regenDuration = Config.uniqueEffects.hivemind.duration;
-        int skillCooldown = Config.uniqueEffects.hivemind.cooldown;
+        int regenDuration = Config.uniqueEffects.hiveheart.duration;
+        int skillCooldown = Config.uniqueEffects.hiveheart.cooldown;
         HelperMethods.incrementStatusEffect(user, StatusEffects.REGENERATION, regenDuration, 1, 3);
         ItemStack stack = user.getMainHandStack();
         world.playSound(null, user.getBlockPos(), SoundRegistry.SPELL_MISC_02.get(),
@@ -97,7 +97,7 @@ public class HiveheartSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.hiveheartsworditem.tooltip4").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.hiveheartsworditem.tooltip5").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.hiveheartsworditem.tooltip6", Config.uniqueEffects.hivemind.cooldown / 20).setStyle(Styles.TEXT));
+        tooltip.add(Text.translatable("item.simplyswords.hiveheartsworditem.tooltip6", Config.uniqueEffects.hiveheart.cooldown / 20).setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.hiveheartsworditem.tooltip7").setStyle(Styles.TEXT));

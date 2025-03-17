@@ -38,9 +38,9 @@ public class TwistedBladeItem extends UniqueSwordItem implements TwoHandedWeapon
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         if (!attacker.getWorld().isClient()) {
             ServerWorld world = (ServerWorld) attacker.getWorld();
-            int hitChance = Config.uniqueEffects.ferocity.chance;
-            int duration = Config.uniqueEffects.ferocity.duration;
-            int maxStacks = Config.uniqueEffects.ferocity.maxStacks;
+            int hitChance = Config.uniqueEffects.twisted_blade.chance;
+            int duration = Config.uniqueEffects.twisted_blade.duration;
+            int maxStacks = Config.uniqueEffects.twisted_blade.maxStacks;
             HelperMethods.playHitSounds(attacker, target);
 
             if (attacker.getRandom().nextInt(100) <= hitChance) {
@@ -66,7 +66,7 @@ public class TwistedBladeItem extends UniqueSwordItem implements TwoHandedWeapon
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         if (user.hasStatusEffect(StatusEffects.HASTE)) {
-            int strength_tier = Config.uniqueEffects.ferocity.strengthTier;
+            int strength_tier = Config.uniqueEffects.twisted_blade.strengthTier;
 
             int a = (user.getStatusEffect(StatusEffects.HASTE).getAmplifier() * 20);
             user.addStatusEffect(new StatusEffectInstance(StatusEffects.STRENGTH, a, strength_tier), user);

@@ -14,7 +14,8 @@ import java.util.List;
 
 public class SimplySwordsClientAPI {
 
-    public static void generateDynamicTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Text> tooltip, TooltipType type, String modId, String itemPath, String uniquePath, String runicPath) {
+    // See UniqueSwordItem for example usage
+    public static void generateDynamicTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Text> tooltip, TooltipType type, String modId, String itemPath, String uniquePath, String runicPath, Identifier customConfigPath) {
         Identifier entry = TooltipUtils.generateDefaultTooltipEntry(itemStack, itemPath);
 
         // Add dynamic tooltip button
@@ -35,7 +36,7 @@ public class SimplySwordsClientAPI {
         }
 
         // Process Control + Alt key events for navigation
-        TooltipUtils.processCtrlAltNavigation(entry, modId);
+        TooltipUtils.processCtrlAltNavigation(entry, modId, customConfigPath);
     }
 
 }

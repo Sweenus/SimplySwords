@@ -38,7 +38,7 @@ public class FlameSeedEffect extends OrbitingEffect {
         int duration = 0;
         if (!livingEntity.getWorld().isClient()) {
             ServerWorld serverWorld = (ServerWorld) livingEntity.getWorld();
-            float abilityDamage = Config.uniqueEffects.emberstorm.damage;
+            float abilityDamage = Config.uniqueEffects.flamewind.damage;
             float volume = 0.3f;
             float pitch = 1.3f;
             int frequency = 20;
@@ -59,12 +59,12 @@ public class FlameSeedEffect extends OrbitingEffect {
                     HelperMethods.spawnOrbitParticles(serverWorld, livingEntity.getPos(), ParticleTypes.POOF, 1, 10);
                     HelperMethods.spawnOrbitParticles(serverWorld, livingEntity.getPos(), ParticleTypes.EXPLOSION, 0.5, 2);
                     HelperMethods.spawnOrbitParticles(serverWorld, livingEntity.getPos(), ParticleTypes.WARPED_SPORE, 1, 10);
-                    abilityDamage = Config.uniqueEffects.emberstorm.detonationDamage;
+                    abilityDamage = Config.uniqueEffects.flamewind.detonationDamage;
                     volume = 0.6f;
                     pitch = 1.0f;
                     soundEvent = SoundRegistry.SPELL_FIRE.get();
                     if (livingEntity.distanceTo(sourceEntity) < 30) {
-                        int maxHaste = Config.uniqueEffects.emberstorm.maxHaste;
+                        int maxHaste = Config.uniqueEffects.flamewind.maxHaste;
                         HelperMethods.incrementStatusEffect(sourceEntity, StatusEffects.HASTE, 120, 1, maxHaste);
                         //HelperMethods.spawnWaistHeightParticles(serverWorld, ParticleTypes.EFFECT, sourceEntity, livingEntity, 20);
                     }
@@ -89,7 +89,7 @@ public class FlameSeedEffect extends OrbitingEffect {
 
                 if (sourceEntity != null) {
                     damageSource = livingEntity.getDamageSources().indirectMagic(livingEntity, sourceEntity);
-                    float spellScalingModifier = Config.uniqueEffects.emberstorm.spellScaling;
+                    float spellScalingModifier = Config.uniqueEffects.flamewind.spellScaling;
                     if (HelperMethods.commonSpellAttributeScaling(spellScalingModifier, sourceEntity, "fire") > abilityDamage)
                         abilityDamage = HelperMethods.commonSpellAttributeScaling(spellScalingModifier, sourceEntity, "fire");
                 }

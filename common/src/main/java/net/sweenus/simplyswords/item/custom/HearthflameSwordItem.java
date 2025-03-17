@@ -3,7 +3,6 @@ package net.sweenus.simplyswords.item.custom;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
@@ -49,7 +48,7 @@ public class HearthflameSwordItem extends UniqueSwordItem implements TwoHandedWe
             ServerWorld world = (ServerWorld) attacker.getWorld();
             HelperMethods.playHitSounds(attacker, target);
 
-            if (attacker.getRandom().nextInt(100) <= Config.uniqueEffects.volcanicFury.chance) {
+            if (attacker.getRandom().nextInt(100) <= Config.uniqueEffects.hearthflame.chance) {
                 target.addStatusEffect(new StatusEffectInstance(StatusEffects.LEVITATION, 10, 1), attacker);
                 target.setVelocity(target.getX() - attacker.getX(), 0.5, target.getZ() - attacker.getZ());
                 target.setOnFireFor(5);
@@ -85,12 +84,12 @@ public class HearthflameSwordItem extends UniqueSwordItem implements TwoHandedWe
     @Override
     public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
         if (HelperMethods.isHolding(stack, user) && user instanceof PlayerEntity player) {
-            int radius = Config.uniqueEffects.volcanicFury.radius;
-            float spellScaling = HelperMethods.commonSpellAttributeScaling(Config.uniqueEffects.volcanicFury.spellScaling, user, "fire");
-            float abilityDamage = spellScaling > 0f ? spellScaling : Config.uniqueEffects.volcanicFury.damage;
+            int radius = Config.uniqueEffects.hearthflame.radius;
+            float spellScaling = HelperMethods.commonSpellAttributeScaling(Config.uniqueEffects.hearthflame.spellScaling, user, "fire");
+            float abilityDamage = spellScaling > 0f ? spellScaling : Config.uniqueEffects.hearthflame.damage;
             int chargePower = stack.getOrDefault(ComponentTypeRegistry.STORED_CHARGE.get(), StoredChargeComponent.DEFAULT).charge();
             AbilityMethods.tickAbilityVolcanicFury(stack, world, user, remainingUseTicks, ability_timer_max,
-                    abilityDamage, Config.uniqueEffects.volcanicFury.cooldown, radius, chargePower);
+                    abilityDamage, Config.uniqueEffects.hearthflame.cooldown, radius, chargePower);
             if (player.age % 20 == 0) {
                 stack.apply(ComponentTypeRegistry.STORED_CHARGE.get(), StoredChargeComponent.DEFAULT, comp -> comp.add(2));
             }
@@ -111,7 +110,7 @@ public class HearthflameSwordItem extends UniqueSwordItem implements TwoHandedWe
     public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
         if (!world.isClient) {
             if (user instanceof PlayerEntity player) {
-                player.getItemCooldownManager().set(this, Config.uniqueEffects.volcanicFury.chance);
+                player.getItemCooldownManager().set(this, Config.uniqueEffects.hearthflame.chance);
             }
             int choose_sound = (int) (Math.random() * 30);
             if (choose_sound <= 10)
@@ -124,14 +123,14 @@ public class HearthflameSwordItem extends UniqueSwordItem implements TwoHandedWe
                 world.playSoundFromEntity(null, user, SoundRegistry.ELEMENTAL_BOW_FIRE_SHOOT_IMPACT_03.get(),
                         user.getSoundCategory(), 0.6f, 1.2f);
             //Damage
-            int radius = Config.uniqueEffects.volcanicFury.radius;
+            int radius = Config.uniqueEffects.hearthflame.radius;
             Box box = new Box(user.getX() + radius, user.getY() + radius, user.getZ() + radius,
                     user.getX() - radius, user.getY() - radius, user.getZ() - radius);
             for (Entity entity : world.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY)) {
                 if ((entity instanceof LivingEntity le) && HelperMethods.checkFriendlyFire((LivingEntity) entity, user)) {
                     float choose = (float) (Math.random() * 1);
-                    float spellScaling = HelperMethods.commonSpellAttributeScaling(Config.uniqueEffects.volcanicFury.spellScaling, user, "fire");
-                    float abilityDamage = spellScaling > 0f ? spellScaling : Config.uniqueEffects.volcanicFury.damage;
+                    float spellScaling = HelperMethods.commonSpellAttributeScaling(Config.uniqueEffects.hearthflame.spellScaling, user, "fire");
+                    float abilityDamage = spellScaling > 0f ? spellScaling : Config.uniqueEffects.hearthflame.damage;
                     int chargePower = stack.getOrDefault(ComponentTypeRegistry.STORED_CHARGE.get(), StoredChargeComponent.DEFAULT).charge();
                     le.damage(user.getDamageSources().indirectMagic(user, user), abilityDamage * (chargePower * 0.3f));
                     le.setOnFireFor(6);

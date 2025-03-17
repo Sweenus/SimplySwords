@@ -48,8 +48,8 @@ public class RibboncleaverSwordItem extends UniqueSwordItem {
 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
-        int skillCooldown = Config.uniqueEffects.ribbonwrath.cooldown;
-        int resilienceAmplifier = Config.uniqueEffects.ribbonwrath.resilienceAmplifier;
+        int skillCooldown = Config.uniqueEffects.ribboncleaver.cooldown;
+        int resilienceAmplifier = Config.uniqueEffects.ribboncleaver.resilienceAmplifier;
 
 
         world.playSound(null, user.getBlockPos(), SoundRegistry.ELEMENTAL_BOW_EARTH_SHOOT_IMPACT_03.get(),

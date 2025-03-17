@@ -37,7 +37,7 @@ public class StormSwordItem extends UniqueSwordItem {
         if (!attacker.getWorld().isClient()) {
             HelperMethods.playHitSounds(attacker, target);
 
-            int hitChance = Config.uniqueEffects.storm.chance;
+            int hitChance = Config.uniqueEffects.mjolnir.chance;
 
             if (attacker.getRandom().nextInt(100) <= hitChance) {
                 target.addStatusEffect(new StatusEffectInstance(EffectRegistry.getReference(EffectRegistry.STORM), 2, 1), attacker);
@@ -54,7 +54,7 @@ public class StormSwordItem extends UniqueSwordItem {
         }
         user.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, 20, 5), user);
         user.setCurrentHand(hand);
-        int cooldown = Config.uniqueEffects.storm.cooldown;
+        int cooldown = Config.uniqueEffects.mjolnir.cooldown;
         user.getItemCooldownManager().set(this, cooldown);
         return TypedActionResult.consume(itemStack);
     }
@@ -62,15 +62,15 @@ public class StormSwordItem extends UniqueSwordItem {
     @Override
     public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
         if (!world.isClient) {
-            int radius = Config.uniqueEffects.storm.radius;
-            int cooldown = Config.uniqueEffects.storm.cooldown;
+            int radius = Config.uniqueEffects.mjolnir.radius;
+            int cooldown = Config.uniqueEffects.mjolnir.cooldown;
             AbilityMethods.tickAbilityStorm(stack, world, user, remainingUseTicks, cooldown, radius);
         }
     }
 
     @Override
     public int getMaxUseTime(ItemStack stack, LivingEntity user) {
-        return Config.uniqueEffects.storm.duration;
+        return Config.uniqueEffects.mjolnir.duration;
     }
 
     @Override

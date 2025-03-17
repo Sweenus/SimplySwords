@@ -88,7 +88,7 @@ public class BattleStandardEntity extends PathAwareEntity {
                 if (!ownerEntity.isAlive())
                     this.setHealth(this.getHealth() - 1000);
                 int radius = 6;
-                float abilityDamage = HelperMethods.spellScaledDamage("fire", ownerEntity, Config.uniqueEffects.righteousStandard.spellScaling, Config.uniqueEffects.righteousStandard.damage);
+                float abilityDamage = HelperMethods.spellScaledDamage("fire", ownerEntity, Config.uniqueEffects.sunfire.spellScaling, Config.uniqueEffects.sunfire.damage);
                 // AOE Aura
                 //living entity, ownerEntity, abilityDamage,
                 if (this.age % 10 == 0) {
@@ -172,7 +172,7 @@ public class BattleStandardEntity extends PathAwareEntity {
                             this.getX() - radius, this.getY() - (float) radius / 3, this.getZ() - radius);
                     for (Entity entities : getWorld().getOtherEntities(this, box, EntityPredicates.VALID_LIVING_ENTITY)) {
                         if (entities instanceof LivingEntity le && !HelperMethods.checkFriendlyFire(le, ownerEntity)) {
-                            float abilityHeal = HelperMethods.spellScaledDamage("healing", ownerEntity, Config.uniqueEffects.righteousStandard.spellScalingHeal, 3f);
+                            float abilityHeal = HelperMethods.spellScaledDamage("healing", ownerEntity, Config.uniqueEffects.sunfire.spellScalingHeal, 3f);
                             //Sunfire positive effects
                             switch (standardType) {
                                 case "sunfire" -> {

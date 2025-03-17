@@ -48,7 +48,7 @@ public class EmberlashSwordItem extends UniqueSwordItem {
                 StatusEffectInstance smoulderingEffect = target.getStatusEffect(EffectRegistry.getReference(EffectRegistry.SMOULDERING));
                 if (smoulderingEffect != null) {
                     DamageSource damageSource = attacker instanceof PlayerEntity player ? player.getDamageSources().playerAttack(player) : world.getDamageSources().generic();
-                    float abilityDamage = Math.max(HelperMethods.commonSpellAttributeScaling(Config.uniqueEffects.smoulder.spellScaling, attacker, "fire"), (float) HelperMethods.getEntityAttackDamage(attacker));
+                    float abilityDamage = Math.max(HelperMethods.commonSpellAttributeScaling(Config.uniqueEffects.emberlash.spellScaling, attacker, "fire"), (float) HelperMethods.getEntityAttackDamage(attacker));
                     float damageMultiplier = 0.15f * smoulderingEffect.getAmplifier();
                     target.damage(damageSource, abilityDamage * damageMultiplier);
                     HelperMethods.spawnOrbitParticles(world, target.getPos(), ParticleTypes.LAVA, 0.2, smoulderingEffect.getAmplifier());
@@ -56,7 +56,7 @@ public class EmberlashSwordItem extends UniqueSwordItem {
                             target.getSoundCategory(), 0.1f, 1.5f);
                 }
             }
-            int maximum_stacks = Config.uniqueEffects.smoulder.maxStacks;
+            int maximum_stacks = Config.uniqueEffects.emberlash.maxStacks;
             HelperMethods.incrementStatusEffect(target, EffectRegistry.getReference(EffectRegistry.SMOULDERING), 100, 1, maximum_stacks + 1);
 
         }
@@ -72,8 +72,8 @@ public class EmberlashSwordItem extends UniqueSwordItem {
         user.setVelocity(user.getRotationVector().negate().multiply(+1.5));
         user.setVelocity(user.getVelocity().x, 0, user.getVelocity().z); // Prevent user flying to the heavens
         user.velocityModified = true;
-        user.heal(user.getMaxHealth() * Config.uniqueEffects.smoulder.heal / 100f);
-        user.getItemCooldownManager().set(this, Config.uniqueEffects.smoulder.cooldown);
+        user.heal(user.getMaxHealth() * Config.uniqueEffects.emberlash.heal / 100f);
+        user.getItemCooldownManager().set(this, Config.uniqueEffects.emberlash.cooldown);
 
         return super.use(world, user, hand);
     }
@@ -97,7 +97,7 @@ public class EmberlashSwordItem extends UniqueSwordItem {
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.emberlashsworditem.tooltip6").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.emberlashsworditem.tooltip7", Config.uniqueEffects.smoulder.heal).setStyle(Styles.TEXT));
+        tooltip.add(Text.translatable("item.simplyswords.emberlashsworditem.tooltip7", Config.uniqueEffects.emberlash.heal).setStyle(Styles.TEXT));
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
         TooltipUtils.appendSpellScaleTooltip(tooltip, "fire");
     }

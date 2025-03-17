@@ -35,10 +35,10 @@ public class LootConfig extends Config {
     public ValidatedBoolean enableLootDrops = new ValidatedBoolean(true);
     public ValidatedBoolean enableLootInVillages = new ValidatedBoolean(false);
 
-    public ValidatedFloat standardLootTableWeight = new ValidatedFloat(0.01f, 1f, 0f);
-    public ValidatedFloat rareLootTableWeight = new ValidatedFloat(0.004f, 1f, 0f);
-    public ValidatedFloat runicLootTableWeight = new ValidatedFloat(0.007f, 1f, 0f);
-    public ValidatedFloat uniqueLootTableWeight = new ValidatedFloat(0.003f, 1f, 0f);
+    public ValidatedFloat standardLootTableWeight = new ValidatedFloat(0.1f, 100f, 0f);
+    public ValidatedFloat rareLootTableWeight = new ValidatedFloat(0.4f, 100f, 0f);
+    public ValidatedFloat runicLootTableWeight = new ValidatedFloat(0.7f, 100f, 0f);
+    public ValidatedFloat uniqueLootTableWeight = new ValidatedFloat(0.3f, 100f, 0f);
 
     //contained remnants will be disabled by default if the unique loot chance is set to 0
     public ValidatedCondition<Boolean> enableContainedRemnants = new ValidatedBoolean()
@@ -53,11 +53,11 @@ public class LootConfig extends Config {
     //if you ever use another toDynamicKey, the predicate id should be unique unless the predicate is exactly the same (non-block)
     public ValidatedIdentifierMap<Float> uniqueLootTableOptions = new ValidatedIdentifierMap.Builder<Float>()
             .keyHandler(ValidatedIdentifier.ofDynamicKey(LootTables.END_CITY_TREASURE_CHEST.getValue(), RegistryKeys.LOOT_TABLE, "simplyswords_no_blocks", (id, e) -> e.value().getType() != LootContextTypes.BLOCK))
-            .valueHandler(new ValidatedFloat(0.01f, 1f, 0f))
+            .valueHandler(new ValidatedFloat(0.1f, 100f, 0f))
             .defaults(
                     ImmutableMap.<Identifier, Float>builder()
-                            .put(Identifier.ofVanilla("entities/wither"), 0.05f)
-                            .put(Identifier.ofVanilla("entities/ender_dragon"), 0.5f)
+                            .put(Identifier.ofVanilla("entities/wither"), 5f)
+                            .put(Identifier.ofVanilla("entities/ender_dragon"), 50f)
                             .put(Identifier.ofVanilla("chests/ruined_portal"), 0f)
                             .put(Identifier.ofVanilla("chests/village/village_armorer"), 0f)
                             .put(Identifier.ofVanilla("chests/village/village_butcher"), 0f)

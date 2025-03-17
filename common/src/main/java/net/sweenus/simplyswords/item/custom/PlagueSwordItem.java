@@ -28,7 +28,7 @@ public class PlagueSwordItem extends UniqueSwordItem {
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        int hitChance = Config.uniqueEffects.plague.chance;
+        int hitChance = Config.uniqueEffects.toxic_longsword.chance;
         HelperMethods.playHitSounds(attacker, target);
 
         if (attacker.getRandom().nextInt(100) <= hitChance) {

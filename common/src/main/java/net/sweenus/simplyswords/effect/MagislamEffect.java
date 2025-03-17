@@ -31,11 +31,11 @@ public class MagislamEffect extends OrbitingEffect {
 
             if (livingEntity instanceof PlayerEntity player) {
                 int ability_timer = Objects.requireNonNull(player.getStatusEffect(EffectRegistry.getReference(EffectRegistry.MAGISLAM))).getDuration();
-                double radius = Config.uniqueEffects.magislam.radius;
+                double radius = Config.uniqueEffects.magispear.radius;
                 double leapVelocity = 1.5;
                 double height = 0.9;
                 double descentVelocity = 1;
-                double damage_multiplier = Config.uniqueEffects.magislam.damageModifier;
+                double damage_multiplier = Config.uniqueEffects.magispear.damageModifier;
                 double damage = (HelperMethods.getEntityAttackDamage(livingEntity) * damage_multiplier);
 
                 if (ability_timer >= 60) {

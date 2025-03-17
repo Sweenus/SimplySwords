@@ -101,7 +101,7 @@ public class BattleStandardDarkEntity extends PathAwareEntity {
                     }
                 }
 
-                float abilityDamage = standardType.equals("enigma") ? 1f : HelperMethods.spellScaledDamage("soul", ownerEntity, Config.uniqueEffects.abyssalStandard.spellScaling, Config.uniqueEffects.abyssalStandard.damage);
+                float abilityDamage = standardType.equals("enigma") ? 1f : HelperMethods.spellScaledDamage("soul", ownerEntity, Config.uniqueEffects.harbinger.spellScaling, Config.uniqueEffects.harbinger.damage);
 
                 //AOE Aura
                 if (this.age % 10 == 0) {

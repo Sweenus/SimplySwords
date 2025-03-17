@@ -39,10 +39,10 @@ public class MagispearSwordItem extends UniqueSwordItem {
         if (!attacker.getWorld().isClient()) {
             HelperMethods.playHitSounds(attacker, target);
             ServerWorld world = (ServerWorld) attacker.getWorld();
-            float hitChance = Config.uniqueEffects.magislam.magicChance;
+            float hitChance = Config.uniqueEffects.magispear.magicChance;
             int random = new Random().nextInt(100);
             if (random < hitChance) {
-                float damage = Config.uniqueEffects.magislam.magicModifier;
+                float damage = Config.uniqueEffects.magispear.magicModifier;
                 target.timeUntilRegen = 0;
                 target.damage(attacker.getDamageSources().indirectMagic(attacker, attacker), damage);
                 target.timeUntilRegen = 0;
@@ -55,7 +55,7 @@ public class MagispearSwordItem extends UniqueSwordItem {
 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
-        int skillCooldown = Config.uniqueEffects.magislam.cooldown;
+        int skillCooldown = Config.uniqueEffects.magispear.cooldown;
 
         world.playSound(null, user.getBlockPos(), SoundRegistry.MAGIC_SHAMANIC_NORDIC_27.get(),
                 user.getSoundCategory(), 0.2f, 1.1f);
