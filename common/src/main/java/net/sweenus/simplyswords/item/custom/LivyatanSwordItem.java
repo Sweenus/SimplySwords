@@ -70,7 +70,7 @@ public class LivyatanSwordItem extends UniqueSwordItem {
 
         user.swingHand(hand);
 
-        user.getItemCooldownManager().set(this, 10);
+        user.getItemCooldownManager().set(this, 1);
         return TypedActionResult.success(itemStack, world.isClient());
     }
 
@@ -85,18 +85,14 @@ public class LivyatanSwordItem extends UniqueSwordItem {
     public void appendTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.livyatansworditem.tooltip1").setStyle(Styles.ABILITY));
-        tooltip.add(Text.translatable("item.simplyswords.livyatansworditem.tooltip8").setStyle(Styles.TEXT));
+        tooltip.add(Text.translatable("item.simplyswords.livyatansworditem.tooltip6").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.livyatansworditem.tooltip2").setStyle(Styles.TEXT));
-        tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.livyatansworditem.tooltip3").setStyle(Styles.TEXT));
+        tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.livyatansworditem.tooltip4").setStyle(Styles.TEXT));
-        tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.livyatansworditem.tooltip5").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.livyatansworditem.tooltip6").setStyle(Styles.TEXT));
-        tooltip.add(Text.literal(""));
-        tooltip.add(Text.translatable("item.simplyswords.livyatansworditem.tooltip7").setStyle(Styles.TEXT));
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
         TooltipUtils.appendSpellScaleTooltip(tooltip, "frost");
     }

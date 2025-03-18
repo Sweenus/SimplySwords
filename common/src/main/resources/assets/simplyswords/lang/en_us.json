@@ -661,11 +661,11 @@
   "item.simplyswords.soulpyresworditem.tooltip9": "a second time.",
 
   "item.simplyswords.frostfallsworditem.tooltip1": "Unique Effect: Frost Fury",
-  "item.simplyswords.frostfallsworditem.tooltip2": "Chance on hit to encase nearby enemies in",
-  "item.simplyswords.frostfallsworditem.tooltip3": "ice, causing them to take no damage.",
-  "item.simplyswords.frostfallsworditem.tooltip4": "After %ds the ice shatters causing %d damage.",
-  "item.simplyswords.frostfallsworditem.tooltip5": "Encase yourself in ice for %ds, rendering you",
-  "item.simplyswords.frostfallsworditem.tooltip6": "immune and granting you regeneration.",
+  "item.simplyswords.frostfallsworditem.tooltip2": "Throw Frostfall forward.",
+  "item.simplyswords.frostfallsworditem.tooltip3": "Airtime and angle affect impact damage.",
+  "item.simplyswords.frostfallsworditem.tooltip4": "After landing, Frostfall pulses 5 times,",
+  "item.simplyswords.frostfallsworditem.tooltip5": "damaging, slowing,  and pulling enemies.",
+  "item.simplyswords.frostfallsworditem.tooltip6": "Has innate Loyalty III",
 
   "item.simplyswords.moltenedgesworditem.tooltip1": "Unique Effect: Molten Roar",
   "item.simplyswords.moltenedgesworditem.tooltip2": "Chance on hit to ignite your enemy or yourself.",
@@ -677,12 +677,10 @@
 
   "item.simplyswords.livyatansworditem.tooltip1": "Unique Effect: Jötunn's Wrath",
   "item.simplyswords.livyatansworditem.tooltip2": "Throw Livyatan forward.",
-  "item.simplyswords.livyatansworditem.tooltip3": "Deal increased damage the longer",
-  "item.simplyswords.livyatansworditem.tooltip4": "Livyatan spends airborne.",
-  "item.simplyswords.livyatansworditem.tooltip5": "Landing a direct hit at the right angle",
-  "item.simplyswords.livyatansworditem.tooltip6": "will deal bonus damage.",
-  "item.simplyswords.livyatansworditem.tooltip7": "Damages and slows enemies on return.",
-  "item.simplyswords.livyatansworditem.tooltip8": "Has innate Loyalty III",
+  "item.simplyswords.livyatansworditem.tooltip3": "Airtime and angle affect impact damage.",
+  "item.simplyswords.livyatansworditem.tooltip4": "On return, Livyatan slows and",
+  "item.simplyswords.livyatansworditem.tooltip5": "damages enemies.",
+  "item.simplyswords.livyatansworditem.tooltip6": "Has innate Loyalty III",
 
   "item.simplyswords.icewhispersworditem.tooltip1": "Unique Effect: Permafrost",
   "item.simplyswords.icewhispersworditem.tooltip2": "While wielded, gain a frost aura that deals",
@@ -1391,10 +1389,11 @@
   "simplyswords.unique_effects.soullpyre.resistanceDuration": "Soultether Resistance duration",
 
   "simplyswords.unique_effects.frostfall": "§6[Frostfall]§7",
-  "simplyswords.unique_effects.frostfall.chance": "Frost Fury chance",
+  "simplyswords.unique_effects.frostfall.chance": "Frost Fury repeat chance",
   "simplyswords.unique_effects.frostfall.cooldown": "Frost Fury cooldown",
   "simplyswords.unique_effects.frostfall.damage": "Frost Fury damage",
-  "simplyswords.unique_effects.frostfall.duration": "Frost Fury duration",
+  "simplyswords.unique_effects.frostfall.pulseDamage": "Frost Fury pulse damage",
+  "simplyswords.unique_effects.frostfall.duration": "Frost Fury slowness duration",
   "simplyswords.unique_effects.frostfall.radius": "Frost Fury radius",
   "simplyswords.unique_effects.frostfall.spellScaling": "Frost Fury Spell Power DMG multi",
 

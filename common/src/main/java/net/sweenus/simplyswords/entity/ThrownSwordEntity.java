@@ -24,6 +24,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.registry.EntityRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
+import net.sweenus.simplyswords.util.HelperMethods;
 import org.jetbrains.annotations.Nullable;
 
 // This thing is honestly so cursed (many issues with saving/load item stack from entity nbt). It finally seems to work, but the code needs cleaning up and I don't want to touch it
@@ -199,7 +200,7 @@ public class ThrownSwordEntity extends PersistentProjectileEntity {
         World world = this.getWorld();
 
         this.dealtDamage = true;
-        if (entity.damage(damageSource, agedDamage)) {
+        if (HelperMethods.damageThroughIframes(entity, damageSource, agedDamage)) {
             if (entity.getType() == EntityType.ENDERMAN) {
                 return;
             }

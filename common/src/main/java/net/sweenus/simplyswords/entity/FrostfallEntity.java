@@ -20,6 +20,10 @@ import net.sweenus.simplyswords.util.HelperMethods;
 
 public class FrostfallEntity extends ThrownSwordEntity {
     private int remainingDetonations = 5;
+    public double detonateRadius = 8;
+    public float detonateDamage = 11;
+    public int duration = 40;
+    public int addedChance = 0;
 
     // Base Constructor
     public FrostfallEntity(EntityType<? extends FrostfallEntity> entityType, World world) {
@@ -66,10 +70,9 @@ public class FrostfallEntity extends ThrownSwordEntity {
         super.doOnTick(entity);
 
         if (entity != null && entity instanceof LivingEntity livingEntity) {
-            if (entity.isOnGround()) {
+            if (this.inGround) {
                 int detonateDelay = 20;
-                int detonateRadius = 8;
-                float detonateDamage = 6;
+                int chance = 1;
                 ServerWorld world = (ServerWorld) this.getWorld();
                 DamageSource damageSource = this.getDamageSources().trident(this, entity);
 
@@ -85,12 +88,16 @@ public class FrostfallEntity extends ThrownSwordEntity {
 
                     for (Entity otherEntity : world.getOtherEntities(this, box, EntityPredicates.VALID_LIVING_ENTITY)) {
                         if ((otherEntity instanceof LivingEntity le) &&
-                                HelperMethods.checkFriendlyFire(le, livingEntity) &&
-                                le.timeUntilRegen == 0) {
-                            le.damage(damageSource, detonateDamage - detonateCount);
-                            le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 40, Math.min( 3, 6-detonateCount)), livingEntity);
+                                HelperMethods.checkFriendlyFire(le, livingEntity)) {
+                            HelperMethods.damageThroughIframes(le, damageSource, detonateDamage - detonateCount);
+                            le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, duration, Math.min( 3, 6-detonateCount)), livingEntity);
                             if (le.distanceTo(this) > 1)
                                 le.setVelocity((this.getX() - le.getX()) / 8, (this.getY() - le.getY()) / 8, (this.getZ() - le.getZ()) / 8);
+                        }
+                    }
+                    for (Entity otherEntity2 : world.getOtherEntities(this, box, EntityPredicates.VALID_ENTITY)) {
+                        if (otherEntity2 instanceof FrostfallEntity) {
+                            chance = Math.min(50, chance+addedChance);
                         }
                     }
 
@@ -104,8 +111,10 @@ public class FrostfallEntity extends ThrownSwordEntity {
                     HelperMethods.spawnOrbitParticles(world, this.getPos(), ParticleTypes.POOF, 6f - detonateCount, 9 - detonateCount);
                     HelperMethods.spawnOrbitParticles(world, this.getPos(), ParticleTypes.CRIT, 6f - detonateCount, 15 - detonateCount);
                     HelperMethods.spawnOrbitParticles(world, this.getPos(), ParticleTypes.ITEM_SNOWBALL, 6f - detonateCount, 10 - detonateCount);
+                    HelperMethods.spawnOrbitParticles(world, this.getPos().add(0, 1, 0), ParticleTypes.WHITE_ASH, 6f - detonateCount, 40 - detonateCount);
 
-                    remainingDetonations--;
+                    if (random.nextInt(100) > chance)
+                        remainingDetonations--;
                 }
             }
         }

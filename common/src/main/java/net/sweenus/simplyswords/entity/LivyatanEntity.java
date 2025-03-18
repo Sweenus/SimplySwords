@@ -54,9 +54,9 @@ public class LivyatanEntity extends ThrownSwordEntity {
                     this.getX() - radius, this.getY() - radius, this.getZ() - radius);
 
             for (Entity entity : world.getOtherEntities(this, box, EntityPredicates.VALID_LIVING_ENTITY)) {
-                if ((entity instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, user) && le.timeUntilRegen == 0) {
+                if ((entity instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, user) && le.age %5 == 0) {
 
-                    le.damage(damageSource, returnDamage);
+                    HelperMethods.damageThroughIframes(le, damageSource, returnDamage);
                     world.playSoundFromEntity(null, user, SoundRegistry.ELEMENTAL_SWORD_ICE_ATTACK_01.get(),
                             user.getSoundCategory(), 0.2f, 1.5f);
                     le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, slownessDuration, 2), user);

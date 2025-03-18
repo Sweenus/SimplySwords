@@ -485,6 +485,14 @@ public class HelperMethods {
         }
     }
 
+    // Ignore iFrames without resetting them entirely
+    public static boolean damageThroughIframes(Entity targetEntity, DamageSource damageSource, float damage) {
+        int iframes = targetEntity.timeUntilRegen;
+        boolean result = targetEntity.damage(damageSource, damage);
+        targetEntity.timeUntilRegen = iframes;
+        return result;
+    }
+
     public static boolean isInTag(ItemStack stack, Identifier tagId) {
         // Check if the stack and its item registry entry exist, and if that entry is in the specified tag
         if (stack != null && !stack.isEmpty()) {
