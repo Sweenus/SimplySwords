@@ -7,10 +7,7 @@ import net.minecraft.entity.SpawnGroup;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.SimplySwords;
-import net.sweenus.simplyswords.entity.BattleStandardDarkEntity;
-import net.sweenus.simplyswords.entity.BattleStandardEntity;
-import net.sweenus.simplyswords.entity.SimplySwordsBeeEntity;
-import net.sweenus.simplyswords.entity.ThrownSwordEntity;
+import net.sweenus.simplyswords.entity.*;
 
 public class EntityRegistry {
 
@@ -31,6 +28,24 @@ public class EntityRegistry {
                     .maxTrackingRange(8)
                     .trackingTickInterval(10)
                     .build(Identifier.of(SimplySwords.MOD_ID, "thrown_sword").toString())
+    );
+
+    public static final RegistrySupplier<EntityType<FrostfallEntity>> FROSTFALLENTITY = ENTITIES.register(
+            "frostfall_entity",
+            () -> EntityType.Builder.<FrostfallEntity>create(FrostfallEntity::new, SpawnGroup.MISC)
+                    .dimensions(0.5f, 0.5f)
+                    .maxTrackingRange(8)
+                    .trackingTickInterval(10)
+                    .build(Identifier.of(SimplySwords.MOD_ID, "frostfall_entity").toString())
+    );
+
+    public static final RegistrySupplier<EntityType<LivyatanEntity>> LIVYATANENTITY = ENTITIES.register(
+            "livyatan_entity",
+            () -> EntityType.Builder.<LivyatanEntity>create(LivyatanEntity::new, SpawnGroup.MISC)
+                    .dimensions(0.5f, 0.5f)
+                    .maxTrackingRange(8)
+                    .trackingTickInterval(10)
+                    .build(Identifier.of(SimplySwords.MOD_ID, "livyatan_entity").toString())
     );
 
 

@@ -8,14 +8,10 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.PersistentProjectileEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvent;
@@ -23,13 +19,11 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
-import net.minecraft.util.math.Box;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.registry.EntityRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
-import net.sweenus.simplyswords.registry.SoundRegistry;
-import net.sweenus.simplyswords.util.HelperMethods;
 import org.jetbrains.annotations.Nullable;
 
 // This thing is honestly so cursed (many issues with saving/load item stack from entity nbt). It finally seems to work, but the code needs cleaning up and I don't want to touch it
@@ -37,6 +31,7 @@ public class ThrownSwordEntity extends PersistentProjectileEntity {
     private boolean dealtDamage;
     private static final TrackedData<Byte> LOYALTY;
     private static final TrackedData<Boolean> ENCHANTED;
+    private static final TrackedData<ItemStack> ITEM_STACK;
     public ItemStack stack;
     public int returnTimer;
     public PickupPermission pickupType;
@@ -44,11 +39,11 @@ public class ThrownSwordEntity extends PersistentProjectileEntity {
     public float keepYaw;
     public float keepPitch = 0;
     public boolean offhandThrow = false;
-    public float float1;
-    public float float2;
-    public float float3;
-    public int int1;
-    public double double1;
+    public float primaryBaseDamage;
+    public float primaryReturnDamage;
+    public double primaryReturnDamageRadius;
+    public boolean returnToPlayer = false;
+
 
 
 
@@ -61,9 +56,10 @@ public class ThrownSwordEntity extends PersistentProjectileEntity {
     // Constructor for owner and item stack
     public ThrownSwordEntity(World world, LivingEntity owner, ItemStack stack) {
         super(EntityRegistry.THROWNSWORDENTITY.get(), owner, world, stack, (ItemStack) null);
-        this.stack = stack;
         this.dataTracker.set(LOYALTY, getLoyalty());
         this.dataTracker.set(ENCHANTED, stack.hasEnchantments());
+        this.dataTracker.set(ITEM_STACK, stack);
+
     }
 
     @Override
@@ -71,7 +67,7 @@ public class ThrownSwordEntity extends PersistentProjectileEntity {
         super.initDataTracker(builder);
         builder.add(LOYALTY, (byte)0);
         builder.add(ENCHANTED, false);
-
+        builder.add(ITEM_STACK, ItemStack.EMPTY);
     }
 
     @Override
@@ -108,7 +104,7 @@ public class ThrownSwordEntity extends PersistentProjectileEntity {
 
         Entity entity = this.getOwner();
         int i = (Byte)this.dataTracker.get(LOYALTY);
-        if (i > 0 && (this.dealtDamage || this.isNoClip()) && entity != null) {
+        if (i > 0 && (this.dealtDamage || this.isNoClip()) && entity != null && returnToPlayer) {
             if (!this.isOwnerAlive()) {
                 if (!this.getWorld().isClient && this.pickupType == PickupPermission.ALLOWED) {
                     this.dropStack(this.asItemStack(), 0.1F);
@@ -126,9 +122,9 @@ public class ThrownSwordEntity extends PersistentProjectileEntity {
                 double d = 0.05 * (double)i;
                 this.setVelocity(this.getVelocity().multiply(0.95).add(vec3d.normalize().multiply(d)));
                 if (this.returnTimer == 0) {
-                    this.playSound(SoundRegistry.ELEMENTAL_BOW_ICE_SHOOT_IMPACT_01.get(), 0.2F, 1.2F);
+                    this.playSound(getReturnSound(), 0.2F, 1.2F);
                 }
-                damageOnReturn(double1, float3);
+                damageOnReturn(primaryReturnDamageRadius, primaryReturnDamage);
                 ++this.returnTimer;
             }
         }
@@ -150,6 +146,8 @@ public class ThrownSwordEntity extends PersistentProjectileEntity {
             if (keepPitch != 0) {tempPitch = keepPitch;}
             this.setRotation(keepYaw - 90, tempPitch);
         }
+
+        doOnTick(entity);
     }
 
 
@@ -187,29 +185,18 @@ public class ThrownSwordEntity extends PersistentProjectileEntity {
         super.onBlockHit(blockHitResult);
     }
 
+    protected void doOnTick(Entity owner) {
+    }
+
     @Override
     protected void onEntityHit(EntityHitResult entityHitResult) {
         Entity entity = entityHitResult.getEntity();
         keepPitch = this.getPitch();
-        float baseDamage = float1;
-        if (this.getPitch() > -220 && this.getPitch() < -90) {
-            baseDamage = baseDamage * 1.5f;
-            //System.out.println("Perfect hit dmg+ " + baseDamage);
-        }
-        float agedDamage = baseDamage + ((float) age / 3);
+        float baseDamage = primaryBaseDamage;
         Entity entity2 = this.getOwner();
-        DamageSource damageSource = this.getDamageSources().trident(this, (Entity)(entity2 == null ? this : entity2));
+        DamageSource damageSource = this.getDamageSources().trident(this, (Entity) (entity2 == null ? this : entity2));
+        float agedDamage = doExtraDamage(entity, baseDamage, damageSource);
         World world = this.getWorld();
-        if (world instanceof ServerWorld serverWorld) {
-            int bonusParticles =  ((int) baseDamage / 2);
-            agedDamage = EnchantmentHelper.getDamage(serverWorld, stack, entity, damageSource, agedDamage);
-            HelperMethods.spawnOrbitParticles(serverWorld, this.getPos(), ParticleTypes.POOF, 0.5f, 3+bonusParticles);
-            HelperMethods.spawnOrbitParticles(serverWorld, this.getPos(), ParticleTypes.CRIT, 0.5f, 5+bonusParticles);
-            HelperMethods.spawnOrbitParticles(serverWorld, this.getPos(), ParticleTypes.SNOWFLAKE, 0.5f, 2+bonusParticles);
-            if (baseDamage > 8)
-                world.playSoundFromEntity(null, this, SoundRegistry.MAGIC_SWORD_PARRY_VARIOUS_HITS.get(),
-                        this.getSoundCategory(), 0.3f, 1.2f);
-        }
 
         this.dealtDamage = true;
         if (entity.damage(damageSource, agedDamage)) {
@@ -217,7 +204,6 @@ public class ThrownSwordEntity extends PersistentProjectileEntity {
                 return;
             }
 
-            world = this.getWorld();
             if (world instanceof ServerWorld serverWorld) {
                 EnchantmentHelper.onTargetDamaged(serverWorld, entity, damageSource, stack);
             }
@@ -229,7 +215,25 @@ public class ThrownSwordEntity extends PersistentProjectileEntity {
         }
 
         this.setVelocity(this.getVelocity().multiply(-0.01, -0.1, -0.01));
-        this.playSound(SoundEvents.ITEM_TRIDENT_HIT, 1.0F, 1.0F);
+        this.playSound(getEntityHitSound(), 1.0F, 1.0F);
+    }
+
+    protected float doExtraDamage(Entity entity, float baseDamage, DamageSource damageSource) {
+        if (this.getPitch() > -220 && this.getPitch() < -90) {
+            baseDamage = baseDamage * 1.5f;
+            //System.out.println("Perfect hit dmg+ " + baseDamage);
+        }
+        float agedDamage = baseDamage + ((float) age / 3);
+        World world = this.getWorld();
+        if (world instanceof ServerWorld serverWorld) {
+            agedDamage = EnchantmentHelper.getDamage(serverWorld, stack, entity, damageSource, agedDamage);
+            doEffects(serverWorld, baseDamage, entity);
+        }
+        return agedDamage;
+    }
+
+    protected void doEffects(ServerWorld serverWorld, float baseDamage, Entity entity) {
+        // For Override
     }
 
     @Nullable
@@ -243,6 +247,7 @@ public class ThrownSwordEntity extends PersistentProjectileEntity {
         this.dealtDamage = nbt.getBoolean("DealtDamage");
         this.dataTracker.set(LOYALTY, this.getLoyalty());
         if (nbt.contains("Stack")) {
+            this.dataTracker.set(ITEM_STACK, this.stack);
             this.stack = ItemStack.fromNbt(this.getRegistryManager(), nbt.getCompound("item")).orElse(this.getDefaultItemStack());
         } else {
             this.stack = ItemStack.EMPTY;
@@ -259,10 +264,10 @@ public class ThrownSwordEntity extends PersistentProjectileEntity {
     }
 
 
-    private byte getLoyalty() {
+    protected byte getLoyalty() {
         World world = this.getWorld();
         if (world instanceof ServerWorld serverWorld) {
-            return 3;
+            return (byte) MathHelper.clamp(EnchantmentHelper.getTridentReturnAcceleration(serverWorld, dataTracker.get(ITEM_STACK), this), 0, 127);
         } else {
             return 0;
         }
@@ -271,8 +276,8 @@ public class ThrownSwordEntity extends PersistentProjectileEntity {
     @Override
     public ItemStack getItemStack() {
         //System.out.println("ThrownSwordEntity: getItemStack called, stack = " + this.stack);
-        return this.stack;
-        }
+        return this.dataTracker.get(ITEM_STACK);
+    }
 
     public ItemStack getWeaponStack() {
         return this.getItemStack();
@@ -280,29 +285,8 @@ public class ThrownSwordEntity extends PersistentProjectileEntity {
 
 
 
-    public void damageOnReturn(double radius, float damage) {
-        if (getWorld().isClient()) return;
-        if (this.stack == null || this.stack.isEmpty()) return;
-
-        ServerWorld world = (ServerWorld) this.getWorld();
-        if (this.getOwner() != null && this.getOwner() instanceof ServerPlayerEntity user) {
-            DamageSource damageSource = user.getDamageSources().trident(this, user);
-            float returnDamage = EnchantmentHelper.getDamage(world, stack, this, damageSource, damage);
-
-            Box box = new Box(this.getX() + radius, this.getY() + radius, this.getZ() + radius,
-                    this.getX() - radius, this.getY() - radius, this.getZ() - radius);
-
-            for (Entity entity : world.getOtherEntities(this, box, EntityPredicates.VALID_LIVING_ENTITY)) {
-                if ((entity instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, user) && le.timeUntilRegen == 0) {
-
-                    le.damage(damageSource, returnDamage);
-                    world.playSoundFromEntity(null, user, SoundRegistry.ELEMENTAL_SWORD_ICE_ATTACK_01.get(),
-                            user.getSoundCategory(), 0.2f, 1.5f);
-                    le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, int1, 2), user);
-                    HelperMethods.spawnOrbitParticles(world, this.getPos(), ParticleTypes.POOF, 0.5f, 3);
-                }
-            }
-        }
+    protected void damageOnReturn(double radius, float damage) {
+        // For Override
     }
 
 
@@ -312,6 +296,14 @@ public class ThrownSwordEntity extends PersistentProjectileEntity {
     @Override
     protected SoundEvent getHitSound() {
         return SoundEvents.ITEM_TRIDENT_HIT_GROUND;
+    }
+
+    protected SoundEvent getReturnSound() {
+        return SoundEvents.ITEM_TRIDENT_RETURN;
+    }
+
+    protected SoundEvent getEntityHitSound() {
+        return SoundEvents.ITEM_TRIDENT_HIT;
     }
 
     @Override
@@ -325,5 +317,6 @@ public class ThrownSwordEntity extends PersistentProjectileEntity {
     static {
         LOYALTY = DataTracker.registerData(ThrownSwordEntity.class, TrackedDataHandlerRegistry.BYTE);
         ENCHANTED = DataTracker.registerData(ThrownSwordEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+        ITEM_STACK = DataTracker.registerData(ThrownSwordEntity.class, TrackedDataHandlerRegistry.ITEM_STACK);
     }
 }

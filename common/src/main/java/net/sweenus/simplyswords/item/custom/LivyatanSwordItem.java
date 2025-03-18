@@ -20,7 +20,7 @@ import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
-import net.sweenus.simplyswords.entity.ThrownSwordEntity;
+import net.sweenus.simplyswords.entity.LivyatanEntity;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -50,18 +50,18 @@ public class LivyatanSwordItem extends UniqueSwordItem {
         ItemStack itemStack = user.getStackInHand(hand);
         if (!world.isClient) {
             itemStack = user.getStackInHand(hand);
-            ThrownSwordEntity thrownSword = new ThrownSwordEntity(world, user, itemStack.copy() );
-            thrownSword.setVelocity(user, user.getPitch(), user.getYaw(), 0.0F, 1.5F, 1.0F);
-            thrownSword.setYaw(user.getYaw());
-            thrownSword.setPitch(user.getPitch());
-            thrownSword.float1 = abilityDamage;
-            thrownSword.int1 = duration;
-            thrownSword.float3 = returnDamage;
-            thrownSword.double1 = radius;
+            LivyatanEntity livyatanEntity = new LivyatanEntity(world, user, itemStack.copy() );
+            livyatanEntity.setVelocity(user, user.getPitch(), user.getYaw(), 0.0F, 1.5F, 1.0F);
+            livyatanEntity.setYaw(user.getYaw());
+            livyatanEntity.setPitch(user.getPitch());
+            livyatanEntity.primaryBaseDamage = abilityDamage;
+            livyatanEntity.slownessDuration = duration;
+            livyatanEntity.primaryReturnDamage = returnDamage;
+            livyatanEntity.primaryReturnDamageRadius = radius;
             if (hand == Hand.OFF_HAND)
-                thrownSword.offhandThrow = true;
-            thrownSword.setPos(user.getX(), user.getEyeY() - 0.5, user.getZ());
-            world.spawnEntity(thrownSword);
+                livyatanEntity.offhandThrow = true;
+            livyatanEntity.setPos(user.getX(), user.getEyeY() - 0.5, user.getZ());
+            world.spawnEntity(livyatanEntity);
 
             if (!user.getAbilities().creativeMode) {
                 itemStack.decrement(1);
@@ -70,6 +70,7 @@ public class LivyatanSwordItem extends UniqueSwordItem {
 
         user.swingHand(hand);
 
+        user.getItemCooldownManager().set(this, 10);
         return TypedActionResult.success(itemStack, world.isClient());
     }
 

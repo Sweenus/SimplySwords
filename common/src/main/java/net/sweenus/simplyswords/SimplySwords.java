@@ -127,6 +127,8 @@ public class SimplySwords {
             EntityModelLayerRegistry.register(BATTLESTANDARD_DARK_MODEL, BattleStandardDarkModel::getTexturedModelData);
             EntityRendererRegistry.register(EntityRegistry.SIMPLYBEEENTITY, BeeEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.THROWNSWORDENTITY, ThrownSwordEntityRenderer::new);
+            EntityRendererRegistry.register(EntityRegistry.FROSTFALLENTITY, ThrownSwordEntityRenderer::new);
+            EntityRendererRegistry.register(EntityRegistry.LIVYATANENTITY, ThrownSwordEntityRenderer::new);
 
         }
     }

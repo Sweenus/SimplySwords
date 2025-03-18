@@ -29,6 +29,7 @@ import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
+import net.sweenus.simplyswords.entity.FrostfallEntity;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.item.component.ChargedLocationComponent;
 import net.sweenus.simplyswords.item.component.StoredChargeComponent;
@@ -83,58 +84,35 @@ public class FrostfallSwordItem extends UniqueSwordItem {
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         if (user.getWorld().isClient()) return super.use(world, user, hand);
 
-        double lastX = user.getX();
-        double lastY = user.getY();
-        double lastZ = user.getZ();
+        float abilityDamage = HelperMethods.spellScaledDamage("frost", user, Config.uniqueEffects.livyatan.spellScaling, Config.uniqueEffects.livyatan.damage);
+        int duration = Config.uniqueEffects.livyatan.duration;
+        float returnDamage = Config.uniqueEffects.livyatan.returnDamage;
+        double radius = Config.uniqueEffects.livyatan.radius;
+        ItemStack itemStack = user.getStackInHand(hand);
+        if (!world.isClient) {
+            itemStack = user.getStackInHand(hand);
+            FrostfallEntity frostfallEntity = new FrostfallEntity(world, user, itemStack.copy() );
+            frostfallEntity.setVelocity(user, user.getPitch(), user.getYaw(), 0.0F, 1.5F, 1.0F);
+            frostfallEntity.setYaw(user.getYaw());
+            frostfallEntity.setPitch(user.getPitch());
+            frostfallEntity.primaryBaseDamage = abilityDamage;
+            frostfallEntity.primaryReturnDamage = returnDamage;
+            frostfallEntity.primaryReturnDamageRadius = radius;
+            if (hand == Hand.OFF_HAND)
+                frostfallEntity.offhandThrow = true;
+            frostfallEntity.setPos(user.getX(), user.getEyeY() - 0.5, user.getZ());
+            world.spawnEntity(frostfallEntity);
 
-        world.playSoundFromEntity(null, user, SoundRegistry.ELEMENTAL_BOW_ICE_SHOOT_IMPACT_03.get(),
-                user.getSoundCategory(), 0.6f, 2f);
-
-        double xPos = user.getX() - 2;
-        double yPos = user.getY();
-        double zPos = user.getZ() - 2;
-        user.setVelocity(0, 0, 0); // Stop player in place
-        user.velocityModified = true;
-        user.teleport(lastX, lastY, lastZ, false); // Ensure they don't end up stuck inside a block
-
-        for (int i = 3; i > 0; i--) {
-            for (int j = 3; j > 0; j--) {
-                BlockPos poscheck = BlockPos.ofFloored(xPos + i, yPos, zPos + j);
-                BlockPos poscheck2 = BlockPos.ofFloored(xPos + i, yPos + 1, zPos + j);
-                BlockPos poscheck3 = BlockPos.ofFloored(xPos + i, yPos + 2, zPos + j);
-                BlockPos poscheck4 = BlockPos.ofFloored(xPos + i, yPos - 1, zPos + j);
-
-                BlockState currentState = world.getBlockState(poscheck);
-                BlockState currentState2 = world.getBlockState(poscheck2);
-                BlockState currentState3 = world.getBlockState(poscheck3);
-                BlockState currentState4 = world.getBlockState(poscheck4);
-                BlockState state = Blocks.ICE.getDefaultState();
-                if (i + j != 4) {
-                    if (currentState == Blocks.AIR.getDefaultState() || currentState == Blocks.SNOW.getDefaultState() || currentState == Blocks.SHORT_GRASS.getDefaultState()
-                            || currentState == Blocks.LARGE_FERN.getDefaultState() || currentState == Blocks.FERN.getDefaultState() || currentState4 == Blocks.TALL_GRASS.getDefaultState())
-                        world.setBlockState(poscheck, state);
-                    if (currentState2 == Blocks.AIR.getDefaultState() || currentState2 == Blocks.SNOW.getDefaultState() || currentState2 == Blocks.SHORT_GRASS.getDefaultState()
-                            || currentState2 == Blocks.LARGE_FERN.getDefaultState() || currentState2 == Blocks.FERN.getDefaultState() || currentState4 == Blocks.TALL_GRASS.getDefaultState())
-                        world.setBlockState(poscheck2, state);
-                }
-                if (currentState3 == Blocks.AIR.getDefaultState() || currentState3 == Blocks.SNOW.getDefaultState() || currentState3 == Blocks.SHORT_GRASS.getDefaultState()
-                        || currentState3 == Blocks.LARGE_FERN.getDefaultState() || currentState3 == Blocks.FERN.getDefaultState() || currentState4 == Blocks.TALL_GRASS.getDefaultState())
-                    world.setBlockState(poscheck3, state);
-                if (currentState4 == Blocks.AIR.getDefaultState() || currentState4 == Blocks.SNOW.getDefaultState() || currentState4 == Blocks.SHORT_GRASS.getDefaultState()
-                        || currentState4 == Blocks.LARGE_FERN.getDefaultState() || currentState4 == Blocks.FERN.getDefaultState() || currentState4 == Blocks.TALL_GRASS.getDefaultState())
-                    world.setBlockState(poscheck4, state);
+            if (!user.getAbilities().creativeMode) {
+                itemStack.decrement(1);
             }
         }
-        user.teleport(lastX, lastY, lastZ, false);
-        int shatter_timer_max = Config.uniqueEffects.frostfall.duration;
-        user.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, shatter_timer_max, 4), user);
-        user.addStatusEffect(new StatusEffectInstance(StatusEffects.MINING_FATIGUE, shatter_timer_max, 4), user);
-        user.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, shatter_timer_max, 4), user);
-        user.addStatusEffect(new StatusEffectInstance(StatusEffects.REGENERATION, shatter_timer_max, 2), user);
-        ItemStack stack = user.getStackInHand(hand);
-        stack.set(ComponentTypeRegistry.CHARGED_LOCATION.get(), new ChargedLocationComponent(shatter_timer_max, lastX, lastY, lastZ));
-        user.getItemCooldownManager().set(this, Config.uniqueEffects.frostfall.cooldown);
-        return super.use(world, user, hand);
+
+        user.swingHand(hand);
+
+
+        user.getItemCooldownManager().set(this, 10);
+        return TypedActionResult.success(itemStack, world.isClient());
     }
 
     @Override

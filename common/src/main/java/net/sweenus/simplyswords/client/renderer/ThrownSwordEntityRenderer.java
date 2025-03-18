@@ -23,9 +23,10 @@ public class ThrownSwordEntityRenderer extends EntityRenderer<ThrownSwordEntity>
 
     @Override
     public void render(ThrownSwordEntity entity, float yaw, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light) {
-        ItemStack swordStack = ItemsRegistry.LIVYATAN.get().getDefaultStack(); // Ideally this would be dynamic and used for any itemStack
+        ItemStack swordStack = entity.getItemStack();
         if (swordStack == null || swordStack.isEmpty()) {
-            System.out.println("ThrownSwordEntityRenderer: swordStack is null or empty!");
+            //System.out.println("ThrownSwordEntityRenderer: swordStack is null or empty! Using default ItemStack.");
+            swordStack = ItemsRegistry.LIVYATAN.get().getDefaultStack(); // Fallback in case the entity's stack is empty
         }
 
         if (swordStack != null && !swordStack.isEmpty()) {
