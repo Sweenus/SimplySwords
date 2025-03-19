@@ -1,0 +1,20 @@
+{
+  "name": "Gema Fusionada del Nether",
+  "icon": "simplyswords:netherfused_gem",
+  "category": "simplyswords:category_gem_socketing",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:netherfused_gem",
+      "text": "Las Gemas Fusionadas del Nether se pueden obtener combinando un Remanente Potenciado y un Lingote de Netherite en una mesa de herrería. Una vez identificadas, estas gemas revelarán un poder aleatorio contenido dentro de la gema."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Las Gemas Fusionadas del Nether se pueden incrustar en armas Únicas que contengan un [ socket fusionado del nether vacío ]."
+    },
+    {
+      "type": "patchouli:smithing",
+      "recipe": "simplyswords:netherfused_gem"
+    }
+  ]
+}

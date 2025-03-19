@@ -1,0 +1,17 @@
+{
+  "name": "Flotar",
+  "icon": "simplyswords:runic_tablet",
+  "category": "simplyswords:category_rune_etching",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:runic_tablet",
+      "title": "Flotar",
+      "text": "Flotar es un poder rúnico que aprovecha el poder de la levitación, permitiendo al portador manipular la gravedad y revertir sus efectos sobre sus objetivos. $(br2)Otorga al portador la posibilidad de levantar a sus enemigos del suelo, dejándolos temporalmente incapaces de moverse o actuar."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Flotar es un poder rúnico poderoso que puede interrumpir el flujo de la batalla y dar al portador una ventaja estratégica. $(br2)Es ideal para personajes enfocados en el control de masas y el apoyo, como magos, brujos e invocadores, que pueden usar el poder para inmovilizar a sus enemigos y dar a sus aliados una oportunidad para atacar."
+    }
+  ]
+}

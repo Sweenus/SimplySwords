@@ -1,0 +1,26 @@
+{
+  "name": "Lanza",
+  "icon": "simplyswords:iron_spear",
+  "category": "simplyswords:category_weapon_variants",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:iron_spear",
+      "text": "Las lanzas han sido usadas a lo largo de la historia como arma para la caza y la guerra. Son conocidas por su versatilidad y alcance, y se usan principalmente para embestir. También son relativamente simples de fabricar y mantener, lo que las convierte en un arma popular entre las culturas antiguas y primitivas."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:iron_spear",
+      "recipe2": "simplyswords:gold_spear"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:diamond_spear"
+    },
+    {
+      "type": "patchouli:smithing",
+      "recipe": "simplyswords:netherite_spear",
+      "recipe2": "simplyswords:runic_spear"
+    }
+  ]
+}

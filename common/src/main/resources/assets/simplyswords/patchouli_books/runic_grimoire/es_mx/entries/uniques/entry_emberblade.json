@@ -1,0 +1,17 @@
+{
+  "name": "Hoja de ascuas",
+  "icon": "simplyswords:emberblade",
+  "advancement": "simplyswords:emberblade", 
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:emberblade",
+      "text": "La Hoja de ascuas es una poderosa espada larga imbuida con el poder del fuego. La hoja está forjada de un metal raro capaz de soportar el intenso calor de las llamas que la rodean. Conocida por envolver a su portador en llamas, la Hoja de ascuas puede otorgar mayor fuerza y velocidad."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Se dice que la espada elige a su portador y que solo aquellos que son dignos de ella pueden empuñarla. Sin embargo, se ha dicho que usar las habilidades de la espada por demasiado tiempo puede hacer que el portador pierda el control y sea abrumado por las llamas, resultando en una muerte de lo más horrible."
+    }
+  ]
+}

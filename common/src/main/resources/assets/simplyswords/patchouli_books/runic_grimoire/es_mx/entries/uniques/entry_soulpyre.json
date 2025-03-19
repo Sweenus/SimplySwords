@@ -1,0 +1,17 @@
+{
+  "name": "Pira de Almas",
+  "icon": "simplyswords:soulpyre",
+  "advancement": "simplyswords:soulpyre",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:soulpyre", 
+      "text": "La Pira de Almas es un hacha antigua y poderosa que se dice contiene el poder de las almas, la transposición y el fuego. Se dice que el hacha fue forjada a partir de un metal raro y místico que está infundido con la energía de incontables almas."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "El hacha tiene la habilidad de transponer las almas de sus víctimas, permitiendo al portador intercambiar su ubicación con la de sus enemigos. También tiene el poder de liberar las almas atrapadas en su interior, desatando una devastadora ola de energía ardiente que puede incinerar un campo de batalla entero."
+    }
+  ]
+}

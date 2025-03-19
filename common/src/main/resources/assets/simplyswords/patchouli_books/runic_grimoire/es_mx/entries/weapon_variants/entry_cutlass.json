@@ -1,0 +1,26 @@
+{
+  "name": "Sable",
+  "icon": "simplyswords:iron_cutlass",
+  "category": "simplyswords:category_weapon_variants",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:iron_cutlass",
+      "text": "El Sable está diseñado tanto para cortar como para ataques de estocada, y fue ampliamente utilizado en combates a corta distancia en barcos y embarcaciones, convirtiéndolo en un arma formidable para la guerra naval. Su forma curva permite ataques cortantes y poderosos, haciéndolo efectivo contra carne y cuerdas."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:iron_cutlass",
+      "recipe2": "simplyswords:gold_cutlass"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:diamond_cutlass"
+    },
+    {
+      "type": "patchouli:smithing",
+      "recipe": "simplyswords:netherite_cutlass",
+      "recipe2": "simplyswords:runic_cutlass"
+    }
+  ]
+}

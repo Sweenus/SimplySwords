@@ -1,0 +1,22 @@
+{
+  "name": "Hoja de liche dormido",
+  "icon": "simplyswords:slumbering_lichblade",
+  "advancement": "simplyswords:slumbering_lichblade",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:slumbering_lichblade",
+      "text": "La Hoja de liche dormido es una gran espada que emana un aura de almas atormentadas que dañan a los enemigos que se acercan demasiado. Se dice que la espada fue forjada con los restos de un poderoso Liche e imbuida con el poder de las almas que consumió. A veces, se puede escuchar un susurro siniestro que emana de la hoja."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "La espada, sin embargo, se encuentra actualmente en un estado latente y su verdadero poder está sellado. A través de un ritual especial o un proceso de fabricación, el portador puede despertar la espada y desbloquear sus mayores habilidades. Una vez despierta, el aura de la espada puede ser comandada para atacar a un enemigo, absorbiendo su fuerza vital y otorgándosela al portador. Es un arma de gran poder y debe ser usada con precaución."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:waking_lichblade",
+      "recipe2": "simplyswords:awakened_lichblade"
+    }
+  ]
+}

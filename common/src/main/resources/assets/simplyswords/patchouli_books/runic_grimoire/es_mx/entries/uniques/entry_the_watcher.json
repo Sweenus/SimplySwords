@@ -1,0 +1,17 @@
+{
+  "name": "El Vigilante",
+  "icon": "simplyswords:watcher_claymore",
+  "advancement": "simplyswords:the_watcher",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:watcher_claymore",
+      "text": "El Vigilante es una espada larga que ostenta un inquietante ojo parpadeante en su empuñadura, el cual se dice que es la fuente de su poder. Su hoja está hecha de un metal oscuro, casi negro, que parece absorber la luz a su alrededor."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Se sabe que El Vigilante es capaz de derribar instantáneamente a cualquier enemigo de un solo golpe, pero se dice que esto solo ocurre cuando el portador está en un estado de pura concentración y cuando el enemigo está en un estado crítico. Se dice que solo un verdadero guerrero, uno con una voluntad fuerte y una sed de poder, puede empuñar El Vigilante y aprovechar todo su potencial."
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "name": "Resto Potenciado",
+  "icon": "simplyswords:empowered_remnant",
+  "category": "simplyswords:category_gem_socketing",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:empowered_remnant",
+      "text": "Los Restos Potenciados se pueden obtener fundiendo armas únicas en un horno. El arma se destruye y una pequeña porción de su poder permanecerá en forma de un Resto Potenciado."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Cuando este objeto se combina en una mesa de herrería con un catalizador, como una Tableta Rúnica o un Lingote de Netherita, se puede formar una gema. Estas gemas pueden insertarse en ranuras correspondientes en armas únicas, permitiéndote potenciarlas de varias maneras."
+    },
+    {
+      "type": "patchouli:smelting",
+      "recipe": "simplyswords:unique_melting"
+    }
+  ]
+}

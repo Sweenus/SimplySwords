@@ -1,0 +1,26 @@
+{
+  "name": "Espada doble",
+  "icon": "simplyswords:iron_twinblade",
+  "category": "simplyswords:category_weapon_variants",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:iron_twinblade",
+      "text": "La Espada doble es un arma que requiere un alto nivel de habilidad y destreza para empuñarla efectivamente. Con su diseño de doble hoja, es conocida por su velocidad y precisión en batalla, lo que la convierte en un arma formidable en las manos adecuadas."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:iron_twinblade",
+      "recipe2": "simplyswords:gold_twinblade"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:diamond_twinblade"
+    },
+    {
+      "type": "patchouli:smithing",
+      "recipe": "simplyswords:netherite_twinblade",
+      "recipe2": "simplyswords:runic_twinblade"
+    }
+  ]
+}

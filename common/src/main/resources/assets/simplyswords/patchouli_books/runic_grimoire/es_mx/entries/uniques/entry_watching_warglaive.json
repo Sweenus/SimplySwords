@@ -1,0 +1,17 @@
+{
+  "name": "Guja de guerra vigilante",
+  "icon": "simplyswords:watching_warglaive",
+  "advancement": "simplyswords:watching_warglaive",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:watching_warglaive",
+      "text": "La Guja de guerra vigilante es un arma poderosa y letal diseñada para ser empuñada por guerreros hábiles y feroces. Con dos ojos parpadeantes en el centro, las hojas están hechas de un metal oscuro, casi negro, que parece absorber la luz a su alrededor."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "La Guja de guerra vigilante tiene el poder de drenar salud de los enemigos cercanos y transferirla a su portador, manteniéndolo en combate por más tiempo. La Guja también tiene la posibilidad de ejecutar inmediatamente a sus oponentes, asestando un golpe poderoso y crítico que puede terminar la pelea al instante."
+    }
+  ]
+}

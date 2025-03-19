@@ -1,0 +1,17 @@
+{
+  "name": "Livyatan",
+  "icon": "simplyswords:livyatan",
+  "advancement": "simplyswords:livyatan",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:livyatan",
+      "text": "El Livyatan es un temible hacha capaz de congelar a sus enemigos y destrozarlos para causar un daño increíble. Con cada golpe, el hacha puede enviar una ola de energía helada que envuelve a los objetivos cercanos, impidiéndoles moverse por completo."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Si el portador lo desea, el hacha los destroza en pedazos, causando un daño devastador. Se dice que el hacha fue forjada a partir del corazón de una criatura legendaria y brilla con una fría luz azul. Esta arma es perfecta para guerreros que desean causar un daño masivo y controlar el campo de batalla congelando y destrozando a sus enemigos."
+    }
+  ]
+}

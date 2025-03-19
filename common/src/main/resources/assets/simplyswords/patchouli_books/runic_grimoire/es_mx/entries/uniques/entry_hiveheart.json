@@ -1,0 +1,17 @@
+{
+  "name": "Corazón de Colmena",
+  "icon": "simplyswords:hiveheart",
+  "advancement": "simplyswords:hiveheart",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:hiveheart",
+      "text": "Corazón de Colmena, el enigmático martillo de dos manos, parece como si una colmena salvaje se hubiera adherido a un mango. Por razones desconocidas, los habitantes de la colmena parecen estar atados en servidumbre al portador, atacando enemigos a la vista."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "La lealtad del enjambre va más allá de la mera fuerza ofensiva. A petición del portador, las abejas producen una miel regenerativa: un néctar milagroso con la capacidad de curar incluso las heridas más graves."
+    }
+  ]
+}

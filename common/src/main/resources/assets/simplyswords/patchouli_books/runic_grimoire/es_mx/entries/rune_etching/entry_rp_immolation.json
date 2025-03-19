@@ -1,0 +1,17 @@
+{
+  "name": "Inmolación",
+  "icon": "simplyswords:runic_tablet", 
+  "category": "simplyswords:category_rune_etching",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:runic_tablet",
+      "title": "Inmolación",
+      "text": "Inmolación proporciona un poderoso aura de fuego sagrado. Mientras está activa, esta aura daña periódicamente a los enemigos cercanos, incinerándolos con llamas justas. Este daño escala según la salud actual del portador."
+    },
+    {
+      "type": "patchouli:text", 
+      "text": "Sin embargo, esta potente habilidad tiene un costo: el portador también recibe un daño menor del fuego sagrado."
+    }
+  ]
+}

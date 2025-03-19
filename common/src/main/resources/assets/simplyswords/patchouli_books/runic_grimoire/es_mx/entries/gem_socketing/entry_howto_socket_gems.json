@@ -1,0 +1,16 @@
+{
+  "name": "Engastar Gemas",
+  "icon": "simplyswords:netherfused_gem",
+  "category": "simplyswords:category_gem_socketing",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:netherfused_gem",
+      "text": "Para engastar una gema debes tener en tu inventario tanto la gema como un arma única con un espacio vacío del mismo tipo (runefused / netherfused)."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Con tu inventario abierto, haz clic izquierdo en la gema para que se ancle a tu cursor. Luego, simplemente haz clic izquierdo en el arma en la que deseas engastar. La gema desaparecerá de tu cursor y tu arma única será engastada."
+    }
+  ]
+}

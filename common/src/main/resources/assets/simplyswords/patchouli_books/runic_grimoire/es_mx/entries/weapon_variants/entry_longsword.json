@@ -1,0 +1,26 @@
+{
+  "name": "Espada larga",
+  "icon": "simplyswords:iron_longsword",
+  "category": "simplyswords:category_weapon_variants", 
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:iron_longsword",
+      "text": "La espada larga es un arma versátil que puede usarse para cortar, empalar y rebanar. Fue ampliamente utilizada por caballeros y otros soldados durante el período medieval. La espada larga es considerada como el arma por excelencia del caballero y es conocida por su precisión, poder de corte y versatilidad."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:iron_longsword",
+      "recipe2": "simplyswords:gold_longsword"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:diamond_longsword"
+    },
+    {
+      "type": "patchouli:smithing",
+      "recipe": "simplyswords:netherite_longsword",
+      "recipe2": "simplyswords:runic_longsword"
+    }
+  ]
+}

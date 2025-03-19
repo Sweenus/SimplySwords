@@ -1,0 +1,17 @@
+{
+  "name": "Espada Larga de la Peste",
+  "icon": "simplyswords:toxic_longsword",
+  "advancement": "simplyswords:longsword_plague",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:toxic_longsword",
+      "text": "La Espada Larga de la Peste es un arma maldita capaz de transformar bendiciones, como regeneración o resistencia, en efectos debilitantes sobre sus enemigos. Esto puede dejar a los enemigos debilitados y vulnerables, dándole al portador ventaja en el combate."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Se dice que la espada fue forjada con los restos de las víctimas de una gran peste e imbuida con magia oscura. Radiando un aura ominosa de decadencia, esta arma es perfecta para guerreros que desean interrumpir a sus enemigos y cambiar el curso de la batalla."
+    }
+  ]
+}

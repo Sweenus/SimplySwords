@@ -1,0 +1,17 @@
+{
+  "name": "Alfiletero",
+  "icon": "simplyswords:runic_tablet",
+  "category": "simplyswords:category_rune_etching",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:runic_tablet",
+      "title": "Alfiletero",
+      "text": "Alfiletero es un poder rúnico que imbuye el arma del portador con la $(#d1422c)$(l)esencia de la represalia$(). $(br2)Proporciona al arma la habilidad de infligir daño adicional a los enemigos basado en la cantidad de flechas clavadas en el cuerpo del portador."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Con Alfiletero, el portador se convierte en un mortal alfiletero para sus enemigos, alentando a los atacantes a distancia a pensarlo dos veces antes de dispararles. Cuantas más flechas impacten al portador, más poderosos se vuelven sus golpes, convirtiéndolo en una amenaza aún mayor en combate."
+    }
+  ]
+}

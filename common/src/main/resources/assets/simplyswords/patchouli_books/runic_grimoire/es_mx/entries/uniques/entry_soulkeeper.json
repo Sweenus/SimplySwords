@@ -1,0 +1,17 @@
+{
+  "name": "Guarda almas",
+  "icon": "simplyswords:soulkeeper",
+  "advancement": "simplyswords:soulkeeper",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:soulkeeper",
+      "text": "El Guarda almas se dice que está forjado con un material misterioso capaz de absorber las almas de los caídos, creando un vínculo entre el portador y las almas. Las almas absorbidas por el martillo actúan como un escudo protector, absorbiendo parte del daño recibido por el portador."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "El martillo también tiene la capacidad de liberar estas almas para debilitar y ralentizar a los enemigos cercanos. El martillo en sí es masivo e imponente, con una ventana que muestra un pozo de almas. El martillo tiene un aura inquietante que lo rodea y se dice que es la arma preferida de aquellos que desean aprovechar el poder de las almas y usarlo a su favor en la batalla."
+    }
+  ]
+}

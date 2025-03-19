@@ -1,0 +1,26 @@
+{
+  "name": "Estoque",
+  "icon": "simplyswords:iron_rapier",
+  "category": "simplyswords:category_weapon_variants", 
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:iron_rapier",
+      "text": "Los estoques fueron populares entre la clase alta durante los siglos XVI y XVII, y se usaban en duelos y defensa personal civil. Los estoques son conocidos por su velocidad, precisión y elegancia en combate. Debido a su hoja delgada y larga, requiere un alto nivel de habilidad y destreza para ser empuñado efectivamente."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:iron_rapier",
+      "recipe2": "simplyswords:gold_rapier"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:diamond_rapier"
+    },
+    {
+      "type": "patchouli:smithing",
+      "recipe": "simplyswords:netherite_rapier",
+      "recipe2": "simplyswords:runic_rapier"
+    }
+  ]
+}

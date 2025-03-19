@@ -1,0 +1,26 @@
+{
+  "name": "Guja",
+  "icon": "simplyswords:iron_glaive",
+  "category": "simplyswords:category_weapon_variants", 
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:iron_glaive",
+      "text": "Una guja es un tipo de arma de asta que consiste en una hoja de un solo filo montada en el extremo de un poste o eje largo, ideal para rebanar o cortar. El diseño de la guja permite un largo alcance en combate, haciéndola útil tanto para atacar como para defender."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:iron_glaive",
+      "recipe2": "simplyswords:gold_glaive"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:diamond_glaive"
+    },
+    {
+      "type": "patchouli:smithing",
+      "recipe": "simplyswords:netherite_glaive",
+      "recipe2": "simplyswords:runic_glaive"
+    }
+  ]
+}

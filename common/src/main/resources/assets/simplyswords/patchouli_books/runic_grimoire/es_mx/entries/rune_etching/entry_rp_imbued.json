@@ -1,0 +1,17 @@
+{
+  "name": "Imbuido",
+  "icon": "simplyswords:runic_tablet",
+  "category": "simplyswords:category_rune_etching",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:runic_tablet",
+      "title": "Imbuido",
+      "text": "Imbuido es un poder rúnico que imbuye el arma del portador con la $(#389fff)$(l)esencia de la magia$(). $(br2)Proporciona al arma la habilidad de desatar una potente energía mágica al golpear enemigos."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "El daño mágico infligido por Imbuido suele ser impredecible y tiende a disminuir a medida que el arma sufre daño de durabilidad. Sería prudente mantener el arma Imbuida reparada."
+    }
+  ]
+}

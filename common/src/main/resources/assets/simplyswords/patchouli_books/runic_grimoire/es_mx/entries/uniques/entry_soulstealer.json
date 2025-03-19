@@ -1,0 +1,17 @@
+{
+  "name": "Ladrón de Almas",
+  "icon": "simplyswords:soulstealer",
+  "advancement": "simplyswords:soulstealer",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:soulstealer",
+      "text": "El Ladrón de Almas es un arma poderosa y misteriosa que se dice tiene la habilidad de robar las almas de sus víctimas y manipular sus percepciones. Se cree que es una poderosa herramienta de manipulación y reubicación, capaz de nublar las mentes de sus objetivos hasta hacerlos ciegos a la presencia de quien la empuña."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "La naturaleza exacta y las capacidades del Ladrón de Almas son apenas comprendidas, ya que es un arma muy codiciada y elusiva que se dice solo es empuñada por los individuos más poderosos y siniestros."
+    }
+  ]
+}

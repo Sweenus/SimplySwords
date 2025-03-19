@@ -1,0 +1,17 @@
+{
+  "name": "Mandoble de Azufre",
+  "icon": "simplyswords:brimstone_claymore",
+  "advancement": "simplyswords:brimstone",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:brimstone_claymore",
+      "text": "La Mandoble de Azufre es un arma temible que aprovecha el poder del azufre fundido para infligir un daño devastador a sus enemigos. La hoja de la Mandoble está imbuida con el poder del azufre, lo que le permite tener una posibilidad de expulsar lava fundida con cada golpe."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Esta arma es extremadamente pesada y requiere un portador fuerte para manejarla adecuadamente, y debe usarse con precaución ya que su poder puede causar graves daños al entorno y a cualquiera que esté cerca. Solo los guerreros más hábiles y poderosos pueden manejar la Mandoble de Azufre de manera efectiva."
+    }
+  ]
+}

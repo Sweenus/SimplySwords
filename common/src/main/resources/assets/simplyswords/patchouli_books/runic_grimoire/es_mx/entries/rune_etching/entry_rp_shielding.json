@@ -1,0 +1,17 @@
+{
+  "name": "Escudo",
+  "icon": "simplyswords:runic_tablet",
+  "category": "simplyswords:category_rune_etching",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:runic_tablet",
+      "title": "Escudo",
+      "text": "Escudo es un poder rúnico que imbuye el arma del portador con la $(#389fff)$(l)esencia de protección$(). $(br2)Otorga al portador una probabilidad de ganar absorción al golpear con cada ataque exitoso."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Escudo es un poderoso poder rúnico que puede darle al portador una ventaja en combate al protegerlo del daño. Es ideal para personajes enfocados en resistir y absorber daño, como guerreros y paladines. $(br2)También puede ser útil para personajes que dependen de ataques contundentes, ya que el efecto de absorción les permite mantenerse en la lucha por más tiempo."
+    }
+  ]
+}

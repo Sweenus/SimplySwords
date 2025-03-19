@@ -1,0 +1,13 @@
+{
+  "name": "Caelestis",
+  "icon": "simplyswords:caelestis",
+  "advancement": "simplyswords:caelestis",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:caelestis",
+      "text": "Un arma extraña con una hoja que revela el plano astral. Otorga al portador la habilidad de entrar en el reino astral, volviéndose intocable por breves momentos."
+    }
+  ]
+}

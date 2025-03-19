@@ -1,0 +1,13 @@
+{
+  "name": "Viento susurrante",
+  "icon": "simplyswords:whisperwind",
+  "advancement": "simplyswords:whisperwind", 
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:whisperwind",
+      "text": "Viento susurrante, la hoja etérea que danza con el viento, otorga a su portador una agilidad sin igual y un poder enigmático. Mientras la katana corta el aire, resuena una tenue melodía, como si fuera llevada por una suave brisa. Con cada veloz arremetida, los sentidos del enemigo son asaltados, dejándolo desorientado y vulnerable."
+    }
+  ]
+}

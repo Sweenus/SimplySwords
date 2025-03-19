@@ -1,0 +1,13 @@
+{
+  "name": "Enigma",
+  "icon": "simplyswords:enigma",
+  "advancement": "simplyswords:enigma",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:enigma",
+      "text": "Una antigua tecnología de origen incierto. Las extrañas luces en la empuñadura parecen parpadear en reacción a los cambios en el viento."
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "name": "Chakram",
+  "icon": "simplyswords:iron_chakram",
+  "category": "simplyswords:category_weapon_variants",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:iron_chakram",
+      "text": "El Chakram es un arma arrojadiza circular que normalmente está hecha de metal y tiene un borde exterior afilado. Cuando se empuña a dos manos, el Chakram tiene la capacidad de lanzar un ataque en área, lo que significa que puede golpear a varios enemigos a la vez alrededor del portador."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:iron_chakram",
+      "recipe2": "simplyswords:gold_chakram"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:diamond_chakram"
+    },
+    {
+      "type": "patchouli:smithing",
+      "recipe": "simplyswords:netherite_chakram",
+      "recipe2": "simplyswords:runic_chakram"
+    }
+  ]
+}

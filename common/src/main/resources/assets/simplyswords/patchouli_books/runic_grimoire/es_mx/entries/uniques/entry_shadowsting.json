@@ -1,0 +1,17 @@
+{
+  "name": "Aguijón Sombrío",
+  "icon": "simplyswords:shadowsting",
+  "advancement": "simplyswords:shadowsting",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:shadowsting",
+      "text": "Aguijón Sombrío es un delgado estoque imbuido con el poder de las sombras. La habilidad única del estoque le permite tener la posibilidad de infligir daño mágico que escala con la armadura de los enemigos, permitiéndole penetrar incluso las armaduras más resistentes."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "El estoque también tiene la habilidad de crear una niebla sombría que nubla la visión de sus enemigos, esta habilidad se conoce como Niebla Sombría. El portador puede usar la niebla para crear confusión y desorientación entre sus enemigos, proporcionando una ventaja estratégica en combate."
+    }
+  ]
+}

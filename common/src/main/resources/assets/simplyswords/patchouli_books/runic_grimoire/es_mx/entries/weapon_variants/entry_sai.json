@@ -1,0 +1,26 @@
+{
+  "name": "Sai",
+  "icon": "simplyswords:iron_sai", 
+  "category": "simplyswords:category_weapon_variants",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:iron_sai",
+      "text": "El sai es un arma versátil que requiere un alto nivel de habilidad y entrenamiento para empuñarla de manera efectiva. Es conocida por su capacidad para desviar y atrapar el arma de un oponente, permitiendo al portador obtener ventaja en el combate. Debido a su pequeño tamaño y fácil manejo, puede ser utilizada en espacios reducidos y combate cercano."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:iron_sai",
+      "recipe2": "simplyswords:gold_sai"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:diamond_sai"
+    },
+    {
+      "type": "patchouli:smithing",
+      "recipe": "simplyswords:netherite_sai",
+      "recipe2": "simplyswords:runic_sai"
+    }
+  ]
+}

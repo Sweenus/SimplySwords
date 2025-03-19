@@ -1,0 +1,17 @@
+{
+  "name": "Piel de Piedra",
+  "icon": "simplyswords:runic_tablet",
+  "category": "simplyswords:category_rune_etching",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:runic_tablet",
+      "title": "Piel de Piedra",
+      "text": "Piel de Piedra es un poder rúnico que imbuye el arma del portador con la $(#916f49)$(l)esencia de la tierra y la piedra$(). $(br2)Otorga al portador la posibilidad de aumentar su resistencia al daño a costa de velocidad con cada golpe exitoso."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Piel de Piedra es un poderoso poder rúnico que puede dar al portador una ventaja en combate al aumentar su durabilidad. $(br2)La disminución de velocidad puede ser una desventaja para personajes que dependen de la rapidez y movilidad, pero la resistencia aumentada puede compensarlo en ciertas situaciones."
+    }
+  ]
+}

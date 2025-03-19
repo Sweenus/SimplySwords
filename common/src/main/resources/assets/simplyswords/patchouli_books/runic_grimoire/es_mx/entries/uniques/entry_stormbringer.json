@@ -1,0 +1,17 @@
+{
+  "name": "Portador de Tormentas",
+  "icon": "simplyswords:stormbringer",
+  "advancement": "simplyswords:stormbringer",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:stormbringer",
+      "text": "La hoja dividida de la espada está imbuida con una poderosa energía eléctrica que chisporrotea y se arquea con cada golpe. Se dice que la espada es particularmente efectiva cuando se usa en batalla durante una tormenta, donde el portador puede aprovechar todo el poder del rayo."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Se dice que la espada es extremadamente poderosa pero también impredecible, ya que su carga eléctrica ha sido conocida por arquearse hacia el usuario, a menudo de manera fatal."
+    }
+  ]
+}

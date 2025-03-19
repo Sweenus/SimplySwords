@@ -1,0 +1,17 @@
+{
+  "name": "Llama del Hogar",
+  "icon": "simplyswords:hearthflame",
+  "advancement": "simplyswords:hearthflame",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:hearthflame",
+      "text": "Llama del Hogar es un poderoso martillo gigante imbuido con la habilidad de causar temblores devastadores. Al ser blandido, envía ondas de fuerza que atraen a los enemigos hacia él antes de incendiarlos en una explosión de fuego."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "La explosión resultante no solo causa un daño masivo, sino que también lanza a los enemigos lejos del portador, proporcionando una oportunidad para reposicionarse o perseguir otros objetivos. Se dice que el martillo fue forjado con las llamas más calientes de la tierra y emana un aura de calor. Esta arma es perfecta para guerreros que desean causar un daño masivo y controlar el campo de batalla."
+    }
+  ]
+}

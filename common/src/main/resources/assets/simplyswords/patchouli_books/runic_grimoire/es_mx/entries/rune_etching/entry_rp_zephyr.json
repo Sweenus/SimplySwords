@@ -1,0 +1,17 @@
+{
+  "name": "Céfiro",
+  "icon": "simplyswords:runic_tablet",
+  "category": "simplyswords:category_rune_etching",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:runic_tablet",
+      "title": "Céfiro",
+      "text": "Céfiro es un poder rúnico que imbuye el arma del portador con la $(#85a0ab)$(l)esencia del elemento viento$(). $(br2)Otorga al portador la probabilidad de obtener velocidad de ataque y movimiento aumentada con cada golpe exitoso."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Es ideal para personajes enfocados en infligir alto daño, como guerreros, bárbaros y pícaros, que pueden aprovechar el aumento de velocidad de ataque y movimiento para golpear rápidamente y evadir ataques enemigos."
+    }
+  ]
+}

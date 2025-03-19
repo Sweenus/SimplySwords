@@ -1,0 +1,17 @@
+{
+  "name": "Lento",
+  "icon": "simplyswords:runic_tablet",
+  "category": "simplyswords:category_rune_etching",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:runic_tablet",
+      "title": "Lento",
+      "text": "Lento es un poder rúnico que imbuye el arma del portador con la $(#87185d)$(l)esencia de la pereza y el letargo$(). $(br2)Otorga al portador la posibilidad de reducir la velocidad de movimiento de sus objetivos con cada golpe exitoso."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Lento es un poderoso poder rúnico que puede interrumpir el flujo de la batalla y darle al portador una ventaja estratégica. $(br2)Es ideal para personajes que dependen de tácticas de golpear y correr, ya que les permite ralentizar la persecución y escapar rápidamente."
+    }
+  ]
+}

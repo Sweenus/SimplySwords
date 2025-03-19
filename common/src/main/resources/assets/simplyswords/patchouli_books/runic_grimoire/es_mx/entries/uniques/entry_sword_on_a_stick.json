@@ -1,0 +1,17 @@
+{
+  "name": "Espada en un Palo",
+  "icon": "simplyswords:sword_on_a_stick",
+  "advancement": "simplyswords:sword_on_a_stick",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:sword_on_a_stick",
+      "text": "La Espada en un Palo es un arma legendaria, se dice que ha sido heredada de generación en generación por una familia de grandes guerreros. Las historias de sus hazañas se han difundido por todas las tierras, y todos los que escuchan no pueden evitar maravillarse con su poder."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Aunque pensándolo bien, probablemente solo sea un palo con una espada atada en el extremo."
+    }
+  ]
+}

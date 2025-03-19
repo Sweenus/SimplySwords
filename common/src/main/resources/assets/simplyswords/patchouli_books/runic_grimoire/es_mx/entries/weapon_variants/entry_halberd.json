@@ -1,0 +1,26 @@
+{
+  "name": "Alabarda",
+  "icon": "simplyswords:iron_halberd",
+  "category": "simplyswords:category_weapon_variants", 
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:iron_halberd",
+      "text": "Una Alabarda es un tipo de arma de asta que cuenta con un largo mango con una hoja afilada y curvada en un extremo y una cabeza de hacha en el otro. Con su versatilidad y alcance, la alabarda es un arma formidable en manos de un guerrero hábil."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:iron_halberd",
+      "recipe2": "simplyswords:gold_halberd"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:diamond_halberd"
+    },
+    {
+      "type": "patchouli:smithing",
+      "recipe": "simplyswords:netherite_halberd",
+      "recipe2": "simplyswords:runic_halberd"
+    }
+  ]
+}

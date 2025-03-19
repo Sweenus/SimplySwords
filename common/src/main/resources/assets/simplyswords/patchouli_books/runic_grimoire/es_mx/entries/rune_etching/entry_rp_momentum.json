@@ -1,0 +1,17 @@
+{
+  "name": "Impulso",
+  "icon": "simplyswords:runic_tablet",
+  "category": "simplyswords:category_rune_etching",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:runic_tablet",
+      "title": "Impulso",
+      "text": "Impulso es un poder rúnico que imbuye el arma del portador con la $(#389fff)$(l)esencia de masa y velocidad$(). $(br2)Genera un impulso hacia adelante, propulsando rápidamente al portador."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "La oleada de energía creada por Impulso puede ser utilizada con gran efecto en combate, permitiendo al portador cubrir terreno rápidamente y acercarse para el golpe final."
+    }
+  ]
+}

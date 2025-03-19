@@ -1,0 +1,17 @@
+{
+  "name": "Protección de Escarcha",
+  "icon": "simplyswords:runic_tablet",
+  "category": "simplyswords:category_rune_etching",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:runic_tablet",
+      "title": "Protección de Escarcha",
+      "text": "Protección de Escarcha es un poder rúnico que imbuye el arma del portador con la $(#38caff)$(l)esencia del frío y la escarcha$(). $(br2)Crea una protección que dispara periódicamente bolas de nieve que dificultan el movimiento de los enemigos cercanos."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Protección de Escarcha es una elección ideal para aquellos que prefieren un estilo de juego más defensivo, ya que les permite controlar el campo de batalla con facilidad."
+    }
+  ]
+}

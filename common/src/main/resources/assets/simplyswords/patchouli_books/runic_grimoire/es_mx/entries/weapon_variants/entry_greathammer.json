@@ -1,0 +1,26 @@
+{
+  "name": "Gran Martillo",
+  "icon": "simplyswords:iron_greathammer",
+  "category": "simplyswords:category_weapon_variants", 
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:iron_greathammer",
+      "text": "El Gran Martillo es conocido por su capacidad de infligir daño devastador con cada golpe, debido a su peso y tamaño. Tradicionalmente era usado por la infantería y caballería pesada en la guerra medieval, y también era utilizado por herreros, albañiles y otros trabajadores para golpes de alta potencia."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:iron_greathammer",
+      "recipe2": "simplyswords:gold_greathammer"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:diamond_greathammer"
+    },
+    {
+      "type": "patchouli:smithing",
+      "recipe": "simplyswords:netherite_greathammer",
+      "recipe2": "simplyswords:runic_greathammer"
+    }
+  ]
+}

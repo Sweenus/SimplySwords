@@ -1,0 +1,17 @@
+{
+  "name": "Filo de la Estrella",
+  "icon": "simplyswords:stars_edge",
+  "advancement": "simplyswords:stars_edge", 
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:stars_edge",
+      "text": "El Filo de la Estrella, la majestuosa hoja doble de dos manos, resuena con la esencia cósmica de una estrella. En el radiante abrazo de la luz del día, el Filo de la Estrella surge con energía, permitiéndole infligir daño adicional."
+    },
+    {
+      "type": "patchouli:text", 
+      "text": "Cuando cae la noche, el Filo de la Estrella se transforma una vez más. Bañada en el brillo ambiental de la luna y las estrellas, la hoja doble exuda un aura tranquilizante. Sus golpes, ahora imbuidos con influencia lunar, drenan la vida de los enemigos."
+    }
+  ]
+}

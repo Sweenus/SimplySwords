@@ -1,0 +1,13 @@
+{
+  "name": "Látigo de ascuas",
+  "icon": "simplyswords:emberlash",
+  "advancement": "simplyswords:emberlash",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:emberlash",
+      "text": "El Látigo de ascuas es un extraordinario puñal que desafía las armas convencionales, con una hoja hecha de pura llama controlada. El Látigo de ascuas no es solo un espectáculo visual; su hoja incandescente tiene la habilidad única de cauterizar heridas y cuenta con un alcance mayor que la mayoría de las hojas de su clase de peso."
+    }
+  ]
+}

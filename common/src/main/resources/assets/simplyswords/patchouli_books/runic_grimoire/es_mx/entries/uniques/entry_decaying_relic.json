@@ -1,0 +1,13 @@
+{
+  "name": "Reliquia Decadente",
+  "icon": "simplyswords:decaying_relic",
+  "advancement": "simplyswords:decaying_relic",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:decaying_relic",
+      "text": "Deja que la oscuridad te guíe a la fuente..."
+    }
+  ]
+}

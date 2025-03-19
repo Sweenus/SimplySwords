@@ -1,0 +1,13 @@
+{
+  "name": "Tejedora de Cera",
+  "icon": "simplyswords:waxweaver",
+  "advancement": "simplyswords:waxweaver",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:waxweaver",
+      "text": "La Tejedora de Cera es un exquisito mandoble que fusiona perfectamente la elegancia con la letalidad, semejante a un ornamentado candelabro. Cuando la Tejedora de Cera golpea a enemigos en llamas, las velas se potencian y su fuerza se transmite al portador."
+    }
+  ]
+}

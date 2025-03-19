@@ -1,0 +1,17 @@
+{
+  "name": "Pionero",
+  "icon": "simplyswords:runic_tablet",
+  "category": "simplyswords:category_rune_etching",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:runic_tablet",
+      "title": "Pionero",
+      "text": "Pionero es un poder rúnico que imbuye el arma del portador con la $(#bf4117)$(l)esencia del fuego$(). $(br2)Otorga al portador la posibilidad de prenderse fuego mientras aumenta su velocidad con cada golpe exitoso."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Puede ser útil en batallas contra enemigos que dependen de la velocidad y la movilidad, ya que el aumento de velocidad puede permitir que el portador los supere. $(br2)El efecto de fuego puede ser una desventaja para personajes que carecen de defensas, pero el aumento de velocidad puede compensarlo en ciertas situaciones."
+    }
+  ]
+}

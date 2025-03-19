@@ -1,0 +1,17 @@
+{
+  "name": "Arcanitesis",
+  "icon": "simplyswords:arcanethyst",
+  "advancement": "simplyswords:arcanethyst",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:arcanethyst",
+      "text": "La Arcanitesis es una poderosa alabarda que aprovecha el poder de la magia arcana para manipular a sus enemigos, similar a la telequinesis. La alabarda está hecha de amatista encantada, una gema rara y valiosa conocida por su capacidad para canalizar energía mágica."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "La habilidad única de la alabarda para levantar enemigos del suelo con una ola de energía arcana los deja vulnerables a ataques consecutivos. Esta alabarda es considerada una poderosa herramienta de destrucción, pero requiere la absorción de poder de la carne de sus enemigos para alcanzar su máximo potencial."
+    }
+  ]
+}

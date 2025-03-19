@@ -1,0 +1,26 @@
+{
+  "name": "Guja de Guerra",
+  "icon": "simplyswords:iron_warglaive",
+  "category": "simplyswords:category_weapon_variants",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:iron_warglaive",
+      "text": "Las gujas de guerra son conocidas por su velocidad y agilidad, y con sus bordes afilados como navajas, pueden realizar golpes rápidos y mortales. Requieren un alto nivel de destreza y habilidad para ser empuñadas efectivamente, pero cuando se usan correctamente pueden ser muy efectivas en batalla."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:iron_warglaive",
+      "recipe2": "simplyswords:gold_warglaive"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:diamond_warglaive"
+    },
+    {
+      "type": "patchouli:smithing",
+      "recipe": "simplyswords:netherite_warglaive",
+      "recipe2": "simplyswords:runic_warglaive"
+    }
+  ]
+}

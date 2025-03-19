@@ -1,0 +1,13 @@
+{
+  "name": "Perforador de Mechas",
+  "icon": "simplyswords:wickpiercer",
+  "advancement": "simplyswords:wickpiercer",
+  "category": "simplyswords:category_unique_weapons",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:wickpiercer",
+      "text": "El Perforador de Mechas es una exquisita lanza que combina perfectamente la elegancia con la letalidad, recordando a un ornamentado candelabro. El Perforador de Mechas tiene la capacidad de influir en la mente y el cuerpo de quien lo empuña, enviándolos a un estado de furia y aumentando su agilidad."
+    }
+  ]
+}

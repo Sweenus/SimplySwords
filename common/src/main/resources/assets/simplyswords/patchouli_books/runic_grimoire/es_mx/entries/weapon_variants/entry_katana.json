@@ -1,0 +1,26 @@
+{
+  "name": "Katana",
+  "icon": "simplyswords:iron_katana",
+  "category": "simplyswords:category_weapon_variants", 
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "simplyswords:iron_katana",
+      "text": "La Katana es conocida por su filo, fuerza y capacidad de ser blandida con gran velocidad y precisión. Tradicionalmente era usada por la clase samurái del Japón feudal y era considerada una de las armas más importantes del samurái."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:iron_katana",
+      "recipe2": "simplyswords:gold_katana"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "simplyswords:diamond_katana"
+    },
+    {
+      "type": "patchouli:smithing",
+      "recipe": "simplyswords:netherite_katana",
+      "recipe2": "simplyswords:runic_katana"
+    }
+  ]
+}
