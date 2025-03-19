@@ -1,6 +1,9 @@
 package net.sweenus.simplyswords.util;
 
 import dev.architectury.platform.Platform;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.AttributeModifierSlot;
+import net.minecraft.component.type.AttributeModifiersComponent;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
@@ -22,6 +25,7 @@ import net.minecraft.registry.tag.TagKey;
 import net.minecraft.scoreboard.AbstractTeam;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
+import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
@@ -412,6 +416,22 @@ public class HelperMethods {
             return attackDamageAttribute.getValue();
         }
         return 0;
+    }
+
+    public static double[] getAttackFromSlot(PlayerEntity player, ItemStack stack, Hand hand) {
+        double attackValue = 0;
+        double attackSpeedValue = 0;
+        AttributeModifierSlot attributeModifierSlot = hand == Hand.MAIN_HAND ? AttributeModifierSlot.MAINHAND : AttributeModifierSlot.OFFHAND;
+        if (!stack.isEmpty()) {
+            AttributeModifiersComponent attributeModifiersComponent = stack.getOrDefault(DataComponentTypes.ATTRIBUTE_MODIFIERS, AttributeModifiersComponent.DEFAULT);
+            for (AttributeModifiersComponent.Entry entry : attributeModifiersComponent.modifiers()) {
+                if (entry.attribute() == EntityAttributes.GENERIC_ATTACK_DAMAGE && entry.slot() == attributeModifierSlot) {
+                    attackValue += entry.modifier().value();
+                }
+            }
+        }
+
+        return new double[] {attackValue, attackSpeedValue};
     }
 
     public static void applyDamageWithoutKnockback(LivingEntity target, DamageSource source, float amount) {

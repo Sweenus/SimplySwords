@@ -48,6 +48,15 @@ public class EntityRegistry {
                     .build(Identifier.of(SimplySwords.MOD_ID, "livyatan_entity").toString())
     );
 
+    public static final RegistrySupplier<EntityType<ThrownSpearEntity>> SPEAR = ENTITIES.register(
+            "spear_entity",
+            () -> EntityType.Builder.<ThrownSpearEntity>create(ThrownSpearEntity::new, SpawnGroup.MISC)
+                    .dimensions(0.5f, 0.5f)
+                    .maxTrackingRange(8)
+                    .trackingTickInterval(10)
+                    .build(Identifier.of(SimplySwords.MOD_ID, "spear_entity").toString())
+    );
+
 
 
 }

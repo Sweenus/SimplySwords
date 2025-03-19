@@ -21,6 +21,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.client.renderer.BattleStandardDarkRenderer;
 import net.sweenus.simplyswords.client.renderer.BattleStandardRenderer;
+import net.sweenus.simplyswords.client.renderer.ThrownSpearEntityRenderer;
 import net.sweenus.simplyswords.client.renderer.ThrownSwordEntityRenderer;
 import net.sweenus.simplyswords.client.renderer.model.BattleStandardDarkModel;
 import net.sweenus.simplyswords.client.renderer.model.BattleStandardModel;
@@ -79,7 +80,6 @@ public class SimplySwords {
         SoundRegistry.SOUND.register();
         EffectRegistry.EFFECT.register();
         EntityRegistry.ENTITIES.register();
-        SimplySwords.RECIPES.register();
         ComponentTypeRegistry.COMPONENT_TYPES.register();
         GemPowerRegistry.register();
         EntityAttributeRegistry.register(EntityRegistry.BATTLESTANDARD, BattleStandardEntity::createBattleStandardAttributes);
@@ -129,6 +129,7 @@ public class SimplySwords {
             EntityRendererRegistry.register(EntityRegistry.THROWNSWORDENTITY, ThrownSwordEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.FROSTFALLENTITY, ThrownSwordEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.LIVYATANENTITY, ThrownSwordEntityRenderer::new);
+            EntityRendererRegistry.register(EntityRegistry.SPEAR, ThrownSpearEntityRenderer::new);
 
         }
     }

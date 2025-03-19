@@ -38,12 +38,12 @@ public class ZephyrPower extends RunefusedGemPower {
 
 	@Override
 	public void appendTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Text> tooltip, TooltipType type, boolean isRunic) {
-		if (TooltipUtils.shouldDisplayTooltip(itemStack, null)) {
 		if (isRunic)
 			tooltip.add(Text.translatable("item.simplyswords.zephyrsworditem.tooltip1").setStyle(Styles.RUNIC));
 		else
 			tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.runefused_power.zephyr").setStyle(Styles.RUNIC));
 
+		if (TooltipUtils.shouldDisplayTooltip(itemStack, null)) {
 		tooltip.add(Text.literal("\u00A0\u00A0\u00A0").append(Text.translatable("item.simplyswords.zephyrsworditem.tooltip2")).setStyle(Styles.RUNIC_DESCRIPTION));
 		tooltip.add(Text.literal("\u00A0\u00A0\u00A0").append(Text.translatable("item.simplyswords.zephyrsworditem.tooltip3")).setStyle(Styles.RUNIC_DESCRIPTION));
 		}

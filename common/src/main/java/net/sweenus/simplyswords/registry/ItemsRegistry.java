@@ -178,8 +178,8 @@ public class ItemsRegistry {
                             .attributeModifiers(SwordItem.createAttributeModifiers(ToolMaterials.IRON,
                                     (int) (iron_modifier + sai_modifier), sai_attackspeed)), "minecraft:iron_ingot"));
 
-    public static final RegistrySupplier<SimplySwordsSwordItem> IRON_SPEAR = ITEM.register("iron_spear", () ->
-            new SimplySwordsSwordItem(
+    public static final RegistrySupplier<SimplySwordsThrowableItem> IRON_SPEAR = ITEM.register("iron_spear", () ->
+            new SimplySwordsThrowableItem(
                     ToolMaterials.IRON,
                     new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS)
                             .attributeModifiers(SwordItem.createAttributeModifiers(ToolMaterials.IRON,
@@ -284,8 +284,8 @@ public class ItemsRegistry {
                             .attributeModifiers(SwordItem.createAttributeModifiers(ToolMaterials.GOLD,
                                     (int) (gold_modifier + sai_modifier), sai_attackspeed)), "minecraft:gold_ingot"));
 
-    public static final RegistrySupplier<SimplySwordsSwordItem> GOLD_SPEAR = ITEM.register("gold_spear", () ->
-            new SimplySwordsSwordItem(
+    public static final RegistrySupplier<SimplySwordsThrowableItem> GOLD_SPEAR = ITEM.register("gold_spear", () ->
+            new SimplySwordsThrowableItem(
                     ToolMaterials.GOLD,
                     new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS)
                             .attributeModifiers(SwordItem.createAttributeModifiers(ToolMaterials.GOLD,
@@ -390,8 +390,8 @@ public class ItemsRegistry {
                             .attributeModifiers(SwordItem.createAttributeModifiers(ToolMaterials.DIAMOND,
                                     (int) (diamond_modifier + sai_modifier), sai_attackspeed)), "minecraft:diamond"));
 
-    public static final RegistrySupplier<SimplySwordsSwordItem> DIAMOND_SPEAR = ITEM.register("diamond_spear", () ->
-            new SimplySwordsSwordItem(
+    public static final RegistrySupplier<SimplySwordsThrowableItem> DIAMOND_SPEAR = ITEM.register("diamond_spear", () ->
+            new SimplySwordsThrowableItem(
                     ToolMaterials.DIAMOND,
                     new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS)
                             .attributeModifiers(SwordItem.createAttributeModifiers(ToolMaterials.DIAMOND,
@@ -496,8 +496,8 @@ public class ItemsRegistry {
                             .attributeModifiers(SwordItem.createAttributeModifiers(ToolMaterials.NETHERITE,
                                     (int) (netherite_modifier + sai_modifier), sai_attackspeed)), "minecraft:netherite_ingot"));
 
-    public static final RegistrySupplier<SimplySwordsNetheriteSwordItem> NETHERITE_SPEAR = ITEM.register("netherite_spear", () ->
-            new SimplySwordsNetheriteSwordItem(
+    public static final RegistrySupplier<SimplySwordsThrowableItem> NETHERITE_SPEAR = ITEM.register("netherite_spear", () ->
+            new SimplySwordsThrowableItem(
                     ToolMaterials.NETHERITE,
                     new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS)
                             .attributeModifiers(SwordItem.createAttributeModifiers(ToolMaterials.NETHERITE,

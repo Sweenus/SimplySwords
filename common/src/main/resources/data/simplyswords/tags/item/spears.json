@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "simplyswords:iron_spear",
+    "simplyswords:gold_spear",
+    "simplyswords:diamond_spear",
+    "simplyswords:netherite_spear",
+    "simplyswords:runic_spear"
+  ]
+}
