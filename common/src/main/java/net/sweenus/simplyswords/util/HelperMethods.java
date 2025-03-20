@@ -212,7 +212,7 @@ public class HelperMethods {
             livingEntity.addStatusEffect(new StatusEffectInstance(
                     statusEffect, Math.max(currentDuration, duration), Math.min(amplifierMax, currentAmplifier + amplifier), false, false, true));
         }
-        livingEntity.addStatusEffect(new StatusEffectInstance(statusEffect, duration, 0, false, false, true));
+        livingEntity.addStatusEffect(new StatusEffectInstance(statusEffect, duration, amplifier, false, false, true));
     }
 
     public static SimplySwordsStatusEffectInstance incrementSimplySwordsStatusEffect(

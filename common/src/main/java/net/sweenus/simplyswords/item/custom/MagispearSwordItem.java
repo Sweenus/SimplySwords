@@ -19,6 +19,7 @@ import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
+import net.sweenus.simplyswords.entity.MagispearEntity;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
@@ -61,9 +62,29 @@ public class MagispearSwordItem extends UniqueSwordItem {
                 user.getSoundCategory(), 0.2f, 1.1f);
         user.addStatusEffect(new StatusEffectInstance(EffectRegistry.getReference(EffectRegistry.MAGISLAM), 62, 1));
         user.addStatusEffect(new StatusEffectInstance(EffectRegistry.getReference(EffectRegistry.RESILIENCE), 64, 3));
-        user.getItemCooldownManager().set(this, skillCooldown);
+        ItemStack itemStack = user.getStackInHand(hand);
+        if (!world.isClient) {
+            itemStack = user.getStackInHand(hand);
+            MagispearEntity magispearEntity = new MagispearEntity(world, user, itemStack.copy() );
+            magispearEntity.setVelocity(user, user.getPitch(), user.getYaw(), 0.0F, 1.5F, 1.0F);
+            magispearEntity.setYaw(user.getYaw());
+            magispearEntity.setPitch(user.getPitch()-90);
+            double[] doubles = HelperMethods.getAttackFromSlot(user, itemStack, user.getActiveHand());
+            magispearEntity.primaryBaseDamage = (float) doubles[0]  *0.5f;
+            magispearEntity.hasLoyalty = 3;
+            if (hand == Hand.OFF_HAND)
+                magispearEntity.offhandThrow = true;
+            magispearEntity.setPos(user.getX(), user.getEyeY() - 0.5, user.getZ());
+            world.spawnEntity(magispearEntity);
 
-        return super.use(world, user, hand);
+            if (!user.getAbilities().creativeMode) {
+                itemStack.decrement(1);
+            }
+        }
+
+        user.swingHand(hand);
+
+        return TypedActionResult.success(itemStack, world.isClient());
     }
 
     @Override
@@ -78,6 +99,7 @@ public class MagispearSwordItem extends UniqueSwordItem {
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.magispearsworditem.tooltip1").setStyle(Styles.ABILITY));
         tooltip.add(Text.translatable("item.simplyswords.magispearsworditem.tooltip2").setStyle(Styles.TEXT));
+        tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.magispearsworditem.tooltip3").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.magispearsworditem.tooltip4").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
@@ -86,6 +108,7 @@ public class MagispearSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.magispearsworditem.tooltip6").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.magispearsworditem.tooltip7").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.magispearsworditem.tooltip8").setStyle(Styles.TEXT));
+        tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.magispearsworditem.tooltip9").setStyle(Styles.TEXT));
 
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
@@ -98,7 +121,7 @@ public class MagispearSwordItem extends UniqueSwordItem {
         }
 
         @ValidatedInt.Restrict(min = 0)
-        public int cooldown = 140;
+        public int cooldown = 20;
         @ValidatedFloat.Restrict(min = 0f)
         public float damageModifier = 2.0f;
         @ValidatedDouble.Restrict(min = 1.0)
@@ -106,7 +129,7 @@ public class MagispearSwordItem extends UniqueSwordItem {
         @ValidatedInt.Restrict(min = 0, max = 100)
         public int magicChance = 35;
         @ValidatedFloat.Restrict(min = 0f)
-        public float magicModifier = 0.5f;
+        public float magicModifier = 2f;
 
     }
 }

@@ -6,12 +6,10 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.Hand;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
@@ -50,19 +48,6 @@ public class FrostfallEntity extends ThrownSwordEntity {
     @Override
     protected ItemStack getDefaultItemStack() {
         return new ItemStack(ItemsRegistry.FROSTFALL.get());
-    }
-
-    protected boolean tryPickup(PlayerEntity player) {
-        if (this.isNoClip() && this.isOwner(player)) {
-            if (offhandThrow && player.getOffHandStack().isEmpty()) {
-                // Send the ItemStack to the player's offhand slot if it's free
-                player.setStackInHand(Hand.OFF_HAND, this.asItemStack());
-                return true;
-            } else {
-                return player.getInventory().insertStack(this.asItemStack());
-            }
-        }
-        return super.tryPickup(player);
     }
 
     @Override

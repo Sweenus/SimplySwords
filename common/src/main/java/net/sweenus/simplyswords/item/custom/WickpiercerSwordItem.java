@@ -5,7 +5,6 @@ import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
@@ -19,6 +18,7 @@ import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
+import net.sweenus.simplyswords.entity.WickpiercerEntity;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
@@ -36,28 +36,28 @@ public class WickpiercerSwordItem extends UniqueSwordItem {
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         if (!attacker.getWorld().isClient()) {
-            float damageModifier = Config.uniqueEffects.wickpiercer.damage;
             HelperMethods.playHitSounds(attacker, target);
 
             ServerWorld world = (ServerWorld) attacker.getWorld();
-            DamageSource damageSource = world.getDamageSources().generic();
-            if (attacker instanceof PlayerEntity player)
+            DamageSource damageSource;
+            if (attacker instanceof PlayerEntity player) {
                 damageSource = attacker.getDamageSources().playerAttack(player);
+                double[] doubles = HelperMethods.getAttackFromSlot(player, stack, attacker.getActiveHand());
+                float damageModifier = (float) doubles[0] * Config.uniqueEffects.wickpiercer.damage;
 
-            if (attacker.hasStatusEffect(EffectRegistry.getReference(EffectRegistry.FRENZY))) {
-                target.timeUntilRegen = 0;
-                target.damage(damageSource, (float) (HelperMethods.getEntityAttackDamage(attacker) * damageModifier));
-                world.playSound(null, attacker.getBlockPos(), SoundRegistry.SPELL_FIRE.get(),
-                        attacker.getSoundCategory(), 0.2f, 1.9f);
+                if (attacker.hasStatusEffect(EffectRegistry.getReference(EffectRegistry.FRENZY))) {
+                    target.timeUntilRegen = 0;
+                    HelperMethods.decrementStatusEffect(player, EffectRegistry.getReference(EffectRegistry.FRENZY));
+                    target.damage(damageSource, damageModifier);
+                    //world.playSound(null, attacker.getBlockPos(), SoundRegistry.SPELL_FIRE.get(),attacker.getSoundCategory(), 0.2f, 1.9f);
+                }
             }
-
         }
         return super.postHit(stack, target, attacker);
     }
 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
-        int skillCooldown = Config.uniqueEffects.wickpiercer.cooldown;
         int baseEffectDuration = Config.uniqueEffects.wickpiercer.duration;
         int effectDuration = baseEffectDuration;
         ItemStack mainhand = user.getMainHandStack();
@@ -66,12 +66,33 @@ public class WickpiercerSwordItem extends UniqueSwordItem {
             effectDuration = baseEffectDuration * 2;
 
         world.playSound(null, user.getBlockPos(), SoundRegistry.SPELL_FIRE.get(),
-                user.getSoundCategory(), 0.5f, 1.0f);
+                user.getSoundCategory(), 0.1f, 1.0f);
 
-        user.addStatusEffect(new StatusEffectInstance(EffectRegistry.getReference(EffectRegistry.FRENZY), effectDuration, 0));
-        user.getItemCooldownManager().set(this, skillCooldown);
+        HelperMethods.incrementStatusEffect(user, EffectRegistry.getReference(EffectRegistry.FRENZY), effectDuration, 1, 4);
 
-        return super.use(world, user, hand);
+        ItemStack itemStack = user.getStackInHand(hand);
+        if (!world.isClient) {
+            itemStack = user.getStackInHand(hand);
+            WickpiercerEntity wickpiercerEntity = new WickpiercerEntity(world, user, itemStack.copy() );
+            wickpiercerEntity.setVelocity(user, user.getPitch(), user.getYaw(), 0.0F, 1.5F, 1.0F);
+            wickpiercerEntity.setYaw(user.getYaw());
+            wickpiercerEntity.setPitch(user.getPitch()-90);
+            double[] doubles = HelperMethods.getAttackFromSlot(user, itemStack, user.getActiveHand());
+            wickpiercerEntity.primaryBaseDamage = (float) doubles[0]  *0.5f;
+            wickpiercerEntity.hasLoyalty = 3;
+            if (hand == Hand.OFF_HAND)
+                wickpiercerEntity.offhandThrow = true;
+            wickpiercerEntity.setPos(user.getX(), user.getEyeY() - 0.5, user.getZ());
+            world.spawnEntity(wickpiercerEntity);
+
+            if (!user.getAbilities().creativeMode) {
+                itemStack.decrement(1);
+            }
+        }
+
+        user.swingHand(hand);
+
+        return TypedActionResult.success(itemStack, world.isClient());
     }
 
     @Override
@@ -85,6 +106,8 @@ public class WickpiercerSwordItem extends UniqueSwordItem {
     public void appendTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.wickpiercersworditem.tooltip1").setStyle(Styles.ABILITY));
+        tooltip.add(Text.translatable("item.simplyswords.wickpiercersworditem.tooltip2").setStyle(Styles.TEXT));
+        tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.waxweaversworditem.tooltip4").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.waxweaversworditem.tooltip5").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.waxweaversworditem.tooltip6").setStyle(Styles.TEXT));
@@ -94,11 +117,12 @@ public class WickpiercerSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.waxweaversworditem.tooltip9", Config.uniqueEffects.waxweaver.cooldown / 20).setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
-        tooltip.add(Text.translatable("item.simplyswords.wickpiercersworditem.tooltip2").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.wickpiercersworditem.tooltip3").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.wickpiercersworditem.tooltip4").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.wickpiercersworditem.tooltip5").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.wickpiercersworditem.tooltip6", Config.uniqueEffects.wickpiercer.duration / 20).setStyle(Styles.TEXT));
+        tooltip.add(Text.literal(""));
+        tooltip.add(Text.translatable("item.simplyswords.wickpiercersworditem.tooltip7").setStyle(Styles.TEXT));
 
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
     }
@@ -109,12 +133,10 @@ public class WickpiercerSwordItem extends UniqueSwordItem {
             super(new ItemStackTooltipAppender(ItemsRegistry.WICKPIERCER::get));
         }
 
-        @ValidatedInt.Restrict(min = 0)
-        public int cooldown = 220;
         @ValidatedFloat.Restrict(min = 0f)
         public float damage = 1.0f;
         @ValidatedInt.Restrict(min = 0)
-        public int duration = 40;
+        public int duration = 80;
 
     }
 }

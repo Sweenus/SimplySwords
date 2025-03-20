@@ -10,7 +10,9 @@ import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.PersistentProjectileEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.SwordItem;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -78,6 +80,9 @@ public class ThrownSwordEntity extends PersistentProjectileEntity {
 
     protected boolean tryPickup(PlayerEntity player) {
         if (this.isNoClip() && this.isOwner(player)) {
+            int cooldown = 0;
+            if (offhandThrow) cooldown = 4;
+            player.getItemCooldownManager().set(this.asItemStack().getItem(), cooldown);
             if (offhandThrow && player.getOffHandStack().isEmpty()) {
                 // Send the ItemStack to the player's offhand slot if it's free
                 player.setStackInHand(Hand.OFF_HAND, this.asItemStack());
@@ -212,6 +217,13 @@ public class ThrownSwordEntity extends PersistentProjectileEntity {
             if (entity instanceof LivingEntity livingEntity) {
                 this.knockback(livingEntity, damageSource);
                 this.onHit(livingEntity);
+                // Get the ItemStack and call postHit if it's defined on the associated Item
+                if (!stack.isEmpty() && this.getOwner() instanceof LivingEntity livingOwner) {
+                    Item weaponItem = stack.getItem();
+                    if (weaponItem instanceof SwordItem) {
+                        ((SwordItem) weaponItem).postHit(stack, livingEntity, livingOwner);
+                    }
+                }
             }
         }
 

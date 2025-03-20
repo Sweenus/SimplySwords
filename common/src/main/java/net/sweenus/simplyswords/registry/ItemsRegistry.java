@@ -701,8 +701,8 @@ public class ItemsRegistry {
                             .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.UNIQUE,
                                     (int) stormbringer_damage_modifier, stormbringer_attackspeed))));
 
-    public static final RegistrySupplier<SwordItem> SWORD_ON_A_STICK = ITEM.register("sword_on_a_stick", () ->
-            new SwordItem(
+    public static final RegistrySupplier<SimplySwordsThrowableItem> SWORD_ON_A_STICK = ITEM.register("sword_on_a_stick", () ->
+            new SimplySwordsThrowableItem(
                     ToolMaterials.WOOD,
                     new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS)
                             .attributeModifiers(SwordItem.createAttributeModifiers(ToolMaterials.WOOD,
