@@ -176,11 +176,13 @@ public class TooltipUtils {
         } else {
             component.appendTooltip(itemStack, tooltipContext, tooltip, type, true);
 
-            RegistryEntry<GemPower> mainComponent = component.runicPower();
-            String powerId = mainComponent.getIdAsString()
-                    .replace(modId + ":", "")
-                    .replace("greater_", "");
-            return Identifier.of(runicPath + "/" + powerId + ".mdx");
+            if (!Platform.isNeoForge()) { // NeoForge / Architectury 1.21.1 conflict. Have to disable this on NeoForge. Can re-enable post 1.21.3 :/
+                RegistryEntry<GemPower> mainComponent = component.runicPower();
+                String powerId = mainComponent.getIdAsString()
+                        .replace(modId + ":", "")
+                        .replace("greater_", "");
+                return Identifier.of(runicPath + "/" + powerId + ".mdx");
+            }
         }
 
         return generateDefaultTooltipEntry(itemStack, itemPath);

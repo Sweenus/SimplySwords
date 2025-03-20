@@ -44,7 +44,7 @@ public class RunicSwordItem extends SwordItem {
     @Override
     public boolean onClicked(ItemStack stack, ItemStack otherStack, Slot slot, ClickType clickType, PlayerEntity player, StackReference cursorStackReference) {
         if(!stack.contains(ComponentTypeRegistry.GEM_POWER.get())) {
-            String[] blacklist = {"simplyswords:throwing"}; // Should be replaced with a modular blacklisting system at a later date
+            String[] blacklist = {"simplyswords:gem_power@simplyswords:throwing"}; // Should be replaced with a modular blacklisting system at a later date
             if (TagRegistry.isInTag(TagRegistry.spearsTag, asItem()))
                 stack.set(ComponentTypeRegistry.GEM_POWER.get(), GemPowerComponent.runic(GemPowerRegistry.gemRandomPower(PowerType.RUNIC, blacklist)));
             else stack.set(ComponentTypeRegistry.GEM_POWER.get(), GemPowerComponent.runic(GemPowerRegistry.gemRandomPower(PowerType.RUNIC)));
@@ -158,7 +158,7 @@ public class RunicSwordItem extends SwordItem {
         if (world.isClient) return;
 
         if(!stack.contains(ComponentTypeRegistry.GEM_POWER.get())) {
-            String[] blacklist = {"simplyswords:throwing"};
+            String[] blacklist = {"simplyswords:gem_power@simplyswords:throwing"};
             if (TagRegistry.isInTag(TagRegistry.spearsTag, asItem()))
                 stack.set(ComponentTypeRegistry.GEM_POWER.get(), GemPowerComponent.runic(GemPowerRegistry.gemRandomPower(PowerType.RUNIC, blacklist)));
             else stack.set(ComponentTypeRegistry.GEM_POWER.get(), GemPowerComponent.runic(GemPowerRegistry.gemRandomPower(PowerType.RUNIC)));

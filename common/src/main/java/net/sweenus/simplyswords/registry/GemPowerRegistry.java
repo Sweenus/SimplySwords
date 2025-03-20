@@ -37,6 +37,17 @@ public class GemPowerRegistry {
 		return powerType.getEntries().stream().filter(entry -> !Config.gemPowers.disabledPowers.contains(entry.getId())).toList();
 	}
 
+	/*
+	public static RegistryEntry<GemPower> gemRandomPower(PowerType powerType) {
+		List<? extends RegistryEntry<GemPower>> powers = getPowers(powerType);
+		if (powers.isEmpty()) {
+			return EMPTY;
+		}
+		return powers.get(HelperMethods.random().nextInt(powers.size()));
+	}
+
+	 */
+
 	public static RegistryEntry<GemPower> gemRandomPower(PowerType powerType) {
 		return gemRandomPower(powerType, null);
 	}
@@ -53,7 +64,7 @@ public class GemPowerRegistry {
 
 			// Filter the list of powers to exclude blacklisted ones
 			powers = powers.stream()
-					.filter(power -> !blacklistSet.contains(power.getKey().toString()))
+					.filter(power -> !blacklistSet.contains(power.toString()))
 					.toList();
 
 			// Check if all available options are blacklisted
@@ -63,6 +74,7 @@ public class GemPowerRegistry {
 		}
 
 		 System.out.println("excluding: " + Arrays.toString(blacklist) + " from " + powers.size() + " powers" );
+		System.out.println("choosing: " + powers.get(HelperMethods.random().nextInt(powers.size())).toString());
 		return powers.get(HelperMethods.random().nextInt(powers.size()));
 	}
 
