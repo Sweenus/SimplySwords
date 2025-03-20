@@ -48,6 +48,7 @@ public class ThrownSpearEntity extends PersistentProjectileEntity {
     public boolean returnToPlayer = true;
     public static int offset = 210;
     public int hasLoyalty;
+    public float weightValue = 0.05f;
 
 
 
@@ -106,7 +107,7 @@ public class ThrownSpearEntity extends PersistentProjectileEntity {
         }
 
         if (keepPitch == 0 && !this.isOnGround())
-            this.setVelocity(getVelocity().x, getVelocity().y - 0.05, getVelocity().z);
+            this.setVelocity(getVelocity().x, getVelocity().y - weightValue, getVelocity().z);
         else if (keepPitch > 0 && this.isOnGround())
             this.setVelocity(getVelocity().x, 0, getVelocity().z); // Stop falling through ground
 

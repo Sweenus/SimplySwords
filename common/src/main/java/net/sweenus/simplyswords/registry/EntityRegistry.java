@@ -57,6 +57,15 @@ public class EntityRegistry {
                     .build(Identifier.of(SimplySwords.MOD_ID, "spear_entity").toString())
     );
 
+    public static final RegistrySupplier<EntityType<ThrownRunicEntity>> THROWNRUNICENTITY = ENTITIES.register(
+            "runic_entity",
+            () -> EntityType.Builder.<ThrownRunicEntity>create(ThrownRunicEntity::new, SpawnGroup.MISC)
+                    .dimensions(0.5f, 0.5f)
+                    .maxTrackingRange(8)
+                    .trackingTickInterval(10)
+                    .build(Identifier.of(SimplySwords.MOD_ID, "runic_entity").toString())
+    );
+
 
 
 }

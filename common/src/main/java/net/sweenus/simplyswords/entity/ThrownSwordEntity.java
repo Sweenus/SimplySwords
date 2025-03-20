@@ -46,6 +46,7 @@ public class ThrownSwordEntity extends PersistentProjectileEntity {
     public float primaryReturnDamage;
     public double primaryReturnDamageRadius;
     public boolean returnToPlayer = false;
+    public float weightValue = 0.09f;
 
 
 
@@ -80,9 +81,9 @@ public class ThrownSwordEntity extends PersistentProjectileEntity {
 
     protected boolean tryPickup(PlayerEntity player) {
         if (this.isNoClip() && this.isOwner(player)) {
-            int cooldown = 0;
-            if (offhandThrow) cooldown = 4;
-            player.getItemCooldownManager().set(this.asItemStack().getItem(), cooldown);
+            float cooldown = player.getItemCooldownManager().getCooldownProgress(this.asItemStack().getItem(), 0);
+            if (cooldown == 0 && offhandThrow) cooldown = 4;
+            player.getItemCooldownManager().set(this.asItemStack().getItem(), (int) cooldown);
             if (offhandThrow && player.getOffHandStack().isEmpty()) {
                 // Send the ItemStack to the player's offhand slot if it's free
                 player.setStackInHand(Hand.OFF_HAND, this.asItemStack());
@@ -104,7 +105,7 @@ public class ThrownSwordEntity extends PersistentProjectileEntity {
         }
 
         if (keepPitch == 0 && !this.isOnGround())
-            this.setVelocity(getVelocity().x, getVelocity().y - 0.09, getVelocity().z);
+            this.setVelocity(getVelocity().x, getVelocity().y - weightValue, getVelocity().z);
         else if (keepPitch > 0 && this.isOnGround())
             this.setVelocity(getVelocity().x, 0, getVelocity().z); // Stop falling through ground
 

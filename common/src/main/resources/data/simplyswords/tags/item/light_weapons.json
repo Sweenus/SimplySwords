@@ -1,0 +1,26 @@
+{
+  "replace": false,
+  "values": [
+    "simplyswords:netherite_rapier",
+    "simplyswords:diamond_rapier",
+    "simplyswords:gold_rapier",
+    "simplyswords:iron_rapier",
+    "simplyswords:iron_chakram",
+    "simplyswords:gold_chakram",
+    "simplyswords:diamond_chakram",
+    "simplyswords:netherite_chakram",
+    "simplyswords:iron_sai",
+    "simplyswords:gold_sai",
+    "simplyswords:diamond_sai",
+    "simplyswords:netherite_sai",
+    "simplyswords:iron_cutlass",
+    "simplyswords:gold_cutlass",
+    "simplyswords:diamond_cutlass",
+    "simplyswords:netherite_cutlass",
+    "simplyswords:runic_cutlass",
+    "simplyswords:runic_katana",
+    "simplyswords:runic_sai",
+    "simplyswords:runic_rapier",
+    "simplyswords:runic_chakram"
+  ]
+}

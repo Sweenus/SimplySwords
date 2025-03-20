@@ -1,0 +1,30 @@
+{
+  "replace": false,
+  "values": [
+    "simplyswords:iron_katana",
+    "simplyswords:gold_katana",
+    "simplyswords:diamond_katana",
+    "simplyswords:netherite_katana",
+    "simplyswords:iron_longsword",
+    "simplyswords:gold_longsword",
+    "simplyswords:diamond_longsword",
+    "simplyswords:netherite_longsword",
+    "simplyswords:iron_warglaive",
+    "simplyswords:gold_warglaive",
+    "simplyswords:diamond_warglaive",
+    "simplyswords:netherite_warglaive",
+    "simplyswords:iron_spear",
+    "simplyswords:gold_spear",
+    "simplyswords:diamond_spear",
+    "simplyswords:netherite_spear",
+    "simplyswords:iron_twinblade",
+    "simplyswords:gold_twinblade",
+    "simplyswords:diamond_twinblade",
+    "simplyswords:netherite_twinblade",
+    "simplyswords:runic_twinblade",
+    "simplyswords:runic_katana",
+    "simplyswords:runic_spear",
+    "simplyswords:runic_warglaive",
+    "simplyswords:runic_longsword"
+  ]
+}

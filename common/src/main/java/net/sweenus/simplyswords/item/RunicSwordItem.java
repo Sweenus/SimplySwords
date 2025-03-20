@@ -29,6 +29,7 @@ import net.sweenus.simplyswords.power.GemPowerComponent;
 import net.sweenus.simplyswords.power.PowerType;
 import net.sweenus.simplyswords.registry.ComponentTypeRegistry;
 import net.sweenus.simplyswords.registry.GemPowerRegistry;
+import net.sweenus.simplyswords.registry.TagRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
 
@@ -43,7 +44,10 @@ public class RunicSwordItem extends SwordItem {
     @Override
     public boolean onClicked(ItemStack stack, ItemStack otherStack, Slot slot, ClickType clickType, PlayerEntity player, StackReference cursorStackReference) {
         if(!stack.contains(ComponentTypeRegistry.GEM_POWER.get())) {
-            stack.set(ComponentTypeRegistry.GEM_POWER.get(), GemPowerComponent.runic(GemPowerRegistry.gemRandomPower(PowerType.RUNIC)));
+            String[] blacklist = {"simplyswords:throwing"}; // Should be replaced with a modular blacklisting system at a later date
+            if (TagRegistry.isInTag(TagRegistry.spearsTag, asItem()))
+                stack.set(ComponentTypeRegistry.GEM_POWER.get(), GemPowerComponent.runic(GemPowerRegistry.gemRandomPower(PowerType.RUNIC, blacklist)));
+            else stack.set(ComponentTypeRegistry.GEM_POWER.get(), GemPowerComponent.runic(GemPowerRegistry.gemRandomPower(PowerType.RUNIC)));
         }
         return false;
     }
@@ -154,7 +158,10 @@ public class RunicSwordItem extends SwordItem {
         if (world.isClient) return;
 
         if(!stack.contains(ComponentTypeRegistry.GEM_POWER.get())) {
-            stack.set(ComponentTypeRegistry.GEM_POWER.get(), GemPowerComponent.runic(GemPowerRegistry.gemRandomPower(PowerType.RUNIC)));
+            String[] blacklist = {"simplyswords:throwing"};
+            if (TagRegistry.isInTag(TagRegistry.spearsTag, asItem()))
+                stack.set(ComponentTypeRegistry.GEM_POWER.get(), GemPowerComponent.runic(GemPowerRegistry.gemRandomPower(PowerType.RUNIC, blacklist)));
+            else stack.set(ComponentTypeRegistry.GEM_POWER.get(), GemPowerComponent.runic(GemPowerRegistry.gemRandomPower(PowerType.RUNIC)));
         }
     }
 

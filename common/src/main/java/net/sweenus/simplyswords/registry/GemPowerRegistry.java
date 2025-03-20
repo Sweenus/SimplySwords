@@ -13,7 +13,10 @@ import net.sweenus.simplyswords.power.PowerType;
 import net.sweenus.simplyswords.power.powers.*;
 import net.sweenus.simplyswords.util.HelperMethods;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Supplier;
 
 public class GemPowerRegistry {
@@ -35,12 +38,36 @@ public class GemPowerRegistry {
 	}
 
 	public static RegistryEntry<GemPower> gemRandomPower(PowerType powerType) {
+		return gemRandomPower(powerType, null);
+	}
+
+	public static RegistryEntry<GemPower> gemRandomPower(PowerType powerType, String[] blacklist) {
 		List<? extends RegistryEntry<GemPower>> powers = getPowers(powerType);
+
 		if (powers.isEmpty()) {
 			return EMPTY;
 		}
+
+		if (blacklist != null) {
+			Set<String> blacklistSet = new HashSet<>(Arrays.asList(blacklist));
+
+			// Filter the list of powers to exclude blacklisted ones
+			powers = powers.stream()
+					.filter(power -> !blacklistSet.contains(power.getKey().toString()))
+					.toList();
+
+			// Check if all available options are blacklisted
+			if (powers.isEmpty()) {
+				return EMPTY;
+			}
+		}
+
+		 System.out.println("excluding: " + Arrays.toString(blacklist) + " from " + powers.size() + " powers" );
 		return powers.get(HelperMethods.random().nextInt(powers.size()));
 	}
+
+
+
 
 	public static RegistrySupplier<GemPower> EMPTY = register("empty_power", () -> GemPower.EMPTY);
 
@@ -74,6 +101,7 @@ public class GemPowerRegistry {
 	public static RegistrySupplier<GemPower> GREATER_MOMENTUM = register("greater_momentum", () -> new MomentumPower(true));
 	public static RegistrySupplier<GemPower> WARD = register("ward", WardPower::new);
 	public static RegistrySupplier<GemPower> IMMOLATION = register("immolation", ImmolationPower::new);
+	public static RegistrySupplier<GemPower> THROWING = register("throwing", ThrowingPower::new);
 
 	public static RegistrySupplier<GemPower> ECHO = register("echo", EchoPower::new);
 	public static RegistrySupplier<GemPower> BERSERK = register("berserk", BerserkPower::new);
