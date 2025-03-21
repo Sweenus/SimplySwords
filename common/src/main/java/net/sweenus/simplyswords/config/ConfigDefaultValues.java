@@ -316,6 +316,8 @@ public class ConfigDefaultValues {
     public static float netheriteEmerald_damageModifier = 3f;
     public static float netheriteDiamond_damageModifier = 3f;
 
+    public static float dragonScale_damageModifier = 3f;
+
 
     public static float longsword_attackSpeed = -2.4f;
     public static float twinblade_attackSpeed = -2.0f;

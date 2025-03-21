@@ -75,6 +75,7 @@ public class AdvancedNetheriteCompat {
     static int greathammer_modifier = (int) (greathammer_positive_modifier - greathammer_negative_modifier);
     static int greataxe_modifier = (int) (greataxe_positive_modifier - greataxe_negative_modifier);
     static int halberd_modifier = (int) (halberd_positive_modifier - halberd_negative_modifier);
+
     static int netherite_iron_modifier = (int) Config.getFloat("netherite_iron_damageModifier", "WeaponAttributes", ConfigDefaultValues.netheriteIron_damageModifier);
     static int netherite_gold_modifier = (int) Config.getFloat("netherite_gold_damageModifier", "WeaponAttributes", ConfigDefaultValues.netheriteGold_damageModifier);
     static int netherite_emerald_modifier = (int) Config.getFloat("netherite_emerald_damageModifier", "WeaponAttributes", ConfigDefaultValues.netheriteEmerald_damageModifier);
@@ -336,7 +337,7 @@ public class AdvancedNetheriteCompat {
 
 
     public static void registerModItems() {
-        SimplySwords.LOGGER.info("Registering Gobber compat Items for " + SimplySwords.MOD_ID);
+        SimplySwords.LOGGER.info("Registering Advanced Netherite compat Items for " + SimplySwords.MOD_ID);
     }
 
 }

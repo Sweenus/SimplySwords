@@ -497,6 +497,22 @@
   "item.advancednetherite.misc.shift":                                                                                  "[SHIFT]",
   "item.advancednetherite.misc.plus":                                                                                   "+",
 
+  "item.simplyswords.dragonloot_compat.dragon_scale.dragon_claymore":                                                   "Dragon Claymore",
+  "item.simplyswords.dragonloot_compat.dragon_scale.dragon_cutlasss":                                                   "Dragon Cutlass",
+  "item.simplyswords.dragonloot_compat.dragon_scale.dragon_glaive":                                                     "Dragon Glaive",
+  "item.simplyswords.dragonloot_compat.dragon_scale.dragon_katana":                                                     "Dragon Katana",
+  "item.simplyswords.dragonloot_compat.dragon_scale.dragon_longsword":                                                  "Dragon Longsword",
+  "item.simplyswords.dragonloot_compat.dragon_scale.dragon_rapier":                                                     "Dragon Rapier",
+  "item.simplyswords.dragonloot_compat.dragon_scale.dragon_sai":                                                        "Dragon Sai",
+  "item.simplyswords.dragonloot_compat.dragon_scale.dragon_spear":                                                      "Dragon Spear",
+  "item.simplyswords.dragonloot_compat.dragon_scale.dragon_twinblade":                                                  "Dragon Longsword",
+  "item.simplyswords.dragonloot_compat.dragon_scale.dragon_warglaive":                                                  "Dragon Warglaive",
+  "item.simplyswords.dragonloot_compat.dragon_scale.dragon_greathammer":                                                "Dragon Greathammer",
+  "item.simplyswords.dragonloot_compat.dragon_scale.dragon_greataxe":                                                   "Dragon Greataxe",
+  "item.simplyswords.dragonloot_compat.dragon_scale.dragon_chakram":                                                    "Dragon Chakram",
+  "item.simplyswords.dragonloot_compat.dragon_scale.dragon_scythe":                                                     "Dragon Scythe",
+  "item.simplyswords.dragonloot_compat.dragon_scale.dragon_halberd":                                                    "Dragon Halberd",
+
   "itemGroup.simplyswords.simplyswords": "Simply Swords",
 
   "message.simplyswords.testlightning": "피해를 입지 않았습니다.",

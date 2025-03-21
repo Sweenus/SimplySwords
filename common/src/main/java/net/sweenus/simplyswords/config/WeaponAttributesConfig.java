@@ -76,6 +76,8 @@ public class WeaponAttributesConfig implements ConfigData {
     public float netheriteEmerald_damageModifier = 3f;
     public float netheriteDiamond_damageModifier = 3f;
 
+    public float dragonScale_damageModifier = 3f;
+
     @ConfigEntry.Gui.PrefixText
     public float longsword_attackSpeed = -2.4f;
     public float twinblade_attackSpeed = -2.0f;
