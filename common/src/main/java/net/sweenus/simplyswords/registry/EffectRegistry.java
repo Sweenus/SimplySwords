@@ -122,4 +122,11 @@ public class EffectRegistry {
     public static final RegistrySupplier<StatusEffect> ASTRAL_SHIFT = EFFECT.register("astral_shift", () ->
             new AstralShiftEffect(StatusEffectCategory.BENEFICIAL, 1124687));
 
+    public static final RegistrySupplier<StatusEffect> SOULTETHER = EFFECT.register("soul_tether", () ->
+            new SoulTetherEffect(StatusEffectCategory.BENEFICIAL, 1124687)
+                    .addAttributeModifier(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE,
+                            Identifier.of("b15ae1eb-36cd-451a-b8c1-7d747b327934"),
+                            1,
+                            EntityAttributeModifier.Operation.ADD_VALUE));
+
 }

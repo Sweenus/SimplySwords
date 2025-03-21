@@ -61,6 +61,7 @@ public abstract class LivingEntityMixin {
         if (!livingEntity.getWorld().isClient()) {
             StatusEffectInstance voidcloakEffect = livingEntity.getStatusEffect(EffectRegistry.getReference(EffectRegistry.VOIDCLOAK));
             StatusEffectInstance ribbonwrathEffect = livingEntity.getStatusEffect(EffectRegistry.getReference(EffectRegistry.RIBBONWRATH));
+            StatusEffectInstance soulTetherEffect = livingEntity.getStatusEffect(EffectRegistry.getReference(EffectRegistry.SOULTETHER));
             if (voidcloakEffect != null) {
                 int amplifier = voidcloakEffect.getAmplifier();
                 float reductionFactor = 1 - (amplifier + 1) * 0.10f; // +1 because amplifier starts at 0
@@ -69,6 +70,10 @@ public abstract class LivingEntityMixin {
             }
             if (ribbonwrathEffect != null) {
                 float reductionFactor = 0.85f;
+                amount *= reductionFactor;
+            }
+            if (soulTetherEffect != null) {
+                float reductionFactor = 0.50f;
                 amount *= reductionFactor;
             }
         }
