@@ -151,6 +151,7 @@ public class WeaponAttributesConfig extends Config {
         public float waxweaver_damageModifier = 6.0f;
         public float whisperwind_damageModifier = 3.0f;
         public float wickpiercer_damageModifier = 4.0f;
+        public float wraithfang_damageModifier = 1.0f;
 
         //eldritch end compat
         public ValidatedCondition<Float> dreadtide_damageModifier = new ValidatedFloat(3.0f)
@@ -203,6 +204,7 @@ public class WeaponAttributesConfig extends Config {
         public float waxweaver_attackSpeed = -2.9f;
         public float whisperwind_attackSpeed = -2.0f;
         public float wickpiercer_attackSpeed = -2.1f;
+        public float wraithfang_attackSpeed = -2.0f;
 
         //eldritch end compat
         public ValidatedCondition<Float> dreadtide_attackSpeed = new ValidatedFloat(-2.0f)

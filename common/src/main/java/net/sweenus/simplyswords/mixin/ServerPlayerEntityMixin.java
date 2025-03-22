@@ -52,7 +52,7 @@ public abstract class ServerPlayerEntityMixin {
             if (serverPlayer.hasStatusEffect(EffectRegistry.getReference(EffectRegistry.RESILIENCE))) {
                 HelperMethods.decrementStatusEffect(serverPlayer, EffectRegistry.getReference(EffectRegistry.RESILIENCE));
                 cir.setReturnValue(false);
-                if (!player.hasStatusEffect(EffectRegistry.getReference(EffectRegistry.MAGISLAM)))
+                if (player.hasStatusEffect(EffectRegistry.getReference(EffectRegistry.RIBBONCLEAVE)))
                     serverPlayer.getWorld().playSoundFromEntity(null, serverPlayer, SoundRegistry.MAGIC_SWORD_PARRY_03.get(),
                         SoundCategory.PLAYERS, 0.7f, 0.5f + (serverPlayer.getRandom().nextBetween(1, 5) * 0.1f));
             }
