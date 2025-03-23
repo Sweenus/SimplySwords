@@ -1,6 +1,6 @@
 {
   "match": {
-    "items": "simplyswords:tempest",
+    "items": "simplyswords:tempest"
   },
   "luminance": 12,
   "water_sensitive": false
