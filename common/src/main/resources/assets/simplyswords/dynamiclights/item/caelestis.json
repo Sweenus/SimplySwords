@@ -1,5 +1,7 @@
 {
-  "item": "simplyswords:caelestis",
+  "match": {
+    "items": "simplyswords:caelestis",
+  },
   "luminance": 6,
   "water_sensitive": false
 }

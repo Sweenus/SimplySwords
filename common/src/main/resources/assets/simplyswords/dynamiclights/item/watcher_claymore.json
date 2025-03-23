@@ -1,5 +1,7 @@
 {
-  "item": "simplyswords:watcher_claymore",
+  "match": {
+    "items": "simplyswords:watcher_claymore",
+  },
   "luminance": 10,
   "water_sensitive": false
 }

@@ -1,5 +1,7 @@
 {
-  "item": "simplyswords:sunfire",
+  "match": {
+    "items": "simplyswords:sunfire",
+  },
   "luminance": 14,
   "water_sensitive": false
 }

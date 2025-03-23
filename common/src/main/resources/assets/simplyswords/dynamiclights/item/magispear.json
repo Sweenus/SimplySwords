@@ -1,5 +1,7 @@
 {
-  "item": "simplyswords:magispear",
+  "match": {
+    "items": "simplyswords:magispear",
+  },
   "luminance": 6,
   "water_sensitive": false
 }

@@ -73,8 +73,8 @@ public class GemPowerRegistry {
 			}
 		}
 
-		 System.out.println("excluding: " + Arrays.toString(blacklist) + " from " + powers.size() + " powers" );
-		System.out.println("choosing: " + powers.get(HelperMethods.random().nextInt(powers.size())).toString());
+		 //System.out.println("excluding: " + Arrays.toString(blacklist) + " from " + powers.size() + " powers" );
+		//System.out.println("choosing: " + powers.get(HelperMethods.random().nextInt(powers.size())).toString());
 		return powers.get(HelperMethods.random().nextInt(powers.size()));
 	}
 

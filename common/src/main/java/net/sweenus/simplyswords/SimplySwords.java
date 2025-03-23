@@ -79,6 +79,7 @@ public class SimplySwords {
         ItemsRegistry.ITEM.register();
         SoundRegistry.SOUND.register();
         EffectRegistry.EFFECT.register();
+        SimplySwords.RECIPES.register();
         EntityRegistry.ENTITIES.register();
         ComponentTypeRegistry.COMPONENT_TYPES.register();
         GemPowerRegistry.register();

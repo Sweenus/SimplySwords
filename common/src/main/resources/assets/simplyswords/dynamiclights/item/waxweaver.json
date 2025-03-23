@@ -1,5 +1,7 @@
 {
-  "item": "simplyswords:waxweaver",
+  "match": {
+    "items": "simplyswords:waxweaver",
+  },
   "luminance": 9,
   "water_sensitive": false
 }

@@ -1,5 +1,7 @@
 {
-  "item": "simplyswords:emberblade",
+  "match": {
+    "items": "simplyswords:emberblade",
+  },
   "luminance": 14,
   "water_sensitive": false
 }

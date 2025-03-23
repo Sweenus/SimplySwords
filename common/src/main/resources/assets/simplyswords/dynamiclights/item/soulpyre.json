@@ -1,5 +1,7 @@
 {
-  "item": "simplyswords:soulpyre",
+  "match": {
+    "items": "simplyswords:soulpyre",
+  },
   "luminance": 11,
   "water_sensitive": false
 }

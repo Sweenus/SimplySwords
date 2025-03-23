@@ -1,5 +1,7 @@
 {
-  "item": "simplyswords:hearthflame",
+  "match": {
+    "items": "simplyswords:hearthflame",
+  },
   "luminance": 13,
   "water_sensitive": false
 }

@@ -1,5 +1,7 @@
 {
-  "item": "simplyswords:soulstealer",
+  "match": {
+    "items": "simplyswords:soulstealer",
+  },
   "luminance": 9,
   "water_sensitive": false
 }

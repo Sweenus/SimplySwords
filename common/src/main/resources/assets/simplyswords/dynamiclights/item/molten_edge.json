@@ -1,5 +1,7 @@
 {
-  "item": "simplyswords:molten_edge",
+  "match": {
+    "items": "simplyswords:molten_edge",
+  },
   "luminance": 13,
   "water_sensitive": false
 }

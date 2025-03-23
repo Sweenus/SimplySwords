@@ -1,5 +1,7 @@
 {
-  "item": "simplyswords:runefused_gem",
+  "match": {
+    "items": "simplyswords:runefused_gem",
+  },
   "luminance": 13,
   "water_sensitive": false
 }

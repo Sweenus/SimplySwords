@@ -1,5 +1,7 @@
 {
-  "item": "simplyswords:whisperwind",
+  "match": {
+    "items": "simplyswords:whisperwind",
+  },
   "luminance": 9,
   "water_sensitive": false
 }

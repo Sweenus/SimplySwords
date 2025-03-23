@@ -35,7 +35,8 @@ public class WraithfangEntity extends ThrownSpearEntity {
         returnToPlayer = true;
 
         Entity owner = getOwner();
-        if (owner != null && owner.distanceTo(this) > 1 && getWorld() instanceof ServerWorld serverWorld) {
+        if (owner != null && owner.distanceTo(this) > 1 && owner.distanceTo(this) < 500
+                && getWorld() instanceof ServerWorld serverWorld && age < 100) {
             owner.setVelocity((this.getX() - owner.getX()) / 8, (this.getY() - owner.getY()) / 8, (this.getZ() - owner.getZ()) / 8);
             owner.velocityModified = true;
             HelperMethods.spawnWaistHeightParticles(serverWorld, ParticleTypes.OMINOUS_SPAWNING, this, owner, (int) this.distanceTo(owner));

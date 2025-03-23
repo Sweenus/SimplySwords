@@ -1,5 +1,7 @@
 {
-  "item": "simplyswords:thunderbrand",
+  "match": {
+    "items": "simplyswords:thunderbrand",
+  },
   "luminance": 10,
   "water_sensitive": false
 }

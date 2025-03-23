@@ -1,5 +1,7 @@
 {
-  "item": "simplyswords:watching_warglaive",
+  "match": {
+    "items": "simplyswords:watching_warglaive",
+  },
   "luminance": 10,
   "water_sensitive": false
 }

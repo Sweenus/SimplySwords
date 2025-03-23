@@ -1,5 +1,7 @@
 {
-  "item": "simplyswords:mjolnir",
+  "match": {
+    "items": "simplyswords:mjolnir",
+  },
   "luminance": 10,
   "water_sensitive": false
 }

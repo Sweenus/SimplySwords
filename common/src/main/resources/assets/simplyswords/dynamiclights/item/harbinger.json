@@ -1,5 +1,7 @@
 {
-  "item": "simplyswords:harbinger",
+  "match": {
+    "items": "simplyswords:harbinger",
+  },
   "luminance": 12,
   "water_sensitive": false
 }

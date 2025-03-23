@@ -1,5 +1,7 @@
 {
-  "item": "simplyswords:magiblade",
+  "match": {
+    "items": "simplyswords:magiblade",
+  },
   "luminance": 6,
   "water_sensitive": false
 }

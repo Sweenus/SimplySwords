@@ -1,5 +1,7 @@
 {
-  "item": "simplyswords:empowered_remnant",
+  "match": {
+    "items": "simplyswords:empowered_remnant",
+  },
   "luminance": 13,
   "water_sensitive": false
 }

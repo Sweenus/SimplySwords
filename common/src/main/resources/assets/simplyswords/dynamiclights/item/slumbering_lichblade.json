@@ -1,5 +1,7 @@
 {
-  "item": "simplyswords:slumbering_lichblade",
+  "match": {
+    "items": "simplyswords:slumbering_lichblade",
+  },
   "luminance": 12,
   "water_sensitive": false
 }

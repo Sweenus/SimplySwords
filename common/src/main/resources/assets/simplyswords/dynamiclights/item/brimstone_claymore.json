@@ -1,5 +1,7 @@
 {
-  "item": "simplyswords:brimstone_claymore",
+  "match": {
+    "items": "simplyswords:brimstone_claymore",
+  },
   "luminance": 14,
   "water_sensitive": false
 }

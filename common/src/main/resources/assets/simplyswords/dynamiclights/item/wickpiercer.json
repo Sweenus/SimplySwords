@@ -1,5 +1,7 @@
 {
-  "item": "simplyswords:wickpiercer",
+  "match": {
+    "items": "simplyswords:wickpiercer",
+  },
   "luminance": 9,
   "water_sensitive": false
 }

@@ -1,5 +1,7 @@
 {
-  "item": "simplyswords:stormbringer",
+  "match": {
+    "items": "simplyswords:stormbringer",
+  },
   "luminance": 10,
   "water_sensitive": false
 }

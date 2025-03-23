@@ -1,5 +1,7 @@
 {
-  "item": "simplyswords:stars_edge",
+  "match": {
+    "items": "simplyswords:stars_edge",
+  },
   "luminance": 11,
   "water_sensitive": false
 }

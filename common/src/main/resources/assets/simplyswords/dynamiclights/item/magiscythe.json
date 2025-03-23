@@ -1,5 +1,7 @@
 {
-  "item": "simplyswords:magiscythe",
+  "match": {
+    "items": "simplyswords:magiscythe",
+  },
   "luminance": 6,
   "water_sensitive": false
 }

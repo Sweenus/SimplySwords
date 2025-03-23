@@ -1,5 +1,7 @@
 {
-  "item": "simplyswords:soulkeeper",
+  "match": {
+    "items": "simplyswords:soulkeeper",
+  },
   "luminance": 10,
   "water_sensitive": false
 }

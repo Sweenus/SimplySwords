@@ -1,5 +1,7 @@
 {
-  "item": "simplyswords:awakened_lichblade",
+  "match": {
+    "items": "simplyswords:awakened_lichblade"
+  },
   "luminance": 12,
   "water_sensitive": false
 }
