@@ -37,7 +37,7 @@ public class ModLootTableModifiers {
                     LootPool.Builder pool = LootPool.builder()
                             .rolls(ConstantLootNumberProvider.create(1))
                             .conditionally(RandomChanceLootCondition.builder(LootConfig.INSTANCE.standardLootTableWeight.get() / 100)) // 1 = 100% of the time
-                            .apply(EnchantRandomlyFromTagLootFunction.create(EnchantmentTags.ON_RANDOM_LOOT)) //This is not ideal, but forge doesn't expose the registry wrapper so...
+                            .apply(EnchantRandomlyFromTagLootFunction.create(EnchantmentTags.DAMAGE_EXCLUSIVE_SET))
                             .with(ItemEntry.builder(ItemsRegistry.IRON_LONGSWORD.get()))
                             .with(ItemEntry.builder(ItemsRegistry.IRON_TWINBLADE.get()))
                             .with(ItemEntry.builder(ItemsRegistry.IRON_RAPIER.get()))
