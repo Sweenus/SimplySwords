@@ -274,7 +274,8 @@ public class ThrownSwordEntity extends PersistentProjectileEntity {
     public void writeCustomDataToNbt(NbtCompound nbt) {
         super.writeCustomDataToNbt(nbt);
         nbt.putBoolean("DealtDamage", this.dealtDamage);
-        nbt.put("item", this.stack.encode(this.getRegistryManager()));
+        if (!this.stack.isEmpty())
+            nbt.put("item", this.stack.encode(this.getRegistryManager()));
     }
 
 
