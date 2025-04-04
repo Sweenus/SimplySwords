@@ -16,6 +16,7 @@ import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.config.LootConfig;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
+import net.sweenus.simplyswords.registry.TagRegistry;
 
 import java.util.List;
 
@@ -132,9 +133,16 @@ public class ModLootTableModifiers {
                             .rolls(ConstantLootNumberProvider.create(1))
                             .conditionally(RandomChanceLootCondition.builder(lootChance / 100));
 
-                    swords.get().stream().filter(it -> !LootConfig.INSTANCE.disabledUniqueWeaponLoot.contains(it)).forEach( item ->
-                            pool.with(ItemEntry.builder(item))
-                    );
+                    swords.get().stream()
+                            .filter(item ->
+                                    // Check if the item is not disabled in the loot configuration
+                                    !LootConfig.INSTANCE.disabledUniqueWeaponLoot.contains(item)
+                                            // Filter out non-lootable uniques
+                                            && TagRegistry.isInTag(TagRegistry.lootableUniques, item.asItem())
+                            )
+                            .forEach(item ->
+                                    pool.with(ItemEntry.builder(item))
+                            );
 
                     context.addPool(pool);
                 }
@@ -144,9 +152,18 @@ public class ModLootTableModifiers {
                                 .rolls(ConstantLootNumberProvider.create(1))
                                 .conditionally(RandomChanceLootCondition.builder(LootConfig.INSTANCE.uniqueLootTableWeight.get() / 100));
 
-                        swords.get().stream().filter(it -> !LootConfig.INSTANCE.disabledUniqueWeaponLoot.contains(it)).forEach( item ->
-                                pool.with(ItemEntry.builder(item))
-                        );
+                        swords.get().stream()
+                                .filter(item ->
+                                        // Check if the item is not disabled in the loot configuration
+                                        !LootConfig.INSTANCE.disabledUniqueWeaponLoot.contains(item)
+                                                // Filter out non-lootable uniques
+                                                && TagRegistry.isInTag(TagRegistry.lootableUniques, item.asItem())
+                                )
+                                .forEach(item ->
+                                        pool.with(ItemEntry.builder(item))
+                                );
+
+
 
                         context.addPool(pool);
                     }
