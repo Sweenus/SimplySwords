@@ -59,7 +59,7 @@
       },
       {
         "hitbox": "HORIZONTAL_PLANE",
-        "conditions": ["NO_OFFHAND_ITEM"],
+        "conditions": ["NOT_DUAL_WIELDING"],
         "damage_multiplier": 1.2,
         "angle": 150,
         "upswing": 0.5,
@@ -72,7 +72,7 @@
       },
       {
         "hitbox": "HORIZONTAL_PLANE",
-        "conditions": ["NO_OFFHAND_ITEM"],
+        "conditions": ["NOT_DUAL_WIELDING"],
         "damage_multiplier": 1.2,
         "angle": 150,
         "upswing": 0.5,

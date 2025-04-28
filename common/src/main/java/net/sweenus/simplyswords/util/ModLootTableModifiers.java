@@ -16,9 +16,9 @@ import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.config.LootConfig;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
-import net.sweenus.simplyswords.registry.TagRegistry;
 
 import java.util.List;
+import java.util.Set;
 
 public class ModLootTableModifiers {
 
@@ -138,7 +138,7 @@ public class ModLootTableModifiers {
                                     // Check if the item is not disabled in the loot configuration
                                     !LootConfig.INSTANCE.disabledUniqueWeaponLoot.contains(item)
                                             // Filter out non-lootable uniques
-                                            && TagRegistry.isInTag(TagRegistry.lootableUniques, item.asItem())
+                                            && isLootableUnique(item)
                             )
                             .forEach(item ->
                                     pool.with(ItemEntry.builder(item))
@@ -157,7 +157,7 @@ public class ModLootTableModifiers {
                                         // Check if the item is not disabled in the loot configuration
                                         !LootConfig.INSTANCE.disabledUniqueWeaponLoot.contains(item)
                                                 // Filter out non-lootable uniques
-                                                && TagRegistry.isInTag(TagRegistry.lootableUniques, item.asItem())
+                                                && isLootableUnique(item)
                                 )
                                 .forEach(item ->
                                         pool.with(ItemEntry.builder(item))
@@ -172,5 +172,49 @@ public class ModLootTableModifiers {
         }));
 
 
+    }
+
+    private static final Set<Item> lootableUniques = Set.of(
+            ItemsRegistry.WATCHER_CLAYMORE.get(),
+            ItemsRegistry.BRIMSTONE_CLAYMORE.get(),
+            ItemsRegistry.STORMS_EDGE.get(),
+            ItemsRegistry.STORMBRINGER.get(),
+            ItemsRegistry.BRAMBLETHORN.get(),
+            ItemsRegistry.WATCHING_WARGLAIVE.get(),
+            ItemsRegistry.TOXIC_LONGSWORD.get(),
+            ItemsRegistry.EMBERBLADE.get(),
+            ItemsRegistry.FROSTFALL.get(),
+            ItemsRegistry.SOULPYRE.get(),
+            ItemsRegistry.MOLTEN_EDGE.get(),
+            ItemsRegistry.LIVYATAN.get(),
+            ItemsRegistry.ICEWHISPER.get(),
+            ItemsRegistry.ARCANETHYST.get(),
+            ItemsRegistry.THUNDERBRAND.get(),
+            ItemsRegistry.HEARTHFLAME.get(),
+            ItemsRegistry.TWISTED_BLADE.get(),
+            ItemsRegistry.SOULRENDER.get(),
+            ItemsRegistry.SOULKEEPER.get(),
+            ItemsRegistry.SOULSTEALER.get(),
+            ItemsRegistry.MJOLNIR.get(),
+            ItemsRegistry.SLUMBERING_LICHBLADE.get(),
+            ItemsRegistry.SHADOWSTING.get(),
+            ItemsRegistry.DORMANT_RELIC.get(),
+            ItemsRegistry.WHISPERWIND.get(),
+            ItemsRegistry.EMBERLASH.get(),
+            ItemsRegistry.WAXWEAVER.get(),
+            ItemsRegistry.HIVEHEART.get(),
+            ItemsRegistry.STARS_EDGE.get(),
+            ItemsRegistry.WICKPIERCER.get(),
+            ItemsRegistry.TEMPEST.get(),
+            ItemsRegistry.FLAMEWIND.get(),
+            ItemsRegistry.RIBBONCLEAVER.get(),
+            ItemsRegistry.CAELESTIS.get(),
+            ItemsRegistry.WRAITHFANG.get()
+    );
+
+    // Tags do not load until after loot tables are registered using Architectury. This seems to be the best way to fix this.
+    // Mapped onto a method so that I can inject into it for SimplyMore
+    public static boolean isLootableUnique(Item item) {
+        return lootableUniques.contains(item.asItem());
     }
 }
