@@ -16,6 +16,7 @@ import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.SimplySwords;
+import net.sweenus.simplyswords.registry.RecipeTypeRegistry;
 
 public class UpgradeUniqueRecipe extends ShapedRecipe {
     private final int upgradableItemSlot;
@@ -72,7 +73,7 @@ public class UpgradeUniqueRecipe extends ShapedRecipe {
     }
 
     @Override
-    public RecipeSerializer<?> getSerializer() {return SimplySwords.UNIQUE_UPGRADE.get();}
+    public RecipeSerializer<?> getSerializer() {return RecipeTypeRegistry.UNIQUE_UPGRADE.get();}
 
     public static class Serializer implements RecipeSerializer<UpgradeUniqueRecipe> {
 

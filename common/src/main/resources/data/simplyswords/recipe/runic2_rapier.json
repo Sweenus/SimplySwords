@@ -1,5 +1,5 @@
 {
-  "type": "minecraft:smithing_transform",
+  "type": "simplyswords:smithing_reroll",
   "base": {
     "item": "simplyswords:runic_rapier"
   },

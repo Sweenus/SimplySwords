@@ -22,6 +22,7 @@ import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
+import net.sweenus.simplyswords.registry.TagRegistry;
 
 @RequiresAction(action = Action.RELOAD_DATA)
 public class LootConfig extends Config {
@@ -78,7 +79,10 @@ public class LootConfig extends Config {
                             .build()
             ).build();
 
-    public ValidatedSet<Item> disabledUniqueWeaponLoot = ValidatedRegistryType.of(ItemsRegistry.ARCANETHYST.value(), Registries.ITEM, (entry) -> entry.value() instanceof UniqueSwordItem).toSet();
+
+    // This now validates using the "simplyswords:lootable_uniques" tag, instead of all items,
+    // meaning non-lootable uniques do not show up in the autocompletion
+    public ValidatedSet<Item> disabledUniqueWeaponLoot = ValidatedRegistryType.of(ItemsRegistry.ARCANETHYST.value(), Registries.ITEM, (entry) -> TagRegistry.isInTag(TagRegistry.lootableUniques, entry.value())).toSet();
 
     //
 }

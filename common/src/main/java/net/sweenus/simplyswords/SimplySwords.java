@@ -53,16 +53,6 @@ public class SimplySwords {
             )
     );
 
-    public static final DeferredRegister<RecipeSerializer<?>> RECIPES =
-            DeferredRegister.create(SimplySwords.MOD_ID, RegistryKeys.RECIPE_SERIALIZER);
-
-    public static final RegistrySupplier<RecipeSerializer<UpgradeUniqueRecipe>> UNIQUE_UPGRADE =
-            RECIPES.register(
-                    "unique_upgrade",
-                    UpgradeUniqueRecipe.Serializer::new
-            );
-
-
     public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
 
     public static String minimumEldritchEndVersion = "0.2.40";
@@ -79,7 +69,7 @@ public class SimplySwords {
         ItemsRegistry.ITEM.register();
         SoundRegistry.SOUND.register();
         EffectRegistry.EFFECT.register();
-        SimplySwords.RECIPES.register();
+        RecipeTypeRegistry.RECIPES.register();
         EntityRegistry.ENTITIES.register();
         ComponentTypeRegistry.COMPONENT_TYPES.register();
         GemPowerRegistry.register();
