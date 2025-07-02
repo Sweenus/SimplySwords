@@ -54,7 +54,6 @@ dependencies {
     // Remove the next line if you don't want to depend on the API
     modApi "dev.architectury:architectury-fabric:${rootProject.architectury_api_version}"
     modCompileOnly("com.terraformersmc:modmenu:${rootProject.mod_menu_version}") { transitive false }
-    modImplementation "curse.maven:mythicmetals-410127:6257791"
     modImplementation "maven.modrinth:spell-power:${rootProject.spellpower_version}-fabric"
     //modImplementation "curse.maven:lambdynamiclights-393442:${rootProject.lambdynlights_version}"
     //include modImplementation("dev.lambdaurora:spruceui:${rootProject.spruceui_version}") 1.21
@@ -67,10 +66,6 @@ dependencies {
     shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
 
     modImplementation "me.fzzyhmstrs:fzzy_config:${project.fzz_config_version}"
-
-    //For testing Mythic Metals compat (remove when not needed)
-    //modImplementation "org.ladysnake.cardinal-components-api:cardinal-components-base:6.1.0"
-    //modImplementation "org.ladysnake.cardinal-components-api:cardinal-components-entity:6.1.0"
 
 }
 
