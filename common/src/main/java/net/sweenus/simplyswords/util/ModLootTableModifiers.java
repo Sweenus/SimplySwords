@@ -17,15 +17,12 @@ import net.sweenus.simplyswords.config.LootConfig;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class ModLootTableModifiers {
 
     //supplies a list of every unique sword item currently registered
     private static final Supplier<List<Item>> swords = Suppliers.memoize(() -> Registries.ITEM.stream().filter(it -> it instanceof UniqueSwordItem).toList());
-
-
 
     public static void init() {
 
@@ -122,7 +119,6 @@ public class ModLootTableModifiers {
         //UNIQUE
         // Check each loot table against the listed namespaces in the loot_config.json, if there's a match modify the
         // table according to the config. Otherwise, use the loot global loot modifiers set in the general_config.json
-
         LootEvent.MODIFY_LOOT_TABLE.register(((RegistryKey<LootTable> key, LootEvent.LootTableModificationContext context, boolean builtin) -> {
             Identifier id = key.getValue();
             if (LootConfig.INSTANCE.enableLootDrops.get()) {
@@ -173,48 +169,52 @@ public class ModLootTableModifiers {
 
 
     }
-
-    private static final Set<Item> lootableUniques = Set.of(
-            ItemsRegistry.WATCHER_CLAYMORE.get(),
-            ItemsRegistry.BRIMSTONE_CLAYMORE.get(),
-            ItemsRegistry.STORMS_EDGE.get(),
-            ItemsRegistry.STORMBRINGER.get(),
-            ItemsRegistry.BRAMBLETHORN.get(),
-            ItemsRegistry.WATCHING_WARGLAIVE.get(),
-            ItemsRegistry.TOXIC_LONGSWORD.get(),
-            ItemsRegistry.EMBERBLADE.get(),
-            ItemsRegistry.FROSTFALL.get(),
-            ItemsRegistry.SOULPYRE.get(),
-            ItemsRegistry.MOLTEN_EDGE.get(),
-            ItemsRegistry.LIVYATAN.get(),
-            ItemsRegistry.ICEWHISPER.get(),
-            ItemsRegistry.ARCANETHYST.get(),
-            ItemsRegistry.THUNDERBRAND.get(),
-            ItemsRegistry.HEARTHFLAME.get(),
-            ItemsRegistry.TWISTED_BLADE.get(),
-            ItemsRegistry.SOULRENDER.get(),
-            ItemsRegistry.SOULKEEPER.get(),
-            ItemsRegistry.SOULSTEALER.get(),
-            ItemsRegistry.MJOLNIR.get(),
-            ItemsRegistry.SLUMBERING_LICHBLADE.get(),
-            ItemsRegistry.SHADOWSTING.get(),
-            ItemsRegistry.DORMANT_RELIC.get(),
-            ItemsRegistry.WHISPERWIND.get(),
-            ItemsRegistry.EMBERLASH.get(),
-            ItemsRegistry.WAXWEAVER.get(),
-            ItemsRegistry.HIVEHEART.get(),
-            ItemsRegistry.STARS_EDGE.get(),
-            ItemsRegistry.WICKPIERCER.get(),
-            ItemsRegistry.TEMPEST.get(),
-            ItemsRegistry.FLAMEWIND.get(),
-            ItemsRegistry.RIBBONCLEAVER.get(),
-            ItemsRegistry.CAELESTIS.get(),
-            ItemsRegistry.WRAITHFANG.get()
-    );
+    private static Set<Item> lootableUniques = new HashSet<>();
 
     // Tags do not load until after loot tables are registered using Architectury. This seems to be the best way to fix this.
     // Mapped onto a method so that I can inject into it for SimplyMore
     public static boolean isLootableUnique(Item item) {
+        // Create the set when required, which prevents this from being loaded too early
+        if (lootableUniques.isEmpty()) {
+            lootableUniques = Set.of(
+                ItemsRegistry.WATCHER_CLAYMORE.get(),
+                ItemsRegistry.BRIMSTONE_CLAYMORE.get(),
+                ItemsRegistry.STORMS_EDGE.get(),
+                ItemsRegistry.STORMBRINGER.get(),
+                ItemsRegistry.BRAMBLETHORN.get(),
+                ItemsRegistry.WATCHING_WARGLAIVE.get(),
+                ItemsRegistry.TOXIC_LONGSWORD.get(),
+                ItemsRegistry.EMBERBLADE.get(),
+                ItemsRegistry.FROSTFALL.get(),
+                ItemsRegistry.SOULPYRE.get(),
+                ItemsRegistry.MOLTEN_EDGE.get(),
+                ItemsRegistry.LIVYATAN.get(),
+                ItemsRegistry.ICEWHISPER.get(),
+                ItemsRegistry.ARCANETHYST.get(),
+                ItemsRegistry.THUNDERBRAND.get(),
+                ItemsRegistry.HEARTHFLAME.get(),
+                ItemsRegistry.TWISTED_BLADE.get(),
+                ItemsRegistry.SOULRENDER.get(),
+                ItemsRegistry.SOULKEEPER.get(),
+                ItemsRegistry.SOULSTEALER.get(),
+                ItemsRegistry.MJOLNIR.get(),
+                ItemsRegistry.SLUMBERING_LICHBLADE.get(),
+                ItemsRegistry.SHADOWSTING.get(),
+                ItemsRegistry.DORMANT_RELIC.get(),
+                ItemsRegistry.WHISPERWIND.get(),
+                ItemsRegistry.EMBERLASH.get(),
+                ItemsRegistry.WAXWEAVER.get(),
+                ItemsRegistry.HIVEHEART.get(),
+                ItemsRegistry.STARS_EDGE.get(),
+                ItemsRegistry.WICKPIERCER.get(),
+                ItemsRegistry.TEMPEST.get(),
+                ItemsRegistry.FLAMEWIND.get(),
+                ItemsRegistry.RIBBONCLEAVER.get(),
+                ItemsRegistry.CAELESTIS.get(),
+                ItemsRegistry.WRAITHFANG.get()
+            );
+        }
+
         return lootableUniques.contains(item.asItem());
     }
 }
