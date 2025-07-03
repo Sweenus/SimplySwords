@@ -3,6 +3,7 @@ package net.sweenus.simplyswords.util;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import dev.architectury.event.events.common.LootEvent;
+import dev.architectury.registry.registries.RegistrySupplier;
 import net.minecraft.item.Item;
 import net.minecraft.loot.LootPool;
 import net.minecraft.loot.LootTable;
@@ -19,6 +20,7 @@ import net.sweenus.simplyswords.registry.ItemsRegistry;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class ModLootTableModifiers {
 
@@ -174,47 +176,55 @@ public class ModLootTableModifiers {
 
     }
 
-    private static final Set<Item> lootableUniques = Set.of(
-            ItemsRegistry.WATCHER_CLAYMORE.get(),
-            ItemsRegistry.BRIMSTONE_CLAYMORE.get(),
-            ItemsRegistry.STORMS_EDGE.get(),
-            ItemsRegistry.STORMBRINGER.get(),
-            ItemsRegistry.BRAMBLETHORN.get(),
-            ItemsRegistry.WATCHING_WARGLAIVE.get(),
-            ItemsRegistry.TOXIC_LONGSWORD.get(),
-            ItemsRegistry.EMBERBLADE.get(),
-            ItemsRegistry.FROSTFALL.get(),
-            ItemsRegistry.SOULPYRE.get(),
-            ItemsRegistry.MOLTEN_EDGE.get(),
-            ItemsRegistry.LIVYATAN.get(),
-            ItemsRegistry.ICEWHISPER.get(),
-            ItemsRegistry.ARCANETHYST.get(),
-            ItemsRegistry.THUNDERBRAND.get(),
-            ItemsRegistry.HEARTHFLAME.get(),
-            ItemsRegistry.TWISTED_BLADE.get(),
-            ItemsRegistry.SOULRENDER.get(),
-            ItemsRegistry.SOULKEEPER.get(),
-            ItemsRegistry.SOULSTEALER.get(),
-            ItemsRegistry.MJOLNIR.get(),
-            ItemsRegistry.SLUMBERING_LICHBLADE.get(),
-            ItemsRegistry.SHADOWSTING.get(),
-            ItemsRegistry.DORMANT_RELIC.get(),
-            ItemsRegistry.WHISPERWIND.get(),
-            ItemsRegistry.EMBERLASH.get(),
-            ItemsRegistry.WAXWEAVER.get(),
-            ItemsRegistry.HIVEHEART.get(),
-            ItemsRegistry.STARS_EDGE.get(),
-            ItemsRegistry.WICKPIERCER.get(),
-            ItemsRegistry.TEMPEST.get(),
-            ItemsRegistry.FLAMEWIND.get(),
-            ItemsRegistry.RIBBONCLEAVER.get(),
-            ItemsRegistry.CAELESTIS.get(),
-            ItemsRegistry.WRAITHFANG.get()
+    private static final Set<RegistrySupplier<? extends Item>> lootableSuppliers = Set.of(
+            ItemsRegistry.WATCHER_CLAYMORE,
+            ItemsRegistry.BRIMSTONE_CLAYMORE,
+            ItemsRegistry.STORMS_EDGE,
+            ItemsRegistry.STORMBRINGER,
+            ItemsRegistry.BRAMBLETHORN,
+            ItemsRegistry.WATCHING_WARGLAIVE,
+            ItemsRegistry.TOXIC_LONGSWORD,
+            ItemsRegistry.EMBERBLADE,
+            ItemsRegistry.FROSTFALL,
+            ItemsRegistry.SOULPYRE,
+            ItemsRegistry.MOLTEN_EDGE,
+            ItemsRegistry.LIVYATAN,
+            ItemsRegistry.ICEWHISPER,
+            ItemsRegistry.ARCANETHYST,
+            ItemsRegistry.THUNDERBRAND,
+            ItemsRegistry.HEARTHFLAME,
+            ItemsRegistry.TWISTED_BLADE,
+            ItemsRegistry.SOULRENDER,
+            ItemsRegistry.SOULKEEPER,
+            ItemsRegistry.SOULSTEALER,
+            ItemsRegistry.MJOLNIR,
+            ItemsRegistry.SLUMBERING_LICHBLADE,
+            ItemsRegistry.SHADOWSTING,
+            ItemsRegistry.DORMANT_RELIC,
+            ItemsRegistry.WHISPERWIND,
+            ItemsRegistry.EMBERLASH,
+            ItemsRegistry.WAXWEAVER,
+            ItemsRegistry.HIVEHEART,
+            ItemsRegistry.STARS_EDGE,
+            ItemsRegistry.WICKPIERCER,
+            ItemsRegistry.TEMPEST,
+            ItemsRegistry.FLAMEWIND,
+            ItemsRegistry.RIBBONCLEAVER,
+            ItemsRegistry.CAELESTIS,
+            ItemsRegistry.WRAITHFANG
     );
+
+    private static Set<Item> lootableItems = Set.of(); // This starts empty to prevent a crash on startup on Neoforge
 
     // Tags do not load until after loot tables are registered using Architectury. This seems to be the best way to fix this.
     // Mapped onto a method so that I can inject into it for SimplyMore
     public static boolean isLootableUnique(Item item) {
-        return lootableUniques.contains(item.asItem());
+        if(lootableItems.isEmpty()) {
+            lootableItems = lootableSuppliers.stream()
+                    .map(java.util.function.Supplier::get)
+                    .collect(Collectors.toSet());
+        }
+
+        return lootableItems.contains(item.asItem());
     }
 }
