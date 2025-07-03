@@ -24,6 +24,8 @@ public class GeneralConfig extends Config {
     public boolean enableWeaponFootfalls = true;
     public boolean enablePassiveParticles = true;
     public boolean enableUniqueGemSockets = true;
+    public boolean enableTooltipInfoButtons = true;
+    public boolean tooltipInfoButtonsRequireInventoryScreen = true;
 
     public ValidatedCondition<Boolean> compatGobberEndWeaponsUnbreakable = new ValidatedBoolean(true)
             .toCondition(

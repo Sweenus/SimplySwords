@@ -1,12 +1,15 @@
 package net.sweenus.simplyswords.client.api;
 
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
+import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.item.RunicSwordItem;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 
@@ -17,6 +20,9 @@ public class SimplySwordsClientAPI {
     // See UniqueSwordItem for example usage
     public static void generateDynamicTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Text> tooltip, TooltipType type, String modId, String itemPath, String uniquePath, String runicPath, Identifier customConfigPath) {
         Identifier entry = TooltipUtils.generateDefaultTooltipEntry(itemStack, itemPath);
+
+        if (!Config.general.enableTooltipInfoButtons) {return;}
+        if (!(MinecraftClient.getInstance().currentScreen instanceof InventoryScreen) && Config.general.tooltipInfoButtonsRequireInventoryScreen) {return;}
 
         // Add dynamic tooltip button
         TooltipUtils.addDynamicButtonTooltip(
