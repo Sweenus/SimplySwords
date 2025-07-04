@@ -13,21 +13,17 @@
       "modid": "mythicmetals"
     }
   ],
-  "type": "minecraft:crafting_shaped",
-  "key": {
-    "#": {
-      "tag": "c:wood_sticks"
-    },
-    "X": {
-      "item": "mythicmetals:carmot_ingot"
-    }
+  "type": "minecraft:smithing_transform",
+  "base": {
+    "item": "simplyswords:mythicmetals_compat/kyber/kyber_katana"
   },
-  "pattern": [
-    "   ",
-    "#XX",
-    "   "
-  ],
+  "addition": {
+    "item": "mythicmetals:carmot_ingot"
+  },
   "result": {
     "id": "simplyswords:mythicmetals_compat/carmot/carmot_katana"
+  },
+  "template": {
+    "item": "mythicmetals:carmot_smithing_template"
   }
 }

@@ -13,24 +13,17 @@
       "modid": "mythicmetals"
     }
   ],
-  "type": "minecraft:crafting_shaped",
-  "key": {
-    "#": {
-      "tag": "c:wood_sticks"
-    },
-    "X": {
-      "item": "mythicmetals:carmot_ingot"
-    },
-    "Y": {
-      "item": "minecraft:iron_nugget"
-    }
+  "type": "minecraft:smithing_transform",
+  "base": {
+    "item": "simplyswords:mythicmetals_compat/kyber/kyber_greataxe"
   },
-  "pattern": [
-    "XXX",
-    "Y#Y",
-    " # "
-  ],
+  "addition": {
+    "item": "mythicmetals:carmot_ingot"
+  },
   "result": {
     "id": "simplyswords:mythicmetals_compat/carmot/carmot_greataxe"
+  },
+  "template": {
+    "item": "mythicmetals:carmot_smithing_template"
   }
 }
