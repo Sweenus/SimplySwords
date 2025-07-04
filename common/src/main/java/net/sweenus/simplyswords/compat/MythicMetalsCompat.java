@@ -12,7 +12,10 @@ import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.compat.mythicmetals.PalladiumSwordItem;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.item.SimplySwordsSwordItem;
-import java.util.*;
+
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 
 import static net.minecraft.item.SwordItem.createAttributeModifiers;
 
@@ -131,7 +134,7 @@ public class MythicMetalsCompat {
     }
 
     private static Item.Settings defaultSettings() {
-        return new Item.Settings();
+        return new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS);
     }
 
     private static Item.Settings prometheumSettings() {
@@ -165,4 +168,6 @@ public class MythicMetalsCompat {
         registerItems(supportedItems);
         ITEM.register();
     }
+
+
 }
