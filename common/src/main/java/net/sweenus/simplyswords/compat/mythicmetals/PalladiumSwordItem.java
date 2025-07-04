@@ -7,8 +7,8 @@ import net.minecraft.item.ToolMaterial;
 import net.sweenus.simplyswords.item.SimplySwordsSwordItem;
 
 public class PalladiumSwordItem extends SimplySwordsSwordItem {
-    public PalladiumSwordItem(ToolMaterial toolMaterial, Settings settings, String... repairIngredient) {
-        super(toolMaterial, settings, repairIngredient);
+    public PalladiumSwordItem(ToolMaterial toolMaterial, Settings settings) {
+        super(toolMaterial, settings);
     }
 
     @Override
