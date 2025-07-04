@@ -86,7 +86,7 @@ public class FrostfallEntity extends ThrownSwordEntity {
                         }
                     }
 
-                    world.playSoundFromEntity(null, entity,
+                    world.playSoundFromEntity(null, this,
                             SoundRegistry.ELEMENTAL_BOW_ICE_SHOOT_IMPACT_02.get(),
                             this.getSoundCategory(),
                             0.6f - ((float) detonateCount / 10),

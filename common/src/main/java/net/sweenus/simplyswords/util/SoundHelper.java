@@ -15,15 +15,16 @@ import java.util.concurrent.TimeUnit;
 
 public class SoundHelper {
 
+
+    // There has to be a better way to loop sounds....
     private static final Map<Identifier, ScheduledExecutorService> soundSchedulers = new ConcurrentHashMap<>();
 
-    public static void loopSound(LivingEntity entity, Identifier soundId, int soundDurationSeconds) {
-        if (entity.getWorld().isClient()) return; // Only execute on the server side
+    public static void loopSound(LivingEntity entity, Identifier soundId, int soundDurationSeconds, int updateFrequencyTicks) {
+        if (entity.getWorld().isClient()) return;
 
         ServerWorld serverWorld = (ServerWorld) entity.getWorld();
         SoundEvent soundEvent = SoundRegistry.SOUND.getRegistrar().get(soundId);
 
-        // If the sound is already playing, do nothing
         if (soundSchedulers.containsKey(soundId)) {
             return;
         }
@@ -31,24 +32,29 @@ public class SoundHelper {
         ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
         soundSchedulers.put(soundId, scheduler);
 
-        // Schedule the sound to play repeatedly
-        scheduler.scheduleAtFixedRate(() -> {
-            if (entity.isAlive() && entity.hasStatusEffect(EffectRegistry.getReference(EffectRegistry.ELEMENTAL_VORTEX))) {
-                playSound(serverWorld, entity, soundEvent);
-            } else {
-                stopLoopingSound(entity, soundId); // Stop the scheduler if the entity is no longer valid
-            }
-        }, 0, soundDurationSeconds, TimeUnit.SECONDS);
-    }
+        int totalTicks = soundDurationSeconds * 20;
+        int[] elapsedTicks = {0};
 
-    private static void playSound(ServerWorld serverWorld, LivingEntity entity, SoundEvent soundEvent) {
-        serverWorld.playSound(null, entity.getBlockPos(), soundEvent, entity.getSoundCategory(), 1.0f, 1.0f);
+        scheduler.scheduleAtFixedRate(() -> {
+            elapsedTicks[0] += updateFrequencyTicks;
+
+            if (entity.isAlive() && elapsedTicks[0] < totalTicks && entity.hasStatusEffect(EffectRegistry.getReference(EffectRegistry.ELEMENTAL_VORTEX))) {
+                float playbackProgress = (elapsedTicks[0] % totalTicks) / (float) totalTicks;
+                float pitch = 1.0f + playbackProgress * 0.2f;
+
+                // Play the sound, updating its position dynamically and simulating playback continuity
+                serverWorld.playSound(null, entity.getBlockPos(), soundEvent, entity.getSoundCategory(), 1.0f, pitch);
+            } else {
+                stopLoopingSound(entity, soundId);
+            }
+        }, 0, updateFrequencyTicks * 50L, TimeUnit.MILLISECONDS);
     }
 
     public static void stopLoopingSound(LivingEntity entity, Identifier soundId) {
         ScheduledExecutorService scheduler = soundSchedulers.remove(soundId);
         if (scheduler != null) {
-            scheduler.shutdownNow();
+            scheduler.shutdownNow(); // Shut down the scheduler to stop the sound from playing
         }
     }
 }
+
