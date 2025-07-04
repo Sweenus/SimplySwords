@@ -15,7 +15,6 @@ import net.minecraft.client.render.entity.BeeEntityRenderer;
 import net.minecraft.client.render.entity.model.EntityModelLayer;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
-import net.minecraft.recipe.RecipeSerializer;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -25,12 +24,12 @@ import net.sweenus.simplyswords.client.renderer.ThrownSpearEntityRenderer;
 import net.sweenus.simplyswords.client.renderer.ThrownSwordEntityRenderer;
 import net.sweenus.simplyswords.client.renderer.model.BattleStandardDarkModel;
 import net.sweenus.simplyswords.client.renderer.model.BattleStandardModel;
+import net.sweenus.simplyswords.compat.MythicMetalsCompat;
 import net.sweenus.simplyswords.compat.eldritch_end.EldritchEndCompatRegistry;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.BattleStandardDarkEntity;
 import net.sweenus.simplyswords.entity.BattleStandardEntity;
 import net.sweenus.simplyswords.entity.SimplySwordsBeeEntity;
-import net.sweenus.simplyswords.recipe.UpgradeUniqueRecipe;
 import net.sweenus.simplyswords.registry.*;
 import net.sweenus.simplyswords.util.FileCopier;
 import net.sweenus.simplyswords.util.ModLootTableModifiers;
@@ -58,6 +57,7 @@ public class SimplySwords {
     public static String minimumEldritchEndVersion = "0.2.40";
     public static String minimumSpellPowerVersion = "0.10.0+1.20.1";
     public static String minimumSpellbookVersion = "1.21-3.8.0";
+    public static String minimumMythicMetalsVersion = "0.24.0+1.21";
 
     public static void init() {
 
@@ -81,6 +81,10 @@ public class SimplySwords {
         if (passVersionCheck("eldritch_end", minimumEldritchEndVersion)) {
             //EldritchEndCompat.registerModItems(); 1.21
             EldritchEndCompatRegistry.EFFECT.register();
+        }
+        if (passVersionCheck("mythicmetals", minimumMythicMetalsVersion)) {
+            LOGGER.info("Registering Mythic Metals items");
+            MythicMetalsCompat.init();
         }
         try {
             FileCopier.copyFileToConfigDirectory();

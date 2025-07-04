@@ -2,7 +2,7 @@
   "replace": false,
   "values": [
     {
-      "id": "#simplyswords:carmot",
+      "id": "#simplyswords:tools/carmot",
       "required": false
     }
   ]

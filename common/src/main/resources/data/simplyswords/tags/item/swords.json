@@ -310,6 +310,86 @@
     {
       "id": "simplyswords:gobber_compat/gobber_end/gobber_end_halberd",
       "required": false
+    },
+    {
+      "id": "#simplyswords:tools/adamantite",
+      "required": false
+    },
+    {
+      "id": "#simplyswords:tools/aquarium",
+      "required": false
+    },
+    {
+      "id": "#simplyswords:tools/banglum",
+      "required": false
+    },
+    {
+      "id": "#simplyswords:tools/bronze",
+      "required": false
+    },
+    {
+      "id": "#simplyswords:tools/carmot",
+      "required": false
+    },
+    {
+      "id": "#simplyswords:tools/celestium",
+      "required": false
+    },
+    {
+      "id": "#simplyswords:tools/copper",
+      "required": false
+    },
+    {
+      "id": "#simplyswords:tools/durasteel",
+      "required": false
+    },
+    {
+      "id": "#simplyswords:tools/kyber",
+      "required": false
+    },
+    {
+      "id": "#simplyswords:tools/metallurgium",
+      "required": false
+    },
+    {
+      "id": "#simplyswords:tools/mythril",
+      "required": false
+    },
+    {
+      "id": "#simplyswords:tools/orichalcum",
+      "required": false
+    },
+    {
+      "id": "#simplyswords:tools/osmium",
+      "required": false
+    },
+    {
+      "id": "#simplyswords:tools/palladium",
+      "required": false
+    },
+    {
+      "id": "#simplyswords:tools/prometheum",
+      "required": false
+    },
+    {
+      "id": "#simplyswords:tools/quadrillum",
+      "required": false
+    },
+    {
+      "id": "#simplyswords:tools/runite",
+      "required": false
+    },
+    {
+      "id": "#simplyswords:tools/star_platinum",
+      "required": false
+    },
+    {
+      "id": "#simplyswords:tools/steel",
+      "required": false
+    },
+    {
+      "id": "#simplyswords:tools/stormyx",
+      "required": false
     }
   ]
 }

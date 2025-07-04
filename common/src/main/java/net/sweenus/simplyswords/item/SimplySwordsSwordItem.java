@@ -25,8 +25,15 @@ public class SimplySwordsSwordItem extends SwordItem {
         this.repairIngredient = repairIngredient;
     }
 
+    public SimplySwordsSwordItem(ToolMaterial toolMaterial, Settings settings) {
+        super(toolMaterial, settings);
+        this.repairIngredient = new String[]{};
+    }
+
     @Override
     public boolean canRepair(ItemStack stack, ItemStack ingredient) {
+        if (repairIngredient.length == 0) return super.canRepair(stack, ingredient);
+
         List<Item> potentialIngredients = new ArrayList<>(List.of());
         Arrays.stream(repairIngredient).toList().forEach(repIngredient ->
             potentialIngredients.add(
