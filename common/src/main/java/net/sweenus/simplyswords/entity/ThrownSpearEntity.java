@@ -238,7 +238,7 @@ public class ThrownSpearEntity extends PersistentProjectileEntity {
                 this.knockback(livingEntity, damageSource);
                 this.onHit(livingEntity);
                 // Get the ItemStack and call postHit if it's defined on the associated Item
-                if (!stack.isEmpty() && this.getOwner() instanceof LivingEntity livingOwner) {
+                if (stack != null &&  !stack.isEmpty() && this.getOwner() instanceof LivingEntity livingOwner) {
                     Item weaponItem = stack.getItem();
                     if (weaponItem instanceof SwordItem) {
                         ((SwordItem) weaponItem).postHit(stack, livingEntity, livingOwner);
