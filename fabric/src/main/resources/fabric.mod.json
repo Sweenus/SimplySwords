@@ -38,15 +38,15 @@
     "fabric": "*",
     "minecraft": ">=1.21.1 <=1.21.1",
     "architectury": ">=7.1.0",
-    "fzzy_config": ">=0.6.6",
-    "oracle_index": ">=0.2.0"
+    "fzzy_config": ">=0.6.6"
   },
   "suggests": {
     "mythicmetals": ">=0.18.2",
     "gobber2": ">=2.6.43"
   },
   "recommends": {
-    "bettercombat": ">=1.7.2"
+    "bettercombat": ">=1.7.2",
+    "oracle_index": ">=0.2.0"
   },
   "custom": {
     "fzzy_config": [

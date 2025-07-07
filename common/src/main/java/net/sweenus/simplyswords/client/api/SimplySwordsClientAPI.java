@@ -2,6 +2,7 @@ package net.sweenus.simplyswords.client.api;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -22,7 +23,7 @@ public class SimplySwordsClientAPI {
         Identifier entry = TooltipUtils.generateDefaultTooltipEntry(itemStack, itemPath);
 
         if (!Config.general.enableTooltipInfoButtons) {return;}
-        if (!(MinecraftClient.getInstance().currentScreen instanceof InventoryScreen) && Config.general.tooltipInfoButtonsRequireInventoryScreen) {return;}
+        if (!(MinecraftClient.getInstance().currentScreen instanceof InventoryScreen || MinecraftClient.getInstance().currentScreen instanceof CreativeInventoryScreen) && Config.general.tooltipInfoButtonsRequireInventoryScreen) {return;}
 
         // Add dynamic tooltip button
         TooltipUtils.addDynamicButtonTooltip(

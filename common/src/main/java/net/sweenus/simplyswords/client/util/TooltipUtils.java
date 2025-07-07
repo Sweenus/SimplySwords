@@ -18,7 +18,6 @@ import net.sweenus.simplyswords.power.GemPowerComponent;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
-import rearth.oracle.ui.OracleScreen;
 
 import java.util.List;
 
@@ -134,17 +133,6 @@ public class TooltipUtils {
         }
     }
 
-    public static void openOracleIndex(Identifier identifier, String modId) {
-        if (!(MinecraftClient.getInstance().currentScreen instanceof OracleScreen)) {
-            if (identifier.getPath().contains("lichblade")) // Lichblade variants are contained within one wiki entry
-                identifier = Identifier.of("oracle_index:books/simplyswords/unique-weapons/lichblade.mdx");
-
-            OracleScreen.activeBook = modId;
-            OracleScreen.activeEntry = identifier;
-            MinecraftClient.getInstance().setScreen(new OracleScreen());
-        }
-    }
-
     public static void openFzzyConfig(String path) {
         if (!ConfigApiJava.isScreenOpen("simplyswords.unique_effects.")) {
             //System.out.println(path);
@@ -204,7 +192,9 @@ public class TooltipUtils {
                         TooltipUtils.openFzzyConfig(customPath);
                     }
                 } else {
-                    TooltipUtils.openOracleIndex(entry, modId);
+                    if (Platform.isModLoaded("oracle_index")) {
+                        OracleIndexUtils.openOracleIndex(entry, modId);
+                    }
                 }
                 ctrlKeyPressTimestamp = 0;
             }
