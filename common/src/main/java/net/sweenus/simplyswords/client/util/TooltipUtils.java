@@ -176,12 +176,19 @@ public class TooltipUtils {
         return generateDefaultTooltipEntry(itemStack, itemPath);
     }
 
-    public static void processCtrlAltNavigation(Identifier entry, String modId, Identifier customConfigPath) {
+    public static void processCtrlAltNavigation(Identifier entry, String modId, Identifier customConfigPath, ItemStack itemStack, List<Text> tooltip) {
         String customPath;
         if (Screen.hasControlDown()) {
             if (ctrlKeyPressTimestamp == 0) {
                 ctrlKeyPressTimestamp = System.currentTimeMillis();
             }
+
+            // Show error message in tooltip if no info mods installed
+            if (!Platform.isModLoaded("oracle_index") && !Platform.isModLoaded("roughlyenoughitems") && !Platform.isModLoaded("emi")) {
+                tooltip.add(Text.translatable("message.simplyswords.documentation.error").setStyle(Styles.TEXT));
+                tooltip.add(Text.translatable("message.simplyswords.documentation.error2").setStyle(Styles.TEXT));
+            }
+
             if ((System.currentTimeMillis() - ctrlKeyPressTimestamp) >= 500) {
                 if (Screen.hasAltDown()) {
                     if (customConfigPath == null) {
@@ -192,9 +199,10 @@ public class TooltipUtils {
                         TooltipUtils.openFzzyConfig(customPath);
                     }
                 } else {
-                    if (Platform.isModLoaded("oracle_index")) {
-                        OracleIndexUtils.openOracleIndex(entry, modId);
-                    }
+                    // Open documentation depending on installed info mods
+                    if (Platform.isModLoaded("oracle_index")) OracleIndexUtils.openOracleIndex(entry, modId);
+                    else if (Platform.isModLoaded("roughlyenoughitems")) ReiUtils.openRei(entry, modId, itemStack);
+                    else if (Platform.isModLoaded("emi")) EmiUtils.openEmi(entry, modId, itemStack);
                 }
                 ctrlKeyPressTimestamp = 0;
             }

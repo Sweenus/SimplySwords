@@ -14,6 +14,7 @@ import net.minecraft.util.Rarity;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
+import net.sweenus.simplyswords.client.api.SimplySwordsClientAPI;
 import net.sweenus.simplyswords.power.GemPowerComponent;
 import net.sweenus.simplyswords.power.GemPowerFiller;
 import net.sweenus.simplyswords.power.PowerType;
@@ -82,5 +83,17 @@ public class NetherfusedGemItem extends Item implements GemPowerFiller {
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.gem_description").formatted(Formatting.GRAY, Formatting.ITALIC));
         tooltip.add(Text.translatable("item.simplyswords.gem_description2").formatted(Formatting.GRAY, Formatting.ITALIC));
+
+        generateDynamicTooltip(itemStack, tooltipContext, tooltip, type);
     }
+
+    protected void generateDynamicTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
+        SimplySwordsClientAPI.generateDynamicTooltip(itemStack, tooltipContext, tooltip, type,
+                SimplySwords.MOD_ID,
+                "oracle_index:books/simplyswords/weapon-types",
+                "oracle_index:books/simplyswords/unique-weapons",
+                "oracle_index:books/simplyswords/runic-powers",
+                null);
+    }
+
 }

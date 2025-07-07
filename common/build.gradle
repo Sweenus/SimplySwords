@@ -49,6 +49,8 @@ dependencies {
 
     modImplementation "io.wispforest:owo-lib:0.12.15.1+1.21" // Needed to use OracleScreen from oracle_index :(
     modCompileOnly "maven.modrinth:mythicmetals:${project.mythicmetals_version}"
+    modCompileOnly "me.shedaniel:RoughlyEnoughItems-api:${rei_version}"
+    modCompileOnly "dev.emi:emi-xplat-intermediary:${emi_version}:api"
 }
 
 publishing {

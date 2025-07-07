@@ -517,6 +517,8 @@
   "item.simplyswords.contained_remnant_description7": "Try keeping this in your inventory",
   "item.simplyswords.contained_remnant_description8": "alongside a Runic Tablet while",
   "item.simplyswords.contained_remnant_description9": "exploring the End dimension.",
+  "message.simplyswords.documentation.error": "For in-game docs, install:",
+  "message.simplyswords.documentation.error2": "Oracle Index, REI, or EMI.",
   "item.simplyswords.contained_remnant.event": "A Remnant in your inventory seems to have changed form",
   "item.simplyswords.contained_remnant.event2": "A Remnant in your inventory is acting strangely",
   "item.simplyswords.tampered_remnant_description3": "It appears to have been tampered",

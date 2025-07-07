@@ -2,7 +2,6 @@ package net.sweenus.simplyswords.client.util;
 
 import dev.architectury.platform.Platform;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import rearth.oracle.ui.OracleScreen;
 
@@ -10,10 +9,6 @@ public class OracleIndexUtils {
 
     public static void openOracleIndex(Identifier identifier, String modId) {
         if (!Platform.isModLoaded("oracle_index")) {
-            MinecraftClient client = MinecraftClient.getInstance();
-            if (client.player != null) {
-                client.player.sendMessage(Text.literal("Please install Oracle Index for in-game documentation"), false);
-            }
             return;
         }
         if (!(MinecraftClient.getInstance().currentScreen instanceof OracleScreen)) {

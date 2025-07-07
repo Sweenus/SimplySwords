@@ -43,7 +43,7 @@ public class SimplySwordsClientAPI {
         }
 
         // Process Control + Alt key events for navigation
-        TooltipUtils.processCtrlAltNavigation(entry, modId, customConfigPath);
+        TooltipUtils.processCtrlAltNavigation(entry, modId, customConfigPath, itemStack, tooltip);
     }
 
 }

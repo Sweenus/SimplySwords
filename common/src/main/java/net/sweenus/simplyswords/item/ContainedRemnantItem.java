@@ -8,6 +8,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Rarity;
 import net.sweenus.simplyswords.SimplySwords;
+import net.sweenus.simplyswords.client.api.SimplySwordsClientAPI;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.Styles;
 
@@ -51,6 +52,14 @@ public class ContainedRemnantItem extends Item {
                 tooltip.add(Text.translatable("item.simplyswords.common.showtooltip.info").formatted(Formatting.GRAY));
             }
         }
-
+        generateDynamicTooltip(itemStack, tooltipContext, tooltip, type);
+    }
+    protected void generateDynamicTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
+        SimplySwordsClientAPI.generateDynamicTooltip(itemStack, tooltipContext, tooltip, type,
+                SimplySwords.MOD_ID,
+                "oracle_index:books/simplyswords/weapon-types",
+                "oracle_index:books/simplyswords/unique-weapons",
+                "oracle_index:books/simplyswords/runic-powers",
+                null);
     }
 }
