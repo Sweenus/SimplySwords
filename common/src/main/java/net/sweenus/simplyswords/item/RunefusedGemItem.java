@@ -1,6 +1,7 @@
 package net.sweenus.simplyswords.item;
 
 import me.fzzyhmstrs.fzzy_config.util.ValidationResult;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.StackReference;
 import net.minecraft.item.Item;
@@ -81,10 +82,11 @@ public class RunefusedGemItem extends Item implements GemPowerFiller {
             component.appendTooltip(itemStack, tooltipContext, tooltip, type);
         }
         tooltip.add(Text.literal(""));
-        tooltip.add(Text.translatable("item.simplyswords.gem_description").formatted(Formatting.GRAY, Formatting.ITALIC));
-        tooltip.add(Text.translatable("item.simplyswords.gem_description2").formatted(Formatting.GRAY, Formatting.ITALIC));
-
         generateDynamicTooltip(itemStack, tooltipContext, tooltip, type);
+        if (Screen.hasAltDown()) {
+            tooltip.add(Text.translatable("item.simplyswords.gem_description").formatted(Formatting.GRAY, Formatting.ITALIC));
+            tooltip.add(Text.translatable("item.simplyswords.gem_description2").formatted(Formatting.GRAY, Formatting.ITALIC));
+        }
     }
 
     protected void generateDynamicTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
