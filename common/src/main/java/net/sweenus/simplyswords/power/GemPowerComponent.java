@@ -46,6 +46,8 @@ public record GemPowerComponent(boolean hasRunicPower, boolean hasNetherPower, R
 			GemPowerComponent::new
 	);
 
+	// This is causing issues withdrawing items in RS2 and Create, but it prevents getKey crash from Architectury/NeoForge incompatibility
+	// Can be removed when moving to future versions of Minecraft, where Architectury has been updated to fix this incompatibility. It is not backported :(
 	@Override
 	public boolean equals(Object componentObject) {
 		if (componentObject == null || getClass() != componentObject.getClass()) {
