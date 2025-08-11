@@ -154,7 +154,7 @@ public class TooltipUtils {
                 itemStack.getItem().getRegistryEntry().registryKey().getValue().getPath() + ".mdx");
     }
 
-    public static Identifier handleRunicSwordTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Text> tooltip, TooltipType type, String modId, String itemPath, String runicPath) {
+    public static Identifier handleRunicSwordTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Text> tooltip, TooltipType type, String itemPath, String runicPath) {
         tooltip.add(Text.literal(""));
 
         GemPowerComponent component = SimplySwordsAPI.getComponent(itemStack);
@@ -167,7 +167,7 @@ public class TooltipUtils {
             if (!Platform.isNeoForge()) { // NeoForge / Architectury 1.21.1 conflict. Have to disable this on NeoForge. Can re-enable post 1.21.3 :/
                 RegistryEntry<GemPower> mainComponent = component.runicPower();
                 String powerId = mainComponent.getIdAsString()
-                        .replace(modId + ":", "")
+                        .replaceAll("[A-Za-z0-9_-]+:", "")
                         .replace("greater_", "");
                 return Identifier.of(runicPath + "/" + powerId + ".mdx");
             }
