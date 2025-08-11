@@ -57,12 +57,12 @@ public class UniqueEffectsConfig extends Config {
     public WraithfangSwordItem.EffectSettings wraithfang = new WraithfangSwordItem.EffectSettings();
 
     // eldritch end compat
-    public ValidatedCondition<DreadtideSwordItem.EffectSettings> voidcaller = new ValidatedAny<>(new DreadtideSwordItem.EffectSettings())
+    public ValidatedCondition<DreadtideSwordItem.EffectSettings> dreadtide = new ValidatedAny<>(new DreadtideSwordItem.EffectSettings())
             .toCondition(
                     () -> SimplySwords.passVersionCheck("eldritch_end", SimplySwords.minimumEldritchEndVersion),
-                    Text.translatable("simplyswords.unique_effects.voidcaller.compat"),
+                    Text.translatable("simplyswords.unique_effects.dreadtide.compat"),
 					DreadtideSwordItem.EffectSettings::new
-            ).withFailTitle(Text.translatable("simplyswords.unique_effects.voidcaller.compat.failTitle"));
+            ).withFailTitle(Text.translatable("simplyswords.unique_effects.dreadtide.compat.failTitle"));
 
 //EffectSettings
         //much like the gem power settings, each setting block is stored within the sword item it's used for
