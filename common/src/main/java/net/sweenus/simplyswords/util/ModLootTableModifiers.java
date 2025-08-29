@@ -9,6 +9,7 @@ import net.minecraft.loot.LootPool;
 import net.minecraft.loot.LootTable;
 import net.minecraft.loot.condition.RandomChanceLootCondition;
 import net.minecraft.loot.entry.ItemEntry;
+import net.minecraft.loot.function.EnchantRandomlyLootFunction;
 import net.minecraft.loot.provider.number.ConstantLootNumberProvider;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKey;
@@ -40,7 +41,7 @@ public class ModLootTableModifiers {
                     LootPool.Builder pool = LootPool.builder()
                             .rolls(ConstantLootNumberProvider.create(1))
                             .conditionally(RandomChanceLootCondition.builder(LootConfig.INSTANCE.standardLootTableWeight.get() / 100))
-                            .apply(EnchantRandomlyFromTagLootFunction.create(EnchantmentTags.DAMAGE_EXCLUSIVE_SET))
+                            .apply(EnchantRandomlyLootFunction.create())
                             .with(ItemEntry.builder(ItemsRegistry.IRON_LONGSWORD.get()))
                             .with(ItemEntry.builder(ItemsRegistry.IRON_TWINBLADE.get()))
                             .with(ItemEntry.builder(ItemsRegistry.IRON_RAPIER.get()))
@@ -85,7 +86,7 @@ public class ModLootTableModifiers {
                     LootPool.Builder pool = LootPool.builder()
                             .rolls(ConstantLootNumberProvider.create(1))
                             .conditionally(RandomChanceLootCondition.builder(LootConfig.INSTANCE.rareLootTableWeight.get() / 100))
-                            .apply(EnchantRandomlyFromTagLootFunction.create(EnchantmentTags.DAMAGE_EXCLUSIVE_SET)) //This is not ideal, but forge doesn't expose the registry wrapper so...
+                            .apply(EnchantRandomlyLootFunction.create()) //This is not ideal, but forge doesn't expose the registry wrapper so...
                             .with(ItemEntry.builder(ItemsRegistry.DIAMOND_LONGSWORD.get()))
                             .with(ItemEntry.builder(ItemsRegistry.DIAMOND_TWINBLADE.get()))
                             .with(ItemEntry.builder(ItemsRegistry.DIAMOND_RAPIER.get()))

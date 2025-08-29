@@ -1248,6 +1248,7 @@
   "simplyswords.weapon_attributes.uniqueDamageModifier.magispear_damageModifier": "§6Magispear§7 damage modifier",
   "simplyswords.weapon_attributes.uniqueDamageModifier.magiblade_damageModifier": "§6Magiblade§7 damage modifier",
   "simplyswords.weapon_attributes.uniqueDamageModifier.caelestis_damageModifier": "§6Caelestis§7 damage modifier",
+  "simplyswords.weapon_attributes.uniqueDamageModifier.wraithfang_damageModifier": "§6Wraithfang§7 damage modifier",
 
   "simplyswords.weapon_attributes.uniqueAttackSpeed": "§6[Unique Attack Speed Modifiers]",
   "simplyswords.weapon_attributes.uniqueAttackSpeed.desc": "Recommended range: -1.0 to -3.7, with -1.0 being fast and -3.7 being slow.",
@@ -1292,6 +1293,7 @@
   "simplyswords.weapon_attributes.uniqueAttackSpeed.magispear_attackSpeed": "§6Magispear§7 attack speed",
   "simplyswords.weapon_attributes.uniqueAttackSpeed.magiblade_attackSpeed": "§6Magiblade§7 attack speed",
   "simplyswords.weapon_attributes.uniqueAttackSpeed.caelestis_attackSpeed": "§6Caelestis§7 attack speed",
+  "simplyswords.weapon_attributes.uniqueAttackSpeed.wraithfang_attackSpeed": "§6Wraithfang§7 attack speed",
 
   "simplyswords.loot.enableLootDrops": "Enable loot drops",
   "simplyswords.loot.enableLootDrops.desc": "Disabling this setting will prevent Simply Swords from generating loot in chests.",
@@ -1400,12 +1402,12 @@
   "simplyswords.unique_effects.bramblethorn": "§6[Bramblethorn]§7",
   "simplyswords.unique_effects.bramblethorn.Chance": "Bramble chance",
 
-  "simplyswords.unique_effects.soullpyre": "§6[Soulpyre]§7",
-  "simplyswords.unique_effects.soullpyre.duration": "Soultether pulse count",
-  "simplyswords.unique_effects.soullpyre.damage": "Soultether damage",
-  "simplyswords.unique_effects.soullpyre.radius": "Soultether radius",
-  "simplyswords.unique_effects.soullpyre.heal": "Soultether heal",
-  "simplyswords.unique_effects.soullpyre.cooldown": "Soultether cooldown",
+  "simplyswords.unique_effects.soulpyre": "§6[Soulpyre]§7",
+  "simplyswords.unique_effects.soulpyre.duration": "Soultether pulse count",
+  "simplyswords.unique_effects.soulpyre.damage": "Soultether damage",
+  "simplyswords.unique_effects.soulpyre.radius": "Soultether radius",
+  "simplyswords.unique_effects.soulpyre.heal": "Soultether heal",
+  "simplyswords.unique_effects.soulpyre.cooldown": "Soultether cooldown",
 
   "simplyswords.unique_effects.frostfall": "§6[Frostfall]§7",
   "simplyswords.unique_effects.frostfall.chance": "Frost Fury repeat chance",

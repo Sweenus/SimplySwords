@@ -39,7 +39,7 @@ public class SimplySwordsClientAPI {
         if (itemStack.getItem() instanceof UniqueSwordItem) {
             entry = TooltipUtils.handleUniqueSwordTooltip(itemStack, tooltipContext, tooltip, type, uniquePath);
         } else if (itemStack.getItem() instanceof RunicSwordItem) {
-            entry = TooltipUtils.handleRunicSwordTooltip(itemStack, tooltipContext, tooltip, type, modId, itemPath, runicPath);
+            entry = TooltipUtils.handleRunicSwordTooltip(itemStack, tooltipContext, tooltip, type, itemPath, runicPath);
         }
 
         // Process Control + Alt key events for navigation
