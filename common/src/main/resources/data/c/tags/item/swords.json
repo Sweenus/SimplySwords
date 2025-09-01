@@ -122,6 +122,8 @@
     "simplyswords:magispear",
     "simplyswords:enigma",
     "simplyswords:caelestis",
+    "simplyswords:wraithfang",
+    "simplyswords:chompolotl",
     {
       "id": "simplyswords:dreadtide",
       "required": false

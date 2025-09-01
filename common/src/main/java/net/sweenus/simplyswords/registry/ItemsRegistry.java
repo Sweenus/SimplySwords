@@ -93,6 +93,7 @@ public class ItemsRegistry {
     static float magiblade_attackspeed = Config.weaponAttribute.uniqueAttackSpeed.magiblade_attackSpeed;
     static float caelestis_attackspeed = Config.weaponAttribute.uniqueAttackSpeed.caelestis_attackSpeed;
     static float wraithfang_attackspeed = Config.weaponAttribute.uniqueAttackSpeed.wraithfang_attackSpeed;
+    static float chompolotl_attackspeed = Config.weaponAttribute.uniqueAttackSpeed.chompolotl_attackSpeed;
 
     static float brimstone_damage_modifier = Config.weaponAttribute.uniqueDamageModifier.brimstone_damageModifier;
     static float thewatcher_damage_modifier = Config.weaponAttribute.uniqueDamageModifier.thewatcher_damageModifier;
@@ -135,6 +136,7 @@ public class ItemsRegistry {
     static float magiblade_damage_modifier = Config.weaponAttribute.uniqueDamageModifier.magiblade_damageModifier;
     static float caelestis_damage_modifier = Config.weaponAttribute.uniqueDamageModifier.caelestis_damageModifier;
     static float wraithfang_damage_modifier = Config.weaponAttribute.uniqueDamageModifier.wraithfang_damageModifier;
+    static float chompolotl_damage_modifier = Config.weaponAttribute.uniqueDamageModifier.chompolotl_damageModifier;
 
     public static final DeferredRegister<Item> ITEM = DeferredRegister.create(SimplySwords.MOD_ID, RegistryKeys.ITEM);
 
@@ -1003,4 +1005,11 @@ public class ItemsRegistry {
                     new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).fireproof()
                             .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.UNIQUE,
                                     (int) wraithfang_damage_modifier, wraithfang_attackspeed))));
+
+    public static final RegistrySupplier<ChompolotlSwordItem> CHOMPOLOTL = ITEM.register("chompolotl", () ->
+            new ChompolotlSwordItem(
+                    ModToolMaterial.UNIQUE,
+                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).fireproof()
+                            .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.UNIQUE,
+                                    (int) chompolotl_damage_modifier, chompolotl_attackspeed))));
 }

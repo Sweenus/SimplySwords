@@ -10,6 +10,7 @@ import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.registry.Registries;
@@ -241,6 +242,13 @@ public abstract class ServerPlayerEntityMixin {
 
                 }
             }
+            // Check for axolotls on the player's shoulders
+            if (serverPlayer.age % 40 == 0) {
+                NbtCompound leftShoulder = player.getShoulderEntityLeft();
+                NbtCompound rightShoulder = player.getShoulderEntityRight();
+                AbilityMethods.applyAxolotlBuff(serverPlayer, leftShoulder, rightShoulder);
+            }
+
         }
     }
 

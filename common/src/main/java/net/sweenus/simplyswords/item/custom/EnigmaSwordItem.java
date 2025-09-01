@@ -8,7 +8,6 @@ import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.SpawnReason;
-import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
@@ -25,6 +24,7 @@ import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
+import net.sweenus.simplyswords.effect.instance.SimplySwordsStatusEffectInstance;
 import net.sweenus.simplyswords.entity.BattleStandardDarkEntity;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.registry.EffectRegistry;
@@ -72,7 +72,9 @@ public class EnigmaSwordItem extends UniqueSwordItem {
                     banner.setCustomName(Text.translatable("entity.simplyswords.battlestandard.name", user.getName()));
                     banner.setCustomNameVisible(false);
                     banner.setInvisible(true);
-                    banner.addStatusEffect( new StatusEffectInstance(EffectRegistry.getReference(EffectRegistry.ELEMENTAL_VORTEX), 900, 11, false, false, false));
+                    SimplySwordsStatusEffectInstance status =  new SimplySwordsStatusEffectInstance(EffectRegistry.getReference(EffectRegistry.ELEMENTAL_VORTEX), 900, 11, false, false, false);
+                    status.setSourceEntity(user);
+                    banner.addStatusEffect(status);
                 }
                 user.getItemCooldownManager().set(this, Config.uniqueEffects.enigma.enigmaCooldown);
             }

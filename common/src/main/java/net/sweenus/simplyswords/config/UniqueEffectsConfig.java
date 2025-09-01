@@ -55,6 +55,7 @@ public class UniqueEffectsConfig extends Config {
     public WatcherSwordItem.EffectSettings       watcher = new WatcherSwordItem.EffectSettings();
     public WaxweaverSwordItem.EffectSettings waxweaver = new WaxweaverSwordItem.EffectSettings();
     public WraithfangSwordItem.EffectSettings wraithfang = new WraithfangSwordItem.EffectSettings();
+    public ChompolotlSwordItem.EffectSettings chompolotl = new ChompolotlSwordItem.EffectSettings();
 
     // eldritch end compat
     public ValidatedCondition<DreadtideSwordItem.EffectSettings> dreadtide = new ValidatedAny<>(new DreadtideSwordItem.EffectSettings())

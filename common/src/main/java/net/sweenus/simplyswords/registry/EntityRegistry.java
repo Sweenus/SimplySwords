@@ -21,6 +21,12 @@ public class EntityRegistry {
                     .build(Identifier.of(SimplySwords.MOD_ID, "simplybeeentity").toString())
     );
 
+    public static final RegistrySupplier<EntityType<SimplySwordsAxolotlEntity>> SIMPLYAXOLOTLENTITY = ENTITIES.register(
+            "simplyaxolotlentity",
+            () -> EntityType.Builder.create(SimplySwordsAxolotlEntity::new, SpawnGroup.CREATURE)
+                    .build(Identifier.of(SimplySwords.MOD_ID, "simplyaxolotlentity").toString())
+    );
+
     public static final RegistrySupplier<EntityType<ThrownSwordEntity>> THROWNSWORDENTITY = ENTITIES.register(
             "thrown_sword",
             () -> EntityType.Builder.<ThrownSwordEntity>create(ThrownSwordEntity::new, SpawnGroup.MISC)

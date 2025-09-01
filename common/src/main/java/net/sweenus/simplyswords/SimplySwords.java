@@ -11,6 +11,7 @@ import dev.architectury.utils.Env;
 import dev.architectury.utils.EnvExecutor;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.render.entity.AxolotlEntityRenderer;
 import net.minecraft.client.render.entity.BeeEntityRenderer;
 import net.minecraft.client.render.entity.model.EntityModelLayer;
 import net.minecraft.item.ItemGroup;
@@ -29,6 +30,7 @@ import net.sweenus.simplyswords.compat.eldritch_end.EldritchEndCompatRegistry;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.BattleStandardDarkEntity;
 import net.sweenus.simplyswords.entity.BattleStandardEntity;
+import net.sweenus.simplyswords.entity.SimplySwordsAxolotlEntity;
 import net.sweenus.simplyswords.entity.SimplySwordsBeeEntity;
 import net.sweenus.simplyswords.registry.*;
 import net.sweenus.simplyswords.util.FileCopier;
@@ -76,6 +78,7 @@ public class SimplySwords {
         EntityAttributeRegistry.register(EntityRegistry.BATTLESTANDARD, BattleStandardEntity::createBattleStandardAttributes);
         EntityAttributeRegistry.register(EntityRegistry.BATTLESTANDARDDARK, BattleStandardDarkEntity::createBattleStandardDarkAttributes);
         EntityAttributeRegistry.register(EntityRegistry.SIMPLYBEEENTITY, SimplySwordsBeeEntity::createSimplyBeeAttributes);
+        EntityAttributeRegistry.register(EntityRegistry.SIMPLYAXOLOTLENTITY, SimplySwordsAxolotlEntity::createSimplyAxolotlAttributes);
 
         ModLootTableModifiers.init();
         if (passVersionCheck("eldritch_end", minimumEldritchEndVersion)) {
@@ -91,9 +94,6 @@ public class SimplySwords {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
-        //Don't announce via in-game chat because that's kinda annoying
-        //ClientPlayerEvent.CLIENT_PLAYER_JOIN.register(new EventGameStart());
 
         System.out.println(SimplySwordsExpectPlatform.getConfigDirectory().toAbsolutePath().normalize().toString());
         EnvExecutor.runInEnv(Env.CLIENT, () -> SimplySwords.Client::initializeClient);
@@ -121,6 +121,7 @@ public class SimplySwords {
             EntityRendererRegistry.register(EntityRegistry.BATTLESTANDARDDARK, BattleStandardDarkRenderer::new);
             EntityModelLayerRegistry.register(BATTLESTANDARD_DARK_MODEL, BattleStandardDarkModel::getTexturedModelData);
             EntityRendererRegistry.register(EntityRegistry.SIMPLYBEEENTITY, BeeEntityRenderer::new);
+            EntityRendererRegistry.register(EntityRegistry.SIMPLYAXOLOTLENTITY, AxolotlEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.THROWNSWORDENTITY, ThrownSwordEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.FROSTFALLENTITY, ThrownSwordEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.LIVYATANENTITY, ThrownSwordEntityRenderer::new);

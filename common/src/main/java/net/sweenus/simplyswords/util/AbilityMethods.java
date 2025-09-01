@@ -5,6 +5,7 @@ import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -19,6 +20,7 @@ import net.sweenus.simplyswords.registry.ComponentTypeRegistry;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 
+import java.util.List;
 import java.util.Random;
 
 public class AbilityMethods {
@@ -428,5 +430,77 @@ public class AbilityMethods {
     }
 
 
-    //Next ability
+    public static void applyAxolotlBuff(ServerPlayerEntity player, NbtCompound axolotlDataLeft, NbtCompound axolotlDataRight) {
+        boolean hasLeftAxolotl = axolotlDataLeft != null && axolotlDataLeft.contains("Variant");
+        boolean hasRightAxolotl = axolotlDataRight != null && axolotlDataRight.contains("Variant");
+
+        if (!hasLeftAxolotl && !hasRightAxolotl) {
+            return;
+        }
+
+        Box area = new Box(
+                player.getX() - 5, player.getY() - 3, player.getZ() - 5,
+                player.getX() + 5, player.getY() + 3, player.getZ() + 5
+        );
+
+        int leftVariant = hasLeftAxolotl ? axolotlDataLeft.getInt("Variant") : -1;
+        int rightVariant = hasRightAxolotl ? axolotlDataRight.getInt("Variant") : -1;
+
+        boolean areVariantsMatching = hasLeftAxolotl && hasRightAxolotl && leftVariant == rightVariant;
+
+        // Increase amplifier by 1 if both variants match
+        int amplifierBoost = areVariantsMatching ? 1 : 0;
+
+        StatusEffectInstance leftPrimaryEffect = hasLeftAxolotl ? switch (leftVariant) {
+            case 0 -> new StatusEffectInstance(StatusEffects.REGENERATION, 80, amplifierBoost);  // Lucy
+            case 1 -> new StatusEffectInstance(StatusEffects.NIGHT_VISION, 80, amplifierBoost); // Wild
+            case 2 -> new StatusEffectInstance(StatusEffects.RESISTANCE, 50, amplifierBoost);   // Gold
+            case 3 -> new StatusEffectInstance(StatusEffects.STRENGTH, 50, amplifierBoost);     // Cyan
+            case 4 -> new StatusEffectInstance(StatusEffects.SPEED, 50, amplifierBoost);            // Blue
+            default -> null;
+        } : null;
+
+        StatusEffectInstance leftSecondaryEffect = (hasLeftAxolotl && leftVariant == 4)
+                ? new StatusEffectInstance(StatusEffects.LUCK, 50, amplifierBoost)
+                : null;
+
+        StatusEffectInstance rightPrimaryEffect = hasRightAxolotl ? switch (rightVariant) {
+            case 0 -> new StatusEffectInstance(StatusEffects.REGENERATION, 80, amplifierBoost);  // Lucy
+            case 1 -> new StatusEffectInstance(StatusEffects.NIGHT_VISION, 80, amplifierBoost); // Wild
+            case 2 -> new StatusEffectInstance(StatusEffects.RESISTANCE, 50, amplifierBoost);   // Gold
+            case 3 -> new StatusEffectInstance(StatusEffects.STRENGTH, 50, amplifierBoost);     // Cyan
+            case 4 -> new StatusEffectInstance(StatusEffects.SPEED, 50, amplifierBoost);            // Blue
+            default -> null;
+        } : null;
+
+        StatusEffectInstance rightSecondaryEffect = (hasRightAxolotl && rightVariant == 4)
+                ? new StatusEffectInstance(StatusEffects.LUCK, 50, amplifierBoost)
+                : null;
+
+        List<PlayerEntity> entities = player.getWorld().getEntitiesByClass(
+                PlayerEntity.class,
+                area,
+                entity -> true
+        );
+
+        for (PlayerEntity entity : entities) {
+            if (leftPrimaryEffect != null) {
+                entity.addStatusEffect(new StatusEffectInstance(leftPrimaryEffect));
+            }
+            if (leftSecondaryEffect != null) {
+                entity.addStatusEffect(new StatusEffectInstance(leftSecondaryEffect));
+            }
+            if (rightPrimaryEffect != null) {
+                entity.addStatusEffect(new StatusEffectInstance(rightPrimaryEffect));
+            }
+            if (rightSecondaryEffect != null) {
+                entity.addStatusEffect(new StatusEffectInstance(rightSecondaryEffect));
+            }
+        }
+    }
+
+
+
+
+
 }
