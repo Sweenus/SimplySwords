@@ -96,8 +96,8 @@ public class ChompolotlSwordItem extends UniqueSwordItem {
 
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
-        HelperMethods.createFootfalls(entity, stack, world, ParticleTypes.BUBBLE,
-                ParticleTypes.BUBBLE, ParticleTypes.BUBBLE, true);
+        HelperMethods.createFootfalls(entity, stack, world, ParticleTypes.FALLING_DRIPSTONE_WATER,
+                ParticleTypes.FALLING_DRIPSTONE_WATER, ParticleTypes.FALLING_DRIPSTONE_WATER, false);
         super.inventoryTick(stack, world, entity, slot, selected);
     }
 
@@ -130,7 +130,7 @@ public class ChompolotlSwordItem extends UniqueSwordItem {
         @ValidatedFloat.Restrict(min = 20f)
         public int duration = 500;
         @ValidatedFloat.Restrict(min = 0f)
-        public float breedChance = 0.0066f;
+        public float breedChance = 0.0266f;
 
     }
 }

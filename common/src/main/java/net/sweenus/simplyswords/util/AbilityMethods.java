@@ -438,65 +438,108 @@ public class AbilityMethods {
             return;
         }
 
-        Box area = new Box(
-                player.getX() - 5, player.getY() - 3, player.getZ() - 5,
-                player.getX() + 5, player.getY() + 3, player.getZ() + 5
-        );
+        if (player.age % 40 == 0) {
+            Box area = new Box(
+                    player.getX() - 5, player.getY() - 3, player.getZ() - 5,
+                    player.getX() + 5, player.getY() + 3, player.getZ() + 5
+            );
 
-        int leftVariant = hasLeftAxolotl ? axolotlDataLeft.getInt("Variant") : -1;
-        int rightVariant = hasRightAxolotl ? axolotlDataRight.getInt("Variant") : -1;
+            int leftVariant = hasLeftAxolotl ? axolotlDataLeft.getInt("Variant") : -1;
+            int rightVariant = hasRightAxolotl ? axolotlDataRight.getInt("Variant") : -1;
 
-        boolean areVariantsMatching = hasLeftAxolotl && hasRightAxolotl && leftVariant == rightVariant;
+            boolean areVariantsMatching = hasLeftAxolotl && hasRightAxolotl && leftVariant == rightVariant;
 
-        // Increase amplifier by 1 if both variants match
-        int amplifierBoost = areVariantsMatching ? 1 : 0;
+            // Increase amplifier by 1 if both variants match
+            int amplifierBoost = areVariantsMatching ? 1 : 0;
 
-        StatusEffectInstance leftPrimaryEffect = hasLeftAxolotl ? switch (leftVariant) {
-            case 0 -> new StatusEffectInstance(StatusEffects.REGENERATION, 80, amplifierBoost);  // Lucy
-            case 1 -> new StatusEffectInstance(StatusEffects.NIGHT_VISION, 80, amplifierBoost); // Wild
-            case 2 -> new StatusEffectInstance(StatusEffects.RESISTANCE, 50, amplifierBoost);   // Gold
-            case 3 -> new StatusEffectInstance(StatusEffects.STRENGTH, 50, amplifierBoost);     // Cyan
-            case 4 -> new StatusEffectInstance(StatusEffects.SPEED, 50, amplifierBoost);            // Blue
-            default -> null;
-        } : null;
+            StatusEffectInstance leftPrimaryEffect = hasLeftAxolotl ? switch (leftVariant) {
+                case 0 ->
+                        new StatusEffectInstance(StatusEffects.REGENERATION, 80, amplifierBoost, false, false, true);  // Lucy
+                case 1 ->
+                        new StatusEffectInstance(StatusEffects.NIGHT_VISION, 80, amplifierBoost, false, false, true); // Wild
+                case 2 ->
+                        new StatusEffectInstance(StatusEffects.RESISTANCE, 50, amplifierBoost, false, false, true);   // Gold
+                case 3 ->
+                        new StatusEffectInstance(StatusEffects.STRENGTH, 50, amplifierBoost, false, false, true);     // Cyan
+                case 4 ->
+                        new StatusEffectInstance(StatusEffects.SPEED, 50, amplifierBoost, false, false, true);            // Blue
+                default -> null;
+            } : null;
 
-        StatusEffectInstance leftSecondaryEffect = (hasLeftAxolotl && leftVariant == 4)
-                ? new StatusEffectInstance(StatusEffects.LUCK, 50, amplifierBoost)
-                : null;
+            StatusEffectInstance leftSecondaryEffect = (hasLeftAxolotl && leftVariant == 4)
+                    ? new StatusEffectInstance(StatusEffects.LUCK, 50, amplifierBoost, false, false, true)
+                    : null;
 
-        StatusEffectInstance rightPrimaryEffect = hasRightAxolotl ? switch (rightVariant) {
-            case 0 -> new StatusEffectInstance(StatusEffects.REGENERATION, 80, amplifierBoost);  // Lucy
-            case 1 -> new StatusEffectInstance(StatusEffects.NIGHT_VISION, 80, amplifierBoost); // Wild
-            case 2 -> new StatusEffectInstance(StatusEffects.RESISTANCE, 50, amplifierBoost);   // Gold
-            case 3 -> new StatusEffectInstance(StatusEffects.STRENGTH, 50, amplifierBoost);     // Cyan
-            case 4 -> new StatusEffectInstance(StatusEffects.SPEED, 50, amplifierBoost);            // Blue
-            default -> null;
-        } : null;
+            StatusEffectInstance rightPrimaryEffect = hasRightAxolotl ? switch (rightVariant) {
+                case 0 ->
+                        new StatusEffectInstance(StatusEffects.REGENERATION, 80, amplifierBoost, false, false, true);  // Lucy
+                case 1 ->
+                        new StatusEffectInstance(StatusEffects.NIGHT_VISION, 80, amplifierBoost, false, false, true); // Wild
+                case 2 ->
+                        new StatusEffectInstance(StatusEffects.RESISTANCE, 50, amplifierBoost, false, false, true);   // Gold
+                case 3 ->
+                        new StatusEffectInstance(StatusEffects.STRENGTH, 50, amplifierBoost, false, false, true);     // Cyan
+                case 4 ->
+                        new StatusEffectInstance(StatusEffects.SPEED, 50, amplifierBoost, false, false, true);            // Blue
+                default -> null;
+            } : null;
 
-        StatusEffectInstance rightSecondaryEffect = (hasRightAxolotl && rightVariant == 4)
-                ? new StatusEffectInstance(StatusEffects.LUCK, 50, amplifierBoost)
-                : null;
+            StatusEffectInstance rightSecondaryEffect = (hasRightAxolotl && rightVariant == 4)
+                    ? new StatusEffectInstance(StatusEffects.LUCK, 50, amplifierBoost, false, false, true)
+                    : null;
 
-        List<PlayerEntity> entities = player.getWorld().getEntitiesByClass(
-                PlayerEntity.class,
-                area,
-                entity -> true
-        );
+            List<PlayerEntity> entities = player.getWorld().getEntitiesByClass(
+                    PlayerEntity.class,
+                    area,
+                    entity -> true
+            );
 
-        for (PlayerEntity entity : entities) {
-            if (leftPrimaryEffect != null) {
-                entity.addStatusEffect(new StatusEffectInstance(leftPrimaryEffect));
-            }
-            if (leftSecondaryEffect != null) {
-                entity.addStatusEffect(new StatusEffectInstance(leftSecondaryEffect));
-            }
-            if (rightPrimaryEffect != null) {
-                entity.addStatusEffect(new StatusEffectInstance(rightPrimaryEffect));
-            }
-            if (rightSecondaryEffect != null) {
-                entity.addStatusEffect(new StatusEffectInstance(rightSecondaryEffect));
+            for (PlayerEntity entity : entities) {
+                if (leftPrimaryEffect != null) {
+                    entity.addStatusEffect(new StatusEffectInstance(leftPrimaryEffect));
+                }
+                if (leftSecondaryEffect != null) {
+                    entity.addStatusEffect(new StatusEffectInstance(leftSecondaryEffect));
+                }
+                if (rightPrimaryEffect != null) {
+                    entity.addStatusEffect(new StatusEffectInstance(rightPrimaryEffect));
+                }
+                if (rightSecondaryEffect != null) {
+                    entity.addStatusEffect(new StatusEffectInstance(rightSecondaryEffect));
+                }
             }
         }
+
+        int frequency = player.getRandom().nextInt(10);
+        if (player.age % 8+frequency == 0) {
+            World world = player.getWorld();
+            if (world instanceof ServerWorld serverWorld) {
+                // Left shoulder particles
+                if (hasLeftAxolotl) {
+                    serverWorld.spawnParticles(
+                            ParticleTypes.FALLING_WATER,
+                            player.getX() - 0.3, player.getY() + 1.3, player.getZ(),
+                            5,
+                            0.1, 0.1, 0.1,
+                            0.03
+                    );
+                }
+
+                // Right shoulder particles
+                if (hasRightAxolotl) {
+                    serverWorld.spawnParticles(
+                            ParticleTypes.FALLING_WATER,
+                            player.getX() + 0.3, player.getY() + 1.3, player.getZ(),
+                            5,
+                            0.1, 0.1, 0.1,
+                            0.03
+                    );
+                }
+            }
+        }
+
+
+
     }
 
 

@@ -18,6 +18,7 @@ import net.minecraft.util.Rarity;
 import net.minecraft.util.math.BlockPos;
 import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.client.api.SimplySwordsClientAPI;
+import net.sweenus.simplyswords.config.LootConfig;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -76,11 +77,24 @@ public class ContainedRemnantItem extends Item {
                     Map.entry(Blocks.SUSPICIOUS_SAND, ItemsRegistry.DORMANT_RELIC.get()),
                     Map.entry(Blocks.CYAN_BANNER, ItemsRegistry.WHISPERWIND.get()),
                     Map.entry(Blocks.SKELETON_SKULL, ItemsRegistry.WRAITHFANG.get()),
-                    Map.entry(Blocks.CAULDRON, ItemsRegistry.THUNDERBRAND.get())
+                    Map.entry(Blocks.CAULDRON, ItemsRegistry.THUNDERBRAND.get()),
+                    Map.entry(Blocks.SAND, ItemsRegistry.STARS_EDGE.get())
             );
 
             Item transformedItem = transformationMap.get(blockState.getBlock());
             if (transformedItem != null) {
+
+                if (LootConfig.INSTANCE.disabledUniqueWeaponLoot.contains(transformedItem))
+                    return ActionResult.PASS;
+
+                if (transformedItem.equals(ItemsRegistry.STARS_EDGE.get())) {
+                    boolean isNight = serverWorld.isNight();
+                    boolean canSeeSky = serverWorld.isSkyVisible(context.getBlockPos().up(1));
+                    if (!isNight || !canSeeSky) {
+                        return ActionResult.PASS;
+                    }
+                }
+
                 ItemStack newItem = new ItemStack(transformedItem);
                 heldStack.decrement(1);
                 HelperMethods.spawnOrbitParticles(serverWorld, player.getPos(), ParticleTypes.CAMPFIRE_COSY_SMOKE, 1, 6);

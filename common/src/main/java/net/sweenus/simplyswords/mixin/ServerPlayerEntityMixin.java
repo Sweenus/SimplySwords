@@ -243,11 +243,9 @@ public abstract class ServerPlayerEntityMixin {
                 }
             }
             // Check for axolotls on the player's shoulders
-            if (serverPlayer.age % 40 == 0) {
-                NbtCompound leftShoulder = player.getShoulderEntityLeft();
-                NbtCompound rightShoulder = player.getShoulderEntityRight();
-                AbilityMethods.applyAxolotlBuff(serverPlayer, leftShoulder, rightShoulder);
-            }
+            NbtCompound leftShoulder = player.getShoulderEntityLeft();
+            NbtCompound rightShoulder = player.getShoulderEntityRight();
+            AbilityMethods.applyAxolotlBuff(serverPlayer, leftShoulder, rightShoulder);
 
         }
     }
