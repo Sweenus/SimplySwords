@@ -12,6 +12,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.Config;
@@ -510,25 +511,28 @@ public class AbilityMethods {
             }
         }
 
+        // Particles
         int frequency = player.getRandom().nextInt(10);
+        World world = player.getWorld();
+        if (world instanceof ServerWorld serverWorld) {
         if (player.age % 8+frequency == 0) {
-            World world = player.getWorld();
-            if (world instanceof ServerWorld serverWorld) {
                 // Left shoulder particles
                 if (hasLeftAxolotl) {
                     serverWorld.spawnParticles(
-                            ParticleTypes.FALLING_WATER,
+                            ParticleTypes.FALLING_DRIPSTONE_WATER,
                             player.getX() - 0.3, player.getY() + 1.3, player.getZ(),
                             5,
                             0.1, 0.1, 0.1,
                             0.03
                     );
                 }
-
+            }
+            frequency = player.getRandom().nextInt(10);
+            if (player.age % 10+frequency == 0) {
                 // Right shoulder particles
                 if (hasRightAxolotl) {
                     serverWorld.spawnParticles(
-                            ParticleTypes.FALLING_WATER,
+                            ParticleTypes.FALLING_DRIPSTONE_WATER,
                             player.getX() + 0.3, player.getY() + 1.3, player.getZ(),
                             5,
                             0.1, 0.1, 0.1,
@@ -536,6 +540,16 @@ public class AbilityMethods {
                     );
                 }
             }
+
+            // Sounds
+            frequency = player.getRandom().nextInt(30);
+            if (player.age % 10+frequency == 0) {
+                world.playSoundFromEntity(null, player, SoundEvents.ENTITY_AXOLOTL_IDLE_AIR,
+                        player.getSoundCategory(), 1.0f, 1.0f);
+            }
+
+
+
         }
 
 

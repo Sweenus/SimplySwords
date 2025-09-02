@@ -7,6 +7,8 @@ import net.minecraft.entity.Tameable;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.passive.AxolotlEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -14,8 +16,10 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
+import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.goal.AttackHostileMobsGoal;
@@ -23,6 +27,7 @@ import net.sweenus.simplyswords.entity.goal.FollowNearestPlayerGoal;
 import net.sweenus.simplyswords.util.HelperMethods;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.UUID;
 
 public class SimplySwordsAxolotlEntity extends AxolotlEntity implements Tameable {
@@ -61,7 +66,6 @@ public class SimplySwordsAxolotlEntity extends AxolotlEntity implements Tameable
             ticksSinceSitAttempt++;
         }
 
-
         this.setInvulnerable(true);
         if (this.age > lifespan)
             this.discard();
@@ -71,19 +75,39 @@ public class SimplySwordsAxolotlEntity extends AxolotlEntity implements Tameable
         if (!this.getWorld().isClient) {
             if (this.getVariant() == Variant.BLUE) {
                 ServerWorld serverWorld = (ServerWorld) this.getWorld();
-                        HelperMethods.spawnParticle(
-                                serverWorld,
-                                ParticleTypes.ELECTRIC_SPARK,
-                                this.getX(),
-                                this.getY() + 0.5,
-                                this.getZ(),
-                                0.2,
-                                0.1,
-                                0.2
-                        );
+                HelperMethods.spawnParticle(
+                        serverWorld,
+                        ParticleTypes.ELECTRIC_SPARK,
+                        this.getX(),
+                        this.getY() + 0.5,
+                        this.getZ(),
+                        0.2,
+                        0.1,
+                        0.2
+                );
+                if (this.isTouchingWater()) {
+
+                    double radius = 16.0;
+                    Box box = new Box(
+                            this.getPos().add(-radius, -radius, -radius),
+                            this.getPos().add(radius, radius, radius)
+                    );
+
+                    List<PlayerEntity> nearbyPlayers = serverWorld.getEntitiesByClass(
+                            PlayerEntity.class,
+                            box,
+                            player -> true
+                    );
+
+                    for (PlayerEntity player : nearbyPlayers) {
+                        player.addStatusEffect(new StatusEffectInstance(StatusEffects.DOLPHINS_GRACE, 200, 0, true, false, true));
+                    }
+                }
             }
         }
     }
+
+
 
     @Override
     public boolean damage(DamageSource source, float amount) {
@@ -123,6 +147,8 @@ public class SimplySwordsAxolotlEntity extends AxolotlEntity implements Tameable
 
         // Discard the axolotl if the mounting was successful
         if (success) {
+            player.getWorld().playSoundFromEntity(null, player, SoundEvents.ENTITY_AXOLOTL_IDLE_AIR,
+                    player.getSoundCategory(), 1.0f, 1.0f);
             //System.out.println("Mounted Axolotl with ID:" + this.getSavedEntityId());
             this.discard();
         }

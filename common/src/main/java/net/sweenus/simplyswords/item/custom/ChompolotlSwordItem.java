@@ -84,6 +84,9 @@ public class ChompolotlSwordItem extends UniqueSwordItem {
                     EntityAttributeInstance attackAttribute = axolotlEntity.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE);
                     if (attackAttribute != null)
                         attackAttribute.setBaseValue(attackDamage);
+                    EntityAttributeInstance speedAttribute = axolotlEntity.getAttributeInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED);
+                    if (speedAttribute != null)
+                        speedAttribute.setBaseValue(2.0);
                     world.playSound(null, user.getBlockPos(), SoundRegistry.ELEMENTAL_BOW_WATER_SHOOT_IMPACT_01.get(),
                             user.getSoundCategory(), 0.4f, 1f);
                     player.getItemCooldownManager().set(stack.getItem(), skillCooldown * 10);
@@ -96,8 +99,8 @@ public class ChompolotlSwordItem extends UniqueSwordItem {
 
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
-        HelperMethods.createFootfalls(entity, stack, world, ParticleTypes.FALLING_DRIPSTONE_WATER,
-                ParticleTypes.FALLING_DRIPSTONE_WATER, ParticleTypes.FALLING_DRIPSTONE_WATER, false);
+        HelperMethods.createFootfalls(entity, stack, world, ParticleTypes.FALLING_WATER,
+                ParticleTypes.FALLING_WATER, ParticleTypes.FALLING_WATER, false);
         super.inventoryTick(stack, world, entity, slot, selected);
     }
 
