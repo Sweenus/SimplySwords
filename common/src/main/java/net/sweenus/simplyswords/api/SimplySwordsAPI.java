@@ -1,6 +1,7 @@
 package net.sweenus.simplyswords.api;
 
 import me.fzzyhmstrs.fzzy_config.util.ValidationResult;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
@@ -17,6 +18,7 @@ import net.minecraft.text.Text;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.BattleStandardEntity;
+import net.sweenus.simplyswords.item.ContainedRemnantItem;
 import net.sweenus.simplyswords.power.GemPowerComponent;
 import net.sweenus.simplyswords.power.GemPowerFiller;
 import net.sweenus.simplyswords.registry.ComponentTypeRegistry;
@@ -128,5 +130,11 @@ public class SimplySwordsAPI {
             component.inventoryTick(stack, world, user, 0, true);
         }
     }
+
+    // Add transformations to the ContainedRemnantItem
+    public static void registerTransformation(Block block, Item item) {
+        ContainedRemnantItem.addTransformation(block, item);
+    }
+
 
 }

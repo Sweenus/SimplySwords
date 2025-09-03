@@ -2,7 +2,6 @@ package net.sweenus.simplyswords.item;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
@@ -10,12 +9,14 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Rarity;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.client.api.SimplySwordsClientAPI;
 import net.sweenus.simplyswords.config.LootConfig;
@@ -24,14 +25,29 @@ import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public class ContainedRemnantItem extends Item {
+
+    private static final int checkRadius = 10;
+    private static final int itemCooldown = 140;
+    private static final Map<UUID, Long> playerInternalCooldowns = new HashMap<>();
+
 
     public ContainedRemnantItem() {
         super( new Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof().maxCount(1));
     }
+
+    private static final Map<Block, Item> transformationMap = new HashMap<>();
+
+
+    public static void addTransformation(Block block, Item item) {
+        transformationMap.put(block, item);
+    }
+
 
     @Override
     public ActionResult useOnBlock(ItemUsageContext context) {
@@ -39,61 +55,15 @@ public class ContainedRemnantItem extends Item {
         BlockState blockState = context.getWorld().getBlockState(context.getBlockPos());
         PlayerEntity player = context.getPlayer();
         ItemStack heldStack = context.getStack();
-        BlockPos blockPos = context.getBlockPos();
 
         if (player != null && !player.getWorld().isClient) {
             ServerWorld serverWorld = (ServerWorld) player.getWorld();
-            Map<Block, Item> transformationMap = Map.ofEntries(
-                    Map.entry(Blocks.SWEET_BERRY_BUSH, ItemsRegistry.BRAMBLETHORN.get()),
-                    Map.entry(Blocks.FURNACE, ItemsRegistry.HEARTHFLAME.get()),
-                    Map.entry(Blocks.CANDLE, ItemsRegistry.WICKPIERCER.get()),
-                    Map.entry(Blocks.BOOKSHELF, ItemsRegistry.WAXWEAVER.get()),
-                    Map.entry(Blocks.AMETHYST_BLOCK, ItemsRegistry.ARCANETHYST.get()),
-                    Map.entry(Blocks.RED_WOOL, ItemsRegistry.RIBBONCLEAVER.get()),
-                    Map.entry(Blocks.ICE, ItemsRegistry.FROSTFALL.get()),
-                    Map.entry(Blocks.LAVA_CAULDRON, ItemsRegistry.MOLTEN_EDGE.get()),
-                    Map.entry(Blocks.MAGMA_BLOCK, ItemsRegistry.BRIMSTONE_CLAYMORE.get()),
-                    Map.entry(Blocks.FIRE, ItemsRegistry.EMBERLASH.get()),
-                    Map.entry(Blocks.SNOW_BLOCK, ItemsRegistry.ICEWHISPER.get()),
-                    Map.entry(Blocks.DEEPSLATE, ItemsRegistry.SHADOWSTING.get()),
-                    Map.entry(Blocks.SPORE_BLOSSOM, ItemsRegistry.TOXIC_LONGSWORD.get()),
-                    Map.entry(Blocks.IRON_BLOCK, ItemsRegistry.MJOLNIR.get()),
-                    Map.entry(Blocks.LIGHTNING_ROD, ItemsRegistry.STORMBRINGER.get()),
-                    Map.entry(Blocks.BEE_NEST, ItemsRegistry.HIVEHEART.get()),
-                    Map.entry(Blocks.IRON_ORE, ItemsRegistry.TWISTED_BLADE.get()),
-                    Map.entry(Blocks.CAMPFIRE, ItemsRegistry.EMBERBLADE.get()),
-                    Map.entry(Blocks.SOUL_LANTERN, ItemsRegistry.SOULKEEPER.get()),
-                    Map.entry(Blocks.SOUL_SOIL, ItemsRegistry.SOULSTEALER.get()),
-                    Map.entry(Blocks.SOUL_CAMPFIRE, ItemsRegistry.SOULPYRE.get()),
-                    Map.entry(Blocks.SOUL_SAND, ItemsRegistry.SOULRENDER.get()),
-                    Map.entry(Blocks.SOUL_FIRE, ItemsRegistry.SLUMBERING_LICHBLADE.get()),
-                    Map.entry(Blocks.BLAST_FURNACE, ItemsRegistry.FLAMEWIND.get()),
-                    Map.entry(Blocks.OBSIDIAN, ItemsRegistry.WATCHER_CLAYMORE.get()),
-                    Map.entry(Blocks.CRYING_OBSIDIAN, ItemsRegistry.WATCHING_WARGLAIVE.get()),
-                    Map.entry(Blocks.POWDER_SNOW, ItemsRegistry.LIVYATAN.get()),
-                    Map.entry(Blocks.END_PORTAL_FRAME, ItemsRegistry.CAELESTIS.get()),
-                    Map.entry(Blocks.TUBE_CORAL_BLOCK, ItemsRegistry.CHOMPOLOTL.get()),
-                    Map.entry(Blocks.FIRE_CORAL_BLOCK, ItemsRegistry.TEMPEST.get()),
-                    Map.entry(Blocks.SUSPICIOUS_SAND, ItemsRegistry.DORMANT_RELIC.get()),
-                    Map.entry(Blocks.CYAN_BANNER, ItemsRegistry.WHISPERWIND.get()),
-                    Map.entry(Blocks.SKELETON_SKULL, ItemsRegistry.WRAITHFANG.get()),
-                    Map.entry(Blocks.CAULDRON, ItemsRegistry.THUNDERBRAND.get()),
-                    Map.entry(Blocks.SAND, ItemsRegistry.STARS_EDGE.get())
-            );
 
             Item transformedItem = transformationMap.get(blockState.getBlock());
             if (transformedItem != null) {
 
                 if (LootConfig.INSTANCE.disabledUniqueWeaponLoot.contains(transformedItem))
                     return ActionResult.PASS;
-
-                if (transformedItem.equals(ItemsRegistry.STARS_EDGE.get())) {
-                    boolean isNight = serverWorld.isNight();
-                    boolean canSeeSky = serverWorld.isSkyVisible(context.getBlockPos().up(1));
-                    if (!isNight || !canSeeSky) {
-                        return ActionResult.PASS;
-                    }
-                }
 
                 ItemStack newItem = new ItemStack(transformedItem);
                 heldStack.decrement(1);
@@ -151,4 +121,47 @@ public class ContainedRemnantItem extends Item {
                 "oracle_index:books/simplyswords/runic-powers",
                 null);
     }
+
+    public static void checkNearbyBlocks(ServerPlayerEntity player) {
+        World world = player.getWorld();
+
+        if (world.isClient) {
+            return;
+        }
+
+        long currentTick = world.getTime();
+
+        UUID playerId = player.getUuid();
+        long lastTick = playerInternalCooldowns.getOrDefault(playerId, 0L);
+        if (currentTick - lastTick < itemCooldown) {
+            return;
+        }
+
+        BlockPos playerPos = player.getBlockPos();
+
+        BlockPos.Mutable mutablePos = new BlockPos.Mutable();
+        for (int x = -checkRadius; x <= checkRadius; x++) {
+            for (int y = -checkRadius; y <= checkRadius; y++) {
+                for (int z = -checkRadius; z <= checkRadius; z++) {
+                    mutablePos.set(playerPos.getX() + x, playerPos.getY() + y, playerPos.getZ() + z);
+                    Block block = world.getBlockState(mutablePos).getBlock();
+
+                    if (transformationMap.containsKey(block)) {
+                        player.sendMessage(
+                                Text.translatable("item.simplyswords.contained_remnant.event3"),
+                                true
+                        );
+
+                        HelperMethods.spawnParticlesBetween(player, mutablePos, (ServerWorld) world, ParticleTypes.ENCHANT, 20);
+                        player.getWorld().playSound(null, mutablePos, SoundRegistry.DARK_ACTIVATION_DISTORTED.get(),
+                                player.getSoundCategory(), 0.1f, 1.2f);
+
+                        playerInternalCooldowns.put(playerId, currentTick);
+                        return;
+                    }
+                }
+            }
+        }
+    }
+
 }

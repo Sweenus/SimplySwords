@@ -24,6 +24,7 @@ import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.goal.AttackHostileMobsGoal;
 import net.sweenus.simplyswords.entity.goal.FollowNearestPlayerGoal;
+import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import org.jetbrains.annotations.Nullable;
 
@@ -85,7 +86,7 @@ public class SimplySwordsAxolotlEntity extends AxolotlEntity implements Tameable
                         0.1,
                         0.2
                 );
-                if (this.isTouchingWater()) {
+                if (this.isTouchingWater() && Config.uniqueEffects.chompolotl.dolphinsGrace && (this.age % 20 == 0)) {
 
                     double radius = 16.0;
                     Box box = new Box(
@@ -117,7 +118,8 @@ public class SimplySwordsAxolotlEntity extends AxolotlEntity implements Tameable
     @Override
     public ActionResult interactMob(PlayerEntity player, Hand hand) {
         if (!this.getWorld().isClient && player instanceof ServerPlayerEntity serverPlayer) {
-            if (this.ticksSinceSitAttempt >= READY_TO_SIT_COOLDOWN) {
+            boolean hasChompolotlItem = HelperMethods.hasItemInInventory(serverPlayer, ItemsRegistry.CHOMPOLOTL.get());
+            if (hasChompolotlItem && this.ticksSinceSitAttempt >= READY_TO_SIT_COOLDOWN) {
                 boolean mounted = this.mountOnto(serverPlayer);
                 //System.out.println("Mount result: " + mounted);
                 this.ticksSinceSitAttempt = 0;

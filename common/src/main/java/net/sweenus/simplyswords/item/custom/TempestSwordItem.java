@@ -136,8 +136,8 @@ public class TempestSwordItem extends UniqueSwordItem {
 
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
-        HelperMethods.createFootfalls(entity, stack, world, ParticleTypes.BUBBLE,
-                ParticleTypes.BUBBLE_COLUMN_UP, ParticleTypes.BUBBLE_POP, true);
+        HelperMethods.createFootfalls(entity, stack, world, ParticleTypes.DUST_PLUME,
+                ParticleTypes.DUST_PLUME, ParticleTypes.DUST_PLUME, true);
 
         super.inventoryTick(stack, world, entity, slot, selected);
     }

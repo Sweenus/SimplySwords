@@ -17,12 +17,14 @@ import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.passive.VillagerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileUtil;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.scoreboard.AbstractTeam;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.util.Hand;
@@ -30,6 +32,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -40,6 +43,7 @@ import net.sweenus.simplyswords.effect.instance.SimplySwordsStatusEffectInstance
 import net.sweenus.simplyswords.entity.BattleStandardDarkEntity;
 import net.sweenus.simplyswords.entity.BattleStandardEntity;
 import net.sweenus.simplyswords.item.TwoHandedWeapon;
+import net.sweenus.simplyswords.registry.ParticlesRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 
 import java.util.Comparator;
@@ -147,6 +151,29 @@ public class HelperMethods {
             serverWorld.spawnParticles(particle, xpos, ypos, zpos, 1, xvelocity, yvelocity, zvelocity, 0.1);
         }
     }
+
+    public static void createServerBubbleTrail(ServerWorld serverWorld, ServerPlayerEntity player) {
+        if (player.age %10 == 0) {
+            double x = player.getX() + (serverWorld.random.nextDouble() - 0.5) * 0.3;
+            double y = player.getY() + 0.1;
+            double z = player.getZ() + (serverWorld.random.nextDouble() - 0.5) * 0.3;
+
+            serverWorld.spawnParticles(
+                    ParticlesRegistry.CUSTOM_BUBBLE.get(), // Updated registry reference
+                    x,
+                    y,
+                    z,
+                    2,
+                    0.1, // X spread
+                    0.05, // Y spread (rise effect)
+                    0.1, // Z spread
+                    0.02 // Speed
+            );
+        }
+    }
+
+
+
 
     // playHitSounds
     public static void playHitSounds(LivingEntity attacker, LivingEntity target) {
@@ -369,6 +396,31 @@ public class HelperMethods {
         }
     }
 
+    public static void spawnParticlesBetween(ServerPlayerEntity player, BlockPos blockPos, ServerWorld world, ParticleEffect particleType, int particleCount) {
+        Vec3d start = player.getPos().add(0, player.getHeight() / 2.0, 0);
+        Vec3d end = Vec3d.ofCenter(blockPos);
+
+        double stepSize = 1.0 / particleCount;
+
+        for (int i = 0; i <= particleCount; i++) {
+            double t = i * stepSize;
+
+            double x = start.x + (end.x - start.x) * t;
+            double y = start.y + (end.y - start.y) * t;
+            double z = start.z + (end.z - start.z) * t;
+
+            world.spawnParticles(
+                    particleType,
+                    x, y, z,
+                    1,
+                    0, 0, 0,
+                    0
+            );
+        }
+    }
+
+
+
     public static float spellScaledDamage(String spellSchool, Entity entity, float damageModifier, float damageFallback) {
         float scaling = commonSpellAttributeScaling(damageModifier, entity, spellSchool);
         return scaling > 0 ? scaling : damageFallback;
@@ -526,5 +578,23 @@ public class HelperMethods {
         return entity.getEquippedStack(EquipmentSlot.MAINHAND).equals(stack)
                 || entity.getEquippedStack(EquipmentSlot.OFFHAND).equals(stack);
     }
+
+    public static boolean isHoldingItem(Item item, LivingEntity entity) {
+        return entity.getEquippedStack(EquipmentSlot.MAINHAND).getItem().equals(item)
+                || entity.getEquippedStack(EquipmentSlot.OFFHAND).getItem().equals(item);
+    }
+
+    public static boolean hasItemInInventory(PlayerEntity player, Item item) {
+        if (player == null || item == null)
+            return false;
+        for (int i = 0; i < player.getInventory().size(); i++) {
+            ItemStack stack = player.getInventory().getStack(i);
+            if (stack.getItem() == item) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 
 }

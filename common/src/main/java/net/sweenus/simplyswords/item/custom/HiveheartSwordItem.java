@@ -73,7 +73,7 @@ public class HiveheartSwordItem extends UniqueSwordItem {
         int regenDuration = Config.uniqueEffects.hiveheart.duration;
         int skillCooldown = Config.uniqueEffects.hiveheart.cooldown;
         HelperMethods.incrementStatusEffect(user, StatusEffects.REGENERATION, regenDuration, 1, 3);
-        ItemStack stack = user.getMainHandStack();
+        ItemStack stack = user.getStackInHand(hand);
         world.playSound(null, user.getBlockPos(), SoundRegistry.SPELL_MISC_02.get(),
                 user.getSoundCategory(), 0.8f, 1.0f);
         user.getItemCooldownManager().set(stack.getItem(), skillCooldown * 10);

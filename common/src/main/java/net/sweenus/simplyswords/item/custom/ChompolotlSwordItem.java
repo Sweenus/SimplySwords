@@ -2,7 +2,6 @@ package net.sweenus.simplyswords.item.custom;
 
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
@@ -12,7 +11,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.item.tooltip.TooltipType;
-import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
@@ -69,7 +67,7 @@ public class ChompolotlSwordItem extends UniqueSwordItem {
 
             int skillCooldown = Config.uniqueEffects.chompolotl.cooldown;
             float skillDamage = Config.uniqueEffects.chompolotl.damage;
-            ItemStack stack = user.getMainHandStack();
+            ItemStack stack = user.getStackInHand(hand);
             ServerWorld serverWorld = (ServerWorld) world;
             if (user instanceof PlayerEntity player && !player.getItemCooldownManager().isCoolingDown(stack.getItem())) {
                 SimplySwordsAxolotlEntity axolotlEntity = EntityRegistry.SIMPLYAXOLOTLENTITY.get().spawn(
@@ -95,13 +93,6 @@ public class ChompolotlSwordItem extends UniqueSwordItem {
         }
 
         return super.use(world, user, hand);
-    }
-
-    @Override
-    public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
-        HelperMethods.createFootfalls(entity, stack, world, ParticleTypes.FALLING_WATER,
-                ParticleTypes.FALLING_WATER, ParticleTypes.FALLING_WATER, false);
-        super.inventoryTick(stack, world, entity, slot, selected);
     }
 
     @Override
@@ -134,6 +125,7 @@ public class ChompolotlSwordItem extends UniqueSwordItem {
         public int duration = 500;
         @ValidatedFloat.Restrict(min = 0f)
         public float breedChance = 0.0266f;
+        public boolean dolphinsGrace = true;
 
     }
 }

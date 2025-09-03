@@ -8,7 +8,6 @@ import net.sweenus.simplyswords.SimplySwords;
 @Mod(SimplySwords.MOD_ID)
 public class SimplySwordsForge {
     public SimplySwordsForge() {
-
         SimplySwords.init();
 
         if (ModList.get().isLoaded("gobber2")) {

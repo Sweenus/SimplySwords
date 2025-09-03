@@ -25,6 +25,7 @@ import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.LootConfig;
+import net.sweenus.simplyswords.item.ContainedRemnantItem;
 import net.sweenus.simplyswords.item.custom.CaelestisSwordItem;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
@@ -32,6 +33,7 @@ import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.AbilityMethods;
 import net.sweenus.simplyswords.util.HelperMethods;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -43,6 +45,8 @@ import java.util.Random;
 
 @Mixin(ServerPlayerEntity.class)
 public abstract class ServerPlayerEntityMixin {
+
+    @Shadow public abstract ServerWorld getServerWorld();
 
     @Inject(at = @At("HEAD"), method = "damage", cancellable = true)
     public void simplyswords$damage(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
@@ -152,7 +156,7 @@ public abstract class ServerPlayerEntityMixin {
             }
 
             // Contained Remnant logic
-            int frequency = 1200; // 1m
+            int frequency = Config.general.containedRemnantTransformFrequency;
             if (serverPlayer.age % frequency == 0) {
                 ItemStack containedRemnant = ItemsRegistry.CONTAINED_REMNANT.get().asItem().getDefaultStack();
                 ItemStack tamperedRemnant = ItemsRegistry.TAMPERED_REMNANT.get().asItem().getDefaultStack();
@@ -246,6 +250,16 @@ public abstract class ServerPlayerEntityMixin {
             NbtCompound leftShoulder = player.getShoulderEntityLeft();
             NbtCompound rightShoulder = player.getShoulderEntityRight();
             AbilityMethods.applyAxolotlBuff(serverPlayer, leftShoulder, rightShoulder);
+
+
+            // Chomp'olotl passive particles
+            if (HelperMethods.isHoldingItem(ItemsRegistry.CHOMPOLOTL.get(), serverPlayer) && Config.general.enablePassiveParticles)
+                HelperMethods.createServerBubbleTrail(getServerWorld(), serverPlayer);
+
+            // Contained Remnant hint messages
+            if (HelperMethods.isHoldingItem(ItemsRegistry.CONTAINED_REMNANT.get(), serverPlayer))
+                ContainedRemnantItem.checkNearbyBlocks(serverPlayer);
+
 
         }
     }
