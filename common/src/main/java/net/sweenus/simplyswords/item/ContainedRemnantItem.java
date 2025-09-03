@@ -14,6 +14,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.Rarity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -41,11 +42,11 @@ public class ContainedRemnantItem extends Item {
         super( new Settings().arch$tab(SimplySwords.SIMPLYSWORDS).rarity(Rarity.EPIC).fireproof().maxCount(1));
     }
 
-    private static final Map<Block, Item> transformationMap = new HashMap<>();
+    private static final Map<Block, Identifier> transformationMap = new HashMap<>();
 
 
-    public static void addTransformation(Block block, Item item) {
-        transformationMap.put(block, item);
+    public static void addTransformation(Block block, Identifier identifier) {
+        transformationMap.put(block, identifier);
     }
 
 
@@ -59,7 +60,10 @@ public class ContainedRemnantItem extends Item {
         if (player != null && !player.getWorld().isClient) {
             ServerWorld serverWorld = (ServerWorld) player.getWorld();
 
-            Item transformedItem = transformationMap.get(blockState.getBlock());
+            if (!ItemsRegistry.ITEM.getRegistrar().contains(transformationMap.get(blockState.getBlock())))
+                return ActionResult.PASS;
+
+            Item transformedItem = ItemsRegistry.ITEM.getRegistrar().get(transformationMap.get(blockState.getBlock()));
             if (transformedItem != null) {
 
                 if (LootConfig.INSTANCE.disabledUniqueWeaponLoot.contains(transformedItem))

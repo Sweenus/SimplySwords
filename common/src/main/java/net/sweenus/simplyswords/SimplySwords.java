@@ -4,7 +4,6 @@ import dev.architectury.platform.Platform;
 import dev.architectury.registry.CreativeTabRegistry;
 import dev.architectury.registry.client.level.entity.EntityModelLayerRegistry;
 import dev.architectury.registry.client.level.entity.EntityRendererRegistry;
-import dev.architectury.registry.client.particle.ParticleProviderRegistry;
 import dev.architectury.registry.level.entity.EntityAttributeRegistry;
 import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
@@ -12,7 +11,6 @@ import dev.architectury.utils.Env;
 import dev.architectury.utils.EnvExecutor;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.particle.EndRodParticle;
 import net.minecraft.client.render.entity.AxolotlEntityRenderer;
 import net.minecraft.client.render.entity.BeeEntityRenderer;
 import net.minecraft.client.render.entity.model.EntityModelLayer;
@@ -132,11 +130,6 @@ public class SimplySwords {
             EntityRendererRegistry.register(EntityRegistry.LIVYATANENTITY, ThrownSwordEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.SPEAR, ThrownSpearEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.THROWNRUNICENTITY, ThrownSwordEntityRenderer::new);
-
-            // Particle
-                ParticleProviderRegistry.register(
-                        ParticlesRegistry.CUSTOM_BUBBLE.get(),
-                        EndRodParticle.Factory::new);
 
 
             }

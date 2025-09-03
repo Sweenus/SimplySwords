@@ -15,6 +15,7 @@ import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.BattleStandardEntity;
@@ -132,8 +133,8 @@ public class SimplySwordsAPI {
     }
 
     // Add transformations to the ContainedRemnantItem
-    public static void registerTransformation(Block block, Item item) {
-        ContainedRemnantItem.addTransformation(block, item);
+    public static void registerTransformation(Block block, Identifier identifier) {
+        ContainedRemnantItem.addTransformation(block, identifier);
     }
 
 

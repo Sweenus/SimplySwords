@@ -15,10 +15,12 @@ public class SimplySwordsClientForge {
     // Particle Factory must be registered on both loaders, not just in Common
     @SubscribeEvent
     public static void onRegisterParticleFactories(RegisterParticleProvidersEvent event) {
-        event.registerSpriteSet(
-                ParticlesRegistry.CUSTOM_BUBBLE.get(),
-                CustomBubbleParticle.Factory::new
-        );
+        ParticlesRegistry.CUSTOM_BUBBLE.ifPresent(bubble -> {
+            event.registerSpriteSet(
+                    bubble,
+                    CustomBubbleParticle.Factory::new
+            );
+        });
     }
 
 }
