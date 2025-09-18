@@ -78,6 +78,15 @@ public class WeaponAttributesConfig extends Config {
         public ValidatedCondition<Float> gobberNether_damageModifier = createCondition(3.0f, "gobber2");
         public ValidatedCondition<Float> gobberEnd_damageModifier = createCondition(6.0f, "gobber2");
 
+        //advanced netherite compat - all mod-loaded gated, unsure if the modname field is correct
+        public ValidatedCondition<Float> netheriteIron_damageModifier = createCondition(3.0f, "advanced_netherite");
+        public ValidatedCondition<Float> netheriteGold_damageModifier = createCondition(3.0f, "advanced_netherite");
+        public ValidatedCondition<Float> netheriteEmerald_damageModifier = createCondition(3.0f, "advanced_netherite");
+        public ValidatedCondition<Float> netheriteDiamond_damageModifier = createCondition(3.0f, "advanced_netherite");
+
+        public ValidatedCondition<Float> dragonScale_damageModifier = createCondition(3.0f, "advanced_netherite");
+        
+
         private ValidatedCondition<Float> createCondition(float defaultValue, String modNeeded) {
             return new ValidatedFloat(defaultValue)
                     .toCondition(

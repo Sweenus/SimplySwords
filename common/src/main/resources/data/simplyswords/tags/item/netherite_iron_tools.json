@@ -1,0 +1,65 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "simplyswords:advancednetherite_compat/netherite_iron/netherite_iron_claymore",
+      "required": false
+    },
+    {
+      "id": "simplyswords:advancednetherite_compat/netherite_iron/netherite_iron_cutlass",
+      "required": false
+    },
+    {
+      "id": "simplyswords:advancednetherite_compat/netherite_iron/netherite_iron_glaive",
+      "required": false
+    },
+    {
+      "id": "simplyswords:advancednetherite_compat/netherite_iron/netherite_iron_katana",
+      "required": false
+    },
+    {
+      "id": "simplyswords:advancednetherite_compat/netherite_iron/netherite_iron_longsword",
+      "required": false
+    },
+    {
+      "id": "simplyswords:advancednetherite_compat/netherite_iron/netherite_iron_rapier",
+      "required": false
+    },
+    {
+      "id": "simplyswords:advancednetherite_compat/netherite_iron/netherite_iron_sai",
+      "required": false
+    },
+    {
+      "id": "simplyswords:advancednetherite_compat/netherite_iron/netherite_iron_spear",
+      "required": false
+    },
+    {
+      "id": "simplyswords:advancednetherite_compat/netherite_iron/netherite_iron_twinblade",
+      "required": false
+    },
+    {
+      "id": "simplyswords:advancednetherite_compat/netherite_iron/netherite_iron_warglaive",
+      "required": false
+    },
+    {
+      "id": "simplyswords:advancednetherite_compat/netherite_iron/netherite_iron_greathammer",
+      "required": false
+    },
+    {
+      "id": "simplyswords:advancednetherite_compat/netherite_iron/netherite_iron_greataxe",
+      "required": false
+    },
+    {
+      "id": "simplyswords:advancednetherite_compat/netherite_iron/netherite_iron_chakram",
+      "required": false
+    },
+    {
+      "id": "simplyswords:advancednetherite_compat/netherite_iron/netherite_iron_scythe",
+      "required": false
+    },
+    {
+      "id": "simplyswords:advancednetherite_compat/netherite_iron/netherite_iron_halberd",
+      "required": false
+    }
+  ]
+}

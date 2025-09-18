@@ -1,0 +1,65 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "simplyswords:advancednetherite_compat/netherite_emerald/netherite_emerald_claymore",
+      "required": false
+    },
+    {
+      "id": "simplyswords:advancednetherite_compat/netherite_emerald/netherite_emerald_cutlass",
+      "required": false
+    },
+    {
+      "id": "simplyswords:advancednetherite_compat/netherite_emerald/netherite_emerald_glaive",
+      "required": false
+    },
+    {
+      "id": "simplyswords:advancednetherite_compat/netherite_emerald/netherite_emerald_katana",
+      "required": false
+    },
+    {
+      "id": "simplyswords:advancednetherite_compat/netherite_emerald/netherite_emerald_longsword",
+      "required": false
+    },
+    {
+      "id": "simplyswords:advancednetherite_compat/netherite_emerald/netherite_emerald_rapier",
+      "required": false
+    },
+    {
+      "id": "simplyswords:advancednetherite_compat/netherite_emerald/netherite_emerald_sai",
+      "required": false
+    },
+    {
+      "id": "simplyswords:advancednetherite_compat/netherite_emerald/netherite_emerald_spear",
+      "required": false
+    },
+    {
+      "id": "simplyswords:advancednetherite_compat/netherite_emerald/netherite_emerald_twinblade",
+      "required": false
+    },
+    {
+      "id": "simplyswords:advancednetherite_compat/netherite_emerald/netherite_emerald_warglaive",
+      "required": false
+    },
+    {
+      "id": "simplyswords:advancednetherite_compat/netherite_emerald/netherite_emerald_greathammer",
+      "required": false
+    },
+    {
+      "id": "simplyswords:advancednetherite_compat/netherite_emerald/netherite_emerald_greataxe",
+      "required": false
+    },
+    {
+      "id": "simplyswords:advancednetherite_compat/netherite_emerald/netherite_emerald_chakram",
+      "required": false
+    },
+    {
+      "id": "simplyswords:advancednetherite_compat/netherite_emerald/netherite_emerald_scythe",
+      "required": false
+    },
+    {
+      "id": "simplyswords:advancednetherite_compat/netherite_emerald/netherite_emerald_halberd",
+      "required": false
+    }
+  ]
+}

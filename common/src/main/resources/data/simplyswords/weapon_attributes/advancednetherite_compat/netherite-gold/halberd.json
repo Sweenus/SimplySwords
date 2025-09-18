@@ -1,0 +1,58 @@
+{
+  "attributes": {
+    "attack_range": 4,
+    "category": "halberd",
+    "pose": "simplyswords:pose_halberd",
+    "two_handed": true,
+    "attacks": [
+      {
+        "hitbox": "FORWARD_BOX",
+        "damage_multiplier": 1,
+        "angle": 0,
+        "upswing": 0.5,
+        "animation": "simplyswords:halberd_stab_right",
+        "swing_sound": {
+          "id": "bettercombat:spear_stab",
+          "volume": 0.5,
+          "pitch": 1
+        }
+      },
+      {
+        "hitbox": "FORWARD_BOX",
+        "damage_multiplier": 1,
+        "angle": 0,
+        "upswing": 0.5,
+        "animation": "simplyswords:halberd_stab_right",
+        "swing_sound": {
+          "id": "bettercombat:spear_stab",
+          "volume": 0.5,
+          "pitch": 1.2
+        }
+      },
+      {
+        "hitbox": "HORIZONTAL_PLANE",
+        "damage_multiplier": 1,
+        "angle": 120,
+        "upswing": 0.5,
+        "animation": "simplyswords:halberd_slash_vertical_right",
+        "swing_sound": {
+          "id": "bettercombat:glaive_slash_slow",
+          "volume": 0.5,
+          "pitch": 0.8
+        }
+      },
+      {
+        "hitbox": "VERTICAL_PLANE",
+        "damage_multiplier": 1.6,
+        "angle": 150,
+        "upswing": 0.5,
+        "animation": "bettercombat:two_handed_slash_vertical_right",
+        "swing_sound": {
+          "id": "bettercombat:glaive_slash_slow",
+          "volume": 0.5,
+          "pitch": 1
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "simplyswords:advancednetherite_compat/netherite_diamond/netherite_diamond_claymore",
+      "required": false
+    },
+    {
+      "id": "simplyswords:advancednetherite_compat/netherite_diamond/netherite_diamond_cutlass",
+      "required": false
+    },
+    {
+      "id": "simplyswords:advancednetherite_compat/netherite_diamond/netherite_diamond_glaive",
+      "required": false
+    },
+    {
+      "id": "simplyswords:advancednetherite_compat/netherite_diamond/netherite_diamond_katana",
+      "required": false
+    },
+    {
+      "id": "simplyswords:advancednetherite_compat/netherite_diamond/netherite_diamond_longsword",
+      "required": false
+    },
+    {
+      "id": "simplyswords:advancednetherite_compat/netherite_diamond/netherite_diamond_rapier",
+      "required": false
+    },
+    {
+      "id": "simplyswords:advancednetherite_compat/netherite_diamond/netherite_diamond_sai",
+      "required": false
+    },
+    {
+      "id": "simplyswords:advancednetherite_compat/netherite_diamond/netherite_diamond_spear",
+      "required": false
+    },
+    {
+      "id": "simplyswords:advancednetherite_compat/netherite_diamond/netherite_diamond_twinblade",
+      "required": false
+    },
+    {
+      "id": "simplyswords:advancednetherite_compat/netherite_diamond/netherite_diamond_warglaive",
+      "required": false
+    },
+    {
+      "id": "simplyswords:advancednetherite_compat/netherite_diamond/netherite_diamond_greathammer",
+      "required": false
+    },
+    {
+      "id": "simplyswords:advancednetherite_compat/netherite_diamond/netherite_diamond_greataxe",
+      "required": false
+    },
+    {
+      "id": "simplyswords:advancednetherite_compat/netherite_diamond/netherite_diamond_chakram",
+      "required": false
+    },
+    {
+      "id": "simplyswords:advancednetherite_compat/netherite_diamond/netherite_diamond_scythe",
+      "required": false
+    },
+    {
+      "id": "simplyswords:advancednetherite_compat/netherite_diamond/netherite_diamond_halberd",
+      "required": false
+    }
+  ]
+}

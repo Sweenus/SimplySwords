@@ -1,0 +1,65 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "simplyswords:advancednetherite_compat/netherite_gold/netherite_gold_claymore",
+      "required": false
+    },
+    {
+      "id": "simplyswords:advancednetherite_compat/netherite_gold/netherite_gold_cutlass",
+      "required": false
+    },
+    {
+      "id": "simplyswords:advancednetherite_compat/netherite_gold/netherite_gold_glaive",
+      "required": false
+    },
+    {
+      "id": "simplyswords:advancednetherite_compat/netherite_gold/netherite_gold_katana",
+      "required": false
+    },
+    {
+      "id": "simplyswords:advancednetherite_compat/netherite_gold/netherite_gold_longsword",
+      "required": false
+    },
+    {
+      "id": "simplyswords:advancednetherite_compat/netherite_gold/netherite_gold_rapier",
+      "required": false
+    },
+    {
+      "id": "simplyswords:advancednetherite_compat/netherite_gold/netherite_gold_sai",
+      "required": false
+    },
+    {
+      "id": "simplyswords:advancednetherite_compat/netherite_gold/netherite_gold_spear",
+      "required": false
+    },
+    {
+      "id": "simplyswords:advancednetherite_compat/netherite_gold/netherite_gold_twinblade",
+      "required": false
+    },
+    {
+      "id": "simplyswords:advancednetherite_compat/netherite_gold/netherite_gold_warglaive",
+      "required": false
+    },
+    {
+      "id": "simplyswords:advancednetherite_compat/netherite_gold/netherite_gold_greathammer",
+      "required": false
+    },
+    {
+      "id": "simplyswords:advancednetherite_compat/netherite_gold/netherite_gold_greataxe",
+      "required": false
+    },
+    {
+      "id": "simplyswords:advancednetherite_compat/netherite_gold/netherite_gold_chakram",
+      "required": false
+    },
+    {
+      "id": "simplyswords:advancednetherite_compat/netherite_gold/netherite_gold_scythe",
+      "required": false
+    },
+    {
+      "id": "simplyswords:advancednetherite_compat/netherite_gold/netherite_gold_halberd",
+      "required": false
+    }
+  ]
+}

@@ -20,6 +20,16 @@ public enum ModToolMaterial implements ToolMaterial {
     GOBBER_NETHER(6, 5200, 12.0F, 9.0F, 25, Items.DIAMOND),
     GOBBER_END(7, 8000, 14.0F, 9.0F, 30, Items.DIAMOND);
 
+    //Items.DIAMOND might need to be replaced, in 1.20 this field was always like this and didn't actually represent the anvil item but i have no idea if that has changed
+    //ADVANCED NETHERITE
+    NETHERITE_IRON(5, 2281, 12.0F, 4.0F, 15, Items.DIAMOND),
+    NETHERITE_GOLD(5, 2313, 20.0F, 5.0F, 25, Items.DIAMOND),
+    NETHERITE_EMERALD(5, 2651, 29.0F, 6.0F, 20, Items.DIAMOND),
+    NETHERITE_DIAMOND(5, 3092, 39.0F, 7.0F, 15, Items.DIAMOND),
+
+    //DRAGON LOOT
+    DRAGON_SCALE(5, 2479 ,12.0f , 5, 20, Items.DIAMOND);
+
     private final int miningLevel;
     private final int itemDurability;
     private final float miningSpeed;
