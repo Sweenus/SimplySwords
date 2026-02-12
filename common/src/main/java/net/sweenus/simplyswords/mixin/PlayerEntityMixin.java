@@ -2,6 +2,7 @@ package net.sweenus.simplyswords.mixin;
 
 import net.minecraft.entity.player.PlayerAbilities;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.nbt.NbtCompound;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import org.spongepowered.asm.mixin.Final;
@@ -11,6 +12,7 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(PlayerEntity.class)
 public abstract class PlayerEntityMixin {
@@ -19,9 +21,41 @@ public abstract class PlayerEntityMixin {
 
     @Shadow @Final private PlayerAbilities abilities;
 
+    @Shadow protected abstract void setShoulderEntityLeft(NbtCompound nbt);
+
+    @Shadow protected abstract void setShoulderEntityRight(NbtCompound nbt);
+
+    @Invoker("dropShoulderEntity")
+    protected abstract void simplyswords$dropShoulderEntity(NbtCompound nbt);
+
     @Unique
     public void simplySwords$invokeDropShoulderEntities() {
         dropShoulderEntities();
+    }
+
+    @Unique
+    private boolean simplyswords$isSimplyAxolotl(NbtCompound nbt) {
+        return nbt != null && !nbt.isEmpty() && "simplyswords:simplyaxolotlentity".equals(nbt.getString("id"));
+    }
+
+    @Unique
+    private void simplyswords$dropSimplyAxolotls() {
+        PlayerEntity player = (PlayerEntity) (Object) this;
+        if (player.getWorld().isClient()) {
+            return;
+        }
+
+        NbtCompound left = player.getShoulderEntityLeft();
+        if (simplyswords$isSimplyAxolotl(left)) {
+            simplyswords$dropShoulderEntity(left);
+            setShoulderEntityLeft(new NbtCompound());
+        }
+
+        NbtCompound right = player.getShoulderEntityRight();
+        if (simplyswords$isSimplyAxolotl(right)) {
+            simplyswords$dropShoulderEntity(right);
+            setShoulderEntityRight(new NbtCompound());
+        }
     }
 
     @Inject(at = @At("HEAD"), method = "dropShoulderEntities", cancellable = true)
@@ -49,7 +83,7 @@ public abstract class PlayerEntityMixin {
         if (player.age % 40 == 0) {
             // Drop axolotls if Chompolotl item not present
             if (!HelperMethods.hasItemInInventory(player, ItemsRegistry.CHOMPOLOTL.get())) {
-                dropShoulderEntities();
+                simplyswords$dropSimplyAxolotls();
             }
         }
     }
@@ -58,7 +92,7 @@ public abstract class PlayerEntityMixin {
     public void simplyswords$tickMovement(CallbackInfo ci) {
         PlayerEntity player = (PlayerEntity) (Object) this;
         if (!player.getWorld().isClient() && (player.isTouchingWater() || player.isSneaking())) {
-            this.dropShoulderEntities();
+            simplyswords$dropSimplyAxolotls();
         }
     }
 }
