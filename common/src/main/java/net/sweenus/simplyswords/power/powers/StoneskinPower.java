@@ -32,7 +32,7 @@ public class StoneskinPower extends RunefusedGemPower {
 			attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, duration,  this.isGreater() ? 2 : 1), attacker);
 			attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.FIRE_RESISTANCE, duration, 0), attacker);
 			attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, duration, this.isGreater() ? 1 : 0), attacker);
-			attacker.getWorld().playSoundFromEntity(null, attacker, SoundRegistry.ELEMENTAL_SWORD_EARTH_ATTACK_02.get(),
+			attacker.getEntityWorld().playSoundFromEntity(null, attacker, SoundRegistry.ELEMENTAL_SWORD_EARTH_ATTACK_02.get(),
 					attacker.getSoundCategory(), 0.3f, this.isGreater() ? 1.1f : 1.3f);
 		}
 	}

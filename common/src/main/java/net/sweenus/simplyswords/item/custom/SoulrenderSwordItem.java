@@ -4,10 +4,12 @@ import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedDouble;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.item.tooltip.TooltipType;
@@ -16,8 +18,8 @@ import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
-import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
@@ -39,9 +41,9 @@ public class SoulrenderSwordItem extends UniqueSwordItem implements TwoHandedWea
     }
 
     @Override
-    public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        if (!attacker.getWorld().isClient()) {
-            ServerWorld world = (ServerWorld) attacker.getWorld();
+    public void postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        if (!attacker.getEntityWorld().isClient()) {
+            ServerWorld world = (ServerWorld) attacker.getEntityWorld();
             int hitChance = Config.uniqueEffects.soulrender.chance;
             int duration = Config.uniqueEffects.soulrender.duration;
             int maxStacks = Config.uniqueEffects.soulrender.maxStacks;
@@ -50,8 +52,8 @@ public class SoulrenderSwordItem extends UniqueSwordItem implements TwoHandedWea
 
             if (attacker.getRandom().nextInt(100) <= hitChance) {
                 particleSelect  = ParticleTypes.SMOKE;
-                HelperMethods.spawnOrbitParticles(world, target.getPos(), particleSelect, 0.5f, particleCount);
-                HelperMethods.spawnOrbitParticles(world, target.getPos().add(0,0.2,0), ParticleTypes.SOUL, 0.4f, 5);
+                HelperMethods.spawnOrbitParticles(world, target.getEntityPos(), particleSelect, 0.5f, particleCount);
+                HelperMethods.spawnOrbitParticles(world, target.getEntityPos().add(0,0.2,0), ParticleTypes.SOUL, 0.4f, 5);
 
                 int choose_sound = (int) (Math.random() * 30);
                 if (choose_sound <= 10)
@@ -86,12 +88,12 @@ public class SoulrenderSwordItem extends UniqueSwordItem implements TwoHandedWea
             }
             HelperMethods.spawnWaistHeightParticles(world, particleSelect, attacker, target, particleCount);
         }
-        return super.postHit(stack, target, attacker);
+        super.postHit(stack, target, attacker);
     }
 
     @Override
-    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
-        if (!user.getWorld().isClient()) {
+    public ActionResult use(World world, PlayerEntity user, Hand hand) {
+        if (!user.getEntityWorld().isClient()) {
             float heal_amount = Config.uniqueEffects.soulrender.healMulti;
             int healamp = 0;
             double hradius = Config.uniqueEffects.soulrender.radius;
@@ -99,7 +101,7 @@ public class SoulrenderSwordItem extends UniqueSwordItem implements TwoHandedWea
             double x = user.getX();
             double y = user.getY();
             double z = user.getZ();
-            ServerWorld sworld = (ServerWorld) user.getWorld();
+            ServerWorld sworld = (ServerWorld) user.getEntityWorld();
             Box box = new Box(x + hradius, y + vradius, z + hradius, x - hradius, y - vradius, z - hradius);
 
             for (Entity entity : sworld.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY)) {
@@ -109,7 +111,7 @@ public class SoulrenderSwordItem extends UniqueSwordItem implements TwoHandedWea
                     healamp += (le.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier());
                     float scaling = HelperMethods.commonSpellAttributeScaling(Config.uniqueEffects.soulrender.spellScaling, entity, "soul");
                     float multiplier = scaling > 0f ? scaling : Config.uniqueEffects.soulrender.damageMulti;
-                    le.damage(user.getDamageSources().indirectMagic(user, user), le.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier() * multiplier);
+                    le.damage((ServerWorld) le.getEntityWorld(), user.getDamageSources().indirectMagic(user, user), le.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier() * multiplier);
                     le.removeStatusEffect(StatusEffects.WEAKNESS);
                     le.removeStatusEffect(StatusEffects.SLOWNESS);
                     world.playSoundFromEntity(null, entity, SoundRegistry.DARK_SWORD_SPELL.get(),
@@ -129,14 +131,14 @@ public class SoulrenderSwordItem extends UniqueSwordItem implements TwoHandedWea
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
+    public void inventoryTick(ItemStack stack, ServerWorld world, Entity entity, EquipmentSlot slot) {
         HelperMethods.createFootfalls(entity, stack, world, ParticleTypes.SOUL, ParticleTypes.SCULK_SOUL,
                 ParticleTypes.WARPED_SPORE, true);
-        super.inventoryTick(stack, world, entity, slot, selected);
+        super.inventoryTick(stack, world, entity, slot);
     }
 
     @Override
-    public void appendTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
+    protected void appendItemTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.rendsworditem.tooltip1").setStyle(Styles.ABILITY));
         tooltip.add(Text.translatable("item.simplyswords.rendsworditem.tooltip2").setStyle(Styles.TEXT));
@@ -146,7 +148,7 @@ public class SoulrenderSwordItem extends UniqueSwordItem implements TwoHandedWea
         tooltip.add(Text.translatable("item.simplyswords.rendsworditem.tooltip4").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.rendsworditem.tooltip5").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.rendsworditem.tooltip6").setStyle(Styles.TEXT));
-        super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        super.appendItemTooltip(itemStack, tooltipContext, tooltip, type);
         TooltipUtils.appendSpellScaleTooltip(tooltip, "soul");
     }
 

@@ -8,6 +8,7 @@ import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.Config;
@@ -29,7 +30,7 @@ public class FatalFlickerEffect extends StatusEffect {
 
         user.setVelocity(user.getRotationVector().multiply(+dashDistance));
         user.setVelocity(user.getVelocity().x, 0, user.getVelocity().z);
-        user.velocityModified = true;
+        user.velocityDirty = true;
         user.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, 10, 3), user);
         user.timeUntilRegen = 25;
 
@@ -55,22 +56,22 @@ public class FatalFlickerEffect extends StatusEffect {
     }
 
     @Override
-    public boolean applyUpdateEffect(LivingEntity user, int amplifier) {
+    public boolean applyUpdateEffect(ServerWorld world, LivingEntity user, int amplifier) {
 
-        super.applyUpdateEffect(user, amplifier);
+        super.applyUpdateEffect(world, user, amplifier);
 
-        if (!user.getWorld().isClient()) {
+        if (!user.getEntityWorld().isClient()) {
 
             int ability_timer = Objects.requireNonNull(user.getStatusEffect(EffectRegistry.getReference(EffectRegistry.FATAL_FLICKER))).getDuration();
-            World world = user.getWorld();
+            World entityWorld = user.getEntityWorld();
             int radius = Config.uniqueEffects.whisperwind.radius;
 
             //Player dash forward
             if (ability_timer >= 5) {
-                performDash(user, world, radius);
+                performDash(user, entityWorld, radius);
             } else {
                 user.setVelocity(0, 0, 0); // Stop user at end of charges
-                user.velocityModified = true;
+                user.velocityDirty = true;
             }
 
             if (user.age % 2 == 0) {
@@ -82,13 +83,13 @@ public class FatalFlickerEffect extends StatusEffect {
                 for (int i = particleRadius * 2; i > 0; i--) {
                     for (int j = particleRadius * 2; j > 0; j--) {
                         float choose = (float) (Math.random() * 1);
-                        HelperMethods.spawnParticle(world, ParticleTypes.ELECTRIC_SPARK,
+                        HelperMethods.spawnParticle(entityWorld, ParticleTypes.ELECTRIC_SPARK,
                                 xpos + i + choose, ypos + 0.4, zpos + j + choose,
                                 0, 0.1, 0);
-                        HelperMethods.spawnParticle(world, ParticleTypes.CLOUD,
+                        HelperMethods.spawnParticle(entityWorld, ParticleTypes.CLOUD,
                                 xpos + i + choose, ypos + 0.1, zpos + j + choose,
                                 0, 0, 0);
-                        HelperMethods.spawnParticle(world, ParticleTypes.WARPED_SPORE,
+                        HelperMethods.spawnParticle(entityWorld, ParticleTypes.WARPED_SPORE,
                                 xpos + i + choose, ypos, zpos + j + choose,
                                 0, 0.1, 0);
                     }

@@ -20,9 +20,9 @@ public class SoundHelper {
     private static final Map<Identifier, ScheduledExecutorService> soundSchedulers = new ConcurrentHashMap<>();
 
     public static void loopSound(LivingEntity entity, Identifier soundId, int soundDurationSeconds, int updateFrequencyTicks) {
-        if (entity.getWorld().isClient()) return;
+        if (entity.getEntityWorld().isClient()) return;
 
-        ServerWorld serverWorld = (ServerWorld) entity.getWorld();
+        ServerWorld serverWorld = (ServerWorld) entity.getEntityWorld();
         SoundEvent soundEvent = SoundRegistry.SOUND.getRegistrar().get(soundId);
 
         if (soundSchedulers.containsKey(soundId)) {

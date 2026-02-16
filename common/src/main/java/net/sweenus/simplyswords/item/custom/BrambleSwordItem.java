@@ -2,14 +2,16 @@ package net.sweenus.simplyswords.item.custom;
 
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
-import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
@@ -27,8 +29,8 @@ public class BrambleSwordItem extends UniqueSwordItem {
     }
 
     @Override
-    public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        if (!attacker.getWorld().isClient()) {
+    public void postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        if (!attacker.getEntityWorld().isClient()) {
 
             int hitChance = Config.uniqueEffects.bramblethorn.chance;
             HelperMethods.playHitSounds(attacker, target);
@@ -38,18 +40,18 @@ public class BrambleSwordItem extends UniqueSwordItem {
             }
 
         }
-        return super.postHit(stack, target, attacker);
+        super.postHit(stack, target, attacker);
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
+    public void inventoryTick(ItemStack stack, ServerWorld world, Entity entity, EquipmentSlot slot) {
         HelperMethods.createFootfalls(entity, stack, world, ParticleTypes.SPORE_BLOSSOM_AIR,
                 ParticleTypes.SPORE_BLOSSOM_AIR, ParticleTypes.MYCELIUM, true);
-        super.inventoryTick(stack, world, entity, slot, selected);
+        super.inventoryTick(stack, world, entity, slot);
     }
 
     @Override
-    public void appendTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
+    protected void appendItemTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.bramblesworditem.tooltip1").setStyle(Styles.ABILITY));
         tooltip.add(Text.translatable("item.simplyswords.bramblesworditem.tooltip2").setStyle(Styles.TEXT));
@@ -61,7 +63,7 @@ public class BrambleSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.bramblesworditem.tooltip7").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.bramblesworditem.tooltip8").setStyle(Styles.TEXT));
 
-        super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        super.appendItemTooltip(itemStack, tooltipContext, tooltip, type);
     }
 
     public static class EffectSettings extends TooltipSettings {

@@ -34,10 +34,10 @@ public class FlameSeedEffect extends OrbitingEffect {
     }
 
     @Override
-    public boolean applyUpdateEffect(LivingEntity livingEntity, int amplifier) {
+    public boolean applyUpdateEffect(ServerWorld world, LivingEntity livingEntity, int amplifier) {
         int duration = 0;
-        if (!livingEntity.getWorld().isClient()) {
-            ServerWorld serverWorld = (ServerWorld) livingEntity.getWorld();
+        if (!livingEntity.getEntityWorld().isClient()) {
+            ServerWorld serverWorld = (ServerWorld) livingEntity.getEntityWorld();
             float abilityDamage = Config.uniqueEffects.flamewind.damage;
             float volume = 0.3f;
             float pitch = 1.3f;
@@ -54,11 +54,11 @@ public class FlameSeedEffect extends OrbitingEffect {
                 livingEntity.timeUntilRegen = 0;
 
                 if (duration < 20  && sourceEntity != null) {
-                    HelperMethods.spawnOrbitParticles(serverWorld, livingEntity.getPos(), ParticleTypes.LAVA, 1, 8);
-                    HelperMethods.spawnOrbitParticles(serverWorld, livingEntity.getPos(), ParticleTypes.CAMPFIRE_SIGNAL_SMOKE, 2, 6);
-                    HelperMethods.spawnOrbitParticles(serverWorld, livingEntity.getPos(), ParticleTypes.POOF, 1, 10);
-                    HelperMethods.spawnOrbitParticles(serverWorld, livingEntity.getPos(), ParticleTypes.EXPLOSION, 0.5, 2);
-                    HelperMethods.spawnOrbitParticles(serverWorld, livingEntity.getPos(), ParticleTypes.WARPED_SPORE, 1, 10);
+                    HelperMethods.spawnOrbitParticles(serverWorld, livingEntity.getEntityPos(), ParticleTypes.LAVA, 1, 8);
+                    HelperMethods.spawnOrbitParticles(serverWorld, livingEntity.getEntityPos(), ParticleTypes.CAMPFIRE_SIGNAL_SMOKE, 2, 6);
+                    HelperMethods.spawnOrbitParticles(serverWorld, livingEntity.getEntityPos(), ParticleTypes.POOF, 1, 10);
+                    HelperMethods.spawnOrbitParticles(serverWorld, livingEntity.getEntityPos(), ParticleTypes.EXPLOSION, 0.5, 2);
+                    HelperMethods.spawnOrbitParticles(serverWorld, livingEntity.getEntityPos(), ParticleTypes.WARPED_SPORE, 1, 10);
                     abilityDamage = Config.uniqueEffects.flamewind.detonationDamage;
                     volume = 0.6f;
                     pitch = 1.0f;
@@ -72,7 +72,7 @@ public class FlameSeedEffect extends OrbitingEffect {
                     Box box = HelperMethods.createBox(livingEntity, 3);
                     for (Entity entity : serverWorld.getOtherEntities(livingEntity, box, EntityPredicates.VALID_LIVING_ENTITY)) {
                         if ((entity instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, sourceEntity)) {
-                            le.damage(damageSource, (abilityDamage));
+                            le.damage((ServerWorld) le.getEntityWorld(), damageSource, (abilityDamage));
                             if (!le.hasStatusEffect(EffectRegistry.getReference(EffectRegistry.FLAMESEED)) && additionalData > 0) {
                                 additionalData -= 1;
                                 SimplySwordsStatusEffectInstance flamSeedEffect = new SimplySwordsStatusEffectInstance(
@@ -97,15 +97,15 @@ public class FlameSeedEffect extends OrbitingEffect {
                 if (livingEntity instanceof PlayerEntity && sourceEntity !=null && sourceEntity instanceof  PlayerEntity playerSourceEntity)
                     damageSource = livingEntity.getDamageSources().playerAttack(playerSourceEntity);
 
-                livingEntity.damage(damageSource, (additionalData + ((float) amplifier / 4) + abilityDamage));
+                livingEntity.damage((ServerWorld) livingEntity.getEntityWorld(), damageSource, (additionalData + ((float) amplifier / 4) + abilityDamage));
                 serverWorld.playSound(null, livingEntity.getBlockPos(), soundEvent,
                         livingEntity.getSoundCategory(), volume, pitch);
-                HelperMethods.spawnOrbitParticles(serverWorld, livingEntity.getPos(), ParticleTypes.LAVA, 1, 4);
-                HelperMethods.spawnOrbitParticles(serverWorld, livingEntity.getPos(), ParticleTypes.ASH, 1, 6);
-                HelperMethods.spawnOrbitParticles(serverWorld, livingEntity.getPos(), ParticleTypes.SMOKE, 1, 6);
+                HelperMethods.spawnOrbitParticles(serverWorld, livingEntity.getEntityPos(), ParticleTypes.LAVA, 1, 4);
+                HelperMethods.spawnOrbitParticles(serverWorld, livingEntity.getEntityPos(), ParticleTypes.ASH, 1, 6);
+                HelperMethods.spawnOrbitParticles(serverWorld, livingEntity.getEntityPos(), ParticleTypes.SMOKE, 1, 6);
             }
         }
-        super.applyUpdateEffect(livingEntity, amplifier);
+        super.applyUpdateEffect(world, livingEntity, amplifier);
         return true;
     }
 

@@ -51,7 +51,7 @@ public record RelocationComponent(double relocateX, double relocateY, double rel
 			RelocationComponent::relocateTarget,
 			PacketCodecs.INTEGER,
 			RelocationComponent::relocationTimer,
-			PacketCodecs.BOOL,
+			PacketCodecs.BOOLEAN,
 			RelocationComponent::canRelocate,
 			RelocationComponent::new
 	);

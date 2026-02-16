@@ -3,6 +3,7 @@ package net.sweenus.simplyswords.effect;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectCategory;
+import net.minecraft.server.world.ServerWorld;
 
 public class FreezeEffect extends StatusEffect {
     public FreezeEffect(StatusEffectCategory statusEffectCategory, int color) {
@@ -10,8 +11,8 @@ public class FreezeEffect extends StatusEffect {
     }
 
     @Override
-    public boolean applyUpdateEffect(LivingEntity pLivingEntity, int pAmplifier) {
-        if (!pLivingEntity.getWorld().isClient()) {
+    public boolean applyUpdateEffect(ServerWorld world, LivingEntity pLivingEntity, int pAmplifier) {
+        if (!pLivingEntity.getEntityWorld().isClient()) {
             double x = pLivingEntity.getX();
             double y = pLivingEntity.getY();
             double z = pLivingEntity.getZ();
@@ -20,7 +21,7 @@ public class FreezeEffect extends StatusEffect {
             pLivingEntity.setVelocity(0, 0, 0);
         }
 
-        super.applyUpdateEffect(pLivingEntity, pAmplifier);
+        super.applyUpdateEffect(world, pLivingEntity, pAmplifier);
 
         return true;
     }

@@ -16,7 +16,7 @@ public class EldritchEndCompatMethods {
 
                 if (!stack.isEmpty() && (stack.isOf(EldritchEndCompat.DREADTIDE.get()))) {
                     HelperMethods.incrementStatusEffect(livingEntity, EffectRegistry.VOIDCLOAK, 280, 1, maxStacks-1);
-                    livingEntity.getWorld().playSound(null, livingEntity.getBlockPos(), SoundRegistry.SPELL_FIRE.get(),
+                    livingEntity.getEntityWorld().playSound(null, livingEntity.getBlockPos(), SoundRegistry.SPELL_FIRE.get(),
                             livingEntity.getSoundCategory(), 0.1f, 1.4f);
                 }
             }

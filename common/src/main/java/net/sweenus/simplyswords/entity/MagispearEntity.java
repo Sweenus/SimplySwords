@@ -34,7 +34,7 @@ public class MagispearEntity extends ThrownSpearEntity {
         if (this.isNoClip() && this.isOwner(player)) {
             int cooldown = Config.uniqueEffects.magispear.cooldown;
             if (offhandThrow) cooldown = Config.uniqueEffects.magispear.cooldown + 4;
-            player.getItemCooldownManager().set(this.asItemStack().getItem(), cooldown);
+            player.getItemCooldownManager().set(this.asItemStack(), cooldown);
             if (offhandThrow && player.getOffHandStack().isEmpty()) {
                 // Send the ItemStack to the player's offhand slot if it's free
                 player.setStackInHand(Hand.OFF_HAND, this.asItemStack());
@@ -58,7 +58,7 @@ public class MagispearEntity extends ThrownSpearEntity {
 
     @Override
     protected byte getLoyalty() {
-        World world = this.getWorld();
+        World world = this.getEntityWorld();
         if (world instanceof ServerWorld serverWorld) {
             return 3;
         } else {

@@ -1,7 +1,6 @@
 package net.sweenus.simplyswords.client.api;
 
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.item.Item;
@@ -31,8 +30,8 @@ public class SimplySwordsClientAPI {
                 Text.translatable("item.simplyswords.common.showtooltip.info"),
                 Text.translatable("item.simplyswords.common.showtooltip.search"),
                 Text.translatable("item.simplyswords.common.showtooltip.config"),
-                Screen.hasAltDown(),
-                Screen.hasControlDown()
+                TooltipUtils.isAltDown(),
+                TooltipUtils.isControlDown()
         );
 
         // Handle specific item types

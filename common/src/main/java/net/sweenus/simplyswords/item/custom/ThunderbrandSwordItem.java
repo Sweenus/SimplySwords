@@ -8,14 +8,16 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
+import net.minecraft.item.consume.UseAction;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
-import net.minecraft.util.TypedActionResult;
-import net.minecraft.util.UseAction;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.config.Config;
@@ -40,54 +42,52 @@ public class ThunderbrandSwordItem extends UniqueSwordItem implements TwoHandedW
     private static final int ability_timer_max = 50;
 
     @Override
-    public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+    public void postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         HelperMethods.playHitSounds(attacker, target);
-        if (!attacker.getWorld().isClient()) {
+        if (!attacker.getEntityWorld().isClient()) {
             int chargeChance = Config.uniqueEffects.thunderbrand.chance;
-            if (attacker.getRandom().nextInt(100) <= chargeChance && (attacker instanceof PlayerEntity player) && player.getItemCooldownManager().getCooldownProgress(this, 1f) > 0) {
-                player.getItemCooldownManager().set(this, 0);
-                attacker.getWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_BLOCK_01.get(),
+            if (attacker.getRandom().nextInt(100) <= chargeChance && (attacker instanceof PlayerEntity player)
+                    && player.getItemCooldownManager().getCooldownProgress(this.getDefaultStack(), 1f) > 0) {
+                player.getItemCooldownManager().set(this.getDefaultStack(), 0);
+                attacker.getEntityWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_BLOCK_01.get(),
                         attacker.getSoundCategory(), 0.7f, 1f);
             }
         }
-        return super.postHit(stack, target, attacker);
+        super.postHit(stack, target, attacker);
     }
 
     @Override
-    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
+    public ActionResult use(World world, PlayerEntity user, Hand hand) {
         ItemStack itemStack = user.getStackInHand(hand);
         if (itemStack.getDamage() >= itemStack.getMaxDamage() - 1) {
-            return TypedActionResult.fail(itemStack);
+            return ActionResult.FAIL;
         }
         world.playSoundFromEntity(null, user, SoundRegistry.MAGIC_BOW_CHARGE_LONG_VERSION.get(),
                 user.getSoundCategory(), 0.4f, 0.6f);
         user.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 40, 3), user);
         user.addStatusEffect(new StatusEffectInstance(StatusEffects.MINING_FATIGUE, 40, 3), user);
         user.setCurrentHand(hand);
-        return TypedActionResult.consume(itemStack);
+        return ActionResult.CONSUME;
     }
 
     @Override
     public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
-        if (!world.isClient && HelperMethods.isHolding(stack, user) && user.isOnGround()) {
-
+        if (!world.isClient() && HelperMethods.isHolding(stack, user) && user.isOnGround()) {
             float abilityDamage = HelperMethods.spellScaledDamage("lightning", user, Config.uniqueEffects.thunderbrand.spellScaling, Config.uniqueEffects.thunderbrand.damage);
             int skillCooldown = Config.uniqueEffects.thunderbrand.cooldown;
             int radius = Config.uniqueEffects.thunderbrand.radius;
-
-            AbilityMethods.tickAbilityThunderBlitz(stack, world, user, remainingUseTicks, ability_timer_max,
-                    abilityDamage, skillCooldown, radius);
+            AbilityMethods.tickAbilityThunderBlitz(stack, world, user, remainingUseTicks, ability_timer_max, abilityDamage, skillCooldown, radius);
         }
     }
 
     @Override
-    public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
-        //Player dash end
-        if (!world.isClient && user.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
-            user.setVelocity(0, 0, 0); // Stop player at end of charge
-            user.velocityModified = true;
+    public boolean onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
+        if (!world.isClient() && user.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
+            user.setVelocity(0, 0, 0);
+            user.velocityDirty = true;
             user.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, 80, 2), user);
         }
+        return false;
     }
 
     @Override
@@ -101,14 +101,13 @@ public class ThunderbrandSwordItem extends UniqueSwordItem implements TwoHandedW
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
-        HelperMethods.createFootfalls(entity, stack, world, ParticleTypes.MYCELIUM, ParticleTypes.MYCELIUM,
-                ParticleTypes.MYCELIUM, true);
-        super.inventoryTick(stack, world, entity, slot, selected);
+    public void inventoryTick(ItemStack stack, ServerWorld world, Entity entity, EquipmentSlot slot) {
+        HelperMethods.createFootfalls(entity, stack, world, ParticleTypes.MYCELIUM, ParticleTypes.MYCELIUM, ParticleTypes.MYCELIUM, true);
+        super.inventoryTick(stack, world, entity, slot);
     }
 
     @Override
-    public void appendTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
+    protected void appendItemTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.thunderbrandsworditem.tooltip1").setStyle(Styles.ABILITY));
         tooltip.add(Text.translatable("item.simplyswords.thunderbrandsworditem.tooltip2").setStyle(Styles.TEXT));
@@ -120,7 +119,7 @@ public class ThunderbrandSwordItem extends UniqueSwordItem implements TwoHandedW
         tooltip.add(Text.translatable("item.simplyswords.thunderbrandsworditem.tooltip5").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.thunderbrandsworditem.tooltip6").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.thunderbrandsworditem.tooltip7").setStyle(Styles.TEXT));
-        super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        super.appendItemTooltip(itemStack, tooltipContext, tooltip, type);
         TooltipUtils.appendSpellScaleTooltip(tooltip, "lightning");
     }
 

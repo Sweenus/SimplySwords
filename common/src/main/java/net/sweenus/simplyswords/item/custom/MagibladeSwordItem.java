@@ -3,19 +3,21 @@ package net.sweenus.simplyswords.item.custom;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
+import net.minecraft.item.consume.UseAction;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
-import net.minecraft.util.TypedActionResult;
-import net.minecraft.util.UseAction;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
@@ -34,26 +36,26 @@ public class MagibladeSwordItem extends UniqueSwordItem {
 
 
     @Override
-    public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        if (!attacker.getWorld().isClient()) {
+    public void postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        if (!attacker.getEntityWorld().isClient()) {
             HelperMethods.playHitSounds(attacker, target);
         }
-        return super.postHit(stack, target, attacker);
+        super.postHit(stack, target, attacker);
     }
 
     @Override
-    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
+    public ActionResult use(World world, PlayerEntity user, Hand hand) {
         ItemStack itemStack = user.getStackInHand(hand);
         if (itemStack.getDamage() >= itemStack.getMaxDamage() - 1) {
-            return TypedActionResult.fail(itemStack);
+            return ActionResult.FAIL;
         }
         user.setCurrentHand(hand);
-        return TypedActionResult.consume(itemStack);
+        return ActionResult.CONSUME;
     }
 
     @Override
     public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
-        if (!world.isClient) {
+        if (!world.isClient()) {
             if ((remainingUseTicks %5 == 0 && remainingUseTicks < getMaxUseTime(stack, user) - 5)) {
                 if (remainingUseTicks < 10) {
                     onStoppedUsing(stack, world, user, remainingUseTicks);
@@ -78,8 +80,8 @@ public class MagibladeSwordItem extends UniqueSwordItem {
     }
 
     @Override
-    public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
-        if (!user.getWorld().isClient() && user instanceof  PlayerEntity player) {
+    public boolean onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
+        if (!user.getEntityWorld().isClient() && user instanceof  PlayerEntity player) {
             int skillCooldown = Config.uniqueEffects.magiblade.cooldown;
             float damageModifier = Config.uniqueEffects.magiblade.damageModifier;
             float damage = (float) (HelperMethods.getEntityAttackDamage(user) * damageModifier);
@@ -94,20 +96,21 @@ public class MagibladeSwordItem extends UniqueSwordItem {
                 user.setVelocity(user.getRotationVector().negate().multiply(+1.1));
                 user.setVelocity(user.getVelocity().x, 0, user.getVelocity().z);
             }
-        player.getItemCooldownManager().set(this, skillCooldown);
+        player.getItemCooldownManager().set(this.getDefaultStack(), skillCooldown);
 
         }
+        return false;
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
+    public void inventoryTick(ItemStack stack, ServerWorld world, Entity entity, EquipmentSlot slot) {
         HelperMethods.createFootfalls(entity, stack, world, ParticleTypes.ENCHANT,
                 ParticleTypes.ENCHANT, ParticleTypes.ASH, true);
-        super.inventoryTick(stack, world, entity, slot, selected);
+        super.inventoryTick(stack, world, entity, slot);
     }
 
     @Override
-    public void appendTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
+    protected void appendItemTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.magibladesworditem.tooltip1").setStyle(Styles.ABILITY));
         tooltip.add(Text.translatable("item.simplyswords.magibladesworditem.tooltip2").setStyle(Styles.TEXT));
@@ -121,7 +124,7 @@ public class MagibladeSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.magibladesworditem.tooltip8").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.magibladesworditem.tooltip9").setStyle(Styles.TEXT));
 
-        super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        super.appendItemTooltip(itemStack, tooltipContext, tooltip, type);
     }
 
     public static class EffectSettings extends TooltipSettings {

@@ -22,10 +22,10 @@ public class HighOrbitingEffect extends StatusEffect {
     private double currentAngle = 0.0;
 
     @Override
-    public boolean applyUpdateEffect(LivingEntity livingEntity, int amplifier) {
-        if (!livingEntity.getWorld().isClient) {
-            ServerWorld serverWorld = (ServerWorld) livingEntity.getWorld();
-            Vec3d center = livingEntity.getPos().add(0, (livingEntity.getHeight() + yOffset), 0); // Center around the entity's waist
+    public boolean applyUpdateEffect(ServerWorld world, LivingEntity livingEntity, int amplifier) {
+        if (!livingEntity.getEntityWorld().isClient()) {
+            ServerWorld serverWorld = (ServerWorld) livingEntity.getEntityWorld();
+            Vec3d center = livingEntity.getEntityPos().add(0, (livingEntity.getHeight() + yOffset), 0); // Center around the entity's waist
             double speed = Math.PI / 8; // Control the speed of the orbit
 
             // Calculate the radius based on the amplifier
@@ -50,7 +50,7 @@ public class HighOrbitingEffect extends StatusEffect {
                 currentAngle -= 2 * Math.PI;
             }
         }
-        super.applyUpdateEffect(livingEntity, amplifier);
+        super.applyUpdateEffect(world, livingEntity, amplifier);
         return true;
     }
 

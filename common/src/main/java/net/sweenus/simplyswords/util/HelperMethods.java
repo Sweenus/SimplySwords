@@ -53,6 +53,27 @@ import java.util.Random;
 
 public class HelperMethods {
 
+    /**
+     * Replacement for SwordItem.createAttributeModifiers which was removed in 1.21.11.
+     * Creates attribute modifiers for a sword-like item with the given material, damage, and attack speed.
+     */
+    public static AttributeModifiersComponent createSwordAttributeModifiers(net.minecraft.item.ToolMaterial material, int attackDamage, float attackSpeed) {
+        return AttributeModifiersComponent.builder()
+                .add(EntityAttributes.ATTACK_DAMAGE,
+                        new net.minecraft.entity.attribute.EntityAttributeModifier(
+                                Item.BASE_ATTACK_DAMAGE_MODIFIER_ID,
+                                (float) attackDamage + material.attackDamageBonus(),
+                                net.minecraft.entity.attribute.EntityAttributeModifier.Operation.ADD_VALUE),
+                        AttributeModifierSlot.MAINHAND)
+                .add(EntityAttributes.ATTACK_SPEED,
+                        new net.minecraft.entity.attribute.EntityAttributeModifier(
+                                Item.BASE_ATTACK_SPEED_MODIFIER_ID,
+                                attackSpeed,
+                                net.minecraft.entity.attribute.EntityAttributeModifier.Operation.ADD_VALUE),
+                        AttributeModifierSlot.MAINHAND)
+                .build();
+    }
+
     private static final Random random = new Random();
 
     public static Random random() {
@@ -145,9 +166,7 @@ public class HelperMethods {
     //spawnParticle - spawns particles across both client & server
     public static void spawnParticle(World world, ParticleEffect particle, double xpos, double ypos, double zpos,
                                      double xvelocity, double yvelocity, double zvelocity) {
-        if (world.isClient) {
-            world.addParticle(particle, xpos, ypos, zpos, xvelocity, yvelocity, zvelocity);
-        } else if (world instanceof ServerWorld serverWorld) {
+        if (world instanceof ServerWorld serverWorld) {
             serverWorld.spawnParticles(particle, xpos, ypos, zpos, 1, xvelocity, yvelocity, zvelocity, 0.1);
         }
     }
@@ -177,8 +196,8 @@ public class HelperMethods {
 
     // playHitSounds
     public static void playHitSounds(LivingEntity attacker, LivingEntity target) {
-        if (!attacker.getWorld().isClient()) {
-            ServerWorld world = (ServerWorld) attacker.getWorld();
+        if (!attacker.getEntityWorld().isClient()) {
+            ServerWorld world = (ServerWorld) attacker.getEntityWorld();
             boolean impactsounds_enabled = Config.general.enableWeaponImpactSounds;
             float impactsounds_volume = Config.general.weaponImpactSoundsVolume;
 
@@ -296,24 +315,24 @@ public class HelperMethods {
             if (isWalking(player) && !player.isSwimming() && player.isOnGround()) {
                 if (stepMod == 6) {
                     if (player.isSprinting()) {
-                        world.addParticle(sprintParticle, player.getX() + player.getHandPosOffset(stack.getItem()).getX(),
+                        spawnParticle(world, sprintParticle, player.getX() + player.getHandPosOffset(stack.getItem()).getX(),
                                 player.getY() + player.getHandPosOffset(stack.getItem()).getY() + 0.2,
                                 player.getZ() + player.getHandPosOffset(stack.getItem()).getZ(),
                                 0, 0.0, 0);
                     } else {
-                        world.addParticle(particle, player.getX() + player.getHandPosOffset(stack.getItem()).getX(),
+                        spawnParticle(world, particle, player.getX() + player.getHandPosOffset(stack.getItem()).getX(),
                                 player.getY() + player.getHandPosOffset(stack.getItem()).getY() + 0.2,
                                 player.getZ() + player.getHandPosOffset(stack.getItem()).getZ(),
                                 0, 0.0, 0);
                     }
                 } else if (stepMod == 3) {
                     if (player.isSprinting()) {
-                        world.addParticle(sprintParticle, player.getX() - player.getHandPosOffset(stack.getItem()).getX(),
+                        spawnParticle(world, sprintParticle, player.getX() - player.getHandPosOffset(stack.getItem()).getX(),
                                 player.getY() + player.getHandPosOffset(stack.getItem()).getY() + 0.2,
                                 player.getZ() - player.getHandPosOffset(stack.getItem()).getZ(),
                                 0, 0.0, 0);
                     } else {
-                        world.addParticle(particle, player.getX() - player.getHandPosOffset(stack.getItem()).getX(),
+                        spawnParticle(world, particle, player.getX() - player.getHandPosOffset(stack.getItem()).getX(),
                                 player.getY() + player.getHandPosOffset(stack.getItem()).getY() + 0.2,
                                 player.getZ() - player.getHandPosOffset(stack.getItem()).getZ(),
                                 0, 0.0, 0);
@@ -323,20 +342,20 @@ public class HelperMethods {
             if (passiveParticles && Config.general.enablePassiveParticles) {
                 float randomy = (float) (Math.random());
                 if (stepMod == 1) {
-                    world.addParticle(passiveParticle, player.getX() - player.getHandPosOffset(stack.getItem()).getX(),
+                    spawnParticle(world, passiveParticle, player.getX() - player.getHandPosOffset(stack.getItem()).getX(),
                             player.getY() + player.getHandPosOffset(stack.getItem()).getY() + 0.4 + randomy,
                             player.getZ() - player.getHandPosOffset(stack.getItem()).getZ(),
                             0, 0.0, 0);
-                    world.addParticle(passiveParticle, player.getX() - player.getHandPosOffset(stack.getItem()).getX() + 0.1,
+                    spawnParticle(world, passiveParticle, player.getX() - player.getHandPosOffset(stack.getItem()).getX() + 0.1,
                             player.getY() + player.getHandPosOffset(stack.getItem()).getY() + randomy,
                             player.getZ() - player.getHandPosOffset(stack.getItem()).getZ() - 0.1,
                             0, 0.0, 0);
                 } else if (stepMod == 4) {
-                    world.addParticle(passiveParticle, player.getX() + player.getHandPosOffset(stack.getItem()).getX(),
+                    spawnParticle(world, passiveParticle, player.getX() + player.getHandPosOffset(stack.getItem()).getX(),
                             player.getY() + player.getHandPosOffset(stack.getItem()).getY() + 0.4 + randomy,
                             player.getZ() + player.getHandPosOffset(stack.getItem()).getZ(),
                             0, 0.0, 0);
-                    world.addParticle(passiveParticle, player.getX() + player.getHandPosOffset(stack.getItem()).getX() - 0.1,
+                    spawnParticle(world, passiveParticle, player.getX() + player.getHandPosOffset(stack.getItem()).getX() - 0.1,
                             player.getY() + player.getHandPosOffset(stack.getItem()).getY() + randomy,
                             player.getZ() + player.getHandPosOffset(stack.getItem()).getZ() + 0.1,
                             0, 0.0, 0);
@@ -361,8 +380,8 @@ public class HelperMethods {
     }
 
     public static void spawnWaistHeightParticles(ServerWorld world, ParticleEffect particle, Entity entity1, Entity entity2, int count) {
-        Vec3d startPos = entity1.getPos().add(0, entity1.getHeight() / 2.0, 0);
-        Vec3d endPos = entity2.getPos().add(0, entity2.getHeight() / 2.0, 0);
+        Vec3d startPos = entity1.getEntityPos().add(0, entity1.getHeight() / 2.0, 0);
+        Vec3d endPos = entity2.getEntityPos().add(0, entity2.getHeight() / 2.0, 0);
         Vec3d direction = endPos.subtract(startPos);
         double distance = direction.length();
         Vec3d normalizedDirection = direction.normalize();
@@ -379,7 +398,7 @@ public class HelperMethods {
     }
 
     public static void spawnRainingParticles(ServerWorld world, ParticleEffect particle, Entity entity2, int count, double blocksAbove) {
-        Vec3d endPos = entity2.getPos().add(0, entity2.getHeight() / 2.0, 0);
+        Vec3d endPos = entity2.getEntityPos().add(0, entity2.getHeight() / 2.0, 0);
         Vec3d startPos = endPos.add(0, blocksAbove, 0);
         Vec3d direction = endPos.subtract(startPos);
         double distance = direction.length();
@@ -397,7 +416,7 @@ public class HelperMethods {
     }
 
     public static void spawnParticlesBetween(ServerPlayerEntity player, BlockPos blockPos, ServerWorld world, ParticleEffect particleType, int particleCount) {
-        Vec3d start = player.getPos().add(0, player.getHeight() / 2.0, 0);
+        Vec3d start = player.getEntityPos().add(0, player.getHeight() / 2.0, 0);
         Vec3d end = Vec3d.ofCenter(blockPos);
 
         double stepSize = 1.0 / particleCount;
@@ -463,7 +482,7 @@ public class HelperMethods {
 
     //Get entity attack damage
     public static double getEntityAttackDamage(LivingEntity livingEntity){
-        EntityAttributeInstance attackDamageAttribute = livingEntity.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE);
+        EntityAttributeInstance attackDamageAttribute = livingEntity.getAttributeInstance(EntityAttributes.ATTACK_DAMAGE);
         if (attackDamageAttribute != null) {
             return attackDamageAttribute.getValue();
         }
@@ -477,7 +496,7 @@ public class HelperMethods {
         if (!stack.isEmpty()) {
             AttributeModifiersComponent attributeModifiersComponent = stack.getOrDefault(DataComponentTypes.ATTRIBUTE_MODIFIERS, AttributeModifiersComponent.DEFAULT);
             for (AttributeModifiersComponent.Entry entry : attributeModifiersComponent.modifiers()) {
-                if (entry.attribute() == EntityAttributes.GENERIC_ATTACK_DAMAGE && entry.slot() == attributeModifierSlot) {
+                if (entry.attribute() == EntityAttributes.ATTACK_DAMAGE && entry.slot() == attributeModifierSlot) {
                     attackValue += entry.modifier().value();
                 }
             }
@@ -487,14 +506,14 @@ public class HelperMethods {
     }
 
     public static void applyDamageWithoutKnockback(LivingEntity target, DamageSource source, float amount) {
-        EntityAttributeInstance knockbackResistance = target.getAttributeInstance(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE);
+        EntityAttributeInstance knockbackResistance = target.getAttributeInstance(EntityAttributes.KNOCKBACK_RESISTANCE);
         double originalKnockbackResistance = 0;
         if (knockbackResistance != null) {
             originalKnockbackResistance = knockbackResistance.getValue();
             knockbackResistance.setBaseValue(1.0);
         }
         try {
-            target.damage(source, amount);
+            target.damage((ServerWorld) target.getEntityWorld(), source, amount);
         } finally {
             if (knockbackResistance != null) {
                 knockbackResistance.setBaseValue(originalKnockbackResistance);
@@ -503,7 +522,7 @@ public class HelperMethods {
     }
 
     public static void spawnDirectionalParticles(ServerWorld world, ParticleEffect particle, Entity entity, int count, double distance) {
-        Vec3d startPos = entity.getPos().add(0, entity.getHeight() / 2.0, 0);
+        Vec3d startPos = entity.getEntityPos().add(0, entity.getHeight() / 2.0, 0);
 
         float pitch = entity.getPitch(1.0F);
         float yaw = entity.getYaw(1.0F);
@@ -528,7 +547,7 @@ public class HelperMethods {
     }
 
     public static void damageEntitiesInTrajectory(ServerWorld world, Entity sourceEntity, double distance, float damage, DamageSource damageSource) {
-        Vec3d startPos = sourceEntity.getPos().add(0, sourceEntity.getHeight() / 2.0, 0);
+        Vec3d startPos = sourceEntity.getEntityPos().add(0, sourceEntity.getHeight() / 2.0, 0);
         float pitch = sourceEntity.getPitch(1.0F);
         float yaw = sourceEntity.getYaw(1.0F);
 
@@ -551,7 +570,7 @@ public class HelperMethods {
                 if ((sourceEntity instanceof PlayerEntity livingEntity)
                         && (entity instanceof LivingEntity livingTarget)
                         && HelperMethods.checkFriendlyFire(livingTarget, livingEntity)) {
-                    livingTarget.damage(damageSource, damage);
+                    livingTarget.damage((ServerWorld) livingTarget.getEntityWorld(), damageSource, damage);
                 }
             }
         }
@@ -560,7 +579,7 @@ public class HelperMethods {
     // Ignore iFrames without resetting them entirely
     public static boolean damageThroughIframes(Entity targetEntity, DamageSource damageSource, float damage) {
         int iframes = targetEntity.timeUntilRegen;
-        boolean result = targetEntity.damage(damageSource, damage);
+        boolean result = targetEntity.damage((ServerWorld) targetEntity.getEntityWorld(), damageSource, damage);
         targetEntity.timeUntilRegen = iframes;
         return result;
     }

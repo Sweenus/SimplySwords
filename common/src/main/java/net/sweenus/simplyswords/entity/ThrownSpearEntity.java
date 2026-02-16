@@ -3,6 +3,7 @@ package net.sweenus.simplyswords.entity;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.FlyingItemEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.data.DataTracker;
@@ -12,12 +13,12 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.PersistentProjectileEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.SwordItem;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
@@ -29,7 +30,7 @@ import net.sweenus.simplyswords.util.HelperMethods;
 import org.jetbrains.annotations.Nullable;
 
 // This thing is honestly so cursed (many issues with saving/load item stack from entity nbt). It finally seems to work, but the code needs cleaning up and I don't want to touch it
-public class ThrownSpearEntity extends PersistentProjectileEntity {
+public class ThrownSpearEntity extends PersistentProjectileEntity implements FlyingItemEntity {
     private boolean dealtDamage;
     private static final TrackedData<Byte> LOYALTY;
     private static final TrackedData<Boolean> ENCHANTED;
@@ -85,7 +86,7 @@ public class ThrownSpearEntity extends PersistentProjectileEntity {
         if (this.isNoClip() && this.isOwner(player)) {
             int cooldown = 1;
             if (offhandThrow) cooldown = 4;
-            player.getItemCooldownManager().set(this.asItemStack().getItem(), cooldown);
+            player.getItemCooldownManager().set(this.asItemStack(), cooldown);
             if (offhandThrow && player.getOffHandStack().isEmpty()) {
                 // Send the ItemStack to the player's offhand slot if it's free
                 player.setStackInHand(Hand.OFF_HAND, this.asItemStack());
@@ -115,16 +116,16 @@ public class ThrownSpearEntity extends PersistentProjectileEntity {
         int i = hasLoyalty;
         if (i > 0 && (this.dealtDamage || this.isNoClip()) && entity != null && returnToPlayer) {
             if (!this.isOwnerAlive()) {
-                if (!this.getWorld().isClient && this.pickupType == PickupPermission.ALLOWED) {
-                    this.dropStack(this.asItemStack(), 0.1F);
+                if (!this.getEntityWorld().isClient() && this.pickupType == PickupPermission.ALLOWED) {
+                    this.dropStack((ServerWorld) this.getEntityWorld(), this.asItemStack());
                 }
 
                 this.discard();
             } else {
                 this.setNoClip(true);
-                Vec3d vec3d = entity.getEyePos().subtract(this.getPos());
+                Vec3d vec3d = entity.getEyePos().subtract(this.getEntityPos());
                 this.setPos(this.getX(), this.getY() + vec3d.y * 0.015 * (double)i, this.getZ());
-                if (this.getWorld().isClient) {
+                if (this.getEntityWorld().isClient()) {
                     this.lastRenderY = this.getY();
                 }
 
@@ -155,7 +156,7 @@ public class ThrownSpearEntity extends PersistentProjectileEntity {
         float fixedYaw = initialYaw;
 
         // Check if the spear is in the ground
-        if (this.inGround) {
+        if (this.isInGround()) {
             // If the spear is in the ground, don't update the angles further
             this.setRotation(fixedYaw + 90, keepPitch);
         } else {
@@ -167,7 +168,6 @@ public class ThrownSpearEntity extends PersistentProjectileEntity {
         doOnTick(entity);
     }
 
-    @Override
     public void updateTrackedPositionAndAngles(double x, double y, double z, float yaw, float pitch, int interpolationSteps) {
         // Update the position
         this.setPosition(x, y, z);
@@ -187,7 +187,7 @@ public class ThrownSpearEntity extends PersistentProjectileEntity {
         float fixedYaw = initialYaw;
 
         // Check if the spear is in the ground
-        if (this.inGround) {
+        if (this.isInGround()) {
             // If the spear is in the ground, don't update the angles further
             this.setRotation(fixedYaw + 90, keepPitch);
         } else {
@@ -222,7 +222,7 @@ public class ThrownSpearEntity extends PersistentProjectileEntity {
         Entity entity2 = this.getOwner();
         DamageSource damageSource = this.getDamageSources().trident(this, (Entity) (entity2 == null ? this : entity2));
         float agedDamage = doExtraDamage(entity, baseDamage, damageSource);
-        World world = this.getWorld();
+        World world = this.getEntityWorld();
 
         this.dealtDamage = true;
         if (HelperMethods.damageThroughIframes(entity, damageSource, agedDamage)) {
@@ -240,8 +240,8 @@ public class ThrownSpearEntity extends PersistentProjectileEntity {
                 // Get the ItemStack and call postHit if it's defined on the associated Item
                 if (stack != null &&  !stack.isEmpty() && this.getOwner() instanceof LivingEntity livingOwner) {
                     Item weaponItem = stack.getItem();
-                    if (weaponItem instanceof SwordItem) {
-                        ((SwordItem) weaponItem).postHit(stack, livingEntity, livingOwner);
+                    if (weaponItem instanceof Item) {
+                        ((Item) weaponItem).postHit(stack, livingEntity, livingOwner);
                     }
                 }
 
@@ -254,7 +254,7 @@ public class ThrownSpearEntity extends PersistentProjectileEntity {
 
     protected float doExtraDamage(Entity entity, float baseDamage, DamageSource damageSource) {
         float agedDamage = baseDamage + ((float) age / 2);
-        World world = this.getWorld();
+        World world = this.getEntityWorld();
         if (world instanceof ServerWorld serverWorld) {
             agedDamage = EnchantmentHelper.getDamage(serverWorld, stack, entity, damageSource, agedDamage);
             doEffects(serverWorld, baseDamage, entity);
@@ -272,31 +272,27 @@ public class ThrownSpearEntity extends PersistentProjectileEntity {
     }
 
     @Override
-    public void readCustomDataFromNbt(NbtCompound nbt) {
-        super.readCustomDataFromNbt(nbt);
-        this.dealtDamage = nbt.getBoolean("DealtDamage");
+    protected void readCustomData(ReadView readView) {
+        super.readCustomData(readView);
+        this.dealtDamage = readView.getBoolean("DealtDamage", false);
         this.dataTracker.set(LOYALTY, this.getLoyalty());
-        if (nbt.contains("Stack")) {
-            this.dataTracker.set(ITEM_STACK, this.stack);
-            this.stack = ItemStack.fromNbt(this.getRegistryManager(), nbt.getCompound("item")).orElse(this.getDefaultItemStack());
-        } else {
-            this.stack = ItemStack.EMPTY;
-        }
-
+        this.stack = readView.read("item", ItemStack.CODEC).orElse(ItemStack.EMPTY);
+        this.dataTracker.set(ITEM_STACK, this.stack);
     }
 
 
     @Override
-    public void writeCustomDataToNbt(NbtCompound nbt) {
-        super.writeCustomDataToNbt(nbt);
-        nbt.putBoolean("DealtDamage", this.dealtDamage);
-        if (!this.stack.isEmpty())
-            nbt.put("item", this.stack.encode(this.getRegistryManager()));
+    protected void writeCustomData(WriteView writeView) {
+        super.writeCustomData(writeView);
+        writeView.putBoolean("DealtDamage", this.dealtDamage);
+        if (!this.stack.isEmpty()) {
+            writeView.put("item", ItemStack.CODEC, this.stack);
+        }
     }
 
 
     protected byte getLoyalty() {
-        World world = this.getWorld();
+        World world = this.getEntityWorld();
         if (world instanceof ServerWorld serverWorld) {
             return (byte) hasLoyalty;
         } else {
@@ -312,6 +308,11 @@ public class ThrownSpearEntity extends PersistentProjectileEntity {
 
     public ItemStack getWeaponStack() {
         return this.getItemStack();
+    }
+
+    @Override
+    public ItemStack getStack() {
+        return this.getWeaponStack();
     }
 
 

@@ -30,7 +30,7 @@ public class FloatPower extends RunefusedGemPower {
 
 		if (attacker.getRandom().nextInt(100) <= hitChance) {
 			target.addStatusEffect(new StatusEffectInstance(StatusEffects.LEVITATION, duration, this.isGreater() ? 3 : 2), attacker);
-			attacker.getWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
+			attacker.getEntityWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
 					attacker.getSoundCategory(), 0.1f, 1.8f);
 		}
 	}

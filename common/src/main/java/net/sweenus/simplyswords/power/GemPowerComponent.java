@@ -12,8 +12,8 @@ import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.codec.PacketCodecs;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.text.Text;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
-import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.registry.GemPowerRegistry;
 import net.sweenus.simplyswords.util.Styles;
@@ -35,9 +35,9 @@ public record GemPowerComponent(boolean hasRunicPower, boolean hasNetherPower, R
 			);
 
 	public static final PacketCodec<RegistryByteBuf, GemPowerComponent> PACKET_CODEC = PacketCodec.tuple(
-			PacketCodecs.BOOL,
+			PacketCodecs.BOOLEAN,
 			GemPowerComponent::hasRunicPower,
-			PacketCodecs.BOOL,
+			PacketCodecs.BOOLEAN,
 			GemPowerComponent::hasNetherPower,
 			PacketCodecs.registryEntry(GemPowerRegistry.REGISTRY.key()),
 			GemPowerComponent::runicPower,
@@ -105,15 +105,17 @@ public record GemPowerComponent(boolean hasRunicPower, boolean hasNetherPower, R
 		netherPower.value().postHit(stack, target, attacker);
 	}
 
-	public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
+	public ActionResult use(World world, PlayerEntity user, Hand hand) {
 		ItemStack itemStack = user.getStackInHand(hand);
-		TypedActionResult<ItemStack> result1 = runicPower.value().use(world, user, hand, itemStack);
-		TypedActionResult<ItemStack> result2 = netherPower.value().use(world, user, hand, itemStack);
-		if (result1.getResult().compareTo(result2.getResult()) < 0) {
+		ActionResult result1 = runicPower.value().use(world, user, hand, itemStack);
+		ActionResult result2 = netherPower.value().use(world, user, hand, itemStack);
+		// Return the more successful result
+		if (result1 == ActionResult.SUCCESS || result1 == ActionResult.CONSUME) {
 			return result1;
-		} else {
+		} else if (result2 == ActionResult.SUCCESS || result2 == ActionResult.CONSUME) {
 			return result2;
 		}
+		return result1;
 	}
 
 	public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
@@ -121,9 +123,10 @@ public record GemPowerComponent(boolean hasRunicPower, boolean hasNetherPower, R
 		netherPower.value().usageTick(world, user, stack, remainingUseTicks);
 	}
 
-	public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
-		runicPower.value().onStoppedUsing(stack, world, user, remainingUseTicks);
-		netherPower.value().onStoppedUsing(stack, world, user, remainingUseTicks);
+	public boolean onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
+		boolean runic = runicPower.value().onStoppedUsing(stack, world, user, remainingUseTicks);
+		boolean nether = netherPower.value().onStoppedUsing(stack, world, user, remainingUseTicks);
+		return runic || nether;
 	}
 
 	public int getMaxUseTime(ItemStack stack) {

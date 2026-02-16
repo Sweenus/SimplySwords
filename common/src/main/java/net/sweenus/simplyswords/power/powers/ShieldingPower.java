@@ -30,7 +30,7 @@ public class ShieldingPower extends RunefusedGemPower {
 
 		if (attacker.getRandom().nextInt(100) <= hitChance) {
 			attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.ABSORPTION, duration, this.isGreater() ? 1 : 0), attacker);
-			attacker.getWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
+			attacker.getEntityWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
 					attacker.getSoundCategory(), 0.1f, 1.8f);
 		}
 	}

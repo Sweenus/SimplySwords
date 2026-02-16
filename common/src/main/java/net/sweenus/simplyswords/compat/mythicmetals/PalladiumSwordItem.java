@@ -12,8 +12,8 @@ public class PalladiumSwordItem extends SimplySwordsSwordItem {
     }
 
     @Override
-    public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+    public void postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         PalladiumToolSet.applyHeatToTarget(target, attacker);
-        return super.postHit(stack, target, attacker);
+        super.postHit(stack, target, attacker);
     }
 }

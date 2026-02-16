@@ -3,10 +3,12 @@ package net.sweenus.simplyswords.item.custom;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.item.tooltip.TooltipType;
@@ -17,8 +19,8 @@ import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.text.Text;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
-import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
@@ -42,11 +44,11 @@ public class TempestSwordItem extends UniqueSwordItem {
     }
 
     @Override
-    public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        if (!attacker.getWorld().isClient()) {
+    public void postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        if (!attacker.getEntityWorld().isClient()) {
 
             int vortexMaxStacks = Config.uniqueEffects.tempest.maxStacks;
-            ServerWorld serverWorld = (ServerWorld) attacker.getWorld();
+            ServerWorld serverWorld = (ServerWorld) attacker.getEntityWorld();
             HelperMethods.playHitSounds(attacker, target);
             SoundEvent soundSelect;
             ParticleEffect particleSelect;
@@ -89,12 +91,12 @@ public class TempestSwordItem extends UniqueSwordItem {
             target.addStatusEffect(effect);
 
         }
-        return super.postHit(stack, target, attacker);
+        super.postHit(stack, target, attacker);
     }
 
     @Override
-    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
-        if (!user.getWorld().isClient() && world instanceof  ServerWorld serverWorld) {
+    public ActionResult use(World world, PlayerEntity user, Hand hand) {
+        if (!user.getEntityWorld().isClient() && world instanceof  ServerWorld serverWorld) {
 
             int vortexMaxSize = Config.uniqueEffects.tempest.maxSize;
             int vortexDuration = Config.uniqueEffects.tempest.duration;
@@ -124,7 +126,7 @@ public class TempestSwordItem extends UniqueSwordItem {
                         status.setSourceEntity(user);
                         le.removeStatusEffect(EffectRegistry.getReference(EffectRegistry.FIRE_VORTEX));
                         le.removeStatusEffect(EffectRegistry.getReference(EffectRegistry.FROST_VORTEX));
-                        user.getItemCooldownManager().set(this, skillCooldown);
+                        user.getItemCooldownManager().set(this.getDefaultStack(), skillCooldown);
                     }
                 }
             }
@@ -135,15 +137,15 @@ public class TempestSwordItem extends UniqueSwordItem {
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
+    public void inventoryTick(ItemStack stack, ServerWorld world, Entity entity, EquipmentSlot slot) {
         HelperMethods.createFootfalls(entity, stack, world, ParticleTypes.DUST_PLUME,
                 ParticleTypes.DUST_PLUME, ParticleTypes.DUST_PLUME, true);
 
-        super.inventoryTick(stack, world, entity, slot, selected);
+        super.inventoryTick(stack, world, entity, slot);
     }
 
     @Override
-    public void appendTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
+    protected void appendItemTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.tempestsworditem.tooltip1").setStyle(Styles.ABILITY));
         tooltip.add(Text.translatable("item.simplyswords.tempestsworditem.tooltip2").setStyle(Styles.TEXT));
@@ -159,7 +161,7 @@ public class TempestSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.tempestsworditem.tooltip9").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.tempestsworditem.tooltip10").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.tempestsworditem.tooltip11").setStyle(Styles.TEXT));
-        super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        super.appendItemTooltip(itemStack, tooltipContext, tooltip, type);
         TooltipUtils.appendSpellScaleTooltip(tooltip, "frost_fire");
     }
 

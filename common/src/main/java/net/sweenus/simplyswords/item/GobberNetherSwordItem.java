@@ -3,7 +3,6 @@ package net.sweenus.simplyswords.item;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.SwordItem;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
@@ -13,15 +12,21 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class GobberNetherSwordItem extends SwordItem {
+public class GobberNetherSwordItem extends Item {
     String[] repairIngredient;
 
     public GobberNetherSwordItem(ToolMaterial toolMaterial, String... repairIngredient) {
-        super(toolMaterial, new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS));
+        super(new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS));
         this.repairIngredient = repairIngredient;
     }
 
-    @Override
+    public GobberNetherSwordItem(ToolMaterial toolMaterial, int attackDamage, float attackSpeed, String... repairIngredient) {
+        super(new Item.Settings()
+                .arch$tab(SimplySwords.SIMPLYSWORDS)
+                .attributeModifiers(net.sweenus.simplyswords.util.HelperMethods.createSwordAttributeModifiers(toolMaterial, attackDamage, attackSpeed)));
+        this.repairIngredient = repairIngredient;
+    }
+
     public boolean canRepair(ItemStack stack, ItemStack ingredient) {
         List<Item> potentialIngredients = new ArrayList<>(List.of());
         Arrays.stream(repairIngredient).toList().forEach(repIngredient ->
@@ -34,11 +39,11 @@ public class GobberNetherSwordItem extends SwordItem {
 
     //Nether ignite on hit
     @Override
-    public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+    public void postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         target.setOnFireFor(10);
 
 
-        return super.postHit(stack, target, attacker);
+        super.postHit(stack, target, attacker);
 
     }
 }

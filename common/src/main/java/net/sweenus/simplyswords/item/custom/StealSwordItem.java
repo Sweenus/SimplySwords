@@ -4,10 +4,12 @@ import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedDouble;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.item.tooltip.TooltipType;
@@ -15,8 +17,8 @@ import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
-import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
@@ -37,13 +39,13 @@ public class StealSwordItem extends UniqueSwordItem {
     }
 
     @Override
-    public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        if (!attacker.getWorld().isClient()) {
-            ServerWorld sworld = (ServerWorld) attacker.getWorld();
+    public void postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        if (!attacker.getEntityWorld().isClient()) {
+            ServerWorld sworld = (ServerWorld) attacker.getEntityWorld();
             int hitChance = Config.uniqueEffects.soulstealer.chance;
             int duration = Config.uniqueEffects.soulstealer.duration;
             attacker.setVelocity(attacker.getRotationVector().multiply(+1));
-            attacker.velocityModified = true;
+            attacker.velocityDirty = true;
 
             HelperMethods.playHitSounds(attacker, target);
 
@@ -65,19 +67,19 @@ public class StealSwordItem extends UniqueSwordItem {
                 target.addStatusEffect(new StatusEffectInstance(StatusEffects.GLOWING, duration, 1), attacker);
             }
         }
-        return super.postHit(stack, target, attacker);
+        super.postHit(stack, target, attacker);
     }
 
     @Override
-    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
-        if (!user.getWorld().isClient()) {
+    public ActionResult use(World world, PlayerEntity user, Hand hand) {
+        if (!user.getEntityWorld().isClient()) {
             double sradius = Config.uniqueEffects.soulstealer.radius;
             double vradius = Config.uniqueEffects.soulstealer.radius / 2.0;
 
             double x = user.getX();
             double y = user.getY();
             double z = user.getZ();
-            ServerWorld sworld = (ServerWorld) user.getWorld();
+            ServerWorld sworld = (ServerWorld) user.getEntityWorld();
             Box box = new Box(x + sradius, y + vradius, z + sradius,
                     x - sradius, y - vradius, z - sradius);
             for (Entity entity : sworld.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY)) {
@@ -92,11 +94,11 @@ public class StealSwordItem extends UniqueSwordItem {
                             sworld.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_SWORD_SCIFI_ATTACK_03.get(),
                                     le.getSoundCategory(), 0.3f, 1.5f);
                             float abilityDamage = HelperMethods.spellScaledDamage("soul", user, Config.uniqueEffects.soulstealer.spellScaling, 5);
-                            le.damage(user.getDamageSources().freeze(), abilityDamage);
+                            le.damage((ServerWorld) user.getEntityWorld(), user.getDamageSources().freeze(), abilityDamage);
                         } else {
                             user.addStatusEffect(new StatusEffectInstance(StatusEffects.INVISIBILITY, iduration, 1), user);
                             user.setVelocity(user.getRotationVector().multiply(+2));
-                            user.velocityModified = true;
+                            user.velocityDirty = true;
                             sworld.playSoundFromEntity(null, entity, SoundRegistry.MAGIC_BOW_SHOOT_MISS_01.get(),
                                     entity.getSoundCategory(), 0.3f, 1.5f);
                         }
@@ -110,14 +112,14 @@ public class StealSwordItem extends UniqueSwordItem {
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
+    public void inventoryTick(ItemStack stack, ServerWorld world, Entity entity, EquipmentSlot slot) {
         HelperMethods.createFootfalls(entity, stack, world, ParticleTypes.NAUTILUS, ParticleTypes.NAUTILUS,
                 ParticleTypes.MYCELIUM, true);
-        super.inventoryTick(stack, world, entity, slot, selected);
+        super.inventoryTick(stack, world, entity, slot);
     }
 
     @Override
-    public void appendTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
+    protected void appendItemTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.stealsworditem.tooltip1").setStyle(Styles.ABILITY));
         tooltip.add(Text.translatable("item.simplyswords.stealsworditem.tooltip2").setStyle(Styles.TEXT));
@@ -132,7 +134,7 @@ public class StealSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.stealsworditem.tooltip8").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.stealsworditem.tooltip9").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.stealsworditem.tooltip10").setStyle(Styles.TEXT));
-        super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        super.appendItemTooltip(itemStack, tooltipContext, tooltip, type);
         TooltipUtils.appendSpellScaleTooltip(tooltip, "soul");
     }
 

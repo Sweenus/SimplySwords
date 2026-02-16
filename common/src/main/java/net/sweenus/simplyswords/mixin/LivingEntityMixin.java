@@ -32,19 +32,19 @@ public abstract class LivingEntityMixin {
     @Inject(at = @At("HEAD"), method = "isDead", cancellable = true)
     public void simplyswords$tick(CallbackInfoReturnable<Boolean> cir) {
         LivingEntity livingEntity = (LivingEntity) (Object) this;
-        if (!livingEntity.getWorld().isClient()) {
+        if (!livingEntity.getEntityWorld().isClient()) {
             if (livingEntity instanceof PlayerEntity player) {
-                World world = player.getWorld();
+                World world = player.getEntityWorld();
                 ItemStack stack = player.getMainHandStack();
 
-                if (player.getHealth() <= 0.0F && !player.getItemCooldownManager().isCoolingDown(stack.getItem())
+                if (player.getHealth() <= 0.0F && !player.getItemCooldownManager().isCoolingDown(stack)
                         && (stack.isOf(ItemsRegistry.WAXWEAVER.get())
                         || stack.isOf(ItemsRegistry.WICKPIERCER.get()))) {
 
                     int skillCooldown = Config.uniqueEffects.waxweaver.cooldown;
                     player.setHealth(player.getMaxHealth());
                     HelperMethods.incrementStatusEffect(player, StatusEffects.RESISTANCE, 100, 2, 3);
-                    player.getItemCooldownManager().set(stack.getItem(), skillCooldown);
+                    player.getItemCooldownManager().set(stack, skillCooldown);
                     world.playSound(null, player.getBlockPos(), SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
                             player.getSoundCategory(), 0.7f, 1.0f);
                     world.playSound(null, player.getBlockPos(), SoundRegistry.SPELL_MISC_02.get(),
@@ -58,7 +58,7 @@ public abstract class LivingEntityMixin {
     @ModifyVariable(method = "modifyAppliedDamage", at = @At("HEAD"), ordinal = 0, argsOnly = true)
     private float simplyswords$modifyDamageAmount(float amount, DamageSource source) {
         LivingEntity livingEntity = (LivingEntity) (Object) this;
-        if (!livingEntity.getWorld().isClient()) {
+        if (!livingEntity.getEntityWorld().isClient()) {
             StatusEffectInstance voidcloakEffect = livingEntity.getStatusEffect(EffectRegistry.getReference(EffectRegistry.VOIDCLOAK));
             StatusEffectInstance ribbonwrathEffect = livingEntity.getStatusEffect(EffectRegistry.getReference(EffectRegistry.RIBBONWRATH));
             StatusEffectInstance soulTetherEffect = livingEntity.getStatusEffect(EffectRegistry.getReference(EffectRegistry.SOULTETHER));
@@ -83,7 +83,7 @@ public abstract class LivingEntityMixin {
     @Inject(at = @At("HEAD"), method = "tick")
     public void simplyswords$tick(CallbackInfo ci) {
         LivingEntity livingEntity = (LivingEntity) (Object) this;
-        if (!livingEntity.getWorld().isClient()) {
+        if (!livingEntity.getEntityWorld().isClient()) {
 
             if (SimplySwords.passVersionCheck("eldritch_end", minimumEldritchEndVersion)
                     && Registries.STATUS_EFFECT.get(Identifier.of("simplyswords:voidhunger")) != null)

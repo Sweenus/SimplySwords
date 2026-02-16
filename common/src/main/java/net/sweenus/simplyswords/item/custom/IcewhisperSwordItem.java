@@ -8,15 +8,17 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
+import net.minecraft.item.consume.UseAction;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
-import net.minecraft.util.TypedActionResult;
-import net.minecraft.util.UseAction;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
@@ -41,22 +43,22 @@ public class IcewhisperSwordItem extends UniqueSwordItem implements TwoHandedWea
     }
 
     @Override
-    public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+    public void postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         HelperMethods.playHitSounds(attacker, target);
-        return super.postHit(stack, target, attacker);
+        super.postHit(stack, target, attacker);
     }
 
     @Override
-    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
+    public ActionResult use(World world, PlayerEntity user, Hand hand) {
         ItemStack itemStack = user.getStackInHand(hand);
 
         if (itemStack.getDamage() >= itemStack.getMaxDamage() - 1) {
-            return TypedActionResult.fail(itemStack);
+            return ActionResult.FAIL;
         }
         itemStack.set(ComponentTypeRegistry.CHARGED_LOCATION.get(), new ChargedLocationComponent(user.getX(), user.getY(), user.getZ()));
 
         user.setCurrentHand(hand);
-        return TypedActionResult.consume(itemStack);
+        return ActionResult.CONSUME;
     }
 
     @Override
@@ -83,16 +85,17 @@ public class IcewhisperSwordItem extends UniqueSwordItem implements TwoHandedWea
     }
 
     @Override
-    public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
-        if (!world.isClient && (user instanceof PlayerEntity player)) {
+    public boolean onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
+        if (!world.isClient() && (user instanceof PlayerEntity player)) {
             int skillCooldown = Config.uniqueEffects.icewhisper.cooldown;
-            player.getItemCooldownManager().set(stack.getItem(), skillCooldown);
+            player.getItemCooldownManager().set(stack, skillCooldown);
         }
+        return false;
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
-        if (!world.isClient && (entity instanceof PlayerEntity player)) {
+    public void inventoryTick(ItemStack stack, ServerWorld world, Entity entity, EquipmentSlot slot) {
+        if (!world.isClient() && (entity instanceof PlayerEntity player)) {
             int radius = Config.uniqueEffects.icewhisper.radius;
             //AOE Aura
             if (player.age % 35 == 0 && player.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
@@ -109,7 +112,7 @@ public class IcewhisperSwordItem extends UniqueSwordItem implements TwoHandedWea
                         float choose = (float) (Math.random() * 1);
                         world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_BOW_ICE_SHOOT_IMPACT_03.get(), le.getSoundCategory(), 0.1f, choose);
                         float abilityDamage = HelperMethods.spellScaledDamage("frost", entity, Config.uniqueEffects.icewhisper.spellScaling, Config.uniqueEffects.icewhisper.damage);
-                        le.damage(player.getDamageSources().indirectMagic(entity, entity), abilityDamage);
+                        le.damage((ServerWorld) le.getEntityWorld(), player.getDamageSources().indirectMagic(entity, entity), abilityDamage);
                     }
                 }
                 world.playSoundFromEntity(null, player, SoundRegistry.ELEMENTAL_SWORD_ICE_ATTACK_02.get(),
@@ -136,11 +139,11 @@ public class IcewhisperSwordItem extends UniqueSwordItem implements TwoHandedWea
         }
         HelperMethods.createFootfalls(entity, stack, world, ParticleTypes.SNOWFLAKE, ParticleTypes.SNOWFLAKE,
                 ParticleTypes.WHITE_ASH, true);
-        super.inventoryTick(stack, world, entity, slot, selected);
+        super.inventoryTick(stack, world, entity, slot);
     }
 
     @Override
-    public void appendTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
+    protected void appendItemTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
         double radius = Config.uniqueEffects.icewhisper.radius;
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.icewhispersworditem.tooltip1").setStyle(Styles.ABILITY));
@@ -151,7 +154,7 @@ public class IcewhisperSwordItem extends UniqueSwordItem implements TwoHandedWea
         tooltip.add(Text.translatable("item.simplyswords.icewhispersworditem.tooltip4").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.icewhispersworditem.tooltip5").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.icewhispersworditem.tooltip6", radius * 2).setStyle(Styles.TEXT));
-        super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        super.appendItemTooltip(itemStack, tooltipContext, tooltip, type);
         TooltipUtils.appendSpellScaleTooltip(tooltip, "frost");
     }
 

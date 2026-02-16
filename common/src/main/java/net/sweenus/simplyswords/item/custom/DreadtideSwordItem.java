@@ -4,9 +4,11 @@ import elocindev.necronomicon.api.text.TextAPI;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.item.tooltip.TooltipType;
@@ -18,9 +20,9 @@ import net.minecraft.sound.SoundEvent;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.SimplySwords;
@@ -44,17 +46,17 @@ public class DreadtideSwordItem extends UniqueSwordItem {
     }
 
     @Override
-    public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        if (!attacker.getWorld().isClient()) {
+    public void postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        if (!attacker.getEntityWorld().isClient()) {
             HelperMethods.playHitSounds(attacker, target);
 
         }
-        return super.postHit(stack, target, attacker);
+        super.postHit(stack, target, attacker);
     }
 
     @Override
-    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
-        if (!user.getWorld().isClient() && world instanceof  ServerWorld serverWorld) {
+    public ActionResult use(World world, PlayerEntity user, Hand hand) {
+        if (!user.getEntityWorld().isClient() && world instanceof  ServerWorld serverWorld) {
             int voidcallerDuration = Config.uniqueEffects.dreadtide.get().duration;
             float voidcallerDamageModifier = Config.uniqueEffects.dreadtide.get().damageModifier;
             int skillCooldown = 20;
@@ -97,7 +99,7 @@ public class DreadtideSwordItem extends UniqueSwordItem {
                             voidAssaultEffect.setAdditionalData((int) (HelperMethods.getEntityAttackDamage(user) * voidcallerDamageModifier));
                             ee.addStatusEffect(voidAssaultEffect);
                             user.removeStatusEffect(EffectRegistry.getReference(EffectRegistry.VOIDCLOAK));
-                            user.getItemCooldownManager().set(this, skillCooldown);
+                            user.getItemCooldownManager().set(this.getDefaultStack(), skillCooldown);
                         }
                     }
                 }
@@ -108,21 +110,21 @@ public class DreadtideSwordItem extends UniqueSwordItem {
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
+    public void inventoryTick(ItemStack stack, ServerWorld world, Entity entity, EquipmentSlot slot) {
         HelperMethods.createFootfalls(entity, stack, world, ParticleTypes.MYCELIUM,
                 ParticleTypes.MYCELIUM, ParticleTypes.MYCELIUM, true);
 
-        super.inventoryTick(stack, world, entity, slot, selected);
+        super.inventoryTick(stack, world, entity, slot);
     }
     @Override
     public Text getName(ItemStack stack) {
-        MutableText name = Text.translatable(stack.getTranslationKey());
+        MutableText name = Text.translatable(this.getTranslationKey());
         Style bold = name.getStyle().withBold(true);
-        return TextAPI.Styles.getGradient(Text.translatable(this.getTranslationKey(stack)).setStyle(bold), 1, 6043781, 12088090, 1.0F);
+        return TextAPI.Styles.getGradient(Text.translatable(this.getTranslationKey()).setStyle(bold), 1, 6043781, 12088090, 1.0F);
     }
 
     @Override
-    public void appendTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
+    protected void appendItemTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
         MutableText ability_icon = Text.empty().append("\uA996 ");
         MutableText types = TextAPI.Styles.getGradient(Text.translatable("item.eldritch_end.corrupted_item.type"), 1, 6043781, 9326287, 1.0F);
 
@@ -146,7 +148,7 @@ public class DreadtideSwordItem extends UniqueSwordItem {
         tooltip.add(Text.literal("\uA999 ").append(Text.translatable("item.simplyswords.dreadtidesworditem.tooltip12").setStyle(Styles.CORRUPTED)));
         tooltip.add(Text.translatable("item.simplyswords.dreadtidesworditem.tooltip13").setStyle(Styles.CORRUPTED));
 
-        super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        super.appendItemTooltip(itemStack, tooltipContext, tooltip, type);
     }
 
     public static class EffectSettings extends TooltipSettings {

@@ -3,8 +3,10 @@ package net.sweenus.simplyswords.item.custom;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.item.tooltip.TooltipType;
@@ -13,8 +15,8 @@ import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.text.Text;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
-import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
@@ -38,19 +40,19 @@ public class FlamewindSwordItem extends UniqueSwordItem {
     }
 
     @Override
-    public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        if (!attacker.getWorld().isClient()) {
+    public void postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        if (!attacker.getEntityWorld().isClient()) {
 
-            ServerWorld serverWorld = (ServerWorld) attacker.getWorld();
+            ServerWorld serverWorld = (ServerWorld) attacker.getEntityWorld();
             HelperMethods.playHitSounds(attacker, target);
 
         }
-        return super.postHit(stack, target, attacker);
+        super.postHit(stack, target, attacker);
     }
 
     @Override
-    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
-        if (!user.getWorld().isClient() && world instanceof  ServerWorld serverWorld) {
+    public ActionResult use(World world, PlayerEntity user, Hand hand) {
+        if (!user.getEntityWorld().isClient() && world instanceof  ServerWorld serverWorld) {
             int flameSeedDuration = 101;
             int flameSeedSpreadCap = Config.uniqueEffects.flamewind.spreadCap;
             int skillCooldown = Config.uniqueEffects.flamewind.cooldown;
@@ -76,7 +78,7 @@ public class FlamewindSwordItem extends UniqueSwordItem {
                         flamSeedEffect.setSourceEntity(user);
                         flamSeedEffect.setAdditionalData(flameSeedSpreadCap);
                         ee.addStatusEffect(flamSeedEffect);
-                        user.getItemCooldownManager().set(this, skillCooldown);
+                        user.getItemCooldownManager().set(this.getDefaultStack(), skillCooldown);
                     }
                 }
             }
@@ -85,15 +87,15 @@ public class FlamewindSwordItem extends UniqueSwordItem {
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
+    public void inventoryTick(ItemStack stack, ServerWorld world, Entity entity, EquipmentSlot slot) {
         HelperMethods.createFootfalls(entity, stack, world, ParticleTypes.FLAME,
                 ParticleTypes.FLAME, ParticleTypes.ASH, true);
 
-        super.inventoryTick(stack, world, entity, slot, selected);
+        super.inventoryTick(stack, world, entity, slot);
     }
 
     @Override
-    public void appendTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
+    protected void appendItemTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.flamewindsworditem.tooltip1").setStyle(Styles.ABILITY));
         tooltip.add(Text.translatable("item.simplyswords.flamewindsworditem.tooltip2").setStyle(Styles.TEXT));
@@ -109,7 +111,7 @@ public class FlamewindSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.flamewindsworditem.tooltip9").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.flamewindsworditem.tooltip10").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.flamewindsworditem.tooltip11", Config.uniqueEffects.flamewind.spreadCap).setStyle(Styles.TEXT));
-        super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        super.appendItemTooltip(itemStack, tooltipContext, tooltip, type);
         TooltipUtils.appendSpellScaleTooltip(tooltip, "fire");
     }
 

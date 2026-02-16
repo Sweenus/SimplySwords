@@ -29,7 +29,7 @@ public record ParryComponent(boolean parried, int parrySuccession) {
 			).apply(instance, ParryComponent::new));
 
 	public static PacketCodec<RegistryByteBuf, ParryComponent> PACKET_CODEC = PacketCodec.tuple(
-			PacketCodecs.BOOL,
+			PacketCodecs.BOOLEAN,
 			ParryComponent::parried,
 			PacketCodecs.INTEGER,
 			ParryComponent::parrySuccession,

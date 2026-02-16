@@ -2,6 +2,7 @@ package net.sweenus.simplyswords.config.settings;
 
 import me.fzzyhmstrs.fzzy_config.util.Translatable;
 import me.fzzyhmstrs.fzzy_config.util.Walkable;
+import net.minecraft.component.ComponentsAccess;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.tooltip.TooltipAppender;
@@ -64,7 +65,7 @@ public class TooltipSettings implements Translatable, Walkable {
 			} else {
 				desc[0].append(Text.literal("\n")).append(text);
 			}
-		}, TooltipType.BASIC);
+		}, TooltipType.BASIC, ItemStack.EMPTY);
 		return desc[0];
 	}
 
@@ -82,7 +83,7 @@ public class TooltipSettings implements Translatable, Walkable {
 	private static record ItemStackAppender(ItemStack stack) implements TooltipAppender {
 
 		@Override
-		public void appendTooltip(Item.TooltipContext context, Consumer<Text> tooltip, TooltipType type) {
+		public void appendTooltip(Item.TooltipContext context, Consumer<Text> tooltip, TooltipType type, ComponentsAccess components) {
 			stack.getTooltip(context, null, type).forEach(tooltip);
 		}
 	}

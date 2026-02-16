@@ -1,5 +1,6 @@
 package net.sweenus.simplyswords.item;
 
+import net.minecraft.component.type.TooltipDisplayComponent;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.tooltip.TooltipType;
@@ -9,7 +10,9 @@ import net.minecraft.util.Rarity;
 import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.util.Styles;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class RunicTabletItem extends Item {
 
@@ -20,11 +23,12 @@ public class RunicTabletItem extends Item {
 
     @Override
     public Text getName(ItemStack stack) {
-        return Text.translatable(this.getTranslationKey(stack)).setStyle(Styles.RUNIC);
+        return Text.translatable(this.getTranslationKey()).setStyle(Styles.RUNIC);
     }
 
     @Override
-    public void appendTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
+    public void appendTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, TooltipDisplayComponent displayComponent, Consumer<Text> textConsumer, TooltipType type) {
+        List<Text> tooltip = new ArrayList<>();
 
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.runic_tablet.tooltip").formatted(Formatting.GRAY, Formatting.ITALIC));
@@ -32,6 +36,6 @@ public class RunicTabletItem extends Item {
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.runic_tablet.tooltip3").formatted(Formatting.GRAY, Formatting.ITALIC));
         tooltip.add(Text.translatable("item.simplyswords.runic_tablet.tooltip4").formatted(Formatting.GRAY, Formatting.ITALIC));
-
+        tooltip.forEach(textConsumer);
     }
 }

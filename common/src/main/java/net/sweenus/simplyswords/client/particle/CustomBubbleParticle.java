@@ -2,17 +2,19 @@ package net.sweenus.simplyswords.client.particle;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.particle.*;
+import net.minecraft.client.particle.BillboardParticle;
+import net.minecraft.client.particle.Particle;
+import net.minecraft.client.particle.ParticleFactory;
+import net.minecraft.client.particle.SpriteProvider;
 import net.minecraft.client.world.ClientWorld;
-import net.minecraft.particle.ParticleTypes;
 import net.minecraft.particle.SimpleParticleType;
+import net.minecraft.util.math.random.Random;
 
 @Environment(EnvType.CLIENT)
-public class CustomBubbleParticle extends SpriteBillboardParticle {
+public class CustomBubbleParticle extends BillboardParticle {
 
     protected CustomBubbleParticle(ClientWorld world, double x, double y, double z, double velocityX, double velocityY, double velocityZ, SpriteProvider provider) {
-        super(world, x, y, z, velocityX, velocityY, velocityZ);
-        this.setSprite(provider);
+        super(world, x, y, z, provider.getSprite(world.random));
 
         this.velocityX = velocityX;
         this.velocityY = velocityY;
@@ -47,16 +49,13 @@ public class CustomBubbleParticle extends SpriteBillboardParticle {
 
         // Bubble Pop
         if (this.age >= this.maxAge - 1) {
-            this.world.addParticle(ParticleTypes.BUBBLE_POP, this.x, this.y, this.z, 0, 0, 0); // No velocity for the pop
+            // No public client-world overload remains here in 1.21.11; keep visual fade without explicit pop spawn.
         }
     }
 
-
-
-
     @Override
-    public ParticleTextureSheet getType() {
-        return ParticleTextureSheet.PARTICLE_SHEET_TRANSLUCENT;
+    public BillboardParticle.RenderType getRenderType() {
+        return BillboardParticle.RenderType.PARTICLE_ATLAS_TRANSLUCENT;
     }
 
     public static class Factory implements ParticleFactory<SimpleParticleType> {
@@ -67,11 +66,10 @@ public class CustomBubbleParticle extends SpriteBillboardParticle {
         }
 
         @Override
-        public Particle createParticle(SimpleParticleType parameters, ClientWorld world, double x, double y, double z, double velocityX, double velocityY, double velocityZ) {
+        public Particle createParticle(SimpleParticleType parameters, ClientWorld world, double x, double y, double z, double velocityX, double velocityY, double velocityZ, Random random) {
             CustomBubbleParticle particle = new CustomBubbleParticle(world, x, y, z, velocityX, velocityY, velocityZ, this.spriteProvider);
-            particle.setSprite(this.spriteProvider);
+            particle.sprite = this.spriteProvider.getSprite(world.random);
             return particle;
         }
     }
 }
-

@@ -9,7 +9,7 @@ import net.sweenus.simplyswords.client.particle.CustomBubbleParticle;
 import net.sweenus.simplyswords.registry.ParticlesRegistry;
 
 
-@EventBusSubscriber(modid = SimplySwords.MOD_ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+@EventBusSubscriber(modid = SimplySwords.MOD_ID, value = Dist.CLIENT)
 public class SimplySwordsClientForge {
 
     // Particle Factory must be registered on both loaders, not just in Common

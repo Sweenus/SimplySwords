@@ -13,7 +13,6 @@ import net.minecraft.loot.function.EnchantRandomlyLootFunction;
 import net.minecraft.loot.provider.number.ConstantLootNumberProvider;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.tag.EnchantmentTags;
 import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.config.LootConfig;
 import net.sweenus.simplyswords.item.UniqueSwordItem;

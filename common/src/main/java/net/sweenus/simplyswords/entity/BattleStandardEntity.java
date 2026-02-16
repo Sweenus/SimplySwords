@@ -16,11 +16,13 @@ import net.minecraft.entity.mob.PathAwareEntity;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
-import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -30,7 +32,8 @@ import java.util.function.Supplier;
 
 public class BattleStandardEntity extends PathAwareEntity {
     public static final Supplier<EntityType<BattleStandardEntity>> TYPE = Suppliers.memoize(() ->
-            EntityType.Builder.create(BattleStandardEntity::new, SpawnGroup.MISC).build("battlestandard"));
+            EntityType.Builder.create(BattleStandardEntity::new, SpawnGroup.MISC).build(
+                    RegistryKey.of(RegistryKeys.ENTITY_TYPE, Identifier.of("simplyswords", "battlestandard"))));
     public LivingEntity ownerEntity;
     public String standardType;
     public int decayRate;
@@ -46,9 +49,9 @@ public class BattleStandardEntity extends PathAwareEntity {
 
     public static DefaultAttributeContainer.Builder createBattleStandardAttributes() {
         return MobEntity.createMobAttributes()
-                .add(EntityAttributes.GENERIC_MAX_HEALTH, 150.0)
-                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.0f)
-                .add(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE, 100.0f);
+                .add(EntityAttributes.MAX_HEALTH, 150.0)
+                .add(EntityAttributes.MOVEMENT_SPEED, 0.0f)
+                .add(EntityAttributes.KNOCKBACK_RESISTANCE, 100.0f);
     }
 
     public BattleStandardEntity(EntityType<? extends PathAwareEntity> entityType, World world) {
@@ -73,13 +76,14 @@ public class BattleStandardEntity extends PathAwareEntity {
     }
 
     @Override
-    public boolean damage(DamageSource source, float amount) {
+    public boolean damage(ServerWorld world, DamageSource source, float amount) {
         return ownerEntity == null;
     }
 
     @Override
     public void baseTick() {
-        if (!this.getWorld().isClient()) {
+        if (!this.getEntityWorld().isClient()) {
+            ServerWorld serverWorld = (ServerWorld) this.getEntityWorld();
             if (this.age % 10 == 0) {
                 this.setHealth(this.getHealth() - decayRate);
                 if (ownerEntity == null) this.setHealth(this.getHealth() - 1000);
@@ -88,13 +92,13 @@ public class BattleStandardEntity extends PathAwareEntity {
                 if (!ownerEntity.isAlive())
                     this.setHealth(this.getHealth() - 1000);
                 int radius = 6;
-                float abilityDamage = HelperMethods.spellScaledDamage("fire", ownerEntity, Config.uniqueEffects.sunfire.spellScaling, Config.uniqueEffects.sunfire.damage);
+                float abilityDamage = HelperMethods.spellScaledDamage("fire", ownerEntity, net.sweenus.simplyswords.config.Config.uniqueEffects.sunfire.spellScaling, net.sweenus.simplyswords.config.Config.uniqueEffects.sunfire.damage);
                 // AOE Aura
                 //living entity, ownerEntity, abilityDamage,
                 if (this.age % 10 == 0) {
                     Box box = new Box(this.getX() + radius, this.getY() + (float) radius / 3, this.getZ() + radius,
                             this.getX() - radius, this.getY() - (float) radius / 3, this.getZ() - radius);
-                    for (Entity entity : getWorld().getOtherEntities(this, box, EntityPredicates.VALID_LIVING_ENTITY)) {
+                    for (Entity entity : getEntityWorld().getOtherEntities(this, box, EntityPredicates.VALID_LIVING_ENTITY)) {
                         if ((entity instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, ownerEntity)
                                 && le != ownerEntity && !(le instanceof BattleStandardEntity)
                                 && !(le instanceof BattleStandardDarkEntity)) {
@@ -102,7 +106,7 @@ public class BattleStandardEntity extends PathAwareEntity {
                             // Sunfire negative effects
                             switch (standardType) {
                                 case "sunfire" -> {
-                                    le.damage(ownerEntity.getDamageSources().magic(), abilityDamage);
+                                    le.damage(serverWorld, ownerEntity.getDamageSources().magic(), abilityDamage);
                                     le.setOnFireFor(1);
                                     le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 120, 1), this);
                                 }
@@ -119,7 +123,7 @@ public class BattleStandardEntity extends PathAwareEntity {
                                 // API negative effects
                                 case "api" -> {
                                     if (dealsDamage)
-                                        le.damage(ownerEntity.getDamageSources().magic(), abilityDamage);
+                                        le.damage(serverWorld, ownerEntity.getDamageSources().magic(), abilityDamage);
                                     if (negativeEffect != null) {
                                         try {
                                             RegistryEntry<StatusEffect> negativeEffectEntry = Registries.STATUS_EFFECT.getEntry(Identifier.of(negativeEffect)).orElseThrow();
@@ -142,26 +146,26 @@ public class BattleStandardEntity extends PathAwareEntity {
                             }
                         }
                     }
-                    HelperMethods.spawnParticle(getWorld(), ParticleTypes.LAVA, this.getX(), this.getY(), this.getZ(),
+                    HelperMethods.spawnParticle(getEntityWorld(), ParticleTypes.LAVA, this.getX(), this.getY(), this.getZ(),
                             0, 0, 0);
                 }
 
 
                 //Landing effects
                 if (this.getHealth() > this.getMaxHealth() - 2 && this.isOnGround()) {
-                    HelperMethods.spawnParticle(getWorld(), ParticleTypes.LAVA,
+                    HelperMethods.spawnParticle(getEntityWorld(), ParticleTypes.LAVA,
                             this.getX(), this.getY(), this.getZ(),
                             0, 0.3, 0);
-                    HelperMethods.spawnParticle(getWorld(), ParticleTypes.CAMPFIRE_COSY_SMOKE,
+                    HelperMethods.spawnParticle(getEntityWorld(), ParticleTypes.CAMPFIRE_COSY_SMOKE,
                             this.getX(), this.getY(), this.getZ(),
                             0, 0.1, 0);
 
                     //Launch nearby entities on land
                     Box box = new Box(this.getX() + 1, this.getY() + 1, this.getZ() + 1,
                             this.getX() - 1, this.getY() - (float) 1, this.getZ() - 1);
-                    for (Entity entity : getWorld().getOtherEntities(this, box, EntityPredicates.VALID_LIVING_ENTITY)) {
+                    for (Entity entity : getEntityWorld().getOtherEntities(this, box, EntityPredicates.VALID_LIVING_ENTITY)) {
                         if ((entity instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, ownerEntity) && le != ownerEntity) {
-                            le.damage(ownerEntity.getDamageSources().magic(), abilityDamage * 3);
+                            le.damage(serverWorld, ownerEntity.getDamageSources().magic(), abilityDamage * 3);
                             le.setOnFireFor(1);
                             le.setVelocity((le.getX() - this.getX()) / 4, 0.5, (le.getZ() - this.getZ()) / 4);
                         }
@@ -170,9 +174,9 @@ public class BattleStandardEntity extends PathAwareEntity {
                 if (this.age % 80 == 0) {
                     Box box = new Box(this.getX() + radius, this.getY() + (float) radius / 3, this.getZ() + radius,
                             this.getX() - radius, this.getY() - (float) radius / 3, this.getZ() - radius);
-                    for (Entity entities : getWorld().getOtherEntities(this, box, EntityPredicates.VALID_LIVING_ENTITY)) {
+                    for (Entity entities : getEntityWorld().getOtherEntities(this, box, EntityPredicates.VALID_LIVING_ENTITY)) {
                         if (entities instanceof LivingEntity le && !HelperMethods.checkFriendlyFire(le, ownerEntity)) {
-                            float abilityHeal = HelperMethods.spellScaledDamage("healing", ownerEntity, Config.uniqueEffects.sunfire.spellScalingHeal, 3f);
+                            float abilityHeal = HelperMethods.spellScaledDamage("healing", ownerEntity, net.sweenus.simplyswords.config.Config.uniqueEffects.sunfire.spellScalingHeal, 3f);
                             //Sunfire positive effects
                             switch (standardType) {
                                 case "sunfire" -> {
@@ -217,7 +221,7 @@ public class BattleStandardEntity extends PathAwareEntity {
                             }
                         }
                     }
-                    getWorld().playSoundFromEntity(null, this, SoundRegistry.ELEMENTAL_BOW_EARTH_SHOOT_IMPACT_02.get(),
+                    getEntityWorld().playSoundFromEntity(null, this, SoundRegistry.ELEMENTAL_BOW_EARTH_SHOOT_IMPACT_02.get(),
                             this.getSoundCategory(), 0.1f, 0.6f);
                     double xpos = this.getX() - (radius + 1);
                     double ypos = this.getY();
@@ -227,7 +231,7 @@ public class BattleStandardEntity extends PathAwareEntity {
                         for (int j = radius * 2; j > 0; j--) {
                             float choose = (float) (Math.random() * 1);
                             if (choose > 0.5) {
-                                HelperMethods.spawnParticle(getWorld(), ParticleTypes.CAMPFIRE_COSY_SMOKE,
+                                HelperMethods.spawnParticle(getEntityWorld(), ParticleTypes.CAMPFIRE_COSY_SMOKE,
                                         xpos + i + choose, ypos, zpos + j + choose,
                                         0, -0.1, 0);
                             }

@@ -4,7 +4,9 @@ import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedDouble;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.item.tooltip.TooltipType;
@@ -15,7 +17,6 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
-import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
@@ -33,9 +34,9 @@ public class WatcherSwordItem extends UniqueSwordItem {
     }
 
     @Override
-    public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        if (!attacker.getWorld().isClient()) {
-            ServerWorld world = (ServerWorld) attacker.getWorld();
+    public void postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        if (!attacker.getEntityWorld().isClient()) {
+            ServerWorld world = (ServerWorld) attacker.getEntityWorld();
 
             int watcherChance = Config.uniqueEffects.watcher.watcherChance;
             int omenChance = Config.uniqueEffects.watcher.omenChance;
@@ -54,7 +55,7 @@ public class WatcherSwordItem extends UniqueSwordItem {
 
                 for (Entity entity : world.getOtherEntities(attacker, box, EntityPredicates.VALID_ENTITY)) {
                     if (entity instanceof LivingEntity && HelperMethods.checkFriendlyFire((LivingEntity) entity, attacker)) {
-                        entity.damage(attacker.getDamageSources().indirectMagic(attacker, attacker), rAmount);
+                        entity.damage((ServerWorld) entity.getEntityWorld(), attacker.getDamageSources().indirectMagic(attacker, attacker), rAmount);
                         attacker.heal(rAmount);
                         BlockPos position2 = entity.getBlockPos();
                         world.playSound(null, position2, SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_IMPACT_02.get(),
@@ -74,22 +75,22 @@ public class WatcherSwordItem extends UniqueSwordItem {
                     attacker.setAbsorptionAmount(Math.min(Math.min(absorptionCap, overallAbsorptionCap), attacker.getAbsorptionAmount() + remainingHealth));
                     world.playSound(null, position, SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_IMPACT_03.get(),
                             target.getSoundCategory(), 0.7f, 1.2f);
-                    target.damage(attacker.getDamageSources().indirectMagic(attacker, attacker), 1000);
+                    target.damage((ServerWorld) target.getEntityWorld(), attacker.getDamageSources().indirectMagic(attacker, attacker), 1000);
                 }
             }
         }
-        return super.postHit(stack, target, attacker);
+        super.postHit(stack, target, attacker);
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
+    public void inventoryTick(ItemStack stack, ServerWorld world, Entity entity, EquipmentSlot slot) {
         HelperMethods.createFootfalls(entity, stack, world, ParticleTypes.ENCHANT, ParticleTypes.ENCHANT,
                 ParticleTypes.MYCELIUM, true);
-        super.inventoryTick(stack, world, entity, slot, selected);
+        super.inventoryTick(stack, world, entity, slot);
     }
 
     @Override
-    public void appendTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
+    protected void appendItemTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.watchersworditem.tooltip1").setStyle(Styles.ABILITY));
         tooltip.add(Text.translatable("item.simplyswords.watchersworditem.tooltip2").setStyle(Styles.TEXT));
@@ -100,7 +101,7 @@ public class WatcherSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.watchersworditem.tooltip6").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.watchersworditem.tooltip7").setStyle(Styles.TEXT));
 
-        super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        super.appendItemTooltip(itemStack, tooltipContext, tooltip, type);
     }
 
     @Override

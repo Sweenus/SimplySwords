@@ -10,7 +10,6 @@ import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.registry.Registries;
@@ -32,8 +31,8 @@ import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.AbilityMethods;
 import net.sweenus.simplyswords.util.HelperMethods;
+import net.sweenus.simplyswords.util.ShoulderAxolotlData;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -46,8 +45,6 @@ import java.util.Random;
 @Mixin(ServerPlayerEntity.class)
 public abstract class ServerPlayerEntityMixin {
 
-    @Shadow public abstract ServerWorld getServerWorld();
-
     @Inject(at = @At("HEAD"), method = "damage", cancellable = true)
     public void simplyswords$damage(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
         PlayerEntity player = (PlayerEntity) (Object) this;
@@ -58,7 +55,7 @@ public abstract class ServerPlayerEntityMixin {
                 HelperMethods.decrementStatusEffect(serverPlayer, EffectRegistry.getReference(EffectRegistry.RESILIENCE));
                 cir.setReturnValue(false);
                 if (player.hasStatusEffect(EffectRegistry.getReference(EffectRegistry.RIBBONCLEAVE)))
-                    serverPlayer.getWorld().playSoundFromEntity(null, serverPlayer, SoundRegistry.MAGIC_SWORD_PARRY_03.get(),
+                    serverPlayer.getEntityWorld().playSoundFromEntity(null, serverPlayer, SoundRegistry.MAGIC_SWORD_PARRY_03.get(),
                         SoundCategory.PLAYERS, 0.7f, 0.5f + (serverPlayer.getRandom().nextBetween(1, 5) * 0.1f));
             }
 
@@ -90,7 +87,7 @@ public abstract class ServerPlayerEntityMixin {
                         ItemStack newItemStack = new ItemStack(ItemsRegistry.MAGISCYTHE.get());
                         newItemStack.applyComponentsFrom(stackInSlot.getComponents());
                         serverPlayer.getInventory().setStack(i, newItemStack);
-                        serverPlayer.getWorld().playSoundFromEntity(null, serverPlayer, SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_IMPACT_02.get(),
+                        serverPlayer.getEntityWorld().playSoundFromEntity(null, serverPlayer, SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_IMPACT_02.get(),
                                 serverPlayer.getSoundCategory(), 0.6f, 0.6f);
                         serverPlayer.sendMessageToClient(Text.translatable("item.simplyswords.magicythe.event"), true);
                         break;
@@ -117,7 +114,7 @@ public abstract class ServerPlayerEntityMixin {
                 if (player.age % frequency == 0 && player.isSprinting() && player.isOnGround()) {
                     float volume = 0.3f;
                     float pitch = 1.0f + player.getRandom().nextBetween(1, 5) * 0.1f;
-                    player.getWorld().playSound(null, player.getBlockPos(),
+                    player.getEntityWorld().playSound(null, player.getBlockPos(),
                             SoundRegistry.OBJECT_IMPACT_THUD.get(), SoundCategory.PLAYERS,volume, pitch);
                 }
             }
@@ -130,7 +127,7 @@ public abstract class ServerPlayerEntityMixin {
                 int totalChance = new Random().nextInt(100);
                 if (serverPlayer.age % frequency == 0 && totalChance < chance) {
                     Box box = HelperMethods.createBox(player, radius);
-                    Entity closestEntity = player.getWorld().getOtherEntities(player, box, EntityPredicates.VALID_LIVING_ENTITY).stream()
+                    Entity closestEntity = player.getEntityWorld().getOtherEntities(player, box, EntityPredicates.VALID_LIVING_ENTITY).stream()
                             .filter(entity -> {
                                 if (entity instanceof LivingEntity livingEntity)
                                     return HelperMethods.checkFriendlyFire(livingEntity, player);
@@ -145,10 +142,10 @@ public abstract class ServerPlayerEntityMixin {
                                 closestEntity.setVelocity((closestEntity.getX() - player.getX()) / 2, 0, (closestEntity.getZ() - player.getZ()) / 2);
                                 float volume = 0.8f;
                                 float pitch = 1.0f + player.getRandom().nextBetween(1, 5) * 0.1f;
-                                player.getWorld().playSound(null, player.getBlockPos(),
+                                player.getEntityWorld().playSound(null, player.getBlockPos(),
                                         SoundEvents.BLOCK_SCULK_SENSOR_CLICKING, SoundCategory.PLAYERS, volume, pitch);
-                                HelperMethods.spawnWaistHeightParticles((ServerWorld) player.getWorld(), ParticleTypes.ENCHANT, closestEntity, player, 10);
-                                HelperMethods.spawnOrbitParticles((ServerWorld) closestEntity.getWorld(), closestEntity.getPos().add(0, closestEntity.getHeight() / 2, 0), ParticleTypes.SCULK_CHARGE_POP, 0.5, 6);
+                                HelperMethods.spawnWaistHeightParticles((ServerWorld) player.getEntityWorld(), ParticleTypes.ENCHANT, closestEntity, player, 10);
+                                HelperMethods.spawnOrbitParticles((ServerWorld) closestEntity.getEntityWorld(), closestEntity.getEntityPos().add(0, closestEntity.getHeight() / 2, 0), ParticleTypes.SCULK_CHARGE_POP, 0.5, 6);
                             }
                         }
                     }
@@ -181,10 +178,10 @@ public abstract class ServerPlayerEntityMixin {
 
                             if (!itemsFromTag.isEmpty() && !itemsFromTagEnd.isEmpty()) {
                                 Item randomItem = ItemsRegistry.TAMPERED_REMNANT.get();
-                                if (serverPlayer.getWorld().getRegistryKey().equals(World.END)
+                                if (serverPlayer.getEntityWorld().getRegistryKey().equals(World.END)
                                         && serverPlayer.getInventory().getStack(i).isOf(containedRemnant.getItem())
                                         && serverPlayer.getInventory().contains(runicTablet)) {
-                                    serverPlayer.getWorld().playSoundFromEntity(null, serverPlayer, SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_IMPACT_03.get(),
+                                    serverPlayer.getEntityWorld().playSoundFromEntity(null, serverPlayer, SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_IMPACT_03.get(),
                                             serverPlayer.getSoundCategory(), 0.3f, 0.6f);
                                     serverPlayer.sendMessageToClient(Text.translatable("item.simplyswords.contained_remnant.event2"), true);
                                 } else {
@@ -192,7 +189,7 @@ public abstract class ServerPlayerEntityMixin {
                                         randomItem = itemsFromTag.get(random.nextInt(itemsFromTag.size()));
                                     else if (serverPlayer.getInventory().getStack(i).isOf(ItemsRegistry.TAMPERED_REMNANT.get()))
                                         randomItem = itemsFromTagEnd.get(random.nextInt(itemsFromTagEnd.size()));
-                                    serverPlayer.getWorld().playSoundFromEntity(null, serverPlayer, SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_IMPACT_02.get(),
+                                    serverPlayer.getEntityWorld().playSoundFromEntity(null, serverPlayer, SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_IMPACT_02.get(),
                                             serverPlayer.getSoundCategory(), 0.3f, 0.6f);
                                     serverPlayer.sendMessageToClient(Text.translatable("item.simplyswords.contained_remnant.event"), true);
                                 }
@@ -223,7 +220,7 @@ public abstract class ServerPlayerEntityMixin {
                         ItemStack newItemStack = new ItemStack(ItemsRegistry.MAGIBLADE.get());
                         newItemStack.applyComponentsFrom(stackInSlot.getComponents());
                         serverPlayer.getInventory().setStack(i, newItemStack);
-                        serverPlayer.getWorld().playSoundFromEntity(null, serverPlayer, SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_IMPACT_02.get(),
+                        serverPlayer.getEntityWorld().playSoundFromEntity(null, serverPlayer, SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_IMPACT_02.get(),
                                 serverPlayer.getSoundCategory(), 0.6f, 0.6f);
                         serverPlayer.sendMessageToClient(Text.translatable("item.simplyswords.magiblade.event"), true);
                         break;
@@ -235,7 +232,7 @@ public abstract class ServerPlayerEntityMixin {
                             ItemStack newItemStack = new ItemStack(ItemsRegistry.MAGISPEAR.get());
                             newItemStack.applyComponentsFrom(stackInSlot.getComponents());
                             serverPlayer.getInventory().setStack(i, newItemStack);
-                            serverPlayer.getWorld().playSoundFromEntity(null, serverPlayer, SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_IMPACT_02.get(),
+                            serverPlayer.getEntityWorld().playSoundFromEntity(null, serverPlayer, SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_IMPACT_02.get(),
                                     serverPlayer.getSoundCategory(), 0.6f, 0.6f);
                             serverPlayer.sendMessageToClient(Text.translatable("item.simplyswords.magispear.event"), true);
                             break;
@@ -247,14 +244,16 @@ public abstract class ServerPlayerEntityMixin {
                 }
             }
             // Check for axolotls on the player's shoulders
-            NbtCompound leftShoulder = player.getShoulderEntityLeft();
-            NbtCompound rightShoulder = player.getShoulderEntityRight();
-            AbilityMethods.applyAxolotlBuff(serverPlayer, leftShoulder, rightShoulder);
+            AbilityMethods.applyAxolotlBuff(
+                    serverPlayer,
+                    ShoulderAxolotlData.getLeftVariant(serverPlayer),
+                    ShoulderAxolotlData.getRightVariant(serverPlayer)
+            );
 
 
             // Chomp'olotl passive particles
             if (HelperMethods.isHoldingItem(ItemsRegistry.CHOMPOLOTL.get(), serverPlayer) && Config.general.enablePassiveParticles)
-                HelperMethods.createServerBubbleTrail(getServerWorld(), serverPlayer);
+                HelperMethods.createServerBubbleTrail((ServerWorld) serverPlayer.getEntityWorld(), serverPlayer);
 
             // Contained Remnant hint messages
             if (HelperMethods.isHoldingItem(ItemsRegistry.CONTAINED_REMNANT.get(), serverPlayer))
@@ -271,13 +270,13 @@ public abstract class ServerPlayerEntityMixin {
         if (player instanceof ServerPlayerEntity serverPlayer) {
             if (target.isAttackable() && target instanceof LivingEntity) {
                 if (!target.handleAttack(player)) {
-                    ServerWorld serverWorld = (ServerWorld) player.getWorld();
+                    ServerWorld serverWorld = (ServerWorld) player.getEntityWorld();
                     //Ribboncleaver Cleave buff
                     if (serverPlayer.hasStatusEffect(EffectRegistry.getReference(EffectRegistry.RIBBONCLEAVE))) {
                         serverPlayer.removeStatusEffect(EffectRegistry.getReference(EffectRegistry.RIBBONCLEAVE));
-                        HelperMethods.spawnOrbitParticles(serverWorld, target.getPos().add(0, 0.3, 0),
+                        HelperMethods.spawnOrbitParticles(serverWorld, target.getEntityPos().add(0, 0.3, 0),
                                 ParticleTypes.POOF, 0.5, 6);
-                        HelperMethods.spawnOrbitParticles(serverWorld, target.getPos().add(0, 0.5, 0),
+                        HelperMethods.spawnOrbitParticles(serverWorld, target.getEntityPos().add(0, 0.5, 0),
                                 ParticleTypes.ENCHANTED_HIT, 0.5, 6);
                         serverWorld.playSound(null, target.getBlockPos(),
                                 SoundRegistry.MAGIC_SWORD_PARRY_01.get(), SoundCategory.PLAYERS,0.8f, 1.0f);

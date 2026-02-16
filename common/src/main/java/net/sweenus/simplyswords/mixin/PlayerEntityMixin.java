@@ -1,10 +1,16 @@
 package net.sweenus.simplyswords.mixin;
 
+import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.player.PlayerAbilities;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
+import net.sweenus.simplyswords.entity.SimplySwordsAxolotlEntity;
+import net.sweenus.simplyswords.registry.EntityRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
+import net.sweenus.simplyswords.util.ShoulderAxolotlData;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -12,7 +18,6 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(PlayerEntity.class)
 public abstract class PlayerEntityMixin {
@@ -21,59 +26,68 @@ public abstract class PlayerEntityMixin {
 
     @Shadow @Final private PlayerAbilities abilities;
 
-    @Shadow protected abstract void setShoulderEntityLeft(NbtCompound nbt);
-
-    @Shadow protected abstract void setShoulderEntityRight(NbtCompound nbt);
-
-    @Invoker("dropShoulderEntity")
-    protected abstract void simplyswords$dropShoulderEntity(NbtCompound nbt);
-
     @Unique
     public void simplySwords$invokeDropShoulderEntities() {
         dropShoulderEntities();
     }
 
     @Unique
-    private boolean simplyswords$isSimplyAxolotl(NbtCompound nbt) {
-        return nbt != null && !nbt.isEmpty() && "simplyswords:simplyaxolotlentity".equals(nbt.getString("id"));
+    private boolean simplyswords$hasAnyShoulderAxolotl(PlayerEntity player) {
+        return ShoulderAxolotlData.getLeftVariant(player).isPresent() || ShoulderAxolotlData.getRightVariant(player).isPresent();
     }
 
     @Unique
-    private void simplyswords$dropSimplyAxolotls() {
-        PlayerEntity player = (PlayerEntity) (Object) this;
-        if (player.getWorld().isClient()) {
-            return;
+    private boolean simplyswords$shouldKeepShoulderAxolotls(PlayerEntity player) {
+        if (!HelperMethods.hasItemInInventory(player, ItemsRegistry.CHOMPOLOTL.get())) return false;
+        if (player.isTouchingWater() || player.isSneaking() || player.isSleeping()) return false;
+        if (player.inPowderSnow || !player.isAlive()) return false;
+        return !this.abilities.flying;
+    }
+
+    @Unique
+    private void simplyswords$spawnShoulderAxolotl(ServerPlayerEntity player, boolean leftShoulder) {
+        var variantOpt = leftShoulder ? ShoulderAxolotlData.getLeftVariant(player) : ShoulderAxolotlData.getRightVariant(player);
+        if (variantOpt.isEmpty()) return;
+
+        SimplySwordsAxolotlEntity axolotl = EntityRegistry.SIMPLYAXOLOTLENTITY.get().spawn(
+                (ServerWorld) player.getEntityWorld(),
+                player.getBlockPos().up(),
+                SpawnReason.MOB_SUMMONED
+        );
+
+        if (axolotl != null) {
+            NbtCompound data = new NbtCompound();
+            data.putInt("Variant", variantOpt.getAsInt());
+            axolotl.copyDataFromNbt(data);
+            axolotl.setOwner(player);
+            axolotl.setYaw(player.getYaw());
+            axolotl.setPitch(0.0f);
+            double xOffset = leftShoulder ? -0.5 : 0.5;
+            axolotl.refreshPositionAndAngles(player.getX() + xOffset, player.getY() + 1.1, player.getZ(), player.getYaw(), 0.0f);
         }
 
-        NbtCompound left = player.getShoulderEntityLeft();
-        if (simplyswords$isSimplyAxolotl(left)) {
-            simplyswords$dropShoulderEntity(left);
-            setShoulderEntityLeft(new NbtCompound());
+        if (leftShoulder) {
+            ShoulderAxolotlData.clearLeftVariant(player);
+            player.setLeftShoulderParrotVariant(java.util.Optional.empty());
+        } else {
+            ShoulderAxolotlData.clearRightVariant(player);
+            player.setRightShoulderParrotVariant(java.util.Optional.empty());
         }
+    }
 
-        NbtCompound right = player.getShoulderEntityRight();
-        if (simplyswords$isSimplyAxolotl(right)) {
-            simplyswords$dropShoulderEntity(right);
-            setShoulderEntityRight(new NbtCompound());
-        }
+    @Unique
+    private void simplyswords$dropSimplyAxolotls(PlayerEntity player) {
+        if (!(player instanceof ServerPlayerEntity serverPlayer)) return;
+        simplyswords$spawnShoulderAxolotl(serverPlayer, true);
+        simplyswords$spawnShoulderAxolotl(serverPlayer, false);
     }
 
     @Inject(at = @At("HEAD"), method = "dropShoulderEntities", cancellable = true)
     public void simplyswords$dropShoulderEntities(CallbackInfo ci) {
         PlayerEntity player = (PlayerEntity) (Object) this;
-
-        if (!HelperMethods.hasItemInInventory(player, ItemsRegistry.CHOMPOLOTL.get())) return;
-
-        // Control how shoulder axolotl are dropped
-        if (!player.isTouchingWater() && !player.isSneaking() && !player.isSleeping() && !player.inPowderSnow && !this.abilities.flying && player.isAlive()) {
-
-            if (player.getShoulderEntityLeft() != null && "simplyswords:simplyaxolotlentity".equals(player.getShoulderEntityLeft().getString("id"))) {
-                ci.cancel();
-            }
-
-            if (player.getShoulderEntityRight() != null && "simplyswords:simplyaxolotlentity".equals(player.getShoulderEntityRight().getString("id"))) {
-                ci.cancel();
-            }
+        if (simplyswords$hasAnyShoulderAxolotl(player) && simplyswords$shouldKeepShoulderAxolotls(player)) {
+            // Keep shoulder axolotls attached while their retention conditions are met.
+            ci.cancel();
         }
     }
 
@@ -81,9 +95,8 @@ public abstract class PlayerEntityMixin {
     public void simplyswords$tick(CallbackInfo ci) {
         PlayerEntity player = (PlayerEntity) (Object) this;
         if (player.age % 40 == 0) {
-            // Drop axolotls if Chompolotl item not present
-            if (!HelperMethods.hasItemInInventory(player, ItemsRegistry.CHOMPOLOTL.get())) {
-                simplyswords$dropSimplyAxolotls();
+            if (simplyswords$hasAnyShoulderAxolotl(player) && !simplyswords$shouldKeepShoulderAxolotls(player)) {
+                simplyswords$dropSimplyAxolotls(player);
             }
         }
     }
@@ -91,8 +104,9 @@ public abstract class PlayerEntityMixin {
     @Inject(at = @At("TAIL"), method = "tickMovement")
     public void simplyswords$tickMovement(CallbackInfo ci) {
         PlayerEntity player = (PlayerEntity) (Object) this;
-        if (!player.getWorld().isClient() && (player.isTouchingWater() || player.isSneaking())) {
-            simplyswords$dropSimplyAxolotls();
+        if (!player.getEntityWorld().isClient() && simplyswords$hasAnyShoulderAxolotl(player)
+                && (player.isTouchingWater() || player.isSneaking())) {
+            simplyswords$dropSimplyAxolotls(player);
         }
     }
 }

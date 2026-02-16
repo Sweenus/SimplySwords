@@ -36,9 +36,9 @@ public class WraithfangEntity extends ThrownSpearEntity {
 
         Entity owner = getOwner();
         if (owner != null && owner.distanceTo(this) > 1 && owner.distanceTo(this) < 500
-                && getWorld() instanceof ServerWorld serverWorld && age < 100) {
+                && this.getEntityWorld() instanceof ServerWorld serverWorld && age < 100) {
             owner.setVelocity((this.getX() - owner.getX()) / 8, (this.getY() - owner.getY()) / 8, (this.getZ() - owner.getZ()) / 8);
-            owner.velocityModified = true;
+            owner.velocityDirty = true;
             HelperMethods.spawnWaistHeightParticles(serverWorld, ParticleTypes.OMINOUS_SPAWNING, this, owner, (int) this.distanceTo(owner));
             if (owner instanceof LivingEntity livingEntity) {
                 livingEntity.addStatusEffect(new StatusEffectInstance(EffectRegistry.getReference(EffectRegistry.RESILIENCE), 20, 4, false, false, true));
@@ -51,11 +51,11 @@ public class WraithfangEntity extends ThrownSpearEntity {
     @Override
     protected boolean tryPickup(PlayerEntity player) {
         if (this.isNoClip() && this.isOwner(player)) {
-            player.getWorld().playSound(this, this.getBlockPos(), SoundRegistry.ELEMENTAL_BOW_WIND_SHOOT_IMPACT_02.get(),
+            player.getEntityWorld().playSound(this, this.getBlockPos(), SoundRegistry.ELEMENTAL_BOW_WIND_SHOOT_IMPACT_02.get(),
                     this.getSoundCategory(), 0.1f, 1.2f);
             player.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, Config.uniqueEffects.wraithfang.duration, Config.uniqueEffects.wraithfang.hasteAmplifier, false, false, true));
             int cooldown = 10;
-            player.getItemCooldownManager().set(this.asItemStack().getItem(), cooldown);
+            player.getItemCooldownManager().set(this.asItemStack(), cooldown);
             if (offhandThrow && player.getOffHandStack().isEmpty()) {
                 // Send the ItemStack to the player's offhand slot if it's free
                 player.setStackInHand(Hand.OFF_HAND, this.asItemStack());
@@ -79,7 +79,7 @@ public class WraithfangEntity extends ThrownSpearEntity {
 
     @Override
     protected byte getLoyalty() {
-        World world = this.getWorld();
+        World world = this.getEntityWorld();
         if (world instanceof ServerWorld serverWorld) {
             return 3;
         } else {

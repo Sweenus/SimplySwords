@@ -26,8 +26,8 @@ public class MagislamEffect extends OrbitingEffect {
 
 
     @Override
-    public boolean applyUpdateEffect(LivingEntity livingEntity, int amplifier) {
-        if (!livingEntity.getWorld().isClient()) {
+    public boolean applyUpdateEffect(ServerWorld world, LivingEntity livingEntity, int amplifier) {
+        if (!livingEntity.getEntityWorld().isClient()) {
 
             if (livingEntity instanceof PlayerEntity player) {
                 int ability_timer = Objects.requireNonNull(player.getStatusEffect(EffectRegistry.getReference(EffectRegistry.MAGISLAM))).getDuration();
@@ -41,25 +41,25 @@ public class MagislamEffect extends OrbitingEffect {
                 if (ability_timer >= 60) {
                     player.setVelocity(livingEntity.getRotationVector().multiply(+leapVelocity));
                 player.setVelocity(livingEntity.getVelocity().x, height, livingEntity.getVelocity().z);
-                player.velocityModified = true;
+                player.velocityDirty = true;
                 }
                 else if (ability_timer <= 50) {
                     player.setVelocity(livingEntity.getVelocity().x, -descentVelocity, livingEntity.getVelocity().z);
-                    player.velocityModified = true;
+                    player.velocityDirty = true;
                     if (player.isOnGround()) {
                         Box box = HelperMethods.createBox(player, radius);
-                        for (Entity entities : livingEntity.getWorld().getOtherEntities(livingEntity, box, EntityPredicates.VALID_LIVING_ENTITY)) {
+                        for (Entity entities : livingEntity.getEntityWorld().getOtherEntities(livingEntity, box, EntityPredicates.VALID_LIVING_ENTITY)) {
 
                             if (entities != null) {
                                 if ((entities instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, player)) {
                                     le.setVelocity((le.getX() - player.getX()) / 4, (le.getY() - player.getY()) / 4, (le.getZ() - player.getZ()) / 4);
-                                    le.damage(player.getDamageSources().playerAttack(player), (float) damage);
+                                    le.damage((ServerWorld) player.getEntityWorld(), player.getDamageSources().playerAttack(player), (float) damage);
                                 }
                             }
                         }
-                        HelperMethods.spawnOrbitParticles((ServerWorld) player.getWorld(), player.getPos(), ParticleTypes.CAMPFIRE_COSY_SMOKE, 2, 8);
-                        HelperMethods.spawnOrbitParticles((ServerWorld) player.getWorld(), player.getPos(), ParticleTypes.EXPLOSION, 1, 3);
-                        player.getWorld().playSoundFromEntity(null, player, SoundEvents.ENTITY_GENERIC_EXPLODE.value(),
+                        HelperMethods.spawnOrbitParticles((ServerWorld) player.getEntityWorld(), player.getEntityPos(), ParticleTypes.CAMPFIRE_COSY_SMOKE, 2, 8);
+                        HelperMethods.spawnOrbitParticles((ServerWorld) player.getEntityWorld(), player.getEntityPos(), ParticleTypes.EXPLOSION, 1, 3);
+                        player.getEntityWorld().playSoundFromEntity(null, player, SoundEvents.ENTITY_GENERIC_EXPLODE.value(),
                                 SoundCategory.PLAYERS, 0.9f, 1.1f);
                         player.removeStatusEffect(EffectRegistry.getReference(EffectRegistry.MAGISLAM));
                         player.removeStatusEffect(EffectRegistry.getReference(EffectRegistry.RESILIENCE));
@@ -67,7 +67,7 @@ public class MagislamEffect extends OrbitingEffect {
                 }
             }
         }
-        super.applyUpdateEffect(livingEntity, amplifier);
+        super.applyUpdateEffect(world, livingEntity, amplifier);
         return true;
     }
 

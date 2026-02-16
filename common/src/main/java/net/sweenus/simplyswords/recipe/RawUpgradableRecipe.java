@@ -131,7 +131,7 @@ public class RawUpgradableRecipe {
         int width = pattern[0].length();
 
         // Create ingredient list
-        DefaultedList<Ingredient> defaultedList = DefaultedList.ofSize(height * width, Ingredient.EMPTY);
+        DefaultedList<Ingredient> defaultedList = DefaultedList.ofSize(height * width, Ingredient.ofItems());
         CharSet charSet = new CharArraySet(data.key.keySet());
         int upgradableSlot = -1;
 
@@ -142,7 +142,7 @@ public class RawUpgradableRecipe {
                 int slot = l + (k * width);
                 char c = string.charAt(l);
 
-                Ingredient ingredient = c == ' ' ? Ingredient.EMPTY : data.key.get(c).getFirst();
+                Ingredient ingredient = c == ' ' ? Ingredient.ofItems() : data.key.get(c).getFirst();
                 boolean upgradable = c != ' ' && data.key.get(c).getSecond();
                 if (ingredient == null) {
                     return DataResult.error(() -> "Pattern references symbol '" + c + "' but it's not defined in the key");
@@ -207,7 +207,7 @@ public class RawUpgradableRecipe {
     private static RawUpgradableRecipe readFromBuf(RegistryByteBuf buf) {
         int i = buf.readVarInt();
         int j = buf.readVarInt();
-        DefaultedList<Ingredient> defaultedList = DefaultedList.ofSize(i * j, Ingredient.EMPTY);
+        DefaultedList<Ingredient> defaultedList = DefaultedList.ofSize(i * j, Ingredient.ofItems());
         defaultedList.replaceAll((ingredient) -> Ingredient.PACKET_CODEC.decode(buf));
         int slot = buf.readVarInt();
         return new RawUpgradableRecipe(i, j, slot, defaultedList, Optional.empty());
@@ -225,7 +225,7 @@ public class RawUpgradableRecipe {
 
         static {
             INGREDIENT_CODEC = Codec.pair(
-                    Ingredient.DISALLOW_EMPTY_CODEC,
+                    Ingredient.CODEC,
                     Codec.BOOL.optionalFieldOf("upgradable", false).codec()
             );
 

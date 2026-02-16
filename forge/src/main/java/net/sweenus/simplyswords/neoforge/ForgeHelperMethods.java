@@ -8,7 +8,7 @@ import net.sweenus.simplyswords.SimplySwords;
 public class ForgeHelperMethods {
     public static float useSpellAttributeScaling(float damageModifier, PlayerEntity player, String magicSchool) {
         if (Platform.isForgeLike() && SimplySwords.passVersionCheck("irons_spellbooks", SimplySwords.minimumSpellbookVersion)) {
-            if (player != null && !player.getWorld().isClient) {
+            if (player != null && !player.getEntityWorld().isClient()) {
                 double spellPower = player.getAttributes().hasAttribute(AttributeRegistry.SPELL_POWER) ? player.getAttributeValue(AttributeRegistry.SPELL_POWER) : 1.f;
                 double attributePower = 0.f;
                 double damageOutput = 0.1;

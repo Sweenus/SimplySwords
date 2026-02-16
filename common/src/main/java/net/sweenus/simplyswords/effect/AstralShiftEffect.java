@@ -23,10 +23,8 @@ public class AstralShiftEffect extends StatusEffect {
         super (statusEffectCategory, color);
     }
     @Override
-    public boolean applyUpdateEffect(LivingEntity entity, int amplifier) {
-        if (!entity.getWorld().isClient()) {
-            ServerWorld world = (ServerWorld) entity.getWorld();
-
+    public boolean applyUpdateEffect(ServerWorld world, LivingEntity entity, int amplifier) {
+        if (!entity.getEntityWorld().isClient()) {
             if (entity instanceof PlayerEntity player) {
                 if (player.hasStatusEffect(EffectRegistry.getReference(EffectRegistry.ASTRAL_SHIFT))) {
                     StatusEffectInstance effectInstance = player.getStatusEffect(EffectRegistry.getReference(EffectRegistry.ASTRAL_SHIFT));
@@ -58,7 +56,7 @@ public class AstralShiftEffect extends StatusEffect {
                                 target.timeUntilRegen = 0;
                                 HelperMethods.spawnRainingParticles(world, ParticleTypes.ENCHANT, target, 4, 2);
                                 HelperMethods.spawnRainingParticles(world, ParticleTypes.WARPED_SPORE, target, 4, 2);
-                                HelperMethods.spawnOrbitParticles(world, target.getPos(), ParticleTypes.WARPED_SPORE, 0.5, 6);
+                                HelperMethods.spawnOrbitParticles(world, target.getEntityPos(), ParticleTypes.WARPED_SPORE, 0.5, 6);
                                 HelperMethods.spawnWaistHeightParticles(world, ParticleTypes.SMOKE, player, target, 15);
                                 HelperMethods.spawnRainingParticles(world, ParticleTypes.EXPLOSION, target, 2, 1);
                             }
@@ -69,7 +67,7 @@ public class AstralShiftEffect extends StatusEffect {
             }
         }
 
-        super.applyUpdateEffect(entity, amplifier);
+        super.applyUpdateEffect(world, entity, amplifier);
         return true;
     }
 

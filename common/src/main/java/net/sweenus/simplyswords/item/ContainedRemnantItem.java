@@ -2,7 +2,7 @@ package net.sweenus.simplyswords.item;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.component.type.TooltipDisplayComponent;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -20,16 +20,15 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.client.api.SimplySwordsClientAPI;
+import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.config.LootConfig;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
+import java.util.function.Consumer;
 
 public class ContainedRemnantItem extends Item {
 
@@ -57,8 +56,8 @@ public class ContainedRemnantItem extends Item {
         PlayerEntity player = context.getPlayer();
         ItemStack heldStack = context.getStack();
 
-        if (player != null && !player.getWorld().isClient) {
-            ServerWorld serverWorld = (ServerWorld) player.getWorld();
+        if (player != null && !player.getEntityWorld().isClient()) {
+            ServerWorld serverWorld = (ServerWorld) player.getEntityWorld();
 
             if (!ItemsRegistry.ITEM.getRegistrar().contains(transformationMap.get(blockState.getBlock())))
                 return ActionResult.PASS;
@@ -71,8 +70,8 @@ public class ContainedRemnantItem extends Item {
 
                 ItemStack newItem = new ItemStack(transformedItem);
                 heldStack.decrement(1);
-                HelperMethods.spawnOrbitParticles(serverWorld, player.getPos(), ParticleTypes.CAMPFIRE_COSY_SMOKE, 1, 6);
-                player.getWorld().playSound(null, player.getBlockPos(), SoundRegistry.DARK_ACTIVATION_DISTORTED.get(),
+                HelperMethods.spawnOrbitParticles(serverWorld, player.getEntityPos(), ParticleTypes.CAMPFIRE_COSY_SMOKE, 1, 6);
+                player.getEntityWorld().playSound(null, player.getBlockPos(), SoundRegistry.DARK_ACTIVATION_DISTORTED.get(),
                         player.getSoundCategory(), 0.4f, 1.8f);
 
                 player.dropItem(newItem, false);
@@ -88,11 +87,12 @@ public class ContainedRemnantItem extends Item {
 
     @Override
     public Text getName(ItemStack stack) {
-        return Text.translatable(this.getTranslationKey(stack)).setStyle(Styles.LEGENDARY);
+        return Text.translatable(this.getTranslationKey()).setStyle(Styles.LEGENDARY);
     }
 
     @Override
-    public void appendTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
+    public void appendTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, TooltipDisplayComponent displayComponent, Consumer<Text> textConsumer, TooltipType type) {
+        List<Text> tooltip = new ArrayList<>();
 
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.contained_remnant_description").formatted(Formatting.GRAY));
@@ -110,14 +110,15 @@ public class ContainedRemnantItem extends Item {
         tooltip.add(Text.literal(""));
         generateDynamicTooltip(itemStack, tooltipContext, tooltip, type);
         if (this.asItem().equals(ItemsRegistry.CONTAINED_REMNANT.get())) {
-            if (Screen.hasAltDown()) {
+            if (TooltipUtils.isAltDown()) {
                 tooltip.add(Text.translatable("item.simplyswords.contained_remnant_description7").formatted(Formatting.GRAY));
                 tooltip.add(Text.translatable("item.simplyswords.contained_remnant_description8").formatted(Formatting.GRAY));
                 tooltip.add(Text.translatable("item.simplyswords.contained_remnant_description9").formatted(Formatting.GRAY));
             }
         }
+        tooltip.forEach(textConsumer);
     }
-    protected void generateDynamicTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
+    protected void generateDynamicTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
         SimplySwordsClientAPI.generateDynamicTooltip(itemStack, tooltipContext, tooltip, type,
                 SimplySwords.MOD_ID,
                 "oracle_index:books/simplyswords/weapon-types",
@@ -127,9 +128,9 @@ public class ContainedRemnantItem extends Item {
     }
 
     public static void checkNearbyBlocks(ServerPlayerEntity player) {
-        World world = player.getWorld();
+        World world = player.getEntityWorld();
 
-        if (world.isClient) {
+        if (world.isClient()) {
             return;
         }
 
@@ -157,7 +158,7 @@ public class ContainedRemnantItem extends Item {
                         );
 
                         HelperMethods.spawnParticlesBetween(player, mutablePos, (ServerWorld) world, ParticleTypes.ENCHANT, 20);
-                        player.getWorld().playSound(null, mutablePos, SoundRegistry.DARK_ACTIVATION_DISTORTED.get(),
+                        player.getEntityWorld().playSound(null, mutablePos, SoundRegistry.DARK_ACTIVATION_DISTORTED.get(),
                                 player.getSoundCategory(), 0.1f, 1.2f);
 
                         playerInternalCooldowns.put(playerId, currentTick);

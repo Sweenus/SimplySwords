@@ -31,7 +31,7 @@ public class WeakenPower extends RunefusedGemPower {
 		if (attacker.getRandom().nextInt(100) <= hitChance) {
 			target.addStatusEffect(new StatusEffectInstance(StatusEffects.WEAKNESS, duration, this.isGreater() ? 1 : 0), attacker);
 			target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, duration, this.isGreater() ? 2 : 1), attacker);
-			attacker.getWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
+			attacker.getEntityWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
 					attacker.getSoundCategory(), 0.1f, 1.8f);
 		}
 	}

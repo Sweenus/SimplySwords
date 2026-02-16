@@ -34,7 +34,7 @@ public class FreezePower extends RunefusedGemPower {
 
 		if (attacker.getRandom().nextInt(100) <= hitChance) {
 			target.addStatusEffect(new StatusEffectInstance(EffectRegistry.getReference(EffectRegistry.FREEZE), freezeDuration, 1), attacker);
-			attacker.getWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
+			attacker.getEntityWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
 					attacker.getSoundCategory(), 0.1f, 1.8f);
 		}
 	}

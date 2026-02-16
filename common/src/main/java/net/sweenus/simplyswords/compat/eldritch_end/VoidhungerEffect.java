@@ -3,6 +3,7 @@ package net.sweenus.simplyswords.compat.eldritch_end;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectCategory;
+import net.minecraft.server.world.ServerWorld;
 
 public class VoidhungerEffect extends StatusEffect {
     public VoidhungerEffect(StatusEffectCategory statusEffectCategory, int color) {
@@ -10,8 +11,8 @@ public class VoidhungerEffect extends StatusEffect {
     }
 
     @Override
-    public boolean applyUpdateEffect(LivingEntity livingEntity, int amplifier) {
-        super.applyUpdateEffect(livingEntity, amplifier);
+    public boolean applyUpdateEffect(ServerWorld world, LivingEntity livingEntity, int amplifier) {
+        super.applyUpdateEffect(world, livingEntity, amplifier);
         return true;
     }
 

@@ -2,18 +2,21 @@ package net.sweenus.simplyswords.item.custom;
 
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
+import net.minecraft.item.consume.UseAction;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
-import net.minecraft.util.TypedActionResult;
-import net.minecraft.util.UseAction;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
@@ -37,48 +40,48 @@ public class StormsEdgeSwordItem extends UniqueSwordItem {
     private static final int ability_timer_max = 13;
 
     @Override
-    public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+    public void postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         HelperMethods.playHitSounds(attacker, target);
         int chargeChance = Config.uniqueEffects.storms_edge.chance;
-        if (!attacker.getWorld().isClient() && attacker.getRandom().nextInt(100) <= chargeChance && (attacker instanceof PlayerEntity player)
-                && player.getItemCooldownManager().getCooldownProgress(this, 1f) > 0) {
-            player.getItemCooldownManager().set(this, 0);
-            attacker.getWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_BLOCK_01.get(),
+        if (!attacker.getEntityWorld().isClient() && attacker.getRandom().nextInt(100) <= chargeChance && (attacker instanceof PlayerEntity player)
+                && player.getItemCooldownManager().getCooldownProgress(this.getDefaultStack(), 1f) > 0) {
+            player.getItemCooldownManager().set(this.getDefaultStack(), 0);
+            attacker.getEntityWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_BLOCK_01.get(),
                     attacker.getSoundCategory(), 0.7f, 1f);
         }
-        return super.postHit(stack, target, attacker);
+        super.postHit(stack, target, attacker);
     }
 
     @Override
-    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
+    public ActionResult use(World world, PlayerEntity user, Hand hand) {
         ItemStack itemStack = user.getStackInHand(hand);
         if (itemStack.getDamage() >= itemStack.getMaxDamage() - 1) {
-            return TypedActionResult.fail(itemStack);
+            return ActionResult.FAIL;
         }
         world.playSoundFromEntity(null, user, SoundRegistry.MAGIC_BOW_CHARGE_SHORT_VERSION.get(),
                 user.getSoundCategory(), 0.4f, 1.2f);
         user.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, 20, 5), user);
         user.timeUntilRegen = 15;
         user.setCurrentHand(hand);
-        return TypedActionResult.consume(itemStack);
+        return ActionResult.CONSUME;
     }
 
     @Override
     public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
-        if (!world.isClient && HelperMethods.isHolding(stack, user)) {
+        if (!world.isClient() && HelperMethods.isHolding(stack, user)) {
             int skillCooldown = Config.uniqueEffects.storms_edge.cooldown;
             AbilityMethods.tickAbilityStormJolt(stack, world, user, remainingUseTicks, skillCooldown, radius);
         }
     }
 
     @Override
-    public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
-        //Player dash end
-        if (!world.isClient && HelperMethods.isHolding(stack, user)) {
-            user.setVelocity(0, 0, 0); // Stop player at end of charge
-            user.velocityModified = true;
+    public boolean onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
+        if (!world.isClient() && HelperMethods.isHolding(stack, user)) {
+            user.setVelocity(0, 0, 0);
+            user.velocityDirty = true;
             user.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, 80, 1), user);
         }
+        return false;
     }
 
     @Override
@@ -92,13 +95,13 @@ public class StormsEdgeSwordItem extends UniqueSwordItem {
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
+    public void inventoryTick(ItemStack stack, ServerWorld world, Entity entity, EquipmentSlot slot) {
         HelperMethods.createFootfalls(entity, stack, world, ParticleTypes.MYCELIUM, ParticleTypes.MYCELIUM, ParticleTypes.MYCELIUM, true);
-        super.inventoryTick(stack, world, entity, slot, selected);
+        super.inventoryTick(stack, world, entity, slot);
     }
 
     @Override
-    public void appendTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
+    protected void appendItemTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.stormsedgesworditem.tooltip1").setStyle(Styles.ABILITY));
         tooltip.add(Text.translatable("item.simplyswords.stormsedgesworditem.tooltip2").setStyle(Styles.TEXT));
@@ -107,8 +110,7 @@ public class StormsEdgeSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.stormsedgesworditem.tooltip3").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.stormsedgesworditem.tooltip4").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.stormsedgesworditem.tooltip5").setStyle(Styles.TEXT));
-
-        super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        super.appendItemTooltip(itemStack, tooltipContext, tooltip, type);
     }
 
     public static class EffectSettings extends TooltipSettings {
@@ -121,6 +123,5 @@ public class StormsEdgeSwordItem extends UniqueSwordItem {
         public int chance = 15;
         @ValidatedInt.Restrict(min = 0)
         public int cooldown = 100;
-
     }
 }

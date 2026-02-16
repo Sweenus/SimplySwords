@@ -5,8 +5,8 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.text.Text;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
-import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.entity.ThrownRunicEntity;
@@ -24,9 +24,9 @@ public class ThrowingPower extends RunicGemPower {
 	}
 
 	@Override
-	public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand, ItemStack itemStack) {
-		if (!world.isClient) {
-			if (TagRegistry.isInTag(TagRegistry.spearsTag, itemStack.getItem())) return TypedActionResult.fail(itemStack);
+	public ActionResult use(World world, PlayerEntity user, Hand hand, ItemStack itemStack) {
+		if (!world.isClient()) {
+			if (TagRegistry.isInTag(TagRegistry.spearsTag, itemStack.getItem())) return ActionResult.FAIL;
 
 			itemStack = user.getStackInHand(hand);
 			ThrownRunicEntity thrownSwordEntity = new ThrownRunicEntity(world, user, itemStack.copy() );
@@ -54,7 +54,7 @@ public class ThrowingPower extends RunicGemPower {
 		}
 
 		user.swingHand(hand);
-		return TypedActionResult.success(itemStack, world.isClient());
+		return ActionResult.SUCCESS;
 	}
 
 	@Override

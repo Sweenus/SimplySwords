@@ -16,9 +16,8 @@ import net.sweenus.simplyswords.util.HelperMethods;
 public class StormEffect extends StatusEffect {
     public StormEffect(StatusEffectCategory statusEffectCategory, int color) {super (statusEffectCategory, color); }
     @Override
-    public boolean applyUpdateEffect(LivingEntity pLivingEntity, int pAmplifier) {
-        if (!pLivingEntity.getWorld().isClient()) {
-            ServerWorld world = (ServerWorld)pLivingEntity.getWorld();
+    public boolean applyUpdateEffect(ServerWorld world, LivingEntity pLivingEntity, int pAmplifier) {
+        if (!pLivingEntity.getEntityWorld().isClient()) {
             double hRadius = Config.uniqueEffects.mjolnir.radius;
             double vRadius = Config.uniqueEffects.mjolnir.radius / 2f;
             double x = pLivingEntity.getX();
@@ -43,7 +42,7 @@ public class StormEffect extends StatusEffect {
 
         }
 
-        super.applyUpdateEffect(pLivingEntity, pAmplifier);
+        super.applyUpdateEffect(world, pLivingEntity, pAmplifier);
 
         return true;
     }

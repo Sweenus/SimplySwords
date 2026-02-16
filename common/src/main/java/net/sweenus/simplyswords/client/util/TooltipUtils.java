@@ -3,7 +3,7 @@ package net.sweenus.simplyswords.client.util;
 import dev.architectury.platform.Platform;
 import me.fzzyhmstrs.fzzy_config.api.ConfigApiJava;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.util.InputUtil;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.tooltip.TooltipType;
@@ -11,19 +11,31 @@ import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.SimplySwords;
-import net.sweenus.simplyswords.SimplySwordsExpectPlatform;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.power.GemPower;
 import net.sweenus.simplyswords.power.GemPowerComponent;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
 
 public class TooltipUtils {
     public static final Identifier runic_tags = Identifier.of(SimplySwords.MOD_ID, "runic_weapons");
     private static long ctrlKeyPressTimestamp = 0;
+
+    public static boolean isAltDown() {
+        MinecraftClient client = MinecraftClient.getInstance();
+        return InputUtil.isKeyPressed(client.getWindow(), GLFW.GLFW_KEY_LEFT_ALT)
+                || InputUtil.isKeyPressed(client.getWindow(), GLFW.GLFW_KEY_RIGHT_ALT);
+    }
+
+    public static boolean isControlDown() {
+        MinecraftClient client = MinecraftClient.getInstance();
+        return InputUtil.isKeyPressed(client.getWindow(), GLFW.GLFW_KEY_LEFT_CONTROL)
+                || InputUtil.isKeyPressed(client.getWindow(), GLFW.GLFW_KEY_RIGHT_CONTROL);
+    }
 
 
     public static void centerAlignTooltip(List<Text> tooltip, Text text) {
@@ -88,7 +100,7 @@ public class TooltipUtils {
 
     public static void appendSpellScaleTooltip(List<Text> tooltip, String spellSchool) {
         if (Platform.isModLoaded("spell_power") || Platform.isModLoaded("irons_spellbooks")) {
-            if (Screen.hasAltDown() && !Screen.hasControlDown()) {
+            if (isAltDown() && !isControlDown()) {
                 tooltip.add(Text.literal(""));
                 tooltip.add(Text.translatable("item.simplyswords.compat.spellScaling").setStyle(Styles.COMMON));
                 switch (spellSchool) {
@@ -113,25 +125,12 @@ public class TooltipUtils {
     }
 
     public static boolean shouldDisplayTooltip(ItemStack stack, Identifier tagId) {
-        return (Screen.hasAltDown() && !Screen.hasControlDown()) // Don't hide info on these items
+        return (isAltDown() && !isControlDown()) // Don't hide info on these items
                 || HelperMethods.isInTag(stack, tagId)
                 || stack.isOf(ItemsRegistry.RUNEFUSED_GEM.get())
                 || stack.isOf(ItemsRegistry.NETHERFUSED_GEM.get());
     }
 
-
-    public static void openPatchouli(Identifier entry) {
-        if (Platform.isModLoaded("patchouli")) {
-            if (entry.getPath().contains("lichblade"))
-                entry = Identifier.of("simplyswords:uniques/entry_slumbering_lichblade");
-            if (entry.getPath().contains("righteous_relic"))
-                entry = Identifier.of("simplyswords:uniques/entry_dormant_relic");
-            if (entry.getPath().contains("tainted_relic"))
-                entry = Identifier.of("simplyswords:uniques/entry_dormant_relic");
-
-            commonPatchouli(entry);
-        }
-    }
 
     public static void openFzzyConfig(String path) {
         if (!ConfigApiJava.isScreenOpen("simplyswords.unique_effects.")) {
@@ -178,7 +177,7 @@ public class TooltipUtils {
 
     public static void processCtrlAltNavigation(Identifier entry, String modId, Identifier customConfigPath, ItemStack itemStack, List<Text> tooltip) {
         String customPath;
-        if (Screen.hasControlDown()) {
+        if (isControlDown()) {
             if (ctrlKeyPressTimestamp == 0) {
                 ctrlKeyPressTimestamp = System.currentTimeMillis();
             }
@@ -190,7 +189,7 @@ public class TooltipUtils {
             }
 
             if ((System.currentTimeMillis() - ctrlKeyPressTimestamp) >= 500) {
-                if (Screen.hasAltDown()) {
+                if (isAltDown()) {
                     if (customConfigPath == null) {
                         TooltipUtils.openFzzyConfig(modId);
                     }
@@ -210,11 +209,4 @@ public class TooltipUtils {
             ctrlKeyPressTimestamp = 0;
         }
     }
-
-
-    public static void commonPatchouli(Identifier entry) {
-        SimplySwordsExpectPlatform.openPatchouli(entry);
-    }
-
-
 }

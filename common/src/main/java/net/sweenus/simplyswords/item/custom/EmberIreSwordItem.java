@@ -8,8 +8,10 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
+import net.minecraft.item.consume.UseAction;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.particle.SimpleParticleType;
@@ -17,9 +19,8 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
-import net.minecraft.util.TypedActionResult;
-import net.minecraft.util.UseAction;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ChanceDurationSettings;
@@ -43,27 +44,27 @@ public class EmberIreSwordItem extends UniqueSwordItem {
     private static SimpleParticleType particlePassive = ParticleTypes.SMOKE;
 
     @Override
-    public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        if (!attacker.getWorld().isClient()) {
+    public void postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        if (!attacker.getEntityWorld().isClient()) {
             HelperMethods.playHitSounds(attacker, target);
 
         }
-        return super.postHit(stack, target, attacker);
+        super.postHit(stack, target, attacker);
     }
 
     @Override
-    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
+    public ActionResult use(World world, PlayerEntity user, Hand hand) {
         ItemStack itemStack = user.getStackInHand(hand);
         if (itemStack.getDamage() >= itemStack.getMaxDamage() - 1) {
-            return TypedActionResult.fail(itemStack);
+            return ActionResult.FAIL;
         }
         user.setCurrentHand(hand);
-        return TypedActionResult.consume(itemStack);
+        return ActionResult.CONSUME;
     }
 
     @Override
     public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
-        if (!world.isClient && remainingUseTicks %10 == 0 && remainingUseTicks < getMaxUseTime(stack, user) - 5) {
+        if (!world.isClient() && remainingUseTicks %10 == 0 && remainingUseTicks < getMaxUseTime(stack, user) - 5) {
             world.playSoundFromEntity(null, user, SoundRegistry.ELEMENTAL_BOW_RECHARGE.get(),
                     user.getSoundCategory(), 0.2f, 1.1f - (remainingUseTicks * 0.001f));
 
@@ -75,8 +76,8 @@ public class EmberIreSwordItem extends UniqueSwordItem {
     }
 
     @Override
-    public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
-        if (!world.isClient && user.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
+    public boolean onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
+        if (!world.isClient() && user.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
             Optional<LivingEntity> targetEntityReturn = HelperMethods.findClosestTarget(user, 18, 3);
             double damageAmount = HelperMethods.getEntityAttackDamage(user) * 0.3;
             if (targetEntityReturn.isPresent() && HelperMethods.checkFriendlyFire(targetEntityReturn.get(), user)) {
@@ -91,7 +92,7 @@ public class EmberIreSwordItem extends UniqueSwordItem {
                 DamageSource damageSource = user.getDamageSources().generic();
                 if (user instanceof PlayerEntity player) {
                     damageSource = user.getDamageSources().playerAttack(player);
-                    player.getItemCooldownManager().set(stack.getItem(), 10);
+                    player.getItemCooldownManager().set(stack, 10);
                 }
 
                 final float minAdditionalDamage = 0.0f;
@@ -100,15 +101,15 @@ public class EmberIreSwordItem extends UniqueSwordItem {
                 float additionalDamage = minAdditionalDamage + (maxAdditionalDamage - minAdditionalDamage) * chargeRatio;
                 float finalDamage = (float) damageAmount + additionalDamage;
                 targetEntity.timeUntilRegen = 0;
-                targetEntity.damage(damageSource, finalDamage);
+                targetEntity.damage((ServerWorld) targetEntity.getEntityWorld(), damageSource, finalDamage);
 
                 world.playSound(null, targetEntity.getBlockPos(), SoundEvents.ENTITY_GENERIC_EXPLODE.value(),
                         user.getSoundCategory(), 0.4f, 1.1f);
-                HelperMethods.spawnOrbitParticles((ServerWorld) world, targetEntity.getPos(), ParticleTypes.EXPLOSION, 1, 1 );
-                HelperMethods.spawnOrbitParticles((ServerWorld) world, targetEntity.getPos(), ParticleTypes.POOF, 1, 20 );
+                HelperMethods.spawnOrbitParticles((ServerWorld) world, targetEntity.getEntityPos(), ParticleTypes.EXPLOSION, 1, 1 );
+                HelperMethods.spawnOrbitParticles((ServerWorld) world, targetEntity.getEntityPos(), ParticleTypes.POOF, 1, 20 );
                 user.setVelocity(user.getRotationVector().negate().multiply(+1.1));
                 user.setVelocity(user.getVelocity().x, 0, user.getVelocity().z);
-                user.velocityModified = true;
+                user.velocityDirty = true;
 
                 int hitChance = Config.uniqueEffects.emberblade.chance;
                 int duration = Config.uniqueEffects.emberblade.duration;
@@ -126,6 +127,7 @@ public class EmberIreSwordItem extends UniqueSwordItem {
 
             }
         }
+        return false;
     }
 
     @Override
@@ -139,7 +141,7 @@ public class EmberIreSwordItem extends UniqueSwordItem {
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
+    public void inventoryTick(ItemStack stack, ServerWorld world, Entity entity, EquipmentSlot slot) {
         if ((entity instanceof PlayerEntity player)) {
             if (!player.hasStatusEffect(StatusEffects.STRENGTH) && !player.isOnFire()) {
                 particlePassive = ParticleTypes.SMOKE;
@@ -149,11 +151,11 @@ public class EmberIreSwordItem extends UniqueSwordItem {
         }
         int stepMod = 7 - (int)(world.getTime() % 7);
         HelperMethods.createFootfalls(entity, stack, world, particleWalk, particleSprint, particlePassive, true);
-        super.inventoryTick(stack, world, entity, slot, selected);
+        super.inventoryTick(stack, world, entity, slot);
     }
 
     @Override
-    public void appendTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
+    protected void appendItemTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.emberiresworditem.tooltip1").setStyle(Styles.ABILITY));
         tooltip.add(Text.literal(""));
@@ -171,7 +173,7 @@ public class EmberIreSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.emberiresworditem.tooltip10").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.emberiresworditem.tooltip11").setStyle(Styles.TEXT));
 
-        super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        super.appendItemTooltip(itemStack, tooltipContext, tooltip, type);
     }
 
     @Translation(prefix = "", negate = true)

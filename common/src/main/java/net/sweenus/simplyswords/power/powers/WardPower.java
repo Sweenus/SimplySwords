@@ -6,8 +6,8 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.text.Text;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
-import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.power.RunicGemPower;
@@ -24,14 +24,14 @@ public class WardPower extends RunicGemPower {
 	}
 
 	@Override
-	public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand, ItemStack itemStack) {
+	public ActionResult use(World world, PlayerEntity user, Hand hand, ItemStack itemStack) {
 		user.setCurrentHand(hand);
 		user.addStatusEffect(new StatusEffectInstance(EffectRegistry.getReference(EffectRegistry.WARD), 120, 0), user);
-		user.getItemCooldownManager().set(itemStack.getItem(), 120);
+		user.getItemCooldownManager().set(itemStack, 120);
 		user.setHealth(user.getHealth() / 2);
 		world.playSoundFromEntity(null, user, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
 				user.getSoundCategory(), 0.3f, 1.2f);
-		return TypedActionResult.consume(itemStack);
+		return ActionResult.CONSUME;
 	}
 
 	@Override

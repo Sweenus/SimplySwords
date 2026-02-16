@@ -3,20 +3,22 @@ package net.sweenus.simplyswords.item.custom;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
+import net.minecraft.item.consume.UseAction;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
-import net.minecraft.util.TypedActionResult;
-import net.minecraft.util.UseAction;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
@@ -43,9 +45,9 @@ public class HearthflameSwordItem extends UniqueSwordItem implements TwoHandedWe
     int ability_timer_max = 120;
 
     @Override
-    public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        if (!attacker.getWorld().isClient()) {
-            ServerWorld world = (ServerWorld) attacker.getWorld();
+    public void postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        if (!attacker.getEntityWorld().isClient()) {
+            ServerWorld world = (ServerWorld) attacker.getEntityWorld();
             HelperMethods.playHitSounds(attacker, target);
 
             if (attacker.getRandom().nextInt(100) <= Config.uniqueEffects.hearthflame.chance) {
@@ -64,21 +66,21 @@ public class HearthflameSwordItem extends UniqueSwordItem implements TwoHandedWe
                             target.getSoundCategory(), 0.5f, 1.2f);
             }
         }
-        return super.postHit(stack, target, attacker);
+        super.postHit(stack, target, attacker);
     }
 
     @Override
-    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
+    public ActionResult use(World world, PlayerEntity user, Hand hand) {
         user.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 20, 5), user);
         user.addStatusEffect(new StatusEffectInstance(StatusEffects.MINING_FATIGUE, 20, 8), user);
         user.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, 20, 5), user);
 
         ItemStack itemStack = user.getStackInHand(hand);
         if (itemStack.getDamage() >= itemStack.getMaxDamage() - 1) {
-            return TypedActionResult.fail(itemStack);
+            return ActionResult.FAIL;
         }
         user.setCurrentHand(hand);
-        return TypedActionResult.consume(itemStack);
+        return ActionResult.CONSUME;
     }
 
     @Override
@@ -107,10 +109,10 @@ public class HearthflameSwordItem extends UniqueSwordItem implements TwoHandedWe
     }
 
     @Override
-    public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
-        if (!world.isClient) {
+    public boolean onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
+        if (!world.isClient()) {
             if (user instanceof PlayerEntity player) {
-                player.getItemCooldownManager().set(this, Config.uniqueEffects.hearthflame.chance);
+                player.getItemCooldownManager().set(this.getDefaultStack(), Config.uniqueEffects.hearthflame.chance);
             }
             int choose_sound = (int) (Math.random() * 30);
             if (choose_sound <= 10)
@@ -132,7 +134,7 @@ public class HearthflameSwordItem extends UniqueSwordItem implements TwoHandedWe
                     float spellScaling = HelperMethods.commonSpellAttributeScaling(Config.uniqueEffects.hearthflame.spellScaling, user, "fire");
                     float abilityDamage = spellScaling > 0f ? spellScaling : Config.uniqueEffects.hearthflame.damage;
                     int chargePower = stack.getOrDefault(ComponentTypeRegistry.STORED_CHARGE.get(), StoredChargeComponent.DEFAULT).charge();
-                    le.damage(user.getDamageSources().indirectMagic(user, user), abilityDamage * (chargePower * 0.3f));
+                    le.damage((ServerWorld) le.getEntityWorld(), user.getDamageSources().indirectMagic(user, user), abilityDamage * (chargePower * 0.3f));
                     le.setOnFireFor(6);
                     world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_BOW_POISON_ATTACK_01.get(),
                             le.getSoundCategory(), 0.1f, choose);
@@ -142,17 +144,18 @@ public class HearthflameSwordItem extends UniqueSwordItem implements TwoHandedWe
                 }
             }
         }
+        return false;
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
+    public void inventoryTick(ItemStack stack, ServerWorld world, Entity entity, EquipmentSlot slot) {
         HelperMethods.createFootfalls(entity, stack, world, ParticleTypes.MYCELIUM, ParticleTypes.MYCELIUM,
                 ParticleTypes.MYCELIUM, true);
-        super.inventoryTick(stack, world, entity, slot, selected);
+        super.inventoryTick(stack, world, entity, slot);
     }
 
     @Override
-    public void appendTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
+    protected void appendItemTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.volcanicfurysworditem.tooltip1").setStyle(Styles.ABILITY));
         tooltip.add(Text.translatable("item.simplyswords.volcanicfurysworditem.tooltip2").setStyle(Styles.TEXT));
@@ -166,7 +169,7 @@ public class HearthflameSwordItem extends UniqueSwordItem implements TwoHandedWe
         tooltip.add(Text.translatable("item.simplyswords.volcanicfurysworditem.tooltip7").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.volcanicfurysworditem.tooltip8").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.volcanicfurysworditem.tooltip9").setStyle(Styles.TEXT));
-        super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        super.appendItemTooltip(itemStack, tooltipContext, tooltip, type);
         TooltipUtils.appendSpellScaleTooltip(tooltip, "fire");
     }
 

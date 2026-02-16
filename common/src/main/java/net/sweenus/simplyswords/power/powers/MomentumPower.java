@@ -9,8 +9,8 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.text.Text;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
-import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.config.Config;
@@ -29,15 +29,15 @@ public class MomentumPower extends RunicGemPower {
 	}
 
 	@Override
-	public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand, ItemStack itemStack) {
+	public ActionResult use(World world, PlayerEntity user, Hand hand, ItemStack itemStack) {
 
 		if (itemStack.getDamage() >= itemStack.getMaxDamage() - 1) {
-			return TypedActionResult.fail(itemStack);
+			return ActionResult.FAIL;
 		}
 		world.playSoundFromEntity(user, user, SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_FLYBY_01.get(),
 				user.getSoundCategory(), 0.3f, 0.7f);
 		user.setCurrentHand(hand);
-		return TypedActionResult.consume(itemStack);
+		return ActionResult.CONSUME;
 	}
 
 	@Override
@@ -51,20 +51,21 @@ public class MomentumPower extends RunicGemPower {
 			if (remainingUseTicks >= 10 && user.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
 				user.setVelocity(user.getRotationVector().multiply(velocity + (this.isGreater() ? 1 : 0)));
 				user.setVelocity(user.getVelocity().x, 0, user.getVelocity().z); // Prevent player flying to the heavens
-				user.velocityModified = true;
+				user.velocityDirty = true;
 				if (user instanceof PlayerEntity player) {
-					player.getItemCooldownManager().set(stack.getItem(), skillCooldown);
+					player.getItemCooldownManager().set(stack, skillCooldown);
 				}
 			}
 		}
 	}
 
 	@Override
-	public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
+	public boolean onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
 		if (user.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
 			user.setVelocity(0, 0, 0); // Stop player at end of charge
-			user.velocityModified = true;
+			user.velocityDirty = true;
 		}
+		return false;
 	}
 
 	@Override

@@ -15,12 +15,11 @@ public class WildfireEffect extends StatusEffect {
     public WildfireEffect(StatusEffectCategory statusEffectCategory, int color) {super (statusEffectCategory, color); }
 
     @Override
-    public boolean applyUpdateEffect(LivingEntity pLivingEntity, int pAmplifier) {
-        if (!pLivingEntity.getWorld().isClient()) {
+    public boolean applyUpdateEffect(ServerWorld world, LivingEntity pLivingEntity, int pAmplifier) {
+        if (!pLivingEntity.getEntityWorld().isClient()) {
             LivingEntity pPlayer = pLivingEntity.getAttacker();
             if (pPlayer != null) {
                 if (pPlayer instanceof PlayerEntity) {
-                    ServerWorld world = (ServerWorld) pLivingEntity.getWorld();
                     double hradius = Config.gemPowers.wildfire.radius;
                     double vradius = Config.gemPowers.wildfire.radius / 2.0;
                     double x = pLivingEntity.getX();
@@ -39,7 +38,7 @@ public class WildfireEffect extends StatusEffect {
             }
         }
 
-        super.applyUpdateEffect(pLivingEntity, pAmplifier);
+        super.applyUpdateEffect(world, pLivingEntity, pAmplifier);
 
         return true;
     }

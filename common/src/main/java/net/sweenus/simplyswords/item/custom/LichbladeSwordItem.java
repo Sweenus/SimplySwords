@@ -9,17 +9,18 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
+import net.minecraft.item.consume.UseAction;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.TypedActionResult;
-import net.minecraft.util.UseAction;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
@@ -47,23 +48,23 @@ public class LichbladeSwordItem extends UniqueSwordItem implements TwoHandedWeap
     LivingEntity abilityTarget;
 
     @Override
-    public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+    public void postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         HelperMethods.playHitSounds(attacker, target);
-        return super.postHit(stack, target, attacker);
+        super.postHit(stack, target, attacker);
     }
 
     @Override
-    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
+    public ActionResult use(World world, PlayerEntity user, Hand hand) {
         ItemStack itemStack = user.getStackInHand(hand);
         if(hand == Hand.OFF_HAND) {
-            return TypedActionResult.fail(itemStack);
+            return ActionResult.FAIL;
         }
 
         if (itemStack.getDamage() >= itemStack.getMaxDamage() - 1) {
-            return TypedActionResult.fail(itemStack);
+            return ActionResult.FAIL;
         }
         if (itemStack.isOf(ItemsRegistry.SLUMBERING_LICHBLADE.get())) {
-            return TypedActionResult.pass(itemStack);
+            return ActionResult.PASS;
         }
         LivingEntity abilityTarget = (LivingEntity) HelperMethods.getTargetedEntity(user, Config.uniqueEffects.lichblade.range);
         if (abilityTarget != null) {
@@ -73,12 +74,12 @@ public class LichbladeSwordItem extends UniqueSwordItem implements TwoHandedWeap
             itemStack.set(ComponentTypeRegistry.TARGETED_LOCATION.get(), new TargetedLocationComponent(abilityTarget.getUuid(), user.getX(), user.getY(), user.getZ()));
         }
         user.setCurrentHand(hand);
-        return TypedActionResult.consume(itemStack);
+        return ActionResult.CONSUME;
     }
 
     @Override
     public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
-        if (world.isClient) return;
+        if (world.isClient()) return;
         TargetedLocationComponent targetLocation = stack.getOrDefault(ComponentTypeRegistry.TARGETED_LOCATION.get(), TargetedLocationComponent.DEFAULT);
         LivingEntity abilityTarget = targetLocation.getEntity((ServerWorld) world);
         if (user.getEquippedStack(EquipmentSlot.MAINHAND) == stack && abilityTarget != null) {
@@ -136,19 +137,20 @@ public class LichbladeSwordItem extends UniqueSwordItem implements TwoHandedWeap
     }
 
     @Override
-    public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
+    public boolean onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
         TargetedLocationComponent targetLocation = stack.get(ComponentTypeRegistry.TARGETED_LOCATION.get());
-        if (!world.isClient && (user instanceof PlayerEntity player) && targetLocation != null && ((ServerWorld)world).getEntity(targetLocation.uuid()) != null) {
-            player.getItemCooldownManager().set(stack.getItem(), Config.uniqueEffects.lichblade.cooldown);
+        if (!world.isClient() && (user instanceof PlayerEntity player) && targetLocation != null && ((ServerWorld)world).getEntity(targetLocation.uuid()) != null) {
+            player.getItemCooldownManager().set(stack, Config.uniqueEffects.lichblade.cooldown);
         }
         stack.set(ComponentTypeRegistry.STORED_CHARGE.get(), null);
         stack.set(ComponentTypeRegistry.TARGETED_LOCATION.get(), null);
+        return false;
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, World world, Entity user, int slot, boolean selected) {
+    public void inventoryTick(ItemStack stack, ServerWorld world, Entity user, EquipmentSlot slot) {
 
-        if (!user.getWorld().isClient()
+        if (!user.getEntityWorld().isClient()
                 && user instanceof LivingEntity livingUser
                 && livingUser.age % 35 == 0
                 && livingUser.getEquippedStack(EquipmentSlot.MAINHAND) == stack
@@ -162,7 +164,7 @@ public class LichbladeSwordItem extends UniqueSwordItem implements TwoHandedWeap
                     livingUser.getX() - radius, livingUser.getY() - radius, livingUser.getZ() - radius);
             for (Entity entity : world.getOtherEntities(livingUser, box, EntityPredicates.VALID_LIVING_ENTITY)) {
                 if ((entity instanceof LivingEntity le) && HelperMethods.checkFriendlyFire((LivingEntity) entity, livingUser)) {
-                    le.damage(livingUser.getDamageSources().indirectMagic(user, user), abilityDamage);
+                    le.damage((ServerWorld) le.getEntityWorld(), livingUser.getDamageSources().indirectMagic(user, user), abilityDamage);
                 }
             }
             world.playSoundFromEntity(null, livingUser, SoundRegistry.DARK_SWORD_BLOCK.get(),
@@ -188,11 +190,11 @@ public class LichbladeSwordItem extends UniqueSwordItem implements TwoHandedWeap
 
         }
         HelperMethods.createFootfalls(user, stack, world, ParticleTypes.SOUL, ParticleTypes.SOUL, ParticleTypes.MYCELIUM, true);
-        super.inventoryTick(stack, world, user, slot, selected);
+        super.inventoryTick(stack, world, user, slot);
     }
 
     @Override
-    public void appendTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
+    protected void appendItemTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
         tooltip.add(Text.literal(""));
         if (itemStack.isOf(ItemsRegistry.SLUMBERING_LICHBLADE.get()))
             tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip1").setStyle(Styles.ABILITY));
@@ -217,7 +219,7 @@ public class LichbladeSwordItem extends UniqueSwordItem implements TwoHandedWeap
                 tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip9").setStyle(Styles.TEXT));
             }
         }
-        super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        super.appendItemTooltip(itemStack, tooltipContext, tooltip, type);
         TooltipUtils.appendSpellScaleTooltip(tooltip, "soul");
     }
 

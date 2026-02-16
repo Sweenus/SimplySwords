@@ -31,8 +31,8 @@ public class ImbuedPower extends RunefusedGemPower {
 
 		if (attacker.getRandom().nextInt(100) <= hitChance) {
 			target.timeUntilRegen = 0;
-			target.damage(attacker.getDamageSources().magic(), damage);
-			attacker.getWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
+			target.damage((net.minecraft.server.world.ServerWorld) attacker.getEntityWorld(), attacker.getDamageSources().magic(), damage);
+			attacker.getEntityWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
 					attacker.getSoundCategory(), 0.2f, 1.8f);
 		}
 	}

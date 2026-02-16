@@ -4,6 +4,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.AttributeContainer;
 import net.minecraft.entity.effect.StatusEffectCategory;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.server.world.ServerWorld;
 
 public class FrenzyEffect extends OrbitingEffect {
     public FrenzyEffect(StatusEffectCategory statusEffectCategory, int color) {
@@ -12,8 +13,8 @@ public class FrenzyEffect extends OrbitingEffect {
     }
 
     @Override
-    public boolean applyUpdateEffect(LivingEntity livingEntity, int amplifier) {
-        super.applyUpdateEffect(livingEntity, amplifier);
+    public boolean applyUpdateEffect(ServerWorld world, LivingEntity livingEntity, int amplifier) {
+        super.applyUpdateEffect(world, livingEntity, amplifier);
         return true;
     }
 

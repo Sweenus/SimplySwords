@@ -3,6 +3,7 @@ package net.sweenus.simplyswords.effect;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectCategory;
+import net.minecraft.server.world.ServerWorld;
 
 public class RibbonwrathEffect extends StatusEffect {
 
@@ -11,9 +12,9 @@ public class RibbonwrathEffect extends StatusEffect {
     }
 
     @Override
-    public boolean applyUpdateEffect(LivingEntity pLivingEntity, int pAmplifier) {
+    public boolean applyUpdateEffect(ServerWorld world, LivingEntity pLivingEntity, int pAmplifier) {
 
-        super.applyUpdateEffect(pLivingEntity, pAmplifier);
+        super.applyUpdateEffect(world, pLivingEntity, pAmplifier);
 
         return true;
     }

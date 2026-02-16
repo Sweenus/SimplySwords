@@ -40,8 +40,8 @@ public class SimplySwordsAPI {
                                                            int negativeEffectAmplifier,
                                                            boolean dealsDamage, boolean doesHealing) {
 
-        if (!user.getWorld().isClient()) {
-            ServerWorld world = (ServerWorld) user.getWorld();
+        if (!user.getEntityWorld().isClient()) {
+            ServerWorld world = (ServerWorld) user.getEntityWorld();
             BlockState currentState = world.getBlockState(user.getBlockPos().up(height).offset(user.getMovementDirection(), distance));
             BlockState state = Blocks.AIR.getDefaultState();
             if (currentState == state) {
@@ -82,7 +82,7 @@ public class SimplySwordsAPI {
 
     // Performs postHit socket effects
     public static void postHitGemSocketLogic(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        if (!attacker.getWorld().isClient()) {
+        if (!attacker.getEntityWorld().isClient()) {
             GemPowerComponent component = getComponent(stack);
             component.postHit(stack, target, attacker);
         }
@@ -109,7 +109,7 @@ public class SimplySwordsAPI {
                     ValidationResult<GemPowerComponent> result = gemPowerFiller.fill(otherStack, component);
                     if (result.isValid()) {
                         stack.set(ComponentTypeRegistry.GEM_POWER.get(), result.get());
-                        player.getWorld().playSoundFromEntity(null, player, SoundEvents.BLOCK_ANVIL_USE, player.getSoundCategory(), 1, 1);
+                        player.getEntityWorld().playSoundFromEntity(null, player, SoundEvents.BLOCK_ANVIL_USE, player.getSoundCategory(), 1, 1);
                         otherStack.decrement(1);
                     }
                 }
@@ -125,7 +125,7 @@ public class SimplySwordsAPI {
             float netherSocketRoll = (float) (Math.random() * 100);
             stack.set(ComponentTypeRegistry.GEM_POWER.get(), GemPowerComponent.createEmpty(runeSocketRoll > runeSocketChance, netherSocketRoll > netherSocketChance));
         }
-        if (!world.isClient && (entity instanceof LivingEntity user) &&
+        if (!world.isClient() && (entity instanceof LivingEntity user) &&
                 (user.getEquippedStack(EquipmentSlot.MAINHAND) == stack || user.getEquippedStack(EquipmentSlot.OFFHAND) == stack)) {
             GemPowerComponent component = getComponent(stack);
             component.inventoryTick(stack, world, user, 0, true);

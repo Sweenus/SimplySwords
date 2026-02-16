@@ -1,14 +1,17 @@
 package net.sweenus.simplyswords.item;
 
+import net.minecraft.component.type.TooltipDisplayComponent;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.StackReference;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.SwordItem;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.screen.slot.Slot;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.ClickType;
 import net.minecraft.util.Identifier;
@@ -20,14 +23,16 @@ import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
-public abstract class UniqueSwordItem extends SwordItem {
+public abstract class UniqueSwordItem extends Item {
 
     String iRarity = "UNIQUE";
 
     public UniqueSwordItem(ToolMaterial toolMaterial, Settings settings) {
-        super(toolMaterial, settings.fireproof());
+        super(settings.fireproof());
     }
 
     @Override
@@ -36,9 +41,13 @@ public abstract class UniqueSwordItem extends SwordItem {
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
+    public void inventoryTick(ItemStack stack, ServerWorld world, Entity entity, EquipmentSlot slot) {
         SimplySwordsAPI.inventoryTickGemSocketLogic(stack, world, entity, 50, 50);
-        super.inventoryTick(stack, world, entity, slot, selected);
+        super.inventoryTick(stack, world, entity, slot);
+    }
+
+    // Subclasses that need World or old-style params can override this
+    public void inventoryTickCompat(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
     }
 
     @Override
@@ -49,12 +58,12 @@ public abstract class UniqueSwordItem extends SwordItem {
     }
 
     @Override
-    public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        if (!attacker.getWorld().isClient()) {
+    public void postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        if (!attacker.getEntityWorld().isClient()) {
             HelperMethods.playHitSounds(attacker, target);
             SimplySwordsAPI.postHitGemSocketLogic(stack, target, attacker);
         }
-        return super.postHit(stack, target, attacker);
+        super.postHit(stack, target, attacker);
     }
 
     @Override
@@ -67,15 +76,22 @@ public abstract class UniqueSwordItem extends SwordItem {
                 || this.getDefaultStack().isOf(ItemsRegistry.MAGIBLADE.get())
                 || this.getDefaultStack().isOf(ItemsRegistry.MAGISCYTHE.get())) {
             this.iRarity = "LEGENDARY";
-            return Text.translatable(this.getTranslationKey(stack)).setStyle(Styles.LEGENDARY);
+            return Text.translatable(this.getTranslationKey()).setStyle(Styles.LEGENDARY);
         }
 
-        if (this.iRarity.equals("UNIQUE")) return Text.translatable(this.getTranslationKey(stack)).setStyle(Styles.UNIQUE);
-        else return Text.translatable(this.getTranslationKey(stack)).setStyle(Styles.COMMON);
+        if (this.iRarity.equals("UNIQUE")) return Text.translatable(this.getTranslationKey()).setStyle(Styles.UNIQUE);
+        else return Text.translatable(this.getTranslationKey()).setStyle(Styles.COMMON);
     }
 
     @Override
-    public void appendTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
+    public void appendTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, TooltipDisplayComponent displayComponent, Consumer<Text> textConsumer, TooltipType type) {
+        List<Text> tooltip = new ArrayList<>();
+        appendItemTooltip(itemStack, tooltipContext, tooltip, type);
+        tooltip.forEach(textConsumer);
+    }
+
+    // Subclasses should override this instead of appendTooltip
+    protected void appendItemTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
         generateDynamicTooltip(itemStack, tooltipContext, tooltip, type);
     }
 
@@ -84,7 +100,7 @@ public abstract class UniqueSwordItem extends SwordItem {
     }
 
     // Override this with your own id & paths
-    protected void generateDynamicTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
+    protected void generateDynamicTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
         SimplySwordsClientAPI.generateDynamicTooltip(itemStack, tooltipContext, tooltip, type,
                 SimplySwords.MOD_ID,
                 "oracle_index:books/simplyswords/weapon-types",

@@ -27,9 +27,9 @@ public class FrostVortexEffect extends OrbitingEffect {
     }
 
     @Override
-    public boolean applyUpdateEffect(LivingEntity livingEntity, int amplifier) {
-        if (!livingEntity.getWorld().isClient()) {
-            ServerWorld serverWorld = (ServerWorld) livingEntity.getWorld();
+    public boolean applyUpdateEffect(ServerWorld world, LivingEntity livingEntity, int amplifier) {
+        if (!livingEntity.getEntityWorld().isClient()) {
+            ServerWorld serverWorld = (ServerWorld) livingEntity.getEntityWorld();
             float abilityDamage = 0;
             if (livingEntity.getStatusEffect(EffectRegistry.getReference(EffectRegistry.FROST_VORTEX)) instanceof SimplySwordsStatusEffectInstance statusEffect) {
                 sourceEntity = statusEffect.getSourceEntity();
@@ -46,15 +46,15 @@ public class FrostVortexEffect extends OrbitingEffect {
                     if (livingEntity instanceof PlayerEntity && sourceEntity instanceof PlayerEntity sourcePlayer)
                         damageSource = livingEntity.getDamageSources().playerAttack(sourcePlayer);
                 }
-                livingEntity.damage(damageSource, (additionalData + ((float) amplifier / 4) + abilityDamage));
+                livingEntity.damage((ServerWorld) livingEntity.getEntityWorld(), damageSource, (additionalData + ((float) amplifier / 4) + abilityDamage));
             }
 
             if (livingEntity.age % 40 == 0) {
-                HelperMethods.spawnOrbitParticles(serverWorld, livingEntity.getPos().add(0, (livingEntity.getHeight() / 2), 0), ParticleTypes.CLOUD, 1, 6);
-                HelperMethods.spawnOrbitParticles(serverWorld, livingEntity.getPos().add(0, (livingEntity.getHeight() / 2), 0), ParticleTypes.FALLING_WATER, 1, 6);
+                HelperMethods.spawnOrbitParticles(serverWorld, livingEntity.getEntityPos().add(0, (livingEntity.getHeight() / 2), 0), ParticleTypes.CLOUD, 1, 6);
+                HelperMethods.spawnOrbitParticles(serverWorld, livingEntity.getEntityPos().add(0, (livingEntity.getHeight() / 2), 0), ParticleTypes.FALLING_WATER, 1, 6);
             }
         }
-        super.applyUpdateEffect(livingEntity, amplifier);
+        super.applyUpdateEffect(world, livingEntity, amplifier);
         return true;
     }
 

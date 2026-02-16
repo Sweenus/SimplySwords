@@ -5,27 +5,32 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.recipe.Ingredient;
-import net.minecraft.recipe.RecipeSerializer;
-import net.minecraft.recipe.SmithingTransformRecipe;
+import net.minecraft.recipe.*;
 import net.minecraft.recipe.input.SmithingRecipeInput;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.world.World;
 import net.sweenus.simplyswords.registry.ComponentTypeRegistry;
 import net.sweenus.simplyswords.registry.RecipeTypeRegistry;
 
-public class RunicRerollRecipe extends SmithingTransformRecipe {
+import java.util.List;
+import java.util.Optional;
+
+public class RunicRerollRecipe implements SmithingRecipe {
     final Ingredient template;
     final Ingredient base;
     final Ingredient addition;
     final ItemStack result;
 
     public RunicRerollRecipe(Ingredient template, Ingredient base, Ingredient addition, ItemStack result) {
-        super(template, base, addition, result);
-
         this.template = template;
         this.base = base;
         this.addition = addition;
         this.result = result;
+    }
+
+    @Override
+    public boolean matches(SmithingRecipeInput input, World world) {
+        return template.test(input.template()) && base.test(input.base()) && addition.test(input.addition());
     }
 
     @Override
@@ -36,22 +41,55 @@ public class RunicRerollRecipe extends SmithingTransformRecipe {
         return itemStack;
     }
 
+    public ItemStack getResult(RegistryWrapper.WrapperLookup registriesLookup) {
+        return result;
+    }
+
     @Override
-    public RecipeSerializer<?> getSerializer() {
+    public RecipeSerializer<? extends SmithingRecipe> getSerializer() {
         return RecipeTypeRegistry.REROLL.get();
     }
 
+    @Override
+    public RecipeType<SmithingRecipe> getType() {
+        return RecipeType.SMITHING;
+    }
+
+    @Override
+    public IngredientPlacement getIngredientPlacement() {
+        return IngredientPlacement.forMultipleSlots(List.of(template(), Optional.of(base()), addition()));
+    }
+
+    @Override
+    public Ingredient base() {
+        return base;
+    }
+
+    @Override
+    public Optional<Ingredient> addition() {
+        return Optional.of(addition);
+    }
+
+    @Override
+    public Optional<Ingredient> template() {
+        return Optional.of(template);
+    }
+
     public static class Serializer implements RecipeSerializer<RunicRerollRecipe> {
-        private static final MapCodec<RunicRerollRecipe> CODEC = RecordCodecBuilder.mapCodec((instance) -> instance.group(Ingredient.ALLOW_EMPTY_CODEC.fieldOf("template").forGetter((recipe) -> recipe.template), Ingredient.ALLOW_EMPTY_CODEC.fieldOf("base").forGetter((recipe) -> recipe.base), Ingredient.ALLOW_EMPTY_CODEC.fieldOf("addition").forGetter((recipe) -> recipe.addition), ItemStack.VALIDATED_CODEC.fieldOf("result").forGetter((recipe) -> recipe.result)).apply(instance, RunicRerollRecipe::new));
+        private static final MapCodec<RunicRerollRecipe> CODEC = RecordCodecBuilder.mapCodec((instance) -> instance.group(
+                Ingredient.CODEC.fieldOf("template").forGetter((recipe) -> recipe.template),
+                Ingredient.CODEC.fieldOf("base").forGetter((recipe) -> recipe.base),
+                Ingredient.CODEC.fieldOf("addition").forGetter((recipe) -> recipe.addition),
+                ItemStack.VALIDATED_CODEC.fieldOf("result").forGetter((recipe) -> recipe.result)
+        ).apply(instance, RunicRerollRecipe::new));
         public static final PacketCodec<RegistryByteBuf, RunicRerollRecipe> PACKET_CODEC = PacketCodec.ofStatic(RunicRerollRecipe.Serializer::write, RunicRerollRecipe.Serializer::read);
 
-        public Serializer() {
-        }
-
+        @Override
         public MapCodec<RunicRerollRecipe> codec() {
             return CODEC;
         }
 
+        @Override
         public PacketCodec<RegistryByteBuf, RunicRerollRecipe> packetCodec() {
             return PACKET_CODEC;
         }

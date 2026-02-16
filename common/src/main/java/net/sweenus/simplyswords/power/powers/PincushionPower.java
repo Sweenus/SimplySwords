@@ -21,8 +21,8 @@ public class PincushionPower extends RunefusedGemPower {
 	@Override
 	public void postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
 		int stuckArrows = attacker.getStuckArrowCount();
-		target.damage(attacker.getDamageSources().generic(), (this.isGreater() ? stuckArrows * 2 : stuckArrows));
-		attacker.getWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
+		target.damage((net.minecraft.server.world.ServerWorld) target.getEntityWorld(), attacker.getDamageSources().generic(), (this.isGreater() ? stuckArrows * 2 : stuckArrows));
+		attacker.getEntityWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
 				attacker.getSoundCategory(), 0.1f, 1.8f);
 	}
 

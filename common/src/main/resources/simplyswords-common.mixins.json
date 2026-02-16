@@ -4,14 +4,15 @@
   "package": "net.sweenus.simplyswords.mixin",
   "compatibilityLevel": "JAVA_21",
   "client": [
+    "client.LivingEntityRendererAccessor",
     "client.PlayerEntityRendererMixin",
-    "client.LivingEntityRendererAccessor"
+    "client.PlayerEntityRenderStateMixin"
   ],
   "mixins": [
+    "AnimalEntityMixin",
     "LivingEntityMixin",
-    "ServerPlayerEntityMixin",
     "PlayerEntityMixin",
-    "AnimalEntityMixin"
+    "ServerPlayerEntityMixin"
   ],
   "injectors": {
     "defaultRequire": 1

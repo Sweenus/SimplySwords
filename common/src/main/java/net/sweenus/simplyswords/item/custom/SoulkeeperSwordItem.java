@@ -3,10 +3,12 @@ package net.sweenus.simplyswords.item.custom;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedDouble;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.item.tooltip.TooltipType;
@@ -14,8 +16,8 @@ import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
-import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.Config;
@@ -36,8 +38,8 @@ public class SoulkeeperSwordItem extends UniqueSwordItem implements TwoHandedWea
     }
 
     @Override
-    public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        if (!attacker.getWorld().isClient()) {
+    public void postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        if (!attacker.getEntityWorld().isClient()) {
             int hitChance = Config.uniqueEffects.soulkeeper.chance;
             int duration = Config.uniqueEffects.soulkeeper.duration;
             HelperMethods.playHitSounds(attacker, target);
@@ -58,18 +60,18 @@ public class SoulkeeperSwordItem extends UniqueSwordItem implements TwoHandedWea
                 }
             }
         }
-        return super.postHit(stack, target, attacker);
+        super.postHit(stack, target, attacker);
     }
 
     @Override
-    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
-        if (!user.getWorld().isClient()) {
+    public ActionResult use(World world, PlayerEntity user, Hand hand) {
+        if (!user.getEntityWorld().isClient()) {
             double hradius = Config.uniqueEffects.soulkeeper.radius;
             double vradius = Config.uniqueEffects.soulkeeper.radius;
             double x = user.getX();
             double y = user.getY();
             double z = user.getZ();
-            ServerWorld serverWorld = (ServerWorld) user.getWorld();
+            ServerWorld serverWorld = (ServerWorld) user.getEntityWorld();
             Box box = new Box(x + hradius, y + vradius, z + hradius, x - hradius, y - vradius, z - hradius);
 
             for (Entity entity : serverWorld.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY)) {
@@ -93,14 +95,14 @@ public class SoulkeeperSwordItem extends UniqueSwordItem implements TwoHandedWea
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
+    public void inventoryTick(ItemStack stack, ServerWorld world, Entity entity, EquipmentSlot slot) {
         HelperMethods.createFootfalls(entity, stack, world, ParticleTypes.SOUL, ParticleTypes.SOUL,
                 ParticleTypes.SPORE_BLOSSOM_AIR, false);
-        super.inventoryTick(stack, world, entity, slot, selected);
+        super.inventoryTick(stack, world, entity, slot);
     }
 
     @Override
-    public void appendTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
+    protected void appendItemTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.soulsworditem.tooltip1").setStyle(Styles.ABILITY));
         tooltip.add(Text.translatable("item.simplyswords.soulsworditem.tooltip2").setStyle(Styles.TEXT));
@@ -111,7 +113,7 @@ public class SoulkeeperSwordItem extends UniqueSwordItem implements TwoHandedWea
         tooltip.add(Text.translatable("item.simplyswords.soulsworditem.tooltip5").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.soulsworditem.tooltip6").setStyle(Styles.TEXT));
 
-        super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        super.appendItemTooltip(itemStack, tooltipContext, tooltip, type);
     }
 
     public static class EffectSettings extends TooltipSettings {

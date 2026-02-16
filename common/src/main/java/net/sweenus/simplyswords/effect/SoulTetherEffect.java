@@ -33,10 +33,9 @@ public class SoulTetherEffect extends StatusEffect {
     public float heal = Config.uniqueEffects.soulpyre.heal;
 
     @Override
-    public boolean applyUpdateEffect(LivingEntity livingEntity, int amplifier) {
-        if (!livingEntity.getWorld().isClient()) {
+    public boolean applyUpdateEffect(ServerWorld world, LivingEntity livingEntity, int amplifier) {
+        if (!livingEntity.getEntityWorld().isClient()) {
             int detonateDelay = 15;
-            ServerWorld world = (ServerWorld) livingEntity.getWorld();
             DamageSource damageSource = livingEntity.getDamageSources().playerAttack(livingEntity instanceof PlayerEntity player ? player : null);
 
             if (remainingDetonations <= 0) {
@@ -71,15 +70,15 @@ public class SoulTetherEffect extends StatusEffect {
                         0.8f + ((float) detonateCount / 10)
                 );
 
-                HelperMethods.spawnOrbitParticles(world, livingEntity.getPos(), ParticleTypes.POOF, detonateRadius - detonateCount, 35 - detonateCount);
-                HelperMethods.spawnOrbitParticles(world, livingEntity.getPos().add(0, 0.1, 0), ParticleTypes.SOUL, detonateRadius - detonateCount, 35 - detonateCount);
-                HelperMethods.spawnOrbitParticles(world, livingEntity.getPos(), ParticleTypes.VAULT_CONNECTION, detonateRadius - detonateCount, 20 - detonateCount);
-                HelperMethods.spawnOrbitParticles(world, livingEntity.getPos().add(0, 1, 0), ParticleTypes.OMINOUS_SPAWNING, detonateRadius - detonateCount, 40 - detonateCount);
+                HelperMethods.spawnOrbitParticles(world, livingEntity.getEntityPos(), ParticleTypes.POOF, detonateRadius - detonateCount, 35 - detonateCount);
+                HelperMethods.spawnOrbitParticles(world, livingEntity.getEntityPos().add(0, 0.1, 0), ParticleTypes.SOUL, detonateRadius - detonateCount, 35 - detonateCount);
+                HelperMethods.spawnOrbitParticles(world, livingEntity.getEntityPos(), ParticleTypes.VAULT_CONNECTION, detonateRadius - detonateCount, 20 - detonateCount);
+                HelperMethods.spawnOrbitParticles(world, livingEntity.getEntityPos().add(0, 1, 0), ParticleTypes.OMINOUS_SPAWNING, detonateRadius - detonateCount, 40 - detonateCount);
 
                 remainingDetonations--;
             }
         }
-        super.applyUpdateEffect(livingEntity, amplifier);
+        super.applyUpdateEffect(world, livingEntity, amplifier);
         return true;
     }
 

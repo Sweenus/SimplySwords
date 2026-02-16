@@ -1,5 +1,6 @@
 package net.sweenus.simplyswords.config.settings;
 
+import net.minecraft.component.ComponentsAccess;
 import net.minecraft.component.type.AttributeModifiersComponent;
 import net.minecraft.item.Item;
 import net.minecraft.item.tooltip.TooltipAppender;
@@ -22,7 +23,7 @@ public class ItemStackTooltipAppender implements Supplier<TooltipAppender> {
 
 	private final List<? extends TooltipAppender> appenders;
 
-	private final static AttributeModifiersComponent hider = new AttributeModifiersComponent(new ArrayList<>(), false);
+	private final static AttributeModifiersComponent hider = new AttributeModifiersComponent(new ArrayList<>());
 
 	@Override
 	public TooltipAppender get() {
@@ -34,11 +35,10 @@ public class ItemStackTooltipAppender implements Supplier<TooltipAppender> {
 	private record StackAppender(Supplier<? extends Item> stack) implements TooltipAppender {
 
 		@Override
-		public void appendTooltip(Item.TooltipContext context, Consumer<Text> tooltip, TooltipType type) {
+		public void appendTooltip(Item.TooltipContext context, Consumer<Text> tooltip, TooltipType type, ComponentsAccess components) {
 			Item s = stack.get();
 			if (s == null) return;
-			List<Text> list = new ArrayList<>();
-			s.appendTooltip(s.getDefaultStack(), context, list, type);
+			List<Text> list = new ArrayList<>(s.getDefaultStack().getTooltip(context, null, type));
 			if (!list.isEmpty() && Objects.equals(list.get(0).getString(), "")) {
 				list.remove(0);
 			}

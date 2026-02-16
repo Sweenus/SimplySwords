@@ -12,9 +12,9 @@ import java.util.UUID;
 public class OpacCompat {
 
     public static boolean checkOpacFriendlyFire(LivingEntity livingEntity, PlayerEntity playerEntity) {
-        if (!playerEntity.getWorld().isClient() && livingEntity instanceof PlayerEntity) {
+        if (!playerEntity.getEntityWorld().isClient() && livingEntity instanceof PlayerEntity) {
 
-            MinecraftServer server = playerEntity.getServer();
+            MinecraftServer server = playerEntity.getEntityWorld().getServer();
             if (server == null) {
                 return true;
             }

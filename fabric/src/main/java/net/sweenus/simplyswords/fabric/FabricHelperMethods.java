@@ -12,7 +12,7 @@ public class FabricHelperMethods {
     //Compatibility with Spell Power Attributes
     public static float useSpellAttributeScaling(float damageModifier, PlayerEntity player, String magicSchool) {
         if (Platform.isFabric() && SimplySwords.passVersionCheck("spell_power", SimplySwords.minimumSpellPowerVersion)) {
-            if (player != null && !player.getWorld().isClient) {
+            if (player != null && !player.getEntityWorld().isClient()) {
 
                 double attributePower = 0;
                 double damageOutput = 0.1;

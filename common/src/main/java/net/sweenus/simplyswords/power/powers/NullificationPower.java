@@ -29,8 +29,8 @@ public class NullificationPower extends NetherGemPower {
 	@Override
 	public void postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
 		if (!attacker.hasStatusEffect(EffectRegistry.getReference(EffectRegistry.BATTLE_FATIGUE))) {
-			if (!attacker.getWorld().isClient()) {
-				ServerWorld serverWorld = (ServerWorld) attacker.getWorld();
+			if (!attacker.getEntityWorld().isClient()) {
+				ServerWorld serverWorld = (ServerWorld) attacker.getEntityWorld();
 				BlockState currentState = serverWorld.getBlockState(attacker.getBlockPos().up(4).offset(attacker.getMovementDirection(), 3));
 				BlockState state = Blocks.AIR.getDefaultState();
 				if (currentState == state) {

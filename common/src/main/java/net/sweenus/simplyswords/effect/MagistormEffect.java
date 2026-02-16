@@ -29,9 +29,8 @@ public class MagistormEffect extends HighOrbitingEffect {
         width = 4;
     }
     @Override
-    public boolean applyUpdateEffect(LivingEntity livingEntity, int amplifier) {
-        if (!livingEntity.getWorld().isClient()) {
-            ServerWorld world = (ServerWorld) livingEntity.getWorld();
+    public boolean applyUpdateEffect(ServerWorld world, LivingEntity livingEntity, int amplifier) {
+        if (!livingEntity.getEntityWorld().isClient()) {
             double x = livingEntity.getX();
             double y = livingEntity.getY();
             double z = livingEntity.getZ();
@@ -58,8 +57,8 @@ public class MagistormEffect extends HighOrbitingEffect {
                         target.timeUntilRegen = 0;
                         HelperMethods.spawnRainingParticles(world, ParticleTypes.ENCHANT, target, 20, yOffset);
                         HelperMethods.spawnRainingParticles(world, ParticleTypes.GLOW, target, 4, yOffset);
-                        HelperMethods.spawnOrbitParticles(world, target.getPos(), ParticleTypes.GLOW, 0.5, 6);
-                        player.getWorld().playSoundFromEntity(null, player, SoundRegistry.ELEMENTAL_BOW_HOLY_SHOOT_IMPACT_03.get(),
+                        HelperMethods.spawnOrbitParticles(world, target.getEntityPos(), ParticleTypes.GLOW, 0.5, 6);
+                        player.getEntityWorld().playSoundFromEntity(null, player, SoundRegistry.ELEMENTAL_BOW_HOLY_SHOOT_IMPACT_03.get(),
                                 SoundCategory.PLAYERS, 0.1f, 1.0f + (player.getRandom().nextFloat()));
 
                         if (new Random().nextInt(100) < 5)
@@ -69,7 +68,7 @@ public class MagistormEffect extends HighOrbitingEffect {
             }
         }
 
-        super.applyUpdateEffect(livingEntity, amplifier);
+        super.applyUpdateEffect(world, livingEntity, amplifier);
         return true;
     }
 

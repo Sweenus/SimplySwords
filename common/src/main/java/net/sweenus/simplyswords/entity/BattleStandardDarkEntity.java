@@ -15,10 +15,12 @@ import net.minecraft.entity.mob.PathAwareEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
-import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.effect.instance.SimplySwordsStatusEffectInstance;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
@@ -29,15 +31,16 @@ import java.util.function.Supplier;
 
 public class BattleStandardDarkEntity extends PathAwareEntity {
     public static final Supplier<EntityType<BattleStandardDarkEntity>> TYPE = Suppliers.memoize(() ->
-            EntityType.Builder.create(BattleStandardDarkEntity::new, SpawnGroup.MISC).build("battlestandarddark"));
+            EntityType.Builder.create(BattleStandardDarkEntity::new, SpawnGroup.MISC).build(
+                    RegistryKey.of(RegistryKeys.ENTITY_TYPE, Identifier.of("simplyswords", "battlestandarddark"))));
     public PlayerEntity ownerEntity;
     public String standardType;
     public int decayRate;
 
     public static DefaultAttributeContainer.Builder createBattleStandardDarkAttributes() {
-        return MobEntity.createMobAttributes().add(EntityAttributes.GENERIC_MAX_HEALTH, 150.0).add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.0f)
-                .add(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE, 100.0f)
-                .add(EntityAttributes.GENERIC_STEP_HEIGHT, 3.0);
+        return MobEntity.createMobAttributes().add(EntityAttributes.MAX_HEALTH, 150.0).add(EntityAttributes.MOVEMENT_SPEED, 0.0f)
+                .add(EntityAttributes.KNOCKBACK_RESISTANCE, 100.0f)
+                .add(EntityAttributes.STEP_HEIGHT, 3.0);
     }
 
     public BattleStandardDarkEntity(EntityType<? extends PathAwareEntity> entityType, World world) {
@@ -56,18 +59,19 @@ public class BattleStandardDarkEntity extends PathAwareEntity {
     }
 
     @Override
-    public boolean damage(DamageSource source, float amount) {
+    public boolean damage(ServerWorld world, DamageSource source, float amount) {
         return ownerEntity == null;
     }
 
     @Override
     public void baseTick() {
-        if (!this.getWorld().isClient()) {
+        if (!this.getEntityWorld().isClient()) {
+            ServerWorld serverWorld = (ServerWorld) this.getEntityWorld();
             if (this.age % 10 == 0) {
                 this.setHealth(this.getHealth() - decayRate);
                 if (ownerEntity == null)
                     this.setHealth(this.getHealth() - 1000);
-                HelperMethods.spawnOrbitParticles((ServerWorld) this.getWorld(), this.getPos(), ParticleTypes.CAMPFIRE_COSY_SMOKE, 0.5, 6);
+                HelperMethods.spawnOrbitParticles((ServerWorld) this.getEntityWorld(), this.getEntityPos(), ParticleTypes.CAMPFIRE_COSY_SMOKE, 0.5, 6);
                 if (ownerEntity != null && this.distanceTo(ownerEntity) < 3)
                     HelperMethods.incrementStatusEffect(ownerEntity, StatusEffects.HASTE, 60, 1, 7);
             }
@@ -80,9 +84,9 @@ public class BattleStandardDarkEntity extends PathAwareEntity {
 
                 if (standardType.equals("enigma")) {
                     radius = 2;
-                    double moveRadius = Config.uniqueEffects.enigma.enigmaChaseRadius;
+                    double moveRadius = net.sweenus.simplyswords.config.Config.uniqueEffects.enigma.enigmaChaseRadius;
                     Box box = HelperMethods.createBox(this, moveRadius);
-                    Entity closestEntity = this.getWorld().getOtherEntities(this, box, EntityPredicates.VALID_LIVING_ENTITY).stream()
+                    Entity closestEntity = this.getEntityWorld().getOtherEntities(this, box, EntityPredicates.VALID_LIVING_ENTITY).stream()
                             .filter(entity -> {
                                 if (entity instanceof LivingEntity livingEntity)
                                     return HelperMethods.checkFriendlyFire(livingEntity, ownerEntity);
@@ -101,18 +105,18 @@ public class BattleStandardDarkEntity extends PathAwareEntity {
                     }
                 }
 
-                float abilityDamage = standardType.equals("enigma") ? 1f : HelperMethods.spellScaledDamage("soul", ownerEntity, Config.uniqueEffects.harbinger.spellScaling, Config.uniqueEffects.harbinger.damage);
+                float abilityDamage = standardType.equals("enigma") ? 1f : HelperMethods.spellScaledDamage("soul", ownerEntity, net.sweenus.simplyswords.config.Config.uniqueEffects.harbinger.spellScaling, net.sweenus.simplyswords.config.Config.uniqueEffects.harbinger.damage);
 
                 //AOE Aura
                 if (this.age % 10 == 0) {
                     Box box = new Box(this.getX() + radius, this.getY() + (float) radius / 3, this.getZ() + radius,
                             this.getX() - radius, this.getY() - (float) radius / 3, this.getZ() - radius);
-                    for (Entity entities : this.getWorld().getOtherEntities(this, box, EntityPredicates.VALID_LIVING_ENTITY)) {
+                    for (Entity entities : this.getEntityWorld().getOtherEntities(this, box, EntityPredicates.VALID_LIVING_ENTITY)) {
                         if ((entities instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, ownerEntity)
                                 && le != ownerEntity && !(le instanceof BattleStandardEntity)
                                 && !(le instanceof BattleStandardDarkEntity)) {
                             le.timeUntilRegen = 0;
-                            le.damage(this.getDamageSources().indirectMagic(ownerEntity, ownerEntity), abilityDamage);
+                            le.damage(serverWorld, this.getDamageSources().indirectMagic(ownerEntity, ownerEntity), abilityDamage);
                             le.timeUntilRegen = 0;
                             if (le.distanceTo(this) > radius - 1)
                                 le.setVelocity((this.getX() - le.getX()) / 4, (this.getY() - le.getY()) / 4, (this.getZ() - le.getZ()) / 4);
@@ -127,25 +131,25 @@ public class BattleStandardDarkEntity extends PathAwareEntity {
                         }
                     }
                     if (!standardType.equals("enigma"))
-                        HelperMethods.spawnParticle(this.getWorld(), ParticleTypes.SCULK_SOUL, this.getX(), this.getY(), this.getZ(),
+                        HelperMethods.spawnParticle(this.getEntityWorld(), ParticleTypes.SCULK_SOUL, this.getX(), this.getY(), this.getZ(),
                             0, 0, 0);
                 }
                 //Landing effects
                 if (this.getHealth() > this.getMaxHealth() - 2 && this.isOnGround()) {
 
                     if (!standardType.equals("enigma")) {
-                        HelperMethods.spawnParticle(this.getWorld(), ParticleTypes.SOUL_FIRE_FLAME, this.getX(), this.getY(), this.getZ(),
+                        HelperMethods.spawnParticle(this.getEntityWorld(), ParticleTypes.SOUL_FIRE_FLAME, this.getX(), this.getY(), this.getZ(),
                                 0, 0.3, 0);
-                        HelperMethods.spawnParticle(this.getWorld(), ParticleTypes.CAMPFIRE_COSY_SMOKE, this.getX(), this.getY(), this.getZ(),
+                        HelperMethods.spawnParticle(this.getEntityWorld(), ParticleTypes.CAMPFIRE_COSY_SMOKE, this.getX(), this.getY(), this.getZ(),
                                 0, 0, 0);
                     }
 
                     //Launch nearby entities on land
                     Box box = new Box(this.getX() + 1, this.getY() + 1, this.getZ() + 1,
                             this.getX() - 1, this.getY() - (float) 1, this.getZ() - 1);
-                    for (Entity entity : this.getWorld().getOtherEntities(this, box, EntityPredicates.VALID_LIVING_ENTITY)) {
+                    for (Entity entity : this.getEntityWorld().getOtherEntities(this, box, EntityPredicates.VALID_LIVING_ENTITY)) {
                         if ((entity instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, ownerEntity) && le != ownerEntity) {
-                            le.damage(this.getDamageSources().indirectMagic(ownerEntity, ownerEntity), abilityDamage * 3);
+                            le.damage(serverWorld, this.getDamageSources().indirectMagic(ownerEntity, ownerEntity), abilityDamage * 3);
                             le.setVelocity((le.getX() - this.getX()) / 4, 0.5, (le.getZ() - this.getZ()) / 4);
                         }
                     }
@@ -154,13 +158,13 @@ public class BattleStandardDarkEntity extends PathAwareEntity {
                     //AOE Heal
                     Box box = new Box(this.getX() + radius, this.getY() + (float) radius / 3, this.getZ() + radius,
                             this.getX() - radius, this.getY() - (float) radius / 3, this.getZ() - radius);
-                    for (Entity entity : this.getWorld().getOtherEntities(this, box, EntityPredicates.VALID_LIVING_ENTITY)) {
+                    for (Entity entity : this.getEntityWorld().getOtherEntities(this, box, EntityPredicates.VALID_LIVING_ENTITY)) {
                         if ((entity instanceof LivingEntity le) && !HelperMethods.checkFriendlyFire(le, ownerEntity)) {
                             le.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, 90, 2), this);
                         }
                     }
 
-                    this.getWorld().playSoundFromEntity(null, this, SoundRegistry.DARK_SWORD_WHOOSH_01.get(),
+                    this.getEntityWorld().playSoundFromEntity(null, this, SoundRegistry.DARK_SWORD_WHOOSH_01.get(),
                             this.getSoundCategory(), 0.1f, 0.6f);
                     double xpos = this.getX() - (radius + 1);
                     double ypos = this.getY();
@@ -170,7 +174,7 @@ public class BattleStandardDarkEntity extends PathAwareEntity {
                         for (int j = radius * 2; j > 0; j--) {
                             float choose = (float) (Math.random() * 1);
                             if (choose > 0.5)
-                                HelperMethods.spawnParticle(this.getWorld(), ParticleTypes.SOUL,
+                                HelperMethods.spawnParticle(this.getEntityWorld(), ParticleTypes.SOUL,
                                         xpos + i + choose, ypos + 0.1, zpos + j + choose,
                                         0, -0.1, 0);
                         }

@@ -1,7 +1,7 @@
 package net.sweenus.simplyswords.item;
 
 import me.fzzyhmstrs.fzzy_config.util.ValidationResult;
-import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.component.type.TooltipDisplayComponent;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.StackReference;
 import net.minecraft.item.Item;
@@ -16,6 +16,7 @@ import net.minecraft.world.World;
 import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.client.api.SimplySwordsClientAPI;
+import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.power.GemPowerComponent;
 import net.sweenus.simplyswords.power.GemPowerFiller;
 import net.sweenus.simplyswords.power.PowerType;
@@ -23,7 +24,9 @@ import net.sweenus.simplyswords.registry.ComponentTypeRegistry;
 import net.sweenus.simplyswords.registry.GemPowerRegistry;
 import net.sweenus.simplyswords.util.Styles;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class RunefusedGemItem extends Item implements GemPowerFiller {
 
@@ -56,7 +59,7 @@ public class RunefusedGemItem extends Item implements GemPowerFiller {
 
     @Override
     public void onCraft(ItemStack stack, World world) {
-        if (world.isClient) return;
+        if (world.isClient()) return;
 
         if (!stack.contains(ComponentTypeRegistry.GEM_POWER.get())) {
             stack.set(ComponentTypeRegistry.GEM_POWER.get(), GemPowerComponent.runic(GemPowerRegistry.gemRandomPower(PowerType.RUNEFUSED)));
@@ -65,11 +68,12 @@ public class RunefusedGemItem extends Item implements GemPowerFiller {
 
     @Override
     public Text getName(ItemStack stack) {
-        return Text.translatable(this.getTranslationKey(stack)).setStyle(Styles.RUNIC);
+        return Text.translatable(this.getTranslationKey()).setStyle(Styles.RUNIC);
     }
 
     @Override
-    public void appendTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
+    public void appendTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, TooltipDisplayComponent displayComponent, Consumer<Text> textConsumer, TooltipType type) {
+        List<Text> tooltip = new ArrayList<>();
 
         tooltip.add(Text.literal(""));
 
@@ -83,13 +87,14 @@ public class RunefusedGemItem extends Item implements GemPowerFiller {
         }
         tooltip.add(Text.literal(""));
         generateDynamicTooltip(itemStack, tooltipContext, tooltip, type);
-        if (Screen.hasAltDown()) {
+        if (TooltipUtils.isAltDown()) {
             tooltip.add(Text.translatable("item.simplyswords.gem_description").formatted(Formatting.GRAY, Formatting.ITALIC));
             tooltip.add(Text.translatable("item.simplyswords.gem_description2").formatted(Formatting.GRAY, Formatting.ITALIC));
         }
+        tooltip.forEach(textConsumer);
     }
 
-    protected void generateDynamicTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
+    protected void generateDynamicTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
         SimplySwordsClientAPI.generateDynamicTooltip(itemStack, tooltipContext, tooltip, type,
                 SimplySwords.MOD_ID,
                 "oracle_index:books/simplyswords/weapon-types",

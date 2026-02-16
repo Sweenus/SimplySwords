@@ -1,7 +1,7 @@
 plugins {
-    id 'dev.architectury.loom' version '1.7.412' apply false
+    id 'dev.architectury.loom' version '1.13.467' apply false
     id 'architectury-plugin' version '3.4-SNAPSHOT'
-    id 'com.github.johnrengelman.shadow' version '8.1.1' apply false
+    id 'com.gradleup.shadow' version '8.3.0' apply false
     id 'org.moddedmc.wiki.toolkit' version '0.2.7'
 }
 
@@ -99,6 +99,7 @@ subprojects {
 
     // Parse all recipes and create corresponding .mdx files, along with a _meta.json.
     // Only supports crafting grid recipes. Revise this once moddedmc.wiki supports other recipe types.
+    /*
     tasks.register('generateRecipeDocs') {
         def recipesDir = file("$rootDir/common/src/main/resources/data/simplyswords/recipe") // Path to recipes folder
         def outputDir = file("$rootDir/docs/generated") // Path to generate .mdx files
@@ -200,6 +201,7 @@ result="${result}"
             println "All .mdx files and _meta.json have been generated in: $outputDir"
         }
     }
+    */
 
 
 

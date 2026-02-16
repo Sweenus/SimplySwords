@@ -5,18 +5,21 @@ import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
-import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.Config;
@@ -37,24 +40,24 @@ public class ShadowstingSwordItem extends UniqueSwordItem {
     }
 
     @Override
-    public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+    public void postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         HelperMethods.playHitSounds(attacker, target);
-        if (!attacker.getWorld().isClient()) {
+        if (!attacker.getEntityWorld().isClient()) {
             if (attacker.getRandom().nextInt(100) <= Config.uniqueEffects.shadowsting.chance && attacker instanceof PlayerEntity) {
-                attacker.getWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
+                attacker.getEntityWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
                         attacker.getSoundCategory(), 0.3f, 1.8f);
                 float extraDamage = (target.getArmor() * Config.uniqueEffects.shadowsting.damageMulti) / 2;
-                target.damage(attacker.getDamageSources().indirectMagic(attacker, attacker), extraDamage);
+                target.damage((ServerWorld) attacker.getEntityWorld(), attacker.getDamageSources().indirectMagic(attacker, attacker), extraDamage);
             }
         }
-        return super.postHit(stack, target, attacker);
+        super.postHit(stack, target, attacker);
     }
 
     @Override
-    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
+    public ActionResult use(World world, PlayerEntity user, Hand hand) {
         world.playSoundFromEntity(null, user, SoundRegistry.ELEMENTAL_SWORD_EARTH_ATTACK_01.get(),
                 user.getSoundCategory(), 0.4f, 1.6f);
-        user.getItemCooldownManager().set(this.getDefaultStack().getItem(), Config.uniqueEffects.shadowsting.cooldown);
+        user.getItemCooldownManager().set(this.getDefaultStack(), Config.uniqueEffects.shadowsting.cooldown);
 
         int radius = Config.uniqueEffects.shadowsting.radius;
         Box box = new Box(user.getX() + radius, user.getY() + radius, user.getZ() + radius,
@@ -84,26 +87,26 @@ public class ShadowstingSwordItem extends UniqueSwordItem {
             }
         }
         BlockState currentStateLow = world.getBlockState(user.getBlockPos().offset(user.getMovementDirection(), 5));
-        double targetPositionX = user.getBlockPos().offset(user.getMovementDirection(), 5).getX();
-        double targetPositionY = user.getBlockPos().offset(user.getMovementDirection(), 5).getY();
-        double targetPositionZ = user.getBlockPos().offset(user.getMovementDirection(), 5).getZ();
+        double targetEntityPositionX = user.getBlockPos().offset(user.getMovementDirection(), 5).getX();
+        double targetEntityPositionY = user.getBlockPos().offset(user.getMovementDirection(), 5).getY();
+        double targetEntityPositionZ = user.getBlockPos().offset(user.getMovementDirection(), 5).getZ();
         BlockState currentStateHigh = world.getBlockState(user.getBlockPos().up(1).offset(user.getMovementDirection(), 5));
         BlockState state = Blocks.AIR.getDefaultState();
         if (currentStateLow == state && currentStateHigh == state) {
-            user.teleport(targetPositionX, targetPositionY, targetPositionZ, false);
+            user.teleport(targetEntityPositionX, targetEntityPositionY, targetEntityPositionZ, false);
         }
         return super.use(world, user, hand);
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
+    public void inventoryTick(ItemStack stack, ServerWorld world, Entity entity, EquipmentSlot slot) {
         HelperMethods.createFootfalls(entity, stack, world, ParticleTypes.MYCELIUM, ParticleTypes.MYCELIUM,
                 ParticleTypes.MYCELIUM, true);
-        super.inventoryTick(stack, world, entity, slot, selected);
+        super.inventoryTick(stack, world, entity, slot);
     }
 
     @Override
-    public void appendTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
+    protected void appendItemTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.shadowmistsworditem.tooltip1").setStyle(Styles.ABILITY));
         tooltip.add(Text.translatable("item.simplyswords.shadowmistsworditem.tooltip2").setStyle(Styles.TEXT));
@@ -113,7 +116,7 @@ public class ShadowstingSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.shadowmistsworditem.tooltip4").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.shadowmistsworditem.tooltip5").setStyle(Styles.TEXT));
 
-        super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        super.appendItemTooltip(itemStack, tooltipContext, tooltip, type);
     }
 
     public static class EffectSettings extends TooltipSettings {

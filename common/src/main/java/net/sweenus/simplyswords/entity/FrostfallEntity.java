@@ -37,9 +37,9 @@ public class FrostfallEntity extends ThrownSwordEntity {
     @Override
     protected void doEffects(ServerWorld serverWorld, float baseDamage, Entity entity) {
         int bonusParticles =  ((int) baseDamage / 2);
-        HelperMethods.spawnOrbitParticles(serverWorld, this.getPos(), ParticleTypes.POOF, 0.5f, 3+bonusParticles);
-        HelperMethods.spawnOrbitParticles(serverWorld, this.getPos(), ParticleTypes.CRIT, 0.5f, 5+bonusParticles);
-        HelperMethods.spawnOrbitParticles(serverWorld, this.getPos(), ParticleTypes.ITEM_SNOWBALL, 0.5f, 2+bonusParticles);
+        HelperMethods.spawnOrbitParticles(serverWorld, this.getEntityPos(), ParticleTypes.POOF, 0.5f, 3+bonusParticles);
+        HelperMethods.spawnOrbitParticles(serverWorld, this.getEntityPos(), ParticleTypes.CRIT, 0.5f, 5+bonusParticles);
+        HelperMethods.spawnOrbitParticles(serverWorld, this.getEntityPos(), ParticleTypes.ITEM_SNOWBALL, 0.5f, 2+bonusParticles);
         if (baseDamage > primaryBaseDamage)
             serverWorld.playSoundFromEntity(null, entity, SoundRegistry.ELEMENTAL_BOW_ICE_SHOOT_IMPACT_02.get(),
                     this.getSoundCategory(), 0.3f, 1.2f);
@@ -55,10 +55,10 @@ public class FrostfallEntity extends ThrownSwordEntity {
         super.doOnTick(entity);
 
         if (entity != null && entity instanceof LivingEntity livingEntity) {
-            if (this.inGround) {
+            if (this.isInGround()) {
                 int detonateDelay = 20;
                 int chance = 1;
-                ServerWorld world = (ServerWorld) this.getWorld();
+                ServerWorld world = (ServerWorld) this.getEntityWorld();
                 DamageSource damageSource = this.getDamageSources().trident(this, entity);
 
                 if (remainingDetonations <= 0) {
@@ -93,10 +93,10 @@ public class FrostfallEntity extends ThrownSwordEntity {
                             0.8f + ((float) detonateCount / 10)
                     );
 
-                    HelperMethods.spawnOrbitParticles(world, this.getPos(), ParticleTypes.POOF, 6f - detonateCount, 9 - detonateCount);
-                    HelperMethods.spawnOrbitParticles(world, this.getPos(), ParticleTypes.CRIT, 6f - detonateCount, 15 - detonateCount);
-                    HelperMethods.spawnOrbitParticles(world, this.getPos(), ParticleTypes.ITEM_SNOWBALL, 6f - detonateCount, 10 - detonateCount);
-                    HelperMethods.spawnOrbitParticles(world, this.getPos().add(0, 1, 0), ParticleTypes.WHITE_ASH, 6f - detonateCount, 40 - detonateCount);
+                    HelperMethods.spawnOrbitParticles(world, this.getEntityPos(), ParticleTypes.POOF, 6f - detonateCount, 9 - detonateCount);
+                    HelperMethods.spawnOrbitParticles(world, this.getEntityPos(), ParticleTypes.CRIT, 6f - detonateCount, 15 - detonateCount);
+                    HelperMethods.spawnOrbitParticles(world, this.getEntityPos(), ParticleTypes.ITEM_SNOWBALL, 6f - detonateCount, 10 - detonateCount);
+                    HelperMethods.spawnOrbitParticles(world, this.getEntityPos().add(0, 1, 0), ParticleTypes.WHITE_ASH, 6f - detonateCount, 40 - detonateCount);
 
                     if (random.nextInt(100) > chance)
                         remainingDetonations--;
@@ -107,7 +107,7 @@ public class FrostfallEntity extends ThrownSwordEntity {
 
     @Override
     protected byte getLoyalty() {
-        World world = this.getWorld();
+        World world = this.getEntityWorld();
         if (world instanceof ServerWorld serverWorld) {
             return 3;
         } else {

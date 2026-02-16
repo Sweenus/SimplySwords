@@ -9,6 +9,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.item.tooltip.TooltipType;
@@ -16,8 +17,8 @@ import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
-import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.Config;
@@ -40,12 +41,15 @@ public class MoltenEdgeSwordItem extends UniqueSwordItem {
     }
 
     @Override
-    public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        if (attacker.getWorld().isClient()) return super.postHit(stack, target, attacker);
+    public void postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        if (attacker.getEntityWorld().isClient()) {
+            super.postHit(stack, target, attacker);
+            return;
+        }
 
         int proc_chance = Config.uniqueEffects.molten_edge.chance;
 
-        ServerWorld world = (ServerWorld) attacker.getWorld();
+        ServerWorld world = (ServerWorld) attacker.getEntityWorld();
         HelperMethods.playHitSounds(attacker, target);
         if (attacker.getRandom().nextInt(100) <= proc_chance) {
             world.playSoundFromEntity(null, attacker, SoundRegistry.ELEMENTAL_BOW_FIRE_SHOOT_IMPACT_03.get(),
@@ -60,12 +64,12 @@ public class MoltenEdgeSwordItem extends UniqueSwordItem {
             }
         }
 
-        return super.postHit(stack, target, attacker);
+        super.postHit(stack, target, attacker);
     }
 
     @Override
-    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
-        if (user.getWorld().isClient()) return super.use(world, user, hand);
+    public ActionResult use(World world, PlayerEntity user, Hand hand) {
+        if (user.getEntityWorld().isClient()) return super.use(world, user, hand);
 
         double radius = Config.uniqueEffects.molten_edge.radius;
         double knockbackStrength = Config.uniqueEffects.molten_edge.knockbackStrength;
@@ -86,7 +90,7 @@ public class MoltenEdgeSwordItem extends UniqueSwordItem {
         int duration = Config.uniqueEffects.molten_edge.duration * amp / 2;
         user.addStatusEffect(new StatusEffectInstance(EffectRegistry.getReference(EffectRegistry.ONSLAUGHT), duration, 0), user);
         user.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, duration, 3), user);
-        user.getItemCooldownManager().set(this, abilityCooldown);
+        user.getItemCooldownManager().set(this.getDefaultStack(), abilityCooldown);
 
         ItemStack stack = user.getStackInHand(hand);
         stack.set(ComponentTypeRegistry.MOLTEN_PARTICLE.get(), new MoltenParticleComponent(ParticleTypes.LAVA, ParticleTypes.LAVA, ParticleTypes.LARGE_SMOKE));
@@ -95,8 +99,8 @@ public class MoltenEdgeSwordItem extends UniqueSwordItem {
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
-        if (!world.isClient && (entity instanceof PlayerEntity player) && player.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
+    public void inventoryTick(ItemStack stack, ServerWorld world, Entity entity, EquipmentSlot slot) {
+        if (!world.isClient() && (entity instanceof PlayerEntity player) && player.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
             int amp = 0;
             if (player.age % 40 == 0) {
                 if (player.getHealth() < player.getMaxHealth() / 2 && player.getHealth() > player.getMaxHealth() / 3) {
@@ -117,11 +121,11 @@ public class MoltenEdgeSwordItem extends UniqueSwordItem {
         }
         MoltenParticleComponent component = stack.getOrDefault(ComponentTypeRegistry.MOLTEN_PARTICLE.get(), MoltenParticleComponent.DEFAULT);
         HelperMethods.createFootfalls(entity, stack, world, component.walk(), component.sprint(), component.passive(), true);
-        super.inventoryTick(stack, world, entity, slot, selected);
+        super.inventoryTick(stack, world, entity, slot);
     }
 
     @Override
-    public void appendTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
+    protected void appendItemTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.moltenedgesworditem.tooltip1").setStyle(Styles.ABILITY));
         tooltip.add(Text.translatable("item.simplyswords.moltenedgesworditem.tooltip2").setStyle(Styles.TEXT));
@@ -134,7 +138,7 @@ public class MoltenEdgeSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.moltenedgesworditem.tooltip6").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.moltenedgesworditem.tooltip7").setStyle(Styles.TEXT));
 
-        super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        super.appendItemTooltip(itemStack, tooltipContext, tooltip, type);
     }
 
     public static class EffectSettings extends TooltipSettings {

@@ -3,16 +3,19 @@ package net.sweenus.simplyswords.item.custom;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedDouble;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
-import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
@@ -32,36 +35,36 @@ public class SoulPyreSwordItem extends UniqueSwordItem implements TwoHandedWeapo
     }
 
     @Override
-    public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        if (!attacker.getWorld().isClient()) {
+    public void postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        if (!attacker.getEntityWorld().isClient()) {
             HelperMethods.playHitSounds(attacker, target);
         }
-        return super.postHit(stack, target, attacker);
+        super.postHit(stack, target, attacker);
     }
 
     @Override
-    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
-        if (!user.getWorld().isClient()) {
+    public ActionResult use(World world, PlayerEntity user, Hand hand) {
+        if (!user.getEntityWorld().isClient()) {
             int relocationDuration = 150;
             user.addStatusEffect(new StatusEffectInstance(EffectRegistry.getReference(EffectRegistry.SOULTETHER), relocationDuration, 0, false, true));
-            user.getItemCooldownManager().set(this, Config.uniqueEffects.soulpyre.cooldown);
+            user.getItemCooldownManager().set(this.getDefaultStack(), Config.uniqueEffects.soulpyre.cooldown);
         }
         return super.use(world, user, hand);
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
+    public void inventoryTick(ItemStack stack, ServerWorld world, Entity entity, EquipmentSlot slot) {
         HelperMethods.createFootfalls(entity, stack, world, ParticleTypes.SOUL_FIRE_FLAME,
                 ParticleTypes.SOUL_FIRE_FLAME, ParticleTypes.MYCELIUM, true);
         HelperMethods.createFootfalls(entity, stack, world, ParticleTypes.SMALL_FLAME,
                 ParticleTypes.SMALL_FLAME, ParticleTypes.MYCELIUM, false);
         HelperMethods.createFootfalls(entity, stack, world, ParticleTypes.SMOKE, ParticleTypes.SMOKE,
                 ParticleTypes.MYCELIUM, false);
-        super.inventoryTick(stack, world, entity, slot, selected);
+        super.inventoryTick(stack, world, entity, slot);
     }
 
     @Override
-    public void appendTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
+    protected void appendItemTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.soulpyresworditem.tooltip1").setStyle(Styles.ABILITY));
         tooltip.add(Text.literal(""));
@@ -76,7 +79,7 @@ public class SoulPyreSwordItem extends UniqueSwordItem implements TwoHandedWeapo
         tooltip.add(Text.translatable("item.simplyswords.soulpyresworditem.tooltip8").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.soulpyresworditem.tooltip9").setStyle(Styles.TEXT));
 
-        super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        super.appendItemTooltip(itemStack, tooltipContext, tooltip, type);
     }
 
     public static class EffectSettings extends TooltipSettings {

@@ -31,7 +31,7 @@ public class TrailblazePower extends RunefusedGemPower {
 		if (attacker.getRandom().nextInt(100) <= hitChance) {
 			attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, duration, this.isGreater() ? 2 : 1), attacker);
 			attacker.setOnFireFor(duration / 20f);
-			attacker.getWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
+			attacker.getEntityWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
 					attacker.getSoundCategory(), 0.1f, 1.8f);
 		}
 	}

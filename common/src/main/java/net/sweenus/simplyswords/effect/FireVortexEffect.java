@@ -27,9 +27,9 @@ public class FireVortexEffect extends OrbitingEffect {
     }
 
     @Override
-    public boolean applyUpdateEffect(LivingEntity livingEntity, int amplifier) {
-        if (!livingEntity.getWorld().isClient()) {
-            ServerWorld serverWorld = (ServerWorld) livingEntity.getWorld();
+    public boolean applyUpdateEffect(ServerWorld world, LivingEntity livingEntity, int amplifier) {
+        if (!livingEntity.getEntityWorld().isClient()) {
+            ServerWorld serverWorld = (ServerWorld) livingEntity.getEntityWorld();
 			if (livingEntity.getStatusEffect(EffectRegistry.getReference(EffectRegistry.FIRE_VORTEX)) instanceof SimplySwordsStatusEffectInstance statusEffect) {
                 sourceEntity = statusEffect.getSourceEntity();
                 additionalData = statusEffect.getAdditionalData();
@@ -46,15 +46,15 @@ public class FireVortexEffect extends OrbitingEffect {
                     if (livingEntity instanceof PlayerEntity && sourceEntity instanceof PlayerEntity sourcePlayer)
                         damageSource = livingEntity.getDamageSources().playerAttack(sourcePlayer);
                 }
-                livingEntity.damage(damageSource, (additionalData + ((float) amplifier / 4) + abilityDamage));
+                livingEntity.damage((ServerWorld) livingEntity.getEntityWorld(), damageSource, (additionalData + ((float) amplifier / 4) + abilityDamage));
             }
 
             if (livingEntity.age % 40 == 0 && amplifier > 5) {
-                HelperMethods.spawnOrbitParticles(serverWorld, livingEntity.getPos(), ParticleTypes.LAVA, 1, 4);
-                HelperMethods.spawnOrbitParticles(serverWorld, livingEntity.getPos(), ParticleTypes.CAMPFIRE_SIGNAL_SMOKE, 2, 10);
+                HelperMethods.spawnOrbitParticles(serverWorld, livingEntity.getEntityPos(), ParticleTypes.LAVA, 1, 4);
+                HelperMethods.spawnOrbitParticles(serverWorld, livingEntity.getEntityPos(), ParticleTypes.CAMPFIRE_SIGNAL_SMOKE, 2, 10);
             }
         }
-        super.applyUpdateEffect(livingEntity, amplifier);
+        super.applyUpdateEffect(world, livingEntity, amplifier);
         return true;
     }
 

@@ -38,7 +38,7 @@ public class WickpiercerEntity extends ThrownSpearEntity {
 
     @Override
     protected byte getLoyalty() {
-        World world = this.getWorld();
+        World world = this.getEntityWorld();
         if (world instanceof ServerWorld serverWorld) {
             return 3;
         } else {

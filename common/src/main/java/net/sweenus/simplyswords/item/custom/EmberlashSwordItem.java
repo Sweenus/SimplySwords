@@ -3,18 +3,20 @@ package net.sweenus.simplyswords.item.custom;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
-import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.config.Config;
@@ -37,9 +39,9 @@ public class EmberlashSwordItem extends UniqueSwordItem {
     public static float tooltipEffectDamage = 0.20f;
 
     @Override
-    public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        if (!attacker.getWorld().isClient()) {
-            ServerWorld world = (ServerWorld) attacker.getWorld();
+    public void postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        if (!attacker.getEntityWorld().isClient()) {
+            ServerWorld world = (ServerWorld) attacker.getEntityWorld();
 
             HelperMethods.playHitSounds(attacker, target);
 
@@ -50,8 +52,8 @@ public class EmberlashSwordItem extends UniqueSwordItem {
                     DamageSource damageSource = attacker instanceof PlayerEntity player ? player.getDamageSources().playerAttack(player) : world.getDamageSources().generic();
                     float abilityDamage = Math.max(HelperMethods.commonSpellAttributeScaling(Config.uniqueEffects.emberlash.spellScaling, attacker, "fire"), (float) HelperMethods.getEntityAttackDamage(attacker));
                     float damageMultiplier = 0.15f * smoulderingEffect.getAmplifier();
-                    target.damage(damageSource, abilityDamage * damageMultiplier);
-                    HelperMethods.spawnOrbitParticles(world, target.getPos(), ParticleTypes.LAVA, 0.2, smoulderingEffect.getAmplifier());
+                    target.damage((ServerWorld) target.getEntityWorld(), damageSource, abilityDamage * damageMultiplier);
+                    HelperMethods.spawnOrbitParticles(world, target.getEntityPos(), ParticleTypes.LAVA, 0.2, smoulderingEffect.getAmplifier());
                     world.playSound(target, target.getBlockPos(), SoundRegistry.SPELL_FIRE.get(),
                             target.getSoundCategory(), 0.1f, 1.5f);
                 }
@@ -60,33 +62,33 @@ public class EmberlashSwordItem extends UniqueSwordItem {
             HelperMethods.incrementStatusEffect(target, EffectRegistry.getReference(EffectRegistry.SMOULDERING), 100, 1, maximum_stacks + 1);
 
         }
-        return super.postHit(stack, target, attacker);
+        super.postHit(stack, target, attacker);
     }
 
     @Override
-    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
+    public ActionResult use(World world, PlayerEntity user, Hand hand) {
         user.swingHand(hand);
         world.playSound(null, user.getBlockPos(), SoundRegistry.SPELL_FIRE.get(),
                 user.getSoundCategory(), 0.5f, 1.0f);
 
         user.setVelocity(user.getRotationVector().negate().multiply(+1.5));
         user.setVelocity(user.getVelocity().x, 0, user.getVelocity().z); // Prevent user flying to the heavens
-        user.velocityModified = true;
+        user.velocityDirty = true;
         user.heal(user.getMaxHealth() * Config.uniqueEffects.emberlash.heal / 100f);
-        user.getItemCooldownManager().set(this, Config.uniqueEffects.emberlash.cooldown);
+        user.getItemCooldownManager().set(this.getDefaultStack(), Config.uniqueEffects.emberlash.cooldown);
 
         return super.use(world, user, hand);
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
+    public void inventoryTick(ItemStack stack, ServerWorld world, Entity entity, EquipmentSlot slot) {
         HelperMethods.createFootfalls(entity, stack, world, ParticleTypes.FALLING_LAVA,
                 ParticleTypes.SMOKE, ParticleTypes.SMOKE, true);
-        super.inventoryTick(stack, world, entity, slot, selected);
+        super.inventoryTick(stack, world, entity, slot);
     }
 
     @Override
-    public void appendTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
+    protected void appendItemTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.emberlashsworditem.tooltip1").setStyle(Styles.ABILITY));
         tooltip.add(Text.translatable("item.simplyswords.emberlashsworditem.tooltip2").setStyle(Styles.TEXT));
@@ -98,7 +100,7 @@ public class EmberlashSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.emberlashsworditem.tooltip6").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.emberlashsworditem.tooltip7", Config.uniqueEffects.emberlash.heal).setStyle(Styles.TEXT));
-        super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        super.appendItemTooltip(itemStack, tooltipContext, tooltip, type);
         TooltipUtils.appendSpellScaleTooltip(tooltip, "fire");
     }
 

@@ -5,6 +5,7 @@ import net.minecraft.entity.attribute.AttributeContainer;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffectCategory;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.server.world.ServerWorld;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.effect.instance.SimplySwordsStatusEffectInstance;
 import net.sweenus.simplyswords.registry.EffectRegistry;
@@ -24,8 +25,8 @@ public class VoidAssaultEffect extends OrbitingEffect {
     }
 
     @Override
-    public boolean applyUpdateEffect(LivingEntity livingEntity, int amplifier) {
-        if (!livingEntity.getWorld().isClient()) {
+    public boolean applyUpdateEffect(ServerWorld world, LivingEntity livingEntity, int amplifier) {
+        if (!livingEntity.getEntityWorld().isClient()) {
             int voidcallerStartingTickFrequency = Config.uniqueEffects.dreadtide.get().startingTickFrequency;
 
             if (livingEntity.getStatusEffect(EffectRegistry.getReference(EffectRegistry.VOIDASSAULT)) instanceof SimplySwordsStatusEffectInstance statusEffect) {
@@ -38,10 +39,10 @@ public class VoidAssaultEffect extends OrbitingEffect {
                 livingEntity.timeUntilRegen = 0;
                 if (sourceEntity != null)
                     damageSource = livingEntity.getDamageSources().indirectMagic(livingEntity, sourceEntity);
-                livingEntity.damage(damageSource, additionalData + amplifier);
+                livingEntity.damage((ServerWorld) livingEntity.getEntityWorld(), damageSource, additionalData + amplifier);
             }
         }
-        super.applyUpdateEffect(livingEntity, amplifier);
+        super.applyUpdateEffect(world, livingEntity, amplifier);
         return true;
     }
 

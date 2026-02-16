@@ -13,18 +13,18 @@ public class SmoulderingEffect extends StatusEffect {
     }
 
     @Override
-    public boolean applyUpdateEffect(LivingEntity livingEntity, int amplifier) {
-        if (!livingEntity.getWorld().isClient()) {
+    public boolean applyUpdateEffect(ServerWorld world, LivingEntity livingEntity, int amplifier) {
+        if (!livingEntity.getEntityWorld().isClient()) {
             int frequency = 10;
-            ServerWorld serverWorld = (ServerWorld) livingEntity.getWorld();
+            ServerWorld serverWorld = (ServerWorld) livingEntity.getEntityWorld();
             if (livingEntity.age % frequency == 0 ) {
-                HelperMethods.spawnOrbitParticles(serverWorld, livingEntity.getPos(), ParticleTypes.LAVA, 0.2, 1);
+                HelperMethods.spawnOrbitParticles(serverWorld, livingEntity.getEntityPos(), ParticleTypes.LAVA, 0.2, 1);
             }
             if (livingEntity.age % frequency*4 == 0 ) {
-                HelperMethods.spawnOrbitParticles(serverWorld, livingEntity.getPos(), ParticleTypes.CAMPFIRE_SIGNAL_SMOKE, 0.2, 1);
+                HelperMethods.spawnOrbitParticles(serverWorld, livingEntity.getEntityPos(), ParticleTypes.CAMPFIRE_SIGNAL_SMOKE, 0.2, 1);
             }
         }
-        super.applyUpdateEffect(livingEntity, amplifier);
+        super.applyUpdateEffect(world, livingEntity, amplifier);
         return true;
     }
 

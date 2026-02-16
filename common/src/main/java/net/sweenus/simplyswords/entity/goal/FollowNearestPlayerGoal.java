@@ -26,9 +26,9 @@ public class FollowNearestPlayerGoal extends Goal {
 
     @Override
     public boolean canStart() {
-        if (axolotl.getWorld() instanceof ServerWorld) {
+        if (axolotl.getEntityWorld() instanceof ServerWorld) {
             // Find the closest player within the search radius
-            PlayerEntity nearestPlayer = axolotl.getWorld()
+            PlayerEntity nearestPlayer = axolotl.getEntityWorld()
                     .getClosestPlayer(axolotl.getX(), axolotl.getY(), axolotl.getZ(), searchRadius, false);
 
             // Set it as the current target
@@ -67,7 +67,7 @@ public class FollowNearestPlayerGoal extends Goal {
             );
 
             // Look at the player
-            Vec3d targetPosition = this.targetPlayer.getPos();
+            Vec3d targetPosition = this.targetPlayer.getEntityPos();
             this.axolotl.getLookControl().lookAt(targetPosition.x, targetPosition.y, targetPosition.z);
         }
     }

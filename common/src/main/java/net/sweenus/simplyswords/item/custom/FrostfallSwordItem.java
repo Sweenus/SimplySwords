@@ -6,15 +6,18 @@ import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
-import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.config.Config;
@@ -34,20 +37,23 @@ public class FrostfallSwordItem extends UniqueSwordItem {
     }
 
     @Override
-    public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        if (attacker.getWorld().isClient()) super.postHit(stack, target, attacker);
+    public void postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        if (attacker.getEntityWorld().isClient()) {
+            super.postHit(stack, target, attacker);
+            return;
+        }
         HelperMethods.playHitSounds(attacker, target);
-        return super.postHit(stack, target, attacker);
+        super.postHit(stack, target, attacker);
     }
 
     @Override
-    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
-        if (user.getWorld().isClient()) return super.use(world, user, hand);
+    public ActionResult use(World world, PlayerEntity user, Hand hand) {
+        if (user.getEntityWorld().isClient()) return super.use(world, user, hand);
 
         float abilityDamage = HelperMethods.spellScaledDamage("frost", user, Config.uniqueEffects.frostfall.spellScaling, Config.uniqueEffects.frostfall.damage);
         float pulseDamage = HelperMethods.spellScaledDamage("frost", user, Config.uniqueEffects.frostfall.spellScaling, Config.uniqueEffects.frostfall.pulseDamage);
         ItemStack itemStack = user.getStackInHand(hand);
-        if (!world.isClient) {
+        if (!world.isClient()) {
             itemStack = user.getStackInHand(hand);
             FrostfallEntity frostfallEntity = new FrostfallEntity(world, user, itemStack.copy() );
             frostfallEntity.setVelocity(user, user.getPitch(), user.getYaw(), 0.0F, 1.5F, 1.0F);
@@ -71,20 +77,20 @@ public class FrostfallSwordItem extends UniqueSwordItem {
         user.swingHand(hand);
 
 
-        user.getItemCooldownManager().set(this, Config.uniqueEffects.frostfall.cooldown);
-        return TypedActionResult.success(itemStack, world.isClient());
+        user.getItemCooldownManager().set(this.getDefaultStack(), Config.uniqueEffects.frostfall.cooldown);
+        return ActionResult.SUCCESS;
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
+    public void inventoryTick(ItemStack stack, ServerWorld world, Entity entity, EquipmentSlot slot) {
         HelperMethods.createFootfalls(entity, stack, world, ParticleTypes.SNOWFLAKE, ParticleTypes.SNOWFLAKE,
                 ParticleTypes.WHITE_ASH, true);
-        super.inventoryTick(stack, world, entity, slot, selected);
+        super.inventoryTick(stack, world, entity, slot);
     }
 
     @Environment(EnvType.CLIENT)
     @Override
-    public void appendTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
+    protected void appendItemTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.frostfallsworditem.tooltip1").setStyle(Styles.ABILITY));
         tooltip.add(Text.translatable("item.simplyswords.frostfallsworditem.tooltip6").setStyle(Styles.TEXT));
@@ -95,7 +101,7 @@ public class FrostfallSwordItem extends UniqueSwordItem {
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.frostfallsworditem.tooltip4").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.frostfallsworditem.tooltip5").setStyle(Styles.TEXT));
-        super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        super.appendItemTooltip(itemStack, tooltipContext, tooltip, type);
         TooltipUtils.appendSpellScaleTooltip(tooltip, "frost");
     }
 

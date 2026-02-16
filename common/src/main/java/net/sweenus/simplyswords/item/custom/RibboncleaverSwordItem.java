@@ -5,18 +5,21 @@ import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedDouble;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.particle.BlockStateParticleEffect;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
-import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.Config;
@@ -37,17 +40,17 @@ public class RibboncleaverSwordItem extends UniqueSwordItem {
     }
 
     @Override
-    public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        if (!attacker.getWorld().isClient()) {
+    public void postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        if (!attacker.getEntityWorld().isClient()) {
 
             HelperMethods.playHitSounds(attacker, target);
 
         }
-        return super.postHit(stack, target, attacker);
+        super.postHit(stack, target, attacker);
     }
 
     @Override
-    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
+    public ActionResult use(World world, PlayerEntity user, Hand hand) {
         int skillCooldown = Config.uniqueEffects.ribboncleaver.cooldown;
         int resilienceAmplifier = Config.uniqueEffects.ribboncleaver.resilienceAmplifier;
 
@@ -59,18 +62,18 @@ public class RibboncleaverSwordItem extends UniqueSwordItem {
                     user.getSoundCategory(), 0.5f, 1.2f);
         user.setVelocity(user.getRotationVector().multiply(+1.7));
         user.setVelocity(user.getVelocity().x, 0, user.getVelocity().z); // Prevent user flying to the heavens
-        user.velocityModified = true;
+        user.velocityDirty = true;
         user.addStatusEffect(new StatusEffectInstance(EffectRegistry.getReference(EffectRegistry.RIBBONCLEAVE),
                 60, 0, false, false, true));
         user.addStatusEffect(new StatusEffectInstance(EffectRegistry.getReference(EffectRegistry.RESILIENCE),
                 15, resilienceAmplifier, false, false, true));
-        user.getItemCooldownManager().set(this, skillCooldown);
+        user.getItemCooldownManager().set(this.getDefaultStack(), skillCooldown);
 
         return super.use(world, user, hand);
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
+    public void inventoryTick(ItemStack stack, ServerWorld world, Entity entity, EquipmentSlot slot) {
 
         //Drag weapon particles
         if (entity.isOnGround() && Platform.isModLoaded("bettercombat") && HelperMethods.isWalking(entity)
@@ -101,17 +104,17 @@ public class RibboncleaverSwordItem extends UniqueSwordItem {
 
                 particleY = entity.isOnGround() ? entity.getY() : particleY;
 
-                world.addParticle(particleEffect, particleX, particleY, particleZ, 0, 0.0, 0);
-                world.addParticle(ParticleTypes.POOF, particleX, particleY, particleZ, 0, 0.0, 0);
+                HelperMethods.spawnParticle(world, particleEffect, particleX, particleY, particleZ, 0, 0.0, 0);
+                HelperMethods.spawnParticle(world, ParticleTypes.POOF, particleX, particleY, particleZ, 0, 0.0, 0);
 
             }
         }
 
-        super.inventoryTick(stack, world, entity, slot, selected);
+        super.inventoryTick(stack, world, entity, slot);
     }
 
     @Override
-    public void appendTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
+    protected void appendItemTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.ribboncleaversworditem.tooltip1").setStyle(Styles.ABILITY));
         tooltip.add(Text.translatable("item.simplyswords.ribboncleaversworditem.tooltip2").setStyle(Styles.TEXT));
@@ -126,7 +129,7 @@ public class RibboncleaverSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.ribboncleaversworditem.tooltip9").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.ribboncleaversworditem.tooltip10").setStyle(Styles.TEXT));
 
-        super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        super.appendItemTooltip(itemStack, tooltipContext, tooltip, type);
     }
 
     public static class EffectSettings extends TooltipSettings {

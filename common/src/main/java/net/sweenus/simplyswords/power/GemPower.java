@@ -12,9 +12,9 @@ import net.minecraft.item.tooltip.TooltipAppender;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.text.Text;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.registry.GemPowerRegistry;
 
@@ -45,7 +45,7 @@ public class GemPower implements TooltipAppender {
 	public List<PowerType> applicableTypes() { return applicableTypes; }
 
 	@Override
-	public void appendTooltip(Item.TooltipContext context, Consumer<Text> tooltip, TooltipType type) {
+	public void appendTooltip(Item.TooltipContext context, Consumer<Text> tooltip, TooltipType type, net.minecraft.component.ComponentsAccess components) {
 		List<Text> list = new ArrayList<>();
 		appendTooltip(ItemStack.EMPTY, context, list, type, false);
 		for (Text text : list) {
@@ -57,9 +57,9 @@ public class GemPower implements TooltipAppender {
 	public void postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {}
 	public void inventoryTick(ItemStack stack, World world, LivingEntity user, int slot, boolean selected) {}
 
-	TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand, ItemStack itemStack) { return TypedActionResult.fail(itemStack); }
+	ActionResult use(World world, PlayerEntity user, Hand hand, ItemStack itemStack) { return ActionResult.FAIL; }
 	void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {}
-	void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {}
+	boolean onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) { return false; }
 	int getMaxUseTime(ItemStack stack) { return 0; }
 
 	public boolean isEmpty() { return false; }

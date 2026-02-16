@@ -31,7 +31,7 @@ public class SlowPower extends RunefusedGemPower {
 		if (attacker.getRandom().nextInt(100) <= hitChance) {
 			target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, duration, 2), attacker);
 			if (this.isGreater()) {
-				attacker.getWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
+				attacker.getEntityWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
 						attacker.getSoundCategory(), 0.1f, 1.8f);
 			}
 		}

@@ -40,10 +40,10 @@ public class LivyatanEntity extends ThrownSwordEntity {
 
     @Override
     protected void damageOnReturn(double radius, float damage) {
-        if (getWorld().isClient()) return;
+        if (getEntityWorld().isClient()) return;
         if (this.stack == null || this.stack.isEmpty()) return;
 
-        ServerWorld world = (ServerWorld) this.getWorld();
+        ServerWorld world = (ServerWorld) this.getEntityWorld();
         if (this.getOwner() != null && this.getOwner() instanceof ServerPlayerEntity user) {
             DamageSource damageSource = user.getDamageSources().trident(this, user);
             float returnDamage = EnchantmentHelper.getDamage(world, stack, this, damageSource, damage);
@@ -58,7 +58,7 @@ public class LivyatanEntity extends ThrownSwordEntity {
                     world.playSoundFromEntity(null, user, SoundRegistry.ELEMENTAL_SWORD_ICE_ATTACK_01.get(),
                             user.getSoundCategory(), 0.2f, 1.5f);
                     le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, slownessDuration, 2), user);
-                    HelperMethods.spawnOrbitParticles(world, this.getPos(), ParticleTypes.POOF, 0.5f, 3);
+                    HelperMethods.spawnOrbitParticles(world, this.getEntityPos(), ParticleTypes.POOF, 0.5f, 3);
                 }
             }
         }
@@ -67,9 +67,9 @@ public class LivyatanEntity extends ThrownSwordEntity {
     @Override
     protected void doEffects(ServerWorld serverWorld, float baseDamage, Entity entity) {
         int bonusParticles =  ((int) baseDamage / 2);
-        HelperMethods.spawnOrbitParticles(serverWorld, this.getPos(), ParticleTypes.POOF, 0.5f, 3+bonusParticles);
-        HelperMethods.spawnOrbitParticles(serverWorld, this.getPos(), ParticleTypes.CRIT, 0.5f, 5+bonusParticles);
-        HelperMethods.spawnOrbitParticles(serverWorld, this.getPos(), ParticleTypes.SNOWFLAKE, 0.5f, 2+bonusParticles);
+        HelperMethods.spawnOrbitParticles(serverWorld, this.getEntityPos(), ParticleTypes.POOF, 0.5f, 3+bonusParticles);
+        HelperMethods.spawnOrbitParticles(serverWorld, this.getEntityPos(), ParticleTypes.CRIT, 0.5f, 5+bonusParticles);
+        HelperMethods.spawnOrbitParticles(serverWorld, this.getEntityPos(), ParticleTypes.SNOWFLAKE, 0.5f, 2+bonusParticles);
         if (baseDamage > primaryBaseDamage)
             serverWorld.playSoundFromEntity(null, entity, SoundRegistry.MAGIC_SWORD_PARRY_VARIOUS_HITS.get(),
                     this.getSoundCategory(), 0.3f, 1.2f);
@@ -92,7 +92,7 @@ public class LivyatanEntity extends ThrownSwordEntity {
 
     @Override
     protected byte getLoyalty() {
-        World world = this.getWorld();
+        World world = this.getEntityWorld();
         if (world instanceof ServerWorld serverWorld) {
             return 3;
         } else {

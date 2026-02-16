@@ -13,10 +13,11 @@ import net.minecraft.recipe.ShapedRecipe;
 import net.minecraft.recipe.book.CraftingRecipeCategory;
 import net.minecraft.recipe.input.CraftingRecipeInput;
 import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.world.World;
-import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.registry.RecipeTypeRegistry;
+
+import java.util.List;
+import java.util.Optional;
 
 public class UpgradeUniqueRecipe extends ShapedRecipe {
     private final int upgradableItemSlot;
@@ -30,14 +31,12 @@ public class UpgradeUniqueRecipe extends ShapedRecipe {
         this.upgradableItemSlot = raw.getUpgradableItemSlot();
     }
 
-    @Override
     public boolean fits(int width, int height) {
         return width >= this.raw.getWidth() && height >= this.raw.getHeight();
     }
 
-    @Override
-    public DefaultedList<Ingredient> getIngredients() {
-        return this.raw.getIngredients();
+    public List<Optional<Ingredient>> getIngredients() {
+        return this.raw.getIngredients().stream().map(Optional::ofNullable).toList();
     }
 
     @Override
@@ -73,7 +72,7 @@ public class UpgradeUniqueRecipe extends ShapedRecipe {
     }
 
     @Override
-    public RecipeSerializer<?> getSerializer() {return RecipeTypeRegistry.UNIQUE_UPGRADE.get();}
+    public RecipeSerializer<UpgradeUniqueRecipe> getSerializer() {return RecipeTypeRegistry.UNIQUE_UPGRADE.get();}
 
     public static class Serializer implements RecipeSerializer<UpgradeUniqueRecipe> {
 

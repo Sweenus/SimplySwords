@@ -12,12 +12,12 @@ import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.compat.mythicmetals.PalladiumSwordItem;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.item.SimplySwordsSwordItem;
+import net.sweenus.simplyswords.util.HelperMethods;
 
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import static net.minecraft.item.SwordItem.createAttributeModifiers;
 
 public class MythicMetalsCompat {
 
@@ -88,8 +88,8 @@ public class MythicMetalsCompat {
     private static void registerSwords(ToolSet toolSet, String name, float modifier) {
         name = name.toLowerCase(Locale.ROOT);
         var weaponPath = "mythicmetals_compat/" + name + "/" + name + "_";
-        var material = toolSet.getSword().getMaterial();
-        var repairStacks = material.getRepairIngredient().getMatchingStacks();
+        // TODO: getMaterial() was removed from Item in 1.21.11. Mythic Metals needs to provide material access differently.
+        ToolMaterial material = ToolMaterial.NETHERITE;
         // Edge case to handle Prometheum Auto Repair items
         var settings = name.equals("prometheum") ? prometheumSettings() : defaultSettings();
         // Handle Palladium separately
@@ -98,39 +98,39 @@ public class MythicMetalsCompat {
             return;
         }
 
-        ITEM.register(weaponPath + "longsword", () -> new SimplySwordsSwordItem(material, settings.attributeModifiers(createAttributeModifiers(material, (int) (modifier + longsword_modifier), longsword_attackspeed))));
-        ITEM.register(weaponPath + "twinblade", () -> new SimplySwordsSwordItem(material, settings.attributeModifiers(createAttributeModifiers(material, (int) (modifier + twinblade_modifier), twinblade_attackspeed))));
-        ITEM.register(weaponPath + "rapier", () -> new SimplySwordsSwordItem(material, settings.attributeModifiers(createAttributeModifiers(material, (int) (modifier + rapier_modifier), rapier_attackspeed))));
-        ITEM.register(weaponPath + "katana", () -> new SimplySwordsSwordItem(material, settings.attributeModifiers(createAttributeModifiers(material, (int) (modifier + katana_modifier), katana_attackspeed))));
-        ITEM.register(weaponPath + "sai", () -> new SimplySwordsSwordItem(material, settings.attributeModifiers(createAttributeModifiers(material, (int) (modifier + sai_modifier), sai_attackspeed))));
-        ITEM.register(weaponPath + "spear", () -> new SimplySwordsSwordItem(material, settings.attributeModifiers(createAttributeModifiers(material, (int) (modifier + spear_modifier), spear_attackspeed))));
-        ITEM.register(weaponPath + "glaive", () -> new SimplySwordsSwordItem(material, settings.attributeModifiers(createAttributeModifiers(material, (int) (modifier + glaive_modifier), glaive_attackspeed))));
-        ITEM.register(weaponPath + "warglaive", () -> new SimplySwordsSwordItem(material, settings.attributeModifiers(createAttributeModifiers(material, (int) (modifier + warglaive_modifier), warglaive_attackspeed))));
-        ITEM.register(weaponPath + "cutlass", () -> new SimplySwordsSwordItem(material, settings.attributeModifiers(createAttributeModifiers(material, (int) (modifier + cutlass_modifier), cutlass_attackspeed))));
-        ITEM.register(weaponPath + "claymore", () -> new SimplySwordsSwordItem(material, settings.attributeModifiers(createAttributeModifiers(material, (int) (modifier + claymore_modifier), claymore_attackspeed))));
-        ITEM.register(weaponPath + "greathammer", () -> new SimplySwordsSwordItem(material, settings.attributeModifiers(createAttributeModifiers(material, (int) (modifier + greathammer_modifier), greathammer_attackspeed))));
-        ITEM.register(weaponPath + "greataxe", () -> new SimplySwordsSwordItem(material, settings.attributeModifiers(createAttributeModifiers(material, (int) (modifier + greataxe_modifier), greataxe_attackspeed))));
-        ITEM.register(weaponPath + "chakram", () -> new SimplySwordsSwordItem(material, settings.attributeModifiers(createAttributeModifiers(material, (int) (modifier + chakram_modifier), chakram_attackspeed))));
-        ITEM.register(weaponPath + "scythe", () -> new SimplySwordsSwordItem(material, settings.attributeModifiers(createAttributeModifiers(material, (int) (modifier + scythe_modifier), scythe_attackspeed))));
-        ITEM.register(weaponPath + "halberd", () -> new SimplySwordsSwordItem(material, settings.attributeModifiers(createAttributeModifiers(material, (int) (modifier + halberd_modifier), halberd_attackspeed))));
+        ITEM.register(weaponPath + "longsword", () -> new SimplySwordsSwordItem(material, settings.attributeModifiers(HelperMethods.createSwordAttributeModifiers(material, (int) (modifier + longsword_modifier), longsword_attackspeed))));
+        ITEM.register(weaponPath + "twinblade", () -> new SimplySwordsSwordItem(material, settings.attributeModifiers(HelperMethods.createSwordAttributeModifiers(material, (int) (modifier + twinblade_modifier), twinblade_attackspeed))));
+        ITEM.register(weaponPath + "rapier", () -> new SimplySwordsSwordItem(material, settings.attributeModifiers(HelperMethods.createSwordAttributeModifiers(material, (int) (modifier + rapier_modifier), rapier_attackspeed))));
+        ITEM.register(weaponPath + "katana", () -> new SimplySwordsSwordItem(material, settings.attributeModifiers(HelperMethods.createSwordAttributeModifiers(material, (int) (modifier + katana_modifier), katana_attackspeed))));
+        ITEM.register(weaponPath + "sai", () -> new SimplySwordsSwordItem(material, settings.attributeModifiers(HelperMethods.createSwordAttributeModifiers(material, (int) (modifier + sai_modifier), sai_attackspeed))));
+        ITEM.register(weaponPath + "spear", () -> new SimplySwordsSwordItem(material, settings.attributeModifiers(HelperMethods.createSwordAttributeModifiers(material, (int) (modifier + spear_modifier), spear_attackspeed))));
+        ITEM.register(weaponPath + "glaive", () -> new SimplySwordsSwordItem(material, settings.attributeModifiers(HelperMethods.createSwordAttributeModifiers(material, (int) (modifier + glaive_modifier), glaive_attackspeed))));
+        ITEM.register(weaponPath + "warglaive", () -> new SimplySwordsSwordItem(material, settings.attributeModifiers(HelperMethods.createSwordAttributeModifiers(material, (int) (modifier + warglaive_modifier), warglaive_attackspeed))));
+        ITEM.register(weaponPath + "cutlass", () -> new SimplySwordsSwordItem(material, settings.attributeModifiers(HelperMethods.createSwordAttributeModifiers(material, (int) (modifier + cutlass_modifier), cutlass_attackspeed))));
+        ITEM.register(weaponPath + "claymore", () -> new SimplySwordsSwordItem(material, settings.attributeModifiers(HelperMethods.createSwordAttributeModifiers(material, (int) (modifier + claymore_modifier), claymore_attackspeed))));
+        ITEM.register(weaponPath + "greathammer", () -> new SimplySwordsSwordItem(material, settings.attributeModifiers(HelperMethods.createSwordAttributeModifiers(material, (int) (modifier + greathammer_modifier), greathammer_attackspeed))));
+        ITEM.register(weaponPath + "greataxe", () -> new SimplySwordsSwordItem(material, settings.attributeModifiers(HelperMethods.createSwordAttributeModifiers(material, (int) (modifier + greataxe_modifier), greataxe_attackspeed))));
+        ITEM.register(weaponPath + "chakram", () -> new SimplySwordsSwordItem(material, settings.attributeModifiers(HelperMethods.createSwordAttributeModifiers(material, (int) (modifier + chakram_modifier), chakram_attackspeed))));
+        ITEM.register(weaponPath + "scythe", () -> new SimplySwordsSwordItem(material, settings.attributeModifiers(HelperMethods.createSwordAttributeModifiers(material, (int) (modifier + scythe_modifier), scythe_attackspeed))));
+        ITEM.register(weaponPath + "halberd", () -> new SimplySwordsSwordItem(material, settings.attributeModifiers(HelperMethods.createSwordAttributeModifiers(material, (int) (modifier + halberd_modifier), halberd_attackspeed))));
     }
 
     private static void registerPalladiumTools(ToolMaterial material, String weaponPath, float modifier) {
-        ITEM.register(weaponPath + "longsword", () -> new PalladiumSwordItem(material, defaultSettings().attributeModifiers(createAttributeModifiers(material, (int) (modifier + longsword_modifier), longsword_attackspeed))));
-        ITEM.register(weaponPath + "twinblade", () -> new PalladiumSwordItem(material, defaultSettings().attributeModifiers(createAttributeModifiers(material, (int) (modifier + twinblade_modifier), twinblade_attackspeed))));
-        ITEM.register(weaponPath + "rapier", () -> new PalladiumSwordItem(material, defaultSettings().attributeModifiers(createAttributeModifiers(material, (int) (modifier + rapier_modifier), rapier_attackspeed))));
-        ITEM.register(weaponPath + "katana", () -> new PalladiumSwordItem(material, defaultSettings().attributeModifiers(createAttributeModifiers(material, (int) (modifier + katana_modifier), katana_attackspeed))));
-        ITEM.register(weaponPath + "sai", () -> new PalladiumSwordItem(material, defaultSettings().attributeModifiers(createAttributeModifiers(material, (int) (modifier + sai_modifier), sai_attackspeed))));
-        ITEM.register(weaponPath + "spear", () -> new PalladiumSwordItem(material, defaultSettings().attributeModifiers(createAttributeModifiers(material, (int) (modifier + spear_modifier), spear_attackspeed))));
-        ITEM.register(weaponPath + "glaive", () -> new PalladiumSwordItem(material, defaultSettings().attributeModifiers(createAttributeModifiers(material, (int) (modifier + glaive_modifier), glaive_attackspeed))));
-        ITEM.register(weaponPath + "warglaive", () -> new PalladiumSwordItem(material, defaultSettings().attributeModifiers(createAttributeModifiers(material, (int) (modifier + warglaive_modifier), warglaive_attackspeed))));
-        ITEM.register(weaponPath + "cutlass", () -> new PalladiumSwordItem(material, defaultSettings().attributeModifiers(createAttributeModifiers(material, (int) (modifier + cutlass_modifier), cutlass_attackspeed))));
-        ITEM.register(weaponPath + "claymore", () -> new PalladiumSwordItem(material, defaultSettings().attributeModifiers(createAttributeModifiers(material, (int) (modifier + claymore_modifier), claymore_attackspeed))));
-        ITEM.register(weaponPath + "greathammer", () -> new PalladiumSwordItem(material, defaultSettings().attributeModifiers(createAttributeModifiers(material, (int) (modifier + greathammer_modifier), greathammer_attackspeed))));
-        ITEM.register(weaponPath + "greataxe", () -> new PalladiumSwordItem(material, defaultSettings().attributeModifiers(createAttributeModifiers(material, (int) (modifier + greataxe_modifier), greataxe_attackspeed))));
-        ITEM.register(weaponPath + "chakram", () -> new PalladiumSwordItem(material, defaultSettings().attributeModifiers(createAttributeModifiers(material, (int) (modifier + chakram_modifier), chakram_attackspeed))));
-        ITEM.register(weaponPath + "scythe", () -> new PalladiumSwordItem(material, defaultSettings().attributeModifiers(createAttributeModifiers(material, (int) (modifier + scythe_modifier), scythe_attackspeed))));
-        ITEM.register(weaponPath + "halberd", () -> new PalladiumSwordItem(material, defaultSettings().attributeModifiers(createAttributeModifiers(material, (int) (modifier + halberd_modifier), halberd_attackspeed))));
+        ITEM.register(weaponPath + "longsword", () -> new PalladiumSwordItem(material, defaultSettings().attributeModifiers(HelperMethods.createSwordAttributeModifiers(material, (int) (modifier + longsword_modifier), longsword_attackspeed))));
+        ITEM.register(weaponPath + "twinblade", () -> new PalladiumSwordItem(material, defaultSettings().attributeModifiers(HelperMethods.createSwordAttributeModifiers(material, (int) (modifier + twinblade_modifier), twinblade_attackspeed))));
+        ITEM.register(weaponPath + "rapier", () -> new PalladiumSwordItem(material, defaultSettings().attributeModifiers(HelperMethods.createSwordAttributeModifiers(material, (int) (modifier + rapier_modifier), rapier_attackspeed))));
+        ITEM.register(weaponPath + "katana", () -> new PalladiumSwordItem(material, defaultSettings().attributeModifiers(HelperMethods.createSwordAttributeModifiers(material, (int) (modifier + katana_modifier), katana_attackspeed))));
+        ITEM.register(weaponPath + "sai", () -> new PalladiumSwordItem(material, defaultSettings().attributeModifiers(HelperMethods.createSwordAttributeModifiers(material, (int) (modifier + sai_modifier), sai_attackspeed))));
+        ITEM.register(weaponPath + "spear", () -> new PalladiumSwordItem(material, defaultSettings().attributeModifiers(HelperMethods.createSwordAttributeModifiers(material, (int) (modifier + spear_modifier), spear_attackspeed))));
+        ITEM.register(weaponPath + "glaive", () -> new PalladiumSwordItem(material, defaultSettings().attributeModifiers(HelperMethods.createSwordAttributeModifiers(material, (int) (modifier + glaive_modifier), glaive_attackspeed))));
+        ITEM.register(weaponPath + "warglaive", () -> new PalladiumSwordItem(material, defaultSettings().attributeModifiers(HelperMethods.createSwordAttributeModifiers(material, (int) (modifier + warglaive_modifier), warglaive_attackspeed))));
+        ITEM.register(weaponPath + "cutlass", () -> new PalladiumSwordItem(material, defaultSettings().attributeModifiers(HelperMethods.createSwordAttributeModifiers(material, (int) (modifier + cutlass_modifier), cutlass_attackspeed))));
+        ITEM.register(weaponPath + "claymore", () -> new PalladiumSwordItem(material, defaultSettings().attributeModifiers(HelperMethods.createSwordAttributeModifiers(material, (int) (modifier + claymore_modifier), claymore_attackspeed))));
+        ITEM.register(weaponPath + "greathammer", () -> new PalladiumSwordItem(material, defaultSettings().attributeModifiers(HelperMethods.createSwordAttributeModifiers(material, (int) (modifier + greathammer_modifier), greathammer_attackspeed))));
+        ITEM.register(weaponPath + "greataxe", () -> new PalladiumSwordItem(material, defaultSettings().attributeModifiers(HelperMethods.createSwordAttributeModifiers(material, (int) (modifier + greataxe_modifier), greataxe_attackspeed))));
+        ITEM.register(weaponPath + "chakram", () -> new PalladiumSwordItem(material, defaultSettings().attributeModifiers(HelperMethods.createSwordAttributeModifiers(material, (int) (modifier + chakram_modifier), chakram_attackspeed))));
+        ITEM.register(weaponPath + "scythe", () -> new PalladiumSwordItem(material, defaultSettings().attributeModifiers(HelperMethods.createSwordAttributeModifiers(material, (int) (modifier + scythe_modifier), scythe_attackspeed))));
+        ITEM.register(weaponPath + "halberd", () -> new PalladiumSwordItem(material, defaultSettings().attributeModifiers(HelperMethods.createSwordAttributeModifiers(material, (int) (modifier + halberd_modifier), halberd_attackspeed))));
     }
 
     private static Item.Settings defaultSettings() {

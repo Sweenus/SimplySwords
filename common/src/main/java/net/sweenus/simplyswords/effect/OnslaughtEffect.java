@@ -6,6 +6,7 @@ import net.minecraft.entity.effect.StatusEffectCategory;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 
 public class OnslaughtEffect extends StatusEffect {
@@ -14,8 +15,8 @@ public class OnslaughtEffect extends StatusEffect {
     }
 
     @Override
-    public boolean applyUpdateEffect(LivingEntity pLivingEntity, int pAmplifier) {
-        if (!pLivingEntity.getWorld().isClient()) {
+    public boolean applyUpdateEffect(ServerWorld world, LivingEntity pLivingEntity, int pAmplifier) {
+        if (!pLivingEntity.getEntityWorld().isClient()) {
             if (pLivingEntity instanceof PlayerEntity) {
 
                 //Grant pulsing haste
@@ -44,7 +45,7 @@ public class OnslaughtEffect extends StatusEffect {
             }
         }
 
-        super.applyUpdateEffect(pLivingEntity, pAmplifier);
+        super.applyUpdateEffect(world, pLivingEntity, pAmplifier);
 
         return true;
     }

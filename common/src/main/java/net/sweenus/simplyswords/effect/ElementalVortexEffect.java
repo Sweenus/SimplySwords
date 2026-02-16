@@ -31,9 +31,9 @@ public class ElementalVortexEffect extends OrbitingEffect {
     }
 
     @Override
-    public boolean applyUpdateEffect(LivingEntity livingEntity, int amplifier) {
-        if (!livingEntity.getWorld().isClient()) {
-            ServerWorld serverWorld = (ServerWorld) livingEntity.getWorld();
+    public boolean applyUpdateEffect(ServerWorld world, LivingEntity livingEntity, int amplifier) {
+        if (!livingEntity.getEntityWorld().isClient()) {
+            ServerWorld serverWorld = (ServerWorld) livingEntity.getEntityWorld();
 			SoundHelper.loopSound(livingEntity, SoundRegistry.AMBIENCE_WIND_LOOP.getId(), 6, 20);
 
             if (livingEntity.getStatusEffect(EffectRegistry.getReference(EffectRegistry.ELEMENTAL_VORTEX)) instanceof SimplySwordsStatusEffectInstance statusEffect) {
@@ -52,7 +52,7 @@ public class ElementalVortexEffect extends OrbitingEffect {
 							float abilityDamageFrost = HelperMethods.commonSpellAttributeScaling(spellScalingModifier, sourceEntity, "frost");
 							float abilityDamageFire = HelperMethods.commonSpellAttributeScaling(spellScalingModifier, sourceEntity, "fire");
 							le.timeUntilRegen = 0;
-                            le.damage(damageSource, (3 + ((float) amplifier / 2)) + (abilityDamageFire + abilityDamageFrost));
+                            le.damage((ServerWorld) le.getEntityWorld(), damageSource, (3 + ((float) amplifier / 2)) + (abilityDamageFire + abilityDamageFrost));
                         }
 
                     }
@@ -60,12 +60,12 @@ public class ElementalVortexEffect extends OrbitingEffect {
             }
 
             if (livingEntity.age % 40 == 0) {
-                HelperMethods.spawnOrbitParticles(serverWorld, livingEntity.getPos().add(0, (livingEntity.getHeight() / 3), 0), ParticleTypes.LAVA, 0.5, 4);
-                HelperMethods.spawnOrbitParticles(serverWorld, livingEntity.getPos().add(0, (livingEntity.getHeight() / 2), 0), ParticleTypes.SNOWFLAKE, 1, 6);
-                HelperMethods.spawnOrbitParticles(serverWorld, livingEntity.getPos().add(0, (livingEntity.getHeight() / 2), 0), ParticleTypes.MYCELIUM, 1.5, 8);
+                HelperMethods.spawnOrbitParticles(serverWorld, livingEntity.getEntityPos().add(0, (livingEntity.getHeight() / 3), 0), ParticleTypes.LAVA, 0.5, 4);
+                HelperMethods.spawnOrbitParticles(serverWorld, livingEntity.getEntityPos().add(0, (livingEntity.getHeight() / 2), 0), ParticleTypes.SNOWFLAKE, 1, 6);
+                HelperMethods.spawnOrbitParticles(serverWorld, livingEntity.getEntityPos().add(0, (livingEntity.getHeight() / 2), 0), ParticleTypes.MYCELIUM, 1.5, 8);
             }
         }
-        super.applyUpdateEffect(livingEntity, amplifier);
+        super.applyUpdateEffect(world, livingEntity, amplifier);
         return true;
     }
 

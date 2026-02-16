@@ -3,19 +3,21 @@ package net.sweenus.simplyswords.item.custom;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
-import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
@@ -34,11 +36,11 @@ public class StarsEdgeSwordItem extends UniqueSwordItem {
     }
 
     @Override
-    public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        if (!attacker.getWorld().isClient()) {
+    public void postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        if (!attacker.getEntityWorld().isClient()) {
             float skillDamageModifier = Config.uniqueEffects.stars_edge.damageModifier;
             float skillLifestealModifier = Config.uniqueEffects.stars_edge.lifestealModifier;
-            ServerWorld world = (ServerWorld) attacker.getWorld();
+            ServerWorld world = (ServerWorld) attacker.getEntityWorld();
             DamageSource damageSource = world.getDamageSources().generic();
             float abilityDamage = (float) HelperMethods.getEntityAttackDamage(attacker);
             if (attacker instanceof PlayerEntity player)
@@ -48,18 +50,18 @@ public class StarsEdgeSwordItem extends UniqueSwordItem {
 
             if (world.isDay()) {
                 target.timeUntilRegen = 0;
-                target.damage(damageSource, abilityDamage * skillDamageModifier);
+                target.damage((ServerWorld) target.getEntityWorld(), damageSource, abilityDamage * skillDamageModifier);
             }
             else if (world.isNight()) {
                 attacker.heal(abilityDamage * skillLifestealModifier);
             }
 
         }
-        return super.postHit(stack, target, attacker);
+        super.postHit(stack, target, attacker);
     }
 
     @Override
-    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
+    public ActionResult use(World world, PlayerEntity user, Hand hand) {
         int skillCooldown = Config.uniqueEffects.stars_edge.cooldown;
         int skillDuration = Config.uniqueEffects.stars_edge.duration;
         int skillStacks = Config.uniqueEffects.stars_edge.stacks;
@@ -71,7 +73,7 @@ public class StarsEdgeSwordItem extends UniqueSwordItem {
 
             user.setVelocity(user.getRotationVector().negate().multiply(+1.5));
             user.setVelocity(user.getVelocity().x, 0, user.getVelocity().z); // Prevent user flying to the heavens
-            user.velocityModified = true;
+            user.velocityDirty = true;
             HelperMethods.incrementStatusEffect(user, StatusEffects.SPEED, skillDuration, 1, 2);
         } else {
             StatusEffectInstance speedEffect = user.getStatusEffect(StatusEffects.SPEED);
@@ -80,11 +82,11 @@ public class StarsEdgeSwordItem extends UniqueSwordItem {
                         user.getSoundCategory(), 0.5f, 1.3f);
                 user.setVelocity(user.getRotationVector().multiply(+1.7));
                 user.setVelocity(user.getVelocity().x, 0, user.getVelocity().z); // Prevent user flying to the heavens
-                user.velocityModified = true;
+                user.velocityDirty = true;
                 user.removeStatusEffect(StatusEffects.SPEED);
                 HelperMethods.incrementStatusEffect(user, StatusEffects.RESISTANCE, skillDuration / 2, 2, 3);
                 HelperMethods.incrementStatusEffect(user, StatusEffects.HASTE, skillDuration / 2, skillStacks, 7);
-                user.getItemCooldownManager().set(this, skillCooldown);
+                user.getItemCooldownManager().set(this.getDefaultStack(), skillCooldown);
             }
         }
 
@@ -92,14 +94,14 @@ public class StarsEdgeSwordItem extends UniqueSwordItem {
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
+    public void inventoryTick(ItemStack stack, ServerWorld world, Entity entity, EquipmentSlot slot) {
         HelperMethods.createFootfalls(entity, stack, world, ParticleTypes.FALLING_OBSIDIAN_TEAR,
                 ParticleTypes.MYCELIUM, ParticleTypes.MYCELIUM, true);
-        super.inventoryTick(stack, world, entity, slot, selected);
+        super.inventoryTick(stack, world, entity, slot);
     }
 
     @Override
-    public void appendTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
+    protected void appendItemTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
 
         float skillDamageModifier = Config.uniqueEffects.stars_edge.damageModifier;
 
@@ -117,7 +119,7 @@ public class StarsEdgeSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.starsedgesworditem.tooltip7").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.starsedgesworditem.tooltip8").setStyle(Styles.TEXT));
 
-        super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        super.appendItemTooltip(itemStack, tooltipContext, tooltip, type);
     }
 
     public static class EffectSettings extends TooltipSettings {

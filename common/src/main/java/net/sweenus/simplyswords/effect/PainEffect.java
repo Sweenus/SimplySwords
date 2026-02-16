@@ -5,6 +5,7 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectCategory;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.sweenus.simplyswords.effect.instance.SimplySwordsStatusEffectInstance;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -23,8 +24,8 @@ public class PainEffect extends StatusEffect {
     }
 
     @Override
-    public boolean applyUpdateEffect(LivingEntity livingEntity, int amplifier) {
-        if (!livingEntity.getWorld().isClient()) {
+    public boolean applyUpdateEffect(ServerWorld world, LivingEntity livingEntity, int amplifier) {
+        if (!livingEntity.getEntityWorld().isClient()) {
             int startingTickFrequency = 15;
 
             if (livingEntity.getStatusEffect(EffectRegistry.getReference(EffectRegistry.PAIN)) instanceof SimplySwordsStatusEffectInstance statusEffect) {
@@ -43,7 +44,7 @@ public class PainEffect extends StatusEffect {
                 livingEntity.timeUntilRegen = 0;
             }
         }
-        super.applyUpdateEffect(livingEntity, amplifier);
+        super.applyUpdateEffect(world, livingEntity, amplifier);
         return true;
     }
 

@@ -30,7 +30,7 @@ public class AttackHostileMobsGoal extends Goal {
 
     @Override
     public boolean canStart() {
-        if (!(entity.getWorld() instanceof ServerWorld serverWorld)) return false;
+        if (!(entity.getEntityWorld() instanceof ServerWorld serverWorld)) return false;
 
         // Find the nearest player within the playerCheckRange
         targetPlayer = serverWorld.getClosestPlayer(entity.getX(), entity.getY(), entity.getZ(), playerCheckRange, false);
@@ -58,6 +58,7 @@ public class AttackHostileMobsGoal extends Goal {
 
     @Override
     public void tick() {
+        if (!(entity.getEntityWorld() instanceof ServerWorld serverWorld)) return;
         if (targetMob != null) {
             // Navigate to the hostile mob
             entity.getNavigation().startMovingTo(targetMob.getX(), targetMob.getY(), targetMob.getZ(), speed);
@@ -67,11 +68,10 @@ public class AttackHostileMobsGoal extends Goal {
 
             // Attack the hostile mob
             if (entity.squaredDistanceTo(targetMob) <= 2.0 * 2.0 && targetMob.timeUntilRegen < 10) {
-                entity.tryAttack(targetMob);
+                entity.tryAttack(serverWorld, targetMob);
             }
         }
     }
 }
-
 
 
