@@ -6,7 +6,9 @@ import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.recipe.Ingredient;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.tag.TagKey;
+import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 
 import java.util.function.Supplier;
@@ -53,7 +55,7 @@ public enum ModToolMaterial implements ToolMaterial {
 
     @Override
     public TagKey<Block> getInverseTag() {
-        return null;
+        return TagKey.of(RegistryKeys.BLOCK, Identifier.of("simplyswords", "empty_inverse_tag"));
     }
 
     @Override
