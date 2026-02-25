@@ -15,7 +15,7 @@ public class OracleIndexUtils {
             if (identifier.getPath().contains("lichblade")) // Lichblade variants are contained within one wiki entry
                 identifier = Identifier.of("oracle_index:books/simplyswords/unique-weapons/lichblade.mdx");
 
-            OracleScreen.activeBook = modId;
+            OracleScreen.activeWiki = modId;
             OracleScreen.activeEntry = identifier;
             MinecraftClient.getInstance().setScreen(new OracleScreen());
         }

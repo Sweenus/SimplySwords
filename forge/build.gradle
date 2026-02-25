@@ -4,6 +4,7 @@ plugins {
 
 repositories {
     maven {url "https://cursemaven.com"}
+    maven { url = "https://jitpack.io" }
     maven { url "https://maven.blamejared.com" }
     maven { url "https://maven.shedaniel.me/" }
     maven {
@@ -63,6 +64,7 @@ dependencies {
     shadowCommon(project(path: ':common', configuration: 'transformProductionNeoForge')) { transitive false }
 
     modImplementation "me.fzzyhmstrs:fzzy_config:${project.fzz_config_version}+neoforge"
+    modRuntimeOnly "com.github.ZsoltMolnarrr:TinyConfig:2.3.2"
     //modImplementation ("curse.maven:gobber-301700:4007899")
     modImplementation "io.redspace:irons_spellbooks:${irons_spells_version}"
     modRuntimeOnly "me.shedaniel:RoughlyEnoughItems-neoforge:${rei_version}"

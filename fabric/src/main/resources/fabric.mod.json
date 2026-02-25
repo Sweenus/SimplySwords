@@ -46,7 +46,7 @@
   },
   "recommends": {
     "bettercombat": ">=1.7.2",
-    "oracle_index": ">=0.2.0"
+    "oracle_index": ">=1.0.0"
   },
   "custom": {
     "fzzy_config": [

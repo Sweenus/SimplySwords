@@ -66,6 +66,7 @@ dependencies {
     shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
 
     modImplementation "me.fzzyhmstrs:fzzy_config:${project.fzz_config_version}"
+    modRuntimeOnly "com.github.ZsoltMolnarrr:TinyConfig:2.3.2"
     modRuntimeOnly "me.shedaniel:RoughlyEnoughItems-fabric:${rei_version}"
     modLocalRuntime "dev.emi:emi-fabric:${emi_version}"
 
