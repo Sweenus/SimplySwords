@@ -131,7 +131,9 @@ public class SimplySwords {
             EntityRendererRegistry.register(EntityRegistry.SPEAR, ThrownSpearEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.THROWNRUNICENTITY, ThrownSwordEntityRenderer::new);
 
-
+            // Simply Tooltips bridge — renders all simplyswords sword items with the ST engine
+            net.sweenus.simplytooltips.api.TooltipProviderRegistry.register(
+                    new net.sweenus.simplyswords.client.tooltip.SimplySwordsTooltipProvider(), 100);
             }
     }
 

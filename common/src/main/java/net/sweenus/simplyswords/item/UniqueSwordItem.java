@@ -74,6 +74,9 @@ public abstract class UniqueSwordItem extends SwordItem {
         else return Text.translatable(this.getTranslationKey(stack)).setStyle(Styles.COMMON);
     }
 
+    /** Returns the rarity string for this item ({@code "UNIQUE"} or {@code "LEGENDARY"}). */
+    public String getItemRarity() { return iRarity; }
+
     @Override
     public void appendTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
         generateDynamicTooltip(itemStack, tooltipContext, tooltip, type);

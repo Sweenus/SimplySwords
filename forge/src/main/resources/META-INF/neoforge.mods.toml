@@ -47,3 +47,10 @@ mandatory = true
 versionRange = "[0.6.6,)"
 ordering = "AFTER"
 side = "BOTH"
+
+[[dependencies.simplyswords]]
+modId = "simplytooltips"
+mandatory = true
+versionRange = "[0.1,)"
+ordering = "NONE"
+side = "CLIENT"
