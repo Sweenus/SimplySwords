@@ -65,7 +65,7 @@ public class UnstablePower extends RunefusedGemPower {
 			tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.runefused_power.unstable").setStyle(Styles.RUNIC));
 
 		if (TooltipUtils.shouldDisplayTooltip(itemStack, null)) {
-			tooltip.add(Text.translatable("\u00A0\u00A0\u00A0").append(Text.translatable("item.simplyswords.unstablesworditem.tooltip2").setStyle(Styles.RUNIC_DESCRIPTION)));
+			tooltip.add(Text.translatable("").append(Text.translatable("item.simplyswords.unstablesworditem.tooltip2").setStyle(Styles.RUNIC_DESCRIPTION)));
 		}
 	}
 

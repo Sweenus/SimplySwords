@@ -44,7 +44,7 @@ public class WeakenPower extends RunefusedGemPower {
 			tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.runefused_power.weaken").setStyle(Styles.RUNIC));
 
 		if (TooltipUtils.shouldDisplayTooltip(itemStack, null)) {
-			tooltip.add(Text.literal("\u00A0\u00A0\u00A0").append(Text.translatable("item.simplyswords.weakensworditem.tooltip2").setStyle(Styles.RUNIC_DESCRIPTION)));
+			tooltip.add(Text.literal("").append(Text.translatable("item.simplyswords.weakensworditem.tooltip2").setStyle(Styles.RUNIC_DESCRIPTION)));
 		}
 	}
 

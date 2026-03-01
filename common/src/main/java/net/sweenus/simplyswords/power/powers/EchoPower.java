@@ -31,7 +31,7 @@ public class EchoPower extends NetherGemPower {
 		tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.echo").setStyle(Styles.NETHERFUSED));
 
 		if (TooltipUtils.shouldDisplayTooltip(itemStack, null)) {
-			tooltip.add(Text.literal("\u00A0\u00A0\u00A0").append(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.echo.description")).setStyle(Styles.NETHERFUSED_DESCRIPTION));
+			tooltip.add(Text.literal("").append(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.echo.description")).setStyle(Styles.NETHERFUSED_DESCRIPTION));
 		}
 	}
 }

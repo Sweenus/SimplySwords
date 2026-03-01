@@ -71,7 +71,7 @@ public class FrostWardPower extends RunefusedGemPower {
 			tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.runefused_power.frost_ward").setStyle(Styles.RUNIC));
 
 		if (TooltipUtils.shouldDisplayTooltip(itemStack, null)) {
-			tooltip.add(Text.literal("\u00A0\u00A0\u00A0").append(Text.translatable("item.simplyswords.frostwardsworditem.tooltip2")).setStyle(Styles.RUNIC_DESCRIPTION));
+			tooltip.add(Text.literal("").append(Text.translatable("item.simplyswords.frostwardsworditem.tooltip2")).setStyle(Styles.RUNIC_DESCRIPTION));
 		}
 	}
 

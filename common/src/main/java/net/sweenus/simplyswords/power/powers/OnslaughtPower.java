@@ -32,7 +32,7 @@ public class OnslaughtPower extends NetherGemPower {
 		tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.onslaught").setStyle(Styles.NETHERFUSED));
 
 		if (TooltipUtils.shouldDisplayTooltip(itemStack, null)) {
-			tooltip.add(Text.literal("\u00A0\u00A0\u00A0").append(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.onslaught.description")).setStyle(Styles.NETHERFUSED_DESCRIPTION));
+			tooltip.add(Text.literal("").append(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.onslaught.description")).setStyle(Styles.NETHERFUSED_DESCRIPTION));
 		}
 	}
 }
