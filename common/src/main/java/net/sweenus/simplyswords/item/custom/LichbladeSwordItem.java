@@ -201,20 +201,15 @@ public class LichbladeSwordItem extends UniqueSwordItem implements TwoHandedWeap
         else tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip1.3").setStyle(Styles.ABILITY));
 
         tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip2").setStyle(Styles.TEXT));
-        tooltip.add( Text.translatable("item.simplyswords.lichbladesworditem.tooltip3").setStyle(Styles.TEXT));
 
         if (!itemStack.isOf(ItemsRegistry.SLUMBERING_LICHBLADE.get())) {
             tooltip.add(Text.literal(""));
             tooltip.add(Text.translatable("item.simplyswords.onrightclickheld").setStyle(Styles.RIGHT_CLICK));
             tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip4").setStyle(Styles.TEXT));
-            tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip5").setStyle(Styles.TEXT));
-            tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip6").setStyle(Styles.TEXT));
 
             if (itemStack.isOf(ItemsRegistry.AWAKENED_LICHBLADE.get())) {
                 tooltip.add(Text.literal(""));
                 tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip7").setStyle(Styles.TEXT));
-                tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip8").setStyle(Styles.TEXT));
-                tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip9").setStyle(Styles.TEXT));
             }
         }
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);

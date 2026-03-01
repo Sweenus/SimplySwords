@@ -109,17 +109,11 @@ public class WickpiercerSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.wickpiercersworditem.tooltip2").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.waxweaversworditem.tooltip4").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.waxweaversworditem.tooltip5").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.waxweaversworditem.tooltip6").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.waxweaversworditem.tooltip7").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
-        tooltip.add(Text.translatable("item.simplyswords.waxweaversworditem.tooltip8").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.waxweaversworditem.tooltip9", Config.uniqueEffects.waxweaver.cooldown / 20).setStyle(Styles.TEXT));
+        tooltip.add(Text.translatable("item.simplyswords.waxweaversworditem.tooltip8", Config.uniqueEffects.waxweaver.cooldown / 20).setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.wickpiercersworditem.tooltip3").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.wickpiercersworditem.tooltip4").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.wickpiercersworditem.tooltip5").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.wickpiercersworditem.tooltip6", Config.uniqueEffects.wickpiercer.duration / 20).setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.wickpiercersworditem.tooltip7").setStyle(Styles.TEXT));

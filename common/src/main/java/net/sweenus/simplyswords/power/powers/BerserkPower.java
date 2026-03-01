@@ -33,8 +33,6 @@ public class BerserkPower extends NetherGemPower {
 
 		if (TooltipUtils.shouldDisplayTooltip(itemStack, null)) {
 			tooltip.add(Text.literal("\u00A0\u00A0\u00A0").append(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.berserk.description")).setStyle(Styles.NETHERFUSED_DESCRIPTION));
-			tooltip.add(Text.literal("\u00A0\u00A0\u00A0").append(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.berserk.description2")).setStyle(Styles.NETHERFUSED_DESCRIPTION));
-			tooltip.add(Text.literal("\u00A0\u00A0\u00A0").append(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.berserk.description3")).setStyle(Styles.NETHERFUSED_DESCRIPTION));
 		}
 	}
 }

@@ -96,24 +96,18 @@ public class ContainedRemnantItem extends Item {
 
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.contained_remnant_description").formatted(Formatting.GRAY));
-        tooltip.add(Text.translatable("item.simplyswords.contained_remnant_description2").formatted(Formatting.GRAY));
         if (this.equals(ItemsRegistry.TAMPERED_REMNANT.get())) {
             tooltip.add(Text.translatable("item.simplyswords.tampered_remnant_description3").formatted(Formatting.GRAY));
-            tooltip.add(Text.translatable("item.simplyswords.tampered_remnant_description4").formatted(Formatting.GRAY));
         } else {
             tooltip.add(Text.translatable("item.simplyswords.contained_remnant_description3").formatted(Formatting.GRAY));
-            tooltip.add(Text.translatable("item.simplyswords.contained_remnant_description4").formatted(Formatting.GRAY));
         }
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.contained_remnant_description5").formatted(Formatting.GRAY));
-        tooltip.add(Text.translatable("item.simplyswords.contained_remnant_description6").formatted(Formatting.GRAY));
         tooltip.add(Text.literal(""));
         generateDynamicTooltip(itemStack, tooltipContext, tooltip, type);
         if (this.asItem().equals(ItemsRegistry.CONTAINED_REMNANT.get())) {
             if (Screen.hasAltDown()) {
                 tooltip.add(Text.translatable("item.simplyswords.contained_remnant_description7").formatted(Formatting.GRAY));
-                tooltip.add(Text.translatable("item.simplyswords.contained_remnant_description8").formatted(Formatting.GRAY));
-                tooltip.add(Text.translatable("item.simplyswords.contained_remnant_description9").formatted(Formatting.GRAY));
             }
         }
     }

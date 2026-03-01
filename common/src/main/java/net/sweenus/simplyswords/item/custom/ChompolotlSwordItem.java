@@ -102,9 +102,6 @@ public class ChompolotlSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.chompolotlsworditem.tooltip2").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.chompolotlsworditem.tooltip3").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.chompolotlsworditem.tooltip4").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.chompolotlsworditem.tooltip5").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.chompolotlsworditem.tooltip6").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.chompolotlsworditem.tooltip7").setStyle(Styles.TEXT));

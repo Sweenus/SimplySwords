@@ -128,14 +128,9 @@ public class EnigmaSwordItem extends UniqueSwordItem {
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.enigmasworditem.tooltip1").setStyle(Styles.ABILITY));
         tooltip.add(Text.translatable("item.simplyswords.enigmasworditem.tooltip2").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.enigmasworditem.tooltip3").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.enigmasworditem.tooltip4").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.enigmasworditem.tooltip5").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.enigmasworditem.tooltip6").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.enigmasworditem.tooltip7").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.enigmasworditem.tooltip8").setStyle(Styles.TEXT));
 
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
     }

@@ -46,7 +46,6 @@ public class ImbuedPower extends RunefusedGemPower {
 
 		if (TooltipUtils.shouldDisplayTooltip(itemStack, null)) {
 			tooltip.add(Text.literal("\u00A0\u00A0\u00A0").append(Text.translatable("item.simplyswords.imbuedsworditem.tooltip2")).setStyle(Styles.RUNIC_DESCRIPTION));
-			tooltip.add(Text.literal("\u00A0\u00A0\u00A0").append(Text.translatable("item.simplyswords.imbuedsworditem.tooltip3")).setStyle(Styles.RUNIC_DESCRIPTION));
 		}
 	}
 

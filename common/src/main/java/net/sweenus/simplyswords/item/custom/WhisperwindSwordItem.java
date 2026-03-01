@@ -73,10 +73,6 @@ public class WhisperwindSwordItem extends UniqueSwordItem implements TwoHandedWe
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.whisperwindsworditem.tooltip3").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.whisperwindsworditem.tooltip4").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.whisperwindsworditem.tooltip5").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.whisperwindsworditem.tooltip6").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.whisperwindsworditem.tooltip7").setStyle(Styles.TEXT));
 
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
     }

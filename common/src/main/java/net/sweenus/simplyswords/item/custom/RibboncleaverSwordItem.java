@@ -115,16 +115,9 @@ public class RibboncleaverSwordItem extends UniqueSwordItem {
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.ribboncleaversworditem.tooltip1").setStyle(Styles.ABILITY));
         tooltip.add(Text.translatable("item.simplyswords.ribboncleaversworditem.tooltip2").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.ribboncleaversworditem.tooltip3").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.ribboncleaversworditem.tooltip4").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.ribboncleaversworditem.tooltip5").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.ribboncleaversworditem.tooltip6").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.ribboncleaversworditem.tooltip7").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.ribboncleaversworditem.tooltip8").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.ribboncleaversworditem.tooltip9").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.ribboncleaversworditem.tooltip10").setStyle(Styles.TEXT));
 
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
     }

@@ -44,7 +44,6 @@ public class SwiftnessPower extends RunefusedGemPower {
 
 		if (TooltipUtils.shouldDisplayTooltip(itemStack, null)) {
 			tooltip.add(Text.literal("\u00A0\u00A0\u00A0").append(Text.translatable("item.simplyswords.speedsworditem.tooltip2")).setStyle(Styles.RUNIC_DESCRIPTION));
-			tooltip.add(Text.literal("\u00A0\u00A0\u00A0").append(Text.translatable("item.simplyswords.speedsworditem.tooltip3")).setStyle(Styles.RUNIC_DESCRIPTION));
 		}
 	}
 

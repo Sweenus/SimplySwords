@@ -93,17 +93,11 @@ public class HiveheartSwordItem extends UniqueSwordItem {
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.hiveheartsworditem.tooltip1").setStyle(Styles.ABILITY));
         tooltip.add(Text.translatable("item.simplyswords.hiveheartsworditem.tooltip2").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.hiveheartsworditem.tooltip3").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.hiveheartsworditem.tooltip4").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
-        tooltip.add(Text.translatable("item.simplyswords.hiveheartsworditem.tooltip5").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.hiveheartsworditem.tooltip6", Config.uniqueEffects.hiveheart.cooldown / 20).setStyle(Styles.TEXT));
+        tooltip.add(Text.translatable("item.simplyswords.hiveheartsworditem.tooltip5", Config.uniqueEffects.hiveheart.cooldown / 20).setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.hiveheartsworditem.tooltip7").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.hiveheartsworditem.tooltip8").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.hiveheartsworditem.tooltip9").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.hiveheartsworditem.tooltip10").setStyle(Styles.TEXT));
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
     }
 

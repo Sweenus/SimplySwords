@@ -74,19 +74,11 @@ public class CaelestisSwordItem extends UniqueSwordItem {
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.caelestissworditem.tooltip1").setStyle(Styles.ABILITY));
         tooltip.add(Text.translatable("item.simplyswords.caelestissworditem.tooltip2").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.caelestissworditem.tooltip3").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.caelestissworditem.tooltip4").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
-        tooltip.add(Text.translatable("item.simplyswords.caelestissworditem.tooltip5").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.caelestissworditem.tooltip6").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.caelestissworditem.tooltip7", Config.uniqueEffects.caelestis.duration / 20).setStyle(Styles.TEXT));
+        tooltip.add(Text.translatable("item.simplyswords.caelestissworditem.tooltip5", Config.uniqueEffects.caelestis.duration / 20).setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.caelestissworditem.tooltip8").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.caelestissworditem.tooltip9").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.caelestissworditem.tooltip10").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.caelestissworditem.tooltip11").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.caelestissworditem.tooltip12").setStyle(Styles.TEXT));
 
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
     }

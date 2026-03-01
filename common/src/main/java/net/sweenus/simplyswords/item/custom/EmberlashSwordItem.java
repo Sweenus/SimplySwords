@@ -91,13 +91,10 @@ public class EmberlashSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.emberlashsworditem.tooltip1").setStyle(Styles.ABILITY));
         tooltip.add(Text.translatable("item.simplyswords.emberlashsworditem.tooltip2").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
-        tooltip.add(Text.translatable("item.simplyswords.emberlashsworditem.tooltip3").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.emberlashsworditem.tooltip4").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.emberlashsworditem.tooltip5", tooltipEffectDamage).setStyle(Styles.TEXT));
+        tooltip.add(Text.translatable("item.simplyswords.emberlashsworditem.tooltip3", tooltipEffectDamage).setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
-        tooltip.add(Text.translatable("item.simplyswords.emberlashsworditem.tooltip6").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.emberlashsworditem.tooltip7", Config.uniqueEffects.emberlash.heal).setStyle(Styles.TEXT));
+        tooltip.add(Text.translatable("item.simplyswords.emberlashsworditem.tooltip6", Config.uniqueEffects.emberlash.heal).setStyle(Styles.TEXT));
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
         TooltipUtils.appendSpellScaleTooltip(tooltip, "fire");
     }

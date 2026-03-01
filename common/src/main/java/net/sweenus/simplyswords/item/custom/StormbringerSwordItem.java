@@ -149,17 +149,10 @@ public class StormbringerSwordItem extends UniqueSwordItem {
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.onrightclickheld").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.stormbringersworditem.tooltip2").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.stormbringersworditem.tooltip3").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.stormbringersworditem.tooltip4").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.stormbringersworditem.tooltip5").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.stormbringersworditem.tooltip6").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.stormbringersworditem.tooltip7").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.stormbringersworditem.tooltip8").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.stormbringersworditem.tooltip9").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.stormbringersworditem.tooltip10").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.stormbringersworditem.tooltip11").setStyle(Styles.TEXT));
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
         TooltipUtils.appendSpellScaleTooltip(tooltip, "lightning");
     }

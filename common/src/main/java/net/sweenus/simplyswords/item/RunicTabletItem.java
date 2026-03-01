@@ -31,7 +31,6 @@ public class RunicTabletItem extends Item {
         tooltip.add(Text.translatable("item.simplyswords.runic_tablet.tooltip2").formatted(Formatting.GRAY, Formatting.ITALIC));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.runic_tablet.tooltip3").formatted(Formatting.GRAY, Formatting.ITALIC));
-        tooltip.add(Text.translatable("item.simplyswords.runic_tablet.tooltip4").formatted(Formatting.GRAY, Formatting.ITALIC));
 
     }
 }

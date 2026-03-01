@@ -58,8 +58,6 @@ public class DormantRelicSwordItem extends UniqueSwordItem {
         if (this.asItem().equals(ItemsRegistry.DECAYING_RELIC.get())) {
             if (Screen.hasAltDown()) {
                 tooltip.add(Text.translatable("item.simplyswords.decayingrelicsworditem.tooltip1").formatted(Formatting.GRAY));
-                tooltip.add(Text.translatable("item.simplyswords.decayingrelicsworditem.tooltip2").formatted(Formatting.GRAY));
-                tooltip.add(Text.translatable("item.simplyswords.decayingrelicsworditem.tooltip3").formatted(Formatting.GRAY));
             }
         }
     }

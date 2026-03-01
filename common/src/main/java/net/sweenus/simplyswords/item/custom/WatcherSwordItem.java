@@ -92,13 +92,10 @@ public class WatcherSwordItem extends UniqueSwordItem {
     public void appendTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.watchersworditem.tooltip1").setStyle(Styles.ABILITY));
-        tooltip.add(Text.translatable("item.simplyswords.watchersworditem.tooltip2").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.watchersworditem.tooltip3", (Config.uniqueEffects.watcher.omenInstantKillThreshold * 100)).setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.watchersworditem.tooltip4").setStyle(Styles.TEXT));
+        tooltip.add(Text.translatable("item.simplyswords.watchersworditem.tooltip2", (Config.uniqueEffects.watcher.omenInstantKillThreshold * 100)).setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.watchersworditem.tooltip5").setStyle(Styles.ABILITY));
         tooltip.add(Text.translatable("item.simplyswords.watchersworditem.tooltip6").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.watchersworditem.tooltip7").setStyle(Styles.TEXT));
 
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
     }

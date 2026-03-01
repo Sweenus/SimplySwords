@@ -87,18 +87,9 @@ public class MagiscytheSwordItem extends UniqueSwordItem {
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.magiscythesworditem.tooltip1").setStyle(Styles.ABILITY));
         tooltip.add(Text.translatable("item.simplyswords.magiscythesworditem.tooltip2").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.magiscythesworditem.tooltip3").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.magiscythesworditem.tooltip4").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.magiscythesworditem.tooltip5").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.magiscythesworditem.tooltip6").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.magiscythesworditem.tooltip7").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.magiscythesworditem.tooltip8").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.magiscythesworditem.tooltip9").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.magiscythesworditem.tooltip10").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.magiscythesworditem.tooltip11").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.magiscythesworditem.tooltip12").setStyle(Styles.TEXT));
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
         TooltipUtils.appendSpellScaleTooltip(tooltip, "arcane");
     }

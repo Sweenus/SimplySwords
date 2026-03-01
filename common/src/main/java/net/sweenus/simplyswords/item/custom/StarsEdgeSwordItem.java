@@ -105,8 +105,7 @@ public class StarsEdgeSwordItem extends UniqueSwordItem {
 
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.starsedgesworditem.tooltip1").setStyle(Styles.ABILITY));
-        tooltip.add(Text.translatable("item.simplyswords.starsedgesworditem.tooltip2").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.starsedgesworditem.tooltip3", skillDamageModifier).setStyle(Styles.TEXT));
+        tooltip.add(Text.translatable("item.simplyswords.starsedgesworditem.tooltip2", skillDamageModifier).setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.starsedgesworditem.tooltip4").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
@@ -114,8 +113,6 @@ public class StarsEdgeSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.starsedgesworditem.tooltip5").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.starsedgesworditem.tooltip6").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.starsedgesworditem.tooltip7").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.starsedgesworditem.tooltip8").setStyle(Styles.TEXT));
 
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
     }

@@ -130,21 +130,13 @@ public class DreadtideSwordItem extends UniqueSwordItem {
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.dreadtidesworditem.tooltip1").setStyle(Styles.CORRUPTED_ABILITY));
         tooltip.add(Text.translatable("item.simplyswords.dreadtidesworditem.tooltip2").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.dreadtidesworditem.tooltip3").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.dreadtidesworditem.tooltip4").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.dreadtidesworditem.tooltip5").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.dreadtidesworditem.tooltip6").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.dreadtidesworditem.tooltip7").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(ability_icon.append(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.CORRUPTED_LIGHT)));
         tooltip.add(Text.translatable("item.simplyswords.dreadtidesworditem.tooltip8").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.dreadtidesworditem.tooltip9").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.dreadtidesworditem.tooltip10").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.dreadtidesworditem.tooltip11").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.literal("\uA999 ").append(Text.translatable("item.simplyswords.dreadtidesworditem.tooltip12").setStyle(Styles.CORRUPTED)));
-        tooltip.add(Text.translatable("item.simplyswords.dreadtidesworditem.tooltip13").setStyle(Styles.CORRUPTED));
 
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
     }
