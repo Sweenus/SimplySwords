@@ -8,7 +8,9 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
+import net.minecraft.text.TextColor;
 import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.SimplySwordsExpectPlatform;
@@ -51,6 +53,18 @@ public class TooltipUtils {
     public static void addDynamicButtonTooltip(List<Text> tooltip, Text info, Text search, Text config, boolean isAlt, boolean isCtrl) {
         boolean isAltAndCtrl = isAlt && isCtrl; // Check if both Alt and Ctrl are being held
 
+        // Initialize the hold timer on the first frame Ctrl is pressed
+        TextColor searchColor;
+        if (isCtrl && !isAlt) {
+            if (ctrlKeyPressTimestamp == 0) {
+                ctrlKeyPressTimestamp = System.currentTimeMillis();
+            }
+            float progress = Math.min(1.0f, (System.currentTimeMillis() - ctrlKeyPressTimestamp) / 1200.0f);
+            searchColor = TextColor.fromRgb(lerpColor(0xFFFFFF, 0xE2A834, progress));
+        } else {
+            searchColor = isAltAndCtrl ? Styles.COMMON.getColor() : Styles.COMMON.getColor();
+        }
+
         tooltip.add(
                 Text.literal("")
                         .append(
@@ -65,11 +79,7 @@ public class TooltipUtils {
                         .append("\u00A0") // Spacer
                         .append(
                                 search.copy().setStyle(
-                                        search.getStyle().withColor(
-                                                isAltAndCtrl ? Styles.COMMON.getColor() : // Both Alt and Ctrl held
-                                                        isCtrl ? Styles.UNIQUE.getColor() : // Only Ctrl held
-                                                                Styles.COMMON.getColor() // Default styling
-                                        )
+                                        Style.EMPTY.withColor(searchColor)
                                 )
                         )
                         .append("\u00A0") // Spacer
@@ -82,6 +92,14 @@ public class TooltipUtils {
                                 )
                         )
         );
+    }
+
+    /** Linear interpolation between two packed RGB colours. */
+    private static int lerpColor(int from, int to, float t) {
+        int r = (int) (((from >> 16) & 0xFF) + t * (((to >> 16) & 0xFF) - ((from >> 16) & 0xFF)));
+        int g = (int) (((from >>  8) & 0xFF) + t * (((to >>  8) & 0xFF) - ((from >>  8) & 0xFF)));
+        int b = (int) ((from         & 0xFF) + t * ((to         & 0xFF) - (from         & 0xFF)));
+        return (r << 16) | (g << 8) | b;
     }
 
 
@@ -179,9 +197,8 @@ public class TooltipUtils {
     public static void processCtrlAltNavigation(Identifier entry, String modId, Identifier customConfigPath, ItemStack itemStack, List<Text> tooltip) {
         String customPath;
         if (Screen.hasControlDown()) {
-            if (ctrlKeyPressTimestamp == 0) {
-                ctrlKeyPressTimestamp = System.currentTimeMillis();
-            }
+            // Note: ctrlKeyPressTimestamp is initialised in addDynamicButtonTooltip(),
+            // which is called earlier in the same tooltip-render frame.
 
             // Show error message in tooltip if no info mods installed
             if (!Platform.isModLoaded("oracle_index") && !Platform.isModLoaded("roughlyenoughitems") && !Platform.isModLoaded("emi")) {
@@ -198,13 +215,18 @@ public class TooltipUtils {
                         customPath = customConfigPath.getPath().replace(modId+":", "");
                         TooltipUtils.openFzzyConfig(customPath);
                     }
+                    ctrlKeyPressTimestamp = 0;
+                } else if (Platform.isModLoaded("oracle_index")) {
+                    // Do NOT reset ctrlKeyPressTimestamp here — the gradient must continue
+                    // running from 500 ms up to 1 200 ms so the icon finishes filling.
+                    // OracleIndexUtils guards against re-setting pendingSetTime on repeat calls.
+                    OracleIndexUtils.openOracleIndex(entry, modId);
                 } else {
-                    // Open documentation depending on installed info mods
-                    if (Platform.isModLoaded("oracle_index")) OracleIndexUtils.openOracleIndex(entry, modId);
-                    else if (Platform.isModLoaded("roughlyenoughitems")) ReiUtils.openRei(entry, modId, itemStack);
+                    // REI / EMI open instantly, so the gradient can stop immediately.
+                    if (Platform.isModLoaded("roughlyenoughitems")) ReiUtils.openRei(entry, modId, itemStack);
                     else if (Platform.isModLoaded("emi")) EmiUtils.openEmi(entry, modId, itemStack);
+                    ctrlKeyPressTimestamp = 0;
                 }
-                ctrlKeyPressTimestamp = 0;
             }
         } else {
             ctrlKeyPressTimestamp = 0;

@@ -1,14 +1,20 @@
 package net.sweenus.simplyswords.fabric.client;
 
+import dev.architectury.platform.Platform;
 import dev.architectury.registry.client.particle.ParticleProviderRegistry;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
 import net.sweenus.simplyswords.client.particle.CustomBubbleParticle;
+import net.sweenus.simplyswords.client.util.OracleIndexUtils;
 import net.sweenus.simplyswords.registry.ParticlesRegistry;
 
 public class SimplySwordsClientFabric implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
+
+        if (Platform.isModLoaded("oracle_index")) {
+            OracleIndexUtils.init();
+        }
 
         // Particle Factory must be registered on both loaders, not just in Common
         ParticleProviderRegistry.register(

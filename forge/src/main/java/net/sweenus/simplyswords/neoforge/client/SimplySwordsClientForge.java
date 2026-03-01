@@ -1,16 +1,26 @@
 package net.sweenus.simplyswords.neoforge.client;
 
+import dev.architectury.platform.Platform;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
 import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.client.particle.CustomBubbleParticle;
+import net.sweenus.simplyswords.client.util.OracleIndexUtils;
 import net.sweenus.simplyswords.registry.ParticlesRegistry;
 
 
 @EventBusSubscriber(modid = SimplySwords.MOD_ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class SimplySwordsClientForge {
+
+    @SubscribeEvent
+    public static void onClientSetup(FMLClientSetupEvent event) {
+        if (Platform.isModLoaded("oracle_index")) {
+            OracleIndexUtils.init();
+        }
+    }
 
     // Particle Factory must be registered on both loaders, not just in Common
     @SubscribeEvent
