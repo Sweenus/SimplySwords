@@ -17,7 +17,7 @@ credits="Konsyliarz42 (Art), KreloX (Contributor), Fzzyhmstrs (Contributor), Ros
 description = '''
 A variety of unique weapons to add to your minecraft repertoire
 '''
-logoFile = "SimplySwordsLogoFinal2.gif"
+logoFile = "icon.png"
 modProperties={fzzy_config="simplyswords:loot"}
 
 [[dependencies.simplyswords]]
