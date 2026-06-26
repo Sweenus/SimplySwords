@@ -37,7 +37,6 @@ public class ThrownSwordEntity extends PersistentProjectileEntity {
     private static final TrackedData<ItemStack> ITEM_STACK;
     public ItemStack stack;
     public int returnTimer;
-    public PickupPermission pickupType;
     public boolean hasYaw = false;
     public float keepYaw;
     public float keepPitch = 0;
@@ -64,6 +63,9 @@ public class ThrownSwordEntity extends PersistentProjectileEntity {
         this.dataTracker.set(ENCHANTED, stack.hasEnchantments());
         this.dataTracker.set(ITEM_STACK, stack);
 
+        this.pickupType = owner.isInCreativeMode() ?
+                PickupPermission.CREATIVE_ONLY :
+                PickupPermission.ALLOWED;
     }
 
     @Override
@@ -86,6 +88,9 @@ public class ThrownSwordEntity extends PersistentProjectileEntity {
             float cooldown = player.getItemCooldownManager().getCooldownProgress(this.asItemStack().getItem(), 0);
             if (cooldown == 0 && offhandThrow) cooldown = 4;
             player.getItemCooldownManager().set(this.asItemStack().getItem(), (int) cooldown);
+
+            if (this.pickupType != PickupPermission.ALLOWED) return true;
+
             if (offhandThrow && player.getOffHandStack().isEmpty()) {
                 // Send the ItemStack to the player's offhand slot if it's free
                 player.setStackInHand(Hand.OFF_HAND, this.asItemStack());

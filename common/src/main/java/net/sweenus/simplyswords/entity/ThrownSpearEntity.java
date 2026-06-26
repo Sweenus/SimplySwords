@@ -36,7 +36,6 @@ public class ThrownSpearEntity extends PersistentProjectileEntity {
     private static final TrackedData<ItemStack> ITEM_STACK;
     public ItemStack stack;
     public int returnTimer;
-    public PickupPermission pickupType;
     public boolean hasYaw = false;
     private Float initialYaw = null; // Store the initial yaw
     public float keepYaw;
@@ -65,6 +64,11 @@ public class ThrownSpearEntity extends PersistentProjectileEntity {
         this.dataTracker.set(LOYALTY, getLoyalty());
         this.dataTracker.set(ENCHANTED, stack.hasEnchantments());
         this.dataTracker.set(ITEM_STACK, stack);
+
+        this.pickupType = owner.isInCreativeMode() ?
+                PickupPermission.CREATIVE_ONLY :
+                PickupPermission.ALLOWED;
+
         this.stack = stack;
     }
 
@@ -84,11 +88,13 @@ public class ThrownSpearEntity extends PersistentProjectileEntity {
     protected boolean tryPickup(PlayerEntity player) {
         if (!this.isOwner(player)) return false;
 
-
         if (this.isNoClip()) {
             int cooldown = 1;
             if (offhandThrow) cooldown = 4;
             player.getItemCooldownManager().set(this.asItemStack().getItem(), cooldown);
+
+            if (this.pickupType != PickupPermission.ALLOWED) return true;
+
             if (offhandThrow && player.getOffHandStack().isEmpty()) {
                 // Send the ItemStack to the player's offhand slot if it's free
                 player.setStackInHand(Hand.OFF_HAND, this.asItemStack());

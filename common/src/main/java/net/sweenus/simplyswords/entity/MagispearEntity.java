@@ -5,7 +5,6 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.Hand;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
@@ -31,19 +30,15 @@ public class MagispearEntity extends ThrownSpearEntity {
 
     @Override
     protected boolean tryPickup(PlayerEntity player) {
-        if (this.isNoClip() && this.isOwner(player)) {
+        boolean canPickup = super.tryPickup(player);
+
+        if (canPickup) {
             int cooldown = Config.uniqueEffects.magispear.cooldown;
             if (offhandThrow) cooldown = Config.uniqueEffects.magispear.cooldown + 4;
             player.getItemCooldownManager().set(this.asItemStack().getItem(), cooldown);
-            if (offhandThrow && player.getOffHandStack().isEmpty()) {
-                // Send the ItemStack to the player's offhand slot if it's free
-                player.setStackInHand(Hand.OFF_HAND, this.asItemStack());
-                return true;
-            } else {
-                return player.getInventory().insertStack(this.asItemStack());
-            }
         }
-        return super.tryPickup(player);
+
+        return canPickup;
     }
 
     @Override
