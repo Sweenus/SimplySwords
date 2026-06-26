@@ -82,7 +82,10 @@ public class ThrownSpearEntity extends PersistentProjectileEntity {
     }
 
     protected boolean tryPickup(PlayerEntity player) {
-        if (this.isNoClip() && this.isOwner(player)) {
+        if (!this.isOwner(player)) return false;
+
+
+        if (this.isNoClip()) {
             int cooldown = 1;
             if (offhandThrow) cooldown = 4;
             player.getItemCooldownManager().set(this.asItemStack().getItem(), cooldown);

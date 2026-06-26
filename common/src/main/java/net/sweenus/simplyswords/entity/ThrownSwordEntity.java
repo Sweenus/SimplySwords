@@ -80,7 +80,9 @@ public class ThrownSwordEntity extends PersistentProjectileEntity {
     }
 
     protected boolean tryPickup(PlayerEntity player) {
-        if (this.isNoClip() && this.isOwner(player)) {
+        if (!this.isOwner(player)) return false;
+
+        if (this.isNoClip()) {
             float cooldown = player.getItemCooldownManager().getCooldownProgress(this.asItemStack().getItem(), 0);
             if (cooldown == 0 && offhandThrow) cooldown = 4;
             player.getItemCooldownManager().set(this.asItemStack().getItem(), (int) cooldown);
