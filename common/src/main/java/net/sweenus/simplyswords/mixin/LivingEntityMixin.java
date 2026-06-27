@@ -33,8 +33,6 @@ import static net.sweenus.simplyswords.SimplySwords.minimumEldritchEndVersion;
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin {
 
-    @Shadow public abstract void setHealth(float health);
-
     @Inject(at = @At("HEAD"), method = "tryUseTotem", cancellable = true)
     public void simplyswords$tryRevive(DamageSource source, CallbackInfoReturnable<Boolean> cir) {
         LivingEntity livingEntity = (LivingEntity) (Object) this;
@@ -42,7 +40,7 @@ public abstract class LivingEntityMixin {
             ItemStack mainhand = player.getStackInHand(Hand.MAIN_HAND);
             if (mainhand.getItem() instanceof RevivalWeapon revivalWeapon) {
                 if(revivalWeapon.canRevive(player, mainhand, source)) {
-                    setHealth(revivalWeapon.getReviveHealth(player, mainhand, source));
+                    player.setHealth(revivalWeapon.getReviveHealth(player, mainhand, source));
                     revivalWeapon.postRevive(player, mainhand, source);
                     cir.setReturnValue(true);
                 }
