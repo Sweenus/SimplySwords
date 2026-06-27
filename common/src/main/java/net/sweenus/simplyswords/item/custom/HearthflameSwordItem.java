@@ -23,7 +23,7 @@ import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
-import net.sweenus.simplyswords.item.TwoHandedWeapon;
+import net.sweenus.simplyswords.item.interfaces.TwoHandedWeapon;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.item.component.StoredChargeComponent;
 import net.sweenus.simplyswords.registry.ComponentTypeRegistry;
