@@ -30,6 +30,7 @@ import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
+import net.sweenus.simplyswords.world.SoulrenderMarkVisualManager;
 
 import java.util.List;
 
@@ -83,6 +84,8 @@ public class SoulrenderSwordItem extends UniqueSwordItem implements TwoHandedWea
                 } else {
                     target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, duration, 0), attacker);
                 }
+
+                SoulrenderMarkVisualManager.refreshMark(world, target, duration);
             }
             HelperMethods.spawnWaistHeightParticles(world, particleSelect, attacker, target, particleCount);
         }
@@ -109,6 +112,7 @@ public class SoulrenderSwordItem extends UniqueSwordItem implements TwoHandedWea
                     healamp += (le.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier());
                     float scaling = HelperMethods.commonSpellAttributeScaling(Config.uniqueEffects.soulrender.spellScaling, entity, "soul");
                     float multiplier = scaling > 0f ? scaling : Config.uniqueEffects.soulrender.damageMulti;
+                    SoulrenderMarkVisualManager.consumeMark(sworld, le, user);
                     le.damage(user.getDamageSources().indirectMagic(user, user), le.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier() * multiplier);
                     le.removeStatusEffect(StatusEffects.WEAKNESS);
                     le.removeStatusEffect(StatusEffects.SLOWNESS);

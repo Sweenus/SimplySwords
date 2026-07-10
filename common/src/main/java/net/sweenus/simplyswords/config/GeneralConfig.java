@@ -24,6 +24,7 @@ public class GeneralConfig extends Config {
     public float weaponImpactSoundsVolume = 0.3f;
     public boolean enableWeaponFootfalls = true;
     public boolean enablePassiveParticles = true;
+    public boolean enableModernFieldEffects = true;
     public boolean enableUniqueGemSockets = true;
     public boolean enableTooltipInfoButtons = true;
     public boolean tooltipInfoButtonsRequireInventoryScreen = true;

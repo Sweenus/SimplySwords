@@ -72,6 +72,23 @@ public class EntityRegistry {
                     .build(Identifier.of(SimplySwords.MOD_ID, "runic_entity").toString())
     );
 
+    public static final RegistrySupplier<EntityType<FrostfallIceSpikeVisualEntity>> FROSTFALL_ICE_SPIKE_VISUAL = ENTITIES.register(
+            "frostfall_ice_spike_visual",
+            () -> EntityType.Builder.<FrostfallIceSpikeVisualEntity>create(FrostfallIceSpikeVisualEntity::new, SpawnGroup.MISC)
+                    .dimensions(0.35f, 1.0f)
+                    .maxTrackingRange(64)
+                    .trackingTickInterval(1)
+                    .build(Identifier.of(SimplySwords.MOD_ID, "frostfall_ice_spike_visual").toString())
+    );
+
+    public static final RegistrySupplier<EntityType<SoulrenderMarkVisualEntity>> SOULRENDER_MARK_VISUAL = ENTITIES.register(
+            "soulrender_mark_visual",
+            () -> EntityType.Builder.<SoulrenderMarkVisualEntity>create(SoulrenderMarkVisualEntity::new, SpawnGroup.MISC)
+                    .dimensions(0.35f, 0.35f)
+                    .maxTrackingRange(64)
+                    .trackingTickInterval(1)
+                    .build(Identifier.of(SimplySwords.MOD_ID, "soulrender_mark_visual").toString())
+    );
 
 
 }

@@ -15,6 +15,7 @@ import net.minecraft.world.World;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
+import net.sweenus.simplyswords.world.FrostfallIceSpikeFieldManager;
 
 public class FrostfallEntity extends ThrownSwordEntity {
     private int remainingDetonations = 5;
@@ -97,6 +98,7 @@ public class FrostfallEntity extends ThrownSwordEntity {
                     HelperMethods.spawnOrbitParticles(world, this.getPos(), ParticleTypes.CRIT, 6f - detonateCount, 15 - detonateCount);
                     HelperMethods.spawnOrbitParticles(world, this.getPos(), ParticleTypes.ITEM_SNOWBALL, 6f - detonateCount, 10 - detonateCount);
                     HelperMethods.spawnOrbitParticles(world, this.getPos().add(0, 1, 0), ParticleTypes.WHITE_ASH, 6f - detonateCount, 40 - detonateCount);
+                    FrostfallIceSpikeFieldManager.createPulse(world, this.getPos(), detonateRadius - detonateCount, detonateCount);
 
                     if (random.nextInt(100) > chance)
                         remainingDetonations--;

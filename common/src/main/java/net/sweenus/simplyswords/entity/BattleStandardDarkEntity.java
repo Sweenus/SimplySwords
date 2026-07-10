@@ -8,6 +8,9 @@ import net.minecraft.entity.SpawnGroup;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.data.DataTracker;
+import net.minecraft.entity.data.TrackedData;
+import net.minecraft.entity.data.TrackedDataHandlerRegistry;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.mob.MobEntity;
@@ -30,6 +33,7 @@ import java.util.function.Supplier;
 public class BattleStandardDarkEntity extends PathAwareEntity {
     public static final Supplier<EntityType<BattleStandardDarkEntity>> TYPE = Suppliers.memoize(() ->
             EntityType.Builder.create(BattleStandardDarkEntity::new, SpawnGroup.MISC).build("battlestandarddark"));
+    private static final TrackedData<String> TRACKED_STANDARD_TYPE = DataTracker.registerData(BattleStandardDarkEntity.class, TrackedDataHandlerRegistry.STRING);
     public PlayerEntity ownerEntity;
     public String standardType;
     public int decayRate;
@@ -43,6 +47,17 @@ public class BattleStandardDarkEntity extends PathAwareEntity {
     public BattleStandardDarkEntity(EntityType<? extends PathAwareEntity> entityType, World world) {
         super(entityType, world);
         setInvisible(true);
+    }
+
+    @Override
+    protected void initDataTracker(DataTracker.Builder builder) {
+        super.initDataTracker(builder);
+        builder.add(TRACKED_STANDARD_TYPE, "");
+    }
+
+    public String getStandardType() {
+        String trackedType = this.dataTracker.get(TRACKED_STANDARD_TYPE);
+        return trackedType == null || trackedType.isBlank() ? this.standardType : trackedType;
     }
 
     @Override
@@ -63,6 +78,9 @@ public class BattleStandardDarkEntity extends PathAwareEntity {
     @Override
     public void baseTick() {
         if (!this.getWorld().isClient()) {
+            if (this.standardType != null && !this.standardType.equals(this.dataTracker.get(TRACKED_STANDARD_TYPE))) {
+                this.dataTracker.set(TRACKED_STANDARD_TYPE, this.standardType);
+            }
             if (this.age % 10 == 0) {
                 this.setHealth(this.getHealth() - decayRate);
                 if (ownerEntity == null)

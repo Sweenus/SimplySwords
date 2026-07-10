@@ -962,6 +962,8 @@
   "simplyswords.general.weaponImpactSoundsVolume": "Weapon impact sounds volume",
   "simplyswords.general.enableWeaponFootfalls": "Enable weapon footfalls",
   "simplyswords.general.enablePassiveParticles": "Enable passive particles",
+  "simplyswords.general.enableModernFieldEffects": "Enable modern field effects",
+  "simplyswords.general.enableModernFieldEffects.desc": "Enables newer field visuals - disabling these may improve performance.",
   "simplyswords.general.enableUniqueGemSockets": "Enable Unique gem sockets",
   "simplyswords.general.enableUniqueGemSockets.desc": "If disabled, gem slots will no longer appear on freshly generated Unique weapons. Not retroactive.",
   "simplyswords.general.enableTooltipInfoButtons": "Enable Tooltip Info Buttons",

@@ -21,6 +21,8 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.client.renderer.BattleStandardDarkRenderer;
 import net.sweenus.simplyswords.client.renderer.BattleStandardRenderer;
+import net.sweenus.simplyswords.client.renderer.FrostfallIceSpikeVisualEntityRenderer;
+import net.sweenus.simplyswords.client.renderer.SoulrenderMarkVisualEntityRenderer;
 import net.sweenus.simplyswords.client.renderer.ThrownSpearEntityRenderer;
 import net.sweenus.simplyswords.client.renderer.ThrownSwordEntityRenderer;
 import net.sweenus.simplyswords.client.renderer.model.BattleStandardDarkModel;
@@ -130,6 +132,8 @@ public class SimplySwords {
             EntityRendererRegistry.register(EntityRegistry.LIVYATANENTITY, ThrownSwordEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.SPEAR, ThrownSpearEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.THROWNRUNICENTITY, ThrownSwordEntityRenderer::new);
+            EntityRendererRegistry.register(EntityRegistry.FROSTFALL_ICE_SPIKE_VISUAL, FrostfallIceSpikeVisualEntityRenderer::new);
+            EntityRendererRegistry.register(EntityRegistry.SOULRENDER_MARK_VISUAL, SoulrenderMarkVisualEntityRenderer::new);
 
             // Simply Tooltips bridge — renders all simplyswords sword items with the ST engine
             net.sweenus.simplytooltips.api.TooltipProviderRegistry.register(

@@ -11,7 +11,8 @@
     "LivingEntityMixin",
     "ServerPlayerEntityMixin",
     "PlayerEntityMixin",
-    "AnimalEntityMixin"
+    "AnimalEntityMixin",
+    "ServerWorldMixin"
   ],
   "injectors": {
     "defaultRequire": 1
