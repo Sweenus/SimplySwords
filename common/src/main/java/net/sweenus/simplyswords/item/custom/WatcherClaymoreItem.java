@@ -1,7 +1,7 @@
 package net.sweenus.simplyswords.item.custom;
 
 import net.minecraft.item.ToolMaterial;
-import net.sweenus.simplyswords.item.TwoHandedWeapon;
+import net.sweenus.simplyswords.item.interfaces.TwoHandedWeapon;
 
 public class WatcherClaymoreItem extends WatcherSwordItem  implements TwoHandedWeapon {
 

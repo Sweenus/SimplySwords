@@ -8,16 +8,20 @@ import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.tag.DamageTypeTags;
+import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.compat.eldritch_end.EldritchEndCompatMethods;
 import net.sweenus.simplyswords.config.Config;
+import net.sweenus.simplyswords.item.interfaces.RevivalWeapon;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
@@ -29,27 +33,16 @@ import static net.sweenus.simplyswords.SimplySwords.minimumEldritchEndVersion;
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin {
 
-    @Inject(at = @At("HEAD"), method = "isDead", cancellable = true)
-    public void simplyswords$tick(CallbackInfoReturnable<Boolean> cir) {
+    @Inject(at = @At("HEAD"), method = "tryUseTotem", cancellable = true)
+    public void simplyswords$tryRevive(DamageSource source, CallbackInfoReturnable<Boolean> cir) {
         LivingEntity livingEntity = (LivingEntity) (Object) this;
-        if (!livingEntity.getWorld().isClient()) {
-            if (livingEntity instanceof PlayerEntity player) {
-                World world = player.getWorld();
-                ItemStack stack = player.getMainHandStack();
-
-                if (player.getHealth() <= 0.0F && !player.getItemCooldownManager().isCoolingDown(stack.getItem())
-                        && (stack.isOf(ItemsRegistry.WAXWEAVER.get())
-                        || stack.isOf(ItemsRegistry.WICKPIERCER.get()))) {
-
-                    int skillCooldown = Config.uniqueEffects.waxweaver.cooldown;
-                    player.setHealth(player.getMaxHealth());
-                    HelperMethods.incrementStatusEffect(player, StatusEffects.RESISTANCE, 100, 2, 3);
-                    player.getItemCooldownManager().set(stack.getItem(), skillCooldown);
-                    world.playSound(null, player.getBlockPos(), SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
-                            player.getSoundCategory(), 0.7f, 1.0f);
-                    world.playSound(null, player.getBlockPos(), SoundRegistry.SPELL_MISC_02.get(),
-                            player.getSoundCategory(), 0.8f, 1.0f);
-                    cir.setReturnValue(false);
+        if(livingEntity instanceof PlayerEntity player && !player.getWorld().isClient()) {
+            ItemStack mainhand = player.getStackInHand(Hand.MAIN_HAND);
+            if (mainhand.getItem() instanceof RevivalWeapon revivalWeapon) {
+                if(revivalWeapon.canRevive(player, mainhand, source)) {
+                    player.setHealth(revivalWeapon.getReviveHealth(player, mainhand, source));
+                    revivalWeapon.postRevive(player, mainhand, source);
+                    cir.setReturnValue(true);
                 }
             }
         }

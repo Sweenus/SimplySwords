@@ -5,11 +5,13 @@ import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
@@ -20,6 +22,7 @@ import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
 import net.sweenus.simplyswords.entity.WickpiercerEntity;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
+import net.sweenus.simplyswords.item.interfaces.RevivalWeapon;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
@@ -28,7 +31,7 @@ import net.sweenus.simplyswords.util.Styles;
 
 import java.util.List;
 
-public class WickpiercerSwordItem extends UniqueSwordItem {
+public class WickpiercerSwordItem extends UniqueSwordItem implements RevivalWeapon {
     public WickpiercerSwordItem(ToolMaterial toolMaterial, Settings settings) {
         super(toolMaterial, settings);
     }
@@ -119,6 +122,30 @@ public class WickpiercerSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.wickpiercersworditem.tooltip7").setStyle(Styles.TEXT));
 
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+    }
+
+    @Override
+    public boolean canRevive(PlayerEntity player, ItemStack stack, DamageSource source) {
+        return !source.isIn(DamageTypeTags.BYPASSES_INVULNERABILITY) &&
+                !player.getItemCooldownManager().isCoolingDown(this);
+    }
+
+    @Override
+    public void postRevive(PlayerEntity player, ItemStack stack, DamageSource source) {
+        int skillCooldown = Config.uniqueEffects.waxweaver.cooldown;
+        HelperMethods.incrementStatusEffect(player, StatusEffects.RESISTANCE, 100, 2, 3);
+        player.getItemCooldownManager().set(stack.getItem(), skillCooldown);
+
+        World world = player.getWorld();
+        world.playSound(null, player.getBlockPos(), SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
+                player.getSoundCategory(), 0.7f, 1.0f);
+        world.playSound(null, player.getBlockPos(), SoundRegistry.SPELL_MISC_02.get(),
+                player.getSoundCategory(), 0.8f, 1.0f);
+    }
+
+    @Override
+    public float getReviveHealth(PlayerEntity player, ItemStack stack, DamageSource source) {
+        return player.getMaxHealth();
     }
 
     public static class EffectSettings extends TooltipSettings {
