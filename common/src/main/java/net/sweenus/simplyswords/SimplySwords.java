@@ -27,6 +27,7 @@ import net.sweenus.simplyswords.client.renderer.RevivalCandleVisualEntityRendere
 import net.sweenus.simplyswords.client.renderer.SoulrenderMarkVisualEntityRenderer;
 import net.sweenus.simplyswords.client.renderer.ThrownSpearEntityRenderer;
 import net.sweenus.simplyswords.client.renderer.ThrownSwordEntityRenderer;
+import net.sweenus.simplyswords.client.renderer.WhisperwindSlashVisualEntityRenderer;
 import net.sweenus.simplyswords.client.renderer.model.BattleStandardDarkModel;
 import net.sweenus.simplyswords.client.renderer.model.BattleStandardModel;
 import net.sweenus.simplyswords.compat.MythicMetalsCompat;
@@ -138,6 +139,7 @@ public class SimplySwords {
             EntityRendererRegistry.register(EntityRegistry.SOULRENDER_MARK_VISUAL, SoulrenderMarkVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.REVIVAL_CANDLE_VISUAL, RevivalCandleVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.FLAME_SEED_VISUAL, FlameSeedVisualEntityRenderer::new);
+            EntityRendererRegistry.register(EntityRegistry.WHISPERWIND_SLASH_VISUAL, WhisperwindSlashVisualEntityRenderer::new);
 
             // Simply Tooltips bridge — renders all simplyswords sword items with the ST engine
             net.sweenus.simplytooltips.api.TooltipProviderRegistry.register(

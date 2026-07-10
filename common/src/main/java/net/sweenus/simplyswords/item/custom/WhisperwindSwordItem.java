@@ -11,6 +11,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
@@ -25,6 +26,7 @@ import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
+import net.sweenus.simplyswords.world.WhisperwindVisualManager;
 
 import java.util.List;
 
@@ -51,6 +53,9 @@ public class WhisperwindSwordItem extends UniqueSwordItem implements TwoHandedWe
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         world.playSoundFromEntity(null, user, SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_IMPACT_01.get(),
                 user.getSoundCategory(), 0.6f, 1.0f);
+        if (!world.isClient() && world instanceof ServerWorld serverWorld) {
+            WhisperwindVisualManager.startDash(serverWorld, user);
+        }
         user.addStatusEffect(new StatusEffectInstance(EffectRegistry.getReference(EffectRegistry.FATAL_FLICKER), 12));
         user.addStatusEffect(new StatusEffectInstance(StatusEffects.ABSORPTION, 100));
         user.getItemCooldownManager().set(this.getDefaultStack().getItem(), Config.uniqueEffects.whisperwind.cooldown);
@@ -93,6 +98,12 @@ public class WhisperwindSwordItem extends UniqueSwordItem implements TwoHandedWe
         public int radius = 3;
         @ValidatedFloat.Restrict(min = 0f)
         public float dashVelocity = 3f;
+        @ValidatedFloat.Restrict(min = 0f)
+        public float delayedDamage = 6f;
+        @ValidatedFloat.Restrict(min = 0f)
+        public float delayedDamagePerTarget = 1f;
+        @ValidatedInt.Restrict(min = 0)
+        public int delayedDamageDelay = 20;
 
     }
 }

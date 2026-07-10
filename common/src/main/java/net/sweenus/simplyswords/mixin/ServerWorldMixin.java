@@ -6,6 +6,7 @@ import net.sweenus.simplyswords.world.FlamewindVisualManager;
 import net.sweenus.simplyswords.world.FrostfallIceSpikeFieldManager;
 import net.sweenus.simplyswords.world.RevivalCandleVisualManager;
 import net.sweenus.simplyswords.world.SoulrenderMarkVisualManager;
+import net.sweenus.simplyswords.world.WhisperwindVisualManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -30,6 +31,9 @@ public abstract class ServerWorldMixin {
         }
         if (FlameSeedEffect.hasPendingDeathDetonations(world)) {
             FlameSeedEffect.tickPendingDeathDetonations(world);
+        }
+        if (WhisperwindVisualManager.hasActive(world)) {
+            WhisperwindVisualManager.tick(world);
         }
         RevivalCandleVisualManager.tickWorld(world);
     }

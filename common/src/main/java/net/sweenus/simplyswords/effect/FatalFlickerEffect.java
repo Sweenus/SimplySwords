@@ -8,11 +8,13 @@ import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
+import net.sweenus.simplyswords.world.WhisperwindVisualManager;
 
 import java.util.List;
 import java.util.Objects;
@@ -24,8 +26,6 @@ public class FatalFlickerEffect extends StatusEffect {
 
     public static void performDash(LivingEntity user, World world, int radius) {
         float dashDistance = Config.uniqueEffects.whisperwind.dashVelocity;
-        int maxAmplifier = Config.uniqueEffects.whisperwind.maxStacks;
-        int amplifier = 1;
 
         user.setVelocity(user.getRotationVector().multiply(+dashDistance));
         user.setVelocity(user.getVelocity().x, 0, user.getVelocity().z);
@@ -35,22 +35,8 @@ public class FatalFlickerEffect extends StatusEffect {
 
         Box box = HelperMethods.createBox(user, radius);
         List<Entity> entities = world.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY);
-        for (Entity entity : entities) {
-            if ((entity instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, user)) {
-                amplifier++;
-            }
-        }
-        for (Entity entity : entities) {
-            if ((entity instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, user)) {
-                HelperMethods.incrementStatusEffect(le, EffectRegistry.getReference(EffectRegistry.ECHO), 20, amplifier, maxAmplifier);
-            }
-        }
-
-        Box boxPull = HelperMethods.createBox(user, radius * 2);
-        for (Entity entity : world.getOtherEntities(user, boxPull, EntityPredicates.VALID_LIVING_ENTITY)) {
-            if ((entity instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, user)) {
-                le.setVelocity((user.getX() - le.getX()) / 4, (user.getY() - le.getY()) / 4, (user.getZ() - le.getZ()) / 4);
-            }
+        if (world instanceof ServerWorld serverWorld) {
+            WhisperwindVisualManager.recordDashTick(serverWorld, user, entities);
         }
     }
 
@@ -69,6 +55,9 @@ public class FatalFlickerEffect extends StatusEffect {
             if (ability_timer >= 5) {
                 performDash(user, world, radius);
             } else {
+                if (world instanceof ServerWorld serverWorld) {
+                    WhisperwindVisualManager.finishDash(serverWorld, user);
+                }
                 user.setVelocity(0, 0, 0); // Stop user at end of charges
                 user.velocityModified = true;
             }

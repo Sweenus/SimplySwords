@@ -108,5 +108,14 @@ public class EntityRegistry {
                     .build(Identifier.of(SimplySwords.MOD_ID, "flame_seed_visual").toString())
     );
 
+    public static final RegistrySupplier<EntityType<WhisperwindSlashVisualEntity>> WHISPERWIND_SLASH_VISUAL = ENTITIES.register(
+            "whisperwind_slash_visual",
+            () -> EntityType.Builder.<WhisperwindSlashVisualEntity>create(WhisperwindSlashVisualEntity::new, SpawnGroup.MISC)
+                    .dimensions(0.35f, 0.35f)
+                    .maxTrackingRange(96)
+                    .trackingTickInterval(1)
+                    .build(Identifier.of(SimplySwords.MOD_ID, "whisperwind_slash_visual").toString())
+    );
+
 
 }
