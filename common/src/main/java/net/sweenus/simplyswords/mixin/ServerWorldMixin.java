@@ -2,6 +2,7 @@ package net.sweenus.simplyswords.mixin;
 
 import net.minecraft.server.world.ServerWorld;
 import net.sweenus.simplyswords.world.FrostfallIceSpikeFieldManager;
+import net.sweenus.simplyswords.world.RevivalCandleVisualManager;
 import net.sweenus.simplyswords.world.SoulrenderMarkVisualManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -22,5 +23,6 @@ public abstract class ServerWorldMixin {
         if (SoulrenderMarkVisualManager.hasActive(world)) {
             SoulrenderMarkVisualManager.tick(world);
         }
+        RevivalCandleVisualManager.tickWorld(world);
     }
 }

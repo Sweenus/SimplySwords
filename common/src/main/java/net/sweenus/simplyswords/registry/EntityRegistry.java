@@ -90,5 +90,14 @@ public class EntityRegistry {
                     .build(Identifier.of(SimplySwords.MOD_ID, "soulrender_mark_visual").toString())
     );
 
+    public static final RegistrySupplier<EntityType<RevivalCandleVisualEntity>> REVIVAL_CANDLE_VISUAL = ENTITIES.register(
+            "revival_candle_visual",
+            () -> EntityType.Builder.<RevivalCandleVisualEntity>create(RevivalCandleVisualEntity::new, SpawnGroup.MISC)
+                    .dimensions(0.35f, 0.35f)
+                    .maxTrackingRange(64)
+                    .trackingTickInterval(1)
+                    .build(Identifier.of(SimplySwords.MOD_ID, "revival_candle_visual").toString())
+    );
+
 
 }

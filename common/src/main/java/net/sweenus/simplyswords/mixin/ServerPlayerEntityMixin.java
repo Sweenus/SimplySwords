@@ -32,6 +32,7 @@ import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.AbilityMethods;
 import net.sweenus.simplyswords.util.HelperMethods;
+import net.sweenus.simplyswords.world.RevivalCandleVisualManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -106,6 +107,7 @@ public abstract class ServerPlayerEntityMixin {
     public void simplyswords$tick(CallbackInfo ci) {
         PlayerEntity player = (PlayerEntity) (Object) this;
         if (player instanceof ServerPlayerEntity serverPlayer) {
+            RevivalCandleVisualManager.tickPlayer(serverPlayer);
 
             //Ribboncleaver movespeed debuff
             if (serverPlayer.getMainHandStack().isOf(ItemsRegistry.RIBBONCLEAVER.get()) || serverPlayer.getMainHandStack().isOf(ItemsRegistry.ENIGMA.get())) {

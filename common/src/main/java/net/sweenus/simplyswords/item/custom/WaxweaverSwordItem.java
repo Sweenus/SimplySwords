@@ -24,6 +24,7 @@ import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
+import net.sweenus.simplyswords.world.RevivalCandleVisualManager;
 
 import java.util.List;
 
@@ -56,6 +57,9 @@ public class WaxweaverSwordItem extends UniqueSwordItem implements RevivalWeapon
     @Override
     public void postRevive(PlayerEntity player, ItemStack stack, DamageSource source) {
         int skillCooldown = Config.uniqueEffects.waxweaver.cooldown;
+        if (player instanceof net.minecraft.server.network.ServerPlayerEntity serverPlayer) {
+            RevivalCandleVisualManager.activate(serverPlayer, stack);
+        }
         HelperMethods.incrementStatusEffect(player, StatusEffects.RESISTANCE, 100, 2, 3);
         player.getItemCooldownManager().set(stack.getItem(), skillCooldown);
 
