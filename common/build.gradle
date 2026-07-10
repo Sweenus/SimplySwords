@@ -50,7 +50,7 @@ dependencies {
 
     modImplementation "io.wispforest:owo-lib:0.12.15.1+1.21" // Needed to use OracleScreen from oracle_index :(
     // Simply Tooltips - hard dependency for modern tooltip rendering
-    compileOnly files("${rootDir}/../Simply Tooltips/common/build/devlibs/SimplyTooltips-common-0.1.0-dev.jar")
+    compileOnly files("${rootDir}/../simplytooltips/common/build/devlibs/SimplyTooltips-common-0.1.4-dev.jar")
 
     modCompileOnly "maven.modrinth:mythicmetals:${project.mythicmetals_version}"
     modCompileOnly "me.shedaniel:RoughlyEnoughItems-api:${rei_version}"
