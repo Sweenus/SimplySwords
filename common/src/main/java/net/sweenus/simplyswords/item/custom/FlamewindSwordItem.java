@@ -28,6 +28,7 @@ import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
+import net.sweenus.simplyswords.world.FlamewindVisualManager;
 
 import java.util.Comparator;
 import java.util.List;
@@ -76,6 +77,7 @@ public class FlamewindSwordItem extends UniqueSwordItem {
                         flamSeedEffect.setSourceEntity(user);
                         flamSeedEffect.setAdditionalData(flameSeedSpreadCap);
                         ee.addStatusEffect(flamSeedEffect);
+                        FlamewindVisualManager.refreshSeed(serverWorld, ee);
                         user.getItemCooldownManager().set(this, skillCooldown);
                     }
                 }
@@ -114,15 +116,17 @@ public class FlamewindSwordItem extends UniqueSwordItem {
         }
 
         @ValidatedInt.Restrict(min = 0)
-        public int cooldown = 980;
+        public int cooldown = 350;
         @ValidatedFloat.Restrict(min = 0f)
-        public float damage = 5f;
+        public float damage = 3f;
         @ValidatedFloat.Restrict(min = 0f)
         public float spellScaling = 0.4f;
         @ValidatedFloat.Restrict(min = 0f)
-        public float detonationDamage = 15f;
+        public float detonationDamage = 5f;
         @ValidatedInt.Restrict(min = 0)
         public int maxHaste = 10;
+        @ValidatedFloat.Restrict(min = 0f)
+        public float spreadDistance = 5f;
         @ValidatedInt.Restrict(min = 1)
         public int spreadCap = 6;
 

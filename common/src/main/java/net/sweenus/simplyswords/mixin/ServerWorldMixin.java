@@ -1,6 +1,8 @@
 package net.sweenus.simplyswords.mixin;
 
 import net.minecraft.server.world.ServerWorld;
+import net.sweenus.simplyswords.effect.FlameSeedEffect;
+import net.sweenus.simplyswords.world.FlamewindVisualManager;
 import net.sweenus.simplyswords.world.FrostfallIceSpikeFieldManager;
 import net.sweenus.simplyswords.world.RevivalCandleVisualManager;
 import net.sweenus.simplyswords.world.SoulrenderMarkVisualManager;
@@ -22,6 +24,12 @@ public abstract class ServerWorldMixin {
         }
         if (SoulrenderMarkVisualManager.hasActive(world)) {
             SoulrenderMarkVisualManager.tick(world);
+        }
+        if (FlamewindVisualManager.hasActive(world)) {
+            FlamewindVisualManager.tick(world);
+        }
+        if (FlameSeedEffect.hasPendingDeathDetonations(world)) {
+            FlameSeedEffect.tickPendingDeathDetonations(world);
         }
         RevivalCandleVisualManager.tickWorld(world);
     }

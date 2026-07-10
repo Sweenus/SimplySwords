@@ -15,6 +15,7 @@ import net.minecraft.world.World;
 import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.compat.eldritch_end.EldritchEndCompatMethods;
 import net.sweenus.simplyswords.config.Config;
+import net.sweenus.simplyswords.effect.FlameSeedEffect;
 import net.sweenus.simplyswords.item.interfaces.RevivalWeapon;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
@@ -82,6 +83,27 @@ public abstract class LivingEntityMixin {
                     && Registries.STATUS_EFFECT.get(Identifier.of("simplyswords:voidhunger")) != null)
                 EldritchEndCompatMethods.generateVoidcloakStacks(livingEntity);
         }
+    }
+
+    @Inject(at = @At("HEAD"), method = "onDeath")
+    public void simplyswords$triggerFlameSeedOnDeath(DamageSource damageSource, CallbackInfo ci) {
+        LivingEntity livingEntity = (LivingEntity) (Object) this;
+        FlameSeedEffect.triggerDeathDetonation(livingEntity);
+    }
+
+    @Inject(at = @At("HEAD"), method = "damage")
+    public void simplyswords$queueFlameSeedDeathDetonation(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
+        LivingEntity livingEntity = (LivingEntity) (Object) this;
+        FlameSeedEffect.queueLethalDeathDetonation(livingEntity, amount);
+    }
+
+    @Inject(
+            method = "damage",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;onDeath(Lnet/minecraft/entity/damage/DamageSource;)V")
+    )
+    public void simplyswords$triggerFlameSeedBeforeDeath(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
+        LivingEntity livingEntity = (LivingEntity) (Object) this;
+        FlameSeedEffect.triggerDeathDetonation(livingEntity);
     }
 
 }

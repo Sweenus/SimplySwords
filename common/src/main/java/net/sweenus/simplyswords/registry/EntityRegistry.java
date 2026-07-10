@@ -99,5 +99,14 @@ public class EntityRegistry {
                     .build(Identifier.of(SimplySwords.MOD_ID, "revival_candle_visual").toString())
     );
 
+    public static final RegistrySupplier<EntityType<FlameSeedVisualEntity>> FLAME_SEED_VISUAL = ENTITIES.register(
+            "flame_seed_visual",
+            () -> EntityType.Builder.<FlameSeedVisualEntity>create(FlameSeedVisualEntity::new, SpawnGroup.MISC)
+                    .dimensions(0.35f, 0.35f)
+                    .maxTrackingRange(64)
+                    .trackingTickInterval(1)
+                    .build(Identifier.of(SimplySwords.MOD_ID, "flame_seed_visual").toString())
+    );
+
 
 }

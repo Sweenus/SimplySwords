@@ -1160,6 +1160,7 @@
   "simplyswords.unique_effects.flamewind.spellScaling": "Emberstorm Spell Power DMG multi",
   "simplyswords.unique_effects.flamewind.detonationDamage": "Emberstorm detonation damage",
   "simplyswords.unique_effects.flamewind.maxHaste": "Emberstorm Haste max",
+  "simplyswords.unique_effects.flamewind.spreadDistance": "Emberstorm spread distance",
   "simplyswords.unique_effects.flamewind.spreadCap": "Emberstorm spread cap",
   "simplyswords.unique_effects.ribboncleaver": "§6[Ribboncleaver]§7",
   "simplyswords.unique_effects.ribboncleaver.cooldown": "Ribbonwrath cooldown",
