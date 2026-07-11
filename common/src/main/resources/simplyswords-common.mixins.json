@@ -6,12 +6,16 @@
   "client": [
     "client.GameRendererMixin",
     "client.HeldItemRendererMixin",
+    "client.InGameHudMixin",
     "client.PlayerEntityRendererMixin",
-    "client.LivingEntityRendererAccessor"
+    "client.LivingEntityRendererAccessor",
+    "client.WorldRendererMixin"
   ],
   "mixins": [
     "LivingEntityMixin",
     "ServerPlayerEntityMixin",
+    "ServerPlayerInteractionManagerMixin",
+    "ServerPlayNetworkHandlerMixin",
     "PlayerEntityMixin",
     "AnimalEntityMixin",
     "ServerWorldMixin"

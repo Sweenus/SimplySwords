@@ -296,5 +296,12 @@ public abstract class ServerPlayerEntityMixin {
         }
     }
 
+    @Inject(at = @At("HEAD"), method = "attack", cancellable = true)
+    public void simplyswords$preventShadowDanceAttack(Entity target, CallbackInfo ci) {
+        if (ShadowstingShadowDanceManager.isActive((ServerPlayerEntity) (Object) this)) {
+            ci.cancel();
+        }
+    }
+
 
 }

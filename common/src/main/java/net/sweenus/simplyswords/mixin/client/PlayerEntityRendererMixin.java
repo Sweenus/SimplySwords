@@ -8,8 +8,11 @@ import net.minecraft.client.render.entity.feature.FeatureRendererContext;
 import net.minecraft.client.render.entity.model.EntityModelLayers;
 import net.minecraft.client.render.entity.model.PlayerEntityModel;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.entity.effect.StatusEffectInstance;
 import net.sweenus.simplyswords.client.ShadowDanceFovHandler;
+import net.sweenus.simplyswords.client.renderer.BattleStandardFieldRenderer;
 import net.sweenus.simplyswords.client.renderer.feature.ShoulderAxolotlFeatureRenderer;
+import net.sweenus.simplyswords.registry.EffectRegistry;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -26,6 +29,17 @@ public abstract class PlayerEntityRendererMixin {
         }
     }
 
+    @Inject(method = "render(Lnet/minecraft/client/network/AbstractClientPlayerEntity;FFLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V",
+            at = @At("TAIL"))
+    private void simplyswords$renderImmolationField(AbstractClientPlayerEntity player, float yaw, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, CallbackInfo ci) {
+        StatusEffectInstance immolation = player.getStatusEffect(EffectRegistry.getReference(EffectRegistry.IMMOLATION));
+        if (immolation == null) {
+            return;
+        }
+
+        BattleStandardFieldRenderer.renderImmolation(matrices, vertexConsumers, player.age, Math.max(0.75F, immolation.getAmplifier()));
+    }
+
     @Inject(method = "<init>", at = @At("TAIL"))
     private void simplyswords$addCustomShoulderFeature(EntityRendererFactory.Context context, boolean slim, CallbackInfo ci) {
         // Call the protected addFeature method via the accessor mixin
@@ -36,6 +50,5 @@ public abstract class PlayerEntityRendererMixin {
         ));
     }
 }
-
 
 

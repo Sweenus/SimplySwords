@@ -359,6 +359,7 @@ public final class ShadowstingShadowDanceManager {
     }
 
     private static void lockPlayer(ServerPlayerEntity player) {
+        player.clearActiveItem();
         player.setVelocity(0.0, 0.0, 0.0);
         player.velocityModified = true;
         player.fallDistance = 0.0F;

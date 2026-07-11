@@ -11,6 +11,7 @@ import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.util.math.Box;
+import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -31,10 +32,12 @@ public class ImmolationEffect extends WideOrbitingEffect {
 
                     player.getWorld().playSoundFromEntity(null, player, SoundRegistry.ELEMENTAL_BOW_FIRE_SHOOT_FLYBY_03.get(),
                             SoundCategory.PLAYERS, 0.1f, 1.0f);
-                    HelperMethods.spawnParticle(player.getWorld(), ParticleTypes.LAVA, player.getX(), player.getY()+0.5, player.getZ(), 0.3, 0.8, 0.2);
-                    HelperMethods.spawnParticle(player.getWorld(), ParticleTypes.LAVA, player.getX(), player.getY()+0.5, player.getZ(), -0.2, 0.6, 0.3);
-                    HelperMethods.spawnParticle(player.getWorld(), ParticleTypes.LAVA, player.getX(), player.getY()+0.5, player.getZ(), 0.5, 0.3, -0.2);
-                    HelperMethods.spawnParticle(player.getWorld(), ParticleTypes.SMOKE, player.getX(), player.getY()+0.5, player.getZ(), 0, 0, 0);
+                    if (!Config.general.enableModernFieldEffects) {
+                        HelperMethods.spawnParticle(player.getWorld(), ParticleTypes.LAVA, player.getX(), player.getY()+0.5, player.getZ(), 0.3, 0.8, 0.2);
+                        HelperMethods.spawnParticle(player.getWorld(), ParticleTypes.LAVA, player.getX(), player.getY()+0.5, player.getZ(), -0.2, 0.6, 0.3);
+                        HelperMethods.spawnParticle(player.getWorld(), ParticleTypes.LAVA, player.getX(), player.getY()+0.5, player.getZ(), 0.5, 0.3, -0.2);
+                        HelperMethods.spawnParticle(player.getWorld(), ParticleTypes.SMOKE, player.getX(), player.getY()+0.5, player.getZ(), 0, 0, 0);
+                    }
 
                     ItemStack checkMainStack = player.getMainHandStack();
                     ItemStack checkOffStack = player.getOffHandStack();
@@ -62,7 +65,9 @@ public class ImmolationEffect extends WideOrbitingEffect {
             }
         }
 
-        super.applyUpdateEffect(pLivingEntity, pAmplifier);
+        if (!Config.general.enableModernFieldEffects) {
+            super.applyUpdateEffect(pLivingEntity, pAmplifier);
+        }
         return true;
     }
 
