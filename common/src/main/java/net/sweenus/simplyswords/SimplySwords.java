@@ -21,9 +21,11 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.client.renderer.BattleStandardDarkRenderer;
 import net.sweenus.simplyswords.client.renderer.BattleStandardRenderer;
+import net.sweenus.simplyswords.client.renderer.EmberlashSmoulderVisualEntityRenderer;
 import net.sweenus.simplyswords.client.renderer.FlameSeedVisualEntityRenderer;
 import net.sweenus.simplyswords.client.renderer.FrostfallIceSpikeVisualEntityRenderer;
 import net.sweenus.simplyswords.client.renderer.RevivalCandleVisualEntityRenderer;
+import net.sweenus.simplyswords.client.renderer.ShadowstingAfterimageVisualEntityRenderer;
 import net.sweenus.simplyswords.client.renderer.SoulrenderMarkVisualEntityRenderer;
 import net.sweenus.simplyswords.client.renderer.ThrownSpearEntityRenderer;
 import net.sweenus.simplyswords.client.renderer.ThrownSwordEntityRenderer;
@@ -140,6 +142,8 @@ public class SimplySwords {
             EntityRendererRegistry.register(EntityRegistry.REVIVAL_CANDLE_VISUAL, RevivalCandleVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.FLAME_SEED_VISUAL, FlameSeedVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.WHISPERWIND_SLASH_VISUAL, WhisperwindSlashVisualEntityRenderer::new);
+            EntityRendererRegistry.register(EntityRegistry.EMBERLASH_SMOULDER_VISUAL, EmberlashSmoulderVisualEntityRenderer::new);
+            EntityRendererRegistry.register(EntityRegistry.SHADOWSTING_AFTERIMAGE_VISUAL, ShadowstingAfterimageVisualEntityRenderer::new);
 
             // Simply Tooltips bridge — renders all simplyswords sword items with the ST engine
             net.sweenus.simplytooltips.api.TooltipProviderRegistry.register(

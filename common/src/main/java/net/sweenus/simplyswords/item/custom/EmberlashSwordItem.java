@@ -26,6 +26,7 @@ import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
+import net.sweenus.simplyswords.world.EmberlashSmoulderVisualManager;
 
 import java.util.List;
 
@@ -58,6 +59,7 @@ public class EmberlashSwordItem extends UniqueSwordItem {
             }
             int maximum_stacks = Config.uniqueEffects.emberlash.maxStacks;
             HelperMethods.incrementStatusEffect(target, EffectRegistry.getReference(EffectRegistry.SMOULDERING), 100, 1, maximum_stacks + 1);
+            EmberlashSmoulderVisualManager.refresh(world, target);
 
         }
         return super.postHit(stack, target, attacker);

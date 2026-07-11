@@ -33,6 +33,7 @@ import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.AbilityMethods;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.world.RevivalCandleVisualManager;
+import net.sweenus.simplyswords.world.ShadowstingShadowDanceManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -53,6 +54,10 @@ public abstract class ServerPlayerEntityMixin {
     public void simplyswords$damage(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
         PlayerEntity player = (PlayerEntity) (Object) this;
         if (player instanceof ServerPlayerEntity serverPlayer) {
+            if (ShadowstingShadowDanceManager.isActive(serverPlayer)) {
+                cir.setReturnValue(false);
+                return;
+            }
 
             //Effect Resilience
             if (serverPlayer.hasStatusEffect(EffectRegistry.getReference(EffectRegistry.RESILIENCE))) {
@@ -108,6 +113,7 @@ public abstract class ServerPlayerEntityMixin {
         PlayerEntity player = (PlayerEntity) (Object) this;
         if (player instanceof ServerPlayerEntity serverPlayer) {
             RevivalCandleVisualManager.tickPlayer(serverPlayer);
+            ShadowstingShadowDanceManager.tickPlayer(serverPlayer);
 
             //Ribboncleaver movespeed debuff
             if (serverPlayer.getMainHandStack().isOf(ItemsRegistry.RIBBONCLEAVER.get()) || serverPlayer.getMainHandStack().isOf(ItemsRegistry.ENIGMA.get())) {

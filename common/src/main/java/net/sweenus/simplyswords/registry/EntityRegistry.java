@@ -117,5 +117,23 @@ public class EntityRegistry {
                     .build(Identifier.of(SimplySwords.MOD_ID, "whisperwind_slash_visual").toString())
     );
 
+    public static final RegistrySupplier<EntityType<EmberlashSmoulderVisualEntity>> EMBERLASH_SMOULDER_VISUAL = ENTITIES.register(
+            "emberlash_smoulder_visual",
+            () -> EntityType.Builder.<EmberlashSmoulderVisualEntity>create(EmberlashSmoulderVisualEntity::new, SpawnGroup.MISC)
+                    .dimensions(0.35f, 0.35f)
+                    .maxTrackingRange(64)
+                    .trackingTickInterval(1)
+                    .build(Identifier.of(SimplySwords.MOD_ID, "emberlash_smoulder_visual").toString())
+    );
+
+    public static final RegistrySupplier<EntityType<ShadowstingAfterimageVisualEntity>> SHADOWSTING_AFTERIMAGE_VISUAL = ENTITIES.register(
+            "shadowsting_afterimage_visual",
+            () -> EntityType.Builder.<ShadowstingAfterimageVisualEntity>create(ShadowstingAfterimageVisualEntity::new, SpawnGroup.MISC)
+                    .dimensions(0.6f, 1.8f)
+                    .maxTrackingRange(64)
+                    .trackingTickInterval(1)
+                    .build(Identifier.of(SimplySwords.MOD_ID, "shadowsting_afterimage_visual").toString())
+    );
+
 
 }

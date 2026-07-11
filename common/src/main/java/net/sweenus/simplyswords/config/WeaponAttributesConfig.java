@@ -133,7 +133,7 @@ public class WeaponAttributesConfig extends Config {
         public float mjolnir_damageModifier = 3.0f;
         public float moltenedge_damageModifier = 4.0f;
         public float ribboncleaver_damageModifier = 7.0f;
-        public float shadowsting_damageModifier = -2.0f;
+        public float shadowsting_damageModifier = 1.0f;
         public float soulkeeper_damageModifier = 8.0f;
         public float soulpyre_damageModifier = 7.0f;
         public float soulrender_damageModifier = 3.0f;

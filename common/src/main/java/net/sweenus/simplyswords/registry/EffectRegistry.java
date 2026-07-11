@@ -129,4 +129,7 @@ public class EffectRegistry {
                             1,
                             EntityAttributeModifier.Operation.ADD_VALUE));
 
+    public static final RegistrySupplier<StatusEffect> SHADOW_DANCE = EFFECT.register("shadow_dance", () ->
+            new ShadowDanceEffect(StatusEffectCategory.BENEFICIAL, 1315860));
+
 }
