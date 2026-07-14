@@ -17,6 +17,8 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
+import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.registry.tag.TagKey;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.BattleStandardEntity;
 import net.sweenus.simplyswords.item.ContainedRemnantItem;
@@ -27,6 +29,7 @@ import net.sweenus.simplyswords.registry.EntityRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 
 import java.util.List;
+import java.util.Optional;
 
 public class SimplySwordsAPI {
 
@@ -137,5 +140,36 @@ public class SimplySwordsAPI {
         ContainedRemnantItem.addTransformation(block, identifier);
     }
 
+    public static void registerWeaponType(Item item, Identifier weaponType) {
+        WeaponImplicitRegistry.registerWeaponType(item, weaponType);
+    }
+
+    public static void registerWeaponType(TagKey<Item> itemTag, Identifier weaponType) {
+        WeaponImplicitRegistry.registerWeaponType(itemTag, weaponType);
+    }
+
+    public static void registerWeaponImplicit(WeaponImplicitDefinition definition) {
+        WeaponImplicitRegistry.registerWeaponImplicit(definition);
+    }
+
+    public static Optional<net.sweenus.simplyswords.item.component.WeaponImplicitComponent> getOrCreateWeaponImplicit(ItemStack stack) {
+        return WeaponImplicitRegistry.getOrCreateWeaponImplicit(stack);
+    }
+
+    public static void appendWeaponImplicitTooltip(ItemStack stack, List<Text> tooltip) {
+        tooltip.addAll(WeaponImplicitRegistry.buildTooltipLines(stack));
+    }
+
+    public static void appendWeaponImplicitTooltip(ItemStack stack, List<Text> tooltip, boolean includeRange) {
+        tooltip.addAll(WeaponImplicitRegistry.buildTooltipLines(stack, includeRange));
+    }
+
+    public static float applyWeaponImplicitDamage(ItemStack stack, LivingEntity target, DamageSource source, float amount) {
+        return WeaponImplicitRegistry.modifyDamage(stack, target, source, amount);
+    }
+
+    public static void applyWeaponImplicitOnHit(ItemStack stack, LivingEntity target, LivingEntity attacker, float damage) {
+        WeaponImplicitRegistry.onHit(stack, target, attacker, damage);
+    }
 
 }

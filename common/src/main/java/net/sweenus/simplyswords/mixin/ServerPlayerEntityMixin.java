@@ -44,6 +44,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
+import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
 
 @Mixin(ServerPlayerEntity.class)
 public abstract class ServerPlayerEntityMixin {
@@ -55,6 +56,11 @@ public abstract class ServerPlayerEntityMixin {
         PlayerEntity player = (PlayerEntity) (Object) this;
         if (player instanceof ServerPlayerEntity serverPlayer) {
             if (ShadowstingShadowDanceManager.isActive(serverPlayer)) {
+                cir.setReturnValue(false);
+                return;
+            }
+
+            if (WeaponImplicitRegistry.tryDeflectIncomingDamage(serverPlayer, source, amount)) {
                 cir.setReturnValue(false);
                 return;
             }

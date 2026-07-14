@@ -8,6 +8,7 @@ import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
 import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.client.particle.CustomBubbleParticle;
+import net.sweenus.simplyswords.client.particle.DrippingBloodParticle;
 import net.sweenus.simplyswords.client.util.OracleIndexUtils;
 import net.sweenus.simplyswords.registry.ParticlesRegistry;
 
@@ -29,6 +30,12 @@ public class SimplySwordsClientForge {
             event.registerSpriteSet(
                     bubble,
                     CustomBubbleParticle.Factory::new
+            );
+        });
+        ParticlesRegistry.DRIPPING_BLOOD.ifPresent(drippingBlood -> {
+            event.registerSpriteSet(
+                    drippingBlood,
+                    DrippingBloodParticle.Factory::new
             );
         });
     }

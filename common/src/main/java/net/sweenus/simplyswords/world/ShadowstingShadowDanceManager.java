@@ -3,6 +3,7 @@ package net.sweenus.simplyswords.world;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
@@ -101,6 +102,7 @@ public final class ShadowstingShadowDanceManager {
         }
 
         lockPlayer(player, dance);
+        clearMobTargets(world, player);
 
         if (world.getTime() >= dance.nextStrikeTick) {
             LivingEntity target = findRandomTarget(world, player);
@@ -370,6 +372,15 @@ public final class ShadowstingShadowDanceManager {
         lockPlayer(player);
         if (dance.anchorPos != null) {
             player.networkHandler.requestTeleport(dance.anchorPos.x, dance.anchorPos.y, dance.anchorPos.z, player.getYaw(), player.getPitch());
+        }
+    }
+
+    private static void clearMobTargets(ServerWorld world, ServerPlayerEntity player) {
+        double radius = Config.uniqueEffects.shadowsting.strikeRadius + 8.0;
+        Box box = new Box(player.getX() - radius, player.getY() - radius, player.getZ() - radius,
+                player.getX() + radius, player.getY() + radius, player.getZ() + radius);
+        for (MobEntity mob : world.getEntitiesByClass(MobEntity.class, box, mob -> mob.getTarget() == player)) {
+            mob.setTarget(null);
         }
     }
 

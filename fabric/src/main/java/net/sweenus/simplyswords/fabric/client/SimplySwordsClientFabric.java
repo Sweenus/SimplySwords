@@ -5,6 +5,7 @@ import dev.architectury.registry.client.particle.ParticleProviderRegistry;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
 import net.sweenus.simplyswords.client.particle.CustomBubbleParticle;
+import net.sweenus.simplyswords.client.particle.DrippingBloodParticle;
 import net.sweenus.simplyswords.client.util.OracleIndexUtils;
 import net.sweenus.simplyswords.registry.ParticlesRegistry;
 
@@ -20,7 +21,11 @@ public class SimplySwordsClientFabric implements ClientModInitializer {
         ParticleProviderRegistry.register(
                 ParticlesRegistry.CUSTOM_BUBBLE.get(),
                 CustomBubbleParticle.Factory::new);
+        ParticleProviderRegistry.register(
+                ParticlesRegistry.DRIPPING_BLOOD.get(),
+                DrippingBloodParticle.Factory::new);
 
         ParticleFactoryRegistry.getInstance().register(ParticlesRegistry.CUSTOM_BUBBLE.get(), CustomBubbleParticle.Factory::new);
+        ParticleFactoryRegistry.getInstance().register(ParticlesRegistry.DRIPPING_BLOOD.get(), DrippingBloodParticle.Factory::new);
     }
 }

@@ -18,7 +18,9 @@
     "ServerPlayNetworkHandlerMixin",
     "PlayerEntityMixin",
     "AnimalEntityMixin",
-    "ServerWorldMixin"
+    "ServerWorldMixin",
+    "MobEntityMixin",
+    "TargetPredicateMixin"
   ],
   "injectors": {
     "defaultRequire": 1

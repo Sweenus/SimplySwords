@@ -126,6 +126,15 @@ public class EntityRegistry {
                     .build(Identifier.of(SimplySwords.MOD_ID, "emberlash_smoulder_visual").toString())
     );
 
+    public static final RegistrySupplier<EntityType<ImplicitStatusVisualEntity>> IMPLICIT_STATUS_VISUAL = ENTITIES.register(
+            "implicit_status_visual",
+            () -> EntityType.Builder.<ImplicitStatusVisualEntity>create(ImplicitStatusVisualEntity::new, SpawnGroup.MISC)
+                    .dimensions(0.35f, 0.35f)
+                    .maxTrackingRange(64)
+                    .trackingTickInterval(1)
+                    .build(Identifier.of(SimplySwords.MOD_ID, "implicit_status_visual").toString())
+    );
+
     public static final RegistrySupplier<EntityType<ShadowstingAfterimageVisualEntity>> SHADOWSTING_AFTERIMAGE_VISUAL = ENTITIES.register(
             "shadowsting_afterimage_visual",
             () -> EntityType.Builder.<ShadowstingAfterimageVisualEntity>create(ShadowstingAfterimageVisualEntity::new, SpawnGroup.MISC)

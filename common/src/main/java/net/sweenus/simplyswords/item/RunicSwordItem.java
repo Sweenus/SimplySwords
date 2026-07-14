@@ -5,6 +5,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.inventory.StackReference;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -22,6 +23,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
+import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
 import net.sweenus.simplyswords.client.api.SimplySwordsClientAPI;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.ThrownSpearEntity;
@@ -43,6 +45,9 @@ public class RunicSwordItem extends SwordItem {
 
     @Override
     public boolean onClicked(ItemStack stack, ItemStack otherStack, Slot slot, ClickType clickType, PlayerEntity player, StackReference cursorStackReference) {
+        if (!player.getWorld().isClient) {
+            WeaponImplicitRegistry.getOrCreateWeaponImplicit(stack);
+        }
         if(!stack.contains(ComponentTypeRegistry.GEM_POWER.get())) {
             String[] blacklist = {"simplyswords:gem_power@simplyswords:throwing"}; // Should be replaced with a modular blacklisting system at a later date
             if (TagRegistry.isInTag(TagRegistry.spearsTag, asItem()))
@@ -134,6 +139,9 @@ public class RunicSwordItem extends SwordItem {
 
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
+        if (!world.isClient) {
+            WeaponImplicitRegistry.getOrCreateWeaponImplicit(stack);
+        }
         if ((entity instanceof LivingEntity user) && (user.getEquippedStack(EquipmentSlot.MAINHAND) == stack || user.getEquippedStack(EquipmentSlot.OFFHAND) == stack)) {
             if (entity.age % 4 == 0 && Config.general.enablePassiveParticles) {
                 float randomx = (float) (Math.random() * 6);
@@ -157,6 +165,7 @@ public class RunicSwordItem extends SwordItem {
     public void onCraft(ItemStack stack, World world) {
         if (world.isClient) return;
 
+        WeaponImplicitRegistry.getOrCreateWeaponImplicit(stack);
         if(!stack.contains(ComponentTypeRegistry.GEM_POWER.get())) {
             String[] blacklist = {"simplyswords:gem_power@simplyswords:throwing"};
             if (TagRegistry.isInTag(TagRegistry.spearsTag, asItem()))
@@ -172,6 +181,7 @@ public class RunicSwordItem extends SwordItem {
 
     @Override
     public void appendTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
+        tooltip.addAll(WeaponImplicitRegistry.buildTooltipLines(itemStack, Screen.hasAltDown()));
         generateDynamicTooltip(itemStack, tooltipContext, tooltip, type);
     }
 

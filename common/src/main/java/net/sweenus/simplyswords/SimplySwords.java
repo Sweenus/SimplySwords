@@ -24,6 +24,7 @@ import net.sweenus.simplyswords.client.renderer.BattleStandardRenderer;
 import net.sweenus.simplyswords.client.renderer.EmberlashSmoulderVisualEntityRenderer;
 import net.sweenus.simplyswords.client.renderer.FlameSeedVisualEntityRenderer;
 import net.sweenus.simplyswords.client.renderer.FrostfallIceSpikeVisualEntityRenderer;
+import net.sweenus.simplyswords.client.renderer.ImplicitStatusVisualEntityRenderer;
 import net.sweenus.simplyswords.client.renderer.RevivalCandleVisualEntityRenderer;
 import net.sweenus.simplyswords.client.renderer.ShadowstingAfterimageVisualEntityRenderer;
 import net.sweenus.simplyswords.client.renderer.SoulrenderMarkVisualEntityRenderer;
@@ -34,6 +35,7 @@ import net.sweenus.simplyswords.client.renderer.model.BattleStandardDarkModel;
 import net.sweenus.simplyswords.client.renderer.model.BattleStandardModel;
 import net.sweenus.simplyswords.compat.MythicMetalsCompat;
 import net.sweenus.simplyswords.compat.eldritch_end.EldritchEndCompatRegistry;
+import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.BattleStandardDarkEntity;
 import net.sweenus.simplyswords.entity.BattleStandardEntity;
@@ -82,6 +84,7 @@ public class SimplySwords {
         EntityRegistry.ENTITIES.register();
         ComponentTypeRegistry.COMPONENT_TYPES.register();
         GemPowerRegistry.register();
+        WeaponImplicitRegistry.registerBuiltins();
         ParticlesRegistry.PARTICLES.register();
         TransformationRegistry.register();
         EntityAttributeRegistry.register(EntityRegistry.BATTLESTANDARD, BattleStandardEntity::createBattleStandardAttributes);
@@ -143,6 +146,7 @@ public class SimplySwords {
             EntityRendererRegistry.register(EntityRegistry.FLAME_SEED_VISUAL, FlameSeedVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.WHISPERWIND_SLASH_VISUAL, WhisperwindSlashVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.EMBERLASH_SMOULDER_VISUAL, EmberlashSmoulderVisualEntityRenderer::new);
+            EntityRendererRegistry.register(EntityRegistry.IMPLICIT_STATUS_VISUAL, ImplicitStatusVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.SHADOWSTING_AFTERIMAGE_VISUAL, ShadowstingAfterimageVisualEntityRenderer::new);
 
             // Simply Tooltips bridge — renders all simplyswords sword items with the ST engine

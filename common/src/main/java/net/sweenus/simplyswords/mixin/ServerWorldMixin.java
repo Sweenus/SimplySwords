@@ -5,6 +5,7 @@ import net.sweenus.simplyswords.effect.FlameSeedEffect;
 import net.sweenus.simplyswords.world.EmberlashSmoulderVisualManager;
 import net.sweenus.simplyswords.world.FlamewindVisualManager;
 import net.sweenus.simplyswords.world.FrostfallIceSpikeFieldManager;
+import net.sweenus.simplyswords.world.ImplicitStatusVisualManager;
 import net.sweenus.simplyswords.world.RevivalCandleVisualManager;
 import net.sweenus.simplyswords.world.ShadowstingShadowDanceManager;
 import net.sweenus.simplyswords.world.SoulrenderMarkVisualManager;
@@ -39,6 +40,9 @@ public abstract class ServerWorldMixin {
         }
         if (EmberlashSmoulderVisualManager.hasActive(world)) {
             EmberlashSmoulderVisualManager.tick(world);
+        }
+        if (ImplicitStatusVisualManager.hasActive(world)) {
+            ImplicitStatusVisualManager.tick(world);
         }
         if (ShadowstingShadowDanceManager.hasPendingCloneStrikes(world)) {
             ShadowstingShadowDanceManager.tickCloneStrikes(world);

@@ -13,6 +13,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.SimplySwords;
+import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
 import net.sweenus.simplyswords.compat.eldritch_end.EldritchEndCompatMethods;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.effect.FlameSeedEffect;
@@ -70,8 +71,17 @@ public abstract class LivingEntityMixin {
                 float reductionFactor = 0.50f;
                 amount *= reductionFactor;
             }
+            amount = WeaponImplicitRegistry.modifyDamage(livingEntity, source, amount);
         }
         return amount;
+    }
+
+    @Inject(at = @At("TAIL"), method = "damage")
+    public void simplyswords$applyWeaponImplicitOnDamage(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
+        LivingEntity livingEntity = (LivingEntity) (Object) this;
+        if (Boolean.TRUE.equals(cir.getReturnValue()) && !livingEntity.getWorld().isClient()) {
+            WeaponImplicitRegistry.onDamageApplied(livingEntity, source, amount);
+        }
     }
 
     @Inject(at = @At("HEAD"), method = "tick")

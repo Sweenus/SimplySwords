@@ -131,5 +131,11 @@ public class EffectRegistry {
 
     public static final RegistrySupplier<StatusEffect> SHADOW_DANCE = EFFECT.register("shadow_dance", () ->
             new ShadowDanceEffect(StatusEffectCategory.BENEFICIAL, 1315860));
+    public static final RegistrySupplier<StatusEffect> BLEED = EFFECT.register("bleed", () ->
+            new BleedEffect(StatusEffectCategory.HARMFUL, 0x8f1f1f));
+    public static final RegistrySupplier<StatusEffect> SUNDERED_ARMOR = EFFECT.register("sundered_armor", () ->
+            new SunderedArmorEffect(StatusEffectCategory.HARMFUL, 0x7f7366));
+    public static final RegistrySupplier<StatusEffect> IMPLICIT_HASTE = EFFECT.register("implicit_haste", () ->
+            new ImplicitHasteEffect(StatusEffectCategory.BENEFICIAL, 0x66d9d9));
 
 }
