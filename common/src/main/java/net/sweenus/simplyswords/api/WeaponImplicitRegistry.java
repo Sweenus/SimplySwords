@@ -16,7 +16,6 @@ import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
@@ -29,13 +28,11 @@ import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.effect.instance.SimplySwordsStatusEffectInstance;
 import net.sweenus.simplyswords.entity.ThrownSpearEntity;
 import net.sweenus.simplyswords.entity.ThrownSwordEntity;
-import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.item.component.WeaponImplicitComponent;
 import net.sweenus.simplyswords.registry.ComponentTypeRegistry;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.ParticlesRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
-import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.world.ImplicitStatusVisualManager;
 
 import java.util.ArrayList;
@@ -80,12 +77,12 @@ public final class WeaponImplicitRegistry {
         registerWeaponImplicit(chanceDefinition(id("spear_armor_pierce"), SPEAR, 15, 35, "armor_pierce", WeaponImplicitRegistry::modifyArmorPierceDamage, null, null));
         registerWeaponImplicit(chanceDefinition(id("cutlass_plunder"), CUTLASS, 1, 3, "plunder", null, WeaponImplicitRegistry::applyPlunder, null));
         registerWeaponImplicit(chanceDefinition(id("glaive_bleed"), GLAIVE, 10, 60, "bleed", null, WeaponImplicitRegistry::applyBleed, null));
-        registerWeaponImplicit(percentDefinition(id("backstab"), SAI, 20, 40, "backstab", WeaponImplicitRegistry::modifyBackstabDamage, null, null));
-        registerWeaponImplicit(percentDefinition(id("dagger_backstab"), DAGGER, 20, 40, "backstab", WeaponImplicitRegistry::modifyBackstabDamage, null, null));
+        registerWeaponImplicit(percentDefinition(id("backstab"), SAI, 20, 40, "backstab", WeaponImplicitRegistry::modifyBackstabDamage, null));
+        registerWeaponImplicit(percentDefinition(id("dagger_backstab"), DAGGER, 20, 40, "backstab", WeaponImplicitRegistry::modifyBackstabDamage, null));
         registerWeaponImplicit(chanceDefinition(id("claymore_deflect"), CLAYMORE, 5, 15, "deflect", null, null, WeaponImplicitRegistry::tryDeflect));
         registerWeaponImplicit(chanceDefinition(id("longsword_deflect"), LONGSWORD, 5, 15, "deflect", null, null, WeaponImplicitRegistry::tryDeflect));
-        registerWeaponImplicit(percentDefinition(id("greathammer_sunder"), GREATHAMMER, 2, 10, "sunder", null, WeaponImplicitRegistry::applySunder, null));
-        registerWeaponImplicit(percentDefinition(id("hammer_sunder"), HAMMER, 2, 6, "sunder", null, WeaponImplicitRegistry::applySunder, null));
+        registerWeaponImplicit(percentDefinition(id("greathammer_sunder"), GREATHAMMER, 2, 10, "sunder", null, WeaponImplicitRegistry::applySunder));
+        registerWeaponImplicit(percentDefinition(id("hammer_sunder"), HAMMER, 2, 6, "sunder", null, WeaponImplicitRegistry::applySunder));
         registerWeaponImplicit(chanceDefinition(id("katana_double_damage"), KATANA, 5, 15, "double_damage", WeaponImplicitRegistry::modifyDoubleDamage, null, null));
         registerWeaponImplicit(chanceDefinition(id("chakram_haste"), CHAKRAM, 5, 25, "chakram_haste", null, WeaponImplicitRegistry::applyChakramHaste, null));
         registerWeaponImplicit(chanceDefinition(id("scythe_execute"), SCYTHE, 5, 15, "execute", WeaponImplicitRegistry::modifyExecuteDamage, null, null));
@@ -269,7 +266,7 @@ public final class WeaponImplicitRegistry {
         if (!(target.getWorld() instanceof ServerWorld serverWorld)) {
             return;
         }
-        int cappedStacks = Math.min(10, Math.max(1, stacks));
+        int cappedStacks = Math.clamp(stacks, 1, 10);
         int dropletCount = tickPulse ? 3 + cappedStacks : 7 + cappedStacks * 2;
         double y = target.getBodyY(tickPulse ? 0.74 : 0.8);
         serverWorld.spawnParticles(ParticlesRegistry.DRIPPING_BLOOD.get(), target.getX(), y, target.getZ(), dropletCount, 0.28, 0.18, 0.28, 0.065);
@@ -285,9 +282,8 @@ public final class WeaponImplicitRegistry {
 
     private static WeaponImplicitDefinition percentDefinition(Identifier id, Identifier weaponType, int min, int max, String key,
                                                              WeaponImplicitDefinition.DamageHandler damage,
-                                                             WeaponImplicitDefinition.HitHandler hit,
-                                                             WeaponImplicitDefinition.IncomingDamageHandler incoming) {
-        return chanceDefinition(id, weaponType, min, max, key, damage, hit, incoming);
+                                                             WeaponImplicitDefinition.HitHandler hit) {
+        return chanceDefinition(id, weaponType, min, max, key, damage, hit, null);
     }
 
     private static WeaponImplicitDefinition resolveDefinition(ItemStack stack) {
@@ -346,7 +342,7 @@ public final class WeaponImplicitRegistry {
     }
 
     private static float modifyArmorPierceDamage(ItemStack stack, WeaponImplicitComponent component, LivingEntity target, DamageSource source, float amount) {
-        if (!roll(target, component.value())) {
+        if (missedRoll(target, component.value())) {
             return amount;
         }
         float armorCompensation = Math.min(amount * 1.5F, target.getArmor() * 0.18F);
@@ -364,7 +360,7 @@ public final class WeaponImplicitRegistry {
     }
 
     private static float modifyDoubleDamage(ItemStack stack, WeaponImplicitComponent component, LivingEntity target, DamageSource source, float amount) {
-        if (!roll(target, component.value())) {
+        if (missedRoll(target, component.value())) {
             return amount;
         }
         spawnProcParticles(target, ParticleTypes.CRIT);
@@ -373,7 +369,7 @@ public final class WeaponImplicitRegistry {
 
     private static float modifyExecuteDamage(ItemStack stack, WeaponImplicitComponent component, LivingEntity target, DamageSource source, float amount) {
         float executeThreshold = target.getMaxHealth() * 0.1F;
-        if (target.getHealth() - amount > executeThreshold || !roll(target, component.value())) {
+        if (target.getHealth() - amount > executeThreshold || missedRoll(target, component.value())) {
             return amount;
         }
         spawnProcParticles(target, ParticleTypes.SOUL);
@@ -381,7 +377,7 @@ public final class WeaponImplicitRegistry {
     }
 
     private static void applyBleed(ItemStack stack, WeaponImplicitComponent component, LivingEntity target, LivingEntity attacker, float damage) {
-        if (!roll(target, component.value())) {
+        if (missedRoll(target, component.value())) {
             return;
         }
         int snapshot = Math.max(1, Math.round(damage * 0.5F * 100.0F));
@@ -396,7 +392,7 @@ public final class WeaponImplicitRegistry {
     }
 
     private static void applyPlunder(ItemStack stack, WeaponImplicitComponent component, LivingEntity target, LivingEntity attacker, float damage) {
-        if (!(target.getWorld() instanceof ServerWorld serverWorld) || target.getCommandTags().contains(CUTLASS_PLUNDERED_TAG) || !roll(target, component.value())) {
+        if (!(target.getWorld() instanceof ServerWorld serverWorld) || target.getCommandTags().contains(CUTLASS_PLUNDERED_TAG) || missedRoll(target, component.value())) {
             return;
         }
 
@@ -443,9 +439,8 @@ public final class WeaponImplicitRegistry {
     }
 
     private static void applySunder(ItemStack stack, WeaponImplicitComponent component, LivingEntity target, LivingEntity attacker, float damage) {
-        int current = target.hasStatusEffect(EffectRegistry.getReference(EffectRegistry.SUNDERED_ARMOR))
-                ? target.getStatusEffect(EffectRegistry.getReference(EffectRegistry.SUNDERED_ARMOR)).getAmplifier() + 1
-                : 0;
+        StatusEffectInstance currentSunder = target.getStatusEffect(EffectRegistry.getReference(EffectRegistry.SUNDERED_ARMOR));
+        int current = currentSunder == null ? 0 : currentSunder.getAmplifier() + 1;
         int next = Math.min(50, current + component.value());
         target.addStatusEffect(new StatusEffectInstance(EffectRegistry.getReference(EffectRegistry.SUNDERED_ARMOR), 200, Math.max(0, next - 1), false, false, true), attacker);
         if (target.getWorld() instanceof ServerWorld serverWorld) {
@@ -457,19 +452,18 @@ public final class WeaponImplicitRegistry {
     }
 
     private static void applyChakramHaste(ItemStack stack, WeaponImplicitComponent component, LivingEntity target, LivingEntity attacker, float damage) {
-        if (!roll(attacker, component.value())) {
+        if (missedRoll(attacker, component.value())) {
             return;
         }
-        int current = attacker.hasStatusEffect(EffectRegistry.getReference(EffectRegistry.IMPLICIT_HASTE))
-                ? attacker.getStatusEffect(EffectRegistry.getReference(EffectRegistry.IMPLICIT_HASTE)).getAmplifier() + 1
-                : 0;
+        StatusEffectInstance currentHaste = attacker.getStatusEffect(EffectRegistry.getReference(EffectRegistry.IMPLICIT_HASTE));
+        int current = currentHaste == null ? 0 : currentHaste.getAmplifier() + 1;
         int next = Math.min(5, current + 1);
         attacker.addStatusEffect(new StatusEffectInstance(EffectRegistry.getReference(EffectRegistry.IMPLICIT_HASTE), 120, next - 1, false, false, true), attacker);
         spawnProcParticles(attacker, ParticleTypes.ENCHANT);
     }
 
     private static void applyDoubleStrike(ItemStack stack, WeaponImplicitComponent component, LivingEntity target, LivingEntity attacker, float damage) {
-        if (!target.isAlive() || !roll(target, component.value())) {
+        if (!target.isAlive() || missedRoll(target, component.value())) {
             return;
         }
         DamageSource source = attacker instanceof PlayerEntity player
@@ -485,7 +479,7 @@ public final class WeaponImplicitRegistry {
     }
 
     private static boolean tryDeflect(ItemStack stack, WeaponImplicitComponent component, LivingEntity bearer, DamageSource source, float amount) {
-        if (!roll(bearer, component.value())) {
+        if (missedRoll(bearer, component.value())) {
             return false;
         }
         if (bearer.getWorld() instanceof ServerWorld serverWorld) {
@@ -495,8 +489,8 @@ public final class WeaponImplicitRegistry {
         return true;
     }
 
-    private static boolean roll(LivingEntity entity, int chance) {
-        return chance > 0 && entity.getRandom().nextInt(100) < chance;
+    private static boolean missedRoll(LivingEntity entity, int chance) {
+        return chance <= 0 || entity.getRandom().nextInt(100) >= chance;
     }
 
     private static boolean isBehindTarget(LivingEntity attacker, LivingEntity target) {
@@ -526,7 +520,7 @@ public final class WeaponImplicitRegistry {
                 return tagRegistration.weaponType();
             }
         }
-        if (!(stack.getItem() instanceof SwordItem) && !(stack.getItem() instanceof UniqueSwordItem)) {
+        if (!(stack.getItem() instanceof SwordItem)) {
             return null;
         }
         String path = itemId.getPath();
@@ -579,7 +573,7 @@ public final class WeaponImplicitRegistry {
         registerPath("magispear", SPEAR);
         registerPath("enigma", CLAYMORE);
         registerPath("caelestis", CLAYMORE);
-        registerPath("wraithfang", DAGGER);
+        registerPath("wraithfang", CUTLASS);
         registerPath("chompolotl", CHAKRAM);
         registerPath("dreadtide", TWINBLADE);
     }
