@@ -27,6 +27,7 @@ import net.sweenus.simplyswords.client.renderer.FrostfallIceSpikeVisualEntityRen
 import net.sweenus.simplyswords.client.renderer.ImplicitStatusVisualEntityRenderer;
 import net.sweenus.simplyswords.client.renderer.RevivalCandleVisualEntityRenderer;
 import net.sweenus.simplyswords.client.renderer.ShadowstingAfterimageVisualEntityRenderer;
+import net.sweenus.simplyswords.client.renderer.SoulkeeperLanternVisualEntityRenderer;
 import net.sweenus.simplyswords.client.renderer.SoulrenderMarkVisualEntityRenderer;
 import net.sweenus.simplyswords.client.renderer.ThrownSpearEntityRenderer;
 import net.sweenus.simplyswords.client.renderer.ThrownSwordEntityRenderer;
@@ -143,6 +144,7 @@ public class SimplySwords {
             EntityRendererRegistry.register(EntityRegistry.FROSTFALL_ICE_SPIKE_VISUAL, FrostfallIceSpikeVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.SOULRENDER_MARK_VISUAL, SoulrenderMarkVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.REVIVAL_CANDLE_VISUAL, RevivalCandleVisualEntityRenderer::new);
+            EntityRendererRegistry.register(EntityRegistry.SOULKEEPER_LANTERN_VISUAL, SoulkeeperLanternVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.FLAME_SEED_VISUAL, FlameSeedVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.WHISPERWIND_SLASH_VISUAL, WhisperwindSlashVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.EMBERLASH_SMOULDER_VISUAL, EmberlashSmoulderVisualEntityRenderer::new);

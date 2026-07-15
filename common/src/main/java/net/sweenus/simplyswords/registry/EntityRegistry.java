@@ -99,6 +99,15 @@ public class EntityRegistry {
                     .build(Identifier.of(SimplySwords.MOD_ID, "revival_candle_visual").toString())
     );
 
+    public static final RegistrySupplier<EntityType<SoulkeeperLanternVisualEntity>> SOULKEEPER_LANTERN_VISUAL = ENTITIES.register(
+            "soulkeeper_lantern_visual",
+            () -> EntityType.Builder.<SoulkeeperLanternVisualEntity>create(SoulkeeperLanternVisualEntity::new, SpawnGroup.MISC)
+                    .dimensions(3.0f, 2.4f)
+                    .maxTrackingRange(64)
+                    .trackingTickInterval(1)
+                    .build(Identifier.of(SimplySwords.MOD_ID, "soulkeeper_lantern_visual").toString())
+    );
+
     public static final RegistrySupplier<EntityType<FlameSeedVisualEntity>> FLAME_SEED_VISUAL = ENTITIES.register(
             "flame_seed_visual",
             () -> EntityType.Builder.<FlameSeedVisualEntity>create(FlameSeedVisualEntity::new, SpawnGroup.MISC)

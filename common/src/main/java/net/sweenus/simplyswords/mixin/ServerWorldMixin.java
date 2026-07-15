@@ -8,6 +8,7 @@ import net.sweenus.simplyswords.world.FrostfallIceSpikeFieldManager;
 import net.sweenus.simplyswords.world.ImplicitStatusVisualManager;
 import net.sweenus.simplyswords.world.RevivalCandleVisualManager;
 import net.sweenus.simplyswords.world.ShadowstingShadowDanceManager;
+import net.sweenus.simplyswords.world.SoulkeeperLanternManager;
 import net.sweenus.simplyswords.world.SoulrenderMarkVisualManager;
 import net.sweenus.simplyswords.world.WhisperwindVisualManager;
 import org.spongepowered.asm.mixin.Mixin;
@@ -48,5 +49,6 @@ public abstract class ServerWorldMixin {
             ShadowstingShadowDanceManager.tickCloneStrikes(world);
         }
         RevivalCandleVisualManager.tickWorld(world);
+        SoulkeeperLanternManager.tickWorld(world);
     }
 }

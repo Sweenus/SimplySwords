@@ -34,6 +34,7 @@ import net.sweenus.simplyswords.util.AbilityMethods;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.world.RevivalCandleVisualManager;
 import net.sweenus.simplyswords.world.ShadowstingShadowDanceManager;
+import net.sweenus.simplyswords.world.SoulkeeperLanternManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -120,6 +121,7 @@ public abstract class ServerPlayerEntityMixin {
         if (player instanceof ServerPlayerEntity serverPlayer) {
             RevivalCandleVisualManager.tickPlayer(serverPlayer);
             ShadowstingShadowDanceManager.tickPlayer(serverPlayer);
+            SoulkeeperLanternManager.tickPlayer(serverPlayer);
 
             //Ribboncleaver movespeed debuff
             if (serverPlayer.getMainHandStack().isOf(ItemsRegistry.RIBBONCLEAVER.get()) || serverPlayer.getMainHandStack().isOf(ItemsRegistry.ENIGMA.get())) {
