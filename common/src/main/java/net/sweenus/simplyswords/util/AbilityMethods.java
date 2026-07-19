@@ -240,63 +240,6 @@ public class AbilityMethods {
         }
     }
 
-    //Arcanethyst - Arcane Assault
-    public static void tickAbilityArcaneAssault(ItemStack stack, World world, LivingEntity user,
-                                                int ability_timer, float abilityDamage, int radius) {
-        if (!user.getWorld().isClient()) {
-
-            if (ability_timer < 5) user.stopUsingItem();
-
-            //AOE Lift - 1 charge
-            if (user.age % 10 == 0 && HelperMethods.isHolding(stack, user)) {
-                Box box = new Box(user.getX() + radius, user.getY() + radius * 2, user.getZ() + radius,
-                        user.getX() - radius, user.getY() - radius, user.getZ() - radius);
-                for (Entity entity : world.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY)) {
-
-                    if ((entity instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, user)) {
-
-                        float choose = (float) (Math.random() * 1);
-
-                        if (!le.hasStatusEffect(StatusEffects.LEVITATION) && ability_timer > 30) {
-                            le.addStatusEffect(new StatusEffectInstance(StatusEffects.LEVITATION, 20, 1), user);
-                            world.playSoundFromEntity(null, le, SoundRegistry.MAGIC_BOW_SHOOT_IMPACT_03.get(),
-                                    le.getSoundCategory(), 0.1f, choose);
-                        }
-                        le.damage(world.getDamageSources().indirectMagic(user, user), abilityDamage);
-                        if (ability_timer < 10) { //Ground Slam - 3 Charges
-                            le.removeStatusEffect(StatusEffects.LEVITATION);
-                            le.damage(world.getDamageSources().indirectMagic(user, user), abilityDamage * 3);
-                            le.setVelocity(0, -10, 0);
-                            user.stopUsingItem();
-                            world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_SWORD_SCIFI_ATTACK_03.get(),
-                                    le.getSoundCategory(), 0.3f, choose);
-                        }
-                    }
-                }
-                world.playSoundFromEntity(null, user, SoundRegistry.MAGIC_BOW_CHARGE_SHORT_VERSION.get(),
-                        user.getSoundCategory(), 0.1f, 0.6f);
-                double xpos = user.getX() - (radius + 1);
-                double ypos = user.getY();
-                double zpos = user.getZ() - (radius + 1);
-
-                for (int i = radius * 2; i > 0; i--) {
-                    for (int j = radius * 2; j > 0; j--) {
-                        float choose = (float) (Math.random() * 1);
-                        HelperMethods.spawnParticle(world, ParticleTypes.DRAGON_BREATH,
-                                xpos + i + choose, ypos + 0.4, zpos + j + choose,
-                                0, 0.1, 0);
-                        HelperMethods.spawnParticle(world, ParticleTypes.PORTAL,
-                                xpos + i + choose, ypos + 0.1, zpos + j + choose,
-                                0, 0, 0);
-                        HelperMethods.spawnParticle(world, ParticleTypes.REVERSE_PORTAL,
-                                xpos + i + choose, ypos + 1, zpos + j + choose,
-                                0, 0.1, 0);
-                    }
-                }
-            }
-        }
-    }
-
     //Hearthflame - Volcanic Fury
     public static void tickAbilityVolcanicFury(ItemStack stack, World world, LivingEntity user,
                                                int ability_timer, int ability_timer_max, float abilityDamage,

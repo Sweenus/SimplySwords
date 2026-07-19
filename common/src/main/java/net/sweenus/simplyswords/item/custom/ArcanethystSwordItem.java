@@ -13,10 +13,10 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
-import net.minecraft.util.UseAction;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.config.Config;
@@ -26,9 +26,9 @@ import net.sweenus.simplyswords.item.interfaces.TwoHandedWeapon;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
-import net.sweenus.simplyswords.util.AbilityMethods;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
+import net.sweenus.simplyswords.world.ArcanethystAssaultManager;
 
 import java.util.List;
 
@@ -52,43 +52,18 @@ public class ArcanethystSwordItem extends UniqueSwordItem implements TwoHandedWe
 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
-        if (!user.getWorld().isClient()) {
-            ItemStack itemStack = user.getStackInHand(hand);
-            if (itemStack.getDamage() >= itemStack.getMaxDamage() - 1) {
-                return TypedActionResult.fail(itemStack);
-            }
-            world.playSoundFromEntity(null, user, SoundRegistry.MAGIC_BOW_SHOOT_IMPACT_02.get(),
-                    user.getSoundCategory(), 0.4f, 1.2f);
-            user.setCurrentHand(hand);
-            return TypedActionResult.consume(itemStack);
+        ItemStack itemStack = user.getStackInHand(hand);
+        if (itemStack.getDamage() >= itemStack.getMaxDamage() - 1) {
+            return TypedActionResult.fail(itemStack);
         }
-        return super.use(world, user, hand);
-    }
-
-    @Override
-    public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
-        if (HelperMethods.isHolding(stack, user) && user instanceof PlayerEntity) {
+        if (world instanceof ServerWorld serverWorld) {
             int radius = Config.uniqueEffects.arcanethyst.radius;
             float abilityDamage = HelperMethods.spellScaledDamage("arcane", user, Config.uniqueEffects.arcanethyst.spellScaling, Config.uniqueEffects.arcanethyst.damage);
-            AbilityMethods.tickAbilityArcaneAssault(stack, world, user, remainingUseTicks, abilityDamage, radius);
+            ArcanethystAssaultManager.start(serverWorld, user, radius, abilityDamage);
+            user.getItemCooldownManager().set(itemStack.getItem(), Config.uniqueEffects.arcanethyst.cooldown);
         }
-    }
-
-    @Override
-    public int getMaxUseTime(ItemStack stack, LivingEntity user) {
-        return Config.uniqueEffects.arcanethyst.duration;
-    }
-
-    @Override
-    public UseAction getUseAction(ItemStack stack) {
-        return UseAction.CROSSBOW;
-    }
-
-    @Override
-    public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
-        if (!world.isClient && (user instanceof PlayerEntity player)) {
-            player.getItemCooldownManager().set(stack.getItem(), Config.uniqueEffects.arcanethyst.cooldown);
-        }
+        user.swingHand(hand);
+        return TypedActionResult.success(itemStack, world.isClient());
     }
 
     @Override
@@ -105,7 +80,7 @@ public class ArcanethystSwordItem extends UniqueSwordItem implements TwoHandedWe
         tooltip.add(Text.translatable("item.simplyswords.arcanethystsworditem.tooltip1").setStyle(Styles.ABILITY));
         tooltip.add(Text.translatable("item.simplyswords.arcanethystsworditem.tooltip2").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
-        tooltip.add(Text.translatable("item.simplyswords.onrightclickheld").setStyle(Styles.RIGHT_CLICK));
+        tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.arcanethystsworditem.tooltip3").setStyle(Styles.TEXT));
         appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.arcanethyst.cooldown);
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
@@ -125,10 +100,20 @@ public class ArcanethystSwordItem extends UniqueSwordItem implements TwoHandedWe
         @ValidatedFloat.Restrict(min = 0f)
         public float damage = 1f;
         @ValidatedInt.Restrict(min = 0)
-        public int duration = 120;
+        public int duration = 100;
         @ValidatedInt.Restrict(min = 1)
         public int radius = 6;
         @ValidatedFloat.Restrict(min = 0f)
         public float spellScaling = 1.4f;
+        @ValidatedFloat.Restrict(min = 0f)
+        public float liftHeight = 4.0f;
+        @ValidatedInt.Restrict(min = 1)
+        public int liftTicks = 18;
+        @ValidatedInt.Restrict(min = 0)
+        public int suspendTicks = 14;
+        @ValidatedInt.Restrict(min = 1)
+        public int slamTicks = 10;
+        @ValidatedFloat.Restrict(min = 0f)
+        public float slamDamageMultiplier = 9.0f;
     }
 }

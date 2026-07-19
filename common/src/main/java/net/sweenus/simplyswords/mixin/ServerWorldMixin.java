@@ -2,6 +2,7 @@ package net.sweenus.simplyswords.mixin;
 
 import net.minecraft.server.world.ServerWorld;
 import net.sweenus.simplyswords.effect.FlameSeedEffect;
+import net.sweenus.simplyswords.world.ArcanethystAssaultManager;
 import net.sweenus.simplyswords.world.EmberlashSmoulderVisualManager;
 import net.sweenus.simplyswords.world.FlamewindVisualManager;
 import net.sweenus.simplyswords.world.FrostfallIceSpikeFieldManager;
@@ -31,6 +32,9 @@ public abstract class ServerWorldMixin {
         }
         if (IcewhisperCometManager.hasActive(world)) {
             IcewhisperCometManager.tick(world);
+        }
+        if (ArcanethystAssaultManager.hasActive(world)) {
+            ArcanethystAssaultManager.tick(world);
         }
         if (SoulrenderMarkVisualManager.hasActive(world)) {
             SoulrenderMarkVisualManager.tick(world);
