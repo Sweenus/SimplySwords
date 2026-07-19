@@ -24,6 +24,7 @@ import net.sweenus.simplyswords.client.renderer.EmberlashSmoulderVisualEntityRen
 import net.sweenus.simplyswords.client.renderer.FlameSeedVisualEntityRenderer;
 import net.sweenus.simplyswords.client.renderer.FrostfallIceSpikeVisualEntityRenderer;
 import net.sweenus.simplyswords.client.renderer.HivemindBeeEntityRenderer;
+import net.sweenus.simplyswords.client.renderer.IcewhisperCometVisualEntityRenderer;
 import net.sweenus.simplyswords.client.renderer.ImplicitStatusVisualEntityRenderer;
 import net.sweenus.simplyswords.client.renderer.RevivalCandleVisualEntityRenderer;
 import net.sweenus.simplyswords.client.renderer.ShadowstingAfterimageVisualEntityRenderer;
@@ -150,6 +151,7 @@ public class SimplySwords {
             EntityRendererRegistry.register(EntityRegistry.EMBERLASH_SMOULDER_VISUAL, EmberlashSmoulderVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.IMPLICIT_STATUS_VISUAL, ImplicitStatusVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.SHADOWSTING_AFTERIMAGE_VISUAL, ShadowstingAfterimageVisualEntityRenderer::new);
+            EntityRendererRegistry.register(EntityRegistry.ICEWHISPER_COMET_VISUAL, IcewhisperCometVisualEntityRenderer::new);
 
             // Simply Tooltips bridge — renders all simplyswords sword items with the ST engine
             net.sweenus.simplytooltips.api.TooltipProviderRegistry.register(

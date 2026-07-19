@@ -240,65 +240,6 @@ public class AbilityMethods {
         }
     }
 
-    //Icewhisper - Permafrost
-    public static void tickAbilityPermafrost(ItemStack stack, World world, LivingEntity user,
-                                             int ability_timer, float abilityDamage, int radius,
-                                             double lastX, double lastY, double lastZ) {
-        if (user.getWorld().isClient()) return;
-
-        int rradius = radius * 2;
-        if (ability_timer < 5) user.stopUsingItem();
-
-        //AOE Blizzard
-        if (user.age % 10 != 0 || !HelperMethods.isHolding(stack, user)) return;
-
-        if (user instanceof PlayerEntity player) {
-            player.getHungerManager().addExhaustion(0.8f);
-        }
-        Box box = new Box(user.getX() + rradius, user.getY() + radius, user.getZ() + rradius,
-                user.getX() - rradius, user.getY() - radius, user.getZ() - rradius);
-        for (Entity entity : world.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY)) {
-
-            if ((entity instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, user)) {
-                if (le.hasStatusEffect(StatusEffects.SLOWNESS)) {
-
-                    int a = (le.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier() + 1);
-
-                    if (a < 4) {
-                        le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 120, a), user);
-                    } else {
-                        le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 120, a - 1), user);
-                    }
-                } else {
-                    le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 120, 0), user);
-                }
-                float choose = (float) (Math.random() * 1);
-                world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_BOW_ICE_SHOOT_IMPACT_03.get(),
-                        user.getSoundCategory(), 0.1f, choose);
-                le.damage(world.getDamageSources().indirectMagic(user, user), abilityDamage * 3);
-            }
-        }
-
-        double xpos = lastX - (rradius + 1);
-        double ypos = lastY;
-        double zpos = lastZ - (rradius + 1);
-        world.playSound(xpos, ypos, zpos, SoundRegistry.ELEMENTAL_BOW_ICE_SHOOT_IMPACT_03.get(),
-                user.getSoundCategory(), 0.1f, 0.2f, true);
-
-        for (int i = rradius * 2; i > 0; i--) {
-            for (int j = rradius * 2; j > 0; j--) {
-                float choose = (float) (Math.random() * 1);
-                HelperMethods.spawnParticle(world, ParticleTypes.SNOWFLAKE,
-                        xpos + i + choose, ypos + 6, zpos + j + choose,
-                        choose / 3, -0.3, choose / 3);
-                choose = (float) (Math.random() * 1);
-                HelperMethods.spawnParticle(world, ParticleTypes.WHITE_ASH,
-                        xpos + i + choose, ypos + 6, zpos + j + choose,
-                        choose / 3, 0, choose / 3);
-            }
-        }
-    }
-
     //Arcanethyst - Arcane Assault
     public static void tickAbilityArcaneAssault(ItemStack stack, World world, LivingEntity user,
                                                 int ability_timer, float abilityDamage, int radius) {

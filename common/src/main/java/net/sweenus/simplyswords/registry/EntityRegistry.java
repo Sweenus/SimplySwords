@@ -153,5 +153,13 @@ public class EntityRegistry {
                     .build(Identifier.of(SimplySwords.MOD_ID, "shadowsting_afterimage_visual").toString())
     );
 
+    public static final RegistrySupplier<EntityType<IcewhisperCometVisualEntity>> ICEWHISPER_COMET_VISUAL = ENTITIES.register(
+            "icewhisper_comet_visual",
+            () -> EntityType.Builder.<IcewhisperCometVisualEntity>create(IcewhisperCometVisualEntity::new, SpawnGroup.MISC)
+                    .dimensions(0.55f, 0.55f)
+                    .maxTrackingRange(96)
+                    .trackingTickInterval(1)
+                    .build(Identifier.of(SimplySwords.MOD_ID, "icewhisper_comet_visual").toString())
+    );
 
 }

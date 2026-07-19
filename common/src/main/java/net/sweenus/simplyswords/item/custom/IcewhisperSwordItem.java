@@ -13,10 +13,10 @@ import net.minecraft.item.ToolMaterial;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
-import net.minecraft.util.UseAction;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
@@ -25,13 +25,12 @@ import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
 import net.sweenus.simplyswords.item.interfaces.TwoHandedWeapon;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
-import net.sweenus.simplyswords.item.component.ChargedLocationComponent;
-import net.sweenus.simplyswords.registry.ComponentTypeRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
-import net.sweenus.simplyswords.util.AbilityMethods;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
+import net.sweenus.simplyswords.world.FrostfallIceSpikeFieldManager;
+import net.sweenus.simplyswords.world.IcewhisperCometManager;
 
 import java.util.List;
 
@@ -53,41 +52,15 @@ public class IcewhisperSwordItem extends UniqueSwordItem implements TwoHandedWea
         if (itemStack.getDamage() >= itemStack.getMaxDamage() - 1) {
             return TypedActionResult.fail(itemStack);
         }
-        itemStack.set(ComponentTypeRegistry.CHARGED_LOCATION.get(), new ChargedLocationComponent(user.getX(), user.getY(), user.getZ()));
 
-        user.setCurrentHand(hand);
-        return TypedActionResult.consume(itemStack);
-    }
-
-    @Override
-    public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
-        if (HelperMethods.isHolding(stack, user) && user instanceof PlayerEntity) {
-
-            ChargedLocationComponent location = stack.getOrDefault(ComponentTypeRegistry.CHARGED_LOCATION.get(), ChargedLocationComponent.DEFAULT);
-            int radius = Config.uniqueEffects.icewhisper.radius;
+        if (world instanceof ServerWorld serverWorld) {
+            int radius = Config.uniqueEffects.icewhisper.radius * 2;
             float abilityDamage = HelperMethods.spellScaledDamage("frost", user, Config.uniqueEffects.icewhisper.spellScaling, Config.uniqueEffects.icewhisper.damage);
-
-            AbilityMethods.tickAbilityPermafrost(stack, world, user, remainingUseTicks, abilityDamage,
-                    radius, location.lastX(), location.lastY(), location.lastZ());
+            IcewhisperCometManager.startStorm(serverWorld, user, radius, abilityDamage * Config.uniqueEffects.icewhisper.cometDamageMultiplier, Config.uniqueEffects.icewhisper.duration);
+            user.getItemCooldownManager().set(itemStack.getItem(), Config.uniqueEffects.icewhisper.cooldown);
         }
-    }
-
-    @Override
-    public int getMaxUseTime(ItemStack stack, LivingEntity user) {
-        return Config.uniqueEffects.icewhisper.duration;
-    }
-
-    @Override
-    public UseAction getUseAction(ItemStack stack) {
-        return UseAction.CROSSBOW;
-    }
-
-    @Override
-    public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
-        if (!world.isClient && (user instanceof PlayerEntity player)) {
-            int skillCooldown = Config.uniqueEffects.icewhisper.cooldown;
-            player.getItemCooldownManager().set(stack.getItem(), skillCooldown);
-        }
+        user.swingHand(hand);
+        return TypedActionResult.success(itemStack, world.isClient());
     }
 
     @Override
@@ -110,6 +83,9 @@ public class IcewhisperSwordItem extends UniqueSwordItem implements TwoHandedWea
                         world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_BOW_ICE_SHOOT_IMPACT_03.get(), le.getSoundCategory(), 0.1f, choose);
                         float abilityDamage = HelperMethods.spellScaledDamage("frost", entity, Config.uniqueEffects.icewhisper.spellScaling, Config.uniqueEffects.icewhisper.damage);
                         le.damage(player.getDamageSources().indirectMagic(entity, entity), abilityDamage);
+                        if (world instanceof ServerWorld serverWorld) {
+                            FrostfallIceSpikeFieldManager.createTargetBurst(serverWorld, le.getPos(), 4, 0.9F);
+                        }
                     }
                 }
                 world.playSoundFromEntity(null, player, SoundRegistry.ELEMENTAL_SWORD_ICE_ATTACK_02.get(),
@@ -146,8 +122,8 @@ public class IcewhisperSwordItem extends UniqueSwordItem implements TwoHandedWea
         tooltip.add(Text.translatable("item.simplyswords.icewhispersworditem.tooltip1").setStyle(Styles.ABILITY));
         tooltip.add(Text.translatable("item.simplyswords.icewhispersworditem.tooltip2", radius).setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
-        tooltip.add(Text.translatable("item.simplyswords.onrightclickheld").setStyle(Styles.RIGHT_CLICK));
-        tooltip.add(Text.translatable("item.simplyswords.icewhispersworditem.tooltip4", radius * 2).setStyle(Styles.TEXT));
+        tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
+        tooltip.add(Text.translatable("item.simplyswords.icewhispersworditem.tooltip4").setStyle(Styles.TEXT));
         appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.icewhisper.cooldown);
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
         TooltipUtils.appendSpellScaleTooltip(tooltip, "frost");
@@ -160,14 +136,24 @@ public class IcewhisperSwordItem extends UniqueSwordItem implements TwoHandedWea
         }
 
         @ValidatedInt.Restrict(min = 0)
-        public int cooldown = 600;
+        public int cooldown = 450;
         @ValidatedFloat.Restrict(min = 0f)
         public float damage = 1f;
-        @ValidatedInt.Restrict(min = 0)
+        @ValidatedInt.Restrict(min = 1)
         public int duration = 200;
         @ValidatedInt.Restrict(min = 1)
         public int radius = 4;
         @ValidatedFloat.Restrict(min = 0f)
         public float spellScaling = 0.9f;
+        @ValidatedInt.Restrict(min = 1)
+        public int cometInterval = 14;
+        @ValidatedInt.Restrict(min = 0)
+        public int cometsPerWave = 2;
+        @ValidatedInt.Restrict(min = 1)
+        public int cometFallTicks = 20;
+        @ValidatedFloat.Restrict(min = 0f)
+        public float cometSplashRadius = 2.5f;
+        @ValidatedFloat.Restrict(min = 0f)
+        public float cometDamageMultiplier = 16.0f;
     }
 }

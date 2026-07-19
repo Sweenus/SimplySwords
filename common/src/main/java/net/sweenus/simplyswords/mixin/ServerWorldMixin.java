@@ -6,6 +6,7 @@ import net.sweenus.simplyswords.world.EmberlashSmoulderVisualManager;
 import net.sweenus.simplyswords.world.FlamewindVisualManager;
 import net.sweenus.simplyswords.world.FrostfallIceSpikeFieldManager;
 import net.sweenus.simplyswords.world.HivemindSwarmManager;
+import net.sweenus.simplyswords.world.IcewhisperCometManager;
 import net.sweenus.simplyswords.world.ImplicitStatusVisualManager;
 import net.sweenus.simplyswords.world.RevivalCandleVisualManager;
 import net.sweenus.simplyswords.world.ShadowstingShadowDanceManager;
@@ -27,6 +28,9 @@ public abstract class ServerWorldMixin {
         ServerWorld world = (ServerWorld) (Object) this;
         if (FrostfallIceSpikeFieldManager.hasActive(world)) {
             FrostfallIceSpikeFieldManager.tick(world);
+        }
+        if (IcewhisperCometManager.hasActive(world)) {
+            IcewhisperCometManager.tick(world);
         }
         if (SoulrenderMarkVisualManager.hasActive(world)) {
             SoulrenderMarkVisualManager.tick(world);

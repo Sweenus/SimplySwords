@@ -62,6 +62,27 @@ public final class FrostfallIceSpikeFieldManager {
         world.playSound(null, center.x, center.y, center.z, SoundEvents.BLOCK_GLASS_BREAK, SoundCategory.PLAYERS, 0.35F, 0.55F + world.random.nextFloat() * 0.2F);
     }
 
+    public static void createTargetBurst(ServerWorld world, Vec3d center, int spikeCount, float heightScale) {
+        if (!Config.general.enableModernFieldEffects) {
+            return;
+        }
+
+        int pointCount = MathHelper.clamp(spikeCount, 1, 8);
+        long now = world.getTime();
+        ActiveIceSpikePulse pulse = new ActiveIceSpikePulse(now + VISUAL_DURATION_TICKS);
+        double phase = world.random.nextDouble() * Math.PI * 2.0;
+        for (int i = 0; i < pointCount; i++) {
+            double angle = phase + ((Math.PI * 2.0) / pointCount) * i;
+            double distance = pointCount == 1 ? 0.0 : 0.18 + world.random.nextDouble() * 0.28;
+            double x = center.x + Math.cos(angle) * distance;
+            double z = center.z + Math.sin(angle) * distance;
+            double y = findGroundTopY(world, x, z, center.y) + BASE_GROUND_OFFSET;
+            int heightSegments = Math.max(2, Math.round((3 + world.random.nextInt(4)) * heightScale));
+            spawnSpikeVisual(world, pulse, x, y, z, heightSegments, now);
+        }
+        ACTIVE_PULSES.computeIfAbsent(world, w -> new ArrayList<>()).add(pulse);
+    }
+
     public static void tick(ServerWorld world) {
         List<ActiveIceSpikePulse> pulses = ACTIVE_PULSES.get(world);
         if (pulses == null || pulses.isEmpty()) {
