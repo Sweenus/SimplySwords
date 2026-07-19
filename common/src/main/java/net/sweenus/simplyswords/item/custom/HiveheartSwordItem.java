@@ -2,17 +2,18 @@ package net.sweenus.simplyswords.item.custom;
 
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
+import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedDouble;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
@@ -25,9 +26,9 @@ import net.sweenus.simplyswords.entity.SimplySwordsBeeEntity;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.registry.EntityRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
-import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
+import net.sweenus.simplyswords.world.HivemindSwarmManager;
 
 import java.util.List;
 
@@ -69,16 +70,16 @@ public class HiveheartSwordItem extends UniqueSwordItem {
 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
-
-        int regenDuration = Config.uniqueEffects.hiveheart.duration;
-        int skillCooldown = Config.uniqueEffects.hiveheart.cooldown;
-        HelperMethods.incrementStatusEffect(user, StatusEffects.REGENERATION, regenDuration, 1, 3);
         ItemStack stack = user.getStackInHand(hand);
-        world.playSound(null, user.getBlockPos(), SoundRegistry.SPELL_MISC_02.get(),
-                user.getSoundCategory(), 0.8f, 1.0f);
-        user.getItemCooldownManager().set(stack.getItem(), skillCooldown * 10);
+        if (!world.isClient() && world instanceof ServerWorld serverWorld && user instanceof ServerPlayerEntity serverPlayer) {
+            if (hand != Hand.MAIN_HAND || serverPlayer.getItemCooldownManager().isCoolingDown(stack.getItem())) {
+                return TypedActionResult.fail(stack);
+            }
+            HivemindSwarmManager.activate(serverWorld, serverPlayer);
+            serverPlayer.getItemCooldownManager().set(stack.getItem(), Config.uniqueEffects.hiveheart.activeCooldown);
+        }
 
-        return super.use(world, user, hand);
+        return TypedActionResult.success(stack, world.isClient());
     }
 
     @Override
@@ -98,6 +99,7 @@ public class HiveheartSwordItem extends UniqueSwordItem {
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.hiveheartsworditem.tooltip7").setStyle(Styles.TEXT));
+        tooltip.add(Text.translatable("item.simplyswords.hiveheartsworditem.tooltip8", Config.uniqueEffects.hiveheart.activeCooldown / 20).setStyle(Styles.TEXT));
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
     }
 
@@ -112,7 +114,21 @@ public class HiveheartSwordItem extends UniqueSwordItem {
         @ValidatedFloat.Restrict(min = 0f)
         public float damage = 1.1f;
         @ValidatedInt.Restrict(min = 0)
-        public int duration = 450;
+        public int activeCooldown = 300;
+        @ValidatedInt.Restrict(min = 0)
+        public int swarmBeeCount = 8;
+        @ValidatedDouble.Restrict(min = 1.0)
+        public double swarmRadius = 8.0;
+        @ValidatedInt.Restrict(min = 20)
+        public int swarmLifetime = 240;
+        @ValidatedInt.Restrict(min = 1)
+        public int stingsPerBee = 10;
+        @ValidatedDouble.Restrict(min = 0.0)
+        public double stingDamageMultiplier = 0.05;
+        @ValidatedInt.Restrict(min = 1)
+        public int stingIntervalTicks = 10;
+        @ValidatedInt.Restrict(min = 0)
+        public int maxSlowAmplifier = 3;
 
     }
 }
