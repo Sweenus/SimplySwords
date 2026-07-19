@@ -140,6 +140,8 @@ public class SimplySwordsAPI {
         ContainedRemnantItem.addTransformation(block, identifier);
     }
 
+    // Register/Assign weapon implicits. If you don't require your own custom implicits, you can instead assign them via tag data under 'resources/data/simplyswords/tags/item/implicit/...'
+
     public static void registerWeaponType(Item item, Identifier weaponType) {
         WeaponImplicitRegistry.registerWeaponType(item, weaponType);
     }
