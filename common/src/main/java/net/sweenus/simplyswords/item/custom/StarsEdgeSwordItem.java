@@ -113,6 +113,7 @@ public class StarsEdgeSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.starsedgesworditem.tooltip5").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.starsedgesworditem.tooltip6").setStyle(Styles.TEXT));
+        appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.stars_edge.cooldown);
 
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
     }

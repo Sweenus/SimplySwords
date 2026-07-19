@@ -130,6 +130,7 @@ public class MoltenEdgeSwordItem extends UniqueSwordItem {
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.moltenedgesworditem.tooltip5").setStyle(Styles.TEXT));
+        appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.molten_edge.cooldown);
 
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
     }

@@ -88,6 +88,17 @@ public abstract class UniqueSwordItem extends SwordItem {
         generateDynamicTooltip(itemStack, tooltipContext, tooltip, type);
     }
 
+    protected static void appendAbilityCooldownTooltip(List<Text> tooltip, int cooldownTicks) {
+        tooltip.add(Text.translatable("tooltip.simplyswords.ability_cooldown", formatCooldown(cooldownTicks)).setStyle(Styles.COOLDOWN));
+    }
+
+    private static String formatCooldown(int cooldownTicks) {
+        if (cooldownTicks > 0 && cooldownTicks < 20) {
+            return "<1s";
+        }
+        return (cooldownTicks / 20) + "s";
+    }
+
     protected Identifier getConfigPath() {
         return Identifier.of("simplyswords.unique_effects."+ this.asItem().getRegistryEntry().registryKey().getValue().getPath());
     }

@@ -79,6 +79,7 @@ public class CaelestisSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.caelestissworditem.tooltip5", Config.uniqueEffects.caelestis.duration / 20).setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.caelestissworditem.tooltip8").setStyle(Styles.TEXT));
+        appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.caelestis.cooldown);
 
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
     }

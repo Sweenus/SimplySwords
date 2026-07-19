@@ -99,7 +99,7 @@ public class HiveheartSwordItem extends UniqueSwordItem {
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.hiveheartsworditem.tooltip7").setStyle(Styles.TEXT));
-        tooltip.add(Text.translatable("item.simplyswords.hiveheartsworditem.tooltip8", Config.uniqueEffects.hiveheart.activeCooldown / 20).setStyle(Styles.TEXT));
+        appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.hiveheart.activeCooldown);
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
     }
 

@@ -105,6 +105,7 @@ public class ChompolotlSwordItem extends UniqueSwordItem {
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.chompolotlsworditem.tooltip7").setStyle(Styles.TEXT));
+        appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.chompolotl.cooldown * 10);
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
     }
 

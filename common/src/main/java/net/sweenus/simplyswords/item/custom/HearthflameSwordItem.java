@@ -110,7 +110,7 @@ public class HearthflameSwordItem extends UniqueSwordItem implements TwoHandedWe
     public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
         if (!world.isClient) {
             if (user instanceof PlayerEntity player) {
-                player.getItemCooldownManager().set(this, Config.uniqueEffects.hearthflame.chance);
+                player.getItemCooldownManager().set(this, Config.uniqueEffects.hearthflame.cooldown);
             }
             int choose_sound = (int) (Math.random() * 30);
             if (choose_sound <= 10)
@@ -161,6 +161,7 @@ public class HearthflameSwordItem extends UniqueSwordItem implements TwoHandedWe
         tooltip.add(Text.translatable("item.simplyswords.volcanicfurysworditem.tooltip4").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.volcanicfurysworditem.tooltip7").setStyle(Styles.TEXT));
+        appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.hearthflame.cooldown);
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
         TooltipUtils.appendSpellScaleTooltip(tooltip, "fire");
     }

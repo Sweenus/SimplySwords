@@ -163,6 +163,7 @@ public class EmberIreSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.emberiresworditem.tooltip6").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.emberiresworditem.tooltip9").setStyle(Styles.TEXT));
+        appendAbilityCooldownTooltip(tooltip, 10);
 
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
     }

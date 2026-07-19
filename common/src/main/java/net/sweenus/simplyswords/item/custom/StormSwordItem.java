@@ -92,6 +92,7 @@ public class StormSwordItem extends UniqueSwordItem {
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.onrightclickheld").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.stormsworditem.tooltip4").setStyle(Styles.TEXT));
+        appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.mjolnir.cooldown);
 
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
     }

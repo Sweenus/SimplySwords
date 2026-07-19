@@ -73,7 +73,7 @@ public class SoulkeeperSwordItem extends UniqueSwordItem implements TwoHandedWea
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.soulsworditem.tooltip4").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
-        tooltip.add(Text.translatable("item.simplyswords.soulsworditem.tooltip5", Config.uniqueEffects.soulkeeper.cooldown / 20).setStyle(Styles.TEXT));
+        appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.soulkeeper.cooldown);
 
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
     }

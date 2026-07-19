@@ -106,6 +106,7 @@ public class MagispearSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.magispearsworditem.tooltip5").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.magispearsworditem.tooltip9").setStyle(Styles.TEXT));
+        appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.magispear.cooldown);
 
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
     }
