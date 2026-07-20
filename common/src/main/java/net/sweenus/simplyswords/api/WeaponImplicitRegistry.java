@@ -28,6 +28,7 @@ import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.effect.instance.SimplySwordsStatusEffectInstance;
 import net.sweenus.simplyswords.entity.ThrownSpearEntity;
 import net.sweenus.simplyswords.entity.ThrownSwordEntity;
+import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.item.component.WeaponImplicitComponent;
 import net.sweenus.simplyswords.registry.ComponentTypeRegistry;
 import net.sweenus.simplyswords.registry.EffectRegistry;
@@ -130,7 +131,7 @@ public final class WeaponImplicitRegistry {
             return Optional.of(existing);
         }
 
-        int value = ThreadLocalRandom.current().nextInt(definition.minValue(), definition.maxValue() + 1);
+        int value = rollImplicitValue(stack, definition);
         WeaponImplicitComponent component = new WeaponImplicitComponent(definition.id(), definition.weaponType(), value);
         stack.set(ComponentTypeRegistry.WEAPON_IMPLICIT.get(), component);
         return Optional.of(component);
@@ -300,6 +301,17 @@ public final class WeaponImplicitRegistry {
 
     private static Text formatRangePreview(WeaponImplicitDefinition definition) {
         return Text.translatable("tooltip.simplyswords.implicit." + tooltipKey(definition), definition.minValue() + "-" + definition.maxValue());
+    }
+
+    private static int rollImplicitValue(ItemStack stack, WeaponImplicitDefinition definition) {
+        int min = definition.minValue();
+        int max = definition.maxValue();
+        if (stack.getItem() instanceof UniqueSwordItem) {
+            int rangeSize = max - min + 1;
+            int topRollCount = Math.max(1, (int) Math.ceil(rangeSize * 0.1D));
+            min = max - topRollCount + 1;
+        }
+        return ThreadLocalRandom.current().nextInt(min, max + 1);
     }
 
     private static boolean componentMatchesDefinition(WeaponImplicitComponent component, WeaponImplicitDefinition definition) {
@@ -533,7 +545,7 @@ public final class WeaponImplicitRegistry {
         registerPath("storms_edge", TWINBLADE);
         registerPath("stormbringer", LONGSWORD);
         registerPath("bramblethorn", RAPIER);
-        registerPath("watching_warglaive", TWINBLADE);
+        registerPath("watching_warglaive", WARGLAIVE);
         registerPath("toxic_longsword", LONGSWORD);
         registerPath("emberblade", LONGSWORD);
         registerPath("frostfall", HAMMER);
