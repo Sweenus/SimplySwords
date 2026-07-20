@@ -16,6 +16,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.client.renderer.BattleStandardFieldRenderer;
+import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.item.custom.StealSwordItem;
 import net.sweenus.simplyswords.item.component.StoredChargeComponent;
 import net.sweenus.simplyswords.registry.ComponentTypeRegistry;
@@ -55,22 +56,41 @@ public abstract class WorldRendererMixin {
             BattleStandardFieldRenderer.renderImmolation(matrices, vertexConsumers, player.age, Math.max(0.75F, immolation.getAmplifier()));
         }
 
-        LivingEntity soulstealerTarget = getReadySoulstealerTarget(player);
-        if (soulstealerTarget != null) {
+        TargetHighlight highlight = getReadyTarget(player);
+        if (highlight != null) {
+            LivingEntity highlightedTarget = highlight.target();
             Vec3d playerPos = new Vec3d(
                     MathHelper.lerp(tickDelta, player.prevX, player.getX()),
                     MathHelper.lerp(tickDelta, player.prevY, player.getY()),
                     MathHelper.lerp(tickDelta, player.prevZ, player.getZ()));
             Vec3d targetPos = new Vec3d(
-                    MathHelper.lerp(tickDelta, soulstealerTarget.prevX, soulstealerTarget.getX()),
-                    MathHelper.lerp(tickDelta, soulstealerTarget.prevY, soulstealerTarget.getY()),
-                    MathHelper.lerp(tickDelta, soulstealerTarget.prevZ, soulstealerTarget.getZ()));
+                    MathHelper.lerp(tickDelta, highlightedTarget.prevX, highlightedTarget.getX()),
+                    MathHelper.lerp(tickDelta, highlightedTarget.prevY, highlightedTarget.getY()),
+                    MathHelper.lerp(tickDelta, highlightedTarget.prevZ, highlightedTarget.getZ()));
             Vec3d targetOffset = targetPos.subtract(playerPos);
-            BattleStandardFieldRenderer.renderSoulstealerTargetLine(matrices, vertexConsumers, player.age, targetOffset);
-            BattleStandardFieldRenderer.renderSoulstealerTargetRing(matrices, vertexConsumers, player.age, targetOffset, soulstealerTarget.getWidth());
+            if (highlight.brimstone()) {
+                BattleStandardFieldRenderer.renderBrimstoneTargetLine(matrices, vertexConsumers, player.age, targetOffset);
+                BattleStandardFieldRenderer.renderBrimstoneTargetRing(matrices, vertexConsumers, player.age, targetOffset, highlightedTarget.getWidth());
+            } else {
+                BattleStandardFieldRenderer.renderSoulstealerTargetLine(matrices, vertexConsumers, player.age, targetOffset);
+                BattleStandardFieldRenderer.renderSoulstealerTargetRing(matrices, vertexConsumers, player.age, targetOffset, highlightedTarget.getWidth());
+            }
         }
 
         vertexConsumers.draw(RenderLayer.getDebugQuads());
+    }
+
+    private TargetHighlight getReadyTarget(ClientPlayerEntity player) {
+        LivingEntity soulstealerTarget = getReadySoulstealerTarget(player);
+        if (soulstealerTarget != null) {
+            return new TargetHighlight(soulstealerTarget, false);
+        }
+        LivingEntity lichbladeTarget = getReadyLichbladeTarget(player);
+        if (lichbladeTarget != null) {
+            return new TargetHighlight(lichbladeTarget, false);
+        }
+        LivingEntity brimstoneTarget = getReadyBrimstoneTarget(player);
+        return brimstoneTarget == null ? null : new TargetHighlight(brimstoneTarget, true);
     }
 
     private LivingEntity getReadySoulstealerTarget(ClientPlayerEntity player) {
@@ -84,6 +104,29 @@ public abstract class WorldRendererMixin {
         return StealSwordItem.findSoulstealerTarget(player);
     }
 
+    private LivingEntity getReadyLichbladeTarget(ClientPlayerEntity player) {
+        ItemStack stack = player.getMainHandStack();
+        if ((!stack.isOf(ItemsRegistry.WAKING_LICHBLADE.get()) && !stack.isOf(ItemsRegistry.AWAKENED_LICHBLADE.get()))
+                || player.getItemCooldownManager().isCoolingDown(stack.getItem())
+                || player.isUsingItem()
+                || stack.getDamage() >= stack.getMaxDamage() - 1) {
+            return null;
+        }
+
+        return StealSwordItem.findLenientTarget(player, Config.uniqueEffects.lichblade.range);
+    }
+
+    private LivingEntity getReadyBrimstoneTarget(ClientPlayerEntity player) {
+        ItemStack stack = player.getMainHandStack();
+        if (!stack.isOf(ItemsRegistry.BRIMSTONE_CLAYMORE.get())
+                || player.getItemCooldownManager().isCoolingDown(stack.getItem())
+                || stack.getDamage() >= stack.getMaxDamage() - 1) {
+            return null;
+        }
+
+        return StealSwordItem.findLenientTarget(player, Config.uniqueEffects.brimstone_claymore.range);
+    }
+
     private ItemStack getHeldSoulstealer(ClientPlayerEntity player) {
         ItemStack mainHandStack = player.getMainHandStack();
         if (mainHandStack.isOf(ItemsRegistry.SOULSTEALER.get())) {
@@ -95,5 +138,8 @@ public abstract class WorldRendererMixin {
             return offHandStack;
         }
         return ItemStack.EMPTY;
+    }
+
+    private record TargetHighlight(LivingEntity target, boolean brimstone) {
     }
 }

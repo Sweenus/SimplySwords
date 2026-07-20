@@ -125,7 +125,10 @@ public class StealSwordItem extends UniqueSwordItem {
     }
 
     public static LivingEntity findSoulstealerTarget(PlayerEntity player) {
-        double range = Config.uniqueEffects.soulstealer.range;
+        return findLenientTarget(player, Config.uniqueEffects.soulstealer.range);
+    }
+
+    public static LivingEntity findLenientTarget(PlayerEntity player, double range) {
         Entity targeted = HelperMethods.getTargetedEntity(player, range);
         if (targeted instanceof LivingEntity livingTarget
                 && isValidSoulstealerTarget(livingTarget, player)) {

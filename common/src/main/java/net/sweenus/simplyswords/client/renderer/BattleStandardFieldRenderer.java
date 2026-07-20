@@ -48,7 +48,22 @@ public final class BattleStandardFieldRenderer {
         renderCircle(matrices, vertexConsumers, age, Math.max(0.75F, radius), 255, 179, 64);
     }
 
+    public static void renderBrimstoneCircle(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int age, float radius) {
+        if (!isEnabled()) {
+            return;
+        }
+        renderCircle(matrices, vertexConsumers, age, Math.max(0.75F, radius), 255, 91, 28);
+    }
+
     public static void renderSoulstealerTargetLine(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int age, Vec3d targetOffset) {
+        renderTargetLine(matrices, vertexConsumers, age, targetOffset, 118, 238, 218, 157, 98, 202);
+    }
+
+    public static void renderBrimstoneTargetLine(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int age, Vec3d targetOffset) {
+        renderTargetLine(matrices, vertexConsumers, age, targetOffset, 255, 142, 48, 255, 64, 24);
+    }
+
+    private static void renderTargetLine(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int age, Vec3d targetOffset, int coreRed, int coreGreen, int coreBlue, int pulseRed, int pulseGreen, int pulseBlue) {
         if (!isEnabled()) {
             return;
         }
@@ -60,8 +75,10 @@ public final class BattleStandardFieldRenderer {
 
         Matrix4f matrix = matrices.peek().getPositionMatrix();
         VertexConsumer vertices = vertexConsumers.getBuffer(RenderLayer.getDebugQuads());
-        Vec3d direction = horizontalOffset.normalize();
-        Vec3d side = new Vec3d(-direction.z, 0.0, direction.x);
+        Vec3d line = new Vec3d(targetOffset.x, targetOffset.y, targetOffset.z);
+        Vec3d direction = line.normalize();
+        Vec3d horizontalDirection = horizontalOffset.normalize();
+        Vec3d side = new Vec3d(-horizontalDirection.z, 0.0, horizontalDirection.x);
         double length = horizontalOffset.horizontalLength();
         double startInset = Math.min(0.85, length * 0.18);
         double endInset = Math.min(0.75, length * 0.14);
@@ -69,16 +86,27 @@ public final class BattleStandardFieldRenderer {
             return;
         }
 
-        Vec3d start = direction.multiply(startInset);
-        Vec3d end = direction.multiply(length - endInset);
+        double fullLength = line.length();
+        double startDistance = fullLength * (startInset / length);
+        double endDistance = fullLength * ((length - endInset) / length);
+        Vec3d start = direction.multiply(startDistance);
+        Vec3d end = direction.multiply(endDistance);
         float pulse = 0.72F + 0.16F * MathHelper.sin(age * 0.16F);
         int coreAlpha = MathHelper.clamp((int) (155.0F * pulse), 95, 180);
 
-        drawLineBand(vertices, matrix, start, end, side, 0.09F, 118, 238, 218, coreAlpha);
-        drawLinePulse(vertices, matrix, age, start, end, side);
+        drawLineBand(vertices, matrix, start, end, side, 0.09F, coreRed, coreGreen, coreBlue, coreAlpha);
+        drawLinePulse(vertices, matrix, age, start, end, side, pulseRed, pulseGreen, pulseBlue);
     }
 
     public static void renderSoulstealerTargetRing(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int age, Vec3d targetOffset, float targetWidth) {
+        renderTargetRing(matrices, vertexConsumers, age, targetOffset, targetWidth, 118, 238, 218, 157, 98, 202);
+    }
+
+    public static void renderBrimstoneTargetRing(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int age, Vec3d targetOffset, float targetWidth) {
+        renderTargetRing(matrices, vertexConsumers, age, targetOffset, targetWidth, 255, 142, 48, 255, 64, 24);
+    }
+
+    private static void renderTargetRing(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int age, Vec3d targetOffset, float targetWidth, int borderRed, int borderGreen, int borderBlue, int waveRed, int waveGreen, int waveBlue) {
         if (!isEnabled()) {
             return;
         }
@@ -90,8 +118,8 @@ public final class BattleStandardFieldRenderer {
         float borderPulse = 0.76F + 0.12F * MathHelper.sin(age * 0.14F);
         int borderAlpha = MathHelper.clamp((int) (165.0F * borderPulse), 90, 185);
 
-        drawOffsetCircleWave(vertices, matrix, center, age, radius, 157, 98, 202);
-        drawOffsetCircleBand(vertices, matrix, center, radius, 0.08F, 118, 238, 218, borderAlpha);
+        drawOffsetCircleWave(vertices, matrix, center, age, radius, waveRed, waveGreen, waveBlue);
+        drawOffsetCircleBand(vertices, matrix, center, radius, 0.08F, borderRed, borderGreen, borderBlue, borderAlpha);
     }
 
     private static void renderRing(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int age, int red, int green, int blue) {
@@ -251,9 +279,9 @@ public final class BattleStandardFieldRenderer {
         }
     }
 
-    private static void drawLinePulse(VertexConsumer vertices, Matrix4f matrix, int age, Vec3d start, Vec3d end, Vec3d side) {
+    private static void drawLinePulse(VertexConsumer vertices, Matrix4f matrix, int age, Vec3d start, Vec3d end, Vec3d side, int red, int green, int blue) {
         Vec3d line = end.subtract(start);
-        double length = line.horizontalLength();
+        double length = line.length();
         if (length <= 0.01) {
             return;
         }
@@ -278,7 +306,7 @@ public final class BattleStandardFieldRenderer {
             Vec3d pulseEnd = start.add(direction.multiply(Math.min(length, trailDistance + halfLength)));
             float trailFade = fade * (1.0F - trailIndex * 0.2F);
             int alpha = MathHelper.clamp((int) (120.0F * trailFade), 0, 120);
-            drawLineBand(vertices, matrix, pulseStart, pulseEnd, side, 0.16F, 157, 98, 202, alpha);
+            drawLineBand(vertices, matrix, pulseStart, pulseEnd, side, 0.16F, red, green, blue, alpha);
         }
     }
 
@@ -288,10 +316,10 @@ public final class BattleStandardFieldRenderer {
         }
 
         Vec3d offset = side.multiply(halfThickness);
-        vertices.vertex(matrix, (float) (start.x + offset.x), Y_OFFSET, (float) (start.z + offset.z)).color(red, green, blue, alpha);
-        vertices.vertex(matrix, (float) (end.x + offset.x), Y_OFFSET, (float) (end.z + offset.z)).color(red, green, blue, alpha);
-        vertices.vertex(matrix, (float) (end.x - offset.x), Y_OFFSET, (float) (end.z - offset.z)).color(red, green, blue, alpha);
-        vertices.vertex(matrix, (float) (start.x - offset.x), Y_OFFSET, (float) (start.z - offset.z)).color(red, green, blue, alpha);
+        vertices.vertex(matrix, (float) (start.x + offset.x), (float) start.y + Y_OFFSET, (float) (start.z + offset.z)).color(red, green, blue, alpha);
+        vertices.vertex(matrix, (float) (end.x + offset.x), (float) end.y + Y_OFFSET, (float) (end.z + offset.z)).color(red, green, blue, alpha);
+        vertices.vertex(matrix, (float) (end.x - offset.x), (float) end.y + Y_OFFSET, (float) (end.z - offset.z)).color(red, green, blue, alpha);
+        vertices.vertex(matrix, (float) (start.x - offset.x), (float) start.y + Y_OFFSET, (float) (start.z - offset.z)).color(red, green, blue, alpha);
     }
 
     private static void drawQuad(VertexConsumer vertices, Matrix4f matrix, float minX, float minZ, float maxX, float maxZ, int red, int green, int blue, int alpha) {

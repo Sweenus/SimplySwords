@@ -6,8 +6,6 @@ import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
@@ -65,9 +63,11 @@ public class LichbladeSwordItem extends UniqueSwordItem implements TwoHandedWeap
         if (itemStack.isOf(ItemsRegistry.SLUMBERING_LICHBLADE.get())) {
             return TypedActionResult.pass(itemStack);
         }
-        LivingEntity abilityTarget = (LivingEntity) HelperMethods.getTargetedEntity(user, Config.uniqueEffects.lichblade.range);
-        if (abilityTarget != null) {
-            abilityTarget.addStatusEffect(new StatusEffectInstance(StatusEffects.GLOWING, 10, 0), user);
+        if (!world.isClient()) {
+            LivingEntity abilityTarget = StealSwordItem.findLenientTarget(user, Config.uniqueEffects.lichblade.range);
+            if (abilityTarget == null) {
+                return TypedActionResult.fail(itemStack);
+            }
             world.playSoundFromEntity(null, user, SoundRegistry.DARK_SWORD_ENCHANT.get(),
                     user.getSoundCategory(), 0.5f, 0.5f);
             itemStack.set(ComponentTypeRegistry.TARGETED_LOCATION.get(), new TargetedLocationComponent(abilityTarget.getUuid(), user.getX(), user.getY(), user.getZ()));

@@ -162,4 +162,13 @@ public class EntityRegistry {
                     .build(Identifier.of(SimplySwords.MOD_ID, "icewhisper_comet_visual").toString())
     );
 
+    public static final RegistrySupplier<EntityType<BrimstoneClaymoreVisualEntity>> BRIMSTONE_CLAYMORE_VISUAL = ENTITIES.register(
+            "brimstone_claymore_visual",
+            () -> EntityType.Builder.<BrimstoneClaymoreVisualEntity>create(BrimstoneClaymoreVisualEntity::new, SpawnGroup.MISC)
+                    .dimensions(0.75f, 0.75f)
+                    .maxTrackingRange(96)
+                    .trackingTickInterval(1)
+                    .build(Identifier.of(SimplySwords.MOD_ID, "brimstone_claymore_visual").toString())
+    );
+
 }
