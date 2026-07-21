@@ -58,6 +58,11 @@ public final class ChainLightningVisualManager {
     }
 
     public static int damageChain(ServerWorld world, ServerPlayerEntity player, LivingEntity firstTarget, int chainCount, float damage, double range, LightningVisualSettings settings) {
+        return damageChain(world, player, player, firstTarget, chainCount, damage, range, settings);
+    }
+
+    public static int damageChain(ServerWorld world, ServerPlayerEntity player, LivingEntity sourceEntity, LivingEntity firstTarget,
+                                  int chainCount, float damage, double range, LightningVisualSettings settings) {
         if (chainCount <= 0 || firstTarget == null || !firstTarget.isAlive()) {
             return 0;
         }
@@ -82,12 +87,13 @@ public final class ChainLightningVisualManager {
         }
 
         List<Vec3d> points = new ArrayList<>();
-        points.add(player.getPos().add(0.0, Math.max(0.55, player.getHeight() * 0.6), 0.0));
+        LivingEntity visualSource = sourceEntity == null ? player : sourceEntity;
+        points.add(visualSource.getPos().add(0.0, Math.max(0.55, visualSource.getHeight() * 0.6), 0.0));
         for (LivingEntity target : chain) {
             points.add(target.getPos().add(0.0, Math.max(0.45, target.getHeight() * 0.58), 0.0));
         }
         spawnChain(world, points, settings);
-        playChainStartSounds(world, player, firstTarget);
+        playChainStartSounds(world, visualSource, firstTarget);
         return damaged;
     }
 
@@ -122,8 +128,8 @@ public final class ChainLightningVisualManager {
         world.spawnParticles(ParticleTypes.ENCHANTED_HIT, pos.x, pos.y, pos.z, 5, 0.16, 0.16, 0.16, 0.03);
     }
 
-    private static void playChainStartSounds(ServerWorld world, ServerPlayerEntity player, LivingEntity firstTarget) {
-        world.playSound(null, player.getBlockPos(), SoundRegistry.ELEMENTAL_BOW_THUNDER_SHOOT_FLYBY_01.get(), SoundCategory.PLAYERS, 0.35F, 1.35F + world.random.nextFloat() * 0.25F);
+    private static void playChainStartSounds(ServerWorld world, LivingEntity source, LivingEntity firstTarget) {
+        world.playSound(null, source.getBlockPos(), SoundRegistry.ELEMENTAL_BOW_THUNDER_SHOOT_FLYBY_01.get(), SoundCategory.PLAYERS, 0.35F, 1.35F + world.random.nextFloat() * 0.25F);
         world.playSound(null, firstTarget.getBlockPos(), SoundRegistry.ELEMENTAL_SWORD_THUNDER_ATTACK_01.get(), SoundCategory.PLAYERS, 0.6F, 0.9F + world.random.nextFloat() * 0.2F);
     }
 

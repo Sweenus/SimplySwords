@@ -10,6 +10,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
+import net.sweenus.simplyswords.api.DelegatedWeaponHitContext;
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
@@ -42,7 +44,12 @@ public class EarthshatterPower extends RunefusedGemPower {
                 Config.gemPowers.earthshatter.spellScaling,
                 Config.gemPowers.earthshatter.damage
         );
-        EarthshatterSunderManager.createSunder(player.getServerWorld(), player, damage);
+        DelegatedWeaponHitContext context = SimplySwordsAPI.getDelegatedWeaponHitContext();
+        if (context != null) {
+            EarthshatterSunderManager.createSunder(player.getServerWorld(), player, context.origin(), context.facing(), damage);
+        } else {
+            EarthshatterSunderManager.createSunder(player.getServerWorld(), player, damage);
+        }
     }
 
     @Override

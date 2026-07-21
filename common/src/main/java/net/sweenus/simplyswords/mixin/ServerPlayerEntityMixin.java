@@ -34,6 +34,7 @@ import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.AbilityMethods;
 import net.sweenus.simplyswords.util.HelperMethods;
+import net.sweenus.simplyswords.world.NecromanticArsenalManager;
 import net.sweenus.simplyswords.world.RevivalCandleVisualManager;
 import net.sweenus.simplyswords.world.ShadowstingShadowDanceManager;
 import net.sweenus.simplyswords.world.SoulkeeperLanternManager;
@@ -123,6 +124,17 @@ public abstract class ServerPlayerEntityMixin {
         }
     }
 
+    @Inject(at = @At("TAIL"), method = "damage")
+    public void simplyswords$retargetNecromanticArsenalMinions(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
+        if (!Boolean.TRUE.equals(cir.getReturnValue())) {
+            return;
+        }
+        if ((Object) this instanceof ServerPlayerEntity serverPlayer
+                && source.getAttacker() instanceof LivingEntity attacker
+                && attacker != serverPlayer) {
+            NecromanticArsenalManager.retargetMinions(serverPlayer, attacker);
+        }
+    }
 
     @Inject(at = @At("HEAD"), method = "tick")
     public void simplyswords$tick(CallbackInfo ci) {

@@ -46,11 +46,18 @@ public final class EarthshatterSunderManager {
     }
 
     public static void createSunder(ServerWorld world, ServerPlayerEntity owner, float damage) {
+        createSunder(world, owner, owner == null ? Vec3d.ZERO : owner.getPos(), owner == null ? Vec3d.ZERO : owner.getRotationVec(1.0F), damage);
+    }
+
+    public static void createSunder(ServerWorld world, ServerPlayerEntity owner, Vec3d origin, Vec3d facing, float damage) {
         if (world == null || owner == null || !owner.isAlive()) {
             return;
         }
 
-        Vec3d direction = owner.getRotationVec(1.0F);
+        if (origin == null) {
+            origin = owner.getPos();
+        }
+        Vec3d direction = facing == null ? Vec3d.ZERO : facing;
         direction = new Vec3d(direction.x, 0.0, direction.z);
         if (direction.lengthSquared() < 0.0001) {
             direction = Vec3d.fromPolar(0.0F, owner.getYaw()).normalize();
@@ -68,13 +75,13 @@ public final class EarthshatterSunderManager {
         ActiveSunder sunder = new ActiveSunder(owner.getUuid(), now + (long) steps * delayTicks + riseTicks + holdTicks + sinkTicks + 4L, new ArrayList<>());
 
         if (Config.general.enableModernFieldEffects) {
-            spawnSpikeLine(world, sunder, owner.getPos(), direction, right, now, steps, delayTicks);
+            spawnSpikeLine(world, sunder, origin, direction, right, now, steps, delayTicks);
         }
-        damageEnemies(world, owner, owner.getPos(), direction, right, damage);
+        damageEnemies(world, owner, origin, direction, right, damage);
         ACTIVE_SUNDERS.computeIfAbsent(world, ignored -> new ArrayList<>()).add(sunder);
 
-        world.playSound(null, owner.getX(), owner.getY(), owner.getZ(), SoundEvents.BLOCK_STONE_BREAK, SoundCategory.PLAYERS, 1.0F, 0.75F + world.random.nextFloat() * 0.12F);
-        world.playSound(null, owner.getX(), owner.getY(), owner.getZ(), SoundEvents.ENTITY_GENERIC_EXPLODE, SoundCategory.PLAYERS, 0.45F, 0.65F + world.random.nextFloat() * 0.08F);
+        world.playSound(null, origin.x, origin.y, origin.z, SoundEvents.BLOCK_STONE_BREAK, SoundCategory.PLAYERS, 1.0F, 0.75F + world.random.nextFloat() * 0.12F);
+        world.playSound(null, origin.x, origin.y, origin.z, SoundEvents.ENTITY_GENERIC_EXPLODE, SoundCategory.PLAYERS, 0.45F, 0.65F + world.random.nextFloat() * 0.08F);
     }
 
     public static void tick(ServerWorld world) {

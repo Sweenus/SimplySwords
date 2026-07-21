@@ -10,6 +10,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
+import net.sweenus.simplyswords.api.DelegatedWeaponHitContext;
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
@@ -40,11 +42,20 @@ public class StormlashPower extends RunefusedGemPower {
         float damage = HelperMethods.spellScaledDamage("lightning", player,
                 Config.gemPowers.stormlash.spellScaling,
                 Config.gemPowers.stormlash.damage);
-        ChainLightningVisualManager.damageChain(player.getServerWorld(), player, target,
-                Config.gemPowers.stormlash.chainCount,
-                damage,
-                Config.gemPowers.stormlash.range,
-                ChainLightningVisualManager.STORMBRINGER_SETTINGS);
+        DelegatedWeaponHitContext context = SimplySwordsAPI.getDelegatedWeaponHitContext();
+        if (context != null) {
+            ChainLightningVisualManager.damageChain(player.getServerWorld(), player, context.actor(), target,
+                    Config.gemPowers.stormlash.chainCount,
+                    damage,
+                    Config.gemPowers.stormlash.range,
+                    ChainLightningVisualManager.STORMBRINGER_SETTINGS);
+        } else {
+            ChainLightningVisualManager.damageChain(player.getServerWorld(), player, target,
+                    Config.gemPowers.stormlash.chainCount,
+                    damage,
+                    Config.gemPowers.stormlash.range,
+                    ChainLightningVisualManager.STORMBRINGER_SETTINGS);
+        }
     }
 
     @Override

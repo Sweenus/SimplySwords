@@ -41,6 +41,7 @@ public class GemPowersConfig extends Config {
 	public ZephyrPower.Settings        zephyr = new ZephyrPower.Settings();
 	public VerdantTrailPower.Settings  verdantTrail = new VerdantTrailPower.Settings();
 	public EarthshatterPower.Settings  earthshatter = new EarthshatterPower.Settings();
+	public NecromanticArsenalPower.Settings necromanticArsenal = new NecromanticArsenalPower.Settings();
 
 	public SimplySkills simplySkills = new SimplySkills();
 

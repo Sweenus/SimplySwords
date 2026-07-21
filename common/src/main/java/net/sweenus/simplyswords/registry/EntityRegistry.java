@@ -21,6 +21,15 @@ public class EntityRegistry {
                     .build(Identifier.of(SimplySwords.MOD_ID, "simplybeeentity").toString())
     );
 
+    public static final RegistrySupplier<EntityType<SimplySwordsSkeletonMinionEntity>> SKELETON_MINION = ENTITIES.register(
+            "skeleton_minion",
+            () -> EntityType.Builder.create(SimplySwordsSkeletonMinionEntity::new, SpawnGroup.MONSTER)
+                    .dimensions(0.6f, 1.99f)
+                    .maxTrackingRange(64)
+                    .trackingTickInterval(3)
+                    .build(Identifier.of(SimplySwords.MOD_ID, "skeleton_minion").toString())
+    );
+
     public static final RegistrySupplier<EntityType<SimplySwordsAxolotlEntity>> SIMPLYAXOLOTLENTITY = ENTITIES.register(
             "simplyaxolotlentity",
             () -> EntityType.Builder.create(SimplySwordsAxolotlEntity::new, SpawnGroup.CREATURE)

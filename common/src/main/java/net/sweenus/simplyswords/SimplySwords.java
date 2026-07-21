@@ -12,6 +12,7 @@ import dev.architectury.utils.EnvExecutor;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.render.entity.AxolotlEntityRenderer;
+import net.minecraft.client.render.entity.SkeletonEntityRenderer;
 import net.minecraft.client.render.entity.model.EntityModelLayer;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
@@ -30,6 +31,7 @@ import net.sweenus.simplyswords.entity.BattleStandardDarkEntity;
 import net.sweenus.simplyswords.entity.BattleStandardEntity;
 import net.sweenus.simplyswords.entity.SimplySwordsAxolotlEntity;
 import net.sweenus.simplyswords.entity.SimplySwordsBeeEntity;
+import net.sweenus.simplyswords.entity.SimplySwordsSkeletonMinionEntity;
 import net.sweenus.simplyswords.registry.*;
 import net.sweenus.simplyswords.util.FileCopier;
 import net.sweenus.simplyswords.util.ModLootTableModifiers;
@@ -80,6 +82,7 @@ public class SimplySwords {
         EntityAttributeRegistry.register(EntityRegistry.BATTLESTANDARD, BattleStandardEntity::createBattleStandardAttributes);
         EntityAttributeRegistry.register(EntityRegistry.BATTLESTANDARDDARK, BattleStandardDarkEntity::createBattleStandardDarkAttributes);
         EntityAttributeRegistry.register(EntityRegistry.SIMPLYBEEENTITY, SimplySwordsBeeEntity::createSimplyBeeAttributes);
+        EntityAttributeRegistry.register(EntityRegistry.SKELETON_MINION, SimplySwordsSkeletonMinionEntity::createMinionAttributes);
         EntityAttributeRegistry.register(EntityRegistry.SIMPLYAXOLOTLENTITY, SimplySwordsAxolotlEntity::createSimplyAxolotlAttributes);
 
         ModLootTableModifiers.init();
@@ -124,6 +127,7 @@ public class SimplySwords {
             EntityRendererRegistry.register(EntityRegistry.BATTLESTANDARDDARK, BattleStandardDarkRenderer::new);
             EntityModelLayerRegistry.register(BATTLESTANDARD_DARK_MODEL, BattleStandardDarkModel::getTexturedModelData);
             EntityRendererRegistry.register(EntityRegistry.SIMPLYBEEENTITY, HivemindBeeEntityRenderer::new);
+            EntityRendererRegistry.register(EntityRegistry.SKELETON_MINION, SkeletonEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.SIMPLYAXOLOTLENTITY, AxolotlEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.THROWNSWORDENTITY, ThrownSwordEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.FROSTFALLENTITY, ThrownSwordEntityRenderer::new);

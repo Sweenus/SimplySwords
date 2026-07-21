@@ -1,6 +1,7 @@
 package net.sweenus.simplyswords.api;
 
 import me.fzzyhmstrs.fzzy_config.util.ValidationResult;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -12,15 +13,19 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.SwordItem;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.BattleStandardEntity;
+import net.sweenus.simplyswords.power.powers.NecromanticArsenalPower;
 import net.sweenus.simplyswords.item.ContainedRemnantItem;
 import net.sweenus.simplyswords.power.GemPowerComponent;
 import net.sweenus.simplyswords.power.GemPowerFiller;
@@ -32,6 +37,8 @@ import java.util.List;
 import java.util.Optional;
 
 public class SimplySwordsAPI {
+
+    private static final ThreadLocal<DelegatedWeaponHitContext> DELEGATED_WEAPON_HIT_CONTEXT = new ThreadLocal<>();
 
 
     // Battle Standard
@@ -88,6 +95,51 @@ public class SimplySwordsAPI {
         if (!attacker.getWorld().isClient()) {
             GemPowerComponent component = getComponent(stack);
             component.postHit(stack, target, attacker);
+        }
+    }
+
+    public static DelegatedWeaponHitContext getDelegatedWeaponHitContext() {
+        return DELEGATED_WEAPON_HIT_CONTEXT.get();
+    }
+
+    public static boolean applyDelegatedWeaponHit(ItemStack stack, LivingEntity target, ServerPlayerEntity owner,
+                                                  LivingEntity actor, float damage) {
+        if (stack == null || stack.isEmpty() || target == null || owner == null || actor == null
+                || !(owner.getWorld() instanceof ServerWorld world) || target.getWorld() != world) {
+            return false;
+        }
+
+        Vec3d facing = actor.getRotationVec(1.0F);
+        if (facing.lengthSquared() < 0.0001) {
+            facing = target.getPos().subtract(actor.getPos());
+        }
+        if (facing.lengthSquared() < 0.0001) {
+            facing = Vec3d.fromPolar(0.0F, actor.getYaw());
+        }
+        facing = facing.normalize();
+
+        DelegatedWeaponHitContext context = new DelegatedWeaponHitContext(owner, actor, actor.getPos(), facing);
+        DELEGATED_WEAPON_HIT_CONTEXT.set(context);
+        try {
+            DamageSource source = owner.getDamageSources().playerAttack(owner);
+            float modifiedDamage = WeaponImplicitRegistry.modifyDamage(stack, target, source, damage);
+            target.timeUntilRegen = 0;
+            boolean[] damaged = {false};
+            WeaponImplicitRegistry.runSuppressed(() -> damaged[0] = target.damage(source, modifiedDamage));
+            target.timeUntilRegen = 0;
+            if (!damaged[0]) {
+                return false;
+            }
+
+            EnchantmentHelper.onTargetDamaged(world, target, source, stack);
+            WeaponImplicitRegistry.onHit(stack, target, owner, modifiedDamage);
+            Item item = stack.getItem();
+            if (item instanceof SwordItem) {
+                NecromanticArsenalPower.runSuppressed(() -> item.postHit(stack, target, owner));
+            }
+            return true;
+        } finally {
+            DELEGATED_WEAPON_HIT_CONTEXT.remove();
         }
     }
 
