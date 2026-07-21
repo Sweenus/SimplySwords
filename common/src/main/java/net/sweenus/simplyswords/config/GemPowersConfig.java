@@ -39,6 +39,7 @@ public class GemPowersConfig extends Config {
 	public WeakenPower.Settings        weaken = new WeakenPower.Settings();
 	public WildfirePower.Settings      wildfire = new WildfirePower.Settings();
 	public ZephyrPower.Settings        zephyr = new ZephyrPower.Settings();
+	public VerdantTrailPower.Settings  verdantTrail = new VerdantTrailPower.Settings();
 
 	public SimplySkills simplySkills = new SimplySkills();
 

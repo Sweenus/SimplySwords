@@ -189,4 +189,13 @@ public class EntityRegistry {
                     .build(Identifier.of(SimplySwords.MOD_ID, "chain_lightning_visual").toString())
     );
 
+    public static final RegistrySupplier<EntityType<VerdantTrailVisualEntity>> VERDANT_TRAIL_VISUAL = ENTITIES.register(
+            "verdant_trail_visual",
+            () -> EntityType.Builder.<VerdantTrailVisualEntity>create(VerdantTrailVisualEntity::new, SpawnGroup.MISC)
+                    .dimensions(0.45f, 0.7f)
+                    .maxTrackingRange(64)
+                    .trackingTickInterval(1)
+                    .build(Identifier.of(SimplySwords.MOD_ID, "verdant_trail_visual").toString())
+    );
+
 }

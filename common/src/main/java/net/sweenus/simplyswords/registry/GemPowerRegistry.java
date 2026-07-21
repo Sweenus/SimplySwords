@@ -122,5 +122,6 @@ public class GemPowerRegistry {
 	public static RegistrySupplier<GemPower> RADIANCE = register("radiance", RadiancePower::new);
 	public static RegistrySupplier<GemPower> ONSLAUGHT = register("onslaught", OnslaughtPower::new);
 	public static RegistrySupplier<GemPower> NULLIFICATION = register("nullification", NullificationPower::new);
+	public static RegistrySupplier<GemPower> VERDANT_TRAIL = register("verdant_trail", VerdantTrailPower::new);
 
 }

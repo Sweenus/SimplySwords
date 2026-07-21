@@ -55,6 +55,9 @@ public abstract class ServerWorldMixin {
         if (TemporaryWorldLightManager.hasActive(world)) {
             TemporaryWorldLightManager.tick(world);
         }
+        if (VerdantTrailManager.hasActive(world)) {
+            VerdantTrailManager.tick(world);
+        }
         RevivalCandleVisualManager.tickWorld(world);
         SoulkeeperLanternManager.tickWorld(world);
     }
