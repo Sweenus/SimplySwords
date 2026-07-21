@@ -34,6 +34,7 @@ public final class VerdantTrailManager {
     private static final int GROUND_SCAN_UP = 2;
     private static final int GROUND_SCAN_DOWN = 5;
     private static final int GROWTH_TICKS = 8;
+    private static final double ORPHAN_VISUAL_CLEANUP_RADIUS = 192.0;
     private static final String TRAIL_VISUAL_TAG = "simplyswords_verdant_trail_visual";
     private static final Map<ServerWorld, List<TrailSegment>> ACTIVE_SEGMENTS = new HashMap<>();
     private static final Map<ServerWorld, Map<UUID, LastPlacement>> LAST_PLACEMENTS = new HashMap<>();
@@ -241,9 +242,17 @@ public final class VerdantTrailManager {
     }
 
     private static void purgeOrphanVisuals(ServerWorld world) {
-        for (Entity entity : world.iterateEntities()) {
-            if (entity instanceof VerdantTrailVisualEntity && entity.getCommandTags().contains(TRAIL_VISUAL_TAG)) {
-                entity.discard();
+        Set<UUID> cleaned = new HashSet<>();
+        for (ServerPlayerEntity player : world.getPlayers()) {
+            Box searchBox = player.getBoundingBox().expand(ORPHAN_VISUAL_CLEANUP_RADIUS);
+            for (VerdantTrailVisualEntity visual : world.getEntitiesByClass(
+                    VerdantTrailVisualEntity.class,
+                    searchBox,
+                    entity -> entity.getCommandTags().contains(TRAIL_VISUAL_TAG)
+            )) {
+                if (cleaned.add(visual.getUuid())) {
+                    visual.discard();
+                }
             }
         }
     }

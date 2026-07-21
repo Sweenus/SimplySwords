@@ -198,4 +198,13 @@ public class EntityRegistry {
                     .build(Identifier.of(SimplySwords.MOD_ID, "verdant_trail_visual").toString())
     );
 
+    public static final RegistrySupplier<EntityType<EarthshatterSpikeVisualEntity>> EARTHSHATTER_SPIKE_VISUAL = ENTITIES.register(
+            "earthshatter_spike_visual",
+            () -> EntityType.Builder.<EarthshatterSpikeVisualEntity>create(EarthshatterSpikeVisualEntity::new, SpawnGroup.MISC)
+                    .dimensions(0.45f, 1.8f)
+                    .maxTrackingRange(96)
+                    .trackingTickInterval(1)
+                    .build(Identifier.of(SimplySwords.MOD_ID, "earthshatter_spike_visual").toString())
+    );
+
 }

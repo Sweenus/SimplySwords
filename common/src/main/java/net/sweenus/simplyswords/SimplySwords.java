@@ -144,6 +144,7 @@ public class SimplySwords {
             EntityRendererRegistry.register(EntityRegistry.BRIMSTONE_CLAYMORE_VISUAL, BrimstoneClaymoreVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.CHAIN_LIGHTNING_VISUAL, ChainLightningVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.VERDANT_TRAIL_VISUAL, VerdantTrailVisualEntityRenderer::new);
+            EntityRendererRegistry.register(EntityRegistry.EARTHSHATTER_SPIKE_VISUAL, EarthshatterSpikeVisualEntityRenderer::new);
 
             // Simply Tooltips bridge — renders all simplyswords sword items with the ST engine
             net.sweenus.simplytooltips.api.TooltipProviderRegistry.register(
