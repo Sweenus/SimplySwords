@@ -18,11 +18,7 @@ import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 public final class SoulkeeperLanternManager {
 
@@ -120,15 +116,13 @@ public final class SoulkeeperLanternManager {
             }
         }
 
-        if (visual != null) {
-            Vec3d pos = player.getPos();
-            visual.setPos(pos.x, pos.y, pos.z);
-            visual.setOwnerEntityId(player.getId());
-            visual.setLanternCount(lanternCount);
-            visual.setSpeedMultiplier(active.speedMultiplier);
-            visual.setOrbitRadius((float) Config.uniqueEffects.soulkeeper.orbitRadius);
-            visual.setOrbitPhase((float) active.orbitPhase);
-        }
+        Vec3d pos = player.getPos();
+        visual.setPos(pos.x, pos.y, pos.z);
+        visual.setOwnerEntityId(player.getId());
+        visual.setLanternCount(lanternCount);
+        visual.setSpeedMultiplier(active.speedMultiplier);
+        visual.setOrbitRadius((float) Config.uniqueEffects.soulkeeper.orbitRadius);
+        visual.setOrbitPhase((float) active.orbitPhase);
 
         damageCollidingTargets(world, player, stack, active, lanternCount);
     }

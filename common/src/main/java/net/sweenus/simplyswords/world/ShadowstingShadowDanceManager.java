@@ -22,11 +22,7 @@ import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public final class ShadowstingShadowDanceManager {
 
@@ -349,7 +345,7 @@ public final class ShadowstingShadowDanceManager {
         if (!world.isSpaceEmpty(player, playerBox)) {
             return false;
         }
-        return !world.getBlockState(BlockPos.ofFloored(pos)).isLiquid();
+        return world.getBlockState(BlockPos.ofFloored(pos)).getFluidState().isEmpty();
     }
 
     private static float[] getFacingRotation(Vec3d fromEye, Vec3d to) {
@@ -411,7 +407,7 @@ public final class ShadowstingShadowDanceManager {
         }
 
         Vec3d delta = to.subtract(from);
-        int steps = Math.max(3, Math.min(10, (int) (delta.length() * 1.35)));
+        int steps = MathHelper.clamp((int) (delta.length() * 1.35), 3, 10);
         for (int i = 1; i < steps; i++) {
             double progress = (double) i / (double) steps;
             Vec3d pos = from.add(delta.multiply(progress));

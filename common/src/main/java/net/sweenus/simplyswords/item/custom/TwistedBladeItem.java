@@ -18,8 +18,8 @@ import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
-import net.sweenus.simplyswords.item.interfaces.TwoHandedWeapon;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
+import net.sweenus.simplyswords.item.interfaces.TwoHandedWeapon;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -32,8 +32,6 @@ public class TwistedBladeItem extends UniqueSwordItem implements TwoHandedWeapon
         super(toolMaterial, settings);
     }
 
-	private static int stepMod = 0;
-
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         if (!attacker.getWorld().isClient()) {
@@ -44,13 +42,14 @@ public class TwistedBladeItem extends UniqueSwordItem implements TwoHandedWeapon
             HelperMethods.playHitSounds(attacker, target);
 
             if (attacker.getRandom().nextInt(100) <= hitChance) {
-                if (attacker.hasStatusEffect(StatusEffects.HASTE)) {
+                StatusEffectInstance haste = attacker.getStatusEffect(StatusEffects.HASTE);
+                if (haste != null) {
 
-                    int a = (attacker.getStatusEffect(StatusEffects.HASTE).getAmplifier() + 1);
+                    int a = (haste.getAmplifier() + 1);
                     world.playSoundFromEntity(null, attacker, SoundRegistry.ELEMENTAL_BOW_HOLY_SHOOT_IMPACT_02.get(),
                             attacker.getSoundCategory(), 0.3f, 1f + (a / 10f));
 
-                    if ((attacker.getStatusEffect(StatusEffects.HASTE).getAmplifier() < maxStacks)) {
+                    if ((haste.getAmplifier() < maxStacks)) {
                         attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, duration, a), attacker);
                     } else {
                         attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, duration, a - 1), attacker);
@@ -65,10 +64,11 @@ public class TwistedBladeItem extends UniqueSwordItem implements TwoHandedWeapon
 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
-        if (user.hasStatusEffect(StatusEffects.HASTE)) {
+        StatusEffectInstance haste = user.getStatusEffect(StatusEffects.HASTE);
+        if (haste != null) {
             int strength_tier = Config.uniqueEffects.twisted_blade.strengthTier;
 
-            int a = (user.getStatusEffect(StatusEffects.HASTE).getAmplifier() * 20);
+            int a = (haste.getAmplifier() * 20);
             user.addStatusEffect(new StatusEffectInstance(StatusEffects.STRENGTH, a, strength_tier), user);
             user.swingHand(hand);
             user.removeStatusEffect(StatusEffects.HASTE);

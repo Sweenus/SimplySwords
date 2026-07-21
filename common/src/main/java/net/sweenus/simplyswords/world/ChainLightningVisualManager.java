@@ -11,17 +11,11 @@ import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
-import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.ChainLightningVisualEntity;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 public final class ChainLightningVisualManager {
 
@@ -64,7 +58,7 @@ public final class ChainLightningVisualManager {
             return 0;
         }
 
-        List<LivingEntity> chain = buildChain(world, player, firstTarget, Math.max(1, chainCount), Math.max(0.5, range));
+        List<LivingEntity> chain = buildChain(world, player, firstTarget, chainCount, Math.max(0.5, range));
         if (chain.isEmpty()) {
             return 0;
         }

@@ -5,9 +5,12 @@ import net.minecraft.item.SwordItem;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
-import net.sweenus.simplytooltips.api.*;
+import net.sweenus.simplyswords.item.UniqueSwordItem;
+import net.sweenus.simplytooltips.api.ModernTooltipModel;
+import net.sweenus.simplytooltips.api.TooltipBorderStyle;
+import net.sweenus.simplytooltips.api.TooltipProvider;
+import net.sweenus.simplytooltips.api.TooltipTheme;
 
 import java.util.ArrayList;
 import java.util.List;

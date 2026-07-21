@@ -16,14 +16,7 @@ import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 public final class ArcanethystAssaultManager {
 
@@ -127,7 +120,7 @@ public final class ArcanethystAssaultManager {
 
             long slamAge = age - liftTicks - suspendTicks;
             if (!active.slamStarted()) {
-                active.setSlamStarted(true);
+                active.markSlamStarted();
                 target.setNoGravity(false);
                 world.playSound(null, target.getX(), target.getY(), target.getZ(), SoundRegistry.ELEMENTAL_SWORD_SCIFI_ATTACK_03.get(), SoundCategory.PLAYERS, 0.35F, 0.85F + world.random.nextFloat() * 0.2F);
             }
@@ -353,8 +346,8 @@ public final class ArcanethystAssaultManager {
             return this.slamStarted;
         }
 
-        private void setSlamStarted(boolean slamStarted) {
-            this.slamStarted = slamStarted;
+        private void markSlamStarted() {
+            this.slamStarted = true;
         }
     }
 }

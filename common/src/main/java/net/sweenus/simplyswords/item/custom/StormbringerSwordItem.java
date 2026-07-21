@@ -9,11 +9,11 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.UseAction;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.config.Config;
@@ -35,7 +35,6 @@ import java.util.UUID;
 
 public class StormbringerSwordItem extends UniqueSwordItem {
 
-    public static boolean scalesWithSpellPower;
     private static final ThreadLocal<Boolean> SUPPRESS_STORMBRINGER_CHAIN = ThreadLocal.withInitial(() -> false);
     private static final Map<UUID, Long> LAST_CHAIN_TICK = new HashMap<>();
 
@@ -68,7 +67,7 @@ public class StormbringerSwordItem extends UniqueSwordItem {
         }
 
         ParryComponent component = stack.getOrDefault(ComponentTypeRegistry.PARRY.get(), ParryComponent.DEFAULT);
-        int stormCharges = Math.min(Math.max(0, Config.uniqueEffects.stormbringer.maxStormCharges), component.stormCharges());
+        int stormCharges = Math.clamp(component.stormCharges(), 0, Math.max(0, Config.uniqueEffects.stormbringer.maxStormCharges));
         if (stormCharges <= 0) {
             return;
         }
@@ -80,7 +79,7 @@ public class StormbringerSwordItem extends UniqueSwordItem {
         try {
             int damaged = ChainLightningVisualManager.damageStormbringerChain(player.getServerWorld(), player, target, stormCharges, damage, Config.uniqueEffects.stormbringer.chainLightningRange);
             if (damaged > 0) {
-                stack.set(ComponentTypeRegistry.PARRY.get(), new ParryComponent(false, Math.max(0, stormCharges - 1)));
+                stack.set(ComponentTypeRegistry.PARRY.get(), component.consumeStormCharge());
                 LAST_CHAIN_TICK.put(player.getUuid(), now);
             }
         } finally {

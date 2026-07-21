@@ -24,8 +24,8 @@ import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
-import net.sweenus.simplyswords.item.interfaces.TwoHandedWeapon;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
+import net.sweenus.simplyswords.item.interfaces.TwoHandedWeapon;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -65,20 +65,22 @@ public class SoulrenderSwordItem extends UniqueSwordItem implements TwoHandedWea
                     world.playSoundFromEntity(null, target, SoundRegistry.DARK_SWORD_ATTACK_WITH_BLOOD_03.get(),
                             target.getSoundCategory(), 0.4f, 1.5f);
 
-                if (target.hasStatusEffect(StatusEffects.WEAKNESS)) {
-                    int a = (target.getStatusEffect(StatusEffects.WEAKNESS).getAmplifier() + 1);
+                StatusEffectInstance weakness = target.getStatusEffect(StatusEffects.WEAKNESS);
+                if (weakness != null) {
+                    int a = (weakness.getAmplifier() + 1);
 
-                    if ((target.getStatusEffect(StatusEffects.WEAKNESS).getAmplifier() <= 0)) {
+                    if ((weakness.getAmplifier() <= 0)) {
                         target.addStatusEffect(new StatusEffectInstance(StatusEffects.WEAKNESS, duration, a), attacker);
                     }
                 } else {
                     target.addStatusEffect(new StatusEffectInstance(StatusEffects.WEAKNESS, duration, 0), attacker);
                 }
 
-                if (target.hasStatusEffect(StatusEffects.SLOWNESS)) {
-                    int a = (target.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier() + 1);
+                StatusEffectInstance slowness = target.getStatusEffect(StatusEffects.SLOWNESS);
+                if (slowness != null) {
+                    int a = (slowness.getAmplifier() + 1);
 
-                    if ((target.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier() < maxStacks)) {
+                    if ((slowness.getAmplifier() < maxStacks)) {
                         target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, duration, a), attacker);
                     }
                 } else {
@@ -106,14 +108,18 @@ public class SoulrenderSwordItem extends UniqueSwordItem implements TwoHandedWea
             Box box = new Box(x + hradius, y + vradius, z + hradius, x - hradius, y - vradius, z - hradius);
 
             for (Entity entity : sworld.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY)) {
-                if ((entity instanceof LivingEntity le) && le.hasStatusEffect(StatusEffects.SLOWNESS)
-                        && le.hasStatusEffect(StatusEffects.WEAKNESS) && HelperMethods.checkFriendlyFire(le, user)) {
+                if ((entity instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, user)) {
+                    StatusEffectInstance slowness = le.getStatusEffect(StatusEffects.SLOWNESS);
+                    StatusEffectInstance weakness = le.getStatusEffect(StatusEffects.WEAKNESS);
+                    if (slowness == null || weakness == null) {
+                        continue;
+                    }
 
-                    healamp += (le.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier());
+                    healamp += slowness.getAmplifier();
                     float scaling = HelperMethods.commonSpellAttributeScaling(Config.uniqueEffects.soulrender.spellScaling, entity, "soul");
                     float multiplier = scaling > 0f ? scaling : Config.uniqueEffects.soulrender.damageMulti;
                     SoulrenderMarkVisualManager.consumeMark(sworld, le, user);
-                    le.damage(user.getDamageSources().indirectMagic(user, user), le.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier() * multiplier);
+                    le.damage(user.getDamageSources().indirectMagic(user, user), slowness.getAmplifier() * multiplier);
                     le.removeStatusEffect(StatusEffects.WEAKNESS);
                     le.removeStatusEffect(StatusEffects.SLOWNESS);
                     world.playSoundFromEntity(null, entity, SoundRegistry.DARK_SWORD_SPELL.get(),

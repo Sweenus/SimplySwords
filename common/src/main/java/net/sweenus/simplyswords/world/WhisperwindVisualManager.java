@@ -12,12 +12,7 @@ import net.sweenus.simplyswords.entity.WhisperwindSlashVisualEntity;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 public final class WhisperwindVisualManager {
 
@@ -41,7 +36,7 @@ public final class WhisperwindVisualManager {
         }
 
         ACTIVE_DASHES.computeIfAbsent(world, ignored -> new HashMap<>())
-                .put(user.getUuid(), new ActiveDash(user.getUuid(), user.getPos(), user.getPos()));
+                .put(user.getUuid(), new ActiveDash(user.getPos(), user.getPos()));
     }
 
     public static void recordDashTick(ServerWorld world, LivingEntity user, Iterable<? extends Entity> entities) {
@@ -52,7 +47,7 @@ public final class WhisperwindVisualManager {
 
         ActiveDash dash = dashes.get(user.getUuid());
         if (dash == null) {
-            dash = new ActiveDash(user.getUuid(), user.getPos(), user.getPos());
+            dash = new ActiveDash(user.getPos(), user.getPos());
             dashes.put(user.getUuid(), dash);
         }
         dash.end = user.getPos();
@@ -195,13 +190,11 @@ public final class WhisperwindVisualManager {
     }
 
     private static final class ActiveDash {
-        private final UUID sourceId;
         private final Vec3d start;
         private final Set<UUID> targets = new HashSet<>();
         private Vec3d end;
 
-        private ActiveDash(UUID sourceId, Vec3d start, Vec3d end) {
-            this.sourceId = sourceId;
+        private ActiveDash(Vec3d start, Vec3d end) {
             this.start = start;
             this.end = end;
         }

@@ -15,7 +15,6 @@ import net.minecraft.recipe.input.CraftingRecipeInput;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.world.World;
-import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.registry.RecipeTypeRegistry;
 
 public class UpgradeUniqueRecipe extends ShapedRecipe {

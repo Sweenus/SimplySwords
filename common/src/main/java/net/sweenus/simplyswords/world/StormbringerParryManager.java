@@ -34,7 +34,7 @@ public final class StormbringerParryManager {
         ServerWorld world = player.getServerWorld();
         long now = world.getTime();
         int blockDuration = Math.max(1, Config.uniqueEffects.stormbringer.blockDuration);
-        int parryDuration = Math.min(blockDuration, Math.max(1, Config.uniqueEffects.stormbringer.parryDuration));
+        int parryDuration = Math.clamp(Config.uniqueEffects.stormbringer.parryDuration, 1, blockDuration);
         ACTIVE_PARRIES.put(player.getUuid(), new ActiveParry(hand, now + blockDuration, now + parryDuration));
         spawnActivationEffects(world, player);
     }
@@ -56,7 +56,7 @@ public final class StormbringerParryManager {
         }
     }
 
-    public static boolean handleIncomingDamage(ServerPlayerEntity player, DamageSource source, float amount) {
+    public static boolean handleIncomingDamage(ServerPlayerEntity player, DamageSource source) {
         ActiveParry active = ACTIVE_PARRIES.get(player.getUuid());
         if (active == null) {
             return false;
@@ -93,7 +93,7 @@ public final class StormbringerParryManager {
         int skillCooldown = Math.max(0, Config.uniqueEffects.stormbringer.cooldown);
         ParryComponent parryComponent = stack.getOrDefault(ComponentTypeRegistry.PARRY.get(), ParryComponent.DEFAULT);
         if (parryComponent.parried()) {
-            performCounterattack(player, parryComponent);
+            performCounterattack(player);
             stack.set(ComponentTypeRegistry.PARRY.get(), parryComponent.resetParry());
         } else {
             spawnMissEffects(player.getServerWorld(), player);
@@ -118,7 +118,7 @@ public final class StormbringerParryManager {
         return attacker.squaredDistanceTo(player) <= radius * radius;
     }
 
-    private static void performCounterattack(ServerPlayerEntity player, ParryComponent parryComponent) {
+    private static void performCounterattack(ServerPlayerEntity player) {
         ServerWorld world = player.getServerWorld();
         double radius = Math.max(0.5, Config.uniqueEffects.stormbringer.radius);
         float abilityDamage = HelperMethods.spellScaledDamage("lightning", player,

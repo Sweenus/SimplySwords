@@ -23,6 +23,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
+import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.LootConfig;
 import net.sweenus.simplyswords.item.ContainedRemnantItem;
@@ -46,7 +47,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
-import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
 
 @Mixin(ServerPlayerEntity.class)
 public abstract class ServerPlayerEntityMixin {
@@ -62,7 +62,7 @@ public abstract class ServerPlayerEntityMixin {
                 return;
             }
 
-            if (StormbringerParryManager.handleIncomingDamage(serverPlayer, source, amount)) {
+            if (StormbringerParryManager.handleIncomingDamage(serverPlayer, source)) {
                 cir.setReturnValue(false);
                 return;
             }

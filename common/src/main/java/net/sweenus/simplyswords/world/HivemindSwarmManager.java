@@ -20,11 +20,7 @@ import net.sweenus.simplyswords.entity.SimplySwordsBeeEntity;
 import net.sweenus.simplyswords.registry.EntityRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public final class HivemindSwarmManager {
 
@@ -51,11 +47,14 @@ public final class HivemindSwarmManager {
         float stingDamage = getStingDamage(player);
         long now = world.getTime();
         int beeCount = Math.max(0, Config.uniqueEffects.hiveheart.swarmBeeCount);
+        if (beeCount <= 0) {
+            return;
+        }
         int stings = Math.max(1, Config.uniqueEffects.hiveheart.stingsPerBee);
         long expiryTick = now + Math.max(20, Config.uniqueEffects.hiveheart.swarmLifetime);
 
         for (int i = 0; i < beeCount; i++) {
-            double angle = (Math.PI * 2.0 / Math.max(1, beeCount)) * i;
+            double angle = (Math.PI * 2.0 / beeCount) * i;
             Vec3d spawnPos = player.getPos().add(Math.cos(angle) * 0.9, 1.3 + (i % 3) * 0.15, Math.sin(angle) * 0.9);
             SimplySwordsBeeEntity bee = EntityRegistry.SIMPLYBEEENTITY.get().spawn(world, player.getBlockPos(), SpawnReason.MOB_SUMMONED);
             if (bee == null) {
@@ -307,7 +306,7 @@ public final class HivemindSwarmManager {
 
         double remainingDistance = Math.sqrt(bee.getPos().squaredDistanceTo(destination));
         double progress = 1.0 - remainingDistance / totalDistance;
-        progress = Math.max(0.0, Math.min(1.0, progress));
+        progress = Math.clamp(progress, 0.0, 1.0);
         double ease = Math.sin(progress * Math.PI);
         return ATTACK_PASS_MIN_SPEED + (ATTACK_PASS_MAX_SPEED - ATTACK_PASS_MIN_SPEED) * ease;
     }
@@ -403,7 +402,7 @@ public final class HivemindSwarmManager {
             if (!(entity instanceof LivingEntity target) || !target.isAlive()) {
                 continue;
             }
-            int amplifier = Math.min(Math.max(0, Config.uniqueEffects.hiveheart.maxSlowAmplifier), Math.max(0, beeCount - 1));
+            int amplifier = Math.clamp(beeCount - 1, 0, Math.max(0, Config.uniqueEffects.hiveheart.maxSlowAmplifier));
             target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 12, amplifier, false, false, true));
         }
     }

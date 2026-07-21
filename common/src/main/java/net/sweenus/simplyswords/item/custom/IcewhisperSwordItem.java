@@ -23,8 +23,8 @@ import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
-import net.sweenus.simplyswords.item.interfaces.TwoHandedWeapon;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
+import net.sweenus.simplyswords.item.interfaces.TwoHandedWeapon;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -73,8 +73,9 @@ public class IcewhisperSwordItem extends UniqueSwordItem implements TwoHandedWea
                         player.getX() - radius, player.getY() - radius, player.getZ() - radius);
                 for (Entity otherEntity : world.getOtherEntities(player, box, EntityPredicates.VALID_LIVING_ENTITY)) {
                     if ((otherEntity instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, player)) {
-                        if (le.hasStatusEffect(StatusEffects.SLOWNESS)) {
-                            int a = (le.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier() + 1);
+                        StatusEffectInstance slowness = le.getStatusEffect(StatusEffects.SLOWNESS);
+                        if (slowness != null) {
+                            int a = (slowness.getAmplifier() + 1);
                             le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 120, Math.max(a, 3)), player);
                         } else {
                             le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 120, 0), player);

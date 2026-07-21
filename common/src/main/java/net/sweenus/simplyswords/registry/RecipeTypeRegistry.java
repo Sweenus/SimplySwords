@@ -3,8 +3,6 @@ package net.sweenus.simplyswords.registry;
 import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
 import net.minecraft.recipe.RecipeSerializer;
-import net.minecraft.recipe.SmithingTransformRecipe;
-import net.minecraft.recipe.SpecialRecipeSerializer;
 import net.minecraft.registry.RegistryKeys;
 import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.recipe.RunicRerollRecipe;
