@@ -19,7 +19,6 @@ import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.entity.DancingBladeVisualEntity;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 public class DancingBladeVisualEntityRenderer extends EntityRenderer<DancingBladeVisualEntity> {
@@ -119,13 +118,8 @@ public class DancingBladeVisualEntityRenderer extends EntityRenderer<DancingBlad
         }
 
         if (entity.age % 80 == 0) {
-            Iterator<Map.Entry<Integer, RenderOrbitState>> iterator = RENDER_STATES.entrySet().iterator();
-            while (iterator.hasNext()) {
-                Map.Entry<Integer, RenderOrbitState> entry = iterator.next();
-                if (entry.getKey() != entity.getId() && ageTicks - entry.getValue().lastAgeTicks > 100.0F) {
-                    iterator.remove();
-                }
-            }
+            RENDER_STATES.entrySet().removeIf(entry ->
+                    entry.getKey() != entity.getId() && ageTicks - entry.getValue().lastAgeTicks > 100.0F);
         }
         return state.phase;
     }

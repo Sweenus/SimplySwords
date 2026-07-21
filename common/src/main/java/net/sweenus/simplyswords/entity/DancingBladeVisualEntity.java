@@ -189,7 +189,7 @@ public class DancingBladeVisualEntity extends Entity {
         nbt.putFloat("attack_direction_z", this.getAttackDirectionZ());
         nbt.putLong("expires_at_tick", this.getExpiresAtTick());
         ItemStack stack = this.getWeaponStack();
-        if (!stack.isEmpty()) {
+        if (stack != null && !stack.isEmpty()) {
             nbt.put("item", stack.encode(this.getRegistryManager()));
         }
     }
