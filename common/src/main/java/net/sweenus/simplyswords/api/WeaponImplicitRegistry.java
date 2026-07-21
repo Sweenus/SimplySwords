@@ -16,6 +16,7 @@ import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
@@ -232,7 +233,8 @@ public final class WeaponImplicitRegistry {
     }
 
     public static boolean tryDeflectIncomingDamage(LivingEntity bearer, DamageSource source, float amount) {
-        if (SUPPRESS_IMPLICITS.get() || bearer.getWorld().isClient() || !Config.general.enableWeaponImplicits) {
+        if (SUPPRESS_IMPLICITS.get() || bearer.getWorld().isClient() || !Config.general.enableWeaponImplicits
+                || source.isIn(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
             return false;
         }
 

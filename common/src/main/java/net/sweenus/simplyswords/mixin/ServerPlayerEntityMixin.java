@@ -14,6 +14,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -57,47 +58,49 @@ public abstract class ServerPlayerEntityMixin {
     public void simplyswords$damage(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
         PlayerEntity player = (PlayerEntity) (Object) this;
         if (player instanceof ServerPlayerEntity serverPlayer) {
-            if (ShadowstingShadowDanceManager.isActive(serverPlayer)) {
-                cir.setReturnValue(false);
-                return;
-            }
+            if (!source.isIn(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
+                if (ShadowstingShadowDanceManager.isActive(serverPlayer)) {
+                    cir.setReturnValue(false);
+                    return;
+                }
 
-            if (StormbringerParryManager.handleIncomingDamage(serverPlayer, source)) {
-                cir.setReturnValue(false);
-                return;
-            }
+                if (StormbringerParryManager.handleIncomingDamage(serverPlayer, source)) {
+                    cir.setReturnValue(false);
+                    return;
+                }
 
-            if (WeaponImplicitRegistry.tryDeflectIncomingDamage(serverPlayer, source, amount)) {
-                cir.setReturnValue(false);
-                return;
-            }
+                if (WeaponImplicitRegistry.tryDeflectIncomingDamage(serverPlayer, source, amount)) {
+                    cir.setReturnValue(false);
+                    return;
+                }
 
-            //Effect Resilience
-            if (serverPlayer.hasStatusEffect(EffectRegistry.getReference(EffectRegistry.RESILIENCE))) {
-                HelperMethods.decrementStatusEffect(serverPlayer, EffectRegistry.getReference(EffectRegistry.RESILIENCE));
-                cir.setReturnValue(false);
-                if (player.hasStatusEffect(EffectRegistry.getReference(EffectRegistry.RIBBONCLEAVE)))
-                    serverPlayer.getWorld().playSoundFromEntity(null, serverPlayer, SoundRegistry.MAGIC_SWORD_PARRY_03.get(),
-                        SoundCategory.PLAYERS, 0.7f, 0.5f + (serverPlayer.getRandom().nextBetween(1, 5) * 0.1f));
-            }
+                //Effect Resilience
+                if (serverPlayer.hasStatusEffect(EffectRegistry.getReference(EffectRegistry.RESILIENCE))) {
+                    HelperMethods.decrementStatusEffect(serverPlayer, EffectRegistry.getReference(EffectRegistry.RESILIENCE));
+                    cir.setReturnValue(false);
+                    if (player.hasStatusEffect(EffectRegistry.getReference(EffectRegistry.RIBBONCLEAVE)))
+                        serverPlayer.getWorld().playSoundFromEntity(null, serverPlayer, SoundRegistry.MAGIC_SWORD_PARRY_03.get(),
+                            SoundCategory.PLAYERS, 0.7f, 0.5f + (serverPlayer.getRandom().nextBetween(1, 5) * 0.1f));
+                }
 
-            if (serverPlayer.hasStatusEffect(EffectRegistry.getReference(EffectRegistry.ASTRAL_SHIFT))) {
-                StatusEffectInstance astralShiftInstance = player.getStatusEffect(EffectRegistry.getReference(EffectRegistry.ASTRAL_SHIFT));
-                if (astralShiftInstance != null) {
-                    int duration = astralShiftInstance.getDuration();
+                if (serverPlayer.hasStatusEffect(EffectRegistry.getReference(EffectRegistry.ASTRAL_SHIFT))) {
+                    StatusEffectInstance astralShiftInstance = player.getStatusEffect(EffectRegistry.getReference(EffectRegistry.ASTRAL_SHIFT));
+                    if (astralShiftInstance != null) {
+                        int duration = astralShiftInstance.getDuration();
 
-                    if (duration > 10) {
-                        HelperMethods.incrementStatusEffect(serverPlayer, EffectRegistry.getReference(EffectRegistry.ASTRAL_SHIFT), duration, (int) Math.max(1, (amount / 10)), 99);
+                        if (duration > 10) {
+                            HelperMethods.incrementStatusEffect(serverPlayer, EffectRegistry.getReference(EffectRegistry.ASTRAL_SHIFT), duration, (int) Math.max(1, (amount / 10)), 99);
+                            AbilityMethods.astralShiftSounds(serverPlayer);
+                            cir.setReturnValue(false);
+                        }
+                    }
+                }
+
+                if (serverPlayer.getMainHandStack().getItem() instanceof CaelestisSwordItem) {
+                    if (AbilityMethods.astralShiftPassive(serverPlayer)) {
                         AbilityMethods.astralShiftSounds(serverPlayer);
                         cir.setReturnValue(false);
                     }
-                }
-            }
-
-            if (serverPlayer.getMainHandStack().getItem() instanceof CaelestisSwordItem) {
-                if (AbilityMethods.astralShiftPassive(serverPlayer)) {
-                    AbilityMethods.astralShiftSounds(serverPlayer);
-                    cir.setReturnValue(false);
                 }
             }
 
