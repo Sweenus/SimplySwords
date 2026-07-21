@@ -128,6 +128,7 @@ public class SimplySwords {
             EntityRendererRegistry.register(EntityRegistry.LIVYATANENTITY, ThrownSwordEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.SPEAR, ThrownSpearEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.THROWNRUNICENTITY, ThrownSwordEntityRenderer::new);
+            EntityRendererRegistry.register(EntityRegistry.DANCING_BLADE_VISUAL, DancingBladeVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.FROSTFALL_ICE_SPIKE_VISUAL, FrostfallIceSpikeVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.SOULRENDER_MARK_VISUAL, SoulrenderMarkVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.REVIVAL_CANDLE_VISUAL, RevivalCandleVisualEntityRenderer::new);

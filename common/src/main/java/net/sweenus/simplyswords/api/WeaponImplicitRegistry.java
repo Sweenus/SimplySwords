@@ -27,6 +27,7 @@ import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.effect.instance.SimplySwordsStatusEffectInstance;
+import net.sweenus.simplyswords.entity.DancingBladeVisualEntity;
 import net.sweenus.simplyswords.entity.ThrownSpearEntity;
 import net.sweenus.simplyswords.entity.ThrownSwordEntity;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
@@ -515,6 +516,9 @@ public final class WeaponImplicitRegistry {
         }
         if (source.getSource() instanceof ThrownSpearEntity thrownSpear) {
             return thrownSpear.getWeaponStack();
+        }
+        if (source.getSource() instanceof DancingBladeVisualEntity dancingBlade) {
+            return dancingBlade.getWeaponStack();
         }
         return attacker == null ? ItemStack.EMPTY : attacker.getMainHandStack();
     }

@@ -26,6 +26,7 @@ public class GemPowersConfig extends Config {
 	public FloatPower.Settings         floating = new FloatPower.Settings();
 	public FreezePower.Settings        freeze = new FreezePower.Settings();
 	public FrostWardPower.Settings     frostWard = new FrostWardPower.Settings();
+	public DancingBladesPower.Settings dancingBlades = new DancingBladesPower.Settings();
 	public ImbuedPower.Settings        imbued = new ImbuedPower.Settings();
 	public MomentumPower.Settings      momentum = new MomentumPower.Settings();
 	public ShieldingPower.Settings     shielding = new ShieldingPower.Settings();

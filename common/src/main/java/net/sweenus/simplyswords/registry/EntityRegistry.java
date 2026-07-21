@@ -72,6 +72,15 @@ public class EntityRegistry {
                     .build(Identifier.of(SimplySwords.MOD_ID, "runic_entity").toString())
     );
 
+    public static final RegistrySupplier<EntityType<DancingBladeVisualEntity>> DANCING_BLADE_VISUAL = ENTITIES.register(
+            "dancing_blade_visual",
+            () -> EntityType.Builder.<DancingBladeVisualEntity>create(DancingBladeVisualEntity::new, SpawnGroup.MISC)
+                    .dimensions(6.0f, 3.0f)
+                    .maxTrackingRange(64)
+                    .trackingTickInterval(1)
+                    .build(Identifier.of(SimplySwords.MOD_ID, "dancing_blade_visual").toString())
+    );
+
     public static final RegistrySupplier<EntityType<FrostfallIceSpikeVisualEntity>> FROSTFALL_ICE_SPIKE_VISUAL = ENTITIES.register(
             "frostfall_ice_spike_visual",
             () -> EntityType.Builder.<FrostfallIceSpikeVisualEntity>create(FrostfallIceSpikeVisualEntity::new, SpawnGroup.MISC)
