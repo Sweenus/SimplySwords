@@ -106,6 +106,7 @@ public class GemPowerRegistry {
 	public static RegistrySupplier<GemPower> UNSTABLE = register("unstable", UnstablePower::new);
 	public static RegistrySupplier<GemPower> IMBUED = register("imbued", () -> new ImbuedPower(false));
 	public static RegistrySupplier<GemPower> GREATER_IMBUED = register("greater_imbued", () -> new ImbuedPower(true));
+	public static RegistrySupplier<GemPower> STORMLASH = register("stormlash", StormlashPower::new);
 	public static RegistrySupplier<GemPower> PINCUSHION = register("pincushion", () -> new PincushionPower(false));
 	public static RegistrySupplier<GemPower> GREATER_PINCUSHION = register("greater_pincushion", () -> new PincushionPower(true));
 

@@ -54,6 +54,10 @@ public final class ChainLightningVisualManager {
     }
 
     public static int damageStormbringerChain(ServerWorld world, ServerPlayerEntity player, LivingEntity firstTarget, int chainCount, float damage, double range) {
+        return damageChain(world, player, firstTarget, chainCount, damage, range, STORMBRINGER_SETTINGS);
+    }
+
+    public static int damageChain(ServerWorld world, ServerPlayerEntity player, LivingEntity firstTarget, int chainCount, float damage, double range, LightningVisualSettings settings) {
         if (chainCount <= 0 || firstTarget == null || !firstTarget.isAlive()) {
             return 0;
         }
@@ -82,7 +86,7 @@ public final class ChainLightningVisualManager {
         for (LivingEntity target : chain) {
             points.add(target.getPos().add(0.0, Math.max(0.45, target.getHeight() * 0.58), 0.0));
         }
-        spawnChain(world, points, STORMBRINGER_SETTINGS);
+        spawnChain(world, points, settings);
         playChainStartSounds(world, player, firstTarget);
         return damaged;
     }

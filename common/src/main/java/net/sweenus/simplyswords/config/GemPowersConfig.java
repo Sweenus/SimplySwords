@@ -30,6 +30,7 @@ public class GemPowersConfig extends Config {
 	public MomentumPower.Settings      momentum = new MomentumPower.Settings();
 	public ShieldingPower.Settings     shielding = new ShieldingPower.Settings();
 	public SlowPower.Settings          slow = new SlowPower.Settings();
+	public StormlashPower.Settings     stormlash = new StormlashPower.Settings();
 	public StoneskinPower.Settings     stoneskin = new StoneskinPower.Settings();
 	public SwiftnessPower.Settings     swiftness = new SwiftnessPower.Settings();
 	public TrailblazePower.Settings    trailblaze = new TrailblazePower.Settings();
