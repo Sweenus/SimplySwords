@@ -9,11 +9,27 @@ import net.minecraft.network.codec.PacketCodecs;
 public record ParryComponent(boolean parried, int parrySuccession) {
 
 	public ParryComponent success() {
-		return new ParryComponent(true, Math.max(20, parrySuccession + 1));
+		return new ParryComponent(true, parrySuccession);
+	}
+
+	public ParryComponent gainStormCharges(int amount, int maxCharges) {
+		return new ParryComponent(true, Math.min(Math.max(0, maxCharges), Math.max(0, parrySuccession) + Math.max(0, amount)));
+	}
+
+	public ParryComponent gainBlockedStormCharges(int amount, int maxCharges) {
+		return new ParryComponent(false, Math.min(Math.max(0, maxCharges), Math.max(0, parrySuccession) + Math.max(0, amount)));
+	}
+
+	public ParryComponent consumeStormCharge() {
+		return new ParryComponent(false, Math.max(0, parrySuccession - 1));
+	}
+
+	public int stormCharges() {
+		return Math.max(0, parrySuccession);
 	}
 
 	public ParryComponent resetFull() {
-		return DEFAULT;
+		return new ParryComponent(false, parrySuccession);
 	}
 
 	public ParryComponent resetParry() {

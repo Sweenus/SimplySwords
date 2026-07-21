@@ -4,19 +4,16 @@ import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.particle.ParticleTypes;
-import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.UseAction;
-import net.minecraft.util.math.Box;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.config.Config;
@@ -26,17 +23,21 @@ import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.item.component.ParryComponent;
 import net.sweenus.simplyswords.registry.ComponentTypeRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
-import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
+import net.sweenus.simplyswords.world.ChainLightningVisualManager;
+import net.sweenus.simplyswords.world.StormbringerParryManager;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 public class StormbringerSwordItem extends UniqueSwordItem {
 
     public static boolean scalesWithSpellPower;
-    int radius = 3;
-    int parrySuccession;
+    private static final ThreadLocal<Boolean> SUPPRESS_STORMBRINGER_CHAIN = ThreadLocal.withInitial(() -> false);
+    private static final Map<UUID, Long> LAST_CHAIN_TICK = new HashMap<>();
 
     public StormbringerSwordItem(ToolMaterial toolMaterial, Settings settings) {
         super(toolMaterial, settings);
@@ -44,8 +45,47 @@ public class StormbringerSwordItem extends UniqueSwordItem {
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        HelperMethods.playHitSounds(attacker, target);
+        if (!attacker.getWorld().isClient() && attacker instanceof ServerPlayerEntity player && !SUPPRESS_STORMBRINGER_CHAIN.get()) {
+            tryTriggerChainLightning(stack, target, player);
+        }
+        if (!SUPPRESS_STORMBRINGER_CHAIN.get()) {
+            HelperMethods.playHitSounds(attacker, target);
+        }
         return super.postHit(stack, target, attacker);
+    }
+
+    public static void tryTriggerChainLightningOnMeleeDamage(ItemStack stack, LivingEntity target, ServerPlayerEntity player) {
+        if (!SUPPRESS_STORMBRINGER_CHAIN.get() && stack.isOf(ItemsRegistry.STORMBRINGER.get())) {
+            tryTriggerChainLightning(stack, target, player);
+        }
+    }
+
+    private static void tryTriggerChainLightning(ItemStack stack, LivingEntity target, ServerPlayerEntity player) {
+        long now = player.getServerWorld().getTime();
+        long lastTriggerTick = LAST_CHAIN_TICK.getOrDefault(player.getUuid(), Long.MIN_VALUE);
+        if (lastTriggerTick != Long.MIN_VALUE && now - lastTriggerTick < Math.max(1, Config.uniqueEffects.stormbringer.chainLightningCooldown)) {
+            return;
+        }
+
+        ParryComponent component = stack.getOrDefault(ComponentTypeRegistry.PARRY.get(), ParryComponent.DEFAULT);
+        int stormCharges = Math.min(Math.max(0, Config.uniqueEffects.stormbringer.maxStormCharges), component.stormCharges());
+        if (stormCharges <= 0) {
+            return;
+        }
+
+        float damage = HelperMethods.spellScaledDamage("lightning", player,
+                Config.uniqueEffects.stormbringer.chainLightningSpellScaling,
+                Config.uniqueEffects.stormbringer.chainLightningDamage);
+        SUPPRESS_STORMBRINGER_CHAIN.set(true);
+        try {
+            int damaged = ChainLightningVisualManager.damageStormbringerChain(player.getServerWorld(), player, target, stormCharges, damage, Config.uniqueEffects.stormbringer.chainLightningRange);
+            if (damaged > 0) {
+                stack.set(ComponentTypeRegistry.PARRY.get(), new ParryComponent(false, Math.max(0, stormCharges - 1)));
+                LAST_CHAIN_TICK.put(player.getUuid(), now);
+            }
+        } finally {
+            SUPPRESS_STORMBRINGER_CHAIN.set(false);
+        }
     }
 
     @Override
@@ -54,80 +94,30 @@ public class StormbringerSwordItem extends UniqueSwordItem {
         if (itemStack.getDamage() >= itemStack.getMaxDamage() - 1) {
             return TypedActionResult.fail(itemStack);
         }
-        int ability_timer_max = Config.uniqueEffects.stormbringer.blockDuration;
-        ParryComponent parryComponent = itemStack.getOrDefault(ComponentTypeRegistry.PARRY.get(), ParryComponent.DEFAULT);
-        world.playSoundFromEntity(null, user, SoundRegistry.MAGIC_SWORD_PARRY_02.get(), user.getSoundCategory(), 0.8f, (float) (0.8f * (parryComponent.parrySuccession() * 0.1)));
-        user.addStatusEffect(new StatusEffectInstance(StatusEffects.ABSORPTION, ability_timer_max, 2), user);
+        if (!world.isClient && user instanceof ServerPlayerEntity serverPlayer) {
+            StormbringerParryManager.activate(serverPlayer, hand);
+        }
         user.setCurrentHand(hand);
         return TypedActionResult.consume(itemStack);
     }
 
     @Override
     public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
-        if (!world.isClient) {
-            if (remainingUseTicks <= 2)
-                user.stopUsingItem();
-
-            Box box = new Box(user.getX() + radius, user.getY() + radius, user.getZ() + radius,
-                    user.getX() - radius, user.getY() - radius, user.getZ() - radius);
-            for (Entity entity : world.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY)) {
-
-                //Parry attack
-                if ((entity instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, user)) {
-                    if (le.handSwinging && remainingUseTicks > getMaxUseTime(stack, user) - Config.uniqueEffects.stormbringer.parryDuration) {
-                        ParryComponent parryComponent = stack.apply(ComponentTypeRegistry.PARRY.get(), ParryComponent.DEFAULT, ParryComponent::success);
-                        user.stopUsingItem();
-                        le.handSwinging = false;
-                        world.playSoundFromEntity(null, user, SoundRegistry.MAGIC_SWORD_PARRY_01.get(),
-                                user.getSoundCategory(), 1f, (float) (0.8f * ((parryComponent != null ? parryComponent.parrySuccession() : 0) * 0.1)));
-                    }
-                }
-            }
+        if (!world.isClient && remainingUseTicks <= 1) {
+            user.stopUsingItem();
         }
     }
 
     @Override
     public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
-        if (!world.isClient) {
-            int skillCooldown = Config.uniqueEffects.stormbringer.cooldown;
-            ParryComponent parryComponent = stack.getOrDefault(ComponentTypeRegistry.PARRY.get(), ParryComponent.DEFAULT);
-            if (parryComponent.parried()) {
-                //Damage
-                Box box = new Box(user.getX() + radius, user.getY() + radius, user.getZ() + radius,
-                        user.getX() - radius, user.getY() - radius, user.getZ() - radius);
-                for (Entity entities : world.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY)) {
-
-                    //damage & knockback
-                    if ((entities instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, user)) {
-                        float choose = (float) (Math.random() * 1);
-                        float abilityDamage = HelperMethods.spellScaledDamage("lightning", user, Config.uniqueEffects.stormbringer.spellScaling, Config.uniqueEffects.stormbringer.damage);
-                        le.damage(user.getDamageSources().indirectMagic(user, user), abilityDamage + parryComponent.parrySuccession());
-                        world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_BOW_POISON_ATTACK_01.get(),
-                                le.getSoundCategory(), 0.3f, choose);
-                        le.setVelocity(le.getX() - user.getX(), 0.1, le.getZ() - user.getZ());
-
-                        //player dodge backwards
-                        user.setVelocity(le.getRotationVector().multiply(+1.5));
-                        user.setVelocity(user.getVelocity().x, 0, user.getVelocity().z); // Prevent player flying to the heavens
-                        user.velocityModified = true;
-                    }
-                }
-                world.playSoundFromEntity(null, user, SoundRegistry.ELEMENTAL_BOW_THUNDER_SHOOT_IMPACT_01.get(),
-                        user.getSoundCategory(), (float) (0.2f * (parryComponent.parrySuccession() * 0.04)), 0.8f);
-                if (user instanceof PlayerEntity player) player.getItemCooldownManager().set(stack.getItem(), (skillCooldown / 2) + (parryComponent.parrySuccession() * 2));
-                stack.set(ComponentTypeRegistry.PARRY.get(), parryComponent.resetParry());
-            } else {
-                if (user instanceof PlayerEntity player) {
-                    player.getItemCooldownManager().set(stack.getItem(), skillCooldown);
-                }
-                stack.set(ComponentTypeRegistry.PARRY.get(), parryComponent.resetFull());
-            }
+        if (!world.isClient && user instanceof ServerPlayerEntity serverPlayer) {
+            StormbringerParryManager.finishUse(serverPlayer, stack);
         }
     }
 
     @Override
     public int getMaxUseTime(ItemStack stack, LivingEntity user) {
-        return Config.uniqueEffects.stormbringer.cooldown;
+        return Math.max(1, Config.uniqueEffects.stormbringer.blockDuration);
     }
 
     @Override
@@ -146,13 +136,12 @@ public class StormbringerSwordItem extends UniqueSwordItem {
     public void appendTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.stormbringersworditem.tooltip1").setStyle(Styles.ABILITY));
-        tooltip.add(Text.literal(""));
-        tooltip.add(Text.translatable("item.simplyswords.onrightclickheld").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.stormbringersworditem.tooltip2").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
-        tooltip.add(Text.translatable("item.simplyswords.stormbringersworditem.tooltip5").setStyle(Styles.TEXT));
+        tooltip.add(Text.translatable("item.simplyswords.onrightclickheld").setStyle(Styles.RIGHT_CLICK));
+        tooltip.add(Text.translatable("item.simplyswords.stormbringersworditem.tooltip3").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
-        tooltip.add(Text.translatable("item.simplyswords.stormbringersworditem.tooltip10").setStyle(Styles.TEXT));
+        tooltip.add(Text.translatable("item.simplyswords.stormbringersworditem.tooltip4").setStyle(Styles.TEXT));
         appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.stormbringer.cooldown);
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
         TooltipUtils.appendSpellScaleTooltip(tooltip, "lightning");
@@ -165,16 +154,32 @@ public class StormbringerSwordItem extends UniqueSwordItem {
         }
 
         @ValidatedInt.Restrict(min = 0)
-        public int cooldown = 90;
+        public int cooldown = 240;
         @ValidatedFloat.Restrict(min = 0f)
         public float damage = 12f;
         @ValidatedFloat.Restrict(min = 0f)
         public float spellScaling = 2.3f;
 
         @ValidatedInt.Restrict(min = 0)
-        public int blockDuration = 35;
+        public int blockDuration = 50;
         @ValidatedInt.Restrict(min = 0)
-        public int parryDuration = 10;
+        public int parryDuration = 20;
+        @ValidatedFloat.Restrict(min = 0f)
+        public float radius = 3f;
+        @ValidatedInt.Restrict(min = 1)
+        public int maxStormCharges = 10;
+        @ValidatedInt.Restrict(min = 0)
+        public int stormChargesPerParry = 5;
+        @ValidatedInt.Restrict(min = 0)
+        public int stormChargesPerBlock = 1;
+        @ValidatedInt.Restrict(min = 1)
+        public int chainLightningCooldown = 20;
+        @ValidatedFloat.Restrict(min = 0f)
+        public float chainLightningRange = 6f;
+        @ValidatedFloat.Restrict(min = 0f)
+        public float chainLightningDamage = 4f;
+        @ValidatedFloat.Restrict(min = 0f)
+        public float chainLightningSpellScaling = 1f;
 
     }
 }

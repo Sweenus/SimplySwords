@@ -34,7 +34,7 @@ public class BrimstoneClaymoreVisualEntityRenderer extends EntityRenderer<Brimst
     @Override
     public void render(BrimstoneClaymoreVisualEntity entity, float yaw, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light) {
         float radius = Math.max(0.1F, entity.getRadius());
-        BattleStandardFieldRenderer.renderBrimstoneCircle(matrices, vertexConsumers, entity.age, radius);
+        ModernFieldRenderer.renderBrimstoneCircle(matrices, vertexConsumers, entity.age, radius);
 
         ItemStack stack = ItemsRegistry.BRIMSTONE_CLAYMORE.get().getDefaultStack();
         float bob = entity.isPlunging() ? 0.0F : MathHelper.sin((entity.age + tickDelta) * 0.14F) * 0.08F;

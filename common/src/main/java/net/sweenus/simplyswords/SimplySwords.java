@@ -21,6 +21,7 @@ import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.client.renderer.BattleStandardDarkRenderer;
 import net.sweenus.simplyswords.client.renderer.BattleStandardRenderer;
 import net.sweenus.simplyswords.client.renderer.BrimstoneClaymoreVisualEntityRenderer;
+import net.sweenus.simplyswords.client.renderer.ChainLightningVisualEntityRenderer;
 import net.sweenus.simplyswords.client.renderer.EmberlashSmoulderVisualEntityRenderer;
 import net.sweenus.simplyswords.client.renderer.FlameSeedVisualEntityRenderer;
 import net.sweenus.simplyswords.client.renderer.FrostfallIceSpikeVisualEntityRenderer;
@@ -154,6 +155,7 @@ public class SimplySwords {
             EntityRendererRegistry.register(EntityRegistry.SHADOWSTING_AFTERIMAGE_VISUAL, ShadowstingAfterimageVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.ICEWHISPER_COMET_VISUAL, IcewhisperCometVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.BRIMSTONE_CLAYMORE_VISUAL, BrimstoneClaymoreVisualEntityRenderer::new);
+            EntityRendererRegistry.register(EntityRegistry.CHAIN_LIGHTNING_VISUAL, ChainLightningVisualEntityRenderer::new);
 
             // Simply Tooltips bridge — renders all simplyswords sword items with the ST engine
             net.sweenus.simplytooltips.api.TooltipProviderRegistry.register(

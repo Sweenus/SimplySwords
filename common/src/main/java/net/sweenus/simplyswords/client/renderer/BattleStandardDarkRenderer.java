@@ -31,7 +31,7 @@ public class BattleStandardDarkRenderer extends MobEntityRenderer<BattleStandard
     @Override
     public boolean shouldRender(BattleStandardDarkEntity entity, Frustum frustum, double x, double y, double z) {
         return super.shouldRender(entity, frustum, x, y, z)
-                || (BattleStandardFieldRenderer.isEnabled()
+                || (ModernFieldRenderer.isEnabled()
                 && "harbinger".equals(entity.getStandardType())
                 && frustum.isVisible(entity.getBoundingBox().expand(FIELD_CULLING_RADIUS, 1.0, FIELD_CULLING_RADIUS)));
     }
@@ -40,7 +40,7 @@ public class BattleStandardDarkRenderer extends MobEntityRenderer<BattleStandard
     public void render(BattleStandardDarkEntity entity, float yaw, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light) {
         super.render(entity, yaw, tickDelta, matrices, vertexConsumers, light);
         if ("harbinger".equals(entity.getStandardType())) {
-            BattleStandardFieldRenderer.renderHarbinger(matrices, vertexConsumers, entity.age);
+            ModernFieldRenderer.renderHarbinger(matrices, vertexConsumers, entity.age);
         }
     }
 }

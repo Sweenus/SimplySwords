@@ -14,6 +14,7 @@ import net.sweenus.simplyswords.world.RevivalCandleVisualManager;
 import net.sweenus.simplyswords.world.ShadowstingShadowDanceManager;
 import net.sweenus.simplyswords.world.SoulkeeperLanternManager;
 import net.sweenus.simplyswords.world.SoulrenderMarkVisualManager;
+import net.sweenus.simplyswords.world.TemporaryWorldLightManager;
 import net.sweenus.simplyswords.world.WhisperwindVisualManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -63,6 +64,9 @@ public abstract class ServerWorldMixin {
         }
         if (ShadowstingShadowDanceManager.hasPendingCloneStrikes(world)) {
             ShadowstingShadowDanceManager.tickCloneStrikes(world);
+        }
+        if (TemporaryWorldLightManager.hasActive(world)) {
+            TemporaryWorldLightManager.tick(world);
         }
         RevivalCandleVisualManager.tickWorld(world);
         SoulkeeperLanternManager.tickWorld(world);

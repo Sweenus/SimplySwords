@@ -171,4 +171,13 @@ public class EntityRegistry {
                     .build(Identifier.of(SimplySwords.MOD_ID, "brimstone_claymore_visual").toString())
     );
 
+    public static final RegistrySupplier<EntityType<ChainLightningVisualEntity>> CHAIN_LIGHTNING_VISUAL = ENTITIES.register(
+            "chain_lightning_visual",
+            () -> EntityType.Builder.<ChainLightningVisualEntity>create(ChainLightningVisualEntity::new, SpawnGroup.MISC)
+                    .dimensions(0.35f, 0.35f)
+                    .maxTrackingRange(96)
+                    .trackingTickInterval(1)
+                    .build(Identifier.of(SimplySwords.MOD_ID, "chain_lightning_visual").toString())
+    );
+
 }

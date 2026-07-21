@@ -1,5 +1,7 @@
 package net.sweenus.simplyswords.client.renderer;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
@@ -9,7 +11,8 @@ import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.config.Config;
 import org.joml.Matrix4f;
 
-public final class BattleStandardFieldRenderer {
+@Environment(EnvType.CLIENT)
+public final class ModernFieldRenderer {
 
     private static final double FIELD_RADIUS = 6.0;
     private static final float BORDER_HALF_THICKNESS = 0.12F;
@@ -20,7 +23,7 @@ public final class BattleStandardFieldRenderer {
     private static final float WAVE_DURATION_TICKS = 28.0F;
     private static final int CIRCLE_SEGMENTS = 96;
 
-    private BattleStandardFieldRenderer() {
+    private ModernFieldRenderer() {
     }
 
     public static boolean isEnabled() {
@@ -63,7 +66,7 @@ public final class BattleStandardFieldRenderer {
         renderTargetLine(matrices, vertexConsumers, age, targetOffset, 255, 142, 48, 255, 64, 24);
     }
 
-    private static void renderTargetLine(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int age, Vec3d targetOffset, int coreRed, int coreGreen, int coreBlue, int pulseRed, int pulseGreen, int pulseBlue) {
+    public static void renderTargetLine(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int age, Vec3d targetOffset, int coreRed, int coreGreen, int coreBlue, int pulseRed, int pulseGreen, int pulseBlue) {
         if (!isEnabled()) {
             return;
         }
@@ -106,7 +109,7 @@ public final class BattleStandardFieldRenderer {
         renderTargetRing(matrices, vertexConsumers, age, targetOffset, targetWidth, 255, 142, 48, 255, 64, 24);
     }
 
-    private static void renderTargetRing(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int age, Vec3d targetOffset, float targetWidth, int borderRed, int borderGreen, int borderBlue, int waveRed, int waveGreen, int waveBlue) {
+    public static void renderTargetRing(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int age, Vec3d targetOffset, float targetWidth, int borderRed, int borderGreen, int borderBlue, int waveRed, int waveGreen, int waveBlue) {
         if (!isEnabled()) {
             return;
         }
@@ -122,7 +125,7 @@ public final class BattleStandardFieldRenderer {
         drawOffsetCircleBand(vertices, matrix, center, radius, 0.08F, borderRed, borderGreen, borderBlue, borderAlpha);
     }
 
-    private static void renderRing(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int age, int red, int green, int blue) {
+    public static void renderRing(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int age, int red, int green, int blue) {
         Matrix4f matrix = matrices.peek().getPositionMatrix();
         VertexConsumer vertices = vertexConsumers.getBuffer(RenderLayer.getDebugQuads());
         float borderPulse = 0.76F + 0.12F * MathHelper.sin(age * 0.12F);
@@ -170,7 +173,7 @@ public final class BattleStandardFieldRenderer {
         drawQuad(vertices, matrix, radius - halfThickness, -radius, radius + halfThickness, radius, red, green, blue, alpha);
     }
 
-    private static void renderCircle(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int age, float radius, int red, int green, int blue) {
+    public static void renderCircle(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int age, float radius, int red, int green, int blue) {
         Matrix4f matrix = matrices.peek().getPositionMatrix();
         VertexConsumer vertices = vertexConsumers.getBuffer(RenderLayer.getDebugQuads());
         float borderPulse = 0.76F + 0.12F * MathHelper.sin(age * 0.12F);

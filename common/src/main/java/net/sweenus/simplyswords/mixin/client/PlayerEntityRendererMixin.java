@@ -10,7 +10,7 @@ import net.minecraft.client.render.entity.model.PlayerEntityModel;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.sweenus.simplyswords.client.ShadowDanceFovHandler;
-import net.sweenus.simplyswords.client.renderer.BattleStandardFieldRenderer;
+import net.sweenus.simplyswords.client.renderer.ModernFieldRenderer;
 import net.sweenus.simplyswords.client.renderer.feature.ShoulderAxolotlFeatureRenderer;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import org.spongepowered.asm.mixin.Mixin;
@@ -37,7 +37,7 @@ public abstract class PlayerEntityRendererMixin {
             return;
         }
 
-        BattleStandardFieldRenderer.renderImmolation(matrices, vertexConsumers, player.age, Math.max(0.75F, immolation.getAmplifier()));
+        ModernFieldRenderer.renderImmolation(matrices, vertexConsumers, player.age, Math.max(0.75F, immolation.getAmplifier()));
     }
 
     @Inject(method = "<init>", at = @At("TAIL"))

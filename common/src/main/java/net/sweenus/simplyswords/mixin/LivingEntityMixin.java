@@ -9,6 +9,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.tag.DamageTypeTags;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
@@ -18,6 +19,7 @@ import net.sweenus.simplyswords.compat.eldritch_end.EldritchEndCompatMethods;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.effect.FlameSeedEffect;
 import net.sweenus.simplyswords.item.interfaces.RevivalWeapon;
+import net.sweenus.simplyswords.item.custom.StormbringerSwordItem;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
@@ -81,6 +83,13 @@ public abstract class LivingEntityMixin {
         LivingEntity livingEntity = (LivingEntity) (Object) this;
         if (Boolean.TRUE.equals(cir.getReturnValue()) && !livingEntity.getWorld().isClient()) {
             WeaponImplicitRegistry.onDamageApplied(livingEntity, source, amount);
+            if (source.isIn(DamageTypeTags.IS_PLAYER_ATTACK) && source.getAttacker() instanceof ServerPlayerEntity player) {
+                ItemStack stack = source.getWeaponStack();
+                if (stack == null || !stack.isOf(ItemsRegistry.STORMBRINGER.get())) {
+                    stack = player.getMainHandStack();
+                }
+                StormbringerSwordItem.tryTriggerChainLightningOnMeleeDamage(stack, livingEntity, player);
+            }
         }
     }
 

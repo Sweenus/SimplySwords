@@ -15,7 +15,7 @@ import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
-import net.sweenus.simplyswords.client.renderer.BattleStandardFieldRenderer;
+import net.sweenus.simplyswords.client.renderer.ModernFieldRenderer;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.item.custom.StealSwordItem;
 import net.sweenus.simplyswords.item.component.StoredChargeComponent;
@@ -53,7 +53,7 @@ public abstract class WorldRendererMixin {
 
         StatusEffectInstance immolation = player.getStatusEffect(EffectRegistry.getReference(EffectRegistry.IMMOLATION));
         if (immolation != null && client.options.getPerspective().isFirstPerson()) {
-            BattleStandardFieldRenderer.renderImmolation(matrices, vertexConsumers, player.age, Math.max(0.75F, immolation.getAmplifier()));
+            ModernFieldRenderer.renderImmolation(matrices, vertexConsumers, player.age, Math.max(0.75F, immolation.getAmplifier()));
         }
 
         TargetHighlight highlight = getReadyTarget(player);
@@ -69,11 +69,11 @@ public abstract class WorldRendererMixin {
                     MathHelper.lerp(tickDelta, highlightedTarget.prevZ, highlightedTarget.getZ()));
             Vec3d targetOffset = targetPos.subtract(playerPos);
             if (highlight.brimstone()) {
-                BattleStandardFieldRenderer.renderBrimstoneTargetLine(matrices, vertexConsumers, player.age, targetOffset);
-                BattleStandardFieldRenderer.renderBrimstoneTargetRing(matrices, vertexConsumers, player.age, targetOffset, highlightedTarget.getWidth());
+                ModernFieldRenderer.renderBrimstoneTargetLine(matrices, vertexConsumers, player.age, targetOffset);
+                ModernFieldRenderer.renderBrimstoneTargetRing(matrices, vertexConsumers, player.age, targetOffset, highlightedTarget.getWidth());
             } else {
-                BattleStandardFieldRenderer.renderSoulstealerTargetLine(matrices, vertexConsumers, player.age, targetOffset);
-                BattleStandardFieldRenderer.renderSoulstealerTargetRing(matrices, vertexConsumers, player.age, targetOffset, highlightedTarget.getWidth());
+                ModernFieldRenderer.renderSoulstealerTargetLine(matrices, vertexConsumers, player.age, targetOffset);
+                ModernFieldRenderer.renderSoulstealerTargetRing(matrices, vertexConsumers, player.age, targetOffset, highlightedTarget.getWidth());
             }
         }
 
