@@ -1,9 +1,11 @@
 package net.sweenus.simplyswords.world;
 
 import net.minecraft.item.ItemStack;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
+import net.minecraft.world.World;
 import net.sweenus.simplyswords.item.RunicSwordItem;
 import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
@@ -65,6 +67,12 @@ public final class PlayerWeaponAbilityManager {
             stack.onStoppedUsing(player.getWorld(), player, player.getItemUseTimeLeft());
             player.clearActiveItem();
         }
+    }
+
+    public static boolean shouldSkipDefaultAbilityUse(World world, PlayerEntity player, Hand hand, ItemStack stack) {
+        return stack != null
+                && !stack.isEmpty()
+                && PlayerWeaponAbilityKeybindState.isHandRebound(world, player, hand);
     }
 
     private static boolean canUse(ServerPlayerEntity player, ItemStack stack) {

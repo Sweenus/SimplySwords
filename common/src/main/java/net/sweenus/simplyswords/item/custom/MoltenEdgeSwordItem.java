@@ -67,7 +67,7 @@ public class MoltenEdgeSwordItem extends UniqueSwordItem implements UniqueWeapon
 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
-        return startPlayerAbility(world, user, hand);
+        return useFromDefaultInput(world, user, hand);
     }
 
     @Override

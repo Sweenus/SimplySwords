@@ -3,6 +3,7 @@
   "minVersion": "0.8",
   "package": "net.sweenus.simplyswords.mixin",
   "compatibilityLevel": "JAVA_21",
+  "plugin": "net.sweenus.simplyswords.mixin.SimplySwordsCommonMixinPlugin",
   "client": [
     "client.GameRendererMixin",
     "client.HeldItemRendererMixin",
@@ -10,7 +11,8 @@
     "client.PlayerEntityRendererMixin",
     "client.LivingEntityRendererAccessor",
     "client.WorldRendererMixin",
-    "client.MinecraftClientMixin"
+    "client.MinecraftClientMixin",
+    "client.compat.SpellEngineSpellHotbarMixin"
   ],
   "mixins": [
     "LivingEntityMixin",

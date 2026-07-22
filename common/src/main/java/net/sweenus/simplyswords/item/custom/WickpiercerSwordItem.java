@@ -66,7 +66,7 @@ public class WickpiercerSwordItem extends UniqueSwordItem implements RevivalWeap
 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
-        return startPlayerAbility(world, user, hand);
+        return useFromDefaultInput(world, user, hand);
     }
 
     @Override

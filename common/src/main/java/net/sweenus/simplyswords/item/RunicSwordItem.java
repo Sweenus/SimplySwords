@@ -34,6 +34,7 @@ import net.sweenus.simplyswords.registry.GemPowerRegistry;
 import net.sweenus.simplyswords.registry.TagRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
+import net.sweenus.simplyswords.world.PlayerWeaponAbilityManager;
 
 import java.util.List;
 
@@ -112,9 +113,13 @@ public class RunicSwordItem extends SwordItem {
                 world.spawnEntity(thrownSwordEntity);
 
                 GemPowerComponent component = SimplySwordsAPI.getComponent(itemStack);
+                boolean skipDefaultAbilityUse = PlayerWeaponAbilityManager.shouldSkipDefaultAbilityUse(world, user, hand, itemStack);
 
                 if (!user.getAbilities().creativeMode) {
                     itemStack.decrement(1);
+                }
+                if (skipDefaultAbilityUse) {
+                    return TypedActionResult.success(itemStack, world.isClient());
                 }
                 return component.use(world, user, hand);
             }
@@ -126,6 +131,9 @@ public class RunicSwordItem extends SwordItem {
         }
 
         if (itemStack.getDamage() < itemStack.getMaxDamage() - 1) {
+            if (PlayerWeaponAbilityManager.shouldSkipDefaultAbilityUse(world, user, hand, itemStack)) {
+                return TypedActionResult.pass(itemStack);
+            }
             GemPowerComponent component = SimplySwordsAPI.getComponent(itemStack);
             return component.use(world, user, hand);
         }

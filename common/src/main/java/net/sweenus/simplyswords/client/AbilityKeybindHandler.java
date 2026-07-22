@@ -11,7 +11,9 @@ import net.minecraft.util.Hand;
 import net.sweenus.simplyswords.item.RunicSwordItem;
 import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
 import net.sweenus.simplyswords.network.UseWeaponAbilityPacket;
+import net.sweenus.simplyswords.network.WeaponAbilityKeybindStatePacket;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
+import net.sweenus.simplyswords.world.PlayerWeaponAbilityKeybindState;
 import org.lwjgl.glfw.GLFW;
 
 public final class AbilityKeybindHandler {
@@ -34,6 +36,9 @@ public final class AbilityKeybindHandler {
     private static boolean offhandPressed;
     private static ItemStack mainhandActiveStack = ItemStack.EMPTY;
     private static ItemStack offhandActiveStack = ItemStack.EMPTY;
+    private static boolean lastMainhandBound;
+    private static boolean lastOffhandBound;
+    private static boolean sentKeybindState;
 
     private AbilityKeybindHandler() {
     }
@@ -42,10 +47,6 @@ public final class AbilityKeybindHandler {
         KeyMappingRegistry.register(MAINHAND_ABILITY);
         KeyMappingRegistry.register(OFFHAND_ABILITY);
         ClientTickEvent.CLIENT_POST.register(AbilityKeybindHandler::tick);
-    }
-
-    public static boolean shouldSuppressDefaultUse(ItemStack stack, Hand hand) {
-        return isReboundAbilityStack(stack, hand);
     }
 
     public static boolean shouldSuppressVanillaStopUsing(PlayerEntity player) {
@@ -62,13 +63,23 @@ public final class AbilityKeybindHandler {
                 && ItemStack.areItemsEqual(player.getStackInHand(hand), activeStack);
     }
 
+    public static boolean isAbilityKeyRebound(Hand hand) {
+        KeyBinding keyBinding = hand == Hand.MAIN_HAND ? MAINHAND_ABILITY : OFFHAND_ABILITY;
+        return !keyBinding.isUnbound();
+    }
+
     private static void tick(MinecraftClient client) {
         if (client == null || client.player == null || client.world == null || client.currentScreen != null) {
             releaseIfNeeded(Hand.MAIN_HAND);
             releaseIfNeeded(Hand.OFF_HAND);
+            if (client == null || client.player == null || client.world == null) {
+                sentKeybindState = false;
+                PlayerWeaponAbilityKeybindState.setClientState(false, false);
+            }
             return;
         }
 
+        syncKeybindState();
         tickHand(Hand.MAIN_HAND, MAINHAND_ABILITY);
         tickHand(Hand.OFF_HAND, OFFHAND_ABILITY);
     }
@@ -118,6 +129,18 @@ public final class AbilityKeybindHandler {
             mainhandActiveStack = ItemStack.EMPTY;
         } else {
             offhandActiveStack = ItemStack.EMPTY;
+        }
+    }
+
+    private static void syncKeybindState() {
+        boolean mainhandBound = !MAINHAND_ABILITY.isUnbound();
+        boolean offhandBound = !OFFHAND_ABILITY.isUnbound();
+        PlayerWeaponAbilityKeybindState.setClientState(mainhandBound, offhandBound);
+        if (!sentKeybindState || mainhandBound != lastMainhandBound || offhandBound != lastOffhandBound) {
+            new WeaponAbilityKeybindStatePacket(mainhandBound, offhandBound).sendToServer();
+            lastMainhandBound = mainhandBound;
+            lastOffhandBound = offhandBound;
+            sentKeybindState = true;
         }
     }
 

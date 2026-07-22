@@ -11,8 +11,17 @@ import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.util.HelperMethods;
+import net.sweenus.simplyswords.world.PlayerWeaponAbilityManager;
 
 public interface UniqueWeaponActiveAbility {
+
+    default TypedActionResult<ItemStack> useFromDefaultInput(World world, PlayerEntity user, Hand hand) {
+        ItemStack stack = user.getStackInHand(hand);
+        if (PlayerWeaponAbilityManager.shouldSkipDefaultAbilityUse(world, user, hand, stack)) {
+            return TypedActionResult.pass(stack);
+        }
+        return startPlayerAbility(world, user, hand);
+    }
 
     default TypedActionResult<ItemStack> startPlayerAbility(World world, PlayerEntity user, Hand hand) {
         ItemStack stack = user.getStackInHand(hand);

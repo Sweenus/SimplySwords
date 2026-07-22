@@ -51,7 +51,7 @@ public class RibboncleaverSwordItem extends UniqueSwordItem implements UniqueWea
 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
-        return startPlayerAbility(world, user, hand);
+        return useFromDefaultInput(world, user, hand);
     }
 
     @Override
