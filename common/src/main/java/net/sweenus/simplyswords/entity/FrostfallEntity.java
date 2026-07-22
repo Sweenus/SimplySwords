@@ -70,12 +70,15 @@ public class FrostfallEntity extends ThrownSwordEntity {
                 if ((age % detonateDelay == 0) && remainingDetonations > 0) {
                     int detonateCount = remainingDetonations;
 
+                    float pulseMultiplier = (6.0f - detonateCount) / 5.0f;
+                    float pulseDamage = detonateDamage * pulseMultiplier;
+
                     Box box = HelperMethods.createBox(this, detonateRadius - detonateCount);
 
                     for (Entity otherEntity : world.getOtherEntities(this, box, EntityPredicates.VALID_LIVING_ENTITY)) {
                         if ((otherEntity instanceof LivingEntity le) &&
                                 HelperMethods.checkFriendlyFire(le, livingEntity)) {
-                            float damage = HelperMethods.applyAbilityDamageEnchantments(world, stack, le, damageSource, detonateDamage - detonateCount);
+                            float damage = HelperMethods.applyAbilityDamageEnchantments(world, stack, le, damageSource, pulseDamage);
                             HelperMethods.damageThroughIframes(le, damageSource, damage);
                             le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, duration, Math.min( 3, 6-detonateCount)), livingEntity);
                             if (le.distanceTo(this) > 1)

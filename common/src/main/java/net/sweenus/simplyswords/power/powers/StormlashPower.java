@@ -88,9 +88,9 @@ public class StormlashPower extends RunefusedGemPower {
         public double range = 6.0;
 
         @ValidatedFloat.Restrict(min = 0f)
-        public float damageScaling = 0.44f;
+        public float damageScaling = 0.35f;
 
         @ValidatedFloat.Restrict(min = 0f)
-        public float spellScaling = 1.0f;
+        public float spellScaling = 0.8f;
     }
 }

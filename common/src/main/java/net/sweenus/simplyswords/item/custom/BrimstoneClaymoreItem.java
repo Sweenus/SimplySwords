@@ -168,13 +168,13 @@ public class BrimstoneClaymoreItem extends UniqueSwordItem implements TwoHandedW
         @ValidatedInt.Restrict(min = 1)
         public int pulseInterval = 20;
         @ValidatedFloat.Restrict(min = 0f)
-        public float hitDamageScaling = 1.0f;
+        public float hitDamageScaling = 0.8f;
         @ValidatedFloat.Restrict(min = 0f)
-        public float pulseDamageScaling = 0.35f;
+        public float pulseDamageScaling = 0.28f;
         @ValidatedFloat.Restrict(min = 0f)
         public float radiusGrowthPerHit = 0.35f;
         @ValidatedFloat.Restrict(min = 0f)
-        public float finalDamageScaling = 1.25f;
+        public float finalDamageScaling = 1.0f;
         @ValidatedDouble.Restrict(min = 0.0)
         public double targetJumpRange = 8.0;
 

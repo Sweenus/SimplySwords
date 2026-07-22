@@ -144,9 +144,9 @@ public class HarbingerSwordItem extends UniqueSwordItem implements UniqueWeaponA
         @ValidatedInt.Restrict(min = 0)
         public int cooldown = 700;
         @ValidatedFloat.Restrict(min = 0f)
-        public float damageScaling = 0.33f;
+        public float damageScaling = 0.26f;
         @ValidatedFloat.Restrict(min = 0f)
-        public float spellScaling = 1.2f;
+        public float spellScaling = 0.96f;
 
     }
 }

@@ -163,7 +163,7 @@ public class StarsEdgeSwordItem extends UniqueSwordItem implements UniqueWeaponA
         @ValidatedInt.Restrict(min = 0)
         public int duration = 120;
         @ValidatedFloat.Restrict(min = 0f)
-        public float damageScaling = 0.40f;
+        public float damageScaling = 0.32f;
         @ValidatedFloat.Restrict(min = 0f)
         public float lifestealModifier = 0.10f;
         @ValidatedInt.Restrict(min = 1)

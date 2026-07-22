@@ -158,7 +158,7 @@ public class MagibladeSwordItem extends UniqueSwordItem implements UniqueWeaponA
         @ValidatedInt.Restrict(min = 0)
         public int cooldown = 35;
         @ValidatedFloat.Restrict(min = 0f)
-        public float damageScaling = 0.7f;
+        public float damageScaling = 0.56f;
         @ValidatedInt.Restrict(min = 0, max = 100)
         public int repelChance = 55;
         @ValidatedFloat.Restrict(min = 1f)

@@ -29,6 +29,7 @@ import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.LootConfig;
 import net.sweenus.simplyswords.item.ContainedRemnantItem;
 import net.sweenus.simplyswords.item.custom.CaelestisSwordItem;
+import net.sweenus.simplyswords.item.custom.WickpiercerSwordItem;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
@@ -323,6 +324,17 @@ public abstract class ServerPlayerEntityMixin {
                                 SoundRegistry.MAGIC_SWORD_PARRY_01.get(), SoundCategory.PLAYERS,0.8f, 1.0f);
                     }
 
+                    if (serverPlayer.getMainHandStack().getItem() instanceof WickpiercerSwordItem
+                            && serverPlayer.hasStatusEffect(EffectRegistry.getReference(EffectRegistry.FRENZY))) {
+                        ItemStack wickpiercerStack = serverPlayer.getMainHandStack();
+                        float damageModifier = HelperMethods.attackScaledDamage(
+                                serverPlayer, wickpiercerStack, Config.uniqueEffects.wickpiercer.damageScaling);
+                        DamageSource damageSource = serverPlayer.getDamageSources().playerAttack(serverPlayer);
+                        target.timeUntilRegen = 0;
+                        HelperMethods.decrementStatusEffect(serverPlayer, EffectRegistry.getReference(EffectRegistry.FRENZY));
+                        target.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments(
+                                serverWorld, wickpiercerStack, target, damageSource, damageModifier));
+                    }
                 }
             }
         }

@@ -125,13 +125,13 @@ public class ArcanethystSwordItem extends UniqueSwordItem implements TwoHandedWe
         @ValidatedInt.Restrict(min = 0)
         public int cooldown = 220;
         @ValidatedFloat.Restrict(min = 0f)
-        public float damageScaling = 0.08f;
+        public float damageScaling = 0.06f;
         @ValidatedInt.Restrict(min = 0)
         public int duration = 100;
         @ValidatedInt.Restrict(min = 1)
         public int radius = 6;
         @ValidatedFloat.Restrict(min = 0f)
-        public float spellScaling = 1.4f;
+        public float spellScaling = 1.12f;
         @ValidatedFloat.Restrict(min = 0f)
         public float liftHeight = 4.0f;
         @ValidatedInt.Restrict(min = 1)

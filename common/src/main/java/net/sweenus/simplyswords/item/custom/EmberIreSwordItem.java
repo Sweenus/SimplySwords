@@ -221,7 +221,7 @@ public class EmberIreSwordItem extends UniqueSwordItem implements UniqueWeaponAc
             super(30, 150, new ItemStackTooltipAppender(ItemsRegistry.EMBERBLADE::get));
         }
 
-        public float initialDamageScaling = 0.3f;
-        public float maxChargeDamageScaling = 3.0f;
+        public float initialDamageScaling = 0.24f;
+        public float maxChargeDamageScaling = 2.4f;
     }
 }

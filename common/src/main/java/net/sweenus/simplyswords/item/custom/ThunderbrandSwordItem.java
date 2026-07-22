@@ -179,10 +179,10 @@ public class ThunderbrandSwordItem extends UniqueSwordItem implements TwoHandedW
         @ValidatedInt.Restrict(min = 0)
         public int cooldown = 250;
         @ValidatedFloat.Restrict(min = 0f)
-        public float damageScaling = 0.23f;
+        public float damageScaling = 0.18f;
         @ValidatedInt.Restrict(min = 1)
         public int radius = 2;
         @ValidatedFloat.Restrict(min = 0f)
-        public float spellScaling = 1.7f;
+        public float spellScaling = 1.36f;
     }
 }

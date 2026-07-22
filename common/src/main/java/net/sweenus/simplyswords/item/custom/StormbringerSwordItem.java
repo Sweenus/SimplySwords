@@ -185,9 +185,9 @@ public class StormbringerSwordItem extends UniqueSwordItem implements UniqueWeap
         @ValidatedInt.Restrict(min = 0)
         public int cooldown = 240;
         @ValidatedFloat.Restrict(min = 0f)
-        public float damageScaling = 1.33f;
+        public float damageScaling = 1.06f;
         @ValidatedFloat.Restrict(min = 0f)
-        public float spellScaling = 2.3f;
+        public float spellScaling = 1.84f;
 
         @ValidatedInt.Restrict(min = 0)
         public int blockDuration = 50;
@@ -206,9 +206,9 @@ public class StormbringerSwordItem extends UniqueSwordItem implements UniqueWeap
         @ValidatedFloat.Restrict(min = 0f)
         public float chainLightningRange = 6f;
         @ValidatedFloat.Restrict(min = 0f)
-        public float chainLightningDamageScaling = 0.44f;
+        public float chainLightningDamageScaling = 0.35f;
         @ValidatedFloat.Restrict(min = 0f)
-        public float chainLightningSpellScaling = 1f;
+        public float chainLightningSpellScaling = 0.8f;
 
     }
 }

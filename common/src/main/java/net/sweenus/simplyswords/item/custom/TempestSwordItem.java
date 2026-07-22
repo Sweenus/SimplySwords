@@ -213,7 +213,7 @@ public class TempestSwordItem extends UniqueSwordItem implements UniqueWeaponAct
         @ValidatedInt.Restrict(min = 1)
         public int maxStacks = 10;
         @ValidatedFloat.Restrict(min = 0f)
-        public float spellScaling = 0.3f;
+        public float spellScaling = 0.24f;
 
     }
 }

@@ -164,7 +164,7 @@ public class ChompolotlSwordItem extends UniqueSwordItem implements UniqueWeapon
         @ValidatedInt.Restrict(min = 0)
         public int cooldown = 60;
         @ValidatedFloat.Restrict(min = 0f)
-        public float damageScaling = 1.0f;
+        public float damageScaling = 0.8f;
         @ValidatedFloat.Restrict(min = 20f)
         public int duration = 500;
         @ValidatedFloat.Restrict(min = 0f)

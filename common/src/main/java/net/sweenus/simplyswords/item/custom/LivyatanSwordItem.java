@@ -139,14 +139,14 @@ public class LivyatanSwordItem extends UniqueSwordItem implements UniqueWeaponAc
         }
 
         @ValidatedFloat.Restrict(min = 0)
-        public float returnDamageScaling = 0.8f;
+        public float returnDamageScaling = 0.64f;
         @ValidatedFloat.Restrict(min = 0f)
-        public float damageScaling = 0.8f;
+        public float damageScaling = 0.64f;
         @ValidatedInt.Restrict(min = 0)
         public int duration = 100;
         @ValidatedDouble.Restrict(min = 0.5)
         public double radius = 0.5;
         @ValidatedFloat.Restrict(min = 0f)
-        public float spellScaling = 1.7f;
+        public float spellScaling = 1.36f;
     }
 }

@@ -136,7 +136,7 @@ public class MagiscytheSwordItem extends UniqueSwordItem implements UniqueWeapon
         @ValidatedInt.Restrict(min = 0)
         public int cooldown = 980;
         @ValidatedFloat.Restrict(min = 0f)
-        public float damageScaling = 0.3f;
+        public float damageScaling = 0.24f;
         @ValidatedInt.Restrict(min = 0)
         public int duration = 400;
         @ValidatedDouble.Restrict(min = 1f)
@@ -144,7 +144,7 @@ public class MagiscytheSwordItem extends UniqueSwordItem implements UniqueWeapon
         @ValidatedFloat.Restrict(min = 0f, max = 1f)
         public float repairChance = 0.25f;
         @ValidatedFloat.Restrict(min = 0f)
-        public float spellScaling = 0.5f;
+        public float spellScaling = 0.4f;
 
     }
 }

@@ -87,10 +87,10 @@ public class FaultlinePower extends RunefusedGemPower {
         public double stepDistance = 1.0;
 
         @ValidatedFloat.Restrict(min = 0f)
-        public float damageScaling = 0.44F;
+        public float damageScaling = 0.35F;
 
         @ValidatedFloat.Restrict(min = 0f)
-        public float spellScaling = 1.0F;
+        public float spellScaling = 0.8F;
 
         @ValidatedFloat.Restrict(min = 0f)
         public float centerSpikeHeight = 1.05F;

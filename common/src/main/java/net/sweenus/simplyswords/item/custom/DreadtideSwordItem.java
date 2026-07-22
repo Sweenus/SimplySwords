@@ -149,7 +149,7 @@ public class DreadtideSwordItem extends UniqueSwordItem {
         }
 
         @ValidatedFloat.Restrict(min = 0)
-        public float damageScaling = 1.0f;
+        public float damageScaling = 0.8f;
         @ValidatedInt.Restrict(min = 0)
         public int duration = 250;
         @ValidatedInt.Restrict(min = 1)

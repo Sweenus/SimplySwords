@@ -150,7 +150,7 @@ public class StormSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
         public int frequency = 10;
         @ValidatedInt.Restrict(min = 1)
         public int radius = 10;
-        public float damageScaling = 0.56f;
+        public float damageScaling = 0.45f;
 
     }
 }

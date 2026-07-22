@@ -46,20 +46,6 @@ public class WickpiercerSwordItem extends UniqueSwordItem implements RevivalWeap
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         if (!attacker.getWorld().isClient()) {
             HelperMethods.playHitSounds(attacker, target);
-
-            ServerWorld world = (ServerWorld) attacker.getWorld();
-            DamageSource damageSource;
-            if (attacker instanceof PlayerEntity player) {
-                damageSource = attacker.getDamageSources().playerAttack(player);
-                float damageModifier = HelperMethods.attackScaledDamage(attacker, stack, Config.uniqueEffects.wickpiercer.damageScaling);
-
-                if (attacker.hasStatusEffect(EffectRegistry.getReference(EffectRegistry.FRENZY))) {
-                    target.timeUntilRegen = 0;
-                    HelperMethods.decrementStatusEffect(player, EffectRegistry.getReference(EffectRegistry.FRENZY));
-                    target.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments(world, stack, target, damageSource, damageModifier));
-                    //world.playSound(null, attacker.getBlockPos(), SoundRegistry.SPELL_FIRE.get(),attacker.getSoundCategory(), 0.2f, 1.9f);
-                }
-            }
         }
         return super.postHit(stack, target, attacker);
     }
@@ -201,9 +187,9 @@ public class WickpiercerSwordItem extends UniqueSwordItem implements RevivalWeap
         }
 
         @ValidatedFloat.Restrict(min = 0f)
-        public float damageScaling = 1.0f;
+        public float damageScaling = 0.8f;
         @ValidatedFloat.Restrict(min = 0f)
-        public float throwDamageScaling = 0.5f;
+        public float throwDamageScaling = 0.4f;
         @ValidatedInt.Restrict(min = 0)
         public int duration = 80;
 

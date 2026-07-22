@@ -214,10 +214,10 @@ public class HearthflameSwordItem extends UniqueSwordItem implements TwoHandedWe
         @ValidatedInt.Restrict(min = 0)
         public int cooldown = 300;
         @ValidatedFloat.Restrict(min = 0f)
-        public float damageScaling = 0.21f;
+        public float damageScaling = 0.17f;
         @ValidatedInt.Restrict(min = 1)
         public int radius = 3;
         @ValidatedFloat.Restrict(min = 0f)
-        public float spellScaling = 1.4f;
+        public float spellScaling = 1.12f;
     }
 }

@@ -164,11 +164,11 @@ public class FlamewindSwordItem extends UniqueSwordItem implements UniqueWeaponA
         @ValidatedInt.Restrict(min = 0)
         public int cooldown = 350;
         @ValidatedFloat.Restrict(min = 0f)
-        public float damageScaling = 0.33f;
+        public float damageScaling = 0.26f;
         @ValidatedFloat.Restrict(min = 0f)
-        public float spellScaling = 0.4f;
+        public float spellScaling = 0.32f;
         @ValidatedFloat.Restrict(min = 0f)
-        public float detonationDamageScaling = 0.56f;
+        public float detonationDamageScaling = 0.45f;
         @ValidatedInt.Restrict(min = 0)
         public int maxHaste = 10;
         @ValidatedFloat.Restrict(min = 0f)

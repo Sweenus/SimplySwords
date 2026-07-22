@@ -167,7 +167,7 @@ public class StormsEdgeSwordItem extends UniqueSwordItem implements UniqueWeapon
         public int chance = 15;
         @ValidatedInt.Restrict(min = 0)
         public int cooldown = 100;
-        public float damageScaling = 0.5f;
+        public float damageScaling = 0.4f;
 
     }
 }

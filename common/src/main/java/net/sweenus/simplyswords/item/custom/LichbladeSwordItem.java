@@ -291,7 +291,7 @@ public class LichbladeSwordItem extends UniqueSwordItem implements TwoHandedWeap
         @ValidatedInt.Restrict(min = 0)
         public int cooldown = 700;
         @ValidatedFloat.Restrict(min = 0f)
-        public float damageScaling = 0.46f;
+        public float damageScaling = 0.37f;
         @ValidatedInt.Restrict(min = 0)
         public int duration = 200;
         @ValidatedFloat.Restrict(min = 0f)
@@ -301,6 +301,6 @@ public class LichbladeSwordItem extends UniqueSwordItem implements TwoHandedWeap
         @ValidatedDouble.Restrict(min = 1.0)
         public double range = 22.0;
         @ValidatedFloat.Restrict(min = 0f)
-        public float spellScaling = 1.6f;
+        public float spellScaling = 1.28f;
     }
 }

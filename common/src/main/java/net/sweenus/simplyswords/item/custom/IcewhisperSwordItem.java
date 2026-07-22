@@ -170,13 +170,13 @@ public class IcewhisperSwordItem extends UniqueSwordItem implements TwoHandedWea
         @ValidatedInt.Restrict(min = 0)
         public int cooldown = 450;
         @ValidatedFloat.Restrict(min = 0f)
-        public float damageScaling = 0.08f;
+        public float damageScaling = 0.06f;
         @ValidatedInt.Restrict(min = 1)
         public int duration = 200;
         @ValidatedInt.Restrict(min = 1)
         public int radius = 4;
         @ValidatedFloat.Restrict(min = 0f)
-        public float spellScaling = 0.9f;
+        public float spellScaling = 0.72f;
         @ValidatedInt.Restrict(min = 1)
         public int cometInterval = 14;
         @ValidatedInt.Restrict(min = 0)

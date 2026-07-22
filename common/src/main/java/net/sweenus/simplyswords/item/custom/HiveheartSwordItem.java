@@ -133,7 +133,7 @@ public class HiveheartSwordItem extends UniqueSwordItem implements UniqueWeaponA
         @ValidatedInt.Restrict(min = 0)
         public int cooldown = 60;
         @ValidatedFloat.Restrict(min = 0f)
-        public float beeDamageScaling = 1.1f;
+        public float beeDamageScaling = 0.88f;
         @ValidatedInt.Restrict(min = 0)
         public int activeCooldown = 300;
         @ValidatedInt.Restrict(min = 0)
@@ -145,7 +145,7 @@ public class HiveheartSwordItem extends UniqueSwordItem implements UniqueWeaponA
         @ValidatedInt.Restrict(min = 1)
         public int stingsPerBee = 10;
         @ValidatedDouble.Restrict(min = 0.0)
-        public double stingDamageScaling = 0.05;
+        public double stingDamageScaling = 0.04;
         @ValidatedInt.Restrict(min = 1)
         public int stingIntervalTicks = 10;
         @ValidatedInt.Restrict(min = 0)
