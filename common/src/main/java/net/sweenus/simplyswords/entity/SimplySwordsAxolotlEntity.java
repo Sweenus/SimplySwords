@@ -118,6 +118,10 @@ public class SimplySwordsAxolotlEntity extends AxolotlEntity implements Tameable
     @Override
     public ActionResult interactMob(PlayerEntity player, Hand hand) {
         if (!this.getWorld().isClient && player instanceof ServerPlayerEntity serverPlayer) {
+            UUID ownerUuid = this.getOwnerUuid();
+            if (ownerUuid == null || !ownerUuid.equals(serverPlayer.getUuid())) {
+                return ActionResult.FAIL;
+            }
             boolean hasChompolotlItem = HelperMethods.hasItemInInventory(serverPlayer, ItemsRegistry.CHOMPOLOTL.get());
             if (hasChompolotlItem && this.ticksSinceSitAttempt >= READY_TO_SIT_COOLDOWN) {
                 boolean mounted = this.mountOnto(serverPlayer);
@@ -183,6 +187,21 @@ public class SimplySwordsAxolotlEntity extends AxolotlEntity implements Tameable
 
     public void setOwner(LivingEntity livingEntity) {
         this.ownerUuid = livingEntity != null ? livingEntity.getUuid() : null;
+    }
+
+    @Override
+    public NbtCompound writeNbt(NbtCompound nbt) {
+        super.writeNbt(nbt);
+        if (this.ownerUuid != null) {
+            nbt.putUuid("Owner", this.ownerUuid);
+        }
+        return nbt;
+    }
+
+    @Override
+    public void readNbt(NbtCompound nbt) {
+        super.readNbt(nbt);
+        this.ownerUuid = nbt.containsUuid("Owner") ? nbt.getUuid("Owner") : null;
     }
 
 
