@@ -38,7 +38,8 @@ public final class NecromanticArsenalManager {
             return false;
         }
 
-        minion.initializeMinion(player, stack.copy(), world.getTime() + Math.max(1, Config.gemPowers.necromanticArsenal.duration),
+        minion.initializeMinion(player, stack.copy(), findSourceWeaponSlot(player, stack),
+                world.getTime() + Math.max(1, Config.gemPowers.necromanticArsenal.duration),
                 (float) Math.max(0.0, HelperMethods.getEntityAttackDamage(player)));
         world.spawnParticles(ParticleTypes.SOUL, minion.getX(), minion.getBodyY(0.55), minion.getZ(), 22, 0.45, 0.55, 0.45, 0.08);
         world.spawnParticles(ParticleTypes.SMOKE, minion.getX(), minion.getBodyY(0.45), minion.getZ(), 14, 0.35, 0.35, 0.35, 0.035);
@@ -64,5 +65,15 @@ public final class NecromanticArsenalManager {
         Box searchBox = player.getBoundingBox().expand(MINION_SEARCH_RADIUS);
         return world.getEntitiesByClass(SimplySwordsSkeletonMinionEntity.class, searchBox, minion ->
                 minion.isAlive() && player.getUuid().equals(minion.getOwnerUuid()));
+    }
+
+    private static int findSourceWeaponSlot(ServerPlayerEntity player, ItemStack sourceStack) {
+        for (int slot = 0; slot < player.getInventory().size(); slot++) {
+            ItemStack inventoryStack = player.getInventory().getStack(slot);
+            if (inventoryStack == sourceStack || inventoryStack.equals(sourceStack)) {
+                return slot;
+            }
+        }
+        return -1;
     }
 }

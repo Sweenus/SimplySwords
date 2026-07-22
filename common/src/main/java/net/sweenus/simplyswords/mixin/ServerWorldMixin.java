@@ -58,8 +58,8 @@ public abstract class ServerWorldMixin {
         if (VerdantTrailManager.hasActive(world)) {
             VerdantTrailManager.tick(world);
         }
-        if (EarthshatterSunderManager.hasActive(world)) {
-            EarthshatterSunderManager.tick(world);
+        if (FaultlineSunderManager.hasActive(world)) {
+            FaultlineSunderManager.tick(world);
         }
         RevivalCandleVisualManager.tickWorld(world);
         SoulkeeperLanternManager.tickWorld(world);

@@ -15,7 +15,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.config.Config;
-import net.sweenus.simplyswords.entity.EarthshatterSpikeVisualEntity;
+import net.sweenus.simplyswords.entity.FaultlineSpikeVisualEntity;
 import net.sweenus.simplyswords.util.HelperMethods;
 
 import java.util.ArrayList;
@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-public final class EarthshatterSunderManager {
+public final class FaultlineSunderManager {
 
     private static final double VISUAL_WIDTH_MULTIPLIER = 0.78;
     private static final int GROUND_SCAN_UP = 4;
@@ -34,10 +34,10 @@ public final class EarthshatterSunderManager {
     private static final double START_DEPTH = 2.8;
     private static final double BASE_GROUND_OFFSET = -0.18;
     private static final double ORPHAN_VISUAL_CLEANUP_RADIUS = 192.0;
-    private static final String SPIKE_VISUAL_TAG = "simplyswords_earthshatter_spike_visual";
+    private static final String SPIKE_VISUAL_TAG = "simplyswords_faultline_spike_visual";
     private static final Map<ServerWorld, List<ActiveSunder>> ACTIVE_SUNDERS = new HashMap<>();
 
-    private EarthshatterSunderManager() {
+    private FaultlineSunderManager() {
     }
 
     public static boolean hasActive(ServerWorld world) {
@@ -67,11 +67,11 @@ public final class EarthshatterSunderManager {
         Vec3d right = new Vec3d(-direction.z, 0.0, direction.x).normalize();
 
         long now = world.getTime();
-        int riseTicks = Math.max(1, Config.gemPowers.earthshatter.riseTicks);
-        int holdTicks = Math.max(0, Config.gemPowers.earthshatter.holdTicks);
-        int sinkTicks = Math.max(1, Config.gemPowers.earthshatter.sinkTicks);
-        int delayTicks = Math.max(0, Config.gemPowers.earthshatter.waveStepDelayTicks);
-        int steps = Math.max(1, (int) Math.ceil(Math.max(1.0, Config.gemPowers.earthshatter.length) / Math.max(0.25, Config.gemPowers.earthshatter.stepDistance)));
+        int riseTicks = Math.max(1, Config.gemPowers.faultline.riseTicks);
+        int holdTicks = Math.max(0, Config.gemPowers.faultline.holdTicks);
+        int sinkTicks = Math.max(1, Config.gemPowers.faultline.sinkTicks);
+        int delayTicks = Math.max(0, Config.gemPowers.faultline.waveStepDelayTicks);
+        int steps = Math.max(1, (int) Math.ceil(Math.max(1.0, Config.gemPowers.faultline.length) / Math.max(0.25, Config.gemPowers.faultline.stepDistance)));
         ActiveSunder sunder = new ActiveSunder(owner.getUuid(), now + (long) steps * delayTicks + riseTicks + holdTicks + sinkTicks + 4L, new ArrayList<>());
 
         if (Config.general.enableModernFieldEffects) {
@@ -108,24 +108,24 @@ public final class EarthshatterSunderManager {
     }
 
     private static void spawnSpikeLine(ServerWorld world, ActiveSunder sunder, Vec3d origin, Vec3d direction, Vec3d right, long now, int steps, int delayTicks) {
-        double length = Math.max(1.0, Config.gemPowers.earthshatter.length);
-        double stepDistance = Math.max(0.25, Config.gemPowers.earthshatter.stepDistance);
-        double halfWidth = Math.max(0.25, Config.gemPowers.earthshatter.width * 0.5 * VISUAL_WIDTH_MULTIPLIER);
+        double length = Math.max(1.0, Config.gemPowers.faultline.length);
+        double stepDistance = Math.max(0.25, Config.gemPowers.faultline.stepDistance);
+        double halfWidth = Math.max(0.25, Config.gemPowers.faultline.width * 0.5 * VISUAL_WIDTH_MULTIPLIER);
 
         for (int step = 1; step <= steps; step++) {
             double forwardDistance = Math.min(length, step * stepDistance);
             Vec3d center = origin.add(direction.multiply(forwardDistance));
             long spawnTick = now + (long) (step - 1) * delayTicks;
-            spawnSpike(world, sunder, center, spawnTick, Config.gemPowers.earthshatter.centerSpikeHeight, false, step);
-            spawnSpike(world, sunder, center.add(right.multiply(halfWidth)), spawnTick, Config.gemPowers.earthshatter.edgeSpikeHeight, true, step);
-            spawnSpike(world, sunder, center.add(right.multiply(-halfWidth)), spawnTick, Config.gemPowers.earthshatter.edgeSpikeHeight, true, step);
+            spawnSpike(world, sunder, center, spawnTick, Config.gemPowers.faultline.centerSpikeHeight, false, step);
+            spawnSpike(world, sunder, center.add(right.multiply(halfWidth)), spawnTick, Config.gemPowers.faultline.edgeSpikeHeight, true, step);
+            spawnSpike(world, sunder, center.add(right.multiply(-halfWidth)), spawnTick, Config.gemPowers.faultline.edgeSpikeHeight, true, step);
         }
     }
 
     private static void spawnSpike(ServerWorld world, ActiveSunder sunder, Vec3d pos, long spawnTick, float baseHeight, boolean edge, int step) {
         double groundY = findGroundTopY(world, pos.x, pos.z, pos.y) + BASE_GROUND_OFFSET;
         float jitter = 0.9F + (((step * (edge ? 17 : 11)) % 7) * 0.035F);
-        EarthshatterSpikeVisualEntity visual = new EarthshatterSpikeVisualEntity(world, pos.x, groundY - START_DEPTH, pos.z, Math.max(0.1F, baseHeight * jitter));
+        FaultlineSpikeVisualEntity visual = new FaultlineSpikeVisualEntity(world, pos.x, groundY - START_DEPTH, pos.z, Math.max(0.1F, baseHeight * jitter));
         visual.addCommandTag(SPIKE_VISUAL_TAG);
         if (!world.spawnEntity(visual)) {
             return;
@@ -136,8 +136,8 @@ public final class EarthshatterSunderManager {
     }
 
     private static void damageEnemies(ServerWorld world, ServerPlayerEntity owner, Vec3d origin, Vec3d direction, Vec3d right, float damage) {
-        double length = Math.max(1.0, Config.gemPowers.earthshatter.length);
-        double halfWidth = Math.max(0.25, Config.gemPowers.earthshatter.width * 0.5 * VISUAL_WIDTH_MULTIPLIER);
+        double length = Math.max(1.0, Config.gemPowers.faultline.length);
+        double halfWidth = Math.max(0.25, Config.gemPowers.faultline.width * 0.5 * VISUAL_WIDTH_MULTIPLIER);
         Vec3d center = origin.add(direction.multiply(length * 0.5));
         Box box = Box.of(center, Math.abs(direction.x) * length + Math.abs(right.x) * halfWidth * 2.0 + 2.0, 3.0, Math.abs(direction.z) * length + Math.abs(right.z) * halfWidth * 2.0 + 2.0);
         Set<UUID> damaged = new HashSet<>();
@@ -159,14 +159,14 @@ public final class EarthshatterSunderManager {
     private static void animateVisuals(ServerWorld world, ActiveSunder sunder) {
         sunder.visuals().removeIf(visual -> {
             Entity entity = world.getEntity(visual.id());
-            if (!(entity instanceof EarthshatterSpikeVisualEntity spike)) {
+            if (!(entity instanceof FaultlineSpikeVisualEntity spike)) {
                 return true;
             }
 
             long age = world.getTime() - visual.spawnTick();
-            int lifetime = Math.max(1, Config.gemPowers.earthshatter.riseTicks)
-                    + Math.max(0, Config.gemPowers.earthshatter.holdTicks)
-                    + Math.max(1, Config.gemPowers.earthshatter.sinkTicks);
+            int lifetime = Math.max(1, Config.gemPowers.faultline.riseTicks)
+                    + Math.max(0, Config.gemPowers.faultline.holdTicks)
+                    + Math.max(1, Config.gemPowers.faultline.sinkTicks);
             if (age >= lifetime) {
                 spike.discard();
                 return true;
@@ -182,9 +182,9 @@ public final class EarthshatterSunderManager {
         if (age < 0) {
             return 0.0F;
         }
-        int riseTicks = Math.max(1, Config.gemPowers.earthshatter.riseTicks);
-        int holdTicks = Math.max(0, Config.gemPowers.earthshatter.holdTicks);
-        int sinkTicks = Math.max(1, Config.gemPowers.earthshatter.sinkTicks);
+        int riseTicks = Math.max(1, Config.gemPowers.faultline.riseTicks);
+        int holdTicks = Math.max(0, Config.gemPowers.faultline.holdTicks);
+        int sinkTicks = Math.max(1, Config.gemPowers.faultline.sinkTicks);
         if (age < riseTicks) {
             float t = MathHelper.clamp((float) age / (float) riseTicks, 0.0F, 1.0F);
             return easeOutBack(t);
@@ -204,9 +204,9 @@ public final class EarthshatterSunderManager {
         if (age < 0) {
             return -START_DEPTH;
         }
-        int riseTicks = Math.max(1, Config.gemPowers.earthshatter.riseTicks);
-        int holdTicks = Math.max(0, Config.gemPowers.earthshatter.holdTicks);
-        int sinkTicks = Math.max(1, Config.gemPowers.earthshatter.sinkTicks);
+        int riseTicks = Math.max(1, Config.gemPowers.faultline.riseTicks);
+        int holdTicks = Math.max(0, Config.gemPowers.faultline.holdTicks);
+        int sinkTicks = Math.max(1, Config.gemPowers.faultline.sinkTicks);
         if (age < riseTicks) {
             float t = MathHelper.clamp((float) age / (float) riseTicks, 0.0F, 1.0F);
             return -START_DEPTH + START_DEPTH * easeOutBack(t);
@@ -257,8 +257,8 @@ public final class EarthshatterSunderManager {
         Set<UUID> cleaned = new HashSet<>();
         for (ServerPlayerEntity player : world.getPlayers()) {
             Box searchBox = player.getBoundingBox().expand(ORPHAN_VISUAL_CLEANUP_RADIUS);
-            for (EarthshatterSpikeVisualEntity visual : world.getEntitiesByClass(
-                    EarthshatterSpikeVisualEntity.class,
+            for (FaultlineSpikeVisualEntity visual : world.getEntitiesByClass(
+                    FaultlineSpikeVisualEntity.class,
                     searchBox,
                     entity -> entity.getCommandTags().contains(SPIKE_VISUAL_TAG)
             )) {

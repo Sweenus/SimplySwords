@@ -48,6 +48,7 @@ public class SimplySwordsSkeletonMinionEntity extends SkeletonEntity implements 
     private UUID ownerUuid;
     private long expiresAtTick;
     private float weaponDamage;
+    private int sourceWeaponSlot = -1;
 
     public SimplySwordsSkeletonMinionEntity(EntityType<? extends SkeletonEntity> entityType, World world) {
         super(entityType, world);
@@ -74,10 +75,11 @@ public class SimplySwordsSkeletonMinionEntity extends SkeletonEntity implements 
         this.targetSelector.add(1, new ActiveTargetGoal<>(this, LivingEntity.class, 10, true, false, this::isValidMinionTarget));
     }
 
-    public void initializeMinion(ServerPlayerEntity owner, ItemStack stack, long expiresAtTick, float weaponDamage) {
+    public void initializeMinion(ServerPlayerEntity owner, ItemStack stack, int sourceWeaponSlot, long expiresAtTick, float weaponDamage) {
         this.ownerUuid = owner.getUuid();
         this.expiresAtTick = expiresAtTick;
         this.weaponDamage = Math.max(0.0F, weaponDamage);
+        this.sourceWeaponSlot = sourceWeaponSlot;
         this.equipStack(EquipmentSlot.MAINHAND, stack.copy());
         this.setEquipmentDropChance(EquipmentSlot.MAINHAND, 0.0F);
         equipRandomArmor();
@@ -119,8 +121,9 @@ public class SimplySwordsSkeletonMinionEntity extends SkeletonEntity implements 
             return false;
         }
         ServerPlayerEntity owner = getOwnerPlayer(world);
-        ItemStack stack = this.getMainHandStack();
-        if (owner == null || stack.isEmpty() || !isValidMinionTarget(livingTarget)) {
+        ItemStack visualStack = this.getMainHandStack();
+        ItemStack effectStack = resolveEffectWeaponStack(owner, visualStack);
+        if (owner == null || visualStack.isEmpty() || effectStack.isEmpty() || !isValidMinionTarget(livingTarget)) {
             return false;
         }
 
@@ -130,7 +133,7 @@ public class SimplySwordsSkeletonMinionEntity extends SkeletonEntity implements 
         }
 
         this.swingHand(Hand.MAIN_HAND);
-        boolean damaged = SimplySwordsAPI.applyDelegatedWeaponHit(stack, livingTarget, owner, this, damage);
+        boolean damaged = SimplySwordsAPI.applyDelegatedWeaponHit(effectStack, livingTarget, owner, this, damage);
         if (damaged) {
             Vec3d hitPos = livingTarget.getPos().add(0.0, Math.max(0.35, livingTarget.getHeight() * 0.55), 0.0);
             world.spawnParticles(ParticleTypes.SOUL_FIRE_FLAME, hitPos.x, hitPos.y, hitPos.z, 5, 0.18, 0.12, 0.18, 0.025);
@@ -183,6 +186,15 @@ public class SimplySwordsSkeletonMinionEntity extends SkeletonEntity implements 
         if (distance > OWNER_FOLLOW_DISTANCE * OWNER_FOLLOW_DISTANCE && this.getTarget() == null) {
             this.navigation.startMovingTo(owner, 1.15);
         }
+    }
+
+    private ItemStack resolveEffectWeaponStack(@Nullable ServerPlayerEntity owner, ItemStack visualStack) {
+        if (owner == null || visualStack == null || visualStack.isEmpty() || this.sourceWeaponSlot < 0
+                || this.sourceWeaponSlot >= owner.getInventory().size()) {
+            return visualStack;
+        }
+        ItemStack sourceStack = owner.getInventory().getStack(this.sourceWeaponSlot);
+        return !sourceStack.isEmpty() && sourceStack.isOf(visualStack.getItem()) ? sourceStack : visualStack;
     }
 
     private boolean isValidMinionTarget(LivingEntity target) {
@@ -239,6 +251,7 @@ public class SimplySwordsSkeletonMinionEntity extends SkeletonEntity implements 
         }
         this.expiresAtTick = nbt.getLong("expires_at_tick");
         this.weaponDamage = nbt.getFloat("weapon_damage");
+        this.sourceWeaponSlot = nbt.contains("source_weapon_slot") ? nbt.getInt("source_weapon_slot") : -1;
     }
 
     @Override
@@ -249,5 +262,6 @@ public class SimplySwordsSkeletonMinionEntity extends SkeletonEntity implements 
         }
         nbt.putLong("expires_at_tick", this.expiresAtTick);
         nbt.putFloat("weapon_damage", this.weaponDamage);
+        nbt.putInt("source_weapon_slot", this.sourceWeaponSlot);
     }
 }

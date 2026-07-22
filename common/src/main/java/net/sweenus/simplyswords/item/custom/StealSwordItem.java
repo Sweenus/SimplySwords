@@ -26,6 +26,7 @@ import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
+import net.sweenus.simplyswords.entity.SimplySwordsSkeletonMinionEntity;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.item.component.StoredChargeComponent;
 import net.sweenus.simplyswords.registry.ComponentTypeRegistry;
@@ -161,6 +162,7 @@ public class StealSwordItem extends UniqueSwordItem {
 
     private static boolean isValidSoulstealerTarget(LivingEntity target, PlayerEntity player) {
         return target.isAlive()
+                && !(target instanceof SimplySwordsSkeletonMinionEntity)
                 && EntityPredicates.VALID_LIVING_ENTITY.test(target)
                 && HelperMethods.checkFriendlyFire(target, player);
     }

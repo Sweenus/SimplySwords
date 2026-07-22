@@ -9,21 +9,21 @@ import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
-import net.sweenus.simplyswords.entity.EarthshatterSpikeVisualEntity;
+import net.sweenus.simplyswords.entity.FaultlineSpikeVisualEntity;
 
-public class EarthshatterSpikeVisualEntityRenderer extends EntityRenderer<EarthshatterSpikeVisualEntity> {
+public class FaultlineSpikeVisualEntityRenderer extends EntityRenderer<FaultlineSpikeVisualEntity> {
 
-    public EarthshatterSpikeVisualEntityRenderer(EntityRendererFactory.Context context) {
+    public FaultlineSpikeVisualEntityRenderer(EntityRendererFactory.Context context) {
         super(context);
     }
 
     @Override
-    public Identifier getTexture(EarthshatterSpikeVisualEntity entity) {
+    public Identifier getTexture(FaultlineSpikeVisualEntity entity) {
         return SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE;
     }
 
     @Override
-    public void render(EarthshatterSpikeVisualEntity entity, float yaw, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light) {
+    public void render(FaultlineSpikeVisualEntity entity, float yaw, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light) {
         float heightScale = Math.max(0.0F, entity.getHeightScale());
         if (heightScale <= 0.01F) {
             return;

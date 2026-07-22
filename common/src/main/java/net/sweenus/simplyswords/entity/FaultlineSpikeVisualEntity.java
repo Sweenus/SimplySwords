@@ -9,19 +9,19 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.registry.EntityRegistry;
 
-public class EarthshatterSpikeVisualEntity extends Entity {
+public class FaultlineSpikeVisualEntity extends Entity {
 
-    private static final TrackedData<Float> TARGET_HEIGHT = DataTracker.registerData(EarthshatterSpikeVisualEntity.class, TrackedDataHandlerRegistry.FLOAT);
-    private static final TrackedData<Float> HEIGHT_SCALE = DataTracker.registerData(EarthshatterSpikeVisualEntity.class, TrackedDataHandlerRegistry.FLOAT);
+    private static final TrackedData<Float> TARGET_HEIGHT = DataTracker.registerData(FaultlineSpikeVisualEntity.class, TrackedDataHandlerRegistry.FLOAT);
+    private static final TrackedData<Float> HEIGHT_SCALE = DataTracker.registerData(FaultlineSpikeVisualEntity.class, TrackedDataHandlerRegistry.FLOAT);
 
-    public EarthshatterSpikeVisualEntity(EntityType<? extends EarthshatterSpikeVisualEntity> type, World world) {
+    public FaultlineSpikeVisualEntity(EntityType<? extends FaultlineSpikeVisualEntity> type, World world) {
         super(type, world);
         this.noClip = true;
         this.setNoGravity(true);
     }
 
-    public EarthshatterSpikeVisualEntity(World world, double x, double y, double z, float targetHeight) {
-        this(EntityRegistry.EARTHSHATTER_SPIKE_VISUAL.get(), world);
+    public FaultlineSpikeVisualEntity(World world, double x, double y, double z, float targetHeight) {
+        this(EntityRegistry.FAULTLINE_SPIKE_VISUAL.get(), world);
         this.setPosition(x, y, z);
         this.setTargetHeight(targetHeight);
         this.setHeightScale(0.0F);

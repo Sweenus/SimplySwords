@@ -109,6 +109,15 @@ public class HelperMethods {
                 return false;
             return playerEntity.shouldDamagePlayer(player);
         }
+        if (attackingEntity instanceof Tameable attackingTameable && attackingTameable.getOwner() != null) {
+            if (attackingTameable.getOwner() == livingEntity) {
+                return false;
+            }
+            if (livingEntity instanceof Tameable targetTameable && targetTameable.getOwner() != null
+                    && targetTameable.getOwner() == attackingTameable.getOwner()) {
+                return false;
+            }
+        }
         if (livingEntity instanceof Tameable tameable) {
             if (tameable.getOwner() != null) {
                 if (tameable.getOwner() != attackingEntity

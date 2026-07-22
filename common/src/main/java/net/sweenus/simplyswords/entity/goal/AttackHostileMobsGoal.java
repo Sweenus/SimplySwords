@@ -7,6 +7,7 @@ import net.minecraft.entity.mob.HostileEntity;
 import net.minecraft.entity.mob.PathAwareEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.sweenus.simplyswords.util.HelperMethods;
 
 import java.util.EnumSet;
 
@@ -37,7 +38,12 @@ public class AttackHostileMobsGoal extends Goal {
         if (targetPlayer == null) return false;
 
         // Look for the nearest hostile mob within the attack range
-        targetMob = serverWorld.getClosestEntity(HostileEntity.class, hostileMobTargetPredicate, entity, entity.getX(), entity.getY(), entity.getZ(), entity.getBoundingBox().expand(attackRange));
+        targetMob = serverWorld.getEntitiesByClass(HostileEntity.class, entity.getBoundingBox().expand(attackRange),
+                        hostile -> hostileMobTargetPredicate.test(entity, hostile)
+                                && HelperMethods.checkFriendlyFire(hostile, entity))
+                .stream()
+                .min((first, second) -> Double.compare(first.squaredDistanceTo(entity), second.squaredDistanceTo(entity)))
+                .orElse(null);
         return targetMob != null;
     }
 
@@ -72,6 +78,4 @@ public class AttackHostileMobsGoal extends Goal {
         }
     }
 }
-
-
 
