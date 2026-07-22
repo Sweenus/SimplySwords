@@ -53,6 +53,11 @@ public class HarbingerSwordItem extends UniqueSwordItem implements UniqueWeaponA
 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
+        return startPlayerAbility(world, user, hand);
+    }
+
+    @Override
+    public TypedActionResult<ItemStack> startPlayerAbility(World world, PlayerEntity user, Hand hand) {
         if (!user.getWorld().isClient()) {
             if (spawnHarbingerStandard((ServerWorld) user.getWorld(), user) != null) {
                 user.getItemCooldownManager().set(this.getDefaultStack().getItem(), Config.uniqueEffects.harbinger.cooldown);

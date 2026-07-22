@@ -1,13 +1,49 @@
 package net.sweenus.simplyswords.item.interfaces;
 
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.Hand;
+import net.minecraft.util.TypedActionResult;
+import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.util.HelperMethods;
 
 public interface UniqueWeaponActiveAbility {
+
+    default TypedActionResult<ItemStack> startPlayerAbility(World world, PlayerEntity user, Hand hand) {
+        ItemStack stack = user.getStackInHand(hand);
+        if (stack == null || stack.isEmpty() || stack.getDamage() >= stack.getMaxDamage() - 1) {
+            return TypedActionResult.fail(stack);
+        }
+        if (!world.isClient && world instanceof ServerWorld serverWorld && user instanceof ServerPlayerEntity serverPlayer) {
+            LivingEntity target = null;
+            Entity targeted = HelperMethods.getTargetedEntity(serverPlayer, 24.0);
+            if (targeted instanceof LivingEntity livingTarget && HelperMethods.checkAbilityTarget(livingTarget, serverPlayer)) {
+                target = livingTarget;
+            } else {
+                target = HelperMethods.findClosestTarget(serverPlayer, 8.0, 8.0)
+                        .filter(fallback -> fallback.getWorld() == serverWorld && HelperMethods.checkAbilityTarget(fallback, serverPlayer))
+                        .orElse(null);
+            }
+            WeaponAbilityContext context = WeaponAbilityContext.of(
+                    serverWorld,
+                    stack,
+                    serverPlayer,
+                    null,
+                    target,
+                    hand,
+                    net.sweenus.simplyswords.api.WeaponAbilityActivationSource.PLAYER
+            );
+            return net.sweenus.simplyswords.api.SimplySwordsAPI.tryActivateWeaponAbility(context)
+                    ? TypedActionResult.success(stack, false)
+                    : TypedActionResult.fail(stack);
+        }
+        return TypedActionResult.success(stack, true);
+    }
 
     default boolean canActivate(WeaponAbilityContext context) {
         if (context != null && context.sourcePlayer() != null) {

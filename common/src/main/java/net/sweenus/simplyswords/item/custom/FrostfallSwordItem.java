@@ -46,6 +46,11 @@ public class FrostfallSwordItem extends UniqueSwordItem implements UniqueWeaponA
 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
+        return startPlayerAbility(world, user, hand);
+    }
+
+    @Override
+    public TypedActionResult<ItemStack> startPlayerAbility(World world, PlayerEntity user, Hand hand) {
         if (user.getWorld().isClient()) return super.use(world, user, hand);
 
         ItemStack itemStack = user.getStackInHand(hand);

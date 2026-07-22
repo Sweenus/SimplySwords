@@ -44,6 +44,11 @@ public class SoulPyreSwordItem extends UniqueSwordItem implements TwoHandedWeapo
 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
+        return startPlayerAbility(world, user, hand);
+    }
+
+    @Override
+    public TypedActionResult<ItemStack> startPlayerAbility(World world, PlayerEntity user, Hand hand) {
         if (!user.getWorld().isClient()) {
             activateSoulTether(user);
             user.getItemCooldownManager().set(this, Config.uniqueEffects.soulpyre.cooldown);

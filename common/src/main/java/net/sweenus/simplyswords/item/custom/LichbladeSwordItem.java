@@ -13,6 +13,7 @@ import net.minecraft.item.ToolMaterial;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
@@ -37,6 +38,7 @@ import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.AbilityMethods;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
+import net.sweenus.simplyswords.world.PlayerWeaponAbilityChannelManager;
 
 import java.util.List;
 
@@ -53,6 +55,11 @@ public class LichbladeSwordItem extends UniqueSwordItem implements TwoHandedWeap
 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
+        return startPlayerAbility(world, user, hand);
+    }
+
+    @Override
+    public TypedActionResult<ItemStack> startPlayerAbility(World world, PlayerEntity user, Hand hand) {
         ItemStack itemStack = user.getStackInHand(hand);
         if(hand == Hand.OFF_HAND) {
             return TypedActionResult.fail(itemStack);
@@ -94,13 +101,17 @@ public class LichbladeSwordItem extends UniqueSwordItem implements TwoHandedWeap
                     if (user.squaredDistanceTo(targetLocation.lastX(), targetLocation.lastY(), targetLocation.lastZ()) < radius) {
                         int damageTracker = stack.getOrDefault(ComponentTypeRegistry.STORED_CHARGE.get(), StoredChargeComponent.DEFAULT).charge();
                         user.setAbsorptionAmount(Math.min(Config.uniqueEffects.abilityAbsorptionCap, user.getAbsorptionAmount() + Math.min(damageTracker / 2f, Config.uniqueEffects.lichblade.absorptionCap)));
-                        user.stopUsingItem();
+                        if (!(user instanceof ServerPlayerEntity serverPlayer) || !PlayerWeaponAbilityChannelManager.finishEarly(serverPlayer, stack)) {
+                            user.stopUsingItem();
+                        }
                         world.playSoundFromEntity(null, user, SoundRegistry.DARK_SWORD_SPELL.get(),
                                 user.getSoundCategory(), 0.04f, 0.5f);
                     }
                 }
             } else if (stack.isOf(ItemsRegistry.WAKING_LICHBLADE.get()) && (abilityTarget.isDead() || remainingUseTicks < maxDuration)) {
-                user.stopUsingItem();
+                if (!(user instanceof ServerPlayerEntity serverPlayer) || !PlayerWeaponAbilityChannelManager.finishEarly(serverPlayer, stack)) {
+                    user.stopUsingItem();
+                }
             }
 
             //Move aura to target

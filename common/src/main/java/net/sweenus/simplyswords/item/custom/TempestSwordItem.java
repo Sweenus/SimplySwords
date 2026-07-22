@@ -96,6 +96,11 @@ public class TempestSwordItem extends UniqueSwordItem implements UniqueWeaponAct
 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
+        return startPlayerAbility(world, user, hand);
+    }
+
+    @Override
+    public TypedActionResult<ItemStack> startPlayerAbility(World world, PlayerEntity user, Hand hand) {
         if (!user.getWorld().isClient() && world instanceof  ServerWorld serverWorld) {
             if (consumeTempestMarks(serverWorld, user) > 0) {
                 user.getItemCooldownManager().set(this, 200);

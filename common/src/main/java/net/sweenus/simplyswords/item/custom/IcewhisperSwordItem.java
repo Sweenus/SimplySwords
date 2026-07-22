@@ -49,6 +49,11 @@ public class IcewhisperSwordItem extends UniqueSwordItem implements TwoHandedWea
 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
+        return startPlayerAbility(world, user, hand);
+    }
+
+    @Override
+    public TypedActionResult<ItemStack> startPlayerAbility(World world, PlayerEntity user, Hand hand) {
         ItemStack itemStack = user.getStackInHand(hand);
 
         if (itemStack.getDamage() >= itemStack.getMaxDamage() - 1) {

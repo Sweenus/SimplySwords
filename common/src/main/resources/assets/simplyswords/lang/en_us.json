@@ -1,4 +1,7 @@
 {
+  "key.categories.simplyswords": "Simply Swords",
+  "key.simplyswords.mainhand_ability": "Use Mainhand Weapon Ability",
+  "key.simplyswords.offhand_ability": "Use Offhand Weapon Ability",
   "item.simplyswords.iron_cutlass": "Iron Cutlass",
   "item.simplyswords.gold_cutlass": "Gold Cutlass",
   "item.simplyswords.diamond_cutlass": "Diamond Cutlass",

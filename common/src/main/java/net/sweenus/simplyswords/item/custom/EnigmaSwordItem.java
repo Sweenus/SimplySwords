@@ -55,6 +55,11 @@ public class EnigmaSwordItem extends UniqueSwordItem implements UniqueWeaponActi
 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
+        return startPlayerAbility(world, user, hand);
+    }
+
+    @Override
+    public TypedActionResult<ItemStack> startPlayerAbility(World world, PlayerEntity user, Hand hand) {
         if (!user.getWorld().isClient()) {
             if (spawnEnigmaStandard((ServerWorld) user.getWorld(), user) != null) {
                 user.getItemCooldownManager().set(this, Config.uniqueEffects.enigma.enigmaCooldown);

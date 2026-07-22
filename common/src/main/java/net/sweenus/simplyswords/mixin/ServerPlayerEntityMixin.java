@@ -35,6 +35,7 @@ import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.AbilityMethods;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.world.NecromanticArsenalManager;
+import net.sweenus.simplyswords.world.PlayerWeaponAbilityChannelManager;
 import net.sweenus.simplyswords.world.RevivalCandleVisualManager;
 import net.sweenus.simplyswords.world.ShadowstingShadowDanceManager;
 import net.sweenus.simplyswords.world.SoulkeeperLanternManager;
@@ -143,6 +144,7 @@ public abstract class ServerPlayerEntityMixin {
             RevivalCandleVisualManager.tickPlayer(serverPlayer);
             ShadowstingShadowDanceManager.tickPlayer(serverPlayer);
             SoulkeeperLanternManager.tickPlayer(serverPlayer);
+            PlayerWeaponAbilityChannelManager.tickPlayer(serverPlayer);
             StormbringerParryManager.tickPlayer(serverPlayer);
 
             //Ribboncleaver movespeed debuff

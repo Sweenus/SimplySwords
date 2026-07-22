@@ -9,7 +9,8 @@
     "client.InGameHudMixin",
     "client.PlayerEntityRendererMixin",
     "client.LivingEntityRendererAccessor",
-    "client.WorldRendererMixin"
+    "client.WorldRendererMixin",
+    "client.MinecraftClientMixin"
   ],
   "mixins": [
     "LivingEntityMixin",

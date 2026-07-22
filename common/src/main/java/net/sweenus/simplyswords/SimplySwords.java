@@ -23,6 +23,7 @@ import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
 import net.sweenus.simplyswords.client.renderer.*;
 import net.sweenus.simplyswords.client.renderer.model.BattleStandardDarkModel;
 import net.sweenus.simplyswords.client.renderer.model.BattleStandardModel;
+import net.sweenus.simplyswords.client.AbilityKeybindHandler;
 import net.sweenus.simplyswords.command.SimplySwordsCommands;
 import net.sweenus.simplyswords.compat.MythicMetalsCompat;
 import net.sweenus.simplyswords.compat.eldritch_end.EldritchEndCompatRegistry;
@@ -33,6 +34,7 @@ import net.sweenus.simplyswords.entity.SimplySwordsAxolotlEntity;
 import net.sweenus.simplyswords.entity.SimplySwordsBeeEntity;
 import net.sweenus.simplyswords.entity.SimplySwordsSkeletonMinionEntity;
 import net.sweenus.simplyswords.registry.*;
+import net.sweenus.simplyswords.network.SimplySwordsNetwork;
 import net.sweenus.simplyswords.util.FileCopier;
 import net.sweenus.simplyswords.util.ModLootTableModifiers;
 import org.apache.logging.log4j.LogManager;
@@ -78,6 +80,7 @@ public class SimplySwords {
         WeaponImplicitRegistry.registerBuiltins();
         ParticlesRegistry.PARTICLES.register();
         TransformationRegistry.register();
+        SimplySwordsNetwork.init();
         SimplySwordsCommands.register();
         EntityAttributeRegistry.register(EntityRegistry.BATTLESTANDARD, BattleStandardEntity::createBattleStandardAttributes);
         EntityAttributeRegistry.register(EntityRegistry.BATTLESTANDARDDARK, BattleStandardDarkEntity::createBattleStandardDarkAttributes);
@@ -121,6 +124,7 @@ public class SimplySwords {
 
         @Environment(EnvType.CLIENT)
         public static void initializeClient() {
+            AbilityKeybindHandler.init();
             // Entity
             EntityRendererRegistry.register(EntityRegistry.BATTLESTANDARD, BattleStandardRenderer::new);
             EntityModelLayerRegistry.register(BATTLESTANDARD_MODEL, BattleStandardModel::getTexturedModelData);

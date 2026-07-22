@@ -21,6 +21,7 @@ import net.sweenus.simplyswords.item.component.StoredChargeComponent;
 import net.sweenus.simplyswords.registry.ComponentTypeRegistry;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
+import net.sweenus.simplyswords.world.PlayerWeaponAbilityChannelManager;
 
 import java.util.List;
 import java.util.Random;
@@ -261,7 +262,10 @@ public class AbilityMethods {
                                                int skillCooldown, int radius, int chargePower) {
         if (!user.getWorld().isClient()) {
 
-            if (ability_timer < 5) user.stopUsingItem();
+            if (ability_timer < 5
+                    && (!(user instanceof ServerPlayerEntity serverPlayer) || !PlayerWeaponAbilityChannelManager.finishEarly(serverPlayer, stack))) {
+                user.stopUsingItem();
+            }
 
             //AOE Damage
             if (user.age % 20 == 0 && HelperMethods.isHolding(stack, user)) {

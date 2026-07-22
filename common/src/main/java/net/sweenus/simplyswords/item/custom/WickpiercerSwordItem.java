@@ -66,6 +66,11 @@ public class WickpiercerSwordItem extends UniqueSwordItem implements RevivalWeap
 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
+        return startPlayerAbility(world, user, hand);
+    }
+
+    @Override
+    public TypedActionResult<ItemStack> startPlayerAbility(World world, PlayerEntity user, Hand hand) {
         int baseEffectDuration = Config.uniqueEffects.wickpiercer.duration;
         int effectDuration = baseEffectDuration;
         ItemStack mainhand = user.getMainHandStack();

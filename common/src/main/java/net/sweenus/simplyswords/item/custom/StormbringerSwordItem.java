@@ -30,6 +30,7 @@ import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
 import net.sweenus.simplyswords.world.ChainLightningVisualManager;
+import net.sweenus.simplyswords.world.PlayerWeaponAbilityChannelManager;
 import net.sweenus.simplyswords.world.StormbringerParryManager;
 
 import java.util.HashMap;
@@ -93,6 +94,11 @@ public class StormbringerSwordItem extends UniqueSwordItem implements UniqueWeap
 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
+        return startPlayerAbility(world, user, hand);
+    }
+
+    @Override
+    public TypedActionResult<ItemStack> startPlayerAbility(World world, PlayerEntity user, Hand hand) {
         ItemStack itemStack = user.getStackInHand(hand);
         if (itemStack.getDamage() >= itemStack.getMaxDamage() - 1) {
             return TypedActionResult.fail(itemStack);
@@ -107,7 +113,9 @@ public class StormbringerSwordItem extends UniqueSwordItem implements UniqueWeap
     @Override
     public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
         if (!world.isClient && remainingUseTicks <= 1) {
-            user.stopUsingItem();
+            if (!(user instanceof ServerPlayerEntity serverPlayer) || !PlayerWeaponAbilityChannelManager.finishEarly(serverPlayer, stack)) {
+                user.stopUsingItem();
+            }
         }
     }
 

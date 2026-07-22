@@ -109,9 +109,10 @@ public final class StormbringerParryManager {
     }
 
     private static boolean isStillUsingStormbringer(ServerPlayerEntity player, Hand hand) {
-        return player.isUsingItem()
+        return (player.isUsingItem()
                 && player.getActiveHand() == hand
-                && player.getStackInHand(hand).isOf(ItemsRegistry.STORMBRINGER.get());
+                && player.getStackInHand(hand).isOf(ItemsRegistry.STORMBRINGER.get()))
+                || PlayerWeaponAbilityChannelManager.isChanneling(player, hand, ItemsRegistry.STORMBRINGER.get());
     }
 
     private static boolean isValidParryAttacker(ServerPlayerEntity player, LivingEntity attacker) {

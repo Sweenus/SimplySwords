@@ -47,6 +47,11 @@ public class LivyatanSwordItem extends UniqueSwordItem implements UniqueWeaponAc
 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
+        return startPlayerAbility(world, user, hand);
+    }
+
+    @Override
+    public TypedActionResult<ItemStack> startPlayerAbility(World world, PlayerEntity user, Hand hand) {
         ItemStack itemStack = user.getStackInHand(hand);
         float abilityDamage = HelperMethods.abilityScaledDamage("frost", user, itemStack,
                 Config.uniqueEffects.livyatan.damageScaling, Config.uniqueEffects.livyatan.spellScaling);

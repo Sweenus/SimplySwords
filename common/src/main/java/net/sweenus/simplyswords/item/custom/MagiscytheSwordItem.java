@@ -66,6 +66,11 @@ public class MagiscytheSwordItem extends UniqueSwordItem implements UniqueWeapon
 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
+        return startPlayerAbility(world, user, hand);
+    }
+
+    @Override
+    public TypedActionResult<ItemStack> startPlayerAbility(World world, PlayerEntity user, Hand hand) {
         activateMagistorm(world, user);
         user.getItemCooldownManager().set(this, Config.uniqueEffects.magiscythe.cooldown);
 
