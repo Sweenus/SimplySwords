@@ -15,7 +15,6 @@ import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.mob.PathAwareEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.server.world.ServerWorld;
@@ -34,7 +33,7 @@ public class BattleStandardDarkEntity extends PathAwareEntity {
     public static final Supplier<EntityType<BattleStandardDarkEntity>> TYPE = Suppliers.memoize(() ->
             EntityType.Builder.create(BattleStandardDarkEntity::new, SpawnGroup.MISC).build("battlestandarddark"));
     private static final TrackedData<String> TRACKED_STANDARD_TYPE = DataTracker.registerData(BattleStandardDarkEntity.class, TrackedDataHandlerRegistry.STRING);
-    public PlayerEntity ownerEntity;
+    public LivingEntity ownerEntity;
     public String standardType;
     public int decayRate;
 
@@ -103,7 +102,7 @@ public class BattleStandardDarkEntity extends PathAwareEntity {
                     Entity closestEntity = this.getWorld().getOtherEntities(this, box, EntityPredicates.VALID_LIVING_ENTITY).stream()
                             .filter(entity -> {
                                 if (entity instanceof LivingEntity livingEntity)
-                                    return HelperMethods.checkFriendlyFire(livingEntity, ownerEntity);
+                                    return HelperMethods.checkAbilityTarget(livingEntity, ownerEntity);
                                 return false;
                             })
                             .min(Comparator.comparingDouble(entity -> entity.squaredDistanceTo(this)))
@@ -126,7 +125,7 @@ public class BattleStandardDarkEntity extends PathAwareEntity {
                     Box box = new Box(this.getX() + radius, this.getY() + (float) radius / 3, this.getZ() + radius,
                             this.getX() - radius, this.getY() - (float) radius / 3, this.getZ() - radius);
                     for (Entity entities : this.getWorld().getOtherEntities(this, box, EntityPredicates.VALID_LIVING_ENTITY)) {
-                        if ((entities instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, ownerEntity)
+                        if ((entities instanceof LivingEntity le) && HelperMethods.checkAbilityTarget(le, ownerEntity)
                                 && le != ownerEntity && !(le instanceof BattleStandardEntity)
                                 && !(le instanceof BattleStandardDarkEntity)) {
                             le.timeUntilRegen = 0;
@@ -162,7 +161,7 @@ public class BattleStandardDarkEntity extends PathAwareEntity {
                     Box box = new Box(this.getX() + 1, this.getY() + 1, this.getZ() + 1,
                             this.getX() - 1, this.getY() - (float) 1, this.getZ() - 1);
                     for (Entity entity : this.getWorld().getOtherEntities(this, box, EntityPredicates.VALID_LIVING_ENTITY)) {
-                        if ((entity instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, ownerEntity) && le != ownerEntity) {
+                        if ((entity instanceof LivingEntity le) && HelperMethods.checkAbilityTarget(le, ownerEntity) && le != ownerEntity) {
                             le.damage(this.getDamageSources().indirectMagic(ownerEntity, ownerEntity), abilityDamage * 3);
                             le.setVelocity((le.getX() - this.getX()) / 4, 0.5, (le.getZ() - this.getZ()) / 4);
                         }

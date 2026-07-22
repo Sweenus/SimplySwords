@@ -20,11 +20,13 @@ import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
+import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.item.interfaces.TwoHandedWeapon;
+import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -34,7 +36,7 @@ import net.sweenus.simplyswords.world.IcewhisperCometManager;
 
 import java.util.List;
 
-public class IcewhisperSwordItem extends UniqueSwordItem implements TwoHandedWeapon {
+public class IcewhisperSwordItem extends UniqueSwordItem implements TwoHandedWeapon, UniqueWeaponActiveAbility {
     public IcewhisperSwordItem(ToolMaterial toolMaterial, Settings settings) {
         super(toolMaterial, settings);
     }
@@ -54,9 +56,7 @@ public class IcewhisperSwordItem extends UniqueSwordItem implements TwoHandedWea
         }
 
         if (world instanceof ServerWorld serverWorld) {
-            int radius = Config.uniqueEffects.icewhisper.radius * 2;
-            float abilityDamage = HelperMethods.spellScaledDamage("frost", user, Config.uniqueEffects.icewhisper.spellScaling, Config.uniqueEffects.icewhisper.damage);
-            IcewhisperCometManager.startStorm(serverWorld, user, radius, abilityDamage * Config.uniqueEffects.icewhisper.cometDamageMultiplier, Config.uniqueEffects.icewhisper.duration);
+            activateIcewhisper(serverWorld, user);
             user.getItemCooldownManager().set(itemStack.getItem(), Config.uniqueEffects.icewhisper.cooldown);
         }
         user.swingHand(hand);
@@ -64,56 +64,79 @@ public class IcewhisperSwordItem extends UniqueSwordItem implements TwoHandedWea
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
-        if (!world.isClient && (entity instanceof PlayerEntity player)) {
-            int radius = Config.uniqueEffects.icewhisper.radius;
-            //AOE Aura
-            if (player.age % 35 == 0 && player.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
-                Box box = new Box(player.getX() + radius, player.getY() + radius, player.getZ() + radius,
-                        player.getX() - radius, player.getY() - radius, player.getZ() - radius);
-                for (Entity otherEntity : world.getOtherEntities(player, box, EntityPredicates.VALID_LIVING_ENTITY)) {
-                    if ((otherEntity instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, player)) {
-                        StatusEffectInstance slowness = le.getStatusEffect(StatusEffects.SLOWNESS);
-                        if (slowness != null) {
-                            int a = (slowness.getAmplifier() + 1);
-                            le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 120, Math.max(a, 3)), player);
-                        } else {
-                            le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 120, 0), player);
-                        }
-                        float choose = (float) (Math.random() * 1);
-                        world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_BOW_ICE_SHOOT_IMPACT_03.get(), le.getSoundCategory(), 0.1f, choose);
-                        float abilityDamage = HelperMethods.spellScaledDamage("frost", entity, Config.uniqueEffects.icewhisper.spellScaling, Config.uniqueEffects.icewhisper.damage);
-                        le.damage(player.getDamageSources().indirectMagic(entity, entity), abilityDamage);
-                        if (world instanceof ServerWorld serverWorld) {
-                            FrostfallIceSpikeFieldManager.createTargetBurst(serverWorld, le.getPos(), 4, 0.9F);
-                        }
-                    }
-                }
-                world.playSoundFromEntity(null, player, SoundRegistry.ELEMENTAL_SWORD_ICE_ATTACK_02.get(),
-                        player.getSoundCategory(), 0.1f, 0.6f);
-                double xpos = player.getX() - (radius + 1);
-                double ypos = player.getY();
-                double zpos = player.getZ() - (radius + 1);
+    public boolean activate(WeaponAbilityContext context) {
+        if (!canActivate(context)) {
+            return false;
+        }
+        activateIcewhisper(context.world(), context.actor());
+        return true;
+    }
 
-                for (int i = radius * 2; i > 0; i--) {
-                    for (int j = radius * 2; j > 0; j--) {
-                        float choose = (float) (Math.random() * 1);
-                        HelperMethods.spawnParticle(world, ParticleTypes.SNOWFLAKE,
-                                xpos + i + choose, ypos + 0.4, zpos + j + choose,
-                                0, 0.1, 0);
-                        HelperMethods.spawnParticle(world, ParticleTypes.CLOUD,
-                                xpos + i + choose, ypos + 0.1, zpos + j + choose,
-                                0, 0, 0);
-                        HelperMethods.spawnParticle(world, ParticleTypes.WHITE_ASH,
-                                xpos + i + choose, ypos + 2, zpos + j + choose,
-                                0, 0, 0);
-                    }
-                }
-            }
+    @Override
+    public int getActivationCooldownTicks(ItemStack stack, WeaponAbilityContext context) {
+        return Config.uniqueEffects.icewhisper.cooldown;
+    }
+
+    private static void activateIcewhisper(ServerWorld serverWorld, LivingEntity actor) {
+        int radius = Config.uniqueEffects.icewhisper.radius * 2;
+        float abilityDamage = HelperMethods.spellScaledDamage("frost", actor, Config.uniqueEffects.icewhisper.spellScaling, Config.uniqueEffects.icewhisper.damage);
+        IcewhisperCometManager.startStorm(serverWorld, actor, radius, abilityDamage * Config.uniqueEffects.icewhisper.cometDamageMultiplier, Config.uniqueEffects.icewhisper.duration);
+    }
+
+    @Override
+    public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
+        if (!world.isClient && world instanceof ServerWorld serverWorld && entity instanceof LivingEntity user
+                && user.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
+            tickPassiveAura(serverWorld, user, stack);
         }
         HelperMethods.createFootfalls(entity, stack, world, ParticleTypes.SNOWFLAKE, ParticleTypes.SNOWFLAKE,
                 ParticleTypes.WHITE_ASH, true);
         super.inventoryTick(stack, world, entity, slot, selected);
+    }
+
+    public static void tickPassiveAura(ServerWorld world, LivingEntity user, ItemStack stack) {
+        if (world == null || user == null || stack == null || stack.isEmpty() || user.age % 35 != 0) {
+            return;
+        }
+        int radius = Config.uniqueEffects.icewhisper.radius;
+        Box box = new Box(user.getX() + radius, user.getY() + radius, user.getZ() + radius,
+                user.getX() - radius, user.getY() - radius, user.getZ() - radius);
+        for (Entity otherEntity : world.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY)) {
+            if ((otherEntity instanceof LivingEntity le) && HelperMethods.checkAbilityTarget(le, user)) {
+                StatusEffectInstance slowness = le.getStatusEffect(StatusEffects.SLOWNESS);
+                if (slowness != null) {
+                    int a = (slowness.getAmplifier() + 1);
+                    le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 120, Math.max(a, 3)), user);
+                } else {
+                    le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 120, 0), user);
+                }
+                float choose = (float) (Math.random() * 1);
+                world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_BOW_ICE_SHOOT_IMPACT_03.get(), le.getSoundCategory(), 0.1f, choose);
+                float abilityDamage = HelperMethods.spellScaledDamage("frost", user, Config.uniqueEffects.icewhisper.spellScaling, Config.uniqueEffects.icewhisper.damage);
+                le.damage(user.getDamageSources().indirectMagic(user, user), abilityDamage);
+                FrostfallIceSpikeFieldManager.createTargetBurst(world, le.getPos(), 4, 0.9F);
+            }
+        }
+        world.playSoundFromEntity(null, user, SoundRegistry.ELEMENTAL_SWORD_ICE_ATTACK_02.get(),
+                user.getSoundCategory(), 0.1f, 0.6f);
+        double xpos = user.getX() - (radius + 1);
+        double ypos = user.getY();
+        double zpos = user.getZ() - (radius + 1);
+
+        for (int i = radius * 2; i > 0; i--) {
+            for (int j = radius * 2; j > 0; j--) {
+                float choose = (float) (Math.random() * 1);
+                HelperMethods.spawnParticle(world, ParticleTypes.SNOWFLAKE,
+                        xpos + i + choose, ypos + 0.4, zpos + j + choose,
+                        0, 0.1, 0);
+                HelperMethods.spawnParticle(world, ParticleTypes.CLOUD,
+                        xpos + i + choose, ypos + 0.1, zpos + j + choose,
+                        0, 0, 0);
+                HelperMethods.spawnParticle(world, ParticleTypes.WHITE_ASH,
+                        xpos + i + choose, ypos + 2, zpos + j + choose,
+                        0, 0, 0);
+            }
+        }
     }
 
     @Override

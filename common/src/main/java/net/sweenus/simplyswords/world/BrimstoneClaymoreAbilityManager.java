@@ -6,7 +6,6 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.particle.BlockStateParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
@@ -34,7 +33,7 @@ public final class BrimstoneClaymoreAbilityManager {
         return active != null && !active.isEmpty() || world.getTime() % 40L == 0L;
     }
 
-    public static void start(ServerWorld world, ServerPlayerEntity owner, LivingEntity target) {
+    public static void start(ServerWorld world, LivingEntity owner, LivingEntity target) {
         if (owner == null || target == null || !target.isAlive()) {
             return;
         }
@@ -81,8 +80,8 @@ public final class BrimstoneClaymoreAbilityManager {
     }
 
     private static boolean tickInstance(ServerWorld world, ActiveBrimstoneClaymore instance) {
-        ServerPlayerEntity owner = world.getServer().getPlayerManager().getPlayer(instance.ownerId());
-        if (owner == null || !owner.isAlive()) {
+        Entity ownerEntity = world.getEntity(instance.ownerId());
+        if (!(ownerEntity instanceof LivingEntity owner) || !owner.isAlive()) {
             removeVisual(world, instance.visualId());
             return true;
         }
@@ -111,7 +110,7 @@ public final class BrimstoneClaymoreAbilityManager {
 
     private static void updateTarget(ServerWorld world, LivingEntity owner, ActiveBrimstoneClaymore instance) {
         Entity entity = instance.targetId() == null ? null : world.getEntity(instance.targetId());
-        if (entity instanceof LivingEntity target && target.isAlive() && HelperMethods.checkFriendlyFire(target, owner)) {
+        if (entity instanceof LivingEntity target && target.isAlive() && HelperMethods.checkAbilityTarget(target, owner)) {
             instance.setPos(getGroundPos(world, target.getPos()));
             return;
         }
@@ -132,7 +131,7 @@ public final class BrimstoneClaymoreAbilityManager {
                 .map(entity -> (LivingEntity) entity)
                 .filter(target -> !target.getUuid().equals(previousTarget))
                 .filter(target -> target.isAlive() && target.squaredDistanceTo(pos) <= range * range)
-                .filter(target -> HelperMethods.checkFriendlyFire(target, owner))
+                .filter(target -> HelperMethods.checkAbilityTarget(target, owner))
                 .min(Comparator.comparingDouble(target -> target.squaredDistanceTo(pos)))
                 .orElse(null);
     }
@@ -198,7 +197,7 @@ public final class BrimstoneClaymoreAbilityManager {
         Box box = new Box(pos.x - radius, pos.y - radius, pos.z - radius, pos.x + radius, pos.y + radius, pos.z + radius);
         int damaged = 0;
         for (Entity entity : world.getOtherEntities(owner, box, EntityPredicates.VALID_LIVING_ENTITY)) {
-            if (entity instanceof LivingEntity target && target.squaredDistanceTo(pos) <= radius * radius && HelperMethods.checkFriendlyFire(target, owner)) {
+            if (entity instanceof LivingEntity target && target.squaredDistanceTo(pos) <= radius * radius && HelperMethods.checkAbilityTarget(target, owner)) {
                 target.setOnFireFor(finalImpact ? 5 : 2);
                 if (HelperMethods.damageThroughIframes(target, world.getDamageSources().indirectMagic(owner, owner), damage)) {
                     damaged++;

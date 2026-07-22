@@ -83,6 +83,22 @@ public final class WhisperwindVisualManager {
         }
     }
 
+    public static void scheduleTargetStrike(ServerWorld world, LivingEntity user, LivingEntity target) {
+        if (world == null || user == null || target == null || !user.isAlive()
+                || !target.isAlive() || !HelperMethods.checkAbilityTarget(target, user)) {
+            return;
+        }
+        Vec3d start = user.getPos();
+        Vec3d end = target.getPos();
+        Set<UUID> targets = new HashSet<>();
+        targets.add(target.getUuid());
+        PENDING_STRIKES.computeIfAbsent(world, ignored -> new HashSet<>())
+                .add(new PendingStrike(user.getUuid(), start, end, targets,
+                        world.getTime() + Config.uniqueEffects.whisperwind.delayedDamageDelay));
+        world.playSound(null, start.x, start.y, start.z, SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_IMPACT_01.get(),
+                SoundCategory.PLAYERS, 0.6F, 1.0F);
+    }
+
     public static void tick(ServerWorld world) {
         Set<PendingStrike> strikes = PENDING_STRIKES.get(world);
         if (strikes != null && !strikes.isEmpty()) {
@@ -116,7 +132,7 @@ public final class WhisperwindVisualManager {
                 + strike.targetIds.size() * Config.uniqueEffects.whisperwind.delayedDamagePerTarget;
         for (UUID targetId : strike.targetIds) {
             Entity entity = world.getEntity(targetId);
-            if (!(entity instanceof LivingEntity target) || !target.isAlive() || !HelperMethods.checkFriendlyFire(target, source)) {
+            if (!(entity instanceof LivingEntity target) || !target.isAlive() || !HelperMethods.checkAbilityTarget(target, source)) {
                 continue;
             }
 

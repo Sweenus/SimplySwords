@@ -11,7 +11,6 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.Hand;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
@@ -44,10 +43,21 @@ public final class HivemindSwarmManager {
     }
 
     public static void activate(ServerWorld world, ServerPlayerEntity player) {
-        float stingDamage = getStingDamage(player);
+        activate(world, player, player);
+    }
+
+    public static void activate(ServerWorld world, ServerPlayerEntity player, LivingEntity actor) {
+        activate(world, actor, getStingDamage(player));
+    }
+
+    public static void activate(ServerWorld world, LivingEntity actor) {
+        activate(world, actor, getStingDamage(actor));
+    }
+
+    private static void activate(ServerWorld world, LivingEntity actor, float stingDamage) {
         long now = world.getTime();
         int beeCount = Math.max(0, Config.uniqueEffects.hiveheart.swarmBeeCount);
-        if (beeCount <= 0) {
+        if (beeCount <= 0 || actor == null || !actor.isAlive()) {
             return;
         }
         int stings = Math.max(1, Config.uniqueEffects.hiveheart.stingsPerBee);
@@ -55,13 +65,14 @@ public final class HivemindSwarmManager {
 
         for (int i = 0; i < beeCount; i++) {
             double angle = (Math.PI * 2.0 / beeCount) * i;
-            Vec3d spawnPos = player.getPos().add(Math.cos(angle) * 0.9, 1.3 + (i % 3) * 0.15, Math.sin(angle) * 0.9);
-            SimplySwordsBeeEntity bee = EntityRegistry.SIMPLYBEEENTITY.get().spawn(world, player.getBlockPos(), SpawnReason.MOB_SUMMONED);
+            Vec3d spawnPos = actor.getPos().add(Math.cos(angle) * 0.9, 1.3 + (i % 3) * 0.15, Math.sin(angle) * 0.9);
+            SimplySwordsBeeEntity bee = EntityRegistry.SIMPLYBEEENTITY.get().spawn(world, actor.getBlockPos(), SpawnReason.MOB_SUMMONED);
             if (bee == null) {
                 continue;
             }
-            bee.refreshPositionAndAngles(spawnPos.x, spawnPos.y, spawnPos.z, player.getYaw(), 0.0F);
-            bee.setOwner(player);
+            bee.refreshPositionAndAngles(spawnPos.x, spawnPos.y, spawnPos.z, actor.getYaw(), 0.0F);
+            bee.setOwner(actor);
+            bee.setSwarmAnchorUuid(actor.getUuid());
             bee.setHivemindSwarmBee(true);
             bee.setSwarmStingsRemaining(stings);
             bee.setSwarmStingDamage(stingDamage);
@@ -74,7 +85,7 @@ public final class HivemindSwarmManager {
             playBeeSound(bee, i % 3 == 0 ? SoundEvents.ENTITY_BEE_POLLINATE : SoundEvents.ENTITY_BEE_LOOP, 0.08F, 1.35F);
         }
 
-        world.spawnParticles(ParticleTypes.FALLING_HONEY, player.getX(), player.getBodyY(0.6), player.getZ(), 18, 0.55, 0.35, 0.55, 0.04);
+        world.spawnParticles(ParticleTypes.FALLING_HONEY, actor.getX(), actor.getBodyY(0.6), actor.getZ(), 18, 0.55, 0.35, 0.55, 0.04);
     }
 
     public static boolean hasActive(ServerWorld world) {
@@ -94,9 +105,10 @@ public final class HivemindSwarmManager {
 
         Map<UUID, Integer> targetCounts = new HashMap<>();
         for (SimplySwordsBeeEntity bee : bees) {
-            ServerPlayerEntity owner = getOwner(world, bee);
+            LivingEntity owner = getOwner(world, bee);
+            LivingEntity anchor = getAnchor(world, bee, owner);
             LivingEntity target = getTarget(world, bee);
-            if (owner == null || !isValidTarget(owner, target)) {
+            if (owner == null || anchor == null || !isValidTarget(owner, anchor, target)) {
                 bee.setSwarmTargetUuid(null);
                 bee.clearSwarmPass();
                 bee.clearSwarmLineup();
@@ -106,20 +118,25 @@ public final class HivemindSwarmManager {
         }
 
         for (SimplySwordsBeeEntity bee : bees) {
-            ServerPlayerEntity owner = getOwner(world, bee);
+            LivingEntity owner = getOwner(world, bee);
             if (owner == null) {
+                bee.discard();
+                continue;
+            }
+            LivingEntity anchor = getAnchor(world, bee, owner);
+            if (anchor == null) {
                 bee.discard();
                 continue;
             }
 
             LivingEntity target = getTarget(world, bee);
-            if (!isValidTarget(owner, target)) {
+            if (!isValidTarget(owner, anchor, target)) {
                 if (target != null) {
                     targetCounts.computeIfPresent(target.getUuid(), (ignored, count) -> Math.max(0, count - 1));
                 }
                 bee.clearSwarmPass();
                 bee.clearSwarmLineup();
-                target = selectTarget(world, owner, targetCounts);
+                target = selectTarget(world, owner, anchor, targetCounts);
                 bee.setSwarmTargetUuid(target == null ? null : target.getUuid());
                 if (target != null) {
                     targetCounts.merge(target.getUuid(), 1, Integer::sum);
@@ -129,7 +146,7 @@ public final class HivemindSwarmManager {
             if (target == null) {
                 bee.clearSwarmPass();
                 bee.clearSwarmLineup();
-                hoverNearOwner(bee, owner);
+                hoverNearAnchor(bee, anchor);
                 continue;
             }
 
@@ -150,17 +167,34 @@ public final class HivemindSwarmManager {
         return bees;
     }
 
-    private static float getStingDamage(ServerPlayerEntity player) {
-        double attackDamage = HelperMethods.getEntityAttackDamage(player);
+    private static float getStingDamage(LivingEntity actor) {
+        double attackDamage = HelperMethods.getEntityAttackDamage(actor);
         if (attackDamage <= 0.0) {
-            attackDamage = Math.max(1.0, 1.0 + HelperMethods.getAttackFromSlot(player, player.getMainHandStack(), Hand.MAIN_HAND)[0]);
+            attackDamage = 1.0;
         }
         return (float) (attackDamage * Config.uniqueEffects.hiveheart.stingDamageMultiplier);
     }
 
-    private static ServerPlayerEntity getOwner(ServerWorld world, SimplySwordsBeeEntity bee) {
+    private static LivingEntity getOwner(ServerWorld world, SimplySwordsBeeEntity bee) {
         UUID ownerUuid = bee.getOwnerUuid();
-        return ownerUuid == null ? null : world.getServer().getPlayerManager().getPlayer(ownerUuid);
+        if (ownerUuid == null) {
+            return null;
+        }
+        ServerPlayerEntity player = world.getServer().getPlayerManager().getPlayer(ownerUuid);
+        if (player != null && player.isAlive()) {
+            return player;
+        }
+        Entity entity = world.getEntity(ownerUuid);
+        return entity instanceof LivingEntity livingEntity && livingEntity.isAlive() ? livingEntity : null;
+    }
+
+    private static LivingEntity getAnchor(ServerWorld world, SimplySwordsBeeEntity bee, LivingEntity owner) {
+        UUID anchorUuid = bee.getSwarmAnchorUuid();
+        if (anchorUuid == null) {
+            return owner;
+        }
+        Entity entity = world.getEntity(anchorUuid);
+        return entity instanceof LivingEntity livingEntity && livingEntity.isAlive() ? livingEntity : null;
     }
 
     private static LivingEntity getTarget(ServerWorld world, SimplySwordsBeeEntity bee) {
@@ -172,23 +206,24 @@ public final class HivemindSwarmManager {
         return entity instanceof LivingEntity livingEntity ? livingEntity : null;
     }
 
-    private static boolean isValidTarget(ServerPlayerEntity owner, LivingEntity target) {
+    private static boolean isValidTarget(LivingEntity owner, LivingEntity anchor, LivingEntity target) {
         return target != null
                 && target.isAlive()
                 && target != owner
-                && target.squaredDistanceTo(owner) <= Config.uniqueEffects.hiveheart.swarmRadius * Config.uniqueEffects.hiveheart.swarmRadius
-                && HelperMethods.checkFriendlyFire(target, owner);
+                && target != anchor
+                && target.squaredDistanceTo(anchor) <= Config.uniqueEffects.hiveheart.swarmRadius * Config.uniqueEffects.hiveheart.swarmRadius
+                && HelperMethods.checkAbilityTarget(target, owner);
     }
 
-    private static LivingEntity selectTarget(ServerWorld world, ServerPlayerEntity owner, Map<UUID, Integer> targetCounts) {
+    private static LivingEntity selectTarget(ServerWorld world, LivingEntity owner, LivingEntity anchor, Map<UUID, Integer> targetCounts) {
         double radius = Math.max(1.0, Config.uniqueEffects.hiveheart.swarmRadius);
-        Box searchBox = owner.getBoundingBox().expand(radius, radius * 0.5, radius);
+        Box searchBox = anchor.getBoundingBox().expand(radius, radius * 0.5, radius);
         LivingEntity selected = null;
         int selectedCount = Integer.MAX_VALUE;
         double selectedDistance = Double.MAX_VALUE;
-        for (LivingEntity candidate : world.getEntitiesByClass(LivingEntity.class, searchBox, candidate -> isValidTarget(owner, candidate))) {
+        for (LivingEntity candidate : world.getEntitiesByClass(LivingEntity.class, searchBox, candidate -> isValidTarget(owner, anchor, candidate))) {
             int count = targetCounts.getOrDefault(candidate.getUuid(), 0);
-            double distance = candidate.squaredDistanceTo(owner);
+            double distance = candidate.squaredDistanceTo(anchor);
             if (count < selectedCount || (count == selectedCount && distance < selectedDistance)) {
                 selected = candidate;
                 selectedCount = count;
@@ -198,7 +233,7 @@ public final class HivemindSwarmManager {
         return selected;
     }
 
-    private static void hoverNearOwner(SimplySwordsBeeEntity bee, ServerPlayerEntity owner) {
+    private static void hoverNearAnchor(SimplySwordsBeeEntity bee, LivingEntity owner) {
         double angle = (bee.age * 0.19) + (bee.getId() * 0.7);
         Vec3d destination = owner.getPos().add(Math.cos(angle) * 1.4, 1.5 + Math.sin(angle * 0.7) * 0.25, Math.sin(angle) * 1.4);
         moveToward(bee, destination, MOVE_SPEED * 0.7);
@@ -362,7 +397,7 @@ public final class HivemindSwarmManager {
         bee.setVelocity(Vec3d.ZERO);
     }
 
-    private static void trySting(ServerWorld world, ServerPlayerEntity owner, SimplySwordsBeeEntity bee, LivingEntity target) {
+    private static void trySting(ServerWorld world, LivingEntity owner, SimplySwordsBeeEntity bee, LivingEntity target) {
         if (bee.hasSwarmPassStung() || world.getTime() < bee.getSwarmNextStingTick() || bee.getSwarmStingsRemaining() <= 0) {
             return;
         }

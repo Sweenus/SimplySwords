@@ -16,23 +16,28 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
 import net.sweenus.simplyswords.entity.WickpiercerEntity;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
+import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
 import net.sweenus.simplyswords.item.interfaces.RevivalWeapon;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
+import net.sweenus.simplyswords.world.LivingEntityAbilityMovementManager;
 import net.sweenus.simplyswords.world.RevivalCandleVisualManager;
+import net.sweenus.simplyswords.world.WeaponAbilityCooldownManager;
 
 import java.util.List;
 
-public class WickpiercerSwordItem extends UniqueSwordItem implements RevivalWeapon {
+public class WickpiercerSwordItem extends UniqueSwordItem implements RevivalWeapon, UniqueWeaponActiveAbility {
     public WickpiercerSwordItem(ToolMaterial toolMaterial, Settings settings) {
         super(toolMaterial, settings);
     }
@@ -100,6 +105,32 @@ public class WickpiercerSwordItem extends UniqueSwordItem implements RevivalWeap
     }
 
     @Override
+    public boolean activate(WeaponAbilityContext context) {
+        if (context.target() == null || !HelperMethods.checkAbilityTarget(context.target(), context.actor())) {
+            return false;
+        }
+        LivingEntity actor = context.actor();
+        HelperMethods.incrementStatusEffect(actor, EffectRegistry.getReference(EffectRegistry.FRENZY),
+                Config.uniqueEffects.wickpiercer.duration, 1, 4);
+        WickpiercerEntity wickpiercerEntity = new WickpiercerEntity(context.world(), actor, context.stack().copy());
+        Vec3d direction = LivingEntityAbilityMovementManager.getLobbedTargetDirection(actor, context.target());
+        wickpiercerEntity.setVelocity(direction.x, direction.y, direction.z, 1.65F, 1.0F);
+        wickpiercerEntity.setYaw(actor.getYaw());
+        wickpiercerEntity.setPitch(actor.getPitch() - 90);
+        wickpiercerEntity.primaryBaseDamage = (float) Math.max(1.0, HelperMethods.getAttackFromStack(context.stack(), net.minecraft.component.type.AttributeModifierSlot.MAINHAND) * 0.5f);
+        wickpiercerEntity.hasLoyalty = 0;
+        wickpiercerEntity.setPos(actor.getX(), actor.getEyeY() - 0.5, actor.getZ());
+        wickpiercerEntity.markNonReturning(80);
+        context.world().spawnEntity(wickpiercerEntity);
+        return true;
+    }
+
+    @Override
+    public int getActivationCooldownTicks(ItemStack stack, WeaponAbilityContext context) {
+        return 20;
+    }
+
+    @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
         HelperMethods.createFootfalls(entity, stack, world, ParticleTypes.WHITE_ASH,
                 ParticleTypes.WHITE_ASH, ParticleTypes.WHITE_ASH, true);
@@ -126,30 +157,38 @@ public class WickpiercerSwordItem extends UniqueSwordItem implements RevivalWeap
     }
 
     @Override
-    public boolean canRevive(PlayerEntity player, ItemStack stack, DamageSource source) {
-        return !source.isIn(DamageTypeTags.BYPASSES_INVULNERABILITY) &&
-                !player.getItemCooldownManager().isCoolingDown(this);
-    }
-
-    @Override
-    public void postRevive(PlayerEntity player, ItemStack stack, DamageSource source) {
-        int skillCooldown = Config.uniqueEffects.waxweaver.cooldown;
-        if (player instanceof net.minecraft.server.network.ServerPlayerEntity serverPlayer) {
-            RevivalCandleVisualManager.activate(serverPlayer, stack);
+    public boolean canRevive(LivingEntity entity, ItemStack stack, DamageSource source) {
+        if (source.isIn(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
+            return false;
         }
-        HelperMethods.incrementStatusEffect(player, StatusEffects.RESISTANCE, 100, 2, 3);
-        player.getItemCooldownManager().set(stack.getItem(), skillCooldown);
-
-        World world = player.getWorld();
-        world.playSound(null, player.getBlockPos(), SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
-                player.getSoundCategory(), 0.7f, 1.0f);
-        world.playSound(null, player.getBlockPos(), SoundRegistry.SPELL_MISC_02.get(),
-                player.getSoundCategory(), 0.8f, 1.0f);
+        if (entity instanceof PlayerEntity player) {
+            return !player.getItemCooldownManager().isCoolingDown(this);
+        }
+        return entity.getWorld() instanceof ServerWorld serverWorld
+                && !WeaponAbilityCooldownManager.isCoolingDown(serverWorld, entity, stack);
     }
 
     @Override
-    public float getReviveHealth(PlayerEntity player, ItemStack stack, DamageSource source) {
-        return player.getMaxHealth();
+    public void postRevive(LivingEntity entity, ItemStack stack, DamageSource source) {
+        int skillCooldown = Config.uniqueEffects.waxweaver.cooldown;
+        if (entity instanceof net.minecraft.server.network.ServerPlayerEntity serverPlayer) {
+            RevivalCandleVisualManager.activate(serverPlayer, stack);
+            serverPlayer.getItemCooldownManager().set(stack.getItem(), skillCooldown);
+        } else if (entity.getWorld() instanceof ServerWorld serverWorld) {
+            WeaponAbilityCooldownManager.setCooldown(serverWorld, entity, stack, skillCooldown);
+        }
+        HelperMethods.incrementStatusEffect(entity, StatusEffects.RESISTANCE, 100, 2, 3);
+
+        World world = entity.getWorld();
+        world.playSound(null, entity.getBlockPos(), SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
+                entity.getSoundCategory(), 0.7f, 1.0f);
+        world.playSound(null, entity.getBlockPos(), SoundRegistry.SPELL_MISC_02.get(),
+                entity.getSoundCategory(), 0.8f, 1.0f);
+    }
+
+    @Override
+    public float getReviveHealth(LivingEntity entity, ItemStack stack, DamageSource source) {
+        return entity.getMaxHealth();
     }
 
     public static class EffectSettings extends TooltipSettings {

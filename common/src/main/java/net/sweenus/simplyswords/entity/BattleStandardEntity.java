@@ -113,7 +113,7 @@ public class BattleStandardEntity extends PathAwareEntity {
                     Box box = new Box(this.getX() + radius, this.getY() + (float) radius / 3, this.getZ() + radius,
                             this.getX() - radius, this.getY() - (float) radius / 3, this.getZ() - radius);
                     for (Entity entity : getWorld().getOtherEntities(this, box, EntityPredicates.VALID_LIVING_ENTITY)) {
-                        if ((entity instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, ownerEntity)
+                        if ((entity instanceof LivingEntity le) && HelperMethods.checkAbilityTarget(le, ownerEntity)
                                 && le != ownerEntity && !(le instanceof BattleStandardEntity)
                                 && !(le instanceof BattleStandardDarkEntity)) {
 
@@ -178,7 +178,7 @@ public class BattleStandardEntity extends PathAwareEntity {
                     Box box = new Box(this.getX() + 1, this.getY() + 1, this.getZ() + 1,
                             this.getX() - 1, this.getY() - (float) 1, this.getZ() - 1);
                     for (Entity entity : getWorld().getOtherEntities(this, box, EntityPredicates.VALID_LIVING_ENTITY)) {
-                        if ((entity instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, ownerEntity) && le != ownerEntity) {
+                        if ((entity instanceof LivingEntity le) && HelperMethods.checkAbilityTarget(le, ownerEntity) && le != ownerEntity) {
                             le.damage(ownerEntity.getDamageSources().magic(), abilityDamage * 3);
                             le.setOnFireFor(1);
                             le.setVelocity((le.getX() - this.getX()) / 4, 0.5, (le.getZ() - this.getZ()) / 4);

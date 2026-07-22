@@ -154,7 +154,7 @@ public final class IcewhisperCometManager {
                 impact.x + splashRadius, impact.y + splashRadius, impact.z + splashRadius
         );
         for (Entity entity : world.getOtherEntities(owner, box, EntityPredicates.VALID_LIVING_ENTITY)) {
-            if (entity instanceof LivingEntity target && HelperMethods.checkFriendlyFire(target, owner)
+            if (entity instanceof LivingEntity target && HelperMethods.checkAbilityTarget(target, owner)
                     && target.squaredDistanceTo(impact) <= splashRadius * splashRadius) {
                 HelperMethods.damageThroughIframes(target, world.getDamageSources().indirectMagic(owner, owner), comet.damage());
             }

@@ -19,11 +19,13 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
+import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
 import net.sweenus.simplyswords.entity.SimplySwordsBeeEntity;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
+import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
 import net.sweenus.simplyswords.registry.EntityRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -32,7 +34,7 @@ import net.sweenus.simplyswords.world.HivemindSwarmManager;
 
 import java.util.List;
 
-public class HiveheartSwordItem extends UniqueSwordItem {
+public class HiveheartSwordItem extends UniqueSwordItem implements UniqueWeaponActiveAbility {
     public HiveheartSwordItem(ToolMaterial toolMaterial, Settings settings) {
         super(toolMaterial, settings);
     }
@@ -80,6 +82,20 @@ public class HiveheartSwordItem extends UniqueSwordItem {
         }
 
         return TypedActionResult.success(stack, world.isClient());
+    }
+
+    @Override
+    public boolean activate(WeaponAbilityContext context) {
+        if (!canActivate(context)) {
+            return false;
+        }
+        HivemindSwarmManager.activate(context.world(), context.actor());
+        return true;
+    }
+
+    @Override
+    public int getActivationCooldownTicks(ItemStack stack, WeaponAbilityContext context) {
+        return Config.uniqueEffects.hiveheart.activeCooldown;
     }
 
     @Override

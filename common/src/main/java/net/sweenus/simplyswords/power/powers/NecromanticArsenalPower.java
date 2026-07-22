@@ -76,5 +76,14 @@ public class NecromanticArsenalPower extends NetherGemPower {
 
         @ValidatedDouble.Restrict(min = 0.0)
         public double damageMultiplier = 1.0;
+
+        @ValidatedInt.Restrict(min = 0, max = 100)
+        public int activeAbilityChance = 10;
+
+        @ValidatedInt.Restrict(min = 1)
+        public int activeAbilityCheckInterval = 90;
+
+        @ValidatedInt.Restrict(min = 0)
+        public int activeAbilityInitialDelay = 40;
     }
 }

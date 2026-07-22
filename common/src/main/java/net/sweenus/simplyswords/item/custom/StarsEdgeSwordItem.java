@@ -17,18 +17,21 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
+import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
+import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
+import net.sweenus.simplyswords.world.LivingEntityAbilityMovementManager;
 
 import java.util.List;
 
-public class StarsEdgeSwordItem extends UniqueSwordItem {
+public class StarsEdgeSwordItem extends UniqueSwordItem implements UniqueWeaponActiveAbility {
     public StarsEdgeSwordItem(ToolMaterial toolMaterial, Settings settings) {
         super(toolMaterial, settings);
     }
@@ -89,6 +92,32 @@ public class StarsEdgeSwordItem extends UniqueSwordItem {
         }
 
         return super.use(world, user, hand);
+    }
+
+    @Override
+    public boolean activate(WeaponAbilityContext context) {
+        LivingEntity actor = context.actor();
+        if (context.target() == null || !HelperMethods.checkAbilityTarget(context.target(), actor)) {
+            return false;
+        }
+        int skillDuration = Config.uniqueEffects.stars_edge.duration;
+        int skillStacks = Config.uniqueEffects.stars_edge.stacks;
+        LivingEntityAbilityMovementManager.dashTowardTarget(context.world(), actor, context.target(), 1.7, 8);
+        HelperMethods.incrementStatusEffect(actor, StatusEffects.SPEED, skillDuration, 1, 2);
+        HelperMethods.incrementStatusEffect(actor, StatusEffects.RESISTANCE, skillDuration / 2, 2, 3);
+        HelperMethods.incrementStatusEffect(actor, StatusEffects.HASTE, skillDuration / 2, skillStacks, 7);
+        context.world().playSound(null, actor.getBlockPos(), context.world().isDay()
+                        ? SoundRegistry.ELEMENTAL_BOW_HOLY_SHOOT_IMPACT_02.get()
+                        : SoundRegistry.ELEMENTAL_BOW_HOLY_SHOOT_IMPACT_01.get(),
+                actor.getSoundCategory(), 0.4f, context.world().isDay() ? 1.0f : 1.3f);
+        context.world().spawnParticles(context.world().isDay() ? ParticleTypes.END_ROD : ParticleTypes.FALLING_OBSIDIAN_TEAR,
+                actor.getX(), actor.getBodyY(0.5), actor.getZ(), 18, 0.45, 0.45, 0.45, 0.04);
+        return true;
+    }
+
+    @Override
+    public int getActivationCooldownTicks(ItemStack stack, WeaponAbilityContext context) {
+        return Config.uniqueEffects.stars_edge.cooldown;
     }
 
     @Override

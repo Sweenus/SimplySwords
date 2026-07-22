@@ -15,20 +15,24 @@ import net.minecraft.particle.ParticleTypes;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
 import net.sweenus.simplyswords.entity.FrostfallEntity;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
+import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
+import net.sweenus.simplyswords.world.LivingEntityAbilityMovementManager;
 
 import java.util.List;
 
-public class FrostfallSwordItem extends UniqueSwordItem {
+public class FrostfallSwordItem extends UniqueSwordItem implements UniqueWeaponActiveAbility {
     public FrostfallSwordItem(ToolMaterial toolMaterial, Settings settings) {
         super(toolMaterial, settings);
     }
@@ -44,23 +48,12 @@ public class FrostfallSwordItem extends UniqueSwordItem {
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         if (user.getWorld().isClient()) return super.use(world, user, hand);
 
-        float abilityDamage = HelperMethods.spellScaledDamage("frost", user, Config.uniqueEffects.frostfall.spellScaling, Config.uniqueEffects.frostfall.damage);
-        float pulseDamage = HelperMethods.spellScaledDamage("frost", user, Config.uniqueEffects.frostfall.spellScaling, Config.uniqueEffects.frostfall.pulseDamage);
         ItemStack itemStack = user.getStackInHand(hand);
         if (!world.isClient) {
             itemStack = user.getStackInHand(hand);
-            FrostfallEntity frostfallEntity = new FrostfallEntity(world, user, itemStack.copy() );
-            frostfallEntity.setVelocity(user, user.getPitch(), user.getYaw(), 0.0F, 1.5F, 1.0F);
-            frostfallEntity.setYaw(user.getYaw());
-            frostfallEntity.setPitch(user.getPitch());
-            frostfallEntity.primaryBaseDamage = abilityDamage;
-            frostfallEntity.detonateDamage = pulseDamage;
-            frostfallEntity.addedChance = Config.uniqueEffects.frostfall.chance;
-            frostfallEntity.detonateRadius = Config.uniqueEffects.frostfall.radius;
-            frostfallEntity.duration = Config.uniqueEffects.frostfall.duration;
+            FrostfallEntity frostfallEntity = createFrostfallEntity(world, user, itemStack.copy());
             if (hand == Hand.OFF_HAND)
                 frostfallEntity.offhandThrow = true;
-            frostfallEntity.setPos(user.getX(), user.getEyeY() - 0.5, user.getZ());
             world.spawnEntity(frostfallEntity);
 
             if (!user.getAbilities().creativeMode) {
@@ -73,6 +66,42 @@ public class FrostfallSwordItem extends UniqueSwordItem {
 
         user.getItemCooldownManager().set(this, Config.uniqueEffects.frostfall.cooldown);
         return TypedActionResult.success(itemStack, world.isClient());
+    }
+
+    private static FrostfallEntity createFrostfallEntity(World world, LivingEntity user, ItemStack stack) {
+        float abilityDamage = HelperMethods.spellScaledDamage("frost", user, Config.uniqueEffects.frostfall.spellScaling, Config.uniqueEffects.frostfall.damage);
+        float pulseDamage = HelperMethods.spellScaledDamage("frost", user, Config.uniqueEffects.frostfall.spellScaling, Config.uniqueEffects.frostfall.pulseDamage);
+        FrostfallEntity frostfallEntity = new FrostfallEntity(world, user, stack);
+        frostfallEntity.setVelocity(user, user.getPitch(), user.getYaw(), 0.0F, 1.5F, 1.0F);
+        frostfallEntity.setYaw(user.getYaw());
+        frostfallEntity.setPitch(user.getPitch());
+        frostfallEntity.primaryBaseDamage = abilityDamage;
+        frostfallEntity.detonateDamage = pulseDamage;
+        frostfallEntity.addedChance = Config.uniqueEffects.frostfall.chance;
+        frostfallEntity.detonateRadius = Config.uniqueEffects.frostfall.radius;
+        frostfallEntity.duration = Config.uniqueEffects.frostfall.duration;
+        frostfallEntity.setPos(user.getX(), user.getEyeY() - 0.5, user.getZ());
+        return frostfallEntity;
+    }
+
+    @Override
+    public boolean activate(WeaponAbilityContext context) {
+        if (context.target() == null || !HelperMethods.checkAbilityTarget(context.target(), context.actor())) {
+            return false;
+        }
+        FrostfallEntity frostfallEntity = createFrostfallEntity(context.world(), context.actor(), context.stack().copy());
+        Vec3d direction = LivingEntityAbilityMovementManager.getLobbedTargetDirection(context.actor(), context.target());
+        frostfallEntity.setVelocity(direction.x, direction.y, direction.z, 1.65F, 1.0F);
+        frostfallEntity.setYaw(context.actor().getYaw());
+        frostfallEntity.setPitch(context.actor().getPitch());
+        frostfallEntity.markNonReturning(Config.uniqueEffects.frostfall.duration + 80);
+        context.world().spawnEntity(frostfallEntity);
+        return true;
+    }
+
+    @Override
+    public int getActivationCooldownTicks(ItemStack stack, WeaponAbilityContext context) {
+        return Config.uniqueEffects.frostfall.cooldown;
     }
 
     @Override

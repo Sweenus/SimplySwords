@@ -17,8 +17,10 @@ import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
+import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.item.interfaces.TwoHandedWeapon;
+import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -26,7 +28,7 @@ import net.sweenus.simplyswords.util.Styles;
 
 import java.util.List;
 
-public class SoulPyreSwordItem extends UniqueSwordItem implements TwoHandedWeapon {
+public class SoulPyreSwordItem extends UniqueSwordItem implements TwoHandedWeapon, UniqueWeaponActiveAbility {
     public SoulPyreSwordItem(ToolMaterial toolMaterial, Settings settings) {
         super(toolMaterial, settings);
     }
@@ -42,11 +44,37 @@ public class SoulPyreSwordItem extends UniqueSwordItem implements TwoHandedWeapo
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         if (!user.getWorld().isClient()) {
-            int relocationDuration = 150;
-            user.addStatusEffect(new StatusEffectInstance(EffectRegistry.getReference(EffectRegistry.SOULTETHER), relocationDuration, 0, false, true));
+            activateSoulTether(user);
             user.getItemCooldownManager().set(this, Config.uniqueEffects.soulpyre.cooldown);
         }
         return super.use(world, user, hand);
+    }
+
+    @Override
+    public boolean canActivate(WeaponAbilityContext context) {
+        return context != null
+                && context.stack() != null
+                && !context.stack().isEmpty()
+                && context.world() != null
+                && context.actor() != null
+                && context.actor().isAlive()
+                && context.stack().getDamage() < context.stack().getMaxDamage() - 1;
+    }
+
+    @Override
+    public boolean activate(WeaponAbilityContext context) {
+        activateSoulTether(context.actor());
+        return true;
+    }
+
+    @Override
+    public int getActivationCooldownTicks(ItemStack stack, WeaponAbilityContext context) {
+        return Config.uniqueEffects.soulpyre.cooldown;
+    }
+
+    private void activateSoulTether(LivingEntity user) {
+        int relocationDuration = 150;
+        user.addStatusEffect(new StatusEffectInstance(EffectRegistry.getReference(EffectRegistry.SOULTETHER), relocationDuration, 0, false, true));
     }
 
     @Override

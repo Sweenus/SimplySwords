@@ -16,21 +16,24 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
+import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
+import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
+import net.sweenus.simplyswords.world.LivingEntityAbilityMovementManager;
 import net.sweenus.simplyswords.world.EmberlashSmoulderVisualManager;
 
 import java.util.List;
 
-public class EmberlashSwordItem extends UniqueSwordItem {
+public class EmberlashSwordItem extends UniqueSwordItem implements UniqueWeaponActiveAbility {
     public EmberlashSwordItem(ToolMaterial toolMaterial, Settings settings) {
         super(toolMaterial, settings);
     }
@@ -78,6 +81,25 @@ public class EmberlashSwordItem extends UniqueSwordItem {
         user.getItemCooldownManager().set(this, Config.uniqueEffects.emberlash.cooldown);
 
         return super.use(world, user, hand);
+    }
+
+    @Override
+    public boolean activate(WeaponAbilityContext context) {
+        LivingEntity actor = context.actor();
+        if (context.target() == null || !HelperMethods.checkAbilityTarget(context.target(), actor)) {
+            return false;
+        }
+        LivingEntityAbilityMovementManager.dashAwayFromTarget(context.world(), actor, context.target(), 1.5, 8);
+        context.world().playSound(null, actor.getBlockPos(), SoundRegistry.SPELL_FIRE.get(),
+                actor.getSoundCategory(), 0.5f, 1.0f);
+        actor.heal(actor.getMaxHealth() * Config.uniqueEffects.emberlash.heal / 100f);
+        context.world().spawnParticles(ParticleTypes.FLAME, actor.getX(), actor.getBodyY(0.5), actor.getZ(), 16, 0.45, 0.45, 0.45, 0.04);
+        return true;
+    }
+
+    @Override
+    public int getActivationCooldownTicks(ItemStack stack, WeaponAbilityContext context) {
+        return Config.uniqueEffects.emberlash.cooldown;
     }
 
     @Override

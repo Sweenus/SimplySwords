@@ -19,19 +19,22 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
+import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
+import net.sweenus.simplyswords.world.LivingEntityAbilityMovementManager;
 
 import java.util.List;
 
-public class RibboncleaverSwordItem extends UniqueSwordItem {
+public class RibboncleaverSwordItem extends UniqueSwordItem implements UniqueWeaponActiveAbility {
     public RibboncleaverSwordItem(ToolMaterial toolMaterial, Settings settings) {
         super(toolMaterial, settings);
     }
@@ -67,6 +70,29 @@ public class RibboncleaverSwordItem extends UniqueSwordItem {
         user.getItemCooldownManager().set(this, skillCooldown);
 
         return super.use(world, user, hand);
+    }
+
+    @Override
+    public boolean activate(WeaponAbilityContext context) {
+        LivingEntity actor = context.actor();
+        if (context.target() == null || !HelperMethods.checkAbilityTarget(context.target(), actor)) {
+            return false;
+        }
+        int resilienceAmplifier = Config.uniqueEffects.ribboncleaver.resilienceAmplifier;
+        LivingEntityAbilityMovementManager.dashTowardTarget(context.world(), actor, context.target(), 1.7, 8);
+        context.world().playSound(null, actor.getBlockPos(), SoundRegistry.ELEMENTAL_BOW_EARTH_SHOOT_IMPACT_03.get(),
+                actor.getSoundCategory(), 0.4f, 1.3f);
+        actor.addStatusEffect(new StatusEffectInstance(EffectRegistry.getReference(EffectRegistry.RIBBONCLEAVE),
+                60, 0, false, false, true));
+        actor.addStatusEffect(new StatusEffectInstance(EffectRegistry.getReference(EffectRegistry.RESILIENCE),
+                15, resilienceAmplifier, false, false, true));
+        context.world().spawnParticles(ParticleTypes.POOF, actor.getX(), actor.getY() + 0.15, actor.getZ(), 12, 0.55, 0.08, 0.55, 0.03);
+        return true;
+    }
+
+    @Override
+    public int getActivationCooldownTicks(ItemStack stack, WeaponAbilityContext context) {
+        return Config.uniqueEffects.ribboncleaver.cooldown;
     }
 
     @Override

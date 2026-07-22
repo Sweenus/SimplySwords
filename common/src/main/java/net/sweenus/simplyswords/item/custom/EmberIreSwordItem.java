@@ -21,10 +21,12 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.UseAction;
 import net.minecraft.world.World;
+import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ChanceDurationSettings;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
+import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -33,7 +35,7 @@ import net.sweenus.simplyswords.util.Styles;
 import java.util.List;
 import java.util.Optional;
 
-public class EmberIreSwordItem extends UniqueSwordItem {
+public class EmberIreSwordItem extends UniqueSwordItem implements UniqueWeaponActiveAbility {
     public EmberIreSwordItem(ToolMaterial toolMaterial, Settings settings) {
         super(toolMaterial, settings);
     }
@@ -126,6 +128,44 @@ public class EmberIreSwordItem extends UniqueSwordItem {
 
             }
         }
+    }
+
+    @Override
+    public boolean activate(WeaponAbilityContext context) {
+        LivingEntity actor = context.actor();
+        LivingEntity target = context.target();
+        if (target == null || !HelperMethods.checkAbilityTarget(target, actor)) {
+            return false;
+        }
+        ServerWorld world = context.world();
+        double damageAmount = HelperMethods.getEntityAttackDamage(actor) * 0.3;
+        float finalDamage = (float) (damageAmount + HelperMethods.getEntityAttackDamage(actor) * 3);
+        SoundEvent soundSelect = SoundRegistry.ELEMENTAL_BOW_FIRE_SHOOT_IMPACT_03.get();
+        HelperMethods.spawnWaistHeightParticles(world, ParticleTypes.SMOKE, actor, target, 20);
+        HelperMethods.spawnWaistHeightParticles(world, ParticleTypes.POOF, actor, target, 20);
+        HelperMethods.spawnWaistHeightParticles(world, ParticleTypes.ASH, actor, target, 20);
+        world.playSound(null, actor.getBlockPos(), soundSelect, actor.getSoundCategory(), 0.4f, 1.5f);
+        target.timeUntilRegen = 0;
+        target.damage(actor.getDamageSources().mobAttack(actor), finalDamage);
+        world.playSound(null, target.getBlockPos(), SoundEvents.ENTITY_GENERIC_EXPLODE.value(), actor.getSoundCategory(), 0.4f, 1.1f);
+        HelperMethods.spawnOrbitParticles(world, target.getPos(), ParticleTypes.EXPLOSION, 1, 1);
+        HelperMethods.spawnOrbitParticles(world, target.getPos(), ParticleTypes.POOF, 1, 20);
+
+        int hitChance = Config.uniqueEffects.emberblade.chance;
+        int duration = Config.uniqueEffects.emberblade.duration;
+        if (actor.getRandom().nextInt(150) <= hitChance) {
+            actor.addStatusEffect(new StatusEffectInstance(StatusEffects.STRENGTH, duration, 0), actor);
+            actor.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, duration, 1), actor);
+            actor.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, duration, 0), actor);
+            world.playSoundFromEntity(null, actor, SoundRegistry.MAGIC_SWORD_SPELL_01.get(),
+                    actor.getSoundCategory(), 0.5f, 2f);
+        }
+        return true;
+    }
+
+    @Override
+    public int getActivationCooldownTicks(ItemStack stack, WeaponAbilityContext context) {
+        return 10;
     }
 
     @Override

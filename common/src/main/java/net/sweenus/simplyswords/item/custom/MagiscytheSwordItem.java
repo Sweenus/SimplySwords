@@ -21,7 +21,9 @@ import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
+import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
+import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
@@ -31,7 +33,7 @@ import net.sweenus.simplyswords.util.Styles;
 import java.util.List;
 import java.util.Random;
 
-public class MagiscytheSwordItem extends UniqueSwordItem {
+public class MagiscytheSwordItem extends UniqueSwordItem implements UniqueWeaponActiveAbility {
     public MagiscytheSwordItem(ToolMaterial toolMaterial, Settings settings) {
         super(toolMaterial, settings);
     }
@@ -64,15 +66,40 @@ public class MagiscytheSwordItem extends UniqueSwordItem {
 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
-        int skillCooldown = Config.uniqueEffects.magiscythe.cooldown;
+        activateMagistorm(world, user);
+        user.getItemCooldownManager().set(this, Config.uniqueEffects.magiscythe.cooldown);
+
+        return super.use(world, user, hand);
+    }
+
+    @Override
+    public boolean canActivate(WeaponAbilityContext context) {
+        return context != null
+                && context.stack() != null
+                && !context.stack().isEmpty()
+                && context.world() != null
+                && context.actor() != null
+                && context.actor().isAlive()
+                && context.stack().getDamage() < context.stack().getMaxDamage() - 1;
+    }
+
+    @Override
+    public boolean activate(WeaponAbilityContext context) {
+        activateMagistorm(context.world(), context.actor());
+        return true;
+    }
+
+    @Override
+    public int getActivationCooldownTicks(ItemStack stack, WeaponAbilityContext context) {
+        return Config.uniqueEffects.magiscythe.cooldown;
+    }
+
+    private void activateMagistorm(World world, LivingEntity user) {
         int baseEffectDuration = Config.uniqueEffects.magiscythe.duration;
 
         world.playSound(null, user.getBlockPos(), SoundRegistry.MAGIC_SHAMANIC_NORDIC_22.get(),
                 user.getSoundCategory(), 0.2f, 1.1f);
         user.addStatusEffect(new StatusEffectInstance(EffectRegistry.getReference(EffectRegistry.MAGISTORM), baseEffectDuration, 1));
-        user.getItemCooldownManager().set(this, skillCooldown);
-
-        return super.use(world, user, hand);
     }
 
     @Override

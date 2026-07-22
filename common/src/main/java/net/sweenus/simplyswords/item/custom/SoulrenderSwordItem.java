@@ -24,8 +24,10 @@ import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
+import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.item.interfaces.TwoHandedWeapon;
+import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -34,7 +36,7 @@ import net.sweenus.simplyswords.world.SoulrenderMarkVisualManager;
 
 import java.util.List;
 
-public class SoulrenderSwordItem extends UniqueSwordItem implements TwoHandedWeapon {
+public class SoulrenderSwordItem extends UniqueSwordItem implements TwoHandedWeapon, UniqueWeaponActiveAbility {
     public SoulrenderSwordItem(ToolMaterial toolMaterial, Settings settings) {
         super(toolMaterial, settings);
     }
@@ -97,45 +99,76 @@ public class SoulrenderSwordItem extends UniqueSwordItem implements TwoHandedWea
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         if (!user.getWorld().isClient()) {
-            float heal_amount = Config.uniqueEffects.soulrender.healMulti;
-            int healamp = 0;
-            double hradius = Config.uniqueEffects.soulrender.radius;
-            double vradius = Config.uniqueEffects.soulrender.radius / 2.0;
-            double x = user.getX();
-            double y = user.getY();
-            double z = user.getZ();
-            ServerWorld sworld = (ServerWorld) user.getWorld();
-            Box box = new Box(x + hradius, y + vradius, z + hradius, x - hradius, y - vradius, z - hradius);
-
-            for (Entity entity : sworld.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY)) {
-                if ((entity instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, user)) {
-                    StatusEffectInstance slowness = le.getStatusEffect(StatusEffects.SLOWNESS);
-                    StatusEffectInstance weakness = le.getStatusEffect(StatusEffects.WEAKNESS);
-                    if (slowness == null || weakness == null) {
-                        continue;
-                    }
-
-                    healamp += slowness.getAmplifier();
-                    float scaling = HelperMethods.commonSpellAttributeScaling(Config.uniqueEffects.soulrender.spellScaling, entity, "soul");
-                    float multiplier = scaling > 0f ? scaling : Config.uniqueEffects.soulrender.damageMulti;
-                    SoulrenderMarkVisualManager.consumeMark(sworld, le, user);
-                    le.damage(user.getDamageSources().indirectMagic(user, user), slowness.getAmplifier() * multiplier);
-                    le.removeStatusEffect(StatusEffects.WEAKNESS);
-                    le.removeStatusEffect(StatusEffects.SLOWNESS);
-                    world.playSoundFromEntity(null, entity, SoundRegistry.DARK_SWORD_SPELL.get(),
-                            entity.getSoundCategory(), 0.1f, 2f);
-                }
-            }
-            if (healamp > 0) {
-                float heal = ((float)healamp * heal_amount);
-
-                if (heal < 1f) heal = 1f;
-                else if (heal > 6f) heal = 6f;
-
-                user.heal(heal);
-            }
+            consumeSoulrenderMarks((ServerWorld) user.getWorld(), user);
         }
         return super.use(world, user, hand);
+    }
+
+    @Override
+    public boolean canActivate(WeaponAbilityContext context) {
+        return context != null
+                && context.stack() != null
+                && !context.stack().isEmpty()
+                && context.world() != null
+                && context.actor() != null
+                && context.actor().isAlive()
+                && context.stack().getDamage() < context.stack().getMaxDamage() - 1
+                && hasSoulrenderMarks(context.world(), context.actor());
+    }
+
+    @Override
+    public boolean activate(WeaponAbilityContext context) {
+        return consumeSoulrenderMarks(context.world(), context.actor()) > 0;
+    }
+
+    private boolean hasSoulrenderMarks(ServerWorld world, LivingEntity user) {
+        double hradius = Config.uniqueEffects.soulrender.radius;
+        double vradius = Config.uniqueEffects.soulrender.radius / 2.0;
+        Box box = new Box(user.getX() + hradius, user.getY() + vradius, user.getZ() + hradius,
+                user.getX() - hradius, user.getY() - vradius, user.getZ() - hradius);
+        return world.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY).stream()
+                .anyMatch(entity -> entity instanceof LivingEntity le
+                        && HelperMethods.checkAbilityTarget(le, user)
+                        && le.hasStatusEffect(StatusEffects.SLOWNESS)
+                        && le.hasStatusEffect(StatusEffects.WEAKNESS));
+    }
+
+    private int consumeSoulrenderMarks(ServerWorld world, LivingEntity user) {
+        float healAmount = Config.uniqueEffects.soulrender.healMulti;
+        int healAmp = 0;
+        int consumed = 0;
+        double hradius = Config.uniqueEffects.soulrender.radius;
+        double vradius = Config.uniqueEffects.soulrender.radius / 2.0;
+        Box box = new Box(user.getX() + hradius, user.getY() + vradius, user.getZ() + hradius,
+                user.getX() - hradius, user.getY() - vradius, user.getZ() - hradius);
+
+        for (Entity entity : world.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY)) {
+            if ((entity instanceof LivingEntity le) && HelperMethods.checkAbilityTarget(le, user)) {
+                StatusEffectInstance slowness = le.getStatusEffect(StatusEffects.SLOWNESS);
+                StatusEffectInstance weakness = le.getStatusEffect(StatusEffects.WEAKNESS);
+                if (slowness == null || weakness == null) {
+                    continue;
+                }
+
+                healAmp += slowness.getAmplifier();
+                float scaling = HelperMethods.commonSpellAttributeScaling(Config.uniqueEffects.soulrender.spellScaling, entity, "soul");
+                float multiplier = scaling > 0f ? scaling : Config.uniqueEffects.soulrender.damageMulti;
+                SoulrenderMarkVisualManager.consumeMark(world, le, user);
+                le.damage(user.getDamageSources().indirectMagic(user, user), slowness.getAmplifier() * multiplier);
+                le.removeStatusEffect(StatusEffects.WEAKNESS);
+                le.removeStatusEffect(StatusEffects.SLOWNESS);
+                world.playSoundFromEntity(null, entity, SoundRegistry.DARK_SWORD_SPELL.get(),
+                        entity.getSoundCategory(), 0.1f, 2f);
+                consumed++;
+            }
+        }
+        if (healAmp > 0) {
+            float heal = (float) healAmp * healAmount;
+            if (heal < 1f) heal = 1f;
+            else if (heal > 6f) heal = 6f;
+            user.heal(heal);
+        }
+        return consumed;
     }
 
     @Override

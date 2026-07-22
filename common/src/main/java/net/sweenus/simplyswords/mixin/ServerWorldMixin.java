@@ -61,7 +61,11 @@ public abstract class ServerWorldMixin {
         if (FaultlineSunderManager.hasActive(world)) {
             FaultlineSunderManager.tick(world);
         }
+        if (LivingEntityAbilityMovementManager.hasActive(world)) {
+            LivingEntityAbilityMovementManager.tick(world);
+        }
         RevivalCandleVisualManager.tickWorld(world);
         SoulkeeperLanternManager.tickWorld(world);
+        WeaponAbilityCooldownManager.tick(world);
     }
 }

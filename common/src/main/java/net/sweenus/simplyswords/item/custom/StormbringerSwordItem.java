@@ -4,6 +4,8 @@ import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
@@ -15,12 +17,14 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.UseAction;
 import net.minecraft.world.World;
+import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.item.component.ParryComponent;
+import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
 import net.sweenus.simplyswords.registry.ComponentTypeRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -33,7 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-public class StormbringerSwordItem extends UniqueSwordItem {
+public class StormbringerSwordItem extends UniqueSwordItem implements UniqueWeaponActiveAbility {
 
     private static final ThreadLocal<Boolean> SUPPRESS_STORMBRINGER_CHAIN = ThreadLocal.withInitial(() -> false);
     private static final Map<UUID, Long> LAST_CHAIN_TICK = new HashMap<>();
@@ -112,6 +116,24 @@ public class StormbringerSwordItem extends UniqueSwordItem {
         if (!world.isClient && user instanceof ServerPlayerEntity serverPlayer) {
             StormbringerParryManager.finishUse(serverPlayer, stack);
         }
+    }
+
+    @Override
+    public boolean activate(WeaponAbilityContext context) {
+        LivingEntity actor = context.actor();
+        ItemStack stack = context.stack();
+        actor.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE,
+                Math.max(1, Config.uniqueEffects.stormbringer.blockDuration), 5), actor);
+        ParryComponent parryComponent = stack.getOrDefault(ComponentTypeRegistry.PARRY.get(), ParryComponent.DEFAULT)
+                .gainBlockedStormCharges(Config.uniqueEffects.stormbringer.stormChargesPerBlock, Config.uniqueEffects.stormbringer.maxStormCharges);
+        stack.set(ComponentTypeRegistry.PARRY.get(), parryComponent);
+        context.world().spawnParticles(ParticleTypes.ELECTRIC_SPARK, actor.getX(), actor.getBodyY(0.5), actor.getZ(), 18, 0.35, 0.38, 0.35, 0.06);
+        return true;
+    }
+
+    @Override
+    public int getActivationCooldownTicks(ItemStack stack, WeaponAbilityContext context) {
+        return Config.uniqueEffects.stormbringer.cooldown;
     }
 
     @Override

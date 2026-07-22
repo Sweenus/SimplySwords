@@ -19,6 +19,7 @@ import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.UseAction;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
+import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
@@ -26,6 +27,7 @@ import net.sweenus.simplyswords.config.settings.TooltipSettings;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.item.component.StoredChargeComponent;
 import net.sweenus.simplyswords.item.interfaces.TwoHandedWeapon;
+import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
 import net.sweenus.simplyswords.registry.ComponentTypeRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
@@ -35,7 +37,7 @@ import net.sweenus.simplyswords.util.Styles;
 
 import java.util.List;
 
-public class HearthflameSwordItem extends UniqueSwordItem implements TwoHandedWeapon {
+public class HearthflameSwordItem extends UniqueSwordItem implements TwoHandedWeapon, UniqueWeaponActiveAbility {
     public HearthflameSwordItem(ToolMaterial toolMaterial, Settings settings) {
         super(toolMaterial, settings);
     }
@@ -142,6 +144,33 @@ public class HearthflameSwordItem extends UniqueSwordItem implements TwoHandedWe
                 }
             }
         }
+    }
+
+    @Override
+    public boolean activate(WeaponAbilityContext context) {
+        LivingEntity actor = context.actor();
+        LivingEntity target = context.target();
+        if (target == null || !HelperMethods.checkAbilityTarget(target, actor)) {
+            return false;
+        }
+        ItemStack stack = context.stack();
+        int chargePower = Math.max(4, stack.getOrDefault(ComponentTypeRegistry.STORED_CHARGE.get(), StoredChargeComponent.DEFAULT).charge());
+        float abilityDamage = HelperMethods.spellScaledDamage("fire", actor, Config.uniqueEffects.hearthflame.spellScaling, Config.uniqueEffects.hearthflame.damage);
+        actor.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, 40, 3), actor);
+        target.damage(actor.getDamageSources().indirectMagic(actor, actor), abilityDamage * (chargePower * 0.3f));
+        target.setOnFireFor(6);
+        target.addStatusEffect(new StatusEffectInstance(StatusEffects.LEVITATION, 10, 1), actor);
+        target.setVelocity(target.getX() - actor.getX(), 0.5, target.getZ() - actor.getZ());
+        context.world().playSoundFromEntity(null, target, SoundRegistry.ELEMENTAL_BOW_POISON_ATTACK_01.get(),
+                target.getSoundCategory(), 0.2f, 0.8f);
+        HelperMethods.spawnOrbitParticles(context.world(), target.getPos(), ParticleTypes.LAVA, Config.uniqueEffects.hearthflame.radius, 20);
+        stack.set(ComponentTypeRegistry.STORED_CHARGE.get(), StoredChargeComponent.DEFAULT);
+        return true;
+    }
+
+    @Override
+    public int getActivationCooldownTicks(ItemStack stack, WeaponAbilityContext context) {
+        return Config.uniqueEffects.hearthflame.cooldown;
     }
 
     @Override

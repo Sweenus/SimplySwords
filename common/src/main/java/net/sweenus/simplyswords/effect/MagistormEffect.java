@@ -44,14 +44,19 @@ public class MagistormEffect extends HighOrbitingEffect {
             float damage = Math.max(Config.uniqueEffects.magiscythe.damage, HelperMethods.commonSpellAttributeScaling(spellScalingModifier, livingEntity, "arcane"));
 
             DamageSource damageSource =  livingEntity.getDamageSources().indirectMagic(livingEntity, livingEntity);
-            if (livingEntity.age % frequency == 0 && livingEntity instanceof  PlayerEntity player) {
+            if (livingEntity.age % frequency == 0) {
                 Box box = new Box(x - radius, y - 1, z - radius, x + radius, y + 1, z + radius);
                 List<Entity> nearbyEntities = world.getOtherEntities(livingEntity, box, EntityPredicates.VALID_LIVING_ENTITY);
 
-                if (!nearbyEntities.isEmpty() && player.getMainHandStack().getItem() instanceof MagiscytheSwordItem) {
-                    Entity randomEntity = nearbyEntities.get(new Random().nextInt(nearbyEntities.size()));
-                    if (randomEntity instanceof LivingEntity target && HelperMethods.checkFriendlyFire(target, player)) {
-                        if (target instanceof PlayerEntity)
+                if (!nearbyEntities.isEmpty() && livingEntity.getMainHandStack().getItem() instanceof MagiscytheSwordItem) {
+                    List<LivingEntity> validTargets = nearbyEntities.stream()
+                            .filter(entity -> entity instanceof LivingEntity)
+                            .map(entity -> (LivingEntity) entity)
+                            .filter(target -> HelperMethods.checkAbilityTarget(target, livingEntity))
+                            .toList();
+                    if (!validTargets.isEmpty()) {
+                        LivingEntity target = validTargets.get(livingEntity.getRandom().nextInt(validTargets.size()));
+                        if (target instanceof PlayerEntity && livingEntity instanceof PlayerEntity player)
                             damageSource = livingEntity.getDamageSources().playerAttack(player);
                         target.timeUntilRegen = 0;
                         HelperMethods.applyDamageWithoutKnockback(target, damageSource, damage);
@@ -59,8 +64,8 @@ public class MagistormEffect extends HighOrbitingEffect {
                         HelperMethods.spawnRainingParticles(world, ParticleTypes.ENCHANT, target, 20, yOffset);
                         HelperMethods.spawnRainingParticles(world, ParticleTypes.GLOW, target, 4, yOffset);
                         HelperMethods.spawnOrbitParticles(world, target.getPos(), ParticleTypes.GLOW, 0.5, 6);
-                        player.getWorld().playSoundFromEntity(null, player, SoundRegistry.ELEMENTAL_BOW_HOLY_SHOOT_IMPACT_03.get(),
-                                SoundCategory.PLAYERS, 0.1f, 1.0f + (player.getRandom().nextFloat()));
+                        livingEntity.getWorld().playSoundFromEntity(null, livingEntity, SoundRegistry.ELEMENTAL_BOW_HOLY_SHOOT_IMPACT_03.get(),
+                                SoundCategory.PLAYERS, 0.1f, 1.0f + (livingEntity.getRandom().nextFloat()));
 
                         if (new Random().nextInt(100) < 5)
                             HelperMethods.incrementStatusEffect(livingEntity, EffectRegistry.getReference(EffectRegistry.MAGISTORM), (int) duration, 1, 10);

@@ -13,17 +13,20 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
+import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.item.interfaces.TwoHandedWeapon;
+import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -32,7 +35,7 @@ import net.sweenus.simplyswords.world.ArcanethystAssaultManager;
 
 import java.util.List;
 
-public class ArcanethystSwordItem extends UniqueSwordItem implements TwoHandedWeapon {
+public class ArcanethystSwordItem extends UniqueSwordItem implements TwoHandedWeapon, UniqueWeaponActiveAbility {
     public ArcanethystSwordItem(ToolMaterial toolMaterial, Settings settings) {
         super(toolMaterial, settings);
     }
@@ -57,13 +60,31 @@ public class ArcanethystSwordItem extends UniqueSwordItem implements TwoHandedWe
             return TypedActionResult.fail(itemStack);
         }
         if (world instanceof ServerWorld serverWorld) {
-            int radius = Config.uniqueEffects.arcanethyst.radius;
-            float abilityDamage = HelperMethods.spellScaledDamage("arcane", user, Config.uniqueEffects.arcanethyst.spellScaling, Config.uniqueEffects.arcanethyst.damage);
-            ArcanethystAssaultManager.start(serverWorld, user, radius, abilityDamage);
+            activateArcanethyst(serverWorld, user);
             user.getItemCooldownManager().set(itemStack.getItem(), Config.uniqueEffects.arcanethyst.cooldown);
         }
         user.swingHand(hand);
         return TypedActionResult.success(itemStack, world.isClient());
+    }
+
+    @Override
+    public boolean activate(WeaponAbilityContext context) {
+        if (!canActivate(context)) {
+            return false;
+        }
+        activateArcanethyst(context.world(), context.actor());
+        return true;
+    }
+
+    @Override
+    public int getActivationCooldownTicks(ItemStack stack, WeaponAbilityContext context) {
+        return Config.uniqueEffects.arcanethyst.cooldown;
+    }
+
+    private static void activateArcanethyst(ServerWorld serverWorld, LivingEntity actor) {
+        int radius = Config.uniqueEffects.arcanethyst.radius;
+        float abilityDamage = HelperMethods.spellScaledDamage("arcane", actor, Config.uniqueEffects.arcanethyst.spellScaling, Config.uniqueEffects.arcanethyst.damage);
+        ArcanethystAssaultManager.start(serverWorld, actor, radius, abilityDamage);
     }
 
     @Override

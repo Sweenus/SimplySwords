@@ -28,6 +28,7 @@ public class SimplySwordsBeeEntity extends BeeEntity implements Tameable {
     private long swarmExpiryTick;
     private long swarmNextStingTick;
     private long swarmNextDiveTick;
+    private UUID swarmAnchorUuid;
     private UUID swarmPassTargetUuid;
     private Vec3d swarmPassStartPos;
     private Vec3d swarmPassExitPos;
@@ -184,6 +185,15 @@ public class SimplySwordsBeeEntity extends BeeEntity implements Tameable {
     }
 
     @Nullable
+    public UUID getSwarmAnchorUuid() {
+        return swarmAnchorUuid;
+    }
+
+    public void setSwarmAnchorUuid(@Nullable UUID swarmAnchorUuid) {
+        this.swarmAnchorUuid = swarmAnchorUuid;
+    }
+
+    @Nullable
     public UUID getSwarmPassTargetUuid() {
         return swarmPassTargetUuid;
     }
@@ -263,6 +273,9 @@ public class SimplySwordsBeeEntity extends BeeEntity implements Tameable {
         this.swarmExpiryTick = nbt.getLong("swarm_expiry_tick");
         this.swarmNextStingTick = nbt.getLong("swarm_next_sting_tick");
         this.swarmNextDiveTick = nbt.getLong("swarm_next_dive_tick");
+        if (nbt.containsUuid("swarm_anchor_uuid")) {
+            this.swarmAnchorUuid = nbt.getUuid("swarm_anchor_uuid");
+        }
         if (nbt.containsUuid("swarm_pass_target_uuid")) {
             this.swarmPassTargetUuid = nbt.getUuid("swarm_pass_target_uuid");
         }
@@ -308,6 +321,9 @@ public class SimplySwordsBeeEntity extends BeeEntity implements Tameable {
         nbt.putLong("swarm_expiry_tick", this.swarmExpiryTick);
         nbt.putLong("swarm_next_sting_tick", this.swarmNextStingTick);
         nbt.putLong("swarm_next_dive_tick", this.swarmNextDiveTick);
+        if (this.swarmAnchorUuid != null) {
+            nbt.putUuid("swarm_anchor_uuid", this.swarmAnchorUuid);
+        }
         if (this.swarmPassTargetUuid != null) {
             nbt.putUuid("swarm_pass_target_uuid", this.swarmPassTargetUuid);
         }

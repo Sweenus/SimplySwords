@@ -15,20 +15,24 @@ import net.minecraft.particle.ParticleTypes;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
 import net.sweenus.simplyswords.entity.LivyatanEntity;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
+import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
+import net.sweenus.simplyswords.world.LivingEntityAbilityMovementManager;
 
 import java.util.List;
 
-public class LivyatanSwordItem extends UniqueSwordItem {
+public class LivyatanSwordItem extends UniqueSwordItem implements UniqueWeaponActiveAbility {
     public LivyatanSwordItem(ToolMaterial toolMaterial, Settings settings) {
         super(toolMaterial, settings);
     }
@@ -72,6 +76,32 @@ public class LivyatanSwordItem extends UniqueSwordItem {
 
         user.getItemCooldownManager().set(this, 1);
         return TypedActionResult.success(itemStack, world.isClient());
+    }
+
+    @Override
+    public boolean activate(WeaponAbilityContext context) {
+        if (context.target() == null || !HelperMethods.checkAbilityTarget(context.target(), context.actor())) {
+            return false;
+        }
+        float abilityDamage = HelperMethods.spellScaledDamage("frost", context.actor(), Config.uniqueEffects.livyatan.spellScaling, Config.uniqueEffects.livyatan.damage);
+        LivyatanEntity livyatanEntity = new LivyatanEntity(context.world(), context.actor(), context.stack().copy());
+        Vec3d direction = LivingEntityAbilityMovementManager.getLobbedTargetDirection(context.actor(), context.target());
+        livyatanEntity.setVelocity(direction.x, direction.y, direction.z, 1.65F, 1.0F);
+        livyatanEntity.setYaw(context.actor().getYaw());
+        livyatanEntity.setPitch(context.actor().getPitch());
+        livyatanEntity.primaryBaseDamage = abilityDamage;
+        livyatanEntity.slownessDuration = Config.uniqueEffects.livyatan.duration;
+        livyatanEntity.primaryReturnDamage = Config.uniqueEffects.livyatan.returnDamage;
+        livyatanEntity.primaryReturnDamageRadius = Config.uniqueEffects.livyatan.radius;
+        livyatanEntity.setPos(context.actor().getX(), context.actor().getEyeY() - 0.5, context.actor().getZ());
+        livyatanEntity.markNonReturning(Config.uniqueEffects.livyatan.duration + 80);
+        context.world().spawnEntity(livyatanEntity);
+        return true;
+    }
+
+    @Override
+    public int getActivationCooldownTicks(ItemStack stack, WeaponAbilityContext context) {
+        return 20;
     }
 
     @Override

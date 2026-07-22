@@ -17,11 +17,13 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
+import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.item.interfaces.TwoHandedWeapon;
+import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -30,7 +32,7 @@ import net.sweenus.simplyswords.world.BrimstoneClaymoreAbilityManager;
 
 import java.util.List;
 
-public class BrimstoneClaymoreItem extends UniqueSwordItem implements TwoHandedWeapon {
+public class BrimstoneClaymoreItem extends UniqueSwordItem implements TwoHandedWeapon, UniqueWeaponActiveAbility {
     public BrimstoneClaymoreItem(ToolMaterial toolMaterial, Settings settings) {
         super(toolMaterial, settings);
     }
@@ -44,14 +46,34 @@ public class BrimstoneClaymoreItem extends UniqueSwordItem implements TwoHandedW
 
         if (!world.isClient() && world instanceof ServerWorld serverWorld && user instanceof ServerPlayerEntity serverPlayer) {
             LivingEntity target = StealSwordItem.findLenientTarget(user, Config.uniqueEffects.brimstone_claymore.range);
-            if (target == null) {
+            if (target == null || !activateBrimstone(serverWorld, serverPlayer, target)) {
                 return TypedActionResult.fail(itemStack);
             }
-            BrimstoneClaymoreAbilityManager.start(serverWorld, serverPlayer, target);
             serverPlayer.getItemCooldownManager().set(itemStack.getItem(), Config.uniqueEffects.brimstone_claymore.cooldown);
         }
         user.swingHand(hand);
         return TypedActionResult.success(itemStack, world.isClient());
+    }
+
+    @Override
+    public boolean activate(WeaponAbilityContext context) {
+        if (!canActivate(context)) {
+            return false;
+        }
+        return activateBrimstone(context.world(), context.actor(), context.target());
+    }
+
+    @Override
+    public int getActivationCooldownTicks(ItemStack stack, WeaponAbilityContext context) {
+        return Config.uniqueEffects.brimstone_claymore.cooldown;
+    }
+
+    private static boolean activateBrimstone(ServerWorld world, LivingEntity owner, LivingEntity target) {
+        if (target == null || !target.isAlive() || !HelperMethods.checkAbilityTarget(target, owner)) {
+            return false;
+        }
+        BrimstoneClaymoreAbilityManager.start(world, owner, target);
+        return true;
     }
 
     @Override
@@ -67,7 +89,7 @@ public class BrimstoneClaymoreItem extends UniqueSwordItem implements TwoHandedW
                 DamageSource damageSource = player.getDamageSources().indirectMagic(player, player);
 
                 for (LivingEntity livingEntity : nearbyEntities) {
-                    if (HelperMethods.checkFriendlyFire(livingEntity, attacker)) {
+                    if (HelperMethods.checkAbilityTarget(livingEntity, attacker)) {
                         HelperMethods.spawnWaistHeightParticles(world, ParticleTypes.LAVA, attacker, target, 3);
                         HelperMethods.spawnOrbitParticles(world, livingEntity.getPos(), ParticleTypes.LAVA, 1, 3);
                         HelperMethods.spawnOrbitParticles(world, livingEntity.getPos(), ParticleTypes.CAMPFIRE_SIGNAL_SMOKE, 2, 6);

@@ -30,6 +30,8 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
+import net.sweenus.simplyswords.api.WeaponAbilityActivationSource;
+import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.util.HelperMethods;
 import org.jetbrains.annotations.Nullable;
@@ -49,6 +51,8 @@ public class SimplySwordsSkeletonMinionEntity extends SkeletonEntity implements 
     private long expiresAtTick;
     private float weaponDamage;
     private int sourceWeaponSlot = -1;
+    private long nextActiveAbilityCheckTick;
+    private long activeAbilityCooldownUntilTick;
 
     public SimplySwordsSkeletonMinionEntity(EntityType<? extends SkeletonEntity> entityType, World world) {
         super(entityType, world);
@@ -110,6 +114,7 @@ public class SimplySwordsSkeletonMinionEntity extends SkeletonEntity implements 
         }
 
         followOwner(owner);
+        tryActivateWeaponAbility(world, owner);
         if (world.getTime() % 12L == 0L) {
             world.spawnParticles(ParticleTypes.SOUL, this.getX(), this.getBodyY(0.65), this.getZ(), 2, 0.18, 0.22, 0.18, 0.01);
         }
@@ -188,6 +193,41 @@ public class SimplySwordsSkeletonMinionEntity extends SkeletonEntity implements 
         }
     }
 
+    private void tryActivateWeaponAbility(ServerWorld world, ServerPlayerEntity owner) {
+        LivingEntity target = this.getTarget();
+        int interval = Math.max(1, Config.gemPowers.necromanticArsenal.activeAbilityCheckInterval);
+        long now = world.getTime();
+        if (this.nextActiveAbilityCheckTick <= 0L) {
+            this.nextActiveAbilityCheckTick = now + Math.max(0, Config.gemPowers.necromanticArsenal.activeAbilityInitialDelay);
+            return;
+        }
+        if (now < this.nextActiveAbilityCheckTick) {
+            return;
+        }
+        this.nextActiveAbilityCheckTick = now + interval;
+        if (now < this.activeAbilityCooldownUntilTick || !isValidMinionTarget(target)) {
+            return;
+        }
+
+        ItemStack visualStack = this.getMainHandStack();
+        ItemStack effectStack = resolveEffectWeaponStack(owner, visualStack);
+        WeaponAbilityContext context = WeaponAbilityContext.of(world, effectStack, this, owner, target, Hand.MAIN_HAND, WeaponAbilityActivationSource.MINION);
+        if (!SimplySwordsAPI.canActivateWeaponAbility(context)) {
+            return;
+        }
+        int chance = Math.clamp(Config.gemPowers.necromanticArsenal.activeAbilityChance, 0, 100);
+        if (chance <= 0 || this.random.nextInt(100) >= chance) {
+            return;
+        }
+
+        if (SimplySwordsAPI.tryActivateWeaponAbility(context)) {
+            this.swingHand(Hand.MAIN_HAND);
+            this.activeAbilityCooldownUntilTick = now + Math.max(1, SimplySwordsAPI.getWeaponAbilityCooldownTicks(context));
+            Vec3d pos = this.getPos().add(0.0, this.getHeight() * 0.7, 0.0);
+            world.spawnParticles(ParticleTypes.SOUL, pos.x, pos.y, pos.z, 8, 0.25, 0.25, 0.25, 0.035);
+        }
+    }
+
     private ItemStack resolveEffectWeaponStack(@Nullable ServerPlayerEntity owner, ItemStack visualStack) {
         if (owner == null || visualStack == null || visualStack.isEmpty() || this.sourceWeaponSlot < 0
                 || this.sourceWeaponSlot >= owner.getInventory().size()) {
@@ -252,6 +292,8 @@ public class SimplySwordsSkeletonMinionEntity extends SkeletonEntity implements 
         this.expiresAtTick = nbt.getLong("expires_at_tick");
         this.weaponDamage = nbt.getFloat("weapon_damage");
         this.sourceWeaponSlot = nbt.contains("source_weapon_slot") ? nbt.getInt("source_weapon_slot") : -1;
+        this.nextActiveAbilityCheckTick = nbt.getLong("next_active_ability_check_tick");
+        this.activeAbilityCooldownUntilTick = nbt.getLong("active_ability_cooldown_until_tick");
     }
 
     @Override
@@ -263,5 +305,7 @@ public class SimplySwordsSkeletonMinionEntity extends SkeletonEntity implements 
         nbt.putLong("expires_at_tick", this.expiresAtTick);
         nbt.putFloat("weapon_damage", this.weaponDamage);
         nbt.putInt("source_weapon_slot", this.sourceWeaponSlot);
+        nbt.putLong("next_active_ability_check_tick", this.nextActiveAbilityCheckTick);
+        nbt.putLong("active_ability_cooldown_until_tick", this.activeAbilityCooldownUntilTick);
     }
 }

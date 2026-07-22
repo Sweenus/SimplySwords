@@ -37,12 +37,20 @@ public final class SoulkeeperLanternManager {
     }
 
     public static void tickPlayerFromItem(ServerPlayerEntity player, ItemStack stack) {
-        if (stack == null || stack.isEmpty() || !stack.isOf(ItemsRegistry.SOULKEEPER.get()) || !player.getMainHandStack().equals(stack)) {
-            discardActive(player.getServerWorld(), player.getUuid());
-            ACTIVE_LANTERNS.remove(player.getUuid());
+        tickFromItem(player, stack);
+    }
+
+    public static void tickFromItem(LivingEntity owner, ItemStack stack) {
+        if (owner == null || stack == null || stack.isEmpty() || !stack.isOf(ItemsRegistry.SOULKEEPER.get()) || !owner.getMainHandStack().equals(stack)) {
+            if (owner != null && owner.getWorld() instanceof ServerWorld world) {
+                discardActive(world, owner.getUuid());
+                ACTIVE_LANTERNS.remove(owner.getUuid());
+            }
             return;
         }
-        tickActivePlayer(player, stack);
+        if (owner.getWorld() instanceof ServerWorld world) {
+            tickActive(world, owner, stack);
+        }
     }
 
     public static void tickPlayer(ServerPlayerEntity player) {
@@ -62,45 +70,55 @@ public final class SoulkeeperLanternManager {
                 continue;
             }
             UUID ownerId = visual.getOwnerUuid();
-            ServerPlayerEntity owner = ownerId == null ? null : world.getServer().getPlayerManager().getPlayer(ownerId);
             ActiveLanterns active = ownerId == null ? null : ACTIVE_LANTERNS.get(ownerId);
-            if (owner == null || !owner.isAlive() || !isHoldingSoulkeeper(owner)) {
+            LivingEntity owner = resolveOwner(world, ownerId);
+            if (active == null || owner == null || !owner.isAlive() || !isHoldingSoulkeeper(owner)) {
                 visual.discard();
                 if (ownerId != null) {
                     ACTIVE_LANTERNS.remove(ownerId);
                 }
                 continue;
             }
-            if (active == null || !visual.getUuid().equals(active.visualId)) {
+            if (!visual.getUuid().equals(active.visualId)) {
                 visual.discard();
             }
         }
     }
 
     public static void onSoulkeeperHit(LivingEntity attacker) {
-        if (attacker instanceof ServerPlayerEntity player && isHoldingSoulkeeper(player)) {
-            increaseSpeed(player);
+        if (isHoldingSoulkeeper(attacker)) {
+            increaseSpeed(attacker);
         }
     }
 
     public static void activate(ServerPlayerEntity player, ItemStack stack) {
+        activate((LivingEntity) player, stack);
+    }
+
+    public static void activate(LivingEntity player, ItemStack stack) {
         if (player == null || stack == null || stack.isEmpty() || !stack.isOf(ItemsRegistry.SOULKEEPER.get()) || !isHoldingSoulkeeper(player)) {
             return;
         }
 
         ActiveLanterns active = ACTIVE_LANTERNS.computeIfAbsent(player.getUuid(), ignored -> new ActiveLanterns());
-        active.extraLanternsUntilTick = player.getServerWorld().getTime() + Config.uniqueEffects.soulkeeper.activeExtraLanternDuration;
+        if (!(player.getWorld() instanceof ServerWorld world)) {
+            return;
+        }
+        active.extraLanternsUntilTick = world.getTime() + Config.uniqueEffects.soulkeeper.activeExtraLanternDuration;
         increaseSpeed(active);
 
-        ServerWorld world = player.getServerWorld();
         Vec3d pos = player.getPos().add(0.0, 1.0, 0.0);
         world.spawnParticles(ParticleTypes.SOUL_FIRE_FLAME, pos.x, pos.y, pos.z, 18, 0.55, 0.35, 0.55, 0.03);
         world.spawnParticles(ParticleTypes.SCULK_SOUL, pos.x, pos.y, pos.z, 8, 0.45, 0.3, 0.45, 0.02);
         world.playSound(null, player.getBlockPos(), SoundRegistry.MAGIC_SWORD_SPELL_03.get(), SoundCategory.PLAYERS, 0.75F, 0.8F + player.getRandom().nextFloat() * 0.2F);
+        tickActive(world, player, stack);
     }
 
     private static void tickActivePlayer(ServerPlayerEntity player, ItemStack stack) {
-        ServerWorld world = player.getServerWorld();
+        tickActive(player.getServerWorld(), player, stack);
+    }
+
+    private static void tickActive(ServerWorld world, LivingEntity player, ItemStack stack) {
         UUID ownerId = player.getUuid();
         ActiveLanterns active = ACTIVE_LANTERNS.computeIfAbsent(ownerId, ignored -> new ActiveLanterns());
         active.tick(world);
@@ -127,7 +145,7 @@ public final class SoulkeeperLanternManager {
         damageCollidingTargets(world, player, stack, active, lanternCount);
     }
 
-    private static void damageCollidingTargets(ServerWorld world, ServerPlayerEntity player, ItemStack stack, ActiveLanterns active, int lanternCount) {
+    private static void damageCollidingTargets(ServerWorld world, LivingEntity player, ItemStack stack, ActiveLanterns active, int lanternCount) {
         float damage = getLanternDamage(player, stack);
         if (damage <= 0.0F || lanternCount <= 0) {
             return;
@@ -139,7 +157,7 @@ public final class SoulkeeperLanternManager {
         Set<UUID> currentlyColliding = new HashSet<>();
 
         for (LivingEntity target : world.getEntitiesByClass(LivingEntity.class, searchBox, target -> target != player && target.isAlive())) {
-            if (!HelperMethods.checkFriendlyFire(target, player)) {
+            if (!HelperMethods.checkAbilityTarget(target, player)) {
                 continue;
             }
 
@@ -163,15 +181,15 @@ public final class SoulkeeperLanternManager {
         active.collidingTargets.addAll(currentlyColliding);
     }
 
-    private static float getLanternDamage(ServerPlayerEntity player, ItemStack stack) {
+    private static float getLanternDamage(LivingEntity player, ItemStack stack) {
         double attackDamage = HelperMethods.getEntityAttackDamage(player);
         if (attackDamage <= 0.0) {
-            attackDamage = Math.max(1.0, 1.0 + HelperMethods.getAttackFromSlot(player, stack, Hand.MAIN_HAND)[0]);
+            attackDamage = Math.max(1.0, 1.0 + HelperMethods.getAttackFromStack(stack, net.minecraft.component.type.AttributeModifierSlot.MAINHAND));
         }
         return (float) (attackDamage * Config.uniqueEffects.soulkeeper.lanternDamageMultiplier);
     }
 
-    private static boolean damageTarget(ServerWorld world, ServerPlayerEntity player, LivingEntity target, float damage) {
+    private static boolean damageTarget(ServerWorld world, LivingEntity player, LivingEntity target, float damage) {
         target.timeUntilRegen = 0;
         boolean[] damaged = {false};
         WeaponImplicitRegistry.runSuppressed(() -> damaged[0] = target.damage(player.getDamageSources().indirectMagic(player, player), damage));
@@ -212,7 +230,7 @@ public final class SoulkeeperLanternManager {
         return 0.0;
     }
 
-    private static void increaseSpeed(ServerPlayerEntity player) {
+    private static void increaseSpeed(LivingEntity player) {
         ActiveLanterns active = ACTIVE_LANTERNS.computeIfAbsent(player.getUuid(), ignored -> new ActiveLanterns());
         increaseSpeed(active);
     }
@@ -227,8 +245,19 @@ public final class SoulkeeperLanternManager {
         world.spawnParticles(ParticleTypes.SOUL, pos.x, pos.y, pos.z, 4, 0.18, 0.18, 0.18, 0.025);
     }
 
-    private static boolean isHoldingSoulkeeper(PlayerEntity player) {
+    private static boolean isHoldingSoulkeeper(LivingEntity player) {
         return player.getMainHandStack().isOf(ItemsRegistry.SOULKEEPER.get());
+    }
+
+    private static LivingEntity resolveOwner(ServerWorld world, UUID ownerId) {
+        if (ownerId == null) {
+            return null;
+        }
+        if (world.getEntity(ownerId) instanceof LivingEntity owner) {
+            return owner;
+        }
+        ServerPlayerEntity player = world.getServer().getPlayerManager().getPlayer(ownerId);
+        return player != null ? player : null;
     }
 
     private static SoulkeeperLanternVisualEntity resolveTracked(ServerWorld world, UUID visualId, UUID ownerId) {

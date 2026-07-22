@@ -23,8 +23,10 @@ import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
+import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.item.component.MoltenParticleComponent;
+import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
 import net.sweenus.simplyswords.registry.ComponentTypeRegistry;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
@@ -34,7 +36,7 @@ import net.sweenus.simplyswords.util.Styles;
 
 import java.util.List;
 
-public class MoltenEdgeSwordItem extends UniqueSwordItem {
+public class MoltenEdgeSwordItem extends UniqueSwordItem implements UniqueWeaponActiveAbility {
     public MoltenEdgeSwordItem(ToolMaterial toolMaterial, Settings settings) {
         super(toolMaterial, settings);
     }
@@ -67,15 +69,43 @@ public class MoltenEdgeSwordItem extends UniqueSwordItem {
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         if (user.getWorld().isClient()) return super.use(world, user, hand);
 
+        activateMoltenEdge(world, user, user.getStackInHand(hand));
+        user.getItemCooldownManager().set(this, Config.uniqueEffects.molten_edge.cooldown);
+
+        return super.use(world, user, hand);
+    }
+
+    @Override
+    public boolean canActivate(WeaponAbilityContext context) {
+        return context != null
+                && context.stack() != null
+                && !context.stack().isEmpty()
+                && context.world() != null
+                && context.actor() != null
+                && context.actor().isAlive()
+                && context.stack().getDamage() < context.stack().getMaxDamage() - 1;
+    }
+
+    @Override
+    public boolean activate(WeaponAbilityContext context) {
+        activateMoltenEdge(context.world(), context.actor(), context.stack());
+        return true;
+    }
+
+    @Override
+    public int getActivationCooldownTicks(ItemStack stack, WeaponAbilityContext context) {
+        return Config.uniqueEffects.molten_edge.cooldown;
+    }
+
+    private void activateMoltenEdge(World world, LivingEntity user, ItemStack stack) {
         double radius = Config.uniqueEffects.molten_edge.radius;
         double knockbackStrength = Config.uniqueEffects.molten_edge.knockbackStrength;
-        int abilityCooldown = Config.uniqueEffects.molten_edge.cooldown;
 
         int amp = 0;
         Box box = new Box(user.getX() + radius, user.getY() + radius, user.getZ() + radius,
                 user.getX() - radius, user.getY() - radius, user.getZ() - radius);
         for (Entity entity : world.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY)) {
-            if ((entity instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, user)) {
+            if ((entity instanceof LivingEntity le) && HelperMethods.checkAbilityTarget(le, user)) {
                 amp++;
                 le.setVelocity((le.getX() - user.getX()) / knockbackStrength, 0.6, (le.getZ() - user.getZ()) / knockbackStrength);
                 le.setOnFireFor(3);
@@ -86,12 +116,8 @@ public class MoltenEdgeSwordItem extends UniqueSwordItem {
         int duration = Config.uniqueEffects.molten_edge.duration * amp / 2;
         user.addStatusEffect(new StatusEffectInstance(EffectRegistry.getReference(EffectRegistry.ONSLAUGHT), duration, 0), user);
         user.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, duration, 3), user);
-        user.getItemCooldownManager().set(this, abilityCooldown);
 
-        ItemStack stack = user.getStackInHand(hand);
         stack.set(ComponentTypeRegistry.MOLTEN_PARTICLE.get(), new MoltenParticleComponent(ParticleTypes.LAVA, ParticleTypes.LAVA, ParticleTypes.LARGE_SMOKE));
-
-        return super.use(world, user, hand);
     }
 
     @Override

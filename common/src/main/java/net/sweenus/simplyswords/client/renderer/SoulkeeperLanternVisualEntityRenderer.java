@@ -8,7 +8,6 @@ import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
@@ -76,8 +75,7 @@ public class SoulkeeperLanternVisualEntityRenderer extends EntityRenderer<Soulke
     }
 
     private static Vec3d getRenderCenter(SoulkeeperLanternVisualEntity entity, float tickDelta) {
-        Entity ownerEntity = entity.getWorld().getEntityById(entity.getOwnerEntityId());
-        if (ownerEntity instanceof PlayerEntity owner) {
+        if (entity.getWorld().getEntityById(entity.getOwnerEntityId()) instanceof PlayerEntity owner) {
             return new Vec3d(
                     MathHelper.lerp(tickDelta, owner.prevX, owner.getX()),
                     MathHelper.lerp(tickDelta, owner.prevY, owner.getY()),

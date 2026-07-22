@@ -19,6 +19,7 @@ import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.ShadowstingAfterimageVisualEntity;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 
@@ -72,6 +73,36 @@ public final class ShadowstingShadowDanceManager {
                 SoundCategory.PLAYERS, 0.75F, 1.25F);
         spawnDepartureParticles(world, player.getPos().add(0.0, player.getHeight() * 0.5, 0.0));
         performStrike(world, player, dance, target);
+        return true;
+    }
+
+    public static boolean start(ServerWorld world, LivingEntity actor, LivingEntity target) {
+        if (world == null || actor == null || target == null || !actor.isAlive()
+                || !target.isAlive() || !HelperMethods.checkAbilityTarget(target, actor)) {
+            return false;
+        }
+
+        Vec3d previousPos = actor.getPos();
+        int strikes = Math.max(1, getActiveDurationTicks() / Math.max(1, getStrikeIntervalTicks()));
+        for (int i = 0; i < Math.min(6, strikes); i++) {
+            if (!target.isAlive() || !HelperMethods.checkAbilityTarget(target, actor)) {
+                break;
+            }
+            Vec3d strikePos = findStrikePosition(world, actor, target);
+            Vec3d lookTarget = target.getPos().add(0.0, Math.max(0.35, target.getHeight() * 0.55), 0.0);
+            spawnDepartureParticles(world, previousPos.add(0.0, actor.getHeight() * 0.5, 0.0));
+            performWeaponStrike(actor, target);
+            world.playSound(null, target.getX(), target.getY(), target.getZ(),
+                    SoundRegistry.DARK_SWORD_WHOOSH_01.get(),
+                    SoundCategory.PLAYERS, 0.45F, 1.45F + world.random.nextFloat() * 0.25F);
+            world.playSound(null, target.getX(), target.getY(), target.getZ(),
+                    SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP,
+                    SoundCategory.PLAYERS, 0.35F, 0.85F + world.random.nextFloat() * 0.2F);
+            spawnArrivalParticles(world, target, strikePos);
+            spawnTrail(world, previousPos.add(0.0, actor.getHeight() * 0.5, 0.0), lookTarget);
+            spawnShadowEcho(world, strikePos, lookTarget, actor.getHeight());
+            previousPos = strikePos;
+        }
         return true;
     }
 
@@ -305,6 +336,14 @@ public final class ShadowstingShadowDanceManager {
         }
     }
 
+    private static void performWeaponStrike(LivingEntity actor, LivingEntity target) {
+        if (actor == null || target == null || !actor.isAlive() || !target.isAlive() || !HelperMethods.checkAbilityTarget(target, actor)) {
+            return;
+        }
+        ItemStack stack = actor.getMainHandStack();
+        SimplySwordsAPI.applyEntityWeaponHit(stack, target, actor, (float) HelperMethods.getEntityAttackDamage(actor));
+    }
+
     private static LivingEntity findRandomTarget(ServerWorld world, ServerPlayerEntity player) {
         double radius = Config.uniqueEffects.shadowsting.strikeRadius;
         Box box = new Box(player.getX() - radius, player.getY() - radius, player.getZ() - radius,
@@ -340,9 +379,35 @@ public final class ShadowstingShadowDanceManager {
         return target.getPos().add(away.normalize().multiply(1.35));
     }
 
+    private static Vec3d findStrikePosition(ServerWorld world, LivingEntity actor, LivingEntity target) {
+        double baseAngle = world.random.nextDouble() * Math.PI * 2.0;
+        for (int i = 0; i < 12; i++) {
+            double angle = baseAngle + (Math.PI * 2.0 * i / 12.0);
+            Vec3d offset = new Vec3d(Math.cos(angle) * 1.35, 0.0, Math.sin(angle) * 1.35);
+            Vec3d candidate = target.getPos().add(offset);
+            candidate = new Vec3d(candidate.x, target.getY(), candidate.z);
+            if (isSafePosition(world, actor, candidate)) {
+                return candidate;
+            }
+        }
+        Vec3d away = actor.getPos().subtract(target.getPos());
+        if (away.horizontalLengthSquared() < 0.001) {
+            away = target.getRotationVec(1.0F).negate();
+        }
+        return target.getPos().add(away.normalize().multiply(1.35));
+    }
+
     private static boolean isSafePosition(ServerWorld world, ServerPlayerEntity player, Vec3d pos) {
         Box playerBox = player.getBoundingBox().offset(pos.subtract(player.getPos()));
         if (!world.isSpaceEmpty(player, playerBox)) {
+            return false;
+        }
+        return world.getBlockState(BlockPos.ofFloored(pos)).getFluidState().isEmpty();
+    }
+
+    private static boolean isSafePosition(ServerWorld world, LivingEntity actor, Vec3d pos) {
+        Box actorBox = actor.getBoundingBox().offset(pos.subtract(actor.getPos()));
+        if (!world.isSpaceEmpty(actor, actorBox)) {
             return false;
         }
         return world.getBlockState(BlockPos.ofFloored(pos)).getFluidState().isEmpty();

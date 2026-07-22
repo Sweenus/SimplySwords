@@ -10,24 +10,29 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.UseAction;
 import net.minecraft.world.World;
+import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
+import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.AbilityMethods;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
+import net.sweenus.simplyswords.world.LivingEntityAbilityMovementManager;
+import net.sweenus.simplyswords.world.WeaponAbilityCooldownManager;
 
 import java.util.List;
 
-public class StormsEdgeSwordItem extends UniqueSwordItem {
+public class StormsEdgeSwordItem extends UniqueSwordItem implements UniqueWeaponActiveAbility {
 
     public StormsEdgeSwordItem(ToolMaterial toolMaterial, Settings settings) {
         super(toolMaterial, settings);
@@ -45,8 +50,42 @@ public class StormsEdgeSwordItem extends UniqueSwordItem {
             player.getItemCooldownManager().set(this, 0);
             attacker.getWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_BLOCK_01.get(),
                     attacker.getSoundCategory(), 0.7f, 1f);
+        } else if (!attacker.getWorld().isClient()
+                && attacker.getRandom().nextInt(100) <= chargeChance
+                && attacker.getWorld() instanceof ServerWorld
+                && !(attacker instanceof PlayerEntity)) {
+            WeaponAbilityCooldownManager.clearCooldown(attacker, stack);
+            attacker.getWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_BLOCK_01.get(),
+                    attacker.getSoundCategory(), 0.7f, 1f);
         }
         return super.postHit(stack, target, attacker);
+    }
+
+    @Override
+    public boolean activate(WeaponAbilityContext context) {
+        LivingEntity actor = context.actor();
+        LivingEntity target = context.target();
+        if (target == null || !HelperMethods.checkAbilityTarget(target, actor)) {
+            return false;
+        }
+        LivingEntityAbilityMovementManager.dashTowardTargetWithImpact(context.world(), actor, target, 1.6, 6, 0.85, () -> {
+            if (!target.isAlive() || !HelperMethods.checkAbilityTarget(target, actor)) {
+                return;
+            }
+            context.world().spawnParticles(ParticleTypes.ELECTRIC_SPARK, target.getX(), target.getBodyY(0.5), target.getZ(), 10, 0.35, 0.35, 0.35, 0.08);
+            target.damage(actor.getDamageSources().indirectMagic(actor, actor), (float) Math.max(1.0, HelperMethods.getEntityAttackDamage(actor) * 0.5));
+        });
+        actor.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, 20, 5), actor);
+        actor.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, 80, 1), actor);
+        actor.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, 80, 1), actor);
+        context.world().playSoundFromEntity(null, actor, SoundRegistry.ELEMENTAL_BOW_THUNDER_SHOOT_FLYBY_03.get(),
+                actor.getSoundCategory(), 0.3f, 1.6f);
+        return true;
+    }
+
+    @Override
+    public int getActivationCooldownTicks(ItemStack stack, WeaponAbilityContext context) {
+        return Config.uniqueEffects.storms_edge.cooldown;
     }
 
     @Override

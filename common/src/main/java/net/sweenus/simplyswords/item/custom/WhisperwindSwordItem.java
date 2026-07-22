@@ -16,21 +16,24 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
+import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.item.interfaces.TwoHandedWeapon;
+import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
+import net.sweenus.simplyswords.world.LivingEntityAbilityMovementManager;
 import net.sweenus.simplyswords.world.WhisperwindVisualManager;
 
 import java.util.List;
 
-public class WhisperwindSwordItem extends UniqueSwordItem implements TwoHandedWeapon {
+public class WhisperwindSwordItem extends UniqueSwordItem implements TwoHandedWeapon, UniqueWeaponActiveAbility {
 
     public WhisperwindSwordItem(ToolMaterial toolMaterial, Settings settings) {
         super(toolMaterial, settings);
@@ -61,6 +64,24 @@ public class WhisperwindSwordItem extends UniqueSwordItem implements TwoHandedWe
         user.getItemCooldownManager().set(this.getDefaultStack().getItem(), Config.uniqueEffects.whisperwind.cooldown);
 
         return super.use(world, user, hand);
+    }
+
+    @Override
+    public boolean activate(WeaponAbilityContext context) {
+        if (context.target() == null || !HelperMethods.checkAbilityTarget(context.target(), context.actor())) {
+            return false;
+        }
+        LivingEntityAbilityMovementManager.dashTowardTarget(context.world(), context.actor(), context.target(),
+                Config.uniqueEffects.whisperwind.dashVelocity, 8);
+        WhisperwindVisualManager.scheduleTargetStrike(context.world(), context.actor(), context.target());
+        context.actor().addStatusEffect(new StatusEffectInstance(EffectRegistry.getReference(EffectRegistry.FATAL_FLICKER), 12));
+        context.actor().addStatusEffect(new StatusEffectInstance(StatusEffects.ABSORPTION, 100));
+        return true;
+    }
+
+    @Override
+    public int getActivationCooldownTicks(ItemStack stack, WeaponAbilityContext context) {
+        return Config.uniqueEffects.whisperwind.cooldown;
     }
 
     @Override

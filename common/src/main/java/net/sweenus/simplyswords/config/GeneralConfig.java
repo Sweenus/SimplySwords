@@ -26,6 +26,11 @@ public class GeneralConfig extends Config {
     public boolean enablePassiveParticles = true;
     public boolean enableModernFieldEffects = true;
     public boolean enableWeaponImplicits = true;
+    public boolean enableNonPlayerWeaponAbilityUse = true;
+    @ValidatedInt.Restrict(min = 1)
+    public int nonPlayerWeaponAbilityCheckInterval = 20;
+    @ValidatedInt.Restrict(min = 0, max = 100)
+    public int nonPlayerWeaponAbilityChance = 100;
     public boolean enableUniqueGemSockets = true;
     public boolean enableTooltipInfoButtons = true;
     public boolean tooltipInfoButtonsRequireInventoryScreen = true;

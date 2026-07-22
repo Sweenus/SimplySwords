@@ -51,7 +51,7 @@ public class SoulTetherEffect extends StatusEffect {
 
                 for (Entity otherEntity : world.getOtherEntities(livingEntity, box, EntityPredicates.VALID_LIVING_ENTITY)) {
                     if ((otherEntity instanceof LivingEntity le) &&
-                            HelperMethods.checkFriendlyFire(le, livingEntity)) {
+                            HelperMethods.checkAbilityTarget(le, livingEntity)) {
                         HelperMethods.damageThroughIframes(le, damageSource, Math.min(30, detonateDamage - detonateCount));
                         if (le.distanceTo(livingEntity) > 1)
                             le.setVelocity((livingEntity.getX() - le.getX()) / 8, (livingEntity.getY() - le.getY()) / 8, (livingEntity.getZ() - le.getZ()) / 8);

@@ -14,6 +14,7 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.decoration.ArmorStandEntity;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.passive.VillagerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileUtil;
@@ -132,6 +133,17 @@ public class HelperMethods {
                 return tameable.getOwner() != attackingEntity;
             }
             return true;
+        }
+        return true;
+    }
+
+    public static boolean checkAbilityTarget(LivingEntity livingEntity, LivingEntity attackingEntity) {
+        if (!checkFriendlyFire(livingEntity, attackingEntity)) {
+            return false;
+        }
+        if (attackingEntity instanceof MobEntity mob) {
+            LivingEntity activeTarget = mob.getTarget();
+            return activeTarget != null && activeTarget.isAlive() && livingEntity == activeTarget;
         }
         return true;
     }
@@ -495,6 +507,19 @@ public class HelperMethods {
         return new double[] {attackValue, attackSpeedValue};
     }
 
+    public static double getAttackFromStack(ItemStack stack, AttributeModifierSlot slot) {
+        double attackValue = 0;
+        if (stack != null && !stack.isEmpty()) {
+            AttributeModifiersComponent attributeModifiersComponent = stack.getOrDefault(DataComponentTypes.ATTRIBUTE_MODIFIERS, AttributeModifiersComponent.DEFAULT);
+            for (AttributeModifiersComponent.Entry entry : attributeModifiersComponent.modifiers()) {
+                if (entry.attribute() == EntityAttributes.GENERIC_ATTACK_DAMAGE && entry.slot() == slot) {
+                    attackValue += entry.modifier().value();
+                }
+            }
+        }
+        return attackValue;
+    }
+
     public static void applyDamageWithoutKnockback(LivingEntity target, DamageSource source, float amount) {
         EntityAttributeInstance knockbackResistance = target.getAttributeInstance(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE);
         double originalKnockbackResistance = 0;
@@ -536,6 +561,16 @@ public class HelperMethods {
         }
     }
 
+    public static void spawnDirectionalParticles(ServerWorld world, ParticleEffect particle, Entity entity, Vec3d direction, int count, double distance) {
+        Vec3d startPos = entity.getPos().add(0, entity.getHeight() / 2.0, 0);
+        Vec3d normalizedDirection = direction.normalize();
+        for (int i = 0; i < count; i++) {
+            double lerpFactor = count <= 1 ? 0.0 : (double) i / (count - 1);
+            Vec3d currentPos = startPos.add(normalizedDirection.multiply(distance * lerpFactor));
+            world.spawnParticles(particle, currentPos.x, currentPos.y, currentPos.z, 1, 0, 0, 0, 0.0);
+        }
+    }
+
     public static void damageEntitiesInTrajectory(ServerWorld world, Entity sourceEntity, double distance, float damage, DamageSource damageSource) {
         Vec3d startPos = sourceEntity.getPos().add(0, sourceEntity.getHeight() / 2.0, 0);
         float pitch = sourceEntity.getPitch(1.0F);
@@ -562,6 +597,22 @@ public class HelperMethods {
                         && HelperMethods.checkFriendlyFire(livingTarget, livingEntity)) {
                     livingTarget.damage(damageSource, damage);
                 }
+            }
+        }
+    }
+
+    public static void damageEntitiesInTrajectory(ServerWorld world, LivingEntity sourceEntity, Vec3d direction, double distance, float damage, DamageSource damageSource) {
+        Vec3d startPos = sourceEntity.getPos().add(0, sourceEntity.getHeight() / 2.0, 0);
+        Vec3d normalizedDirection = direction.normalize();
+        Vec3d endPos = startPos.add(normalizedDirection.multiply(distance));
+        Box searchBox = new Box(startPos, endPos).expand(0.5);
+
+        for (Entity entity : world.getOtherEntities(sourceEntity, searchBox)) {
+            Box entityBox = entity.getBoundingBox().expand(entity.getTargetingMargin());
+            if (entityBox.intersects(searchBox)
+                    && entity instanceof LivingEntity livingTarget
+                    && HelperMethods.checkAbilityTarget(livingTarget, sourceEntity)) {
+                livingTarget.damage(damageSource, damage);
             }
         }
     }

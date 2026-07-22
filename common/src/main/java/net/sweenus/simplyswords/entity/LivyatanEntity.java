@@ -34,7 +34,9 @@ public class LivyatanEntity extends ThrownSwordEntity {
     }
     @Override
     public void tick() {
-        returnToPlayer = true;
+        if (!nonReturning) {
+            returnToPlayer = true;
+        }
         super.tick();
     }
 
@@ -44,7 +46,7 @@ public class LivyatanEntity extends ThrownSwordEntity {
         if (this.stack == null || this.stack.isEmpty()) return;
 
         ServerWorld world = (ServerWorld) this.getWorld();
-        if (this.getOwner() != null && this.getOwner() instanceof ServerPlayerEntity user) {
+        if (this.getOwner() != null && this.getOwner() instanceof LivingEntity user) {
             DamageSource damageSource = user.getDamageSources().trident(this, user);
             float returnDamage = EnchantmentHelper.getDamage(world, stack, this, damageSource, damage);
 
@@ -52,7 +54,7 @@ public class LivyatanEntity extends ThrownSwordEntity {
                     this.getX() - radius, this.getY() - radius, this.getZ() - radius);
 
             for (Entity entity : world.getOtherEntities(this, box, EntityPredicates.VALID_LIVING_ENTITY)) {
-                if ((entity instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, user) && le.age %5 == 0) {
+                if ((entity instanceof LivingEntity le) && HelperMethods.checkAbilityTarget(le, user) && le.age %5 == 0) {
 
                     HelperMethods.damageThroughIframes(le, damageSource, returnDamage);
                     world.playSoundFromEntity(null, user, SoundRegistry.ELEMENTAL_SWORD_ICE_ATTACK_01.get(),

@@ -20,6 +20,7 @@ import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.UseAction;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
+import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
@@ -28,6 +29,7 @@ import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.item.component.StoredChargeComponent;
 import net.sweenus.simplyswords.item.component.TargetedLocationComponent;
 import net.sweenus.simplyswords.item.interfaces.TwoHandedWeapon;
+import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
 import net.sweenus.simplyswords.registry.ComponentTypeRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
@@ -37,7 +39,7 @@ import net.sweenus.simplyswords.util.Styles;
 
 import java.util.List;
 
-public class LichbladeSwordItem extends UniqueSwordItem implements TwoHandedWeapon {
+public class LichbladeSwordItem extends UniqueSwordItem implements TwoHandedWeapon, UniqueWeaponActiveAbility {
     public LichbladeSwordItem(ToolMaterial toolMaterial, Settings settings) {
         super(toolMaterial, settings);
     }
@@ -141,6 +143,39 @@ public class LichbladeSwordItem extends UniqueSwordItem implements TwoHandedWeap
         }
         stack.set(ComponentTypeRegistry.STORED_CHARGE.get(), null);
         stack.set(ComponentTypeRegistry.TARGETED_LOCATION.get(), null);
+    }
+
+    @Override
+    public boolean canActivate(WeaponAbilityContext context) {
+        return !context.stack().isOf(ItemsRegistry.SLUMBERING_LICHBLADE.get()) && UniqueWeaponActiveAbility.super.canActivate(context);
+    }
+
+    @Override
+    public boolean activate(WeaponAbilityContext context) {
+        LivingEntity actor = context.actor();
+        LivingEntity target = context.target();
+        ItemStack stack = context.stack();
+        if (target == null || !HelperMethods.checkAbilityTarget(target, actor) || stack.isOf(ItemsRegistry.SLUMBERING_LICHBLADE.get())) {
+            return false;
+        }
+        float abilityDamage = HelperMethods.spellScaledDamage("soul", actor, Config.uniqueEffects.lichblade.spellScaling, Config.uniqueEffects.lichblade.damage);
+        float healAmount = Config.uniqueEffects.lichblade.heal;
+        int radius = Config.uniqueEffects.lichblade.radius;
+        stack.set(ComponentTypeRegistry.TARGETED_LOCATION.get(), new TargetedLocationComponent(target.getUuid(), target.getX(), target.getY(), target.getZ()));
+        AbilityMethods.tickAbilitySoulAnguish(stack, context.world(), actor, abilityDamage, radius, target.getX(), target.getY(), target.getZ(), healAmount, target);
+        if (stack.isOf(ItemsRegistry.AWAKENED_LICHBLADE.get())) {
+            int damageTracker = stack.getOrDefault(ComponentTypeRegistry.STORED_CHARGE.get(), StoredChargeComponent.DEFAULT).charge();
+            actor.setAbsorptionAmount(Math.min(Config.uniqueEffects.abilityAbsorptionCap,
+                    actor.getAbsorptionAmount() + Math.min(damageTracker / 2f, Config.uniqueEffects.lichblade.absorptionCap)));
+        }
+        stack.set(ComponentTypeRegistry.STORED_CHARGE.get(), null);
+        stack.set(ComponentTypeRegistry.TARGETED_LOCATION.get(), null);
+        return true;
+    }
+
+    @Override
+    public int getActivationCooldownTicks(ItemStack stack, WeaponAbilityContext context) {
+        return Config.uniqueEffects.lichblade.cooldown;
     }
 
     @Override

@@ -48,6 +48,8 @@ public class ThrownSpearEntity extends PersistentProjectileEntity {
     public static int offset = 210;
     public int hasLoyalty;
     public float weightValue = 0.05f;
+    public boolean nonReturning = false;
+    public int nonReturningMaxAge = 80;
 
 
 
@@ -65,7 +67,7 @@ public class ThrownSpearEntity extends PersistentProjectileEntity {
         this.dataTracker.set(ENCHANTED, stack.hasEnchantments());
         this.dataTracker.set(ITEM_STACK, stack);
 
-        this.pickupType = owner.isInCreativeMode() ?
+        this.pickupType = owner instanceof PlayerEntity && owner.isInCreativeMode() ?
                 PickupPermission.CREATIVE_ONLY :
                 PickupPermission.ALLOWED;
 
@@ -109,6 +111,11 @@ public class ThrownSpearEntity extends PersistentProjectileEntity {
 
     @Override
     public void tick() {
+        if (!this.getWorld().isClient && nonReturning && this.age > nonReturningMaxAge) {
+            damageOnReturn(primaryReturnDamageRadius, primaryReturnDamage);
+            this.discard();
+            return;
+        }
 
         if (this.inGroundTime > 4) {
             this.dealtDamage = true;
@@ -223,9 +230,21 @@ public class ThrownSpearEntity extends PersistentProjectileEntity {
     protected void doOnTick(Entity owner) {
     }
 
+    public void markNonReturning(int maxAgeTicks) {
+        this.nonReturning = true;
+        this.nonReturningMaxAge = Math.max(1, maxAgeTicks);
+        this.returnToPlayer = false;
+        this.hasLoyalty = 0;
+        this.pickupType = PickupPermission.CREATIVE_ONLY;
+    }
+
     @Override
     protected void onEntityHit(EntityHitResult entityHitResult) {
         Entity entity = entityHitResult.getEntity();
+        if (this.nonReturning && this.getOwner() instanceof LivingEntity owner && entity instanceof LivingEntity target
+                && !HelperMethods.checkAbilityTarget(target, owner)) {
+            return;
+        }
         keepPitch = this.getPitch();
         float baseDamage = primaryBaseDamage;
         Entity entity2 = this.getOwner();
@@ -259,6 +278,10 @@ public class ThrownSpearEntity extends PersistentProjectileEntity {
 
         this.setVelocity(this.getVelocity().multiply(-0.01, -0.1, -0.01));
         this.playSound(getEntityHitSound(), 1.0F, 1.0F);
+        if (!this.getWorld().isClient && nonReturning) {
+            damageOnReturn(primaryReturnDamageRadius, primaryReturnDamage);
+            this.discard();
+        }
     }
 
     protected float doExtraDamage(Entity entity, float baseDamage, DamageSource damageSource) {

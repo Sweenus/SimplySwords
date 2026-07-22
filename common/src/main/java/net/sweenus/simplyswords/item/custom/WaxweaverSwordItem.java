@@ -25,6 +25,7 @@ import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
 import net.sweenus.simplyswords.world.RevivalCandleVisualManager;
+import net.sweenus.simplyswords.world.WeaponAbilityCooldownManager;
 
 import java.util.List;
 
@@ -49,30 +50,38 @@ public class WaxweaverSwordItem extends UniqueSwordItem implements RevivalWeapon
     }
 
     @Override
-    public boolean canRevive(PlayerEntity player, ItemStack stack, DamageSource source) {
-        return !source.isIn(DamageTypeTags.BYPASSES_INVULNERABILITY) &&
-                !player.getItemCooldownManager().isCoolingDown(this);
-    }
-
-    @Override
-    public void postRevive(PlayerEntity player, ItemStack stack, DamageSource source) {
-        int skillCooldown = Config.uniqueEffects.waxweaver.cooldown;
-        if (player instanceof net.minecraft.server.network.ServerPlayerEntity serverPlayer) {
-            RevivalCandleVisualManager.activate(serverPlayer, stack);
+    public boolean canRevive(LivingEntity entity, ItemStack stack, DamageSource source) {
+        if (source.isIn(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
+            return false;
         }
-        HelperMethods.incrementStatusEffect(player, StatusEffects.RESISTANCE, 100, 2, 3);
-        player.getItemCooldownManager().set(stack.getItem(), skillCooldown);
-
-        World world = player.getWorld();
-        world.playSound(null, player.getBlockPos(), SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
-                player.getSoundCategory(), 0.7f, 1.0f);
-        world.playSound(null, player.getBlockPos(), SoundRegistry.SPELL_MISC_02.get(),
-                player.getSoundCategory(), 0.8f, 1.0f);
+        if (entity instanceof PlayerEntity player) {
+            return !player.getItemCooldownManager().isCoolingDown(this);
+        }
+        return entity.getWorld() instanceof net.minecraft.server.world.ServerWorld serverWorld
+                && !WeaponAbilityCooldownManager.isCoolingDown(serverWorld, entity, stack);
     }
 
     @Override
-    public float getReviveHealth(PlayerEntity player, ItemStack stack, DamageSource source) {
-        return player.getMaxHealth();
+    public void postRevive(LivingEntity entity, ItemStack stack, DamageSource source) {
+        int skillCooldown = Config.uniqueEffects.waxweaver.cooldown;
+        if (entity instanceof net.minecraft.server.network.ServerPlayerEntity serverPlayer) {
+            RevivalCandleVisualManager.activate(serverPlayer, stack);
+            serverPlayer.getItemCooldownManager().set(stack.getItem(), skillCooldown);
+        } else if (entity.getWorld() instanceof net.minecraft.server.world.ServerWorld serverWorld) {
+            WeaponAbilityCooldownManager.setCooldown(serverWorld, entity, stack, skillCooldown);
+        }
+        HelperMethods.incrementStatusEffect(entity, StatusEffects.RESISTANCE, 100, 2, 3);
+
+        World world = entity.getWorld();
+        world.playSound(null, entity.getBlockPos(), SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
+                entity.getSoundCategory(), 0.7f, 1.0f);
+        world.playSound(null, entity.getBlockPos(), SoundRegistry.SPELL_MISC_02.get(),
+                entity.getSoundCategory(), 0.8f, 1.0f);
+    }
+
+    @Override
+    public float getReviveHealth(LivingEntity entity, ItemStack stack, DamageSource source) {
+        return entity.getMaxHealth();
     }
 
     @Override

@@ -4,7 +4,7 @@ package net.sweenus.simplyswords.mixin;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.tag.DamageTypeTags;
@@ -12,6 +12,9 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.SimplySwords;
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+import net.sweenus.simplyswords.api.WeaponAbilityActivationSource;
+import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
 import net.sweenus.simplyswords.compat.eldritch_end.EldritchEndCompatMethods;
 import net.sweenus.simplyswords.effect.FlameSeedEffect;
@@ -35,15 +38,41 @@ public abstract class LivingEntityMixin {
     @Inject(at = @At("HEAD"), method = "tryUseTotem", cancellable = true)
     public void simplyswords$tryRevive(DamageSource source, CallbackInfoReturnable<Boolean> cir) {
         LivingEntity livingEntity = (LivingEntity) (Object) this;
-        if(livingEntity instanceof PlayerEntity player && !player.getWorld().isClient()) {
-            ItemStack mainhand = player.getStackInHand(Hand.MAIN_HAND);
+        if(!livingEntity.getWorld().isClient()) {
+            ItemStack mainhand = livingEntity.getStackInHand(Hand.MAIN_HAND);
             if (mainhand.getItem() instanceof RevivalWeapon revivalWeapon) {
-                if(revivalWeapon.canRevive(player, mainhand, source)) {
-                    player.setHealth(revivalWeapon.getReviveHealth(player, mainhand, source));
-                    revivalWeapon.postRevive(player, mainhand, source);
+                if(revivalWeapon.canRevive(livingEntity, mainhand, source)) {
+                    livingEntity.setHealth(revivalWeapon.getReviveHealth(livingEntity, mainhand, source));
+                    revivalWeapon.postRevive(livingEntity, mainhand, source);
                     cir.setReturnValue(true);
                 }
             }
+        }
+    }
+
+    @Inject(at = @At("HEAD"), method = "damage", cancellable = true)
+    public void simplyswords$autoTriggerLivingStormbringer(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
+        LivingEntity livingEntity = (LivingEntity) (Object) this;
+        if (livingEntity.getWorld().isClient()
+                || livingEntity instanceof ServerPlayerEntity
+                || source.isIn(DamageTypeTags.BYPASSES_INVULNERABILITY)
+                || !(livingEntity instanceof MobEntity mob)
+                || !(livingEntity.getWorld() instanceof net.minecraft.server.world.ServerWorld world)
+                || !(source.getAttacker() instanceof LivingEntity attacker)
+                || attacker != mob.getTarget()
+                || !HelperMethods.checkAbilityTarget(attacker, mob)) {
+            return;
+        }
+
+        ItemStack stack = mob.getMainHandStack();
+        if (!stack.isOf(ItemsRegistry.STORMBRINGER.get())) {
+            return;
+        }
+
+        WeaponAbilityContext context = WeaponAbilityContext.of(world, stack, mob, null, attacker,
+                Hand.MAIN_HAND, WeaponAbilityActivationSource.MOB);
+        if (SimplySwordsAPI.tryActivateWeaponAbility(context)) {
+            cir.setReturnValue(false);
         }
     }
 

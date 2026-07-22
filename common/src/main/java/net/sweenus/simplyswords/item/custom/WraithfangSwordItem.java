@@ -5,6 +5,8 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
@@ -13,19 +15,23 @@ import net.minecraft.particle.ParticleTypes;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
 import net.sweenus.simplyswords.entity.WraithfangEntity;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
+import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
+import net.sweenus.simplyswords.world.LivingEntityAbilityMovementManager;
 
 import java.util.List;
 
-public class WraithfangSwordItem extends UniqueSwordItem {
+public class WraithfangSwordItem extends UniqueSwordItem implements UniqueWeaponActiveAbility {
     public WraithfangSwordItem(ToolMaterial toolMaterial, Settings settings) {
         super(toolMaterial, settings);
     }
@@ -68,6 +74,33 @@ public class WraithfangSwordItem extends UniqueSwordItem {
 
         user.getItemCooldownManager().set(this, 1);
         return TypedActionResult.success(itemStack, world.isClient());
+    }
+
+    @Override
+    public boolean activate(WeaponAbilityContext context) {
+        if (context.target() == null || !HelperMethods.checkAbilityTarget(context.target(), context.actor())) {
+            return false;
+        }
+        LivingEntity actor = context.actor();
+        WraithfangEntity wraithfangEntity = new WraithfangEntity(context.world(), actor, context.stack().copy());
+        Vec3d direction = LivingEntityAbilityMovementManager.getLobbedTargetDirection(actor, context.target());
+        wraithfangEntity.setVelocity(direction.x, direction.y, direction.z, 1.65F, 1.0F);
+        wraithfangEntity.setYaw(actor.getYaw());
+        wraithfangEntity.setPitch(actor.getPitch());
+        wraithfangEntity.primaryBaseDamage = (float) Math.max(1.0, HelperMethods.getAttackFromStack(context.stack(), net.minecraft.component.type.AttributeModifierSlot.MAINHAND));
+        wraithfangEntity.hasLoyalty = 0;
+        wraithfangEntity.setPos(actor.getX(), actor.getEyeY() - 0.5, actor.getZ());
+        wraithfangEntity.markNonReturning(80);
+        context.world().spawnEntity(wraithfangEntity);
+        LivingEntityAbilityMovementManager.dashTowardTarget(context.world(), actor, context.target(), 1.35, 10);
+        actor.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, 80, 1), actor);
+        context.world().playSound(wraithfangEntity, actor.getBlockPos(), SoundRegistry.DARK_SWORD_SPELL.get(), actor.getSoundCategory(), 0.1f, 1.0f);
+        return true;
+    }
+
+    @Override
+    public int getActivationCooldownTicks(ItemStack stack, WeaponAbilityContext context) {
+        return 20;
     }
 
     @Override

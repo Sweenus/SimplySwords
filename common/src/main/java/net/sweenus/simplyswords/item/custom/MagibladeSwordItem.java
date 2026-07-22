@@ -16,18 +16,21 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.UseAction;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
+import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
 
 import java.util.List;
 
-public class MagibladeSwordItem extends UniqueSwordItem {
+public class MagibladeSwordItem extends UniqueSwordItem implements UniqueWeaponActiveAbility {
     public MagibladeSwordItem(ToolMaterial toolMaterial, Settings settings) {
         super(toolMaterial, settings);
     }
@@ -97,6 +100,29 @@ public class MagibladeSwordItem extends UniqueSwordItem {
         player.getItemCooldownManager().set(this, skillCooldown);
 
         }
+    }
+
+    @Override
+    public boolean activate(WeaponAbilityContext context) {
+        LivingEntity actor = context.actor();
+        LivingEntity target = context.target();
+        if (target == null || !HelperMethods.checkAbilityTarget(target, actor)) {
+            return false;
+        }
+        float damage = (float) (HelperMethods.getEntityAttackDamage(actor) * Config.uniqueEffects.magiblade.damageModifier);
+        float distance = Config.uniqueEffects.magiblade.sonicDistance;
+        Vec3d direction = target.getPos().add(0.0, target.getHeight() * 0.5, 0.0)
+                .subtract(actor.getPos().add(0.0, actor.getHeight() * 0.5, 0.0));
+        context.world().playSound(null, actor.getBlockPos(), SoundEvents.ENTITY_WARDEN_SONIC_BOOM,
+                actor.getSoundCategory(), 0.8f, 1.1f);
+        HelperMethods.spawnDirectionalParticles(context.world(), ParticleTypes.SONIC_BOOM, actor, direction, 10, distance);
+        HelperMethods.damageEntitiesInTrajectory(context.world(), actor, direction, distance, damage, actor.getDamageSources().mobAttack(actor));
+        return true;
+    }
+
+    @Override
+    public int getActivationCooldownTicks(ItemStack stack, WeaponAbilityContext context) {
+        return Config.uniqueEffects.magiblade.cooldown;
     }
 
     @Override

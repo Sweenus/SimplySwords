@@ -21,8 +21,10 @@ import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
+import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.effect.instance.SimplySwordsStatusEffectInstance;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
+import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
@@ -33,7 +35,7 @@ import net.sweenus.simplyswords.world.FlamewindVisualManager;
 import java.util.Comparator;
 import java.util.List;
 
-public class FlamewindSwordItem extends UniqueSwordItem {
+public class FlamewindSwordItem extends UniqueSwordItem implements UniqueWeaponActiveAbility {
     public FlamewindSwordItem(ToolMaterial toolMaterial, Settings settings) {
         super(toolMaterial, settings);
     }
@@ -52,38 +54,76 @@ public class FlamewindSwordItem extends UniqueSwordItem {
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         if (!user.getWorld().isClient() && world instanceof  ServerWorld serverWorld) {
-            int flameSeedDuration = 101;
-            int flameSeedSpreadCap = Config.uniqueEffects.flamewind.spreadCap;
-            int skillCooldown = Config.uniqueEffects.flamewind.cooldown;
-
-            Box box = HelperMethods.createBox(user, 10);
-            Entity closestEntity = world.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY).stream()
-                    .min(Comparator.comparingDouble(entity -> entity.squaredDistanceTo(user)))
-                    .orElse(null);
-
-            if (closestEntity != null) {
-                if ((closestEntity instanceof LivingEntity ee)) {
-                    if (HelperMethods.checkFriendlyFire(ee, user) && !ee.hasStatusEffect(EffectRegistry.getReference(EffectRegistry.FLAMESEED))) {
-
-                        SoundEvent soundSelect = SoundRegistry.SPELL_FIRE.get();
-                        int particleCount = 20; // Number of particles along the line
-                        HelperMethods.spawnWaistHeightParticles(serverWorld, ParticleTypes.LAVA, user, ee, particleCount);
-                        world.playSound(null, user.getBlockPos(), soundSelect,
-                                user.getSoundCategory(), 0.3f, 1.3f);
-
-                        SimplySwordsStatusEffectInstance flamSeedEffect = new SimplySwordsStatusEffectInstance(
-                                EffectRegistry.getReference(EffectRegistry.FLAMESEED), flameSeedDuration, 0, false,
-                                false, true);
-                        flamSeedEffect.setSourceEntity(user);
-                        flamSeedEffect.setAdditionalData(flameSeedSpreadCap);
-                        ee.addStatusEffect(flamSeedEffect);
-                        FlamewindVisualManager.refreshSeed(serverWorld, ee);
-                        user.getItemCooldownManager().set(this, skillCooldown);
-                    }
-                }
+            LivingEntity target = findFlamewindTarget(serverWorld, user);
+            if (target != null && activateFlamewind(serverWorld, user, target)) {
+                user.getItemCooldownManager().set(this, Config.uniqueEffects.flamewind.cooldown);
             }
         }
         return super.use(world, user, hand);
+    }
+
+    @Override
+    public boolean canActivate(WeaponAbilityContext context) {
+        return context != null
+                && context.stack() != null
+                && !context.stack().isEmpty()
+                && context.world() != null
+                && context.actor() != null
+                && context.actor().isAlive()
+                && context.stack().getDamage() < context.stack().getMaxDamage() - 1
+                && getContextTarget(context) != null;
+    }
+
+    @Override
+    public boolean activate(WeaponAbilityContext context) {
+        LivingEntity target = getContextTarget(context);
+        return target != null && activateFlamewind(context.world(), context.actor(), target);
+    }
+
+    @Override
+    public int getActivationCooldownTicks(ItemStack stack, WeaponAbilityContext context) {
+        return Config.uniqueEffects.flamewind.cooldown;
+    }
+
+    private LivingEntity getContextTarget(WeaponAbilityContext context) {
+        LivingEntity target = context.target();
+        if (target != null
+                && target.isAlive()
+                && HelperMethods.checkAbilityTarget(target, context.actor())
+                && !target.hasStatusEffect(EffectRegistry.getReference(EffectRegistry.FLAMESEED))) {
+            return target;
+        }
+        return findFlamewindTarget(context.world(), context.actor());
+    }
+
+    private LivingEntity findFlamewindTarget(World world, LivingEntity user) {
+        Box box = HelperMethods.createBox(user, 10);
+        Entity closestEntity = world.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY).stream()
+                .filter(entity -> entity instanceof LivingEntity le
+                        && HelperMethods.checkAbilityTarget(le, user)
+                        && !le.hasStatusEffect(EffectRegistry.getReference(EffectRegistry.FLAMESEED)))
+                .min(Comparator.comparingDouble(entity -> entity.squaredDistanceTo(user)))
+                .orElse(null);
+        return closestEntity instanceof LivingEntity livingEntity ? livingEntity : null;
+    }
+
+    private boolean activateFlamewind(ServerWorld serverWorld, LivingEntity user, LivingEntity target) {
+        int flameSeedDuration = 101;
+        int flameSeedSpreadCap = Config.uniqueEffects.flamewind.spreadCap;
+
+        SoundEvent soundSelect = SoundRegistry.SPELL_FIRE.get();
+        int particleCount = 20;
+        HelperMethods.spawnWaistHeightParticles(serverWorld, ParticleTypes.LAVA, user, target, particleCount);
+        serverWorld.playSound(null, user.getBlockPos(), soundSelect, user.getSoundCategory(), 0.3f, 1.3f);
+
+        SimplySwordsStatusEffectInstance flameSeedEffect = new SimplySwordsStatusEffectInstance(
+                EffectRegistry.getReference(EffectRegistry.FLAMESEED), flameSeedDuration, 0, false,
+                false, true);
+        flameSeedEffect.setSourceEntity(user);
+        flameSeedEffect.setAdditionalData(flameSeedSpreadCap);
+        target.addStatusEffect(flameSeedEffect);
+        FlamewindVisualManager.refreshSeed(serverWorld, target);
+        return true;
     }
 
     @Override

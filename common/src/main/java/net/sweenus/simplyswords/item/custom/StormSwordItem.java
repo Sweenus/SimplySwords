@@ -6,6 +6,9 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.LightningEntity;
+import net.minecraft.entity.SpawnReason;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.item.tooltip.TooltipType;
@@ -15,10 +18,12 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.UseAction;
 import net.minecraft.world.World;
+import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
+import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.AbilityMethods;
@@ -27,7 +32,7 @@ import net.sweenus.simplyswords.util.Styles;
 
 import java.util.List;
 
-public class StormSwordItem extends UniqueSwordItem {
+public class StormSwordItem extends UniqueSwordItem implements UniqueWeaponActiveAbility {
     public StormSwordItem(ToolMaterial toolMaterial, Settings settings) {
         super(toolMaterial, settings);
     }
@@ -66,6 +71,30 @@ public class StormSwordItem extends UniqueSwordItem {
             int cooldown = Config.uniqueEffects.mjolnir.cooldown;
             AbilityMethods.tickAbilityStorm(stack, world, user, remainingUseTicks, cooldown, radius);
         }
+    }
+
+    @Override
+    public boolean activate(WeaponAbilityContext context) {
+        LivingEntity actor = context.actor();
+        LivingEntity target = context.target();
+        if (target == null || !HelperMethods.checkAbilityTarget(target, actor)) {
+            return false;
+        }
+        actor.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, Config.uniqueEffects.mjolnir.frequency + 5, 5), actor);
+        target.addStatusEffect(new StatusEffectInstance(EffectRegistry.getReference(EffectRegistry.FREEZE), Config.uniqueEffects.mjolnir.frequency + 5, 0), actor);
+        LightningEntity storm = EntityType.LIGHTNING_BOLT.spawn(context.world(), target.getBlockPos(), SpawnReason.TRIGGERED);
+        if (storm != null) {
+            storm.setCosmetic(true);
+        }
+        target.damage(actor.getDamageSources().indirectMagic(actor, actor), 5);
+        context.world().spawnParticles(ParticleTypes.CLOUD, actor.getX(), actor.getY() + 2.0, actor.getZ(), 24,
+                Config.uniqueEffects.mjolnir.radius * 0.25, 0.6, Config.uniqueEffects.mjolnir.radius * 0.25, 0.02);
+        return true;
+    }
+
+    @Override
+    public int getActivationCooldownTicks(ItemStack stack, WeaponAbilityContext context) {
+        return Config.uniqueEffects.mjolnir.cooldown;
     }
 
     @Override

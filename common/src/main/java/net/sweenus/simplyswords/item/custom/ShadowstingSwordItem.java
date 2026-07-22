@@ -14,10 +14,12 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
+import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
+import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
@@ -25,7 +27,7 @@ import net.sweenus.simplyswords.world.ShadowstingShadowDanceManager;
 
 import java.util.List;
 
-public class ShadowstingSwordItem extends UniqueSwordItem {
+public class ShadowstingSwordItem extends UniqueSwordItem implements UniqueWeaponActiveAbility {
 
     public ShadowstingSwordItem(ToolMaterial toolMaterial, Settings settings) {
         super(toolMaterial, settings);
@@ -54,6 +56,18 @@ public class ShadowstingSwordItem extends UniqueSwordItem {
             user.getItemCooldownManager().set(itemStack.getItem(), Config.uniqueEffects.shadowsting.cooldown);
         }
         return TypedActionResult.success(itemStack, world.isClient());
+    }
+
+    @Override
+    public boolean activate(WeaponAbilityContext context) {
+        return context.target() != null
+                && HelperMethods.checkAbilityTarget(context.target(), context.actor())
+                && ShadowstingShadowDanceManager.start(context.world(), context.actor(), context.target());
+    }
+
+    @Override
+    public int getActivationCooldownTicks(ItemStack stack, WeaponAbilityContext context) {
+        return Config.uniqueEffects.shadowsting.cooldown;
     }
 
     @Override

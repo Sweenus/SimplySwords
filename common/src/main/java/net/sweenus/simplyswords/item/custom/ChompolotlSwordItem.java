@@ -16,20 +16,23 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
+import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
 import net.sweenus.simplyswords.entity.SimplySwordsAxolotlEntity;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
+import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
 import net.sweenus.simplyswords.registry.EntityRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
+import net.sweenus.simplyswords.world.WeaponAbilityCooldownManager;
 
 import java.util.List;
 
-public class ChompolotlSwordItem extends UniqueSwordItem {
+public class ChompolotlSwordItem extends UniqueSwordItem implements UniqueWeaponActiveAbility {
     public ChompolotlSwordItem(ToolMaterial toolMaterial, Settings settings) {
         super(toolMaterial, settings);
     }
@@ -42,19 +45,16 @@ public class ChompolotlSwordItem extends UniqueSwordItem {
             float skillDamage = Config.uniqueEffects.chompolotl.damage;
             HelperMethods.playHitSounds(attacker, target);
 
-            if (attacker instanceof PlayerEntity player && !player.getItemCooldownManager().isCoolingDown(stack.getItem())) {
-            SimplySwordsAxolotlEntity axolotlEntity = EntityRegistry.SIMPLYAXOLOTLENTITY.get().spawn(
-                    serverWorld,
-                    attacker.getBlockPos().up(2).offset(attacker.getMovementDirection(), 3),
-                    SpawnReason.MOB_SUMMONED);
-                if (axolotlEntity != null && target != null) {
-                    axolotlEntity.setTarget(target);
-                    axolotlEntity.setOwner(attacker);
-                    double attackDamage = (0.5f + skillDamage * HelperMethods.getEntityAttackDamage(attacker));
-                    EntityAttributeInstance attackAttribute = axolotlEntity.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE);
-                    if (attackAttribute != null)
-                        attackAttribute.setBaseValue(attackDamage);
-                    player.getItemCooldownManager().set(stack.getItem(), skillCooldown);
+            boolean coolingDown = attacker instanceof PlayerEntity player
+                    ? player.getItemCooldownManager().isCoolingDown(stack.getItem())
+                    : WeaponAbilityCooldownManager.isCoolingDown(serverWorld, attacker, stack);
+            if (!coolingDown && target != null && HelperMethods.checkAbilityTarget(target, attacker)) {
+                if (spawnAxolotl(serverWorld, attacker, target, skillDamage, false) != null) {
+                    if (attacker instanceof PlayerEntity player) {
+                        player.getItemCooldownManager().set(stack.getItem(), skillCooldown);
+                    } else {
+                        WeaponAbilityCooldownManager.setCooldown(serverWorld, attacker, stack, skillCooldown);
+                    }
                 }
             }
         }
@@ -93,6 +93,48 @@ public class ChompolotlSwordItem extends UniqueSwordItem {
         }
 
         return super.use(world, user, hand);
+    }
+
+    @Override
+    public boolean activate(WeaponAbilityContext context) {
+        if (context.target() == null || !HelperMethods.checkAbilityTarget(context.target(), context.actor())) {
+            return false;
+        }
+        return spawnAxolotl(context.world(), context.actor(), context.target(), Config.uniqueEffects.chompolotl.damage, true) != null;
+    }
+
+    @Override
+    public int getActivationCooldownTicks(ItemStack stack, WeaponAbilityContext context) {
+        return Config.uniqueEffects.chompolotl.cooldown * 10;
+    }
+
+    private static SimplySwordsAxolotlEntity spawnAxolotl(ServerWorld serverWorld, LivingEntity owner, LivingEntity target, float skillDamage, boolean activeSummon) {
+        SimplySwordsAxolotlEntity axolotlEntity = EntityRegistry.SIMPLYAXOLOTLENTITY.get().spawn(
+                serverWorld,
+                owner.getBlockPos().up(2).offset(owner.getMovementDirection(), 3),
+                SpawnReason.MOB_SUMMONED);
+        if (axolotlEntity == null) {
+            return null;
+        }
+        axolotlEntity.setTarget(target);
+        axolotlEntity.setOwner(owner);
+        if (activeSummon) {
+            axolotlEntity.setVariant(AxolotlEntity.Variant.values()[4]);
+        }
+        double attackDamage = (0.5f + skillDamage * HelperMethods.getEntityAttackDamage(owner));
+        EntityAttributeInstance attackAttribute = axolotlEntity.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE);
+        if (attackAttribute != null) {
+            attackAttribute.setBaseValue(attackDamage);
+        }
+        if (activeSummon) {
+            EntityAttributeInstance speedAttribute = axolotlEntity.getAttributeInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED);
+            if (speedAttribute != null) {
+                speedAttribute.setBaseValue(2.0);
+            }
+            serverWorld.playSound(null, owner.getBlockPos(), SoundRegistry.ELEMENTAL_BOW_WATER_SHOOT_IMPACT_01.get(),
+                    owner.getSoundCategory(), 0.4f, 1f);
+        }
+        return axolotlEntity;
     }
 
     @Override

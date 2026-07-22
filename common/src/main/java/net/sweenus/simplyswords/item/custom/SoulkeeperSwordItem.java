@@ -15,11 +15,13 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
+import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.item.interfaces.TwoHandedWeapon;
+import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
@@ -27,7 +29,7 @@ import net.sweenus.simplyswords.world.SoulkeeperLanternManager;
 
 import java.util.List;
 
-public class SoulkeeperSwordItem extends UniqueSwordItem implements TwoHandedWeapon {
+public class SoulkeeperSwordItem extends UniqueSwordItem implements TwoHandedWeapon, UniqueWeaponActiveAbility {
     public SoulkeeperSwordItem(ToolMaterial toolMaterial, Settings settings) {
         super(toolMaterial, settings);
     }
@@ -55,9 +57,20 @@ public class SoulkeeperSwordItem extends UniqueSwordItem implements TwoHandedWea
     }
 
     @Override
+    public boolean activate(WeaponAbilityContext context) {
+        SoulkeeperLanternManager.activate(context.actor(), context.stack());
+        return true;
+    }
+
+    @Override
+    public int getActivationCooldownTicks(ItemStack stack, WeaponAbilityContext context) {
+        return Config.uniqueEffects.soulkeeper.cooldown;
+    }
+
+    @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
-        if (!world.isClient() && entity instanceof ServerPlayerEntity serverPlayer && serverPlayer.getMainHandStack().equals(stack)) {
-            SoulkeeperLanternManager.tickPlayerFromItem(serverPlayer, stack);
+        if (!world.isClient() && entity instanceof LivingEntity livingEntity && livingEntity.getMainHandStack().equals(stack)) {
+            SoulkeeperLanternManager.tickFromItem(livingEntity, stack);
         }
         HelperMethods.createFootfalls(entity, stack, world, ParticleTypes.SOUL, ParticleTypes.SOUL,
                 ParticleTypes.SPORE_BLOSSOM_AIR, false);

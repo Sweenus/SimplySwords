@@ -15,22 +15,26 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
 import net.sweenus.simplyswords.entity.MagispearEntity;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
+import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
+import net.sweenus.simplyswords.world.LivingEntityAbilityMovementManager;
 
 import java.util.List;
 import java.util.Random;
 
-public class MagispearSwordItem extends UniqueSwordItem {
+public class MagispearSwordItem extends UniqueSwordItem implements UniqueWeaponActiveAbility {
     public MagispearSwordItem(ToolMaterial toolMaterial, Settings settings) {
         super(toolMaterial, settings);
     }
@@ -85,6 +89,33 @@ public class MagispearSwordItem extends UniqueSwordItem {
         user.swingHand(hand);
 
         return TypedActionResult.success(itemStack, world.isClient());
+    }
+
+    @Override
+    public boolean activate(WeaponAbilityContext context) {
+        if (context.target() == null || !HelperMethods.checkAbilityTarget(context.target(), context.actor())) {
+            return false;
+        }
+        LivingEntity actor = context.actor();
+        actor.addStatusEffect(new StatusEffectInstance(EffectRegistry.getReference(EffectRegistry.MAGISLAM), 62, 1));
+        actor.addStatusEffect(new StatusEffectInstance(EffectRegistry.getReference(EffectRegistry.RESILIENCE), 64, 3));
+        MagispearEntity magispearEntity = new MagispearEntity(context.world(), actor, context.stack().copy());
+        Vec3d direction = LivingEntityAbilityMovementManager.getLobbedTargetDirection(actor, context.target());
+        magispearEntity.setVelocity(direction.x, direction.y, direction.z, 1.65F, 1.0F);
+        magispearEntity.setYaw(actor.getYaw());
+        magispearEntity.setPitch(actor.getPitch() - 90);
+        magispearEntity.primaryBaseDamage = (float) Math.max(1.0, HelperMethods.getAttackFromStack(context.stack(), net.minecraft.component.type.AttributeModifierSlot.MAINHAND) * 0.5f);
+        magispearEntity.hasLoyalty = 0;
+        magispearEntity.setPos(actor.getX(), actor.getEyeY() - 0.5, actor.getZ());
+        magispearEntity.markNonReturning(80);
+        context.world().spawnEntity(magispearEntity);
+        LivingEntityAbilityMovementManager.dashTowardTarget(context.world(), actor, context.target(), 1.35, 10);
+        return true;
+    }
+
+    @Override
+    public int getActivationCooldownTicks(ItemStack stack, WeaponAbilityContext context) {
+        return Config.uniqueEffects.magispear.cooldown;
     }
 
     @Override

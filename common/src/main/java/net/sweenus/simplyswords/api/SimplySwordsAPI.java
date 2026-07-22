@@ -25,6 +25,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.BattleStandardEntity;
+import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
 import net.sweenus.simplyswords.power.powers.NecromanticArsenalPower;
 import net.sweenus.simplyswords.item.ContainedRemnantItem;
 import net.sweenus.simplyswords.power.GemPowerComponent;
@@ -32,6 +33,7 @@ import net.sweenus.simplyswords.power.GemPowerFiller;
 import net.sweenus.simplyswords.registry.ComponentTypeRegistry;
 import net.sweenus.simplyswords.registry.EntityRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
+import net.sweenus.simplyswords.world.WeaponAbilityCooldownManager;
 
 import java.util.List;
 import java.util.Optional;
@@ -102,6 +104,61 @@ public class SimplySwordsAPI {
         return DELEGATED_WEAPON_HIT_CONTEXT.get();
     }
 
+    public static boolean canActivateWeaponAbility(WeaponAbilityContext context) {
+        return context != null
+                && context.stack() != null
+                && !context.stack().isEmpty()
+                && context.stack().getItem() instanceof UniqueWeaponActiveAbility ability
+                && ability.canActivate(context)
+                && !isWeaponAbilityCoolingDown(context);
+    }
+
+    public static int getWeaponAbilityCooldownTicks(WeaponAbilityContext context) {
+        if (context == null
+                || context.stack() == null
+                || context.stack().isEmpty()
+                || !(context.stack().getItem() instanceof UniqueWeaponActiveAbility ability)) {
+            return 20;
+        }
+        return ability.getActivationCooldownTicks(context.stack(), context);
+    }
+
+    public static boolean tryActivateWeaponAbility(WeaponAbilityContext context) {
+        if (context == null
+                || context.stack() == null
+                || context.stack().isEmpty()
+                || !(context.stack().getItem() instanceof UniqueWeaponActiveAbility ability)
+                || !ability.canActivate(context)) {
+            return false;
+        }
+
+        if (isWeaponAbilityCoolingDown(context)) {
+            return false;
+        }
+
+        if (!ability.activate(context)) {
+            return false;
+        }
+
+        int cooldown = Math.max(1, ability.getActivationCooldownTicks(context.stack(), context));
+        if (context.actor() instanceof ServerPlayerEntity player) {
+            player.getItemCooldownManager().set(context.stack().getItem(), cooldown);
+        } else {
+            WeaponAbilityCooldownManager.setCooldown(context.world(), context.actor(), context.stack(), cooldown);
+        }
+        return true;
+    }
+
+    private static boolean isWeaponAbilityCoolingDown(WeaponAbilityContext context) {
+        if (context == null || context.stack() == null || context.stack().isEmpty() || context.actor() == null) {
+            return true;
+        }
+        if (context.actor() instanceof ServerPlayerEntity player) {
+            return player.getItemCooldownManager().isCoolingDown(context.stack().getItem());
+        }
+        return context.world() == null || WeaponAbilityCooldownManager.isCoolingDown(context.world(), context.actor(), context.stack());
+    }
+
     public static boolean applyDelegatedWeaponHit(ItemStack stack, LivingEntity target, ServerPlayerEntity owner,
                                                   LivingEntity actor, float damage) {
         if (stack == null || stack.isEmpty() || target == null || owner == null || actor == null
@@ -141,6 +198,70 @@ public class SimplySwordsAPI {
         } finally {
             DELEGATED_WEAPON_HIT_CONTEXT.remove();
         }
+    }
+
+    public static boolean applyEntityWeaponHit(ItemStack stack, LivingEntity target, LivingEntity actor, float damage) {
+        if (stack == null || stack.isEmpty() || target == null || actor == null
+                || !(actor.getWorld() instanceof ServerWorld world) || target.getWorld() != world
+                || !target.isAlive()) {
+            return false;
+        }
+
+        Vec3d facing = actor.getRotationVec(1.0F);
+        if (facing.lengthSquared() < 0.0001) {
+            facing = target.getPos().subtract(actor.getPos());
+        }
+        if (facing.lengthSquared() < 0.0001) {
+            facing = Vec3d.fromPolar(0.0F, actor.getYaw());
+        }
+        facing = facing.normalize();
+
+        DelegatedWeaponHitContext context = new DelegatedWeaponHitContext(actor instanceof ServerPlayerEntity player ? player : null, actor, actor.getPos(), facing);
+        DELEGATED_WEAPON_HIT_CONTEXT.set(context);
+        try {
+            DamageSource source = getWeaponDamageSource(actor);
+            float modifiedDamage = WeaponImplicitRegistry.modifyDamage(stack, target, source, damage);
+            target.timeUntilRegen = 0;
+            boolean[] damaged = {false};
+            WeaponImplicitRegistry.runSuppressed(() -> damaged[0] = target.damage(source, modifiedDamage));
+            target.timeUntilRegen = 0;
+            if (!damaged[0]) {
+                return false;
+            }
+
+            EnchantmentHelper.onTargetDamaged(world, target, source, stack);
+            WeaponImplicitRegistry.onHit(stack, target, actor, modifiedDamage);
+            Item item = stack.getItem();
+            if (item instanceof SwordItem) {
+                NecromanticArsenalPower.runSuppressed(() -> item.postHit(stack, target, actor));
+            }
+            return true;
+        } finally {
+            DELEGATED_WEAPON_HIT_CONTEXT.remove();
+        }
+    }
+
+    public static void applyEntityWeaponPostHit(ItemStack stack, LivingEntity target, LivingEntity actor, float damage) {
+        if (stack == null || stack.isEmpty() || target == null || actor == null || actor.getWorld().isClient()
+                || !(stack.getItem() instanceof SwordItem item)) {
+            return;
+        }
+        DelegatedWeaponHitContext context = new DelegatedWeaponHitContext(actor instanceof ServerPlayerEntity player ? player : null,
+                actor, actor.getPos(), actor.getRotationVec(1.0F));
+        DELEGATED_WEAPON_HIT_CONTEXT.set(context);
+        try {
+            WeaponImplicitRegistry.onHit(stack, target, actor, damage);
+            NecromanticArsenalPower.runSuppressed(() -> item.postHit(stack, target, actor));
+        } finally {
+            DELEGATED_WEAPON_HIT_CONTEXT.remove();
+        }
+    }
+
+    public static DamageSource getWeaponDamageSource(LivingEntity actor) {
+        if (actor instanceof PlayerEntity player) {
+            return player.getDamageSources().playerAttack(player);
+        }
+        return actor.getDamageSources().mobAttack(actor);
     }
 
     // Adds the relevant socket information to the item tooltip

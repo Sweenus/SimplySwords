@@ -148,7 +148,7 @@ public final class ArcanethystAssaultManager {
 
     private static boolean canTarget(LivingEntity owner, LivingEntity target, ActiveAssault assault) {
         return !assault.processedTargets().contains(target.getUuid())
-                && HelperMethods.checkFriendlyFire(target, owner)
+                && HelperMethods.checkAbilityTarget(target, owner)
                 && target.getWidth() <= PLAYER_WIDTH_LIMIT
                 && target.getHeight() <= PLAYER_HEIGHT_LIMIT;
     }
