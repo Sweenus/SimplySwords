@@ -5,6 +5,7 @@ import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
@@ -71,12 +72,14 @@ public class ThunderbrandSwordItem extends UniqueSwordItem implements TwoHandedW
         if (target == null || !HelperMethods.checkAbilityTarget(target, actor)) {
             return false;
         }
-        float abilityDamage = HelperMethods.spellScaledDamage("lightning", actor, Config.uniqueEffects.thunderbrand.spellScaling, Config.uniqueEffects.thunderbrand.damage);
+        float abilityDamage = HelperMethods.abilityScaledDamage("lightning", actor, context.stack(),
+                Config.uniqueEffects.thunderbrand.damageScaling, Config.uniqueEffects.thunderbrand.spellScaling);
         LivingEntityAbilityMovementManager.dashTowardTargetWithImpact(context.world(), actor, target, 2.2, 8, 0.9, () -> {
             if (!target.isAlive() || !HelperMethods.checkAbilityTarget(target, actor)) {
                 return;
             }
-            target.damage(actor.getDamageSources().indirectMagic(actor, actor), abilityDamage * 3.0F);
+            DamageSource damageSource = actor.getDamageSources().indirectMagic(actor, actor);
+            target.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments(context.world(), context.stack(), target, damageSource, abilityDamage * 3.0F));
             context.world().spawnParticles(ParticleTypes.ELECTRIC_SPARK, target.getX(), target.getBodyY(0.5), target.getZ(), 18, 0.45, 0.45, 0.45, 0.12);
             context.world().playSoundFromEntity(null, target, SoundRegistry.ELEMENTAL_BOW_THUNDER_SHOOT_IMPACT_02.get(),
                     target.getSoundCategory(), 0.35f, 1.6f);
@@ -108,7 +111,8 @@ public class ThunderbrandSwordItem extends UniqueSwordItem implements TwoHandedW
     public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
         if (!world.isClient && HelperMethods.isHolding(stack, user) && user.isOnGround()) {
 
-            float abilityDamage = HelperMethods.spellScaledDamage("lightning", user, Config.uniqueEffects.thunderbrand.spellScaling, Config.uniqueEffects.thunderbrand.damage);
+            float abilityDamage = HelperMethods.abilityScaledDamage("lightning", user, stack,
+                    Config.uniqueEffects.thunderbrand.damageScaling, Config.uniqueEffects.thunderbrand.spellScaling);
             int skillCooldown = Config.uniqueEffects.thunderbrand.cooldown;
             int radius = Config.uniqueEffects.thunderbrand.radius;
 
@@ -170,7 +174,7 @@ public class ThunderbrandSwordItem extends UniqueSwordItem implements TwoHandedW
         @ValidatedInt.Restrict(min = 0)
         public int cooldown = 250;
         @ValidatedFloat.Restrict(min = 0f)
-        public float damage = 3f;
+        public float damageScaling = 0.23f;
         @ValidatedInt.Restrict(min = 1)
         public int radius = 2;
         @ValidatedFloat.Restrict(min = 0f)

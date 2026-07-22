@@ -1,6 +1,7 @@
 package net.sweenus.simplyswords.item.custom;
 
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedDouble;
+import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -112,8 +113,8 @@ public class SoulPyreSwordItem extends UniqueSwordItem implements TwoHandedWeapo
         public int pulseCount = 10;
         @ValidatedDouble.Restrict(min = 11.0)
         public double radius = 12.0;
-        @ValidatedDouble.Restrict(min = 11.0)
-        public float damage = 11.0f;
+        @ValidatedFloat.Restrict(min = 0f)
+        public float damageScaling = 0.92f;
         @ValidatedInt.Restrict(min = 1)
         public int heal = 1;
         @ValidatedInt.Restrict(min = 1)

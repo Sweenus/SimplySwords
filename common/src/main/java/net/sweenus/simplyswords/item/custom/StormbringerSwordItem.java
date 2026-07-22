@@ -76,9 +76,9 @@ public class StormbringerSwordItem extends UniqueSwordItem implements UniqueWeap
             return;
         }
 
-        float damage = HelperMethods.spellScaledDamage("lightning", player,
-                Config.uniqueEffects.stormbringer.chainLightningSpellScaling,
-                Config.uniqueEffects.stormbringer.chainLightningDamage);
+        float damage = HelperMethods.abilityScaledDamage("lightning", player, stack,
+                Config.uniqueEffects.stormbringer.chainLightningDamageScaling,
+                Config.uniqueEffects.stormbringer.chainLightningSpellScaling);
         SUPPRESS_STORMBRINGER_CHAIN.set(true);
         try {
             int damaged = ChainLightningVisualManager.damageStormbringerChain(player.getServerWorld(), player, target, stormCharges, damage, Config.uniqueEffects.stormbringer.chainLightningRange);
@@ -177,7 +177,7 @@ public class StormbringerSwordItem extends UniqueSwordItem implements UniqueWeap
         @ValidatedInt.Restrict(min = 0)
         public int cooldown = 240;
         @ValidatedFloat.Restrict(min = 0f)
-        public float damage = 12f;
+        public float damageScaling = 1.33f;
         @ValidatedFloat.Restrict(min = 0f)
         public float spellScaling = 2.3f;
 
@@ -198,7 +198,7 @@ public class StormbringerSwordItem extends UniqueSwordItem implements UniqueWeap
         @ValidatedFloat.Restrict(min = 0f)
         public float chainLightningRange = 6f;
         @ValidatedFloat.Restrict(min = 0f)
-        public float chainLightningDamage = 4f;
+        public float chainLightningDamageScaling = 0.44f;
         @ValidatedFloat.Restrict(min = 0f)
         public float chainLightningSpellScaling = 1f;
 

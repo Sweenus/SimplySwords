@@ -4,6 +4,7 @@ import dev.architectury.platform.Platform;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.AttributeModifierSlot;
 import net.minecraft.component.type.AttributeModifiersComponent;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
@@ -38,6 +39,8 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.SimplySwordsExpectPlatform;
+import net.sweenus.simplyswords.api.DelegatedWeaponHitContext;
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.compat.opac.OpacCompat;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.effect.instance.SimplySwordsStatusEffectInstance;
@@ -447,6 +450,52 @@ public class HelperMethods {
         return scaling > 0 ? scaling : damageFallback;
     }
 
+    public static float abilityScaledDamage(String spellSchool, LivingEntity actor, ItemStack stack, float attackScaling, float spellScaling) {
+        float scaling = commonSpellAttributeScaling(spellScaling, actor, spellSchool);
+        if (scaling > 0f) {
+            return scaling;
+        }
+        return attackScaledDamage(actor, stack, attackScaling);
+    }
+
+    public static float abilityScaledDamage(String spellSchool, LivingEntity actor, float attackScaling, float spellScaling) {
+        return abilityScaledDamage(spellSchool, actor, actor == null ? ItemStack.EMPTY : actor.getMainHandStack(), attackScaling, spellScaling);
+    }
+
+    public static float attackScaledDamage(LivingEntity actor, ItemStack stack, float attackScaling) {
+        double attackDamage = actor == null ? 0.0 : getEntityAttackDamage(actor);
+        if (attackDamage <= 0.0 && stack != null && !stack.isEmpty()) {
+            attackDamage = Math.max(1.0, 1.0 + getAttackFromStack(stack, AttributeModifierSlot.MAINHAND));
+        }
+        return (float) Math.max(0.0, attackDamage * attackScaling);
+    }
+
+    public static float applyAbilityDamageEnchantments(ServerWorld world, ItemStack stack, Entity target, DamageSource damageSource, float damage) {
+        float finalDamage = damage;
+        if (Config.general.enableAbilityDamageEnchantScaling && world != null && stack != null && !stack.isEmpty() && target != null && damageSource != null) {
+            finalDamage = EnchantmentHelper.getDamage(world, stack, target, damageSource, finalDamage);
+        }
+        return applyNonPlayerAbilityDamageModifier(resolveAbilityDamageActor(damageSource), finalDamage);
+    }
+
+    public static float applyNonPlayerAbilityDamageModifier(LivingEntity actor, float damage) {
+        if (actor instanceof PlayerEntity || actor == null) {
+            return damage;
+        }
+        return Math.max(0.0F, damage * Math.max(0.0F, Config.general.nonPlayerWeaponAbilityDamageModifier));
+    }
+
+    public static LivingEntity resolveAbilityDamageActor(DamageSource damageSource) {
+        DelegatedWeaponHitContext delegatedContext = SimplySwordsAPI.getDelegatedWeaponHitContext();
+        if (delegatedContext != null && delegatedContext.actor() != null) {
+            return delegatedContext.actor();
+        }
+        if (damageSource != null && damageSource.getAttacker() instanceof LivingEntity livingEntity) {
+            return livingEntity;
+        }
+        return null;
+    }
+
     public static float commonSpellAttributeScaling(float damageModifier, Entity entity, String magicSchool) {
         if ((entity instanceof PlayerEntity player) && Config.general.compatEnableSpellPowerScaling.get())
             return SimplySwordsExpectPlatform.getSpellPowerDamage(damageModifier, player, magicSchool);
@@ -572,6 +621,10 @@ public class HelperMethods {
     }
 
     public static void damageEntitiesInTrajectory(ServerWorld world, Entity sourceEntity, double distance, float damage, DamageSource damageSource) {
+        damageEntitiesInTrajectory(world, sourceEntity, ItemStack.EMPTY, distance, damage, damageSource);
+    }
+
+    public static void damageEntitiesInTrajectory(ServerWorld world, Entity sourceEntity, ItemStack stack, double distance, float damage, DamageSource damageSource) {
         Vec3d startPos = sourceEntity.getPos().add(0, sourceEntity.getHeight() / 2.0, 0);
         float pitch = sourceEntity.getPitch(1.0F);
         float yaw = sourceEntity.getYaw(1.0F);
@@ -595,13 +648,17 @@ public class HelperMethods {
                 if ((sourceEntity instanceof PlayerEntity livingEntity)
                         && (entity instanceof LivingEntity livingTarget)
                         && HelperMethods.checkFriendlyFire(livingTarget, livingEntity)) {
-                    livingTarget.damage(damageSource, damage);
+                    livingTarget.damage(damageSource, applyAbilityDamageEnchantments(world, stack, livingTarget, damageSource, damage));
                 }
             }
         }
     }
 
     public static void damageEntitiesInTrajectory(ServerWorld world, LivingEntity sourceEntity, Vec3d direction, double distance, float damage, DamageSource damageSource) {
+        damageEntitiesInTrajectory(world, sourceEntity, ItemStack.EMPTY, direction, distance, damage, damageSource);
+    }
+
+    public static void damageEntitiesInTrajectory(ServerWorld world, LivingEntity sourceEntity, ItemStack stack, Vec3d direction, double distance, float damage, DamageSource damageSource) {
         Vec3d startPos = sourceEntity.getPos().add(0, sourceEntity.getHeight() / 2.0, 0);
         Vec3d normalizedDirection = direction.normalize();
         Vec3d endPos = startPos.add(normalizedDirection.multiply(distance));
@@ -612,7 +669,7 @@ public class HelperMethods {
             if (entityBox.intersects(searchBox)
                     && entity instanceof LivingEntity livingTarget
                     && HelperMethods.checkAbilityTarget(livingTarget, sourceEntity)) {
-                livingTarget.damage(damageSource, damage);
+                livingTarget.damage(damageSource, applyAbilityDamageEnchantments(world, stack, livingTarget, damageSource, damage));
             }
         }
     }

@@ -42,7 +42,7 @@ public class ChompolotlSwordItem extends UniqueSwordItem implements UniqueWeapon
         if (!attacker.getWorld().isClient()) {
             ServerWorld serverWorld = (ServerWorld) attacker.getWorld();
             int skillCooldown = Config.uniqueEffects.chompolotl.cooldown;
-            float skillDamage = Config.uniqueEffects.chompolotl.damage;
+            float skillDamage = Config.uniqueEffects.chompolotl.damageScaling;
             HelperMethods.playHitSounds(attacker, target);
 
             boolean coolingDown = attacker instanceof PlayerEntity player
@@ -66,7 +66,6 @@ public class ChompolotlSwordItem extends UniqueSwordItem implements UniqueWeapon
         if (!world.isClient()) {
 
             int skillCooldown = Config.uniqueEffects.chompolotl.cooldown;
-            float skillDamage = Config.uniqueEffects.chompolotl.damage;
             ItemStack stack = user.getStackInHand(hand);
             ServerWorld serverWorld = (ServerWorld) world;
             if (user instanceof PlayerEntity player && !player.getItemCooldownManager().isCoolingDown(stack.getItem())) {
@@ -78,7 +77,7 @@ public class ChompolotlSwordItem extends UniqueSwordItem implements UniqueWeapon
                     axolotlEntity.setTarget(user);
                     axolotlEntity.setOwner(user);
                     axolotlEntity.setVariant(AxolotlEntity.Variant.values()[4]);
-                    double attackDamage = (0.5f + skillDamage * HelperMethods.getEntityAttackDamage(user));
+                    double attackDamage = 0.5f + HelperMethods.attackScaledDamage(user, stack, Config.uniqueEffects.chompolotl.damageScaling);
                     EntityAttributeInstance attackAttribute = axolotlEntity.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE);
                     if (attackAttribute != null)
                         attackAttribute.setBaseValue(attackDamage);
@@ -100,7 +99,7 @@ public class ChompolotlSwordItem extends UniqueSwordItem implements UniqueWeapon
         if (context.target() == null || !HelperMethods.checkAbilityTarget(context.target(), context.actor())) {
             return false;
         }
-        return spawnAxolotl(context.world(), context.actor(), context.target(), Config.uniqueEffects.chompolotl.damage, true) != null;
+        return spawnAxolotl(context.world(), context.actor(), context.target(), Config.uniqueEffects.chompolotl.damageScaling, true) != null;
     }
 
     @Override
@@ -121,7 +120,7 @@ public class ChompolotlSwordItem extends UniqueSwordItem implements UniqueWeapon
         if (activeSummon) {
             axolotlEntity.setVariant(AxolotlEntity.Variant.values()[4]);
         }
-        double attackDamage = (0.5f + skillDamage * HelperMethods.getEntityAttackDamage(owner));
+        double attackDamage = 0.5f + HelperMethods.attackScaledDamage(owner, owner.getMainHandStack(), skillDamage);
         EntityAttributeInstance attackAttribute = axolotlEntity.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE);
         if (attackAttribute != null) {
             attackAttribute.setBaseValue(attackDamage);
@@ -160,7 +159,7 @@ public class ChompolotlSwordItem extends UniqueSwordItem implements UniqueWeapon
         @ValidatedInt.Restrict(min = 0)
         public int cooldown = 60;
         @ValidatedFloat.Restrict(min = 0f)
-        public float damage = 1.0f;
+        public float damageScaling = 1.0f;
         @ValidatedFloat.Restrict(min = 20f)
         public int duration = 500;
         @ValidatedFloat.Restrict(min = 0f)

@@ -1,6 +1,5 @@
 package net.sweenus.simplyswords.entity;
 
-import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -48,14 +47,13 @@ public class LivyatanEntity extends ThrownSwordEntity {
         ServerWorld world = (ServerWorld) this.getWorld();
         if (this.getOwner() != null && this.getOwner() instanceof LivingEntity user) {
             DamageSource damageSource = user.getDamageSources().trident(this, user);
-            float returnDamage = EnchantmentHelper.getDamage(world, stack, this, damageSource, damage);
-
             Box box = new Box(this.getX() + radius, this.getY() + radius, this.getZ() + radius,
                     this.getX() - radius, this.getY() - radius, this.getZ() - radius);
 
             for (Entity entity : world.getOtherEntities(this, box, EntityPredicates.VALID_LIVING_ENTITY)) {
                 if ((entity instanceof LivingEntity le) && HelperMethods.checkAbilityTarget(le, user) && le.age %5 == 0) {
 
+                    float returnDamage = HelperMethods.applyAbilityDamageEnchantments(world, stack, le, damageSource, damage);
                     HelperMethods.damageThroughIframes(le, damageSource, returnDamage);
                     world.playSoundFromEntity(null, user, SoundRegistry.ELEMENTAL_SWORD_ICE_ATTACK_01.get(),
                             user.getSoundCategory(), 0.2f, 1.5f);

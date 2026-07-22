@@ -139,7 +139,9 @@ public class SunfireSwordItem extends UniqueSwordItem implements UniqueWeaponAct
         @ValidatedInt.Restrict(min = 0)
         public int cooldown = 700;
         @ValidatedFloat.Restrict(min = 0)
-        public float damage = 3f;
+        public float damageScaling = 0.33f;
+        @ValidatedFloat.Restrict(min = 0)
+        public float healScaling = 0.33f;
         @ValidatedFloat.Restrict(min = 0)
         public float spellScaling = 1.1f;
         @ValidatedFloat.Restrict(min = 0)

@@ -75,7 +75,8 @@ public class FrostfallEntity extends ThrownSwordEntity {
                     for (Entity otherEntity : world.getOtherEntities(this, box, EntityPredicates.VALID_LIVING_ENTITY)) {
                         if ((otherEntity instanceof LivingEntity le) &&
                                 HelperMethods.checkFriendlyFire(le, livingEntity)) {
-                            HelperMethods.damageThroughIframes(le, damageSource, detonateDamage - detonateCount);
+                            float damage = HelperMethods.applyAbilityDamageEnchantments(world, stack, le, damageSource, detonateDamage - detonateCount);
+                            HelperMethods.damageThroughIframes(le, damageSource, damage);
                             le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, duration, Math.min( 3, 6-detonateCount)), livingEntity);
                             if (le.distanceTo(this) > 1)
                                 le.setVelocity((this.getX() - le.getX()) / 8, (this.getY() - le.getY()) / 8, (this.getZ() - le.getZ()) / 8);

@@ -3,6 +3,7 @@ package net.sweenus.simplyswords.world;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.particle.BlockStateParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -152,7 +153,8 @@ public final class FaultlineSunderManager {
             if (forward < 0.0 || forward > length || lateral > halfWidth + target.getWidth() * 0.5) {
                 continue;
             }
-            target.damage(owner.getDamageSources().indirectMagic(owner, owner), damage);
+            DamageSource damageSource = owner.getDamageSources().indirectMagic(owner, owner);
+            target.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments(world, owner.getMainHandStack(), target, damageSource, damage));
         }
     }
 

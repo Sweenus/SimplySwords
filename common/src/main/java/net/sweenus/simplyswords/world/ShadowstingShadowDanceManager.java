@@ -341,7 +341,8 @@ public final class ShadowstingShadowDanceManager {
             return;
         }
         ItemStack stack = actor.getMainHandStack();
-        SimplySwordsAPI.applyEntityWeaponHit(stack, target, actor, (float) HelperMethods.getEntityAttackDamage(actor));
+        float damage = HelperMethods.applyNonPlayerAbilityDamageModifier(actor, (float) HelperMethods.getEntityAttackDamage(actor));
+        SimplySwordsAPI.applyEntityWeaponHit(stack, target, actor, damage);
     }
 
     private static LivingEntity findRandomTarget(ServerWorld world, ServerPlayerEntity player) {

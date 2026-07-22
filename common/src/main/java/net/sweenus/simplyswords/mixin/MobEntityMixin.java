@@ -15,6 +15,7 @@ import net.sweenus.simplyswords.item.RunicSwordItem;
 import net.sweenus.simplyswords.item.SimplySwordsSwordItem;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.item.custom.IcewhisperSwordItem;
+import net.sweenus.simplyswords.item.custom.LichbladeSwordItem;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.world.ShadowstingShadowDanceManager;
@@ -51,6 +52,9 @@ public abstract class MobEntityMixin {
         }
         if (stack.isOf(ItemsRegistry.SOULKEEPER.get())) {
             SoulkeeperLanternManager.tickFromItem(mob, stack);
+        }
+        if (stack.getItem() instanceof LichbladeSwordItem) {
+            LichbladeSwordItem.tickPassiveAura(world, mob, stack);
         }
         if (mob instanceof SimplySwordsSkeletonMinionEntity) {
             return;

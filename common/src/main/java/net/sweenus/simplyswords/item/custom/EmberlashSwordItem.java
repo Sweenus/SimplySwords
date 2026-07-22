@@ -52,9 +52,10 @@ public class EmberlashSwordItem extends UniqueSwordItem implements UniqueWeaponA
                 StatusEffectInstance smoulderingEffect = target.getStatusEffect(EffectRegistry.getReference(EffectRegistry.SMOULDERING));
                 if (smoulderingEffect != null) {
                     DamageSource damageSource = attacker instanceof PlayerEntity player ? player.getDamageSources().playerAttack(player) : world.getDamageSources().generic();
-                    float abilityDamage = Math.max(HelperMethods.commonSpellAttributeScaling(Config.uniqueEffects.emberlash.spellScaling, attacker, "fire"), (float) HelperMethods.getEntityAttackDamage(attacker));
-                    float damageMultiplier = 0.15f * smoulderingEffect.getAmplifier();
-                    target.damage(damageSource, abilityDamage * damageMultiplier);
+                    float abilityDamage = HelperMethods.abilityScaledDamage("fire", attacker, stack,
+                            Config.uniqueEffects.emberlash.smoulderDamageScaling, Config.uniqueEffects.emberlash.spellScaling);
+                    float damageMultiplier = smoulderingEffect.getAmplifier();
+                    target.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments(world, stack, target, damageSource, abilityDamage * damageMultiplier));
                     HelperMethods.spawnOrbitParticles(world, target.getPos(), ParticleTypes.LAVA, 0.2, smoulderingEffect.getAmplifier());
                     world.playSound(target, target.getBlockPos(), SoundRegistry.SPELL_FIRE.get(),
                             target.getSoundCategory(), 0.1f, 1.5f);
@@ -138,6 +139,8 @@ public class EmberlashSwordItem extends UniqueSwordItem implements UniqueWeaponA
         public int maxStacks = 5;
         @ValidatedFloat.Restrict(min = 0f)
         public float spellScaling = 0.4f;
+        @ValidatedFloat.Restrict(min = 0f)
+        public float smoulderDamageScaling = 0.15f;
 
     }
 }

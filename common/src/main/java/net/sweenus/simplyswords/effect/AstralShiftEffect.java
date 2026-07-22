@@ -35,11 +35,11 @@ public class AstralShiftEffect extends StatusEffect {
                         double x = entity.getX();
                         double y = entity.getY();
                         double z = entity.getZ();
-                        float damageMulti = Config.uniqueEffects.caelestis.damageModifier;
+                        float damageMulti = Config.uniqueEffects.caelestis.damageScaling;
                         float damageMax = Config.uniqueEffects.caelestis.damageMax;
                         double radius = 8;
 
-                        float damage = Math.min((amplifier) * damageMulti, damageMax);
+                        float damage = Math.min(HelperMethods.attackScaledDamage(entity, entity.getMainHandStack(), amplifier * damageMulti), damageMax);
 
                         world.playSound(null, entity.getBlockPos(), SoundRegistry.DARK_ACTIVATION_DISTORTED.get(),
                                 entity.getSoundCategory(), 0.5f, 1.1f);
@@ -54,7 +54,8 @@ public class AstralShiftEffect extends StatusEffect {
                                     damageSource = entity.getDamageSources().playerAttack(player);
                                 }
                                 target.timeUntilRegen = 0;
-                                HelperMethods.applyDamageWithoutKnockback(target, damageSource, damage);
+                                float enchantedDamage = HelperMethods.applyAbilityDamageEnchantments(world, entity.getMainHandStack(), target, damageSource, damage);
+                                HelperMethods.applyDamageWithoutKnockback(target, damageSource, enchantedDamage);
                                 target.timeUntilRegen = 0;
                                 HelperMethods.spawnRainingParticles(world, ParticleTypes.ENCHANT, target, 4, 2);
                                 HelperMethods.spawnRainingParticles(world, ParticleTypes.WARPED_SPORE, target, 4, 2);

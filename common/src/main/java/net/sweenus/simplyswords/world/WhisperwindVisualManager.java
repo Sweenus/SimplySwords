@@ -128,8 +128,9 @@ public final class WhisperwindVisualManager {
             return;
         }
 
-        float damage = Config.uniqueEffects.whisperwind.delayedDamage
-                + strike.targetIds.size() * Config.uniqueEffects.whisperwind.delayedDamagePerTarget;
+        float damage = HelperMethods.attackScaledDamage(source, source.getMainHandStack(),
+                Config.uniqueEffects.whisperwind.delayedDamageScaling
+                        + strike.targetIds.size() * Config.uniqueEffects.whisperwind.delayedDamagePerTargetScaling);
         for (UUID targetId : strike.targetIds) {
             Entity entity = world.getEntity(targetId);
             if (!(entity instanceof LivingEntity target) || !target.isAlive() || !HelperMethods.checkAbilityTarget(target, source)) {
@@ -137,7 +138,8 @@ public final class WhisperwindVisualManager {
             }
 
             target.timeUntilRegen = 0;
-            target.damage(world.getDamageSources().indirectMagic(source, source), damage);
+            var damageSource = world.getDamageSources().indirectMagic(source, source);
+            target.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments(world, source.getMainHandStack(), target, damageSource, damage));
             spawnBlossoms(world, target);
         }
 

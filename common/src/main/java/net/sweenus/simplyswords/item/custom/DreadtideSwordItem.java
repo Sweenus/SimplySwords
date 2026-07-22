@@ -56,7 +56,7 @@ public class DreadtideSwordItem extends UniqueSwordItem {
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         if (!user.getWorld().isClient() && world instanceof  ServerWorld serverWorld) {
             int voidcallerDuration = Config.uniqueEffects.dreadtide.get().duration;
-            float voidcallerDamageModifier = Config.uniqueEffects.dreadtide.get().damageModifier;
+            float voidcallerDamageModifier = Config.uniqueEffects.dreadtide.get().damageScaling;
             int skillCooldown = 20;
 
             Box box = HelperMethods.createBox(user, 10);
@@ -149,7 +149,7 @@ public class DreadtideSwordItem extends UniqueSwordItem {
         }
 
         @ValidatedFloat.Restrict(min = 0)
-        public float damageModifier = 1.0f;
+        public float damageScaling = 1.0f;
         @ValidatedInt.Restrict(min = 0)
         public int duration = 250;
         @ValidatedInt.Restrict(min = 1)

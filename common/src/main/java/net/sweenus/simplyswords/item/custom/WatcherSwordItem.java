@@ -48,14 +48,16 @@ public class WatcherSwordItem extends UniqueSwordItem {
                 double x = target.getX();
                 double y = target.getY();
                 double z = target.getZ();
-                float rAmount = Config.uniqueEffects.watcher.watcherRestoreAmount;
+                float rAmount = HelperMethods.attackScaledDamage(attacker, stack, Config.uniqueEffects.watcher.watcherRestoreScaling);
                 Box box = new Box(x + hradius, y + vradius, z + hradius,
                         x - hradius, y - vradius, z - hradius);
 
                 for (Entity entity : world.getOtherEntities(attacker, box, EntityPredicates.VALID_ENTITY)) {
-                    if (entity instanceof LivingEntity && HelperMethods.checkFriendlyFire((LivingEntity) entity, attacker)) {
-                        entity.damage(attacker.getDamageSources().indirectMagic(attacker, attacker), rAmount);
-                        attacker.heal(rAmount);
+                    if (entity instanceof LivingEntity livingTarget && HelperMethods.checkFriendlyFire(livingTarget, attacker)) {
+                        var damageSource = attacker.getDamageSources().indirectMagic(attacker, attacker);
+                        float damage = HelperMethods.applyAbilityDamageEnchantments(world, stack, livingTarget, damageSource, rAmount);
+                        livingTarget.damage(damageSource, damage);
+                        attacker.heal(damage);
                         BlockPos position2 = entity.getBlockPos();
                         world.playSound(null, position2, SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_IMPACT_02.get(),
                                 entity.getSoundCategory(), 0.05f, 1.2f);
@@ -116,7 +118,7 @@ public class WatcherSwordItem extends UniqueSwordItem {
         @ValidatedDouble.Restrict(min = 1.0)
         public double watcherRadius = 8.0;
         @ValidatedFloat.Restrict(min = 0f)
-        public float watcherRestoreAmount = 0.5f;
+        public float watcherRestoreScaling = 0.05f;
 
         @ValidatedFloat.Restrict(min = 0, max = 100)
         public float omenAbsorptionCap = 20f;

@@ -99,7 +99,7 @@ public class SoulrenderSwordItem extends UniqueSwordItem implements TwoHandedWea
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         if (!user.getWorld().isClient()) {
-            consumeSoulrenderMarks((ServerWorld) user.getWorld(), user);
+            consumeSoulrenderMarks((ServerWorld) user.getWorld(), user, user.getStackInHand(hand));
         }
         return super.use(world, user, hand);
     }
@@ -118,7 +118,7 @@ public class SoulrenderSwordItem extends UniqueSwordItem implements TwoHandedWea
 
     @Override
     public boolean activate(WeaponAbilityContext context) {
-        return consumeSoulrenderMarks(context.world(), context.actor()) > 0;
+        return consumeSoulrenderMarks(context.world(), context.actor(), context.stack()) > 0;
     }
 
     private boolean hasSoulrenderMarks(ServerWorld world, LivingEntity user) {
@@ -133,7 +133,7 @@ public class SoulrenderSwordItem extends UniqueSwordItem implements TwoHandedWea
                         && le.hasStatusEffect(StatusEffects.WEAKNESS));
     }
 
-    private int consumeSoulrenderMarks(ServerWorld world, LivingEntity user) {
+    private int consumeSoulrenderMarks(ServerWorld world, LivingEntity user, ItemStack stack) {
         float healAmount = Config.uniqueEffects.soulrender.healMulti;
         int healAmp = 0;
         int consumed = 0;
@@ -151,10 +151,11 @@ public class SoulrenderSwordItem extends UniqueSwordItem implements TwoHandedWea
                 }
 
                 healAmp += slowness.getAmplifier();
-                float scaling = HelperMethods.commonSpellAttributeScaling(Config.uniqueEffects.soulrender.spellScaling, entity, "soul");
-                float multiplier = scaling > 0f ? scaling : Config.uniqueEffects.soulrender.damageMulti;
+                float damage = HelperMethods.abilityScaledDamage("soul", user, stack,
+                        Config.uniqueEffects.soulrender.damageScaling, Config.uniqueEffects.soulrender.spellScaling);
                 SoulrenderMarkVisualManager.consumeMark(world, le, user);
-                le.damage(user.getDamageSources().indirectMagic(user, user), slowness.getAmplifier() * multiplier);
+                var damageSource = user.getDamageSources().indirectMagic(user, user);
+                le.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments(world, stack, le, damageSource, slowness.getAmplifier() * damage));
                 le.removeStatusEffect(StatusEffects.WEAKNESS);
                 le.removeStatusEffect(StatusEffects.SLOWNESS);
                 world.playSoundFromEntity(null, entity, SoundRegistry.DARK_SWORD_SPELL.get(),
@@ -208,7 +209,7 @@ public class SoulrenderSwordItem extends UniqueSwordItem implements TwoHandedWea
         @ValidatedFloat.Restrict(min = 0f)
         public float healMulti = 0.5f;
         @ValidatedFloat.Restrict(min = 0f)
-        public float damageMulti = 3f;
+        public float damageScaling = 0.33f;
         @ValidatedFloat.Restrict(min = 0f)
         public float spellScaling = 0.4f;
     }

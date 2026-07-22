@@ -291,6 +291,9 @@ public class ThrownSpearEntity extends PersistentProjectileEntity {
             agedDamage = EnchantmentHelper.getDamage(serverWorld, stack, entity, damageSource, agedDamage);
             doEffects(serverWorld, baseDamage, entity);
         }
+        if (this.getOwner() instanceof LivingEntity livingOwner) {
+            agedDamage = HelperMethods.applyNonPlayerAbilityDamageModifier(livingOwner, agedDamage);
+        }
         return agedDamage;
     }
 

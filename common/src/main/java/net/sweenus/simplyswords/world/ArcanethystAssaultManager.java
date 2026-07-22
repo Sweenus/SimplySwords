@@ -3,6 +3,7 @@ package net.sweenus.simplyswords.world;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.particle.BlockStateParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
@@ -33,7 +34,7 @@ public final class ArcanethystAssaultManager {
         return assaults != null && !assaults.isEmpty();
     }
 
-    public static void start(ServerWorld world, LivingEntity owner, double radius, float damage) {
+    public static void start(ServerWorld world, LivingEntity owner, ItemStack stack, double radius, float damage) {
         if (owner == null || !owner.isAlive()) {
             return;
         }
@@ -47,7 +48,7 @@ public final class ArcanethystAssaultManager {
             restoreTargets(world, assault);
             return true;
         });
-        ActiveAssault assault = new ActiveAssault(owner.getUuid(), now, now + Math.max(1, Config.uniqueEffects.arcanethyst.duration), now, radius, damage, new ArrayList<>(), new HashSet<>());
+        ActiveAssault assault = new ActiveAssault(owner.getUuid(), stack.copy(), now, now + Math.max(1, Config.uniqueEffects.arcanethyst.duration), now, radius, damage, new ArrayList<>(), new HashSet<>());
         scanForTargets(world, owner, assault);
         assaults.add(assault);
         spawnCastParticles(world, owner.getPos());
@@ -124,7 +125,7 @@ public final class ArcanethystAssaultManager {
                 target.setNoGravity(false);
                 world.playSound(null, target.getX(), target.getY(), target.getZ(), SoundRegistry.ELEMENTAL_SWORD_SCIFI_ATTACK_03.get(), SoundCategory.PLAYERS, 0.35F, 0.85F + world.random.nextFloat() * 0.2F);
             }
-            return tickSlam(world, owner, target, active, slamAge, slamTicks, assault.damage());
+            return tickSlam(world, owner, assault.stack(), target, active, slamAge, slamTicks, assault.damage());
         });
 
         return assault.targets().isEmpty();
@@ -168,15 +169,17 @@ public final class ArcanethystAssaultManager {
         spawnSuspendParticles(world, target);
     }
 
-    private static boolean tickSlam(ServerWorld world, LivingEntity owner, LivingEntity target, ActiveTarget active, long slamAge, int slamTicks, float damage) {
+    private static boolean tickSlam(ServerWorld world, LivingEntity owner, ItemStack stack, LivingEntity target, ActiveTarget active, long slamAge, int slamTicks, float damage) {
         target.setVelocity(0.0, -1.75, 0.0);
         target.velocityModified = true;
         spawnSlamTrail(world, target);
         if (target.isOnGround() || slamAge >= slamTicks) {
             restoreTarget(world, active);
             target.fallDistance = 0.0F;
-            float slamDamage = damage * Config.uniqueEffects.arcanethyst.slamDamageMultiplier;
-            HelperMethods.damageThroughIframes(target, world.getDamageSources().indirectMagic(owner, owner), slamDamage);
+            var damageSource = world.getDamageSources().indirectMagic(owner, owner);
+            float slamDamage = HelperMethods.applyAbilityDamageEnchantments(world, stack, target, damageSource,
+                    damage * Config.uniqueEffects.arcanethyst.slamDamageMultiplier);
+            HelperMethods.damageThroughIframes(target, damageSource, slamDamage);
             spawnImpact(world, target.getPos());
             return true;
         }
@@ -254,6 +257,7 @@ public final class ArcanethystAssaultManager {
 
     private static final class ActiveAssault {
         private final UUID ownerId;
+        private final ItemStack stack;
         private final long startTick;
         private final long expiryTick;
         private long nextScanTick;
@@ -262,8 +266,9 @@ public final class ArcanethystAssaultManager {
         private final List<ActiveTarget> targets;
         private final Set<UUID> processedTargets;
 
-        private ActiveAssault(UUID ownerId, long startTick, long expiryTick, long nextScanTick, double radius, float damage, List<ActiveTarget> targets, Set<UUID> processedTargets) {
+        private ActiveAssault(UUID ownerId, ItemStack stack, long startTick, long expiryTick, long nextScanTick, double radius, float damage, List<ActiveTarget> targets, Set<UUID> processedTargets) {
             this.ownerId = ownerId;
+            this.stack = stack;
             this.startTick = startTick;
             this.expiryTick = expiryTick;
             this.nextScanTick = nextScanTick;
@@ -275,6 +280,10 @@ public final class ArcanethystAssaultManager {
 
         private UUID ownerId() {
             return this.ownerId;
+        }
+
+        private ItemStack stack() {
+            return this.stack;
         }
 
         private long expiryTick() {

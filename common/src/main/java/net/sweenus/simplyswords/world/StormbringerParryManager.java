@@ -126,8 +126,9 @@ public final class StormbringerParryManager {
     private static void performCounterattack(ServerPlayerEntity player) {
         ServerWorld world = player.getServerWorld();
         double radius = Math.max(0.5, Config.uniqueEffects.stormbringer.radius);
-        float abilityDamage = HelperMethods.spellScaledDamage("lightning", player,
-                Config.uniqueEffects.stormbringer.spellScaling, Config.uniqueEffects.stormbringer.damage);
+        ItemStack stack = player.getMainHandStack();
+        float abilityDamage = HelperMethods.abilityScaledDamage("lightning", player, stack,
+                Config.uniqueEffects.stormbringer.damageScaling, Config.uniqueEffects.stormbringer.spellScaling);
         Box box = player.getBoundingBox().expand(radius, radius, radius);
 
         for (Entity entity : world.getOtherEntities(player, box, EntityPredicates.VALID_LIVING_ENTITY)) {
@@ -135,7 +136,8 @@ public final class StormbringerParryManager {
                 continue;
             }
 
-            target.damage(player.getDamageSources().indirectMagic(player, player), abilityDamage);
+            DamageSource damageSource = player.getDamageSources().indirectMagic(player, player);
+            target.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments(world, stack, target, damageSource, abilityDamage));
             Vec3d direction = target.getPos().subtract(player.getPos());
             if (direction.lengthSquared() > 0.0001) {
                 direction = direction.normalize();

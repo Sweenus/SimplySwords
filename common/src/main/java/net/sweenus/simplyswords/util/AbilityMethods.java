@@ -1,6 +1,7 @@
 package net.sweenus.simplyswords.util;
 
 import net.minecraft.entity.*;
+import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
@@ -97,7 +98,9 @@ public class AbilityMethods {
                             if (storm != null) {
                                 storm.setCosmetic(true);
                             }
-                            ee.damage(user.getDamageSources().indirectMagic(user, user), 5);
+                            DamageSource damageSource = user.getDamageSources().indirectMagic(user, user);
+                            float damage = HelperMethods.attackScaledDamage(user, stack, Config.uniqueEffects.mjolnir.damageScaling);
+                            ee.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments(sworld, stack, ee, damageSource, damage));
                         }
                     }
                 }
@@ -154,11 +157,19 @@ public class AbilityMethods {
                         float choose = (float) (Math.random() * 1);
 
                         if (ability_timer > (ability_timer_max - 40)) {
-                            le.damage(world.getDamageSources().indirectMagic(user, user), abilityDamage);
+                            DamageSource damageSource = world.getDamageSources().indirectMagic(user, user);
+                            float damage = world instanceof ServerWorld serverWorld
+                                    ? HelperMethods.applyAbilityDamageEnchantments(serverWorld, stack, le, damageSource, abilityDamage)
+                                    : abilityDamage;
+                            le.damage(damageSource, damage);
                             world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_BOW_POISON_ATTACK_02.get(),
                                     le.getSoundCategory(), 0.1f, choose);
                         } else if (ability_timer < (ability_timer_max - 40)) {
-                            le.damage(world.getDamageSources().indirectMagic(user, user), abilityDamage * 3);
+                            DamageSource damageSource = world.getDamageSources().indirectMagic(user, user);
+                            float damage = world instanceof ServerWorld serverWorld
+                                    ? HelperMethods.applyAbilityDamageEnchantments(serverWorld, stack, le, damageSource, abilityDamage * 3)
+                                    : abilityDamage * 3;
+                            le.damage(damageSource, damage);
                             world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_BOW_POISON_ATTACK_01.get(),
                                     le.getSoundCategory(), 0.1f, choose);
                         }
@@ -212,7 +223,11 @@ public class AbilityMethods {
                         user.heal(healAmount);
                     }
                     stack.apply(ComponentTypeRegistry.STORED_CHARGE.get(), StoredChargeComponent.DEFAULT, StoredChargeComponent::increment);
-                    le.damage(user.getDamageSources().indirectMagic(user, user), abilityDamage);
+                    DamageSource damageSource = user.getDamageSources().indirectMagic(user, user);
+                    float damage = world instanceof ServerWorld serverWorld
+                            ? HelperMethods.applyAbilityDamageEnchantments(serverWorld, stack, le, damageSource, abilityDamage)
+                            : abilityDamage;
+                    le.damage(damageSource, damage);
                 }
             }
             world.playSound(null, lastX, lastY, lastZ, SoundRegistry.DARK_SWORD_BLOCK.get(),
@@ -268,7 +283,11 @@ public class AbilityMethods {
                     if ((entity instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, user)) {
 
                         if (ability_timer > 12) {
-                            le.damage(world.getDamageSources().indirectMagic(user, user), abilityDamage);
+                            DamageSource damageSource = world.getDamageSources().indirectMagic(user, user);
+                            float damage = world instanceof ServerWorld serverWorld
+                                    ? HelperMethods.applyAbilityDamageEnchantments(serverWorld, stack, le, damageSource, abilityDamage)
+                                    : abilityDamage;
+                            le.damage(damageSource, damage);
                             le.setVelocity((user.getX() - le.getX()) / 10, (user.getY() - le.getY()) / 10, (user.getZ() - le.getZ()) / 10);
                             le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 40, 3), user);
                         }

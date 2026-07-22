@@ -77,7 +77,8 @@ public final class ChainLightningVisualManager {
         for (LivingEntity target : chain) {
             target.timeUntilRegen = 0;
             boolean[] result = {false};
-            WeaponImplicitRegistry.runSuppressed(() -> result[0] = target.damage(source, damage));
+            float enchantedDamage = HelperMethods.applyAbilityDamageEnchantments(world, player.getMainHandStack(), target, source, damage);
+            WeaponImplicitRegistry.runSuppressed(() -> result[0] = target.damage(source, enchantedDamage));
             target.timeUntilRegen = 0;
             if (result[0]) {
                 damaged++;

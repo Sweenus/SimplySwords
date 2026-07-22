@@ -132,7 +132,7 @@ public class SimplySwordsSkeletonMinionEntity extends SkeletonEntity implements 
             return false;
         }
 
-        float damage = (float) (this.weaponDamage * Config.gemPowers.necromanticArsenal.damageMultiplier);
+        float damage = (float) (this.weaponDamage * Config.gemPowers.necromanticArsenal.damageScaling);
         if (damage <= 0.0F) {
             return false;
         }

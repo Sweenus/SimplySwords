@@ -80,7 +80,7 @@ public class EmberIreSwordItem extends UniqueSwordItem implements UniqueWeaponAc
     public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
         if (!world.isClient && user.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
             Optional<LivingEntity> targetEntityReturn = HelperMethods.findClosestTarget(user, 18, 3);
-            double damageAmount = HelperMethods.getEntityAttackDamage(user) * 0.3;
+            double damageAmount = HelperMethods.attackScaledDamage(user, stack, Config.uniqueEffects.emberblade.initialDamageScaling);
             if (targetEntityReturn.isPresent() && HelperMethods.checkFriendlyFire(targetEntityReturn.get(), user)) {
                 LivingEntity targetEntity = targetEntityReturn.get();
                 SoundEvent soundSelect = SoundRegistry.ELEMENTAL_BOW_FIRE_SHOOT_IMPACT_03.get();
@@ -97,12 +97,12 @@ public class EmberIreSwordItem extends UniqueSwordItem implements UniqueWeaponAc
                 }
 
                 final float minAdditionalDamage = 0.0f;
-                final float maxAdditionalDamage = (float) (HelperMethods.getEntityAttackDamage(user) * 3);
+                final float maxAdditionalDamage = HelperMethods.attackScaledDamage(user, stack, Config.uniqueEffects.emberblade.maxChargeDamageScaling);
                 float chargeRatio = 1.0f - ((float) remainingUseTicks / getMaxUseTime(stack, user));
                 float additionalDamage = minAdditionalDamage + (maxAdditionalDamage - minAdditionalDamage) * chargeRatio;
                 float finalDamage = (float) damageAmount + additionalDamage;
                 targetEntity.timeUntilRegen = 0;
-                targetEntity.damage(damageSource, finalDamage);
+                targetEntity.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments((ServerWorld) world, stack, targetEntity, damageSource, finalDamage));
 
                 world.playSound(null, targetEntity.getBlockPos(), SoundEvents.ENTITY_GENERIC_EXPLODE.value(),
                         user.getSoundCategory(), 0.4f, 1.1f);
@@ -138,15 +138,16 @@ public class EmberIreSwordItem extends UniqueSwordItem implements UniqueWeaponAc
             return false;
         }
         ServerWorld world = context.world();
-        double damageAmount = HelperMethods.getEntityAttackDamage(actor) * 0.3;
-        float finalDamage = (float) (damageAmount + HelperMethods.getEntityAttackDamage(actor) * 3);
+        double damageAmount = HelperMethods.attackScaledDamage(actor, context.stack(), Config.uniqueEffects.emberblade.initialDamageScaling);
+        float finalDamage = (float) (damageAmount + HelperMethods.attackScaledDamage(actor, context.stack(), Config.uniqueEffects.emberblade.maxChargeDamageScaling));
         SoundEvent soundSelect = SoundRegistry.ELEMENTAL_BOW_FIRE_SHOOT_IMPACT_03.get();
         HelperMethods.spawnWaistHeightParticles(world, ParticleTypes.SMOKE, actor, target, 20);
         HelperMethods.spawnWaistHeightParticles(world, ParticleTypes.POOF, actor, target, 20);
         HelperMethods.spawnWaistHeightParticles(world, ParticleTypes.ASH, actor, target, 20);
         world.playSound(null, actor.getBlockPos(), soundSelect, actor.getSoundCategory(), 0.4f, 1.5f);
         target.timeUntilRegen = 0;
-        target.damage(actor.getDamageSources().mobAttack(actor), finalDamage);
+        DamageSource damageSource = actor.getDamageSources().mobAttack(actor);
+        target.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments(world, context.stack(), target, damageSource, finalDamage));
         world.playSound(null, target.getBlockPos(), SoundEvents.ENTITY_GENERIC_EXPLODE.value(), actor.getSoundCategory(), 0.4f, 1.1f);
         HelperMethods.spawnOrbitParticles(world, target.getPos(), ParticleTypes.EXPLOSION, 1, 1);
         HelperMethods.spawnOrbitParticles(world, target.getPos(), ParticleTypes.POOF, 1, 20);
@@ -214,5 +215,8 @@ public class EmberIreSwordItem extends UniqueSwordItem implements UniqueWeaponAc
         public EffectSettings() {
             super(30, 150, new ItemStackTooltipAppender(ItemsRegistry.EMBERBLADE::get));
         }
+
+        public float initialDamageScaling = 0.3f;
+        public float maxChargeDamageScaling = 3.0f;
     }
 }

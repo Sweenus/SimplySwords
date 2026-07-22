@@ -3,6 +3,7 @@ package net.sweenus.simplyswords.item.custom;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
@@ -86,7 +87,9 @@ public class StormSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
         if (storm != null) {
             storm.setCosmetic(true);
         }
-        target.damage(actor.getDamageSources().indirectMagic(actor, actor), 5);
+        DamageSource damageSource = actor.getDamageSources().indirectMagic(actor, actor);
+        float damage = HelperMethods.attackScaledDamage(actor, context.stack(), Config.uniqueEffects.mjolnir.damageScaling);
+        target.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments(context.world(), context.stack(), target, damageSource, damage));
         context.world().spawnParticles(ParticleTypes.CLOUD, actor.getX(), actor.getY() + 2.0, actor.getZ(), 24,
                 Config.uniqueEffects.mjolnir.radius * 0.25, 0.6, Config.uniqueEffects.mjolnir.radius * 0.25, 0.02);
         return true;
@@ -142,6 +145,7 @@ public class StormSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
         public int frequency = 10;
         @ValidatedInt.Restrict(min = 1)
         public int radius = 10;
+        public float damageScaling = 0.56f;
 
     }
 }

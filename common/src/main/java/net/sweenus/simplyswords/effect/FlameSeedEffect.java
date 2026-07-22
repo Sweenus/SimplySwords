@@ -49,7 +49,7 @@ public class FlameSeedEffect extends OrbitingEffect {
     public boolean applyUpdateEffect(LivingEntity livingEntity, int amplifier) {
         if (!livingEntity.getWorld().isClient()) {
             ServerWorld serverWorld = (ServerWorld) livingEntity.getWorld();
-            float abilityDamage = Config.uniqueEffects.flamewind.damage;
+            float abilityDamage = 0f;
             float volume = 0.3f;
             float pitch = 1.3f;
             int frequency = 20;
@@ -59,6 +59,10 @@ public class FlameSeedEffect extends OrbitingEffect {
             if (currentEffect instanceof SimplySwordsStatusEffectInstance statusEffect) {
                 this.sourceEntity = statusEffect.getSourceEntity();
                 this.additionalData = statusEffect.getAdditionalData();
+            }
+            if (this.sourceEntity != null) {
+                abilityDamage = HelperMethods.abilityScaledDamage("fire", this.sourceEntity, this.sourceEntity.getMainHandStack(),
+                        Config.uniqueEffects.flamewind.damageScaling, Config.uniqueEffects.flamewind.spellScaling);
             }
             FlamewindVisualManager.refreshSeed(serverWorld, livingEntity);
 
@@ -71,7 +75,8 @@ public class FlameSeedEffect extends OrbitingEffect {
                     triggerDetonation(serverWorld, livingEntity, this.sourceEntity, this.additionalData);
                     livingEntity.removeStatusEffect(EffectRegistry.getReference(EffectRegistry.FLAMESEED));
                     expiryDetonation = true;
-                    abilityDamage = Config.uniqueEffects.flamewind.detonationDamage;
+                    abilityDamage = HelperMethods.attackScaledDamage(this.sourceEntity, this.sourceEntity == null ? null : this.sourceEntity.getMainHandStack(),
+                            Config.uniqueEffects.flamewind.detonationDamageScaling);
                     volume = 0.6f;
                     pitch = 1.0f;
                     soundEvent = SoundRegistry.SPELL_FIRE.get();
@@ -79,9 +84,7 @@ public class FlameSeedEffect extends OrbitingEffect {
 
                 if (this.sourceEntity != null) {
                     damageSource = livingEntity.getDamageSources().indirectMagic(livingEntity, this.sourceEntity);
-                    float spellScalingModifier = Config.uniqueEffects.flamewind.spellScaling;
-                    if (HelperMethods.commonSpellAttributeScaling(spellScalingModifier, this.sourceEntity, "fire") > abilityDamage)
-                        abilityDamage = HelperMethods.commonSpellAttributeScaling(spellScalingModifier, this.sourceEntity, "fire");
+                    abilityDamage = Math.max(abilityDamage, HelperMethods.commonSpellAttributeScaling(Config.uniqueEffects.flamewind.spellScaling, this.sourceEntity, "fire"));
                 }
 
                 if (livingEntity instanceof PlayerEntity && this.sourceEntity !=null && this.sourceEntity instanceof  PlayerEntity playerSourceEntity)
@@ -90,7 +93,11 @@ public class FlameSeedEffect extends OrbitingEffect {
                 if (expiryDetonation) {
                     DETONATING_TARGETS.add(livingEntity.getUuid());
                 }
-                livingEntity.damage(damageSource, (this.additionalData + ((float) amplifier / 4) + abilityDamage));
+                float damage = this.additionalData + ((float) amplifier / 4) + abilityDamage;
+                if (this.sourceEntity != null) {
+                    damage = HelperMethods.applyAbilityDamageEnchantments(serverWorld, this.sourceEntity.getMainHandStack(), livingEntity, damageSource, damage);
+                }
+                livingEntity.damage(damageSource, damage);
                 if (expiryDetonation) {
                     DETONATING_TARGETS.remove(livingEntity.getUuid());
                 }
@@ -198,7 +205,8 @@ public class FlameSeedEffect extends OrbitingEffect {
         serverWorld.spawnParticles(ParticleTypes.EXPLOSION, center.x, center.y + 0.35, center.z, 2, 0.35, 0.2, 0.35, 0.01);
         serverWorld.spawnParticles(ParticleTypes.WARPED_SPORE, center.x, center.y + 0.35, center.z, 10, 0.8, 0.35, 0.8, 0.02);
 
-        float abilityDamage = Config.uniqueEffects.flamewind.detonationDamage;
+        float abilityDamage = HelperMethods.attackScaledDamage(sourceEntity, sourceEntity == null ? null : sourceEntity.getMainHandStack(),
+                Config.uniqueEffects.flamewind.detonationDamageScaling);
         if (center.distanceTo(sourceEntity.getPos()) < 30) {
             int maxHaste = Config.uniqueEffects.flamewind.maxHaste;
             HelperMethods.incrementStatusEffect(sourceEntity, StatusEffects.HASTE, 120, 1, maxHaste);
@@ -220,7 +228,9 @@ public class FlameSeedEffect extends OrbitingEffect {
                 continue;
             }
 
-            le.damage(damageSource, abilityDamage);
+            float damage = sourceEntity == null ? abilityDamage
+                    : HelperMethods.applyAbilityDamageEnchantments(serverWorld, sourceEntity.getMainHandStack(), le, damageSource, abilityDamage);
+            le.damage(damageSource, damage);
             if (!le.hasStatusEffect(EffectRegistry.getReference(EffectRegistry.FLAMESEED)) && remaining > 0) {
                 remaining -= 1;
                 SimplySwordsStatusEffectInstance flameSeedEffect = new SimplySwordsStatusEffectInstance(

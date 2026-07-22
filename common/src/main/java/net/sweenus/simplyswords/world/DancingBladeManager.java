@@ -90,7 +90,7 @@ public final class DancingBladeManager {
     }
 
     private static void damageCollidingTargets(ServerWorld world, ServerPlayerEntity owner, DancingBladeVisualEntity blade, Vec3d bladePos) {
-        double damage = HelperMethods.getEntityAttackDamage(owner) * Config.gemPowers.dancingBlades.damageMultiplier;
+        double damage = HelperMethods.attackScaledDamage(owner, blade.getWeaponStack(), Config.gemPowers.dancingBlades.damageScaling);
         if (damage <= 0.0) {
             return;
         }
@@ -124,7 +124,9 @@ public final class DancingBladeManager {
         }
 
         target.timeUntilRegen = 0;
-        boolean damaged = target.damage(world.getDamageSources().trident(blade, owner), damage);
+        var damageSource = world.getDamageSources().trident(blade, owner);
+        float enchantedDamage = HelperMethods.applyAbilityDamageEnchantments(world, stack, target, damageSource, damage);
+        boolean damaged = target.damage(damageSource, enchantedDamage);
         target.timeUntilRegen = 0;
         if (!damaged) {
             return;

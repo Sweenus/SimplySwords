@@ -135,6 +135,7 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
 
         float multiplier = getBackstabMultiplier(stacks);
         float damage = (float) (HelperMethods.getEntityAttackDamage(actor) * multiplier);
+        damage = HelperMethods.applyNonPlayerAbilityDamageModifier(actor, damage);
         DamageSource damageSource = SimplySwordsAPI.getWeaponDamageSource(actor);
         target.timeUntilRegen = 0;
         boolean damaged = target.damage(damageSource, damage);

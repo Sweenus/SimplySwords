@@ -73,6 +73,6 @@ public class DancingBladesPower extends RunefusedGemPower {
         public double orbitRadius = 2.65;
 
         @ValidatedFloat.Restrict(min = 0f)
-        public float damageMultiplier = 1.0f;
+        public float damageScaling = 1.0f;
     }
 }

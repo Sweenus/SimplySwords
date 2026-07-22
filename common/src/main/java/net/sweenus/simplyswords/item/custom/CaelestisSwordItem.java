@@ -97,7 +97,7 @@ public class CaelestisSwordItem extends UniqueSwordItem {
         @ValidatedFloat.Restrict(min = 0)
         public float damageMax = 300f;
         @ValidatedFloat.Restrict(min = 0f)
-        public float damageModifier = 1.0f;
+        public float damageScaling = 1.0f;
         @ValidatedInt.Restrict(min = 0)
         public int duration = 100;
 

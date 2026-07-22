@@ -38,11 +38,12 @@ public class FaultlinePower extends RunefusedGemPower {
             return;
         }
 
-        float damage = HelperMethods.spellScaledDamage(
+        float damage = HelperMethods.abilityScaledDamage(
                 "earth",
                 player,
-                Config.gemPowers.faultline.spellScaling,
-                Config.gemPowers.faultline.damage
+                stack,
+                Config.gemPowers.faultline.damageScaling,
+                Config.gemPowers.faultline.spellScaling
         );
         DelegatedWeaponHitContext context = SimplySwordsAPI.getDelegatedWeaponHitContext();
         if (context != null) {
@@ -86,7 +87,7 @@ public class FaultlinePower extends RunefusedGemPower {
         public double stepDistance = 1.0;
 
         @ValidatedFloat.Restrict(min = 0f)
-        public float damage = 4.0F;
+        public float damageScaling = 0.44F;
 
         @ValidatedFloat.Restrict(min = 0f)
         public float spellScaling = 1.0F;

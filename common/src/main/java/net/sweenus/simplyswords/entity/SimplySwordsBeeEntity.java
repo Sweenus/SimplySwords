@@ -6,12 +6,15 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.Tameable;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.attribute.EntityAttributes;
+import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.passive.BeeEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
@@ -38,6 +41,8 @@ public class SimplySwordsBeeEntity extends BeeEntity implements Tameable {
 
     public SimplySwordsBeeEntity(EntityType<? extends BeeEntity> entityType, World world) {
         super(entityType, world);
+        this.experiencePoints = 0;
+        this.setCanPickUpLoot(false);
     }
 
     @Override
@@ -85,6 +90,14 @@ public class SimplySwordsBeeEntity extends BeeEntity implements Tameable {
     }
 
     @Override
+    public boolean damage(DamageSource source, float amount) {
+        if (isHivemindSwarmBee() && source.getAttacker() instanceof PlayerEntity) {
+            return false;
+        }
+        return super.damage(source, amount);
+    }
+
+    @Override
     public boolean isPushable() {
         return !isHivemindSwarmBee() && super.isPushable();
     }
@@ -129,6 +142,17 @@ public class SimplySwordsBeeEntity extends BeeEntity implements Tameable {
     public void setHivemindSwarmBee(boolean hivemindSwarmBee) {
         this.dataTracker.set(HIVEMIND_SWARM, hivemindSwarmBee);
         this.noClip = hivemindSwarmBee;
+        if (hivemindSwarmBee) {
+            this.experiencePoints = 0;
+            this.setCanPickUpLoot(false);
+        }
+    }
+
+    @Override
+    protected void dropEquipment(ServerWorld world, DamageSource source, boolean causedByPlayer) {
+        if (!isHivemindSwarmBee()) {
+            super.dropEquipment(world, source, causedByPlayer);
+        }
     }
 
     @Nullable

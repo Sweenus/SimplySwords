@@ -179,6 +179,14 @@ public class EnigmaSwordItem extends UniqueSwordItem implements UniqueWeaponActi
         public int enigmaCooldown = 800;
         @ValidatedDouble.Restrict(min = 1.0)
         public double enigmaChaseRadius = 16.0;
+        @ValidatedDouble.Restrict(min = 1.0)
+        public double enigmaTornadoRadius = 5.5;
+        @ValidatedInt.Restrict(min = 1)
+        public int enigmaOrbitTicks = 35;
+        @ValidatedDouble.Restrict(min = 0.0)
+        public double enigmaFlingStrength = 1.35;
+        @ValidatedDouble.Restrict(min = 0.0)
+        public double enigmaFlingUpwardStrength = 0.55;
         @ValidatedInt.Restrict(min = 1)
         public int enigmaDecayRate = 2;
 

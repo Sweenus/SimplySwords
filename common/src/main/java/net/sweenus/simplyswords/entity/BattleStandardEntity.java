@@ -4,10 +4,10 @@ import com.google.common.base.Suppliers;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.SpawnGroup;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
@@ -20,6 +20,7 @@ import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
@@ -106,7 +107,8 @@ public class BattleStandardEntity extends PathAwareEntity {
                 if (!ownerEntity.isAlive())
                     this.setHealth(this.getHealth() - 1000);
                 int radius = 6;
-                float abilityDamage = HelperMethods.spellScaledDamage("fire", ownerEntity, Config.uniqueEffects.sunfire.spellScaling, Config.uniqueEffects.sunfire.damage);
+                float abilityDamage = HelperMethods.abilityScaledDamage("fire", ownerEntity, ownerEntity.getMainHandStack(),
+                        Config.uniqueEffects.sunfire.damageScaling, Config.uniqueEffects.sunfire.spellScaling);
                 // AOE Aura
                 //living entity, ownerEntity, abilityDamage,
                 if (this.age % 10 == 0) {
@@ -120,7 +122,8 @@ public class BattleStandardEntity extends PathAwareEntity {
                             // Sunfire negative effects
                             switch (standardType) {
                                 case "sunfire" -> {
-                                    le.damage(ownerEntity.getDamageSources().magic(), abilityDamage);
+                                    DamageSource damageSource = ownerEntity.getDamageSources().magic();
+                                    le.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments((ServerWorld) getWorld(), ownerEntity.getMainHandStack(), le, damageSource, abilityDamage));
                                     le.setOnFireFor(1);
                                     le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 120, 1), this);
                                 }
@@ -136,8 +139,10 @@ public class BattleStandardEntity extends PathAwareEntity {
                                 }
                                 // API negative effects
                                 case "api" -> {
-                                    if (dealsDamage)
-                                        le.damage(ownerEntity.getDamageSources().magic(), abilityDamage);
+                                    if (dealsDamage) {
+                                        DamageSource damageSource = ownerEntity.getDamageSources().magic();
+                                        le.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments((ServerWorld) getWorld(), ownerEntity.getMainHandStack(), le, damageSource, abilityDamage));
+                                    }
                                     if (negativeEffect != null) {
                                         try {
                                             RegistryEntry<StatusEffect> negativeEffectEntry = Registries.STATUS_EFFECT.getEntry(Identifier.of(negativeEffect)).orElseThrow();
@@ -179,7 +184,8 @@ public class BattleStandardEntity extends PathAwareEntity {
                             this.getX() - 1, this.getY() - (float) 1, this.getZ() - 1);
                     for (Entity entity : getWorld().getOtherEntities(this, box, EntityPredicates.VALID_LIVING_ENTITY)) {
                         if ((entity instanceof LivingEntity le) && HelperMethods.checkAbilityTarget(le, ownerEntity) && le != ownerEntity) {
-                            le.damage(ownerEntity.getDamageSources().magic(), abilityDamage * 3);
+                            DamageSource damageSource = ownerEntity.getDamageSources().magic();
+                            le.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments((ServerWorld) getWorld(), ownerEntity.getMainHandStack(), le, damageSource, abilityDamage * 3));
                             le.setOnFireFor(1);
                             le.setVelocity((le.getX() - this.getX()) / 4, 0.5, (le.getZ() - this.getZ()) / 4);
                         }
@@ -190,7 +196,8 @@ public class BattleStandardEntity extends PathAwareEntity {
                             this.getX() - radius, this.getY() - (float) radius / 3, this.getZ() - radius);
                     for (Entity entities : getWorld().getOtherEntities(this, box, EntityPredicates.VALID_LIVING_ENTITY)) {
                         if (entities instanceof LivingEntity le && !HelperMethods.checkFriendlyFire(le, ownerEntity)) {
-                            float abilityHeal = HelperMethods.spellScaledDamage("healing", ownerEntity, Config.uniqueEffects.sunfire.spellScalingHeal, 3f);
+                            float abilityHeal = HelperMethods.abilityScaledDamage("healing", ownerEntity, ownerEntity.getMainHandStack(),
+                                    Config.uniqueEffects.sunfire.healScaling, Config.uniqueEffects.sunfire.spellScalingHeal);
                             //Sunfire positive effects
                             switch (standardType) {
                                 case "sunfire" -> {

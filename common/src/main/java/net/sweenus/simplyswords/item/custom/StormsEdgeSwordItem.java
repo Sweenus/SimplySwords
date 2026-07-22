@@ -3,6 +3,7 @@ package net.sweenus.simplyswords.item.custom;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
@@ -73,7 +74,9 @@ public class StormsEdgeSwordItem extends UniqueSwordItem implements UniqueWeapon
                 return;
             }
             context.world().spawnParticles(ParticleTypes.ELECTRIC_SPARK, target.getX(), target.getBodyY(0.5), target.getZ(), 10, 0.35, 0.35, 0.35, 0.08);
-            target.damage(actor.getDamageSources().indirectMagic(actor, actor), (float) Math.max(1.0, HelperMethods.getEntityAttackDamage(actor) * 0.5));
+            DamageSource damageSource = actor.getDamageSources().indirectMagic(actor, actor);
+            float damage = HelperMethods.attackScaledDamage(actor, context.stack(), Config.uniqueEffects.storms_edge.damageScaling);
+            target.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments(context.world(), context.stack(), target, damageSource, damage));
         });
         actor.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, 20, 5), actor);
         actor.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, 80, 1), actor);
@@ -159,6 +162,7 @@ public class StormsEdgeSwordItem extends UniqueSwordItem implements UniqueWeapon
         public int chance = 15;
         @ValidatedInt.Restrict(min = 0)
         public int cooldown = 100;
+        public float damageScaling = 0.5f;
 
     }
 }

@@ -46,7 +46,8 @@ public class FrostVortexEffect extends OrbitingEffect {
                     if (livingEntity instanceof PlayerEntity && sourceEntity instanceof PlayerEntity sourcePlayer)
                         damageSource = livingEntity.getDamageSources().playerAttack(sourcePlayer);
                 }
-                livingEntity.damage(damageSource, (additionalData + ((float) amplifier / 4) + abilityDamage));
+                float damage = HelperMethods.applyNonPlayerAbilityDamageModifier(sourceEntity, additionalData + ((float) amplifier / 4) + abilityDamage);
+                livingEntity.damage(damageSource, damage);
             }
 
             if (livingEntity.age % 40 == 0) {

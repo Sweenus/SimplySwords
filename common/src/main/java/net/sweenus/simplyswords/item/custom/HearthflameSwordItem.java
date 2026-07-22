@@ -87,8 +87,8 @@ public class HearthflameSwordItem extends UniqueSwordItem implements TwoHandedWe
     public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
         if (HelperMethods.isHolding(stack, user) && user instanceof PlayerEntity player) {
             int radius = Config.uniqueEffects.hearthflame.radius;
-            float spellScaling = HelperMethods.commonSpellAttributeScaling(Config.uniqueEffects.hearthflame.spellScaling, user, "fire");
-            float abilityDamage = spellScaling > 0f ? spellScaling : Config.uniqueEffects.hearthflame.damage;
+            float abilityDamage = HelperMethods.abilityScaledDamage("fire", user, stack,
+                    Config.uniqueEffects.hearthflame.damageScaling, Config.uniqueEffects.hearthflame.spellScaling);
             int chargePower = stack.getOrDefault(ComponentTypeRegistry.STORED_CHARGE.get(), StoredChargeComponent.DEFAULT).charge();
             AbilityMethods.tickAbilityVolcanicFury(stack, world, user, remainingUseTicks, ability_timer_max,
                     abilityDamage, Config.uniqueEffects.hearthflame.cooldown, radius, chargePower);
@@ -131,10 +131,11 @@ public class HearthflameSwordItem extends UniqueSwordItem implements TwoHandedWe
             for (Entity entity : world.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY)) {
                 if ((entity instanceof LivingEntity le) && HelperMethods.checkFriendlyFire((LivingEntity) entity, user)) {
                     float choose = (float) (Math.random() * 1);
-                    float spellScaling = HelperMethods.commonSpellAttributeScaling(Config.uniqueEffects.hearthflame.spellScaling, user, "fire");
-                    float abilityDamage = spellScaling > 0f ? spellScaling : Config.uniqueEffects.hearthflame.damage;
+                    float abilityDamage = HelperMethods.abilityScaledDamage("fire", user, stack,
+                            Config.uniqueEffects.hearthflame.damageScaling, Config.uniqueEffects.hearthflame.spellScaling);
                     int chargePower = stack.getOrDefault(ComponentTypeRegistry.STORED_CHARGE.get(), StoredChargeComponent.DEFAULT).charge();
-                    le.damage(user.getDamageSources().indirectMagic(user, user), abilityDamage * (chargePower * 0.3f));
+                    var damageSource = user.getDamageSources().indirectMagic(user, user);
+                    le.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments((ServerWorld) world, stack, le, damageSource, abilityDamage * (chargePower * 0.3f)));
                     le.setOnFireFor(6);
                     world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_BOW_POISON_ATTACK_01.get(),
                             le.getSoundCategory(), 0.1f, choose);
@@ -155,9 +156,11 @@ public class HearthflameSwordItem extends UniqueSwordItem implements TwoHandedWe
         }
         ItemStack stack = context.stack();
         int chargePower = Math.max(4, stack.getOrDefault(ComponentTypeRegistry.STORED_CHARGE.get(), StoredChargeComponent.DEFAULT).charge());
-        float abilityDamage = HelperMethods.spellScaledDamage("fire", actor, Config.uniqueEffects.hearthflame.spellScaling, Config.uniqueEffects.hearthflame.damage);
+        float abilityDamage = HelperMethods.abilityScaledDamage("fire", actor, stack,
+                Config.uniqueEffects.hearthflame.damageScaling, Config.uniqueEffects.hearthflame.spellScaling);
         actor.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, 40, 3), actor);
-        target.damage(actor.getDamageSources().indirectMagic(actor, actor), abilityDamage * (chargePower * 0.3f));
+        var damageSource = actor.getDamageSources().indirectMagic(actor, actor);
+        target.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments(context.world(), stack, target, damageSource, abilityDamage * (chargePower * 0.3f)));
         target.setOnFireFor(6);
         target.addStatusEffect(new StatusEffectInstance(StatusEffects.LEVITATION, 10, 1), actor);
         target.setVelocity(target.getX() - actor.getX(), 0.5, target.getZ() - actor.getZ());
@@ -206,7 +209,7 @@ public class HearthflameSwordItem extends UniqueSwordItem implements TwoHandedWe
         @ValidatedInt.Restrict(min = 0)
         public int cooldown = 300;
         @ValidatedFloat.Restrict(min = 0f)
-        public float damage = 3f;
+        public float damageScaling = 0.21f;
         @ValidatedInt.Restrict(min = 1)
         public int radius = 3;
         @ValidatedFloat.Restrict(min = 0f)

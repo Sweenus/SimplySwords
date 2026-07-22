@@ -44,7 +44,7 @@ public class HiveheartSwordItem extends UniqueSwordItem implements UniqueWeaponA
         if (!attacker.getWorld().isClient()) {
             ServerWorld serverWorld = (ServerWorld) attacker.getWorld();
             int skillCooldown = Config.uniqueEffects.hiveheart.cooldown;
-            float skillDamage = Config.uniqueEffects.hiveheart.damage;
+            float skillDamage = Config.uniqueEffects.hiveheart.beeDamageScaling;
             HelperMethods.playHitSounds(attacker, target);
 
             if (attacker instanceof PlayerEntity player && !player.getItemCooldownManager().isCoolingDown(stack.getItem())) {
@@ -59,7 +59,7 @@ public class HiveheartSwordItem extends UniqueSwordItem implements UniqueWeaponA
                     beeEntity.shouldAngerAt(target);
                     beeEntity.setInvulnerable(true);
                     beeEntity.setOwner(attacker);
-                    double attackDamage = (1 + skillDamage * HelperMethods.getEntityAttackDamage(attacker));
+                    double attackDamage = 1 + HelperMethods.attackScaledDamage(attacker, stack, skillDamage);
                     EntityAttributeInstance attackAttribute = beeEntity.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE);
                     if (attackAttribute != null)
                         attackAttribute.setBaseValue(attackDamage);
@@ -128,7 +128,7 @@ public class HiveheartSwordItem extends UniqueSwordItem implements UniqueWeaponA
         @ValidatedInt.Restrict(min = 0)
         public int cooldown = 60;
         @ValidatedFloat.Restrict(min = 0f)
-        public float damage = 1.1f;
+        public float beeDamageScaling = 1.1f;
         @ValidatedInt.Restrict(min = 0)
         public int activeCooldown = 300;
         @ValidatedInt.Restrict(min = 0)
@@ -140,7 +140,7 @@ public class HiveheartSwordItem extends UniqueSwordItem implements UniqueWeaponA
         @ValidatedInt.Restrict(min = 1)
         public int stingsPerBee = 10;
         @ValidatedDouble.Restrict(min = 0.0)
-        public double stingDamageMultiplier = 0.05;
+        public double stingDamageScaling = 0.05;
         @ValidatedInt.Restrict(min = 1)
         public int stingIntervalTicks = 10;
         @ValidatedInt.Restrict(min = 0)

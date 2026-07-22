@@ -163,7 +163,7 @@ public final class VerdantTrailManager {
                         owner
                 );
             } else {
-                damageWithoutKnockback(entity, owner, Math.max(0.0F, Config.gemPowers.verdantTrail.damage));
+                damageWithoutKnockback(entity, owner, HelperMethods.attackScaledDamage(owner, owner.getMainHandStack(), Config.gemPowers.verdantTrail.damageScaling));
             }
         }
     }
@@ -173,7 +173,8 @@ public final class VerdantTrailManager {
             return;
         }
         Vec3d velocity = target.getVelocity();
-        if (target.damage(owner.getDamageSources().indirectMagic(owner, owner), damage)) {
+        var damageSource = owner.getDamageSources().indirectMagic(owner, owner);
+        if (target.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments((ServerWorld) owner.getWorld(), owner.getMainHandStack(), target, damageSource, damage))) {
             target.setVelocity(velocity);
             target.velocityModified = true;
         }

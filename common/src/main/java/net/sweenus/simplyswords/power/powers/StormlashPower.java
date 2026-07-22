@@ -39,9 +39,9 @@ public class StormlashPower extends RunefusedGemPower {
             return;
         }
 
-        float damage = HelperMethods.spellScaledDamage("lightning", player,
-                Config.gemPowers.stormlash.spellScaling,
-                Config.gemPowers.stormlash.damage);
+        float damage = HelperMethods.abilityScaledDamage("lightning", player, stack,
+                Config.gemPowers.stormlash.damageScaling,
+                Config.gemPowers.stormlash.spellScaling);
         DelegatedWeaponHitContext context = SimplySwordsAPI.getDelegatedWeaponHitContext();
         if (context != null) {
             ChainLightningVisualManager.damageChain(player.getServerWorld(), player, context.actor(), target,
@@ -88,7 +88,7 @@ public class StormlashPower extends RunefusedGemPower {
         public double range = 6.0;
 
         @ValidatedFloat.Restrict(min = 0f)
-        public float damage = 4.0f;
+        public float damageScaling = 0.44f;
 
         @ValidatedFloat.Restrict(min = 0f)
         public float spellScaling = 1.0f;

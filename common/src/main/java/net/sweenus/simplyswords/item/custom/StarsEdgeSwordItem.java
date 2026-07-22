@@ -39,11 +39,11 @@ public class StarsEdgeSwordItem extends UniqueSwordItem implements UniqueWeaponA
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         if (!attacker.getWorld().isClient()) {
-            float skillDamageModifier = Config.uniqueEffects.stars_edge.damageModifier;
+            float skillDamageModifier = Config.uniqueEffects.stars_edge.damageScaling;
             float skillLifestealModifier = Config.uniqueEffects.stars_edge.lifestealModifier;
             ServerWorld world = (ServerWorld) attacker.getWorld();
             DamageSource damageSource = world.getDamageSources().generic();
-            float abilityDamage = (float) HelperMethods.getEntityAttackDamage(attacker);
+            float abilityDamage = HelperMethods.attackScaledDamage(attacker, stack, skillDamageModifier);
             if (attacker instanceof PlayerEntity player)
                 damageSource = attacker.getDamageSources().playerAttack(player);
 
@@ -51,7 +51,7 @@ public class StarsEdgeSwordItem extends UniqueSwordItem implements UniqueWeaponA
 
             if (world.isDay()) {
                 target.timeUntilRegen = 0;
-                target.damage(damageSource, abilityDamage * skillDamageModifier);
+                target.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments(world, stack, target, damageSource, abilityDamage));
             }
             else if (world.isNight()) {
                 attacker.heal(abilityDamage * skillLifestealModifier);
@@ -130,7 +130,7 @@ public class StarsEdgeSwordItem extends UniqueSwordItem implements UniqueWeaponA
     @Override
     public void appendTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
 
-        float skillDamageModifier = Config.uniqueEffects.stars_edge.damageModifier;
+        float skillDamageModifier = Config.uniqueEffects.stars_edge.damageScaling;
 
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.starsedgesworditem.tooltip1").setStyle(Styles.ABILITY));
@@ -158,7 +158,7 @@ public class StarsEdgeSwordItem extends UniqueSwordItem implements UniqueWeaponA
         @ValidatedInt.Restrict(min = 0)
         public int duration = 120;
         @ValidatedFloat.Restrict(min = 0f)
-        public float damageModifier = 0.40f;
+        public float damageScaling = 0.40f;
         @ValidatedFloat.Restrict(min = 0f)
         public float lifestealModifier = 0.10f;
         @ValidatedInt.Restrict(min = 1)

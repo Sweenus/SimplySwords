@@ -8,6 +8,7 @@ import net.minecraft.text.Text;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.power.RunefusedGemPower;
 import net.sweenus.simplyswords.registry.SoundRegistry;
+import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
 
 import java.util.List;
@@ -21,7 +22,8 @@ public class PincushionPower extends RunefusedGemPower {
 	@Override
 	public void postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
 		int stuckArrows = attacker.getStuckArrowCount();
-		target.damage(attacker.getDamageSources().generic(), (this.isGreater() ? stuckArrows * 2 : stuckArrows));
+		float damage = HelperMethods.applyNonPlayerAbilityDamageModifier(attacker, (this.isGreater() ? stuckArrows * 2 : stuckArrows));
+		target.damage(attacker.getDamageSources().generic(), damage);
 		attacker.getWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
 				attacker.getSoundCategory(), 0.1f, 1.8f);
 	}

@@ -5,6 +5,8 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.item.ItemStack;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -172,7 +174,8 @@ public final class HivemindSwarmManager {
         if (attackDamage <= 0.0) {
             attackDamage = 1.0;
         }
-        return (float) (attackDamage * Config.uniqueEffects.hiveheart.stingDamageMultiplier);
+        return HelperMethods.attackScaledDamage(actor, actor == null ? ItemStack.EMPTY : actor.getMainHandStack(),
+                (float) Config.uniqueEffects.hiveheart.stingDamageScaling);
     }
 
     private static LivingEntity getOwner(ServerWorld world, SimplySwordsBeeEntity bee) {
@@ -409,7 +412,10 @@ public final class HivemindSwarmManager {
         Vec3d velocity = target.getVelocity();
         target.timeUntilRegen = 0;
         boolean[] damaged = {false};
-        WeaponImplicitRegistry.runSuppressed(() -> damaged[0] = target.damage(owner.getDamageSources().indirectMagic(owner, owner), bee.getSwarmStingDamage()));
+        DamageSource damageSource = owner.getDamageSources().indirectMagic(owner, owner);
+        ItemStack stack = owner.getMainHandStack();
+        float damage = HelperMethods.applyAbilityDamageEnchantments(world, stack, target, damageSource, bee.getSwarmStingDamage());
+        WeaponImplicitRegistry.runSuppressed(() -> damaged[0] = target.damage(damageSource, damage));
         target.timeUntilRegen = iframes;
         target.setVelocity(velocity);
         target.velocityModified = true;

@@ -39,9 +39,8 @@ public class MagistormEffect extends HighOrbitingEffect {
             float duration = Config.uniqueEffects.magiscythe.duration;
             int frequency = Math.max(3, 10 - amplifier);
 
-            float spellScalingModifier = Config.uniqueEffects.magiscythe.spellScaling;
-
-            float damage = Math.max(Config.uniqueEffects.magiscythe.damage, HelperMethods.commonSpellAttributeScaling(spellScalingModifier, livingEntity, "arcane"));
+            float damage = HelperMethods.abilityScaledDamage("arcane", livingEntity, livingEntity.getMainHandStack(),
+                    Config.uniqueEffects.magiscythe.damageScaling, Config.uniqueEffects.magiscythe.spellScaling);
 
             DamageSource damageSource =  livingEntity.getDamageSources().indirectMagic(livingEntity, livingEntity);
             if (livingEntity.age % frequency == 0) {
@@ -59,7 +58,8 @@ public class MagistormEffect extends HighOrbitingEffect {
                         if (target instanceof PlayerEntity && livingEntity instanceof PlayerEntity player)
                             damageSource = livingEntity.getDamageSources().playerAttack(player);
                         target.timeUntilRegen = 0;
-                        HelperMethods.applyDamageWithoutKnockback(target, damageSource, damage);
+                        float enchantedDamage = HelperMethods.applyAbilityDamageEnchantments(world, livingEntity.getMainHandStack(), target, damageSource, damage);
+                        HelperMethods.applyDamageWithoutKnockback(target, damageSource, enchantedDamage);
                         target.timeUntilRegen = 0;
                         HelperMethods.spawnRainingParticles(world, ParticleTypes.ENCHANT, target, 20, yOffset);
                         HelperMethods.spawnRainingParticles(world, ParticleTypes.GLOW, target, 4, yOffset);

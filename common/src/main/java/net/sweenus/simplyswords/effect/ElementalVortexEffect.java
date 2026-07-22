@@ -52,7 +52,9 @@ public class ElementalVortexEffect extends OrbitingEffect {
 							float abilityDamageFrost = HelperMethods.commonSpellAttributeScaling(spellScalingModifier, sourceEntity, "frost");
 							float abilityDamageFire = HelperMethods.commonSpellAttributeScaling(spellScalingModifier, sourceEntity, "fire");
 							le.timeUntilRegen = 0;
-                            le.damage(damageSource, (3 + ((float) amplifier / 2)) + (abilityDamageFire + abilityDamageFrost));
+                            float damage = HelperMethods.applyNonPlayerAbilityDamageModifier(sourceEntity,
+                                    (3 + ((float) amplifier / 2)) + (abilityDamageFire + abilityDamageFrost));
+                            le.damage(damageSource, damage);
                         }
 
                     }

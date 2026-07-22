@@ -56,7 +56,7 @@ public class IcewhisperSwordItem extends UniqueSwordItem implements TwoHandedWea
         }
 
         if (world instanceof ServerWorld serverWorld) {
-            activateIcewhisper(serverWorld, user);
+            activateIcewhisper(serverWorld, user, itemStack);
             user.getItemCooldownManager().set(itemStack.getItem(), Config.uniqueEffects.icewhisper.cooldown);
         }
         user.swingHand(hand);
@@ -68,7 +68,7 @@ public class IcewhisperSwordItem extends UniqueSwordItem implements TwoHandedWea
         if (!canActivate(context)) {
             return false;
         }
-        activateIcewhisper(context.world(), context.actor());
+        activateIcewhisper(context.world(), context.actor(), context.stack());
         return true;
     }
 
@@ -77,10 +77,11 @@ public class IcewhisperSwordItem extends UniqueSwordItem implements TwoHandedWea
         return Config.uniqueEffects.icewhisper.cooldown;
     }
 
-    private static void activateIcewhisper(ServerWorld serverWorld, LivingEntity actor) {
+    private static void activateIcewhisper(ServerWorld serverWorld, LivingEntity actor, ItemStack stack) {
         int radius = Config.uniqueEffects.icewhisper.radius * 2;
-        float abilityDamage = HelperMethods.spellScaledDamage("frost", actor, Config.uniqueEffects.icewhisper.spellScaling, Config.uniqueEffects.icewhisper.damage);
-        IcewhisperCometManager.startStorm(serverWorld, actor, radius, abilityDamage * Config.uniqueEffects.icewhisper.cometDamageMultiplier, Config.uniqueEffects.icewhisper.duration);
+        float abilityDamage = HelperMethods.abilityScaledDamage("frost", actor, stack,
+                Config.uniqueEffects.icewhisper.damageScaling, Config.uniqueEffects.icewhisper.spellScaling);
+        IcewhisperCometManager.startStorm(serverWorld, actor, stack, radius, abilityDamage * Config.uniqueEffects.icewhisper.cometDamageMultiplier, Config.uniqueEffects.icewhisper.duration);
     }
 
     @Override
@@ -112,8 +113,10 @@ public class IcewhisperSwordItem extends UniqueSwordItem implements TwoHandedWea
                 }
                 float choose = (float) (Math.random() * 1);
                 world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_BOW_ICE_SHOOT_IMPACT_03.get(), le.getSoundCategory(), 0.1f, choose);
-                float abilityDamage = HelperMethods.spellScaledDamage("frost", user, Config.uniqueEffects.icewhisper.spellScaling, Config.uniqueEffects.icewhisper.damage);
-                le.damage(user.getDamageSources().indirectMagic(user, user), abilityDamage);
+                float abilityDamage = HelperMethods.abilityScaledDamage("frost", user, stack,
+                        Config.uniqueEffects.icewhisper.damageScaling, Config.uniqueEffects.icewhisper.spellScaling);
+                var damageSource = user.getDamageSources().indirectMagic(user, user);
+                le.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments(world, stack, le, damageSource, abilityDamage));
                 FrostfallIceSpikeFieldManager.createTargetBurst(world, le.getPos(), 4, 0.9F);
             }
         }
@@ -162,7 +165,7 @@ public class IcewhisperSwordItem extends UniqueSwordItem implements TwoHandedWea
         @ValidatedInt.Restrict(min = 0)
         public int cooldown = 450;
         @ValidatedFloat.Restrict(min = 0f)
-        public float damage = 1f;
+        public float damageScaling = 0.08f;
         @ValidatedInt.Restrict(min = 1)
         public int duration = 200;
         @ValidatedInt.Restrict(min = 1)

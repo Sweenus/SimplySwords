@@ -51,13 +51,12 @@ public class WickpiercerSwordItem extends UniqueSwordItem implements RevivalWeap
             DamageSource damageSource;
             if (attacker instanceof PlayerEntity player) {
                 damageSource = attacker.getDamageSources().playerAttack(player);
-                double[] doubles = HelperMethods.getAttackFromSlot(player, stack, attacker.getActiveHand());
-                float damageModifier = (float) doubles[0] * Config.uniqueEffects.wickpiercer.damage;
+                float damageModifier = HelperMethods.attackScaledDamage(attacker, stack, Config.uniqueEffects.wickpiercer.damageScaling);
 
                 if (attacker.hasStatusEffect(EffectRegistry.getReference(EffectRegistry.FRENZY))) {
                     target.timeUntilRegen = 0;
                     HelperMethods.decrementStatusEffect(player, EffectRegistry.getReference(EffectRegistry.FRENZY));
-                    target.damage(damageSource, damageModifier);
+                    target.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments(world, stack, target, damageSource, damageModifier));
                     //world.playSound(null, attacker.getBlockPos(), SoundRegistry.SPELL_FIRE.get(),attacker.getSoundCategory(), 0.2f, 1.9f);
                 }
             }
@@ -86,8 +85,7 @@ public class WickpiercerSwordItem extends UniqueSwordItem implements RevivalWeap
             wickpiercerEntity.setVelocity(user, user.getPitch(), user.getYaw(), 0.0F, 1.5F, 1.0F);
             wickpiercerEntity.setYaw(user.getYaw());
             wickpiercerEntity.setPitch(user.getPitch()-90);
-            double[] doubles = HelperMethods.getAttackFromSlot(user, itemStack, user.getActiveHand());
-            wickpiercerEntity.primaryBaseDamage = (float) doubles[0]  *0.5f;
+            wickpiercerEntity.primaryBaseDamage = HelperMethods.attackScaledDamage(user, itemStack, Config.uniqueEffects.wickpiercer.throwDamageScaling);
             wickpiercerEntity.hasLoyalty = 3;
             if (hand == Hand.OFF_HAND)
                 wickpiercerEntity.offhandThrow = true;
@@ -117,7 +115,7 @@ public class WickpiercerSwordItem extends UniqueSwordItem implements RevivalWeap
         wickpiercerEntity.setVelocity(direction.x, direction.y, direction.z, 1.65F, 1.0F);
         wickpiercerEntity.setYaw(actor.getYaw());
         wickpiercerEntity.setPitch(actor.getPitch() - 90);
-        wickpiercerEntity.primaryBaseDamage = (float) Math.max(1.0, HelperMethods.getAttackFromStack(context.stack(), net.minecraft.component.type.AttributeModifierSlot.MAINHAND) * 0.5f);
+        wickpiercerEntity.primaryBaseDamage = HelperMethods.attackScaledDamage(actor, context.stack(), Config.uniqueEffects.wickpiercer.throwDamageScaling);
         wickpiercerEntity.hasLoyalty = 0;
         wickpiercerEntity.setPos(actor.getX(), actor.getEyeY() - 0.5, actor.getZ());
         wickpiercerEntity.markNonReturning(80);
@@ -198,7 +196,9 @@ public class WickpiercerSwordItem extends UniqueSwordItem implements RevivalWeap
         }
 
         @ValidatedFloat.Restrict(min = 0f)
-        public float damage = 1.0f;
+        public float damageScaling = 1.0f;
+        @ValidatedFloat.Restrict(min = 0f)
+        public float throwDamageScaling = 0.5f;
         @ValidatedInt.Restrict(min = 0)
         public int duration = 80;
 

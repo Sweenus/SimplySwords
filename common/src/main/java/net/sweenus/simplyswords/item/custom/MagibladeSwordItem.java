@@ -84,8 +84,7 @@ public class MagibladeSwordItem extends UniqueSwordItem implements UniqueWeaponA
     public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
         if (!user.getWorld().isClient() && user instanceof  PlayerEntity player) {
             int skillCooldown = Config.uniqueEffects.magiblade.cooldown;
-            float damageModifier = Config.uniqueEffects.magiblade.damageModifier;
-            float damage = (float) (HelperMethods.getEntityAttackDamage(user) * damageModifier);
+            float damage = HelperMethods.attackScaledDamage(user, stack, Config.uniqueEffects.magiblade.damageScaling);
             float distance = Config.uniqueEffects.magiblade.sonicDistance;
             DamageSource damageSource = player.getDamageSources().playerAttack(player);
 
@@ -93,7 +92,7 @@ public class MagibladeSwordItem extends UniqueSwordItem implements UniqueWeaponA
                 world.playSound(null, user.getBlockPos(), SoundEvents.ENTITY_WARDEN_SONIC_BOOM,
                         user.getSoundCategory(), 0.8f, 1.1f);
                 HelperMethods.spawnDirectionalParticles((ServerWorld) world, ParticleTypes.SONIC_BOOM, player, 10, distance);
-                HelperMethods.damageEntitiesInTrajectory((ServerWorld) world, player, distance, damage, damageSource);
+                HelperMethods.damageEntitiesInTrajectory((ServerWorld) world, player, stack, distance, damage, damageSource);
                 user.setVelocity(user.getRotationVector().negate().multiply(+1.1));
                 user.setVelocity(user.getVelocity().x, 0, user.getVelocity().z);
             }
@@ -109,14 +108,14 @@ public class MagibladeSwordItem extends UniqueSwordItem implements UniqueWeaponA
         if (target == null || !HelperMethods.checkAbilityTarget(target, actor)) {
             return false;
         }
-        float damage = (float) (HelperMethods.getEntityAttackDamage(actor) * Config.uniqueEffects.magiblade.damageModifier);
+        float damage = HelperMethods.attackScaledDamage(actor, context.stack(), Config.uniqueEffects.magiblade.damageScaling);
         float distance = Config.uniqueEffects.magiblade.sonicDistance;
         Vec3d direction = target.getPos().add(0.0, target.getHeight() * 0.5, 0.0)
                 .subtract(actor.getPos().add(0.0, actor.getHeight() * 0.5, 0.0));
         context.world().playSound(null, actor.getBlockPos(), SoundEvents.ENTITY_WARDEN_SONIC_BOOM,
                 actor.getSoundCategory(), 0.8f, 1.1f);
         HelperMethods.spawnDirectionalParticles(context.world(), ParticleTypes.SONIC_BOOM, actor, direction, 10, distance);
-        HelperMethods.damageEntitiesInTrajectory(context.world(), actor, direction, distance, damage, actor.getDamageSources().mobAttack(actor));
+        HelperMethods.damageEntitiesInTrajectory(context.world(), actor, context.stack(), direction, distance, damage, actor.getDamageSources().mobAttack(actor));
         return true;
     }
 
@@ -154,7 +153,7 @@ public class MagibladeSwordItem extends UniqueSwordItem implements UniqueWeaponA
         @ValidatedInt.Restrict(min = 0)
         public int cooldown = 35;
         @ValidatedFloat.Restrict(min = 0f)
-        public float damageModifier = 0.7f;
+        public float damageScaling = 0.7f;
         @ValidatedInt.Restrict(min = 0, max = 100)
         public int repelChance = 55;
         @ValidatedFloat.Restrict(min = 1f)

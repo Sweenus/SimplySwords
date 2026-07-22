@@ -13,6 +13,7 @@ import net.sweenus.simplyswords.config.settings.TooltipSettings;
 import net.sweenus.simplyswords.power.RunefusedGemPower;
 import net.sweenus.simplyswords.registry.GemPowerRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
+import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
 
 import java.util.List;
@@ -31,7 +32,7 @@ public class ImbuedPower extends RunefusedGemPower {
 
 		if (attacker.getRandom().nextInt(100) <= hitChance) {
 			target.timeUntilRegen = 0;
-			target.damage(attacker.getDamageSources().magic(), damage);
+			target.damage(attacker.getDamageSources().magic(), HelperMethods.applyNonPlayerAbilityDamageModifier(attacker, damage));
 			attacker.getWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
 					attacker.getSoundCategory(), 0.2f, 1.8f);
 		}

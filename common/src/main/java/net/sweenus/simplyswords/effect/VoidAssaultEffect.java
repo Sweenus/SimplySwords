@@ -8,6 +8,7 @@ import net.minecraft.particle.ParticleTypes;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.effect.instance.SimplySwordsStatusEffectInstance;
 import net.sweenus.simplyswords.registry.EffectRegistry;
+import net.sweenus.simplyswords.util.HelperMethods;
 
 public class VoidAssaultEffect extends OrbitingEffect {
     public LivingEntity sourceEntity; // The player who applied the effect
@@ -38,7 +39,8 @@ public class VoidAssaultEffect extends OrbitingEffect {
                 livingEntity.timeUntilRegen = 0;
                 if (sourceEntity != null)
                     damageSource = livingEntity.getDamageSources().indirectMagic(livingEntity, sourceEntity);
-                livingEntity.damage(damageSource, additionalData + amplifier);
+                float damage = HelperMethods.applyNonPlayerAbilityDamageModifier(sourceEntity, additionalData + amplifier);
+                livingEntity.damage(damageSource, damage);
             }
         }
         super.applyUpdateEffect(livingEntity, amplifier);

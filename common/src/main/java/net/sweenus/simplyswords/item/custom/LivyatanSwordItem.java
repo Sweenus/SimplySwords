@@ -47,11 +47,12 @@ public class LivyatanSwordItem extends UniqueSwordItem implements UniqueWeaponAc
 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
-        float abilityDamage = HelperMethods.spellScaledDamage("frost", user, Config.uniqueEffects.livyatan.spellScaling, Config.uniqueEffects.livyatan.damage);
-        int duration = Config.uniqueEffects.livyatan.duration;
-        float returnDamage = Config.uniqueEffects.livyatan.returnDamage;
-        double radius = Config.uniqueEffects.livyatan.radius;
         ItemStack itemStack = user.getStackInHand(hand);
+        float abilityDamage = HelperMethods.abilityScaledDamage("frost", user, itemStack,
+                Config.uniqueEffects.livyatan.damageScaling, Config.uniqueEffects.livyatan.spellScaling);
+        int duration = Config.uniqueEffects.livyatan.duration;
+        float returnDamage = HelperMethods.attackScaledDamage(user, itemStack, Config.uniqueEffects.livyatan.returnDamageScaling);
+        double radius = Config.uniqueEffects.livyatan.radius;
         if (!world.isClient) {
             itemStack = user.getStackInHand(hand);
             LivyatanEntity livyatanEntity = new LivyatanEntity(world, user, itemStack.copy() );
@@ -83,7 +84,8 @@ public class LivyatanSwordItem extends UniqueSwordItem implements UniqueWeaponAc
         if (context.target() == null || !HelperMethods.checkAbilityTarget(context.target(), context.actor())) {
             return false;
         }
-        float abilityDamage = HelperMethods.spellScaledDamage("frost", context.actor(), Config.uniqueEffects.livyatan.spellScaling, Config.uniqueEffects.livyatan.damage);
+        float abilityDamage = HelperMethods.abilityScaledDamage("frost", context.actor(), context.stack(),
+                Config.uniqueEffects.livyatan.damageScaling, Config.uniqueEffects.livyatan.spellScaling);
         LivyatanEntity livyatanEntity = new LivyatanEntity(context.world(), context.actor(), context.stack().copy());
         Vec3d direction = LivingEntityAbilityMovementManager.getLobbedTargetDirection(context.actor(), context.target());
         livyatanEntity.setVelocity(direction.x, direction.y, direction.z, 1.65F, 1.0F);
@@ -91,7 +93,7 @@ public class LivyatanSwordItem extends UniqueSwordItem implements UniqueWeaponAc
         livyatanEntity.setPitch(context.actor().getPitch());
         livyatanEntity.primaryBaseDamage = abilityDamage;
         livyatanEntity.slownessDuration = Config.uniqueEffects.livyatan.duration;
-        livyatanEntity.primaryReturnDamage = Config.uniqueEffects.livyatan.returnDamage;
+        livyatanEntity.primaryReturnDamage = HelperMethods.attackScaledDamage(context.actor(), context.stack(), Config.uniqueEffects.livyatan.returnDamageScaling);
         livyatanEntity.primaryReturnDamageRadius = Config.uniqueEffects.livyatan.radius;
         livyatanEntity.setPos(context.actor().getX(), context.actor().getEyeY() - 0.5, context.actor().getZ());
         livyatanEntity.markNonReturning(Config.uniqueEffects.livyatan.duration + 80);
@@ -132,9 +134,9 @@ public class LivyatanSwordItem extends UniqueSwordItem implements UniqueWeaponAc
         }
 
         @ValidatedFloat.Restrict(min = 0)
-        public float returnDamage = 8f;
+        public float returnDamageScaling = 0.8f;
         @ValidatedFloat.Restrict(min = 0f)
-        public float damage = 8f;
+        public float damageScaling = 0.8f;
         @ValidatedInt.Restrict(min = 0)
         public int duration = 100;
         @ValidatedDouble.Restrict(min = 0.5)

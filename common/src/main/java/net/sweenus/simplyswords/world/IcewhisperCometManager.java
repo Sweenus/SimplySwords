@@ -3,6 +3,7 @@ package net.sweenus.simplyswords.world;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.particle.BlockStateParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
@@ -35,17 +36,17 @@ public final class IcewhisperCometManager {
         return (comets != null && !comets.isEmpty()) || (storms != null && !storms.isEmpty()) || (world.getTime() % 20L == 0L);
     }
 
-    public static void startStorm(ServerWorld world, LivingEntity owner, double radius, float damage, int durationTicks) {
+    public static void startStorm(ServerWorld world, LivingEntity owner, ItemStack stack, double radius, float damage, int durationTicks) {
         if (owner == null || durationTicks <= 0) {
             return;
         }
 
         List<ActiveStorm> storms = ACTIVE_STORMS.computeIfAbsent(world, w -> new ArrayList<>());
         storms.removeIf(storm -> storm.ownerId().equals(owner.getUuid()));
-        storms.add(new ActiveStorm(owner.getUuid(), world.getTime() + durationTicks, world.getTime(), radius, damage));
+        storms.add(new ActiveStorm(owner.getUuid(), stack.copy(), world.getTime() + durationTicks, world.getTime(), radius, damage));
     }
 
-    public static void spawnWave(ServerWorld world, LivingEntity owner, double radius, float damage) {
+    public static void spawnWave(ServerWorld world, LivingEntity owner, ItemStack stack, double radius, float damage) {
         int cometCount = Math.max(0, Config.uniqueEffects.icewhisper.cometsPerWave);
         if (cometCount <= 0 || owner == null) {
             return;
@@ -53,7 +54,7 @@ public final class IcewhisperCometManager {
 
         for (int i = 0; i < cometCount; i++) {
             Vec3d impact = chooseImpactPosition(world, owner.getPos(), radius);
-            spawnComet(world, owner, impact, damage);
+            spawnComet(world, owner, stack, impact, damage);
         }
     }
 
@@ -90,7 +91,7 @@ public final class IcewhisperCometManager {
                 return true;
             }
             if (world.getTime() >= storm.nextWaveTick()) {
-                spawnWave(world, owner, storm.radius(), storm.damage());
+                spawnWave(world, owner, storm.stack(), storm.radius(), storm.damage());
                 storm.setNextWaveTick(world.getTime() + Math.max(1, Config.uniqueEffects.icewhisper.cometInterval));
             }
             return false;
@@ -101,7 +102,7 @@ public final class IcewhisperCometManager {
         }
     }
 
-    private static void spawnComet(ServerWorld world, LivingEntity owner, Vec3d impact, float damage) {
+    private static void spawnComet(ServerWorld world, LivingEntity owner, ItemStack stack, Vec3d impact, float damage) {
         long startTick = world.getTime();
         int fallTicks = Math.max(1, Config.uniqueEffects.icewhisper.cometFallTicks);
         Vec3d start = impact.add(
@@ -118,7 +119,7 @@ public final class IcewhisperCometManager {
             visualId = visual.getUuid();
         }
 
-        ActiveComet comet = new ActiveComet(owner.getUuid(), visualId, start, impact, startTick, fallTicks, damage);
+        ActiveComet comet = new ActiveComet(owner.getUuid(), stack.copy(), visualId, start, impact, startTick, fallTicks, damage);
         ACTIVE_COMETS.computeIfAbsent(world, w -> new ArrayList<>()).add(comet);
     }
 
@@ -156,7 +157,9 @@ public final class IcewhisperCometManager {
         for (Entity entity : world.getOtherEntities(owner, box, EntityPredicates.VALID_LIVING_ENTITY)) {
             if (entity instanceof LivingEntity target && HelperMethods.checkAbilityTarget(target, owner)
                     && target.squaredDistanceTo(impact) <= splashRadius * splashRadius) {
-                HelperMethods.damageThroughIframes(target, world.getDamageSources().indirectMagic(owner, owner), comet.damage());
+                var damageSource = world.getDamageSources().indirectMagic(owner, owner);
+                float damage = HelperMethods.applyAbilityDamageEnchantments(world, comet.stack(), target, damageSource, comet.damage());
+                HelperMethods.damageThroughIframes(target, damageSource, damage);
             }
         }
 
@@ -218,18 +221,20 @@ public final class IcewhisperCometManager {
         }
     }
 
-    private record ActiveComet(UUID ownerId, UUID visualId, Vec3d start, Vec3d impact, long startTick, int fallTicks, float damage) {
+    private record ActiveComet(UUID ownerId, ItemStack stack, UUID visualId, Vec3d start, Vec3d impact, long startTick, int fallTicks, float damage) {
     }
 
     private static final class ActiveStorm {
         private final UUID ownerId;
+        private final ItemStack stack;
         private final long expiryTick;
         private long nextWaveTick;
         private final double radius;
         private final float damage;
 
-        private ActiveStorm(UUID ownerId, long expiryTick, long nextWaveTick, double radius, float damage) {
+        private ActiveStorm(UUID ownerId, ItemStack stack, long expiryTick, long nextWaveTick, double radius, float damage) {
             this.ownerId = ownerId;
+            this.stack = stack;
             this.expiryTick = expiryTick;
             this.nextWaveTick = nextWaveTick;
             this.radius = radius;
@@ -238,6 +243,10 @@ public final class IcewhisperCometManager {
 
         private UUID ownerId() {
             return this.ownerId;
+        }
+
+        private ItemStack stack() {
+            return this.stack;
         }
 
         private long expiryTick() {

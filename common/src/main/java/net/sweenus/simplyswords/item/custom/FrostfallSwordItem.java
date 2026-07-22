@@ -69,8 +69,10 @@ public class FrostfallSwordItem extends UniqueSwordItem implements UniqueWeaponA
     }
 
     private static FrostfallEntity createFrostfallEntity(World world, LivingEntity user, ItemStack stack) {
-        float abilityDamage = HelperMethods.spellScaledDamage("frost", user, Config.uniqueEffects.frostfall.spellScaling, Config.uniqueEffects.frostfall.damage);
-        float pulseDamage = HelperMethods.spellScaledDamage("frost", user, Config.uniqueEffects.frostfall.spellScaling, Config.uniqueEffects.frostfall.pulseDamage);
+        float abilityDamage = HelperMethods.abilityScaledDamage("frost", user, stack,
+                Config.uniqueEffects.frostfall.damageScaling, Config.uniqueEffects.frostfall.spellScaling);
+        float pulseDamage = HelperMethods.abilityScaledDamage("frost", user, stack,
+                Config.uniqueEffects.frostfall.pulseDamageScaling, Config.uniqueEffects.frostfall.spellScaling);
         FrostfallEntity frostfallEntity = new FrostfallEntity(world, user, stack);
         frostfallEntity.setVelocity(user, user.getPitch(), user.getYaw(), 0.0F, 1.5F, 1.0F);
         frostfallEntity.setYaw(user.getYaw());
@@ -138,9 +140,9 @@ public class FrostfallSwordItem extends UniqueSwordItem implements UniqueWeaponA
         @ValidatedInt.Restrict(min = 1)
         public int cooldown = 3;
         @ValidatedFloat.Restrict(min = 1f)
-        public float damage = 11f;
+        public float damageScaling = 1.0f;
         @ValidatedFloat.Restrict(min = 0f)
-        public float pulseDamage = 11f;
+        public float pulseDamageScaling = 1.0f;
         @ValidatedInt.Restrict(min = 1)
         public int duration = 80;
         @ValidatedDouble.Restrict(min = 6.0)

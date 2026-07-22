@@ -5,6 +5,7 @@ import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -47,9 +48,10 @@ public class MagispearSwordItem extends UniqueSwordItem implements UniqueWeaponA
             float hitChance = Config.uniqueEffects.magispear.magicChance;
             int random = new Random().nextInt(100);
             if (random < hitChance) {
-                float damage = Config.uniqueEffects.magispear.magicModifier;
+                float damage = HelperMethods.attackScaledDamage(attacker, stack, Config.uniqueEffects.magispear.magicDamageScaling);
+                DamageSource damageSource = attacker.getDamageSources().indirectMagic(attacker, attacker);
                 target.timeUntilRegen = 0;
-                target.damage(attacker.getDamageSources().indirectMagic(attacker, attacker), damage);
+                target.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments(world, stack, target, damageSource, damage));
                 target.timeUntilRegen = 0;
                 world.playSound(null, attacker.getBlockPos(), SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
                         attacker.getSoundCategory(), 0.2f, 1.1f);
@@ -73,8 +75,7 @@ public class MagispearSwordItem extends UniqueSwordItem implements UniqueWeaponA
             magispearEntity.setVelocity(user, user.getPitch(), user.getYaw(), 0.0F, 1.5F, 1.0F);
             magispearEntity.setYaw(user.getYaw());
             magispearEntity.setPitch(user.getPitch()-90);
-            double[] doubles = HelperMethods.getAttackFromSlot(user, itemStack, user.getActiveHand());
-            magispearEntity.primaryBaseDamage = (float) doubles[0]  *0.5f;
+            magispearEntity.primaryBaseDamage = HelperMethods.attackScaledDamage(user, itemStack, Config.uniqueEffects.magispear.throwDamageScaling);
             magispearEntity.hasLoyalty = 3;
             if (hand == Hand.OFF_HAND)
                 magispearEntity.offhandThrow = true;
@@ -104,7 +105,7 @@ public class MagispearSwordItem extends UniqueSwordItem implements UniqueWeaponA
         magispearEntity.setVelocity(direction.x, direction.y, direction.z, 1.65F, 1.0F);
         magispearEntity.setYaw(actor.getYaw());
         magispearEntity.setPitch(actor.getPitch() - 90);
-        magispearEntity.primaryBaseDamage = (float) Math.max(1.0, HelperMethods.getAttackFromStack(context.stack(), net.minecraft.component.type.AttributeModifierSlot.MAINHAND) * 0.5f);
+        magispearEntity.primaryBaseDamage = HelperMethods.attackScaledDamage(actor, context.stack(), Config.uniqueEffects.magispear.throwDamageScaling);
         magispearEntity.hasLoyalty = 0;
         magispearEntity.setPos(actor.getX(), actor.getEyeY() - 0.5, actor.getZ());
         magispearEntity.markNonReturning(80);
@@ -151,13 +152,15 @@ public class MagispearSwordItem extends UniqueSwordItem implements UniqueWeaponA
         @ValidatedInt.Restrict(min = 0)
         public int cooldown = 20;
         @ValidatedFloat.Restrict(min = 0f)
-        public float damageModifier = 2.0f;
+        public float damageScaling = 2.0f;
         @ValidatedDouble.Restrict(min = 1.0)
         public double radius = 4.0;
         @ValidatedInt.Restrict(min = 0, max = 100)
         public int magicChance = 35;
         @ValidatedFloat.Restrict(min = 0f)
-        public float magicModifier = 2f;
+        public float magicDamageScaling = 0.2f;
+        @ValidatedFloat.Restrict(min = 0f)
+        public float throwDamageScaling = 0.5f;
 
     }
 }

@@ -6,6 +6,7 @@ import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
@@ -119,7 +120,8 @@ public class LichbladeSwordItem extends UniqueSwordItem implements TwoHandedWeap
                 if (targetY < lastY) lastY -= 1;
             }
             stack.set(ComponentTypeRegistry.TARGETED_LOCATION.get(), new TargetedLocationComponent(abilityTarget.getUuid(), lastX, lastY, lastZ));
-            float abilityDamage = HelperMethods.spellScaledDamage("soul", user, Config.uniqueEffects.lichblade.spellScaling, Config.uniqueEffects.lichblade.damage);
+            float abilityDamage = HelperMethods.abilityScaledDamage("soul", user, stack,
+                    Config.uniqueEffects.lichblade.damageScaling, Config.uniqueEffects.lichblade.spellScaling);
             float healAmount = Config.uniqueEffects.lichblade.heal;
             AbilityMethods.tickAbilitySoulAnguish(stack, world, user, abilityDamage, radius, lastX, lastY, lastZ, healAmount, abilityTarget);
         }
@@ -158,7 +160,8 @@ public class LichbladeSwordItem extends UniqueSwordItem implements TwoHandedWeap
         if (target == null || !HelperMethods.checkAbilityTarget(target, actor) || stack.isOf(ItemsRegistry.SLUMBERING_LICHBLADE.get())) {
             return false;
         }
-        float abilityDamage = HelperMethods.spellScaledDamage("soul", actor, Config.uniqueEffects.lichblade.spellScaling, Config.uniqueEffects.lichblade.damage);
+        float abilityDamage = HelperMethods.abilityScaledDamage("soul", actor, stack,
+                Config.uniqueEffects.lichblade.damageScaling, Config.uniqueEffects.lichblade.spellScaling);
         float healAmount = Config.uniqueEffects.lichblade.heal;
         int radius = Config.uniqueEffects.lichblade.radius;
         stack.set(ComponentTypeRegistry.TARGETED_LOCATION.get(), new TargetedLocationComponent(target.getUuid(), target.getX(), target.getY(), target.getZ()));
@@ -183,45 +186,56 @@ public class LichbladeSwordItem extends UniqueSwordItem implements TwoHandedWeap
 
         if (!user.getWorld().isClient()
                 && user instanceof LivingEntity livingUser
-                && livingUser.age % 35 == 0
                 && livingUser.getEquippedStack(EquipmentSlot.MAINHAND) == stack
                 && !livingUser.isUsingItem()) {
-
-            float abilityDamage = HelperMethods.spellScaledDamage("soul", user, Config.uniqueEffects.lichblade.spellScaling, Config.uniqueEffects.lichblade.damage);
-            int radius = Config.uniqueEffects.lichblade.radius;
-
-            //AOE Aura
-            Box box = new Box(livingUser.getX() + radius, livingUser.getY() + radius, livingUser.getZ() + radius,
-                    livingUser.getX() - radius, livingUser.getY() - radius, livingUser.getZ() - radius);
-            for (Entity entity : world.getOtherEntities(livingUser, box, EntityPredicates.VALID_LIVING_ENTITY)) {
-                if ((entity instanceof LivingEntity le) && HelperMethods.checkFriendlyFire((LivingEntity) entity, livingUser)) {
-                    le.damage(livingUser.getDamageSources().indirectMagic(user, user), abilityDamage);
-                }
-            }
-            world.playSoundFromEntity(null, livingUser, SoundRegistry.DARK_SWORD_BLOCK.get(),
-                    livingUser.getSoundCategory(), 0.1f, 0.2f);
-            double xPos = livingUser.getX() - (radius + 1);
-            double yPos = livingUser.getY();
-            double zPos = livingUser.getZ() - (radius + 1);
-
-            for (int i = radius * 2; i > 0; i--) {
-                for (int j = radius * 2; j > 0; j--) {
-                    float choose = (float) (Math.random() * 1);
-                    HelperMethods.spawnParticle(world, ParticleTypes.SCULK_SOUL,
-                            xPos + i + choose, yPos, zPos + j + choose,
-                            0, 0.1, 0);
-                    HelperMethods.spawnParticle(world, ParticleTypes.SOUL,
-                            xPos + i + choose, yPos + 0.1, zPos + j + choose,
-                            0, 0, 0);
-                    HelperMethods.spawnParticle(world, ParticleTypes.MYCELIUM,
-                            xPos + i + choose, yPos + 2, zPos + j + choose,
-                            0, 0, 0);
-                }
-            }
-
+            tickPassiveAura((ServerWorld) world, livingUser, stack);
         }
         HelperMethods.createFootfalls(user, stack, world, ParticleTypes.SOUL, ParticleTypes.SOUL, ParticleTypes.MYCELIUM, true);
         super.inventoryTick(stack, world, user, slot, selected);
+    }
+
+    public static void tickPassiveAura(ServerWorld world, LivingEntity livingUser, ItemStack stack) {
+        if (livingUser == null
+                || stack == null
+                || stack.isEmpty()
+                || livingUser.age % 35 != 0
+                || livingUser.getEquippedStack(EquipmentSlot.MAINHAND) != stack
+                || livingUser.isUsingItem()) {
+            return;
+        }
+
+        float abilityDamage = HelperMethods.abilityScaledDamage("soul", livingUser, stack,
+                Config.uniqueEffects.lichblade.damageScaling, Config.uniqueEffects.lichblade.spellScaling);
+        int radius = Config.uniqueEffects.lichblade.radius;
+
+        Box box = new Box(livingUser.getX() + radius, livingUser.getY() + radius, livingUser.getZ() + radius,
+                livingUser.getX() - radius, livingUser.getY() - radius, livingUser.getZ() - radius);
+        for (Entity entity : world.getOtherEntities(livingUser, box, EntityPredicates.VALID_LIVING_ENTITY)) {
+            if (entity instanceof LivingEntity le && HelperMethods.checkAbilityTarget(le, livingUser)) {
+                DamageSource damageSource = livingUser.getDamageSources().indirectMagic(livingUser, livingUser);
+                le.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments(world, stack, le, damageSource, abilityDamage));
+            }
+        }
+        world.playSoundFromEntity(null, livingUser, SoundRegistry.DARK_SWORD_BLOCK.get(),
+                livingUser.getSoundCategory(), 0.1f, 0.2f);
+        double xPos = livingUser.getX() - (radius + 1);
+        double yPos = livingUser.getY();
+        double zPos = livingUser.getZ() - (radius + 1);
+
+        for (int i = radius * 2; i > 0; i--) {
+            for (int j = radius * 2; j > 0; j--) {
+                float choose = (float) (Math.random() * 1);
+                HelperMethods.spawnParticle(world, ParticleTypes.SCULK_SOUL,
+                        xPos + i + choose, yPos, zPos + j + choose,
+                        0, 0.1, 0);
+                HelperMethods.spawnParticle(world, ParticleTypes.SOUL,
+                        xPos + i + choose, yPos + 0.1, zPos + j + choose,
+                        0, 0, 0);
+                HelperMethods.spawnParticle(world, ParticleTypes.MYCELIUM,
+                        xPos + i + choose, yPos + 2, zPos + j + choose,
+                        0, 0, 0);
+            }
+        }
     }
 
     @Override
@@ -266,7 +280,7 @@ public class LichbladeSwordItem extends UniqueSwordItem implements TwoHandedWeap
         @ValidatedInt.Restrict(min = 0)
         public int cooldown = 700;
         @ValidatedFloat.Restrict(min = 0f)
-        public float damage = 6f;
+        public float damageScaling = 0.46f;
         @ValidatedInt.Restrict(min = 0)
         public int duration = 200;
         @ValidatedFloat.Restrict(min = 0f)

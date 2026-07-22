@@ -72,7 +72,7 @@ public class VerdantTrailPower extends NetherGemPower {
         public int regenerationAmplifier = 0;
 
         @ValidatedFloat.Restrict(min = 0f)
-        public float damage = 2.0F;
+        public float damageScaling = 0.22F;
 
         @ValidatedInt.Restrict(min = 1)
         public int visualPointsMin = 7;

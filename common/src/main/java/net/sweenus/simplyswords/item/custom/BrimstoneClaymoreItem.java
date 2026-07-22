@@ -99,7 +99,8 @@ public class BrimstoneClaymoreItem extends UniqueSwordItem implements TwoHandedW
                         livingEntity.setOnFireFor(3);
                         livingEntity.takeKnockback(1, 0.1, 0.1);
                         livingEntity.timeUntilRegen = 0;
-                        livingEntity.damage(damageSource, (float) HelperMethods.getEntityAttackDamage(attacker));
+                        float damage = HelperMethods.attackScaledDamage(attacker, stack, Config.uniqueEffects.brimstone_claymore.hitDamageScaling);
+                        livingEntity.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments(world, stack, livingEntity, damageSource, damage));
                         livingEntity.timeUntilRegen = 0;
                     }
                 }
@@ -162,11 +163,13 @@ public class BrimstoneClaymoreItem extends UniqueSwordItem implements TwoHandedW
         @ValidatedInt.Restrict(min = 1)
         public int pulseInterval = 20;
         @ValidatedFloat.Restrict(min = 0f)
-        public float pulseDamageMultiplier = 0.35f;
+        public float hitDamageScaling = 1.0f;
+        @ValidatedFloat.Restrict(min = 0f)
+        public float pulseDamageScaling = 0.35f;
         @ValidatedFloat.Restrict(min = 0f)
         public float radiusGrowthPerHit = 0.35f;
         @ValidatedFloat.Restrict(min = 0f)
-        public float finalDamageMultiplier = 1.25f;
+        public float finalDamageScaling = 1.25f;
         @ValidatedDouble.Restrict(min = 0.0)
         public double targetJumpRange = 8.0;
 

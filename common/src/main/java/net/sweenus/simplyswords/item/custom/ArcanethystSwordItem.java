@@ -60,7 +60,7 @@ public class ArcanethystSwordItem extends UniqueSwordItem implements TwoHandedWe
             return TypedActionResult.fail(itemStack);
         }
         if (world instanceof ServerWorld serverWorld) {
-            activateArcanethyst(serverWorld, user);
+        activateArcanethyst(serverWorld, user, itemStack);
             user.getItemCooldownManager().set(itemStack.getItem(), Config.uniqueEffects.arcanethyst.cooldown);
         }
         user.swingHand(hand);
@@ -72,7 +72,7 @@ public class ArcanethystSwordItem extends UniqueSwordItem implements TwoHandedWe
         if (!canActivate(context)) {
             return false;
         }
-        activateArcanethyst(context.world(), context.actor());
+        activateArcanethyst(context.world(), context.actor(), context.stack());
         return true;
     }
 
@@ -81,10 +81,11 @@ public class ArcanethystSwordItem extends UniqueSwordItem implements TwoHandedWe
         return Config.uniqueEffects.arcanethyst.cooldown;
     }
 
-    private static void activateArcanethyst(ServerWorld serverWorld, LivingEntity actor) {
+    private static void activateArcanethyst(ServerWorld serverWorld, LivingEntity actor, ItemStack stack) {
         int radius = Config.uniqueEffects.arcanethyst.radius;
-        float abilityDamage = HelperMethods.spellScaledDamage("arcane", actor, Config.uniqueEffects.arcanethyst.spellScaling, Config.uniqueEffects.arcanethyst.damage);
-        ArcanethystAssaultManager.start(serverWorld, actor, radius, abilityDamage);
+        float abilityDamage = HelperMethods.abilityScaledDamage("arcane", actor, stack,
+                Config.uniqueEffects.arcanethyst.damageScaling, Config.uniqueEffects.arcanethyst.spellScaling);
+        ArcanethystAssaultManager.start(serverWorld, actor, stack, radius, abilityDamage);
     }
 
     @Override
@@ -119,7 +120,7 @@ public class ArcanethystSwordItem extends UniqueSwordItem implements TwoHandedWe
         @ValidatedInt.Restrict(min = 0)
         public int cooldown = 220;
         @ValidatedFloat.Restrict(min = 0f)
-        public float damage = 1f;
+        public float damageScaling = 0.08f;
         @ValidatedInt.Restrict(min = 0)
         public int duration = 100;
         @ValidatedInt.Restrict(min = 1)

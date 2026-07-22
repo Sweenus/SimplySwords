@@ -27,10 +27,13 @@ public class GeneralConfig extends Config {
     public boolean enableModernFieldEffects = true;
     public boolean enableWeaponImplicits = true;
     public boolean enableNonPlayerWeaponAbilityUse = true;
+    public boolean enableAbilityDamageEnchantScaling = true;
+    @ValidatedFloat.Restrict(min = 0f)
+    public float nonPlayerWeaponAbilityDamageModifier = 0.5f;
     @ValidatedInt.Restrict(min = 1)
-    public int nonPlayerWeaponAbilityCheckInterval = 20;
+    public int nonPlayerWeaponAbilityCheckInterval = 80;
     @ValidatedInt.Restrict(min = 0, max = 100)
-    public int nonPlayerWeaponAbilityChance = 100;
+    public int nonPlayerWeaponAbilityChance = 50;
     public boolean enableUniqueGemSockets = true;
     public boolean enableTooltipInfoButtons = true;
     public boolean tooltipInfoButtonsRequireInventoryScreen = true;

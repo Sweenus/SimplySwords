@@ -182,20 +182,20 @@ public final class SoulkeeperLanternManager {
     }
 
     private static float getLanternDamage(LivingEntity player, ItemStack stack) {
-        double attackDamage = HelperMethods.getEntityAttackDamage(player);
-        if (attackDamage <= 0.0) {
-            attackDamage = Math.max(1.0, 1.0 + HelperMethods.getAttackFromStack(stack, net.minecraft.component.type.AttributeModifierSlot.MAINHAND));
-        }
-        return (float) (attackDamage * Config.uniqueEffects.soulkeeper.lanternDamageMultiplier);
+        return HelperMethods.attackScaledDamage(player, stack, Config.uniqueEffects.soulkeeper.lanternDamageScaling);
     }
 
     private static boolean damageTarget(ServerWorld world, LivingEntity player, LivingEntity target, float damage) {
         target.timeUntilRegen = 0;
         boolean[] damaged = {false};
-        WeaponImplicitRegistry.runSuppressed(() -> damaged[0] = target.damage(player.getDamageSources().indirectMagic(player, player), damage));
+        ItemStack stack = player.getMainHandStack();
+        var damageSource = player.getDamageSources().indirectMagic(player, player);
+        float scaledDamage = HelperMethods.applyAbilityDamageEnchantments(world, stack, target, damageSource, damage);
+        WeaponImplicitRegistry.runSuppressed(() -> damaged[0] = target.damage(damageSource, scaledDamage));
         target.timeUntilRegen = 0;
         if (!damaged[0]) {
-            WeaponImplicitRegistry.runSuppressed(() -> damaged[0] = target.damage(world.getDamageSources().magic(), damage));
+            float fallbackDamage = HelperMethods.applyNonPlayerAbilityDamageModifier(player, damage);
+            WeaponImplicitRegistry.runSuppressed(() -> damaged[0] = target.damage(world.getDamageSources().magic(), fallbackDamage));
             target.timeUntilRegen = 0;
         }
         return damaged[0];
