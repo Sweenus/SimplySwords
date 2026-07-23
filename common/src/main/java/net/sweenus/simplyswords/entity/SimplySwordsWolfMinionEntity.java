@@ -149,7 +149,20 @@ public class SimplySwordsWolfMinionEntity extends WolfEntity implements Tameable
         if (attacker instanceof PlayerEntity player && isProtectedFromPlayer(player)) {
             return false;
         }
+        if (isSiblingMinion(attacker)) {
+            return false;
+        }
         return super.damage(source, amount);
+    }
+
+    private boolean isSiblingMinion(Entity attacker) {
+        if (this.ownerUuid == null || attacker == null || attacker == this) {
+            return false;
+        }
+        if (attacker instanceof Tameable tameable) {
+            return this.ownerUuid.equals(tameable.getOwnerUuid());
+        }
+        return false;
     }
 
     @Override
