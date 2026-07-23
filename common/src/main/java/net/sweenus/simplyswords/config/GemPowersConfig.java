@@ -42,6 +42,7 @@ public class GemPowersConfig extends Config {
 	public VerdantTrailPower.Settings  verdantTrail = new VerdantTrailPower.Settings();
 	public FaultlinePower.Settings  faultline = new FaultlinePower.Settings();
 	public NecromanticArsenalPower.Settings necromanticArsenal = new NecromanticArsenalPower.Settings();
+	public WolfPackPower.Settings wolfPack = new WolfPackPower.Settings();
 
 	public SimplySkills simplySkills = new SimplySkills();
 

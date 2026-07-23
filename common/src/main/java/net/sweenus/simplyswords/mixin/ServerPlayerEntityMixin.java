@@ -36,6 +36,7 @@ import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.AbilityMethods;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.world.NecromanticArsenalManager;
+import net.sweenus.simplyswords.world.WolfPackManager;
 import net.sweenus.simplyswords.world.PlayerWeaponAbilityChannelManager;
 import net.sweenus.simplyswords.world.RevivalCandleVisualManager;
 import net.sweenus.simplyswords.world.ShadowstingShadowDanceManager;
@@ -135,6 +136,7 @@ public abstract class ServerPlayerEntityMixin {
                 && source.getAttacker() instanceof LivingEntity attacker
                 && attacker != serverPlayer) {
             NecromanticArsenalManager.retargetMinions(serverPlayer, attacker);
+            WolfPackManager.retargetMinions(serverPlayer, attacker);
         }
     }
 

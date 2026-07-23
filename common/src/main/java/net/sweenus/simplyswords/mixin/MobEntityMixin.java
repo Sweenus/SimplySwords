@@ -11,6 +11,7 @@ import net.sweenus.simplyswords.api.WeaponAbilityActivationSource;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.SimplySwordsSkeletonMinionEntity;
+import net.sweenus.simplyswords.entity.SimplySwordsWolfMinionEntity;
 import net.sweenus.simplyswords.item.RunicSwordItem;
 import net.sweenus.simplyswords.item.SimplySwordsSwordItem;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
@@ -56,7 +57,7 @@ public abstract class MobEntityMixin {
         if (stack.getItem() instanceof LichbladeSwordItem) {
             LichbladeSwordItem.tickPassiveAura(world, mob, stack);
         }
-        if (mob instanceof SimplySwordsSkeletonMinionEntity) {
+        if (mob instanceof SimplySwordsSkeletonMinionEntity || mob instanceof SimplySwordsWolfMinionEntity) {
             return;
         }
 
@@ -84,6 +85,7 @@ public abstract class MobEntityMixin {
         MobEntity mob = (MobEntity) (Object) this;
         if (!cir.getReturnValue()
                 || mob instanceof SimplySwordsSkeletonMinionEntity
+                || mob instanceof SimplySwordsWolfMinionEntity
                 || mob.getWorld().isClient()
                 || !(target instanceof LivingEntity livingTarget)) {
             return;

@@ -16,13 +16,13 @@ import net.sweenus.simplyswords.power.NetherGemPower;
 import net.sweenus.simplyswords.registry.GemPowerRegistry;
 import net.sweenus.simplyswords.util.Styles;
 import net.sweenus.simplyswords.world.MinionHitSuppression;
-import net.sweenus.simplyswords.world.NecromanticArsenalManager;
+import net.sweenus.simplyswords.world.WolfPackManager;
 
 import java.util.List;
 
-public class NecromanticArsenalPower extends NetherGemPower {
+public class WolfPackPower extends NetherGemPower {
 
-    public NecromanticArsenalPower() {
+    public WolfPackPower() {
         super(false);
     }
 
@@ -32,50 +32,46 @@ public class NecromanticArsenalPower extends NetherGemPower {
             return;
         }
 
-        if (attacker.getRandom().nextInt(100) >= Config.gemPowers.necromanticArsenal.chance) {
+        if (attacker.getRandom().nextInt(100) >= Config.gemPowers.wolfPack.chance) {
             return;
         }
 
-        NecromanticArsenalManager.trySummon(player, stack);
-    }
-
-    public static void runSuppressed(Runnable runnable) {
-        MinionHitSuppression.runSuppressed(runnable);
+        WolfPackManager.trySummon(player, stack);
     }
 
     @Override
     public void appendTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Text> tooltip, TooltipType type, boolean isRunic) {
-        tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.necromantic_arsenal").setStyle(Styles.NETHERFUSED));
+        tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.wolf_pack").setStyle(Styles.NETHERFUSED));
         if (TooltipUtils.shouldDisplayTooltip(itemStack, null)) {
-            tooltip.add(Text.literal("").append(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.necromantic_arsenal.description")).setStyle(Styles.NETHERFUSED_DESCRIPTION));
+            tooltip.add(Text.literal("").append(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.wolf_pack.description")).setStyle(Styles.NETHERFUSED_DESCRIPTION));
         }
     }
 
     public static class Settings extends TooltipSettings {
 
         public Settings() {
-            super(GemPowerRegistry.NECROMANTIC_ARSENAL);
+            super(GemPowerRegistry.WOLF_PACK);
         }
 
         @Translation(prefix = "simplyswords.config.basic_settings")
         @ValidatedInt.Restrict(min = 0, max = 100)
-        public int chance = 10;
+        public int chance = 40;
 
         @ValidatedInt.Restrict(min = 1)
-        public int maxMinions = 3;
+        public int maxMinions = 2;
 
         @Translation(prefix = "simplyswords.config.basic_settings")
         @ValidatedInt.Restrict(min = 1)
-        public int duration = 600;
+        public int duration = 1400;
 
         @ValidatedDouble.Restrict(min = 0.0)
-        public double damageScaling = 0.6;
+        public double damageScaling = 1.0;
 
         @ValidatedInt.Restrict(min = 0, max = 100)
-        public int activeAbilityChance = 10;
+        public int activeAbilityChance = 35;
 
         @ValidatedInt.Restrict(min = 1)
-        public int activeAbilityCheckInterval = 110;
+        public int activeAbilityCheckInterval = 40;
 
         @ValidatedInt.Restrict(min = 0)
         public int activeAbilityInitialDelay = 40;

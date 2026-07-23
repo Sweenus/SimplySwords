@@ -29,6 +29,7 @@ import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
 import net.sweenus.simplyswords.entity.SimplySwordsSkeletonMinionEntity;
+import net.sweenus.simplyswords.entity.SimplySwordsWolfMinionEntity;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.item.component.StoredChargeComponent;
 import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
@@ -207,6 +208,7 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
     private static boolean isValidSoulstealerTarget(LivingEntity target, LivingEntity actor) {
         return target.isAlive()
                 && !(target instanceof SimplySwordsSkeletonMinionEntity)
+                && !(target instanceof SimplySwordsWolfMinionEntity)
                 && EntityPredicates.VALID_LIVING_ENTITY.test(target)
                 && HelperMethods.checkAbilityTarget(target, actor);
     }
