@@ -165,6 +165,9 @@ public class SimplySwordsAPI {
                 || !(owner.getWorld() instanceof ServerWorld world) || target.getWorld() != world) {
             return false;
         }
+        if (target instanceof PlayerEntity player && (player.isCreative() || player.isSpectator())) {
+            return false;
+        }
 
         Vec3d facing = actor.getRotationVec(1.0F);
         if (facing.lengthSquared() < 0.0001) {

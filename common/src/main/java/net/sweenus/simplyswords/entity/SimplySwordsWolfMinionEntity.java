@@ -2,7 +2,12 @@ package net.sweenus.simplyswords.entity;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.DyedColorComponent;
 import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.item.Items;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.util.DyeColor;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.Tameable;
 import net.minecraft.entity.ai.goal.LookAroundGoal;
@@ -21,7 +26,6 @@ import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.passive.WolfEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -45,6 +49,7 @@ public class SimplySwordsWolfMinionEntity extends WolfEntity implements Tameable
 
     private static final double OWNER_FOLLOW_DISTANCE = 14.0;
     private static final double HEALTH_PER_ATTACK = 8.0;
+    private static final float ARMOR_CHANCE = 0.55F;
     private static final double OWNER_TELEPORT_DISTANCE = 32.0;
     private UUID ownerUuid;
     private long expiresAtTick;
@@ -95,6 +100,17 @@ public class SimplySwordsWolfMinionEntity extends WolfEntity implements Tameable
         }
         this.setPersistent();
         this.setCustomName(owner.getName().copy().append("'s Wolf"));
+        this.setVariant(this.getRegistryManager()
+                .get(RegistryKeys.WOLF_VARIANT)
+                .getRandom(this.getRandom())
+                .orElseThrow());
+        if (this.random.nextFloat() <= ARMOR_CHANCE) {
+            DyeColor dye = DyeColor.values()[this.random.nextInt(DyeColor.values().length)];
+            ItemStack wolfArmor = new ItemStack(Items.WOLF_ARMOR);
+            wolfArmor.set(DataComponentTypes.DYED_COLOR, new DyedColorComponent(dye.getSignColor(), false));
+            this.equipStack(EquipmentSlot.BODY, wolfArmor);
+            this.setEquipmentDropChance(EquipmentSlot.BODY, 0.0F);
+        }
     }
 
     @Override
@@ -123,6 +139,7 @@ public class SimplySwordsWolfMinionEntity extends WolfEntity implements Tameable
         tryActivateWeaponAbility(world, owner);
         if (this.age % MinionTargeting.tauntIntervalTicks() == 0) {
             MinionTargeting.tauntNearbyEnemies(world, this, owner, this::isValidMinionTarget);
+            MinionTargeting.cleanupMarkedTargets(world, owner);
         }
         if (world.getTime() % 12L == 0L) {
             world.spawnParticles(ParticleTypes.CRIT, this.getX(), this.getBodyY(0.65), this.getZ(), 2, 0.18, 0.22, 0.18, 0.01);
@@ -270,7 +287,16 @@ public class SimplySwordsWolfMinionEntity extends WolfEntity implements Tameable
             return false;
         }
         ServerPlayerEntity owner = getOwnerPlayer(world);
-        return owner != null && target != owner && HelperMethods.checkFriendlyFire(target, owner);
+        if (owner == null || target == owner) {
+            return false;
+        }
+        if (!HelperMethods.checkFriendlyFire(target, owner)) {
+            return false;
+        }
+        if (!HelperMethods.isMonsterFaction(target)) {
+            return MinionTargeting.isMarkedTarget(world, owner, target);
+        }
+        return true;
     }
 
     private boolean isProtectedFromPlayer(PlayerEntity player) {

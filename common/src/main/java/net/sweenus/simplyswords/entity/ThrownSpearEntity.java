@@ -241,7 +241,7 @@ public class ThrownSpearEntity extends PersistentProjectileEntity {
     @Override
     protected void onEntityHit(EntityHitResult entityHitResult) {
         Entity entity = entityHitResult.getEntity();
-        if (this.nonReturning && this.getOwner() instanceof LivingEntity owner && entity instanceof LivingEntity target
+        if (this.getOwner() instanceof LivingEntity owner && entity instanceof LivingEntity target
                 && !HelperMethods.checkAbilityTarget(target, owner)) {
             return;
         }

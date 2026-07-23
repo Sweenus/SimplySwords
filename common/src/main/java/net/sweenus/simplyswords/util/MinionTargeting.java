@@ -11,7 +11,10 @@ import net.minecraft.util.math.Box;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
@@ -25,6 +28,7 @@ public final class MinionTargeting {
     private static final long RECENT_ATTACK_WINDOW_TICKS = 100L;
 
     private static final Map<UUID, LastAttack> LAST_ATTACK = new ConcurrentHashMap<>();
+    private static final Map<UUID, Set<UUID>> MARKED_TARGETS = new ConcurrentHashMap<>();
 
     private MinionTargeting() {
     }
@@ -34,6 +38,50 @@ public final class MinionTargeting {
             return;
         }
         LAST_ATTACK.put(player.getUuid(), new LastAttack(target.getUuid(), player.getWorld().getTime()));
+        MARKED_TARGETS.computeIfAbsent(player.getUuid(), k -> new HashSet<>()).add(target.getUuid());
+    }
+
+    public static boolean isMarkedTarget(ServerWorld world, ServerPlayerEntity owner, LivingEntity target) {
+        if (owner == null || target == null) {
+            return false;
+        }
+        Set<UUID> marked = MARKED_TARGETS.get(owner.getUuid());
+        if (marked == null || marked.isEmpty()) {
+            return false;
+        }
+        if (!marked.contains(target.getUuid())) {
+            return false;
+        }
+        Entity entity = world.getEntity(target.getUuid());
+        if (!(entity instanceof LivingEntity living) || !living.isAlive()) {
+            marked.remove(target.getUuid());
+            if (marked.isEmpty()) {
+                MARKED_TARGETS.remove(owner.getUuid());
+            }
+            return false;
+        }
+        return true;
+    }
+
+    public static void cleanupMarkedTargets(ServerWorld world, ServerPlayerEntity owner) {
+        if (owner == null) {
+            return;
+        }
+        Set<UUID> marked = MARKED_TARGETS.get(owner.getUuid());
+        if (marked == null || marked.isEmpty()) {
+            return;
+        }
+        Iterator<UUID> it = marked.iterator();
+        while (it.hasNext()) {
+            UUID uuid = it.next();
+            Entity entity = world.getEntity(uuid);
+            if (!(entity instanceof LivingEntity living) || !living.isAlive()) {
+                it.remove();
+            }
+        }
+        if (marked.isEmpty()) {
+            MARKED_TARGETS.remove(owner.getUuid());
+        }
     }
 
     public static LivingEntity getRecentAttackTarget(ServerWorld world, ServerPlayerEntity owner) {

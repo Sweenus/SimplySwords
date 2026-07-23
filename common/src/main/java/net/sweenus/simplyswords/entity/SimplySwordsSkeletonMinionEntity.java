@@ -126,6 +126,7 @@ public class SimplySwordsSkeletonMinionEntity extends SkeletonEntity implements 
         tryActivateWeaponAbility(world, owner);
         if (this.age % MinionTargeting.tauntIntervalTicks() == 0) {
             MinionTargeting.tauntNearbyEnemies(world, this, owner, this::isValidMinionTarget);
+            MinionTargeting.cleanupMarkedTargets(world, owner);
         }
         if (world.getTime() % 12L == 0L) {
             world.spawnParticles(ParticleTypes.SOUL, this.getX(), this.getBodyY(0.65), this.getZ(), 2, 0.18, 0.22, 0.18, 0.01);
@@ -273,7 +274,16 @@ public class SimplySwordsSkeletonMinionEntity extends SkeletonEntity implements 
             return false;
         }
         ServerPlayerEntity owner = getOwnerPlayer(world);
-        return owner != null && target != owner && HelperMethods.checkFriendlyFire(target, owner);
+        if (owner == null || target == owner) {
+            return false;
+        }
+        if (!HelperMethods.checkFriendlyFire(target, owner)) {
+            return false;
+        }
+        if (!HelperMethods.isMonsterFaction(target)) {
+            return MinionTargeting.isMarkedTarget(world, owner, target);
+        }
+        return true;
     }
 
     private boolean isProtectedFromPlayer(PlayerEntity player) {

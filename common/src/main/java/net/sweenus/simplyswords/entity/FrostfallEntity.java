@@ -10,7 +10,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
@@ -49,6 +51,24 @@ public class FrostfallEntity extends ThrownSwordEntity {
     @Override
     protected ItemStack getDefaultItemStack() {
         return new ItemStack(ItemsRegistry.FROSTFALL.get());
+    }
+
+    @Override
+    protected void onEntityHit(EntityHitResult entityHitResult) {
+        Entity entity = entityHitResult.getEntity();
+        if (this.getOwner() instanceof LivingEntity owner && entity instanceof LivingEntity target
+                && !HelperMethods.checkAbilityTarget(target, owner)) {
+            return;
+        }
+        boolean wasNonReturning = this.nonReturning;
+        this.nonReturning = false;
+        super.onEntityHit(entityHitResult);
+        this.nonReturning = wasNonReturning;
+        if (!this.isRemoved()) {
+            this.inGround = true;
+            this.setVelocity(Vec3d.ZERO);
+            this.velocityModified = true;
+        }
     }
 
     @Override

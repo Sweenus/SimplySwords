@@ -89,6 +89,8 @@ public class HelperMethods {
     public static boolean checkFriendlyFire (LivingEntity livingEntity, LivingEntity attackingEntity) {
         if (livingEntity == null || attackingEntity == null)
             return false;
+        if (livingEntity instanceof PlayerEntity player && (player.isCreative() || player.isSpectator()))
+            return false;
         if (!checkEntityBlacklist(livingEntity, attackingEntity))
             return false;
         if (livingEntity == attackingEntity)
@@ -147,7 +149,7 @@ public class HelperMethods {
         return checkFriendlyFire(livingEntity, attackingEntity);
     }
 
-    private static boolean isMonsterFaction(LivingEntity entity) {
+    public static boolean isMonsterFaction(LivingEntity entity) {
         if (entity instanceof Monster) {
             if (entity instanceof Tameable tameable && tameable.getOwner() != null) {
                 return false;
@@ -682,6 +684,8 @@ public class HelperMethods {
 
     // Ignore iFrames without resetting them entirely
     public static boolean damageThroughIframes(Entity targetEntity, DamageSource damageSource, float damage) {
+        if (targetEntity instanceof PlayerEntity player && (player.isCreative() || player.isSpectator()))
+            return false;
         int iframes = targetEntity.timeUntilRegen;
         boolean result = targetEntity.damage(damageSource, damage);
         targetEntity.timeUntilRegen = iframes;
