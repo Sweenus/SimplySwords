@@ -5,15 +5,18 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.Tameable;
-import net.minecraft.entity.ai.goal.ActiveTargetGoal;
 import net.minecraft.entity.ai.goal.LookAroundGoal;
 import net.minecraft.entity.ai.goal.LookAtEntityGoal;
 import net.minecraft.entity.ai.goal.SwimGoal;
 import net.minecraft.entity.ai.goal.WanderAroundFarGoal;
+import net.sweenus.simplyswords.entity.goal.MinionTargetPriorityGoal;
+import net.sweenus.simplyswords.util.MinionTargeting;
 import net.sweenus.simplyswords.entity.goal.WolfLungeAttackGoal;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.attribute.EntityAttributeInstance;
+import net.minecraft.sound.SoundEvent;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.passive.WolfEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -41,6 +44,7 @@ import java.util.UUID;
 public class SimplySwordsWolfMinionEntity extends WolfEntity implements Tameable {
 
     private static final double OWNER_FOLLOW_DISTANCE = 14.0;
+    private static final double HEALTH_PER_ATTACK = 8.0;
     private static final double OWNER_TELEPORT_DISTANCE = 32.0;
     private UUID ownerUuid;
     private long expiresAtTick;
@@ -61,7 +65,7 @@ public class SimplySwordsWolfMinionEntity extends WolfEntity implements Tameable
                 .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.35)
                 .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 4.0)
                 .add(EntityAttributes.GENERIC_FOLLOW_RANGE, 24.0)
-                .add(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE, 0.35);
+                .add(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE, 1.0);
     }
 
     @Override
@@ -71,7 +75,7 @@ public class SimplySwordsWolfMinionEntity extends WolfEntity implements Tameable
         this.goalSelector.add(7, new WanderAroundFarGoal(this, 0.85));
         this.goalSelector.add(8, new LookAtEntityGoal(this, PlayerEntity.class, 8.0F));
         this.goalSelector.add(8, new LookAroundGoal(this));
-        this.targetSelector.add(1, new ActiveTargetGoal<>(this, LivingEntity.class, 10, true, false, this::isValidMinionTarget));
+        this.targetSelector.add(1, new MinionTargetPriorityGoal(this, world -> getOwnerPlayer(world), this::isValidMinionTarget, 16.0, 20));
     }
 
     public void initializeMinion(ServerPlayerEntity owner, ItemStack stack, int sourceWeaponSlot, long expiresAtTick, float weaponDamage) {
@@ -83,6 +87,12 @@ public class SimplySwordsWolfMinionEntity extends WolfEntity implements Tameable
         this.setSitting(false);
         this.equipStack(EquipmentSlot.MAINHAND, stack.copy());
         this.setEquipmentDropChance(EquipmentSlot.MAINHAND, 0.0F);
+        EntityAttributeInstance health = this.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH);
+        if (health != null) {
+            double scaled = health.getBaseValue() + weaponDamage * HEALTH_PER_ATTACK;
+            health.setBaseValue(scaled);
+            this.setHealth((float) scaled);
+        }
         this.setPersistent();
         this.setCustomName(owner.getName().copy().append("'s Wolf"));
     }
@@ -111,6 +121,9 @@ public class SimplySwordsWolfMinionEntity extends WolfEntity implements Tameable
 
         followOwner(owner);
         tryActivateWeaponAbility(world, owner);
+        if (this.age % MinionTargeting.tauntIntervalTicks() == 0) {
+            MinionTargeting.tauntNearbyEnemies(world, this, owner, this::isValidMinionTarget);
+        }
         if (world.getTime() % 12L == 0L) {
             world.spawnParticles(ParticleTypes.CRIT, this.getX(), this.getBodyY(0.65), this.getZ(), 2, 0.18, 0.22, 0.18, 0.01);
         }
@@ -152,6 +165,9 @@ public class SimplySwordsWolfMinionEntity extends WolfEntity implements Tameable
         if (isSiblingMinion(attacker)) {
             return false;
         }
+        if (attacker instanceof LivingEntity livingAttacker && isValidMinionTarget(livingAttacker)) {
+            this.setTarget(livingAttacker);
+        }
         return super.damage(source, amount);
     }
 
@@ -173,6 +189,12 @@ public class SimplySwordsWolfMinionEntity extends WolfEntity implements Tameable
     @Override
     public boolean isBreedingItem(ItemStack stack) {
         return false;
+    }
+
+    @Override
+    @Nullable
+    protected SoundEvent getHurtSound(DamageSource source) {
+        return null;
     }
 
     public boolean trySetRetaliationTarget(LivingEntity attacker) {

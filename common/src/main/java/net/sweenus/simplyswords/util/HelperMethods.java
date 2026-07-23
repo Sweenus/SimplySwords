@@ -15,7 +15,7 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.decoration.ArmorStandEntity;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.mob.MobEntity;
+import net.minecraft.entity.mob.Monster;
 import net.minecraft.entity.passive.VillagerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileUtil;
@@ -93,6 +93,9 @@ public class HelperMethods {
             return false;
         if (livingEntity == attackingEntity)
             return false;
+        if (isMonsterFaction(attackingEntity) && isMonsterFaction(livingEntity)) {
+            return false;
+        }
 
         // Check if the player and the living entity are on the same team
         AbstractTeam playerTeam = attackingEntity.getScoreboardTeam();
@@ -141,14 +144,17 @@ public class HelperMethods {
     }
 
     public static boolean checkAbilityTarget(LivingEntity livingEntity, LivingEntity attackingEntity) {
-        if (!checkFriendlyFire(livingEntity, attackingEntity)) {
-            return false;
+        return checkFriendlyFire(livingEntity, attackingEntity);
+    }
+
+    private static boolean isMonsterFaction(LivingEntity entity) {
+        if (entity instanceof Monster) {
+            if (entity instanceof Tameable tameable && tameable.getOwner() != null) {
+                return false;
+            }
+            return true;
         }
-        if (attackingEntity instanceof MobEntity mob) {
-            LivingEntity activeTarget = mob.getTarget();
-            return activeTarget != null && activeTarget.isAlive() && livingEntity == activeTarget;
-        }
-        return true;
+        return false;
     }
 
     public static boolean isOpacLoaded() {

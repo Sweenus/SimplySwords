@@ -37,6 +37,7 @@ import net.sweenus.simplyswords.util.AbilityMethods;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.world.NecromanticArsenalManager;
 import net.sweenus.simplyswords.world.WolfPackManager;
+import net.sweenus.simplyswords.util.MinionTargeting;
 import net.sweenus.simplyswords.world.PlayerWeaponAbilityChannelManager;
 import net.sweenus.simplyswords.world.RevivalCandleVisualManager;
 import net.sweenus.simplyswords.world.ShadowstingShadowDanceManager;
@@ -312,7 +313,8 @@ public abstract class ServerPlayerEntityMixin {
     public void simplyswords$attack(Entity target, CallbackInfo ci) {
         PlayerEntity player = (PlayerEntity) (Object) this;
         if (player instanceof ServerPlayerEntity serverPlayer) {
-            if (target.isAttackable() && target instanceof LivingEntity) {
+            if (target.isAttackable() && target instanceof LivingEntity livingTarget) {
+                MinionTargeting.recordLastAttack(serverPlayer, livingTarget);
                 if (!target.handleAttack(player)) {
                     ServerWorld serverWorld = (ServerWorld) player.getWorld();
                     //Ribboncleaver Cleave buff
