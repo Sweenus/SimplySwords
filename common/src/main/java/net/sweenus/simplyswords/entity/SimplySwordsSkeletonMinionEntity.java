@@ -40,7 +40,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 
-public class SimplySwordsSkeletonMinionEntity extends SkeletonEntity implements Tameable {
+public class SimplySwordsSkeletonMinionEntity extends SkeletonEntity implements Tameable, SimplySwordsMinion {
 
     private static final double OWNER_FOLLOW_DISTANCE = 14.0;
     private static final double HEALTH_PER_ATTACK = 8.0;

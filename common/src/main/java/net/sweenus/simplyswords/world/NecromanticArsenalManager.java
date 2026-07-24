@@ -10,6 +10,7 @@ import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.Box;
 import net.sweenus.simplyswords.config.Config;
+import net.sweenus.simplyswords.entity.SimplySwordsMinion;
 import net.sweenus.simplyswords.entity.SimplySwordsSkeletonMinionEntity;
 import net.sweenus.simplyswords.registry.EntityRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -23,6 +24,9 @@ public final class NecromanticArsenalManager {
     }
 
     public static boolean trySummon(LivingEntity attacker, ItemStack stack) {
+        if (attacker instanceof SimplySwordsMinion) {
+            return false;
+        }
         if (attacker instanceof ServerPlayerEntity player) {
             return trySummon(player, stack);
         }

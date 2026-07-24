@@ -1,6 +1,7 @@
 # gradle
 
 .gradle/
+.ghome/
 build/
 out/
 classes/
