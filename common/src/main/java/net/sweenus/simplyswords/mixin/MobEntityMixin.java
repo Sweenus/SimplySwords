@@ -49,6 +49,9 @@ public abstract class MobEntityMixin {
         }
 
         ItemStack stack = mob.getMainHandStack();
+        if (!stack.isEmpty()) {
+            stack.inventoryTick(world, mob, 0, true);
+        }
         if (stack.isOf(ItemsRegistry.ICEWHISPER.get())) {
             IcewhisperSwordItem.tickPassiveAura(world, mob, stack);
         }
