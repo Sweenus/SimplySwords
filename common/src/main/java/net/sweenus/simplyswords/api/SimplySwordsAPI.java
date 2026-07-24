@@ -260,7 +260,8 @@ public class SimplySwordsAPI {
                 actor, actor.getPos(), actor.getRotationVec(1.0F));
         DELEGATED_WEAPON_HIT_CONTEXT.set(context);
         try {
-            WeaponImplicitRegistry.onHit(stack, target, actor, damage);
+            float hitDamage = net.sweenus.simplyswords.util.HelperMethods.applyNonPlayerWeaponHitDamageModifier(actor, damage);
+            WeaponImplicitRegistry.onHit(stack, target, actor, hitDamage);
             NecromanticArsenalPower.runSuppressed(() -> item.postHit(stack, target, actor));
         } finally {
             DELEGATED_WEAPON_HIT_CONTEXT.remove();

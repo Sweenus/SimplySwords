@@ -23,7 +23,8 @@ public class PincushionPower extends RunefusedGemPower {
 	public void postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
 		int stuckArrows = attacker.getStuckArrowCount();
 		float damage = HelperMethods.applyNonPlayerAbilityDamageModifier(attacker, (this.isGreater() ? stuckArrows * 2 : stuckArrows));
-		target.damage(attacker.getDamageSources().generic(), damage);
+		damage = HelperMethods.applyNonPlayerWeaponHitDamageModifier(attacker, damage);
+		target.damage(attacker.getDamageSources().generic(), HelperMethods.applyWeaponAbilityDamageToPlayersModifier(target, damage));
 		attacker.getWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
 				attacker.getSoundCategory(), 0.1f, 1.8f);
 	}

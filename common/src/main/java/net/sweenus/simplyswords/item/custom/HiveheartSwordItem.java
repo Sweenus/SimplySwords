@@ -145,7 +145,7 @@ public class HiveheartSwordItem extends UniqueSwordItem implements UniqueWeaponA
         @ValidatedInt.Restrict(min = 1)
         public int stingsPerBee = 10;
         @ValidatedDouble.Restrict(min = 0.0)
-        public double stingDamageScaling = 0.04;
+        public double stingDamageScaling = 0.01;
         @ValidatedInt.Restrict(min = 1)
         public int stingIntervalTicks = 10;
         @ValidatedInt.Restrict(min = 0)

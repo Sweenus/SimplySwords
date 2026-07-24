@@ -22,6 +22,8 @@ public class BerserkPower extends NetherGemPower {
 	public void postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
 		int amp = HelperMethods.isUniqueTwohanded(stack) ? 4 : 2;
 		if (attacker.getArmor() < 10) {
+			amp = (int) HelperMethods.applyNonPlayerWeaponHitDamageModifier(attacker, amp);
+			amp = (int) HelperMethods.applyWeaponAbilityDamageToPlayersModifier(target, amp);
 			target.setHealth(target.getHealth() - amp);
 			attacker.heal((float) amp / 2);
 		}

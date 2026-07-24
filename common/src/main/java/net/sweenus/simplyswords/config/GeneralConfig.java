@@ -30,6 +30,10 @@ public class GeneralConfig extends Config {
     public boolean enableAbilityDamageEnchantScaling = true;
     @ValidatedFloat.Restrict(min = 0f)
     public float nonPlayerWeaponAbilityDamageModifier = 0.5f;
+    @ValidatedFloat.Restrict(min = 0f)
+    public float weaponAbilityDamageToPlayersModifier = 0.5f;
+    @ValidatedFloat.Restrict(min = 0f)
+    public float nonPlayerWeaponHitDamageModifier = 0.3f;
     @ValidatedInt.Restrict(min = 1)
     public int nonPlayerWeaponAbilityCheckInterval = 80;
     @ValidatedInt.Restrict(min = 0, max = 100)

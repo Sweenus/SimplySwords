@@ -523,7 +523,9 @@ public class HelperMethods {
         if (Config.general.enableAbilityDamageEnchantScaling && world != null && stack != null && !stack.isEmpty() && target != null && damageSource != null) {
             finalDamage = EnchantmentHelper.getDamage(world, stack, target, damageSource, finalDamage);
         }
-        return applyNonPlayerAbilityDamageModifier(resolveAbilityDamageActor(damageSource), finalDamage);
+        finalDamage = applyNonPlayerAbilityDamageModifier(resolveAbilityDamageActor(damageSource), finalDamage);
+        finalDamage = applyWeaponAbilityDamageToPlayersModifier(target, finalDamage);
+        return finalDamage;
     }
 
     public static float applyNonPlayerAbilityDamageModifier(LivingEntity actor, float damage) {
@@ -531,6 +533,20 @@ public class HelperMethods {
             return damage;
         }
         return Math.max(0.0F, damage * Math.max(0.0F, Config.general.nonPlayerWeaponAbilityDamageModifier));
+    }
+
+    public static float applyWeaponAbilityDamageToPlayersModifier(Entity target, float damage) {
+        if (target instanceof PlayerEntity) {
+            return Math.max(0.0F, damage * Math.max(0.0F, Config.general.weaponAbilityDamageToPlayersModifier));
+        }
+        return damage;
+    }
+
+    public static float applyNonPlayerWeaponHitDamageModifier(LivingEntity actor, float damage) {
+        if (actor instanceof PlayerEntity || actor == null) {
+            return damage;
+        }
+        return Math.max(0.0F, damage * Math.max(0.0F, Config.general.nonPlayerWeaponHitDamageModifier));
     }
 
     public static LivingEntity resolveAbilityDamageActor(DamageSource damageSource) {

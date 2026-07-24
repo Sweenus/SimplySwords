@@ -32,7 +32,9 @@ public class ImbuedPower extends RunefusedGemPower {
 
 		if (attacker.getRandom().nextInt(100) <= hitChance) {
 			target.timeUntilRegen = 0;
-			target.damage(attacker.getDamageSources().magic(), HelperMethods.applyNonPlayerAbilityDamageModifier(attacker, damage));
+			float hitDamage = HelperMethods.applyNonPlayerAbilityDamageModifier(attacker, damage);
+			hitDamage = HelperMethods.applyNonPlayerWeaponHitDamageModifier(attacker, hitDamage);
+			target.damage(attacker.getDamageSources().magic(), HelperMethods.applyWeaponAbilityDamageToPlayersModifier(target, hitDamage));
 			attacker.getWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
 					attacker.getSoundCategory(), 0.2f, 1.8f);
 		}

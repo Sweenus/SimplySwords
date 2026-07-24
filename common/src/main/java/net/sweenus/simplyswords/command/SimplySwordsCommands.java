@@ -34,6 +34,7 @@ import net.sweenus.simplyswords.power.PowerType;
 import net.sweenus.simplyswords.registry.ComponentTypeRegistry;
 import net.sweenus.simplyswords.registry.GemPowerRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
+import net.sweenus.simplyswords.util.Styles;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -251,10 +252,42 @@ public final class SimplySwordsCommands {
 
             mob.equipStack(EquipmentSlot.MAINHAND, weaponStack);
             mob.setEquipmentDropChance(EquipmentSlot.MAINHAND, 0.0F);
+
+            if (count == 1) {
+                Text mobName = mob.getName();
+                Text weaponName = weaponStack.getName();
+                net.minecraft.text.MutableText msg = Text.literal("Spawned ").append(mobName)
+                        .append(" with ").append(weaponName);
+                if (runicPower == null && netherPower == null) {
+                    msg.append(" (no sockets)");
+                } else {
+                    msg.append(" (");
+                    boolean first = true;
+                    if (runicPower != null) {
+                        Identifier runicId = GemPowerRegistry.REGISTRY.getId(runicPower.value());
+                        if (runicId != null) {
+                            msg.append(Text.translatable("item.simplyswords.uniquesworditem.runefused_power." + runicId.getPath()).setStyle(Styles.RUNIC));
+                            first = false;
+                        }
+                    }
+                    if (netherPower != null) {
+                        Identifier netherId = GemPowerRegistry.REGISTRY.getId(netherPower.value());
+                        if (netherId != null) {
+                            if (!first) msg.append(" | ");
+                            msg.append(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power." + netherId.getPath()).setStyle(Styles.NETHERFUSED));
+                        }
+                    }
+                    msg.append(")");
+                }
+                final Text finalMsg = msg;
+                source.sendFeedback(() -> finalMsg, false);
+            }
         }
 
-        final int spawned = count;
-        source.sendFeedback(() -> Text.literal("Spawned " + spawned + " hostile mob" + (spawned == 1 ? "" : "s") + " with random Simply Swords weapons."), true);
-        return spawned;
+        if (count > 1) {
+            final int spawned = count;
+            source.sendFeedback(() -> Text.literal("Spawned " + spawned + " hostile mobs with random Simply Swords weapons."), true);
+        }
+        return count;
     }
 }

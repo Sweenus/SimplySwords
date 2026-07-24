@@ -44,6 +44,7 @@ public class StarsEdgeSwordItem extends UniqueSwordItem implements UniqueWeaponA
             ServerWorld world = (ServerWorld) attacker.getWorld();
             DamageSource damageSource = world.getDamageSources().generic();
             float abilityDamage = HelperMethods.attackScaledDamage(attacker, stack, skillDamageModifier);
+            abilityDamage = HelperMethods.applyNonPlayerWeaponHitDamageModifier(attacker, abilityDamage);
             if (attacker instanceof PlayerEntity player)
                 damageSource = attacker.getDamageSources().playerAttack(player);
 
