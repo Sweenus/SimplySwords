@@ -8,7 +8,6 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.tooltip.TooltipType;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.sweenus.simplyswords.api.DelegatedWeaponHitContext;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
@@ -31,7 +30,7 @@ public class FaultlinePower extends RunefusedGemPower {
 
     @Override
     public void postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        if (!(attacker instanceof ServerPlayerEntity player) || attacker.getWorld().isClient()) {
+        if (attacker.getWorld().isClient()) {
             return;
         }
         if (attacker.getRandom().nextInt(100) >= Config.gemPowers.faultline.chance) {
@@ -40,16 +39,16 @@ public class FaultlinePower extends RunefusedGemPower {
 
         float damage = HelperMethods.abilityScaledDamage(
                 "earth",
-                player,
+                attacker,
                 stack,
                 Config.gemPowers.faultline.damageScaling,
                 Config.gemPowers.faultline.spellScaling
         );
         DelegatedWeaponHitContext context = SimplySwordsAPI.getDelegatedWeaponHitContext();
         if (context != null) {
-            FaultlineSunderManager.createSunder(player.getServerWorld(), player, context.origin(), context.facing(), damage);
+            FaultlineSunderManager.createSunder((net.minecraft.server.world.ServerWorld) attacker.getWorld(), attacker, context.origin(), context.facing(), damage);
         } else {
-            FaultlineSunderManager.createSunder(player.getServerWorld(), player, damage);
+            FaultlineSunderManager.createSunder((net.minecraft.server.world.ServerWorld) attacker.getWorld(), attacker, damage);
         }
     }
 

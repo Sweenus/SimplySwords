@@ -1,5 +1,6 @@
 package net.sweenus.simplyswords.command;
 
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -8,6 +9,10 @@ import dev.architectury.event.events.common.CommandRegistrationEvent;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.IdentifierArgumentType;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.mob.MobEntity;
+import net.minecraft.entity.SpawnReason;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
@@ -15,11 +20,14 @@ import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
 import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
 import net.sweenus.simplyswords.item.RunicSwordItem;
+import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.power.GemPower;
 import net.sweenus.simplyswords.power.GemPowerComponent;
 import net.sweenus.simplyswords.power.PowerType;
@@ -27,6 +35,9 @@ import net.sweenus.simplyswords.registry.ComponentTypeRegistry;
 import net.sweenus.simplyswords.registry.GemPowerRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Stream;
 
 public final class SimplySwordsCommands {
@@ -37,6 +48,14 @@ public final class SimplySwordsCommands {
             Text.literal("Gem power cannot be applied to this item type: " + value));
     private static final DynamicCommandExceptionType UNKNOWN_RUNIC_WEAPON = new DynamicCommandExceptionType(value ->
             Text.literal("Unknown Simply Swords runic weapon: " + value));
+
+    private static List<Item> cachedUniqueWeapons;
+    private static final float SOCKET_CHANCE = 0.5F;
+    private static final List<EntityType<? extends MobEntity>> HOSTILE_MOBS = List.of(
+            EntityType.HUSK,
+            EntityType.VINDICATOR,
+            EntityType.PIGLIN
+    );
 
     private SimplySwordsCommands() {
     }
@@ -62,7 +81,23 @@ public final class SimplySwordsCommands {
                                         .suggests((context, builder) -> suggestRunicWeapons(builder))
                                         .then(CommandManager.argument("power", IdentifierArgumentType.identifier())
                                                 .suggests((context, builder) -> suggestPowers(builder, PowerType.RUNIC))
-                                                .executes(SimplySwordsCommands::givePoweredRunicWeapon))))));
+                                                .executes(SimplySwordsCommands::givePoweredRunicWeapon)))))
+                .then(CommandManager.literal("spawn_hostile")
+                        .executes(context -> spawnHostile(context, 1))
+                        .then(CommandManager.argument("count", IntegerArgumentType.integer(1, 50))
+                                .executes(context -> spawnHostile(context, IntegerArgumentType.getInteger(context, "count")))
+                                .then(CommandManager.literal("runefused")
+                                        .then(CommandManager.argument("runefused_power", IdentifierArgumentType.identifier())
+                                                .suggests((context, builder) -> suggestPowers(builder, PowerType.RUNEFUSED))
+                                                .executes(context -> spawnHostile(context, IntegerArgumentType.getInteger(context, "count")))
+                                                .then(CommandManager.literal("netherfused")
+                                                        .then(CommandManager.argument("netherfused_power", IdentifierArgumentType.identifier())
+                                                                .suggests((context, builder) -> suggestPowers(builder, PowerType.NETHER))
+                                                                .executes(context -> spawnHostile(context, IntegerArgumentType.getInteger(context, "count")))))))
+                                .then(CommandManager.literal("netherfused")
+                                        .then(CommandManager.argument("netherfused_power", IdentifierArgumentType.identifier())
+                                                .suggests((context, builder) -> suggestPowers(builder, PowerType.NETHER))
+                                                .executes(context -> spawnHostile(context, IntegerArgumentType.getInteger(context, "count"))))))));
     }
 
     private static int givePoweredGem(CommandContext<ServerCommandSource> context, PowerType powerType) throws CommandSyntaxException {
@@ -148,5 +183,78 @@ public final class SimplySwordsCommands {
                 .filter(id -> id.getNamespace().equals(SimplySwords.MOD_ID))
                 .filter(id -> Registries.ITEM.get(id) instanceof RunicSwordItem);
         return CommandSource.suggestIdentifiers(ids, builder);
+    }
+
+    private static List<Item> getUniqueWeapons() {
+        if (cachedUniqueWeapons == null) {
+            cachedUniqueWeapons = new ArrayList<>();
+            for (Identifier id : Registries.ITEM.getIds()) {
+                if (id.getNamespace().equals(SimplySwords.MOD_ID)) {
+                    Item item = Registries.ITEM.get(id);
+                    if (item instanceof UniqueSwordItem) {
+                        cachedUniqueWeapons.add(item);
+                    }
+                }
+            }
+        }
+        return cachedUniqueWeapons;
+    }
+
+    private static int spawnHostile(CommandContext<ServerCommandSource> context, int count) throws CommandSyntaxException {
+        ServerCommandSource source = context.getSource();
+        ServerPlayerEntity player = source.getPlayerOrThrow();
+        ServerWorld world = source.getWorld();
+        List<Item> weapons = getUniqueWeapons();
+
+        if (weapons.isEmpty()) {
+            source.sendFeedback(() -> Text.literal("No Simply Swords unique weapons found."), false);
+            return 0;
+        }
+
+        RegistryEntry<GemPower> forcedRunic = null;
+        RegistryEntry<GemPower> forcedNether = null;
+        try {
+            forcedRunic = getPower(context, "runefused_power", PowerType.RUNEFUSED);
+        } catch (IllegalArgumentException ignored) {
+        }
+        try {
+            forcedNether = getPower(context, "netherfused_power", PowerType.NETHER);
+        } catch (IllegalArgumentException ignored) {
+        }
+
+        ThreadLocalRandom rng = ThreadLocalRandom.current();
+
+        for (int i = 0; i < count; i++) {
+            EntityType<? extends MobEntity> mobType = HOSTILE_MOBS.get(rng.nextInt(HOSTILE_MOBS.size()));
+            double offsetX = (rng.nextDouble() - 0.5) * 6.0;
+            double offsetZ = (rng.nextDouble() - 0.5) * 6.0;
+            BlockPos spawnPos = BlockPos.ofFloored(player.getX() + offsetX, player.getY(), player.getZ() + offsetZ);
+
+            MobEntity mob = mobType.spawn(world, spawnPos, SpawnReason.COMMAND);
+            if (mob == null) continue;
+
+            Item weapon = weapons.get(rng.nextInt(weapons.size()));
+            ItemStack weaponStack = new ItemStack(weapon);
+
+            RegistryEntry<GemPower> runicPower = forcedRunic;
+            RegistryEntry<GemPower> netherPower = forcedNether;
+            if (runicPower == null && rng.nextFloat() <= SOCKET_CHANCE) {
+                runicPower = GemPowerRegistry.gemRandomPower(PowerType.RUNEFUSED);
+            }
+            if (netherPower == null && rng.nextFloat() <= SOCKET_CHANCE) {
+                netherPower = GemPowerRegistry.gemRandomPower(PowerType.NETHER);
+            }
+            if (runicPower != null || netherPower != null) {
+                weaponStack.set(ComponentTypeRegistry.GEM_POWER.get(),
+                        GemPowerComponent.create(runicPower, netherPower));
+            }
+
+            mob.equipStack(EquipmentSlot.MAINHAND, weaponStack);
+            mob.setEquipmentDropChance(EquipmentSlot.MAINHAND, 0.0F);
+        }
+
+        final int spawned = count;
+        source.sendFeedback(() -> Text.literal("Spawned " + spawned + " hostile mob" + (spawned == 1 ? "" : "s") + " with random Simply Swords weapons."), true);
+        return spawned;
     }
 }

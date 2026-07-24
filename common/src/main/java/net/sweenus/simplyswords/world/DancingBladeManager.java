@@ -1,13 +1,13 @@
 package net.sweenus.simplyswords.world;
 
 import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.SwordItem;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
@@ -34,12 +34,12 @@ public final class DancingBladeManager {
     private DancingBladeManager() {
     }
 
-    public static boolean trySummon(ServerPlayerEntity player, ItemStack stack) {
+    public static boolean trySummon(LivingEntity player, ItemStack stack) {
         if (player == null || stack == null || stack.isEmpty() || !player.isAlive()) {
             return false;
         }
 
-        ServerWorld world = player.getServerWorld();
+        ServerWorld world = (net.minecraft.server.world.ServerWorld) player.getWorld();
         int maxSwords = Math.max(1, Config.gemPowers.dancingBlades.maxSwords);
         int slot = firstAvailableSlot(world, player, maxSwords);
         if (slot < 0) {
@@ -72,7 +72,7 @@ public final class DancingBladeManager {
             return;
         }
 
-        ServerPlayerEntity owner = getOwner(world, blade);
+        LivingEntity owner = getOwner(world, blade);
         ItemStack stack = blade.getWeaponStack();
         if (owner == null || !owner.isAlive() || world.getTime() > blade.getExpiresAtTick() || stack == null || stack.isEmpty()) {
             discardBlade(blade);
@@ -89,7 +89,7 @@ public final class DancingBladeManager {
         damageCollidingTargets(world, owner, blade, pos);
     }
 
-    private static void damageCollidingTargets(ServerWorld world, ServerPlayerEntity owner, DancingBladeVisualEntity blade, Vec3d bladePos) {
+    private static void damageCollidingTargets(ServerWorld world, LivingEntity owner, DancingBladeVisualEntity blade, Vec3d bladePos) {
         double damage = HelperMethods.attackScaledDamage(owner, blade.getWeaponStack(), Config.gemPowers.dancingBlades.damageScaling);
         if (damage <= 0.0) {
             return;
@@ -116,7 +116,7 @@ public final class DancingBladeManager {
         COLLIDING_TARGETS.addAll(current);
     }
 
-    private static void damageTarget(ServerWorld world, ServerPlayerEntity owner, DancingBladeVisualEntity blade, LivingEntity target, float damage, Vec3d bladePos) {
+    private static void damageTarget(ServerWorld world, LivingEntity owner, DancingBladeVisualEntity blade, LivingEntity target, float damage, Vec3d bladePos) {
         ItemStack stack = blade.getWeaponStack();
         if (stack == null || stack.isEmpty()) {
             discardBlade(blade);
@@ -155,7 +155,7 @@ public final class DancingBladeManager {
         world.playSound(null, target.getBlockPos(), SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, SoundCategory.PLAYERS, 0.35F, 1.25F);
     }
 
-    private static int firstAvailableSlot(ServerWorld world, ServerPlayerEntity player, int maxSwords) {
+    private static int firstAvailableSlot(ServerWorld world, LivingEntity player, int maxSwords) {
         boolean[] occupied = new boolean[maxSwords];
         int active = 0;
         for (DancingBladeVisualEntity blade : getOwnedBlades(world, player)) {
@@ -175,15 +175,17 @@ public final class DancingBladeManager {
         return -1;
     }
 
-    private static Iterable<DancingBladeVisualEntity> getOwnedBlades(ServerWorld world, ServerPlayerEntity player) {
+    private static Iterable<DancingBladeVisualEntity> getOwnedBlades(ServerWorld world, LivingEntity player) {
         double radius = Math.max(8.0, Config.gemPowers.dancingBlades.orbitRadius + 6.0);
         return world.getEntitiesByClass(DancingBladeVisualEntity.class, player.getBoundingBox().expand(radius, 4.0, radius), blade ->
                 player.getUuid().equals(blade.getOwnerUuid()) && blade.isAlive());
     }
 
-    private static ServerPlayerEntity getOwner(ServerWorld world, DancingBladeVisualEntity blade) {
+    private static LivingEntity getOwner(ServerWorld world, DancingBladeVisualEntity blade) {
         UUID ownerId = blade.getOwnerUuid();
-        return ownerId == null ? null : world.getServer().getPlayerManager().getPlayer(ownerId);
+        if (ownerId == null) return null;
+        Entity entity = world.getEntity(ownerId);
+        return entity instanceof LivingEntity living ? living : null;
     }
 
     private static Vec3d getBladePosition(Vec3d center, long time, int slot, int maxSwords, double orbitRadius) {

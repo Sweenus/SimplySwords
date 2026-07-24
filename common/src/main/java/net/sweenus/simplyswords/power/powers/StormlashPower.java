@@ -8,7 +8,6 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.tooltip.TooltipType;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.sweenus.simplyswords.api.DelegatedWeaponHitContext;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
@@ -31,7 +30,7 @@ public class StormlashPower extends RunefusedGemPower {
 
     @Override
     public void postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        if (!(attacker instanceof ServerPlayerEntity player) || attacker.getWorld().isClient()) {
+        if (attacker.getWorld().isClient()) {
             return;
         }
 
@@ -39,18 +38,18 @@ public class StormlashPower extends RunefusedGemPower {
             return;
         }
 
-        float damage = HelperMethods.abilityScaledDamage("lightning", player, stack,
+        float damage = HelperMethods.abilityScaledDamage("lightning", attacker, stack,
                 Config.gemPowers.stormlash.damageScaling,
                 Config.gemPowers.stormlash.spellScaling);
         DelegatedWeaponHitContext context = SimplySwordsAPI.getDelegatedWeaponHitContext();
         if (context != null) {
-            ChainLightningVisualManager.damageChain(player.getServerWorld(), player, context.actor(), target,
+            ChainLightningVisualManager.damageChain((net.minecraft.server.world.ServerWorld) attacker.getWorld(), attacker, context.actor(), target,
                     Config.gemPowers.stormlash.chainCount,
                     damage,
                     Config.gemPowers.stormlash.range,
                     ChainLightningVisualManager.STORMBRINGER_SETTINGS);
         } else {
-            ChainLightningVisualManager.damageChain(player.getServerWorld(), player, target,
+            ChainLightningVisualManager.damageChain((net.minecraft.server.world.ServerWorld) attacker.getWorld(), attacker, target,
                     Config.gemPowers.stormlash.chainCount,
                     damage,
                     Config.gemPowers.stormlash.range,

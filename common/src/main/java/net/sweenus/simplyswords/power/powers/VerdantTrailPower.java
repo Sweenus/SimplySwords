@@ -8,7 +8,6 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.tooltip.TooltipType;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
@@ -28,8 +27,8 @@ public class VerdantTrailPower extends NetherGemPower {
 
     @Override
     public void inventoryTick(ItemStack stack, World world, LivingEntity user, int slot, boolean selected) {
-        if (!world.isClient && user instanceof ServerPlayerEntity player) {
-            VerdantTrailManager.tryPlaceTrail(player);
+        if (!world.isClient && user instanceof LivingEntity livingUser) {
+            VerdantTrailManager.tryPlaceTrail(livingUser);
         }
     }
 

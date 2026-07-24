@@ -4,7 +4,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.predicate.entity.EntityPredicates;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.Box;
 
@@ -33,7 +32,7 @@ public final class MinionTargeting {
     private MinionTargeting() {
     }
 
-    public static void recordLastAttack(ServerPlayerEntity player, LivingEntity target) {
+    public static void recordLastAttack(LivingEntity player, LivingEntity target) {
         if (player == null || target == null) {
             return;
         }
@@ -41,7 +40,7 @@ public final class MinionTargeting {
         MARKED_TARGETS.computeIfAbsent(player.getUuid(), k -> new HashSet<>()).add(target.getUuid());
     }
 
-    public static boolean isMarkedTarget(ServerWorld world, ServerPlayerEntity owner, LivingEntity target) {
+    public static boolean isMarkedTarget(ServerWorld world, LivingEntity owner, LivingEntity target) {
         if (owner == null || target == null) {
             return false;
         }
@@ -63,7 +62,7 @@ public final class MinionTargeting {
         return true;
     }
 
-    public static void cleanupMarkedTargets(ServerWorld world, ServerPlayerEntity owner) {
+    public static void cleanupMarkedTargets(ServerWorld world, LivingEntity owner) {
         if (owner == null) {
             return;
         }
@@ -84,7 +83,7 @@ public final class MinionTargeting {
         }
     }
 
-    public static LivingEntity getRecentAttackTarget(ServerWorld world, ServerPlayerEntity owner) {
+    public static LivingEntity getRecentAttackTarget(ServerWorld world, LivingEntity owner) {
         if (owner == null) {
             return null;
         }
@@ -102,7 +101,7 @@ public final class MinionTargeting {
         return null;
     }
 
-    public static void tauntNearbyEnemies(ServerWorld world, LivingEntity minion, ServerPlayerEntity owner, Predicate<LivingEntity> validEnemy) {
+    public static void tauntNearbyEnemies(ServerWorld world, LivingEntity minion, LivingEntity owner, Predicate<LivingEntity> validEnemy) {
         if (owner == null) {
             return;
         }
@@ -131,7 +130,7 @@ public final class MinionTargeting {
         }
     }
 
-    public static LivingEntity findNearestValidToOwner(ServerWorld world, ServerPlayerEntity owner, Predicate<LivingEntity> validEnemy, double radius) {
+    public static LivingEntity findNearestValidToOwner(ServerWorld world, LivingEntity owner, Predicate<LivingEntity> validEnemy, double radius) {
         if (owner == null) {
             return null;
         }
@@ -142,6 +141,15 @@ public final class MinionTargeting {
                 .filter(validEnemy)
                 .min(Comparator.comparingDouble(entity -> entity.squaredDistanceTo(owner)))
                 .orElse(null);
+    }
+
+    public static LivingEntity getOwnerCurrentTarget(ServerWorld world, LivingEntity owner) {
+        if (owner == null) return null;
+        if (owner instanceof MobEntity mob) {
+            LivingEntity target = mob.getTarget();
+            if (target != null && target.isAlive()) return target;
+        }
+        return getRecentAttackTarget(world, owner);
     }
 
     public static int tauntIntervalTicks() {

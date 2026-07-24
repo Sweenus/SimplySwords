@@ -223,6 +223,9 @@ public class ThrownSwordEntity extends PersistentProjectileEntity {
                 && !HelperMethods.checkAbilityTarget(target, owner)) {
             return;
         }
+        if (this.getOwner() == null && entity instanceof LivingEntity) {
+            return;
+        }
         keepPitch = this.getPitch();
         float baseDamage = primaryBaseDamage;
         Entity entity2 = this.getOwner();

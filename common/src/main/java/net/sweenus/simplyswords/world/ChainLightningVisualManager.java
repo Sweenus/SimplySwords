@@ -4,7 +4,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
-import net.minecraft.server.network.ServerPlayerEntity;
+
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
@@ -53,15 +53,15 @@ public final class ChainLightningVisualManager {
         }
     }
 
-    public static int damageStormbringerChain(ServerWorld world, ServerPlayerEntity player, LivingEntity firstTarget, int chainCount, float damage, double range) {
+    public static int damageStormbringerChain(ServerWorld world, LivingEntity player, LivingEntity firstTarget, int chainCount, float damage, double range) {
         return damageChain(world, player, firstTarget, chainCount, damage, range, STORMBRINGER_SETTINGS);
     }
 
-    public static int damageChain(ServerWorld world, ServerPlayerEntity player, LivingEntity firstTarget, int chainCount, float damage, double range, LightningVisualSettings settings) {
+    public static int damageChain(ServerWorld world, LivingEntity player, LivingEntity firstTarget, int chainCount, float damage, double range, LightningVisualSettings settings) {
         return damageChain(world, player, player, firstTarget, chainCount, damage, range, settings);
     }
 
-    public static int damageChain(ServerWorld world, ServerPlayerEntity player, LivingEntity sourceEntity, LivingEntity firstTarget,
+    public static int damageChain(ServerWorld world, LivingEntity player, LivingEntity sourceEntity, LivingEntity firstTarget,
                                   int chainCount, float damage, double range, LightningVisualSettings settings) {
         if (chainCount <= 0 || firstTarget == null || !firstTarget.isAlive()) {
             return 0;
@@ -98,7 +98,7 @@ public final class ChainLightningVisualManager {
         return damaged;
     }
 
-    private static List<LivingEntity> buildChain(ServerWorld world, ServerPlayerEntity player, LivingEntity firstTarget, int chainCount, double range) {
+    private static List<LivingEntity> buildChain(ServerWorld world, LivingEntity player, LivingEntity firstTarget, int chainCount, double range) {
         List<LivingEntity> chain = new ArrayList<>();
         Set<UUID> visited = new HashSet<>();
         LivingEntity current = firstTarget;
@@ -110,7 +110,7 @@ public final class ChainLightningVisualManager {
         return chain;
     }
 
-    private static LivingEntity findNextTarget(ServerWorld world, ServerPlayerEntity player, LivingEntity current, Set<UUID> visited, double range) {
+    private static LivingEntity findNextTarget(ServerWorld world, LivingEntity player, LivingEntity current, Set<UUID> visited, double range) {
         Box box = current.getBoundingBox().expand(range, range * 0.5, range);
         return world.getEntitiesByClass(LivingEntity.class, box, target ->
                         target != player

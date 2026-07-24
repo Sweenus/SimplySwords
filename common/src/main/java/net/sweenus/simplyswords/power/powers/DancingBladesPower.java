@@ -8,7 +8,6 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.tooltip.TooltipType;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.config.Config;
@@ -28,7 +27,7 @@ public class DancingBladesPower extends RunefusedGemPower {
 
     @Override
     public void postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        if (!(attacker instanceof ServerPlayerEntity player) || attacker.getWorld().isClient()) {
+        if (attacker.getWorld().isClient()) {
             return;
         }
 
@@ -36,7 +35,7 @@ public class DancingBladesPower extends RunefusedGemPower {
             return;
         }
 
-        DancingBladeManager.trySummon(player, stack);
+        DancingBladeManager.trySummon(attacker, stack);
     }
 
     @Override

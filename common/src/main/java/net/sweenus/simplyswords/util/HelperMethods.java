@@ -8,6 +8,7 @@ import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
+import java.util.UUID;
 import net.minecraft.entity.Tameable;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributes;
@@ -118,27 +119,42 @@ public class HelperMethods {
                 return false;
             return playerEntity.shouldDamagePlayer(player);
         }
-        if (attackingEntity instanceof Tameable attackingTameable && attackingTameable.getOwner() != null) {
-            if (attackingTameable.getOwner() == livingEntity) {
-                return false;
-            }
-            if (livingEntity instanceof Tameable targetTameable && targetTameable.getOwner() != null
-                    && targetTameable.getOwner() == attackingTameable.getOwner()) {
-                return false;
+        if (attackingEntity instanceof Tameable attackingTameable) {
+            UUID attackerOwnerUuid = attackingTameable.getOwnerUuid();
+            if (attackerOwnerUuid != null) {
+                if (attackerOwnerUuid.equals(livingEntity.getUuid())) {
+                    return false;
+                }
+                if (livingEntity instanceof Tameable targetTameable) {
+                    UUID targetOwnerUuid = targetTameable.getOwnerUuid();
+                    if (targetOwnerUuid != null && targetOwnerUuid.equals(attackerOwnerUuid)) {
+                        return false;
+                    }
+                }
             }
         }
         if (livingEntity instanceof Tameable tameable) {
-            if (tameable.getOwner() != null) {
-                if (tameable.getOwner() != attackingEntity
-                        && (tameable.getOwner() instanceof PlayerEntity ownerPlayer)
-                && attackingEntity instanceof PlayerEntity playerEntity) {
+            UUID ownerUuid = tameable.getOwnerUuid();
+            if (ownerUuid != null) {
+                if (ownerUuid.equals(attackingEntity.getUuid())) {
+                    return false;
+                }
+                if (attackingEntity instanceof Tameable attackingTameable) {
+                    UUID attackerOwnerUuid = attackingTameable.getOwnerUuid();
+                    if (attackerOwnerUuid != null && attackerOwnerUuid.equals(ownerUuid)) {
+                        return false;
+                    }
+                }
+                LivingEntity owner = tameable.getOwner();
+                if (owner != null && owner != attackingEntity
+                        && (owner instanceof PlayerEntity ownerPlayer)
+                        && attackingEntity instanceof PlayerEntity playerEntity) {
                     if (HelperMethods.isOpacLoaded()) {
-                        // Is OpenPAC loaded? And is the pet owner a team/ally member?
                         return OpacCompat.checkOpacFriendlyFire(ownerPlayer, playerEntity);
                     }
                     return playerEntity.shouldDamagePlayer(ownerPlayer);
                 }
-                return tameable.getOwner() != attackingEntity;
+                return !ownerUuid.equals(attackingEntity.getUuid());
             }
             return true;
         }
@@ -151,10 +167,34 @@ public class HelperMethods {
 
     public static boolean isMonsterFaction(LivingEntity entity) {
         if (entity instanceof Monster) {
-            if (entity instanceof Tameable tameable && tameable.getOwner() != null) {
+            if (entity instanceof Tameable tameable) {
+                LivingEntity owner = tameable.getOwner();
+                if (owner != null) {
+                    return isMonsterFaction(owner);
+                }
+                UUID ownerUuid = tameable.getOwnerUuid();
+                if (ownerUuid != null && entity.getWorld() instanceof ServerWorld world) {
+                    Entity ownerEntity = world.getEntity(ownerUuid);
+                    if (ownerEntity instanceof LivingEntity ownerLiving) {
+                        return isMonsterFaction(ownerLiving);
+                    }
+                }
                 return false;
             }
             return true;
+        }
+        if (entity instanceof Tameable tameable) {
+            LivingEntity owner = tameable.getOwner();
+            if (owner != null) {
+                return isMonsterFaction(owner);
+            }
+            UUID ownerUuid = tameable.getOwnerUuid();
+            if (ownerUuid != null && entity.getWorld() instanceof ServerWorld world) {
+                Entity ownerEntity = world.getEntity(ownerUuid);
+                if (ownerEntity instanceof LivingEntity ownerLiving) {
+                    return isMonsterFaction(ownerLiving);
+                }
+            }
         }
         return false;
     }

@@ -19,6 +19,7 @@ import net.sweenus.simplyswords.item.custom.IcewhisperSwordItem;
 import net.sweenus.simplyswords.item.custom.LichbladeSwordItem;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
+import net.sweenus.simplyswords.util.MinionTargeting;
 import net.sweenus.simplyswords.world.ShadowstingShadowDanceManager;
 import net.sweenus.simplyswords.world.SoulkeeperLanternManager;
 import org.spongepowered.asm.mixin.Mixin;
@@ -96,6 +97,7 @@ public abstract class MobEntityMixin {
                 || stack.getItem() instanceof RunicSwordItem
                 || stack.getItem() instanceof SimplySwordsSwordItem) {
             SimplySwordsAPI.applyEntityWeaponPostHit(stack, livingTarget, mob, (float) net.sweenus.simplyswords.util.HelperMethods.getEntityAttackDamage(mob));
+            MinionTargeting.recordLastAttack(mob, livingTarget);
         }
     }
 }

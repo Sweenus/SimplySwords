@@ -80,7 +80,37 @@ public class SimplySwordsWolfMinionEntity extends WolfEntity implements Tameable
         this.goalSelector.add(7, new WanderAroundFarGoal(this, 0.85));
         this.goalSelector.add(8, new LookAtEntityGoal(this, PlayerEntity.class, 8.0F));
         this.goalSelector.add(8, new LookAroundGoal(this));
-        this.targetSelector.add(1, new MinionTargetPriorityGoal(this, world -> getOwnerPlayer(world), this::isValidMinionTarget, 16.0, 20));
+        this.targetSelector.add(1, new MinionTargetPriorityGoal(this, world -> getOwner(world), this::isValidMinionTarget, 16.0, 20));
+    }
+
+    public void initializeMinion(LivingEntity owner, ItemStack stack, int sourceWeaponSlot, long expiresAtTick, float weaponDamage) {
+        this.ownerUuid = owner.getUuid();
+        this.expiresAtTick = expiresAtTick;
+        this.weaponDamage = Math.max(0.0F, weaponDamage);
+        this.sourceWeaponSlot = sourceWeaponSlot;
+        this.setTamed(true, false);
+        this.setSitting(false);
+        this.equipStack(EquipmentSlot.MAINHAND, stack.copy());
+        this.setEquipmentDropChance(EquipmentSlot.MAINHAND, 0.0F);
+        EntityAttributeInstance health = this.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH);
+        if (health != null) {
+            double scaled = health.getBaseValue() + weaponDamage * HEALTH_PER_ATTACK;
+            health.setBaseValue(scaled);
+            this.setHealth((float) scaled);
+        }
+        this.setPersistent();
+        this.setCustomName(owner.getName().copy().append("'s Wolf"));
+        this.setVariant(this.getRegistryManager()
+                .get(RegistryKeys.WOLF_VARIANT)
+                .getRandom(this.getRandom())
+                .orElseThrow());
+        if (this.random.nextFloat() <= ARMOR_CHANCE) {
+            net.minecraft.util.DyeColor dye = net.minecraft.util.DyeColor.values()[this.random.nextInt(net.minecraft.util.DyeColor.values().length)];
+            ItemStack wolfArmor = new ItemStack(net.minecraft.item.Items.WOLF_ARMOR);
+            wolfArmor.set(net.minecraft.component.DataComponentTypes.DYED_COLOR, new net.minecraft.component.type.DyedColorComponent(dye.getSignColor(), false));
+            this.equipStack(EquipmentSlot.BODY, wolfArmor);
+            this.setEquipmentDropChance(EquipmentSlot.BODY, 0.0F);
+        }
     }
 
     public void initializeMinion(ServerPlayerEntity owner, ItemStack stack, int sourceWeaponSlot, long expiresAtTick, float weaponDamage) {
@@ -129,7 +159,7 @@ public class SimplySwordsWolfMinionEntity extends WolfEntity implements Tameable
             this.extinguish();
         }
 
-        ServerPlayerEntity owner = getOwnerPlayer(world);
+        LivingEntity owner = getOwner(world);
         if (owner == null || !owner.isAlive()) {
             expire();
             return;
@@ -151,9 +181,9 @@ public class SimplySwordsWolfMinionEntity extends WolfEntity implements Tameable
         if (!(target instanceof LivingEntity livingTarget) || !(this.getWorld() instanceof ServerWorld world)) {
             return false;
         }
-        ServerPlayerEntity owner = getOwnerPlayer(world);
+        LivingEntity owner = getOwner(world);
         ItemStack visualStack = this.getMainHandStack();
-        ItemStack effectStack = resolveEffectWeaponStack(owner, visualStack);
+        ItemStack effectStack = resolveEffectWeaponStack(owner instanceof ServerPlayerEntity sp ? sp : null, visualStack);
         if (owner == null || visualStack.isEmpty() || effectStack.isEmpty() || !isValidMinionTarget(livingTarget)) {
             return false;
         }
@@ -180,6 +210,9 @@ public class SimplySwordsWolfMinionEntity extends WolfEntity implements Tameable
             return false;
         }
         if (isSiblingMinion(attacker)) {
+            return false;
+        }
+        if (attacker != null && this.ownerUuid != null && this.ownerUuid.equals(attacker.getUuid())) {
             return false;
         }
         if (attacker instanceof LivingEntity livingAttacker && isValidMinionTarget(livingAttacker)) {
@@ -223,6 +256,18 @@ public class SimplySwordsWolfMinionEntity extends WolfEntity implements Tameable
         return true;
     }
 
+    private void followOwner(LivingEntity owner) {
+        double distance = this.squaredDistanceTo(owner);
+        if (distance > OWNER_TELEPORT_DISTANCE * OWNER_TELEPORT_DISTANCE) {
+            this.refreshPositionAndAngles(owner.getX(), owner.getY(), owner.getZ(), owner.getYaw(), owner.getPitch());
+            this.navigation.stop();
+            return;
+        }
+        if (distance > OWNER_FOLLOW_DISTANCE * OWNER_FOLLOW_DISTANCE && this.getTarget() == null) {
+            this.navigation.startMovingTo(owner, 1.15);
+        }
+    }
+
     private void followOwner(ServerPlayerEntity owner) {
         double distance = this.squaredDistanceTo(owner);
         if (distance > OWNER_TELEPORT_DISTANCE * OWNER_TELEPORT_DISTANCE) {
@@ -235,7 +280,7 @@ public class SimplySwordsWolfMinionEntity extends WolfEntity implements Tameable
         }
     }
 
-    private void tryActivateWeaponAbility(ServerWorld world, ServerPlayerEntity owner) {
+    private void tryActivateWeaponAbility(ServerWorld world, LivingEntity owner) {
         LivingEntity target = this.getTarget();
         int interval = Math.max(1, Config.gemPowers.wolfPack.activeAbilityCheckInterval);
         long now = world.getTime();
@@ -252,8 +297,8 @@ public class SimplySwordsWolfMinionEntity extends WolfEntity implements Tameable
         }
 
         ItemStack visualStack = this.getMainHandStack();
-        ItemStack effectStack = resolveEffectWeaponStack(owner, visualStack);
-        WeaponAbilityContext context = WeaponAbilityContext.of(world, effectStack, this, owner, target, Hand.MAIN_HAND, WeaponAbilityActivationSource.MINION);
+        ItemStack effectStack = resolveEffectWeaponStack(owner instanceof ServerPlayerEntity sp ? sp : null, visualStack);
+        WeaponAbilityContext context = WeaponAbilityContext.of(world, effectStack, this, owner instanceof ServerPlayerEntity sp ? sp : null, target, Hand.MAIN_HAND, WeaponAbilityActivationSource.MINION);
         if (!SimplySwordsAPI.canActivateWeaponAbility(context)) {
             return;
         }
@@ -286,17 +331,35 @@ public class SimplySwordsWolfMinionEntity extends WolfEntity implements Tameable
         if (!(this.getWorld() instanceof ServerWorld world)) {
             return false;
         }
-        ServerPlayerEntity owner = getOwnerPlayer(world);
+        LivingEntity owner = getOwner(world);
         if (owner == null || target == owner) {
             return false;
         }
-        if (!HelperMethods.checkFriendlyFire(target, owner)) {
+        if (isSiblingMinion(target)) {
             return false;
         }
-        if (!HelperMethods.isMonsterFaction(target)) {
-            return MinionTargeting.isMarkedTarget(world, owner, target);
+        if (owner instanceof ServerPlayerEntity) {
+            if (!HelperMethods.checkFriendlyFire(target, owner)) {
+                return false;
+            }
+            if (!HelperMethods.isMonsterFaction(target)) {
+                return MinionTargeting.isMarkedTarget(world, owner, target);
+            }
+            return true;
         }
-        return true;
+        if (owner instanceof MobEntity mobOwner && target == mobOwner.getTarget()) {
+            return true;
+        }
+        if (MinionTargeting.getRecentAttackTarget(world, owner) == target) {
+            return true;
+        }
+        if (HelperMethods.isMonsterFaction(owner)) {
+            if (HelperMethods.isMonsterFaction(target)) {
+                return false;
+            }
+            return HelperMethods.checkFriendlyFire(target, owner);
+        }
+        return HelperMethods.checkFriendlyFire(target, owner);
     }
 
     private boolean isProtectedFromPlayer(PlayerEntity player) {
@@ -311,6 +374,15 @@ public class SimplySwordsWolfMinionEntity extends WolfEntity implements Tameable
         return this.ownerUuid == null ? null : world.getServer().getPlayerManager().getPlayer(this.ownerUuid);
     }
 
+    @Nullable
+    private LivingEntity getOwner(ServerWorld world) {
+        if (this.ownerUuid == null) return null;
+        ServerPlayerEntity player = getOwnerPlayer(world);
+        if (player != null) return player;
+        Entity entity = world.getEntity(this.ownerUuid);
+        return entity instanceof LivingEntity living ? living : null;
+    }
+
     private void expire() {
         if (this.getWorld() instanceof ServerWorld world) {
             world.spawnParticles(ParticleTypes.POOF, this.getX(), this.getBodyY(0.5), this.getZ(), 12, 0.35, 0.35, 0.35, 0.04);
@@ -323,6 +395,18 @@ public class SimplySwordsWolfMinionEntity extends WolfEntity implements Tameable
     @Override
     public UUID getOwnerUuid() {
         return this.ownerUuid;
+    }
+
+    @Override
+    public LivingEntity getOwner() {
+        if (this.ownerUuid == null) return null;
+        if (this.getWorld() instanceof ServerWorld world) {
+            ServerPlayerEntity player = getOwnerPlayer(world);
+            if (player != null) return player;
+            Entity entity = world.getEntity(this.ownerUuid);
+            return entity instanceof LivingEntity living ? living : null;
+        }
+        return null;
     }
 
     @Override

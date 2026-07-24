@@ -161,6 +161,11 @@ public class SimplySwordsAPI {
 
     public static boolean applyDelegatedWeaponHit(ItemStack stack, LivingEntity target, ServerPlayerEntity owner,
                                                   LivingEntity actor, float damage) {
+        return applyDelegatedWeaponHit(stack, target, (LivingEntity) owner, actor, damage);
+    }
+
+    public static boolean applyDelegatedWeaponHit(ItemStack stack, LivingEntity target, LivingEntity owner,
+                                                  LivingEntity actor, float damage) {
         if (stack == null || stack.isEmpty() || target == null || owner == null || actor == null
                 || !(owner.getWorld() instanceof ServerWorld world) || target.getWorld() != world) {
             return false;
@@ -178,10 +183,12 @@ public class SimplySwordsAPI {
         }
         facing = facing.normalize();
 
-        DelegatedWeaponHitContext context = new DelegatedWeaponHitContext(owner, actor, actor.getPos(), facing);
+        DelegatedWeaponHitContext context = new DelegatedWeaponHitContext(owner instanceof ServerPlayerEntity sp ? sp : null, actor, actor.getPos(), facing);
         DELEGATED_WEAPON_HIT_CONTEXT.set(context);
         try {
-            DamageSource source = owner.getDamageSources().playerAttack(owner);
+            DamageSource source = owner instanceof ServerPlayerEntity sp
+                    ? owner.getDamageSources().playerAttack(sp)
+                    : owner.getDamageSources().mobAttack(owner);
             float modifiedDamage = WeaponImplicitRegistry.modifyDamage(stack, target, source, damage);
             target.timeUntilRegen = 0;
             boolean[] damaged = {false};

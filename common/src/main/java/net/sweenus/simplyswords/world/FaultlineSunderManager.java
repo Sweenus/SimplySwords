@@ -7,6 +7,7 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.particle.BlockStateParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
@@ -46,11 +47,11 @@ public final class FaultlineSunderManager {
         return (sunders != null && !sunders.isEmpty()) || world.getTime() % 20L == 0L;
     }
 
-    public static void createSunder(ServerWorld world, ServerPlayerEntity owner, float damage) {
+    public static void createSunder(ServerWorld world, LivingEntity owner, float damage) {
         createSunder(world, owner, owner == null ? Vec3d.ZERO : owner.getPos(), owner == null ? Vec3d.ZERO : owner.getRotationVec(1.0F), damage);
     }
 
-    public static void createSunder(ServerWorld world, ServerPlayerEntity owner, Vec3d origin, Vec3d facing, float damage) {
+    public static void createSunder(ServerWorld world, LivingEntity owner, Vec3d origin, Vec3d facing, float damage) {
         if (world == null || owner == null || !owner.isAlive()) {
             return;
         }
@@ -136,7 +137,7 @@ public final class FaultlineSunderManager {
         world.spawnParticles(ParticleTypes.POOF, pos.x, groundY + 0.08, pos.z, edge ? 2 : 1, 0.1, 0.04, 0.1, 0.0);
     }
 
-    private static void damageEnemies(ServerWorld world, ServerPlayerEntity owner, Vec3d origin, Vec3d direction, Vec3d right, float damage) {
+    private static void damageEnemies(ServerWorld world, LivingEntity owner, Vec3d origin, Vec3d direction, Vec3d right, float damage) {
         double length = Math.max(1.0, Config.gemPowers.faultline.length);
         double halfWidth = Math.max(0.25, Config.gemPowers.faultline.width * 0.5 * VISUAL_WIDTH_MULTIPLIER);
         Vec3d center = origin.add(direction.multiply(length * 0.5));

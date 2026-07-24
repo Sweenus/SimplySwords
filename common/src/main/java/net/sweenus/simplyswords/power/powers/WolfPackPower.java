@@ -7,7 +7,6 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.tooltip.TooltipType;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.config.Config;
@@ -15,7 +14,6 @@ import net.sweenus.simplyswords.config.settings.TooltipSettings;
 import net.sweenus.simplyswords.power.NetherGemPower;
 import net.sweenus.simplyswords.registry.GemPowerRegistry;
 import net.sweenus.simplyswords.util.Styles;
-import net.sweenus.simplyswords.world.MinionHitSuppression;
 import net.sweenus.simplyswords.world.WolfPackManager;
 
 import java.util.List;
@@ -28,7 +26,7 @@ public class WolfPackPower extends NetherGemPower {
 
     @Override
     public void postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        if (MinionHitSuppression.isSuppressed() || !(attacker instanceof ServerPlayerEntity player) || attacker.getWorld().isClient()) {
+        if (attacker.getWorld().isClient()) {
             return;
         }
 
@@ -36,7 +34,7 @@ public class WolfPackPower extends NetherGemPower {
             return;
         }
 
-        WolfPackManager.trySummon(player, stack);
+        WolfPackManager.trySummon(attacker, stack);
     }
 
     @Override

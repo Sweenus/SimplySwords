@@ -4,6 +4,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.particle.BlockStateParticleEffect;
@@ -48,20 +49,21 @@ public final class VerdantTrailManager {
         return (segments != null && !segments.isEmpty()) || (placements != null && !placements.isEmpty()) || world.getTime() % 20L == 0L;
     }
 
-    public static void tryPlaceTrail(ServerPlayerEntity player) {
-        ServerWorld world = player.getServerWorld();
-        if (!player.isAlive() || player.isSpectator() || !player.isOnGround()) {
+    public static void tryPlaceTrail(LivingEntity user) {
+        if (!(user.getWorld() instanceof ServerWorld world)) return;
+        boolean spectator = user instanceof PlayerEntity p && p.isSpectator();
+        if (!user.isAlive() || spectator || !user.isOnGround()) {
             return;
         }
 
-        Vec3d center = new Vec3d(player.getX(), player.getY(), player.getZ());
+        Vec3d center = new Vec3d(user.getX(), user.getY(), user.getZ());
         Vec3d ground = findGroundPosition(world, center);
         if (ground == null) {
             return;
         }
 
         Map<UUID, LastPlacement> placements = LAST_PLACEMENTS.computeIfAbsent(world, ignored -> new HashMap<>());
-        UUID ownerId = player.getUuid();
+        UUID ownerId = user.getUuid();
         LastPlacement previous = placements.get(ownerId);
         long now = world.getTime();
         int cooldown = Math.max(1, Config.gemPowers.verdantTrail.placementCooldown);
@@ -99,7 +101,11 @@ public final class VerdantTrailManager {
         Iterator<TrailSegment> iterator = segments.iterator();
         while (iterator.hasNext()) {
             TrailSegment segment = iterator.next();
-            ServerPlayerEntity owner = world.getServer().getPlayerManager().getPlayer(segment.ownerId());
+            LivingEntity owner;
+            {
+                Entity entity = world.getEntity(segment.ownerId());
+                owner = entity instanceof LivingEntity l ? l : null;
+            }
             if (owner == null || now >= segment.expiryTick()) {
                 removeSegment(world, segment);
                 iterator.remove();
@@ -145,7 +151,7 @@ public final class VerdantTrailManager {
         }
     }
 
-    private static void applyAura(ServerWorld world, TrailSegment segment, ServerPlayerEntity owner, Set<UUID> affectedThisPulse) {
+    private static void applyAura(ServerWorld world, TrailSegment segment, LivingEntity owner, Set<UUID> affectedThisPulse) {
         double radius = Math.max(0.1, Config.gemPowers.verdantTrail.radius);
         Box box = Box.of(segment.center(), radius * 2.0, 1.6, radius * 2.0);
         for (LivingEntity entity : world.getEntitiesByClass(LivingEntity.class, box, LivingEntity::isAlive)) {
@@ -168,7 +174,7 @@ public final class VerdantTrailManager {
         }
     }
 
-    private static void damageWithoutKnockback(LivingEntity target, ServerPlayerEntity owner, float damage) {
+    private static void damageWithoutKnockback(LivingEntity target, LivingEntity owner, float damage) {
         if (damage <= 0.0F) {
             return;
         }
