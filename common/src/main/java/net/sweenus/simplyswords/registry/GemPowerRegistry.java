@@ -126,5 +126,6 @@ public class GemPowerRegistry {
 	public static RegistrySupplier<GemPower> VERDANT_TRAIL = register("verdant_trail", VerdantTrailPower::new);
 	public static RegistrySupplier<GemPower> NECROMANTIC_ARSENAL = register("necromantic_arsenal", NecromanticArsenalPower::new);
 	public static RegistrySupplier<GemPower> WOLF_PACK = register("wolf_pack", WolfPackPower::new);
+	public static RegistrySupplier<GemPower> GOAT_STAMPEDE = register("goat_stampede", GoatStampedePower::new);
 
 }

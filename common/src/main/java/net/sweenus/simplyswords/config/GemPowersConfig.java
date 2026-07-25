@@ -43,6 +43,7 @@ public class GemPowersConfig extends Config {
 	public FaultlinePower.Settings  faultline = new FaultlinePower.Settings();
 	public NecromanticArsenalPower.Settings necromanticArsenal = new NecromanticArsenalPower.Settings();
 	public WolfPackPower.Settings wolfPack = new WolfPackPower.Settings();
+	public GoatStampedePower.Settings goatStampede = new GoatStampedePower.Settings();
 
 	public SimplySkills simplySkills = new SimplySkills();
 
