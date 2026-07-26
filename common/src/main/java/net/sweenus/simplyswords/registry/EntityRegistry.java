@@ -234,4 +234,13 @@ public class EntityRegistry {
                     .build(Identifier.of(SimplySwords.MOD_ID, "faultline_spike_visual").toString())
     );
 
+    public static final RegistrySupplier<EntityType<SimplySwordsCreeperHeadEntity>> CREEPER_HEAD = ENTITIES.register(
+            "creeper_head",
+            () -> EntityType.Builder.<SimplySwordsCreeperHeadEntity>create(SimplySwordsCreeperHeadEntity::new, SpawnGroup.MISC)
+                    .dimensions(0.5f, 0.5f)
+                    .maxTrackingRange(64)
+                    .trackingTickInterval(1)
+                    .build(Identifier.of(SimplySwords.MOD_ID, "creeper_head").toString())
+    );
+
 }

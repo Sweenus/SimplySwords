@@ -44,6 +44,7 @@ public class GemPowersConfig extends Config {
 	public NecromanticArsenalPower.Settings necromanticArsenal = new NecromanticArsenalPower.Settings();
 	public WolfPackPower.Settings wolfPack = new WolfPackPower.Settings();
 	public GoatStampedePower.Settings goatStampede = new GoatStampedePower.Settings();
+	public BaneheadSwarmPower.Settings baneheadSwarm = new BaneheadSwarmPower.Settings();
 
 	public SimplySkills simplySkills = new SimplySkills();
 

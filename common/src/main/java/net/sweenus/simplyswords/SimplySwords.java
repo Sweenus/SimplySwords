@@ -36,6 +36,7 @@ import net.sweenus.simplyswords.entity.SimplySwordsBeeEntity;
 import net.sweenus.simplyswords.entity.SimplySwordsSkeletonMinionEntity;
 import net.sweenus.simplyswords.entity.SimplySwordsWolfMinionEntity;
 import net.sweenus.simplyswords.entity.SimplySwordsGoatStampedeEntity;
+import net.sweenus.simplyswords.entity.SimplySwordsCreeperHeadEntity;
 import net.sweenus.simplyswords.registry.*;
 import net.sweenus.simplyswords.network.SimplySwordsNetwork;
 import net.sweenus.simplyswords.util.FileCopier;
@@ -91,6 +92,7 @@ public class SimplySwords {
         EntityAttributeRegistry.register(EntityRegistry.SKELETON_MINION, SimplySwordsSkeletonMinionEntity::createMinionAttributes);
         EntityAttributeRegistry.register(EntityRegistry.WOLF_MINION, SimplySwordsWolfMinionEntity::createMinionAttributes);
         EntityAttributeRegistry.register(EntityRegistry.GOAT_STAMPEDE, SimplySwordsGoatStampedeEntity::createStampedeAttributes);
+        EntityAttributeRegistry.register(EntityRegistry.CREEPER_HEAD, SimplySwordsCreeperHeadEntity::createHeadAttributes);
         EntityAttributeRegistry.register(EntityRegistry.SIMPLYAXOLOTLENTITY, SimplySwordsAxolotlEntity::createSimplyAxolotlAttributes);
 
         ModLootTableModifiers.init();
@@ -140,6 +142,7 @@ public class SimplySwords {
             EntityRendererRegistry.register(EntityRegistry.WOLF_MINION, SimplySwordsWolfMinionRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.SIMPLYAXOLOTLENTITY, AxolotlEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.GOAT_STAMPEDE, GoatEntityRenderer::new);
+            EntityRendererRegistry.register(EntityRegistry.CREEPER_HEAD, CreeperHeadVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.THROWNSWORDENTITY, ThrownSwordEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.FROSTFALLENTITY, ThrownSwordEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.LIVYATANENTITY, ThrownSwordEntityRenderer::new);
