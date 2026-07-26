@@ -9,6 +9,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.SimplySwords;
@@ -23,6 +24,7 @@ import net.sweenus.simplyswords.item.interfaces.RevivalWeapon;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
+import net.sweenus.simplyswords.world.RunicSlashManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -147,6 +149,19 @@ public abstract class LivingEntityMixin {
     public void simplyswords$triggerFlameSeedBeforeDeath(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
         LivingEntity livingEntity = (LivingEntity) (Object) this;
         FlameSeedEffect.triggerDeathDetonation(livingEntity);
+    }
+
+    @Inject(method = "swingHand(Lnet/minecraft/util/Hand;Z)V", at = @At("TAIL"))
+    public void simplyswords$triggerRunicPowerOnSwing(Hand hand, boolean fromServerPlayer, CallbackInfo ci) {
+        LivingEntity livingEntity = (LivingEntity) (Object) this;
+        if (!(livingEntity.getWorld() instanceof ServerWorld world) || RunicSlashManager.isSuppressed()) {
+            return;
+        }
+
+        ItemStack stack = livingEntity.getStackInHand(hand);
+        if (!stack.isEmpty()) {
+            SimplySwordsAPI.getComponent(stack).onSwing(stack, world, livingEntity, hand);
+        }
     }
 
 }

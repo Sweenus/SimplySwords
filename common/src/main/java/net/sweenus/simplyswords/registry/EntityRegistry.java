@@ -162,6 +162,15 @@ public class EntityRegistry {
                     .build(Identifier.of(SimplySwords.MOD_ID, "whisperwind_slash_visual").toString())
     );
 
+    public static final RegistrySupplier<EntityType<RunicSlashProjectileEntity>> RUNIC_SLASH_PROJECTILE = ENTITIES.register(
+            "runic_slash_projectile",
+            () -> EntityType.Builder.<RunicSlashProjectileEntity>create(RunicSlashProjectileEntity::new, SpawnGroup.MISC)
+                    .dimensions(1.25f, 1.25f)
+                    .maxTrackingRange(96)
+                    .trackingTickInterval(1)
+                    .build(Identifier.of(SimplySwords.MOD_ID, "runic_slash_projectile").toString())
+    );
+
     public static final RegistrySupplier<EntityType<EmberlashSmoulderVisualEntity>> EMBERLASH_SMOULDER_VISUAL = ENTITIES.register(
             "emberlash_smoulder_visual",
             () -> EntityType.Builder.<EmberlashSmoulderVisualEntity>create(EmberlashSmoulderVisualEntity::new, SpawnGroup.MISC)

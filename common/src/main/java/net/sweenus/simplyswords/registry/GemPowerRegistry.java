@@ -109,6 +109,7 @@ public class GemPowerRegistry {
 	public static RegistrySupplier<GemPower> STORMLASH = register("stormlash", StormlashPower::new);
 	public static RegistrySupplier<GemPower> DANCING_BLADES = register("dancing_blades", DancingBladesPower::new);
 	public static RegistrySupplier<GemPower> FAULTLINE = register("faultline", FaultlinePower::new);
+	public static RegistrySupplier<GemPower> RUNIC_SLASH = register("runic_slash", RunicSlashPower::new);
 	public static RegistrySupplier<GemPower> PINCUSHION = register("pincushion", () -> new PincushionPower(false));
 	public static RegistrySupplier<GemPower> GREATER_PINCUSHION = register("greater_pincushion", () -> new PincushionPower(true));
 

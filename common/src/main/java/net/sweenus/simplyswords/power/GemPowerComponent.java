@@ -11,6 +11,7 @@ import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.codec.PacketCodecs;
 import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
@@ -103,6 +104,11 @@ public record GemPowerComponent(boolean hasRunicPower, boolean hasNetherPower, R
 	public void postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
 		runicPower.value().postHit(stack, target, attacker);
 		netherPower.value().postHit(stack, target, attacker);
+	}
+
+	public void onSwing(ItemStack stack, ServerWorld world, LivingEntity user, Hand hand) {
+		runicPower.value().onSwing(stack, world, user, hand);
+		netherPower.value().onSwing(stack, world, user, hand);
 	}
 
 	public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {

@@ -11,6 +11,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.tooltip.TooltipAppender;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
@@ -55,6 +56,7 @@ public class GemPower implements TooltipAppender {
 
 	public void appendTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Text> tooltip, TooltipType type, boolean isRunic) {}
 	public void postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {}
+	public void onSwing(ItemStack stack, ServerWorld world, LivingEntity user, Hand hand) {}
 	public void inventoryTick(ItemStack stack, World world, LivingEntity user, int slot, boolean selected) {}
 
 	TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand, ItemStack itemStack) { return TypedActionResult.fail(itemStack); }
