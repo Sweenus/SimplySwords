@@ -33,10 +33,12 @@ public class RunicSlashPower extends RunefusedGemPower {
 
     @Override
     public void appendTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Text> tooltip, TooltipType type, boolean isRunic) {
-        tooltip.add(Text.translatable("item.simplyswords.runicslashsworditem.tooltip1").setStyle(Styles.RUNIC));
+        if (isRunic)
+            tooltip.add(Text.translatable("item.simplyswords.runicslashsworditem.tooltip1").setStyle(Styles.RUNIC));
+        else
+            tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.runefused_power.runic_slash").setStyle(Styles.RUNIC));
 
         if (TooltipUtils.shouldDisplayTooltip(itemStack, null)) {
-            tooltip.add(Text.translatable("item.simplyswords.onattack").setStyle(Styles.RIGHT_CLICK));
             tooltip.add(Text.literal("").append(Text.translatable("item.simplyswords.runicslashsworditem.tooltip2")).setStyle(Styles.RUNIC_DESCRIPTION));
         }
     }

@@ -47,6 +47,7 @@ public class GemPowersConfig extends Config {
 	public BaneheadSwarmPower.Settings baneheadSwarm = new BaneheadSwarmPower.Settings();
 	public WingBuffetPower.Settings wingBuffet = new WingBuffetPower.Settings();
 	public RunicSlashPower.Settings runicSlash = new RunicSlashPower.Settings();
+	public EvocationPower.Settings evocation = new EvocationPower.Settings();
 
 	public SimplySkills simplySkills = new SimplySkills();
 

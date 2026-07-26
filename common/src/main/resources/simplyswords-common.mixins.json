@@ -23,6 +23,7 @@
     "AnimalEntityMixin",
     "ServerWorldMixin",
     "MobEntityMixin",
+    "EvokerFangsEntityMixin",
     "TargetPredicateMixin",
     "compat.BetterCombatServerNetworkMixin"
   ],

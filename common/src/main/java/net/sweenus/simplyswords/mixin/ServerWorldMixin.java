@@ -64,6 +64,9 @@ public abstract class ServerWorldMixin {
         if (LivingEntityAbilityMovementManager.hasActive(world)) {
             LivingEntityAbilityMovementManager.tick(world);
         }
+        if (EvocationFangManager.hasActive(world)) {
+            EvocationFangManager.tick(world);
+        }
         RevivalCandleVisualManager.tickWorld(world);
         SoulkeeperLanternManager.tickWorld(world);
         WeaponAbilityCooldownManager.tick(world);
