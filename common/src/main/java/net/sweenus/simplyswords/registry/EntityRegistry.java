@@ -243,6 +243,24 @@ public class EntityRegistry {
                     .build(Identifier.of(SimplySwords.MOD_ID, "dragon_wing_buffet_visual").toString())
     );
 
+    public static final RegistrySupplier<EntityType<DragonMawHeadVisualEntity>> DRAGON_MAW_HEAD_VISUAL = ENTITIES.register(
+            "dragon_maw_head_visual",
+            () -> EntityType.Builder.<DragonMawHeadVisualEntity>create(DragonMawHeadVisualEntity::new, SpawnGroup.MISC)
+                    .dimensions(3.5f, 3.5f)
+                    .maxTrackingRange(96)
+                    .trackingTickInterval(1)
+                    .build(Identifier.of(SimplySwords.MOD_ID, "dragon_maw_head_visual").toString())
+    );
+
+    public static final RegistrySupplier<EntityType<DragonMawBreathCloudEntity>> DRAGON_MAW_BREATH_CLOUD = ENTITIES.register(
+            "dragon_maw_breath_cloud",
+            () -> EntityType.Builder.<DragonMawBreathCloudEntity>create(DragonMawBreathCloudEntity::new, SpawnGroup.MISC)
+                    .dimensions(4.5f, 1.25f)
+                    .maxTrackingRange(96)
+                    .trackingTickInterval(1)
+                    .build(Identifier.of(SimplySwords.MOD_ID, "dragon_maw_breath_cloud").toString())
+    );
+
     public static final RegistrySupplier<EntityType<VerdantTrailVisualEntity>> VERDANT_TRAIL_VISUAL = ENTITIES.register(
             "verdant_trail_visual",
             () -> EntityType.Builder.<VerdantTrailVisualEntity>create(VerdantTrailVisualEntity::new, SpawnGroup.MISC)

@@ -12,6 +12,7 @@ import dev.architectury.utils.EnvExecutor;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.render.entity.AxolotlEntityRenderer;
+import net.minecraft.client.render.entity.EmptyEntityRenderer;
 import net.minecraft.client.render.entity.GoatEntityRenderer;
 import net.minecraft.client.render.entity.SkeletonEntityRenderer;
 import net.minecraft.client.render.entity.model.EntityModelLayer;
@@ -166,6 +167,8 @@ public class SimplySwords {
             EntityRendererRegistry.register(EntityRegistry.BRIMSTONE_CLAYMORE_VISUAL, BrimstoneClaymoreVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.CHAIN_LIGHTNING_VISUAL, ChainLightningVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.DRAGON_WING_BUFFET_VISUAL, DragonWingBuffetVisualEntityRenderer::new);
+            EntityRendererRegistry.register(EntityRegistry.DRAGON_MAW_HEAD_VISUAL, DragonMawHeadVisualEntityRenderer::new);
+            EntityRendererRegistry.register(EntityRegistry.DRAGON_MAW_BREATH_CLOUD, EmptyEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.VERDANT_TRAIL_VISUAL, VerdantTrailVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.FAULTLINE_SPIKE_VISUAL, FaultlineSpikeVisualEntityRenderer::new);
 

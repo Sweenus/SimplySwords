@@ -46,6 +46,7 @@ public class GemPowersConfig extends Config {
 	public GoatStampedePower.Settings goatStampede = new GoatStampedePower.Settings();
 	public BaneheadSwarmPower.Settings baneheadSwarm = new BaneheadSwarmPower.Settings();
 	public WingBuffetPower.Settings wingBuffet = new WingBuffetPower.Settings();
+	public DragonMawPower.Settings dragonMaw = new DragonMawPower.Settings();
 	public RunicSlashPower.Settings runicSlash = new RunicSlashPower.Settings();
 	public EvocationPower.Settings evocation = new EvocationPower.Settings();
 	public SnifferSlamPower.Settings snifferSlam = new SnifferSlamPower.Settings();

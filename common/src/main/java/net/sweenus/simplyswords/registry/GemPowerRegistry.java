@@ -132,5 +132,6 @@ public class GemPowerRegistry {
 	public static RegistrySupplier<GemPower> GOAT_STAMPEDE = register("goat_stampede", GoatStampedePower::new);
 	public static RegistrySupplier<GemPower> BANEHEAD_SWARM = register("banehead_swarm", BaneheadSwarmPower::new);
 	public static RegistrySupplier<GemPower> WING_BUFFET = register("wing_buffet", WingBuffetPower::new);
+	public static RegistrySupplier<GemPower> DRAGON_MAW = register("dragon_maw", DragonMawPower::new);
 
 }
