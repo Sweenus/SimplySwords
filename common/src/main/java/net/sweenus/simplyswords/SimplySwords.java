@@ -31,6 +31,7 @@ import net.sweenus.simplyswords.compat.eldritch_end.EldritchEndCompatRegistry;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.BattleStandardDarkEntity;
 import net.sweenus.simplyswords.entity.BattleStandardEntity;
+import net.sweenus.simplyswords.entity.FallingSnifferEntity;
 import net.sweenus.simplyswords.entity.SimplySwordsAxolotlEntity;
 import net.sweenus.simplyswords.entity.SimplySwordsBeeEntity;
 import net.sweenus.simplyswords.entity.SimplySwordsSkeletonMinionEntity;
@@ -92,6 +93,7 @@ public class SimplySwords {
         EntityAttributeRegistry.register(EntityRegistry.SKELETON_MINION, SimplySwordsSkeletonMinionEntity::createMinionAttributes);
         EntityAttributeRegistry.register(EntityRegistry.WOLF_MINION, SimplySwordsWolfMinionEntity::createMinionAttributes);
         EntityAttributeRegistry.register(EntityRegistry.GOAT_STAMPEDE, SimplySwordsGoatStampedeEntity::createStampedeAttributes);
+        EntityAttributeRegistry.register(EntityRegistry.FALLING_SNIFFER, FallingSnifferEntity::createFallingSnifferAttributes);
         EntityAttributeRegistry.register(EntityRegistry.CREEPER_HEAD, SimplySwordsCreeperHeadEntity::createHeadAttributes);
         EntityAttributeRegistry.register(EntityRegistry.SIMPLYAXOLOTLENTITY, SimplySwordsAxolotlEntity::createSimplyAxolotlAttributes);
 
@@ -142,6 +144,7 @@ public class SimplySwords {
             EntityRendererRegistry.register(EntityRegistry.WOLF_MINION, SimplySwordsWolfMinionRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.SIMPLYAXOLOTLENTITY, AxolotlEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.GOAT_STAMPEDE, GoatEntityRenderer::new);
+            EntityRendererRegistry.register(EntityRegistry.FALLING_SNIFFER, FallingSnifferEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.CREEPER_HEAD, CreeperHeadVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.THROWNSWORDENTITY, ThrownSwordEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.FROSTFALLENTITY, ThrownSwordEntityRenderer::new);
