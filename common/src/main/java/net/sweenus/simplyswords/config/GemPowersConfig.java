@@ -45,6 +45,7 @@ public class GemPowersConfig extends Config {
 	public WolfPackPower.Settings wolfPack = new WolfPackPower.Settings();
 	public GoatStampedePower.Settings goatStampede = new GoatStampedePower.Settings();
 	public BaneheadSwarmPower.Settings baneheadSwarm = new BaneheadSwarmPower.Settings();
+	public WingBuffetPower.Settings wingBuffet = new WingBuffetPower.Settings();
 
 	public SimplySkills simplySkills = new SimplySkills();
 

@@ -128,5 +128,6 @@ public class GemPowerRegistry {
 	public static RegistrySupplier<GemPower> WOLF_PACK = register("wolf_pack", WolfPackPower::new);
 	public static RegistrySupplier<GemPower> GOAT_STAMPEDE = register("goat_stampede", GoatStampedePower::new);
 	public static RegistrySupplier<GemPower> BANEHEAD_SWARM = register("banehead_swarm", BaneheadSwarmPower::new);
+	public static RegistrySupplier<GemPower> WING_BUFFET = register("wing_buffet", WingBuffetPower::new);
 
 }

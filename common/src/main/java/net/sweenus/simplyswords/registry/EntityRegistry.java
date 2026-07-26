@@ -216,6 +216,15 @@ public class EntityRegistry {
                     .build(Identifier.of(SimplySwords.MOD_ID, "chain_lightning_visual").toString())
     );
 
+    public static final RegistrySupplier<EntityType<DragonWingBuffetVisualEntity>> DRAGON_WING_BUFFET_VISUAL = ENTITIES.register(
+            "dragon_wing_buffet_visual",
+            () -> EntityType.Builder.<DragonWingBuffetVisualEntity>create(DragonWingBuffetVisualEntity::new, SpawnGroup.MISC)
+                    .dimensions(4.0f, 4.0f)
+                    .maxTrackingRange(96)
+                    .trackingTickInterval(1)
+                    .build(Identifier.of(SimplySwords.MOD_ID, "dragon_wing_buffet_visual").toString())
+    );
+
     public static final RegistrySupplier<EntityType<VerdantTrailVisualEntity>> VERDANT_TRAIL_VISUAL = ENTITIES.register(
             "verdant_trail_visual",
             () -> EntityType.Builder.<VerdantTrailVisualEntity>create(VerdantTrailVisualEntity::new, SpawnGroup.MISC)
