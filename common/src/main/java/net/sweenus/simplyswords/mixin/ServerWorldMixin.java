@@ -67,6 +67,9 @@ public abstract class ServerWorldMixin {
         if (LivingEntityAbilityMovementManager.hasActive(world)) {
             LivingEntityAbilityMovementManager.tick(world);
         }
+        if (ThunderbrandAbilityManager.hasActive(world)) {
+            ThunderbrandAbilityManager.tick(world);
+        }
         if (EvocationFangManager.hasActive(world)) {
             EvocationFangManager.tick(world);
         }

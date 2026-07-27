@@ -3,11 +3,7 @@ package net.sweenus.simplyswords.item.custom;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
@@ -29,10 +25,9 @@ import net.sweenus.simplyswords.item.interfaces.TwoHandedWeapon;
 import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
-import net.sweenus.simplyswords.util.AbilityMethods;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
-import net.sweenus.simplyswords.world.LivingEntityAbilityMovementManager;
+import net.sweenus.simplyswords.world.ThunderbrandAbilityManager;
 import net.sweenus.simplyswords.world.WeaponAbilityCooldownManager;
 
 import java.util.List;
@@ -42,8 +37,6 @@ public class ThunderbrandSwordItem extends UniqueSwordItem implements TwoHandedW
     public ThunderbrandSwordItem(ToolMaterial toolMaterial, Settings settings) {
         super(toolMaterial, settings);
     }
-
-    private static final int ability_timer_max = 50;
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
@@ -66,26 +59,31 @@ public class ThunderbrandSwordItem extends UniqueSwordItem implements TwoHandedW
     }
 
     @Override
-    public boolean activate(WeaponAbilityContext context) {
-        LivingEntity actor = context.actor();
-        LivingEntity target = context.target();
-        if (target == null || !HelperMethods.checkAbilityTarget(target, actor)) {
+    public boolean canActivate(WeaponAbilityContext context) {
+        if (context == null
+                || context.world() == null
+                || context.actor() == null
+                || !context.actor().isAlive()
+                || context.stack() == null
+                || context.stack().isEmpty()
+                || context.stack().getDamage() >= context.stack().getMaxDamage() - 1
+                || ThunderbrandAbilityManager.isActive(context.actor())) {
             return false;
         }
-        float abilityDamage = HelperMethods.abilityScaledDamage("lightning", actor, context.stack(),
-                Config.uniqueEffects.thunderbrand.damageScaling, Config.uniqueEffects.thunderbrand.spellScaling);
-        LivingEntityAbilityMovementManager.dashTowardTargetWithImpact(context.world(), actor, target, 2.2, 8, 0.9, () -> {
-            if (!target.isAlive() || !HelperMethods.checkAbilityTarget(target, actor)) {
-                return;
-            }
-            DamageSource damageSource = actor.getDamageSources().indirectMagic(actor, actor);
-            target.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments(context.world(), context.stack(), target, damageSource, abilityDamage * 3.0F));
-            context.world().spawnParticles(ParticleTypes.ELECTRIC_SPARK, target.getX(), target.getBodyY(0.5), target.getZ(), 18, 0.45, 0.45, 0.45, 0.12);
-            context.world().playSoundFromEntity(null, target, SoundRegistry.ELEMENTAL_BOW_THUNDER_SHOOT_IMPACT_02.get(),
-                    target.getSoundCategory(), 0.35f, 1.6f);
-        });
-        actor.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, 80, 2), actor);
-        return true;
+        if (context.target() == null) {
+            return context.actor() instanceof PlayerEntity;
+        }
+        if (!HelperMethods.checkAbilityTarget(context.target(), context.actor())) {
+            return false;
+        }
+        return context.sourcePlayer() == null
+                || context.target() != context.sourcePlayer()
+                && HelperMethods.checkFriendlyFire(context.target(), context.sourcePlayer());
+    }
+
+    @Override
+    public boolean activate(WeaponAbilityContext context) {
+        return ThunderbrandAbilityManager.start(context);
     }
 
     @Override
@@ -100,45 +98,30 @@ public class ThunderbrandSwordItem extends UniqueSwordItem implements TwoHandedW
 
     @Override
     public TypedActionResult<ItemStack> startPlayerAbility(World world, PlayerEntity user, Hand hand) {
-        ItemStack itemStack = user.getStackInHand(hand);
-        if (itemStack.getDamage() >= itemStack.getMaxDamage() - 1) {
-            return TypedActionResult.fail(itemStack);
+        TypedActionResult<ItemStack> result = UniqueWeaponActiveAbility.super.startPlayerAbility(world, user, hand);
+        if (result.getResult().isAccepted()) {
+            user.setCurrentHand(hand);
         }
-        world.playSoundFromEntity(null, user, SoundRegistry.MAGIC_BOW_CHARGE_LONG_VERSION.get(),
-                user.getSoundCategory(), 0.4f, 0.6f);
-        user.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 40, 3), user);
-        user.addStatusEffect(new StatusEffectInstance(StatusEffects.MINING_FATIGUE, 40, 3), user);
-        user.setCurrentHand(hand);
-        return TypedActionResult.consume(itemStack);
+        return result;
     }
 
     @Override
     public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
-        if (!world.isClient && HelperMethods.isHolding(stack, user) && user.isOnGround()) {
-
-            float abilityDamage = HelperMethods.abilityScaledDamage("lightning", user, stack,
-                    Config.uniqueEffects.thunderbrand.damageScaling, Config.uniqueEffects.thunderbrand.spellScaling);
-            int skillCooldown = Config.uniqueEffects.thunderbrand.cooldown;
-            int radius = Config.uniqueEffects.thunderbrand.radius;
-
-            AbilityMethods.tickAbilityThunderBlitz(stack, world, user, remainingUseTicks, ability_timer_max,
-                    abilityDamage, skillCooldown, radius);
-        }
+        // The shared server-side manager advances both player and non-player activations.
     }
 
     @Override
     public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
-        //Player dash end
-        if (!world.isClient && user.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
-            user.setVelocity(0, 0, 0); // Stop player at end of charge
-            user.velocityModified = true;
-            user.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, 80, 2), user);
+        if (!world.isClient) {
+            ThunderbrandAbilityManager.cancelCharging(user);
         }
     }
 
     @Override
     public int getMaxUseTime(ItemStack stack, LivingEntity user) {
-        return ability_timer_max;
+        return Math.max(1, Config.uniqueEffects.thunderbrand.chargeDuration)
+                + Math.max(1, Config.uniqueEffects.thunderbrand.dashDuration)
+                + 5;
     }
 
     @Override
@@ -184,5 +167,15 @@ public class ThunderbrandSwordItem extends UniqueSwordItem implements TwoHandedW
         public int radius = 2;
         @ValidatedFloat.Restrict(min = 0f)
         public float spellScaling = 1.36f;
+        @ValidatedInt.Restrict(min = 1)
+        public int chargeDuration = 40;
+        @ValidatedInt.Restrict(min = 1)
+        public int dashDuration = 15;
+        @ValidatedFloat.Restrict(min = 0.1f)
+        public float dashSpeed = 4.0f;
+        @ValidatedInt.Restrict(min = 1)
+        public int chainTargets = 4;
+        @ValidatedFloat.Restrict(min = 0.5f)
+        public float chainRange = 6.0f;
     }
 }

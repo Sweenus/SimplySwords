@@ -43,6 +43,7 @@ import net.sweenus.simplyswords.world.RevivalCandleVisualManager;
 import net.sweenus.simplyswords.world.ShadowstingShadowDanceManager;
 import net.sweenus.simplyswords.world.SoulkeeperLanternManager;
 import net.sweenus.simplyswords.world.StormbringerParryManager;
+import net.sweenus.simplyswords.world.ThunderbrandAbilityManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -63,6 +64,10 @@ public abstract class ServerPlayerEntityMixin {
     public void simplyswords$damage(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
         PlayerEntity player = (PlayerEntity) (Object) this;
         if (player instanceof ServerPlayerEntity serverPlayer) {
+            if (ThunderbrandAbilityManager.handleIncomingDamage(serverPlayer, source, amount)) {
+                cir.setReturnValue(false);
+                return;
+            }
             if (!source.isIn(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
                 if (ShadowstingShadowDanceManager.isActive(serverPlayer)) {
                     cir.setReturnValue(false);

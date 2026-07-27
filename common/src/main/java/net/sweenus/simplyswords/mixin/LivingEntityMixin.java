@@ -25,6 +25,7 @@ import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.world.RunicSlashManager;
+import net.sweenus.simplyswords.world.ThunderbrandAbilityManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -55,6 +56,12 @@ public abstract class LivingEntityMixin {
     @Inject(at = @At("HEAD"), method = "damage", cancellable = true)
     public void simplyswords$autoTriggerLivingStormbringer(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
         LivingEntity livingEntity = (LivingEntity) (Object) this;
+        if (!livingEntity.getWorld().isClient()
+                && !(livingEntity instanceof ServerPlayerEntity)
+                && ThunderbrandAbilityManager.handleIncomingDamage(livingEntity, source, amount)) {
+            cir.setReturnValue(false);
+            return;
+        }
         if (livingEntity.getWorld().isClient()
                 || livingEntity instanceof ServerPlayerEntity
                 || source.isIn(DamageTypeTags.BYPASSES_INVULNERABILITY)

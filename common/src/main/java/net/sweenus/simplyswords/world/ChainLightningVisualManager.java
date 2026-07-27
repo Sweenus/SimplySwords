@@ -82,6 +82,13 @@ public final class ChainLightningVisualManager {
 
     public static int damageChain(ServerWorld world, LivingEntity player, LivingEntity sourceEntity, LivingEntity firstTarget,
                                   int chainCount, float damage, double range, LightningVisualSettings settings) {
+        return damageChain(world, player, sourceEntity, player.getMainHandStack(), firstTarget,
+                chainCount, damage, range, settings);
+    }
+
+    public static int damageChain(ServerWorld world, LivingEntity player, LivingEntity sourceEntity, ItemStack stack,
+                                  LivingEntity firstTarget, int chainCount, float damage, double range,
+                                  LightningVisualSettings settings) {
         if (chainCount <= 0 || firstTarget == null || !firstTarget.isAlive()) {
             return 0;
         }
@@ -95,7 +102,7 @@ public final class ChainLightningVisualManager {
         int damaged = 0;
         for (LivingEntity target : chain) {
             boolean[] result = {false};
-            float enchantedDamage = HelperMethods.applyAbilityDamageEnchantments(world, player.getMainHandStack(), target, source, damage);
+            float enchantedDamage = HelperMethods.applyAbilityDamageEnchantments(world, stack, target, source, damage);
             WeaponImplicitRegistry.runSuppressed(() -> result[0] = HelperMethods.damageThroughIframes(target, source, enchantedDamage));
             if (result[0]) {
                 damaged++;
