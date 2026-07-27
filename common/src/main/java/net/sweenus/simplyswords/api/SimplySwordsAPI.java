@@ -20,11 +20,13 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
+import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.BattleStandardEntity;
+import net.sweenus.simplyswords.item.custom.LivyatanSwordItem;
 import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
 import net.sweenus.simplyswords.power.powers.NecromanticArsenalPower;
 import net.sweenus.simplyswords.item.ContainedRemnantItem;
@@ -86,6 +88,16 @@ public class SimplySwordsAPI {
 
     public static GemPowerComponent getComponent(ItemStack stack) {
         return stack.getOrDefault(ComponentTypeRegistry.GEM_POWER.get(), GemPowerComponent.DEFAULT);
+    }
+
+    public static void onWeaponSwing(ItemStack stack, ServerWorld world, LivingEntity user, Hand hand) {
+        if (stack == null || stack.isEmpty() || world == null || user == null || !user.isAlive()) {
+            return;
+        }
+        getComponent(stack).onSwing(stack, world, user, hand);
+        if (stack.getItem() instanceof LivyatanSwordItem livyatan) {
+            livyatan.onSwing(stack, world, user, hand);
+        }
     }
 
     // Gem Sockets

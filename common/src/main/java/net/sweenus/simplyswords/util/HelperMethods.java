@@ -743,9 +743,12 @@ public class HelperMethods {
         if (targetEntity instanceof PlayerEntity player && (player.isCreative() || player.isSpectator()))
             return false;
         int iframes = targetEntity.timeUntilRegen;
-        boolean result = targetEntity.damage(damageSource, damage);
-        targetEntity.timeUntilRegen = iframes;
-        return result;
+        try {
+            targetEntity.timeUntilRegen = 0;
+            return targetEntity.damage(damageSource, damage);
+        } finally {
+            targetEntity.timeUntilRegen = iframes;
+        }
     }
 
     public static boolean isInTag(ItemStack stack, Identifier tagId) {

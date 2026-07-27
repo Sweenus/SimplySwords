@@ -12,6 +12,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
@@ -29,6 +30,7 @@ import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
 import net.sweenus.simplyswords.world.LivingEntityAbilityMovementManager;
+import net.sweenus.simplyswords.world.LivyatanWaveManager;
 
 import java.util.List;
 
@@ -43,6 +45,10 @@ public class LivyatanSwordItem extends UniqueSwordItem implements UniqueWeaponAc
         HelperMethods.playHitSounds(attacker, target);
 
         return super.postHit(stack, target, attacker);
+    }
+
+    public void onSwing(ItemStack stack, ServerWorld world, LivingEntity user, Hand hand) {
+        LivyatanWaveManager.tryFire(world, user, stack);
     }
 
     @Override
@@ -145,8 +151,40 @@ public class LivyatanSwordItem extends UniqueSwordItem implements UniqueWeaponAc
         @ValidatedInt.Restrict(min = 0)
         public int duration = 100;
         @ValidatedDouble.Restrict(min = 0.5)
-        public double radius = 0.5;
+        public double radius = 6.0;
         @ValidatedFloat.Restrict(min = 0f)
         public float spellScaling = 1.36f;
+
+        @ValidatedFloat.Restrict(min = 0f)
+        public float waveDamageScaling = 0.64f;
+        @ValidatedInt.Restrict(min = 1)
+        public int swingWaveMinimumCooldownTicks = 2;
+        @ValidatedDouble.Restrict(min = 0.5)
+        public double waveWidthBlocks = 5.0;
+        @ValidatedDouble.Restrict(min = 0.25)
+        public double waveSegmentThickness = 1.25;
+        @ValidatedDouble.Restrict(min = 0.1)
+        public double waveStepDistance = 0.8;
+        @ValidatedInt.Restrict(min = 1)
+        public int waveStepIntervalTicks = 1;
+        @ValidatedDouble.Restrict(min = 0.1)
+        public double waveForwardStartOffset = 1.2;
+        @ValidatedInt.Restrict(min = 1)
+        public int waveLengthSteps = 7;
+        @ValidatedDouble.Restrict(min = 0.0)
+        public double waveKnockback = 0.52;
+        @ValidatedDouble.Restrict(min = 0.0)
+        public double waveKnockUp = 0.14;
+
+        @ValidatedDouble.Restrict(min = 0.0)
+        public double returnWavePullStrength = 0.42;
+        @ValidatedInt.Restrict(min = 0, max = 100)
+        public int returnLightningChance = 20;
+        @ValidatedFloat.Restrict(min = 0f)
+        public float returnLightningDamageScaling = 0.35f;
+        @ValidatedFloat.Restrict(min = 0f)
+        public float returnLightningSpellScaling = 0.8f;
+        @ValidatedDouble.Restrict(min = 1.0)
+        public double returnLightningSkyHeight = 12.0;
     }
 }

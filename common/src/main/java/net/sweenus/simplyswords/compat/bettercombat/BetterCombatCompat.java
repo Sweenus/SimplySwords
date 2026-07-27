@@ -42,7 +42,7 @@ public final class BetterCombatCompat {
         }
         if (!stack.isEmpty()) {
             ItemStack finalStack = stack;
-            RunicSlashManager.runIgnoringAttackReady(() -> SimplySwordsAPI.getComponent(finalStack).onSwing(finalStack, world, player, hand));
+            RunicSlashManager.runIgnoringAttackReady(() -> SimplySwordsAPI.onWeaponSwing(finalStack, world, player, hand));
         }
     }
 

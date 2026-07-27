@@ -61,6 +61,9 @@ public abstract class ServerWorldMixin {
         if (FaultlineSunderManager.hasActive(world)) {
             FaultlineSunderManager.tick(world);
         }
+        if (LivyatanWaveManager.hasActive(world)) {
+            LivyatanWaveManager.tick(world);
+        }
         if (LivingEntityAbilityMovementManager.hasActive(world)) {
             LivingEntityAbilityMovementManager.tick(world);
         }

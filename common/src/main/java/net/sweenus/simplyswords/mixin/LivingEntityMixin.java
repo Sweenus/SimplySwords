@@ -160,7 +160,7 @@ public abstract class LivingEntityMixin {
 
         ItemStack stack = livingEntity.getStackInHand(hand);
         if (!stack.isEmpty()) {
-            SimplySwordsAPI.getComponent(stack).onSwing(stack, world, livingEntity, hand);
+            SimplySwordsAPI.onWeaponSwing(stack, world, livingEntity, hand);
         }
     }
 
