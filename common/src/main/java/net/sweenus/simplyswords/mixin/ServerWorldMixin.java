@@ -79,6 +79,9 @@ public abstract class ServerWorldMixin {
         if (MoltenEdgeAbilityManager.hasActive(world)) {
             MoltenEdgeAbilityManager.tick(world);
         }
+        if (TwistedBladeAbilityManager.hasActive(world)) {
+            TwistedBladeAbilityManager.tick(world);
+        }
         if (EvocationFangManager.hasActive(world)) {
             EvocationFangManager.tick(world);
         }

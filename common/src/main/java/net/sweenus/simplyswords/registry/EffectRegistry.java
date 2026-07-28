@@ -50,6 +50,8 @@ public class EffectRegistry {
                             Identifier.of("54e1b9b9-6de9-49bb-a716-564b3d375892"),
                             0.3,
                             EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+    public static final RegistrySupplier<StatusEffect> FEROCITY = EFFECT.register("ferocity", () ->
+            new FerocityEffect(StatusEffectCategory.BENEFICIAL, 0x9D63C4));
     public static final RegistrySupplier<StatusEffect> VOIDCLOAK = EFFECT.register("voidcloak", () ->
             new VoidcloakEffect(StatusEffectCategory.BENEFICIAL, 1124687)
                     .addAttributeModifier(EntityAttributes.GENERIC_ATTACK_SPEED,

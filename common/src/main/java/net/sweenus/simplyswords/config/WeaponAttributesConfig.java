@@ -146,7 +146,7 @@ public class WeaponAttributesConfig extends Config {
         public float tempest_damageModifier = 0.0f;
         public float thewatcher_damageModifier = 6.0f;
         public float thunderbrand_damageModifier = 7.0f;
-        public float twistedblade_damageModifier = 4.0f;
+        public float twistedblade_damageModifier = 0.0f;
         public float watchingwarglaive_damageModifier = 3.0f;
         public float waxweaver_damageModifier = 6.0f;
         public float whisperwind_damageModifier = 3.0f;

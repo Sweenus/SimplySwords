@@ -189,6 +189,15 @@ public class EntityRegistry {
                     .build(Identifier.of(SimplySwords.MOD_ID, "runic_slash_projectile").toString())
     );
 
+    public static final RegistrySupplier<EntityType<TwistedBladeCrescendoVisualEntity>> TWISTED_BLADE_CRESCENDO_VISUAL = ENTITIES.register(
+            "twisted_blade_crescendo_visual",
+            () -> EntityType.Builder.<TwistedBladeCrescendoVisualEntity>create(TwistedBladeCrescendoVisualEntity::new, SpawnGroup.MISC)
+                    .dimensions(0.5f, 0.5f)
+                    .maxTrackingRange(96)
+                    .trackingTickInterval(1)
+                    .build(Identifier.of(SimplySwords.MOD_ID, "twisted_blade_crescendo_visual").toString())
+    );
+
     public static final RegistrySupplier<EntityType<EmberlashSmoulderVisualEntity>> EMBERLASH_SMOULDER_VISUAL = ENTITIES.register(
             "emberlash_smoulder_visual",
             () -> EntityType.Builder.<EmberlashSmoulderVisualEntity>create(EmberlashSmoulderVisualEntity::new, SpawnGroup.MISC)
