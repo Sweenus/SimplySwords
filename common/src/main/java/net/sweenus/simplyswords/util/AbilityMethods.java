@@ -28,54 +28,6 @@ import java.util.Random;
 
 public class AbilityMethods {
 
-    //Storm's Edge - Storm Jolt
-    public static void tickAbilityStormJolt(ItemStack stack, World world, LivingEntity user,
-                                            int ability_timer, int skillCooldown, int radius) {
-        if (!user.getWorld().isClient()) {
-
-            //Player dash forward
-            if (ability_timer == 12 || ability_timer == 13 && HelperMethods.isHolding(stack, user)) {
-                user.setVelocity(user.getRotationVector().multiply(+4));
-                user.setVelocity(user.getVelocity().x, 0, user.getVelocity().z); // Prevent user flying to the heavens
-                user.velocityModified = true;
-                world.playSoundFromEntity(null, user, SoundRegistry.ELEMENTAL_BOW_THUNDER_SHOOT_FLYBY_03.get(),
-                        user.getSoundCategory(), 0.3f, 1.6f);
-                user.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, 80, 1), user);
-                user.addStatusEffect(new StatusEffectInstance(StatusEffects.MINING_FATIGUE, 10, 5), user);
-                if (user instanceof PlayerEntity player) player.getItemCooldownManager().set(stack.getItem(), skillCooldown);
-            }
-
-            //Player dash end
-            if (ability_timer < 5 && HelperMethods.isHolding(stack, user)) {
-                user.setVelocity(0, 0, 0); // Stop user at end of charge
-                user.velocityModified = true;
-                user.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, 80, 1), user);
-
-            }
-
-            if (user.age % 2 == 0 && HelperMethods.isHolding(stack, user)) {
-                double xpos = user.getX() - (radius + 1);
-                double ypos = user.getY();
-                double zpos = user.getZ() - (radius + 1);
-
-                for (int i = radius * 2; i > 0; i--) {
-                    for (int j = radius * 2; j > 0; j--) {
-                        float choose = (float) (Math.random() * 1);
-                        HelperMethods.spawnParticle(world, ParticleTypes.ELECTRIC_SPARK,
-                                xpos + i + choose, ypos + 0.4, zpos + j + choose,
-                                0, 0.1, 0);
-                        HelperMethods.spawnParticle(world, ParticleTypes.CLOUD,
-                                xpos + i + choose, ypos + 0.1, zpos + j + choose,
-                                0, 0, 0);
-                        HelperMethods.spawnParticle(world, ParticleTypes.WARPED_SPORE,
-                                xpos + i + choose, ypos, zpos + j + choose,
-                                0, 0.1, 0);
-                    }
-                }
-            }
-        }
-    }
-
     //Mjolnir - Storm
     public static void tickAbilityStorm(ItemStack stack, World world, LivingEntity user,
                                         int ability_timer, int skillCooldown, int radius) {
