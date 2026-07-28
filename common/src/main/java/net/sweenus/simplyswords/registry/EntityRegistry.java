@@ -315,6 +315,42 @@ public class EntityRegistry {
                     .build(Identifier.of(SimplySwords.MOD_ID, "molten_rupture_visual").toString())
     );
 
+    public static final RegistrySupplier<EntityType<CaelestisBreachVisualEntity>> CAELESTIS_BREACH_VISUAL = ENTITIES.register(
+            "caelestis_breach_visual",
+            () -> EntityType.Builder.<CaelestisBreachVisualEntity>create(CaelestisBreachVisualEntity::new, SpawnGroup.MISC)
+                    .dimensions(31.0F, 4.0F)
+                    .maxTrackingRange(96)
+                    .trackingTickInterval(1)
+                    .build(Identifier.of(SimplySwords.MOD_ID, "caelestis_breach_visual").toString())
+    );
+
+    public static final RegistrySupplier<EntityType<CaelestisRiftlingEntity>> CAELESTIS_RIFTLING = ENTITIES.register(
+            "caelestis_riftling",
+            () -> EntityType.Builder.<CaelestisRiftlingEntity>create(CaelestisRiftlingEntity::new, SpawnGroup.MONSTER)
+                    .dimensions(0.9F, 0.6F)
+                    .maxTrackingRange(64)
+                    .trackingTickInterval(2)
+                    .build(Identifier.of(SimplySwords.MOD_ID, "caelestis_riftling").toString())
+    );
+
+    public static final RegistrySupplier<EntityType<CaelestisHollowEntity>> CAELESTIS_HOLLOW = ENTITIES.register(
+            "caelestis_hollow",
+            () -> EntityType.Builder.<CaelestisHollowEntity>create(CaelestisHollowEntity::new, SpawnGroup.MONSTER)
+                    .dimensions(0.6F, 1.95F)
+                    .maxTrackingRange(64)
+                    .trackingTickInterval(2)
+                    .build(Identifier.of(SimplySwords.MOD_ID, "caelestis_hollow").toString())
+    );
+
+    public static final RegistrySupplier<EntityType<CaelestisDreadglareEntity>> CAELESTIS_DREADGLARE = ENTITIES.register(
+            "caelestis_dreadglare",
+            () -> EntityType.Builder.<CaelestisDreadglareEntity>create(CaelestisDreadglareEntity::new, SpawnGroup.MONSTER)
+                    .dimensions(0.75F, 0.75F)
+                    .maxTrackingRange(64)
+                    .trackingTickInterval(1)
+                    .build(Identifier.of(SimplySwords.MOD_ID, "caelestis_dreadglare").toString())
+    );
+
     public static final RegistrySupplier<EntityType<SimplySwordsCreeperHeadEntity>> CREEPER_HEAD = ENTITIES.register(
             "creeper_head",
             () -> EntityType.Builder.<SimplySwordsCreeperHeadEntity>create(SimplySwordsCreeperHeadEntity::new, SpawnGroup.MISC)

@@ -12,7 +12,6 @@ import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
@@ -23,7 +22,6 @@ import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.world.PlayerWeaponAbilityChannelManager;
 
 import java.util.List;
-import java.util.Random;
 
 public class AbilityMethods {
 
@@ -145,25 +143,6 @@ public class AbilityMethods {
             }
         }
     }
-
-    public static void astralShiftSounds(ServerPlayerEntity serverPlayer) {
-        SoundEvent[] soundOptions = new SoundEvent[]{
-                SoundRegistry.DISTORTION_ARC_01.get(),
-                SoundRegistry.DISTORTION_ARC_02.get(),
-                SoundRegistry.DISTORTION_ARC_03.get()
-        };
-
-        Random random = new Random();
-        SoundEvent soundRandom = soundOptions[random.nextInt(soundOptions.length)];
-
-        serverPlayer.getWorld().playSoundFromEntity(null, serverPlayer, soundRandom,
-                SoundCategory.PLAYERS, 0.7f, 0.5f + (serverPlayer.getRandom().nextBetween(1, 5) * 0.1f));
-    }
-
-    public static boolean astralShiftPassive(ServerPlayerEntity serverPlayer) {
-        return (serverPlayer.getRandom().nextInt(100) < Config.uniqueEffects.caelestis.chance);
-    }
-
 
     public static void applyAxolotlBuff(ServerPlayerEntity player, NbtCompound axolotlDataLeft, NbtCompound axolotlDataRight) {
         boolean hasLeftAxolotl = axolotlDataLeft != null && axolotlDataLeft.contains("Variant");

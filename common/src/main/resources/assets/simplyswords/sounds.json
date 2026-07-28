@@ -823,5 +823,37 @@
     "sounds": [
       "simplyswords:distortion_arc_03"
     ]
+  },
+  "caelestis_creature_ambient": {
+    "sounds": [
+      "simplyswords:caelestis_creature_ambient_01",
+      "simplyswords:caelestis_creature_ambient_02",
+      "simplyswords:caelestis_creature_ambient_03"
+    ]
+  },
+  "caelestis_creature_hurt": {
+    "sounds": [
+      "simplyswords:caelestis_creature_hurt_01",
+      "simplyswords:caelestis_creature_hurt_02"
+    ]
+  },
+  "caelestis_creature_attack": {
+    "sounds": [
+      "simplyswords:caelestis_creature_attack_01",
+      "simplyswords:caelestis_creature_attack_02"
+    ]
+  },
+  "caelestis_creature_arrival": {
+    "sounds": [
+      "simplyswords:caelestis_creature_arrival"
+    ]
+  },
+  "caelestis_breach_ambience": {
+    "sounds": [
+      {
+        "name": "simplyswords:caelestis_breach_ambience",
+        "stream": true
+      }
+    ]
   }
 }

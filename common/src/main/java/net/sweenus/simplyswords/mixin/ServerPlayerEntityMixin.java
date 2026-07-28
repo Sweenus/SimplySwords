@@ -28,7 +28,6 @@ import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.LootConfig;
 import net.sweenus.simplyswords.item.ContainedRemnantItem;
-import net.sweenus.simplyswords.item.custom.CaelestisSwordItem;
 import net.sweenus.simplyswords.item.custom.WickpiercerSwordItem;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
@@ -98,25 +97,6 @@ public abstract class ServerPlayerEntityMixin {
                             SoundCategory.PLAYERS, 0.7f, 0.5f + (serverPlayer.getRandom().nextBetween(1, 5) * 0.1f));
                 }
 
-                if (serverPlayer.hasStatusEffect(EffectRegistry.getReference(EffectRegistry.ASTRAL_SHIFT))) {
-                    StatusEffectInstance astralShiftInstance = player.getStatusEffect(EffectRegistry.getReference(EffectRegistry.ASTRAL_SHIFT));
-                    if (astralShiftInstance != null) {
-                        int duration = astralShiftInstance.getDuration();
-
-                        if (duration > 10) {
-                            HelperMethods.incrementStatusEffect(serverPlayer, EffectRegistry.getReference(EffectRegistry.ASTRAL_SHIFT), duration, (int) Math.max(1, (amount / 10)), 99);
-                            AbilityMethods.astralShiftSounds(serverPlayer);
-                            cir.setReturnValue(false);
-                        }
-                    }
-                }
-
-                if (serverPlayer.getMainHandStack().getItem() instanceof CaelestisSwordItem) {
-                    if (AbilityMethods.astralShiftPassive(serverPlayer)) {
-                        AbilityMethods.astralShiftSounds(serverPlayer);
-                        cir.setReturnValue(false);
-                    }
-                }
             }
 
             // Magiscythe trigger

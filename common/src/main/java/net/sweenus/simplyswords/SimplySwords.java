@@ -25,13 +25,19 @@ import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
 import net.sweenus.simplyswords.client.renderer.*;
 import net.sweenus.simplyswords.client.renderer.model.BattleStandardDarkModel;
 import net.sweenus.simplyswords.client.renderer.model.BattleStandardModel;
+import net.sweenus.simplyswords.client.renderer.model.CaelestisDreadglareModel;
+import net.sweenus.simplyswords.client.renderer.model.CaelestisRiftlingModel;
 import net.sweenus.simplyswords.client.AbilityKeybindHandler;
+import net.sweenus.simplyswords.client.CaelestisBreachAmbience;
 import net.sweenus.simplyswords.command.SimplySwordsCommands;
 import net.sweenus.simplyswords.compat.MythicMetalsCompat;
 import net.sweenus.simplyswords.compat.eldritch_end.EldritchEndCompatRegistry;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.BattleStandardDarkEntity;
 import net.sweenus.simplyswords.entity.BattleStandardEntity;
+import net.sweenus.simplyswords.entity.CaelestisDreadglareEntity;
+import net.sweenus.simplyswords.entity.CaelestisHollowEntity;
+import net.sweenus.simplyswords.entity.CaelestisRiftlingEntity;
 import net.sweenus.simplyswords.entity.FallingSnifferEntity;
 import net.sweenus.simplyswords.entity.SimplySwordsAxolotlEntity;
 import net.sweenus.simplyswords.entity.SimplySwordsBeeEntity;
@@ -99,6 +105,9 @@ public class SimplySwords {
         EntityAttributeRegistry.register(EntityRegistry.FALLING_SNIFFER, FallingSnifferEntity::createFallingSnifferAttributes);
         EntityAttributeRegistry.register(EntityRegistry.CREEPER_HEAD, SimplySwordsCreeperHeadEntity::createHeadAttributes);
         EntityAttributeRegistry.register(EntityRegistry.SIMPLYAXOLOTLENTITY, SimplySwordsAxolotlEntity::createSimplyAxolotlAttributes);
+        EntityAttributeRegistry.register(EntityRegistry.CAELESTIS_RIFTLING, CaelestisRiftlingEntity::createBreachAttributes);
+        EntityAttributeRegistry.register(EntityRegistry.CAELESTIS_HOLLOW, CaelestisHollowEntity::createBreachAttributes);
+        EntityAttributeRegistry.register(EntityRegistry.CAELESTIS_DREADGLARE, CaelestisDreadglareEntity::createBreachAttributes);
 
         ModLootTableModifiers.init();
         if (passVersionCheck("eldritch_end", minimumEldritchEndVersion)) {
@@ -131,17 +140,26 @@ public class SimplySwords {
 
     @Environment(EnvType.CLIENT)
     public static class Client {
-        public static final EntityModelLayer BATTLESTANDARD_MODEL = new EntityModelLayer(Identifier.of("battlestandard", "cube"), "main");
-        public static final EntityModelLayer BATTLESTANDARD_DARK_MODEL = new EntityModelLayer(Identifier.of("battlestandarddark", "cube"), "main");
+        public static final EntityModelLayer BATTLESTANDARD_MODEL =
+                new EntityModelLayer(Identifier.of("battlestandard", "cube"), "main");
+        public static final EntityModelLayer BATTLESTANDARD_DARK_MODEL =
+                new EntityModelLayer(Identifier.of("battlestandarddark", "cube"), "main");
+        public static final EntityModelLayer CAELESTIS_RIFTLING_MODEL =
+                new EntityModelLayer(Identifier.of(MOD_ID, "caelestis_riftling"), "main");
+        public static final EntityModelLayer CAELESTIS_DREADGLARE_MODEL =
+                new EntityModelLayer(Identifier.of(MOD_ID, "caelestis_dreadglare"), "main");
 
         @Environment(EnvType.CLIENT)
         public static void initializeClient() {
             AbilityKeybindHandler.init();
+            CaelestisBreachAmbience.init();
             // Entity
             EntityRendererRegistry.register(EntityRegistry.BATTLESTANDARD, BattleStandardRenderer::new);
             EntityModelLayerRegistry.register(BATTLESTANDARD_MODEL, BattleStandardModel::getTexturedModelData);
             EntityRendererRegistry.register(EntityRegistry.BATTLESTANDARDDARK, BattleStandardDarkRenderer::new);
             EntityModelLayerRegistry.register(BATTLESTANDARD_DARK_MODEL, BattleStandardDarkModel::getTexturedModelData);
+            EntityModelLayerRegistry.register(CAELESTIS_RIFTLING_MODEL, CaelestisRiftlingModel::getTexturedModelData);
+            EntityModelLayerRegistry.register(CAELESTIS_DREADGLARE_MODEL, CaelestisDreadglareModel::getTexturedModelData);
             EntityRendererRegistry.register(EntityRegistry.SIMPLYBEEENTITY, HivemindBeeEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.WATCHER_BAT, WatcherBatEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.SKELETON_MINION, SkeletonEntityRenderer::new);
@@ -177,6 +195,10 @@ public class SimplySwords {
             EntityRendererRegistry.register(EntityRegistry.FAULTLINE_SPIKE_VISUAL, FaultlineSpikeVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.LIVYATAN_WAVE_VISUAL, LivyatanWaveVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.MOLTEN_RUPTURE_VISUAL, MoltenRuptureVisualEntityRenderer::new);
+            EntityRendererRegistry.register(EntityRegistry.CAELESTIS_BREACH_VISUAL, CaelestisBreachVisualEntityRenderer::new);
+            EntityRendererRegistry.register(EntityRegistry.CAELESTIS_RIFTLING, CaelestisRiftlingRenderer::new);
+            EntityRendererRegistry.register(EntityRegistry.CAELESTIS_HOLLOW, CaelestisHollowRenderer::new);
+            EntityRendererRegistry.register(EntityRegistry.CAELESTIS_DREADGLARE, CaelestisDreadglareRenderer::new);
 
             // Simply Tooltips bridge — renders all simplyswords sword items with the ST engine
             net.sweenus.simplytooltips.api.TooltipProviderRegistry.register(

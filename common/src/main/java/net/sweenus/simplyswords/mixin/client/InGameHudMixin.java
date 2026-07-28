@@ -6,7 +6,11 @@ import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.client.render.RenderTickCounter;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
+import net.minecraft.util.math.Box;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.config.Config;
+import net.sweenus.simplyswords.entity.CaelestisBreachVisualEntity;
 import net.sweenus.simplyswords.item.component.MoltenHeatComponent;
 import net.sweenus.simplyswords.item.component.ParryComponent;
 import net.sweenus.simplyswords.item.component.StoredChargeComponent;
@@ -44,6 +48,85 @@ public abstract class InGameHudMixin {
     private float simplyswords$lastHeatRenderTime;
     @Unique
     private boolean simplyswords$heatDisplayInitialized;
+    @Unique
+    private float simplyswords$breachTint;
+    @Unique
+    private float simplyswords$lastBreachRenderTime;
+
+    @Inject(method = "render", at = @At("HEAD"))
+    private void simplyswords$renderAstralBreachTint(DrawContext context, RenderTickCounter tickCounter, CallbackInfo ci) {
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client.world == null || !Config.general.enableModernFieldEffects) {
+            simplyswords$breachTint = 0.0F;
+            simplyswords$lastBreachRenderTime = 0.0F;
+            return;
+        }
+
+        Vec3d cameraPos = client.gameRenderer.getCamera().getPos();
+        double searchRadius = Math.max(2.0, Config.uniqueEffects.caelestis.maxRadius + 2.0);
+        Box search = new Box(cameraPos, cameraPos).expand(
+                searchRadius,
+                Math.max(2.0, Config.uniqueEffects.caelestis.verticalRange + 2.0),
+                searchRadius);
+        float target = 0.0F;
+        boolean collapsing = false;
+        for (CaelestisBreachVisualEntity breach : client.world.getEntitiesByClass(
+                CaelestisBreachVisualEntity.class, search, entity -> entity.getRadius() > 0.05F)) {
+            double dx = cameraPos.x - breach.getX();
+            double dz = cameraPos.z - breach.getZ();
+            double distance = Math.sqrt(dx * dx + dz * dz);
+            if (distance > breach.getRadius()
+                    || Math.abs(cameraPos.y - breach.getY())
+                    > breach.getVerticalRange()) {
+                continue;
+            }
+            float edge = MathHelper.clamp((float) ((breach.getRadius() - distance) / 2.25), 0.0F, 1.0F);
+            float radiusStrength = MathHelper.clamp(
+                    breach.getRadius() / breach.getMaxRadius(),
+                    0.0F, 1.0F);
+            float strength = (0.35F + edge * 0.65F) * (0.45F + radiusStrength * 0.55F);
+            if (strength > target) {
+                target = strength;
+                collapsing = breach.getPhase() == CaelestisBreachVisualEntity.PHASE_COLLAPSING;
+            }
+        }
+
+        float renderTime = client.world.getTime() + tickCounter.getTickDelta(false);
+        float elapsed = this.simplyswords$lastBreachRenderTime == 0.0F
+                ? 1.0F : MathHelper.clamp(renderTime - this.simplyswords$lastBreachRenderTime, 0.0F, 5.0F);
+        float smoothing = 1.0F - (float) Math.exp(-0.28F * elapsed);
+        this.simplyswords$breachTint += (target - this.simplyswords$breachTint) * smoothing;
+        this.simplyswords$lastBreachRenderTime = renderTime;
+        if (this.simplyswords$breachTint < 0.005F) {
+            return;
+        }
+
+        int width = context.getScaledWindowWidth();
+        int height = context.getScaledWindowHeight();
+        float pulse = 0.5F + 0.5F * (float) Math.sin(renderTime * (collapsing ? 0.52F : 0.18F));
+        int centerAlpha = MathHelper.clamp(
+                (int) ((collapsing ? 20.0F + pulse * 10.0F : 15.0F + pulse * 5.0F)
+                        * this.simplyswords$breachTint), 0, 36);
+        int centerColor = (centerAlpha << 24) | (collapsing ? 0x4A0611 : 0x21052E);
+        context.fill(0, 0, width, height, centerColor);
+
+        for (int layer = 0; layer < 6; layer++) {
+            int insetX = layer * Math.max(2, width / 90);
+            int insetY = layer * Math.max(2, height / 70);
+            int thicknessX = Math.max(3, width / 38);
+            int thicknessY = Math.max(3, height / 30);
+            int alpha = MathHelper.clamp(
+                    (int) ((36.0F - layer * 4.0F + pulse * 8.0F)
+                            * this.simplyswords$breachTint), 0, 58);
+            int color = (alpha << 24) | (collapsing ? 0x720A1D : 0x360848);
+            context.fill(insetX, insetY, width - insetX, insetY + thicknessY, color);
+            context.fill(insetX, height - insetY - thicknessY, width - insetX, height - insetY, color);
+            context.fill(insetX, insetY + thicknessY, insetX + thicknessX,
+                    height - insetY - thicknessY, color);
+            context.fill(width - insetX - thicknessX, insetY + thicknessY, width - insetX,
+                    height - insetY - thicknessY, color);
+        }
+    }
 
     @Inject(method = "render", at = @At("TAIL"))
     private void simplyswords$renderSoulDebtHud(DrawContext context, RenderTickCounter tickCounter, CallbackInfo ci) {

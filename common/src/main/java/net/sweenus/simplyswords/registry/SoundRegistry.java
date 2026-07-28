@@ -343,5 +343,20 @@ public class SoundRegistry {
             SoundEvent.of(Identifier.of(SimplySwords.MOD_ID, "distortion_arc_02")));
     public static final RegistrySupplier<SoundEvent> DISTORTION_ARC_03 = SOUND.register("distortion_arc_03", () ->
             SoundEvent.of(Identifier.of(SimplySwords.MOD_ID, "distortion_arc_03")));
+    public static final RegistrySupplier<SoundEvent> CAELESTIS_CREATURE_AMBIENT = SOUND.register(
+            "caelestis_creature_ambient", () ->
+                    SoundEvent.of(Identifier.of(SimplySwords.MOD_ID, "caelestis_creature_ambient")));
+    public static final RegistrySupplier<SoundEvent> CAELESTIS_CREATURE_HURT = SOUND.register(
+            "caelestis_creature_hurt", () ->
+                    SoundEvent.of(Identifier.of(SimplySwords.MOD_ID, "caelestis_creature_hurt")));
+    public static final RegistrySupplier<SoundEvent> CAELESTIS_CREATURE_ATTACK = SOUND.register(
+            "caelestis_creature_attack", () ->
+                    SoundEvent.of(Identifier.of(SimplySwords.MOD_ID, "caelestis_creature_attack")));
+    public static final RegistrySupplier<SoundEvent> CAELESTIS_CREATURE_ARRIVAL = SOUND.register(
+            "caelestis_creature_arrival", () ->
+                    SoundEvent.of(Identifier.of(SimplySwords.MOD_ID, "caelestis_creature_arrival")));
+    public static final RegistrySupplier<SoundEvent> CAELESTIS_BREACH_AMBIENCE = SOUND.register(
+            "caelestis_breach_ambience", () ->
+                    SoundEvent.of(Identifier.of(SimplySwords.MOD_ID, "caelestis_breach_ambience")));
 
 }
