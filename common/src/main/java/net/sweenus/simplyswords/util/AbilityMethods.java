@@ -19,7 +19,6 @@ import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.item.component.StoredChargeComponent;
 import net.sweenus.simplyswords.registry.ComponentTypeRegistry;
-import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.world.PlayerWeaponAbilityChannelManager;
 
@@ -27,53 +26,6 @@ import java.util.List;
 import java.util.Random;
 
 public class AbilityMethods {
-
-    //Mjolnir - Storm
-    public static void tickAbilityStorm(ItemStack stack, World world, LivingEntity user,
-                                        int ability_timer, int skillCooldown, int radius) {
-        if (!user.getWorld().isClient()) {
-            int frequency = Config.uniqueEffects.mjolnir.frequency;
-            if (user.age % frequency == 0) {
-                double x = user.getX();
-                double y = user.getY();
-                double z = user.getZ();
-                user.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, frequency+5, 5), user);
-                Box box = new Box(x + radius, y + radius, z + radius, x - radius, y - radius, z - radius);
-                ServerWorld sworld = (ServerWorld) user.getWorld();
-
-                for (Entity entity : world.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY)) {
-                    float choose = (float) (Math.random() * 1);
-                    if ((entity instanceof LivingEntity ee)) {
-                        if (HelperMethods.checkFriendlyFire(ee, user) && choose > 0.7) {
-                            var stormtarget = ee.getBlockPos();
-                            ee.addStatusEffect(new StatusEffectInstance(EffectRegistry.getReference(EffectRegistry.FREEZE), frequency+5, 0), user);
-                            LightningEntity storm = EntityType.LIGHTNING_BOLT.spawn(sworld, stormtarget, SpawnReason.TRIGGERED);
-                            if (storm != null) {
-                                storm.setCosmetic(true);
-                            }
-                            DamageSource damageSource = user.getDamageSources().indirectMagic(user, user);
-                            float damage = HelperMethods.attackScaledDamage(user, stack, Config.uniqueEffects.mjolnir.damageScaling);
-                            ee.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments(sworld, stack, ee, damageSource, damage));
-                        }
-                    }
-                }
-            }
-            if (user.age % 5 == 0) {
-                double xpos = user.getX() - (radius + 1);
-                double ypos = user.getY();
-                double zpos = user.getZ() - (radius + 1);
-
-                for (int i = radius * 2; i > 0; i--) {
-                    for (int j = radius * 2; j > 0; j--) {
-                        float choose = (float) (Math.random() * 1);
-                        HelperMethods.spawnParticle(world, ParticleTypes.CLOUD,
-                                xpos + i + choose, ypos + 10, zpos + j + choose,
-                                0, 0, 0);
-                    }
-                }
-            }
-        }
-    }
 
     //Lichblade - Soul Anguish
     public static void tickAbilitySoulAnguish(ItemStack stack, World world, LivingEntity user, float abilityDamage, int radius,

@@ -82,6 +82,9 @@ public abstract class ServerWorldMixin {
         if (TwistedBladeAbilityManager.hasActive(world)) {
             TwistedBladeAbilityManager.tick(world);
         }
+        if (MjolnirStormManager.hasActive(world)) {
+            MjolnirStormManager.tick(world);
+        }
         if (EvocationFangManager.hasActive(world)) {
             EvocationFangManager.tick(world);
         }

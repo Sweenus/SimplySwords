@@ -26,6 +26,11 @@ public final class ChainLightningVisualManager {
     }
 
     public static void spawnBolt(ServerWorld world, Vec3d start, Vec3d end, LightningVisualSettings settings) {
+        spawnBolt(world, start, end, settings, true);
+    }
+
+    public static void spawnBolt(ServerWorld world, Vec3d start, Vec3d end,
+                                 LightningVisualSettings settings, boolean illuminate) {
         Vec3d offset = end.subtract(start);
         if (offset.lengthSquared() < 0.01) {
             return;
@@ -45,7 +50,9 @@ public final class ChainLightningVisualManager {
                 Math.max(0, settings.branches())
         );
         world.spawnEntity(visual);
-        TemporaryWorldLightManager.placeBoltLights(world, start, end, 5, 3);
+        if (illuminate) {
+            TemporaryWorldLightManager.placeBoltLights(world, start, end, 5, 3);
+        }
     }
 
     public static void spawnChain(ServerWorld world, List<Vec3d> points, LightningVisualSettings settings) {
