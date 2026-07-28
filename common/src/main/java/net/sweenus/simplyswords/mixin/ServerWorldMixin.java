@@ -70,6 +70,9 @@ public abstract class ServerWorldMixin {
         if (ThunderbrandAbilityManager.hasActive(world)) {
             ThunderbrandAbilityManager.tick(world);
         }
+        if (MoltenEdgeAbilityManager.hasActive(world)) {
+            MoltenEdgeAbilityManager.tick(world);
+        }
         if (EvocationFangManager.hasActive(world)) {
             EvocationFangManager.tick(world);
         }

@@ -25,6 +25,7 @@ import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.world.RunicSlashManager;
+import net.sweenus.simplyswords.world.MoltenEdgeAbilityManager;
 import net.sweenus.simplyswords.world.ThunderbrandAbilityManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -89,6 +90,7 @@ public abstract class LivingEntityMixin {
     private float simplyswords$modifyDamageAmount(float amount, DamageSource source) {
         LivingEntity livingEntity = (LivingEntity) (Object) this;
         if (!livingEntity.getWorld().isClient()) {
+            amount = MoltenEdgeAbilityManager.modifyOutgoingDamage(source, amount);
             StatusEffectInstance voidcloakEffect = livingEntity.getStatusEffect(EffectRegistry.getReference(EffectRegistry.VOIDCLOAK));
             StatusEffectInstance ribbonwrathEffect = livingEntity.getStatusEffect(EffectRegistry.getReference(EffectRegistry.RIBBONWRATH));
             StatusEffectInstance soulTetherEffect = livingEntity.getStatusEffect(EffectRegistry.getReference(EffectRegistry.SOULTETHER));
@@ -107,6 +109,7 @@ public abstract class LivingEntityMixin {
                 amount *= reductionFactor;
             }
             amount = WeaponImplicitRegistry.modifyDamage(livingEntity, source, amount);
+            amount = MoltenEdgeAbilityManager.modifyIncomingDamage(livingEntity, amount);
         }
         return amount;
     }
@@ -115,6 +118,7 @@ public abstract class LivingEntityMixin {
     public void simplyswords$applyWeaponImplicitOnDamage(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
         LivingEntity livingEntity = (LivingEntity) (Object) this;
         if (Boolean.TRUE.equals(cir.getReturnValue()) && !livingEntity.getWorld().isClient()) {
+            MoltenEdgeAbilityManager.gainHeatFromIncomingDamage(livingEntity, amount, true);
             WeaponImplicitRegistry.onDamageApplied(livingEntity, source, amount);
             if (source.isIn(DamageTypeTags.IS_PLAYER_ATTACK) && source.getAttacker() instanceof ServerPlayerEntity player) {
                 ItemStack stack = source.getWeaponStack();
@@ -140,6 +144,7 @@ public abstract class LivingEntityMixin {
     @Inject(at = @At("HEAD"), method = "onDeath")
     public void simplyswords$triggerFlameSeedOnDeath(DamageSource damageSource, CallbackInfo ci) {
         LivingEntity livingEntity = (LivingEntity) (Object) this;
+        MoltenEdgeAbilityManager.resetWielder(livingEntity);
         FlameSeedEffect.triggerDeathDetonation(livingEntity);
     }
 

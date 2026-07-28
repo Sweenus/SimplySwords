@@ -288,6 +288,15 @@ public class EntityRegistry {
                     .build(Identifier.of(SimplySwords.MOD_ID, "livyatan_wave_visual").toString())
     );
 
+    public static final RegistrySupplier<EntityType<MoltenRuptureVisualEntity>> MOLTEN_RUPTURE_VISUAL = ENTITIES.register(
+            "molten_rupture_visual",
+            () -> EntityType.Builder.<MoltenRuptureVisualEntity>create(MoltenRuptureVisualEntity::new, SpawnGroup.MISC)
+                    .dimensions(0.75f, 1.25f)
+                    .maxTrackingRange(96)
+                    .trackingTickInterval(1)
+                    .build(Identifier.of(SimplySwords.MOD_ID, "molten_rupture_visual").toString())
+    );
+
     public static final RegistrySupplier<EntityType<SimplySwordsCreeperHeadEntity>> CREEPER_HEAD = ENTITIES.register(
             "creeper_head",
             () -> EntityType.Builder.<SimplySwordsCreeperHeadEntity>create(SimplySwordsCreeperHeadEntity::new, SpawnGroup.MISC)

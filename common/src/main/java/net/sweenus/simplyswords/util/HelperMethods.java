@@ -363,8 +363,19 @@ public class HelperMethods {
     // createFootfalls - creates weapon footfall particle effects (footsteps)
     public static void createFootfalls(Entity entity, ItemStack stack, World world, ParticleEffect particle,
                                        ParticleEffect sprintParticle, ParticleEffect passiveParticle, boolean passiveParticles) {
+        createFootfalls(entity, stack, world, particle, sprintParticle, passiveParticle, passiveParticles, false);
+    }
+
+    public static void createFootfalls(Entity entity, ItemStack stack, World world, ParticleEffect particle,
+                                       ParticleEffect sprintParticle, ParticleEffect passiveParticle, boolean passiveParticles,
+                                       boolean includeOffHand) {
         int stepMod = 7 - (int)(world.getTime() % 7);
-        if ((entity instanceof PlayerEntity player) && Config.general.enableWeaponFootfalls && player.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
+        if ((entity instanceof PlayerEntity player)
+                && Config.general.enableWeaponFootfalls
+                && (player.getEquippedStack(EquipmentSlot.MAINHAND) == stack
+                || (includeOffHand
+                && player.getEquippedStack(EquipmentSlot.OFFHAND) == stack
+                && !player.getEquippedStack(EquipmentSlot.MAINHAND).isOf(stack.getItem())))) {
             if (isWalking(player) && !player.isSwimming() && player.isOnGround()) {
                 if (stepMod == 6) {
                     if (player.isSprinting()) {
@@ -499,11 +510,9 @@ public class HelperMethods {
     }
 
     public static float abilityScaledDamage(String spellSchool, LivingEntity actor, ItemStack stack, float attackScaling, float spellScaling) {
-        float scaling = commonSpellAttributeScaling(spellScaling, actor, spellSchool);
-        if (scaling > 0f) {
-            return scaling;
-        }
-        return attackScaledDamage(actor, stack, attackScaling);
+        float spellDamage = commonSpellAttributeScaling(spellScaling, actor, spellSchool);
+        float attackDamage = attackScaledDamage(actor, stack, attackScaling);
+        return Math.max(spellDamage, attackDamage);
     }
 
     public static float abilityScaledDamage(String spellSchool, LivingEntity actor, float attackScaling, float spellScaling) {

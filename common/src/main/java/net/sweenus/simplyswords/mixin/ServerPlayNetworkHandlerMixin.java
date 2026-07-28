@@ -1,9 +1,11 @@
 package net.sweenus.simplyswords.mixin;
 
 import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
+import net.minecraft.network.DisconnectionInfo;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.sweenus.simplyswords.world.ShadowstingShadowDanceManager;
+import net.sweenus.simplyswords.world.MoltenEdgeAbilityManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -21,5 +23,10 @@ public abstract class ServerPlayNetworkHandlerMixin {
         if (ShadowstingShadowDanceManager.isActive(player)) {
             ci.cancel();
         }
+    }
+
+    @Inject(at = @At("HEAD"), method = "onDisconnected")
+    private void simplyswords$resetMoltenHeatOnDisconnect(DisconnectionInfo info, CallbackInfo ci) {
+        MoltenEdgeAbilityManager.resetWielder(player);
     }
 }

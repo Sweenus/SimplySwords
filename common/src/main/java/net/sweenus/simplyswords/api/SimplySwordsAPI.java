@@ -27,6 +27,7 @@ import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.BattleStandardEntity;
 import net.sweenus.simplyswords.item.custom.LivyatanSwordItem;
+import net.sweenus.simplyswords.item.custom.MoltenEdgeSwordItem;
 import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
 import net.sweenus.simplyswords.power.powers.NecromanticArsenalPower;
 import net.sweenus.simplyswords.item.ContainedRemnantItem;
@@ -97,6 +98,9 @@ public class SimplySwordsAPI {
         getComponent(stack).onSwing(stack, world, user, hand);
         if (stack.getItem() instanceof LivyatanSwordItem livyatan) {
             livyatan.onSwing(stack, world, user, hand);
+        }
+        if (stack.getItem() instanceof MoltenEdgeSwordItem moltenEdge) {
+            moltenEdge.onSwing(stack, world, user, hand);
         }
     }
 

@@ -11,14 +11,36 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RotationAxis;
 import net.sweenus.simplyswords.client.ShadowDanceFovHandler;
+import net.sweenus.simplyswords.registry.ComponentTypeRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(HeldItemRenderer.class)
 public abstract class HeldItemRendererMixin {
+
+    @Redirect(
+            method = "updateHeldItems",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/item/ItemStack;areEqual(Lnet/minecraft/item/ItemStack;Lnet/minecraft/item/ItemStack;)Z",
+                    ordinal = 0
+            )
+    )
+    private boolean simplyswords$ignoreMoltenHeatForMainHandEquip(ItemStack previous, ItemStack current) {
+        if (!previous.isOf(ItemsRegistry.MOLTEN_EDGE.get()) || !current.isOf(ItemsRegistry.MOLTEN_EDGE.get())) {
+            return ItemStack.areEqual(previous, current);
+        }
+
+        ItemStack previousWithoutHeat = previous.copy();
+        ItemStack currentWithoutHeat = current.copy();
+        previousWithoutHeat.remove(ComponentTypeRegistry.MOLTEN_HEAT.get());
+        currentWithoutHeat.remove(ComponentTypeRegistry.MOLTEN_HEAT.get());
+        return ItemStack.areEqual(previousWithoutHeat, currentWithoutHeat);
+    }
 
     @Inject(method = "renderItem(FLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider$Immediate;Lnet/minecraft/client/network/ClientPlayerEntity;I)V",
             at = @At("HEAD"), cancellable = true)
