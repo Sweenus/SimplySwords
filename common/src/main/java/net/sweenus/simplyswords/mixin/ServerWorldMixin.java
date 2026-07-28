@@ -31,6 +31,9 @@ public abstract class ServerWorldMixin {
         if (SoulrenderMarkVisualManager.hasActive(world)) {
             SoulrenderMarkVisualManager.tick(world);
         }
+        if (WatcherAbilityManager.hasActive(world)) {
+            WatcherAbilityManager.tick(world);
+        }
         if (FlamewindVisualManager.hasActive(world)) {
             FlamewindVisualManager.tick(world);
         }

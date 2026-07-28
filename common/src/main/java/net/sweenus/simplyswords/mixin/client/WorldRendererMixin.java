@@ -4,23 +4,32 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.render.*;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.client.renderer.ModernFieldRenderer;
+import net.sweenus.simplyswords.client.renderer.TargetHighlight;
 import net.sweenus.simplyswords.config.Config;
+import net.sweenus.simplyswords.entity.WatcherBatEntity;
 import net.sweenus.simplyswords.item.component.StoredChargeComponent;
 import net.sweenus.simplyswords.item.custom.StealSwordItem;
 import net.sweenus.simplyswords.registry.ComponentTypeRegistry;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
+import net.sweenus.simplyswords.util.HelperMethods;
+import net.sweenus.simplyswords.world.WatcherWeaponType;
 import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Mixin(WorldRenderer.class)
 public abstract class WorldRendererMixin {
@@ -62,12 +71,15 @@ public abstract class WorldRendererMixin {
                     MathHelper.lerp(tickDelta, highlightedTarget.prevY, highlightedTarget.getY()),
                     MathHelper.lerp(tickDelta, highlightedTarget.prevZ, highlightedTarget.getZ()));
             Vec3d targetOffset = targetPos.subtract(playerPos);
-            if (highlight.brimstone()) {
-                ModernFieldRenderer.renderBrimstoneTargetLine(matrices, vertexConsumers, player.age, targetOffset);
-                ModernFieldRenderer.renderBrimstoneTargetRing(matrices, vertexConsumers, player.age, targetOffset, highlightedTarget.getWidth());
-            } else {
+            if (highlight.style() == TargetHighlight.Style.SOUL) {
                 ModernFieldRenderer.renderSoulstealerTargetLine(matrices, vertexConsumers, player.age, targetOffset);
                 ModernFieldRenderer.renderSoulstealerTargetRing(matrices, vertexConsumers, player.age, targetOffset, highlightedTarget.getWidth());
+            } else if (highlight.style() == TargetHighlight.Style.BRIMSTONE) {
+                ModernFieldRenderer.renderBrimstoneTargetLine(matrices, vertexConsumers, player.age, targetOffset);
+                ModernFieldRenderer.renderBrimstoneTargetRing(matrices, vertexConsumers, player.age, targetOffset, highlightedTarget.getWidth());
+            } else if (highlight.style() == TargetHighlight.Style.WATCHER) {
+                ModernFieldRenderer.renderWatcherTargetLine(matrices, vertexConsumers, player.age, targetOffset);
+                ModernFieldRenderer.renderWatcherTargetRing(matrices, vertexConsumers, player.age, targetOffset, highlightedTarget.getWidth());
             }
         }
 
@@ -77,14 +89,19 @@ public abstract class WorldRendererMixin {
     private TargetHighlight getReadyTarget(ClientPlayerEntity player) {
         LivingEntity soulstealerTarget = getReadySoulstealerTarget(player);
         if (soulstealerTarget != null) {
-            return new TargetHighlight(soulstealerTarget, false);
+            return new TargetHighlight(soulstealerTarget, TargetHighlight.Style.SOUL);
         }
         LivingEntity lichbladeTarget = getReadyLichbladeTarget(player);
         if (lichbladeTarget != null) {
-            return new TargetHighlight(lichbladeTarget, false);
+            return new TargetHighlight(lichbladeTarget, TargetHighlight.Style.SOUL);
+        }
+        LivingEntity watcherTarget = getReadyWatcherTarget(player);
+        if (watcherTarget != null) {
+            return new TargetHighlight(watcherTarget, TargetHighlight.Style.WATCHER);
         }
         LivingEntity brimstoneTarget = getReadyBrimstoneTarget(player);
-        return brimstoneTarget == null ? null : new TargetHighlight(brimstoneTarget, true);
+        return brimstoneTarget == null ? null
+                : new TargetHighlight(brimstoneTarget, TargetHighlight.Style.BRIMSTONE);
     }
 
     private LivingEntity getReadySoulstealerTarget(ClientPlayerEntity player) {
@@ -121,6 +138,58 @@ public abstract class WorldRendererMixin {
         return StealSwordItem.findLenientTarget(player, Config.uniqueEffects.brimstone_claymore.range);
     }
 
+    private LivingEntity getReadyWatcherTarget(ClientPlayerEntity player) {
+        ItemStack stack = player.getMainHandStack();
+        if (!stack.isOf(ItemsRegistry.WATCHER_CLAYMORE.get())
+                || player.getItemCooldownManager().isCoolingDown(stack.getItem())
+                || player.isUsingItem()
+                || stack.getDamage() >= stack.getMaxDamage() - 1) {
+            return null;
+        }
+
+        double range = Math.max(1.0, Config.uniqueEffects.watcher.activationRange);
+        List<WatcherBatEntity> markBats = player.getWorld().getEntitiesByClass(
+                WatcherBatEntity.class,
+                player.getBoundingBox().expand(range + 2.0),
+                bat -> bat.getWatcherOwnerId() == player.getId()
+                        && bat.getWatcherWeaponType() == WatcherWeaponType.CLAYMORE
+                        && bat.getWatcherMode() == WatcherBatEntity.MODE_MARK
+        );
+        if (markBats.isEmpty()) {
+            return null;
+        }
+
+        Set<Integer> markedTargetIds = new HashSet<>();
+        for (WatcherBatEntity bat : markBats) {
+            if (bat.getWatcherTargetId() >= 0) {
+                markedTargetIds.add(bat.getWatcherTargetId());
+            }
+        }
+
+        LivingEntity preferred = StealSwordItem.findLenientTarget(player, range);
+        if (preferred != null && markedTargetIds.contains(preferred.getId())
+                && HelperMethods.checkAbilityTarget(preferred, player)) {
+            return preferred;
+        }
+
+        LivingEntity nearest = null;
+        double nearestDistance = Double.MAX_VALUE;
+        for (int targetId : markedTargetIds) {
+            Entity entity = player.getWorld().getEntityById(targetId);
+            if (!(entity instanceof LivingEntity target)
+                    || !target.isAlive()
+                    || !HelperMethods.checkAbilityTarget(target, player)) {
+                continue;
+            }
+            double distance = target.squaredDistanceTo(player);
+            if (distance <= range * range && distance < nearestDistance) {
+                nearest = target;
+                nearestDistance = distance;
+            }
+        }
+        return nearest;
+    }
+
     private ItemStack getHeldSoulstealer(ClientPlayerEntity player) {
         ItemStack mainHandStack = player.getMainHandStack();
         if (mainHandStack.isOf(ItemsRegistry.SOULSTEALER.get())) {
@@ -134,6 +203,4 @@ public abstract class WorldRendererMixin {
         return ItemStack.EMPTY;
     }
 
-    private record TargetHighlight(LivingEntity target, boolean brimstone) {
-    }
 }

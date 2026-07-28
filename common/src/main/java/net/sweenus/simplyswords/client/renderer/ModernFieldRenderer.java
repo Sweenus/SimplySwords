@@ -66,6 +66,10 @@ public final class ModernFieldRenderer {
         renderTargetLine(matrices, vertexConsumers, age, targetOffset, 255, 142, 48, 255, 64, 24);
     }
 
+    public static void renderWatcherTargetLine(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int age, Vec3d targetOffset) {
+        renderTargetLine(matrices, vertexConsumers, age, targetOffset, 88, 34, 112, 174, 58, 214);
+    }
+
     public static void renderTargetLine(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int age, Vec3d targetOffset, int coreRed, int coreGreen, int coreBlue, int pulseRed, int pulseGreen, int pulseBlue) {
         if (!isEnabled()) {
             return;
@@ -107,6 +111,10 @@ public final class ModernFieldRenderer {
 
     public static void renderBrimstoneTargetRing(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int age, Vec3d targetOffset, float targetWidth) {
         renderTargetRing(matrices, vertexConsumers, age, targetOffset, targetWidth, 255, 142, 48, 255, 64, 24);
+    }
+
+    public static void renderWatcherTargetRing(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int age, Vec3d targetOffset, float targetWidth) {
+        renderTargetRing(matrices, vertexConsumers, age, targetOffset, targetWidth, 88, 34, 112, 174, 58, 214);
     }
 
     public static void renderTargetRing(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int age, Vec3d targetOffset, float targetWidth, int borderRed, int borderGreen, int borderBlue, int waveRed, int waveGreen, int waveBlue) {
