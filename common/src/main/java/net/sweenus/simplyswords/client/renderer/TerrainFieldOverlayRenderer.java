@@ -10,16 +10,20 @@ import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.WorldRenderer;
+import net.minecraft.client.render.block.FluidRenderer;
 import net.minecraft.client.render.model.BakedModelManager;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.registry.tag.BlockTags;
+import net.minecraft.registry.tag.FluidTags;
+import net.minecraft.fluid.FluidState;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.World;
 
@@ -41,6 +45,8 @@ public final class TerrainFieldOverlayRenderer {
     private static final float DETAIL_OFFSET = 0.001F;
     private static final float WASH_OFFSET = 0.002F;
     private static final float EDGE_OVERLAP = 0.008F;
+    private static final float FLUID_OFFSET = 0.012F;
+    private static final float FLUID_EDGE_OVERLAP = 0.003F;
     private static final float SURFACE_EPSILON = 0.001F;
     private static final Identifier WHITE_TEXTURE =
             Identifier.ofVanilla("textures/misc/white.png");
@@ -72,7 +78,7 @@ public final class TerrainFieldOverlayRenderer {
 
     public static final Palette SOUL_PYRE = new Palette(
             List.of(
-                    new Variant(48,
+                    new Variant(43,
                             Identifier.ofVanilla("block/soul_soil"), null,
                             Identifier.ofVanilla("block/soul_soil"), null),
                     new Variant(22,
@@ -86,13 +92,21 @@ public final class TerrainFieldOverlayRenderer {
                             Identifier.ofVanilla("block/blackstone"), null),
                     new Variant(5,
                             Identifier.ofVanilla("block/crying_obsidian"), null,
-                            Identifier.ofVanilla("block/crying_obsidian"), null)
+                            Identifier.ofVanilla("block/crying_obsidian"), null),
+                    new Variant(5,
+                            Identifier.ofVanilla("block/glowstone"), null,
+                            Identifier.ofVanilla("block/glowstone"), null,
+                            true)
             ),
             188, 210, 222,
             20, 88, 94, 30,
             7,
             10,
-            3
+            3,
+            new FluidReplacement(
+                    Identifier.ofVanilla("block/lava_still"),
+                    Identifier.ofVanilla("block/lava_flow")
+            )
     );
 
     private final Map<UUID, TerrainCache> caches = new HashMap<>();
@@ -112,13 +126,13 @@ public final class TerrainFieldOverlayRenderer {
         }
         TerrainCache cache = getCache(
                 world, id, centerX, centerY, centerZ, maxRadius, verticalRange, palette);
-        if (cache.faces.isEmpty()) {
+        if (cache.faces.isEmpty() && cache.fluidSurfaces.isEmpty()) {
             return;
         }
 
         SpriteSet sprites = SpriteSet.load(palette);
         VertexConsumer texturedVertices = vertexConsumers.getBuffer(
-                RenderLayer.getEntityCutoutNoCull(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE));
+                RenderLayer.getCutout());
         VertexConsumer washVertices = vertexConsumers.getBuffer(
                 RenderLayer.getEntityTranslucent(WHITE_TEXTURE));
         double minY = centerY - verticalRange;
@@ -133,6 +147,15 @@ public final class TerrainFieldOverlayRenderer {
                 drawVerticalFace(centerX, centerY, centerZ, matrices,
                         texturedVertices, washVertices, cache, sprites, palette,
                         face, radius, minY, maxY);
+            }
+        }
+        if (sprites.fluidStill != null && sprites.fluidFlow != null) {
+            for (FluidSurface surface : cache.fluidSurfaces) {
+                drawFluidSurface(
+                        centerX, centerY, centerZ,
+                        matrices, texturedVertices, sprites,
+                        surface, radius, minY, maxY
+                );
             }
         }
     }
@@ -176,6 +199,7 @@ public final class TerrainFieldOverlayRenderer {
                                            float verticalRange, Palette palette, long now) {
         List<TerrainFace> faces = new ArrayList<>();
         Map<FaceKey, TerrainFace> facesByKey = new HashMap<>();
+        List<FluidSurface> fluidSurfaces = new ArrayList<>();
         int minBlockY = Math.max(
                 world.getBottomY() + 1,
                 MathHelper.floor(centerY - verticalRange) - 1);
@@ -189,6 +213,14 @@ public final class TerrainFieldOverlayRenderer {
                 for (int y = minBlockY; y <= maxBlockY; y++) {
                     cursor.set(x, y, z);
                     BlockState state = world.getBlockState(cursor);
+                    if (palette.fluidReplacement != null
+                            && isReplaceableWater(world, cursor, state)) {
+                        FluidSurface fluidSurface = buildFluidSurface(
+                                world, cursor.toImmutable(), state);
+                        if (fluidSurface != null) {
+                            fluidSurfaces.add(fluidSurface);
+                        }
+                    }
                     if (!isEligible(world, cursor, state)) {
                         continue;
                     }
@@ -229,7 +261,7 @@ public final class TerrainFieldOverlayRenderer {
         }
         return new TerrainCache(
                 world, centerX, centerY, centerZ, scanRadius,
-                verticalRange, palette, now, faces, facesByKey);
+                verticalRange, palette, now, faces, facesByKey, fluidSurfaces);
     }
 
     private static boolean isEligible(World world, BlockPos pos, BlockState state) {
@@ -241,6 +273,83 @@ public final class TerrainFieldOverlayRenderer {
         return !state.getCollisionShape(world, pos).isEmpty();
     }
 
+    private static boolean isReplaceableWater(
+            World world, BlockPos pos, BlockState state) {
+        return state.getFluidState().isIn(FluidTags.WATER)
+                && state.getCollisionShape(world, pos).isEmpty();
+    }
+
+    private static FluidSurface buildFluidSurface(
+            World world, BlockPos pos, BlockState state) {
+        FluidState fluid = state.getFluidState();
+        boolean top = FluidRenderer.shouldRenderSide(
+                world,
+                pos,
+                fluid,
+                state,
+                Direction.UP,
+                world.getFluidState(pos.up())
+        );
+        int sideMask = 0;
+        for (Direction direction : Direction.Type.HORIZONTAL) {
+            if (FluidRenderer.shouldRenderSide(
+                    world,
+                    pos,
+                    fluid,
+                    state,
+                    direction,
+                    world.getFluidState(pos.offset(direction)))) {
+                sideMask |= 1 << direction.getHorizontal();
+            }
+        }
+        if (!top && sideMask == 0) {
+            return null;
+        }
+
+        Vec3d velocity = fluid.getVelocity(world, pos);
+        return new FluidSurface(
+                pos.getX(),
+                pos.getY(),
+                pos.getZ(),
+                fluidCornerHeight(world, pos, 0, 0),
+                fluidCornerHeight(world, pos, 0, 1),
+                fluidCornerHeight(world, pos, 1, 1),
+                fluidCornerHeight(world, pos, 1, 0),
+                velocity.x,
+                velocity.z,
+                top,
+                sideMask
+        );
+    }
+
+    private static float fluidCornerHeight(
+            World world, BlockPos origin, int cornerX, int cornerZ) {
+        float weightedHeight = 0.0F;
+        float totalWeight = 0.0F;
+        BlockPos.Mutable sample = new BlockPos.Mutable();
+        for (int dx = cornerX - 1; dx <= cornerX; dx++) {
+            for (int dz = cornerZ - 1; dz <= cornerZ; dz++) {
+                sample.set(origin.getX() + dx, origin.getY(), origin.getZ() + dz);
+                BlockState state = world.getBlockState(sample);
+                if (!isReplaceableWater(world, sample, state)) {
+                    continue;
+                }
+                if (isReplaceableWater(world, sample.up(),
+                        world.getBlockState(sample.up()))) {
+                    return 1.0F;
+                }
+                float height = state.getFluidState().getHeight(world, sample);
+                float weight = height >= 0.8F ? 10.0F : 1.0F;
+                weightedHeight += height * weight;
+                totalWeight += weight;
+            }
+        }
+        if (totalWeight <= 0.0F) {
+            return 0.0F;
+        }
+        return weightedHeight / totalWeight;
+    }
+
     private static double facePlane(int x, int y, int z, Box bounds, Direction direction) {
         return switch (direction) {
             case UP -> y + bounds.maxY;
@@ -250,6 +359,290 @@ public final class TerrainFieldOverlayRenderer {
             case WEST -> x + bounds.minX;
             case EAST -> x + bounds.maxX;
         };
+    }
+
+    private static void drawFluidSurface(
+            double centerX, double centerY, double centerZ,
+            MatrixStack.Entry matrices, VertexConsumer vertices,
+            SpriteSet sprites, FluidSurface surface, float radius,
+            double minY, double maxY) {
+        if (surface.top) {
+            drawFluidTop(
+                    centerX, centerY, centerZ,
+                    matrices, vertices, sprites, surface,
+                    radius, minY, maxY
+            );
+        }
+        for (Direction direction : Direction.Type.HORIZONTAL) {
+            if ((surface.sideMask & 1 << direction.getHorizontal()) != 0) {
+                drawFluidSide(
+                        centerX, centerY, centerZ,
+                        matrices, vertices, sprites.fluidFlow,
+                        surface, direction, radius, minY, maxY
+                );
+            }
+        }
+    }
+
+    private static void drawFluidTop(
+            double centerX, double centerY, double centerZ,
+            MatrixStack.Entry matrices, VertexConsumer vertices,
+            SpriteSet sprites, FluidSurface surface, float radius,
+            double minY, double maxY) {
+        double lowest = surface.y + Math.min(
+                Math.min(surface.northWestHeight, surface.southWestHeight),
+                Math.min(surface.southEastHeight, surface.northEastHeight));
+        double highest = surface.y + Math.max(
+                Math.max(surface.northWestHeight, surface.southWestHeight),
+                Math.max(surface.southEastHeight, surface.northEastHeight));
+        if (highest < minY - SURFACE_EPSILON
+                || lowest > maxY + SURFACE_EPSILON) {
+            return;
+        }
+
+        List<TerrainPoint> polygon = clipHorizontalRectangle(
+                centerX,
+                centerZ,
+                surface.x - FLUID_EDGE_OVERLAP,
+                surface.x + 1.0 + FLUID_EDGE_OVERLAP,
+                surface.z - FLUID_EDGE_OVERLAP,
+                surface.z + 1.0 + FLUID_EDGE_OVERLAP,
+                radius
+        );
+        if (polygon.size() < 3) {
+            return;
+        }
+
+        boolean flowing = surface.velocityX * surface.velocityX
+                + surface.velocityZ * surface.velocityZ > 1.0E-6;
+        Sprite sprite = flowing ? sprites.fluidFlow : sprites.fluidStill;
+        TerrainPoint center = polygonCenter(polygon);
+        for (int i = 0; i < polygon.size(); i++) {
+            TerrainPoint first = polygon.get(i);
+            TerrainPoint second = polygon.get((i + 1) % polygon.size());
+            TerrainPoint clockwiseFirst = second;
+            TerrainPoint clockwiseSecond = first;
+            putFluidTopVertex(
+                    centerX, centerY, centerZ,
+                    matrices, vertices, sprite, surface, center, flowing);
+            putFluidTopVertex(
+                    centerX, centerY, centerZ,
+                    matrices, vertices, sprite, surface, clockwiseFirst, flowing);
+            putFluidTopVertex(
+                    centerX, centerY, centerZ,
+                    matrices, vertices, sprite, surface, clockwiseSecond, flowing);
+            putFluidTopVertex(
+                    centerX, centerY, centerZ,
+                    matrices, vertices, sprite, surface, clockwiseSecond, flowing);
+        }
+    }
+
+    private static void putFluidTopVertex(
+            double centerX, double centerY, double centerZ,
+            MatrixStack.Entry matrices, VertexConsumer vertices,
+            Sprite sprite, FluidSurface surface,
+            TerrainPoint point, boolean flowing) {
+        double worldX = point.x + centerX;
+        double worldZ = point.z + centerZ;
+        double u = MathHelper.clamp(worldX - surface.x, 0.0, 1.0);
+        double v = MathHelper.clamp(worldZ - surface.z, 0.0, 1.0);
+        float height = fluidHeightAt(surface, u, v);
+        TextureCoordinates texture = fluidTextureCoordinates(
+                u, v, surface.velocityX, surface.velocityZ, flowing);
+        putFluidVertex(
+                matrices,
+                vertices,
+                sprite,
+                point.x,
+                (float) (surface.y + height - centerY + FLUID_OFFSET),
+                point.z,
+                texture.u,
+                texture.v,
+                Direction.UP
+        );
+    }
+
+    private static float fluidHeightAt(
+            FluidSurface surface, double u, double v) {
+        float north = MathHelper.lerp(
+                (float) u,
+                surface.northWestHeight,
+                surface.northEastHeight
+        );
+        float south = MathHelper.lerp(
+                (float) u,
+                surface.southWestHeight,
+                surface.southEastHeight
+        );
+        return MathHelper.lerp((float) v, north, south);
+    }
+
+    private static TextureCoordinates fluidTextureCoordinates(
+            double u, double v, double velocityX, double velocityZ,
+            boolean flowing) {
+        if (!flowing) {
+            return new TextureCoordinates(u, v);
+        }
+        double angle = Math.atan2(velocityZ, velocityX) - Math.PI * 0.5;
+        double sine = Math.sin(angle) * 0.35;
+        double cosine = Math.cos(angle) * 0.35;
+        double centeredU = u - 0.5;
+        double centeredV = v - 0.5;
+        return new TextureCoordinates(
+                0.5 + centeredU * cosine - centeredV * sine,
+                0.5 + centeredU * sine + centeredV * cosine
+        );
+    }
+
+    private static void drawFluidSide(
+            double centerX, double centerY, double centerZ,
+            MatrixStack.Entry matrices, VertexConsumer vertices,
+            Sprite sprite, FluidSurface surface, Direction direction,
+            float radius, double minY, double maxY) {
+        boolean xAxis = direction.getAxis() == Direction.Axis.Z;
+        double variableStart = xAxis ? surface.x : surface.z;
+        double variableEnd = variableStart + 1.0;
+        double fixed = switch (direction) {
+            case NORTH -> surface.z - FLUID_OFFSET;
+            case SOUTH -> surface.z + 1.0 + FLUID_OFFSET;
+            case WEST -> surface.x - FLUID_OFFSET;
+            case EAST -> surface.x + 1.0 + FLUID_OFFSET;
+            default -> throw new IllegalArgumentException("Vertical fluid side");
+        };
+
+        double fixedCenter = xAxis ? centerZ : centerX;
+        double fixedDistance = fixed - fixedCenter;
+        double radiusSquared = radius * radius;
+        if (fixedDistance * fixedDistance > radiusSquared) {
+            return;
+        }
+        double span = Math.sqrt(Math.max(
+                0.0, radiusSquared - fixedDistance * fixedDistance));
+        double variableCenter = xAxis ? centerX : centerZ;
+        double clippedStart = Math.max(
+                variableStart - FLUID_EDGE_OVERLAP,
+                variableCenter - span);
+        double clippedEnd = Math.min(
+                variableEnd + FLUID_EDGE_OVERLAP,
+                variableCenter + span);
+        if (clippedEnd - clippedStart <= 1.0E-5) {
+            return;
+        }
+
+        double startU = MathHelper.clamp(
+                clippedStart - variableStart, 0.0, 1.0);
+        double endU = MathHelper.clamp(
+                clippedEnd - variableStart, 0.0, 1.0);
+        float startHeight;
+        float endHeight;
+        if (direction == Direction.NORTH) {
+            startHeight = MathHelper.lerp(
+                    (float) startU,
+                    surface.northWestHeight,
+                    surface.northEastHeight);
+            endHeight = MathHelper.lerp(
+                    (float) endU,
+                    surface.northWestHeight,
+                    surface.northEastHeight);
+        } else if (direction == Direction.SOUTH) {
+            startHeight = MathHelper.lerp(
+                    (float) startU,
+                    surface.southWestHeight,
+                    surface.southEastHeight);
+            endHeight = MathHelper.lerp(
+                    (float) endU,
+                    surface.southWestHeight,
+                    surface.southEastHeight);
+        } else if (direction == Direction.WEST) {
+            startHeight = MathHelper.lerp(
+                    (float) startU,
+                    surface.northWestHeight,
+                    surface.southWestHeight);
+            endHeight = MathHelper.lerp(
+                    (float) endU,
+                    surface.northWestHeight,
+                    surface.southWestHeight);
+        } else {
+            startHeight = MathHelper.lerp(
+                    (float) startU,
+                    surface.northEastHeight,
+                    surface.southEastHeight);
+            endHeight = MathHelper.lerp(
+                    (float) endU,
+                    surface.northEastHeight,
+                    surface.southEastHeight);
+        }
+
+        double bottomY = Math.max(surface.y, minY);
+        double startTopY = Math.min(surface.y + startHeight + FLUID_OFFSET, maxY);
+        double endTopY = Math.min(surface.y + endHeight + FLUID_OFFSET, maxY);
+        if (startTopY <= bottomY && endTopY <= bottomY) {
+            return;
+        }
+
+        double x0;
+        double x1;
+        double z0;
+        double z1;
+        if (xAxis) {
+            x0 = clippedStart - centerX;
+            x1 = clippedEnd - centerX;
+            z0 = z1 = fixed - centerZ;
+        } else {
+            x0 = x1 = fixed - centerX;
+            z0 = clippedStart - centerZ;
+            z1 = clippedEnd - centerZ;
+        }
+        float localBottom = (float) (bottomY - centerY);
+        float localStartTop = (float) (startTopY - centerY);
+        float localEndTop = (float) (endTopY - centerY);
+        if (direction == Direction.NORTH || direction == Direction.EAST) {
+            putFluidVertex(
+                    matrices, vertices, sprite,
+                    x0, localBottom, z0,
+                    startU, 1.0, direction);
+            putFluidVertex(
+                    matrices, vertices, sprite,
+                    x0, localStartTop, z0,
+                    startU, 1.0 - startHeight, direction);
+            putFluidVertex(
+                    matrices, vertices, sprite,
+                    x1, localEndTop, z1,
+                    endU, 1.0 - endHeight, direction);
+            putFluidVertex(
+                    matrices, vertices, sprite,
+                    x1, localBottom, z1,
+                    endU, 1.0, direction);
+        } else {
+            putFluidVertex(
+                    matrices, vertices, sprite,
+                    x0, localBottom, z0,
+                    startU, 1.0, direction);
+            putFluidVertex(
+                    matrices, vertices, sprite,
+                    x1, localBottom, z1,
+                    endU, 1.0, direction);
+            putFluidVertex(
+                    matrices, vertices, sprite,
+                    x1, localEndTop, z1,
+                    endU, 1.0 - endHeight, direction);
+            putFluidVertex(
+                    matrices, vertices, sprite,
+                    x0, localStartTop, z0,
+                    startU, 1.0 - startHeight, direction);
+        }
+    }
+
+    private static void putFluidVertex(
+            MatrixStack.Entry matrices, VertexConsumer vertices, Sprite sprite,
+            double x, float y, double z, double u, double v,
+            Direction direction) {
+        vertices.vertex(matrices, (float) x, y, (float) z)
+                .color(255, 255, 255, 255)
+                .texture(sprite.getFrameU((float) u), sprite.getFrameV((float) v))
+                .light(LightmapTextureManager.MAX_LIGHT_COORDINATE)
+                .normal(matrices, direction.getOffsetX(),
+                        direction.getOffsetY(), direction.getOffsetZ());
     }
 
     private static void drawHorizontalFace(
@@ -354,6 +747,11 @@ public final class TerrainFieldOverlayRenderer {
         for (int i = 0; i < polygon.size(); i++) {
             TerrainPoint first = polygon.get(i);
             TerrainPoint second = polygon.get((i + 1) % polygon.size());
+            if (face.direction == Direction.UP) {
+                TerrainPoint swap = first;
+                first = second;
+                second = swap;
+            }
             putHorizontalTextureVertex(centerX, centerZ, matrices, vertices,
                     face, sprite, center, localY, light, palette);
             putHorizontalTextureVertex(centerX, centerZ, matrices, vertices,
@@ -376,6 +774,11 @@ public final class TerrainFieldOverlayRenderer {
         for (int i = 0; i < polygon.size(); i++) {
             TerrainPoint first = polygon.get(i);
             TerrainPoint second = polygon.get((i + 1) % polygon.size());
+            if (face.direction == Direction.UP) {
+                TerrainPoint swap = first;
+                first = second;
+                second = swap;
+            }
             putWashVertex(matrices, vertices, center.x, localY, center.z,
                     light, face.direction, palette);
             putWashVertex(matrices, vertices, first.x, localY, first.z,
@@ -499,18 +902,33 @@ public final class TerrainFieldOverlayRenderer {
         double v0 = MathHelper.clamp(1.0 - (y0 - face.y), 0.0, 1.0);
         double v1 = MathHelper.clamp(1.0 - (y1 - face.y), 0.0, 1.0);
 
-        putTextureVertex(matrices, vertices, sprite,
-                quad.x0, quad.y0, quad.z0, u0, v0,
-                light, face.direction, palette);
-        putTextureVertex(matrices, vertices, sprite,
-                quad.x1, quad.y0, quad.z1, u1, v0,
-                light, face.direction, palette);
-        putTextureVertex(matrices, vertices, sprite,
-                quad.x1, quad.y1, quad.z1, u1, v1,
-                light, face.direction, palette);
-        putTextureVertex(matrices, vertices, sprite,
-                quad.x0, quad.y1, quad.z0, u0, v1,
-                light, face.direction, palette);
+        if (face.direction == Direction.NORTH || face.direction == Direction.EAST) {
+            putTextureVertex(matrices, vertices, sprite,
+                    quad.x0, quad.y0, quad.z0, u0, v0,
+                    light, face.direction, palette);
+            putTextureVertex(matrices, vertices, sprite,
+                    quad.x0, quad.y1, quad.z0, u0, v1,
+                    light, face.direction, palette);
+            putTextureVertex(matrices, vertices, sprite,
+                    quad.x1, quad.y1, quad.z1, u1, v1,
+                    light, face.direction, palette);
+            putTextureVertex(matrices, vertices, sprite,
+                    quad.x1, quad.y0, quad.z1, u1, v0,
+                    light, face.direction, palette);
+        } else {
+            putTextureVertex(matrices, vertices, sprite,
+                    quad.x0, quad.y0, quad.z0, u0, v0,
+                    light, face.direction, palette);
+            putTextureVertex(matrices, vertices, sprite,
+                    quad.x1, quad.y0, quad.z1, u1, v0,
+                    light, face.direction, palette);
+            putTextureVertex(matrices, vertices, sprite,
+                    quad.x1, quad.y1, quad.z1, u1, v1,
+                    light, face.direction, palette);
+            putTextureVertex(matrices, vertices, sprite,
+                    quad.x0, quad.y1, quad.z0, u0, v1,
+                    light, face.direction, palette);
+        }
     }
 
     private static void drawVerticalWashLayer(
@@ -523,14 +941,25 @@ public final class TerrainFieldOverlayRenderer {
                 centerX, centerY, centerZ, face, xAxis,
                 variableStart, variableEnd, y0, y1, normalOffset);
         int light = terrainLight(face, palette);
-        putWashVertex(matrices, vertices, quad.x0, quad.y0, quad.z0,
-                light, face.direction, palette);
-        putWashVertex(matrices, vertices, quad.x1, quad.y0, quad.z1,
-                light, face.direction, palette);
-        putWashVertex(matrices, vertices, quad.x1, quad.y1, quad.z1,
-                light, face.direction, palette);
-        putWashVertex(matrices, vertices, quad.x0, quad.y1, quad.z0,
-                light, face.direction, palette);
+        if (face.direction == Direction.NORTH || face.direction == Direction.EAST) {
+            putWashVertex(matrices, vertices, quad.x0, quad.y0, quad.z0,
+                    light, face.direction, palette);
+            putWashVertex(matrices, vertices, quad.x0, quad.y1, quad.z0,
+                    light, face.direction, palette);
+            putWashVertex(matrices, vertices, quad.x1, quad.y1, quad.z1,
+                    light, face.direction, palette);
+            putWashVertex(matrices, vertices, quad.x1, quad.y0, quad.z1,
+                    light, face.direction, palette);
+        } else {
+            putWashVertex(matrices, vertices, quad.x0, quad.y0, quad.z0,
+                    light, face.direction, palette);
+            putWashVertex(matrices, vertices, quad.x1, quad.y0, quad.z1,
+                    light, face.direction, palette);
+            putWashVertex(matrices, vertices, quad.x1, quad.y1, quad.z1,
+                    light, face.direction, palette);
+            putWashVertex(matrices, vertices, quad.x0, quad.y1, quad.z0,
+                    light, face.direction, palette);
+        }
     }
 
     private static VerticalQuad verticalQuad(
@@ -657,7 +1086,6 @@ public final class TerrainFieldOverlayRenderer {
         vertices.vertex(matrices, (float) x, y, (float) z)
                 .color(palette.terrainRed, palette.terrainGreen, palette.terrainBlue, 255)
                 .texture(sprite.getFrameU((float) u), sprite.getFrameV((float) v))
-                .overlay(OverlayTexture.DEFAULT_UV)
                 .light(light)
                 .normal(matrices, direction.getOffsetX(),
                         direction.getOffsetY(), direction.getOffsetZ());
@@ -678,6 +1106,9 @@ public final class TerrainFieldOverlayRenderer {
     }
 
     private static int terrainLight(TerrainFace face, Palette palette) {
+        if (palette.variants.get(face.variant).emissive) {
+            return LightmapTextureManager.MAX_LIGHT_COORDINATE;
+        }
         int light = WorldRenderer.getLightmapCoordinates(
                 face.world, face.state, face.blockPos);
         int blockLight = Math.max(
@@ -710,12 +1141,27 @@ public final class TerrainFieldOverlayRenderer {
         private final int lightFloor;
         private final int refreshTicks;
         private final int movementMargin;
+        private final FluidReplacement fluidReplacement;
         private final int totalWeight;
 
         private Palette(List<Variant> variants,
                         int terrainRed, int terrainGreen, int terrainBlue,
                         int washRed, int washGreen, int washBlue, int washAlpha,
                         int lightFloor, int refreshTicks, int movementMargin) {
+            this(
+                    variants,
+                    terrainRed, terrainGreen, terrainBlue,
+                    washRed, washGreen, washBlue, washAlpha,
+                    lightFloor, refreshTicks, movementMargin,
+                    null
+            );
+        }
+
+        private Palette(List<Variant> variants,
+                        int terrainRed, int terrainGreen, int terrainBlue,
+                        int washRed, int washGreen, int washBlue, int washAlpha,
+                        int lightFloor, int refreshTicks, int movementMargin,
+                        FluidReplacement fluidReplacement) {
             this.variants = variants;
             this.terrainRed = terrainRed;
             this.terrainGreen = terrainGreen;
@@ -727,6 +1173,7 @@ public final class TerrainFieldOverlayRenderer {
             this.lightFloor = lightFloor;
             this.refreshTicks = Math.max(1, refreshTicks);
             this.movementMargin = Math.max(0, movementMargin);
+            this.fluidReplacement = fluidReplacement;
             this.totalWeight = variants.stream().mapToInt(Variant::weight).sum();
         }
 
@@ -744,14 +1191,30 @@ public final class TerrainFieldOverlayRenderer {
 
     private record Variant(int weight, Identifier topFoundation,
                            Identifier topDetail, Identifier sideFoundation,
-                           Identifier sideDetail) {
+                           Identifier sideDetail, boolean emissive) {
+        private Variant(int weight, Identifier topFoundation,
+                        Identifier topDetail, Identifier sideFoundation,
+                        Identifier sideDetail) {
+            this(
+                    weight,
+                    topFoundation,
+                    topDetail,
+                    sideFoundation,
+                    sideDetail,
+                    false
+            );
+        }
+    }
+
+    private record FluidReplacement(Identifier still, Identifier flow) {
     }
 
     private record SpriteVariant(Sprite topFoundation, Sprite topDetail,
                                  Sprite sideFoundation, Sprite sideDetail) {
     }
 
-    private record SpriteSet(List<SpriteVariant> variants) {
+    private record SpriteSet(List<SpriteVariant> variants,
+                             Sprite fluidStill, Sprite fluidFlow) {
         private static SpriteSet load(Palette palette) {
             BakedModelManager models = MinecraftClient.getInstance().getBakedModelManager();
             SpriteAtlasTexture atlas = models.getAtlas(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE);
@@ -764,7 +1227,13 @@ public final class TerrainFieldOverlayRenderer {
                         variant.sideDetail == null ? null : atlas.getSprite(variant.sideDetail)
                 ));
             }
-            return new SpriteSet(sprites);
+            Sprite fluidStill = palette.fluidReplacement == null
+                    ? null
+                    : atlas.getSprite(palette.fluidReplacement.still);
+            Sprite fluidFlow = palette.fluidReplacement == null
+                    ? null
+                    : atlas.getSprite(palette.fluidReplacement.flow);
+            return new SpriteSet(sprites, fluidStill, fluidFlow);
         }
 
         private Sprite topFoundation(int index) {
@@ -812,6 +1281,39 @@ public final class TerrainFieldOverlayRenderer {
         }
     }
 
+    private static final class FluidSurface {
+        private final int x;
+        private final int y;
+        private final int z;
+        private final float northWestHeight;
+        private final float southWestHeight;
+        private final float southEastHeight;
+        private final float northEastHeight;
+        private final double velocityX;
+        private final double velocityZ;
+        private final boolean top;
+        private final int sideMask;
+
+        private FluidSurface(
+                int x, int y, int z,
+                float northWestHeight, float southWestHeight,
+                float southEastHeight, float northEastHeight,
+                double velocityX, double velocityZ,
+                boolean top, int sideMask) {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+            this.northWestHeight = northWestHeight;
+            this.southWestHeight = southWestHeight;
+            this.southEastHeight = southEastHeight;
+            this.northEastHeight = northEastHeight;
+            this.velocityX = velocityX;
+            this.velocityZ = velocityZ;
+            this.top = top;
+            this.sideMask = sideMask;
+        }
+    }
+
     private static final class TerrainCache {
         private final World world;
         private final int centerX;
@@ -823,12 +1325,14 @@ public final class TerrainFieldOverlayRenderer {
         private final long lastRefreshTick;
         private final List<TerrainFace> faces;
         private final Map<FaceKey, TerrainFace> facesByKey;
+        private final List<FluidSurface> fluidSurfaces;
         private long lastSeenTick;
 
         private TerrainCache(World world, int centerX, int centerY, int centerZ,
                              int scanRadius, float verticalRange, Palette palette,
                              long now, List<TerrainFace> faces,
-                             Map<FaceKey, TerrainFace> facesByKey) {
+                             Map<FaceKey, TerrainFace> facesByKey,
+                             List<FluidSurface> fluidSurfaces) {
             this.world = world;
             this.centerX = centerX;
             this.centerY = centerY;
@@ -840,6 +1344,7 @@ public final class TerrainFieldOverlayRenderer {
             this.lastSeenTick = now;
             this.faces = faces;
             this.facesByKey = facesByKey;
+            this.fluidSurfaces = fluidSurfaces;
         }
     }
 

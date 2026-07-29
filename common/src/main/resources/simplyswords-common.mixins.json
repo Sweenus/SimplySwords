@@ -15,6 +15,7 @@
     "client.compat.SpellEngineSpellHotbarMixin"
   ],
   "mixins": [
+    "EntityMixin",
     "LivingEntityMixin",
     "ServerPlayerEntityMixin",
     "ServerPlayerInteractionManagerMixin",

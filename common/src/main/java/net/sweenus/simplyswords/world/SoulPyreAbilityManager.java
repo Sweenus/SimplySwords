@@ -1,18 +1,24 @@
 package net.sweenus.simplyswords.world;
 
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.item.ItemStack;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.tag.FluidTags;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
+import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.SoulPyreVisualEntity;
 import net.sweenus.simplyswords.entity.SoulPyreWispEntity;
@@ -35,12 +41,15 @@ public final class SoulPyreAbilityManager {
     private static final String WISP_VISUAL_TAG = "simplyswords_soul_pyre_wisp";
     private static final int RADIUS_GROWTH_TICKS = 10;
     private static final int WISP_LIFETIME = 30;
+    private static final int TRANSMUTED_LAVA_DAMAGE_INTERVAL = 10;
     private static final double WISP_SPEED = 0.78;
     private static final double WISP_IMPACT_DISTANCE = 0.72;
     private static final float[] RADIUS_MILESTONES = {0.25F, 0.50F, 0.75F, 1.0F};
 
     private static final Map<ServerWorld, Map<UUID, ActivePyre>> ACTIVE = new HashMap<>();
     private static final Map<ServerWorld, List<ActiveWisp>> WISPS = new HashMap<>();
+    private static final Map<ServerWorld, Map<UUID, Long>> LAVA_DAMAGE_COOLDOWNS =
+            new HashMap<>();
 
     private SoulPyreAbilityManager() {
     }
@@ -55,6 +64,60 @@ public final class SoulPyreAbilityManager {
     public static boolean hasActiveForActor(ServerWorld world, UUID actorId) {
         Map<UUID, ActivePyre> active = ACTIVE.get(world);
         return active != null && actorId != null && active.containsKey(actorId);
+    }
+
+    public static boolean isInTransmutedLava(Entity entity) {
+        return findTransmutedLavaContact(entity) != null;
+    }
+
+    public static boolean handleTransmutedLavaContact(Entity entity) {
+        TransmutedLavaContact contact = findTransmutedLavaContact(entity);
+        if (contact == null) {
+            return false;
+        }
+
+        LivingEntity target = contact.target;
+        if (target.isFireImmune()) {
+            return true;
+        }
+
+        target.setOnFireFor(15.0F);
+        long now = contact.world.getTime();
+        Map<UUID, Long> cooldowns = LAVA_DAMAGE_COOLDOWNS.computeIfAbsent(
+                contact.world,
+                ignored -> new HashMap<>()
+        );
+        if (target.timeUntilRegen > TRANSMUTED_LAVA_DAMAGE_INTERVAL
+                || now < cooldowns.getOrDefault(target.getUuid(), Long.MIN_VALUE)) {
+            return true;
+        }
+        cooldowns.put(
+                target.getUuid(),
+                now + TRANSMUTED_LAVA_DAMAGE_INTERVAL
+        );
+
+        LivingEntity attributedOwner = contact.sourceOwner == null
+                ? contact.actor
+                : contact.sourceOwner;
+        DamageSource source = new DamageSource(
+                contact.world.getRegistryManager()
+                        .get(RegistryKeys.DAMAGE_TYPE)
+                        .entryOf(DamageTypes.LAVA),
+                contact.actor,
+                attributedOwner
+        );
+        boolean[] damaged = {false};
+        WeaponImplicitRegistry.runSuppressed(
+                () -> damaged[0] = target.damage(source, 4.0F)
+        );
+        if (damaged[0]) {
+            target.playSound(
+                    SoundEvents.ENTITY_GENERIC_BURN,
+                    0.4F,
+                    2.0F + target.getRandom().nextFloat() * 0.4F
+            );
+        }
+        return true;
     }
 
     public static boolean canActivate(WeaponAbilityContext context) {
@@ -152,8 +215,21 @@ public final class SoulPyreAbilityManager {
     }
 
     public static void tick(ServerWorld world) {
+        tickLavaDamageCooldowns(world);
         tickPyres(world);
         tickWisps(world);
+    }
+
+    private static void tickLavaDamageCooldowns(ServerWorld world) {
+        Map<UUID, Long> cooldowns = LAVA_DAMAGE_COOLDOWNS.get(world);
+        if (cooldowns == null) {
+            return;
+        }
+        long now = world.getTime();
+        cooldowns.entrySet().removeIf(entry -> entry.getValue() <= now);
+        if (cooldowns.isEmpty()) {
+            LAVA_DAMAGE_COOLDOWNS.remove(world);
+        }
     }
 
     public static void onDeath(LivingEntity target, DamageSource source) {
@@ -738,6 +814,85 @@ public final class SoulPyreAbilityManager {
                 <= verticalRange;
     }
 
+    private static TransmutedLavaContact findTransmutedLavaContact(Entity entity) {
+        if (!(entity instanceof LivingEntity target)
+                || !(entity.getWorld() instanceof ServerWorld world)
+                || !target.isAlive()
+                || !target.isTouchingWater()
+                || !touchesReplaceableWater(world, target)) {
+            return null;
+        }
+
+        Map<UUID, ActivePyre> active = ACTIVE.get(world);
+        if (active == null || active.isEmpty()) {
+            return null;
+        }
+
+        TransmutedLavaContact selected = null;
+        double bestDistance = Double.MAX_VALUE;
+        UUID bestActorId = null;
+        for (ActivePyre pyre : active.values()) {
+            if (pyre.currentRadius <= 0.05F) {
+                continue;
+            }
+            LivingEntity actor = resolveLiving(world, pyre.actorId);
+            LivingEntity sourceOwner = resolveLiving(world, pyre.sourceOwnerId);
+            if (actor == null
+                    || !actor.isAlive()
+                    || !isEligibleTarget(actor, sourceOwner, target)
+                    || !isInsideField(actor, target, pyre.currentRadius)) {
+                continue;
+            }
+
+            double distance = actor.squaredDistanceTo(target);
+            if (selected == null
+                    || distance < bestDistance - 1.0E-6
+                    || Math.abs(distance - bestDistance) <= 1.0E-6
+                    && actor.getUuid().compareTo(bestActorId) < 0) {
+                selected = new TransmutedLavaContact(
+                        world,
+                        target,
+                        actor,
+                        sourceOwner
+                );
+                bestDistance = distance;
+                bestActorId = actor.getUuid();
+            }
+        }
+        return selected;
+    }
+
+    private static boolean touchesReplaceableWater(
+            ServerWorld world, LivingEntity target) {
+        Box bounds = target.getBoundingBox().contract(0.001);
+        int minX = MathHelper.floor(bounds.minX);
+        int maxX = MathHelper.floor(bounds.maxX);
+        int minY = MathHelper.floor(bounds.minY);
+        int maxY = MathHelper.floor(bounds.maxY);
+        int minZ = MathHelper.floor(bounds.minZ);
+        int maxZ = MathHelper.floor(bounds.maxZ);
+        BlockPos.Mutable cursor = new BlockPos.Mutable();
+
+        for (int x = minX; x <= maxX; x++) {
+            for (int y = minY; y <= maxY; y++) {
+                for (int z = minZ; z <= maxZ; z++) {
+                    cursor.set(x, y, z);
+                    BlockState state = world.getBlockState(cursor);
+                    if (!state.getFluidState().isIn(FluidTags.WATER)
+                            || !state.getCollisionShape(world, cursor).isEmpty()) {
+                        continue;
+                    }
+                    double fluidTop = y
+                            + state.getFluidState().getHeight(world, cursor);
+                    if (bounds.maxY > y && bounds.minY < fluidTop) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
     private static void pullTarget(LivingEntity actor, LivingEntity target) {
         Vec3d direction = actor.getPos()
                 .add(0.0, actor.getHeight() * 0.45, 0.0)
@@ -1003,5 +1158,12 @@ public final class SoulPyreAbilityManager {
             this.searchRadius = searchRadius;
             this.expiresAt = expiresAt;
         }
+    }
+
+    private record TransmutedLavaContact(
+            ServerWorld world,
+            LivingEntity target,
+            LivingEntity actor,
+            LivingEntity sourceOwner) {
     }
 }
