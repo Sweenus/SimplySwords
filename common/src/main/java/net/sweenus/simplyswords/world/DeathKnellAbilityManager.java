@@ -574,7 +574,7 @@ public final class DeathKnellAbilityManager {
     private static void spawnFeverGainEffects(ServerWorld world, LivingEntity target,
                                                int stacks, int threshold, boolean converted) {
         Vec3d center = target.getPos().add(0.0, target.getHeight() * 0.55, 0.0);
-        int count = 2 + Math.min(7, stacks);
+        int count = 1 + Math.min(3, (stacks + 1) / 2);
         world.spawnParticles(
                 PLAGUE_DUST,
                 center.x,
@@ -591,10 +591,10 @@ public final class DeathKnellAbilityManager {
                 center.x,
                 center.y,
                 center.z,
-                converted ? 7 : 2,
-                target.getWidth() * 0.3,
-                target.getHeight() * 0.2,
-                target.getWidth() * 0.3,
+                converted ? 4 : 1,
+                target.getWidth() * 0.22,
+                target.getHeight() * 0.16,
+                target.getWidth() * 0.22,
                 0.015
         );
         float progress = stacks / (float) Math.max(1, threshold);

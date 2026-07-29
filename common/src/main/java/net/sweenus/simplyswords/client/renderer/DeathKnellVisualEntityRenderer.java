@@ -22,6 +22,8 @@ public class DeathKnellVisualEntityRenderer extends EntityRenderer<DeathKnellVis
 
     private static final Identifier WHITE_TEXTURE =
             Identifier.ofVanilla("textures/misc/white.png");
+    private static final Identifier[] SOUL_TEXTURES = particleFrames("soul", 11);
+    private static final Identifier[] SMOKE_TEXTURES = particleFrames("big_smoke", 12);
     private static final int BELL_SEGMENTS = 18;
     private static final int RING_SEGMENTS = 64;
 
@@ -55,95 +57,72 @@ public class DeathKnellVisualEntityRenderer extends EntityRenderer<DeathKnellVis
         float targetHeight = target instanceof LivingEntity living ? living.getHeight() : 1.8F;
         float targetWidth = target instanceof LivingEntity living ? living.getWidth() : 0.6F;
         float time = visual.age + tickDelta;
-        VertexConsumer dark = vertexConsumers.getBuffer(RenderLayer.getDebugQuads());
-        VertexConsumer glow = vertexConsumers.getBuffer(
-                RenderLayer.getEntityTranslucentEmissive(WHITE_TEXTURE));
 
         if (visual.getMode() == DeathKnellVisualEntity.MODE_FEVER) {
-            renderFever(visual, matrices.peek().getPositionMatrix(), dark, glow,
-                    relativeTarget, targetHeight, targetWidth, time);
+            renderFever(visual, matrices, vertexConsumers,
+                    relativeTarget, targetHeight, targetWidth, time, light);
         } else {
-            renderToll(visual, matrices, dark, glow,
-                    relativeTarget, targetHeight, targetWidth, time);
+            VertexConsumer dark = vertexConsumers.getBuffer(RenderLayer.getDebugQuads());
+            VertexConsumer glow = vertexConsumers.getBuffer(
+                    RenderLayer.getEntityTranslucentEmissive(WHITE_TEXTURE));
+            renderToll(visual, matrices, vertexConsumers, dark, glow,
+                    relativeTarget, targetHeight, targetWidth, time, light);
         }
         super.render(visual, yaw, tickDelta, matrices, vertexConsumers, light);
     }
 
-    private static void renderFever(DeathKnellVisualEntity visual, Matrix4f matrix,
-                                    VertexConsumer dark, VertexConsumer glow,
-                                    Vec3d target, float targetHeight, float targetWidth,
-                                    float time) {
+    private void renderFever(DeathKnellVisualEntity visual, MatrixStack matrices,
+                             VertexConsumerProvider vertexConsumers,
+                             Vec3d target, float targetHeight, float targetWidth,
+                             float time, int light) {
         int maximum = Math.max(1, visual.getMaxStacks());
         int stacks = Math.clamp(visual.getStacks(), 0, maximum);
+        if (stacks <= 0) {
+            return;
+        }
         float progress = stacks / (float) maximum;
-        float bodyRadius = Math.max(0.5F, targetWidth * 0.82F);
-        Vec3d bodyCenter = target.add(0.0, targetHeight * 0.58, 0.0);
+        float bodyRadius = MathHelper.clamp(targetWidth * 0.88F, 0.46F, 1.55F);
+        float circleRadius = Math.max(0.5F, targetWidth * 0.82F);
         float phase = visual.getSeed() * 0.017F;
 
+        VertexConsumer dark = vertexConsumers.getBuffer(RenderLayer.getDebugQuads());
+        VertexConsumer glow = vertexConsumers.getBuffer(
+                RenderLayer.getEntityTranslucentEmissive(WHITE_TEXTURE));
         drawHorizontalRing(
                 dark,
                 glow,
-                matrix,
+                matrices.peek().getPositionMatrix(),
                 target.add(0.0, 0.055, 0.0),
-                bodyRadius * (1.0F + progress * 0.32F),
+                circleRadius * (1.0F + progress * 0.32F),
                 0.025F + progress * 0.018F,
                 phase + time * 0.018F,
                 20, 33, 25, 120 + (int) (progress * 65),
                 89, 240, 72, 90 + (int) (progress * 115)
         );
 
-        for (int i = 0; i < maximum; i++) {
-            boolean active = i < stacks;
-            float angle = phase + time * (0.045F + progress * 0.035F)
-                    + MathHelper.TAU * i / maximum;
-            float verticalWave = MathHelper.sin(time * 0.16F + i * 1.73F) * 0.12F;
-            float radius = bodyRadius * (0.9F + 0.12F * MathHelper.sin(time * 0.08F + i));
-            Vec3d mote = bodyCenter.add(
-                    MathHelper.cos(angle) * radius,
-                    verticalWave + (i % 2 == 0 ? 0.12 : -0.08),
-                    MathHelper.sin(angle) * radius
+        for (int i = 0; i < stacks; i++) {
+            renderPestilentWisp(
+                    visual,
+                    matrices,
+                    vertexConsumers,
+                    target,
+                    targetHeight,
+                    bodyRadius,
+                    stacks,
+                    i,
+                    progress,
+                    phase,
+                    time,
+                    light
             );
-            float size = active
-                    ? 0.075F + progress * 0.025F
-                    : 0.045F;
-            drawCube(dark, matrix, mote, size * 1.45F,
-                    active ? 12 : 15, active ? 25 : 20, active ? 17 : 18,
-                    active ? 190 : 80, false);
-            if (active) {
-                drawCube(glow, matrix, mote, size,
-                        105 + (int) (progress * 65),
-                        255,
-                        78 + (int) (progress * 42),
-                        185 + (int) (progress * 55), true);
-            }
-        }
-
-        int wispCount = 3 + Math.min(4, stacks);
-        for (int i = 0; i < wispCount; i++) {
-            float angle = phase + i * 2.14F + time * (0.022F + i * 0.002F);
-            float startY = targetHeight * (0.08F + (i % 3) * 0.19F);
-            float endY = Math.min(targetHeight * 0.92F, startY + 0.42F + progress * 0.28F);
-            Vec3d start = target.add(
-                    MathHelper.cos(angle) * bodyRadius * 0.72F,
-                    startY,
-                    MathHelper.sin(angle) * bodyRadius * 0.72F
-            );
-            Vec3d end = target.add(
-                    MathHelper.cos(angle + 0.42F) * bodyRadius * 0.9F,
-                    endY,
-                    MathHelper.sin(angle + 0.42F) * bodyRadius * 0.9F
-            );
-            drawCrossRibbon(dark, matrix, start, end, 0.025F + progress * 0.02F,
-                    11, 25, 18, 55 + (int) (progress * 75), false);
-            drawCrossRibbon(glow, matrix, start, end, 0.009F + progress * 0.006F,
-                    52, 192, 88, 45 + (int) (progress * 75), true);
         }
     }
 
-    private static void renderToll(DeathKnellVisualEntity visual, MatrixStack matrices,
-                                   VertexConsumer dark, VertexConsumer glow,
-                                   Vec3d target, float targetHeight, float targetWidth,
-                                   float time) {
+    private void renderToll(DeathKnellVisualEntity visual, MatrixStack matrices,
+                            VertexConsumerProvider vertexConsumers,
+                            VertexConsumer dark, VertexConsumer glow,
+                            Vec3d target, float targetHeight, float targetWidth,
+                            float time, int light) {
         float impactAge = Math.max(1.0F, visual.getImpactAge());
         float endAge = Math.max(impactAge + 1.0F, visual.getEndAge());
         float formation = easeOutBack(MathHelper.clamp(time / impactAge, 0.0F, 1.0F));
@@ -156,8 +135,8 @@ public class DeathKnellVisualEntityRenderer extends EntityRenderer<DeathKnellVis
                 0.0
         );
 
-        renderFormationMotes(visual, matrixOf(matrices), glow, target, bellCenter,
-                time, formation, fade);
+        renderFormationMotes(visual, matrices, vertexConsumers, target, bellCenter,
+                time, formation, fade, light);
 
         matrices.push();
         matrices.translate(bellCenter.x, bellCenter.y, bellCenter.z);
@@ -293,11 +272,11 @@ public class DeathKnellVisualEntityRenderer extends EntityRenderer<DeathKnellVis
         }
     }
 
-    private static void renderFormationMotes(DeathKnellVisualEntity visual, Matrix4f matrix,
-                                             VertexConsumer glow, Vec3d target,
-                                             Vec3d bellCenter, float time,
-                                             float formation, float fade) {
-        int count = 12;
+    private void renderFormationMotes(DeathKnellVisualEntity visual, MatrixStack matrices,
+                                      VertexConsumerProvider vertexConsumers,
+                                      Vec3d target, Vec3d bellCenter, float time,
+                                      float formation, float fade, int light) {
+        int count = 10;
         for (int i = 0; i < count; i++) {
             float offset = i / (float) count;
             float angle = visual.getSeed() * 0.013F + i * 2.399F + time * 0.10F;
@@ -314,18 +293,153 @@ public class DeathKnellVisualEntityRenderer extends EntityRenderer<DeathKnellVis
                     MathHelper.sin(angle + offset) * (0.45F + offset * 0.7F)
             );
             Vec3d point = origin.lerp(destination, formation);
-            drawCube(
-                    glow,
-                    matrix,
+            int soulFrame = Math.floorMod((int) (time * 0.72F) + i * 2, SOUL_TEXTURES.length);
+            int smokeFrame = Math.floorMod((int) (time * 0.48F) + i * 3, SMOKE_TEXTURES.length);
+            renderWispBillboard(
+                    matrices,
+                    vertexConsumers,
                     point,
-                    0.028F + (i % 3) * 0.007F,
-                    81 + (i % 2) * 40,
-                    255,
-                    69 + (i % 3) * 19,
-                    (int) (175 * fade),
-                    true
+                    0.11F + (i % 3) * 0.012F,
+                    angle * (180.0F / MathHelper.PI),
+                    SOUL_TEXTURES[soulFrame],
+                    SMOKE_TEXTURES[smokeFrame],
+                    (int) (145 * fade),
+                    (int) (215 * fade),
+                    0.84F,
+                    light
             );
         }
+    }
+
+    private void renderPestilentWisp(DeathKnellVisualEntity visual,
+                                     MatrixStack matrices,
+                                     VertexConsumerProvider vertexConsumers,
+                                     Vec3d target, float targetHeight, float bodyRadius,
+                                     int stackCount, int stackIndex, float progress,
+                                     float phase, float time, int light) {
+        float speed = 0.035F + progress * 0.050F;
+        float trailSpacing = 1.45F + progress * 0.65F;
+        float baseSize = MathHelper.clamp(
+                0.20F + progress * 0.055F + bodyRadius * 0.025F,
+                0.20F,
+                0.31F
+        );
+
+        for (int trail = 3; trail >= 0; trail--) {
+            float sampleTime = time - trail * trailSpacing;
+            Vec3d point = feverWispPosition(
+                    visual,
+                    target,
+                    targetHeight,
+                    bodyRadius,
+                    stackCount,
+                    stackIndex,
+                    progress,
+                    phase,
+                    sampleTime,
+                    speed
+            );
+            float trailFade = trail == 0
+                    ? 1.0F
+                    : (1.0F - trail / 4.2F) * (0.42F + progress * 0.18F);
+            float size = baseSize * (1.0F - trail * 0.105F);
+            int soulFrame = Math.floorMod(
+                    (int) (sampleTime * 0.70F) + stackIndex * 3,
+                    SOUL_TEXTURES.length
+            );
+            int smokeFrame = Math.floorMod(
+                    (int) (sampleTime * 0.48F) + stackIndex * 5,
+                    SMOKE_TEXTURES.length
+            );
+            float pulse = 0.92F
+                    + MathHelper.sin(sampleTime * 0.22F + stackIndex * 1.91F) * 0.08F;
+            renderWispBillboard(
+                    matrices,
+                    vertexConsumers,
+                    point,
+                    size * pulse,
+                    -sampleTime * (2.8F + progress * 2.1F) + stackIndex * 37.0F,
+                    SOUL_TEXTURES[soulFrame],
+                    SMOKE_TEXTURES[smokeFrame],
+                    Math.max(1, (int) ((trail == 0 ? 178 : 78) * trailFade)),
+                    trail == 0 ? 230 : Math.max(1, (int) (82 * trailFade)),
+                    trail == 0 ? 1.0F : 0.58F,
+                    light
+            );
+        }
+    }
+
+    private static Vec3d feverWispPosition(DeathKnellVisualEntity visual,
+                                           Vec3d target, float targetHeight, float bodyRadius,
+                                           int stackCount, int stackIndex, float progress,
+                                           float phase, float sampleTime, float speed) {
+        float separation = MathHelper.TAU * stackIndex / Math.max(1, stackCount);
+        float angle = phase + separation + sampleTime * speed;
+        float heightSeed = Math.floorMod(
+                visual.getSeed() + stackIndex * 41,
+                97
+        ) / 96.0F;
+        float baseHeight = targetHeight * MathHelper.lerp(heightSeed, 0.30F, 0.72F);
+        float bob = MathHelper.sin(sampleTime * 0.16F + stackIndex * 1.73F)
+                * MathHelper.clamp(targetHeight * 0.065F, 0.07F, 0.18F);
+        float agitation = Math.max(0.0F, progress - 0.55F) / 0.45F;
+        float dartWave = Math.max(
+                0.0F,
+                MathHelper.sin(sampleTime * 0.24F + stackIndex * 2.37F)
+        );
+        float inwardDart = (float) Math.pow(dartWave, 7.0) * agitation * 0.30F;
+        float radiusPulse = 1.0F
+                + MathHelper.sin(sampleTime * 0.075F + stackIndex) * 0.10F
+                - inwardDart;
+        return target.add(
+                MathHelper.cos(angle) * bodyRadius * radiusPulse,
+                baseHeight + bob + inwardDart * targetHeight * 0.18F,
+                MathHelper.sin(angle) * bodyRadius * radiusPulse
+        );
+    }
+
+    private void renderWispBillboard(MatrixStack matrices,
+                                     VertexConsumerProvider vertexConsumers,
+                                     Vec3d position, float size, float rollDegrees,
+                                     Identifier soulTexture, Identifier smokeTexture,
+                                     int smokeAlpha, int coreAlpha,
+                                     float coreScale, int light) {
+        matrices.push();
+        matrices.translate(position.x, position.y, position.z);
+        matrices.multiply(this.dispatcher.getRotation());
+        matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(rollDegrees));
+        Matrix4f matrix = matrices.peek().getPositionMatrix();
+
+        VertexConsumer smoke = vertexConsumers.getBuffer(
+                RenderLayer.getEntityTranslucent(smokeTexture));
+        drawSpriteQuad(
+                smoke,
+                matrix,
+                size * 0.82F,
+                size * 1.22F,
+                0.0F,
+                30,
+                92,
+                58,
+                smokeAlpha,
+                light
+        );
+
+        VertexConsumer core = vertexConsumers.getBuffer(
+                RenderLayer.getEntityTranslucentEmissive(soulTexture));
+        drawSpriteQuad(
+                core,
+                matrix,
+                size * 0.52F * coreScale,
+                size * 0.88F * coreScale,
+                0.006F,
+                142,
+                255,
+                108,
+                coreAlpha,
+                LightmapTextureManager.MAX_LIGHT_COORDINATE
+        );
+        matrices.pop();
     }
 
     private static float radiusAtBellY(float y) {
@@ -484,6 +598,60 @@ public class DeathKnellVisualEntityRenderer extends EntityRenderer<DeathKnellVis
         } else {
             vertex.light(LightmapTextureManager.MAX_LIGHT_COORDINATE);
         }
+    }
+
+    private static void drawSpriteQuad(VertexConsumer vertices, Matrix4f matrix,
+                                       float halfWidth, float halfHeight, float z,
+                                       int red, int green, int blue, int alpha,
+                                       int light) {
+        putTexturedVertex(vertices, matrix, -halfWidth, -halfHeight, z,
+                0.0F, 1.0F, red, green, blue, alpha, light);
+        putTexturedVertex(vertices, matrix, halfWidth, -halfHeight, z,
+                1.0F, 1.0F, red, green, blue, alpha, light);
+        putTexturedVertex(vertices, matrix, halfWidth, halfHeight, z,
+                1.0F, 0.0F, red, green, blue, alpha, light);
+        putTexturedVertex(vertices, matrix, -halfWidth, halfHeight, z,
+                0.0F, 0.0F, red, green, blue, alpha, light);
+    }
+
+    private static void putTexturedVertex(VertexConsumer vertices, Matrix4f matrix,
+                                          Vec3d position, float u, float v,
+                                          int red, int green, int blue, int alpha,
+                                          int light) {
+        putTexturedVertex(
+                vertices,
+                matrix,
+                (float) position.x,
+                (float) position.y,
+                (float) position.z,
+                u,
+                v,
+                red,
+                green,
+                blue,
+                alpha,
+                light
+        );
+    }
+
+    private static void putTexturedVertex(VertexConsumer vertices, Matrix4f matrix,
+                                          float x, float y, float z, float u, float v,
+                                          int red, int green, int blue, int alpha,
+                                          int light) {
+        vertices.vertex(matrix, x, y, z)
+                .color(red, green, blue, alpha)
+                .texture(u, v)
+                .overlay(OverlayTexture.DEFAULT_UV)
+                .light(light)
+                .normal(0.0F, 1.0F, 0.0F);
+    }
+
+    private static Identifier[] particleFrames(String name, int count) {
+        Identifier[] frames = new Identifier[Math.max(1, count)];
+        for (int i = 0; i < frames.length; i++) {
+            frames[i] = Identifier.ofVanilla("textures/particle/" + name + "_" + i + ".png");
+        }
+        return frames;
     }
 
     private static Matrix4f matrixOf(MatrixStack matrices) {
