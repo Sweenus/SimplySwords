@@ -664,7 +664,7 @@
   "item.simplyswords.magispearsworditem.tooltip5": "Throw the Magispear and perform a forward leap, followed by a slam attack, damaging nearby enemies.",
   "item.simplyswords.magispearsworditem.tooltip9": "You are immune while leaping.",
   "item.simplyswords.caelestissworditem.tooltip1": "Unique Effect: Astral Breach",
-  "item.simplyswords.caelestissworditem.tooltip2": "Tear open a fixed breach into another dimension, summoning corrupted creatures that fight for you.",
+  "item.simplyswords.caelestissworditem.tooltip2": "Tear open a breach into another dimension, summoning corrupted creatures that fight for you.",
   "item.simplyswords.caelestissworditem.tooltip5": "The breach lasts %1$ds and expands to a %2$d block radius.",
   "item.simplyswords.caelestissworditem.tooltip8": "It collapses over its final %1$ds, pulling the summons back to their dimension. Each breach has a %2$d%% chance to release an Unbound creature that hunts you.",
   "item.simplyswords.wraithfangsworditem.tooltip1": "Unique Effect: Spectral Leap",
