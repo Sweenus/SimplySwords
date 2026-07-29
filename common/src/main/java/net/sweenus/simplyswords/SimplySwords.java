@@ -201,6 +201,8 @@ public class SimplySwords {
             EntityRendererRegistry.register(EntityRegistry.LIVYATAN_WAVE_VISUAL, LivyatanWaveVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.MOLTEN_RUPTURE_VISUAL, MoltenRuptureVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.CAELESTIS_BREACH_VISUAL, CaelestisBreachVisualEntityRenderer::new);
+            EntityRendererRegistry.register(EntityRegistry.SOUL_PYRE_VISUAL, SoulPyreVisualEntityRenderer::new);
+            EntityRendererRegistry.register(EntityRegistry.SOUL_PYRE_WISP, SoulPyreWispEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.CAELESTIS_RIFTLING, CaelestisRiftlingRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.CAELESTIS_HOLLOW, CaelestisHollowRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.CAELESTIS_DREADGLARE, CaelestisDreadglareRenderer::new);

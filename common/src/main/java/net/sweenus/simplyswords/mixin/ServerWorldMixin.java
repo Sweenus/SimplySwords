@@ -88,6 +88,9 @@ public abstract class ServerWorldMixin {
         if (HearthflameAbilityManager.hasActive(world)) {
             HearthflameAbilityManager.tick(world);
         }
+        if (SoulPyreAbilityManager.hasActive(world)) {
+            SoulPyreAbilityManager.tick(world);
+        }
         if (CaelestisBreachManager.hasActive(world)) {
             CaelestisBreachManager.tick(world);
         }

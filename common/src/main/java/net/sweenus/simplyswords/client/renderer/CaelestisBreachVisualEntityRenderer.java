@@ -70,6 +70,8 @@ public class CaelestisBreachVisualEntityRenderer
             Identifier.ofVanilla("textures/misc/white.png");
 
     private final Map<UUID, TerrainCache> terrainCaches = new HashMap<>();
+    private final TerrainFieldOverlayRenderer terrainOverlay =
+            new TerrainFieldOverlayRenderer();
 
     public CaelestisBreachVisualEntityRenderer(EntityRendererFactory.Context context) {
         super(context);
@@ -101,15 +103,29 @@ public class CaelestisBreachVisualEntityRenderer
                        MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light) {
         if (!Config.general.enableModernFieldEffects) {
             terrainCaches.remove(entity.getUuid());
+            terrainOverlay.clear(entity.getUuid());
             return;
         }
         if (entity.getRadius() <= 0.05F) {
             terrainCaches.remove(entity.getUuid());
+            terrainOverlay.clear(entity.getUuid());
             return;
         }
 
         float radius = entity.getRadius();
-        renderSculkTerrain(entity, matrices.peek(), vertexConsumers, radius);
+        terrainOverlay.render(
+                entity.getWorld(),
+                entity.getUuid(),
+                entity.getX(),
+                entity.getY(),
+                entity.getZ(),
+                radius,
+                entity.getMaxRadius(),
+                entity.getVerticalRange(),
+                TerrainFieldOverlayRenderer.CAELESTIS,
+                matrices.peek(),
+                vertexConsumers
+        );
 
         VertexConsumer vertices = vertexConsumers.getBuffer(RenderLayer.getDebugQuads());
         VertexConsumer veilVertices = vertexConsumers.getBuffer(

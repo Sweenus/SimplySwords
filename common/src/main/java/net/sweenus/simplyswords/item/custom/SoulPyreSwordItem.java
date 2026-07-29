@@ -5,7 +5,6 @@ import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
@@ -22,10 +21,10 @@ import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.item.interfaces.TwoHandedWeapon;
 import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
-import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
+import net.sweenus.simplyswords.world.SoulPyreAbilityManager;
 
 import java.util.List;
 
@@ -48,39 +47,18 @@ public class SoulPyreSwordItem extends UniqueSwordItem implements TwoHandedWeapo
     }
 
     @Override
-    public TypedActionResult<ItemStack> startPlayerAbility(World world, PlayerEntity user, Hand hand) {
-        if (!user.getWorld().isClient()) {
-            activateSoulTether(user);
-            user.getItemCooldownManager().set(this, Config.uniqueEffects.soulpyre.cooldown);
-        }
-        return super.use(world, user, hand);
-    }
-
-    @Override
     public boolean canActivate(WeaponAbilityContext context) {
-        return context != null
-                && context.stack() != null
-                && !context.stack().isEmpty()
-                && context.world() != null
-                && context.actor() != null
-                && context.actor().isAlive()
-                && context.stack().getDamage() < context.stack().getMaxDamage() - 1;
+        return SoulPyreAbilityManager.canActivate(context);
     }
 
     @Override
     public boolean activate(WeaponAbilityContext context) {
-        activateSoulTether(context.actor());
-        return true;
+        return SoulPyreAbilityManager.start(context);
     }
 
     @Override
     public int getActivationCooldownTicks(ItemStack stack, WeaponAbilityContext context) {
         return Config.uniqueEffects.soulpyre.cooldown;
-    }
-
-    private void activateSoulTether(LivingEntity user) {
-        int relocationDuration = 150;
-        user.addStatusEffect(new StatusEffectInstance(EffectRegistry.getReference(EffectRegistry.SOULTETHER), relocationDuration, 0, false, true));
     }
 
     @Override
@@ -102,6 +80,8 @@ public class SoulPyreSwordItem extends UniqueSwordItem implements TwoHandedWeapo
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.soulpyresworditem.tooltip2").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
+        tooltip.add(Text.translatable("item.simplyswords.soulpyresworditem.tooltip7").setStyle(Styles.TEXT));
+        tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.soulpyresworditem.tooltip6").setStyle(Styles.TEXT));
         appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.soulpyre.cooldown);
 
@@ -116,13 +96,33 @@ public class SoulPyreSwordItem extends UniqueSwordItem implements TwoHandedWeapo
 
         @ValidatedInt.Restrict(min = 3)
         public int pulseCount = 10;
+        @ValidatedInt.Restrict(min = 1)
+        public int duration = 600;
+        @ValidatedInt.Restrict(min = 1)
+        public int collapseDuration = 60;
+        @ValidatedFloat.Restrict(min = 1.5f)
+        public float startingRadius = 3.0f;
+        @ValidatedFloat.Restrict(min = 0f)
+        public float radiusGrowthPerKill = 1.0f;
         @ValidatedDouble.Restrict(min = 11.0)
-        public double radius = 12.0;
+        public double radius = 8.0;
+        @ValidatedFloat.Restrict(min = 2.0f)
+        public float verticalRange = 8.0f;
         @ValidatedFloat.Restrict(min = 0f)
         public float damageScaling = 0.74f;
         @ValidatedInt.Restrict(min = 1)
         public int heal = 1;
         @ValidatedInt.Restrict(min = 1)
-        public int cooldown = 400;
+        public int wispVolleySize = 5;
+        @ValidatedFloat.Restrict(min = 0f)
+        public float pulseDamageBonusPerSoul = 0.05f;
+        @ValidatedFloat.Restrict(min = 0f)
+        public float requiemDamageBonusPerSoul = 0.12f;
+        @ValidatedFloat.Restrict(min = 0f)
+        public float wispDamageMultiplier = 0.30f;
+        @ValidatedFloat.Restrict(min = 0f)
+        public float requiemHealingPerSoul = 1.0f;
+        @ValidatedInt.Restrict(min = 1)
+        public int cooldown = 1400;
     }
 }

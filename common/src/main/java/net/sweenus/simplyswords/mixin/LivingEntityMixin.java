@@ -26,6 +26,7 @@ import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.world.RunicSlashManager;
 import net.sweenus.simplyswords.world.MoltenEdgeAbilityManager;
+import net.sweenus.simplyswords.world.SoulPyreAbilityManager;
 import net.sweenus.simplyswords.world.StormsEdgeAbilityManager;
 import net.sweenus.simplyswords.world.ThunderbrandAbilityManager;
 import org.spongepowered.asm.mixin.Mixin;
@@ -151,6 +152,7 @@ public abstract class LivingEntityMixin {
     public void simplyswords$triggerFlameSeedOnDeath(DamageSource damageSource, CallbackInfo ci) {
         LivingEntity livingEntity = (LivingEntity) (Object) this;
         MoltenEdgeAbilityManager.resetWielder(livingEntity);
+        SoulPyreAbilityManager.onDeath(livingEntity, damageSource);
         FlameSeedEffect.triggerDeathDetonation(livingEntity);
     }
 

@@ -333,6 +333,24 @@ public class EntityRegistry {
                     .build(Identifier.of(SimplySwords.MOD_ID, "caelestis_breach_visual").toString())
     );
 
+    public static final RegistrySupplier<EntityType<SoulPyreVisualEntity>> SOUL_PYRE_VISUAL = ENTITIES.register(
+            "soul_pyre_visual",
+            () -> EntityType.Builder.<SoulPyreVisualEntity>create(SoulPyreVisualEntity::new, SpawnGroup.MISC)
+                    .dimensions(27.0F, 4.0F)
+                    .maxTrackingRange(96)
+                    .trackingTickInterval(1)
+                    .build(Identifier.of(SimplySwords.MOD_ID, "soul_pyre_visual").toString())
+    );
+
+    public static final RegistrySupplier<EntityType<SoulPyreWispEntity>> SOUL_PYRE_WISP = ENTITIES.register(
+            "soul_pyre_wisp",
+            () -> EntityType.Builder.<SoulPyreWispEntity>create(SoulPyreWispEntity::new, SpawnGroup.MISC)
+                    .dimensions(0.35F, 0.35F)
+                    .maxTrackingRange(96)
+                    .trackingTickInterval(1)
+                    .build(Identifier.of(SimplySwords.MOD_ID, "soul_pyre_wisp").toString())
+    );
+
     public static final RegistrySupplier<EntityType<CaelestisRiftlingEntity>> CAELESTIS_RIFTLING = ENTITIES.register(
             "caelestis_riftling",
             () -> EntityType.Builder.<CaelestisRiftlingEntity>create(CaelestisRiftlingEntity::new, SpawnGroup.MONSTER)
