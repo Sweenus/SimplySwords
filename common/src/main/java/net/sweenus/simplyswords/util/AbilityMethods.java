@@ -19,7 +19,6 @@ import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.item.component.StoredChargeComponent;
 import net.sweenus.simplyswords.registry.ComponentTypeRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
-import net.sweenus.simplyswords.world.PlayerWeaponAbilityChannelManager;
 
 import java.util.List;
 
@@ -78,69 +77,6 @@ public class AbilityMethods {
                 }
             }
 
-        }
-    }
-
-    //Hearthflame - Volcanic Fury
-    public static void tickAbilityVolcanicFury(ItemStack stack, World world, LivingEntity user,
-                                               int ability_timer, int ability_timer_max, float abilityDamage,
-                                               int skillCooldown, int radius, int chargePower) {
-        if (!user.getWorld().isClient()) {
-
-            if (ability_timer < 5
-                    && (!(user instanceof ServerPlayerEntity serverPlayer) || !PlayerWeaponAbilityChannelManager.finishEarly(serverPlayer, stack))) {
-                user.stopUsingItem();
-            }
-
-            //AOE Damage
-            if (user.age % 20 == 0 && HelperMethods.isHolding(stack, user)) {
-
-                if (ability_timer > 10) {
-                    user.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 20, 5), user);
-                    user.addStatusEffect(new StatusEffectInstance(StatusEffects.MINING_FATIGUE, 20, 5), user);
-                    user.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, 20, 5), user);
-                    world.playSoundFromEntity(null, user, SoundRegistry.ELEMENTAL_BOW_EARTH_SHOOT_IMPACT_02.get(),
-                            user.getSoundCategory(), 0.8f, 0.1f * chargePower);
-                    if (user.getHealth() > 2 && (!(user instanceof PlayerEntity player) || !player.isCreative()))
-                        user.setHealth(user.getHealth() - 1);
-                }
-
-                Box box = new Box(user.getX() + radius * 8, user.getY() + radius, user.getZ() + radius * 8,
-                        user.getX() - radius * 8, user.getY() - radius, user.getZ() - radius * 8);
-                for (Entity entity : world.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY)) {
-
-                    if ((entity instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, user)) {
-
-                        if (ability_timer > 12) {
-                            DamageSource damageSource = world.getDamageSources().indirectMagic(user, user);
-                            float damage = world instanceof ServerWorld serverWorld
-                                    ? HelperMethods.applyAbilityDamageEnchantments(serverWorld, stack, le, damageSource, abilityDamage)
-                                    : abilityDamage;
-                            le.damage(damageSource, damage);
-                            le.setVelocity((user.getX() - le.getX()) / 10, (user.getY() - le.getY()) / 10, (user.getZ() - le.getZ()) / 10);
-                            le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 40, 3), user);
-                        }
-                    }
-                }
-                double xpos = user.getX() - (radius + 1);
-                double ypos = user.getY();
-                double zpos = user.getZ() - (radius + 1);
-
-                for (int i = radius * 2; i > 0; i--) {
-                    for (int j = radius * 2; j > 0; j--) {
-                        float choose = (float) (Math.random() * 1);
-                        HelperMethods.spawnParticle(world, ParticleTypes.WARPED_SPORE,
-                                xpos + i + choose, ypos + 0.4, zpos + j + choose,
-                                0, 0.1, 0);
-                        HelperMethods.spawnParticle(world, ParticleTypes.CAMPFIRE_COSY_SMOKE,
-                                xpos + i + choose, ypos + 0.1, zpos + j + choose,
-                                0, 0, 0);
-                        HelperMethods.spawnParticle(world, ParticleTypes.LAVA,
-                                xpos + i + choose, ypos, zpos + j + choose,
-                                0, 0.1, 0);
-                    }
-                }
-            }
         }
     }
 

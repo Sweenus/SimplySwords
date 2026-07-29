@@ -85,6 +85,9 @@ public abstract class ServerWorldMixin {
         if (MjolnirStormManager.hasActive(world)) {
             MjolnirStormManager.tick(world);
         }
+        if (HearthflameAbilityManager.hasActive(world)) {
+            HearthflameAbilityManager.tick(world);
+        }
         if (CaelestisBreachManager.hasActive(world)) {
             CaelestisBreachManager.tick(world);
         }
