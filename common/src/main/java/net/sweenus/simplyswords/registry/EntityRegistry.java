@@ -198,6 +198,15 @@ public class EntityRegistry {
                     .build(Identifier.of(SimplySwords.MOD_ID, "twisted_blade_crescendo_visual").toString())
     );
 
+    public static final RegistrySupplier<EntityType<DeathKnellVisualEntity>> DEATH_KNELL_VISUAL = ENTITIES.register(
+            "death_knell_visual",
+            () -> EntityType.Builder.<DeathKnellVisualEntity>create(DeathKnellVisualEntity::new, SpawnGroup.MISC)
+                    .dimensions(0.5f, 0.5f)
+                    .maxTrackingRange(96)
+                    .trackingTickInterval(1)
+                    .build(Identifier.of(SimplySwords.MOD_ID, "death_knell_visual").toString())
+    );
+
     public static final RegistrySupplier<EntityType<EmberlashSmoulderVisualEntity>> EMBERLASH_SMOULDER_VISUAL = ENTITIES.register(
             "emberlash_smoulder_visual",
             () -> EntityType.Builder.<EmberlashSmoulderVisualEntity>create(EmberlashSmoulderVisualEntity::new, SpawnGroup.MISC)
