@@ -173,35 +173,47 @@ public final class CaelestisBreachManager {
     private static boolean tickBreach(ServerWorld world, ActiveBreach breach) {
         Entity actorEntity = world.getEntity(breach.actorId);
         if (!(actorEntity instanceof LivingEntity actor) || !actor.isAlive()
-                || !world.isChunkLoaded(ChunkPos.toLong(BlockPos.ofFloored(breach.center)))
-                || world.getTime() >= breach.endTick) {
+                || !world.isChunkLoaded(ChunkPos.toLong(BlockPos.ofFloored(breach.center)))) {
             return true;
         }
 
-        long age = world.getTime() - breach.startTick;
-        float radius = radiusAt(age, breach.profile);
-        int phase = phaseAt(age, breach.profile);
+        long now = world.getTime();
+        if (!breach.forcedCollapse && now >= breach.endTick) {
+            return true;
+        }
+        if (!breach.forcedCollapse
+                && actor instanceof PlayerEntity
+                && !isWieldingCaelestis(actor)) {
+            beginForcedCollapse(world, breach, now);
+        }
+        if (breach.forcedCollapse && now >= breach.forcedCollapseEndTick) {
+            return true;
+        }
+
+        float radius = radiusAt(now, breach);
+        int phase = phaseAt(now, breach);
         updateVisual(world, breach, radius, phase);
         cleanCreatureIds(world, breach);
         cleanTentacleIds(world, breach);
 
         if (phase != CaelestisBreachVisualEntity.PHASE_COLLAPSING
-                && world.getTime() >= breach.nextSpawnTick) {
+                && now >= breach.nextSpawnTick) {
             spawnWave(world, breach);
-            breach.nextSpawnTick = world.getTime() + Math.max(1, Config.uniqueEffects.caelestis.spawnInterval);
+            breach.nextSpawnTick = now + Math.max(1, Config.uniqueEffects.caelestis.spawnInterval);
         }
         if (phase != CaelestisBreachVisualEntity.PHASE_COLLAPSING
-                && world.getTime() >= breach.nextTentacleSpawnTick) {
+                && now >= breach.nextTentacleSpawnTick) {
             spawnTentacle(world, breach, radius);
-            breach.nextTentacleSpawnTick = world.getTime()
+            breach.nextTentacleSpawnTick = now
                     + Math.max(1, Config.uniqueEffects.caelestis.tentacleSpawnInterval);
         }
         if (breach.betrayalPending && !breach.betrayalSpawned
                 && phase != CaelestisBreachVisualEntity.PHASE_COLLAPSING
-                && world.getTime() >= breach.betrayalTick) {
+                && now >= breach.betrayalTick) {
             breach.betrayalSpawned = spawnUnbound(world, breach);
         }
-        if (Math.floorMod(world.getTime() + breach.seed, AGGRO_PULSE_INTERVAL) == 0L) {
+        if (!breach.forcedCollapse
+                && Math.floorMod(now + breach.seed, AGGRO_PULSE_INTERVAL) == 0L) {
             redirectAggroToBoundMinions(world, breach);
         }
 
@@ -209,13 +221,13 @@ public final class CaelestisBreachManager {
             sweepCollapsingPerimeter(world, breach, radius);
             sweepCollapsingTentacles(world, breach, radius);
         }
-        if (world.getTime() % 5L == 0L) {
+        if (now % 5L == 0L) {
             spawnBoundaryParticles(world, breach.center, radius, phase, breach.seed);
         }
-        if (world.getTime() % 12L == 0L) {
+        if (now % 12L == 0L) {
             spawnInteriorMotes(world, breach, radius);
         }
-        if (world.getTime() % 60L == 0L) {
+        if (now % 60L == 0L) {
             playAmbientPulse(world, breach.center, phase);
         }
         return false;
@@ -239,14 +251,14 @@ public final class CaelestisBreachManager {
         int max = breach.profile.maxSpawnPerWave;
         int count = min + world.random.nextInt(max - min + 1);
         count = Math.min(count, cap - friendlyCount);
-        float radius = radiusAt(world.getTime() - breach.startTick, breach.profile);
+        float radius = radiusAt(world.getTime(), breach);
         for (int i = 0; i < count; i++) {
             spawnCreature(world, breach, radius, chooseArchetype(world), false);
         }
     }
 
     private static boolean spawnUnbound(ServerWorld world, ActiveBreach breach) {
-        float radius = radiusAt(world.getTime() - breach.startTick, breach.profile);
+        float radius = radiusAt(world.getTime(), breach);
         int archetype = world.random.nextBoolean() ? 1 : 2;
         return spawnCreature(world, breach, radius, archetype, true);
     }
@@ -466,13 +478,14 @@ public final class CaelestisBreachManager {
             return false;
         }
         ActiveBreach breach = get(world, creature.getBreachId());
-        if (breach == null || world.getTime() >= breach.endTick) {
+        if (breach == null || breach.forcedCollapse
+                || world.getTime() >= breach.endTick) {
             dissolveCreature(world, mob, creature.isUnbound());
             return false;
         }
 
-        float radius = radiusAt(world.getTime() - breach.startTick, breach.profile);
-        boolean collapsing = phaseAt(world.getTime() - breach.startTick, breach.profile)
+        float radius = radiusAt(world.getTime(), breach);
+        boolean collapsing = phaseAt(world.getTime(), breach)
                 == CaelestisBreachVisualEntity.PHASE_COLLAPSING;
         double dx = mob.getX() - breach.center.x;
         double dz = mob.getZ() - breach.center.z;
@@ -522,15 +535,16 @@ public final class CaelestisBreachManager {
             return false;
         }
         ActiveBreach breach = get(world, tentacle.getBreachId());
-        if (breach == null || world.getTime() >= breach.endTick) {
+        if (breach == null || breach.forcedCollapse
+                || world.getTime() >= breach.endTick) {
             return false;
         }
 
-        float radius = radiusAt(world.getTime() - breach.startTick, breach.profile);
+        float radius = radiusAt(world.getTime(), breach);
         double dx = tentacle.getX() - breach.center.x;
         double dz = tentacle.getZ() - breach.center.z;
         double edgeDistance = Math.sqrt(dx * dx + dz * dz) + tentacle.getContactRadius();
-        if (phaseAt(world.getTime() - breach.startTick, breach.profile)
+        if (phaseAt(world.getTime(), breach)
                 == CaelestisBreachVisualEntity.PHASE_COLLAPSING
                 && edgeDistance >= radius) {
             return false;
@@ -685,7 +699,8 @@ public final class CaelestisBreachManager {
             return false;
         }
         ActiveBreach breach = get(world, creature.getBreachId());
-        if (breach == null || !isValidCreatureTarget(world, breach, creature, target)) {
+        if (breach == null || breach.forcedCollapse
+                || !isValidCreatureTarget(world, breach, creature, target)) {
             return false;
         }
 
@@ -757,7 +772,7 @@ public final class CaelestisBreachManager {
     private static boolean isInside(ActiveBreach breach, LivingEntity entity) {
         double dx = entity.getX() - breach.center.x;
         double dz = entity.getZ() - breach.center.z;
-        float radius = radiusAt(entity.getWorld().getTime() - breach.startTick, breach.profile);
+        float radius = radiusAt(entity.getWorld().getTime(), breach);
         return dx * dx + dz * dz <= radius * radius
                 && Math.abs(entity.getY() - breach.center.y)
                 <= breach.profile.verticalRange;
@@ -888,6 +903,36 @@ public final class CaelestisBreachManager {
     private static void cleanTentacleIds(ServerWorld world, ActiveBreach breach) {
         breach.tentacleIds.removeIf(uuid ->
                 !(world.getEntity(uuid) instanceof CaelestisTentacleEntity));
+    }
+
+    private static void beginForcedCollapse(ServerWorld world, ActiveBreach breach, long now) {
+        float currentRadius = radiusAt(now, breach);
+        boolean alreadyCollapsing = phaseAt(now, breach)
+                == CaelestisBreachVisualEntity.PHASE_COLLAPSING;
+        long collapseTicks = alreadyCollapsing
+                ? Math.max(1L, breach.endTick - now)
+                : Math.max(1, breach.profile.collapseTicks);
+
+        breach.forcedCollapse = true;
+        breach.forcedCollapseStartTick = now;
+        breach.forcedCollapseEndTick = now + collapseTicks;
+        breach.forcedCollapseStartRadius = currentRadius;
+
+        for (UUID creatureId : List.copyOf(breach.creatureIds)) {
+            Entity entity = world.getEntity(creatureId);
+            if (entity instanceof MobEntity mob
+                    && entity instanceof CaelestisBreachCreature creature) {
+                dissolveCreature(world, mob, creature.isUnbound());
+            }
+        }
+        breach.creatureIds.clear();
+        for (UUID tentacleId : List.copyOf(breach.tentacleIds)) {
+            Entity entity = world.getEntity(tentacleId);
+            if (entity instanceof CaelestisTentacleEntity tentacle) {
+                tentacle.beginRetraction();
+            }
+        }
+        breach.tentacleIds.clear();
     }
 
     private static void close(ServerWorld world, ActiveBreach breach) {
@@ -1061,6 +1106,38 @@ public final class CaelestisBreachManager {
                 : CaelestisBreachVisualEntity.PHASE_EXPANDING;
     }
 
+    private static float radiusAt(long now, ActiveBreach breach) {
+        if (!breach.forcedCollapse) {
+            return radiusAt(now - breach.startTick, breach.profile);
+        }
+        float progress = MathHelper.clamp(
+                (now - breach.forcedCollapseStartTick)
+                        / (float) Math.max(
+                        1L,
+                        breach.forcedCollapseEndTick
+                                - breach.forcedCollapseStartTick
+                ),
+                0.0F,
+                1.0F
+        );
+        return MathHelper.lerp(
+                progress * progress,
+                breach.forcedCollapseStartRadius,
+                0.0F
+        );
+    }
+
+    private static int phaseAt(long now, ActiveBreach breach) {
+        return breach.forcedCollapse
+                ? CaelestisBreachVisualEntity.PHASE_COLLAPSING
+                : phaseAt(now - breach.startTick, breach.profile);
+    }
+
+    private static boolean isWieldingCaelestis(LivingEntity actor) {
+        return actor.getMainHandStack().isOf(ItemsRegistry.CAELESTIS.get())
+                || actor.getOffHandStack().isOf(ItemsRegistry.CAELESTIS.get());
+    }
+
     private static ActiveBreach get(ServerWorld world, UUID breachId) {
         Map<UUID, ActiveBreach> breaches = ACTIVE.get(world);
         return breaches == null || breachId == null ? null : breaches.get(breachId);
@@ -1080,7 +1157,7 @@ public final class CaelestisBreachManager {
 
         double safeMargin = Math.max(0.25, margin);
         double maxHorizontal = Math.max(0.5,
-                radiusAt(world.getTime() - breach.startTick, breach.profile) - safeMargin);
+                radiusAt(world.getTime(), breach) - safeMargin);
         double dx = desired.x - breach.center.x;
         double dz = desired.z - breach.center.z;
         double horizontal = Math.sqrt(dx * dx + dz * dz);
@@ -1136,6 +1213,10 @@ public final class CaelestisBreachManager {
         private final BreachProfile profile;
         private final Set<UUID> creatureIds;
         private final Set<UUID> tentacleIds;
+        private boolean forcedCollapse;
+        private long forcedCollapseStartTick;
+        private long forcedCollapseEndTick;
+        private float forcedCollapseStartRadius;
 
         private ActiveBreach(UUID id, UUID actorId, UUID principalId, ItemStack stack, Vec3d center,
                              long startTick, long endTick, long nextSpawnTick,

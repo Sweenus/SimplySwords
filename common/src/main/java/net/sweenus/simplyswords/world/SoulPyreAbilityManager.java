@@ -6,6 +6,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
@@ -300,6 +301,12 @@ public final class SoulPyreAbilityManager {
                 continue;
             }
 
+            if (!pyre.cancelled
+                    && actor instanceof PlayerEntity
+                    && !isWieldingSoulPyre(actor)) {
+                cancelPyre(world, actor, pyre, now);
+            }
+
             if (pyre.collapsing) {
                 if (tickCollapse(world, actor, pyre, now)) {
                     iterator.remove();
@@ -335,6 +342,25 @@ public final class SoulPyreAbilityManager {
 
         if (active.isEmpty()) {
             ACTIVE.remove(world);
+        }
+    }
+
+    private static void cancelPyre(ServerWorld world, LivingEntity actor,
+                                   ActivePyre pyre, long now) {
+        pyre.cancelled = true;
+        pyre.souls = 0;
+        pyre.pendingVolleys = 0;
+        pyre.growing = false;
+        actor.removeStatusEffect(EffectRegistry.getReference(EffectRegistry.SOULTETHER));
+
+        if (!pyre.collapsing) {
+            pyre.collapsing = true;
+            pyre.collapseStartTick = now;
+            pyre.collapseEndTick = now + pyre.collapseDuration;
+            pyre.collapseStartRadius = pyre.currentRadius;
+            beginVisualCollapse(world, actor, pyre);
+        } else {
+            updateVisual(world, actor, pyre, pyre.currentRadius);
         }
     }
 
@@ -832,7 +858,7 @@ public final class SoulPyreAbilityManager {
         double bestDistance = Double.MAX_VALUE;
         UUID bestActorId = null;
         for (ActivePyre pyre : active.values()) {
-            if (pyre.currentRadius <= 0.05F) {
+            if (pyre.cancelled || pyre.currentRadius <= 0.05F) {
                 continue;
             }
             LivingEntity actor = resolveLiving(world, pyre.actorId);
@@ -1087,6 +1113,11 @@ public final class SoulPyreAbilityManager {
         return entity instanceof LivingEntity living ? living : null;
     }
 
+    private static boolean isWieldingSoulPyre(LivingEntity actor) {
+        return actor.getMainHandStack().isOf(ItemsRegistry.SOULPYRE.get())
+                || actor.getOffHandStack().isOf(ItemsRegistry.SOULPYRE.get());
+    }
+
     private static final class ActivePyre {
         private final UUID actorId;
         private final UUID sourceOwnerId;
@@ -1110,6 +1141,7 @@ public final class SoulPyreAbilityManager {
         private long growthStartTick;
         private boolean growing;
         private boolean collapsing;
+        private boolean cancelled;
         private long collapseStartTick;
         private long collapseEndTick;
         private float collapseStartRadius;

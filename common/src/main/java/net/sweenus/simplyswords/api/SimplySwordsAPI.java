@@ -11,6 +11,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.StackReference;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.SwordItem;
@@ -35,6 +36,7 @@ import net.sweenus.simplyswords.power.GemPowerComponent;
 import net.sweenus.simplyswords.power.GemPowerFiller;
 import net.sweenus.simplyswords.registry.ComponentTypeRegistry;
 import net.sweenus.simplyswords.registry.EntityRegistry;
+import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.world.WeaponAbilityCooldownManager;
 
@@ -305,28 +307,91 @@ public class SimplySwordsAPI {
 
     // Allows for the socketing of gems
     public static void onClickedGemSocketLogic (ItemStack stack, ItemStack otherStack, PlayerEntity player) {
+        onClickedGemSocketLogic(stack, otherStack, player, StackReference.EMPTY);
+    }
+
+    // Allows for the socketing of gems while retaining access to the cursor in Creative mode
+    public static void onClickedGemSocketLogic(ItemStack stack, ItemStack otherStack,
+                                               PlayerEntity player,
+                                               StackReference cursorStackReference) {
         if (Config.general.enableUniqueGemSockets) {
             GemPowerComponent component = getComponent(stack);
             if (component.canBeFilled()) {
                 if (otherStack.getItem() instanceof GemPowerFiller gemPowerFiller) {
+                    Item incomingGemItem = otherStack.getItem();
                     ValidationResult<GemPowerComponent> result = gemPowerFiller.fill(otherStack, component);
                     if (result.isValid()) {
                         stack.set(ComponentTypeRegistry.GEM_POWER.get(), result.get());
                         player.getWorld().playSoundFromEntity(null, player, SoundEvents.BLOCK_ANVIL_USE, player.getSoundCategory(), 1, 1);
                         otherStack.decrement(1);
+                        returnDisplacedGem(
+                                player,
+                                component,
+                                incomingGemItem,
+                                cursorStackReference
+                        );
                     }
                 }
             }
         }
     }
 
-    // netherSocketChance & runeSocketChance determine how likely these sockets are to appear on the item. An int of 50 = 50% chance for the socket to appear.
+    private static void returnDisplacedGem(PlayerEntity player, GemPowerComponent weaponComponent,
+                                           Item incomingGemItem,
+                                           StackReference cursorStackReference) {
+        ItemStack displacedGem = createDisplacedGem(weaponComponent, incomingGemItem);
+        if (displacedGem.isEmpty()) {
+            return;
+        }
+
+        if (player.getWorld().isClient()) {
+            if (!player.isCreative()) {
+                return;
+            }
+            if (!player.getInventory().insertStack(displacedGem)
+                    && cursorStackReference != StackReference.EMPTY) {
+                cursorStackReference.set(displacedGem);
+            }
+            return;
+        }
+
+        giveOrDropStack(player, displacedGem);
+    }
+
+    private static ItemStack createDisplacedGem(GemPowerComponent weaponComponent,
+                                                Item incomingGemItem) {
+        if (incomingGemItem == ItemsRegistry.RUNEFUSED_GEM.get()
+                && !weaponComponent.runicPower().value().isEmpty()) {
+            ItemStack displacedRunic = new ItemStack(ItemsRegistry.RUNEFUSED_GEM.get());
+            displacedRunic.set(ComponentTypeRegistry.GEM_POWER.get(),
+                    GemPowerComponent.runic(weaponComponent.runicPower()));
+            return displacedRunic;
+        }
+        if (incomingGemItem == ItemsRegistry.NETHERFUSED_GEM.get()
+                && !weaponComponent.netherPower().value().isEmpty()) {
+            ItemStack displacedNether = new ItemStack(ItemsRegistry.NETHERFUSED_GEM.get());
+            displacedNether.set(ComponentTypeRegistry.GEM_POWER.get(),
+                    GemPowerComponent.nether(weaponComponent.netherPower()));
+            return displacedNether;
+        }
+        return ItemStack.EMPTY;
+    }
+
+    private static void giveOrDropStack(PlayerEntity player, ItemStack stack) {
+        if (!player.getInventory().insertStack(stack)) {
+            player.dropItem(stack, false);
+        }
+    }
+
     public static void inventoryTickGemSocketLogic (ItemStack stack, World world, Entity entity,
                                                     int runeSocketChance, int netherSocketChance) {
         if (!stack.contains(ComponentTypeRegistry.GEM_POWER.get()) && Config.general.enableUniqueGemSockets) {
             float runeSocketRoll = (float) (Math.random() * 100);
             float netherSocketRoll = (float) (Math.random() * 100);
-            stack.set(ComponentTypeRegistry.GEM_POWER.get(), GemPowerComponent.createEmpty(runeSocketRoll > runeSocketChance, netherSocketRoll > netherSocketChance));
+            stack.set(ComponentTypeRegistry.GEM_POWER.get(), GemPowerComponent.createEmpty(
+                    runeSocketRoll < runeSocketChance,
+                    netherSocketRoll < netherSocketChance
+            ));
         }
         if (!world.isClient && (entity instanceof LivingEntity user) &&
                 (user.getEquippedStack(EquipmentSlot.MAINHAND) == stack || user.getEquippedStack(EquipmentSlot.OFFHAND) == stack)) {

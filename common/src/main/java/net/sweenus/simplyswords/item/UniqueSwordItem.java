@@ -42,14 +42,19 @@ public abstract class UniqueSwordItem extends SwordItem {
         if (!world.isClient) {
             WeaponImplicitRegistry.getOrCreateWeaponImplicit(stack);
         }
-        SimplySwordsAPI.inventoryTickGemSocketLogic(stack, world, entity, 50, 50);
+        SimplySwordsAPI.inventoryTickGemSocketLogic(stack, world, entity, 100, 100);
         super.inventoryTick(stack, world, entity, slot, selected);
     }
 
     @Override
     public boolean onClicked(ItemStack stack, ItemStack otherStack, Slot slot, ClickType clickType, PlayerEntity player,
                              StackReference cursorStackReference) {
-        SimplySwordsAPI.onClickedGemSocketLogic(stack, otherStack, player);
+        SimplySwordsAPI.onClickedGemSocketLogic(
+                stack,
+                otherStack,
+                player,
+                cursorStackReference
+        );
         return false;
     }
 

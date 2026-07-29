@@ -34,7 +34,9 @@ public class RunefusedGemItem extends Item implements GemPowerFiller {
     @Override
     public ValidationResult<GemPowerComponent> fill(ItemStack stack, GemPowerComponent component) {
         GemPowerComponent gemComponent = SimplySwordsAPI.getComponent(stack);
-        if (!gemComponent.hasRunicPower() || !component.runicPower().value().isEmpty() || !component.hasRunicPower()) {
+        if (!gemComponent.hasRunicPower()
+                || gemComponent.runicPower().value().isEmpty()
+                || !component.hasRunicPower()) {
             return ValidationResult.Companion.error(component, "Can't socket to the provided component");
         }
         return ValidationResult.Companion.success(component.fill(

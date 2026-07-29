@@ -69,8 +69,8 @@ public final class TerrainFieldOverlayRenderer {
                             Identifier.ofVanilla("block/sculk"),
                             Identifier.ofVanilla("block/sculk_sensor_side"))
             ),
-            232, 205, 255,
-            110, 35, 160, 42,
+            255, 125, 255,
+            108, 65, 152, 72,
             8,
             20,
             0

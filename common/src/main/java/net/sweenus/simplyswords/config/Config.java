@@ -1,6 +1,7 @@
 package net.sweenus.simplyswords.config;
 
 import me.fzzyhmstrs.fzzy_config.api.ConfigApiJava;
+import me.fzzyhmstrs.fzzy_config.api.RegisterType;
 
 public final class Config {
 
@@ -10,6 +11,7 @@ public final class Config {
     //Loot config is registered internally in LootConfig. There were some load order issues otherwise.
     //////////
     public static final GeneralConfig general = ConfigApiJava.registerAndLoadConfig(GeneralConfig::new);
+    public static final GuiConfig gui = ConfigApiJava.registerAndLoadConfig(GuiConfig::new, RegisterType.CLIENT);
     public static final GemPowersConfig gemPowers = ConfigApiJava.registerAndLoadConfig(GemPowersConfig::new);
     public static final StatusEffectsConfig statusEffects = ConfigApiJava.registerAndLoadConfig(StatusEffectsConfig::new);
     public static final WeaponAttributesConfig weaponAttribute = ConfigApiJava.registerAndLoadConfig(WeaponAttributesConfig::new);

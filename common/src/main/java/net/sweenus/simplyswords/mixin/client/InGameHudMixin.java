@@ -41,6 +41,7 @@ public abstract class InGameHudMixin {
     private static final int HEAT_EMPTY_COLOR = 0xAA271009;
     private static final int HEAT_BORDER_COLOR = 0xE06B1D08;
     private static final float HEAT_SMOOTHING_RATE = 0.43F;
+    private static final int WEAPON_HUD_BOTTOM_OFFSET = 68;
 
     @Unique
     private float simplyswords$displayedHeat;
@@ -193,9 +194,10 @@ public abstract class InGameHudMixin {
 
         int clampedStacks = Math.min(stacks, maxStacks);
         int width = maxStacks * PIP_SIZE + (maxStacks - 1) * PIP_GAP;
-        int x = context.getScaledWindowWidth() / 2 - width / 2;
-        int y = context.getScaledWindowHeight() - 68;
+        int x = -width / 2;
+        int y = 0;
 
+        pushWeaponHudTransform(context);
         for (int i = 0; i < maxStacks; i++) {
             int pipX = x + i * (PIP_SIZE + PIP_GAP);
             int color = i < clampedStacks ? filledColor : emptyColor;
@@ -204,8 +206,9 @@ public abstract class InGameHudMixin {
         }
 
         String label = clampedStacks + "/" + maxStacks;
-        int labelX = context.getScaledWindowWidth() / 2 - client.textRenderer.getWidth(label) / 2;
+        int labelX = -client.textRenderer.getWidth(label) / 2;
         context.drawTextWithShadow(client.textRenderer, label, labelX, y - 11, filledColor);
+        context.getMatrices().pop();
     }
 
     private void renderHeatBar(DrawContext context, MinecraftClient client, RenderTickCounter tickCounter, MoltenHeatComponent component) {
@@ -243,10 +246,11 @@ public abstract class InGameHudMixin {
         fillColor = blendColor(fillColor, 0xFFFFFFFF, flash);
         int borderColor = blendColor(HEAT_BORDER_COLOR, 0xFFFFD27A, danger * pulse * 0.55F);
 
-        int x = context.getScaledWindowWidth() / 2 - HEAT_BAR_WIDTH / 2;
-        int y = context.getScaledWindowHeight() - 68;
+        int x = -HEAT_BAR_WIDTH / 2;
+        int y = 0;
         int fillWidth = Math.round(HEAT_BAR_WIDTH * fraction);
 
+        pushWeaponHudTransform(context);
         if (danger > 0.0F) {
             int glowAlpha = Math.clamp((int) ((28.0F + 74.0F * pulse) * danger), 0, 120);
             int glowColor = withAlpha(fillColor, glowAlpha);
@@ -270,8 +274,20 @@ public abstract class InGameHudMixin {
                 Math.round(simplyswords$displayedHeat)
         );
         String label = labelText.getString();
-        int labelX = context.getScaledWindowWidth() / 2 - client.textRenderer.getWidth(label) / 2;
+        int labelX = -client.textRenderer.getWidth(label) / 2;
         context.drawTextWithShadow(client.textRenderer, label, labelX, y - 11, fillColor);
+        context.getMatrices().pop();
+    }
+
+    private static void pushWeaponHudTransform(DrawContext context) {
+        context.getMatrices().push();
+        context.getMatrices().translate(
+                context.getScaledWindowWidth() / 2 + Config.gui.xOffset,
+                context.getScaledWindowHeight() - WEAPON_HUD_BOTTOM_OFFSET + Config.gui.yOffset,
+                0.0F
+        );
+        float scale = Math.clamp(Config.gui.scale, 0.25F, 4.0F);
+        context.getMatrices().scale(scale, scale, 1.0F);
     }
 
     private static int blendColor(int first, int second, float progress) {

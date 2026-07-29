@@ -2,20 +2,32 @@ package net.sweenus.simplyswords.command;
 
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
+import com.mojang.brigadier.suggestion.Suggestions;
+import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import dev.architectury.event.events.common.CommandRegistrationEvent;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.IdentifierArgumentType;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.mob.MobEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.loot.LootTable;
+import net.minecraft.loot.context.LootContextParameterSet;
+import net.minecraft.loot.context.LootContextParameters;
+import net.minecraft.loot.context.LootContextTypes;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
@@ -37,7 +49,12 @@ import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.Styles;
 
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Stream;
 
@@ -49,9 +66,19 @@ public final class SimplySwordsCommands {
             Text.literal("Gem power cannot be applied to this item type: " + value));
     private static final DynamicCommandExceptionType UNKNOWN_RUNIC_WEAPON = new DynamicCommandExceptionType(value ->
             Text.literal("Unknown Simply Swords runic weapon: " + value));
+    private static final DynamicCommandExceptionType UNKNOWN_UNIQUE_WEAPON = new DynamicCommandExceptionType(value ->
+            Text.literal("Unknown Simply Swords unique weapon: " + value));
+    private static final DynamicCommandExceptionType UNKNOWN_LOOT_TABLE = new DynamicCommandExceptionType(value ->
+            Text.literal("Unknown loot table: " + value));
+    private static final DynamicCommandExceptionType UNSUPPORTED_LOOT_TABLE = new DynamicCommandExceptionType(value ->
+            Text.literal("Loot testing only supports chest and entity tables: " + value));
+    private static final DynamicCommandExceptionType ENTITY_LOOT_SOURCE_REQUIRED = new DynamicCommandExceptionType(value ->
+            Text.literal("Testing an entity loot table requires an entity command source: " + value));
 
     private static List<Item> cachedUniqueWeapons;
-    private static final float SOCKET_CHANCE = 0.5F;
+    private static final float RANDOM_POWER_CHANCE = 0.5F;
+    private static final int MIN_LOOT_TEST_ROLLS = 1;
+    private static final int MAX_LOOT_TEST_ROLLS = 200_000;
     private static final List<EntityType<? extends MobEntity>> HOSTILE_MOBS = List.of(
             EntityType.HUSK,
             EntityType.VINDICATOR,
@@ -66,6 +93,27 @@ public final class SimplySwordsCommands {
     }
 
     private static void registerCommands(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
+        var weaponArgument = configureSpawnArguments(CommandManager.argument("weapon", IdentifierArgumentType.identifier())
+                .suggests((context, builder) -> suggestUniqueWeapons(builder)));
+        var countedWeaponArgument = configureSpawnArguments(CommandManager.argument("weapon", IdentifierArgumentType.identifier())
+                .suggests((context, builder) -> suggestUniqueWeapons(builder)));
+        var countArgument = configureSpawnArguments(CommandManager.argument("count", IntegerArgumentType.integer(1, 50)))
+                .then(countedWeaponArgument);
+        var spawnHostileCommand = CommandManager.literal("spawn_hostile")
+                .executes(SimplySwordsCommands::spawnHostile)
+                .then(countArgument)
+                .then(weaponArgument);
+        var lootTestCommand = CommandManager.literal("loot_test")
+                .then(CommandManager.argument("table", IdentifierArgumentType.identifier())
+                        .suggests(SimplySwordsCommands::suggestLootTables)
+                        .then(CommandManager.argument(
+                                        "rolls",
+                                        IntegerArgumentType.integer(
+                                                MIN_LOOT_TEST_ROLLS,
+                                                MAX_LOOT_TEST_ROLLS
+                                        ))
+                                .executes(SimplySwordsCommands::runLootTest)));
+
         dispatcher.register(CommandManager.literal("simplyswords")
                 .requires(source -> source.hasPermissionLevel(2))
                 .then(CommandManager.literal("power")
@@ -83,22 +131,25 @@ public final class SimplySwordsCommands {
                                         .then(CommandManager.argument("power", IdentifierArgumentType.identifier())
                                                 .suggests((context, builder) -> suggestPowers(builder, PowerType.RUNIC))
                                                 .executes(SimplySwordsCommands::givePoweredRunicWeapon)))))
-                .then(CommandManager.literal("spawn_hostile")
-                        .executes(context -> spawnHostile(context, 1))
-                        .then(CommandManager.argument("count", IntegerArgumentType.integer(1, 50))
-                                .executes(context -> spawnHostile(context, IntegerArgumentType.getInteger(context, "count")))
-                                .then(CommandManager.literal("runefused")
-                                        .then(CommandManager.argument("runefused_power", IdentifierArgumentType.identifier())
-                                                .suggests((context, builder) -> suggestPowers(builder, PowerType.RUNEFUSED))
-                                                .executes(context -> spawnHostile(context, IntegerArgumentType.getInteger(context, "count")))
-                                                .then(CommandManager.literal("netherfused")
-                                                        .then(CommandManager.argument("netherfused_power", IdentifierArgumentType.identifier())
-                                                                .suggests((context, builder) -> suggestPowers(builder, PowerType.NETHER))
-                                                                .executes(context -> spawnHostile(context, IntegerArgumentType.getInteger(context, "count")))))))
+                .then(spawnHostileCommand)
+                .then(lootTestCommand));
+    }
+
+    private static <T extends ArgumentBuilder<ServerCommandSource, T>> T configureSpawnArguments(T builder) {
+        return builder
+                .executes(SimplySwordsCommands::spawnHostile)
+                .then(CommandManager.literal("runefused")
+                        .then(CommandManager.argument("runefused_power", IdentifierArgumentType.identifier())
+                                .suggests((context, suggestions) -> suggestPowers(suggestions, PowerType.RUNEFUSED))
+                                .executes(SimplySwordsCommands::spawnHostile)
                                 .then(CommandManager.literal("netherfused")
                                         .then(CommandManager.argument("netherfused_power", IdentifierArgumentType.identifier())
-                                                .suggests((context, builder) -> suggestPowers(builder, PowerType.NETHER))
-                                                .executes(context -> spawnHostile(context, IntegerArgumentType.getInteger(context, "count"))))))));
+                                                .suggests((context, suggestions) -> suggestPowers(suggestions, PowerType.NETHER))
+                                                .executes(SimplySwordsCommands::spawnHostile)))))
+                .then(CommandManager.literal("netherfused")
+                        .then(CommandManager.argument("netherfused_power", IdentifierArgumentType.identifier())
+                                .suggests((context, suggestions) -> suggestPowers(suggestions, PowerType.NETHER))
+                                .executes(SimplySwordsCommands::spawnHostile)));
     }
 
     private static int givePoweredGem(CommandContext<ServerCommandSource> context, PowerType powerType) throws CommandSyntaxException {
@@ -186,6 +237,27 @@ public final class SimplySwordsCommands {
         return CommandSource.suggestIdentifiers(ids, builder);
     }
 
+    private static java.util.concurrent.CompletableFuture<com.mojang.brigadier.suggestion.Suggestions> suggestUniqueWeapons(com.mojang.brigadier.suggestion.SuggestionsBuilder builder) {
+        Stream<Identifier> ids = Registries.ITEM.getIds().stream()
+                .filter(id -> Registries.ITEM.get(id) instanceof UniqueSwordItem);
+        return CommandSource.suggestIdentifiers(ids, builder);
+    }
+
+    private static CompletableFuture<Suggestions> suggestLootTables(
+            CommandContext<ServerCommandSource> context,
+            SuggestionsBuilder builder) {
+        var lootTables = context.getSource().getServer().getReloadableRegistries();
+        Stream<Identifier> ids = lootTables.getIds(RegistryKeys.LOOT_TABLE).stream()
+                .filter(id -> {
+                    LootTable table = lootTables.getLootTable(
+                            RegistryKey.of(RegistryKeys.LOOT_TABLE, id)
+                    );
+                    return table.getType() == LootContextTypes.CHEST
+                            || table.getType() == LootContextTypes.ENTITY;
+                });
+        return CommandSource.suggestIdentifiers(ids, builder);
+    }
+
     private static List<Item> getUniqueWeapons() {
         if (cachedUniqueWeapons == null) {
             cachedUniqueWeapons = new ArrayList<>();
@@ -201,13 +273,236 @@ public final class SimplySwordsCommands {
         return cachedUniqueWeapons;
     }
 
-    private static int spawnHostile(CommandContext<ServerCommandSource> context, int count) throws CommandSyntaxException {
+    private static int runLootTest(
+            CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+        ServerCommandSource source = context.getSource();
+        ServerWorld world = source.getWorld();
+        Identifier rawTableId = IdentifierArgumentType.getIdentifier(context, "table");
+        Identifier tableId = normalizeLootTableId(rawTableId);
+        int rolls = IntegerArgumentType.getInteger(context, "rolls");
+        var lootTables = source.getServer().getReloadableRegistries();
+
+        if (!lootTables.getIds(RegistryKeys.LOOT_TABLE).contains(tableId)) {
+            throw UNKNOWN_LOOT_TABLE.create(tableId);
+        }
+
+        RegistryKey<LootTable> tableKey = RegistryKey.of(
+                RegistryKeys.LOOT_TABLE,
+                tableId
+        );
+        LootTable lootTable = lootTables.getLootTable(tableKey);
+        LootContextParameterSet lootContext = createLootTestContext(
+                source,
+                tableId,
+                lootTable
+        );
+
+        Map<Identifier, Long> weaponCounts = new HashMap<>();
+        long totalUniqueWeapons = 0L;
+        int rollsWithUnique = 0;
+
+        for (int i = 0; i < rolls; i++) {
+            List<ItemStack> generated = lootTable.generateLoot(
+                    lootContext,
+                    world.getRandom().nextLong()
+            );
+            boolean foundUnique = false;
+            for (ItemStack generatedStack : generated) {
+                if (generatedStack == null || generatedStack.isEmpty()
+                        || !(generatedStack.getItem() instanceof UniqueSwordItem)) {
+                    continue;
+                }
+                Identifier itemId = Registries.ITEM.getId(generatedStack.getItem());
+                if (!itemId.getNamespace().equals(SimplySwords.MOD_ID)) {
+                    continue;
+                }
+
+                long count = Math.max(1, generatedStack.getCount());
+                weaponCounts.merge(itemId, count, Long::sum);
+                totalUniqueWeapons += count;
+                foundUnique = true;
+            }
+            if (foundUnique) {
+                rollsWithUnique++;
+            }
+        }
+
+        if (!rawTableId.equals(tableId)) {
+            source.sendFeedback(
+                    () -> Text.literal(
+                            "Normalized loot table id: "
+                                    + tableId
+                                    + " (from "
+                                    + rawTableId
+                                    + ")"
+                    ),
+                    false
+            );
+        }
+
+        int finalRollsWithUnique = rollsWithUnique;
+        long finalTotalUniqueWeapons = totalUniqueWeapons;
+        source.sendFeedback(
+                () -> Text.literal("Loot test: " + tableId + " | rolls=" + rolls),
+                false
+        );
+        source.sendFeedback(
+                () -> Text.literal(
+                        "Rolls with a Simply Swords unique: "
+                                + finalRollsWithUnique
+                                + "/"
+                                + rolls
+                                + " ("
+                                + formatPercentage(finalRollsWithUnique, rolls)
+                                + ")"
+                ),
+                false
+        );
+        source.sendFeedback(
+                () -> Text.literal(
+                        "Total Simply Swords unique weapons dropped: "
+                                + finalTotalUniqueWeapons
+                ),
+                false
+        );
+
+        if (weaponCounts.isEmpty()) {
+            source.sendFeedback(
+                    () -> Text.literal(
+                            "No Simply Swords unique weapons dropped in this simulation."
+                    ),
+                    false
+            );
+            return 1;
+        }
+
+        List<Map.Entry<Identifier, Long>> sorted = new ArrayList<>(
+                weaponCounts.entrySet()
+        );
+        sorted.sort(
+                Comparator.<Map.Entry<Identifier, Long>>comparingLong(
+                                Map.Entry::getValue
+                        )
+                        .reversed()
+                        .thenComparing(entry -> entry.getKey().toString())
+        );
+        for (Map.Entry<Identifier, Long> entry : sorted) {
+            Identifier itemId = entry.getKey();
+            long count = entry.getValue();
+            source.sendFeedback(
+                    () -> Text.literal(
+                            " - "
+                                    + itemId
+                                    + ": "
+                                    + count
+                                    + " ("
+                                    + formatPercentage(count, rolls)
+                                    + " per roll)"
+                    ),
+                    false
+            );
+        }
+        return 1;
+    }
+
+    private static LootContextParameterSet createLootTestContext(
+            ServerCommandSource source,
+            Identifier tableId,
+            LootTable lootTable) throws CommandSyntaxException {
+        LootContextParameterSet.Builder builder =
+                new LootContextParameterSet.Builder(source.getWorld())
+                        .add(LootContextParameters.ORIGIN, source.getPosition());
+
+        if (lootTable.getType() == LootContextTypes.CHEST) {
+            builder.addOptional(LootContextParameters.THIS_ENTITY, source.getEntity());
+            return builder.build(LootContextTypes.CHEST);
+        }
+        if (lootTable.getType() != LootContextTypes.ENTITY) {
+            throw UNSUPPORTED_LOOT_TABLE.create(tableId);
+        }
+
+        Entity entity = source.getEntity();
+        if (entity == null) {
+            throw ENTITY_LOOT_SOURCE_REQUIRED.create(tableId);
+        }
+
+        DamageSource damageSource = entity instanceof PlayerEntity player
+                ? source.getWorld().getDamageSources().playerAttack(player)
+                : source.getWorld().getDamageSources().generic();
+        builder.add(LootContextParameters.THIS_ENTITY, entity)
+                .add(LootContextParameters.DAMAGE_SOURCE, damageSource)
+                .addOptional(LootContextParameters.ATTACKING_ENTITY, entity)
+                .addOptional(LootContextParameters.DIRECT_ATTACKING_ENTITY, entity);
+        if (entity instanceof ServerPlayerEntity player) {
+            builder.addOptional(LootContextParameters.LAST_DAMAGE_PLAYER, player);
+            builder.luck(player.getLuck());
+        }
+        return builder.build(LootContextTypes.ENTITY);
+    }
+
+    private static Identifier normalizeLootTableId(Identifier id) {
+        String namespace = id.getNamespace();
+        String path = id.getPath();
+
+        if (namespace.equals(Identifier.DEFAULT_NAMESPACE)
+                && path.startsWith(Identifier.DEFAULT_NAMESPACE + "/")) {
+            path = path.substring((Identifier.DEFAULT_NAMESPACE + "/").length());
+        }
+        if (!path.contains("/")) {
+            path = "chests/" + path;
+        }
+
+        int chestIndex = path.indexOf("chests/");
+        int entityIndex = path.indexOf("entities/");
+        int tablePathIndex;
+        if (chestIndex < 0) {
+            tablePathIndex = entityIndex;
+        } else if (entityIndex < 0) {
+            tablePathIndex = chestIndex;
+        } else {
+            tablePathIndex = Math.min(chestIndex, entityIndex);
+        }
+        if (tablePathIndex > 0) {
+            path = path.substring(tablePathIndex);
+        }
+
+        return Identifier.of(namespace, path);
+    }
+
+    private static String formatPercentage(long count, int total) {
+        if (total <= 0) {
+            return "0.0000%";
+        }
+        return String.format(
+                Locale.ROOT,
+                "%.4f%%",
+                count * 100.0 / total
+        );
+    }
+
+    private static int spawnHostile(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         ServerCommandSource source = context.getSource();
         ServerPlayerEntity player = source.getPlayerOrThrow();
         ServerWorld world = source.getWorld();
         List<Item> weapons = getUniqueWeapons();
+        int count = 1;
+        try {
+            count = IntegerArgumentType.getInteger(context, "count");
+        } catch (IllegalArgumentException ignored) {
+        }
 
-        if (weapons.isEmpty()) {
+        Item selectedWeapon = null;
+        try {
+            Identifier weaponId = normalizeSimplySwordsId(IdentifierArgumentType.getIdentifier(context, "weapon"));
+            Item item = Registries.ITEM.get(weaponId);
+            if (!(item instanceof UniqueSwordItem)) {
+                throw UNKNOWN_UNIQUE_WEAPON.create(weaponId);
+            }
+            selectedWeapon = item;
+        } catch (IllegalArgumentException ignored) {
+        }
+
+        if (selectedWeapon == null && weapons.isEmpty()) {
             source.sendFeedback(() -> Text.literal("No Simply Swords unique weapons found."), false);
             return 0;
         }
@@ -234,21 +529,25 @@ public final class SimplySwordsCommands {
             MobEntity mob = mobType.spawn(world, spawnPos, SpawnReason.COMMAND);
             if (mob == null) continue;
 
-            Item weapon = weapons.get(rng.nextInt(weapons.size()));
+            Item weapon = selectedWeapon != null
+                    ? selectedWeapon
+                    : weapons.get(rng.nextInt(weapons.size()));
             ItemStack weaponStack = new ItemStack(weapon);
 
             RegistryEntry<GemPower> runicPower = forcedRunic;
             RegistryEntry<GemPower> netherPower = forcedNether;
-            if (runicPower == null && rng.nextFloat() <= SOCKET_CHANCE) {
+            if (runicPower == null && rng.nextFloat() <= RANDOM_POWER_CHANCE) {
                 runicPower = GemPowerRegistry.gemRandomPower(PowerType.RUNEFUSED);
             }
-            if (netherPower == null && rng.nextFloat() <= SOCKET_CHANCE) {
+            if (netherPower == null && rng.nextFloat() <= RANDOM_POWER_CHANCE) {
                 netherPower = GemPowerRegistry.gemRandomPower(PowerType.NETHER);
             }
-            if (runicPower != null || netherPower != null) {
-                weaponStack.set(ComponentTypeRegistry.GEM_POWER.get(),
-                        GemPowerComponent.create(runicPower, netherPower));
-            }
+            weaponStack.set(ComponentTypeRegistry.GEM_POWER.get(), new GemPowerComponent(
+                    true,
+                    true,
+                    runicPower != null ? runicPower : GemPowerRegistry.EMPTY,
+                    netherPower != null ? netherPower : GemPowerRegistry.EMPTY
+            ));
 
             mob.equipStack(EquipmentSlot.MAINHAND, weaponStack);
             mob.setEquipmentDropChance(EquipmentSlot.MAINHAND, 0.0F);
@@ -259,7 +558,7 @@ public final class SimplySwordsCommands {
                 net.minecraft.text.MutableText msg = Text.literal("Spawned ").append(mobName)
                         .append(" with ").append(weaponName);
                 if (runicPower == null && netherPower == null) {
-                    msg.append(" (no sockets)");
+                    msg.append(" (empty sockets)");
                 } else {
                     msg.append(" (");
                     boolean first = true;
@@ -286,7 +585,13 @@ public final class SimplySwordsCommands {
 
         if (count > 1) {
             final int spawned = count;
-            source.sendFeedback(() -> Text.literal("Spawned " + spawned + " hostile mobs with random Simply Swords weapons."), true);
+            if (selectedWeapon != null) {
+                final Text selectedWeaponName = selectedWeapon.getName();
+                source.sendFeedback(() -> Text.literal("Spawned " + spawned + " hostile mobs with ")
+                        .append(selectedWeaponName).append("."), true);
+            } else {
+                source.sendFeedback(() -> Text.literal("Spawned " + spawned + " hostile mobs with random Simply Swords weapons."), true);
+            }
         }
         return count;
     }

@@ -34,7 +34,9 @@ public class NetherfusedGemItem extends Item implements GemPowerFiller {
     @Override
     public ValidationResult<GemPowerComponent> fill(ItemStack stack, GemPowerComponent component) {
         GemPowerComponent gemComponent = SimplySwordsAPI.getComponent(stack);
-        if (!gemComponent.hasNetherPower() || !component.netherPower().value().isEmpty() || !component.hasNetherPower()) {
+        if (!gemComponent.hasNetherPower()
+                || gemComponent.netherPower().value().isEmpty()
+                || !component.hasNetherPower()) {
             return ValidationResult.Companion.error(component, "Can't socket to the provided component");
         }
         return ValidationResult.Companion.success(component.fill(
@@ -59,7 +61,7 @@ public class NetherfusedGemItem extends Item implements GemPowerFiller {
         if (world.isClient) return;
 
         if (!stack.contains(ComponentTypeRegistry.GEM_POWER.get())) {
-            stack.set(ComponentTypeRegistry.GEM_POWER.get(), GemPowerComponent.runic(GemPowerRegistry.gemRandomPower(PowerType.NETHER)));
+            stack.set(ComponentTypeRegistry.GEM_POWER.get(), GemPowerComponent.nether(GemPowerRegistry.gemRandomPower(PowerType.NETHER)));
         }
     }
 
