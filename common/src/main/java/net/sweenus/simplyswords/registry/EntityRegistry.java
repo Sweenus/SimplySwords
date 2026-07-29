@@ -351,6 +351,15 @@ public class EntityRegistry {
                     .build(Identifier.of(SimplySwords.MOD_ID, "caelestis_dreadglare").toString())
     );
 
+    public static final RegistrySupplier<EntityType<CaelestisTentacleEntity>> CAELESTIS_TENTACLE = ENTITIES.register(
+            "caelestis_tentacle",
+            () -> EntityType.Builder.<CaelestisTentacleEntity>create(CaelestisTentacleEntity::new, SpawnGroup.MISC)
+                    .dimensions(1.6F, 4.1F)
+                    .maxTrackingRange(96)
+                    .trackingTickInterval(1)
+                    .build(Identifier.of(SimplySwords.MOD_ID, "caelestis_tentacle").toString())
+    );
+
     public static final RegistrySupplier<EntityType<SimplySwordsCreeperHeadEntity>> CREEPER_HEAD = ENTITIES.register(
             "creeper_head",
             () -> EntityType.Builder.<SimplySwordsCreeperHeadEntity>create(SimplySwordsCreeperHeadEntity::new, SpawnGroup.MISC)

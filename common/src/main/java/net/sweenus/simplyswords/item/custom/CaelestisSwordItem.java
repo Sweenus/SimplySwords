@@ -120,6 +120,14 @@ public class CaelestisSwordItem extends UniqueSwordItem implements UniqueWeaponA
         public int maxSpawnPerWave = 3;
         @ValidatedInt.Restrict(min = 1)
         public int maxMinions = 12;
+        @ValidatedInt.Restrict(min = 0)
+        public int maxTentacles = 12;
+        @ValidatedInt.Restrict(min = 1)
+        public int tentacleSpawnInterval = 30;
+        @ValidatedInt.Restrict(min = 1)
+        public int tentacleSlowDuration = 20;
+        @ValidatedInt.Restrict(min = 0, max = 4)
+        public int tentacleSlowAmplifier = 1;
         @ValidatedInt.Restrict(min = 0, max = 100)
         public int betrayalChance = 5;
         @ValidatedInt.Restrict(min = 0, max = 100)
