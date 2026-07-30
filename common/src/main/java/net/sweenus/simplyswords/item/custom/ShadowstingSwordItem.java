@@ -35,6 +35,9 @@ public class ShadowstingSwordItem extends UniqueSwordItem implements UniqueWeapo
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        if (!net.sweenus.simplyswords.api.AwakeningApi.isAbilityUnlocked(stack)) {
+            return super.postHit(stack, target, attacker);
+        }
         HelperMethods.playHitSounds(attacker, target);
         if (!attacker.getWorld().isClient()
                 && attacker instanceof ServerPlayerEntity serverPlayer

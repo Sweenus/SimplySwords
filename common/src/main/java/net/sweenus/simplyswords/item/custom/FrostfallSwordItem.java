@@ -39,6 +39,9 @@ public class FrostfallSwordItem extends UniqueSwordItem implements UniqueWeaponA
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        if (!net.sweenus.simplyswords.api.AwakeningApi.isAbilityUnlocked(stack)) {
+            return super.postHit(stack, target, attacker);
+        }
         if (attacker.getWorld().isClient()) super.postHit(stack, target, attacker);
         HelperMethods.playHitSounds(attacker, target);
         return super.postHit(stack, target, attacker);

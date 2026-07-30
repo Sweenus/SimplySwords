@@ -53,6 +53,9 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        if (!net.sweenus.simplyswords.api.AwakeningApi.isAbilityUnlocked(stack)) {
+            return super.postHit(stack, target, attacker);
+        }
         if (!attacker.getWorld().isClient()) {
             ServerWorld sworld = (ServerWorld) attacker.getWorld();
             HelperMethods.playHitSounds(attacker, target);

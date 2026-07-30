@@ -11,6 +11,7 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.DragonWingBuffetVisualEntity;
@@ -33,7 +34,8 @@ public final class WingBuffetManager {
         Vec3d center = attacker.getPos().add(0.0, attacker.getHeight() * 0.55, 0.0);
         double range = Math.max(0.5, Config.gemPowers.wingBuffet.range);
         double halfAngleCos = Math.cos(Math.toRadians(MathHelper.clamp(Config.gemPowers.wingBuffet.coneAngleDegrees, 1.0, 180.0) * 0.5));
-        float damage = HelperMethods.attackScaledDamage(attacker, stack, Config.gemPowers.wingBuffet.damageScaling);
+        float damage = AwakeningApi.scaleGemPower(stack,
+                HelperMethods.attackScaledDamage(attacker, stack, Config.gemPowers.wingBuffet.damageScaling));
         DamageSource damageSource = SimplySwordsAPI.getWeaponDamageSource(attacker);
         boolean hitAny = false;
 
@@ -56,7 +58,7 @@ public final class WingBuffetManager {
             }
 
             if (damageTarget(world, stack, target, damageSource, damage)) {
-                applyKnockback(target, targetDirection);
+                applyKnockback(target, targetDirection, AwakeningApi.getGemPowerMultiplier(stack));
                 hitAny = true;
             }
         }
@@ -72,9 +74,9 @@ public final class WingBuffetManager {
         return direction.lengthSquared() > 1.0E-5 ? direction.normalize() : Vec3d.fromPolar(0.0F, attacker.getYaw()).normalize();
     }
 
-    private static void applyKnockback(LivingEntity target, Vec3d targetDirection) {
-        double strength = Math.max(0.0, Config.gemPowers.wingBuffet.knockbackStrength);
-        double upward = Math.max(0.0, Config.gemPowers.wingBuffet.upwardKnockback);
+    private static void applyKnockback(LivingEntity target, Vec3d targetDirection, float multiplier) {
+        double strength = Math.max(0.0, Config.gemPowers.wingBuffet.knockbackStrength) * multiplier;
+        double upward = Math.max(0.0, Config.gemPowers.wingBuffet.upwardKnockback) * multiplier;
         target.setVelocity(target.getVelocity().add(targetDirection.x * strength, upward, targetDirection.z * strength));
         target.velocityModified = true;
     }

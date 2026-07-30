@@ -46,6 +46,9 @@ public class EmberIreSwordItem extends UniqueSwordItem implements UniqueWeaponAc
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        if (!net.sweenus.simplyswords.api.AwakeningApi.isAbilityUnlocked(stack)) {
+            return super.postHit(stack, target, attacker);
+        }
         if (!attacker.getWorld().isClient()) {
             HelperMethods.playHitSounds(attacker, target);
 

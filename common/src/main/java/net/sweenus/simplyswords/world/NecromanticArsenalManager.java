@@ -9,6 +9,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.Box;
+import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.SimplySwordsMinion;
 import net.sweenus.simplyswords.entity.SimplySwordsSkeletonMinionEntity;
@@ -52,7 +53,8 @@ public final class NecromanticArsenalManager {
 
         minion.initializeMinion(attacker, stack.copy(), -1,
                 world.getTime() + Math.max(1, Config.gemPowers.necromanticArsenal.duration),
-                (float) Math.max(0.0, HelperMethods.getEntityAttackDamage(attacker)));
+                AwakeningApi.scaleGemPower(stack,
+                        (float) Math.max(0.0, HelperMethods.getEntityAttackDamage(attacker))));
         world.spawnParticles(ParticleTypes.SOUL, minion.getX(), minion.getBodyY(0.55), minion.getZ(), 22, 0.45, 0.55, 0.45, 0.08);
         world.spawnParticles(ParticleTypes.SMOKE, minion.getX(), minion.getBodyY(0.45), minion.getZ(), 14, 0.35, 0.35, 0.35, 0.035);
         world.playSound(null, minion.getBlockPos(), SoundEvents.ENTITY_WITHER_SKELETON_AMBIENT, SoundCategory.PLAYERS, 0.65F, 1.35F);
@@ -78,7 +80,8 @@ public final class NecromanticArsenalManager {
 
         minion.initializeMinion(player, stack.copy(), findSourceWeaponSlot(player, stack),
                 world.getTime() + Math.max(1, Config.gemPowers.necromanticArsenal.duration),
-                (float) Math.max(0.0, HelperMethods.getEntityAttackDamage(player)));
+                AwakeningApi.scaleGemPower(stack,
+                        (float) Math.max(0.0, HelperMethods.getEntityAttackDamage(player))));
         world.spawnParticles(ParticleTypes.SOUL, minion.getX(), minion.getBodyY(0.55), minion.getZ(), 22, 0.45, 0.55, 0.45, 0.08);
         world.spawnParticles(ParticleTypes.SMOKE, minion.getX(), minion.getBodyY(0.45), minion.getZ(), 14, 0.35, 0.35, 0.35, 0.035);
         world.playSound(null, minion.getBlockPos(), SoundEvents.ENTITY_WITHER_SKELETON_AMBIENT, SoundCategory.PLAYERS, 0.65F, 1.35F);

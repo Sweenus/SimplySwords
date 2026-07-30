@@ -16,6 +16,7 @@ import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
+import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
@@ -56,6 +57,7 @@ public class ActiveDefencePower extends RunefusedGemPower {
 						ArrowEntity arrow = new ArrowEntity(EntityType.ARROW, world);
 						arrow.updatePosition(player.getX(), (player.getY() + 1.5), player.getZ());
 						arrow.setOwner(player);
+						arrow.setDamage(AwakeningApi.scaleGemPower(stack, arrow.getDamage()));
 						arrow.setVelocity(le.getX() - player.getX(), (le.getY() - player.getY()) - 1, le.getZ() - player.getZ());
 						world.spawnEntity(arrow);
 						break;

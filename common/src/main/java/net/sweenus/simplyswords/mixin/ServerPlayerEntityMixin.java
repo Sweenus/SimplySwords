@@ -25,6 +25,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
+import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.LootConfig;
 import net.sweenus.simplyswords.item.ContainedRemnantItem;
@@ -106,6 +107,7 @@ public abstract class ServerPlayerEntityMixin {
                     if (stackInSlot.isOf(ItemsRegistry.DECAYING_RELIC.get())) {
                         ItemStack newItemStack = new ItemStack(ItemsRegistry.MAGISCYTHE.get());
                         newItemStack.applyComponentsFrom(stackInSlot.getComponents());
+                        AwakeningApi.setLevel(newItemStack, AwakeningApi.getLevel(stackInSlot));
                         serverPlayer.getInventory().setStack(i, newItemStack);
                         serverPlayer.getWorld().playSoundFromEntity(null, serverPlayer, SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_IMPACT_02.get(),
                                 serverPlayer.getSoundCategory(), 0.6f, 0.6f);
@@ -142,7 +144,10 @@ public abstract class ServerPlayerEntityMixin {
             StormbringerParryManager.tickPlayer(serverPlayer);
 
             //Ribboncleaver movespeed debuff
-            if (serverPlayer.getMainHandStack().isOf(ItemsRegistry.RIBBONCLEAVER.get()) || serverPlayer.getMainHandStack().isOf(ItemsRegistry.ENIGMA.get())) {
+            ItemStack heldUnique = serverPlayer.getMainHandStack();
+            if (AwakeningApi.isAbilityUnlocked(heldUnique)
+                    && (heldUnique.isOf(ItemsRegistry.RIBBONCLEAVER.get())
+                    || heldUnique.isOf(ItemsRegistry.ENIGMA.get()))) {
                 int frequency = 6;
                 if (serverPlayer.age % 20 == 0 && serverPlayer.getMainHandStack().isOf(ItemsRegistry.RIBBONCLEAVER.get()))
                     serverPlayer.addStatusEffect(new StatusEffectInstance(EffectRegistry.getReference(EffectRegistry.RIBBONWRATH),
@@ -231,6 +236,7 @@ public abstract class ServerPlayerEntityMixin {
                                     serverPlayer.sendMessageToClient(Text.translatable("item.simplyswords.contained_remnant.event"), true);
                                 }
                                 ItemStack newItemStack = new ItemStack(randomItem);
+                                AwakeningApi.initializeNaturalDrop(newItemStack);
                                 serverPlayer.getInventory().setStack(i, newItemStack);
                                 break;
                             }
@@ -256,6 +262,7 @@ public abstract class ServerPlayerEntityMixin {
                     if (chance < 15 && playerStandingBlock.isOf(Blocks.SCULK_SENSOR) && stackInSlot.isOf(decayingRelic.getItem())) {
                         ItemStack newItemStack = new ItemStack(ItemsRegistry.MAGIBLADE.get());
                         newItemStack.applyComponentsFrom(stackInSlot.getComponents());
+                        AwakeningApi.setLevel(newItemStack, AwakeningApi.getLevel(stackInSlot));
                         serverPlayer.getInventory().setStack(i, newItemStack);
                         serverPlayer.getWorld().playSoundFromEntity(null, serverPlayer, SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_IMPACT_02.get(),
                                 serverPlayer.getSoundCategory(), 0.6f, 0.6f);
@@ -268,6 +275,7 @@ public abstract class ServerPlayerEntityMixin {
                         if (chance < 2) {
                             ItemStack newItemStack = new ItemStack(ItemsRegistry.MAGISPEAR.get());
                             newItemStack.applyComponentsFrom(stackInSlot.getComponents());
+                            AwakeningApi.setLevel(newItemStack, AwakeningApi.getLevel(stackInSlot));
                             serverPlayer.getInventory().setStack(i, newItemStack);
                             serverPlayer.getWorld().playSoundFromEntity(null, serverPlayer, SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_IMPACT_02.get(),
                                     serverPlayer.getSoundCategory(), 0.6f, 0.6f);

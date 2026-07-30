@@ -7,6 +7,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Hand;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
+import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.api.WeaponAbilityActivationSource;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.config.Config;
@@ -52,13 +53,13 @@ public abstract class MobEntityMixin {
         if (!stack.isEmpty()) {
             stack.inventoryTick(world, mob, 0, true);
         }
-        if (stack.isOf(ItemsRegistry.ICEWHISPER.get())) {
+        if (AwakeningApi.isAbilityUnlocked(stack) && stack.isOf(ItemsRegistry.ICEWHISPER.get())) {
             IcewhisperSwordItem.tickPassiveAura(world, mob, stack);
         }
-        if (stack.isOf(ItemsRegistry.SOULKEEPER.get())) {
+        if (AwakeningApi.isAbilityUnlocked(stack) && stack.isOf(ItemsRegistry.SOULKEEPER.get())) {
             SoulkeeperLanternManager.tickFromItem(mob, stack);
         }
-        if (stack.getItem() instanceof LichbladeSwordItem) {
+        if (AwakeningApi.isAbilityUnlocked(stack) && stack.getItem() instanceof LichbladeSwordItem) {
             LichbladeSwordItem.tickPassiveAura(world, mob, stack);
         }
         if (mob instanceof SimplySwordsSkeletonMinionEntity || mob instanceof SimplySwordsWolfMinionEntity) {

@@ -22,5 +22,7 @@ public class ComponentTypeRegistry {
     public static final RegistrySupplier<ComponentType<MoltenHeatComponent>> MOLTEN_HEAT = COMPONENT_TYPES.register("molten_heat", () -> ComponentType.<MoltenHeatComponent>builder().codec(MoltenHeatComponent.CODEC).packetCodec(MoltenHeatComponent.PACKET_CODEC).build());
     public static final RegistrySupplier<ComponentType<ParryComponent>> PARRY = COMPONENT_TYPES.register("parry", () -> ComponentType.<ParryComponent>builder().codec(ParryComponent.CODEC).packetCodec(ParryComponent.PACKET_CODEC).build());
     public static final RegistrySupplier<ComponentType<WeaponImplicitComponent>> WEAPON_IMPLICIT = COMPONENT_TYPES.register("weapon_implicit", () -> ComponentType.<WeaponImplicitComponent>builder().codec(WeaponImplicitComponent.CODEC).packetCodec(WeaponImplicitComponent.PACKET_CODEC).build());
+    public static final RegistrySupplier<ComponentType<AwakeningComponent>> AWAKENING = COMPONENT_TYPES.register("awakening", () -> ComponentType.<AwakeningComponent>builder().codec(AwakeningComponent.CODEC).packetCodec(AwakeningComponent.PACKET_CODEC).build());
+    public static final RegistrySupplier<ComponentType<RelicAttunementComponent>> RELIC_ATTUNEMENT = COMPONENT_TYPES.register("relic_attunement", () -> ComponentType.<RelicAttunementComponent>builder().codec(RelicAttunementComponent.CODEC).packetCodec(RelicAttunementComponent.PACKET_CODEC).build());
 
 }

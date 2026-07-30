@@ -40,6 +40,7 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.SimplySwordsExpectPlatform;
+import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.api.DelegatedWeaponHitContext;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.compat.opac.OpacCompat;
@@ -512,7 +513,7 @@ public class HelperMethods {
     public static float abilityScaledDamage(String spellSchool, LivingEntity actor, ItemStack stack, float attackScaling, float spellScaling) {
         float spellDamage = commonSpellAttributeScaling(spellScaling, actor, spellSchool);
         float attackDamage = attackScaledDamage(actor, stack, attackScaling);
-        return Math.max(spellDamage, attackDamage);
+        return AwakeningApi.scaleEffect(stack, Math.max(spellDamage, attackDamage));
     }
 
     public static float abilityScaledDamage(String spellSchool, LivingEntity actor, float attackScaling, float spellScaling) {

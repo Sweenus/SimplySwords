@@ -42,6 +42,9 @@ public abstract class WatcherSwordItem extends UniqueSwordItem implements Unique
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        if (!net.sweenus.simplyswords.api.AwakeningApi.isAbilityUnlocked(stack)) {
+            return super.postHit(stack, target, attacker);
+        }
         if (!attacker.getWorld().isClient() && attacker.getWorld() instanceof ServerWorld world) {
             DelegatedWeaponHitContext delegated = SimplySwordsAPI.getDelegatedWeaponHitContext();
             LivingEntity effectiveActor = delegated == null ? attacker : delegated.actor();

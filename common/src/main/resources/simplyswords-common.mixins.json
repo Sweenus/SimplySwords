@@ -18,6 +18,8 @@
     "EntityMixin",
     "LivingEntityMixin",
     "ServerPlayerEntityMixin",
+    "ServerPlayerPityMixin",
+    "LootableInventoryMixin",
     "ServerPlayerInteractionManagerMixin",
     "ServerPlayNetworkHandlerMixin",
     "PlayerEntityMixin",

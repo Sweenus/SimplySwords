@@ -6,6 +6,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.Box;
+import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.FallingSnifferEntity;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -33,7 +34,8 @@ public final class SnifferSlamManager {
             return false;
         }
 
-        float damage = HelperMethods.attackScaledDamage(attacker, stack, (float) Config.gemPowers.snifferSlam.damageScaling);
+        float damage = AwakeningApi.scaleGemPower(stack,
+                HelperMethods.attackScaledDamage(attacker, stack, (float) Config.gemPowers.snifferSlam.damageScaling));
         if (damage <= 0.0F) {
             return false;
         }
@@ -43,7 +45,7 @@ public final class SnifferSlamManager {
                 Config.gemPowers.snifferSlam.fallHeight,
                 Config.gemPowers.snifferSlam.fallSpeed,
                 Config.gemPowers.snifferSlam.impactRadius,
-                Config.gemPowers.snifferSlam.immobiliseDurationTicks,
+                AwakeningApi.scaleGemPowerDuration(stack, Config.gemPowers.snifferSlam.immobiliseDurationTicks),
                 Config.gemPowers.snifferSlam.lingerTicks);
         if (!world.spawnEntity(sniffer)) {
             return false;

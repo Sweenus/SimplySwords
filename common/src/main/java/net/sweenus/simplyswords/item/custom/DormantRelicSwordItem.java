@@ -3,25 +3,40 @@ package net.sweenus.simplyswords.item.custom;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.SpawnReason;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.TypedActionResult;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.sweenus.simplyswords.api.AwakeningApi;
+import net.sweenus.simplyswords.api.WeaponAbilityContext;
+import net.sweenus.simplyswords.config.Config;
+import net.sweenus.simplyswords.entity.BattleStandardDarkEntity;
+import net.sweenus.simplyswords.entity.BattleStandardEntity;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
+import net.sweenus.simplyswords.item.component.RelicAttunementComponent;
+import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
+import net.sweenus.simplyswords.registry.ComponentTypeRegistry;
+import net.sweenus.simplyswords.registry.EntityRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
+import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
 
 import java.util.List;
 
-public class DormantRelicSwordItem extends UniqueSwordItem {
+public class DormantRelicSwordItem extends UniqueSwordItem implements UniqueWeaponActiveAbility {
 
     public DormantRelicSwordItem(ToolMaterial toolMaterial, Settings settings) {
         super(toolMaterial, settings);
@@ -29,13 +44,99 @@ public class DormantRelicSwordItem extends UniqueSwordItem {
 
 	@Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        if (!net.sweenus.simplyswords.api.AwakeningApi.isAbilityUnlocked(stack)) {
+            return super.postHit(stack, target, attacker);
+        }
         HelperMethods.playHitSounds(attacker, target);
+        if (!attacker.getWorld().isClient() && AwakeningApi.isAbilityUnlocked(stack)) {
+            RelicAttunementComponent attunement = stack.getOrDefault(
+                    ComponentTypeRegistry.RELIC_ATTUNEMENT.get(), RelicAttunementComponent.UNATTUNED);
+            if (attunement.isSun()
+                    && attacker.getRandom().nextInt(100) < AwakeningApi.scaleChance(stack, Config.uniqueEffects.sunfire.chance)) {
+                attacker.getWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
+                        attacker.getSoundCategory(), 0.3f, 1.7f);
+                attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.REGENERATION, 40,
+                        AwakeningApi.getLevel(stack) >= 8 ? 1 : 0), attacker);
+            } else if (attunement.isHarbinger()
+                    && attacker.getRandom().nextInt(100) < AwakeningApi.scaleChance(stack, Config.uniqueEffects.harbinger.chance)) {
+                attacker.getWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
+                        attacker.getSoundCategory(), 0.3f, 1.6f);
+                target.addStatusEffect(new StatusEffectInstance(StatusEffects.WEAKNESS, 160, 0), attacker);
+            }
+        }
         return super.postHit(stack, target, attacker);
     }
 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
-        return super.use(world, user, hand);
+        return useFromDefaultInput(world, user, hand);
+    }
+
+    @Override
+    public boolean canActivate(WeaponAbilityContext context) {
+        if (context == null || AwakeningApi.getLevel(context.stack()) < 8) {
+            return false;
+        }
+        RelicAttunementComponent attunement = context.stack().getOrDefault(
+                ComponentTypeRegistry.RELIC_ATTUNEMENT.get(), RelicAttunementComponent.UNATTUNED);
+        return (attunement.isSun() || attunement.isHarbinger())
+                && context.world().getBlockState(getStandardPosition(context.actor())).isAir()
+                && context.actor().isAlive()
+                && context.stack().getDamage() < context.stack().getMaxDamage() - 1;
+    }
+
+    @Override
+    public boolean activate(WeaponAbilityContext context) {
+        RelicAttunementComponent attunement = context.stack().getOrDefault(
+                ComponentTypeRegistry.RELIC_ATTUNEMENT.get(), RelicAttunementComponent.UNATTUNED);
+        BlockPos pos = getStandardPosition(context.actor());
+        if (!context.world().getBlockState(pos).isAir()) {
+            return false;
+        }
+        if (attunement.isSun()) {
+            context.world().playSoundFromEntity(null, context.actor(),
+                    SoundRegistry.ELEMENTAL_SWORD_EARTH_ATTACK_01.get(),
+                    context.actor().getSoundCategory(), 0.4f, 0.8f);
+            BattleStandardEntity standard = EntityRegistry.BATTLESTANDARD.get().spawn(
+                    context.world(), pos, SpawnReason.MOB_SUMMONED);
+            if (standard == null) return false;
+            standard.setVelocity(0, -1, 0);
+            standard.ownerEntity = context.actor();
+            standard.decayRate = 3;
+            standard.standardType = "sunfire";
+            standard.setCustomName(Text.translatable("entity.simplyswords.battlestandard.name",
+                    context.actor().getName()));
+            return true;
+        }
+        if (attunement.isHarbinger()) {
+            context.world().playSoundFromEntity(null, context.actor(),
+                    SoundRegistry.DARK_SWORD_ATTACK_WITH_BLOOD_02.get(),
+                    context.actor().getSoundCategory(), 0.4f, 0.8f);
+            BattleStandardDarkEntity standard = EntityRegistry.BATTLESTANDARDDARK.get().spawn(
+                    context.world(), pos, SpawnReason.MOB_SUMMONED);
+            if (standard == null) return false;
+            standard.setVelocity(0, -1, 0);
+            standard.ownerEntity = context.actor();
+            standard.decayRate = 3;
+            standard.standardType = "harbinger";
+            standard.setCustomName(Text.translatable("entity.simplyswords.battlestandard.name",
+                    context.actor().getName()));
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public int getActivationCooldownTicks(ItemStack stack, WeaponAbilityContext context) {
+        RelicAttunementComponent attunement = stack.getOrDefault(
+                ComponentTypeRegistry.RELIC_ATTUNEMENT.get(), RelicAttunementComponent.UNATTUNED);
+        return attunement.isSun()
+                ? Config.uniqueEffects.sunfire.cooldown
+                : Config.uniqueEffects.harbinger.cooldown;
+    }
+
+    private BlockPos getStandardPosition(LivingEntity user) {
+        return user.getBlockPos().up(4).offset(user.getMovementDirection(), 3);
     }
 
     @Override
@@ -51,9 +152,25 @@ public class DormantRelicSwordItem extends UniqueSwordItem {
 
     @Override
     public void appendTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
-
         tooltip.add(Text.literal(""));
-        tooltip.add(Text.translatable("item.simplyswords.dormantrelicsworditem.tooltip2").setStyle(Styles.TEXT));
+        int awakening = AwakeningApi.getLevel(itemStack);
+        RelicAttunementComponent attunement = itemStack.getOrDefault(
+                ComponentTypeRegistry.RELIC_ATTUNEMENT.get(), RelicAttunementComponent.UNATTUNED);
+        if (awakening < 4 || (!attunement.isSun() && !attunement.isHarbinger())) {
+            tooltip.add(Text.translatable("item.simplyswords.dormantrelicsworditem.tooltip2").setStyle(Styles.TEXT));
+        } else {
+            String path = attunement.isSun() ? "sunfire" : "harbinger";
+            tooltip.add(Text.translatable("item.simplyswords." + path + "sworditem.tooltip1").setStyle(Styles.ABILITY));
+            tooltip.add(Text.translatable("item.simplyswords." + path + "sworditem.tooltip2").setStyle(Styles.TEXT));
+            if (awakening >= 8) {
+                tooltip.add(Text.literal(""));
+                tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
+                tooltip.add(Text.translatable("item.simplyswords." + path + "sworditem.tooltip3").setStyle(Styles.TEXT));
+                appendAbilityCooldownTooltip(tooltip, attunement.isSun()
+                        ? Config.uniqueEffects.sunfire.cooldown
+                        : Config.uniqueEffects.harbinger.cooldown);
+            }
+        }
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
         if (this.asItem().equals(ItemsRegistry.DECAYING_RELIC.get())) {
             if (Screen.hasAltDown()) {

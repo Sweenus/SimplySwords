@@ -39,6 +39,9 @@ public class StormsEdgeSwordItem extends UniqueSwordItem implements UniqueWeapon
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        if (!net.sweenus.simplyswords.api.AwakeningApi.isAbilityUnlocked(stack)) {
+            return super.postHit(stack, target, attacker);
+        }
         HelperMethods.playHitSounds(attacker, target);
         if (attacker.getWorld().isClient()) {
             return super.postHit(stack, target, attacker);

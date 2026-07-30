@@ -7,6 +7,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.item.ItemStack;
 import net.minecraft.particle.BlockStateParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -17,6 +18,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.VerdantTrailVisualEntity;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -49,8 +51,9 @@ public final class VerdantTrailManager {
         return (segments != null && !segments.isEmpty()) || (placements != null && !placements.isEmpty()) || world.getTime() % 20L == 0L;
     }
 
-    public static void tryPlaceTrail(LivingEntity user) {
+    public static void tryPlaceTrail(LivingEntity user, ItemStack stack) {
         if (!(user.getWorld() instanceof ServerWorld world)) return;
+        if (stack == null || stack.isEmpty()) return;
         boolean spectator = user instanceof PlayerEntity p && p.isSpectator();
         if (!user.isAlive() || spectator || !user.isOnGround()) {
             return;
@@ -74,7 +77,7 @@ public final class VerdantTrailManager {
         }
 
         placements.put(ownerId, new LastPlacement(ground, now));
-        createSegment(world, ownerId, ground);
+        createSegment(world, user, ground, stack);
     }
 
     public static void tick(ServerWorld world) {
@@ -124,9 +127,21 @@ public final class VerdantTrailManager {
         }
     }
 
-    private static void createSegment(ServerWorld world, UUID ownerId, Vec3d center) {
+    private static void createSegment(ServerWorld world, LivingEntity owner, Vec3d center, ItemStack stack) {
         int duration = Math.max(1, Config.gemPowers.verdantTrail.duration);
-        TrailSegment segment = new TrailSegment(ownerId, center, world.getTime(), world.getTime() + duration, new ArrayList<>());
+        float damage = AwakeningApi.scaleGemPower(stack,
+                HelperMethods.attackScaledDamage(owner, stack, Config.gemPowers.verdantTrail.damageScaling));
+        int regenerationDuration = AwakeningApi.scaleGemPowerDuration(
+                stack, Config.gemPowers.verdantTrail.regenerationDuration);
+        TrailSegment segment = new TrailSegment(
+                owner.getUuid(),
+                center,
+                world.getTime(),
+                world.getTime() + duration,
+                stack.copy(),
+                damage,
+                regenerationDuration,
+                new ArrayList<>());
         int minPoints = Math.max(1, Config.gemPowers.verdantTrail.visualPointsMin);
         int maxPoints = Math.max(minPoints, Config.gemPowers.verdantTrail.visualPointsMax);
         int pointCount = minPoints + world.random.nextInt(maxPoints - minPoints + 1);
@@ -162,25 +177,27 @@ public final class VerdantTrailManager {
             if (entity == owner || !HelperMethods.checkFriendlyFire(entity, owner)) {
                 entity.addStatusEffect(
                         new StatusEffectInstance(StatusEffects.REGENERATION,
-                                Math.max(1, Config.gemPowers.verdantTrail.regenerationDuration),
+                                segment.regenerationDuration(),
                                 Math.max(0, Config.gemPowers.verdantTrail.regenerationAmplifier),
                                 false,
                                 true),
                         owner
                 );
             } else {
-                damageWithoutKnockback(entity, owner, HelperMethods.attackScaledDamage(owner, owner.getMainHandStack(), Config.gemPowers.verdantTrail.damageScaling));
+                damageWithoutKnockback(entity, owner, segment.weaponStack(), segment.damage());
             }
         }
     }
 
-    private static void damageWithoutKnockback(LivingEntity target, LivingEntity owner, float damage) {
+    private static void damageWithoutKnockback(
+            LivingEntity target, LivingEntity owner, ItemStack stack, float damage) {
         if (damage <= 0.0F) {
             return;
         }
         Vec3d velocity = target.getVelocity();
         var damageSource = owner.getDamageSources().indirectMagic(owner, owner);
-        if (target.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments((ServerWorld) owner.getWorld(), owner.getMainHandStack(), target, damageSource, damage))) {
+        if (target.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments(
+                (ServerWorld) owner.getWorld(), stack, target, damageSource, damage))) {
             target.setVelocity(velocity);
             target.velocityModified = true;
         }
@@ -264,7 +281,15 @@ public final class VerdantTrailManager {
         }
     }
 
-    private record TrailSegment(UUID ownerId, Vec3d center, long createdTick, long expiryTick, List<UUID> visualIds) {
+    private record TrailSegment(
+            UUID ownerId,
+            Vec3d center,
+            long createdTick,
+            long expiryTick,
+            ItemStack weaponStack,
+            float damage,
+            int regenerationDuration,
+            List<UUID> visualIds) {
     }
 
     private record LastPlacement(Vec3d position, long tick) {

@@ -9,6 +9,7 @@ import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
+import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.SimplySwordsGoatStampedeEntity;
 import net.sweenus.simplyswords.entity.SimplySwordsMinion;
@@ -69,11 +70,13 @@ public final class GoatStampedeManager {
             boolean screaming = attacker.getRandom().nextInt(100) < Config.gemPowers.goatStampede.screamingChance;
             anyScreaming |= screaming;
             double damageScaling = screaming ? Config.gemPowers.goatStampede.screamingDamageScaling : Config.gemPowers.goatStampede.damageScaling;
-            float damage = HelperMethods.attackScaledDamage(attacker, stack, (float) damageScaling);
+            float damage = AwakeningApi.scaleGemPower(stack,
+                    HelperMethods.attackScaledDamage(attacker, stack, (float) damageScaling));
 
             goat.refreshPositionAndAngles(spawnPos.x, spawnPos.y, spawnPos.z, attacker.getYaw(), 0.0F);
             goat.initializeStampede(attacker, stack, direction, expiresAtTick, damage,
-                    Config.gemPowers.goatStampede.knockbackStrength, Config.gemPowers.goatStampede.chargeSpeed, screaming);
+                    AwakeningApi.scaleGemPower(stack, Config.gemPowers.goatStampede.knockbackStrength),
+                    Config.gemPowers.goatStampede.chargeSpeed, screaming);
         }
 
         world.spawnParticles(ParticleTypes.POOF, attacker.getX(), attacker.getBodyY(0.4), attacker.getZ(), 14, 0.4, 0.3, 0.4, 0.03);

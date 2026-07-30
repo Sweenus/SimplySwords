@@ -20,6 +20,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
+import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.MoltenRuptureVisualEntity;
 import net.sweenus.simplyswords.item.component.MoltenHeatComponent;
@@ -107,6 +108,7 @@ public final class MoltenEdgeAbilityManager {
                 && stack != null
                 && !stack.isEmpty()
                 && stack.isOf(ItemsRegistry.MOLTEN_EDGE.get())
+                && AwakeningApi.isAbilityUnlocked(stack)
                 && (wielder.getMainHandStack() == stack || wielder.getOffHandStack() == stack);
     }
 
@@ -282,6 +284,13 @@ public final class MoltenEdgeAbilityManager {
         }
 
         MoltenHeatComponent heat = getHeatComponent(stack);
+        if (!AwakeningApi.isAbilityUnlocked(stack)) {
+            if (heat.heat() > 0 || heat.venting()) {
+                stack.set(ComponentTypeRegistry.MOLTEN_HEAT.get(), MoltenHeatComponent.DEFAULT);
+                cancelVent(living, stack);
+            }
+            return;
+        }
         if (!isHeldMoltenEdge(living, stack)) {
             if (heat.heat() > 0 || heat.venting()) {
                 stack.set(ComponentTypeRegistry.MOLTEN_HEAT.get(), MoltenHeatComponent.DEFAULT);

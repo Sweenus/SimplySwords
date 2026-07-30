@@ -13,6 +13,7 @@ import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
+import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.DancingBladeVisualEntity;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -46,6 +47,8 @@ public final class DancingBladeManager {
             return false;
         }
 
+        float damage = AwakeningApi.scaleGemPower(stack,
+                HelperMethods.attackScaledDamage(player, stack, Config.gemPowers.dancingBlades.damageScaling));
         DancingBladeVisualEntity blade = new DancingBladeVisualEntity(
                 world,
                 player.getUuid(),
@@ -53,7 +56,8 @@ public final class DancingBladeManager {
                 stack.copy(),
                 slot,
                 Math.max(0.5, Config.gemPowers.dancingBlades.orbitRadius),
-                world.getTime() + Math.max(1, Config.gemPowers.dancingBlades.duration)
+                world.getTime() + Math.max(1, Config.gemPowers.dancingBlades.duration),
+                damage
         );
         blade.addCommandTag(DANCING_BLADE_VISUAL_TAG);
         Vec3d start = getBladePosition(player.getPos(), world.getTime(), slot, maxSwords, blade.getOrbitRadius());
@@ -90,7 +94,7 @@ public final class DancingBladeManager {
     }
 
     private static void damageCollidingTargets(ServerWorld world, LivingEntity owner, DancingBladeVisualEntity blade, Vec3d bladePos) {
-        double damage = HelperMethods.attackScaledDamage(owner, blade.getWeaponStack(), Config.gemPowers.dancingBlades.damageScaling);
+        double damage = blade.getDamage();
         if (damage <= 0.0) {
             return;
         }

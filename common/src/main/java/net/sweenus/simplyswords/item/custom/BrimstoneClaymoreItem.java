@@ -83,6 +83,9 @@ public class BrimstoneClaymoreItem extends UniqueSwordItem implements TwoHandedW
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        if (!net.sweenus.simplyswords.api.AwakeningApi.isAbilityUnlocked(stack)) {
+            return super.postHit(stack, target, attacker);
+        }
         if (!attacker.getWorld().isClient()) {
             ServerWorld world = (ServerWorld) attacker.getWorld();
             int fhitchance = Config.uniqueEffects.brimstone_claymore.chance;

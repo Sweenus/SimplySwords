@@ -38,8 +38,12 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
+import net.sweenus.simplyswords.api.AwakeningApi;
+import net.sweenus.simplyswords.config.LootConfig;
 import net.sweenus.simplyswords.item.RunicSwordItem;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
+import net.sweenus.simplyswords.loot.PityLootManager;
+import net.sweenus.simplyswords.loot.PlayerPityState;
 import net.sweenus.simplyswords.power.GemPower;
 import net.sweenus.simplyswords.power.GemPowerComponent;
 import net.sweenus.simplyswords.power.PowerType;
@@ -297,15 +301,236 @@ public final class SimplySwordsCommands {
                 lootTable
         );
 
-        Map<Identifier, Long> weaponCounts = new HashMap<>();
-        long totalUniqueWeapons = 0L;
-        int rollsWithUnique = 0;
+        if (!rawTableId.equals(tableId)) {
+            source.sendFeedback(
+                    () -> Text.literal(
+                            "Normalized loot table id: "
+                                    + tableId
+                                    + " (from "
+                                    + rawTableId
+                                    + ")"
+                    ),
+                    false
+            );
+        }
 
+        source.sendFeedback(
+                () -> Text.literal("Loot test: " + tableId + " | rolls=" + rolls),
+                false
+        );
+
+        if (lootTable.getType() == LootContextTypes.CHEST) {
+            sendChestLootTestConfiguration(source, tableId);
+            ChestLootTestStats chestStats = simulateChestLootTest(
+                    lootTable,
+                    lootContext,
+                    tableKey,
+                    world,
+                    rolls
+            );
+            sendLootTestStats(source, "Independent base-chance rolls", chestStats.base);
+            sendLootTestStats(source, "Consecutive pity-progression rolls", chestStats.pity);
+        } else {
+            LootTestStats directStats = simulateDirectLootTest(
+                    lootTable,
+                    lootContext,
+                    world,
+                    rolls
+            );
+            sendLootTestStats(source, "Direct loot-table rolls", directStats);
+        }
+        return 1;
+    }
+
+    private static ChestLootTestStats simulateChestLootTest(
+            LootTable lootTable,
+            LootContextParameterSet lootContext,
+            RegistryKey<LootTable> tableKey,
+            ServerWorld world,
+            int rolls
+    ) {
+        LootTestStats baseStats = new LootTestStats(rolls);
+        LootTestStats pityStats = new LootTestStats(rolls);
+        PlayerPityState baseState = new PlayerPityState();
+        PlayerPityState pityState = new PlayerPityState();
         for (int i = 0; i < rolls; i++) {
-            List<ItemStack> generated = lootTable.generateLoot(
+            List<ItemStack> directLoot = lootTable.generateLoot(
                     lootContext,
                     world.getRandom().nextLong()
             );
+            List<ItemStack> baseLoot = new ArrayList<>(directLoot);
+            baseLoot.addAll(PityLootManager.simulateGeneratedContainerLoot(
+                    tableKey,
+                    baseState,
+                    world.getRandom(),
+                    PityLootManager.SimulationMode.BASE_ONLY
+            ));
+            baseStats.record(baseLoot);
+
+            List<ItemStack> pityLoot = new ArrayList<>(directLoot);
+            pityLoot.addAll(PityLootManager.simulateGeneratedContainerLoot(
+                    tableKey,
+                    pityState,
+                    world.getRandom(),
+                    PityLootManager.SimulationMode.PITY_PROGRESSION
+            ));
+            pityStats.record(pityLoot);
+        }
+        return new ChestLootTestStats(baseStats, pityStats);
+    }
+
+    private static LootTestStats simulateDirectLootTest(
+            LootTable lootTable,
+            LootContextParameterSet lootContext,
+            ServerWorld world,
+            int rolls
+    ) {
+        LootTestStats stats = new LootTestStats(rolls);
+        for (int i = 0; i < rolls; i++) {
+            stats.record(lootTable.generateLoot(
+                    lootContext,
+                    world.getRandom().nextLong()
+            ));
+        }
+        return stats;
+    }
+
+    private static void sendChestLootTestConfiguration(
+            ServerCommandSource source,
+            Identifier tableId
+    ) {
+        if (!LootConfig.INSTANCE.enableLootDrops.get()) {
+            source.sendFeedback(
+                    () -> Text.literal("Chest pity injection is disabled by the loot config."),
+                    false
+            );
+            return;
+        }
+        if (!tableId.getPath().contains("chests")) {
+            source.sendFeedback(
+                    () -> Text.literal(
+                            "Chest pity injection requires a loot table id containing 'chests'."
+                    ),
+                    false
+            );
+            return;
+        }
+        if (tableId.getPath().contains("spectrum")) {
+            source.sendFeedback(
+                    () -> Text.literal("Chest pity injection excludes Spectrum loot tables."),
+                    false
+            );
+            return;
+        }
+        if (!LootConfig.INSTANCE.enableLootInVillages.get()
+                && tableId.getPath().contains("village")) {
+            source.sendFeedback(
+                    () -> Text.literal("Chest pity injection is disabled for village loot tables."),
+                    false
+            );
+            return;
+        }
+
+        float baseChance = PityLootManager.getConfiguredUniqueChance(tableId);
+        source.sendFeedback(
+                () -> Text.literal(
+                        "Unique base chance="
+                                + String.format(Locale.ROOT, "%.4f%%", baseChance)
+                                + " | soft pity="
+                                + LootConfig.INSTANCE.uniqueSoftPityStart.get()
+                                + " | increment="
+                                + String.format(
+                                        Locale.ROOT,
+                                        "%.4f percentage points",
+                                        LootConfig.INSTANCE.uniqueSoftPityIncrement.get())
+                                + " | hard pity="
+                                + LootConfig.INSTANCE.uniqueHardPity.get()
+                ),
+                false
+        );
+        if (baseChance <= 0.0F) {
+            source.sendFeedback(
+                    () -> Text.literal(
+                            "The configured unique chance is 0%; unique pity is inactive for this table."
+                    ),
+                    false
+            );
+        }
+    }
+
+    private static void sendLootTestStats(
+            ServerCommandSource source,
+            String label,
+            LootTestStats stats
+    ) {
+        source.sendFeedback(() -> Text.literal(label + ":"), false);
+        source.sendFeedback(
+                () -> Text.literal(
+                        " Rolls with a Simply Swords unique: "
+                                + stats.rollsWithUnique
+                                + "/"
+                                + stats.rolls
+                                + " ("
+                                + formatPercentage(stats.rollsWithUnique, stats.rolls)
+                                + ")"
+                ),
+                false
+        );
+        source.sendFeedback(
+                () -> Text.literal(
+                        " Total Simply Swords unique weapons dropped: "
+                                + stats.totalUniqueWeapons
+                ),
+                false
+        );
+
+        if (stats.weaponCounts.isEmpty()) {
+            source.sendFeedback(
+                    () -> Text.literal(" No Simply Swords unique weapons dropped in this simulation."),
+                    false
+            );
+            return;
+        }
+
+        List<Map.Entry<Identifier, Long>> sorted = new ArrayList<>(
+                stats.weaponCounts.entrySet()
+        );
+        sorted.sort(
+                Comparator.<Map.Entry<Identifier, Long>>comparingLong(
+                                Map.Entry::getValue
+                        )
+                        .reversed()
+                        .thenComparing(entry -> entry.getKey().toString())
+        );
+        for (Map.Entry<Identifier, Long> entry : sorted) {
+            Identifier itemId = entry.getKey();
+            long count = entry.getValue();
+            source.sendFeedback(
+                    () -> Text.literal(
+                            " - "
+                                    + itemId
+                                    + ": "
+                                    + count
+                                    + " ("
+                                    + formatPercentage(count, stats.rolls)
+                                    + " per roll)"
+                    ),
+                    false
+            );
+        }
+    }
+
+    private static final class LootTestStats {
+        private final int rolls;
+        private final Map<Identifier, Long> weaponCounts = new HashMap<>();
+        private long totalUniqueWeapons;
+        private int rollsWithUnique;
+
+        private LootTestStats(int rolls) {
+            this.rolls = rolls;
+        }
+
+        private void record(List<ItemStack> generated) {
             boolean foundUnique = false;
             for (ItemStack generatedStack : generated) {
                 if (generatedStack == null || generatedStack.isEmpty()
@@ -326,83 +551,9 @@ public final class SimplySwordsCommands {
                 rollsWithUnique++;
             }
         }
+    }
 
-        if (!rawTableId.equals(tableId)) {
-            source.sendFeedback(
-                    () -> Text.literal(
-                            "Normalized loot table id: "
-                                    + tableId
-                                    + " (from "
-                                    + rawTableId
-                                    + ")"
-                    ),
-                    false
-            );
-        }
-
-        int finalRollsWithUnique = rollsWithUnique;
-        long finalTotalUniqueWeapons = totalUniqueWeapons;
-        source.sendFeedback(
-                () -> Text.literal("Loot test: " + tableId + " | rolls=" + rolls),
-                false
-        );
-        source.sendFeedback(
-                () -> Text.literal(
-                        "Rolls with a Simply Swords unique: "
-                                + finalRollsWithUnique
-                                + "/"
-                                + rolls
-                                + " ("
-                                + formatPercentage(finalRollsWithUnique, rolls)
-                                + ")"
-                ),
-                false
-        );
-        source.sendFeedback(
-                () -> Text.literal(
-                        "Total Simply Swords unique weapons dropped: "
-                                + finalTotalUniqueWeapons
-                ),
-                false
-        );
-
-        if (weaponCounts.isEmpty()) {
-            source.sendFeedback(
-                    () -> Text.literal(
-                            "No Simply Swords unique weapons dropped in this simulation."
-                    ),
-                    false
-            );
-            return 1;
-        }
-
-        List<Map.Entry<Identifier, Long>> sorted = new ArrayList<>(
-                weaponCounts.entrySet()
-        );
-        sorted.sort(
-                Comparator.<Map.Entry<Identifier, Long>>comparingLong(
-                                Map.Entry::getValue
-                        )
-                        .reversed()
-                        .thenComparing(entry -> entry.getKey().toString())
-        );
-        for (Map.Entry<Identifier, Long> entry : sorted) {
-            Identifier itemId = entry.getKey();
-            long count = entry.getValue();
-            source.sendFeedback(
-                    () -> Text.literal(
-                            " - "
-                                    + itemId
-                                    + ": "
-                                    + count
-                                    + " ("
-                                    + formatPercentage(count, rolls)
-                                    + " per roll)"
-                    ),
-                    false
-            );
-        }
-        return 1;
+    private record ChestLootTestStats(LootTestStats base, LootTestStats pity) {
     }
 
     private static LootContextParameterSet createLootTestContext(
@@ -533,6 +684,7 @@ public final class SimplySwordsCommands {
                     ? selectedWeapon
                     : weapons.get(rng.nextInt(weapons.size()));
             ItemStack weaponStack = new ItemStack(weapon);
+            AwakeningApi.initializeFullyAwakened(weaponStack);
 
             RegistryEntry<GemPower> runicPower = forcedRunic;
             RegistryEntry<GemPower> netherPower = forcedNether;

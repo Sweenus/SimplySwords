@@ -28,7 +28,7 @@ public class VerdantTrailPower extends NetherGemPower {
     @Override
     public void inventoryTick(ItemStack stack, World world, LivingEntity user, int slot, boolean selected) {
         if (!world.isClient && user instanceof LivingEntity livingUser) {
-            VerdantTrailManager.tryPlaceTrail(livingUser);
+            VerdantTrailManager.tryPlaceTrail(livingUser, stack);
         }
     }
 

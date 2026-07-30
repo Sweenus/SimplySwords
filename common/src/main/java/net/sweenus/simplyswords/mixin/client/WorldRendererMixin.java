@@ -12,10 +12,12 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.client.renderer.ModernFieldRenderer;
 import net.sweenus.simplyswords.client.renderer.TargetHighlight;
+import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.WatcherBatEntity;
 import net.sweenus.simplyswords.item.component.StoredChargeComponent;
 import net.sweenus.simplyswords.item.custom.StealSwordItem;
+import net.sweenus.simplyswords.item.custom.LichbladeSwordItem;
 import net.sweenus.simplyswords.registry.ComponentTypeRegistry;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
@@ -117,7 +119,8 @@ public abstract class WorldRendererMixin {
 
     private LivingEntity getReadyLichbladeTarget(ClientPlayerEntity player) {
         ItemStack stack = player.getMainHandStack();
-        if ((!stack.isOf(ItemsRegistry.WAKING_LICHBLADE.get()) && !stack.isOf(ItemsRegistry.AWAKENED_LICHBLADE.get()))
+        if (!(stack.getItem() instanceof LichbladeSwordItem)
+                || !AwakeningApi.isAbilityUnlocked(stack)
                 || player.getItemCooldownManager().isCoolingDown(stack.getItem())
                 || player.isUsingItem()
                 || stack.getDamage() >= stack.getMaxDamage() - 1) {

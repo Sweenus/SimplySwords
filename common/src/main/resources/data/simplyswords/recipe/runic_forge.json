@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "A": {
+      "item": "minecraft:amethyst_shard"
+    },
+    "O": {
+      "item": "minecraft:obsidian"
+    },
+    "R": {
+      "item": "simplyswords:runic_tablet"
+    },
+    "S": {
+      "item": "minecraft:smithing_table"
+    }
+  },
+  "pattern": [
+    "OAO",
+    "ASA",
+    "ORO"
+  ],
+  "result": {
+    "count": 1,
+    "id": "simplyswords:runic_forge"
+  }
+}

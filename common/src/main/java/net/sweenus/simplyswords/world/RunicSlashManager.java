@@ -8,6 +8,7 @@ import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.util.math.Vec3d;
+import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.RunicSlashProjectileEntity;
 import net.sweenus.simplyswords.registry.SoundRegistry;
@@ -70,7 +71,8 @@ public final class RunicSlashManager {
 
         double speed = Math.max(0.05, Config.gemPowers.runicSlash.speed);
         double distance = Math.max(0.25, Config.gemPowers.runicSlash.distance);
-        float damage = HelperMethods.attackScaledDamage(user, stack, Config.gemPowers.runicSlash.damageScaling);
+        float damage = AwakeningApi.scaleGemPower(stack,
+                HelperMethods.attackScaledDamage(user, stack, Config.gemPowers.runicSlash.damageScaling));
         Vec3d start = user.getEyePos().subtract(0.0, Math.max(0.15, user.getHeight() * 0.18), 0.0).add(direction.multiply(0.65));
 
         RunicSlashProjectileEntity slash = new RunicSlashProjectileEntity(world, user, stack.copy(), direction, distance, speed, damage, Config.gemPowers.runicSlash.width);

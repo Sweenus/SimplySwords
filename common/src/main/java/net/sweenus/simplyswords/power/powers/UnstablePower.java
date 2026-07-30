@@ -10,6 +10,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.text.Text;
 import net.minecraft.world.World;
+import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
@@ -27,7 +28,7 @@ public class UnstablePower extends RunefusedGemPower {
 
 	@Override
 	public void inventoryTick(ItemStack stack, World world, LivingEntity user, int slot, boolean selected) {
-		int duration = Config.gemPowers.unstable.duration;
+		int duration = AwakeningApi.scaleGemPowerDuration(stack, Config.gemPowers.unstable.duration);
 		int frequency = Config.gemPowers.unstable.frequency;
 
 		if (user.age % frequency == 0) {

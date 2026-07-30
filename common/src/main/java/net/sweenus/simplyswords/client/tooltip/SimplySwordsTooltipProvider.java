@@ -6,7 +6,10 @@ import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
+import net.sweenus.simplyswords.api.AwakeningApi;
+import net.sweenus.simplyswords.item.component.AwakeningComponent;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
+import net.sweenus.simplytooltips.api.ItemFrameProgress;
 import net.sweenus.simplytooltips.api.ModernTooltipModel;
 import net.sweenus.simplytooltips.api.TooltipBorderStyle;
 import net.sweenus.simplytooltips.api.TooltipProvider;
@@ -42,7 +45,7 @@ public final class SimplySwordsTooltipProvider implements TooltipProvider {
         }
         String rarityBadge = "COMMON";
         if (stack.getItem() instanceof UniqueSwordItem u) {
-            rarityBadge = u.getItemRarity(); // "UNIQUE" or "LEGENDARY"
+            rarityBadge = u.getItemRarity(stack); // "UNIQUE" or "LEGENDARY"
             badges.add(rarityBadge);
         }
 
@@ -53,6 +56,28 @@ public final class SimplySwordsTooltipProvider implements TooltipProvider {
 
         // ---- Parse ability + attribute lines from rawLines ----
         List<String> abilityLines = parseAbilityLines(rawLines);
+        ItemFrameProgress frameProgress = null;
+        String animKeyExtra = null;
+        if (stack.getItem() instanceof UniqueSwordItem
+                && AwakeningApi.usesAwakeningProgression(stack)) {
+            int awakeningLevel = AwakeningApi.getLevel(stack);
+            animKeyExtra = "|awakening:" + awakeningLevel;
+            frameProgress = new ItemFrameProgress(
+                    awakeningLevel,
+                    AwakeningComponent.MAX_LEVEL,
+                    0xFF74E7FF,
+                    0xFFFFFFFF,
+                    Text.literal(Integer.toString(awakeningLevel))
+            );
+            if (altDown) {
+                badges.clear();
+                badges.add(Text.translatable(
+                        "tooltip.simplyswords.awakening.alt_badge", awakeningLevel).getString());
+            }
+            if (!AwakeningApi.isAbilityUnlocked(stack)) {
+                abilityLines = buildLockedAbilityLines(abilityLines, stack);
+            }
+        }
         List<String> implicitLines = parseImplicitLines(stack, altDown);
         if (!implicitLines.isEmpty()) {
             abilityLines.addAll(0, implicitLines);
@@ -69,10 +94,11 @@ public final class SimplySwordsTooltipProvider implements TooltipProvider {
                 extraLines,
                 TooltipTheme.defaultTheme(),
                 null,
-                null,
+                animKeyExtra,
                 themeKey,
                 hint,
-                List.of()
+                List.of(),
+                frameProgress
         );
     }
 
@@ -101,6 +127,33 @@ public final class SimplySwordsTooltipProvider implements TooltipProvider {
     };
 
     // --- Parsing helpers ---
+
+    private static List<String> buildLockedAbilityLines(List<String> parsedLines, ItemStack stack) {
+        List<String> lockedLines = new ArrayList<>();
+        String abilityNameLine = null;
+        for (String line : parsedLines) {
+            if (line == null || line.isBlank()) continue;
+            String content = line.startsWith(ModernTooltipModel.SECTION_MARKER)
+                    ? line.substring(ModernTooltipModel.SECTION_MARKER.length())
+                    : line;
+            if (content.toLowerCase().contains("unique effect:")) {
+                abilityNameLine = content;
+                break;
+            }
+        }
+        if (abilityNameLine != null) {
+            lockedLines.add(abilityNameLine);
+        } else {
+            lockedLines.add(Text.translatable(
+                    "tooltip.simplyswords.awakening.locked_ability").getString());
+        }
+        lockedLines.add(Text.translatable(
+                "tooltip.simplyswords.awakening.unlock_level",
+                AwakeningApi.getAbilityUnlockLevel(stack)).getString());
+        lockedLines.add(Text.translatable(
+                "tooltip.simplyswords.awakening.upgrade_at_forge").getString());
+        return lockedLines;
+    }
 
     /**
      * Collects ability description lines from rawLines[1..N].

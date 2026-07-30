@@ -17,6 +17,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
+import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
@@ -38,7 +39,7 @@ public class FrostWardPower extends RunefusedGemPower {
 		int frequency = Config.gemPowers.frostWard.frequency;
 
 		if (user.age % frequency == 0) {
-			int duration = Config.gemPowers.frostWard.duration;
+			int duration = AwakeningApi.scaleGemPowerDuration(stack, Config.gemPowers.frostWard.duration);
 			double sRadius = Config.gemPowers.frostWard.radius;
 			double vRadius = Config.gemPowers.frostWard.radius / 2.0;
 			double x = user.getX();

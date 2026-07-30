@@ -23,6 +23,7 @@ import net.minecraft.util.UseAction;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
+import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
@@ -49,6 +50,9 @@ public class LichbladeSwordItem extends UniqueSwordItem implements TwoHandedWeap
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        if (!net.sweenus.simplyswords.api.AwakeningApi.isAbilityUnlocked(stack)) {
+            return super.postHit(stack, target, attacker);
+        }
         HelperMethods.playHitSounds(attacker, target);
         return super.postHit(stack, target, attacker);
     }
@@ -68,7 +72,7 @@ public class LichbladeSwordItem extends UniqueSwordItem implements TwoHandedWeap
         if (itemStack.getDamage() >= itemStack.getMaxDamage() - 1) {
             return TypedActionResult.fail(itemStack);
         }
-        if (itemStack.isOf(ItemsRegistry.SLUMBERING_LICHBLADE.get())) {
+        if (!AwakeningApi.isAbilityUnlocked(itemStack)) {
             return TypedActionResult.pass(itemStack);
         }
         if (!world.isClient()) {
@@ -94,7 +98,7 @@ public class LichbladeSwordItem extends UniqueSwordItem implements TwoHandedWeap
             int maxDuration = Config.uniqueEffects.lichblade.duration;
             int radius = Config.uniqueEffects.lichblade.radius;
 
-            if (stack.isOf(ItemsRegistry.AWAKENED_LICHBLADE.get())) {
+            if (AwakeningApi.getLevel(stack) >= 8) {
                 if (abilityTarget.isDead() || abilityTarget == user || remainingUseTicks < maxDuration) {
                     stack.set(ComponentTypeRegistry.TARGETED_LOCATION.get(), targetLocation.setTarget(user));
                     abilityTarget = user;
@@ -108,7 +112,7 @@ public class LichbladeSwordItem extends UniqueSwordItem implements TwoHandedWeap
                                 user.getSoundCategory(), 0.04f, 0.5f);
                     }
                 }
-            } else if (stack.isOf(ItemsRegistry.WAKING_LICHBLADE.get()) && (abilityTarget.isDead() || remainingUseTicks < maxDuration)) {
+            } else if (AwakeningApi.isAbilityUnlocked(stack) && (abilityTarget.isDead() || remainingUseTicks < maxDuration)) {
                 if (!(user instanceof ServerPlayerEntity serverPlayer) || !PlayerWeaponAbilityChannelManager.finishEarly(serverPlayer, stack)) {
                     user.stopUsingItem();
                 }
@@ -160,7 +164,9 @@ public class LichbladeSwordItem extends UniqueSwordItem implements TwoHandedWeap
 
     @Override
     public boolean canActivate(WeaponAbilityContext context) {
-        return !context.stack().isOf(ItemsRegistry.SLUMBERING_LICHBLADE.get()) && UniqueWeaponActiveAbility.super.canActivate(context);
+        return context != null
+                && AwakeningApi.isAbilityUnlocked(context.stack())
+                && UniqueWeaponActiveAbility.super.canActivate(context);
     }
 
     @Override
@@ -168,7 +174,7 @@ public class LichbladeSwordItem extends UniqueSwordItem implements TwoHandedWeap
         LivingEntity actor = context.actor();
         LivingEntity target = context.target();
         ItemStack stack = context.stack();
-        if (target == null || !HelperMethods.checkAbilityTarget(target, actor) || stack.isOf(ItemsRegistry.SLUMBERING_LICHBLADE.get())) {
+        if (target == null || !HelperMethods.checkAbilityTarget(target, actor) || !AwakeningApi.isAbilityUnlocked(stack)) {
             return false;
         }
         float abilityDamage = HelperMethods.abilityScaledDamage("soul", actor, stack,
@@ -177,7 +183,7 @@ public class LichbladeSwordItem extends UniqueSwordItem implements TwoHandedWeap
         int radius = Config.uniqueEffects.lichblade.radius;
         stack.set(ComponentTypeRegistry.TARGETED_LOCATION.get(), new TargetedLocationComponent(target.getUuid(), target.getX(), target.getY(), target.getZ()));
         AbilityMethods.tickAbilitySoulAnguish(stack, context.world(), actor, abilityDamage, radius, target.getX(), target.getY(), target.getZ(), healAmount, target);
-        if (stack.isOf(ItemsRegistry.AWAKENED_LICHBLADE.get())) {
+        if (AwakeningApi.getLevel(stack) >= 8) {
             int damageTracker = stack.getOrDefault(ComponentTypeRegistry.STORED_CHARGE.get(), StoredChargeComponent.DEFAULT).charge();
             actor.setAbsorptionAmount(Math.min(Config.uniqueEffects.abilityAbsorptionCap,
                     actor.getAbsorptionAmount() + Math.min(damageTracker / 2f, Config.uniqueEffects.lichblade.absorptionCap)));
@@ -198,6 +204,7 @@ public class LichbladeSwordItem extends UniqueSwordItem implements TwoHandedWeap
         if (!user.getWorld().isClient()
                 && user instanceof LivingEntity livingUser
                 && livingUser.getEquippedStack(EquipmentSlot.MAINHAND) == stack
+                && AwakeningApi.isAbilityUnlocked(stack)
                 && !livingUser.isUsingItem()) {
             tickPassiveAura((ServerWorld) world, livingUser, stack);
         }
@@ -209,6 +216,7 @@ public class LichbladeSwordItem extends UniqueSwordItem implements TwoHandedWeap
         if (livingUser == null
                 || stack == null
                 || stack.isEmpty()
+                || !AwakeningApi.isAbilityUnlocked(stack)
                 || livingUser.age % 35 != 0
                 || livingUser.getEquippedStack(EquipmentSlot.MAINHAND) != stack
                 || livingUser.isUsingItem()) {
@@ -252,21 +260,22 @@ public class LichbladeSwordItem extends UniqueSwordItem implements TwoHandedWeap
     @Override
     public void appendTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
         tooltip.add(Text.literal(""));
-        if (itemStack.isOf(ItemsRegistry.SLUMBERING_LICHBLADE.get()))
+        int awakening = AwakeningApi.getLevel(itemStack);
+        if (awakening < 4)
             tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip1").setStyle(Styles.ABILITY));
-        else if (itemStack.isOf(ItemsRegistry.WAKING_LICHBLADE.get()))
+        else if (awakening < 8)
             tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip1.2").setStyle(Styles.ABILITY));
         else tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip1.3").setStyle(Styles.ABILITY));
 
         tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip2").setStyle(Styles.TEXT));
 
-        if (!itemStack.isOf(ItemsRegistry.SLUMBERING_LICHBLADE.get())) {
+        if (awakening >= 4) {
             tooltip.add(Text.literal(""));
             tooltip.add(Text.translatable("item.simplyswords.onrightclickheld").setStyle(Styles.RIGHT_CLICK));
             tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip4").setStyle(Styles.TEXT));
             appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.lichblade.cooldown);
 
-            if (itemStack.isOf(ItemsRegistry.AWAKENED_LICHBLADE.get())) {
+            if (awakening >= 8) {
                 tooltip.add(Text.literal(""));
                 tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip7").setStyle(Styles.TEXT));
             }

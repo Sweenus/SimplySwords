@@ -16,10 +16,14 @@ import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
+import net.sweenus.simplyswords.api.AwakeningApi;
+import net.sweenus.simplyswords.item.component.RelicAttunementComponent;
+import net.sweenus.simplyswords.registry.ComponentTypeRegistry;
 import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
 import net.sweenus.simplyswords.client.api.SimplySwordsClientAPI;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
+import net.sweenus.simplyswords.util.LegacyUniqueMigration;
 import net.sweenus.simplyswords.util.Styles;
 
 import java.util.List;
@@ -40,6 +44,10 @@ public abstract class UniqueSwordItem extends SwordItem {
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
         if (!world.isClient) {
+            if (LegacyUniqueMigration.migratePlayerSlot(stack, entity, slot)) {
+                return;
+            }
+            AwakeningApi.ensureInitialized(stack);
             WeaponImplicitRegistry.getOrCreateWeaponImplicit(stack);
         }
         SimplySwordsAPI.inventoryTickGemSocketLogic(stack, world, entity, 100, 100);
@@ -69,6 +77,26 @@ public abstract class UniqueSwordItem extends SwordItem {
 
     @Override
     public Text getName(ItemStack stack) {
+        if (stack.isOf(ItemsRegistry.SLUMBERING_LICHBLADE.get())) {
+            int level = AwakeningApi.getLevel(stack);
+            String key = level >= 8
+                    ? "item.simplyswords.awakened_lichblade"
+                    : level >= 4
+                    ? "item.simplyswords.waking_lichblade"
+                    : "item.simplyswords.slumbering_lichblade";
+            return Text.translatable(key).setStyle(level >= 8 ? Styles.LEGENDARY : Styles.UNIQUE);
+        }
+        if (stack.isOf(ItemsRegistry.DORMANT_RELIC.get())) {
+            int level = AwakeningApi.getLevel(stack);
+            RelicAttunementComponent attunement = stack.getOrDefault(
+                    ComponentTypeRegistry.RELIC_ATTUNEMENT.get(), RelicAttunementComponent.UNATTUNED);
+            String key = "item.simplyswords.dormant_relic";
+            if (level >= 8 && attunement.isSun()) key = "item.simplyswords.sunfire";
+            else if (level >= 8 && attunement.isHarbinger()) key = "item.simplyswords.harbinger";
+            else if (level >= 4 && attunement.isSun()) key = "item.simplyswords.righteous_relic";
+            else if (level >= 4 && attunement.isHarbinger()) key = "item.simplyswords.tainted_relic";
+            return Text.translatable(key).setStyle(level >= 8 ? Styles.LEGENDARY : Styles.UNIQUE);
+        }
 
         if (this.getDefaultStack().isOf(ItemsRegistry.AWAKENED_LICHBLADE.get())
                 || this.getDefaultStack().isOf(ItemsRegistry.HARBINGER.get())
@@ -86,6 +114,16 @@ public abstract class UniqueSwordItem extends SwordItem {
 
     /** Returns the rarity string for this item ({@code "UNIQUE"} or {@code "LEGENDARY"}). */
     public String getItemRarity() { return iRarity; }
+
+    /** Stack-aware rarity used by tooltip integrations for awakening-dependent weapons. */
+    public String getItemRarity(ItemStack stack) {
+        if ((stack.isOf(ItemsRegistry.SLUMBERING_LICHBLADE.get())
+                || stack.isOf(ItemsRegistry.DORMANT_RELIC.get()))
+                && AwakeningApi.getLevel(stack) >= 8) {
+            return "LEGENDARY";
+        }
+        return getItemRarity();
+    }
 
     @Override
     public void appendTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {

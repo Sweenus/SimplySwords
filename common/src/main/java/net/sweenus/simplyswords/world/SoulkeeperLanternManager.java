@@ -12,6 +12,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
+import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.SoulkeeperLanternVisualEntity;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
@@ -41,7 +42,10 @@ public final class SoulkeeperLanternManager {
     }
 
     public static void tickFromItem(LivingEntity owner, ItemStack stack) {
-        if (owner == null || stack == null || stack.isEmpty() || !stack.isOf(ItemsRegistry.SOULKEEPER.get()) || !owner.getMainHandStack().equals(stack)) {
+        if (owner == null || stack == null || stack.isEmpty()
+                || !stack.isOf(ItemsRegistry.SOULKEEPER.get())
+                || !AwakeningApi.isAbilityUnlocked(stack)
+                || !owner.getMainHandStack().equals(stack)) {
             if (owner != null && owner.getWorld() instanceof ServerWorld world) {
                 discardActive(world, owner.getUuid());
                 ACTIVE_LANTERNS.remove(owner.getUuid());

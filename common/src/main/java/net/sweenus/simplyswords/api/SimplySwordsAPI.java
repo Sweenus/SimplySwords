@@ -98,12 +98,26 @@ public class SimplySwordsAPI {
             return;
         }
         getComponent(stack).onSwing(stack, world, user, hand);
+        if (!AwakeningApi.isAbilityUnlocked(stack)) {
+            return;
+        }
         if (stack.getItem() instanceof LivyatanSwordItem livyatan) {
             livyatan.onSwing(stack, world, user, hand);
         }
         if (stack.getItem() instanceof MoltenEdgeSwordItem moltenEdge) {
             moltenEdge.onSwing(stack, world, user, hand);
         }
+    }
+
+
+    //Opts an addon weapon into awakening and Runic Forge handling.
+    public static void registerAwakeningProfile(Item item, AwakeningProfile profile) {
+        AwakeningProfileRegistry.register(item, profile);
+    }
+
+    //Adds an addon unique to the pity-controlled chest pool.
+    public static void registerUniqueLoot(Item item, int weight) {
+        UniqueLootRegistry.register(item, weight);
     }
 
     // Gem Sockets
@@ -126,6 +140,7 @@ public class SimplySwordsAPI {
         return context != null
                 && context.stack() != null
                 && !context.stack().isEmpty()
+                && AwakeningApi.isAbilityUnlocked(context.stack())
                 && context.stack().getItem() instanceof UniqueWeaponActiveAbility ability
                 && ability.canActivate(context)
                 && !isWeaponAbilityCoolingDown(context);
@@ -145,6 +160,7 @@ public class SimplySwordsAPI {
         if (context == null
                 || context.stack() == null
                 || context.stack().isEmpty()
+                || !AwakeningApi.isAbilityUnlocked(context.stack())
                 || !(context.stack().getItem() instanceof UniqueWeaponActiveAbility ability)
                 || !ability.canActivate(context)) {
             return false;

@@ -7,6 +7,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.text.Text;
+import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ChanceDurationSettings;
@@ -26,7 +27,7 @@ public class SwiftnessPower extends RunefusedGemPower {
 	@Override
 	public void postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
 		int hitChance = Config.gemPowers.swiftness.chance;
-		int duration = Config.gemPowers.swiftness.duration;
+		int duration = AwakeningApi.scaleGemPowerDuration(stack, Config.gemPowers.swiftness.duration);
 
 		if (attacker.getRandom().nextInt(100) <= hitChance) {
 			attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, duration, this.isGreater() ? 1 : 0), attacker);

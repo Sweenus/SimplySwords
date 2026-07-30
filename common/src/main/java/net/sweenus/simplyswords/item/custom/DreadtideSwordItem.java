@@ -45,6 +45,9 @@ public class DreadtideSwordItem extends UniqueSwordItem {
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        if (!net.sweenus.simplyswords.api.AwakeningApi.isAbilityUnlocked(stack)) {
+            return super.postHit(stack, target, attacker);
+        }
         if (!attacker.getWorld().isClient()) {
             HelperMethods.playHitSounds(attacker, target);
 
@@ -54,6 +57,10 @@ public class DreadtideSwordItem extends UniqueSwordItem {
 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
+        ItemStack stack = user.getStackInHand(hand);
+        if (!net.sweenus.simplyswords.api.AwakeningApi.isAbilityUnlocked(stack)) {
+            return TypedActionResult.pass(stack);
+        }
         if (!user.getWorld().isClient() && world instanceof  ServerWorld serverWorld) {
             int voidcallerDuration = Config.uniqueEffects.dreadtide.get().duration;
             float voidcallerDamageModifier = Config.uniqueEffects.dreadtide.get().damageScaling;

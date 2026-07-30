@@ -14,6 +14,7 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.registry.SoundRegistry;
@@ -65,7 +66,8 @@ public final class EvocationFangManager {
             return;
         }
 
-        float damage = HelperMethods.attackScaledDamage(owner, stack, Config.gemPowers.evocation.damageScaling);
+        float damage = AwakeningApi.scaleGemPower(stack,
+                HelperMethods.attackScaledDamage(owner, stack, Config.gemPowers.evocation.damageScaling));
         if (damage <= 0.0F) {
             return;
         }
@@ -165,7 +167,8 @@ public final class EvocationFangManager {
         }
 
         int amplifier = MathHelper.clamp(Config.gemPowers.evocation.slownessAmplifier, 0, 1);
-        int duration = Math.max(1, Config.gemPowers.evocation.slownessDurationTicks);
+        int duration = AwakeningApi.scaleGemPowerDuration(
+                strike.stack(), Math.max(1, Config.gemPowers.evocation.slownessDurationTicks));
         target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, duration, amplifier, false, false, true), owner);
         world.spawnParticles(ParticleTypes.ENCHANTED_HIT, target.getX(), target.getBodyY(0.5), target.getZ(), 8, 0.3, 0.3, 0.3, 0.05);
         world.playSound(null, target.getX(), target.getY(), target.getZ(),

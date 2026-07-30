@@ -36,6 +36,9 @@ public class WaxweaverSwordItem extends UniqueSwordItem implements RevivalWeapon
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        if (!net.sweenus.simplyswords.api.AwakeningApi.isAbilityUnlocked(stack)) {
+            return super.postHit(stack, target, attacker);
+        }
         if (!attacker.getWorld().isClient()) {
             int maximum_stacks = Config.uniqueEffects.waxweaver.maxStacks;
             HelperMethods.playHitSounds(attacker, target);
@@ -51,7 +54,8 @@ public class WaxweaverSwordItem extends UniqueSwordItem implements RevivalWeapon
 
     @Override
     public boolean canRevive(LivingEntity entity, ItemStack stack, DamageSource source) {
-        if (source.isIn(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
+        if (!net.sweenus.simplyswords.api.AwakeningApi.isAbilityUnlocked(stack)
+                || source.isIn(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
             return false;
         }
         if (entity instanceof PlayerEntity player) {

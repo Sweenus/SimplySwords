@@ -39,6 +39,9 @@ public class ChompolotlSwordItem extends UniqueSwordItem implements UniqueWeapon
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        if (!net.sweenus.simplyswords.api.AwakeningApi.isAbilityUnlocked(stack)) {
+            return super.postHit(stack, target, attacker);
+        }
         if (!attacker.getWorld().isClient()) {
             ServerWorld serverWorld = (ServerWorld) attacker.getWorld();
             int skillCooldown = Config.uniqueEffects.chompolotl.cooldown;

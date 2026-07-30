@@ -16,6 +16,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
+import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.registry.GemPowerRegistry;
 import net.sweenus.simplyswords.util.Styles;
 import org.jetbrains.annotations.NotNull;
@@ -102,17 +103,22 @@ public record GemPowerComponent(boolean hasRunicPower, boolean hasNetherPower, R
 	}
 
 	public void postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+		if (!AwakeningApi.areGemPowersActive(stack)) return;
 		runicPower.value().postHit(stack, target, attacker);
 		netherPower.value().postHit(stack, target, attacker);
 	}
 
 	public void onSwing(ItemStack stack, ServerWorld world, LivingEntity user, Hand hand) {
+		if (!AwakeningApi.areGemPowersActive(stack)) return;
 		runicPower.value().onSwing(stack, world, user, hand);
 		netherPower.value().onSwing(stack, world, user, hand);
 	}
 
 	public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
 		ItemStack itemStack = user.getStackInHand(hand);
+		if (!AwakeningApi.areGemPowersActive(itemStack)) {
+			return TypedActionResult.fail(itemStack);
+		}
 		TypedActionResult<ItemStack> result1 = runicPower.value().use(world, user, hand, itemStack);
 		TypedActionResult<ItemStack> result2 = netherPower.value().use(world, user, hand, itemStack);
 		if (result1.getResult().compareTo(result2.getResult()) < 0) {
@@ -123,20 +129,24 @@ public record GemPowerComponent(boolean hasRunicPower, boolean hasNetherPower, R
 	}
 
 	public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
+		if (!AwakeningApi.areGemPowersActive(stack)) return;
 		runicPower.value().usageTick(world, user, stack, remainingUseTicks);
 		netherPower.value().usageTick(world, user, stack, remainingUseTicks);
 	}
 
 	public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
+		if (!AwakeningApi.areGemPowersActive(stack)) return;
 		runicPower.value().onStoppedUsing(stack, world, user, remainingUseTicks);
 		netherPower.value().onStoppedUsing(stack, world, user, remainingUseTicks);
 	}
 
 	public int getMaxUseTime(ItemStack stack) {
+		if (!AwakeningApi.areGemPowersActive(stack)) return 0;
 		return Math.max(runicPower.value().getMaxUseTime(stack), netherPower.value().getMaxUseTime(stack));
 	}
 
 	public void inventoryTick(ItemStack stack, World world, LivingEntity user, int slot, boolean selected) {
+		if (!AwakeningApi.areGemPowersActive(stack)) return;
 		runicPower.value().inventoryTick(stack, world, user, slot, selected);
 		netherPower.value().inventoryTick(stack, world, user, slot, selected);
 	}

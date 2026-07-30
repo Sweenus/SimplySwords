@@ -5,6 +5,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.text.Text;
+import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.power.RunefusedGemPower;
 import net.sweenus.simplyswords.registry.SoundRegistry;
@@ -22,7 +23,8 @@ public class PincushionPower extends RunefusedGemPower {
 	@Override
 	public void postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
 		int stuckArrows = attacker.getStuckArrowCount();
-		float damage = HelperMethods.applyNonPlayerAbilityDamageModifier(attacker, (this.isGreater() ? stuckArrows * 2 : stuckArrows));
+		float damage = AwakeningApi.scaleGemPower(stack, this.isGreater() ? stuckArrows * 2.0F : stuckArrows);
+		damage = HelperMethods.applyNonPlayerAbilityDamageModifier(attacker, damage);
 		damage = HelperMethods.applyNonPlayerWeaponHitDamageModifier(attacker, damage);
 		target.damage(attacker.getDamageSources().generic(), HelperMethods.applyWeaponAbilityDamageToPlayersModifier(target, damage));
 		attacker.getWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),

@@ -36,6 +36,9 @@ public class SoulkeeperSwordItem extends UniqueSwordItem implements TwoHandedWea
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        if (!net.sweenus.simplyswords.api.AwakeningApi.isAbilityUnlocked(stack)) {
+            return super.postHit(stack, target, attacker);
+        }
         if (!attacker.getWorld().isClient()) {
             HelperMethods.playHitSounds(attacker, target);
             SoulkeeperLanternManager.onSoulkeeperHit(attacker);

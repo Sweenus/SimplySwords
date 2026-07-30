@@ -7,6 +7,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.text.Text;
+import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ChanceDurationSettings;
@@ -27,8 +28,8 @@ public class FreezePower extends RunefusedGemPower {
 	@Override
 	public void postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
 		int hitChance = Config.gemPowers.freeze.chance;
-		int freezeDuration = Config.gemPowers.freeze.duration;
-		int duration = freezeDuration * 3;
+		int freezeDuration = AwakeningApi.scaleGemPowerDuration(stack, Config.gemPowers.freeze.duration);
+		int duration = AwakeningApi.scaleGemPowerDuration(stack, Config.gemPowers.freeze.duration * 3);
 
 		target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, duration, 1), attacker);
 

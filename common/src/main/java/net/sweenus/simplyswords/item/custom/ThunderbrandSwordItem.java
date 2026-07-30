@@ -40,6 +40,9 @@ public class ThunderbrandSwordItem extends UniqueSwordItem implements TwoHandedW
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        if (!net.sweenus.simplyswords.api.AwakeningApi.isAbilityUnlocked(stack)) {
+            return super.postHit(stack, target, attacker);
+        }
         HelperMethods.playHitSounds(attacker, target);
         if (!attacker.getWorld().isClient()) {
             int chargeChance = Config.uniqueEffects.thunderbrand.chance;

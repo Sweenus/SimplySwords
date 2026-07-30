@@ -12,6 +12,7 @@ import me.fzzyhmstrs.fzzy_config.validation.minecraft.ValidatedRegistryType;
 import me.fzzyhmstrs.fzzy_config.validation.misc.ValidatedBoolean;
 import me.fzzyhmstrs.fzzy_config.validation.misc.ValidatedCondition;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
+import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.item.Item;
 import net.minecraft.loot.LootTables;
 import net.minecraft.loot.context.LootContextTypes;
@@ -38,7 +39,11 @@ public class LootConfig extends Config {
     public ValidatedFloat standardLootTableWeight = new ValidatedFloat(0.1f, 100f, 0f);
     public ValidatedFloat rareLootTableWeight = new ValidatedFloat(0.4f, 100f, 0f);
     public ValidatedFloat runicLootTableWeight = new ValidatedFloat(0.7f, 100f, 0f);
-    public ValidatedFloat uniqueLootTableWeight = new ValidatedFloat(0.3f, 100f, 0f);
+    public ValidatedFloat uniqueLootTableWeight = new ValidatedFloat(0.05f, 100f, 0f);
+    public ValidatedInt uniqueSoftPityStart = new ValidatedInt(25, 100000, 0);
+    public ValidatedFloat uniqueSoftPityIncrement = new ValidatedFloat(0.2f, 100f, 0f);
+    public ValidatedInt uniqueHardPity = new ValidatedInt(75, 100000, 1);
+    public ValidatedInt tabletHardPity = new ValidatedInt(60, 100000, 1);
 
     //contained remnants will be disabled by default if the unique loot chance is set to 0
     public ValidatedCondition<Boolean> enableContainedRemnants = new ValidatedBoolean()

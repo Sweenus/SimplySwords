@@ -7,6 +7,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.text.Text;
+import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
@@ -28,7 +29,8 @@ public class ImbuedPower extends RunefusedGemPower {
 	public void postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
 		int hitChance = Config.gemPowers.imbued.chance;
 
-		int damage = (this.isGreater() ? 10 : 6) - ((stack.getDamage() / stack.getMaxDamage()) * 100) / 20;
+		float damage = AwakeningApi.scaleGemPower(stack,
+				(this.isGreater() ? 10.0F : 6.0F) - ((stack.getDamage() / stack.getMaxDamage()) * 100) / 20.0F);
 
 		if (attacker.getRandom().nextInt(100) <= hitChance) {
 			target.timeUntilRegen = 0;

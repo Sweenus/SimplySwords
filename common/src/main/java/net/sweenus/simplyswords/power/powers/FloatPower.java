@@ -7,6 +7,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.text.Text;
+import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ChanceDurationSettings;
@@ -26,7 +27,7 @@ public class FloatPower extends RunefusedGemPower {
 	@Override
 	public void postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
 		int hitChance = Config.gemPowers.floating.chance;
-		int duration = Config.gemPowers.floating.duration;
+		int duration = AwakeningApi.scaleGemPowerDuration(stack, Config.gemPowers.floating.duration);
 
 		if (attacker.getRandom().nextInt(100) <= hitChance) {
 			target.addStatusEffect(new StatusEffectInstance(StatusEffects.LEVITATION, duration, this.isGreater() ? 3 : 2), attacker);

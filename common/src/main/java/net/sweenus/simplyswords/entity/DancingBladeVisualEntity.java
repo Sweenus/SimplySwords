@@ -25,6 +25,7 @@ public class DancingBladeVisualEntity extends Entity {
     private static final TrackedData<ItemStack> ITEM_STACK = DataTracker.registerData(DancingBladeVisualEntity.class, TrackedDataHandlerRegistry.ITEM_STACK);
     private UUID ownerUuid;
     private long expiresAtTick;
+    private float damage;
 
     public DancingBladeVisualEntity(EntityType<? extends DancingBladeVisualEntity> type, World world) {
         super(type, world);
@@ -32,7 +33,15 @@ public class DancingBladeVisualEntity extends Entity {
         this.setNoGravity(true);
     }
 
-    public DancingBladeVisualEntity(World world, UUID ownerUuid, int ownerEntityId, ItemStack stack, int orbitSlot, double orbitRadius, long expiresAtTick) {
+    public DancingBladeVisualEntity(
+            World world,
+            UUID ownerUuid,
+            int ownerEntityId,
+            ItemStack stack,
+            int orbitSlot,
+            double orbitRadius,
+            long expiresAtTick,
+            float damage) {
         this(EntityRegistry.DANCING_BLADE_VISUAL.get(), world);
         this.ownerUuid = ownerUuid;
         this.setOwnerEntityId(ownerEntityId);
@@ -40,6 +49,7 @@ public class DancingBladeVisualEntity extends Entity {
         this.setOrbitRadius((float) orbitRadius);
         this.setItemStack(stack.copy());
         this.expiresAtTick = expiresAtTick;
+        this.damage = Math.max(0.0F, damage);
     }
 
     @Override
@@ -136,6 +146,10 @@ public class DancingBladeVisualEntity extends Entity {
         this.expiresAtTick = expiresAtTick;
     }
 
+    public float getDamage() {
+        return this.damage;
+    }
+
     @Override
     public boolean isAttackable() {
         return false;
@@ -170,6 +184,9 @@ public class DancingBladeVisualEntity extends Entity {
         if (nbt.contains("expires_at_tick")) {
             this.setExpiresAtTick(nbt.getLong("expires_at_tick"));
         }
+        if (nbt.contains("damage")) {
+            this.damage = Math.max(0.0F, nbt.getFloat("damage"));
+        }
         if (nbt.contains("item")) {
             this.setItemStack(ItemStack.fromNbt(this.getRegistryManager(), nbt.getCompound("item")).orElse(ItemStack.EMPTY));
         }
@@ -188,6 +205,7 @@ public class DancingBladeVisualEntity extends Entity {
         nbt.putFloat("attack_direction_x", this.getAttackDirectionX());
         nbt.putFloat("attack_direction_z", this.getAttackDirectionZ());
         nbt.putLong("expires_at_tick", this.getExpiresAtTick());
+        nbt.putFloat("damage", this.getDamage());
         ItemStack stack = this.getWeaponStack();
         if (stack != null && !stack.isEmpty()) {
             nbt.put("item", stack.encode(this.getRegistryManager()));

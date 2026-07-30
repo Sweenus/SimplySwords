@@ -10,6 +10,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
+import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.world.PlayerWeaponAbilityManager;
 
@@ -17,6 +18,9 @@ public interface UniqueWeaponActiveAbility {
 
     default TypedActionResult<ItemStack> useFromDefaultInput(World world, PlayerEntity user, Hand hand) {
         ItemStack stack = user.getStackInHand(hand);
+        if (!AwakeningApi.isAbilityUnlocked(stack)) {
+            return TypedActionResult.pass(stack);
+        }
         if (PlayerWeaponAbilityManager.shouldSkipDefaultAbilityUse(world, user, hand, stack)) {
             return TypedActionResult.pass(stack);
         }
@@ -25,7 +29,9 @@ public interface UniqueWeaponActiveAbility {
 
     default TypedActionResult<ItemStack> startPlayerAbility(World world, PlayerEntity user, Hand hand) {
         ItemStack stack = user.getStackInHand(hand);
-        if (stack == null || stack.isEmpty() || stack.getDamage() >= stack.getMaxDamage() - 1) {
+        if (stack == null || stack.isEmpty()
+                || !AwakeningApi.isAbilityUnlocked(stack)
+                || stack.getDamage() >= stack.getMaxDamage() - 1) {
             return TypedActionResult.fail(stack);
         }
         if (!world.isClient && world instanceof ServerWorld serverWorld && user instanceof ServerPlayerEntity serverPlayer) {

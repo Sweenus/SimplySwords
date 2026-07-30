@@ -38,6 +38,7 @@ public class GeneralConfig extends Config {
     public int nonPlayerWeaponAbilityCheckInterval = 80;
     @ValidatedInt.Restrict(min = 0, max = 100)
     public int nonPlayerWeaponAbilityChance = 50;
+    public boolean enableUniqueWeaponAwakening = true;
     public boolean enableUniqueGemSockets = true;
     public boolean enableTooltipInfoButtons = true;
     public boolean tooltipInfoButtonsRequireInventoryScreen = true;

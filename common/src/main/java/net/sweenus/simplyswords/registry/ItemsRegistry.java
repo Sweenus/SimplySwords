@@ -3,6 +3,7 @@ package net.sweenus.simplyswords.registry;
 import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
 import net.minecraft.item.Item;
+import net.minecraft.item.BlockItem;
 import net.minecraft.item.SwordItem;
 import net.minecraft.item.ToolMaterials;
 import net.minecraft.registry.RegistryKeys;
@@ -140,6 +141,9 @@ public class ItemsRegistry {
 
     public static final DeferredRegister<Item> ITEM = DeferredRegister.create(SimplySwords.MOD_ID, RegistryKeys.ITEM);
 
+    public static final RegistrySupplier<BlockItem> RUNIC_FORGE = ITEM.register("runic_forge", () ->
+            new BlockItem(BlocksRegistry.RUNIC_FORGE.get(),
+                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS)));
     public static final RegistrySupplier<RunicTabletItem> RUNIC_TABLET = ITEM.register("runic_tablet", RunicTabletItem::new);
     public static final RegistrySupplier<RunefusedGemItem> RUNEFUSED_GEM = ITEM.register("runefused_gem", RunefusedGemItem::new);
     public static final RegistrySupplier<NetherfusedGemItem> NETHERFUSED_GEM = ITEM.register("netherfused_gem", NetherfusedGemItem::new);
@@ -841,14 +845,14 @@ public class ItemsRegistry {
     public static final RegistrySupplier<LichbladeSwordItem> WAKING_LICHBLADE = ITEM.register("waking_lichblade", () ->
             new LichbladeSwordItem(
                     ModToolMaterial.UNIQUE,
-                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).fireproof()
+                    new Item.Settings().fireproof()
                             .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.UNIQUE,
                                     (int) lichblade_damage_modifier, lichblade_attackspeed))));
 
     public static final RegistrySupplier<LichbladeSwordItem> AWAKENED_LICHBLADE = ITEM.register("awakened_lichblade", () ->
             new LichbladeSwordItem(
                     ModToolMaterial.UNIQUE,
-                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).fireproof()
+                    new Item.Settings().fireproof()
                             .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.UNIQUE,
                                     (int) lichblade_damage_modifier, lichblade_attackspeed))));
 
@@ -869,28 +873,28 @@ public class ItemsRegistry {
     public static final RegistrySupplier<RighteousRelicSwordItem> RIGHTEOUS_RELIC = ITEM.register("righteous_relic", () ->
             new RighteousRelicSwordItem(
                     ModToolMaterial.UNIQUE,
-                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).fireproof()
+                    new Item.Settings().fireproof()
                             .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.UNIQUE,
                                     (int) sunfire_damage_modifier, sunfire_attackspeed))));
 
     public static final RegistrySupplier<TaintedRelicSwordItem> TAINTED_RELIC = ITEM.register("tainted_relic", () ->
             new TaintedRelicSwordItem(
                     ModToolMaterial.UNIQUE,
-                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).fireproof()
+                    new Item.Settings().fireproof()
                             .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.UNIQUE,
                                     (int) harbinger_damage_modifier, harbinger_attackspeed))));
 
     public static final RegistrySupplier<SunfireSwordItem> SUNFIRE = ITEM.register("sunfire", () ->
             new SunfireSwordItem(
                     ModToolMaterial.UNIQUE,
-                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).fireproof()
+                    new Item.Settings().fireproof()
                             .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.UNIQUE,
                                             (int) sunfire_damage_modifier, sunfire_attackspeed))));
 
     public static final RegistrySupplier<HarbingerSwordItem> HARBINGER = ITEM.register("harbinger", () ->
             new HarbingerSwordItem(
                     ModToolMaterial.UNIQUE,
-                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).fireproof()
+                    new Item.Settings().fireproof()
                             .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.UNIQUE,
                                     (int) harbinger_damage_modifier, harbinger_attackspeed))));
 

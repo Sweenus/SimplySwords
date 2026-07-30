@@ -49,6 +49,9 @@ public class StormbringerSwordItem extends UniqueSwordItem implements UniqueWeap
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        if (!net.sweenus.simplyswords.api.AwakeningApi.isAbilityUnlocked(stack)) {
+            return super.postHit(stack, target, attacker);
+        }
         if (!attacker.getWorld().isClient() && attacker instanceof ServerPlayerEntity player && !SUPPRESS_STORMBRINGER_CHAIN.get()) {
             tryTriggerChainLightning(stack, target, player);
         }

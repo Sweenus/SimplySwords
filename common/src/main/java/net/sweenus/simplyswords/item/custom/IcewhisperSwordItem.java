@@ -43,6 +43,9 @@ public class IcewhisperSwordItem extends UniqueSwordItem implements TwoHandedWea
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        if (!net.sweenus.simplyswords.api.AwakeningApi.isAbilityUnlocked(stack)) {
+            return super.postHit(stack, target, attacker);
+        }
         HelperMethods.playHitSounds(attacker, target);
         return super.postHit(stack, target, attacker);
     }
@@ -101,7 +104,9 @@ public class IcewhisperSwordItem extends UniqueSwordItem implements TwoHandedWea
     }
 
     public static void tickPassiveAura(ServerWorld world, LivingEntity user, ItemStack stack) {
-        if (world == null || user == null || stack == null || stack.isEmpty() || user.age % 35 != 0) {
+        if (world == null || user == null || stack == null || stack.isEmpty()
+                || !net.sweenus.simplyswords.api.AwakeningApi.isAbilityUnlocked(stack)
+                || user.age % 35 != 0) {
             return;
         }
         int radius = Config.uniqueEffects.icewhisper.radius;

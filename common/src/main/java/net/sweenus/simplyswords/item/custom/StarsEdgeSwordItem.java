@@ -38,6 +38,9 @@ public class StarsEdgeSwordItem extends UniqueSwordItem implements UniqueWeaponA
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        if (!net.sweenus.simplyswords.api.AwakeningApi.isAbilityUnlocked(stack)) {
+            return super.postHit(stack, target, attacker);
+        }
         if (!attacker.getWorld().isClient()) {
             float skillDamageModifier = Config.uniqueEffects.stars_edge.damageScaling;
             float skillLifestealModifier = Config.uniqueEffects.stars_edge.lifestealModifier;

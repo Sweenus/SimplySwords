@@ -1,7 +1,10 @@
 {
   "display": {
     "icon": {
-      "id": "simplyswords:awakened_lichblade"
+      "id": "simplyswords:slumbering_lichblade",
+      "components": {
+        "simplyswords:awakening": 8
+      }
     },
     "title": {
       "translate": "advancements.simplyswords.awakened_lichblade.title",
@@ -28,8 +31,11 @@
         "items": [
           {
             "items": [
-              "simplyswords:awakened_lichblade"
-            ]
+              "simplyswords:slumbering_lichblade"
+            ],
+            "components": {
+              "simplyswords:awakening": 8
+            }
           }
         ]
       }

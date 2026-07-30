@@ -9,6 +9,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.Box;
+import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.SimplySwordsMinion;
 import net.sweenus.simplyswords.entity.SimplySwordsWolfMinionEntity;
@@ -53,7 +54,8 @@ public final class WolfPackManager {
 
         minion.initializeMinion(attacker, stack.copy(), -1,
                 world.getTime() + Math.max(1, Config.gemPowers.wolfPack.duration),
-                (float) Math.max(0.0, HelperMethods.getEntityAttackDamage(attacker)));
+                AwakeningApi.scaleGemPower(stack,
+                        (float) Math.max(0.0, HelperMethods.getEntityAttackDamage(attacker))));
         world.spawnParticles(ParticleTypes.CRIT, minion.getX(), minion.getBodyY(0.55), minion.getZ(), 18, 0.4, 0.45, 0.4, 0.08);
         world.spawnParticles(ParticleTypes.CLOUD, minion.getX(), minion.getBodyY(0.45), minion.getZ(), 10, 0.3, 0.3, 0.3, 0.03);
         world.playSound(null, minion.getBlockPos(), SoundEvents.ENTITY_WOLF_GROWL, SoundCategory.PLAYERS, 0.7F, 1.15F);
@@ -79,7 +81,8 @@ public final class WolfPackManager {
 
         minion.initializeMinion(player, stack.copy(), findSourceWeaponSlot(player, stack),
                 world.getTime() + Math.max(1, Config.gemPowers.wolfPack.duration),
-                (float) Math.max(0.0, HelperMethods.getEntityAttackDamage(player)));
+                AwakeningApi.scaleGemPower(stack,
+                        (float) Math.max(0.0, HelperMethods.getEntityAttackDamage(player))));
         world.spawnParticles(ParticleTypes.CRIT, minion.getX(), minion.getBodyY(0.55), minion.getZ(), 18, 0.4, 0.45, 0.4, 0.08);
         world.spawnParticles(ParticleTypes.CLOUD, minion.getX(), minion.getBodyY(0.45), minion.getZ(), 10, 0.3, 0.3, 0.3, 0.03);
         world.playSound(null, minion.getBlockPos(), SoundEvents.ENTITY_WOLF_GROWL, SoundCategory.PLAYERS, 0.7F, 1.15F);

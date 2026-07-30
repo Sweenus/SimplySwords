@@ -6,6 +6,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.text.Text;
+import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.power.NetherGemPower;
 import net.sweenus.simplyswords.registry.EffectRegistry;
@@ -23,7 +24,10 @@ public class EchoPower extends NetherGemPower {
 	@Override
 	public void postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
 		int amp = HelperMethods.isUniqueTwohanded(stack) ? 2 : 0;
-		target.addStatusEffect(new StatusEffectInstance(EffectRegistry.getReference(EffectRegistry.ECHO), 20, amp), attacker);
+		target.addStatusEffect(new StatusEffectInstance(
+				EffectRegistry.getReference(EffectRegistry.ECHO),
+				AwakeningApi.scaleGemPowerDuration(stack, 20),
+				amp), attacker);
 	}
 
 	@Override
