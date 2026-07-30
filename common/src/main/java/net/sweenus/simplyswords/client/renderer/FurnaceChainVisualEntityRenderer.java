@@ -47,9 +47,18 @@ public class FurnaceChainVisualEntityRenderer extends EntityRenderer<FurnaceChai
         float time = entity.age + tickDelta;
         Matrix4f matrix = matrices.peek().getPositionMatrix();
         VertexConsumer dark = vertexConsumers.getBuffer(RenderLayer.getDebugQuads());
-        VertexConsumer glow = vertexConsumers.getBuffer(RenderLayer.getEntityTranslucentEmissive(WHITE_TEXTURE));
         Vec3d entityPos = lerpedPosition(entity, tickDelta);
 
+        renderPass(entity, tickDelta, time, entityPos, matrix, dark, null);
+        VertexConsumer glow = vertexConsumers.getBuffer(
+                RenderLayer.getEntityTranslucentEmissive(WHITE_TEXTURE));
+        renderPass(entity, tickDelta, time, entityPos, matrix, null, glow);
+        super.render(entity, yaw, tickDelta, matrices, vertexConsumers, light);
+    }
+
+    private static void renderPass(FurnaceChainVisualEntity entity, float tickDelta, float time,
+                                   Vec3d entityPos, Matrix4f matrix,
+                                   VertexConsumer dark, VertexConsumer glow) {
         switch (entity.getMode()) {
             case FurnaceChainVisualEntity.MODE_BRAND ->
                     renderBrand(entity, tickDelta, time, entityPos, matrix, dark, glow);
@@ -62,7 +71,6 @@ public class FurnaceChainVisualEntityRenderer extends EntityRenderer<FurnaceChai
             default -> {
             }
         }
-        super.render(entity, yaw, tickDelta, matrices, vertexConsumers, light);
     }
 
     private static void renderBrand(FurnaceChainVisualEntity visual, float tickDelta, float time,
@@ -84,7 +92,9 @@ public class FurnaceChainVisualEntityRenderer extends EntityRenderer<FurnaceChai
         drawBrokenRing(dark, glow, matrix, center.add(0.0, 0.13, 0.0), radius * 0.82F, 0.028F,
                 -time * 0.06F, 26, 12, 8, 125,
                 255, 132, 28, (int) (145 * pulse));
-        drawVerticalEmbers(glow, matrix, center, radius, time, 8, 255, 84, 18);
+        if (glow != null) {
+            drawVerticalEmbers(glow, matrix, center, radius, time, 8, 255, 84, 18);
+        }
     }
 
     private static void renderCore(FurnaceChainVisualEntity visual, float tickDelta, float time,
@@ -107,8 +117,10 @@ public class FurnaceChainVisualEntityRenderer extends EntityRenderer<FurnaceChai
         drawBrokenRing(dark, glow, matrix, center.add(0.0, 0.18, 0.0), radius * 0.72F, 0.032F,
                 -time * (0.04F + heat * 0.04F), 30, 13, 9, 135,
                 255, MathHelper.clamp((int) (82 + heat * 100), 0, 255), 20, (int) (135 * pulse));
-        drawVerticalEmbers(glow, matrix, center, radius, time, 6 + (int) (heat * 8.0F),
-                255, heatGreen(heat), 18);
+        if (glow != null) {
+            drawVerticalEmbers(glow, matrix, center, radius, time, 6 + (int) (heat * 8.0F),
+                    255, heatGreen(heat), 18);
+        }
 
         if (heat >= 0.99F) {
             float flare = 0.5F + 0.5F * MathHelper.sin(time * 0.55F);
@@ -202,14 +214,18 @@ public class FurnaceChainVisualEntityRenderer extends EntityRenderer<FurnaceChai
                     0,
                     255
             );
-            drawRibbon(dark, matrix, from, to, widthAxis, 0.11F,
-                    linkDarkRed, linkDarkGreen, linkDarkBlue, darkAlpha);
-            drawRibbon(dark, matrix, from, to, secondAxis, 0.055F,
-                    linkEdgeRed, linkEdgeGreen, linkEdgeBlue, darkAlpha);
-            drawEmissiveRibbon(glow, matrix, from, to, widthAxis,
-                    0.035F + pulseIntensity * 0.025F,
-                    linkGlowRed, linkGlowGreen, linkGlowBlue, linkGlowAlpha);
-            if (pulseIntensity > 0.02F) {
+            if (dark != null) {
+                drawRibbon(dark, matrix, from, to, widthAxis, 0.11F,
+                        linkDarkRed, linkDarkGreen, linkDarkBlue, darkAlpha);
+                drawRibbon(dark, matrix, from, to, secondAxis, 0.055F,
+                        linkEdgeRed, linkEdgeGreen, linkEdgeBlue, darkAlpha);
+            }
+            if (glow != null) {
+                drawEmissiveRibbon(glow, matrix, from, to, widthAxis,
+                        0.035F + pulseIntensity * 0.025F,
+                        linkGlowRed, linkGlowGreen, linkGlowBlue, linkGlowAlpha);
+            }
+            if (glow != null && pulseIntensity > 0.02F) {
                 float coreIntensity = MathHelper.clamp(
                         (pulseIntensity - 0.18F) / 0.82F,
                         0.0F,
@@ -248,13 +264,15 @@ public class FurnaceChainVisualEntityRenderer extends EntityRenderer<FurnaceChai
                 255, 185, 65, (int) (175 * fade));
 
         float columnHeight = 0.6F + MathHelper.sin(progress * MathHelper.PI) * (4.5F + visual.getHeat() * 2.0F);
-        for (int i = 0; i < 6; i++) {
-            double angle = time * 0.15 + i * MathHelper.TAU / 6.0;
-            Vec3d base = center.add(Math.cos(angle) * 0.34, 0.0, Math.sin(angle) * 0.34);
-            Vec3d top = center.add(Math.cos(angle + 0.55) * 0.13, columnHeight, Math.sin(angle + 0.55) * 0.13);
-            drawEmissiveRibbon(glow, matrix, base, top,
-                    horizontalPerpendicular(top.subtract(base)), 0.09F + fade * 0.05F,
-                    255, 82 + i * 18, 12, (int) (190 * fade));
+        if (glow != null) {
+            for (int i = 0; i < 6; i++) {
+                double angle = time * 0.15 + i * MathHelper.TAU / 6.0;
+                Vec3d base = center.add(Math.cos(angle) * 0.34, 0.0, Math.sin(angle) * 0.34);
+                Vec3d top = center.add(Math.cos(angle + 0.55) * 0.13, columnHeight, Math.sin(angle + 0.55) * 0.13);
+                drawEmissiveRibbon(glow, matrix, base, top,
+                        horizontalPerpendicular(top.subtract(base)), 0.09F + fade * 0.05F,
+                        255, 82 + i * 18, 12, (int) (190 * fade));
+            }
         }
     }
 
@@ -321,10 +339,14 @@ public class FurnaceChainVisualEntityRenderer extends EntityRenderer<FurnaceChai
             Vec3d from = center.add(Math.cos(angle) * radius, 0.0, Math.sin(angle) * radius);
             Vec3d to = center.add(Math.cos(next) * radius, 0.0, Math.sin(next) * radius);
             Vec3d outward = new Vec3d(Math.cos((angle + next) * 0.5), 0.0, Math.sin((angle + next) * 0.5));
-            drawRibbon(dark, matrix, from, to, outward, halfWidth,
-                    darkRed, darkGreen, darkBlue, darkAlpha);
-            drawEmissiveRibbon(glow, matrix, from.add(0.0, 0.004, 0.0), to.add(0.0, 0.004, 0.0),
-                    outward, halfWidth * 0.42F, glowRed, glowGreen, glowBlue, glowAlpha);
+            if (dark != null) {
+                drawRibbon(dark, matrix, from, to, outward, halfWidth,
+                        darkRed, darkGreen, darkBlue, darkAlpha);
+            }
+            if (glow != null) {
+                drawEmissiveRibbon(glow, matrix, from.add(0.0, 0.004, 0.0), to.add(0.0, 0.004, 0.0),
+                        outward, halfWidth * 0.42F, glowRed, glowGreen, glowBlue, glowAlpha);
+            }
         }
     }
 
@@ -338,10 +360,14 @@ public class FurnaceChainVisualEntityRenderer extends EntityRenderer<FurnaceChai
             Vec3d from = center.add(Math.cos(angle) * radius, 0.0, Math.sin(angle) * radius);
             Vec3d to = center.add(Math.cos(next) * radius, 0.0, Math.sin(next) * radius);
             Vec3d outward = new Vec3d(Math.cos((angle + next) * 0.5), 0.0, Math.sin((angle + next) * 0.5));
-            drawRibbon(dark, matrix, from, to, outward, halfWidth,
-                    darkRed, darkGreen, darkBlue, darkAlpha);
-            drawEmissiveRibbon(glow, matrix, from.add(0.0, 0.006, 0.0), to.add(0.0, 0.006, 0.0),
-                    outward, halfWidth * 0.48F, glowRed, glowGreen, glowBlue, glowAlpha);
+            if (dark != null) {
+                drawRibbon(dark, matrix, from, to, outward, halfWidth,
+                        darkRed, darkGreen, darkBlue, darkAlpha);
+            }
+            if (glow != null) {
+                drawEmissiveRibbon(glow, matrix, from.add(0.0, 0.006, 0.0), to.add(0.0, 0.006, 0.0),
+                        outward, halfWidth * 0.48F, glowRed, glowGreen, glowBlue, glowAlpha);
+            }
         }
     }
 

@@ -2,16 +2,25 @@ package net.sweenus.simplyswords.fabric.client;
 
 import dev.architectury.platform.Platform;
 import dev.architectury.registry.client.particle.ParticleProviderRegistry;
+import dev.architectury.registry.menu.MenuRegistry;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
+import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.client.particle.CustomBubbleParticle;
 import net.sweenus.simplyswords.client.particle.DrippingBloodParticle;
+import net.sweenus.simplyswords.client.screen.RunicForgeScreen;
 import net.sweenus.simplyswords.client.util.OracleIndexUtils;
 import net.sweenus.simplyswords.registry.ParticlesRegistry;
+import net.sweenus.simplyswords.registry.ScreenHandlerRegistry;
 
 public class SimplySwordsClientFabric implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
+        SimplySwords.Client.initializeRegistryDependentClient();
+        MenuRegistry.registerScreenFactory(
+                ScreenHandlerRegistry.RUNIC_FORGE.get(),
+                RunicForgeScreen::new
+        );
 
         if (Platform.isModLoaded("oracle_index")) {
             OracleIndexUtils.init();

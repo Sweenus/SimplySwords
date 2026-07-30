@@ -90,8 +90,6 @@ public class SoulPyreVisualEntityRenderer extends EntityRenderer<SoulPyreVisualE
         float time = entity.age + tickDelta;
         float pulse = 0.5F + 0.5F * MathHelper.sin(time * 0.22F);
         VertexConsumer bands = vertexConsumers.getBuffer(RenderLayer.getDebugQuads());
-        VertexConsumer glow = vertexConsumers.getBuffer(
-                RenderLayer.getEntityTranslucentEmissive(WHITE_TEXTURE));
 
         drawBand(entity, center, matrices.peek(), bands, radius, 0.085F,
                 24, 180, 188, 125 + (int) (pulse * 55.0F), false, 0);
@@ -112,6 +110,8 @@ public class SoulPyreVisualEntityRenderer extends EntityRenderer<SoulPyreVisualE
                     (int) (145.0F * (1.0F - progress)), false, 17);
         }
 
+        VertexConsumer glow = vertexConsumers.getBuffer(
+                RenderLayer.getEntityTranslucentEmissive(WHITE_TEXTURE));
         drawPerimeterFlames(entity, center, matrices.peek(), glow, radius, time);
         drawOrbitingSouls(entity, matrices, vertexConsumers, time);
         matrices.pop();

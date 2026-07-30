@@ -62,10 +62,7 @@ public class DeathKnellVisualEntityRenderer extends EntityRenderer<DeathKnellVis
             renderFever(visual, matrices, vertexConsumers,
                     relativeTarget, targetHeight, targetWidth, time, light);
         } else {
-            VertexConsumer dark = vertexConsumers.getBuffer(RenderLayer.getDebugQuads());
-            VertexConsumer glow = vertexConsumers.getBuffer(
-                    RenderLayer.getEntityTranslucentEmissive(WHITE_TEXTURE));
-            renderToll(visual, matrices, vertexConsumers, dark, glow,
+            renderToll(visual, matrices, vertexConsumers,
                     relativeTarget, targetHeight, targetWidth, time, light);
         }
         super.render(visual, yaw, tickDelta, matrices, vertexConsumers, light);
@@ -86,10 +83,21 @@ public class DeathKnellVisualEntityRenderer extends EntityRenderer<DeathKnellVis
         float phase = visual.getSeed() * 0.017F;
 
         VertexConsumer dark = vertexConsumers.getBuffer(RenderLayer.getDebugQuads());
+        drawHorizontalRing(
+                dark,
+                null,
+                matrices.peek().getPositionMatrix(),
+                target.add(0.0, 0.055, 0.0),
+                circleRadius * (1.0F + progress * 0.32F),
+                0.025F + progress * 0.018F,
+                phase + time * 0.018F,
+                20, 33, 25, 120 + (int) (progress * 65),
+                89, 240, 72, 90 + (int) (progress * 115)
+        );
         VertexConsumer glow = vertexConsumers.getBuffer(
                 RenderLayer.getEntityTranslucentEmissive(WHITE_TEXTURE));
         drawHorizontalRing(
-                dark,
+                null,
                 glow,
                 matrices.peek().getPositionMatrix(),
                 target.add(0.0, 0.055, 0.0),
@@ -120,7 +128,6 @@ public class DeathKnellVisualEntityRenderer extends EntityRenderer<DeathKnellVis
 
     private void renderToll(DeathKnellVisualEntity visual, MatrixStack matrices,
                             VertexConsumerProvider vertexConsumers,
-                            VertexConsumer dark, VertexConsumer glow,
                             Vec3d target, float targetHeight, float targetWidth,
                             float time, int light) {
         float impactAge = Math.max(1.0F, visual.getImpactAge());
@@ -138,6 +145,21 @@ public class DeathKnellVisualEntityRenderer extends EntityRenderer<DeathKnellVis
         renderFormationMotes(visual, matrices, vertexConsumers, target, bellCenter,
                 time, formation, fade, light);
 
+        VertexConsumer dark = vertexConsumers.getBuffer(RenderLayer.getDebugQuads());
+        renderTollPass(visual, matrices, dark, null, target, targetWidth, time,
+                impactAge, afterImpact, formation, fade, depthHue, bellCenter);
+        VertexConsumer glow = vertexConsumers.getBuffer(
+                RenderLayer.getEntityTranslucentEmissive(WHITE_TEXTURE));
+        renderTollPass(visual, matrices, null, glow, target, targetWidth, time,
+                impactAge, afterImpact, formation, fade, depthHue, bellCenter);
+    }
+
+    private static void renderTollPass(
+            DeathKnellVisualEntity visual, MatrixStack matrices,
+            VertexConsumer dark, VertexConsumer glow,
+            Vec3d target, float targetWidth, float time,
+            float impactAge, float afterImpact, float formation,
+            float fade, float depthHue, Vec3d bellCenter) {
         matrices.push();
         matrices.translate(bellCenter.x, bellCenter.y, bellCenter.z);
         float swing;
@@ -570,6 +592,9 @@ public class DeathKnellVisualEntityRenderer extends EntityRenderer<DeathKnellVis
                                  Vec3d a, Vec3d b, Vec3d c, Vec3d d,
                                  int red, int green, int blue, int alpha,
                                  boolean emissive) {
+        if (vertices == null || alpha <= 0) {
+            return;
+        }
         putVertex(vertices, matrix, a, red, green, blue, alpha, emissive);
         putVertex(vertices, matrix, b, red, green, blue, alpha, emissive);
         putVertex(vertices, matrix, c, red, green, blue, alpha, emissive);

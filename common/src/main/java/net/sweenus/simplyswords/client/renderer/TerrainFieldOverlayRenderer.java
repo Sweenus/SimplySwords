@@ -131,22 +131,29 @@ public final class TerrainFieldOverlayRenderer {
         }
 
         SpriteSet sprites = SpriteSet.load(palette);
-        VertexConsumer texturedVertices = vertexConsumers.getBuffer(
-                RenderLayer.getCutout());
-        VertexConsumer washVertices = vertexConsumers.getBuffer(
-                RenderLayer.getEntityTranslucent(WHITE_TEXTURE));
         double minY = centerY - verticalRange;
         double maxY = centerY + verticalRange;
-
+        List<PreparedFace> preparedFaces = new ArrayList<>(cache.faces.size());
         for (TerrainFace face : cache.faces) {
-            if (face.direction.getAxis() == Direction.Axis.Y) {
-                drawHorizontalFace(centerX, centerY, centerZ, matrices,
-                        texturedVertices, washVertices, cache, sprites, palette,
-                        face, radius, minY, maxY);
-            } else {
-                drawVerticalFace(centerX, centerY, centerZ, matrices,
-                        texturedVertices, washVertices, cache, sprites, palette,
-                        face, radius, minY, maxY);
+            PreparedFace prepared = face.direction.getAxis() == Direction.Axis.Y
+                    ? prepareHorizontalFace(centerX, centerZ, cache, face, radius, minY, maxY)
+                    : prepareVerticalFace(centerX, centerZ, cache, face, radius, minY, maxY);
+            if (prepared != null) {
+                preparedFaces.add(prepared);
+            }
+        }
+
+        VertexConsumer texturedVertices = vertexConsumers.getBuffer(
+                RenderLayer.getCutout());
+        for (PreparedFace prepared : preparedFaces) {
+            if (prepared instanceof PreparedHorizontalFace horizontal) {
+                drawHorizontalTextureFace(
+                        centerX, centerY, centerZ, matrices, texturedVertices,
+                        sprites, palette, horizontal);
+            } else if (prepared instanceof PreparedVerticalFace vertical) {
+                drawVerticalTextureFace(
+                        centerX, centerY, centerZ, matrices, texturedVertices,
+                        sprites, palette, vertical);
             }
         }
         if (sprites.fluidStill != null && sprites.fluidFlow != null) {
@@ -156,6 +163,18 @@ public final class TerrainFieldOverlayRenderer {
                         matrices, texturedVertices, sprites,
                         surface, radius, minY, maxY
                 );
+            }
+        }
+
+        VertexConsumer washVertices = vertexConsumers.getBuffer(
+                RenderLayer.getEntityTranslucent(WHITE_TEXTURE));
+        for (PreparedFace prepared : preparedFaces) {
+            if (prepared instanceof PreparedHorizontalFace horizontal) {
+                drawHorizontalWashFace(centerY, matrices, washVertices, palette, horizontal);
+            } else if (prepared instanceof PreparedVerticalFace vertical) {
+                drawVerticalWashFace(
+                        centerX, centerY, centerZ, matrices, washVertices,
+                        palette, vertical);
             }
         }
     }
@@ -645,14 +664,11 @@ public final class TerrainFieldOverlayRenderer {
                         direction.getOffsetY(), direction.getOffsetZ());
     }
 
-    private static void drawHorizontalFace(
-            double centerX, double centerY, double centerZ,
-            MatrixStack.Entry matrices, VertexConsumer texturedVertices,
-            VertexConsumer washVertices, TerrainCache cache, SpriteSet sprites,
-            Palette palette, TerrainFace face, float radius,
-            double minY, double maxY) {
+    private static PreparedHorizontalFace prepareHorizontalFace(
+            double centerX, double centerZ, TerrainCache cache,
+            TerrainFace face, float radius, double minY, double maxY) {
         if (face.plane < minY - SURFACE_EPSILON || face.plane > maxY + SURFACE_EPSILON) {
-            return;
+            return null;
         }
 
         double x0 = face.x;
@@ -675,9 +691,17 @@ public final class TerrainFieldOverlayRenderer {
         List<TerrainPoint> polygon = clipHorizontalRectangle(
                 centerX, centerZ, x0, x1, z0, z1, radius);
         if (polygon.size() < 3) {
-            return;
+            return null;
         }
+        return new PreparedHorizontalFace(face, polygon);
+    }
 
+    private static void drawHorizontalTextureFace(
+            double centerX, double centerY, double centerZ,
+            MatrixStack.Entry matrices, VertexConsumer texturedVertices,
+            SpriteSet sprites, Palette palette, PreparedHorizontalFace prepared) {
+        TerrainFace face = prepared.face;
+        List<TerrainPoint> polygon = prepared.polygon;
         Sprite foundation = sprites.topFoundation(
                 face.direction == Direction.UP ? face.variant : 0);
         Sprite detail = face.direction == Direction.UP
@@ -691,8 +715,13 @@ public final class TerrainFieldOverlayRenderer {
                     centerX, centerY, centerZ, matrices, texturedVertices,
                     face, polygon, detail, palette, FACE_OFFSET + DETAIL_OFFSET);
         }
+    }
+
+    private static void drawHorizontalWashFace(
+            double centerY, MatrixStack.Entry matrices, VertexConsumer washVertices,
+            Palette palette, PreparedHorizontalFace prepared) {
         drawHorizontalWashLayer(
-                centerY, matrices, washVertices, face, polygon, palette,
+                centerY, matrices, washVertices, prepared.face, prepared.polygon, palette,
                 FACE_OFFSET + WASH_OFFSET);
     }
 
@@ -815,12 +844,9 @@ public final class TerrainFieldOverlayRenderer {
                 light, face.direction, palette);
     }
 
-    private static void drawVerticalFace(
-            double centerX, double centerY, double centerZ,
-            MatrixStack.Entry matrices, VertexConsumer texturedVertices,
-            VertexConsumer washVertices, TerrainCache cache, SpriteSet sprites,
-            Palette palette, TerrainFace face, float radius,
-            double minY, double maxY) {
+    private static PreparedVerticalFace prepareVerticalFace(
+            double centerX, double centerZ, TerrainCache cache,
+            TerrainFace face, float radius, double minY, double maxY) {
         boolean xAxis = face.direction.getAxis() == Direction.Axis.Z;
         Direction lowDirection = xAxis ? Direction.WEST : Direction.NORTH;
         Direction highDirection = xAxis ? Direction.EAST : Direction.SOUTH;
@@ -844,14 +870,14 @@ public final class TerrainFieldOverlayRenderer {
         y0 = Math.max(y0, minY);
         y1 = Math.min(y1, maxY);
         if (y1 - y0 <= 1.0E-5) {
-            return;
+            return null;
         }
 
         double fixedCenter = xAxis ? centerZ : centerX;
         double fixedDistance = face.plane - fixedCenter;
         double radiusSquared = radius * radius;
         if (fixedDistance * fixedDistance > radiusSquared) {
-            return;
+            return null;
         }
         double span = Math.sqrt(Math.max(
                 0.0, radiusSquared - fixedDistance * fixedDistance));
@@ -859,24 +885,42 @@ public final class TerrainFieldOverlayRenderer {
         double clippedStart = Math.max(variableStart, variableCenter - span);
         double clippedEnd = Math.min(variableEnd, variableCenter + span);
         if (clippedEnd - clippedStart <= 1.0E-5) {
-            return;
+            return null;
         }
+        return new PreparedVerticalFace(
+                face, xAxis, clippedStart, clippedEnd, y0, y1);
+    }
 
+    private static void drawVerticalTextureFace(
+            double centerX, double centerY, double centerZ,
+            MatrixStack.Entry matrices, VertexConsumer texturedVertices,
+            SpriteSet sprites, Palette palette, PreparedVerticalFace prepared) {
+        TerrainFace face = prepared.face;
         Sprite foundation = sprites.sideFoundation(face.variant);
         Sprite detail = sprites.sideDetail(face.variant);
         drawVerticalTextureLayer(
                 centerX, centerY, centerZ, matrices, texturedVertices,
-                face, foundation, palette, xAxis,
-                clippedStart, clippedEnd, y0, y1, FACE_OFFSET);
+                face, foundation, palette, prepared.xAxis,
+                prepared.clippedStart, prepared.clippedEnd,
+                prepared.y0, prepared.y1, FACE_OFFSET);
         if (detail != null) {
             drawVerticalTextureLayer(
                     centerX, centerY, centerZ, matrices, texturedVertices,
-                    face, detail, palette, xAxis,
-                    clippedStart, clippedEnd, y0, y1, FACE_OFFSET + DETAIL_OFFSET);
+                    face, detail, palette, prepared.xAxis,
+                    prepared.clippedStart, prepared.clippedEnd,
+                    prepared.y0, prepared.y1, FACE_OFFSET + DETAIL_OFFSET);
         }
+    }
+
+    private static void drawVerticalWashFace(
+            double centerX, double centerY, double centerZ,
+            MatrixStack.Entry matrices, VertexConsumer washVertices,
+            Palette palette, PreparedVerticalFace prepared) {
         drawVerticalWashLayer(
                 centerX, centerY, centerZ, matrices, washVertices,
-                face, palette, xAxis, clippedStart, clippedEnd, y0, y1,
+                prepared.face, palette, prepared.xAxis,
+                prepared.clippedStart, prepared.clippedEnd,
+                prepared.y0, prepared.y1,
                 FACE_OFFSET + WASH_OFFSET);
     }
 
@@ -1349,6 +1393,19 @@ public final class TerrainFieldOverlayRenderer {
     }
 
     private record FaceKey(int x, int y, int z, Direction direction) {
+    }
+
+    private interface PreparedFace {
+    }
+
+    private record PreparedHorizontalFace(
+            TerrainFace face, List<TerrainPoint> polygon) implements PreparedFace {
+    }
+
+    private record PreparedVerticalFace(
+            TerrainFace face, boolean xAxis,
+            double clippedStart, double clippedEnd,
+            double y0, double y1) implements PreparedFace {
     }
 
     private record TerrainPoint(double x, double z) {

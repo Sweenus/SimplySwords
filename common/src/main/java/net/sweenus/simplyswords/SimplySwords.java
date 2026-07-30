@@ -5,7 +5,6 @@ import dev.architectury.registry.CreativeTabRegistry;
 import dev.architectury.registry.client.level.entity.EntityModelLayerRegistry;
 import dev.architectury.registry.client.level.entity.EntityRendererRegistry;
 import dev.architectury.registry.level.entity.EntityAttributeRegistry;
-import dev.architectury.registry.menu.MenuRegistry;
 import dev.architectury.registry.item.ItemPropertiesRegistry;
 import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
@@ -160,24 +159,6 @@ public class SimplySwords {
 
         @Environment(EnvType.CLIENT)
         public static void initializeClient() {
-            MenuRegistry.registerScreenFactory(ScreenHandlerRegistry.RUNIC_FORGE.get(),
-                    net.sweenus.simplyswords.client.screen.RunicForgeScreen::new);
-            ItemPropertiesRegistry.register(ItemsRegistry.SLUMBERING_LICHBLADE.get(),
-                    Identifier.of(MOD_ID, "awakening"),
-                    (stack, world, entity, seed) -> AwakeningApi.getLevel(stack) / 8.0F);
-            ItemPropertiesRegistry.register(ItemsRegistry.DORMANT_RELIC.get(),
-                    Identifier.of(MOD_ID, "relic_form"),
-                    (stack, world, entity, seed) -> {
-                        int level = AwakeningApi.getLevel(stack);
-                        RelicAttunementComponent route = stack.getOrDefault(
-                                ComponentTypeRegistry.RELIC_ATTUNEMENT.get(),
-                                RelicAttunementComponent.UNATTUNED);
-                        if (level >= 8 && route.isHarbinger()) return 1.0F;
-                        if (level >= 8 && route.isSun()) return 0.75F;
-                        if (level >= 4 && route.isHarbinger()) return 0.5F;
-                        if (level >= 4 && route.isSun()) return 0.25F;
-                        return 0.0F;
-                    });
             AbilityKeybindHandler.init();
             CaelestisBreachAmbience.init();
             // Entity
@@ -236,7 +217,31 @@ public class SimplySwords {
             // Simply Tooltips bridge — renders all simplyswords sword items with the ST engine
             net.sweenus.simplytooltips.api.TooltipProviderRegistry.register(
                     new net.sweenus.simplyswords.client.tooltip.SimplySwordsTooltipProvider(), 100);
-            }
+        }
+
+        //
+        // Registers client features that dereference deferred registry entries. Loader entrypoints
+        // must call this only after their item registries have been populated.
+        //
+        @Environment(EnvType.CLIENT)
+        public static void initializeRegistryDependentClient() {
+            ItemPropertiesRegistry.register(ItemsRegistry.SLUMBERING_LICHBLADE.get(),
+                    Identifier.of(MOD_ID, "awakening"),
+                    (stack, world, entity, seed) -> AwakeningApi.getLevel(stack) / 8.0F);
+            ItemPropertiesRegistry.register(ItemsRegistry.DORMANT_RELIC.get(),
+                    Identifier.of(MOD_ID, "relic_form"),
+                    (stack, world, entity, seed) -> {
+                        int level = AwakeningApi.getLevel(stack);
+                        RelicAttunementComponent route = stack.getOrDefault(
+                                ComponentTypeRegistry.RELIC_ATTUNEMENT.get(),
+                                RelicAttunementComponent.UNATTUNED);
+                        if (level >= 8 && route.isHarbinger()) return 1.0F;
+                        if (level >= 8 && route.isSun()) return 0.75F;
+                        if (level >= 4 && route.isHarbinger()) return 0.5F;
+                        if (level >= 4 && route.isSun()) return 0.25F;
+                        return 0.0F;
+                    });
+        }
     }
 
 }

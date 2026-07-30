@@ -128,8 +128,6 @@ public class CaelestisBreachVisualEntityRenderer
         );
 
         VertexConsumer vertices = vertexConsumers.getBuffer(RenderLayer.getDebugQuads());
-        VertexConsumer veilVertices = vertexConsumers.getBuffer(
-                RenderLayer.getEntityTranslucentEmissive(WHITE_TEXTURE));
         float time = entity.age + tickDelta;
         float pulse = 0.5F + 0.5F * MathHelper.sin(time * 0.18F);
         boolean collapsing = entity.getPhase() == CaelestisBreachVisualEntity.PHASE_COLLAPSING;
@@ -156,6 +154,8 @@ public class CaelestisBreachVisualEntityRenderer
                 edgeRed, edgeGreen, edgeBlue,
                 MathHelper.clamp((int) (88.0F * (1.0F - rippleProgress)), 0, 88), true, 13);
 
+        VertexConsumer veilVertices = vertexConsumers.getBuffer(
+                RenderLayer.getEntityTranslucentEmissive(WHITE_TEXTURE));
         drawBoundaryVeil(entity, veilVertices, matrices.peek(), radius, time,
                 edgeRed, edgeGreen, edgeBlue);
         super.render(entity, yaw, tickDelta, matrices, vertexConsumers, light);
@@ -171,17 +171,27 @@ public class CaelestisBreachVisualEntityRenderer
         SpriteSet sprites = SpriteSet.load();
         VertexConsumer texturedVertices = vertexConsumers.getBuffer(
                 RenderLayer.getEntityCutoutNoCull(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE));
-        VertexConsumer washVertices = vertexConsumers.getBuffer(
-                RenderLayer.getEntityTranslucent(WHITE_TEXTURE));
         double minY = entity.getY() - entity.getVerticalRange();
         double maxY = entity.getY() + entity.getVerticalRange();
 
         for (TerrainFace face : cache.faces) {
             if (face.direction.getAxis() == Direction.Axis.Y) {
-                drawHorizontalFace(entity, matrices, texturedVertices, washVertices,
+                drawHorizontalFace(entity, matrices, texturedVertices, null,
                         cache, sprites, face, radius, minY, maxY);
             } else {
-                drawVerticalFace(entity, matrices, texturedVertices, washVertices,
+                drawVerticalFace(entity, matrices, texturedVertices, null,
+                        cache, sprites, face, radius, minY, maxY);
+            }
+        }
+
+        VertexConsumer washVertices = vertexConsumers.getBuffer(
+                RenderLayer.getEntityTranslucent(WHITE_TEXTURE));
+        for (TerrainFace face : cache.faces) {
+            if (face.direction.getAxis() == Direction.Axis.Y) {
+                drawHorizontalFace(entity, matrices, null, washVertices,
+                        cache, sprites, face, radius, minY, maxY);
+            } else {
+                drawVerticalFace(entity, matrices, null, washVertices,
                         cache, sprites, face, radius, minY, maxY);
             }
         }
@@ -327,20 +337,24 @@ public class CaelestisBreachVisualEntityRenderer
             return;
         }
 
-        Sprite foundation = face.direction == Direction.UP
-                ? sprites.topFoundation(face.variant)
-                : sprites.sculk;
-        Sprite detail = face.direction == Direction.UP
-                ? sprites.topDetail(face.variant)
-                : null;
-        drawHorizontalTextureLayer(entity, matrices, texturedVertices, face,
-                polygon, foundation, TERRAIN_FACE_OFFSET);
-        if (detail != null) {
+        if (texturedVertices != null) {
+            Sprite foundation = face.direction == Direction.UP
+                    ? sprites.topFoundation(face.variant)
+                    : sprites.sculk;
+            Sprite detail = face.direction == Direction.UP
+                    ? sprites.topDetail(face.variant)
+                    : null;
             drawHorizontalTextureLayer(entity, matrices, texturedVertices, face,
-                    polygon, detail, TERRAIN_FACE_OFFSET + TERRAIN_DETAIL_OFFSET);
+                    polygon, foundation, TERRAIN_FACE_OFFSET);
+            if (detail != null) {
+                drawHorizontalTextureLayer(entity, matrices, texturedVertices, face,
+                        polygon, detail, TERRAIN_FACE_OFFSET + TERRAIN_DETAIL_OFFSET);
+            }
         }
-        drawHorizontalWashLayer(entity, matrices, washVertices, face, polygon,
-                TERRAIN_FACE_OFFSET + TERRAIN_WASH_OFFSET);
+        if (washVertices != null) {
+            drawHorizontalWashLayer(entity, matrices, washVertices, face, polygon,
+                    TERRAIN_FACE_OFFSET + TERRAIN_WASH_OFFSET);
+        }
     }
 
     private static List<TerrainPoint> clipHorizontalRectangle(
@@ -497,18 +511,23 @@ public class CaelestisBreachVisualEntityRenderer
             return;
         }
 
-        Sprite foundation = sprites.sideFoundation(face.variant);
-        Sprite detail = sprites.sideDetail(face.variant);
-        drawVerticalTextureLayer(entity, matrices, texturedVertices, face, foundation,
-                xAxis, clippedStart, clippedEnd, y0, y1, TERRAIN_FACE_OFFSET);
-        if (detail != null) {
-            drawVerticalTextureLayer(entity, matrices, texturedVertices, face, detail,
+        if (texturedVertices != null) {
+            Sprite foundation = sprites.sideFoundation(face.variant);
+            Sprite detail = sprites.sideDetail(face.variant);
+            drawVerticalTextureLayer(entity, matrices, texturedVertices, face, foundation,
                     xAxis, clippedStart, clippedEnd, y0, y1,
-                    TERRAIN_FACE_OFFSET + TERRAIN_DETAIL_OFFSET);
+                    TERRAIN_FACE_OFFSET);
+            if (detail != null) {
+                drawVerticalTextureLayer(entity, matrices, texturedVertices, face, detail,
+                        xAxis, clippedStart, clippedEnd, y0, y1,
+                        TERRAIN_FACE_OFFSET + TERRAIN_DETAIL_OFFSET);
+            }
         }
-        drawVerticalWashLayer(entity, matrices, washVertices, face,
-                xAxis, clippedStart, clippedEnd, y0, y1,
-                TERRAIN_FACE_OFFSET + TERRAIN_WASH_OFFSET);
+        if (washVertices != null) {
+            drawVerticalWashLayer(entity, matrices, washVertices, face,
+                    xAxis, clippedStart, clippedEnd, y0, y1,
+                    TERRAIN_FACE_OFFSET + TERRAIN_WASH_OFFSET);
+        }
     }
 
     private static void drawVerticalTextureLayer(
