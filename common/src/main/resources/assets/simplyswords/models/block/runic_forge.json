@@ -1,12 +1,12 @@
 {
   "parent": "minecraft:block/cube",
   "textures": {
-    "down": "minecraft:block/oak_planks",
-    "up": "minecraft:block/crafting_table_top",
-    "north": "minecraft:block/crafting_table_front",
-    "south": "minecraft:block/crafting_table_front",
-    "west": "minecraft:block/crafting_table_side",
-    "east": "minecraft:block/crafting_table_side",
-    "particle": "minecraft:block/crafting_table_front"
+    "down": "simplyswords:block/runic_forge_bottom",
+    "up": "simplyswords:block/runic_forge_top",
+    "north": "simplyswords:block/runic_forge_front",
+    "south": "simplyswords:block/runic_forge_front",
+    "west": "simplyswords:block/runic_forge_side",
+    "east": "simplyswords:block/runic_forge_side",
+    "particle": "simplyswords:block/runic_forge_side"
   }
 }
