@@ -1,20 +1,56 @@
-![enter image description here](https://img.shields.io/badge/ENVIRONMENT-CLIENT%20&%20SERVER-orange?style=for-the-badge&logo=)
-![enter image description here](https://img.shields.io/badge/ARCHITECTURY-REQUIRED-orange?style=for-the-badge&logo=)
-![Discord](https://img.shields.io/discord/1020119045925773382?color=5865f2&label=%20&logo=Discord&logoColor=ffffff&style=for-the-badge)
-<a title="Bisect Hosting" href="https://www.bisecthosting.com/Timefall" target="_blank" rel="noopener noreferrer"><img style="display: block; margin-left: auto; margin-right: auto;" src="https://www.bisecthosting.com/images/logos/dark_text@1538x500.png" width="105" height="34" /></a></p>
+# Simply Swords addon developer documentation
 
-![Simply Swords](https://imgur.com/7FSLYtk.gif)
-![Weapon Variants](https://imgur.com/eOWyCv6.gif)
-![Unique Weapons](https://imgur.com/iduZbq5.gif)
-![Mod Support](https://imgur.com/wNQ0qRk.gif)
-![Recommend Better Combat](https://imgur.com/H8BUkyQ.png)
-![Recommend Patchouli](https://imgur.com/WfWziAG.png)
-![Additional mod support](https://imgur.com/hHoFbQt.png)
-![Requires Architectury](https://imgur.com/I2coWxr.png)
+These documents explain how an addon can build weapons that behave like Simply
+Swords' built-in unique weapons. They target Minecraft 1.21.1 and Java 21.
 
+Start here:
 
-Prefer an alternate look? Try the  [Yourscraft resourcepack + Simply Swords addon](https://www.curseforge.com/minecraft/texture-packs/yourscraft/files/all)
+1. [Set up the dependency](developer-docs/getting-started.md).
+2. Follow the [complete unique weapon walkthrough](developer-docs/unique-weapon-walkthrough.md).
+3. Use the [API reference](developer-docs/api/README.md) when adding more advanced behavior.
+4. Finish with the [testing checklist](developer-docs/testing-checklist.md).
 
-Want to play with Simply Swords on a server with friends? How about considering a server from BisectHosting? They're already set up and ready to go!
+## What counts as a supported extension point?
 
-[![](https://www.bisecthosting.com/partners/custom-banners/9deaa8f0-11c2-41f1-8f4f-32d2493b0912.png)](https://www.curseforge.com/linkout?remoteUrl=https://www.bisecthosting.com/Timefall)
+The primary API lives in:
+
+- `net.sweenus.simplyswords.api`
+- `net.sweenus.simplyswords.client.api`
+
+The following classes are also intended for addon use:
+
+- `UniqueSwordItem`
+- `UniqueWeaponActiveAbility`
+- `GemPower`, `RunicGemPower`, `RunefusedGemPower`, and `NetherGemPower`
+- `GemPowerRegistry`
+
+Classes under `world`, `mixin`, and most of `util` are implementation details.
+The reference occasionally mentions a utility when it is the only practical way
+to match built-in behavior. Treat those utilities as less stable than the API
+package.
+
+## API registration rule
+
+Register addon items normally, then register their Simply Swords integrations
+during common initialization. Client model properties and other rendering hooks
+belong in the addon's client initializer.
+
+Simply Swords must be a required dependency so its registries and components
+exist before addon content is used.
+
+## Documents
+
+- [Getting started](developer-docs/getting-started.md)
+- [Unique weapon walkthrough](developer-docs/unique-weapon-walkthrough.md)
+- [Testing checklist](developer-docs/testing-checklist.md)
+- [API index](developer-docs/api/README.md)
+- [Active abilities](developer-docs/api/active-abilities.md)
+- [Awakening](developer-docs/api/awakening.md)
+- [Awakening forms](developer-docs/api/awakening-forms.md)
+- [Gem sockets and powers](developer-docs/api/gem-sockets-and-powers.md)
+- [Unique loot and pity](developer-docs/api/unique-loot.md)
+- [Weapon implicits](developer-docs/api/weapon-implicits.md)
+- [Combat and damage](developer-docs/api/combat-and-damage.md)
+- [Contained Remnants](developer-docs/api/contained-remnants.md)
+- [Battle Standards](developer-docs/api/battle-standards.md)
+- [Client integration](developer-docs/api/client-integration.md)
