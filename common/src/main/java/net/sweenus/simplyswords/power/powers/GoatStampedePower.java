@@ -93,6 +93,6 @@ public class GoatStampedePower extends NetherGemPower {
         public double summonerKnockback = 0.5;
 
         @ValidatedInt.Restrict(min = 1)
-        public int maxActiveGoats = 20;
+        public int maxActiveStampedes = 1;
     }
 }

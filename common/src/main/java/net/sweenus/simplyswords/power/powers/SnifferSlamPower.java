@@ -104,7 +104,7 @@ public class SnifferSlamPower extends RunefusedGemPower {
         public int lingerTicks = 20;
 
         @ValidatedInt.Restrict(min = 1)
-        public int maxActiveSniffers = 8;
+        public int maxActiveSlams = 1;
 
         @ValidatedInt.Restrict(min = 0, max = 100)
         public int screamingGoatSoundChance = 5;

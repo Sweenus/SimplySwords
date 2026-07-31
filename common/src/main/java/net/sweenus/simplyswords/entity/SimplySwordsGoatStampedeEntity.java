@@ -33,6 +33,7 @@ public class SimplySwordsGoatStampedeEntity extends GoatEntity implements Simply
     private static final double HIT_SEARCH_RADIUS = 1.1;
 
     private UUID ownerUuid;
+    private UUID stampedeId;
     private long expiresAtTick;
     private float damage;
     private double knockbackStrength;
@@ -51,9 +52,10 @@ public class SimplySwordsGoatStampedeEntity extends GoatEntity implements Simply
                 .add(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE, 1.0);
     }
 
-    public void initializeStampede(LivingEntity owner, ItemStack stack, Vec3d direction, long expiresAtTick,
+    public void initializeStampede(LivingEntity owner, ItemStack stack, UUID stampedeId, Vec3d direction, long expiresAtTick,
                                     float damage, double knockbackStrength, double chargeSpeed, boolean screaming) {
         this.ownerUuid = owner.getUuid();
+        this.stampedeId = stampedeId;
         this.sourceStack = stack.copy();
         this.direction = direction.lengthSquared() > 1.0E-4 ? direction.normalize() : Vec3d.fromPolar(0.0F, owner.getYaw());
         this.expiresAtTick = expiresAtTick;
@@ -127,6 +129,11 @@ public class SimplySwordsGoatStampedeEntity extends GoatEntity implements Simply
     @Nullable
     public UUID getOwnerUuid() {
         return this.ownerUuid;
+    }
+
+    @Nullable
+    public UUID getStampedeId() {
+        return this.stampedeId;
     }
 
     @Nullable

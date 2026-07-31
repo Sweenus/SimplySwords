@@ -1,5 +1,6 @@
 package net.sweenus.simplyswords.world;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.item.ItemStack;
@@ -27,6 +28,9 @@ public final class WingBuffetManager {
             return false;
         }
         if (!(attacker.getWorld() instanceof ServerWorld world)) {
+            return false;
+        }
+        if (hasActiveBuffet(world, attacker)) {
             return false;
         }
 
@@ -72,6 +76,17 @@ public final class WingBuffetManager {
         Vec3d look = attacker.getRotationVec(1.0F);
         Vec3d direction = new Vec3d(look.x, 0.0, look.z);
         return direction.lengthSquared() > 1.0E-5 ? direction.normalize() : Vec3d.fromPolar(0.0F, attacker.getYaw()).normalize();
+    }
+
+    private static boolean hasActiveBuffet(ServerWorld world, LivingEntity owner) {
+        for (Entity entity : world.iterateEntities()) {
+            if (entity instanceof DragonWingBuffetVisualEntity visual
+                    && visual.isAlive()
+                    && visual.getOwnerEntityId() == owner.getId()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static void applyKnockback(LivingEntity target, Vec3d targetDirection, float multiplier) {

@@ -1,5 +1,6 @@
 package net.sweenus.simplyswords.world;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.item.ItemStack;
@@ -7,7 +8,6 @@ import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.config.Config;
@@ -16,9 +16,12 @@ import net.sweenus.simplyswords.entity.SimplySwordsMinion;
 import net.sweenus.simplyswords.registry.EntityRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
+
 public final class GoatStampedeManager {
 
-    private static final double MINION_SEARCH_RADIUS = 32.0;
     private static final double LATERAL_SPACING = 0.9;
 
     private GoatStampedeManager() {
@@ -35,8 +38,8 @@ public final class GoatStampedeManager {
             return false;
         }
 
-        int maxActiveGoats = Math.max(1, Config.gemPowers.goatStampede.maxActiveGoats);
-        if (getActiveGoatCount(world, attacker) >= maxActiveGoats) {
+        int maxActiveStampedes = Math.max(1, Config.gemPowers.goatStampede.maxActiveStampedes);
+        if (getActiveStampedeCount(world, attacker) >= maxActiveStampedes) {
             return false;
         }
 
@@ -55,6 +58,7 @@ public final class GoatStampedeManager {
 
         int goatCount = Math.max(1, Config.gemPowers.goatStampede.goatCount);
         long expiresAtTick = world.getTime() + Math.max(1, Config.gemPowers.goatStampede.duration);
+        UUID stampedeId = UUID.randomUUID();
         boolean anyScreaming = false;
 
         for (int i = 0; i < goatCount; i++) {
@@ -74,7 +78,7 @@ public final class GoatStampedeManager {
                     HelperMethods.attackScaledDamage(attacker, stack, (float) damageScaling));
 
             goat.refreshPositionAndAngles(spawnPos.x, spawnPos.y, spawnPos.z, attacker.getYaw(), 0.0F);
-            goat.initializeStampede(attacker, stack, direction, expiresAtTick, damage,
+            goat.initializeStampede(attacker, stack, stampedeId, direction, expiresAtTick, damage,
                     AwakeningApi.scaleGemPower(stack, Config.gemPowers.goatStampede.knockbackStrength),
                     Config.gemPowers.goatStampede.chargeSpeed, screaming);
         }
@@ -86,9 +90,16 @@ public final class GoatStampedeManager {
         return true;
     }
 
-    private static int getActiveGoatCount(ServerWorld world, LivingEntity owner) {
-        Box searchBox = owner.getBoundingBox().expand(MINION_SEARCH_RADIUS);
-        return world.getEntitiesByClass(SimplySwordsGoatStampedeEntity.class, searchBox,
-                goat -> goat.isAlive() && owner.getUuid().equals(goat.getOwnerUuid())).size();
+    private static int getActiveStampedeCount(ServerWorld world, LivingEntity owner) {
+        Set<UUID> activeStampedes = new HashSet<>();
+        for (Entity entity : world.iterateEntities()) {
+            if (entity instanceof SimplySwordsGoatStampedeEntity goat
+                    && goat.isAlive()
+                    && owner.getUuid().equals(goat.getOwnerUuid())) {
+                UUID stampedeId = goat.getStampedeId();
+                activeStampedes.add(stampedeId == null ? goat.getUuid() : stampedeId);
+            }
+        }
+        return activeStampedes.size();
     }
 }

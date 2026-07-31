@@ -1,19 +1,17 @@
 package net.sweenus.simplyswords.world;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.math.Box;
 import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.FallingSnifferEntity;
 import net.sweenus.simplyswords.util.HelperMethods;
 
 public final class SnifferSlamManager {
-
-    private static final double ACTIVE_SEARCH_RADIUS = 48.0;
 
     private SnifferSlamManager() {
     }
@@ -29,8 +27,8 @@ public final class SnifferSlamManager {
             return false;
         }
 
-        int maxActive = Math.max(1, Config.gemPowers.snifferSlam.maxActiveSniffers);
-        if (getActiveSnifferCount(world, attacker) >= maxActive) {
+        int maxActiveSlams = Math.max(1, Config.gemPowers.snifferSlam.maxActiveSlams);
+        if (getActiveSlamCount(world, attacker) >= maxActiveSlams) {
             return false;
         }
 
@@ -66,9 +64,15 @@ public final class SnifferSlamManager {
                 pitches[world.random.nextInt(pitches.length)]);
     }
 
-    private static int getActiveSnifferCount(ServerWorld world, LivingEntity owner) {
-        Box searchBox = owner.getBoundingBox().expand(ACTIVE_SEARCH_RADIUS);
-        return world.getEntitiesByClass(FallingSnifferEntity.class, searchBox,
-                sniffer -> sniffer.isAlive() && owner.getUuid().equals(sniffer.getOwnerUuid())).size();
+    private static int getActiveSlamCount(ServerWorld world, LivingEntity owner) {
+        int count = 0;
+        for (Entity entity : world.iterateEntities()) {
+            if (entity instanceof FallingSnifferEntity sniffer
+                    && sniffer.isAlive()
+                    && owner.getUuid().equals(sniffer.getOwnerUuid())) {
+                count++;
+            }
+        }
+        return count;
     }
 }
