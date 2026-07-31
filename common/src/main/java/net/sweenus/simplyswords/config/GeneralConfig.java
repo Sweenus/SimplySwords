@@ -2,8 +2,10 @@ package net.sweenus.simplyswords.config;
 
 import dev.architectury.platform.Platform;
 import me.fzzyhmstrs.fzzy_config.config.Config;
+import me.fzzyhmstrs.fzzy_config.validation.collection.ValidatedSet;
 import me.fzzyhmstrs.fzzy_config.validation.misc.ValidatedBoolean;
 import me.fzzyhmstrs.fzzy_config.validation.misc.ValidatedCondition;
+import me.fzzyhmstrs.fzzy_config.validation.misc.ValidatedString;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.text.Text;
@@ -40,6 +42,8 @@ public class GeneralConfig extends Config {
     public int nonPlayerWeaponAbilityChance = 50;
     public boolean enableUniqueWeaponAwakening = true;
     public boolean enableUniqueGemSockets = true;
+    public ValidatedSet<String> additionalGemSocketItems =
+            new ValidatedString("", "(?:#?[a-z0-9_.-]+:[a-z0-9_./-]+)?").toSet();
     public boolean enableTooltipInfoButtons = true;
     public boolean tooltipInfoButtonsRequireInventoryScreen = true;
     @ValidatedInt.Restrict(min = 1200, max = 72000)

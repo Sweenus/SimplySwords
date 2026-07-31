@@ -12,6 +12,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.api.AwakeningFormRegistry;
+import net.sweenus.simplyswords.api.AdditionalGemSocketApi;
 import net.sweenus.simplyswords.power.GemPowerComponent;
 import net.sweenus.simplyswords.power.PowerType;
 import net.sweenus.simplyswords.registry.BlocksRegistry;
@@ -97,17 +98,23 @@ public class RunicForgeScreenHandler extends ScreenHandler {
     private void loadInsertedWeapon() {
         if (committing || owner.getWorld().isClient()) return;
         ItemStack weapon = forgeInventory.getStack(WEAPON_SLOT);
-        if (!weapon.isEmpty() && !editingLoaded && AwakeningApi.usesAwakeningProgression(weapon)) {
+        if (!weapon.isEmpty() && !editingLoaded && isForgeWeapon(weapon)) {
             committing = true;
             try {
-                ItemStack converted = LegacyUniqueMigration.convertStack(weapon);
-                if (converted != weapon) {
-                    forgeInventory.setStack(WEAPON_SLOT, converted);
-                    weapon = converted;
+                if (AwakeningApi.usesAwakeningProgression(weapon)) {
+                    ItemStack converted = LegacyUniqueMigration.convertStack(weapon);
+                    if (converted != weapon) {
+                        forgeInventory.setStack(WEAPON_SLOT, converted);
+                        weapon = converted;
+                    }
+                    AwakeningFormRegistry.ensureInitialized(weapon);
+                } else {
+                    AdditionalGemSocketApi.ensureInitialized(weapon);
                 }
-                AwakeningFormRegistry.ensureInitialized(weapon);
                 originalStack = weapon.copy();
-                originalLevel = AwakeningApi.getLevel(weapon);
+                originalLevel = AwakeningApi.usesAwakeningProgression(weapon)
+                        ? AwakeningApi.getLevel(weapon)
+                        : 0;
                 extractWeaponContents(weapon);
                 editingLoaded = true;
             } finally {
@@ -122,7 +129,8 @@ public class RunicForgeScreenHandler extends ScreenHandler {
     }
 
     private void extractWeaponContents(ItemStack weapon) {
-        int level = AwakeningApi.getLevel(weapon);
+        boolean awakenable = AwakeningApi.usesAwakeningProgression(weapon);
+        int level = awakenable ? AwakeningApi.getLevel(weapon) : 0;
         GemPowerComponent gems = weapon.getOrDefault(
                 ComponentTypeRegistry.GEM_POWER.get(), GemPowerComponent.DEFAULT);
         for (int i = 0; i < TABLET_COUNT; i++) {
@@ -141,7 +149,9 @@ public class RunicForgeScreenHandler extends ScreenHandler {
         }
         weapon.set(ComponentTypeRegistry.GEM_POWER.get(),
                 GemPowerComponent.createEmpty(gems.hasRunicPower(), gems.hasNetherPower()));
-        AwakeningApi.setLevel(weapon, 0);
+        if (awakenable) {
+            AwakeningApi.setLevel(weapon, 0);
+        }
     }
 
     private void commitWeapon() {
@@ -177,7 +187,10 @@ public class RunicForgeScreenHandler extends ScreenHandler {
         } finally {
             committing = false;
         }
-        if (changed && !committedStack.isEmpty() && owner instanceof ServerPlayerEntity serverPlayer) {
+        if (changed
+                && !committedStack.isEmpty()
+                && AwakeningApi.usesAwakeningProgression(sourceSnapshot)
+                && owner instanceof ServerPlayerEntity serverPlayer) {
             AwakeningFormRegistry.notifyCommitted(
                     sourceSnapshot,
                     committedStack,
@@ -214,11 +227,15 @@ public class RunicForgeScreenHandler extends ScreenHandler {
     private ItemStack buildConfiguredPreview(ItemStack weapon) {
         if (weapon.isEmpty()) return ItemStack.EMPTY;
         ItemStack preview = weapon.copy();
+        boolean awakenable = AwakeningApi.usesAwakeningProgression(
+                originalStack.isEmpty() ? weapon : originalStack);
         int level = 0;
-        for (int i = 0; i < TABLET_COUNT; i++) {
-            if (forgeInventory.getStack(TABLET_START + i)
-                    .isOf(ItemsRegistry.RUNIC_TABLET.get())) {
-                level++;
+        if (awakenable) {
+            for (int i = 0; i < TABLET_COUNT; i++) {
+                if (forgeInventory.getStack(TABLET_START + i)
+                        .isOf(ItemsRegistry.RUNIC_TABLET.get())) {
+                    level++;
+                }
             }
         }
 
@@ -236,16 +253,18 @@ public class RunicForgeScreenHandler extends ScreenHandler {
                 sockets.hasNetherPower() && !netherGem.netherPower().value().isEmpty()
                         ? netherGem.netherPower() : GemPowerRegistry.EMPTY
         ));
-        AwakeningApi.setLevel(preview, level);
-        if (owner instanceof ServerPlayerEntity serverPlayer) {
-            preview = AwakeningFormRegistry.resolvePreview(
-                    preview,
-                    originalStack.isEmpty() ? weapon : originalStack,
-                    originalLevel,
-                    level,
-                    serverPlayer,
-                    forgePos
-            );
+        if (awakenable) {
+            AwakeningApi.setLevel(preview, level);
+            if (owner instanceof ServerPlayerEntity serverPlayer) {
+                preview = AwakeningFormRegistry.resolvePreview(
+                        preview,
+                        originalStack.isEmpty() ? weapon : originalStack,
+                        originalLevel,
+                        level,
+                        serverPlayer,
+                        forgePos
+                );
+            }
         }
         return preview;
     }
@@ -279,7 +298,7 @@ public class RunicForgeScreenHandler extends ScreenHandler {
             }
         } else if (slotIndex >= PLAYER_SLOT_START
                 && slotIndex < PLAYER_SLOT_END
-                && AwakeningApi.usesAwakeningProgression(source)) {
+                && isForgeWeapon(source)) {
             if (!insertItem(source, WEAPON_SLOT, WEAPON_SLOT + 1, false)) return ItemStack.EMPTY;
         } else if (slotIndex >= PLAYER_SLOT_START
                 && slotIndex < PLAYER_SLOT_END
@@ -323,7 +342,7 @@ public class RunicForgeScreenHandler extends ScreenHandler {
 
         @Override
         public boolean canInsert(ItemStack stack) {
-            return getStack().isEmpty() && AwakeningApi.usesAwakeningProgression(stack);
+            return getStack().isEmpty() && isForgeWeapon(stack);
         }
 
         @Override
@@ -380,7 +399,8 @@ public class RunicForgeScreenHandler extends ScreenHandler {
             super(inventory, index, x, y);
         }
         @Override public boolean canInsert(ItemStack stack) {
-            return !forgeInventory.getStack(WEAPON_SLOT).isEmpty()
+            return AwakeningApi.usesAwakeningProgression(
+                    forgeInventory.getStack(WEAPON_SLOT))
                     && stack.isOf(ItemsRegistry.RUNIC_TABLET.get());
         }
         @Override public int getMaxItemCount() { return 1; }
@@ -405,5 +425,12 @@ public class RunicForgeScreenHandler extends ScreenHandler {
         public boolean isEnabled() {
             return false;
         }
+    }
+
+    private static boolean isForgeWeapon(ItemStack stack) {
+        return stack != null
+                && !stack.isEmpty()
+                && (AwakeningApi.usesAwakeningProgression(stack)
+                || AdditionalGemSocketApi.isManaged(stack));
     }
 }

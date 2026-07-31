@@ -7,6 +7,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Hand;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
+import net.sweenus.simplyswords.api.AdditionalGemSocketApi;
 import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.api.WeaponAbilityActivationSource;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
@@ -19,6 +20,8 @@ import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.item.custom.IcewhisperSwordItem;
 import net.sweenus.simplyswords.item.custom.LichbladeSwordItem;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
+import net.sweenus.simplyswords.registry.ComponentTypeRegistry;
+import net.sweenus.simplyswords.power.GemPowerComponent;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.MinionTargeting;
 import net.sweenus.simplyswords.world.ShadowstingShadowDanceManager;
@@ -97,6 +100,13 @@ public abstract class MobEntityMixin {
         }
 
         ItemStack stack = mob.getMainHandStack();
+        if (AdditionalGemSocketApi.ensureInitialized(stack)) {
+            GemPowerComponent component = stack.getOrDefault(
+                    ComponentTypeRegistry.GEM_POWER.get(), GemPowerComponent.DEFAULT);
+            component.postHit(stack, livingTarget, mob);
+            MinionTargeting.recordLastAttack(mob, livingTarget);
+            return;
+        }
         if (stack.getItem() instanceof UniqueSwordItem
                 || stack.getItem() instanceof RunicSwordItem
                 || stack.getItem() instanceof SimplySwordsSwordItem) {

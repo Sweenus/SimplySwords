@@ -132,7 +132,7 @@ public class TooltipUtils {
 
     public static boolean shouldDisplayTooltip(ItemStack stack, Identifier tagId) {
         return (Screen.hasAltDown() && !Screen.hasControlDown()) // Don't hide info on these items
-                || HelperMethods.isInTag(stack, tagId)
+                || (tagId != null && HelperMethods.isInTag(stack, tagId))
                 || stack.isOf(ItemsRegistry.RUNEFUSED_GEM.get())
                 || stack.isOf(ItemsRegistry.NETHERFUSED_GEM.get());
     }

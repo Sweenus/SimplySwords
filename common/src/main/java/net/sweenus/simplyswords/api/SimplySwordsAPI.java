@@ -97,6 +97,7 @@ public class SimplySwordsAPI {
         if (stack == null || stack.isEmpty() || world == null || user == null || !user.isAlive()) {
             return;
         }
+        AdditionalGemSocketApi.ensureInitialized(stack);
         getComponent(stack).onSwing(stack, world, user, hand);
         if (!AwakeningApi.isAbilityUnlocked(stack)) {
             return;
@@ -338,7 +339,8 @@ public class SimplySwordsAPI {
     public static void onClickedGemSocketLogic(ItemStack stack, ItemStack otherStack,
                                                PlayerEntity player,
                                                StackReference cursorStackReference) {
-        if (Config.general.enableUniqueGemSockets) {
+        if (Config.general.enableUniqueGemSockets
+                || AdditionalGemSocketApi.hasAdditionalSockets(stack)) {
             GemPowerComponent component = getComponent(stack);
             if (component.canBeFilled()) {
                 if (otherStack.getItem() instanceof GemPowerFiller gemPowerFiller) {
