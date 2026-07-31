@@ -73,6 +73,9 @@ public abstract class ServerWorldMixin {
         if (ThunderbrandAbilityManager.hasActive(world)) {
             ThunderbrandAbilityManager.tick(world);
         }
+        if (MagibladeAbilityManager.hasActive(world)) {
+            MagibladeAbilityManager.tick(world);
+        }
         if (StormsEdgeAbilityManager.hasActive(world)) {
             StormsEdgeAbilityManager.tick(world);
         }

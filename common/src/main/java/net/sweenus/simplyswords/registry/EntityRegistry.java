@@ -288,6 +288,15 @@ public class EntityRegistry {
                     .build(Identifier.of(SimplySwords.MOD_ID, "dragon_maw_head_visual").toString())
     );
 
+    public static final RegistrySupplier<EntityType<MagibladeWardenHeadVisualEntity>> MAGIBLADE_WARDEN_HEAD_VISUAL = ENTITIES.register(
+            "magiblade_warden_head_visual",
+            () -> EntityType.Builder.<MagibladeWardenHeadVisualEntity>create(MagibladeWardenHeadVisualEntity::new, SpawnGroup.MISC)
+                    .dimensions(1.5F, 1.5F)
+                    .maxTrackingRange(96)
+                    .trackingTickInterval(1)
+                    .build(Identifier.of(SimplySwords.MOD_ID, "magiblade_warden_head_visual").toString())
+    );
+
     public static final RegistrySupplier<EntityType<DragonMawBreathCloudEntity>> DRAGON_MAW_BREATH_CLOUD = ENTITIES.register(
             "dragon_maw_breath_cloud",
             () -> EntityType.Builder.<DragonMawBreathCloudEntity>create(DragonMawBreathCloudEntity::new, SpawnGroup.MISC)

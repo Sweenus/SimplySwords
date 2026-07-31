@@ -12,7 +12,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.particle.ParticleTypes;
-import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.registry.tag.TagKey;
@@ -22,7 +21,6 @@ import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
 import net.sweenus.simplyswords.api.AwakeningApi;
@@ -52,7 +50,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 
@@ -158,39 +155,6 @@ public abstract class ServerPlayerEntityMixin {
                     float pitch = 1.0f + player.getRandom().nextBetween(1, 5) * 0.1f;
                     player.getWorld().playSound(null, player.getBlockPos(),
                             SoundRegistry.OBJECT_IMPACT_THUD.get(), SoundCategory.PLAYERS,volume, pitch);
-                }
-            }
-
-            //Magiblade repellent
-            if (serverPlayer.getMainHandStack().isOf(ItemsRegistry.MAGIBLADE.get())) {
-                int frequency = 8;
-                double radius = Config.uniqueEffects.magiblade.repelRadius;
-                int chance = Config.uniqueEffects.magiblade.repelChance;
-                int totalChance = new Random().nextInt(100);
-                if (serverPlayer.age % frequency == 0 && totalChance < chance) {
-                    Box box = HelperMethods.createBox(player, radius);
-                    Entity closestEntity = player.getWorld().getOtherEntities(player, box, EntityPredicates.VALID_LIVING_ENTITY).stream()
-                            .filter(entity -> {
-                                if (entity instanceof LivingEntity livingEntity)
-                                    return HelperMethods.checkFriendlyFire(livingEntity, player);
-                                return false;
-                            })
-                            .min(Comparator.comparingDouble(entity -> entity.squaredDistanceTo(player)))
-                            .orElse(null);
-
-                    if (closestEntity != null) {
-                        if ((closestEntity instanceof LivingEntity le)) {
-                            if (le.distanceTo(player) > 1) {
-                                closestEntity.setVelocity((closestEntity.getX() - player.getX()) / 2, 0, (closestEntity.getZ() - player.getZ()) / 2);
-                                float volume = 0.8f;
-                                float pitch = 1.0f + player.getRandom().nextBetween(1, 5) * 0.1f;
-                                player.getWorld().playSound(null, player.getBlockPos(),
-                                        SoundEvents.BLOCK_SCULK_SENSOR_CLICKING, SoundCategory.PLAYERS, volume, pitch);
-                                HelperMethods.spawnWaistHeightParticles((ServerWorld) player.getWorld(), ParticleTypes.ENCHANT, closestEntity, player, 10);
-                                HelperMethods.spawnOrbitParticles((ServerWorld) closestEntity.getWorld(), closestEntity.getPos().add(0, closestEntity.getHeight() / 2, 0), ParticleTypes.SCULK_CHARGE_POP, 0.5, 6);
-                            }
-                        }
-                    }
                 }
             }
 
