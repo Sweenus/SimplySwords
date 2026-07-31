@@ -13,7 +13,6 @@ import net.minecraft.text.Text;
 import net.minecraft.text.TextColor;
 import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.SimplySwords;
-import net.sweenus.simplyswords.SimplySwordsExpectPlatform;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.power.GemPower;
 import net.sweenus.simplyswords.power.GemPowerComponent;
@@ -138,19 +137,6 @@ public class TooltipUtils {
     }
 
 
-    public static void openPatchouli(Identifier entry) {
-        if (Platform.isModLoaded("patchouli")) {
-            if (entry.getPath().contains("lichblade"))
-                entry = Identifier.of("simplyswords:uniques/entry_slumbering_lichblade");
-            if (entry.getPath().contains("righteous_relic"))
-                entry = Identifier.of("simplyswords:uniques/entry_dormant_relic");
-            if (entry.getPath().contains("tainted_relic"))
-                entry = Identifier.of("simplyswords:uniques/entry_dormant_relic");
-
-            commonPatchouli(entry);
-        }
-    }
-
     public static void openFzzyConfig(String path) {
         if (!ConfigApiJava.isScreenOpen("simplyswords.unique_effects.")) {
             //System.out.println(path);
@@ -231,11 +217,6 @@ public class TooltipUtils {
         } else {
             ctrlKeyPressTimestamp = 0;
         }
-    }
-
-
-    public static void commonPatchouli(Identifier entry) {
-        SimplySwordsExpectPlatform.openPatchouli(entry);
     }
 
 

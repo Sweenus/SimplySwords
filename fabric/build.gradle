@@ -59,7 +59,6 @@ dependencies {
     //include modImplementation("dev.lambdaurora:spruceui:${rootProject.spruceui_version}") 1.21
     //modImplementation "curse.maven:eldritch-end-877553:${rootProject.eldritch_end_version}" 1.21
     //modImplementation "curse.maven:amethyst-imbuement-608261:4514358"
-    modImplementation "vazkii.patchouli:Patchouli:1.21-87-FABRIC"
     //modImplementation(annotationProcessor("com.github.llamalad7.mixinextras:mixinextras-fabric:${rootProject.mixin_extras_version}")) 1.21
 
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
