@@ -2,33 +2,33 @@
 title: Unique Weapons
 icon: simplyswords:flamewind
 ---
+
 <center>
 <ModAsset location="simplyswords:uniques/caelestis" width={256} />
 </center>
----
+
 # What are Unique weapons?
 
----
+Unique weapons are the most mechanically elaborate weapons in Simply Swords. Each has a fixed weapon type and a signature passive, triggered, or active ability. Their listed statistics are fully awakened defaults and may be changed by configuration.
 
-Unique weapons are powerful weapons that possess unique abilities and deal slightly more damage than their Netherite counterparts.
+# Finding Unique weapons
 
----
+Eligible chests, including many modded structure chests, can roll Unique loot. The default base Unique chance is **0.05%**. Per-player pity begins after **25** eligible misses, increases the chance by **0.2 percentage points** per further miss, and guarantees a Unique by the 75th eligible miss. Pity progress belongs to the individual player, making it suitable for multiplayer servers with players at different progression stages.
 
-# Where can I find Unique weapons?
+The Wither and Ender Dragon have separate default Unique chances of **5%** and **50%**. Village loot injection is disabled by default. All chances, eligible tables, disabled weapons, and pity thresholds are configurable.
 
----
+Natural Unique drops begin at Awakening level 0 when awakening is enabled. Restore them with up to eight Runic Tablets at a Runic Forge.
 
-### Chest Loot
-Unique weapons can be found in any chest throughout your adventures, including chests from most modded structures. The chance to find a unique weapon is very low.
-### Monster Loot
-By default, Unique weapons can also be obtained by defeating the Wither & Ender Dragon at a 5% and 50% chance respectively.
-### Crafting
-Unique weapons cannot be crafted, however, some Unique weapons can be upgraded via crafting.
+# Contained Remnants
 
----
+Using a Contained Remnant on a matching thematic block produces a deterministic Unique weapon. Hold the remnant to receive nearby hints. Examples include an Iron Block for Mjolnir, a Copper Bulb for Storm's Edge, an End Portal Frame for Caelestis, and Soul Fire for a Slumbering Lichblade.
 
-# How do I repair Unique weapons?
+# Repair and testing
 
----
+Built-in Unique weapons use Runic Tablets for repair. Operators can test the configured loot pipeline without changing player pity by running:
 
-Most Unique weapons can be repaired using Runic Tablets, however, there are a few exceptions to this - take a look at the wiki entry for your Unique weapon to find its repair ingredient.
+```
+/simplyswords loot_test <loot_table_id> <rolls>
+```
+
+Unique abilities and socketed gem powers scale with awakening. The ability is sealed until Awakening level 4 by default; consult the Awakening and Runic Forge section for full details.
