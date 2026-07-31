@@ -11,7 +11,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.particle.ParticleTypes;
-import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
@@ -20,14 +19,13 @@ import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.AwakeningApi;
+import net.sweenus.simplyswords.api.AwakeningFormRegistry;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.BattleStandardDarkEntity;
 import net.sweenus.simplyswords.entity.BattleStandardEntity;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
-import net.sweenus.simplyswords.item.component.RelicAttunementComponent;
 import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
-import net.sweenus.simplyswords.registry.ComponentTypeRegistry;
 import net.sweenus.simplyswords.registry.EntityRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
@@ -49,15 +47,13 @@ public class DormantRelicSwordItem extends UniqueSwordItem implements UniqueWeap
         }
         HelperMethods.playHitSounds(attacker, target);
         if (!attacker.getWorld().isClient() && AwakeningApi.isAbilityUnlocked(stack)) {
-            RelicAttunementComponent attunement = stack.getOrDefault(
-                    ComponentTypeRegistry.RELIC_ATTUNEMENT.get(), RelicAttunementComponent.UNATTUNED);
-            if (attunement.isSun()
+            if (isSunForm(stack)
                     && attacker.getRandom().nextInt(100) < AwakeningApi.scaleChance(stack, Config.uniqueEffects.sunfire.chance)) {
                 attacker.getWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
                         attacker.getSoundCategory(), 0.3f, 1.7f);
                 attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.REGENERATION, 40,
                         AwakeningApi.getLevel(stack) >= 8 ? 1 : 0), attacker);
-            } else if (attunement.isHarbinger()
+            } else if (isHarbingerForm(stack)
                     && attacker.getRandom().nextInt(100) < AwakeningApi.scaleChance(stack, Config.uniqueEffects.harbinger.chance)) {
                 attacker.getWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
                         attacker.getSoundCategory(), 0.3f, 1.6f);
@@ -77,9 +73,7 @@ public class DormantRelicSwordItem extends UniqueSwordItem implements UniqueWeap
         if (context == null || AwakeningApi.getLevel(context.stack()) < 8) {
             return false;
         }
-        RelicAttunementComponent attunement = context.stack().getOrDefault(
-                ComponentTypeRegistry.RELIC_ATTUNEMENT.get(), RelicAttunementComponent.UNATTUNED);
-        return (attunement.isSun() || attunement.isHarbinger())
+        return (isSunForm(context.stack()) || isHarbingerForm(context.stack()))
                 && context.world().getBlockState(getStandardPosition(context.actor())).isAir()
                 && context.actor().isAlive()
                 && context.stack().getDamage() < context.stack().getMaxDamage() - 1;
@@ -87,13 +81,11 @@ public class DormantRelicSwordItem extends UniqueSwordItem implements UniqueWeap
 
     @Override
     public boolean activate(WeaponAbilityContext context) {
-        RelicAttunementComponent attunement = context.stack().getOrDefault(
-                ComponentTypeRegistry.RELIC_ATTUNEMENT.get(), RelicAttunementComponent.UNATTUNED);
         BlockPos pos = getStandardPosition(context.actor());
         if (!context.world().getBlockState(pos).isAir()) {
             return false;
         }
-        if (attunement.isSun()) {
+        if (isSunForm(context.stack())) {
             context.world().playSoundFromEntity(null, context.actor(),
                     SoundRegistry.ELEMENTAL_SWORD_EARTH_ATTACK_01.get(),
                     context.actor().getSoundCategory(), 0.4f, 0.8f);
@@ -108,7 +100,7 @@ public class DormantRelicSwordItem extends UniqueSwordItem implements UniqueWeap
                     context.actor().getName()));
             return true;
         }
-        if (attunement.isHarbinger()) {
+        if (isHarbingerForm(context.stack())) {
             context.world().playSoundFromEntity(null, context.actor(),
                     SoundRegistry.DARK_SWORD_ATTACK_WITH_BLOOD_02.get(),
                     context.actor().getSoundCategory(), 0.4f, 0.8f);
@@ -128,9 +120,7 @@ public class DormantRelicSwordItem extends UniqueSwordItem implements UniqueWeap
 
     @Override
     public int getActivationCooldownTicks(ItemStack stack, WeaponAbilityContext context) {
-        RelicAttunementComponent attunement = stack.getOrDefault(
-                ComponentTypeRegistry.RELIC_ATTUNEMENT.get(), RelicAttunementComponent.UNATTUNED);
-        return attunement.isSun()
+        return isSunForm(stack)
                 ? Config.uniqueEffects.sunfire.cooldown
                 : Config.uniqueEffects.harbinger.cooldown;
     }
@@ -154,19 +144,19 @@ public class DormantRelicSwordItem extends UniqueSwordItem implements UniqueWeap
     public void appendTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
         tooltip.add(Text.literal(""));
         int awakening = AwakeningApi.getLevel(itemStack);
-        RelicAttunementComponent attunement = itemStack.getOrDefault(
-                ComponentTypeRegistry.RELIC_ATTUNEMENT.get(), RelicAttunementComponent.UNATTUNED);
-        if (awakening < 4 || (!attunement.isSun() && !attunement.isHarbinger())) {
+        boolean sunForm = isSunForm(itemStack);
+        boolean harbingerForm = isHarbingerForm(itemStack);
+        if (awakening < 4 || (!sunForm && !harbingerForm)) {
             tooltip.add(Text.translatable("item.simplyswords.dormantrelicsworditem.tooltip2").setStyle(Styles.TEXT));
         } else {
-            String path = attunement.isSun() ? "sunfire" : "harbinger";
+            String path = sunForm ? "sunfire" : "harbinger";
             tooltip.add(Text.translatable("item.simplyswords." + path + "sworditem.tooltip1").setStyle(Styles.ABILITY));
             tooltip.add(Text.translatable("item.simplyswords." + path + "sworditem.tooltip2").setStyle(Styles.TEXT));
             if (awakening >= 8) {
                 tooltip.add(Text.literal(""));
                 tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
                 tooltip.add(Text.translatable("item.simplyswords." + path + "sworditem.tooltip3").setStyle(Styles.TEXT));
-                appendAbilityCooldownTooltip(tooltip, attunement.isSun()
+                appendAbilityCooldownTooltip(tooltip, sunForm
                         ? Config.uniqueEffects.sunfire.cooldown
                         : Config.uniqueEffects.harbinger.cooldown);
             }
@@ -177,5 +167,17 @@ public class DormantRelicSwordItem extends UniqueSwordItem implements UniqueWeap
                 tooltip.add(Text.translatable("item.simplyswords.decayingrelicsworditem.tooltip1").formatted(Formatting.GRAY));
             }
         }
+    }
+
+    private static boolean isSunForm(ItemStack stack) {
+        return AwakeningApi.getFormRoute(stack)
+                .filter(AwakeningFormRegistry.SUN_ROUTE::equals)
+                .isPresent();
+    }
+
+    private static boolean isHarbingerForm(ItemStack stack) {
+        return AwakeningApi.getFormRoute(stack)
+                .filter(AwakeningFormRegistry.HARBINGER_ROUTE::equals)
+                .isPresent();
     }
 }

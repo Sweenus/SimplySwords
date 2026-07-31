@@ -115,6 +115,14 @@ public class SimplySwordsAPI {
         AwakeningProfileRegistry.register(item, profile);
     }
 
+    //
+    // Registers an addon weapon family whose Runic Forge outcome may vary by
+    // awakening level and authoritative server context.
+    //
+    public static void registerAwakeningFormFamily(AwakeningFormFamily family) {
+        AwakeningFormRegistry.register(family);
+    }
+
     //Adds an addon unique to the pity-controlled chest pool.
     public static void registerUniqueLoot(Item item, int weight) {
         UniqueLootRegistry.register(item, weight);

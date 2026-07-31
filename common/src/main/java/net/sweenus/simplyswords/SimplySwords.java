@@ -24,7 +24,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
 import net.sweenus.simplyswords.api.AwakeningApi;
-import net.sweenus.simplyswords.item.component.RelicAttunementComponent;
+import net.sweenus.simplyswords.api.AwakeningFormRegistry;
 import net.sweenus.simplyswords.client.renderer.*;
 import net.sweenus.simplyswords.client.renderer.model.BattleStandardDarkModel;
 import net.sweenus.simplyswords.client.renderer.model.BattleStandardModel;
@@ -99,6 +99,7 @@ public class SimplySwords {
         WeaponImplicitRegistry.registerBuiltins();
         ParticlesRegistry.PARTICLES.register();
         TransformationRegistry.register();
+        AwakeningFormRegistry.registerBuiltins();
         SimplySwordsNetwork.init();
         SimplySwordsCommands.register();
         EntityAttributeRegistry.register(EntityRegistry.BATTLESTANDARD, BattleStandardEntity::createBattleStandardAttributes);
@@ -227,20 +228,10 @@ public class SimplySwords {
         public static void initializeRegistryDependentClient() {
             ItemPropertiesRegistry.register(ItemsRegistry.SLUMBERING_LICHBLADE.get(),
                     Identifier.of(MOD_ID, "awakening"),
-                    (stack, world, entity, seed) -> AwakeningApi.getLevel(stack) / 8.0F);
+                    (stack, world, entity, seed) -> AwakeningApi.getFormModelValue(stack));
             ItemPropertiesRegistry.register(ItemsRegistry.DORMANT_RELIC.get(),
                     Identifier.of(MOD_ID, "relic_form"),
-                    (stack, world, entity, seed) -> {
-                        int level = AwakeningApi.getLevel(stack);
-                        RelicAttunementComponent route = stack.getOrDefault(
-                                ComponentTypeRegistry.RELIC_ATTUNEMENT.get(),
-                                RelicAttunementComponent.UNATTUNED);
-                        if (level >= 8 && route.isHarbinger()) return 1.0F;
-                        if (level >= 8 && route.isSun()) return 0.75F;
-                        if (level >= 4 && route.isHarbinger()) return 0.5F;
-                        if (level >= 4 && route.isSun()) return 0.25F;
-                        return 0.0F;
-                    });
+                    (stack, world, entity, seed) -> AwakeningApi.getFormModelValue(stack));
         }
     }
 

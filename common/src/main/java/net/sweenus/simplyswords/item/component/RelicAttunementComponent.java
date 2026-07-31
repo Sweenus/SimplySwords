@@ -6,7 +6,8 @@ import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.codec.PacketCodecs;
 
 //
-// The route selected for a Dormant Relic when it first reaches four tablets.
+// Legacy Dormant Relic route data retained for existing saves and advancement
+// predicates. New form logic uses AwakeningRouteComponent.
 //
 public record RelicAttunementComponent(int route) {
     public static final int NONE = 0;

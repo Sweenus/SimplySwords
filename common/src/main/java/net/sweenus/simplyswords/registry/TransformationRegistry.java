@@ -42,6 +42,7 @@ public class TransformationRegistry {
         SimplySwordsAPI.registerTransformation(Blocks.SKELETON_SKULL, Identifier.of("simplyswords", "wraithfang"));
         SimplySwordsAPI.registerTransformation(Blocks.CAULDRON, Identifier.of("simplyswords", "thunderbrand"));
         SimplySwordsAPI.registerTransformation(Blocks.QUARTZ_BLOCK, Identifier.of("simplyswords", "stars_edge"));
+        SimplySwordsAPI.registerTransformation(Blocks.COPPER_BULB, Identifier.of("simplyswords", "storms_edge"));
     }
 
 }

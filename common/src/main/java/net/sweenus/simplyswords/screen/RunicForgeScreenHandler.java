@@ -1,7 +1,5 @@
 package net.sweenus.simplyswords.screen;
 
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.AttributeModifiersComponent;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
@@ -10,11 +8,10 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
-import net.minecraft.server.world.ServerWorld;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.AwakeningApi;
-import net.sweenus.simplyswords.item.component.RelicAttunementComponent;
+import net.sweenus.simplyswords.api.AwakeningFormRegistry;
 import net.sweenus.simplyswords.power.GemPowerComponent;
 import net.sweenus.simplyswords.power.PowerType;
 import net.sweenus.simplyswords.registry.BlocksRegistry;
@@ -42,6 +39,8 @@ public class RunicForgeScreenHandler extends ScreenHandler {
     private final BlockPos forgePos;
     private boolean editingLoaded;
     private boolean committing;
+    private ItemStack originalStack = ItemStack.EMPTY;
+    private int originalLevel;
 
     public RunicForgeScreenHandler(int syncId, PlayerInventory inventory, PacketByteBuf buf) {
         this(syncId, inventory, buf.readBlockPos());
@@ -106,6 +105,9 @@ public class RunicForgeScreenHandler extends ScreenHandler {
                     forgeInventory.setStack(WEAPON_SLOT, converted);
                     weapon = converted;
                 }
+                AwakeningFormRegistry.ensureInitialized(weapon);
+                originalStack = weapon.copy();
+                originalLevel = AwakeningApi.getLevel(weapon);
                 extractWeaponContents(weapon);
                 editingLoaded = true;
             } finally {
@@ -113,6 +115,8 @@ public class RunicForgeScreenHandler extends ScreenHandler {
             }
         } else if (weapon.isEmpty()) {
             editingLoaded = false;
+            originalStack = ItemStack.EMPTY;
+            originalLevel = 0;
             previewInventory.setStack(0, ItemStack.EMPTY);
         }
     }
@@ -144,6 +148,11 @@ public class RunicForgeScreenHandler extends ScreenHandler {
         if (owner.getWorld().isClient()) return;
         ItemStack weapon = forgeInventory.getStack(WEAPON_SLOT);
         if (committing || weapon.isEmpty() || !editingLoaded) return;
+        ItemStack sourceSnapshot = originalStack.isEmpty() ? weapon.copy() : originalStack.copy();
+        ItemStack committedStack = ItemStack.EMPTY;
+        int committedOriginalLevel = originalLevel;
+        int targetLevel = originalLevel;
+        boolean changed = false;
         committing = true;
         try {
             ItemStack preview = previewInventory.getStack(0);
@@ -151,25 +160,32 @@ public class RunicForgeScreenHandler extends ScreenHandler {
                 preview = buildConfiguredPreview(weapon);
             }
             if (!preview.isEmpty()) {
-                weapon.applyUnvalidatedChanges(preview.getComponentChanges());
-                AttributeModifiersComponent previewAttributes =
-                        preview.get(DataComponentTypes.ATTRIBUTE_MODIFIERS);
-                if (previewAttributes == null) {
-                    weapon.remove(DataComponentTypes.ATTRIBUTE_MODIFIERS);
-                } else {
-                    // A max-awakened preview uses the item's default attributes, so
-                    // getComponentChanges() omits them. Copy the effective value
-                    // explicitly to clear the temporary dormant override.
-                    weapon.set(DataComponentTypes.ATTRIBUTE_MODIFIERS, previewAttributes);
-                }
+                committedStack = preview.copyWithCount(weapon.getCount());
+                targetLevel = AwakeningApi.getLevel(committedStack);
+                changed = !ItemStack.areEqual(sourceSnapshot, committedStack);
+                forgeInventory.setStack(WEAPON_SLOT, committedStack);
             }
             for (int i = 1; i < FORGE_SLOT_COUNT; i++) {
                 forgeInventory.setStack(i, ItemStack.EMPTY);
             }
             editingLoaded = false;
-            previewInventory.setStack(0, weapon.copy());
+            originalStack = ItemStack.EMPTY;
+            originalLevel = 0;
+            previewInventory.setStack(0, committedStack.isEmpty()
+                    ? forgeInventory.getStack(WEAPON_SLOT).copy()
+                    : committedStack.copy());
         } finally {
             committing = false;
+        }
+        if (changed && !committedStack.isEmpty() && owner instanceof ServerPlayerEntity serverPlayer) {
+            AwakeningFormRegistry.notifyCommitted(
+                    sourceSnapshot,
+                    committedStack,
+                    committedOriginalLevel,
+                    targetLevel,
+                    serverPlayer,
+                    forgePos
+            );
         }
         sendContentUpdates();
     }
@@ -221,7 +237,16 @@ public class RunicForgeScreenHandler extends ScreenHandler {
                         ? netherGem.netherPower() : GemPowerRegistry.EMPTY
         ));
         AwakeningApi.setLevel(preview, level);
-        applyRelicAttunement(preview, level);
+        if (owner instanceof ServerPlayerEntity serverPlayer) {
+            preview = AwakeningFormRegistry.resolvePreview(
+                    preview,
+                    originalStack.isEmpty() ? weapon : originalStack,
+                    originalLevel,
+                    level,
+                    serverPlayer,
+                    forgePos
+            );
+        }
         return preview;
     }
 
@@ -234,24 +259,6 @@ public class RunicForgeScreenHandler extends ScreenHandler {
                 : GemPowerComponent.runic(GemPowerRegistry.gemRandomPower(PowerType.RUNEFUSED));
         stack.set(ComponentTypeRegistry.GEM_POWER.get(), identified);
         return identified;
-    }
-
-    private void applyRelicAttunement(ItemStack weapon, int level) {
-        if (!weapon.isOf(ItemsRegistry.DORMANT_RELIC.get())) return;
-        if (level < 4) {
-            weapon.remove(ComponentTypeRegistry.RELIC_ATTUNEMENT.get());
-            return;
-        }
-        RelicAttunementComponent current = weapon.getOrDefault(
-                ComponentTypeRegistry.RELIC_ATTUNEMENT.get(), RelicAttunementComponent.UNATTUNED);
-        if (current.route() != RelicAttunementComponent.NONE
-                || !(owner.getWorld() instanceof ServerWorld serverWorld)) return;
-        ServerWorld overworld = serverWorld.getServer().getWorld(World.OVERWORLD);
-        boolean day = overworld == null || overworld.isDay();
-        weapon.set(ComponentTypeRegistry.RELIC_ATTUNEMENT.get(),
-                new RelicAttunementComponent(day
-                        ? RelicAttunementComponent.SUN
-                        : RelicAttunementComponent.HARBINGER));
     }
 
     @Override

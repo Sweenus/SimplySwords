@@ -3,7 +3,10 @@ package net.sweenus.simplyswords.util;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.api.AwakeningApi;
+import net.sweenus.simplyswords.api.AwakeningFormRegistry;
+import net.sweenus.simplyswords.item.component.AwakeningRouteComponent;
 import net.sweenus.simplyswords.item.component.RelicAttunementComponent;
 import net.sweenus.simplyswords.registry.ComponentTypeRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
@@ -16,12 +19,15 @@ public final class LegacyUniqueMigration {
         ItemStack result;
         int level;
         int route = RelicAttunementComponent.NONE;
+        Identifier awakeningRoute = null;
         if (source.isOf(ItemsRegistry.WAKING_LICHBLADE.get())) {
             result = source.copyComponentsToNewStack(ItemsRegistry.SLUMBERING_LICHBLADE.get(), source.getCount());
             level = 4;
+            awakeningRoute = AwakeningFormRegistry.LICHBLADE_ROUTE;
         } else if (source.isOf(ItemsRegistry.AWAKENED_LICHBLADE.get())) {
             result = source.copyComponentsToNewStack(ItemsRegistry.SLUMBERING_LICHBLADE.get(), source.getCount());
             level = 8;
+            awakeningRoute = AwakeningFormRegistry.LICHBLADE_ROUTE;
         } else if (source.isOf(ItemsRegistry.RIGHTEOUS_RELIC.get())) {
             result = source.copyComponentsToNewStack(ItemsRegistry.DORMANT_RELIC.get(), source.getCount());
             level = 4;
@@ -42,8 +48,17 @@ public final class LegacyUniqueMigration {
             return source;
         }
         AwakeningApi.setLevel(result, level);
+        if (awakeningRoute != null) {
+            result.set(ComponentTypeRegistry.AWAKENING_ROUTE.get(),
+                    new AwakeningRouteComponent(awakeningRoute));
+        }
         if (route != RelicAttunementComponent.NONE) {
             result.set(ComponentTypeRegistry.RELIC_ATTUNEMENT.get(), new RelicAttunementComponent(route));
+            result.set(ComponentTypeRegistry.AWAKENING_ROUTE.get(), new AwakeningRouteComponent(
+                    route == RelicAttunementComponent.SUN
+                            ? AwakeningFormRegistry.SUN_ROUTE
+                            : AwakeningFormRegistry.HARBINGER_ROUTE
+            ));
         }
         return result;
     }

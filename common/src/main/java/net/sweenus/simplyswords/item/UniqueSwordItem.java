@@ -10,15 +10,16 @@ import net.minecraft.item.SwordItem;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.screen.slot.Slot;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.ClickType;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.SimplySwords;
+import net.sweenus.simplyswords.api.AwakeningFormRarity;
+import net.sweenus.simplyswords.api.AwakeningFormStage;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.api.AwakeningApi;
-import net.sweenus.simplyswords.item.component.RelicAttunementComponent;
-import net.sweenus.simplyswords.registry.ComponentTypeRegistry;
 import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
 import net.sweenus.simplyswords.client.api.SimplySwordsClientAPI;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
@@ -77,25 +78,15 @@ public abstract class UniqueSwordItem extends SwordItem {
 
     @Override
     public Text getName(ItemStack stack) {
-        if (stack.isOf(ItemsRegistry.SLUMBERING_LICHBLADE.get())) {
-            int level = AwakeningApi.getLevel(stack);
-            String key = level >= 8
-                    ? "item.simplyswords.awakened_lichblade"
-                    : level >= 4
-                    ? "item.simplyswords.waking_lichblade"
-                    : "item.simplyswords.slumbering_lichblade";
-            return Text.translatable(key).setStyle(level >= 8 ? Styles.LEGENDARY : Styles.UNIQUE);
-        }
-        if (stack.isOf(ItemsRegistry.DORMANT_RELIC.get())) {
-            int level = AwakeningApi.getLevel(stack);
-            RelicAttunementComponent attunement = stack.getOrDefault(
-                    ComponentTypeRegistry.RELIC_ATTUNEMENT.get(), RelicAttunementComponent.UNATTUNED);
-            String key = "item.simplyswords.dormant_relic";
-            if (level >= 8 && attunement.isSun()) key = "item.simplyswords.sunfire";
-            else if (level >= 8 && attunement.isHarbinger()) key = "item.simplyswords.harbinger";
-            else if (level >= 4 && attunement.isSun()) key = "item.simplyswords.righteous_relic";
-            else if (level >= 4 && attunement.isHarbinger()) key = "item.simplyswords.tainted_relic";
-            return Text.translatable(key).setStyle(level >= 8 ? Styles.LEGENDARY : Styles.UNIQUE);
+        AwakeningFormStage form = AwakeningApi.getFormStage(stack).orElse(null);
+        if (form != null && form.displayTranslationKey().isPresent()) {
+            MutableText name = Text.translatable(form.displayTranslationKey().get());
+            if (form.rarity() == AwakeningFormRarity.LEGENDARY) {
+                return name.setStyle(Styles.LEGENDARY);
+            }
+            if (form.rarity() == AwakeningFormRarity.UNIQUE) {
+                return name.setStyle(Styles.UNIQUE);
+            }
         }
 
         if (this.getDefaultStack().isOf(ItemsRegistry.AWAKENED_LICHBLADE.get())
@@ -117,11 +108,11 @@ public abstract class UniqueSwordItem extends SwordItem {
 
     /** Stack-aware rarity used by tooltip integrations for awakening-dependent weapons. */
     public String getItemRarity(ItemStack stack) {
-        if ((stack.isOf(ItemsRegistry.SLUMBERING_LICHBLADE.get())
-                || stack.isOf(ItemsRegistry.DORMANT_RELIC.get()))
-                && AwakeningApi.getLevel(stack) >= 8) {
-            return "LEGENDARY";
-        }
+        AwakeningFormRarity formRarity = AwakeningApi.getFormStage(stack)
+                .map(AwakeningFormStage::rarity)
+                .orElse(AwakeningFormRarity.UNCHANGED);
+        if (formRarity == AwakeningFormRarity.LEGENDARY) return "LEGENDARY";
+        if (formRarity == AwakeningFormRarity.UNIQUE) return "UNIQUE";
         return getItemRarity();
     }
 

@@ -5,10 +5,13 @@ import net.minecraft.component.type.AttributeModifiersComponent;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.item.component.AwakeningComponent;
 import net.sweenus.simplyswords.registry.ComponentTypeRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
+
+import java.util.Optional;
 
 public final class AwakeningApi {
     private static final double PLAYER_BASE_DAMAGE = 1.0D;
@@ -27,9 +30,10 @@ public final class AwakeningApi {
 
      // Returns whether this stack should use its stored awakening progression.
      //
-     // Lichblade and Dormant Relic progression remains active when the global
-     // system is disabled. Other awakenable weapons behave as fully awakened
-     // while retaining their stored level.
+     // Form families registered with persistent progression (including the
+     // Lichblade and Dormant Relic) remain active when the global system is
+     // disabled. Other awakenable weapons behave as fully awakened while
+     // retaining their stored level.
      //
     public static boolean usesAwakeningProgression(ItemStack stack) {
         if (!AwakeningProfileRegistry.isAwakenable(stack)) {
@@ -61,6 +65,7 @@ public final class AwakeningApi {
         if (!AwakeningProfileRegistry.isAwakenable(stack)) {
             return;
         }
+        AwakeningFormRegistry.ensureInitialized(stack);
         if (!usesAwakeningProgression(stack)) {
             AttributeModifiersComponent full = stack.getItem().getComponents()
                     .getOrDefault(DataComponentTypes.ATTRIBUTE_MODIFIERS, AttributeModifiersComponent.DEFAULT);
@@ -188,15 +193,32 @@ public final class AwakeningApi {
     }
 
     private static boolean isPersistentProgressionWeapon(ItemStack stack) {
-        return stack.isOf(ItemsRegistry.SLUMBERING_LICHBLADE.get())
-                || stack.isOf(ItemsRegistry.WAKING_LICHBLADE.get())
-                || stack.isOf(ItemsRegistry.AWAKENED_LICHBLADE.get())
-                || stack.isOf(ItemsRegistry.DORMANT_RELIC.get())
-                || stack.isOf(ItemsRegistry.RIGHTEOUS_RELIC.get())
-                || stack.isOf(ItemsRegistry.TAINTED_RELIC.get())
-                || stack.isOf(ItemsRegistry.SUNFIRE.get())
-                || stack.isOf(ItemsRegistry.HARBINGER.get())
+        return AwakeningFormRegistry.isPersistentProgression(stack)
                 || stack.isOf(ItemsRegistry.DECAYING_RELIC.get());
+    }
+
+    //
+    // Returns the route locked onto this stack, if it belongs to a branching
+    // awakening family and has selected one.
+    //
+    public static Optional<Identifier> getFormRoute(ItemStack stack) {
+        return AwakeningFormRegistry.getRoute(stack);
+    }
+
+    //
+    // Returns the level-resolved form metadata used by names, models, tooltips,
+    // and addon weapon logic.
+    //
+    public static Optional<AwakeningFormStage> getFormStage(ItemStack stack) {
+        return AwakeningFormRegistry.getStage(stack);
+    }
+
+    public static Optional<Identifier> getFormId(ItemStack stack) {
+        return getFormStage(stack).map(AwakeningFormStage::id);
+    }
+
+    public static float getFormModelValue(ItemStack stack) {
+        return getFormStage(stack).map(AwakeningFormStage::modelValue).orElse(0.0F);
     }
 
     public static float getEffectMultiplier(ItemStack stack) {
