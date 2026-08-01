@@ -109,6 +109,9 @@ public abstract class ServerWorldMixin {
         if (WaxweaverEncasementManager.hasActive(world)) {
             WaxweaverEncasementManager.tick(world);
         }
+        if (BramblethornAbilityManager.hasActive(world)) {
+            BramblethornAbilityManager.tick(world);
+        }
         if (EvocationFangManager.hasActive(world)) {
             EvocationFangManager.tick(world);
         }

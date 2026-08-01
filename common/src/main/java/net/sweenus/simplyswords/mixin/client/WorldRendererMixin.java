@@ -24,6 +24,7 @@ import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.world.WatcherWeaponType;
 import net.sweenus.simplyswords.world.WaxweaverEncasementManager;
+import net.sweenus.simplyswords.world.BramblethornAbilityManager;
 import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -86,6 +87,9 @@ public abstract class WorldRendererMixin {
             } else if (highlight.style() == TargetHighlight.Style.WAX) {
                 ModernFieldRenderer.renderWaxTargetLine(matrices, vertexConsumers, player.age, targetOffset);
                 ModernFieldRenderer.renderWaxTargetRing(matrices, vertexConsumers, player.age, targetOffset, highlightedTarget.getWidth());
+            } else if (highlight.style() == TargetHighlight.Style.BRAMBLE) {
+                ModernFieldRenderer.renderBrambleTargetLine(matrices, vertexConsumers, player.age, targetOffset);
+                ModernFieldRenderer.renderBrambleTargetRing(matrices, vertexConsumers, player.age, targetOffset, highlightedTarget.getWidth());
             }
         }
 
@@ -110,8 +114,12 @@ public abstract class WorldRendererMixin {
             return new TargetHighlight(brimstoneTarget, TargetHighlight.Style.BRIMSTONE);
         }
         LivingEntity waxweaverTarget = getReadyWaxweaverTarget(player);
-        return waxweaverTarget == null ? null
-                : new TargetHighlight(waxweaverTarget, TargetHighlight.Style.WAX);
+        if (waxweaverTarget != null) {
+            return new TargetHighlight(waxweaverTarget, TargetHighlight.Style.WAX);
+        }
+        LivingEntity brambleTarget = getReadyBrambleTarget(player);
+        return brambleTarget == null ? null
+                : new TargetHighlight(brambleTarget, TargetHighlight.Style.BRAMBLE);
     }
 
     private LivingEntity getReadySoulstealerTarget(ClientPlayerEntity player) {
@@ -160,6 +168,17 @@ public abstract class WorldRendererMixin {
         }
 
         return WaxweaverEncasementManager.findPlayerTarget(player);
+    }
+
+    private LivingEntity getReadyBrambleTarget(ClientPlayerEntity player) {
+        ItemStack stack = getHeldBramblethorn(player);
+        if (stack.isEmpty()
+                || !AwakeningApi.isAbilityUnlocked(stack)
+                || player.getItemCooldownManager().isCoolingDown(stack.getItem())
+                || stack.getDamage() >= stack.getMaxDamage() - 1) {
+            return null;
+        }
+        return BramblethornAbilityManager.findPlayerTarget(player);
     }
 
     private LivingEntity getReadyWatcherTarget(ClientPlayerEntity player) {
@@ -238,6 +257,16 @@ public abstract class WorldRendererMixin {
             return offHandStack;
         }
         return ItemStack.EMPTY;
+    }
+
+    private ItemStack getHeldBramblethorn(ClientPlayerEntity player) {
+        ItemStack mainHandStack = player.getMainHandStack();
+        if (mainHandStack.isOf(ItemsRegistry.BRAMBLETHORN.get())) {
+            return mainHandStack;
+        }
+        ItemStack offHandStack = player.getOffHandStack();
+        return offHandStack.isOf(ItemsRegistry.BRAMBLETHORN.get())
+                ? offHandStack : ItemStack.EMPTY;
     }
 
 }

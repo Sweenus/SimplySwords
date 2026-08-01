@@ -25,6 +25,7 @@ import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.world.RunicSlashManager;
+import net.sweenus.simplyswords.world.BramblethornAbilityManager;
 import net.sweenus.simplyswords.world.MagispearAbilityManager;
 import net.sweenus.simplyswords.world.MoltenEdgeAbilityManager;
 import net.sweenus.simplyswords.world.SoulPyreAbilityManager;
@@ -136,6 +137,7 @@ public abstract class LivingEntityMixin {
     public void simplyswords$applyWeaponImplicitOnDamage(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
         LivingEntity livingEntity = (LivingEntity) (Object) this;
         if (Boolean.TRUE.equals(cir.getReturnValue()) && !livingEntity.getWorld().isClient()) {
+            BramblethornAbilityManager.onBoundTargetDamaged(livingEntity, source, amount);
             MoltenEdgeAbilityManager.gainHeatFromIncomingDamage(livingEntity, amount, true);
             WeaponImplicitRegistry.onDamageApplied(livingEntity, source, amount);
             if (source.isIn(DamageTypeTags.IS_PLAYER_ATTACK) && source.getAttacker() instanceof ServerPlayerEntity player) {

@@ -8,6 +8,7 @@ public record TargetHighlight(LivingEntity target, Style style) {
         SOUL,
         BRIMSTONE,
         WATCHER,
-        WAX
+        WAX,
+        BRAMBLE
     }
 }

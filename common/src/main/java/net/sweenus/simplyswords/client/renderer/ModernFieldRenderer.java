@@ -74,6 +74,10 @@ public final class ModernFieldRenderer {
         renderTargetLine(matrices, vertexConsumers, age, targetOffset, 255, 184, 52, 255, 236, 148);
     }
 
+    public static void renderBrambleTargetLine(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int age, Vec3d targetOffset) {
+        renderTargetLine(matrices, vertexConsumers, age, targetOffset, 52, 103, 43, 162, 226, 91);
+    }
+
     public static void renderTargetLine(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int age, Vec3d targetOffset, int coreRed, int coreGreen, int coreBlue, int pulseRed, int pulseGreen, int pulseBlue) {
         if (!isEnabled()) {
             return;
@@ -123,6 +127,10 @@ public final class ModernFieldRenderer {
 
     public static void renderWaxTargetRing(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int age, Vec3d targetOffset, float targetWidth) {
         renderTargetRing(matrices, vertexConsumers, age, targetOffset, targetWidth, 255, 184, 52, 255, 236, 148);
+    }
+
+    public static void renderBrambleTargetRing(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int age, Vec3d targetOffset, float targetWidth) {
+        renderTargetRing(matrices, vertexConsumers, age, targetOffset, targetWidth, 52, 103, 43, 162, 226, 91);
     }
 
     public static void renderTargetRing(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int age, Vec3d targetOffset, float targetWidth, int borderRed, int borderGreen, int borderBlue, int waveRed, int waveGreen, int waveBlue) {
