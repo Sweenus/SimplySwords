@@ -30,7 +30,7 @@ public class SimplySwordsClientFabric implements ClientModInitializer {
         }
 
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) ->
-                dispatcher.register(ClientCommandManager.literal("simplyswords")
+                dispatcher.register(ClientCommandManager.literal("simplyswords_client")
                         .then(ClientCommandManager.literal("export_unique_tooltips")
                                 .executes(context -> UniqueTooltipExportController.start())
                                 .then(ClientCommandManager.literal("cancel")

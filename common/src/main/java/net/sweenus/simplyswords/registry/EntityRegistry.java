@@ -243,6 +243,24 @@ public class EntityRegistry {
                     .build(Identifier.of(SimplySwords.MOD_ID, "icewhisper_comet_visual").toString())
     );
 
+    public static final RegistrySupplier<EntityType<MagispearFirmamentVisualEntity>> MAGISPEAR_FIRMAMENT_VISUAL = ENTITIES.register(
+            "magispear_firmament_visual",
+            () -> EntityType.Builder.<MagispearFirmamentVisualEntity>create(MagispearFirmamentVisualEntity::new, SpawnGroup.MISC)
+                    .dimensions(10.0F, 12.0F)
+                    .maxTrackingRange(96)
+                    .trackingTickInterval(1)
+                    .build(Identifier.of(SimplySwords.MOD_ID, "magispear_firmament_visual").toString())
+    );
+
+    public static final RegistrySupplier<EntityType<MagispearFallingSpearVisualEntity>> MAGISPEAR_FALLING_SPEAR_VISUAL = ENTITIES.register(
+            "magispear_falling_spear_visual",
+            () -> EntityType.Builder.<MagispearFallingSpearVisualEntity>create(MagispearFallingSpearVisualEntity::new, SpawnGroup.MISC)
+                    .dimensions(0.75F, 2.5F)
+                    .maxTrackingRange(96)
+                    .trackingTickInterval(1)
+                    .build(Identifier.of(SimplySwords.MOD_ID, "magispear_falling_spear_visual").toString())
+    );
+
     public static final RegistrySupplier<EntityType<BrimstoneClaymoreVisualEntity>> BRIMSTONE_CLAYMORE_VISUAL = ENTITIES.register(
             "brimstone_claymore_visual",
             () -> EntityType.Builder.<BrimstoneClaymoreVisualEntity>create(BrimstoneClaymoreVisualEntity::new, SpawnGroup.MISC)

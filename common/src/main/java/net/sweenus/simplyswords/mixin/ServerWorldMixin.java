@@ -22,6 +22,9 @@ public abstract class ServerWorldMixin {
         if (IcewhisperCometManager.hasActive(world)) {
             IcewhisperCometManager.tick(world);
         }
+        if (MagispearAbilityManager.hasActive(world)) {
+            MagispearAbilityManager.tick(world);
+        }
         if (BrimstoneClaymoreAbilityManager.hasActive(world)) {
             BrimstoneClaymoreAbilityManager.tick(world);
         }

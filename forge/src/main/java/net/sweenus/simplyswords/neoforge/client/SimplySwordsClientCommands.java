@@ -12,7 +12,7 @@ import net.sweenus.simplyswords.client.tooltip.UniqueTooltipExportController;
 public final class SimplySwordsClientCommands {
     @SubscribeEvent
     public static void registerClientCommands(RegisterClientCommandsEvent event) {
-        event.getDispatcher().register(CommandManager.literal("simplyswords")
+        event.getDispatcher().register(CommandManager.literal("simplyswords_client")
                 .then(CommandManager.literal("export_unique_tooltips")
                         .executes(context -> UniqueTooltipExportController.start())
                         .then(CommandManager.literal("cancel")
