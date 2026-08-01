@@ -82,6 +82,9 @@ public abstract class ServerWorldMixin {
         if (StormsEdgeAbilityManager.hasActive(world)) {
             StormsEdgeAbilityManager.tick(world);
         }
+        if (StarsEdgeAbilityManager.hasActive(world)) {
+            StarsEdgeAbilityManager.tick(world);
+        }
         if (MoltenEdgeAbilityManager.hasActive(world)) {
             MoltenEdgeAbilityManager.tick(world);
         }

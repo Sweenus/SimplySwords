@@ -1,12 +1,11 @@
 package net.sweenus.simplyswords.item.custom;
 
+import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedDouble;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
@@ -24,10 +23,9 @@ import net.sweenus.simplyswords.config.settings.TooltipSettings;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
-import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
-import net.sweenus.simplyswords.world.LivingEntityAbilityMovementManager;
+import net.sweenus.simplyswords.world.StarsEdgeAbilityManager;
 
 import java.util.List;
 
@@ -71,62 +69,20 @@ public class StarsEdgeSwordItem extends UniqueSwordItem implements UniqueWeaponA
     }
 
     @Override
-    public TypedActionResult<ItemStack> startPlayerAbility(World world, PlayerEntity user, Hand hand) {
-        int skillCooldown = Config.uniqueEffects.stars_edge.cooldown;
-        int skillDuration = Config.uniqueEffects.stars_edge.duration;
-        int skillStacks = Config.uniqueEffects.stars_edge.stacks;
-
-        if (!user.hasStatusEffect(StatusEffects.SPEED)) {
-            user.swingHand(hand);
-            world.playSound(null, user.getBlockPos(), SoundRegistry.ELEMENTAL_BOW_HOLY_SHOOT_IMPACT_02.get(),
-                    user.getSoundCategory(), 0.3f, 1.0f);
-
-            user.setVelocity(user.getRotationVector().negate().multiply(+1.5));
-            user.setVelocity(user.getVelocity().x, 0, user.getVelocity().z); // Prevent user flying to the heavens
-            user.velocityModified = true;
-            HelperMethods.incrementStatusEffect(user, StatusEffects.SPEED, skillDuration, 1, 2);
-        } else {
-            StatusEffectInstance speedEffect = user.getStatusEffect(StatusEffects.SPEED);
-            if (speedEffect != null && speedEffect.getDuration() < (skillDuration - 10)) {
-                world.playSound(null, user.getBlockPos(), SoundRegistry.ELEMENTAL_BOW_HOLY_SHOOT_IMPACT_01.get(),
-                        user.getSoundCategory(), 0.5f, 1.3f);
-                user.setVelocity(user.getRotationVector().multiply(+1.7));
-                user.setVelocity(user.getVelocity().x, 0, user.getVelocity().z); // Prevent user flying to the heavens
-                user.velocityModified = true;
-                user.removeStatusEffect(StatusEffects.SPEED);
-                HelperMethods.incrementStatusEffect(user, StatusEffects.RESISTANCE, skillDuration / 2, 2, 3);
-                HelperMethods.incrementStatusEffect(user, StatusEffects.HASTE, skillDuration / 2, skillStacks, 7);
-                user.getItemCooldownManager().set(this, skillCooldown);
-            }
-        }
-
-        return super.use(world, user, hand);
+    public boolean canActivate(WeaponAbilityContext context) {
+        return StarsEdgeAbilityManager.canActivate(context);
     }
 
     @Override
     public boolean activate(WeaponAbilityContext context) {
-        LivingEntity actor = context.actor();
-        if (context.target() == null || !HelperMethods.checkAbilityTarget(context.target(), actor)) {
-            return false;
-        }
-        int skillDuration = Config.uniqueEffects.stars_edge.duration;
-        int skillStacks = Config.uniqueEffects.stars_edge.stacks;
-        LivingEntityAbilityMovementManager.dashTowardTarget(context.world(), actor, context.target(), 1.7, 8);
-        HelperMethods.incrementStatusEffect(actor, StatusEffects.SPEED, skillDuration, 1, 2);
-        HelperMethods.incrementStatusEffect(actor, StatusEffects.RESISTANCE, skillDuration / 2, 2, 3);
-        HelperMethods.incrementStatusEffect(actor, StatusEffects.HASTE, skillDuration / 2, skillStacks, 7);
-        context.world().playSound(null, actor.getBlockPos(), context.world().isDay()
-                        ? SoundRegistry.ELEMENTAL_BOW_HOLY_SHOOT_IMPACT_02.get()
-                        : SoundRegistry.ELEMENTAL_BOW_HOLY_SHOOT_IMPACT_01.get(),
-                actor.getSoundCategory(), 0.4f, context.world().isDay() ? 1.0f : 1.3f);
-        context.world().spawnParticles(context.world().isDay() ? ParticleTypes.END_ROD : ParticleTypes.FALLING_OBSIDIAN_TEAR,
-                actor.getX(), actor.getBodyY(0.5), actor.getZ(), 18, 0.45, 0.45, 0.45, 0.04);
-        return true;
+        return StarsEdgeAbilityManager.activate(context);
     }
 
     @Override
     public int getActivationCooldownTicks(ItemStack stack, WeaponAbilityContext context) {
-        return Config.uniqueEffects.stars_edge.cooldown;
+        return context != null && StarsEdgeAbilityManager.isActive(context.actor())
+                ? 1
+                : Config.uniqueEffects.stars_edge.cooldown;
     }
 
     @Override
@@ -163,15 +119,29 @@ public class StarsEdgeSwordItem extends UniqueSwordItem implements UniqueWeaponA
         }
 
         @ValidatedInt.Restrict(min = 0)
-        public int cooldown = 120;
-        @ValidatedInt.Restrict(min = 0)
-        public int duration = 120;
+        public int cooldown = 240;
         @ValidatedFloat.Restrict(min = 0f)
-        public float damageScaling = 0.32f;
+        public float damageScaling = 0.55f;
         @ValidatedFloat.Restrict(min = 0f)
         public float lifestealModifier = 0.10f;
         @ValidatedInt.Restrict(min = 1)
-        public int stacks = 6;
+        public int recordingDuration = 120;
+        @ValidatedDouble.Restrict(min = 0.1)
+        public double initialDashDistance = 6.0;
+        @ValidatedDouble.Restrict(min = 0.1)
+        public double initialDashSpeed = 1.5;
+        @ValidatedDouble.Restrict(min = 0.25)
+        public double nodeSpacing = 2.0;
+        @ValidatedInt.Restrict(min = 2, max = 16)
+        public int maxNodes = 12;
+        @ValidatedFloat.Restrict(min = 0f)
+        public float constellationDamageScaling = 0.45f;
+        @ValidatedInt.Restrict(min = 1)
+        public int constellationDuration = 100;
+        @ValidatedInt.Restrict(min = 1)
+        public int segmentExplosionInterval = 5;
+        @ValidatedDouble.Restrict(min = 0.1)
+        public double segmentExplosionRadius = 2.5;
 
     }
 }

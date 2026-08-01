@@ -196,6 +196,7 @@ public class SimplySwords {
             EntityRendererRegistry.register(EntityRegistry.EMBERLASH_SMOULDER_VISUAL, EmberlashSmoulderVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.IMPLICIT_STATUS_VISUAL, ImplicitStatusVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.SHADOWSTING_AFTERIMAGE_VISUAL, ShadowstingAfterimageVisualEntityRenderer::new);
+            EntityRendererRegistry.register(EntityRegistry.STARS_EDGE_CONSTELLATION_VISUAL, StarsEdgeConstellationVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.ICEWHISPER_COMET_VISUAL, IcewhisperCometVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.MAGISPEAR_FIRMAMENT_VISUAL, MagispearFirmamentVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.MAGISPEAR_FALLING_SPEAR_VISUAL, MagispearFallingSpearVisualEntityRenderer::new);

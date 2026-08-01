@@ -234,6 +234,15 @@ public class EntityRegistry {
                     .build(Identifier.of(SimplySwords.MOD_ID, "shadowsting_afterimage_visual").toString())
     );
 
+    public static final RegistrySupplier<EntityType<StarsEdgeConstellationVisualEntity>> STARS_EDGE_CONSTELLATION_VISUAL = ENTITIES.register(
+            "stars_edge_constellation_visual",
+            () -> EntityType.Builder.<StarsEdgeConstellationVisualEntity>create(StarsEdgeConstellationVisualEntity::new, SpawnGroup.MISC)
+                    .dimensions(0.35f, 0.35f)
+                    .maxTrackingRange(128)
+                    .trackingTickInterval(1)
+                    .build(Identifier.of(SimplySwords.MOD_ID, "stars_edge_constellation_visual").toString())
+    );
+
     public static final RegistrySupplier<EntityType<IcewhisperCometVisualEntity>> ICEWHISPER_COMET_VISUAL = ENTITIES.register(
             "icewhisper_comet_visual",
             () -> EntityType.Builder.<IcewhisperCometVisualEntity>create(IcewhisperCometVisualEntity::new, SpawnGroup.MISC)
