@@ -229,6 +229,7 @@ public final class StarsEdgeAbilityManager {
             return true;
         }
         if (world.getTime() < active.nextExplosionTick) {
+            damageConstellationOnContact(world, actor, active, phaseAge);
             return false;
         }
 
@@ -245,6 +246,7 @@ public final class StarsEdgeAbilityManager {
             return true;
         }
 
+        damageConstellationOnContact(world, actor, active, phaseAge);
         active.nextExplosionTick = world.getTime()
                 + Math.max(1, Config.uniqueEffects.stars_edge.segmentExplosionInterval);
         return false;
@@ -349,6 +351,62 @@ public final class StarsEdgeAbilityManager {
         spawnSegmentExplosionEffects(world, actor, start, end);
     }
 
+    private static void damageConstellationOnContact(ServerWorld world, LivingEntity actor,
+                                                      ActiveReprise active, long phaseAge) {
+        int interval = Math.max(1, Config.uniqueEffects.stars_edge.constellationDamageInterval);
+        if (phaseAge % interval != 0L || active.constellationDamage <= 0.0F) {
+            return;
+        }
+
+        double width = Math.max(0.1, Config.uniqueEffects.stars_edge.constellationDamageWidth);
+        Set<UUID> pulseHitTargets = new HashSet<>();
+        for (int segmentIndex = active.nextSegmentIndex;
+             segmentIndex < active.nodes.size();
+             segmentIndex++) {
+            damageContactSegment(world, actor, active,
+                    active.nodes.get(segmentIndex - 1).position,
+                    active.nodes.get(segmentIndex).position,
+                    width,
+                    pulseHitTargets);
+        }
+    }
+
+    private static void damageContactSegment(ServerWorld world, LivingEntity actor, ActiveReprise active,
+                                             Vec3d start, Vec3d end, double width,
+                                             Set<UUID> pulseHitTargets) {
+        if (start.squaredDistanceTo(end) < 0.0001) {
+            return;
+        }
+
+        Vec3d bodyStart = start.add(0.0, 0.85, 0.0);
+        Vec3d bodyEnd = end.add(0.0, 0.85, 0.0);
+        double halfWidth = width * 0.5;
+        Box search = new Box(bodyStart, bodyEnd).expand(halfWidth + 1.0);
+
+        for (LivingEntity target : world.getEntitiesByClass(LivingEntity.class, search,
+                target -> target != actor
+                        && target.isAlive()
+                        && EntityPredicates.VALID_LIVING_ENTITY.test(target)
+                        && !pulseHitTargets.contains(target.getUuid())
+                        && HelperMethods.checkAbilityTarget(target, actor))) {
+            Box targetBox = target.getBoundingBox();
+            double lineMidY = (bodyStart.y + bodyEnd.y) * 0.5;
+            Vec3d targetCenter = new Vec3d(
+                    target.getX(),
+                    Math.clamp(lineMidY, targetBox.minY, targetBox.maxY),
+                    target.getZ());
+            double targetRadius = Math.max(0.1, target.getWidth() * 0.5);
+            double allowed = halfWidth + targetRadius;
+            if (distanceSquaredToSegment(targetCenter, bodyStart, bodyEnd) > allowed * allowed) {
+                continue;
+            }
+            if (!pulseHitTargets.add(target.getUuid())) {
+                continue;
+            }
+            damageTarget(world, actor, active.stack, target, active.constellationDamage, true);
+        }
+    }
+
     private static void damageSegmentExplosion(ServerWorld world, LivingEntity actor, ActiveReprise active,
                                                Vec3d start, Vec3d end, double radius,
                                                float baseDamage) {
@@ -380,7 +438,7 @@ public final class StarsEdgeAbilityManager {
             if (!segmentHitTargets.add(target.getUuid())) {
                 continue;
             }
-            damageTarget(world, actor, active.stack, target, baseDamage);
+            damageTarget(world, actor, active.stack, target, baseDamage, false);
         }
     }
 
@@ -420,12 +478,19 @@ public final class StarsEdgeAbilityManager {
     }
 
     private static void damageTarget(ServerWorld world, LivingEntity actor, ItemStack stack,
-                                     LivingEntity target, float baseDamage) {
+                                     LivingEntity target, float baseDamage, boolean preserveVelocity) {
         DamageSource source = actor.getDamageSources().indirectMagic(actor, actor);
         float damage = HelperMethods.applyAbilityDamageEnchantments(
                 world, stack, target, source, baseDamage);
+        Vec3d previousVelocity = preserveVelocity ? target.getVelocity() : null;
+        boolean[] damaged = {false};
         WeaponImplicitRegistry.runSuppressed(
-                () -> HelperMethods.damageThroughIframes(target, source, damage));
+                () -> damaged[0] = HelperMethods.damageThroughIframes(target, source, damage));
+        if (damaged[0] && preserveVelocity) {
+            target.setVelocity(previousVelocity);
+            target.velocityModified = true;
+            target.velocityDirty = true;
+        }
         Vec3d center = target.getBoundingBox().getCenter();
         world.spawnParticles(ParticleTypes.FIREWORK, center.x, center.y, center.z,
                 10, 0.28, 0.32, 0.28, 0.05);

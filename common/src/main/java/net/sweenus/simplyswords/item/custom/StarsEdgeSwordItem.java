@@ -139,6 +139,10 @@ public class StarsEdgeSwordItem extends UniqueSwordItem implements UniqueWeaponA
         @ValidatedInt.Restrict(min = 1)
         public int constellationDuration = 100;
         @ValidatedInt.Restrict(min = 1)
+        public int constellationDamageInterval = 10;
+        @ValidatedDouble.Restrict(min = 0.1)
+        public double constellationDamageWidth = 1.5;
+        @ValidatedInt.Restrict(min = 1)
         public int segmentExplosionInterval = 5;
         @ValidatedDouble.Restrict(min = 0.1)
         public double segmentExplosionRadius = 2.5;
