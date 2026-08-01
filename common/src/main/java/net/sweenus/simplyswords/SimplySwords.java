@@ -1,5 +1,6 @@
 package net.sweenus.simplyswords;
 
+import dev.architectury.event.events.common.LifecycleEvent;
 import dev.architectury.platform.Platform;
 import dev.architectury.registry.CreativeTabRegistry;
 import dev.architectury.registry.client.level.entity.EntityModelLayerRegistry;
@@ -99,7 +100,7 @@ public class SimplySwords {
         WeaponImplicitRegistry.registerBuiltins();
         ParticlesRegistry.PARTICLES.register();
         TransformationRegistry.register();
-        AwakeningFormRegistry.registerBuiltins();
+        LifecycleEvent.SETUP.register(AwakeningFormRegistry::registerBuiltins);
         SimplySwordsNetwork.init();
         SimplySwordsCommands.register();
         EntityAttributeRegistry.register(EntityRegistry.BATTLESTANDARD, BattleStandardEntity::createBattleStandardAttributes);

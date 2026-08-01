@@ -27,6 +27,7 @@ public final class AwakeningFormRegistry {
     public static final Identifier HARBINGER_ROUTE = Identifier.of(SimplySwords.MOD_ID, "harbinger");
 
     private static final Map<Item, AwakeningFormFamily> FAMILIES = new IdentityHashMap<>();
+    private static boolean builtinsRegistered;
 
     private AwakeningFormRegistry() {
     }
@@ -47,7 +48,11 @@ public final class AwakeningFormRegistry {
     //
     // Register Simply Swords' evolving weapons through the API
     //
-    public static void registerBuiltins() {
+    public static synchronized void registerBuiltins() {
+        if (builtinsRegistered) {
+            return;
+        }
+
         register(AwakeningFormFamily.builder(
                         ItemsRegistry.SLUMBERING_LICHBLADE.get(),
                         AwakeningProfile.DEFAULT,
@@ -126,6 +131,8 @@ public final class AwakeningFormRegistry {
                     return overworld == null || overworld.isDay() ? SUN_ROUTE : HARBINGER_ROUTE;
                 })
                 .build());
+
+        builtinsRegistered = true;
     }
 
     public static Optional<AwakeningFormFamily> get(ItemStack stack) {

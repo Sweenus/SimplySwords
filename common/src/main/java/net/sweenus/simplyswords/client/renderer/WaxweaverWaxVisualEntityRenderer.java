@@ -362,14 +362,18 @@ public class WaxweaverWaxVisualEntityRenderer extends EntityRenderer<WaxweaverWa
     private static void renderDetonation(WaxweaverWaxVisualEntity visual, MatrixStack matrices,
                                          VertexConsumerProvider providers, Sprite bone,
                                          Sprite honey, Sprite magma, float time, int light) {
+        // NeoForge may end a shared builder when another render layer is requested. Finish each
+        // debris pass before acquiring the consumer for the next layer.
         VertexConsumer solid = providers.getBuffer(RenderLayer.getEntityCutout(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE));
-        VertexConsumer translucent = providers.getBuffer(RenderLayer.getTranslucentMovingBlock());
-        VertexConsumer emissive = providers.getBuffer(
-                RenderLayer.getEntityTranslucentEmissive(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE));
         renderDebrisGroup(visual, matrices, solid, bone, time, Math.max(light, 0x00D000D0),
                 0, 18, 1.0F, 0.78F, 0.28F, false);
+
+        VertexConsumer translucent = providers.getBuffer(RenderLayer.getTranslucentMovingBlock());
         renderDebrisGroup(visual, matrices, translucent, honey, time, Math.max(light, 0x00D000D0),
                 18, 8, 1.0F, 0.72F, 0.2F, false);
+
+        VertexConsumer emissive = providers.getBuffer(
+                RenderLayer.getEntityTranslucentEmissive(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE));
         renderDebrisGroup(visual, matrices, emissive, magma, time, FULL_LIGHT,
                 26, 6, 1.0F, 0.64F, 0.12F, true);
     }

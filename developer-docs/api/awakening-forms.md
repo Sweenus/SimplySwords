@@ -54,6 +54,31 @@ expose it to item model overrides.
 Prefer `SimplySwordsAPI.registerAwakeningFormFamily` for addon registration and
 the `AwakeningApi` lookup methods for normal weapon logic.
 
+## Registration timing
+
+Form families contain resolved `Item` instances. Register them after item
+registries have been populated so deferred item suppliers are safe to read on
+NeoForge. Architectury addons can use the common setup lifecycle on both
+loaders:
+
+```java
+LifecycleEvent.SETUP.register(() -> {
+    AwakeningFormFamily family = AwakeningFormFamily.builder(
+            RIFTBRAND.get(),
+            AwakeningProfile.DEFAULT,
+            Identifier.of("exampleaddon", "dormant_riftbrand")
+        )
+        // Add presentation and routes here.
+        .build();
+
+    SimplySwordsAPI.registerAwakeningFormFamily(family);
+});
+```
+
+Register the lifecycle callback during common initialization, after declaring
+the addon's deferred item registrations. Do not call `RegistrySupplier.get()`
+from a NeoForge mod constructor while registries are still being assembled.
+
 ## Branching by dimension
 
 Multiple routes require an `AwakeningFormHandler`. Its selector runs when the

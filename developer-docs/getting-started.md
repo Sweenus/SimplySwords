@@ -78,7 +78,7 @@ Common initialization should:
 
 1. Register addon items.
 2. Register custom gem powers before registries freeze.
-3. Register awakening profiles or form families.
+3. Schedule awakening profiles or form families.
 4. Register unique loot, weapon types, implicits, and optional remnant recipes.
 
 Client initialization should:
