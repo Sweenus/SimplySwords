@@ -23,6 +23,7 @@ import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.world.WatcherWeaponType;
+import net.sweenus.simplyswords.world.WaxweaverEncasementManager;
 import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -82,6 +83,9 @@ public abstract class WorldRendererMixin {
             } else if (highlight.style() == TargetHighlight.Style.WATCHER) {
                 ModernFieldRenderer.renderWatcherTargetLine(matrices, vertexConsumers, player.age, targetOffset);
                 ModernFieldRenderer.renderWatcherTargetRing(matrices, vertexConsumers, player.age, targetOffset, highlightedTarget.getWidth());
+            } else if (highlight.style() == TargetHighlight.Style.WAX) {
+                ModernFieldRenderer.renderWaxTargetLine(matrices, vertexConsumers, player.age, targetOffset);
+                ModernFieldRenderer.renderWaxTargetRing(matrices, vertexConsumers, player.age, targetOffset, highlightedTarget.getWidth());
             }
         }
 
@@ -102,8 +106,12 @@ public abstract class WorldRendererMixin {
             return new TargetHighlight(watcherTarget, TargetHighlight.Style.WATCHER);
         }
         LivingEntity brimstoneTarget = getReadyBrimstoneTarget(player);
-        return brimstoneTarget == null ? null
-                : new TargetHighlight(brimstoneTarget, TargetHighlight.Style.BRIMSTONE);
+        if (brimstoneTarget != null) {
+            return new TargetHighlight(brimstoneTarget, TargetHighlight.Style.BRIMSTONE);
+        }
+        LivingEntity waxweaverTarget = getReadyWaxweaverTarget(player);
+        return waxweaverTarget == null ? null
+                : new TargetHighlight(waxweaverTarget, TargetHighlight.Style.WAX);
     }
 
     private LivingEntity getReadySoulstealerTarget(ClientPlayerEntity player) {
@@ -139,6 +147,19 @@ public abstract class WorldRendererMixin {
         }
 
         return StealSwordItem.findLenientTarget(player, Config.uniqueEffects.brimstone_claymore.range);
+    }
+
+    private LivingEntity getReadyWaxweaverTarget(ClientPlayerEntity player) {
+        ItemStack stack = getHeldWaxweaver(player);
+        if (stack.isEmpty()
+                || !AwakeningApi.isAbilityUnlocked(stack)
+                || player.getItemCooldownManager().isCoolingDown(stack.getItem())
+                || stack.getDamage() >= stack.getMaxDamage() - 1
+                || WaxweaverEncasementManager.isEncased(player)) {
+            return null;
+        }
+
+        return WaxweaverEncasementManager.findPlayerTarget(player);
     }
 
     private LivingEntity getReadyWatcherTarget(ClientPlayerEntity player) {
@@ -201,6 +222,19 @@ public abstract class WorldRendererMixin {
 
         ItemStack offHandStack = player.getOffHandStack();
         if (offHandStack.isOf(ItemsRegistry.SOULSTEALER.get())) {
+            return offHandStack;
+        }
+        return ItemStack.EMPTY;
+    }
+
+    private ItemStack getHeldWaxweaver(ClientPlayerEntity player) {
+        ItemStack mainHandStack = player.getMainHandStack();
+        if (mainHandStack.isOf(ItemsRegistry.WAXWEAVER.get())) {
+            return mainHandStack;
+        }
+
+        ItemStack offHandStack = player.getOffHandStack();
+        if (offHandStack.isOf(ItemsRegistry.WAXWEAVER.get())) {
             return offHandStack;
         }
         return ItemStack.EMPTY;

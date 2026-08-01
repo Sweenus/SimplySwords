@@ -1,6 +1,7 @@
 package net.sweenus.simplyswords.item.custom;
 
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
+import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
@@ -20,16 +21,19 @@ import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.item.interfaces.RevivalWeapon;
+import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
 import net.sweenus.simplyswords.world.RevivalCandleVisualManager;
-import net.sweenus.simplyswords.world.WeaponAbilityCooldownManager;
+import net.sweenus.simplyswords.world.RevivalCooldownManager;
+import net.sweenus.simplyswords.world.WaxweaverEncasementManager;
+import net.sweenus.simplyswords.api.WeaponAbilityContext;
 
 import java.util.List;
 
-public class WaxweaverSwordItem extends UniqueSwordItem implements RevivalWeapon {
+public class WaxweaverSwordItem extends UniqueSwordItem implements RevivalWeapon, UniqueWeaponActiveAbility {
     public WaxweaverSwordItem(ToolMaterial toolMaterial, Settings settings) {
         super(toolMaterial, settings);
     }
@@ -58,11 +62,8 @@ public class WaxweaverSwordItem extends UniqueSwordItem implements RevivalWeapon
                 || source.isIn(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
             return false;
         }
-        if (entity instanceof PlayerEntity player) {
-            return !player.getItemCooldownManager().isCoolingDown(this);
-        }
         return entity.getWorld() instanceof net.minecraft.server.world.ServerWorld serverWorld
-                && !WeaponAbilityCooldownManager.isCoolingDown(serverWorld, entity, stack);
+                && !RevivalCooldownManager.isCoolingDown(serverWorld, entity, stack);
     }
 
     @Override
@@ -70,10 +71,9 @@ public class WaxweaverSwordItem extends UniqueSwordItem implements RevivalWeapon
         int skillCooldown = Config.uniqueEffects.waxweaver.cooldown;
         if (entity instanceof net.minecraft.server.network.ServerPlayerEntity serverPlayer) {
             RevivalCandleVisualManager.activate(serverPlayer, stack);
-            serverPlayer.getItemCooldownManager().set(stack.getItem(), skillCooldown);
-        } else if (entity.getWorld() instanceof net.minecraft.server.world.ServerWorld serverWorld) {
-            WeaponAbilityCooldownManager.setCooldown(serverWorld, entity, stack, skillCooldown);
         }
+        if (entity.getWorld() instanceof net.minecraft.server.world.ServerWorld serverWorld)
+            RevivalCooldownManager.setCooldown(serverWorld, entity, stack, skillCooldown);
         HelperMethods.incrementStatusEffect(entity, StatusEffects.RESISTANCE, 100, 2, 3);
 
         World world = entity.getWorld();
@@ -90,8 +90,22 @@ public class WaxweaverSwordItem extends UniqueSwordItem implements RevivalWeapon
 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
+        return useFromDefaultInput(world, user, hand);
+    }
 
-        return super.use(world, user, hand);
+    @Override
+    public boolean canActivate(WeaponAbilityContext context) {
+        return WaxweaverEncasementManager.canStart(context);
+    }
+
+    @Override
+    public boolean activate(WeaponAbilityContext context) {
+        return WaxweaverEncasementManager.start(context);
+    }
+
+    @Override
+    public int getActivationCooldownTicks(ItemStack stack, WeaponAbilityContext context) {
+        return Config.uniqueEffects.waxweaver.activeCooldown;
     }
 
     @Override
@@ -109,7 +123,15 @@ public class WaxweaverSwordItem extends UniqueSwordItem implements RevivalWeapon
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.waxweaversworditem.tooltip4").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
-        appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.waxweaver.cooldown);
+        tooltip.add(Text.translatable("item.simplyswords.waxweaversworditem.tooltip8",
+                Math.max(0, Config.uniqueEffects.waxweaver.cooldown / 20)).setStyle(Styles.TEXT));
+        tooltip.add(Text.literal(""));
+        tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
+        tooltip.add(Text.translatable("item.simplyswords.waxweaversworditem.tooltip3").setStyle(Styles.TEXT));
+        tooltip.add(Text.literal(""));
+        tooltip.add(Text.translatable("item.simplyswords.waxweaversworditem.tooltip5").setStyle(Styles.TEXT));
+
+        appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.waxweaver.activeCooldown);
 
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
     }
@@ -124,6 +146,31 @@ public class WaxweaverSwordItem extends UniqueSwordItem implements RevivalWeapon
         public int cooldown = 1200;
         @ValidatedInt.Restrict(min = 1)
         public int maxStacks = 3;
+        @ValidatedInt.Restrict(min = 0)
+        public int activeCooldown = 260;
+        @ValidatedFloat.Restrict(min = 1.0F)
+        public float targetRange = 12.0F;
+        @ValidatedInt.Restrict(min = 1)
+        public int encasementDuration = 120;
+        @ValidatedFloat.Restrict(min = 0.1F)
+        public float maximumTargetWidth = 0.9F;
+        @ValidatedFloat.Restrict(min = 0.1F)
+        public float maximumTargetHeight = 2.1F;
+        @ValidatedInt.Restrict(min = 1)
+        public int tauntInterval = 10;
+        @ValidatedFloat.Restrict(min = 1.0F)
+        public float tauntRadius = 10.0F;
+        @ValidatedInt.Restrict(min = 0)
+        public int tauntMaxTargets = 10;
+        @ValidatedInt.Restrict(min = 1)
+        @ValidatedFloat.Restrict(min = 0.0F)
+        public float explosionDamageScaling = 0.55F;
+        @ValidatedFloat.Restrict(min = 0.5F)
+        public float explosionRadius = 4.0F;
+        @ValidatedFloat.Restrict(min = 0.0F)
+        public float explosionKnockback = 0.4F;
+        @ValidatedInt.Restrict(min = 0)
+        public int explosionIgniteSeconds = 4;
 
     }
 }

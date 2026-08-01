@@ -2,14 +2,17 @@ package net.sweenus.simplyswords.mixin;
 
 import net.minecraft.entity.player.PlayerAbilities;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.item.component.MoltenHeatComponent;
 import net.sweenus.simplyswords.registry.ComponentTypeRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.world.MoltenEdgeAbilityManager;
+import net.sweenus.simplyswords.world.WaxweaverEncasementManager;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -22,6 +25,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(PlayerEntity.class)
 public abstract class PlayerEntityMixin {
+
+    @Inject(at = @At("HEAD"), method = "attack", cancellable = true)
+    private void simplyswords$preventWaxEncasedAttack(Entity target, CallbackInfo ci) {
+        if (WaxweaverEncasementManager.isEncased((PlayerEntity) (Object) this)) {
+            ci.cancel();
+        }
+    }
 
     @Shadow protected abstract void dropShoulderEntities();
 
@@ -97,6 +107,10 @@ public abstract class PlayerEntityMixin {
     @Inject(at = @At("TAIL"), method = "tickMovement")
     public void simplyswords$tickMovement(CallbackInfo ci) {
         PlayerEntity player = (PlayerEntity) (Object) this;
+        if (WaxweaverEncasementManager.isEncased(player)) {
+            player.setVelocity(Vec3d.ZERO);
+            player.fallDistance = 0.0F;
+        }
         if (!player.getWorld().isClient() && (player.isTouchingWater() || player.isSneaking())) {
             simplyswords$dropSimplyAxolotls();
         }

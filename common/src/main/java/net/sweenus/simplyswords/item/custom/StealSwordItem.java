@@ -41,6 +41,7 @@ import net.sweenus.simplyswords.util.Styles;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiveAbility {
     private static final double BACKSTAB_DISTANCE = 1.35;
@@ -178,9 +179,17 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
     }
 
     public static LivingEntity findLenientTarget(PlayerEntity player, double range) {
+        return findLenientTarget(player, range, target -> isValidSoulstealerTarget(target, player));
+    }
+
+    public static LivingEntity findLenientTarget(PlayerEntity player, double range,
+                                                  Predicate<LivingEntity> targetPredicate) {
+        if (player == null || targetPredicate == null) {
+            return null;
+        }
         Entity targeted = HelperMethods.getTargetedEntity(player, range);
         if (targeted instanceof LivingEntity livingTarget
-                && isValidSoulstealerTarget(livingTarget, player)) {
+                && targetPredicate.test(livingTarget)) {
             return livingTarget;
         }
 
@@ -190,7 +199,7 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
         LivingEntity closestTarget = null;
         double closestDistance = range * range;
         for (Entity entity : player.getWorld().getOtherEntities(player, searchBox, entity -> entity instanceof LivingEntity)) {
-            if (!(entity instanceof LivingEntity livingTarget) || !isValidSoulstealerTarget(livingTarget, player)) {
+            if (!(entity instanceof LivingEntity livingTarget) || !targetPredicate.test(livingTarget)) {
                 continue;
             }
 

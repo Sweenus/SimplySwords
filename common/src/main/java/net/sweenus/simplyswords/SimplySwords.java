@@ -218,6 +218,7 @@ public class SimplySwords {
             EntityRendererRegistry.register(EntityRegistry.CAELESTIS_HOLLOW, CaelestisHollowRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.CAELESTIS_DREADGLARE, CaelestisDreadglareRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.CAELESTIS_TENTACLE, CaelestisTentacleRenderer::new);
+            EntityRendererRegistry.register(EntityRegistry.WAXWEAVER_WAX_VISUAL, WaxweaverWaxVisualEntityRenderer::new);
 
             // Simply Tooltips bridge — renders all simplyswords sword items with the ST engine
             net.sweenus.simplytooltips.api.TooltipProviderRegistry.register(

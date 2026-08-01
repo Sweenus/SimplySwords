@@ -30,6 +30,7 @@ import net.sweenus.simplyswords.world.MoltenEdgeAbilityManager;
 import net.sweenus.simplyswords.world.SoulPyreAbilityManager;
 import net.sweenus.simplyswords.world.StormsEdgeAbilityManager;
 import net.sweenus.simplyswords.world.ThunderbrandAbilityManager;
+import net.sweenus.simplyswords.world.WaxweaverEncasementManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -102,6 +103,10 @@ public abstract class LivingEntityMixin {
     @ModifyVariable(method = "modifyAppliedDamage", at = @At("HEAD"), ordinal = 0, argsOnly = true)
     private float simplyswords$modifyDamageAmount(float amount, DamageSource source) {
         LivingEntity livingEntity = (LivingEntity) (Object) this;
+        if (source.getAttacker() instanceof LivingEntity attacker
+                && WaxweaverEncasementManager.isEncased(attacker)) {
+            return 0.0F;
+        }
         if (!livingEntity.getWorld().isClient()) {
             amount = MoltenEdgeAbilityManager.modifyOutgoingDamage(source, amount);
             StatusEffectInstance voidcloakEffect = livingEntity.getStatusEffect(EffectRegistry.getReference(EffectRegistry.VOIDCLOAK));
@@ -157,6 +162,7 @@ public abstract class LivingEntityMixin {
     @Inject(at = @At("HEAD"), method = "onDeath")
     public void simplyswords$triggerFlameSeedOnDeath(DamageSource damageSource, CallbackInfo ci) {
         LivingEntity livingEntity = (LivingEntity) (Object) this;
+        WaxweaverEncasementManager.onTargetDeath(livingEntity);
         MoltenEdgeAbilityManager.resetWielder(livingEntity);
         SoulPyreAbilityManager.onDeath(livingEntity, damageSource);
         FlameSeedEffect.triggerDeathDetonation(livingEntity);

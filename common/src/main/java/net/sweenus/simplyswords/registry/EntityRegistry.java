@@ -432,6 +432,15 @@ public class EntityRegistry {
                     .build(Identifier.of(SimplySwords.MOD_ID, "caelestis_tentacle").toString())
     );
 
+    public static final RegistrySupplier<EntityType<WaxweaverWaxVisualEntity>> WAXWEAVER_WAX_VISUAL = ENTITIES.register(
+            "waxweaver_wax_visual",
+            () -> EntityType.Builder.<WaxweaverWaxVisualEntity>create(WaxweaverWaxVisualEntity::new, SpawnGroup.MISC)
+                    .dimensions(0.25F, 0.25F)
+                    .maxTrackingRange(96)
+                    .trackingTickInterval(1)
+                    .build(Identifier.of(SimplySwords.MOD_ID, "waxweaver_wax_visual").toString())
+    );
+
     public static final RegistrySupplier<EntityType<SimplySwordsCreeperHeadEntity>> CREEPER_HEAD = ENTITIES.register(
             "creeper_head",
             () -> EntityType.Builder.<SimplySwordsCreeperHeadEntity>create(SimplySwordsCreeperHeadEntity::new, SpawnGroup.MISC)

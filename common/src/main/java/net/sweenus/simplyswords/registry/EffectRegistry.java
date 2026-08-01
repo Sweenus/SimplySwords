@@ -30,6 +30,8 @@ public class EffectRegistry {
 
     public static final RegistrySupplier<StatusEffect> FREEZE = EFFECT.register("freeze", () ->
             new FreezeEffect(StatusEffectCategory.HARMFUL, 1124687));
+    public static final RegistrySupplier<StatusEffect> WAX_ENCASED = EFFECT.register("wax_encased", () ->
+            new WaxEncasedEffect(StatusEffectCategory.HARMFUL, 0xE7B84B));
     public static final RegistrySupplier<StatusEffect> WARD = EFFECT.register("ward", () ->
             new WardEffect(StatusEffectCategory.BENEFICIAL, 1124687));
     public static final RegistrySupplier<StatusEffect> IMMOLATION = EFFECT.register("immolation", () ->

@@ -106,11 +106,15 @@ public abstract class ServerWorldMixin {
         if (CaelestisBreachManager.hasActive(world)) {
             CaelestisBreachManager.tick(world);
         }
+        if (WaxweaverEncasementManager.hasActive(world)) {
+            WaxweaverEncasementManager.tick(world);
+        }
         if (EvocationFangManager.hasActive(world)) {
             EvocationFangManager.tick(world);
         }
         RevivalCandleVisualManager.tickWorld(world);
         SoulkeeperLanternManager.tickWorld(world);
         WeaponAbilityCooldownManager.tick(world);
+        RevivalCooldownManager.tick(world);
     }
 }

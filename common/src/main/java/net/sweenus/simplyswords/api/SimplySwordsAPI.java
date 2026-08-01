@@ -39,6 +39,7 @@ import net.sweenus.simplyswords.registry.EntityRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.world.WeaponAbilityCooldownManager;
+import net.sweenus.simplyswords.world.WaxweaverEncasementManager;
 
 import java.util.List;
 import java.util.Optional;
@@ -94,7 +95,8 @@ public class SimplySwordsAPI {
     }
 
     public static void onWeaponSwing(ItemStack stack, ServerWorld world, LivingEntity user, Hand hand) {
-        if (stack == null || stack.isEmpty() || world == null || user == null || !user.isAlive()) {
+        if (stack == null || stack.isEmpty() || world == null || user == null || !user.isAlive()
+                || WaxweaverEncasementManager.isEncased(user)) {
             return;
         }
         AdditionalGemSocketApi.ensureInitialized(stack);
@@ -149,6 +151,8 @@ public class SimplySwordsAPI {
         return context != null
                 && context.stack() != null
                 && !context.stack().isEmpty()
+                && context.actor() != null
+                && !WaxweaverEncasementManager.isEncased(context.actor())
                 && AwakeningApi.isAbilityUnlocked(context.stack())
                 && context.stack().getItem() instanceof UniqueWeaponActiveAbility ability
                 && ability.canActivate(context)
@@ -169,6 +173,8 @@ public class SimplySwordsAPI {
         if (context == null
                 || context.stack() == null
                 || context.stack().isEmpty()
+                || context.actor() == null
+                || WaxweaverEncasementManager.isEncased(context.actor())
                 || !AwakeningApi.isAbilityUnlocked(context.stack())
                 || !(context.stack().getItem() instanceof UniqueWeaponActiveAbility ability)
                 || !ability.canActivate(context)) {

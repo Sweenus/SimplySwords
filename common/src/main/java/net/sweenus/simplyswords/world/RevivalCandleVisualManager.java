@@ -314,7 +314,11 @@ public final class RevivalCandleVisualManager {
 
     private static boolean isHeldWeaponCoolingDown(ServerPlayerEntity player) {
         ItemStack stack = player.getMainHandStack();
-        return stack.isEmpty() || player.getItemCooldownManager().isCoolingDown(stack.getItem());
+        if (stack.isEmpty()) return true;
+        if (stack.isOf(ItemsRegistry.WAXWEAVER.get())) {
+            return RevivalCooldownManager.isCoolingDown(player.getServerWorld(), player, stack);
+        }
+        return player.getItemCooldownManager().isCoolingDown(stack.getItem());
     }
 
     private static float easeOut(float t) {

@@ -10,6 +10,7 @@
     "client.InGameHudMixin",
     "client.PlayerEntityRendererMixin",
     "client.LivingEntityRendererAccessor",
+    "client.WaxEncasedLivingEntityRendererMixin",
     "client.WorldRendererMixin",
     "client.MinecraftClientMixin",
     "client.compat.SpellEngineSpellHotbarMixin"

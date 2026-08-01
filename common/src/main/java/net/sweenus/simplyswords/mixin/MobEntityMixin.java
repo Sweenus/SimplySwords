@@ -26,6 +26,7 @@ import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.MinionTargeting;
 import net.sweenus.simplyswords.world.ShadowstingShadowDanceManager;
 import net.sweenus.simplyswords.world.SoulkeeperLanternManager;
+import net.sweenus.simplyswords.world.WaxweaverEncasementManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -34,6 +35,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(MobEntity.class)
 public abstract class MobEntityMixin {
+
+    @Inject(method = "tryAttack", at = @At("HEAD"), cancellable = true)
+    private void simplyswords$preventWaxEncasedAttack(net.minecraft.entity.Entity target,
+                                                      CallbackInfoReturnable<Boolean> cir) {
+        if (WaxweaverEncasementManager.isEncased((MobEntity) (Object) this)) {
+            cir.setReturnValue(false);
+        }
+    }
 
     @Inject(method = "setTarget", at = @At("HEAD"), cancellable = true)
     private void simplyswords$ignoreShadowDancingTargets(LivingEntity target, CallbackInfo ci) {
@@ -48,7 +57,8 @@ public abstract class MobEntityMixin {
         if (!Config.general.enableNonPlayerWeaponAbilityUse
                 || mob.getWorld().isClient()
                 || !(mob.getWorld() instanceof ServerWorld world)
-                || !mob.isAlive()) {
+                || !mob.isAlive()
+                || WaxweaverEncasementManager.isEncased(mob)) {
             return;
         }
 
