@@ -1,5 +1,6 @@
 package net.sweenus.simplyswords.command;
 
+import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.ArgumentBuilder;
@@ -11,7 +12,10 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import dev.architectury.event.events.common.CommandRegistrationEvent;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
+import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.command.argument.IdentifierArgumentType;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.ContainerLootComponent;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
@@ -21,6 +25,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.loot.LootTable;
 import net.minecraft.loot.context.LootContextParameterSet;
 import net.minecraft.loot.context.LootContextParameters;
@@ -36,6 +41,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
 import net.sweenus.simplyswords.api.AwakeningApi;
@@ -43,6 +49,7 @@ import net.sweenus.simplyswords.config.LootConfig;
 import net.sweenus.simplyswords.item.RunicSwordItem;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.loot.PityLootManager;
+import net.sweenus.simplyswords.loot.PityStateHolder;
 import net.sweenus.simplyswords.loot.PlayerPityState;
 import net.sweenus.simplyswords.power.GemPower;
 import net.sweenus.simplyswords.power.GemPowerComponent;
@@ -76,6 +83,8 @@ public final class SimplySwordsCommands {
             Text.literal("Unknown loot table: " + value));
     private static final DynamicCommandExceptionType UNSUPPORTED_LOOT_TABLE = new DynamicCommandExceptionType(value ->
             Text.literal("Loot testing only supports chest and entity tables: " + value));
+    private static final DynamicCommandExceptionType CHEST_LOOT_TABLE_REQUIRED = new DynamicCommandExceptionType(value ->
+            Text.literal("A chest-context loot table is required: " + value));
     private static final DynamicCommandExceptionType ENTITY_LOOT_SOURCE_REQUIRED = new DynamicCommandExceptionType(value ->
             Text.literal("Testing an entity loot table requires an entity command source: " + value));
 
@@ -83,6 +92,9 @@ public final class SimplySwordsCommands {
     private static final float RANDOM_POWER_CHANCE = 0.5F;
     private static final int MIN_LOOT_TEST_ROLLS = 1;
     private static final int MAX_LOOT_TEST_ROLLS = 200_000;
+    private static final int DEFAULT_LOOT_TEST_CHESTS = 16;
+    private static final int MAX_LOOT_TEST_CHESTS = 64;
+    private static final int MAX_PITY_MISSES = 100_000;
     private static final List<EntityType<? extends MobEntity>> HOSTILE_MOBS = List.of(
             EntityType.HUSK,
             EntityType.VINDICATOR,
@@ -117,6 +129,59 @@ public final class SimplySwordsCommands {
                                                 MAX_LOOT_TEST_ROLLS
                                         ))
                                 .executes(SimplySwordsCommands::runLootTest)));
+        var lootTestChestCommand = CommandManager.literal("loot_test_chest")
+                .then(CommandManager.argument("table", IdentifierArgumentType.identifier())
+                        .suggests(SimplySwordsCommands::suggestChestLootTables)
+                        .executes(context -> giveLootTestChests(
+                                context, DEFAULT_LOOT_TEST_CHESTS))
+                        .then(CommandManager.argument(
+                                        "count",
+                                        IntegerArgumentType.integer(1, MAX_LOOT_TEST_CHESTS))
+                                .executes(context -> giveLootTestChests(
+                                        context,
+                                        IntegerArgumentType.getInteger(context, "count")))));
+        var pityStatusCommand = CommandManager.literal("status")
+                .executes(SimplySwordsCommands::showPityStatus)
+                .then(CommandManager.argument("player", EntityArgumentType.player())
+                        .executes(SimplySwordsCommands::showPityStatus));
+        var pityIgnoreRegionsCommand = CommandManager.literal("ignore_regions")
+                .then(CommandManager.argument("enabled", BoolArgumentType.bool())
+                        .executes(SimplySwordsCommands::setPityRegionBypass)
+                        .then(CommandManager.argument("player", EntityArgumentType.player())
+                                .executes(SimplySwordsCommands::setPityRegionBypass)));
+        var pitySetCommand = CommandManager.literal("set")
+                .then(CommandManager.literal("unique")
+                        .then(CommandManager.argument(
+                                        "misses",
+                                        IntegerArgumentType.integer(0, MAX_PITY_MISSES))
+                                .executes(context -> setPityMisses(context, PityTrack.UNIQUE))
+                                .then(CommandManager.argument("player", EntityArgumentType.player())
+                                        .executes(context -> setPityMisses(context, PityTrack.UNIQUE)))))
+                .then(CommandManager.literal("tablet")
+                        .then(CommandManager.argument(
+                                        "misses",
+                                        IntegerArgumentType.integer(0, MAX_PITY_MISSES))
+                                .executes(context -> setPityMisses(context, PityTrack.TABLET))
+                                .then(CommandManager.argument("player", EntityArgumentType.player())
+                                        .executes(context -> setPityMisses(context, PityTrack.TABLET)))));
+        var pityResetCommand = CommandManager.literal("reset")
+                .then(CommandManager.literal("unique")
+                        .executes(context -> resetPity(context, PityTrack.UNIQUE))
+                        .then(CommandManager.argument("player", EntityArgumentType.player())
+                                .executes(context -> resetPity(context, PityTrack.UNIQUE))))
+                .then(CommandManager.literal("tablet")
+                        .executes(context -> resetPity(context, PityTrack.TABLET))
+                        .then(CommandManager.argument("player", EntityArgumentType.player())
+                                .executes(context -> resetPity(context, PityTrack.TABLET))))
+                .then(CommandManager.literal("all")
+                        .executes(context -> resetPity(context, PityTrack.ALL))
+                        .then(CommandManager.argument("player", EntityArgumentType.player())
+                                .executes(context -> resetPity(context, PityTrack.ALL))));
+        var pityCommand = CommandManager.literal("pity")
+                .then(pityStatusCommand)
+                .then(pityIgnoreRegionsCommand)
+                .then(pitySetCommand)
+                .then(pityResetCommand);
 
         dispatcher.register(CommandManager.literal("simplyswords")
                 .requires(source -> source.hasPermissionLevel(2))
@@ -136,7 +201,9 @@ public final class SimplySwordsCommands {
                                                 .suggests((context, builder) -> suggestPowers(builder, PowerType.RUNIC))
                                                 .executes(SimplySwordsCommands::givePoweredRunicWeapon)))))
                 .then(spawnHostileCommand)
-                .then(lootTestCommand));
+                .then(lootTestCommand)
+                .then(lootTestChestCommand)
+                .then(pityCommand));
     }
 
     private static <T extends ArgumentBuilder<ServerCommandSource, T>> T configureSpawnArguments(T builder) {
@@ -262,6 +329,17 @@ public final class SimplySwordsCommands {
         return CommandSource.suggestIdentifiers(ids, builder);
     }
 
+    private static CompletableFuture<Suggestions> suggestChestLootTables(
+            CommandContext<ServerCommandSource> context,
+            SuggestionsBuilder builder) {
+        var lootTables = context.getSource().getServer().getReloadableRegistries();
+        Stream<Identifier> ids = lootTables.getIds(RegistryKeys.LOOT_TABLE).stream()
+                .filter(id -> lootTables.getLootTable(
+                        RegistryKey.of(RegistryKeys.LOOT_TABLE, id)
+                ).getType() == LootContextTypes.CHEST);
+        return CommandSource.suggestIdentifiers(ids, builder);
+    }
+
     private static List<Item> getUniqueWeapons() {
         if (cachedUniqueWeapons == null) {
             cachedUniqueWeapons = new ArrayList<>();
@@ -275,6 +353,170 @@ public final class SimplySwordsCommands {
             }
         }
         return cachedUniqueWeapons;
+    }
+
+    private static int giveLootTestChests(
+            CommandContext<ServerCommandSource> context,
+            int count) throws CommandSyntaxException {
+        ServerCommandSource source = context.getSource();
+        ServerPlayerEntity player = source.getPlayerOrThrow();
+        Identifier rawTableId = IdentifierArgumentType.getIdentifier(context, "table");
+        Identifier tableId = normalizeLootTableId(rawTableId);
+        var lootTables = source.getServer().getReloadableRegistries();
+
+        if (!lootTables.getIds(RegistryKeys.LOOT_TABLE).contains(tableId)) {
+            throw UNKNOWN_LOOT_TABLE.create(tableId);
+        }
+
+        RegistryKey<LootTable> tableKey = RegistryKey.of(RegistryKeys.LOOT_TABLE, tableId);
+        if (lootTables.getLootTable(tableKey).getType() != LootContextTypes.CHEST) {
+            throw CHEST_LOOT_TABLE_REQUIRED.create(tableId);
+        }
+
+        ItemStack stack = new ItemStack(Items.CHEST, count);
+        stack.set(
+                DataComponentTypes.CONTAINER_LOOT,
+                new ContainerLootComponent(tableKey, 0L)
+        );
+        if (!player.getInventory().insertStack(stack)) {
+            player.dropItem(stack, false);
+        }
+
+        source.sendFeedback(
+                () -> Text.literal("Gave " + count + " loot test chests using " + tableId
+                        + ". Place and open a fresh chest for each real loot roll."),
+                false
+        );
+        return count;
+    }
+
+    private static int showPityStatus(
+            CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+        ServerCommandSource source = context.getSource();
+        ServerPlayerEntity player = getPityPlayer(context);
+        PlayerPityState state = getPityState(player);
+        ServerWorld world = player.getServerWorld();
+        ChunkPos chunk = new ChunkPos(player.getBlockPos());
+        int regionX = Math.floorDiv(chunk.x, 2);
+        int regionZ = Math.floorDiv(chunk.z, 2);
+        long region = ChunkPos.toLong(regionX, regionZ);
+        String dimension = world.getRegistryKey().getValue().toString();
+        Text playerName = player.getDisplayName();
+
+        source.sendFeedback(
+                () -> Text.literal("Pity status for ").append(playerName).append(":"),
+                false
+        );
+        source.sendFeedback(
+                () -> Text.literal(" Unique misses=" + state.uniqueMisses()
+                        + " | soft pity=" + LootConfig.INSTANCE.uniqueSoftPityStart.get()
+                        + " | hard pity=" + LootConfig.INSTANCE.uniqueHardPity.get()),
+                false
+        );
+        source.sendFeedback(
+                () -> Text.literal(" Tablet misses=" + state.tabletMisses()
+                        + " | hard pity=" + LootConfig.INSTANCE.tabletHardPity.get()),
+                false
+        );
+        source.sendFeedback(
+                () -> Text.literal(" Ignore regions=" + state.ignoresRegionRestriction()
+                        + " (session only)"),
+                false
+        );
+        source.sendFeedback(
+                () -> Text.literal(" Current region=" + dimension + " [" + regionX + ", " + regionZ + "]"
+                        + " | unique credited=" + state.hasCreditedUnique(dimension, region)
+                        + " | tablet credited=" + state.hasCreditedTablet(dimension, region)),
+                false
+        );
+        return 1;
+    }
+
+    private static int setPityRegionBypass(
+            CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+        ServerCommandSource source = context.getSource();
+        ServerPlayerEntity player = getPityPlayer(context);
+        boolean enabled = BoolArgumentType.getBool(context, "enabled");
+        getPityState(player).setIgnoreRegionRestriction(enabled);
+        Text playerName = player.getDisplayName();
+        source.sendFeedback(
+                () -> Text.literal("Region-independent pity testing for ")
+                        .append(playerName)
+                        .append(enabled
+                                ? " is enabled for this login session."
+                                : " is disabled."),
+                false
+        );
+        return 1;
+    }
+
+    private static int setPityMisses(
+            CommandContext<ServerCommandSource> context,
+            PityTrack track) throws CommandSyntaxException {
+        ServerCommandSource source = context.getSource();
+        ServerPlayerEntity player = getPityPlayer(context);
+        PlayerPityState state = getPityState(player);
+        int misses = IntegerArgumentType.getInteger(context, "misses");
+        if (track == PityTrack.UNIQUE) {
+            state.setUniqueMisses(misses);
+        } else {
+            state.setTabletMisses(misses);
+        }
+        Text playerName = player.getDisplayName();
+        source.sendFeedback(
+                () -> Text.literal("Set " + track.label + " pity misses for ")
+                        .append(playerName)
+                        .append(" to " + misses + "."),
+                false
+        );
+        return 1;
+    }
+
+    private static int resetPity(
+            CommandContext<ServerCommandSource> context,
+            PityTrack track) throws CommandSyntaxException {
+        ServerCommandSource source = context.getSource();
+        ServerPlayerEntity player = getPityPlayer(context);
+        PlayerPityState state = getPityState(player);
+        if (track == PityTrack.UNIQUE || track == PityTrack.ALL) {
+            state.clearUniqueProgress();
+        }
+        if (track == PityTrack.TABLET || track == PityTrack.ALL) {
+            state.clearTabletProgress();
+        }
+        Text playerName = player.getDisplayName();
+        source.sendFeedback(
+                () -> Text.literal("Reset " + track.label + " pity counters and region history for ")
+                        .append(playerName)
+                        .append("."),
+                false
+        );
+        return 1;
+    }
+
+    private static ServerPlayerEntity getPityPlayer(
+            CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+        try {
+            return EntityArgumentType.getPlayer(context, "player");
+        } catch (IllegalArgumentException ignored) {
+            return context.getSource().getPlayerOrThrow();
+        }
+    }
+
+    private static PlayerPityState getPityState(ServerPlayerEntity player) {
+        return ((PityStateHolder) player).simplyswords$getPityState();
+    }
+
+    private enum PityTrack {
+        UNIQUE("unique"),
+        TABLET("tablet"),
+        ALL("all");
+
+        private final String label;
+
+        PityTrack(String label) {
+            this.label = label;
+        }
     }
 
     private static int runLootTest(
@@ -466,7 +708,7 @@ public final class SimplySwordsCommands {
         source.sendFeedback(() -> Text.literal(label + ":"), false);
         source.sendFeedback(
                 () -> Text.literal(
-                        " Rolls with a Simply Swords unique: "
+                        " Rolls with a registered unique: "
                                 + stats.rollsWithUnique
                                 + "/"
                                 + stats.rolls
@@ -478,7 +720,7 @@ public final class SimplySwordsCommands {
         );
         source.sendFeedback(
                 () -> Text.literal(
-                        " Total Simply Swords unique weapons dropped: "
+                        " Total registered unique weapons dropped: "
                                 + stats.totalUniqueWeapons
                 ),
                 false
@@ -486,7 +728,7 @@ public final class SimplySwordsCommands {
 
         if (stats.weaponCounts.isEmpty()) {
             source.sendFeedback(
-                    () -> Text.literal(" No Simply Swords unique weapons dropped in this simulation."),
+                    () -> Text.literal(" No registered unique weapons dropped in this simulation."),
                     false
             );
             return;
@@ -534,13 +776,10 @@ public final class SimplySwordsCommands {
             boolean foundUnique = false;
             for (ItemStack generatedStack : generated) {
                 if (generatedStack == null || generatedStack.isEmpty()
-                        || !(generatedStack.getItem() instanceof UniqueSwordItem)) {
+                        || !PityLootManager.isRegisteredUniqueLootItem(generatedStack.getItem())) {
                     continue;
                 }
                 Identifier itemId = Registries.ITEM.getId(generatedStack.getItem());
-                if (!itemId.getNamespace().equals(SimplySwords.MOD_ID)) {
-                    continue;
-                }
 
                 long count = Math.max(1, generatedStack.getCount());
                 weaponCounts.merge(itemId, count, Long::sum);

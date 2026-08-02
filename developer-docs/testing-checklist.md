@@ -51,7 +51,12 @@ the selection level. Restart the world and confirm the selected route persists.
 
 - Run `/simplyswords loot_test <loot_table> <rolls>` and confirm the addon item
   appears.
-- Test real chest generation and verify the initial awakening level.
+- Use `/simplyswords loot_test_chest <loot_table> [count]` to test real chest
+  generation and verify the initial awakening level.
+- Enable `/simplyswords pity ignore_regions true` when repeatedly placing fresh
+  test chests in the same location, then disable it or reconnect afterward.
+- Use `/simplyswords pity status`, `set`, and `reset` to verify soft pity, hard
+  pity, successful-roll resets, and separate Unique/Tablet progression.
 - Confirm disabled-unique configuration excludes the item.
 - Verify weapon implicit values and tooltip text survive save/reload.
 - Test any Contained Remnant block interaction and disabled-loot handling.

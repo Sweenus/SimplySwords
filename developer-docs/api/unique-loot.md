@@ -55,5 +55,21 @@ without the addon implementing another blacklist.
 ## Testing
 
 Use `/simplyswords loot_test <loot_table> <rolls>` to run simulated loot rolls.
-Also test a real chest because the command measures selection logic, not every
-structure mod's loot-table behavior.
+The command reports every registered unique, including addon namespaces.
+
+Use `/simplyswords loot_test_chest <loot_table> [count]` to receive real
+loot-table-backed chests. It gives 16 by default. Place and open a fresh chest
+for every roll; an opened vanilla loot container cannot generate twice.
+
+Operators can inspect and control live player pity with:
+
+```text
+/simplyswords pity status [player]
+/simplyswords pity ignore_regions <true|false> [player]
+/simplyswords pity set <unique|tablet> <misses> [player]
+/simplyswords pity reset <unique|tablet|all> [player]
+```
+
+Region bypass lets newly placed chests at the same coordinates grant pity
+progress repeatedly. It lasts only for the player's current login session;
+the counters themselves remain persistent until reset or satisfied.

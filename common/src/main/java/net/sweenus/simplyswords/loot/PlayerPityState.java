@@ -10,15 +10,32 @@ import java.util.Set;
 public final class PlayerPityState {
     private int uniqueMisses;
     private int tabletMisses;
+    // Operator testing flag. Intentionally omitted from NBT so reconnecting or
+    // restarting the server always restores normal regional pity behavior.
+    private boolean ignoreRegionRestriction;
     private final Map<String, Set<Long>> uniqueRegions = new HashMap<>();
     private final Map<String, Set<Long>> tabletRegions = new HashMap<>();
 
     public int uniqueMisses() { return uniqueMisses; }
     public int tabletMisses() { return tabletMisses; }
+    public boolean ignoresRegionRestriction() { return ignoreRegionRestriction; }
+    public void setUniqueMisses(int misses) { uniqueMisses = Math.max(0, misses); }
+    public void setTabletMisses(int misses) { tabletMisses = Math.max(0, misses); }
+    public void setIgnoreRegionRestriction(boolean ignore) { ignoreRegionRestriction = ignore; }
     public void resetUnique() { uniqueMisses = 0; }
     public void resetTablet() { tabletMisses = 0; }
     public void missUnique() { uniqueMisses++; }
     public void missTablet() { tabletMisses++; }
+
+    public void clearUniqueProgress() {
+        resetUnique();
+        uniqueRegions.clear();
+    }
+
+    public void clearTabletProgress() {
+        resetTablet();
+        tabletRegions.clear();
+    }
 
     public boolean creditUnique(String dimension, long region) {
         return uniqueRegions.computeIfAbsent(dimension, key -> new HashSet<>()).add(region);
@@ -28,10 +45,21 @@ public final class PlayerPityState {
         return tabletRegions.computeIfAbsent(dimension, key -> new HashSet<>()).add(region);
     }
 
+    public boolean hasCreditedUnique(String dimension, long region) {
+        Set<Long> regions = uniqueRegions.get(dimension);
+        return regions != null && regions.contains(region);
+    }
+
+    public boolean hasCreditedTablet(String dimension, long region) {
+        Set<Long> regions = tabletRegions.get(dimension);
+        return regions != null && regions.contains(region);
+    }
+
     public PlayerPityState copy() {
         PlayerPityState copy = new PlayerPityState();
         copy.uniqueMisses = uniqueMisses;
         copy.tabletMisses = tabletMisses;
+        copy.ignoreRegionRestriction = ignoreRegionRestriction;
         uniqueRegions.forEach((key, value) -> copy.uniqueRegions.put(key, new HashSet<>(value)));
         tabletRegions.forEach((key, value) -> copy.tabletRegions.put(key, new HashSet<>(value)));
         return copy;

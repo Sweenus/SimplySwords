@@ -51,19 +51,21 @@ public final class PityLootManager {
                 state,
                 serverPlayer.getRandom(),
                 true,
-                () -> state.creditUnique(dimension, region),
-                () -> state.creditTablet(dimension, region),
+                () -> state.ignoresRegionRestriction()
+                        || state.creditUnique(dimension, region),
+                () -> state.ignoresRegionRestriction()
+                        || state.creditTablet(dimension, region),
                 stack -> insert(inventory, stack)
         );
     }
 
-    /**
-     * Runs the post-loot-table chest injection against isolated state.
-     *
-     * <p>This is intended for diagnostics such as {@code loot_test}. Pity
-     * progression treats each call as a newly credited region without storing
-     * synthetic region ids.</p>
-     */
+    //
+    // Runs the post-loot-table chest injection against isolated state.
+    //
+    // This is intended for diagnostics such as oot_test. Pity
+    // progression treats each call as a newly credited region without storing
+    // synthetic region ids.
+    //
     public static List<ItemStack> simulateGeneratedContainerLoot(
             RegistryKey<net.minecraft.loot.LootTable> table,
             PlayerPityState state,
@@ -106,6 +108,17 @@ public final class PityLootManager {
         return override == null
                 ? LootConfig.INSTANCE.uniqueLootTableWeight.get()
                 : override;
+    }
+
+    //
+    // Returns whether an item belongs to the registered pity-controlled unique
+    // loot pool. Addon entries intentionally do not need to extend
+    // UniqueSwordItem or use the Simply Swords namespace.
+    //
+    public static boolean isRegisteredUniqueLootItem(Item item) {
+        return UniqueLootRegistry.entries().containsKey(item)
+                || (item instanceof UniqueSwordItem
+                && ModLootTableModifiers.isLootableUnique(item));
     }
 
     private static void rollContainerLoot(
