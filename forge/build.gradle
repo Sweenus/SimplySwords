@@ -48,7 +48,7 @@ configurations {
     shadowCommon // Don't use shadow from the shadow plugin because we don't want IDEA to index this.
     compileClasspath.extendsFrom common
     runtimeClasspath.extendsFrom common
-    developmentForge.extendsFrom common
+    developmentNeoForge.extendsFrom common
 }
 
 dependencies {
@@ -60,10 +60,20 @@ dependencies {
     common(project(path: ':common', configuration: 'namedElements')) { transitive false }
     shadowCommon(project(path: ':common', configuration: 'transformProductionNeoForge')) { transitive false }
 
-    modImplementation "me.fzzyhmstrs:fzzy_config:${project.fzz_config_version}+neoforge"
+    modImplementation("me.fzzyhmstrs:fzzy_config:${project.fzz_config_version}+neoforge") {
+        exclude group: "net.neoforged.fancymodloader", module: "loader"
+    }
+    // KFF and Fzzy Config initialize across NeoForge module layers before ordinary remapped mod
+    // dependencies are visible. Keep their library-only dependencies on the loader classpath in
+    // development runs; release jars continue to obtain these from their normal bundled metadata.
+    forgeRuntimeLibrary "org.jetbrains.kotlin:kotlin-stdlib:2.1.0"
+    forgeRuntimeLibrary "org.jetbrains.kotlin:kotlin-reflect:2.0.20"
+    forgeRuntimeLibrary "blue.endless:jankson:1.2.3"
+    forgeRuntimeLibrary "net.peanuuutz.tomlkt:tomlkt-jvm:0.3.7"
+    modRuntimeOnly files("${rootDir}/../simplytooltips/neoforge/build/libs/SimplyTooltips-neoforge-0.1.5.jar")
     modRuntimeOnly "com.github.ZsoltMolnarrr:TinyConfig:2.3.2"
     //modImplementation ("curse.maven:gobber-301700:4007899")
-    modImplementation "io.redspace:irons_spellbooks:${irons_spells_version}"
+    modCompileOnly "io.redspace:irons_spellbooks:${irons_spells_version}"
     modRuntimeOnly "me.shedaniel:RoughlyEnoughItems-neoforge:${rei_version}"
 }
 
