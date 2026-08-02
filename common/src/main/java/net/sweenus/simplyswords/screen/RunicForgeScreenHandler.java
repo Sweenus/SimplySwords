@@ -8,7 +8,11 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
+import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvent;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.BlockPos;
 import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.api.AwakeningFormRegistry;
@@ -20,9 +24,11 @@ import net.sweenus.simplyswords.registry.ComponentTypeRegistry;
 import net.sweenus.simplyswords.registry.GemPowerRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.ScreenHandlerRegistry;
+import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.LegacyUniqueMigration;
 
 public class RunicForgeScreenHandler extends ScreenHandler {
+    public static final int GUI_X_OFFSET = 12;
     public static final int WEAPON_SLOT = 0;
     public static final int RUNIC_GEM_SLOT = 1;
     public static final int NETHER_GEM_SLOT = 2;
@@ -61,20 +67,22 @@ public class RunicForgeScreenHandler extends ScreenHandler {
         forgeInventory.onOpen(owner);
         forgeInventory.addListener(this::onContentChanged);
 
-        addSlot(new WeaponSlot(forgeInventory, WEAPON_SLOT, 80, 22));
-        addSlot(new RunicGemSlot(forgeInventory, RUNIC_GEM_SLOT, 21, 22));
-        addSlot(new NetherGemSlot(forgeInventory, NETHER_GEM_SLOT, 139, 22));
+        addSlot(new WeaponSlot(forgeInventory, WEAPON_SLOT, 80 + GUI_X_OFFSET, 22));
+        addSlot(new RunicGemSlot(forgeInventory, RUNIC_GEM_SLOT, 21 + GUI_X_OFFSET, 22));
+        addSlot(new NetherGemSlot(forgeInventory, NETHER_GEM_SLOT, 139 + GUI_X_OFFSET, 22));
         for (int i = 0; i < TABLET_COUNT; i++) {
-            addSlot(new TabletSlot(forgeInventory, TABLET_START + i, 17 + i * 18, 56));
+            addSlot(new TabletSlot(forgeInventory, TABLET_START + i,
+                    17 + GUI_X_OFFSET + i * 18, 56));
         }
         for (int row = 0; row < 3; row++) {
             for (int column = 0; column < 9; column++) {
                 addSlot(new Slot(playerInventory, column + row * 9 + 9,
-                        7 + column * 18, 84 + row * 18));
+                        7 + GUI_X_OFFSET + column * 18, 84 + row * 18));
             }
         }
         for (int column = 0; column < 9; column++) {
-            addSlot(new Slot(playerInventory, column, 7 + column * 18, 142));
+            addSlot(new Slot(playerInventory, column,
+                    7 + GUI_X_OFFSET + column * 18, 142));
         }
         addSlot(new PreviewSlot(previewInventory, 0));
     }
@@ -281,6 +289,67 @@ public class RunicForgeScreenHandler extends ScreenHandler {
     }
 
     @Override
+    public void onSlotClick(int slotIndex, int button, SlotActionType actionType, PlayerEntity player) {
+        ItemStack[] previousForgeStacks = player instanceof ServerPlayerEntity
+                ? snapshotForgeStacks()
+                : null;
+        super.onSlotClick(slotIndex, button, actionType, player);
+        if (previousForgeStacks != null && player instanceof ServerPlayerEntity serverPlayer) {
+            playForgeSlotSounds(serverPlayer, previousForgeStacks);
+        }
+    }
+
+    private ItemStack[] snapshotForgeStacks() {
+        ItemStack[] snapshot = new ItemStack[FORGE_SLOT_COUNT];
+        for (int i = 0; i < FORGE_SLOT_COUNT; i++) {
+            snapshot[i] = forgeInventory.getStack(i).copy();
+        }
+        return snapshot;
+    }
+
+    private void playForgeSlotSounds(ServerPlayerEntity player, ItemStack[] previousStacks) {
+        ItemStack previousWeapon = previousStacks[WEAPON_SLOT];
+        ItemStack currentWeapon = forgeInventory.getStack(WEAPON_SLOT);
+        if (previousWeapon.isEmpty() && !currentWeapon.isEmpty()) {
+            playForgeSound(player, SoundEvents.ITEM_ARMOR_EQUIP_IRON.value(), 0.7F, 0.9F);
+            return;
+        }
+        if (!previousWeapon.isEmpty() && currentWeapon.isEmpty()) {
+            playWeaponRemovalSound(player);
+            return;
+        }
+
+        if (wasInsertedOrReplaced(previousStacks[RUNIC_GEM_SLOT],
+                forgeInventory.getStack(RUNIC_GEM_SLOT))) {
+            playForgeSound(player, SoundEvents.BLOCK_AMETHYST_CLUSTER_PLACE, 0.7F, 1.15F);
+        }
+        if (wasInsertedOrReplaced(previousStacks[NETHER_GEM_SLOT],
+                forgeInventory.getStack(NETHER_GEM_SLOT))) {
+            playForgeSound(player, SoundEvents.BLOCK_AMETHYST_CLUSTER_PLACE, 0.7F, 1.15F);
+        }
+        for (int i = TABLET_START; i < TABLET_START + TABLET_COUNT; i++) {
+            if (wasInsertedOrReplaced(previousStacks[i], forgeInventory.getStack(i))) {
+                playForgeSound(player, SoundEvents.BLOCK_STONE_HIT,
+                        0.30F, 1.35F);
+                break;
+            }
+        }
+    }
+
+    private static boolean wasInsertedOrReplaced(ItemStack previous, ItemStack current) {
+        return !current.isEmpty() && !ItemStack.areEqual(previous, current);
+    }
+
+    private static void playWeaponRemovalSound(ServerPlayerEntity player) {
+        playForgeSound(player, SoundEvents.BLOCK_ENCHANTMENT_TABLE_USE, 0.65F, 1.05F);
+    }
+
+    private static void playForgeSound(ServerPlayerEntity player, SoundEvent sound,
+                                       float volume, float pitch) {
+        player.playSoundToPlayer(sound, SoundCategory.BLOCKS, volume, pitch);
+    }
+
+    @Override
     public ItemStack quickMove(PlayerEntity player, int slotIndex) {
         if (slotIndex < 0 || slotIndex >= slots.size() || slotIndex == PREVIEW_SLOT) {
             return ItemStack.EMPTY;
@@ -322,9 +391,13 @@ public class RunicForgeScreenHandler extends ScreenHandler {
     public void onClosed(PlayerEntity player) {
         super.onClosed(player);
         if (!player.getWorld().isClient()) {
+            boolean returningWeapon = !forgeInventory.getStack(WEAPON_SLOT).isEmpty();
             commitWeapon();
             dropInventory(player, forgeInventory);
             forgeInventory.onClose(player);
+            if (returningWeapon && player instanceof ServerPlayerEntity serverPlayer) {
+                playWeaponRemovalSound(serverPlayer);
+            }
         }
     }
 

@@ -27,8 +27,9 @@ public class RunicForgeScreen extends HandledScreen<RunicForgeScreenHandler> {
 
     public RunicForgeScreen(RunicForgeScreenHandler handler, PlayerInventory inventory, Text title) {
         super(handler, inventory, title);
-        backgroundWidth = 176;
-        backgroundHeight = 166;
+        backgroundWidth = 176 + RunicForgeScreenHandler.GUI_X_OFFSET * 2;
+        backgroundHeight = 182;
+        playerInventoryTitleX = 8 + RunicForgeScreenHandler.GUI_X_OFFSET;
         playerInventoryTitleY = 74;
         Arrays.fill(previousCounts, -1);
     }
