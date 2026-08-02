@@ -61,8 +61,7 @@ public class LootConfig extends Config {
             .valueHandler(new ValidatedFloat(0.1f, 100f, 0f))
             .defaults(
                     ImmutableMap.<Identifier, Float>builder()
-                            .put(Identifier.ofVanilla("entities/wither"), 5f)
-                            .put(Identifier.ofVanilla("entities/ender_dragon"), 50f)
+                            .put(Identifier.ofVanilla("entities/ender_dragon"), 5f)
                             .put(Identifier.ofVanilla("chests/ruined_portal"), 0f)
                             .put(Identifier.ofVanilla("chests/village/village_armorer"), 0f)
                             .put(Identifier.ofVanilla("chests/village/village_butcher"), 0f)

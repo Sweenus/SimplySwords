@@ -6,6 +6,7 @@ public record TargetHighlight(LivingEntity target, Style style) {
 
     public enum Style {
         SOUL,
+        EMBER,
         BRIMSTONE,
         WATCHER,
         WAX,

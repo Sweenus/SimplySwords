@@ -33,9 +33,10 @@ import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
 
 import java.util.List;
-import java.util.Optional;
 
 public class EmberIreSwordItem extends UniqueSwordItem implements UniqueWeaponActiveAbility {
+    private static final double TARGET_RANGE = 18.0;
+
     public EmberIreSwordItem(ToolMaterial toolMaterial, Settings settings) {
         super(toolMaterial, settings);
     }
@@ -87,10 +88,9 @@ public class EmberIreSwordItem extends UniqueSwordItem implements UniqueWeaponAc
     @Override
     public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
         if (!world.isClient && user.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
-            Optional<LivingEntity> targetEntityReturn = HelperMethods.findClosestTarget(user, 18, 3);
+            LivingEntity targetEntity = user instanceof PlayerEntity player ? findPlayerTarget(player) : null;
             double damageAmount = HelperMethods.attackScaledDamage(user, stack, Config.uniqueEffects.emberblade.initialDamageScaling);
-            if (targetEntityReturn.isPresent() && HelperMethods.checkFriendlyFire(targetEntityReturn.get(), user)) {
-                LivingEntity targetEntity = targetEntityReturn.get();
+            if (targetEntity != null) {
                 SoundEvent soundSelect = SoundRegistry.ELEMENTAL_BOW_FIRE_SHOOT_IMPACT_03.get();
                 int particleCount = 20;
                 HelperMethods.spawnWaistHeightParticles((ServerWorld) world, ParticleTypes.SMOKE, user, targetEntity, particleCount);
@@ -136,6 +136,10 @@ public class EmberIreSwordItem extends UniqueSwordItem implements UniqueWeaponAc
 
             }
         }
+    }
+
+    public static LivingEntity findPlayerTarget(PlayerEntity player) {
+        return StealSwordItem.findLenientTarget(player, TARGET_RANGE);
     }
 
     @Override

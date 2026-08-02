@@ -62,6 +62,10 @@ public final class ModernFieldRenderer {
         renderTargetLine(matrices, vertexConsumers, age, targetOffset, 118, 238, 218, 157, 98, 202);
     }
 
+    public static void renderEmberTargetLine(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int age, Vec3d targetOffset) {
+        renderTargetLine(matrices, vertexConsumers, age, targetOffset, 255, 176, 48, 255, 58, 18);
+    }
+
     public static void renderBrimstoneTargetLine(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int age, Vec3d targetOffset) {
         renderTargetLine(matrices, vertexConsumers, age, targetOffset, 255, 142, 48, 255, 64, 24);
     }
@@ -115,6 +119,10 @@ public final class ModernFieldRenderer {
 
     public static void renderSoulstealerTargetRing(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int age, Vec3d targetOffset, float targetWidth) {
         renderTargetRing(matrices, vertexConsumers, age, targetOffset, targetWidth, 118, 238, 218, 157, 98, 202);
+    }
+
+    public static void renderEmberTargetRing(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int age, Vec3d targetOffset, float targetWidth) {
+        renderTargetRing(matrices, vertexConsumers, age, targetOffset, targetWidth, 255, 176, 48, 255, 58, 18);
     }
 
     public static void renderBrimstoneTargetRing(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int age, Vec3d targetOffset, float targetWidth) {

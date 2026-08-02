@@ -16,6 +16,7 @@ import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.WatcherBatEntity;
 import net.sweenus.simplyswords.item.component.StoredChargeComponent;
+import net.sweenus.simplyswords.item.custom.EmberIreSwordItem;
 import net.sweenus.simplyswords.item.custom.StealSwordItem;
 import net.sweenus.simplyswords.item.custom.LichbladeSwordItem;
 import net.sweenus.simplyswords.registry.ComponentTypeRegistry;
@@ -78,6 +79,9 @@ public abstract class WorldRendererMixin {
             if (highlight.style() == TargetHighlight.Style.SOUL) {
                 ModernFieldRenderer.renderSoulstealerTargetLine(matrices, vertexConsumers, player.age, targetOffset);
                 ModernFieldRenderer.renderSoulstealerTargetRing(matrices, vertexConsumers, player.age, targetOffset, highlightedTarget.getWidth());
+            } else if (highlight.style() == TargetHighlight.Style.EMBER) {
+                ModernFieldRenderer.renderEmberTargetLine(matrices, vertexConsumers, player.age, targetOffset);
+                ModernFieldRenderer.renderEmberTargetRing(matrices, vertexConsumers, player.age, targetOffset, highlightedTarget.getWidth());
             } else if (highlight.style() == TargetHighlight.Style.BRIMSTONE) {
                 ModernFieldRenderer.renderBrimstoneTargetLine(matrices, vertexConsumers, player.age, targetOffset);
                 ModernFieldRenderer.renderBrimstoneTargetRing(matrices, vertexConsumers, player.age, targetOffset, highlightedTarget.getWidth());
@@ -97,6 +101,10 @@ public abstract class WorldRendererMixin {
     }
 
     private TargetHighlight getReadyTarget(ClientPlayerEntity player) {
+        LivingEntity emberTarget = getReadyEmberTarget(player);
+        if (emberTarget != null) {
+            return new TargetHighlight(emberTarget, TargetHighlight.Style.EMBER);
+        }
         LivingEntity soulstealerTarget = getReadySoulstealerTarget(player);
         if (soulstealerTarget != null) {
             return new TargetHighlight(soulstealerTarget, TargetHighlight.Style.SOUL);
@@ -120,6 +128,17 @@ public abstract class WorldRendererMixin {
         LivingEntity brambleTarget = getReadyBrambleTarget(player);
         return brambleTarget == null ? null
                 : new TargetHighlight(brambleTarget, TargetHighlight.Style.BRAMBLE);
+    }
+
+    private LivingEntity getReadyEmberTarget(ClientPlayerEntity player) {
+        ItemStack stack = player.getMainHandStack();
+        if (!stack.isOf(ItemsRegistry.EMBERBLADE.get())
+                || !AwakeningApi.isAbilityUnlocked(stack)
+                || player.getItemCooldownManager().isCoolingDown(stack.getItem())
+                || stack.getDamage() >= stack.getMaxDamage() - 1) {
+            return null;
+        }
+        return EmberIreSwordItem.findPlayerTarget(player);
     }
 
     private LivingEntity getReadySoulstealerTarget(ClientPlayerEntity player) {
