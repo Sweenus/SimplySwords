@@ -26,6 +26,8 @@ import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
 import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.api.AwakeningFormRegistry;
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+import net.sweenus.simplyswords.client.api.ObserverStatusEffectClientApi;
 import net.sweenus.simplyswords.client.renderer.*;
 import net.sweenus.simplyswords.client.renderer.model.BattleStandardDarkModel;
 import net.sweenus.simplyswords.client.renderer.model.BattleStandardModel;
@@ -55,6 +57,8 @@ import net.sweenus.simplyswords.registry.*;
 import net.sweenus.simplyswords.network.SimplySwordsNetwork;
 import net.sweenus.simplyswords.util.FileCopier;
 import net.sweenus.simplyswords.util.ModLootTableModifiers;
+import net.sweenus.simplyswords.world.ObserverStatusEffectSyncManager;
+import net.sweenus.simplyswords.world.ShadowstingShadowDanceManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -102,6 +106,9 @@ public class SimplySwords {
         TransformationRegistry.register();
         LifecycleEvent.SETUP.register(AwakeningFormRegistry::registerBuiltins);
         SimplySwordsNetwork.init();
+        SimplySwordsAPI.registerObserverSyncedStatusEffect(EffectRegistry.SHADOW_DANCE_ID);
+        ObserverStatusEffectSyncManager.init();
+        ShadowstingShadowDanceManager.init();
         SimplySwordsCommands.register();
         EntityAttributeRegistry.register(EntityRegistry.BATTLESTANDARD, BattleStandardEntity::createBattleStandardAttributes);
         EntityAttributeRegistry.register(EntityRegistry.BATTLESTANDARDDARK, BattleStandardDarkEntity::createBattleStandardDarkAttributes);
@@ -163,6 +170,7 @@ public class SimplySwords {
         public static void initializeClient() {
             AbilityKeybindHandler.init();
             CaelestisBreachAmbience.init();
+            ObserverStatusEffectClientApi.init();
             // Entity
             EntityRendererRegistry.register(EntityRegistry.BATTLESTANDARD, BattleStandardRenderer::new);
             EntityModelLayerRegistry.register(BATTLESTANDARD_MODEL, BattleStandardModel::getTexturedModelData);

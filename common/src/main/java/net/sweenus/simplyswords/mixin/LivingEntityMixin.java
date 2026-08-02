@@ -1,6 +1,7 @@
 package net.sweenus.simplyswords.mixin;
 
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffectInstance;
@@ -28,6 +29,7 @@ import net.sweenus.simplyswords.world.RunicSlashManager;
 import net.sweenus.simplyswords.world.BramblethornAbilityManager;
 import net.sweenus.simplyswords.world.MagispearAbilityManager;
 import net.sweenus.simplyswords.world.MoltenEdgeAbilityManager;
+import net.sweenus.simplyswords.world.ObserverStatusEffectSyncManager;
 import net.sweenus.simplyswords.world.SoulPyreAbilityManager;
 import net.sweenus.simplyswords.world.StormsEdgeAbilityManager;
 import net.sweenus.simplyswords.world.ThunderbrandAbilityManager;
@@ -43,6 +45,22 @@ import static net.sweenus.simplyswords.SimplySwords.minimumEldritchEndVersion;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin {
+
+    @Inject(method = "onStatusEffectApplied", at = @At("TAIL"))
+    private void simplyswords$syncObserverEffectApplied(StatusEffectInstance effect, Entity source, CallbackInfo ci) {
+        ObserverStatusEffectSyncManager.syncApplied((LivingEntity) (Object) this, effect);
+    }
+
+    @Inject(method = "onStatusEffectUpgraded", at = @At("TAIL"))
+    private void simplyswords$syncObserverEffectUpgraded(StatusEffectInstance effect, boolean reapplyEffect,
+                                                          Entity source, CallbackInfo ci) {
+        ObserverStatusEffectSyncManager.syncApplied((LivingEntity) (Object) this, effect);
+    }
+
+    @Inject(method = "onStatusEffectRemoved", at = @At("TAIL"))
+    private void simplyswords$syncObserverEffectRemoved(StatusEffectInstance effect, CallbackInfo ci) {
+        ObserverStatusEffectSyncManager.syncRemoved((LivingEntity) (Object) this, effect);
+    }
 
     @Inject(at = @At("HEAD"), method = "tryUseTotem", cancellable = true)
     public void simplyswords$tryRevive(DamageSource source, CallbackInfoReturnable<Boolean> cir) {

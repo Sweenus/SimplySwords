@@ -131,6 +131,14 @@ public class SimplySwordsAPI {
         UniqueLootRegistry.register(item, weight);
     }
 
+    //
+    // Opts a status effect into client presentation synchronization for
+    // observers of affected living entities.
+    //
+    public static void registerObserverSyncedStatusEffect(Identifier effectId) {
+        ObserverStatusEffectSyncRegistry.register(effectId);
+    }
+
     // Gem Sockets
     // When each method is added to an item class, allows for gem sockets to appear on the item.
     // Each method needs to be called in its respective Override method. (Eg. inventoryTickGemSocketLogic goes in inventoryTick)

@@ -15,6 +15,8 @@ import net.sweenus.simplyswords.effect.*;
 
 public class EffectRegistry {
 
+    public static final Identifier SHADOW_DANCE_ID = Identifier.of(SimplySwords.MOD_ID, "shadow_dance");
+
     public static final DeferredRegister<StatusEffect> EFFECT = DeferredRegister.create(SimplySwords.MOD_ID, RegistryKeys.STATUS_EFFECT);
 
     //This is currently REQUIRED as a wrapper around a call to one of the effects below, since Architectury has a bug involving RegistrySuppliers not being able to save properly.
@@ -133,7 +135,7 @@ public class EffectRegistry {
                             1,
                             EntityAttributeModifier.Operation.ADD_VALUE));
 
-    public static final RegistrySupplier<StatusEffect> SHADOW_DANCE = EFFECT.register("shadow_dance", () ->
+    public static final RegistrySupplier<StatusEffect> SHADOW_DANCE = EFFECT.register(SHADOW_DANCE_ID.getPath(), () ->
             new ShadowDanceEffect(StatusEffectCategory.BENEFICIAL, 1315860));
     public static final RegistrySupplier<StatusEffect> BLEED = EFFECT.register("bleed", () ->
             new BleedEffect(StatusEffectCategory.HARMFUL, 0x8f1f1f));

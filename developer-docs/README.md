@@ -53,4 +53,5 @@ exist before addon content is used.
 - [Combat and damage](api/combat-and-damage.md)
 - [Contained Remnants](api/contained-remnants.md)
 - [Battle Standards](api/battle-standards.md)
+- [Observer-synchronized status effects](api/observer-status-effects.md)
 - [Client integration](api/client-integration.md)

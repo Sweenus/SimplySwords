@@ -150,5 +150,10 @@ text or another addon-provided presentation.
 Gameplay state should be created on the server. Use vanilla tracked entities,
 particles, sounds, or explicit addon packets to present that state to clients.
 
+When a renderer needs the full state of a status effect applied to another
+player or mob, use the opt-in
+[observer status-effect API](observer-status-effects.md). It avoids requiring an
+addon-specific packet and does not apply gameplay effects to remote entities.
+
 Keep renderer classes and `MinecraftClient` references in client source sets.
 Test a dedicated server to catch accidental client classloading.

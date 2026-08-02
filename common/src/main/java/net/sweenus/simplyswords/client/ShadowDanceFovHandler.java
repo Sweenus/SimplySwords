@@ -4,6 +4,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.sweenus.simplyswords.registry.EffectRegistry;
+import net.sweenus.simplyswords.client.api.ObserverStatusEffectClientApi;
 
 public final class ShadowDanceFovHandler {
 
@@ -39,7 +40,9 @@ public final class ShadowDanceFovHandler {
     }
 
     public static boolean isShadowDancing(Entity entity) {
-        return entity instanceof LivingEntity livingEntity && getShadowDance(livingEntity) != null;
+        return entity instanceof LivingEntity livingEntity
+                && (getShadowDance(livingEntity) != null
+                || ObserverStatusEffectClientApi.isActive(livingEntity, EffectRegistry.SHADOW_DANCE_ID));
     }
 
     private static StatusEffectInstance getShadowDance(LivingEntity livingEntity) {

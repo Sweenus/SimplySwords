@@ -1,7 +1,10 @@
 package net.sweenus.simplyswords.network;
 
+import dev.architectury.networking.NetworkManager;
 import dev.architectury.networking.simple.MessageType;
 import dev.architectury.networking.simple.SimpleNetworkManager;
+import dev.architectury.platform.Platform;
+import dev.architectury.utils.Env;
 import net.sweenus.simplyswords.SimplySwords;
 
 public final class SimplySwordsNetwork {
@@ -14,6 +17,10 @@ public final class SimplySwordsNetwork {
     }
 
     public static void init() {
-        // Loads the class so packet types are registered during common init.
+        if (Platform.getEnvironment() == Env.SERVER) {
+            NetworkManager.registerS2CPayloadType(
+                    ObserverStatusEffectsPacket.ID,
+                    ObserverStatusEffectsPacket.CODEC);
+        }
     }
 }

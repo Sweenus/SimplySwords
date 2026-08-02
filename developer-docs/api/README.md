@@ -17,6 +17,7 @@ Use `SimplySwordsAPI` as the preferred common-side facade and
 | Weapon hits | `DelegatedWeaponHitContext`, hit helpers on `SimplySwordsAPI` | [Combat and damage](combat-and-damage.md) |
 | Remnant transformations | `SimplySwordsAPI.registerTransformation` | [Contained Remnants](contained-remnants.md) |
 | Battle Standards | `SimplySwordsAPI.spawnBattleStandard` | [Battle Standards](battle-standards.md) |
+| Observer status effects | `SimplySwordsAPI.registerObserverSyncedStatusEffect`, `ObserverStatusEffectClientApi` | [Observer status effects](observer-status-effects.md) |
 | Client integration | `SimplySwordsClientAPI` | [Client integration](client-integration.md) |
 
 ## Preferred facade methods
@@ -29,7 +30,8 @@ Use `SimplySwordsAPI` as the preferred common-side facade and
 - gem socket hooks;
 - weapon type and implicit registration;
 - synthetic and delegated weapon hits;
-- Contained Remnant transformations.
+- Contained Remnant transformations;
+- observer status-effect registration for remote client presentation.
 
 Registry classes expose extra lookup operations needed by tooltips or advanced
 integrations. Prefer the facade when it offers the same operation.

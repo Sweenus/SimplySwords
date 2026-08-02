@@ -1,5 +1,6 @@
 package net.sweenus.simplyswords.world;
 
+import dev.architectury.event.events.common.PlayerEvent;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffectInstance;
@@ -34,8 +35,17 @@ public final class ShadowstingShadowDanceManager {
     private static final Map<UUID, ActiveShadowDance> ACTIVE_DANCES = new HashMap<>();
     private static final Map<ServerWorld, List<PendingShadowCloneStrike>> PENDING_CLONE_STRIKES = new HashMap<>();
     private static final ThreadLocal<Integer> CURRENT_CLONE_DEPTH = ThreadLocal.withInitial(() -> 0);
+    private static boolean initialized;
 
     private ShadowstingShadowDanceManager() {
+    }
+
+    public static void init() {
+        if (initialized) {
+            return;
+        }
+        initialized = true;
+        PlayerEvent.PLAYER_QUIT.register(ShadowstingShadowDanceManager::onPlayerQuit);
     }
 
     public static boolean start(ServerWorld world, ServerPlayerEntity player) {
@@ -115,6 +125,7 @@ public final class ShadowstingShadowDanceManager {
         ServerWorld world = player.getServerWorld();
         if (!dance.worldKey.equals(world.getRegistryKey().getValue().toString()) || !player.isAlive()) {
             finishNow(player);
+            player.removeStatusEffect(EffectRegistry.getReference(EffectRegistry.SHADOW_DANCE));
             return;
         }
 
@@ -193,6 +204,14 @@ public final class ShadowstingShadowDanceManager {
 
     public static void end(ServerPlayerEntity player) {
         finishNow(player);
+    }
+
+    private static void onPlayerQuit(ServerPlayerEntity player) {
+        if (player == null) {
+            return;
+        }
+        ACTIVE_DANCES.remove(player.getUuid());
+        player.removeStatusEffect(EffectRegistry.getReference(EffectRegistry.SHADOW_DANCE));
     }
 
     private static void finishNow(ServerPlayerEntity player) {
