@@ -147,27 +147,24 @@ public final class WeaponImplicitRegistry {
         return formatTooltip(stack, false);
     }
 
+    // Read-only. Tooltips render on the client every frame, so this must never write a
+    // component to the stack — that would roll a fresh random value from the render thread
+    // and desync the stack from the server and from any storage mod tracking it.
+    // The stack gets its implicit from inventoryTick / onCraft / onClicked instead; until
+    // then the tooltip shows the range preview.
     public static Text formatTooltip(ItemStack stack, boolean includeRange) {
         Optional<WeaponImplicitComponent> component = peekWeaponImplicit(stack);
+        WeaponImplicitDefinition currentDefinition = resolveDefinition(stack);
         if (component.isPresent()) {
             WeaponImplicitDefinition definition = DEFINITIONS_BY_ID.get(component.get().implicitId());
-            WeaponImplicitDefinition currentDefinition = resolveDefinition(stack);
-            if (definition == null || currentDefinition == null || !componentMatchesDefinition(component.get(), currentDefinition)) {
-                component = getOrCreateWeaponImplicit(stack);
-                if (component.isEmpty()) {
-                    return null;
-                }
-                definition = DEFINITIONS_BY_ID.get(component.get().implicitId());
+            if (definition != null && currentDefinition != null && componentMatchesDefinition(component.get(), currentDefinition)) {
+                Text text = definition.formatTooltip(component.get());
+                return includeRange ? appendRange(text, definition) : text;
             }
-            if (definition == null) {
-                return null;
-            }
-            Text text = definition.formatTooltip(component.get());
-            return includeRange ? appendRange(text, definition) : text;
         }
 
-        WeaponImplicitDefinition previewDefinition = resolveDefinition(stack);
-        return previewDefinition == null ? null : formatRangePreview(previewDefinition);
+        // No implicit yet, or the stored one is stale for this weapon type.
+        return currentDefinition == null ? null : formatRangePreview(currentDefinition);
     }
 
     public static List<Text> buildTooltipLines(ItemStack stack) {

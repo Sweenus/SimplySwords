@@ -81,32 +81,39 @@ public final class AdditionalGemSocketApi {
             return false;
         }
         if (hasAdditionalSockets(stack)) {
-            GemPowerComponent existing = stack.getOrDefault(
-                    ComponentTypeRegistry.GEM_POWER.get(), GemPowerComponent.DEFAULT);
-            if (!existing.hasRunicPower() || !existing.hasNetherPower()) {
-                stack.set(ComponentTypeRegistry.GEM_POWER.get(), new GemPowerComponent(
-                        true,
-                        true,
-                        existing.runicPower(),
-                        existing.netherPower()
-                ));
-            }
+            openBothSockets(stack);
             return true;
         }
         if (!isConfigured(stack)) {
             return false;
         }
 
+        openBothSockets(stack);
+        if (!hasAdditionalSockets(stack)) {
+            stack.set(ComponentTypeRegistry.ADDITIONAL_GEM_SOCKETS.get(), true);
+        }
+        return true;
+    }
+
+    //
+    // Marks both sockets as present, writing only when that is not already the case.
+    //
+    // This runs from ItemStack#inventoryTick for every stack in the game, so an
+    // unconditional set would rewrite the component every tick — making storage mods
+    // (Refined Storage, Create, AE2) see the stack as perpetually changed.
+    //
+    private static void openBothSockets(ItemStack stack) {
         GemPowerComponent existing = stack.getOrDefault(
                 ComponentTypeRegistry.GEM_POWER.get(), GemPowerComponent.DEFAULT);
+        if (existing.hasRunicPower() && existing.hasNetherPower()) {
+            return;
+        }
         stack.set(ComponentTypeRegistry.GEM_POWER.get(), new GemPowerComponent(
                 true,
                 true,
                 existing.runicPower(),
                 existing.netherPower()
         ));
-        stack.set(ComponentTypeRegistry.ADDITIONAL_GEM_SOCKETS.get(), true);
-        return true;
     }
 
     public static GemPowerComponent getTooltipComponent(ItemStack stack) {

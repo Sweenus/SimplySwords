@@ -35,7 +35,7 @@ public class NetherfusedGemItem extends Item implements GemPowerFiller {
     public ValidationResult<GemPowerComponent> fill(ItemStack stack, GemPowerComponent component) {
         GemPowerComponent gemComponent = SimplySwordsAPI.getComponent(stack);
         if (!gemComponent.hasNetherPower()
-                || gemComponent.netherPower().value().isEmpty()
+                || !gemComponent.hasNetherSlotFilled()
                 || !component.hasNetherPower()) {
             return ValidationResult.Companion.error(component, "Can't socket to the provided component");
         }
@@ -49,7 +49,9 @@ public class NetherfusedGemItem extends Item implements GemPowerFiller {
     public boolean onClicked(ItemStack stack, ItemStack otherStack, Slot slot, ClickType clickType, PlayerEntity player,
                              StackReference cursorStackReference) {
 
-        if (!stack.contains(ComponentTypeRegistry.GEM_POWER.get())) {
+        // Must roll on BOTH sides - see the note in RunefusedGemItem#onClicked. In creative
+        // the client owns the stack and a server-only roll is discarded.
+        if (SimplySwordsAPI.needsGemPowerRoll(stack)) {
             stack.set(ComponentTypeRegistry.GEM_POWER.get(), GemPowerComponent.nether(GemPowerRegistry.gemRandomPower(PowerType.NETHER)));
         }
 
@@ -60,7 +62,7 @@ public class NetherfusedGemItem extends Item implements GemPowerFiller {
     public void onCraft(ItemStack stack, World world) {
         if (world.isClient) return;
 
-        if (!stack.contains(ComponentTypeRegistry.GEM_POWER.get())) {
+        if (SimplySwordsAPI.needsGemPowerRoll(stack)) {
             stack.set(ComponentTypeRegistry.GEM_POWER.get(), GemPowerComponent.nether(GemPowerRegistry.gemRandomPower(PowerType.NETHER)));
         }
     }

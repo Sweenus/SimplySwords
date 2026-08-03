@@ -49,13 +49,22 @@ public class RunicSwordItem extends SwordItem {
         if (!player.getWorld().isClient) {
             WeaponImplicitRegistry.getOrCreateWeaponImplicit(stack);
         }
-        if(!stack.contains(ComponentTypeRegistry.GEM_POWER.get())) {
-            String[] blacklist = {"simplyswords:gem_power@simplyswords:throwing"}; // Should be replaced with a modular blacklisting system at a later date
-            if (TagRegistry.isInTag(TagRegistry.spearsTag, asItem()))
-                stack.set(ComponentTypeRegistry.GEM_POWER.get(), GemPowerComponent.runic(GemPowerRegistry.gemRandomPower(PowerType.RUNIC, blacklist)));
-            else stack.set(ComponentTypeRegistry.GEM_POWER.get(), GemPowerComponent.runic(GemPowerRegistry.gemRandomPower(PowerType.RUNIC)));
-        }
+        // Must roll on BOTH sides - see the note in RunefusedGemItem#onClicked. In creative
+        // the client owns the stack and a server-only roll is discarded.
+        rollRunicPower(stack);
         return false;
+    }
+
+    // Should be replaced with a modular blacklisting system at a later date
+    private static final Identifier[] SPEAR_POWER_BLACKLIST = {Identifier.of(SimplySwords.MOD_ID, "throwing")};
+
+    private void rollRunicPower(ItemStack stack) {
+        if (!SimplySwordsAPI.needsGemPowerRoll(stack)) return;
+
+        Identifier power = TagRegistry.isInTag(TagRegistry.spearsTag, asItem())
+                ? GemPowerRegistry.gemRandomPower(PowerType.RUNIC, SPEAR_POWER_BLACKLIST)
+                : GemPowerRegistry.gemRandomPower(PowerType.RUNIC);
+        stack.set(ComponentTypeRegistry.GEM_POWER.get(), GemPowerComponent.runic(power));
     }
 
     @Override
@@ -174,12 +183,7 @@ public class RunicSwordItem extends SwordItem {
         if (world.isClient) return;
 
         WeaponImplicitRegistry.getOrCreateWeaponImplicit(stack);
-        if(!stack.contains(ComponentTypeRegistry.GEM_POWER.get())) {
-            String[] blacklist = {"simplyswords:gem_power@simplyswords:throwing"};
-            if (TagRegistry.isInTag(TagRegistry.spearsTag, asItem()))
-                stack.set(ComponentTypeRegistry.GEM_POWER.get(), GemPowerComponent.runic(GemPowerRegistry.gemRandomPower(PowerType.RUNIC, blacklist)));
-            else stack.set(ComponentTypeRegistry.GEM_POWER.get(), GemPowerComponent.runic(GemPowerRegistry.gemRandomPower(PowerType.RUNIC)));
-        }
+        rollRunicPower(stack);
     }
 
     @Override

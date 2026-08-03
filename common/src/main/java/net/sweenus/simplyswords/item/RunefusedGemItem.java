@@ -35,7 +35,7 @@ public class RunefusedGemItem extends Item implements GemPowerFiller {
     public ValidationResult<GemPowerComponent> fill(ItemStack stack, GemPowerComponent component) {
         GemPowerComponent gemComponent = SimplySwordsAPI.getComponent(stack);
         if (!gemComponent.hasRunicPower()
-                || gemComponent.runicPower().value().isEmpty()
+                || !gemComponent.hasRunicSlotFilled()
                 || !component.hasRunicPower()) {
             return ValidationResult.Companion.error(component, "Can't socket to the provided component");
         }
@@ -49,7 +49,19 @@ public class RunefusedGemItem extends Item implements GemPowerFiller {
     public boolean onClicked(ItemStack stack, ItemStack otherStack, Slot slot, ClickType clickType, PlayerEntity player,
                              StackReference cursorStackReference) {
 
-        if (!stack.contains(ComponentTypeRegistry.GEM_POWER.get())) {
+        // Must roll on BOTH sides - do not add an isClient guard here.
+        //
+        // Which side owns the resulting stack depends on the game mode. In survival the
+        // server runs this via ClickSlotC2SPacket and syncs the result back. In creative the
+        // client is authoritative: clicks go through ClientPlayerInteractionManager
+        // .clickCreativeStack, and ServerPlayNetworkHandler.onCreativeInventoryAction writes
+        // the client's stack straight into the slot without ever calling Item#onClicked. A
+        // server-only roll is therefore silently discarded in creative and the gem can never
+        // be identified.
+        //
+        // The two sides can pick different powers, but the authoritative side always wins and
+        // the other is corrected on the next slot sync.
+        if (SimplySwordsAPI.needsGemPowerRoll(stack)) {
             stack.set(ComponentTypeRegistry.GEM_POWER.get(), GemPowerComponent.runic(GemPowerRegistry.gemRandomPower(PowerType.RUNEFUSED)));
         }
         return false;
@@ -60,7 +72,7 @@ public class RunefusedGemItem extends Item implements GemPowerFiller {
     public void onCraft(ItemStack stack, World world) {
         if (world.isClient) return;
 
-        if (!stack.contains(ComponentTypeRegistry.GEM_POWER.get())) {
+        if (SimplySwordsAPI.needsGemPowerRoll(stack)) {
             stack.set(ComponentTypeRegistry.GEM_POWER.get(), GemPowerComponent.runic(GemPowerRegistry.gemRandomPower(PowerType.RUNEFUSED)));
         }
     }

@@ -94,6 +94,22 @@ public class SimplySwordsAPI {
         return stack.getOrDefault(ComponentTypeRegistry.GEM_POWER.get(), GemPowerComponent.DEFAULT);
     }
 
+    //
+    // Whether an identify-on-click item still needs its power rolled: either it has no gem
+    // power component at all, or it has one whose sockets are all empty because an earlier
+    // roll failed (for instance if the power pool was not yet available).
+    //
+    // Callers use this rather than a bare stack.contains(GEM_POWER) check, so a stack that
+    // picked up an empty component can never be permanently stuck as "unidentified".
+    //
+    // Only for items that identify on click - gems and runic weapons. Unique weapons use an
+    // empty component legitimately to mean "has sockets, nothing socketed yet".
+    //
+    public static boolean needsGemPowerRoll(ItemStack stack) {
+        GemPowerComponent component = stack.get(ComponentTypeRegistry.GEM_POWER.get());
+        return component == null || component.isEmpty();
+    }
+
     public static void onWeaponSwing(ItemStack stack, ServerWorld world, LivingEntity user, Hand hand) {
         if (stack == null || stack.isEmpty() || world == null || user == null || !user.isAlive()
                 || WaxweaverEncasementManager.isEncased(user)) {
@@ -401,14 +417,14 @@ public class SimplySwordsAPI {
     private static ItemStack createDisplacedGem(GemPowerComponent weaponComponent,
                                                 Item incomingGemItem) {
         if (incomingGemItem == ItemsRegistry.RUNEFUSED_GEM.get()
-                && !weaponComponent.runicPower().value().isEmpty()) {
+                && weaponComponent.hasRunicSlotFilled()) {
             ItemStack displacedRunic = new ItemStack(ItemsRegistry.RUNEFUSED_GEM.get());
             displacedRunic.set(ComponentTypeRegistry.GEM_POWER.get(),
                     GemPowerComponent.runic(weaponComponent.runicPower()));
             return displacedRunic;
         }
         if (incomingGemItem == ItemsRegistry.NETHERFUSED_GEM.get()
-                && !weaponComponent.netherPower().value().isEmpty()) {
+                && weaponComponent.hasNetherSlotFilled()) {
             ItemStack displacedNether = new ItemStack(ItemsRegistry.NETHERFUSED_GEM.get());
             displacedNether.set(ComponentTypeRegistry.GEM_POWER.get(),
                     GemPowerComponent.nether(weaponComponent.netherPower()));
@@ -425,9 +441,11 @@ public class SimplySwordsAPI {
 
     public static void inventoryTickGemSocketLogic (ItemStack stack, World world, Entity entity,
                                                     int runeSocketChance, int netherSocketChance) {
-        if (!stack.contains(ComponentTypeRegistry.GEM_POWER.get()) && Config.general.enableUniqueGemSockets) {
-            float runeSocketRoll = (float) (Math.random() * 100);
-            float netherSocketRoll = (float) (Math.random() * 100);
+        // Server-side only: rolling on both sides gave the client a different socket layout
+        // than the server, and rewrote the component on stacks a storage mod was tracking.
+        if (!world.isClient && !stack.contains(ComponentTypeRegistry.GEM_POWER.get()) && Config.general.enableUniqueGemSockets) {
+            float runeSocketRoll = world.getRandom().nextFloat() * 100;
+            float netherSocketRoll = world.getRandom().nextFloat() * 100;
             stack.set(ComponentTypeRegistry.GEM_POWER.get(), GemPowerComponent.createEmpty(
                     runeSocketRoll < runeSocketChance,
                     netherSocketRoll < netherSocketChance

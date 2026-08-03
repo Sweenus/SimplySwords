@@ -9,11 +9,13 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import com.mojang.serialization.DataResult;
 import dev.architectury.event.events.common.CommandRegistrationEvent;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.command.argument.IdentifierArgumentType;
+import net.minecraft.component.Component;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.ContainerLootComponent;
 import net.minecraft.entity.Entity;
@@ -30,15 +32,18 @@ import net.minecraft.loot.LootTable;
 import net.minecraft.loot.context.LootContextParameterSet;
 import net.minecraft.loot.context.LootContextParameters;
 import net.minecraft.loot.context.LootContextTypes;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.registry.RegistryOps;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
@@ -87,6 +92,8 @@ public final class SimplySwordsCommands {
             Text.literal("A chest-context loot table is required: " + value));
     private static final DynamicCommandExceptionType ENTITY_LOOT_SOURCE_REQUIRED = new DynamicCommandExceptionType(value ->
             Text.literal("Testing an entity loot table requires an entity command source: " + value));
+    private static final DynamicCommandExceptionType EMPTY_HAND = new DynamicCommandExceptionType(value ->
+            Text.literal("Hold the item you want to test in your main hand: " + value));
 
     private static List<Item> cachedUniqueWeapons;
     private static final float RANDOM_POWER_CHANCE = 0.5F;
@@ -140,6 +147,8 @@ public final class SimplySwordsCommands {
                                 .executes(context -> giveLootTestChests(
                                         context,
                                         IntegerArgumentType.getInteger(context, "count")))));
+        var componentTestCommand = CommandManager.literal("component_test")
+                .executes(SimplySwordsCommands::runComponentTest);
         var pityStatusCommand = CommandManager.literal("status")
                 .executes(SimplySwordsCommands::showPityStatus)
                 .then(CommandManager.argument("player", EntityArgumentType.player())
@@ -203,7 +212,92 @@ public final class SimplySwordsCommands {
                 .then(spawnHostileCommand)
                 .then(lootTestCommand)
                 .then(lootTestChestCommand)
+                .then(componentTestCommand)
                 .then(pityCommand));
+    }
+
+    //
+    // Encodes the held stack and every Simply Swords component on it, decodes the result,
+    // and reports whether the round trip produced something equal to what we started with.
+    //
+    // This is the exact comparison storage mods make: Refined Storage rebuilds a stack from
+    // its item id and component map and matches it against what it has in storage. A
+    // component whose equals()/hashCode() is wrong makes that match fail, and the player
+    // gets a fuzzy-matched substitute instead of the item they asked for.
+    //
+    private static int runComponentTest(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+        ServerCommandSource source = context.getSource();
+        ServerPlayerEntity player = source.getPlayerOrThrow();
+        ItemStack stack = player.getMainHandStack();
+        if (stack.isEmpty()) {
+            throw EMPTY_HAND.create("component_test");
+        }
+
+        RegistryOps<NbtElement> ops = RegistryOps.of(NbtOps.INSTANCE, source.getRegistryManager());
+        List<Text> lines = new ArrayList<>();
+        boolean allPassed = true;
+
+        for (Component<?> component : stack.getComponents()) {
+            Identifier typeId = Registries.DATA_COMPONENT_TYPE.getId(component.type());
+            if (typeId == null || !typeId.getNamespace().equals(SimplySwords.MOD_ID)) continue;
+            ComponentResult result = roundTripComponent(component, ops);
+            allPassed &= result.passed();
+            lines.add(Text.literal(" " + (result.passed() ? "✔ " : "✘ ") + typeId + " — " + result.detail())
+                    .formatted(result.passed() ? Formatting.GREEN : Formatting.RED));
+        }
+
+        if (lines.isEmpty()) {
+            lines.add(Text.literal(" (no Simply Swords components on this stack)").formatted(Formatting.GRAY));
+        }
+
+        boolean stackPassed = roundTripStack(stack, ops);
+        allPassed &= stackPassed;
+        lines.add(Text.literal(" " + (stackPassed ? "✔ " : "✘ ") + "whole stack (ItemStack.CODEC round trip)")
+                .formatted(stackPassed ? Formatting.GREEN : Formatting.RED));
+
+        final boolean passed = allPassed;
+        final Text header = Text.literal("Component round-trip test: " + stack.getName().getString())
+                .formatted(passed ? Formatting.GREEN : Formatting.RED);
+        source.sendFeedback(() -> header, false);
+        for (Text line : lines) {
+            source.sendFeedback(() -> line, false);
+        }
+        return passed ? 1 : 0;
+    }
+
+    private record ComponentResult(boolean passed, String detail) {
+    }
+
+    private static <T> ComponentResult roundTripComponent(Component<T> component, RegistryOps<NbtElement> ops) {
+        DataResult<NbtElement> encoded = component.encode(ops);
+        if (encoded.error().isPresent()) {
+            return new ComponentResult(false, "encode failed: " + encoded.error().get().message());
+        }
+        DataResult<T> decoded = component.type().getCodecOrThrow()
+                .parse(ops, encoded.getOrThrow());
+        if (decoded.error().isPresent()) {
+            return new ComponentResult(false, "decode failed: " + decoded.error().get().message());
+        }
+
+        T original = component.value();
+        T roundTripped = decoded.getOrThrow();
+        boolean equal = original.equals(roundTripped);
+        boolean hashEqual = original.hashCode() == roundTripped.hashCode();
+        if (equal && hashEqual) {
+            return new ComponentResult(true, "equals + hashCode agree");
+        }
+        if (!equal) {
+            return new ComponentResult(false, "decoded value is not equal to the original");
+        }
+        return new ComponentResult(false, "equals() agrees but hashCode() differs");
+    }
+
+    private static boolean roundTripStack(ItemStack stack, RegistryOps<NbtElement> ops) {
+        DataResult<NbtElement> encoded = ItemStack.CODEC.encodeStart(ops, stack);
+        if (encoded.error().isPresent()) return false;
+        DataResult<ItemStack> decoded = ItemStack.CODEC.parse(ops, encoded.getOrThrow());
+        if (decoded.error().isPresent()) return false;
+        return ItemStack.areItemsAndComponentsEqual(stack, decoded.getOrThrow());
     }
 
     private static <T extends ArgumentBuilder<ServerCommandSource, T>> T configureSpawnArguments(T builder) {
@@ -224,7 +318,7 @@ public final class SimplySwordsCommands {
     }
 
     private static int givePoweredGem(CommandContext<ServerCommandSource> context, PowerType powerType) throws CommandSyntaxException {
-        RegistryEntry<GemPower> power = getPower(context, "power", powerType);
+        Identifier power = getPower(context, "power", powerType);
         ItemStack stack = powerType == PowerType.NETHER
                 ? new ItemStack(ItemsRegistry.NETHERFUSED_GEM.get())
                 : new ItemStack(ItemsRegistry.RUNEFUSED_GEM.get());
@@ -236,7 +330,7 @@ public final class SimplySwordsCommands {
     }
 
     private static int givePoweredRunicWeapon(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-        RegistryEntry<GemPower> power = getPower(context, "power", PowerType.RUNIC);
+        Identifier power = getPower(context, "power", PowerType.RUNIC);
         Identifier weaponId = normalizeSimplySwordsId(IdentifierArgumentType.getIdentifier(context, "weapon"));
         Item item = Registries.ITEM.get(weaponId);
         if (!(item instanceof RunicSwordItem)) {
@@ -250,7 +344,7 @@ public final class SimplySwordsCommands {
         return 1;
     }
 
-    private static RegistryEntry<GemPower> getPower(CommandContext<ServerCommandSource> context, String argument, PowerType powerType) throws CommandSyntaxException {
+    private static Identifier getPower(CommandContext<ServerCommandSource> context, String argument, PowerType powerType) throws CommandSyntaxException {
         Identifier powerId = normalizeSimplySwordsId(IdentifierArgumentType.getIdentifier(context, argument));
         if (!GemPowerRegistry.REGISTRY.contains(powerId)) {
             throw UNKNOWN_POWER.create(powerId);
@@ -264,22 +358,17 @@ public final class SimplySwordsCommands {
             throw WRONG_POWER_TYPE.create(powerId);
         }
 
-        RegistryEntry<GemPower> entry = GemPowerRegistry.REGISTRY.getHolder(powerId);
-        if (entry == null) {
-            throw UNKNOWN_POWER.create(powerId);
-        }
-        return entry;
+        return powerId;
     }
 
-    private static void giveStack(ServerCommandSource source, ItemStack stack, RegistryEntry<GemPower> power) throws CommandSyntaxException {
+    private static void giveStack(ServerCommandSource source, ItemStack stack, Identifier power) throws CommandSyntaxException {
         ServerPlayerEntity player = source.getPlayerOrThrow();
         Text itemName = stack.getName();
         if (!player.getInventory().insertStack(stack)) {
             player.dropItem(stack, false);
         }
 
-        Identifier powerId = GemPowerRegistry.REGISTRY.getId(power.value());
-        source.sendFeedback(() -> Text.literal("Gave " + itemName.getString() + " with power " + powerId), true);
+        source.sendFeedback(() -> Text.literal("Gave " + itemName.getString() + " with power " + power), true);
     }
 
     private static Identifier normalizeSimplySwordsId(Identifier id) {
@@ -897,8 +986,8 @@ public final class SimplySwordsCommands {
             return 0;
         }
 
-        RegistryEntry<GemPower> forcedRunic = null;
-        RegistryEntry<GemPower> forcedNether = null;
+        Identifier forcedRunic = null;
+        Identifier forcedNether = null;
         try {
             forcedRunic = getPower(context, "runefused_power", PowerType.RUNEFUSED);
         } catch (IllegalArgumentException ignored) {
@@ -925,8 +1014,8 @@ public final class SimplySwordsCommands {
             ItemStack weaponStack = new ItemStack(weapon);
             AwakeningApi.initializeFullyAwakened(weaponStack);
 
-            RegistryEntry<GemPower> runicPower = forcedRunic;
-            RegistryEntry<GemPower> netherPower = forcedNether;
+            Identifier runicPower = forcedRunic;
+            Identifier netherPower = forcedNether;
             if (runicPower == null && rng.nextFloat() <= RANDOM_POWER_CHANCE) {
                 runicPower = GemPowerRegistry.gemRandomPower(PowerType.RUNEFUSED);
             }
@@ -936,8 +1025,8 @@ public final class SimplySwordsCommands {
             weaponStack.set(ComponentTypeRegistry.GEM_POWER.get(), new GemPowerComponent(
                     true,
                     true,
-                    runicPower != null ? runicPower : GemPowerRegistry.EMPTY,
-                    netherPower != null ? netherPower : GemPowerRegistry.EMPTY
+                    runicPower != null ? runicPower : GemPower.EMPTY_ID,
+                    netherPower != null ? netherPower : GemPower.EMPTY_ID
             ));
 
             mob.equipStack(EquipmentSlot.MAINHAND, weaponStack);
@@ -954,18 +1043,12 @@ public final class SimplySwordsCommands {
                     msg.append(" (");
                     boolean first = true;
                     if (runicPower != null) {
-                        Identifier runicId = GemPowerRegistry.REGISTRY.getId(runicPower.value());
-                        if (runicId != null) {
-                            msg.append(Text.translatable("item.simplyswords.uniquesworditem.runefused_power." + runicId.getPath()).setStyle(Styles.RUNIC));
-                            first = false;
-                        }
+                        msg.append(Text.translatable("item.simplyswords.uniquesworditem.runefused_power." + runicPower.getPath()).setStyle(Styles.RUNIC));
+                        first = false;
                     }
                     if (netherPower != null) {
-                        Identifier netherId = GemPowerRegistry.REGISTRY.getId(netherPower.value());
-                        if (netherId != null) {
-                            if (!first) msg.append(" | ");
-                            msg.append(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power." + netherId.getPath()).setStyle(Styles.NETHERFUSED));
-                        }
+                        if (!first) msg.append(" | ");
+                        msg.append(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power." + netherPower.getPath()).setStyle(Styles.NETHERFUSED));
                     }
                     msg.append(")");
                 }

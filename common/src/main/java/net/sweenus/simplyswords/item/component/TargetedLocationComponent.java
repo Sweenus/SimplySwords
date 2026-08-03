@@ -16,12 +16,12 @@ import java.util.UUID;
 public record TargetedLocationComponent(UUID uuid, double lastX, double lastY, double lastZ) {
 
 	public TargetedLocationComponent(double lastX, double lastY, double lastZ) {
-		this(UUID.randomUUID(), lastX, lastY, lastZ);
+		this(DEFAULT_UUID, lastX, lastY, lastZ);
 	}
 
 	@Nullable
 	public LivingEntity getEntity(ServerWorld world) {
-		if (uuid == DEFAULT_UUID) return null;
+		if (DEFAULT_UUID.equals(uuid)) return null;
 		Entity entity = world.getEntity(uuid);
 		return entity instanceof LivingEntity ? (LivingEntity) entity : null;
 	}
@@ -30,7 +30,10 @@ public record TargetedLocationComponent(UUID uuid, double lastX, double lastY, d
 		return new TargetedLocationComponent(newTarget.getUuid(), lastX, lastY, lastZ);
 	}
 
-	private static final UUID DEFAULT_UUID = UUID.randomUUID();
+	// Fixed sentinel, not UUID.randomUUID(): a per-JVM value means client and server never
+	// agree on "no target", and it does not survive an encode/decode round trip — which
+	// breaks stack comparison for storage mods.
+	private static final UUID DEFAULT_UUID = new UUID(0L, 0L);
 	public static TargetedLocationComponent DEFAULT = new TargetedLocationComponent(DEFAULT_UUID, 0.0, 0.0, 0.0);
 
 	public static Codec<TargetedLocationComponent> CODEC = RecordCodecBuilder.create(instance ->

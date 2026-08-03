@@ -36,20 +36,22 @@ public class SimplySwordsClientAPI {
     public static void generateDynamicTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Text> tooltip, TooltipType type, String modId, String itemPath, String uniquePath, String runicPath, Identifier customConfigPath) {
         Identifier entry = TooltipUtils.generateDefaultTooltipEntry(itemStack, itemPath);
 
-        if (!Config.general.enableTooltipInfoButtons) {return;}
-        if (!(MinecraftClient.getInstance().currentScreen instanceof InventoryScreen || MinecraftClient.getInstance().currentScreen instanceof CreativeInventoryScreen) && Config.general.tooltipInfoButtonsRequireInventoryScreen) {return;}
+        boolean showInfoButtons = Config.general.enableTooltipInfoButtons
+                && (!Config.general.tooltipInfoButtonsRequireInventoryScreen
+                        || isInfoButtonScreen(MinecraftClient.getInstance().currentScreen));
 
         // Add dynamic tooltip button
-        TooltipUtils.addDynamicButtonTooltip(
-                tooltip,
-                Text.translatable("item.simplyswords.common.showtooltip.info"),
-                Text.translatable("item.simplyswords.common.showtooltip.search"),
-                Text.translatable("item.simplyswords.common.showtooltip.config"),
-                Screen.hasAltDown(),
-                Screen.hasControlDown()
-        );
+        if (showInfoButtons) {
+            TooltipUtils.addDynamicButtonTooltip(
+                    tooltip,
+                    Text.translatable("item.simplyswords.common.showtooltip.info"),
+                    Text.translatable("item.simplyswords.common.showtooltip.search"),
+                    Text.translatable("item.simplyswords.common.showtooltip.config"),
+                    Screen.hasAltDown(),
+                    Screen.hasControlDown()
+            );
+        }
 
-        // Handle specific item types
         if (itemStack.getItem() instanceof UniqueSwordItem) {
             entry = TooltipUtils.handleUniqueSwordTooltip(itemStack, tooltipContext, tooltip, type, uniquePath);
         } else if (itemStack.getItem() instanceof RunicSwordItem) {
@@ -57,7 +59,13 @@ public class SimplySwordsClientAPI {
         }
 
         // Process Control + Alt key events for navigation
-        TooltipUtils.processCtrlAltNavigation(entry, modId, customConfigPath, itemStack, tooltip);
+        if (showInfoButtons) {
+            TooltipUtils.processCtrlAltNavigation(entry, modId, customConfigPath, itemStack, tooltip);
+        }
+    }
+
+    private static boolean isInfoButtonScreen(Screen screen) {
+        return screen instanceof InventoryScreen || screen instanceof CreativeInventoryScreen;
     }
 
 }

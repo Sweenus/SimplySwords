@@ -20,7 +20,7 @@ public record RelocationComponent(double relocateX, double relocateY, double rel
 	}
 
 	public RelocationComponent tickDown() {
-		if (this == DEFAULT) return this;
+		if (DEFAULT.equals(this)) return this;
 		return new RelocationComponent(relocateX, relocateY, relocateZ, relocateTarget, Math.max(0, relocationTimer - 1), canRelocate);
 	}
 
@@ -28,7 +28,8 @@ public record RelocationComponent(double relocateX, double relocateY, double rel
 		return DEFAULT;
 	}
 
-	public static RelocationComponent DEFAULT = new RelocationComponent(0.0, 0.0, 0.0, UUID.randomUUID(), 0, false);
+	// Fixed sentinel, not UUID.randomUUID() — see TargetedLocationComponent.
+	public static RelocationComponent DEFAULT = new RelocationComponent(0.0, 0.0, 0.0, new UUID(0L, 0L), 0, false);
 
 	public static Codec<RelocationComponent> CODEC = RecordCodecBuilder.create(instance ->
 				instance.group(

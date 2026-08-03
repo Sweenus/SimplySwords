@@ -7,7 +7,6 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.tooltip.TooltipType;
-import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.text.TextColor;
@@ -15,12 +14,12 @@ import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.api.SpellScalingProfile;
-import net.sweenus.simplyswords.power.GemPower;
 import net.sweenus.simplyswords.power.GemPowerComponent;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class TooltipUtils {
@@ -177,34 +176,47 @@ public class TooltipUtils {
     }
 
     public static Identifier handleUniqueSwordTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Text> tooltip, TooltipType type, String uniquePath) {
-        tooltip.add(Text.literal(""));
-
-        SimplySwordsAPI.appendTooltipGemSocketLogic(itemStack, tooltipContext, tooltip, type);
+        List<Text> lines = new ArrayList<>();
+        SimplySwordsAPI.appendTooltipGemSocketLogic(itemStack, tooltipContext, lines, type);
+        appendWithSeparator(tooltip, lines);
 
         return Identifier.of(uniquePath + "/" +
                 itemStack.getItem().getRegistryEntry().registryKey().getValue().getPath() + ".mdx");
     }
 
     public static Identifier handleRunicSwordTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Text> tooltip, TooltipType type, String itemPath, String runicPath) {
-        tooltip.add(Text.literal(""));
+        List<Text> lines = new ArrayList<>();
+        Identifier entry = generateDefaultTooltipEntry(itemStack, itemPath);
 
         GemPowerComponent component = SimplySwordsAPI.getComponent(itemStack);
         if (component.isEmpty()) {
-            tooltip.add(Text.translatable("item.simplyswords.unidentifiedsworditem.tooltip1").setStyle(Styles.RUNIC));
-            tooltip.add(Text.translatable("item.simplyswords.unidentifiedsworditem.tooltip2").setStyle(Styles.TEXT));
+            lines.add(Text.translatable("item.simplyswords.unidentifiedsworditem.tooltip1").setStyle(Styles.RUNIC));
+            lines.add(Text.translatable("item.simplyswords.unidentifiedsworditem.tooltip2").setStyle(Styles.TEXT));
         } else {
-            component.appendTooltip(itemStack, tooltipContext, tooltip, type, true);
+            component.appendTooltip(itemStack, tooltipContext, lines, type, true);
 
-            if (!Platform.isNeoForge()) { // NeoForge / Architectury 1.21.1 conflict. Have to disable this on NeoForge. Can re-enable post 1.21.3 :/
-                RegistryEntry<GemPower> mainComponent = component.runicPower();
-                String powerId = mainComponent.getIdAsString()
-                        .replaceAll("[A-Za-z0-9_-]+:", "")
-                        .replace("greater_", "");
-                return Identifier.of(runicPath + "/" + powerId + ".mdx");
+            if (component.hasRunicSlotFilled()) {
+                String powerId = component.runicPower().getPath().replace("greater_", "");
+                entry = Identifier.of(runicPath + "/" + powerId + ".mdx");
             }
         }
 
-        return generateDefaultTooltipEntry(itemStack, itemPath);
+        appendWithSeparator(tooltip, lines);
+        return entry;
+    }
+
+    // Appends a single blank separator line followed by the given lines, and does nothing at
+    // all when there is nothing to append.
+    private static void appendWithSeparator(List<Text> tooltip, List<Text> lines) {
+        int start = 0;
+        while (start < lines.size() && lines.get(start).getString().isEmpty()) {
+            start++;
+        }
+        if (start == lines.size()) {
+            return;
+        }
+        tooltip.add(Text.literal(""));
+        tooltip.addAll(lines.subList(start, lines.size()));
     }
 
     public static void processCtrlAltNavigation(Identifier entry, String modId, Identifier customConfigPath, ItemStack itemStack, List<Text> tooltip) {

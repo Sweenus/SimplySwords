@@ -4,7 +4,6 @@ import dev.architectury.registry.registries.Registrar;
 import dev.architectury.registry.registries.RegistrarManager;
 import dev.architectury.registry.registries.RegistrySupplier;
 import dev.architectury.registry.registries.options.DefaultIdRegistrarOption;
-import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.config.Config;
@@ -12,6 +11,7 @@ import net.sweenus.simplyswords.power.GemPower;
 import net.sweenus.simplyswords.power.PowerType;
 import net.sweenus.simplyswords.power.powers.*;
 import net.sweenus.simplyswords.util.HelperMethods;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -25,57 +25,60 @@ public class GemPowerRegistry {
 
 	public static Registrar<GemPower> REGISTRY = RegistrarManager.get("simplyswords")
 			.<GemPower>builder(Identifier.of(SimplySwords.MOD_ID, "gem_power"))
-			.option(new DefaultIdRegistrarOption(Identifier.of(SimplySwords.MOD_ID, "empty_power")))
+			.option(new DefaultIdRegistrarOption(GemPower.EMPTY_ID))
 			.syncToClients()
 			.build();
+
+	// Resolves a stored power id to its GemPower.
+	//
+	// Deliberately goes through Registrar#get(Identifier) rather than any Holder accessor:
+	// Architectury's RegistrySupplier inherits conflicting getKey() defaults from
+	// DeferredSupplier and NeoForge's IHolderExtension, so anything that routes through
+	// getKey() (unwrap, unwrapKey, getRegisteredName) throws IncompatibleClassChangeError
+	// on NeoForge. See architectury-api#562 / #592 / #703.
+	//
+	// Unknown ids resolve to EMPTY rather than failing, so a stack keeps its power id on
+	// disk when the addon that registered it is temporarily absent.
+	public static GemPower resolve(@Nullable Identifier id) {
+		if (id == null) return GemPower.EMPTY;
+		GemPower power = REGISTRY.get(id);
+		return power == null ? GemPower.EMPTY : power;
+	}
 
 	private static RegistrySupplier<GemPower> register(String path, Supplier<GemPower> power) {
 		return REGISTRY.register(Identifier.of(SimplySwords.MOD_ID, path), power);
 	}
 
-	public static List<? extends RegistryEntry<GemPower>> getPowers(PowerType powerType) {
+	public static List<? extends RegistrySupplier<GemPower>> getPowers(PowerType powerType) {
 		return powerType.getEntries().stream().filter(entry -> !Config.gemPowers.disabledPowers.contains(entry.getId())).toList();
 	}
 
-	/*
-	public static RegistryEntry<GemPower> gemRandomPower(PowerType powerType) {
-		List<? extends RegistryEntry<GemPower>> powers = getPowers(powerType);
-		if (powers.isEmpty()) {
-			return EMPTY;
-		}
-		return powers.get(HelperMethods.random().nextInt(powers.size()));
-	}
-
-	 */
-
-	public static RegistryEntry<GemPower> gemRandomPower(PowerType powerType) {
+	public static Identifier gemRandomPower(PowerType powerType) {
 		return gemRandomPower(powerType, null);
 	}
 
-	public static RegistryEntry<GemPower> gemRandomPower(PowerType powerType, String[] blacklist) {
-		List<? extends RegistryEntry<GemPower>> powers = getPowers(powerType);
+	public static Identifier gemRandomPower(PowerType powerType, Identifier[] blacklist) {
+		List<? extends RegistrySupplier<GemPower>> powers = getPowers(powerType);
 
 		if (powers.isEmpty()) {
-			return EMPTY;
+			return GemPower.EMPTY_ID;
 		}
 
 		if (blacklist != null) {
-			Set<String> blacklistSet = new HashSet<>(Arrays.asList(blacklist));
+			Set<Identifier> blacklistSet = new HashSet<>(Arrays.asList(blacklist));
 
 			// Filter the list of powers to exclude blacklisted ones
 			powers = powers.stream()
-					.filter(power -> !blacklistSet.contains(power.toString()))
+					.filter(power -> !blacklistSet.contains(power.getId()))
 					.toList();
 
 			// Check if all available options are blacklisted
 			if (powers.isEmpty()) {
-				return EMPTY;
+				return GemPower.EMPTY_ID;
 			}
 		}
 
-		 //System.out.println("excluding: " + Arrays.toString(blacklist) + " from " + powers.size() + " powers" );
-		//System.out.println("choosing: " + powers.get(HelperMethods.random().nextInt(powers.size())).toString());
-		return powers.get(HelperMethods.random().nextInt(powers.size()));
+		return powers.get(HelperMethods.random().nextInt(powers.size())).getId();
 	}
 
 

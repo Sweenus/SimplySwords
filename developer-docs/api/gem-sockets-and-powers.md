@@ -149,6 +149,45 @@ SimplySwordsAPI.onWeaponSwing(stack, world, user, hand);
 `GemPowerComponent`. Prefer the higher-level hooks unless custom behavior needs
 to inspect it directly.
 
+### Reading a component (breaking change in 1.70.0)
+
+`GemPowerComponent` stores power **IDs**, not registry entries. Before 1.70.0 its
+accessors and factories used `RegistryEntry<GemPower>`:
+
+```java
+GemPowerComponent c = SimplySwordsAPI.getComponent(stack);
+
+Identifier runicId = c.runicPower();   // was RegistryEntry<GemPower>
+GemPower   runic   = c.runic();        // resolves; EMPTY when unset or unknown
+boolean    filled  = c.hasRunicSlotFilled();
+
+GemPowerComponent next = GemPowerComponent.create(runicId, netherId);
+Identifier rolled = GemPowerRegistry.gemRandomPower(PowerType.RUNEFUSED);
+```
+
+`GemPower.EMPTY_ID` is the ID of the empty placeholder, and
+`GemPowerRegistry.resolve(id)` performs the lookup behind `runic()` / `nether()`.
+To test whether an ID names a real power, use `GemPowerRegistry.REGISTRY.contains(id)`.
+
+Addons built against an earlier version must be recompiled; this cannot be
+source- or binary-compatible, because `runicPower()` is a record accessor and
+Java cannot overload on return type.
+
+The reason for the change: registry entries reached a component from two
+sources that never compare equal — freshly built components held Architectury
+`RegistrySupplier` objects, while decoded ones held vanilla
+`RegistryEntry.Reference` objects. A component therefore never survived an
+encode/decode round trip intact, so storage mods that rebuild a stack from its
+component map and match it against storage (Refined Storage, Create, AE2) failed
+the match and silently extracted a fuzzy-matched substitute. IDs give correct
+value equality, and they also keep `getKey()` off every code path in the
+component — that method is ambiguous between Architectury and NeoForge and
+throws `IncompatibleClassChangeError` on NeoForge.
+
+For the same reason, do not read powers with `GemPowerRegistry.REGISTRY.getHolder(id)`:
+it returns a holder whose `equals` is identity-based, which reintroduces the
+problem in your own addon. Store and compare IDs.
+
 ## Awakening scaling
 
 Gem powers on awakenable unique weapons use the same unlock threshold and level

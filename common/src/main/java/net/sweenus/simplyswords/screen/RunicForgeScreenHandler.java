@@ -17,6 +17,7 @@ import net.minecraft.util.math.BlockPos;
 import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.api.AwakeningFormRegistry;
 import net.sweenus.simplyswords.api.AdditionalGemSocketApi;
+import net.sweenus.simplyswords.power.GemPower;
 import net.sweenus.simplyswords.power.GemPowerComponent;
 import net.sweenus.simplyswords.power.PowerType;
 import net.sweenus.simplyswords.registry.BlocksRegistry;
@@ -145,12 +146,12 @@ public class RunicForgeScreenHandler extends ScreenHandler {
             forgeInventory.setStack(TABLET_START + i,
                     i < level ? new ItemStack(ItemsRegistry.RUNIC_TABLET.get()) : ItemStack.EMPTY);
         }
-        if (!gems.runicPower().value().isEmpty()) {
+        if (gems.hasRunicSlotFilled()) {
             ItemStack runic = new ItemStack(ItemsRegistry.RUNEFUSED_GEM.get());
             runic.set(ComponentTypeRegistry.GEM_POWER.get(), GemPowerComponent.runic(gems.runicPower()));
             forgeInventory.setStack(RUNIC_GEM_SLOT, runic);
         }
-        if (!gems.netherPower().value().isEmpty()) {
+        if (gems.hasNetherSlotFilled()) {
             ItemStack nether = new ItemStack(ItemsRegistry.NETHERFUSED_GEM.get());
             nether.set(ComponentTypeRegistry.GEM_POWER.get(), GemPowerComponent.nether(gems.netherPower()));
             forgeInventory.setStack(NETHER_GEM_SLOT, nether);
@@ -256,10 +257,10 @@ public class RunicForgeScreenHandler extends ScreenHandler {
         preview.set(ComponentTypeRegistry.GEM_POWER.get(), new GemPowerComponent(
                 sockets.hasRunicPower(),
                 sockets.hasNetherPower(),
-                sockets.hasRunicPower() && !runicGem.runicPower().value().isEmpty()
-                        ? runicGem.runicPower() : GemPowerRegistry.EMPTY,
-                sockets.hasNetherPower() && !netherGem.netherPower().value().isEmpty()
-                        ? netherGem.netherPower() : GemPowerRegistry.EMPTY
+                sockets.hasRunicPower() && runicGem.hasRunicSlotFilled()
+                        ? runicGem.runicPower() : GemPower.EMPTY_ID,
+                sockets.hasNetherPower() && netherGem.hasNetherSlotFilled()
+                        ? netherGem.netherPower() : GemPower.EMPTY_ID
         ));
         if (awakenable) {
             AwakeningApi.setLevel(preview, level);

@@ -37,6 +37,10 @@ public abstract class ItemStackMixin {
             StackReference cursorStackReference,
             CallbackInfoReturnable<Boolean> cir
     ) {
+        // Runs on both sides on purpose: onClickedGemSocketLogic has a client-side branch
+        // that keeps the displaced gem on the cursor in Creative mode. The GemPowerFiller
+        // check keeps ensureInitialized off every unrelated click, and its writes are
+        // conditional, so this does not churn components.
         ItemStack stack = (ItemStack) (Object) this;
         if (!(otherStack.getItem() instanceof GemPowerFiller)
                 || !AdditionalGemSocketApi.ensureInitialized(stack)) {
@@ -76,9 +80,12 @@ public abstract class ItemStackMixin {
             return;
         }
 
+        // Check that the stack is actually held before ensureInitialized, which writes
+        // components. Stacks resting in chests, Refined Storage disks, Create vaults etc.
+        // still get an inventory tick, and must not be touched.
         ItemStack stack = (ItemStack) (Object) this;
-        if (!AdditionalGemSocketApi.ensureInitialized(stack)
-                || (user.getMainHandStack() != stack && user.getOffHandStack() != stack)) {
+        if ((user.getMainHandStack() != stack && user.getOffHandStack() != stack)
+                || !AdditionalGemSocketApi.ensureInitialized(stack)) {
             return;
         }
 
