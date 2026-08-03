@@ -1,23 +1,19 @@
 package net.sweenus.simplyswords.network;
 
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
+import dev.architectury.networking.NetworkManager;
+import dev.architectury.networking.simple.BaseS2CMessage;
+import dev.architectury.networking.simple.MessageType;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.Identifier;
-import net.sweenus.simplyswords.SimplySwords;
+import net.sweenus.simplyswords.client.ObserverStatusEffectClientState;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class ObserverStatusEffectsPacket implements CustomPayload {
+public class ObserverStatusEffectsPacket extends BaseS2CMessage {
 
     private static final int MAX_ENTRIES = 65536;
-    public static final CustomPayload.Id<ObserverStatusEffectsPacket> ID =
-            new CustomPayload.Id<>(Identifier.of(SimplySwords.MOD_ID, "observer_status_effects"));
-    public static final PacketCodec<RegistryByteBuf, ObserverStatusEffectsPacket> CODEC =
-            PacketCodec.of(ObserverStatusEffectsPacket::write, ObserverStatusEffectsPacket::new);
-
     private final Identifier dimensionId;
     private final long serverWorldTime;
     private final boolean replaceAll;
@@ -34,7 +30,7 @@ public class ObserverStatusEffectsPacket implements CustomPayload {
         this.entries = List.copyOf(entries);
     }
 
-    public ObserverStatusEffectsPacket(RegistryByteBuf buf) {
+    public ObserverStatusEffectsPacket(PacketByteBuf buf) {
         this.dimensionId = buf.readIdentifier();
         this.serverWorldTime = buf.readLong();
         this.replaceAll = buf.readBoolean();
@@ -50,11 +46,12 @@ public class ObserverStatusEffectsPacket implements CustomPayload {
     }
 
     @Override
-    public CustomPayload.Id<ObserverStatusEffectsPacket> getId() {
-        return ID;
+    public MessageType getType() {
+        return SimplySwordsNetwork.OBSERVER_STATUS_EFFECTS;
     }
 
-    private void write(RegistryByteBuf buf) {
+    @Override
+    public void write(PacketByteBuf buf) {
         buf.writeIdentifier(dimensionId);
         buf.writeLong(serverWorldTime);
         buf.writeBoolean(replaceAll);
@@ -62,6 +59,11 @@ public class ObserverStatusEffectsPacket implements CustomPayload {
         for (Entry entry : entries) {
             entry.write(buf);
         }
+    }
+
+    @Override
+    public void handle(NetworkManager.PacketContext context) {
+        context.queue(() -> ObserverStatusEffectClientState.apply(this));
     }
 
     public Identifier dimensionId() {
@@ -94,7 +96,7 @@ public class ObserverStatusEffectsPacket implements CustomPayload {
             return new Entry(entityId, effectId, false, 0, 0, false, false, false, false);
         }
 
-        private static Entry read(RegistryByteBuf buf) {
+        private static Entry read(PacketByteBuf buf) {
             UUID entityId = buf.readUuid();
             Identifier effectId = buf.readIdentifier();
             boolean active = buf.readBoolean();
@@ -113,7 +115,7 @@ public class ObserverStatusEffectsPacket implements CustomPayload {
                     buf.readBoolean());
         }
 
-        private void write(RegistryByteBuf buf) {
+        private void write(PacketByteBuf buf) {
             buf.writeUuid(entityId);
             buf.writeIdentifier(effectId);
             buf.writeBoolean(active);

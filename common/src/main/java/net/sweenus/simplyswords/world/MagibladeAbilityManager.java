@@ -137,7 +137,7 @@ public final class MagibladeAbilityManager {
         if ((actor.age + actor.getId()) % frequency != 0) {
             return;
         }
-        int chance = Math.clamp(Config.uniqueEffects.magiblade.repelChance, 0, 100);
+        int chance = net.minecraft.util.math.MathHelper.clamp(Config.uniqueEffects.magiblade.repelChance, 0, 100);
         if (chance <= 0 || actor.getRandom().nextInt(100) >= chance) {
             return;
         }

@@ -43,7 +43,7 @@ For data-driven assignment, place the addon item in a Simply Swords implicit
 tag, for example:
 
 ```text
-data/simplyswords/tags/item/implicit/longsword.json
+data/simplyswords/tags/items/implicit/longsword.json
 ```
 
 Use `"replace": false` and list the addon's item ID.
@@ -89,7 +89,7 @@ definitions before stacks of that weapon initialize.
 Ordinary weapons roll across the complete inclusive range. A stack whose item
 extends `UniqueSwordItem` rolls in the top 10% of the range.
 
-The roll is stored in the weapon implicit data component and survives save,
+The roll is stored in the weapon's typed Simply Swords stack state and survives save,
 reload, socket changes, and awakening.
 
 ## Manual integration
@@ -106,4 +106,3 @@ SimplySwordsAPI.applyWeaponImplicitOnHit(stack, target, attacker, damage);
 
 Do not apply a handler manually if the normal Simply Swords hit path already
 does so, or it will execute twice.
-

@@ -3,10 +3,10 @@ package net.sweenus.simplyswords.mixin;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.client.item.TooltipContext;
 import net.minecraft.inventory.StackReference;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.text.Text;
 import net.minecraft.util.ClickType;
@@ -54,11 +54,11 @@ public abstract class ItemStackMixin {
         );
     }
 
-    @Inject(method = "postHit", at = @At("RETURN"))
+    @Inject(method = "postHit(Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/entity/player/PlayerEntity;)V", at = @At("RETURN"))
     private void simplyswords$triggerAdditionalGemPostHit(
             LivingEntity target,
             PlayerEntity attacker,
-            CallbackInfoReturnable<Boolean> cir
+            CallbackInfo ci
     ) {
         ItemStack stack = (ItemStack) (Object) this;
         if (attacker.getWorld().isClient()
@@ -89,16 +89,14 @@ public abstract class ItemStackMixin {
             return;
         }
 
-        GemPowerComponent component = stack.getOrDefault(
-                ComponentTypeRegistry.GEM_POWER.get(), GemPowerComponent.DEFAULT);
+        GemPowerComponent component = ComponentTypeRegistry.GEM_POWER.getOrDefault(stack, GemPowerComponent.DEFAULT);
         component.inventoryTick(stack, world, user, slot, selected);
     }
 
     @Inject(method = "getTooltip", at = @At("RETURN"), cancellable = true)
     private void simplyswords$appendAdditionalGemTooltip(
-            Item.TooltipContext context,
             PlayerEntity player,
-            TooltipType type,
+            TooltipContext context,
             CallbackInfoReturnable<List<Text>> cir
     ) {
         ItemStack stack = (ItemStack) (Object) this;
@@ -109,7 +107,7 @@ public abstract class ItemStackMixin {
         GemPowerComponent component = AdditionalGemSocketApi.getTooltipComponent(stack);
         List<Text> socketLines = new ArrayList<>();
         socketLines.add(Text.literal(""));
-        component.appendTooltip(stack, context, socketLines, type);
+        component.appendTooltip(stack, player == null ? null : player.getWorld(), socketLines, context);
 
         List<Text> tooltip = new ArrayList<>(cir.getReturnValue());
         String mainHandHeader = Text.translatable("item.modifiers.mainhand").getString();

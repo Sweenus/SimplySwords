@@ -18,7 +18,7 @@ import org.joml.Matrix4f;
 public class SoulPyreWispEntityRenderer extends EntityRenderer<SoulPyreWispEntity> {
 
     private static final Identifier WHITE_TEXTURE =
-            Identifier.ofVanilla("textures/misc/white.png");
+            new Identifier("minecraft", "textures/misc/white.png");
 
     public SoulPyreWispEntityRenderer(EntityRendererFactory.Context context) {
         super(context);
@@ -83,6 +83,6 @@ public class SoulPyreWispEntityRenderer extends EntityRenderer<SoulPyreWispEntit
                 .texture(u, v)
                 .overlay(OverlayTexture.DEFAULT_UV)
                 .light(LightmapTextureManager.MAX_LIGHT_COORDINATE)
-                .normal(0.0F, 1.0F, 0.0F);
+                .normal(0.0F, 1.0F, 0.0F).next();
     }
 }

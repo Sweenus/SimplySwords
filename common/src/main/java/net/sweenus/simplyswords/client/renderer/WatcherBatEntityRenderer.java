@@ -10,7 +10,7 @@ import net.sweenus.simplyswords.SimplySwords;
 
 public class WatcherBatEntityRenderer extends BatEntityRenderer {
     private static final Identifier TEXTURE =
-            Identifier.of(SimplySwords.MOD_ID, "textures/entity/watcher_bat.png");
+            new Identifier(SimplySwords.MOD_ID, "textures/entity/watcher_bat.png");
     private static final float SCALE = 0.82F;
 
     public WatcherBatEntityRenderer(EntityRendererFactory.Context context) {

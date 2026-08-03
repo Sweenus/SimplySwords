@@ -1,6 +1,6 @@
 package net.sweenus.simplyswords.compat.mythicmetals;
 
-import com.mythicmetals.item.tools.PalladiumToolSet;
+import nourl.mythicmetals.item.tools.PalladiumToolSet;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;

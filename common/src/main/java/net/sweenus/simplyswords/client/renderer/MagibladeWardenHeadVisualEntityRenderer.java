@@ -26,9 +26,9 @@ public class MagibladeWardenHeadVisualEntityRenderer
         extends EntityRenderer<MagibladeWardenHeadVisualEntity> {
 
     private static final Identifier BASE_TEXTURE =
-            Identifier.ofVanilla("textures/entity/warden/warden.png");
+            new Identifier("minecraft", "textures/entity/warden/warden.png");
     private static final Identifier BIOLUMINESCENT_TEXTURE =
-            Identifier.ofVanilla("textures/entity/warden/warden_bioluminescent_layer.png");
+            new Identifier("minecraft", "textures/entity/warden/warden_bioluminescent_layer.png");
     private static final double ORBIT_BOB_HEIGHT = 0.1;
     private static final double ORBIT_BOB_SPEED = 0.16;
 
@@ -102,12 +102,10 @@ public class MagibladeWardenHeadVisualEntityRenderer
         matrices.scale(scale, scale, scale);
         matrices.translate(0.0F, -0.5F, -shotPulse * 0.08F);
 
-        int alpha = MathHelper.clamp((int) (255.0F * fade), 0, 255);
-        int color = alpha << 24 | 0xFFFFFF;
-
         VertexConsumer baseVertices =
                 vertexConsumers.getBuffer(RenderLayer.getEntityTranslucent(BASE_TEXTURE));
-        this.head.render(matrices, baseVertices, light, OverlayTexture.DEFAULT_UV, color);
+        this.head.render(matrices, baseVertices, light, OverlayTexture.DEFAULT_UV,
+                1.0F, 1.0F, 1.0F, fade);
 
         VertexConsumer glowVertices =
                 vertexConsumers.getBuffer(RenderLayer.getEntityTranslucentEmissive(BIOLUMINESCENT_TEXTURE));
@@ -116,7 +114,7 @@ public class MagibladeWardenHeadVisualEntityRenderer
                 glowVertices,
                 LightmapTextureManager.MAX_LIGHT_COORDINATE,
                 OverlayTexture.DEFAULT_UV,
-                color
+                1.0F, 1.0F, 1.0F, fade
         );
         matrices.pop();
     }

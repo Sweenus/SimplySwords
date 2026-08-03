@@ -15,7 +15,7 @@ public class BleedEffect extends StatusEffect {
     }
 
     @Override
-    public boolean applyUpdateEffect(LivingEntity livingEntity, int amplifier) {
+    public void applyUpdateEffect(LivingEntity livingEntity, int amplifier) {
         if (!livingEntity.getWorld().isClient() && livingEntity.age % 20 == 0) {
             int snapshot = 0;
             LivingEntity source = null;
@@ -30,7 +30,6 @@ public class BleedEffect extends StatusEffect {
             WeaponImplicitRegistry.runSuppressed(() -> HelperMethods.applyDamageWithoutKnockback(livingEntity, sourceDamage, tickDamage));
             WeaponImplicitRegistry.spawnBleedParticles(livingEntity, amplifier + 1, true);
         }
-        return true;
     }
 
     @Override

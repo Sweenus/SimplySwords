@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "#": {
+      "tag": "c:wood_sticks"
+    },
+    "X": {
+      "item": "minecraft:diamond"
+    }
+  },
+  "pattern": [
+    "XX#",
+    "X# ",
+    "#  "
+  ],
+  "result": {
+    "item": "simplyswords:diamond_scythe",
+    "count": 1
+  }
+}

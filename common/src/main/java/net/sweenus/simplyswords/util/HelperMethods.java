@@ -1,9 +1,7 @@
 package net.sweenus.simplyswords.util;
 
 import dev.architectury.platform.Platform;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.AttributeModifierSlot;
-import net.minecraft.component.type.AttributeModifiersComponent;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
@@ -295,7 +293,7 @@ public class HelperMethods {
 
     public static void incrementStatusEffect(
             LivingEntity livingEntity,
-            RegistryEntry<StatusEffect> statusEffect,
+            StatusEffect statusEffect,
             int duration,
             int amplifier,
             int amplifierMax) {
@@ -318,7 +316,7 @@ public class HelperMethods {
 
     public static SimplySwordsStatusEffectInstance incrementSimplySwordsStatusEffect(
             LivingEntity livingEntity,
-            RegistryEntry<StatusEffect> statusEffect,
+            StatusEffect statusEffect,
             int duration,
             int amplifier,
             int amplifierMax) {
@@ -345,7 +343,7 @@ public class HelperMethods {
         return statusReturn;
     }
 
-    public static void decrementStatusEffect(LivingEntity livingEntity, RegistryEntry<StatusEffect> statusEffect) {
+    public static void decrementStatusEffect(LivingEntity livingEntity, StatusEffect statusEffect) {
 
         if (livingEntity.hasStatusEffect(statusEffect)) {
             int currentAmplifier = livingEntity.getStatusEffect(statusEffect).getAmplifier();
@@ -556,7 +554,7 @@ public class HelperMethods {
     public static float attackScaledDamage(LivingEntity actor, ItemStack stack, float attackScaling) {
         double attackDamage = actor == null ? 0.0 : getEntityAttackDamage(actor);
         if (attackDamage <= 0.0 && stack != null && !stack.isEmpty()) {
-            attackDamage = Math.max(1.0, 1.0 + getAttackFromStack(stack, AttributeModifierSlot.MAINHAND));
+            attackDamage = Math.max(1.0, 1.0 + getAttackFromStack(stack, EquipmentSlot.MAINHAND));
         }
         return (float) Math.max(0.0, attackDamage * attackScaling);
     }
@@ -564,7 +562,9 @@ public class HelperMethods {
     public static float applyAbilityDamageEnchantments(ServerWorld world, ItemStack stack, Entity target, DamageSource damageSource, float damage) {
         float finalDamage = damage;
         if (Config.general.enableAbilityDamageEnchantScaling && world != null && stack != null && !stack.isEmpty() && target != null && damageSource != null) {
-            finalDamage = EnchantmentHelper.getDamage(world, stack, target, damageSource, finalDamage);
+            if (target instanceof LivingEntity livingTarget) {
+                finalDamage += EnchantmentHelper.getAttackDamage(stack, livingTarget.getGroup());
+            }
         }
         finalDamage = applyNonPlayerAbilityDamageModifier(resolveAbilityDamageActor(damageSource), finalDamage);
         finalDamage = applyWeaponAbilityDamageToPlayersModifier(target, finalDamage);
@@ -655,12 +655,11 @@ public class HelperMethods {
     public static double[] getAttackFromSlot(PlayerEntity player, ItemStack stack, Hand hand) {
         double attackValue = 0;
         double attackSpeedValue = 0;
-        AttributeModifierSlot attributeModifierSlot = hand == Hand.MAIN_HAND ? AttributeModifierSlot.MAINHAND : AttributeModifierSlot.OFFHAND;
+        EquipmentSlot equipmentSlot = hand == Hand.MAIN_HAND ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND;
         if (!stack.isEmpty()) {
-            AttributeModifiersComponent attributeModifiersComponent = stack.getOrDefault(DataComponentTypes.ATTRIBUTE_MODIFIERS, AttributeModifiersComponent.DEFAULT);
-            for (AttributeModifiersComponent.Entry entry : attributeModifiersComponent.modifiers()) {
-                if (entry.attribute() == EntityAttributes.GENERIC_ATTACK_DAMAGE && entry.slot() == attributeModifierSlot) {
-                    attackValue += entry.modifier().value();
+            for (var entry : stack.getAttributeModifiers(equipmentSlot).entries()) {
+                if (entry.getKey() == EntityAttributes.GENERIC_ATTACK_DAMAGE) {
+                    attackValue += entry.getValue().getValue();
                 }
             }
         }
@@ -668,13 +667,12 @@ public class HelperMethods {
         return new double[] {attackValue, attackSpeedValue};
     }
 
-    public static double getAttackFromStack(ItemStack stack, AttributeModifierSlot slot) {
+    public static double getAttackFromStack(ItemStack stack, EquipmentSlot slot) {
         double attackValue = 0;
         if (stack != null && !stack.isEmpty()) {
-            AttributeModifiersComponent attributeModifiersComponent = stack.getOrDefault(DataComponentTypes.ATTRIBUTE_MODIFIERS, AttributeModifiersComponent.DEFAULT);
-            for (AttributeModifiersComponent.Entry entry : attributeModifiersComponent.modifiers()) {
-                if (entry.attribute() == EntityAttributes.GENERIC_ATTACK_DAMAGE && entry.slot() == slot) {
-                    attackValue += entry.modifier().value();
+            for (var entry : stack.getAttributeModifiers(slot).entries()) {
+                if (entry.getKey() == EntityAttributes.GENERIC_ATTACK_DAMAGE) {
+                    attackValue += entry.getValue().getValue();
                 }
             }
         }

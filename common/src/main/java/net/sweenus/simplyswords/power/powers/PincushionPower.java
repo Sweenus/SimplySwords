@@ -3,7 +3,6 @@ package net.sweenus.simplyswords.power.powers;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.text.Text;
 import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
@@ -32,7 +31,7 @@ public class PincushionPower extends RunefusedGemPower {
 	}
 
 	@Override
-	public void appendTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Text> tooltip, TooltipType type, boolean isRunic) {
+	public void appendTooltip(ItemStack itemStack, net.minecraft.world.World world, List<Text> tooltip, net.minecraft.client.item.TooltipContext tooltipContext, boolean isRunic) {
 		if (isRunic)
 			tooltip.add(Text.translatable("item.simplyswords.pincushionsworditem.tooltip1").setStyle(Styles.RUNIC));
 		else

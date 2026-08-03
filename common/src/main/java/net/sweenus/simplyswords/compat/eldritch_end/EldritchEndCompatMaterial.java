@@ -14,7 +14,7 @@ import java.util.function.Supplier;
 public enum EldritchEndCompatMaterial implements ToolMaterial {
     ;
 
-    //ABERRATION(MiningLevels.NETHERITE, 3270, 15.0f, 5.0f, 30, Registries.ITEM.get(Identifier.of("eldritch_end:aberration_heart"))); 1.21
+    //ABERRATION(MiningLevels.NETHERITE, 3270, 15.0f, 5.0f, 30, Registries.ITEM.get(new Identifier("eldritch_end:aberration_heart"))); 1.21
 
     private final int miningLevel;
     private final int itemDurability;
@@ -48,8 +48,8 @@ public enum EldritchEndCompatMaterial implements ToolMaterial {
     }
 
     @Override
-    public TagKey<Block> getInverseTag() {
-        return TagKey.of(RegistryKeys.BLOCK, Identifier.of("simplyswords", "empty_inverse_tag"));
+    public int getMiningLevel() {
+        return this.miningLevel;
     }
 
     @Override

@@ -53,12 +53,12 @@ public class WatcherBatEntity extends BatEntity {
     }
 
     @Override
-    protected void initDataTracker(DataTracker.Builder builder) {
-        super.initDataTracker(builder);
-        builder.add(WATCHER_OWNER_ID, -1);
-        builder.add(WATCHER_TARGET_ID, -1);
-        builder.add(WATCHER_WEAPON_TYPE, WatcherWeaponType.WARGLAIVE.ordinal());
-        builder.add(WATCHER_MODE, MODE_MARK);
+    protected void initDataTracker() {
+        super.initDataTracker();
+        this.dataTracker.startTracking(WATCHER_OWNER_ID, -1);
+        this.dataTracker.startTracking(WATCHER_TARGET_ID, -1);
+        this.dataTracker.startTracking(WATCHER_WEAPON_TYPE, WatcherWeaponType.WARGLAIVE.ordinal());
+        this.dataTracker.startTracking(WATCHER_MODE, MODE_MARK);
     }
 
     public void configureWatcher(LivingEntity owner, LivingEntity target, WatcherWeaponType weaponType, int mode) {
@@ -147,7 +147,7 @@ public class WatcherBatEntity extends BatEntity {
     }
 
     @Override
-    protected void dropEquipment(ServerWorld world, DamageSource source, boolean causedByPlayer) {
+    protected void dropEquipment(DamageSource source, int lootingMultiplier, boolean causedByPlayer) {
     }
 
     @Override

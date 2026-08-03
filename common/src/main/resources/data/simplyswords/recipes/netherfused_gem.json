@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:smithing_transform",
+  "base": {
+    "item": "simplyswords:empowered_remnant"
+  },
+  "addition": {
+    "item": "minecraft:netherite_ingot"
+  },
+  "result": {
+    "item": "simplyswords:netherfused_gem",
+    "count": 1
+  },
+  "template": {
+    "item": "simplyswords:runic_tablet"
+  }
+}

@@ -40,7 +40,7 @@ public final class DragonMawManager {
                 .sorted(Comparator.comparingDouble(owner::squaredDistanceTo))
                 .toList();
 
-        int chance = Math.clamp(Config.gemPowers.dragonMaw.chance, 0, 100);
+        int chance = net.minecraft.util.math.MathHelper.clamp(Config.gemPowers.dragonMaw.chance, 0, 100);
         if (chance <= 0) {
             return;
         }

@@ -45,12 +45,9 @@ dependencies {
 
     modImplementation "me.fzzyhmstrs:fzzy_config:${project.fzz_config_version}"
     modImplementation "com.github.ZsoltMolnarrr:TinyConfig:2.3.2"
-    modImplementation "curse.maven:oracle-index-1206582:${rootProject.oracle_index_version}"
     modImplementation "curse.maven:open-parties-and-claims-636608:${project.openpac_version}"
-
-    modImplementation "io.wispforest:owo-lib:0.12.15.1+1.21" // Needed to use OracleScreen from oracle_index :(
     // Simply Tooltips - hard dependency for modern tooltip rendering
-    compileOnly files("${rootDir}/../simplytooltips/common/build/devlibs/SimplyTooltips-common-0.1.5-dev.jar")
+    compileOnly files("${rootDir}/../simplytooltips-1.20.1/common/build/devlibs/SimplyTooltips-common-0.1.5-1.20.1-dev.jar")
 
     modCompileOnly "maven.modrinth:mythicmetals:${project.mythicmetals_version}"
     modCompileOnly "me.shedaniel:RoughlyEnoughItems-api:${rei_version}"

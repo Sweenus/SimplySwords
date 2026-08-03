@@ -63,14 +63,14 @@ public class StarsEdgeConstellationVisualEntity extends Entity {
     }
 
     @Override
-    protected void initDataTracker(DataTracker.Builder builder) {
-        builder.add(KIND, KIND_NODE);
-        builder.add(PHASE, PHASE_RECORDING);
-        builder.add(PHASE_START_AGE, 0);
-        builder.add(LIFETIME, 280);
-        builder.add(END_OFFSET_X, 0.0F);
-        builder.add(END_OFFSET_Y, 0.0F);
-        builder.add(END_OFFSET_Z, 0.0F);
+    protected void initDataTracker() {
+        this.dataTracker.startTracking(KIND, KIND_NODE);
+        this.dataTracker.startTracking(PHASE, PHASE_RECORDING);
+        this.dataTracker.startTracking(PHASE_START_AGE, 0);
+        this.dataTracker.startTracking(LIFETIME, 280);
+        this.dataTracker.startTracking(END_OFFSET_X, 0.0F);
+        this.dataTracker.startTracking(END_OFFSET_Y, 0.0F);
+        this.dataTracker.startTracking(END_OFFSET_Z, 0.0F);
     }
 
     @Override

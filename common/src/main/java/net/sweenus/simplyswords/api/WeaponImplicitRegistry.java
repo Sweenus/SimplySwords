@@ -92,7 +92,7 @@ public final class WeaponImplicitRegistry {
 
         registerUniqueOverrides();
         for (Identifier type : List.of(RAPIER, CUTLASS, SAI, DAGGER, CLAYMORE, LONGSWORD, GREATHAMMER, HAMMER, KATANA, SPEAR, GLAIVE, HALBERD, WARGLAIVE, CHAKRAM, SCYTHE, GREATAXE, TWINBLADE)) {
-            registerWeaponType(TagKey.of(RegistryKeys.ITEM, Identifier.of(SimplySwords.MOD_ID, "implicit/" + type.getPath())), type);
+            registerWeaponType(TagKey.of(RegistryKeys.ITEM, new Identifier(SimplySwords.MOD_ID, "implicit/" + type.getPath())), type);
         }
     }
 
@@ -124,14 +124,14 @@ public final class WeaponImplicitRegistry {
             return Optional.empty();
         }
 
-        WeaponImplicitComponent existing = stack.get(ComponentTypeRegistry.WEAPON_IMPLICIT.get());
+        WeaponImplicitComponent existing = ComponentTypeRegistry.WEAPON_IMPLICIT.get(stack);
         if (existing != null && existing.implicitId().equals(definition.id()) && existing.weaponType().equals(definition.weaponType())) {
             return Optional.of(existing);
         }
 
         int value = rollImplicitValue(stack, definition);
         WeaponImplicitComponent component = new WeaponImplicitComponent(definition.id(), definition.weaponType(), value);
-        stack.set(ComponentTypeRegistry.WEAPON_IMPLICIT.get(), component);
+        ComponentTypeRegistry.WEAPON_IMPLICIT.set(stack, component);
         return Optional.of(component);
     }
 
@@ -139,7 +139,7 @@ public final class WeaponImplicitRegistry {
         if (stack == null || stack.isEmpty() || !Config.general.enableWeaponImplicits) {
             return Optional.empty();
         }
-        WeaponImplicitComponent component = stack.get(ComponentTypeRegistry.WEAPON_IMPLICIT.get());
+        WeaponImplicitComponent component = ComponentTypeRegistry.WEAPON_IMPLICIT.get(stack);
         return component == null ? Optional.empty() : Optional.of(component);
     }
 
@@ -263,7 +263,7 @@ public final class WeaponImplicitRegistry {
         if (!(target.getWorld() instanceof ServerWorld serverWorld)) {
             return;
         }
-        int cappedStacks = Math.clamp(stacks, 1, 10);
+        int cappedStacks = net.minecraft.util.math.MathHelper.clamp(stacks, 1, 10);
         int dropletCount = tickPulse ? 3 + cappedStacks : 7 + cappedStacks * 2;
         double y = target.getBodyY(tickPulse ? 0.74 : 0.8);
         serverWorld.spawnParticles(ParticlesRegistry.DRIPPING_BLOOD.get(), target.getX(), y, target.getZ(), dropletCount, 0.28, 0.18, 0.28, 0.065);
@@ -407,14 +407,14 @@ public final class WeaponImplicitRegistry {
         DamageSource source = attacker instanceof PlayerEntity player
                 ? attacker.getDamageSources().playerAttack(player)
                 : attacker.getDamageSources().mobAttack(attacker);
-        RegistryKey<LootTable> lootTableKey = target.getLootTable();
-        LootTable lootTable = serverWorld.getServer().getReloadableRegistries().getLootTable(lootTableKey);
+        Identifier lootTableId = target.getLootTable();
+        LootTable lootTable = serverWorld.getServer().getLootManager().getLootTable(lootTableId);
         LootContextParameterSet.Builder contextBuilder = new LootContextParameterSet.Builder(serverWorld)
                 .add(LootContextParameters.THIS_ENTITY, target)
                 .add(LootContextParameters.ORIGIN, target.getPos())
                 .add(LootContextParameters.DAMAGE_SOURCE, source)
-                .addOptional(LootContextParameters.ATTACKING_ENTITY, attacker)
-                .addOptional(LootContextParameters.DIRECT_ATTACKING_ENTITY, attacker);
+                .addOptional(LootContextParameters.KILLER_ENTITY, attacker)
+                .addOptional(LootContextParameters.DIRECT_KILLER_ENTITY, attacker);
         if (attacker instanceof PlayerEntity player) {
             contextBuilder.addOptional(LootContextParameters.LAST_DAMAGE_PLAYER, player);
             contextBuilder.luck(player.getLuck());
@@ -590,7 +590,7 @@ public final class WeaponImplicitRegistry {
     }
 
     private static void registerPath(String path, Identifier weaponType) {
-        ITEM_TYPES.put(Identifier.of(SimplySwords.MOD_ID, path), weaponType);
+        ITEM_TYPES.put(new Identifier(SimplySwords.MOD_ID, path), weaponType);
     }
 
     private static Identifier resolvePathType(String path) {
@@ -603,11 +603,11 @@ public final class WeaponImplicitRegistry {
     }
 
     private static Identifier normalizeType(Identifier weaponType) {
-        return Identifier.of(weaponType.getNamespace(), weaponType.getPath());
+        return new Identifier(weaponType.getNamespace(), weaponType.getPath());
     }
 
     private static Identifier id(String path) {
-        return Identifier.of(SimplySwords.MOD_ID, path);
+        return new Identifier(SimplySwords.MOD_ID, path);
     }
 
     private static void spawnProcParticles(LivingEntity entity, net.minecraft.particle.ParticleEffect particle) {

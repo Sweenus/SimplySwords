@@ -38,7 +38,7 @@ public class WraithfangEntity extends ThrownSpearEntity {
                 && getWorld() instanceof ServerWorld serverWorld && age < 100) {
             owner.setVelocity((this.getX() - owner.getX()) / 8, (this.getY() - owner.getY()) / 8, (this.getZ() - owner.getZ()) / 8);
             owner.velocityModified = true;
-            HelperMethods.spawnWaistHeightParticles(serverWorld, ParticleTypes.OMINOUS_SPAWNING, this, owner, (int) this.distanceTo(owner));
+            HelperMethods.spawnWaistHeightParticles(serverWorld, ParticleTypes.SOUL, this, owner, (int) this.distanceTo(owner));
             if (owner instanceof LivingEntity livingEntity) {
                 livingEntity.addStatusEffect(new StatusEffectInstance(EffectRegistry.getReference(EffectRegistry.RESILIENCE), 20, 4, false, false, true));
             }

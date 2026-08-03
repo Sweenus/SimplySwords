@@ -10,9 +10,8 @@ import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
-import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.particle.ParticleTypes;
-import net.minecraft.particle.SimpleParticleType;
+import net.minecraft.particle.DefaultParticleType;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
@@ -41,9 +40,9 @@ public class EmberIreSwordItem extends UniqueSwordItem implements UniqueWeaponAc
         super(toolMaterial, settings);
     }
 
-    private static SimpleParticleType particleWalk = ParticleTypes.FALLING_LAVA;
-    private static SimpleParticleType particleSprint = ParticleTypes.FALLING_LAVA;
-    private static SimpleParticleType particlePassive = ParticleTypes.SMOKE;
+    private static DefaultParticleType particleWalk = ParticleTypes.FALLING_LAVA;
+    private static DefaultParticleType particleSprint = ParticleTypes.FALLING_LAVA;
+    private static DefaultParticleType particlePassive = ParticleTypes.SMOKE;
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
@@ -74,7 +73,7 @@ public class EmberIreSwordItem extends UniqueSwordItem implements UniqueWeaponAc
 
     @Override
     public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
-        if (!world.isClient && remainingUseTicks %10 == 0 && remainingUseTicks < getMaxUseTime(stack, user) - 5) {
+        if (!world.isClient && remainingUseTicks %10 == 0 && remainingUseTicks < getMaxUseTime(stack) - 5) {
             world.playSoundFromEntity(null, user, SoundRegistry.ELEMENTAL_BOW_RECHARGE.get(),
                     user.getSoundCategory(), 0.2f, 1.1f - (remainingUseTicks * 0.001f));
 
@@ -108,13 +107,13 @@ public class EmberIreSwordItem extends UniqueSwordItem implements UniqueWeaponAc
                 final float minAdditionalDamage = 0.0f;
                 final float maxAdditionalDamage = HelperMethods.abilityScaledDamage("fire", user, stack,
                         Config.uniqueEffects.emberblade.maxChargeDamageScaling, Config.uniqueEffects.emberblade.maxChargeSpellScaling);
-                float chargeRatio = 1.0f - ((float) remainingUseTicks / getMaxUseTime(stack, user));
+                float chargeRatio = 1.0f - ((float) remainingUseTicks / getMaxUseTime(stack));
                 float additionalDamage = minAdditionalDamage + (maxAdditionalDamage - minAdditionalDamage) * chargeRatio;
                 float finalDamage = (float) damageAmount + additionalDamage;
                 targetEntity.timeUntilRegen = 0;
                 targetEntity.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments((ServerWorld) world, stack, targetEntity, damageSource, finalDamage));
 
-                world.playSound(null, targetEntity.getBlockPos(), SoundEvents.ENTITY_GENERIC_EXPLODE.value(),
+                world.playSound(null, targetEntity.getBlockPos(), SoundEvents.ENTITY_GENERIC_EXPLODE,
                         user.getSoundCategory(), 0.4f, 1.1f);
                 HelperMethods.spawnOrbitParticles((ServerWorld) world, targetEntity.getPos(), ParticleTypes.EXPLOSION, 1, 1 );
                 HelperMethods.spawnOrbitParticles((ServerWorld) world, targetEntity.getPos(), ParticleTypes.POOF, 1, 20 );
@@ -164,7 +163,7 @@ public class EmberIreSwordItem extends UniqueSwordItem implements UniqueWeaponAc
         target.timeUntilRegen = 0;
         DamageSource damageSource = actor.getDamageSources().mobAttack(actor);
         target.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments(world, context.stack(), target, damageSource, finalDamage));
-        world.playSound(null, target.getBlockPos(), SoundEvents.ENTITY_GENERIC_EXPLODE.value(), actor.getSoundCategory(), 0.4f, 1.1f);
+        world.playSound(null, target.getBlockPos(), SoundEvents.ENTITY_GENERIC_EXPLODE, actor.getSoundCategory(), 0.4f, 1.1f);
         HelperMethods.spawnOrbitParticles(world, target.getPos(), ParticleTypes.EXPLOSION, 1, 1);
         HelperMethods.spawnOrbitParticles(world, target.getPos(), ParticleTypes.POOF, 1, 20);
 
@@ -186,7 +185,7 @@ public class EmberIreSwordItem extends UniqueSwordItem implements UniqueWeaponAc
     }
 
     @Override
-    public int getMaxUseTime(ItemStack stack, LivingEntity user) {
+    public int getMaxUseTime(ItemStack stack) {
         return 80;
     }
 
@@ -210,7 +209,7 @@ public class EmberIreSwordItem extends UniqueSwordItem implements UniqueWeaponAc
     }
 
     @Override
-    public void appendTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
+    public void appendTooltip(ItemStack itemStack, net.minecraft.world.World world, List<Text> tooltip, net.minecraft.client.item.TooltipContext tooltipContext) {
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.emberiresworditem.tooltip1").setStyle(Styles.ABILITY));
         tooltip.add(Text.literal(""));
@@ -222,7 +221,7 @@ public class EmberIreSwordItem extends UniqueSwordItem implements UniqueWeaponAc
         tooltip.add(Text.translatable("item.simplyswords.emberiresworditem.tooltip9").setStyle(Styles.TEXT));
         appendAbilityCooldownTooltip(tooltip, 10);
 
-        super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        super.appendTooltip(itemStack, world, tooltip, tooltipContext);
         net.sweenus.simplyswords.client.util.TooltipUtils.appendSpellScaleTooltip(tooltip, "fire");
     }
 

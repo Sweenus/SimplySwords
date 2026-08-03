@@ -47,13 +47,13 @@ public class MagispearFallingSpearVisualEntity extends Entity {
     }
 
     @Override
-    protected void initDataTracker(DataTracker.Builder builder) {
-        builder.add(END_OFFSET_X, 0.0F);
-        builder.add(END_OFFSET_Y, -10.0F);
-        builder.add(END_OFFSET_Z, 0.0F);
-        builder.add(LIFETIME, 6);
-        builder.add(MODE, MODE_RAIN);
-        builder.add(SCALE, 1.0F);
+    protected void initDataTracker() {
+        this.dataTracker.startTracking(END_OFFSET_X, 0.0F);
+        this.dataTracker.startTracking(END_OFFSET_Y, -10.0F);
+        this.dataTracker.startTracking(END_OFFSET_Z, 0.0F);
+        this.dataTracker.startTracking(LIFETIME, 6);
+        this.dataTracker.startTracking(MODE, MODE_RAIN);
+        this.dataTracker.startTracking(SCALE, 1.0F);
     }
 
     @Override

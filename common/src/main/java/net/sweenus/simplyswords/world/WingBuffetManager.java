@@ -134,7 +134,7 @@ public final class WingBuffetManager {
         world.playSound(null, attacker.getBlockPos(), SoundEvents.ENTITY_ENDER_DRAGON_GROWL, SoundCategory.PLAYERS, 0.55F, 1.35F);
         world.playSound(null, attacker.getBlockPos(), SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, SoundCategory.PLAYERS, 0.9F, 0.55F);
         if (hitAny) {
-            world.playSound(null, attacker.getBlockPos(), SoundEvents.ENTITY_GENERIC_EXPLODE.value(), SoundCategory.PLAYERS, 0.55F, 1.15F);
+            world.playSound(null, attacker.getBlockPos(), SoundEvents.ENTITY_GENERIC_EXPLODE, SoundCategory.PLAYERS, 0.55F, 1.15F);
             world.playSound(null, attacker.getBlockPos(), SoundEvents.ENTITY_ENDER_DRAGON_HURT, SoundCategory.PLAYERS, 0.55F, 1.6F);
         }
     }

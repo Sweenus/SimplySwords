@@ -32,7 +32,7 @@ public class ImmolationEffect extends WideOrbitingEffect {
     }
 
     @Override
-    public boolean applyUpdateEffect(LivingEntity pLivingEntity, int pAmplifier) {
+    public void applyUpdateEffect(LivingEntity pLivingEntity, int pAmplifier) {
         if (!pLivingEntity.getWorld().isClient()) {
             if (pLivingEntity instanceof PlayerEntity player) {
                 if (pLivingEntity.age % 15 == 0) {
@@ -83,12 +83,11 @@ public class ImmolationEffect extends WideOrbitingEffect {
         if (!Config.general.enableModernFieldEffects) {
             super.applyUpdateEffect(pLivingEntity, pAmplifier);
         }
-        return true;
     }
 
     @Override
-    public void onRemoved(AttributeContainer attributes) {
-        super.onRemoved(attributes);
+    public void onRemoved(LivingEntity effectEntity, AttributeContainer attributes, int amplifier) {
+        super.onRemoved(effectEntity, attributes, amplifier);
     }
 
     @Override
@@ -105,8 +104,8 @@ public class ImmolationEffect extends WideOrbitingEffect {
         float multiplier = AwakeningApi.getGemPowerMultiplier(stack);
         float spellDamage = HelperMethods.commonSpellAttributeScaling(
                 spellScaling, owner, SpellScalingProfile.FIRE) * multiplier;
-        int packedMultiplier = Math.clamp(Math.round(multiplier * SCALE_PRECISION), 0, 0xFFFF);
-        int packedSpell = Math.clamp(Math.round(spellDamage * SPELL_PRECISION), 0, 0xFFFF);
+        int packedMultiplier = net.minecraft.util.math.MathHelper.clamp(Math.round(multiplier * SCALE_PRECISION), 0, 0xFFFF);
+        int packedSpell = net.minecraft.util.math.MathHelper.clamp(Math.round(spellDamage * SPELL_PRECISION), 0, 0xFFFF);
         instance.setAdditionalData((packedMultiplier << 16) | packedSpell);
         return instance;
     }

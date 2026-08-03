@@ -41,7 +41,7 @@ public class FatalFlickerEffect extends StatusEffect {
     }
 
     @Override
-    public boolean applyUpdateEffect(LivingEntity user, int amplifier) {
+    public void applyUpdateEffect(LivingEntity user, int amplifier) {
 
         super.applyUpdateEffect(user, amplifier);
 
@@ -84,7 +84,6 @@ public class FatalFlickerEffect extends StatusEffect {
                 }
             }
         }
-        return true;
     }
 
     @Override

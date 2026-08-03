@@ -15,7 +15,6 @@ import net.minecraft.inventory.StackReference;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.SwordItem;
-import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -91,7 +90,7 @@ public class SimplySwordsAPI {
     }
 
     public static GemPowerComponent getComponent(ItemStack stack) {
-        return stack.getOrDefault(ComponentTypeRegistry.GEM_POWER.get(), GemPowerComponent.DEFAULT);
+        return ComponentTypeRegistry.GEM_POWER.getOrDefault(stack, GemPowerComponent.DEFAULT);
     }
 
     //
@@ -106,7 +105,7 @@ public class SimplySwordsAPI {
     // empty component legitimately to mean "has sockets, nothing socketed yet".
     //
     public static boolean needsGemPowerRoll(ItemStack stack) {
-        GemPowerComponent component = stack.get(ComponentTypeRegistry.GEM_POWER.get());
+        GemPowerComponent component = ComponentTypeRegistry.GEM_POWER.get(stack);
         return component == null || component.isEmpty();
     }
 
@@ -271,7 +270,7 @@ public class SimplySwordsAPI {
                 return false;
             }
 
-            EnchantmentHelper.onTargetDamaged(world, target, source, stack);
+            EnchantmentHelper.onTargetDamaged(owner, target);
             WeaponImplicitRegistry.onHit(stack, target, owner, modifiedDamage);
             Item item = stack.getItem();
             if (item instanceof SwordItem) {
@@ -312,7 +311,7 @@ public class SimplySwordsAPI {
                 return false;
             }
 
-            EnchantmentHelper.onTargetDamaged(world, target, source, stack);
+            EnchantmentHelper.onTargetDamaged(actor, target);
             WeaponImplicitRegistry.onHit(stack, target, actor, modifiedDamage);
             Item item = stack.getItem();
             if (item instanceof SwordItem) {
@@ -349,7 +348,7 @@ public class SimplySwordsAPI {
     }
 
     // Adds the relevant socket information to the item tooltip
-    public static void appendTooltipGemSocketLogic(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
+    public static void appendTooltipGemSocketLogic(ItemStack itemStack, net.minecraft.world.World world, List<Text> tooltip, net.minecraft.client.item.TooltipContext tooltipContext) {
 
         GemPowerComponent component = getComponent(itemStack);
 
@@ -357,7 +356,7 @@ public class SimplySwordsAPI {
             tooltip.add(Text.literal(""));
         }
 
-        component.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        component.appendTooltip(itemStack, world, tooltip, tooltipContext);
     }
 
     // Allows for the socketing of gems
@@ -377,7 +376,7 @@ public class SimplySwordsAPI {
                     Item incomingGemItem = otherStack.getItem();
                     ValidationResult<GemPowerComponent> result = gemPowerFiller.fill(otherStack, component);
                     if (result.isValid()) {
-                        stack.set(ComponentTypeRegistry.GEM_POWER.get(), result.get());
+                        ComponentTypeRegistry.GEM_POWER.set(stack, result.get());
                         player.getWorld().playSoundFromEntity(null, player, SoundEvents.BLOCK_ANVIL_USE, player.getSoundCategory(), 1, 1);
                         otherStack.decrement(1);
                         returnDisplacedGem(
@@ -419,14 +418,14 @@ public class SimplySwordsAPI {
         if (incomingGemItem == ItemsRegistry.RUNEFUSED_GEM.get()
                 && weaponComponent.hasRunicSlotFilled()) {
             ItemStack displacedRunic = new ItemStack(ItemsRegistry.RUNEFUSED_GEM.get());
-            displacedRunic.set(ComponentTypeRegistry.GEM_POWER.get(),
+            ComponentTypeRegistry.GEM_POWER.set(displacedRunic,
                     GemPowerComponent.runic(weaponComponent.runicPower()));
             return displacedRunic;
         }
         if (incomingGemItem == ItemsRegistry.NETHERFUSED_GEM.get()
                 && weaponComponent.hasNetherSlotFilled()) {
             ItemStack displacedNether = new ItemStack(ItemsRegistry.NETHERFUSED_GEM.get());
-            displacedNether.set(ComponentTypeRegistry.GEM_POWER.get(),
+            ComponentTypeRegistry.GEM_POWER.set(displacedNether,
                     GemPowerComponent.nether(weaponComponent.netherPower()));
             return displacedNether;
         }
@@ -443,10 +442,10 @@ public class SimplySwordsAPI {
                                                     int runeSocketChance, int netherSocketChance) {
         // Server-side only: rolling on both sides gave the client a different socket layout
         // than the server, and rewrote the component on stacks a storage mod was tracking.
-        if (!world.isClient && !stack.contains(ComponentTypeRegistry.GEM_POWER.get()) && Config.general.enableUniqueGemSockets) {
+        if (!world.isClient && !ComponentTypeRegistry.GEM_POWER.contains(stack) && Config.general.enableUniqueGemSockets) {
             float runeSocketRoll = world.getRandom().nextFloat() * 100;
             float netherSocketRoll = world.getRandom().nextFloat() * 100;
-            stack.set(ComponentTypeRegistry.GEM_POWER.get(), GemPowerComponent.createEmpty(
+            ComponentTypeRegistry.GEM_POWER.set(stack, GemPowerComponent.createEmpty(
                     runeSocketRoll < runeSocketChance,
                     netherSocketRoll < netherSocketChance
             ));
@@ -463,7 +462,7 @@ public class SimplySwordsAPI {
         ContainedRemnantItem.addTransformation(block, identifier);
     }
 
-    // Register/Assign weapon implicits. If you don't require your own custom implicits, you can instead assign them via tag data under 'resources/data/simplyswords/tags/item/implicit/...'
+    // Register/Assign weapon implicits. If you don't require your own custom implicits, you can instead assign them via tag data under 'resources/data/simplyswords/tags/items/implicit/...'
 
     public static void registerWeaponType(Item item, Identifier weaponType) {
         WeaponImplicitRegistry.registerWeaponType(item, weaponType);

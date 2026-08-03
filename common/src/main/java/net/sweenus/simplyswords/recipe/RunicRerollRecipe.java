@@ -1,27 +1,28 @@
 package net.sweenus.simplyswords.recipe;
 
-import com.mojang.serialization.MapCodec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.google.gson.JsonObject;
+import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.recipe.RecipeSerializer;
 import net.minecraft.recipe.SmithingTransformRecipe;
-import net.minecraft.recipe.input.SmithingRecipeInput;
-import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.registry.DynamicRegistryManager;
+import net.minecraft.registry.Registries;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.JsonHelper;
 import net.sweenus.simplyswords.registry.ComponentTypeRegistry;
 import net.sweenus.simplyswords.registry.RecipeTypeRegistry;
 
 public class RunicRerollRecipe extends SmithingTransformRecipe {
-    final Ingredient template;
-    final Ingredient base;
-    final Ingredient addition;
-    final ItemStack result;
+    private final Ingredient template;
+    private final Ingredient base;
+    private final Ingredient addition;
+    private final ItemStack result;
 
-    public RunicRerollRecipe(Ingredient template, Ingredient base, Ingredient addition, ItemStack result) {
-        super(template, base, addition, result);
-
+    public RunicRerollRecipe(Identifier id, Ingredient template, Ingredient base,
+                             Ingredient addition, ItemStack result) {
+        super(id, template, base, addition, result);
         this.template = template;
         this.base = base;
         this.addition = addition;
@@ -29,46 +30,41 @@ public class RunicRerollRecipe extends SmithingTransformRecipe {
     }
 
     @Override
-    public ItemStack craft(SmithingRecipeInput smithingRecipeInput, RegistryWrapper.WrapperLookup wrapperLookup) {
-        ItemStack itemStack = smithingRecipeInput.base().copyComponentsToNewStack(this.result.getItem(), this.result.getCount());
-        itemStack.applyUnvalidatedChanges(this.result.getComponentChanges());
-        itemStack.remove(ComponentTypeRegistry.GEM_POWER.get());
-        return itemStack;
+    public ItemStack craft(Inventory inventory, DynamicRegistryManager registryManager) {
+        ItemStack source = inventory.getStack(1);
+        ItemStack output = new ItemStack(result.getItem(), result.getCount());
+        if (source.hasNbt()) output.setNbt(source.getNbt().copy());
+        ComponentTypeRegistry.GEM_POWER.remove(output);
+        return output;
     }
 
-    @Override
-    public RecipeSerializer<?> getSerializer() {
-        return RecipeTypeRegistry.REROLL.get();
-    }
+    @Override public RecipeSerializer<?> getSerializer() { return RecipeTypeRegistry.REROLL.get(); }
 
-    public static class Serializer implements RecipeSerializer<RunicRerollRecipe> {
-        private static final MapCodec<RunicRerollRecipe> CODEC = RecordCodecBuilder.mapCodec((instance) -> instance.group(Ingredient.ALLOW_EMPTY_CODEC.fieldOf("template").forGetter((recipe) -> recipe.template), Ingredient.ALLOW_EMPTY_CODEC.fieldOf("base").forGetter((recipe) -> recipe.base), Ingredient.ALLOW_EMPTY_CODEC.fieldOf("addition").forGetter((recipe) -> recipe.addition), ItemStack.VALIDATED_CODEC.fieldOf("result").forGetter((recipe) -> recipe.result)).apply(instance, RunicRerollRecipe::new));
-        public static final PacketCodec<RegistryByteBuf, RunicRerollRecipe> PACKET_CODEC = PacketCodec.ofStatic(RunicRerollRecipe.Serializer::write, RunicRerollRecipe.Serializer::read);
-
-        public Serializer() {
+    public static final class Serializer implements RecipeSerializer<RunicRerollRecipe> {
+        @Override
+        public RunicRerollRecipe read(Identifier id, JsonObject json) {
+            Ingredient template = Ingredient.fromJson(JsonHelper.getElement(json, "template"));
+            Ingredient base = Ingredient.fromJson(JsonHelper.getElement(json, "base"));
+            Ingredient addition = Ingredient.fromJson(JsonHelper.getElement(json, "addition"));
+            JsonObject resultJson = JsonHelper.getObject(json, "result");
+            String itemId = JsonHelper.getString(resultJson, resultJson.has("id") ? "id" : "item");
+            ItemStack result = new ItemStack(Registries.ITEM.get(new Identifier(itemId)),
+                    JsonHelper.getInt(resultJson, "count", 1));
+            return new RunicRerollRecipe(id, template, base, addition, result);
         }
 
-        public MapCodec<RunicRerollRecipe> codec() {
-            return CODEC;
+        @Override
+        public RunicRerollRecipe read(Identifier id, PacketByteBuf buf) {
+            return new RunicRerollRecipe(id, Ingredient.fromPacket(buf), Ingredient.fromPacket(buf),
+                    Ingredient.fromPacket(buf), buf.readItemStack());
         }
 
-        public PacketCodec<RegistryByteBuf, RunicRerollRecipe> packetCodec() {
-            return PACKET_CODEC;
-        }
-
-        private static RunicRerollRecipe read(RegistryByteBuf buf) {
-            Ingredient ingredient = Ingredient.PACKET_CODEC.decode(buf);
-            Ingredient ingredient2 = Ingredient.PACKET_CODEC.decode(buf);
-            Ingredient ingredient3 = Ingredient.PACKET_CODEC.decode(buf);
-            ItemStack itemStack = ItemStack.PACKET_CODEC.decode(buf);
-            return new RunicRerollRecipe(ingredient, ingredient2, ingredient3, itemStack);
-        }
-
-        private static void write(RegistryByteBuf buf, RunicRerollRecipe recipe) {
-            Ingredient.PACKET_CODEC.encode(buf, recipe.template);
-            Ingredient.PACKET_CODEC.encode(buf, recipe.base);
-            Ingredient.PACKET_CODEC.encode(buf, recipe.addition);
-            ItemStack.PACKET_CODEC.encode(buf, recipe.result);
+        @Override
+        public void write(PacketByteBuf buf, RunicRerollRecipe recipe) {
+            recipe.template.write(buf);
+            recipe.base.write(buf);
+            recipe.addition.write(buf);
+            buf.writeItemStack(recipe.result);
         }
     }
 }

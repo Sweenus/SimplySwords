@@ -22,7 +22,7 @@ public class HighOrbitingEffect extends StatusEffect {
     private double currentAngle = 0.0;
 
     @Override
-    public boolean applyUpdateEffect(LivingEntity livingEntity, int amplifier) {
+    public void applyUpdateEffect(LivingEntity livingEntity, int amplifier) {
         if (!livingEntity.getWorld().isClient) {
             ServerWorld serverWorld = (ServerWorld) livingEntity.getWorld();
             Vec3d center = livingEntity.getPos().add(0, (livingEntity.getHeight() + yOffset), 0); // Center around the entity's waist
@@ -51,7 +51,6 @@ public class HighOrbitingEffect extends StatusEffect {
             }
         }
         super.applyUpdateEffect(livingEntity, amplifier);
-        return true;
     }
 
     private void spawnParticles(ServerWorld serverWorld, double x, double y, double z) {

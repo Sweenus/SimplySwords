@@ -55,7 +55,7 @@ public class VerdantTrailVisualEntityRenderer extends EntityRenderer<VerdantTrai
             case 4 -> Blocks.AZURE_BLUET.getDefaultState();
             case 5 -> Blocks.OXEYE_DAISY.getDefaultState();
             case 6 -> Blocks.CORNFLOWER.getDefaultState();
-            default -> Blocks.SHORT_GRASS.getDefaultState();
+            default -> Blocks.GRASS.getDefaultState();
         };
     }
 }

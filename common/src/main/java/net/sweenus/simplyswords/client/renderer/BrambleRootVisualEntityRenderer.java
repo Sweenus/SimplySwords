@@ -24,7 +24,7 @@ import org.joml.Matrix4f;
 
 public class BrambleRootVisualEntityRenderer extends EntityRenderer<BrambleRootVisualEntity> {
 
-    private static final Identifier WHITE_TEXTURE = Identifier.ofVanilla("textures/misc/white.png");
+    private static final Identifier WHITE_TEXTURE = new Identifier("minecraft", "textures/misc/white.png");
     private static final int PATH_SEGMENTS = 24;
     private static final int SPIRAL_SEGMENTS = 30;
     private static final int CORE_SEGMENTS = 44;
@@ -511,7 +511,7 @@ public class BrambleRootVisualEntityRenderer extends EntityRenderer<BrambleRootV
     private static void vertex(VertexConsumer vertices, Matrix4f matrix, Vec3d position,
                                int red, int green, int blue, int alpha, int light) {
         vertices.vertex(matrix, (float) position.x, (float) position.y, (float) position.z)
-                .color(red, green, blue, alpha).light(light);
+                .color(red, green, blue, alpha).light(light).next();
     }
 
     private static void emissiveQuad(VertexConsumer vertices, Matrix4f matrix,
@@ -542,7 +542,7 @@ public class BrambleRootVisualEntityRenderer extends EntityRenderer<BrambleRootV
                 .texture(u, v)
                 .overlay(OverlayTexture.DEFAULT_UV)
                 .light(light)
-                .normal((float) normal.x, (float) normal.y, (float) normal.z);
+                .normal((float) normal.x, (float) normal.y, (float) normal.z).next();
     }
 
     private static Vec3d horizontalPerpendicular(Vec3d direction) {

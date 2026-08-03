@@ -9,7 +9,6 @@ import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
-import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.registry.Registries;
@@ -131,7 +130,7 @@ public class DreadtideSwordItem extends UniqueSwordItem {
     }
 
     @Override
-    public void appendTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
+    public void appendTooltip(ItemStack itemStack, net.minecraft.world.World world, List<Text> tooltip, net.minecraft.client.item.TooltipContext tooltipContext) {
         MutableText ability_icon = Text.empty().append("\uA996 ");
         MutableText types = TextAPI.Styles.getGradient(Text.translatable("item.eldritch_end.corrupted_item.type"), 1, 6043781, 9326287, 1.0F);
 
@@ -148,14 +147,14 @@ public class DreadtideSwordItem extends UniqueSwordItem {
         tooltip.add(Text.literal(""));
         tooltip.add(Text.literal("\uA999 ").append(Text.translatable("item.simplyswords.dreadtidesworditem.tooltip12").setStyle(Styles.CORRUPTED)));
 
-        super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        super.appendTooltip(itemStack, world, tooltip, tooltipContext);
         net.sweenus.simplyswords.client.util.TooltipUtils.appendSpellScaleTooltip(tooltip, "eldritch");
     }
 
     public static class EffectSettings extends TooltipSettings {
 
         public EffectSettings() {
-            super(new ItemStackTooltipAppender(() -> Registries.ITEM.get(Identifier.of(SimplySwords.MOD_ID, "dreadtide"))));
+            super(new ItemStackTooltipAppender(() -> Registries.ITEM.get(new Identifier(SimplySwords.MOD_ID, "dreadtide"))));
         }
 
         @ValidatedFloat.Restrict(min = 0)

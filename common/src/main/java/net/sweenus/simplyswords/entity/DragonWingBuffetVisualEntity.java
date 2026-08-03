@@ -39,12 +39,12 @@ public class DragonWingBuffetVisualEntity extends Entity {
     }
 
     @Override
-    protected void initDataTracker(DataTracker.Builder builder) {
-        builder.add(OWNER_ENTITY_ID, -1);
-        builder.add(OWNER_YAW, 0.0F);
-        builder.add(LIFETIME, 18);
-        builder.add(SCALE, 0.65F);
-        builder.add(PHASE_OFFSET, 0.0F);
+    protected void initDataTracker() {
+        this.dataTracker.startTracking(OWNER_ENTITY_ID, -1);
+        this.dataTracker.startTracking(OWNER_YAW, 0.0F);
+        this.dataTracker.startTracking(LIFETIME, 18);
+        this.dataTracker.startTracking(SCALE, 0.65F);
+        this.dataTracker.startTracking(PHASE_OFFSET, 0.0F);
     }
 
     @Override

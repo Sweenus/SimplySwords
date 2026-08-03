@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "#": {
+      "tag": "c:wood_sticks"
+    },
+    "X": {
+      "item": "minecraft:gold_ingot"
+    }
+  },
+  "pattern": [
+    "XX#",
+    "X# ",
+    "#  "
+  ],
+  "result": {
+    "item": "simplyswords:gold_scythe",
+    "count": 1
+  }
+}

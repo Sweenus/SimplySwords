@@ -26,7 +26,7 @@ public class MagislamEffect extends OrbitingEffect {
 
 
     @Override
-    public boolean applyUpdateEffect(LivingEntity livingEntity, int amplifier) {
+    public void applyUpdateEffect(LivingEntity livingEntity, int amplifier) {
         if (!livingEntity.getWorld().isClient()) {
 
             if (livingEntity instanceof PlayerEntity player) {
@@ -60,7 +60,7 @@ public class MagislamEffect extends OrbitingEffect {
                         }
                         HelperMethods.spawnOrbitParticles((ServerWorld) player.getWorld(), player.getPos(), ParticleTypes.CAMPFIRE_COSY_SMOKE, 2, 8);
                         HelperMethods.spawnOrbitParticles((ServerWorld) player.getWorld(), player.getPos(), ParticleTypes.EXPLOSION, 1, 3);
-                        player.getWorld().playSoundFromEntity(null, player, SoundEvents.ENTITY_GENERIC_EXPLODE.value(),
+                        player.getWorld().playSoundFromEntity(null, player, SoundEvents.ENTITY_GENERIC_EXPLODE,
                                 SoundCategory.PLAYERS, 0.9f, 1.1f);
                         player.removeStatusEffect(EffectRegistry.getReference(EffectRegistry.MAGISLAM));
                         player.removeStatusEffect(EffectRegistry.getReference(EffectRegistry.RESILIENCE));
@@ -69,12 +69,11 @@ public class MagislamEffect extends OrbitingEffect {
             }
         }
         super.applyUpdateEffect(livingEntity, amplifier);
-        return true;
     }
 
     @Override
-    public void onRemoved(AttributeContainer attributes) {
-        super.onRemoved(attributes);
+    public void onRemoved(LivingEntity effectEntity, AttributeContainer attributes, int amplifier) {
+        super.onRemoved(effectEntity, attributes, amplifier);
     }
 
 

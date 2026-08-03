@@ -54,14 +54,14 @@ public class CaelestisTentacleEntity extends Entity {
     }
 
     @Override
-    protected void initDataTracker(DataTracker.Builder builder) {
-        builder.add(BREACH_ID, Optional.empty());
-        builder.add(SIZE, SIZE_MEDIUM);
-        builder.add(CORRUPTION_SEED, 0);
-        builder.add(RETRACTING, false);
-        builder.add(EMERGENCE_TICKS_ELAPSED, 0);
-        builder.add(RETRACT_TICKS_ELAPSED, 0);
-        builder.add(CONTACT_INTENSITY, 0.0F);
+    protected void initDataTracker() {
+        this.dataTracker.startTracking(BREACH_ID, Optional.empty());
+        this.dataTracker.startTracking(SIZE, SIZE_MEDIUM);
+        this.dataTracker.startTracking(CORRUPTION_SEED, 0);
+        this.dataTracker.startTracking(RETRACTING, false);
+        this.dataTracker.startTracking(EMERGENCE_TICKS_ELAPSED, 0);
+        this.dataTracker.startTracking(RETRACT_TICKS_ELAPSED, 0);
+        this.dataTracker.startTracking(CONTACT_INTENSITY, 0.0F);
     }
 
     @Override
@@ -111,7 +111,7 @@ public class CaelestisTentacleEntity extends Entity {
     }
 
     public void setTentacleSize(int size) {
-        this.dataTracker.set(SIZE, Math.clamp(size, SIZE_SMALL, SIZE_LARGE));
+        this.dataTracker.set(SIZE, net.minecraft.util.math.MathHelper.clamp(size, SIZE_SMALL, SIZE_LARGE));
     }
 
     public int getCorruptionSeed() {
@@ -139,7 +139,7 @@ public class CaelestisTentacleEntity extends Entity {
     }
 
     public void setContactIntensity(float contactIntensity) {
-        this.dataTracker.set(CONTACT_INTENSITY, Math.clamp(contactIntensity, 0.0F, 1.0F));
+        this.dataTracker.set(CONTACT_INTENSITY, net.minecraft.util.math.MathHelper.clamp(contactIntensity, 0.0F, 1.0F));
     }
 
     public float getContactRadius() {

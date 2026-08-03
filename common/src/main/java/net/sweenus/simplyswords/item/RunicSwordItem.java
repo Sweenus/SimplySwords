@@ -11,7 +11,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.SwordItem;
 import net.minecraft.item.ToolMaterial;
-import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.tag.TagKey;
@@ -41,7 +40,8 @@ import java.util.List;
 public class RunicSwordItem extends SwordItem {
 
     public RunicSwordItem(ToolMaterial toolMaterial, Settings settings) {
-        super(toolMaterial, settings.fireproof());
+        super(toolMaterial, LegacyWeaponAttributes.attackDamage(settings),
+                LegacyWeaponAttributes.attackSpeed(settings), settings.fireproof());
     }
 
     @Override
@@ -56,7 +56,7 @@ public class RunicSwordItem extends SwordItem {
     }
 
     // Should be replaced with a modular blacklisting system at a later date
-    private static final Identifier[] SPEAR_POWER_BLACKLIST = {Identifier.of(SimplySwords.MOD_ID, "throwing")};
+    private static final Identifier[] SPEAR_POWER_BLACKLIST = {new Identifier(SimplySwords.MOD_ID, "throwing")};
 
     private void rollRunicPower(ItemStack stack) {
         if (!SimplySwordsAPI.needsGemPowerRoll(stack)) return;
@@ -64,7 +64,7 @@ public class RunicSwordItem extends SwordItem {
         Identifier power = TagRegistry.isInTag(TagRegistry.spearsTag, asItem())
                 ? GemPowerRegistry.gemRandomPower(PowerType.RUNIC, SPEAR_POWER_BLACKLIST)
                 : GemPowerRegistry.gemRandomPower(PowerType.RUNIC);
-        stack.set(ComponentTypeRegistry.GEM_POWER.get(), GemPowerComponent.runic(power));
+        ComponentTypeRegistry.GEM_POWER.set(stack, GemPowerComponent.runic(power));
     }
 
     @Override
@@ -96,7 +96,7 @@ public class RunicSwordItem extends SwordItem {
     }
 
     @Override
-    public int getMaxUseTime(ItemStack stack, LivingEntity user) {
+    public int getMaxUseTime(ItemStack stack) {
         GemPowerComponent component = SimplySwordsAPI.getComponent(stack);
         return component.getMaxUseTime(stack);
     }
@@ -104,7 +104,7 @@ public class RunicSwordItem extends SwordItem {
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         ItemStack itemStack = user.getStackInHand(hand);
-        TagKey<Item> tagKey = TagKey.of(RegistryKeys.ITEM, Identifier.of(SimplySwords.MOD_ID, "spears"));
+        TagKey<Item> tagKey = TagKey.of(RegistryKeys.ITEM, new Identifier(SimplySwords.MOD_ID, "spears"));
         if (itemStack.getItem().getRegistryEntry().isIn(tagKey)) {
             if (!world.isClient) {
                 itemStack = user.getStackInHand(hand);
@@ -115,7 +115,7 @@ public class RunicSwordItem extends SwordItem {
                 double[] doubles = HelperMethods.getAttackFromSlot(user, itemStack, user.getActiveHand());
                 thrownSwordEntity.primaryBaseDamage = (float) doubles[0];
                 //System.out.println("Returned Attack value: " + (float) doubles[0]);
-                thrownSwordEntity.hasLoyalty = MathHelper.clamp(EnchantmentHelper.getTridentReturnAcceleration((ServerWorld) world, itemStack, user), 0, 127);
+                thrownSwordEntity.hasLoyalty = MathHelper.clamp(EnchantmentHelper.getLoyalty(itemStack), 0, 127);
                 if (hand == Hand.OFF_HAND)
                     thrownSwordEntity.offhandThrow = true;
                 thrownSwordEntity.setPos(user.getX(), user.getEyeY() - 0.5, user.getZ());
@@ -179,7 +179,7 @@ public class RunicSwordItem extends SwordItem {
     }
 
     @Override
-    public void onCraft(ItemStack stack, World world) {
+    public void onCraft(ItemStack stack, World world, PlayerEntity player) {
         if (world.isClient) return;
 
         WeaponImplicitRegistry.getOrCreateWeaponImplicit(stack);
@@ -192,14 +192,14 @@ public class RunicSwordItem extends SwordItem {
     }
 
     @Override
-    public void appendTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
+    public void appendTooltip(ItemStack itemStack, net.minecraft.world.World world, List<Text> tooltip, net.minecraft.client.item.TooltipContext tooltipContext) {
         tooltip.addAll(WeaponImplicitRegistry.buildTooltipLines(itemStack, Screen.hasAltDown()));
-        generateDynamicTooltip(itemStack, tooltipContext, tooltip, type);
+        generateDynamicTooltip(itemStack, world, tooltip, tooltipContext);
     }
 
     // Override this with your own id & paths
-    protected void generateDynamicTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
-        SimplySwordsClientAPI.generateDynamicTooltip(itemStack, tooltipContext, tooltip, type,
+    protected void generateDynamicTooltip(ItemStack itemStack, net.minecraft.world.World world, List<Text> tooltip, net.minecraft.client.item.TooltipContext tooltipContext) {
+        SimplySwordsClientAPI.generateDynamicTooltip(itemStack, world, tooltip, tooltipContext,
                 SimplySwords.MOD_ID,
                 "oracle_index:books/simplyswords/weapon-types",
                 "oracle_index:books/simplyswords/unique-weapons",

@@ -33,8 +33,9 @@ public class BattleStandardDarkModel extends EntityModel<BattleStandardDarkEntit
 	}
 
 	@Override
-	public void render(MatrixStack matrices, VertexConsumer vertexConsumer, int light, int overlay, int color) {
-		supports.render(matrices, vertexConsumer, light, overlay, color);
-		bb_main.render(matrices, vertexConsumer, light, overlay, color);
+	public void render(MatrixStack matrices, VertexConsumer vertexConsumer, int light, int overlay,
+					   float red, float green, float blue, float alpha) {
+		supports.render(matrices, vertexConsumer, light, overlay, red, green, blue, alpha);
+		bb_main.render(matrices, vertexConsumer, light, overlay, red, green, blue, alpha);
 	}
 }

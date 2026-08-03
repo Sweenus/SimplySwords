@@ -9,7 +9,6 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
-import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -278,7 +277,7 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
     }
 
     private static int getSoulDebt(ItemStack stack) {
-        return stack.getOrDefault(ComponentTypeRegistry.STORED_CHARGE.get(), StoredChargeComponent.DEFAULT).charge();
+        return ComponentTypeRegistry.STORED_CHARGE.getOrDefault(stack, StoredChargeComponent.DEFAULT).charge();
     }
 
     private static void addSoulDebt(ItemStack stack, int amount) {
@@ -291,7 +290,7 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
     }
 
     private static void setSoulDebt(ItemStack stack, int amount) {
-        stack.set(ComponentTypeRegistry.STORED_CHARGE.get(), new StoredChargeComponent(Math.max(0, amount)));
+        ComponentTypeRegistry.STORED_CHARGE.set(stack, new StoredChargeComponent(Math.max(0, amount)));
     }
 
     private static void spawnSoulDebtGainEffects(ServerWorld world, LivingEntity target, LivingEntity attacker, ItemStack stack) {
@@ -345,7 +344,7 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
     }
 
     @Override
-    public void appendTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
+    public void appendTooltip(ItemStack itemStack, net.minecraft.world.World world, List<Text> tooltip, net.minecraft.client.item.TooltipContext tooltipContext) {
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.stealsworditem.tooltip1").setStyle(Styles.ABILITY));
         tooltip.add(Text.translatable("item.simplyswords.stealsworditem.tooltip2").setStyle(Styles.TEXT));
@@ -353,7 +352,7 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.stealsworditem.tooltip5").setStyle(Styles.TEXT));
         appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.soulstealer.cooldown);
-        super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        super.appendTooltip(itemStack, world, tooltip, tooltipContext);
         net.sweenus.simplyswords.client.util.TooltipUtils.appendSpellScaleTooltip(tooltip, "soul");
     }
 

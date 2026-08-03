@@ -53,17 +53,17 @@ public class MagibladeWardenHeadVisualEntity extends Entity {
     }
 
     @Override
-    protected void initDataTracker(DataTracker.Builder builder) {
-        builder.add(OWNER_ENTITY_ID, -1);
-        builder.add(TARGET_ENTITY_ID, -1);
-        builder.add(TARGET_YAW, 0.0F);
-        builder.add(TARGET_PITCH, 0.0F);
-        builder.add(SCALE, 0.65F);
-        builder.add(ORBIT_PHASE, 0.0F);
-        builder.add(AIMING, false);
-        builder.add(SHOT_PULSE_TICKS, 0);
-        builder.add(DISMISSING, false);
-        builder.add(DISMISS_TICKS, 0);
+    protected void initDataTracker() {
+        this.dataTracker.startTracking(OWNER_ENTITY_ID, -1);
+        this.dataTracker.startTracking(TARGET_ENTITY_ID, -1);
+        this.dataTracker.startTracking(TARGET_YAW, 0.0F);
+        this.dataTracker.startTracking(TARGET_PITCH, 0.0F);
+        this.dataTracker.startTracking(SCALE, 0.65F);
+        this.dataTracker.startTracking(ORBIT_PHASE, 0.0F);
+        this.dataTracker.startTracking(AIMING, false);
+        this.dataTracker.startTracking(SHOT_PULSE_TICKS, 0);
+        this.dataTracker.startTracking(DISMISSING, false);
+        this.dataTracker.startTracking(DISMISS_TICKS, 0);
     }
 
     @Override

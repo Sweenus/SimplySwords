@@ -1,6 +1,6 @@
 # Getting started
 
-Simply Swords 1.21.1 uses Java 21 and Architectury. An addon may itself be
+Simply Swords 1.20.1 uses Java 17 and Architectury. An addon may itself be
 multiloader or loader-specific.
 
 ## Add the dependency
@@ -18,7 +18,7 @@ repositories {
 }
 ```
 
-Put the correct Fabric or NeoForge file ID in `gradle.properties`:
+Put the correct Fabric or Forge/NeoForge file ID in `gradle.properties`:
 
 ```properties
 simply_swords_file_id=REPLACE_WITH_FILE_ID
@@ -34,18 +34,19 @@ dependencies {
 
 File IDs are listed on the
 [Simply Swords files page](https://www.curseforge.com/minecraft/mc-mods/simply-swords/files).
-Choose a Minecraft 1.21.1 file for the same loader as the module being built.
+Choose a Minecraft 1.20.1 file for the same loader as the module being built.
+The Forge 1.20.1 jar is also used on NeoForge 1.20.1.
 
 CurseMaven does not guarantee useful transitive dependency metadata. Keep the
 normal Architectury dependency in an Architectury addon and provide Simply
 Swords' required runtime dependencies in the development run configuration.
 The authoritative dependency list is in Simply Swords' `fabric.mod.json` and
-`neoforge.mods.toml`.
+`mods.toml`.
 
 ## Declare the mod dependency
 
 Make Simply Swords a required dependency in the addon's loader metadata. This
-prevents the addon from loading without the APIs and data components it uses.
+prevents the addon from loading without the APIs and typed stack state it uses.
 
 Fabric example:
 
@@ -53,12 +54,12 @@ Fabric example:
 {
   "depends": {
     "simplyswords": ">=1.63.0",
-    "minecraft": "1.21.1"
+    "minecraft": "1.20.1"
   }
 }
 ```
 
-NeoForge example:
+Forge/NeoForge 1.20.1 example:
 
 ```toml
 [[dependencies.exampleaddon]]

@@ -43,12 +43,12 @@ public class TwistedBladeCrescendoVisualEntity extends Entity {
     }
 
     @Override
-    protected void initDataTracker(DataTracker.Builder builder) {
-        builder.add(SCALE, 1.0F);
-        builder.add(GROUND_OFFSET, 0.9F);
-        builder.add(LIFETIME, 8);
-        builder.add(EMPOWERED, false);
-        builder.add(MIRRORED, false);
+    protected void initDataTracker() {
+        this.dataTracker.startTracking(SCALE, 1.0F);
+        this.dataTracker.startTracking(GROUND_OFFSET, 0.9F);
+        this.dataTracker.startTracking(LIFETIME, 8);
+        this.dataTracker.startTracking(EMPOWERED, false);
+        this.dataTracker.startTracking(MIRRORED, false);
     }
 
     @Override

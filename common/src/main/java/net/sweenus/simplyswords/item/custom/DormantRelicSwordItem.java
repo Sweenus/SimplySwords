@@ -9,7 +9,6 @@ import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
-import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -137,11 +136,11 @@ public class DormantRelicSwordItem extends UniqueSwordItem implements UniqueWeap
     }
     @Override
     protected Identifier getConfigPath() {
-        return Identifier.of("simplyswords.unique_effects");
+        return new Identifier("simplyswords.unique_effects");
     }
 
     @Override
-    public void appendTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
+    public void appendTooltip(ItemStack itemStack, net.minecraft.world.World world, List<Text> tooltip, net.minecraft.client.item.TooltipContext tooltipContext) {
         tooltip.add(Text.literal(""));
         int awakening = AwakeningApi.getLevel(itemStack);
         boolean sunForm = isSunForm(itemStack);
@@ -161,7 +160,7 @@ public class DormantRelicSwordItem extends UniqueSwordItem implements UniqueWeap
                         : Config.uniqueEffects.harbinger.cooldown);
             }
         }
-        super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        super.appendTooltip(itemStack, world, tooltip, tooltipContext);
         if (this.asItem().equals(ItemsRegistry.DECAYING_RELIC.get())) {
             if (Screen.hasAltDown()) {
                 tooltip.add(Text.translatable("item.simplyswords.decayingrelicsworditem.tooltip1").formatted(Formatting.GRAY));

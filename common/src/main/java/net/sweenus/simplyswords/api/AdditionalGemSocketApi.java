@@ -60,7 +60,7 @@ public final class AdditionalGemSocketApi {
     public static boolean hasAdditionalSockets(ItemStack stack) {
         return stack != null
                 && !stack.isEmpty()
-                && stack.getOrDefault(ComponentTypeRegistry.ADDITIONAL_GEM_SOCKETS.get(), false);
+                && ComponentTypeRegistry.ADDITIONAL_GEM_SOCKETS.getOrDefault(stack, false);
     }
 
     //
@@ -90,7 +90,7 @@ public final class AdditionalGemSocketApi {
 
         openBothSockets(stack);
         if (!hasAdditionalSockets(stack)) {
-            stack.set(ComponentTypeRegistry.ADDITIONAL_GEM_SOCKETS.get(), true);
+            ComponentTypeRegistry.ADDITIONAL_GEM_SOCKETS.set(stack, true);
         }
         return true;
     }
@@ -103,12 +103,11 @@ public final class AdditionalGemSocketApi {
     // (Refined Storage, Create, AE2) see the stack as perpetually changed.
     //
     private static void openBothSockets(ItemStack stack) {
-        GemPowerComponent existing = stack.getOrDefault(
-                ComponentTypeRegistry.GEM_POWER.get(), GemPowerComponent.DEFAULT);
+        GemPowerComponent existing = ComponentTypeRegistry.GEM_POWER.getOrDefault(stack, GemPowerComponent.DEFAULT);
         if (existing.hasRunicPower() && existing.hasNetherPower()) {
             return;
         }
-        stack.set(ComponentTypeRegistry.GEM_POWER.get(), new GemPowerComponent(
+        ComponentTypeRegistry.GEM_POWER.set(stack, new GemPowerComponent(
                 true,
                 true,
                 existing.runicPower(),
@@ -118,16 +117,14 @@ public final class AdditionalGemSocketApi {
 
     public static GemPowerComponent getTooltipComponent(ItemStack stack) {
         if (hasAdditionalSockets(stack)) {
-            GemPowerComponent existing = stack.getOrDefault(
-                    ComponentTypeRegistry.GEM_POWER.get(), GemPowerComponent.DEFAULT);
+            GemPowerComponent existing = ComponentTypeRegistry.GEM_POWER.getOrDefault(stack, GemPowerComponent.DEFAULT);
             return new GemPowerComponent(true, true, existing.runicPower(), existing.netherPower());
         }
         if (!isConfigured(stack)) {
             return GemPowerComponent.DEFAULT;
         }
 
-        GemPowerComponent existing = stack.getOrDefault(
-                ComponentTypeRegistry.GEM_POWER.get(), GemPowerComponent.DEFAULT);
+        GemPowerComponent existing = ComponentTypeRegistry.GEM_POWER.getOrDefault(stack, GemPowerComponent.DEFAULT);
         return new GemPowerComponent(true, true, existing.runicPower(), existing.netherPower());
     }
 

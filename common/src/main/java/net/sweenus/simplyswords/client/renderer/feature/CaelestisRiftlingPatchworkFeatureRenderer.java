@@ -11,6 +11,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.client.renderer.model.CaelestisRiftlingModel;
 import net.sweenus.simplyswords.entity.CaelestisRiftlingEntity;
+import net.sweenus.simplyswords.client.renderer.LegacyRenderColor;
 
 import java.util.List;
 
@@ -18,9 +19,9 @@ public class CaelestisRiftlingPatchworkFeatureRenderer
         extends FeatureRenderer<CaelestisRiftlingEntity, CaelestisRiftlingModel> {
 
     private static final Identifier[] TEXTURES = {
-            Identifier.of("minecraft", "textures/entity/spider/spider.png"),
-            Identifier.of("minecraft", "textures/entity/spider/cave_spider.png"),
-            Identifier.of("minecraft", "textures/entity/endermite.png")
+            new Identifier("minecraft", "textures/entity/spider/spider.png"),
+            new Identifier("minecraft", "textures/entity/spider/cave_spider.png"),
+            new Identifier("minecraft", "textures/entity/endermite.png")
     };
 
     public CaelestisRiftlingPatchworkFeatureRenderer(
@@ -53,6 +54,8 @@ public class CaelestisRiftlingPatchworkFeatureRenderer
     private static void renderVisible(CaelestisRiftlingModel model, Identifier texture,
                                       MatrixStack matrices, VertexConsumerProvider vertexConsumers, int color) {
         VertexConsumer vertices = vertexConsumers.getBuffer(RenderLayer.getEntityCutoutNoCull(texture));
-        model.render(matrices, vertices, 0x00F000F0, OverlayTexture.DEFAULT_UV, color);
+        model.render(matrices, vertices, 0x00F000F0, OverlayTexture.DEFAULT_UV,
+                LegacyRenderColor.red(color), LegacyRenderColor.green(color),
+                LegacyRenderColor.blue(color), LegacyRenderColor.alpha(color));
     }
 }

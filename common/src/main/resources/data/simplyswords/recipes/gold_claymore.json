@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "#": {
+      "tag": "c:wood_sticks"
+    },
+    "X": {
+      "item": "minecraft:gold_ingot"
+    },
+    "Y": {
+      "item": "minecraft:iron_nugget"
+    }
+  },
+  "pattern": [
+    " YX",
+    "YXY",
+    "#Y "
+  ],
+  "result": {
+    "item": "simplyswords:gold_claymore",
+    "count": 1
+  }
+}

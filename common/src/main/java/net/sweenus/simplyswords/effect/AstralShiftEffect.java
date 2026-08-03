@@ -10,8 +10,7 @@ public class AstralShiftEffect extends StatusEffect {
     }
 
     @Override
-    public boolean applyUpdateEffect(LivingEntity entity, int amplifier) {
-        return true;
+    public void applyUpdateEffect(LivingEntity entity, int amplifier) {
     }
 
     @Override

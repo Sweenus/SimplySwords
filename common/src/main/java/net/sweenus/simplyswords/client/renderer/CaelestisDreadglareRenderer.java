@@ -16,7 +16,7 @@ public class CaelestisDreadglareRenderer
         extends MobEntityRenderer<CaelestisDreadglareEntity, CaelestisDreadglareModel> {
 
     private static final Identifier TEXTURE =
-            Identifier.of(SimplySwords.MOD_ID, "textures/entity/caelestis_dreadglare.png");
+            new Identifier(SimplySwords.MOD_ID, "textures/entity/caelestis_dreadglare.png");
 
     public CaelestisDreadglareRenderer(EntityRendererFactory.Context context) {
         super(context, new CaelestisDreadglareModel(

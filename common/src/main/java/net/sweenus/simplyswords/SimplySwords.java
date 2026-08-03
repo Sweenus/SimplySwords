@@ -156,15 +156,15 @@ public class SimplySwords {
     @Environment(EnvType.CLIENT)
     public static class Client {
         public static final EntityModelLayer BATTLESTANDARD_MODEL =
-                new EntityModelLayer(Identifier.of("battlestandard", "cube"), "main");
+                new EntityModelLayer(new Identifier("battlestandard", "cube"), "main");
         public static final EntityModelLayer BATTLESTANDARD_DARK_MODEL =
-                new EntityModelLayer(Identifier.of("battlestandarddark", "cube"), "main");
+                new EntityModelLayer(new Identifier("battlestandarddark", "cube"), "main");
         public static final EntityModelLayer CAELESTIS_RIFTLING_MODEL =
-                new EntityModelLayer(Identifier.of(MOD_ID, "caelestis_riftling"), "main");
+                new EntityModelLayer(new Identifier(MOD_ID, "caelestis_riftling"), "main");
         public static final EntityModelLayer CAELESTIS_DREADGLARE_MODEL =
-                new EntityModelLayer(Identifier.of(MOD_ID, "caelestis_dreadglare"), "main");
+                new EntityModelLayer(new Identifier(MOD_ID, "caelestis_dreadglare"), "main");
         public static final EntityModelLayer CAELESTIS_TENTACLE_MODEL =
-                new EntityModelLayer(Identifier.of(MOD_ID, "caelestis_tentacle"), "main");
+                new EntityModelLayer(new Identifier(MOD_ID, "caelestis_tentacle"), "main");
 
         @Environment(EnvType.CLIENT)
         public static void initializeClient() {
@@ -242,10 +242,10 @@ public class SimplySwords {
         @Environment(EnvType.CLIENT)
         public static void initializeRegistryDependentClient() {
             ItemPropertiesRegistry.register(ItemsRegistry.SLUMBERING_LICHBLADE.get(),
-                    Identifier.of(MOD_ID, "awakening"),
+                    new Identifier(MOD_ID, "awakening"),
                     (stack, world, entity, seed) -> AwakeningApi.getFormModelValue(stack));
             ItemPropertiesRegistry.register(ItemsRegistry.DORMANT_RELIC.get(),
-                    Identifier.of(MOD_ID, "relic_form"),
+                    new Identifier(MOD_ID, "relic_form"),
                     (stack, world, entity, seed) -> AwakeningApi.getFormModelValue(stack));
         }
     }

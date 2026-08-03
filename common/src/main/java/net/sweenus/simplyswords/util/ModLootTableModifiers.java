@@ -10,7 +10,10 @@ import net.minecraft.loot.LootTable;
 import net.minecraft.loot.condition.RandomChanceLootCondition;
 import net.minecraft.loot.entry.ItemEntry;
 import net.minecraft.loot.function.EnchantRandomlyLootFunction;
-import net.minecraft.loot.function.SetComponentsLootFunction;
+import net.minecraft.loot.context.LootContext;
+import net.minecraft.loot.function.LootFunction;
+import net.minecraft.loot.function.LootFunctionType;
+import net.minecraft.loot.function.LootFunctionTypes;
 import net.minecraft.loot.provider.number.ConstantLootNumberProvider;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKey;
@@ -18,6 +21,7 @@ import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.config.LootConfig;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.item.component.AwakeningComponent;
+import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.registry.ComponentTypeRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 
@@ -35,8 +39,7 @@ public class ModLootTableModifiers {
     public static void init() {
 
         //STANDARD
-        LootEvent.MODIFY_LOOT_TABLE.register(((RegistryKey<LootTable> key, LootEvent.LootTableModificationContext context, boolean builtin) -> {
-            Identifier id = key.getValue();
+        LootEvent.MODIFY_LOOT_TABLE.register(((lootManager, id, context, builtin) -> {
             if (LootConfig.INSTANCE.enableLootDrops.get() && id.getPath().contains("chests") && !id.getPath().contains("spectrum")) {
                 //System.out.println( id.getNamespace() + ":" + id.getPath()); //PRINT POSSIBLE PATHS
                 if (LootConfig.INSTANCE.enableLootInVillages.get() || !id.getPath().contains("village")) {
@@ -81,8 +84,7 @@ public class ModLootTableModifiers {
         }));
 
         //RARE
-        LootEvent.MODIFY_LOOT_TABLE.register(((RegistryKey<LootTable> key, LootEvent.LootTableModificationContext context, boolean builtin) -> {
-            Identifier id = key.getValue();
+        LootEvent.MODIFY_LOOT_TABLE.register(((lootManager, id, context, builtin) -> {
             if (LootConfig.INSTANCE.enableLootDrops.get() && id.getPath().contains("chests") && !id.getPath().contains("spectrum")) {
                 if (LootConfig.INSTANCE.enableLootInVillages.get() || !id.getPath().contains("village")) {
                     LootPool.Builder pool = LootPool.builder()
@@ -114,8 +116,7 @@ public class ModLootTableModifiers {
         // Check each loot table against the listed namespaces in the loot_config.json, if there's a match modify the
         // table according to the config. Otherwise, use the loot global loot modifiers set in the general_config.json
 
-        LootEvent.MODIFY_LOOT_TABLE.register(((RegistryKey<LootTable> key, LootEvent.LootTableModificationContext context, boolean builtin) -> {
-            Identifier id = key.getValue();
+        LootEvent.MODIFY_LOOT_TABLE.register(((lootManager, id, context, builtin) -> {
             if (LootConfig.INSTANCE.enableLootDrops.get()) {
                 Float lootChance = LootConfig.INSTANCE.uniqueLootTableOptions.get(id);
                 if (lootChance != null && lootChance > 0f && !id.getPath().contains("chests")) {
@@ -123,8 +124,7 @@ public class ModLootTableModifiers {
                     LootPool.Builder pool = LootPool.builder()
                             .rolls(ConstantLootNumberProvider.create(1))
                             .conditionally(RandomChanceLootCondition.builder(lootChance / 100))
-                            .apply(SetComponentsLootFunction.builder(
-                                    ComponentTypeRegistry.AWAKENING.get(), AwakeningComponent.DORMANT));
+                            .apply(() -> new DormantAwakeningLootFunction());
 
                     swords.get().stream()
                             .filter(item ->
@@ -195,5 +195,18 @@ public class ModLootTableModifiers {
         }
 
         return lootableItems.contains(item.asItem());
+    }
+
+    private static final class DormantAwakeningLootFunction implements LootFunction {
+        @Override
+        public LootFunctionType getType() {
+            // Internal-only function; no serializer is required.
+            return LootFunctionTypes.SET_NBT;
+        }
+
+        @Override
+        public net.minecraft.item.ItemStack apply(net.minecraft.item.ItemStack stack, LootContext context) {
+            return AwakeningApi.initializeNaturalDrop(stack);
+        }
     }
 }

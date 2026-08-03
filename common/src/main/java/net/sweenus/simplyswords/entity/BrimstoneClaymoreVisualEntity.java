@@ -33,11 +33,11 @@ public class BrimstoneClaymoreVisualEntity extends Entity {
     }
 
     @Override
-    protected void initDataTracker(DataTracker.Builder builder) {
-        builder.add(RADIUS, 2.5F);
-        builder.add(SCALE, 1.0F);
-        builder.add(PLUNGING, false);
-        builder.add(PLUNGE_START_AGE, 0);
+    protected void initDataTracker() {
+        this.dataTracker.startTracking(RADIUS, 2.5F);
+        this.dataTracker.startTracking(SCALE, 1.0F);
+        this.dataTracker.startTracking(PLUNGING, false);
+        this.dataTracker.startTracking(PLUNGE_START_AGE, 0);
     }
 
     @Override

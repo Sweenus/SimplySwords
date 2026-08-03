@@ -1,7 +1,8 @@
 # Simply Swords addon developer documentation
 
 These documents explain how an addon can build weapons that behave like Simply
-Swords' built-in unique weapons. They target Minecraft 1.21.1 and Java 21.
+Swords' built-in unique weapons. This branch targets Minecraft 1.20.1 and Java
+17.
 
 Start here:
 
@@ -35,8 +36,8 @@ Register addon items normally, then register their Simply Swords integrations
 during common initialization. Client model properties and other rendering hooks
 belong in the addon's client initializer.
 
-Simply Swords must be a required dependency so its registries and components
-exist before addon content is used.
+Simply Swords must be a required dependency so its registries and typed stack
+state APIs exist before addon content is used.
 
 ## Documents
 

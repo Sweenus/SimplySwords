@@ -8,7 +8,6 @@ import net.minecraft.inventory.StackReference;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.SwordItem;
 import net.minecraft.item.ToolMaterial;
-import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -34,11 +33,12 @@ public abstract class UniqueSwordItem extends SwordItem {
     String iRarity = "UNIQUE";
 
     public UniqueSwordItem(ToolMaterial toolMaterial, Settings settings) {
-        super(toolMaterial, settings.fireproof());
+        super(toolMaterial, LegacyWeaponAttributes.attackDamage(settings),
+                LegacyWeaponAttributes.attackSpeed(settings), settings.fireproof());
     }
 
     @Override
-    public int getMaxUseTime(ItemStack stack, LivingEntity user) {
+    public int getMaxUseTime(ItemStack stack) {
         return 0;
     }
 
@@ -117,9 +117,9 @@ public abstract class UniqueSwordItem extends SwordItem {
     }
 
     @Override
-    public void appendTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
+    public void appendTooltip(ItemStack itemStack, net.minecraft.world.World world, List<Text> tooltip, net.minecraft.client.item.TooltipContext tooltipContext) {
         tooltip.addAll(WeaponImplicitRegistry.buildTooltipLines(itemStack, Screen.hasAltDown()));
-        generateDynamicTooltip(itemStack, tooltipContext, tooltip, type);
+        generateDynamicTooltip(itemStack, world, tooltip, tooltipContext);
     }
 
     protected static void appendAbilityCooldownTooltip(List<Text> tooltip, int cooldownTicks) {
@@ -134,12 +134,12 @@ public abstract class UniqueSwordItem extends SwordItem {
     }
 
     protected Identifier getConfigPath() {
-        return Identifier.of("simplyswords.unique_effects."+ this.asItem().getRegistryEntry().registryKey().getValue().getPath());
+        return new Identifier("simplyswords.unique_effects."+ this.asItem().getRegistryEntry().registryKey().getValue().getPath());
     }
 
     // Override this with your own id & paths
-    protected void generateDynamicTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
-        SimplySwordsClientAPI.generateDynamicTooltip(itemStack, tooltipContext, tooltip, type,
+    protected void generateDynamicTooltip(ItemStack itemStack, net.minecraft.world.World world, List<Text> tooltip, net.minecraft.client.item.TooltipContext tooltipContext) {
+        SimplySwordsClientAPI.generateDynamicTooltip(itemStack, world, tooltip, tooltipContext,
                 SimplySwords.MOD_ID,
                 "oracle_index:books/simplyswords/weapon-types",
                 "oracle_index:books/simplyswords/unique-weapons",

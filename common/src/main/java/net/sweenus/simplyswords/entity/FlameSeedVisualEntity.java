@@ -26,8 +26,8 @@ public class FlameSeedVisualEntity extends Entity {
     }
 
     @Override
-    protected void initDataTracker(DataTracker.Builder builder) {
-        builder.add(SCALE, 1.0F);
+    protected void initDataTracker() {
+        this.dataTracker.startTracking(SCALE, 1.0F);
     }
 
     public void setScale(float scale) {

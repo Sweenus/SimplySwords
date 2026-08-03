@@ -1,0 +1,16 @@
+{
+  "type": "simplyswords:smithing_reroll",
+  "base": {
+    "item": "simplyswords:runic_greathammer"
+  },
+  "addition": {
+    "item": "minecraft:diamond"
+  },
+  "result": {
+    "item": "simplyswords:runic_greathammer",
+    "count": 1
+  },
+  "template": {
+    "item": "simplyswords:runic_tablet"
+  }
+}

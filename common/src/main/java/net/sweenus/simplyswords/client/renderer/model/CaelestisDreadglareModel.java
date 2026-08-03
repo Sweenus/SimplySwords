@@ -71,8 +71,8 @@ public class CaelestisDreadglareModel extends EntityModel<CaelestisDreadglareEnt
 
     @Override
     public void render(MatrixStack matrices, VertexConsumer vertexConsumer,
-                       int light, int overlay, int color) {
-        this.core.render(matrices, vertexConsumer, light, overlay, color);
-        this.growths.render(matrices, vertexConsumer, light, overlay, color);
+                       int light, int overlay, float red, float green, float blue, float alpha) {
+        this.core.render(matrices, vertexConsumer, light, overlay, red, green, blue, alpha);
+        this.growths.render(matrices, vertexConsumer, light, overlay, red, green, blue, alpha);
     }
 }

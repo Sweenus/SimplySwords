@@ -1,32 +1,45 @@
 package net.sweenus.simplyswords.registry;
 
-import dev.architectury.registry.registries.DeferredRegister;
-import dev.architectury.registry.registries.RegistrySupplier;
 import com.mojang.serialization.Codec;
-import net.minecraft.component.ComponentType;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.registry.RegistryKeys;
+import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.item.component.*;
 import net.sweenus.simplyswords.power.GemPowerComponent;
 
-public class ComponentTypeRegistry {
+/**
+ * Typed item-stack state used by the 1.20.1 backport.
+ *
+ * The field names intentionally match the 1.21 data-component registry so
+ * shared gameplay code and addon-facing concepts remain equivalent.
+ */
+public final class ComponentTypeRegistry {
+    public static final NoopRegistrar COMPONENT_TYPES = new NoopRegistrar();
 
-    public static final DeferredRegister<ComponentType<?>> COMPONENT_TYPES = DeferredRegister.create(SimplySwords.MOD_ID, RegistryKeys.DATA_COMPONENT_TYPE);
+    public static final StackComponentKey<GemPowerComponent> GEM_POWER = key("gem_power", GemPowerComponent.CODEC);
+    public static final StackComponentKey<Boolean> ADDITIONAL_GEM_SOCKETS = key("additional_gem_sockets", Codec.BOOL);
+    public static final StackComponentKey<StoredChargeComponent> STORED_CHARGE = key("stored_charge", StoredChargeComponent.CODEC);
+    public static final StackComponentKey<StoredChargeComponent> STORED_BONUS = key("stored_bonus", StoredChargeComponent.CODEC);
+    public static final StackComponentKey<ChargedLocationComponent> CHARGED_LOCATION = key("charged_location", ChargedLocationComponent.CODEC);
+    public static final StackComponentKey<TargetedLocationComponent> TARGETED_LOCATION = key("targeted_location", TargetedLocationComponent.CODEC);
+    public static final StackComponentKey<RelocationComponent> RELOCATION = key("relocation", RelocationComponent.CODEC);
+    public static final StackComponentKey<MoltenParticleComponent> MOLTEN_PARTICLE = key("molten_particle", MoltenParticleComponent.CODEC);
+    public static final StackComponentKey<MoltenHeatComponent> MOLTEN_HEAT = key("molten_heat", MoltenHeatComponent.CODEC);
+    public static final StackComponentKey<ParryComponent> PARRY = key("parry", ParryComponent.CODEC);
+    public static final StackComponentKey<WeaponImplicitComponent> WEAPON_IMPLICIT = key("weapon_implicit", WeaponImplicitComponent.CODEC);
+    public static final StackComponentKey<AwakeningComponent> AWAKENING = key("awakening", AwakeningComponent.CODEC);
+    public static final StackComponentKey<AwakeningRouteComponent> AWAKENING_ROUTE = key("awakening_route", AwakeningRouteComponent.CODEC);
+    public static final StackComponentKey<RelicAttunementComponent> RELIC_ATTUNEMENT = key("relic_attunement", RelicAttunementComponent.CODEC);
 
-    public static final RegistrySupplier<ComponentType<GemPowerComponent>> GEM_POWER = COMPONENT_TYPES.register("gem_power", () -> ComponentType.<GemPowerComponent>builder().codec(GemPowerComponent.CODEC).packetCodec(GemPowerComponent.PACKET_CODEC).build());
-    public static final RegistrySupplier<ComponentType<Boolean>> ADDITIONAL_GEM_SOCKETS = COMPONENT_TYPES.register("additional_gem_sockets", () -> ComponentType.<Boolean>builder().codec(Codec.BOOL).packetCodec(PacketCodecs.BOOL).build());
-    public static final RegistrySupplier<ComponentType<StoredChargeComponent>> STORED_CHARGE = COMPONENT_TYPES.register("stored_charge", () -> ComponentType.<StoredChargeComponent>builder().codec(StoredChargeComponent.CODEC).packetCodec(StoredChargeComponent.PACKET_CODEC).build());
-    public static final RegistrySupplier<ComponentType<StoredChargeComponent>> STORED_BONUS = COMPONENT_TYPES.register("stored_bonus", () -> ComponentType.<StoredChargeComponent>builder().codec(StoredChargeComponent.CODEC).packetCodec(StoredChargeComponent.PACKET_CODEC).build());
-    public static final RegistrySupplier<ComponentType<ChargedLocationComponent>> CHARGED_LOCATION = COMPONENT_TYPES.register("charged_location", () -> ComponentType.<ChargedLocationComponent>builder().codec(ChargedLocationComponent.CODEC).packetCodec(ChargedLocationComponent.PACKET_CODEC).build());
-    public static final RegistrySupplier<ComponentType<TargetedLocationComponent>> TARGETED_LOCATION = COMPONENT_TYPES.register("targeted_location", () -> ComponentType.<TargetedLocationComponent>builder().codec(TargetedLocationComponent.CODEC).packetCodec(TargetedLocationComponent.PACKET_CODEC).build());
-    public static final RegistrySupplier<ComponentType<RelocationComponent>> RELOCATION = COMPONENT_TYPES.register("relocation", () -> ComponentType.<RelocationComponent>builder().codec(RelocationComponent.CODEC).packetCodec(RelocationComponent.PACKET_CODEC).build());
-    public static final RegistrySupplier<ComponentType<MoltenParticleComponent>> MOLTEN_PARTICLE = COMPONENT_TYPES.register("molten_particle", () -> ComponentType.<MoltenParticleComponent>builder().codec(MoltenParticleComponent.CODEC).packetCodec(MoltenParticleComponent.PACKET_CODEC).build());
-    public static final RegistrySupplier<ComponentType<MoltenHeatComponent>> MOLTEN_HEAT = COMPONENT_TYPES.register("molten_heat", () -> ComponentType.<MoltenHeatComponent>builder().codec(MoltenHeatComponent.CODEC).packetCodec(MoltenHeatComponent.PACKET_CODEC).build());
-    public static final RegistrySupplier<ComponentType<ParryComponent>> PARRY = COMPONENT_TYPES.register("parry", () -> ComponentType.<ParryComponent>builder().codec(ParryComponent.CODEC).packetCodec(ParryComponent.PACKET_CODEC).build());
-    public static final RegistrySupplier<ComponentType<WeaponImplicitComponent>> WEAPON_IMPLICIT = COMPONENT_TYPES.register("weapon_implicit", () -> ComponentType.<WeaponImplicitComponent>builder().codec(WeaponImplicitComponent.CODEC).packetCodec(WeaponImplicitComponent.PACKET_CODEC).build());
-    public static final RegistrySupplier<ComponentType<AwakeningComponent>> AWAKENING = COMPONENT_TYPES.register("awakening", () -> ComponentType.<AwakeningComponent>builder().codec(AwakeningComponent.CODEC).packetCodec(AwakeningComponent.PACKET_CODEC).build());
-    public static final RegistrySupplier<ComponentType<AwakeningRouteComponent>> AWAKENING_ROUTE = COMPONENT_TYPES.register("awakening_route", () -> ComponentType.<AwakeningRouteComponent>builder().codec(AwakeningRouteComponent.CODEC).packetCodec(AwakeningRouteComponent.PACKET_CODEC).build());
-    public static final RegistrySupplier<ComponentType<RelicAttunementComponent>> RELIC_ATTUNEMENT = COMPONENT_TYPES.register("relic_attunement", () -> ComponentType.<RelicAttunementComponent>builder().codec(RelicAttunementComponent.CODEC).packetCodec(RelicAttunementComponent.PACKET_CODEC).build());
+    private ComponentTypeRegistry() {
+    }
 
+    private static <T> StackComponentKey<T> key(String path, Codec<T> codec) {
+        return new StackComponentKey<>(new Identifier(SimplySwords.MOD_ID, path), codec);
+    }
+
+    public static final class NoopRegistrar {
+        public void register() {
+            // Data component types are native only to newer Minecraft versions.
+        }
+    }
 }

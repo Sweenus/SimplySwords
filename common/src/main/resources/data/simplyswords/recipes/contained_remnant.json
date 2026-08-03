@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "#": {
+      "item": "minecraft:iron_ingot"
+    },
+    "O": {
+      "item": "simplyswords:empowered_remnant"
+    },
+    "S": {
+      "item": "minecraft:glass"
+    }
+  },
+  "pattern": [
+    "#O#",
+    "SOS",
+    "#O#"
+  ],
+  "result": {
+    "item": "simplyswords:contained_remnant",
+    "count": 1
+  }
+}

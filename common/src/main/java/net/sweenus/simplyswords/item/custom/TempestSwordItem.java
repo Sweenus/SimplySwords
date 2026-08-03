@@ -9,7 +9,6 @@ import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
-import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
@@ -55,7 +54,7 @@ public class TempestSwordItem extends UniqueSwordItem implements UniqueWeaponAct
             HelperMethods.playHitSounds(attacker, target);
             SoundEvent soundSelect;
             ParticleEffect particleSelect;
-            RegistryEntry<StatusEffect> statusSelect;
+            StatusEffect statusSelect;
 
             List<SoundEvent> sounds = new ArrayList<>();
             sounds.add(SoundRegistry.SPELL_FIRE.get());
@@ -69,7 +68,7 @@ public class TempestSwordItem extends UniqueSwordItem implements UniqueWeaponAct
             particles.add(ParticleTypes.SMOKE);
             particles.add(ParticleTypes.CLOUD);
 
-            List<RegistryEntry<StatusEffect>> status = new ArrayList<>();
+            List<StatusEffect> status = new ArrayList<>();
             status.add(EffectRegistry.getReference(EffectRegistry.FIRE_VORTEX));
             status.add(EffectRegistry.getReference(EffectRegistry.FROST_VORTEX));
             status.add(EffectRegistry.getReference(EffectRegistry.FIRE_VORTEX));
@@ -196,14 +195,14 @@ public class TempestSwordItem extends UniqueSwordItem implements UniqueWeaponAct
 
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
-        HelperMethods.createFootfalls(entity, stack, world, ParticleTypes.DUST_PLUME,
-                ParticleTypes.DUST_PLUME, ParticleTypes.DUST_PLUME, true);
+        HelperMethods.createFootfalls(entity, stack, world, ParticleTypes.POOF,
+                ParticleTypes.POOF, ParticleTypes.POOF, true);
 
         super.inventoryTick(stack, world, entity, slot, selected);
     }
 
     @Override
-    public void appendTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
+    public void appendTooltip(ItemStack itemStack, net.minecraft.world.World world, List<Text> tooltip, net.minecraft.client.item.TooltipContext tooltipContext) {
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.tempestsworditem.tooltip1").setStyle(Styles.ABILITY));
         tooltip.add(Text.translatable("item.simplyswords.tempestsworditem.tooltip2").setStyle(Styles.TEXT));
@@ -213,7 +212,7 @@ public class TempestSwordItem extends UniqueSwordItem implements UniqueWeaponAct
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.tempestsworditem.tooltip7").setStyle(Styles.TEXT));
         appendAbilityCooldownTooltip(tooltip, 200);
-        super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        super.appendTooltip(itemStack, world, tooltip, tooltipContext);
         TooltipUtils.appendSpellScaleTooltip(tooltip, "frost_fire");
     }
 

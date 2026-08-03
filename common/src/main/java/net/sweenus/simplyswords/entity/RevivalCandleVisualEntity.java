@@ -35,11 +35,11 @@ public class RevivalCandleVisualEntity extends Entity {
     }
 
     @Override
-    protected void initDataTracker(DataTracker.Builder builder) {
-        builder.add(OWNER_ENTITY_ID, -1);
-        builder.add(WEAPON_TYPE, 0);
-        builder.add(SCALE, 1.0F);
-        builder.add(ACTIVATING, false);
+    protected void initDataTracker() {
+        this.dataTracker.startTracking(OWNER_ENTITY_ID, -1);
+        this.dataTracker.startTracking(WEAPON_TYPE, 0);
+        this.dataTracker.startTracking(SCALE, 1.0F);
+        this.dataTracker.startTracking(ACTIVATING, false);
     }
 
     public UUID getOwnerUuid() {

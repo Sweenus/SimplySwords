@@ -29,7 +29,7 @@ public class MagistormEffect extends HighOrbitingEffect {
         width = 4;
     }
     @Override
-    public boolean applyUpdateEffect(LivingEntity livingEntity, int amplifier) {
+    public void applyUpdateEffect(LivingEntity livingEntity, int amplifier) {
         if (!livingEntity.getWorld().isClient()) {
             ServerWorld world = (ServerWorld) livingEntity.getWorld();
             double x = livingEntity.getX();
@@ -75,7 +75,6 @@ public class MagistormEffect extends HighOrbitingEffect {
         }
 
         super.applyUpdateEffect(livingEntity, amplifier);
-        return true;
     }
 
 

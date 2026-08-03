@@ -9,7 +9,7 @@ import net.sweenus.simplyswords.SimplySwords;
 public class GuiConfig extends Config {
 
     public GuiConfig() {
-        super(Identifier.of(SimplySwords.MOD_ID, "gui"));
+        super(new Identifier(SimplySwords.MOD_ID, "gui"));
     }
 
     @ValidatedInt.Restrict(min = -2000, max = 2000)

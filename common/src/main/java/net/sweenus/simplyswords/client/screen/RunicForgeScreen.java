@@ -17,7 +17,7 @@ import java.util.List;
 
 public class RunicForgeScreen extends HandledScreen<RunicForgeScreenHandler> {
     private static final Identifier TEXTURE =
-            Identifier.of(SimplySwords.MOD_ID, "textures/gui/container/runic_forge.png");
+            new Identifier(SimplySwords.MOD_ID, "textures/gui/container/runic_forge.png");
     private static final long CHANNEL_DURATION_MS = 800L;
     private static final int GLOW = 0xCC74E7FF;
     private static final int GLOW_SOFT = 0x5574E7FF;
@@ -142,7 +142,7 @@ public class RunicForgeScreen extends HandledScreen<RunicForgeScreenHandler> {
             }
         }
         if (samples.isEmpty()) return;
-        int head = Math.clamp(Math.round((samples.size() - 1) * progress), 0, samples.size() - 1);
+        int head = net.minecraft.util.math.MathHelper.clamp(Math.round((samples.size() - 1) * progress), 0, samples.size() - 1);
         int tail = Math.max(0, head - 16);
         for (int i = tail; i <= head; i++) {
             int x = samples.get(i)[0];
@@ -161,7 +161,7 @@ public class RunicForgeScreen extends HandledScreen<RunicForgeScreenHandler> {
     }
 
     private static int withAlpha(int color, float multiplier) {
-        int alpha = Math.clamp(Math.round(((color >>> 24) & 0xFF) * multiplier), 0, 255);
+        int alpha = net.minecraft.util.math.MathHelper.clamp(Math.round(((color >>> 24) & 0xFF) * multiplier), 0, 255);
         return (color & 0x00FFFFFF) | (alpha << 24);
     }
 }

@@ -102,7 +102,7 @@ public final class CaelestisBreachManager {
         BreachProfile profile = BreachProfile.capture(actor instanceof PlayerEntity);
         int duration = profile.duration;
         boolean betrayalPending = world.random.nextInt(100)
-                < Math.clamp(Config.uniqueEffects.caelestis.betrayalChance, 0, 100);
+                < net.minecraft.util.math.MathHelper.clamp(Config.uniqueEffects.caelestis.betrayalChance, 0, 100);
         long betrayalTick = now + getBetrayalDelay(world, profile);
         float baseDamage = HelperMethods.abilityScaledDamage(
                 "eldritch",
@@ -579,7 +579,7 @@ public final class CaelestisBreachManager {
                         && candidate.getBoundingBox().intersects(contactBox)
                         && isTentacleHostile(world, breach, candidate))) {
             int duration = Math.max(1, Config.uniqueEffects.caelestis.tentacleSlowDuration);
-            int amplifier = Math.clamp(
+            int amplifier = net.minecraft.util.math.MathHelper.clamp(
                     Config.uniqueEffects.caelestis.tentacleSlowAmplifier, 0, 4);
             target.addStatusEffect(
                     new StatusEffectInstance(
@@ -973,7 +973,7 @@ public final class CaelestisBreachManager {
             return;
         }
         mob.addCommandTag(UNBOUND_REWARD_ROLLED_TAG);
-        int chance = Math.clamp(Config.uniqueEffects.caelestis.unboundTabletDropChance, 0, 100);
+        int chance = net.minecraft.util.math.MathHelper.clamp(Config.uniqueEffects.caelestis.unboundTabletDropChance, 0, 100);
         if (chance > 0 && world.random.nextInt(100) < chance) {
             mob.dropStack(new ItemStack(ItemsRegistry.RUNIC_TABLET.get()), mob.getHeight() * 0.5F);
         }
@@ -1282,11 +1282,11 @@ public final class CaelestisBreachManager {
             float scale = reduced ? 0.5F : 1.0F;
             int duration = Math.max(2, Math.round(Math.max(2,
                     Config.uniqueEffects.caelestis.duration) * scale));
-            int collapse = Math.clamp(Math.max(1, Math.round(
+            int collapse = net.minecraft.util.math.MathHelper.clamp(Math.max(1, Math.round(
                             Config.uniqueEffects.caelestis.collapseDuration * scale)),
                     1, duration - 1);
             int preCollapse = Math.max(1, duration - collapse);
-            int expansion = Math.clamp(Math.max(1, Math.round(
+            int expansion = net.minecraft.util.math.MathHelper.clamp(Math.max(1, Math.round(
                             Config.uniqueEffects.caelestis.expansionDuration * scale)),
                     1, preCollapse);
             int minWave = scaledCount(Config.uniqueEffects.caelestis.minSpawnPerWave, scale);

@@ -57,10 +57,10 @@ public class RunicSlashProjectileEntity extends Entity {
     }
 
     @Override
-    protected void initDataTracker(DataTracker.Builder builder) {
-        builder.add(WEAPON_STACK, ItemStack.EMPTY);
-        builder.add(OWNER_ID, -1);
-        builder.add(WIDTH, 1.15F);
+    protected void initDataTracker() {
+        this.dataTracker.startTracking(WEAPON_STACK, ItemStack.EMPTY);
+        this.dataTracker.startTracking(OWNER_ID, -1);
+        this.dataTracker.startTracking(WIDTH, 1.15F);
     }
 
     @Override
@@ -158,7 +158,7 @@ public class RunicSlashProjectileEntity extends Entity {
         this.traveled = nbt.getDouble("traveled");
         this.damage = nbt.getFloat("damage");
         if (nbt.contains("weapon_stack")) {
-            this.dataTracker.set(WEAPON_STACK, ItemStack.fromNbt(this.getRegistryManager(), nbt.getCompound("weapon_stack")).orElse(ItemStack.EMPTY));
+            this.dataTracker.set(WEAPON_STACK, ItemStack.fromNbt(nbt.getCompound("weapon_stack")));
         }
         if (nbt.contains("owner_id")) {
             this.dataTracker.set(OWNER_ID, nbt.getInt("owner_id"));
@@ -178,7 +178,7 @@ public class RunicSlashProjectileEntity extends Entity {
         nbt.putFloat("damage", this.damage);
         ItemStack stack = this.dataTracker.get(WEAPON_STACK);
         if (!stack.isEmpty()) {
-            nbt.put("weapon_stack", stack.encode(this.getRegistryManager()));
+            nbt.put("weapon_stack", stack.writeNbt(new NbtCompound()));
         }
         nbt.putInt("owner_id", this.dataTracker.get(OWNER_ID));
         nbt.putFloat("width", this.dataTracker.get(WIDTH));

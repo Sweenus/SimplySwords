@@ -123,7 +123,7 @@ public abstract class PlayerEntityMixin {
     private void simplyswords$resetDroppedMoltenEdge(ItemStack stack, boolean throwRandomly, boolean retainOwnership, CallbackInfoReturnable<ItemEntity> cir) {
         PlayerEntity player = (PlayerEntity) (Object) this;
         if (!player.getWorld().isClient() && stack.isOf(ItemsRegistry.MOLTEN_EDGE.get())) {
-            stack.set(ComponentTypeRegistry.MOLTEN_HEAT.get(), MoltenHeatComponent.DEFAULT);
+            ComponentTypeRegistry.MOLTEN_HEAT.set(stack, MoltenHeatComponent.DEFAULT);
             MoltenEdgeAbilityManager.cancelVent(player, stack);
         }
     }

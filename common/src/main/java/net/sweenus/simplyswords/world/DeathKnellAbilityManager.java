@@ -168,7 +168,7 @@ public final class DeathKnellAbilityManager {
 
     private static List<CarriedAilment> tryConvertEffects(ServerWorld world, LivingEntity actor,
                                                            LivingEntity target, long now) {
-        int chance = Math.clamp(Config.uniqueEffects.toxic_longsword.chance, 0, 100);
+        int chance = net.minecraft.util.math.MathHelper.clamp(Config.uniqueEffects.toxic_longsword.chance, 0, 100);
         if (chance <= 0 || actor.getRandom().nextInt(100) >= chance) {
             return List.of();
         }
@@ -211,7 +211,7 @@ public final class DeathKnellAbilityManager {
 
     private static void scheduleToll(ServerWorld world, Outbreak outbreak, FeverKey key,
                                      LivingEntity target,
-                                     Map<RegistryEntry<StatusEffect>, CarriedAilment> ailments,
+                                     Map<StatusEffect, CarriedAilment> ailments,
                                      int depth, int windupTicks) {
         if (outbreak.scheduledTolls >= outbreak.maximumTolls
                 || !outbreak.queuedTargetIds.add(target.getUuid())) {
@@ -426,12 +426,12 @@ public final class DeathKnellAbilityManager {
 
     private static void applyCarriedAilments(ServerWorld world, LivingEntity actor,
                                               LivingEntity target,
-                                              Map<RegistryEntry<StatusEffect>, CarriedAilment> ailments) {
+                                              Map<StatusEffect, CarriedAilment> ailments) {
         if (ailments.isEmpty()) {
             return;
         }
         long now = world.getTime();
-        float multiplier = Math.clamp(
+        float multiplier = net.minecraft.util.math.MathHelper.clamp(
                 Config.uniqueEffects.toxic_longsword.copiedAilmentDurationMultiplier,
                 0.0F,
                 1.0F
@@ -549,7 +549,7 @@ public final class DeathKnellAbilityManager {
         return Math.max(1, Config.uniqueEffects.toxic_longsword.feverThreshold);
     }
 
-    private static void mergeAilments(Map<RegistryEntry<StatusEffect>, CarriedAilment> destination,
+    private static void mergeAilments(Map<StatusEffect, CarriedAilment> destination,
                                       List<CarriedAilment> additions) {
         for (CarriedAilment addition : additions) {
             destination.merge(
@@ -564,7 +564,7 @@ public final class DeathKnellAbilityManager {
         }
     }
 
-    private static void pruneExpiredAilments(Map<RegistryEntry<StatusEffect>, CarriedAilment> ailments,
+    private static void pruneExpiredAilments(Map<StatusEffect, CarriedAilment> ailments,
                                              long now) {
         ailments.values().removeIf(ailment ->
                 ailment.expiresAt != Long.MAX_VALUE && ailment.expiresAt <= now);
@@ -677,7 +677,7 @@ public final class DeathKnellAbilityManager {
 
     private static void spawnSpreadTrail(ServerWorld world, Vec3d start, Vec3d end) {
         double distance = start.distanceTo(end);
-        int points = Math.clamp((int) Math.ceil(distance * 2.2), 2, 14);
+        int points = net.minecraft.util.math.MathHelper.clamp((int) Math.ceil(distance * 2.2), 2, 14);
         for (int i = 1; i < points; i++) {
             double t = i / (double) points;
             Vec3d position = start.lerp(end, t).add(
@@ -700,7 +700,7 @@ public final class DeathKnellAbilityManager {
     }
 
     private static void playTollSound(ServerWorld world, Vec3d center, int depth) {
-        float pitch = Math.clamp(0.54F + depth * 0.065F, 0.54F, 0.88F);
+        float pitch = net.minecraft.util.math.MathHelper.clamp(0.54F + depth * 0.065F, 0.54F, 0.88F);
         float volume = Math.max(0.65F, 1.25F - depth * 0.08F);
         world.playSound(
                 null,
@@ -737,14 +737,14 @@ public final class DeathKnellAbilityManager {
     private record FeverKey(UUID actorId, UUID targetId) {
     }
 
-    private record ConversionMapping(RegistryEntry<StatusEffect> positive,
-                                     RegistryEntry<StatusEffect> negative,
+    private record ConversionMapping(StatusEffect positive,
+                                     StatusEffect negative,
                                      int amplifierDivisor,
                                      boolean instant,
                                      boolean copyOnToll) {
     }
 
-    private record CarriedAilment(RegistryEntry<StatusEffect> effect,
+    private record CarriedAilment(StatusEffect effect,
                                   int amplifier,
                                   long expiresAt) {
     }
@@ -755,7 +755,7 @@ public final class DeathKnellAbilityManager {
         private UUID sourcePlayerId;
         private UUID visualId;
         private ItemStack stack = ItemStack.EMPTY;
-        private final Map<RegistryEntry<StatusEffect>, CarriedAilment> ailments = new HashMap<>();
+        private final Map<StatusEffect, CarriedAilment> ailments = new HashMap<>();
     }
 
     private static final class PendingToll {
@@ -763,11 +763,11 @@ public final class DeathKnellAbilityManager {
         private final UUID targetId;
         private final long executeAt;
         private final int depth;
-        private final Map<RegistryEntry<StatusEffect>, CarriedAilment> ailments;
+        private final Map<StatusEffect, CarriedAilment> ailments;
         private final UUID visualId;
 
         private PendingToll(FeverKey key, UUID targetId, long executeAt, int depth,
-                            Map<RegistryEntry<StatusEffect>, CarriedAilment> ailments,
+                            Map<StatusEffect, CarriedAilment> ailments,
                             UUID visualId) {
             this.key = key;
             this.targetId = targetId;

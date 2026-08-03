@@ -2,9 +2,6 @@ package net.sweenus.simplyswords.item.component;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
 
 public record ChargedLocationComponent(int charge, double lastX, double lastY, double lastZ) {
 
@@ -26,16 +23,5 @@ public record ChargedLocationComponent(int charge, double lastX, double lastY, d
 						Codec.DOUBLE.fieldOf("z").forGetter(ChargedLocationComponent::lastZ)
 				).apply(instance, ChargedLocationComponent::new));
 
-	public static PacketCodec<RegistryByteBuf, ChargedLocationComponent> PACKET_CODEC = PacketCodec.tuple(
-			PacketCodecs.INTEGER,
-			ChargedLocationComponent::charge,
-			PacketCodecs.DOUBLE,
-			ChargedLocationComponent::lastX,
-			PacketCodecs.DOUBLE,
-			ChargedLocationComponent::lastY,
-			PacketCodecs.DOUBLE,
-			ChargedLocationComponent::lastZ,
-			ChargedLocationComponent::new
-	);
 
 }

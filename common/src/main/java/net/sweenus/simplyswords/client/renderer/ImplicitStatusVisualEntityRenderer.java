@@ -12,7 +12,7 @@ import org.joml.Matrix4f;
 
 public class ImplicitStatusVisualEntityRenderer extends EntityRenderer<ImplicitStatusVisualEntity> {
 
-    private static final Identifier SUNDERED_ARMOR_TEXTURE = Identifier.of("simplyswords", "textures/mob_effect/sundered_armor.png");
+    private static final Identifier SUNDERED_ARMOR_TEXTURE = new Identifier("simplyswords", "textures/mob_effect/sundered_armor.png");
 
     public ImplicitStatusVisualEntityRenderer(EntityRendererFactory.Context context) {
         super(context);
@@ -70,6 +70,6 @@ public class ImplicitStatusVisualEntityRenderer extends EntityRenderer<ImplicitS
                 .texture(u, v)
                 .overlay(OverlayTexture.DEFAULT_UV)
                 .light(LightmapTextureManager.MAX_LIGHT_COORDINATE)
-                .normal(0.0F, 1.0F, 0.0F);
+                .normal(0.0F, 1.0F, 0.0F).next();
     }
 }

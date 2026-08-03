@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "#": {
+      "tag": "c:wood_sticks"
+    },
+    "X": {
+      "item": "minecraft:diamond"
+    },
+    "Y": {
+      "item": "minecraft:iron_nugget"
+    }
+  },
+  "pattern": [
+    " Y",
+    "XX",
+    "# "
+  ],
+  "result": {
+    "item": "simplyswords:diamond_cutlass",
+    "count": 1
+  }
+}

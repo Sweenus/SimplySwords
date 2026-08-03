@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "#": {
+      "tag": "c:wood_sticks"
+    },
+    "X": {
+      "item": "minecraft:diamond"
+    }
+  },
+  "pattern": [
+    "   ",
+    "#XX",
+    "   "
+  ],
+  "result": {
+    "item": "simplyswords:diamond_katana",
+    "count": 1
+  }
+}

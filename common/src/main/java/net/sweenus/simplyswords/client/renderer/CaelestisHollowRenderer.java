@@ -17,7 +17,7 @@ public class CaelestisHollowRenderer
         extends ZombieBaseEntityRenderer<CaelestisHollowEntity, CaelestisHollowModel> {
 
     private static final Identifier FALLBACK_TEXTURE =
-            Identifier.of("minecraft", "textures/entity/zombie/zombie.png");
+            new Identifier("minecraft", "textures/entity/zombie/zombie.png");
 
     public CaelestisHollowRenderer(EntityRendererFactory.Context context) {
         super(

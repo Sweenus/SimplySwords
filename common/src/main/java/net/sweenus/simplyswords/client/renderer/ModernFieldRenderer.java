@@ -257,10 +257,10 @@ public final class ModernFieldRenderer {
             float nextOuterX = (float) (Math.cos(nextAngle) * outerRadius);
             float nextOuterZ = (float) (Math.sin(nextAngle) * outerRadius);
 
-            vertices.vertex(matrix, innerX, Y_OFFSET, innerZ).color(red, green, blue, alpha);
-            vertices.vertex(matrix, outerX, Y_OFFSET, outerZ).color(red, green, blue, alpha);
-            vertices.vertex(matrix, nextOuterX, Y_OFFSET, nextOuterZ).color(red, green, blue, alpha);
-            vertices.vertex(matrix, nextInnerX, Y_OFFSET, nextInnerZ).color(red, green, blue, alpha);
+            vertices.vertex(matrix, innerX, Y_OFFSET, innerZ).color(red, green, blue, alpha).next();
+            vertices.vertex(matrix, outerX, Y_OFFSET, outerZ).color(red, green, blue, alpha).next();
+            vertices.vertex(matrix, nextOuterX, Y_OFFSET, nextOuterZ).color(red, green, blue, alpha).next();
+            vertices.vertex(matrix, nextInnerX, Y_OFFSET, nextInnerZ).color(red, green, blue, alpha).next();
         }
     }
 
@@ -307,10 +307,10 @@ public final class ModernFieldRenderer {
             float nextOuterX = (float) center.x + (float) (Math.cos(nextAngle) * outerRadius);
             float nextOuterZ = (float) center.z + (float) (Math.sin(nextAngle) * outerRadius);
 
-            vertices.vertex(matrix, innerX, y, innerZ).color(red, green, blue, alpha);
-            vertices.vertex(matrix, outerX, y, outerZ).color(red, green, blue, alpha);
-            vertices.vertex(matrix, nextOuterX, y, nextOuterZ).color(red, green, blue, alpha);
-            vertices.vertex(matrix, nextInnerX, y, nextInnerZ).color(red, green, blue, alpha);
+            vertices.vertex(matrix, innerX, y, innerZ).color(red, green, blue, alpha).next();
+            vertices.vertex(matrix, outerX, y, outerZ).color(red, green, blue, alpha).next();
+            vertices.vertex(matrix, nextOuterX, y, nextOuterZ).color(red, green, blue, alpha).next();
+            vertices.vertex(matrix, nextInnerX, y, nextInnerZ).color(red, green, blue, alpha).next();
         }
     }
 
@@ -351,16 +351,16 @@ public final class ModernFieldRenderer {
         }
 
         Vec3d offset = side.multiply(halfThickness);
-        vertices.vertex(matrix, (float) (start.x + offset.x), (float) start.y + Y_OFFSET, (float) (start.z + offset.z)).color(red, green, blue, alpha);
-        vertices.vertex(matrix, (float) (end.x + offset.x), (float) end.y + Y_OFFSET, (float) (end.z + offset.z)).color(red, green, blue, alpha);
-        vertices.vertex(matrix, (float) (end.x - offset.x), (float) end.y + Y_OFFSET, (float) (end.z - offset.z)).color(red, green, blue, alpha);
-        vertices.vertex(matrix, (float) (start.x - offset.x), (float) start.y + Y_OFFSET, (float) (start.z - offset.z)).color(red, green, blue, alpha);
+        vertices.vertex(matrix, (float) (start.x + offset.x), (float) start.y + Y_OFFSET, (float) (start.z + offset.z)).color(red, green, blue, alpha).next();
+        vertices.vertex(matrix, (float) (end.x + offset.x), (float) end.y + Y_OFFSET, (float) (end.z + offset.z)).color(red, green, blue, alpha).next();
+        vertices.vertex(matrix, (float) (end.x - offset.x), (float) end.y + Y_OFFSET, (float) (end.z - offset.z)).color(red, green, blue, alpha).next();
+        vertices.vertex(matrix, (float) (start.x - offset.x), (float) start.y + Y_OFFSET, (float) (start.z - offset.z)).color(red, green, blue, alpha).next();
     }
 
     private static void drawQuad(VertexConsumer vertices, Matrix4f matrix, float minX, float minZ, float maxX, float maxZ, int red, int green, int blue, int alpha) {
-        vertices.vertex(matrix, minX, Y_OFFSET, minZ).color(red, green, blue, alpha);
-        vertices.vertex(matrix, minX, Y_OFFSET, maxZ).color(red, green, blue, alpha);
-        vertices.vertex(matrix, maxX, Y_OFFSET, maxZ).color(red, green, blue, alpha);
-        vertices.vertex(matrix, maxX, Y_OFFSET, minZ).color(red, green, blue, alpha);
+        vertices.vertex(matrix, minX, Y_OFFSET, minZ).color(red, green, blue, alpha).next();
+        vertices.vertex(matrix, minX, Y_OFFSET, maxZ).color(red, green, blue, alpha).next();
+        vertices.vertex(matrix, maxX, Y_OFFSET, maxZ).color(red, green, blue, alpha).next();
+        vertices.vertex(matrix, maxX, Y_OFFSET, minZ).color(red, green, blue, alpha).next();
     }
 }

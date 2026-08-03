@@ -240,7 +240,7 @@ public final class ThunderbrandAbilityManager {
 
     private static void releaseScheduledChains(ServerWorld world, LivingEntity actor, ActiveThunderBlitz ability,
                                                int dashTick, int dashDuration) {
-        int totalChains = Math.clamp(ability.storedDamageInstances, 0, MAX_STORED_DAMAGE_INSTANCES);
+        int totalChains = net.minecraft.util.math.MathHelper.clamp(ability.storedDamageInstances, 0, MAX_STORED_DAMAGE_INSTANCES);
         if (totalChains <= 0) {
             return;
         }

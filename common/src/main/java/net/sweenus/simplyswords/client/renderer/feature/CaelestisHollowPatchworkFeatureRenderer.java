@@ -10,16 +10,17 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.client.renderer.model.CaelestisHollowModel;
 import net.sweenus.simplyswords.entity.CaelestisHollowEntity;
+import net.sweenus.simplyswords.client.renderer.LegacyRenderColor;
 
 public class CaelestisHollowPatchworkFeatureRenderer
         extends FeatureRenderer<CaelestisHollowEntity, CaelestisHollowModel> {
 
     private static final Identifier[] TEXTURES = {
-            Identifier.of("minecraft", "textures/entity/zombie/zombie.png"),
-            Identifier.of("minecraft", "textures/entity/zombie/husk.png"),
-            Identifier.of("minecraft", "textures/entity/zombie/drowned.png"),
-            Identifier.of("minecraft", "textures/entity/piglin/zombified_piglin.png"),
-            Identifier.of("minecraft", "textures/entity/illager/illusioner.png")
+            new Identifier("minecraft", "textures/entity/zombie/zombie.png"),
+            new Identifier("minecraft", "textures/entity/zombie/husk.png"),
+            new Identifier("minecraft", "textures/entity/zombie/drowned.png"),
+            new Identifier("minecraft", "textures/entity/piglin/zombified_piglin.png"),
+            new Identifier("minecraft", "textures/entity/illager/illusioner.png")
     };
 
     public CaelestisHollowPatchworkFeatureRenderer(
@@ -72,6 +73,8 @@ public class CaelestisHollowPatchworkFeatureRenderer
     private static void renderVisible(CaelestisHollowModel model, Identifier texture,
                                       MatrixStack matrices, VertexConsumerProvider vertexConsumers, int color) {
         VertexConsumer vertices = vertexConsumers.getBuffer(RenderLayer.getEntityCutoutNoCull(texture));
-        model.render(matrices, vertices, 0x00F000F0, OverlayTexture.DEFAULT_UV, color);
+        model.render(matrices, vertices, 0x00F000F0, OverlayTexture.DEFAULT_UV,
+                LegacyRenderColor.red(color), LegacyRenderColor.green(color),
+                LegacyRenderColor.blue(color), LegacyRenderColor.alpha(color));
     }
 }

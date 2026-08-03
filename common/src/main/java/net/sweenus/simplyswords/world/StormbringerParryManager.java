@@ -35,7 +35,7 @@ public final class StormbringerParryManager {
         ServerWorld world = player.getServerWorld();
         long now = world.getTime();
         int blockDuration = Math.max(1, Config.uniqueEffects.stormbringer.blockDuration);
-        int parryDuration = Math.clamp(Config.uniqueEffects.stormbringer.parryDuration, 1, blockDuration);
+        int parryDuration = net.minecraft.util.math.MathHelper.clamp(Config.uniqueEffects.stormbringer.parryDuration, 1, blockDuration);
         ACTIVE_PARRIES.put(player.getUuid(), new ActiveParry(hand, now + blockDuration, now + parryDuration));
         spawnActivationEffects(world, player);
     }
@@ -76,16 +76,16 @@ public final class StormbringerParryManager {
         LivingEntity attacker = source.getAttacker() instanceof LivingEntity living ? living : null;
         if (world.getTime() <= active.parryExpiresAt && isValidParryAttacker(player, attacker)) {
             ItemStack stack = player.getStackInHand(active.hand);
-            ParryComponent parryComponent = stack.getOrDefault(ComponentTypeRegistry.PARRY.get(), ParryComponent.DEFAULT)
+            ParryComponent parryComponent = ComponentTypeRegistry.PARRY.getOrDefault(stack, ParryComponent.DEFAULT)
                     .gainStormCharges(Config.uniqueEffects.stormbringer.stormChargesPerParry, Config.uniqueEffects.stormbringer.maxStormCharges);
-            stack.set(ComponentTypeRegistry.PARRY.get(), parryComponent);
+            ComponentTypeRegistry.PARRY.set(stack, parryComponent);
             spawnParryCatchEffects(world, player, attacker, parryComponent);
             player.stopUsingItem();
         } else {
             ItemStack stack = player.getStackInHand(active.hand);
-            ParryComponent parryComponent = stack.getOrDefault(ComponentTypeRegistry.PARRY.get(), ParryComponent.DEFAULT)
+            ParryComponent parryComponent = ComponentTypeRegistry.PARRY.getOrDefault(stack, ParryComponent.DEFAULT)
                     .gainBlockedStormCharges(Config.uniqueEffects.stormbringer.stormChargesPerBlock, Config.uniqueEffects.stormbringer.maxStormCharges);
-            stack.set(ComponentTypeRegistry.PARRY.get(), parryComponent);
+            ComponentTypeRegistry.PARRY.set(stack, parryComponent);
             spawnBlockedHitEffects(world, player);
         }
 
@@ -96,13 +96,13 @@ public final class StormbringerParryManager {
         ACTIVE_PARRIES.remove(player.getUuid());
 
         int skillCooldown = Math.max(0, Config.uniqueEffects.stormbringer.cooldown);
-        ParryComponent parryComponent = stack.getOrDefault(ComponentTypeRegistry.PARRY.get(), ParryComponent.DEFAULT);
+        ParryComponent parryComponent = ComponentTypeRegistry.PARRY.getOrDefault(stack, ParryComponent.DEFAULT);
         if (parryComponent.parried()) {
             performCounterattack(player);
-            stack.set(ComponentTypeRegistry.PARRY.get(), parryComponent.resetParry());
+            ComponentTypeRegistry.PARRY.set(stack, parryComponent.resetParry());
         } else {
             spawnMissEffects(player.getServerWorld(), player);
-            stack.set(ComponentTypeRegistry.PARRY.get(), parryComponent.resetFull());
+            ComponentTypeRegistry.PARRY.set(stack, parryComponent.resetFull());
         }
 
         player.getItemCooldownManager().set(stack.getItem(), skillCooldown);

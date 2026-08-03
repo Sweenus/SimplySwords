@@ -65,11 +65,11 @@ public class CaelestisDreadglareEntity extends VexEntity implements CaelestisBre
     }
 
     @Override
-    protected void initDataTracker(DataTracker.Builder builder) {
-        super.initDataTracker(builder);
-        builder.add(UNBOUND, false);
-        builder.add(CORRUPTION_SEED, 0);
-        builder.add(FLIGHT_STATE, STATE_ORBIT);
+    protected void initDataTracker() {
+        super.initDataTracker();
+        this.dataTracker.startTracking(UNBOUND, false);
+        this.dataTracker.startTracking(CORRUPTION_SEED, 0);
+        this.dataTracker.startTracking(FLIGHT_STATE, STATE_ORBIT);
     }
 
     @Override
@@ -245,7 +245,7 @@ public class CaelestisDreadglareEntity extends VexEntity implements CaelestisBre
     }
 
     private void setFlightState(int state) {
-        this.dataTracker.set(FLIGHT_STATE, Math.clamp(state, STATE_ORBIT, STATE_RECOVER));
+        this.dataTracker.set(FLIGHT_STATE, net.minecraft.util.math.MathHelper.clamp(state, STATE_ORBIT, STATE_RECOVER));
     }
 
     @Nullable
@@ -267,7 +267,7 @@ public class CaelestisDreadglareEntity extends VexEntity implements CaelestisBre
     }
 
     @Override
-    protected int getXpToDrop() {
+    public int getXpToDrop() {
         return 0;
     }
 
@@ -282,7 +282,7 @@ public class CaelestisDreadglareEntity extends VexEntity implements CaelestisBre
     }
 
     @Override
-    protected void dropEquipment(ServerWorld world, DamageSource source, boolean causedByPlayer) {
+    protected void dropEquipment(DamageSource source, int lootingMultiplier, boolean causedByPlayer) {
     }
 
     @Override

@@ -6,7 +6,6 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.text.TextColor;
@@ -23,7 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TooltipUtils {
-    public static final Identifier runic_tags = Identifier.of(SimplySwords.MOD_ID, "runic_weapons");
+    public static final Identifier runic_tags = new Identifier(SimplySwords.MOD_ID, "runic_weapons");
     private static long ctrlKeyPressTimestamp = 0;
 
 
@@ -124,21 +123,21 @@ public class TooltipUtils {
                     case "healing_fire" ->
                             tooltip.add(Text.literal("\uAB47").append(Text.translatable("item.simplyswords.compat.scaleHealing")).append(Text.literal("   \uAB42")).append(Text.translatable("item.simplyswords.compat.scaleFire")));
                     case "nature" -> {
-                        if (Platform.isNeoForge()) {
+                        if (Platform.isForge()) {
                             tooltip.add(Text.literal("\uAB47").append(Text.translatable("item.simplyswords.compat.scaleNature")));
                         } else {
                             tooltip.add(Text.literal("\uAB47").append(Text.translatable("item.simplyswords.compat.scaleHealing")));
                         }
                     }
                     case "evocation" -> {
-                        if (Platform.isNeoForge()) {
+                        if (Platform.isForge()) {
                             tooltip.add(Text.literal("\uAB46").append(Text.translatable("item.simplyswords.compat.scaleEvocation")));
                         } else {
                             tooltip.add(Text.literal("\uAB46").append(Text.translatable("item.simplyswords.compat.scaleArcane")));
                         }
                     }
                     case "eldritch" -> {
-                        if (Platform.isNeoForge()) {
+                        if (Platform.isForge()) {
                             tooltip.add(Text.literal("\uAB45").append(Text.translatable("item.simplyswords.compat.scaleEldritch")));
                         } else {
                             tooltip.add(Text.literal("\uAB45").append(Text.translatable("item.simplyswords.compat.scaleSoul")));
@@ -171,20 +170,20 @@ public class TooltipUtils {
     }
 
     public static Identifier generateDefaultTooltipEntry(ItemStack itemStack, String itemPath) {
-        return Identifier.of(itemPath + "/" +
+        return new Identifier(itemPath + "/" +
                 itemStack.getItem().getRegistryEntry().registryKey().getValue().getPath() + ".mdx");
     }
 
-    public static Identifier handleUniqueSwordTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Text> tooltip, TooltipType type, String uniquePath) {
+    public static Identifier handleUniqueSwordTooltip(ItemStack itemStack, net.minecraft.world.World world, List<Text> tooltip, net.minecraft.client.item.TooltipContext tooltipContext, String uniquePath) {
         List<Text> lines = new ArrayList<>();
-        SimplySwordsAPI.appendTooltipGemSocketLogic(itemStack, tooltipContext, lines, type);
+        SimplySwordsAPI.appendTooltipGemSocketLogic(itemStack, world, lines, tooltipContext);
         appendWithSeparator(tooltip, lines);
 
-        return Identifier.of(uniquePath + "/" +
+        return new Identifier(uniquePath + "/" +
                 itemStack.getItem().getRegistryEntry().registryKey().getValue().getPath() + ".mdx");
     }
 
-    public static Identifier handleRunicSwordTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Text> tooltip, TooltipType type, String itemPath, String runicPath) {
+    public static Identifier handleRunicSwordTooltip(ItemStack itemStack, net.minecraft.world.World world, List<Text> tooltip, net.minecraft.client.item.TooltipContext tooltipContext, String itemPath, String runicPath) {
         List<Text> lines = new ArrayList<>();
         Identifier entry = generateDefaultTooltipEntry(itemStack, itemPath);
 
@@ -193,11 +192,11 @@ public class TooltipUtils {
             lines.add(Text.translatable("item.simplyswords.unidentifiedsworditem.tooltip1").setStyle(Styles.RUNIC));
             lines.add(Text.translatable("item.simplyswords.unidentifiedsworditem.tooltip2").setStyle(Styles.TEXT));
         } else {
-            component.appendTooltip(itemStack, tooltipContext, lines, type, true);
+            component.appendTooltip(itemStack, world, lines, tooltipContext, true);
 
             if (component.hasRunicSlotFilled()) {
                 String powerId = component.runicPower().getPath().replace("greater_", "");
-                entry = Identifier.of(runicPath + "/" + powerId + ".mdx");
+                entry = new Identifier(runicPath + "/" + powerId + ".mdx");
             }
         }
 

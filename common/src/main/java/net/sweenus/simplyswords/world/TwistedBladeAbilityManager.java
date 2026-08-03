@@ -202,7 +202,7 @@ public final class TwistedBladeAbilityManager {
     }
 
     private static int tryGainFerocity(ServerWorld world, LivingEntity actor) {
-        int chance = Math.clamp(Config.uniqueEffects.twisted_blade.chance, 0, 100);
+        int chance = net.minecraft.util.math.MathHelper.clamp(Config.uniqueEffects.twisted_blade.chance, 0, 100);
         int currentStacks = getFerocityStacks(actor);
         if (chance <= 0 || actor.getRandom().nextInt(100) >= chance) {
             return currentStacks;
@@ -340,7 +340,7 @@ public final class TwistedBladeAbilityManager {
             target.takeKnockback(strength, -direction.x, -direction.z);
         }
 
-        double resistance = Math.clamp(
+        double resistance = net.minecraft.util.math.MathHelper.clamp(
                 target.getAttributeValue(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE),
                 0.0,
                 1.0

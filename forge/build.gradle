@@ -27,9 +27,9 @@ repositories {
 
 architectury {
     platformSetupLoomIde()
-    neoForge()
+    forge()
 }
-/*
+
 loom {
     accessWidenerPath = project(":common").loom.accessWidenerPath
 
@@ -41,46 +41,50 @@ loom {
         mixinConfig "simplyswords.mixins.json"
     }
 }
- */
 
 configurations {
     common
     shadowCommon // Don't use shadow from the shadow plugin because we don't want IDEA to index this.
     compileClasspath.extendsFrom common
     runtimeClasspath.extendsFrom common
-    developmentNeoForge.extendsFrom common
+    developmentForge.extendsFrom common
 }
 
 dependencies {
-    neoForge "net.neoforged:neoforge:$rootProject.neoforge_version"
+    forge "net.minecraftforge:forge:$rootProject.forge_version"
 
     // Architectury API. This is optional, and you can comment it out if you don't need it.
-    modImplementation "dev.architectury:architectury-neoforge:$rootProject.architectury_api_version"
+    modImplementation "dev.architectury:architectury-forge:$rootProject.architectury_api_version"
 
     common(project(path: ':common', configuration: 'namedElements')) { transitive false }
-    shadowCommon(project(path: ':common', configuration: 'transformProductionNeoForge')) { transitive false }
+    shadowCommon(project(path: ':common', configuration: 'transformProductionForge')) { transitive false }
 
-    modImplementation("me.fzzyhmstrs:fzzy_config:${project.fzz_config_version}+neoforge") {
-        exclude group: "net.neoforged.fancymodloader", module: "loader"
+    modImplementation("me.fzzyhmstrs:fzzy_config:${project.fzz_config_version}+forge") {
+        transitive = false
     }
-    // KFF and Fzzy Config initialize across NeoForge module layers before ordinary remapped mod
-    // dependencies are visible. Keep their library-only dependencies on the loader classpath in
-    // development runs; release jars continue to obtain these from their normal bundled metadata.
-    forgeRuntimeLibrary "org.jetbrains.kotlin:kotlin-stdlib:2.1.0"
+    modImplementation "thedarkcolour:kfflang:${rootProject.kotlinforforge_version}"
+    modImplementation "thedarkcolour:kfflib:${rootProject.kotlinforforge_version}"
+    modImplementation "thedarkcolour:kffmod:${rootProject.kotlinforforge_version}"
+    forgeRuntimeLibrary "org.jetbrains.kotlin:kotlin-stdlib:2.0.20"
     forgeRuntimeLibrary "org.jetbrains.kotlin:kotlin-reflect:2.0.20"
     forgeRuntimeLibrary "blue.endless:jankson:1.2.3"
-    forgeRuntimeLibrary "net.peanuuutz.tomlkt:tomlkt-jvm:0.3.7"
-    modRuntimeOnly files("${rootDir}/../simplytooltips/neoforge/build/libs/SimplyTooltips-neoforge-0.1.5.jar")
+    forgeRuntimeLibrary "net.peanuuutz.tomlkt:tomlkt-jvm:${rootProject.tomlkt_version}"
+    forgeRuntimeLibrary "org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.6.3"
+    forgeRuntimeLibrary "org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.10.2"
+    def simplyTooltipsForge = file("${rootDir}/../simplytooltips-1.20.1/forge/build/libs/SimplyTooltips-forge-0.1.5-1.20.1.jar")
+    if (simplyTooltipsForge.exists()) {
+        modRuntimeOnly files(simplyTooltipsForge)
+    }
     modRuntimeOnly "com.github.ZsoltMolnarrr:TinyConfig:2.3.2"
     //modImplementation ("curse.maven:gobber-301700:4007899")
     modCompileOnly "io.redspace:irons_spellbooks:${irons_spells_version}"
-    modRuntimeOnly "me.shedaniel:RoughlyEnoughItems-neoforge:${rei_version}"
+    modRuntimeOnly "me.shedaniel:RoughlyEnoughItems-forge:${rei_version}"
 }
 
 processResources {
     inputs.property 'version', project.version
 
-    filesMatching('META-INF/neoforge.mods.toml') {
+    filesMatching('META-INF/mods.toml') {
         expand version: project.version
     }
 }

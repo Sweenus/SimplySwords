@@ -9,7 +9,6 @@ import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
-import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
@@ -74,8 +73,8 @@ public class StormbringerSwordItem extends UniqueSwordItem implements UniqueWeap
             return;
         }
 
-        ParryComponent component = stack.getOrDefault(ComponentTypeRegistry.PARRY.get(), ParryComponent.DEFAULT);
-        int stormCharges = Math.clamp(component.stormCharges(), 0, Math.max(0, Config.uniqueEffects.stormbringer.maxStormCharges));
+        ParryComponent component = ComponentTypeRegistry.PARRY.getOrDefault(stack, ParryComponent.DEFAULT);
+        int stormCharges = net.minecraft.util.math.MathHelper.clamp(component.stormCharges(), 0, Math.max(0, Config.uniqueEffects.stormbringer.maxStormCharges));
         if (stormCharges <= 0) {
             return;
         }
@@ -87,7 +86,7 @@ public class StormbringerSwordItem extends UniqueSwordItem implements UniqueWeap
         try {
             int damaged = ChainLightningVisualManager.damageStormbringerChain(player.getServerWorld(), player, target, stormCharges, damage, Config.uniqueEffects.stormbringer.chainLightningRange);
             if (damaged > 0) {
-                stack.set(ComponentTypeRegistry.PARRY.get(), component.consumeStormCharge());
+                ComponentTypeRegistry.PARRY.set(stack, component.consumeStormCharge());
                 LAST_CHAIN_TICK.put(player.getUuid(), now);
             }
         } finally {
@@ -135,9 +134,9 @@ public class StormbringerSwordItem extends UniqueSwordItem implements UniqueWeap
         ItemStack stack = context.stack();
         actor.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE,
                 Math.max(1, Config.uniqueEffects.stormbringer.blockDuration), 5), actor);
-        ParryComponent parryComponent = stack.getOrDefault(ComponentTypeRegistry.PARRY.get(), ParryComponent.DEFAULT)
+        ParryComponent parryComponent = ComponentTypeRegistry.PARRY.getOrDefault(stack, ParryComponent.DEFAULT)
                 .gainBlockedStormCharges(Config.uniqueEffects.stormbringer.stormChargesPerBlock, Config.uniqueEffects.stormbringer.maxStormCharges);
-        stack.set(ComponentTypeRegistry.PARRY.get(), parryComponent);
+        ComponentTypeRegistry.PARRY.set(stack, parryComponent);
         context.world().spawnParticles(ParticleTypes.ELECTRIC_SPARK, actor.getX(), actor.getBodyY(0.5), actor.getZ(), 18, 0.35, 0.38, 0.35, 0.06);
         return true;
     }
@@ -148,7 +147,7 @@ public class StormbringerSwordItem extends UniqueSwordItem implements UniqueWeap
     }
 
     @Override
-    public int getMaxUseTime(ItemStack stack, LivingEntity user) {
+    public int getMaxUseTime(ItemStack stack) {
         return Math.max(1, Config.uniqueEffects.stormbringer.blockDuration);
     }
 
@@ -165,7 +164,7 @@ public class StormbringerSwordItem extends UniqueSwordItem implements UniqueWeap
     }
 
     @Override
-    public void appendTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
+    public void appendTooltip(ItemStack itemStack, net.minecraft.world.World world, List<Text> tooltip, net.minecraft.client.item.TooltipContext tooltipContext) {
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.stormbringersworditem.tooltip1").setStyle(Styles.ABILITY));
         tooltip.add(Text.translatable("item.simplyswords.stormbringersworditem.tooltip2").setStyle(Styles.TEXT));
@@ -175,7 +174,7 @@ public class StormbringerSwordItem extends UniqueSwordItem implements UniqueWeap
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.stormbringersworditem.tooltip4").setStyle(Styles.TEXT));
         appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.stormbringer.cooldown);
-        super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        super.appendTooltip(itemStack, world, tooltip, tooltipContext);
         TooltipUtils.appendSpellScaleTooltip(tooltip, "lightning");
     }
 

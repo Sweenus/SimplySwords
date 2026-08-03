@@ -32,9 +32,9 @@ public class SoulPyreWispEntity extends Entity {
     }
 
     @Override
-    protected void initDataTracker(DataTracker.Builder builder) {
-        builder.add(LIFETIME, 30);
-        builder.add(SEED, 0);
+    protected void initDataTracker() {
+        this.dataTracker.startTracking(LIFETIME, 30);
+        this.dataTracker.startTracking(SEED, 0);
     }
 
     @Override

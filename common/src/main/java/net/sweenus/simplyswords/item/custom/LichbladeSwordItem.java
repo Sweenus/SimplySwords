@@ -10,7 +10,6 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
-import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -82,7 +81,7 @@ public class LichbladeSwordItem extends UniqueSwordItem implements TwoHandedWeap
             }
             world.playSoundFromEntity(null, user, SoundRegistry.DARK_SWORD_ENCHANT.get(),
                     user.getSoundCategory(), 0.5f, 0.5f);
-            itemStack.set(ComponentTypeRegistry.TARGETED_LOCATION.get(), new TargetedLocationComponent(abilityTarget.getUuid(), user.getX(), user.getY(), user.getZ()));
+            ComponentTypeRegistry.TARGETED_LOCATION.set(itemStack, new TargetedLocationComponent(abilityTarget.getUuid(), user.getX(), user.getY(), user.getZ()));
         }
         user.setCurrentHand(hand);
         return TypedActionResult.consume(itemStack);
@@ -91,7 +90,7 @@ public class LichbladeSwordItem extends UniqueSwordItem implements TwoHandedWeap
     @Override
     public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
         if (world.isClient) return;
-        TargetedLocationComponent targetLocation = stack.getOrDefault(ComponentTypeRegistry.TARGETED_LOCATION.get(), TargetedLocationComponent.DEFAULT);
+        TargetedLocationComponent targetLocation = ComponentTypeRegistry.TARGETED_LOCATION.getOrDefault(stack, TargetedLocationComponent.DEFAULT);
         LivingEntity abilityTarget = targetLocation.getEntity((ServerWorld) world);
         if (user.getEquippedStack(EquipmentSlot.MAINHAND) == stack && abilityTarget != null) {
             //Return to user after the duration or after the enemy dies & buff user
@@ -100,10 +99,10 @@ public class LichbladeSwordItem extends UniqueSwordItem implements TwoHandedWeap
 
             if (AwakeningApi.getLevel(stack) >= 8) {
                 if (abilityTarget.isDead() || abilityTarget == user || remainingUseTicks < maxDuration) {
-                    stack.set(ComponentTypeRegistry.TARGETED_LOCATION.get(), targetLocation.setTarget(user));
+                    ComponentTypeRegistry.TARGETED_LOCATION.set(stack, targetLocation.setTarget(user));
                     abilityTarget = user;
                     if (user.squaredDistanceTo(targetLocation.lastX(), targetLocation.lastY(), targetLocation.lastZ()) < radius) {
-                        int damageTracker = stack.getOrDefault(ComponentTypeRegistry.STORED_CHARGE.get(), StoredChargeComponent.DEFAULT).charge();
+                        int damageTracker = ComponentTypeRegistry.STORED_CHARGE.getOrDefault(stack, StoredChargeComponent.DEFAULT).charge();
                         user.setAbsorptionAmount(Math.min(Config.uniqueEffects.abilityAbsorptionCap, user.getAbsorptionAmount() + Math.min(damageTracker / 2f, Config.uniqueEffects.lichblade.absorptionCap)));
                         if (!(user instanceof ServerPlayerEntity serverPlayer) || !PlayerWeaponAbilityChannelManager.finishEarly(serverPlayer, stack)) {
                             user.stopUsingItem();
@@ -134,7 +133,7 @@ public class LichbladeSwordItem extends UniqueSwordItem implements TwoHandedWeap
                 if (targetY > lastY) lastY += 1;
                 if (targetY < lastY) lastY -= 1;
             }
-            stack.set(ComponentTypeRegistry.TARGETED_LOCATION.get(), new TargetedLocationComponent(abilityTarget.getUuid(), lastX, lastY, lastZ));
+            ComponentTypeRegistry.TARGETED_LOCATION.set(stack, new TargetedLocationComponent(abilityTarget.getUuid(), lastX, lastY, lastZ));
             float abilityDamage = HelperMethods.abilityScaledDamage("soul", user, stack,
                     Config.uniqueEffects.lichblade.damageScaling, Config.uniqueEffects.lichblade.spellScaling);
             float healAmount = Config.uniqueEffects.lichblade.heal;
@@ -143,7 +142,7 @@ public class LichbladeSwordItem extends UniqueSwordItem implements TwoHandedWeap
     }
 
     @Override
-    public int getMaxUseTime(ItemStack stack, LivingEntity user) {
+    public int getMaxUseTime(ItemStack stack) {
         return Config.uniqueEffects.lichblade.duration * 2;
     }
 
@@ -154,12 +153,12 @@ public class LichbladeSwordItem extends UniqueSwordItem implements TwoHandedWeap
 
     @Override
     public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
-        TargetedLocationComponent targetLocation = stack.get(ComponentTypeRegistry.TARGETED_LOCATION.get());
+        TargetedLocationComponent targetLocation = ComponentTypeRegistry.TARGETED_LOCATION.get(stack);
         if (!world.isClient && (user instanceof PlayerEntity player) && targetLocation != null && ((ServerWorld)world).getEntity(targetLocation.uuid()) != null) {
             player.getItemCooldownManager().set(stack.getItem(), Config.uniqueEffects.lichblade.cooldown);
         }
-        stack.set(ComponentTypeRegistry.STORED_CHARGE.get(), null);
-        stack.set(ComponentTypeRegistry.TARGETED_LOCATION.get(), null);
+        ComponentTypeRegistry.STORED_CHARGE.set(stack, null);
+        ComponentTypeRegistry.TARGETED_LOCATION.set(stack, null);
     }
 
     @Override
@@ -181,15 +180,15 @@ public class LichbladeSwordItem extends UniqueSwordItem implements TwoHandedWeap
                 Config.uniqueEffects.lichblade.damageScaling, Config.uniqueEffects.lichblade.spellScaling);
         float healAmount = Config.uniqueEffects.lichblade.heal;
         int radius = Config.uniqueEffects.lichblade.radius;
-        stack.set(ComponentTypeRegistry.TARGETED_LOCATION.get(), new TargetedLocationComponent(target.getUuid(), target.getX(), target.getY(), target.getZ()));
+        ComponentTypeRegistry.TARGETED_LOCATION.set(stack, new TargetedLocationComponent(target.getUuid(), target.getX(), target.getY(), target.getZ()));
         AbilityMethods.tickAbilitySoulAnguish(stack, context.world(), actor, abilityDamage, radius, target.getX(), target.getY(), target.getZ(), healAmount, target);
         if (AwakeningApi.getLevel(stack) >= 8) {
-            int damageTracker = stack.getOrDefault(ComponentTypeRegistry.STORED_CHARGE.get(), StoredChargeComponent.DEFAULT).charge();
+            int damageTracker = ComponentTypeRegistry.STORED_CHARGE.getOrDefault(stack, StoredChargeComponent.DEFAULT).charge();
             actor.setAbsorptionAmount(Math.min(Config.uniqueEffects.abilityAbsorptionCap,
                     actor.getAbsorptionAmount() + Math.min(damageTracker / 2f, Config.uniqueEffects.lichblade.absorptionCap)));
         }
-        stack.set(ComponentTypeRegistry.STORED_CHARGE.get(), null);
-        stack.set(ComponentTypeRegistry.TARGETED_LOCATION.get(), null);
+        ComponentTypeRegistry.STORED_CHARGE.set(stack, null);
+        ComponentTypeRegistry.TARGETED_LOCATION.set(stack, null);
         return true;
     }
 
@@ -258,7 +257,7 @@ public class LichbladeSwordItem extends UniqueSwordItem implements TwoHandedWeap
     }
 
     @Override
-    public void appendTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
+    public void appendTooltip(ItemStack itemStack, net.minecraft.world.World world, List<Text> tooltip, net.minecraft.client.item.TooltipContext tooltipContext) {
         tooltip.add(Text.literal(""));
         int awakening = AwakeningApi.getLevel(itemStack);
         if (awakening < 4)
@@ -280,13 +279,13 @@ public class LichbladeSwordItem extends UniqueSwordItem implements TwoHandedWeap
                 tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip7").setStyle(Styles.TEXT));
             }
         }
-        super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        super.appendTooltip(itemStack, world, tooltip, tooltipContext);
         TooltipUtils.appendSpellScaleTooltip(tooltip, "soul");
     }
 
     @Override
     protected Identifier getConfigPath() {
-        return Identifier.of("simplyswords.unique_effects.lichblade");
+        return new Identifier("simplyswords.unique_effects.lichblade");
     }
 
     public static class EffectSettings extends TooltipSettings {

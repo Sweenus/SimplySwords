@@ -15,7 +15,7 @@ import net.sweenus.simplyswords.SimplySwords;
 public class WeaponAttributesConfig extends Config {
 
     public WeaponAttributesConfig() {
-        super(Identifier.of(SimplySwords.MOD_ID, "weapon_attributes"));
+        super(new Identifier(SimplySwords.MOD_ID, "weapon_attributes"));
     }
 
     public TypeDamageModifier typeDamageModifier = new TypeDamageModifier();

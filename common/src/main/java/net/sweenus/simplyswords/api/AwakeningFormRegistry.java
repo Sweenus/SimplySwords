@@ -1,6 +1,5 @@
 package net.sweenus.simplyswords.api;
 
-import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -22,9 +21,9 @@ import java.util.Optional;
 // Runtime registry and resolver for addon-defined Runic Forge form families.
 //
 public final class AwakeningFormRegistry {
-    public static final Identifier LICHBLADE_ROUTE = Identifier.of(SimplySwords.MOD_ID, "lichblade");
-    public static final Identifier SUN_ROUTE = Identifier.of(SimplySwords.MOD_ID, "sun");
-    public static final Identifier HARBINGER_ROUTE = Identifier.of(SimplySwords.MOD_ID, "harbinger");
+    public static final Identifier LICHBLADE_ROUTE = new Identifier(SimplySwords.MOD_ID, "lichblade");
+    public static final Identifier SUN_ROUTE = new Identifier(SimplySwords.MOD_ID, "sun");
+    public static final Identifier HARBINGER_ROUTE = new Identifier(SimplySwords.MOD_ID, "harbinger");
 
     private static final Map<Item, AwakeningFormFamily> FAMILIES = new IdentityHashMap<>();
     private static boolean builtinsRegistered;
@@ -56,7 +55,7 @@ public final class AwakeningFormRegistry {
         register(AwakeningFormFamily.builder(
                         ItemsRegistry.SLUMBERING_LICHBLADE.get(),
                         AwakeningProfile.DEFAULT,
-                        Identifier.of(SimplySwords.MOD_ID, "slumbering_lichblade"))
+                        new Identifier(SimplySwords.MOD_ID, "slumbering_lichblade"))
                 .basePresentation(
                         "item.simplyswords.slumbering_lichblade",
                         AwakeningFormRarity.UNIQUE,
@@ -67,14 +66,14 @@ public final class AwakeningFormRegistry {
                 .alias(ItemsRegistry.AWAKENED_LICHBLADE.get())
                 .route(LICHBLADE_ROUTE,
                         new AwakeningFormStage(
-                                Identifier.of(SimplySwords.MOD_ID, "waking_lichblade"),
+                                new Identifier(SimplySwords.MOD_ID, "waking_lichblade"),
                                 4,
                                 ItemsRegistry.SLUMBERING_LICHBLADE.get(),
                                 "item.simplyswords.waking_lichblade",
                                 AwakeningFormRarity.UNIQUE,
                                 0.5F),
                         new AwakeningFormStage(
-                                Identifier.of(SimplySwords.MOD_ID, "awakened_lichblade"),
+                                new Identifier(SimplySwords.MOD_ID, "awakened_lichblade"),
                                 8,
                                 ItemsRegistry.SLUMBERING_LICHBLADE.get(),
                                 "item.simplyswords.awakened_lichblade",
@@ -85,7 +84,7 @@ public final class AwakeningFormRegistry {
         register(AwakeningFormFamily.builder(
                         ItemsRegistry.DORMANT_RELIC.get(),
                         AwakeningProfile.DEFAULT,
-                        Identifier.of(SimplySwords.MOD_ID, "dormant_relic"))
+                        new Identifier(SimplySwords.MOD_ID, "dormant_relic"))
                 .basePresentation(
                         "item.simplyswords.dormant_relic",
                         AwakeningFormRarity.UNIQUE,
@@ -98,14 +97,14 @@ public final class AwakeningFormRegistry {
                 .alias(ItemsRegistry.HARBINGER.get())
                 .route(SUN_ROUTE,
                         new AwakeningFormStage(
-                                Identifier.of(SimplySwords.MOD_ID, "righteous_relic"),
+                                new Identifier(SimplySwords.MOD_ID, "righteous_relic"),
                                 4,
                                 ItemsRegistry.DORMANT_RELIC.get(),
                                 "item.simplyswords.righteous_relic",
                                 AwakeningFormRarity.UNIQUE,
                                 0.25F),
                         new AwakeningFormStage(
-                                Identifier.of(SimplySwords.MOD_ID, "sunfire"),
+                                new Identifier(SimplySwords.MOD_ID, "sunfire"),
                                 8,
                                 ItemsRegistry.DORMANT_RELIC.get(),
                                 "item.simplyswords.sunfire",
@@ -113,14 +112,14 @@ public final class AwakeningFormRegistry {
                                 0.75F))
                 .route(HARBINGER_ROUTE,
                         new AwakeningFormStage(
-                                Identifier.of(SimplySwords.MOD_ID, "tainted_relic"),
+                                new Identifier(SimplySwords.MOD_ID, "tainted_relic"),
                                 4,
                                 ItemsRegistry.DORMANT_RELIC.get(),
                                 "item.simplyswords.tainted_relic",
                                 AwakeningFormRarity.UNIQUE,
                                 0.5F),
                         new AwakeningFormStage(
-                                Identifier.of(SimplySwords.MOD_ID, "harbinger"),
+                                new Identifier(SimplySwords.MOD_ID, "harbinger"),
                                 8,
                                 ItemsRegistry.DORMANT_RELIC.get(),
                                 "item.simplyswords.harbinger",
@@ -147,7 +146,7 @@ public final class AwakeningFormRegistry {
 
     public static Optional<Identifier> getRoute(ItemStack stack) {
         if (stack == null || stack.isEmpty()) return Optional.empty();
-        AwakeningRouteComponent route = stack.get(ComponentTypeRegistry.AWAKENING_ROUTE.get());
+        AwakeningRouteComponent route = ComponentTypeRegistry.AWAKENING_ROUTE.get(stack);
         if (route != null) return Optional.of(route.route());
         Optional<Identifier> legacyRoute = getLegacyRelicRoute(stack);
         if (legacyRoute.isPresent()) return legacyRoute;
@@ -174,17 +173,16 @@ public final class AwakeningFormRegistry {
     }
 
     public static void ensureInitialized(ItemStack stack) {
-        if (stack == null || stack.isEmpty() || stack.contains(ComponentTypeRegistry.AWAKENING_ROUTE.get())) {
+        if (stack == null || stack.isEmpty() || ComponentTypeRegistry.AWAKENING_ROUTE.contains(stack)) {
             return;
         }
         Optional<Identifier> legacy = getLegacyRelicRoute(stack);
         if (legacy.isPresent()) {
-            stack.set(ComponentTypeRegistry.AWAKENING_ROUTE.get(), new AwakeningRouteComponent(legacy.get()));
+            ComponentTypeRegistry.AWAKENING_ROUTE.set(stack, new AwakeningRouteComponent(legacy.get()));
             return;
         }
         get(stack).filter(family -> family.selectionLevel() == 0 && family.routes().size() == 1)
-                .ifPresent(family -> stack.set(
-                        ComponentTypeRegistry.AWAKENING_ROUTE.get(),
+                .ifPresent(family -> ComponentTypeRegistry.AWAKENING_ROUTE.set(stack,
                         new AwakeningRouteComponent(family.routes().keySet().iterator().next())
                 ));
     }
@@ -231,11 +229,11 @@ public final class AwakeningFormRegistry {
             }
         }
 
-        result.set(ComponentTypeRegistry.AWAKENING_ROUTE.get(), new AwakeningRouteComponent(route));
+        ComponentTypeRegistry.AWAKENING_ROUTE.set(result, new AwakeningRouteComponent(route));
         syncLegacyRoute(family, result, route);
         AwakeningFormStage stage = family.resolveStage(route, targetLevel);
         if (result.getItem() != stage.item()) {
-            result = result.copyComponentsToNewStack(stage.item(), result.getCount());
+            result = copyToItem(result, stage.item());
         }
         AwakeningApi.setLevel(result, targetLevel);
         clampDamage(result);
@@ -270,8 +268,8 @@ public final class AwakeningFormRegistry {
     private static void clampDamage(ItemStack stack) {
         if (!stack.isDamageable()) return;
         int maxDamage = stack.getMaxDamage();
-        int damage = stack.getOrDefault(DataComponentTypes.DAMAGE, 0);
-        stack.set(DataComponentTypes.DAMAGE, Math.clamp(damage, 0, Math.max(0, maxDamage - 1)));
+        stack.setDamage(net.minecraft.util.math.MathHelper.clamp(
+                stack.getDamage(), 0, Math.max(0, maxDamage - 1)));
     }
 
     private static ItemStack toBaseForm(
@@ -279,10 +277,10 @@ public final class AwakeningFormRegistry {
             ItemStack stack,
             int targetLevel
     ) {
-        stack.remove(ComponentTypeRegistry.AWAKENING_ROUTE.get());
+        ComponentTypeRegistry.AWAKENING_ROUTE.remove(stack);
         clearLegacyRoute(family, stack);
         if (stack.getItem() != family.baseItem()) {
-            stack = stack.copyComponentsToNewStack(family.baseItem(), stack.getCount());
+            stack = copyToItem(stack, family.baseItem());
         }
         AwakeningApi.setLevel(stack, targetLevel);
         clampDamage(stack);
@@ -291,17 +289,22 @@ public final class AwakeningFormRegistry {
 
     private static Optional<Identifier> getLegacyRelicRoute(ItemStack stack) {
         if (!stack.isOf(ItemsRegistry.DORMANT_RELIC.get())) return Optional.empty();
-        RelicAttunementComponent legacy = stack.get(
-                ComponentTypeRegistry.RELIC_ATTUNEMENT.get());
+        RelicAttunementComponent legacy = ComponentTypeRegistry.RELIC_ATTUNEMENT.get(stack);
         if (legacy == null) return Optional.empty();
         if (legacy.isSun()) return Optional.of(SUN_ROUTE);
         if (legacy.isHarbinger()) return Optional.of(HARBINGER_ROUTE);
         return Optional.empty();
     }
 
+    private static ItemStack copyToItem(ItemStack source, Item target) {
+        ItemStack result = new ItemStack(target, source.getCount());
+        if (source.hasNbt()) result.setNbt(source.getNbt().copy());
+        return result;
+    }
+
     private static void clearLegacyRoute(AwakeningFormFamily family, ItemStack stack) {
         if (family.baseItem() == ItemsRegistry.DORMANT_RELIC.get()) {
-            stack.remove(ComponentTypeRegistry.RELIC_ATTUNEMENT.get());
+            ComponentTypeRegistry.RELIC_ATTUNEMENT.remove(stack);
         }
     }
 
@@ -312,10 +315,10 @@ public final class AwakeningFormRegistry {
     ) {
         if (family.baseItem() != ItemsRegistry.DORMANT_RELIC.get()) return;
         if (SUN_ROUTE.equals(route)) {
-            stack.set(ComponentTypeRegistry.RELIC_ATTUNEMENT.get(),
+            ComponentTypeRegistry.RELIC_ATTUNEMENT.set(stack,
                     new RelicAttunementComponent(RelicAttunementComponent.SUN));
         } else if (HARBINGER_ROUTE.equals(route)) {
-            stack.set(ComponentTypeRegistry.RELIC_ATTUNEMENT.get(),
+            ComponentTypeRegistry.RELIC_ATTUNEMENT.set(stack,
                     new RelicAttunementComponent(RelicAttunementComponent.HARBINGER));
         }
     }

@@ -193,7 +193,7 @@ At minimum, add:
 assets/exampleaddon/lang/en_us.json
 assets/exampleaddon/models/item/riftbrand.json
 assets/exampleaddon/textures/item/riftbrand.png
-data/simplytooltips/tags/item/simply_swords_compat.json
+data/simplytooltips/tags/items/simply_swords_compat.json
 ```
 
 Language example:

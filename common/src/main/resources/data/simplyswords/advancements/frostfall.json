@@ -1,0 +1,38 @@
+{
+  "display": {
+    "icon": {
+      "item": "simplyswords:frostfall"
+    },
+    "title": {
+      "translate": "advancements.simplyswords.frostfall.title",
+      "with": []
+    },
+    "description": {
+      "translate": "advancements.simplyswords.find_unique.description",
+      "with": [
+        {
+          "translate": "item.simplyswords.frostfall"
+        }
+      ]
+    },
+    "hidden": true,
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "parent": "simplyswords:runic_weapon",
+  "criteria": {
+    "requirement": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "simplyswords:frostfall"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

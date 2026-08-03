@@ -88,13 +88,13 @@ public class FallingSnifferEntity extends SnifferEntity implements SimplySwordsM
     }
 
     @Override
-    protected void initDataTracker(DataTracker.Builder builder) {
-        super.initDataTracker(builder);
-        builder.add(WEAPON_STACK, ItemStack.EMPTY);
-        builder.add(OWNER_ID, -1);
-        builder.add(TARGET_ID, -1);
-        builder.add(IMPACTED, false);
-        builder.add(LINGER_TICKS, 20);
+    protected void initDataTracker() {
+        super.initDataTracker();
+        this.dataTracker.startTracking(WEAPON_STACK, ItemStack.EMPTY);
+        this.dataTracker.startTracking(OWNER_ID, -1);
+        this.dataTracker.startTracking(TARGET_ID, -1);
+        this.dataTracker.startTracking(IMPACTED, false);
+        this.dataTracker.startTracking(LINGER_TICKS, 20);
     }
 
     @Override
@@ -188,7 +188,7 @@ public class FallingSnifferEntity extends SnifferEntity implements SimplySwordsM
         world.spawnParticles(ParticleTypes.POOF, this.getX(), this.getBodyY(0.35), this.getZ(), 24, 0.8, 0.18, 0.8, 0.06);
         world.spawnParticles(ParticleTypes.CRIT, this.getX(), this.getBodyY(0.35), this.getZ(), 16, 0.7, 0.2, 0.7, 0.04);
         spawnBodyImpactParticles(world);
-        world.playSound(null, this.getBlockPos(), SoundEvents.ENTITY_GENERIC_EXPLODE.value(), SoundCategory.PLAYERS, 0.45F, 0.6F + world.random.nextFloat() * 0.08F);
+        world.playSound(null, this.getBlockPos(), SoundEvents.ENTITY_GENERIC_EXPLODE, SoundCategory.PLAYERS, 0.45F, 0.6F + world.random.nextFloat() * 0.08F);
     }
 
     private void spawnBodyImpactParticles(ServerWorld world) {
@@ -251,7 +251,7 @@ public class FallingSnifferEntity extends SnifferEntity implements SimplySwordsM
     }
 
     @Override
-    protected void dropEquipment(ServerWorld world, DamageSource source, boolean causedByPlayer) {
+    protected void dropEquipment(DamageSource source, int lootingMultiplier, boolean causedByPlayer) {
     }
 
     @Override
@@ -292,7 +292,7 @@ public class FallingSnifferEntity extends SnifferEntity implements SimplySwordsM
         this.immobiliseDurationTicks = nbt.getInt("immobilise_duration_ticks");
         this.discardAtTick = nbt.getLong("discard_at_tick");
         if (nbt.contains("weapon_stack")) {
-            this.dataTracker.set(WEAPON_STACK, ItemStack.fromNbt(this.getRegistryManager(), nbt.getCompound("weapon_stack")).orElse(ItemStack.EMPTY));
+            this.dataTracker.set(WEAPON_STACK, ItemStack.fromNbt(nbt.getCompound("weapon_stack")));
         }
         if (nbt.contains("owner_id")) {
             this.dataTracker.set(OWNER_ID, nbt.getInt("owner_id"));
@@ -324,7 +324,7 @@ public class FallingSnifferEntity extends SnifferEntity implements SimplySwordsM
         nbt.putLong("discard_at_tick", this.discardAtTick);
         ItemStack stack = this.dataTracker.get(WEAPON_STACK);
         if (!stack.isEmpty()) {
-            nbt.put("weapon_stack", stack.encode(this.getRegistryManager()));
+            nbt.put("weapon_stack", stack.writeNbt(new NbtCompound()));
         }
         nbt.putInt("owner_id", this.dataTracker.get(OWNER_ID));
         nbt.putInt("target_id", this.dataTracker.get(TARGET_ID));

@@ -25,7 +25,7 @@ public class VoidAssaultEffect extends OrbitingEffect {
     }
 
     @Override
-    public boolean applyUpdateEffect(LivingEntity livingEntity, int amplifier) {
+    public void applyUpdateEffect(LivingEntity livingEntity, int amplifier) {
         if (!livingEntity.getWorld().isClient()) {
             int voidcallerStartingTickFrequency = Config.uniqueEffects.dreadtide.get().startingTickFrequency;
 
@@ -44,12 +44,11 @@ public class VoidAssaultEffect extends OrbitingEffect {
             }
         }
         super.applyUpdateEffect(livingEntity, amplifier);
-        return true;
     }
 
     @Override
-    public void onRemoved(AttributeContainer attributes) {
-        super.onRemoved(attributes);
+    public void onRemoved(LivingEntity effectEntity, AttributeContainer attributes, int amplifier) {
+        super.onRemoved(effectEntity, attributes, amplifier);
     }
 
     @Override

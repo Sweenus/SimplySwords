@@ -60,16 +60,16 @@ public class BrambleRootVisualEntity extends Entity {
     }
 
     @Override
-    protected void initDataTracker(DataTracker.Builder builder) {
-        builder.add(MODE, MODE_BRANCH);
-        builder.add(SOURCE_ID, -1);
-        builder.add(TARGET_ID, -1);
-        builder.add(PHASE, PHASE_GROW);
-        builder.add(PHASE_START_AGE, 0);
-        builder.add(PULSE, 0);
-        builder.add(PULSE_START_AGE, -1000);
-        builder.add(VISUAL_SEED, 0);
-        builder.add(END_AGE, 120);
+    protected void initDataTracker() {
+        this.dataTracker.startTracking(MODE, MODE_BRANCH);
+        this.dataTracker.startTracking(SOURCE_ID, -1);
+        this.dataTracker.startTracking(TARGET_ID, -1);
+        this.dataTracker.startTracking(PHASE, PHASE_GROW);
+        this.dataTracker.startTracking(PHASE_START_AGE, 0);
+        this.dataTracker.startTracking(PULSE, 0);
+        this.dataTracker.startTracking(PULSE_START_AGE, -1000);
+        this.dataTracker.startTracking(VISUAL_SEED, 0);
+        this.dataTracker.startTracking(END_AGE, 120);
     }
 
     @Override

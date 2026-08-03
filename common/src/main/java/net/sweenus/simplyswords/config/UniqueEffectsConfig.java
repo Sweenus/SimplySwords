@@ -11,7 +11,7 @@ import net.sweenus.simplyswords.item.custom.*;
 public class UniqueEffectsConfig extends Config {
 
     public UniqueEffectsConfig() {
-        super(Identifier.of(SimplySwords.MOD_ID, "unique_effects"));
+        super(new Identifier(SimplySwords.MOD_ID, "unique_effects"));
     }
 
     public float abilityAbsorptionCap = 20f;

@@ -10,7 +10,6 @@ import net.minecraft.entity.passive.AxolotlEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
-import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
@@ -76,7 +75,7 @@ public class ChompolotlSwordItem extends UniqueSwordItem implements UniqueWeapon
             int skillCooldown = Config.uniqueEffects.chompolotl.cooldown;
             ItemStack stack = user.getStackInHand(hand);
             ServerWorld serverWorld = (ServerWorld) world;
-            if (user instanceof PlayerEntity player && !player.getItemCooldownManager().isCoolingDown(stack.getItem())) {
+            if (!user.getItemCooldownManager().isCoolingDown(stack.getItem())) {
                 SimplySwordsAxolotlEntity axolotlEntity = EntityRegistry.SIMPLYAXOLOTLENTITY.get().spawn(
                         serverWorld,
                         user.getBlockPos().up(2).offset(user.getMovementDirection(), 3),
@@ -95,7 +94,7 @@ public class ChompolotlSwordItem extends UniqueSwordItem implements UniqueWeapon
                         speedAttribute.setBaseValue(2.0);
                     world.playSound(null, user.getBlockPos(), SoundRegistry.ELEMENTAL_BOW_WATER_SHOOT_IMPACT_01.get(),
                             user.getSoundCategory(), 0.4f, 1f);
-                    player.getItemCooldownManager().set(stack.getItem(), skillCooldown * 10);
+                    user.getItemCooldownManager().set(stack.getItem(), skillCooldown * 10);
                 }
             }
         }
@@ -147,7 +146,7 @@ public class ChompolotlSwordItem extends UniqueSwordItem implements UniqueWeapon
     }
 
     @Override
-    public void appendTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
+    public void appendTooltip(ItemStack itemStack, net.minecraft.world.World world, List<Text> tooltip, net.minecraft.client.item.TooltipContext tooltipContext) {
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.chompolotlsworditem.tooltip1").setStyle(Styles.ABILITY));
         tooltip.add(Text.translatable("item.simplyswords.chompolotlsworditem.tooltip2").setStyle(Styles.TEXT));
@@ -157,7 +156,7 @@ public class ChompolotlSwordItem extends UniqueSwordItem implements UniqueWeapon
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.chompolotlsworditem.tooltip7").setStyle(Styles.TEXT));
         appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.chompolotl.cooldown * 10);
-        super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        super.appendTooltip(itemStack, world, tooltip, tooltipContext);
         net.sweenus.simplyswords.client.util.TooltipUtils.appendSpellScaleTooltip(tooltip, "nature");
     }
 

@@ -1,7 +1,6 @@
 package net.sweenus.simplyswords.loot;
 
-import net.minecraft.loot.LootTable;
-import net.minecraft.registry.RegistryKey;
+import net.minecraft.util.Identifier;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -18,26 +17,26 @@ public final class PityLootContext {
     private PityLootContext() {
     }
 
-    public static void capture(RegistryKey<LootTable> table) {
+    public static void capture(Identifier table) {
         // ArrayDeque cannot contain null, so wrap the nullable table. Nested
         // generateLoot(null) calls must still occupy their own stack frame.
         CAPTURED_TABLES.get().push(new CapturedTable(table));
     }
 
-    public static RegistryKey<LootTable> take() {
+    public static Identifier take() {
         Deque<CapturedTable> captures = CAPTURED_TABLES.get();
         if (captures.isEmpty()) {
             CAPTURED_TABLES.remove();
             return null;
         }
 
-        RegistryKey<LootTable> table = captures.pop().table();
+        Identifier table = captures.pop().table();
         if (captures.isEmpty()) {
             CAPTURED_TABLES.remove();
         }
         return table;
     }
 
-    private record CapturedTable(RegistryKey<LootTable> table) {
+    private record CapturedTable(Identifier table) {
     }
 }

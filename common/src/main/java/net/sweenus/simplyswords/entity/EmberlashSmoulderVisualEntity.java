@@ -27,9 +27,9 @@ public class EmberlashSmoulderVisualEntity extends Entity {
     }
 
     @Override
-    protected void initDataTracker(DataTracker.Builder builder) {
-        builder.add(STACKS, 1);
-        builder.add(SCALE, 1.0F);
+    protected void initDataTracker() {
+        this.dataTracker.startTracking(STACKS, 1);
+        this.dataTracker.startTracking(SCALE, 1.0F);
     }
 
     public void setStacks(int stacks) {

@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:smelting",
+  "ingredient": {
+    "tag": "simplyswords:gems"
+  },
+  "result": "simplyswords:empowered_remnant",
+  "cookingtime": 500
+}

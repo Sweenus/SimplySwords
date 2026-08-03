@@ -10,9 +10,8 @@ public class VoidhungerEffect extends StatusEffect {
     }
 
     @Override
-    public boolean applyUpdateEffect(LivingEntity livingEntity, int amplifier) {
+    public void applyUpdateEffect(LivingEntity livingEntity, int amplifier) {
         super.applyUpdateEffect(livingEntity, amplifier);
-        return true;
     }
 
     @Override

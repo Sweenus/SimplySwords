@@ -1,0 +1,38 @@
+{
+  "display": {
+    "icon": {
+      "item": "simplyswords:enigma"
+    },
+    "title": {
+      "translate": "advancements.simplyswords.enigma.title",
+      "with": []
+    },
+    "description": {
+      "translate": "advancements.simplyswords.obtain_unique.description",
+      "with": [
+        {
+          "translate": "item.simplyswords.enigma"
+        }
+      ]
+    },
+    "hidden": true,
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "parent": "simplyswords:runic_weapon",
+  "criteria": {
+    "requirement": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "simplyswords:enigma"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

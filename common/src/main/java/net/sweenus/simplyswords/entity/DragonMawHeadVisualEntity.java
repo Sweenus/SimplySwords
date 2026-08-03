@@ -71,18 +71,18 @@ public class DragonMawHeadVisualEntity extends Entity {
     }
 
     @Override
-    protected void initDataTracker(DataTracker.Builder builder) {
-        builder.add(OWNER_ENTITY_ID, -1);
-        builder.add(TARGET_ENTITY_ID, -1);
-        builder.add(WEAPON_STACK, ItemStack.EMPTY);
-        builder.add(LIFETIME, 300);
-        builder.add(BREATH_DELAY, 12);
-        builder.add(BREATH_REPEAT, 60);
-        builder.add(SCALE, 2.35F);
-        builder.add(TARGET_YAW, 0.0F);
-        builder.add(TARGET_PITCH, 0.0F);
-        builder.add(DAMAGE, 0.0F);
-        builder.add(TURN_SPEED, 6.0F);
+    protected void initDataTracker() {
+        this.dataTracker.startTracking(OWNER_ENTITY_ID, -1);
+        this.dataTracker.startTracking(TARGET_ENTITY_ID, -1);
+        this.dataTracker.startTracking(WEAPON_STACK, ItemStack.EMPTY);
+        this.dataTracker.startTracking(LIFETIME, 300);
+        this.dataTracker.startTracking(BREATH_DELAY, 12);
+        this.dataTracker.startTracking(BREATH_REPEAT, 60);
+        this.dataTracker.startTracking(SCALE, 2.35F);
+        this.dataTracker.startTracking(TARGET_YAW, 0.0F);
+        this.dataTracker.startTracking(TARGET_PITCH, 0.0F);
+        this.dataTracker.startTracking(DAMAGE, 0.0F);
+        this.dataTracker.startTracking(TURN_SPEED, 6.0F);
     }
 
     @Override
@@ -322,7 +322,7 @@ public class DragonMawHeadVisualEntity extends Entity {
             this.dataTracker.set(TARGET_ENTITY_ID, nbt.getInt("target_id"));
         }
         if (nbt.contains("weapon_stack")) {
-            this.dataTracker.set(WEAPON_STACK, ItemStack.fromNbt(this.getRegistryManager(), nbt.getCompound("weapon_stack")).orElse(ItemStack.EMPTY));
+            this.dataTracker.set(WEAPON_STACK, ItemStack.fromNbt(nbt.getCompound("weapon_stack")));
         }
         this.dataTracker.set(LIFETIME, nbt.getInt("lifetime"));
         this.dataTracker.set(BREATH_DELAY, nbt.getInt("breath_delay"));
@@ -349,7 +349,7 @@ public class DragonMawHeadVisualEntity extends Entity {
         nbt.putInt("target_id", this.dataTracker.get(TARGET_ENTITY_ID));
         ItemStack stack = this.dataTracker.get(WEAPON_STACK);
         if (!stack.isEmpty()) {
-            nbt.put("weapon_stack", stack.encode(this.getRegistryManager()));
+            nbt.put("weapon_stack", stack.writeNbt(new NbtCompound()));
         }
         nbt.putInt("lifetime", this.dataTracker.get(LIFETIME));
         nbt.putInt("breath_delay", this.dataTracker.get(BREATH_DELAY));

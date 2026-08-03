@@ -165,6 +165,6 @@ public class ChainLightningVisualEntityRenderer extends EntityRenderer<ChainLigh
     private static void vertex(VertexConsumer vertices, Matrix4f matrix, Vec3d pos, int red, int green, int blue, int alpha) {
         vertices.vertex(matrix, (float) pos.x, (float) pos.y, (float) pos.z)
                 .color(red, green, blue, alpha)
-                .light(LightmapTextureManager.MAX_LIGHT_COORDINATE);
+                .light(LightmapTextureManager.MAX_LIGHT_COORDINATE).next();
     }
 }

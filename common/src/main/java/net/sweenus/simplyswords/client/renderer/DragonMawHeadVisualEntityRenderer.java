@@ -26,7 +26,7 @@ import net.sweenus.simplyswords.entity.DragonMawHeadVisualEntity;
 
 public class DragonMawHeadVisualEntityRenderer extends EntityRenderer<DragonMawHeadVisualEntity> {
 
-    private static final Identifier TEXTURE = Identifier.of("minecraft", "textures/entity/enderdragon/dragon.png");
+    private static final Identifier TEXTURE = new Identifier("minecraft", "textures/entity/enderdragon/dragon.png");
     private final DragonHeadEntityModel model;
 
     public DragonMawHeadVisualEntityRenderer(EntityRendererFactory.Context context) {
@@ -81,9 +81,9 @@ public class DragonMawHeadVisualEntityRenderer extends EntityRenderer<DragonMawH
         this.model.setHeadRotation(2.5F * mouthOpen, 0.0F, 0.0F);
         RenderLayer layer = SkullBlockEntityRenderer.getRenderLayer(SkullBlock.Type.DRAGON, null);
         VertexConsumer vertices = vertexConsumers.getBuffer(layer);
-        int alpha = MathHelper.clamp((int) (255.0F * fade), 0, 255);
-        int color = alpha << 24 | 0xFFFFFF;
-        this.model.render(matrices, vertices, Math.max(light, LightmapTextureManager.MAX_LIGHT_COORDINATE), OverlayTexture.DEFAULT_UV, color);
+        this.model.render(matrices, vertices,
+                Math.max(light, LightmapTextureManager.MAX_LIGHT_COORDINATE),
+                OverlayTexture.DEFAULT_UV, 1.0F, 1.0F, 1.0F, fade);
         matrices.pop();
     }
 

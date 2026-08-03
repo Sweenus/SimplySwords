@@ -12,7 +12,7 @@ public class EchoEffect extends StatusEffect {
     }
 
     @Override
-    public boolean applyUpdateEffect(LivingEntity livingEntity, int amplifier) {
+    public void applyUpdateEffect(LivingEntity livingEntity, int amplifier) {
         if (!livingEntity.getWorld().isClient()) {
             if (livingEntity.age % 15 == 0) {
                 int damage = Config.statusEffects.echoDamage;
@@ -22,7 +22,6 @@ public class EchoEffect extends StatusEffect {
             }
         }
         super.applyUpdateEffect(livingEntity, amplifier);
-        return true;
     }
 
     @Override

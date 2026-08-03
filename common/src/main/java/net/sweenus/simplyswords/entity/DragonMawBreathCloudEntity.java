@@ -58,13 +58,13 @@ public class DragonMawBreathCloudEntity extends Entity {
     }
 
     @Override
-    protected void initDataTracker(DataTracker.Builder builder) {
-        builder.add(OWNER_ENTITY_ID, -1);
-        builder.add(WEAPON_STACK, ItemStack.EMPTY);
-        builder.add(DAMAGE, 0.0F);
-        builder.add(RADIUS, 2.25F);
-        builder.add(LIFETIME, 50);
-        builder.add(DAMAGE_INTERVAL, 10);
+    protected void initDataTracker() {
+        this.dataTracker.startTracking(OWNER_ENTITY_ID, -1);
+        this.dataTracker.startTracking(WEAPON_STACK, ItemStack.EMPTY);
+        this.dataTracker.startTracking(DAMAGE, 0.0F);
+        this.dataTracker.startTracking(RADIUS, 2.25F);
+        this.dataTracker.startTracking(LIFETIME, 50);
+        this.dataTracker.startTracking(DAMAGE_INTERVAL, 10);
     }
 
     @Override
@@ -283,7 +283,7 @@ public class DragonMawBreathCloudEntity extends Entity {
             this.origin = new Vec3d(nbt.getDouble("origin_x"), nbt.getDouble("origin_y"), nbt.getDouble("origin_z"));
         }
         if (nbt.contains("weapon_stack")) {
-            this.dataTracker.set(WEAPON_STACK, ItemStack.fromNbt(this.getRegistryManager(), nbt.getCompound("weapon_stack")).orElse(ItemStack.EMPTY));
+            this.dataTracker.set(WEAPON_STACK, ItemStack.fromNbt(nbt.getCompound("weapon_stack")));
         }
         this.dataTracker.set(DAMAGE, nbt.getFloat("damage"));
         this.dataTracker.set(RADIUS, nbt.getFloat("radius"));
@@ -302,7 +302,7 @@ public class DragonMawBreathCloudEntity extends Entity {
         nbt.putInt("owner_id", this.dataTracker.get(OWNER_ENTITY_ID));
         ItemStack stack = this.dataTracker.get(WEAPON_STACK);
         if (!stack.isEmpty()) {
-            nbt.put("weapon_stack", stack.encode(this.getRegistryManager()));
+            nbt.put("weapon_stack", stack.writeNbt(new NbtCompound()));
         }
         nbt.putFloat("damage", this.dataTracker.get(DAMAGE));
         nbt.putFloat("radius", this.dataTracker.get(RADIUS));

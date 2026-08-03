@@ -4,9 +4,6 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Uuids;
 import org.jetbrains.annotations.Nullable;
@@ -44,16 +41,5 @@ public record TargetedLocationComponent(UUID uuid, double lastX, double lastY, d
 						Codec.DOUBLE.fieldOf("z").forGetter(TargetedLocationComponent::lastZ)
 				).apply(instance, TargetedLocationComponent::new));
 
-	public static PacketCodec<RegistryByteBuf, TargetedLocationComponent> PACKET_CODEC = PacketCodec.tuple(
-			PacketCodecs.STRING.xmap(UUID::fromString, UUID::toString),
-			TargetedLocationComponent::uuid,
-			PacketCodecs.DOUBLE,
-			TargetedLocationComponent::lastX,
-			PacketCodecs.DOUBLE,
-			TargetedLocationComponent::lastY,
-			PacketCodecs.DOUBLE,
-			TargetedLocationComponent::lastZ,
-			TargetedLocationComponent::new
-	);
 
 }

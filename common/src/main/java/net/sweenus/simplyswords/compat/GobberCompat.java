@@ -228,7 +228,7 @@ public class GobberCompat {
 
 
     private static Item registerItem(String name, Item item) {
-        return Registry.register(Registries.ITEM, Identifier.of(SimplySwords.MOD_ID, name), item);
+        return Registry.register(Registries.ITEM, new Identifier(SimplySwords.MOD_ID, name), item);
     }
 
 

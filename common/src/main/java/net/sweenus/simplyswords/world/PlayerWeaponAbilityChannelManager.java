@@ -24,7 +24,7 @@ public final class PlayerWeaponAbilityChannelManager {
             return;
         }
 
-        int maxUseTime = stack.getMaxUseTime(player);
+        int maxUseTime = stack.getMaxUseTime();
         if (maxUseTime <= 0) {
             return;
         }

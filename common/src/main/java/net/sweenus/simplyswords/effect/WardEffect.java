@@ -15,7 +15,7 @@ public class WardEffect extends StatusEffect {
     }
 
     @Override
-    public boolean applyUpdateEffect(LivingEntity livingEntity, int amplifier) {
+    public void applyUpdateEffect(LivingEntity livingEntity, int amplifier) {
         if (!livingEntity.getWorld().isClient()) {
             if (livingEntity instanceof PlayerEntity) {
                 if (livingEntity.age % 20 == 0) {
@@ -24,7 +24,6 @@ public class WardEffect extends StatusEffect {
             }
         }
         super.applyUpdateEffect(livingEntity, amplifier);
-        return true;
     }
 
     @Override

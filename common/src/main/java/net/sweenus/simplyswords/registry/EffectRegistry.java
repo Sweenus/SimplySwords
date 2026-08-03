@@ -15,14 +15,14 @@ import net.sweenus.simplyswords.effect.*;
 
 public class EffectRegistry {
 
-    public static final Identifier SHADOW_DANCE_ID = Identifier.of(SimplySwords.MOD_ID, "shadow_dance");
+    public static final Identifier SHADOW_DANCE_ID = new Identifier(SimplySwords.MOD_ID, "shadow_dance");
 
     public static final DeferredRegister<StatusEffect> EFFECT = DeferredRegister.create(SimplySwords.MOD_ID, RegistryKeys.STATUS_EFFECT);
 
     //This is currently REQUIRED as a wrapper around a call to one of the effects below, since Architectury has a bug involving RegistrySuppliers not being able to save properly.
     //Once they fix that bug, this could be removed (but also works fine as is)
-    public static RegistryEntry<StatusEffect> getReference(RegistrySupplier<StatusEffect> input) {
-        return EFFECT.getRegistrar().getHolder(input.getId());
+    public static StatusEffect getReference(RegistrySupplier<StatusEffect> input) {
+        return input.get();
     }
 
     public static final RegistrySupplier<StatusEffect> WILDFIRE = EFFECT.register("wildfire", () ->
@@ -51,41 +51,41 @@ public class EffectRegistry {
     public static final RegistrySupplier<StatusEffect> FRENZY = EFFECT.register("frenzy", () ->
             new FrenzyEffect(StatusEffectCategory.BENEFICIAL, 1124687)
                     .addAttributeModifier(EntityAttributes.GENERIC_ATTACK_SPEED,
-                            Identifier.of("54e1b9b9-6de9-49bb-a716-564b3d375892"),
+                            "54e1b9b9-6de9-49bb-a716-564b3d375892",
                             0.3,
-                            EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+                            EntityAttributeModifier.Operation.MULTIPLY_TOTAL));
     public static final RegistrySupplier<StatusEffect> FEROCITY = EFFECT.register("ferocity", () ->
             new FerocityEffect(StatusEffectCategory.BENEFICIAL, 0x9D63C4));
     public static final RegistrySupplier<StatusEffect> VOIDCLOAK = EFFECT.register("voidcloak", () ->
             new VoidcloakEffect(StatusEffectCategory.BENEFICIAL, 1124687)
                     .addAttributeModifier(EntityAttributes.GENERIC_ATTACK_SPEED,
-                            Identifier.of("d07f34ad-6367-4a86-b47a-736947e2c008"),
+                            "d07f34ad-6367-4a86-b47a-736947e2c008",
                             0.1,
-                            EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+                            EntityAttributeModifier.Operation.MULTIPLY_TOTAL));
     public static final RegistrySupplier<StatusEffect> VOIDASSAULT = EFFECT.register("void_assault", () ->
             new VoidAssaultEffect(StatusEffectCategory.HARMFUL, 1124687));
 
     public static final RegistrySupplier<StatusEffect> FIRE_VORTEX = EFFECT.register("fire_vortex", () ->
             new FireVortexEffect(StatusEffectCategory.HARMFUL, 1124687)
                     .addAttributeModifier(EntityAttributes.GENERIC_ARMOR,
-                            Identifier.of("f20d79bc-5f73-49d3-9e3f-30bf9a8da15a"),
+                            "f20d79bc-5f73-49d3-9e3f-30bf9a8da15a",
                             -0.01,
-                            EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL)
+                            EntityAttributeModifier.Operation.MULTIPLY_TOTAL)
                     .addAttributeModifier(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE,
-                            Identifier.of("3f68cd63-6fc5-4a23-87bd-c5902579d9db"),
+                            "3f68cd63-6fc5-4a23-87bd-c5902579d9db",
                             85,
-                            EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+                            EntityAttributeModifier.Operation.MULTIPLY_TOTAL));
 
     public static final RegistrySupplier<StatusEffect> FROST_VORTEX = EFFECT.register("frost_vortex", () ->
             new FrostVortexEffect(StatusEffectCategory.HARMFUL, 1124687)
                     .addAttributeModifier(EntityAttributes.GENERIC_MOVEMENT_SPEED,
-                            Identifier.of("d0814391-9325-441e-bc7e-ace3f8f89a21"),
+                            "d0814391-9325-441e-bc7e-ace3f8f89a21",
                             -0.01,
-                            EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL)
+                            EntityAttributeModifier.Operation.MULTIPLY_TOTAL)
                     .addAttributeModifier(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE,
-                            Identifier.of("8b1fc18c-9539-4718-af61-224d0ccd274f"),
+                            "8b1fc18c-9539-4718-af61-224d0ccd274f",
                             85,
-                            EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+                            EntityAttributeModifier.Operation.MULTIPLY_TOTAL));
 
     public static final RegistrySupplier<StatusEffect> ELEMENTAL_VORTEX = EFFECT.register("elemental_vortex", () ->
             new ElementalVortexEffect(StatusEffectCategory.BENEFICIAL, 1124687));
@@ -96,20 +96,20 @@ public class EffectRegistry {
     public static final RegistrySupplier<StatusEffect> RIBBONWRATH = EFFECT.register("ribbonwrath", () ->
             new RibbonwrathEffect(StatusEffectCategory.HARMFUL, 1124687)
                     .addAttributeModifier(EntityAttributes.GENERIC_MOVEMENT_SPEED,
-                            Identifier.of("325de159-03bd-421c-8dd0-53e0090857ed"),
+                            "325de159-03bd-421c-8dd0-53e0090857ed",
                             -0.05,
-                            EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+                            EntityAttributeModifier.Operation.MULTIPLY_TOTAL));
 
     public static final RegistrySupplier<StatusEffect> RIBBONCLEAVE = EFFECT.register("ribboncleave", () ->
             new RibboncleaveEffect(StatusEffectCategory.BENEFICIAL, 1124687)
                     .addAttributeModifier(EntityAttributes.GENERIC_ATTACK_DAMAGE,
-                            Identifier.of("c8fb5e9f-c446-4475-b73f-a2290196210f"),
+                            "c8fb5e9f-c446-4475-b73f-a2290196210f",
                             Config.uniqueEffects.ribboncleaver.damageBonusPercent,
-                            EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL)
+                            EntityAttributeModifier.Operation.MULTIPLY_TOTAL)
                     .addAttributeModifier(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE,
-                            Identifier.of("1b147b80-6598-48d4-917f-7da3032c070f"),
+                            "1b147b80-6598-48d4-917f-7da3032c070f",
                             1,
-                            EntityAttributeModifier.Operation.ADD_VALUE));
+                            EntityAttributeModifier.Operation.ADDITION));
     public static final RegistrySupplier<StatusEffect> RESILIENCE = EFFECT.register("resilience", () ->
             new ResilienceEffect(StatusEffectCategory.BENEFICIAL, 1124687));
 
@@ -131,9 +131,9 @@ public class EffectRegistry {
     public static final RegistrySupplier<StatusEffect> SOULTETHER = EFFECT.register("soul_tether", () ->
             new SoulTetherEffect(StatusEffectCategory.BENEFICIAL, 1124687)
                     .addAttributeModifier(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE,
-                            Identifier.of("b15ae1eb-36cd-451a-b8c1-7d747b327934"),
+                            "b15ae1eb-36cd-451a-b8c1-7d747b327934",
                             1,
-                            EntityAttributeModifier.Operation.ADD_VALUE));
+                            EntityAttributeModifier.Operation.ADDITION));
 
     public static final RegistrySupplier<StatusEffect> SHADOW_DANCE = EFFECT.register(SHADOW_DANCE_ID.getPath(), () ->
             new ShadowDanceEffect(StatusEffectCategory.BENEFICIAL, 1315860));

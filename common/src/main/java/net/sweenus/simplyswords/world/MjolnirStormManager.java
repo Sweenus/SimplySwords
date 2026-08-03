@@ -169,7 +169,7 @@ public final class MjolnirStormManager {
             return;
         }
 
-        double radius = Math.clamp(Math.max(0.25, target.getWidth() * 0.55), 0.25, 0.8);
+        double radius = net.minecraft.util.math.MathHelper.clamp(Math.max(0.25, target.getWidth() * 0.55), 0.25, 0.8);
         double startAngle = world.random.nextDouble() * Math.PI * 2.0;
         spawnConductiveJump(world, target, radius, startAngle);
         if (world.random.nextInt(4) == 0) {
@@ -602,7 +602,7 @@ public final class MjolnirStormManager {
             target.takeKnockback(strength, -direction.x, -direction.z);
         }
 
-        double resistance = Math.clamp(
+        double resistance = net.minecraft.util.math.MathHelper.clamp(
                 target.getAttributeValue(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE),
                 0.0,
                 1.0

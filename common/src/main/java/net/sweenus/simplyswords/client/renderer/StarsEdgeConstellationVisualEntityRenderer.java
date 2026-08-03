@@ -229,7 +229,7 @@ public class StarsEdgeConstellationVisualEntityRenderer
                                int red, int green, int blue, int alpha, int light) {
         vertices.vertex(matrix, (float) position.x, (float) position.y, (float) position.z)
                 .color(red, green, blue, alpha)
-                .light(light);
+                .light(light).next();
     }
 
     private static int alpha(int base, float multiplier) {

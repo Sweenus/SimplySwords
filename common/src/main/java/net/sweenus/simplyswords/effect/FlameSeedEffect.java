@@ -46,7 +46,7 @@ public class FlameSeedEffect extends OrbitingEffect {
     }
 
     @Override
-    public boolean applyUpdateEffect(LivingEntity livingEntity, int amplifier) {
+    public void applyUpdateEffect(LivingEntity livingEntity, int amplifier) {
         if (!livingEntity.getWorld().isClient()) {
             ServerWorld serverWorld = (ServerWorld) livingEntity.getWorld();
             float abilityDamage = 0f;
@@ -110,7 +110,6 @@ public class FlameSeedEffect extends OrbitingEffect {
             }
         }
         super.applyUpdateEffect(livingEntity, amplifier);
-        return true;
     }
 
     public static boolean hasPendingDeathDetonations(ServerWorld world) {
@@ -254,12 +253,12 @@ public class FlameSeedEffect extends OrbitingEffect {
     }
 
     @Override
-    public void onRemoved(AttributeContainer attributes) {
+    public void onRemoved(LivingEntity effectEntity, AttributeContainer attributes, int amplifier) {
         LivingEntity livingEntity = getEntityFromAttributeContainer(attributes);
         if (livingEntity != null && !livingEntity.getWorld().isClient() && livingEntity.getWorld() instanceof ServerWorld serverWorld) {
             FlamewindVisualManager.removeSeed(serverWorld, livingEntity);
         }
-        super.onRemoved(attributes);
+        super.onRemoved(effectEntity, attributes, amplifier);
     }
 
     @Override

@@ -18,7 +18,7 @@ import static net.sweenus.simplyswords.SimplySwords.minimumSpellbookVersion;
 public class GeneralConfig extends Config {
 
     public GeneralConfig() {
-        super(Identifier.of(SimplySwords.MOD_ID, "general"));
+        super(new Identifier(SimplySwords.MOD_ID, "general"));
     }
 
     public boolean enableWeaponImpactSounds = true;

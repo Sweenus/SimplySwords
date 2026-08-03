@@ -31,7 +31,7 @@ public class ElementalVortexEffect extends OrbitingEffect {
     }
 
     @Override
-    public boolean applyUpdateEffect(LivingEntity livingEntity, int amplifier) {
+    public void applyUpdateEffect(LivingEntity livingEntity, int amplifier) {
         if (!livingEntity.getWorld().isClient()) {
             ServerWorld serverWorld = (ServerWorld) livingEntity.getWorld();
 			SoundHelper.loopSound(livingEntity, SoundRegistry.AMBIENCE_WIND_LOOP.getId(), 6, 20);
@@ -65,14 +65,13 @@ public class ElementalVortexEffect extends OrbitingEffect {
             }
         }
         super.applyUpdateEffect(livingEntity, amplifier);
-        return true;
     }
 
     @Override
-    public void onRemoved(AttributeContainer attributes) {
+    public void onRemoved(LivingEntity effectEntity, AttributeContainer attributes, int amplifier) {
         LivingEntity entity = getEntityFromAttributeContainer(attributes);
         SoundHelper.stopLoopingSound(entity, SoundRegistry.AMBIENCE_WIND_LOOP.getId());
-        super.onRemoved(attributes);
+        super.onRemoved(effectEntity, attributes, amplifier);
     }
 
     @Override

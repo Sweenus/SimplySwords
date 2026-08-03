@@ -57,17 +57,17 @@ public class CaelestisBreachVisualEntityRenderer
     private static final int WASH_BLUE = 160;
     private static final int WASH_ALPHA = 42;
 
-    private static final Identifier SCULK_TEXTURE = Identifier.ofVanilla("block/sculk");
-    private static final Identifier CATALYST_TOP_TEXTURE = Identifier.ofVanilla("block/sculk_catalyst_top");
-    private static final Identifier CATALYST_SIDE_TEXTURE = Identifier.ofVanilla("block/sculk_catalyst_side");
-    private static final Identifier SHRIEKER_TOP_TEXTURE = Identifier.ofVanilla("block/sculk_shrieker_top");
+    private static final Identifier SCULK_TEXTURE = new Identifier("minecraft", "block/sculk");
+    private static final Identifier CATALYST_TOP_TEXTURE = new Identifier("minecraft", "block/sculk_catalyst_top");
+    private static final Identifier CATALYST_SIDE_TEXTURE = new Identifier("minecraft", "block/sculk_catalyst_side");
+    private static final Identifier SHRIEKER_TOP_TEXTURE = new Identifier("minecraft", "block/sculk_shrieker_top");
     private static final Identifier SHRIEKER_INNER_TOP_TEXTURE =
-            Identifier.ofVanilla("block/sculk_shrieker_inner_top");
-    private static final Identifier SHRIEKER_SIDE_TEXTURE = Identifier.ofVanilla("block/sculk_shrieker_side");
-    private static final Identifier SENSOR_TOP_TEXTURE = Identifier.ofVanilla("block/sculk_sensor_top");
-    private static final Identifier SENSOR_SIDE_TEXTURE = Identifier.ofVanilla("block/sculk_sensor_side");
+            new Identifier("minecraft", "block/sculk_shrieker_inner_top");
+    private static final Identifier SHRIEKER_SIDE_TEXTURE = new Identifier("minecraft", "block/sculk_shrieker_side");
+    private static final Identifier SENSOR_TOP_TEXTURE = new Identifier("minecraft", "block/sculk_sensor_top");
+    private static final Identifier SENSOR_SIDE_TEXTURE = new Identifier("minecraft", "block/sculk_sensor_side");
     private static final Identifier WHITE_TEXTURE =
-            Identifier.ofVanilla("textures/misc/white.png");
+            new Identifier("minecraft", "textures/misc/white.png");
 
     private final Map<UUID, TerrainCache> terrainCaches = new HashMap<>();
     private final TerrainFieldOverlayRenderer terrainOverlay =
@@ -688,25 +688,26 @@ public class CaelestisBreachVisualEntityRenderer
             MatrixStack.Entry matrices, VertexConsumer vertices, Sprite sprite,
             double x, float y, double z, double u, double v, int light,
             Direction direction) {
-        vertices.vertex(matrices, (float) x, y, (float) z)
+        vertices.vertex(matrices.getPositionMatrix(), (float) x, y, (float) z)
                 .color(TERRAIN_RED, TERRAIN_GREEN, TERRAIN_BLUE, 255)
-                .texture(sprite.getFrameU((float) u), sprite.getFrameV((float) v))
+                .texture(TerrainFieldOverlayRenderer.normalizedSpriteU(sprite, u),
+                        TerrainFieldOverlayRenderer.normalizedSpriteV(sprite, v))
                 .overlay(OverlayTexture.DEFAULT_UV)
                 .light(light)
-                .normal(matrices, direction.getOffsetX(),
-                        direction.getOffsetY(), direction.getOffsetZ());
+                .normal(matrices.getNormalMatrix(), direction.getOffsetX(),
+                        direction.getOffsetY(), direction.getOffsetZ()).next();
     }
 
     private static void putWashVertex(
             MatrixStack.Entry matrices, VertexConsumer vertices,
             double x, float y, double z, int light, Direction direction) {
-        vertices.vertex(matrices, (float) x, y, (float) z)
+        vertices.vertex(matrices.getPositionMatrix(), (float) x, y, (float) z)
                 .color(WASH_RED, WASH_GREEN, WASH_BLUE, WASH_ALPHA)
                 .texture(0.5F, 0.5F)
                 .overlay(OverlayTexture.DEFAULT_UV)
                 .light(light)
-                .normal(matrices, direction.getOffsetX(),
-                        direction.getOffsetY(), direction.getOffsetZ());
+                .normal(matrices.getNormalMatrix(), direction.getOffsetX(),
+                        direction.getOffsetY(), direction.getOffsetZ()).next();
     }
 
     private static int terrainLight(
@@ -757,10 +758,10 @@ public class CaelestisBreachVisualEntityRenderer
             float y0 = groundOffset(entity, ox, oz);
             float y1 = groundOffset(entity, nox, noz);
 
-            vertices.vertex(matrices, ix, y0, iz).color(red, green, blue, alpha);
-            vertices.vertex(matrices, ox, y0, oz).color(red, green, blue, alpha);
-            vertices.vertex(matrices, nox, y1, noz).color(red, green, blue, alpha);
-            vertices.vertex(matrices, nix, y1, niz).color(red, green, blue, alpha);
+            vertices.vertex(matrices.getPositionMatrix(), ix, y0, iz).color(red, green, blue, alpha).next();
+            vertices.vertex(matrices.getPositionMatrix(), ox, y0, oz).color(red, green, blue, alpha).next();
+            vertices.vertex(matrices.getPositionMatrix(), nox, y1, noz).color(red, green, blue, alpha).next();
+            vertices.vertex(matrices.getPositionMatrix(), nix, y1, niz).color(red, green, blue, alpha).next();
         }
     }
 
@@ -803,12 +804,12 @@ public class CaelestisBreachVisualEntityRenderer
                                       float x, float y, float z,
                                       int red, int green, int blue, int alpha,
                                       float normalX, float normalZ) {
-        vertices.vertex(matrices, x, y, z)
+        vertices.vertex(matrices.getPositionMatrix(), x, y, z)
                 .color(red, green, blue, alpha)
                 .texture(0.5F, 0.5F)
                 .overlay(OverlayTexture.DEFAULT_UV)
                 .light(LightmapTextureManager.MAX_LIGHT_COORDINATE)
-                .normal(matrices, normalX, 0.0F, normalZ);
+                .normal(matrices.getNormalMatrix(), normalX, 0.0F, normalZ).next();
     }
 
     private static float groundOffset(CaelestisBreachVisualEntity entity, float localX, float localZ) {

@@ -9,15 +9,11 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import com.mojang.serialization.DataResult;
 import dev.architectury.event.events.common.CommandRegistrationEvent;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.command.argument.IdentifierArgumentType;
-import net.minecraft.component.Component;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.ContainerLootComponent;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
@@ -29,15 +25,14 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.loot.LootTable;
+import net.minecraft.loot.LootDataType;
 import net.minecraft.loot.context.LootContextParameterSet;
 import net.minecraft.loot.context.LootContextParameters;
 import net.minecraft.loot.context.LootContextTypes;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.RegistryOps;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -233,29 +228,12 @@ public final class SimplySwordsCommands {
             throw EMPTY_HAND.create("component_test");
         }
 
-        RegistryOps<NbtElement> ops = RegistryOps.of(NbtOps.INSTANCE, source.getRegistryManager());
         List<Text> lines = new ArrayList<>();
-        boolean allPassed = true;
-
-        for (Component<?> component : stack.getComponents()) {
-            Identifier typeId = Registries.DATA_COMPONENT_TYPE.getId(component.type());
-            if (typeId == null || !typeId.getNamespace().equals(SimplySwords.MOD_ID)) continue;
-            ComponentResult result = roundTripComponent(component, ops);
-            allPassed &= result.passed();
-            lines.add(Text.literal(" " + (result.passed() ? "✔ " : "✘ ") + typeId + " — " + result.detail())
-                    .formatted(result.passed() ? Formatting.GREEN : Formatting.RED));
-        }
-
-        if (lines.isEmpty()) {
-            lines.add(Text.literal(" (no Simply Swords components on this stack)").formatted(Formatting.GRAY));
-        }
-
-        boolean stackPassed = roundTripStack(stack, ops);
-        allPassed &= stackPassed;
-        lines.add(Text.literal(" " + (stackPassed ? "✔ " : "✘ ") + "whole stack (ItemStack.CODEC round trip)")
+        boolean stackPassed = roundTripStack(stack);
+        lines.add(Text.literal(" " + (stackPassed ? "✔ " : "✘ ") + "whole stack (NBT round trip)")
                 .formatted(stackPassed ? Formatting.GREEN : Formatting.RED));
 
-        final boolean passed = allPassed;
+        final boolean passed = stackPassed;
         final Text header = Text.literal("Component round-trip test: " + stack.getName().getString())
                 .formatted(passed ? Formatting.GREEN : Formatting.RED);
         source.sendFeedback(() -> header, false);
@@ -265,39 +243,10 @@ public final class SimplySwordsCommands {
         return passed ? 1 : 0;
     }
 
-    private record ComponentResult(boolean passed, String detail) {
-    }
-
-    private static <T> ComponentResult roundTripComponent(Component<T> component, RegistryOps<NbtElement> ops) {
-        DataResult<NbtElement> encoded = component.encode(ops);
-        if (encoded.error().isPresent()) {
-            return new ComponentResult(false, "encode failed: " + encoded.error().get().message());
-        }
-        DataResult<T> decoded = component.type().getCodecOrThrow()
-                .parse(ops, encoded.getOrThrow());
-        if (decoded.error().isPresent()) {
-            return new ComponentResult(false, "decode failed: " + decoded.error().get().message());
-        }
-
-        T original = component.value();
-        T roundTripped = decoded.getOrThrow();
-        boolean equal = original.equals(roundTripped);
-        boolean hashEqual = original.hashCode() == roundTripped.hashCode();
-        if (equal && hashEqual) {
-            return new ComponentResult(true, "equals + hashCode agree");
-        }
-        if (!equal) {
-            return new ComponentResult(false, "decoded value is not equal to the original");
-        }
-        return new ComponentResult(false, "equals() agrees but hashCode() differs");
-    }
-
-    private static boolean roundTripStack(ItemStack stack, RegistryOps<NbtElement> ops) {
-        DataResult<NbtElement> encoded = ItemStack.CODEC.encodeStart(ops, stack);
-        if (encoded.error().isPresent()) return false;
-        DataResult<ItemStack> decoded = ItemStack.CODEC.parse(ops, encoded.getOrThrow());
-        if (decoded.error().isPresent()) return false;
-        return ItemStack.areItemsAndComponentsEqual(stack, decoded.getOrThrow());
+    private static boolean roundTripStack(ItemStack stack) {
+        NbtCompound encoded = stack.writeNbt(new NbtCompound());
+        ItemStack decoded = ItemStack.fromNbt(encoded);
+        return ItemStack.areEqual(stack, decoded);
     }
 
     private static <T extends ArgumentBuilder<ServerCommandSource, T>> T configureSpawnArguments(T builder) {
@@ -322,7 +271,7 @@ public final class SimplySwordsCommands {
         ItemStack stack = powerType == PowerType.NETHER
                 ? new ItemStack(ItemsRegistry.NETHERFUSED_GEM.get())
                 : new ItemStack(ItemsRegistry.RUNEFUSED_GEM.get());
-        stack.set(ComponentTypeRegistry.GEM_POWER.get(), powerType == PowerType.NETHER
+        ComponentTypeRegistry.GEM_POWER.set(stack, powerType == PowerType.NETHER
                 ? GemPowerComponent.nether(power)
                 : GemPowerComponent.runic(power));
         giveStack(context.getSource(), stack, power);
@@ -338,7 +287,7 @@ public final class SimplySwordsCommands {
         }
 
         ItemStack stack = new ItemStack(item);
-        stack.set(ComponentTypeRegistry.GEM_POWER.get(), GemPowerComponent.runic(power));
+        ComponentTypeRegistry.GEM_POWER.set(stack, GemPowerComponent.runic(power));
         WeaponImplicitRegistry.getOrCreateWeaponImplicit(stack);
         giveStack(context.getSource(), stack, power);
         return 1;
@@ -373,7 +322,7 @@ public final class SimplySwordsCommands {
 
     private static Identifier normalizeSimplySwordsId(Identifier id) {
         if (id.getNamespace().equals(Identifier.DEFAULT_NAMESPACE)) {
-            Identifier simplySwordsId = Identifier.of(SimplySwords.MOD_ID, id.getPath());
+            Identifier simplySwordsId = new Identifier(SimplySwords.MOD_ID, id.getPath());
             if (GemPowerRegistry.REGISTRY.contains(simplySwordsId) || Registries.ITEM.containsId(simplySwordsId)) {
                 return simplySwordsId;
             }
@@ -406,12 +355,10 @@ public final class SimplySwordsCommands {
     private static CompletableFuture<Suggestions> suggestLootTables(
             CommandContext<ServerCommandSource> context,
             SuggestionsBuilder builder) {
-        var lootTables = context.getSource().getServer().getReloadableRegistries();
-        Stream<Identifier> ids = lootTables.getIds(RegistryKeys.LOOT_TABLE).stream()
+        var lootTables = context.getSource().getServer().getLootManager();
+        Stream<Identifier> ids = lootTables.getIds(LootDataType.LOOT_TABLES).stream()
                 .filter(id -> {
-                    LootTable table = lootTables.getLootTable(
-                            RegistryKey.of(RegistryKeys.LOOT_TABLE, id)
-                    );
+                    LootTable table = lootTables.getLootTable(id);
                     return table.getType() == LootContextTypes.CHEST
                             || table.getType() == LootContextTypes.ENTITY;
                 });
@@ -421,11 +368,9 @@ public final class SimplySwordsCommands {
     private static CompletableFuture<Suggestions> suggestChestLootTables(
             CommandContext<ServerCommandSource> context,
             SuggestionsBuilder builder) {
-        var lootTables = context.getSource().getServer().getReloadableRegistries();
-        Stream<Identifier> ids = lootTables.getIds(RegistryKeys.LOOT_TABLE).stream()
-                .filter(id -> lootTables.getLootTable(
-                        RegistryKey.of(RegistryKeys.LOOT_TABLE, id)
-                ).getType() == LootContextTypes.CHEST);
+        var lootTables = context.getSource().getServer().getLootManager();
+        Stream<Identifier> ids = lootTables.getIds(LootDataType.LOOT_TABLES).stream()
+                .filter(id -> lootTables.getLootTable(id).getType() == LootContextTypes.CHEST);
         return CommandSource.suggestIdentifiers(ids, builder);
     }
 
@@ -451,22 +396,21 @@ public final class SimplySwordsCommands {
         ServerPlayerEntity player = source.getPlayerOrThrow();
         Identifier rawTableId = IdentifierArgumentType.getIdentifier(context, "table");
         Identifier tableId = normalizeLootTableId(rawTableId);
-        var lootTables = source.getServer().getReloadableRegistries();
+        var lootTables = source.getServer().getLootManager();
 
-        if (!lootTables.getIds(RegistryKeys.LOOT_TABLE).contains(tableId)) {
+        if (!lootTables.getIds(LootDataType.LOOT_TABLES).contains(tableId)) {
             throw UNKNOWN_LOOT_TABLE.create(tableId);
         }
 
-        RegistryKey<LootTable> tableKey = RegistryKey.of(RegistryKeys.LOOT_TABLE, tableId);
-        if (lootTables.getLootTable(tableKey).getType() != LootContextTypes.CHEST) {
+        if (lootTables.getLootTable(tableId).getType() != LootContextTypes.CHEST) {
             throw CHEST_LOOT_TABLE_REQUIRED.create(tableId);
         }
 
         ItemStack stack = new ItemStack(Items.CHEST, count);
-        stack.set(
-                DataComponentTypes.CONTAINER_LOOT,
-                new ContainerLootComponent(tableKey, 0L)
-        );
+        NbtCompound blockEntityTag = new NbtCompound();
+        blockEntityTag.putString("LootTable", tableId.toString());
+        blockEntityTag.putLong("LootTableSeed", 0L);
+        stack.setSubNbt("BlockEntityTag", blockEntityTag);
         if (!player.getInventory().insertStack(stack)) {
             player.dropItem(stack, false);
         }
@@ -615,17 +559,13 @@ public final class SimplySwordsCommands {
         Identifier rawTableId = IdentifierArgumentType.getIdentifier(context, "table");
         Identifier tableId = normalizeLootTableId(rawTableId);
         int rolls = IntegerArgumentType.getInteger(context, "rolls");
-        var lootTables = source.getServer().getReloadableRegistries();
+        var lootTables = source.getServer().getLootManager();
 
-        if (!lootTables.getIds(RegistryKeys.LOOT_TABLE).contains(tableId)) {
+        if (!lootTables.getIds(LootDataType.LOOT_TABLES).contains(tableId)) {
             throw UNKNOWN_LOOT_TABLE.create(tableId);
         }
 
-        RegistryKey<LootTable> tableKey = RegistryKey.of(
-                RegistryKeys.LOOT_TABLE,
-                tableId
-        );
-        LootTable lootTable = lootTables.getLootTable(tableKey);
+        LootTable lootTable = lootTables.getLootTable(tableId);
         LootContextParameterSet lootContext = createLootTestContext(
                 source,
                 tableId,
@@ -655,7 +595,7 @@ public final class SimplySwordsCommands {
             ChestLootTestStats chestStats = simulateChestLootTest(
                     lootTable,
                     lootContext,
-                    tableKey,
+                    tableId,
                     world,
                     rolls
             );
@@ -676,7 +616,7 @@ public final class SimplySwordsCommands {
     private static ChestLootTestStats simulateChestLootTest(
             LootTable lootTable,
             LootContextParameterSet lootContext,
-            RegistryKey<LootTable> tableKey,
+            Identifier tableId,
             ServerWorld world,
             int rolls
     ) {
@@ -691,7 +631,7 @@ public final class SimplySwordsCommands {
             );
             List<ItemStack> baseLoot = new ArrayList<>(directLoot);
             baseLoot.addAll(PityLootManager.simulateGeneratedContainerLoot(
-                    tableKey,
+                    tableId,
                     baseState,
                     world.getRandom(),
                     PityLootManager.SimulationMode.BASE_ONLY
@@ -700,7 +640,7 @@ public final class SimplySwordsCommands {
 
             List<ItemStack> pityLoot = new ArrayList<>(directLoot);
             pityLoot.addAll(PityLootManager.simulateGeneratedContainerLoot(
-                    tableKey,
+                    tableId,
                     pityState,
                     world.getRandom(),
                     PityLootManager.SimulationMode.PITY_PROGRESSION
@@ -910,8 +850,8 @@ public final class SimplySwordsCommands {
                 : source.getWorld().getDamageSources().generic();
         builder.add(LootContextParameters.THIS_ENTITY, entity)
                 .add(LootContextParameters.DAMAGE_SOURCE, damageSource)
-                .addOptional(LootContextParameters.ATTACKING_ENTITY, entity)
-                .addOptional(LootContextParameters.DIRECT_ATTACKING_ENTITY, entity);
+                .addOptional(LootContextParameters.KILLER_ENTITY, entity)
+                .addOptional(LootContextParameters.DIRECT_KILLER_ENTITY, entity);
         if (entity instanceof ServerPlayerEntity player) {
             builder.addOptional(LootContextParameters.LAST_DAMAGE_PLAYER, player);
             builder.luck(player.getLuck());
@@ -945,7 +885,7 @@ public final class SimplySwordsCommands {
             path = path.substring(tablePathIndex);
         }
 
-        return Identifier.of(namespace, path);
+        return new Identifier(namespace, path);
     }
 
     private static String formatPercentage(long count, int total) {
@@ -1022,7 +962,7 @@ public final class SimplySwordsCommands {
             if (netherPower == null && rng.nextFloat() <= RANDOM_POWER_CHANCE) {
                 netherPower = GemPowerRegistry.gemRandomPower(PowerType.NETHER);
             }
-            weaponStack.set(ComponentTypeRegistry.GEM_POWER.get(), new GemPowerComponent(
+            ComponentTypeRegistry.GEM_POWER.set(weaponStack, new GemPowerComponent(
                     true,
                     true,
                     runicPower != null ? runicPower : GemPower.EMPTY_ID,

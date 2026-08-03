@@ -2,11 +2,8 @@ package net.sweenus.simplyswords.entity;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.DyedColorComponent;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.Items;
-import net.minecraft.registry.RegistryKeys;
 import net.minecraft.util.DyeColor;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.Tameable;
@@ -88,7 +85,7 @@ public class SimplySwordsWolfMinionEntity extends WolfEntity implements Tameable
         this.expiresAtTick = expiresAtTick;
         this.weaponDamage = Math.max(0.0F, weaponDamage);
         this.sourceWeaponSlot = sourceWeaponSlot;
-        this.setTamed(true, false);
+        this.setTamed(true);
         this.setSitting(false);
         this.equipStack(EquipmentSlot.MAINHAND, stack.copy());
         this.setEquipmentDropChance(EquipmentSlot.MAINHAND, 0.0F);
@@ -100,47 +97,18 @@ public class SimplySwordsWolfMinionEntity extends WolfEntity implements Tameable
         }
         this.setPersistent();
         this.setCustomName(owner.getName().copy().append("'s Wolf"));
-        this.setVariant(this.getRegistryManager()
-                .get(RegistryKeys.WOLF_VARIANT)
-                .getRandom(this.getRandom())
-                .orElseThrow());
         if (this.random.nextFloat() <= ARMOR_CHANCE) {
-            net.minecraft.util.DyeColor dye = net.minecraft.util.DyeColor.values()[this.random.nextInt(net.minecraft.util.DyeColor.values().length)];
-            ItemStack wolfArmor = new ItemStack(net.minecraft.item.Items.WOLF_ARMOR);
-            wolfArmor.set(net.minecraft.component.DataComponentTypes.DYED_COLOR, new net.minecraft.component.type.DyedColorComponent(dye.getSignColor(), false));
-            this.equipStack(EquipmentSlot.BODY, wolfArmor);
-            this.setEquipmentDropChance(EquipmentSlot.BODY, 0.0F);
+            this.setCollarColor(DyeColor.values()[this.random.nextInt(DyeColor.values().length)]);
         }
     }
 
     public void initializeMinion(ServerPlayerEntity owner, ItemStack stack, int sourceWeaponSlot, long expiresAtTick, float weaponDamage) {
-        this.ownerUuid = owner.getUuid();
-        this.expiresAtTick = expiresAtTick;
-        this.weaponDamage = Math.max(0.0F, weaponDamage);
-        this.sourceWeaponSlot = sourceWeaponSlot;
-        this.setTamed(true, false);
-        this.setSitting(false);
-        this.equipStack(EquipmentSlot.MAINHAND, stack.copy());
-        this.setEquipmentDropChance(EquipmentSlot.MAINHAND, 0.0F);
-        EntityAttributeInstance health = this.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH);
-        if (health != null) {
-            double scaled = health.getBaseValue() + weaponDamage * HEALTH_PER_ATTACK;
-            health.setBaseValue(scaled);
-            this.setHealth((float) scaled);
-        }
-        this.setPersistent();
-        this.setCustomName(owner.getName().copy().append("'s Wolf"));
-        this.setVariant(this.getRegistryManager()
-                .get(RegistryKeys.WOLF_VARIANT)
-                .getRandom(this.getRandom())
-                .orElseThrow());
-        if (this.random.nextFloat() <= ARMOR_CHANCE) {
-            DyeColor dye = DyeColor.values()[this.random.nextInt(DyeColor.values().length)];
-            ItemStack wolfArmor = new ItemStack(Items.WOLF_ARMOR);
-            wolfArmor.set(DataComponentTypes.DYED_COLOR, new DyedColorComponent(dye.getSignColor(), false));
-            this.equipStack(EquipmentSlot.BODY, wolfArmor);
-            this.setEquipmentDropChance(EquipmentSlot.BODY, 0.0F);
-        }
+        initializeMinion((LivingEntity) owner, stack, sourceWeaponSlot, expiresAtTick, weaponDamage);
+    }
+
+    @Override
+    public World method_48926() {
+        return this.getWorld();
     }
 
     @Override
@@ -302,7 +270,7 @@ public class SimplySwordsWolfMinionEntity extends WolfEntity implements Tameable
         if (!SimplySwordsAPI.canActivateWeaponAbility(context)) {
             return;
         }
-        int chance = Math.clamp(Config.gemPowers.wolfPack.activeAbilityChance, 0, 100);
+        int chance = net.minecraft.util.math.MathHelper.clamp(Config.gemPowers.wolfPack.activeAbilityChance, 0, 100);
         if (chance <= 0 || this.random.nextInt(100) >= chance) {
             return;
         }
@@ -410,7 +378,7 @@ public class SimplySwordsWolfMinionEntity extends WolfEntity implements Tameable
     }
 
     @Override
-    protected void dropEquipment(ServerWorld world, DamageSource source, boolean causedByPlayer) {
+    protected void dropEquipment(DamageSource source, int lootingMultiplier, boolean causedByPlayer) {
     }
 
     @Override

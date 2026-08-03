@@ -108,7 +108,7 @@ public abstract class ServerPlayerEntityMixin {
                     ItemStack stackInSlot = serverPlayer.getInventory().getStack(i);
                     if (stackInSlot.isOf(ItemsRegistry.DECAYING_RELIC.get())) {
                         ItemStack newItemStack = new ItemStack(ItemsRegistry.MAGISCYTHE.get());
-                        newItemStack.applyComponentsFrom(stackInSlot.getComponents());
+                        newItemStack.setNbt(stackInSlot.getNbt() == null ? null : stackInSlot.getNbt().copy());
                         AwakeningApi.setLevel(newItemStack, AwakeningApi.getLevel(stackInSlot));
                         serverPlayer.getInventory().setStack(i, newItemStack);
                         serverPlayer.getWorld().playSoundFromEntity(null, serverPlayer, SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_IMPACT_02.get(),
@@ -171,8 +171,8 @@ public abstract class ServerPlayerEntityMixin {
                 ItemStack decayingRelic = ItemsRegistry.DECAYING_RELIC.get().asItem().getDefaultStack();
                 ItemStack runicTablet = ItemsRegistry.RUNIC_TABLET.get().asItem().getDefaultStack();
                 Random random = new Random();
-                TagKey<Item> desiredItemsTag = TagKey.of(Registries.ITEM.getKey(), Identifier.of("simplyswords", "conditional_uniques_type_1"));
-                TagKey<Item> endItemsTag = TagKey.of(Registries.ITEM.getKey(), Identifier.of("simplyswords", "conditional_uniques_type_2"));
+                TagKey<Item> desiredItemsTag = TagKey.of(Registries.ITEM.getKey(), new Identifier("simplyswords", "conditional_uniques_type_1"));
+                TagKey<Item> endItemsTag = TagKey.of(Registries.ITEM.getKey(), new Identifier("simplyswords", "conditional_uniques_type_2"));
                 int chance = random.nextInt(100);
 
                 for (int i = 0; i < serverPlayer.getInventory().size(); i++) {
@@ -230,7 +230,7 @@ public abstract class ServerPlayerEntityMixin {
                     // Magiblade trigger
                     if (chance < 15 && playerStandingBlock.isOf(Blocks.SCULK_SENSOR) && stackInSlot.isOf(decayingRelic.getItem())) {
                         ItemStack newItemStack = new ItemStack(ItemsRegistry.MAGIBLADE.get());
-                        newItemStack.applyComponentsFrom(stackInSlot.getComponents());
+                        newItemStack.setNbt(stackInSlot.getNbt() == null ? null : stackInSlot.getNbt().copy());
                         AwakeningApi.setLevel(newItemStack, AwakeningApi.getLevel(stackInSlot));
                         serverPlayer.getInventory().setStack(i, newItemStack);
                         serverPlayer.getWorld().playSoundFromEntity(null, serverPlayer, SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_IMPACT_02.get(),
@@ -243,7 +243,7 @@ public abstract class ServerPlayerEntityMixin {
                     if (stackInSlot.isOf(decayingRelic.getItem()) && player.hasStatusEffect(StatusEffects.DARKNESS)) {
                         if (chance < 2) {
                             ItemStack newItemStack = new ItemStack(ItemsRegistry.MAGISPEAR.get());
-                            newItemStack.applyComponentsFrom(stackInSlot.getComponents());
+                            newItemStack.setNbt(stackInSlot.getNbt() == null ? null : stackInSlot.getNbt().copy());
                             AwakeningApi.setLevel(newItemStack, AwakeningApi.getLevel(stackInSlot));
                             serverPlayer.getInventory().setStack(i, newItemStack);
                             serverPlayer.getWorld().playSoundFromEntity(null, serverPlayer, SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_IMPACT_02.get(),

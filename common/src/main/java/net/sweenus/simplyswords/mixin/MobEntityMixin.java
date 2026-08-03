@@ -83,7 +83,7 @@ public abstract class MobEntityMixin {
         if ((mob.age + mob.getId()) % interval != 0) {
             return;
         }
-        int chance = Math.clamp(Config.general.nonPlayerWeaponAbilityChance, 0, 100);
+        int chance = net.minecraft.util.math.MathHelper.clamp(Config.general.nonPlayerWeaponAbilityChance, 0, 100);
         if (chance <= 0 || mob.getRandom().nextInt(100) >= chance) {
             return;
         }
@@ -111,8 +111,7 @@ public abstract class MobEntityMixin {
 
         ItemStack stack = mob.getMainHandStack();
         if (AdditionalGemSocketApi.ensureInitialized(stack)) {
-            GemPowerComponent component = stack.getOrDefault(
-                    ComponentTypeRegistry.GEM_POWER.get(), GemPowerComponent.DEFAULT);
+            GemPowerComponent component = ComponentTypeRegistry.GEM_POWER.getOrDefault(stack, GemPowerComponent.DEFAULT);
             component.postHit(stack, livingTarget, mob);
             MinionTargeting.recordLastAttack(mob, livingTarget);
             return;

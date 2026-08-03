@@ -53,7 +53,7 @@ public class BattleStandardDarkEntity extends PathAwareEntity {
     public static DefaultAttributeContainer.Builder createBattleStandardDarkAttributes() {
         return MobEntity.createMobAttributes().add(EntityAttributes.GENERIC_MAX_HEALTH, 150.0).add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.0f)
                 .add(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE, 100.0f)
-                .add(EntityAttributes.GENERIC_STEP_HEIGHT, 3.0);
+                ;
     }
 
     public BattleStandardDarkEntity(EntityType<? extends PathAwareEntity> entityType, World world) {
@@ -62,9 +62,9 @@ public class BattleStandardDarkEntity extends PathAwareEntity {
     }
 
     @Override
-    protected void initDataTracker(DataTracker.Builder builder) {
-        super.initDataTracker(builder);
-        builder.add(TRACKED_STANDARD_TYPE, "");
+    protected void initDataTracker() {
+        super.initDataTracker();
+        this.dataTracker.startTracking(TRACKED_STANDARD_TYPE, "");
     }
 
     public String getStandardType() {
@@ -280,7 +280,7 @@ public class BattleStandardDarkEntity extends PathAwareEntity {
         );
         Vec3d desiredVelocity = orbitPoint.subtract(target.getPos()).multiply(0.32)
                 .add(toCenter.normalize().multiply(ENIGMA_PULL_STRENGTH * pullScale));
-        target.setVelocity(desiredVelocity.x, Math.clamp(desiredVelocity.y, -0.35, 0.55), desiredVelocity.z);
+        target.setVelocity(desiredVelocity.x, net.minecraft.util.math.MathHelper.clamp(desiredVelocity.y, -0.35, 0.55), desiredVelocity.z);
         target.velocityModified = true;
         target.fallDistance = 0.0F;
     }

@@ -20,9 +20,9 @@ public record AwakeningProfile(
     );
 
     public AwakeningProfile {
-        dormantAttributeMultiplier = Math.clamp(dormantAttributeMultiplier, 0.0F, 1.0F);
-        dormantAttackSpeedMultiplier = Math.clamp(dormantAttackSpeedMultiplier, 0.0F, 1.0F);
-        abilityUnlockLevel = Math.clamp(abilityUnlockLevel, 0,
+        dormantAttributeMultiplier = net.minecraft.util.math.MathHelper.clamp(dormantAttributeMultiplier, 0.0F, 1.0F);
+        dormantAttackSpeedMultiplier = net.minecraft.util.math.MathHelper.clamp(dormantAttackSpeedMultiplier, 0.0F, 1.0F);
+        abilityUnlockLevel = net.minecraft.util.math.MathHelper.clamp(abilityUnlockLevel, 0,
                 net.sweenus.simplyswords.item.component.AwakeningComponent.MAX_LEVEL);
     }
 

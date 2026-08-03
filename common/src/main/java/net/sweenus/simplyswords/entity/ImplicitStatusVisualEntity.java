@@ -26,9 +26,9 @@ public class ImplicitStatusVisualEntity extends Entity {
     }
 
     @Override
-    protected void initDataTracker(DataTracker.Builder builder) {
-        builder.add(BLEED_STACKS, 0);
-        builder.add(SUNDER_AMOUNT, 0);
+    protected void initDataTracker() {
+        this.dataTracker.startTracking(BLEED_STACKS, 0);
+        this.dataTracker.startTracking(SUNDER_AMOUNT, 0);
     }
 
     public void setBleedStacks(int stacks) {

@@ -83,7 +83,7 @@ Simply Swords' built-in tooltip provider deliberately supports only items in the
 For the standard Simply Swords lore and stats layout, tag the item:
 
 ```text
-data/simplytooltips/tags/item/simply_swords_compat.json
+data/simplytooltips/tags/items/simply_swords_compat.json
 ```
 
 ```json

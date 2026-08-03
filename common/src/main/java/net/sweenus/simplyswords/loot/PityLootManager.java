@@ -34,11 +34,11 @@ public final class PityLootManager {
     private PityLootManager() {
     }
 
-    public static void applyGeneratedContainerLoot(Inventory inventory, RegistryKey<net.minecraft.loot.LootTable> table,
+    public static void applyGeneratedContainerLoot(Inventory inventory, Identifier table,
                                                    PlayerEntity player, BlockPos pos, World world) {
         if (!(player instanceof ServerPlayerEntity serverPlayer)
                 || world == null) return;
-        Identifier id = table.getValue();
+        Identifier id = table;
         if (!isEligibleChestTable(id)) return;
 
         PlayerPityState state = ((PityStateHolder) serverPlayer).simplyswords$getPityState();
@@ -67,12 +67,11 @@ public final class PityLootManager {
     // synthetic region ids.
     //
     public static List<ItemStack> simulateGeneratedContainerLoot(
-            RegistryKey<net.minecraft.loot.LootTable> table,
+            Identifier id,
             PlayerPityState state,
             Random random,
             SimulationMode mode
     ) {
-        Identifier id = table.getValue();
         if (!isEligibleChestTable(id)) {
             return List.of();
         }
@@ -194,7 +193,7 @@ public final class PityLootManager {
                 inventory.markDirty();
                 return true;
             }
-            if (ItemStack.areItemsAndComponentsEqual(current, stack)
+            if (ItemStack.canCombine(current, stack)
                     && current.getCount() < current.getMaxCount()) {
                 int moved = Math.min(stack.getCount(), current.getMaxCount() - current.getCount());
                 current.increment(moved);

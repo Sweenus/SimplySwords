@@ -34,10 +34,10 @@ public class MagispearFirmamentVisualEntity extends Entity {
     }
 
     @Override
-    protected void initDataTracker(DataTracker.Builder builder) {
-        builder.add(RADIUS, 4.0F);
-        builder.add(WAVE_COUNT, 4);
-        builder.add(LIFETIME, 46);
+    protected void initDataTracker() {
+        this.dataTracker.startTracking(RADIUS, 4.0F);
+        this.dataTracker.startTracking(WAVE_COUNT, 4);
+        this.dataTracker.startTracking(LIFETIME, 46);
     }
 
     @Override

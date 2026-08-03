@@ -11,6 +11,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.entity.CaelestisBreachCreature;
+import net.sweenus.simplyswords.client.renderer.LegacyRenderColor;
 
 import java.util.function.Function;
 
@@ -41,7 +42,8 @@ public class CaelestisCorruptionFeatureRenderer<T extends LivingEntity, M extend
                 vertices,
                 0x00F000F0,
                 OverlayTexture.DEFAULT_UV,
-                color
+                LegacyRenderColor.red(color), LegacyRenderColor.green(color),
+                LegacyRenderColor.blue(color), LegacyRenderColor.alpha(color)
         );
     }
 

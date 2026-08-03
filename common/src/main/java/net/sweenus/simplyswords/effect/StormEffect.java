@@ -12,12 +12,11 @@ public class StormEffect extends StatusEffect {
     }
 
     @Override
-    public boolean applyUpdateEffect(LivingEntity livingEntity, int amplifier) {
+    public void applyUpdateEffect(LivingEntity livingEntity, int amplifier) {
         if (livingEntity.getWorld() instanceof ServerWorld world
                 && (livingEntity.age + livingEntity.getId()) % 6 == 0) {
             MjolnirStormManager.spawnConductiveIndicator(world, livingEntity);
         }
-        return true;
     }
 
     @Override

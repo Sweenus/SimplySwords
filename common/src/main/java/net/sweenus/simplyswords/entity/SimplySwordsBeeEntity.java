@@ -46,9 +46,9 @@ public class SimplySwordsBeeEntity extends BeeEntity implements Tameable {
     }
 
     @Override
-    protected void initDataTracker(DataTracker.Builder builder) {
-        super.initDataTracker(builder);
-        builder.add(HIVEMIND_SWARM, false);
+    protected void initDataTracker() {
+        super.initDataTracker();
+        this.dataTracker.startTracking(HIVEMIND_SWARM, false);
     }
 
     public static DefaultAttributeContainer.Builder createSimplyBeeAttributes() {
@@ -125,11 +125,10 @@ public class SimplySwordsBeeEntity extends BeeEntity implements Tameable {
         return ownerUuid;
     }
 
-    //I think this is just Entity.getWorld()? What even are mappings
-    //@Override
-    //public EntityView method_48926() {
-        //return this.getWorld();
-    //} 1.21
+    @Override
+    public net.minecraft.world.EntityView method_48926() {
+        return this.getWorld();
+    }
 
     public void setOwner(LivingEntity livingEntity) {
         this.ownerUuid = livingEntity.getUuid();
@@ -149,9 +148,9 @@ public class SimplySwordsBeeEntity extends BeeEntity implements Tameable {
     }
 
     @Override
-    protected void dropEquipment(ServerWorld world, DamageSource source, boolean causedByPlayer) {
+    protected void dropEquipment(DamageSource source, int lootingMultiplier, boolean causedByPlayer) {
         if (!isHivemindSwarmBee()) {
-            super.dropEquipment(world, source, causedByPlayer);
+            super.dropEquipment(source, lootingMultiplier, causedByPlayer);
         }
     }
 

@@ -1,269 +1,136 @@
 package net.sweenus.simplyswords.recipe;
 
-import com.mojang.datafixers.util.Pair;
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.DataResult;
-import com.mojang.serialization.MapCodec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
-import it.unimi.dsi.fastutil.chars.CharArraySet;
-import it.unimi.dsi.fastutil.chars.CharSet;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import net.minecraft.inventory.RecipeInputInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.recipe.Ingredient;
-import net.minecraft.recipe.input.CraftingRecipeInput;
-import net.minecraft.util.Util;
+import net.minecraft.util.JsonHelper;
 import net.minecraft.util.collection.DefaultedList;
-import net.minecraft.util.dynamic.Codecs;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.function.Function;
 
-public class RawUpgradableRecipe {
-    public static final MapCodec<RawUpgradableRecipe> CODEC;
-    public static final PacketCodec<RegistryByteBuf, RawUpgradableRecipe> PACKET_CODEC;
+/** The shaped portion of a unique-upgrade recipe, including its source slot. */
+public final class RawUpgradableRecipe {
     private final int width;
     private final int height;
-    private boolean mirrored;
-
-    public int getUpgradableItemSlot() {
-        return upgradableItemSlot;
-    }
-
-    public int getWidth() {
-        return width;
-    }
-
-    public int getHeight() {
-        return height;
-    }
-
     private final int upgradableItemSlot;
     private final DefaultedList<Ingredient> ingredients;
+    private boolean mirrored;
 
-    public DefaultedList<Ingredient> getIngredients() {
-        return ingredients;
-    }
-
-    private final Optional<RawUpgradableRecipe.Data> data;
-    private final int ingredientCount;
-    private final boolean symmetrical;
-
-    public RawUpgradableRecipe(int width, int height, int upgradableItemSlot, DefaultedList<Ingredient> ingredients, Optional<RawUpgradableRecipe.Data> data) {
+    public RawUpgradableRecipe(int width, int height, int upgradableItemSlot,
+                               DefaultedList<Ingredient> ingredients) {
         this.width = width;
         this.height = height;
         this.upgradableItemSlot = upgradableItemSlot;
         this.ingredients = ingredients;
-        this.data = data;
-        int i = 0;
-
-        for(Ingredient ingredient : ingredients) {
-            if (!ingredient.isEmpty()) {
-                ++i;
-            }
-        }
-
-        this.ingredientCount = i;
-        this.symmetrical = Util.isSymmetrical(width, height, ingredients);
     }
 
-    private void writeToBuf(RegistryByteBuf buf) {
-        buf.writeVarInt(this.width);
-        buf.writeVarInt(this.height);
+    public int getWidth() { return width; }
+    public int getHeight() { return height; }
+    public int getUpgradableItemSlot() { return upgradableItemSlot; }
+    public DefaultedList<Ingredient> getIngredients() { return ingredients; }
+    public boolean isMirrored() { return mirrored; }
 
-        for(Ingredient ingredient : this.ingredients) {
-            Ingredient.PACKET_CODEC.encode(buf, ingredient);
-        }
-
-        buf.writeVarInt(this.upgradableItemSlot);
+    public boolean matches(RecipeInputInventory input) {
+        if (input.getWidth() != width || input.getHeight() != height) return false;
+        int expected = 0;
+        int actual = 0;
+        for (Ingredient ingredient : ingredients) if (!ingredient.isEmpty()) expected++;
+        for (int i = 0; i < input.size(); i++) if (!input.getStack(i).isEmpty()) actual++;
+        return expected == actual && (matches(input, false) || matches(input, true));
     }
 
-    public boolean matches(CraftingRecipeInput input) {
-        if (input.getStackCount() == this.ingredientCount) {
-            if (input.getWidth() == this.width && input.getHeight() == this.height) {
-                if (!this.symmetrical && this.matches(input, true)) {
-                    return true;
-                }
-
-                return this.matches(input, false);
-            }
-
-        }
-        return false;
-    }
-
-    private boolean matches(CraftingRecipeInput input, boolean mirrored) {
-        for(int i = 0; i < this.height; ++i) {
-            for(int j = 0; j < this.width; ++j) {
-                Ingredient ingredient;
-                if (mirrored) {
-                    ingredient = this.ingredients.get(this.width - j - 1 + i * this.width);
-                } else {
-                    ingredient = this.ingredients.get(j + i * this.width);
-                }
-
-                ItemStack itemStack = input.getStackInSlot(j, i);
-                if (!ingredient.test(itemStack)) {
-                    return false;
-                }
+    private boolean matches(RecipeInputInventory input, boolean mirror) {
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int ingredientX = mirror ? width - x - 1 : x;
+                Ingredient ingredient = ingredients.get(ingredientX + y * width);
+                ItemStack stack = input.getStack(x + y * input.getWidth());
+                if (!ingredient.test(stack)) return false;
             }
         }
-
-        this.mirrored = mirrored;
+        mirrored = mirror;
         return true;
     }
 
-    static {
-        CODEC = Data.CODEC.flatXmap(RawUpgradableRecipe::fromData, (recipe) ->
-                recipe.data.map(DataResult::success)
-                .orElseGet(() -> DataResult.error(() -> "Cannot encode unpacked recipe")));
-
-        PACKET_CODEC = PacketCodec.of(RawUpgradableRecipe::writeToBuf, RawUpgradableRecipe::readFromBuf);
+    public void write(PacketByteBuf buf) {
+        buf.writeVarInt(width);
+        buf.writeVarInt(height);
+        for (Ingredient ingredient : ingredients) ingredient.write(buf);
+        buf.writeVarInt(upgradableItemSlot);
     }
 
-    private static DataResult<? extends RawUpgradableRecipe> fromData(Data data) {
-        // Clamp to box
-        String[] pattern = stripWhitespace(data.pattern);
+    public static RawUpgradableRecipe read(PacketByteBuf buf) {
+        int width = buf.readVarInt();
+        int height = buf.readVarInt();
+        DefaultedList<Ingredient> ingredients = DefaultedList.ofSize(width * height, Ingredient.EMPTY);
+        for (int i = 0; i < ingredients.size(); i++) ingredients.set(i, Ingredient.fromPacket(buf));
+        return new RawUpgradableRecipe(width, height, buf.readVarInt(), ingredients);
+    }
+
+    public static RawUpgradableRecipe fromJson(JsonObject json) {
+        JsonArray patternJson = JsonHelper.getArray(json, "pattern");
+        List<String> rows = new ArrayList<>();
+        for (JsonElement element : patternJson) rows.add(element.getAsString());
+        String[] pattern = stripWhitespace(rows);
         int height = pattern.length;
         int width = pattern[0].length();
 
-        // Create ingredient list
-        DefaultedList<Ingredient> defaultedList = DefaultedList.ofSize(height * width, Ingredient.EMPTY);
-        CharSet charSet = new CharArraySet(data.key.keySet());
+        JsonObject keyJson = JsonHelper.getObject(json, "key");
+        DefaultedList<Ingredient> ingredients = DefaultedList.ofSize(width * height, Ingredient.EMPTY);
         int upgradableSlot = -1;
-
-        for(int k = 0; k < pattern.length; ++k) {
-            String string = pattern[k];
-
-            for(int l = 0; l < string.length(); ++l) {
-                int slot = l + (k * width);
-                char c = string.charAt(l);
-
-                Ingredient ingredient = c == ' ' ? Ingredient.EMPTY : data.key.get(c).getFirst();
-                boolean upgradable = c != ' ' && data.key.get(c).getSecond();
-                if (ingredient == null) {
-                    return DataResult.error(() -> "Pattern references symbol '" + c + "' but it's not defined in the key");
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                char symbol = pattern[y].charAt(x);
+                if (symbol == ' ') continue;
+                JsonElement encoded = keyJson.get(String.valueOf(symbol));
+                if (encoded == null) throw new IllegalArgumentException("Undefined recipe symbol: " + symbol);
+                boolean upgradable = false;
+                JsonElement ingredientJson = encoded;
+                if (encoded.isJsonArray()) {
+                    JsonArray pair = encoded.getAsJsonArray();
+                    ingredientJson = pair.get(0);
+                    upgradable = pair.size() > 1 && pair.get(1).getAsBoolean();
+                } else if (encoded.isJsonObject() && encoded.getAsJsonObject().has("ingredient")) {
+                    JsonObject object = encoded.getAsJsonObject();
+                    ingredientJson = object.get("ingredient");
+                    upgradable = JsonHelper.getBoolean(object, "upgradable", false);
+                } else if (encoded.isJsonObject()) {
+                    upgradable = JsonHelper.getBoolean(encoded.getAsJsonObject(), "upgradable", false);
                 }
-
-                if(upgradable) {
-                    if(upgradableSlot < 0) {
-                        upgradableSlot = slot;
-                    } else {
-                        int finalSlot = upgradableSlot;
-                        return DataResult.error(() -> "Pattern attempted to define slot #" + slot + " as upgradable, but slot #" + finalSlot + " is already upgradable");
-                    }
+                ingredients.set(x + y * width, Ingredient.fromJson(ingredientJson));
+                if (upgradable) {
+                    if (upgradableSlot >= 0) throw new IllegalArgumentException("Only one slot may be upgradable");
+                    upgradableSlot = x + y * width;
                 }
-
-                charSet.remove(c);
-                defaultedList.set(slot, ingredient);
             }
         }
-
-        if(upgradableSlot < 0) {
-            return DataResult.error(() -> "Pattern does not define a slot as upgradable");
-        }
-
-        // Construct
-        if (!charSet.isEmpty()) {
-            return DataResult.error(() -> "Key defines symbols that aren't used in pattern: " + charSet);
-        } else {
-            return DataResult.success(new RawUpgradableRecipe(width, height, upgradableSlot, defaultedList, Optional.of(data)));
-        }
-
+        if (upgradableSlot < 0) throw new IllegalArgumentException("Recipe has no upgradable slot");
+        return new RawUpgradableRecipe(width, height, upgradableSlot, ingredients);
     }
 
-    private static String[] stripWhitespace(List<String> strings) {
-        // Find Box Size
-        int a = strings.getFirst().length(); // x1
-        int b = strings.size(); // y1
-        int c = 0; // x2
-        int d = 0; // y2
-
-        for(int y = 0; y < strings.size(); y++) {
-            for(int x = 0; x < strings.getFirst().length(); x++) {
-                if (strings.get(y).charAt(x) == ' ') continue;
-
-                if(x < a) a = x;
-                if(x > c) c = x;
-
-                if(y < b) b = y;
-                if(y > d) d = y;
+    private static String[] stripWhitespace(List<String> rows) {
+        int left = Integer.MAX_VALUE;
+        int right = -1;
+        int top = Integer.MAX_VALUE;
+        int bottom = -1;
+        for (int y = 0; y < rows.size(); y++) {
+            for (int x = 0; x < rows.get(y).length(); x++) {
+                if (rows.get(y).charAt(x) == ' ') continue;
+                left = Math.min(left, x);
+                right = Math.max(right, x);
+                top = Math.min(top, y);
+                bottom = Math.max(bottom, y);
             }
         }
-
-        // Reconstruct with excess whitespace stripped
-        List<String> strippedStrings = new ArrayList<>();
-        for(int y = 0; y < strings.size(); y++) {
-            if(y < b || y > d) continue;
-            strippedStrings.add(strings.get(y).substring(a, c+1));
-        }
-
-        return strippedStrings.toArray(new String[0]);
+        if (right < left) throw new IllegalArgumentException("Empty recipe pattern");
+        List<String> result = new ArrayList<>();
+        for (int y = top; y <= bottom; y++) result.add(rows.get(y).substring(left, right + 1));
+        return result.toArray(new String[0]);
     }
-
-    private static RawUpgradableRecipe readFromBuf(RegistryByteBuf buf) {
-        int i = buf.readVarInt();
-        int j = buf.readVarInt();
-        DefaultedList<Ingredient> defaultedList = DefaultedList.ofSize(i * j, Ingredient.EMPTY);
-        defaultedList.replaceAll((ingredient) -> Ingredient.PACKET_CODEC.decode(buf));
-        int slot = buf.readVarInt();
-        return new RawUpgradableRecipe(i, j, slot, defaultedList, Optional.empty());
-    }
-
-    public boolean isMirrored() {
-        return mirrored;
-    }
-
-    public record Data(Map<Character, Pair<Ingredient, Boolean>> key, List<String> pattern) {
-        private static final Codec<List<String>> PATTERN_CODEC;
-        private static final Codec<Pair<Ingredient, Boolean>> INGREDIENT_CODEC;
-        private static final Codec<Character> KEY_ENTRY_CODEC;
-        public static final MapCodec<RawUpgradableRecipe.Data> CODEC;
-
-        static {
-            INGREDIENT_CODEC = Codec.pair(
-                    Ingredient.DISALLOW_EMPTY_CODEC,
-                    Codec.BOOL.optionalFieldOf("upgradable", false).codec()
-            );
-
-            PATTERN_CODEC = Codec.STRING.listOf().comapFlatMap((pattern) -> {
-                        if (pattern.size() > 3) {
-                            return DataResult.error(() -> "Invalid pattern: too many rows, 3 is maximum");
-                        } else if (pattern.isEmpty()) {
-                            return DataResult.error(() -> "Invalid pattern: empty pattern not allowed");
-                        } else {
-                            int i = (pattern.getFirst()).length();
-
-                            for(String string : pattern) {
-                                if (string.length() > 3) {
-                                    return DataResult.error(() -> "Invalid pattern: too many columns, 3 is maximum");
-                                }
-
-                                if (i != string.length()) {
-                                    return DataResult.error(() -> "Invalid pattern: each row must be the same width");
-                                }
-                            }
-
-                            return DataResult.success(pattern);
-                        }
-                    }, Function.identity());
-
-            KEY_ENTRY_CODEC = Codec.STRING.comapFlatMap((keyEntry) -> {
-                if (keyEntry.length() != 1) {
-                    return DataResult.error(() -> "Invalid key entry: '" + keyEntry + "' is an invalid symbol (must be 1 character only).");
-                } else {
-                    return " ".equals(keyEntry) ? DataResult.error(() -> "Invalid key entry: ' ' is a reserved symbol.") : DataResult.success(keyEntry.charAt(0));
-                }
-            }, String::valueOf);
-
-            CODEC = RecordCodecBuilder.mapCodec((instance) -> instance.group(
-                    Codecs.strictUnboundedMap(KEY_ENTRY_CODEC, INGREDIENT_CODEC).fieldOf("key").forGetter((data) -> data.key),
-                    PATTERN_CODEC.fieldOf("pattern").forGetter((data) -> data.pattern)
-            ).apply(instance, Data::new));
-        }
-    }
-
 }

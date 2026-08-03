@@ -21,7 +21,7 @@ import org.joml.Matrix4f;
 public class DeathKnellVisualEntityRenderer extends EntityRenderer<DeathKnellVisualEntity> {
 
     private static final Identifier WHITE_TEXTURE =
-            Identifier.ofVanilla("textures/misc/white.png");
+            new Identifier("minecraft", "textures/misc/white.png");
     private static final Identifier[] SOUL_TEXTURES = particleFrames("soul", 11);
     private static final Identifier[] SMOKE_TEXTURES = particleFrames("big_smoke", 12);
     private static final int BELL_SEGMENTS = 18;
@@ -73,7 +73,7 @@ public class DeathKnellVisualEntityRenderer extends EntityRenderer<DeathKnellVis
                              Vec3d target, float targetHeight, float targetWidth,
                              float time, int light) {
         int maximum = Math.max(1, visual.getMaxStacks());
-        int stacks = Math.clamp(visual.getStacks(), 0, maximum);
+        int stacks = net.minecraft.util.math.MathHelper.clamp(visual.getStacks(), 0, maximum);
         if (stacks <= 0) {
             return;
         }
@@ -623,6 +623,7 @@ public class DeathKnellVisualEntityRenderer extends EntityRenderer<DeathKnellVis
         } else {
             vertex.light(LightmapTextureManager.MAX_LIGHT_COORDINATE);
         }
+        vertex.next();
     }
 
     private static void drawSpriteQuad(VertexConsumer vertices, Matrix4f matrix,
@@ -668,13 +669,13 @@ public class DeathKnellVisualEntityRenderer extends EntityRenderer<DeathKnellVis
                 .texture(u, v)
                 .overlay(OverlayTexture.DEFAULT_UV)
                 .light(light)
-                .normal(0.0F, 1.0F, 0.0F);
+                .normal(0.0F, 1.0F, 0.0F).next();
     }
 
     private static Identifier[] particleFrames(String name, int count) {
         Identifier[] frames = new Identifier[Math.max(1, count)];
         for (int i = 0; i < frames.length; i++) {
-            frames[i] = Identifier.ofVanilla("textures/particle/" + name + "_" + i + ".png");
+            frames[i] = new Identifier("minecraft", "textures/particle/" + name + "_" + i + ".png");
         }
         return frames;
     }

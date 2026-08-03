@@ -4,6 +4,7 @@ package net.sweenus.simplyswords.mixin;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.item.ItemStack;
@@ -158,11 +159,8 @@ public abstract class LivingEntityMixin {
             BramblethornAbilityManager.onBoundTargetDamaged(livingEntity, source, amount);
             MoltenEdgeAbilityManager.gainHeatFromIncomingDamage(livingEntity, amount, true);
             WeaponImplicitRegistry.onDamageApplied(livingEntity, source, amount);
-            if (source.isIn(DamageTypeTags.IS_PLAYER_ATTACK) && source.getAttacker() instanceof ServerPlayerEntity player) {
-                ItemStack stack = source.getWeaponStack();
-                if (stack == null || !stack.isOf(ItemsRegistry.STORMBRINGER.get())) {
-                    stack = player.getMainHandStack();
-                }
+            if (source.isOf(DamageTypes.PLAYER_ATTACK) && source.getAttacker() instanceof ServerPlayerEntity player) {
+                ItemStack stack = player.getMainHandStack();
                 StormbringerSwordItem.tryTriggerChainLightningOnMeleeDamage(stack, livingEntity, player);
             }
         }
@@ -174,7 +172,7 @@ public abstract class LivingEntityMixin {
         if (!livingEntity.getWorld().isClient()) {
 
             if (SimplySwords.passVersionCheck("eldritch_end", minimumEldritchEndVersion)
-                    && Registries.STATUS_EFFECT.get(Identifier.of("simplyswords:voidhunger")) != null)
+                    && Registries.STATUS_EFFECT.get(new Identifier("simplyswords:voidhunger")) != null)
                 EldritchEndCompatMethods.generateVoidcloakStacks(livingEntity);
         }
     }

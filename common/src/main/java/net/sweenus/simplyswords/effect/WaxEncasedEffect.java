@@ -12,11 +12,10 @@ public class WaxEncasedEffect extends StatusEffect {
     }
 
     @Override
-    public boolean applyUpdateEffect(LivingEntity entity, int amplifier) {
+    public void applyUpdateEffect(LivingEntity entity, int amplifier) {
         entity.stopUsingItem();
         entity.setVelocity(Vec3d.ZERO);
         entity.fallDistance = 0.0F;
-        return true;
     }
 
     @Override

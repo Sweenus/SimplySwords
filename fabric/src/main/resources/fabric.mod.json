@@ -36,8 +36,8 @@
   ],
   "depends": {
     "fabric": "*",
-    "minecraft": ">=1.21.1 <=1.21.1",
-    "architectury": ">=7.1.0",
+    "minecraft": ">=1.20.1 <=1.20.1",
+    "architectury": ">=9.2.14",
     "fzzy_config": ">=0.6.6",
     "simplytooltips": "*"
   },
@@ -46,8 +46,7 @@
     "gobber2": ">=2.6.43"
   },
   "recommends": {
-    "bettercombat": ">=1.7.2",
-    "oracle_index": ">=1.0.0"
+    "bettercombat": ">=1.7.2"
   },
   "custom": {
     "fzzy_config": [

@@ -22,9 +22,9 @@ import net.sweenus.simplyswords.world.WaxweaverEncasementManager;
 
 public class WaxweaverWaxVisualEntityRenderer extends EntityRenderer<WaxweaverWaxVisualEntity> {
 
-    private static final Identifier BONE_SPRITE = Identifier.ofVanilla("block/bone_block_side");
-    private static final Identifier HONEY_SPRITE = Identifier.ofVanilla("block/honey_block_side");
-    private static final Identifier MAGMA_SPRITE = Identifier.ofVanilla("block/magma");
+    private static final Identifier BONE_SPRITE = new Identifier("minecraft", "block/bone_block_side");
+    private static final Identifier HONEY_SPRITE = new Identifier("minecraft", "block/honey_block_side");
+    private static final Identifier MAGMA_SPRITE = new Identifier("minecraft", "block/magma");
     private static final int FULL_LIGHT = 0x00F000F0;
     private static final int SHELL_SEGMENTS = 12;
     private static final int SHELL_RINGS = 7;
@@ -460,12 +460,12 @@ public class WaxweaverWaxVisualEntityRenderer extends EntityRenderer<WaxweaverWa
                                float x, float y, float z, float u, float v, int light,
                                float red, float green, float blue, float alpha,
                                float nx, float ny, float nz) {
-        vertices.vertex(entry, x, y, z)
+        vertices.vertex(entry.getPositionMatrix(), x, y, z)
                 .color(red, green, blue, alpha)
                 .texture(u, v)
                 .overlay(OverlayTexture.DEFAULT_UV)
                 .light(light)
-                .normal(entry, nx, ny, nz);
+                .normal(entry.getNormalMatrix(), nx, ny, nz).next();
     }
 
     private static float irregular(int seed, int ring, int segment) {

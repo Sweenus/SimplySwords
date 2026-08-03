@@ -61,7 +61,7 @@ public final class MoltenEdgeAbilityManager {
         if (stack == null || stack.isEmpty() || !stack.isOf(ItemsRegistry.MOLTEN_EDGE.get())) {
             return MoltenHeatComponent.DEFAULT;
         }
-        return stack.getOrDefault(ComponentTypeRegistry.MOLTEN_HEAT.get(), MoltenHeatComponent.DEFAULT);
+        return ComponentTypeRegistry.MOLTEN_HEAT.getOrDefault(stack, MoltenHeatComponent.DEFAULT);
     }
 
     public static int getHeat(LivingEntity wielder) {
@@ -128,7 +128,7 @@ public final class MoltenEdgeAbilityManager {
         }
         MoltenHeatComponent increased = heat.normalizedAt(now, getVentDrainPerTick())
                 .addHeat(Config.uniqueEffects.molten_edge.heatPerHit);
-        stack.set(ComponentTypeRegistry.MOLTEN_HEAT.get(), increased);
+        ComponentTypeRegistry.MOLTEN_HEAT.set(stack, increased);
         igniteAtMaximumHeat(attacker, increased);
     }
 
@@ -149,7 +149,7 @@ public final class MoltenEdgeAbilityManager {
             }
             MoltenHeatComponent increased = heat.normalizedAt(now, getVentDrainPerTick())
                     .addHeat(Config.uniqueEffects.molten_edge.heatPerDamageTaken);
-            stack.set(ComponentTypeRegistry.MOLTEN_HEAT.get(), increased);
+            ComponentTypeRegistry.MOLTEN_HEAT.set(stack, increased);
             igniteAtMaximumHeat(target, increased);
         }
     }
@@ -202,7 +202,7 @@ public final class MoltenEdgeAbilityManager {
         }
 
         MoltenHeatComponent ventingHeat = new MoltenHeatComponent(currentHeat, false).startVenting(now);
-        heldStack.set(ComponentTypeRegistry.MOLTEN_HEAT.get(), ventingHeat);
+        ComponentTypeRegistry.MOLTEN_HEAT.set(heldStack, ventingHeat);
         vents.put(actor.getUuid(), new ActiveVent(actor.getUuid(), heldStack));
 
         float heatFraction = currentHeat / (float) MoltenHeatComponent.MAX_HEAT;
@@ -286,21 +286,21 @@ public final class MoltenEdgeAbilityManager {
         MoltenHeatComponent heat = getHeatComponent(stack);
         if (!AwakeningApi.isAbilityUnlocked(stack)) {
             if (heat.heat() > 0 || heat.venting()) {
-                stack.set(ComponentTypeRegistry.MOLTEN_HEAT.get(), MoltenHeatComponent.DEFAULT);
+                ComponentTypeRegistry.MOLTEN_HEAT.set(stack, MoltenHeatComponent.DEFAULT);
                 cancelVent(living, stack);
             }
             return;
         }
         if (!isHeldMoltenEdge(living, stack)) {
             if (heat.heat() > 0 || heat.venting()) {
-                stack.set(ComponentTypeRegistry.MOLTEN_HEAT.get(), MoltenHeatComponent.DEFAULT);
+                ComponentTypeRegistry.MOLTEN_HEAT.set(stack, MoltenHeatComponent.DEFAULT);
                 cancelVent(living, stack);
             }
             return;
         }
 
         if (!living.isAlive()) {
-            stack.set(ComponentTypeRegistry.MOLTEN_HEAT.get(), MoltenHeatComponent.DEFAULT);
+            ComponentTypeRegistry.MOLTEN_HEAT.set(stack, MoltenHeatComponent.DEFAULT);
             cancelVent(living, stack);
             return;
         }
@@ -327,7 +327,7 @@ public final class MoltenEdgeAbilityManager {
             vents.remove(wielder.getUuid());
         }
         if (vent != null) {
-            vent.stackReference.set(ComponentTypeRegistry.MOLTEN_HEAT.get(), MoltenHeatComponent.DEFAULT);
+            ComponentTypeRegistry.MOLTEN_HEAT.set(vent.stackReference, MoltenHeatComponent.DEFAULT);
         }
         if (vents != null && vents.isEmpty()) {
             ACTIVE_VENTS.remove(world);
@@ -339,7 +339,7 @@ public final class MoltenEdgeAbilityManager {
             return;
         }
         for (ItemStack stack : getHeldMoltenEdges(wielder)) {
-            stack.set(ComponentTypeRegistry.MOLTEN_HEAT.get(), MoltenHeatComponent.DEFAULT);
+            ComponentTypeRegistry.MOLTEN_HEAT.set(stack, MoltenHeatComponent.DEFAULT);
         }
         cancelVent(wielder);
     }
@@ -372,7 +372,7 @@ public final class MoltenEdgeAbilityManager {
                     || !owner.isAlive()
                     || !isHeldMoltenEdge(owner, vent.stackReference)
                     || !vent.stackReference.isOf(ItemsRegistry.MOLTEN_EDGE.get())) {
-                vent.stackReference.set(ComponentTypeRegistry.MOLTEN_HEAT.get(), MoltenHeatComponent.DEFAULT);
+                ComponentTypeRegistry.MOLTEN_HEAT.set(vent.stackReference, MoltenHeatComponent.DEFAULT);
                 iterator.remove();
                 continue;
             }

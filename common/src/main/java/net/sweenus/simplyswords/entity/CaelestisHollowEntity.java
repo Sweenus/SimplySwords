@@ -63,10 +63,10 @@ public class CaelestisHollowEntity extends ZombieEntity implements CaelestisBrea
     }
 
     @Override
-    protected void initDataTracker(DataTracker.Builder builder) {
-        super.initDataTracker(builder);
-        builder.add(UNBOUND, false);
-        builder.add(CORRUPTION_SEED, 0);
+    protected void initDataTracker() {
+        super.initDataTracker();
+        this.dataTracker.startTracking(UNBOUND, false);
+        this.dataTracker.startTracking(CORRUPTION_SEED, 0);
     }
 
     @Override
@@ -146,7 +146,7 @@ public class CaelestisHollowEntity extends ZombieEntity implements CaelestisBrea
     }
 
     @Override
-    protected int getXpToDrop() {
+    public int getXpToDrop() {
         return 0;
     }
 
@@ -161,7 +161,7 @@ public class CaelestisHollowEntity extends ZombieEntity implements CaelestisBrea
     }
 
     @Override
-    protected void dropEquipment(ServerWorld world, DamageSource source, boolean causedByPlayer) {
+    protected void dropEquipment(DamageSource source, int lootingMultiplier, boolean causedByPlayer) {
     }
 
     @Override

@@ -37,8 +37,8 @@ public abstract class HeldItemRendererMixin {
 
         ItemStack previousWithoutHeat = previous.copy();
         ItemStack currentWithoutHeat = current.copy();
-        previousWithoutHeat.remove(ComponentTypeRegistry.MOLTEN_HEAT.get());
-        currentWithoutHeat.remove(ComponentTypeRegistry.MOLTEN_HEAT.get());
+        ComponentTypeRegistry.MOLTEN_HEAT.remove(previousWithoutHeat);
+        ComponentTypeRegistry.MOLTEN_HEAT.remove(currentWithoutHeat);
         return ItemStack.areEqual(previousWithoutHeat, currentWithoutHeat);
     }
 
@@ -61,7 +61,7 @@ public abstract class HeldItemRendererMixin {
 
         Arm arm = hand == Hand.MAIN_HAND ? player.getMainArm() : player.getMainArm().getOpposite();
         int side = arm == Arm.RIGHT ? 1 : -1;
-        float useProgress = MathHelper.clamp((stack.getMaxUseTime(player) - player.getItemUseTimeLeft() + tickDelta) / 5.0F, 0.0F, 1.0F);
+        float useProgress = MathHelper.clamp((stack.getMaxUseTime() - player.getItemUseTimeLeft() + tickDelta) / 5.0F, 0.0F, 1.0F);
         float eased = 1.0F - (1.0F - useProgress) * (1.0F - useProgress);
 
         matrices.translate(side * -0.42F * eased, 0.08F * eased, -0.34F * eased);

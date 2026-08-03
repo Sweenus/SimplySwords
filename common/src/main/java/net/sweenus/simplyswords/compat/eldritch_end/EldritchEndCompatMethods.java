@@ -10,8 +10,8 @@ public class EldritchEndCompatMethods {
 
         if (livingEntity instanceof PlayerEntity player) {
             ItemStack stack = player.getMainHandStack();
-            if (player.age % 180 == 0 && Registries.ATTRIBUTE.get(Identifier.of("eldritch_end:corruption")) != null) {
-                double corruption = livingEntity.getAttributeValue(Registries.ATTRIBUTE.get(Identifier.of("eldritch_end:corruption")));
+            if (player.age % 180 == 0 && Registries.ATTRIBUTE.get(new Identifier("eldritch_end:corruption")) != null) {
+                double corruption = livingEntity.getAttributeValue(Registries.ATTRIBUTE.get(new Identifier("eldritch_end:corruption")));
                 int maxStacks = ((int) corruption / 20);
 
                 if (!stack.isEmpty() && (stack.isOf(EldritchEndCompat.DREADTIDE.get()))) {

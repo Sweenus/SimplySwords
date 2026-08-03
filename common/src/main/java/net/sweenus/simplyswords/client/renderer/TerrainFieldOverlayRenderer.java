@@ -49,25 +49,25 @@ public final class TerrainFieldOverlayRenderer {
     private static final float FLUID_EDGE_OVERLAP = 0.003F;
     private static final float SURFACE_EPSILON = 0.001F;
     private static final Identifier WHITE_TEXTURE =
-            Identifier.ofVanilla("textures/misc/white.png");
+            new Identifier("minecraft", "textures/misc/white.png");
 
     public static final Palette CAELESTIS = new Palette(
             List.of(
                     new Variant(65,
-                            Identifier.ofVanilla("block/sculk"), null,
-                            Identifier.ofVanilla("block/sculk"), null),
+                            new Identifier("minecraft", "block/sculk"), null,
+                            new Identifier("minecraft", "block/sculk"), null),
                     new Variant(17,
-                            Identifier.ofVanilla("block/sculk_catalyst_top"), null,
-                            Identifier.ofVanilla("block/sculk_catalyst_side"), null),
+                            new Identifier("minecraft", "block/sculk_catalyst_top"), null,
+                            new Identifier("minecraft", "block/sculk_catalyst_side"), null),
                     new Variant(10,
-                            Identifier.ofVanilla("block/sculk_shrieker_inner_top"),
-                            Identifier.ofVanilla("block/sculk_shrieker_top"),
-                            Identifier.ofVanilla("block/sculk"),
-                            Identifier.ofVanilla("block/sculk_shrieker_side")),
+                            new Identifier("minecraft", "block/sculk_shrieker_inner_top"),
+                            new Identifier("minecraft", "block/sculk_shrieker_top"),
+                            new Identifier("minecraft", "block/sculk"),
+                            new Identifier("minecraft", "block/sculk_shrieker_side")),
                     new Variant(8,
-                            Identifier.ofVanilla("block/sculk_sensor_top"), null,
-                            Identifier.ofVanilla("block/sculk"),
-                            Identifier.ofVanilla("block/sculk_sensor_side"))
+                            new Identifier("minecraft", "block/sculk_sensor_top"), null,
+                            new Identifier("minecraft", "block/sculk"),
+                            new Identifier("minecraft", "block/sculk_sensor_side"))
             ),
             255, 125, 255,
             108, 65, 152, 72,
@@ -79,23 +79,23 @@ public final class TerrainFieldOverlayRenderer {
     public static final Palette SOUL_PYRE = new Palette(
             List.of(
                     new Variant(43,
-                            Identifier.ofVanilla("block/soul_soil"), null,
-                            Identifier.ofVanilla("block/soul_soil"), null),
+                            new Identifier("minecraft", "block/soul_soil"), null,
+                            new Identifier("minecraft", "block/soul_soil"), null),
                     new Variant(22,
-                            Identifier.ofVanilla("block/soul_sand"), null,
-                            Identifier.ofVanilla("block/soul_sand"), null),
+                            new Identifier("minecraft", "block/soul_sand"), null,
+                            new Identifier("minecraft", "block/soul_sand"), null),
                     new Variant(14,
-                            Identifier.ofVanilla("block/basalt_top"), null,
-                            Identifier.ofVanilla("block/basalt_side"), null),
+                            new Identifier("minecraft", "block/basalt_top"), null,
+                            new Identifier("minecraft", "block/basalt_side"), null),
                     new Variant(11,
-                            Identifier.ofVanilla("block/blackstone"), null,
-                            Identifier.ofVanilla("block/blackstone"), null),
+                            new Identifier("minecraft", "block/blackstone"), null,
+                            new Identifier("minecraft", "block/blackstone"), null),
                     new Variant(5,
-                            Identifier.ofVanilla("block/crying_obsidian"), null,
-                            Identifier.ofVanilla("block/crying_obsidian"), null),
+                            new Identifier("minecraft", "block/crying_obsidian"), null,
+                            new Identifier("minecraft", "block/crying_obsidian"), null),
                     new Variant(5,
-                            Identifier.ofVanilla("block/glowstone"), null,
-                            Identifier.ofVanilla("block/glowstone"), null,
+                            new Identifier("minecraft", "block/glowstone"), null,
+                            new Identifier("minecraft", "block/glowstone"), null,
                             true)
             ),
             188, 210, 222,
@@ -104,8 +104,8 @@ public final class TerrainFieldOverlayRenderer {
             10,
             3,
             new FluidReplacement(
-                    Identifier.ofVanilla("block/lava_still"),
-                    Identifier.ofVanilla("block/lava_flow")
+                    new Identifier("minecraft", "block/lava_still"),
+                    new Identifier("minecraft", "block/lava_flow")
             )
     );
 
@@ -656,12 +656,12 @@ public final class TerrainFieldOverlayRenderer {
             MatrixStack.Entry matrices, VertexConsumer vertices, Sprite sprite,
             double x, float y, double z, double u, double v,
             Direction direction) {
-        vertices.vertex(matrices, (float) x, y, (float) z)
+        vertices.vertex(matrices.getPositionMatrix(), (float) x, y, (float) z)
                 .color(255, 255, 255, 255)
-                .texture(sprite.getFrameU((float) u), sprite.getFrameV((float) v))
+                .texture(normalizedSpriteU(sprite, u), normalizedSpriteV(sprite, v))
                 .light(LightmapTextureManager.MAX_LIGHT_COORDINATE)
-                .normal(matrices, direction.getOffsetX(),
-                        direction.getOffsetY(), direction.getOffsetZ());
+                .normal(matrices.getNormalMatrix(), direction.getOffsetX(),
+                        direction.getOffsetY(), direction.getOffsetZ()).next();
     }
 
     private static PreparedHorizontalFace prepareHorizontalFace(
@@ -1127,26 +1127,34 @@ public final class TerrainFieldOverlayRenderer {
             MatrixStack.Entry matrices, VertexConsumer vertices, Sprite sprite,
             double x, float y, double z, double u, double v, int light,
             Direction direction, Palette palette) {
-        vertices.vertex(matrices, (float) x, y, (float) z)
+        vertices.vertex(matrices.getPositionMatrix(), (float) x, y, (float) z)
                 .color(palette.terrainRed, palette.terrainGreen, palette.terrainBlue, 255)
-                .texture(sprite.getFrameU((float) u), sprite.getFrameV((float) v))
+                .texture(normalizedSpriteU(sprite, u), normalizedSpriteV(sprite, v))
                 .light(light)
-                .normal(matrices, direction.getOffsetX(),
-                        direction.getOffsetY(), direction.getOffsetZ());
+                .normal(matrices.getNormalMatrix(), direction.getOffsetX(),
+                        direction.getOffsetY(), direction.getOffsetZ()).next();
+    }
+
+    static float normalizedSpriteU(Sprite sprite, double normalizedU) {
+        return sprite.getFrameU(normalizedU * 16.0);
+    }
+
+    static float normalizedSpriteV(Sprite sprite, double normalizedV) {
+        return sprite.getFrameV(normalizedV * 16.0);
     }
 
     private static void putWashVertex(
             MatrixStack.Entry matrices, VertexConsumer vertices,
             double x, float y, double z, int light,
             Direction direction, Palette palette) {
-        vertices.vertex(matrices, (float) x, y, (float) z)
+        vertices.vertex(matrices.getPositionMatrix(), (float) x, y, (float) z)
                 .color(palette.washRed, palette.washGreen,
                         palette.washBlue, palette.washAlpha)
                 .texture(0.5F, 0.5F)
                 .overlay(OverlayTexture.DEFAULT_UV)
                 .light(light)
-                .normal(matrices, direction.getOffsetX(),
-                        direction.getOffsetY(), direction.getOffsetZ());
+                .normal(matrices.getNormalMatrix(), direction.getOffsetX(),
+                        direction.getOffsetY(), direction.getOffsetZ()).next();
     }
 
     private static int terrainLight(TerrainFace face, Palette palette) {

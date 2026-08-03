@@ -3,7 +3,7 @@ package net.sweenus.simplyswords.network;
 import dev.architectury.networking.NetworkManager;
 import dev.architectury.networking.simple.BaseC2SMessage;
 import dev.architectury.networking.simple.MessageType;
-import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Hand;
 import net.sweenus.simplyswords.world.PlayerWeaponAbilityManager;
@@ -18,7 +18,7 @@ public class UseWeaponAbilityPacket extends BaseC2SMessage {
         this.pressed = pressed;
     }
 
-    public UseWeaponAbilityPacket(RegistryByteBuf buf) {
+    public UseWeaponAbilityPacket(PacketByteBuf buf) {
         this.hand = buf.readEnumConstant(Hand.class);
         this.pressed = buf.readBoolean();
     }
@@ -29,7 +29,7 @@ public class UseWeaponAbilityPacket extends BaseC2SMessage {
     }
 
     @Override
-    public void write(RegistryByteBuf buf) {
+    public void write(PacketByteBuf buf) {
         buf.writeEnumConstant(hand);
         buf.writeBoolean(pressed);
     }

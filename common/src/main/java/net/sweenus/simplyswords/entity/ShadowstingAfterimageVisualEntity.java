@@ -29,9 +29,9 @@ public class ShadowstingAfterimageVisualEntity extends Entity {
     }
 
     @Override
-    protected void initDataTracker(DataTracker.Builder builder) {
-        builder.add(VISUAL_YAW, 0.0F);
-        builder.add(LIFETIME, 8);
+    protected void initDataTracker() {
+        this.dataTracker.startTracking(VISUAL_YAW, 0.0F);
+        this.dataTracker.startTracking(LIFETIME, 8);
     }
 
     @Override

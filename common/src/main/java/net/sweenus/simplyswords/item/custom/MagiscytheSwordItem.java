@@ -10,7 +10,6 @@ import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
-import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
@@ -54,7 +53,7 @@ public class MagiscytheSwordItem extends UniqueSwordItem implements UniqueWeapon
                 float repairChance = Config.uniqueEffects.magiscythe.repairChance;
                 Random random = new Random();
                 for (EquipmentSlot slot : EquipmentSlot.values()) {
-                    if (slot.getType() == EquipmentSlot.Type.HUMANOID_ARMOR || slot == EquipmentSlot.MAINHAND || slot == EquipmentSlot.OFFHAND) {
+                    if (slot.getType() == EquipmentSlot.Type.ARMOR || slot == EquipmentSlot.MAINHAND || slot == EquipmentSlot.OFFHAND) {
                         ItemStack item = attacker.getEquippedStack(slot);
                         if (!item.isEmpty() && random.nextFloat() < repairChance && item.getDamage() > 0) {
                             item.setDamage((int) (item.getDamage() - HelperMethods.getEntityAttackDamage(attacker)));
@@ -118,7 +117,7 @@ public class MagiscytheSwordItem extends UniqueSwordItem implements UniqueWeapon
     }
 
     @Override
-    public void appendTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
+    public void appendTooltip(ItemStack itemStack, net.minecraft.world.World world, List<Text> tooltip, net.minecraft.client.item.TooltipContext tooltipContext) {
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.magiscythesworditem.tooltip1").setStyle(Styles.ABILITY));
         tooltip.add(Text.translatable("item.simplyswords.magiscythesworditem.tooltip2").setStyle(Styles.TEXT));
@@ -126,7 +125,7 @@ public class MagiscytheSwordItem extends UniqueSwordItem implements UniqueWeapon
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.magiscythesworditem.tooltip6").setStyle(Styles.TEXT));
         appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.magiscythe.cooldown);
-        super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        super.appendTooltip(itemStack, world, tooltip, tooltipContext);
         TooltipUtils.appendSpellScaleTooltip(tooltip, "arcane");
     }
 

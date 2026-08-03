@@ -39,29 +39,32 @@ import java.util.Set;
 @Mixin(WorldRenderer.class)
 public abstract class WorldRendererMixin {
 
-    @Inject(method = "render", at = @At("TAIL"))
-    private void simplyswords$renderFirstPersonImmolationField(RenderTickCounter tickCounter, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightmapTextureManager lightmapTextureManager, Matrix4f positionMatrix, Matrix4f projectionMatrix, CallbackInfo ci) {
+    @Inject(method = "render(Lnet/minecraft/client/util/math/MatrixStack;FJZLnet/minecraft/client/render/Camera;Lnet/minecraft/client/render/GameRenderer;Lnet/minecraft/client/render/LightmapTextureManager;Lorg/joml/Matrix4f;)V", at = @At("TAIL"))
+    private void simplyswords$renderFirstPersonImmolationField(MatrixStack worldMatrices, float tickDelta,
+                                                               long frameDeadline, boolean renderBlockOutline,
+                                                               Camera camera, GameRenderer gameRenderer,
+                                                               LightmapTextureManager lightmapTextureManager,
+                                                               Matrix4f projectionMatrix, CallbackInfo ci) {
         MinecraftClient client = MinecraftClient.getInstance();
         ClientPlayerEntity player = client.player;
         if (player == null) {
             return;
         }
 
-        float tickDelta = tickCounter.getTickDelta(false);
         Vec3d cameraPos = camera.getPos();
         double x = MathHelper.lerp(tickDelta, player.prevX, player.getX()) - cameraPos.x;
         double y = MathHelper.lerp(tickDelta, player.prevY, player.getY()) - cameraPos.y;
         double z = MathHelper.lerp(tickDelta, player.prevZ, player.getZ()) - cameraPos.z;
 
-        MatrixStack matrices = new MatrixStack();
-        matrices.multiplyPositionMatrix(positionMatrix);
-        matrices.translate(x, y, z);
+        MatrixStack effectMatrices = new MatrixStack();
+        effectMatrices.multiplyPositionMatrix(worldMatrices.peek().getPositionMatrix());
+        effectMatrices.translate(x, y, z);
 
         VertexConsumerProvider.Immediate vertexConsumers = client.getBufferBuilders().getEntityVertexConsumers();
 
         StatusEffectInstance immolation = player.getStatusEffect(EffectRegistry.getReference(EffectRegistry.IMMOLATION));
         if (immolation != null && client.options.getPerspective().isFirstPerson()) {
-            ModernFieldRenderer.renderImmolation(matrices, vertexConsumers, player.age, Math.max(0.75F, immolation.getAmplifier()));
+            ModernFieldRenderer.renderImmolation(effectMatrices, vertexConsumers, player.age, Math.max(0.75F, immolation.getAmplifier()));
         }
 
         TargetHighlight highlight = getReadyTarget(player);
@@ -77,23 +80,23 @@ public abstract class WorldRendererMixin {
                     MathHelper.lerp(tickDelta, highlightedTarget.prevZ, highlightedTarget.getZ()));
             Vec3d targetOffset = targetPos.subtract(playerPos);
             if (highlight.style() == TargetHighlight.Style.SOUL) {
-                ModernFieldRenderer.renderSoulstealerTargetLine(matrices, vertexConsumers, player.age, targetOffset);
-                ModernFieldRenderer.renderSoulstealerTargetRing(matrices, vertexConsumers, player.age, targetOffset, highlightedTarget.getWidth());
+                ModernFieldRenderer.renderSoulstealerTargetLine(effectMatrices, vertexConsumers, player.age, targetOffset);
+                ModernFieldRenderer.renderSoulstealerTargetRing(effectMatrices, vertexConsumers, player.age, targetOffset, highlightedTarget.getWidth());
             } else if (highlight.style() == TargetHighlight.Style.EMBER) {
-                ModernFieldRenderer.renderEmberTargetLine(matrices, vertexConsumers, player.age, targetOffset);
-                ModernFieldRenderer.renderEmberTargetRing(matrices, vertexConsumers, player.age, targetOffset, highlightedTarget.getWidth());
+                ModernFieldRenderer.renderEmberTargetLine(effectMatrices, vertexConsumers, player.age, targetOffset);
+                ModernFieldRenderer.renderEmberTargetRing(effectMatrices, vertexConsumers, player.age, targetOffset, highlightedTarget.getWidth());
             } else if (highlight.style() == TargetHighlight.Style.BRIMSTONE) {
-                ModernFieldRenderer.renderBrimstoneTargetLine(matrices, vertexConsumers, player.age, targetOffset);
-                ModernFieldRenderer.renderBrimstoneTargetRing(matrices, vertexConsumers, player.age, targetOffset, highlightedTarget.getWidth());
+                ModernFieldRenderer.renderBrimstoneTargetLine(effectMatrices, vertexConsumers, player.age, targetOffset);
+                ModernFieldRenderer.renderBrimstoneTargetRing(effectMatrices, vertexConsumers, player.age, targetOffset, highlightedTarget.getWidth());
             } else if (highlight.style() == TargetHighlight.Style.WATCHER) {
-                ModernFieldRenderer.renderWatcherTargetLine(matrices, vertexConsumers, player.age, targetOffset);
-                ModernFieldRenderer.renderWatcherTargetRing(matrices, vertexConsumers, player.age, targetOffset, highlightedTarget.getWidth());
+                ModernFieldRenderer.renderWatcherTargetLine(effectMatrices, vertexConsumers, player.age, targetOffset);
+                ModernFieldRenderer.renderWatcherTargetRing(effectMatrices, vertexConsumers, player.age, targetOffset, highlightedTarget.getWidth());
             } else if (highlight.style() == TargetHighlight.Style.WAX) {
-                ModernFieldRenderer.renderWaxTargetLine(matrices, vertexConsumers, player.age, targetOffset);
-                ModernFieldRenderer.renderWaxTargetRing(matrices, vertexConsumers, player.age, targetOffset, highlightedTarget.getWidth());
+                ModernFieldRenderer.renderWaxTargetLine(effectMatrices, vertexConsumers, player.age, targetOffset);
+                ModernFieldRenderer.renderWaxTargetRing(effectMatrices, vertexConsumers, player.age, targetOffset, highlightedTarget.getWidth());
             } else if (highlight.style() == TargetHighlight.Style.BRAMBLE) {
-                ModernFieldRenderer.renderBrambleTargetLine(matrices, vertexConsumers, player.age, targetOffset);
-                ModernFieldRenderer.renderBrambleTargetRing(matrices, vertexConsumers, player.age, targetOffset, highlightedTarget.getWidth());
+                ModernFieldRenderer.renderBrambleTargetLine(effectMatrices, vertexConsumers, player.age, targetOffset);
+                ModernFieldRenderer.renderBrambleTargetRing(effectMatrices, vertexConsumers, player.age, targetOffset, highlightedTarget.getWidth());
             }
         }
 
@@ -145,7 +148,7 @@ public abstract class WorldRendererMixin {
         ItemStack stack = getHeldSoulstealer(player);
         if (stack.isEmpty()
                 || player.getItemCooldownManager().isCoolingDown(stack.getItem())
-                || stack.getOrDefault(ComponentTypeRegistry.STORED_CHARGE.get(), StoredChargeComponent.DEFAULT).charge() <= 0) {
+                || ComponentTypeRegistry.STORED_CHARGE.getOrDefault(stack, StoredChargeComponent.DEFAULT).charge() <= 0) {
             return null;
         }
 

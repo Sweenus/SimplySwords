@@ -6,7 +6,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.StackReference;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.text.Text;
 import net.minecraft.util.ClickType;
@@ -52,18 +51,18 @@ public class NetherfusedGemItem extends Item implements GemPowerFiller {
         // Must roll on BOTH sides - see the note in RunefusedGemItem#onClicked. In creative
         // the client owns the stack and a server-only roll is discarded.
         if (SimplySwordsAPI.needsGemPowerRoll(stack)) {
-            stack.set(ComponentTypeRegistry.GEM_POWER.get(), GemPowerComponent.nether(GemPowerRegistry.gemRandomPower(PowerType.NETHER)));
+            ComponentTypeRegistry.GEM_POWER.set(stack, GemPowerComponent.nether(GemPowerRegistry.gemRandomPower(PowerType.NETHER)));
         }
 
         return false;
     }
 
     @Override
-    public void onCraft(ItemStack stack, World world) {
+    public void onCraft(ItemStack stack, World world, PlayerEntity player) {
         if (world.isClient) return;
 
         if (SimplySwordsAPI.needsGemPowerRoll(stack)) {
-            stack.set(ComponentTypeRegistry.GEM_POWER.get(), GemPowerComponent.nether(GemPowerRegistry.gemRandomPower(PowerType.NETHER)));
+            ComponentTypeRegistry.GEM_POWER.set(stack, GemPowerComponent.nether(GemPowerRegistry.gemRandomPower(PowerType.NETHER)));
         }
     }
 
@@ -73,7 +72,7 @@ public class NetherfusedGemItem extends Item implements GemPowerFiller {
     }
 
     @Override
-    public void appendTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
+    public void appendTooltip(ItemStack itemStack, net.minecraft.world.World world, List<Text> tooltip, net.minecraft.client.item.TooltipContext tooltipContext) {
 
         tooltip.add(Text.literal(""));
 
@@ -83,18 +82,18 @@ public class NetherfusedGemItem extends Item implements GemPowerFiller {
             tooltip.add(Text.translatable("item.simplyswords.netherfused_gem.tooltip1").setStyle(Styles.NETHERFUSED));
             tooltip.add(Text.translatable("item.simplyswords.unidentifiedsworditem.tooltip2").setStyle(Styles.TEXT));
         } else {
-            component.appendTooltip(itemStack, tooltipContext, tooltip, type);
+            component.appendTooltip(itemStack, world, tooltip, tooltipContext);
         }
         tooltip.add(Text.literal(""));
-        generateDynamicTooltip(itemStack, tooltipContext, tooltip, type);
+        generateDynamicTooltip(itemStack, world, tooltip, tooltipContext);
         if (Screen.hasAltDown()) {
             tooltip.add(Text.translatable("item.simplyswords.gem_description").formatted(Formatting.GRAY, Formatting.ITALIC));
             tooltip.add(Text.translatable("item.simplyswords.gem_description2").formatted(Formatting.GRAY, Formatting.ITALIC));
         }
     }
 
-    protected void generateDynamicTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
-        SimplySwordsClientAPI.generateDynamicTooltip(itemStack, tooltipContext, tooltip, type,
+    protected void generateDynamicTooltip(ItemStack itemStack, net.minecraft.world.World world, List<Text> tooltip, net.minecraft.client.item.TooltipContext tooltipContext) {
+        SimplySwordsClientAPI.generateDynamicTooltip(itemStack, world, tooltip, tooltipContext,
                 SimplySwords.MOD_ID,
                 "oracle_index:books/simplyswords/weapon-types",
                 "oracle_index:books/simplyswords/unique-weapons",

@@ -14,7 +14,7 @@ public class OnslaughtEffect extends StatusEffect {
     }
 
     @Override
-    public boolean applyUpdateEffect(LivingEntity pLivingEntity, int pAmplifier) {
+    public void applyUpdateEffect(LivingEntity pLivingEntity, int pAmplifier) {
         if (!pLivingEntity.getWorld().isClient()) {
             if (pLivingEntity instanceof PlayerEntity) {
 
@@ -46,7 +46,6 @@ public class OnslaughtEffect extends StatusEffect {
 
         super.applyUpdateEffect(pLivingEntity, pAmplifier);
 
-        return true;
     }
 
     @Override

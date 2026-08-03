@@ -3,7 +3,6 @@ package net.sweenus.simplyswords.mixin.client;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.InGameHud;
-import net.minecraft.client.render.RenderTickCounter;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.Box;
@@ -55,7 +54,7 @@ public abstract class InGameHudMixin {
     private float simplyswords$lastBreachRenderTime;
 
     @Inject(method = "render", at = @At("HEAD"))
-    private void simplyswords$renderAstralBreachTint(DrawContext context, RenderTickCounter tickCounter, CallbackInfo ci) {
+    private void simplyswords$renderAstralBreachTint(DrawContext context, float tickDelta, CallbackInfo ci) {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.world == null || !Config.general.enableModernFieldEffects) {
             simplyswords$breachTint = 0.0F;
@@ -92,7 +91,7 @@ public abstract class InGameHudMixin {
             }
         }
 
-        float renderTime = client.world.getTime() + tickCounter.getTickDelta(false);
+        float renderTime = client.world.getTime() + tickDelta;
         float elapsed = this.simplyswords$lastBreachRenderTime == 0.0F
                 ? 1.0F : MathHelper.clamp(renderTime - this.simplyswords$lastBreachRenderTime, 0.0F, 5.0F);
         float smoothing = 1.0F - (float) Math.exp(-0.28F * elapsed);
@@ -130,7 +129,7 @@ public abstract class InGameHudMixin {
     }
 
     @Inject(method = "render", at = @At("TAIL"))
-    private void simplyswords$renderSoulDebtHud(DrawContext context, RenderTickCounter tickCounter, CallbackInfo ci) {
+    private void simplyswords$renderSoulDebtHud(DrawContext context, float tickDelta, CallbackInfo ci) {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null || client.options.hudHidden) {
             simplyswords$heatDisplayInitialized = false;
@@ -140,18 +139,18 @@ public abstract class InGameHudMixin {
         ItemStack stack = client.player.getMainHandStack();
         ItemStack moltenEdge = simplyswords$selectMoltenEdge(client);
         if (!moltenEdge.isEmpty()) {
-            MoltenHeatComponent heat = moltenEdge.getOrDefault(ComponentTypeRegistry.MOLTEN_HEAT.get(), MoltenHeatComponent.DEFAULT);
-            renderHeatBar(context, client, tickCounter, heat);
+            MoltenHeatComponent heat = ComponentTypeRegistry.MOLTEN_HEAT.getOrDefault(moltenEdge, MoltenHeatComponent.DEFAULT);
+            renderHeatBar(context, client, tickDelta, heat);
             return;
         }
         simplyswords$heatDisplayInitialized = false;
         if (stack.isOf(ItemsRegistry.SOULSTEALER.get())) {
-            int stacks = stack.getOrDefault(ComponentTypeRegistry.STORED_CHARGE.get(), StoredChargeComponent.DEFAULT).charge();
+            int stacks = ComponentTypeRegistry.STORED_CHARGE.getOrDefault(stack, StoredChargeComponent.DEFAULT).charge();
             renderChargePips(context, client, stacks, Math.max(1, Config.uniqueEffects.soulstealer.maxStacks), SOUL_DEBT_COLOR, SOUL_DEBT_EMPTY_COLOR, SOUL_DEBT_BORDER_COLOR);
             return;
         }
         if (stack.isOf(ItemsRegistry.STORMBRINGER.get())) {
-            int charges = stack.getOrDefault(ComponentTypeRegistry.PARRY.get(), ParryComponent.DEFAULT).stormCharges();
+            int charges = ComponentTypeRegistry.PARRY.getOrDefault(stack, ParryComponent.DEFAULT).stormCharges();
             renderChargePips(context, client, charges, Math.max(1, Config.uniqueEffects.stormbringer.maxStormCharges), STORM_CHARGE_COLOR, STORM_CHARGE_EMPTY_COLOR, STORM_CHARGE_BORDER_COLOR);
         }
     }
@@ -175,8 +174,8 @@ public abstract class InGameHudMixin {
 
         long worldTime = client.world == null ? 0L : client.world.getTime();
         int ventDrain = Math.max(1, Config.uniqueEffects.molten_edge.ventDrainPerTick);
-        MoltenHeatComponent mainHeat = mainHand.getOrDefault(ComponentTypeRegistry.MOLTEN_HEAT.get(), MoltenHeatComponent.DEFAULT);
-        MoltenHeatComponent offHeat = offHand.getOrDefault(ComponentTypeRegistry.MOLTEN_HEAT.get(), MoltenHeatComponent.DEFAULT);
+        MoltenHeatComponent mainHeat = ComponentTypeRegistry.MOLTEN_HEAT.getOrDefault(mainHand, MoltenHeatComponent.DEFAULT);
+        MoltenHeatComponent offHeat = ComponentTypeRegistry.MOLTEN_HEAT.getOrDefault(offHand, MoltenHeatComponent.DEFAULT);
         boolean mainVenting = mainHeat.isVentingAt(worldTime, ventDrain);
         boolean offVenting = offHeat.isVentingAt(worldTime, ventDrain);
         if (mainVenting != offVenting) {
@@ -211,11 +210,11 @@ public abstract class InGameHudMixin {
         context.getMatrices().pop();
     }
 
-    private void renderHeatBar(DrawContext context, MinecraftClient client, RenderTickCounter tickCounter, MoltenHeatComponent component) {
+    private void renderHeatBar(DrawContext context, MinecraftClient client, float tickDelta, MoltenHeatComponent component) {
         long worldTime = client.world == null ? 0L : client.world.getTime();
         int ventDrain = Math.max(1, Config.uniqueEffects.molten_edge.ventDrainPerTick);
         float targetHeat = component.heatAt(worldTime, ventDrain);
-        float renderTime = worldTime + tickCounter.getTickDelta(false);
+        float renderTime = worldTime + tickDelta;
         if (!simplyswords$heatDisplayInitialized) {
             simplyswords$displayedHeat = targetHeat;
             simplyswords$lastHeatRenderTime = renderTime;
@@ -234,7 +233,7 @@ public abstract class InGameHudMixin {
             simplyswords$lastHeatRenderTime = renderTime;
         }
 
-        float fraction = Math.clamp(simplyswords$displayedHeat / MoltenHeatComponent.MAX_HEAT, 0.0F, 1.0F);
+        float fraction = net.minecraft.util.math.MathHelper.clamp(simplyswords$displayedHeat / MoltenHeatComponent.MAX_HEAT, 0.0F, 1.0F);
         float danger = Math.max(0.0F, (fraction - 0.75F) / 0.25F);
         float pulseSpeed = fraction >= 0.9F ? 0.72F : 0.34F;
         float pulse = 0.5F + 0.5F * (float) Math.sin(renderTime * pulseSpeed);
@@ -252,7 +251,7 @@ public abstract class InGameHudMixin {
 
         pushWeaponHudTransform(context);
         if (danger > 0.0F) {
-            int glowAlpha = Math.clamp((int) ((28.0F + 74.0F * pulse) * danger), 0, 120);
+            int glowAlpha = net.minecraft.util.math.MathHelper.clamp((int) ((28.0F + 74.0F * pulse) * danger), 0, 120);
             int glowColor = withAlpha(fillColor, glowAlpha);
             context.fill(x - 4, y - 4, x + HEAT_BAR_WIDTH + 4, y + HEAT_BAR_HEIGHT + 4, withAlpha(glowColor, glowAlpha / 3));
             context.fill(x - 2, y - 2, x + HEAT_BAR_WIDTH + 2, y + HEAT_BAR_HEIGHT + 2, glowColor);
@@ -286,12 +285,12 @@ public abstract class InGameHudMixin {
                 context.getScaledWindowHeight() - WEAPON_HUD_BOTTOM_OFFSET + Config.gui.yOffset,
                 0.0F
         );
-        float scale = Math.clamp(Config.gui.scale, 0.25F, 4.0F);
+        float scale = net.minecraft.util.math.MathHelper.clamp(Config.gui.scale, 0.25F, 4.0F);
         context.getMatrices().scale(scale, scale, 1.0F);
     }
 
     private static int blendColor(int first, int second, float progress) {
-        float t = Math.clamp(progress, 0.0F, 1.0F);
+        float t = net.minecraft.util.math.MathHelper.clamp(progress, 0.0F, 1.0F);
         int a = Math.round(((first >>> 24) & 0xFF) + (((second >>> 24) & 0xFF) - ((first >>> 24) & 0xFF)) * t);
         int r = Math.round(((first >>> 16) & 0xFF) + (((second >>> 16) & 0xFF) - ((first >>> 16) & 0xFF)) * t);
         int g = Math.round(((first >>> 8) & 0xFF) + (((second >>> 8) & 0xFF) - ((first >>> 8) & 0xFF)) * t);
@@ -300,6 +299,6 @@ public abstract class InGameHudMixin {
     }
 
     private static int withAlpha(int color, int alpha) {
-        return Math.clamp(alpha, 0, 255) << 24 | color & 0x00FFFFFF;
+        return net.minecraft.util.math.MathHelper.clamp(alpha, 0, 255) << 24 | color & 0x00FFFFFF;
     }
 }

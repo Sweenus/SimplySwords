@@ -24,7 +24,7 @@ public abstract class OrbitingEffect extends StatusEffect {
     private double currentAngle = 0.0;
 
     @Override
-    public boolean applyUpdateEffect(LivingEntity livingEntity, int amplifier) {
+    public void applyUpdateEffect(LivingEntity livingEntity, int amplifier) {
         if (!livingEntity.getWorld().isClient) {
             ServerWorld serverWorld = (ServerWorld) livingEntity.getWorld();
             Vec3d center = livingEntity.getPos().add(0, livingEntity.getHeight() / 2.0, 0); // Center around the entity's waist
@@ -56,7 +56,6 @@ public abstract class OrbitingEffect extends StatusEffect {
                 currentAngle -= 2 * Math.PI;
             }
         }
-        return true;
     }
 
     // Protected method to set the particle type
@@ -65,8 +64,8 @@ public abstract class OrbitingEffect extends StatusEffect {
     }
 
     @Override
-    public void onRemoved(AttributeContainer attributes) {
-        super.onRemoved(attributes);
+    public void onRemoved(LivingEntity effectEntity, AttributeContainer attributes, int amplifier) {
+        super.onRemoved(effectEntity, attributes, amplifier);
     }
 
 
@@ -77,9 +76,9 @@ public abstract class OrbitingEffect extends StatusEffect {
 
     // Store the entity and its attribute container when the effect is applied
     @Override
-    public void onApplied(LivingEntity entity, int amplifier) {
-        super.onApplied(entity, amplifier);
-        entityAttributeMap.put(entity, entity.getAttributes());
+    public void onApplied(LivingEntity entity, AttributeContainer attributes, int amplifier) {
+        super.onApplied(entity, attributes, amplifier);
+        entityAttributeMap.put(entity, attributes);
     }
 
     // Retrieve the entity from the attribute container

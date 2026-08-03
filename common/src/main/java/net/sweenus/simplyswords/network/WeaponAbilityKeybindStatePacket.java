@@ -3,7 +3,7 @@ package net.sweenus.simplyswords.network;
 import dev.architectury.networking.NetworkManager;
 import dev.architectury.networking.simple.BaseC2SMessage;
 import dev.architectury.networking.simple.MessageType;
-import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.sweenus.simplyswords.world.PlayerWeaponAbilityKeybindState;
 
@@ -17,7 +17,7 @@ public class WeaponAbilityKeybindStatePacket extends BaseC2SMessage {
         this.offhandRebound = offhandRebound;
     }
 
-    public WeaponAbilityKeybindStatePacket(RegistryByteBuf buf) {
+    public WeaponAbilityKeybindStatePacket(PacketByteBuf buf) {
         this.mainhandRebound = buf.readBoolean();
         this.offhandRebound = buf.readBoolean();
     }
@@ -28,7 +28,7 @@ public class WeaponAbilityKeybindStatePacket extends BaseC2SMessage {
     }
 
     @Override
-    public void write(RegistryByteBuf buf) {
+    public void write(PacketByteBuf buf) {
         buf.writeBoolean(mainhandRebound);
         buf.writeBoolean(offhandRebound);
     }

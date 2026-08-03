@@ -1,0 +1,38 @@
+{
+  "display": {
+    "icon": {
+      "item": "simplyswords:magispear"
+    },
+    "title": {
+      "translate": "advancements.simplyswords.magispear.title",
+      "with": []
+    },
+    "description": {
+      "translate": "advancements.simplyswords.obtain_unique.description",
+      "with": [
+        {
+          "translate": "item.simplyswords.magispear"
+        }
+      ]
+    },
+    "hidden": true,
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "parent": "simplyswords:decaying_relic",
+  "criteria": {
+    "requirement": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "simplyswords:magispear"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

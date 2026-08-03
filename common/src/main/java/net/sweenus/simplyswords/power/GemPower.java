@@ -2,10 +2,7 @@ package net.sweenus.simplyswords.power;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.tooltip.TooltipAppender;
-import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
@@ -13,6 +10,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.SimplySwords;
+import net.sweenus.simplyswords.config.settings.TooltipProvider;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,7 +25,7 @@ import java.util.function.Consumer;
  * @see RunefusedGemPower
  * @see NetherGemPower
  */
-public class GemPower implements TooltipAppender {
+public class GemPower implements TooltipProvider {
 
 	public GemPower(boolean isGreater, PowerType... applicableTypes) {
 		this.isGreater = isGreater;
@@ -41,15 +39,15 @@ public class GemPower implements TooltipAppender {
 	public List<PowerType> applicableTypes() { return applicableTypes; }
 
 	@Override
-	public void appendTooltip(Item.TooltipContext context, Consumer<Text> tooltip, TooltipType type) {
+	public void appendTooltip(Consumer<Text> tooltip) {
 		List<Text> list = new ArrayList<>();
-		appendTooltip(ItemStack.EMPTY, context, list, type, false);
+		appendTooltip(ItemStack.EMPTY, null, list, net.minecraft.client.item.TooltipContext.BASIC, false);
 		for (Text text : list) {
 			tooltip.accept(text);
 		}
 	}
 
-	public void appendTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Text> tooltip, TooltipType type, boolean isRunic) {}
+	public void appendTooltip(ItemStack itemStack, net.minecraft.world.World world, List<Text> tooltip, net.minecraft.client.item.TooltipContext tooltipContext, boolean isRunic) {}
 	public void postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {}
 	public void onSwing(ItemStack stack, ServerWorld world, LivingEntity user, Hand hand) {}
 	public void inventoryTick(ItemStack stack, World world, LivingEntity user, int slot, boolean selected) {}
@@ -72,7 +70,7 @@ public class GemPower implements TooltipAppender {
 	// the registry to initialise — GemPowerComponent.DEFAULT needs it at class-init
 	// time, well before any registry exists.
 	//
-	public static final Identifier EMPTY_ID = Identifier.of(SimplySwords.MOD_ID, "empty_power");
+	public static final Identifier EMPTY_ID = new Identifier(SimplySwords.MOD_ID, "empty_power");
 
 	private static class EmptyGemPower extends GemPower {
 

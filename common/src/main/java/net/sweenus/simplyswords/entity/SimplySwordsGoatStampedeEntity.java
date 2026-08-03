@@ -156,7 +156,7 @@ public class SimplySwordsGoatStampedeEntity extends GoatEntity implements Simply
     }
 
     @Override
-    protected void dropEquipment(ServerWorld world, DamageSource source, boolean causedByPlayer) {
+    protected void dropEquipment(DamageSource source, int lootingMultiplier, boolean causedByPlayer) {
     }
 
     @Override

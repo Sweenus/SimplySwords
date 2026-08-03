@@ -1,0 +1,38 @@
+{
+  "display": {
+    "icon": {
+      "item": "simplyswords:emberlash"
+    },
+    "title": {
+      "translate": "advancements.simplyswords.emberlash.title",
+      "with": []
+    },
+    "description": {
+      "translate": "advancements.simplyswords.find_unique.description",
+      "with": [
+        {
+          "translate": "item.simplyswords.emberlash"
+        }
+      ]
+    },
+    "hidden": true,
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "parent": "simplyswords:runic_weapon",
+  "criteria": {
+    "requirement": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "simplyswords:emberlash"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

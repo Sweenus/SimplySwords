@@ -6,10 +6,6 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.tooltip.TooltipType;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
@@ -50,17 +46,6 @@ public record GemPowerComponent(boolean hasRunicPower, boolean hasNetherPower, I
 				).apply(instance, GemPowerComponent::new)
 			);
 
-	public static final PacketCodec<RegistryByteBuf, GemPowerComponent> PACKET_CODEC = PacketCodec.tuple(
-			PacketCodecs.BOOL,
-			GemPowerComponent::hasRunicPower,
-			PacketCodecs.BOOL,
-			GemPowerComponent::hasNetherPower,
-			Identifier.PACKET_CODEC,
-			GemPowerComponent::runicPower,
-			Identifier.PACKET_CODEC,
-			GemPowerComponent::netherPower,
-			GemPowerComponent::new
-	);
 
 	public static final GemPowerComponent DEFAULT = new GemPowerComponent(false, false, GemPower.EMPTY_ID, GemPower.EMPTY_ID);
 
@@ -173,17 +158,17 @@ public record GemPowerComponent(boolean hasRunicPower, boolean hasNetherPower, I
 		nether().inventoryTick(stack, world, user, slot, selected);
 	}
 
-	public void appendTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
-		appendTooltip(itemStack, tooltipContext, tooltip, type, false);
+	public void appendTooltip(ItemStack itemStack, net.minecraft.world.World world, List<Text> tooltip, net.minecraft.client.item.TooltipContext tooltipContext) {
+		appendTooltip(itemStack, world, tooltip, tooltipContext, false);
 	}
 
-	public void appendTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Text> tooltip, TooltipType type, boolean isRunic) {
+	public void appendTooltip(ItemStack itemStack, net.minecraft.world.World world, List<Text> tooltip, net.minecraft.client.item.TooltipContext tooltipContext, boolean isRunic) {
 		GemPower runic = runic();
 		if (runic.isGreater()) {
 			tooltip.add(Text.translatable("item.simplyswords.greater_runic_power").setStyle(Styles.RUNIC));
 		}
 		if (!runic.isEmpty()) {
-			runic.appendTooltip(itemStack, tooltipContext, tooltip, type, isRunic);
+			runic.appendTooltip(itemStack, world, tooltip, tooltipContext, isRunic);
 		} else if (!isRunic && hasRunicPower) {
 			tooltip.add(Text.translatable("item.simplyswords.empty_runic_slot").setStyle(Styles.RUNIC));
 		}
@@ -193,7 +178,7 @@ public record GemPowerComponent(boolean hasRunicPower, boolean hasNetherPower, I
 			tooltip.add(Text.translatable("item.simplyswords.greater_nether_power").setStyle(Styles.NETHERFUSED));
 		}
 		if (!nether.isEmpty()) {
-			nether.appendTooltip(itemStack, tooltipContext, tooltip, type, isRunic);
+			nether.appendTooltip(itemStack, world, tooltip, tooltipContext, isRunic);
 		} else if (!isRunic && hasNetherPower) {
 			tooltip.add(Text.translatable("item.simplyswords.empty_nether_slot").setStyle(Styles.NETHERFUSED));
 		}

@@ -28,9 +28,9 @@ public class VerdantTrailVisualEntity extends Entity {
     }
 
     @Override
-    protected void initDataTracker(DataTracker.Builder builder) {
-        builder.add(PLANT_TYPE, 0);
-        builder.add(HEIGHT_SCALE, 0.0F);
+    protected void initDataTracker() {
+        this.dataTracker.startTracking(PLANT_TYPE, 0);
+        this.dataTracker.startTracking(HEIGHT_SCALE, 0.0F);
     }
 
     public int getPlantType() {

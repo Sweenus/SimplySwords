@@ -2,18 +2,15 @@ package net.sweenus.simplyswords.item.component;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
 
 public record ParryComponent(boolean parried, int parrySuccession) {
 
 	public ParryComponent gainStormCharges(int amount, int maxCharges) {
-		return new ParryComponent(true, Math.clamp(Math.max(0, parrySuccession) + Math.max(0, amount), 0, Math.max(0, maxCharges)));
+		return new ParryComponent(true, net.minecraft.util.math.MathHelper.clamp(Math.max(0, parrySuccession) + Math.max(0, amount), 0, Math.max(0, maxCharges)));
 	}
 
 	public ParryComponent gainBlockedStormCharges(int amount, int maxCharges) {
-		return new ParryComponent(false, Math.clamp(Math.max(0, parrySuccession) + Math.max(0, amount), 0, Math.max(0, maxCharges)));
+		return new ParryComponent(false, net.minecraft.util.math.MathHelper.clamp(Math.max(0, parrySuccession) + Math.max(0, amount), 0, Math.max(0, maxCharges)));
 	}
 
 	public ParryComponent consumeStormCharge() {
@@ -40,12 +37,5 @@ public record ParryComponent(boolean parried, int parrySuccession) {
 					Codec.INT.fieldOf("succession").forGetter(ParryComponent::parrySuccession)
 			).apply(instance, ParryComponent::new));
 
-	public static PacketCodec<RegistryByteBuf, ParryComponent> PACKET_CODEC = PacketCodec.tuple(
-			PacketCodecs.BOOL,
-			ParryComponent::parried,
-			PacketCodecs.INTEGER,
-			ParryComponent::parrySuccession,
-			ParryComponent::new
-	);
 
 }

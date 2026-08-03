@@ -7,7 +7,6 @@ import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.text.Text;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
@@ -27,13 +26,14 @@ public class VerdantTrailPower extends NetherGemPower {
 
     @Override
     public void inventoryTick(ItemStack stack, World world, LivingEntity user, int slot, boolean selected) {
-        if (!world.isClient && user instanceof LivingEntity livingUser) {
+        if (!world.isClient) {
+            LivingEntity livingUser = user;
             VerdantTrailManager.tryPlaceTrail(livingUser, stack);
         }
     }
 
     @Override
-    public void appendTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Text> tooltip, TooltipType type, boolean isRunic) {
+    public void appendTooltip(ItemStack itemStack, net.minecraft.world.World world, List<Text> tooltip, net.minecraft.client.item.TooltipContext tooltipContext, boolean isRunic) {
         tooltip.add(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.verdant_trail").setStyle(Styles.NETHERFUSED));
 
         if (TooltipUtils.shouldDisplayTooltip(itemStack, null)) {

@@ -9,11 +9,10 @@ public class ResilienceEffect extends StatusEffect {
         super (statusEffectCategory, color);
     }
     @Override
-    public boolean applyUpdateEffect(LivingEntity pLivingEntity, int pAmplifier) {
+    public void applyUpdateEffect(LivingEntity pLivingEntity, int pAmplifier) {
 
         super.applyUpdateEffect(pLivingEntity, pAmplifier);
 
-        return true;
     }
 
     @Override

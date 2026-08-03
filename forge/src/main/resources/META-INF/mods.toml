@@ -1,0 +1,56 @@
+modLoader = "javafml"
+loaderVersion = "[47,)"
+issueTrackerURL = "https://github.com/Sweenus/SimplySwords/issues"
+license = "Timefall Development License"
+
+[[mixins]]
+config = "simplyswords.mixins.json"
+[[mixins]]
+config = "simplyswords-common.mixins.json"
+
+[[mods]]
+modId = "simplyswords"
+version = "${version}"
+displayName = "Simply Swords"
+authors = "Sweenus"
+credits="Konsyliarz42 (Art), KreloX (Contributor), Fzzyhmstrs (Contributor), RosemaryThyme (Contributor), DestrSpirit (Contributor)"
+description = '''
+A variety of unique weapons to add to your minecraft repertoire
+'''
+logoFile = "icon.png"
+modProperties={fzzy_config="simplyswords:loot"}
+
+[[dependencies.simplyswords]]
+modId = "forge"
+mandatory = true
+versionRange = "[47,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.simplyswords]]
+modId = "minecraft"
+mandatory = true
+versionRange = "[1.20.1, 1.20.2)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.simplyswords]]
+modId = "architectury"
+mandatory = true
+versionRange = "[9.2.14,)"
+ordering = "AFTER"
+side = "BOTH"
+
+[[dependencies.simplyswords]]
+modId = "fzzy_config"
+mandatory = true
+versionRange = "[0.6.6,)"
+ordering = "AFTER"
+side = "BOTH"
+
+[[dependencies.simplyswords]]
+modId = "simplytooltips"
+mandatory = true
+versionRange = "[0.1,)"
+ordering = "NONE"
+side = "CLIENT"

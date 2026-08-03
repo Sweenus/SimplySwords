@@ -8,7 +8,6 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
-import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
@@ -47,7 +46,7 @@ public class StormsEdgeSwordItem extends UniqueSwordItem implements UniqueWeapon
             return super.postHit(stack, target, attacker);
         }
 
-        int refreshChance = Math.clamp(Config.uniqueEffects.storms_edge.chance, 0, 100);
+        int refreshChance = net.minecraft.util.math.MathHelper.clamp(Config.uniqueEffects.storms_edge.chance, 0, 100);
         if (refreshChance <= 0 || attacker.getRandom().nextInt(100) >= refreshChance) {
             return super.postHit(stack, target, attacker);
         }
@@ -117,7 +116,7 @@ public class StormsEdgeSwordItem extends UniqueSwordItem implements UniqueWeapon
     }
 
     @Override
-    public void appendTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
+    public void appendTooltip(ItemStack itemStack, net.minecraft.world.World world, List<Text> tooltip, net.minecraft.client.item.TooltipContext tooltipContext) {
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.stormsedgesworditem.tooltip1").setStyle(Styles.ABILITY));
         tooltip.add(Text.translatable("item.simplyswords.stormsedgesworditem.tooltip2").setStyle(Styles.TEXT));
@@ -126,7 +125,7 @@ public class StormsEdgeSwordItem extends UniqueSwordItem implements UniqueWeapon
         tooltip.add(Text.translatable("item.simplyswords.stormsedgesworditem.tooltip3").setStyle(Styles.TEXT));
         appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.storms_edge.cooldown);
 
-        super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        super.appendTooltip(itemStack, world, tooltip, tooltipContext);
         TooltipUtils.appendSpellScaleTooltip(tooltip, "lightning");
     }
 

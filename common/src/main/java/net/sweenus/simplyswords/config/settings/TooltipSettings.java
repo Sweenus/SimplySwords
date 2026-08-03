@@ -2,10 +2,7 @@ package net.sweenus.simplyswords.config.settings;
 
 import me.fzzyhmstrs.fzzy_config.util.Translatable;
 import me.fzzyhmstrs.fzzy_config.util.Walkable;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.tooltip.TooltipAppender;
-import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
@@ -19,7 +16,7 @@ import java.util.function.Supplier;
  */
 public class TooltipSettings implements Translatable, Walkable {
 
-	public TooltipSettings(@Nullable Supplier<? extends TooltipAppender> appender) {
+	public TooltipSettings(@Nullable Supplier<? extends TooltipProvider> appender) {
 		this.appender = appender;
 	}
 
@@ -28,11 +25,11 @@ public class TooltipSettings implements Translatable, Walkable {
 	}
 
 	public TooltipSettings() {
-		this((Supplier<? extends TooltipAppender>) null);
+		this((Supplier<? extends TooltipProvider>) null);
 	}
 
 	@Nullable
-	Supplier<? extends TooltipAppender> appender;
+	Supplier<? extends TooltipProvider> appender;
 
 	@NotNull
 	@Override
@@ -58,13 +55,13 @@ public class TooltipSettings implements Translatable, Walkable {
 		//System.out.println("description");
 		if (appender == null) return Text.empty();
 		final MutableText[] desc = {null};
-		appender.get().appendTooltip(Item.TooltipContext.DEFAULT, (text) -> {
+		appender.get().appendTooltip((text) -> {
 			if (desc[0] == null) {
 				desc[0] = text.copy();
 			} else {
 				desc[0].append(Text.literal("\n")).append(text);
 			}
-		}, TooltipType.BASIC);
+		});
 		return desc[0];
 	}
 
@@ -79,11 +76,11 @@ public class TooltipSettings implements Translatable, Walkable {
 		return appender != null;
 	}
 
-	private static record ItemStackAppender(ItemStack stack) implements TooltipAppender {
+	private static record ItemStackAppender(ItemStack stack) implements TooltipProvider {
 
 		@Override
-		public void appendTooltip(Item.TooltipContext context, Consumer<Text> tooltip, TooltipType type) {
-			stack.getTooltip(context, null, type).forEach(tooltip);
+		public void appendTooltip(Consumer<Text> tooltip) {
+			stack.getTooltip(null, net.minecraft.client.item.TooltipContext.BASIC).forEach(tooltip);
 		}
 	}
 }

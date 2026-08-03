@@ -197,7 +197,7 @@ public class LivyatanEntity extends ThrownSwordEntity {
     public void readCustomDataFromNbt(NbtCompound nbt) {
         super.readCustomDataFromNbt(nbt);
         if ((this.stack == null || this.stack.isEmpty()) && nbt.contains("item")) {
-            this.stack = ItemStack.fromNbt(this.getRegistryManager(), nbt.getCompound("item")).orElse(this.getDefaultItemStack());
+            this.stack = ItemStack.fromNbt(nbt.getCompound("item"));
         }
     }
 

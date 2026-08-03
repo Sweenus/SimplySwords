@@ -16,11 +16,11 @@ import net.minecraft.util.math.RotationAxis;
 
 public class ShoulderAxolotlFeatureRenderer extends FeatureRenderer<AbstractClientPlayerEntity, PlayerEntityModel<AbstractClientPlayerEntity>> {
 
-    private static final Identifier WILD_AXOLOTL_TEXTURE = Identifier.of("minecraft", "textures/entity/axolotl/axolotl_wild.png");
-    private static final Identifier LUCY_AXOLOTL_TEXTURE = Identifier.of("minecraft", "textures/entity/axolotl/axolotl_lucy.png");
-    private static final Identifier GOLD_AXOLOTL_TEXTURE = Identifier.of("minecraft", "textures/entity/axolotl/axolotl_gold.png");
-    private static final Identifier CYAN_AXOLOTL_TEXTURE = Identifier.of("minecraft", "textures/entity/axolotl/axolotl_cyan.png");
-    private static final Identifier BLUE_AXOLOTL_TEXTURE = Identifier.of("minecraft", "textures/entity/axolotl/axolotl_blue.png");
+    private static final Identifier WILD_AXOLOTL_TEXTURE = new Identifier("minecraft", "textures/entity/axolotl/axolotl_wild.png");
+    private static final Identifier LUCY_AXOLOTL_TEXTURE = new Identifier("minecraft", "textures/entity/axolotl/axolotl_lucy.png");
+    private static final Identifier GOLD_AXOLOTL_TEXTURE = new Identifier("minecraft", "textures/entity/axolotl/axolotl_gold.png");
+    private static final Identifier CYAN_AXOLOTL_TEXTURE = new Identifier("minecraft", "textures/entity/axolotl/axolotl_cyan.png");
+    private static final Identifier BLUE_AXOLOTL_TEXTURE = new Identifier("minecraft", "textures/entity/axolotl/axolotl_blue.png");
 
     private final ModelPart axolotlModel;
 

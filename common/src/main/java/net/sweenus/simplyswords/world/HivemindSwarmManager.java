@@ -342,7 +342,7 @@ public final class HivemindSwarmManager {
 
         double remainingDistance = Math.sqrt(bee.getPos().squaredDistanceTo(destination));
         double progress = 1.0 - remainingDistance / totalDistance;
-        progress = Math.clamp(progress, 0.0, 1.0);
+        progress = net.minecraft.util.math.MathHelper.clamp(progress, 0.0, 1.0);
         double ease = Math.sin(progress * Math.PI);
         return ATTACK_PASS_MIN_SPEED + (ATTACK_PASS_MAX_SPEED - ATTACK_PASS_MIN_SPEED) * ease;
     }
@@ -441,7 +441,7 @@ public final class HivemindSwarmManager {
             if (!(entity instanceof LivingEntity target) || !target.isAlive()) {
                 continue;
             }
-            int amplifier = Math.clamp(beeCount - 1, 0, Math.max(0, Config.uniqueEffects.hiveheart.maxSlowAmplifier));
+            int amplifier = net.minecraft.util.math.MathHelper.clamp(beeCount - 1, 0, Math.max(0, Config.uniqueEffects.hiveheart.maxSlowAmplifier));
             target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 12, amplifier, false, false, true));
         }
     }

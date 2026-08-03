@@ -1,7 +1,9 @@
 package net.sweenus.simplyswords.entity;
 
 import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityGroup;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
@@ -62,27 +64,26 @@ public class ThrownSpearEntity extends PersistentProjectileEntity {
 
     // Constructor for owner and item stack
     public ThrownSpearEntity(World world, LivingEntity owner, ItemStack stack) {
-        super(EntityRegistry.SPEAR.get(), owner, world, stack, (ItemStack) null);
-        this.dataTracker.set(LOYALTY, getLoyalty());
+        super(EntityRegistry.SPEAR.get(), owner, world);
+        this.stack = stack;
         this.dataTracker.set(ENCHANTED, stack.hasEnchantments());
         this.dataTracker.set(ITEM_STACK, stack);
+        this.dataTracker.set(LOYALTY, getLoyalty());
 
-        this.pickupType = owner instanceof PlayerEntity && owner.isInCreativeMode() ?
+        this.pickupType = owner instanceof PlayerEntity player && player.isCreative() ?
                 PickupPermission.CREATIVE_ONLY :
                 PickupPermission.ALLOWED;
 
-        this.stack = stack;
     }
 
     @Override
-    protected void initDataTracker(DataTracker.Builder builder) {
-        super.initDataTracker(builder);
-        builder.add(LOYALTY, (byte)0);
-        builder.add(ENCHANTED, false);
-        builder.add(ITEM_STACK, ItemStack.EMPTY);
+    protected void initDataTracker() {
+        super.initDataTracker();
+        this.dataTracker.startTracking(LOYALTY, (byte)0);
+        this.dataTracker.startTracking(ENCHANTED, false);
+        this.dataTracker.startTracking(ITEM_STACK, ItemStack.EMPTY);
     }
 
-    @Override
     protected ItemStack getDefaultItemStack() {
         return new ItemStack(ItemsRegistry.LIVYATAN.get());
     }
@@ -184,7 +185,8 @@ public class ThrownSpearEntity extends PersistentProjectileEntity {
     }
 
     @Override
-    public void updateTrackedPositionAndAngles(double x, double y, double z, float yaw, float pitch, int interpolationSteps) {
+    public void updateTrackedPositionAndAngles(double x, double y, double z, float yaw, float pitch,
+                                               int interpolationSteps, boolean teleport) {
         // Update the position
         this.setPosition(x, y, z);
 
@@ -258,12 +260,12 @@ public class ThrownSpearEntity extends PersistentProjectileEntity {
                 return;
             }
 
-            if (world instanceof ServerWorld serverWorld) {
-                EnchantmentHelper.onTargetDamaged(serverWorld, entity, damageSource, stack);
+            if (this.getOwner() instanceof LivingEntity livingOwner) {
+                EnchantmentHelper.onTargetDamaged(livingOwner, entity);
             }
 
             if (entity instanceof LivingEntity livingEntity) {
-                this.knockback(livingEntity, damageSource);
+                this.applyKnockback(livingEntity);
                 this.onHit(livingEntity);
                 // Get the ItemStack and call postHit if it's defined on the associated Item
                 if (stack != null &&  !stack.isEmpty() && this.getOwner() instanceof LivingEntity livingOwner) {
@@ -288,7 +290,8 @@ public class ThrownSpearEntity extends PersistentProjectileEntity {
         float agedDamage = baseDamage + ((float) age / 2);
         World world = this.getWorld();
         if (world instanceof ServerWorld serverWorld) {
-            agedDamage = EnchantmentHelper.getDamage(serverWorld, stack, entity, damageSource, agedDamage);
+            agedDamage += EnchantmentHelper.getAttackDamage(stack,
+                    entity instanceof LivingEntity living ? living.getGroup() : EntityGroup.DEFAULT);
             doEffects(serverWorld, baseDamage, entity);
         }
         if (this.getOwner() instanceof LivingEntity livingOwner) {
@@ -311,9 +314,9 @@ public class ThrownSpearEntity extends PersistentProjectileEntity {
         super.readCustomDataFromNbt(nbt);
         this.dealtDamage = nbt.getBoolean("DealtDamage");
         this.dataTracker.set(LOYALTY, this.getLoyalty());
-        if (nbt.contains("Stack")) {
+        if (nbt.contains("item")) {
+            this.stack = ItemStack.fromNbt(nbt.getCompound("item"));
             this.dataTracker.set(ITEM_STACK, this.stack);
-            this.stack = ItemStack.fromNbt(this.getRegistryManager(), nbt.getCompound("item")).orElse(this.getDefaultItemStack());
         } else {
             this.stack = ItemStack.EMPTY;
         }
@@ -326,7 +329,7 @@ public class ThrownSpearEntity extends PersistentProjectileEntity {
         super.writeCustomDataToNbt(nbt);
         nbt.putBoolean("DealtDamage", this.dealtDamage);
         if (!this.stack.isEmpty())
-            nbt.put("item", this.stack.encode(this.getRegistryManager()));
+            nbt.put("item", this.stack.writeNbt(new NbtCompound()));
     }
 
 
@@ -339,7 +342,6 @@ public class ThrownSpearEntity extends PersistentProjectileEntity {
         }
     }
 
-    @Override
     public ItemStack getItemStack() {
         //System.out.println("ThrownSwordEntity: getItemStack called, stack = " + this.stack);
         return this.dataTracker.get(ITEM_STACK);
@@ -347,6 +349,19 @@ public class ThrownSpearEntity extends PersistentProjectileEntity {
 
     public ItemStack getWeaponStack() {
         return this.getItemStack();
+    }
+
+    @Override
+    protected ItemStack asItemStack() {
+        return this.getItemStack().copy();
+    }
+
+    private void applyKnockback(LivingEntity target) {
+        int level = EnchantmentHelper.getLevel(Enchantments.KNOCKBACK, this.stack);
+        if (level > 0) {
+            target.takeKnockback(level * 0.5F,
+                    this.getX() - target.getX(), this.getZ() - target.getZ());
+        }
     }
 
 

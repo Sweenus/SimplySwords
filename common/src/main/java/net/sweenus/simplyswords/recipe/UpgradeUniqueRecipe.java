@@ -1,116 +1,82 @@
-
 package net.sweenus.simplyswords.recipe;
 
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.MapCodec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.google.gson.JsonObject;
+import net.minecraft.inventory.RecipeInputInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.recipe.RecipeSerializer;
 import net.minecraft.recipe.ShapedRecipe;
 import net.minecraft.recipe.book.CraftingRecipeCategory;
-import net.minecraft.recipe.input.CraftingRecipeInput;
-import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.registry.DynamicRegistryManager;
+import net.minecraft.registry.Registries;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.JsonHelper;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.registry.RecipeTypeRegistry;
 
 public class UpgradeUniqueRecipe extends ShapedRecipe {
-    private final int upgradableItemSlot;
-    private final ItemStack result;
     private final RawUpgradableRecipe raw;
+    private final ItemStack result;
 
-    public UpgradeUniqueRecipe(String group, CraftingRecipeCategory category, RawUpgradableRecipe raw, ItemStack result, boolean showNotification) {
-        super(group, category, null, result, showNotification);
+    public UpgradeUniqueRecipe(Identifier id, String group, CraftingRecipeCategory category,
+                               RawUpgradableRecipe raw, ItemStack result, boolean showNotification) {
+        super(id, group, category, raw.getWidth(), raw.getHeight(), raw.getIngredients(), result, showNotification);
         this.raw = raw;
         this.result = result;
-        this.upgradableItemSlot = raw.getUpgradableItemSlot();
     }
 
+    @Override public boolean matches(RecipeInputInventory input, World world) { return raw.matches(input); }
+
     @Override
-    public boolean fits(int width, int height) {
-        return width >= this.raw.getWidth() && height >= this.raw.getHeight();
+    public ItemStack craft(RecipeInputInventory input, DynamicRegistryManager registryManager) {
+        int slot = raw.getUpgradableItemSlot();
+        if (raw.isMirrored()) {
+            int x = slot % raw.getWidth();
+            int y = slot / raw.getWidth();
+            slot = y * raw.getWidth() + raw.getWidth() - 1 - x;
+        }
+        ItemStack output = result.copy();
+        ItemStack source = input.getStack(slot);
+        if (source.hasNbt()) output.setNbt(source.getNbt().copy());
+        return output;
     }
 
-    @Override
-    public DefaultedList<Ingredient> getIngredients() {
-        return this.raw.getIngredients();
-    }
+    @Override public RecipeSerializer<?> getSerializer() { return RecipeTypeRegistry.UNIQUE_UPGRADE.get(); }
 
-    @Override
-    public int getHeight() {
-        return this.raw.getHeight();
-    }
-
-    @Override
-    public int getWidth() {
-        return this.raw.getWidth();
-    }
-
-    @Override
-    public boolean matches(CraftingRecipeInput craftingRecipeInput, World world) {
-        return raw.matches(craftingRecipeInput);
-    }
-
-    @Override
-    public ItemStack craft(CraftingRecipeInput craftingRecipeInput, RegistryWrapper.WrapperLookup wrapperLookup) {
-        int slot = upgradableItemSlot;
-        if(raw.isMirrored()) {
-            int width = getWidth();
-            int x = slot % width;
-            int y = slot / width;
-
-            slot = (y * width) + (width - 1 - x);
+    public static final class Serializer implements RecipeSerializer<UpgradeUniqueRecipe> {
+        @Override
+        public UpgradeUniqueRecipe read(Identifier id, JsonObject json) {
+            String group = JsonHelper.getString(json, "group", "");
+            CraftingRecipeCategory category = CraftingRecipeCategory.CODEC
+                    .parse(com.mojang.serialization.JsonOps.INSTANCE,
+                            json.has("category") ? json.get("category") : new com.google.gson.JsonPrimitive("misc"))
+                    .result().orElse(CraftingRecipeCategory.MISC);
+            RawUpgradableRecipe raw = RawUpgradableRecipe.fromJson(JsonHelper.getObject(json, "raw"));
+            JsonObject resultJson = JsonHelper.getObject(json, "result");
+            String itemId = JsonHelper.getString(resultJson, resultJson.has("id") ? "id" : "item");
+            ItemStack result = new ItemStack(Registries.ITEM.get(new Identifier(itemId)),
+                    JsonHelper.getInt(resultJson, "count", 1));
+            return new UpgradeUniqueRecipe(id, group, category, raw, result,
+                    JsonHelper.getBoolean(json, "show_notification", true));
         }
 
-        ItemStack result = this.result.copy();
-        result.applyComponentsFrom(craftingRecipeInput.getStackInSlot(slot).getComponents());
-
-        return result;
-    }
-
-    @Override
-    public RecipeSerializer<?> getSerializer() {return RecipeTypeRegistry.UNIQUE_UPGRADE.get();}
-
-    public static class Serializer implements RecipeSerializer<UpgradeUniqueRecipe> {
-
-        public static final MapCodec<UpgradeUniqueRecipe> CODEC = RecordCodecBuilder.mapCodec((instance) -> instance.group(
-                Codec.STRING.optionalFieldOf("group", "").forGetter(ShapedRecipe::getGroup),
-                CraftingRecipeCategory.CODEC.fieldOf("category").orElse(CraftingRecipeCategory.MISC).forGetter(ShapedRecipe::getCategory),
-                RawUpgradableRecipe.CODEC.forGetter((recipe) -> recipe.raw),
-                ItemStack.VALIDATED_CODEC.fieldOf("result").forGetter((recipe) -> recipe.result),
-                Codec.BOOL.optionalFieldOf("show_notification", true).forGetter(ShapedRecipe::showNotification)
-        ).apply(instance, UpgradeUniqueRecipe::new));
-
-        public static final PacketCodec<RegistryByteBuf, UpgradeUniqueRecipe> PACKET_CODEC = PacketCodec.ofStatic(UpgradeUniqueRecipe.Serializer::write, UpgradeUniqueRecipe.Serializer::read);
-
-        public Serializer() {
+        @Override
+        public UpgradeUniqueRecipe read(Identifier id, PacketByteBuf buf) {
+            String group = buf.readString();
+            CraftingRecipeCategory category = buf.readEnumConstant(CraftingRecipeCategory.class);
+            RawUpgradableRecipe raw = RawUpgradableRecipe.read(buf);
+            ItemStack result = buf.readItemStack();
+            return new UpgradeUniqueRecipe(id, group, category, raw, result, buf.readBoolean());
         }
 
-        public MapCodec<UpgradeUniqueRecipe> codec() {
-            return CODEC;
-        }
-
-        public PacketCodec<RegistryByteBuf, UpgradeUniqueRecipe> packetCodec() {
-            return PACKET_CODEC;
-        }
-
-        private static UpgradeUniqueRecipe read(RegistryByteBuf buf) {
-            String string = buf.readString();
-            CraftingRecipeCategory craftingRecipeCategory = buf.readEnumConstant(CraftingRecipeCategory.class);
-            RawUpgradableRecipe rawShapedRecipe = RawUpgradableRecipe.PACKET_CODEC.decode(buf);
-            ItemStack itemStack = ItemStack.PACKET_CODEC.decode(buf);
-            boolean bl = buf.readBoolean();
-            return new UpgradeUniqueRecipe(string, craftingRecipeCategory, rawShapedRecipe, itemStack, bl);
-        }
-
-        private static void write(RegistryByteBuf buf, UpgradeUniqueRecipe recipe) {
+        @Override
+        public void write(PacketByteBuf buf, UpgradeUniqueRecipe recipe) {
             buf.writeString(recipe.getGroup());
             buf.writeEnumConstant(recipe.getCategory());
-            RawUpgradableRecipe.PACKET_CODEC.encode(buf, recipe.raw);
-            ItemStack.PACKET_CODEC.encode(buf, recipe.result);
+            recipe.raw.write(buf);
+            buf.writeItemStack(recipe.result);
             buf.writeBoolean(recipe.showNotification());
         }
     }

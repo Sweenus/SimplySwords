@@ -146,6 +146,6 @@ public class MagispearFallingSpearVisualEntityRenderer
     private static void vertex(VertexConsumer vertices, Matrix4f matrix, Vec3d pos,
                                int red, int green, int blue, int alpha, int light) {
         vertices.vertex(matrix, (float) pos.x, (float) pos.y, (float) pos.z)
-                .color(red, green, blue, alpha).light(light);
+                .color(red, green, blue, alpha).light(light).next();
     }
 }

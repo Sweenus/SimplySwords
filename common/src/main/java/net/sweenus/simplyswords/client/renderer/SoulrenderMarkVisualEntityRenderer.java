@@ -20,7 +20,7 @@ import java.util.Map;
 
 public class SoulrenderMarkVisualEntityRenderer extends EntityRenderer<SoulrenderMarkVisualEntity> {
 
-    private static final Identifier VEX_TEXTURE = Identifier.ofVanilla("textures/entity/illager/vex.png");
+    private static final Identifier VEX_TEXTURE = new Identifier("minecraft", "textures/entity/illager/vex.png");
     private static final double RENDER_POSITION_SMOOTHING = 0.4;
     private static final float RENDER_YAW_SMOOTHING = 0.4F;
     private static final double MIN_MOTION_FOR_HEADING_SQ = 1.0E-5;

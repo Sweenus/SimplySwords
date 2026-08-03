@@ -140,23 +140,22 @@ public class RunicForgeScreenHandler extends ScreenHandler {
     private void extractWeaponContents(ItemStack weapon) {
         boolean awakenable = AwakeningApi.usesAwakeningProgression(weapon);
         int level = awakenable ? AwakeningApi.getLevel(weapon) : 0;
-        GemPowerComponent gems = weapon.getOrDefault(
-                ComponentTypeRegistry.GEM_POWER.get(), GemPowerComponent.DEFAULT);
+        GemPowerComponent gems = ComponentTypeRegistry.GEM_POWER.getOrDefault(weapon, GemPowerComponent.DEFAULT);
         for (int i = 0; i < TABLET_COUNT; i++) {
             forgeInventory.setStack(TABLET_START + i,
                     i < level ? new ItemStack(ItemsRegistry.RUNIC_TABLET.get()) : ItemStack.EMPTY);
         }
         if (gems.hasRunicSlotFilled()) {
             ItemStack runic = new ItemStack(ItemsRegistry.RUNEFUSED_GEM.get());
-            runic.set(ComponentTypeRegistry.GEM_POWER.get(), GemPowerComponent.runic(gems.runicPower()));
+            ComponentTypeRegistry.GEM_POWER.set(runic, GemPowerComponent.runic(gems.runicPower()));
             forgeInventory.setStack(RUNIC_GEM_SLOT, runic);
         }
         if (gems.hasNetherSlotFilled()) {
             ItemStack nether = new ItemStack(ItemsRegistry.NETHERFUSED_GEM.get());
-            nether.set(ComponentTypeRegistry.GEM_POWER.get(), GemPowerComponent.nether(gems.netherPower()));
+            ComponentTypeRegistry.GEM_POWER.set(nether, GemPowerComponent.nether(gems.netherPower()));
             forgeInventory.setStack(NETHER_GEM_SLOT, nether);
         }
-        weapon.set(ComponentTypeRegistry.GEM_POWER.get(),
+        ComponentTypeRegistry.GEM_POWER.set(weapon,
                 GemPowerComponent.createEmpty(gems.hasRunicPower(), gems.hasNetherPower()));
         if (awakenable) {
             AwakeningApi.setLevel(weapon, 0);
@@ -174,6 +173,7 @@ public class RunicForgeScreenHandler extends ScreenHandler {
         boolean changed = false;
         committing = true;
         try {
+            refundExcessTablets();
             ItemStack preview = previewInventory.getStack(0);
             if (preview.isEmpty()) {
                 preview = buildConfiguredPreview(weapon);
@@ -212,6 +212,21 @@ public class RunicForgeScreenHandler extends ScreenHandler {
         sendContentUpdates();
     }
 
+    private void refundExcessTablets() {
+        boolean changed = false;
+        for (int i = TABLET_START; i < TABLET_START + TABLET_COUNT; i++) {
+            ItemStack tablets = forgeInventory.getStack(i);
+            if (tablets.isOf(ItemsRegistry.RUNIC_TABLET.get()) && tablets.getCount() > 1) {
+                ItemStack excess = tablets.split(tablets.getCount() - 1);
+                owner.getInventory().offerOrDrop(excess);
+                changed = true;
+            }
+        }
+        if (changed) {
+            forgeInventory.markDirty();
+        }
+    }
+
     private void refreshPreview() {
         if (owner.getWorld().isClient() || committing) return;
         ItemStack weapon = forgeInventory.getStack(WEAPON_SLOT);
@@ -248,13 +263,12 @@ public class RunicForgeScreenHandler extends ScreenHandler {
             }
         }
 
-        GemPowerComponent sockets = preview.getOrDefault(
-                ComponentTypeRegistry.GEM_POWER.get(), GemPowerComponent.DEFAULT);
+        GemPowerComponent sockets = ComponentTypeRegistry.GEM_POWER.getOrDefault(preview, GemPowerComponent.DEFAULT);
         GemPowerComponent runicGem = identifyGem(
                 forgeInventory.getStack(RUNIC_GEM_SLOT), PowerType.RUNEFUSED);
         GemPowerComponent netherGem = identifyGem(
                 forgeInventory.getStack(NETHER_GEM_SLOT), PowerType.NETHER);
-        preview.set(ComponentTypeRegistry.GEM_POWER.get(), new GemPowerComponent(
+        ComponentTypeRegistry.GEM_POWER.set(preview, new GemPowerComponent(
                 sockets.hasRunicPower(),
                 sockets.hasNetherPower(),
                 sockets.hasRunicPower() && runicGem.hasRunicSlotFilled()
@@ -280,12 +294,12 @@ public class RunicForgeScreenHandler extends ScreenHandler {
 
     private GemPowerComponent identifyGem(ItemStack stack, PowerType type) {
         if (stack.isEmpty()) return GemPowerComponent.DEFAULT;
-        GemPowerComponent component = stack.get(ComponentTypeRegistry.GEM_POWER.get());
+        GemPowerComponent component = ComponentTypeRegistry.GEM_POWER.get(stack);
         if (component != null && !component.isEmpty()) return component;
         GemPowerComponent identified = type == PowerType.NETHER
                 ? GemPowerComponent.nether(GemPowerRegistry.gemRandomPower(PowerType.NETHER))
                 : GemPowerComponent.runic(GemPowerRegistry.gemRandomPower(PowerType.RUNEFUSED));
-        stack.set(ComponentTypeRegistry.GEM_POWER.get(), identified);
+        ComponentTypeRegistry.GEM_POWER.set(stack, identified);
         return identified;
     }
 
@@ -312,7 +326,7 @@ public class RunicForgeScreenHandler extends ScreenHandler {
         ItemStack previousWeapon = previousStacks[WEAPON_SLOT];
         ItemStack currentWeapon = forgeInventory.getStack(WEAPON_SLOT);
         if (previousWeapon.isEmpty() && !currentWeapon.isEmpty()) {
-            playForgeSound(player, SoundEvents.ITEM_ARMOR_EQUIP_IRON.value(), 0.7F, 0.9F);
+            playForgeSound(player, SoundEvents.ITEM_ARMOR_EQUIP_IRON, 0.7F, 0.9F);
             return;
         }
         if (!previousWeapon.isEmpty() && currentWeapon.isEmpty()) {
@@ -347,7 +361,7 @@ public class RunicForgeScreenHandler extends ScreenHandler {
 
     private static void playForgeSound(ServerPlayerEntity player, SoundEvent sound,
                                        float volume, float pitch) {
-        player.playSoundToPlayer(sound, SoundCategory.BLOCKS, volume, pitch);
+        player.playSound(sound, SoundCategory.BLOCKS, volume, pitch);
     }
 
     @Override
@@ -381,11 +395,26 @@ public class RunicForgeScreenHandler extends ScreenHandler {
         } else if (slotIndex >= PLAYER_SLOT_START
                 && slotIndex < PLAYER_SLOT_END
                 && source.isOf(ItemsRegistry.RUNIC_TABLET.get())) {
-            if (!insertItem(source, TABLET_START, TABLET_START + TABLET_COUNT, false)) return ItemStack.EMPTY;
+            if (!insertRunicTablets(source)) return ItemStack.EMPTY;
         } else return ItemStack.EMPTY;
         if (source.isEmpty()) slot.setStack(ItemStack.EMPTY);
         else slot.markDirty();
         return copy;
+    }
+
+    private boolean insertRunicTablets(ItemStack source) {
+        boolean inserted = false;
+        for (int i = TABLET_START;
+             i < TABLET_START + TABLET_COUNT && !source.isEmpty();
+             i++) {
+            Slot tabletSlot = slots.get(i);
+            if (tabletSlot.hasStack() || !tabletSlot.canInsert(source)) {
+                continue;
+            }
+            tabletSlot.setStack(source.split(1));
+            inserted = true;
+        }
+        return inserted;
     }
 
     @Override
@@ -463,8 +492,7 @@ public class RunicForgeScreenHandler extends ScreenHandler {
     private boolean socketAvailable(boolean runic) {
         ItemStack weapon = forgeInventory.getStack(WEAPON_SLOT);
         if (weapon.isEmpty()) return false;
-        GemPowerComponent sockets = weapon.getOrDefault(
-                ComponentTypeRegistry.GEM_POWER.get(), GemPowerComponent.DEFAULT);
+        GemPowerComponent sockets = ComponentTypeRegistry.GEM_POWER.getOrDefault(weapon, GemPowerComponent.DEFAULT);
         return runic ? sockets.hasRunicPower() : sockets.hasNetherPower();
     }
 

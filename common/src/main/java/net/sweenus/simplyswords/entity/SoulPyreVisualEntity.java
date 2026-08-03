@@ -56,17 +56,17 @@ public class SoulPyreVisualEntity extends Entity {
     }
 
     @Override
-    protected void initDataTracker(DataTracker.Builder builder) {
-        builder.add(OWNER_ENTITY_ID, -1);
-        builder.add(RADIUS, 1.5F);
-        builder.add(MAX_RADIUS, 12.0F);
-        builder.add(VERTICAL_RANGE, 8.0F);
-        builder.add(SOUL_COUNT, 0);
-        builder.add(PULSE_COUNTER, 0);
-        builder.add(PULSE_START_AGE, -1000);
-        builder.add(PHASE, PHASE_ACTIVE);
-        builder.add(SEED, 0);
-        builder.add(LIFETIME, 180);
+    protected void initDataTracker() {
+        this.dataTracker.startTracking(OWNER_ENTITY_ID, -1);
+        this.dataTracker.startTracking(RADIUS, 1.5F);
+        this.dataTracker.startTracking(MAX_RADIUS, 12.0F);
+        this.dataTracker.startTracking(VERTICAL_RANGE, 8.0F);
+        this.dataTracker.startTracking(SOUL_COUNT, 0);
+        this.dataTracker.startTracking(PULSE_COUNTER, 0);
+        this.dataTracker.startTracking(PULSE_START_AGE, -1000);
+        this.dataTracker.startTracking(PHASE, PHASE_ACTIVE);
+        this.dataTracker.startTracking(SEED, 0);
+        this.dataTracker.startTracking(LIFETIME, 180);
     }
 
     @Override
@@ -140,7 +140,7 @@ public class SoulPyreVisualEntity extends Entity {
 
     public void setPhase(int phase) {
         this.dataTracker.set(PHASE,
-                Math.clamp(phase, PHASE_ACTIVE, PHASE_COLLAPSING));
+                net.minecraft.util.math.MathHelper.clamp(phase, PHASE_ACTIVE, PHASE_COLLAPSING));
     }
 
     public int getSeed() {

@@ -2,9 +2,6 @@ package net.sweenus.simplyswords.item.component;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
 
 public record MoltenHeatComponent(int heat, boolean venting, long ventStartedAt) {
 
@@ -18,18 +15,9 @@ public record MoltenHeatComponent(int heat, boolean venting, long ventStartedAt)
                     Codec.LONG.optionalFieldOf("vent_started_at", 0L).forGetter(MoltenHeatComponent::ventStartedAt)
             ).apply(instance, MoltenHeatComponent::new));
 
-    public static final PacketCodec<RegistryByteBuf, MoltenHeatComponent> PACKET_CODEC = PacketCodec.tuple(
-            PacketCodecs.INTEGER,
-            MoltenHeatComponent::heat,
-            PacketCodecs.BOOL,
-            MoltenHeatComponent::venting,
-            PacketCodecs.VAR_LONG,
-            MoltenHeatComponent::ventStartedAt,
-            MoltenHeatComponent::new
-    );
 
     public MoltenHeatComponent {
-        heat = Math.clamp(heat, 0, MAX_HEAT);
+        heat = net.minecraft.util.math.MathHelper.clamp(heat, 0, MAX_HEAT);
         if (heat <= 0) {
             venting = false;
         }
@@ -42,7 +30,7 @@ public record MoltenHeatComponent(int heat, boolean venting, long ventStartedAt)
 
     public MoltenHeatComponent addHeat(int amount) {
         return new MoltenHeatComponent(
-                Math.clamp(this.heat + Math.max(0, amount), 0, MAX_HEAT),
+                net.minecraft.util.math.MathHelper.clamp(this.heat + Math.max(0, amount), 0, MAX_HEAT),
                 this.venting,
                 this.ventStartedAt
         );

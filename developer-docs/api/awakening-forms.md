@@ -130,7 +130,8 @@ AwakeningFormHandler handler = new AwakeningFormHandler() {
 A stage may reference:
 
 - the base item, changing only presentation and model value; or
-- another registered item, replacing the stack while copying components.
+- another registered item, replacing the stack while copying its persistent
+  Simply Swords stack state.
 
 Use `.alias(item)` for legacy or alternate items that belong to the family but
 do not appear directly as a stage. An item may belong to only one family.

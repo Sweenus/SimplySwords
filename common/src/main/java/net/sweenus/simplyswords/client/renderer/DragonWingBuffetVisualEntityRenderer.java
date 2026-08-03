@@ -23,7 +23,7 @@ import net.sweenus.simplyswords.entity.DragonWingBuffetVisualEntity;
 
 public class DragonWingBuffetVisualEntityRenderer extends EntityRenderer<DragonWingBuffetVisualEntity> {
 
-    private static final Identifier TEXTURE = Identifier.of("minecraft", "textures/entity/enderdragon/dragon.png");
+    private static final Identifier TEXTURE = new Identifier("minecraft", "textures/entity/enderdragon/dragon.png");
     private static final float MODEL_BACK_OFFSET = 0.35F;
     private static final float MODEL_VERTICAL_OFFSET = -6.7F;
     private final WingModel model;
@@ -119,7 +119,7 @@ public class DragonWingBuffetVisualEntityRenderer extends EntityRenderer<DragonW
 
         private void render(MatrixStack matrices, VertexConsumer vertices, int light, int alpha,
                             float wingPitch, float wingYaw, float wingRoll, float tipRoll) {
-            int color = alpha << 24 | 0xFFFFFF;
+            float opacity = alpha / 255.0F;
 
             this.leftWing.pitch = wingPitch;
             this.leftWing.yaw = wingYaw;
@@ -127,7 +127,8 @@ public class DragonWingBuffetVisualEntityRenderer extends EntityRenderer<DragonW
             this.leftWingTip.pitch = 0.0F;
             this.leftWingTip.yaw = 0.0F;
             this.leftWingTip.roll = tipRoll;
-            this.leftWing.render(matrices, vertices, light, OverlayTexture.DEFAULT_UV, color);
+            this.leftWing.render(matrices, vertices, light, OverlayTexture.DEFAULT_UV,
+                    1.0F, 1.0F, 1.0F, opacity);
 
             this.rightWing.pitch = wingPitch;
             this.rightWing.yaw = -wingYaw;
@@ -135,7 +136,8 @@ public class DragonWingBuffetVisualEntityRenderer extends EntityRenderer<DragonW
             this.rightWingTip.pitch = 0.0F;
             this.rightWingTip.yaw = 0.0F;
             this.rightWingTip.roll = -tipRoll;
-            this.rightWing.render(matrices, vertices, light, OverlayTexture.DEFAULT_UV, color);
+            this.rightWing.render(matrices, vertices, light, OverlayTexture.DEFAULT_UV,
+                    1.0F, 1.0F, 1.0F, opacity);
         }
     }
 }

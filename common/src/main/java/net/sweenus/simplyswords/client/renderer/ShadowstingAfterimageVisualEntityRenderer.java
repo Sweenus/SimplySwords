@@ -72,9 +72,9 @@ public class ShadowstingAfterimageVisualEntityRenderer extends EntityRenderer<Sh
                              float x3, float y3, float z3,
                              float x4, float y4, float z4,
                              int red, int green, int blue, int alpha) {
-        vertices.vertex(matrix, x1, y1, z1).color(red, green, blue, alpha);
-        vertices.vertex(matrix, x2, y2, z2).color(red, green, blue, alpha);
-        vertices.vertex(matrix, x3, y3, z3).color(red, green, blue, alpha);
-        vertices.vertex(matrix, x4, y4, z4).color(red, green, blue, alpha);
+        vertices.vertex(matrix, x1, y1, z1).color(red, green, blue, alpha).next();
+        vertices.vertex(matrix, x2, y2, z2).color(red, green, blue, alpha).next();
+        vertices.vertex(matrix, x3, y3, z3).color(red, green, blue, alpha).next();
+        vertices.vertex(matrix, x4, y4, z4).color(red, green, blue, alpha).next();
     }
 }

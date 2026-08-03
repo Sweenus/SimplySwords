@@ -11,7 +11,7 @@ import net.sweenus.simplyswords.entity.FallingSnifferEntity;
 
 public class FallingSnifferEntityRenderer extends MobEntityRenderer<FallingSnifferEntity, SnifferEntityModel<FallingSnifferEntity>> {
 
-    private static final Identifier TEXTURE = Identifier.of("minecraft", "textures/entity/sniffer/sniffer.png");
+    private static final Identifier TEXTURE = new Identifier("minecraft", "textures/entity/sniffer/sniffer.png");
 
     public FallingSnifferEntityRenderer(EntityRendererFactory.Context context) {
         super(context, new SnifferEntityModel<>(context.getPart(EntityModelLayers.SNIFFER)), 1.1F);
@@ -26,11 +26,7 @@ public class FallingSnifferEntityRenderer extends MobEntityRenderer<FallingSniff
     public void render(FallingSnifferEntity entity, float yaw, float tickDelta, MatrixStack matrices,
                        VertexConsumerProvider vertexConsumers, int light) {
         entity.forceFlatDiggingPose(tickDelta);
+        this.shadowRadius = entity.getWorld().isClient() && entity.isOnGround() ? 1.35F : 0.75F;
         super.render(entity, yaw, tickDelta, matrices, vertexConsumers, light);
-    }
-
-    @Override
-    protected float getShadowRadius(FallingSnifferEntity entity) {
-        return entity.getWorld().isClient() && entity.isOnGround() ? 1.35F : 0.75F;
     }
 }

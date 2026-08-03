@@ -64,9 +64,9 @@ public class WhisperwindSlashVisualEntityRenderer extends EntityRenderer<Whisper
         Vec3d tailRight = tail.subtract(side);
         Vec3d headLeft = head.add(side);
         Vec3d headRight = head.subtract(side);
-        vertices.vertex(matrix, (float) tailLeft.x, (float) baseY, (float) tailLeft.z).color(red, green, blue, alpha);
-        vertices.vertex(matrix, (float) tailRight.x, (float) (baseY + height * 0.35), (float) tailRight.z).color(red, green, blue, alpha);
-        vertices.vertex(matrix, (float) headRight.x, (float) (baseY + height), (float) headRight.z).color(red, green, blue, alpha);
-        vertices.vertex(matrix, (float) headLeft.x, (float) (baseY + height * 0.62), (float) headLeft.z).color(red, green, blue, alpha);
+        vertices.vertex(matrix, (float) tailLeft.x, (float) baseY, (float) tailLeft.z).color(red, green, blue, alpha).next();
+        vertices.vertex(matrix, (float) tailRight.x, (float) (baseY + height * 0.35), (float) tailRight.z).color(red, green, blue, alpha).next();
+        vertices.vertex(matrix, (float) headRight.x, (float) (baseY + height), (float) headRight.z).color(red, green, blue, alpha).next();
+        vertices.vertex(matrix, (float) headLeft.x, (float) (baseY + height * 0.62), (float) headLeft.z).color(red, green, blue, alpha).next();
     }
 }

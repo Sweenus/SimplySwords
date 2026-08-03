@@ -592,7 +592,7 @@ public final class HearthflameAbilityManager {
     }
 
     private static boolean rollBrand(LivingEntity actor) {
-        int chance = Math.clamp(Config.uniqueEffects.hearthflame.chance, 0, 100);
+        int chance = net.minecraft.util.math.MathHelper.clamp(Config.uniqueEffects.hearthflame.chance, 0, 100);
         return chance > 0 && actor.getRandom().nextInt(100) < chance;
     }
 
@@ -838,7 +838,7 @@ public final class HearthflameAbilityManager {
 
     private static void spawnFinaleEffects(ServerWorld world, LivingEntity actor, float strength, boolean struckFinale) {
         float clamped = MathHelper.clamp(strength, 0.0F, 1.0F);
-        world.playSoundFromEntity(null, actor, SoundEvents.ITEM_MACE_SMASH_GROUND_HEAVY,
+        world.playSoundFromEntity(null, actor, SoundEvents.ENTITY_GENERIC_EXPLODE,
                 actor.getSoundCategory(), 1.4F, struckFinale ? 0.68F : 0.78F);
         world.playSoundFromEntity(null, actor, SoundEvents.BLOCK_ANVIL_LAND,
                 actor.getSoundCategory(), 1.2F, 0.55F);

@@ -16,7 +16,7 @@ public class CaelestisRiftlingRenderer
         extends MobEntityRenderer<CaelestisRiftlingEntity, CaelestisRiftlingModel> {
 
     private static final Identifier FALLBACK_TEXTURE =
-            Identifier.of("minecraft", "textures/entity/spider/spider.png");
+            new Identifier("minecraft", "textures/entity/spider/spider.png");
 
     public CaelestisRiftlingRenderer(EntityRendererFactory.Context context) {
         super(context, new CaelestisRiftlingModel(

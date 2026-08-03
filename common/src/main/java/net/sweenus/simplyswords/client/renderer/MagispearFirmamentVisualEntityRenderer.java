@@ -169,7 +169,7 @@ public class MagispearFirmamentVisualEntityRenderer
 
     private static void vertex(VertexConsumer vertices, Matrix4f matrix, float x, float y, float z,
                                int red, int green, int blue, int alpha, int light) {
-        vertices.vertex(matrix, x, y, z).color(red, green, blue, alpha).light(light);
+        vertices.vertex(matrix, x, y, z).color(red, green, blue, alpha).light(light).next();
     }
 
     private static int alpha(int base, float multiplier) {

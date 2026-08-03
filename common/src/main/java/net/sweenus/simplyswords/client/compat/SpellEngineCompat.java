@@ -36,7 +36,7 @@ public final class SpellEngineCompat {
             }
         }
         for (Hand hand : Hand.values()) {
-            if (ItemStack.areItemsAndComponentsEqual(client.player.getStackInHand(hand), stack)) {
+            if (ItemStack.areEqual(client.player.getStackInHand(hand), stack)) {
                 return hand;
             }
         }

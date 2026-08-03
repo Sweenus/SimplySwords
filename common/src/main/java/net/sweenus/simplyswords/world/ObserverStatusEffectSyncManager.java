@@ -3,7 +3,6 @@ package net.sweenus.simplyswords.world;
 import dev.architectury.event.EventResult;
 import dev.architectury.event.events.common.EntityEvent;
 import dev.architectury.event.events.common.PlayerEvent;
-import dev.architectury.networking.NetworkManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
@@ -31,7 +30,7 @@ public final class ObserverStatusEffectSyncManager {
         initialized = true;
 
         PlayerEvent.PLAYER_JOIN.register(ObserverStatusEffectSyncManager::sendSnapshot);
-        PlayerEvent.PLAYER_RESPAWN.register((player, conqueredEnd, removalReason) -> sendSnapshot(player));
+        PlayerEvent.PLAYER_RESPAWN.register((player, conqueredEnd) -> sendSnapshot(player));
         PlayerEvent.CHANGE_DIMENSION.register((player, oldLevel, newLevel) -> sendSnapshot(player));
         EntityEvent.ADD.register((entity, world) -> {
             if (entity instanceof LivingEntity livingEntity && world instanceof ServerWorld serverWorld) {
@@ -83,11 +82,11 @@ public final class ObserverStatusEffectSyncManager {
         }
         ServerWorld world = player.getServerWorld();
         List<ObserverStatusEffectsPacket.Entry> entries = collectWorldEntries(world);
-        NetworkManager.sendToPlayer(player, new ObserverStatusEffectsPacket(
+        new ObserverStatusEffectsPacket(
                 world.getRegistryKey().getValue(),
                 world.getTime(),
                 true,
-                entries));
+                entries).sendTo(player);
     }
 
     private static void syncEntity(ServerWorld world, LivingEntity entity) {
@@ -132,7 +131,7 @@ public final class ObserverStatusEffectSyncManager {
     }
 
     private static Identifier effectId(StatusEffectInstance instance) {
-        return instance == null ? null : Registries.STATUS_EFFECT.getId(instance.getEffectType().value());
+        return instance == null ? null : Registries.STATUS_EFFECT.getId(instance.getEffectType());
     }
 
     private static void sendToWorld(ServerWorld world, boolean replaceAll,
@@ -140,10 +139,10 @@ public final class ObserverStatusEffectSyncManager {
         if (world == null || entries == null || entries.isEmpty()) {
             return;
         }
-        NetworkManager.sendToPlayers(world.getPlayers(), new ObserverStatusEffectsPacket(
+        new ObserverStatusEffectsPacket(
                 world.getRegistryKey().getValue(),
                 world.getTime(),
                 replaceAll,
-                entries));
+                entries).sendTo(world.getPlayers());
     }
 }

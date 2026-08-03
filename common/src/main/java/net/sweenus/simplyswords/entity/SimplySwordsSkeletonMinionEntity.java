@@ -277,7 +277,7 @@ public class SimplySwordsSkeletonMinionEntity extends SkeletonEntity implements 
         if (!SimplySwordsAPI.canActivateWeaponAbility(context)) {
             return;
         }
-        int chance = Math.clamp(Config.gemPowers.necromanticArsenal.activeAbilityChance, 0, 100);
+        int chance = net.minecraft.util.math.MathHelper.clamp(Config.gemPowers.necromanticArsenal.activeAbilityChance, 0, 100);
         if (chance <= 0 || this.random.nextInt(100) >= chance) {
             return;
         }
@@ -373,6 +373,11 @@ public class SimplySwordsSkeletonMinionEntity extends SkeletonEntity implements 
     }
 
     @Override
+    public net.minecraft.world.EntityView method_48926() {
+        return this.getWorld();
+    }
+
+    @Override
     public LivingEntity getOwner() {
         if (this.ownerUuid == null) return null;
         if (this.getWorld() instanceof ServerWorld world) {
@@ -385,7 +390,7 @@ public class SimplySwordsSkeletonMinionEntity extends SkeletonEntity implements 
     }
 
     @Override
-    protected void dropEquipment(ServerWorld world, net.minecraft.entity.damage.DamageSource source, boolean causedByPlayer) {
+    protected void dropEquipment(DamageSource source, int lootingMultiplier, boolean causedByPlayer) {
     }
 
     @Override

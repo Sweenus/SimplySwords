@@ -40,13 +40,13 @@ public class WaxweaverWaxVisualEntity extends Entity {
     }
 
     @Override
-    protected void initDataTracker(DataTracker.Builder builder) {
-        builder.add(MODE, MODE_ENCASE);
-        builder.add(SOURCE_ID, -1);
-        builder.add(TARGET_ID, -1);
-        builder.add(RADIUS, 1.0F);
-        builder.add(LIFETIME, 10);
-        builder.add(SEED, 0);
+    protected void initDataTracker() {
+        this.dataTracker.startTracking(MODE, MODE_ENCASE);
+        this.dataTracker.startTracking(SOURCE_ID, -1);
+        this.dataTracker.startTracking(TARGET_ID, -1);
+        this.dataTracker.startTracking(RADIUS, 1.0F);
+        this.dataTracker.startTracking(LIFETIME, 10);
+        this.dataTracker.startTracking(SEED, 0);
     }
 
     @Override

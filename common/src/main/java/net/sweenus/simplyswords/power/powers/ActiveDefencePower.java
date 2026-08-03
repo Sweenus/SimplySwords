@@ -11,7 +11,6 @@ import net.minecraft.entity.projectile.ArrowEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.Box;
@@ -68,7 +67,7 @@ public class ActiveDefencePower extends RunefusedGemPower {
 	}
 
 	@Override
-	public void appendTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Text> tooltip, TooltipType type, boolean isRunic) {
+	public void appendTooltip(ItemStack itemStack, net.minecraft.world.World world, List<Text> tooltip, net.minecraft.client.item.TooltipContext tooltipContext, boolean isRunic) {
 		if (isRunic)
 			tooltip.add(Text.translatable("item.simplyswords.activedefencesworditem.tooltip1").setStyle(Styles.RUNIC));
 		else

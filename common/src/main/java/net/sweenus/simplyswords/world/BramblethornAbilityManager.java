@@ -465,7 +465,7 @@ public final class BramblethornAbilityManager {
             return point.squaredDistanceTo(start);
         }
         double projection = point.subtract(start).dotProduct(segment) / lengthSquared;
-        double t = Math.clamp(projection, 0.0, 1.0);
+        double t = net.minecraft.util.math.MathHelper.clamp(projection, 0.0, 1.0);
         return point.squaredDistanceTo(start.add(segment.multiply(t)));
     }
 
@@ -695,10 +695,6 @@ public final class BramblethornAbilityManager {
     }
 
     private static boolean isBrambleWeaponHit(DamageSource source, LivingEntity actor) {
-        ItemStack sourceStack = source.getWeaponStack();
-        if (sourceStack != null && sourceStack.isOf(ItemsRegistry.BRAMBLETHORN.get())) {
-            return true;
-        }
         return actor != null && (actor.getMainHandStack().isOf(ItemsRegistry.BRAMBLETHORN.get())
                 || actor.getOffHandStack().isOf(ItemsRegistry.BRAMBLETHORN.get()));
     }
@@ -716,7 +712,7 @@ public final class BramblethornAbilityManager {
                         && target.getPos().squaredDistanceTo(center) <= radius * radius));
         candidates.remove(anchorTarget);
         candidates.sort(Comparator.comparingDouble(target -> target.squaredDistanceTo(center)));
-        candidates.addFirst(anchorTarget);
+        candidates.add(0, anchorTarget);
         if (candidates.size() > maximum) {
             return new ArrayList<>(candidates.subList(0, maximum));
         }

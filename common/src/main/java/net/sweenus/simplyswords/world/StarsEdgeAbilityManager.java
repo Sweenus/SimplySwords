@@ -253,13 +253,13 @@ public final class StarsEdgeAbilityManager {
 
     private static boolean recordMovement(ServerWorld world, ActiveReprise active, Vec3d current) {
         double spacing = Math.max(0.25, Config.uniqueEffects.stars_edge.nodeSpacing);
-        int maxNodes = Math.clamp(Config.uniqueEffects.stars_edge.maxNodes, 2, 16);
-        RouteNode lastNode = active.nodes.getLast();
+        int maxNodes = net.minecraft.util.math.MathHelper.clamp(Config.uniqueEffects.stars_edge.maxNodes, 2, 16);
+        RouteNode lastNode = active.nodes.get(active.nodes.size() - 1);
         Vec3d remaining = current.subtract(lastNode.position);
         while (remaining.length() >= spacing && active.nodes.size() < maxNodes) {
             Vec3d next = lastNode.position.add(remaining.normalize().multiply(spacing));
             appendNode(world, active, next);
-            lastNode = active.nodes.getLast();
+            lastNode = active.nodes.get(active.nodes.size() - 1);
             remaining = current.subtract(lastNode.position);
         }
         return active.nodes.size() >= maxNodes;
@@ -268,8 +268,8 @@ public final class StarsEdgeAbilityManager {
     private static void sealCurrentEndpoint(ServerWorld world, LivingEntity actor, ActiveReprise active) {
         Vec3d current = actor.getPos();
         recordMovement(world, active, current);
-        int maxNodes = Math.clamp(Config.uniqueEffects.stars_edge.maxNodes, 2, 16);
-        if (active.nodes.size() < maxNodes && active.nodes.getLast().position.distanceTo(current) > 0.25) {
+        int maxNodes = net.minecraft.util.math.MathHelper.clamp(Config.uniqueEffects.stars_edge.maxNodes, 2, 16);
+        if (active.nodes.size() < maxNodes && active.nodes.get(active.nodes.size() - 1).position.distanceTo(current) > 0.25) {
             appendNode(world, active, current);
         }
     }
@@ -297,7 +297,7 @@ public final class StarsEdgeAbilityManager {
 
         UUID linkVisualId = null;
         if (!active.nodes.isEmpty()) {
-            Vec3d previous = active.nodes.getLast().position;
+            Vec3d previous = active.nodes.get(active.nodes.size() - 1).position;
             StarsEdgeConstellationVisualEntity linkVisual = StarsEdgeConstellationVisualEntity.link(
                     world, previous, position, visualLifetime());
             linkVisual.addCommandTag(VISUAL_TAG);
@@ -392,7 +392,7 @@ public final class StarsEdgeAbilityManager {
             double lineMidY = (bodyStart.y + bodyEnd.y) * 0.5;
             Vec3d targetCenter = new Vec3d(
                     target.getX(),
-                    Math.clamp(lineMidY, targetBox.minY, targetBox.maxY),
+                    net.minecraft.util.math.MathHelper.clamp(lineMidY, targetBox.minY, targetBox.maxY),
                     target.getZ());
             double targetRadius = Math.max(0.1, target.getWidth() * 0.5);
             double allowed = halfWidth + targetRadius;
@@ -427,7 +427,7 @@ public final class StarsEdgeAbilityManager {
             double lineMidY = (bodyStart.y + bodyEnd.y) * 0.5;
             Vec3d targetCenter = new Vec3d(
                     target.getX(),
-                    Math.clamp(lineMidY, targetBox.minY, targetBox.maxY),
+                    net.minecraft.util.math.MathHelper.clamp(lineMidY, targetBox.minY, targetBox.maxY),
                     target.getZ());
             double targetRadius = Math.max(0.1, target.getWidth() * 0.5);
             double allowed = radius + targetRadius;
@@ -504,7 +504,7 @@ public final class StarsEdgeAbilityManager {
             return point.squaredDistanceTo(start);
         }
         double projection = point.subtract(start).dotProduct(segment) / lengthSquared;
-        double t = Math.clamp(projection, 0.0, 1.0);
+        double t = net.minecraft.util.math.MathHelper.clamp(projection, 0.0, 1.0);
         return point.squaredDistanceTo(start.add(segment.multiply(t)));
     }
 
@@ -617,7 +617,7 @@ public final class StarsEdgeAbilityManager {
     }
 
     private static void spawnCompletionRing(ServerWorld world, ActiveReprise active, int age) {
-        Vec3d center = active.nodes.isEmpty() ? active.previousPosition : active.nodes.getFirst().position;
+        Vec3d center = active.nodes.isEmpty() ? active.previousPosition : active.nodes.get(0).position;
         double maximumRadius = 2.5;
         for (RouteNode node : active.nodes) {
             double dx = node.position.x - center.x;

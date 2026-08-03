@@ -47,7 +47,7 @@ public class AbilityMethods {
                                 le.getSoundCategory(), soundDistance, choose);
                         user.heal(healAmount);
                     }
-                    stack.apply(ComponentTypeRegistry.STORED_CHARGE.get(), StoredChargeComponent.DEFAULT, StoredChargeComponent::increment);
+                    ComponentTypeRegistry.STORED_CHARGE.apply(stack, StoredChargeComponent.DEFAULT, StoredChargeComponent::increment);
                     DamageSource damageSource = user.getDamageSources().indirectMagic(user, user);
                     float damage = world instanceof ServerWorld serverWorld
                             ? HelperMethods.applyAbilityDamageEnchantments(serverWorld, stack, le, damageSource, abilityDamage)

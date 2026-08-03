@@ -1,0 +1,40 @@
+{
+  "display": {
+    "icon": {
+      "item": "simplyswords:dormant_relic",
+      "nbt": "{SimplySwordsComponents:{\"simplyswords:awakening\":8,\"simplyswords:relic_attunement\":1}}"
+    },
+    "title": {
+      "translate": "advancements.simplyswords.sunfire.title",
+      "with": []
+    },
+    "description": {
+      "translate": "advancements.simplyswords.obtain_unique.description",
+      "with": [
+        {
+          "translate": "item.simplyswords.sunfire"
+        }
+      ]
+    },
+    "hidden": true,
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "parent": "simplyswords:dormant_relic",
+  "criteria": {
+    "requirement": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "simplyswords:dormant_relic"
+            ],
+            "nbt": "{SimplySwordsComponents:{\"simplyswords:awakening\":8,\"simplyswords:relic_attunement\":1}}"
+          }
+        ]
+      }
+    }
+  }
+}

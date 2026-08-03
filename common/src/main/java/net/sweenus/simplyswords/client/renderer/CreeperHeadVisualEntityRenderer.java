@@ -16,7 +16,7 @@ import net.sweenus.simplyswords.entity.SimplySwordsCreeperHeadEntity;
 
 public class CreeperHeadVisualEntityRenderer extends EntityRenderer<SimplySwordsCreeperHeadEntity> {
 
-    private static final Identifier TEXTURE = Identifier.ofVanilla("textures/entity/creeper/creeper.png");
+    private static final Identifier TEXTURE = new Identifier("minecraft", "textures/entity/creeper/creeper.png");
 
     private final SkullEntityModel model;
 
@@ -55,7 +55,8 @@ public class CreeperHeadVisualEntityRenderer extends EntityRenderer<SimplySwords
 
         VertexConsumer vertexConsumer = vertexConsumers.getBuffer(this.model.getLayer(getTexture(entity)));
         this.model.setHeadRotation(0.0F, headYaw, pitch);
-        this.model.render(matrices, vertexConsumer, light, OverlayTexture.DEFAULT_UV);
+        this.model.render(matrices, vertexConsumer, light, OverlayTexture.DEFAULT_UV,
+                1.0F, 1.0F, 1.0F, 1.0F);
 
         matrices.pop();
         super.render(entity, yaw, tickDelta, matrices, vertexConsumers, light);

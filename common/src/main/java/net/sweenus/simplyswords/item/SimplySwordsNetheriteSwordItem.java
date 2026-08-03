@@ -7,7 +7,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.SwordItem;
 import net.minecraft.item.ToolMaterial;
-import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -25,7 +24,8 @@ public class SimplySwordsNetheriteSwordItem extends SwordItem {
     String[] repairIngredient;
 
     public SimplySwordsNetheriteSwordItem(ToolMaterial toolMaterial, Settings settings, String... repairIngredient) {
-        super(toolMaterial, settings);
+        super(toolMaterial, LegacyWeaponAttributes.attackDamage(settings),
+                LegacyWeaponAttributes.attackSpeed(settings), settings);
         this.repairIngredient = repairIngredient;
     }
 
@@ -34,7 +34,7 @@ public class SimplySwordsNetheriteSwordItem extends SwordItem {
         List<Item> potentialIngredients = new ArrayList<>(List.of());
         Arrays.stream(repairIngredient).toList().forEach(repIngredient ->
             potentialIngredients.add(
-                    Registries.ITEM.get(Identifier.of(repIngredient))));
+                    Registries.ITEM.get(new Identifier(repIngredient))));
 
 
         return potentialIngredients.contains(ingredient.getItem());
@@ -57,10 +57,10 @@ public class SimplySwordsNetheriteSwordItem extends SwordItem {
     }
 
     @Override
-    public void appendTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
-        super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+    public void appendTooltip(ItemStack itemStack, net.minecraft.world.World world, List<Text> tooltip, net.minecraft.client.item.TooltipContext tooltipContext) {
+        super.appendTooltip(itemStack, world, tooltip, tooltipContext);
         tooltip.addAll(WeaponImplicitRegistry.buildTooltipLines(itemStack, Screen.hasAltDown()));
-        SimplySwordsClientAPI.generateDynamicTooltip(itemStack, tooltipContext, tooltip, type,
+        SimplySwordsClientAPI.generateDynamicTooltip(itemStack, world, tooltip, tooltipContext,
                 SimplySwords.MOD_ID,
                 "oracle_index:books/simplyswords/weapon-types/",
                 "oracle_index:books/simplyswords/unique-weapons/",

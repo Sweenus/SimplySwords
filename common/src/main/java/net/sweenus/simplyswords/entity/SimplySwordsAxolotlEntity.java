@@ -45,10 +45,10 @@ public class SimplySwordsAxolotlEntity extends AxolotlEntity implements Tameable
                 .add(EntityAttributes.GENERIC_MAX_HEALTH, 35.0)
                 .add(EntityAttributes.GENERIC_FLYING_SPEED, 1.0f)
                 .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 1.0f)
-                .add(EntityAttributes.GENERIC_WATER_MOVEMENT_EFFICIENCY, 10.0)
+
                 .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 1.0)
                 .add(EntityAttributes.GENERIC_ATTACK_KNOCKBACK, 0.1)
-                .add(EntityAttributes.GENERIC_STEP_HEIGHT, 1.0)
+
                 .add(EntityAttributes.GENERIC_FOLLOW_RANGE, 48.0);
     }
 
@@ -166,6 +166,11 @@ public class SimplySwordsAxolotlEntity extends AxolotlEntity implements Tameable
     @Override
     public UUID getOwnerUuid() {
         return this.ownerUuid;
+    }
+
+    @Override
+    public net.minecraft.world.EntityView method_48926() {
+        return this.getWorld();
     }
 
     @Nullable

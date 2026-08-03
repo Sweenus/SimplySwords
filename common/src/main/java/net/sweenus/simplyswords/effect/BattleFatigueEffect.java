@@ -10,11 +10,10 @@ public class BattleFatigueEffect extends StatusEffect {
     }
 
     @Override
-    public boolean applyUpdateEffect(LivingEntity pLivingEntity, int pAmplifier) {
+    public void applyUpdateEffect(LivingEntity pLivingEntity, int pAmplifier) {
 
         super.applyUpdateEffect(pLivingEntity, pAmplifier);
 
-        return true;
     }
 
     @Override

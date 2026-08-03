@@ -103,14 +103,14 @@ public class SimplySwordsCreeperHeadEntity extends PathAwareEntity {
     }
 
     @Override
-    protected void initDataTracker(DataTracker.Builder builder) {
-        super.initDataTracker(builder);
-        builder.add(OWNER_ENTITY_ID, -1);
-        builder.add(ORBIT_BASE_ANGLE, 0.0F);
-        builder.add(ORBIT_RADIUS_TRACKED, 1.6F);
-        builder.add(ORBIT_HEIGHT_TRACKED, 1.4F);
-        builder.add(ORBIT_ANGULAR_SPEED_TRACKED, 0.05F);
-        builder.add(HOMING, false);
+    protected void initDataTracker() {
+        super.initDataTracker();
+        this.dataTracker.startTracking(OWNER_ENTITY_ID, -1);
+        this.dataTracker.startTracking(ORBIT_BASE_ANGLE, 0.0F);
+        this.dataTracker.startTracking(ORBIT_RADIUS_TRACKED, 1.6F);
+        this.dataTracker.startTracking(ORBIT_HEIGHT_TRACKED, 1.4F);
+        this.dataTracker.startTracking(ORBIT_ANGULAR_SPEED_TRACKED, 0.05F);
+        this.dataTracker.startTracking(HOMING, false);
     }
 
     public int getOwnerEntityId() {
@@ -337,7 +337,7 @@ public class SimplySwordsCreeperHeadEntity extends PathAwareEntity {
     }
 
     @Override
-    protected void dropEquipment(ServerWorld world, DamageSource source, boolean causedByPlayer) {
+    protected void dropEquipment(DamageSource source, int lootingMultiplier, boolean causedByPlayer) {
     }
 
     @Override

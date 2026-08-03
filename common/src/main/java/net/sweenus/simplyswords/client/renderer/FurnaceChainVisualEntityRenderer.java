@@ -19,7 +19,7 @@ import org.joml.Matrix4f;
 
 public class FurnaceChainVisualEntityRenderer extends EntityRenderer<FurnaceChainVisualEntity> {
 
-    private static final Identifier WHITE_TEXTURE = Identifier.ofVanilla("textures/misc/white.png");
+    private static final Identifier WHITE_TEXTURE = new Identifier("minecraft", "textures/misc/white.png");
     private static final int CHAIN_SEGMENTS = 28;
     private static final int RING_SEGMENTS = 64;
     private static final float PULSE_TRAVEL_TICKS = 10.0F;
@@ -438,7 +438,7 @@ public class FurnaceChainVisualEntityRenderer extends EntityRenderer<FurnaceChai
                                       int red, int green, int blue, int alpha) {
         vertices.vertex(matrix, (float) pos.x, (float) pos.y, (float) pos.z)
                 .color(red, green, blue, alpha)
-                .light(LightmapTextureManager.MAX_LIGHT_COORDINATE);
+                .light(LightmapTextureManager.MAX_LIGHT_COORDINATE).next();
     }
 
     private static void putGlowVertex(VertexConsumer vertices, Matrix4f matrix, Vec3d pos,
@@ -448,7 +448,7 @@ public class FurnaceChainVisualEntityRenderer extends EntityRenderer<FurnaceChai
                 .texture(0.5F, 0.5F)
                 .overlay(OverlayTexture.DEFAULT_UV)
                 .light(LightmapTextureManager.MAX_LIGHT_COORDINATE)
-                .normal(0.0F, 1.0F, 0.0F);
+                .normal(0.0F, 1.0F, 0.0F).next();
     }
 
     private static int heatRed(float heat) {

@@ -18,9 +18,9 @@ import net.sweenus.simplyswords.entity.CaelestisTentacleEntity;
 public class CaelestisTentacleRenderer extends EntityRenderer<CaelestisTentacleEntity> {
 
     private static final Identifier TEXTURE =
-            Identifier.of(SimplySwords.MOD_ID, "textures/entity/caelestis_tentacle.png");
+            new Identifier(SimplySwords.MOD_ID, "textures/entity/caelestis_tentacle.png");
     private static final Identifier EMISSIVE_TEXTURE =
-            Identifier.of(SimplySwords.MOD_ID, "textures/entity/caelestis_tentacle_emissive.png");
+            new Identifier(SimplySwords.MOD_ID, "textures/entity/caelestis_tentacle_emissive.png");
 
     private final CaelestisTentacleModel model;
 
@@ -67,12 +67,12 @@ public class CaelestisTentacleRenderer extends EntityRenderer<CaelestisTentacleE
 
         VertexConsumer baseVertices = vertexConsumers.getBuffer(
                 RenderLayer.getEntityCutoutNoCull(TEXTURE));
-        this.model.render(matrices, baseVertices, light, OverlayTexture.DEFAULT_UV, 0xFFFFFFFF);
+        this.model.render(matrices, baseVertices, light, OverlayTexture.DEFAULT_UV,
+                1.0F, 1.0F, 1.0F, 1.0F);
 
         float pulse = 0.78F + MathHelper.sin(
                 time * 0.19F + Math.floorMod(entity.getCorruptionSeed(), 37)) * 0.18F;
         int alpha = MathHelper.clamp((int) (255.0F * pulse), 0, 255);
-        int emissiveColor = alpha << 24 | 0xFFFFFF;
         VertexConsumer emissiveVertices = vertexConsumers.getBuffer(
                 RenderLayer.getEntityTranslucentEmissive(EMISSIVE_TEXTURE));
         this.model.render(
@@ -80,7 +80,7 @@ public class CaelestisTentacleRenderer extends EntityRenderer<CaelestisTentacleE
                 emissiveVertices,
                 LightmapTextureManager.MAX_LIGHT_COORDINATE,
                 OverlayTexture.DEFAULT_UV,
-                emissiveColor
+                1.0F, 1.0F, 1.0F, alpha / 255.0F
         );
         matrices.pop();
         super.render(entity, yaw, tickDelta, matrices, vertexConsumers, light);

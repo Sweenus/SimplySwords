@@ -10,7 +10,7 @@ public class FreezeEffect extends StatusEffect {
     }
 
     @Override
-    public boolean applyUpdateEffect(LivingEntity pLivingEntity, int pAmplifier) {
+    public void applyUpdateEffect(LivingEntity pLivingEntity, int pAmplifier) {
         if (!pLivingEntity.getWorld().isClient()) {
             double x = pLivingEntity.getX();
             double y = pLivingEntity.getY();
@@ -22,7 +22,6 @@ public class FreezeEffect extends StatusEffect {
 
         super.applyUpdateEffect(pLivingEntity, pAmplifier);
 
-        return true;
     }
 
     @Override

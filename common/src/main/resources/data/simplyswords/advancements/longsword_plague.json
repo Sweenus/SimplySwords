@@ -1,0 +1,38 @@
+{
+  "display": {
+    "icon": {
+      "item": "simplyswords:toxic_longsword"
+    },
+    "title": {
+      "translate": "advancements.simplyswords.toxic_longsword.title",
+      "with": []
+    },
+    "description": {
+      "translate": "advancements.simplyswords.find_unique.description",
+      "with": [
+        {
+          "translate": "item.simplyswords.toxic_longsword"
+        }
+      ]
+    },
+    "hidden": true,
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "parent": "simplyswords:runic_weapon",
+  "criteria": {
+    "requirement": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "simplyswords:toxic_longsword"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

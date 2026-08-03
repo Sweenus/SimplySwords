@@ -47,13 +47,13 @@ public class CaelestisBreachVisualEntity extends Entity {
     }
 
     @Override
-    protected void initDataTracker(DataTracker.Builder builder) {
-        builder.add(BREACH_ID, Optional.empty());
-        builder.add(RADIUS, 1.5F);
-        builder.add(MAX_RADIUS, 20.0F);
-        builder.add(VERTICAL_RANGE, 10.0F);
-        builder.add(PHASE, PHASE_EXPANDING);
-        builder.add(SEED, 0);
+    protected void initDataTracker() {
+        this.dataTracker.startTracking(BREACH_ID, Optional.empty());
+        this.dataTracker.startTracking(RADIUS, 1.5F);
+        this.dataTracker.startTracking(MAX_RADIUS, 20.0F);
+        this.dataTracker.startTracking(VERTICAL_RANGE, 10.0F);
+        this.dataTracker.startTracking(PHASE, PHASE_EXPANDING);
+        this.dataTracker.startTracking(SEED, 0);
     }
 
     @Override
@@ -105,7 +105,7 @@ public class CaelestisBreachVisualEntity extends Entity {
     }
 
     public void setPhase(int phase) {
-        this.dataTracker.set(PHASE, Math.clamp(phase, PHASE_EXPANDING, PHASE_COLLAPSING));
+        this.dataTracker.set(PHASE, net.minecraft.util.math.MathHelper.clamp(phase, PHASE_EXPANDING, PHASE_COLLAPSING));
     }
 
     public int getSeed() {

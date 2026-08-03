@@ -53,15 +53,15 @@ public class DancingBladeVisualEntity extends Entity {
     }
 
     @Override
-    protected void initDataTracker(DataTracker.Builder builder) {
-        builder.add(OWNER_ENTITY_ID, -1);
-        builder.add(ORBIT_SLOT, 0);
-        builder.add(ORBIT_RADIUS, 2.65F);
-        builder.add(ORBIT_PHASE, 0.0F);
-        builder.add(ATTACK_START_AGE, -1000);
-        builder.add(ATTACK_DIRECTION_X, 0.0F);
-        builder.add(ATTACK_DIRECTION_Z, 1.0F);
-        builder.add(ITEM_STACK, ItemStack.EMPTY);
+    protected void initDataTracker() {
+        this.dataTracker.startTracking(OWNER_ENTITY_ID, -1);
+        this.dataTracker.startTracking(ORBIT_SLOT, 0);
+        this.dataTracker.startTracking(ORBIT_RADIUS, 2.65F);
+        this.dataTracker.startTracking(ORBIT_PHASE, 0.0F);
+        this.dataTracker.startTracking(ATTACK_START_AGE, -1000);
+        this.dataTracker.startTracking(ATTACK_DIRECTION_X, 0.0F);
+        this.dataTracker.startTracking(ATTACK_DIRECTION_Z, 1.0F);
+        this.dataTracker.startTracking(ITEM_STACK, ItemStack.EMPTY);
     }
 
     @Override
@@ -188,7 +188,7 @@ public class DancingBladeVisualEntity extends Entity {
             this.damage = Math.max(0.0F, nbt.getFloat("damage"));
         }
         if (nbt.contains("item")) {
-            this.setItemStack(ItemStack.fromNbt(this.getRegistryManager(), nbt.getCompound("item")).orElse(ItemStack.EMPTY));
+            this.setItemStack(ItemStack.fromNbt(nbt.getCompound("item")));
         }
     }
 
@@ -208,7 +208,7 @@ public class DancingBladeVisualEntity extends Entity {
         nbt.putFloat("damage", this.getDamage());
         ItemStack stack = this.getWeaponStack();
         if (stack != null && !stack.isEmpty()) {
-            nbt.put("item", stack.encode(this.getRegistryManager()));
+            nbt.put("item", stack.writeNbt(new NbtCompound()));
         }
     }
 }

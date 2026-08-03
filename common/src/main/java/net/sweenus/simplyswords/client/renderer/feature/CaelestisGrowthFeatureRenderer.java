@@ -19,12 +19,13 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.sweenus.simplyswords.entity.CaelestisBreachCreature;
+import net.sweenus.simplyswords.client.renderer.LegacyRenderColor;
 
 public class CaelestisGrowthFeatureRenderer<T extends LivingEntity & CaelestisBreachCreature,
         M extends EntityModel<T>> extends FeatureRenderer<T, M> {
 
     private static final Identifier WHITE =
-            Identifier.of("minecraft", "textures/misc/white.png");
+            new Identifier("minecraft", "textures/misc/white.png");
 
     private final ModelPart growths;
 
@@ -46,12 +47,14 @@ public class CaelestisGrowthFeatureRenderer<T extends LivingEntity & CaelestisBr
                 animationProgress * 0.18F + Math.floorMod(entity.getCorruptionSeed(), 29)) * 0.035F;
 
         VertexConsumer vertices = vertexConsumers.getBuffer(RenderLayer.getEntityTranslucentEmissive(WHITE));
+        int color = growthColor(entity);
         this.growths.render(
                 matrices,
                 vertices,
                 0x00F000F0,
                 OverlayTexture.DEFAULT_UV,
-                growthColor(entity)
+                LegacyRenderColor.red(color), LegacyRenderColor.green(color),
+                LegacyRenderColor.blue(color), LegacyRenderColor.alpha(color)
         );
     }
 

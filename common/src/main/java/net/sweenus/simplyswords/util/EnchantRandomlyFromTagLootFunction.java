@@ -9,6 +9,7 @@ import net.minecraft.loot.function.LootFunction;
 import net.minecraft.loot.function.LootFunctionType;
 import net.minecraft.loot.function.LootFunctionTypes;
 import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.Registries;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.entry.RegistryEntryList;
 import net.minecraft.registry.tag.TagKey;
@@ -33,15 +34,20 @@ public class EnchantRandomlyFromTagLootFunction implements LootFunction {
 
 
 	@Override
-	public LootFunctionType<? extends LootFunction> getType() {
+	public LootFunctionType getType() {
 		//This isn't typically safe (should have its own type), but since we are never using this function in data packs, should be ok
 		return LootFunctionTypes.ENCHANT_RANDOMLY;
 	}
 
 	@Override
 	public ItemStack apply(ItemStack itemStack, LootContext lootContext) {
-		if (enchants == null)
-			enchants = lootContext.getLookup().getOrThrow(RegistryKeys.ENCHANTMENT).getOrThrow(tagKey);
+		if (enchants == null) {
+			enchants = Registries.ENCHANTMENT.getEntryList(tagKey).orElse(null);
+		}
+		if (enchants == null) {
+			LOGGER.warn("Couldn't resolve enchantment tag {}", tagKey.id());
+			return itemStack;
+		}
 		List<RegistryEntry<Enchantment>> list = enchants.stream().toList();
 		Random random = lootContext.getRandom();
 		Optional<RegistryEntry<Enchantment>> optional = Util.getRandomOrEmpty(list, random);
@@ -63,7 +69,7 @@ public class EnchantRandomlyFromTagLootFunction implements LootFunction {
 			stack = new ItemStack(Items.ENCHANTED_BOOK);
 		}
 
-		stack.addEnchantment(enchantment, i);
+		stack.addEnchantment(enchantment.value(), i);
 		return stack;
 	}
 

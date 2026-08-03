@@ -68,16 +68,16 @@ public class DeathKnellVisualEntity extends Entity {
     }
 
     @Override
-    protected void initDataTracker(DataTracker.Builder builder) {
-        builder.add(MODE, MODE_FEVER);
-        builder.add(TARGET_ID, -1);
-        builder.add(STACKS, 1);
-        builder.add(MAX_STACKS, 5);
-        builder.add(RADIUS, 5.0F);
-        builder.add(IMPACT_AGE, 6);
-        builder.add(END_AGE, 22);
-        builder.add(CHAIN_DEPTH, 0);
-        builder.add(SEED, 0);
+    protected void initDataTracker() {
+        this.dataTracker.startTracking(MODE, MODE_FEVER);
+        this.dataTracker.startTracking(TARGET_ID, -1);
+        this.dataTracker.startTracking(STACKS, 1);
+        this.dataTracker.startTracking(MAX_STACKS, 5);
+        this.dataTracker.startTracking(RADIUS, 5.0F);
+        this.dataTracker.startTracking(IMPACT_AGE, 6);
+        this.dataTracker.startTracking(END_AGE, 22);
+        this.dataTracker.startTracking(CHAIN_DEPTH, 0);
+        this.dataTracker.startTracking(SEED, 0);
     }
 
     @Override

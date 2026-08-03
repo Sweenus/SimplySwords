@@ -137,7 +137,7 @@ public final class DancingBladeManager {
             return;
         }
 
-        EnchantmentHelper.onTargetDamaged(world, target, world.getDamageSources().trident(blade, owner), stack);
+        EnchantmentHelper.onTargetDamaged(owner, target);
         Item item = stack.getItem();
         if (item instanceof SwordItem) {
             item.postHit(stack, target, owner);

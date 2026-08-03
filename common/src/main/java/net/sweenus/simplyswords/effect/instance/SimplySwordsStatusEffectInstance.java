@@ -10,7 +10,7 @@ public class SimplySwordsStatusEffectInstance extends StatusEffectInstance {
     public LivingEntity sourceEntity;
     public int additionalData;
 
-    public SimplySwordsStatusEffectInstance(RegistryEntry<StatusEffect> type, int duration, int amplifier, boolean ambient, boolean showParticles, boolean showIcon) {
+    public SimplySwordsStatusEffectInstance(StatusEffect type, int duration, int amplifier, boolean ambient, boolean showParticles, boolean showIcon) {
         super(type, duration, amplifier, ambient, showParticles, showIcon);
     }
 

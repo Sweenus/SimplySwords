@@ -8,7 +8,6 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
-import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
@@ -86,8 +85,8 @@ public abstract class WatcherSwordItem extends UniqueSwordItem implements Unique
     }
 
     @Override
-    public void appendTooltip(ItemStack itemStack, TooltipContext tooltipContext,
-                              List<Text> tooltip, TooltipType type) {
+    public void appendTooltip(ItemStack itemStack, World world,
+                              List<Text> tooltip, net.minecraft.client.item.TooltipContext tooltipContext) {
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.watchersworditem.tooltip1").setStyle(Styles.ABILITY));
         tooltip.add(Text.translatable("item.simplyswords.watchersworditem.tooltip2",
@@ -107,13 +106,13 @@ public abstract class WatcherSwordItem extends UniqueSwordItem implements Unique
             appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.watcher.claymoreCooldown);
         }
 
-        super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        super.appendTooltip(itemStack, world, tooltip, tooltipContext);
         TooltipUtils.appendSpellScaleTooltip(tooltip, "soul");
     }
 
     @Override
     protected Identifier getConfigPath() {
-        return Identifier.of("simplyswords.unique_effects.watcher");
+        return new Identifier("simplyswords.unique_effects.watcher");
     }
 
     public static class EffectSettings extends TooltipSettings {

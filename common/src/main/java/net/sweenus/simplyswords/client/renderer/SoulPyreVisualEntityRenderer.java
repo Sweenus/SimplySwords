@@ -25,7 +25,7 @@ public class SoulPyreVisualEntityRenderer extends EntityRenderer<SoulPyreVisualE
 
     private static final int SEGMENTS = 96;
     private static final Identifier WHITE_TEXTURE =
-            Identifier.ofVanilla("textures/misc/white.png");
+            new Identifier("minecraft", "textures/misc/white.png");
 
     private final TerrainFieldOverlayRenderer terrainOverlay =
             new TerrainFieldOverlayRenderer();
@@ -185,10 +185,10 @@ public class SoulPyreVisualEntityRenderer extends EntityRenderer<SoulPyreVisualE
             float noz = (float) (Math.sin(next) * outer);
             float y0 = groundOffset(entity, center, ox, oz);
             float y1 = groundOffset(entity, center, nox, noz);
-            vertices.vertex(matrices, ix, y0, iz).color(red, green, blue, alpha);
-            vertices.vertex(matrices, ox, y0, oz).color(red, green, blue, alpha);
-            vertices.vertex(matrices, nox, y1, noz).color(red, green, blue, alpha);
-            vertices.vertex(matrices, nix, y1, niz).color(red, green, blue, alpha);
+            vertices.vertex(matrices.getPositionMatrix(), ix, y0, iz).color(red, green, blue, alpha).next();
+            vertices.vertex(matrices.getPositionMatrix(), ox, y0, oz).color(red, green, blue, alpha).next();
+            vertices.vertex(matrices.getPositionMatrix(), nox, y1, noz).color(red, green, blue, alpha).next();
+            vertices.vertex(matrices.getPositionMatrix(), nix, y1, niz).color(red, green, blue, alpha).next();
         }
     }
 
@@ -263,12 +263,12 @@ public class SoulPyreVisualEntityRenderer extends EntityRenderer<SoulPyreVisualE
             float x, float y, float z,
             int red, int green, int blue, int alpha,
             float normalX, float normalZ) {
-        vertices.vertex(matrices, x, y, z)
+        vertices.vertex(matrices.getPositionMatrix(), x, y, z)
                 .color(red, green, blue, alpha)
                 .texture(0.5F, 0.5F)
                 .overlay(OverlayTexture.DEFAULT_UV)
                 .light(LightmapTextureManager.MAX_LIGHT_COORDINATE)
-                .normal(matrices, normalX, 0.0F, normalZ);
+                .normal(matrices.getNormalMatrix(), normalX, 0.0F, normalZ).next();
     }
 
     private static void vertex(
@@ -280,6 +280,6 @@ public class SoulPyreVisualEntityRenderer extends EntityRenderer<SoulPyreVisualE
                 .texture(u, v)
                 .overlay(OverlayTexture.DEFAULT_UV)
                 .light(LightmapTextureManager.MAX_LIGHT_COORDINATE)
-                .normal(0.0F, 1.0F, 0.0F);
+                .normal(0.0F, 1.0F, 0.0F).next();
     }
 }

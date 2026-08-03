@@ -1,7 +1,8 @@
 package net.sweenus.simplyswords.api;
 
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.AttributeModifiersComponent;
+import com.google.common.collect.Multimap;
+import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.item.ItemStack;
@@ -17,6 +18,8 @@ public final class AwakeningApi {
     private static final double PLAYER_BASE_DAMAGE = 1.0D;
     private static final double PLAYER_BASE_ATTACK_SPEED = 4.0D;
     private static final float LEGACY_DEFAULT_DORMANT_ATTRIBUTE_MULTIPLIER = 0.25F;
+    private static final String DAMAGE_SCALE_KEY = "SimplySwordsAwakeningDamageScale";
+    private static final String SPEED_SCALE_KEY = "SimplySwordsAwakeningSpeedScale";
 
     private AwakeningApi() {
     }
@@ -49,7 +52,7 @@ public final class AwakeningApi {
         if (!usesAwakeningProgression(stack)) {
             return AwakeningComponent.MAX_LEVEL;
         }
-        AwakeningComponent component = stack.get(ComponentTypeRegistry.AWAKENING.get());
+        AwakeningComponent component = ComponentTypeRegistry.AWAKENING.get(stack);
         if (component != null) {
             return component.level();
         }
@@ -67,75 +70,15 @@ public final class AwakeningApi {
         }
         AwakeningFormRegistry.ensureInitialized(stack);
         if (!usesAwakeningProgression(stack)) {
-            AttributeModifiersComponent full = stack.getItem().getComponents()
-                    .getOrDefault(DataComponentTypes.ATTRIBUTE_MODIFIERS, AttributeModifiersComponent.DEFAULT);
-            AttributeModifiersComponent current = stack.getOrDefault(
-                    DataComponentTypes.ATTRIBUTE_MODIFIERS, AttributeModifiersComponent.DEFAULT);
-            if (!current.equals(full)) {
-                stack.set(DataComponentTypes.ATTRIBUTE_MODIFIERS, full);
-            }
+            clearScaledAttributes(stack);
             return;
         }
-        if (stack.contains(ComponentTypeRegistry.AWAKENING.get())) {
-            AttributeModifiersComponent current = stack.getOrDefault(
-                    DataComponentTypes.ATTRIBUTE_MODIFIERS, AttributeModifiersComponent.DEFAULT);
-            AttributeModifiersComponent full = stack.getItem().getComponents()
-                    .getOrDefault(DataComponentTypes.ATTRIBUTE_MODIFIERS, AttributeModifiersComponent.DEFAULT);
+        if (ComponentTypeRegistry.AWAKENING.contains(stack)) {
             int level = getLevel(stack);
-            AttributeModifiersComponent expected = buildAttributeModifiers(
-                    stack,
-                    getAttributeMultiplier(stack, level),
-                    getAttackSpeedMultiplier(stack, level)
-            );
-            if (current.equals(expected)) {
-                return;
-            }
-
-            AttributeModifiersComponent legacyAtCurrentLevel = buildAttributeModifiers(
-                    stack,
-                    getAttributeMultiplier(stack, level),
-                    getAttributeMultiplier(stack, level)
-            );
-            boolean unscaledPartialWeapon = level < AwakeningComponent.MAX_LEVEL
-                    && current.equals(full);
-            boolean legacySpeedCurve = level < AwakeningComponent.MAX_LEVEL
-                    && current.equals(legacyAtCurrentLevel);
-            boolean legacyDefaultDamageCurve = false;
-            if (level < AwakeningComponent.MAX_LEVEL && usesDefaultProfile(stack)) {
-                float legacyDamageMultiplier = interpolateMultiplier(
-                        LEGACY_DEFAULT_DORMANT_ATTRIBUTE_MULTIPLIER,
-                        level
-                );
-                legacyDefaultDamageCurve = current.equals(buildAttributeModifiers(
-                        stack,
-                        legacyDamageMultiplier,
-                        legacyDamageMultiplier
-                )) || current.equals(buildAttributeModifiers(
-                        stack,
-                        legacyDamageMultiplier,
-                        getAttackSpeedMultiplier(stack, level)
-                ));
-            }
-            boolean corruptedMaxWeapon = level == AwakeningComponent.MAX_LEVEL
-                    && (current.equals(buildAttributeModifiers(
-                            stack,
-                            getAttributeMultiplier(stack, 0),
-                            getAttributeMultiplier(stack, 0)))
-                    || current.equals(buildAttributeModifiers(
-                            stack,
-                            getAttributeMultiplier(stack, 0),
-                            getAttackSpeedMultiplier(stack, 0)))
-                    || usesDefaultProfile(stack)
-                    && (current.equals(buildAttributeModifiers(
-                            stack,
-                            LEGACY_DEFAULT_DORMANT_ATTRIBUTE_MULTIPLIER,
-                            LEGACY_DEFAULT_DORMANT_ATTRIBUTE_MULTIPLIER))
-                    || current.equals(buildAttributeModifiers(
-                            stack,
-                            LEGACY_DEFAULT_DORMANT_ATTRIBUTE_MULTIPLIER,
-                            getAttackSpeedMultiplier(stack, 0)))));
-            if (unscaledPartialWeapon || legacySpeedCurve || legacyDefaultDamageCurve || corruptedMaxWeapon) {
-                stack.set(DataComponentTypes.ATTRIBUTE_MODIFIERS, expected);
+            float damageScale = getAttributeMultiplier(stack, level);
+            float speedScale = getAttackSpeedMultiplier(stack, level);
+            if (!hasExpectedScales(stack, damageScale, speedScale)) {
+                rebuildAttributes(stack);
             }
             return;
         }
@@ -156,8 +99,8 @@ public final class AwakeningApi {
         if (!AwakeningProfileRegistry.isAwakenable(stack)) {
             return;
         }
-        int level = Math.clamp(requestedLevel, 0, AwakeningComponent.MAX_LEVEL);
-        stack.set(ComponentTypeRegistry.AWAKENING.get(), new AwakeningComponent(level));
+        int level = net.minecraft.util.math.MathHelper.clamp(requestedLevel, 0, AwakeningComponent.MAX_LEVEL);
+        ComponentTypeRegistry.AWAKENING.set(stack, new AwakeningComponent(level));
         rebuildAttributes(stack);
     }
 
@@ -181,7 +124,7 @@ public final class AwakeningApi {
     }
 
     private static float interpolateMultiplier(float dormantMultiplier, int level) {
-        float progress = Math.clamp(level, 0, AwakeningComponent.MAX_LEVEL)
+        float progress = net.minecraft.util.math.MathHelper.clamp(level, 0, AwakeningComponent.MAX_LEVEL)
                 / (float) AwakeningComponent.MAX_LEVEL;
         return dormantMultiplier + (1.0F - dormantMultiplier) * progress;
     }
@@ -251,7 +194,7 @@ public final class AwakeningApi {
     }
 
     public static int scaleChance(ItemStack stack, int fullChance) {
-        return Math.clamp(Math.round(fullChance * getEffectMultiplier(stack)), 0, 100);
+        return net.minecraft.util.math.MathHelper.clamp(Math.round(fullChance * getEffectMultiplier(stack)), 0, 100);
     }
 
     //
@@ -289,41 +232,41 @@ public final class AwakeningApi {
     }
 
     public static void rebuildAttributes(ItemStack stack) {
-        AttributeModifiersComponent rebuilt = buildAttributeModifiers(
-                stack,
-                getAttributeMultiplier(stack),
-                getAttackSpeedMultiplier(stack)
-        );
-        if (rebuilt.modifiers().isEmpty()) {
-            return;
+        float damageMultiplier = getAttributeMultiplier(stack);
+        float attackSpeedMultiplier = getAttackSpeedMultiplier(stack);
+        stack.removeSubNbt("AttributeModifiers");
+
+        if (damageMultiplier < 0.99999F || attackSpeedMultiplier < 0.99999F) {
+            Multimap<EntityAttribute, EntityAttributeModifier> defaults =
+                    stack.getItem().getAttributeModifiers(EquipmentSlot.MAINHAND);
+            defaults.forEach((attribute, modifier) -> {
+                double value = modifier.getValue();
+                if (attribute == EntityAttributes.GENERIC_ATTACK_DAMAGE) {
+                    value = (PLAYER_BASE_DAMAGE + value) * damageMultiplier - PLAYER_BASE_DAMAGE;
+                } else if (attribute == EntityAttributes.GENERIC_ATTACK_SPEED) {
+                    value = (PLAYER_BASE_ATTACK_SPEED + value) * attackSpeedMultiplier - PLAYER_BASE_ATTACK_SPEED;
+                }
+                stack.addAttributeModifier(attribute,
+                        new EntityAttributeModifier(modifier.getId(), modifier.getName(), value, modifier.getOperation()),
+                        EquipmentSlot.MAINHAND);
+            });
         }
-        stack.set(DataComponentTypes.ATTRIBUTE_MODIFIERS, rebuilt);
+
+        stack.getOrCreateNbt().putFloat(DAMAGE_SCALE_KEY, damageMultiplier);
+        stack.getOrCreateNbt().putFloat(SPEED_SCALE_KEY, attackSpeedMultiplier);
     }
 
-    private static AttributeModifiersComponent buildAttributeModifiers(
-            ItemStack stack,
-            float attributeMultiplier,
-            float attackSpeedMultiplier
-    ) {
-        AttributeModifiersComponent full = stack.getItem().getComponents()
-                .getOrDefault(DataComponentTypes.ATTRIBUTE_MODIFIERS, AttributeModifiersComponent.DEFAULT);
-        if (full.modifiers().isEmpty()) {
-            return full;
-        }
+    private static boolean hasExpectedScales(ItemStack stack, float damage, float speed) {
+        if (!stack.hasNbt()) return false;
+        return Math.abs(stack.getNbt().getFloat(DAMAGE_SCALE_KEY) - damage) < 0.00001F
+                && Math.abs(stack.getNbt().getFloat(SPEED_SCALE_KEY) - speed) < 0.00001F;
+    }
 
-        AttributeModifiersComponent.Builder builder = AttributeModifiersComponent.builder();
-        for (AttributeModifiersComponent.Entry entry : full.modifiers()) {
-            EntityAttributeModifier modifier = entry.modifier();
-            double value = modifier.value();
-            if (entry.attribute() == EntityAttributes.GENERIC_ATTACK_DAMAGE) {
-                value = (PLAYER_BASE_DAMAGE + value) * attributeMultiplier - PLAYER_BASE_DAMAGE;
-            } else if (entry.attribute() == EntityAttributes.GENERIC_ATTACK_SPEED) {
-                value = (PLAYER_BASE_ATTACK_SPEED + value) * attackSpeedMultiplier - PLAYER_BASE_ATTACK_SPEED;
-            }
-            builder.add(entry.attribute(),
-                    new EntityAttributeModifier(modifier.id(), value, modifier.operation()),
-                    entry.slot());
+    private static void clearScaledAttributes(ItemStack stack) {
+        stack.removeSubNbt("AttributeModifiers");
+        if (stack.hasNbt()) {
+            stack.getNbt().remove(DAMAGE_SCALE_KEY);
+            stack.getNbt().remove(SPEED_SCALE_KEY);
         }
-        return builder.build().withShowInTooltip(full.showInTooltip());
     }
 }

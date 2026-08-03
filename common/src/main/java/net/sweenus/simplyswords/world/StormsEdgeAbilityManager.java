@@ -291,7 +291,7 @@ public final class StormsEdgeAbilityManager {
             return px * px + pz * pz;
         }
         double projection = ((point.x - start.x) * dx + (point.z - start.z) * dz) / lengthSquared;
-        double t = Math.clamp(projection, 0.0, 1.0);
+        double t = net.minecraft.util.math.MathHelper.clamp(projection, 0.0, 1.0);
         double closestX = start.x + dx * t;
         double closestZ = start.z + dz * t;
         double px = point.x - closestX;
@@ -322,7 +322,7 @@ public final class StormsEdgeAbilityManager {
             return start;
         }
         double projection = ((point.x - start.x) * dx + (point.z - start.z) * dz) / lengthSquared;
-        double t = Math.clamp(projection, 0.0, 1.0);
+        double t = net.minecraft.util.math.MathHelper.clamp(projection, 0.0, 1.0);
         return new Vec3d(start.x + dx * t, point.y, start.z + dz * t);
     }
 
@@ -335,7 +335,7 @@ public final class StormsEdgeAbilityManager {
     }
 
     private static void applyKnockback(LivingEntity target, Vec3d outward, double strength, double lift) {
-        double resistance = Math.clamp(
+        double resistance = net.minecraft.util.math.MathHelper.clamp(
                 target.getAttributeValue(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE),
                 0.0,
                 1.0

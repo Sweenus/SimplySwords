@@ -1,14 +1,10 @@
 package net.sweenus.simplyswords.item;
 
 import com.google.common.base.Suppliers;
-import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.recipe.Ingredient;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.tag.TagKey;
-import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 
 import java.util.function.Supplier;
@@ -54,8 +50,8 @@ public enum ModToolMaterial implements ToolMaterial {
     }
 
     @Override
-    public TagKey<Block> getInverseTag() {
-        return TagKey.of(RegistryKeys.BLOCK, Identifier.of("simplyswords", "empty_inverse_tag"));
+    public int getMiningLevel() {
+        return this.miningLevel;
     }
 
     @Override

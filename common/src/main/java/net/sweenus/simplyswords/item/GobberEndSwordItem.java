@@ -17,7 +17,7 @@ public class GobberEndSwordItem extends SwordItem {
     String[] repairIngredient;
 
     public GobberEndSwordItem(ToolMaterial toolMaterial, String... repairIngredient) {
-        super(toolMaterial, new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS));
+        super(toolMaterial, 3, -2.4F, new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS));
         this.repairIngredient = repairIngredient;
     }
 
@@ -26,7 +26,7 @@ public class GobberEndSwordItem extends SwordItem {
         List<Item> potentialIngredients = new ArrayList<>(List.of());
         Arrays.stream(repairIngredient).toList().forEach(repIngredient ->
             potentialIngredients.add(
-                    Registries.ITEM.get(Identifier.of(repIngredient))));
+                    Registries.ITEM.get(new Identifier(repIngredient))));
 
 
         return potentialIngredients.contains(ingredient.getItem());

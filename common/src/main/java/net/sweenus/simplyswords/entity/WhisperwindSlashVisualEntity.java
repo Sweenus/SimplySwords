@@ -30,11 +30,11 @@ public class WhisperwindSlashVisualEntity extends Entity {
     }
 
     @Override
-    protected void initDataTracker(DataTracker.Builder builder) {
-        builder.add(END_OFFSET_X, 0.0F);
-        builder.add(END_OFFSET_Y, 0.0F);
-        builder.add(END_OFFSET_Z, 0.0F);
-        builder.add(LIFETIME, 12);
+    protected void initDataTracker() {
+        this.dataTracker.startTracking(END_OFFSET_X, 0.0F);
+        this.dataTracker.startTracking(END_OFFSET_Y, 0.0F);
+        this.dataTracker.startTracking(END_OFFSET_Z, 0.0F);
+        this.dataTracker.startTracking(LIFETIME, 12);
     }
 
     @Override

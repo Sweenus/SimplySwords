@@ -39,15 +39,15 @@ public class ChainLightningVisualEntity extends Entity {
     }
 
     @Override
-    protected void initDataTracker(DataTracker.Builder builder) {
-        builder.add(END_OFFSET_X, 0.0F);
-        builder.add(END_OFFSET_Y, 0.0F);
-        builder.add(END_OFFSET_Z, 0.0F);
-        builder.add(LIFETIME, 8);
-        builder.add(SEED, 0);
-        builder.add(COLOR, 0x83E8FF);
-        builder.add(THICKNESS, 0.075F);
-        builder.add(BRANCHES, 4);
+    protected void initDataTracker() {
+        this.dataTracker.startTracking(END_OFFSET_X, 0.0F);
+        this.dataTracker.startTracking(END_OFFSET_Y, 0.0F);
+        this.dataTracker.startTracking(END_OFFSET_Z, 0.0F);
+        this.dataTracker.startTracking(LIFETIME, 8);
+        this.dataTracker.startTracking(SEED, 0);
+        this.dataTracker.startTracking(COLOR, 0x83E8FF);
+        this.dataTracker.startTracking(THICKNESS, 0.075F);
+        this.dataTracker.startTracking(BRANCHES, 4);
     }
 
     @Override

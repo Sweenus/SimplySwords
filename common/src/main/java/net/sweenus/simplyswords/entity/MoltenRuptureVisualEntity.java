@@ -28,9 +28,9 @@ public class MoltenRuptureVisualEntity extends Entity {
     }
 
     @Override
-    protected void initDataTracker(DataTracker.Builder builder) {
-        builder.add(TARGET_HEIGHT, 0.8F);
-        builder.add(HEIGHT_SCALE, 0.0F);
+    protected void initDataTracker() {
+        this.dataTracker.startTracking(TARGET_HEIGHT, 0.8F);
+        this.dataTracker.startTracking(HEIGHT_SCALE, 0.0F);
     }
 
     public float getTargetHeight() {

@@ -18,7 +18,7 @@ import net.sweenus.simplyswords.entity.LivyatanWaveVisualEntity;
 
 public class LivyatanWaveVisualEntityRenderer extends EntityRenderer<LivyatanWaveVisualEntity> {
 
-    private static final Identifier WATER_STILL_SPRITE = Identifier.ofVanilla("block/water_still");
+    private static final Identifier WATER_STILL_SPRITE = new Identifier("minecraft", "block/water_still");
     private static final float BLOCK_INSET = 0.01F;
     private static final float FOAM_CAP_THICKNESS = 0.07F;
     private static final float FOAM_SIDE_BAND_HEIGHT = 0.24F;
@@ -170,12 +170,12 @@ public class LivyatanWaveVisualEntityRenderer extends EntityRenderer<LivyatanWav
             float r, float g, float b, float a,
             float nx, float ny, float nz
     ) {
-        vc.vertex(entry, x, y, z)
+        vc.vertex(entry.getPositionMatrix(), x, y, z)
                 .color(r, g, b, a)
                 .texture(u, v)
                 .overlay(OverlayTexture.DEFAULT_UV)
                 .light(light)
-                .normal(entry, nx, ny, nz);
+                .normal(entry.getNormalMatrix(), nx, ny, nz).next();
     }
 
     private static Vec3d entitySafePos(MinecraftClient client) {

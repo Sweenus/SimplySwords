@@ -7,7 +7,6 @@ import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.api.AwakeningApi;
@@ -33,7 +32,7 @@ public class SimplySwordsClientAPI {
     }
 
     // See UniqueSwordItem for example usage
-    public static void generateDynamicTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Text> tooltip, TooltipType type, String modId, String itemPath, String uniquePath, String runicPath, Identifier customConfigPath) {
+    public static void generateDynamicTooltip(ItemStack itemStack, net.minecraft.world.World world, List<Text> tooltip, net.minecraft.client.item.TooltipContext tooltipContext, String modId, String itemPath, String uniquePath, String runicPath, Identifier customConfigPath) {
         Identifier entry = TooltipUtils.generateDefaultTooltipEntry(itemStack, itemPath);
 
         boolean showInfoButtons = Config.general.enableTooltipInfoButtons
@@ -53,9 +52,9 @@ public class SimplySwordsClientAPI {
         }
 
         if (itemStack.getItem() instanceof UniqueSwordItem) {
-            entry = TooltipUtils.handleUniqueSwordTooltip(itemStack, tooltipContext, tooltip, type, uniquePath);
+            entry = TooltipUtils.handleUniqueSwordTooltip(itemStack, world, tooltip, tooltipContext, uniquePath);
         } else if (itemStack.getItem() instanceof RunicSwordItem) {
-            entry = TooltipUtils.handleRunicSwordTooltip(itemStack, tooltipContext, tooltip, type, itemPath, runicPath);
+            entry = TooltipUtils.handleRunicSwordTooltip(itemStack, world, tooltip, tooltipContext, itemPath, runicPath);
         }
 
         // Process Control + Alt key events for navigation

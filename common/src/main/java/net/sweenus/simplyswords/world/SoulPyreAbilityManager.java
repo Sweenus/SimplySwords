@@ -82,7 +82,7 @@ public final class SoulPyreAbilityManager {
             return true;
         }
 
-        target.setOnFireFor(15.0F);
+        target.setOnFireFor(15);
         long now = contact.world.getTime();
         Map<UUID, Long> cooldowns = LAVA_DAMAGE_COOLDOWNS.computeIfAbsent(
                 contact.world,
@@ -437,7 +437,7 @@ public final class SoulPyreAbilityManager {
         world.playSoundFromEntity(
                 null,
                 actor,
-                SoundEvents.PARTICLE_SOUL_ESCAPE.value(),
+                SoundEvents.PARTICLE_SOUL_ESCAPE,
                 actor.getSoundCategory(),
                 1.15F,
                 0.55F
@@ -1026,7 +1026,7 @@ public final class SoulPyreAbilityManager {
         world.playSoundFromEntity(
                 null,
                 actor,
-                SoundEvents.PARTICLE_SOUL_ESCAPE.value(),
+                SoundEvents.PARTICLE_SOUL_ESCAPE,
                 actor.getSoundCategory(),
                 0.35F + Math.min(5, soulCount) * 0.035F,
                 1.15F + Math.min(5, soulCount) * 0.035F
@@ -1097,7 +1097,7 @@ public final class SoulPyreAbilityManager {
         world.playSoundFromEntity(
                 null,
                 actor,
-                SoundEvents.PARTICLE_SOUL_ESCAPE.value(),
+                SoundEvents.PARTICLE_SOUL_ESCAPE,
                 actor.getSoundCategory(),
                 0.9F,
                 0.78F

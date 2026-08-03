@@ -222,7 +222,7 @@ public final class VerdantTrailManager {
         }
         world.spawnParticles(ParticleTypes.FALLING_SPORE_BLOSSOM, center.x, center.y + 0.25, center.z, 1, 0.45, 0.08, 0.45, 0.0);
         if (world.random.nextFloat() < 0.45F) {
-            world.spawnParticles(new BlockStateParticleEffect(ParticleTypes.BLOCK, Blocks.SHORT_GRASS.getDefaultState()), center.x, center.y + 0.08, center.z, 1, 0.35, 0.03, 0.35, 0.01);
+            world.spawnParticles(new BlockStateParticleEffect(ParticleTypes.BLOCK, Blocks.GRASS.getDefaultState()), center.x, center.y + 0.08, center.z, 1, 0.35, 0.03, 0.35, 0.01);
         }
     }
 

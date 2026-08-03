@@ -112,7 +112,7 @@ public final class UniqueTooltipExportController {
         ItemStack stack = new ItemStack(spec.item().get());
         AwakeningApi.ensureInitialized(stack);
         AwakeningApi.setLevel(stack, spec.awakeningLevel());
-        stack.set(ComponentTypeRegistry.GEM_POWER.get(), GemPowerComponent.createEmpty(true, true));
+        ComponentTypeRegistry.GEM_POWER.set(stack, GemPowerComponent.createEmpty(true, true));
         return new TooltipExportEntry(spec.outputName(), stack);
     }
 

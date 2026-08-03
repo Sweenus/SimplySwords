@@ -4,7 +4,6 @@ import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
-import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.MathHelper;
@@ -30,7 +29,7 @@ public class SimplySwordsThrowableItem extends SimplySwordsSwordItem {
             double[] doubles = HelperMethods.getAttackFromSlot(user, itemStack, user.getActiveHand());
             thrownSwordEntity.primaryBaseDamage = (float) doubles[0];
             //System.out.println("Returned Attack value: " + (float) doubles[0]);
-            thrownSwordEntity.hasLoyalty = MathHelper.clamp(EnchantmentHelper.getTridentReturnAcceleration((ServerWorld) world, itemStack, user), 0, 127);
+            thrownSwordEntity.hasLoyalty = MathHelper.clamp(EnchantmentHelper.getLoyalty(itemStack), 0, 127);
             if (hand == Hand.OFF_HAND)
                 thrownSwordEntity.offhandThrow = true;
             thrownSwordEntity.setPos(user.getX(), user.getEyeY() - 0.5, user.getZ());

@@ -21,7 +21,7 @@ public class SporeSwarmEffect extends WideOrbitingEffect {
         setParticleType3(ParticleTypes.WARPED_SPORE);
     }
     @Override
-    public boolean applyUpdateEffect(LivingEntity livingEntity, int amplifier) {
+    public void applyUpdateEffect(LivingEntity livingEntity, int amplifier) {
         if (!livingEntity.getWorld().isClient()) {
             ServerWorld world = (ServerWorld) livingEntity.getWorld();
             double x = livingEntity.getX();
@@ -53,7 +53,6 @@ public class SporeSwarmEffect extends WideOrbitingEffect {
 
         super.applyUpdateEffect(livingEntity, amplifier);
 
-        return true;
     }
 
 

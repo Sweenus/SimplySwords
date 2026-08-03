@@ -16,7 +16,7 @@ import net.sweenus.simplyswords.registry.GemPowerRegistry;
 public class GemPowersConfig extends Config {
 
 	public GemPowersConfig() {
-		super(Identifier.of(SimplySwords.MOD_ID, "gem_powers"));
+		super(new Identifier(SimplySwords.MOD_ID, "gem_powers"));
 	}
 
 	@SuppressWarnings("deprecation")
