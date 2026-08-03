@@ -53,8 +53,7 @@ public final class NecromanticArsenalManager {
 
         minion.initializeMinion(attacker, stack.copy(), -1,
                 world.getTime() + Math.max(1, Config.gemPowers.necromanticArsenal.duration),
-                AwakeningApi.scaleGemPower(stack,
-                        (float) Math.max(0.0, HelperMethods.getEntityAttackDamage(attacker))));
+                getSummonPower(attacker, stack));
         world.spawnParticles(ParticleTypes.SOUL, minion.getX(), minion.getBodyY(0.55), minion.getZ(), 22, 0.45, 0.55, 0.45, 0.08);
         world.spawnParticles(ParticleTypes.SMOKE, minion.getX(), minion.getBodyY(0.45), minion.getZ(), 14, 0.35, 0.35, 0.35, 0.035);
         world.playSound(null, minion.getBlockPos(), SoundEvents.ENTITY_WITHER_SKELETON_AMBIENT, SoundCategory.PLAYERS, 0.65F, 1.35F);
@@ -80,8 +79,7 @@ public final class NecromanticArsenalManager {
 
         minion.initializeMinion(player, stack.copy(), findSourceWeaponSlot(player, stack),
                 world.getTime() + Math.max(1, Config.gemPowers.necromanticArsenal.duration),
-                AwakeningApi.scaleGemPower(stack,
-                        (float) Math.max(0.0, HelperMethods.getEntityAttackDamage(player))));
+                getSummonPower(player, stack));
         world.spawnParticles(ParticleTypes.SOUL, minion.getX(), minion.getBodyY(0.55), minion.getZ(), 22, 0.45, 0.55, 0.45, 0.08);
         world.spawnParticles(ParticleTypes.SMOKE, minion.getX(), minion.getBodyY(0.45), minion.getZ(), 14, 0.35, 0.35, 0.35, 0.035);
         world.playSound(null, minion.getBlockPos(), SoundEvents.ENTITY_WITHER_SKELETON_AMBIENT, SoundCategory.PLAYERS, 0.65F, 1.35F);
@@ -96,6 +94,12 @@ public final class NecromanticArsenalManager {
         for (SimplySwordsSkeletonMinionEntity minion : getOwnedMinions(world, player)) {
             minion.trySetRetaliationTarget(attacker);
         }
+    }
+
+    private static float getSummonPower(LivingEntity owner, ItemStack stack) {
+        float damageScaling = (float) Math.max(0.0001, Config.gemPowers.necromanticArsenal.damageScaling);
+        return HelperMethods.gemPowerScaledDamage("soul", owner, stack, 1.0F,
+                (float) Config.gemPowers.necromanticArsenal.spellScaling / damageScaling);
     }
 
     private static int getActiveMinionCount(ServerWorld world, ServerPlayerEntity player) {

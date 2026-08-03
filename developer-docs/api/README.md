@@ -15,6 +15,7 @@ Use `SimplySwordsAPI` as the preferred common-side facade and
 | Unique loot | `UniqueLootRegistry`, `SimplySwordsAPI.registerUniqueLoot` | [Unique loot](unique-loot.md) |
 | Weapon implicits | `WeaponImplicitDefinition`, `WeaponImplicitRegistry` | [Weapon implicits](weapon-implicits.md) |
 | Weapon hits | `DelegatedWeaponHitContext`, hit helpers on `SimplySwordsAPI` | [Combat and damage](combat-and-damage.md) |
+| Spell scaling | `SpellScalingProfile`, scaling helpers on `HelperMethods` | [Combat and damage](combat-and-damage.md) |
 | Remnant transformations | `SimplySwordsAPI.registerTransformation` | [Contained Remnants](contained-remnants.md) |
 | Battle Standards | `SimplySwordsAPI.spawnBattleStandard` | [Battle Standards](battle-standards.md) |
 | Observer status effects | `SimplySwordsAPI.registerObserverSyncedStatusEffect`, `ObserverStatusEffectClientApi` | [Observer status effects](observer-status-effects.md) |

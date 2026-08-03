@@ -18,6 +18,7 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.api.AwakeningApi;
+import net.sweenus.simplyswords.api.SpellScalingProfile;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.api.WeaponAbilityActivationSource;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
@@ -90,9 +91,10 @@ public final class BramblethornAbilityManager {
         }
 
         ItemStack stack = context.stack().copy();
-        float slamDamage = AwakeningApi.scaleEffect(stack,
-                HelperMethods.attackScaledDamage(actor, stack,
-                        Math.max(0.0F, Config.uniqueEffects.bramblethorn.slamDamageScaling)));
+        float slamDamage = HelperMethods.abilityScaledDamage(
+                SpellScalingProfile.NATURE, actor, stack,
+                Math.max(0.0F, Config.uniqueEffects.bramblethorn.slamDamageScaling),
+                Math.max(0.0F, Config.uniqueEffects.bramblethorn.slamSpellScaling));
         long now = world.getTime();
         int growingTicks = Math.max(1, Config.uniqueEffects.bramblethorn.rootTravelTicks);
         int bindingTicks = Math.max(1, Config.uniqueEffects.bramblethorn.bindingDuration);
@@ -259,9 +261,10 @@ public final class BramblethornAbilityManager {
     private static void launchHunt(ServerWorld world, LivingEntity attacker, ItemStack stack,
                                    LivingEntity previousTarget, LivingEntity target) {
         int travelTicks = Math.max(1, Config.uniqueEffects.bramblethorn.huntTravelTicks);
-        float damage = AwakeningApi.scaleEffect(stack,
-                HelperMethods.attackScaledDamage(attacker, stack,
-                        Math.max(0.0F, Config.uniqueEffects.bramblethorn.huntDamageScaling)));
+        float damage = HelperMethods.abilityScaledDamage(
+                SpellScalingProfile.NATURE, attacker, stack,
+                Math.max(0.0F, Config.uniqueEffects.bramblethorn.huntDamageScaling),
+                Math.max(0.0F, Config.uniqueEffects.bramblethorn.huntSpellScaling));
         float effectMultiplier = AwakeningApi.getEffectMultiplier(stack);
         int configuredSlowDuration = Math.max(0, Config.uniqueEffects.bramblethorn.huntSlowDuration);
         int slowDuration = configuredSlowDuration <= 0 || effectMultiplier <= 0.0F

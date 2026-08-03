@@ -270,10 +270,9 @@ public final class MagibladeAbilityManager {
 
     private static void completeCharge(ServerWorld world, LivingEntity actor, LivingEntity sourceOwner,
                                        ChargeState charge, long now) {
-        float damage = AwakeningApi.scaleEffect(
-                charge.stack,
-                HelperMethods.attackScaledDamage(actor, charge.stack, Config.uniqueEffects.magiblade.damageScaling)
-        );
+        float damage = HelperMethods.abilityScaledDamage("arcane", actor, charge.stack,
+                Config.uniqueEffects.magiblade.damageScaling,
+                Config.uniqueEffects.magiblade.spellScaling);
         Map<UUID, HeadState> heads = ACTIVE_HEADS.computeIfAbsent(world, ignored -> new HashMap<>());
         HeadState existing = heads.get(actor.getUuid());
         if (existing != null) {

@@ -48,7 +48,7 @@ public final class ShadowstingShadowDanceManager {
         PlayerEvent.PLAYER_QUIT.register(ShadowstingShadowDanceManager::onPlayerQuit);
     }
 
-    public static boolean start(ServerWorld world, ServerPlayerEntity player) {
+    public static boolean start(ServerWorld world, ServerPlayerEntity player, ItemStack stack) {
         if (world == null || player == null || ACTIVE_DANCES.containsKey(player.getUuid())) {
             return false;
         }
@@ -66,7 +66,8 @@ public final class ShadowstingShadowDanceManager {
                 world.getRegistryKey().getValue().toString(),
                 world.getTime() + getActiveDurationTicks(),
                 world.getTime(),
-                player.getPos()
+                player.getPos(),
+                stack.copy()
         );
         ACTIVE_DANCES.put(player.getUuid(), dance);
         player.addStatusEffect(new StatusEffectInstance(
@@ -86,7 +87,7 @@ public final class ShadowstingShadowDanceManager {
         return true;
     }
 
-    public static boolean start(ServerWorld world, LivingEntity actor, LivingEntity target) {
+    public static boolean start(ServerWorld world, LivingEntity actor, LivingEntity target, ItemStack stack) {
         if (world == null || actor == null || target == null || !actor.isAlive()
                 || !target.isAlive() || !HelperMethods.checkAbilityTarget(target, actor)) {
             return false;
@@ -101,7 +102,7 @@ public final class ShadowstingShadowDanceManager {
             Vec3d strikePos = findStrikePosition(world, actor, target);
             Vec3d lookTarget = target.getPos().add(0.0, Math.max(0.35, target.getHeight() * 0.55), 0.0);
             spawnDepartureParticles(world, previousPos.add(0.0, actor.getHeight() * 0.5, 0.0));
-            performWeaponStrike(actor, target);
+            performWeaponStrike(actor, target, stack);
             world.playSound(null, target.getX(), target.getY(), target.getZ(),
                     SoundRegistry.DARK_SWORD_WHOOSH_01.get(),
                     SoundCategory.PLAYERS, 0.45F, 1.45F + world.random.nextFloat() * 0.25F);
@@ -291,7 +292,7 @@ public final class ShadowstingShadowDanceManager {
         dance.lastLookTarget = lookTarget;
         lockPlayer(player);
 
-        performWeaponStrike(player, target);
+        performWeaponStrike(player, target, dance.stack);
 
         world.playSound(null, target.getX(), target.getY(), target.getZ(),
                 SoundRegistry.DARK_SWORD_WHOOSH_01.get(),
@@ -336,31 +337,35 @@ public final class ShadowstingShadowDanceManager {
         int previousDepth = CURRENT_CLONE_DEPTH.get();
         CURRENT_CLONE_DEPTH.set(strike.chainDepth());
         try {
-            performWeaponStrike(owner, target);
+            performWeaponStrike(owner, target, owner.getMainHandStack());
         } finally {
             CURRENT_CLONE_DEPTH.set(previousDepth);
         }
     }
 
-    private static void performWeaponStrike(ServerPlayerEntity player, LivingEntity target) {
+    private static void performWeaponStrike(ServerPlayerEntity player, LivingEntity target, ItemStack stack) {
         if (player == null || target == null || !player.isAlive() || !target.isAlive()) {
             return;
         }
 
-        ItemStack stack = player.getMainHandStack();
         DamageSource damageSource = player.getDamageSources().playerAttack(player);
         target.timeUntilRegen = 0;
-        if (target.damage(damageSource, (float) HelperMethods.getEntityAttackDamage(player)) && !stack.isEmpty()) {
+        float damage = HelperMethods.abilityScaledDamage("soul", player, stack,
+                Config.uniqueEffects.shadowsting.damageScaling,
+                Config.uniqueEffects.shadowsting.spellScaling);
+        if (target.damage(damageSource, damage) && !stack.isEmpty()) {
             stack.getItem().postHit(stack, target, player);
         }
     }
 
-    private static void performWeaponStrike(LivingEntity actor, LivingEntity target) {
+    private static void performWeaponStrike(LivingEntity actor, LivingEntity target, ItemStack stack) {
         if (actor == null || target == null || !actor.isAlive() || !target.isAlive() || !HelperMethods.checkAbilityTarget(target, actor)) {
             return;
         }
-        ItemStack stack = actor.getMainHandStack();
-        float damage = HelperMethods.applyNonPlayerAbilityDamageModifier(actor, (float) HelperMethods.getEntityAttackDamage(actor));
+        float damage = HelperMethods.abilityScaledDamage("soul", actor, stack,
+                Config.uniqueEffects.shadowsting.damageScaling,
+                Config.uniqueEffects.shadowsting.spellScaling);
+        damage = HelperMethods.applyNonPlayerAbilityDamageModifier(actor, damage);
         SimplySwordsAPI.applyEntityWeaponHit(stack, target, actor, damage);
     }
 
@@ -552,6 +557,7 @@ public final class ShadowstingShadowDanceManager {
         private final String worldKey;
         private final long endTick;
         private final Vec3d anchorPos;
+        private final ItemStack stack;
         private long nextStrikeTick;
         private Vec3d lastStrikePos;
         private Vec3d lastVisualPos;
@@ -565,11 +571,12 @@ public final class ShadowstingShadowDanceManager {
         private float finishEndYaw;
         private float finishEndPitch;
 
-        private ActiveShadowDance(String worldKey, long endTick, long nextStrikeTick, Vec3d anchorPos) {
+        private ActiveShadowDance(String worldKey, long endTick, long nextStrikeTick, Vec3d anchorPos, ItemStack stack) {
             this.worldKey = worldKey;
             this.endTick = endTick;
             this.nextStrikeTick = nextStrikeTick;
             this.anchorPos = anchorPos;
+            this.stack = stack;
             this.lastVisualPos = anchorPos;
         }
     }

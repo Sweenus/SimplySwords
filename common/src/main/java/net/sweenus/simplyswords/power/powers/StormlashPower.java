@@ -38,7 +38,7 @@ public class StormlashPower extends RunefusedGemPower {
             return;
         }
 
-        float damage = HelperMethods.abilityScaledDamage("lightning", attacker, stack,
+        float damage = HelperMethods.gemPowerScaledDamage("lightning", attacker, stack,
                 Config.gemPowers.stormlash.damageScaling,
                 Config.gemPowers.stormlash.spellScaling);
         DelegatedWeaponHitContext context = SimplySwordsAPI.getDelegatedWeaponHitContext();
@@ -68,6 +68,7 @@ public class StormlashPower extends RunefusedGemPower {
         if (TooltipUtils.shouldDisplayTooltip(itemStack, null)) {
             tooltip.add(Text.literal("").append(Text.translatable("item.simplyswords.stormlashsworditem.tooltip2")).setStyle(Styles.RUNIC_DESCRIPTION));
         }
+        TooltipUtils.appendSpellScaleTooltip(tooltip, "lightning");
     }
 
     public static class Settings extends TooltipSettings {

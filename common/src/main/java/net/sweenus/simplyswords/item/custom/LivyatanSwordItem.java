@@ -65,7 +65,9 @@ public class LivyatanSwordItem extends UniqueSwordItem implements UniqueWeaponAc
         float abilityDamage = HelperMethods.abilityScaledDamage("frost", user, itemStack,
                 Config.uniqueEffects.livyatan.damageScaling, Config.uniqueEffects.livyatan.spellScaling);
         int duration = Config.uniqueEffects.livyatan.duration;
-        float returnDamage = HelperMethods.attackScaledDamage(user, itemStack, Config.uniqueEffects.livyatan.returnDamageScaling);
+        float returnDamage = HelperMethods.abilityScaledDamage("frost", user, itemStack,
+                Config.uniqueEffects.livyatan.returnDamageScaling,
+                Config.uniqueEffects.livyatan.returnSpellScaling);
         double radius = Config.uniqueEffects.livyatan.radius;
         if (!world.isClient) {
             itemStack = user.getStackInHand(hand);
@@ -107,7 +109,9 @@ public class LivyatanSwordItem extends UniqueSwordItem implements UniqueWeaponAc
         livyatanEntity.setPitch(context.actor().getPitch());
         livyatanEntity.primaryBaseDamage = abilityDamage;
         livyatanEntity.slownessDuration = Config.uniqueEffects.livyatan.duration;
-        livyatanEntity.primaryReturnDamage = HelperMethods.attackScaledDamage(context.actor(), context.stack(), Config.uniqueEffects.livyatan.returnDamageScaling);
+        livyatanEntity.primaryReturnDamage = HelperMethods.abilityScaledDamage("frost", context.actor(), context.stack(),
+                Config.uniqueEffects.livyatan.returnDamageScaling,
+                Config.uniqueEffects.livyatan.returnSpellScaling);
         livyatanEntity.primaryReturnDamageRadius = Config.uniqueEffects.livyatan.radius;
         livyatanEntity.setPos(context.actor().getX(), context.actor().getEyeY() - 0.5, context.actor().getZ());
         livyatanEntity.markNonReturning(Config.uniqueEffects.livyatan.duration + 80);
@@ -149,6 +153,8 @@ public class LivyatanSwordItem extends UniqueSwordItem implements UniqueWeaponAc
 
         @ValidatedFloat.Restrict(min = 0)
         public float returnDamageScaling = 0.64f;
+        @ValidatedFloat.Restrict(min = 0)
+        public float returnSpellScaling = 1.28f;
         @ValidatedFloat.Restrict(min = 0f)
         public float damageScaling = 0.64f;
         @ValidatedInt.Restrict(min = 0)

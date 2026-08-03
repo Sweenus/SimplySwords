@@ -51,7 +51,7 @@ public class BrimstoneClaymoreItem extends UniqueSwordItem implements TwoHandedW
 
         if (!world.isClient() && world instanceof ServerWorld serverWorld && user instanceof ServerPlayerEntity serverPlayer) {
             LivingEntity target = StealSwordItem.findLenientTarget(user, Config.uniqueEffects.brimstone_claymore.range);
-            if (target == null || !activateBrimstone(serverWorld, serverPlayer, target)) {
+            if (target == null || !activateBrimstone(serverWorld, serverPlayer, target, itemStack)) {
                 return TypedActionResult.fail(itemStack);
             }
             serverPlayer.getItemCooldownManager().set(itemStack.getItem(), Config.uniqueEffects.brimstone_claymore.cooldown);
@@ -65,7 +65,7 @@ public class BrimstoneClaymoreItem extends UniqueSwordItem implements TwoHandedW
         if (!canActivate(context)) {
             return false;
         }
-        return activateBrimstone(context.world(), context.actor(), context.target());
+        return activateBrimstone(context.world(), context.actor(), context.target(), context.stack());
     }
 
     @Override
@@ -73,11 +73,11 @@ public class BrimstoneClaymoreItem extends UniqueSwordItem implements TwoHandedW
         return Config.uniqueEffects.brimstone_claymore.cooldown;
     }
 
-    private static boolean activateBrimstone(ServerWorld world, LivingEntity owner, LivingEntity target) {
+    private static boolean activateBrimstone(ServerWorld world, LivingEntity owner, LivingEntity target, ItemStack stack) {
         if (target == null || !target.isAlive() || !HelperMethods.checkAbilityTarget(target, owner)) {
             return false;
         }
-        BrimstoneClaymoreAbilityManager.start(world, owner, target);
+        BrimstoneClaymoreAbilityManager.start(world, owner, target, stack);
         return true;
     }
 
@@ -107,7 +107,9 @@ public class BrimstoneClaymoreItem extends UniqueSwordItem implements TwoHandedW
                         livingEntity.setOnFireFor(3);
                         livingEntity.takeKnockback(1, 0.1, 0.1);
                         livingEntity.timeUntilRegen = 0;
-                        float damage = HelperMethods.attackScaledDamage(attacker, stack, Config.uniqueEffects.brimstone_claymore.hitDamageScaling);
+                        float damage = HelperMethods.abilityScaledDamage("fire", attacker, stack,
+                                Config.uniqueEffects.brimstone_claymore.hitDamageScaling,
+                                Config.uniqueEffects.brimstone_claymore.hitSpellScaling);
                         livingEntity.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments(world, stack, livingEntity, damageSource, damage));
                         livingEntity.timeUntilRegen = 0;
                     }
@@ -148,6 +150,7 @@ public class BrimstoneClaymoreItem extends UniqueSwordItem implements TwoHandedW
         appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.brimstone_claymore.cooldown);
 
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        net.sweenus.simplyswords.client.util.TooltipUtils.appendSpellScaleTooltip(tooltip, "fire");
     }
 
     public static class EffectSettings extends TooltipSettings {
@@ -173,11 +176,15 @@ public class BrimstoneClaymoreItem extends UniqueSwordItem implements TwoHandedW
         @ValidatedFloat.Restrict(min = 0f)
         public float hitDamageScaling = 0.8f;
         @ValidatedFloat.Restrict(min = 0f)
+        public float hitSpellScaling = 1.6f;
+        @ValidatedFloat.Restrict(min = 0f)
         public float pulseDamageScaling = 0.28f;
         @ValidatedFloat.Restrict(min = 0f)
         public float radiusGrowthPerHit = 0.35f;
         @ValidatedFloat.Restrict(min = 0f)
         public float finalDamageScaling = 1.0f;
+        @ValidatedFloat.Restrict(min = 0f)
+        public float spellScaling = 2.0f;
         @ValidatedDouble.Restrict(min = 0.0)
         public double targetJumpRange = 8.0;
 

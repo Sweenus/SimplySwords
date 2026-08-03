@@ -120,6 +120,7 @@ public class MagibladeSwordItem extends UniqueSwordItem implements UniqueWeaponA
         appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.magiblade.cooldown);
 
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        net.sweenus.simplyswords.client.util.TooltipUtils.appendSpellScaleTooltip(tooltip, "arcane");
     }
 
     public static class EffectSettings extends TooltipSettings {
@@ -132,6 +133,8 @@ public class MagibladeSwordItem extends UniqueSwordItem implements UniqueWeaponA
         public int cooldown = 35;
         @ValidatedFloat.Restrict(min = 0f)
         public float damageScaling = 0.85f;
+        @ValidatedFloat.Restrict(min = 0f)
+        public float spellScaling = 1.70f;
         @ValidatedInt.Restrict(min = 0, max = 100)
         public int repelChance = 55;
         @ValidatedFloat.Restrict(min = 1f)

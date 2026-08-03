@@ -86,6 +86,9 @@ The multiplier is zero below the profile's ability unlock level and then follows
 damage and spell-power scaling and then applies awakening scaling. Do not call
 `scaleEffect` on its result a second time.
 
+Use `HelperMethods.abilityScaledValue(...)` for a fixed full-strength value that
+should compete with spell power. It also applies `scaleEffect` internally.
+
 Gem powers use their own named helpers:
 
 ```java
@@ -97,6 +100,11 @@ AwakeningApi.scaleGemPowerDuration(stack, fullTicks);
 
 Non-awakenable weapons, including runic weapons, behave at full gem-power
 strength.
+
+Damage-bearing gem powers should normally use
+`HelperMethods.gemPowerScaledDamage(...)` or `gemPowerScaledValue(...)`. These
+helpers select the greater physical/spell result and apply `scaleGemPower`
+exactly once.
 
 ## Global compatibility mode
 

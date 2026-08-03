@@ -144,7 +144,8 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
         actor.velocityModified = true;
 
         float multiplier = getBackstabMultiplier(stacks);
-        float damage = (float) (HelperMethods.getEntityAttackDamage(actor) * multiplier);
+        float damage = HelperMethods.abilityScaledDamage("soul", actor, stack,
+                multiplier, multiplier * Config.uniqueEffects.soulstealer.spellScalingPerMultiplier);
         damage = HelperMethods.applyNonPlayerAbilityDamageModifier(actor, damage);
         DamageSource damageSource = SimplySwordsAPI.getWeaponDamageSource(actor);
         target.timeUntilRegen = 0;
@@ -353,6 +354,7 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
         tooltip.add(Text.translatable("item.simplyswords.stealsworditem.tooltip5").setStyle(Styles.TEXT));
         appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.soulstealer.cooldown);
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        net.sweenus.simplyswords.client.util.TooltipUtils.appendSpellScaleTooltip(tooltip, "soul");
     }
 
     public static class EffectSettings extends TooltipSettings {
@@ -377,5 +379,7 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
         public float minBackstabMultiplier = 2.0f;
         @ValidatedFloat.Restrict(min = 0f)
         public float maxBackstabMultiplier = 5.0f;
+        @ValidatedFloat.Restrict(min = 0f)
+        public float spellScalingPerMultiplier = 2.0f;
     }
 }

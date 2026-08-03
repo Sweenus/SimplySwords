@@ -90,7 +90,21 @@ public class TempestSwordItem extends UniqueSwordItem implements UniqueWeaponAct
                     target, statusSelect, 500, 1, vortexMaxStacks);
 
             effect.setSourceEntity(attacker);
-            effect.setAdditionalData((int) HelperMethods.getEntityAttackDamage(attacker) / 3);
+            float scaledDamage;
+            if (statusSelect == EffectRegistry.getReference(EffectRegistry.FIRE_VORTEX)) {
+                scaledDamage = HelperMethods.abilityScaledDamage("fire", attacker, stack,
+                        Config.uniqueEffects.tempest.damageScaling, Config.uniqueEffects.tempest.spellScaling);
+            } else if (statusSelect == EffectRegistry.getReference(EffectRegistry.FROST_VORTEX)) {
+                scaledDamage = HelperMethods.abilityScaledDamage("frost", attacker, stack,
+                        Config.uniqueEffects.tempest.damageScaling, Config.uniqueEffects.tempest.spellScaling);
+            } else {
+                scaledDamage = Math.max(
+                        HelperMethods.abilityScaledDamage("fire", attacker, stack,
+                                Config.uniqueEffects.tempest.damageScaling, Config.uniqueEffects.tempest.spellScaling),
+                        HelperMethods.abilityScaledDamage("frost", attacker, stack,
+                                Config.uniqueEffects.tempest.damageScaling, Config.uniqueEffects.tempest.spellScaling));
+            }
+            effect.setAdditionalData(Math.max(1, Math.round(scaledDamage)));
             target.addStatusEffect(effect);
 
         }
@@ -215,6 +229,8 @@ public class TempestSwordItem extends UniqueSwordItem implements UniqueWeaponAct
         public int maxSize = 30;
         @ValidatedInt.Restrict(min = 1)
         public int maxStacks = 10;
+        @ValidatedFloat.Restrict(min = 0f)
+        public float damageScaling = 0.33f;
         @ValidatedFloat.Restrict(min = 0f)
         public float spellScaling = 0.24f;
 

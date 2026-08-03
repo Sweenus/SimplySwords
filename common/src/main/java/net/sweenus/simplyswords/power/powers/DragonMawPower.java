@@ -47,6 +47,7 @@ public class DragonMawPower extends NetherGemPower {
         if (TooltipUtils.shouldDisplayTooltip(itemStack, null)) {
             tooltip.add(Text.literal("").append(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.dragon_maw.description")).setStyle(Styles.NETHERFUSED_DESCRIPTION));
         }
+        TooltipUtils.appendSpellScaleTooltip(tooltip, "fire");
     }
 
     public static class Settings extends TooltipSettings {
@@ -87,6 +88,8 @@ public class DragonMawPower extends NetherGemPower {
         @Translation(prefix = "simplyswords.config.basic_settings")
         @ValidatedFloat.Restrict(min = 0f)
         public float damageScaling = 0.45F;
+        @ValidatedFloat.Restrict(min = 0f)
+        public float spellScaling = 0.90F;
 
         @ValidatedFloat.Restrict(min = 0.1f)
         public float headScale = 2.35F;

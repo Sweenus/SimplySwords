@@ -186,7 +186,9 @@ public final class SoulkeeperLanternManager {
     }
 
     private static float getLanternDamage(LivingEntity player, ItemStack stack) {
-        return HelperMethods.attackScaledDamage(player, stack, Config.uniqueEffects.soulkeeper.lanternDamageScaling);
+        return HelperMethods.abilityScaledDamage("soul", player, stack,
+                Config.uniqueEffects.soulkeeper.lanternDamageScaling,
+                Config.uniqueEffects.soulkeeper.spellScaling);
     }
 
     private static boolean damageTarget(ServerWorld world, LivingEntity player, LivingEntity target, float damage) {

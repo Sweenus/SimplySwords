@@ -134,6 +134,7 @@ public class WaxweaverSwordItem extends UniqueSwordItem implements RevivalWeapon
         appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.waxweaver.activeCooldown);
 
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        net.sweenus.simplyswords.client.util.TooltipUtils.appendSpellScaleTooltip(tooltip, "fire");
     }
 
     public static class EffectSettings extends TooltipSettings {
@@ -165,6 +166,8 @@ public class WaxweaverSwordItem extends UniqueSwordItem implements RevivalWeapon
         @ValidatedInt.Restrict(min = 1)
         @ValidatedFloat.Restrict(min = 0.0F)
         public float explosionDamageScaling = 0.55F;
+        @ValidatedFloat.Restrict(min = 0.0F)
+        public float spellScaling = 2.0F;
         @ValidatedFloat.Restrict(min = 0.5F)
         public float explosionRadius = 4.0F;
         @ValidatedFloat.Restrict(min = 0.0F)

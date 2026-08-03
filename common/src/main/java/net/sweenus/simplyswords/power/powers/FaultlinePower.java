@@ -37,8 +37,8 @@ public class FaultlinePower extends RunefusedGemPower {
             return;
         }
 
-        float damage = HelperMethods.abilityScaledDamage(
-                "earth",
+        float damage = HelperMethods.gemPowerScaledDamage(
+                "nature",
                 attacker,
                 stack,
                 Config.gemPowers.faultline.damageScaling,
@@ -63,6 +63,7 @@ public class FaultlinePower extends RunefusedGemPower {
         if (TooltipUtils.shouldDisplayTooltip(itemStack, null)) {
             tooltip.add(Text.literal("").append(Text.translatable("item.simplyswords.faultlinesworditem.tooltip2")).setStyle(Styles.RUNIC_DESCRIPTION));
         }
+        TooltipUtils.appendSpellScaleTooltip(tooltip, "nature");
     }
 
     public static class Settings extends TooltipSettings {

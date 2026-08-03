@@ -2,6 +2,7 @@ package net.sweenus.simplyswords.world;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.server.world.ServerWorld;
@@ -30,13 +31,13 @@ public final class WhisperwindVisualManager {
         return (dashes != null && !dashes.isEmpty()) || (strikes != null && !strikes.isEmpty()) || (world.getTime() % 80L == 0L);
     }
 
-    public static void startDash(ServerWorld world, LivingEntity user) {
+    public static void startDash(ServerWorld world, LivingEntity user, ItemStack stack) {
         if (world == null || user == null) {
             return;
         }
 
         ACTIVE_DASHES.computeIfAbsent(world, ignored -> new HashMap<>())
-                .put(user.getUuid(), new ActiveDash(user.getPos(), user.getPos()));
+                .put(user.getUuid(), new ActiveDash(user.getPos(), user.getPos(), stack.copy()));
     }
 
     public static void recordDashTick(ServerWorld world, LivingEntity user, Iterable<? extends Entity> entities) {
@@ -47,7 +48,7 @@ public final class WhisperwindVisualManager {
 
         ActiveDash dash = dashes.get(user.getUuid());
         if (dash == null) {
-            dash = new ActiveDash(user.getPos(), user.getPos());
+            dash = new ActiveDash(user.getPos(), user.getPos(), user.getMainHandStack().copy());
             dashes.put(user.getUuid(), dash);
         }
         dash.end = user.getPos();
@@ -76,14 +77,14 @@ public final class WhisperwindVisualManager {
         if (!dash.targets.isEmpty()) {
             long triggerTick = world.getTime() + Config.uniqueEffects.whisperwind.delayedDamageDelay;
             PENDING_STRIKES.computeIfAbsent(world, ignored -> new HashSet<>())
-                    .add(new PendingStrike(user.getUuid(), dash.start, dash.end, new HashSet<>(dash.targets), triggerTick));
+                    .add(new PendingStrike(user.getUuid(), dash.stack.copy(), dash.start, dash.end, new HashSet<>(dash.targets), triggerTick));
         }
         if (dashes.isEmpty()) {
             ACTIVE_DASHES.remove(world);
         }
     }
 
-    public static void scheduleTargetStrike(ServerWorld world, LivingEntity user, LivingEntity target) {
+    public static void scheduleTargetStrike(ServerWorld world, LivingEntity user, LivingEntity target, ItemStack stack) {
         if (world == null || user == null || target == null || !user.isAlive()
                 || !target.isAlive() || !HelperMethods.checkAbilityTarget(target, user)) {
             return;
@@ -93,7 +94,7 @@ public final class WhisperwindVisualManager {
         Set<UUID> targets = new HashSet<>();
         targets.add(target.getUuid());
         PENDING_STRIKES.computeIfAbsent(world, ignored -> new HashSet<>())
-                .add(new PendingStrike(user.getUuid(), start, end, targets,
+                .add(new PendingStrike(user.getUuid(), stack.copy(), start, end, targets,
                         world.getTime() + Config.uniqueEffects.whisperwind.delayedDamageDelay));
         world.playSound(null, start.x, start.y, start.z, SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_IMPACT_01.get(),
                 SoundCategory.PLAYERS, 0.6F, 1.0F);
@@ -128,9 +129,11 @@ public final class WhisperwindVisualManager {
             return;
         }
 
-        float damage = HelperMethods.attackScaledDamage(source, source.getMainHandStack(),
+        float damage = HelperMethods.abilityScaledDamage("evocation", source, strike.stack,
                 Config.uniqueEffects.whisperwind.delayedDamageScaling
-                        + strike.targetIds.size() * Config.uniqueEffects.whisperwind.delayedDamagePerTargetScaling);
+                        + strike.targetIds.size() * Config.uniqueEffects.whisperwind.delayedDamagePerTargetScaling,
+                Config.uniqueEffects.whisperwind.delayedSpellScaling
+                        + strike.targetIds.size() * Config.uniqueEffects.whisperwind.delayedSpellPerTargetScaling);
         for (UUID targetId : strike.targetIds) {
             Entity entity = world.getEntity(targetId);
             if (!(entity instanceof LivingEntity target) || !target.isAlive() || !HelperMethods.checkAbilityTarget(target, source)) {
@@ -139,7 +142,7 @@ public final class WhisperwindVisualManager {
 
             target.timeUntilRegen = 0;
             var damageSource = world.getDamageSources().indirectMagic(source, source);
-            target.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments(world, source.getMainHandStack(), target, damageSource, damage));
+            target.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments(world, strike.stack, target, damageSource, damage));
             spawnBlossoms(world, target);
         }
 
@@ -210,14 +213,16 @@ public final class WhisperwindVisualManager {
     private static final class ActiveDash {
         private final Vec3d start;
         private final Set<UUID> targets = new HashSet<>();
+        private final ItemStack stack;
         private Vec3d end;
 
-        private ActiveDash(Vec3d start, Vec3d end) {
+        private ActiveDash(Vec3d start, Vec3d end, ItemStack stack) {
             this.start = start;
             this.end = end;
+            this.stack = stack;
         }
     }
 
-    private record PendingStrike(UUID sourceId, Vec3d start, Vec3d end, Set<UUID> targetIds, long triggerTick) {
+    private record PendingStrike(UUID sourceId, ItemStack stack, Vec3d start, Vec3d end, Set<UUID> targetIds, long triggerTick) {
     }
 }

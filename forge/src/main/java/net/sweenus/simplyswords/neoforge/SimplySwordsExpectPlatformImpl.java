@@ -1,7 +1,7 @@
 package net.sweenus.simplyswords.neoforge;
 
 
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.LivingEntity;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLPaths;
 import net.sweenus.simplyswords.SimplySwordsExpectPlatform;
@@ -20,5 +20,5 @@ public class SimplySwordsExpectPlatformImpl {
 
     public static String getVersion() {return ModList.get().getModContainerById(MOD_ID).map(it -> it.getModInfo().getVersion().toString()).orElseThrow();}
 
-    public static float getSpellPowerDamage(float damageModifier, PlayerEntity player, String magicSchool) {return ForgeHelperMethods.useSpellAttributeScaling(damageModifier, player, magicSchool);}
+    public static float getSpellPowerDamage(float damageModifier, LivingEntity player, String magicSchool) {return ForgeHelperMethods.useSpellAttributeScaling(damageModifier, player, magicSchool);}
 }

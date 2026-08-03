@@ -106,6 +106,7 @@ public class BrambleSwordItem extends UniqueSwordItem implements UniqueWeaponAct
         appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.bramblethorn.cooldown);
 
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        net.sweenus.simplyswords.client.util.TooltipUtils.appendSpellScaleTooltip(tooltip, "nature");
     }
 
     public static class EffectSettings extends TooltipSettings {
@@ -132,6 +133,8 @@ public class BrambleSwordItem extends UniqueSwordItem implements UniqueWeaponAct
         public float sharedDamageRatio = 0.35F;
         @ValidatedFloat.Restrict(min = 0.0F)
         public float slamDamageScaling = 0.85F;
+        @ValidatedFloat.Restrict(min = 0.0F)
+        public float slamSpellScaling = 1.70F;
         @ValidatedFloat.Restrict(min = 0.1F)
         public float maximumLiftWidth = 1.5F;
         @ValidatedFloat.Restrict(min = 0.1F)
@@ -156,6 +159,8 @@ public class BrambleSwordItem extends UniqueSwordItem implements UniqueWeaponAct
         public double huntHitRadius = 0.7;
         @ValidatedFloat.Restrict(min = 0.0F)
         public float huntDamageScaling = 0.30F;
+        @ValidatedFloat.Restrict(min = 0.0F)
+        public float huntSpellScaling = 0.60F;
         @ValidatedInt.Restrict(min = 0)
         public int huntSlowDuration = 30;
         @ValidatedInt.Restrict(min = 0, max = 4)

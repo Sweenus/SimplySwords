@@ -71,6 +71,7 @@ public class SnifferSlamPower extends RunefusedGemPower {
         if (TooltipUtils.shouldDisplayTooltip(itemStack, null)) {
             tooltip.add(Text.literal("").append(Text.translatable("item.simplyswords.snifferslamsworditem.tooltip2")).setStyle(Styles.RUNIC_DESCRIPTION));
         }
+        TooltipUtils.appendSpellScaleTooltip(tooltip, "nature");
     }
 
     public static class Settings extends TooltipSettings {
@@ -86,6 +87,8 @@ public class SnifferSlamPower extends RunefusedGemPower {
         @Translation(prefix = "simplyswords.config.basic_settings")
         @ValidatedDouble.Restrict(min = 0.0)
         public double damageScaling = 2.0;
+        @ValidatedDouble.Restrict(min = 0.0)
+        public double spellScaling = 4.0;
 
         @ValidatedDouble.Restrict(min = 1.0)
         public double fallHeight = 8.0;

@@ -85,7 +85,13 @@ public final class RiftEchoPower extends RunefusedGemPower {
         if (attacker.getWorld().isClient()) {
             return;
         }
-        float strength = AwakeningApi.scaleGemPower(stack, 2.0F);
+        float strength = HelperMethods.gemPowerScaledDamage(
+                SpellScalingProfile.ELDRITCH,
+                attacker,
+                stack,
+                0.5F,
+                1.0F
+        );
         if (strength <= 0.0F) {
             return;
         }
@@ -156,3 +162,9 @@ int ticks = AwakeningApi.scaleGemPowerDuration(stack, fullDuration);
 ```
 
 Runic and other non-awakenable weapons always receive full values.
+
+Use `gemPowerScaledDamage` for attack-derived damage and
+`gemPowerScaledValue` when the non-spell side is a fixed value. They select the
+greater result and apply gem awakening once. Do not pass their result through
+`scaleGemPower` again. The available loader-neutral profiles and their Fabric
+and NeoForge mappings are listed in [Combat and damage](combat-and-damage.md).

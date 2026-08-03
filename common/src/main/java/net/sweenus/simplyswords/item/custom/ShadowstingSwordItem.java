@@ -1,6 +1,7 @@
 package net.sweenus.simplyswords.item.custom;
 
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
+import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -58,7 +59,7 @@ public class ShadowstingSwordItem extends UniqueSwordItem implements UniqueWeapo
     public TypedActionResult<ItemStack> startPlayerAbility(World world, PlayerEntity user, Hand hand) {
         ItemStack itemStack = user.getStackInHand(hand);
         if (!world.isClient() && world instanceof ServerWorld serverWorld && user instanceof ServerPlayerEntity serverPlayer) {
-            if (!ShadowstingShadowDanceManager.start(serverWorld, serverPlayer)) {
+            if (!ShadowstingShadowDanceManager.start(serverWorld, serverPlayer, itemStack)) {
                 return TypedActionResult.fail(itemStack);
             }
             user.getItemCooldownManager().set(itemStack.getItem(), Config.uniqueEffects.shadowsting.cooldown);
@@ -70,7 +71,7 @@ public class ShadowstingSwordItem extends UniqueSwordItem implements UniqueWeapo
     public boolean activate(WeaponAbilityContext context) {
         return context.target() != null
                 && HelperMethods.checkAbilityTarget(context.target(), context.actor())
-                && ShadowstingShadowDanceManager.start(context.world(), context.actor(), context.target());
+                && ShadowstingShadowDanceManager.start(context.world(), context.actor(), context.target(), context.stack());
     }
 
     @Override
@@ -96,6 +97,7 @@ public class ShadowstingSwordItem extends UniqueSwordItem implements UniqueWeapo
         appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.shadowsting.cooldown);
 
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        net.sweenus.simplyswords.client.util.TooltipUtils.appendSpellScaleTooltip(tooltip, "soul");
     }
 
     public static class EffectSettings extends TooltipSettings {
@@ -114,6 +116,10 @@ public class ShadowstingSwordItem extends UniqueSwordItem implements UniqueWeapo
         public int strikeInterval = 8;
         @ValidatedInt.Restrict(min = 1)
         public int strikeRadius = 10;
+        @ValidatedFloat.Restrict(min = 0f)
+        public float damageScaling = 1.0f;
+        @ValidatedFloat.Restrict(min = 0f)
+        public float spellScaling = 2.0f;
 
     }
 }

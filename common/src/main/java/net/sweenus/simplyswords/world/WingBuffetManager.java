@@ -38,8 +38,9 @@ public final class WingBuffetManager {
         Vec3d center = attacker.getPos().add(0.0, attacker.getHeight() * 0.55, 0.0);
         double range = Math.max(0.5, Config.gemPowers.wingBuffet.range);
         double halfAngleCos = Math.cos(Math.toRadians(MathHelper.clamp(Config.gemPowers.wingBuffet.coneAngleDegrees, 1.0, 180.0) * 0.5));
-        float damage = AwakeningApi.scaleGemPower(stack,
-                HelperMethods.attackScaledDamage(attacker, stack, Config.gemPowers.wingBuffet.damageScaling));
+        float damage = HelperMethods.gemPowerScaledDamage("evocation", attacker, stack,
+                Config.gemPowers.wingBuffet.damageScaling,
+                Config.gemPowers.wingBuffet.spellScaling);
         DamageSource damageSource = SimplySwordsAPI.getWeaponDamageSource(attacker);
         boolean hitAny = false;
 

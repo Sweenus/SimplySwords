@@ -49,6 +49,7 @@ public class DancingBladesPower extends RunefusedGemPower {
         if (TooltipUtils.shouldDisplayTooltip(itemStack, null)) {
             tooltip.add(Text.literal("").append(Text.translatable("item.simplyswords.dancingbladessworditem.tooltip2")).setStyle(Styles.RUNIC_DESCRIPTION));
         }
+        TooltipUtils.appendSpellScaleTooltip(tooltip, "evocation");
     }
 
     public static class Settings extends TooltipSettings {
@@ -73,5 +74,7 @@ public class DancingBladesPower extends RunefusedGemPower {
 
         @ValidatedFloat.Restrict(min = 0f)
         public float damageScaling = 0.8f;
+        @ValidatedFloat.Restrict(min = 0f)
+        public float spellScaling = 1.6f;
     }
 }

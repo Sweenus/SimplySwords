@@ -66,8 +66,9 @@ public final class EvocationFangManager {
             return;
         }
 
-        float damage = AwakeningApi.scaleGemPower(stack,
-                HelperMethods.attackScaledDamage(owner, stack, Config.gemPowers.evocation.damageScaling));
+        float damage = HelperMethods.gemPowerScaledDamage("evocation", owner, stack,
+                Config.gemPowers.evocation.damageScaling,
+                Config.gemPowers.evocation.spellScaling);
         if (damage <= 0.0F) {
             return;
         }

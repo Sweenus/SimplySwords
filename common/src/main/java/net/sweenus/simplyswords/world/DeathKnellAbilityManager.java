@@ -340,11 +340,10 @@ public final class DeathKnellAbilityManager {
         );
         affected.sort(Comparator.comparingDouble(candidate -> candidate.squaredDistanceTo(center)));
 
-        float baseDamage = HelperMethods.attackScaledDamage(
-                actor,
-                outbreak.stack,
-                Math.max(0.0F, Config.uniqueEffects.toxic_longsword.tollDamageScaling)
-        );
+        float baseDamage = HelperMethods.abilityScaledDamage(
+                "soul", actor, outbreak.stack,
+                Math.max(0.0F, Config.uniqueEffects.toxic_longsword.tollDamageScaling),
+                Math.max(0.0F, Config.uniqueEffects.toxic_longsword.tollSpellScaling));
         for (LivingEntity candidate : affected) {
             if (outbreak.damagedTargetIds.add(candidate.getUuid())) {
                 damageTarget(world, actor, outbreak.stack, candidate, baseDamage);

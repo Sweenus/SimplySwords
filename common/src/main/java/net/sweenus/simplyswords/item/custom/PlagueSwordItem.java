@@ -59,6 +59,7 @@ public class PlagueSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.plaguesworditem.tooltip4").setStyle(Styles.TEXT));
 
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        net.sweenus.simplyswords.client.util.TooltipUtils.appendSpellScaleTooltip(tooltip, "soul");
     }
 
     public static class EffectSettings extends TooltipSettings {
@@ -79,6 +80,8 @@ public class PlagueSwordItem extends UniqueSwordItem {
         public int feverDuration = 120;
         @ValidatedFloat.Restrict(min = 0.0F)
         public float tollDamageScaling = 0.60F;
+        @ValidatedFloat.Restrict(min = 0.0F)
+        public float tollSpellScaling = 1.20F;
         @ValidatedFloat.Restrict(min = 0.1F)
         public float tollRadius = 5.0F;
         @ValidatedInt.Restrict(min = 0)

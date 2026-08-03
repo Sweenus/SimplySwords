@@ -89,7 +89,8 @@ public class EmberIreSwordItem extends UniqueSwordItem implements UniqueWeaponAc
     public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
         if (!world.isClient && user.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
             LivingEntity targetEntity = user instanceof PlayerEntity player ? findPlayerTarget(player) : null;
-            double damageAmount = HelperMethods.attackScaledDamage(user, stack, Config.uniqueEffects.emberblade.initialDamageScaling);
+            double damageAmount = HelperMethods.abilityScaledDamage("fire", user, stack,
+                    Config.uniqueEffects.emberblade.initialDamageScaling, Config.uniqueEffects.emberblade.initialSpellScaling);
             if (targetEntity != null) {
                 SoundEvent soundSelect = SoundRegistry.ELEMENTAL_BOW_FIRE_SHOOT_IMPACT_03.get();
                 int particleCount = 20;
@@ -105,7 +106,8 @@ public class EmberIreSwordItem extends UniqueSwordItem implements UniqueWeaponAc
                 }
 
                 final float minAdditionalDamage = 0.0f;
-                final float maxAdditionalDamage = HelperMethods.attackScaledDamage(user, stack, Config.uniqueEffects.emberblade.maxChargeDamageScaling);
+                final float maxAdditionalDamage = HelperMethods.abilityScaledDamage("fire", user, stack,
+                        Config.uniqueEffects.emberblade.maxChargeDamageScaling, Config.uniqueEffects.emberblade.maxChargeSpellScaling);
                 float chargeRatio = 1.0f - ((float) remainingUseTicks / getMaxUseTime(stack, user));
                 float additionalDamage = minAdditionalDamage + (maxAdditionalDamage - minAdditionalDamage) * chargeRatio;
                 float finalDamage = (float) damageAmount + additionalDamage;
@@ -150,8 +152,10 @@ public class EmberIreSwordItem extends UniqueSwordItem implements UniqueWeaponAc
             return false;
         }
         ServerWorld world = context.world();
-        double damageAmount = HelperMethods.attackScaledDamage(actor, context.stack(), Config.uniqueEffects.emberblade.initialDamageScaling);
-        float finalDamage = (float) (damageAmount + HelperMethods.attackScaledDamage(actor, context.stack(), Config.uniqueEffects.emberblade.maxChargeDamageScaling));
+        double damageAmount = HelperMethods.abilityScaledDamage("fire", actor, context.stack(),
+                Config.uniqueEffects.emberblade.initialDamageScaling, Config.uniqueEffects.emberblade.initialSpellScaling);
+        float finalDamage = (float) (damageAmount + HelperMethods.abilityScaledDamage("fire", actor, context.stack(),
+                Config.uniqueEffects.emberblade.maxChargeDamageScaling, Config.uniqueEffects.emberblade.maxChargeSpellScaling));
         SoundEvent soundSelect = SoundRegistry.ELEMENTAL_BOW_FIRE_SHOOT_IMPACT_03.get();
         HelperMethods.spawnWaistHeightParticles(world, ParticleTypes.SMOKE, actor, target, 20);
         HelperMethods.spawnWaistHeightParticles(world, ParticleTypes.POOF, actor, target, 20);
@@ -219,6 +223,7 @@ public class EmberIreSwordItem extends UniqueSwordItem implements UniqueWeaponAc
         appendAbilityCooldownTooltip(tooltip, 10);
 
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        net.sweenus.simplyswords.client.util.TooltipUtils.appendSpellScaleTooltip(tooltip, "fire");
     }
 
     @Translation(prefix = "", negate = true)
@@ -229,6 +234,8 @@ public class EmberIreSwordItem extends UniqueSwordItem implements UniqueWeaponAc
         }
 
         public float initialDamageScaling = 0.24f;
+        public float initialSpellScaling = 0.48f;
         public float maxChargeDamageScaling = 2.4f;
+        public float maxChargeSpellScaling = 4.8f;
     }
 }

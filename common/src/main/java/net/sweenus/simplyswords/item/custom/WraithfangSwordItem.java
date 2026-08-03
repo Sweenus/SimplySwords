@@ -1,6 +1,7 @@
 package net.sweenus.simplyswords.item.custom;
 
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
+import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.entity.Entity;
@@ -18,6 +19,8 @@ import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
+import net.sweenus.simplyswords.api.SpellScalingProfile;
+import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
 import net.sweenus.simplyswords.entity.WraithfangEntity;
@@ -62,7 +65,9 @@ public class WraithfangSwordItem extends UniqueSwordItem implements UniqueWeapon
             wraithfangEntity.setVelocity(user, user.getPitch(), user.getYaw(), 0.0F, 1.5F, 1.0F);
             wraithfangEntity.setYaw(user.getYaw());
             wraithfangEntity.setPitch(user.getPitch());
-            wraithfangEntity.primaryBaseDamage = (float) damage[0];
+            wraithfangEntity.primaryBaseDamage = HelperMethods.abilityScaledValue(
+                    SpellScalingProfile.SOUL, user, itemStack, (float) damage[0],
+                    Config.uniqueEffects.wraithfang.spellScaling);
             wraithfangEntity.hasLoyalty = 1;
             if (hand == Hand.OFF_HAND)
                 wraithfangEntity.offhandThrow = true;
@@ -95,7 +100,11 @@ public class WraithfangSwordItem extends UniqueSwordItem implements UniqueWeapon
         wraithfangEntity.setVelocity(direction.x, direction.y, direction.z, 1.65F, 1.0F);
         wraithfangEntity.setYaw(actor.getYaw());
         wraithfangEntity.setPitch(actor.getPitch());
-        wraithfangEntity.primaryBaseDamage = (float) Math.max(1.0, HelperMethods.getAttackFromStack(context.stack(), net.minecraft.component.type.AttributeModifierSlot.MAINHAND));
+        float weaponDamage = (float) Math.max(1.0, HelperMethods.getAttackFromStack(
+                context.stack(), net.minecraft.component.type.AttributeModifierSlot.MAINHAND));
+        wraithfangEntity.primaryBaseDamage = HelperMethods.abilityScaledValue(
+                SpellScalingProfile.SOUL, actor, context.stack(), weaponDamage,
+                Config.uniqueEffects.wraithfang.spellScaling);
         wraithfangEntity.hasLoyalty = 0;
         wraithfangEntity.setPos(actor.getX(), actor.getEyeY() - 0.5, actor.getZ());
         wraithfangEntity.markNonReturning(80);
@@ -129,6 +138,7 @@ public class WraithfangSwordItem extends UniqueSwordItem implements UniqueWeapon
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.wraithfangsworditem.tooltip5").setStyle(Styles.TEXT));
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        net.sweenus.simplyswords.client.util.TooltipUtils.appendSpellScaleTooltip(tooltip, "soul");
     }
 
     public static class EffectSettings extends TooltipSettings {
@@ -141,5 +151,7 @@ public class WraithfangSwordItem extends UniqueSwordItem implements UniqueWeapon
         public int hasteAmplifier = 1;
         @ValidatedInt.Restrict(min = 10)
         public int duration = 80;
+        @ValidatedFloat.Restrict(min = 0)
+        public float spellScaling = 2.0f;
     }
 }

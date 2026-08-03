@@ -79,7 +79,9 @@ public class WickpiercerSwordItem extends UniqueSwordItem implements RevivalWeap
             wickpiercerEntity.setVelocity(user, user.getPitch(), user.getYaw(), 0.0F, 1.5F, 1.0F);
             wickpiercerEntity.setYaw(user.getYaw());
             wickpiercerEntity.setPitch(user.getPitch()-90);
-            wickpiercerEntity.primaryBaseDamage = HelperMethods.attackScaledDamage(user, itemStack, Config.uniqueEffects.wickpiercer.throwDamageScaling);
+            wickpiercerEntity.primaryBaseDamage = HelperMethods.abilityScaledDamage("fire", user, itemStack,
+                    Config.uniqueEffects.wickpiercer.throwDamageScaling,
+                    Config.uniqueEffects.wickpiercer.throwSpellScaling);
             wickpiercerEntity.hasLoyalty = 3;
             if (hand == Hand.OFF_HAND)
                 wickpiercerEntity.offhandThrow = true;
@@ -109,7 +111,9 @@ public class WickpiercerSwordItem extends UniqueSwordItem implements RevivalWeap
         wickpiercerEntity.setVelocity(direction.x, direction.y, direction.z, 1.65F, 1.0F);
         wickpiercerEntity.setYaw(actor.getYaw());
         wickpiercerEntity.setPitch(actor.getPitch() - 90);
-        wickpiercerEntity.primaryBaseDamage = HelperMethods.attackScaledDamage(actor, context.stack(), Config.uniqueEffects.wickpiercer.throwDamageScaling);
+        wickpiercerEntity.primaryBaseDamage = HelperMethods.abilityScaledDamage("fire", actor, context.stack(),
+                Config.uniqueEffects.wickpiercer.throwDamageScaling,
+                Config.uniqueEffects.wickpiercer.throwSpellScaling);
         wickpiercerEntity.hasLoyalty = 0;
         wickpiercerEntity.setPos(actor.getX(), actor.getEyeY() - 0.5, actor.getZ());
         wickpiercerEntity.markNonReturning(80);
@@ -146,6 +150,7 @@ public class WickpiercerSwordItem extends UniqueSwordItem implements RevivalWeap
         tooltip.add(Text.translatable("item.simplyswords.wickpiercersworditem.tooltip7").setStyle(Styles.TEXT));
 
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        net.sweenus.simplyswords.client.util.TooltipUtils.appendSpellScaleTooltip(tooltip, "fire");
     }
 
     @Override
@@ -194,6 +199,8 @@ public class WickpiercerSwordItem extends UniqueSwordItem implements RevivalWeap
         public float damageScaling = 0.8f;
         @ValidatedFloat.Restrict(min = 0f)
         public float throwDamageScaling = 0.4f;
+        @ValidatedFloat.Restrict(min = 0f)
+        public float throwSpellScaling = 0.8f;
         @ValidatedInt.Restrict(min = 0)
         public int duration = 80;
 

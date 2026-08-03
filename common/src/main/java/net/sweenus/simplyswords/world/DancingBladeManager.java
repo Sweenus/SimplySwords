@@ -47,8 +47,9 @@ public final class DancingBladeManager {
             return false;
         }
 
-        float damage = AwakeningApi.scaleGemPower(stack,
-                HelperMethods.attackScaledDamage(player, stack, Config.gemPowers.dancingBlades.damageScaling));
+        float damage = HelperMethods.gemPowerScaledDamage("evocation", player, stack,
+                Config.gemPowers.dancingBlades.damageScaling,
+                Config.gemPowers.dancingBlades.spellScaling);
         DancingBladeVisualEntity blade = new DancingBladeVisualEntity(
                 world,
                 player.getUuid(),

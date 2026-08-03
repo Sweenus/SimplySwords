@@ -50,7 +50,9 @@ public class MagispearSwordItem extends UniqueSwordItem implements UniqueWeaponA
             float hitChance = Config.uniqueEffects.magispear.magicChance;
             int random = new Random().nextInt(100);
             if (random < hitChance) {
-                float damage = HelperMethods.attackScaledDamage(attacker, stack, Config.uniqueEffects.magispear.magicDamageScaling);
+                float damage = HelperMethods.abilityScaledDamage("arcane", attacker, stack,
+                        Config.uniqueEffects.magispear.magicDamageScaling,
+                        Config.uniqueEffects.magispear.magicSpellScaling);
                 DamageSource damageSource = attacker.getDamageSources().indirectMagic(attacker, attacker);
                 target.timeUntilRegen = 0;
                 target.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments(world, stack, target, damageSource, damage));
@@ -129,6 +131,7 @@ public class MagispearSwordItem extends UniqueSwordItem implements UniqueWeaponA
         appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.magispear.cooldown);
 
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        net.sweenus.simplyswords.client.util.TooltipUtils.appendSpellScaleTooltip(tooltip, "arcane");
     }
 
     public static class EffectSettings extends TooltipSettings {
@@ -141,6 +144,8 @@ public class MagispearSwordItem extends UniqueSwordItem implements UniqueWeaponA
         public int cooldown = 120;
         @ValidatedFloat.Restrict(min = 0f)
         public float damageScaling = 1.1f;
+        @ValidatedFloat.Restrict(min = 0f)
+        public float spellScaling = 2.2f;
         @ValidatedDouble.Restrict(min = 1.0)
         public double radius = 4.0;
         @ValidatedInt.Restrict(min = 0, max = 100)
@@ -148,7 +153,11 @@ public class MagispearSwordItem extends UniqueSwordItem implements UniqueWeaponA
         @ValidatedFloat.Restrict(min = 0f)
         public float magicDamageScaling = 0.16f;
         @ValidatedFloat.Restrict(min = 0f)
+        public float magicSpellScaling = 0.32f;
+        @ValidatedFloat.Restrict(min = 0f)
         public float throwDamageScaling = 0.8f;
+        @ValidatedFloat.Restrict(min = 0f)
+        public float throwSpellScaling = 1.6f;
         @ValidatedDouble.Restrict(min = 1.0)
         public double targetingRange = 24.0;
         @ValidatedInt.Restrict(min = 1, max = 8)

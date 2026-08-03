@@ -28,6 +28,8 @@ public class GemPowersConfig extends Config {
 	public FrostWardPower.Settings     frostWard = new FrostWardPower.Settings();
 	public DancingBladesPower.Settings dancingBlades = new DancingBladesPower.Settings();
 	public ImbuedPower.Settings        imbued = new ImbuedPower.Settings();
+	public ImmolationPower.Settings    immolation = new ImmolationPower.Settings();
+	public RadiancePower.Settings      radiance = new RadiancePower.Settings();
 	public MomentumPower.Settings      momentum = new MomentumPower.Settings();
 	public ShieldingPower.Settings     shielding = new ShieldingPower.Settings();
 	public SlowPower.Settings          slow = new SlowPower.Settings();

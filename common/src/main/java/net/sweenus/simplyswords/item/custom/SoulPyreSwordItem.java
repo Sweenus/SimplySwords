@@ -89,6 +89,7 @@ public class SoulPyreSwordItem extends UniqueSwordItem implements TwoHandedWeapo
         appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.soulpyre.cooldown);
 
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        net.sweenus.simplyswords.client.util.TooltipUtils.appendSpellScaleTooltip(tooltip, "soul");
     }
 
     public static class EffectSettings extends TooltipSettings {
@@ -113,6 +114,8 @@ public class SoulPyreSwordItem extends UniqueSwordItem implements TwoHandedWeapo
         public float verticalRange = 8.0f;
         @ValidatedFloat.Restrict(min = 0f)
         public float damageScaling = 0.74f;
+        @ValidatedFloat.Restrict(min = 0f)
+        public float spellScaling = 1.48f;
         @ValidatedInt.Restrict(min = 1)
         public int heal = 1;
         @ValidatedInt.Restrict(min = 1)

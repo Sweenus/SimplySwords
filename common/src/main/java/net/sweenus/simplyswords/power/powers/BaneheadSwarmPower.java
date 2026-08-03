@@ -49,6 +49,7 @@ public class BaneheadSwarmPower extends RunefusedGemPower {
         if (TooltipUtils.shouldDisplayTooltip(itemStack, null)) {
             tooltip.add(Text.literal("").append(Text.translatable("item.simplyswords.baneheadswarmsworditem.tooltip2")).setStyle(Styles.RUNIC_DESCRIPTION));
         }
+        TooltipUtils.appendSpellScaleTooltip(tooltip, "eldritch");
     }
 
     public static class Settings extends TooltipSettings {
@@ -106,6 +107,8 @@ public class BaneheadSwarmPower extends RunefusedGemPower {
         @Translation(prefix = "simplyswords.config.basic_settings")
         @ValidatedDouble.Restrict(min = 0.0)
         public double damageScaling = 0.6;
+        @ValidatedDouble.Restrict(min = 0.0)
+        public double spellScaling = 1.2;
 
         @ValidatedInt.Restrict(min = 1)
         public int maxHomingTicks = 100;

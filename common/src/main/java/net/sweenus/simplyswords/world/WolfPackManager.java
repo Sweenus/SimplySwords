@@ -54,8 +54,7 @@ public final class WolfPackManager {
 
         minion.initializeMinion(attacker, stack.copy(), -1,
                 world.getTime() + Math.max(1, Config.gemPowers.wolfPack.duration),
-                AwakeningApi.scaleGemPower(stack,
-                        (float) Math.max(0.0, HelperMethods.getEntityAttackDamage(attacker))));
+                getSummonPower(attacker, stack));
         world.spawnParticles(ParticleTypes.CRIT, minion.getX(), minion.getBodyY(0.55), minion.getZ(), 18, 0.4, 0.45, 0.4, 0.08);
         world.spawnParticles(ParticleTypes.CLOUD, minion.getX(), minion.getBodyY(0.45), minion.getZ(), 10, 0.3, 0.3, 0.3, 0.03);
         world.playSound(null, minion.getBlockPos(), SoundEvents.ENTITY_WOLF_GROWL, SoundCategory.PLAYERS, 0.7F, 1.15F);
@@ -81,8 +80,7 @@ public final class WolfPackManager {
 
         minion.initializeMinion(player, stack.copy(), findSourceWeaponSlot(player, stack),
                 world.getTime() + Math.max(1, Config.gemPowers.wolfPack.duration),
-                AwakeningApi.scaleGemPower(stack,
-                        (float) Math.max(0.0, HelperMethods.getEntityAttackDamage(player))));
+                getSummonPower(player, stack));
         world.spawnParticles(ParticleTypes.CRIT, minion.getX(), minion.getBodyY(0.55), minion.getZ(), 18, 0.4, 0.45, 0.4, 0.08);
         world.spawnParticles(ParticleTypes.CLOUD, minion.getX(), minion.getBodyY(0.45), minion.getZ(), 10, 0.3, 0.3, 0.3, 0.03);
         world.playSound(null, minion.getBlockPos(), SoundEvents.ENTITY_WOLF_GROWL, SoundCategory.PLAYERS, 0.7F, 1.15F);
@@ -97,6 +95,12 @@ public final class WolfPackManager {
         for (SimplySwordsWolfMinionEntity minion : getOwnedMinions(world, player)) {
             minion.trySetRetaliationTarget(attacker);
         }
+    }
+
+    private static float getSummonPower(LivingEntity owner, ItemStack stack) {
+        float damageScaling = (float) Math.max(0.0001, Config.gemPowers.wolfPack.damageScaling);
+        return HelperMethods.gemPowerScaledDamage("nature", owner, stack, 1.0F,
+                (float) Config.gemPowers.wolfPack.spellScaling / damageScaling);
     }
 
     private static int getActiveMinionCount(ServerWorld world, ServerPlayerEntity player) {

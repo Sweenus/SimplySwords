@@ -42,6 +42,7 @@ import net.minecraft.world.World;
 import net.sweenus.simplyswords.SimplySwordsExpectPlatform;
 import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.api.DelegatedWeaponHitContext;
+import net.sweenus.simplyswords.api.SpellScalingProfile;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.compat.opac.OpacCompat;
 import net.sweenus.simplyswords.config.Config;
@@ -511,13 +512,45 @@ public class HelperMethods {
     }
 
     public static float abilityScaledDamage(String spellSchool, LivingEntity actor, ItemStack stack, float attackScaling, float spellScaling) {
+        return abilityScaledDamage(SpellScalingProfile.fromLegacyName(spellSchool), actor, stack, attackScaling, spellScaling);
+    }
+
+    public static float abilityScaledDamage(SpellScalingProfile spellSchool, LivingEntity actor, ItemStack stack, float attackScaling, float spellScaling) {
+        ItemStack scalingStack = stack == null ? ItemStack.EMPTY : stack;
         float spellDamage = commonSpellAttributeScaling(spellScaling, actor, spellSchool);
-        float attackDamage = attackScaledDamage(actor, stack, attackScaling);
-        return AwakeningApi.scaleEffect(stack, Math.max(spellDamage, attackDamage));
+        float attackDamage = attackScaledDamage(actor, scalingStack, attackScaling);
+        return AwakeningApi.scaleEffect(scalingStack, Math.max(spellDamage, attackDamage));
     }
 
     public static float abilityScaledDamage(String spellSchool, LivingEntity actor, float attackScaling, float spellScaling) {
         return abilityScaledDamage(spellSchool, actor, actor == null ? ItemStack.EMPTY : actor.getMainHandStack(), attackScaling, spellScaling);
+    }
+
+    public static float abilityScaledDamage(SpellScalingProfile spellSchool, LivingEntity actor, float attackScaling, float spellScaling) {
+        return abilityScaledDamage(spellSchool, actor, actor == null ? ItemStack.EMPTY : actor.getMainHandStack(), attackScaling, spellScaling);
+    }
+
+    public static float abilityScaledValue(SpellScalingProfile spellSchool, LivingEntity actor, ItemStack stack, float fullValue, float spellScaling) {
+        ItemStack scalingStack = stack == null ? ItemStack.EMPTY : stack;
+        float spellValue = commonSpellAttributeScaling(spellScaling, actor, spellSchool);
+        return AwakeningApi.scaleEffect(scalingStack, Math.max(fullValue, spellValue));
+    }
+
+    public static float gemPowerScaledDamage(String spellSchool, LivingEntity actor, ItemStack stack, float attackScaling, float spellScaling) {
+        return gemPowerScaledDamage(SpellScalingProfile.fromLegacyName(spellSchool), actor, stack, attackScaling, spellScaling);
+    }
+
+    public static float gemPowerScaledDamage(SpellScalingProfile spellSchool, LivingEntity actor, ItemStack stack, float attackScaling, float spellScaling) {
+        ItemStack scalingStack = stack == null ? ItemStack.EMPTY : stack;
+        float spellDamage = commonSpellAttributeScaling(spellScaling, actor, spellSchool);
+        float attackDamage = attackScaledDamage(actor, scalingStack, attackScaling);
+        return AwakeningApi.scaleGemPower(scalingStack, Math.max(spellDamage, attackDamage));
+    }
+
+    public static float gemPowerScaledValue(SpellScalingProfile spellSchool, LivingEntity actor, ItemStack stack, float fullValue, float spellScaling) {
+        ItemStack scalingStack = stack == null ? ItemStack.EMPTY : stack;
+        float spellValue = commonSpellAttributeScaling(spellScaling, actor, spellSchool);
+        return AwakeningApi.scaleGemPower(scalingStack, Math.max(fullValue, spellValue));
     }
 
     public static float attackScaledDamage(LivingEntity actor, ItemStack stack, float attackScaling) {
@@ -571,8 +604,13 @@ public class HelperMethods {
     }
 
     public static float commonSpellAttributeScaling(float damageModifier, Entity entity, String magicSchool) {
-        if ((entity instanceof PlayerEntity player) && Config.general.compatEnableSpellPowerScaling.get())
-            return SimplySwordsExpectPlatform.getSpellPowerDamage(damageModifier, player, magicSchool);
+        return commonSpellAttributeScaling(damageModifier, entity, SpellScalingProfile.fromLegacyName(magicSchool));
+    }
+
+    public static float commonSpellAttributeScaling(float damageModifier, Entity entity, SpellScalingProfile magicSchool) {
+        if ((entity instanceof LivingEntity livingEntity) && Config.general.compatEnableSpellPowerScaling.get())
+            return SimplySwordsExpectPlatform.getSpellPowerDamage(damageModifier, livingEntity,
+                    (magicSchool == null ? SpellScalingProfile.ARCANE : magicSchool).id());
         return 0f;
     }
 

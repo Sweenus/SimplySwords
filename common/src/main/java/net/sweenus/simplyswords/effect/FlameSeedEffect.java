@@ -75,8 +75,10 @@ public class FlameSeedEffect extends OrbitingEffect {
                     triggerDetonation(serverWorld, livingEntity, this.sourceEntity, this.additionalData);
                     livingEntity.removeStatusEffect(EffectRegistry.getReference(EffectRegistry.FLAMESEED));
                     expiryDetonation = true;
-                    abilityDamage = HelperMethods.attackScaledDamage(this.sourceEntity, this.sourceEntity == null ? null : this.sourceEntity.getMainHandStack(),
-                            Config.uniqueEffects.flamewind.detonationDamageScaling);
+                    abilityDamage = HelperMethods.abilityScaledDamage("fire", this.sourceEntity,
+                            this.sourceEntity == null ? null : this.sourceEntity.getMainHandStack(),
+                            Config.uniqueEffects.flamewind.detonationDamageScaling,
+                            Config.uniqueEffects.flamewind.detonationSpellScaling);
                     volume = 0.6f;
                     pitch = 1.0f;
                     soundEvent = SoundRegistry.SPELL_FIRE.get();
@@ -84,7 +86,6 @@ public class FlameSeedEffect extends OrbitingEffect {
 
                 if (this.sourceEntity != null) {
                     damageSource = livingEntity.getDamageSources().indirectMagic(livingEntity, this.sourceEntity);
-                    abilityDamage = Math.max(abilityDamage, HelperMethods.commonSpellAttributeScaling(Config.uniqueEffects.flamewind.spellScaling, this.sourceEntity, "fire"));
                 }
 
                 if (livingEntity instanceof PlayerEntity && this.sourceEntity !=null && this.sourceEntity instanceof  PlayerEntity playerSourceEntity)
@@ -205,8 +206,10 @@ public class FlameSeedEffect extends OrbitingEffect {
         serverWorld.spawnParticles(ParticleTypes.EXPLOSION, center.x, center.y + 0.35, center.z, 2, 0.35, 0.2, 0.35, 0.01);
         serverWorld.spawnParticles(ParticleTypes.WARPED_SPORE, center.x, center.y + 0.35, center.z, 10, 0.8, 0.35, 0.8, 0.02);
 
-        float abilityDamage = HelperMethods.attackScaledDamage(sourceEntity, sourceEntity == null ? null : sourceEntity.getMainHandStack(),
-                Config.uniqueEffects.flamewind.detonationDamageScaling);
+        float abilityDamage = HelperMethods.abilityScaledDamage("fire", sourceEntity,
+                sourceEntity == null ? null : sourceEntity.getMainHandStack(),
+                Config.uniqueEffects.flamewind.detonationDamageScaling,
+                Config.uniqueEffects.flamewind.detonationSpellScaling);
         if (center.distanceTo(sourceEntity.getPos()) < 30) {
             int maxHaste = Config.uniqueEffects.flamewind.maxHaste;
             HelperMethods.incrementStatusEffect(sourceEntity, StatusEffects.HASTE, 120, 1, maxHaste);

@@ -41,6 +41,7 @@ public class RunicSlashPower extends RunefusedGemPower {
         if (TooltipUtils.shouldDisplayTooltip(itemStack, null)) {
             tooltip.add(Text.literal("").append(Text.translatable("item.simplyswords.runicslashsworditem.tooltip2")).setStyle(Styles.RUNIC_DESCRIPTION));
         }
+        TooltipUtils.appendSpellScaleTooltip(tooltip, "arcane");
     }
 
     public static class Settings extends TooltipSettings {
@@ -62,6 +63,8 @@ public class RunicSlashPower extends RunefusedGemPower {
 
         @ValidatedFloat.Restrict(min = 0f)
         public float damageScaling = 1.0F;
+        @ValidatedFloat.Restrict(min = 0f)
+        public float spellScaling = 2.0F;
 
         @ValidatedInt.Restrict(min = 1)
         public int minimumSwingCooldownTicks = 2;

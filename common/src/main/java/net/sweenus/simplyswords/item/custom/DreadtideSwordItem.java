@@ -101,7 +101,9 @@ public class DreadtideSwordItem extends UniqueSwordItem {
                                     EffectRegistry.getReference(EffectRegistry.VOIDASSAULT), voidcallerDuration, voidcloakEffect.getAmplifier(), false,
                                     false, true);
                             voidAssaultEffect.setSourceEntity(user);
-                            voidAssaultEffect.setAdditionalData((int) (HelperMethods.getEntityAttackDamage(user) * voidcallerDamageModifier));
+                            voidAssaultEffect.setAdditionalData((int) HelperMethods.abilityScaledDamage(
+                                    "eldritch", user, stack, voidcallerDamageModifier,
+                                    Config.uniqueEffects.dreadtide.get().spellScaling));
                             ee.addStatusEffect(voidAssaultEffect);
                             user.removeStatusEffect(EffectRegistry.getReference(EffectRegistry.VOIDCLOAK));
                             user.getItemCooldownManager().set(this, skillCooldown);
@@ -147,6 +149,7 @@ public class DreadtideSwordItem extends UniqueSwordItem {
         tooltip.add(Text.literal("\uA999 ").append(Text.translatable("item.simplyswords.dreadtidesworditem.tooltip12").setStyle(Styles.CORRUPTED)));
 
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        net.sweenus.simplyswords.client.util.TooltipUtils.appendSpellScaleTooltip(tooltip, "eldritch");
     }
 
     public static class EffectSettings extends TooltipSettings {
@@ -157,6 +160,8 @@ public class DreadtideSwordItem extends UniqueSwordItem {
 
         @ValidatedFloat.Restrict(min = 0)
         public float damageScaling = 0.8f;
+        @ValidatedFloat.Restrict(min = 0)
+        public float spellScaling = 1.6f;
         @ValidatedInt.Restrict(min = 0)
         public int duration = 250;
         @ValidatedInt.Restrict(min = 1)

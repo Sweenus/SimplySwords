@@ -62,10 +62,11 @@ public class WhisperwindSwordItem extends UniqueSwordItem implements TwoHandedWe
 
     @Override
     public TypedActionResult<ItemStack> startPlayerAbility(World world, PlayerEntity user, Hand hand) {
+        ItemStack stack = user.getStackInHand(hand);
         world.playSoundFromEntity(null, user, SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_IMPACT_01.get(),
                 user.getSoundCategory(), 0.6f, 1.0f);
         if (!world.isClient() && world instanceof ServerWorld serverWorld) {
-            WhisperwindVisualManager.startDash(serverWorld, user);
+            WhisperwindVisualManager.startDash(serverWorld, user, stack);
         }
         user.addStatusEffect(new StatusEffectInstance(EffectRegistry.getReference(EffectRegistry.FATAL_FLICKER), 12));
         user.addStatusEffect(new StatusEffectInstance(StatusEffects.ABSORPTION, 100));
@@ -81,7 +82,7 @@ public class WhisperwindSwordItem extends UniqueSwordItem implements TwoHandedWe
         }
         LivingEntityAbilityMovementManager.dashTowardTarget(context.world(), context.actor(), context.target(),
                 Config.uniqueEffects.whisperwind.dashVelocity, 8);
-        WhisperwindVisualManager.scheduleTargetStrike(context.world(), context.actor(), context.target());
+        WhisperwindVisualManager.scheduleTargetStrike(context.world(), context.actor(), context.target(), context.stack());
         context.actor().addStatusEffect(new StatusEffectInstance(EffectRegistry.getReference(EffectRegistry.FATAL_FLICKER), 12));
         context.actor().addStatusEffect(new StatusEffectInstance(StatusEffects.ABSORPTION, 100));
         return true;
@@ -110,6 +111,7 @@ public class WhisperwindSwordItem extends UniqueSwordItem implements TwoHandedWe
         appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.whisperwind.cooldown);
 
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        net.sweenus.simplyswords.client.util.TooltipUtils.appendSpellScaleTooltip(tooltip, "evocation");
     }
 
     public static class EffectSettings extends TooltipSettings {
@@ -131,7 +133,11 @@ public class WhisperwindSwordItem extends UniqueSwordItem implements TwoHandedWe
         @ValidatedFloat.Restrict(min = 0f)
         public float delayedDamageScaling = 0.54f;
         @ValidatedFloat.Restrict(min = 0f)
+        public float delayedSpellScaling = 1.08f;
+        @ValidatedFloat.Restrict(min = 0f)
         public float delayedDamagePerTargetScaling = 0.09f;
+        @ValidatedFloat.Restrict(min = 0f)
+        public float delayedSpellPerTargetScaling = 0.18f;
         @ValidatedInt.Restrict(min = 0)
         public int delayedDamageDelay = 20;
 

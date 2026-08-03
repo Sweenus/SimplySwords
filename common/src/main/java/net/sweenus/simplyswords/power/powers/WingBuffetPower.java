@@ -44,6 +44,7 @@ public class WingBuffetPower extends NetherGemPower {
         if (TooltipUtils.shouldDisplayTooltip(itemStack, null)) {
             tooltip.add(Text.literal("").append(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.wing_buffet.description")).setStyle(Styles.NETHERFUSED_DESCRIPTION));
         }
+        TooltipUtils.appendSpellScaleTooltip(tooltip, "evocation");
     }
 
     public static class Settings extends TooltipSettings {
@@ -64,6 +65,8 @@ public class WingBuffetPower extends NetherGemPower {
 
         @ValidatedFloat.Restrict(min = 0f)
         public float damageScaling = 1.75F;
+        @ValidatedFloat.Restrict(min = 0f)
+        public float spellScaling = 3.5F;
 
         @ValidatedDouble.Restrict(min = 0.0)
         public double knockbackStrength = 1.4;

@@ -105,7 +105,7 @@ public final class CaelestisBreachManager {
                 < Math.clamp(Config.uniqueEffects.caelestis.betrayalChance, 0, 100);
         long betrayalTick = now + getBetrayalDelay(world, profile);
         float baseDamage = HelperMethods.abilityScaledDamage(
-                "soul",
+                "eldritch",
                 actor,
                 context.stack(),
                 Config.uniqueEffects.caelestis.minionDamageScaling,

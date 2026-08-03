@@ -71,8 +71,9 @@ public final class RunicSlashManager {
 
         double speed = Math.max(0.05, Config.gemPowers.runicSlash.speed);
         double distance = Math.max(0.25, Config.gemPowers.runicSlash.distance);
-        float damage = AwakeningApi.scaleGemPower(stack,
-                HelperMethods.attackScaledDamage(user, stack, Config.gemPowers.runicSlash.damageScaling));
+        float damage = HelperMethods.gemPowerScaledDamage("arcane", user, stack,
+                Config.gemPowers.runicSlash.damageScaling,
+                Config.gemPowers.runicSlash.spellScaling);
         Vec3d start = user.getEyePos().subtract(0.0, Math.max(0.15, user.getHeight() * 0.18), 0.0).add(direction.multiply(0.65));
 
         RunicSlashProjectileEntity slash = new RunicSlashProjectileEntity(world, user, stack.copy(), direction, distance, speed, damage, Config.gemPowers.runicSlash.width);

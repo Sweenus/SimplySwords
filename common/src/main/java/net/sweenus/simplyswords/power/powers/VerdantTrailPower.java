@@ -39,6 +39,7 @@ public class VerdantTrailPower extends NetherGemPower {
         if (TooltipUtils.shouldDisplayTooltip(itemStack, null)) {
             tooltip.add(Text.literal("").append(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.verdant_trail.description")).setStyle(Styles.NETHERFUSED_DESCRIPTION));
         }
+        TooltipUtils.appendSpellScaleTooltip(tooltip, "nature");
     }
 
     public static class Settings extends TooltipSettings {
@@ -72,6 +73,8 @@ public class VerdantTrailPower extends NetherGemPower {
 
         @ValidatedFloat.Restrict(min = 0f)
         public float damageScaling = 0.18F;
+        @ValidatedFloat.Restrict(min = 0f)
+        public float spellScaling = 0.36F;
 
         @ValidatedInt.Restrict(min = 1)
         public int visualPointsMin = 7;

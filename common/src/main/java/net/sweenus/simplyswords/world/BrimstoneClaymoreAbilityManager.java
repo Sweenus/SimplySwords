@@ -7,6 +7,7 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.particle.BlockStateParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
+import net.minecraft.item.ItemStack;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
@@ -34,7 +35,7 @@ public final class BrimstoneClaymoreAbilityManager {
         return active != null && !active.isEmpty() || world.getTime() % 40L == 0L;
     }
 
-    public static void start(ServerWorld world, LivingEntity owner, LivingEntity target) {
+    public static void start(ServerWorld world, LivingEntity owner, LivingEntity target, ItemStack stack) {
         if (owner == null || target == null || !target.isAlive()) {
             return;
         }
@@ -59,7 +60,9 @@ public final class BrimstoneClaymoreAbilityManager {
                 now + Math.max(1, Config.uniqueEffects.brimstone_claymore.pulseInterval),
                 -1L,
                 baseRadius,
-                HelperMethods.attackScaledDamage(owner, owner.getMainHandStack(), 1.0f)
+                stack.copy(),
+                HelperMethods.abilityScaledDamage("fire", owner, stack, 1.0f,
+                        Config.uniqueEffects.brimstone_claymore.spellScaling)
         ));
         spawnStartEffects(world, groundPos);
     }
@@ -148,7 +151,7 @@ public final class BrimstoneClaymoreAbilityManager {
     }
 
     private static void pulse(ServerWorld world, LivingEntity owner, ActiveBrimstoneClaymore instance) {
-        int damaged = damageInRadius(world, owner, instance.pos(), instance.radius(), instance.weaponDamage() * Config.uniqueEffects.brimstone_claymore.pulseDamageScaling, false);
+        int damaged = damageInRadius(world, owner, instance.stack(), instance.pos(), instance.radius(), instance.weaponDamage() * Config.uniqueEffects.brimstone_claymore.pulseDamageScaling, false);
         if (damaged > 0) {
             float maxRadius = Math.max(instance.radius(), Config.uniqueEffects.brimstone_claymore.maxRadius);
             float growth = Math.max(0.0F, Config.uniqueEffects.brimstone_claymore.radiusGrowthPerHit) * damaged;
@@ -190,18 +193,18 @@ public final class BrimstoneClaymoreAbilityManager {
     private static void impact(ServerWorld world, LivingEntity owner, ActiveBrimstoneClaymore instance) {
         float baseRadius = Math.max(0.5F, Config.uniqueEffects.brimstone_claymore.baseRadius);
         float damage = instance.weaponDamage() * Config.uniqueEffects.brimstone_claymore.finalDamageScaling * (instance.radius() / baseRadius);
-        int damaged = damageInRadius(world, owner, instance.pos(), instance.radius(), damage, true);
+        int damaged = damageInRadius(world, owner, instance.stack(), instance.pos(), instance.radius(), damage, true);
         spawnImpactEffects(world, instance.pos(), instance.radius(), damaged);
     }
 
-    private static int damageInRadius(ServerWorld world, LivingEntity owner, Vec3d pos, float radius, float damage, boolean finalImpact) {
+    private static int damageInRadius(ServerWorld world, LivingEntity owner, ItemStack stack, Vec3d pos, float radius, float damage, boolean finalImpact) {
         Box box = new Box(pos.x - radius, pos.y - radius, pos.z - radius, pos.x + radius, pos.y + radius, pos.z + radius);
         int damaged = 0;
         for (Entity entity : world.getOtherEntities(owner, box, EntityPredicates.VALID_LIVING_ENTITY)) {
             if (entity instanceof LivingEntity target && target.squaredDistanceTo(pos) <= radius * radius && HelperMethods.checkAbilityTarget(target, owner)) {
                 target.setOnFireFor(finalImpact ? 5 : 2);
                 DamageSource damageSource = world.getDamageSources().indirectMagic(owner, owner);
-                float enchantedDamage = HelperMethods.applyAbilityDamageEnchantments(world, owner.getMainHandStack(), target, damageSource, damage);
+                float enchantedDamage = HelperMethods.applyAbilityDamageEnchantments(world, stack, target, damageSource, damage);
                 if (HelperMethods.damageThroughIframes(target, damageSource, enchantedDamage)) {
                     damaged++;
                     Vec3d targetPos = target.getPos().add(0.0, Math.max(0.35, target.getHeight() * 0.5), 0.0);
@@ -311,9 +314,10 @@ public final class BrimstoneClaymoreAbilityManager {
         private long nextPulseTick;
         private long plungeEndTick;
         private float radius;
+        private final ItemStack stack;
         private final float weaponDamage;
 
-        private ActiveBrimstoneClaymore(UUID ownerId, UUID targetId, UUID visualId, Vec3d pos, long expiryTick, long nextPulseTick, long plungeEndTick, float radius, float weaponDamage) {
+        private ActiveBrimstoneClaymore(UUID ownerId, UUID targetId, UUID visualId, Vec3d pos, long expiryTick, long nextPulseTick, long plungeEndTick, float radius, ItemStack stack, float weaponDamage) {
             this.ownerId = ownerId;
             this.targetId = targetId;
             this.visualId = visualId;
@@ -322,6 +326,7 @@ public final class BrimstoneClaymoreAbilityManager {
             this.nextPulseTick = nextPulseTick;
             this.plungeEndTick = plungeEndTick;
             this.radius = radius;
+            this.stack = stack;
             this.weaponDamage = weaponDamage;
         }
 
@@ -379,6 +384,10 @@ public final class BrimstoneClaymoreAbilityManager {
 
         private float weaponDamage() {
             return this.weaponDamage;
+        }
+
+        private ItemStack stack() {
+            return this.stack;
         }
     }
 }

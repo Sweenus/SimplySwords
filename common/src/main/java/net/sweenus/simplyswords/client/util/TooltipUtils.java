@@ -14,6 +14,7 @@ import net.minecraft.text.TextColor;
 import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
+import net.sweenus.simplyswords.api.SpellScalingProfile;
 import net.sweenus.simplyswords.power.GemPower;
 import net.sweenus.simplyswords.power.GemPowerComponent;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
@@ -123,10 +124,36 @@ public class TooltipUtils {
                             tooltip.add(Text.literal("\uAB43").append(Text.translatable("item.simplyswords.compat.scaleFrost")).append(Text.literal("   \uAB42")).append(Text.translatable("item.simplyswords.compat.scaleFire")));
                     case "healing_fire" ->
                             tooltip.add(Text.literal("\uAB47").append(Text.translatable("item.simplyswords.compat.scaleHealing")).append(Text.literal("   \uAB42")).append(Text.translatable("item.simplyswords.compat.scaleFire")));
+                    case "nature" -> {
+                        if (Platform.isNeoForge()) {
+                            tooltip.add(Text.literal("\uAB47").append(Text.translatable("item.simplyswords.compat.scaleNature")));
+                        } else {
+                            tooltip.add(Text.literal("\uAB47").append(Text.translatable("item.simplyswords.compat.scaleHealing")));
+                        }
+                    }
+                    case "evocation" -> {
+                        if (Platform.isNeoForge()) {
+                            tooltip.add(Text.literal("\uAB46").append(Text.translatable("item.simplyswords.compat.scaleEvocation")));
+                        } else {
+                            tooltip.add(Text.literal("\uAB46").append(Text.translatable("item.simplyswords.compat.scaleArcane")));
+                        }
+                    }
+                    case "eldritch" -> {
+                        if (Platform.isNeoForge()) {
+                            tooltip.add(Text.literal("\uAB45").append(Text.translatable("item.simplyswords.compat.scaleEldritch")));
+                        } else {
+                            tooltip.add(Text.literal("\uAB45").append(Text.translatable("item.simplyswords.compat.scaleSoul")));
+                        }
+                    }
                 }
                 tooltip.add(Text.literal(""));
             }
         }
+    }
+
+    public static void appendSpellScaleTooltip(List<Text> tooltip, SpellScalingProfile profile) {
+        appendSpellScaleTooltip(tooltip,
+                (profile == null ? SpellScalingProfile.ARCANE : profile).id());
     }
 
     public static boolean shouldDisplayTooltip(ItemStack stack, Identifier tagId) {

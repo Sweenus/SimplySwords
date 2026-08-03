@@ -43,6 +43,7 @@ public class WolfPackPower extends NetherGemPower {
         if (TooltipUtils.shouldDisplayTooltip(itemStack, null)) {
             tooltip.add(Text.literal("").append(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.wolf_pack.description")).setStyle(Styles.NETHERFUSED_DESCRIPTION));
         }
+        TooltipUtils.appendSpellScaleTooltip(tooltip, "nature");
     }
 
     public static class Settings extends TooltipSettings {
@@ -64,6 +65,8 @@ public class WolfPackPower extends NetherGemPower {
 
         @ValidatedDouble.Restrict(min = 0.0)
         public double damageScaling = 1.0;
+        @ValidatedDouble.Restrict(min = 0.0)
+        public double spellScaling = 2.0;
 
         @ValidatedInt.Restrict(min = 0, max = 100)
         public int activeAbilityChance = 35;

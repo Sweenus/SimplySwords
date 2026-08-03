@@ -97,6 +97,7 @@ public class SoulkeeperSwordItem extends UniqueSwordItem implements TwoHandedWea
         appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.soulkeeper.cooldown);
 
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        net.sweenus.simplyswords.client.util.TooltipUtils.appendSpellScaleTooltip(tooltip, "soul");
     }
 
     public static class EffectSettings extends TooltipSettings {
@@ -111,6 +112,8 @@ public class SoulkeeperSwordItem extends UniqueSwordItem implements TwoHandedWea
         public int activeExtraLanternDuration = 300;
         @ValidatedDouble.Restrict(min = 0.0)
         public float lanternDamageScaling = 0.24f;
+        @ValidatedDouble.Restrict(min = 0.0)
+        public float spellScaling = 0.48f;
         @ValidatedDouble.Restrict(min = 0.0)
         public double speedIncreasePerHit = 0.20;
         @ValidatedDouble.Restrict(min = 0.0)

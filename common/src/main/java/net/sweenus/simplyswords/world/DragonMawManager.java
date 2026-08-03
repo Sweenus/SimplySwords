@@ -56,8 +56,9 @@ public final class DragonMawManager {
             return;
         }
 
-        float damage = AwakeningApi.scaleGemPower(stack,
-                HelperMethods.attackScaledDamage(owner, stack, Config.gemPowers.dragonMaw.damageScaling));
+        float damage = HelperMethods.gemPowerScaledDamage("fire", owner, stack,
+                Config.gemPowers.dragonMaw.damageScaling,
+                Config.gemPowers.dragonMaw.spellScaling);
         if (damage <= 0.0F) {
             return;
         }

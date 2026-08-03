@@ -129,8 +129,9 @@ public final class VerdantTrailManager {
 
     private static void createSegment(ServerWorld world, LivingEntity owner, Vec3d center, ItemStack stack) {
         int duration = Math.max(1, Config.gemPowers.verdantTrail.duration);
-        float damage = AwakeningApi.scaleGemPower(stack,
-                HelperMethods.attackScaledDamage(owner, stack, Config.gemPowers.verdantTrail.damageScaling));
+        float damage = HelperMethods.gemPowerScaledDamage("nature", owner, stack,
+                Config.gemPowers.verdantTrail.damageScaling,
+                Config.gemPowers.verdantTrail.spellScaling);
         int regenerationDuration = AwakeningApi.scaleGemPowerDuration(
                 stack, Config.gemPowers.verdantTrail.regenerationDuration);
         TrailSegment segment = new TrailSegment(

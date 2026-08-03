@@ -74,8 +74,9 @@ public final class GoatStampedeManager {
             boolean screaming = attacker.getRandom().nextInt(100) < Config.gemPowers.goatStampede.screamingChance;
             anyScreaming |= screaming;
             double damageScaling = screaming ? Config.gemPowers.goatStampede.screamingDamageScaling : Config.gemPowers.goatStampede.damageScaling;
-            float damage = AwakeningApi.scaleGemPower(stack,
-                    HelperMethods.attackScaledDamage(attacker, stack, (float) damageScaling));
+            double spellScaling = screaming ? Config.gemPowers.goatStampede.screamingSpellScaling : Config.gemPowers.goatStampede.spellScaling;
+            float damage = HelperMethods.gemPowerScaledDamage("nature", attacker, stack,
+                    (float) damageScaling, (float) spellScaling);
 
             goat.refreshPositionAndAngles(spawnPos.x, spawnPos.y, spawnPos.z, attacker.getYaw(), 0.0F);
             goat.initializeStampede(attacker, stack, stampedeId, direction, expiresAtTick, damage,

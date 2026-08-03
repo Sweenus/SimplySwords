@@ -32,8 +32,9 @@ public final class SnifferSlamManager {
             return false;
         }
 
-        float damage = AwakeningApi.scaleGemPower(stack,
-                HelperMethods.attackScaledDamage(attacker, stack, (float) Config.gemPowers.snifferSlam.damageScaling));
+        float damage = HelperMethods.gemPowerScaledDamage("nature", attacker, stack,
+                (float) Config.gemPowers.snifferSlam.damageScaling,
+                (float) Config.gemPowers.snifferSlam.spellScaling);
         if (damage <= 0.0F) {
             return false;
         }

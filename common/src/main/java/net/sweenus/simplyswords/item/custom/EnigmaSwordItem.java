@@ -2,6 +2,7 @@ package net.sweenus.simplyswords.item.custom;
 
 import dev.architectury.platform.Platform;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedDouble;
+import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
@@ -64,7 +65,7 @@ public class EnigmaSwordItem extends UniqueSwordItem implements UniqueWeaponActi
     @Override
     public TypedActionResult<ItemStack> startPlayerAbility(World world, PlayerEntity user, Hand hand) {
         if (!user.getWorld().isClient()) {
-            if (spawnEnigmaStandard((ServerWorld) user.getWorld(), user) != null) {
+            if (spawnEnigmaStandard((ServerWorld) user.getWorld(), user, user.getStackInHand(hand)) != null) {
                 user.getItemCooldownManager().set(this, Config.uniqueEffects.enigma.enigmaCooldown);
             }
         }
@@ -85,7 +86,7 @@ public class EnigmaSwordItem extends UniqueSwordItem implements UniqueWeaponActi
 
     @Override
     public boolean activate(WeaponAbilityContext context) {
-        return spawnEnigmaStandard(context.world(), context.actor()) != null;
+        return spawnEnigmaStandard(context.world(), context.actor(), context.stack()) != null;
     }
 
     @Override
@@ -97,7 +98,7 @@ public class EnigmaSwordItem extends UniqueSwordItem implements UniqueWeaponActi
         return user.getBlockPos().up(1).offset(user.getMovementDirection(), 2);
     }
 
-    private BattleStandardDarkEntity spawnEnigmaStandard(ServerWorld world, LivingEntity user) {
+    private BattleStandardDarkEntity spawnEnigmaStandard(ServerWorld world, LivingEntity user, ItemStack stack) {
         BlockPos pos = getStandardPosition(user);
         if (!world.getBlockState(pos).isAir()) {
             return null;
@@ -111,6 +112,7 @@ public class EnigmaSwordItem extends UniqueSwordItem implements UniqueWeaponActi
         if (banner != null) {
             banner.setVelocity(0, -1, 0);
             banner.ownerEntity = user;
+            banner.abilityStack = stack.copy();
             banner.decayRate = Config.uniqueEffects.enigma.enigmaDecayRate;
             banner.standardType = "enigma";
             banner.setCustomName(Text.translatable("entity.simplyswords.battlestandard.name", user.getName()));
@@ -175,6 +177,7 @@ public class EnigmaSwordItem extends UniqueSwordItem implements UniqueWeaponActi
         appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.enigma.enigmaCooldown);
 
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        net.sweenus.simplyswords.client.util.TooltipUtils.appendSpellScaleTooltip(tooltip, "evocation");
     }
 
     public static class EffectSettings extends TooltipSettings {
@@ -197,6 +200,10 @@ public class EnigmaSwordItem extends UniqueSwordItem implements UniqueWeaponActi
         public double enigmaFlingUpwardStrength = 0.55;
         @ValidatedInt.Restrict(min = 1)
         public int enigmaDecayRate = 2;
+        @ValidatedFloat.Restrict(min = 0f)
+        public float damageScaling = 0.14f;
+        @ValidatedFloat.Restrict(min = 0f)
+        public float spellScaling = 0.28f;
 
 
     }

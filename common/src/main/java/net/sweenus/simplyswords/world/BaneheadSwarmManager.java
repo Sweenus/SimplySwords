@@ -54,8 +54,9 @@ public final class BaneheadSwarmManager {
         double orbitBaseAngle = activeCount * ((Math.PI * 2.0) / maxActiveHeads);
         double orbitRadius = Config.gemPowers.baneheadSwarm.orbitRadius;
         double orbitHeight = Config.gemPowers.baneheadSwarm.orbitHeight;
-        float damage = AwakeningApi.scaleGemPower(stack,
-                HelperMethods.attackScaledDamage(user, stack, (float) Config.gemPowers.baneheadSwarm.damageScaling));
+        float damage = HelperMethods.gemPowerScaledDamage("eldritch", user, stack,
+                (float) Config.gemPowers.baneheadSwarm.damageScaling,
+                (float) Config.gemPowers.baneheadSwarm.spellScaling);
 
         SimplySwordsCreeperHeadEntity head = new SimplySwordsCreeperHeadEntity(EntityRegistry.CREEPER_HEAD.get(), world);
         Vec3d spawnPos = SimplySwordsCreeperHeadEntity.ringPositionAt(user.getPos(), orbitBaseAngle, orbitRadius, orbitHeight);

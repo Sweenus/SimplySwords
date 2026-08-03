@@ -246,7 +246,9 @@ public final class MagispearAbilityManager {
         double splashRadius = Math.max(0.25, Config.uniqueEffects.magispear.rainSplashRadius);
         Set<UUID> hitThisWave = new HashSet<>();
         float waveScaling = Config.uniqueEffects.magispear.throwDamageScaling / Math.max(1, magislam.waveCount);
-        float baseDamage = HelperMethods.attackScaledDamage(owner, magislam.stack, waveScaling);
+        float waveSpellScaling = Config.uniqueEffects.magispear.throwSpellScaling / Math.max(1, magislam.waveCount);
+        float baseDamage = HelperMethods.abilityScaledDamage("arcane", owner, magislam.stack,
+                waveScaling, waveSpellScaling);
         damageRainArea(world, owner, magislam, first, splashRadius, baseDamage, hitThisWave);
         damageRainArea(world, owner, magislam, opposite, splashRadius, baseDamage, hitThisWave);
         spawnRainImpactEffects(world, first);
@@ -280,8 +282,10 @@ public final class MagispearAbilityManager {
         owner.fallDistance = 0.0F;
 
         double radius = Math.max(1.0, Config.uniqueEffects.magispear.radius);
-        float baseDamage = HelperMethods.attackScaledDamage(
-                owner, magislam.stack, Config.uniqueEffects.magispear.damageScaling);
+        float baseDamage = HelperMethods.abilityScaledDamage(
+                "arcane", owner, magislam.stack,
+                Config.uniqueEffects.magispear.damageScaling,
+                Config.uniqueEffects.magispear.spellScaling);
         Box box = new Box(impact.x - radius, impact.y - 2.0, impact.z - radius,
                 impact.x + radius, impact.y + radius, impact.z + radius);
         for (LivingEntity target : world.getEntitiesByClass(LivingEntity.class, box,

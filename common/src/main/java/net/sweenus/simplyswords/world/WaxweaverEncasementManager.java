@@ -15,6 +15,7 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.api.AwakeningApi;
+import net.sweenus.simplyswords.api.SpellScalingProfile;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.api.WeaponAbilityActivationSource;
 import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
@@ -63,8 +64,8 @@ public final class WaxweaverEncasementManager {
         ServerWorld world = context.world();
         LivingEntity actor = context.actor();
         UUID principalId = context.sourcePlayer() == null ? actor.getUuid() : context.sourcePlayer().getUuid();
-        float attack = AwakeningApi.scaleEffect(context.stack(),
-                HelperMethods.attackScaledDamage(actor, context.stack(), 1.0F));
+        float attack = HelperMethods.abilityScaledDamage(SpellScalingProfile.FIRE, actor, context.stack(),
+                1.0F, Config.uniqueEffects.waxweaver.spellScaling);
         int duration = Math.max(1, Config.uniqueEffects.waxweaver.encasementDuration);
         Vec3d anchor = target.getPos();
 

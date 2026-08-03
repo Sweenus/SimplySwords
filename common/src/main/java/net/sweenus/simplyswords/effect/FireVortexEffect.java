@@ -38,15 +38,12 @@ public class FireVortexEffect extends OrbitingEffect {
             if (livingEntity.age % Math.max(1, (15 - (amplifier))) == 0 && additionalData != 0) {
                 DamageSource damageSource = livingEntity.getDamageSources().magic();
                 livingEntity.timeUntilRegen = 0;
-				float abilityDamage = 0;
 				if (sourceEntity != null) {
                     damageSource = livingEntity.getDamageSources().indirectMagic(livingEntity, sourceEntity);
-                    float spellScalingModifier = Config.uniqueEffects.tempest.spellScaling;
-                    abilityDamage = HelperMethods.commonSpellAttributeScaling(spellScalingModifier, sourceEntity, "fire");
                     if (livingEntity instanceof PlayerEntity && sourceEntity instanceof PlayerEntity sourcePlayer)
                         damageSource = livingEntity.getDamageSources().playerAttack(sourcePlayer);
                 }
-                float damage = HelperMethods.applyNonPlayerAbilityDamageModifier(sourceEntity, additionalData + ((float) amplifier / 4) + abilityDamage);
+                float damage = HelperMethods.applyNonPlayerAbilityDamageModifier(sourceEntity, additionalData + ((float) amplifier / 4));
                 livingEntity.damage(damageSource, damage);
             }
 

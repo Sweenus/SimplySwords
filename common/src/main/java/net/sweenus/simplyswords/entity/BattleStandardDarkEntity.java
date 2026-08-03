@@ -15,6 +15,7 @@ import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.mob.PathAwareEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.server.world.ServerWorld;
@@ -41,6 +42,7 @@ public class BattleStandardDarkEntity extends PathAwareEntity {
     public LivingEntity ownerEntity;
     public String standardType;
     public int decayRate;
+    public ItemStack abilityStack = ItemStack.EMPTY;
     private final Map<UUID, EnigmaTornadoTarget> enigmaTornadoTargets = new HashMap<>();
     private final Map<UUID, Long> enigmaTornadoCooldowns = new HashMap<>();
     private static final double ENIGMA_PULL_STRENGTH = 0.18;
@@ -130,8 +132,12 @@ public class BattleStandardDarkEntity extends PathAwareEntity {
                     tickEnigmaTornado((ServerWorld) this.getWorld());
                 }
 
-                float abilityDamage = standardType.equals("enigma") ? 1f : HelperMethods.abilityScaledDamage("soul", ownerEntity, ownerEntity.getMainHandStack(),
-                        Config.uniqueEffects.harbinger.damageScaling, Config.uniqueEffects.harbinger.spellScaling);
+                ItemStack damageStack = abilityStack.isEmpty() ? ownerEntity.getMainHandStack() : abilityStack;
+                float abilityDamage = standardType.equals("enigma")
+                        ? HelperMethods.abilityScaledDamage("evocation", ownerEntity, damageStack,
+                                Config.uniqueEffects.enigma.damageScaling, Config.uniqueEffects.enigma.spellScaling)
+                        : HelperMethods.abilityScaledDamage("soul", ownerEntity, damageStack,
+                                Config.uniqueEffects.harbinger.damageScaling, Config.uniqueEffects.harbinger.spellScaling);
 
                 //AOE Aura
                 if (this.age % 10 == 0) {
@@ -143,7 +149,7 @@ public class BattleStandardDarkEntity extends PathAwareEntity {
                                 && !(le instanceof BattleStandardDarkEntity)) {
                             le.timeUntilRegen = 0;
                             DamageSource damageSource = this.getDamageSources().indirectMagic(ownerEntity, ownerEntity);
-                            le.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments((ServerWorld) getWorld(), ownerEntity.getMainHandStack(), le, damageSource, abilityDamage));
+                            le.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments((ServerWorld) getWorld(), damageStack, le, damageSource, abilityDamage));
                             le.timeUntilRegen = 0;
                             if (le.distanceTo(this) > radius - 1)
                                 le.setVelocity((this.getX() - le.getX()) / 4, (this.getY() - le.getY()) / 4, (this.getZ() - le.getZ()) / 4);

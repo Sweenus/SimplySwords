@@ -10,7 +10,7 @@ and uses the greater result:
 
 ```java
 float baseDamage = HelperMethods.abilityScaledDamage(
-        "arcane",
+        SpellScalingProfile.ARCANE,
         actor,
         stack,
         0.8F, // attack-damage multiplier
@@ -21,9 +21,60 @@ float baseDamage = HelperMethods.abilityScaledDamage(
 This helper also applies awakening effect scaling. Do not scale its result
 again.
 
-Known spell-school strings used by built-in content include `arcane`, `fire`,
-`frost`, `healing`, `lightning`, and `soul`. If no compatible spell-power
-provider is present, attack damage remains the fallback.
+Use `SpellScalingProfile` for new code. Legacy string overloads remain for
+binary/source compatibility, but unknown strings fall back to Arcane.
+
+| Profile | Spell Power Attributes (Fabric) | Iron's Spells (NeoForge) |
+| --- | --- | --- |
+| `FIRE` | Fire | Fire |
+| `FROST` | Frost | Ice |
+| `LIGHTNING` | Lightning | Lightning |
+| `ARCANE` | Arcane | Ender |
+| `SOUL` | Soul | Blood |
+| `HEALING` | Healing | Holy |
+| `NATURE` | Healing | Nature |
+| `EVOCATION` | Arcane | Evocation |
+| `ELDRITCH` | Soul | Eldritch |
+
+The helper accepts any `LivingEntity`, so player and mob casts use the same
+path. If the relevant compatibility mod or attribute is unavailable, attack
+damage remains the fallback.
+
+On NeoForge, Iron's Spells uses one shared configurable base power for all
+abilities:
+
+```text
+spellScaling * ironsSpellBasePower * genericSpellPower * schoolSpellPower
+```
+
+`ironsSpellBasePower` defaults to `2.0`. The per-ability `spellScaling` argument
+remains the coefficient that distinguishes small repeated hits from major
+impacts. On Fabric, Spell Power Attributes keeps its native coefficient-based
+calculation and does not use this shared base value.
+
+For a fixed full-strength value that should compete with spell power, use
+`abilityScaledValue(profile, actor, stack, fullValue, spellScaling)`. It applies
+unique awakening after choosing the larger value.
+
+## Scaling gem-power damage
+
+Gem powers must use the gem awakening curve rather than the unique-ability
+curve:
+
+```java
+float damage = HelperMethods.gemPowerScaledDamage(
+        SpellScalingProfile.NATURE,
+        actor,
+        stack,
+        0.8F,
+        1.6F
+);
+```
+
+For fixed values, use `gemPowerScaledValue`. Both helpers choose the greater of
+the attack/fixed result and spell result, then call
+`AwakeningApi.scaleGemPower`. Runic and other non-awakenable weapons therefore
+retain full gem-power values.
 
 To include weapon enchantments and Simply Swords' player/non-player damage
 configuration:
@@ -127,4 +178,3 @@ context.sourcePlayer() == null
   friendly-fire check.
 - A directly casting player is the actor and has no `sourcePlayer`.
 - Never assume an ability stack is in the main hand.
-

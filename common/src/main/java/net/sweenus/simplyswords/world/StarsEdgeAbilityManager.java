@@ -140,11 +140,10 @@ public final class StarsEdgeAbilityManager {
 
         long now = context.world().getTime();
         ItemStack abilityStack = context.stack().copy();
-        float constellationDamage = AwakeningApi.scaleEffect(
-                abilityStack,
-                HelperMethods.attackScaledDamage(actor, abilityStack,
-                        Math.max(0.0F, Config.uniqueEffects.stars_edge.constellationDamageScaling))
-        );
+        float constellationDamage = HelperMethods.abilityScaledDamage(
+                "arcane", actor, abilityStack,
+                Math.max(0.0F, Config.uniqueEffects.stars_edge.constellationDamageScaling),
+                Math.max(0.0F, Config.uniqueEffects.stars_edge.constellationSpellScaling));
         ActiveReprise active = new ActiveReprise(
                 actor.getUuid(),
                 abilityStack,

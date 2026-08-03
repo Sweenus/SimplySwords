@@ -170,12 +170,10 @@ public final class HivemindSwarmManager {
     }
 
     private static float getStingDamage(LivingEntity actor) {
-        double attackDamage = HelperMethods.getEntityAttackDamage(actor);
-        if (attackDamage <= 0.0) {
-            attackDamage = 1.0;
-        }
-        return HelperMethods.attackScaledDamage(actor, actor == null ? ItemStack.EMPTY : actor.getMainHandStack(),
-                (float) Config.uniqueEffects.hiveheart.stingDamageScaling);
+        return HelperMethods.abilityScaledDamage("nature", actor,
+                actor == null ? ItemStack.EMPTY : actor.getMainHandStack(),
+                (float) Config.uniqueEffects.hiveheart.stingDamageScaling,
+                (float) Config.uniqueEffects.hiveheart.stingSpellScaling);
     }
 
     private static LivingEntity getOwner(ServerWorld world, SimplySwordsBeeEntity bee) {

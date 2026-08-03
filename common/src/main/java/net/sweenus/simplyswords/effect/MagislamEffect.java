@@ -35,8 +35,8 @@ public class MagislamEffect extends OrbitingEffect {
                 double leapVelocity = 1.5;
                 double height = 0.9;
                 double descentVelocity = 1;
-                double damage = HelperMethods.attackScaledDamage(livingEntity, livingEntity.getMainHandStack(),
-                        Config.uniqueEffects.magispear.damageScaling);
+                double damage = HelperMethods.abilityScaledDamage("arcane", livingEntity, livingEntity.getMainHandStack(),
+                        Config.uniqueEffects.magispear.damageScaling, Config.uniqueEffects.magispear.spellScaling);
 
                 if (ability_timer >= 60) {
                     player.setVelocity(livingEntity.getRotationVector().multiply(+leapVelocity));

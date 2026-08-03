@@ -1,7 +1,7 @@
 package net.sweenus.simplyswords.fabric;
 
 import dev.architectury.platform.Platform;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.LivingEntity;
 import net.spell_power.api.SpellPower;
 import net.spell_power.api.SpellSchools;
 import net.sweenus.simplyswords.SimplySwords;
@@ -10,7 +10,7 @@ public class FabricHelperMethods {
 
 
     //Compatibility with Spell Power Attributes
-    public static float useSpellAttributeScaling(float damageModifier, PlayerEntity player, String magicSchool) {
+    public static float useSpellAttributeScaling(float damageModifier, LivingEntity player, String magicSchool) {
         if (Platform.isFabric() && SimplySwords.passVersionCheck("spell_power", SimplySwords.minimumSpellPowerVersion)) {
             if (player != null && !player.getWorld().isClient) {
 
@@ -31,6 +31,12 @@ public class FabricHelperMethods {
                     attributePower = SpellPower.getSpellPower(SpellSchools.SOUL, player).randomValue();
                 else if (magicSchool.contains("healing"))
                     attributePower = SpellPower.getSpellPower(SpellSchools.HEALING, player).randomValue();
+                else if (magicSchool.contains("nature"))
+                    attributePower = SpellPower.getSpellPower(SpellSchools.HEALING, player).randomValue();
+                else if (magicSchool.contains("evocation"))
+                    attributePower = SpellPower.getSpellPower(SpellSchools.ARCANE, player).randomValue();
+                else if (magicSchool.contains("eldritch"))
+                    attributePower = SpellPower.getSpellPower(SpellSchools.SOUL, player).randomValue();
 
 
                 damageOutput = (damageModifier * attributePower);

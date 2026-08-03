@@ -93,7 +93,7 @@ public boolean activate(WeaponAbilityContext context) {
     DamageSource source = SimplySwordsAPI.getWeaponDamageSource(actor);
 
     float damage = HelperMethods.abilityScaledDamage(
-            "arcane", actor, stack, 0.8F, 0.8F
+            SpellScalingProfile.ARCANE, actor, stack, 0.8F, 1.6F
     );
 
     List<LivingEntity> targets = world.getEntitiesByClass(
@@ -158,6 +158,18 @@ SimplySwordsAPI.registerAwakeningProfile(
 The sample ability uses `abilityScaledDamage`, which already scales its result
 with awakening. Do not pass that result through `AwakeningApi.scaleEffect`
 again.
+
+Choose a `SpellScalingProfile` that matches the ability. The platform bridge
+maps it to Spell Power Attributes on Fabric and Iron's Spells on NeoForge. As a
+starting point, built-in abilities generally use a spell multiplier around
+twice their attack multiplier so dedicated spell investment can compete with a
+weapon build. Tune both values in the weapon's config.
+
+On NeoForge, that spell multiplier is combined with the single shared
+`general.ironsSpellBasePower` setting and the actor's generic and mapped-school
+Iron's Spells attributes. Addons do not need a separate Iron's base-power field
+for each ability. Fabric continues to interpret the same multiplier through
+Spell Power Attributes.
 
 Add it to the pity-controlled unique pool and give it the built-in longsword
 implicit:

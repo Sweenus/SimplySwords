@@ -52,7 +52,7 @@ public class ChompolotlSwordItem extends UniqueSwordItem implements UniqueWeapon
                     ? player.getItemCooldownManager().isCoolingDown(stack.getItem())
                     : WeaponAbilityCooldownManager.isCoolingDown(serverWorld, attacker, stack);
             if (!coolingDown && target != null && HelperMethods.checkAbilityTarget(target, attacker)) {
-                if (spawnAxolotl(serverWorld, attacker, target, skillDamage, false) != null) {
+                if (spawnAxolotl(serverWorld, attacker, target, stack, skillDamage, false) != null) {
                     if (attacker instanceof PlayerEntity player) {
                         player.getItemCooldownManager().set(stack.getItem(), skillCooldown);
                     } else {
@@ -85,7 +85,8 @@ public class ChompolotlSwordItem extends UniqueSwordItem implements UniqueWeapon
                     axolotlEntity.setTarget(user);
                     axolotlEntity.setOwner(user);
                     axolotlEntity.setVariant(AxolotlEntity.Variant.values()[4]);
-                    double attackDamage = 0.5f + HelperMethods.attackScaledDamage(user, stack, Config.uniqueEffects.chompolotl.damageScaling);
+                    double attackDamage = 0.5f + HelperMethods.abilityScaledDamage("nature", user, stack,
+                            Config.uniqueEffects.chompolotl.damageScaling, Config.uniqueEffects.chompolotl.spellScaling);
                     EntityAttributeInstance attackAttribute = axolotlEntity.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE);
                     if (attackAttribute != null)
                         attackAttribute.setBaseValue(attackDamage);
@@ -107,7 +108,7 @@ public class ChompolotlSwordItem extends UniqueSwordItem implements UniqueWeapon
         if (context.target() == null || !HelperMethods.checkAbilityTarget(context.target(), context.actor())) {
             return false;
         }
-        return spawnAxolotl(context.world(), context.actor(), context.target(), Config.uniqueEffects.chompolotl.damageScaling, true) != null;
+        return spawnAxolotl(context.world(), context.actor(), context.target(), context.stack(), Config.uniqueEffects.chompolotl.damageScaling, true) != null;
     }
 
     @Override
@@ -115,7 +116,7 @@ public class ChompolotlSwordItem extends UniqueSwordItem implements UniqueWeapon
         return Config.uniqueEffects.chompolotl.cooldown * 10;
     }
 
-    private static SimplySwordsAxolotlEntity spawnAxolotl(ServerWorld serverWorld, LivingEntity owner, LivingEntity target, float skillDamage, boolean activeSummon) {
+    private static SimplySwordsAxolotlEntity spawnAxolotl(ServerWorld serverWorld, LivingEntity owner, LivingEntity target, ItemStack stack, float skillDamage, boolean activeSummon) {
         SimplySwordsAxolotlEntity axolotlEntity = EntityRegistry.SIMPLYAXOLOTLENTITY.get().spawn(
                 serverWorld,
                 owner.getBlockPos().up(2).offset(owner.getMovementDirection(), 3),
@@ -128,7 +129,8 @@ public class ChompolotlSwordItem extends UniqueSwordItem implements UniqueWeapon
         if (activeSummon) {
             axolotlEntity.setVariant(AxolotlEntity.Variant.values()[4]);
         }
-        double attackDamage = 0.5f + HelperMethods.attackScaledDamage(owner, owner.getMainHandStack(), skillDamage);
+        double attackDamage = 0.5f + HelperMethods.abilityScaledDamage("nature", owner, stack,
+                skillDamage, Config.uniqueEffects.chompolotl.spellScaling);
         EntityAttributeInstance attackAttribute = axolotlEntity.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE);
         if (attackAttribute != null) {
             attackAttribute.setBaseValue(attackDamage);
@@ -156,6 +158,7 @@ public class ChompolotlSwordItem extends UniqueSwordItem implements UniqueWeapon
         tooltip.add(Text.translatable("item.simplyswords.chompolotlsworditem.tooltip7").setStyle(Styles.TEXT));
         appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.chompolotl.cooldown * 10);
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        net.sweenus.simplyswords.client.util.TooltipUtils.appendSpellScaleTooltip(tooltip, "nature");
     }
 
     public static class EffectSettings extends TooltipSettings {
@@ -168,6 +171,8 @@ public class ChompolotlSwordItem extends UniqueSwordItem implements UniqueWeapon
         public int cooldown = 60;
         @ValidatedFloat.Restrict(min = 0f)
         public float damageScaling = 0.8f;
+        @ValidatedFloat.Restrict(min = 0f)
+        public float spellScaling = 1.6f;
         @ValidatedFloat.Restrict(min = 20f)
         public int duration = 500;
         @ValidatedFloat.Restrict(min = 0f)

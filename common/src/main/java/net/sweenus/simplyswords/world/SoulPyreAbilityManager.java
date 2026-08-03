@@ -178,11 +178,10 @@ public final class SoulPyreAbilityManager {
                 collapseDuration,
                 startRadius,
                 maxRadius,
-                HelperMethods.attackScaledDamage(
-                        actor,
-                        context.stack(),
-                        Config.uniqueEffects.soulpyre.damageScaling
-                )
+                HelperMethods.abilityScaledDamage(
+                        "soul", actor, context.stack(),
+                        Config.uniqueEffects.soulpyre.damageScaling,
+                        Config.uniqueEffects.soulpyre.spellScaling)
         );
         ACTIVE.computeIfAbsent(world, ignored -> new HashMap<>()).put(actor.getUuid(), pyre);
         actor.addStatusEffect(new StatusEffectInstance(

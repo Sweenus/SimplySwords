@@ -62,7 +62,8 @@ public class HiveheartSwordItem extends UniqueSwordItem implements UniqueWeaponA
                     beeEntity.shouldAngerAt(target);
                     beeEntity.setInvulnerable(true);
                     beeEntity.setOwner(attacker);
-                    double attackDamage = 1 + HelperMethods.attackScaledDamage(attacker, stack, skillDamage);
+                    double attackDamage = 1 + HelperMethods.abilityScaledDamage("nature", attacker, stack,
+                            skillDamage, Config.uniqueEffects.hiveheart.beeSpellScaling);
                     EntityAttributeInstance attackAttribute = beeEntity.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE);
                     if (attackAttribute != null)
                         attackAttribute.setBaseValue(attackDamage);
@@ -125,6 +126,7 @@ public class HiveheartSwordItem extends UniqueSwordItem implements UniqueWeaponA
         tooltip.add(Text.translatable("item.simplyswords.hiveheartsworditem.tooltip7").setStyle(Styles.TEXT));
         appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.hiveheart.activeCooldown);
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        net.sweenus.simplyswords.client.util.TooltipUtils.appendSpellScaleTooltip(tooltip, "nature");
     }
 
     public static class EffectSettings extends TooltipSettings {
@@ -137,6 +139,8 @@ public class HiveheartSwordItem extends UniqueSwordItem implements UniqueWeaponA
         public int cooldown = 60;
         @ValidatedFloat.Restrict(min = 0f)
         public float beeDamageScaling = 0.88f;
+        @ValidatedFloat.Restrict(min = 0f)
+        public float beeSpellScaling = 1.76f;
         @ValidatedInt.Restrict(min = 0)
         public int activeCooldown = 300;
         @ValidatedInt.Restrict(min = 0)
@@ -149,6 +153,8 @@ public class HiveheartSwordItem extends UniqueSwordItem implements UniqueWeaponA
         public int stingsPerBee = 10;
         @ValidatedDouble.Restrict(min = 0.0)
         public double stingDamageScaling = 0.01;
+        @ValidatedDouble.Restrict(min = 0.0)
+        public double stingSpellScaling = 0.02;
         @ValidatedInt.Restrict(min = 1)
         public int stingIntervalTicks = 10;
         @ValidatedInt.Restrict(min = 0)

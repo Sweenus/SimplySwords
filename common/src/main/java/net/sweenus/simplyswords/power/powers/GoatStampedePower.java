@@ -55,6 +55,7 @@ public class GoatStampedePower extends NetherGemPower {
         if (TooltipUtils.shouldDisplayTooltip(itemStack, null)) {
             tooltip.add(Text.literal("").append(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.goat_stampede.description")).setStyle(Styles.NETHERFUSED_DESCRIPTION));
         }
+        TooltipUtils.appendSpellScaleTooltip(tooltip, "nature");
     }
 
     public static class Settings extends TooltipSettings {
@@ -76,12 +77,16 @@ public class GoatStampedePower extends NetherGemPower {
 
         @ValidatedDouble.Restrict(min = 0.0)
         public double damageScaling = 0.30;
+        @ValidatedDouble.Restrict(min = 0.0)
+        public double spellScaling = 0.60;
 
         @ValidatedInt.Restrict(min = 0, max = 100)
         public int screamingChance = 15;
 
         @ValidatedDouble.Restrict(min = 0.0)
         public double screamingDamageScaling = 0.50;
+        @ValidatedDouble.Restrict(min = 0.0)
+        public double screamingSpellScaling = 1.0;
 
         @ValidatedDouble.Restrict(min = 0.0)
         public double knockbackStrength = 0.9;

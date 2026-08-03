@@ -50,6 +50,7 @@ public class EvocationPower extends RunefusedGemPower {
         if (TooltipUtils.shouldDisplayTooltip(itemStack, null)) {
             tooltip.add(Text.literal("").append(Text.translatable("item.simplyswords.evocationsworditem.tooltip2")).setStyle(Styles.RUNIC_DESCRIPTION));
         }
+        TooltipUtils.appendSpellScaleTooltip(tooltip, "evocation");
     }
 
     public static class Settings extends TooltipSettings {
@@ -80,6 +81,8 @@ public class EvocationPower extends RunefusedGemPower {
         @Translation(prefix = "simplyswords.config.basic_settings")
         @ValidatedFloat.Restrict(min = 0f)
         public float damageScaling = 0.2F;
+        @ValidatedFloat.Restrict(min = 0f)
+        public float spellScaling = 0.4F;
 
         @Translation(prefix = "simplyswords.config.basic_settings")
         @ValidatedInt.Restrict(min = 1)
