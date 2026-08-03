@@ -1,8 +1,7 @@
 # Simply Swords addon developer documentation
 
 These documents explain how an addon can build weapons that behave like Simply
-Swords' built-in unique weapons. This branch targets Minecraft 1.20.1 and Java
-17. See [BACKPORTING.md](BACKPORTING.md) for the cross-version workflow.
+Swords' built-in unique weapons. This branch targets Minecraft 1.20.1 and Java 17.
 
 Start here:
 
