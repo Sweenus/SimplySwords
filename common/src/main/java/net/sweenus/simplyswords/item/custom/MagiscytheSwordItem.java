@@ -125,6 +125,8 @@ public class MagiscytheSwordItem extends UniqueSwordItem implements UniqueWeapon
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.magiscythesworditem.tooltip6").setStyle(Styles.TEXT));
+        tooltip.add(Text.literal(""));
+        tooltip.add(Text.translatable("item.simplyswords.magiscythesworditem.tooltip7").setStyle(Styles.TEXT));
         appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.magiscythe.cooldown);
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
         TooltipUtils.appendSpellScaleTooltip(tooltip, "arcane");

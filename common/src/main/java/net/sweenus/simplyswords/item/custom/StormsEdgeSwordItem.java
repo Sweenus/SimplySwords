@@ -124,6 +124,8 @@ public class StormsEdgeSwordItem extends UniqueSwordItem implements UniqueWeapon
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.stormsedgesworditem.tooltip3").setStyle(Styles.TEXT));
+        tooltip.add(Text.literal(""));
+        tooltip.add(Text.translatable("item.simplyswords.stormsedgesworditem.tooltip4").setStyle(Styles.TEXT));
         appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.storms_edge.cooldown);
 
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
