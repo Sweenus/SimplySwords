@@ -1,6 +1,6 @@
 {
   "attributes": {
-    "range_bonus": 2.5,
+    "attack_range": 5.5,
     "two_handed": false,
     "category": "chakram",
     "attacks": [

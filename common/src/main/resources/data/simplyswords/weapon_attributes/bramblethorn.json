@@ -1,6 +1,6 @@
 {
   "attributes": {
-    "range_bonus": 0.25,
+    "attack_range": 3.25,
     "category": "rapier",
     "attacks": [
       {

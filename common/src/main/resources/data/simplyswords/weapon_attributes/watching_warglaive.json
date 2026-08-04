@@ -1,6 +1,6 @@
 {
   "attributes": {
-    "range_bonus": 0.1,
+    "attack_range": 3.1,
     "pose": "simplyswords:pose_warglaive_dual_animated",
     "two_handed": false,
     "category": "warglaive",

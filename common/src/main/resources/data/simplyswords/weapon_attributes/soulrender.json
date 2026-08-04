@@ -1,6 +1,6 @@
 {
   "attributes": {
-    "range_bonus": 1,
+    "attack_range": 4,
     "pose": "simplyswords:pose_soulrender",
     "two_handed": false,
     "category": "scythe",

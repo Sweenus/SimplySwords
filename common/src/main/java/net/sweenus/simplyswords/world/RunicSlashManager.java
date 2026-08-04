@@ -41,6 +41,15 @@ public final class RunicSlashManager {
         }
     }
 
+    //
+    // Whether the caller is pacing swings itself and the vanilla attack-speed gate should be
+    // skipped. Set by runIgnoringAttackReady for Better Combat attacks, which never
+    // reach the vanilla swingHand path.
+    //
+    public static boolean isIgnoringAttackReady() {
+        return IGNORE_ATTACK_READY.get();
+    }
+
     public static void runIgnoringAttackReady(Runnable runnable) {
         boolean previous = IGNORE_ATTACK_READY.get();
         IGNORE_ATTACK_READY.set(true);

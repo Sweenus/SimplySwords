@@ -1,5 +1,6 @@
 package net.sweenus.simplyswords;
 
+import dev.architectury.event.events.client.ClientGuiEvent;
 import dev.architectury.event.events.common.LifecycleEvent;
 import dev.architectury.platform.Platform;
 import dev.architectury.registry.CreativeTabRegistry;
@@ -36,8 +37,10 @@ import net.sweenus.simplyswords.client.renderer.model.CaelestisRiftlingModel;
 import net.sweenus.simplyswords.client.renderer.model.CaelestisTentacleModel;
 import net.sweenus.simplyswords.client.AbilityKeybindHandler;
 import net.sweenus.simplyswords.client.CaelestisBreachAmbience;
+import net.sweenus.simplyswords.client.hud.WeaponHudRenderer;
 import net.sweenus.simplyswords.command.SimplySwordsCommands;
 import net.sweenus.simplyswords.compat.MythicMetalsCompat;
+import net.sweenus.simplyswords.compat.bettercombat.BetterCombatCompat;
 import net.sweenus.simplyswords.compat.eldritch_end.EldritchEndCompatRegistry;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.BattleStandardDarkEntity;
@@ -105,6 +108,13 @@ public class SimplySwords {
         ParticlesRegistry.PARTICLES.register();
         TransformationRegistry.register();
         LifecycleEvent.SETUP.register(AwakeningFormRegistry::registerBuiltins);
+        // At SETUP rather than here, so Better Combat's classes aren't force-loaded during
+        // mod construction and Platform can actually answer isModLoaded.
+        LifecycleEvent.SETUP.register(() -> {
+            if (Platform.isModLoaded("bettercombat")) {
+                BetterCombatCompat.verifyAttackHookTarget();
+            }
+        });
         SimplySwordsNetwork.init();
         SimplySwordsAPI.registerObserverSyncedStatusEffect(EffectRegistry.SHADOW_DANCE_ID);
         ObserverStatusEffectSyncManager.init();
@@ -171,6 +181,9 @@ public class SimplySwords {
             AbilityKeybindHandler.init();
             CaelestisBreachAmbience.init();
             ObserverStatusEffectClientApi.init();
+            // Not a mixin on InGameHud#render: Forge 1.20.1 substitutes ForgeGui, which overrides
+            // render without calling super, so such a mixin never runs on Forge.
+            ClientGuiEvent.RENDER_HUD.register(WeaponHudRenderer::render);
             // Entity
             EntityRendererRegistry.register(EntityRegistry.BATTLESTANDARD, BattleStandardRenderer::new);
             EntityModelLayerRegistry.register(BATTLESTANDARD_MODEL, BattleStandardModel::getTexturedModelData);

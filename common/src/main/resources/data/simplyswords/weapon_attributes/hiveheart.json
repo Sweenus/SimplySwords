@@ -1,7 +1,7 @@
 {
   "parent": "bettercombat:heavy_axe",
   "attributes" : {
-    "range_bonus": 1,
+    "attack_range": 4,
     "pose": "bettercombat:pose_two_handed_heavy",
     "category": "greathammer",
     "two_handed": true,

@@ -282,6 +282,12 @@ public final class LivyatanWaveManager {
         if (now % 200L == 0L) {
             purgeOldSwingEntries(now);
         }
+        // Better Combat paces its own attacks and never hits the vanilla swingHand path, so its
+        // swings would otherwise be dropped by the attack-speed gate below.
+        if (RunicSlashManager.isIgnoringAttackReady()) {
+            LAST_ACTIVATION.put(user.getUuid(), now);
+            return true;
+        }
         Long last = LAST_ACTIVATION.get(user.getUuid());
         if (last != null && now - last < getAttackReadyCooldownTicks(user)) {
             return false;

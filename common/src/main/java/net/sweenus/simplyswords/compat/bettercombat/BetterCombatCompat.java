@@ -1,6 +1,5 @@
 package net.sweenus.simplyswords.compat.bettercombat;
 
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -11,84 +10,138 @@ import net.sweenus.simplyswords.world.RunicSlashManager;
 
 import java.lang.reflect.Method;
 
+/**
+ * Bridges Better Combat attacks onto {@link SimplySwordsAPI#onWeaponSwing}.
+ * <p>
+ * Called from {@code BetterCombatServerNetworkMixin}, which hands us the {@code AttackHand}
+ * Better Combat already resolved for the request. Better Combat is a soft dependency, so that
+ * object is reflected rather than typed.
+ */
 public final class BetterCombatCompat {
-    private static Method getCurrentAttackMethod;
-    private static Method isOffHandMethod;
-    private static Method itemStackMethod;
-    private static Method comboCountMethod;
+    // The lambda BetterCombatServerNetworkMixin injects into. Kept in sync with that mixin.
+    private static final String ATTACK_HANDLER_LAMBDA = "lambda$initializeHandlers$5";
+    // The mixin's injector method, merged into ServerNetwork once the mixin applies.
+    private static final String INJECTED_HANDLER = "simplyswords$triggerRunicSlashFromBetterCombat";
+
+    private static Method attackHandIsOffHand;
+    private static Method attackHandItemStack;
     private static boolean initialized;
     private static boolean reflectionUnavailableLogged;
 
     private BetterCombatCompat() {
     }
 
-    public static void triggerRunicSlash(Object request, ServerPlayerEntity player) {
-        if (request == null
-                || player == null
+    //
+    // Reports if the Better Combat attack hook is not in place, which is otherwise silent:
+    // BetterCombatServerNetworkMixin uses require = 0 so it degrades to "no
+    // on-swing effects under Better Combat" rather than crashing.
+    //
+    // Checks both failure modes separately - Better Combat's handler having moved, and the mixin
+    // not having applied at all.
+    //
+    public static void verifyAttackHookTarget() {
+        try {
+            // Loaded without initializing so this doesn't run Better Combat's static setup early.
+            Class<?> serverNetwork = Class.forName(
+                    "net.bettercombat.network.ServerNetwork", false,
+                    BetterCombatCompat.class.getClassLoader());
+
+            boolean targetPresent = false;
+            boolean injected = false;
+            for (Method method : serverNetwork.getDeclaredMethods()) {
+                String name = method.getName();
+                targetPresent |= name.equals(ATTACK_HANDLER_LAMBDA);
+                injected |= name.contains(INJECTED_HANDLER);
+            }
+
+            if (!targetPresent) {
+                SimplySwords.LOGGER.warn(
+                        "Better Combat is installed but {}#{} is missing, so on-swing weapon "
+                                + "effects (runic slash, Livyatan waves) will not fire for Better "
+                                + "Combat attacks. Its attack handler has most likely moved and "
+                                + "BetterCombatServerNetworkMixin needs retargeting.",
+                        serverNetwork.getName(), ATTACK_HANDLER_LAMBDA);
+            } else if (!injected) {
+                SimplySwords.LOGGER.warn(
+                        "BetterCombatServerNetworkMixin did not apply to {}, so on-swing weapon "
+                                + "effects (runic slash, Livyatan waves) will not fire for Better "
+                                + "Combat attacks. The mixin was skipped before it could be "
+                                + "applied - check for a 'Skipping virtual target' line, and note "
+                                + "that mod-loaded gating in SimplySwordsCommonMixinPlugin cannot "
+                                + "work on Forge.",
+                        serverNetwork.getName());
+            }
+        } catch (ReflectiveOperationException | LinkageError | RuntimeException e) {
+            SimplySwords.LOGGER.warn(
+                    "Unable to inspect Better Combat's server attack handler; on-swing weapon "
+                            + "effects may not fire for Better Combat attacks.", e);
+        }
+    }
+
+    //
+    // Fires on-swing weapon effects for a Better Combat attack.
+    //
+    // @param attackHand Better Combat's net.bettercombat.api.AttackHand for this attack,
+    //                   used to tell a dual-wielded off-hand attack from a main-hand one.
+    //
+    public static void triggerRunicSlash(ServerPlayerEntity player, Object attackHand) {
+        if (player == null
                 || !(player.getWorld() instanceof ServerWorld world)
                 || RunicSlashManager.isSuppressed()) {
             return;
         }
 
-        AttackData attackData = resolveAttackData(request, player);
-        if (attackData == null) {
+        Hand hand = resolveHand(attackHand);
+        ItemStack stack = resolveStack(attackHand, player, hand);
+        if (stack.isEmpty()) {
             return;
         }
 
-        ItemStack stack = attackData.stack();
-        Hand hand = attackData.offHand() ? Hand.OFF_HAND : Hand.MAIN_HAND;
-        if (stack == null || stack.isEmpty()) {
-            stack = player.getStackInHand(hand);
-        }
-        if (!stack.isEmpty()) {
-            ItemStack finalStack = stack;
-            RunicSlashManager.runIgnoringAttackReady(() -> SimplySwordsAPI.onWeaponSwing(finalStack, world, player, hand));
-        }
+        // Better Combat paces its own attacks, so bypass the vanilla attack-speed gate that the
+        // swingHand path relies on - otherwise faster BC combos would drop swings.
+        RunicSlashManager.runIgnoringAttackReady(
+                () -> SimplySwordsAPI.onWeaponSwing(stack, world, player, hand));
     }
 
-    private static AttackData resolveAttackData(Object request, ServerPlayerEntity player) {
-        if (!ensureReflectionReady(request)) {
-            return fallbackMainHand(player);
+    private static Hand resolveHand(Object attackHand) {
+        if (attackHand == null || !ensureReflectionReady()) {
+            return Hand.MAIN_HAND;
         }
-
         try {
-            int comboCount = (int) comboCountMethod.invoke(request);
-            Object attackHand = getCurrentAttackMethod.invoke(null, player, comboCount);
-            if (attackHand == null) {
-                return null;
-            }
-
-            boolean offHand = (boolean) isOffHandMethod.invoke(attackHand);
-            Object stack = itemStackMethod.invoke(attackHand);
-            return stack instanceof ItemStack itemStack
-                    ? new AttackData(offHand, itemStack)
-                    : new AttackData(offHand, player.getStackInHand(offHand ? Hand.OFF_HAND : Hand.MAIN_HAND));
+            return (boolean) attackHandIsOffHand.invoke(attackHand) ? Hand.OFF_HAND : Hand.MAIN_HAND;
         } catch (ReflectiveOperationException | RuntimeException e) {
             logReflectionUnavailable(e);
-            return fallbackMainHand(player);
+            return Hand.MAIN_HAND;
         }
     }
 
-    private static AttackData fallbackMainHand(ServerPlayerEntity player) {
-        return new AttackData(false, player.getMainHandStack());
+    private static ItemStack resolveStack(Object attackHand, ServerPlayerEntity player, Hand hand) {
+        if (attackHand != null && ensureReflectionReady()) {
+            try {
+                if (attackHandItemStack.invoke(attackHand) instanceof ItemStack stack && !stack.isEmpty()) {
+                    return stack;
+                }
+            } catch (ReflectiveOperationException | RuntimeException e) {
+                logReflectionUnavailable(e);
+            }
+        }
+        return player.getStackInHand(hand);
     }
 
-    private static boolean ensureReflectionReady(Object request) {
+    private static boolean ensureReflectionReady() {
         if (initialized) {
-            return true;
+            return attackHandIsOffHand != null;
         }
+        initialized = true;
 
         try {
-            Class<?> helperClass = Class.forName("net.bettercombat.logic.PlayerAttackHelper");
-            getCurrentAttackMethod = helperClass.getMethod("getCurrentAttack", PlayerEntity.class, int.class);
-            comboCountMethod = request.getClass().getMethod("comboCount");
-
             Class<?> attackHandClass = Class.forName("net.bettercombat.api.AttackHand");
-            isOffHandMethod = attackHandClass.getMethod("isOffHand");
-            itemStackMethod = attackHandClass.getMethod("itemStack");
-            initialized = true;
+            attackHandIsOffHand = attackHandClass.getMethod("isOffHand");
+            attackHandItemStack = attackHandClass.getMethod("itemStack");
             return true;
         } catch (ReflectiveOperationException | RuntimeException e) {
+            attackHandIsOffHand = null;
+            attackHandItemStack = null;
             logReflectionUnavailable(e);
             return false;
         }
@@ -97,10 +150,8 @@ public final class BetterCombatCompat {
     private static void logReflectionUnavailable(Exception e) {
         if (!reflectionUnavailableLogged) {
             reflectionUnavailableLogged = true;
-            SimplySwords.LOGGER.warn("Unable to resolve Better Combat attack hand for Runic Slash compatibility; falling back to main hand.", e);
+            SimplySwords.LOGGER.warn("Unable to resolve the Better Combat attack hand; "
+                    + "assuming main-hand attacks for on-swing weapon effects.", e);
         }
-    }
-
-    private record AttackData(boolean offHand, ItemStack stack) {
     }
 }

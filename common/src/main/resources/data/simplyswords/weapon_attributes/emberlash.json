@@ -1,6 +1,6 @@
 {
   "attributes": {
-    "range_bonus": -0.5,
+    "attack_range": 2.5,
     "two_handed": false,
     "category": "warglaive",
     "attacks": [

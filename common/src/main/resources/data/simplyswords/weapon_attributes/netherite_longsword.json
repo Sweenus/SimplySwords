@@ -1,6 +1,6 @@
 {
   "attributes": {
-    "range_bonus": -0.2,
+    "attack_range": 2.8,
     "category": "sword",
     "attacks": [
       {
