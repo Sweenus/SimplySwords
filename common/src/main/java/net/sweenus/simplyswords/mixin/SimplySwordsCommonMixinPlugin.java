@@ -1,56 +1,24 @@
 package net.sweenus.simplyswords.mixin;
 
-import dev.architectury.platform.Platform;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.function.Supplier;
 
 public final class SimplySwordsCommonMixinPlugin implements IMixinConfigPlugin {
-    private static final Supplier<Boolean> TRUE = () -> true;
 
-    private static final Map<String, Supplier<Boolean>> CONDITIONS = Map.of(
-            "net.sweenus.simplyswords.mixin.compat.BetterCombatServerNetworkMixin",
-            () -> isModLoaded("bettercombat")
-    );
-
+    //
+    // Do not gate mixins on whether another mod is loaded here.
+    //
+    // Mixin calls this during config prepare, which on NeoForge runs before the mod list exists -
+    // ModList.get() is still null and Architectury's Platform cannot answer either. Any such check
+    // returns false, Mixin silently drops the target, and nothing is logged.
+    //
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        return CONDITIONS.getOrDefault(mixinClassName, TRUE).get();
-    }
-
-    private static boolean isModLoaded(String modId) {
-        try {
-            if (Platform.isModLoaded(modId)) {
-                return true;
-            }
-        } catch (Throwable ignored) {
-        }
-        return isFabricModLoaded(modId) || isNeoForgeModLoaded(modId);
-    }
-
-    private static boolean isFabricModLoaded(String modId) {
-        try {
-            Class<?> loaderClass = Class.forName("net.fabricmc.loader.api.FabricLoader");
-            Object loader = loaderClass.getMethod("getInstance").invoke(null);
-            return (boolean) loaderClass.getMethod("isModLoaded", String.class).invoke(loader, modId);
-        } catch (Throwable ignored) {
-            return false;
-        }
-    }
-
-    private static boolean isNeoForgeModLoaded(String modId) {
-        try {
-            Class<?> modListClass = Class.forName("net.neoforged.fml.ModList");
-            Object modList = modListClass.getMethod("get").invoke(null);
-            return (boolean) modListClass.getMethod("isLoaded", String.class).invoke(modList, modId);
-        } catch (Throwable ignored) {
-            return false;
-        }
+        return true;
     }
 
     @Override

@@ -12,6 +12,11 @@ import net.sweenus.simplyswords.world.RunicSlashManager;
 import java.lang.reflect.Method;
 
 public final class BetterCombatCompat {
+    // The Better Combat handler BetterCombatServerNetworkMixin injects into. Kept in sync with that mixin.
+    private static final String ATTACK_HANDLER = "handleAttackRequest";
+    // The mixin's injector method, merged into ServerNetwork once the mixin applies.
+    private static final String INJECTED_HANDLER = "simplyswords$triggerRunicSlashFromBetterCombat";
+
     private static Method getCurrentAttackMethod;
     private static Method isOffHandMethod;
     private static Method itemStackMethod;
@@ -20,6 +25,53 @@ public final class BetterCombatCompat {
     private static boolean reflectionUnavailableLogged;
 
     private BetterCombatCompat() {
+    }
+
+    //
+    // Reports if the Better Combat attack hook is not in place. A failed injection crashes on its
+    // own, but a mixin that gets skipped before it can be applied is completely silent - that is
+    // the failure this catches.
+    //
+    // Checks both modes separately - Better Combat's handler having moved, and the mixin not
+    // having applied at all.
+    //
+    public static void verifyAttackHookTarget() {
+        try {
+            // Loaded without initializing so this doesn't run Better Combat's static setup early.
+            Class<?> serverNetwork = Class.forName(
+                    "net.bettercombat.network.ServerNetwork", false,
+                    BetterCombatCompat.class.getClassLoader());
+
+            boolean targetPresent = false;
+            boolean injected = false;
+            for (Method method : serverNetwork.getDeclaredMethods()) {
+                String name = method.getName();
+                targetPresent |= name.equals(ATTACK_HANDLER);
+                injected |= name.contains(INJECTED_HANDLER);
+            }
+
+            if (!targetPresent) {
+                SimplySwords.LOGGER.warn(
+                        "Better Combat is installed but {}#{} is missing, so on-swing weapon "
+                                + "effects (runic slash, Livyatan waves) will not fire for Better "
+                                + "Combat attacks. Its attack handler has most likely moved and "
+                                + "BetterCombatServerNetworkMixin needs retargeting.",
+                        serverNetwork.getName(), ATTACK_HANDLER);
+            } else if (!injected) {
+                SimplySwords.LOGGER.warn(
+                        "BetterCombatServerNetworkMixin did not apply to {}, so on-swing weapon "
+                                + "effects (runic slash, Livyatan waves) will not fire for Better "
+                                + "Combat attacks. The mixin was skipped before it could be "
+                                + "applied - check for a 'Skipping virtual target' line, and note "
+                                + "that mod-loaded gating in SimplySwordsCommonMixinPlugin cannot "
+                                + "work on NeoForge.",
+                        serverNetwork.getName());
+            }
+        } catch (ReflectiveOperationException | LinkageError | RuntimeException e) {
+            SimplySwords.LOGGER.warn(
+                    "Unable to inspect Better Combat's server attack handler; on-swing weapon "
+                            + "effects may not fire for Better Combat attacks.", e);
+        }
     }
 
     public static void triggerRunicSlash(Object request, ServerPlayerEntity player) {

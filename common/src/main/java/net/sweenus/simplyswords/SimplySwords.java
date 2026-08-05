@@ -38,6 +38,7 @@ import net.sweenus.simplyswords.client.AbilityKeybindHandler;
 import net.sweenus.simplyswords.client.CaelestisBreachAmbience;
 import net.sweenus.simplyswords.command.SimplySwordsCommands;
 import net.sweenus.simplyswords.compat.MythicMetalsCompat;
+import net.sweenus.simplyswords.compat.bettercombat.BetterCombatCompat;
 import net.sweenus.simplyswords.compat.eldritch_end.EldritchEndCompatRegistry;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.BattleStandardDarkEntity;
@@ -105,6 +106,11 @@ public class SimplySwords {
         ParticlesRegistry.PARTICLES.register();
         TransformationRegistry.register();
         LifecycleEvent.SETUP.register(AwakeningFormRegistry::registerBuiltins);
+        LifecycleEvent.SETUP.register(() -> {
+            if (Platform.isModLoaded("bettercombat")) {
+                BetterCombatCompat.verifyAttackHookTarget();
+            }
+        });
         SimplySwordsNetwork.init();
         SimplySwordsAPI.registerObserverSyncedStatusEffect(EffectRegistry.SHADOW_DANCE_ID);
         ObserverStatusEffectSyncManager.init();
