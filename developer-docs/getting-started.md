@@ -35,7 +35,10 @@ dependencies {
 File IDs are listed on the
 [Simply Swords files page](https://www.curseforge.com/minecraft/mc-mods/simply-swords/files).
 Choose a Minecraft 1.20.1 file for the same loader as the module being built.
-The Forge 1.20.1 jar is also used on NeoForge 1.20.1.
+There is no separate NeoForge 1.20.1 build: one jar serves both loaders, and is
+named `simplyswords-forge-neoforge-<version>.jar` to say so. NeoForge 1.20.1
+reads the same `META-INF/mods.toml` and keeps the `net.minecraftforge` package
+namespace, so the Forge build loads on it unchanged.
 
 CurseMaven does not guarantee useful transitive dependency metadata. Keep the
 normal Architectury dependency in an Architectury addon and provide Simply

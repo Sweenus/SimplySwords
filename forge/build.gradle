@@ -101,6 +101,9 @@ remapJar {
     inputFile.set shadowJar.archiveFile
     dependsOn shadowJar
     archiveClassifier.set(null)
+    // One jar serves both loaders: NeoForge 1.20.1 reads META-INF/mods.toml and keeps the
+    // net.minecraftforge namespace, so name the distributable for both.
+    archiveBaseName.set("$rootProject.archives_name-forge-neoforge")
 }
 
 jar {
