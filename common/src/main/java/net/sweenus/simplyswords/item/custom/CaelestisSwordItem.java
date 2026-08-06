@@ -135,7 +135,7 @@ public class CaelestisSwordItem extends UniqueSwordItem implements UniqueWeaponA
         @ValidatedInt.Restrict(min = 0, max = 100)
         public int betrayalChance = 5;
         @ValidatedInt.Restrict(min = 0, max = 100)
-        public int unboundTabletDropChance = 10;
+        public int unboundTabletDropChance = 1;
         @ValidatedFloat.Restrict(min = 0f)
         public float minionHealthScaling = 0.08f;
         @ValidatedFloat.Restrict(min = 0f)
