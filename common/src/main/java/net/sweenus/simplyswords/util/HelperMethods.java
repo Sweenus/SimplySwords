@@ -13,11 +13,9 @@ import net.minecraft.entity.Tameable;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.decoration.ArmorStandEntity;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.mob.Monster;
-import net.minecraft.entity.passive.VillagerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileUtil;
 import net.minecraft.item.Item;
@@ -205,15 +203,16 @@ public class HelperMethods {
         return Platform.isModLoaded("openpartiesandclaims");
     }
 
-    //Check if the target matches blacklisted entities (expand this to be configurable if there is demand)
+    //Check if the target matches blacklisted entities. Armour stands, villagers and any other
+    //excluded entity live in the abilityIgnoredEntities config; our own utility entities do not.
     public static boolean checkEntityBlacklist(LivingEntity target, LivingEntity player) {
         if (target == null || player == null) {
             return false;
         }
-        return !(target instanceof ArmorStandEntity)
-                && !(target instanceof VillagerEntity)
-                && !(target instanceof BattleStandardEntity)
-                && !(target instanceof BattleStandardDarkEntity);
+        if (target instanceof BattleStandardEntity || target instanceof BattleStandardDarkEntity) {
+            return false;
+        }
+        return !IgnoredEntities.isIgnored(target);
     }
 
     //spawnParticle - spawns particles across both client & server
@@ -682,6 +681,9 @@ public class HelperMethods {
     }
 
     public static void applyDamageWithoutKnockback(LivingEntity target, DamageSource source, float amount) {
+        if (IgnoredEntities.isIgnored(target)) {
+            return;
+        }
         EntityAttributeInstance knockbackResistance = target.getAttributeInstance(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE);
         double originalKnockbackResistance = 0;
         if (knockbackResistance != null) {
@@ -789,6 +791,8 @@ public class HelperMethods {
     // Ignore iFrames without resetting them entirely
     public static boolean damageThroughIframes(Entity targetEntity, DamageSource damageSource, float damage) {
         if (targetEntity instanceof PlayerEntity player && (player.isCreative() || player.isSpectator()))
+            return false;
+        if (IgnoredEntities.isIgnored(targetEntity))
             return false;
         int iframes = targetEntity.timeUntilRegen;
         try {

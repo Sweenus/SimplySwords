@@ -1065,6 +1065,8 @@
   "simplyswords.general.enableUniqueGemSockets.desc": "If disabled, gem slots will no longer appear on freshly generated Unique weapons. Not retroactive.",
   "simplyswords.general.additionalGemSocketItems": "Additional gem socket items",
   "simplyswords.general.additionalGemSocketItems.desc": "Grant both Runefused and Netherfused gem sockets to matching non-stackable items. Accepts item IDs such as minecraft:diamond_sword and item tags prefixed with #, such as #minecraft:swords.",
+  "simplyswords.general.abilityIgnoredEntities": "Ability ignored entities",
+  "simplyswords.general.abilityIgnoredEntities.desc": "Entities that weapon and gem abilities never target or damage. Accepts entity IDs such as minecraft:cow, entity tags prefixed with #, such as #minecraft:skeletons, and the category keywords passive, animal, villager, hostile, water, ambient, golem, player and tameable. Note that passive does not cover squid, bats or golems. Direct melee attacks are unaffected.",
   "simplyswords.general.enableTooltipInfoButtons": "Enable Tooltip Info Buttons",
   "simplyswords.general.enableTooltipInfoButtons.desc": "Show/hide the tooltip buttons that appear on some items from the mod. This will also disable the associated hotkey actions, and hide gem socket info.",
   "simplyswords.general.tooltipInfoButtonsRequireInventoryScreen": "Tooltip Info Buttons require inventory screen",
