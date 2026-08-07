@@ -37,6 +37,7 @@ import net.sweenus.simplyswords.registry.ComponentTypeRegistry;
 import net.sweenus.simplyswords.registry.EntityRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
+import net.sweenus.simplyswords.util.IgnoredEntities;
 import net.sweenus.simplyswords.world.WeaponAbilityCooldownManager;
 import net.sweenus.simplyswords.world.WaxweaverEncasementManager;
 
@@ -245,6 +246,9 @@ public class SimplySwordsAPI {
         if (target instanceof PlayerEntity player && (player.isCreative() || player.isSpectator())) {
             return false;
         }
+        if (IgnoredEntities.isIgnored(target)) {
+            return false;
+        }
 
         Vec3d facing = actor.getRotationVec(1.0F);
         if (facing.lengthSquared() < 0.0001) {
@@ -286,6 +290,9 @@ public class SimplySwordsAPI {
         if (stack == null || stack.isEmpty() || target == null || actor == null
                 || !(actor.getWorld() instanceof ServerWorld world) || target.getWorld() != world
                 || !target.isAlive()) {
+            return false;
+        }
+        if (IgnoredEntities.isIgnored(target)) {
             return false;
         }
 

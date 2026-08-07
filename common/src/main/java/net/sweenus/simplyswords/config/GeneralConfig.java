@@ -40,6 +40,9 @@ public class GeneralConfig extends Config {
     public int nonPlayerWeaponAbilityCheckInterval = 80;
     @ValidatedInt.Restrict(min = 0, max = 100)
     public int nonPlayerWeaponAbilityChance = 50;
+    public ValidatedSet<String> abilityIgnoredEntities =
+            new ValidatedString("", "(?:#?[a-z0-9_.-]+:[a-z0-9_./-]+|[a-z_]+)?")
+                    .toSet("passive", "minecraft:armor_stand", "minecraft:villager");
     public boolean enableUniqueWeaponAwakening = true;
     public boolean enableUniqueGemSockets = true;
     public ValidatedSet<String> additionalGemSocketItems =
