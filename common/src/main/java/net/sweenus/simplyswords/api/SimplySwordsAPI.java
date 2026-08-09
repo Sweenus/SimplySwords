@@ -15,6 +15,7 @@ import net.minecraft.inventory.StackReference;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.SwordItem;
+import net.minecraft.particle.ParticleEffect;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -26,8 +27,11 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.BattleStandardEntity;
+import net.sweenus.simplyswords.entity.SimplySwordsSkeletonMinionEntity;
+import net.sweenus.simplyswords.entity.SimplySwordsWolfMinionEntity;
 import net.sweenus.simplyswords.item.custom.LivyatanSwordItem;
 import net.sweenus.simplyswords.item.custom.MoltenEdgeSwordItem;
+import net.sweenus.simplyswords.item.custom.StealSwordItem;
 import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
 import net.sweenus.simplyswords.power.powers.NecromanticArsenalPower;
 import net.sweenus.simplyswords.item.ContainedRemnantItem;
@@ -38,11 +42,14 @@ import net.sweenus.simplyswords.registry.EntityRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.IgnoredEntities;
+import net.sweenus.simplyswords.util.HelperMethods;
+import net.sweenus.simplyswords.world.ChainLightningVisualManager;
 import net.sweenus.simplyswords.world.WeaponAbilityCooldownManager;
 import net.sweenus.simplyswords.world.WaxweaverEncasementManager;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 public class SimplySwordsAPI {
 
@@ -501,6 +508,48 @@ public class SimplySwordsAPI {
 
     public static void applyWeaponImplicitOnHit(ItemStack stack, LivingEntity target, LivingEntity attacker, float damage) {
         WeaponImplicitRegistry.onHit(stack, target, attacker, damage);
+    }
+
+    public static float scaleAbilityDamage(SpellScalingProfile school, LivingEntity actor, ItemStack stack,
+                                           float attackScaling, float spellScaling) {
+        return HelperMethods.abilityScaledDamage(school, actor, stack, attackScaling, spellScaling);
+    }
+
+    public static float scaleAbilityValue(SpellScalingProfile school, LivingEntity actor, ItemStack stack,
+                                          float baseValue, float spellScaling) {
+        return HelperMethods.abilityScaledValue(school, actor, stack, baseValue, spellScaling);
+    }
+
+    public static LivingEntity findLenientAbilityTarget(PlayerEntity player, double range,
+                                                        Predicate<LivingEntity> predicate) {
+        return StealSwordItem.findLenientTarget(player, range, predicate);
+    }
+
+    public static List<LivingEntity> findAbilityChainTargets(ServerWorld world, LivingEntity actor,
+                                                             LivingEntity firstTarget, int count, double range) {
+        return ChainLightningVisualManager.chainTargets(world, actor, firstTarget, count, range);
+    }
+
+    public static boolean applyAbilityBoltDamage(ServerWorld world, LivingEntity actor, ItemStack stack,
+                                                 LivingEntity target, float damage) {
+        return ChainLightningVisualManager.damageBoltTarget(world, actor, stack, target, damage);
+    }
+
+    public static boolean isValidAbilityTarget(LivingEntity target, LivingEntity actor) {
+        return target != null
+                && actor != null
+                && !(target instanceof SimplySwordsSkeletonMinionEntity)
+                && !(target instanceof SimplySwordsWolfMinionEntity)
+                && HelperMethods.checkAbilityTarget(target, actor);
+    }
+
+    public static Optional<LivingEntity> findClosestAbilityTarget(LivingEntity actor, double range, double width) {
+        return actor == null ? Optional.empty() : HelperMethods.findClosestTarget(actor, range, width);
+    }
+
+    public static void spawnAbilityOrbitParticles(ServerWorld world, Vec3d centre, ParticleEffect particle,
+                                                  double radius, int count) {
+        HelperMethods.spawnOrbitParticles(world, centre, particle, radius, count);
     }
 
 }

@@ -31,7 +31,7 @@ To support ordinary right-click as a fallback:
 
 ```java
 @Override
-public TypedActionResult<ItemStack> use(
+protected TypedActionResult<ItemStack> useUniqueWeapon(
         World world,
         PlayerEntity user,
         Hand hand
@@ -39,6 +39,11 @@ public TypedActionResult<ItemStack> use(
     return useFromDefaultInput(world, user, hand);
 }
 ```
+
+This hook is available on `UniqueWeaponItem` and `UniqueSwordItem`. Addon
+subclasses should not override Minecraft's mapped `use` method directly: an
+addon and its Simply Swords dependency are remapped separately, so that method
+may no longer override the runtime name in a production jar.
 
 If a player binds the matching ability hotkey, Simply Swords suppresses this
 default-input path to prevent two casts from one action.
@@ -128,8 +133,24 @@ This model works for players and other living entities. The
 `PlayerWeaponAbilityChannelManager` only models held player input and should not
 be the sole driver of shared gameplay.
 
-Override `getMaxUseTime`, `usageTick`, and `onStoppedUsing` only when held-input
-behavior is part of the design. `UniqueSwordItem` defaults to zero use time.
+Use the remap-safe `UniqueWeaponItem` hooks when held-input behavior is part of
+the design:
+
+```java
+protected int getUniqueWeaponMaxUseTime(ItemStack stack);
+protected void tickUniqueWeaponUse(
+        World world, LivingEntity user, ItemStack stack, int remainingTicks
+);
+protected ItemStack finishUniqueWeaponUse(
+        ItemStack stack, World world, LivingEntity user
+);
+protected void stopUniqueWeaponUse(
+        ItemStack stack, World world, LivingEntity user, int remainingTicks
+);
+```
+
+The default maximum use time is zero. Override only the hooks needed by the
+weapon, and keep authoritative channel state on the server.
 
 ## Cooldowns and refreshes
 

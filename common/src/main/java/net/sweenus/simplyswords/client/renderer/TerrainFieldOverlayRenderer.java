@@ -109,6 +109,34 @@ public final class TerrainFieldOverlayRenderer {
             )
     );
 
+    public static final Palette WHITE_MARBLE = new Palette(
+            List.of(
+                    new Variant(46,
+                            new Identifier("minecraft", "block/calcite"), null,
+                            new Identifier("minecraft", "block/calcite"), null),
+                    new Variant(20,
+                            new Identifier("minecraft", "block/quartz_block_top"), null,
+                            new Identifier("minecraft", "block/quartz_block_side"), null),
+                    new Variant(16,
+                            new Identifier("minecraft", "block/polished_diorite"), null,
+                            new Identifier("minecraft", "block/polished_diorite"), null),
+                    new Variant(10,
+                            new Identifier("minecraft", "block/quartz_block_bottom"), null,
+                            new Identifier("minecraft", "block/quartz_block_bottom"), null),
+                    new Variant(5,
+                            new Identifier("minecraft", "block/chiseled_quartz_block_top"), null,
+                            new Identifier("minecraft", "block/chiseled_quartz_block"), null),
+                    new Variant(3,
+                            new Identifier("minecraft", "block/quartz_pillar_top"), null,
+                            new Identifier("minecraft", "block/quartz_pillar"), null)
+            ),
+            255, 255, 255,
+            255, 255, 255, 0,
+            10,
+            20,
+            0
+    );
+
     private final Map<UUID, TerrainCache> caches = new HashMap<>();
 
     public void clear(UUID id) {

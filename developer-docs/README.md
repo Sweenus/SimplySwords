@@ -20,10 +20,13 @@ The primary API lives in:
 
 The following classes are also intended for addon use:
 
+- `UniqueWeaponItem`
 - `UniqueSwordItem`
+- `LegacyWeaponAttributes` for 1.20.1 item settings
 - `UniqueWeaponActiveAbility`
 - `GemPower`, `RunicGemPower`, `RunefusedGemPower`, and `NetherGemPower`
 - `GemPowerRegistry`
+- the parchment render-data interfaces and their matching client renderers
 
 Classes under `world`, `mixin`, and most of `util` are implementation details.
 The reference occasionally mentions a utility when it is the only practical way
@@ -56,3 +59,4 @@ state APIs exist before addon content is used.
 - [Battle Standards](api/battle-standards.md)
 - [Observer-synchronized status effects](api/observer-status-effects.md)
 - [Client integration](api/client-integration.md)
+- [Parchment visuals](api/parchment-visuals.md)

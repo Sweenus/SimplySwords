@@ -18,6 +18,7 @@ public class Styles {
 	public static Style CORRUPTED_ABILITY = color(0xA987C2);
 	public static Style CORRUPTED_TEXT = color(0x7E7883);
 	public static Style TEXT = color(0xE0E0E0);
+	public static Style SEALED = color(0x7E7883);
 	public static Style COOLDOWN = color(0xF6A23A);
 
 

@@ -11,18 +11,33 @@ Use this checklist before releasing an addon unique weapon.
   classloading errors.
 - Confirm the game also starts with optional integrations absent. Keep declared
   hard dependencies, including Simply Tooltips, installed.
+- Test the built addon jar in a production/remapped instance, not only a Gradle
+  development run. Confirm `UniqueWeaponItem` lifecycle hooks still dispatch.
 
 ## Ability casting
 
 - Test the main-hand hotkey.
 - Test the offhand hotkey and dual wielding.
-- Test right-click if the item implements the fallback.
+- Test right-click if the item implements `useUniqueWeapon` as a fallback.
+- For held-use weapons, test start, per-tick use, completion, early release,
+  death, and item swapping.
 - Test with and without a valid target.
 - Test cooldown start, expiry, death, dimension change, and weapon swapping.
 - Give the weapon to a normal `MobEntity` and verify main-hand automatic use.
 - If custom living entities call the API directly, verify their context and
   cooldown behavior.
 - Confirm particles and sounds do not execute twice.
+
+## Tooltips and shared visuals
+
+- Hover the item in creative inventory and survival inventory from a dedicated
+  server connection.
+- Confirm registered addon namespaces receive rarity, awakening progress,
+  sealed-ability state, badges, and spell-scaling lines.
+- Test every parchment renderer mode or ribbon style used by the addon.
+- Confirm custom glyph atlases select the expected cells, colors, and glow.
+- Verify terrain fields follow the modern field-effects option and disappear
+  cleanly when their entity is removed.
 
 ## Awakening and Runic Forge
 

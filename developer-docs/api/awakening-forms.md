@@ -158,7 +158,7 @@ AwakeningApi.getFormModelValue(stack); // current model value
 ```
 
 Names and rarity are automatically form-aware when the item extends
-`UniqueSwordItem`.
+`UniqueWeaponItem`, including through `UniqueSwordItem`.
 
 Registering a family also registers its awakening profile for the base item,
 aliases, and stage items. Do not register those members into another family.

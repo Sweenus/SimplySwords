@@ -56,7 +56,7 @@ Fabric example:
 ```json
 {
   "depends": {
-    "simplyswords": ">=1.63.0",
+    "simplyswords": ">=1.70.0",
     "minecraft": "1.20.1"
   }
 }
@@ -68,7 +68,7 @@ Forge/NeoForge 1.20.1 example:
 [[dependencies.exampleaddon]]
 modId = "simplyswords"
 mandatory = true
-versionRange = "[1.63.0,)"
+versionRange = "[1.70.0,)"
 ordering = "AFTER"
 side = "BOTH"
 ```

@@ -7,8 +7,9 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
 import net.sweenus.simplyswords.api.AwakeningApi;
+import net.sweenus.simplyswords.client.api.SimplySwordsClientAPI;
 import net.sweenus.simplyswords.item.component.AwakeningComponent;
-import net.sweenus.simplyswords.item.UniqueSwordItem;
+import net.sweenus.simplyswords.item.UniqueWeaponItem;
 import net.sweenus.simplytooltips.api.ItemFrameProgress;
 import net.sweenus.simplytooltips.api.ModernTooltipModel;
 import net.sweenus.simplytooltips.api.TooltipBorderStyle;
@@ -26,9 +27,14 @@ public final class SimplySwordsTooltipProvider implements TooltipProvider {
 
     @Override
     public boolean supports(ItemStack stack) {
-        if (stack == null || stack.isEmpty() || !(stack.getItem() instanceof SwordItem)) return false;
+        if (stack == null || stack.isEmpty()) return false;
         Identifier id = Registries.ITEM.getId(stack.getItem());
-        return id != null && "simplyswords".equals(id.getNamespace());
+        if (id == null) return false;
+        if ("simplyswords".equals(id.getNamespace())) {
+            return stack.getItem() instanceof SwordItem;
+        }
+        return stack.getItem() instanceof UniqueWeaponItem
+                && SimplySwordsClientAPI.isUniqueTooltipNamespace(id.getNamespace());
     }
 
     @Override
@@ -40,11 +46,19 @@ public final class SimplySwordsTooltipProvider implements TooltipProvider {
 
         // ---- Badges: weapon type + rarity ----
         List<String> badges = new ArrayList<>();
-        for (String type : WEAPON_TYPES) {
-            if (path.contains(type)) { badges.add(type.toUpperCase()); break; }
+        if (stack.getItem() instanceof UniqueWeaponItem uniqueWeapon) {
+            String type = uniqueWeapon.getTooltipWeaponType(stack);
+            if (type != null && !type.isBlank()) {
+                badges.add(type.toUpperCase());
+            }
+        }
+        if (badges.isEmpty()) {
+            for (String type : WEAPON_TYPES) {
+                if (path.contains(type)) { badges.add(type.toUpperCase()); break; }
+            }
         }
         String rarityBadge = "COMMON";
-        if (stack.getItem() instanceof UniqueSwordItem u) {
+        if (stack.getItem() instanceof UniqueWeaponItem u) {
             rarityBadge = u.getItemRarity(stack); // "UNIQUE" or "LEGENDARY"
             badges.add(rarityBadge);
         }
@@ -58,7 +72,7 @@ public final class SimplySwordsTooltipProvider implements TooltipProvider {
         List<String> abilityLines = parseAbilityLines(rawLines);
         ItemFrameProgress frameProgress = null;
         String animKeyExtra = null;
-        if (stack.getItem() instanceof UniqueSwordItem
+        if (stack.getItem() instanceof UniqueWeaponItem
                 && AwakeningApi.usesAwakeningProgression(stack)) {
             int awakeningLevel = AwakeningApi.getLevel(stack);
             animKeyExtra = "|awakening:" + awakeningLevel;

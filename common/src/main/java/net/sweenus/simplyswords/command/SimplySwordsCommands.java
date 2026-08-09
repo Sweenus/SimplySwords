@@ -47,7 +47,7 @@ import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
 import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.config.LootConfig;
 import net.sweenus.simplyswords.item.RunicSwordItem;
-import net.sweenus.simplyswords.item.UniqueSwordItem;
+import net.sweenus.simplyswords.item.UniqueWeaponItem;
 import net.sweenus.simplyswords.loot.PityLootManager;
 import net.sweenus.simplyswords.loot.PityStateHolder;
 import net.sweenus.simplyswords.loot.PlayerPityState;
@@ -348,7 +348,7 @@ public final class SimplySwordsCommands {
 
     private static java.util.concurrent.CompletableFuture<com.mojang.brigadier.suggestion.Suggestions> suggestUniqueWeapons(com.mojang.brigadier.suggestion.SuggestionsBuilder builder) {
         Stream<Identifier> ids = Registries.ITEM.getIds().stream()
-                .filter(id -> Registries.ITEM.get(id) instanceof UniqueSwordItem);
+                .filter(id -> Registries.ITEM.get(id) instanceof UniqueWeaponItem);
         return CommandSource.suggestIdentifiers(ids, builder);
     }
 
@@ -380,7 +380,7 @@ public final class SimplySwordsCommands {
             for (Identifier id : Registries.ITEM.getIds()) {
                 if (id.getNamespace().equals(SimplySwords.MOD_ID)) {
                     Item item = Registries.ITEM.get(id);
-                    if (item instanceof UniqueSwordItem) {
+                    if (item instanceof UniqueWeaponItem) {
                         cachedUniqueWeapons.add(item);
                     }
                 }
@@ -914,7 +914,7 @@ public final class SimplySwordsCommands {
         try {
             Identifier weaponId = normalizeSimplySwordsId(IdentifierArgumentType.getIdentifier(context, "weapon"));
             Item item = Registries.ITEM.get(weaponId);
-            if (!(item instanceof UniqueSwordItem)) {
+            if (!(item instanceof UniqueWeaponItem)) {
                 throw UNKNOWN_UNIQUE_WEAPON.create(weaponId);
             }
             selectedWeapon = item;

@@ -6,7 +6,7 @@ import net.minecraft.registry.tag.TagKey;
 import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.item.RunicSwordItem;
-import net.sweenus.simplyswords.item.UniqueSwordItem;
+import net.sweenus.simplyswords.item.UniqueWeaponItem;
 import net.sweenus.simplyswords.power.GemPowerComponent;
 import net.sweenus.simplyswords.power.GemPowerFiller;
 import net.sweenus.simplyswords.registry.ComponentTypeRegistry;
@@ -132,7 +132,7 @@ public final class AdditionalGemSocketApi {
         if (stack == null || stack.isEmpty() || stack.getMaxCount() != 1) {
             return false;
         }
-        if (stack.getItem() instanceof UniqueSwordItem
+        if (stack.getItem() instanceof UniqueWeaponItem
                 || stack.getItem() instanceof RunicSwordItem
                 || stack.getItem() instanceof GemPowerFiller) {
             return false;

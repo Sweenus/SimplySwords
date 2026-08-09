@@ -16,7 +16,7 @@ import net.sweenus.simplyswords.entity.SimplySwordsSkeletonMinionEntity;
 import net.sweenus.simplyswords.entity.SimplySwordsWolfMinionEntity;
 import net.sweenus.simplyswords.item.RunicSwordItem;
 import net.sweenus.simplyswords.item.SimplySwordsSwordItem;
-import net.sweenus.simplyswords.item.UniqueSwordItem;
+import net.sweenus.simplyswords.item.UniqueWeaponItem;
 import net.sweenus.simplyswords.item.custom.IcewhisperSwordItem;
 import net.sweenus.simplyswords.item.custom.LichbladeSwordItem;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
@@ -116,7 +116,7 @@ public abstract class MobEntityMixin {
             MinionTargeting.recordLastAttack(mob, livingTarget);
             return;
         }
-        if (stack.getItem() instanceof UniqueSwordItem
+        if (stack.getItem() instanceof UniqueWeaponItem
                 || stack.getItem() instanceof RunicSwordItem
                 || stack.getItem() instanceof SimplySwordsSwordItem) {
             SimplySwordsAPI.applyEntityWeaponPostHit(stack, livingTarget, mob, (float) net.sweenus.simplyswords.util.HelperMethods.getEntityAttackDamage(mob));

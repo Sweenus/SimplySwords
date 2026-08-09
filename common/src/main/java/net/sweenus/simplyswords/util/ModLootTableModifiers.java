@@ -19,7 +19,7 @@ import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.config.LootConfig;
-import net.sweenus.simplyswords.item.UniqueSwordItem;
+import net.sweenus.simplyswords.item.UniqueWeaponItem;
 import net.sweenus.simplyswords.item.component.AwakeningComponent;
 import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.registry.ComponentTypeRegistry;
@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 public class ModLootTableModifiers {
 
     //supplies a list of every unique sword item currently registered
-    private static final Supplier<List<Item>> swords = Suppliers.memoize(() -> Registries.ITEM.stream().filter(it -> it instanceof UniqueSwordItem).toList());
+    private static final Supplier<List<Item>> swords = Suppliers.memoize(() -> Registries.ITEM.stream().filter(it -> it instanceof UniqueWeaponItem).toList());
 
 
 

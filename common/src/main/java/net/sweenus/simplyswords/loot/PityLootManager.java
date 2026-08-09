@@ -15,7 +15,7 @@ import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.api.UniqueLootRegistry;
 import net.sweenus.simplyswords.config.LootConfig;
-import net.sweenus.simplyswords.item.UniqueSwordItem;
+import net.sweenus.simplyswords.item.UniqueWeaponItem;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.ModLootTableModifiers;
 
@@ -112,11 +112,11 @@ public final class PityLootManager {
     //
     // Returns whether an item belongs to the registered pity-controlled unique
     // loot pool. Addon entries intentionally do not need to extend
-    // UniqueSwordItem or use the Simply Swords namespace.
+    // UniqueWeaponItem or use the Simply Swords namespace.
     //
     public static boolean isRegisteredUniqueLootItem(Item item) {
         return UniqueLootRegistry.entries().containsKey(item)
-                || (item instanceof UniqueSwordItem
+                || (item instanceof UniqueWeaponItem
                 && ModLootTableModifiers.isLootableUnique(item));
     }
 
@@ -172,7 +172,7 @@ public final class PityLootManager {
     private static Item chooseUnique(Random random) {
         List<Item> weighted = new ArrayList<>();
         for (Item item : Registries.ITEM) {
-            if (item instanceof UniqueSwordItem
+            if (item instanceof UniqueWeaponItem
                     && ModLootTableModifiers.isLootableUnique(item)
                     && !LootConfig.INSTANCE.disabledUniqueWeaponLoot.contains(item)) {
                 weighted.add(item);
