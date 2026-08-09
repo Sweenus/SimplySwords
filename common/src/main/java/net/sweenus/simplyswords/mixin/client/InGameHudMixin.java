@@ -153,6 +153,7 @@ public abstract class InGameHudMixin {
         if (stack.isOf(ItemsRegistry.STORMBRINGER.get())) {
             int charges = stack.getOrDefault(ComponentTypeRegistry.PARRY.get(), ParryComponent.DEFAULT).stormCharges();
             renderChargePips(context, client, charges, Math.max(1, Config.uniqueEffects.stormbringer.maxStormCharges), STORM_CHARGE_COLOR, STORM_CHARGE_EMPTY_COLOR, STORM_CHARGE_BORDER_COLOR);
+            return;
         }
     }
 

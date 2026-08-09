@@ -1016,4 +1016,5 @@ public class ItemsRegistry {
                     new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).fireproof()
                             .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.UNIQUE,
                                     (int) chompolotl_damage_modifier, chompolotl_attackspeed))));
+
 }

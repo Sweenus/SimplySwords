@@ -9,7 +9,7 @@ The built-in combined scaler compares attack damage with optional spell power
 and uses the greater result:
 
 ```java
-float baseDamage = HelperMethods.abilityScaledDamage(
+float baseDamage = SimplySwordsAPI.scaleAbilityDamage(
         SpellScalingProfile.ARCANE,
         actor,
         stack,
@@ -53,8 +53,49 @@ impacts. On Fabric, Spell Power Attributes keeps its native coefficient-based
 calculation and does not use this shared base value.
 
 For a fixed full-strength value that should compete with spell power, use
-`abilityScaledValue(profile, actor, stack, fullValue, spellScaling)`. It applies
-unique awakening after choosing the larger value.
+`SimplySwordsAPI.scaleAbilityValue(profile, actor, stack, fullValue,
+spellScaling)`. It applies unique awakening after choosing the larger value.
+
+## Ability targeting helpers
+
+Use the facade helpers instead of depending on built-in weapon or world-manager
+classes:
+
+```java
+LivingEntity aimed = SimplySwordsAPI.findLenientAbilityTarget(
+        player,
+        range,
+        target -> SimplySwordsAPI.isValidAbilityTarget(target, player)
+);
+
+Optional<LivingEntity> closest = SimplySwordsAPI.findClosestAbilityTarget(
+        actor, range, width
+);
+
+List<LivingEntity> chain = SimplySwordsAPI.findAbilityChainTargets(
+        world, actor, firstTarget, count, jumpRange
+);
+```
+
+`findLenientAbilityTarget` first uses the direct crosshair target, then tests a
+slightly expanded ray against candidates accepted by the predicate.
+`findClosestAbilityTarget` searches a forward box but does not apply hostility
+or friendly-fire rules; validate its result with `isValidAbilityTarget`.
+Chain selection includes the first target and avoids repeats while applying
+friendly-fire checks to later targets.
+
+For bolt-like magic damage:
+
+```java
+boolean damaged = SimplySwordsAPI.applyAbilityBoltDamage(
+        world, actor, stack, target, damage
+);
+```
+
+This validates the target, applies ability-damage enchantments, bypasses
+iframes, and suppresses weapon implicits. It is server-only. For a simple visual
+ring of server-spawned particles, use
+`spawnAbilityOrbitParticles(world, centre, particle, radius, count)`.
 
 ## Scaling gem-power damage
 
@@ -155,12 +196,12 @@ Do not pair it with `applyEntityWeaponHit` for the same strike.
 Before selecting or damaging a target, use:
 
 ```java
-HelperMethods.checkAbilityTarget(target, actor);
+SimplySwordsAPI.isValidAbilityTarget(target, actor);
 ```
 
 This accounts for self-targeting, creative and spectator players, teams, player
-PVP, configured entity exclusions, tameable ownership, and supported party
-integration.
+PVP, configured entity exclusions, tameable ownership, supported party
+integration, and Simply Swords minions.
 
 For a delegated player-owned actor, also reject the owner and check:
 

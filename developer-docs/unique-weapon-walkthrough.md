@@ -20,13 +20,21 @@ public final class RiftbrandItem extends UniqueSwordItem
 }
 ```
 
-`UniqueSwordItem` makes the weapon fireproof and supplies:
+`UniqueSwordItem` is the semantic base for unique swords. It extends
+`UniqueWeaponItem`, which is the shared addon base for swords, staves, and other
+unique weapons. Both bases make the weapon fireproof and supply:
 
 - awakening initialization and Runic Forge support;
 - runefused and netherfused sockets;
 - socket ticking, inventory socketing, and post-hit gem powers;
 - weapon implicit initialization and tooltip lines;
 - form-aware names and rarity.
+
+Extend `UniqueWeaponItem` directly for a unique that should not be described as
+a sword. Its constructor and attribute requirements are the same. External
+addons should use the protected `UniqueWeaponItem` hooks documented below
+instead of overriding mapped Minecraft item methods directly; those mapped
+names are not stable across a separately remapped addon jar.
 
 Register it using the addon's normal item registry. This Architectury example
 uses Netherite as a placeholder material:
@@ -61,7 +69,11 @@ available through Simply Swords' configurable main-hand and offhand hotkeys:
 
 ```java
 @Override
-public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
+protected TypedActionResult<ItemStack> useUniqueWeapon(
+        World world,
+        PlayerEntity user,
+        Hand hand
+) {
     return useFromDefaultInput(world, user, hand);
 }
 ```
@@ -92,7 +104,7 @@ public boolean activate(WeaponAbilityContext context) {
     ServerWorld world = context.world();
     DamageSource source = SimplySwordsAPI.getWeaponDamageSource(actor);
 
-    float damage = HelperMethods.abilityScaledDamage(
+    float damage = SimplySwordsAPI.scaleAbilityDamage(
             SpellScalingProfile.ARCANE, actor, stack, 0.8F, 1.6F
     );
 
@@ -100,7 +112,7 @@ public boolean activate(WeaponAbilityContext context) {
             LivingEntity.class,
             actor.getBoundingBox().expand(4.0),
             target -> target.isAlive()
-                    && HelperMethods.checkAbilityTarget(target, actor)
+                    && SimplySwordsAPI.isValidAbilityTarget(target, actor)
     );
 
     for (LivingEntity target : targets) {
@@ -142,7 +154,8 @@ depend on a player-only channel callback.
 
 ## 3. Register awakening and integrations
 
-Because Riftbrand extends `UniqueSwordItem`, it automatically receives the
+Because Riftbrand extends `UniqueSwordItem`, and therefore `UniqueWeaponItem`,
+it automatically receives the
 default awakening profile: 50% dormant attack damage, 75% dormant attack speed,
 and ability unlock at level 4.
 
@@ -155,7 +168,7 @@ SimplySwordsAPI.registerAwakeningProfile(
 );
 ```
 
-The sample ability uses `abilityScaledDamage`, which already scales its result
+The sample ability uses `scaleAbilityDamage`, which already scales its result
 with awakening. Do not pass that result through `AwakeningApi.scaleEffect`
 again.
 
@@ -218,16 +231,17 @@ stats layout:
 }
 ```
 
-Full awakening-frame parity requires a small addon tooltip provider because
-Simply Swords' own provider only claims items in the `simplyswords` namespace.
-See [Client integration](api/client-integration.md).
+For the built-in unique layout and awakening frame, register the addon namespace
+with `SimplySwordsClientAPI.registerUniqueTooltipNamespace` during client
+initialization. See [Client integration](api/client-integration.md).
 
-Override `appendTooltip` to add the ability description, then call
-`super.appendTooltip(...)` so implicit and Simply Swords integrations remain:
+Override the remap-safe tooltip hook to add the ability description, then call
+`appendSharedUniqueWeaponTooltip(...)` so implicit and Simply Swords
+integrations remain:
 
 ```java
 @Override
-public void appendTooltip(
+protected void appendUniqueWeaponTooltip(
         ItemStack stack,
         TooltipContext context,
         List<Text> tooltip,
@@ -236,11 +250,11 @@ public void appendTooltip(
     tooltip.add(Text.empty());
     tooltip.add(Text.translatable("item.exampleaddon.riftbrand.ability"));
     tooltip.add(Text.translatable("item.exampleaddon.riftbrand.description"));
-    super.appendTooltip(stack, context, tooltip, type);
+    appendSharedUniqueWeaponTooltip(stack, context, tooltip, type);
 }
 ```
 
-`UniqueSwordItem`'s default dynamic documentation links point at Simply Swords.
+`UniqueWeaponItem`'s default dynamic documentation links point at Simply Swords.
 Override its protected `generateDynamicTooltip` method if the addon publishes
 its own Oracle Index pages or config navigation. It is also valid to leave that
 method empty while retaining the ordinary tooltip lines.
@@ -250,7 +264,7 @@ method empty while retaining the ordinary tooltip lines.
 A built-in-equivalent unique should normally have:
 
 - a fireproof, damageable item with configured attributes;
-- `UniqueSwordItem` behavior or equivalent calls to each subsystem;
+- `UniqueWeaponItem` behavior or equivalent calls to each subsystem;
 - player hotkey and optional right-click activation;
 - server-authoritative behavior that works for players and mobs;
 - awakening-scaled attributes, ability values, and gem powers;

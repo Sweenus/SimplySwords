@@ -126,8 +126,10 @@ public abstract class WorldRendererMixin {
             return new TargetHighlight(waxweaverTarget, TargetHighlight.Style.WAX);
         }
         LivingEntity brambleTarget = getReadyBrambleTarget(player);
-        return brambleTarget == null ? null
-                : new TargetHighlight(brambleTarget, TargetHighlight.Style.BRAMBLE);
+        if (brambleTarget != null) {
+            return new TargetHighlight(brambleTarget, TargetHighlight.Style.BRAMBLE);
+        }
+        return null;
     }
 
     private LivingEntity getReadyEmberTarget(ClientPlayerEntity player) {

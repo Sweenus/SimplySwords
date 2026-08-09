@@ -109,6 +109,34 @@ public final class TerrainFieldOverlayRenderer {
             )
     );
 
+    public static final Palette WHITE_MARBLE = new Palette(
+            List.of(
+                    new Variant(46,
+                            Identifier.ofVanilla("block/calcite"), null,
+                            Identifier.ofVanilla("block/calcite"), null),
+                    new Variant(20,
+                            Identifier.ofVanilla("block/quartz_block_top"), null,
+                            Identifier.ofVanilla("block/quartz_block_side"), null),
+                    new Variant(16,
+                            Identifier.ofVanilla("block/polished_diorite"), null,
+                            Identifier.ofVanilla("block/polished_diorite"), null),
+                    new Variant(10,
+                            Identifier.ofVanilla("block/quartz_block_bottom"), null,
+                            Identifier.ofVanilla("block/quartz_block_bottom"), null),
+                    new Variant(5,
+                            Identifier.ofVanilla("block/chiseled_quartz_block_top"), null,
+                            Identifier.ofVanilla("block/chiseled_quartz_block"), null),
+                    new Variant(3,
+                            Identifier.ofVanilla("block/quartz_pillar_top"), null,
+                            Identifier.ofVanilla("block/quartz_pillar"), null)
+            ),
+            255, 255, 255,
+            255, 255, 255, 0,
+            10,
+            20,
+            0
+    );
+
     private final Map<UUID, TerrainCache> caches = new HashMap<>();
 
     public void clear(UUID id) {
@@ -166,15 +194,17 @@ public final class TerrainFieldOverlayRenderer {
             }
         }
 
-        VertexConsumer washVertices = vertexConsumers.getBuffer(
-                RenderLayer.getEntityTranslucent(WHITE_TEXTURE));
-        for (PreparedFace prepared : preparedFaces) {
-            if (prepared instanceof PreparedHorizontalFace horizontal) {
-                drawHorizontalWashFace(centerY, matrices, washVertices, palette, horizontal);
-            } else if (prepared instanceof PreparedVerticalFace vertical) {
-                drawVerticalWashFace(
-                        centerX, centerY, centerZ, matrices, washVertices,
-                        palette, vertical);
+        if (palette.washAlpha > 0) {
+            VertexConsumer washVertices = vertexConsumers.getBuffer(
+                    RenderLayer.getEntityTranslucent(WHITE_TEXTURE));
+            for (PreparedFace prepared : preparedFaces) {
+                if (prepared instanceof PreparedHorizontalFace horizontal) {
+                    drawHorizontalWashFace(centerY, matrices, washVertices, palette, horizontal);
+                } else if (prepared instanceof PreparedVerticalFace vertical) {
+                    drawVerticalWashFace(
+                            centerX, centerY, centerZ, matrices, washVertices,
+                            palette, vertical);
+                }
             }
         }
     }

@@ -68,19 +68,47 @@ SimplySwordsClientAPI.generateDynamicTooltip(
 The paths are Oracle Index document locations. The config identifier may be
 null when the addon does not expose a compatible config path.
 
-`UniqueSwordItem` calls this through its protected
+`UniqueWeaponItem` calls this through its protected
 `generateDynamicTooltip` method. Override that method to supply addon paths, or
 leave it empty if the addon does not use Oracle Index navigation.
 
-Always call `super.appendTooltip(...)` when overriding the public tooltip method
-unless the addon intentionally replaces implicit and integration lines.
+Add custom lines through `appendUniqueWeaponTooltip(...)`, then call
+`appendSharedUniqueWeaponTooltip(...)`. Do not override the mapped public
+`appendTooltip` method from a separately compiled addon.
+
+For a standard spell-school scaling line:
+
+```java
+SimplySwordsClientAPI.appendSpellScaleTooltip(tooltip, "arcane");
+```
 
 ## Simply Tooltips
 
-Simply Swords' built-in tooltip provider deliberately supports only items in the
-`simplyswords` namespace. Addon weapons therefore have two integration levels.
+Register the addon namespace during client initialization to let Simply Swords'
+built-in provider render addon `UniqueWeaponItem` instances:
 
-For the standard Simply Swords lore and stats layout, tag the item:
+```java
+SimplySwordsClientAPI.registerUniqueTooltipNamespace("exampleaddon");
+```
+
+This supplies the standard lore and stat layout, unique rarity, awakening
+progress frame, sealed-ability presentation, and level-aware reveal animation.
+It claims only `UniqueWeaponItem` instances in that namespace.
+
+Override `getTooltipWeaponType` when the provider should show a weapon-type
+badge that cannot be inferred from the item path:
+
+```java
+@Override
+public String getTooltipWeaponType(ItemStack stack) {
+    return "stave";
+}
+```
+
+Themes can still be assigned through Simply Tooltips'
+`assets/simplytooltips/item_themes/*.json` data files.
+
+For compatible items that do not extend `UniqueWeaponItem`, use the data tag:
 
 ```text
 data/simplytooltips/tags/item/simply_swords_compat.json
@@ -96,54 +124,26 @@ data/simplytooltips/tags/item/simply_swords_compat.json
 }
 ```
 
-This parses ability sections, action labels, implicit lines, attribute stats,
-and dynamic-tooltip hints. Themes and badges can be assigned through Simply
-Tooltips' `assets/simplytooltips/item_themes/*.json` data files.
+The compatibility provider parses ordinary lore and stats but does not add the
+awakening progress presentation. Addons only need a custom `TooltipProvider`
+when deliberately replacing the built-in unique layout.
 
-The compatibility tag does not add awakening progress. For full parity,
-register an addon `TooltipProvider` from client initialization at a priority
-above the compatibility provider:
+## Shared weapon HUD placement
 
-```java
-TooltipProviderRegistry.register(new RiftbrandTooltipProvider(), 100);
-```
-
-The provider should:
-
-1. Support only the addon's applicable unique items.
-2. Build its lore and stats from the raw tooltip lines.
-3. Read the effective level and unlock state from `AwakeningApi`.
-4. Supply this progress metadata in its `ModernTooltipModel`:
+Use the shared transform when an addon HUD should follow Simply Swords' scale
+and offset configuration:
 
 ```java
-int level = AwakeningApi.getLevel(stack);
-
-ItemFrameProgress progress = AwakeningApi.usesAwakeningProgression(stack)
-        ? new ItemFrameProgress(
-                level,
-                8,
-                0xFF74E7FF,
-                0xFFFFFFFF,
-                Text.literal(Integer.toString(level))
-        )
-        : null;
+SimplySwordsClientAPI.pushWeaponHudTransform(context);
+try {
+    // Draw around local origin.
+} finally {
+    context.getMatrices().pop();
+}
 ```
 
-Use an animation key containing the level, such as
-`"|awakening:" + level`, so a level change creates a fresh reveal animation.
-When ALT is held, replace ordinary badges with an
-`AWAKENING LEVEL <level>` badge. When
-`AwakeningApi.isAbilityUnlocked(stack)` is false, replace or grey the ability
-body and show `AwakeningApi.getAbilityUnlockLevel(stack)`.
-
-Pass the `ItemFrameProgress` as the final field of `ModernTooltipModel`.
-Simply Tooltips handles the frame shape, reveal animation, and travelling
-highlight; the addon only supplies progress data.
-
-Compiling a custom provider requires the Simply Tooltips API on the client
-compile classpath. If the addon does not want that compile-time integration, use
-the data tag and accept that awakening progress remains in ordinary tooltip
-text or another addon-provided presentation.
+The helper pushes the matrix stack, centres the origin above the hotbar, and
+applies the configured scale. The caller must pop it.
 
 ## Visual effects
 
@@ -157,3 +157,6 @@ addon-specific packet and does not apply gameplay effects to remote entities.
 
 Keep renderer classes and `MinecraftClient` references in client source sets.
 Test a dedicated server to catch accidental client classloading.
+
+For reusable parchment entities, glyph atlases, and white-marble terrain
+fields, see [Parchment visuals](parchment-visuals.md).

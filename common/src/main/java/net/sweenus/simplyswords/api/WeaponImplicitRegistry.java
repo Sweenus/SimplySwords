@@ -30,7 +30,7 @@ import net.sweenus.simplyswords.effect.instance.SimplySwordsStatusEffectInstance
 import net.sweenus.simplyswords.entity.DancingBladeVisualEntity;
 import net.sweenus.simplyswords.entity.ThrownSpearEntity;
 import net.sweenus.simplyswords.entity.ThrownSwordEntity;
-import net.sweenus.simplyswords.item.UniqueSwordItem;
+import net.sweenus.simplyswords.item.UniqueWeaponItem;
 import net.sweenus.simplyswords.item.component.WeaponImplicitComponent;
 import net.sweenus.simplyswords.registry.ComponentTypeRegistry;
 import net.sweenus.simplyswords.registry.EffectRegistry;
@@ -302,7 +302,7 @@ public final class WeaponImplicitRegistry {
     private static int rollImplicitValue(ItemStack stack, WeaponImplicitDefinition definition) {
         int min = definition.minValue();
         int max = definition.maxValue();
-        if (stack.getItem() instanceof UniqueSwordItem) {
+        if (stack.getItem() instanceof UniqueWeaponItem) {
             int rangeSize = max - min + 1;
             int topRollCount = Math.max(1, (int) Math.ceil(rangeSize * 0.1D));
             min = max - topRollCount + 1;

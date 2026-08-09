@@ -3,8 +3,8 @@
 An implicit is a rolled property associated with a weapon type. For example,
 longswords can deflect incoming damage and rapiers can pierce armor.
 
-`UniqueSwordItem` initializes its implicit on the server and appends its tooltip
-automatically.
+`UniqueWeaponItem`, including `UniqueSwordItem`, initializes its implicit on the
+server and appends its tooltip automatically.
 
 ## Assigning a built-in weapon type
 
@@ -87,7 +87,7 @@ definitions before stacks of that weapon initialize.
 ## Values
 
 Ordinary weapons roll across the complete inclusive range. A stack whose item
-extends `UniqueSwordItem` rolls in the top 10% of the range.
+extends `UniqueWeaponItem` rolls in the top 10% of the range.
 
 The roll is stored in the weapon implicit data component and survives save,
 reload, socket changes, and awakening.
@@ -106,4 +106,3 @@ SimplySwordsAPI.applyWeaponImplicitOnHit(stack, target, attacker, damage);
 
 Do not apply a handler manually if the normal Simply Swords hit path already
 does so, or it will execute twice.
-

@@ -65,22 +65,39 @@ public final class ChainLightningVisualManager {
         return damageChain(world, player, firstTarget, chainCount, damage, range, STORMBRINGER_SETTINGS);
     }
 
+    public static boolean damageBoltTarget(ServerWorld world, LivingEntity player, ItemStack stack,
+                                           LivingEntity target, float damage) {
+        if (world == null || player == null || target == null || !player.isAlive() || !target.isAlive() || !HelperMethods.checkAbilityTarget(target, player)) {
+            return false;
+        }
+        DamageSource source = player.getDamageSources().indirectMagic(player, player);
+        boolean[] result = {false};
+        float enchantedDamage = HelperMethods.applyAbilityDamageEnchantments(world, stack, target, source, damage);
+        WeaponImplicitRegistry.runSuppressed(() -> result[0] = HelperMethods.damageThroughIframes(target, source, enchantedDamage));
+        return result[0];
+    }
+
+    public static List<LivingEntity> chainTargets(ServerWorld world, LivingEntity player, LivingEntity firstTarget,
+                                                  int chainCount, double range) {
+        if (world == null || player == null || firstTarget == null || !firstTarget.isAlive() || chainCount <= 0) {
+            return List.of();
+        }
+        return buildChain(world, player, firstTarget, chainCount, Math.max(0.5, range));
+    }
+
     public static boolean damageSkyBolt(ServerWorld world, LivingEntity player, ItemStack stack, LivingEntity target, float damage, double skyHeight, LightningVisualSettings settings) {
         if (world == null || player == null || target == null || !player.isAlive() || !target.isAlive() || !HelperMethods.checkAbilityTarget(target, player)) {
             return false;
         }
 
-        DamageSource source = player.getDamageSources().indirectMagic(player, player);
-        boolean[] result = {false};
-        float enchantedDamage = HelperMethods.applyAbilityDamageEnchantments(world, stack, target, source, damage);
-        WeaponImplicitRegistry.runSuppressed(() -> result[0] = HelperMethods.damageThroughIframes(target, source, enchantedDamage));
+        boolean result = damageBoltTarget(world, player, stack, target, damage);
 
         Vec3d end = target.getPos().add(0.0, Math.max(0.45, target.getHeight() * 0.58), 0.0);
         Vec3d start = end.add(0.0, Math.max(1.0, skyHeight), 0.0);
         spawnBolt(world, start, end, settings);
         spawnImpactEffects(world, target);
         playTargetCrackle(world, target, 1);
-        return result[0];
+        return result;
     }
 
     public static int damageChain(ServerWorld world, LivingEntity player, LivingEntity firstTarget, int chainCount, float damage, double range, LightningVisualSettings settings) {

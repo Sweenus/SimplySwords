@@ -58,6 +58,14 @@ public final class ModernFieldRenderer {
         renderCircle(matrices, vertexConsumers, age, Math.max(0.75F, radius), 255, 91, 28);
     }
 
+    public static void renderParchmentTargetLine(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int age, Vec3d targetOffset) {
+        renderTargetLine(matrices, vertexConsumers, age, targetOffset, 242, 216, 154, 255, 236, 176);
+    }
+
+    public static void renderParchmentTargetRing(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int age, Vec3d targetOffset, float targetWidth) {
+        renderTargetRing(matrices, vertexConsumers, age, targetOffset, targetWidth, 242, 216, 154, 255, 236, 176);
+    }
+
     public static void renderSoulstealerTargetLine(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int age, Vec3d targetOffset) {
         renderTargetLine(matrices, vertexConsumers, age, targetOffset, 118, 238, 218, 157, 98, 202);
     }

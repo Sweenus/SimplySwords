@@ -2,7 +2,7 @@ package net.sweenus.simplyswords.api;
 
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.sweenus.simplyswords.item.UniqueSwordItem;
+import net.sweenus.simplyswords.item.UniqueWeaponItem;
 
 import java.util.IdentityHashMap;
 import java.util.Map;
@@ -26,7 +26,7 @@ public final class AwakeningProfileRegistry {
         if (registered != null) {
             return Optional.of(registered);
         }
-        return item instanceof UniqueSwordItem ? Optional.of(AwakeningProfile.DEFAULT) : Optional.empty();
+        return item instanceof UniqueWeaponItem ? Optional.of(AwakeningProfile.DEFAULT) : Optional.empty();
     }
 
     public static Optional<AwakeningProfile> get(ItemStack stack) {

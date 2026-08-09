@@ -5,7 +5,7 @@ both socket types; runic weapons use their existing runic handling.
 
 ## Native unique sockets
 
-`UniqueSwordItem.inventoryTick` creates both sockets at a 100% chance when
+`UniqueWeaponItem.inventoryTick` creates both sockets at a 100% chance when
 unique sockets are enabled. It also:
 
 - runs equipped gem-power ticks from either hand;
@@ -14,7 +14,8 @@ unique sockets are enabled. It also:
 - invokes post-hit gem powers;
 - appends socket information through Simply Swords' tooltip integration.
 
-An addon extending `UniqueSwordItem` should not duplicate these calls.
+An addon extending `UniqueWeaponItem` or `UniqueSwordItem` should not duplicate
+these calls.
 
 ## Adding sockets to unrelated items
 
@@ -56,7 +57,7 @@ SimplySwordsAPI.appendTooltipGemSocketLogic(
 ```
 
 Call each hook from the matching item lifecycle method. Do not add these calls
-to a `UniqueSwordItem` subclass because its base implementation already owns
+to a `UniqueWeaponItem` subclass because its base implementation already owns
 the lifecycle.
 
 ## Creating a custom passive gem power

@@ -5,7 +5,8 @@ removes one Runic Tablet per level.
 
 ## Opting in
 
-Every `UniqueSwordItem` automatically receives `AwakeningProfile.DEFAULT`.
+Every `UniqueWeaponItem`, including `UniqueSwordItem`, automatically receives
+`AwakeningProfile.DEFAULT`.
 Other item classes must register a profile:
 
 ```java
@@ -66,7 +67,7 @@ level-8 stack unless it is explicitly initialized as a natural drop. This keeps
 commands, recipes, and intentional direct rewards backward compatible. Always
 call the appropriate initializer in an addon's own acquisition path.
 
-`ensureInitialized` is normally called by `UniqueSwordItem.inventoryTick`.
+`ensureInitialized` is normally called by `UniqueWeaponItem.inventoryTick`.
 Custom base items must either register a profile and call it themselves or make
 sure the stack passes through another supported initialization path.
 
@@ -82,12 +83,12 @@ int chance = AwakeningApi.scaleChance(stack, fullChance);
 The multiplier is zero below the profile's ability unlock level and then follows
 `level / 8`.
 
-`HelperMethods.abilityScaledDamage(...)` already chooses the greater of attack
+`SimplySwordsAPI.scaleAbilityDamage(...)` already chooses the greater of attack
 damage and spell-power scaling and then applies awakening scaling. Do not call
 `scaleEffect` on its result a second time.
 
-Use `HelperMethods.abilityScaledValue(...)` for a fixed full-strength value that
-should compete with spell power. It also applies `scaleEffect` internally.
+Use `SimplySwordsAPI.scaleAbilityValue(...)` for a fixed full-strength value
+that should compete with spell power. It also applies `scaleEffect` internally.
 
 Gem powers use their own named helpers:
 

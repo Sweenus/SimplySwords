@@ -7,6 +7,7 @@ Use `SimplySwordsAPI` as the preferred common-side facade and
 
 | System | Main types | Guide |
 | --- | --- | --- |
+| Unique item lifecycle | `UniqueWeaponItem`, `UniqueSwordItem` | [Unique weapon walkthrough](../unique-weapon-walkthrough.md) |
 | Active abilities | `UniqueWeaponActiveAbility`, `WeaponAbilityContext`, `WeaponAbilityActivationSource` | [Active abilities](active-abilities.md) |
 | Awakening | `AwakeningApi`, `AwakeningProfile`, `AwakeningProfileRegistry` | [Awakening](awakening.md) |
 | Branching forms | `AwakeningFormFamily`, `AwakeningFormStage`, `AwakeningFormRoute`, `AwakeningFormHandler`, `AwakeningFormRegistry` | [Awakening forms](awakening-forms.md) |
@@ -15,11 +16,12 @@ Use `SimplySwordsAPI` as the preferred common-side facade and
 | Unique loot | `UniqueLootRegistry`, `SimplySwordsAPI.registerUniqueLoot` | [Unique loot](unique-loot.md) |
 | Weapon implicits | `WeaponImplicitDefinition`, `WeaponImplicitRegistry` | [Weapon implicits](weapon-implicits.md) |
 | Weapon hits | `DelegatedWeaponHitContext`, hit helpers on `SimplySwordsAPI` | [Combat and damage](combat-and-damage.md) |
-| Spell scaling | `SpellScalingProfile`, scaling helpers on `HelperMethods` | [Combat and damage](combat-and-damage.md) |
+| Spell scaling and targeting | `SpellScalingProfile`, ability helpers on `SimplySwordsAPI` | [Combat and damage](combat-and-damage.md) |
 | Remnant transformations | `SimplySwordsAPI.registerTransformation` | [Contained Remnants](contained-remnants.md) |
 | Battle Standards | `SimplySwordsAPI.spawnBattleStandard` | [Battle Standards](battle-standards.md) |
 | Observer status effects | `SimplySwordsAPI.registerObserverSyncedStatusEffect`, `ObserverStatusEffectClientApi` | [Observer status effects](observer-status-effects.md) |
 | Client integration | `SimplySwordsClientAPI` | [Client integration](client-integration.md) |
+| Parchment visuals | render-data interfaces, shared renderers, glyph styles | [Parchment visuals](parchment-visuals.md) |
 
 ## Preferred facade methods
 
@@ -31,6 +33,7 @@ Use `SimplySwordsAPI` as the preferred common-side facade and
 - gem socket hooks;
 - weapon type and implicit registration;
 - synthetic and delegated weapon hits;
+- ability scaling, targeting, chain, bolt-damage, and orbit-particle helpers;
 - Contained Remnant transformations;
 - observer status-effect registration for remote client presentation.
 
@@ -47,5 +50,6 @@ integrations. Prefer the facade when it offers the same operation.
 - `applyEntityWeaponPostHit` runs post-hit integrations without dealing damage.
   Most abilities should use a normal damage call or one of the complete
   synthetic hit methods instead.
-- Classes outside the API and extension packages may change as built-in
-  abilities evolve.
+- The shared parchment renderers listed in [Parchment visuals](parchment-visuals.md)
+  are supported exceptions. Other classes outside the API and extension
+  packages may change as built-in abilities evolve.
