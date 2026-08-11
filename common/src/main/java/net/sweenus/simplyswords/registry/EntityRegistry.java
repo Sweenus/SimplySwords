@@ -288,6 +288,24 @@ public class EntityRegistry {
                     .build(Identifier.of(SimplySwords.MOD_ID, "chain_lightning_visual").toString())
     );
 
+    public static final RegistrySupplier<EntityType<LightningPhenomenonVisualEntity>> LIGHTNING_PHENOMENON_VISUAL = ENTITIES.register(
+            "lightning_phenomenon_visual",
+            () -> EntityType.Builder.<LightningPhenomenonVisualEntity>create(LightningPhenomenonVisualEntity::new, SpawnGroup.MISC)
+                    .dimensions(0.35F, 0.35F)
+                    .maxTrackingRange(160)
+                    .trackingTickInterval(1)
+                    .build(Identifier.of(SimplySwords.MOD_ID, "lightning_phenomenon_visual").toString())
+    );
+
+    public static final RegistrySupplier<EntityType<AtmosphericVisualEntity>> ATMOSPHERIC_VISUAL = ENTITIES.register(
+            "atmospheric_visual",
+            () -> EntityType.Builder.<AtmosphericVisualEntity>create(AtmosphericVisualEntity::new, SpawnGroup.MISC)
+                    .dimensions(0.35F, 0.35F)
+                    .maxTrackingRange(160)
+                    .trackingTickInterval(1)
+                    .build(Identifier.of(SimplySwords.MOD_ID, "atmospheric_visual").toString())
+    );
+
     public static final RegistrySupplier<EntityType<FurnaceChainVisualEntity>> FURNACE_CHAIN_VISUAL = ENTITIES.register(
             "furnace_chain_visual",
             () -> EntityType.Builder.<FurnaceChainVisualEntity>create(FurnaceChainVisualEntity::new, SpawnGroup.MISC)

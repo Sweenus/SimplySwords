@@ -6,6 +6,7 @@ import net.minecraft.registry.RegistryKey;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Hand;
 import net.minecraft.world.World;
+import net.sweenus.simplyswords.api.IncapacitatingStatusEffectRegistry;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -129,7 +130,9 @@ public final class PlayerWeaponAbilityChannelManager {
     }
 
     private static boolean isValid(ServerPlayerEntity player, ActiveChannel channel) {
-        if (!player.isAlive() || player.getWorld().isClient() || player.getWorld().getRegistryKey() != channel.worldKey) {
+        if (!player.isAlive() || player.getWorld().isClient()
+                || IncapacitatingStatusEffectRegistry.isIncapacitated(player)
+                || player.getWorld().getRegistryKey() != channel.worldKey) {
             return false;
         }
 

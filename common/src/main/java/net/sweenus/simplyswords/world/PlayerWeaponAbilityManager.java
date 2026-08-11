@@ -9,6 +9,7 @@ import net.minecraft.world.World;
 import net.sweenus.simplyswords.item.RunicSwordItem;
 import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
+import net.sweenus.simplyswords.api.IncapacitatingStatusEffectRegistry;
 import net.sweenus.simplyswords.power.GemPowerComponent;
 
 public final class PlayerWeaponAbilityManager {
@@ -78,6 +79,7 @@ public final class PlayerWeaponAbilityManager {
     private static boolean canUse(ServerPlayerEntity player, ItemStack stack) {
         return player != null
                 && player.isAlive()
+                && !IncapacitatingStatusEffectRegistry.isIncapacitated(player)
                 && stack != null
                 && !stack.isEmpty()
                 && stack.getDamage() < stack.getMaxDamage() - 1

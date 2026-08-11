@@ -7,6 +7,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Hand;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
+import net.sweenus.simplyswords.api.IncapacitatingStatusEffectRegistry;
 import net.sweenus.simplyswords.api.AdditionalGemSocketApi;
 import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.api.WeaponAbilityActivationSource;
@@ -39,8 +40,19 @@ public abstract class MobEntityMixin {
     @Inject(method = "tryAttack", at = @At("HEAD"), cancellable = true)
     private void simplyswords$preventWaxEncasedAttack(net.minecraft.entity.Entity target,
                                                       CallbackInfoReturnable<Boolean> cir) {
-        if (WaxweaverEncasementManager.isEncased((MobEntity) (Object) this)) {
+        MobEntity mob = (MobEntity) (Object) this;
+        if (WaxweaverEncasementManager.isEncased(mob)
+                || IncapacitatingStatusEffectRegistry.isIncapacitated(mob)) {
             cir.setReturnValue(false);
+        }
+    }
+
+    @Inject(method = "tickNewAi", at = @At("HEAD"), cancellable = true)
+    private void simplyswords$pauseIncapacitatedAi(CallbackInfo ci) {
+        MobEntity mob = (MobEntity) (Object) this;
+        if (IncapacitatingStatusEffectRegistry.isIncapacitated(mob)) {
+            mob.getNavigation().stop();
+            ci.cancel();
         }
     }
 
@@ -58,7 +70,8 @@ public abstract class MobEntityMixin {
                 || mob.getWorld().isClient()
                 || !(mob.getWorld() instanceof ServerWorld world)
                 || !mob.isAlive()
-                || WaxweaverEncasementManager.isEncased(mob)) {
+                || WaxweaverEncasementManager.isEncased(mob)
+                || IncapacitatingStatusEffectRegistry.isIncapacitated(mob)) {
             return;
         }
 

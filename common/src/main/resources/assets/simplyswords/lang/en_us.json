@@ -1058,6 +1058,8 @@
   "simplyswords.general.enablePassiveParticles.desc": "Show idle particle effects on weapons - disabling these may improve performance.",
   "simplyswords.general.enableModernFieldEffects": "Modern field effects",
   "simplyswords.general.enableModernFieldEffects.desc": "Enables newer field visuals - disabling these may improve performance.",
+  "simplyswords.general.stormEffectDetail": "Storm effect detail",
+  "simplyswords.general.stormEffectDetail.desc": "Detail level for lightning and atmospheric storm visuals - 0 low, 1 medium, 2 high.",
   "simplyswords.general.enableWeaponImplicits": "Weapon implicits",
   "simplyswords.general.enableWeaponImplicits.desc": "Enables rolled implicit weapon type bonuses on Simply Swords weapons.",
   "simplyswords.general.enableNonPlayerWeaponAbilityUse": "Non-player weapon abilities",

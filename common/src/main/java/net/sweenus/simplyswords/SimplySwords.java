@@ -36,6 +36,7 @@ import net.sweenus.simplyswords.client.renderer.model.CaelestisRiftlingModel;
 import net.sweenus.simplyswords.client.renderer.model.CaelestisTentacleModel;
 import net.sweenus.simplyswords.client.AbilityKeybindHandler;
 import net.sweenus.simplyswords.client.CaelestisBreachAmbience;
+import net.sweenus.simplyswords.client.LocalStormVisualManager;
 import net.sweenus.simplyswords.command.SimplySwordsCommands;
 import net.sweenus.simplyswords.compat.MythicMetalsCompat;
 import net.sweenus.simplyswords.compat.bettercombat.BetterCombatCompat;
@@ -177,6 +178,7 @@ public class SimplySwords {
             AbilityKeybindHandler.init();
             CaelestisBreachAmbience.init();
             ObserverStatusEffectClientApi.init();
+            LocalStormVisualManager.init();
             // Entity
             EntityRendererRegistry.register(EntityRegistry.BATTLESTANDARD, BattleStandardRenderer::new);
             EntityModelLayerRegistry.register(BATTLESTANDARD_MODEL, BattleStandardModel::getTexturedModelData);
@@ -217,6 +219,8 @@ public class SimplySwords {
             EntityRendererRegistry.register(EntityRegistry.MAGISPEAR_FALLING_SPEAR_VISUAL, MagispearFallingSpearVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.BRIMSTONE_CLAYMORE_VISUAL, BrimstoneClaymoreVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.CHAIN_LIGHTNING_VISUAL, ChainLightningVisualEntityRenderer::new);
+            EntityRendererRegistry.register(EntityRegistry.LIGHTNING_PHENOMENON_VISUAL, LightningPhenomenonVisualEntityRenderer::new);
+            EntityRendererRegistry.register(EntityRegistry.ATMOSPHERIC_VISUAL, AtmosphericVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.FURNACE_CHAIN_VISUAL, FurnaceChainVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.BRAMBLE_ROOT_VISUAL, BrambleRootVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.DRAGON_WING_BUFFET_VISUAL, DragonWingBuffetVisualEntityRenderer::new);

@@ -27,6 +27,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.Config;
+import net.sweenus.simplyswords.api.render.*;
 import net.sweenus.simplyswords.entity.BattleStandardEntity;
 import net.sweenus.simplyswords.entity.SimplySwordsSkeletonMinionEntity;
 import net.sweenus.simplyswords.entity.SimplySwordsWolfMinionEntity;
@@ -45,11 +46,15 @@ import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.IgnoredEntities;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.world.ChainLightningVisualManager;
+import net.sweenus.simplyswords.world.AbilityVisualManager;
 import net.sweenus.simplyswords.world.WeaponAbilityCooldownManager;
 import net.sweenus.simplyswords.world.WaxweaverEncasementManager;
+import net.sweenus.simplyswords.world.PlayerMovementIntentManager;
+import net.sweenus.simplyswords.api.render.ObserverStatusVisualStyle;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Predicate;
 
 public class SimplySwordsAPI {
@@ -120,7 +125,8 @@ public class SimplySwordsAPI {
 
     public static void onWeaponSwing(ItemStack stack, ServerWorld world, LivingEntity user, Hand hand) {
         if (stack == null || stack.isEmpty() || world == null || user == null || !user.isAlive()
-                || WaxweaverEncasementManager.isEncased(user)) {
+                || WaxweaverEncasementManager.isEncased(user)
+                || IncapacitatingStatusEffectRegistry.isIncapacitated(user)) {
             return;
         }
         AdditionalGemSocketApi.ensureInitialized(stack);
@@ -163,6 +169,26 @@ public class SimplySwordsAPI {
         ObserverStatusEffectSyncRegistry.register(effectId);
     }
 
+    // Registers an addon effect that prevents affected entities from moving or acting.
+    public static void registerIncapacitatingStatusEffect(Identifier effectId) {
+        IncapacitatingStatusEffectRegistry.register(effectId);
+    }
+
+    // Registers an observer-synced effect that produces a local, presentation-only vanilla storm.
+    public static void registerLocalStormStatusEffect(Identifier effectId) {
+        LocalStormStatusEffectRegistry.register(effectId);
+    }
+
+    // Registers an observer-synced visual rendered directly around affected living entities.
+    public static void registerObserverStatusVisual(Identifier effectId, ObserverStatusVisualStyle style) {
+        ObserverStatusVisualRegistry.register(effectId, style);
+    }
+
+    // Returns neutral when input has not been received recently.
+    public static PlayerMovementIntent getPlayerMovementIntent(ServerPlayerEntity player) {
+        return PlayerMovementIntentManager.get(player);
+    }
+
     // Gem Sockets
     // When each method is added to an item class, allows for gem sockets to appear on the item.
     // Each method needs to be called in its respective Override method. (Eg. inventoryTickGemSocketLogic goes in inventoryTick)
@@ -185,6 +211,7 @@ public class SimplySwordsAPI {
                 && !context.stack().isEmpty()
                 && context.actor() != null
                 && !WaxweaverEncasementManager.isEncased(context.actor())
+                && !IncapacitatingStatusEffectRegistry.isIncapacitated(context.actor())
                 && AwakeningApi.isAbilityUnlocked(context.stack())
                 && context.stack().getItem() instanceof UniqueWeaponActiveAbility ability
                 && ability.canActivate(context)
@@ -207,6 +234,7 @@ public class SimplySwordsAPI {
                 || context.stack().isEmpty()
                 || context.actor() == null
                 || WaxweaverEncasementManager.isEncased(context.actor())
+                || IncapacitatingStatusEffectRegistry.isIncapacitated(context.actor())
                 || !AwakeningApi.isAbilityUnlocked(context.stack())
                 || !(context.stack().getItem() instanceof UniqueWeaponActiveAbility ability)
                 || !ability.canActivate(context)) {
@@ -534,6 +562,63 @@ public class SimplySwordsAPI {
     public static boolean applyAbilityBoltDamage(ServerWorld world, LivingEntity actor, ItemStack stack,
                                                  LivingEntity target, float damage) {
         return ChainLightningVisualManager.damageBoltTarget(world, actor, stack, target, damage);
+    }
+
+    public static boolean applyAbilityBoltDamageWithoutKnockback(ServerWorld world, LivingEntity actor, ItemStack stack,
+                                                                 LivingEntity target, float damage) {
+        return ChainLightningVisualManager.damageBoltTargetWithoutKnockback(world, actor, stack, target, damage);
+    }
+
+    public static void spawnAbilityLightningBolt(ServerWorld world, Vec3d start, Vec3d end,
+                                                  LightningBoltStyle style) {
+        if (world == null || start == null || end == null || style == null) {
+            return;
+        }
+        ChainLightningVisualManager.spawnBolt(world, start, end,
+                new ChainLightningVisualManager.LightningVisualSettings(
+                        style.color(), style.lifetimeTicks(), style.thickness(), style.branches()),
+                style.illuminate());
+    }
+
+    public static UUID spawnAbilityLightningPhenomenon(ServerWorld world, Vec3d start, Vec3d end,
+                                                        LightningPhenomenonStyle style) {
+        return AbilityVisualManager.spawnLightningPhenomenon(world, start, end, style);
+    }
+
+    public static UUID spawnAbilityLightningPhenomenon(ServerWorld world, Entity start, float startYOffset,
+                                                        Entity end, float endYOffset,
+                                                        LightningPhenomenonStyle style) {
+        return AbilityVisualManager.spawnLightningPhenomenon(world, start, startYOffset, end, endYOffset, style);
+    }
+
+    public static UUID spawnAbilityLightningPhenomenon(ServerWorld world, Vec3d start,
+                                                        Entity end, float endYOffset,
+                                                        LightningPhenomenonStyle style) {
+        return AbilityVisualManager.spawnLightningPhenomenon(world, start, end, endYOffset, style);
+    }
+
+    public static UUID spawnAbilityStormVolume(ServerWorld world, Vec3d position,
+                                                StormVolumeStyle style) {
+        return AbilityVisualManager.spawnStormVolume(world, position, style);
+    }
+
+    public static UUID spawnAbilityStormVolume(ServerWorld world, Entity anchor,
+                                                StormVolumeStyle style) {
+        return AbilityVisualManager.spawnStormVolume(world, anchor, style);
+    }
+
+    public static UUID spawnAbilitySurfaceDischarge(ServerWorld world, Vec3d origin, Vec3d direction,
+                                                     double length, SurfaceDischargeStyle style) {
+        return AbilityVisualManager.spawnSurfaceDischarge(world, origin, direction, length, style);
+    }
+
+    public static UUID spawnAbilityShockFront(ServerWorld world, Vec3d origin, Vec3d direction,
+                                               ShockFrontStyle style) {
+        return AbilityVisualManager.spawnShockFront(world, origin, direction, style);
+    }
+
+    public static void discardAbilityVisual(ServerWorld world, UUID visualId) {
+        AbilityVisualManager.discard(world, visualId);
     }
 
     public static boolean isValidAbilityTarget(LivingEntity target, LivingEntity actor) {
