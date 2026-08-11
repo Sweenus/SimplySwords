@@ -27,6 +27,8 @@ public class GeneralConfig extends Config {
     public boolean enableWeaponFootfalls = true;
     public boolean enablePassiveParticles = true;
     public boolean enableModernFieldEffects = true;
+    @ValidatedInt.Restrict(min = 0, max = 2)
+    public int stormEffectDetail = 2;
     public boolean enableWeaponImplicits = true;
     public boolean enableNonPlayerWeaponAbilityUse = true;
     public boolean enableAbilityDamageEnchantScaling = true;

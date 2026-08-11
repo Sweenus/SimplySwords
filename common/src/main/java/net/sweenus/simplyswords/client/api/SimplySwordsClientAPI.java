@@ -6,14 +6,18 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
+import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.MathHelper;
 import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
+import net.sweenus.simplyswords.client.renderer.ModernFieldRenderer;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.item.RunicSwordItem;
 import net.sweenus.simplyswords.item.UniqueWeaponItem;
@@ -42,6 +46,23 @@ public class SimplySwordsClientAPI {
 
     public static void registerParchmentGlyphStyle(Identifier id, ParchmentGlyphStyle style) {
         ParchmentVisualRegistry.registerGlyphStyle(id, style);
+    }
+
+    public static void renderAbilityTargetHighlight(MatrixStack matrices,
+                                                    VertexConsumerProvider vertexConsumers,
+                                                    int age, Vec3d targetOffset, float targetWidth,
+                                                    AbilityTargetHighlightStyle style) {
+        if (matrices == null || vertexConsumers == null || targetOffset == null || style == null) {
+            return;
+        }
+        int primary = style.primaryColor();
+        int pulse = style.pulseColor();
+        ModernFieldRenderer.renderTargetLine(matrices, vertexConsumers, age, targetOffset,
+                primary >> 16 & 255, primary >> 8 & 255, primary & 255,
+                pulse >> 16 & 255, pulse >> 8 & 255, pulse & 255);
+        ModernFieldRenderer.renderTargetRing(matrices, vertexConsumers, age, targetOffset, targetWidth,
+                primary >> 16 & 255, primary >> 8 & 255, primary & 255,
+                pulse >> 16 & 255, pulse >> 8 & 255, pulse & 255);
     }
 
     public static void pushWeaponHudTransform(DrawContext context) {

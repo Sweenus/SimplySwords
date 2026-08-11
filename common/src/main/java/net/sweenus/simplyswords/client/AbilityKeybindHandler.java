@@ -12,6 +12,7 @@ import net.sweenus.simplyswords.item.RunicSwordItem;
 import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
 import net.sweenus.simplyswords.network.UseWeaponAbilityPacket;
 import net.sweenus.simplyswords.network.WeaponAbilityKeybindStatePacket;
+import net.sweenus.simplyswords.network.PlayerMovementIntentPacket;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.world.PlayerWeaponAbilityKeybindState;
 import org.lwjgl.glfw.GLFW;
@@ -39,6 +40,10 @@ public final class AbilityKeybindHandler {
     private static boolean lastMainhandBound;
     private static boolean lastOffhandBound;
     private static boolean sentKeybindState;
+    private static int lastMovementForward;
+    private static int lastMovementStrafe;
+    private static int lastMovementSentAt = Integer.MIN_VALUE;
+    private static boolean sentMovementIntent;
 
     private AbilityKeybindHandler() {
     }
@@ -69,11 +74,13 @@ public final class AbilityKeybindHandler {
     }
 
     private static void tick(MinecraftClient client) {
+        syncMovementIntent(client, client != null && client.currentScreen == null);
         if (client == null || client.player == null || client.world == null || client.currentScreen != null) {
             releaseIfNeeded(Hand.MAIN_HAND);
             releaseIfNeeded(Hand.OFF_HAND);
             if (client == null || client.player == null || client.world == null) {
                 sentKeybindState = false;
+                sentMovementIntent = false;
                 PlayerWeaponAbilityKeybindState.setClientState(false, false);
             }
             return;
@@ -82,6 +89,30 @@ public final class AbilityKeybindHandler {
         syncKeybindState();
         tickHand(Hand.MAIN_HAND, MAINHAND_ABILITY);
         tickHand(Hand.OFF_HAND, OFFHAND_ABILITY);
+    }
+
+    private static void syncMovementIntent(MinecraftClient client, boolean allowInput) {
+        if (client == null || client.player == null || client.world == null) {
+            sentMovementIntent = false;
+            return;
+        }
+        int forward = 0;
+        int strafe = 0;
+        if (allowInput && client.player.input != null) {
+            forward = (client.player.input.pressingForward ? 1 : 0)
+                    - (client.player.input.pressingBack ? 1 : 0);
+            strafe = (client.player.input.pressingRight ? 1 : 0)
+                    - (client.player.input.pressingLeft ? 1 : 0);
+        }
+        int age = client.player.age;
+        if (!sentMovementIntent || forward != lastMovementForward || strafe != lastMovementStrafe
+                || age - lastMovementSentAt >= 20) {
+            new PlayerMovementIntentPacket(forward, strafe).sendToServer();
+            lastMovementForward = forward;
+            lastMovementStrafe = strafe;
+            lastMovementSentAt = age;
+            sentMovementIntent = true;
+        }
     }
 
     private static void tickHand(Hand hand, KeyBinding keyBinding) {

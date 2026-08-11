@@ -5,6 +5,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.sweenus.simplyswords.compat.bettercombat.BetterCombatCompat;
 import net.sweenus.simplyswords.world.WaxweaverEncasementManager;
+import net.sweenus.simplyswords.api.IncapacitatingStatusEffectRegistry;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.injection.At;
@@ -51,7 +52,8 @@ public abstract class BetterCombatServerNetworkMixin {
             boolean dualWielding,
             ServerPlayNetworkHandler networkHandler,
             CallbackInfo ci) {
-        if (WaxweaverEncasementManager.isEncased(player)) {
+        if (WaxweaverEncasementManager.isEncased(player)
+                || IncapacitatingStatusEffectRegistry.isIncapacitated(player)) {
             ci.cancel();
             return;
         }

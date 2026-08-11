@@ -16,6 +16,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
+import net.sweenus.simplyswords.api.IncapacitatingStatusEffectRegistry;
 import net.sweenus.simplyswords.api.WeaponAbilityActivationSource;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
@@ -36,6 +37,7 @@ import net.sweenus.simplyswords.world.StormsEdgeAbilityManager;
 import net.sweenus.simplyswords.world.ThunderbrandAbilityManager;
 import net.sweenus.simplyswords.world.WaxweaverEncasementManager;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
@@ -46,6 +48,28 @@ import static net.sweenus.simplyswords.SimplySwords.minimumEldritchEndVersion;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin {
+
+    @Shadow protected boolean jumping;
+
+    @Inject(method = "tickMovement", at = @At("HEAD"))
+    private void simplyswords$suppressIncapacitatedMovementInput(CallbackInfo ci) {
+        LivingEntity living = (LivingEntity) (Object) this;
+        if (!IncapacitatingStatusEffectRegistry.isIncapacitated(living)) return;
+        living.forwardSpeed = 0.0F;
+        living.sidewaysSpeed = 0.0F;
+        living.upwardSpeed = 0.0F;
+        jumping = false;
+        living.stopUsingItem();
+    }
+
+    @Inject(method = "tickMovement", at = @At("TAIL"))
+    private void simplyswords$clampIncapacitatedVelocity(CallbackInfo ci) {
+        LivingEntity living = (LivingEntity) (Object) this;
+        if (!IncapacitatingStatusEffectRegistry.isIncapacitated(living)) return;
+        var velocity = living.getVelocity();
+        living.setVelocity(0.0, Math.min(0.0, velocity.y), 0.0);
+        living.velocityModified = true;
+    }
 
     @Inject(method = "onStatusEffectApplied", at = @At("TAIL"))
     private void simplyswords$syncObserverEffectApplied(StatusEffectInstance effect, Entity source, CallbackInfo ci) {

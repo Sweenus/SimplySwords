@@ -56,8 +56,13 @@ public final class ChainLightningVisualManager {
     }
 
     public static void spawnChain(ServerWorld world, List<Vec3d> points, LightningVisualSettings settings) {
+        spawnChain(world, points, settings, true);
+    }
+
+    public static void spawnChain(ServerWorld world, List<Vec3d> points,
+                                  LightningVisualSettings settings, boolean illuminate) {
         for (int i = 0; i < points.size() - 1; i++) {
-            spawnBolt(world, points.get(i), points.get(i + 1), settings);
+            spawnBolt(world, points.get(i), points.get(i + 1), settings, illuminate);
         }
     }
 
@@ -77,6 +82,20 @@ public final class ChainLightningVisualManager {
         WeaponImplicitRegistry.runSuppressed(() ->
                 result[0] = HelperMethods.damageThroughIframes(target, source, enchantedDamage));
         return result[0];
+    }
+
+    public static boolean damageBoltTargetWithoutKnockback(ServerWorld world, LivingEntity player, ItemStack stack,
+                                                           LivingEntity target, float damage) {
+        if (target == null) {
+            return false;
+        }
+        Vec3d velocity = target.getVelocity();
+        boolean damaged = damageBoltTarget(world, player, stack, target, damage);
+        if (damaged) {
+            target.setVelocity(velocity);
+            target.velocityModified = true;
+        }
+        return damaged;
     }
 
     public static List<LivingEntity> chainTargets(ServerWorld world, LivingEntity player,

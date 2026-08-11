@@ -13,6 +13,7 @@ import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.world.MoltenEdgeAbilityManager;
 import net.sweenus.simplyswords.world.WaxweaverEncasementManager;
+import net.sweenus.simplyswords.api.IncapacitatingStatusEffectRegistry;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -28,7 +29,9 @@ public abstract class PlayerEntityMixin {
 
     @Inject(at = @At("HEAD"), method = "attack", cancellable = true)
     private void simplyswords$preventWaxEncasedAttack(Entity target, CallbackInfo ci) {
-        if (WaxweaverEncasementManager.isEncased((PlayerEntity) (Object) this)) {
+        PlayerEntity player = (PlayerEntity) (Object) this;
+        if (WaxweaverEncasementManager.isEncased(player)
+                || IncapacitatingStatusEffectRegistry.isIncapacitated(player)) {
             ci.cancel();
         }
     }

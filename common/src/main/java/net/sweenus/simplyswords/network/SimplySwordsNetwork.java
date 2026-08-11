@@ -9,6 +9,7 @@ public final class SimplySwordsNetwork {
     public static final SimpleNetworkManager NETWORK = SimpleNetworkManager.create(SimplySwords.MOD_ID);
     public static final MessageType USE_WEAPON_ABILITY = NETWORK.registerC2S("use_weapon_ability", UseWeaponAbilityPacket::new);
     public static final MessageType WEAPON_ABILITY_KEYBIND_STATE = NETWORK.registerC2S("weapon_ability_keybind_state", WeaponAbilityKeybindStatePacket::new);
+    public static final MessageType PLAYER_MOVEMENT_INTENT = NETWORK.registerC2S("player_movement_intent", PlayerMovementIntentPacket::new);
     public static final MessageType OBSERVER_STATUS_EFFECTS = NETWORK.registerS2C("observer_status_effects", ObserverStatusEffectsPacket::new);
 
     private SimplySwordsNetwork() {

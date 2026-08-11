@@ -41,10 +41,11 @@ public abstract class UniqueWeaponItem extends SwordItem {
 
     @Override
     public int getMaxUseTime(ItemStack stack) {
-        return getUniqueWeaponMaxUseTime(stack);
+        return getUniqueWeaponMaxUseTime(stack, null);
     }
 
-    protected int getUniqueWeaponMaxUseTime(ItemStack stack) {
+    // 1.20.1 resolves use time without a holder, so user is null when vanilla asks.
+    protected int getUniqueWeaponMaxUseTime(ItemStack stack, LivingEntity user) {
         return 0;
     }
 

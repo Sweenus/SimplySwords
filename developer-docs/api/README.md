@@ -20,6 +20,7 @@ Use `SimplySwordsAPI` as the preferred common-side facade and
 | Remnant transformations | `SimplySwordsAPI.registerTransformation` | [Contained Remnants](contained-remnants.md) |
 | Battle Standards | `SimplySwordsAPI.spawnBattleStandard` | [Battle Standards](battle-standards.md) |
 | Observer status effects | `SimplySwordsAPI.registerObserverSyncedStatusEffect`, `ObserverStatusEffectClientApi` | [Observer status effects](observer-status-effects.md) |
+| Control and status visuals | movement intent, incapacitation, local storms, observer visuals | [Control and status visuals](control-and-status-visuals.md) |
 | Client integration | `SimplySwordsClientAPI` | [Client integration](client-integration.md) |
 | Parchment visuals | render-data interfaces, shared renderers, glyph styles | [Parchment visuals](parchment-visuals.md) |
 
@@ -33,7 +34,7 @@ Use `SimplySwordsAPI` as the preferred common-side facade and
 - gem socket hooks;
 - weapon type and implicit registration;
 - synthetic and delegated weapon hits;
-- ability scaling, targeting, chain, bolt-damage, and orbit-particle helpers;
+- ability scaling, targeting, damage, particles, and reusable ability visuals;
 - Contained Remnant transformations;
 - observer status-effect registration for remote client presentation.
 
