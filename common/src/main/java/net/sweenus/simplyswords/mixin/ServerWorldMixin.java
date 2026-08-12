@@ -28,6 +28,9 @@ public abstract class ServerWorldMixin {
         if (BrimstoneClaymoreAbilityManager.hasActive(world)) {
             BrimstoneClaymoreAbilityManager.tick(world);
         }
+        if (StormscaleLightningRodManager.hasActive(world)) {
+            StormscaleLightningRodManager.tick(world);
+        }
         if (ArcanethystAssaultManager.hasActive(world)) {
             ArcanethystAssaultManager.tick(world);
         }

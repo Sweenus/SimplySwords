@@ -7,9 +7,12 @@ import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.entity.Entity;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import net.sweenus.simplyswords.api.render.LightningPhenomenonShape;
 import net.sweenus.simplyswords.client.render.BoltIntensity;
 import net.sweenus.simplyswords.client.render.BoltPath;
 import net.sweenus.simplyswords.client.render.LightningRenderLayers;
@@ -35,9 +38,17 @@ public class LightningPhenomenonVisualEntityRenderer
     @Override
     public boolean shouldRender(LightningPhenomenonVisualEntity entity, Frustum frustum,
                                 double x, double y, double z) {
-        return super.shouldRender(entity, frustum, x, y, z)
-                || frustum.isVisible(entity.getBoundingBox().stretch(
-                entity.getEnd().subtract(entity.getStart())).expand(3.0));
+        if (super.shouldRender(entity, frustum, x, y, z)) {
+            return true;
+        }
+        LightningPhenomenonShape shape = entity.getShape();
+        Vec3d start = usesInterpolatedAnchors(shape)
+                ? resolveAnchor(entity, entity.getStartId(), entity.getStartOffset(), entity.getStart(), 1.0F)
+                : entity.getStart();
+        Vec3d end = usesInterpolatedAnchors(shape)
+                ? resolveAnchor(entity, entity.getEndId(), entity.getEndOffset(), entity.getEnd(), 1.0F)
+                : entity.getEnd();
+        return frustum.isVisible(new Box(start, end).expand(3.0));
     }
 
     @Override
@@ -47,15 +58,25 @@ public class LightningPhenomenonVisualEntityRenderer
         float age = entity.age + tickDelta - entity.getDelay();
         if (age < 0.0F || age > entity.getLifetime()) return;
 
+        LightningPhenomenonShape shape = entity.getShape();
+        Vec3d startWorld = usesInterpolatedAnchors(shape)
+                ? resolveAnchor(entity, entity.getStartId(), entity.getStartOffset(), entity.getStart(), tickDelta)
+                : entity.getStart();
+        Vec3d endWorld = usesInterpolatedAnchors(shape)
+                ? resolveAnchor(entity, entity.getEndId(), entity.getEndOffset(), entity.getEnd(), tickDelta)
+                : entity.getEnd();
         Vec3d entityPos = entity.getLerpedPos(tickDelta);
-        Vec3d start = entity.getStart().subtract(entityPos);
-        Vec3d end = entity.getEnd().subtract(entityPos);
+        Vec3d start = startWorld.subtract(entityPos);
+        Vec3d end = endWorld.subtract(entityPos);
         double length = start.distanceTo(end);
         if (length < 0.01) return;
 
         int detail = MathHelper.clamp(Config.general.stormEffectDetail, 0, 2);
         int segments = MathHelper.clamp(MathHelper.ceil((float) length * 0.72F) + detail - 1, 4, 14);
-        float[] trunk = MinecraftLightningRenderer.generate(start, end, entity.getSeed(), age,
+        float[] trunk = shape == LightningPhenomenonShape.ENERGY_LINK
+                || shape == LightningPhenomenonShape.TRAVELLING_PULSE
+                ? linearPath(start, end, segments)
+                : MinecraftLightningRenderer.generate(start, end, entity.getSeed(), age,
                 Math.max(0.025F, entity.getSpread() * 0.32F), segments, 2.0F);
         VertexConsumer vertices = consumers.getBuffer(LightningRenderLayers.BLOCKY_LIGHTNING);
         Matrix4f matrix = matrices.peek().getPositionMatrix();
@@ -66,8 +87,26 @@ public class LightningPhenomenonVisualEntityRenderer
             case LEADER_RETURN -> drawLeaderReturn(entity, vertices, matrix, trunk, age, width);
             case SKY_STRIKE -> drawSkyStrike(entity, vertices, matrix, trunk, age, width);
             case CONDUCTIVE_LINK -> drawConductiveLink(entity, vertices, matrix, trunk, age, width);
+            case ENERGY_LINK -> drawEnergyLink(entity, vertices, matrix, trunk, age, width);
+            case TRAVELLING_PULSE -> drawTravellingPulse(entity, vertices, matrix, trunk, age, width);
         }
         super.render(entity, yaw, tickDelta, matrices, consumers, light);
+    }
+
+    private static boolean usesInterpolatedAnchors(LightningPhenomenonShape shape) {
+        return shape == LightningPhenomenonShape.ENERGY_LINK
+                || shape == LightningPhenomenonShape.TRAVELLING_PULSE;
+    }
+
+    private static Vec3d resolveAnchor(LightningPhenomenonVisualEntity visual, int entityId,
+                                       float yOffset, Vec3d fallback, float tickDelta) {
+        if (entityId < 0) {
+            return fallback;
+        }
+        Entity anchor = visual.getWorld().getEntityById(entityId);
+        return anchor == null || anchor.isRemoved()
+                ? fallback
+                : anchor.getLerpedPos(tickDelta).add(0.0, yOffset, 0.0);
     }
 
     private static void drawConductiveLink(LightningPhenomenonVisualEntity entity, VertexConsumer vertices,
@@ -80,6 +119,37 @@ public class LightningPhenomenonVisualEntityRenderer
                     Math.min(3, entity.getBranches()), Math.max(0.35F, entity.getSpread()), width * 0.42F,
                     entity.getCoreColor(), entity.getPrimaryColor(), pulse * 0.7F);
         }
+    }
+
+    private static void drawEnergyLink(LightningPhenomenonVisualEntity entity, VertexConsumer vertices,
+                                       Matrix4f matrix, float[] trunk, float age, float width) {
+        float shimmer = 0.76F + BoltIntensity.shimmer(entity.getSeed(), age) * 0.18F;
+        MinecraftLightningRenderer.draw(vertices, matrix, trunk,
+                width * 1.35F, width * 1.05F,
+                entity.getCoreColor(), entity.getPrimaryColor(), shimmer, false);
+        MinecraftLightningRenderer.draw(vertices, matrix, trunk,
+                width * 0.52F, width * 0.42F,
+                0xFFFFFF, entity.getCoreColor(), Math.min(1.0F, shimmer + 0.12F), false);
+    }
+
+    private static void drawTravellingPulse(LightningPhenomenonVisualEntity entity, VertexConsumer vertices,
+                                            Matrix4f matrix, float[] trunk, float age, float width) {
+        float progress = MathHelper.clamp(age / Math.max(1.0F, entity.getLifetime()), 0.0F, 1.0F);
+        float tailProgress = Math.max(0.0F, progress - 0.12F);
+        float headProgress = Math.min(1.0F, progress + 0.035F);
+        Vec3d tail = sample(trunk, tailProgress);
+        Vec3d center = sample(trunk, progress);
+        Vec3d head = sample(trunk, headProgress);
+        float[] wake = path(tail, center);
+        float[] crest = path(center, head);
+        float shimmer = 0.86F + BoltIntensity.shimmer(entity.getSeed(), age) * 0.14F;
+
+        MinecraftLightningRenderer.draw(vertices, matrix, wake,
+                width * 0.35F, width * 2.8F,
+                entity.getCoreColor(), entity.getPrimaryColor(), shimmer * 0.82F, false);
+        MinecraftLightningRenderer.draw(vertices, matrix, crest,
+                width * 2.8F, width * 0.55F,
+                0xFFFFFF, entity.getPrimaryColor(), shimmer, false);
     }
 
     private static void drawDirect(LightningPhenomenonVisualEntity entity, VertexConsumer vertices,
@@ -138,6 +208,41 @@ public class LightningPhenomenonVisualEntityRenderer
         int points = path.length / 3;
         int keep = Math.max(2, Math.min(points, 1 + Math.round((points - 1) * progress)));
         return Arrays.copyOf(path, keep * 3);
+    }
+
+    private static Vec3d sample(float[] path, float progress) {
+        int points = path.length / 3;
+        float scaled = MathHelper.clamp(progress, 0.0F, 1.0F) * (points - 1);
+        int first = Math.min(points - 2, MathHelper.floor(scaled));
+        int second = first + 1;
+        float blend = scaled - first;
+        int a = first * 3;
+        int b = second * 3;
+        return new Vec3d(
+                MathHelper.lerp(blend, path[a], path[b]),
+                MathHelper.lerp(blend, path[a + 1], path[b + 1]),
+                MathHelper.lerp(blend, path[a + 2], path[b + 2])
+        );
+    }
+
+    private static float[] path(Vec3d start, Vec3d end) {
+        return new float[]{
+                (float) start.x, (float) start.y, (float) start.z,
+                (float) end.x, (float) end.y, (float) end.z
+        };
+    }
+
+    private static float[] linearPath(Vec3d start, Vec3d end, int segments) {
+        float[] path = new float[(segments + 1) * 3];
+        for (int index = 0; index <= segments; index++) {
+            double progress = index / (double) segments;
+            Vec3d point = start.lerp(end, progress);
+            int offset = index * 3;
+            path[offset] = (float) point.x;
+            path[offset + 1] = (float) point.y;
+            path[offset + 2] = (float) point.z;
+        }
+        return path;
     }
 
     private static float ease(float value) {

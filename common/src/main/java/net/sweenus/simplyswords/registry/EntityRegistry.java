@@ -279,6 +279,15 @@ public class EntityRegistry {
                     .build(new Identifier(SimplySwords.MOD_ID, "brimstone_claymore_visual").toString())
     );
 
+    public static final RegistrySupplier<EntityType<StormscaleRodVisualEntity>> STORMSCALE_ROD_VISUAL = ENTITIES.register(
+            "stormscale_rod_visual",
+            () -> EntityType.Builder.<StormscaleRodVisualEntity>create(StormscaleRodVisualEntity::new, SpawnGroup.MISC)
+                    .setDimensions(0.75F, 2.5F)
+                    .maxTrackingRange(128)
+                    .trackingTickInterval(1)
+                    .build(new Identifier(SimplySwords.MOD_ID, "stormscale_rod_visual").toString())
+    );
+
     public static final RegistrySupplier<EntityType<ChainLightningVisualEntity>> CHAIN_LIGHTNING_VISUAL = ENTITIES.register(
             "chain_lightning_visual",
             () -> EntityType.Builder.<ChainLightningVisualEntity>create(ChainLightningVisualEntity::new, SpawnGroup.MISC)

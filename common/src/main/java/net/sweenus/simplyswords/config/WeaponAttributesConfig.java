@@ -140,6 +140,7 @@ public class WeaponAttributesConfig extends Config {
         public float soulstealer_damageModifier = 0.0f;
         public float starsedge_damageModifier = 3.0f;
         public float stormsedge_damageModifier = 3.0f;
+        public float stormscale_damageModifier = 3.0f;
         public float stormbringer_damageModifier = 3.0f;
         public float sunfire_damageModifier = 3.0f;
         public float swordonastick_damageModifier = 5.0f;
@@ -194,6 +195,7 @@ public class WeaponAttributesConfig extends Config {
         public float soulstealer_attackSpeed = -1.5f;
         public float starsedge_attackSpeed = -2.0f;
         public float stormsedge_attackSpeed = -2.0f;
+        public float stormscale_attackSpeed = -2.6f;
         public float stormbringer_attackSpeed = -2.4f;
         public float sunfire_attackSpeed = -2.4f;
         public float swordonastick_attackSpeed = -2.6f;

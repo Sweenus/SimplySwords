@@ -57,6 +57,7 @@ public final class UniqueTooltipExportController {
             spec("soulstealer", ItemsRegistry.SOULSTEALER::get),
             spec("stars_edge", ItemsRegistry.STARS_EDGE::get),
             spec("stormbringer", ItemsRegistry.STORMBRINGER::get),
+            spec("stormscale", ItemsRegistry.STORMSCALE::get),
             spec("storms_edge", ItemsRegistry.STORMS_EDGE::get),
             spec("sunfire", ItemsRegistry.SUNFIRE::get),
             spec("tainted_relic", ItemsRegistry.TAINTED_RELIC::get, 4),

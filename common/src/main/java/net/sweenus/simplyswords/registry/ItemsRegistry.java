@@ -56,6 +56,7 @@ public class ItemsRegistry {
     static float brimstone_attackspeed = Config.weaponAttribute.uniqueAttackSpeed.brimstone_attackSpeed;
     static float thewatcher_attackspeed = Config.weaponAttribute.uniqueAttackSpeed.thewatcher_attackSpeed;
     static float stormsedge_attackspeed = Config.weaponAttribute.uniqueAttackSpeed.stormsedge_attackSpeed;
+    static float stormscale_attackspeed = Config.weaponAttribute.uniqueAttackSpeed.stormscale_attackSpeed;
     static float stormbringer_attackspeed = Config.weaponAttribute.uniqueAttackSpeed.stormbringer_attackSpeed;
     static float swordonastick_attackspeed = Config.weaponAttribute.uniqueAttackSpeed.swordonastick_attackSpeed;
     static float bramblethorn_attackspeed = Config.weaponAttribute.uniqueAttackSpeed.bramblethorn_attackSpeed;
@@ -99,6 +100,7 @@ public class ItemsRegistry {
     static float brimstone_damage_modifier = Config.weaponAttribute.uniqueDamageModifier.brimstone_damageModifier;
     static float thewatcher_damage_modifier = Config.weaponAttribute.uniqueDamageModifier.thewatcher_damageModifier;
     static float stormsedge_damage_modifier = Config.weaponAttribute.uniqueDamageModifier.stormsedge_damageModifier;
+    static float stormscale_damage_modifier = Config.weaponAttribute.uniqueDamageModifier.stormscale_damageModifier;
     static float stormbringer_damage_modifier = Config.weaponAttribute.uniqueDamageModifier.stormbringer_damageModifier;
     static float swordonastick_damage_modifier = Config.weaponAttribute.uniqueDamageModifier.swordonastick_damageModifier;
     static float bramblethorn_damage_modifier = Config.weaponAttribute.uniqueDamageModifier.bramblethorn_damageModifier;
@@ -623,6 +625,12 @@ public class ItemsRegistry {
                     ModToolMaterial.UNIQUE,
                     LegacyWeaponAttributes.configure(new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).fireproof()
                             , (int) stormsedge_damage_modifier, stormsedge_attackspeed)));
+
+    public static final RegistrySupplier<StormscaleSwordItem> STORMSCALE = ITEM.register("stormscale", () ->
+            new StormscaleSwordItem(
+                    ModToolMaterial.UNIQUE,
+                    LegacyWeaponAttributes.configure(new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).fireproof()
+                            , (int) stormscale_damage_modifier, stormscale_attackspeed)));
 
     public static final RegistrySupplier<StormbringerSwordItem> STORMBRINGER = ITEM.register("stormbringer", () ->
             new StormbringerSwordItem(
