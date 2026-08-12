@@ -57,6 +57,7 @@ public class ItemsRegistry {
     static float thewatcher_attackspeed = Config.weaponAttribute.uniqueAttackSpeed.thewatcher_attackSpeed;
     static float stormsedge_attackspeed = Config.weaponAttribute.uniqueAttackSpeed.stormsedge_attackSpeed;
     static float stormscale_attackspeed = Config.weaponAttribute.uniqueAttackSpeed.stormscale_attackSpeed;
+    static float bloodwake_attackspeed = Config.weaponAttribute.uniqueAttackSpeed.bloodwake_attackSpeed;
     static float stormbringer_attackspeed = Config.weaponAttribute.uniqueAttackSpeed.stormbringer_attackSpeed;
     static float swordonastick_attackspeed = Config.weaponAttribute.uniqueAttackSpeed.swordonastick_attackSpeed;
     static float bramblethorn_attackspeed = Config.weaponAttribute.uniqueAttackSpeed.bramblethorn_attackSpeed;
@@ -101,6 +102,7 @@ public class ItemsRegistry {
     static float thewatcher_damage_modifier = Config.weaponAttribute.uniqueDamageModifier.thewatcher_damageModifier;
     static float stormsedge_damage_modifier = Config.weaponAttribute.uniqueDamageModifier.stormsedge_damageModifier;
     static float stormscale_damage_modifier = Config.weaponAttribute.uniqueDamageModifier.stormscale_damageModifier;
+    static float bloodwake_damage_modifier = Config.weaponAttribute.uniqueDamageModifier.bloodwake_damageModifier;
     static float stormbringer_damage_modifier = Config.weaponAttribute.uniqueDamageModifier.stormbringer_damageModifier;
     static float swordonastick_damage_modifier = Config.weaponAttribute.uniqueDamageModifier.swordonastick_damageModifier;
     static float bramblethorn_damage_modifier = Config.weaponAttribute.uniqueDamageModifier.bramblethorn_damageModifier;
@@ -1018,6 +1020,13 @@ public class ItemsRegistry {
                     new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).fireproof()
                             .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.UNIQUE,
                                     (int) wraithfang_damage_modifier, wraithfang_attackspeed))));
+
+    public static final RegistrySupplier<BloodwakeSwordItem> BLOODWAKE = ITEM.register("bloodwake", () ->
+            new BloodwakeSwordItem(
+                    ModToolMaterial.UNIQUE,
+                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).fireproof()
+                            .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.UNIQUE,
+                                    (int) bloodwake_damage_modifier, bloodwake_attackspeed))));
 
     public static final RegistrySupplier<ChompolotlSwordItem> CHOMPOLOTL = ITEM.register("chompolotl", () ->
             new ChompolotlSwordItem(

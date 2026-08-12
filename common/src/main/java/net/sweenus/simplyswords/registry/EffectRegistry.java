@@ -16,6 +16,7 @@ import net.sweenus.simplyswords.effect.*;
 public class EffectRegistry {
 
     public static final Identifier SHADOW_DANCE_ID = Identifier.of(SimplySwords.MOD_ID, "shadow_dance");
+    public static final Identifier BLOOD_PLAGUE_ID = Identifier.of(SimplySwords.MOD_ID, "blood_plague");
 
     public static final DeferredRegister<StatusEffect> EFFECT = DeferredRegister.create(SimplySwords.MOD_ID, RegistryKeys.STATUS_EFFECT);
 
@@ -139,6 +140,14 @@ public class EffectRegistry {
             new ShadowDanceEffect(StatusEffectCategory.BENEFICIAL, 1315860));
     public static final RegistrySupplier<StatusEffect> BLEED = EFFECT.register("bleed", () ->
             new BleedEffect(StatusEffectCategory.HARMFUL, 0x8f1f1f));
+    public static final RegistrySupplier<StatusEffect> BLOOD_PLAGUE = EFFECT.register(BLOOD_PLAGUE_ID.getPath(), () ->
+            new BloodPlagueEffect(StatusEffectCategory.HARMFUL, 0x710515));
+    public static final RegistrySupplier<StatusEffect> BLOODWAKE_FRENZY = EFFECT.register("bloodwake_frenzy", () ->
+            new BloodFrenzyEffect(StatusEffectCategory.BENEFICIAL, 0xB3122C)
+                    .addAttributeModifier(EntityAttributes.GENERIC_ATTACK_SPEED,
+                            Identifier.of("5b780a25-d6cb-42a7-a55f-096bcdb4b67a"),
+                            0.10,
+                            EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
     public static final RegistrySupplier<StatusEffect> SUNDERED_ARMOR = EFFECT.register("sundered_armor", () ->
             new SunderedArmorEffect(StatusEffectCategory.HARMFUL, 0x7f7366));
     public static final RegistrySupplier<StatusEffect> IMPLICIT_HASTE = EFFECT.register("implicit_haste", () ->

@@ -38,7 +38,7 @@
   "depends": {
     "fabric": "*",
     "minecraft": ">=1.21.1 <=1.21.1",
-    "architectury": ">=7.1.0",
+    "architectury": ">=13.0.11",
     "fzzy_config": ">=0.6.6",
     "simplytooltips": "*"
   },

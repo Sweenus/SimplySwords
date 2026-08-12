@@ -28,6 +28,7 @@ import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.world.RunicSlashManager;
 import net.sweenus.simplyswords.world.BramblethornAbilityManager;
+import net.sweenus.simplyswords.world.BloodwakeAbilityManager;
 import net.sweenus.simplyswords.world.MagispearAbilityManager;
 import net.sweenus.simplyswords.world.MoltenEdgeAbilityManager;
 import net.sweenus.simplyswords.world.ObserverStatusEffectSyncManager;
@@ -182,6 +183,7 @@ public abstract class LivingEntityMixin {
             BramblethornAbilityManager.onBoundTargetDamaged(livingEntity, source, amount);
             MoltenEdgeAbilityManager.gainHeatFromIncomingDamage(livingEntity, amount, true);
             WeaponImplicitRegistry.onDamageApplied(livingEntity, source, amount);
+            BloodwakeAbilityManager.onTargetDamaged(livingEntity, source);
             if (source.isIn(DamageTypeTags.IS_PLAYER_ATTACK) && source.getAttacker() instanceof ServerPlayerEntity player) {
                 ItemStack stack = source.getWeaponStack();
                 if (stack == null || !stack.isOf(ItemsRegistry.STORMBRINGER.get())) {

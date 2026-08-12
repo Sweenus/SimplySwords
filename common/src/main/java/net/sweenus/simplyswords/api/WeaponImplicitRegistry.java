@@ -26,7 +26,6 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.config.Config;
-import net.sweenus.simplyswords.effect.instance.SimplySwordsStatusEffectInstance;
 import net.sweenus.simplyswords.entity.DancingBladeVisualEntity;
 import net.sweenus.simplyswords.entity.ThrownSpearEntity;
 import net.sweenus.simplyswords.entity.ThrownSwordEntity;
@@ -36,6 +35,7 @@ import net.sweenus.simplyswords.registry.ComponentTypeRegistry;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.ParticlesRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
+import net.sweenus.simplyswords.util.BleedHelper;
 import net.sweenus.simplyswords.world.ImplicitStatusVisualManager;
 
 import java.util.*;
@@ -388,15 +388,7 @@ public final class WeaponImplicitRegistry {
         if (missedRoll(target, component.value())) {
             return;
         }
-        int snapshot = Math.max(1, Math.round(damage * 0.5F * 100.0F));
-        SimplySwordsStatusEffectInstance current = target.getStatusEffect(EffectRegistry.getReference(EffectRegistry.BLEED)) instanceof SimplySwordsStatusEffectInstance instance ? instance : null;
-        int stacks = Math.min(10, current == null ? 1 : current.getAmplifier() + 2);
-        int highestSnapshot = Math.max(snapshot, current == null ? 0 : current.getAdditionalData());
-        SimplySwordsStatusEffectInstance next = new SimplySwordsStatusEffectInstance(EffectRegistry.getReference(EffectRegistry.BLEED), 160, stacks - 1, false, false, true);
-        next.setAdditionalData(highestSnapshot);
-        next.setSourceEntity(attacker);
-        target.addStatusEffect(next, attacker);
-        spawnBleedParticles(target, stacks, false);
+        BleedHelper.apply(target, attacker, damage);
     }
 
     private static void applyPlunder(ItemStack stack, WeaponImplicitComponent component, LivingEntity target, LivingEntity attacker, float damage) {
@@ -586,6 +578,7 @@ public final class WeaponImplicitRegistry {
         registerPath("enigma", CLAYMORE);
         registerPath("caelestis", CLAYMORE);
         registerPath("wraithfang", CUTLASS);
+        registerPath("bloodwake", CUTLASS);
         registerPath("chompolotl", CHAKRAM);
         registerPath("dreadtide", TWINBLADE);
     }

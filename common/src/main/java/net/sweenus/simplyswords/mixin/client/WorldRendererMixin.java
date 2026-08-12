@@ -11,6 +11,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.client.renderer.ModernFieldRenderer;
+import net.sweenus.simplyswords.client.renderer.TerrainFieldOverlayRenderer;
 import net.sweenus.simplyswords.client.renderer.TargetHighlight;
 import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.config.Config;
@@ -38,6 +39,16 @@ import java.util.Set;
 
 @Mixin(WorldRenderer.class)
 public abstract class WorldRendererMixin {
+
+    @Inject(method = "render", at = @At("HEAD"))
+    private void simplyswords$beginTerrainOverlayFrame(
+            RenderTickCounter tickCounter, boolean renderBlockOutline,
+            Camera camera, GameRenderer gameRenderer,
+            LightmapTextureManager lightmapTextureManager,
+            Matrix4f positionMatrix, Matrix4f projectionMatrix,
+            CallbackInfo ci) {
+        TerrainFieldOverlayRenderer.beginWorldFrame();
+    }
 
     @Inject(method = "render", at = @At("TAIL"))
     private void simplyswords$renderFirstPersonImmolationField(RenderTickCounter tickCounter, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightmapTextureManager lightmapTextureManager, Matrix4f positionMatrix, Matrix4f projectionMatrix, CallbackInfo ci) {
