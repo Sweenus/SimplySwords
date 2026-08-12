@@ -149,6 +149,7 @@ public class ModLootTableModifiers {
             ItemsRegistry.WATCHER_CLAYMORE,
             ItemsRegistry.BRIMSTONE_CLAYMORE,
             ItemsRegistry.STORMS_EDGE,
+            ItemsRegistry.STORMSCALE,
             ItemsRegistry.STORMBRINGER,
             ItemsRegistry.BRAMBLETHORN,
             ItemsRegistry.WATCHING_WARGLAIVE,

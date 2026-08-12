@@ -41,6 +41,7 @@ public class UniqueEffectsConfig extends Config {
     public SunfireSwordItem.EffectSettings sunfire = new SunfireSwordItem.EffectSettings();
     public ShadowstingSwordItem.EffectSettings shadowsting = new ShadowstingSwordItem.EffectSettings();
     public StormbringerSwordItem.EffectSettings stormbringer = new StormbringerSwordItem.EffectSettings();
+    public StormscaleSwordItem.EffectSettings stormscale = new StormscaleSwordItem.EffectSettings();
     public EmberlashSwordItem.EffectSettings emberlash = new EmberlashSwordItem.EffectSettings();
     public LichbladeSwordItem.EffectSettings lichblade = new LichbladeSwordItem.EffectSettings();
     public SoulkeeperSwordItem.EffectSettings    soulkeeper = new SoulkeeperSwordItem.EffectSettings();

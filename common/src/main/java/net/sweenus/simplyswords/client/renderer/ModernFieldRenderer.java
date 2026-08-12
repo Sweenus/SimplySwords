@@ -58,6 +58,42 @@ public final class ModernFieldRenderer {
         renderCircle(matrices, vertexConsumers, age, Math.max(0.75F, radius), 255, 91, 28);
     }
 
+    public static void renderStormscaleCircle(MatrixStack matrices, VertexConsumerProvider vertexConsumers,
+                                              float age, float pulseAge, float radius) {
+        if (!isEnabled()) {
+            return;
+        }
+
+        Matrix4f matrix = matrices.peek().getPositionMatrix();
+        VertexConsumer vertices = vertexConsumers.getBuffer(RenderLayer.getDebugQuads());
+        float clampedRadius = Math.max(0.75F, radius);
+        float borderPulse = 0.78F + 0.16F * MathHelper.sin(age * 0.19F);
+        int borderAlpha = MathHelper.clamp((int) (190.0F * borderPulse), 110, 210);
+        drawCircleBand(vertices, matrix, clampedRadius, 0.095F,
+                66, 200, 255, borderAlpha);
+        drawCircleBand(vertices, matrix, Math.max(0.3F, clampedRadius * 0.34F), 0.045F,
+                221, 250, 255, MathHelper.clamp((int) (115.0F * borderPulse), 55, 130));
+
+        if (pulseAge < 0.0F || pulseAge > 14.0F) {
+            return;
+        }
+        float progress = MathHelper.clamp(pulseAge / 14.0F, 0.0F, 1.0F);
+        float eased = 1.0F - (1.0F - progress) * (1.0F - progress);
+        float waveRadius = MathHelper.lerp(eased, 0.25F, clampedRadius);
+        float fade = 1.0F - progress;
+        drawCircleBand(vertices, matrix, waveRadius, 0.11F,
+                235, 253, 255, MathHelper.clamp((int) (230.0F * fade), 0, 230));
+        for (int trail = 1; trail <= 4; trail++) {
+            float trailRadius = waveRadius - trail * 0.24F;
+            if (trailRadius <= 0.12F) {
+                continue;
+            }
+            float trailFade = fade * (1.0F - trail * 0.16F);
+            drawCircleBand(vertices, matrix, trailRadius, 0.052F,
+                    66, 200, 255, MathHelper.clamp((int) (145.0F * trailFade), 0, 145));
+        }
+    }
+
     public static void renderParchmentTargetLine(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int age, Vec3d targetOffset) {
         renderTargetLine(matrices, vertexConsumers, age, targetOffset, 242, 216, 154, 255, 236, 176);
     }
