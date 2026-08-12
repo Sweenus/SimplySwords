@@ -28,6 +28,8 @@ import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
 import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.api.AwakeningFormRegistry;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
+import net.sweenus.simplyswords.api.render.ObserverStatusVisualShape;
+import net.sweenus.simplyswords.api.render.ObserverStatusVisualStyle;
 import net.sweenus.simplyswords.client.api.ObserverStatusEffectClientApi;
 import net.sweenus.simplyswords.client.renderer.*;
 import net.sweenus.simplyswords.client.renderer.model.BattleStandardDarkModel;
@@ -118,6 +120,9 @@ public class SimplySwords {
         });
         SimplySwordsNetwork.init();
         SimplySwordsAPI.registerObserverSyncedStatusEffect(EffectRegistry.SHADOW_DANCE_ID);
+        SimplySwordsAPI.registerObserverStatusVisual(EffectRegistry.BLOOD_PLAGUE_ID,
+                new ObserverStatusVisualStyle(ObserverStatusVisualShape.GROUND_RING,
+                        0x39030B, 0xF02B3D, 1, 1.0F));
         ObserverStatusEffectSyncManager.init();
         ShadowstingShadowDanceManager.init();
         SimplySwordsCommands.register();
@@ -238,6 +243,9 @@ public class SimplySwords {
             EntityRendererRegistry.register(EntityRegistry.VERDANT_TRAIL_VISUAL, VerdantTrailVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.FAULTLINE_SPIKE_VISUAL, FaultlineSpikeVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.LIVYATAN_WAVE_VISUAL, LivyatanWaveVisualEntityRenderer::new);
+            EntityRendererRegistry.register(EntityRegistry.BLOODWAKE_BLADE_VISUAL, BloodwakeBladeVisualEntityRenderer::new);
+            EntityRendererRegistry.register(EntityRegistry.BLOOD_PLAGUE_SPREAD_VISUAL, BloodPlagueSpreadVisualEntityRenderer::new);
+            EntityRendererRegistry.register(EntityRegistry.BLOOD_STAIN_VISUAL, BloodStainVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.MOLTEN_RUPTURE_VISUAL, MoltenRuptureVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.CAELESTIS_BREACH_VISUAL, CaelestisBreachVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.SOUL_PYRE_VISUAL, SoulPyreVisualEntityRenderer::new);

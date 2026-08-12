@@ -31,6 +31,12 @@ public abstract class ServerWorldMixin {
         if (StormscaleLightningRodManager.hasActive(world)) {
             StormscaleLightningRodManager.tick(world);
         }
+        if (BloodwakeAbilityManager.hasActive(world)) {
+            BloodwakeAbilityManager.tick(world);
+        }
+        if (BloodStainManager.hasActive(world)) {
+            BloodStainManager.tick(world);
+        }
         if (ArcanethystAssaultManager.hasActive(world)) {
             ArcanethystAssaultManager.tick(world);
         }

@@ -28,6 +28,7 @@ public final class UniqueTooltipExportController {
             spec("arcanethyst", ItemsRegistry.ARCANETHYST::get),
             spec("bramblethorn", ItemsRegistry.BRAMBLETHORN::get),
             spec("brimstone_claymore", ItemsRegistry.BRIMSTONE_CLAYMORE::get),
+            spec("bloodwake", ItemsRegistry.BLOODWAKE::get),
             spec("caelestis", ItemsRegistry.CAELESTIS::get),
             spec("chompolotl", ItemsRegistry.CHOMPOLOTL::get),
             spec("decaying_relic", ItemsRegistry.DECAYING_RELIC::get, 0),

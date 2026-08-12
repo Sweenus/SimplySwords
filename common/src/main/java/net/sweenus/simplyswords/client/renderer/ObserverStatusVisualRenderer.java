@@ -4,7 +4,9 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.render.LightmapTextureManager;
 import net.minecraft.client.render.OverlayTexture;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
@@ -33,6 +35,8 @@ import java.util.Optional;
 public final class ObserverStatusVisualRenderer {
 
     private static final Vec3d UP = new Vec3d(0.0, 1.0, 0.0);
+    private static final Identifier WHITE_TEXTURE = new Identifier("minecraft", "textures/misc/white.png");
+    private static final int GROUND_RING_SEGMENTS = 48;
 
     private ObserverStatusVisualRenderer() {
     }
@@ -51,8 +55,70 @@ public final class ObserverStatusVisualRenderer {
                 case LIGHTNING_ROD -> renderRod(entity, tickDelta, style, matrices, consumers, light);
                 case ORBITING_GLYPHS -> renderOrbitingGlyphs(entity, tickDelta, style, stacks, matrices, consumers);
                 case PARCHMENT_BAND -> renderParchmentBand(entity, tickDelta, style, matrices, consumers, light);
+                case GROUND_RING -> renderGroundRing(entity, tickDelta, style, matrices, consumers);
                 default -> renderStatic(entity, tickDelta, style, matrices, consumers);
             }
+        }
+    }
+
+    private static void renderGroundRing(LivingEntity entity, float tickDelta, ObserverStatusVisualStyle style,
+                                         MatrixStack matrices, VertexConsumerProvider consumers) {
+        float age = entity.age + tickDelta;
+        float pulse = 0.96F + MathHelper.sin(age * 0.09F) * 0.04F;
+        float radius = Math.max(0.5F, entity.getWidth() * 0.82F) * style.scale() * pulse;
+        float width = Math.max(0.03F, radius * 0.065F);
+        float rotation = age * 0.006F + (entity.getId() & 31) * 0.17F;
+        Matrix4f matrix = matrices.peek().getPositionMatrix();
+
+        VertexConsumer dark = consumers.getBuffer(RenderLayer.getDebugQuads());
+        drawGroundRing(dark, matrix, radius, width, 0.055F, rotation,
+                style.primaryColor(), 178, false);
+
+        VertexConsumer glow = consumers.getBuffer(RenderLayer.getEntityTranslucentEmissive(WHITE_TEXTURE));
+        drawGroundRing(glow, matrix, radius, width * 0.56F, 0.061F, -rotation,
+                style.coreColor(), 205, true);
+    }
+
+    private static void drawGroundRing(VertexConsumer vertices, Matrix4f matrix,
+                                       float radius, float width, float y, float rotation,
+                                       int color, int alpha, boolean emissive) {
+        float inner = Math.max(0.01F, radius - width);
+        int red = color >> 16 & 0xFF;
+        int green = color >> 8 & 0xFF;
+        int blue = color & 0xFF;
+        for (int segment = 0; segment < GROUND_RING_SEGMENTS; segment++) {
+            float start = rotation + MathHelper.TAU * segment / GROUND_RING_SEGMENTS;
+            float end = rotation + MathHelper.TAU * (segment + 1) / GROUND_RING_SEGMENTS;
+            float outerStartX = MathHelper.cos(start) * radius;
+            float outerStartZ = MathHelper.sin(start) * radius;
+            float outerEndX = MathHelper.cos(end) * radius;
+            float outerEndZ = MathHelper.sin(end) * radius;
+            float innerEndX = MathHelper.cos(end) * inner;
+            float innerEndZ = MathHelper.sin(end) * inner;
+            float innerStartX = MathHelper.cos(start) * inner;
+            float innerStartZ = MathHelper.sin(start) * inner;
+            ringVertex(vertices, matrix, outerStartX, y, outerStartZ, red, green, blue, alpha, emissive);
+            ringVertex(vertices, matrix, outerEndX, y, outerEndZ, red, green, blue, alpha, emissive);
+            ringVertex(vertices, matrix, innerEndX, y, innerEndZ, red, green, blue, alpha, emissive);
+            ringVertex(vertices, matrix, innerStartX, y, innerStartZ, red, green, blue, alpha, emissive);
+            ringVertex(vertices, matrix, innerStartX, y, innerStartZ, red, green, blue, alpha, emissive);
+            ringVertex(vertices, matrix, innerEndX, y, innerEndZ, red, green, blue, alpha, emissive);
+            ringVertex(vertices, matrix, outerEndX, y, outerEndZ, red, green, blue, alpha, emissive);
+            ringVertex(vertices, matrix, outerStartX, y, outerStartZ, red, green, blue, alpha, emissive);
+        }
+    }
+
+    private static void ringVertex(VertexConsumer vertices, Matrix4f matrix,
+                                   float x, float y, float z,
+                                   int red, int green, int blue, int alpha, boolean emissive) {
+        var vertex = vertices.vertex(matrix, x, y, z).color(red, green, blue, alpha);
+        if (emissive) {
+            vertex.texture(0.5F, 0.5F)
+                    .overlay(OverlayTexture.DEFAULT_UV)
+                    .light(LightmapTextureManager.MAX_LIGHT_COORDINATE)
+                    .normal(0.0F, 1.0F, 0.0F);
+        } else {
+            vertex.light(LightmapTextureManager.MAX_LIGHT_COORDINATE);
         }
     }
 

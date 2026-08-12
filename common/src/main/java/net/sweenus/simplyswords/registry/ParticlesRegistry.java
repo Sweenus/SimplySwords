@@ -23,6 +23,11 @@ public class ParticlesRegistry {
             () -> new DefaultParticleType(true) {}
     );
 
+    public static final RegistrySupplier<DefaultParticleType> BLOOD_SPRAY = PARTICLES.register(
+            "blood_spray",
+            () -> new DefaultParticleType(true) {}
+    );
+
     public static void registerParticles() {
         PARTICLES.register();
     }

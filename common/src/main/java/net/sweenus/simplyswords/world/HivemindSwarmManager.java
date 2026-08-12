@@ -14,11 +14,15 @@ import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.Box;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.SimplySwordsBeeEntity;
 import net.sweenus.simplyswords.registry.EntityRegistry;
+import net.sweenus.simplyswords.registry.ParticlesRegistry;
+import net.sweenus.simplyswords.registry.SoundRegistry;
+import net.sweenus.simplyswords.util.BleedHelper;
 import net.sweenus.simplyswords.util.HelperMethods;
 
 import java.util.*;
@@ -54,6 +58,43 @@ public final class HivemindSwarmManager {
 
     public static void activate(ServerWorld world, LivingEntity actor) {
         activate(world, actor, getStingDamage(actor));
+    }
+
+    public static boolean activateBloodFlies(ServerWorld world, LivingEntity actor) {
+        int flyCount = Math.max(1, Config.uniqueEffects.bloodwake.bloodFlyCount);
+        int contacts = Math.max(1, Config.uniqueEffects.bloodwake.bloodFlyContacts);
+        long now = world.getTime();
+        long expiry = now + Math.max(20, Config.uniqueEffects.bloodwake.bloodFlyLifetime);
+        int spawned = 0;
+        for (int i = 0; i < flyCount; i++) {
+            double angle = MathHelper.TAU * i / flyCount;
+            Vec3d spawnPos = actor.getPos().add(Math.cos(angle) * 0.8,
+                    1.15 + (i % 3) * 0.13, Math.sin(angle) * 0.8);
+            SimplySwordsBeeEntity fly = EntityRegistry.SIMPLYBEEENTITY.get().spawn(world, actor.getBlockPos(), SpawnReason.MOB_SUMMONED);
+            if (fly == null) {
+                continue;
+            }
+            fly.refreshPositionAndAngles(spawnPos.x, spawnPos.y, spawnPos.z, actor.getYaw(), 0.0F);
+            fly.setOwner(actor);
+            fly.setSwarmAnchorUuid(actor.getUuid());
+            fly.setHivemindSwarmBee(true);
+            fly.setBloodwakeFly(true);
+            fly.setSwarmStingsRemaining(contacts);
+            fly.setSwarmStingDamage((float) Math.max(1.0, HelperMethods.getEntityAttackDamage(actor)));
+            fly.setSwarmExpiryTick(expiry);
+            fly.setSwarmNextStingTick(now + i % Math.max(1, Config.uniqueEffects.bloodwake.bloodFlyContactInterval));
+            fly.setSwarmNextDiveTick(now + randomDiveDelay(world));
+            fly.setInvulnerable(true);
+            fly.setNoGravity(true);
+            fly.setAiDisabled(true);
+            playBeeSound(fly, SoundEvents.ENTITY_BEE_LOOP_AGGRESSIVE, 0.08F, 0.72F);
+            spawned++;
+        }
+        if (spawned > 0) {
+            world.spawnParticles(ParticlesRegistry.DRIPPING_BLOOD.get(), actor.getX(), actor.getBodyY(0.6), actor.getZ(), 28, 0.75, 0.45, 0.75, 0.08);
+            world.playSound(null, actor.getBlockPos(), SoundRegistry.MAGIC_SWORD_ATTACK_WITH_BLOOD_01.get(), SoundCategory.PLAYERS, 0.68F, 0.62F);
+        }
+        return spawned > 0;
     }
 
     private static void activate(ServerWorld world, LivingEntity actor, float stingDamage) {
@@ -110,7 +151,7 @@ public final class HivemindSwarmManager {
             LivingEntity owner = getOwner(world, bee);
             LivingEntity anchor = getAnchor(world, bee, owner);
             LivingEntity target = getTarget(world, bee);
-            if (owner == null || anchor == null || !isValidTarget(owner, anchor, target)) {
+            if (owner == null || anchor == null || !isValidTarget(bee, owner, anchor, target)) {
                 bee.setSwarmTargetUuid(null);
                 bee.clearSwarmPass();
                 bee.clearSwarmLineup();
@@ -132,13 +173,13 @@ public final class HivemindSwarmManager {
             }
 
             LivingEntity target = getTarget(world, bee);
-            if (!isValidTarget(owner, anchor, target)) {
+            if (!isValidTarget(bee, owner, anchor, target)) {
                 if (target != null) {
                     targetCounts.computeIfPresent(target.getUuid(), (ignored, count) -> Math.max(0, count - 1));
                 }
                 bee.clearSwarmPass();
                 bee.clearSwarmLineup();
-                target = selectTarget(world, owner, anchor, targetCounts);
+                target = selectTarget(world, bee, owner, anchor, targetCounts);
                 bee.setSwarmTargetUuid(target == null ? null : target.getUuid());
                 if (target != null) {
                     targetCounts.merge(target.getUuid(), 1, Integer::sum);
@@ -207,22 +248,27 @@ public final class HivemindSwarmManager {
         return entity instanceof LivingEntity livingEntity ? livingEntity : null;
     }
 
-    private static boolean isValidTarget(LivingEntity owner, LivingEntity anchor, LivingEntity target) {
+    private static boolean isValidTarget(SimplySwordsBeeEntity bee, LivingEntity owner, LivingEntity anchor, LivingEntity target) {
+        double radius = bee.isBloodwakeFly()
+                ? Math.max(1.0, Config.uniqueEffects.bloodwake.targetingRadius)
+                : Math.max(1.0, Config.uniqueEffects.hiveheart.swarmRadius);
         return target != null
                 && target.isAlive()
                 && target != owner
                 && target != anchor
-                && target.squaredDistanceTo(anchor) <= Config.uniqueEffects.hiveheart.swarmRadius * Config.uniqueEffects.hiveheart.swarmRadius
+                && target.squaredDistanceTo(anchor) <= radius * radius
                 && HelperMethods.checkAbilityTarget(target, owner);
     }
 
-    private static LivingEntity selectTarget(ServerWorld world, LivingEntity owner, LivingEntity anchor, Map<UUID, Integer> targetCounts) {
-        double radius = Math.max(1.0, Config.uniqueEffects.hiveheart.swarmRadius);
+    private static LivingEntity selectTarget(ServerWorld world, SimplySwordsBeeEntity bee, LivingEntity owner, LivingEntity anchor, Map<UUID, Integer> targetCounts) {
+        double radius = bee.isBloodwakeFly()
+                ? Math.max(1.0, Config.uniqueEffects.bloodwake.targetingRadius)
+                : Math.max(1.0, Config.uniqueEffects.hiveheart.swarmRadius);
         Box searchBox = anchor.getBoundingBox().expand(radius, radius * 0.5, radius);
         LivingEntity selected = null;
         int selectedCount = Integer.MAX_VALUE;
         double selectedDistance = Double.MAX_VALUE;
-        for (LivingEntity candidate : world.getEntitiesByClass(LivingEntity.class, searchBox, candidate -> isValidTarget(owner, anchor, candidate))) {
+        for (LivingEntity candidate : world.getEntitiesByClass(LivingEntity.class, searchBox, candidate -> isValidTarget(bee, owner, anchor, candidate))) {
             int count = targetCounts.getOrDefault(candidate.getUuid(), 0);
             double distance = candidate.squaredDistanceTo(anchor);
             if (count < selectedCount || (count == selectedCount && distance < selectedDistance)) {
@@ -406,6 +452,21 @@ public final class HivemindSwarmManager {
             return;
         }
 
+        if (bee.isBloodwakeFly()) {
+            BleedHelper.apply(target, owner, bee.getSwarmStingDamage());
+            bee.decrementSwarmStingsRemaining();
+            bee.setSwarmPassStung(true);
+            bee.setSwarmNextStingTick(world.getTime() + Math.max(1, Config.uniqueEffects.bloodwake.bloodFlyContactInterval));
+            Vec3d pos = target.getPos().add(0.0, Math.max(0.35, target.getHeight() * 0.55), 0.0);
+            world.spawnParticles(ParticlesRegistry.DRIPPING_BLOOD.get(), pos.x, pos.y, pos.z, 7, 0.22, 0.2, 0.22, 0.07);
+            world.spawnParticles(ParticleTypes.ANGRY_VILLAGER, pos.x, pos.y, pos.z, 1, 0.12, 0.1, 0.12, 0.01);
+            playBeeSound(bee, SoundEvents.ENTITY_BEE_STING, 0.16F, 0.78F);
+            if (bee.getSwarmStingsRemaining() <= 0) {
+                bee.discard();
+            }
+            return;
+        }
+
         int iframes = target.timeUntilRegen;
         Vec3d velocity = target.getVelocity();
         target.timeUntilRegen = 0;
@@ -432,7 +493,13 @@ public final class HivemindSwarmManager {
     }
 
     private static void applySlowness(ServerWorld world, Map<UUID, Integer> targetCounts) {
-        for (Map.Entry<UUID, Integer> entry : targetCounts.entrySet()) {
+        Map<UUID, Integer> hivemindCounts = new HashMap<>();
+        for (SimplySwordsBeeEntity bee : getSwarmBees(world)) {
+            if (!bee.isBloodwakeFly() && bee.getSwarmTargetUuid() != null) {
+                hivemindCounts.merge(bee.getSwarmTargetUuid(), 1, Integer::sum);
+            }
+        }
+        for (Map.Entry<UUID, Integer> entry : hivemindCounts.entrySet()) {
             int beeCount = entry.getValue();
             if (beeCount <= 0) {
                 continue;

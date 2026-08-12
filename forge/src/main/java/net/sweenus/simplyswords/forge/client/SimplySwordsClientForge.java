@@ -9,6 +9,7 @@ import net.minecraftforge.client.event.RegisterParticleProvidersEvent;
 import net.minecraft.client.gui.screen.ingame.HandledScreens;
 import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.client.particle.CustomBubbleParticle;
+import net.sweenus.simplyswords.client.particle.BloodSprayParticle;
 import net.sweenus.simplyswords.client.particle.DrippingBloodParticle;
 import net.sweenus.simplyswords.client.screen.RunicForgeScreen;
 import net.sweenus.simplyswords.client.util.OracleIndexUtils;
@@ -43,6 +44,12 @@ public class SimplySwordsClientForge {
             event.registerSpriteSet(
                     drippingBlood,
                     DrippingBloodParticle.Factory::new
+            );
+        });
+        ParticlesRegistry.BLOOD_SPRAY.ifPresent(bloodSpray -> {
+            event.registerSpriteSet(
+                    bloodSpray,
+                    BloodSprayParticle.Factory::new
             );
         });
     }

@@ -396,6 +396,33 @@ public class EntityRegistry {
                     .build(new Identifier(SimplySwords.MOD_ID, "livyatan_wave_visual").toString())
     );
 
+    public static final RegistrySupplier<EntityType<BloodwakeBladeVisualEntity>> BLOODWAKE_BLADE_VISUAL = ENTITIES.register(
+            "bloodwake_blade_visual",
+            () -> EntityType.Builder.<BloodwakeBladeVisualEntity>create(BloodwakeBladeVisualEntity::new, SpawnGroup.MISC)
+                    .setDimensions(0.75F, 2.5F)
+                    .maxTrackingRange(96)
+                    .trackingTickInterval(1)
+                    .build(new Identifier(SimplySwords.MOD_ID, "bloodwake_blade_visual").toString())
+    );
+
+    public static final RegistrySupplier<EntityType<BloodPlagueSpreadVisualEntity>> BLOOD_PLAGUE_SPREAD_VISUAL = ENTITIES.register(
+            "blood_plague_spread_visual",
+            () -> EntityType.Builder.<BloodPlagueSpreadVisualEntity>create(BloodPlagueSpreadVisualEntity::new, SpawnGroup.MISC)
+                    .setDimensions(0.35F, 0.35F)
+                    .maxTrackingRange(96)
+                    .trackingTickInterval(1)
+                    .build(new Identifier(SimplySwords.MOD_ID, "blood_plague_spread_visual").toString())
+    );
+
+    public static final RegistrySupplier<EntityType<BloodStainVisualEntity>> BLOOD_STAIN_VISUAL = ENTITIES.register(
+            "blood_stain_visual",
+            () -> EntityType.Builder.<BloodStainVisualEntity>create(BloodStainVisualEntity::new, SpawnGroup.MISC)
+                    .setDimensions(0.35F, 0.35F)
+                    .maxTrackingRange(128)
+                    .trackingTickInterval(1)
+                    .build(new Identifier(SimplySwords.MOD_ID, "blood_stain_visual").toString())
+    );
+
     public static final RegistrySupplier<EntityType<MoltenRuptureVisualEntity>> MOLTEN_RUPTURE_VISUAL = ENTITIES.register(
             "molten_rupture_visual",
             () -> EntityType.Builder.<MoltenRuptureVisualEntity>create(MoltenRuptureVisualEntity::new, SpawnGroup.MISC)

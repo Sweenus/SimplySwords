@@ -4,5 +4,6 @@ public enum ObserverStatusVisualShape {
     STATIC_STREAKS,
     LIGHTNING_ROD,
     ORBITING_GLYPHS,
-    PARCHMENT_BAND
+    PARCHMENT_BAND,
+    GROUND_RING
 }

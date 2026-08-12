@@ -23,6 +23,7 @@ import java.util.UUID;
 
 public class SimplySwordsBeeEntity extends BeeEntity implements Tameable {
     private static final TrackedData<Boolean> HIVEMIND_SWARM = DataTracker.registerData(SimplySwordsBeeEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+    private static final TrackedData<Boolean> BLOODWAKE_FLY = DataTracker.registerData(SimplySwordsBeeEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
     public UUID ownerUuid;
     public static int lifespan = 200;
     private UUID swarmTargetUuid;
@@ -49,6 +50,7 @@ public class SimplySwordsBeeEntity extends BeeEntity implements Tameable {
     protected void initDataTracker() {
         super.initDataTracker();
         this.dataTracker.startTracking(HIVEMIND_SWARM, false);
+        this.dataTracker.startTracking(BLOODWAKE_FLY, false);
     }
 
     public static DefaultAttributeContainer.Builder createSimplyBeeAttributes() {
@@ -145,6 +147,14 @@ public class SimplySwordsBeeEntity extends BeeEntity implements Tameable {
             this.experiencePoints = 0;
             this.setCanPickUpLoot(false);
         }
+    }
+
+    public boolean isBloodwakeFly() {
+        return this.dataTracker.get(BLOODWAKE_FLY);
+    }
+
+    public void setBloodwakeFly(boolean bloodwakeFly) {
+        this.dataTracker.set(BLOODWAKE_FLY, bloodwakeFly);
     }
 
     @Override
@@ -288,6 +298,7 @@ public class SimplySwordsBeeEntity extends BeeEntity implements Tameable {
             this.ownerUuid = nbt.getUuid("owner_uuid");
         }
         this.setHivemindSwarmBee(nbt.getBoolean("hivemind_swarm"));
+        this.setBloodwakeFly(nbt.getBoolean("bloodwake_fly"));
         if (nbt.containsUuid("swarm_target_uuid")) {
             this.swarmTargetUuid = nbt.getUuid("swarm_target_uuid");
         }
@@ -336,6 +347,7 @@ public class SimplySwordsBeeEntity extends BeeEntity implements Tameable {
             nbt.putUuid("owner_uuid", this.ownerUuid);
         }
         nbt.putBoolean("hivemind_swarm", this.isHivemindSwarmBee());
+        nbt.putBoolean("bloodwake_fly", this.isBloodwakeFly());
         if (this.swarmTargetUuid != null) {
             nbt.putUuid("swarm_target_uuid", this.swarmTargetUuid);
         }

@@ -9,6 +9,7 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallba
 import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
 import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.client.particle.CustomBubbleParticle;
+import net.sweenus.simplyswords.client.particle.BloodSprayParticle;
 import net.sweenus.simplyswords.client.particle.DrippingBloodParticle;
 import net.sweenus.simplyswords.client.screen.RunicForgeScreen;
 import net.sweenus.simplyswords.client.tooltip.UniqueTooltipExportController;
@@ -43,8 +44,12 @@ public class SimplySwordsClientFabric implements ClientModInitializer {
         ParticleProviderRegistry.register(
                 ParticlesRegistry.DRIPPING_BLOOD.get(),
                 DrippingBloodParticle.Factory::new);
+        ParticleProviderRegistry.register(
+                ParticlesRegistry.BLOOD_SPRAY.get(),
+                BloodSprayParticle.Factory::new);
 
         ParticleFactoryRegistry.getInstance().register(ParticlesRegistry.CUSTOM_BUBBLE.get(), CustomBubbleParticle.Factory::new);
         ParticleFactoryRegistry.getInstance().register(ParticlesRegistry.DRIPPING_BLOOD.get(), DrippingBloodParticle.Factory::new);
+        ParticleFactoryRegistry.getInstance().register(ParticlesRegistry.BLOOD_SPRAY.get(), BloodSprayParticle.Factory::new);
     }
 }

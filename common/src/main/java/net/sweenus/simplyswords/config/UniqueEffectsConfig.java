@@ -42,6 +42,7 @@ public class UniqueEffectsConfig extends Config {
     public ShadowstingSwordItem.EffectSettings shadowsting = new ShadowstingSwordItem.EffectSettings();
     public StormbringerSwordItem.EffectSettings stormbringer = new StormbringerSwordItem.EffectSettings();
     public StormscaleSwordItem.EffectSettings stormscale = new StormscaleSwordItem.EffectSettings();
+    public BloodwakeSwordItem.EffectSettings bloodwake = new BloodwakeSwordItem.EffectSettings();
     public EmberlashSwordItem.EffectSettings emberlash = new EmberlashSwordItem.EffectSettings();
     public LichbladeSwordItem.EffectSettings lichblade = new LichbladeSwordItem.EffectSettings();
     public SoulkeeperSwordItem.EffectSettings    soulkeeper = new SoulkeeperSwordItem.EffectSettings();

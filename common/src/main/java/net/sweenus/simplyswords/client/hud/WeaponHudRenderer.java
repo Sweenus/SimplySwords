@@ -33,6 +33,9 @@ public final class WeaponHudRenderer {
     private static final int STORM_CHARGE_COLOR = 0xFF83E8FF;
     private static final int STORM_CHARGE_EMPTY_COLOR = 0x66112B42;
     private static final int STORM_CHARGE_BORDER_COLOR = 0xCC08263D;
+    private static final int BLOOD_FRENZY_COLOR = 0xFFE12A42;
+    private static final int BLOOD_FRENZY_EMPTY_COLOR = 0x66520B18;
+    private static final int BLOOD_FRENZY_BORDER_COLOR = 0xCC26030B;
     private static final int HEAT_BAR_WIDTH = 100;
     private static final int HEAT_BAR_HEIGHT = 8;
     private static final int HEAT_YELLOW_COLOR = 0xFFFFD52A;
@@ -146,6 +149,14 @@ public final class WeaponHudRenderer {
             return;
         }
         heatDisplayInitialized = false;
+        ItemStack bloodwake = selectBloodwake(client);
+        if (!bloodwake.isEmpty()) {
+            int stacks = ComponentTypeRegistry.STORED_CHARGE.getOrDefault(bloodwake, StoredChargeComponent.DEFAULT).charge();
+            renderChargePips(context, client, stacks, 5, BLOOD_FRENZY_COLOR,
+                    BLOOD_FRENZY_EMPTY_COLOR, BLOOD_FRENZY_BORDER_COLOR,
+                    Text.translatable("hud.simplyswords.bloodwake_frenzy", Math.min(stacks, 5), 5).getString());
+            return;
+        }
         if (stack.isOf(ItemsRegistry.SOULSTEALER.get())) {
             int stacks = ComponentTypeRegistry.STORED_CHARGE.getOrDefault(stack, StoredChargeComponent.DEFAULT).charge();
             renderChargePips(context, client, stacks, Math.max(1, Config.uniqueEffects.soulstealer.maxStacks), SOUL_DEBT_COLOR, SOUL_DEBT_EMPTY_COLOR, SOUL_DEBT_BORDER_COLOR);
@@ -155,6 +166,25 @@ public final class WeaponHudRenderer {
             int charges = ComponentTypeRegistry.PARRY.getOrDefault(stack, ParryComponent.DEFAULT).stormCharges();
             renderChargePips(context, client, charges, Math.max(1, Config.uniqueEffects.stormbringer.maxStormCharges), STORM_CHARGE_COLOR, STORM_CHARGE_EMPTY_COLOR, STORM_CHARGE_BORDER_COLOR);
         }
+    }
+
+    private static ItemStack selectBloodwake(MinecraftClient client) {
+        if (client.player == null) {
+            return ItemStack.EMPTY;
+        }
+        ItemStack main = client.player.getMainHandStack();
+        ItemStack off = client.player.getOffHandStack();
+        boolean mainBloodwake = main.isOf(ItemsRegistry.BLOODWAKE.get());
+        boolean offBloodwake = off.isOf(ItemsRegistry.BLOODWAKE.get());
+        if (!mainBloodwake) {
+            return offBloodwake ? off : ItemStack.EMPTY;
+        }
+        if (!offBloodwake) {
+            return main;
+        }
+        int mainStacks = ComponentTypeRegistry.STORED_CHARGE.getOrDefault(main, StoredChargeComponent.DEFAULT).charge();
+        int offStacks = ComponentTypeRegistry.STORED_CHARGE.getOrDefault(off, StoredChargeComponent.DEFAULT).charge();
+        return mainStacks >= offStacks ? main : off;
     }
 
     private static ItemStack selectMoltenEdge(MinecraftClient client) {
@@ -188,6 +218,12 @@ public final class WeaponHudRenderer {
     }
 
     private static void renderChargePips(DrawContext context, MinecraftClient client, int stacks, int maxStacks, int filledColor, int emptyColor, int borderColor) {
+        renderChargePips(context, client, stacks, maxStacks, filledColor, emptyColor, borderColor,
+                Math.min(stacks, maxStacks) + "/" + maxStacks);
+    }
+
+    private static void renderChargePips(DrawContext context, MinecraftClient client, int stacks, int maxStacks,
+                                         int filledColor, int emptyColor, int borderColor, String label) {
         if (stacks <= 0) {
             return;
         }
@@ -205,7 +241,6 @@ public final class WeaponHudRenderer {
             context.drawBorder(pipX - 1, y - 1, PIP_SIZE + 2, PIP_SIZE + 2, borderColor);
         }
 
-        String label = clampedStacks + "/" + maxStacks;
         int labelX = -client.textRenderer.getWidth(label) / 2;
         context.drawTextWithShadow(client.textRenderer, label, labelX, y - 11, filledColor);
         context.getMatrices().pop();

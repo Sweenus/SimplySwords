@@ -8,6 +8,7 @@ import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
 import net.sweenus.simplyswords.effect.instance.SimplySwordsStatusEffectInstance;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
+import net.sweenus.simplyswords.world.BloodwakeAbilityManager;
 
 public class BleedEffect extends StatusEffect {
     public BleedEffect(StatusEffectCategory statusEffectCategory, int color) {
@@ -27,7 +28,9 @@ public class BleedEffect extends StatusEffect {
             DamageSource sourceDamage = source == null ? livingEntity.getDamageSources().generic() : livingEntity.getDamageSources().indirectMagic(source, source);
             float tickDamage = Math.max(0.25F, totalDamage / 8.0F);
             livingEntity.timeUntilRegen = 0;
-            WeaponImplicitRegistry.runSuppressed(() -> HelperMethods.applyDamageWithoutKnockback(livingEntity, sourceDamage, tickDamage));
+            BloodwakeAbilityManager.runWithoutPlagueSpread(() ->
+                    WeaponImplicitRegistry.runSuppressed(() ->
+                            HelperMethods.applyDamageWithoutKnockback(livingEntity, sourceDamage, tickDamage)));
             WeaponImplicitRegistry.spawnBleedParticles(livingEntity, amplifier + 1, true);
         }
     }

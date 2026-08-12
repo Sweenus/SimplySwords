@@ -44,6 +44,7 @@ public class TransformationRegistry {
         SimplySwordsAPI.registerTransformation(Blocks.QUARTZ_BLOCK, new Identifier("simplyswords", "stars_edge"));
         SimplySwordsAPI.registerTransformation(Blocks.REDSTONE_LAMP, new Identifier("simplyswords", "storms_edge"));
         SimplySwordsAPI.registerTransformation(Blocks.LIGHTNING_ROD, new Identifier("simplyswords", "stormscale"));
+        SimplySwordsAPI.registerTransformation(Blocks.NETHER_WART_BLOCK, new Identifier("simplyswords", "bloodwake"));
     }
 
 }

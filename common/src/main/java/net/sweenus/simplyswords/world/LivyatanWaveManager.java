@@ -350,15 +350,15 @@ public final class LivyatanWaveManager {
         return 1.0F + c3 * p * p * p + c1 * p * p;
     }
 
-    private static double waveWidthBlocks() {
+    public static double waveWidthBlocks() {
         return Math.max(0.5, Config.uniqueEffects.livyatan.waveWidthBlocks);
     }
 
-    private static int visualLaneCount() {
+    public static int visualLaneCount() {
         return Math.max(1, (int) Math.ceil(waveWidthBlocks()));
     }
 
-    private static double visualLaneSpacing() {
+    public static double visualLaneSpacing() {
         return Math.max(0.1, 1.0 - VISUAL_LANE_OVERLAP);
     }
 

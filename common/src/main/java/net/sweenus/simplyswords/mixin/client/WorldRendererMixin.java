@@ -11,6 +11,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.client.renderer.ModernFieldRenderer;
+import net.sweenus.simplyswords.client.renderer.TerrainFieldOverlayRenderer;
 import net.sweenus.simplyswords.client.renderer.TargetHighlight;
 import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.config.Config;
@@ -38,6 +39,15 @@ import java.util.Set;
 
 @Mixin(WorldRenderer.class)
 public abstract class WorldRendererMixin {
+
+    @Inject(method = "render(Lnet/minecraft/client/util/math/MatrixStack;FJZLnet/minecraft/client/render/Camera;Lnet/minecraft/client/render/GameRenderer;Lnet/minecraft/client/render/LightmapTextureManager;Lorg/joml/Matrix4f;)V", at = @At("HEAD"))
+    private void simplyswords$beginTerrainOverlayFrame(MatrixStack worldMatrices, float tickDelta,
+                                                       long frameDeadline, boolean renderBlockOutline,
+                                                       Camera camera, GameRenderer gameRenderer,
+                                                       LightmapTextureManager lightmapTextureManager,
+                                                       Matrix4f projectionMatrix, CallbackInfo ci) {
+        TerrainFieldOverlayRenderer.beginWorldFrame();
+    }
 
     @Inject(method = "render(Lnet/minecraft/client/util/math/MatrixStack;FJZLnet/minecraft/client/render/Camera;Lnet/minecraft/client/render/GameRenderer;Lnet/minecraft/client/render/LightmapTextureManager;Lorg/joml/Matrix4f;)V", at = @At("TAIL"))
     private void simplyswords$renderFirstPersonImmolationField(MatrixStack worldMatrices, float tickDelta,
