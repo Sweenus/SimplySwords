@@ -49,6 +49,7 @@ public class RunicForgeScreenHandler extends ScreenHandler {
     private boolean committing;
     private ItemStack originalStack = ItemStack.EMPTY;
     private int originalLevel;
+    private Boolean previewThundering;
 
     public RunicForgeScreenHandler(int syncId, PlayerInventory inventory, PacketByteBuf buf) {
         this(syncId, inventory, buf.readBlockPos());
@@ -174,10 +175,7 @@ public class RunicForgeScreenHandler extends ScreenHandler {
         committing = true;
         try {
             refundExcessTablets();
-            ItemStack preview = previewInventory.getStack(0);
-            if (preview.isEmpty()) {
-                preview = buildConfiguredPreview(weapon);
-            }
+            ItemStack preview = buildConfiguredPreview(weapon);
             if (!preview.isEmpty()) {
                 committedStack = preview.copyWithCount(weapon.getCount());
                 targetLevel = AwakeningApi.getLevel(committedStack);
@@ -232,6 +230,7 @@ public class RunicForgeScreenHandler extends ScreenHandler {
         ItemStack weapon = forgeInventory.getStack(WEAPON_SLOT);
         if (weapon.isEmpty()) {
             previewInventory.setStack(0, ItemStack.EMPTY);
+            previewThundering = null;
             sendContentUpdates();
             return;
         }
@@ -241,6 +240,7 @@ public class RunicForgeScreenHandler extends ScreenHandler {
             previewInventory.setStack(0, editingLoaded
                     ? buildConfiguredPreview(weapon)
                     : weapon.copy());
+            previewThundering = owner.getWorld().isThundering();
             forgeInventory.markDirty();
         } finally {
             committing = false;
@@ -290,6 +290,26 @@ public class RunicForgeScreenHandler extends ScreenHandler {
             }
         }
         return preview;
+    }
+
+    @Override
+    public void sendContentUpdates() {
+        if (!owner.getWorld().isClient() && editingLoaded && !committing) {
+            boolean thundering = owner.getWorld().isThundering();
+            if (previewThundering == null || previewThundering != thundering) {
+                ItemStack weapon = forgeInventory.getStack(WEAPON_SLOT);
+                if (!weapon.isEmpty()) {
+                    committing = true;
+                    try {
+                        previewInventory.setStack(0, buildConfiguredPreview(weapon));
+                        previewThundering = thundering;
+                    } finally {
+                        committing = false;
+                    }
+                }
+            }
+        }
+        super.sendContentUpdates();
     }
 
     private GemPowerComponent identifyGem(ItemStack stack, PowerType type) {

@@ -571,6 +571,7 @@ public final class WeaponImplicitRegistry {
         registerPath("tempest", CHAKRAM);
         registerPath("flamewind", GLAIVE);
         registerPath("stormscale", GLAIVE);
+        registerPath("ionbound_stormscale", GLAIVE);
         registerPath("ribboncleaver", CLAYMORE);
         registerPath("magiscythe", SCYTHE);
         registerPath("magiblade", TWINBLADE);

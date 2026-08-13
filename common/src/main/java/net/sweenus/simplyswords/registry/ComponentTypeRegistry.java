@@ -24,6 +24,7 @@ public final class ComponentTypeRegistry {
     public static final StackComponentKey<RelocationComponent> RELOCATION = key("relocation", RelocationComponent.CODEC);
     public static final StackComponentKey<MoltenParticleComponent> MOLTEN_PARTICLE = key("molten_particle", MoltenParticleComponent.CODEC);
     public static final StackComponentKey<MoltenHeatComponent> MOLTEN_HEAT = key("molten_heat", MoltenHeatComponent.CODEC);
+    public static final StackComponentKey<IonCubeComponent> ION_CUBES = key("ion_cubes", IonCubeComponent.CODEC);
     public static final StackComponentKey<ParryComponent> PARRY = key("parry", ParryComponent.CODEC);
     public static final StackComponentKey<WeaponImplicitComponent> WEAPON_IMPLICIT = key("weapon_implicit", WeaponImplicitComponent.CODEC);
     public static final StackComponentKey<AwakeningComponent> AWAKENING = key("awakening", AwakeningComponent.CODEC);

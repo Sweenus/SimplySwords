@@ -17,6 +17,7 @@ public class EffectRegistry {
 
     public static final Identifier SHADOW_DANCE_ID = new Identifier(SimplySwords.MOD_ID, "shadow_dance");
     public static final Identifier BLOOD_PLAGUE_ID = new Identifier(SimplySwords.MOD_ID, "blood_plague");
+    public static final Identifier ION_PARALYSIS_ID = new Identifier(SimplySwords.MOD_ID, "ion_paralysis");
 
     public static final DeferredRegister<StatusEffect> EFFECT = DeferredRegister.create(SimplySwords.MOD_ID, RegistryKeys.STATUS_EFFECT);
 
@@ -148,6 +149,8 @@ public class EffectRegistry {
                             "5b780a25-d6cb-42a7-a55f-096bcdb4b67a",
                             0.10,
                             EntityAttributeModifier.Operation.MULTIPLY_TOTAL));
+    public static final RegistrySupplier<StatusEffect> ION_PARALYSIS = EFFECT.register(ION_PARALYSIS_ID.getPath(), () ->
+            new IonParalysisEffect(StatusEffectCategory.HARMFUL, 0x2F8CFF));
     public static final RegistrySupplier<StatusEffect> SUNDERED_ARMOR = EFFECT.register("sundered_armor", () ->
             new SunderedArmorEffect(StatusEffectCategory.HARMFUL, 0x7f7366));
     public static final RegistrySupplier<StatusEffect> IMPLICIT_HASTE = EFFECT.register("implicit_haste", () ->

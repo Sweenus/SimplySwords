@@ -634,6 +634,12 @@ public class ItemsRegistry {
                     LegacyWeaponAttributes.configure(new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).fireproof()
                             , (int) stormscale_damage_modifier, stormscale_attackspeed)));
 
+    public static final RegistrySupplier<IonboundStormscaleSwordItem> IONBOUND_STORMSCALE = ITEM.register("ionbound_stormscale", () ->
+            new IonboundStormscaleSwordItem(
+                    ModToolMaterial.UNIQUE,
+                    LegacyWeaponAttributes.configure(new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).fireproof()
+                            , (int) stormscale_damage_modifier, stormscale_attackspeed)));
+
     public static final RegistrySupplier<StormbringerSwordItem> STORMBRINGER = ITEM.register("stormbringer", () ->
             new StormbringerSwordItem(
                     ModToolMaterial.UNIQUE,

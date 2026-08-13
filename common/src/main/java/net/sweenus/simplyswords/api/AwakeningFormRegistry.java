@@ -24,6 +24,8 @@ public final class AwakeningFormRegistry {
     public static final Identifier LICHBLADE_ROUTE = new Identifier(SimplySwords.MOD_ID, "lichblade");
     public static final Identifier SUN_ROUTE = new Identifier(SimplySwords.MOD_ID, "sun");
     public static final Identifier HARBINGER_ROUTE = new Identifier(SimplySwords.MOD_ID, "harbinger");
+    public static final Identifier STORMSCALE_ROUTE = new Identifier(SimplySwords.MOD_ID, "stormscale");
+    public static final Identifier IONBOUND_ROUTE = new Identifier(SimplySwords.MOD_ID, "ionbound_stormscale");
 
     private static final Map<Item, AwakeningFormFamily> FAMILIES = new IdentityHashMap<>();
     private static boolean builtinsRegistered;
@@ -79,6 +81,26 @@ public final class AwakeningFormRegistry {
                                 "item.simplyswords.awakened_lichblade",
                                 AwakeningFormRarity.LEGENDARY,
                                 1.0F))
+                .build());
+
+        register(AwakeningFormFamily.builder(
+                        ItemsRegistry.STORMSCALE.get(),
+                        AwakeningProfile.DEFAULT,
+                        new Identifier(SimplySwords.MOD_ID, "stormscale"))
+                .basePresentation("item.simplyswords.stormscale", AwakeningFormRarity.UNIQUE, 0.0F)
+                .selectionLevel(4)
+                .route(STORMSCALE_ROUTE, new AwakeningFormStage(
+                        new Identifier(SimplySwords.MOD_ID, "awakened_stormscale"), 4,
+                        ItemsRegistry.STORMSCALE.get(), "item.simplyswords.stormscale",
+                        AwakeningFormRarity.UNIQUE, 0.0F))
+                .route(IONBOUND_ROUTE, new AwakeningFormStage(
+                        new Identifier(SimplySwords.MOD_ID, "ionbound_stormscale"), 4,
+                        ItemsRegistry.IONBOUND_STORMSCALE.get(), "item.simplyswords.ionbound_stormscale",
+                        AwakeningFormRarity.LEGENDARY, 1.0F))
+                .routeHandler(context -> context.world().isThundering() ? IONBOUND_ROUTE : STORMSCALE_ROUTE)
+                .routeTransitionHandler((context, currentRoute) ->
+                        STORMSCALE_ROUTE.equals(currentRoute) && context.world().isThundering()
+                                ? IONBOUND_ROUTE : currentRoute)
                 .build());
 
         register(AwakeningFormFamily.builder(
@@ -207,6 +229,14 @@ public final class AwakeningFormRegistry {
         Identifier route = getRoute(result)
                 .filter(family::containsRoute)
                 .orElse(null);
+        if (route != null && family.transitionHandler() != null
+                && player.getWorld() instanceof ServerWorld serverWorld) {
+            Identifier transitioned = family.transitionHandler().transitionRoute(new AwakeningFormContext(
+                    serverWorld, player, forgePos, sourceStack, originalLevel, targetLevel), route);
+            if (transitioned != null && family.containsRoute(transitioned)) {
+                route = transitioned;
+            }
+        }
         if (route == null) {
             if (!(player.getWorld() instanceof ServerWorld serverWorld)) return result;
             try {
@@ -281,6 +311,9 @@ public final class AwakeningFormRegistry {
         clearLegacyRoute(family, stack);
         if (stack.getItem() != family.baseItem()) {
             stack = copyToItem(stack, family.baseItem());
+        }
+        if (family.baseItem() == ItemsRegistry.STORMSCALE.get()) {
+            ComponentTypeRegistry.ION_CUBES.remove(stack);
         }
         AwakeningApi.setLevel(stack, targetLevel);
         clampDamage(stack);

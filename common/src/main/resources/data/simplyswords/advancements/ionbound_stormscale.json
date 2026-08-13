@@ -1,0 +1,38 @@
+{
+  "display": {
+    "icon": {
+      "item": "simplyswords:ionbound_stormscale"
+    },
+    "title": {
+      "translate": "advancements.simplyswords.ionbound_stormscale.title",
+      "with": []
+    },
+    "description": {
+      "translate": "advancements.simplyswords.find_unique.description",
+      "with": [
+        {
+          "translate": "item.simplyswords.ionbound_stormscale"
+        }
+      ]
+    },
+    "hidden": true,
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "parent": "simplyswords:stormscale",
+  "criteria": {
+    "requirement": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "simplyswords:ionbound_stormscale"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

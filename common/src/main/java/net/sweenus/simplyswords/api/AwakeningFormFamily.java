@@ -27,6 +27,7 @@ public final class AwakeningFormFamily {
     private final boolean persistentProgression;
     private final Map<Identifier, AwakeningFormRoute> routes;
     private final AwakeningFormHandler handler;
+    private final AwakeningFormTransitionHandler transitionHandler;
     private final Set<Item> members;
 
     private AwakeningFormFamily(Builder builder) {
@@ -48,6 +49,7 @@ public final class AwakeningFormFamily {
         } else {
             handler = builder.handler;
         }
+        transitionHandler = builder.transitionHandler;
 
         Set<Item> familyMembers = java.util.Collections.newSetFromMap(new IdentityHashMap<>());
         Set<Identifier> formIds = new HashSet<>();
@@ -97,6 +99,10 @@ public final class AwakeningFormFamily {
         return handler;
     }
 
+    public AwakeningFormTransitionHandler transitionHandler() {
+        return transitionHandler;
+    }
+
     public Set<Item> members() {
         return members;
     }
@@ -121,6 +127,7 @@ public final class AwakeningFormFamily {
         private final Map<Identifier, AwakeningFormRoute> routes = new LinkedHashMap<>();
         private final List<Item> aliases = new ArrayList<>();
         private AwakeningFormHandler handler;
+        private AwakeningFormTransitionHandler transitionHandler;
 
         private Builder(Item baseItem, AwakeningProfile profile, Identifier baseFormId) {
             this.baseItem = Objects.requireNonNull(baseItem, "baseItem");
@@ -175,6 +182,11 @@ public final class AwakeningFormFamily {
 
         public Builder routeHandler(AwakeningFormHandler handler) {
             this.handler = Objects.requireNonNull(handler, "handler");
+            return this;
+        }
+
+        public Builder routeTransitionHandler(AwakeningFormTransitionHandler handler) {
+            this.transitionHandler = Objects.requireNonNull(handler, "handler");
             return this;
         }
 

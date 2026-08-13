@@ -41,6 +41,7 @@ import net.sweenus.simplyswords.client.AbilityKeybindHandler;
 import net.sweenus.simplyswords.client.CaelestisBreachAmbience;
 import net.sweenus.simplyswords.client.LocalStormVisualManager;
 import net.sweenus.simplyswords.client.hud.WeaponHudRenderer;
+import net.sweenus.simplyswords.client.IonboundBeamClientState;
 import net.sweenus.simplyswords.command.SimplySwordsCommands;
 import net.sweenus.simplyswords.compat.MythicMetalsCompat;
 import net.sweenus.simplyswords.compat.bettercombat.BetterCombatCompat;
@@ -123,6 +124,10 @@ public class SimplySwords {
         SimplySwordsAPI.registerObserverStatusVisual(EffectRegistry.BLOOD_PLAGUE_ID,
                 new ObserverStatusVisualStyle(ObserverStatusVisualShape.GROUND_RING,
                         0x39030B, 0xF02B3D, 1, 1.0F));
+        SimplySwordsAPI.registerIncapacitatingStatusEffect(EffectRegistry.ION_PARALYSIS_ID);
+        SimplySwordsAPI.registerObserverStatusVisual(EffectRegistry.ION_PARALYSIS_ID,
+                new ObserverStatusVisualStyle(ObserverStatusVisualShape.STATIC_STREAKS,
+                        0x2F8CFF, 0xF7FDFF, 5, 1.0F));
         ObserverStatusEffectSyncManager.init();
         ShadowstingShadowDanceManager.init();
         SimplySwordsCommands.register();
@@ -191,6 +196,7 @@ public class SimplySwords {
             // Not a mixin on InGameHud#render: Forge 1.20.1 substitutes ForgeGui, which overrides
             // render without calling super, so such a mixin never runs on Forge.
             ClientGuiEvent.RENDER_HUD.register(WeaponHudRenderer::render);
+            IonboundBeamClientState.init();
             // Entity
             EntityRendererRegistry.register(EntityRegistry.BATTLESTANDARD, BattleStandardRenderer::new);
             EntityModelLayerRegistry.register(BATTLESTANDARD_MODEL, BattleStandardModel::getTexturedModelData);
@@ -231,6 +237,7 @@ public class SimplySwords {
             EntityRendererRegistry.register(EntityRegistry.MAGISPEAR_FALLING_SPEAR_VISUAL, MagispearFallingSpearVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.BRIMSTONE_CLAYMORE_VISUAL, BrimstoneClaymoreVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.STORMSCALE_ROD_VISUAL, StormscaleRodVisualEntityRenderer::new);
+            EntityRendererRegistry.register(EntityRegistry.IONBOUND_STORMSCALE_VISUAL, IonboundStormscaleVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.CHAIN_LIGHTNING_VISUAL, ChainLightningVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.LIGHTNING_PHENOMENON_VISUAL, LightningPhenomenonVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.ATMOSPHERIC_VISUAL, AtmosphericVisualEntityRenderer::new);

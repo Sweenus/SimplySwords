@@ -36,6 +36,8 @@ public class OracleIndexUtils {
         if (!isOracleScreen(MinecraftClient.getInstance().currentScreen)) {
             if (identifier.getPath().contains("lichblade")) // Lichblade variants are contained within one wiki entry
                 identifier = new Identifier("oracle_index", "books/simplyswords/unique-weapons/lichblade.mdx");
+            if (identifier.getPath().contains("ionbound_stormscale"))
+                identifier = new Identifier("oracle_index", "books/simplyswords/unique-weapons/stormscale.mdx");
 
             pendingEntry = identifier;
             pendingModId = modId;

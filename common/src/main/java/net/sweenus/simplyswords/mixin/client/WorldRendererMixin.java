@@ -13,6 +13,7 @@ import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.client.renderer.ModernFieldRenderer;
 import net.sweenus.simplyswords.client.renderer.TerrainFieldOverlayRenderer;
 import net.sweenus.simplyswords.client.renderer.TargetHighlight;
+import net.sweenus.simplyswords.client.render.IonDeferredRenderController;
 import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.WatcherBatEntity;
@@ -31,6 +32,7 @@ import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.HashSet;
@@ -47,6 +49,21 @@ public abstract class WorldRendererMixin {
                                                        LightmapTextureManager lightmapTextureManager,
                                                        Matrix4f projectionMatrix, CallbackInfo ci) {
         TerrainFieldOverlayRenderer.beginWorldFrame();
+        IonDeferredRenderController.beginFrame();
+    }
+
+    @Inject(method = "render(Lnet/minecraft/client/util/math/MatrixStack;FJZLnet/minecraft/client/render/Camera;Lnet/minecraft/client/render/GameRenderer;Lnet/minecraft/client/render/LightmapTextureManager;Lorg/joml/Matrix4f;)V",
+            slice = @Slice(from = @At(value = "INVOKE", target =
+                    "Lnet/minecraft/client/render/WorldRenderer;renderClouds(Lnet/minecraft/client/util/math/MatrixStack;Lorg/joml/Matrix4f;FDDD)V",
+                    ordinal = 0)),
+            at = @At(value = "FIELD", target =
+                    "Lnet/minecraft/client/render/WorldRenderer;transparencyPostProcessor:Lnet/minecraft/client/gl/PostEffectProcessor;", ordinal = 0))
+    private void simplyswords$drawDeferredIonFields(MatrixStack worldMatrices, float tickDelta,
+                                                    long frameDeadline, boolean renderBlockOutline,
+                                                    Camera camera, GameRenderer gameRenderer,
+                                                    LightmapTextureManager lightmapTextureManager,
+                                                    Matrix4f projectionMatrix, CallbackInfo ci) {
+        IonDeferredRenderController.drawDeferred();
     }
 
     @Inject(method = "render(Lnet/minecraft/client/util/math/MatrixStack;FJZLnet/minecraft/client/render/Camera;Lnet/minecraft/client/render/GameRenderer;Lnet/minecraft/client/render/LightmapTextureManager;Lorg/joml/Matrix4f;)V", at = @At("TAIL"))

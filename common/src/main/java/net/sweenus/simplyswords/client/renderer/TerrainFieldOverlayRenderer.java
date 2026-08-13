@@ -36,6 +36,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.World;
+import net.sweenus.simplyswords.client.render.IrisCompat;
 import net.sweenus.simplyswords.entity.BloodStainVisualEntity;
 
 import java.util.ArrayList;
@@ -47,7 +48,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.lang.reflect.Method;
 import java.util.function.Supplier;
 
 /**
@@ -188,11 +188,11 @@ public final class TerrainFieldOverlayRenderer {
         BLOOD_FACES_THIS_FRAME.clear();
         BLOOD_COMPONENTS_THIS_FRAME.clear();
         bloodFrame++;
-        skipBloodRenderThisFrame = IrisBridge.isRenderingShadowPass();
+        skipBloodRenderThisFrame = IrisCompat.isRenderingShadowPass();
     }
 
     public static boolean shouldSkipBloodRender() {
-        return skipBloodRenderThisFrame || IrisBridge.isRenderingShadowPass();
+        return skipBloodRenderThisFrame || IrisCompat.isRenderingShadowPass();
     }
 
     public void clear(UUID id) {
@@ -3527,42 +3527,4 @@ public final class TerrainFieldOverlayRenderer {
                                 double x1, float y1, double z1) {
     }
 
-    private static final class IrisBridge {
-        private static boolean initialized;
-        private static Object irisApi;
-        private static Method shadowPassMethod;
-
-        private IrisBridge() {
-        }
-
-        private static boolean isRenderingShadowPass() {
-            if (!initialized) {
-                initialize();
-            }
-            if (irisApi == null || shadowPassMethod == null) {
-                return false;
-            }
-            try {
-                return Boolean.TRUE.equals(shadowPassMethod.invoke(irisApi));
-            } catch (ReflectiveOperationException | RuntimeException ignored) {
-                irisApi = null;
-                shadowPassMethod = null;
-                return false;
-            }
-        }
-
-        private static void initialize() {
-            initialized = true;
-            try {
-                Class<?> apiClass = Class.forName(
-                        "net.irisshaders.iris.api.v0.IrisApi");
-                Method getInstance = apiClass.getMethod("getInstance");
-                irisApi = getInstance.invoke(null);
-                shadowPassMethod = apiClass.getMethod("isRenderingShadowPass");
-            } catch (ReflectiveOperationException | LinkageError ignored) {
-                irisApi = null;
-                shadowPassMethod = null;
-            }
-        }
-    }
 }
