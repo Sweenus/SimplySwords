@@ -288,6 +288,15 @@ public class EntityRegistry {
                     .build(Identifier.of(SimplySwords.MOD_ID, "stormscale_rod_visual").toString())
     );
 
+    public static final RegistrySupplier<EntityType<IonboundStormscaleVisualEntity>> IONBOUND_STORMSCALE_VISUAL = ENTITIES.register(
+            "ionbound_stormscale_visual",
+            () -> EntityType.Builder.<IonboundStormscaleVisualEntity>create(IonboundStormscaleVisualEntity::new, SpawnGroup.MISC)
+                    .dimensions(0.25F, 0.25F)
+                    .maxTrackingRange(160)
+                    .trackingTickInterval(1)
+                    .build(Identifier.of(SimplySwords.MOD_ID, "ionbound_stormscale_visual").toString())
+    );
+
     public static final RegistrySupplier<EntityType<ChainLightningVisualEntity>> CHAIN_LIGHTNING_VISUAL = ENTITIES.register(
             "chain_lightning_visual",
             () -> EntityType.Builder.<ChainLightningVisualEntity>create(ChainLightningVisualEntity::new, SpawnGroup.MISC)

@@ -39,6 +39,51 @@ public final class LightningRenderLayers {
                     .writeMaskState(RenderPhase.COLOR_MASK)
                     .build(false));
 
+    public static final RenderLayer DEFERRED_ION_FIELD = RenderLayer.of(
+            "simplyswords_deferred_ion_field",
+            VertexFormats.POSITION_COLOR,
+            VertexFormat.DrawMode.QUADS,
+            BUFFER_SIZE,
+            false,
+            true,
+            RenderLayer.MultiPhaseParameters.builder()
+                    .program(RenderPhase.COLOR_PROGRAM)
+                    .transparency(RenderPhase.TRANSLUCENT_TRANSPARENCY)
+                    .cull(RenderPhase.DISABLE_CULLING)
+                    .depthTest(RenderPhase.LEQUAL_DEPTH_TEST)
+                    .writeMaskState(RenderPhase.COLOR_MASK)
+                    .build(false));
+
+    public static final RenderLayer DEFERRED_ION_LIGHTNING = RenderLayer.of(
+            "simplyswords_deferred_ion_lightning",
+            VertexFormats.POSITION_COLOR,
+            VertexFormat.DrawMode.QUADS,
+            BUFFER_SIZE,
+            false,
+            true,
+            RenderLayer.MultiPhaseParameters.builder()
+                    .program(RenderPhase.COLOR_PROGRAM)
+                    .transparency(RenderPhase.TRANSLUCENT_TRANSPARENCY)
+                    .cull(RenderPhase.DISABLE_CULLING)
+                    .depthTest(RenderPhase.LEQUAL_DEPTH_TEST)
+                    .writeMaskState(RenderPhase.COLOR_MASK)
+                    .build(false));
+
+    public static final RenderLayer DEFERRED_ION_DEPTH = RenderLayer.of(
+            "simplyswords_deferred_ion_depth",
+            VertexFormats.POSITION_COLOR,
+            VertexFormat.DrawMode.QUADS,
+            BUFFER_SIZE,
+            false,
+            true,
+            RenderLayer.MultiPhaseParameters.builder()
+                    .program(RenderPhase.COLOR_PROGRAM)
+                    .transparency(RenderPhase.NO_TRANSPARENCY)
+                    .cull(RenderPhase.DISABLE_CULLING)
+                    .depthTest(RenderPhase.LEQUAL_DEPTH_TEST)
+                    .writeMaskState(RenderPhase.DEPTH_MASK)
+                    .build(false));
+
     private LightningRenderLayers() {
     }
 }

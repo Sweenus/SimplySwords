@@ -13,6 +13,7 @@ import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.client.renderer.ModernFieldRenderer;
 import net.sweenus.simplyswords.client.renderer.TerrainFieldOverlayRenderer;
 import net.sweenus.simplyswords.client.renderer.TargetHighlight;
+import net.sweenus.simplyswords.client.render.IonDeferredRenderController;
 import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.WatcherBatEntity;
@@ -31,6 +32,7 @@ import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.HashSet;
@@ -48,6 +50,20 @@ public abstract class WorldRendererMixin {
             Matrix4f positionMatrix, Matrix4f projectionMatrix,
             CallbackInfo ci) {
         TerrainFieldOverlayRenderer.beginWorldFrame();
+        IonDeferredRenderController.beginFrame();
+    }
+
+    @Inject(method = "render", slice = @Slice(from = @At(value = "INVOKE", target =
+            "Lnet/minecraft/client/render/WorldRenderer;renderClouds(Lnet/minecraft/client/util/math/MatrixStack;Lorg/joml/Matrix4f;Lorg/joml/Matrix4f;FDDD)V")),
+            at = @At(value = "FIELD", target =
+                    "Lnet/minecraft/client/render/WorldRenderer;transparencyPostProcessor:Lnet/minecraft/client/gl/PostEffectProcessor;", ordinal = 0))
+    private void simplyswords$drawDeferredIonFields(
+            RenderTickCounter tickCounter, boolean renderBlockOutline,
+            Camera camera, GameRenderer gameRenderer,
+            LightmapTextureManager lightmapTextureManager,
+            Matrix4f positionMatrix, Matrix4f projectionMatrix,
+            CallbackInfo ci) {
+        IonDeferredRenderController.drawDeferred();
     }
 
     @Inject(method = "render", at = @At("TAIL"))

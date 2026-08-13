@@ -39,6 +39,7 @@ import net.sweenus.simplyswords.util.MinionTargeting;
 import net.sweenus.simplyswords.world.PlayerWeaponAbilityChannelManager;
 import net.sweenus.simplyswords.world.RevivalCandleVisualManager;
 import net.sweenus.simplyswords.world.MagispearAbilityManager;
+import net.sweenus.simplyswords.world.IonboundStormscaleAbilityManager;
 import net.sweenus.simplyswords.world.ShadowstingShadowDanceManager;
 import net.sweenus.simplyswords.world.SoulkeeperLanternManager;
 import net.sweenus.simplyswords.world.StormbringerParryManager;
@@ -63,6 +64,10 @@ public abstract class ServerPlayerEntityMixin {
     public void simplyswords$damage(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
         PlayerEntity player = (PlayerEntity) (Object) this;
         if (player instanceof ServerPlayerEntity serverPlayer) {
+            if (IonboundStormscaleAbilityManager.handleIncomingDamage(serverPlayer, source, amount)) {
+                cir.setReturnValue(false);
+                return;
+            }
             if (MagispearAbilityManager.blocksIncomingDamage(serverPlayer, source)) {
                 cir.setReturnValue(false);
                 return;

@@ -13,6 +13,7 @@
     "client.WaxEncasedLivingEntityRendererMixin",
     "client.WorldRendererMixin",
     "client.MinecraftClientMixin",
+    "client.MouseMixin",
     "client.ClientPlayerEntityMixin",
     "client.WorldWeatherMixin",
     "client.compat.SpellEngineSpellHotbarMixin"

@@ -26,20 +26,26 @@ public abstract class HeldItemRendererMixin {
             method = "updateHeldItems",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/item/ItemStack;areEqual(Lnet/minecraft/item/ItemStack;Lnet/minecraft/item/ItemStack;)Z",
-                    ordinal = 0
+                    target = "Lnet/minecraft/item/ItemStack;areEqual(Lnet/minecraft/item/ItemStack;Lnet/minecraft/item/ItemStack;)Z"
             )
     )
-    private boolean simplyswords$ignoreMoltenHeatForMainHandEquip(ItemStack previous, ItemStack current) {
-        if (!previous.isOf(ItemsRegistry.MOLTEN_EDGE.get()) || !current.isOf(ItemsRegistry.MOLTEN_EDGE.get())) {
-            return ItemStack.areEqual(previous, current);
+    private boolean simplyswords$ignoreRuntimeComponentsForEquip(ItemStack previous, ItemStack current) {
+        if (previous.isOf(ItemsRegistry.MOLTEN_EDGE.get()) && current.isOf(ItemsRegistry.MOLTEN_EDGE.get())) {
+            ItemStack previousWithoutHeat = previous.copy();
+            ItemStack currentWithoutHeat = current.copy();
+            previousWithoutHeat.remove(ComponentTypeRegistry.MOLTEN_HEAT.get());
+            currentWithoutHeat.remove(ComponentTypeRegistry.MOLTEN_HEAT.get());
+            return ItemStack.areEqual(previousWithoutHeat, currentWithoutHeat);
         }
-
-        ItemStack previousWithoutHeat = previous.copy();
-        ItemStack currentWithoutHeat = current.copy();
-        previousWithoutHeat.remove(ComponentTypeRegistry.MOLTEN_HEAT.get());
-        currentWithoutHeat.remove(ComponentTypeRegistry.MOLTEN_HEAT.get());
-        return ItemStack.areEqual(previousWithoutHeat, currentWithoutHeat);
+        if (previous.isOf(ItemsRegistry.IONBOUND_STORMSCALE.get())
+                && current.isOf(ItemsRegistry.IONBOUND_STORMSCALE.get())) {
+            ItemStack previousWithoutCubes = previous.copy();
+            ItemStack currentWithoutCubes = current.copy();
+            previousWithoutCubes.remove(ComponentTypeRegistry.ION_CUBES.get());
+            currentWithoutCubes.remove(ComponentTypeRegistry.ION_CUBES.get());
+            return ItemStack.areEqual(previousWithoutCubes, currentWithoutCubes);
+        }
+        return ItemStack.areEqual(previous, current);
     }
 
     @Inject(method = "renderItem(FLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider$Immediate;Lnet/minecraft/client/network/ClientPlayerEntity;I)V",

@@ -29,6 +29,7 @@ import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.world.RunicSlashManager;
 import net.sweenus.simplyswords.world.BramblethornAbilityManager;
 import net.sweenus.simplyswords.world.BloodwakeAbilityManager;
+import net.sweenus.simplyswords.world.IonboundStormscaleAbilityManager;
 import net.sweenus.simplyswords.world.MagispearAbilityManager;
 import net.sweenus.simplyswords.world.MoltenEdgeAbilityManager;
 import net.sweenus.simplyswords.world.ObserverStatusEffectSyncManager;
@@ -105,6 +106,11 @@ public abstract class LivingEntityMixin {
     @Inject(at = @At("HEAD"), method = "damage", cancellable = true)
     public void simplyswords$handleIncomingAbilityDamage(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
         LivingEntity livingEntity = (LivingEntity) (Object) this;
+        if (!(livingEntity instanceof ServerPlayerEntity)
+                && IonboundStormscaleAbilityManager.handleIncomingDamage(livingEntity, source, amount)) {
+            cir.setReturnValue(false);
+            return;
+        }
         if (!(livingEntity instanceof ServerPlayerEntity)
                 && MagispearAbilityManager.blocksIncomingDamage(livingEntity, source)) {
             cir.setReturnValue(false);
