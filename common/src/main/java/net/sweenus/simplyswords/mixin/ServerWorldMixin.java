@@ -34,6 +34,15 @@ public abstract class ServerWorldMixin {
         if (IonboundStormscaleAbilityManager.hasActive(world)) {
             IonboundStormscaleAbilityManager.tick(world);
         }
+        if (DevourerAbilityManager.hasActive(world)) {
+            DevourerAbilityManager.tick(world);
+        }
+        if (DevourerStainManager.hasActive(world)) {
+            DevourerStainManager.tick(world);
+        }
+        if (DevourerReprisalManager.hasActive(world)) {
+            DevourerReprisalManager.tick(world);
+        }
         if (BloodwakeAbilityManager.hasActive(world)) {
             BloodwakeAbilityManager.tick(world);
         }

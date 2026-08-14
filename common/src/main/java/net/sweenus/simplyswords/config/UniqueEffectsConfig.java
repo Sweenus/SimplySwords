@@ -56,6 +56,7 @@ public class UniqueEffectsConfig extends Config {
     public HearthflameSwordItem.EffectSettings hearthflame = new HearthflameSwordItem.EffectSettings();
     public TempestSwordItem.EffectSettings tempest = new TempestSwordItem.EffectSettings();
     public WatcherSwordItem.EffectSettings       watcher = new WatcherSwordItem.EffectSettings();
+    public DevourerClaymoreItem.EffectSettings devourer = new DevourerClaymoreItem.EffectSettings();
     public WaxweaverSwordItem.EffectSettings waxweaver = new WaxweaverSwordItem.EffectSettings();
     public WraithfangSwordItem.EffectSettings wraithfang = new WraithfangSwordItem.EffectSettings();
     public ChompolotlSwordItem.EffectSettings chompolotl = new ChompolotlSwordItem.EffectSettings();

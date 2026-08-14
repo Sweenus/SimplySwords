@@ -231,6 +231,9 @@ public class SimplySwords {
             EntityRendererRegistry.register(EntityRegistry.BRIMSTONE_CLAYMORE_VISUAL, BrimstoneClaymoreVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.STORMSCALE_ROD_VISUAL, StormscaleRodVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.IONBOUND_STORMSCALE_VISUAL, IonboundStormscaleVisualEntityRenderer::new);
+            EntityRendererRegistry.register(EntityRegistry.DEVOURER_MASS_VISUAL, DevourerMassVisualEntityRenderer::new);
+            EntityRendererRegistry.register(EntityRegistry.DEVOURER_TENDRIL_VISUAL, DevourerTendrilVisualEntityRenderer::new);
+            EntityRendererRegistry.register(EntityRegistry.DEVOURER_REPRISAL_VISUAL, DevourerReprisalVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.CHAIN_LIGHTNING_VISUAL, ChainLightningVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.LIGHTNING_PHENOMENON_VISUAL, LightningPhenomenonVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.ATMOSPHERIC_VISUAL, AtmosphericVisualEntityRenderer::new);

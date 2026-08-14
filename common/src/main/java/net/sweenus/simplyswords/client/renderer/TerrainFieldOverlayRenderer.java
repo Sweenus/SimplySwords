@@ -46,6 +46,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -61,6 +62,8 @@ public final class TerrainFieldOverlayRenderer {
     private static final int BLOOD_POOL_SEGMENTS = 24;
     private static final int BLOOD_FINE_GRID_SCALE = 4;
     private static final int BLOOD_COARSE_GRID_SCALE = 2;
+    private static final float DEVOURER_CELL_FADE_TICKS = 5.0F;
+    private static final float DEVOURER_SPREAD_RESPONSE = 1.65F;
     private static final int BLOOD_COARSE_ENTER_CELLS = 768;
     private static final int BLOOD_COARSE_EXIT_CELLS = 512;
     private static final int BLOOD_CACHE_GROWTH_MARGIN = 4;
@@ -74,6 +77,7 @@ public final class TerrainFieldOverlayRenderer {
     private static final float FLUID_OFFSET = 0.012F;
     private static final float FLUID_EDGE_OVERLAP = 0.003F;
     private static final float SURFACE_EPSILON = 0.001F;
+    private static final int[] NO_CONTRIBUTORS = new int[0];
     private static final Identifier WHITE_TEXTURE =
             Identifier.ofVanilla("textures/misc/white.png");
     private static final Set<FaceKey> BLOOD_FACES_THIS_FRAME = new HashSet<>();
@@ -146,6 +150,13 @@ public final class TerrainFieldOverlayRenderer {
             0
     );
 
+    static final Palette DEVOURER_STAIN = Palette.blockTextureTint(
+            112, 48, 150,
+            new BloodStyle(34, 12, 50, (float) BLOOD_BORDER_WIDTH),
+            40,
+            0
+    );
+
     public static final Palette WHITE_MARBLE = new Palette(
             List.of(
                     new Variant(46,
@@ -177,12 +188,8 @@ public final class TerrainFieldOverlayRenderer {
     private final Map<UUID, TerrainCache> caches = new HashMap<>();
     private final Map<UUID, ShapeCache> bloodShapes = new HashMap<>();
     private final Map<UUID, BloodMaskCache> bloodMasks = new HashMap<>();
-    private long bloodSnapshotFrame = Long.MIN_VALUE;
-    private BloodSnapshot bloodSnapshot = BloodSnapshot.EMPTY;
-    private World bloodTopologyWorld;
-    private long bloodTopologySignature = Long.MIN_VALUE;
-    private int bloodGridScale = BLOOD_FINE_GRID_SCALE;
-    private Map<UUID, BloodComponent> bloodComponentsByMember = Map.of();
+    private final Map<UUID, DevourerGrowthState> devourerGrowth = new HashMap<>();
+    private final Map<Integer, MergedStainState> mergedStainStates = new HashMap<>();
 
     public static void beginWorldFrame() {
         BLOOD_FACES_THIS_FRAME.clear();
@@ -199,16 +206,12 @@ public final class TerrainFieldOverlayRenderer {
         this.caches.remove(id);
         this.bloodShapes.remove(id);
         this.bloodMasks.remove(id);
+        this.devourerGrowth.remove(id);
     }
 
     public void clearBlood() {
-        this.bloodSnapshot = BloodSnapshot.EMPTY;
-        this.bloodSnapshotFrame = Long.MIN_VALUE;
+        this.mergedStainStates.clear();
         this.bloodMasks.clear();
-        this.bloodTopologyWorld = null;
-        this.bloodTopologySignature = Long.MIN_VALUE;
-        this.bloodComponentsByMember = Map.of();
-        this.bloodGridScale = BLOOD_FINE_GRID_SCALE;
     }
 
     public void render(World world, UUID id,
@@ -258,18 +261,701 @@ public final class TerrainFieldOverlayRenderer {
                                   float radius, float verticalRange, int seed, float opacity,
                                   MatrixStack.Entry matrices,
                                   VertexConsumerProvider vertexConsumers) {
+        renderOrganicCircle(world, id, centerX, centerY, centerZ,
+                radius, verticalRange, seed, opacity, 2, BLOOD_STAIN,
+                matrices, vertexConsumers);
+    }
+
+    void renderDevourerStain(World world, UUID id, int sourceEntityId,
+                             double centerX, double centerY, double centerZ,
+                             float targetRadius, float maximumRadius,
+                             float verticalRange, int seed, float opacity,
+                             float animationTime, float tickDelta,
+                             MatrixStack.Entry matrices,
+                             VertexConsumerProvider vertexConsumers) {
+        if (maximumRadius <= 0.05F || opacity <= 0.01F) {
+            clear(id);
+            return;
+        }
+        if (shouldSkipBloodRender()) {
+            return;
+        }
+        long finalShapeKey = shapeKey(4, maximumRadius, 0.0F, 0.0F, seed);
+        SplatterShape finalShape = getBloodShape(
+                id, finalShapeKey, () -> bloodPoolShape(maximumRadius, seed));
+        long growthKey = maskKey(finalShapeKey, centerX, centerZ);
+        DevourerGrowthState growth = devourerGrowth.get(id);
+        if (growth == null || growth.world != world || growth.growthKey != growthKey) {
+            growth = buildDevourerGrowthState(
+                    world, growthKey, finalShape, centerX, centerZ,
+                    maximumRadius, seed, animationTime);
+            devourerGrowth.put(id, growth);
+        }
+        updateDevourerGrowth(growth,
+                MathHelper.clamp(targetRadius / maximumRadius, 0.0F, 1.0F),
+                animationTime);
+        DevourerTrailSnapshot trails = buildDevourerTrailSnapshot(
+                world, sourceEntityId, tickDelta);
+        if (growth.trailSignature != trails.signature) {
+            growth.trailCells = trails.cells;
+            growth.trailSignature = trails.signature;
+            growth.preparedGeometry = null;
+        }
+        DevourerCompositeBounds bounds = devourerCompositeBounds(
+                growth, trails, centerY, verticalRange);
+        TerrainCache terrain = getCache(
+                world, id, bounds.centerX, bounds.centerY, bounds.centerZ,
+                bounds.extent, bounds.verticalRange, DEVOURER_STAIN);
+        if (terrain.faces.isEmpty()) {
+            return;
+        }
+        DevourerGrowthGeometry geometry = prepareDevourerGrowthGeometry(
+                terrain, growth, bounds.centerX, bounds.centerY, bounds.centerZ,
+                bounds.minY, bounds.maxY);
+        drawDevourerGrowthGeometry(
+                centerX, centerY, centerZ, matrices, vertexConsumers,
+                growth, geometry, opacity);
+    }
+
+    private DevourerTrailSnapshot buildDevourerTrailSnapshot(
+            World world, int sourceEntityId, float tickDelta) {
+        LongOpenHashSet cells = new LongOpenHashSet();
+        Set<UUID> loaded = new HashSet<>();
+        double minY = Double.POSITIVE_INFINITY;
+        double maxY = Double.NEGATIVE_INFINITY;
+        for (BloodStainVisualEntity entity : bloodEntities(world)) {
+            loaded.add(entity.getUuid());
+            if (entity.getStyle() != BloodStainVisualEntity.STYLE_DEVOURER
+                    || entity.getSourceEntityId() != sourceEntityId
+                    || entity.getRadius() <= 0.05F) {
+                continue;
+            }
+            double entityX = MathHelper.lerp(tickDelta, entity.prevX, entity.getX());
+            double entityY = MathHelper.lerp(tickDelta, entity.prevY, entity.getY());
+            double entityZ = MathHelper.lerp(tickDelta, entity.prevZ, entity.getZ());
+            float yaw = MathHelper.lerpAngleDegrees(
+                    tickDelta, entity.prevYaw, entity.getYaw())
+                    * MathHelper.RADIANS_PER_DEGREE;
+            long shapeKey;
+            SplatterShape shape;
+            if (entity.getShape() == BloodStainVisualEntity.SHAPE_TRAIL) {
+                shapeKey = shapeKey(13, entity.getHalfLength(),
+                        entity.getRadius(), yaw, entity.getSeed());
+                shape = getBloodShape(entity.getUuid(), shapeKey,
+                        () -> bloodTrailShape(entity.getHalfLength(),
+                                entity.getRadius(), yaw, entity.getSeed()));
+            } else {
+                shapeKey = shapeKey(12, entity.getRadius(),
+                        0.0F, 0.0F, entity.getSeed());
+                shape = getBloodShape(entity.getUuid(), shapeKey,
+                        () -> bloodPoolShape(entity.getRadius(), entity.getSeed()));
+            }
+            long maskKey = maskKey(shapeKey, entityX, entityZ);
+            BloodMaskCache mask = this.bloodMasks.get(entity.getUuid());
+            if (mask == null || mask.maskKey != maskKey) {
+                mask = new BloodMaskCache(maskKey,
+                        rasterizeBloodShape(
+                                shape, entityX, entityZ, BLOOD_FINE_GRID_SCALE),
+                        null);
+                this.bloodMasks.put(entity.getUuid(), mask);
+            }
+            cells.addAll(coarseBloodMask(mask));
+            minY = Math.min(minY, entityY - entity.getVerticalRange());
+            maxY = Math.max(maxY, entityY + entity.getVerticalRange());
+        }
+        this.bloodMasks.keySet().removeIf(entityId -> !loaded.contains(entityId));
+        this.bloodShapes.keySet().removeIf(entityId ->
+                !loaded.contains(entityId) && !this.caches.containsKey(entityId));
+        long[] ordered = cells.toLongArray();
+        Arrays.sort(ordered);
+        long signature = 0xcbf29ce484222325L;
+        for (long cell : ordered) {
+            signature = mixSignature(signature, cell);
+        }
+        signature = mixSignature(signature, ordered.length);
+        return new DevourerTrailSnapshot(
+                cells, signature, minY, maxY, !cells.isEmpty());
+    }
+
+    private static DevourerCompositeBounds devourerCompositeBounds(
+            DevourerGrowthState growth, DevourerTrailSnapshot trails,
+            double centerY, float verticalRange) {
+        int minGridX = Integer.MAX_VALUE;
+        int maxGridX = Integer.MIN_VALUE;
+        int minGridZ = Integer.MAX_VALUE;
+        int maxGridZ = Integer.MIN_VALUE;
+        for (long cell : growth.cells) {
+            minGridX = Math.min(minGridX, gridCellX(cell));
+            maxGridX = Math.max(maxGridX, gridCellX(cell));
+            minGridZ = Math.min(minGridZ, gridCellZ(cell));
+            maxGridZ = Math.max(maxGridZ, gridCellZ(cell));
+        }
+        for (LongIterator iterator = trails.cells.iterator(); iterator.hasNext(); ) {
+            long cell = iterator.nextLong();
+            minGridX = Math.min(minGridX, gridCellX(cell));
+            maxGridX = Math.max(maxGridX, gridCellX(cell));
+            minGridZ = Math.min(minGridZ, gridCellZ(cell));
+            maxGridZ = Math.max(maxGridZ, gridCellZ(cell));
+        }
+        double gridSize = 1.0 / BLOOD_COARSE_GRID_SCALE;
+        double minX = minGridX * gridSize;
+        double maxX = (maxGridX + 1.0) * gridSize;
+        double minZ = minGridZ * gridSize;
+        double maxZ = (maxGridZ + 1.0) * gridSize;
+        double minY = trails.present
+                ? Math.min(centerY - verticalRange, trails.minY)
+                : centerY - verticalRange;
+        double maxY = trails.present
+                ? Math.max(centerY + verticalRange, trails.maxY)
+                : centerY + verticalRange;
+        double boundsCenterX = (minX + maxX) * 0.5;
+        double boundsCenterY = (minY + maxY) * 0.5;
+        double boundsCenterZ = (minZ + maxZ) * 0.5;
+        float extent = (float) Math.max(1.0,
+                Math.max((maxX - minX) * 0.5, (maxZ - minZ) * 0.5) + 1.0);
+        float boundsVertical = (float) Math.max(2.0,
+                Math.max(boundsCenterY - minY, maxY - boundsCenterY));
+        return new DevourerCompositeBounds(
+                boundsCenterX, boundsCenterY, boundsCenterZ,
+                extent, boundsVertical, minY, maxY);
+    }
+
+    private DevourerGrowthState buildDevourerGrowthState(
+            World world, long growthKey, SplatterShape finalShape,
+            double centerX, double centerZ, float maximumRadius,
+            int seed, float animationTime) {
+        LongSet mask = rasterizeBloodShape(
+                finalShape, centerX, centerZ, BLOOD_COARSE_GRID_SCALE);
+        long[] cells = mask.toLongArray();
+        Arrays.sort(cells);
+        Long2IntOpenHashMap indices = new Long2IntOpenHashMap(cells.length);
+        indices.defaultReturnValue(-1);
+        for (int i = 0; i < cells.length; i++) {
+            indices.put(cells[i], i);
+        }
+        float[] arrivals = devourerArrivalTimes(
+                cells, indices, centerX, centerZ, maximumRadius, seed);
+        float[] activatedAt = new float[cells.length];
+        float[] wetness = new float[cells.length];
+        Arrays.fill(activatedAt, Float.NaN);
+        return new DevourerGrowthState(
+                world, growthKey, cells, indices, arrivals,
+                activatedAt, wetness, animationTime, world.getTime(), seed);
+    }
+
+    private static float[] devourerArrivalTimes(
+            long[] cells, Long2IntOpenHashMap indices,
+            double centerX, double centerZ, float maximumRadius, int seed) {
+        float[] arrivals = new float[cells.length];
+        Arrays.fill(arrivals, Float.POSITIVE_INFINITY);
+        PriorityQueue<DevourerSpreadNode> frontier = new PriorityQueue<>(
+                Comparator.comparingDouble(DevourerSpreadNode::arrival));
+        boolean firstComponent = true;
+        while (true) {
+            int componentSeed = -1;
+            double closestDistance = Double.POSITIVE_INFINITY;
+            for (int i = 0; i < cells.length; i++) {
+                if (Float.isFinite(arrivals[i])) {
+                    continue;
+                }
+                double cellX = (gridCellX(cells[i]) + 0.5)
+                        / BLOOD_COARSE_GRID_SCALE;
+                double cellZ = (gridCellZ(cells[i]) + 0.5)
+                        / BLOOD_COARSE_GRID_SCALE;
+                double distance = MathHelper.hypot(
+                        cellX - centerX, cellZ - centerZ);
+                if (distance < closestDistance) {
+                    closestDistance = distance;
+                    componentSeed = i;
+                }
+            }
+            if (componentSeed < 0) {
+                break;
+            }
+            float seedArrival = firstComponent ? 0.0F
+                    : MathHelper.clamp(
+                    (float) (closestDistance / maximumRadius) * 0.88F
+                            + 0.035F
+                            + devourerNoise(seed, cells[componentSeed], 91) * 0.04F,
+                    0.0F, 0.94F);
+            arrivals[componentSeed] = seedArrival;
+            frontier.add(new DevourerSpreadNode(componentSeed, seedArrival));
+            while (!frontier.isEmpty()) {
+                DevourerSpreadNode node = frontier.poll();
+                if (node.arrival() > arrivals[node.index()] + 1.0E-6F) {
+                    continue;
+                }
+                long cell = cells[node.index()];
+                int gridX = gridCellX(cell);
+                int gridZ = gridCellZ(cell);
+                for (Direction direction : Direction.Type.HORIZONTAL) {
+                    long neighborCell = packGridCell(
+                            gridX + direction.getOffsetX(),
+                            gridZ + direction.getOffsetZ());
+                    int neighbor = indices.get(neighborCell);
+                    if (neighbor < 0) {
+                        continue;
+                    }
+                    float step = (0.76F
+                            + devourerNoise(seed, neighborCell,
+                            direction.getHorizontal() + 17) * 0.48F)
+                            / (maximumRadius * BLOOD_COARSE_GRID_SCALE);
+                    float candidate = node.arrival() + step;
+                    if (candidate + 1.0E-6F < arrivals[neighbor]) {
+                        arrivals[neighbor] = candidate;
+                        frontier.add(new DevourerSpreadNode(neighbor, candidate));
+                    }
+                }
+            }
+            firstComponent = false;
+        }
+        float maximumArrival = 0.0F;
+        for (float arrival : arrivals) {
+            if (Float.isFinite(arrival)) {
+                maximumArrival = Math.max(maximumArrival, arrival);
+            }
+        }
+        float scale = maximumArrival <= 1.0E-5F ? 1.0F : 0.96F / maximumArrival;
+        for (int i = 0; i < arrivals.length; i++) {
+            arrivals[i] = MathHelper.clamp(arrivals[i] * scale, 0.0F, 0.96F);
+        }
+        return arrivals;
+    }
+
+    private static float devourerNoise(int seed, long cell, int salt) {
+        int hash = coordinateHash(
+                gridCellX(cell) ^ seed,
+                gridCellZ(cell) + salt * 31,
+                seed ^ salt * 0x632be5ab);
+        return (hash & 0x7fffffff) / (float) Integer.MAX_VALUE;
+    }
+
+    private void updateDevourerGrowth(
+            DevourerGrowthState growth, float targetProgress, float animationTime) {
+        float elapsed = MathHelper.clamp(animationTime - growth.lastAnimationTime, 0.0F, 20.0F);
+        float target = Math.max(growth.displayedProgress, targetProgress);
+        if (elapsed > 0.0F && target > growth.displayedProgress) {
+            float response = 1.0F - (float) Math.exp(-elapsed / DEVOURER_SPREAD_RESPONSE);
+            growth.displayedProgress = MathHelper.lerp(
+                    response, growth.displayedProgress, target);
+        }
+        growth.displayedProgress = Math.max(growth.displayedProgress,
+                Math.min(target, 0.001F));
+        growth.lastAnimationTime = animationTime;
+        growth.lastSeenTick = growth.world.getTime();
+        for (int i = 0; i < growth.arrivals.length; i++) {
+            if (Float.isNaN(growth.activatedAt[i])
+                    && growth.arrivals[i] <= growth.displayedProgress + 1.0E-5F) {
+                growth.activatedAt[i] = animationTime;
+            }
+            if (Float.isNaN(growth.activatedAt[i])) {
+                growth.wetness[i] = 0.0F;
+                continue;
+            }
+            float progress = MathHelper.clamp(
+                    (animationTime - growth.activatedAt[i])
+                            / DEVOURER_CELL_FADE_TICKS,
+                    0.0F, 1.0F);
+            growth.wetness[i] = progress * progress * (3.0F - 2.0F * progress);
+        }
+        long now = growth.world.getTime();
+        devourerGrowth.entrySet().removeIf(entry ->
+                entry.getValue() != growth
+                        && (entry.getValue().world != growth.world
+                        || now - entry.getValue().lastSeenTick > 1200L));
+    }
+
+    private static DevourerGrowthGeometry prepareDevourerGrowthGeometry(
+            TerrainCache terrain, DevourerGrowthState growth,
+            double centerX, double centerY, double centerZ,
+            double minY, double maxY) {
+        if (growth.preparedTerrain == terrain
+                && Double.compare(growth.preparedCenterX, centerX) == 0
+                && Double.compare(growth.preparedCenterY, centerY) == 0
+                && Double.compare(growth.preparedCenterZ, centerZ) == 0
+                && Double.compare(growth.preparedMinY, minY) == 0
+                && Double.compare(growth.preparedMaxY, maxY) == 0
+                && growth.preparedTrailSignature == growth.trailSignature
+                && growth.preparedGeometry != null) {
+            return growth.preparedGeometry;
+        }
+        LongOpenHashSet combined = new LongOpenHashSet(
+                growth.cells.length + growth.trailCells.size());
+        for (long cell : growth.cells) {
+            combined.add(cell);
+        }
+        combined.addAll(growth.trailCells);
+        long[] cells = combined.toLongArray();
+        Arrays.sort(cells);
+        Long2IntOpenHashMap indices = new Long2IntOpenHashMap(cells.length);
+        indices.defaultReturnValue(-1);
+        int[] mainIndices = new int[cells.length];
+        boolean[] trailCells = new boolean[cells.length];
+        for (int index = 0; index < cells.length; index++) {
+            indices.put(cells[index], index);
+            mainIndices[index] = growth.indices.get(cells[index]);
+            trailCells[index] = growth.trailCells.contains(cells[index]);
+        }
+        List<DevourerFillPatch> fills = new ArrayList<>();
+        List<DevourerBorderPatch> borders = new ArrayList<>();
+        double phase = (growth.seed & 0x7fffffff)
+                / (double) Integer.MAX_VALUE * MathHelper.TAU;
+        for (int index = 0; index < cells.length; index++) {
+            long cell = cells[index];
+            int gridX = gridCellX(cell);
+            int gridZ = gridCellZ(cell);
+            int blockX = Math.floorDiv(gridX, BLOOD_COARSE_GRID_SCALE);
+            int blockZ = Math.floorDiv(gridZ, BLOOD_COARSE_GRID_SCALE);
+            List<TerrainFace> columnFaces = terrain.facesByColumn.get(
+                    packGridCell(blockX, blockZ));
+            if (columnFaces == null) {
+                continue;
+            }
+            double x0 = gridX / (double) BLOOD_COARSE_GRID_SCALE;
+            double x1 = (gridX + 1.0) / BLOOD_COARSE_GRID_SCALE;
+            double z0 = gridZ / (double) BLOOD_COARSE_GRID_SCALE;
+            double z1 = (gridZ + 1.0) / BLOOD_COARSE_GRID_SCALE;
+            int localX = Math.floorMod(gridX, BLOOD_COARSE_GRID_SCALE);
+            int localZ = Math.floorMod(gridZ, BLOOD_COARSE_GRID_SCALE);
+            for (TerrainFace face : columnFaces) {
+                if (face.plane < minY - SURFACE_EPSILON
+                        || face.plane > maxY + SURFACE_EPSILON) {
+                    continue;
+                }
+                if (face.direction == Direction.UP) {
+                    prepareDevourerHorizontalCell(
+                            fills, borders, face, indices, index,
+                            gridX, gridZ, x0, x1, z0, z1, phase);
+                } else if (devourerCellTouchesFace(
+                        face.direction, localX, localZ)) {
+                    prepareDevourerVerticalCell(
+                            fills, borders, terrain, face, index,
+                            x0, x1, z0, z1, phase, minY, maxY);
+                }
+            }
+        }
+        growth.preparedTerrain = terrain;
+        growth.preparedCenterX = centerX;
+        growth.preparedCenterY = centerY;
+        growth.preparedCenterZ = centerZ;
+        growth.preparedMinY = minY;
+        growth.preparedMaxY = maxY;
+        growth.preparedTrailSignature = growth.trailSignature;
+        growth.preparedGeometry = new DevourerGrowthGeometry(
+                List.copyOf(fills), List.copyOf(borders),
+                mainIndices, trailCells);
+        return growth.preparedGeometry;
+    }
+
+    private static boolean devourerCellTouchesFace(
+            Direction direction, int localX, int localZ) {
+        return switch (direction) {
+            case NORTH -> localZ == 0;
+            case SOUTH -> localZ == BLOOD_COARSE_GRID_SCALE - 1;
+            case WEST -> localX == 0;
+            case EAST -> localX == BLOOD_COARSE_GRID_SCALE - 1;
+            default -> false;
+        };
+    }
+
+    private static void prepareDevourerHorizontalCell(
+            List<DevourerFillPatch> fills,
+            List<DevourerBorderPatch> borders,
+            TerrainFace face, Long2IntOpenHashMap indices, int index,
+            int gridX, int gridZ,
+            double x0, double x1, double z0, double z1, double phase) {
+        fills.add(new DevourerFillPatch(
+                devourerHorizontalPatch(face, phase, x0, x1, z0, z1), index));
+        int north = indices.get(packGridCell(gridX, gridZ - 1));
+        int south = indices.get(packGridCell(gridX, gridZ + 1));
+        int west = indices.get(packGridCell(gridX - 1, gridZ));
+        int east = indices.get(packGridCell(gridX + 1, gridZ));
+        double width = Math.min(
+                DEVOURER_STAIN.bloodStyle.rimWidth,
+                (x1 - x0) * 0.22);
+        double innerX0 = x0 + width;
+        double innerX1 = x1 - width;
+        double innerZ0 = z0 + width;
+        double innerZ1 = z1 - width;
+        addDevourerBorderPatch(
+                borders, face, index, north, -1, false, phase,
+                innerX0, innerX1, z0, innerZ0,
+                true, false, false, true);
+        addDevourerBorderPatch(
+                borders, face, index, south, -1, false, phase,
+                innerX0, innerX1, innerZ1, z1,
+                false, true, true, false);
+        addDevourerBorderPatch(
+                borders, face, index, west, -1, false, phase,
+                x0, innerX0, innerZ0, innerZ1,
+                true, true, false, false);
+        addDevourerBorderPatch(
+                borders, face, index, east, -1, false, phase,
+                innerX1, x1, innerZ0, innerZ1,
+                false, false, true, true);
+        addDevourerBorderPatch(
+                borders, face, index, north, west, true, phase,
+                x0, innerX0, z0, innerZ0,
+                true, true, false, true);
+        addDevourerBorderPatch(
+                borders, face, index, north, east, true, phase,
+                innerX1, x1, z0, innerZ0,
+                true, false, true, true);
+        addDevourerBorderPatch(
+                borders, face, index, south, east, true, phase,
+                innerX1, x1, innerZ1, z1,
+                false, true, true, true);
+        addDevourerBorderPatch(
+                borders, face, index, south, west, true, phase,
+                x0, innerX0, innerZ1, z1,
+                true, true, true, false);
+    }
+
+    private static void addDevourerBorderPatch(
+            List<DevourerBorderPatch> borders,
+            TerrainFace face, int cellIndex,
+            int neighborA, int neighborB, boolean corner,
+            double phase, double x0, double x1, double z0, double z1,
+            boolean rim00, boolean rim01, boolean rim11, boolean rim10) {
+        if (x1 - x0 <= 1.0E-5 || z1 - z0 <= 1.0E-5) {
+            return;
+        }
+        double y = face.plane;
+        BloodPreparedPatch patch = new BloodPreparedPatch(
+                face, NO_CONTRIBUTORS,
+                devourerBorderVertex(phase, x0, y, z0, rim00),
+                devourerBorderVertex(phase, x0, y, z1, rim01),
+                devourerBorderVertex(phase, x1, y, z1, rim11),
+                devourerBorderVertex(phase, x1, y, z0, rim10),
+                terrainLight(face, DEVOURER_STAIN), BLOOD_BORDER_OFFSET);
+        borders.add(new DevourerBorderPatch(
+                patch, cellIndex, neighborA, neighborB, corner));
+    }
+
+    private static BloodPreparedPatch devourerHorizontalPatch(
+            TerrainFace face, double phase,
+            double x0, double x1, double z0, double z1) {
+        double y = face.plane;
+        return new BloodPreparedPatch(
+                face, NO_CONTRIBUTORS,
+                devourerPatchVertex(phase, x0, y, z0),
+                devourerPatchVertex(phase, x0, y, z1),
+                devourerPatchVertex(phase, x1, y, z1),
+                devourerPatchVertex(phase, x1, y, z0),
+                terrainLight(face, DEVOURER_STAIN), 0.0F);
+    }
+
+    private static void prepareDevourerVerticalCell(
+            List<DevourerFillPatch> fills,
+            List<DevourerBorderPatch> borders,
+            TerrainCache terrain, TerrainFace face, int index,
+            double x0, double x1, double z0, double z1, double phase,
+            double minY, double maxY) {
+        double y0 = face.y;
+        double y1 = face.y + 1.0;
+        if (!hasCoplanarNeighbor(terrain, face, Direction.DOWN)) {
+            y0 -= EDGE_OVERLAP;
+        }
+        if (!hasCoplanarNeighbor(terrain, face, Direction.UP)) {
+            y1 += EDGE_OVERLAP;
+        }
+        y0 = Math.max(y0, minY);
+        y1 = Math.min(y1, maxY);
+        if (y1 - y0 <= 1.0E-5) {
+            return;
+        }
+        boolean variableX = face.direction.getAxis() == Direction.Axis.Z;
+        double variable0 = variableX ? x0 : z0;
+        double variable1 = variableX ? x1 : z1;
+        fills.add(new DevourerFillPatch(
+                devourerVerticalPatch(
+                        face, phase, variableX, variable0, variable1, y0, y1, false),
+                index));
+        double borderY0 = Math.max(y0,
+                y1 - DEVOURER_STAIN.bloodStyle.rimWidth);
+        borders.add(new DevourerBorderPatch(
+                devourerVerticalPatch(
+                        face, phase, variableX, variable0, variable1,
+                        borderY0, y1, true),
+                index, -1, -1, false));
+    }
+
+    private static BloodPreparedPatch devourerVerticalPatch(
+            TerrainFace face, double phase, boolean variableX,
+            double variable0, double variable1,
+            double y0, double y1, boolean border) {
+        double x0;
+        double x1;
+        double z0;
+        double z1;
+        if (variableX) {
+            x0 = variable0;
+            x1 = variable1;
+            z0 = z1 = face.plane;
+        } else {
+            x0 = x1 = face.plane;
+            z0 = variable0;
+            z1 = variable1;
+        }
+        BloodPatchVertex low0 = border
+                ? devourerBorderVertex(phase, x0, y0, z0, false)
+                : devourerPatchVertex(phase, x0, y0, z0);
+        BloodPatchVertex high0 = border
+                ? devourerBorderVertex(phase, x0, y1, z0, true)
+                : devourerPatchVertex(phase, x0, y1, z0);
+        BloodPatchVertex high1 = border
+                ? devourerBorderVertex(phase, x1, y1, z1, true)
+                : devourerPatchVertex(phase, x1, y1, z1);
+        BloodPatchVertex low1 = border
+                ? devourerBorderVertex(phase, x1, y0, z1, false)
+                : devourerPatchVertex(phase, x1, y0, z1);
+        float offset = border ? BLOOD_BORDER_OFFSET : 0.0F;
+        if (face.direction == Direction.NORTH || face.direction == Direction.EAST) {
+            return new BloodPreparedPatch(
+                    face, NO_CONTRIBUTORS, low0, high0, high1, low1,
+                    terrainLight(face, DEVOURER_STAIN), offset);
+        }
+        return new BloodPreparedPatch(
+                face, NO_CONTRIBUTORS, low0, low1, high1, high0,
+                terrainLight(face, DEVOURER_STAIN), offset);
+    }
+
+    private static BloodPatchVertex devourerPatchVertex(
+            double phase, double x, double y, double z) {
+        return new BloodPatchVertex(
+                x, y, z, stainBaseTint(DEVOURER_STAIN, phase, x, z));
+    }
+
+    private static BloodPatchVertex devourerBorderVertex(
+            double phase, double x, double y, double z, boolean rim) {
+        return new BloodPatchVertex(
+                x, y, z, rim
+                ? stainRimTint(DEVOURER_STAIN, phase, x, z)
+                : stainBaseTint(DEVOURER_STAIN, phase, x, z));
+    }
+
+    private static void drawDevourerGrowthGeometry(
+            double centerX, double centerY, double centerZ,
+            MatrixStack.Entry matrices,
+            VertexConsumerProvider vertexConsumers,
+            DevourerGrowthState growth, DevourerGrowthGeometry geometry,
+            float opacity) {
+        float globalOpacity = MathHelper.clamp(opacity, 0.0F, 1.0F);
+        VertexConsumer opaque = vertexConsumers.getBuffer(RenderLayer.getCutout());
+        for (DevourerFillPatch fill : geometry.fills) {
+            float patchOpacity = globalOpacity
+                    * devourerCompositeWetness(growth, geometry, fill.cellIndex);
+            if (patchOpacity >= 0.999F) {
+                drawBloodPatch(centerX, centerY, centerZ,
+                        matrices, opaque, fill.patch, 1.0F);
+            }
+        }
+        for (DevourerBorderPatch border : geometry.borders) {
+            float patchOpacity = globalOpacity
+                    * devourerBorderOpacity(growth, geometry, border);
+            if (patchOpacity >= 0.999F) {
+                drawBloodPatch(centerX, centerY, centerZ,
+                        matrices, opaque, border.patch, 1.0F);
+            }
+        }
+        VertexConsumer translucent = null;
+        for (DevourerFillPatch fill : geometry.fills) {
+            float patchOpacity = globalOpacity
+                    * devourerCompositeWetness(growth, geometry, fill.cellIndex);
+            if (patchOpacity > 0.01F && patchOpacity < 0.999F) {
+                if (translucent == null) {
+                    translucent = vertexConsumers.getBuffer(
+                            RenderLayer.getEntityTranslucent(
+                                    SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE));
+                }
+                drawBloodPatch(centerX, centerY, centerZ,
+                        matrices, translucent, fill.patch, patchOpacity);
+            }
+        }
+        for (DevourerBorderPatch border : geometry.borders) {
+            float patchOpacity = globalOpacity
+                    * devourerBorderOpacity(growth, geometry, border);
+            if (patchOpacity > 0.01F && patchOpacity < 0.999F) {
+                if (translucent == null) {
+                    translucent = vertexConsumers.getBuffer(
+                            RenderLayer.getEntityTranslucent(
+                                    SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE));
+                }
+                drawBloodPatch(centerX, centerY, centerZ,
+                        matrices, translucent, border.patch, patchOpacity);
+            }
+        }
+    }
+
+    private static float devourerBorderOpacity(
+            DevourerGrowthState growth, DevourerGrowthGeometry geometry,
+            DevourerBorderPatch border) {
+        float cell = devourerCompositeWetness(
+                growth, geometry, border.cellIndex);
+        float first = cell * (1.0F - devourerNeighborWetness(
+                growth, geometry, border.cellIndex, border.neighborA));
+        if (!border.corner) {
+            return first;
+        }
+        float second = cell * (1.0F - devourerNeighborWetness(
+                growth, geometry, border.cellIndex, border.neighborB));
+        return Math.max(first, second);
+    }
+
+    private static float devourerCompositeWetness(
+            DevourerGrowthState growth, DevourerGrowthGeometry geometry,
+            int index) {
+        if (index < 0 || index >= geometry.mainIndices.length) {
+            return 0.0F;
+        }
+        int mainIndex = geometry.mainIndices[index];
+        float mainWetness = mainIndex < 0 ? 0.0F : growth.wetness[mainIndex];
+        if (mainIndex >= 0 && !Float.isNaN(growth.activatedAt[mainIndex])) {
+            return mainWetness;
+        }
+        return geometry.trailCells[index] ? 1.0F : 0.0F;
+    }
+
+    private static float devourerNeighborWetness(
+            DevourerGrowthState growth, DevourerGrowthGeometry geometry,
+            int currentIndex, int neighborIndex) {
+        float wetness = devourerCompositeWetness(
+                growth, geometry, neighborIndex);
+        if (neighborIndex < 0) {
+            return 0.0F;
+        }
+        int neighborMainIndex = geometry.mainIndices[neighborIndex];
+        boolean neighborOccupied = geometry.trailCells[neighborIndex]
+                || neighborMainIndex >= 0
+                && !Float.isNaN(growth.activatedAt[neighborMainIndex]);
+        if (!neighborOccupied) {
+            return 0.0F;
+        }
+        if (geometry.trailCells[currentIndex]
+                || geometry.trailCells[neighborIndex]) {
+            return 1.0F;
+        }
+        return wetness;
+    }
+
+    private void renderOrganicCircle(World world, UUID id,
+                                     double centerX, double centerY, double centerZ,
+                                     float radius, float verticalRange, int seed, float opacity,
+                                     int shapeType, Palette palette,
+                                     MatrixStack.Entry matrices,
+                                     VertexConsumerProvider vertexConsumers) {
         if (radius <= 0.05F || shouldSkipBloodRender()) {
             if (radius <= 0.05F) {
                 clear(id);
             }
             return;
         }
-        long shapeKey = shapeKey(2, radius, 0.0F, 0.0F, seed);
+        long shapeKey = shapeKey(shapeType, radius, 0.0F, 0.0F, seed);
         SplatterShape shape = getBloodShape(
                 id, shapeKey, () -> bloodPoolShape(radius, seed));
         renderFootprint(world, id, centerX, centerY, centerZ,
                 shape, shapeKey, radius, 0.0F, verticalRange,
-                BLOOD_STAIN, opacity, matrices, vertexConsumers);
+                palette, opacity, matrices, vertexConsumers);
     }
 
     public void renderBloodTrail(World world, UUID id,
@@ -292,19 +978,23 @@ public final class TerrainFieldOverlayRenderer {
                 BLOOD_STAIN, opacity, matrices, vertexConsumers);
     }
 
-    public void renderMergedBlood(BloodStainVisualEntity trigger, float tickDelta,
+    public void renderMergedStain(BloodStainVisualEntity trigger, float tickDelta,
                                   MatrixStack.Entry matrices,
                                   VertexConsumerProvider vertexConsumers) {
         if (shouldSkipBloodRender()) {
             return;
         }
         World world = trigger.getWorld();
-        if (this.bloodSnapshotFrame != bloodFrame
-                || this.bloodSnapshot.world != world) {
-            this.bloodSnapshot = buildBloodSnapshot(world, tickDelta);
-            this.bloodSnapshotFrame = bloodFrame;
+        int style = trigger.getStyle();
+        Palette palette = style == BloodStainVisualEntity.STYLE_DEVOURER
+                ? DEVOURER_STAIN : BLOOD_STAIN;
+        MergedStainState state = this.mergedStainStates.computeIfAbsent(
+                style, ignored -> new MergedStainState());
+        if (state.snapshotFrame != bloodFrame || state.snapshot.world != world) {
+            state.snapshot = buildBloodSnapshot(world, tickDelta, style, state);
+            state.snapshotFrame = bloodFrame;
         }
-        BloodComponent component = this.bloodSnapshot.byMember.get(trigger.getUuid());
+        BloodComponent component = state.snapshot.byMember.get(trigger.getUuid());
         if (component == null || !BLOOD_COMPONENTS_THIS_FRAME.add(component.id)) {
             return;
         }
@@ -331,24 +1021,28 @@ public final class TerrainFieldOverlayRenderer {
         TerrainCache terrain = getCache(
                 world, component.id, cacheCenterX, cacheCenterY, cacheCenterZ,
                 (float) Math.max(extentX, extentZ),
-                verticalRange, BLOOD_STAIN);
+                verticalRange, palette);
         if (terrain.faces.isEmpty()) {
             return;
         }
         BloodPreparedGeometry geometry = prepareBloodGeometry(
                 terrain, component, cacheCenterX, cacheCenterY, cacheCenterZ,
-                component.minY, component.maxY);
+                component.minY, component.maxY, palette);
         drawBloodGeometry(renderCenterX, renderCenterY, renderCenterZ,
                 matrices, vertexConsumers,
-                geometry, this.bloodSnapshot.sourceOpacities,
-                this.bloodSnapshot.allOpaque);
+                geometry, state.snapshot.sourceOpacities,
+                state.snapshot.allOpaque);
     }
 
-    private BloodSnapshot buildBloodSnapshot(World world, float tickDelta) {
+    private BloodSnapshot buildBloodSnapshot(World world, float tickDelta,
+                                             int style, MergedStainState renderState) {
         List<BloodEntityState> states = new ArrayList<>();
         Set<UUID> loaded = new HashSet<>();
         for (BloodStainVisualEntity entity : bloodEntities(world)) {
             loaded.add(entity.getUuid());
+            if (entity.getStyle() != style) {
+                continue;
+            }
             float opacity = bloodOpacity(entity, tickDelta);
             if (opacity <= 0.01F || entity.getRadius() <= 0.05F) {
                 continue;
@@ -362,13 +1056,13 @@ public final class TerrainFieldOverlayRenderer {
             long shapeKey;
             SplatterShape organicShape;
             if (entity.getShape() == BloodStainVisualEntity.SHAPE_TRAIL) {
-                shapeKey = shapeKey(3, entity.getHalfLength(),
+                shapeKey = shapeKey(3 + style * 10, entity.getHalfLength(),
                         entity.getRadius(), yaw, entity.getSeed());
                 organicShape = getBloodShape(entity.getUuid(), shapeKey,
                         () -> bloodTrailShape(entity.getHalfLength(),
                                 entity.getRadius(), yaw, entity.getSeed()));
             } else {
-                shapeKey = shapeKey(2, entity.getRadius(),
+                shapeKey = shapeKey(2 + style * 10, entity.getRadius(),
                         0.0F, 0.0F, entity.getSeed());
                 organicShape = getBloodShape(entity.getUuid(), shapeKey,
                         () -> bloodPoolShape(entity.getRadius(), entity.getSeed()));
@@ -394,9 +1088,9 @@ public final class TerrainFieldOverlayRenderer {
         this.bloodShapes.keySet().removeIf(id ->
                 !loaded.contains(id) && !this.caches.containsKey(id));
         if (states.isEmpty()) {
-            this.bloodComponentsByMember = Map.of();
-            this.bloodTopologyWorld = world;
-            this.bloodTopologySignature = 0L;
+            renderState.componentsByMember = Map.of();
+            renderState.topologyWorld = world;
+            renderState.topologySignature = 0L;
             return new BloodSnapshot(world, Map.of(), new float[0], true);
         }
 
@@ -405,22 +1099,22 @@ public final class TerrainFieldOverlayRenderer {
         for (BloodEntityState state : states) {
             estimatedFineCells += state.mask.fineCells.size();
         }
-        if (this.bloodGridScale == BLOOD_FINE_GRID_SCALE
+        if (renderState.gridScale == BLOOD_FINE_GRID_SCALE
                 && estimatedFineCells > BLOOD_COARSE_ENTER_CELLS) {
-            this.bloodGridScale = BLOOD_COARSE_GRID_SCALE;
-        } else if (this.bloodGridScale == BLOOD_COARSE_GRID_SCALE
+            renderState.gridScale = BLOOD_COARSE_GRID_SCALE;
+        } else if (renderState.gridScale == BLOOD_COARSE_GRID_SCALE
                 && estimatedFineCells < BLOOD_COARSE_EXIT_CELLS) {
-            this.bloodGridScale = BLOOD_FINE_GRID_SCALE;
+            renderState.gridScale = BLOOD_FINE_GRID_SCALE;
         }
 
         List<BloodSource> sources = new ArrayList<>(states.size());
         float[] opacities = new float[states.size()];
         boolean allOpaque = true;
         long topologySignature = mixSignature(
-                0xcbf29ce484222325L, this.bloodGridScale);
+                0xcbf29ce484222325L, renderState.gridScale);
         for (int i = 0; i < states.size(); i++) {
             BloodEntityState state = states.get(i);
-            LongSet cells = this.bloodGridScale == BLOOD_FINE_GRID_SCALE
+            LongSet cells = renderState.gridScale == BLOOD_FINE_GRID_SCALE
                     ? state.mask.fineCells
                     : coarseBloodMask(state.mask);
             sources.add(new BloodSource(
@@ -435,15 +1129,15 @@ public final class TerrainFieldOverlayRenderer {
                     topologySignature, Double.doubleToLongBits(state.maxY));
         }
 
-        if (this.bloodTopologyWorld != world
-                || this.bloodTopologySignature != topologySignature) {
-            this.bloodComponentsByMember = buildBloodTopology(
-                    sources, this.bloodGridScale);
-            this.bloodTopologyWorld = world;
-            this.bloodTopologySignature = topologySignature;
+        if (renderState.topologyWorld != world
+                || renderState.topologySignature != topologySignature) {
+            renderState.componentsByMember = buildBloodTopology(
+                    sources, renderState.gridScale);
+            renderState.topologyWorld = world;
+            renderState.topologySignature = topologySignature;
         }
         return new BloodSnapshot(
-                world, this.bloodComponentsByMember, opacities, allOpaque);
+                world, renderState.componentsByMember, opacities, allOpaque);
     }
 
     private static Iterable<BloodStainVisualEntity> bloodEntities(World world) {
@@ -562,7 +1256,7 @@ public final class TerrainFieldOverlayRenderer {
         int requestedZ = MathHelper.floor(centerZ);
         int requiredScanRadius = MathHelper.ceil(scanExtent)
                 + 2 + palette.movementMargin;
-        boolean bloodPalette = palette == BLOOD_STAIN;
+        boolean bloodPalette = palette.bloodStyle != null;
         int scanRadius = requiredScanRadius
                 + (bloodPalette ? BLOOD_CACHE_GROWTH_MARGIN : 0);
         TerrainCache cache = caches.get(id);
@@ -821,7 +1515,7 @@ public final class TerrainFieldOverlayRenderer {
     private static BloodPreparedGeometry prepareBloodGeometry(
             TerrainCache cache, BloodComponent component,
             double centerX, double centerY, double centerZ,
-            double minY, double maxY) {
+            double minY, double maxY, Palette palette) {
         BloodPreparedSignature signature = new BloodPreparedSignature(
                 centerX, centerY, centerZ, component.signature,
                 component.gridScale, minY, maxY);
@@ -847,13 +1541,13 @@ public final class TerrainFieldOverlayRenderer {
                 }
                 if (face.direction == Direction.UP) {
                     prepareBloodHorizontalPatches(
-                            fillPatches, face, component, phase);
+                            fillPatches, face, component, phase, palette);
                     prepareBloodHorizontalBorderPatches(
-                            borderPatches, face, component, phase);
+                            borderPatches, face, component, phase, palette);
                 } else if (face.direction.getAxis().isHorizontal()) {
                     prepareBloodVerticalPatches(
                             fillPatches, borderPatches, cache, face,
-                            component, phase, minY, maxY);
+                            component, phase, minY, maxY, palette);
                 }
             }
         }
@@ -865,7 +1559,7 @@ public final class TerrainFieldOverlayRenderer {
 
     private static void prepareBloodHorizontalPatches(
             List<BloodPreparedPatch> patches, TerrainFace face,
-            BloodComponent component, double phase) {
+            BloodComponent component, double phase, Palette palette) {
         int scale = component.gridScale;
         double gridSize = 1.0 / scale;
         int baseX = face.x * scale;
@@ -874,7 +1568,7 @@ public final class TerrainFieldOverlayRenderer {
                 component, baseX, baseZ, scale);
         if (fullBlockContributors != null) {
             patches.add(horizontalBloodPatch(
-                    face, fullBlockContributors, phase,
+                    face, fullBlockContributors, phase, palette,
                     face.x, face.x + 1.0, face.z, face.z + 1.0));
             return;
         }
@@ -904,7 +1598,7 @@ public final class TerrainFieldOverlayRenderer {
                 double z0 = face.z + localZ * gridSize;
                 double z1 = z0 + gridSize;
                 patches.add(horizontalBloodPatch(
-                        face, contributors, phase,
+                        face, contributors, phase, palette,
                         x0, x1, z0, z1));
                 localX = endX;
             }
@@ -913,19 +1607,19 @@ public final class TerrainFieldOverlayRenderer {
 
     private static void prepareBloodHorizontalBorderPatches(
             List<BloodPreparedPatch> patches, TerrainFace face,
-            BloodComponent component, double phase) {
+            BloodComponent component, double phase, Palette palette) {
         int scale = component.gridScale;
         double gridSize = 1.0 / scale;
         int baseX = face.x * scale;
         int baseZ = face.z * scale;
         prepareBloodBorderRuns(
-                patches, face, component, phase, Direction.NORTH);
+                patches, face, component, phase, Direction.NORTH, palette);
         prepareBloodBorderRuns(
-                patches, face, component, phase, Direction.SOUTH);
+                patches, face, component, phase, Direction.SOUTH, palette);
         prepareBloodBorderRuns(
-                patches, face, component, phase, Direction.WEST);
+                patches, face, component, phase, Direction.WEST, palette);
         prepareBloodBorderRuns(
-                patches, face, component, phase, Direction.EAST);
+                patches, face, component, phase, Direction.EAST, palette);
         for (int localZ = 0; localZ < scale; localZ++) {
             for (int localX = 0; localX < scale; localX++) {
                 int gridX = baseX + localX;
@@ -943,29 +1637,29 @@ public final class TerrainFieldOverlayRenderer {
                 double x1 = x0 + gridSize;
                 double z0 = face.z + localZ * gridSize;
                 double z1 = z0 + gridSize;
-                double width = Math.min(BLOOD_BORDER_WIDTH, gridSize * 0.4);
+                double width = Math.min(palette.bloodStyle.rimWidth, gridSize * 0.4);
 
                 if (north && west) {
                     addHorizontalBloodBorderPatch(
-                            patches, face, contributors, phase,
+                            patches, face, contributors, phase, palette,
                             x0, x0 + width, z0, z0 + width,
                             true, true, false, true);
                 }
                 if (north && east) {
                     addHorizontalBloodBorderPatch(
-                            patches, face, contributors, phase,
+                            patches, face, contributors, phase, palette,
                             x1 - width, x1, z0, z0 + width,
                             true, false, true, true);
                 }
                 if (south && east) {
                     addHorizontalBloodBorderPatch(
-                            patches, face, contributors, phase,
+                            patches, face, contributors, phase, palette,
                             x1 - width, x1, z1 - width, z1,
                             false, true, true, true);
                 }
                 if (south && west) {
                     addHorizontalBloodBorderPatch(
-                            patches, face, contributors, phase,
+                            patches, face, contributors, phase, palette,
                             x0, x0 + width, z1 - width, z1,
                             true, true, true, false);
                 }
@@ -975,10 +1669,10 @@ public final class TerrainFieldOverlayRenderer {
 
     private static void prepareBloodBorderRuns(
             List<BloodPreparedPatch> patches, TerrainFace face,
-            BloodComponent component, double phase, Direction edge) {
+            BloodComponent component, double phase, Direction edge, Palette palette) {
         int scale = component.gridScale;
         double gridSize = 1.0 / scale;
-        double width = Math.min(BLOOD_BORDER_WIDTH, gridSize * 0.4);
+        double width = Math.min(palette.bloodStyle.rimWidth, gridSize * 0.4);
         int baseX = face.x * scale;
         int baseZ = face.z * scale;
         boolean variableX = edge.getAxis() == Direction.Axis.Z;
@@ -1027,12 +1721,12 @@ public final class TerrainFieldOverlayRenderer {
                     }
                     if (edge == Direction.NORTH) {
                         addHorizontalBloodBorderPatch(
-                                patches, face, contributors, phase,
+                                patches, face, contributors, phase, palette,
                                 x0, x1, z0, z0 + width,
                                 true, false, false, true);
                     } else {
                         addHorizontalBloodBorderPatch(
-                                patches, face, contributors, phase,
+                                patches, face, contributors, phase, palette,
                                 x0, x1, z1 - width, z1,
                                 false, true, true, false);
                     }
@@ -1051,12 +1745,12 @@ public final class TerrainFieldOverlayRenderer {
                     }
                     if (edge == Direction.WEST) {
                         addHorizontalBloodBorderPatch(
-                                patches, face, contributors, phase,
+                                patches, face, contributors, phase, palette,
                                 x0, x0 + width, z0, z1,
                                 true, true, false, false);
                     } else {
                         addHorizontalBloodBorderPatch(
-                                patches, face, contributors, phase,
+                                patches, face, contributors, phase, palette,
                                 x1 - width, x1, z0, z1,
                                 false, false, true, true);
                     }
@@ -1081,7 +1775,7 @@ public final class TerrainFieldOverlayRenderer {
 
     private static void addHorizontalBloodBorderPatch(
             List<BloodPreparedPatch> patches, TerrainFace face,
-            int[] contributors, double phase,
+            int[] contributors, double phase, Palette palette,
             double x0, double x1, double z0, double z1,
             boolean rim00, boolean rim01, boolean rim11, boolean rim10) {
         if (x1 - x0 <= 1.0E-5 || z1 - z0 <= 1.0E-5) {
@@ -1090,11 +1784,11 @@ public final class TerrainFieldOverlayRenderer {
         double y = face.plane;
         patches.add(new BloodPreparedPatch(
                 face, contributors,
-                bloodBorderVertex(phase, x0, y, z0, rim00),
-                bloodBorderVertex(phase, x0, y, z1, rim01),
-                bloodBorderVertex(phase, x1, y, z1, rim11),
-                bloodBorderVertex(phase, x1, y, z0, rim10),
-                terrainLight(face, BLOOD_STAIN), BLOOD_BORDER_OFFSET));
+                bloodBorderVertex(phase, x0, y, z0, rim00, palette),
+                bloodBorderVertex(phase, x0, y, z1, rim01, palette),
+                bloodBorderVertex(phase, x1, y, z1, rim11, palette),
+                bloodBorderVertex(phase, x1, y, z0, rim10, palette),
+                terrainLight(face, palette), BLOOD_BORDER_OFFSET));
     }
 
     private static int[] fullBloodBlockContributors(
@@ -1118,26 +1812,27 @@ public final class TerrainFieldOverlayRenderer {
 
     private static BloodPreparedPatch horizontalBloodPatch(
             TerrainFace face, int[] contributors,
-            double phase, double x0, double x1, double z0, double z1) {
+            double phase, Palette palette,
+            double x0, double x1, double z0, double z1) {
         double y = face.plane;
         BloodPatchVertex v00 = bloodPatchVertex(
-                phase, x0, y, z0);
+                phase, x0, y, z0, palette);
         BloodPatchVertex v01 = bloodPatchVertex(
-                phase, x0, y, z1);
+                phase, x0, y, z1, palette);
         BloodPatchVertex v11 = bloodPatchVertex(
-                phase, x1, y, z1);
+                phase, x1, y, z1, palette);
         BloodPatchVertex v10 = bloodPatchVertex(
-                phase, x1, y, z0);
+                phase, x1, y, z0, palette);
         return new BloodPreparedPatch(
                 face, contributors, v00, v01, v11, v10,
-                terrainLight(face, BLOOD_STAIN), 0.0F);
+                terrainLight(face, palette), 0.0F);
     }
 
     private static void prepareBloodVerticalPatches(
             List<BloodPreparedPatch> fillPatches,
             List<BloodPreparedPatch> borderPatches, TerrainCache cache,
             TerrainFace face, BloodComponent component, double phase,
-            double minY, double maxY) {
+            double minY, double maxY, Palette palette) {
         double y0 = face.y;
         double y1 = face.y + 1.0;
         if (!hasCoplanarNeighbor(cache, face, Direction.DOWN)) {
@@ -1171,7 +1866,7 @@ public final class TerrainFieldOverlayRenderer {
             double variable0 = (variableX ? face.x : face.z) + segment * gridSize;
             double variable1 = (variableX ? face.x : face.z) + end * gridSize;
             fillPatches.add(verticalBloodPatch(
-                    face, contributors, phase,
+                    face, contributors, phase, palette,
                     variableX, variable0, variable1, y0, y1));
             segment = end;
         }
@@ -1196,9 +1891,9 @@ public final class TerrainFieldOverlayRenderer {
             double variable0 = (variableX ? face.x : face.z) + segment * gridSize;
             double variable1 = (variableX ? face.x : face.z) + end * gridSize;
             borderPatches.add(verticalBloodBorderPatch(
-                    face, contributors, phase, variableX,
+                    face, contributors, phase, palette, variableX,
                     variable0, variable1,
-                    Math.max(y0, y1 - BLOOD_BORDER_WIDTH), y1));
+                    Math.max(y0, y1 - palette.bloodStyle.rimWidth), y1));
             segment = end;
         }
     }
@@ -1254,7 +1949,7 @@ public final class TerrainFieldOverlayRenderer {
 
     private static BloodPreparedPatch verticalBloodPatch(
             TerrainFace face, int[] contributors,
-            double phase, boolean variableX,
+            double phase, Palette palette, boolean variableX,
             double variable0, double variable1, double y0, double y1) {
         double x0;
         double x1;
@@ -1270,25 +1965,25 @@ public final class TerrainFieldOverlayRenderer {
             z1 = variable1;
         }
         BloodPatchVertex low0 = bloodPatchVertex(
-                phase, x0, y0, z0);
+                phase, x0, y0, z0, palette);
         BloodPatchVertex high0 = bloodPatchVertex(
-                phase, x0, y1, z0);
+                phase, x0, y1, z0, palette);
         BloodPatchVertex high1 = bloodPatchVertex(
-                phase, x1, y1, z1);
+                phase, x1, y1, z1, palette);
         BloodPatchVertex low1 = bloodPatchVertex(
-                phase, x1, y0, z1);
+                phase, x1, y0, z1, palette);
         if (face.direction == Direction.NORTH || face.direction == Direction.EAST) {
             return new BloodPreparedPatch(
                     face, contributors, low0, high0, high1, low1,
-                    terrainLight(face, BLOOD_STAIN), 0.0F);
+                    terrainLight(face, palette), 0.0F);
         }
         return new BloodPreparedPatch(
                 face, contributors, low0, low1, high1, high0,
-                terrainLight(face, BLOOD_STAIN), 0.0F);
+                terrainLight(face, palette), 0.0F);
     }
 
     private static BloodPreparedPatch verticalBloodBorderPatch(
-            TerrainFace face, int[] contributors, double phase,
+            TerrainFace face, int[] contributors, double phase, Palette palette,
             boolean variableX, double variable0, double variable1,
             double y0, double y1) {
         double x0;
@@ -1305,52 +2000,52 @@ public final class TerrainFieldOverlayRenderer {
             z1 = variable1;
         }
         BloodPatchVertex low0 = bloodBorderVertex(
-                phase, x0, y0, z0, false);
+                phase, x0, y0, z0, false, palette);
         BloodPatchVertex high0 = bloodBorderVertex(
-                phase, x0, y1, z0, true);
+                phase, x0, y1, z0, true, palette);
         BloodPatchVertex high1 = bloodBorderVertex(
-                phase, x1, y1, z1, true);
+                phase, x1, y1, z1, true, palette);
         BloodPatchVertex low1 = bloodBorderVertex(
-                phase, x1, y0, z1, false);
+                phase, x1, y0, z1, false, palette);
         if (face.direction == Direction.NORTH || face.direction == Direction.EAST) {
             return new BloodPreparedPatch(
                     face, contributors, low0, high0, high1, low1,
-                    terrainLight(face, BLOOD_STAIN), BLOOD_BORDER_OFFSET);
+                    terrainLight(face, palette), BLOOD_BORDER_OFFSET);
         }
         return new BloodPreparedPatch(
                 face, contributors, low0, low1, high1, high0,
-                terrainLight(face, BLOOD_STAIN), BLOOD_BORDER_OFFSET);
+                terrainLight(face, palette), BLOOD_BORDER_OFFSET);
     }
 
     private static BloodPatchVertex bloodPatchVertex(
-            double phase, double x, double y, double z) {
+            double phase, double x, double y, double z, Palette palette) {
         return new BloodPatchVertex(
-                x, y, z, bloodBaseTint(phase, x, z));
+                x, y, z, stainBaseTint(palette, phase, x, z));
     }
 
     private static BloodPatchVertex bloodBorderVertex(
-            double phase, double x, double y, double z, boolean rim) {
+            double phase, double x, double y, double z, boolean rim, Palette palette) {
         return new BloodPatchVertex(
                 x, y, z, rim
-                ? bloodRimTint(phase, x, z)
-                : bloodBaseTint(phase, x, z));
+                ? stainRimTint(palette, phase, x, z)
+                : stainBaseTint(palette, phase, x, z));
     }
 
-    private static TintColor bloodBaseTint(
-            double phase, double worldX, double worldZ) {
+    private static TintColor stainBaseTint(
+            Palette palette, double phase, double worldX, double worldZ) {
         return bloodSolidTint(
-                BLOOD_STAIN.terrainRed,
-                BLOOD_STAIN.terrainGreen,
-                BLOOD_STAIN.terrainBlue,
+                palette.terrainRed,
+                palette.terrainGreen,
+                palette.terrainBlue,
                 bloodTintVariation(phase, worldX, worldZ));
     }
 
-    private static TintColor bloodRimTint(
-            double phase, double worldX, double worldZ) {
+    private static TintColor stainRimTint(
+            Palette palette, double phase, double worldX, double worldZ) {
         return bloodSolidTint(
-                BLOOD_STAIN.bloodStyle.rimRed,
-                BLOOD_STAIN.bloodStyle.rimGreen,
-                BLOOD_STAIN.bloodStyle.rimBlue,
+                palette.bloodStyle.rimRed,
+                palette.bloodStyle.rimGreen,
+                palette.bloodStyle.rimBlue,
                 bloodTintVariation(phase, worldX, worldZ));
     }
 
@@ -1574,7 +2269,7 @@ public final class TerrainFieldOverlayRenderer {
                     int uvTransform = Math.floorMod(hash >>> 8, 8);
 
                     for (Direction direction : Direction.values()) {
-                        if (palette == BLOOD_STAIN && direction == Direction.DOWN) {
+                        if (palette.bloodStyle != null && direction == Direction.DOWN) {
                             continue;
                         }
                         if (!Block.isFaceFullSquare(shape, direction)) {
@@ -2713,7 +3408,7 @@ public final class TerrainFieldOverlayRenderer {
                 && palette.variants.get(face.variant).emissive) {
             return LightmapTextureManager.MAX_LIGHT_COORDINATE;
         }
-        int light = palette == BLOOD_STAIN
+        int light = palette.bloodStyle != null
                 ? WorldRenderer.getLightmapCoordinates(
                 face.world, face.blockPos.offset(face.direction))
                 : WorldRenderer.getLightmapCoordinates(
@@ -3310,6 +4005,85 @@ public final class TerrainFieldOverlayRenderer {
             float[] sourceOpacities, boolean allOpaque) {
         private static final BloodSnapshot EMPTY =
                 new BloodSnapshot(null, Map.of(), new float[0], true);
+    }
+
+    private static final class MergedStainState {
+        private long snapshotFrame = Long.MIN_VALUE;
+        private BloodSnapshot snapshot = BloodSnapshot.EMPTY;
+        private World topologyWorld;
+        private long topologySignature = Long.MIN_VALUE;
+        private int gridScale = BLOOD_FINE_GRID_SCALE;
+        private Map<UUID, BloodComponent> componentsByMember = Map.of();
+    }
+
+    private static final class DevourerGrowthState {
+        private final World world;
+        private final long growthKey;
+        private final long[] cells;
+        private final Long2IntOpenHashMap indices;
+        private final float[] arrivals;
+        private final float[] activatedAt;
+        private final float[] wetness;
+        private final int seed;
+        private float displayedProgress;
+        private float lastAnimationTime;
+        private long lastSeenTick;
+        private TerrainCache preparedTerrain;
+        private double preparedCenterX;
+        private double preparedCenterY;
+        private double preparedCenterZ;
+        private double preparedMinY;
+        private double preparedMaxY;
+        private LongSet trailCells = new LongOpenHashSet();
+        private long trailSignature;
+        private long preparedTrailSignature = Long.MIN_VALUE;
+        private DevourerGrowthGeometry preparedGeometry;
+
+        private DevourerGrowthState(
+                World world, long growthKey, long[] cells,
+                Long2IntOpenHashMap indices, float[] arrivals,
+                float[] activatedAt, float[] wetness,
+                float lastAnimationTime, long lastSeenTick, int seed) {
+            this.world = world;
+            this.growthKey = growthKey;
+            this.cells = cells;
+            this.indices = indices;
+            this.arrivals = arrivals;
+            this.activatedAt = activatedAt;
+            this.wetness = wetness;
+            this.lastAnimationTime = lastAnimationTime;
+            this.lastSeenTick = lastSeenTick;
+            this.seed = seed;
+        }
+    }
+
+    private record DevourerSpreadNode(int index, float arrival) {
+    }
+
+    private record DevourerGrowthGeometry(
+            List<DevourerFillPatch> fills,
+            List<DevourerBorderPatch> borders,
+            int[] mainIndices, boolean[] trailCells) {
+    }
+
+    private record DevourerTrailSnapshot(
+            LongSet cells, long signature,
+            double minY, double maxY, boolean present) {
+    }
+
+    private record DevourerCompositeBounds(
+            double centerX, double centerY, double centerZ,
+            float extent, float verticalRange,
+            double minY, double maxY) {
+    }
+
+    private record DevourerFillPatch(
+            BloodPreparedPatch patch, int cellIndex) {
+    }
+
+    private record DevourerBorderPatch(
+            BloodPreparedPatch patch, int cellIndex,
+            int neighborA, int neighborB, boolean corner) {
     }
 
     private record BloodPreparedSignature(

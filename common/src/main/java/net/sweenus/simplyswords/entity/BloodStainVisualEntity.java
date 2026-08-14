@@ -12,6 +12,8 @@ import net.sweenus.simplyswords.registry.EntityRegistry;
 public class BloodStainVisualEntity extends Entity {
     public static final int SHAPE_CIRCLE = 0;
     public static final int SHAPE_TRAIL = 1;
+    public static final int STYLE_BLOOD = 0;
+    public static final int STYLE_DEVOURER = 1;
 
     private static final TrackedData<Integer> SHAPE =
             DataTracker.registerData(BloodStainVisualEntity.class, TrackedDataHandlerRegistry.INTEGER);
@@ -27,6 +29,10 @@ public class BloodStainVisualEntity extends Entity {
             DataTracker.registerData(BloodStainVisualEntity.class, TrackedDataHandlerRegistry.INTEGER);
     private static final TrackedData<Integer> SEED =
             DataTracker.registerData(BloodStainVisualEntity.class, TrackedDataHandlerRegistry.INTEGER);
+    private static final TrackedData<Integer> STYLE =
+            DataTracker.registerData(BloodStainVisualEntity.class, TrackedDataHandlerRegistry.INTEGER);
+    private static final TrackedData<Integer> SOURCE_ENTITY_ID =
+            DataTracker.registerData(BloodStainVisualEntity.class, TrackedDataHandlerRegistry.INTEGER);
 
     public BloodStainVisualEntity(EntityType<? extends BloodStainVisualEntity> type, World world) {
         super(type, world);
@@ -39,6 +45,14 @@ public class BloodStainVisualEntity extends Entity {
                                   int shape, float radius, float halfLength,
                                   float yaw, float verticalRange,
                                   int lifetime, int fadeDuration, int seed) {
+        this(world, x, y, z, shape, radius, halfLength, yaw, verticalRange,
+                lifetime, fadeDuration, seed, STYLE_BLOOD);
+    }
+
+    public BloodStainVisualEntity(World world, double x, double y, double z,
+                                  int shape, float radius, float halfLength,
+                                  float yaw, float verticalRange,
+                                  int lifetime, int fadeDuration, int seed, int style) {
         this(EntityRegistry.BLOOD_STAIN_VISUAL.get(), world);
         this.setPosition(x, y, z);
         this.setShape(shape);
@@ -49,6 +63,7 @@ public class BloodStainVisualEntity extends Entity {
         this.setLifetime(lifetime);
         this.setFadeDuration(fadeDuration);
         this.setSeed(seed);
+        this.setStyle(style);
     }
 
     @Override
@@ -60,6 +75,8 @@ public class BloodStainVisualEntity extends Entity {
         builder.add(LIFETIME, 600);
         builder.add(FADE_DURATION, 100);
         builder.add(SEED, 0);
+        builder.add(STYLE, STYLE_BLOOD);
+        builder.add(SOURCE_ENTITY_ID, -1);
     }
 
     @Override
@@ -128,6 +145,22 @@ public class BloodStainVisualEntity extends Entity {
         this.dataTracker.set(SEED, seed);
     }
 
+    public int getStyle() {
+        return this.dataTracker.get(STYLE);
+    }
+
+    public void setStyle(int style) {
+        this.dataTracker.set(STYLE, Math.clamp(style, STYLE_BLOOD, STYLE_DEVOURER));
+    }
+
+    public int getSourceEntityId() {
+        return this.dataTracker.get(SOURCE_ENTITY_ID);
+    }
+
+    public void setSourceEntityId(int sourceEntityId) {
+        this.dataTracker.set(SOURCE_ENTITY_ID, sourceEntityId);
+    }
+
     @Override
     public boolean isAttackable() {
         return false;
@@ -153,6 +186,9 @@ public class BloodStainVisualEntity extends Entity {
         this.setLifetime(nbt.getInt("lifetime"));
         this.setFadeDuration(nbt.getInt("fade_duration"));
         this.setSeed(nbt.getInt("seed"));
+        this.setStyle(nbt.getInt("style"));
+        this.setSourceEntityId(nbt.contains("source_entity_id")
+                ? nbt.getInt("source_entity_id") : -1);
     }
 
     @Override
@@ -165,5 +201,7 @@ public class BloodStainVisualEntity extends Entity {
         nbt.putInt("lifetime", this.getLifetime());
         nbt.putInt("fade_duration", this.getFadeDuration());
         nbt.putInt("seed", this.getSeed());
+        nbt.putInt("style", this.getStyle());
+        nbt.putInt("source_entity_id", this.getSourceEntityId());
     }
 }

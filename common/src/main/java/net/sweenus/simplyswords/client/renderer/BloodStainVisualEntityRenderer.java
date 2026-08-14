@@ -41,7 +41,11 @@ public class BloodStainVisualEntityRenderer extends EntityRenderer<BloodStainVis
             terrainOverlay.clearBlood();
             return;
         }
-        terrainOverlay.renderMergedBlood(entity, tickDelta, matrices.peek(), consumers);
+        if (entity.getStyle() == BloodStainVisualEntity.STYLE_DEVOURER) {
+            super.render(entity, yaw, tickDelta, matrices, consumers, light);
+            return;
+        }
+        terrainOverlay.renderMergedStain(entity, tickDelta, matrices.peek(), consumers);
         super.render(entity, yaw, tickDelta, matrices, consumers, light);
     }
 }

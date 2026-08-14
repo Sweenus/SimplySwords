@@ -3,11 +3,14 @@ package net.sweenus.simplyswords.api;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraft.world.biome.Biome;
+import net.minecraft.world.biome.BiomeKeys;
 import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.item.component.AwakeningRouteComponent;
 import net.sweenus.simplyswords.item.component.RelicAttunementComponent;
@@ -27,6 +30,8 @@ public final class AwakeningFormRegistry {
     public static final Identifier HARBINGER_ROUTE = Identifier.of(SimplySwords.MOD_ID, "harbinger");
     public static final Identifier STORMSCALE_ROUTE = Identifier.of(SimplySwords.MOD_ID, "stormscale");
     public static final Identifier IONBOUND_ROUTE = Identifier.of(SimplySwords.MOD_ID, "ionbound_stormscale");
+    public static final Identifier WATCHER_ROUTE = Identifier.of(SimplySwords.MOD_ID, "watcher_claymore");
+    public static final Identifier DEVOURER_ROUTE = Identifier.of(SimplySwords.MOD_ID, "the_devourer");
 
     private static final Map<Item, AwakeningFormFamily> FAMILIES = new IdentityHashMap<>();
     private static boolean builtinsRegistered;
@@ -105,6 +110,26 @@ public final class AwakeningFormRegistry {
                 .build());
 
         register(AwakeningFormFamily.builder(
+                        ItemsRegistry.WATCHER_CLAYMORE.get(),
+                        AwakeningProfile.DEFAULT,
+                        Identifier.of(SimplySwords.MOD_ID, "watcher_claymore"))
+                .basePresentation("item.simplyswords.watcher_claymore", AwakeningFormRarity.UNIQUE, 0.0F)
+                .selectionLevel(4)
+                .route(WATCHER_ROUTE, new AwakeningFormStage(
+                        Identifier.of(SimplySwords.MOD_ID, "awakened_watcher_claymore"), 4,
+                        ItemsRegistry.WATCHER_CLAYMORE.get(), "item.simplyswords.watcher_claymore",
+                        AwakeningFormRarity.UNIQUE, 0.0F))
+                .route(DEVOURER_ROUTE, new AwakeningFormStage(
+                        Identifier.of(SimplySwords.MOD_ID, "the_devourer"), 4,
+                        ItemsRegistry.THE_DEVOURER.get(), "item.simplyswords.the_devourer",
+                        AwakeningFormRarity.LEGENDARY, 1.0F))
+                .routeHandler(context -> isDeepDarkForge(context) ? DEVOURER_ROUTE : WATCHER_ROUTE)
+                .routeTransitionHandler((context, currentRoute) ->
+                        WATCHER_ROUTE.equals(currentRoute) && isDeepDarkForge(context)
+                                ? DEVOURER_ROUTE : currentRoute)
+                .build());
+
+        register(AwakeningFormFamily.builder(
                         ItemsRegistry.DORMANT_RELIC.get(),
                         AwakeningProfile.DEFAULT,
                         Identifier.of(SimplySwords.MOD_ID, "dormant_relic"))
@@ -155,6 +180,11 @@ public final class AwakeningFormRegistry {
                 .build());
 
         builtinsRegistered = true;
+    }
+
+    private static boolean isDeepDarkForge(AwakeningFormContext context) {
+        RegistryEntry<Biome> biome = context.world().getBiome(context.forgePos());
+        return biome.matchesKey(BiomeKeys.DEEP_DARK);
     }
 
     public static Optional<AwakeningFormFamily> get(ItemStack stack) {

@@ -699,6 +699,13 @@ public class ItemsRegistry {
                             .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.UNIQUE,
                                     (int) thewatcher_damage_modifier, thewatcher_attackspeed))));
 
+    public static final RegistrySupplier<DevourerClaymoreItem> THE_DEVOURER = ITEM.register("the_devourer", () ->
+            new DevourerClaymoreItem(
+                    ModToolMaterial.UNIQUE,
+                    new Item.Settings().fireproof()
+                            .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.UNIQUE,
+                                    (int) thewatcher_damage_modifier, thewatcher_attackspeed))));
+
     public static final RegistrySupplier<StormsEdgeSwordItem> STORMS_EDGE = ITEM.register("storms_edge", () ->
             new StormsEdgeSwordItem(
                     ModToolMaterial.UNIQUE,
@@ -716,7 +723,7 @@ public class ItemsRegistry {
     public static final RegistrySupplier<IonboundStormscaleSwordItem> IONBOUND_STORMSCALE = ITEM.register("ionbound_stormscale", () ->
             new IonboundStormscaleSwordItem(
                     ModToolMaterial.UNIQUE,
-                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).fireproof()
+                    new Item.Settings().fireproof()
                             .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.UNIQUE,
                                     (int) stormscale_damage_modifier, stormscale_attackspeed))));
 
