@@ -324,6 +324,15 @@ public class EntityRegistry {
                     .build(Identifier.of(SimplySwords.MOD_ID, "devourer_reprisal_visual").toString())
     );
 
+    public static final RegistrySupplier<EntityType<WraithmawCutlassEntity>> WRAITHMAW_CUTLASS = ENTITIES.register(
+            "wraithmaw_cutlass",
+            () -> EntityType.Builder.<WraithmawCutlassEntity>create(WraithmawCutlassEntity::new, SpawnGroup.MISC)
+                    .dimensions(0.55F, 0.55F)
+                    .maxTrackingRange(128)
+                    .trackingTickInterval(1)
+                    .build(Identifier.of(SimplySwords.MOD_ID, "wraithmaw_cutlass").toString())
+    );
+
     public static final RegistrySupplier<EntityType<ChainLightningVisualEntity>> CHAIN_LIGHTNING_VISUAL = ENTITIES.register(
             "chain_lightning_visual",
             () -> EntityType.Builder.<ChainLightningVisualEntity>create(ChainLightningVisualEntity::new, SpawnGroup.MISC)

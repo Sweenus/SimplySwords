@@ -59,6 +59,7 @@ public class UniqueEffectsConfig extends Config {
     public DevourerClaymoreItem.EffectSettings devourer = new DevourerClaymoreItem.EffectSettings();
     public WaxweaverSwordItem.EffectSettings waxweaver = new WaxweaverSwordItem.EffectSettings();
     public WraithfangSwordItem.EffectSettings wraithfang = new WraithfangSwordItem.EffectSettings();
+    public WraithmawSwordItem.EffectSettings wraithmaw = new WraithmawSwordItem.EffectSettings();
     public ChompolotlSwordItem.EffectSettings chompolotl = new ChompolotlSwordItem.EffectSettings();
 
     // eldritch end compat

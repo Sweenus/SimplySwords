@@ -41,7 +41,8 @@ public class BloodStainVisualEntityRenderer extends EntityRenderer<BloodStainVis
             terrainOverlay.clearBlood();
             return;
         }
-        if (entity.getStyle() == BloodStainVisualEntity.STYLE_DEVOURER) {
+        if (entity.getStyle() == BloodStainVisualEntity.STYLE_DEVOURER
+                && entity.getSourceEntityId() >= 0) {
             super.render(entity, yaw, tickDelta, matrices, consumers, light);
             return;
         }

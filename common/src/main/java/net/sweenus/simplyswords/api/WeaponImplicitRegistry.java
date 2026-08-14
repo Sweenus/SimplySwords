@@ -585,6 +585,7 @@ public final class WeaponImplicitRegistry {
         registerPath("enigma", CLAYMORE);
         registerPath("caelestis", CLAYMORE);
         registerPath("wraithfang", CUTLASS);
+        registerPath("wraithmaw", CUTLASS);
         registerPath("bloodwake", CUTLASS);
         registerPath("chompolotl", CHAKRAM);
         registerPath("dreadtide", TWINBLADE);

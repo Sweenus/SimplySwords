@@ -25,9 +25,13 @@ import net.minecraft.world.RaycastContext;
 import net.sweenus.simplyswords.api.SpellScalingProfile;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
+import net.sweenus.simplyswords.api.AwakeningApi;
+import net.sweenus.simplyswords.api.AwakeningFormRegistry;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.DevourerMassVisualEntity;
 import net.sweenus.simplyswords.entity.DevourerTendrilVisualEntity;
+import net.sweenus.simplyswords.item.component.AwakeningRouteComponent;
+import net.sweenus.simplyswords.registry.ComponentTypeRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -242,7 +246,9 @@ public final class DevourerAbilityManager {
         candidates.addAll(world.getEntitiesByClass(ExperienceOrbEntity.class, search,
                 target -> isAvailableLooseTarget(world, mass, target, radius)));
         Entity target = candidates.stream()
-                .sorted(Comparator.comparingDouble(candidate -> candidate.squaredDistanceTo(mass.center)))
+                .sorted(Comparator
+                        .comparingInt(DevourerAbilityManager::looseTargetPriority)
+                        .thenComparingDouble(candidate -> candidate.squaredDistanceTo(mass.center)))
                 .findFirst()
                 .orElse(null);
         if (target == null) {
@@ -322,6 +328,9 @@ public final class DevourerAbilityManager {
                     : looseDeliverySlot(mass.center, radius, captured, target);
             boolean delivered = pullLooseTowardSlot(target, slot, !captured.stored);
             if (!captured.stored && delivered) {
+                if (corruptWraithfang(world, target, mass.center)) {
+                    visual.feed();
+                }
                 captured.stored = true;
                 if (tendril != null) {
                     tendril.discard();
@@ -332,6 +341,38 @@ public final class DevourerAbilityManager {
             }
         }
         return slotFreed;
+    }
+
+    private static int looseTargetPriority(Entity entity) {
+        return entity instanceof ItemEntity itemEntity
+                && itemEntity.getStack().isOf(ItemsRegistry.WRAITHFANG.get()) ? 0 : 1;
+    }
+
+    private static boolean corruptWraithfang(ServerWorld world, Entity target, Vec3d center) {
+        if (!(target instanceof ItemEntity itemEntity)) {
+            return false;
+        }
+        ItemStack source = itemEntity.getStack();
+        if (!source.isOf(ItemsRegistry.WRAITHFANG.get())) {
+            return false;
+        }
+        int level = AwakeningApi.getLevel(source);
+        ItemStack result = source.copyComponentsToNewStack(ItemsRegistry.WRAITHMAW.get(), source.getCount());
+        result.set(ComponentTypeRegistry.AWAKENING_ROUTE.get(),
+                new AwakeningRouteComponent(AwakeningFormRegistry.WRAITHMAW_ROUTE));
+        AwakeningApi.setLevel(result, level);
+        itemEntity.setStack(result);
+        world.spawnParticles(DEVOURER_DUST, center.x, center.y, center.z,
+                42, 0.72, 0.72, 0.72, 0.07);
+        world.spawnParticles(ParticleTypes.SCULK_SOUL, center.x, center.y, center.z,
+                18, 0.48, 0.48, 0.48, 0.045);
+        world.spawnParticles(ParticleTypes.REVERSE_PORTAL, center.x, center.y, center.z,
+                36, 0.64, 0.64, 0.64, 0.12);
+        world.playSound(null, center.x, center.y, center.z, SoundRegistry.DARK_ACTIVATION_DISTORTED.get(),
+                SoundCategory.PLAYERS, 0.9F, 0.62F);
+        world.playSound(null, center.x, center.y, center.z, SoundEvents.ENTITY_WARDEN_HEARTBEAT,
+                SoundCategory.PLAYERS, 0.72F, 0.82F);
+        return true;
     }
 
     private static Vec3d looseDeliverySlot(Vec3d center, float radius,

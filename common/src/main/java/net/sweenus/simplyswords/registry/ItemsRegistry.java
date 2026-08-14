@@ -1035,6 +1035,13 @@ public class ItemsRegistry {
                             .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.UNIQUE,
                                     (int) wraithfang_damage_modifier, wraithfang_attackspeed))));
 
+    public static final RegistrySupplier<WraithmawSwordItem> WRAITHMAW = ITEM.register("wraithmaw", () ->
+            new WraithmawSwordItem(
+                    ModToolMaterial.UNIQUE,
+                    new Item.Settings().fireproof()
+                            .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.UNIQUE,
+                                    (int) wraithfang_damage_modifier, wraithfang_attackspeed))));
+
     public static final RegistrySupplier<BloodwakeSwordItem> BLOODWAKE = ITEM.register("bloodwake", () ->
             new BloodwakeSwordItem(
                     ModToolMaterial.UNIQUE,

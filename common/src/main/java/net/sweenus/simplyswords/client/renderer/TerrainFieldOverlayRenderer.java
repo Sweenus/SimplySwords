@@ -986,12 +986,15 @@ public final class TerrainFieldOverlayRenderer {
         }
         World world = trigger.getWorld();
         int style = trigger.getStyle();
+        boolean standaloneDevourer = style == BloodStainVisualEntity.STYLE_DEVOURER
+                && trigger.getSourceEntityId() < 0;
         Palette palette = style == BloodStainVisualEntity.STYLE_DEVOURER
                 ? DEVOURER_STAIN : BLOOD_STAIN;
+        int renderGroup = style * 2 + (standaloneDevourer ? 1 : 0);
         MergedStainState state = this.mergedStainStates.computeIfAbsent(
-                style, ignored -> new MergedStainState());
+                renderGroup, ignored -> new MergedStainState());
         if (state.snapshotFrame != bloodFrame || state.snapshot.world != world) {
-            state.snapshot = buildBloodSnapshot(world, tickDelta, style, state);
+            state.snapshot = buildBloodSnapshot(world, tickDelta, style, standaloneDevourer, state);
             state.snapshotFrame = bloodFrame;
         }
         BloodComponent component = state.snapshot.byMember.get(trigger.getUuid());
@@ -1035,12 +1038,17 @@ public final class TerrainFieldOverlayRenderer {
     }
 
     private BloodSnapshot buildBloodSnapshot(World world, float tickDelta,
-                                             int style, MergedStainState renderState) {
+                                             int style, boolean standaloneDevourer,
+                                             MergedStainState renderState) {
         List<BloodEntityState> states = new ArrayList<>();
         Set<UUID> loaded = new HashSet<>();
         for (BloodStainVisualEntity entity : bloodEntities(world)) {
             loaded.add(entity.getUuid());
             if (entity.getStyle() != style) {
+                continue;
+            }
+            if (style == BloodStainVisualEntity.STYLE_DEVOURER
+                    && (entity.getSourceEntityId() < 0) != standaloneDevourer) {
                 continue;
             }
             float opacity = bloodOpacity(entity, tickDelta);

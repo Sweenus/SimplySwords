@@ -32,6 +32,8 @@ public final class AwakeningFormRegistry {
     public static final Identifier IONBOUND_ROUTE = Identifier.of(SimplySwords.MOD_ID, "ionbound_stormscale");
     public static final Identifier WATCHER_ROUTE = Identifier.of(SimplySwords.MOD_ID, "watcher_claymore");
     public static final Identifier DEVOURER_ROUTE = Identifier.of(SimplySwords.MOD_ID, "the_devourer");
+    public static final Identifier WRAITHFANG_ROUTE = Identifier.of(SimplySwords.MOD_ID, "wraithfang");
+    public static final Identifier WRAITHMAW_ROUTE = Identifier.of(SimplySwords.MOD_ID, "wraithmaw");
 
     private static final Map<Item, AwakeningFormFamily> FAMILIES = new IdentityHashMap<>();
     private static boolean builtinsRegistered;
@@ -127,6 +129,23 @@ public final class AwakeningFormRegistry {
                 .routeTransitionHandler((context, currentRoute) ->
                         WATCHER_ROUTE.equals(currentRoute) && isDeepDarkForge(context)
                                 ? DEVOURER_ROUTE : currentRoute)
+                .build());
+
+        register(AwakeningFormFamily.builder(
+                        ItemsRegistry.WRAITHFANG.get(),
+                        AwakeningProfile.DEFAULT,
+                        Identifier.of(SimplySwords.MOD_ID, "wraithfang"))
+                .basePresentation("item.simplyswords.wraithfang", AwakeningFormRarity.UNIQUE, 0.0F)
+                .selectionLevel(0)
+                .route(WRAITHFANG_ROUTE, new AwakeningFormStage(
+                        Identifier.of(SimplySwords.MOD_ID, "spectral_wraithfang"), 0,
+                        ItemsRegistry.WRAITHFANG.get(), "item.simplyswords.wraithfang",
+                        AwakeningFormRarity.UNIQUE, 0.0F))
+                .route(WRAITHMAW_ROUTE, new AwakeningFormStage(
+                        Identifier.of(SimplySwords.MOD_ID, "wraithmaw"), 0,
+                        ItemsRegistry.WRAITHMAW.get(), "item.simplyswords.wraithmaw",
+                        AwakeningFormRarity.LEGENDARY, 1.0F))
+                .routeHandler(context -> WRAITHFANG_ROUTE)
                 .build());
 
         register(AwakeningFormFamily.builder(
