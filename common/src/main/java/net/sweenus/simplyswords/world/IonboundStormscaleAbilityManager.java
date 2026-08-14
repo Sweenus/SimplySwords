@@ -439,10 +439,14 @@ public final class IonboundStormscaleAbilityManager {
             LivingEntity owner = resolveLiving(world, entry.getKey());
             Entity visual = world.getEntity(entry.getValue());
             if (owner == null || !isHoldingIonbound(owner) || visibleCubeCount(owner) <= 0
-                    || !(visual instanceof IonboundStormscaleVisualEntity)) {
+                    || !(visual instanceof IonboundStormscaleVisualEntity orbit)
+                    || orbit.getKind() != IonboundStormscaleVisualEntity.ORBIT
+                    || !orbit.isOwnedBy(owner) || orbit.needsOrbitRenewal()) {
                 if (visual != null) visual.discard();
                 iterator.remove();
+                continue;
             }
+            orbit.refreshOrbitLease(owner, visibleCubeCount(owner));
         }
         if (visuals.isEmpty()) ORBIT_VISUALS.remove(world);
     }
@@ -455,10 +459,13 @@ public final class IonboundStormscaleAbilityManager {
             visuals.remove(actor.getUuid());
             return;
         }
-        if (existing instanceof IonboundStormscaleVisualEntity visual) {
-            visual.setCubes(cubes);
+        if (existing instanceof IonboundStormscaleVisualEntity visual
+                && visual.getKind() == IonboundStormscaleVisualEntity.ORBIT
+                && visual.isOwnedBy(actor) && !visual.needsOrbitRenewal()) {
+            visual.refreshOrbitLease(actor, cubes);
             return;
         }
+        if (existing != null) existing.discard();
         IonboundStormscaleVisualEntity visual = IonboundStormscaleVisualEntity.orbit(world, actor, cubes);
         visual.addCommandTag(VISUAL_TAG);
         world.spawnEntity(visual);

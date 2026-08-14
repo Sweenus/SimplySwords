@@ -12,6 +12,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.registry.EntityRegistry;
 
+import java.util.Optional;
 import java.util.UUID;
 
 public final class IonboundStormscaleVisualEntity extends Entity {
@@ -19,9 +20,12 @@ public final class IonboundStormscaleVisualEntity extends Entity {
     public static final int SHIELD = 1;
     public static final int CORRIDOR = 2;
     public static final int BEAM = 3;
+    private static final int ORBIT_LIFETIME = 1800;
+    private static final long ORBIT_LEASE_TICKS = 100L;
 
     private static final TrackedData<Integer> KIND = DataTracker.registerData(IonboundStormscaleVisualEntity.class, TrackedDataHandlerRegistry.INTEGER);
     private static final TrackedData<Integer> OWNER_ID = DataTracker.registerData(IonboundStormscaleVisualEntity.class, TrackedDataHandlerRegistry.INTEGER);
+    private static final TrackedData<Optional<UUID>> OWNER_UUID = DataTracker.registerData(IonboundStormscaleVisualEntity.class, TrackedDataHandlerRegistry.OPTIONAL_UUID);
     private static final TrackedData<Integer> CUBES = DataTracker.registerData(IonboundStormscaleVisualEntity.class, TrackedDataHandlerRegistry.INTEGER);
     private static final TrackedData<Integer> LIFETIME = DataTracker.registerData(IonboundStormscaleVisualEntity.class, TrackedDataHandlerRegistry.INTEGER);
     private static final TrackedData<Float> LENGTH = DataTracker.registerData(IonboundStormscaleVisualEntity.class, TrackedDataHandlerRegistry.FLOAT);
@@ -32,7 +36,7 @@ public final class IonboundStormscaleVisualEntity extends Entity {
     private static final TrackedData<Integer> CLOSE = DataTracker.registerData(IonboundStormscaleVisualEntity.class, TrackedDataHandlerRegistry.INTEGER);
     private static final TrackedData<Integer> SEED = DataTracker.registerData(IonboundStormscaleVisualEntity.class, TrackedDataHandlerRegistry.INTEGER);
 
-    private UUID ownerUuid;
+    private long orbitLeaseExpiresAt = Long.MIN_VALUE;
 
     public IonboundStormscaleVisualEntity(EntityType<? extends IonboundStormscaleVisualEntity> type, World world) {
         super(type, world);
@@ -41,17 +45,15 @@ public final class IonboundStormscaleVisualEntity extends Entity {
     }
 
     public static IonboundStormscaleVisualEntity orbit(World world, Entity owner, int cubes) {
-        IonboundStormscaleVisualEntity visual = create(world, owner.getPos(), ORBIT, Integer.MAX_VALUE);
-        visual.ownerUuid = owner.getUuid();
-        visual.dataTracker.set(OWNER_ID, owner.getId());
-        visual.dataTracker.set(CUBES, cubes);
+        IonboundStormscaleVisualEntity visual = create(world, owner.getPos(), ORBIT, ORBIT_LIFETIME);
+        visual.dataTracker.set(SEED, owner.getUuid().hashCode());
+        visual.refreshOrbitLease(owner, cubes);
         return visual;
     }
 
     public static IonboundStormscaleVisualEntity shield(World world, Entity owner, int lifetime) {
         IonboundStormscaleVisualEntity visual = create(world, owner.getPos(), SHIELD, lifetime);
-        visual.ownerUuid = owner.getUuid();
-        visual.dataTracker.set(OWNER_ID, owner.getId());
+        visual.setOwner(owner);
         visual.dataTracker.set(WIDTH, owner.getWidth() + 0.9F);
         visual.dataTracker.set(HEIGHT, owner.getHeight() + 0.7F);
         return visual;
@@ -75,8 +77,7 @@ public final class IonboundStormscaleVisualEntity extends Entity {
     public static IonboundStormscaleVisualEntity beam(World world, Entity owner,
                                                        float length, float width, int lifetime) {
         IonboundStormscaleVisualEntity visual = create(world, owner.getPos(), BEAM, lifetime);
-        visual.ownerUuid = owner.getUuid();
-        visual.dataTracker.set(OWNER_ID, owner.getId());
+        visual.setOwner(owner);
         visual.setYaw(owner.getYaw());
         visual.setPitch(owner.getPitch());
         visual.dataTracker.set(LENGTH, length);
@@ -98,6 +99,7 @@ public final class IonboundStormscaleVisualEntity extends Entity {
     protected void initDataTracker(DataTracker.Builder builder) {
         builder.add(KIND, ORBIT);
         builder.add(OWNER_ID, -1);
+        builder.add(OWNER_UUID, Optional.empty());
         builder.add(CUBES, 0);
         builder.add(LIFETIME, 20);
         builder.add(LENGTH, 1.0F);
@@ -113,6 +115,11 @@ public final class IonboundStormscaleVisualEntity extends Entity {
     public void tick() {
         super.tick();
         if (getWorld().isClient()) return;
+        if (getKind() == ORBIT && getWorld() instanceof ServerWorld serverWorld
+                && (age >= getLifetime() || serverWorld.getTime() > orbitLeaseExpiresAt)) {
+            discard();
+            return;
+        }
         if (getKind() == ORBIT || getKind() == SHIELD || getKind() == BEAM) {
             Entity owner = getOwner();
             if (owner == null || !owner.isAlive()) {
@@ -125,6 +132,21 @@ public final class IonboundStormscaleVisualEntity extends Entity {
     }
 
     public void setCubes(int cubes) { dataTracker.set(CUBES, Math.clamp(cubes, 0, 3)); }
+    public void refreshOrbitLease(Entity owner, int cubes) {
+        if (getKind() != ORBIT || owner == null) return;
+        setOwner(owner);
+        setCubes(cubes);
+        if (getWorld() instanceof ServerWorld serverWorld) {
+            orbitLeaseExpiresAt = serverWorld.getTime() + ORBIT_LEASE_TICKS;
+        }
+    }
+    public boolean isOwnedBy(Entity owner) {
+        return owner != null && dataTracker.get(OWNER_UUID)
+                .map(owner.getUuid()::equals).orElse(false);
+    }
+    public boolean needsOrbitRenewal() {
+        return getKind() != ORBIT || age >= ORBIT_LIFETIME - 1;
+    }
     public int getKind() { return dataTracker.get(KIND); }
     public int getOwnerId() { return dataTracker.get(OWNER_ID); }
     public int getCubes() { return dataTracker.get(CUBES); }
@@ -137,11 +159,19 @@ public final class IonboundStormscaleVisualEntity extends Entity {
     public int getCloseTicks() { return dataTracker.get(CLOSE); }
     public int getSeed() { return dataTracker.get(SEED); }
     public Entity getOwner() {
+        Optional<UUID> expected = dataTracker.get(OWNER_UUID);
+        if (expected.isEmpty()) return null;
         Entity byId = getOwnerId() < 0 ? null : getWorld().getEntityById(getOwnerId());
-        if (!(getWorld() instanceof ServerWorld serverWorld)) return byId;
-        if (ownerUuid == null) return null;
-        if (byId != null && ownerUuid.equals(byId.getUuid())) return byId;
-        return serverWorld.getEntity(ownerUuid);
+        if (byId != null && expected.get().equals(byId.getUuid())) return byId;
+        if (!(getWorld() instanceof ServerWorld serverWorld)) return null;
+        Entity byUuid = serverWorld.getEntity(expected.get());
+        if (byUuid != null) dataTracker.set(OWNER_ID, byUuid.getId());
+        return byUuid;
+    }
+
+    private void setOwner(Entity owner) {
+        dataTracker.set(OWNER_ID, owner.getId());
+        dataTracker.set(OWNER_UUID, Optional.of(owner.getUuid()));
     }
 
     @Override
@@ -159,7 +189,8 @@ public final class IonboundStormscaleVisualEntity extends Entity {
 
     @Override
     protected void readCustomDataFromNbt(NbtCompound nbt) {
-        ownerUuid = nbt.containsUuid("owner_uuid") ? nbt.getUuid("owner_uuid") : null;
+        dataTracker.set(OWNER_UUID, nbt.containsUuid("owner_uuid")
+                ? Optional.of(nbt.getUuid("owner_uuid")) : Optional.empty());
         dataTracker.set(KIND, nbt.getInt("kind"));
         dataTracker.set(OWNER_ID, nbt.getInt("owner"));
         dataTracker.set(CUBES, nbt.getInt("cubes"));
@@ -175,7 +206,7 @@ public final class IonboundStormscaleVisualEntity extends Entity {
 
     @Override
     protected void writeCustomDataToNbt(NbtCompound nbt) {
-        if (ownerUuid != null) nbt.putUuid("owner_uuid", ownerUuid);
+        dataTracker.get(OWNER_UUID).ifPresent(uuid -> nbt.putUuid("owner_uuid", uuid));
         nbt.putInt("kind", getKind());
         nbt.putInt("owner", getOwnerId());
         nbt.putInt("cubes", getCubes());
