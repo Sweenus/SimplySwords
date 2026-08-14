@@ -110,6 +110,11 @@ public class SimplySwordsBeeEntity extends BeeEntity implements Tameable {
     }
 
     @Override
+    public boolean shouldSave() {
+        return !isBloodwakeFly() && super.shouldSave();
+    }
+
+    @Override
     public boolean collidesWith(Entity other) {
         return !isHivemindSwarmBee() && super.collidesWith(other);
     }

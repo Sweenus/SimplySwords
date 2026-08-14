@@ -70,7 +70,10 @@ public final class IonboundStormscaleAbilityManager {
         Hand hand = heldHand(actor, stack);
         if (hand == null || !actor.isAlive() || !AwakeningApi.isAbilityUnlocked(stack)) {
             flushRechargeForStack(serverWorld, actor.getUuid(), stack);
-            if (!isHoldingIonbound(actor)) discardOrbit(serverWorld, actor.getUuid());
+            if (!actor.isAlive() || hand != null && !AwakeningApi.isAbilityUnlocked(stack)
+                    || !isHoldingIonbound(actor)) {
+                discardOrbit(serverWorld, actor.getUuid());
+            }
             return;
         }
 
@@ -160,7 +163,8 @@ public final class IonboundStormscaleAbilityManager {
                 || !SHIELDS.getOrDefault(world, Map.of()).isEmpty()
                 || !BEAMS.getOrDefault(world, Map.of()).isEmpty()
                 || !ORBIT_VISUALS.getOrDefault(world, Map.of()).isEmpty()
-                || !RECHARGE.getOrDefault(world, Map.of()).isEmpty();
+                || !RECHARGE.getOrDefault(world, Map.of()).isEmpty()
+                || world.getTime() % 40L == 0L;
     }
 
     public static void tick(ServerWorld world) {
@@ -169,6 +173,7 @@ public final class IonboundStormscaleAbilityManager {
         tickShields(world);
         tickOrbits(world);
         tickRecharge(world);
+        if (world.getTime() % 40L == 0L) purgeOrphanVisuals(world);
     }
 
     public static void flushWielder(LivingEntity actor) {
@@ -433,7 +438,8 @@ public final class IonboundStormscaleAbilityManager {
             Map.Entry<UUID, UUID> entry = iterator.next();
             LivingEntity owner = resolveLiving(world, entry.getKey());
             Entity visual = world.getEntity(entry.getValue());
-            if (owner == null || !isHoldingIonbound(owner) || !(visual instanceof IonboundStormscaleVisualEntity)) {
+            if (owner == null || !isHoldingIonbound(owner) || visibleCubeCount(owner) <= 0
+                    || !(visual instanceof IonboundStormscaleVisualEntity)) {
                 if (visual != null) visual.discard();
                 iterator.remove();
             }
@@ -548,6 +554,14 @@ public final class IonboundStormscaleAbilityManager {
         WielderRecharge wielder = active == null ? null : active.remove(actorId);
         if (wielder != null) wielder.hands.values().forEach(IonboundStormscaleAbilityManager::checkpointRecharge);
         if (active != null && active.isEmpty()) RECHARGE.remove(world);
+        Map<UUID, ActiveCorridor> corridors = CORRIDORS.get(world);
+        ActiveCorridor corridor = corridors == null ? null : corridors.remove(actorId);
+        if (corridor != null) discardVisual(world, corridor.visualId);
+        if (corridors != null && corridors.isEmpty()) CORRIDORS.remove(world);
+        Map<UUID, ActiveShield> shields = SHIELDS.get(world);
+        ActiveShield shield = shields == null ? null : shields.remove(actorId);
+        if (shield != null) discardVisual(world, shield.visualId());
+        if (shields != null && shields.isEmpty()) SHIELDS.remove(world);
         Map<UUID, ActiveBeam> beams = BEAMS.get(world);
         ActiveBeam beam = beams == null ? null : beams.remove(actorId);
         if (beam != null) discardVisual(world, beam.visualId);
@@ -555,6 +569,21 @@ public final class IonboundStormscaleAbilityManager {
         LivingEntity actor = resolveLivingForCleanup(world, actorId);
         if (actor != null) removeBeamMovementSlow(actor);
         discardOrbit(world, actorId);
+    }
+
+    private static void purgeOrphanVisuals(ServerWorld world) {
+        java.util.Set<UUID> tracked = new java.util.HashSet<>();
+        CORRIDORS.getOrDefault(world, Map.of()).values().forEach(corridor -> {
+            if (corridor.visualId != null) tracked.add(corridor.visualId);
+        });
+        SHIELDS.getOrDefault(world, Map.of()).values().forEach(shield -> tracked.add(shield.visualId()));
+        BEAMS.getOrDefault(world, Map.of()).values().forEach(beam -> tracked.add(beam.visualId));
+        tracked.addAll(ORBIT_VISUALS.getOrDefault(world, Map.of()).values());
+        for (Entity entity : world.iterateEntities()) {
+            if (entity instanceof IonboundStormscaleVisualEntity && !tracked.contains(entity.getUuid())) {
+                entity.discard();
+            }
+        }
     }
 
     private static void applyBeamMovementSlow(LivingEntity actor) {

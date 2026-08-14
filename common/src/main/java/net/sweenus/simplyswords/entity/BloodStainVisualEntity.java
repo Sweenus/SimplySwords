@@ -177,6 +177,11 @@ public class BloodStainVisualEntity extends Entity {
     }
 
     @Override
+    public boolean shouldSave() {
+        return false;
+    }
+
+    @Override
     protected void readCustomDataFromNbt(NbtCompound nbt) {
         this.setShape(nbt.getInt("shape"));
         this.setRadius(nbt.getFloat("radius"));

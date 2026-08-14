@@ -57,6 +57,7 @@ public final class DevourerAbilityManager {
     private static final double LOOSE_PULL_SPEED_SCALE = 0.5;
     private static final int LOST_SIGHT_GRACE = 8;
     private static final double RELEASE_BUFFER = 3.0;
+    private static final String CAPTURED_GRAVITY_TAG = "simplyswords_devourer_captured_gravity";
     private static final DustColorTransitionParticleEffect DEVOURER_DUST =
             new DustColorTransitionParticleEffect(new Vector3f(0.025F, 0.008F, 0.07F),
                     new Vector3f(0.42F, 0.08F, 0.72F), 1.35F);
@@ -68,7 +69,9 @@ public final class DevourerAbilityManager {
 
     public static boolean hasActive(ServerWorld world) {
         Map<UUID, ActiveMass> active = ACTIVE.get(world);
-        return active != null && !active.isEmpty();
+        return active != null && !active.isEmpty()
+                || !CAPTURED_LOOT.getOrDefault(world, Set.of()).isEmpty()
+                || world.getTime() % 40L == 0L;
     }
 
     public static boolean hasActiveFor(ServerWorld world, UUID actorId) {
@@ -169,6 +172,9 @@ public final class DevourerAbilityManager {
     }
 
     public static void tick(ServerWorld world) {
+        if (world.getTime() % 40L == 0L) {
+            purgeOrphans(world);
+        }
         Map<UUID, ActiveMass> active = ACTIVE.get(world);
         if (active == null || active.isEmpty()) {
             return;
@@ -287,6 +293,9 @@ public final class DevourerAbilityManager {
                 targetId, target.hasNoGravity(), target.getPos(), tendril.getUuid(),
                 baseAngle, angularSpeed, radialVariation, verticalVariation));
         CAPTURED_LOOT.computeIfAbsent(world, ignored -> new HashSet<>()).add(targetId);
+        if (!target.hasNoGravity()) {
+            target.addCommandTag(CAPTURED_GRAVITY_TAG);
+        }
         target.setNoGravity(true);
     }
 
@@ -722,6 +731,7 @@ public final class DevourerAbilityManager {
                                            boolean retract) {
         if (target != null) {
             target.setNoGravity(captured.originalNoGravity);
+            target.removeCommandTag(CAPTURED_GRAVITY_TAG);
         }
         Set<UUID> capturedIds = CAPTURED_LOOT.get(world);
         if (capturedIds != null) {
@@ -748,6 +758,52 @@ public final class DevourerAbilityManager {
                 10, 0.16, 0.14, 0.16, 0.025);
         world.spawnParticles(DEVOURER_DUST, start.x, start.y, start.z,
                 16, 0.2, 0.18, 0.2, 0.03);
+    }
+
+    private static void purgeOrphans(ServerWorld world) {
+        Set<UUID> activeMassIds = new HashSet<>();
+        Set<Integer> activeMassEntityIds = new HashSet<>();
+        Set<UUID> activeLootIds = new HashSet<>();
+        for (ActiveMass mass : ACTIVE.getOrDefault(world, Map.of()).values()) {
+            activeMassIds.add(mass.visualId);
+            activeLootIds.addAll(mass.looseTargets.keySet());
+            DevourerMassVisualEntity visual = resolveMassVisual(world, mass.visualId);
+            if (visual != null) activeMassEntityIds.add(visual.getId());
+        }
+
+        List<DevourerMassVisualEntity> orphanMasses = new ArrayList<>();
+        for (Entity entity : world.iterateEntities()) {
+            if ((entity instanceof ItemEntity || entity instanceof ExperienceOrbEntity)
+                    && entity.getCommandTags().contains(CAPTURED_GRAVITY_TAG)
+                    && !activeLootIds.contains(entity.getUuid())) {
+                entity.setNoGravity(false);
+                entity.removeCommandTag(CAPTURED_GRAVITY_TAG);
+            } else if (entity instanceof DevourerMassVisualEntity mass
+                    && !activeMassIds.contains(entity.getUuid())) {
+                orphanMasses.add(mass);
+            } else if (entity instanceof DevourerTendrilVisualEntity tendril
+                    && !activeMassEntityIds.contains(tendril.getMassId())) {
+                tendril.discard();
+            }
+        }
+
+        for (DevourerMassVisualEntity mass : orphanMasses) {
+            double radius = Math.max(1.0, mass.getMaximumRadius());
+            for (Entity entity : world.getOtherEntities(mass,
+                    mass.getBoundingBox().expand(radius), candidate ->
+                            (candidate instanceof ItemEntity || candidate instanceof ExperienceOrbEntity)
+                                    && candidate.hasNoGravity())) {
+                entity.setNoGravity(false);
+                entity.removeCommandTag(CAPTURED_GRAVITY_TAG);
+            }
+            mass.discard();
+        }
+
+        Set<UUID> captured = CAPTURED_LOOT.get(world);
+        if (captured != null) {
+            captured.retainAll(activeLootIds);
+            if (captured.isEmpty()) CAPTURED_LOOT.remove(world);
+        }
     }
 
     private static void spawnSeedArrivalEffects(ServerWorld world, Vec3d center) {

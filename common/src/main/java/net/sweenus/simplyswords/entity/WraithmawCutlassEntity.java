@@ -69,6 +69,8 @@ public final class WraithmawCutlassEntity extends Entity {
     private long expiresAtTick;
     private double traveled;
     private boolean struckEntity;
+    private boolean loadedFromNbt;
+    private int missingOwnerTicks;
 
     public WraithmawCutlassEntity(EntityType<? extends WraithmawCutlassEntity> type, World world) {
         super(type, world);
@@ -107,6 +109,13 @@ public final class WraithmawCutlassEntity extends Entity {
         this.setNoGravity(true);
         if (this.getWorld().isClient() || !(this.getWorld() instanceof ServerWorld world)) {
             return;
+        }
+        if (loadedFromNbt) {
+            loadedFromNbt = false;
+            if (getState() != STATE_EMBEDDED && getState() != STATE_ORBITING) {
+                discard();
+                return;
+            }
         }
         switch (getState()) {
             case STATE_MUSTER -> tickMuster(world);
@@ -218,10 +227,16 @@ public final class WraithmawCutlassEntity extends Entity {
 
     private void tickOrbiting(ServerWorld world) {
         LivingEntity owner = resolveOwner(world);
-        if (owner == null || world.getTime() >= expiresAtTick) {
+        if (world.getTime() >= expiresAtTick) {
             dissipate(world, getPos(), false);
             return;
         }
+        if (owner == null) {
+            setOwnerId(-1);
+            if (++missingOwnerTicks >= 100) dissipate(world, getPos(), false);
+            return;
+        }
+        missingOwnerTicks = 0;
         setPosition(owner.getX(), owner.getY(), owner.getZ());
         setOwnerId(owner.getId());
         if (age % 8 == 0) {
@@ -380,11 +395,18 @@ public final class WraithmawCutlassEntity extends Entity {
     }
 
     private LivingEntity resolveOwner(ServerWorld world) {
+        if (ownerUuid == null) {
+            return null;
+        }
         Entity owner = getOwnerId() >= 0 ? world.getEntityById(getOwnerId()) : null;
-        if (!(owner instanceof LivingEntity) && ownerUuid != null) {
+        if (owner == null || !ownerUuid.equals(owner.getUuid())) {
             owner = world.getEntity(ownerUuid);
         }
-        return owner instanceof LivingEntity living && living.isAlive() && !living.isRemoved() ? living : null;
+        if (owner instanceof LivingEntity living && living.isAlive() && !living.isRemoved()) {
+            setOwnerId(living.getId());
+            return living;
+        }
+        return null;
     }
 
     public void recover(int slot, long expiresAtTick) {
@@ -467,7 +489,14 @@ public final class WraithmawCutlassEntity extends Entity {
     }
 
     @Override
+    public boolean shouldSave() {
+        return (getState() == STATE_EMBEDDED || getState() == STATE_ORBITING)
+                && super.shouldSave();
+    }
+
+    @Override
     protected void readCustomDataFromNbt(NbtCompound nbt) {
+        loadedFromNbt = true;
         ownerUuid = nbt.containsUuid("owner_uuid") ? nbt.getUuid("owner_uuid") : null;
         setOwnerId(nbt.getInt("owner_id"));
         setState(nbt.getInt("state"));

@@ -39,7 +39,7 @@ public final class DevourerStainManager {
 
     public static boolean hasActive(ServerWorld world) {
         Map<UUID, ActiveField> fields = ACTIVE.get(world);
-        return fields != null && !fields.isEmpty();
+        return fields != null && !fields.isEmpty() || world.getTime() % 40L == 0L;
     }
 
     public static void begin(ServerWorld world, UUID ownerId, UUID sourcePlayerId,
@@ -64,6 +64,7 @@ public final class DevourerStainManager {
     public static void tick(ServerWorld world) {
         Map<UUID, ActiveField> fields = ACTIVE.get(world);
         if (fields == null || fields.isEmpty()) {
+            if (world.getTime() % 40L == 0L) purgeOrphans(world, Set.of());
             return;
         }
         long now = world.getTime();
@@ -82,6 +83,13 @@ public final class DevourerStainManager {
                 iterator.remove();
                 continue;
             }
+            field.segments.removeIf(segment ->
+                    !(world.getEntity(segment.visualId) instanceof BloodStainVisualEntity));
+            for (Carrier carrier : field.carriers.values()) {
+                if (carrier.currentSegment != null && !field.segments.contains(carrier.currentSegment)) {
+                    carrier.currentSegment = null;
+                }
+            }
             if (now >= field.activeEndTick) {
                 field.insideMain.clear();
                 field.carriers.clear();
@@ -97,6 +105,22 @@ public final class DevourerStainManager {
         }
         if (fields.isEmpty()) {
             ACTIVE.remove(world);
+        } else if (now % 40L == 0L) {
+            Set<UUID> activeVisualIds = fields.values().stream()
+                    .flatMap(field -> field.segments.stream())
+                    .map(segment -> segment.visualId)
+                    .collect(java.util.stream.Collectors.toSet());
+            purgeOrphans(world, activeVisualIds);
+        }
+    }
+
+    private static void purgeOrphans(ServerWorld world, Set<UUID> activeVisualIds) {
+        for (Entity entity : world.iterateEntities()) {
+            if (entity instanceof BloodStainVisualEntity
+                    && entity.getCommandTags().contains(VISUAL_TAG)
+                    && !activeVisualIds.contains(entity.getUuid())) {
+                entity.discard();
+            }
         }
     }
 

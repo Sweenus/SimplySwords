@@ -155,6 +155,11 @@ public final class DevourerMassVisualEntity extends Entity {
     }
 
     @Override
+    public boolean shouldSave() {
+        return false;
+    }
+
+    @Override
     protected void readCustomDataFromNbt(NbtCompound nbt) {
         dataTracker.set(START_X, nbt.getFloat("start_x"));
         dataTracker.set(START_Y, nbt.getFloat("start_y"));

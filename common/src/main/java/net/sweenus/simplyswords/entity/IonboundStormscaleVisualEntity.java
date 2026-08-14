@@ -6,10 +6,13 @@ import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.registry.EntityRegistry;
+
+import java.util.UUID;
 
 public final class IonboundStormscaleVisualEntity extends Entity {
     public static final int ORBIT = 0;
@@ -29,6 +32,8 @@ public final class IonboundStormscaleVisualEntity extends Entity {
     private static final TrackedData<Integer> CLOSE = DataTracker.registerData(IonboundStormscaleVisualEntity.class, TrackedDataHandlerRegistry.INTEGER);
     private static final TrackedData<Integer> SEED = DataTracker.registerData(IonboundStormscaleVisualEntity.class, TrackedDataHandlerRegistry.INTEGER);
 
+    private UUID ownerUuid;
+
     public IonboundStormscaleVisualEntity(EntityType<? extends IonboundStormscaleVisualEntity> type, World world) {
         super(type, world);
         noClip = true;
@@ -37,6 +42,7 @@ public final class IonboundStormscaleVisualEntity extends Entity {
 
     public static IonboundStormscaleVisualEntity orbit(World world, Entity owner, int cubes) {
         IonboundStormscaleVisualEntity visual = create(world, owner.getPos(), ORBIT, Integer.MAX_VALUE);
+        visual.ownerUuid = owner.getUuid();
         visual.dataTracker.set(OWNER_ID, owner.getId());
         visual.dataTracker.set(CUBES, cubes);
         return visual;
@@ -44,6 +50,7 @@ public final class IonboundStormscaleVisualEntity extends Entity {
 
     public static IonboundStormscaleVisualEntity shield(World world, Entity owner, int lifetime) {
         IonboundStormscaleVisualEntity visual = create(world, owner.getPos(), SHIELD, lifetime);
+        visual.ownerUuid = owner.getUuid();
         visual.dataTracker.set(OWNER_ID, owner.getId());
         visual.dataTracker.set(WIDTH, owner.getWidth() + 0.9F);
         visual.dataTracker.set(HEIGHT, owner.getHeight() + 0.7F);
@@ -68,6 +75,7 @@ public final class IonboundStormscaleVisualEntity extends Entity {
     public static IonboundStormscaleVisualEntity beam(World world, Entity owner,
                                                        float length, float width, int lifetime) {
         IonboundStormscaleVisualEntity visual = create(world, owner.getPos(), BEAM, lifetime);
+        visual.ownerUuid = owner.getUuid();
         visual.dataTracker.set(OWNER_ID, owner.getId());
         visual.setYaw(owner.getYaw());
         visual.setPitch(owner.getPitch());
@@ -128,7 +136,18 @@ public final class IonboundStormscaleVisualEntity extends Entity {
     public int getHoldTicks() { return dataTracker.get(HOLD); }
     public int getCloseTicks() { return dataTracker.get(CLOSE); }
     public int getSeed() { return dataTracker.get(SEED); }
-    public Entity getOwner() { return getOwnerId() < 0 ? null : getWorld().getEntityById(getOwnerId()); }
+    public Entity getOwner() {
+        Entity byId = getOwnerId() < 0 ? null : getWorld().getEntityById(getOwnerId());
+        if (!(getWorld() instanceof ServerWorld serverWorld)) return byId;
+        if (ownerUuid == null) return null;
+        if (byId != null && ownerUuid.equals(byId.getUuid())) return byId;
+        return serverWorld.getEntity(ownerUuid);
+    }
+
+    @Override
+    public boolean shouldSave() {
+        return false;
+    }
 
     @Override
     public Box getVisibilityBoundingBox() {
@@ -140,6 +159,7 @@ public final class IonboundStormscaleVisualEntity extends Entity {
 
     @Override
     protected void readCustomDataFromNbt(NbtCompound nbt) {
+        ownerUuid = nbt.containsUuid("owner_uuid") ? nbt.getUuid("owner_uuid") : null;
         dataTracker.set(KIND, nbt.getInt("kind"));
         dataTracker.set(OWNER_ID, nbt.getInt("owner"));
         dataTracker.set(CUBES, nbt.getInt("cubes"));
@@ -155,6 +175,7 @@ public final class IonboundStormscaleVisualEntity extends Entity {
 
     @Override
     protected void writeCustomDataToNbt(NbtCompound nbt) {
+        if (ownerUuid != null) nbt.putUuid("owner_uuid", ownerUuid);
         nbt.putInt("kind", getKind());
         nbt.putInt("owner", getOwnerId());
         nbt.putInt("cubes", getCubes());

@@ -33,7 +33,7 @@ public final class WraithmawStainManager {
 
     public static boolean hasActive(ServerWorld world) {
         List<ActivePatch> patches = ACTIVE.get(world);
-        return patches != null && !patches.isEmpty();
+        return patches != null && !patches.isEmpty() || world.getTime() % 40L == 0L;
     }
 
     public static void createPatch(ServerWorld world, UUID ownerId, Vec3d center, double radius) {
@@ -84,6 +84,7 @@ public final class WraithmawStainManager {
     public static void tick(ServerWorld world) {
         List<ActivePatch> patches = ACTIVE.get(world);
         if (patches == null || patches.isEmpty()) {
+            if (world.getTime() % 40L == 0L) purgeOrphans(world, Set.of());
             return;
         }
         long now = world.getTime();
@@ -98,6 +99,12 @@ public final class WraithmawStainManager {
         if (patches.isEmpty()) {
             ACTIVE.remove(world);
             return;
+        }
+        if (now % 40L == 0L) {
+            Set<UUID> activeVisualIds = patches.stream()
+                    .map(patch -> patch.visualId)
+                    .collect(java.util.stream.Collectors.toSet());
+            purgeOrphans(world, activeVisualIds);
         }
         if (now % CONTACT_INTERVAL == 0L) {
             applySlowness(world, patches);
@@ -141,6 +148,16 @@ public final class WraithmawStainManager {
         Entity entity = id == null ? null : world.getEntity(id);
         if (entity != null) {
             entity.discard();
+        }
+    }
+
+    private static void purgeOrphans(ServerWorld world, Set<UUID> activeVisualIds) {
+        for (Entity entity : world.iterateEntities()) {
+            if (entity instanceof BloodStainVisualEntity
+                    && entity.getCommandTags().contains(VISUAL_TAG)
+                    && !activeVisualIds.contains(entity.getUuid())) {
+                entity.discard();
+            }
         }
     }
 

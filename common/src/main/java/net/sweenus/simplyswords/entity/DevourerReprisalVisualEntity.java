@@ -76,6 +76,11 @@ public final class DevourerReprisalVisualEntity extends Entity {
     }
 
     @Override
+    public boolean shouldSave() {
+        return false;
+    }
+
+    @Override
     protected void readCustomDataFromNbt(NbtCompound nbt) {
         dataTracker.set(LIFETIME, nbt.getInt("lifetime"));
         dataTracker.set(SEED, nbt.getInt("seed"));

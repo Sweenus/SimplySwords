@@ -130,7 +130,7 @@ public final class BloodStainManager {
         if (stains == null || stains.isEmpty()) {
             HEAL_PROGRESS.remove(world);
             if (world.getTime() % 40L == 0L) {
-                purgeOrphans(world);
+                purgeOrphans(world, Set.of());
             }
             return;
         }
@@ -139,7 +139,9 @@ public final class BloodStainManager {
         Iterator<ActiveStain> iterator = stains.iterator();
         while (iterator.hasNext()) {
             ActiveStain stain = iterator.next();
-            if (stain.finished && now >= stain.expiryTick) {
+            Entity visual = world.getEntity(stain.visualId);
+            if (!(visual instanceof BloodStainVisualEntity)
+                    || stain.finished && now >= stain.expiryTick) {
                 discardVisual(world, stain.visualId);
                 iterator.remove();
             }
@@ -148,6 +150,12 @@ public final class BloodStainManager {
             ACTIVE.remove(world);
             HEAL_PROGRESS.remove(world);
             return;
+        }
+        if (now % 40L == 0L) {
+            Set<UUID> activeVisualIds = stains.stream()
+                    .map(stain -> stain.visualId)
+                    .collect(java.util.stream.Collectors.toSet());
+            purgeOrphans(world, activeVisualIds);
         }
         if (now % CONTACT_INTERVAL == 0L) {
             applySurfaceEffects(world, stains);
@@ -293,10 +301,11 @@ public final class BloodStainManager {
         }
     }
 
-    private static void purgeOrphans(ServerWorld world) {
+    private static void purgeOrphans(ServerWorld world, Set<UUID> activeVisualIds) {
         for (Entity entity : world.iterateEntities()) {
             if (entity instanceof BloodStainVisualEntity
-                    && entity.getCommandTags().contains(VISUAL_TAG)) {
+                    && entity.getCommandTags().contains(VISUAL_TAG)
+                    && !activeVisualIds.contains(entity.getUuid())) {
                 entity.discard();
             }
         }

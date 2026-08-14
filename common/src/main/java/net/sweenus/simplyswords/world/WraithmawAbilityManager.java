@@ -89,11 +89,10 @@ public final class WraithmawAbilityManager {
             return;
         }
         Map<UUID, Long> suppressed = SUPPRESSED_SWINGS.get(world);
-        if (suppressed != null && suppressed.remove(actor.getUuid(), world.getTime())) {
-            if (suppressed.isEmpty()) {
-                SUPPRESSED_SWINGS.remove(world);
-            }
-            return;
+        if (suppressed != null) {
+            Long suppressedAt = suppressed.remove(actor.getUuid());
+            if (suppressed.isEmpty()) SUPPRESSED_SWINGS.remove(world);
+            if (suppressedAt != null && suppressedAt == world.getTime()) return;
         }
         WraithmawCutlassEntity cutlass = ownedCutlasses(world, actor).stream()
                 .filter(entity -> entity.getState() == WraithmawCutlassEntity.STATE_ORBITING)
@@ -167,6 +166,18 @@ public final class WraithmawAbilityManager {
         Vec3d right = new Vec3d(Math.cos(yaw), 0.0, Math.sin(yaw));
         Vec3d forward = new Vec3d(-Math.sin(yaw), 0.0, Math.cos(yaw));
         return owner.getPos().add(right.multiply(localX)).add(forward.multiply(localZ)).add(0.0, localY, 0.0);
+    }
+
+    public static boolean hasActive(ServerWorld world) {
+        return !SUPPRESSED_SWINGS.getOrDefault(world, Map.of()).isEmpty();
+    }
+
+    public static void tick(ServerWorld world) {
+        Map<UUID, Long> suppressed = SUPPRESSED_SWINGS.get(world);
+        if (suppressed == null) return;
+        long now = world.getTime();
+        suppressed.values().removeIf(tick -> tick < now);
+        if (suppressed.isEmpty()) SUPPRESSED_SWINGS.remove(world);
     }
 
     private static List<WraithmawCutlassEntity> ownedCutlasses(ServerWorld world, LivingEntity owner) {

@@ -131,6 +131,11 @@ public final class DevourerTendrilVisualEntity extends Entity {
     }
 
     @Override
+    public boolean shouldSave() {
+        return false;
+    }
+
+    @Override
     protected void readCustomDataFromNbt(NbtCompound nbt) {
         dataTracker.set(MASS_ID, nbt.getInt("mass_id"));
         dataTracker.set(TARGET_ID, nbt.getInt("target_id"));
