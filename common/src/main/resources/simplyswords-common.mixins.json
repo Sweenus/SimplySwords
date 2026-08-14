@@ -19,6 +19,8 @@
   ],
   "mixins": [
     "EntityMixin",
+    "ExperienceOrbEntityMixin",
+    "ItemEntityMixin",
     "ItemStackMixin",
     "LivingEntityMixin",
     "ServerPlayerEntityMixin",

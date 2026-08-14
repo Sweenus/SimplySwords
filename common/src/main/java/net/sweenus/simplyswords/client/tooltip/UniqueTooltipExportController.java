@@ -72,7 +72,8 @@ public final class UniqueTooltipExportController {
             spec("waxweaver", ItemsRegistry.WAXWEAVER::get),
             spec("whisperwind", ItemsRegistry.WHISPERWIND::get),
             spec("wickpiercer", ItemsRegistry.WICKPIERCER::get),
-            spec("wraithfang", ItemsRegistry.WRAITHFANG::get)
+            spec("wraithfang", ItemsRegistry.WRAITHFANG::get),
+            spec("wraithmaw", ItemsRegistry.WRAITHMAW::get)
     );
 
     public static int start() {

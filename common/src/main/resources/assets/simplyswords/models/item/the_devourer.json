@@ -1,0 +1,8 @@
+{
+  "parent": "simplyswords:item/template_claymore",
+  "textures": {
+    "layer0": "simplyswords:item/eyeblade_base",
+    "layer1": "simplyswords:item/eyeblade_eyes",
+    "layer2": "simplyswords:item/eyeblade_lids_solo_90s"
+  }
+}

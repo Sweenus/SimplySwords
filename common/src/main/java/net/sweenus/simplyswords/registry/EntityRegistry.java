@@ -297,6 +297,42 @@ public class EntityRegistry {
                     .build(new Identifier(SimplySwords.MOD_ID, "ionbound_stormscale_visual").toString())
     );
 
+    public static final RegistrySupplier<EntityType<DevourerMassVisualEntity>> DEVOURER_MASS_VISUAL = ENTITIES.register(
+            "devourer_mass_visual",
+            () -> EntityType.Builder.<DevourerMassVisualEntity>create(DevourerMassVisualEntity::new, SpawnGroup.MISC)
+                    .setDimensions(0.25F, 0.25F)
+                    .maxTrackingRange(128)
+                    .trackingTickInterval(1)
+                    .build(new Identifier(SimplySwords.MOD_ID, "devourer_mass_visual").toString())
+    );
+
+    public static final RegistrySupplier<EntityType<DevourerTendrilVisualEntity>> DEVOURER_TENDRIL_VISUAL = ENTITIES.register(
+            "devourer_tendril_visual",
+            () -> EntityType.Builder.<DevourerTendrilVisualEntity>create(DevourerTendrilVisualEntity::new, SpawnGroup.MISC)
+                    .setDimensions(0.25F, 0.25F)
+                    .maxTrackingRange(128)
+                    .trackingTickInterval(1)
+                    .build(new Identifier(SimplySwords.MOD_ID, "devourer_tendril_visual").toString())
+    );
+
+    public static final RegistrySupplier<EntityType<DevourerReprisalVisualEntity>> DEVOURER_REPRISAL_VISUAL = ENTITIES.register(
+            "devourer_reprisal_visual",
+            () -> EntityType.Builder.<DevourerReprisalVisualEntity>create(DevourerReprisalVisualEntity::new, SpawnGroup.MISC)
+                    .setDimensions(0.25F, 0.25F)
+                    .maxTrackingRange(128)
+                    .trackingTickInterval(1)
+                    .build(new Identifier(SimplySwords.MOD_ID, "devourer_reprisal_visual").toString())
+    );
+
+    public static final RegistrySupplier<EntityType<WraithmawCutlassEntity>> WRAITHMAW_CUTLASS = ENTITIES.register(
+            "wraithmaw_cutlass",
+            () -> EntityType.Builder.<WraithmawCutlassEntity>create(WraithmawCutlassEntity::new, SpawnGroup.MISC)
+                    .setDimensions(0.55F, 0.55F)
+                    .maxTrackingRange(128)
+                    .trackingTickInterval(1)
+                    .build(new Identifier(SimplySwords.MOD_ID, "wraithmaw_cutlass").toString())
+    );
+
     public static final RegistrySupplier<EntityType<ChainLightningVisualEntity>> CHAIN_LIGHTNING_VISUAL = ENTITIES.register(
             "chain_lightning_visual",
             () -> EntityType.Builder.<ChainLightningVisualEntity>create(ChainLightningVisualEntity::new, SpawnGroup.MISC)

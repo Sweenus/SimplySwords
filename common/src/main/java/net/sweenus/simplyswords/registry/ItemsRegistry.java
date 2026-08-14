@@ -622,6 +622,12 @@ public class ItemsRegistry {
                     LegacyWeaponAttributes.configure(new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).fireproof()
                             , (int) thewatcher_damage_modifier, thewatcher_attackspeed)));
 
+    public static final RegistrySupplier<DevourerClaymoreItem> THE_DEVOURER = ITEM.register("the_devourer", () ->
+            new DevourerClaymoreItem(
+                    ModToolMaterial.UNIQUE,
+                    LegacyWeaponAttributes.configure(new Item.Settings().fireproof()
+                            , (int) thewatcher_damage_modifier, thewatcher_attackspeed)));
+
     public static final RegistrySupplier<StormsEdgeSwordItem> STORMS_EDGE = ITEM.register("storms_edge", () ->
             new StormsEdgeSwordItem(
                     ModToolMaterial.UNIQUE,
@@ -637,7 +643,7 @@ public class ItemsRegistry {
     public static final RegistrySupplier<IonboundStormscaleSwordItem> IONBOUND_STORMSCALE = ITEM.register("ionbound_stormscale", () ->
             new IonboundStormscaleSwordItem(
                     ModToolMaterial.UNIQUE,
-                    LegacyWeaponAttributes.configure(new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).fireproof()
+                    LegacyWeaponAttributes.configure(new Item.Settings().fireproof()
                             , (int) stormscale_damage_modifier, stormscale_attackspeed)));
 
     public static final RegistrySupplier<StormbringerSwordItem> STORMBRINGER = ITEM.register("stormbringer", () ->
@@ -902,6 +908,12 @@ public class ItemsRegistry {
             new WraithfangSwordItem(
                     ModToolMaterial.UNIQUE,
                     LegacyWeaponAttributes.configure(new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).fireproof()
+                            , (int) wraithfang_damage_modifier, wraithfang_attackspeed)));
+
+    public static final RegistrySupplier<WraithmawSwordItem> WRAITHMAW = ITEM.register("wraithmaw", () ->
+            new WraithmawSwordItem(
+                    ModToolMaterial.UNIQUE,
+                    LegacyWeaponAttributes.configure(new Item.Settings().fireproof()
                             , (int) wraithfang_damage_modifier, wraithfang_attackspeed)));
 
     public static final RegistrySupplier<BloodwakeSwordItem> BLOODWAKE = ITEM.register("bloodwake", () ->

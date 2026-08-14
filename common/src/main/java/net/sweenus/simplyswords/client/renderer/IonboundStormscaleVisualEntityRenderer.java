@@ -50,11 +50,15 @@ public final class IonboundStormscaleVisualEntityRenderer extends EntityRenderer
         if (IrisCompat.isRenderingShadowPass()) {
             return;
         }
-        float age = entity.age + tickDelta;
         Entity owner = entity.getOwner();
-        boolean ownerAnchored = owner != null && (entity.getKind() == IonboundStormscaleVisualEntity.ORBIT
+        boolean ownerAnchored = entity.getKind() == IonboundStormscaleVisualEntity.ORBIT
                 || entity.getKind() == IonboundStormscaleVisualEntity.SHIELD
-                || entity.getKind() == IonboundStormscaleVisualEntity.BEAM);
+                || entity.getKind() == IonboundStormscaleVisualEntity.BEAM;
+        if (ownerAnchored && owner == null) {
+            return;
+        }
+        float age = entity.getKind() == IonboundStormscaleVisualEntity.ORBIT
+                ? owner.age + tickDelta : entity.age + tickDelta;
         if (ownerAnchored) {
             Vec3d offset = owner.getLerpedPos(tickDelta).subtract(entity.getLerpedPos(tickDelta));
             matrices.push();

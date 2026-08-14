@@ -57,6 +57,11 @@ public class BloodwakeBladeVisualEntity extends Entity {
     }
 
     @Override
+    public boolean shouldSave() {
+        return false;
+    }
+
+    @Override
     protected void readCustomDataFromNbt(NbtCompound nbt) {
         this.setPlungeProgress(nbt.getFloat("plunge_progress"));
         if (nbt.contains("item")) {

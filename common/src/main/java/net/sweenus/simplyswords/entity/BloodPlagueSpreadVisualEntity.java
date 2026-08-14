@@ -81,6 +81,11 @@ public class BloodPlagueSpreadVisualEntity extends Entity {
     }
 
     @Override
+    public boolean shouldSave() {
+        return false;
+    }
+
+    @Override
     protected void readCustomDataFromNbt(NbtCompound nbt) {
         this.setTargetId(nbt.getInt("target_id"));
         this.setRadius(nbt.getFloat("radius"));

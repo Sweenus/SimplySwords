@@ -131,6 +131,11 @@ public class LivyatanWaveVisualEntity extends Entity {
     }
 
     @Override
+    public boolean shouldSave() {
+        return !isBloodwakeStyle() && super.shouldSave();
+    }
+
+    @Override
     protected void readCustomDataFromNbt(NbtCompound nbt) {
         if (nbt.contains("target_height")) {
             this.setTargetHeight(nbt.getFloat("target_height"));

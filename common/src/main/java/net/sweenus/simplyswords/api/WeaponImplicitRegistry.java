@@ -33,9 +33,11 @@ import net.sweenus.simplyswords.item.UniqueWeaponItem;
 import net.sweenus.simplyswords.item.component.WeaponImplicitComponent;
 import net.sweenus.simplyswords.registry.ComponentTypeRegistry;
 import net.sweenus.simplyswords.registry.EffectRegistry;
+import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.ParticlesRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.BleedHelper;
+import net.sweenus.simplyswords.world.DevourerReprisalManager;
 import net.sweenus.simplyswords.world.ImplicitStatusVisualManager;
 
 import java.util.*;
@@ -485,6 +487,9 @@ public final class WeaponImplicitRegistry {
         if (bearer.getWorld() instanceof ServerWorld serverWorld) {
             serverWorld.playSound(null, bearer.getBlockPos(), SoundRegistry.MAGIC_SWORD_PARRY_01.get(), SoundCategory.PLAYERS, 0.55F, 1.25F);
             serverWorld.spawnParticles(ParticleTypes.ENCHANTED_HIT, bearer.getX(), bearer.getBodyY(0.55), bearer.getZ(), 8, 0.35, 0.25, 0.35, 0.03);
+            if (stack.isOf(ItemsRegistry.THE_DEVOURER.get())) {
+                DevourerReprisalManager.trigger(stack, bearer, source);
+            }
         }
         return true;
     }
@@ -532,6 +537,7 @@ public final class WeaponImplicitRegistry {
 
     private static void registerUniqueOverrides() {
         registerPath("watcher_claymore", CLAYMORE);
+        registerPath("the_devourer", CLAYMORE);
         registerPath("brimstone_claymore", CLAYMORE);
         registerPath("storms_edge", TWINBLADE);
         registerPath("stormbringer", LONGSWORD);
@@ -579,6 +585,7 @@ public final class WeaponImplicitRegistry {
         registerPath("enigma", CLAYMORE);
         registerPath("caelestis", CLAYMORE);
         registerPath("wraithfang", CUTLASS);
+        registerPath("wraithmaw", CUTLASS);
         registerPath("bloodwake", CUTLASS);
         registerPath("chompolotl", CHAKRAM);
         registerPath("dreadtide", TWINBLADE);
