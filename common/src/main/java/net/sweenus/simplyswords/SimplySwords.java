@@ -50,6 +50,7 @@ import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.BattleStandardDarkEntity;
 import net.sweenus.simplyswords.entity.BattleStandardEntity;
 import net.sweenus.simplyswords.entity.CaelestisDreadglareEntity;
+import net.sweenus.simplyswords.entity.SoulstalkerStrideEntity;
 import net.sweenus.simplyswords.entity.CaelestisHollowEntity;
 import net.sweenus.simplyswords.entity.CaelestisRiftlingEntity;
 import net.sweenus.simplyswords.entity.FallingSnifferEntity;
@@ -144,6 +145,7 @@ public class SimplySwords {
         EntityAttributeRegistry.register(EntityRegistry.CAELESTIS_RIFTLING, CaelestisRiftlingEntity::createBreachAttributes);
         EntityAttributeRegistry.register(EntityRegistry.CAELESTIS_HOLLOW, CaelestisHollowEntity::createBreachAttributes);
         EntityAttributeRegistry.register(EntityRegistry.CAELESTIS_DREADGLARE, CaelestisDreadglareEntity::createBreachAttributes);
+        EntityAttributeRegistry.register(EntityRegistry.SOULSTALKER_STRIDE, SoulstalkerStrideEntity::createStrideAttributes);
 
         ModLootTableModifiers.init();
         if (passVersionCheck("eldritch_end", minimumEldritchEndVersion)) {
@@ -242,6 +244,11 @@ public class SimplySwords {
             EntityRendererRegistry.register(EntityRegistry.DEVOURER_TENDRIL_VISUAL, DevourerTendrilVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.DEVOURER_REPRISAL_VISUAL, DevourerReprisalVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.WRAITHMAW_CUTLASS, WraithmawCutlassEntityRenderer::new);
+            EntityRendererRegistry.register(EntityRegistry.GLOAMPIERCER_SPEAR, GloampiercerSpearEntityRenderer::new);
+            EntityRendererRegistry.register(EntityRegistry.GLOAMPIERCER_CLONE_VISUAL, GloampiercerCloneVisualEntityRenderer::new);
+            EntityRendererRegistry.register(EntityRegistry.SOULSTALKER_STRIDE, SoulstalkerStrideEntityRenderer::new);
+            EntityRendererRegistry.register(EntityRegistry.SOULSTALKER_CLEAVE, SoulstalkerCleaveEntityRenderer::new);
+            EntityRendererRegistry.register(EntityRegistry.SOULSTALKER_TENTACLE_VISUAL, SoulstalkerTentacleVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.CHAIN_LIGHTNING_VISUAL, ChainLightningVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.LIGHTNING_PHENOMENON_VISUAL, LightningPhenomenonVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.ATMOSPHERIC_VISUAL, AtmosphericVisualEntityRenderer::new);

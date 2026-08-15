@@ -712,6 +712,12 @@ public class ItemsRegistry {
                     LegacyWeaponAttributes.configure(new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).fireproof()
                             , (int) soulrender_damage_modifier, soulrender_attackspeed)));
 
+    public static final RegistrySupplier<SoulstalkerSwordItem> SOULSTALKER = ITEM.register("soulstalker", () ->
+            new SoulstalkerSwordItem(
+                    ModToolMaterial.UNIQUE,
+                    LegacyWeaponAttributes.configure(new Item.Settings().fireproof()
+                            , (int) soulrender_damage_modifier, soulrender_attackspeed)));
+
     public static final RegistrySupplier<SoulPyreSwordItem> SOULPYRE = ITEM.register("soulpyre", () ->
             new SoulPyreSwordItem(
                     ModToolMaterial.UNIQUE,
@@ -848,6 +854,12 @@ public class ItemsRegistry {
             new WickpiercerSwordItem(
                     ModToolMaterial.UNIQUE,
                     LegacyWeaponAttributes.configure(new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).fireproof()
+                            , (int) wickpiercer_damage_modifier, wickpiercer_attackspeed)));
+
+    public static final RegistrySupplier<GloampiercerSwordItem> GLOAMPIERCER = ITEM.register("gloampiercer", () ->
+            new GloampiercerSwordItem(
+                    ModToolMaterial.UNIQUE,
+                    LegacyWeaponAttributes.configure(new Item.Settings().fireproof()
                             , (int) wickpiercer_damage_modifier, wickpiercer_attackspeed)));
 
     public static final RegistrySupplier<TempestSwordItem> TEMPEST = ITEM.register("tempest", () ->

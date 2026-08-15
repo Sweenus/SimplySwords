@@ -33,6 +33,10 @@ public final class AwakeningFormRegistry {
     public static final Identifier DEVOURER_ROUTE = new Identifier(SimplySwords.MOD_ID, "the_devourer");
     public static final Identifier WRAITHFANG_ROUTE = new Identifier(SimplySwords.MOD_ID, "wraithfang");
     public static final Identifier WRAITHMAW_ROUTE = new Identifier(SimplySwords.MOD_ID, "wraithmaw");
+    public static final Identifier WICKPIERCER_ROUTE = new Identifier(SimplySwords.MOD_ID, "wickpiercer");
+    public static final Identifier GLOAMPIERCER_ROUTE = new Identifier(SimplySwords.MOD_ID, "gloampiercer");
+    public static final Identifier SOULRENDER_ROUTE = new Identifier(SimplySwords.MOD_ID, "soulrender");
+    public static final Identifier SOULSTALKER_ROUTE = new Identifier(SimplySwords.MOD_ID, "soulstalker");
 
     private static final Map<Item, AwakeningFormFamily> FAMILIES = new IdentityHashMap<>();
     private static boolean builtinsRegistered;
@@ -145,6 +149,40 @@ public final class AwakeningFormRegistry {
                         ItemsRegistry.WRAITHMAW.get(), "item.simplyswords.wraithmaw",
                         AwakeningFormRarity.LEGENDARY, 1.0F))
                 .routeHandler(context -> WRAITHFANG_ROUTE)
+                .build());
+
+        register(AwakeningFormFamily.builder(
+                        ItemsRegistry.WICKPIERCER.get(),
+                        AwakeningProfile.DEFAULT,
+                        new Identifier(SimplySwords.MOD_ID, "wickpiercer"))
+                .basePresentation("item.simplyswords.wickpiercer", AwakeningFormRarity.UNIQUE, 0.0F)
+                .selectionLevel(0)
+                .route(WICKPIERCER_ROUTE, new AwakeningFormStage(
+                        new Identifier(SimplySwords.MOD_ID, "spectral_wickpiercer"), 0,
+                        ItemsRegistry.WICKPIERCER.get(), "item.simplyswords.wickpiercer",
+                        AwakeningFormRarity.UNIQUE, 0.0F))
+                .route(GLOAMPIERCER_ROUTE, new AwakeningFormStage(
+                        new Identifier(SimplySwords.MOD_ID, "gloampiercer"), 0,
+                        ItemsRegistry.GLOAMPIERCER.get(), "item.simplyswords.gloampiercer",
+                        AwakeningFormRarity.LEGENDARY, 1.0F))
+                .routeHandler(context -> WICKPIERCER_ROUTE)
+                .build());
+
+        register(AwakeningFormFamily.builder(
+                        ItemsRegistry.SOULRENDER.get(),
+                        AwakeningProfile.DEFAULT,
+                        new Identifier(SimplySwords.MOD_ID, "soulrender"))
+                .basePresentation("item.simplyswords.soulrender", AwakeningFormRarity.UNIQUE, 0.0F)
+                .selectionLevel(0)
+                .route(SOULRENDER_ROUTE, new AwakeningFormStage(
+                        new Identifier(SimplySwords.MOD_ID, "spectral_soulrender"), 0,
+                        ItemsRegistry.SOULRENDER.get(), "item.simplyswords.soulrender",
+                        AwakeningFormRarity.UNIQUE, 0.0F))
+                .route(SOULSTALKER_ROUTE, new AwakeningFormStage(
+                        new Identifier(SimplySwords.MOD_ID, "soulstalker"), 0,
+                        ItemsRegistry.SOULSTALKER.get(), "item.simplyswords.soulstalker",
+                        AwakeningFormRarity.LEGENDARY, 1.0F))
+                .routeHandler(context -> SOULRENDER_ROUTE)
                 .build());
 
         register(AwakeningFormFamily.builder(

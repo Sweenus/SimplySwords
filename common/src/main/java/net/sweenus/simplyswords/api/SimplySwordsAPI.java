@@ -30,8 +30,10 @@ import net.sweenus.simplyswords.api.render.*;
 import net.sweenus.simplyswords.entity.BattleStandardEntity;
 import net.sweenus.simplyswords.entity.SimplySwordsSkeletonMinionEntity;
 import net.sweenus.simplyswords.entity.SimplySwordsWolfMinionEntity;
+import net.sweenus.simplyswords.item.custom.GloampiercerSwordItem;
 import net.sweenus.simplyswords.item.custom.LivyatanSwordItem;
 import net.sweenus.simplyswords.item.custom.MoltenEdgeSwordItem;
+import net.sweenus.simplyswords.item.custom.SoulstalkerSwordItem;
 import net.sweenus.simplyswords.item.custom.StealSwordItem;
 import net.sweenus.simplyswords.item.custom.WraithmawSwordItem;
 import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
@@ -45,6 +47,8 @@ import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.IgnoredEntities;
 import net.sweenus.simplyswords.util.HelperMethods;
+import net.sweenus.simplyswords.world.GloampiercerAbilityManager;
+import net.sweenus.simplyswords.world.SoulstalkerAbilityManager;
 import net.sweenus.simplyswords.world.ChainLightningVisualManager;
 import net.sweenus.simplyswords.world.AbilityVisualManager;
 import net.sweenus.simplyswords.world.WeaponAbilityCooldownManager;
@@ -143,6 +147,12 @@ public class SimplySwordsAPI {
         }
         if (stack.getItem() instanceof WraithmawSwordItem) {
             WraithmawAbilityManager.onSwing(stack, world, user);
+        }
+        if (stack.getItem() instanceof GloampiercerSwordItem) {
+            GloampiercerAbilityManager.onSwing(stack, world, user);
+        }
+        if (stack.getItem() instanceof SoulstalkerSwordItem) {
+            SoulstalkerAbilityManager.onSwing(stack, world, user, hand);
         }
     }
 

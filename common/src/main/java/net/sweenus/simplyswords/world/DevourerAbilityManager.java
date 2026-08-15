@@ -7,6 +7,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.projectile.ProjectileUtil;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.particle.DustColorTransitionParticleEffect;
 import net.minecraft.particle.ParticleTypes;
@@ -15,6 +16,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Hand;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
@@ -337,7 +339,7 @@ public final class DevourerAbilityManager {
                     : looseDeliverySlot(mass.center, radius, captured, target);
             boolean delivered = pullLooseTowardSlot(target, slot, !captured.stored);
             if (!captured.stored && delivered) {
-                if (corruptWraithfang(world, target, mass.center)) {
+                if (corruptWeapon(world, target, mass.center)) {
                     visual.feed();
                 }
                 captured.stored = true;
@@ -353,23 +355,38 @@ public final class DevourerAbilityManager {
     }
 
     private static int looseTargetPriority(Entity entity) {
-        return entity instanceof ItemEntity itemEntity
-                && itemEntity.getStack().isOf(ItemsRegistry.WRAITHFANG.get()) ? 0 : 1;
+        if (!(entity instanceof ItemEntity itemEntity)) {
+            return 1;
+        }
+        ItemStack stack = itemEntity.getStack();
+        return stack.isOf(ItemsRegistry.WRAITHFANG.get())
+                || stack.isOf(ItemsRegistry.WICKPIERCER.get())
+                || stack.isOf(ItemsRegistry.SOULRENDER.get()) ? 0 : 1;
     }
 
-    private static boolean corruptWraithfang(ServerWorld world, Entity target, Vec3d center) {
+    private static boolean corruptWeapon(ServerWorld world, Entity target, Vec3d center) {
         if (!(target instanceof ItemEntity itemEntity)) {
             return false;
         }
         ItemStack source = itemEntity.getStack();
-        if (!source.isOf(ItemsRegistry.WRAITHFANG.get())) {
+        Item corrupted;
+        Identifier route;
+        if (source.isOf(ItemsRegistry.WRAITHFANG.get())) {
+            corrupted = ItemsRegistry.WRAITHMAW.get();
+            route = AwakeningFormRegistry.WRAITHMAW_ROUTE;
+        } else if (source.isOf(ItemsRegistry.WICKPIERCER.get())) {
+            corrupted = ItemsRegistry.GLOAMPIERCER.get();
+            route = AwakeningFormRegistry.GLOAMPIERCER_ROUTE;
+        } else if (source.isOf(ItemsRegistry.SOULRENDER.get())) {
+            corrupted = ItemsRegistry.SOULSTALKER.get();
+            route = AwakeningFormRegistry.SOULSTALKER_ROUTE;
+        } else {
             return false;
         }
         int level = AwakeningApi.getLevel(source);
-        ItemStack result = new ItemStack(ItemsRegistry.WRAITHMAW.get(), source.getCount());
+        ItemStack result = new ItemStack(corrupted, source.getCount());
         if (source.hasNbt()) result.setNbt(source.getNbt().copy());
-        ComponentTypeRegistry.AWAKENING_ROUTE.set(result,
-                new AwakeningRouteComponent(AwakeningFormRegistry.WRAITHMAW_ROUTE));
+        ComponentTypeRegistry.AWAKENING_ROUTE.set(result, new AwakeningRouteComponent(route));
         AwakeningApi.setLevel(result, level);
         itemEntity.setStack(result);
         world.spawnParticles(DEVOURER_DUST, center.x, center.y, center.z,

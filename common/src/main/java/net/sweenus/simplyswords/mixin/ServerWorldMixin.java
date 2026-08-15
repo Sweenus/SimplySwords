@@ -46,6 +46,12 @@ public abstract class ServerWorldMixin {
         if (WraithmawAbilityManager.hasActive(world)) {
             WraithmawAbilityManager.tick(world);
         }
+        if (GloampiercerAbilityManager.hasActive(world)) {
+            GloampiercerAbilityManager.tick(world);
+        }
+        if (SoulstalkerAbilityManager.hasActive(world)) {
+            SoulstalkerAbilityManager.tick(world);
+        }
         if (DevourerReprisalManager.hasActive(world)) {
             DevourerReprisalManager.tick(world);
         }
