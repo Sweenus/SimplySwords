@@ -15,6 +15,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Hand;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
@@ -337,7 +338,7 @@ public final class DevourerAbilityManager {
                     : looseDeliverySlot(mass.center, radius, captured, target);
             boolean delivered = pullLooseTowardSlot(target, slot, !captured.stored);
             if (!captured.stored && delivered) {
-                if (corruptWraithfang(world, target, mass.center)) {
+                if (corruptWeapon(world, target, mass.center)) {
                     visual.feed();
                 }
                 captured.stored = true;
@@ -353,22 +354,33 @@ public final class DevourerAbilityManager {
     }
 
     private static int looseTargetPriority(Entity entity) {
-        return entity instanceof ItemEntity itemEntity
-                && itemEntity.getStack().isOf(ItemsRegistry.WRAITHFANG.get()) ? 0 : 1;
+        if (!(entity instanceof ItemEntity itemEntity)) {
+            return 1;
+        }
+        ItemStack stack = itemEntity.getStack();
+        return stack.isOf(ItemsRegistry.WRAITHFANG.get())
+                || stack.isOf(ItemsRegistry.WICKPIERCER.get()) ? 0 : 1;
     }
 
-    private static boolean corruptWraithfang(ServerWorld world, Entity target, Vec3d center) {
+    private static boolean corruptWeapon(ServerWorld world, Entity target, Vec3d center) {
         if (!(target instanceof ItemEntity itemEntity)) {
             return false;
         }
         ItemStack source = itemEntity.getStack();
-        if (!source.isOf(ItemsRegistry.WRAITHFANG.get())) {
+        ItemStack result;
+        Identifier route;
+        if (source.isOf(ItemsRegistry.WRAITHFANG.get())) {
+            result = source.copyComponentsToNewStack(ItemsRegistry.WRAITHMAW.get(), source.getCount());
+            route = AwakeningFormRegistry.WRAITHMAW_ROUTE;
+        } else if (source.isOf(ItemsRegistry.WICKPIERCER.get())) {
+            result = source.copyComponentsToNewStack(ItemsRegistry.GLOAMPIERCER.get(), source.getCount());
+            route = AwakeningFormRegistry.GLOAMPIERCER_ROUTE;
+        } else {
             return false;
         }
         int level = AwakeningApi.getLevel(source);
-        ItemStack result = source.copyComponentsToNewStack(ItemsRegistry.WRAITHMAW.get(), source.getCount());
         result.set(ComponentTypeRegistry.AWAKENING_ROUTE.get(),
-                new AwakeningRouteComponent(AwakeningFormRegistry.WRAITHMAW_ROUTE));
+                new AwakeningRouteComponent(route));
         AwakeningApi.setLevel(result, level);
         itemEntity.setStack(result);
         world.spawnParticles(DEVOURER_DUST, center.x, center.y, center.z,

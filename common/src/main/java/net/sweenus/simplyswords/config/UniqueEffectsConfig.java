@@ -28,6 +28,7 @@ public class UniqueEffectsConfig extends Config {
     public WhisperwindSwordItem.EffectSettings whisperwind = new WhisperwindSwordItem.EffectSettings();
     public TwistedBladeItem.EffectSettings twisted_blade = new TwistedBladeItem.EffectSettings();
     public WickpiercerSwordItem.EffectSettings wickpiercer = new WickpiercerSwordItem.EffectSettings();
+    public GloampiercerSwordItem.EffectSettings gloampiercer = new GloampiercerSwordItem.EffectSettings();
     public FrostfallSwordItem.EffectSettings frostfall = new FrostfallSwordItem.EffectSettings();
     public LivyatanSwordItem.EffectSettings livyatan = new LivyatanSwordItem.EffectSettings();
     public HiveheartSwordItem.EffectSettings hiveheart = new HiveheartSwordItem.EffectSettings();

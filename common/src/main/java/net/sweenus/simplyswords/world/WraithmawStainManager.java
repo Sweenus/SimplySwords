@@ -37,12 +37,21 @@ public final class WraithmawStainManager {
     }
 
     public static void createPatch(ServerWorld world, UUID ownerId, Vec3d center, double radius) {
+        createPatch(world, ownerId, center, radius,
+                Math.max(20, Config.uniqueEffects.wraithmaw.stainDuration),
+                Math.max(1, Config.uniqueEffects.wraithmaw.stainFadeDuration),
+                Math.clamp(Config.uniqueEffects.wraithmaw.stainSlowAmplifier, 0, 4));
+    }
+
+    public static void createPatch(ServerWorld world, UUID ownerId, Vec3d center, double radius,
+                                   int durationTicks, int fadeTicks, int slowAmplifier) {
         if (world == null || ownerId == null || center == null || radius <= 0.0) {
             return;
         }
         float patchRadius = (float) Math.max(0.25, radius);
-        int duration = Math.max(20, Config.uniqueEffects.wraithmaw.stainDuration);
-        int fade = Math.clamp(Config.uniqueEffects.wraithmaw.stainFadeDuration, 1, duration);
+        int duration = Math.max(20, durationTicks);
+        int fade = Math.clamp(fadeTicks, 1, duration);
+        int amplifier = Math.clamp(slowAmplifier, 0, 4);
         long expiry = world.getTime() + duration;
         List<ActivePatch> patches = ACTIVE.computeIfAbsent(world, ignored -> new ArrayList<>());
         ActivePatch nearby = patches.stream()
@@ -53,6 +62,7 @@ public final class WraithmawStainManager {
                 .orElse(null);
         if (nearby != null) {
             nearby.expiryTick = expiry;
+            nearby.slowAmplifier = Math.max(nearby.slowAmplifier, amplifier);
             Entity entity = world.getEntity(nearby.visualId);
             if (entity instanceof BloodStainVisualEntity visual) {
                 visual.setLifetime(visual.age + duration);
@@ -78,7 +88,7 @@ public final class WraithmawStainManager {
                 BloodStainVisualEntity.STYLE_DEVOURER);
         visual.addCommandTag(VISUAL_TAG);
         world.spawnEntity(visual);
-        patches.add(new ActivePatch(ownerId, visual.getUuid(), center, patchRadius, expiry));
+        patches.add(new ActivePatch(ownerId, visual.getUuid(), center, patchRadius, expiry, amplifier));
     }
 
     public static void tick(ServerWorld world) {
@@ -113,7 +123,6 @@ public final class WraithmawStainManager {
 
     private static void applySlowness(ServerWorld world, List<ActivePatch> patches) {
         Set<UUID> slowed = new HashSet<>();
-        int amplifier = Math.clamp(Config.uniqueEffects.wraithmaw.stainSlowAmplifier, 0, 4);
         for (ActivePatch patch : patches) {
             LivingEntity owner = resolveLiving(world, patch.ownerId);
             if (owner == null) {
@@ -133,7 +142,7 @@ public final class WraithmawStainManager {
                 }
                 target.addStatusEffect(new StatusEffectInstance(
                         StatusEffects.SLOWNESS, CONTACT_INTERVAL * 2,
-                        amplifier, false, false, true), owner);
+                        patch.slowAmplifier, false, false, true), owner);
             }
         }
     }
@@ -167,14 +176,16 @@ public final class WraithmawStainManager {
         private final Vec3d center;
         private final float radius;
         private long expiryTick;
+        private int slowAmplifier;
 
         private ActivePatch(UUID ownerId, UUID visualId, Vec3d center,
-                            float radius, long expiryTick) {
+                            float radius, long expiryTick, int slowAmplifier) {
             this.ownerId = ownerId;
             this.visualId = visualId;
             this.center = center;
             this.radius = radius;
             this.expiryTick = expiryTick;
+            this.slowAmplifier = slowAmplifier;
         }
     }
 }

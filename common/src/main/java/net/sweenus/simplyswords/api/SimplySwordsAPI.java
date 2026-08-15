@@ -35,6 +35,7 @@ import net.sweenus.simplyswords.item.custom.LivyatanSwordItem;
 import net.sweenus.simplyswords.item.custom.MoltenEdgeSwordItem;
 import net.sweenus.simplyswords.item.custom.StealSwordItem;
 import net.sweenus.simplyswords.item.custom.WraithmawSwordItem;
+import net.sweenus.simplyswords.item.custom.GloampiercerSwordItem;
 import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
 import net.sweenus.simplyswords.power.powers.NecromanticArsenalPower;
 import net.sweenus.simplyswords.item.ContainedRemnantItem;
@@ -51,6 +52,7 @@ import net.sweenus.simplyswords.world.AbilityVisualManager;
 import net.sweenus.simplyswords.world.WeaponAbilityCooldownManager;
 import net.sweenus.simplyswords.world.WaxweaverEncasementManager;
 import net.sweenus.simplyswords.world.WraithmawAbilityManager;
+import net.sweenus.simplyswords.world.GloampiercerAbilityManager;
 import net.sweenus.simplyswords.world.PlayerMovementIntentManager;
 import net.sweenus.simplyswords.api.render.ObserverStatusVisualStyle;
 
@@ -144,6 +146,9 @@ public class SimplySwordsAPI {
         }
         if (stack.getItem() instanceof WraithmawSwordItem) {
             WraithmawAbilityManager.onSwing(stack, world, user);
+        }
+        if (stack.getItem() instanceof GloampiercerSwordItem) {
+            GloampiercerAbilityManager.onSwing(stack, world, user);
         }
     }
 

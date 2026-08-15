@@ -965,6 +965,13 @@ public class ItemsRegistry {
                             .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.UNIQUE,
                                     (int) wickpiercer_damage_modifier, wickpiercer_attackspeed))));
 
+    public static final RegistrySupplier<GloampiercerSwordItem> GLOAMPIERCER = ITEM.register("gloampiercer", () ->
+            new GloampiercerSwordItem(
+                    ModToolMaterial.UNIQUE,
+                    new Item.Settings().fireproof()
+                            .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.UNIQUE,
+                                    (int) wickpiercer_damage_modifier, wickpiercer_attackspeed))));
+
     public static final RegistrySupplier<TempestSwordItem> TEMPEST = ITEM.register("tempest", () ->
             new TempestSwordItem(
                     ModToolMaterial.UNIQUE,

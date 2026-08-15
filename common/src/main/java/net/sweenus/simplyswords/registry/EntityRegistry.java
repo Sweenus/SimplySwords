@@ -333,6 +333,25 @@ public class EntityRegistry {
                     .build(Identifier.of(SimplySwords.MOD_ID, "wraithmaw_cutlass").toString())
     );
 
+    public static final RegistrySupplier<EntityType<GloampiercerSpearEntity>> GLOAMPIERCER_SPEAR = ENTITIES.register(
+            "gloampiercer_spear",
+            () -> EntityType.Builder.<GloampiercerSpearEntity>create(GloampiercerSpearEntity::new, SpawnGroup.MISC)
+                    .dimensions(0.45F, 0.45F)
+                    .maxTrackingRange(160)
+                    .trackingTickInterval(1)
+                    .build(Identifier.of(SimplySwords.MOD_ID, "gloampiercer_spear").toString())
+    );
+
+    public static final RegistrySupplier<EntityType<GloampiercerCloneVisualEntity>> GLOAMPIERCER_CLONE_VISUAL = ENTITIES.register(
+            "gloampiercer_clone_visual",
+            () -> EntityType.Builder.<GloampiercerCloneVisualEntity>create(GloampiercerCloneVisualEntity::new, SpawnGroup.MISC)
+                    .dimensions(0.6F, 1.8F)
+                    .maxTrackingRange(160)
+                    .trackingTickInterval(1)
+                    .disableSaving()
+                    .build(Identifier.of(SimplySwords.MOD_ID, "gloampiercer_clone_visual").toString())
+    );
+
     public static final RegistrySupplier<EntityType<ChainLightningVisualEntity>> CHAIN_LIGHTNING_VISUAL = ENTITIES.register(
             "chain_lightning_visual",
             () -> EntityType.Builder.<ChainLightningVisualEntity>create(ChainLightningVisualEntity::new, SpawnGroup.MISC)
