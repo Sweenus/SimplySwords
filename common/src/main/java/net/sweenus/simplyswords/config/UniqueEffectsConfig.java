@@ -49,6 +49,7 @@ public class UniqueEffectsConfig extends Config {
     public LichbladeSwordItem.EffectSettings lichblade = new LichbladeSwordItem.EffectSettings();
     public SoulkeeperSwordItem.EffectSettings    soulkeeper = new SoulkeeperSwordItem.EffectSettings();
     public SoulrenderSwordItem.EffectSettings soulrender = new SoulrenderSwordItem.EffectSettings();
+    public SoulstalkerSwordItem.EffectSettings soulstalker = new SoulstalkerSwordItem.EffectSettings();
     public SoulPyreSwordItem.EffectSettings soulpyre = new SoulPyreSwordItem.EffectSettings();
     public StealSwordItem.EffectSettings soulstealer = new StealSwordItem.EffectSettings();
     public StormSwordItem.EffectSettings mjolnir = new StormSwordItem.EffectSettings();

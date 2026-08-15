@@ -804,6 +804,13 @@ public class ItemsRegistry {
                             .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.UNIQUE,
                                     (int) soulrender_damage_modifier, soulrender_attackspeed))));
 
+    public static final RegistrySupplier<SoulstalkerSwordItem> SOULSTALKER = ITEM.register("soulstalker", () ->
+            new SoulstalkerSwordItem(
+                    ModToolMaterial.UNIQUE,
+                    new Item.Settings().fireproof()
+                            .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.UNIQUE,
+                                    (int) soulrender_damage_modifier, soulrender_attackspeed))));
+
     public static final RegistrySupplier<SoulPyreSwordItem> SOULPYRE = ITEM.register("soulpyre", () ->
             new SoulPyreSwordItem(
                     ModToolMaterial.UNIQUE,

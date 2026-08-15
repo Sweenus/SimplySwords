@@ -58,6 +58,7 @@ public final class UniqueTooltipExportController {
             spec("soulkeeper", ItemsRegistry.SOULKEEPER::get),
             spec("soulpyre", ItemsRegistry.SOULPYRE::get),
             spec("soulrender", ItemsRegistry.SOULRENDER::get),
+            spec("soulstalker", ItemsRegistry.SOULSTALKER::get, AwakeningFormRegistry.SOULSTALKER_ROUTE),
             spec("soulstealer", ItemsRegistry.SOULSTEALER::get),
             spec("stars_edge", ItemsRegistry.STARS_EDGE::get),
             spec("stormbringer", ItemsRegistry.STORMBRINGER::get),

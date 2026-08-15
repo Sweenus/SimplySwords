@@ -555,6 +555,7 @@ public final class WeaponImplicitRegistry {
         registerPath("hearthflame", GREATHAMMER);
         registerPath("twisted_blade", CLAYMORE);
         registerPath("soulrender", SCYTHE);
+        registerPath("soulstalker", SCYTHE);
         registerPath("soulkeeper", GREATHAMMER);
         registerPath("soulstealer", DAGGER);
         registerPath("mjolnir", HAMMER);
