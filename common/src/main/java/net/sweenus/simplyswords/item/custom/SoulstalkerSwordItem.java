@@ -100,6 +100,7 @@ public final class SoulstalkerSwordItem extends UniqueSwordItem implements TwoHa
         @ValidatedDouble.Restrict(min = 0.05) public double cleaveSpeed = 0.8;
         @ValidatedDouble.Restrict(min = 0.25) public double cleaveInitialWidth = 0.5;
         @ValidatedDouble.Restrict(min = 0.25) public double cleaveFinalWidth = 3.2;
+        @ValidatedInt.Restrict(min = 1) public int cleaveMinimumSwingCooldownTicks = 2;
         @ValidatedInt.Restrict(min = 0, max = 100) public int passiveChance = 25;
         @ValidatedInt.Restrict(min = 1) public int passiveCheckInterval = 20;
         @ValidatedInt.Restrict(min = 1) public int passiveLockout = 60;

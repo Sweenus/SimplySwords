@@ -1281,6 +1281,7 @@
   "simplyswords.unique_effects.soulstalker.cleaveSpeed": "Shadow cleave speed",
   "simplyswords.unique_effects.soulstalker.cleaveInitialWidth": "Shadow cleave starting width",
   "simplyswords.unique_effects.soulstalker.cleaveFinalWidth": "Shadow cleave final width",
+  "simplyswords.unique_effects.soulstalker.cleaveMinimumSwingCooldownTicks": "Shadow cleave minimum swing cooldown",
   "simplyswords.unique_effects.soulstalker.passiveChance": "Stygian tendril chance",
   "simplyswords.unique_effects.soulstalker.passiveCheckInterval": "Stygian tendril check interval",
   "simplyswords.unique_effects.soulstalker.passiveLockout": "Stygian tendril lockout",

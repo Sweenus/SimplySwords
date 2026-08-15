@@ -41,6 +41,10 @@ public final class RunicSlashManager {
         }
     }
 
+    public static boolean isIgnoringAttackReady() {
+        return IGNORE_ATTACK_READY.get();
+    }
+
     public static void runIgnoringAttackReady(Runnable runnable) {
         boolean previous = IGNORE_ATTACK_READY.get();
         IGNORE_ATTACK_READY.set(true);

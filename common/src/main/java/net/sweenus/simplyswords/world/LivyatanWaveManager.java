@@ -282,6 +282,10 @@ public final class LivyatanWaveManager {
         if (now % 200L == 0L) {
             purgeOldSwingEntries(now);
         }
+        if (RunicSlashManager.isIgnoringAttackReady()) {
+            LAST_ACTIVATION.put(user.getUuid(), now);
+            return true;
+        }
         Long last = LAST_ACTIVATION.get(user.getUuid());
         if (last != null && now - last < getAttackReadyCooldownTicks(user)) {
             return false;

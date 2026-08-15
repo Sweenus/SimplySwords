@@ -53,6 +53,7 @@ public final class SoulstalkerAbilityManager {
     private static final Map<ServerWorld, List<PendingStrike>> PENDING_STRIKES = new HashMap<>();
     private static final Map<ServerWorld, Map<UUID, Long>> LAST_PASSIVE_CHECK = new HashMap<>();
     private static final Map<ServerWorld, Map<UUID, Long>> PASSIVE_LOCKOUT = new HashMap<>();
+    private static final Map<UUID, Long> LAST_CLEAVE = new HashMap<>();
 
     private SoulstalkerAbilityManager() {
     }
@@ -121,6 +122,9 @@ public final class SoulstalkerAbilityManager {
         if (stride == null || owner.getVehicle() != stride) {
             return;
         }
+        if (!isCleaveReady(world, owner)) {
+            return;
+        }
         Vec3d direction = owner.getRotationVec(1.0F);
         if (direction.lengthSquared() < 1.0E-6) {
             direction = Vec3d.fromPolar(owner.getPitch(), owner.getYaw());
@@ -145,6 +149,33 @@ public final class SoulstalkerAbilityManager {
                 SoundCategory.PLAYERS, 0.8F, 0.68F + world.random.nextFloat() * 0.12F);
         world.playSound(null, owner.getBlockPos(), SoundEvents.ENTITY_WARDEN_SONIC_CHARGE,
                 SoundCategory.PLAYERS, 0.28F, 1.45F + world.random.nextFloat() * 0.1F);
+    }
+
+    private static boolean isCleaveReady(ServerWorld world, LivingEntity user) {
+        long now = world.getTime();
+        if (now % 200L == 0L) {
+            LAST_CLEAVE.entrySet().removeIf(entry -> now - entry.getValue() > 1200L);
+        }
+        if (RunicSlashManager.isIgnoringAttackReady()) {
+            LAST_CLEAVE.put(user.getUuid(), now);
+            return true;
+        }
+        Long last = LAST_CLEAVE.get(user.getUuid());
+        if (last != null && now - last < getCleaveCooldownTicks(user)) {
+            return false;
+        }
+        LAST_CLEAVE.put(user.getUuid(), now);
+        return true;
+    }
+
+    private static int getCleaveCooldownTicks(LivingEntity user) {
+        EntityAttributeInstance attackSpeed = user.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_SPEED);
+        double value = attackSpeed == null ? 4.0 : attackSpeed.getValue();
+        if (value <= 0.0) {
+            value = 4.0;
+        }
+        return Math.max(Config.uniqueEffects.soulstalker.cleaveMinimumSwingCooldownTicks,
+                (int) Math.ceil(20.0 / value));
     }
 
     public static void tickHeldPassive(LivingEntity owner, ItemStack stack) {
