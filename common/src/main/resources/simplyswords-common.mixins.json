@@ -8,6 +8,7 @@
     "client.GameRendererMixin",
     "client.HeldItemRendererMixin",
     "client.InGameHudMixin",
+    "client.BipedEntityModelMixin",
     "client.PlayerEntityRendererMixin",
     "client.LivingEntityRendererAccessor",
     "client.WaxEncasedLivingEntityRendererMixin",

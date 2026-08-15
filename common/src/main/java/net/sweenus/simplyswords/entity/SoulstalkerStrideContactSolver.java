@@ -29,7 +29,8 @@ public final class SoulstalkerStrideContactSolver {
 
     private static Contact findGround(World world, Entity source, Vec3d center, float yaw, int leg) {
         double angle = yaw + leg * MathHelper.TAU / 6.0;
-        double radius = 1.32 + (leg % 3) * 0.08;
+        double lean = Math.sin(leg * MathHelper.TAU / 6.0);
+        double radius = (1.32 + (leg % 3) * 0.08) * (1.0 + lean * 0.14);
         Vec3d desired = center.add(Math.cos(angle) * radius, 0.0, Math.sin(angle) * radius);
         BlockHitResult hit = world.raycast(new RaycastContext(
                 desired.add(0.0, 3.0, 0.0), desired.add(0.0, -5.0, 0.0),

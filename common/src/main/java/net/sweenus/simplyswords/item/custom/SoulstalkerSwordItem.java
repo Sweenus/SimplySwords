@@ -83,21 +83,21 @@ public final class SoulstalkerSwordItem extends UniqueSwordItem implements TwoHa
             super(new ItemStackTooltipAppender(ItemsRegistry.SOULSTALKER::get));
         }
 
-        @ValidatedInt.Restrict(min = 1) public int cooldown = 900;
-        @ValidatedInt.Restrict(min = 20) public int duration = 300;
+        @ValidatedInt.Restrict(min = 1) public int cooldown = 1200;
+        @ValidatedInt.Restrict(min = 20) public int duration = 800;
         @ValidatedDouble.Restrict(min = 0.05, max = 1.0) public double movementSpeed = 0.215;
         @ValidatedDouble.Restrict(min = 0.05, max = 1.0) public double climbSpeed = 0.30;
         @ValidatedDouble.Restrict(min = 0.5, max = 4.0) public double stepHeight = 2.0;
         @ValidatedDouble.Restrict(min = 0.5, max = 4.0) public double riderHeight = 2.2;
-        @ValidatedDouble.Restrict(min = 0.0, max = 2.0) public double leapVerticalStrength = 0.75;
-        @ValidatedDouble.Restrict(min = 0.1, max = 3.0) public double leapHorizontalStrength = 1.1;
-        @ValidatedDouble.Restrict(min = 0.0, max = 1.0) public double leapSurfaceReleaseStrength = 0.3;
+        @ValidatedDouble.Restrict(min = 0.0, max = 3.0) public double leapVerticalStrength = 1.0;
+        @ValidatedDouble.Restrict(min = 0.1, max = 3.0) public double leapHorizontalStrength = 2.0;
+        @ValidatedDouble.Restrict(min = 0.0, max = 1.0) public double leapSurfaceReleaseStrength = 0.6;
         @ValidatedDouble.Restrict(min = 0.0, max = 1.0) public double footfallDamageScaling = 0.15;
         @ValidatedDouble.Restrict(min = 0.1, max = 3.0) public double footfallRadius = 0.8;
         @ValidatedInt.Restrict(min = 1) public int footfallTargetImmunity = 10;
-        @ValidatedDouble.Restrict(min = 1.0) public double cleaveRange = 10.0;
+        @ValidatedDouble.Restrict(min = 1.0) public double cleaveRange = 16.0;
         @ValidatedDouble.Restrict(min = 0.05) public double cleaveSpeed = 0.8;
-        @ValidatedDouble.Restrict(min = 0.25) public double cleaveInitialWidth = 1.1;
+        @ValidatedDouble.Restrict(min = 0.25) public double cleaveInitialWidth = 0.5;
         @ValidatedDouble.Restrict(min = 0.25) public double cleaveFinalWidth = 3.2;
         @ValidatedInt.Restrict(min = 0, max = 100) public int passiveChance = 25;
         @ValidatedInt.Restrict(min = 1) public int passiveCheckInterval = 20;

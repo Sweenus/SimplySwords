@@ -56,13 +56,13 @@ public final class SoulstalkerTentacleVisualEntityRenderer extends EntityRendere
         Vec3d[] path = buildPath(root, endpoint, origin, entity.getBackDirection(tickDelta), entity.getSeed(), age);
         Matrix4f matrix = matrices.peek().getPositionMatrix();
         int packedLight = LightmapTextureManager.pack(
-                Math.max(5, LightmapTextureManager.getBlockLightCoordinates(light)),
+                Math.max(2, LightmapTextureManager.getBlockLightCoordinates(light)),
                 LightmapTextureManager.getSkyLightCoordinates(light));
         VertexConsumer dark = consumers.getBuffer(RenderLayer.getDebugQuads());
         for (int segment = 0; segment < path.length - 1; segment++) {
             float progress = segment / (float) (path.length - 1);
             float width = MathHelper.lerp(progress, 0.17F, 0.046F);
-            int color = ((segment + entity.getSeed()) & 2) == 0 ? 0x08040D : 0x160922;
+            int color = ((segment + entity.getSeed()) & 2) == 0 ? 0x08040D : 0x0D0514;
             SoulstalkerRenderGeometry.prism(dark, matrix, path[segment], path[segment + 1],
                     width, color, Math.round(245.0F * fade), packedLight, false);
         }
@@ -72,9 +72,9 @@ public final class SoulstalkerTentacleVisualEntityRenderer extends EntityRendere
             float progress = segment / (float) (path.length - 1);
             float pulse = MathHelper.clamp(impactPulse - Math.abs(progress - reach) * 0.3F, 0.0F, 1.0F);
             SoulstalkerRenderGeometry.crossRibbon(glow, matrix, path[segment], path[segment + 1],
-                    MathHelper.lerp(progress, 0.034F, 0.011F) * (1.0F + pulse * 0.55F),
-                    pulse > 0.1F ? 0x9361B8 : 0x68208F,
-                    Math.round((92.0F + pulse * 74.0F) * fade));
+                    MathHelper.lerp(progress, 0.022F, 0.008F) * (1.0F + pulse * 0.55F),
+                    pulse > 0.1F ? 0x4A1C63 : 0x24082F,
+                    Math.round((46.0F + pulse * 38.0F) * fade));
         }
         super.render(entity, yaw, tickDelta, matrices, consumers, light);
     }

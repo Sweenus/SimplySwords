@@ -11,6 +11,7 @@ import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
@@ -29,9 +30,9 @@ public final class SoulstalkerStrideEntityRenderer extends EntityRenderer<Soulst
     private static final int LEG_COUNT = 6;
     private static final int PATH_POINTS = 10;
     private static final int[] TRANSITION_ORDER = {0, 3, 1, 4, 2, 5};
-    private static final int DARK_CORE = 0x08040D;
-    private static final int DARK_PURPLE = 0x160922;
-    private static final int GLOW_PURPLE = 0x68208F;
+    private static final int DARK_CORE = 0x040207;
+    private static final int DARK_PURPLE = 0x0D0514;
+    private static final int GLOW_PURPLE = 0x24082F;
     private static final Map<SoulstalkerStrideEntity, RigState> RIGS = new WeakHashMap<>();
 
     public SoulstalkerStrideEntityRenderer(EntityRendererFactory.Context context) {
@@ -67,12 +68,14 @@ public final class SoulstalkerStrideEntityRenderer extends EntityRenderer<Soulst
         Vec3d ownerPosition = owner == null
                 ? entityPosition.add(0.0, Config.uniqueEffects.soulstalker.riderHeight, 0.0)
                 : owner.getLerpedPos(tickDelta);
-        float bodyYaw = owner == null ? entity.getYaw(tickDelta)
+        float rigYaw = owner == null ? entity.getYaw(tickDelta)
+                : owner instanceof PlayerEntity
+                ? MathHelper.lerpAngleDegrees(tickDelta, owner.prevYaw, owner.getYaw())
                 : MathHelper.lerpAngleDegrees(tickDelta, owner.prevBodyYaw, owner.bodyYaw);
-        Vec3d forward = horizontalFacing(bodyYaw);
+        Vec3d forward = horizontalFacing(rigYaw);
         Vec3d back = forward.multiply(-1.0);
-        Vec3d right = rightFacing(bodyYaw);
-        byte surfaceMode = entity.getSurfaceMode();
+        Vec3d right = rightFacing(rigYaw);
+        byte surfaceMode = solveMode(entity.getSurfaceMode());
         RigState rig = RIGS.computeIfAbsent(entity, ignored -> new RigState());
         rig.beginFrame(entity, time);
         Vec3d[][] paths = new Vec3d[LEG_COUNT][];
@@ -80,7 +83,7 @@ public final class SoulstalkerStrideEntityRenderer extends EntityRenderer<Soulst
             Vec3d root = rootPosition(ownerPosition, back, right, leg);
             SoulstalkerStrideContactSolver.Contact contact = surfaceMode == SoulstalkerStrideEntity.SURFACE_AIRBORNE
                     ? airborneContact(ownerPosition, back, right, leg)
-                    : SoulstalkerStrideContactSolver.find(entity.getWorld(), entity, entityPosition, bodyYaw,
+                    : SoulstalkerStrideContactSolver.find(entity.getWorld(), entity, entityPosition, rigYaw,
                     MathHelper.clamp(Config.uniqueEffects.soulstalker.riderHeight, 0.5, 4.0),
                     surfaceMode, entity.getSurfaceNormal(), leg);
             Vec3d foot = rig.update(leg, contact.position(), contact.normal(), time, surfaceMode);
@@ -89,7 +92,7 @@ public final class SoulstalkerStrideEntityRenderer extends EntityRenderer<Soulst
         }
         boolean firstPersonOwner = isFirstPersonOwner(entity);
         int packedLight = LightmapTextureManager.pack(
-                Math.max(5, LightmapTextureManager.getBlockLightCoordinates(light)),
+                Math.max(2, LightmapTextureManager.getBlockLightCoordinates(light)),
                 LightmapTextureManager.getSkyLightCoordinates(light));
         Matrix4f matrix = matrices.peek().getPositionMatrix();
         VertexConsumer dark = consumers.getBuffer(RenderLayer.getDebugQuads());
@@ -113,8 +116,8 @@ public final class SoulstalkerStrideEntityRenderer extends EntityRenderer<Soulst
                 float pulse = 0.68F + MathHelper.sin(time * 0.16F + leg * 1.7F + progress * 4.0F) * 0.14F;
                 SoulstalkerRenderGeometry.crossRibbon(glow, matrix,
                         path[segment], path[segment + 1],
-                        MathHelper.lerp(progress, 0.022F, 0.008F) * appear,
-                        GLOW_PURPLE, Math.round(112.0F * appear * pulse));
+                        MathHelper.lerp(progress, 0.015F, 0.006F) * appear,
+                        GLOW_PURPLE, Math.round(50.0F * appear * pulse));
             }
         }
         super.render(entity, yaw, tickDelta, matrices, consumers, light);
@@ -150,11 +153,20 @@ public final class SoulstalkerStrideEntityRenderer extends EntityRenderer<Soulst
         double sideSign = (leg & 1) == 0 ? -1.0 : 1.0;
         Vec3d normal = contactNormal.lengthSquared() < 1.0E-6
                 ? new Vec3d(0.0, 1.0, 0.0) : contactNormal.normalize();
-        Vec3d firstControl = rootWorld.add(back.multiply(0.72 + row * 0.08))
-                .add(right.multiply(sideSign * (0.12 + row * 0.04)))
-                .add(0.0, surfaceMode == SoulstalkerStrideEntity.SURFACE_CEILING ? 0.08 : 0.22, 0.0);
+        Vec3d flat = new Vec3d(line.x, 0.0, line.z);
+        double flatLength = flat.length();
+        boolean adhered = surfaceMode == SoulstalkerStrideEntity.SURFACE_WALL
+                || surfaceMode == SoulstalkerStrideEntity.SURFACE_CEILING;
+        double forwardness = flatLength < 1.0E-4 || adhered ? 0.0
+                : MathHelper.clamp(flat.multiply(1.0 / flatLength).dotProduct(back.multiply(-1.0)), 0.0, 1.0);
+        double sideness = flatLength < 1.0E-4 ? 0.0 : flat.multiply(1.0 / flatLength).dotProduct(right);
+        double bowSign = Math.abs(sideness) < 0.15 ? sideSign : Math.signum(sideness);
+        Vec3d firstControl = rootWorld.add(back.multiply((0.72 + row * 0.08) * (1.0 - forwardness * 0.85)))
+                .add(right.multiply(bowSign * (0.12 + row * 0.04 + forwardness * 0.62)))
+                .add(0.0, (surfaceMode == SoulstalkerStrideEntity.SURFACE_CEILING ? 0.08 : 0.22)
+                        + forwardness * 0.3, 0.0);
         Vec3d secondControl = footWorld.add(normal.multiply(Math.min(1.15, 0.48 + distance * 0.13)))
-                .add(right.multiply(-sideSign * 0.1));
+                .add(right.multiply(bowSign * forwardness * 0.28 - sideSign * 0.1));
         Vec3d[] points = new Vec3d[PATH_POINTS];
         for (int index = 0; index < PATH_POINTS; index++) {
             double progress = index / (double) (PATH_POINTS - 1);
@@ -166,7 +178,9 @@ public final class SoulstalkerStrideEntityRenderer extends EntityRenderer<Soulst
             double envelope = Math.sin(progress * Math.PI);
             double flex = Math.sin(time * 0.11 + leg * 1.9 + progress * Math.PI * 2.0)
                     * envelope * 0.045;
-            points[index] = point.add(right.multiply(flex * sideSign)).subtract(entityPosition);
+            double bow = envelope * forwardness * 0.45;
+            points[index] = point.add(right.multiply(flex * sideSign + bow * bowSign))
+                    .subtract(entityPosition);
         }
         return points;
     }
@@ -192,6 +206,11 @@ public final class SoulstalkerStrideEntityRenderer extends EntityRenderer<Soulst
         return value * value * (3.0F - 2.0F * value);
     }
 
+    private static byte solveMode(byte surfaceMode) {
+        return surfaceMode == SoulstalkerStrideEntity.SURFACE_MANTLE
+                ? SoulstalkerStrideEntity.SURFACE_GROUND : surfaceMode;
+    }
+
     private static int transitionRank(int leg) {
         for (int index = 0; index < TRANSITION_ORDER.length; index++) {
             if (TRANSITION_ORDER[index] == leg) {
@@ -210,8 +229,8 @@ public final class SoulstalkerStrideEntityRenderer extends EntityRenderer<Soulst
         private float modeChangedAt;
 
         private void beginFrame(SoulstalkerStrideEntity entity, float time) {
-            if (surfaceMode != entity.getSurfaceMode()) {
-                surfaceMode = entity.getSurfaceMode();
+            if (surfaceMode != solveMode(entity.getSurfaceMode())) {
+                surfaceMode = solveMode(entity.getSurfaceMode());
                 modeChangedAt = time;
                 for (LegState leg : legs) {
                     if (leg != null) {
@@ -256,7 +275,7 @@ public final class SoulstalkerStrideEntityRenderer extends EntityRenderer<Soulst
                 state.pendingTransition = false;
                 commandedLeg = -1;
             } else if (state.pendingTransition
-                    && time >= modeChangedAt + 10.0F + transitionRank(index) * 2.0F) {
+                    && time >= modeChangedAt + transitionRank(index) * 1.0F) {
                 state.begin(desired, normal, time);
                 state.pendingTransition = false;
             } else if (!state.stepping && state.planted.squaredDistanceTo(desired) > 12.0) {

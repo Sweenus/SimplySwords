@@ -175,7 +175,9 @@ public final class SoulstalkerCleaveEntity extends Entity {
     }
 
     public float getCurrentWidth() {
-        return MathHelper.lerp(getProgress(), dataTracker.get(INITIAL_WIDTH), dataTracker.get(FINAL_WIDTH));
+        float progress = MathHelper.clamp(getProgress(), 0.0F, 1.0F);
+        float eased = progress * progress * (3.0F - 2.0F * progress);
+        return MathHelper.lerp(eased, dataTracker.get(INITIAL_WIDTH), dataTracker.get(FINAL_WIDTH));
     }
 
     public float getProgress() {
