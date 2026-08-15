@@ -11,7 +11,6 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
-import net.sweenus.simplyswords.client.render.IonDeferredRenderController;
 import net.sweenus.simplyswords.client.render.IrisCompat;
 import net.sweenus.simplyswords.entity.SoulstalkerTentacleVisualEntity;
 import org.joml.Matrix4f;
@@ -62,19 +61,9 @@ public final class SoulstalkerTentacleVisualEntityRenderer extends EntityRendere
         for (int segment = 0; segment < path.length - 1; segment++) {
             float progress = segment / (float) (path.length - 1);
             float width = MathHelper.lerp(progress, 0.17F, 0.046F);
-            int color = ((segment + entity.getSeed()) & 2) == 0 ? 0x08040D : 0x0D0514;
+            int color = ((segment + entity.getSeed()) & 2) == 0 ? 0x08040D : 0x000000;
             SoulstalkerRenderGeometry.prism(dark, matrix, path[segment], path[segment + 1],
                     width, color, Math.round(245.0F * fade), packedLight, false);
-        }
-        VertexConsumer glow = IonDeferredRenderController.getLightningBuffer();
-        float impactPulse = MathHelper.clamp(1.0F - Math.abs(age - entity.getImpactAge()) / 4.0F, 0.0F, 1.0F);
-        for (int segment = 0; segment < path.length - 1; segment++) {
-            float progress = segment / (float) (path.length - 1);
-            float pulse = MathHelper.clamp(impactPulse - Math.abs(progress - reach) * 0.3F, 0.0F, 1.0F);
-            SoulstalkerRenderGeometry.crossRibbon(glow, matrix, path[segment], path[segment + 1],
-                    MathHelper.lerp(progress, 0.022F, 0.008F) * (1.0F + pulse * 0.55F),
-                    pulse > 0.1F ? 0x4A1C63 : 0x24082F,
-                    Math.round((46.0F + pulse * 38.0F) * fade));
         }
         super.render(entity, yaw, tickDelta, matrices, consumers, light);
     }

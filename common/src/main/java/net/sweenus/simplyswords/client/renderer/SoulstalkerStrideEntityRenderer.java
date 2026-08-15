@@ -15,7 +15,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
-import net.sweenus.simplyswords.client.render.IonDeferredRenderController;
 import net.sweenus.simplyswords.client.render.IrisCompat;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.SoulstalkerStrideContactSolver;
@@ -31,8 +30,7 @@ public final class SoulstalkerStrideEntityRenderer extends EntityRenderer<Soulst
     private static final int PATH_POINTS = 10;
     private static final int[] TRANSITION_ORDER = {0, 3, 1, 4, 2, 5};
     private static final int DARK_CORE = 0x040207;
-    private static final int DARK_PURPLE = 0x0D0514;
-    private static final int GLOW_PURPLE = 0x24082F;
+    private static final int DARK_PURPLE = 0x000000;
     private static final Map<SoulstalkerStrideEntity, RigState> RIGS = new WeakHashMap<>();
 
     public SoulstalkerStrideEntityRenderer(EntityRendererFactory.Context context) {
@@ -105,19 +103,6 @@ public final class SoulstalkerStrideEntityRenderer extends EntityRenderer<Soulst
                 int color = ((segment + leg) & 1) == 0 ? DARK_CORE : DARK_PURPLE;
                 SoulstalkerRenderGeometry.prism(dark, matrix, path[segment], path[segment + 1],
                         width, color, Math.round(246.0F * appear), packedLight, false);
-            }
-        }
-        VertexConsumer glow = IonDeferredRenderController.getLightningBuffer();
-        for (int leg = 0; leg < LEG_COUNT; leg++) {
-            Vec3d[] path = paths[leg];
-            int start = firstPersonOwner ? 2 : 0;
-            for (int segment = start; segment < path.length - 1; segment++) {
-                float progress = segment / (float) (path.length - 1);
-                float pulse = 0.68F + MathHelper.sin(time * 0.16F + leg * 1.7F + progress * 4.0F) * 0.14F;
-                SoulstalkerRenderGeometry.crossRibbon(glow, matrix,
-                        path[segment], path[segment + 1],
-                        MathHelper.lerp(progress, 0.015F, 0.006F) * appear,
-                        GLOW_PURPLE, Math.round(50.0F * appear * pulse));
             }
         }
         super.render(entity, yaw, tickDelta, matrices, consumers, light);
