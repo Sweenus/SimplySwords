@@ -13,8 +13,12 @@ import net.minecraft.entity.data.TrackedDataHandlerRegistry;
 import net.minecraft.entity.passive.AbstractHorseEntity;
 import net.minecraft.entity.passive.HorseEntity;
 import net.minecraft.entity.passive.PassiveEntity;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.fluid.FluidState;
 import net.minecraft.item.ItemStack;
+import net.minecraft.registry.tag.FluidTags;
 import net.minecraft.particle.DustColorTransitionParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.world.ServerWorld;
@@ -45,16 +49,22 @@ public class RiftmaneChargerEntity extends HorseEntity implements SimplySwordsMi
             DataTracker.registerData(RiftmaneChargerEntity.class, TrackedDataHandlerRegistry.INTEGER);
     private static final TrackedData<Integer> SEED =
             DataTracker.registerData(RiftmaneChargerEntity.class, TrackedDataHandlerRegistry.INTEGER);
+    private static final TrackedData<Boolean> WATER_WALK =
+            DataTracker.registerData(RiftmaneChargerEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
 
     private static final float REAR_RISE_FRACTION = 0.45F;
     private static final float REAR_DROP_TICKS = 4.0F;
     private static final double WALL_HEIGHT = 2.0;
     private static final double PROBE_RADIUS = 0.35;
+    private static final int GALLOP_INTERVAL = 16;
+    private static final int HIT_SOUND_INTERVAL = 4;
     private static final DustColorTransitionParticleEffect RIFT_DUST =
             new DustColorTransitionParticleEffect(new Vector3f(0.05F, 0.72F, 0.70F),
                     new Vector3f(0.68F, 0.99F, 0.96F), 1.1F);
 
     private UUID ownerUuid;
+    private boolean audioLead;
+    private int lastHitSoundAge = Integer.MIN_VALUE;
     private long expiresAtTick;
     private float damage;
     private double knockbackStrength;
@@ -83,6 +93,51 @@ public class RiftmaneChargerEntity extends HorseEntity implements SimplySwordsMi
         builder.add(LIFETIME, 60);
         builder.add(REAR_TICKS, 0);
         builder.add(SEED, 0);
+        builder.add(WATER_WALK, false);
+    }
+
+    public void setAudioLead(boolean audioLead) {
+        this.audioLead = audioLead;
+    }
+
+    public boolean getWaterWalk() {
+        return this.dataTracker.get(WATER_WALK);
+    }
+
+    public void setWaterWalk(boolean waterWalk) {
+        this.dataTracker.set(WATER_WALK, waterWalk);
+    }
+
+    @Override
+    public boolean canWalkOnFluid(FluidState state) {
+        return this.getWaterWalk() && state.isIn(FluidTags.WATER);
+    }
+
+    @Override
+    public boolean shouldDismountUnderwater() {
+        return false;
+    }
+
+    @Override
+    public LivingEntity getControllingPassenger() {
+        return null;
+    }
+
+    @Override
+    protected boolean canAddPassenger(Entity passenger) {
+        return !this.hasPassengers() && this.ownerUuid != null
+                && this.ownerUuid.equals(passenger.getUuid());
+    }
+
+    @Override
+    public Vec3d getPassengerRidingPos(Entity passenger) {
+        Vec3d base = super.getPassengerRidingPos(passenger);
+        float rear = this.getRearProgress(1.0F);
+        if (rear <= 0.001F) {
+            return base;
+        }
+        Vec3d facing = Vec3d.fromPolar(0.0F, this.getYaw());
+        return base.add(-facing.x * 0.35 * rear, 0.45 * rear, -facing.z * 0.35 * rear);
     }
 
     public void initializeCharge(LivingEntity owner, ItemStack stack, Vec3d direction, int lifetime,
@@ -173,6 +228,10 @@ public class RiftmaneChargerEntity extends HorseEntity implements SimplySwordsMi
         if (this.isOnFire()) {
             this.extinguish();
         }
+        this.fallDistance = 0.0F;
+        for (Entity passenger : this.getPassengerList()) {
+            passenger.fallDistance = 0.0F;
+        }
 
         int rearTicks = this.getRearTicks();
         if (this.age < rearTicks) {
@@ -207,8 +266,11 @@ public class RiftmaneChargerEntity extends HorseEntity implements SimplySwordsMi
                 Vec3d hitPos = target.getPos().add(0.0, Math.max(0.35, target.getHeight() * 0.55), 0.0);
                 world.spawnParticles(ParticleTypes.CRIT, hitPos.x, hitPos.y, hitPos.z, 8, 0.24, 0.2, 0.24, 0.06);
                 world.spawnParticles(RIFT_DUST, hitPos.x, hitPos.y, hitPos.z, 10, 0.3, 0.25, 0.3, 0.02);
-                world.playSound(null, target.getBlockPos(), SoundRegistry.OBJECT_IMPACT_THUD.get(),
-                        SoundCategory.PLAYERS, 0.45F, 1.25F + world.random.nextFloat() * 0.2F);
+                if (this.age - this.lastHitSoundAge >= HIT_SOUND_INTERVAL) {
+                    this.lastHitSoundAge = this.age;
+                    world.playSound(null, target.getBlockPos(), SoundRegistry.OBJECT_IMPACT_THUD.get(),
+                            SoundCategory.PLAYERS, 0.32F, 1.25F + world.random.nextFloat() * 0.2F);
+                }
             }
         }
 
@@ -226,6 +288,9 @@ public class RiftmaneChargerEntity extends HorseEntity implements SimplySwordsMi
         if (this.age % 2 == 0) {
             world.spawnParticles(ParticleTypes.END_ROD, this.getX(), emergeY, this.getZ(),
                     2, 0.4, 0.6, 0.4, 0.02);
+        }
+        if (!this.audioLead) {
+            return;
         }
         if (this.age == Math.max(1, rearTicks / 3)) {
             world.playSound(null, this.getBlockPos(), SoundEvents.ENTITY_HORSE_ANGRY,
@@ -253,6 +318,9 @@ public class RiftmaneChargerEntity extends HorseEntity implements SimplySwordsMi
                 14, 0.5, 0.1, 0.5, 0.12);
         world.spawnParticles(ParticleTypes.POOF, hooves.x, hooves.y + 0.1, hooves.z,
                 8, 0.5, 0.05, 0.5, 0.02);
+        if (!this.audioLead) {
+            return;
+        }
         world.playSound(null, this.getBlockPos(), SoundRegistry.OBJECT_IMPACT_THUD.get(),
                 SoundCategory.PLAYERS, 0.55F, 0.85F + world.random.nextFloat() * 0.15F);
         world.playSound(null, this.getBlockPos(), SoundEvents.ENTITY_WARDEN_SONIC_BOOM,
@@ -280,7 +348,7 @@ public class RiftmaneChargerEntity extends HorseEntity implements SimplySwordsMi
         Vec3d ahead = this.getPos().add(travel.multiply(halfWidth + 0.45));
         Box probe = new Box(ahead.x - PROBE_RADIUS, clearance, ahead.z - PROBE_RADIUS,
                 ahead.x + PROBE_RADIUS, ceiling, ahead.z + PROBE_RADIUS);
-        for (VoxelShape shape : this.getWorld().getBlockCollisions(this, probe)) {
+        for (VoxelShape shape : this.getWorld().getBlockCollisions(null, probe)) {
             if (!shape.isEmpty() && shape.getBoundingBox().maxY > clearance) {
                 return true;
             }
@@ -295,9 +363,9 @@ public class RiftmaneChargerEntity extends HorseEntity implements SimplySwordsMi
             world.spawnParticles(ParticleTypes.END_ROD, this.getX(), this.getY() + 0.1, this.getZ(),
                     1, 0.3, 0.05, 0.3, 0.005);
         }
-        if (this.age % 7 == 0) {
+        if (Math.floorMod(this.age + this.getSeed(), GALLOP_INTERVAL) == 0) {
             world.playSound(null, this.getBlockPos(), SoundEvents.ENTITY_HORSE_GALLOP,
-                    SoundCategory.PLAYERS, 0.28F, 0.7F + world.random.nextFloat() * 0.2F);
+                    SoundCategory.PLAYERS, 0.18F, 0.7F + world.random.nextFloat() * 0.2F);
         }
     }
 
@@ -305,7 +373,7 @@ public class RiftmaneChargerEntity extends HorseEntity implements SimplySwordsMi
         if (target == null || !target.isAlive() || target == this) {
             return false;
         }
-        if (target instanceof RiftmaneChargerEntity) {
+        if (target instanceof RiftmaneChargerEntity || this.hasPassenger(target)) {
             return false;
         }
         if (!(this.getWorld() instanceof ServerWorld world)) {
@@ -332,13 +400,34 @@ public class RiftmaneChargerEntity extends HorseEntity implements SimplySwordsMi
         return entity instanceof LivingEntity living ? living : null;
     }
 
+    private void releaseRiders(ServerWorld world) {
+        Vec3d release = this.getPos().add(0.0, 0.1, 0.0);
+        for (Entity passenger : this.getPassengerList()) {
+            if (!(passenger instanceof LivingEntity rider)) {
+                continue;
+            }
+            rider.stopRiding();
+            Box targetBox = rider.getBoundingBox().offset(release.subtract(rider.getPos()));
+            if (world.isSpaceEmpty(rider, targetBox)) {
+                rider.refreshPositionAfterTeleport(release);
+            }
+            rider.fallDistance = 0.0F;
+            rider.addStatusEffect(new StatusEffectInstance(
+                    StatusEffects.SLOW_FALLING, 40, 0, false, false, false), rider);
+            world.playSound(null, rider.getBlockPos(), SoundRegistry.DARK_ACTIVATION_DISTORTED.get(),
+                    SoundCategory.PLAYERS, 0.5F, 1.35F);
+        }
+        this.removeAllPassengers();
+    }
+
     private void expire(boolean impact) {
         if (this.getWorld() instanceof ServerWorld world) {
+            releaseRiders(world);
             world.spawnParticles(ParticleTypes.POOF, this.getX(), this.getBodyY(0.5), this.getZ(),
                     impact ? 18 : 10, 0.35, 0.35, 0.35, 0.05);
             world.spawnParticles(RIFT_DUST, this.getX(), this.getBodyY(0.6), this.getZ(),
                     impact ? 24 : 12, 0.4, 0.4, 0.4, 0.03);
-            if (impact) {
+            if (impact && this.audioLead) {
                 world.playSound(null, this.getBlockPos(), SoundRegistry.OBJECT_IMPACT_THUD.get(),
                         SoundCategory.PLAYERS, 0.5F, 0.8F);
             }

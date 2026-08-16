@@ -58,6 +58,8 @@ public final class RiftmaneSwordItem extends UniqueSwordItem implements TwoHande
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.riftmanesworditem.tooltip4").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
+        tooltip.add(Text.translatable("item.simplyswords.riftmanesworditem.tooltip5").setStyle(Styles.TEXT));
+        tooltip.add(Text.literal(""));
         appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.riftmane.cooldown);
         super.appendTooltip(stack, context, tooltip, type);
     }
@@ -79,6 +81,8 @@ public final class RiftmaneSwordItem extends UniqueSwordItem implements TwoHande
         @ValidatedDouble.Restrict(min = 0.05, max = 3.0) public double chargeSpeed = 0.9;
         @ValidatedInt.Restrict(min = 0, max = 60) public int rearDuration = 16;
         @ValidatedDouble.Restrict(min = 0.0, max = 8.0) public double spawnOffset = 3.0;
+        @ValidatedDouble.Restrict(min = 1.0, max = 5.0) public double mountedDistanceMultiplier = 2.0;
+        public boolean waterWalking = true;
         @ValidatedDouble.Restrict(min = 0.0, max = 2.0) public double stepHeight = 1.0;
         @ValidatedDouble.Restrict(min = 0.0) public double damageScaling = 1.0;
         @ValidatedDouble.Restrict(min = 0.0) public double spellScaling = 0.5;

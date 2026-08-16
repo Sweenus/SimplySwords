@@ -1,7 +1,12 @@
 package net.sweenus.simplyswords.world;
 
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.registry.tag.FluidTags;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.particle.DustColorTransitionParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
@@ -21,6 +26,7 @@ import net.sweenus.simplyswords.registry.EntityRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 
 import java.util.Comparator;
@@ -38,6 +44,8 @@ public final class RiftmaneAbilityManager {
     private static final int RIFT_TRAILING_TICKS = 8;
     private static final int RIFT_MINIMUM_LIFETIME = 16;
     private static final float RIFT_HEIGHT = 2.6F;
+    private static final int SUPPORT_SCAN_UP = 4;
+    private static final int SUPPORT_SCAN_DOWN = 12;
 
     private static final Map<ServerWorld, Map<UUID, Long>> LAST_PASSIVE = new HashMap<>();
 
@@ -69,14 +77,31 @@ public final class RiftmaneAbilityManager {
         float damage = HelperMethods.abilityScaledDamage(SpellScalingProfile.ARCANE, owner, context.stack(),
                 (float) settings.damageScaling, (float) settings.spellScaling);
 
+        boolean waterWalk = settings.waterWalking && !owner.isSubmergedInWater();
+        ServerPlayerEntity rider = context.actor() instanceof ServerPlayerEntity player
+                && player.isSprinting() && !player.hasVehicle() ? player : null;
+        int mountIndex = rider == null ? -1 : count / 2;
+
         int spawned = 0;
         for (int index = 0; index < count; index++) {
             double lateral = (index - (count - 1) * 0.5) * spacing;
             Vec3d lane = owner.getPos().add(side.multiply(lateral));
             Vec3d ahead = lane.add(forward.multiply(Math.max(0.0, settings.spawnOffset)));
-            if (summon(world, owner, context.stack(), ahead, forward, damage, settings)
-                    || summon(world, owner, context.stack(), lane, forward, damage, settings)) {
-                spawned++;
+            double distanceMultiplier = index == mountIndex
+                    ? Math.max(1.0, settings.mountedDistanceMultiplier) : 1.0;
+            boolean audioLead = spawned == 0;
+            RiftmaneChargerEntity charger = summon(world, owner, context.stack(), ahead, forward,
+                    damage, settings, waterWalk, distanceMultiplier, audioLead);
+            if (charger == null) {
+                charger = summon(world, owner, context.stack(), lane, forward,
+                        damage, settings, waterWalk, distanceMultiplier, audioLead);
+            }
+            if (charger == null) {
+                continue;
+            }
+            spawned++;
+            if (index == mountIndex) {
+                rider.startRiding(charger, true);
             }
         }
         if (spawned == 0) {
@@ -106,13 +131,14 @@ public final class RiftmaneAbilityManager {
             return;
         }
 
+        boolean waterWalk = settings.waterWalking && !owner.isSubmergedInWater();
         Vec3d forward = horizontal(target.getPos().subtract(owner.getPos()), owner.getYaw());
         Vec3d position = owner.getPos().add(forward.multiply(Math.max(0.0, settings.spawnOffset)));
         float damage = HelperMethods.abilityScaledDamage(SpellScalingProfile.ARCANE, owner, stack,
                 (float) settings.damageScaling, (float) settings.spellScaling);
-        if (!summon(world, owner, stack, position, forward, damage, settings)) {
+        if (summon(world, owner, stack, position, forward, damage, settings, waterWalk, 1.0, true) == null) {
             position = owner.getPos();
-            if (!summon(world, owner, stack, position, forward, damage, settings)) {
+            if (summon(world, owner, stack, position, forward, damage, settings, waterWalk, 1.0, true) == null) {
                 return;
             }
         }
@@ -143,46 +169,77 @@ public final class RiftmaneAbilityManager {
         }
     }
 
-    private static boolean summon(ServerWorld world, LivingEntity owner, ItemStack stack, Vec3d position,
-                                  Vec3d forward, float damage, RiftmaneSwordItem.EffectSettings settings) {
+    @Nullable
+    private static RiftmaneChargerEntity summon(ServerWorld world, LivingEntity owner, ItemStack stack,
+                                                Vec3d position, Vec3d forward, float damage,
+                                                RiftmaneSwordItem.EffectSettings settings,
+                                                boolean waterWalk, double distanceMultiplier,
+                                                boolean audioLead) {
         double speed = Math.max(0.05, settings.chargeSpeed);
-        double distance = Math.max(1.0, settings.chargeDistance);
+        double distance = Math.max(1.0, settings.chargeDistance) * Math.max(1.0, distanceMultiplier);
         int rearTicks = Math.max(0, settings.rearDuration);
         int lifetime = rearTicks + (int) Math.ceil(distance / speed) + LIFETIME_MARGIN;
-        double groundY = LivyatanWaveManager.findGroundTopY(world, position.x, position.z, owner.getY() + 1.0);
+        double groundY = findSupportTopY(world, position.x, position.z, owner.getY() + 1.0, waterWalk);
         int seed = owner.getRandom().nextInt(4096);
 
         RiftmaneChargerEntity charger = new RiftmaneChargerEntity(EntityRegistry.RIFTMANE_CHARGER.get(), world);
+        charger.setWaterWalk(waterWalk);
+        charger.setAudioLead(audioLead);
         float yaw = MathHelper.wrapDegrees((float) Math.toDegrees(Math.atan2(-forward.x, forward.z)));
         charger.refreshPositionAndAngles(position.x, groundY, position.z, yaw, 0.0F);
         if (!world.isSpaceEmpty(charger, charger.getBoundingBox())) {
             charger.discard();
-            return false;
+            return null;
         }
         charger.initializeCharge(owner, stack, forward, lifetime, rearTicks, seed, damage,
                 AwakeningApi.scaleEffect(stack, settings.knockbackStrength),
                 speed, settings.hitRadius, settings.stepHeight);
         if (!world.spawnEntity(charger)) {
             charger.discard();
-            return false;
+            return null;
         }
 
-        spawnRift(world, position, groundY, yaw, rearTicks, seed);
+        spawnRift(world, position, groundY, yaw, rearTicks, seed, audioLead);
         world.spawnParticles(RIFT_DUST, position.x, groundY + 0.8, position.z, 16, 0.4, 0.5, 0.4, 0.04);
-        return true;
+        return charger;
+    }
+
+    private static double findSupportTopY(ServerWorld world, double x, double z, double centerY,
+                                          boolean waterWalk) {
+        if (!waterWalk) {
+            return LivyatanWaveManager.findGroundTopY(world, x, z, centerY);
+        }
+        int blockX = MathHelper.floor(x);
+        int blockZ = MathHelper.floor(z);
+        int startY = MathHelper.floor(centerY) + SUPPORT_SCAN_UP;
+        int minY = Math.max(world.getBottomY(), MathHelper.floor(centerY) - SUPPORT_SCAN_DOWN);
+        for (int y = startY; y >= minY; y--) {
+            BlockPos pos = new BlockPos(blockX, y, blockZ);
+            BlockState state = world.getBlockState(pos);
+            if (state.isSideSolidFullSquare(world, pos, Direction.UP)) {
+                return y + 1.0;
+            }
+            if (state.getFluidState().isIn(FluidTags.WATER)
+                    && !world.getBlockState(pos.up()).getFluidState().isIn(FluidTags.WATER)) {
+                return y + 1.0;
+            }
+        }
+        return LivyatanWaveManager.findGroundTopY(world, x, z, centerY);
     }
 
     private static void spawnRift(ServerWorld world, Vec3d position, double groundY, float chargeYaw,
-                                  int rearTicks, int seed) {
+                                  int rearTicks, int seed, boolean audioLead) {
         int lifetime = Math.max(RIFT_MINIMUM_LIFETIME, rearTicks + RIFT_TRAILING_TICKS);
         RiftmaneRiftVisualEntity rift = new RiftmaneRiftVisualEntity(world,
                 position.x, groundY, position.z,
                 MathHelper.wrapDegrees(chargeYaw + 180.0F), lifetime, RIFT_HEIGHT, seed);
         world.spawnEntity(rift);
-        world.playSound(null, rift.getBlockPos(), SoundRegistry.DARK_ACTIVATION_DISTORTED.get(),
-                SoundCategory.PLAYERS, 0.9F, 0.58F);
-        world.playSound(null, rift.getBlockPos(), SoundRegistry.CAELESTIS_CREATURE_ARRIVAL.get(),
-                SoundCategory.PLAYERS, 0.45F, 1.25F);
+        if (audioLead) {
+            world.playSound(null, rift.getBlockPos(), SoundRegistry.DARK_ACTIVATION_DISTORTED.get(),
+                    SoundCategory.PLAYERS, 0.9F, 0.58F);
+            world.playSound(null, rift.getBlockPos(), SoundRegistry.CAELESTIS_CREATURE_ARRIVAL.get(),
+                    SoundCategory.PLAYERS, 0.45F, 1.25F);
+        }
         world.spawnParticles(ParticleTypes.REVERSE_PORTAL, position.x, groundY + RIFT_HEIGHT * 0.5, position.z,
                 40, 0.45, 0.8, 0.45, 0.11);
     }
