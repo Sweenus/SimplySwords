@@ -382,6 +382,26 @@ public class EntityRegistry {
                     .build(Identifier.of(SimplySwords.MOD_ID, "soulstalker_tentacle_visual").toString())
     );
 
+    public static final RegistrySupplier<EntityType<RiftmaneChargerEntity>> RIFTMANE_CHARGER = ENTITIES.register(
+            "riftmane_charger",
+            () -> EntityType.Builder.<RiftmaneChargerEntity>create(RiftmaneChargerEntity::new, SpawnGroup.MISC)
+                    .dimensions(1.3964844F, 1.6F)
+                    .maxTrackingRange(160)
+                    .trackingTickInterval(1)
+                    .disableSaving()
+                    .build(Identifier.of(SimplySwords.MOD_ID, "riftmane_charger").toString())
+    );
+
+    public static final RegistrySupplier<EntityType<RiftmaneRiftVisualEntity>> RIFTMANE_RIFT_VISUAL = ENTITIES.register(
+            "riftmane_rift_visual",
+            () -> EntityType.Builder.<RiftmaneRiftVisualEntity>create(RiftmaneRiftVisualEntity::new, SpawnGroup.MISC)
+                    .dimensions(0.2F, 0.2F)
+                    .maxTrackingRange(160)
+                    .trackingTickInterval(1)
+                    .disableSaving()
+                    .build(Identifier.of(SimplySwords.MOD_ID, "riftmane_rift_visual").toString())
+    );
+
     public static final RegistrySupplier<EntityType<ChainLightningVisualEntity>> CHAIN_LIGHTNING_VISUAL = ENTITIES.register(
             "chain_lightning_visual",
             () -> EntityType.Builder.<ChainLightningVisualEntity>create(ChainLightningVisualEntity::new, SpawnGroup.MISC)

@@ -1,0 +1,47 @@
+{
+  "attributes": {
+    "range_bonus": 1,
+    "two_handed": true,
+    "pose": "simplyswords:pose_greatsword",
+    "category": "claymore",
+    "attacks": [
+      {
+        "hitbox": "HORIZONTAL_PLANE",
+        "damage_multiplier": 0.75,
+        "angle": 150,
+        "upswing": 0.5,
+        "animation": "bettercombat:two_handed_slash_horizontal_left",
+        "swing_sound": {
+          "id": "simplyswords:elemental_sword_sci-fi_attack_01",
+          "volume": 0.25,
+          "pitch": 1.1
+        }
+      },
+      {
+        "hitbox": "HORIZONTAL_PLANE",
+        "damage_multiplier": 0.75,
+        "angle": 150,
+        "upswing": 0.5,
+        "animation": "bettercombat:two_handed_slash_horizontal_right",
+        "swing_sound": {
+          "id": "simplyswords:elemental_sword_sci-fi_attack_02",
+          "volume": 0.25,
+          "pitch": 1.25
+        }
+      },
+      {
+        "hitbox": "VERTICAL_PLANE",
+        "damage_multiplier": 1.45,
+        "angle": 150,
+        "upswing": 0.5,
+        "animation": "bettercombat:two_handed_slam",
+        "swing_sound": {
+          "id": "simplyswords:elemental_sword_sci-fi_attack_03",
+          "volume": 0.25,
+          "pitch": 1.4,
+          "randomness": 0
+        }
+      }
+    ]
+  }
+}
