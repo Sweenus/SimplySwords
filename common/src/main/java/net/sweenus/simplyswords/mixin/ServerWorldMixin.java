@@ -52,6 +52,9 @@ public abstract class ServerWorldMixin {
         if (SoulstalkerAbilityManager.hasActive(world)) {
             SoulstalkerAbilityManager.tick(world);
         }
+        if (RiftmaneAbilityManager.hasActive(world)) {
+            RiftmaneAbilityManager.tick(world);
+        }
         if (DevourerReprisalManager.hasActive(world)) {
             DevourerReprisalManager.tick(world);
         }

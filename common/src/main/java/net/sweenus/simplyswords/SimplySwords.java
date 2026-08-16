@@ -60,6 +60,7 @@ import net.sweenus.simplyswords.entity.SimplySwordsSkeletonMinionEntity;
 import net.sweenus.simplyswords.entity.SimplySwordsWolfMinionEntity;
 import net.sweenus.simplyswords.entity.SimplySwordsGoatStampedeEntity;
 import net.sweenus.simplyswords.entity.SimplySwordsCreeperHeadEntity;
+import net.sweenus.simplyswords.entity.RiftmaneChargerEntity;
 import net.sweenus.simplyswords.entity.WatcherBatEntity;
 import net.sweenus.simplyswords.registry.*;
 import net.sweenus.simplyswords.network.SimplySwordsNetwork;
@@ -146,6 +147,7 @@ public class SimplySwords {
         EntityAttributeRegistry.register(EntityRegistry.CAELESTIS_HOLLOW, CaelestisHollowEntity::createBreachAttributes);
         EntityAttributeRegistry.register(EntityRegistry.CAELESTIS_DREADGLARE, CaelestisDreadglareEntity::createBreachAttributes);
         EntityAttributeRegistry.register(EntityRegistry.SOULSTALKER_STRIDE, SoulstalkerStrideEntity::createStrideAttributes);
+        EntityAttributeRegistry.register(EntityRegistry.RIFTMANE_CHARGER, RiftmaneChargerEntity::createChargerAttributes);
 
         ModLootTableModifiers.init();
         if (passVersionCheck("eldritch_end", minimumEldritchEndVersion)) {
@@ -249,6 +251,8 @@ public class SimplySwords {
             EntityRendererRegistry.register(EntityRegistry.SOULSTALKER_STRIDE, SoulstalkerStrideEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.SOULSTALKER_CLEAVE, SoulstalkerCleaveEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.SOULSTALKER_TENTACLE_VISUAL, SoulstalkerTentacleVisualEntityRenderer::new);
+            EntityRendererRegistry.register(EntityRegistry.RIFTMANE_CHARGER, RiftmaneChargerEntityRenderer::new);
+            EntityRendererRegistry.register(EntityRegistry.RIFTMANE_RIFT_VISUAL, RiftmaneRiftVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.CHAIN_LIGHTNING_VISUAL, ChainLightningVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.LIGHTNING_PHENOMENON_VISUAL, LightningPhenomenonVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.ATMOSPHERIC_VISUAL, AtmosphericVisualEntityRenderer::new);
