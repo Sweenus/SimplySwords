@@ -134,6 +134,7 @@ public class WeaponAttributesConfig extends Config {
         public float moltenedge_damageModifier = 4.0f;
         public float ribboncleaver_damageModifier = 7.0f;
         public float riftmane_damageModifier = 6.0f;
+        public float dawnquiver_damageModifier = 6.0f;
         public float shadowsting_damageModifier = 1.0f;
         public float soulkeeper_damageModifier = 8.0f;
         public float soulpyre_damageModifier = 7.0f;
@@ -191,6 +192,7 @@ public class WeaponAttributesConfig extends Config {
         public float moltenedge_attackSpeed = -2.1f;
         public float ribboncleaver_attackSpeed = -3.2f;
         public float riftmane_attackSpeed = -2.9f;
+        public float dawnquiver_attackSpeed = -2.9f;
         public float shadowsting_attackSpeed = -1.7f;
         public float soulkeeper_attackSpeed = -2.9f;
         public float soulpyre_attackSpeed = -3.0f;

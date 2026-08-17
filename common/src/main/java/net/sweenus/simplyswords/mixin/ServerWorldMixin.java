@@ -55,6 +55,9 @@ public abstract class ServerWorldMixin {
         if (RiftmaneAbilityManager.hasActive(world)) {
             RiftmaneAbilityManager.tick(world);
         }
+        if (DawnquiverAbilityManager.hasActive(world)) {
+            DawnquiverAbilityManager.tick(world);
+        }
         if (DevourerReprisalManager.hasActive(world)) {
             DevourerReprisalManager.tick(world);
         }

@@ -382,6 +382,36 @@ public class EntityRegistry {
                     .build(Identifier.of(SimplySwords.MOD_ID, "soulstalker_tentacle_visual").toString())
     );
 
+    public static final RegistrySupplier<EntityType<DawnquiverBowVisualEntity>> DAWNQUIVER_BOW_VISUAL = ENTITIES.register(
+            "dawnquiver_bow_visual",
+            () -> EntityType.Builder.<DawnquiverBowVisualEntity>create(DawnquiverBowVisualEntity::new, SpawnGroup.MISC)
+                    .dimensions(0.2F, 0.2F)
+                    .maxTrackingRange(160)
+                    .trackingTickInterval(1)
+                    .disableSaving()
+                    .build(Identifier.of(SimplySwords.MOD_ID, "dawnquiver_bow_visual").toString())
+    );
+
+    public static final RegistrySupplier<EntityType<DawnquiverArrowEntity>> DAWNQUIVER_ARROW = ENTITIES.register(
+            "dawnquiver_arrow",
+            () -> EntityType.Builder.<DawnquiverArrowEntity>create(DawnquiverArrowEntity::new, SpawnGroup.MISC)
+                    .dimensions(0.4F, 0.4F)
+                    .maxTrackingRange(160)
+                    .trackingTickInterval(1)
+                    .disableSaving()
+                    .build(Identifier.of(SimplySwords.MOD_ID, "dawnquiver_arrow").toString())
+    );
+
+    public static final RegistrySupplier<EntityType<DawnquiverImpactVisualEntity>> DAWNQUIVER_IMPACT_VISUAL = ENTITIES.register(
+            "dawnquiver_impact_visual",
+            () -> EntityType.Builder.<DawnquiverImpactVisualEntity>create(DawnquiverImpactVisualEntity::new, SpawnGroup.MISC)
+                    .dimensions(0.2F, 0.2F)
+                    .maxTrackingRange(160)
+                    .trackingTickInterval(1)
+                    .disableSaving()
+                    .build(Identifier.of(SimplySwords.MOD_ID, "dawnquiver_impact_visual").toString())
+    );
+
     public static final RegistrySupplier<EntityType<RiftmaneChargerEntity>> RIFTMANE_CHARGER = ENTITIES.register(
             "riftmane_charger",
             () -> EntityType.Builder.<RiftmaneChargerEntity>create(RiftmaneChargerEntity::new, SpawnGroup.MISC)

@@ -53,6 +53,7 @@ public final class UniqueTooltipExportController {
             spec("mjolnir", ItemsRegistry.MJOLNIR::get),
             spec("molten_edge", ItemsRegistry.MOLTEN_EDGE::get),
             spec("ribboncleaver", ItemsRegistry.RIBBONCLEAVER::get),
+            spec("dawnquiver", ItemsRegistry.DAWNQUIVER::get),
             spec("riftmane", ItemsRegistry.RIFTMANE::get),
             spec("righteous_relic", ItemsRegistry.RIGHTEOUS_RELIC::get, 4, AwakeningFormRegistry.SUN_ROUTE),
             spec("shadowsting", ItemsRegistry.SHADOWSTING::get),

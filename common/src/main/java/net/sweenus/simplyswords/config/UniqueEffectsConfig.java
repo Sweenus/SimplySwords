@@ -40,6 +40,7 @@ public class UniqueEffectsConfig extends Config {
     public PlagueSwordItem.EffectSettings toxic_longsword = new PlagueSwordItem.EffectSettings();
     public RibboncleaverSwordItem.EffectSettings ribboncleaver = new RibboncleaverSwordItem.EffectSettings();
     public RiftmaneSwordItem.EffectSettings riftmane = new RiftmaneSwordItem.EffectSettings();
+    public DawnquiverSwordItem.EffectSettings dawnquiver = new DawnquiverSwordItem.EffectSettings();
     public SunfireSwordItem.EffectSettings sunfire = new SunfireSwordItem.EffectSettings();
     public ShadowstingSwordItem.EffectSettings shadowsting = new ShadowstingSwordItem.EffectSettings();
     public StormbringerSwordItem.EffectSettings stormbringer = new StormbringerSwordItem.EffectSettings();

@@ -181,6 +181,7 @@ public class ModLootTableModifiers {
             ItemsRegistry.FLAMEWIND,
             ItemsRegistry.RIBBONCLEAVER,
             ItemsRegistry.RIFTMANE,
+            ItemsRegistry.DAWNQUIVER,
             ItemsRegistry.CAELESTIS,
             ItemsRegistry.WRAITHFANG
     );
