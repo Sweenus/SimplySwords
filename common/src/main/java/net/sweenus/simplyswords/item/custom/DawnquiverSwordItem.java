@@ -199,7 +199,7 @@ public final class DawnquiverSwordItem extends UniqueSwordItem implements TwoHan
         @ValidatedDouble.Restrict(min = 0.0) public double maxChargeSpellScaling = 5.0;
         @ValidatedInt.Restrict(min = 1) public int passiveInterval = 100;
         @ValidatedInt.Restrict(min = 1) public int passiveLockout = 80;
-        @ValidatedDouble.Restrict(min = 0.0, max = 1.0) public double passiveChorusChance = 0.25;
+        @ValidatedDouble.Restrict(min = 0.0, max = 1.0) public double passiveChorusChance = 0.35;
         @ValidatedDouble.Restrict(min = 1.0, max = 64.0) public double passiveRange = 24.0;
         @ValidatedDouble.Restrict(min = 0.0) public double passiveDamageScaling = 0.5;
         @ValidatedDouble.Restrict(min = 0.0) public double passiveSpellScaling = 1.0;
