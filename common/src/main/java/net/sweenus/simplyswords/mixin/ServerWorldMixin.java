@@ -40,8 +40,11 @@ public abstract class ServerWorldMixin {
         if (DevourerStainManager.hasActive(world)) {
             DevourerStainManager.tick(world);
         }
-        if (WraithmawStainManager.hasActive(world)) {
-            WraithmawStainManager.tick(world);
+        if (GloamStainManager.hasActive(world)) {
+            GloamStainManager.tick(world);
+        }
+        if (GloamMechanicsManager.hasActive(world)) {
+            GloamMechanicsManager.tick(world);
         }
         if (WraithmawAbilityManager.hasActive(world)) {
             WraithmawAbilityManager.tick(world);

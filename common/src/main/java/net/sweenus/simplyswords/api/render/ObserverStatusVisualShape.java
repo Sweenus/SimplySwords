@@ -6,5 +6,7 @@ public enum ObserverStatusVisualShape {
     ORBITING_GLYPHS,
     PARCHMENT_BAND,
     GROUND_RING,
-    CORRUPTED_WOUNDS
+    CORRUPTED_WOUNDS,
+    GLOAM_EXPOSURE,
+    GLOAM_GRASP
 }

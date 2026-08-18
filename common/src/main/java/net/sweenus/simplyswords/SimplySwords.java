@@ -65,6 +65,7 @@ import net.sweenus.simplyswords.network.SimplySwordsNetwork;
 import net.sweenus.simplyswords.util.FileCopier;
 import net.sweenus.simplyswords.util.ModLootTableModifiers;
 import net.sweenus.simplyswords.world.ObserverStatusEffectSyncManager;
+import net.sweenus.simplyswords.world.GloamMechanicsManager;
 import net.sweenus.simplyswords.world.ShadowstingShadowDanceManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -129,6 +130,13 @@ public class SimplySwords {
         SimplySwordsAPI.registerObserverStatusVisual(EffectRegistry.CORRUPTED_WOUND_ID,
                 new ObserverStatusVisualStyle(ObserverStatusVisualShape.CORRUPTED_WOUNDS,
                         0x4B0B71, 0x8DFF73, 5, 1.0F));
+        SimplySwordsAPI.registerObserverStatusVisual(EffectRegistry.GLOAM_EXPOSURE_ID,
+                new ObserverStatusVisualStyle(ObserverStatusVisualShape.GLOAM_EXPOSURE,
+                        0x250A35, 0xD49A2C, 3, 1.0F));
+        SimplySwordsAPI.registerObserverStatusVisual(EffectRegistry.GLOAM_GRASP_ID,
+                new ObserverStatusVisualStyle(ObserverStatusVisualShape.GLOAM_GRASP,
+                        0x250A35, 0x250A35, 4, 1.0F));
+        GloamMechanicsManager.init();
         ObserverStatusEffectSyncManager.init();
         ShadowstingShadowDanceManager.init();
         SimplySwordsCommands.register();

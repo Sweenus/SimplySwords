@@ -70,6 +70,8 @@ public final class SoulstalkerSwordItem extends UniqueSwordItem implements TwoHa
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.soulstalkersworditem.tooltip5").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
+        tooltip.add(Text.translatable("item.simplyswords.gloam.tooltip").setStyle(Styles.TEXT));
+        tooltip.add(Text.literal(""));
         appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.soulstalker.cooldown);
         super.appendTooltip(stack, context, tooltip, type);
     }

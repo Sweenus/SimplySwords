@@ -27,7 +27,7 @@ import net.sweenus.simplyswords.registry.EntityRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.world.WraithmawAbilityManager;
-import net.sweenus.simplyswords.world.WraithmawStainManager;
+import net.sweenus.simplyswords.world.GloamStainManager;
 import org.joml.Vector3f;
 
 import java.util.Comparator;
@@ -341,7 +341,7 @@ public final class WraithmawCutlassEntity extends Entity {
         setVelocity(Vec3d.ZERO);
         setState(STATE_EMBEDDED);
         expiresAtTick = world.getTime() + Math.max(20, Config.uniqueEffects.wraithmaw.embeddedDuration);
-        WraithmawStainManager.createPatch(world, ownerUuid, impact,
+        GloamStainManager.createPatch(world, ownerUuid, impact,
                 Math.max(0.25, Config.uniqueEffects.wraithmaw.stainRadius));
         world.spawnParticles(SPECTRAL_DUST, impact.x, impact.y + 0.12, impact.z,
                 16, 0.38, 0.12, 0.38, 0.04);

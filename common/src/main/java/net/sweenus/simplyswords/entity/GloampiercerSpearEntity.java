@@ -27,7 +27,7 @@ import net.sweenus.simplyswords.registry.EntityRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
-import net.sweenus.simplyswords.world.WraithmawStainManager;
+import net.sweenus.simplyswords.world.GloamStainManager;
 import org.joml.Vector3f;
 
 import java.util.Comparator;
@@ -256,7 +256,7 @@ public final class GloampiercerSpearEntity extends Entity {
     }
 
     private void createStain(ServerWorld world, Vec3d center) {
-        WraithmawStainManager.createPatch(world, getOwnerUuid(), center,
+        GloamStainManager.createPatch(world, getOwnerUuid(), center,
                 Math.max(0.25, Config.uniqueEffects.gloampiercer.stainRadius),
                 Math.max(20, Config.uniqueEffects.gloampiercer.stainDuration),
                 Math.max(1, Config.uniqueEffects.gloampiercer.stainFadeDuration),

@@ -85,7 +85,7 @@ public final class DreadwhisperAbilityManager {
                 maximumTicks + COLLAPSE_LIFETIME + 4);
         context.world().spawnEntity(visual);
 
-        UUID stainId = WraithmawStainManager.beginTrail(
+        UUID stainId = GloamStainManager.beginTrail(
                 context.world(), actor.getUuid(), groundPosition(context.world(), actor.getPos()),
                 direction, Math.max(1.0, Config.uniqueEffects.dreadwhisper.frontWidth),
                 Math.max(20, Config.uniqueEffects.dreadwhisper.stainDuration),
@@ -184,7 +184,7 @@ public final class DreadwhisperAbilityManager {
         if (moved > 0.01) {
             active.distanceTravelled += moved;
             damageDashTargets(world, owner, active, active.previousPosition, current);
-            WraithmawStainManager.extendTrail(world, active.stainId, groundPosition(world, current));
+            GloamStainManager.extendTrail(world, active.stainId, groundPosition(world, current));
         }
         active.previousPosition = current;
         updateFrontPosition(world, active, current);
@@ -251,7 +251,7 @@ public final class DreadwhisperAbilityManager {
 
     private static void finishDash(ServerWorld world, LivingEntity owner, ActiveRend active) {
         stopDash(owner);
-        WraithmawStainManager.finishTrail(world, active.stainId);
+        GloamStainManager.finishTrail(world, active.stainId);
         Entity entity = world.getEntity(active.visualId);
         if (entity instanceof DreadwhisperVisualEntity visual) {
             visual.setPosition(owner.getPos());
@@ -336,7 +336,7 @@ public final class DreadwhisperAbilityManager {
 
     private static void cancel(ServerWorld world, LivingEntity owner, ActiveRend active) {
         stopDash(owner);
-        WraithmawStainManager.finishTrail(world, active.stainId);
+        GloamStainManager.finishTrail(world, active.stainId);
         Entity visual = world.getEntity(active.visualId);
         if (visual != null) {
             visual.discard();

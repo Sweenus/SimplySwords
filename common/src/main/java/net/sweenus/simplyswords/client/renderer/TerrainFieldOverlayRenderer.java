@@ -77,6 +77,8 @@ public final class TerrainFieldOverlayRenderer {
     private static final float FLUID_OFFSET = 0.012F;
     private static final float FLUID_EDGE_OVERLAP = 0.003F;
     private static final float SURFACE_EPSILON = 0.001F;
+    private static final int GLOAM_EYE_LIMIT = 4;
+    private static final double GLOAM_EYE_SPACING_SQUARED = 25.0;
     private static final int[] NO_CONTRIBUTORS = new int[0];
     private static final Identifier WHITE_TEXTURE =
             Identifier.ofVanilla("textures/misc/white.png");
@@ -84,6 +86,7 @@ public final class TerrainFieldOverlayRenderer {
     private static final Set<UUID> BLOOD_COMPONENTS_THIS_FRAME = new HashSet<>();
     private static long bloodFrame;
     private static boolean skipBloodRenderThisFrame;
+    private static final List<Vec3d> GLOAM_EYES_THIS_FRAME = new ArrayList<>(GLOAM_EYE_LIMIT);
 
     public static final Palette CAELESTIS = new Palette(
             List.of(
@@ -195,6 +198,7 @@ public final class TerrainFieldOverlayRenderer {
         BLOOD_FACES_THIS_FRAME.clear();
         BLOOD_COMPONENTS_THIS_FRAME.clear();
         bloodFrame++;
+        GLOAM_EYES_THIS_FRAME.clear();
         skipBloodRenderThisFrame = IrisCompat.isRenderingShadowPass();
     }
 
@@ -315,6 +319,8 @@ public final class TerrainFieldOverlayRenderer {
         drawDevourerGrowthGeometry(
                 centerX, centerY, centerZ, matrices, vertexConsumers,
                 growth, geometry, opacity);
+        drawGloamTerrainEyes(centerX, centerY, centerZ,
+                matrices, vertexConsumers, growth, geometry, id, animationTime);
     }
 
     private DevourerTrailSnapshot buildDevourerTrailSnapshot(
@@ -643,6 +649,7 @@ public final class TerrainFieldOverlayRenderer {
         growth.preparedTrailSignature = growth.trailSignature;
         growth.preparedGeometry = new DevourerGrowthGeometry(
                 List.copyOf(fills), List.copyOf(borders),
+                selectDevourerEyePatches(fills, growth.seed, 8),
                 mainIndices, trailCells);
         return growth.preparedGeometry;
     }
@@ -1035,6 +1042,11 @@ public final class TerrainFieldOverlayRenderer {
                 matrices, vertexConsumers,
                 geometry, state.snapshot.sourceOpacities,
                 state.snapshot.allOpaque);
+        if (standaloneDevourer) {
+            drawGloamTerrainEyes(renderCenterX, renderCenterY, renderCenterZ,
+                    matrices, vertexConsumers, geometry,
+                    component.id.hashCode(), world.getTime() + tickDelta);
+        }
     }
 
     private BloodSnapshot buildBloodSnapshot(World world, float tickDelta,
@@ -1164,9 +1176,14 @@ public final class TerrainFieldOverlayRenderer {
     private static float bloodOpacity(BloodStainVisualEntity entity, float tickDelta) {
         float age = entity.age + tickDelta;
         float remaining = entity.getLifetime() - age;
-        return remaining >= entity.getFadeDuration()
+        float fadeOut = remaining >= entity.getFadeDuration()
                 ? 1.0F
                 : MathHelper.clamp(remaining / entity.getFadeDuration(), 0.0F, 1.0F);
+        int fadeInDuration = entity.getFadeInDuration();
+        float fadeIn = fadeInDuration <= 0
+                ? 1.0F
+                : MathHelper.clamp(age / fadeInDuration, 0.0F, 1.0F);
+        return fadeIn * fadeOut;
     }
 
     private void renderFootprint(World world, UUID id,
@@ -1561,7 +1578,8 @@ public final class TerrainFieldOverlayRenderer {
         }
         cache.bloodPreparedSignature = signature;
         cache.bloodPreparedGeometry = new BloodPreparedGeometry(
-                List.copyOf(fillPatches), List.copyOf(borderPatches));
+                List.copyOf(fillPatches), List.copyOf(borderPatches),
+                selectBloodEyePatches(fillPatches, component.id.hashCode(), 4));
         return cache.bloodPreparedGeometry;
     }
 
@@ -2130,6 +2148,226 @@ public final class TerrainFieldOverlayRenderer {
                         matrices, translucent, patch, opacity);
             }
         }
+    }
+
+    private static List<BloodPreparedPatch> selectBloodEyePatches(
+            List<BloodPreparedPatch> patches, int seed, int cap) {
+        List<BloodPreparedPatch> selected = new ArrayList<>(cap);
+        List<Integer> scores = new ArrayList<>(cap);
+        Set<FaceKey> seen = new HashSet<>();
+        for (BloodPreparedPatch patch : patches) {
+            if (patch.face.direction != Direction.UP
+                    || !seen.add(new FaceKey(
+                    patch.face.x, patch.face.y, patch.face.z, patch.face.direction))) {
+                continue;
+            }
+            int score = gloamEyeScore(patch, seed);
+            addRankedEyePatch(selected, scores, patch, score, cap);
+        }
+        return List.copyOf(selected);
+    }
+
+    private static List<DevourerFillPatch> selectDevourerEyePatches(
+            List<DevourerFillPatch> fills, int seed, int cap) {
+        List<DevourerFillPatch> selected = new ArrayList<>(cap);
+        List<Integer> scores = new ArrayList<>(cap);
+        Set<FaceKey> seen = new HashSet<>();
+        for (DevourerFillPatch fill : fills) {
+            if (fill.patch.face.direction != Direction.UP
+                    || !seen.add(new FaceKey(
+                    fill.patch.face.x, fill.patch.face.y,
+                    fill.patch.face.z, fill.patch.face.direction))) {
+                continue;
+            }
+            int score = gloamEyeScore(fill.patch, seed);
+            if (selected.size() < cap) {
+                selected.add(fill);
+                scores.add(score);
+                continue;
+            }
+            int weakest = weakestScoreIndex(scores);
+            if (score > scores.get(weakest)) {
+                selected.set(weakest, fill);
+                scores.set(weakest, score);
+            }
+        }
+        return List.copyOf(selected);
+    }
+
+    private static void addRankedEyePatch(
+            List<BloodPreparedPatch> selected, List<Integer> scores,
+            BloodPreparedPatch patch, int score, int cap) {
+        if (selected.size() < cap) {
+            selected.add(patch);
+            scores.add(score);
+            return;
+        }
+        int weakest = weakestScoreIndex(scores);
+        if (score > scores.get(weakest)) {
+            selected.set(weakest, patch);
+            scores.set(weakest, score);
+        }
+    }
+
+    private static int weakestScoreIndex(List<Integer> scores) {
+        int weakest = 0;
+        for (int index = 1; index < scores.size(); index++) {
+            if (scores.get(index) < scores.get(weakest)) {
+                weakest = index;
+            }
+        }
+        return weakest;
+    }
+
+    private static int gloamEyeScore(BloodPreparedPatch patch, int seed) {
+        return coordinateHash(patch.face.x, patch.face.z,
+                seed ^ patch.face.y * 0x632be5ab) & Integer.MAX_VALUE;
+    }
+
+    private static void drawGloamTerrainEyes(
+            double centerX, double centerY, double centerZ,
+            MatrixStack.Entry matrices, VertexConsumerProvider vertexConsumers,
+            BloodPreparedGeometry geometry, int seed, float age) {
+        if (!canRenderGloamEyes(centerX, centerY, centerZ)) {
+            return;
+        }
+        int candidate = 0;
+        for (BloodPreparedPatch patch : geometry.eyePatches) {
+            if (drawGloamTerrainEye(centerX, centerY, centerZ,
+                    matrices, vertexConsumers, patch,
+                    seed + candidate++ * 8191, age)) {
+                return;
+            }
+            if (GLOAM_EYES_THIS_FRAME.size() >= GLOAM_EYE_LIMIT) {
+                return;
+            }
+        }
+    }
+
+    private static void drawGloamTerrainEyes(
+            double centerX, double centerY, double centerZ,
+            MatrixStack.Entry matrices, VertexConsumerProvider vertexConsumers,
+            DevourerGrowthState growth, DevourerGrowthGeometry geometry,
+            UUID id, float age) {
+        if (!canRenderGloamEyes(centerX, centerY, centerZ)) {
+            return;
+        }
+        int candidate = 0;
+        int rendered = 0;
+        int seed = id.hashCode();
+        for (DevourerFillPatch fill : geometry.eyePatches) {
+            BloodPreparedPatch patch = fill.patch;
+            if (fill.cellIndex < 0
+                    || devourerCompositeWetness(growth, geometry, fill.cellIndex) < 0.85F) {
+                candidate++;
+                continue;
+            }
+            if (drawGloamTerrainEye(centerX, centerY, centerZ,
+                    matrices, vertexConsumers, patch,
+                    seed + candidate * 8191, age)) {
+                rendered++;
+            }
+            candidate++;
+            if (GLOAM_EYES_THIS_FRAME.size() >= GLOAM_EYE_LIMIT || rendered >= 2) {
+                return;
+            }
+        }
+    }
+
+    private static boolean canRenderGloamEyes(double x, double y, double z) {
+        if (GLOAM_EYES_THIS_FRAME.size() >= GLOAM_EYE_LIMIT || shouldSkipBloodRender()) {
+            return false;
+        }
+        Vec3d camera = MinecraftClient.getInstance().gameRenderer.getCamera().getPos();
+        double dx = camera.x - x;
+        double dy = camera.y - y;
+        double dz = camera.z - z;
+        return dx * dx + dy * dy + dz * dz <= 2304.0;
+    }
+
+    private static boolean drawGloamTerrainEye(
+            double centerX, double centerY, double centerZ,
+            MatrixStack.Entry matrices, VertexConsumerProvider vertexConsumers,
+            BloodPreparedPatch patch, int seed, float age) {
+        double worldX = (patch.first.x + patch.second.x + patch.third.x + patch.fourth.x) * 0.25;
+        double worldY = Math.max(Math.max(patch.first.y, patch.second.y),
+                Math.max(patch.third.y, patch.fourth.y)) + 0.013;
+        double worldZ = (patch.first.z + patch.second.z + patch.third.z + patch.fourth.z) * 0.25;
+        Vec3d worldPosition = new Vec3d(worldX, worldY, worldZ);
+        for (Vec3d existing : GLOAM_EYES_THIS_FRAME) {
+            if (existing.squaredDistanceTo(worldPosition) < GLOAM_EYE_SPACING_SQUARED) {
+                return false;
+            }
+        }
+        GLOAM_EYES_THIS_FRAME.add(worldPosition);
+        int variation = coordinateHash(MathHelper.floor(worldX * 4.0),
+                MathHelper.floor(worldZ * 4.0), seed);
+        float angle = (variation & 1023) / 1023.0F * MathHelper.TAU;
+        float scale = 0.9F + ((variation >>> 10) & 255) / 255.0F * 0.2F;
+        float blinkPhase = age * 0.006F + (seed & 511) / 511.0F;
+        blinkPhase -= MathHelper.floor(blinkPhase);
+        float openness = blinkPhase > 0.95F
+                ? MathHelper.clamp(Math.abs(blinkPhase - 0.975F) / 0.025F, 0.05F, 1.0F)
+                : 1.0F;
+        float halfLength = 0.19F * scale;
+        float halfWidth = 0.078F * scale * openness;
+        Vec3d longAxis = new Vec3d(Math.cos(angle), 0.0, Math.sin(angle));
+        Vec3d shortAxis = new Vec3d(-longAxis.z, 0.0, longAxis.x);
+        Vec3d local = new Vec3d(worldX - centerX, worldY - centerY, worldZ - centerZ);
+        VertexConsumer rim = vertexConsumers.getBuffer(RenderLayer.getDebugQuads());
+        putGloamEyeColorVertex(rim, matrices,
+                local.add(longAxis.multiply(halfLength)), 111, 58, 15, 220);
+        putGloamEyeColorVertex(rim, matrices,
+                local.subtract(shortAxis.multiply(halfWidth)), 111, 58, 15, 220);
+        putGloamEyeColorVertex(rim, matrices,
+                local.subtract(longAxis.multiply(halfLength)), 111, 58, 15, 220);
+        putGloamEyeColorVertex(rim, matrices,
+                local.add(shortAxis.multiply(halfWidth)), 111, 58, 15, 220);
+        float irisLength = halfLength * 0.78F;
+        float irisWidth = Math.max(0.004F, halfWidth * 0.72F);
+        Vec3d iris = local.add(0.0, 0.003, 0.0);
+        VertexConsumer glow = vertexConsumers.getBuffer(
+                RenderLayer.getEntityTranslucentEmissive(WHITE_TEXTURE));
+        putGloamEyeGlowVertex(glow, matrices,
+                iris.add(longAxis.multiply(irisLength)), 226, 158, 37, 205);
+        putGloamEyeGlowVertex(glow, matrices,
+                iris.subtract(shortAxis.multiply(irisWidth)), 226, 158, 37, 205);
+        putGloamEyeGlowVertex(glow, matrices,
+                iris.subtract(longAxis.multiply(irisLength)), 226, 158, 37, 205);
+        putGloamEyeGlowVertex(glow, matrices,
+                iris.add(shortAxis.multiply(irisWidth)), 226, 158, 37, 205);
+        Vec3d pupil = iris.add(0.0, 0.004, 0.0);
+        float pupilWidth = Math.max(0.006F, irisLength * 0.075F);
+        float pupilHeight = irisWidth * 0.82F;
+        putGloamEyeGlowVertex(glow, matrices,
+                pupil.add(longAxis.multiply(pupilWidth)),
+                5, 1, 8, 255);
+        putGloamEyeGlowVertex(glow, matrices,
+                pupil.subtract(shortAxis.multiply(pupilHeight)),
+                5, 1, 8, 255);
+        putGloamEyeGlowVertex(glow, matrices,
+                pupil.subtract(longAxis.multiply(pupilWidth)),
+                5, 1, 8, 255);
+        putGloamEyeGlowVertex(glow, matrices,
+                pupil.add(shortAxis.multiply(pupilHeight)),
+                5, 1, 8, 255);
+        return true;
+    }
+
+    private static void putGloamEyeColorVertex(VertexConsumer vertices, MatrixStack.Entry matrices,
+                                                Vec3d point, int red, int green, int blue, int alpha) {
+        vertices.vertex(matrices, (float) point.x, (float) point.y, (float) point.z)
+                .color(red, green, blue, alpha);
+    }
+
+    private static void putGloamEyeGlowVertex(VertexConsumer vertices, MatrixStack.Entry matrices,
+                                               Vec3d point, int red, int green, int blue, int alpha) {
+        vertices.vertex(matrices, (float) point.x, (float) point.y, (float) point.z)
+                .color(red, green, blue, alpha)
+                .texture(0.5F, 0.5F)
+                .overlay(OverlayTexture.DEFAULT_UV)
+                .light(LightmapTextureManager.MAX_LIGHT_COORDINATE)
+                .normal(matrices, 0.0F, 1.0F, 0.0F);
     }
 
     private static float bloodPatchOpacity(
@@ -4071,6 +4309,7 @@ public final class TerrainFieldOverlayRenderer {
     private record DevourerGrowthGeometry(
             List<DevourerFillPatch> fills,
             List<DevourerBorderPatch> borders,
+            List<DevourerFillPatch> eyePatches,
             int[] mainIndices, boolean[] trailCells) {
     }
 
@@ -4102,7 +4341,8 @@ public final class TerrainFieldOverlayRenderer {
 
     private record BloodPreparedGeometry(
             List<BloodPreparedPatch> fillPatches,
-            List<BloodPreparedPatch> borderPatches) {
+            List<BloodPreparedPatch> borderPatches,
+            List<BloodPreparedPatch> eyePatches) {
     }
 
     private record BloodPreparedPatch(

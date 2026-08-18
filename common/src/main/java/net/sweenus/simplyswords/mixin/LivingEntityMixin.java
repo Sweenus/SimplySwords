@@ -34,6 +34,7 @@ import net.sweenus.simplyswords.world.MagispearAbilityManager;
 import net.sweenus.simplyswords.world.MoltenEdgeAbilityManager;
 import net.sweenus.simplyswords.world.ObserverStatusEffectSyncManager;
 import net.sweenus.simplyswords.world.DreadwhisperAbilityManager;
+import net.sweenus.simplyswords.world.GloamMechanicsManager;
 import net.sweenus.simplyswords.world.SoulPyreAbilityManager;
 import net.sweenus.simplyswords.world.StormsEdgeAbilityManager;
 import net.sweenus.simplyswords.world.ThunderbrandAbilityManager;
@@ -56,12 +57,15 @@ public abstract class LivingEntityMixin {
     @Inject(method = "tickMovement", at = @At("HEAD"))
     private void simplyswords$suppressIncapacitatedMovementInput(CallbackInfo ci) {
         LivingEntity living = (LivingEntity) (Object) this;
-        if (!IncapacitatingStatusEffectRegistry.isIncapacitated(living)) return;
+        boolean incapacitated = IncapacitatingStatusEffectRegistry.isIncapacitated(living);
+        if (!incapacitated && !GloamMechanicsManager.isGrasped(living)) return;
         living.forwardSpeed = 0.0F;
         living.sidewaysSpeed = 0.0F;
         living.upwardSpeed = 0.0F;
         jumping = false;
-        living.stopUsingItem();
+        if (incapacitated) {
+            living.stopUsingItem();
+        }
     }
 
     @Inject(method = "tickMovement", at = @At("TAIL"))
@@ -225,6 +229,14 @@ public abstract class LivingEntityMixin {
         MoltenEdgeAbilityManager.resetWielder(livingEntity);
         SoulPyreAbilityManager.onDeath(livingEntity, damageSource);
         FlameSeedEffect.triggerDeathDetonation(livingEntity);
+        GloamMechanicsManager.onTargetDeath(livingEntity);
+    }
+
+    @Inject(method = "jump", at = @At("HEAD"), cancellable = true)
+    private void simplyswords$preventGloamGraspJump(CallbackInfo ci) {
+        if (GloamMechanicsManager.isGrasped((LivingEntity) (Object) this)) {
+            ci.cancel();
+        }
     }
 
     @Inject(at = @At("HEAD"), method = "damage")

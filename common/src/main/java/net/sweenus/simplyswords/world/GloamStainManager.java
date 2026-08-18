@@ -2,39 +2,118 @@ package net.sweenus.simplyswords.world;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.particle.DustParticleEffect;
+import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.BloodStainVisualEntity;
+import net.sweenus.simplyswords.entity.DevourerMassVisualEntity;
 import net.sweenus.simplyswords.util.HelperMethods;
+import org.joml.Vector3f;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-public final class WraithmawStainManager {
+public final class GloamStainManager {
     private static final int CONTACT_INTERVAL = 5;
     private static final int MAX_PATCHES_PER_OWNER = 32;
     private static final float VERTICAL_RANGE = 6.0F;
-    private static final String VISUAL_TAG = "simplyswords_wraithmaw_stain_visual";
+    private static final double CLIENT_VISUAL_SEARCH_RANGE = 32.0;
+    private static final String VISUAL_TAG = "simplyswords_gloam_stain_visual";
     private static final Map<ServerWorld, List<ActivePatch>> ACTIVE = new HashMap<>();
+    private static final DustParticleEffect GLOAM_DUST =
+            new DustParticleEffect(new Vector3f(0.34F, 0.07F, 0.48F), 1.0F);
 
-    private WraithmawStainManager() {
+    private GloamStainManager() {
     }
 
     public static boolean hasActive(ServerWorld world) {
         List<ActivePatch> patches = ACTIVE.get(world);
         return patches != null && !patches.isEmpty() || world.getTime() % 40L == 0L;
+    }
+
+    public static boolean isOnGloam(Entity entity) {
+        if (entity == null) {
+            return false;
+        }
+        Vec3d position = entity.getPos();
+        World world = entity.getWorld();
+        if (world instanceof ServerWorld serverWorld) {
+            for (ActivePatch patch : ACTIVE.getOrDefault(serverWorld, List.of())) {
+                if (patch.contains(position)) {
+                    return true;
+                }
+            }
+            return DevourerStainManager.contains(serverWorld, position);
+        }
+        if (!world.isClient()) {
+            return false;
+        }
+        Box search = Box.of(position,
+                CLIENT_VISUAL_SEARCH_RANGE * 2.0, VERTICAL_RANGE * 2.0,
+                CLIENT_VISUAL_SEARCH_RANGE * 2.0);
+        for (BloodStainVisualEntity visual : world.getEntitiesByClass(
+                BloodStainVisualEntity.class, search,
+                stain -> stain.isAlive()
+                        && stain.getStyle() == BloodStainVisualEntity.STYLE_DEVOURER)) {
+            if (containsClientStain(visual, position)) {
+                return true;
+            }
+        }
+        for (DevourerMassVisualEntity mass : world.getEntitiesByClass(
+                DevourerMassVisualEntity.class, search, Entity::isAlive)) {
+            if (containsClientMass(mass, position)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean containsClientStain(
+            BloodStainVisualEntity visual, Vec3d position) {
+        if (Math.abs(position.y - visual.getY()) > visual.getVerticalRange()) {
+            return false;
+        }
+        double dx = position.x - visual.getX();
+        double dz = position.z - visual.getZ();
+        double radius = visual.getRadius();
+        if (visual.getShape() == BloodStainVisualEntity.SHAPE_CIRCLE) {
+            return dx * dx + dz * dz <= radius * radius;
+        }
+        double yaw = visual.getYaw() * MathHelper.RADIANS_PER_DEGREE;
+        double directionX = Math.cos(yaw);
+        double directionZ = Math.sin(yaw);
+        double halfLength = visual.getHalfLength();
+        double projection = MathHelper.clamp(
+                dx * directionX + dz * directionZ, -halfLength, halfLength);
+        double closestX = visual.getX() + directionX * projection;
+        double closestZ = visual.getZ() + directionZ * projection;
+        double closestDx = position.x - closestX;
+        double closestDz = position.z - closestZ;
+        return closestDx * closestDx + closestDz * closestDz <= radius * radius;
+    }
+
+    private static boolean containsClientMass(
+            DevourerMassVisualEntity mass, Vec3d position) {
+        if (mass.age < mass.getTravelTicks()
+                || mass.age >= mass.getTotalLifetime()
+                || Math.abs(position.y - mass.getY()) > VERTICAL_RANGE) {
+            return false;
+        }
+        double radius = Math.max(0.4, mass.getStableRadius(0.0F) * 2.1);
+        double dx = position.x - mass.getX();
+        double dz = position.z - mass.getZ();
+        return dx * dx + dz * dz <= radius * radius;
     }
 
     public static void createPatch(ServerWorld world, UUID ownerId, Vec3d center, double radius) {
@@ -46,6 +125,32 @@ public final class WraithmawStainManager {
 
     public static void createPatch(ServerWorld world, UUID ownerId, Vec3d center, double radius,
                                    int durationTicks, int fadeTicks, int slowAmplifier) {
+        createCircle(world, ownerId, center, radius, durationTicks, fadeTicks,
+                slowAmplifier, false, 0);
+    }
+
+    public static void createGrowthPatch(ServerWorld world, UUID ownerId,
+                                         Vec3d position, int slowAmplifier) {
+        if (world == null || ownerId == null || position == null) {
+            return;
+        }
+        Vec3d center = new Vec3d(position.x,
+                LivyatanWaveManager.findGroundTopY(world, position.x, position.z, position.y),
+                position.z);
+        int duration = Math.max(20, Config.uniqueEffects.gloam.growthDuration);
+        int fade = Math.clamp(Config.uniqueEffects.gloam.growthFadeDuration, 1, duration);
+        createCircle(world, ownerId, center,
+                Math.max(0.25, Config.uniqueEffects.gloam.growthRadius),
+                duration, fade, slowAmplifier, true, 8);
+        world.spawnParticles(GLOAM_DUST, center.x, center.y + 0.08, center.z,
+                16, 0.55, 0.05, 0.55, 0.035);
+        world.spawnParticles(ParticleTypes.REVERSE_PORTAL, center.x, center.y + 0.12, center.z,
+                8, 0.42, 0.08, 0.42, 0.018);
+    }
+
+    private static void createCircle(ServerWorld world, UUID ownerId, Vec3d center, double radius,
+                                     int durationTicks, int fadeTicks, int slowAmplifier,
+                                     boolean growth, int fadeInTicks) {
         if (world == null || ownerId == null || center == null || radius <= 0.0) {
             return;
         }
@@ -55,22 +160,27 @@ public final class WraithmawStainManager {
         int amplifier = Math.clamp(slowAmplifier, 0, 4);
         long expiry = world.getTime() + duration;
         List<ActivePatch> patches = ACTIVE.computeIfAbsent(world, ignored -> new ArrayList<>());
-        ActivePatch nearby = patches.stream()
-                .filter(patch -> patch.shape == BloodStainVisualEntity.SHAPE_CIRCLE)
-                .filter(patch -> patch.ownerId.equals(ownerId))
-                .filter(patch -> patch.center.squaredDistanceTo(center)
-                        <= Math.pow(Math.min(patch.radius, patchRadius) * 0.45, 2.0))
-                .min(Comparator.comparingDouble(patch -> patch.center.squaredDistanceTo(center)))
-                .orElse(null);
-        if (nearby != null) {
-            nearby.expiryTick = expiry;
-            nearby.slowAmplifier = Math.max(nearby.slowAmplifier, amplifier);
-            Entity entity = world.getEntity(nearby.visualId);
-            if (entity instanceof BloodStainVisualEntity visual) {
-                visual.setLifetime(visual.age + duration);
-                visual.setFadeDuration(fade);
+        if (!growth) {
+            ActivePatch nearby = patches.stream()
+                    .filter(patch -> patch.shape == BloodStainVisualEntity.SHAPE_CIRCLE)
+                    .filter(patch -> patch.ownerId.equals(ownerId))
+                    .filter(patch -> patch.center.squaredDistanceTo(center)
+                            <= Math.pow(Math.min(patch.radius, patchRadius) * 0.45, 2.0))
+                    .min(Comparator.comparingDouble(patch -> patch.center.squaredDistanceTo(center)))
+                    .orElse(null);
+            if (nearby != null) {
+                nearby.expiryTick = expiry;
+                nearby.slowAmplifier = Math.max(nearby.slowAmplifier, amplifier);
+                Entity entity = world.getEntity(nearby.visualId);
+                if (entity instanceof BloodStainVisualEntity visual) {
+                    visual.setLifetime(visual.age + duration);
+                    visual.setFadeDuration(fade);
+                }
+                return;
             }
-            return;
+        }
+        if (growth) {
+            enforceGrowthCap(world, patches, ownerId);
         }
         enforceOwnerCap(world, patches, ownerId);
         BloodStainVisualEntity visual = new BloodStainVisualEntity(
@@ -78,12 +188,13 @@ public final class WraithmawStainManager {
                 BloodStainVisualEntity.SHAPE_CIRCLE, patchRadius, 0.0F, 0.0F,
                 VERTICAL_RANGE, duration, fade, world.random.nextInt(),
                 BloodStainVisualEntity.STYLE_DEVOURER);
+        visual.setFadeInDuration(fadeInTicks);
         visual.addCommandTag(VISUAL_TAG);
         if (!world.spawnEntity(visual)) {
             return;
         }
         patches.add(ActivePatch.circle(ownerId, visual.getUuid(), center,
-                patchRadius, expiry, duration, fade, amplifier));
+                patchRadius, expiry, duration, fade, amplifier, growth));
     }
 
     public static UUID beginTrail(ServerWorld world, UUID ownerId, Vec3d origin,
@@ -179,12 +290,11 @@ public final class WraithmawStainManager {
             purgeOrphans(world, activeVisualIds);
         }
         if (now % CONTACT_INTERVAL == 0L) {
-            applySlowness(world, patches);
+            recordContacts(world, patches);
         }
     }
 
-    private static void applySlowness(ServerWorld world, List<ActivePatch> patches) {
-        Set<UUID> slowed = new HashSet<>();
+    private static void recordContacts(ServerWorld world, List<ActivePatch> patches) {
         for (ActivePatch patch : patches) {
             LivingEntity owner = resolveLiving(world, patch.ownerId);
             if (owner == null) {
@@ -193,13 +303,30 @@ public final class WraithmawStainManager {
             for (LivingEntity target : world.getEntitiesByClass(LivingEntity.class, patch.bounds(),
                     entity -> entity.isAlive() && entity.isOnGround()
                             && entity != owner && HelperMethods.checkAbilityTarget(entity, owner))) {
-                if (!patch.contains(target.getPos()) || !slowed.add(target.getUuid())) {
+                if (!patch.contains(target.getPos())) {
                     continue;
                 }
-                target.addStatusEffect(new StatusEffectInstance(
-                        StatusEffects.SLOWNESS, CONTACT_INTERVAL * 2,
-                        patch.slowAmplifier, false, false, true), owner);
+                GloamMechanicsManager.recordContact(
+                        world, owner, target, patch.slowAmplifier);
             }
+        }
+    }
+
+    private static void enforceGrowthCap(ServerWorld world, List<ActivePatch> patches, UUID ownerId) {
+        int cap = Math.clamp(Config.uniqueEffects.gloam.growthPatchCap, 1, 32);
+        long count = patches.stream()
+                .filter(patch -> patch.growth && patch.ownerId.equals(ownerId))
+                .count();
+        if (count < cap) {
+            return;
+        }
+        ActivePatch oldest = patches.stream()
+                .filter(patch -> patch.growth && patch.ownerId.equals(ownerId))
+                .min(Comparator.comparingLong(patch -> patch.expiryTick))
+                .orElse(null);
+        if (oldest != null) {
+            discardVisual(world, oldest.visualId);
+            patches.remove(oldest);
         }
     }
 
@@ -267,6 +394,7 @@ public final class WraithmawStainManager {
         private final float radius;
         private final int durationTicks;
         private final int fadeTicks;
+        private final boolean growth;
         private Vec3d center;
         private double length;
         private double endY;
@@ -277,7 +405,7 @@ public final class WraithmawStainManager {
                             Vec3d start, Vec3d direction, Vec3d center,
                             float radius, double length, double endY,
                             long expiryTick, int durationTicks, int fadeTicks,
-                            int slowAmplifier) {
+                            int slowAmplifier, boolean growth) {
             this.id = id;
             this.ownerId = ownerId;
             this.visualId = visualId;
@@ -292,14 +420,16 @@ public final class WraithmawStainManager {
             this.durationTicks = durationTicks;
             this.fadeTicks = fadeTicks;
             this.slowAmplifier = slowAmplifier;
+            this.growth = growth;
         }
 
         private static ActivePatch circle(UUID ownerId, UUID visualId, Vec3d center,
                                           float radius, long expiryTick, int durationTicks,
-                                          int fadeTicks, int slowAmplifier) {
+                                          int fadeTicks, int slowAmplifier, boolean growth) {
             return new ActivePatch(UUID.randomUUID(), ownerId, visualId,
                     BloodStainVisualEntity.SHAPE_CIRCLE, center, Vec3d.ZERO, center,
-                    radius, 0.0, center.y, expiryTick, durationTicks, fadeTicks, slowAmplifier);
+                    radius, 0.0, center.y, expiryTick, durationTicks, fadeTicks,
+                    slowAmplifier, growth);
         }
 
         private static ActivePatch trail(UUID id, UUID ownerId, UUID visualId,
@@ -308,7 +438,8 @@ public final class WraithmawStainManager {
                                          int fadeTicks, int slowAmplifier) {
             return new ActivePatch(id, ownerId, visualId,
                     BloodStainVisualEntity.SHAPE_TRAIL, start, direction, start,
-                    radius, 0.0, start.y, expiryTick, durationTicks, fadeTicks, slowAmplifier);
+                    radius, 0.0, start.y, expiryTick, durationTicks, fadeTicks,
+                    slowAmplifier, false);
         }
 
         private void updateCenter() {
