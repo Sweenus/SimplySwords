@@ -79,6 +79,7 @@ public final class UniqueTooltipExportController {
             spec("watching_warglaive", ItemsRegistry.WATCHING_WARGLAIVE::get),
             spec("waxweaver", ItemsRegistry.WAXWEAVER::get),
             spec("whisperwind", ItemsRegistry.WHISPERWIND::get),
+            spec("dreadwhisper", ItemsRegistry.DREADWHISPER::get, AwakeningFormRegistry.DREADWHISPER_ROUTE),
             spec("wickpiercer", ItemsRegistry.WICKPIERCER::get),
             spec("gloampiercer", ItemsRegistry.GLOAMPIERCER::get, AwakeningFormRegistry.GLOAMPIERCER_ROUTE),
             spec("wraithfang", ItemsRegistry.WRAITHFANG::get),

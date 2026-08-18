@@ -569,6 +569,7 @@ public final class WeaponImplicitRegistry {
         registerPath("sunfire", LONGSWORD);
         registerPath("harbinger", LONGSWORD);
         registerPath("whisperwind", KATANA);
+        registerPath("dreadwhisper", KATANA);
         registerPath("emberlash", DAGGER);
         registerPath("waxweaver", CLAYMORE);
         registerPath("hiveheart", GREATHAMMER);

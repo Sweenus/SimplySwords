@@ -38,6 +38,8 @@ public final class AwakeningFormRegistry {
     public static final Identifier GLOAMPIERCER_ROUTE = Identifier.of(SimplySwords.MOD_ID, "gloampiercer");
     public static final Identifier SOULRENDER_ROUTE = Identifier.of(SimplySwords.MOD_ID, "soulrender");
     public static final Identifier SOULSTALKER_ROUTE = Identifier.of(SimplySwords.MOD_ID, "soulstalker");
+    public static final Identifier WHISPERWIND_ROUTE = Identifier.of(SimplySwords.MOD_ID, "whisperwind");
+    public static final Identifier DREADWHISPER_ROUTE = Identifier.of(SimplySwords.MOD_ID, "dreadwhisper");
 
     private static final Map<Item, AwakeningFormFamily> FAMILIES = new IdentityHashMap<>();
     private static boolean builtinsRegistered;
@@ -184,6 +186,23 @@ public final class AwakeningFormRegistry {
                         ItemsRegistry.SOULSTALKER.get(), "item.simplyswords.soulstalker",
                         AwakeningFormRarity.LEGENDARY, 1.0F))
                 .routeHandler(context -> SOULRENDER_ROUTE)
+                .build());
+
+        register(AwakeningFormFamily.builder(
+                        ItemsRegistry.WHISPERWIND.get(),
+                        AwakeningProfile.DEFAULT,
+                        Identifier.of(SimplySwords.MOD_ID, "whisperwind"))
+                .basePresentation("item.simplyswords.whisperwind", AwakeningFormRarity.UNIQUE, 0.0F)
+                .selectionLevel(0)
+                .route(WHISPERWIND_ROUTE, new AwakeningFormStage(
+                        Identifier.of(SimplySwords.MOD_ID, "spectral_whisperwind"), 0,
+                        ItemsRegistry.WHISPERWIND.get(), "item.simplyswords.whisperwind",
+                        AwakeningFormRarity.UNIQUE, 0.0F))
+                .route(DREADWHISPER_ROUTE, new AwakeningFormStage(
+                        Identifier.of(SimplySwords.MOD_ID, "dreadwhisper"), 0,
+                        ItemsRegistry.DREADWHISPER.get(), "item.simplyswords.dreadwhisper",
+                        AwakeningFormRarity.LEGENDARY, 1.0F))
+                .routeHandler(context -> WHISPERWIND_ROUTE)
                 .build());
 
         register(AwakeningFormFamily.builder(

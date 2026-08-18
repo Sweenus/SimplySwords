@@ -18,6 +18,7 @@ public class EffectRegistry {
     public static final Identifier SHADOW_DANCE_ID = Identifier.of(SimplySwords.MOD_ID, "shadow_dance");
     public static final Identifier BLOOD_PLAGUE_ID = Identifier.of(SimplySwords.MOD_ID, "blood_plague");
     public static final Identifier ION_PARALYSIS_ID = Identifier.of(SimplySwords.MOD_ID, "ion_paralysis");
+    public static final Identifier CORRUPTED_WOUND_ID = Identifier.of(SimplySwords.MOD_ID, "corrupted_wound");
 
     public static final DeferredRegister<StatusEffect> EFFECT = DeferredRegister.create(SimplySwords.MOD_ID, RegistryKeys.STATUS_EFFECT);
 
@@ -151,6 +152,8 @@ public class EffectRegistry {
                             EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
     public static final RegistrySupplier<StatusEffect> ION_PARALYSIS = EFFECT.register(ION_PARALYSIS_ID.getPath(), () ->
             new IonParalysisEffect(StatusEffectCategory.HARMFUL, 0x2F8CFF));
+    public static final RegistrySupplier<StatusEffect> CORRUPTED_WOUND = EFFECT.register(CORRUPTED_WOUND_ID.getPath(), () ->
+            new CorruptedWoundEffect(StatusEffectCategory.HARMFUL, 0x6F21A8));
     public static final RegistrySupplier<StatusEffect> SUNDERED_ARMOR = EFFECT.register("sundered_armor", () ->
             new SunderedArmorEffect(StatusEffectCategory.HARMFUL, 0x7f7366));
     public static final RegistrySupplier<StatusEffect> IMPLICIT_HASTE = EFFECT.register("implicit_haste", () ->

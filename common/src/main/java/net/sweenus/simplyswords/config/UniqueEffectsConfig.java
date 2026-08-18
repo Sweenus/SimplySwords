@@ -26,6 +26,7 @@ public class UniqueEffectsConfig extends Config {
     public FlamewindSwordItem.EffectSettings flamewind = new FlamewindSwordItem.EffectSettings();
     public EnigmaSwordItem.EffectSettings        enigma = new EnigmaSwordItem.EffectSettings();
     public WhisperwindSwordItem.EffectSettings whisperwind = new WhisperwindSwordItem.EffectSettings();
+    public DreadwhisperSwordItem.EffectSettings dreadwhisper = new DreadwhisperSwordItem.EffectSettings();
     public TwistedBladeItem.EffectSettings twisted_blade = new TwistedBladeItem.EffectSettings();
     public WickpiercerSwordItem.EffectSettings wickpiercer = new WickpiercerSwordItem.EffectSettings();
     public GloampiercerSwordItem.EffectSettings gloampiercer = new GloampiercerSwordItem.EffectSettings();

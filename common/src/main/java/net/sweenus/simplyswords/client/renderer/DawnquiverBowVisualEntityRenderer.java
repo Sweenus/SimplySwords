@@ -74,7 +74,8 @@ public final class DawnquiverBowVisualEntityRenderer extends EntityRenderer<Dawn
         float draw = passive ? 1.0F : entity.getDrawProgress();
 
         LivingEntity owner = entity.getOwner();
-        boolean firstPerson = isFirstPersonOwner(owner);
+        boolean firstPerson = entity.getMode() != DawnquiverBowVisualEntity.MODE_FIXED
+                && isFirstPersonOwner(owner);
         Vec3d entityOrigin = entity.getLerpedPos(tickDelta);
         Vec3d aimDirection = renderDirection(entity, owner, tickDelta);
         Vec3d displayDirection = firstPerson && owner != null
@@ -142,7 +143,8 @@ public final class DawnquiverBowVisualEntityRenderer extends EntityRenderer<Dawn
                 return direction.normalize();
             }
         }
-        if (owner != null && entity.getPhase() == DawnquiverBowVisualEntity.PHASE_DRAWING) {
+        if (owner != null && entity.getMode() != DawnquiverBowVisualEntity.MODE_FIXED
+                && entity.getPhase() == DawnquiverBowVisualEntity.PHASE_DRAWING) {
             Vec3d direction = owner.getRotationVec(tickDelta);
             if (direction.lengthSquared() >= 1.0E-6) {
                 return direction.normalize();
@@ -159,6 +161,9 @@ public final class DawnquiverBowVisualEntityRenderer extends EntityRenderer<Dawn
     private static Vec3d renderOrigin(DawnquiverBowVisualEntity entity, LivingEntity owner,
                                       float tickDelta, boolean firstPerson, Vec3d forward) {
         if (owner == null) {
+            return entity.getLerpedPos(tickDelta);
+        }
+        if (entity.getMode() == DawnquiverBowVisualEntity.MODE_FIXED) {
             return entity.getLerpedPos(tickDelta);
         }
         Vec3d right = new Vec3d(0.0, 1.0, 0.0).crossProduct(forward);
@@ -437,6 +442,27 @@ public final class DawnquiverBowVisualEntityRenderer extends EntityRenderer<Dawn
                 0.11, 0.28 + strength * 0.34, 0.035,
                 age * 0.045F, 255, 219, 104,
                 Math.round(105 * strength * opacity), 0);
+
+        float piercingThreshold = (float) MathHelper.clamp(
+                Config.uniqueEffects.dawnquiver.piercingThreshold, 0.0, 1.0);
+        float fullThreshold = (float) MathHelper.clamp(
+                Config.uniqueEffects.dawnquiver.fullDrawThreshold, piercingThreshold, 1.0);
+        if (draw >= piercingThreshold) {
+            float piercing = MathHelper.clamp((draw - piercingThreshold) / 0.08F, 0.0F, 1.0F);
+            DawnquiverRenderGeometry.flatRing(glow, matrix, 40, new Vec3d(0.0, 0.0, 0.08),
+                    (0.78 + piercing * 0.22) * pulse, 0.045,
+                    123, 235, 255, Math.round(115 * piercing * opacity));
+        }
+        if (draw >= fullThreshold) {
+            float full = MathHelper.clamp((draw - fullThreshold) / 0.06F, 0.0F, 1.0F);
+            DawnquiverRenderGeometry.flatRing(glow, matrix, 48, new Vec3d(0.0, 0.0, 0.11),
+                    (1.05 + full * 0.28) * pulse, 0.075,
+                    255, 247, 194, Math.round(165 * full * opacity));
+            DawnquiverRenderGeometry.rays(glow, matrix, new Vec3d(0.0, 0.0, 0.12), 12,
+                    0.24, 0.68 + full * 0.38, 0.045,
+                    -age * 0.032F, 255, 240, 158,
+                    Math.round(145 * full * opacity), 0);
+        }
     }
 
     private static void drawReleaseFlare(VertexConsumer glow, Matrix4f matrix,

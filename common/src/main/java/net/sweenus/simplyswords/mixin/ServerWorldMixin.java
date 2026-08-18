@@ -85,6 +85,9 @@ public abstract class ServerWorldMixin {
         if (WhisperwindVisualManager.hasActive(world)) {
             WhisperwindVisualManager.tick(world);
         }
+        if (DreadwhisperAbilityManager.hasActive(world)) {
+            DreadwhisperAbilityManager.tick(world);
+        }
         if (EmberlashSmoulderVisualManager.hasActive(world)) {
             EmberlashSmoulderVisualManager.tick(world);
         }

@@ -180,6 +180,15 @@ public class EntityRegistry {
                     .build(Identifier.of(SimplySwords.MOD_ID, "whisperwind_slash_visual").toString())
     );
 
+    public static final RegistrySupplier<EntityType<DreadwhisperVisualEntity>> DREADWHISPER_VISUAL = ENTITIES.register(
+            "dreadwhisper_visual",
+            () -> EntityType.Builder.<DreadwhisperVisualEntity>create(DreadwhisperVisualEntity::new, SpawnGroup.MISC)
+                    .dimensions(0.35f, 0.35f)
+                    .maxTrackingRange(128)
+                    .trackingTickInterval(1)
+                    .build(Identifier.of(SimplySwords.MOD_ID, "dreadwhisper_visual").toString())
+    );
+
     public static final RegistrySupplier<EntityType<RunicSlashProjectileEntity>> RUNIC_SLASH_PROJECTILE = ENTITIES.register(
             "runic_slash_projectile",
             () -> EntityType.Builder.<RunicSlashProjectileEntity>create(RunicSlashProjectileEntity::new, SpawnGroup.MISC)

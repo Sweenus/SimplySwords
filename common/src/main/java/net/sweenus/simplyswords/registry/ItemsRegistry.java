@@ -941,6 +941,13 @@ public class ItemsRegistry {
                             .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.UNIQUE,
                                     (int) whisperwind_damage_modifier, whisperwind_attackspeed))));
 
+    public static final RegistrySupplier<DreadwhisperSwordItem> DREADWHISPER = ITEM.register("dreadwhisper", () ->
+            new DreadwhisperSwordItem(
+                    ModToolMaterial.UNIQUE,
+                    new Item.Settings().fireproof()
+                            .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.UNIQUE,
+                                    (int) whisperwind_damage_modifier, whisperwind_attackspeed))));
+
     public static final RegistrySupplier<EmberlashSwordItem> EMBERLASH = ITEM.register("emberlash", () ->
             new EmberlashSwordItem(
                     ModToolMaterial.UNIQUE,

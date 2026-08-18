@@ -33,6 +33,7 @@ import net.sweenus.simplyswords.world.IonboundStormscaleAbilityManager;
 import net.sweenus.simplyswords.world.MagispearAbilityManager;
 import net.sweenus.simplyswords.world.MoltenEdgeAbilityManager;
 import net.sweenus.simplyswords.world.ObserverStatusEffectSyncManager;
+import net.sweenus.simplyswords.world.DreadwhisperAbilityManager;
 import net.sweenus.simplyswords.world.SoulPyreAbilityManager;
 import net.sweenus.simplyswords.world.StormsEdgeAbilityManager;
 import net.sweenus.simplyswords.world.ThunderbrandAbilityManager;
@@ -121,6 +122,11 @@ public abstract class LivingEntityMixin {
             cir.setReturnValue(false);
             return;
         }
+        if (!(livingEntity instanceof ServerPlayerEntity)
+                && DreadwhisperAbilityManager.blocksIncomingDamage(livingEntity, source)) {
+            cir.setReturnValue(false);
+            return;
+        }
         if (!livingEntity.getWorld().isClient()
                 && !(livingEntity instanceof ServerPlayerEntity)
                 && ThunderbrandAbilityManager.handleIncomingDamage(livingEntity, source, amount)) {
@@ -177,6 +183,7 @@ public abstract class LivingEntityMixin {
                 amount *= reductionFactor;
             }
             amount = WeaponImplicitRegistry.modifyDamage(livingEntity, source, amount);
+            amount = DreadwhisperAbilityManager.modifyIncomingDamage(livingEntity, source, amount);
             amount = MoltenEdgeAbilityManager.modifyIncomingDamage(livingEntity, amount);
         }
         return amount;

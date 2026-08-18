@@ -45,6 +45,13 @@ public abstract class HeldItemRendererMixin {
             currentWithoutCubes.remove(ComponentTypeRegistry.ION_CUBES.get());
             return ItemStack.areEqual(previousWithoutCubes, currentWithoutCubes);
         }
+        if (previous.isOf(ItemsRegistry.DAWNQUIVER.get()) && current.isOf(ItemsRegistry.DAWNQUIVER.get())) {
+            ItemStack previousWithoutChorus = previous.copy();
+            ItemStack currentWithoutChorus = current.copy();
+            previousWithoutChorus.remove(ComponentTypeRegistry.STORED_CHARGE.get());
+            currentWithoutChorus.remove(ComponentTypeRegistry.STORED_CHARGE.get());
+            return ItemStack.areEqual(previousWithoutChorus, currentWithoutChorus);
+        }
         return ItemStack.areEqual(previous, current);
     }
 

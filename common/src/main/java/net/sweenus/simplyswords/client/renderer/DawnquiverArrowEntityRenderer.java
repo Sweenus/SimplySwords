@@ -67,6 +67,9 @@ public final class DawnquiverArrowEntityRenderer extends EntityRenderer<Dawnquiv
             drawReleaseWisps(glow, matrix, forward, side, up, scale, age);
         }
         drawShaft(body, glow, matrix, forward, side, up, scale * pulse);
+        if (entity.getMode() == DawnquiverArrowEntity.MODE_PIERCING) {
+            drawPiercingLances(body, glow, matrix, forward, side, up, scale, age);
+        }
         matrices.pop();
 
         matrices.push();
@@ -108,6 +111,21 @@ public final class DawnquiverArrowEntityRenderer extends EntityRenderer<Dawnquiv
         DawnquiverRenderGeometry.rays(glow, matrix, Vec3d.ZERO, 8,
                 outer * 0.36, outer * 1.45, outer * 0.09, 0.0F,
                 255, 206, 75, 145, 0);
+    }
+
+    private static void drawPiercingLances(VertexConsumer body, VertexConsumer glow, Matrix4f matrix,
+                                           Vec3d forward, Vec3d side, Vec3d up,
+                                           float scale, float age) {
+        double separation = (0.22 + MathHelper.sin(age * 0.3F) * 0.035) * scale;
+        Vec3d tail = forward.multiply(-1.25 * scale);
+        Vec3d head = forward.multiply(1.95 * scale);
+        for (double sign : new double[]{-1.0, 1.0}) {
+            Vec3d offset = side.multiply(separation * sign);
+            DawnquiverRenderGeometry.line(glow, matrix, tail.add(offset), head.add(offset), up,
+                    0.11 * scale, 102, 236, 255, 180);
+            DawnquiverRenderGeometry.line(body, matrix, tail.add(offset), head.add(offset), up,
+                    0.032 * scale, 239, 255, 255, 235);
+        }
     }
 
     private static void drawTrail(VertexConsumer body, VertexConsumer glow, Matrix4f matrix,

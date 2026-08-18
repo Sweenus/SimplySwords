@@ -34,6 +34,8 @@ import net.sweenus.simplyswords.world.PlayerWeaponAbilityChannelManager;
 import java.util.List;
 
 public final class DawnquiverSwordItem extends UniqueSwordItem implements TwoHandedWeapon, UniqueWeaponActiveAbility {
+    private static final int MAX_USE_TIME = 72000;
+
     public DawnquiverSwordItem(ToolMaterial material, Settings settings) {
         super(material, settings);
     }
@@ -65,10 +67,14 @@ public final class DawnquiverSwordItem extends UniqueSwordItem implements TwoHan
             return;
         }
         int maxUseTime = getMaxUseTime(stack, user);
+        int useTicks = Math.max(0, maxUseTime - remainingUseTicks);
+        int drawDuration = Math.max(4, Config.uniqueEffects.dawnquiver.drawDuration);
         float chargeRatio = chargeRatio(stack, user, remainingUseTicks);
         DawnquiverAbilityManager.tickDraw(serverWorld, user, chargeRatio);
 
-        if (remainingUseTicks % 8 == 0 && remainingUseTicks < maxUseTime - 4) {
+        int cappedDrawTicks = Math.max(1,
+                (int) Math.ceil(drawDuration * DawnquiverAbilityManager.maximumDrawProgress(stack)));
+        if (useTicks > 4 && useTicks <= cappedDrawTicks && useTicks % 8 == 0) {
             world.playSoundFromEntity(null, user, SoundRegistry.MAGIC_BOW_PULL_BACK_LONG_VERSION_01.get(),
                     user.getSoundCategory(), 0.18F, 0.85F + chargeRatio * 0.55F);
         }
@@ -91,11 +97,7 @@ public final class DawnquiverSwordItem extends UniqueSwordItem implements TwoHan
             return;
         }
         float chargeRatio = chargeRatio(stack, user, remainingUseTicks);
-        DawnquiverAbilityManager.release(serverWorld, user, stack, chargeRatio);
-
-        int cooldown = chargeRatio < Config.uniqueEffects.dawnquiver.minimumDraw
-                ? Math.max(1, Config.uniqueEffects.dawnquiver.cooldown / 4)
-                : Math.max(1, Config.uniqueEffects.dawnquiver.cooldown);
+        int cooldown = DawnquiverAbilityManager.release(serverWorld, user, stack, chargeRatio);
         if (user instanceof PlayerEntity player) {
             player.getItemCooldownManager().set(stack.getItem(), cooldown);
         }
@@ -111,7 +113,7 @@ public final class DawnquiverSwordItem extends UniqueSwordItem implements TwoHan
 
     @Override
     public int getMaxUseTime(ItemStack stack, LivingEntity user) {
-        return Math.max(4, Config.uniqueEffects.dawnquiver.drawDuration);
+        return MAX_USE_TIME;
     }
 
     @Override
@@ -136,23 +138,34 @@ public final class DawnquiverSwordItem extends UniqueSwordItem implements TwoHan
 
     private float chargeRatio(ItemStack stack, LivingEntity user, int remainingUseTicks) {
         int maxUseTime = getMaxUseTime(stack, user);
-        if (maxUseTime <= 0) {
-            return 0.0F;
-        }
-        return net.minecraft.util.math.MathHelper.clamp(
-                1.0F - (float) remainingUseTicks / maxUseTime, 0.0F, 1.0F);
+        int drawDuration = Math.max(4, Config.uniqueEffects.dawnquiver.drawDuration);
+        int useTicks = Math.max(0, maxUseTime - remainingUseTicks);
+        float progress = net.minecraft.util.math.MathHelper.clamp(
+                (float) useTicks / drawDuration, 0.0F, 1.0F);
+        return DawnquiverAbilityManager.capDrawProgress(stack, progress);
     }
 
     @Override
     public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType type) {
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.dawnquiversworditem.tooltip1").setStyle(Styles.ABILITY));
-        tooltip.add(Text.translatable("item.simplyswords.dawnquiversworditem.tooltip2").setStyle(Styles.TEXT));
+        tooltip.add(Text.translatable("item.simplyswords.dawnquiversworditem.tooltip2",
+                Math.round(Config.uniqueEffects.dawnquiver.passiveChorusChance * 100.0)).setStyle(Styles.TEXT));
+        tooltip.add(Text.literal(""));
+        tooltip.add(Text.translatable("item.simplyswords.dawnquiversworditem.tooltip3",
+                Config.uniqueEffects.dawnquiver.maxChorus).setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.dawnquiversworditem.tooltip4").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
-        appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.dawnquiver.cooldown);
+        tooltip.add(Text.translatable("item.simplyswords.dawnquiversworditem.tooltip5",
+                Config.uniqueEffects.dawnquiver.quickCooldown / 20.0F).setStyle(Styles.TEXT));
+        tooltip.add(Text.literal(""));
+        tooltip.add(Text.translatable("item.simplyswords.dawnquiversworditem.tooltip6",
+                Config.uniqueEffects.dawnquiver.piercingCooldown / 20.0F).setStyle(Styles.TEXT));
+        tooltip.add(Text.literal(""));
+        tooltip.add(Text.translatable("item.simplyswords.dawnquiversworditem.tooltip7",
+                Config.uniqueEffects.dawnquiver.cooldown / 20.0F).setStyle(Styles.TEXT));
         super.appendTooltip(stack, context, tooltip, type);
     }
 
@@ -166,9 +179,14 @@ public final class DawnquiverSwordItem extends UniqueSwordItem implements TwoHan
             super(new ItemStackTooltipAppender(ItemsRegistry.DAWNQUIVER::get));
         }
 
-        @ValidatedInt.Restrict(min = 1) public int cooldown = 300;
-        @ValidatedInt.Restrict(min = 4, max = 200) public int drawDuration = 40;
+        @ValidatedInt.Restrict(min = 1) public int cooldown = 150;
+        @ValidatedInt.Restrict(min = 1) public int quickCooldown = 50;
+        @ValidatedInt.Restrict(min = 1) public int piercingCooldown = 100;
+        @ValidatedInt.Restrict(min = 4, max = 200) public int drawDuration = 80;
         @ValidatedDouble.Restrict(min = 0.0, max = 1.0) public double minimumDraw = 0.35;
+        @ValidatedDouble.Restrict(min = 0.0, max = 1.0) public double piercingThreshold = 0.65;
+        @ValidatedDouble.Restrict(min = 0.0, max = 1.0) public double fullDrawThreshold = 0.9;
+        @ValidatedInt.Restrict(min = 3, max = 6) public int maxChorus = 3;
         @ValidatedDouble.Restrict(min = 0.0, max = 8.0) public double bowDistance = 1.0;
         @ValidatedDouble.Restrict(min = 0.1, max = 3.0) public double bowScale = 0.75;
         @ValidatedDouble.Restrict(min = 1.0, max = 64.0) public double activeRange = 32.0;
@@ -181,10 +199,17 @@ public final class DawnquiverSwordItem extends UniqueSwordItem implements TwoHan
         @ValidatedDouble.Restrict(min = 0.0) public double maxChargeSpellScaling = 5.0;
         @ValidatedInt.Restrict(min = 1) public int passiveInterval = 100;
         @ValidatedInt.Restrict(min = 1) public int passiveLockout = 80;
+        @ValidatedDouble.Restrict(min = 0.0, max = 1.0) public double passiveChorusChance = 0.25;
         @ValidatedDouble.Restrict(min = 1.0, max = 64.0) public double passiveRange = 24.0;
         @ValidatedDouble.Restrict(min = 0.0) public double passiveDamageScaling = 0.5;
         @ValidatedDouble.Restrict(min = 0.0) public double passiveSpellScaling = 1.0;
         @ValidatedDouble.Restrict(min = 0.1, max = 2.0) public double passiveArrowScale = 0.45;
         @ValidatedDouble.Restrict(min = 0.1, max = 2.0) public double passiveBowScale = 0.45;
+        @ValidatedInt.Restrict(min = 1, max = 12) public int piercingMaxTargets = 4;
+        @ValidatedDouble.Restrict(min = 0.0, max = 1.0) public double piercingDamageRetention = 0.85;
+        @ValidatedInt.Restrict(min = 1, max = 40) public int convergenceFormationDelay = 6;
+        @ValidatedInt.Restrict(min = 1, max = 20) public int convergenceFiringStagger = 2;
+        @ValidatedDouble.Restrict(min = 1.0, max = 12.0) public double convergenceRadius = 3.5;
+        @ValidatedDouble.Restrict(min = 1.0, max = 24.0) public double convergenceRetargetRange = 6.0;
     }
 }

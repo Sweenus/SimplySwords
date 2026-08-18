@@ -19,6 +19,7 @@ public class DawnquiverBowVisualEntity extends Entity {
     public static final int PHASE_RELEASED = 1;
     public static final int MODE_ACTIVE = 0;
     public static final int MODE_PASSIVE = 1;
+    public static final int MODE_FIXED = 2;
 
     private static final TrackedData<Integer> OWNER_ID =
             DataTracker.registerData(DawnquiverBowVisualEntity.class, TrackedDataHandlerRegistry.INTEGER);
@@ -55,7 +56,7 @@ public class DawnquiverBowVisualEntity extends Entity {
         this(EntityRegistry.DAWNQUIVER_BOW_VISUAL.get(), world);
         this.dataTracker.set(OWNER_ID, owner.getId());
         this.dataTracker.set(HAND, hand == Hand.OFF_HAND ? 1 : 0);
-        this.dataTracker.set(MODE, mode == MODE_PASSIVE ? MODE_PASSIVE : MODE_ACTIVE);
+        this.dataTracker.set(MODE, MathHelper.clamp(mode, MODE_ACTIVE, MODE_FIXED));
         this.setPosition(x, y, z);
         this.setYaw(yaw);
         this.setPitch(pitch);

@@ -16,6 +16,7 @@ import net.sweenus.simplyswords.item.component.ParryComponent;
 import net.sweenus.simplyswords.item.component.StoredChargeComponent;
 import net.sweenus.simplyswords.registry.ComponentTypeRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
+import net.sweenus.simplyswords.world.DawnquiverAbilityManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -36,6 +37,15 @@ public abstract class InGameHudMixin {
     private static final int BLOOD_FRENZY_COLOR = 0xFFE12A42;
     private static final int BLOOD_FRENZY_EMPTY_COLOR = 0x66520B18;
     private static final int BLOOD_FRENZY_BORDER_COLOR = 0xCC26030B;
+    private static final int DAWN_CHORUS_COLOR = 0xFFFFD968;
+    private static final int DAWN_CHORUS_EMPTY_COLOR = 0x665B4514;
+    private static final int DAWN_CHORUS_BORDER_COLOR = 0xCC6D4D0B;
+    private static final int DAWN_DRAW_BAR_WIDTH = 112;
+    private static final int DAWN_DRAW_BAR_HEIGHT = 7;
+    private static final int DAWN_DRAW_NEUTRAL_COLOR = 0xFF837866;
+    private static final int DAWN_DRAW_VOLLEY_COLOR = 0xFFFFC84A;
+    private static final int DAWN_DRAW_SUNLANCE_COLOR = 0xFF71E6FF;
+    private static final int DAWN_DRAW_SERAPHIC_COLOR = 0xFFFFF1A8;
     private static final int HEAT_BAR_WIDTH = 100;
     private static final int HEAT_BAR_HEIGHT = 8;
     private static final int HEAT_YELLOW_COLOR = 0xFFFFD52A;
@@ -156,6 +166,14 @@ public abstract class InGameHudMixin {
                     Text.translatable("hud.simplyswords.bloodwake_frenzy", Math.min(stacks, 5), 5).getString());
             return;
         }
+        ItemStack dawnquiver = simplyswords$selectDawnquiver(client);
+        if (!dawnquiver.isEmpty()) {
+            int stacks = dawnquiver.getOrDefault(ComponentTypeRegistry.STORED_CHARGE.get(),
+                    StoredChargeComponent.DEFAULT).charge();
+            int maximum = Math.max(1, Config.uniqueEffects.dawnquiver.maxChorus);
+            renderDawnquiverHud(context, client, tickCounter, dawnquiver, stacks, maximum);
+            return;
+        }
         if (stack.isOf(ItemsRegistry.SOULSTEALER.get())) {
             int stacks = stack.getOrDefault(ComponentTypeRegistry.STORED_CHARGE.get(), StoredChargeComponent.DEFAULT).charge();
             renderChargePips(context, client, stacks, Math.max(1, Config.uniqueEffects.soulstealer.maxStacks), SOUL_DEBT_COLOR, SOUL_DEBT_EMPTY_COLOR, SOUL_DEBT_BORDER_COLOR);
@@ -186,6 +204,184 @@ public abstract class InGameHudMixin {
         int mainStacks = main.getOrDefault(ComponentTypeRegistry.STORED_CHARGE.get(), StoredChargeComponent.DEFAULT).charge();
         int offStacks = off.getOrDefault(ComponentTypeRegistry.STORED_CHARGE.get(), StoredChargeComponent.DEFAULT).charge();
         return mainStacks >= offStacks ? main : off;
+    }
+
+    @Unique
+    private static ItemStack simplyswords$selectDawnquiver(MinecraftClient client) {
+        if (client.player == null) {
+            return ItemStack.EMPTY;
+        }
+        if (client.player.isUsingItem()) {
+            ItemStack active = client.player.getActiveItem();
+            if (active.isOf(ItemsRegistry.DAWNQUIVER.get())) {
+                return active;
+            }
+        }
+        ItemStack main = client.player.getMainHandStack();
+        ItemStack off = client.player.getOffHandStack();
+        boolean mainDawnquiver = main.isOf(ItemsRegistry.DAWNQUIVER.get());
+        boolean offDawnquiver = off.isOf(ItemsRegistry.DAWNQUIVER.get());
+        if (!mainDawnquiver) {
+            return offDawnquiver ? off : ItemStack.EMPTY;
+        }
+        if (!offDawnquiver) {
+            return main;
+        }
+        int mainStacks = main.getOrDefault(ComponentTypeRegistry.STORED_CHARGE.get(),
+                StoredChargeComponent.DEFAULT).charge();
+        int offStacks = off.getOrDefault(ComponentTypeRegistry.STORED_CHARGE.get(),
+                StoredChargeComponent.DEFAULT).charge();
+        return mainStacks >= offStacks ? main : off;
+    }
+
+    @Unique
+    private static void renderDawnquiverHud(DrawContext context, MinecraftClient client,
+                                             RenderTickCounter tickCounter, ItemStack stack,
+                                             int stacks, int maximum) {
+        int clampedStacks = Math.clamp(stacks, 0, maximum);
+        int pipWidth = maximum * PIP_SIZE + (maximum - 1) * PIP_GAP;
+        int pipX = -pipWidth / 2;
+
+        pushWeaponHudTransform(context);
+        for (int i = 0; i < maximum; i++) {
+            int x = pipX + i * (PIP_SIZE + PIP_GAP);
+            int color = i < clampedStacks ? DAWN_CHORUS_COLOR : DAWN_CHORUS_EMPTY_COLOR;
+            context.fill(x, 0, x + PIP_SIZE, PIP_SIZE, color);
+            context.drawBorder(x - 1, -1, PIP_SIZE + 2, PIP_SIZE + 2, DAWN_CHORUS_BORDER_COLOR);
+        }
+
+        String chorusLabel = Text.translatable("hud.simplyswords.dawnquiver_chorus",
+                clampedStacks, maximum).getString();
+        context.drawTextWithShadow(client.textRenderer, chorusLabel,
+                -client.textRenderer.getWidth(chorusLabel) / 2, -11, DAWN_CHORUS_COLOR);
+
+        boolean drawing = client.player != null
+                && client.player.isUsingItem()
+                && client.player.getActiveItem().isOf(ItemsRegistry.DAWNQUIVER.get());
+        if (drawing) {
+            renderDawnquiverDrawBar(context, client, tickCounter, stack, clampedStacks);
+        }
+        context.getMatrices().pop();
+    }
+
+    @Unique
+    private static void renderDawnquiverDrawBar(DrawContext context, MinecraftClient client,
+                                                 RenderTickCounter tickCounter, ItemStack stack,
+                                                 int chorus) {
+        int maximumUseTime = stack.getMaxUseTime(client.player);
+        float elapsed = Math.max(0, maximumUseTime - client.player.getItemUseTimeLeft())
+                + tickCounter.getTickDelta(false);
+        float rawProgress = MathHelper.clamp(
+                elapsed / Math.max(4.0F, Config.uniqueEffects.dawnquiver.drawDuration), 0.0F, 1.0F);
+        float maximumProgress = DawnquiverAbilityManager.maximumDrawProgress(stack);
+        float progress = DawnquiverAbilityManager.capDrawProgress(stack, rawProgress);
+        float minimum = MathHelper.clamp((float) Config.uniqueEffects.dawnquiver.minimumDraw, 0.0F, 1.0F);
+        float piercing = MathHelper.clamp((float) Config.uniqueEffects.dawnquiver.piercingThreshold,
+                minimum, 1.0F);
+        float full = MathHelper.clamp((float) Config.uniqueEffects.dawnquiver.fullDrawThreshold,
+                piercing, 1.0F);
+        float renderTime = (client.world == null ? 0.0F : client.world.getTime())
+                + tickCounter.getTickDelta(false);
+        float pulse = 0.5F + 0.5F * (float) Math.sin(renderTime * 0.28F);
+
+        int tier = DawnquiverAbilityManager.affordableDrawTier(stack, progress);
+        boolean atCap = rawProgress >= maximumProgress - 1.0E-4F;
+        int activeColor = tier < 0 ? DAWN_DRAW_NEUTRAL_COLOR
+                : tier == 0 ? DAWN_DRAW_VOLLEY_COLOR
+                : tier == 1 ? DAWN_DRAW_SUNLANCE_COLOR
+                : DAWN_DRAW_SERAPHIC_COLOR;
+        int barX = -DAWN_DRAW_BAR_WIDTH / 2;
+        int barY = -30;
+
+        if (tier == 2) {
+            int glowAlpha = 18 + Math.round(pulse * 34.0F);
+            context.fill(barX - 3, barY - 3,
+                    barX + DAWN_DRAW_BAR_WIDTH + 3, barY + DAWN_DRAW_BAR_HEIGHT + 3,
+                    withAlpha(DAWN_DRAW_SERAPHIC_COLOR, glowAlpha));
+        }
+
+        renderDawnquiverBarSegment(context, barX, barY, 0.0F, minimum,
+                progress, DAWN_DRAW_NEUTRAL_COLOR);
+        renderDawnquiverBarSegment(context, barX, barY, minimum, piercing,
+                progress, DAWN_DRAW_VOLLEY_COLOR);
+        renderDawnquiverBarSegment(context, barX, barY, piercing, full,
+                progress, DAWN_DRAW_SUNLANCE_COLOR);
+        renderDawnquiverBarSegment(context, barX, barY, full, 1.0F,
+                progress, DAWN_DRAW_SERAPHIC_COLOR);
+        int capX = barX + Math.round(maximumProgress * DAWN_DRAW_BAR_WIDTH);
+        if (capX < barX + DAWN_DRAW_BAR_WIDTH) {
+            context.fill(capX, barY, barX + DAWN_DRAW_BAR_WIDTH,
+                    barY + DAWN_DRAW_BAR_HEIGHT, 0x66000000);
+        }
+
+        context.drawBorder(barX - 1, barY - 1,
+                DAWN_DRAW_BAR_WIDTH + 2, DAWN_DRAW_BAR_HEIGHT + 2, DAWN_CHORUS_BORDER_COLOR);
+        drawDawnquiverThreshold(context, barX, barY, minimum);
+        drawDawnquiverThreshold(context, barX, barY, piercing);
+        drawDawnquiverThreshold(context, barX, barY, full);
+
+        float activeStart = tier < 0 ? 0.0F : tier == 0 ? minimum : tier == 1 ? piercing : full;
+        float activeEnd = tier < 0 ? minimum : tier == 0 ? piercing : tier == 1 ? full : 1.0F;
+        int activeX = barX + Math.round(activeStart * DAWN_DRAW_BAR_WIDTH);
+        int activeEndX = barX + Math.round(activeEnd * DAWN_DRAW_BAR_WIDTH);
+        int highlight = blendColor(activeColor, 0xFFFFFFFF, 0.25F + pulse * 0.3F);
+        if (activeEndX > activeX) {
+            context.fill(activeX, barY - 2, activeEndX, barY - 1, highlight);
+            context.fill(activeX, barY + DAWN_DRAW_BAR_HEIGHT + 1,
+                    activeEndX, barY + DAWN_DRAW_BAR_HEIGHT + 2, highlight);
+        }
+
+        int markerX = Math.clamp(barX + Math.round(progress * DAWN_DRAW_BAR_WIDTH),
+                barX, barX + DAWN_DRAW_BAR_WIDTH);
+        context.fill(markerX - 1, barY - 4, markerX + 2, barY - 3, 0xFFFFFFFF);
+        context.fill(markerX, barY - 3, markerX + 1,
+                barY + DAWN_DRAW_BAR_HEIGHT + 3, 0xFFFFFFFF);
+
+        Text state;
+        int labelColor = activeColor;
+        if (tier < 0) {
+            state = chorus <= 0 && atCap
+                    ? Text.translatable("hud.simplyswords.dawnquiver.base_ready")
+                    : Text.translatable("hud.simplyswords.dawnquiver.drawing");
+        } else {
+            int cost = tier + 1;
+            Text tierName = Text.translatable(tier == 0
+                    ? "hud.simplyswords.dawnquiver.dawn_volley"
+                    : tier == 1
+                    ? "hud.simplyswords.dawnquiver.sunlance"
+                    : "hud.simplyswords.dawnquiver.seraphic_chorus");
+            state = Text.translatable("hud.simplyswords.dawnquiver.ready", tierName, cost);
+        }
+        String label = state.getString();
+        context.drawTextWithShadow(client.textRenderer, label,
+                -client.textRenderer.getWidth(label) / 2, barY - 13, labelColor);
+    }
+
+    @Unique
+    private static void renderDawnquiverBarSegment(DrawContext context, int barX, int barY,
+                                                    float start, float end, float progress, int color) {
+        int startX = barX + Math.round(start * DAWN_DRAW_BAR_WIDTH);
+        int endX = barX + Math.round(end * DAWN_DRAW_BAR_WIDTH);
+        if (endX <= startX) {
+            return;
+        }
+        context.fill(startX, barY, endX, barY + DAWN_DRAW_BAR_HEIGHT, withAlpha(color, 52));
+        float filledEnd = MathHelper.clamp(progress, start, end);
+        int filledEndX = barX + Math.round(filledEnd * DAWN_DRAW_BAR_WIDTH);
+        if (filledEndX > startX) {
+            context.fill(startX, barY, filledEndX, barY + DAWN_DRAW_BAR_HEIGHT, color);
+            context.fill(startX, barY, filledEndX, barY + 1,
+                    blendColor(color, 0xFFFFFFFF, 0.38F));
+        }
+    }
+
+    @Unique
+    private static void drawDawnquiverThreshold(DrawContext context, int barX, int barY, float threshold) {
+        if (threshold <= 0.0F || threshold >= 1.0F) {
+            return;
+        }
+        int x = barX + Math.round(threshold * DAWN_DRAW_BAR_WIDTH);
+        context.fill(x, barY, x + 1, barY + DAWN_DRAW_BAR_HEIGHT, 0xE6FFFFFF);
     }
 
     @Unique
@@ -227,7 +423,14 @@ public abstract class InGameHudMixin {
     @Unique
     private static void renderChargePips(DrawContext context, MinecraftClient client, int stacks, int maxStacks,
                                          int filledColor, int emptyColor, int borderColor, String label) {
-        if (stacks <= 0) {
+        renderChargePips(context, client, stacks, maxStacks, filledColor, emptyColor, borderColor, label, false);
+    }
+
+    @Unique
+    private static void renderChargePips(DrawContext context, MinecraftClient client, int stacks, int maxStacks,
+                                         int filledColor, int emptyColor, int borderColor, String label,
+                                         boolean showWhenEmpty) {
+        if (stacks <= 0 && !showWhenEmpty) {
             return;
         }
 

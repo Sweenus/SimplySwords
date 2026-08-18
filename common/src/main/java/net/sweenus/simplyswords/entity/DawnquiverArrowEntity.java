@@ -12,6 +12,7 @@ import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
+import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Box;
@@ -23,19 +24,31 @@ import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.registry.EntityRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
+import net.sweenus.simplyswords.world.DawnquiverAbilityManager;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 public class DawnquiverArrowEntity extends Entity {
+
+    public static final int MODE_NORMAL = 0;
+    public static final int MODE_PASSIVE = 1;
+    public static final int MODE_QUICK_CHORUS = 2;
+    public static final int MODE_PIERCING = 3;
+    public static final int MODE_FULL_PRIMARY = 4;
+    public static final int MODE_CONVERGENCE = 5;
 
     private static final TrackedData<Integer> OWNER_ID =
             DataTracker.registerData(DawnquiverArrowEntity.class, TrackedDataHandlerRegistry.INTEGER);
     private static final TrackedData<Float> SCALE =
             DataTracker.registerData(DawnquiverArrowEntity.class, TrackedDataHandlerRegistry.FLOAT);
     private static final TrackedData<Integer> SEED =
+            DataTracker.registerData(DawnquiverArrowEntity.class, TrackedDataHandlerRegistry.INTEGER);
+    private static final TrackedData<Integer> MODE =
             DataTracker.registerData(DawnquiverArrowEntity.class, TrackedDataHandlerRegistry.INTEGER);
 
     private static final DustColorTransitionParticleEffect DAWN_DUST =
@@ -47,12 +60,17 @@ public class DawnquiverArrowEntity extends Entity {
     private UUID ownerUuid;
     private UUID targetUuid;
     private ItemStack sourceStack = ItemStack.EMPTY;
+    private Hand sourceHand = Hand.MAIN_HAND;
     private float damage;
+    private float secondaryDamage;
     private double speed = 1.2;
     private double turnRateDegrees = 9.0;
     private double impactRadius = 2.0;
     private double maxDistance = 64.0;
     private double traveled;
+    private int maximumPiercingTargets = 1;
+    private double piercingDamageRetention = 1.0;
+    private final Set<UUID> piercedTargets = new HashSet<>();
 
     public DawnquiverArrowEntity(EntityType<? extends DawnquiverArrowEntity> entityType, World world) {
         super(entityType, world);
@@ -64,20 +82,37 @@ public class DawnquiverArrowEntity extends Entity {
                                  Vec3d direction, @Nullable LivingEntity target, float damage,
                                  double speed, double turnRateDegrees, double scale,
                                  double impactRadius, double maxDistance) {
+        this(world, owner, stack, Hand.MAIN_HAND, origin, direction, target, damage, 0.0F,
+                speed, turnRateDegrees, scale, impactRadius, maxDistance,
+                MODE_NORMAL, 1, 1.0);
+    }
+
+    public DawnquiverArrowEntity(ServerWorld world, LivingEntity owner, ItemStack stack, Hand sourceHand,
+                                 Vec3d origin, Vec3d direction, @Nullable LivingEntity target,
+                                 float damage, float secondaryDamage, double speed,
+                                 double turnRateDegrees, double scale, double impactRadius,
+                                 double maxDistance, int mode, int maximumPiercingTargets,
+                                 double piercingDamageRetention) {
         this(EntityRegistry.DAWNQUIVER_ARROW.get(), world);
         this.ownerUuid = owner.getUuid();
         this.sourceStack = stack.copy();
+        this.sourceHand = sourceHand == null ? Hand.MAIN_HAND : sourceHand;
         this.damage = Math.max(0.0F, damage);
+        this.secondaryDamage = Math.max(0.0F, secondaryDamage);
         this.speed = Math.max(0.1, speed);
         this.turnRateDegrees = Math.max(0.0, turnRateDegrees);
         this.impactRadius = Math.max(0.0, impactRadius);
         this.maxDistance = Math.max(4.0, maxDistance);
         this.targetUuid = target == null ? null : target.getUuid();
+        this.maximumPiercingTargets = Math.max(1, maximumPiercingTargets);
+        this.piercingDamageRetention = MathHelper.clamp(piercingDamageRetention, 0.0, 1.0);
         this.dataTracker.set(OWNER_ID, owner.getId());
         this.dataTracker.set(SCALE, (float) Math.max(0.2, scale));
         this.dataTracker.set(SEED, owner.getRandom().nextInt(4096));
+        this.dataTracker.set(MODE, MathHelper.clamp(mode, MODE_NORMAL, MODE_CONVERGENCE));
         this.setPosition(origin.x, origin.y, origin.z);
-        this.setVelocity(direction.normalize().multiply(this.speed));
+        Vec3d normalized = direction.lengthSquared() < 1.0E-6 ? owner.getRotationVec(1.0F) : direction.normalize();
+        this.setVelocity(normalized.multiply(this.speed));
     }
 
     @Override
@@ -85,6 +120,7 @@ public class DawnquiverArrowEntity extends Entity {
         builder.add(OWNER_ID, -1);
         builder.add(SCALE, 1.0F);
         builder.add(SEED, 0);
+        builder.add(MODE, MODE_NORMAL);
     }
 
     public float getScale() {
@@ -95,15 +131,16 @@ public class DawnquiverArrowEntity extends Entity {
         return this.dataTracker.get(SEED);
     }
 
+    public int getMode() {
+        return this.dataTracker.get(MODE);
+    }
+
     @Override
     public void tick() {
         super.tick();
         this.noClip = true;
         this.setNoGravity(true);
-        if (this.getWorld().isClient()) {
-            return;
-        }
-        if (!(this.getWorld() instanceof ServerWorld world)) {
+        if (this.getWorld().isClient() || !(this.getWorld() instanceof ServerWorld world)) {
             return;
         }
 
@@ -116,7 +153,8 @@ public class DawnquiverArrowEntity extends Entity {
         Vec3d current = this.getPos();
         Vec3d velocity = this.getVelocity();
         LivingEntity target = resolveTarget(world, owner);
-        if (target != null && velocity.lengthSquared() > 1.0E-6) {
+        boolean canHome = getMode() != MODE_PIERCING || this.piercedTargets.isEmpty();
+        if (canHome && target != null && velocity.lengthSquared() > 1.0E-6) {
             Vec3d desired = aimPoint(target).subtract(current);
             if (desired.lengthSquared() > 1.0E-6) {
                 Vec3d steered = turnToward(velocity.normalize(), desired.normalize(),
@@ -130,28 +168,48 @@ public class DawnquiverArrowEntity extends Entity {
         BlockHitResult blockHit = world.raycast(new RaycastContext(current, next,
                 RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, this));
         Vec3d segmentEnd = blockHit.getType() == HitResult.Type.MISS ? next : blockHit.getPos();
-
         LivingEntity struck = findCollisionTarget(world, owner, current, segmentEnd);
-        if (struck != null) {
-            this.setPosition(segmentEnd.x, segmentEnd.y, segmentEnd.z);
-            impact(world, owner, struck);
-            return;
-        }
 
         this.setPosition(segmentEnd.x, segmentEnd.y, segmentEnd.z);
         this.traveled += current.distanceTo(segmentEnd);
         spawnTrail(world, current, segmentEnd);
 
+        if (struck != null) {
+            if (getMode() == MODE_PIERCING) {
+                pierce(world, owner, struck);
+            } else {
+                impact(world, owner, struck, true);
+            }
+            return;
+        }
+
         if (blockHit.getType() != HitResult.Type.MISS) {
-            impact(world, owner, null);
+            impact(world, owner, null, false);
         }
     }
 
-    private void impact(ServerWorld world, LivingEntity owner, @Nullable LivingEntity struck) {
-        float scale = getScale();
-        if (struck != null) {
-            SimplySwordsAPI.applyEntityWeaponHit(this.sourceStack, struck, owner, this.damage);
+    private void pierce(ServerWorld world, LivingEntity owner, LivingEntity struck) {
+        this.piercedTargets.add(struck.getUuid());
+        SimplySwordsAPI.applyEntityWeaponHit(this.sourceStack, struck, owner, this.damage);
+        spawnPiercingImpact(world);
+        this.targetUuid = null;
+        if (this.piercedTargets.size() >= this.maximumPiercingTargets) {
+            impact(world, owner, struck, false);
+            return;
         }
+        this.damage *= (float) this.piercingDamageRetention;
+    }
+
+    private void impact(ServerWorld world, LivingEntity owner, @Nullable LivingEntity struck,
+                        boolean applyDirectHit) {
+        float scale = getScale();
+        if (applyDirectHit && struck != null) {
+            SimplySwordsAPI.applyEntityWeaponHit(this.sourceStack, struck, owner, this.damage);
+            if (getMode() == MODE_PASSIVE) {
+                DawnquiverAbilityManager.onPassiveArrowHit(world, owner, this.sourceHand);
+            }
+        }
+
         if (this.impactRadius > 0.0) {
             Box splash = this.getBoundingBox().expand(this.impactRadius);
             for (LivingEntity nearby : world.getEntitiesByClass(LivingEntity.class, splash,
@@ -160,16 +218,35 @@ public class DawnquiverArrowEntity extends Entity {
             }
         }
 
+        spawnImpact(world, scale);
+        if (getMode() == MODE_FULL_PRIMARY) {
+            DawnquiverAbilityManager.onFullArrowImpact(world, owner, this.sourceStack,
+                    this.sourceHand, this.getPos(), struck, this.secondaryDamage);
+        }
+        this.discard();
+    }
+
+    private void spawnPiercingImpact(ServerWorld world) {
+        float scale = getScale();
+        world.spawnParticles(DAWN_DUST, this.getX(), this.getY(), this.getZ(),
+                Math.max(8, Math.round(16 * scale)), 0.22 * scale, 0.22 * scale, 0.22 * scale, 0.08);
+        world.spawnParticles(ParticleTypes.END_ROD, this.getX(), this.getY(), this.getZ(),
+                Math.max(3, Math.round(6 * scale)), 0.16 * scale, 0.16 * scale, 0.16 * scale, 0.09);
+        world.playSound(null, this.getBlockPos(), SoundRegistry.ELEMENTAL_BOW_HOLY_SHOOT_IMPACT_01.get(),
+                SoundCategory.PLAYERS, 0.32F * scale, 1.25F + world.random.nextFloat() * 0.12F);
+    }
+
+    private void spawnImpact(ServerWorld world, float scale) {
         world.spawnParticles(DAWN_DUST, this.getX(), this.getY(), this.getZ(),
                 Math.round(40 * scale), 0.55 * scale, 0.55 * scale, 0.55 * scale, 0.09);
         world.spawnParticles(ParticleTypes.END_ROD, this.getX(), this.getY(), this.getZ(),
                 Math.round(18 * scale), 0.4 * scale, 0.4 * scale, 0.4 * scale, 0.12);
-        world.spawnParticles(ParticleTypes.FLASH, this.getX(), this.getY(), this.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
+        world.spawnParticles(ParticleTypes.FLASH, this.getX(), this.getY(), this.getZ(),
+                1, 0.0, 0.0, 0.0, 0.0);
         world.spawnEntity(new DawnquiverImpactVisualEntity(world,
                 this.getX(), this.getY(), this.getZ(), scale, this.getSeed()));
         world.playSound(null, this.getBlockPos(), SoundRegistry.ELEMENTAL_BOW_HOLY_SHOOT_IMPACT_02.get(),
                 SoundCategory.PLAYERS, 0.6F * scale, 1.0F + world.random.nextFloat() * 0.15F);
-        this.discard();
     }
 
     private void dissipate(ServerWorld world) {
@@ -180,11 +257,12 @@ public class DawnquiverArrowEntity extends Entity {
 
     private void spawnTrail(ServerWorld world, Vec3d from, Vec3d to) {
         float scale = getScale();
+        int multiplier = getMode() == MODE_PIERCING ? 2 : 1;
         world.spawnParticles(DAWN_DUST, to.x, to.y, to.z,
-                Math.round(3 * scale), 0.08, 0.08, 0.08, 0.01);
+                Math.round(3 * scale) * multiplier, 0.08, 0.08, 0.08, 0.01);
         if (this.age % 2 == 0) {
             world.spawnParticles(ParticleTypes.END_ROD, from.x, from.y, from.z,
-                    1, 0.05, 0.05, 0.05, 0.005);
+                    multiplier, 0.05, 0.05, 0.05, 0.005);
         }
     }
 
@@ -192,7 +270,8 @@ public class DawnquiverArrowEntity extends Entity {
         double grace = 0.35 * getScale();
         Box search = new Box(start, end).expand(grace + 0.55);
         return world.getEntitiesByClass(LivingEntity.class, search,
-                        entity -> isValidTarget(entity, owner)
+                        entity -> !this.piercedTargets.contains(entity.getUuid())
+                                && isValidTarget(entity, owner)
                                 && entity.getBoundingBox().expand(entity.getTargetingMargin() + grace)
                                 .raycast(start, end).isPresent())
                 .stream()

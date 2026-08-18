@@ -126,6 +126,9 @@ public class SimplySwords {
         SimplySwordsAPI.registerObserverStatusVisual(EffectRegistry.ION_PARALYSIS_ID,
                 new ObserverStatusVisualStyle(ObserverStatusVisualShape.STATIC_STREAKS,
                         0x2F8CFF, 0xF7FDFF, 5, 1.0F));
+        SimplySwordsAPI.registerObserverStatusVisual(EffectRegistry.CORRUPTED_WOUND_ID,
+                new ObserverStatusVisualStyle(ObserverStatusVisualShape.CORRUPTED_WOUNDS,
+                        0x4B0B71, 0x8DFF73, 5, 1.0F));
         ObserverStatusEffectSyncManager.init();
         ShadowstingShadowDanceManager.init();
         SimplySwordsCommands.register();
@@ -222,6 +225,7 @@ public class SimplySwords {
             EntityRendererRegistry.register(EntityRegistry.SOULKEEPER_LANTERN_VISUAL, SoulkeeperLanternVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.FLAME_SEED_VISUAL, FlameSeedVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.WHISPERWIND_SLASH_VISUAL, WhisperwindSlashVisualEntityRenderer::new);
+            EntityRendererRegistry.register(EntityRegistry.DREADWHISPER_VISUAL, DreadwhisperVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.RUNIC_SLASH_PROJECTILE, RunicSlashProjectileEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.TWISTED_BLADE_CRESCENDO_VISUAL, TwistedBladeCrescendoVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.DEATH_KNELL_VISUAL, DeathKnellVisualEntityRenderer::new);
