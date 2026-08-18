@@ -11,6 +11,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.client.renderer.ModernFieldRenderer;
+import net.sweenus.simplyswords.client.renderer.ObserverStatusVisualRenderer;
 import net.sweenus.simplyswords.client.renderer.TerrainFieldOverlayRenderer;
 import net.sweenus.simplyswords.client.renderer.TargetHighlight;
 import net.sweenus.simplyswords.client.render.IonDeferredRenderController;
@@ -49,6 +50,7 @@ public abstract class WorldRendererMixin {
                                                        LightmapTextureManager lightmapTextureManager,
                                                        Matrix4f projectionMatrix, CallbackInfo ci) {
         TerrainFieldOverlayRenderer.beginWorldFrame();
+        ObserverStatusVisualRenderer.beginWorldFrame();
         IonDeferredRenderController.beginFrame();
     }
 

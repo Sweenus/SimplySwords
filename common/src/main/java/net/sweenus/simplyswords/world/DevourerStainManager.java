@@ -2,8 +2,6 @@ package net.sweenus.simplyswords.world;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.Box;
@@ -40,6 +38,25 @@ public final class DevourerStainManager {
     public static boolean hasActive(ServerWorld world) {
         Map<UUID, ActiveField> fields = ACTIVE.get(world);
         return fields != null && !fields.isEmpty() || world.getTime() % 40L == 0L;
+    }
+
+    public static boolean contains(ServerWorld world, Vec3d position) {
+        if (world == null || position == null) {
+            return false;
+        }
+        for (ActiveField field : ACTIVE.getOrDefault(world, Map.of()).values()) {
+            DevourerMassVisualEntity mass = resolveMass(world, field.massVisualId);
+            if (mass != null && Math.abs(position.y - field.center.y) <= VERTICAL_RANGE) {
+                double mainRadius = Math.max(0.4, mass.getStableRadius(0.0F) * 2.1);
+                if (horizontalDistanceSquared(position, field.center) <= mainRadius * mainRadius) {
+                    return true;
+                }
+            }
+            if (containsTrail(field.segments, position)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static void begin(ServerWorld world, UUID ownerId, UUID sourcePlayerId,
@@ -139,7 +156,7 @@ public final class DevourerStainManager {
                 continue;
             }
             insideNow.put(target.getUuid(), target.getPos());
-            applySlow(owner, target);
+            applySlow(world, owner, target);
             slowed.add(target.getUuid());
         }
 
@@ -291,7 +308,7 @@ public final class DevourerStainManager {
             if (alreadySlowed.contains(target.getUuid()) || !containsTrail(field.segments, target.getPos())) {
                 continue;
             }
-            applySlow(owner, target);
+            applySlow(world, owner, target);
             alreadySlowed.add(target.getUuid());
         }
     }
@@ -321,11 +338,9 @@ public final class DevourerStainManager {
         return false;
     }
 
-    private static void applySlow(LivingEntity owner, LivingEntity target) {
+    private static void applySlow(ServerWorld world, LivingEntity owner, LivingEntity target) {
         int amplifier = MathHelper.clamp(Config.uniqueEffects.devourer.stainSlowAmplifier, 0, 4);
-        target.addStatusEffect(new StatusEffectInstance(
-                StatusEffects.SLOWNESS, CONTACT_INTERVAL * 2 + 1,
-                amplifier, false, false, true), owner);
+        GloamMechanicsManager.recordContact(world, owner, target, amplifier);
     }
 
     private static boolean isValidTarget(ServerWorld world, LivingEntity owner,

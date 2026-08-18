@@ -70,6 +70,8 @@ public final class SoulstalkerSwordItem extends UniqueSwordItem implements TwoHa
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.soulstalkersworditem.tooltip5").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
+        tooltip.add(Text.translatable("item.simplyswords.gloam.tooltip").setStyle(Styles.TEXT));
+        tooltip.add(Text.literal(""));
         appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.soulstalker.cooldown);
         super.appendTooltip(stack, world, tooltip, tooltipContext);
     }
@@ -93,6 +95,11 @@ public final class SoulstalkerSwordItem extends UniqueSwordItem implements TwoHa
         @ValidatedDouble.Restrict(min = 0.0, max = 3.0) public double leapVerticalStrength = 1.0;
         @ValidatedDouble.Restrict(min = 0.1, max = 3.0) public double leapHorizontalStrength = 2.0;
         @ValidatedDouble.Restrict(min = 0.0, max = 1.0) public double leapSurfaceReleaseStrength = 0.6;
+        @ValidatedDouble.Restrict(min = 0.0, max = 3.0) public double leapImpactDamageScaling = 0.75;
+        @ValidatedDouble.Restrict(min = 0.25, max = 8.0) public double leapImpactRadius = 2.5;
+        @ValidatedDouble.Restrict(min = 0.0, max = 3.0) public double leapImpactKnockback = 0.7;
+        @ValidatedDouble.Restrict(min = 0.0, max = 1.0) public double leapImpactLift = 0.18;
+        @ValidatedDouble.Restrict(min = 0.25, max = 4.0) public double leapImpactStainRadius = 0.9;
         @ValidatedDouble.Restrict(min = 0.0, max = 1.0) public double footfallDamageScaling = 0.15;
         @ValidatedDouble.Restrict(min = 0.1, max = 3.0) public double footfallRadius = 0.8;
         @ValidatedInt.Restrict(min = 1) public int footfallTargetImmunity = 10;

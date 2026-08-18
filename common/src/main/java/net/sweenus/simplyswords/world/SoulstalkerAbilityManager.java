@@ -336,7 +336,7 @@ public final class SoulstalkerAbilityManager {
                 Math.sin(Math.toRadians(stride.getYaw())));
         double side = ((world.getTime() / TRAIL_INTERVAL) & 1L) == 0L ? -0.45 : 0.45;
         Vec3d point = new Vec3d(stride.getX(), y, stride.getZ()).add(right.multiply(side));
-        WraithmawStainManager.createPatch(world, owner.getUuid(), point,
+        GloamStainManager.createPatch(world, owner.getUuid(), point,
                 Math.max(0.25, Config.uniqueEffects.soulstalker.stainTrailWidth * 0.72),
                 Math.max(20, Config.uniqueEffects.soulstalker.stainDuration),
                 Math.max(1, Config.uniqueEffects.soulstalker.stainFadeDuration),
@@ -348,7 +348,7 @@ public final class SoulstalkerAbilityManager {
 
     private static void createImpactStain(ServerWorld world, LivingEntity owner, Vec3d position) {
         double y = LivyatanWaveManager.findGroundTopY(world, position.x, position.z, position.y + 1.5);
-        WraithmawStainManager.createPatch(world, owner.getUuid(),
+        GloamStainManager.createPatch(world, owner.getUuid(),
                 new Vec3d(position.x, y, position.z),
                 Math.max(0.25, Config.uniqueEffects.soulstalker.stainRadius),
                 Math.max(20, Config.uniqueEffects.soulstalker.stainDuration),

@@ -61,6 +61,8 @@ public final class WraithmawSwordItem extends UniqueSwordItem implements UniqueW
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.wraithmawsworditem.tooltip4").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
+        tooltip.add(Text.translatable("item.simplyswords.gloam.tooltip").setStyle(Styles.TEXT));
+        tooltip.add(Text.literal(""));
         appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.wraithmaw.cooldown);
         super.appendTooltip(stack, world, tooltip, tooltipContext);
     }

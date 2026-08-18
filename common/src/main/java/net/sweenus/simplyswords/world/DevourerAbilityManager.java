@@ -361,7 +361,8 @@ public final class DevourerAbilityManager {
         ItemStack stack = itemEntity.getStack();
         return stack.isOf(ItemsRegistry.WRAITHFANG.get())
                 || stack.isOf(ItemsRegistry.WICKPIERCER.get())
-                || stack.isOf(ItemsRegistry.SOULRENDER.get()) ? 0 : 1;
+                || stack.isOf(ItemsRegistry.SOULRENDER.get())
+                || stack.isOf(ItemsRegistry.WHISPERWIND.get()) ? 0 : 1;
     }
 
     private static boolean corruptWeapon(ServerWorld world, Entity target, Vec3d center) {
@@ -380,6 +381,9 @@ public final class DevourerAbilityManager {
         } else if (source.isOf(ItemsRegistry.SOULRENDER.get())) {
             corrupted = ItemsRegistry.SOULSTALKER.get();
             route = AwakeningFormRegistry.SOULSTALKER_ROUTE;
+        } else if (source.isOf(ItemsRegistry.WHISPERWIND.get())) {
+            corrupted = ItemsRegistry.DREADWHISPER.get();
+            route = AwakeningFormRegistry.DREADWHISPER_ROUTE;
         } else {
             return false;
         }

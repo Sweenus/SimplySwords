@@ -26,6 +26,7 @@ import net.sweenus.simplyswords.power.GemPowerComponent;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.MinionTargeting;
 import net.sweenus.simplyswords.world.ShadowstingShadowDanceManager;
+import net.sweenus.simplyswords.world.GloamMechanicsManager;
 import net.sweenus.simplyswords.world.SoulkeeperLanternManager;
 import net.sweenus.simplyswords.world.WaxweaverEncasementManager;
 import org.spongepowered.asm.mixin.Mixin;
@@ -50,6 +51,9 @@ public abstract class MobEntityMixin {
     @Inject(method = "tickNewAi", at = @At("HEAD"), cancellable = true)
     private void simplyswords$pauseIncapacitatedAi(CallbackInfo ci) {
         MobEntity mob = (MobEntity) (Object) this;
+        if (GloamMechanicsManager.isGrasped(mob)) {
+            mob.getNavigation().stop();
+        }
         if (IncapacitatingStatusEffectRegistry.isIncapacitated(mob)) {
             mob.getNavigation().stop();
             ci.cancel();

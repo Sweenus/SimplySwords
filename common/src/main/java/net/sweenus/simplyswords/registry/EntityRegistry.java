@@ -180,6 +180,15 @@ public class EntityRegistry {
                     .build(new Identifier(SimplySwords.MOD_ID, "whisperwind_slash_visual").toString())
     );
 
+    public static final RegistrySupplier<EntityType<DreadwhisperVisualEntity>> DREADWHISPER_VISUAL = ENTITIES.register(
+            "dreadwhisper_visual",
+            () -> EntityType.Builder.<DreadwhisperVisualEntity>create(DreadwhisperVisualEntity::new, SpawnGroup.MISC)
+                    .setDimensions(0.35f, 0.35f)
+                    .maxTrackingRange(128)
+                    .trackingTickInterval(1)
+                    .build(Identifier.of(SimplySwords.MOD_ID, "dreadwhisper_visual").toString())
+    );
+
     public static final RegistrySupplier<EntityType<RunicSlashProjectileEntity>> RUNIC_SLASH_PROJECTILE = ENTITIES.register(
             "runic_slash_projectile",
             () -> EntityType.Builder.<RunicSlashProjectileEntity>create(RunicSlashProjectileEntity::new, SpawnGroup.MISC)
@@ -380,6 +389,36 @@ public class EntityRegistry {
                     .trackingTickInterval(1)
                     .disableSaving()
                     .build(new Identifier(SimplySwords.MOD_ID, "soulstalker_tentacle_visual").toString())
+    );
+
+    public static final RegistrySupplier<EntityType<DawnquiverBowVisualEntity>> DAWNQUIVER_BOW_VISUAL = ENTITIES.register(
+            "dawnquiver_bow_visual",
+            () -> EntityType.Builder.<DawnquiverBowVisualEntity>create(DawnquiverBowVisualEntity::new, SpawnGroup.MISC)
+                    .setDimensions(0.2F, 0.2F)
+                    .maxTrackingRange(160)
+                    .trackingTickInterval(1)
+                    .disableSaving()
+                    .build(Identifier.of(SimplySwords.MOD_ID, "dawnquiver_bow_visual").toString())
+    );
+
+    public static final RegistrySupplier<EntityType<DawnquiverArrowEntity>> DAWNQUIVER_ARROW = ENTITIES.register(
+            "dawnquiver_arrow",
+            () -> EntityType.Builder.<DawnquiverArrowEntity>create(DawnquiverArrowEntity::new, SpawnGroup.MISC)
+                    .setDimensions(0.4F, 0.4F)
+                    .maxTrackingRange(160)
+                    .trackingTickInterval(1)
+                    .disableSaving()
+                    .build(Identifier.of(SimplySwords.MOD_ID, "dawnquiver_arrow").toString())
+    );
+
+    public static final RegistrySupplier<EntityType<DawnquiverImpactVisualEntity>> DAWNQUIVER_IMPACT_VISUAL = ENTITIES.register(
+            "dawnquiver_impact_visual",
+            () -> EntityType.Builder.<DawnquiverImpactVisualEntity>create(DawnquiverImpactVisualEntity::new, SpawnGroup.MISC)
+                    .setDimensions(0.2F, 0.2F)
+                    .maxTrackingRange(160)
+                    .trackingTickInterval(1)
+                    .disableSaving()
+                    .build(Identifier.of(SimplySwords.MOD_ID, "dawnquiver_impact_visual").toString())
     );
 
     public static final RegistrySupplier<EntityType<RiftmaneChargerEntity>> RIFTMANE_CHARGER = ENTITIES.register(

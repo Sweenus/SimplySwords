@@ -28,6 +28,8 @@ public class BloodStainVisualEntity extends Entity {
             DataTracker.registerData(BloodStainVisualEntity.class, TrackedDataHandlerRegistry.INTEGER);
     private static final TrackedData<Integer> FADE_DURATION =
             DataTracker.registerData(BloodStainVisualEntity.class, TrackedDataHandlerRegistry.INTEGER);
+    private static final TrackedData<Integer> FADE_IN_DURATION =
+            DataTracker.registerData(BloodStainVisualEntity.class, TrackedDataHandlerRegistry.INTEGER);
     private static final TrackedData<Integer> SEED =
             DataTracker.registerData(BloodStainVisualEntity.class, TrackedDataHandlerRegistry.INTEGER);
     private static final TrackedData<Integer> STYLE =
@@ -75,6 +77,7 @@ public class BloodStainVisualEntity extends Entity {
         this.dataTracker.startTracking(VERTICAL_RANGE, 6.0F);
         this.dataTracker.startTracking(LIFETIME, 600);
         this.dataTracker.startTracking(FADE_DURATION, 100);
+        this.dataTracker.startTracking(FADE_IN_DURATION, 0);
         this.dataTracker.startTracking(SEED, 0);
         this.dataTracker.startTracking(STYLE, STYLE_BLOOD);
         this.dataTracker.startTracking(SOURCE_ENTITY_ID, -1);
@@ -138,6 +141,14 @@ public class BloodStainVisualEntity extends Entity {
         this.dataTracker.set(FADE_DURATION, Math.max(1, fadeDuration));
     }
 
+    public int getFadeInDuration() {
+        return this.dataTracker.get(FADE_IN_DURATION);
+    }
+
+    public void setFadeInDuration(int fadeInDuration) {
+        this.dataTracker.set(FADE_IN_DURATION, Math.max(0, fadeInDuration));
+    }
+
     public int getSeed() {
         return this.dataTracker.get(SEED);
     }
@@ -191,6 +202,8 @@ public class BloodStainVisualEntity extends Entity {
         this.setVerticalRange(nbt.getFloat("vertical_range"));
         this.setLifetime(nbt.getInt("lifetime"));
         this.setFadeDuration(nbt.getInt("fade_duration"));
+        this.setFadeInDuration(nbt.contains("fade_in_duration")
+                ? nbt.getInt("fade_in_duration") : 0);
         this.setSeed(nbt.getInt("seed"));
         this.setStyle(nbt.getInt("style"));
         this.setSourceEntityId(nbt.contains("source_entity_id")
@@ -206,6 +219,7 @@ public class BloodStainVisualEntity extends Entity {
         nbt.putFloat("vertical_range", this.getVerticalRange());
         nbt.putInt("lifetime", this.getLifetime());
         nbt.putInt("fade_duration", this.getFadeDuration());
+        nbt.putInt("fade_in_duration", this.getFadeInDuration());
         nbt.putInt("seed", this.getSeed());
         nbt.putInt("style", this.getStyle());
         nbt.putInt("source_entity_id", this.getSourceEntityId());

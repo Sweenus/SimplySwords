@@ -98,6 +98,7 @@ public class ItemsRegistry {
     static float wraithfang_attackspeed = Config.weaponAttribute.uniqueAttackSpeed.wraithfang_attackSpeed;
     static float chompolotl_attackspeed = Config.weaponAttribute.uniqueAttackSpeed.chompolotl_attackSpeed;
     static float riftmane_attackspeed = Config.weaponAttribute.uniqueAttackSpeed.riftmane_attackSpeed;
+    static float dawnquiver_attackspeed = Config.weaponAttribute.uniqueAttackSpeed.dawnquiver_attackSpeed;
 
     static float brimstone_damage_modifier = Config.weaponAttribute.uniqueDamageModifier.brimstone_damageModifier;
     static float thewatcher_damage_modifier = Config.weaponAttribute.uniqueDamageModifier.thewatcher_damageModifier;
@@ -144,6 +145,7 @@ public class ItemsRegistry {
     static float wraithfang_damage_modifier = Config.weaponAttribute.uniqueDamageModifier.wraithfang_damageModifier;
     static float chompolotl_damage_modifier = Config.weaponAttribute.uniqueDamageModifier.chompolotl_damageModifier;
     static float riftmane_damage_modifier = Config.weaponAttribute.uniqueDamageModifier.riftmane_damageModifier;
+    static float dawnquiver_damage_modifier = Config.weaponAttribute.uniqueDamageModifier.dawnquiver_damageModifier;
 
     public static final DeferredRegister<Item> ITEM = DeferredRegister.create(SimplySwords.MOD_ID, RegistryKeys.ITEM);
 
@@ -828,6 +830,12 @@ public class ItemsRegistry {
                     LegacyWeaponAttributes.configure(new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).fireproof()
                             , (int) whisperwind_damage_modifier, whisperwind_attackspeed)));
 
+    public static final RegistrySupplier<DreadwhisperSwordItem> DREADWHISPER = ITEM.register("dreadwhisper", () ->
+            new DreadwhisperSwordItem(
+                    ModToolMaterial.UNIQUE,
+                    LegacyWeaponAttributes.configure(new Item.Settings().fireproof(),
+                            (int) whisperwind_damage_modifier, whisperwind_attackspeed)));
+
     public static final RegistrySupplier<EmberlashSwordItem> EMBERLASH = ITEM.register("emberlash", () ->
             new EmberlashSwordItem(
                     ModToolMaterial.UNIQUE,
@@ -917,6 +925,12 @@ public class ItemsRegistry {
                     ModToolMaterial.UNIQUE,
                     LegacyWeaponAttributes.configure(new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).fireproof()
                             , (int) caelestis_damage_modifier, caelestis_attackspeed)));
+
+    public static final RegistrySupplier<DawnquiverSwordItem> DAWNQUIVER = ITEM.register("dawnquiver", () ->
+            new DawnquiverSwordItem(
+                    ModToolMaterial.UNIQUE,
+                    LegacyWeaponAttributes.configure(new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).fireproof(),
+                            (int) dawnquiver_damage_modifier, dawnquiver_attackspeed)));
 
     public static final RegistrySupplier<RiftmaneSwordItem> RIFTMANE = ITEM.register("riftmane", () ->
             new RiftmaneSwordItem(

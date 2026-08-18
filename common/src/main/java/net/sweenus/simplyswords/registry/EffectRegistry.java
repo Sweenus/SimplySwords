@@ -18,6 +18,9 @@ public class EffectRegistry {
     public static final Identifier SHADOW_DANCE_ID = new Identifier(SimplySwords.MOD_ID, "shadow_dance");
     public static final Identifier BLOOD_PLAGUE_ID = new Identifier(SimplySwords.MOD_ID, "blood_plague");
     public static final Identifier ION_PARALYSIS_ID = new Identifier(SimplySwords.MOD_ID, "ion_paralysis");
+    public static final Identifier CORRUPTED_WOUND_ID = new Identifier(SimplySwords.MOD_ID, "corrupted_wound");
+    public static final Identifier GLOAM_EXPOSURE_ID = new Identifier(SimplySwords.MOD_ID, "gloam_exposure");
+    public static final Identifier GLOAM_GRASP_ID = new Identifier(SimplySwords.MOD_ID, "gloam_grasp");
 
     public static final DeferredRegister<StatusEffect> EFFECT = DeferredRegister.create(SimplySwords.MOD_ID, RegistryKeys.STATUS_EFFECT);
 
@@ -151,6 +154,16 @@ public class EffectRegistry {
                             EntityAttributeModifier.Operation.MULTIPLY_TOTAL));
     public static final RegistrySupplier<StatusEffect> ION_PARALYSIS = EFFECT.register(ION_PARALYSIS_ID.getPath(), () ->
             new IonParalysisEffect(StatusEffectCategory.HARMFUL, 0x2F8CFF));
+    public static final RegistrySupplier<StatusEffect> CORRUPTED_WOUND = EFFECT.register(CORRUPTED_WOUND_ID.getPath(), () ->
+            new CorruptedWoundEffect(StatusEffectCategory.HARMFUL, 0x6F21A8));
+    public static final RegistrySupplier<StatusEffect> GLOAM_EXPOSURE = EFFECT.register(GLOAM_EXPOSURE_ID.getPath(), () ->
+            new GloamExposureEffect(StatusEffectCategory.HARMFUL, 0x6F2B91));
+    public static final RegistrySupplier<StatusEffect> GLOAM_GRASP = EFFECT.register(GLOAM_GRASP_ID.getPath(), () ->
+            new GloamGraspEffect(StatusEffectCategory.HARMFUL, 0x281039)
+                    .addAttributeModifier(EntityAttributes.GENERIC_MOVEMENT_SPEED,
+                            "4fef6cd9-37d4-4d97-9e09-405eed8069e6",
+                            -1.0,
+                            EntityAttributeModifier.Operation.MULTIPLY_TOTAL));
     public static final RegistrySupplier<StatusEffect> SUNDERED_ARMOR = EFFECT.register("sundered_armor", () ->
             new SunderedArmorEffect(StatusEffectCategory.HARMFUL, 0x7f7366));
     public static final RegistrySupplier<StatusEffect> IMPLICIT_HASTE = EFFECT.register("implicit_haste", () ->

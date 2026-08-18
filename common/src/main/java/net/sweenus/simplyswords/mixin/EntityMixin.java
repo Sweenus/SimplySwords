@@ -1,7 +1,11 @@
 package net.sweenus.simplyswords.mixin;
 
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.sound.SoundEvents;
+import net.minecraft.util.math.BlockPos;
+import net.sweenus.simplyswords.world.GloamStainManager;
 import net.sweenus.simplyswords.world.SoulPyreAbilityManager;
 import net.sweenus.simplyswords.world.ObserverStatusEffectSyncManager;
 import org.spongepowered.asm.mixin.Mixin;
@@ -36,5 +40,19 @@ public abstract class EntityMixin {
                 (Entity) (Object) this)) {
             ci.cancel();
         }
+    }
+
+    @Inject(method = "playStepSound", at = @At("HEAD"), cancellable = true)
+    private void simplyswords$playGloamStepSound(
+            BlockPos pos, BlockState state, CallbackInfo ci) {
+        Entity entity = (Entity) (Object) this;
+        if (!GloamStainManager.isOnGloam(entity)) {
+            return;
+        }
+        entity.playSound(SoundEvents.BLOCK_WET_GRASS_STEP, 0.15F,
+                0.72F + entity.getWorld().getRandom().nextFloat() * 0.16F);
+        entity.playSound(SoundEvents.ENTITY_SLIME_SQUISH_SMALL, 0.065F,
+                0.62F + entity.getWorld().getRandom().nextFloat() * 0.16F);
+        ci.cancel();
     }
 }

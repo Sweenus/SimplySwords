@@ -569,6 +569,7 @@ public final class WeaponImplicitRegistry {
         registerPath("sunfire", LONGSWORD);
         registerPath("harbinger", LONGSWORD);
         registerPath("whisperwind", KATANA);
+        registerPath("dreadwhisper", KATANA);
         registerPath("emberlash", DAGGER);
         registerPath("waxweaver", CLAYMORE);
         registerPath("hiveheart", GREATHAMMER);
@@ -582,6 +583,7 @@ public final class WeaponImplicitRegistry {
         registerPath("ionbound_stormscale", GLAIVE);
         registerPath("ribboncleaver", CLAYMORE);
         registerPath("riftmane", CLAYMORE);
+        registerPath("dawnquiver", CLAYMORE);
         registerPath("magiscythe", SCYTHE);
         registerPath("magiblade", TWINBLADE);
         registerPath("magispear", SPEAR);
