@@ -65,6 +65,8 @@ public final class SoulstalkerStrideEntity extends MobEntity implements JumpingM
     private static final double CEILING_LATCH_ALIGNMENT = 0.45;
     private static final int WALL_COYOTE = 8;
     private static final int CORNER_GRACE = 4;
+    private static final int CEILING_SUPPORT_GRACE = 5;
+    private static final double CEILING_CLEARANCE = 0.045;
     private static final int STANDOFF_STALL_TICKS = 12;
     private static final double STANDOFF_HOLD_REACH = 2.6;
     private static final double MAX_STANDOFF = 1.65;
@@ -140,6 +142,8 @@ public final class SoulstalkerStrideEntity extends MobEntity implements JumpingM
     private Vec3d mantleTarget;
     private int mantleAge;
     private int mantleDuration;
+    private double ceilingTargetY = Double.NaN;
+    private int ceilingSupportTicks;
 
     public SoulstalkerStrideEntity(EntityType<? extends SoulstalkerStrideEntity> type, World world) {
         super(type, world);
@@ -332,8 +336,10 @@ public final class SoulstalkerStrideEntity extends MobEntity implements JumpingM
                 ? resolveWallFace(controller) : findWall(getPos(), travel, WALL_ENTRY_REACH);
         BlockHitResult ceiling = findCeiling();
         if (mode == SURFACE_CEILING) {
-            if (ceiling.getType() != HitResult.Type.MISS) {
-                setSurface(SURFACE_CEILING, Vec3d.of(ceiling.getSide().getVector()));
+            CeilingSupport support = refreshCeilingSupport(controller, true);
+            if (support != null || ceilingSupportTicks > 0) {
+                Vec3d normal = support == null ? new Vec3d(0.0, -1.0, 0.0) : support.normal();
+                setSurface(SURFACE_CEILING, normal);
             } else if (!tryBeginCeilingMantle(controller)) {
                 setSurface(SURFACE_AIRBORNE, new Vec3d(0.0, 1.0, 0.0));
             }
@@ -479,6 +485,9 @@ public final class SoulstalkerStrideEntity extends MobEntity implements JumpingM
             setVelocity(velocity);
             velocityModified = true;
         } else if (mode == SURFACE_CEILING) {
+            if (getWorld().isClient()) {
+                refreshCeilingSupport(controller, false);
+            }
             if (dataTracker.get(CEILING_FORWARD_LOCKED) && controller.forwardSpeed <= 0.05F) {
                 dataTracker.set(CEILING_FORWARD_LOCKED, false);
                 dataTracker.set(SURFACE_FRAME_YAW, 0.0F);
@@ -488,8 +497,14 @@ public final class SoulstalkerStrideEntity extends MobEntity implements JumpingM
             Vec3d right = rightFacing(frameYaw);
             double speed = MathHelper.clamp(Config.uniqueEffects.soulstalker.movementSpeed, 0.05, 1.0) * 0.9;
             double correction = ceilingCorrection();
-            setVelocity(forward.multiply(controller.forwardSpeed * speed)
-                    .add(right.multiply(controller.sidewaysSpeed * speed * 0.72))
+            Vec3d horizontal = forward.multiply(controller.forwardSpeed * speed)
+                    .add(right.multiply(controller.sidewaysSpeed * speed * 0.72));
+            if (!Double.isNaN(ceilingTargetY) && ceilingTargetY < getY() - 0.08) {
+                double remainingDrop = getY() - ceilingTargetY;
+                double travelScale = MathHelper.clamp(1.0 - (remainingDrop - 0.08) / 0.45, 0.08, 1.0);
+                horizontal = horizontal.multiply(travelScale);
+            }
+            setVelocity(horizontal
                     .add(0.0, correction, 0.0));
             velocityModified = true;
             lastWallNormal = null;
@@ -597,12 +612,71 @@ public final class SoulstalkerStrideEntity extends MobEntity implements JumpingM
     }
 
     private double ceilingCorrection() {
-        BlockHitResult ceiling = findCeiling();
-        if (ceiling.getType() == HitResult.Type.MISS) {
-            return 0.0;
+        double targetY = ceilingTargetY;
+        if (Double.isNaN(targetY)) {
+            BlockHitResult ceiling = findCeiling();
+            if (ceiling.getType() == HitResult.Type.MISS) {
+                return 0.0;
+            }
+            targetY = ceiling.getPos().y - getAssemblyHeight() - CEILING_CLEARANCE;
         }
-        double desiredTop = ceiling.getPos().y - 0.045;
-        return MathHelper.clamp((desiredTop - (getY() + getAssemblyHeight())) * 0.48, -0.18, 0.18);
+        return MathHelper.clamp((targetY - getY()) * 0.5, -0.26, 0.26);
+    }
+
+    private CeilingSupport refreshCeilingSupport(LivingEntity controller, boolean useGrace) {
+        double stepHeight = Math.max(0.5, getStepHeight());
+        CeilingSupport local = findCeilingSupport(getPos(), stepHeight);
+        CeilingSupport selected = local;
+        Vec3d movement = ceilingMovement(controller);
+        if (movement.lengthSquared() > 1.0E-6) {
+            Vec3d direction = movement.normalize();
+            double halfWidth = getDimensions(EntityPose.STANDING).width() * 0.5;
+            for (double distance : new double[]{halfWidth + 0.22, halfWidth + 0.78}) {
+                CeilingSupport ahead = findCeilingSupport(getPos().add(direction.multiply(distance)), stepHeight);
+                if (ahead == null) {
+                    continue;
+                }
+                if (selected == null || Math.abs(ahead.targetY() - selected.targetY()) > 0.08) {
+                    selected = ahead;
+                    break;
+                }
+            }
+        }
+        if (selected != null) {
+            ceilingTargetY = selected.targetY();
+            if (useGrace) {
+                ceilingSupportTicks = CEILING_SUPPORT_GRACE;
+            }
+            return selected;
+        }
+        if (useGrace && ceilingSupportTicks > 0) {
+            ceilingSupportTicks--;
+        }
+        return null;
+    }
+
+    private CeilingSupport findCeilingSupport(Vec3d sample, double stepHeight) {
+        double assemblyHeight = getAssemblyHeight();
+        double assemblyTop = getY() + assemblyHeight;
+        Vec3d start = new Vec3d(sample.x, assemblyTop - stepHeight - 0.28, sample.z);
+        Vec3d end = new Vec3d(sample.x, assemblyTop + stepHeight + 0.78, sample.z);
+        BlockHitResult hit = getWorld().raycast(new RaycastContext(
+                start, end, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, this));
+        if (hit.getType() == HitResult.Type.MISS || hit.getSide().getVector().getY() >= 0) {
+            return null;
+        }
+        double targetY = hit.getPos().y - assemblyHeight - CEILING_CLEARANCE;
+        if (Math.abs(targetY - getY()) > stepHeight + 0.12) {
+            return null;
+        }
+        Vec3d target = new Vec3d(sample.x, targetY, sample.z);
+        return canOccupy(target) ? new CeilingSupport(targetY, Vec3d.of(hit.getSide().getVector())) : null;
+    }
+
+    private Vec3d ceilingMovement(LivingEntity controller) {
+        float frameYaw = controller.getYaw() + getFrameYaw();
+        return horizontalFacing(frameYaw).multiply(controller.forwardSpeed)
+                .add(rightFacing(frameYaw).multiply(controller.sidewaysSpeed * 0.72));
     }
 
     private BlockHitResult findWall(Vec3d origin, Vec3d direction, double reach) {
@@ -1204,12 +1278,12 @@ public final class SoulstalkerStrideEntity extends MobEntity implements JumpingM
                 22, particleRadius * 0.82, particleRadius * 0.52, particleRadius * 0.82, 0.11);
         world.spawnParticles(ParticleTypes.SCULK_SOUL, center.x, center.y, center.z,
                 9, particleRadius * 0.55, particleRadius * 0.42, particleRadius * 0.55, 0.045);
-        world.playSound(null, center.x, center.y, center.z, SoundRegistry.OBJECT_IMPACT_THUD.get(),
-                SoundCategory.PLAYERS, 0.82F, 0.66F + world.random.nextFloat() * 0.08F);
-        world.playSound(null, center.x, center.y, center.z, SoundEvents.BLOCK_RESPAWN_ANCHOR_DEPLETE,
-                SoundCategory.PLAYERS, 0.64F, 0.72F + world.random.nextFloat() * 0.1F);
+        world.playSound(null, center.x, center.y, center.z, SoundEvents.BLOCK_WET_SPONGE_STEP,
+                SoundCategory.PLAYERS, 1.0F, 0.52F + world.random.nextFloat() * 0.08F);
+        world.playSound(null, center.x, center.y, center.z, SoundEvents.ENTITY_SLIME_SQUISH,
+                SoundCategory.PLAYERS, 0.88F, 0.58F + world.random.nextFloat() * 0.08F);
         world.playSound(null, center.x, center.y, center.z, SoundRegistry.DARK_SWORD_ATTACK_03.get(),
-                SoundCategory.PLAYERS, 0.48F, 0.7F + world.random.nextFloat() * 0.1F);
+                SoundCategory.PLAYERS, 0.42F, 0.62F + world.random.nextFloat() * 0.08F);
     }
 
     private static double squaredDistanceToBox(Vec3d point, Box box) {
@@ -1359,6 +1433,8 @@ public final class SoulstalkerStrideEntity extends MobEntity implements JumpingM
         }
         if (mode != SURFACE_CEILING) {
             dataTracker.set(CEILING_FORWARD_LOCKED, false);
+            ceilingTargetY = Double.NaN;
+            ceilingSupportTicks = 0;
         }
         dataTracker.set(SURFACE_MODE, mode);
         Vec3d resolved = normal.lengthSquared() < 1.0E-6 ? new Vec3d(0.0, 1.0, 0.0) : normal.normalize();
@@ -1558,5 +1634,8 @@ public final class SoulstalkerStrideEntity extends MobEntity implements JumpingM
     }
 
     private record PendingFootfall(Vec3d position, net.minecraft.util.math.BlockPos blockPos, long impactTick) {
+    }
+
+    private record CeilingSupport(double targetY, Vec3d normal) {
     }
 }
