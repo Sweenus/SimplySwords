@@ -149,7 +149,7 @@ public class HarbingerSwordItem extends UniqueSwordItem implements UniqueWeaponA
         @ValidatedFloat.Restrict(min = 0f)
         public float damageScaling = 0.26f;
         @ValidatedFloat.Restrict(min = 0f)
-        public float spellScaling = 0.96f;
+        public float spellScaling = 1.25f;
 
     }
 }

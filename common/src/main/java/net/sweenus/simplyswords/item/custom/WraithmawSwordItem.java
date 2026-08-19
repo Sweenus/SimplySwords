@@ -1,6 +1,7 @@
 package net.sweenus.simplyswords.item.custom;
 
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedDouble;
+import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
@@ -12,6 +13,8 @@ import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 import net.minecraft.entity.player.PlayerEntity;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
+import net.sweenus.simplyswords.api.SpellScalingProfile;
+import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
@@ -65,6 +68,7 @@ public final class WraithmawSwordItem extends UniqueSwordItem implements UniqueW
         tooltip.add(Text.literal(""));
         appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.wraithmaw.cooldown);
         super.appendTooltip(stack, context, tooltip, type);
+        TooltipUtils.appendSpellScaleTooltip(tooltip, SpellScalingProfile.SOUL);
     }
 
     @Override
@@ -81,6 +85,8 @@ public final class WraithmawSwordItem extends UniqueSwordItem implements UniqueW
         @ValidatedDouble.Restrict(min = 1.0) public double castRange = 18.0;
         @ValidatedDouble.Restrict(min = 0.5) public double stormRadius = 6.0;
         @ValidatedInt.Restrict(min = 1, max = 32) public int cutlassCount = 16;
+        @ValidatedFloat.Restrict(min = 0.0F) public float cutlassDamageScaling = 1.0F;
+        @ValidatedFloat.Restrict(min = 0.0F) public float cutlassSpellScaling = 3.57F;
         @ValidatedDouble.Restrict(min = 0.0, max = 2.0) public double collisionGrace = 0.45;
         @ValidatedInt.Restrict(min = 20) public int embeddedDuration = 500;
         @ValidatedInt.Restrict(min = 1, max = 8) public int maxRecovered = 6;

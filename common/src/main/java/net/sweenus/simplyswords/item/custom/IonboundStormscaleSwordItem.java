@@ -94,7 +94,7 @@ public final class IonboundStormscaleSwordItem extends UniqueSwordItem implement
         @ValidatedInt.Restrict(min = 1) public int corridorCloseTicks = 8;
         @ValidatedDouble.Restrict(min = 0.0) public double corridorPullStrength = 0.34;
         @ValidatedFloat.Restrict(min = 0.0F) public float slamDamageScaling = 1.0F;
-        @ValidatedFloat.Restrict(min = 0.0F) public float slamSpellScaling = 2.0F;
+        @ValidatedFloat.Restrict(min = 0.0F) public float slamSpellScaling = 4.59F;
         @ValidatedInt.Restrict(min = 1) public int slowDuration = 80;
         @ValidatedInt.Restrict(min = 0, max = 4) public int slowAmplifier = 1;
         @ValidatedInt.Restrict(min = 1) public int followupWindow = 20;
@@ -104,7 +104,7 @@ public final class IonboundStormscaleSwordItem extends UniqueSwordItem implement
         @ValidatedFloat.Restrict(min = 0.0F) public float beamTotalDamageMultiplier = 4.0F;
         @ValidatedDouble.Restrict(min = 0.0, max = 0.99) public double beamMovementSpeedReduction = 0.90;
         @ValidatedFloat.Restrict(min = 0.0F) public float beamDamageScaling = 2.75F;
-        @ValidatedFloat.Restrict(min = 0.0F) public float beamSpellScaling = 2.5F;
+        @ValidatedFloat.Restrict(min = 0.0F) public float beamSpellScaling = 12.62F;
         @ValidatedInt.Restrict(min = 1) public int paralysisDuration = 100;
     }
 }

@@ -156,6 +156,6 @@ public class FrostfallSwordItem extends UniqueSwordItem implements UniqueWeaponA
         @ValidatedDouble.Restrict(min = 6.0)
         public double radius = 8.0;
         @ValidatedFloat.Restrict(min = 0f)
-        public float spellScaling = 1.12f;
+        public float spellScaling = 4.61f;
     }
 }

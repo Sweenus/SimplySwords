@@ -21,4 +21,5 @@ public class SimplySwordsExpectPlatformImpl {
     public static String getVersion() {return ModList.get().getModContainerById(MOD_ID).map(it -> it.getModInfo().getVersion().toString()).orElseThrow();}
 
     public static float getSpellPowerDamage(float damageModifier, LivingEntity player, String magicSchool) {return ForgeHelperMethods.useSpellAttributeScaling(damageModifier, player, magicSchool);}
+    public static String getSpellSchoolDisplayKey(String magicSchool) {return ForgeHelperMethods.spellSchoolDisplayKey(magicSchool);}
 }

@@ -1,0 +1,15 @@
+modLoader="javafml"
+loaderVersion="[4,)"
+license="Timefall Development License"
+
+[[mods]]
+modId="simplyswords_balance_test"
+version="1.0.0"
+displayName="Simply Swords Balance Tests"
+
+[[dependencies.simplyswords_balance_test]]
+modId="simplyswords"
+type="required"
+versionRange="[1,)"
+ordering="AFTER"
+side="BOTH"

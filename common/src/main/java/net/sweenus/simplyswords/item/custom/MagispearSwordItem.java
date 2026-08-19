@@ -145,7 +145,7 @@ public class MagispearSwordItem extends UniqueSwordItem implements UniqueWeaponA
         @ValidatedFloat.Restrict(min = 0f)
         public float damageScaling = 1.1f;
         @ValidatedFloat.Restrict(min = 0f)
-        public float spellScaling = 2.2f;
+        public float spellScaling = 5.88f;
         @ValidatedDouble.Restrict(min = 1.0)
         public double radius = 4.0;
         @ValidatedInt.Restrict(min = 0, max = 100)
@@ -153,11 +153,11 @@ public class MagispearSwordItem extends UniqueSwordItem implements UniqueWeaponA
         @ValidatedFloat.Restrict(min = 0f)
         public float magicDamageScaling = 0.16f;
         @ValidatedFloat.Restrict(min = 0f)
-        public float magicSpellScaling = 0.32f;
+        public float magicSpellScaling = 0.83f;
         @ValidatedFloat.Restrict(min = 0f)
         public float throwDamageScaling = 0.8f;
         @ValidatedFloat.Restrict(min = 0f)
-        public float throwSpellScaling = 1.6f;
+        public float throwSpellScaling = 4.27f;
         @ValidatedDouble.Restrict(min = 1.0)
         public double targetingRange = 24.0;
         @ValidatedInt.Restrict(min = 1, max = 8)

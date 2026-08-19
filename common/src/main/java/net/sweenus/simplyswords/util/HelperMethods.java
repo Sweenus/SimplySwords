@@ -518,7 +518,9 @@ public class HelperMethods {
         ItemStack scalingStack = stack == null ? ItemStack.EMPTY : stack;
         float spellDamage = commonSpellAttributeScaling(spellScaling, actor, spellSchool);
         float attackDamage = attackScaledDamage(actor, scalingStack, attackScaling);
-        return AwakeningApi.scaleEffect(scalingStack, Math.max(spellDamage, attackDamage));
+        spellDamage = applySpellDamageDiminishingReturns(spellDamage, attackDamage);
+        return AwakeningApi.scaleEffect(scalingStack, AbilityScalingProbe.choose(spellSchool,
+                AbilityScalingProbe.BranchKind.DAMAGE, spellDamage, attackDamage));
     }
 
     public static float abilityScaledDamage(String spellSchool, LivingEntity actor, float attackScaling, float spellScaling) {
@@ -532,7 +534,16 @@ public class HelperMethods {
     public static float abilityScaledValue(SpellScalingProfile spellSchool, LivingEntity actor, ItemStack stack, float fullValue, float spellScaling) {
         ItemStack scalingStack = stack == null ? ItemStack.EMPTY : stack;
         float spellValue = commonSpellAttributeScaling(spellScaling, actor, spellSchool);
-        return AwakeningApi.scaleEffect(scalingStack, Math.max(fullValue, spellValue));
+        return AwakeningApi.scaleEffect(scalingStack, AbilityScalingProbe.choose(spellSchool,
+                AbilityScalingProbe.BranchKind.VALUE, spellValue, fullValue));
+    }
+
+    public static float abilityScaledDamageFromValue(SpellScalingProfile spellSchool, LivingEntity actor, ItemStack stack, float attackDamage, float spellScaling) {
+        ItemStack scalingStack = stack == null ? ItemStack.EMPTY : stack;
+        float spellDamage = commonSpellAttributeScaling(spellScaling, actor, spellSchool);
+        spellDamage = applySpellDamageDiminishingReturns(spellDamage, attackDamage);
+        return AwakeningApi.scaleEffect(scalingStack, AbilityScalingProbe.choose(spellSchool,
+                AbilityScalingProbe.BranchKind.DAMAGE, spellDamage, attackDamage));
     }
 
     public static float gemPowerScaledDamage(String spellSchool, LivingEntity actor, ItemStack stack, float attackScaling, float spellScaling) {
@@ -543,13 +554,16 @@ public class HelperMethods {
         ItemStack scalingStack = stack == null ? ItemStack.EMPTY : stack;
         float spellDamage = commonSpellAttributeScaling(spellScaling, actor, spellSchool);
         float attackDamage = attackScaledDamage(actor, scalingStack, attackScaling);
-        return AwakeningApi.scaleGemPower(scalingStack, Math.max(spellDamage, attackDamage));
+        spellDamage = applySpellDamageDiminishingReturns(spellDamage, attackDamage);
+        return AwakeningApi.scaleGemPower(scalingStack, AbilityScalingProbe.choose(spellSchool,
+                AbilityScalingProbe.BranchKind.DAMAGE, spellDamage, attackDamage));
     }
 
     public static float gemPowerScaledValue(SpellScalingProfile spellSchool, LivingEntity actor, ItemStack stack, float fullValue, float spellScaling) {
         ItemStack scalingStack = stack == null ? ItemStack.EMPTY : stack;
         float spellValue = commonSpellAttributeScaling(spellScaling, actor, spellSchool);
-        return AwakeningApi.scaleGemPower(scalingStack, Math.max(fullValue, spellValue));
+        return AwakeningApi.scaleGemPower(scalingStack, AbilityScalingProbe.choose(spellSchool,
+                AbilityScalingProbe.BranchKind.VALUE, spellValue, fullValue));
     }
 
     public static float attackScaledDamage(LivingEntity actor, ItemStack stack, float attackScaling) {
@@ -558,6 +572,30 @@ public class HelperMethods {
             attackDamage = Math.max(1.0, 1.0 + getAttackFromStack(stack, AttributeModifierSlot.MAINHAND));
         }
         return (float) Math.max(0.0, attackDamage * attackScaling);
+    }
+
+    public static float applySpellDamageDiminishingReturns(float spellDamage, float attackDamage) {
+        return applySpellDamageDiminishingReturns(
+                spellDamage,
+                attackDamage,
+                Config.general.spellScalingDiminishingReturnsStart,
+                Config.general.spellScalingDiminishingReturnsStrength
+        );
+    }
+
+    static float applySpellDamageDiminishingReturns(float spellDamage, float attackDamage, float start, float strength) {
+        if (spellDamage <= 0.0F || attackDamage <= 0.0F || strength <= 0.0F) {
+            return spellDamage;
+        }
+
+        float rawRatio = spellDamage / attackDamage;
+        if (rawRatio <= start) {
+            return spellDamage;
+        }
+
+        double excess = (double) spellDamage / attackDamage - start;
+        double adjustedRatio = start + Math.log1p(strength * excess) / strength;
+        return Math.min(spellDamage, (float) (attackDamage * adjustedRatio));
     }
 
     public static float applyAbilityDamageEnchantments(ServerWorld world, ItemStack stack, Entity target, DamageSource damageSource, float damage) {

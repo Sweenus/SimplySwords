@@ -569,6 +569,11 @@ public class SimplySwordsAPI {
         return HelperMethods.abilityScaledValue(school, actor, stack, baseValue, spellScaling);
     }
 
+    public static float scaleAbilityDamageFromValue(SpellScalingProfile school, LivingEntity actor, ItemStack stack,
+                                                     float attackDamage, float spellScaling) {
+        return HelperMethods.abilityScaledDamageFromValue(school, actor, stack, attackDamage, spellScaling);
+    }
+
     public static LivingEntity findLenientAbilityTarget(PlayerEntity player, double range,
                                                         Predicate<LivingEntity> predicate) {
         return StealSwordItem.findLenientTarget(player, range, predicate);

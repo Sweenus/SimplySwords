@@ -134,7 +134,7 @@ public class BrambleSwordItem extends UniqueSwordItem implements UniqueWeaponAct
         @ValidatedFloat.Restrict(min = 0.0F)
         public float slamDamageScaling = 0.85F;
         @ValidatedFloat.Restrict(min = 0.0F)
-        public float slamSpellScaling = 1.70F;
+        public float slamSpellScaling = 3.9508F;
         @ValidatedFloat.Restrict(min = 0.1F)
         public float maximumLiftWidth = 1.5F;
         @ValidatedFloat.Restrict(min = 0.1F)
@@ -160,7 +160,7 @@ public class BrambleSwordItem extends UniqueSwordItem implements UniqueWeaponAct
         @ValidatedFloat.Restrict(min = 0.0F)
         public float huntDamageScaling = 0.30F;
         @ValidatedFloat.Restrict(min = 0.0F)
-        public float huntSpellScaling = 0.60F;
+        public float huntSpellScaling = 1.3944F;
         @ValidatedInt.Restrict(min = 0)
         public int huntSlowDuration = 30;
         @ValidatedInt.Restrict(min = 0, max = 4)

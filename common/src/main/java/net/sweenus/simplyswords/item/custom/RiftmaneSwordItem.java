@@ -12,6 +12,8 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
+import net.sweenus.simplyswords.api.SpellScalingProfile;
+import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
@@ -62,6 +64,7 @@ public final class RiftmaneSwordItem extends UniqueSwordItem implements TwoHande
         tooltip.add(Text.literal(""));
         appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.riftmane.cooldown);
         super.appendTooltip(stack, context, tooltip, type);
+        TooltipUtils.appendSpellScaleTooltip(tooltip, SpellScalingProfile.ARCANE);
     }
 
     @Override
@@ -85,7 +88,7 @@ public final class RiftmaneSwordItem extends UniqueSwordItem implements TwoHande
         public boolean waterWalking = true;
         @ValidatedDouble.Restrict(min = 0.0, max = 2.0) public double stepHeight = 1.0;
         @ValidatedDouble.Restrict(min = 0.0) public double damageScaling = 1.0;
-        @ValidatedDouble.Restrict(min = 0.0) public double spellScaling = 0.5;
+        @ValidatedDouble.Restrict(min = 0.0) public double spellScaling = 6.23;
         @ValidatedDouble.Restrict(min = 0.0, max = 5.0) public double knockbackStrength = 1.2;
         @ValidatedDouble.Restrict(min = 0.25, max = 4.0) public double hitRadius = 1.1;
         @ValidatedInt.Restrict(min = 0, max = 100) public int passiveChance = 70;

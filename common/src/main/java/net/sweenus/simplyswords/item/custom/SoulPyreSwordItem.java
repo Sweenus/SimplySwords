@@ -115,7 +115,7 @@ public class SoulPyreSwordItem extends UniqueSwordItem implements TwoHandedWeapo
         @ValidatedFloat.Restrict(min = 0f)
         public float damageScaling = 0.74f;
         @ValidatedFloat.Restrict(min = 0f)
-        public float spellScaling = 1.48f;
+        public float spellScaling = 5.29f;
         @ValidatedInt.Restrict(min = 1)
         public int heal = 1;
         @ValidatedInt.Restrict(min = 1)

@@ -81,7 +81,7 @@ public class PlagueSwordItem extends UniqueSwordItem {
         @ValidatedFloat.Restrict(min = 0.0F)
         public float tollDamageScaling = 0.60F;
         @ValidatedFloat.Restrict(min = 0.0F)
-        public float tollSpellScaling = 1.20F;
+        public float tollSpellScaling = 2.75F;
         @ValidatedFloat.Restrict(min = 0.1F)
         public float tollRadius = 5.0F;
         @ValidatedInt.Restrict(min = 0)

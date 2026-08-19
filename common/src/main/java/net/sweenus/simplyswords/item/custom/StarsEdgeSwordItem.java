@@ -125,7 +125,7 @@ public class StarsEdgeSwordItem extends UniqueSwordItem implements UniqueWeaponA
         @ValidatedFloat.Restrict(min = 0f)
         public float damageScaling = 0.55f;
         @ValidatedFloat.Restrict(min = 0f)
-        public float spellScaling = 1.10f;
+        public float spellScaling = 2.57f;
         @ValidatedFloat.Restrict(min = 0f)
         public float lifestealModifier = 0.10f;
         @ValidatedInt.Restrict(min = 1)
@@ -141,7 +141,7 @@ public class StarsEdgeSwordItem extends UniqueSwordItem implements UniqueWeaponA
         @ValidatedFloat.Restrict(min = 0f)
         public float constellationDamageScaling = 0.45f;
         @ValidatedFloat.Restrict(min = 0f)
-        public float constellationSpellScaling = 0.90f;
+        public float constellationSpellScaling = 2.16f;
         @ValidatedInt.Restrict(min = 1)
         public int constellationDuration = 100;
         @ValidatedInt.Restrict(min = 1)

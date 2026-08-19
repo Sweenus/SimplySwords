@@ -203,7 +203,7 @@ public class EnigmaSwordItem extends UniqueSwordItem implements UniqueWeaponActi
         @ValidatedFloat.Restrict(min = 0f)
         public float damageScaling = 0.14f;
         @ValidatedFloat.Restrict(min = 0f)
-        public float spellScaling = 0.28f;
+        public float spellScaling = 0.97f;
 
 
     }

@@ -174,15 +174,20 @@ again.
 
 Choose a `SpellScalingProfile` that matches the ability. The platform bridge
 maps it to Spell Power Attributes on Fabric and Iron's Spells on NeoForge. As a
-starting point, built-in abilities generally use a spell multiplier around
-twice their attack multiplier so dedicated spell investment can compete with a
-weapon build. Tune both values in the weapon's config.
+starting point, set the spell coefficient for the specific damage event to about
+`0.51` times that event's attack candidate (`attack damage * attackScaling`).
+That is the coefficient the built-in uniques are tuned to: it puts the spell
+candidate near `1.11` times attack with no spell-power gear and near `1.66`
+times after diminishing returns on a maximum caster build. Multi-hit, pulse,
+detonation, and secondary-hit events may need different coefficients.
 
 On NeoForge, that spell multiplier is combined with the single shared
 `general.ironsSpellBasePower` setting and the actor's generic and mapped-school
 Iron's Spells attributes. Addons do not need a separate Iron's base-power field
 for each ability. Fabric continues to interpret the same multiplier through
-Spell Power Attributes.
+Spell Power Attributes. The combined damage helper preserves backend spell
+criticals, applies the configured spell diminishing returns against the attack
+candidate, chooses the larger result, and then applies awakening.
 
 Add it to the pity-controlled unique pool and give it the built-in longsword
 implicit:

@@ -104,7 +104,7 @@ public class TempestSwordItem extends UniqueSwordItem implements UniqueWeaponAct
                         HelperMethods.abilityScaledDamage("frost", attacker, stack,
                                 Config.uniqueEffects.tempest.damageScaling, Config.uniqueEffects.tempest.spellScaling));
             }
-            effect.setAdditionalData(Math.max(1, Math.round(scaledDamage)));
+            effect.setScaledDamage(Math.max(1.0F, scaledDamage));
             target.addStatusEffect(effect);
 
         }
@@ -232,7 +232,7 @@ public class TempestSwordItem extends UniqueSwordItem implements UniqueWeaponAct
         @ValidatedFloat.Restrict(min = 0f)
         public float damageScaling = 0.33f;
         @ValidatedFloat.Restrict(min = 0f)
-        public float spellScaling = 0.24f;
+        public float spellScaling = 1.2266f;
 
     }
 }

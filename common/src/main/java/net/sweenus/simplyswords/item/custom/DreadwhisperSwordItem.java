@@ -13,6 +13,8 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
+import net.sweenus.simplyswords.api.SpellScalingProfile;
+import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
@@ -69,6 +71,7 @@ public final class DreadwhisperSwordItem extends UniqueSwordItem implements TwoH
         tooltip.add(Text.literal(""));
         appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.dreadwhisper.cooldown);
         super.appendTooltip(stack, context, tooltip, type);
+        TooltipUtils.appendSpellScaleTooltip(tooltip, SpellScalingProfile.SOUL);
     }
 
     @Override
@@ -87,6 +90,7 @@ public final class DreadwhisperSwordItem extends UniqueSwordItem implements TwoH
         @ValidatedDouble.Restrict(min = 1.0) public double frontWidth = 4.5;
         @ValidatedDouble.Restrict(min = 0.5) public double frontHeight = 2.8;
         @ValidatedFloat.Restrict(min = 0.0F) public float weaponHitScaling = 1.0F;
+        @ValidatedFloat.Restrict(min = 0.0F) public float weaponHitSpellScaling = 4.59F;
         @ValidatedFloat.Restrict(min = 0.0F, max = 1.0F) public float healRatio = 0.35F;
         @ValidatedInt.Restrict(min = 20) public int stainDuration = 240;
         @ValidatedInt.Restrict(min = 1) public int stainFadeDuration = 40;

@@ -23,11 +23,108 @@ repositories {
         name = "Iron's Maven - Release"
         url = "https://code.redspace.io/releases"
     }
+    maven {
+        url = "https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/"
+        content { includeGroup "software.bernie.geckolib" }
+    }
+    maven { url = "https://maven.theillusivec4.top" }
+    maven { url = "https://maven.kosmx.dev/" }
+}
+
+def ironsSpellbooksBalanceArtifact = configurations.detachedConfiguration(
+        dependencies.create("io.redspace:irons_spellbooks:${irons_spells_version}")
+)
+ironsSpellbooksBalanceArtifact.transitive = false
+
+def balanceTestIronsSpellbooks = providers.provider {
+    def input = ironsSpellbooksBalanceArtifact.singleFile
+    def output = layout.buildDirectory.file("balance-libs/irons_spellbooks-${irons_spells_version}-balance.jar").get().asFile
+    output.parentFile.mkdirs()
+    try {
+        if (output.lastModified() >= input.lastModified()) {
+            def existing = new java.util.zip.ZipFile(output)
+            def valid = existing.getEntry("META-INF/enumextensions.json") != null
+            existing.close()
+            if (valid) return output
+        }
+    } catch (java.util.zip.ZipException ignored) {
+    }
+    def temporary = new File(output.parentFile, "${output.name}.${Thread.currentThread().threadId()}.tmp")
+    def source = new java.util.zip.ZipFile(input)
+    def target = new java.util.zip.ZipOutputStream(new java.io.FileOutputStream(temporary))
+    source.entries().each { entry ->
+        def copied = new java.util.zip.ZipEntry(entry.name)
+        copied.time = entry.time
+        target.putNextEntry(copied)
+        def stream = source.getInputStream(entry)
+        if (entry.name == "META-INF/enumextensions.json") {
+            def value = stream.getText("UTF-8")
+                    .replace("net/minecraft/client/model/HumanoidModel\$ArmPose", "net/minecraft/client/render/entity/model/BipedEntityModel\$ArmPose")
+                    .replace("net/minecraft/world/item/Rarity", "net/minecraft/util/Rarity")
+            target.write(value.getBytes(java.nio.charset.StandardCharsets.UTF_8))
+        } else {
+            stream.transferTo(target)
+        }
+        stream.close()
+        target.closeEntry()
+    }
+    target.close()
+    source.close()
+    java.nio.file.Files.move(temporary.toPath(), output.toPath(),
+            java.nio.file.StandardCopyOption.REPLACE_EXISTING,
+            java.nio.file.StandardCopyOption.ATOMIC_MOVE)
+    return output
+}
+
+def balanceIsFiltered = ["balanceQuick", "balanceWeapon", "balanceBuild", "balanceScenario"].any { project.hasProperty(it) }
+def balanceReportDir = { String loader ->
+    file("${rootProject.buildDir}/reports/simplyswords-balance/${loader}" + (balanceIsFiltered ? "/scratch" : ""))
 }
 
 architectury {
     platformSetupLoomIde()
     neoForge()
+}
+
+sourceSets {
+    balanceTest {
+        compileClasspath += sourceSets.main.output + configurations.compileClasspath + project(":common").sourceSets.balanceTest.output
+        runtimeClasspath += output + sourceSets.main.output + configurations.runtimeClasspath + project(":common").sourceSets.balanceTest.output
+    }
+}
+
+loom {
+    createRemapConfigurations(sourceSets.balanceTest)
+
+    mods {
+        simplyswords {
+            sourceSet sourceSets.main
+        }
+        simplyswords_balance_test {
+            sourceSet sourceSets.balanceTest
+            sourceSet "balanceTest", ":common"
+        }
+    }
+
+    runs {
+        balanceTestServer {
+            environment "gametestserver"
+            forgeTemplate "gameTestServer"
+            source sourceSets.main
+            source sourceSets.balanceTest
+            vmArg "-Dneoforge.enabledGameTestNamespaces=simplyswords_balance_test"
+            vmArg "-Dsimplyswords.balance-report-dir=${balanceReportDir("neoforge").absolutePath}"
+            if (project.hasProperty("balanceQuick")) {
+                vmArg "-Dsimplyswords.balance.isolated-repetitions=1"
+                vmArg "-Dsimplyswords.balance.rotation-repetitions=1"
+                vmArg "-Dsimplyswords.balance.reliability-repetitions=1"
+            }
+            if (project.hasProperty("balanceWeapon")) vmArg "-Dsimplyswords.balance.weapon=${project.property("balanceWeapon")}"
+            if (project.hasProperty("balanceBuild")) vmArg "-Dsimplyswords.balance.build=${project.property("balanceBuild")}"
+            if (project.hasProperty("balanceScenario")) vmArg "-Dsimplyswords.balance.scenario=${project.property("balanceScenario")}"
+            runDir "build/balance-gametest"
+        }
+    }
 }
 /*
 loom {
@@ -75,6 +172,20 @@ dependencies {
     //modImplementation ("curse.maven:gobber-301700:4007899")
     modCompileOnly "io.redspace:irons_spellbooks:${irons_spells_version}"
     modRuntimeOnly "me.shedaniel:RoughlyEnoughItems-neoforge:${rei_version}"
+    modBalanceTestImplementation files(balanceTestIronsSpellbooks)
+    modBalanceTestImplementation "software.bernie.geckolib:geckolib-neoforge-1.21.1:4.9.2"
+    modBalanceTestImplementation "dev.kosmx.player-anim:player-animation-lib-forge:2.0.4+1.21.1"
+    modBalanceTestImplementation "top.theillusivec4.curios:curios-neoforge:9.5.1+1.21.1"
+    modBalanceTestImplementation "io.redspace:irons_lib:1.21.1-2.1.0"
+    modBalanceTestImplementation "net.neoforged:testframework:${neoforge_version}"
+}
+
+tasks.named("compileBalanceTestJava") {
+    dependsOn project(":common").tasks.named("compileBalanceTestJava")
+}
+
+tasks.named("processBalanceTestResources") {
+    from project(":common").sourceSets.balanceTest.resources
 }
 
 processResources {
@@ -126,5 +237,12 @@ publishing {
     // See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
     repositories {
         // Add repositories to publish to here.
+    }
+}
+
+// Persisted fzzy_config overrides the Java defaults, so drop it before each run.
+tasks.matching { it.name == "runBalanceTestServer" }.configureEach {
+    doFirst {
+        project.delete("${project.projectDir}/build/balance-gametest/config/simplyswords")
     }
 }

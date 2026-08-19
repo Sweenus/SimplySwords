@@ -19,6 +19,7 @@ import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.WraithmawCutlassEntity;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
+import net.sweenus.simplyswords.api.SpellScalingProfile;
 import net.sweenus.simplyswords.util.HelperMethods;
 import org.joml.Vector3f;
 
@@ -62,8 +63,10 @@ public final class WraithmawAbilityManager {
         Vec3d origin = actor.getPos();
         int count = Math.clamp(Config.uniqueEffects.wraithmaw.cutlassCount, 1, 32);
         double radius = Math.max(0.5, Config.uniqueEffects.wraithmaw.stormRadius);
-        float damage = (float) Math.max(1.0, HelperMethods.getEntityAttackDamage(actor));
         ItemStack snapshot = context.stack().copy();
+        float damage = Math.max(1.0F, HelperMethods.abilityScaledDamage(SpellScalingProfile.SOUL, actor, snapshot,
+                Config.uniqueEffects.wraithmaw.cutlassDamageScaling,
+                Config.uniqueEffects.wraithmaw.cutlassSpellScaling));
         for (int index = 0; index < count; index++) {
             double fraction = Math.sqrt((index + 0.5) / count);
             double angle = index * GOLDEN_ANGLE + actor.getRandom().nextDouble() * 0.28;

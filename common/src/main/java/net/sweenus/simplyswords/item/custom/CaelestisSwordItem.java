@@ -141,7 +141,7 @@ public class CaelestisSwordItem extends UniqueSwordItem implements UniqueWeaponA
         @ValidatedFloat.Restrict(min = 0f)
         public float minionDamageScaling = 0.30f;
         @ValidatedFloat.Restrict(min = 0f)
-        public float minionSpellScaling = 0.55f;
+        public float minionSpellScaling = 2.8f;
         @ValidatedFloat.Restrict(min = 0f)
         public float unboundDamageMultiplier = 1.25f;
         @ValidatedInt.Restrict(min = 0)

@@ -234,8 +234,8 @@ public class EmberIreSwordItem extends UniqueSwordItem implements UniqueWeaponAc
         }
 
         public float initialDamageScaling = 0.24f;
-        public float initialSpellScaling = 0.48f;
+        public float initialSpellScaling = 0.9593f;
         public float maxChargeDamageScaling = 2.4f;
-        public float maxChargeSpellScaling = 4.8f;
+        public float maxChargeSpellScaling = 9.5935f;
     }
 }

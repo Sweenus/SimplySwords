@@ -8,11 +8,13 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.text.Style;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.text.TextColor;
 import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
+import net.sweenus.simplyswords.SimplySwordsExpectPlatform;
 import net.sweenus.simplyswords.api.SpellScalingProfile;
 import net.sweenus.simplyswords.power.GemPowerComponent;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
@@ -103,48 +105,34 @@ public class TooltipUtils {
 
 
 
+    private static String schoolGlyph(String school) {
+        if (school.contains("lightning")) return "\uAB44";
+        if (school.contains("fire")) return "\uAB42";
+        if (school.contains("frost")) return "\uAB43";
+        if (school.contains("soul") || school.contains("eldritch")) return "\uAB45";
+        if (school.contains("arcane") || school.contains("evocation")) return "\uAB46";
+        return "\uAB47";
+    }
+
     public static void appendSpellScaleTooltip(List<Text> tooltip, String spellSchool) {
         if (Platform.isModLoaded("spell_power") || Platform.isModLoaded("irons_spellbooks")) {
             if (Screen.hasAltDown() && !Screen.hasControlDown()) {
                 tooltip.add(Text.literal(""));
                 tooltip.add(Text.translatable("item.simplyswords.compat.spellScaling").setStyle(Styles.COMMON));
-                switch (spellSchool) {
-                    case "fire" ->
-                            tooltip.add(Text.literal("\uAB42").append(Text.translatable("item.simplyswords.compat.scaleFire")));
-                    case "frost" ->
-                            tooltip.add(Text.literal("\uAB43").append(Text.translatable("item.simplyswords.compat.scaleFrost")));
-                    case "lightning" ->
-                            tooltip.add(Text.literal("\uAB44").append(Text.translatable("item.simplyswords.compat.scaleLightning")));
-                    case "soul" ->
-                            tooltip.add(Text.literal("\uAB45").append(Text.translatable("item.simplyswords.compat.scaleSoul")));
-                    case "arcane" ->
-                            tooltip.add(Text.literal("\uAB46").append(Text.translatable("item.simplyswords.compat.scaleArcane")));
-                    case "frost_fire" ->
-                            tooltip.add(Text.literal("\uAB43").append(Text.translatable("item.simplyswords.compat.scaleFrost")).append(Text.literal("   \uAB42")).append(Text.translatable("item.simplyswords.compat.scaleFire")));
-                    case "healing_fire" ->
-                            tooltip.add(Text.literal("\uAB47").append(Text.translatable("item.simplyswords.compat.scaleHealing")).append(Text.literal("   \uAB42")).append(Text.translatable("item.simplyswords.compat.scaleFire")));
-                    case "nature" -> {
-                        if (Platform.isNeoForge()) {
-                            tooltip.add(Text.literal("\uAB47").append(Text.translatable("item.simplyswords.compat.scaleNature")));
-                        } else {
-                            tooltip.add(Text.literal("\uAB47").append(Text.translatable("item.simplyswords.compat.scaleHealing")));
-                        }
+                MutableText line = Text.empty();
+                String[] parts = (spellSchool == null ? "" : spellSchool).split("_");
+                for (int index = 0; index < parts.length; index++) {
+                    String part = parts[index];
+                    if (part.isEmpty()) {
+                        continue;
                     }
-                    case "evocation" -> {
-                        if (Platform.isNeoForge()) {
-                            tooltip.add(Text.literal("\uAB46").append(Text.translatable("item.simplyswords.compat.scaleEvocation")));
-                        } else {
-                            tooltip.add(Text.literal("\uAB46").append(Text.translatable("item.simplyswords.compat.scaleArcane")));
-                        }
+                    if (index > 0) {
+                        line.append(Text.literal("   "));
                     }
-                    case "eldritch" -> {
-                        if (Platform.isNeoForge()) {
-                            tooltip.add(Text.literal("\uAB45").append(Text.translatable("item.simplyswords.compat.scaleEldritch")));
-                        } else {
-                            tooltip.add(Text.literal("\uAB45").append(Text.translatable("item.simplyswords.compat.scaleSoul")));
-                        }
-                    }
+                    line.append(Text.literal(schoolGlyph(part)))
+                            .append(Text.translatable(SimplySwordsExpectPlatform.getSpellSchoolDisplayKey(part)));
                 }
+                tooltip.add(line);
                 tooltip.add(Text.literal(""));
             }
         }

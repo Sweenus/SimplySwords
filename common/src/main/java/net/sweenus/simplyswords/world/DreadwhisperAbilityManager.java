@@ -24,6 +24,7 @@ import net.sweenus.simplyswords.entity.DreadwhisperVisualEntity;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
+import net.sweenus.simplyswords.api.SpellScalingProfile;
 import net.sweenus.simplyswords.util.HelperMethods;
 import org.joml.Vector3f;
 
@@ -207,8 +208,9 @@ public final class DreadwhisperAbilityManager {
         double halfWidth = Math.max(1.0, Config.uniqueEffects.dreadwhisper.frontWidth) * 0.5;
         double height = Math.max(0.5, Config.uniqueEffects.dreadwhisper.frontHeight);
         Box search = segmentBox(start, end, height, halfWidth);
-        float weaponDamage = HelperMethods.attackScaledDamage(
-                owner, active.stack, Math.max(0.0F, Config.uniqueEffects.dreadwhisper.weaponHitScaling));
+        float weaponDamage = HelperMethods.abilityScaledDamage(SpellScalingProfile.SOUL, owner, active.stack,
+                Math.max(0.0F, Config.uniqueEffects.dreadwhisper.weaponHitScaling),
+                Math.max(0.0F, Config.uniqueEffects.dreadwhisper.weaponHitSpellScaling));
         for (LivingEntity target : world.getEntitiesByClass(LivingEntity.class, search,
                 candidate -> validTarget(candidate, owner)
                         && !active.hitTargets.contains(candidate.getUuid())

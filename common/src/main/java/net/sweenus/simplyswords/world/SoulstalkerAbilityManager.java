@@ -28,6 +28,7 @@ import net.sweenus.simplyswords.entity.SoulstalkerTentacleVisualEntity;
 import net.sweenus.simplyswords.registry.EntityRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
+import net.sweenus.simplyswords.api.SpellScalingProfile;
 import net.sweenus.simplyswords.util.HelperMethods;
 import org.joml.Vector3f;
 
@@ -136,7 +137,9 @@ public final class SoulstalkerAbilityManager {
                 world, owner, active.stackSnapshot, origin, direction,
                 Math.max(1.0, Config.uniqueEffects.soulstalker.cleaveRange),
                 Math.max(0.05, Config.uniqueEffects.soulstalker.cleaveSpeed),
-                Math.max(1.0F, (float) HelperMethods.getEntityAttackDamage(owner)),
+                Math.max(1.0F, HelperMethods.abilityScaledDamage(SpellScalingProfile.SOUL, owner, active.stackSnapshot,
+                        Config.uniqueEffects.soulstalker.strikeDamageScaling,
+                        Config.uniqueEffects.soulstalker.strikeSpellScaling)),
                 (float) Math.max(0.25, Config.uniqueEffects.soulstalker.cleaveInitialWidth),
                 (float) Math.max(0.25, Config.uniqueEffects.soulstalker.cleaveFinalWidth));
         world.spawnEntity(cleave);
@@ -212,7 +215,9 @@ public final class SoulstalkerAbilityManager {
         world.spawnEntity(visual);
         PENDING_STRIKES.computeIfAbsent(world, ignored -> new ArrayList<>())
                 .add(new PendingStrike(owner.getUuid(), target.getUuid(), visual.getUuid(),
-                        stack.copy(), Math.max(1.0F, (float) HelperMethods.getEntityAttackDamage(owner)),
+                        stack.copy(), Math.max(1.0F, HelperMethods.abilityScaledDamage(SpellScalingProfile.SOUL, owner, stack,
+                                Config.uniqueEffects.soulstalker.strikeDamageScaling,
+                                Config.uniqueEffects.soulstalker.strikeSpellScaling)),
                         now + PASSIVE_IMPACT_DELAY));
         lockouts.put(owner.getUuid(), now + Math.max(1, Config.uniqueEffects.soulstalker.passiveLockout));
         Vec3d root = owner.getPos().add(0.0, owner.getHeight() * 0.68, 0.0);

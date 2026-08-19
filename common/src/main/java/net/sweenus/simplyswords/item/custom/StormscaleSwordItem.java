@@ -114,6 +114,6 @@ public class StormscaleSwordItem extends UniqueSwordItem implements UniqueWeapon
         @ValidatedFloat.Restrict(min = 0.0F)
         public float pulseDamageScaling = 0.4F;
         @ValidatedFloat.Restrict(min = 0.0F)
-        public float pulseSpellScaling = 0.8F;
+        public float pulseSpellScaling = 1.8592F;
     }
 }

@@ -2,8 +2,16 @@ architectury {
     common(rootProject.enabled_platforms.split(","))
 }
 
+sourceSets {
+    balanceTest {
+        compileClasspath += sourceSets.main.output + configurations.compileClasspath
+        runtimeClasspath += output + configurations.runtimeClasspath
+    }
+}
+
 loom {
     accessWidenerPath = file("src/main/resources/simplyswords.accesswidener")
+    createRemapConfigurations(sourceSets.balanceTest)
 }
 repositories {
     maven {
@@ -55,6 +63,12 @@ dependencies {
     modCompileOnly "maven.modrinth:mythicmetals:${project.mythicmetals_version}"
     modCompileOnly "me.shedaniel:RoughlyEnoughItems-api:${rei_version}"
     modCompileOnly "dev.emi:emi-xplat-intermediary:${emi_version}:api"
+
+    testImplementation "org.junit.jupiter:junit-jupiter:5.11.4"
+}
+
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
 }
 
 publishing {

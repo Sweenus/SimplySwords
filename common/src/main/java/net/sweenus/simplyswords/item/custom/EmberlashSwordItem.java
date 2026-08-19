@@ -146,7 +146,7 @@ public class EmberlashSwordItem extends UniqueSwordItem implements UniqueWeaponA
         @ValidatedInt.Restrict(min = 1)
         public int maxStacks = 5;
         @ValidatedFloat.Restrict(min = 0f)
-        public float spellScaling = 0.32f;
+        public float spellScaling = 0.38f;
         @ValidatedFloat.Restrict(min = 0f)
         public float smoulderDamageScaling = 0.12f;
 

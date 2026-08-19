@@ -145,11 +145,11 @@ public class StormsEdgeSwordItem extends UniqueSwordItem implements UniqueWeapon
         @ValidatedFloat.Restrict(min = 0f)
         public float damageScaling = 0.4f;
         @ValidatedFloat.Restrict(min = 0f)
-        public float spellScaling = 0.8f;
+        public float spellScaling = 1.89f;
         @ValidatedFloat.Restrict(min = 0f)
         public float thunderclapDamageScaling = 0.8f;
         @ValidatedFloat.Restrict(min = 0f)
-        public float thunderclapSpellScaling = 1.6f;
+        public float thunderclapSpellScaling = 3.77f;
         @ValidatedDouble.Restrict(min = 0.1)
         public double dashDistance = 10.0;
         @ValidatedDouble.Restrict(min = 0.1)

@@ -1,6 +1,7 @@
 package net.sweenus.simplyswords.item.custom;
 
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedDouble;
+import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -14,6 +15,8 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
+import net.sweenus.simplyswords.api.SpellScalingProfile;
+import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
@@ -74,6 +77,7 @@ public final class SoulstalkerSwordItem extends UniqueSwordItem implements TwoHa
         tooltip.add(Text.literal(""));
         appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.soulstalker.cooldown);
         super.appendTooltip(stack, context, tooltip, type);
+        TooltipUtils.appendSpellScaleTooltip(tooltip, SpellScalingProfile.SOUL);
     }
 
     @Override
@@ -88,6 +92,8 @@ public final class SoulstalkerSwordItem extends UniqueSwordItem implements TwoHa
 
         @ValidatedInt.Restrict(min = 1) public int cooldown = 1200;
         @ValidatedInt.Restrict(min = 20) public int duration = 800;
+        @ValidatedFloat.Restrict(min = 0.0F) public float strikeDamageScaling = 1.0F;
+        @ValidatedFloat.Restrict(min = 0.0F) public float strikeSpellScaling = 4.59F;
         @ValidatedDouble.Restrict(min = 0.05, max = 1.0) public double movementSpeed = 0.215;
         @ValidatedDouble.Restrict(min = 0.05, max = 1.0) public double climbSpeed = 0.30;
         @ValidatedDouble.Restrict(min = 0.5, max = 4.0) public double stepHeight = 2.0;

@@ -380,6 +380,6 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
         @ValidatedFloat.Restrict(min = 0f)
         public float maxBackstabMultiplier = 5.0f;
         @ValidatedFloat.Restrict(min = 0f)
-        public float spellScalingPerMultiplier = 2.0f;
+        public float spellScalingPerMultiplier = 3.098f;
     }
 }

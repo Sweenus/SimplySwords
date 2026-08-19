@@ -169,7 +169,7 @@ public class ThunderbrandSwordItem extends UniqueSwordItem implements TwoHandedW
         @ValidatedInt.Restrict(min = 1)
         public int radius = 2;
         @ValidatedFloat.Restrict(min = 0f)
-        public float spellScaling = 1.36f;
+        public float spellScaling = 1.23f;
         @ValidatedInt.Restrict(min = 1)
         public int chargeDuration = 40;
         @ValidatedInt.Restrict(min = 1)

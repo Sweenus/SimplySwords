@@ -172,7 +172,7 @@ public class ChompolotlSwordItem extends UniqueSwordItem implements UniqueWeapon
         @ValidatedFloat.Restrict(min = 0f)
         public float damageScaling = 0.8f;
         @ValidatedFloat.Restrict(min = 0f)
-        public float spellScaling = 1.6f;
+        public float spellScaling = 2.52f;
         @ValidatedFloat.Restrict(min = 20f)
         public int duration = 500;
         @ValidatedFloat.Restrict(min = 0f)

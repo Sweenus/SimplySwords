@@ -219,6 +219,6 @@ public class SoulrenderSwordItem extends UniqueSwordItem implements TwoHandedWea
         @ValidatedFloat.Restrict(min = 0f)
         public float damageScaling = 0.26f;
         @ValidatedFloat.Restrict(min = 0f)
-        public float spellScaling = 0.32f;
+        public float spellScaling = 1.31f;
     }
 }

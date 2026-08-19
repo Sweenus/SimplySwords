@@ -310,6 +310,6 @@ public class LichbladeSwordItem extends UniqueSwordItem implements TwoHandedWeap
         @ValidatedDouble.Restrict(min = 1.0)
         public double range = 22.0;
         @ValidatedFloat.Restrict(min = 0f)
-        public float spellScaling = 1.28f;
+        public float spellScaling = 2.52f;
     }
 }

@@ -62,6 +62,63 @@ the selection level. Restart the world and confirm the selected route persists.
 - Test an actor whose weapon is in the offhand.
 - Test delegated effects with both player and non-player owners.
 
+For combined attack/spell damage, test unique abilities and
+`gemPowerScaledDamage` with both compatibility backends:
+
+- Confirm a weapon with no spell-power equipment sits near the `1.11` times
+  attack-candidate floor. Materially above that means the ability's
+  `spellScaling` is set too high for its attack candidate.
+- Confirm a maximum caster build reaches about `1.66` times the equivalent melee
+  candidate after diminishing returns, from a raw ratio near `2.66`. This target
+  is deliberately above the `1.40` knee.
+- Confirm the attack candidate wins when no compatibility mod is installed,
+  since the spell path returns zero there.
+- Confirm a raw `1.95` spell critical becomes about `1.59` times melee.
+- Confirm raw ratios of `1.40`, `2.00`, `5.00`, `10.00`, and `100.00` become
+  approximately `1.40`, `1.59`, `1.76`, `1.85`, and `2.09` respectively.
+- Confirm damage remains increasing at extreme ratios, strength `0` disables
+  compression, and awakening is applied exactly once.
+- Repeat at Sharpness levels 0 through V and with unawakened and fully awakened
+  weapons.
+
+## Automated spell-balance tests
+
+Run the fast formula and config tests with:
+
+```bash
+bash ./gradlew :common:test --console=plain
+```
+
+The GameTest balance harness executes real abilities, server ticks, legal melee
+cadence, normal damage iframes, and stationary zero-armor targets. Run it on
+either loader:
+
+```bash
+bash ./gradlew :fabric:runBalanceTestServer --console=plain
+bash ./gradlew :forge:runBalanceTestServer --console=plain
+```
+
+The full run uses 100 isolated/reliability repetitions and 20 repetitions for
+each 60-second rotation. For development, `-PbalanceQuick` reduces each count
+to one. The optional filters are `-PbalanceWeapon=<item_path>`,
+`-PbalanceBuild=<profile>`, and `-PbalanceScenario=<scenario>`; enum filters use
+names such as `VANILLA_BASE` and `ISOLATED_ABILITY`.
+
+The server does not throttle to 20 ticks per second here, it ticks as fast as the
+machine allows, so a full-fidelity sweep is minutes rather than hours. The harness
+logs `Balance harness starting: <jobs> jobs` up front and a
+`Balance progress: job i/N ... ~h:mm:ss remaining` line every 500 jobs. If a run is
+instead crawling and the server is reporting "Can't keep up", something is wrong -
+see the note on `runAtEveryTick` in `BalanceGameTestSuite` before assuming the
+abilities are simply expensive.
+
+CSV and Markdown results are written per loader to
+`build/reports/simplyswords-balance/<loader>/ability-balance.*`, so Fabric and
+NeoForge runs no longer overwrite each other and can run side by side. The report is
+also rewritten every 2000 completed jobs, so an interrupted run still leaves usable
+data behind. Treat unavailable caster profiles as missing test dependencies, not
+zero-damage results.
+
 ## Loot and data
 
 - Run `/simplyswords loot_test <loot_table> <rolls>` and confirm the addon item

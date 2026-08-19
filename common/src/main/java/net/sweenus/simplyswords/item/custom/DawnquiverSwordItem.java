@@ -18,6 +18,8 @@ import net.minecraft.util.UseAction;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
+import net.sweenus.simplyswords.api.SpellScalingProfile;
+import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
@@ -167,6 +169,7 @@ public final class DawnquiverSwordItem extends UniqueSwordItem implements TwoHan
         tooltip.add(Text.translatable("item.simplyswords.dawnquiversworditem.tooltip7",
                 Config.uniqueEffects.dawnquiver.cooldown / 20.0F).setStyle(Styles.TEXT));
         super.appendTooltip(stack, context, tooltip, type);
+        TooltipUtils.appendSpellScaleTooltip(tooltip, SpellScalingProfile.HEALING);
     }
 
     @Override
@@ -194,15 +197,15 @@ public final class DawnquiverSwordItem extends UniqueSwordItem implements TwoHan
         @ValidatedDouble.Restrict(min = 0.0, max = 45.0) public double homingStrength = 9.0;
         @ValidatedDouble.Restrict(min = 0.0, max = 8.0) public double impactRadius = 2.0;
         @ValidatedDouble.Restrict(min = 0.0) public double initialDamageScaling = 0.4;
-        @ValidatedDouble.Restrict(min = 0.0) public double initialSpellScaling = 0.8;
+        @ValidatedDouble.Restrict(min = 0.0) public double initialSpellScaling = 2.45;
         @ValidatedDouble.Restrict(min = 0.0) public double maxChargeDamageScaling = 2.6;
-        @ValidatedDouble.Restrict(min = 0.0) public double maxChargeSpellScaling = 5.0;
+        @ValidatedDouble.Restrict(min = 0.0) public double maxChargeSpellScaling = 15.91;
         @ValidatedInt.Restrict(min = 1) public int passiveInterval = 100;
         @ValidatedInt.Restrict(min = 1) public int passiveLockout = 80;
         @ValidatedDouble.Restrict(min = 0.0, max = 1.0) public double passiveChorusChance = 0.35;
         @ValidatedDouble.Restrict(min = 1.0, max = 64.0) public double passiveRange = 24.0;
         @ValidatedDouble.Restrict(min = 0.0) public double passiveDamageScaling = 0.5;
-        @ValidatedDouble.Restrict(min = 0.0) public double passiveSpellScaling = 1.0;
+        @ValidatedDouble.Restrict(min = 0.0) public double passiveSpellScaling = 3.06;
         @ValidatedDouble.Restrict(min = 0.1, max = 2.0) public double passiveArrowScale = 0.45;
         @ValidatedDouble.Restrict(min = 0.1, max = 2.0) public double passiveBowScale = 0.45;
         @ValidatedInt.Restrict(min = 1, max = 12) public int piercingMaxTargets = 4;

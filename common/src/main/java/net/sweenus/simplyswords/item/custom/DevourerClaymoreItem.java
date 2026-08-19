@@ -113,13 +113,13 @@ public final class DevourerClaymoreItem extends UniqueSwordItem implements Uniqu
         @ValidatedFloat.Restrict(min = 0.2F) public float maximumMassRadius = 3.9F;
         @ValidatedInt.Restrict(min = 1) public int damageInterval = 20;
         @ValidatedFloat.Restrict(min = 0.0F) public float damageScaling = 0.12F;
-        @ValidatedFloat.Restrict(min = 0.0F) public float spellScaling = 0.18F;
+        @ValidatedFloat.Restrict(min = 0.0F) public float spellScaling = 0.7436F;
         @ValidatedDouble.Restrict(min = 1.0) public double reprisalReach = 24.0;
         @ValidatedDouble.Restrict(min = 0.5) public double reprisalRadius = 3.5;
         @ValidatedInt.Restrict(min = 1, max = 16) public int reprisalTargetCap = 6;
         @ValidatedInt.Restrict(min = 1, max = 40) public int reprisalDragDuration = 10;
         @ValidatedDouble.Restrict(min = 0.0) public double reprisalPullStrength = 0.32;
         @ValidatedFloat.Restrict(min = 0.0F) public float reprisalDamageScaling = 0.50F;
-        @ValidatedFloat.Restrict(min = 0.0F) public float reprisalSpellScaling = 0.75F;
+        @ValidatedFloat.Restrict(min = 0.0F) public float reprisalSpellScaling = 3.0983F;
     }
 }

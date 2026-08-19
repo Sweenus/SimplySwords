@@ -133,7 +133,7 @@ public class WhisperwindSwordItem extends UniqueSwordItem implements TwoHandedWe
         @ValidatedFloat.Restrict(min = 0f)
         public float delayedDamageScaling = 0.54f;
         @ValidatedFloat.Restrict(min = 0f)
-        public float delayedSpellScaling = 1.08f;
+        public float delayedSpellScaling = 2.48f;
         @ValidatedFloat.Restrict(min = 0f)
         public float delayedDamagePerTargetScaling = 0.09f;
         @ValidatedFloat.Restrict(min = 0f)

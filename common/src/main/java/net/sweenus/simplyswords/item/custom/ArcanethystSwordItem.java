@@ -134,7 +134,7 @@ public class ArcanethystSwordItem extends UniqueSwordItem implements TwoHandedWe
         @ValidatedInt.Restrict(min = 1)
         public int radius = 6;
         @ValidatedFloat.Restrict(min = 0f)
-        public float spellScaling = 1.12f;
+        public float spellScaling = 0.76f;
         @ValidatedFloat.Restrict(min = 0f)
         public float liftHeight = 4.0f;
         @ValidatedInt.Restrict(min = 1)
@@ -144,6 +144,6 @@ public class ArcanethystSwordItem extends UniqueSwordItem implements TwoHandedWe
         @ValidatedInt.Restrict(min = 1)
         public int slamTicks = 10;
         @ValidatedFloat.Restrict(min = 0f)
-        public float slamDamageMultiplier = 9.0f;
+        public float slamDamageMultiplier = 4.0f;
     }
 }

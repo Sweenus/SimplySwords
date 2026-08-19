@@ -105,7 +105,7 @@ public class StormSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
         @ValidatedFloat.Restrict(min = 0f)
         public float damageScaling = 0.45f;
         @ValidatedFloat.Restrict(min = 0f)
-        public float spellScaling = 0.8f;
+        public float spellScaling = 2.12f;
 
         @ValidatedInt.Restrict(min = 1)
         public int conductiveDuration = 120;
@@ -115,7 +115,7 @@ public class StormSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
         @ValidatedFloat.Restrict(min = 0f)
         public float conductiveBurstDamageScaling = 0.25f;
         @ValidatedFloat.Restrict(min = 0f)
-        public float conductiveBurstSpellScaling = 0.5f;
+        public float conductiveBurstSpellScaling = 1.18f;
         @ValidatedDouble.Restrict(min = 0.1)
         public double conductiveBurstRadius = 2.5;
         @ValidatedDouble.Restrict(min = 0.0)
@@ -130,7 +130,7 @@ public class StormSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
         @ValidatedFloat.Restrict(min = 0f)
         public float finalThunderclapDamageScaling = 0.9f;
         @ValidatedFloat.Restrict(min = 0f)
-        public float finalThunderclapSpellScaling = 1.6f;
+        public float finalThunderclapSpellScaling = 4.33f;
         @ValidatedDouble.Restrict(min = 0.1)
         public double finalThunderclapRadius = 6.0;
         @ValidatedDouble.Restrict(min = 0.0)

@@ -22,6 +22,7 @@ import net.sweenus.simplyswords.entity.GloampiercerCloneVisualEntity;
 import net.sweenus.simplyswords.entity.GloampiercerSpearEntity;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
+import net.sweenus.simplyswords.api.SpellScalingProfile;
 import net.sweenus.simplyswords.util.HelperMethods;
 import org.joml.Vector3f;
 
@@ -74,7 +75,9 @@ public final class GloampiercerAbilityManager {
         double lift = findLiftHeight(world, owner, Math.max(0.0, Config.uniqueEffects.gloampiercer.liftHeight));
         ActiveChannel channel = new ActiveChannel(owner.getUuid(), context.stack().copy(), context.hand(),
                 owner.getPos(), center, owner.getY() + lift, world.getTime(), duration,
-                Math.max(1.0F, (float) HelperMethods.getEntityAttackDamage(owner)));
+                Math.max(1.0F, HelperMethods.abilityScaledDamage(SpellScalingProfile.SOUL, owner, context.stack(),
+                        Config.uniqueEffects.gloampiercer.strikeDamageScaling,
+                        Config.uniqueEffects.gloampiercer.strikeSpellScaling)));
         spawnActiveClones(world, owner, channel, cloneCount);
         ACTIVE.computeIfAbsent(world, ignored -> new HashMap<>()).put(owner.getUuid(), channel);
         spawnActivationEffects(world, owner, center);
@@ -106,7 +109,9 @@ public final class GloampiercerAbilityManager {
         PASSIVE_STRIKES.computeIfAbsent(world, ignored -> new ArrayList<>())
                 .add(new PendingPassiveStrike(owner.getUuid(), target.getUuid(), clone.getUuid(),
                         stack.copy(), cloneHandOrigin(clonePosition, target.getPos()), now + throwTick,
-                        Math.max(1.0F, (float) HelperMethods.getEntityAttackDamage(owner))));
+                        Math.max(1.0F, HelperMethods.abilityScaledDamage(SpellScalingProfile.SOUL, owner, stack,
+                                Config.uniqueEffects.gloampiercer.strikeDamageScaling,
+                                Config.uniqueEffects.gloampiercer.strikeSpellScaling))));
         cooldowns.put(owner.getUuid(), now);
         spawnCloneMaterialization(world, clonePosition);
     }

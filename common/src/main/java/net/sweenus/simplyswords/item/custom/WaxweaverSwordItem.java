@@ -167,7 +167,7 @@ public class WaxweaverSwordItem extends UniqueSwordItem implements RevivalWeapon
         @ValidatedFloat.Restrict(min = 0.0F)
         public float explosionDamageScaling = 0.55F;
         @ValidatedFloat.Restrict(min = 0.0F)
-        public float spellScaling = 2.0F;
+        public float spellScaling = 6.196F;
         @ValidatedFloat.Restrict(min = 0.5F)
         public float explosionRadius = 4.0F;
         @ValidatedFloat.Restrict(min = 0.0F)

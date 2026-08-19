@@ -149,7 +149,7 @@ public class MagiscytheSwordItem extends UniqueSwordItem implements UniqueWeapon
         @ValidatedFloat.Restrict(min = 0f, max = 1f)
         public float repairChance = 0.25f;
         @ValidatedFloat.Restrict(min = 0f)
-        public float spellScaling = 0.4f;
+        public float spellScaling = 1.28f;
 
     }
 }

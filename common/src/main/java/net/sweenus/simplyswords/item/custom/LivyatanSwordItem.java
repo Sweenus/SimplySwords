@@ -154,7 +154,7 @@ public class LivyatanSwordItem extends UniqueSwordItem implements UniqueWeaponAc
         @ValidatedFloat.Restrict(min = 0)
         public float returnDamageScaling = 0.64f;
         @ValidatedFloat.Restrict(min = 0)
-        public float returnSpellScaling = 1.28f;
+        public float returnSpellScaling = 3.32f;
         @ValidatedFloat.Restrict(min = 0f)
         public float damageScaling = 0.64f;
         @ValidatedInt.Restrict(min = 0)
@@ -162,7 +162,7 @@ public class LivyatanSwordItem extends UniqueSwordItem implements UniqueWeaponAc
         @ValidatedDouble.Restrict(min = 0.5)
         public double radius = 6.0;
         @ValidatedFloat.Restrict(min = 0f)
-        public float spellScaling = 1.36f;
+        public float spellScaling = 3.32f;
 
         @ValidatedFloat.Restrict(min = 0f)
         public float waveDamageScaling = 0.64f;
@@ -192,7 +192,7 @@ public class LivyatanSwordItem extends UniqueSwordItem implements UniqueWeaponAc
         @ValidatedFloat.Restrict(min = 0f)
         public float returnLightningDamageScaling = 0.35f;
         @ValidatedFloat.Restrict(min = 0f)
-        public float returnLightningSpellScaling = 0.8f;
+        public float returnLightningSpellScaling = 1.82f;
         @ValidatedDouble.Restrict(min = 1.0)
         public double returnLightningSkyHeight = 12.0;
     }

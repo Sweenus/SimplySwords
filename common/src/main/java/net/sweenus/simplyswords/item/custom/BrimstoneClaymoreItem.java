@@ -176,7 +176,7 @@ public class BrimstoneClaymoreItem extends UniqueSwordItem implements TwoHandedW
         @ValidatedFloat.Restrict(min = 0f)
         public float hitDamageScaling = 0.8f;
         @ValidatedFloat.Restrict(min = 0f)
-        public float hitSpellScaling = 1.6f;
+        public float hitSpellScaling = 4.19f;
         @ValidatedFloat.Restrict(min = 0f)
         public float pulseDamageScaling = 0.28f;
         @ValidatedFloat.Restrict(min = 0f)
@@ -184,7 +184,7 @@ public class BrimstoneClaymoreItem extends UniqueSwordItem implements TwoHandedW
         @ValidatedFloat.Restrict(min = 0f)
         public float finalDamageScaling = 1.0f;
         @ValidatedFloat.Restrict(min = 0f)
-        public float spellScaling = 2.0f;
+        public float spellScaling = 5.3395f;
         @ValidatedDouble.Restrict(min = 0.0)
         public double targetJumpRange = 8.0;
 

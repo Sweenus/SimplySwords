@@ -200,7 +200,7 @@ public class WickpiercerSwordItem extends UniqueSwordItem implements RevivalWeap
         @ValidatedFloat.Restrict(min = 0f)
         public float throwDamageScaling = 0.4f;
         @ValidatedFloat.Restrict(min = 0f)
-        public float throwSpellScaling = 0.8f;
+        public float throwSpellScaling = 2.0656f;
         @ValidatedInt.Restrict(min = 0)
         public int duration = 80;
 

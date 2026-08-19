@@ -119,7 +119,7 @@ public class ShadowstingSwordItem extends UniqueSwordItem implements UniqueWeapo
         @ValidatedFloat.Restrict(min = 0f)
         public float damageScaling = 1.0f;
         @ValidatedFloat.Restrict(min = 0f)
-        public float spellScaling = 2.0f;
+        public float spellScaling = 3.0202f;
 
     }
 }

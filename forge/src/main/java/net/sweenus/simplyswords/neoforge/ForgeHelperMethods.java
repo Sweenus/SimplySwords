@@ -7,6 +7,22 @@ import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.config.Config;
 
 public class ForgeHelperMethods {
+    public static String spellSchoolDisplayKey(String magicSchool) {
+        String school = magicSchool == null ? "" : magicSchool;
+        String name;
+        if (school.contains("lightning")) name = "scaleLightning";
+        else if (school.contains("fire")) name = "scaleFire";
+        else if (school.contains("frost")) name = "scaleIce";
+        else if (school.contains("arcane")) name = "scaleEnder";
+        else if (school.contains("soul")) name = "scaleBlood";
+        else if (school.contains("healing")) name = "scaleHoly";
+        else if (school.contains("nature")) name = "scaleNature";
+        else if (school.contains("evocation")) name = "scaleEvocation";
+        else if (school.contains("eldritch")) name = "scaleEldritch";
+        else name = "scaleEnder";
+        return "item.simplyswords.compat." + name;
+    }
+
     public static float useSpellAttributeScaling(float damageModifier, LivingEntity player, String magicSchool) {
         if (Platform.isForgeLike() && SimplySwords.passVersionCheck("irons_spellbooks", SimplySwords.minimumSpellbookVersion)) {
             if (player != null && !player.getWorld().isClient) {

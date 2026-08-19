@@ -113,7 +113,7 @@ public class SoulkeeperSwordItem extends UniqueSwordItem implements TwoHandedWea
         @ValidatedDouble.Restrict(min = 0.0)
         public float lanternDamageScaling = 0.24f;
         @ValidatedDouble.Restrict(min = 0.0)
-        public float spellScaling = 0.48f;
+        public float spellScaling = 1.76f;
         @ValidatedDouble.Restrict(min = 0.0)
         public double speedIncreasePerHit = 0.20;
         @ValidatedDouble.Restrict(min = 0.0)

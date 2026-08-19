@@ -69,6 +69,12 @@ public class GeneralConfig extends Config {
             ).withFailTitle(Text.translatable("simplyswords.general.compatEnableSpellPowerScaling.failTitle"));
 
     @ValidatedFloat.Restrict(min = 0f)
-    public float ironsSpellBasePower = 6.0f;
+    public float ironsSpellBasePower = 2.17f;
+
+    @ValidatedFloat.Restrict(min = 1.0f)
+    public float spellScalingDiminishingReturnsStart = 1.40f;
+
+    @ValidatedFloat.Restrict(min = 0.0f)
+    public float spellScalingDiminishingReturnsStrength = 10.0f;
 
 }

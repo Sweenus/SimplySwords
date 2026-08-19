@@ -40,6 +40,46 @@ The helper accepts any `LivingEntity`, so player and mob casts use the same
 path. If the relevant compatibility mod or attribute is unavailable, attack
 damage remains the fallback.
 
+Damage scaling follows this order:
+
+```text
+spellCandidate = backend spell result * spellScaling
+attackCandidate = attack damage * attackScaling
+
+if spellCandidate / attackCandidate > spellScalingDiminishingReturnsStart:
+    compress the portion above that ratio
+
+result = max(attackCandidate, adjustedSpellCandidate)
+result = awakening scaling
+```
+
+Spell criticals supplied by compatibility APIs are intentionally preserved and
+occur before Simply Swords' spell-damage diminishing returns. With the defaults,
+spell candidates at or below `1.40` times attack damage are unchanged. Higher
+ratios continue to increase without a hard cap, but with progressively smaller
+gains.
+
+Spell power is intended to contribute from the first point invested rather than
+only after it overtakes attack damage. Built-in uniques set each ability's
+`spellScaling` to roughly `0.51` times that ability's attack candidate, which
+produces:
+
+| Spell investment | Raw spell:attack | After diminishing returns |
+| --- | ---: | ---: |
+| None, neutral attributes | `1.11` | `1.11` |
+| Partial caster gear | `1.66` | `1.53` |
+| Maximum caster gear | `2.66` | `1.66` |
+
+With Iron's Spells installed the spell candidate is therefore normally the
+winning branch, including at neutral attributes. The attack candidate is the
+floor: it wins for players without a compatibility mod, where the spell path
+returns zero.
+
+| General config | Default | Effect |
+| --- | ---: | --- |
+| `spellScalingDiminishingReturnsStart` | `1.40` | Spell-to-attack ratio where compression begins |
+| `spellScalingDiminishingReturnsStrength` | `10.0` | Compression strength above the start ratio; `0` disables it |
+
 On NeoForge, Iron's Spells uses one shared configurable base power for all
 abilities:
 
@@ -47,7 +87,7 @@ abilities:
 spellScaling * ironsSpellBasePower * genericSpellPower * schoolSpellPower
 ```
 
-`ironsSpellBasePower` defaults to `2.0`. The per-ability `spellScaling` argument
+`ironsSpellBasePower` defaults to `2.17`. The per-ability `spellScaling` argument
 remains the coefficient that distinguishes small repeated hits from major
 impacts. On Fabric, Spell Power Attributes keeps its native coefficient-based
 calculation and does not use this shared base value.
@@ -55,6 +95,24 @@ calculation and does not use this shared base value.
 For a fixed full-strength value that should compete with spell power, use
 `SimplySwordsAPI.scaleAbilityValue(profile, actor, stack, fullValue,
 spellScaling)`. It applies unique awakening after choosing the larger value.
+The diminishing-return curve does not apply because this generic value path has
+no attack-damage reference and may represent a non-damage effect.
+
+When the fixed value is damage, use the damage-specific variant so it receives
+the same diminishing returns as attack-scaled damage:
+
+```java
+float damage = SimplySwordsAPI.scaleAbilityDamageFromValue(
+        SpellScalingProfile.SOUL,
+        actor,
+        stack,
+        fixedDamage,
+        spellScaling
+);
+```
+
+The fixed damage is the attack baseline for the ratio calculation. The result
+includes unique awakening scaling; do not apply it again.
 
 ## Ability targeting helpers
 
@@ -112,10 +170,12 @@ float damage = HelperMethods.gemPowerScaledDamage(
 );
 ```
 
-For fixed values, use `gemPowerScaledValue`. Both helpers choose the greater of
-the attack/fixed result and spell result, then call
-`AwakeningApi.scaleGemPower`. Runic and other non-awakenable weapons therefore
-retain full gem-power values.
+`gemPowerScaledDamage` applies the same spell diminishing returns as unique
+ability damage before choosing the larger attack or spell candidate. For fixed
+values, use `gemPowerScaledValue`; it does not apply the curve because it has no
+attack-damage reference and may represent a non-damage effect. Both helpers
+then call `AwakeningApi.scaleGemPower`. Runic and other non-awakenable weapons
+therefore retain full gem-power values.
 
 To include weapon enchantments and Simply Swords' player/non-player damage
 configuration:

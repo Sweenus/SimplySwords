@@ -10,6 +10,22 @@ public class FabricHelperMethods {
 
 
     //Compatibility with Spell Power Attributes
+    public static String spellSchoolDisplayKey(String magicSchool) {
+        String school = magicSchool == null ? "" : magicSchool;
+        String name;
+        if (school.contains("lightning")) name = "scaleLightning";
+        else if (school.contains("fire")) name = "scaleFire";
+        else if (school.contains("frost")) name = "scaleFrost";
+        else if (school.contains("arcane")) name = "scaleArcane";
+        else if (school.contains("soul")) name = "scaleSoul";
+        else if (school.contains("healing")) name = "scaleHealing";
+        else if (school.contains("nature")) name = "scaleHealing";
+        else if (school.contains("evocation")) name = "scaleArcane";
+        else if (school.contains("eldritch")) name = "scaleSoul";
+        else name = "scaleArcane";
+        return "item.simplyswords.compat." + name;
+    }
+
     public static float useSpellAttributeScaling(float damageModifier, LivingEntity player, String magicSchool) {
         if (Platform.isFabric() && SimplySwords.passVersionCheck("spell_power", SimplySwords.minimumSpellPowerVersion)) {
             if (player != null && !player.getWorld().isClient) {

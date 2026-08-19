@@ -105,7 +105,7 @@ public class BloodwakeSwordItem extends UniqueSwordItem implements UniqueWeaponA
         @ValidatedFloat.Restrict(min = 0.0F)
         public float burstDamageScaling = 0.65F;
         @ValidatedFloat.Restrict(min = 0.0F)
-        public float burstSpellScaling = 1.30F;
+        public float burstSpellScaling = 2.3491F;
         @ValidatedInt.Restrict(min = 1)
         public int plagueDuration = 160;
         @ValidatedDouble.Restrict(min = 0.5)
