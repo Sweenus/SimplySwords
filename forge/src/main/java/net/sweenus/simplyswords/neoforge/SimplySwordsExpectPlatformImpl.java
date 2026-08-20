@@ -22,4 +22,7 @@ public class SimplySwordsExpectPlatformImpl {
 
     public static float getSpellPowerDamage(float damageModifier, LivingEntity player, String magicSchool) {return ForgeHelperMethods.useSpellAttributeScaling(damageModifier, player, magicSchool);}
     public static String getSpellSchoolDisplayKey(String magicSchool) {return ForgeHelperMethods.spellSchoolDisplayKey(magicSchool);}
+    public static boolean hasManaSystem() {return ForgeHelperMethods.hasManaSystem();}
+    public static boolean hasMana(LivingEntity entity, float amount) {return ForgeHelperMethods.hasMana(entity, amount);}
+    public static void spendMana(LivingEntity entity, float amount) {ForgeHelperMethods.spendMana(entity, amount);}
 }

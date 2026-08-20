@@ -95,6 +95,7 @@ public class ShadowstingSwordItem extends UniqueSwordItem implements UniqueWeapo
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.shadowmistsworditem.tooltip4").setStyle(Styles.TEXT));
         appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.shadowsting.cooldown);
+        appendAbilityManaCostTooltip(tooltip, itemStack);
 
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
         net.sweenus.simplyswords.client.util.TooltipUtils.appendSpellScaleTooltip(tooltip, "soul");

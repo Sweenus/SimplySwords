@@ -153,6 +153,7 @@ public class RibboncleaverSwordItem extends UniqueSwordItem implements UniqueWea
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.ribboncleaversworditem.tooltip5").setStyle(Styles.TEXT));
         appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.ribboncleaver.cooldown);
+        appendAbilityManaCostTooltip(tooltip, itemStack);
 
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
     }

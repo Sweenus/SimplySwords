@@ -6,7 +6,9 @@ import net.sweenus.simplyswords.api.SpellScalingProfile;
 import net.sweenus.simplyswords.util.AbilityScalingProbe;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 enum ActivationMode {
     PASSIVE_ON_HIT,
@@ -120,6 +122,7 @@ record AbilityBalanceSpec(
         ScenarioSetup setup,
         boolean reliabilitySensitive,
         boolean requiresMeleeTrigger,
+        boolean meleeAmplifier,
         String notes
 ) {
 }
@@ -130,19 +133,19 @@ record DamageEvent(long tick, String source, float amount, boolean melee) {
 final class DamageRecorder {
     private final List<DamageEvent> events = new ArrayList<>();
     private long meleeTick = Long.MIN_VALUE;
-    private boolean meleeTickClaimed;
+    private final Set<Object> meleeTickClaimedBy = new HashSet<>();
 
     void markMeleeTick(long tick) {
         meleeTick = tick;
-        meleeTickClaimed = false;
+        meleeTickClaimedBy.clear();
     }
 
-    void record(long tick, DamageSource source, float amount) {
-        // The first direct event in a swing tick is the auto-attack; later ones are on-hit procs.
-        boolean melee = !meleeTickClaimed && tick == meleeTick
+    void record(long tick, DamageSource source, float amount, Object target) {
+        // One auto-attack per target per swing tick; a full-charge swing also sweeps the others.
+        boolean melee = tick == meleeTick && !meleeTickClaimedBy.contains(target)
                 && source.isDirect() && source.getSource() == source.getAttacker();
         if (melee) {
-            meleeTickClaimed = true;
+            meleeTickClaimedBy.add(target);
         }
         events.add(new DamageEvent(tick, source.getName(), amount, melee));
     }
@@ -150,7 +153,7 @@ final class DamageRecorder {
     void clear() {
         events.clear();
         meleeTick = Long.MIN_VALUE;
-        meleeTickClaimed = false;
+        meleeTickClaimedBy.clear();
     }
 
     List<DamageEvent> events() {

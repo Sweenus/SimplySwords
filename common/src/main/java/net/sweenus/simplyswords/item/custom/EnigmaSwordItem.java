@@ -175,6 +175,7 @@ public class EnigmaSwordItem extends UniqueSwordItem implements UniqueWeaponActi
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.enigmasworditem.tooltip4").setStyle(Styles.TEXT));
         appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.enigma.enigmaCooldown);
+        appendAbilityManaCostTooltip(tooltip, itemStack);
 
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
         net.sweenus.simplyswords.client.util.TooltipUtils.appendSpellScaleTooltip(tooltip, "evocation");

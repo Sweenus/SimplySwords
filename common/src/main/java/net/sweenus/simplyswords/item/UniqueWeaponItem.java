@@ -28,6 +28,7 @@ import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.LegacyUniqueMigration;
 import net.sweenus.simplyswords.util.Styles;
+import net.sweenus.simplyswords.util.WeaponManaCost;
 
 import java.util.List;
 
@@ -176,6 +177,13 @@ public abstract class UniqueWeaponItem extends SwordItem {
     protected static void appendAbilityCooldownTooltip(List<Text> tooltip, int cooldownTicks) {
         tooltip.add(Text.translatable("tooltip.simplyswords.ability_cooldown", formatCooldown(cooldownTicks))
                 .setStyle(Styles.COOLDOWN));
+    }
+
+    protected static void appendAbilityManaCostTooltip(List<Text> tooltip, ItemStack stack) {
+        int cost = WeaponManaCost.of(stack);
+        if (cost > 0) {
+            tooltip.add(Text.translatable("tooltip.simplyswords.ability_mana_cost", cost).setStyle(Styles.MANA));
+        }
     }
 
     private static String formatCooldown(int cooldownTicks) {

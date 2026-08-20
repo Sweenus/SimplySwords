@@ -109,6 +109,7 @@ public class WhisperwindSwordItem extends UniqueSwordItem implements TwoHandedWe
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.whisperwindsworditem.tooltip3").setStyle(Styles.TEXT));
         appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.whisperwind.cooldown);
+        appendAbilityManaCostTooltip(tooltip, itemStack);
 
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
         net.sweenus.simplyswords.client.util.TooltipUtils.appendSpellScaleTooltip(tooltip, "evocation");

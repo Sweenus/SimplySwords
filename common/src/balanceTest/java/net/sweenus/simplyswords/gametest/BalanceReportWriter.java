@@ -25,6 +25,7 @@ final class BalanceReportWriter {
             "AbilityDpsVsVanillaBase", "AbilityDpsVsSharpnessV",
             "SpellBranchAvg", "MeleeBranchAvg", "SpellBranchWinRate", "BranchSamples", "ValueBranchSamples",
             "TopDamageSources",
+            "ThroughputVsMedian", "ThroughputStatus",
             "Status", "Notes"
     };
 
@@ -66,18 +67,37 @@ final class BalanceReportWriter {
             }
         });
 
+        // Cluster rows read higher than single target, so throughput is compared within build and scenario.
+        Map<ThroughputGroup, List<Float>> throughputSamples = new LinkedHashMap<>();
+        grouped.forEach((key, runs) -> {
+            if (!isThroughputScenario(key.scenario) || runs.stream().noneMatch(BalanceRunResult::available)) {
+                return;
+            }
+            Float dps = meanDps.get(key);
+            if (dps != null && Float.isFinite(dps)) {
+                throughputSamples.computeIfAbsent(new ThroughputGroup(key.build, key.scenario),
+                        ignored -> new ArrayList<>()).add(dps);
+            }
+        });
+        Map<ThroughputGroup, Float> throughputMedian = new LinkedHashMap<>();
+        throughputSamples.forEach((group, samples) ->
+                throughputMedian.put(group, percentile(samples, 0.5)));
+
         List<ReportRow> rows = new ArrayList<>();
         grouped.forEach((key, runs) -> {
             RowKey vanillaKey = key.withBuild(BalanceBuildProfile.VANILLA_BASE);
             RowKey sharpnessKey = key.withBuild(BalanceBuildProfile.VANILLA_SHARPNESS_V);
             Float abilityBaseline = meanAbilityDps.get(sharpnessKey);
+            Float median = isThroughputScenario(key.scenario)
+                    ? throughputMedian.get(new ThroughputGroup(key.build, key.scenario)) : null;
             rows.add(ReportRow.from(key, runs,
                     ratio(meanDps.get(key), meanDps.get(vanillaKey)),
                     ratio(meanDps.get(key), meanDps.get(sharpnessKey)),
                     ratio(meanAbilityDps.get(key), meanAbilityDps.get(vanillaKey)),
                     ratio(meanAbilityDps.get(key), abilityBaseline),
                     abilityBaseline == null ? 0.0F : abilityBaseline,
-                    judgedScenario.getOrDefault(key.weapon, BalanceScenarioType.SINGLE_TARGET_ROTATION)));
+                    judgedScenario.getOrDefault(key.weapon, BalanceScenarioType.SINGLE_TARGET_ROTATION),
+                    median));
         });
         rows.sort(Comparator.comparing((ReportRow row) -> row.key.weapon)
                 .thenComparing(row -> row.key.scenario)
@@ -133,6 +153,14 @@ final class BalanceReportWriter {
         return Objects.toString(value, "").replace("|", "\\|").replace("\n", " ");
     }
 
+    private static boolean isThroughputScenario(BalanceScenarioType scenario) {
+        return scenario == BalanceScenarioType.SINGLE_TARGET_ROTATION
+                || scenario == BalanceScenarioType.FIVE_TARGET_CLUSTER;
+    }
+
+    private record ThroughputGroup(BalanceBuildProfile build, BalanceScenarioType scenario) {
+    }
+
     private record RowKey(String weapon, String ability, BalanceBuildProfile build,
                           BalanceScenarioType scenario, int targets, int durationTicks) {
         RowKey withBuild(BalanceBuildProfile replacement) {
@@ -143,7 +171,7 @@ final class BalanceReportWriter {
     private record ReportRow(RowKey key, List<String> values) {
         static ReportRow from(RowKey key, List<BalanceRunResult> runs, float ratioVanilla, float ratioSharpness,
                               float abilityRatioVanilla, float abilityRatioSharpness, float abilityBaseline,
-                              BalanceScenarioType judgedScenario) {
+                              BalanceScenarioType judgedScenario, Float throughputMedian) {
             List<BalanceRunResult> available = runs.stream().filter(BalanceRunResult::available).toList();
             boolean hasData = !available.isEmpty();
             List<Float> dps = available.stream().map(BalanceRunResult::totalDps).toList();
@@ -167,8 +195,16 @@ final class BalanceReportWriter {
             int branchSamples = available.stream().mapToInt(result -> result.branchStats().samples()).sum();
             int valueSamples = available.stream().mapToInt(result -> result.branchStats().valueSamples()).sum();
             String topSources = topDamageSources(available);
-            String status = status(key, hasData, abilityRatioVanilla, abilityRatioSharpness, abilityBaseline,
-                    judgedScenario);
+            float throughput = hasData && throughputMedian != null && throughputMedian > 1.0E-4F
+                    ? BalanceReportWriter.mean(dps) / throughputMedian : Float.NaN;
+            String throughputStatus = throughputStatus(throughput);
+            AbilityBalanceSpec spec = runs.getFirst().spec();
+            boolean amplifier = spec.meleeAmplifier();
+            String status = status(key, hasData,
+                    amplifier ? ratioVanilla : abilityRatioVanilla,
+                    amplifier ? ratioSharpness : abilityRatioSharpness,
+                    amplifier ? 1.0F : abilityBaseline,
+                    judgedScenario, totalCasts, spec.activationMode());
             List<String> values = List.of(
                     key.weapon,
                     key.ability,
@@ -206,6 +242,8 @@ final class BalanceReportWriter {
                     Integer.toString(branchSamples),
                     Integer.toString(valueSamples),
                     topSources,
+                    Float.isNaN(throughput) ? "" : format(throughput),
+                    throughputStatus,
                     status,
                     notes
             );
@@ -240,13 +278,33 @@ final class BalanceReportWriter {
                     .collect(Collectors.joining(" "));
         }
 
+        private static String throughputStatus(float throughput) {
+            if (Float.isNaN(throughput)) {
+                return "";
+            }
+            if (throughput > 5.0F) {
+                return "THROUGHPUT_SEVERE";
+            }
+            if (throughput > 2.5F) {
+                return "THROUGHPUT_HIGH";
+            }
+            if (throughput < 0.4F) {
+                return "THROUGHPUT_LOW";
+            }
+            return "THROUGHPUT_OK";
+        }
+
         private static String status(RowKey key, boolean available, float ratioVanilla, float ratioSharpness,
-                                     float abilityBaseline, BalanceScenarioType judgedScenario) {
+                                     float abilityBaseline, BalanceScenarioType judgedScenario,
+                                     int totalCasts, ActivationMode activationMode) {
             if (!available) {
                 return "UNAVAILABLE";
             }
             if (key.scenario != judgedScenario) {
                 return "INFORMATIONAL";
+            }
+            if (totalCasts == 0 && activationMode != ActivationMode.PASSIVE_ON_HIT) {
+                return "NOT_EXERCISED";
             }
             if (abilityBaseline <= 1.0E-3F) {
                 return "NO_ABILITY_DAMAGE";
@@ -260,16 +318,21 @@ final class BalanceReportWriter {
             if (!Float.isFinite(ratioSharpness)) {
                 return "INFORMATIONAL";
             }
-            if (ratioSharpness > 1.50F) {
+            // A ratio off a near-zero base is noise, not a verdict.
+            if (abilityBaseline < SINGLE_TARGET_JUDGEMENT_FLOOR) {
+                return "INFORMATIONAL";
+            }
+            // Bands centre on the documented 1.66 max-caster target in combat-and-damage.md.
+            if (ratioSharpness > 2.30F) {
                 return "SEVERE";
             }
-            if (ratioSharpness > 1.35F) {
+            if (ratioSharpness > 2.00F) {
                 return "OVERPERFORMING";
             }
-            if (ratioSharpness > 1.30F) {
+            if (ratioSharpness > 1.85F) {
                 return "WATCH";
             }
-            if (ratioSharpness < 1.10F) {
+            if (ratioSharpness < 1.45F) {
                 return "UNDERPERFORMING";
             }
             return "HEALTHY";

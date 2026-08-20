@@ -4,6 +4,7 @@ import com.mojang.authlib.GameProfile;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.MovementType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.ClientConnection;
@@ -42,6 +43,7 @@ import java.util.UUID;
 final class BalanceHarness {
     private static final int PROGRESS_INTERVAL_JOBS = 500;
     private static final int CHECKPOINT_INTERVAL_JOBS = 2000;
+    private static final int DRAW_TICKS = 90;
     // Stable UUID: PlayerManager caches a PlayerAdvancements per UUID and never evicts it.
     private static final UUID BALANCE_PLAYER_UUID = UUID.fromString("5b91e3a2-0000-4000-8000-5eee00000001");
 
@@ -60,7 +62,7 @@ final class BalanceHarness {
         verifyPlayerAttributes();
         this.jobs = createJobs();
         buildArena();
-        holdAtNight();
+        holdAtNoon();
         SimplySwords.LOGGER.info("Balance harness starting: {} jobs, {} nominal ticks",
                 jobs.size(), jobs.stream().mapToLong(BalanceHarness::jobTicks).sum());
     }
@@ -70,7 +72,7 @@ final class BalanceHarness {
         if (weapon.isEmpty()) {
             return;
         }
-        ServerPlayerEntity probe = createPlayer();
+        BalancePlayerEntity probe = createPlayer();
         try {
             float bare = HelperMethods.attackScaledDamage(probe, ItemStack.EMPTY, 1.0F);
             BalanceEquipment.equip(probe, EquipmentSlot.MAINHAND, weapon);
@@ -141,7 +143,7 @@ final class BalanceHarness {
         Item weapon = Registries.ITEM.get(weaponId);
         ItemStack stack = AwakeningApi.initializeFullyAwakened(new ItemStack(weapon));
         DamageRecorder recorder = new DamageRecorder();
-        ServerPlayerEntity player = createPlayer();
+        BalancePlayerEntity player = createPlayer();
         Vec3d targetCenter = context.getAbsolute(new Vec3d(8.0, 1.0, 9.0));
         Vec3d playerPosition = targetCenter.add(0.0, 0.0, -spec.targetDistance());
         player.setPosition(playerPosition);
@@ -152,6 +154,16 @@ final class BalanceHarness {
         if (!equipment.available()) {
             player.discard();
             return new ActiveRun(job, equipment.notes());
+        }
+
+        // Ability managers re-resolve their owner with world.getEntity each tick and abort when it is absent.
+        Entity previous = world.getEntity(BALANCE_PLAYER_UUID);
+        if (previous != null) {
+            previous.discard();
+        }
+        if (!world.spawnEntity(player)) {
+            throw new IllegalStateException("Harness player could not be spawned; abilities would silently record"
+                    + " no damage because their managers resolve the owner from the world");
         }
 
         int targetCount = job.scenario() == BalanceScenarioType.FIVE_TARGET_CLUSTER ? 5 : 1;
@@ -174,21 +186,10 @@ final class BalanceHarness {
                 branches, notes);
     }
 
-    private ServerPlayerEntity createPlayer() {
+    private BalancePlayerEntity createPlayer() {
         GameProfile profile = new GameProfile(BALANCE_PLAYER_UUID, "balance-test-player");
         ConnectedClientData clientData = ConnectedClientData.createDefault(profile, false);
-        ServerPlayerEntity player = new ServerPlayerEntity(world.getServer(), world,
-                profile, SyncedClientOptions.createDefault()) {
-            @Override
-            public boolean isSpectator() {
-                return false;
-            }
-
-            @Override
-            public boolean isCreative() {
-                return true;
-            }
-        };
+        BalancePlayerEntity player = new BalancePlayerEntity(world.getServer(), world, profile);
         ClientConnection connection = new ClientConnection(NetworkSide.SERVERBOUND);
         player.networkHandler = new ServerPlayNetworkHandler(world.getServer(), connection, player, clientData) {
             @Override
@@ -286,9 +287,9 @@ final class BalanceHarness {
         context.complete();
     }
 
-    // Zombie targets burn in daylight, and that damage is recorded as ability damage.
-    private void holdAtNight() {
-        world.setTimeOfDay(18000L);
+    // Frozen so day-gated abilities behave the same for every job in a sweep.
+    private void holdAtNoon() {
+        world.setTimeOfDay(6000L);
         world.getGameRules().get(GameRules.DO_DAYLIGHT_CYCLE).set(false, world.getServer());
     }
 
@@ -350,7 +351,7 @@ final class BalanceHarness {
 
     private final class ActiveRun {
         private final BalanceJob job;
-        private final ServerPlayerEntity player;
+        private final BalancePlayerEntity player;
         private final ItemStack weapon;
         private final List<BalanceTargetEntity> targets;
         private final DamageRecorder recorder;
@@ -363,11 +364,12 @@ final class BalanceHarness {
         private int casts;
         private int swings;
         private int setupTicks;
+        private int drawTicks = -1;
         private boolean completed;
 
         private final BranchAccumulator branches;
 
-        private ActiveRun(BalanceJob job, ServerPlayerEntity player, ItemStack weapon,
+        private ActiveRun(BalanceJob job, BalancePlayerEntity player, ItemStack weapon,
                           List<BalanceTargetEntity> targets, DamageRecorder recorder, int duration,
                           float rawRatio, float adjustedRatio, BranchAccumulator branches, String notes) {
             this.branches = branches;
@@ -383,6 +385,7 @@ final class BalanceHarness {
             this.available = true;
             if (job.spec().setup() == ScenarioSetup.PRIME_WITH_MELEE) {
                 recorder.markMeleeTick(world.getTime());
+                player.primeAttackCharge();
                 player.attack(targets.getFirst());
                 setupTicks = 12;
             }
@@ -412,6 +415,10 @@ final class BalanceHarness {
                 return;
             }
             keepAimed();
+            // The world does not tick a manually spawned player, so drive what abilities depend on.
+            player.getItemCooldownManager().update();
+            ManaTopUp.refill(player);
+            applyPlayerMovement();
             if (job.scenario().rotation()) {
                 runRotationTick();
             } else if (elapsed == 0) {
@@ -423,10 +430,22 @@ final class BalanceHarness {
             }
         }
 
+        // Dash and leap abilities deliver their damage along the path the actor travels.
+        private void applyPlayerMovement() {
+            Vec3d velocity = player.getVelocity();
+            if (velocity.lengthSquared() < 1.0E-6) {
+                return;
+            }
+            player.move(MovementType.SELF, velocity);
+            player.setVelocity(velocity.multiply(0.6));
+        }
+
         private void runRotationTick() {
-            int cadence = Math.max(1, (int) Math.ceil(1.0F / Math.max(0.01F, player.getAttackCooldownProgressPerTick())));
+            // getAttackCooldownProgressPerTick already returns ticks per swing, not a fraction.
+            int cadence = Math.max(1, (int) Math.ceil(player.getAttackCooldownProgressPerTick()));
             if (elapsed > 0 && elapsed % cadence == 0) {
                 recorder.markMeleeTick(world.getTime());
+                player.primeAttackCharge();
                 player.attack(targets.getFirst());
                 swings++;
             }
@@ -434,6 +453,14 @@ final class BalanceHarness {
         }
 
         private void activate() {
+            if (drawTicks >= 0) {
+                if (--drawTicks <= 0) {
+                    weapon.getItem().onStoppedUsing(weapon, world, player, 0);
+                    drawTicks = -1;
+                    casts++;
+                }
+                return;
+            }
             WeaponAbilityContext abilityContext = WeaponAbilityContext.of(
                     world,
                     weapon,
@@ -445,6 +472,18 @@ final class BalanceHarness {
             );
             if (SimplySwordsAPI.tryActivateWeaponAbility(abilityContext)) {
                 casts++;
+                // Charge states are dropped unless the owner is still holding the item down.
+                if (job.spec().activationMode() == ActivationMode.SUMMON
+                        || job.spec().activationMode() == ActivationMode.CHANNEL) {
+                    player.setCurrentHand(Hand.MAIN_HAND);
+                }
+                return;
+            }
+            // Charge weapons decline the ability API and run through use/onStoppedUsing instead.
+            if (job.spec().activationMode() == ActivationMode.HOLD_RELEASE
+                    && !player.getItemCooldownManager().isCoolingDown(weapon.getItem())
+                    && weapon.getItem().use(world, player, Hand.MAIN_HAND).getResult().isAccepted()) {
+                drawTicks = DRAW_TICKS;
             }
         }
 

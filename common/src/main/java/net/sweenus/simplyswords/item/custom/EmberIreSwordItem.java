@@ -30,6 +30,7 @@ import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
+import net.sweenus.simplyswords.util.WeaponManaCost;
 import net.sweenus.simplyswords.util.Styles;
 
 import java.util.List;
@@ -86,8 +87,14 @@ public class EmberIreSwordItem extends UniqueSwordItem implements UniqueWeaponAc
     }
 
     @Override
+    public boolean chargesManaOnRelease() {
+        return true;
+    }
+
+    @Override
     public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
         if (!world.isClient && user.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
+            WeaponManaCost.spend(user, stack);
             LivingEntity targetEntity = user instanceof PlayerEntity player ? findPlayerTarget(player) : null;
             double damageAmount = HelperMethods.abilityScaledDamage("fire", user, stack,
                     Config.uniqueEffects.emberblade.initialDamageScaling, Config.uniqueEffects.emberblade.initialSpellScaling);
@@ -182,7 +189,7 @@ public class EmberIreSwordItem extends UniqueSwordItem implements UniqueWeaponAc
 
     @Override
     public int getActivationCooldownTicks(ItemStack stack, WeaponAbilityContext context) {
-        return 10;
+        return Math.max(1, Config.uniqueEffects.emberblade.cooldown);
     }
 
     @Override
@@ -221,6 +228,7 @@ public class EmberIreSwordItem extends UniqueSwordItem implements UniqueWeaponAc
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.emberiresworditem.tooltip9").setStyle(Styles.TEXT));
         appendAbilityCooldownTooltip(tooltip, 10);
+        appendAbilityManaCostTooltip(tooltip, itemStack);
 
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
         net.sweenus.simplyswords.client.util.TooltipUtils.appendSpellScaleTooltip(tooltip, "fire");
@@ -233,6 +241,7 @@ public class EmberIreSwordItem extends UniqueSwordItem implements UniqueWeaponAc
             super(30, 150, new ItemStackTooltipAppender(ItemsRegistry.EMBERBLADE::get));
         }
 
+        public int cooldown = 60;
         public float initialDamageScaling = 0.24f;
         public float initialSpellScaling = 0.9593f;
         public float maxChargeDamageScaling = 2.4f;

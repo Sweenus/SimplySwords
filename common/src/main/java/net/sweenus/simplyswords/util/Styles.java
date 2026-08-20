@@ -20,6 +20,7 @@ public class Styles {
 	public static Style TEXT = color(0xE0E0E0);
 	public static Style SEALED = color(0x7E7883);
 	public static Style COOLDOWN = color(0xF6A23A);
+	public static Style MANA = color(0x3AA7F6);
 
 
 	private static Style color(int color) {

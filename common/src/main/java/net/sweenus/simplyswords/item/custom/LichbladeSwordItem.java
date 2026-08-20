@@ -274,6 +274,7 @@ public class LichbladeSwordItem extends UniqueSwordItem implements TwoHandedWeap
             tooltip.add(Text.translatable("item.simplyswords.onrightclickheld").setStyle(Styles.RIGHT_CLICK));
             tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip4").setStyle(Styles.TEXT));
             appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.lichblade.cooldown);
+            appendAbilityManaCostTooltip(tooltip, itemStack);
 
             if (awakening >= 8) {
                 tooltip.add(Text.literal(""));

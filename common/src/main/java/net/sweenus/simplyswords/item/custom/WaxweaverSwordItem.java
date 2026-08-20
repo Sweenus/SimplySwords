@@ -133,6 +133,8 @@ public class WaxweaverSwordItem extends UniqueSwordItem implements RevivalWeapon
 
         appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.waxweaver.activeCooldown);
 
+        appendAbilityManaCostTooltip(tooltip, itemStack);
+
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
         net.sweenus.simplyswords.client.util.TooltipUtils.appendSpellScaleTooltip(tooltip, "fire");
     }

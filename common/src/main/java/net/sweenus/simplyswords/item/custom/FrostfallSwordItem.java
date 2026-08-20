@@ -133,6 +133,7 @@ public class FrostfallSwordItem extends UniqueSwordItem implements UniqueWeaponA
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.frostfallsworditem.tooltip4").setStyle(Styles.TEXT));
         appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.frostfall.cooldown);
+        appendAbilityManaCostTooltip(tooltip, itemStack);
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
         TooltipUtils.appendSpellScaleTooltip(tooltip, "frost");
     }
@@ -146,7 +147,7 @@ public class FrostfallSwordItem extends UniqueSwordItem implements UniqueWeaponA
         @ValidatedInt.Restrict(min = 1, max = 100)
         public int chance = 25;
         @ValidatedInt.Restrict(min = 1)
-        public int cooldown = 3;
+        public int cooldown = 60;
         @ValidatedFloat.Restrict(min = 1f)
         public float damageScaling = 0.8f;
         @ValidatedFloat.Restrict(min = 0f)

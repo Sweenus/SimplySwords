@@ -83,6 +83,7 @@ public class StormSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.stormsworditem.tooltip5").setStyle(Styles.TEXT));
         appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.mjolnir.cooldown);
+        appendAbilityManaCostTooltip(tooltip, itemStack);
 
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
         TooltipUtils.appendSpellScaleTooltip(tooltip, "lightning");

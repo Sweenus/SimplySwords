@@ -121,7 +121,7 @@ public class LivyatanSwordItem extends UniqueSwordItem implements UniqueWeaponAc
 
     @Override
     public int getActivationCooldownTicks(ItemStack stack, WeaponAbilityContext context) {
-        return 20;
+        return Math.max(1, Config.uniqueEffects.livyatan.cooldown);
     }
 
     @Override
@@ -141,6 +141,7 @@ public class LivyatanSwordItem extends UniqueSwordItem implements UniqueWeaponAc
         tooltip.add(Text.translatable("item.simplyswords.livyatansworditem.tooltip2").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.livyatansworditem.tooltip4").setStyle(Styles.TEXT));
+        appendAbilityManaCostTooltip(tooltip, itemStack);
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
         TooltipUtils.appendSpellScaleTooltip(tooltip, "frost");
     }
@@ -152,6 +153,7 @@ public class LivyatanSwordItem extends UniqueSwordItem implements UniqueWeaponAc
         }
 
         @ValidatedFloat.Restrict(min = 0)
+        public int cooldown = 65;
         public float returnDamageScaling = 0.64f;
         @ValidatedFloat.Restrict(min = 0)
         public float returnSpellScaling = 3.32f;

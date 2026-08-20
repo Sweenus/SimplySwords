@@ -1183,6 +1183,7 @@
   "simplyswords.general.containedRemnantTransformFrequency.desc": "How often, in ticks, Contained and Tampered Remnants carried in your inventory are checked to change form. Higher values check less often.",
   "tooltip.simplyswords.implicit.header": "Implicit",
   "tooltip.simplyswords.ability_cooldown": "⌛ %s",
+  "tooltip.simplyswords.ability_mana_cost": "✦ %s mana",
   "tooltip.simplyswords.implicit.generic": "+%s implicit value",
   "tooltip.simplyswords.implicit.armor_pierce": "%s%% chance to ignore armor",
   "tooltip.simplyswords.implicit.bleed": "%s%% chance to inflict Bleed",

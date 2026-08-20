@@ -38,13 +38,19 @@ final class BalanceTargetEntity extends ZombieEntity {
         setHealth(TEST_HEALTH);
     }
 
+    // Sunburn would otherwise be recorded as ability damage.
+    @Override
+    protected boolean burnsInDaylight() {
+        return false;
+    }
+
     @Override
     public boolean damage(DamageSource source, float amount) {
         float before = getHealth();
         boolean accepted = super.damage(source, amount);
         float lost = Math.max(0.0F, before - getHealth());
         if (accepted && lost > 0.0F) {
-            recorder.record(getWorld().getTime(), source, lost);
+            recorder.record(getWorld().getTime(), source, lost, this);
         }
         if (isRemoved() || !isAlive()) {
             setHealth(TEST_HEALTH);

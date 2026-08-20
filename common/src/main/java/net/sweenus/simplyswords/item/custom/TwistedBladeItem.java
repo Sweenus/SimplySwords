@@ -85,6 +85,8 @@ public class TwistedBladeItem extends UniqueSwordItem implements TwoHandedWeapon
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.ferocitysworditem.tooltip4").setStyle(Styles.TEXT));
 
+        appendAbilityManaCostTooltip(tooltip, itemStack);
+
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
     }
 
@@ -108,6 +110,8 @@ public class TwistedBladeItem extends UniqueSwordItem implements TwoHandedWeapon
         public int crescendoMinimumInterval = 2;
         @ValidatedFloat.Restrict(min = 0.0F)
         public float crescendoDamageScaling = 0.35F;
+        @ValidatedFloat.Restrict(min = 0.0F)
+        public float crescendoSpellScaling = 1.8331F;
         @ValidatedDouble.Restrict(min = 0.1)
         public double crescendoRadius = 2.5;
         @ValidatedDouble.Restrict(min = 0.0)
@@ -117,7 +121,11 @@ public class TwistedBladeItem extends UniqueSwordItem implements TwoHandedWeapon
         @ValidatedFloat.Restrict(min = 0.0F)
         public float empoweredMinimumDamageScaling = 0.5F;
         @ValidatedFloat.Restrict(min = 0.0F)
+        public float empoweredMinimumSpellScaling = 2.6188F;
+        @ValidatedFloat.Restrict(min = 0.0F)
         public float empoweredMaximumDamageScaling = 2.5F;
+        @ValidatedFloat.Restrict(min = 0.0F)
+        public float empoweredMaximumSpellScaling = 13.0938F;
         @ValidatedDouble.Restrict(min = 0.1)
         public double empoweredMinimumRadius = 2.5;
         @ValidatedDouble.Restrict(min = 0.1)

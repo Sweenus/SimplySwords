@@ -12,6 +12,7 @@ import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.util.HelperMethods;
+import net.sweenus.simplyswords.util.WeaponManaCost;
 import net.sweenus.simplyswords.world.PlayerWeaponAbilityManager;
 
 public interface UniqueWeaponActiveAbility {
@@ -24,7 +25,19 @@ public interface UniqueWeaponActiveAbility {
         if (PlayerWeaponAbilityManager.shouldSkipDefaultAbilityUse(world, user, hand, stack)) {
             return TypedActionResult.pass(stack);
         }
-        return startPlayerAbility(world, user, hand);
+        if (!WeaponManaCost.canAfford(user, stack)) {
+            return TypedActionResult.fail(stack);
+        }
+        TypedActionResult<ItemStack> result = startPlayerAbility(world, user, hand);
+        // Charge weapons pay on release instead, so a canceled draw costs nothing.
+        if (result.getResult().isAccepted() && !chargesManaOnRelease()) {
+            WeaponManaCost.spend(user, stack);
+        }
+        return result;
+    }
+
+    default boolean chargesManaOnRelease() {
+        return false;
     }
 
     default TypedActionResult<ItemStack> startPlayerAbility(World world, PlayerEntity user, Hand hand) {

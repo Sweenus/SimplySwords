@@ -29,6 +29,7 @@ import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
+import net.sweenus.simplyswords.util.WeaponManaCost;
 import net.sweenus.simplyswords.util.Styles;
 import net.sweenus.simplyswords.world.DawnquiverAbilityManager;
 import net.sweenus.simplyswords.world.PlayerWeaponAbilityChannelManager;
@@ -90,6 +91,11 @@ public final class DawnquiverSwordItem extends UniqueSwordItem implements TwoHan
     }
 
     @Override
+    public boolean chargesManaOnRelease() {
+        return true;
+    }
+
+    @Override
     public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
         if (world.isClient() || !(world instanceof ServerWorld serverWorld)) {
             return;
@@ -100,6 +106,7 @@ public final class DawnquiverSwordItem extends UniqueSwordItem implements TwoHan
         }
         float chargeRatio = chargeRatio(stack, user, remainingUseTicks);
         int cooldown = DawnquiverAbilityManager.release(serverWorld, user, stack, chargeRatio);
+        WeaponManaCost.spend(user, stack);
         if (user instanceof PlayerEntity player) {
             player.getItemCooldownManager().set(stack.getItem(), cooldown);
         }
@@ -168,6 +175,7 @@ public final class DawnquiverSwordItem extends UniqueSwordItem implements TwoHan
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.dawnquiversworditem.tooltip7",
                 Config.uniqueEffects.dawnquiver.cooldown / 20.0F).setStyle(Styles.TEXT));
+        appendAbilityManaCostTooltip(tooltip, stack);
         super.appendTooltip(stack, context, tooltip, type);
         TooltipUtils.appendSpellScaleTooltip(tooltip, SpellScalingProfile.HEALING);
     }

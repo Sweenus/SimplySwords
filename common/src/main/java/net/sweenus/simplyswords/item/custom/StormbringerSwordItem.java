@@ -28,6 +28,7 @@ import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
 import net.sweenus.simplyswords.registry.ComponentTypeRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
+import net.sweenus.simplyswords.util.WeaponManaCost;
 import net.sweenus.simplyswords.util.Styles;
 import net.sweenus.simplyswords.world.ChainLightningVisualManager;
 import net.sweenus.simplyswords.world.PlayerWeaponAbilityChannelManager;
@@ -123,9 +124,15 @@ public class StormbringerSwordItem extends UniqueSwordItem implements UniqueWeap
     }
 
     @Override
+    public boolean chargesManaOnRelease() {
+        return true;
+    }
+
+    @Override
     public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
         if (!world.isClient && user instanceof ServerPlayerEntity serverPlayer) {
             StormbringerParryManager.finishUse(serverPlayer, stack);
+            WeaponManaCost.spend(serverPlayer, stack);
         }
     }
 
@@ -175,6 +182,7 @@ public class StormbringerSwordItem extends UniqueSwordItem implements UniqueWeap
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.stormbringersworditem.tooltip4").setStyle(Styles.TEXT));
         appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.stormbringer.cooldown);
+        appendAbilityManaCostTooltip(tooltip, itemStack);
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
         TooltipUtils.appendSpellScaleTooltip(tooltip, "lightning");
     }

@@ -89,6 +89,7 @@ public class BloodwakeSwordItem extends UniqueSwordItem implements UniqueWeaponA
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.bloodwakesworditem.tooltip5").setStyle(Styles.TEXT));
         appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.bloodwake.cooldown);
+        appendAbilityManaCostTooltip(tooltip, stack);
         super.appendTooltip(stack, context, tooltip, type);
         net.sweenus.simplyswords.client.util.TooltipUtils.appendSpellScaleTooltip(tooltip, "soul");
     }

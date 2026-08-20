@@ -54,7 +54,7 @@ final class AbilityBalanceCatalog {
                 spec("hiveheart", "Hiveheart", SpellScalingProfile.NATURE, ActivationMode.SUMMON, 300, 3, BalanceCategory.SUMMON, ScenarioSetup.NONE, true, "Runs through the swarm lifetime"),
                 spec("ionbound_stormscale", "Ionbound Stormscale", SpellScalingProfile.LIGHTNING, ActivationMode.ACTIVE_ABILITY, 160, 3, BalanceCategory.SHORT_COOLDOWN_ACTIVE, ScenarioSetup.NONE, false, "Upgraded stormscale variant"),
                 spec("molten_edge", "Molten Edge", SpellScalingProfile.FIRE, ActivationMode.ACTIVE_ABILITY, 160, 3, BalanceCategory.FREQUENT_PASSIVE, ScenarioSetup.NONE, false, "Two second cooldown, near-permanent uptime"),
-                spec("ribboncleaver", "Ribboncleaver", SpellScalingProfile.ARCANE, ActivationMode.ACTIVE_ABILITY, 160, 3, BalanceCategory.SHORT_COOLDOWN_ACTIVE, ScenarioSetup.NONE, false, "No scaling helper used at all" + NO_SCALING),
+                amplifierSpec("ribboncleaver", "Ribboncleaver", SpellScalingProfile.ARCANE, ActivationMode.ACTIVE_ABILITY, 160, 3, BalanceCategory.SHORT_COOLDOWN_ACTIVE, "Buff amplifies the next melee hit, so it is judged on total DPS" + NO_SCALING),
                 spec("soulstalker", "Soulstalker", SpellScalingProfile.SOUL, ActivationMode.ACTIVE_ABILITY, 900, 3, BalanceCategory.LONG_COOLDOWN_BURST, ScenarioSetup.NONE, false, "Leap with a long cooldown" + NO_SCALING),
                 spec("soulstealer", "Soulstealer", SpellScalingProfile.SOUL, ActivationMode.PASSIVE_ON_HIT, 160, 3, BalanceCategory.FREQUENT_PASSIVE, ScenarioSetup.NONE, false, true, "One second cooldown on-hit steal"),
                 spec("stormscale", "Stormscale", SpellScalingProfile.LIGHTNING, ActivationMode.ACTIVE_ABILITY, 900, 3, BalanceCategory.LONG_COOLDOWN_BURST, ScenarioSetup.NONE, false, "Fifty second cooldown with a long active window"),
@@ -75,11 +75,18 @@ final class AbilityBalanceCatalog {
                 reliabilitySensitive, false, notes);
     }
 
+    private static AbilityBalanceSpec amplifierSpec(String weaponId, String ability, SpellScalingProfile profile,
+                                                    ActivationMode activationMode, int durationTicks,
+                                                    int targetDistance, BalanceCategory category, String notes) {
+        return new AbilityBalanceSpec(weaponId, ability, profile, activationMode, durationTicks,
+                targetDistance, category, ScenarioSetup.NONE, false, false, true, notes);
+    }
+
     private static AbilityBalanceSpec spec(String weaponId, String ability, SpellScalingProfile profile,
                                            ActivationMode activationMode, int durationTicks, int targetDistance,
                                            BalanceCategory category, ScenarioSetup setup,
                                            boolean reliabilitySensitive, boolean requiresMeleeTrigger, String notes) {
         return new AbilityBalanceSpec(weaponId, ability, profile, activationMode, durationTicks,
-                targetDistance, category, setup, reliabilitySensitive, requiresMeleeTrigger, notes);
+                targetDistance, category, setup, reliabilitySensitive, requiresMeleeTrigger, false, notes);
     }
 }

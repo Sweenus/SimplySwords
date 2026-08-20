@@ -118,6 +118,7 @@ public class MagibladeSwordItem extends UniqueSwordItem implements UniqueWeaponA
                 Math.max(1, Config.uniqueEffects.magiblade.summonDuration) / 20.0F
         ).setStyle(Styles.TEXT));
         appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.magiblade.cooldown);
+        appendAbilityManaCostTooltip(tooltip, itemStack);
 
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
         net.sweenus.simplyswords.client.util.TooltipUtils.appendSpellScaleTooltip(tooltip, "arcane");

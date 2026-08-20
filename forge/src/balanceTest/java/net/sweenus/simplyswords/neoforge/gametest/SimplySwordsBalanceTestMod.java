@@ -11,6 +11,7 @@ public final class SimplySwordsBalanceTestMod {
 
     public SimplySwordsBalanceTestMod(IEventBus eventBus, ModContainer container) {
         IronsCasterGearEnhancer.register();
+        IronsManaTopUp.register();
         FrameworkConfiguration.builder(Identifier.of("simplyswords_balance_test", "tests"))
                 .build()
                 .create()

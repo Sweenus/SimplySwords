@@ -123,7 +123,7 @@ public class WickpiercerSwordItem extends UniqueSwordItem implements RevivalWeap
 
     @Override
     public int getActivationCooldownTicks(ItemStack stack, WeaponAbilityContext context) {
-        return 20;
+        return Math.max(1, Config.uniqueEffects.wickpiercer.cooldown);
     }
 
     @Override
@@ -141,7 +141,8 @@ public class WickpiercerSwordItem extends UniqueSwordItem implements RevivalWeap
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.waxweaversworditem.tooltip4").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
-        appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.waxweaver.cooldown);
+        appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.wickpiercer.cooldown);
+        appendAbilityManaCostTooltip(tooltip, itemStack);
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.wickpiercersworditem.tooltip3").setStyle(Styles.TEXT));
@@ -195,8 +196,12 @@ public class WickpiercerSwordItem extends UniqueSwordItem implements RevivalWeap
             super(new ItemStackTooltipAppender(ItemsRegistry.WICKPIERCER::get));
         }
 
+        @ValidatedInt.Restrict(min = 1)
+        public int cooldown = 33;
         @ValidatedFloat.Restrict(min = 0f)
         public float damageScaling = 0.8f;
+        @ValidatedFloat.Restrict(min = 0f)
+        public float spellScaling = 4.1312f;
         @ValidatedFloat.Restrict(min = 0f)
         public float throwDamageScaling = 0.4f;
         @ValidatedFloat.Restrict(min = 0f)

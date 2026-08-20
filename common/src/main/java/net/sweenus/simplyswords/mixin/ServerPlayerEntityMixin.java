@@ -308,8 +308,9 @@ public abstract class ServerPlayerEntityMixin {
                     if (serverPlayer.getMainHandStack().getItem() instanceof WickpiercerSwordItem
                             && serverPlayer.hasStatusEffect(EffectRegistry.getReference(EffectRegistry.FRENZY))) {
                         ItemStack wickpiercerStack = serverPlayer.getMainHandStack();
-                        float damageModifier = HelperMethods.attackScaledDamage(
-                                serverPlayer, wickpiercerStack, Config.uniqueEffects.wickpiercer.damageScaling);
+                        float damageModifier = HelperMethods.abilityScaledDamage("fire",
+                                serverPlayer, wickpiercerStack, Config.uniqueEffects.wickpiercer.damageScaling,
+                                Config.uniqueEffects.wickpiercer.spellScaling);
                         DamageSource damageSource = serverPlayer.getDamageSources().playerAttack(serverPlayer);
                         target.timeUntilRegen = 0;
                         HelperMethods.decrementStatusEffect(serverPlayer, EffectRegistry.getReference(EffectRegistry.FRENZY));

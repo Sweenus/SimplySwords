@@ -1,7 +1,11 @@
 package net.sweenus.simplyswords.neoforge;
 
 import dev.architectury.platform.Platform;
+import io.redspace.ironsspellbooks.api.magic.MagicData;
 import io.redspace.ironsspellbooks.api.registry.AttributeRegistry;
+import io.redspace.ironsspellbooks.network.SyncManaPacket;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.neoforged.neoforge.network.PacketDistributor;
 import net.minecraft.entity.LivingEntity;
 import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.config.Config;
@@ -57,5 +61,29 @@ public class ForgeHelperMethods {
             }
         }
         return 0;
+    }
+
+    public static boolean hasManaSystem() {
+        return Platform.isForgeLike()
+                && SimplySwords.passVersionCheck("irons_spellbooks", SimplySwords.minimumSpellbookVersion);
+    }
+
+    public static boolean hasMana(LivingEntity entity, float amount) {
+        if (amount <= 0.0F || !hasManaSystem() || entity == null || entity.getWorld().isClient) {
+            return true;
+        }
+        return MagicData.getPlayerMagicData(entity).getMana() >= amount;
+    }
+
+    public static void spendMana(LivingEntity entity, float amount) {
+        if (amount <= 0.0F || !hasManaSystem() || entity == null || entity.getWorld().isClient) {
+            return;
+        }
+        MagicData magicData = MagicData.getPlayerMagicData(entity);
+        magicData.setMana(Math.max(0.0F, magicData.getMana() - amount));
+        // MagicData has no internal sync, so the client HUD needs the packet explicitly.
+        if (entity instanceof ServerPlayerEntity serverPlayer) {
+            PacketDistributor.sendToPlayer(serverPlayer, new SyncManaPacket(magicData));
+        }
     }
 }

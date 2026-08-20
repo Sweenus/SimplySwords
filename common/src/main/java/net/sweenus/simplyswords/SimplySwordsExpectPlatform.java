@@ -41,4 +41,22 @@ public class SimplySwordsExpectPlatform {
         // Just throw an error, the content should get replaced at runtime.
         throw new AssertionError();
     }
+
+    /**
+     * Whether a mana system is present. False on platforms without Iron's Spells, where costs are skipped.
+     */
+    @ExpectPlatform
+    public static boolean hasManaSystem() {
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
+    public static boolean hasMana(LivingEntity entity, float amount) {
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
+    public static void spendMana(LivingEntity entity, float amount) {
+        throw new AssertionError();
+    }
 }

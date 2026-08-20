@@ -18,4 +18,7 @@ public class SimplySwordsExpectPlatformImpl {
     public static String getVersion() {return FabricLoader.getInstance().getModContainer(MOD_ID).get().getMetadata().getVersion().toString();}
     public static float getSpellPowerDamage(float damageModifier, LivingEntity player, String magicSchool) {return FabricHelperMethods.useSpellAttributeScaling(damageModifier, player, magicSchool);}
     public static String getSpellSchoolDisplayKey(String magicSchool) {return FabricHelperMethods.spellSchoolDisplayKey(magicSchool);}
+    public static boolean hasManaSystem() {return ManaCostImpl.hasManaSystem();}
+    public static boolean hasMana(net.minecraft.entity.LivingEntity entity, float amount) {return ManaCostImpl.hasMana(entity, amount);}
+    public static void spendMana(net.minecraft.entity.LivingEntity entity, float amount) {ManaCostImpl.spendMana(entity, amount);}
 }

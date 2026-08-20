@@ -159,6 +159,7 @@ public class DormantRelicSwordItem extends UniqueSwordItem implements UniqueWeap
                 appendAbilityCooldownTooltip(tooltip, sunForm
                         ? Config.uniqueEffects.sunfire.cooldown
                         : Config.uniqueEffects.harbinger.cooldown);
+                appendAbilityManaCostTooltip(tooltip, itemStack);
             }
         }
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
