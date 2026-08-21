@@ -47,7 +47,7 @@ public class NecromanticArsenalPower extends NetherGemPower {
         if (TooltipUtils.shouldDisplayTooltip(itemStack, null)) {
             tooltip.add(Text.literal("").append(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.necromantic_arsenal.description")).setStyle(Styles.NETHERFUSED_DESCRIPTION));
         }
-        TooltipUtils.appendSpellScaleTooltip(tooltip, "soul");
+        TooltipUtils.appendGemPowerSpellScaleTooltip(tooltip, "necromantic_arsenal");
     }
 
     public static class Settings extends TooltipSettings {

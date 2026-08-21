@@ -87,8 +87,10 @@ public class SoulPyreSwordItem extends UniqueSwordItem implements TwoHandedWeapo
         tooltip.add(Text.translatable("item.simplyswords.soulpyresworditem.tooltip6").setStyle(Styles.TEXT));
         appendAbilityCooldownTooltip(tooltip, itemStack, Config.uniqueEffects.soulpyre.cooldown);
 
+        appendAbilityManaCostTooltip(tooltip, itemStack);
+
         super.appendTooltip(itemStack, world, tooltip, tooltipContext);
-        net.sweenus.simplyswords.client.util.TooltipUtils.appendSpellScaleTooltip(tooltip, "soul");
+        net.sweenus.simplyswords.client.util.TooltipUtils.appendWeaponSpellScaleTooltip(tooltip, itemStack, "soul");
     }
 
     public static class EffectSettings extends TooltipSettings {

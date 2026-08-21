@@ -1,9 +1,14 @@
 package net.sweenus.simplyswords.mixin;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Multimap;
 import net.minecraft.client.item.TooltipContext;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.attribute.EntityAttribute;
+import net.minecraft.entity.attribute.EntityAttributeModifier;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.StackReference;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -13,6 +18,7 @@ import net.minecraft.util.ClickType;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.AdditionalGemSocketApi;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
+import net.sweenus.simplyswords.compat.SpellPowerWeaponAttributes;
 import net.sweenus.simplyswords.power.GemPowerComponent;
 import net.sweenus.simplyswords.power.GemPowerFiller;
 import net.sweenus.simplyswords.registry.ComponentTypeRegistry;
@@ -27,6 +33,18 @@ import java.util.List;
 
 @Mixin(ItemStack.class)
 public abstract class ItemStackMixin {
+
+    @Inject(method = "getAttributeModifiers", at = @At("RETURN"), cancellable = true)
+    private void simplyswords$applySpellPowerModifiers(
+            EquipmentSlot slot,
+            CallbackInfoReturnable<Multimap<EntityAttribute, EntityAttributeModifier>> cir
+    ) {
+        ImmutableMultimap.Builder<EntityAttribute, EntityAttributeModifier> modifiers = ImmutableMultimap.builder();
+        modifiers.putAll(cir.getReturnValue());
+        SpellPowerWeaponAttributes.applyEquipmentModifiers(
+                (ItemStack) (Object) this, slot, modifiers::put);
+        cir.setReturnValue(modifiers.build());
+    }
 
     @Inject(method = "onClicked", at = @At("HEAD"))
     private void simplyswords$socketAdditionalGem(

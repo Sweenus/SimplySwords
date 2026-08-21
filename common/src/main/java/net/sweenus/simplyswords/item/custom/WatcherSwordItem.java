@@ -96,6 +96,7 @@ public abstract class WatcherSwordItem extends UniqueSwordItem implements Unique
         if (getWatcherWeaponType() == WatcherWeaponType.WARGLAIVE) {
             tooltip.add(Text.translatable("item.simplyswords.watchersworditem.warglaive.tooltip2").setStyle(Styles.TEXT));
             appendAbilityCooldownTooltip(tooltip, itemStack, Config.uniqueEffects.watcher.warglaiveCooldown);
+            appendAbilityManaCostTooltip(tooltip, itemStack);
         } else {
             tooltip.add(Text.translatable("item.simplyswords.watchersworditem.claymore.tooltip2").setStyle(Styles.TEXT));
             tooltip.add(Text.literal(""));
@@ -104,10 +105,11 @@ public abstract class WatcherSwordItem extends UniqueSwordItem implements Unique
             tooltip.add(Text.literal(""));
             tooltip.add(Text.translatable("item.simplyswords.watchersworditem.claymore.tooltip4").setStyle(Styles.TEXT));
             appendAbilityCooldownTooltip(tooltip, itemStack, Config.uniqueEffects.watcher.claymoreCooldown);
+            appendAbilityManaCostTooltip(tooltip, itemStack);
         }
 
         super.appendTooltip(itemStack, world, tooltip, tooltipContext);
-        TooltipUtils.appendSpellScaleTooltip(tooltip, "soul");
+        TooltipUtils.appendWeaponSpellScaleTooltip(tooltip, itemStack, "soul");
     }
 
     @Override

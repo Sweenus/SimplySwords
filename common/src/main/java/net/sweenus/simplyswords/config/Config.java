@@ -16,6 +16,7 @@ public final class Config {
     public static final StatusEffectsConfig statusEffects = ConfigApiJava.registerAndLoadConfig(StatusEffectsConfig::new);
     public static final WeaponAttributesConfig weaponAttribute = ConfigApiJava.registerAndLoadConfig(WeaponAttributesConfig::new);
     public static final UniqueEffectsConfig uniqueEffects = ConfigApiJava.registerAndLoadConfig(UniqueEffectsConfig::new);
+    public static final CompatibilityConfig compatibility = ConfigApiJava.registerAndLoadConfig(CompatibilityConfig::new);
 
 //Guide to Config Features
 
@@ -30,22 +31,6 @@ public final class Config {
 //ValidatedCondition
         //ValidatedCondition is a wrapper around a setting that only allows interaction with the setting if a condition is met.
         //in SS case, I've used it to gate mod compat settings behind checks for the mod being loaded.
-        //Example below.
-            //line1: the setting itself, using a `Validated[Thing] instead of a plain java type
-            //line2: wraps the setting in the condition
-            //line3: supplies the conditional boolean check
-            //line4: tooltip text for when the condition is failing. "Requires Gobber" etc.
-            //line5: Fallback value. This supplies the value to get from the setting if the condition fails, regardless of the config choices made underneath.
-                //So in this case, it will always return false if gobber isn't loaded.
-            //line6: adds a unique Caption to the setting button. Normally "Condition not met", in SS I changed it to "Disabled"
-        /*
-        public ValidatedCondition<Boolean> compatGobberEndWeaponsUnbreakable = new ValidatedBoolean(true)
-            .toCondition(
-                    () -> Platform.isModLoaded("gobber2"),
-                    Text.translatable("simplyswords.general.compatGobberEndWeaponsUnbreakable.condition"),
-                    () -> false
-            ).withFailTitle(Text.translatable("simplyswords.general.compatGobberEndWeaponsUnbreakable.failTitle"));
-        */
 
 //@Validated[Number].Restrict
         //Works basically like the Cloth version of this annotation. Just make sure the [Number] type matches the actual number being restricted.

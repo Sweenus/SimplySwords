@@ -15,12 +15,15 @@ import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.SimplySwordsExpectPlatform;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.api.SpellScalingProfile;
+import net.sweenus.simplyswords.compat.SpellScalingComponents;
+import net.sweenus.simplyswords.compat.SpellSchoolDisplay;
 import net.sweenus.simplyswords.power.GemPowerComponent;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class TooltipUtils {
@@ -138,16 +141,55 @@ public class TooltipUtils {
                 (profile == null ? SpellScalingProfile.ARCANE : profile).registryId());
     }
 
-    public static void appendSpellScaleTooltip(List<Text> tooltip, Identifier scalingProfileId) {
+    public static void appendWeaponSpellScaleTooltip(List<Text> tooltip, ItemStack stack, String spellSchools) {
+        String[] parts = (spellSchools == null ? "" : spellSchools).split("_");
+        List<Identifier> components = new ArrayList<>();
+        for (String part : parts) {
+            if (!part.isEmpty()) {
+                components.add(SpellScalingComponents.weaponComponent(
+                        stack, SpellScalingProfile.fromLegacyName(part)));
+            }
+        }
+        appendSpellScaleTooltip(tooltip, components.toArray(Identifier[]::new));
+    }
+
+    public static void appendWeaponSpellScaleTooltip(List<Text> tooltip, ItemStack stack,
+                                                      SpellScalingProfile... profiles) {
+        SpellScalingProfile[] requested = profiles == null || profiles.length == 0
+                ? new SpellScalingProfile[]{SpellScalingProfile.ARCANE}
+                : profiles;
+        appendSpellScaleTooltip(tooltip, Arrays.stream(requested)
+                .map(profile -> SpellScalingComponents.weaponComponent(stack, profile))
+                .distinct()
+                .toArray(Identifier[]::new));
+    }
+
+    public static void appendGemPowerSpellScaleTooltip(List<Text> tooltip, String powerPath) {
+        appendSpellScaleTooltip(tooltip, SpellScalingComponents.power(powerPath));
+    }
+
+    public static void appendSpellScaleTooltip(List<Text> tooltip, Identifier... scalingProfileIds) {
         if ((Platform.isModLoaded("spell_power") || Platform.isModLoaded("irons_spellbooks"))
                 && Screen.hasAltDown() && !Screen.hasControlDown()) {
-            Identifier profileId = scalingProfileId == null
-                    ? SpellScalingProfile.ARCANE.registryId()
-                    : scalingProfileId;
+            Identifier[] profileIds = scalingProfileIds == null || scalingProfileIds.length == 0
+                    ? new Identifier[]{SpellScalingProfile.ARCANE.registryId()}
+                    : scalingProfileIds;
             tooltip.add(Text.literal(""));
             tooltip.add(Text.translatable("item.simplyswords.compat.spellScaling").setStyle(Styles.COMMON));
-            tooltip.add(Text.literal(schoolGlyph(profileId.getPath()))
-                    .append(Text.translatable(SimplySwordsExpectPlatform.getSpellSchoolDisplayKey(profileId))));
+            for (Identifier profileId : profileIds) {
+                if (profileId == null) {
+                    continue;
+                }
+                SpellSchoolDisplay display = SimplySwordsExpectPlatform.getActiveSpellSchoolDisplay(profileId);
+                MutableText line = Text.empty();
+                SpellScalingComponents.get(profileId)
+                        .map(SpellScalingComponents.Definition::effectTranslationKey)
+                        .filter(key -> !key.isBlank())
+                        .ifPresent(key -> line.append(Text.translatable(key)).append(Text.literal(": ")));
+                line.append(Text.literal(schoolGlyph(display.schoolId().getPath())))
+                        .append(display.name());
+                tooltip.add(line);
+            }
             tooltip.add(Text.literal(""));
         }
     }

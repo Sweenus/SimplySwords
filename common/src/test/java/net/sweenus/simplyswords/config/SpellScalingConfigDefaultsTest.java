@@ -4,22 +4,19 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 class SpellScalingConfigDefaultsTest {
 
     @Test
     void globalDefaultsAreValid() {
-        GeneralConfig settings = new GeneralConfig();
-
         assertAll(
-                () -> assertEquals(2.17F, settings.ironsSpellBasePower),
-                () -> assertEquals(1.40F, settings.spellScalingDiminishingReturnsStart),
-                () -> assertEquals(10.0F, settings.spellScalingDiminishingReturnsStrength),
-                () -> assertTrue(settings.compatEnableIronsCooldownReduction.getUnconditional()),
-                () -> assertTrue(settings.ironsSpellBasePower > 0.0F),
-                () -> assertTrue(settings.spellScalingDiminishingReturnsStart >= 1.0F),
-                () -> assertTrue(settings.spellScalingDiminishingReturnsStrength >= 0.0F)
+                () -> assertEquals(2.17F, CompatibilityConfig.DEFAULT_IRONS_BASE_POWER),
+                () -> assertEquals(0.50F, CompatibilityConfig.DEFAULT_SPELL_POWER_API_SCALING_MULTIPLIER),
+                () -> assertEquals(1.40F, CompatibilityConfig.DEFAULT_DIMINISHING_RETURNS_START),
+                () -> assertEquals(10.0F, CompatibilityConfig.DEFAULT_DIMINISHING_RETURNS_STRENGTH),
+                () -> assertFalse(CompatibilityConfig.defaultWeaponManaCosts().containsKey(
+                        net.minecraft.util.Identifier.of("simplyswords", "dreadtide")))
         );
     }
 }

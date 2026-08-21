@@ -128,8 +128,9 @@ public class HiveheartSwordItem extends UniqueSwordItem implements UniqueWeaponA
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.hiveheartsworditem.tooltip7").setStyle(Styles.TEXT));
         appendAbilityCooldownTooltip(tooltip, itemStack, Config.uniqueEffects.hiveheart.activeCooldown);
+        appendAbilityManaCostTooltip(tooltip, itemStack);
         super.appendTooltip(itemStack, world, tooltip, tooltipContext);
-        net.sweenus.simplyswords.client.util.TooltipUtils.appendSpellScaleTooltip(tooltip, "nature");
+        net.sweenus.simplyswords.client.util.TooltipUtils.appendWeaponSpellScaleTooltip(tooltip, itemStack, "nature");
     }
 
     public static class EffectSettings extends TooltipSettings {

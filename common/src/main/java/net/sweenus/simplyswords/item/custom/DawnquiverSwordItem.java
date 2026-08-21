@@ -180,8 +180,9 @@ public final class DawnquiverSwordItem extends UniqueSwordItem implements TwoHan
         tooltip.add(Text.translatable("item.simplyswords.dawnquiversworditem.tooltip7",
                 TooltipUtils.getEffectiveWeaponCooldownTicks(stack,
                         Config.uniqueEffects.dawnquiver.cooldown) / 20.0F).setStyle(Styles.TEXT));
+        appendAbilityManaCostTooltip(tooltip, stack);
         super.appendTooltip(stack, world, tooltip, tooltipContext);
-        TooltipUtils.appendSpellScaleTooltip(tooltip, SpellScalingProfile.HEALING);
+        TooltipUtils.appendWeaponSpellScaleTooltip(tooltip, stack, SpellScalingProfile.HEALING);
     }
 
     @Override

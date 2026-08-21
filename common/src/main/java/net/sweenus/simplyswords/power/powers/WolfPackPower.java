@@ -42,7 +42,7 @@ public class WolfPackPower extends NetherGemPower {
         if (TooltipUtils.shouldDisplayTooltip(itemStack, null)) {
             tooltip.add(Text.literal("").append(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.wolf_pack.description")).setStyle(Styles.NETHERFUSED_DESCRIPTION));
         }
-        TooltipUtils.appendSpellScaleTooltip(tooltip, "nature");
+        TooltipUtils.appendGemPowerSpellScaleTooltip(tooltip, "wolf_pack");
     }
 
     public static class Settings extends TooltipSettings {

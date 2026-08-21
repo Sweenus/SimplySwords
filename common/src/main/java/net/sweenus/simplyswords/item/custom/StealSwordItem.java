@@ -352,8 +352,9 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.stealsworditem.tooltip5").setStyle(Styles.TEXT));
         appendAbilityCooldownTooltip(tooltip, itemStack, Config.uniqueEffects.soulstealer.cooldown);
+        appendAbilityManaCostTooltip(tooltip, itemStack);
         super.appendTooltip(itemStack, world, tooltip, tooltipContext);
-        net.sweenus.simplyswords.client.util.TooltipUtils.appendSpellScaleTooltip(tooltip, "soul");
+        net.sweenus.simplyswords.client.util.TooltipUtils.appendWeaponSpellScaleTooltip(tooltip, itemStack, "soul");
     }
 
     public static class EffectSettings extends TooltipSettings {

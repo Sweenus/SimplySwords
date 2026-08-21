@@ -151,8 +151,9 @@ public class ThunderbrandSwordItem extends UniqueSwordItem implements TwoHandedW
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.thunderbrandsworditem.tooltip5").setStyle(Styles.TEXT));
         appendAbilityCooldownTooltip(tooltip, itemStack, Config.uniqueEffects.thunderbrand.cooldown);
+        appendAbilityManaCostTooltip(tooltip, itemStack);
         super.appendTooltip(itemStack, world, tooltip, tooltipContext);
-        TooltipUtils.appendSpellScaleTooltip(tooltip, "lightning");
+        TooltipUtils.appendWeaponSpellScaleTooltip(tooltip, itemStack, "lightning");
     }
 
     public static class EffectSettings extends TooltipSettings {

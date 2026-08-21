@@ -184,8 +184,9 @@ public class StormbringerSwordItem extends UniqueSwordItem implements UniqueWeap
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.stormbringersworditem.tooltip4").setStyle(Styles.TEXT));
         appendAbilityCooldownTooltip(tooltip, itemStack, Config.uniqueEffects.stormbringer.cooldown);
+        appendAbilityManaCostTooltip(tooltip, itemStack);
         super.appendTooltip(itemStack, world, tooltip, tooltipContext);
-        TooltipUtils.appendSpellScaleTooltip(tooltip, "lightning");
+        TooltipUtils.appendWeaponSpellScaleTooltip(tooltip, itemStack, "lightning");
     }
 
     public static class EffectSettings extends TooltipSettings {

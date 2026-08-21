@@ -155,8 +155,9 @@ public class FlamewindSwordItem extends UniqueSwordItem implements UniqueWeaponA
         tooltip.add(Text.translatable("item.simplyswords.flamewindsworditem.tooltip7").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.flamewindsworditem.tooltip11", Config.uniqueEffects.flamewind.spreadCap).setStyle(Styles.TEXT));
         appendAbilityCooldownTooltip(tooltip, itemStack, Config.uniqueEffects.flamewind.cooldown);
+        appendAbilityManaCostTooltip(tooltip, itemStack);
         super.appendTooltip(itemStack, world, tooltip, tooltipContext);
-        TooltipUtils.appendSpellScaleTooltip(tooltip, "fire");
+        TooltipUtils.appendWeaponSpellScaleTooltip(tooltip, itemStack, "fire");
     }
 
     public static class EffectSettings extends TooltipSettings {

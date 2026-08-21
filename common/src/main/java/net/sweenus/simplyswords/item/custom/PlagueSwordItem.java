@@ -58,7 +58,7 @@ public class PlagueSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.plaguesworditem.tooltip4").setStyle(Styles.TEXT));
 
         super.appendTooltip(itemStack, world, tooltip, tooltipContext);
-        net.sweenus.simplyswords.client.util.TooltipUtils.appendSpellScaleTooltip(tooltip, "soul");
+        net.sweenus.simplyswords.client.util.TooltipUtils.appendWeaponSpellScaleTooltip(tooltip, itemStack, "soul");
     }
 
     public static class EffectSettings extends TooltipSettings {

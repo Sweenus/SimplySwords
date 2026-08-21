@@ -5,6 +5,9 @@
     "A": {
       "item": "minecraft:amethyst_shard"
     },
+    "G": {
+      "item": "minecraft:gold_ingot"
+    },
     "O": {
       "item": "minecraft:obsidian"
     },
@@ -16,9 +19,9 @@
     }
   },
   "pattern": [
-    "OAO",
+    "GOG",
     "ASA",
-    "ORO"
+    "GRG"
   ],
   "result": {
     "count": 1,

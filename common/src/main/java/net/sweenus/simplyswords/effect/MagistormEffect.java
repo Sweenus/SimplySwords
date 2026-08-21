@@ -11,6 +11,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.util.math.Box;
 import net.sweenus.simplyswords.config.Config;
+import net.sweenus.simplyswords.compat.SpellScalingComponents;
 import net.sweenus.simplyswords.item.custom.MagiscytheSwordItem;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
@@ -39,7 +40,7 @@ public class MagistormEffect extends HighOrbitingEffect {
             float duration = Config.uniqueEffects.magiscythe.duration;
             int frequency = Math.max(3, 10 - amplifier);
 
-            float damage = HelperMethods.abilityScaledDamage("arcane", livingEntity, livingEntity.getMainHandStack(),
+            float damage = HelperMethods.abilityScaledDamage(SpellScalingComponents.id("magiscythe"), livingEntity, livingEntity.getMainHandStack(),
                     Config.uniqueEffects.magiscythe.damageScaling, Config.uniqueEffects.magiscythe.spellScaling);
 
             DamageSource damageSource =  livingEntity.getDamageSources().indirectMagic(livingEntity, livingEntity);

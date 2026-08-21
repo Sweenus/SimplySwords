@@ -149,8 +149,10 @@ public class DreadtideSwordItem extends UniqueSwordItem {
         tooltip.add(Text.literal(""));
         tooltip.add(Text.literal("\uA999 ").append(Text.translatable("item.simplyswords.dreadtidesworditem.tooltip12").setStyle(Styles.CORRUPTED)));
 
+        appendAbilityManaCostTooltip(tooltip, itemStack);
+
         super.appendTooltip(itemStack, world, tooltip, tooltipContext);
-        net.sweenus.simplyswords.client.util.TooltipUtils.appendSpellScaleTooltip(tooltip, "eldritch");
+        net.sweenus.simplyswords.client.util.TooltipUtils.appendWeaponSpellScaleTooltip(tooltip, itemStack, "eldritch");
     }
 
     public static class EffectSettings extends TooltipSettings {

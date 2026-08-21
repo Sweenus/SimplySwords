@@ -95,8 +95,9 @@ public class HearthflameSwordItem extends UniqueSwordItem implements TwoHandedWe
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.volcanicfurysworditem.tooltip8").setStyle(Styles.TEXT));
         appendAbilityCooldownTooltip(tooltip, itemStack, Config.uniqueEffects.hearthflame.cooldown);
+        appendAbilityManaCostTooltip(tooltip, itemStack);
         super.appendTooltip(itemStack, world, tooltip, tooltipContext);
-        TooltipUtils.appendSpellScaleTooltip(tooltip, "fire");
+        TooltipUtils.appendWeaponSpellScaleTooltip(tooltip, itemStack, "fire");
     }
 
     public static class EffectSettings extends TooltipSettings {

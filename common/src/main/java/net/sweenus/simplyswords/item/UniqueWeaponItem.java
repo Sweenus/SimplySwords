@@ -176,7 +176,6 @@ public abstract class UniqueWeaponItem extends SwordItem {
     protected final void appendSharedUniqueWeaponTooltip(ItemStack itemStack, World world, List<Text> tooltip,
                                                          net.minecraft.client.item.TooltipContext tooltipContext) {
         tooltip.addAll(WeaponImplicitRegistry.buildTooltipLines(itemStack, Screen.hasAltDown()));
-        appendAbilityManaCostTooltip(tooltip, itemStack);
         generateDynamicTooltip(itemStack, world, tooltip, tooltipContext);
     }
 

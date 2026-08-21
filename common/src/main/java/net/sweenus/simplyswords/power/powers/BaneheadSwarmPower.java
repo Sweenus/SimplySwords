@@ -48,7 +48,7 @@ public class BaneheadSwarmPower extends RunefusedGemPower {
         if (TooltipUtils.shouldDisplayTooltip(itemStack, null)) {
             tooltip.add(Text.literal("").append(Text.translatable("item.simplyswords.baneheadswarmsworditem.tooltip2")).setStyle(Styles.RUNIC_DESCRIPTION));
         }
-        TooltipUtils.appendSpellScaleTooltip(tooltip, "eldritch");
+        TooltipUtils.appendGemPowerSpellScaleTooltip(tooltip, "banehead_swarm");
     }
 
     public static class Settings extends TooltipSettings {

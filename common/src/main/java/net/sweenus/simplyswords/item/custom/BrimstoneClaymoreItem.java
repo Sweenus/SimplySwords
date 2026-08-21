@@ -150,8 +150,10 @@ public class BrimstoneClaymoreItem extends UniqueSwordItem implements TwoHandedW
         tooltip.add(Text.translatable("item.simplyswords.brimstoneclaymoreitem.tooltip4").setStyle(Styles.TEXT));
         appendAbilityCooldownTooltip(tooltip, itemStack, Config.uniqueEffects.brimstone_claymore.cooldown);
 
+        appendAbilityManaCostTooltip(tooltip, itemStack);
+
         super.appendTooltip(itemStack, world, tooltip, tooltipContext);
-        net.sweenus.simplyswords.client.util.TooltipUtils.appendSpellScaleTooltip(tooltip, "fire");
+        net.sweenus.simplyswords.client.util.TooltipUtils.appendWeaponSpellScaleTooltip(tooltip, itemStack, "fire");
     }
 
     public static class EffectSettings extends TooltipSettings {

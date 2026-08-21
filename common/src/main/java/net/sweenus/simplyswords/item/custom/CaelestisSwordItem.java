@@ -93,8 +93,10 @@ public class CaelestisSwordItem extends UniqueSwordItem implements UniqueWeaponA
                 Config.uniqueEffects.caelestis.betrayalChance).setStyle(Styles.TEXT));
         appendAbilityCooldownTooltip(tooltip, itemStack, Config.uniqueEffects.caelestis.cooldown);
 
+        appendAbilityManaCostTooltip(tooltip, itemStack);
+
         super.appendTooltip(itemStack, world, tooltip, tooltipContext);
-        net.sweenus.simplyswords.client.util.TooltipUtils.appendSpellScaleTooltip(tooltip, "eldritch");
+        net.sweenus.simplyswords.client.util.TooltipUtils.appendWeaponSpellScaleTooltip(tooltip, itemStack, "eldritch");
     }
 
     public static class EffectSettings extends TooltipSettings {

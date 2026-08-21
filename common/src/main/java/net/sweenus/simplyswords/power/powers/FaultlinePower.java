@@ -10,6 +10,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.sweenus.simplyswords.api.DelegatedWeaponHitContext;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
+import net.sweenus.simplyswords.compat.SpellScalingComponents;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
@@ -37,7 +38,7 @@ public class FaultlinePower extends RunefusedGemPower {
         }
 
         float damage = HelperMethods.gemPowerScaledDamage(
-                "nature",
+                SpellScalingComponents.power("faultline"),
                 attacker,
                 stack,
                 Config.gemPowers.faultline.damageScaling,
@@ -62,7 +63,7 @@ public class FaultlinePower extends RunefusedGemPower {
         if (TooltipUtils.shouldDisplayTooltip(itemStack, null)) {
             tooltip.add(Text.literal("").append(Text.translatable("item.simplyswords.faultlinesworditem.tooltip2")).setStyle(Styles.RUNIC_DESCRIPTION));
         }
-        TooltipUtils.appendSpellScaleTooltip(tooltip, "nature");
+        TooltipUtils.appendGemPowerSpellScaleTooltip(tooltip, "faultline");
     }
 
     public static class Settings extends TooltipSettings {

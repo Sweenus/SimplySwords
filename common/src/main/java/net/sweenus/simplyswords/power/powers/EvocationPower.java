@@ -49,7 +49,7 @@ public class EvocationPower extends RunefusedGemPower {
         if (TooltipUtils.shouldDisplayTooltip(itemStack, null)) {
             tooltip.add(Text.literal("").append(Text.translatable("item.simplyswords.evocationsworditem.tooltip2")).setStyle(Styles.RUNIC_DESCRIPTION));
         }
-        TooltipUtils.appendSpellScaleTooltip(tooltip, "evocation");
+        TooltipUtils.appendGemPowerSpellScaleTooltip(tooltip, "evocation");
     }
 
     public static class Settings extends TooltipSettings {

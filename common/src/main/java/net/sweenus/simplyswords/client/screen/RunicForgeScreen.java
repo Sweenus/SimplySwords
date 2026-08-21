@@ -21,6 +21,7 @@ public class RunicForgeScreen extends HandledScreen<RunicForgeScreenHandler> {
     private static final long CHANNEL_DURATION_MS = 800L;
     private static final int GLOW = 0xCC74E7FF;
     private static final int GLOW_SOFT = 0x5574E7FF;
+    private static final int TITLE_COLOR = 0xFFFFFF;
 
     private final int[] previousCounts = new int[RunicForgeScreenHandler.FORGE_SLOT_COUNT];
     private final long[] animationStarts = new long[RunicForgeScreenHandler.FORGE_SLOT_COUNT];
@@ -85,7 +86,9 @@ public class RunicForgeScreen extends HandledScreen<RunicForgeScreenHandler> {
 
     @Override
     protected void drawForeground(DrawContext context, int mouseX, int mouseY) {
-        super.drawForeground(context, mouseX, mouseY);
+        context.drawText(textRenderer, title, titleX, titleY, TITLE_COLOR, false);
+        context.drawText(textRenderer, playerInventoryTitle,
+                playerInventoryTitleX, playerInventoryTitleY, TITLE_COLOR, false);
         long now = Util.getMeasuringTimeMs();
         boolean weaponGlow = false;
         for (int i = 1; i < RunicForgeScreenHandler.FORGE_SLOT_COUNT; i++) {

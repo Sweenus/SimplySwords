@@ -230,8 +230,10 @@ public class EmberIreSwordItem extends UniqueSwordItem implements UniqueWeaponAc
         tooltip.add(Text.translatable("item.simplyswords.emberiresworditem.tooltip9").setStyle(Styles.TEXT));
         appendAbilityCooldownTooltip(tooltip, itemStack, Config.uniqueEffects.emberblade.cooldown);
 
+        appendAbilityManaCostTooltip(tooltip, itemStack);
+
         super.appendTooltip(itemStack, world, tooltip, tooltipContext);
-        net.sweenus.simplyswords.client.util.TooltipUtils.appendSpellScaleTooltip(tooltip, "fire");
+        net.sweenus.simplyswords.client.util.TooltipUtils.appendWeaponSpellScaleTooltip(tooltip, itemStack, "fire");
     }
 
     @Translation(prefix = "", negate = true)

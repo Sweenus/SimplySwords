@@ -84,6 +84,8 @@ public class TwistedBladeItem extends UniqueSwordItem implements TwoHandedWeapon
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.ferocitysworditem.tooltip4").setStyle(Styles.TEXT));
 
+        appendAbilityManaCostTooltip(tooltip, itemStack);
+
         super.appendTooltip(itemStack, world, tooltip, tooltipContext);
     }
 

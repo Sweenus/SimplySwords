@@ -63,8 +63,9 @@ public final class RiftmaneSwordItem extends UniqueSwordItem implements TwoHande
         tooltip.add(Text.translatable("item.simplyswords.riftmanesworditem.tooltip5").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         appendAbilityCooldownTooltip(tooltip, stack, Config.uniqueEffects.riftmane.cooldown);
+        appendAbilityManaCostTooltip(tooltip, stack);
         super.appendTooltip(stack, world, tooltip, tooltipContext);
-        TooltipUtils.appendSpellScaleTooltip(tooltip, SpellScalingProfile.ARCANE);
+        TooltipUtils.appendWeaponSpellScaleTooltip(tooltip, stack, SpellScalingProfile.ARCANE);
     }
 
     @Override

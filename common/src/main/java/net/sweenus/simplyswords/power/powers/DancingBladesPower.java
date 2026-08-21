@@ -48,7 +48,7 @@ public class DancingBladesPower extends RunefusedGemPower {
         if (TooltipUtils.shouldDisplayTooltip(itemStack, null)) {
             tooltip.add(Text.literal("").append(Text.translatable("item.simplyswords.dancingbladessworditem.tooltip2")).setStyle(Styles.RUNIC_DESCRIPTION));
         }
-        TooltipUtils.appendSpellScaleTooltip(tooltip, "evocation");
+        TooltipUtils.appendGemPowerSpellScaleTooltip(tooltip, "dancing_blades");
     }
 
     public static class Settings extends TooltipSettings {

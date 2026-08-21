@@ -7,7 +7,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
-import net.sweenus.simplyswords.api.SpellScalingProfile;
+import net.sweenus.simplyswords.compat.SpellScalingComponents;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
@@ -31,7 +31,7 @@ public class ImbuedPower extends RunefusedGemPower {
 
 		float fullValue = (this.isGreater() ? 10.0F : 6.0F)
 				- ((stack.getDamage() / stack.getMaxDamage()) * 100) / 20.0F;
-		float damage = HelperMethods.gemPowerScaledValue(SpellScalingProfile.ARCANE, attacker, stack,
+		float damage = HelperMethods.gemPowerScaledValue(SpellScalingComponents.power("imbued"), attacker, stack,
 				fullValue, Config.gemPowers.imbued.spellScaling);
 
 		if (attacker.getRandom().nextInt(100) <= hitChance) {
@@ -54,7 +54,7 @@ public class ImbuedPower extends RunefusedGemPower {
 		if (TooltipUtils.shouldDisplayTooltip(itemStack, null)) {
 			tooltip.add(Text.literal("").append(Text.translatable("item.simplyswords.imbuedsworditem.tooltip2")).setStyle(Styles.RUNIC_DESCRIPTION));
 		}
-		TooltipUtils.appendSpellScaleTooltip(tooltip, "arcane");
+        TooltipUtils.appendGemPowerSpellScaleTooltip(tooltip, "imbued");
 	}
 
 	public static class Settings extends TooltipSettings {

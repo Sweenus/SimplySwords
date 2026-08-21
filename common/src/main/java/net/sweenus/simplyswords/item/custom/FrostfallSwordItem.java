@@ -134,8 +134,9 @@ public class FrostfallSwordItem extends UniqueSwordItem implements UniqueWeaponA
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.frostfallsworditem.tooltip4").setStyle(Styles.TEXT));
         appendAbilityCooldownTooltip(tooltip, itemStack, Config.uniqueEffects.frostfall.cooldown);
+        appendAbilityManaCostTooltip(tooltip, itemStack);
         super.appendTooltip(itemStack, world, tooltip, tooltipContext);
-        TooltipUtils.appendSpellScaleTooltip(tooltip, "frost");
+        TooltipUtils.appendWeaponSpellScaleTooltip(tooltip, itemStack, "frost");
     }
 
     public static class EffectSettings extends TooltipSettings {

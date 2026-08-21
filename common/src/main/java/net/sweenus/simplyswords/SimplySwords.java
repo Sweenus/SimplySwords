@@ -92,7 +92,7 @@ public class SimplySwords {
 
     public static String minimumEldritchEndVersion = "0.2.40";
     public static String minimumSpellPowerVersion = "0.10.0+1.20.1";
-    public static String minimumSpellbookVersion = "1.21-3.8.0";
+    public static String minimumSpellbookVersion = "1.20.1-3.16.2";
     public static String minimumMythicMetalsVersion = "0.24.0+1.21";
 
     public static void init() {

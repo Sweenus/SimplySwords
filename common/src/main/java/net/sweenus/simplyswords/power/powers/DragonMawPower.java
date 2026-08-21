@@ -46,7 +46,7 @@ public class DragonMawPower extends NetherGemPower {
         if (TooltipUtils.shouldDisplayTooltip(itemStack, null)) {
             tooltip.add(Text.literal("").append(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.dragon_maw.description")).setStyle(Styles.NETHERFUSED_DESCRIPTION));
         }
-        TooltipUtils.appendSpellScaleTooltip(tooltip, "fire");
+        TooltipUtils.appendGemPowerSpellScaleTooltip(tooltip, "dragon_maw");
     }
 
     public static class Settings extends TooltipSettings {

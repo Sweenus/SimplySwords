@@ -104,8 +104,10 @@ public class BrambleSwordItem extends UniqueSwordItem implements UniqueWeaponAct
         tooltip.add(Text.translatable("item.simplyswords.bramblesworditem.tooltip5").setStyle(Styles.TEXT));
         appendAbilityCooldownTooltip(tooltip, itemStack, Config.uniqueEffects.bramblethorn.cooldown);
 
+        appendAbilityManaCostTooltip(tooltip, itemStack);
+
         super.appendTooltip(itemStack, world, tooltip, tooltipContext);
-        net.sweenus.simplyswords.client.util.TooltipUtils.appendSpellScaleTooltip(tooltip, "nature");
+        net.sweenus.simplyswords.client.util.TooltipUtils.appendWeaponSpellScaleTooltip(tooltip, itemStack, "nature");
     }
 
     public static class EffectSettings extends TooltipSettings {

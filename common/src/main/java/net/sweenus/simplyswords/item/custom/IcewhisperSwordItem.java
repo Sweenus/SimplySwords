@@ -164,8 +164,9 @@ public class IcewhisperSwordItem extends UniqueSwordItem implements TwoHandedWea
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.icewhispersworditem.tooltip4").setStyle(Styles.TEXT));
         appendAbilityCooldownTooltip(tooltip, itemStack, Config.uniqueEffects.icewhisper.cooldown);
+        appendAbilityManaCostTooltip(tooltip, itemStack);
         super.appendTooltip(itemStack, world, tooltip, tooltipContext);
-        TooltipUtils.appendSpellScaleTooltip(tooltip, "frost");
+        TooltipUtils.appendWeaponSpellScaleTooltip(tooltip, itemStack, "frost");
     }
 
     public static class EffectSettings extends TooltipSettings {

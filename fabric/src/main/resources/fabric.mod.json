@@ -12,6 +12,7 @@
   ],
   "authors": [
     "Sweenus",
+    "Hootea (Art)",
     "Konsyliarz42 (Art)"
   ],
   "contact": {
@@ -43,7 +44,8 @@
   },
   "suggests": {
     "mythicmetals": ">=0.18.2",
-    "gobber2": ">=2.6.43"
+    "gobber2": ">=2.6.43",
+    "spell_power": ">=0.10.0+1.20.1"
   },
   "recommends": {
     "bettercombat": ">=1.7.2"

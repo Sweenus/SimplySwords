@@ -97,8 +97,10 @@ public class SoulkeeperSwordItem extends UniqueSwordItem implements TwoHandedWea
         tooltip.add(Text.literal(""));
         appendAbilityCooldownTooltip(tooltip, itemStack, Config.uniqueEffects.soulkeeper.cooldown);
 
+        appendAbilityManaCostTooltip(tooltip, itemStack);
+
         super.appendTooltip(itemStack, world, tooltip, tooltipContext);
-        net.sweenus.simplyswords.client.util.TooltipUtils.appendSpellScaleTooltip(tooltip, "soul");
+        net.sweenus.simplyswords.client.util.TooltipUtils.appendWeaponSpellScaleTooltip(tooltip, itemStack, "soul");
     }
 
     public static class EffectSettings extends TooltipSettings {

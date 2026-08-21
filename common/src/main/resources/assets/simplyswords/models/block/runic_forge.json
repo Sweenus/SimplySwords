@@ -4,7 +4,7 @@
     "down": "simplyswords:block/runic_forge_bottom",
     "up": "simplyswords:block/runic_forge_top",
     "north": "simplyswords:block/runic_forge_front",
-    "south": "simplyswords:block/runic_forge_front",
+    "south": "simplyswords:block/runic_forge_side",
     "west": "simplyswords:block/runic_forge_side",
     "east": "simplyswords:block/runic_forge_side",
     "particle": "simplyswords:block/runic_forge_side"

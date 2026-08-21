@@ -39,7 +39,7 @@ public class VerdantTrailPower extends NetherGemPower {
         if (TooltipUtils.shouldDisplayTooltip(itemStack, null)) {
             tooltip.add(Text.literal("").append(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.verdant_trail.description")).setStyle(Styles.NETHERFUSED_DESCRIPTION));
         }
-        TooltipUtils.appendSpellScaleTooltip(tooltip, "nature");
+        TooltipUtils.appendGemPowerSpellScaleTooltip(tooltip, "verdant_trail");
     }
 
     public static class Settings extends TooltipSettings {

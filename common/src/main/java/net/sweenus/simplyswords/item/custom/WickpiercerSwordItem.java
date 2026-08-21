@@ -150,8 +150,10 @@ public class WickpiercerSwordItem extends UniqueSwordItem implements RevivalWeap
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.wickpiercersworditem.tooltip7").setStyle(Styles.TEXT));
 
+        appendAbilityManaCostTooltip(tooltip, itemStack);
+
         super.appendTooltip(itemStack, world, tooltip, tooltipContext);
-        net.sweenus.simplyswords.client.util.TooltipUtils.appendSpellScaleTooltip(tooltip, "fire");
+        net.sweenus.simplyswords.client.util.TooltipUtils.appendWeaponSpellScaleTooltip(tooltip, itemStack, "fire");
     }
 
     @Override

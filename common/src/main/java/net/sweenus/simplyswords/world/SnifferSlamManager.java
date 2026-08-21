@@ -7,6 +7,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.sweenus.simplyswords.api.AwakeningApi;
+import net.sweenus.simplyswords.compat.SpellScalingComponents;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.FallingSnifferEntity;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -32,7 +33,7 @@ public final class SnifferSlamManager {
             return false;
         }
 
-        float damage = HelperMethods.gemPowerScaledDamage("nature", attacker, stack,
+        float damage = HelperMethods.gemPowerScaledDamage(SpellScalingComponents.power("sniffer_slam"), attacker, stack,
                 (float) Config.gemPowers.snifferSlam.damageScaling,
                 (float) Config.gemPowers.snifferSlam.spellScaling);
         if (damage <= 0.0F) {

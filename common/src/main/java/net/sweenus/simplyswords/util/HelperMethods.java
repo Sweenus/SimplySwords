@@ -33,6 +33,7 @@ import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.SimplySwordsExpectPlatform;
@@ -40,6 +41,7 @@ import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.api.DelegatedWeaponHitContext;
 import net.sweenus.simplyswords.api.SpellScalingProfile;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
+import net.sweenus.simplyswords.compat.SpellScalingComponents;
 import net.sweenus.simplyswords.compat.opac.OpacCompat;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.effect.instance.SimplySwordsStatusEffectInstance;
@@ -519,7 +521,8 @@ public class HelperMethods {
 
     public static float abilityScaledDamage(Identifier scalingProfileId, LivingEntity actor, ItemStack stack, float attackScaling, float spellScaling) {
         ItemStack scalingStack = stack == null ? ItemStack.EMPTY : stack;
-        Identifier profileId = scalingProfileId == null ? SpellScalingProfile.ARCANE.registryId() : scalingProfileId;
+        Identifier requestedProfileId = scalingProfileId == null ? SpellScalingProfile.ARCANE.registryId() : scalingProfileId;
+        Identifier profileId = SpellScalingComponents.weaponComponent(scalingStack, requestedProfileId);
         float spellDamage = commonSpellAttributeScaling(spellScaling, actor, profileId);
         float attackDamage = attackScaledDamage(actor, scalingStack, attackScaling);
         spellDamage = applySpellDamageDiminishingReturns(spellDamage, attackDamage);
@@ -541,7 +544,8 @@ public class HelperMethods {
 
     public static float abilityScaledValue(Identifier scalingProfileId, LivingEntity actor, ItemStack stack, float fullValue, float spellScaling) {
         ItemStack scalingStack = stack == null ? ItemStack.EMPTY : stack;
-        Identifier profileId = scalingProfileId == null ? SpellScalingProfile.ARCANE.registryId() : scalingProfileId;
+        Identifier requestedProfileId = scalingProfileId == null ? SpellScalingProfile.ARCANE.registryId() : scalingProfileId;
+        Identifier profileId = SpellScalingComponents.weaponComponent(scalingStack, requestedProfileId);
         float spellValue = commonSpellAttributeScaling(spellScaling, actor, profileId);
         return AwakeningApi.scaleEffect(scalingStack, Math.max(fullValue, spellValue));
     }
@@ -555,7 +559,8 @@ public class HelperMethods {
     public static float abilityScaledDamageFromValue(Identifier scalingProfileId, LivingEntity actor, ItemStack stack,
                                                      float attackDamage, float spellScaling) {
         ItemStack scalingStack = stack == null ? ItemStack.EMPTY : stack;
-        Identifier profileId = scalingProfileId == null ? SpellScalingProfile.ARCANE.registryId() : scalingProfileId;
+        Identifier requestedProfileId = scalingProfileId == null ? SpellScalingProfile.ARCANE.registryId() : scalingProfileId;
+        Identifier profileId = SpellScalingComponents.weaponComponent(scalingStack, requestedProfileId);
         float spellDamage = commonSpellAttributeScaling(spellScaling, actor, profileId);
         spellDamage = applySpellDamageDiminishingReturns(spellDamage, attackDamage);
         return AwakeningApi.scaleEffect(scalingStack, Math.max(spellDamage, attackDamage));
@@ -603,8 +608,8 @@ public class HelperMethods {
         return applySpellDamageDiminishingReturns(
                 spellDamage,
                 attackDamage,
-                Config.general.spellScalingDiminishingReturnsStart,
-                Config.general.spellScalingDiminishingReturnsStrength
+                Config.compatibility.spellScalingDiminishingReturnsStart.get(),
+                Config.compatibility.spellScalingDiminishingReturnsStrength.get()
         );
     }
 
@@ -675,10 +680,19 @@ public class HelperMethods {
     }
 
     public static float commonSpellAttributeScaling(float damageModifier, Entity entity, Identifier scalingProfileId) {
-        if ((entity instanceof LivingEntity livingEntity) && Config.general.compatEnableSpellPowerScaling.get())
+        if ((entity instanceof LivingEntity livingEntity) && Config.compatibility.enableSpellPowerScaling.get())
             return SimplySwordsExpectPlatform.getSpellPowerDamage(damageModifier, livingEntity,
                     scalingProfileId == null ? SpellScalingProfile.ARCANE.registryId() : scalingProfileId);
         return 0f;
+    }
+
+    public static float applySpellPowerApiScalingMultiplier(float value) {
+        return applySpellPowerApiScalingMultiplier(
+                value, Config.compatibility.spellPowerApi.get().scalingMultiplier.get());
+    }
+
+    static float applySpellPowerApiScalingMultiplier(float value, float multiplier) {
+        return value * MathHelper.clamp(multiplier, 0.0F, 1.0F);
     }
 
     public static Optional<LivingEntity> findClosestTarget(LivingEntity livingEntity, double maxDistance, double width) {

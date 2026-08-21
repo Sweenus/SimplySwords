@@ -10,6 +10,7 @@ import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.Box;
 import net.sweenus.simplyswords.api.AwakeningApi;
+import net.sweenus.simplyswords.compat.SpellScalingComponents;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.SimplySwordsMinion;
 import net.sweenus.simplyswords.entity.SimplySwordsWolfMinionEntity;
@@ -99,7 +100,7 @@ public final class WolfPackManager {
 
     private static float getSummonPower(LivingEntity owner, ItemStack stack) {
         float damageScaling = (float) Math.max(0.0001, Config.gemPowers.wolfPack.damageScaling);
-        return HelperMethods.gemPowerScaledDamage("nature", owner, stack, 1.0F,
+        return HelperMethods.gemPowerScaledDamage(SpellScalingComponents.power("wolf_pack"), owner, stack, 1.0F,
                 (float) Config.gemPowers.wolfPack.spellScaling / damageScaling);
     }
 

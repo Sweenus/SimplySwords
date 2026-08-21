@@ -214,8 +214,9 @@ public class TempestSwordItem extends UniqueSwordItem implements UniqueWeaponAct
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.tempestsworditem.tooltip7").setStyle(Styles.TEXT));
         appendAbilityCooldownTooltip(tooltip, itemStack, 200);
+        appendAbilityManaCostTooltip(tooltip, itemStack);
         super.appendTooltip(itemStack, world, tooltip, tooltipContext);
-        TooltipUtils.appendSpellScaleTooltip(tooltip, "frost_fire");
+        TooltipUtils.appendWeaponSpellScaleTooltip(tooltip, itemStack, "frost_fire");
     }
 
     public static class EffectSettings extends TooltipSettings {

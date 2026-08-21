@@ -23,6 +23,7 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.Config;
+import net.sweenus.simplyswords.compat.SpellScalingComponents;
 import net.sweenus.simplyswords.effect.instance.SimplySwordsStatusEffectInstance;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
@@ -134,9 +135,9 @@ public class BattleStandardDarkEntity extends PathAwareEntity {
 
                 ItemStack damageStack = abilityStack.isEmpty() ? ownerEntity.getMainHandStack() : abilityStack;
                 float abilityDamage = standardType.equals("enigma")
-                        ? HelperMethods.abilityScaledDamage("evocation", ownerEntity, damageStack,
+                        ? HelperMethods.abilityScaledDamage(SpellScalingComponents.id("enigma"), ownerEntity, damageStack,
                                 Config.uniqueEffects.enigma.damageScaling, Config.uniqueEffects.enigma.spellScaling)
-                        : HelperMethods.abilityScaledDamage("soul", ownerEntity, damageStack,
+                        : HelperMethods.abilityScaledDamage(SpellScalingComponents.id("harbinger"), ownerEntity, damageStack,
                                 Config.uniqueEffects.harbinger.damageScaling, Config.uniqueEffects.harbinger.spellScaling);
 
                 //AOE Aura
