@@ -107,6 +107,7 @@
   "item.simplyswords.thunderbrand": "Thunderbrand",
   "block.simplyswords.runic_forge": "Runic Forge",
   "container.simplyswords.runic_forge": "Runic Forge",
+  "block.simplyswords.runic_forge_description": "Used to awaken unique weapons.",
   "tooltip.simplyswords.awakening": "Awakening: %s/%s",
   "tooltip.simplyswords.awakening.header": "Awakening",
   "tooltip.simplyswords.awakening.forge": "Modify at a Runic Forge",
