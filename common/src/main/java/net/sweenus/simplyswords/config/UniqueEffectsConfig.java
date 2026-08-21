@@ -1,85 +1,23 @@
 package net.sweenus.simplyswords.config;
 
-import com.google.common.collect.ImmutableMap;
+import me.fzzyhmstrs.fzzy_config.annotations.Version;
 import me.fzzyhmstrs.fzzy_config.config.Config;
 import me.fzzyhmstrs.fzzy_config.config.ConfigSection;
-import me.fzzyhmstrs.fzzy_config.validation.collection.ValidatedIdentifierMap;
-import me.fzzyhmstrs.fzzy_config.validation.minecraft.ValidatedIdentifier;
 import me.fzzyhmstrs.fzzy_config.validation.misc.ValidatedAny;
 import me.fzzyhmstrs.fzzy_config.validation.misc.ValidatedCondition;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedDouble;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
-import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.item.custom.*;
 
+@Version(version = 1)
 public class UniqueEffectsConfig extends Config {
 
     public UniqueEffectsConfig() {
         super(Identifier.of(SimplySwords.MOD_ID, "unique_effects"));
     }
-
-
-    // Mana drawn from Iron's Spells when an active ability fires. 0 disables the cost.
-    public ValidatedIdentifierMap<Integer> weaponManaCosts = new ValidatedIdentifierMap.Builder<Integer>()
-            .keyHandler(ValidatedIdentifier.ofRegistry(Identifier.of(SimplySwords.MOD_ID, "emberblade"), Registries.ITEM))
-            .valueHandler(new ValidatedInt(0, 10000, 0))
-            .defaults(
-                    ImmutableMap.<Identifier, Integer>builder()
-                            .put(Identifier.of(SimplySwords.MOD_ID, "arcanethyst"), 45)
-                            .put(Identifier.of(SimplySwords.MOD_ID, "awakened_lichblade"), 55)
-                            .put(Identifier.of(SimplySwords.MOD_ID, "bloodwake"), 15)
-                            .put(Identifier.of(SimplySwords.MOD_ID, "bramblethorn"), 45)
-                            .put(Identifier.of(SimplySwords.MOD_ID, "brimstone_claymore"), 45)
-                            .put(Identifier.of(SimplySwords.MOD_ID, "caelestis"), 150)
-                            .put(Identifier.of(SimplySwords.MOD_ID, "chompolotl"), 43)
-                            .put(Identifier.of(SimplySwords.MOD_ID, "dawnquiver"), 45)
-                            .put(Identifier.of(SimplySwords.MOD_ID, "dreadtide"), 0)
-                            .put(Identifier.of(SimplySwords.MOD_ID, "dreadwhisper"), 45)
-                            .put(Identifier.of(SimplySwords.MOD_ID, "emberblade"), 15)
-                            .put(Identifier.of(SimplySwords.MOD_ID, "emberlash"), 20)
-                            .put(Identifier.of(SimplySwords.MOD_ID, "enigma"), 100)
-                            .put(Identifier.of(SimplySwords.MOD_ID, "flamewind"), 30)
-                            .put(Identifier.of(SimplySwords.MOD_ID, "frostfall"), 17)
-                            .put(Identifier.of(SimplySwords.MOD_ID, "gloampiercer"), 45)
-                            .put(Identifier.of(SimplySwords.MOD_ID, "harbinger"), 67)
-                            .put(Identifier.of(SimplySwords.MOD_ID, "hearthflame"), 25)
-                            .put(Identifier.of(SimplySwords.MOD_ID, "hiveheart"), 80)
-                            .put(Identifier.of(SimplySwords.MOD_ID, "icewhisper"), 45)
-                            .put(Identifier.of(SimplySwords.MOD_ID, "ionbound_stormscale"), 25)
-                            .put(Identifier.of(SimplySwords.MOD_ID, "livyatan"), 10)
-                            .put(Identifier.of(SimplySwords.MOD_ID, "magiblade"), 15)
-                            .put(Identifier.of(SimplySwords.MOD_ID, "magiscythe"), 77)
-                            .put(Identifier.of(SimplySwords.MOD_ID, "magispear"), 35)
-                            .put(Identifier.of(SimplySwords.MOD_ID, "mjolnir"), 55)
-                            .put(Identifier.of(SimplySwords.MOD_ID, "molten_edge"), 10)
-                            .put(Identifier.of(SimplySwords.MOD_ID, "ribboncleaver"), 10)
-                            .put(Identifier.of(SimplySwords.MOD_ID, "riftmane"), 60)
-                            .put(Identifier.of(SimplySwords.MOD_ID, "shadowsting"), 70)
-                            .put(Identifier.of(SimplySwords.MOD_ID, "soulkeeper"), 40)
-                            .put(Identifier.of(SimplySwords.MOD_ID, "soulpyre"), 115)
-                            .put(Identifier.of(SimplySwords.MOD_ID, "soulrender"), 10)
-                            .put(Identifier.of(SimplySwords.MOD_ID, "soulstalker"), 100)
-                            .put(Identifier.of(SimplySwords.MOD_ID, "soulstealer"), 60)
-                            .put(Identifier.of(SimplySwords.MOD_ID, "stars_edge"), 52)
-                            .put(Identifier.of(SimplySwords.MOD_ID, "stormbringer"), 10)
-                            .put(Identifier.of(SimplySwords.MOD_ID, "storms_edge"), 30)
-                            .put(Identifier.of(SimplySwords.MOD_ID, "stormscale"), 25)
-                            .put(Identifier.of(SimplySwords.MOD_ID, "sunfire"), 67)
-                            .put(Identifier.of(SimplySwords.MOD_ID, "tempest"), 20)
-                            .put(Identifier.of(SimplySwords.MOD_ID, "the_devourer"), 60)
-                            .put(Identifier.of(SimplySwords.MOD_ID, "thunderbrand"), 45)
-                            .put(Identifier.of(SimplySwords.MOD_ID, "toxic_longsword"), 0)
-                            .put(Identifier.of(SimplySwords.MOD_ID, "twisted_blade"), 20)
-                            .put(Identifier.of(SimplySwords.MOD_ID, "waxweaver"), 40)
-                            .put(Identifier.of(SimplySwords.MOD_ID, "whisperwind"), 40)
-                            .put(Identifier.of(SimplySwords.MOD_ID, "wickpiercer"), 3)
-                            .put(Identifier.of(SimplySwords.MOD_ID, "wraithfang"), 40)
-                            .put(Identifier.of(SimplySwords.MOD_ID, "wraithmaw"), 47)
-                            .build()
-            ).build();
 
     public float abilityAbsorptionCap = 20f;
     public GloamSettings gloam = new GloamSettings();

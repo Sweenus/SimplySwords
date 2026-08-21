@@ -17,7 +17,7 @@ public final class WeaponManaCost {
             return 0;
         }
         Identifier id = Registries.ITEM.getId(stack.getItem());
-        Integer cost = Config.uniqueEffects.weaponManaCosts.get(id);
+        Integer cost = Config.compatibility.ironsSpells.get().weaponManaCosts.get(id);
         return cost == null ? 0 : Math.max(0, cost);
     }
 

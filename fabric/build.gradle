@@ -64,7 +64,7 @@ configurations {
 
 def spellPowerTinyConfig = providers.provider {
     def spellPowerJar = configurations.modImplementation.resolve().find {
-        it.name.startsWith("spell-power-") && it.name.endsWith("-fabric.jar")
+        it.name.startsWith("spell-power-") && it.name.endsWith(".jar")
     }
     def output = layout.buildDirectory.file("balance-libs/tiny-config-3.1.0-fabric.jar").get().asFile
     def archive = new java.util.zip.ZipFile(spellPowerJar)
@@ -110,7 +110,7 @@ dependencies {
     // Remove the next line if you don't want to depend on the API
     modApi "dev.architectury:architectury-fabric:${rootProject.architectury_api_version}"
     modCompileOnly("com.terraformersmc:modmenu:${rootProject.mod_menu_version}") { transitive false }
-    modImplementation "maven.modrinth:spell-power:${rootProject.spellpower_version}-fabric"
+    modImplementation "curse.maven:spell-power-771265:${rootProject.spellpower_fabric_file}"
     //modImplementation "curse.maven:lambdynamiclights-393442:${rootProject.lambdynlights_version}"
     //include modImplementation("dev.lambdaurora:spruceui:${rootProject.spruceui_version}") 1.21
     //modImplementation "curse.maven:eldritch-end-877553:${rootProject.eldritch_end_version}" 1.21

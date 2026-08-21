@@ -12,6 +12,19 @@ class HelperMethodsSpellDamageScalingTest {
     private static final float ATTACK_DAMAGE = 100.0F;
 
     @Test
+    void appliesSpellPowerApiScalingMultiplier() {
+        assertEquals(0.0F, HelperMethods.applySpellPowerApiScalingMultiplier(20.0F, 0.0F));
+        assertEquals(10.0F, HelperMethods.applySpellPowerApiScalingMultiplier(20.0F, 0.5F));
+        assertEquals(20.0F, HelperMethods.applySpellPowerApiScalingMultiplier(20.0F, 1.0F));
+    }
+
+    @Test
+    void clampsSpellPowerApiScalingMultiplierToReductionRange() {
+        assertEquals(0.0F, HelperMethods.applySpellPowerApiScalingMultiplier(20.0F, -1.0F));
+        assertEquals(20.0F, HelperMethods.applySpellPowerApiScalingMultiplier(20.0F, 2.0F));
+    }
+
+    @Test
     void matchesDefaultCurveReferenceValues() {
         assertAdjustedDamage(100.0F, 100.0F);
         assertAdjustedDamage(130.0F, 130.0F);

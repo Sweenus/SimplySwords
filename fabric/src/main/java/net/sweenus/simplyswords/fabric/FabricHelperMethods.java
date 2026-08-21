@@ -13,6 +13,7 @@ import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.api.SpellScalingDefinition;
 import net.sweenus.simplyswords.api.SpellScalingProfile;
 import net.sweenus.simplyswords.api.SpellScalingTarget;
+import net.sweenus.simplyswords.util.HelperMethods;
 
 public class FabricHelperMethods {
 
@@ -33,7 +34,9 @@ public class FabricHelperMethods {
             if (player != null && !player.getWorld().isClient) {
                 SpellSchool school = resolveSchool(scalingProfileId);
                 if (school != null) {
-                    return (float) (damageModifier * SpellPower.getSpellPower(school, player).randomValue());
+                    float scaledValue = (float) (damageModifier
+                            * SpellPower.getSpellPower(school, player).randomValue());
+                    return HelperMethods.applySpellPowerApiScalingMultiplier(scaledValue);
                 }
             }
         }

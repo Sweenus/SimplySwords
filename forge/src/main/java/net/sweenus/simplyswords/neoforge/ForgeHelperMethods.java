@@ -23,7 +23,7 @@ import net.sweenus.simplyswords.config.Config;
 
 public class ForgeHelperMethods {
     public static String spellSchoolDisplayKey(Identifier scalingProfileId) {
-        return target(scalingProfileId)
+        return activeTarget(scalingProfileId)
                 .map(SpellScalingTarget::displayTranslationKey)
                 .filter(key -> !key.isBlank())
                 .orElse("item.simplyswords.compat.scaleEnder");
@@ -34,16 +34,19 @@ public class ForgeHelperMethods {
     }
 
     public static float useSpellAttributeScaling(float damageModifier, LivingEntity player, Identifier scalingProfileId) {
-        if (hasManaSystem()) {
-            if (player != null && !player.getWorld().isClient) {
+        if (player != null && !player.getWorld().isClient) {
+            if (hasManaSystem()) {
                 double spellPower = player.getAttributes().hasAttribute(AttributeRegistry.SPELL_POWER) ? player.getAttributeValue(AttributeRegistry.SPELL_POWER) : 1.f;
                 SchoolType school = resolveSchool(scalingProfileId);
                 if (school != null) {
                     return (float) (damageModifier
-                            * Math.max(0.f, Config.general.ironsSpellBasePower)
+                            * Math.max(0.f, Config.compatibility.ironsSpells.get().basePower.get())
                             * spellPower
                             * school.getPowerFor(player));
                 }
+            }
+            if (hasSpellPowerSystem()) {
+                return NeoForgeSpellPowerCompat.scale(damageModifier, player, scalingProfileId);
             }
         }
         return 0;
@@ -75,19 +78,33 @@ public class ForgeHelperMethods {
         if (!hasManaSystem()) {
             return null;
         }
-        return target(scalingProfileId)
+        return ironsTarget(scalingProfileId)
                 .map(target -> SchoolRegistry.getSchool(target.schoolId()))
                 .orElse(null);
     }
 
-    private static java.util.Optional<SpellScalingTarget> target(Identifier scalingProfileId) {
+    private static java.util.Optional<SpellScalingTarget> activeTarget(Identifier scalingProfileId) {
+        return hasManaSystem() ? ironsTarget(scalingProfileId) : spellPowerTarget(scalingProfileId);
+    }
+
+    private static java.util.Optional<SpellScalingTarget> ironsTarget(Identifier scalingProfileId) {
         return SimplySwordsAPI.getSpellScalingDefinition(scalingProfileId)
                 .map(SpellScalingDefinition::ironsTarget);
+    }
+
+    private static java.util.Optional<SpellScalingTarget> spellPowerTarget(Identifier scalingProfileId) {
+        return SimplySwordsAPI.getSpellScalingDefinition(scalingProfileId)
+                .map(SpellScalingDefinition::spellPowerTarget);
     }
 
     public static boolean hasManaSystem() {
         return Platform.isForgeLike()
                 && SimplySwords.passVersionCheck("irons_spellbooks", SimplySwords.minimumSpellbookVersion);
+    }
+
+    public static boolean hasSpellPowerSystem() {
+        return Platform.isForgeLike()
+                && SimplySwords.passVersionCheck("spell_power", SimplySwords.minimumSpellPowerVersion);
     }
 
     public static boolean hasMana(LivingEntity entity, float amount) {

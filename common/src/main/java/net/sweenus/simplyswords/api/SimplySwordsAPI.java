@@ -295,7 +295,7 @@ public class SimplySwordsAPI {
 
         int cooldown = Math.max(1, baseCooldownTicks);
         if (stack == null || stack.isEmpty() || actor == null
-                || !Config.general.compatEnableIronsCooldownReduction.get()) {
+                || !Config.compatibility.ironsSpells.get().enableCooldownReduction.get()) {
             return cooldown;
         }
         if (stack.getItem() instanceof UniqueWeaponActiveAbility ability

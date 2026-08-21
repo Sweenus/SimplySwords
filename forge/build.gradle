@@ -76,6 +76,19 @@ def balanceTestIronsSpellbooks = providers.provider {
     return output
 }
 
+def spellPowerTinyConfig = providers.provider {
+    def spellPowerJar = configurations.modImplementation.resolve().find {
+        it.name.startsWith("spell-power-") && it.name.endsWith(".jar")
+    }
+    def output = layout.buildDirectory.file("balance-libs/tiny-config-3.1.0-neoforge.jar").get().asFile
+    def archive = new java.util.zip.ZipFile(spellPowerJar)
+    def entry = archive.getEntry("META-INF/jars/tiny-config-3.1.0-neoforge.jar")
+    output.parentFile.mkdirs()
+    output.withOutputStream { stream -> archive.getInputStream(entry).transferTo(stream) }
+    archive.close()
+    return output
+}
+
 def balanceIsFiltered = ["balanceQuick", "balanceWeapon", "balanceBuild", "balanceScenario"].any { project.hasProperty(it) }
 def balanceReportDir = { String loader ->
     file("${rootProject.buildDir}/reports/simplyswords-balance/${loader}" + (balanceIsFiltered ? "/scratch" : ""))
@@ -171,6 +184,8 @@ dependencies {
     modRuntimeOnly "com.github.ZsoltMolnarrr:TinyConfig:2.3.2"
     //modImplementation ("curse.maven:gobber-301700:4007899")
     modCompileOnly "io.redspace:irons_spellbooks:${irons_spells_version}"
+    modImplementation "curse.maven:spell-power-771265:${rootProject.spellpower_neoforge_file}"
+    modRuntimeOnly files(spellPowerTinyConfig)
     modRuntimeOnly "me.shedaniel:RoughlyEnoughItems-neoforge:${rei_version}"
     modBalanceTestImplementation files(balanceTestIronsSpellbooks)
     modBalanceTestImplementation "software.bernie.geckolib:geckolib-neoforge-1.21.1:4.9.2"

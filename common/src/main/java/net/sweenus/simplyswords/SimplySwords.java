@@ -89,7 +89,7 @@ public class SimplySwords {
     public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
 
     public static String minimumEldritchEndVersion = "0.2.40";
-    public static String minimumSpellPowerVersion = "0.10.0+1.20.1";
+    public static String minimumSpellPowerVersion = "1.6.0+1.21.1";
     public static String minimumSpellbookVersion = "1.21-3.8.0";
     public static String minimumMythicMetalsVersion = "0.24.0+1.21";
 

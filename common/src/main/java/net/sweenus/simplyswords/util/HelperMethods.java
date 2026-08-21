@@ -35,6 +35,7 @@ import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.SimplySwordsExpectPlatform;
@@ -608,8 +609,8 @@ public class HelperMethods {
         return applySpellDamageDiminishingReturns(
                 spellDamage,
                 attackDamage,
-                Config.general.spellScalingDiminishingReturnsStart,
-                Config.general.spellScalingDiminishingReturnsStrength
+                Config.compatibility.spellScalingDiminishingReturnsStart.get(),
+                Config.compatibility.spellScalingDiminishingReturnsStrength.get()
         );
     }
 
@@ -680,10 +681,19 @@ public class HelperMethods {
     }
 
     public static float commonSpellAttributeScaling(float damageModifier, Entity entity, Identifier scalingProfileId) {
-        if ((entity instanceof LivingEntity livingEntity) && Config.general.compatEnableSpellPowerScaling.get())
+        if ((entity instanceof LivingEntity livingEntity) && Config.compatibility.enableSpellPowerScaling.get())
             return SimplySwordsExpectPlatform.getSpellPowerDamage(damageModifier, livingEntity,
                     scalingProfileId == null ? SpellScalingProfile.ARCANE.registryId() : scalingProfileId);
         return 0f;
+    }
+
+    public static float applySpellPowerApiScalingMultiplier(float value) {
+        return applySpellPowerApiScalingMultiplier(
+                value, Config.compatibility.spellPowerApi.get().scalingMultiplier.get());
+    }
+
+    static float applySpellPowerApiScalingMultiplier(float value, float multiplier) {
+        return value * MathHelper.clamp(multiplier, 0.0F, 1.0F);
     }
 
     public static Optional<LivingEntity> findClosestTarget(LivingEntity livingEntity, double maxDistance, double width) {

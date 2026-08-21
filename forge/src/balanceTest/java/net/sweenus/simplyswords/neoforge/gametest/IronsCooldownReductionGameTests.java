@@ -30,9 +30,10 @@ public final class IronsCooldownReductionGameTests {
 
         ItemStack weapon = new ItemStack(ItemsRegistry.FLAMEWIND.get());
         int baseCooldown = 100;
-        boolean previousToggle = Config.general.compatEnableIronsCooldownReduction.getUnconditional();
+        var settings = Config.compatibility.ironsSpells.getUnconditional();
+        boolean previousToggle = settings.enableCooldownReduction.get();
         try {
-            Config.general.compatEnableIronsCooldownReduction.accept(true);
+            settings.enableCooldownReduction.accept(true);
             attribute.setBaseValue(1.5D);
 
             int expected = Utils.applyCooldownReduction(baseCooldown, actor);
@@ -40,12 +41,12 @@ public final class IronsCooldownReductionGameTests {
             context.assertTrue(actual == expected, "Simply Swords cooldown does not match Iron's helper");
             context.assertTrue(actual < baseCooldown, "Iron's cooldown reduction did not shorten the cooldown");
 
-            Config.general.compatEnableIronsCooldownReduction.accept(false);
+            settings.enableCooldownReduction.accept(false);
             context.assertTrue(
                     SimplySwordsAPI.getEffectiveWeaponCooldownTicks(weapon, actor, baseCooldown) == baseCooldown,
                     "Global cooldown reduction toggle was ignored");
 
-            Config.general.compatEnableIronsCooldownReduction.accept(true);
+            settings.enableCooldownReduction.accept(true);
             SimplySwordsAPI.setWeaponCooldown(actor, weapon, baseCooldown);
             context.assertTrue(
                     WeaponAbilityCooldownManager.isCoolingDown(context.getWorld(), actor, weapon),
@@ -61,11 +62,11 @@ public final class IronsCooldownReductionGameTests {
                             "Committed cooldown lasted longer than the reduced duration");
                     context.complete();
                 } finally {
-                    Config.general.compatEnableIronsCooldownReduction.accept(previousToggle);
+                    settings.enableCooldownReduction.accept(previousToggle);
                 }
             });
         } catch (RuntimeException | Error failure) {
-            Config.general.compatEnableIronsCooldownReduction.accept(previousToggle);
+            settings.enableCooldownReduction.accept(previousToggle);
             throw failure;
         }
     }

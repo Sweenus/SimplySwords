@@ -9,9 +9,12 @@ public final class BalanceGameTestSuite {
     }
 
     public static void run(TestContext context) {
-        context.assertTrue(Config.general.ironsSpellBasePower > 0.0F, "Iron's base spell power must be positive");
-        context.assertTrue(Config.general.spellScalingDiminishingReturnsStart >= 1.0F, "Diminishing returns must start at or above one");
-        context.assertTrue(Config.general.spellScalingDiminishingReturnsStrength >= 0.0F, "Diminishing returns strength must not be negative");
+        context.assertTrue(Config.compatibility.ironsSpells.get().basePower.get() > 0.0F,
+                "Iron's base spell power must be positive");
+        context.assertTrue(Config.compatibility.spellScalingDiminishingReturnsStart.get() >= 1.0F,
+                "Diminishing returns must start at or above one");
+        context.assertTrue(Config.compatibility.spellScalingDiminishingReturnsStrength.get() >= 0.0F,
+                "Diminishing returns strength must not be negative");
         BalanceHarness harness = new BalanceHarness(context);
         scheduleNextTick(context, harness);
     }
