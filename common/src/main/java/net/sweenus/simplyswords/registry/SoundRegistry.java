@@ -343,6 +343,33 @@ public class SoundRegistry {
             SoundEvent.of(Identifier.of(SimplySwords.MOD_ID, "distortion_arc_02")));
     public static final RegistrySupplier<SoundEvent> DISTORTION_ARC_03 = SOUND.register("distortion_arc_03", () ->
             SoundEvent.of(Identifier.of(SimplySwords.MOD_ID, "distortion_arc_03")));
+    public static final RegistrySupplier<SoundEvent> DEVOURER_MASS_AGGRESSIVE_SNARL = SOUND.register(
+            "devourer_mass_aggressive_snarl", () ->
+                    SoundEvent.of(Identifier.of(SimplySwords.MOD_ID, "devourer_mass_aggressive_snarl")));
+    public static final RegistrySupplier<SoundEvent> DEVOURER_MASS_BELLOW_VARIATION_01 = SOUND.register(
+            "devourer_mass_bellow_variation_01", () ->
+                    SoundEvent.of(Identifier.of(SimplySwords.MOD_ID, "devourer_mass_bellow_variation_01")));
+    public static final RegistrySupplier<SoundEvent> DEVOURER_MASS_BELLOW_VARIATION_02 = SOUND.register(
+            "devourer_mass_bellow_variation_02", () ->
+                    SoundEvent.of(Identifier.of(SimplySwords.MOD_ID, "devourer_mass_bellow_variation_02")));
+    public static final RegistrySupplier<SoundEvent> DEVOURER_MASS_HEAVY_BREATHING = SOUND.register(
+            "devourer_mass_heavy_breathing", () ->
+                    SoundEvent.of(Identifier.of(SimplySwords.MOD_ID, "devourer_mass_heavy_breathing")));
+    public static final RegistrySupplier<SoundEvent> DEVOURER_MASS_WARNING_RUMBLE = SOUND.register(
+            "devourer_mass_warning_rumble", () ->
+                    SoundEvent.of(Identifier.of(SimplySwords.MOD_ID, "devourer_mass_warning_rumble")));
+    public static final RegistrySupplier<SoundEvent> SOULSTALKER_LEAP_ATTACK_LAND = SOUND.register(
+            "soulstalker_leap_attack_land", () ->
+                    SoundEvent.of(Identifier.of(SimplySwords.MOD_ID, "soulstalker_leap_attack_land")));
+    public static final RegistrySupplier<SoundEvent> SOULSTALKER_IDLE_WARNING_RATTLE = SOUND.register(
+            "soulstalker_idle_warning_rattle", () ->
+                    SoundEvent.of(Identifier.of(SimplySwords.MOD_ID, "soulstalker_idle_warning_rattle")));
+    public static final RegistrySupplier<SoundEvent> SOULSTALKER_IDLE_WET_BREATHING = SOUND.register(
+            "soulstalker_idle_wet_breathing", () ->
+                    SoundEvent.of(Identifier.of(SimplySwords.MOD_ID, "soulstalker_idle_wet_breathing")));
+    public static final RegistrySupplier<SoundEvent> SOULSTALKER_IDLE_LOW_HISS = SOUND.register(
+            "soulstalker_idle_low_hiss", () ->
+                    SoundEvent.of(Identifier.of(SimplySwords.MOD_ID, "soulstalker_idle_low_hiss")));
     public static final RegistrySupplier<SoundEvent> CAELESTIS_CREATURE_AMBIENT = SOUND.register(
             "caelestis_creature_ambient", () ->
                     SoundEvent.of(Identifier.of(SimplySwords.MOD_ID, "caelestis_creature_ambient")));
