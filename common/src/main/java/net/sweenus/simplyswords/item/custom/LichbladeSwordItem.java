@@ -1,5 +1,7 @@
 package net.sweenus.simplyswords.item.custom;
 
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedDouble;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
@@ -155,7 +157,7 @@ public class LichbladeSwordItem extends UniqueSwordItem implements TwoHandedWeap
     public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
         TargetedLocationComponent targetLocation = ComponentTypeRegistry.TARGETED_LOCATION.get(stack);
         if (!world.isClient && (user instanceof PlayerEntity player) && targetLocation != null && ((ServerWorld)world).getEntity(targetLocation.uuid()) != null) {
-            player.getItemCooldownManager().set(stack.getItem(), Config.uniqueEffects.lichblade.cooldown);
+            SimplySwordsAPI.setWeaponCooldown(player, stack, Config.uniqueEffects.lichblade.cooldown);
         }
         ComponentTypeRegistry.STORED_CHARGE.set(stack, null);
         ComponentTypeRegistry.TARGETED_LOCATION.set(stack, null);
@@ -272,7 +274,7 @@ public class LichbladeSwordItem extends UniqueSwordItem implements TwoHandedWeap
             tooltip.add(Text.literal(""));
             tooltip.add(Text.translatable("item.simplyswords.onrightclickheld").setStyle(Styles.RIGHT_CLICK));
             tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip4").setStyle(Styles.TEXT));
-            appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.lichblade.cooldown);
+            appendAbilityCooldownTooltip(tooltip, itemStack, Config.uniqueEffects.lichblade.cooldown);
 
             if (awakening >= 8) {
                 tooltip.add(Text.literal(""));
@@ -309,6 +311,6 @@ public class LichbladeSwordItem extends UniqueSwordItem implements TwoHandedWeap
         @ValidatedDouble.Restrict(min = 1.0)
         public double range = 22.0;
         @ValidatedFloat.Restrict(min = 0f)
-        public float spellScaling = 1.28f;
+        public float spellScaling = 2.52f;
     }
 }

@@ -29,6 +29,7 @@ import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
 import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.api.AwakeningFormRegistry;
+import net.sweenus.simplyswords.api.StackReplacement;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.DevourerMassVisualEntity;
 import net.sweenus.simplyswords.entity.DevourerTendrilVisualEntity;
@@ -388,8 +389,7 @@ public final class DevourerAbilityManager {
             return false;
         }
         int level = AwakeningApi.getLevel(source);
-        ItemStack result = new ItemStack(corrupted, source.getCount());
-        if (source.hasNbt()) result.setNbt(source.getNbt().copy());
+        ItemStack result = StackReplacement.copyTo(source, corrupted);
         ComponentTypeRegistry.AWAKENING_ROUTE.set(result, new AwakeningRouteComponent(route));
         AwakeningApi.setLevel(result, level);
         itemEntity.setStack(result);

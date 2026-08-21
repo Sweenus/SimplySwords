@@ -123,14 +123,15 @@ public class WaxweaverSwordItem extends UniqueSwordItem implements RevivalWeapon
         tooltip.add(Text.translatable("item.simplyswords.waxweaversworditem.tooltip4").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.waxweaversworditem.tooltip8",
-                Math.max(0, Config.uniqueEffects.waxweaver.cooldown / 20)).setStyle(Styles.TEXT));
+                net.sweenus.simplyswords.client.util.TooltipUtils.getEffectiveWeaponCooldownTicks(
+                        itemStack, Config.uniqueEffects.waxweaver.cooldown) / 20).setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.waxweaversworditem.tooltip3").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.waxweaversworditem.tooltip5").setStyle(Styles.TEXT));
 
-        appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.waxweaver.activeCooldown);
+        appendAbilityCooldownTooltip(tooltip, itemStack, Config.uniqueEffects.waxweaver.activeCooldown);
 
         super.appendTooltip(itemStack, world, tooltip, tooltipContext);
         net.sweenus.simplyswords.client.util.TooltipUtils.appendSpellScaleTooltip(tooltip, "fire");
@@ -166,7 +167,7 @@ public class WaxweaverSwordItem extends UniqueSwordItem implements RevivalWeapon
         @ValidatedFloat.Restrict(min = 0.0F)
         public float explosionDamageScaling = 0.55F;
         @ValidatedFloat.Restrict(min = 0.0F)
-        public float spellScaling = 2.0F;
+        public float spellScaling = 6.196F;
         @ValidatedFloat.Restrict(min = 0.5F)
         public float explosionRadius = 4.0F;
         @ValidatedFloat.Restrict(min = 0.0F)

@@ -1,5 +1,7 @@
 package net.sweenus.simplyswords.world;
 
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
@@ -673,11 +675,7 @@ public final class WatcherAbilityManager {
     }
 
     private static void resetClaymoreCooldown(LivingEntity actor, ItemStack stack) {
-        if (actor instanceof ServerPlayerEntity player) {
-            player.getItemCooldownManager().set(stack.getItem(), 0);
-        } else {
-            WeaponAbilityCooldownManager.clearCooldown(actor, stack);
-        }
+        SimplySwordsAPI.setWeaponCooldown(actor, stack, 0);
     }
 
     private static LivingEntity resolveActivationTarget(WeaponAbilityContext context, WatcherWeaponType type) {

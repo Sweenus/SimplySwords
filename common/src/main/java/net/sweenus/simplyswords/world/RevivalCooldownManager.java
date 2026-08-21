@@ -4,6 +4,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.world.ServerWorld;
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -29,7 +30,8 @@ public final class RevivalCooldownManager {
         if (world == null || owner == null || stack == null || stack.isEmpty() || ticks <= 0) {
             return;
         }
-        COOLDOWNS.put(new CooldownKey(owner.getUuid(), stack.getItem()), world.getTime() + ticks);
+        int cooldown = SimplySwordsAPI.getEffectiveWeaponCooldownTicks(stack, owner, ticks);
+        COOLDOWNS.put(new CooldownKey(owner.getUuid(), stack.getItem()), world.getTime() + cooldown);
     }
 
     public static void tick(ServerWorld world) {

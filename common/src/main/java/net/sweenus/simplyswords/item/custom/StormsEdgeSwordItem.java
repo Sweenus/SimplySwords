@@ -1,5 +1,7 @@
 package net.sweenus.simplyswords.item.custom;
 
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedDouble;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
@@ -53,12 +55,12 @@ public class StormsEdgeSwordItem extends UniqueSwordItem implements UniqueWeapon
 
         boolean refreshed = false;
         if (attacker instanceof PlayerEntity player && player.getItemCooldownManager().isCoolingDown(this)) {
-            player.getItemCooldownManager().set(this, 0);
+            SimplySwordsAPI.setWeaponCooldown(player, stack, 0);
             refreshed = true;
         } else if (!(attacker instanceof PlayerEntity)
                 && attacker.getWorld() instanceof ServerWorld serverWorld
                 && WeaponAbilityCooldownManager.isCoolingDown(serverWorld, attacker, stack)) {
-            WeaponAbilityCooldownManager.clearCooldown(attacker, stack);
+            SimplySwordsAPI.setWeaponCooldown(attacker, stack, 0);
             refreshed = true;
         }
         if (refreshed) {
@@ -125,7 +127,7 @@ public class StormsEdgeSwordItem extends UniqueSwordItem implements UniqueWeapon
         tooltip.add(Text.translatable("item.simplyswords.stormsedgesworditem.tooltip3").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.stormsedgesworditem.tooltip4").setStyle(Styles.TEXT));
-        appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.storms_edge.cooldown);
+        appendAbilityCooldownTooltip(tooltip, itemStack, Config.uniqueEffects.storms_edge.cooldown);
 
         super.appendTooltip(itemStack, world, tooltip, tooltipContext);
         TooltipUtils.appendSpellScaleTooltip(tooltip, "lightning");
@@ -144,11 +146,11 @@ public class StormsEdgeSwordItem extends UniqueSwordItem implements UniqueWeapon
         @ValidatedFloat.Restrict(min = 0f)
         public float damageScaling = 0.4f;
         @ValidatedFloat.Restrict(min = 0f)
-        public float spellScaling = 0.8f;
+        public float spellScaling = 1.89f;
         @ValidatedFloat.Restrict(min = 0f)
         public float thunderclapDamageScaling = 0.8f;
         @ValidatedFloat.Restrict(min = 0f)
-        public float thunderclapSpellScaling = 1.6f;
+        public float thunderclapSpellScaling = 3.77f;
         @ValidatedDouble.Restrict(min = 0.1)
         public double dashDistance = 10.0;
         @ValidatedDouble.Restrict(min = 0.1)

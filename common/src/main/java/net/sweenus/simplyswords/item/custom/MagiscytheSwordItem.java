@@ -1,5 +1,7 @@
 package net.sweenus.simplyswords.item.custom;
 
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedDouble;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
@@ -74,7 +76,7 @@ public class MagiscytheSwordItem extends UniqueSwordItem implements UniqueWeapon
     @Override
     public TypedActionResult<ItemStack> startPlayerAbility(World world, PlayerEntity user, Hand hand) {
         activateMagistorm(world, user);
-        user.getItemCooldownManager().set(this, Config.uniqueEffects.magiscythe.cooldown);
+        SimplySwordsAPI.setWeaponCooldown(user, user.getStackInHand(hand), Config.uniqueEffects.magiscythe.cooldown);
 
         return super.use(world, user, hand);
     }
@@ -126,7 +128,7 @@ public class MagiscytheSwordItem extends UniqueSwordItem implements UniqueWeapon
         tooltip.add(Text.translatable("item.simplyswords.magiscythesworditem.tooltip6").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.magiscythesworditem.tooltip7").setStyle(Styles.TEXT));
-        appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.magiscythe.cooldown);
+        appendAbilityCooldownTooltip(tooltip, itemStack, Config.uniqueEffects.magiscythe.cooldown);
         super.appendTooltip(itemStack, world, tooltip, tooltipContext);
         TooltipUtils.appendSpellScaleTooltip(tooltip, "arcane");
     }
@@ -148,7 +150,7 @@ public class MagiscytheSwordItem extends UniqueSwordItem implements UniqueWeapon
         @ValidatedFloat.Restrict(min = 0f, max = 1f)
         public float repairChance = 0.25f;
         @ValidatedFloat.Restrict(min = 0f)
-        public float spellScaling = 0.4f;
+        public float spellScaling = 1.28f;
 
     }
 }

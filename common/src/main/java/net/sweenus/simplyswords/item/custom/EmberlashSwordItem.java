@@ -1,5 +1,7 @@
 package net.sweenus.simplyswords.item.custom;
 
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.entity.Entity;
@@ -86,7 +88,7 @@ public class EmberlashSwordItem extends UniqueSwordItem implements UniqueWeaponA
         user.setVelocity(user.getVelocity().x, 0, user.getVelocity().z); // Prevent user flying to the heavens
         user.velocityModified = true;
         user.heal(user.getMaxHealth() * Config.uniqueEffects.emberlash.heal / 100f);
-        user.getItemCooldownManager().set(this, Config.uniqueEffects.emberlash.cooldown);
+        SimplySwordsAPI.setWeaponCooldown(user, user.getStackInHand(hand), Config.uniqueEffects.emberlash.cooldown);
 
         return super.use(world, user, hand);
     }
@@ -127,7 +129,7 @@ public class EmberlashSwordItem extends UniqueSwordItem implements UniqueWeaponA
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.emberlashsworditem.tooltip6", Config.uniqueEffects.emberlash.heal).setStyle(Styles.TEXT));
-        appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.emberlash.cooldown);
+        appendAbilityCooldownTooltip(tooltip, itemStack, Config.uniqueEffects.emberlash.cooldown);
         super.appendTooltip(itemStack, world, tooltip, tooltipContext);
         TooltipUtils.appendSpellScaleTooltip(tooltip, "fire");
     }
@@ -145,7 +147,7 @@ public class EmberlashSwordItem extends UniqueSwordItem implements UniqueWeaponA
         @ValidatedInt.Restrict(min = 1)
         public int maxStacks = 5;
         @ValidatedFloat.Restrict(min = 0f)
-        public float spellScaling = 0.32f;
+        public float spellScaling = 0.38f;
         @ValidatedFloat.Restrict(min = 0f)
         public float smoulderDamageScaling = 0.12f;
 

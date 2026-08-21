@@ -1,5 +1,7 @@
 package net.sweenus.simplyswords.item.custom;
 
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import net.fabricmc.api.EnvType;
@@ -64,7 +66,7 @@ public class WraithfangSwordItem extends UniqueSwordItem implements UniqueWeapon
             wraithfangEntity.setVelocity(user, user.getPitch(), user.getYaw(), 0.0F, 1.5F, 1.0F);
             wraithfangEntity.setYaw(user.getYaw());
             wraithfangEntity.setPitch(user.getPitch());
-            wraithfangEntity.primaryBaseDamage = HelperMethods.abilityScaledValue(
+            wraithfangEntity.primaryBaseDamage = HelperMethods.abilityScaledDamageFromValue(
                     SpellScalingProfile.SOUL, user, itemStack, (float) damage[0],
                     Config.uniqueEffects.wraithfang.spellScaling);
             wraithfangEntity.hasLoyalty = 1;
@@ -84,7 +86,7 @@ public class WraithfangSwordItem extends UniqueSwordItem implements UniqueWeapon
 
         user.swingHand(hand);
 
-        user.getItemCooldownManager().set(this, 1);
+        SimplySwordsAPI.setWeaponCooldown(user, itemStack, 1);
         return TypedActionResult.success(itemStack, world.isClient());
     }
 
@@ -101,7 +103,7 @@ public class WraithfangSwordItem extends UniqueSwordItem implements UniqueWeapon
         wraithfangEntity.setPitch(actor.getPitch());
         float weaponDamage = (float) Math.max(1.0, HelperMethods.getAttackFromStack(
                 context.stack(), net.minecraft.entity.EquipmentSlot.MAINHAND));
-        wraithfangEntity.primaryBaseDamage = HelperMethods.abilityScaledValue(
+        wraithfangEntity.primaryBaseDamage = HelperMethods.abilityScaledDamageFromValue(
                 SpellScalingProfile.SOUL, actor, context.stack(), weaponDamage,
                 Config.uniqueEffects.wraithfang.spellScaling);
         wraithfangEntity.hasLoyalty = 0;
@@ -151,6 +153,6 @@ public class WraithfangSwordItem extends UniqueSwordItem implements UniqueWeapon
         @ValidatedInt.Restrict(min = 10)
         public int duration = 80;
         @ValidatedFloat.Restrict(min = 0)
-        public float spellScaling = 2.0f;
+        public float spellScaling = 3.10f;
     }
 }

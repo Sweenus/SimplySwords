@@ -40,6 +40,36 @@ The helper accepts any `LivingEntity`, so player and mob casts use the same
 path. If the relevant compatibility mod or attribute is unavailable, attack
 damage remains the fallback.
 
+### Addon-defined scaling profiles
+
+Addons can register a logical profile without extending `SpellScalingProfile`:
+
+```java
+Identifier solar = new Identifier("exampleaddon", "solar");
+SimplySwordsAPI.registerSpellScalingDefinition(new SpellScalingDefinition(
+        solar,
+        new SpellScalingTarget(
+                new Identifier("examplemagic", "solar"),
+                "school.examplemagic.solar"
+        ),
+        new SpellScalingTarget(
+                new Identifier("ironsaddon", "solar"),
+                "school.ironsaddon.solar"
+        )
+));
+
+float damage = SimplySwordsAPI.scaleAbilityDamage(
+        solar, actor, stack, 0.8F, 0.8F
+);
+```
+
+Register the definition during common initialization. The corresponding Spell
+Power or Iron's addon must register each external school before Simply Swords
+tries to resolve it. Either target may be `null` when the profile supports only
+one backend. Re-registering an identical definition is harmless; registering a
+different definition for an existing ID throws instead of silently overriding
+another addon.
+
 On NeoForge, Iron's Spells uses one shared configurable base power for all
 abilities:
 
@@ -47,7 +77,7 @@ abilities:
 spellScaling * ironsSpellBasePower * genericSpellPower * schoolSpellPower
 ```
 
-`ironsSpellBasePower` defaults to `2.0`. The per-ability `spellScaling` argument
+`ironsSpellBasePower` defaults to `2.17`. The per-ability `spellScaling` argument
 remains the coefficient that distinguishes small repeated hits from major
 impacts. On Fabric, Spell Power Attributes keeps its native coefficient-based
 calculation and does not use this shared base value.
@@ -219,3 +249,41 @@ context.sourcePlayer() == null
   friendly-fire check.
 - A directly casting player is the actor and has no `sourcePlayer`.
 - Never assume an ability stack is in the main hand.
+
+## Iron's cooldown reduction
+
+Wielder-owned weapon cooldowns use Iron's Spells 'n Spellbooks cooldown
+reduction on Forge when `compatEnableIronsCooldownReduction` is enabled. The
+option defaults to enabled. Fabric and installations without Iron's preserve
+the configured base cooldown.
+
+All unique weapons opt in by default. A weapon can opt out by overriding
+`usesSpellCooldownReduction(ItemStack)` to return `false`.
+
+Use `SimplySwordsAPI.getEffectiveWeaponCooldownTicks` for custom passive or
+proc timers and `SimplySwordsAPI.setWeaponCooldown` when committing an item
+cooldown. Pass the configured base duration; the shared helper applies
+reduction exactly once.
+
+Addon tooltips and HUDs can call
+`SimplySwordsClientAPI.getEffectiveWeaponCooldownTicks`; the legacy two-argument
+`appendAbilityCooldownTooltip` overload remains only for compatibility and
+cannot resolve a player-specific value without a stack.
+
+## Explicit magical ability damage
+
+For damage that is explicitly magical rather than a synthetic weapon hit, use:
+
+```java
+boolean damaged = SimplySwordsAPI.applyAbilityMagicDamage(
+        world, actor, stack, target, damage, SpellScalingProfile.FROST
+);
+```
+
+The identifier overload supports addon-defined profiles. On Forge this uses
+the mapped Iron's school damage type and applies Iron's generic and matching
+school resistance. On Fabric it retains ordinary indirect-magic behavior.
+The method respects normal iframes;
+`applyAbilityMagicDamageThroughIframes` is the narrowly scoped bypass variant.
+Neither method runs weapon implicits, enchantment hit callbacks, or sword
+`postHit`.

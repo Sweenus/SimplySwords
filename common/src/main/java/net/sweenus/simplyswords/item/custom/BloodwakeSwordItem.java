@@ -88,7 +88,7 @@ public class BloodwakeSwordItem extends UniqueSwordItem implements UniqueWeaponA
         tooltip.add(Text.translatable("item.simplyswords.bloodwakesworditem.tooltip4").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.bloodwakesworditem.tooltip5").setStyle(Styles.TEXT));
-        appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.bloodwake.cooldown);
+        appendAbilityCooldownTooltip(tooltip, stack, Config.uniqueEffects.bloodwake.cooldown);
         super.appendTooltip(stack, world, tooltip, context);
         net.sweenus.simplyswords.client.util.TooltipUtils.appendSpellScaleTooltip(tooltip, "soul");
     }
@@ -105,7 +105,7 @@ public class BloodwakeSwordItem extends UniqueSwordItem implements UniqueWeaponA
         @ValidatedFloat.Restrict(min = 0.0F)
         public float burstDamageScaling = 0.65F;
         @ValidatedFloat.Restrict(min = 0.0F)
-        public float burstSpellScaling = 1.30F;
+        public float burstSpellScaling = 2.3491F;
         @ValidatedInt.Restrict(min = 1)
         public int plagueDuration = 160;
         @ValidatedDouble.Restrict(min = 0.5)

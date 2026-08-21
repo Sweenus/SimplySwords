@@ -1,6 +1,7 @@
 package net.sweenus.simplyswords.item.custom;
 
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedDouble;
+import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -11,6 +12,8 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
+import net.sweenus.simplyswords.api.SpellScalingProfile;
+import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
@@ -59,8 +62,9 @@ public final class GloampiercerSwordItem extends UniqueSwordItem implements Uniq
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.gloam.tooltip").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
-        appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.gloampiercer.cooldown);
+        appendAbilityCooldownTooltip(tooltip, stack, Config.uniqueEffects.gloampiercer.cooldown);
         super.appendTooltip(stack, world, tooltip, tooltipContext);
+        TooltipUtils.appendSpellScaleTooltip(tooltip, SpellScalingProfile.SOUL);
     }
 
     @Override
@@ -77,6 +81,8 @@ public final class GloampiercerSwordItem extends UniqueSwordItem implements Uniq
         @ValidatedDouble.Restrict(min = 1.0) public double castRange = 18.0;
         @ValidatedDouble.Restrict(min = 1.0) public double barrageRadius = 7.0;
         @ValidatedInt.Restrict(min = 3, max = 36) public int spearCount = 18;
+        @ValidatedFloat.Restrict(min = 0.0F) public float strikeDamageScaling = 1.0F;
+        @ValidatedFloat.Restrict(min = 0.0F) public float strikeSpellScaling = 5.1F;
         @ValidatedInt.Restrict(min = 1, max = 8) public int cloneCount = 5;
         @ValidatedInt.Restrict(min = 20, max = 120) public int channelDuration = 60;
         @ValidatedDouble.Restrict(min = 0.0, max = 8.0) public double liftHeight = 3.0;

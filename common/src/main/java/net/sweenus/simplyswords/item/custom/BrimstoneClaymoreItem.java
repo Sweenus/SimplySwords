@@ -1,5 +1,7 @@
 package net.sweenus.simplyswords.item.custom;
 
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedDouble;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
@@ -53,7 +55,7 @@ public class BrimstoneClaymoreItem extends UniqueSwordItem implements TwoHandedW
             if (target == null || !activateBrimstone(serverWorld, serverPlayer, target, itemStack)) {
                 return TypedActionResult.fail(itemStack);
             }
-            serverPlayer.getItemCooldownManager().set(itemStack.getItem(), Config.uniqueEffects.brimstone_claymore.cooldown);
+            SimplySwordsAPI.setWeaponCooldown(serverPlayer, itemStack, Config.uniqueEffects.brimstone_claymore.cooldown);
         }
         user.swingHand(hand);
         return TypedActionResult.success(itemStack, world.isClient());
@@ -146,7 +148,7 @@ public class BrimstoneClaymoreItem extends UniqueSwordItem implements TwoHandedW
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.brimstoneclaymoreitem.tooltip4").setStyle(Styles.TEXT));
-        appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.brimstone_claymore.cooldown);
+        appendAbilityCooldownTooltip(tooltip, itemStack, Config.uniqueEffects.brimstone_claymore.cooldown);
 
         super.appendTooltip(itemStack, world, tooltip, tooltipContext);
         net.sweenus.simplyswords.client.util.TooltipUtils.appendSpellScaleTooltip(tooltip, "fire");
@@ -175,7 +177,7 @@ public class BrimstoneClaymoreItem extends UniqueSwordItem implements TwoHandedW
         @ValidatedFloat.Restrict(min = 0f)
         public float hitDamageScaling = 0.8f;
         @ValidatedFloat.Restrict(min = 0f)
-        public float hitSpellScaling = 1.6f;
+        public float hitSpellScaling = 4.19f;
         @ValidatedFloat.Restrict(min = 0f)
         public float pulseDamageScaling = 0.28f;
         @ValidatedFloat.Restrict(min = 0f)
@@ -183,7 +185,7 @@ public class BrimstoneClaymoreItem extends UniqueSwordItem implements TwoHandedW
         @ValidatedFloat.Restrict(min = 0f)
         public float finalDamageScaling = 1.0f;
         @ValidatedFloat.Restrict(min = 0f)
-        public float spellScaling = 2.0f;
+        public float spellScaling = 5.3395f;
         @ValidatedDouble.Restrict(min = 0.0)
         public double targetJumpRange = 8.0;
 

@@ -1,5 +1,7 @@
 package net.sweenus.simplyswords.item.custom;
 
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import net.minecraft.entity.Entity;
@@ -61,7 +63,7 @@ public class ShadowstingSwordItem extends UniqueSwordItem implements UniqueWeapo
             if (!ShadowstingShadowDanceManager.start(serverWorld, serverPlayer, itemStack)) {
                 return TypedActionResult.fail(itemStack);
             }
-            user.getItemCooldownManager().set(itemStack.getItem(), Config.uniqueEffects.shadowsting.cooldown);
+            SimplySwordsAPI.setWeaponCooldown(user, itemStack, Config.uniqueEffects.shadowsting.cooldown);
         }
         return TypedActionResult.success(itemStack, world.isClient());
     }
@@ -93,7 +95,7 @@ public class ShadowstingSwordItem extends UniqueSwordItem implements UniqueWeapo
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.shadowmistsworditem.tooltip4").setStyle(Styles.TEXT));
-        appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.shadowsting.cooldown);
+        appendAbilityCooldownTooltip(tooltip, itemStack, Config.uniqueEffects.shadowsting.cooldown);
 
         super.appendTooltip(itemStack, world, tooltip, tooltipContext);
         net.sweenus.simplyswords.client.util.TooltipUtils.appendSpellScaleTooltip(tooltip, "soul");
@@ -118,7 +120,7 @@ public class ShadowstingSwordItem extends UniqueSwordItem implements UniqueWeapo
         @ValidatedFloat.Restrict(min = 0f)
         public float damageScaling = 1.0f;
         @ValidatedFloat.Restrict(min = 0f)
-        public float spellScaling = 2.0f;
+        public float spellScaling = 3.0202f;
 
     }
 }

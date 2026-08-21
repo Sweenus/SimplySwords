@@ -1,5 +1,7 @@
 package net.sweenus.simplyswords.item.custom;
 
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedDouble;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
@@ -71,7 +73,7 @@ public class FrostfallSwordItem extends UniqueSwordItem implements UniqueWeaponA
         user.swingHand(hand);
 
 
-        user.getItemCooldownManager().set(this, Config.uniqueEffects.frostfall.cooldown);
+        SimplySwordsAPI.setWeaponCooldown(user, itemStack, Config.uniqueEffects.frostfall.cooldown);
         return TypedActionResult.success(itemStack, world.isClient());
     }
 
@@ -131,7 +133,7 @@ public class FrostfallSwordItem extends UniqueSwordItem implements UniqueWeaponA
         tooltip.add(Text.translatable("item.simplyswords.frostfallsworditem.tooltip2").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.frostfallsworditem.tooltip4").setStyle(Styles.TEXT));
-        appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.frostfall.cooldown);
+        appendAbilityCooldownTooltip(tooltip, itemStack, Config.uniqueEffects.frostfall.cooldown);
         super.appendTooltip(itemStack, world, tooltip, tooltipContext);
         TooltipUtils.appendSpellScaleTooltip(tooltip, "frost");
     }
@@ -145,7 +147,7 @@ public class FrostfallSwordItem extends UniqueSwordItem implements UniqueWeaponA
         @ValidatedInt.Restrict(min = 1, max = 100)
         public int chance = 25;
         @ValidatedInt.Restrict(min = 1)
-        public int cooldown = 3;
+        public int cooldown = 60;
         @ValidatedFloat.Restrict(min = 1f)
         public float damageScaling = 0.8f;
         @ValidatedFloat.Restrict(min = 0f)
@@ -155,6 +157,6 @@ public class FrostfallSwordItem extends UniqueSwordItem implements UniqueWeaponA
         @ValidatedDouble.Restrict(min = 6.0)
         public double radius = 8.0;
         @ValidatedFloat.Restrict(min = 0f)
-        public float spellScaling = 1.12f;
+        public float spellScaling = 4.61f;
     }
 }

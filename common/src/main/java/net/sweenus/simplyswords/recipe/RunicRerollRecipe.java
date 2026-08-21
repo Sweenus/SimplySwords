@@ -13,6 +13,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.JsonHelper;
 import net.sweenus.simplyswords.registry.ComponentTypeRegistry;
 import net.sweenus.simplyswords.registry.RecipeTypeRegistry;
+import net.sweenus.simplyswords.api.StackReplacement;
 
 public class RunicRerollRecipe extends SmithingTransformRecipe {
     private final Ingredient template;
@@ -32,8 +33,7 @@ public class RunicRerollRecipe extends SmithingTransformRecipe {
     @Override
     public ItemStack craft(Inventory inventory, DynamicRegistryManager registryManager) {
         ItemStack source = inventory.getStack(1);
-        ItemStack output = new ItemStack(result.getItem(), result.getCount());
-        if (source.hasNbt()) output.setNbt(source.getNbt().copy());
+        ItemStack output = StackReplacement.copyTo(source, result.getItem(), result.getCount());
         ComponentTypeRegistry.GEM_POWER.remove(output);
         return output;
     }

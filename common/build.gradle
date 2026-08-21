@@ -52,6 +52,12 @@ dependencies {
     modCompileOnly "maven.modrinth:mythicmetals:${project.mythicmetals_version}"
     modCompileOnly "me.shedaniel:RoughlyEnoughItems-api:${rei_version}"
     modCompileOnly "dev.emi:emi-xplat-intermediary:${emi_version}:api"
+
+    testImplementation "org.junit.jupiter:junit-jupiter:5.11.4"
+}
+
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
 }
 
 publishing {

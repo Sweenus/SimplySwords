@@ -81,7 +81,7 @@ public class StormSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
         tooltip.add(Text.translatable("item.simplyswords.stormsworditem.tooltip4").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.stormsworditem.tooltip5").setStyle(Styles.TEXT));
-        appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.mjolnir.cooldown);
+        appendAbilityCooldownTooltip(tooltip, itemStack, Config.uniqueEffects.mjolnir.cooldown);
 
         super.appendTooltip(itemStack, world, tooltip, tooltipContext);
         TooltipUtils.appendSpellScaleTooltip(tooltip, "lightning");
@@ -104,7 +104,7 @@ public class StormSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
         @ValidatedFloat.Restrict(min = 0f)
         public float damageScaling = 0.45f;
         @ValidatedFloat.Restrict(min = 0f)
-        public float spellScaling = 0.8f;
+        public float spellScaling = 2.12f;
 
         @ValidatedInt.Restrict(min = 1)
         public int conductiveDuration = 120;
@@ -114,7 +114,7 @@ public class StormSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
         @ValidatedFloat.Restrict(min = 0f)
         public float conductiveBurstDamageScaling = 0.25f;
         @ValidatedFloat.Restrict(min = 0f)
-        public float conductiveBurstSpellScaling = 0.5f;
+        public float conductiveBurstSpellScaling = 1.18f;
         @ValidatedDouble.Restrict(min = 0.1)
         public double conductiveBurstRadius = 2.5;
         @ValidatedDouble.Restrict(min = 0.0)
@@ -129,7 +129,7 @@ public class StormSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
         @ValidatedFloat.Restrict(min = 0f)
         public float finalThunderclapDamageScaling = 0.9f;
         @ValidatedFloat.Restrict(min = 0f)
-        public float finalThunderclapSpellScaling = 1.6f;
+        public float finalThunderclapSpellScaling = 4.33f;
         @ValidatedDouble.Restrict(min = 0.1)
         public double finalThunderclapRadius = 6.0;
         @ValidatedDouble.Restrict(min = 0.0)

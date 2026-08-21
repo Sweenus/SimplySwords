@@ -1,5 +1,7 @@
 package net.sweenus.simplyswords.item.custom;
 
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+
 import dev.architectury.platform.Platform;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedDouble;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
@@ -74,7 +76,7 @@ public class RibboncleaverSwordItem extends UniqueSwordItem implements UniqueWea
                 60, 0, false, false, true));
         user.addStatusEffect(new StatusEffectInstance(EffectRegistry.getReference(EffectRegistry.RESILIENCE),
                 15, resilienceAmplifier, false, false, true));
-        user.getItemCooldownManager().set(this, skillCooldown);
+        SimplySwordsAPI.setWeaponCooldown(user, user.getStackInHand(hand), skillCooldown);
 
         return super.use(world, user, hand);
     }
@@ -151,7 +153,7 @@ public class RibboncleaverSwordItem extends UniqueSwordItem implements UniqueWea
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.ribboncleaversworditem.tooltip5").setStyle(Styles.TEXT));
-        appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.ribboncleaver.cooldown);
+        appendAbilityCooldownTooltip(tooltip, itemStack, Config.uniqueEffects.ribboncleaver.cooldown);
 
         super.appendTooltip(itemStack, world, tooltip, tooltipContext);
     }

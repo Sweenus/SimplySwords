@@ -1,5 +1,7 @@
 package net.sweenus.simplyswords.world;
 
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
@@ -679,8 +681,7 @@ public final class IonboundStormscaleAbilityManager {
 
     private static void applyCooldown(ServerWorld world, LivingEntity actor, ItemStack stack) {
         int cooldown = Math.max(1, Config.uniqueEffects.ionbound_stormscale.cooldown);
-        if (actor instanceof ServerPlayerEntity player) player.getItemCooldownManager().set(stack.getItem(), cooldown);
-        else WeaponAbilityCooldownManager.setCooldown(world, actor, stack, cooldown);
+        SimplySwordsAPI.setWeaponCooldown(actor, stack, cooldown);
     }
 
     private static void discardVisual(ServerWorld world, UUID id) {

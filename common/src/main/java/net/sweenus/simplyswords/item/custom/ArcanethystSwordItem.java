@@ -1,5 +1,7 @@
 package net.sweenus.simplyswords.item.custom;
 
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.fabricmc.api.EnvType;
@@ -68,7 +70,7 @@ public class ArcanethystSwordItem extends UniqueSwordItem implements TwoHandedWe
         }
         if (world instanceof ServerWorld serverWorld) {
         activateArcanethyst(serverWorld, user, itemStack);
-            user.getItemCooldownManager().set(itemStack.getItem(), Config.uniqueEffects.arcanethyst.cooldown);
+            SimplySwordsAPI.setWeaponCooldown(user, itemStack, Config.uniqueEffects.arcanethyst.cooldown);
         }
         user.swingHand(hand);
         return TypedActionResult.success(itemStack, world.isClient());
@@ -111,7 +113,7 @@ public class ArcanethystSwordItem extends UniqueSwordItem implements TwoHandedWe
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.arcanethystsworditem.tooltip3").setStyle(Styles.TEXT));
-        appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.arcanethyst.cooldown);
+        appendAbilityCooldownTooltip(tooltip, itemStack, Config.uniqueEffects.arcanethyst.cooldown);
         super.appendTooltip(itemStack, world, tooltip, tooltipContext);
         TooltipUtils.appendSpellScaleTooltip(tooltip, "arcane");
     }
@@ -133,7 +135,7 @@ public class ArcanethystSwordItem extends UniqueSwordItem implements TwoHandedWe
         @ValidatedInt.Restrict(min = 1)
         public int radius = 6;
         @ValidatedFloat.Restrict(min = 0f)
-        public float spellScaling = 1.12f;
+        public float spellScaling = 0.76f;
         @ValidatedFloat.Restrict(min = 0f)
         public float liftHeight = 4.0f;
         @ValidatedInt.Restrict(min = 1)
@@ -143,6 +145,6 @@ public class ArcanethystSwordItem extends UniqueSwordItem implements TwoHandedWe
         @ValidatedInt.Restrict(min = 1)
         public int slamTicks = 10;
         @ValidatedFloat.Restrict(min = 0f)
-        public float slamDamageMultiplier = 9.0f;
+        public float slamDamageMultiplier = 4.0f;
     }
 }

@@ -1,5 +1,7 @@
 package net.sweenus.simplyswords.world;
 
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
@@ -22,6 +24,7 @@ import net.sweenus.simplyswords.entity.GloampiercerCloneVisualEntity;
 import net.sweenus.simplyswords.entity.GloampiercerSpearEntity;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
+import net.sweenus.simplyswords.api.SpellScalingProfile;
 import net.sweenus.simplyswords.util.HelperMethods;
 import org.joml.Vector3f;
 
@@ -74,7 +77,9 @@ public final class GloampiercerAbilityManager {
         double lift = findLiftHeight(world, owner, Math.max(0.0, Config.uniqueEffects.gloampiercer.liftHeight));
         ActiveChannel channel = new ActiveChannel(owner.getUuid(), context.stack().copy(), context.hand(),
                 owner.getPos(), center, owner.getY() + lift, world.getTime(), duration,
-                Math.max(1.0F, (float) HelperMethods.getEntityAttackDamage(owner)));
+                Math.max(1.0F, HelperMethods.abilityScaledDamage(SpellScalingProfile.SOUL, owner, context.stack(),
+                        Config.uniqueEffects.gloampiercer.strikeDamageScaling,
+                        Config.uniqueEffects.gloampiercer.strikeSpellScaling)));
         spawnActiveClones(world, owner, channel, cloneCount);
         ACTIVE.computeIfAbsent(world, ignored -> new HashMap<>()).put(owner.getUuid(), channel);
         spawnActivationEffects(world, owner, center);
@@ -88,8 +93,8 @@ public final class GloampiercerAbilityManager {
         }
         long now = world.getTime();
         Map<UUID, Long> cooldowns = LAST_PASSIVE.computeIfAbsent(world, ignored -> new HashMap<>());
-        Long previous = cooldowns.get(owner.getUuid());
-        if (previous != null && now - previous < Math.max(1, Config.uniqueEffects.gloampiercer.passiveCooldown)) {
+        Long nextEligible = cooldowns.get(owner.getUuid());
+        if (nextEligible != null && now < nextEligible) {
             return;
         }
         LivingEntity target = findPassiveTarget(world, owner);
@@ -106,8 +111,11 @@ public final class GloampiercerAbilityManager {
         PASSIVE_STRIKES.computeIfAbsent(world, ignored -> new ArrayList<>())
                 .add(new PendingPassiveStrike(owner.getUuid(), target.getUuid(), clone.getUuid(),
                         stack.copy(), cloneHandOrigin(clonePosition, target.getPos()), now + throwTick,
-                        Math.max(1.0F, (float) HelperMethods.getEntityAttackDamage(owner))));
-        cooldowns.put(owner.getUuid(), now);
+                        Math.max(1.0F, HelperMethods.abilityScaledDamage(SpellScalingProfile.SOUL, owner, stack,
+                                Config.uniqueEffects.gloampiercer.strikeDamageScaling,
+                                Config.uniqueEffects.gloampiercer.strikeSpellScaling))));
+        cooldowns.put(owner.getUuid(), now + SimplySwordsAPI.getEffectiveWeaponCooldownTicks(
+                stack, owner, Config.uniqueEffects.gloampiercer.passiveCooldown));
         spawnCloneMaterialization(world, clonePosition);
     }
 
@@ -135,7 +143,7 @@ public final class GloampiercerAbilityManager {
             Map<UUID, Long> cooldowns = LAST_PASSIVE.get(world);
             if (cooldowns != null) {
                 long now = world.getTime();
-                cooldowns.values().removeIf(tick -> now - tick > 1200L);
+                cooldowns.values().removeIf(tick -> tick <= now);
                 if (cooldowns.isEmpty()) {
                     LAST_PASSIVE.remove(world);
                 }

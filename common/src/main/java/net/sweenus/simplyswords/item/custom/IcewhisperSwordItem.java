@@ -1,5 +1,8 @@
 package net.sweenus.simplyswords.item.custom;
 
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+import net.sweenus.simplyswords.api.SpellScalingProfile;
+
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.entity.Entity;
@@ -64,7 +67,7 @@ public class IcewhisperSwordItem extends UniqueSwordItem implements TwoHandedWea
 
         if (world instanceof ServerWorld serverWorld) {
             activateIcewhisper(serverWorld, user, itemStack);
-            user.getItemCooldownManager().set(itemStack.getItem(), Config.uniqueEffects.icewhisper.cooldown);
+            SimplySwordsAPI.setWeaponCooldown(user, itemStack, Config.uniqueEffects.icewhisper.cooldown);
         }
         user.swingHand(hand);
         return TypedActionResult.success(itemStack, world.isClient());
@@ -124,8 +127,8 @@ public class IcewhisperSwordItem extends UniqueSwordItem implements TwoHandedWea
                 world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_BOW_ICE_SHOOT_IMPACT_03.get(), le.getSoundCategory(), 0.1f, choose);
                 float abilityDamage = HelperMethods.abilityScaledDamage("frost", user, stack,
                         Config.uniqueEffects.icewhisper.damageScaling, Config.uniqueEffects.icewhisper.spellScaling);
-                var damageSource = user.getDamageSources().indirectMagic(user, user);
-                le.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments(world, stack, le, damageSource, abilityDamage));
+                SimplySwordsAPI.applyAbilityMagicDamage(
+                        world, user, stack, le, abilityDamage, SpellScalingProfile.FROST);
                 FrostfallIceSpikeFieldManager.createTargetBurst(world, le.getPos(), 4, 0.9F);
             }
         }
@@ -160,7 +163,7 @@ public class IcewhisperSwordItem extends UniqueSwordItem implements TwoHandedWea
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.icewhispersworditem.tooltip4").setStyle(Styles.TEXT));
-        appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.icewhisper.cooldown);
+        appendAbilityCooldownTooltip(tooltip, itemStack, Config.uniqueEffects.icewhisper.cooldown);
         super.appendTooltip(itemStack, world, tooltip, tooltipContext);
         TooltipUtils.appendSpellScaleTooltip(tooltip, "frost");
     }
@@ -180,7 +183,7 @@ public class IcewhisperSwordItem extends UniqueSwordItem implements TwoHandedWea
         @ValidatedInt.Restrict(min = 1)
         public int radius = 4;
         @ValidatedFloat.Restrict(min = 0f)
-        public float spellScaling = 0.72f;
+        public float spellScaling = 0.40f;
         @ValidatedInt.Restrict(min = 1)
         public int cometInterval = 14;
         @ValidatedInt.Restrict(min = 0)

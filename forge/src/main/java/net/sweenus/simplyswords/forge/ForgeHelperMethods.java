@@ -1,45 +1,113 @@
 package net.sweenus.simplyswords.forge;
 
 import dev.architectury.platform.Platform;
+import io.redspace.ironsspellbooks.api.magic.MagicData;
 import io.redspace.ironsspellbooks.api.registry.AttributeRegistry;
+import io.redspace.ironsspellbooks.api.registry.SchoolRegistry;
+import io.redspace.ironsspellbooks.api.spells.SchoolType;
+import io.redspace.ironsspellbooks.api.util.Utils;
+import io.redspace.ironsspellbooks.damage.DamageSources;
+import io.redspace.ironsspellbooks.network.SyncManaPacket;
+import io.redspace.ironsspellbooks.setup.PacketDistributor;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.SimplySwords;
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+import net.sweenus.simplyswords.api.SpellScalingDefinition;
+import net.sweenus.simplyswords.api.SpellScalingProfile;
+import net.sweenus.simplyswords.api.SpellScalingTarget;
 import net.sweenus.simplyswords.config.Config;
 
 public class ForgeHelperMethods {
-    public static float useSpellAttributeScaling(float damageModifier, LivingEntity player, String magicSchool) {
-        if (Platform.isForge() && SimplySwords.passVersionCheck("irons_spellbooks", SimplySwords.minimumSpellbookVersion)) {
-            if (player != null && !player.getWorld().isClient) {
-                double spellPower = player.getAttributes().hasAttribute(AttributeRegistry.SPELL_POWER.get()) ? player.getAttributeValue(AttributeRegistry.SPELL_POWER.get()) : 1.f;
-                double attributePower = 1.f;
+    public static String spellSchoolDisplayKey(Identifier scalingProfileId) {
+        return target(scalingProfileId)
+                .map(SpellScalingTarget::displayTranslationKey)
+                .filter(key -> !key.isBlank())
+                .orElse("item.simplyswords.compat.scaleEnder");
+    }
 
-                // Iron's spell-power attributes are multiplicative and have a neutral value of 1.
+    public static String spellSchoolDisplayKey(String legacySchool) {
+        return spellSchoolDisplayKey(SpellScalingProfile.fromLegacyName(legacySchool).registryId());
+    }
 
-                if (magicSchool.contains("lightning"))
-                    attributePower = player.getAttributes().hasAttribute(AttributeRegistry.LIGHTNING_SPELL_POWER.get()) ? player.getAttributeValue(AttributeRegistry.LIGHTNING_SPELL_POWER.get()) : 1.f;
-                else if (magicSchool.contains("fire"))
-                    attributePower = player.getAttributes().hasAttribute(AttributeRegistry.FIRE_SPELL_POWER.get()) ? player.getAttributeValue(AttributeRegistry.FIRE_SPELL_POWER.get()) : 1.f;
-                else if (magicSchool.contains("frost"))
-                    attributePower = player.getAttributes().hasAttribute(AttributeRegistry.ICE_SPELL_POWER.get()) ? player.getAttributeValue(AttributeRegistry.ICE_SPELL_POWER.get()) : 1.f;
-                else if (magicSchool.contains("arcane"))
-                    attributePower = player.getAttributes().hasAttribute(AttributeRegistry.ENDER_SPELL_POWER.get()) ? player.getAttributeValue(AttributeRegistry.ENDER_SPELL_POWER.get()) : 1.f;
-                else if (magicSchool.contains("soul")) //there is no equivalent to soul school in spellbook, blood is closest
-                    attributePower = player.getAttributes().hasAttribute(AttributeRegistry.BLOOD_SPELL_POWER.get()) ? player.getAttributeValue(AttributeRegistry.BLOOD_SPELL_POWER.get()) : 1.f;
-                else if (magicSchool.contains("healing"))
-                    attributePower = player.getAttributes().hasAttribute(AttributeRegistry.HOLY_SPELL_POWER.get()) ? player.getAttributeValue(AttributeRegistry.HOLY_SPELL_POWER.get()) : 1.f;
-                else if (magicSchool.contains("nature"))
-                    attributePower = player.getAttributes().hasAttribute(AttributeRegistry.NATURE_SPELL_POWER.get()) ? player.getAttributeValue(AttributeRegistry.NATURE_SPELL_POWER.get()) : 1.f;
-                else if (magicSchool.contains("evocation"))
-                    attributePower = player.getAttributes().hasAttribute(AttributeRegistry.EVOCATION_SPELL_POWER.get()) ? player.getAttributeValue(AttributeRegistry.EVOCATION_SPELL_POWER.get()) : 1.f;
-                else if (magicSchool.contains("eldritch"))
-                    attributePower = player.getAttributes().hasAttribute(AttributeRegistry.ELDRITCH_SPELL_POWER.get()) ? player.getAttributeValue(AttributeRegistry.ELDRITCH_SPELL_POWER.get()) : 1.f;
-
+    public static float useSpellAttributeScaling(float damageModifier, LivingEntity player,
+                                                 Identifier scalingProfileId) {
+        if (hasManaSystem() && player != null && !player.getWorld().isClient) {
+            double spellPower = player.getAttributes().hasAttribute(AttributeRegistry.SPELL_POWER.get())
+                    ? player.getAttributeValue(AttributeRegistry.SPELL_POWER.get()) : 1.0;
+            SchoolType school = resolveSchool(scalingProfileId);
+            if (school != null) {
                 return (float) (damageModifier
-                        * Math.max(0.f, Config.general.ironsSpellBasePower)
+                        * Math.max(0.0F, Config.general.ironsSpellBasePower)
                         * spellPower
-                        * attributePower);
+                        * school.getPowerFor(player));
             }
         }
         return 0;
+    }
+
+    public static float useSpellAttributeScaling(float damageModifier, LivingEntity player, String legacySchool) {
+        return useSpellAttributeScaling(
+                damageModifier, player, SpellScalingProfile.fromLegacyName(legacySchool).registryId());
+    }
+
+    public static DamageSource getAbilityMagicDamageSource(ServerWorld world, LivingEntity actor,
+                                                            Identifier scalingProfileId) {
+        SchoolType school = resolveSchool(scalingProfileId);
+        return school == null
+                ? world.getDamageSources().indirectMagic(actor, actor)
+                : new DamageSource(
+                        world.getRegistryManager().get(RegistryKeys.DAMAGE_TYPE).entryOf(school.getDamageType()),
+                        actor);
+    }
+
+    public static float getAbilityMagicResistanceMultiplier(LivingEntity target, Identifier scalingProfileId) {
+        SchoolType school = resolveSchool(scalingProfileId);
+        return school == null ? 1.0F : DamageSources.getResist(target, school);
+    }
+
+    public static int applySpellCooldownReduction(int baseTicks, LivingEntity actor) {
+        return hasManaSystem() ? Utils.applyCooldownReduction(baseTicks, actor) : baseTicks;
+    }
+
+    private static SchoolType resolveSchool(Identifier scalingProfileId) {
+        if (!hasManaSystem()) {
+            return null;
+        }
+        return target(scalingProfileId)
+                .map(target -> SchoolRegistry.getSchool(target.schoolId()))
+                .orElse(null);
+    }
+
+    private static java.util.Optional<SpellScalingTarget> target(Identifier scalingProfileId) {
+        return SimplySwordsAPI.getSpellScalingDefinition(scalingProfileId)
+                .map(SpellScalingDefinition::ironsTarget);
+    }
+
+    public static boolean hasManaSystem() {
+        return Platform.isForge()
+                && SimplySwords.passVersionCheck("irons_spellbooks", SimplySwords.minimumSpellbookVersion);
+    }
+
+    public static boolean hasMana(LivingEntity entity, float amount) {
+        if (amount <= 0.0F || !hasManaSystem() || entity == null || entity.getWorld().isClient) {
+            return true;
+        }
+        return MagicData.getPlayerMagicData(entity).getMana() >= amount;
+    }
+
+    public static void spendMana(LivingEntity entity, float amount) {
+        if (amount <= 0.0F || !hasManaSystem() || entity == null || entity.getWorld().isClient) {
+            return;
+        }
+        MagicData magicData = MagicData.getPlayerMagicData(entity);
+        magicData.setMana(Math.max(0.0F, magicData.getMana() - amount));
+        if (entity instanceof ServerPlayerEntity serverPlayer) {
+            PacketDistributor.sendToPlayer(serverPlayer, new SyncManaPacket(magicData));
+        }
     }
 }

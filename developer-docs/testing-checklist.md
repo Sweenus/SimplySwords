@@ -2,6 +2,9 @@
 
 Use this checklist before releasing an addon unique weapon.
 
+The automated balance/GameTest harness intentionally lives only on the 1.21.1
+source-of-truth branch.
+
 ## Startup and registration
 
 - Start a Fabric client.

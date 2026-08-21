@@ -1,5 +1,7 @@
 package net.sweenus.simplyswords.item.custom;
 
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.entity.Entity;
@@ -48,7 +50,7 @@ public class WhisperwindSwordItem extends UniqueSwordItem implements TwoHandedWe
             if (attacker.getRandom().nextInt(100) <= Config.uniqueEffects.whisperwind.chance && (attacker instanceof PlayerEntity player)) {
                 attacker.getWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
                         attacker.getSoundCategory(), 0.3f, 1.8f);
-                player.getItemCooldownManager().set(this.getDefaultStack().getItem(), 0);
+                SimplySwordsAPI.setWeaponCooldown(player, stack, 0);
             }
         }
         return super.postHit(stack, target, attacker);
@@ -69,7 +71,7 @@ public class WhisperwindSwordItem extends UniqueSwordItem implements TwoHandedWe
         }
         user.addStatusEffect(new StatusEffectInstance(EffectRegistry.getReference(EffectRegistry.FATAL_FLICKER), 12));
         user.addStatusEffect(new StatusEffectInstance(StatusEffects.ABSORPTION, 100));
-        user.getItemCooldownManager().set(this.getDefaultStack().getItem(), Config.uniqueEffects.whisperwind.cooldown);
+        SimplySwordsAPI.setWeaponCooldown(user, user.getStackInHand(hand), Config.uniqueEffects.whisperwind.cooldown);
 
         return super.use(world, user, hand);
     }
@@ -107,7 +109,7 @@ public class WhisperwindSwordItem extends UniqueSwordItem implements TwoHandedWe
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.whisperwindsworditem.tooltip3").setStyle(Styles.TEXT));
-        appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.whisperwind.cooldown);
+        appendAbilityCooldownTooltip(tooltip, itemStack, Config.uniqueEffects.whisperwind.cooldown);
 
         super.appendTooltip(itemStack, world, tooltip, tooltipContext);
         net.sweenus.simplyswords.client.util.TooltipUtils.appendSpellScaleTooltip(tooltip, "evocation");
@@ -132,7 +134,7 @@ public class WhisperwindSwordItem extends UniqueSwordItem implements TwoHandedWe
         @ValidatedFloat.Restrict(min = 0f)
         public float delayedDamageScaling = 0.54f;
         @ValidatedFloat.Restrict(min = 0f)
-        public float delayedSpellScaling = 1.08f;
+        public float delayedSpellScaling = 2.48f;
         @ValidatedFloat.Restrict(min = 0f)
         public float delayedDamagePerTargetScaling = 0.09f;
         @ValidatedFloat.Restrict(min = 0f)

@@ -513,9 +513,16 @@ public class HelperMethods {
     }
 
     public static float abilityScaledDamage(SpellScalingProfile spellSchool, LivingEntity actor, ItemStack stack, float attackScaling, float spellScaling) {
+        SpellScalingProfile profile = spellSchool == null ? SpellScalingProfile.ARCANE : spellSchool;
+        return abilityScaledDamage(profile.registryId(), actor, stack, attackScaling, spellScaling);
+    }
+
+    public static float abilityScaledDamage(Identifier scalingProfileId, LivingEntity actor, ItemStack stack, float attackScaling, float spellScaling) {
         ItemStack scalingStack = stack == null ? ItemStack.EMPTY : stack;
-        float spellDamage = commonSpellAttributeScaling(spellScaling, actor, spellSchool);
+        Identifier profileId = scalingProfileId == null ? SpellScalingProfile.ARCANE.registryId() : scalingProfileId;
+        float spellDamage = commonSpellAttributeScaling(spellScaling, actor, profileId);
         float attackDamage = attackScaledDamage(actor, scalingStack, attackScaling);
+        spellDamage = applySpellDamageDiminishingReturns(spellDamage, attackDamage);
         return AwakeningApi.scaleEffect(scalingStack, Math.max(spellDamage, attackDamage));
     }
 
@@ -528,9 +535,30 @@ public class HelperMethods {
     }
 
     public static float abilityScaledValue(SpellScalingProfile spellSchool, LivingEntity actor, ItemStack stack, float fullValue, float spellScaling) {
+        SpellScalingProfile profile = spellSchool == null ? SpellScalingProfile.ARCANE : spellSchool;
+        return abilityScaledValue(profile.registryId(), actor, stack, fullValue, spellScaling);
+    }
+
+    public static float abilityScaledValue(Identifier scalingProfileId, LivingEntity actor, ItemStack stack, float fullValue, float spellScaling) {
         ItemStack scalingStack = stack == null ? ItemStack.EMPTY : stack;
-        float spellValue = commonSpellAttributeScaling(spellScaling, actor, spellSchool);
+        Identifier profileId = scalingProfileId == null ? SpellScalingProfile.ARCANE.registryId() : scalingProfileId;
+        float spellValue = commonSpellAttributeScaling(spellScaling, actor, profileId);
         return AwakeningApi.scaleEffect(scalingStack, Math.max(fullValue, spellValue));
+    }
+
+    public static float abilityScaledDamageFromValue(SpellScalingProfile spellSchool, LivingEntity actor, ItemStack stack,
+                                                     float attackDamage, float spellScaling) {
+        SpellScalingProfile profile = spellSchool == null ? SpellScalingProfile.ARCANE : spellSchool;
+        return abilityScaledDamageFromValue(profile.registryId(), actor, stack, attackDamage, spellScaling);
+    }
+
+    public static float abilityScaledDamageFromValue(Identifier scalingProfileId, LivingEntity actor, ItemStack stack,
+                                                     float attackDamage, float spellScaling) {
+        ItemStack scalingStack = stack == null ? ItemStack.EMPTY : stack;
+        Identifier profileId = scalingProfileId == null ? SpellScalingProfile.ARCANE.registryId() : scalingProfileId;
+        float spellDamage = commonSpellAttributeScaling(spellScaling, actor, profileId);
+        spellDamage = applySpellDamageDiminishingReturns(spellDamage, attackDamage);
+        return AwakeningApi.scaleEffect(scalingStack, Math.max(spellDamage, attackDamage));
     }
 
     public static float gemPowerScaledDamage(String spellSchool, LivingEntity actor, ItemStack stack, float attackScaling, float spellScaling) {
@@ -538,15 +566,28 @@ public class HelperMethods {
     }
 
     public static float gemPowerScaledDamage(SpellScalingProfile spellSchool, LivingEntity actor, ItemStack stack, float attackScaling, float spellScaling) {
+        SpellScalingProfile profile = spellSchool == null ? SpellScalingProfile.ARCANE : spellSchool;
+        return gemPowerScaledDamage(profile.registryId(), actor, stack, attackScaling, spellScaling);
+    }
+
+    public static float gemPowerScaledDamage(Identifier scalingProfileId, LivingEntity actor, ItemStack stack, float attackScaling, float spellScaling) {
         ItemStack scalingStack = stack == null ? ItemStack.EMPTY : stack;
-        float spellDamage = commonSpellAttributeScaling(spellScaling, actor, spellSchool);
+        Identifier profileId = scalingProfileId == null ? SpellScalingProfile.ARCANE.registryId() : scalingProfileId;
+        float spellDamage = commonSpellAttributeScaling(spellScaling, actor, profileId);
         float attackDamage = attackScaledDamage(actor, scalingStack, attackScaling);
+        spellDamage = applySpellDamageDiminishingReturns(spellDamage, attackDamage);
         return AwakeningApi.scaleGemPower(scalingStack, Math.max(spellDamage, attackDamage));
     }
 
     public static float gemPowerScaledValue(SpellScalingProfile spellSchool, LivingEntity actor, ItemStack stack, float fullValue, float spellScaling) {
+        SpellScalingProfile profile = spellSchool == null ? SpellScalingProfile.ARCANE : spellSchool;
+        return gemPowerScaledValue(profile.registryId(), actor, stack, fullValue, spellScaling);
+    }
+
+    public static float gemPowerScaledValue(Identifier scalingProfileId, LivingEntity actor, ItemStack stack, float fullValue, float spellScaling) {
         ItemStack scalingStack = stack == null ? ItemStack.EMPTY : stack;
-        float spellValue = commonSpellAttributeScaling(spellScaling, actor, spellSchool);
+        Identifier profileId = scalingProfileId == null ? SpellScalingProfile.ARCANE.registryId() : scalingProfileId;
+        float spellValue = commonSpellAttributeScaling(spellScaling, actor, profileId);
         return AwakeningApi.scaleGemPower(scalingStack, Math.max(fullValue, spellValue));
     }
 
@@ -556,6 +597,28 @@ public class HelperMethods {
             attackDamage = Math.max(1.0, 1.0 + getAttackFromStack(stack, EquipmentSlot.MAINHAND));
         }
         return (float) Math.max(0.0, attackDamage * attackScaling);
+    }
+
+    public static float applySpellDamageDiminishingReturns(float spellDamage, float attackDamage) {
+        return applySpellDamageDiminishingReturns(
+                spellDamage,
+                attackDamage,
+                Config.general.spellScalingDiminishingReturnsStart,
+                Config.general.spellScalingDiminishingReturnsStrength
+        );
+    }
+
+    static float applySpellDamageDiminishingReturns(float spellDamage, float attackDamage, float start, float strength) {
+        if (spellDamage <= 0.0F || attackDamage <= 0.0F || strength <= 0.0F) {
+            return spellDamage;
+        }
+        float rawRatio = spellDamage / attackDamage;
+        if (rawRatio <= start) {
+            return spellDamage;
+        }
+        double excess = (double) spellDamage / attackDamage - start;
+        double adjustedRatio = start + Math.log1p(strength * excess) / strength;
+        return Math.min(spellDamage, (float) (attackDamage * adjustedRatio));
     }
 
     public static float applyAbilityDamageEnchantments(ServerWorld world, ItemStack stack, Entity target, DamageSource damageSource, float damage) {
@@ -607,9 +670,14 @@ public class HelperMethods {
     }
 
     public static float commonSpellAttributeScaling(float damageModifier, Entity entity, SpellScalingProfile magicSchool) {
+        SpellScalingProfile profile = magicSchool == null ? SpellScalingProfile.ARCANE : magicSchool;
+        return commonSpellAttributeScaling(damageModifier, entity, profile.registryId());
+    }
+
+    public static float commonSpellAttributeScaling(float damageModifier, Entity entity, Identifier scalingProfileId) {
         if ((entity instanceof LivingEntity livingEntity) && Config.general.compatEnableSpellPowerScaling.get())
             return SimplySwordsExpectPlatform.getSpellPowerDamage(damageModifier, livingEntity,
-                    (magicSchool == null ? SpellScalingProfile.ARCANE : magicSchool).id());
+                    scalingProfileId == null ? SpellScalingProfile.ARCANE.registryId() : scalingProfileId);
         return 0f;
     }
 

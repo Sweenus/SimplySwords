@@ -81,7 +81,7 @@ public class StarsEdgeSwordItem extends UniqueSwordItem implements UniqueWeaponA
     @Override
     public int getActivationCooldownTicks(ItemStack stack, WeaponAbilityContext context) {
         return context != null && StarsEdgeAbilityManager.isActive(context.actor())
-                ? 1
+                ? Math.max(1, Config.uniqueEffects.stars_edge.activeReactivationCooldown)
                 : Config.uniqueEffects.stars_edge.cooldown;
     }
 
@@ -107,7 +107,7 @@ public class StarsEdgeSwordItem extends UniqueSwordItem implements UniqueWeaponA
         tooltip.add(Text.translatable("item.simplyswords.starsedgesworditem.tooltip5").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.starsedgesworditem.tooltip6").setStyle(Styles.TEXT));
-        appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.stars_edge.cooldown);
+        appendAbilityCooldownTooltip(tooltip, itemStack, Config.uniqueEffects.stars_edge.cooldown);
 
         super.appendTooltip(itemStack, world, tooltip, tooltipContext);
         net.sweenus.simplyswords.client.util.TooltipUtils.appendSpellScaleTooltip(tooltip, "arcane");
@@ -121,10 +121,12 @@ public class StarsEdgeSwordItem extends UniqueSwordItem implements UniqueWeaponA
 
         @ValidatedInt.Restrict(min = 0)
         public int cooldown = 240;
+        @ValidatedInt.Restrict(min = 1)
+        public int activeReactivationCooldown = 240;
         @ValidatedFloat.Restrict(min = 0f)
-        public float damageScaling = 0.55f;
+        public float damageScaling = 0.155f;
         @ValidatedFloat.Restrict(min = 0f)
-        public float spellScaling = 1.10f;
+        public float spellScaling = 0.725f;
         @ValidatedFloat.Restrict(min = 0f)
         public float lifestealModifier = 0.10f;
         @ValidatedInt.Restrict(min = 1)
@@ -138,9 +140,9 @@ public class StarsEdgeSwordItem extends UniqueSwordItem implements UniqueWeaponA
         @ValidatedInt.Restrict(min = 2, max = 16)
         public int maxNodes = 12;
         @ValidatedFloat.Restrict(min = 0f)
-        public float constellationDamageScaling = 0.45f;
+        public float constellationDamageScaling = 0.27f;
         @ValidatedFloat.Restrict(min = 0f)
-        public float constellationSpellScaling = 0.90f;
+        public float constellationSpellScaling = 1.30f;
         @ValidatedInt.Restrict(min = 1)
         public int constellationDuration = 100;
         @ValidatedInt.Restrict(min = 1)

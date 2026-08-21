@@ -1,6 +1,9 @@
 package net.sweenus.simplyswords.api;
 
 import java.util.Locale;
+import java.util.Optional;
+import net.minecraft.util.Identifier;
+import net.sweenus.simplyswords.SimplySwords;
 
 //
 // Loader-neutral spell schools used by Simply Swords ability scaling.
@@ -27,6 +30,21 @@ public enum SpellScalingProfile {
 
     public String id() {
         return id;
+    }
+
+    public Identifier registryId() {
+        return new Identifier(SimplySwords.MOD_ID, id);
+    }
+
+    public static Optional<SpellScalingProfile> fromRegistryId(Identifier id) {
+        if (id != null && SimplySwords.MOD_ID.equals(id.getNamespace())) {
+            for (SpellScalingProfile profile : values()) {
+                if (profile.id.equals(id.getPath())) {
+                    return Optional.of(profile);
+                }
+            }
+        }
+        return Optional.empty();
     }
 
     //

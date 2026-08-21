@@ -1,5 +1,7 @@
 package net.sweenus.simplyswords.item.custom;
 
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.entity.Entity;
@@ -103,7 +105,7 @@ public class TempestSwordItem extends UniqueSwordItem implements UniqueWeaponAct
                         HelperMethods.abilityScaledDamage("frost", attacker, stack,
                                 Config.uniqueEffects.tempest.damageScaling, Config.uniqueEffects.tempest.spellScaling));
             }
-            effect.setAdditionalData(Math.max(1, Math.round(scaledDamage)));
+            effect.setScaledDamage(Math.max(1.0F, scaledDamage));
             target.addStatusEffect(effect);
 
         }
@@ -119,7 +121,7 @@ public class TempestSwordItem extends UniqueSwordItem implements UniqueWeaponAct
     public TypedActionResult<ItemStack> startPlayerAbility(World world, PlayerEntity user, Hand hand) {
         if (!user.getWorld().isClient() && world instanceof  ServerWorld serverWorld) {
             if (consumeTempestMarks(serverWorld, user) > 0) {
-                user.getItemCooldownManager().set(this, 200);
+                SimplySwordsAPI.setWeaponCooldown(user, user.getStackInHand(hand), 200);
             }
         }
 
@@ -211,7 +213,7 @@ public class TempestSwordItem extends UniqueSwordItem implements UniqueWeaponAct
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.tempestsworditem.tooltip7").setStyle(Styles.TEXT));
-        appendAbilityCooldownTooltip(tooltip, 200);
+        appendAbilityCooldownTooltip(tooltip, itemStack, 200);
         super.appendTooltip(itemStack, world, tooltip, tooltipContext);
         TooltipUtils.appendSpellScaleTooltip(tooltip, "frost_fire");
     }
@@ -231,7 +233,7 @@ public class TempestSwordItem extends UniqueSwordItem implements UniqueWeaponAct
         @ValidatedFloat.Restrict(min = 0f)
         public float damageScaling = 0.33f;
         @ValidatedFloat.Restrict(min = 0f)
-        public float spellScaling = 0.24f;
+        public float spellScaling = 1.2266f;
 
     }
 }

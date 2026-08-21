@@ -436,9 +436,7 @@ public final class AwakeningFormRegistry {
     }
 
     private static ItemStack copyToItem(ItemStack source, Item target) {
-        ItemStack result = new ItemStack(target, source.getCount());
-        if (source.hasNbt()) result.setNbt(source.getNbt().copy());
-        return result;
+        return StackReplacement.copyTo(source, target);
     }
 
     private static void clearLegacyRoute(AwakeningFormFamily family, ItemStack stack) {

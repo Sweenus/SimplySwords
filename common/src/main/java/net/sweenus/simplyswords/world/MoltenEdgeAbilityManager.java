@@ -1,5 +1,7 @@
 package net.sweenus.simplyswords.world;
 
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -242,7 +244,7 @@ public final class MoltenEdgeAbilityManager {
         long now = world.getTime();
         if (!heat.isVentingAt(now, getVentDrainPerTick())
                 || getEffectiveHeat(heat, now) <= 0
-                || !isAttackReady(world, wielder)) {
+                || !isAttackReady(world, wielder, stack)) {
             return;
         }
 
@@ -684,16 +686,17 @@ public final class MoltenEdgeAbilityManager {
                 target.getSoundCategory(), 0.5F, 0.82F + world.random.nextFloat() * 0.14F);
     }
 
-    private static boolean isAttackReady(ServerWorld world, LivingEntity user) {
+    private static boolean isAttackReady(ServerWorld world, LivingEntity user, ItemStack stack) {
         long now = world.getTime();
         if (now % 200L == 0L) {
-            LAST_RUPTURE_SWING.entrySet().removeIf(entry -> now - entry.getValue() > 1200L);
+            LAST_RUPTURE_SWING.entrySet().removeIf(entry -> entry.getValue() <= now);
         }
-        Long last = LAST_RUPTURE_SWING.get(user.getUuid());
-        if (last != null && now - last < getAttackReadyCooldownTicks(user)) {
+        Long nextEligible = LAST_RUPTURE_SWING.get(user.getUuid());
+        if (nextEligible != null && now < nextEligible) {
             return false;
         }
-        LAST_RUPTURE_SWING.put(user.getUuid(), now);
+        LAST_RUPTURE_SWING.put(user.getUuid(), now + SimplySwordsAPI.getEffectiveWeaponCooldownTicks(
+                stack, user, getAttackReadyCooldownTicks(user)));
         return true;
     }
 

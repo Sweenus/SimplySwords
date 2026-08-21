@@ -1,5 +1,7 @@
 package net.sweenus.simplyswords.item.custom;
 
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.entity.Entity;
@@ -122,7 +124,7 @@ public class WickpiercerSwordItem extends UniqueSwordItem implements RevivalWeap
 
     @Override
     public int getActivationCooldownTicks(ItemStack stack, WeaponAbilityContext context) {
-        return 20;
+        return Math.max(1, Config.uniqueEffects.wickpiercer.cooldown);
     }
 
     @Override
@@ -140,7 +142,7 @@ public class WickpiercerSwordItem extends UniqueSwordItem implements RevivalWeap
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.waxweaversworditem.tooltip4").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
-        appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.waxweaver.cooldown);
+        appendAbilityCooldownTooltip(tooltip, itemStack, Config.uniqueEffects.wickpiercer.cooldown);
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.wickpiercersworditem.tooltip3").setStyle(Styles.TEXT));
@@ -170,10 +172,8 @@ public class WickpiercerSwordItem extends UniqueSwordItem implements RevivalWeap
         int skillCooldown = Config.uniqueEffects.waxweaver.cooldown;
         if (entity instanceof net.minecraft.server.network.ServerPlayerEntity serverPlayer) {
             RevivalCandleVisualManager.activate(serverPlayer, stack);
-            serverPlayer.getItemCooldownManager().set(stack.getItem(), skillCooldown);
-        } else if (entity.getWorld() instanceof ServerWorld serverWorld) {
-            WeaponAbilityCooldownManager.setCooldown(serverWorld, entity, stack, skillCooldown);
         }
+        SimplySwordsAPI.setWeaponCooldown(entity, stack, skillCooldown);
         HelperMethods.incrementStatusEffect(entity, StatusEffects.RESISTANCE, 100, 2, 3);
 
         World world = entity.getWorld();
@@ -194,12 +194,16 @@ public class WickpiercerSwordItem extends UniqueSwordItem implements RevivalWeap
             super(new ItemStackTooltipAppender(ItemsRegistry.WICKPIERCER::get));
         }
 
+        @ValidatedInt.Restrict(min = 1)
+        public int cooldown = 33;
         @ValidatedFloat.Restrict(min = 0f)
         public float damageScaling = 0.8f;
         @ValidatedFloat.Restrict(min = 0f)
+        public float spellScaling = 4.1312f;
+        @ValidatedFloat.Restrict(min = 0f)
         public float throwDamageScaling = 0.4f;
         @ValidatedFloat.Restrict(min = 0f)
-        public float throwSpellScaling = 0.8f;
+        public float throwSpellScaling = 2.0656f;
         @ValidatedInt.Restrict(min = 0)
         public int duration = 80;
 

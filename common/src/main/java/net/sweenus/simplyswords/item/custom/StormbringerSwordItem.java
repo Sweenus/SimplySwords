@@ -1,5 +1,7 @@
 package net.sweenus.simplyswords.item.custom;
 
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.entity.Entity;
@@ -27,6 +29,7 @@ import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
 import net.sweenus.simplyswords.registry.ComponentTypeRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
+import net.sweenus.simplyswords.util.WeaponManaCost;
 import net.sweenus.simplyswords.util.Styles;
 import net.sweenus.simplyswords.world.ChainLightningVisualManager;
 import net.sweenus.simplyswords.world.PlayerWeaponAbilityChannelManager;
@@ -40,7 +43,7 @@ import java.util.UUID;
 public class StormbringerSwordItem extends UniqueSwordItem implements UniqueWeaponActiveAbility {
 
     private static final ThreadLocal<Boolean> SUPPRESS_STORMBRINGER_CHAIN = ThreadLocal.withInitial(() -> false);
-    private static final Map<UUID, Long> LAST_CHAIN_TICK = new HashMap<>();
+    private static final Map<UUID, Long> NEXT_CHAIN_TICK = new HashMap<>();
 
     public StormbringerSwordItem(ToolMaterial toolMaterial, Settings settings) {
         super(toolMaterial, settings);
@@ -68,8 +71,8 @@ public class StormbringerSwordItem extends UniqueSwordItem implements UniqueWeap
 
     private static void tryTriggerChainLightning(ItemStack stack, LivingEntity target, ServerPlayerEntity player) {
         long now = player.getServerWorld().getTime();
-        long lastTriggerTick = LAST_CHAIN_TICK.getOrDefault(player.getUuid(), Long.MIN_VALUE);
-        if (lastTriggerTick != Long.MIN_VALUE && now - lastTriggerTick < Math.max(1, Config.uniqueEffects.stormbringer.chainLightningCooldown)) {
+        long nextTriggerTick = NEXT_CHAIN_TICK.getOrDefault(player.getUuid(), Long.MIN_VALUE);
+        if (now < nextTriggerTick) {
             return;
         }
 
@@ -87,7 +90,8 @@ public class StormbringerSwordItem extends UniqueSwordItem implements UniqueWeap
             int damaged = ChainLightningVisualManager.damageStormbringerChain(player.getServerWorld(), player, target, stormCharges, damage, Config.uniqueEffects.stormbringer.chainLightningRange);
             if (damaged > 0) {
                 ComponentTypeRegistry.PARRY.set(stack, component.consumeStormCharge());
-                LAST_CHAIN_TICK.put(player.getUuid(), now);
+                NEXT_CHAIN_TICK.put(player.getUuid(), now + SimplySwordsAPI.getEffectiveWeaponCooldownTicks(
+                        stack, player, Config.uniqueEffects.stormbringer.chainLightningCooldown));
             }
         } finally {
             SUPPRESS_STORMBRINGER_CHAIN.set(false);
@@ -122,9 +126,15 @@ public class StormbringerSwordItem extends UniqueSwordItem implements UniqueWeap
     }
 
     @Override
+    public boolean chargesManaOnRelease() {
+        return true;
+    }
+
+    @Override
     public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
         if (!world.isClient && user instanceof ServerPlayerEntity serverPlayer) {
             StormbringerParryManager.finishUse(serverPlayer, stack);
+            WeaponManaCost.spend(serverPlayer, stack);
         }
     }
 
@@ -173,7 +183,7 @@ public class StormbringerSwordItem extends UniqueSwordItem implements UniqueWeap
         tooltip.add(Text.translatable("item.simplyswords.stormbringersworditem.tooltip3").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.stormbringersworditem.tooltip4").setStyle(Styles.TEXT));
-        appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.stormbringer.cooldown);
+        appendAbilityCooldownTooltip(tooltip, itemStack, Config.uniqueEffects.stormbringer.cooldown);
         super.appendTooltip(itemStack, world, tooltip, tooltipContext);
         TooltipUtils.appendSpellScaleTooltip(tooltip, "lightning");
     }
@@ -189,7 +199,7 @@ public class StormbringerSwordItem extends UniqueSwordItem implements UniqueWeap
         @ValidatedFloat.Restrict(min = 0f)
         public float damageScaling = 1.06f;
         @ValidatedFloat.Restrict(min = 0f)
-        public float spellScaling = 1.84f;
+        public float spellScaling = 5.34f;
 
         @ValidatedInt.Restrict(min = 0)
         public int blockDuration = 50;
@@ -210,7 +220,7 @@ public class StormbringerSwordItem extends UniqueSwordItem implements UniqueWeap
         @ValidatedFloat.Restrict(min = 0f)
         public float chainLightningDamageScaling = 0.35f;
         @ValidatedFloat.Restrict(min = 0f)
-        public float chainLightningSpellScaling = 0.8f;
+        public float chainLightningSpellScaling = 1.65f;
 
     }
 }

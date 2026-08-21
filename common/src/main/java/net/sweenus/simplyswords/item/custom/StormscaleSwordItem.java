@@ -82,7 +82,7 @@ public class StormscaleSwordItem extends UniqueSwordItem implements UniqueWeapon
         tooltip.add(Text.translatable("item.simplyswords.stormscalesworditem.tooltip3").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.stormscalesworditem.tooltip4").setStyle(Styles.TEXT));
-        appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.stormscale.cooldown);
+        appendAbilityCooldownTooltip(tooltip, itemStack, Config.uniqueEffects.stormscale.cooldown);
         super.appendTooltip(itemStack, world, tooltip, tooltipContext);
         TooltipUtils.appendSpellScaleTooltip(tooltip, "lightning");
     }
@@ -114,6 +114,6 @@ public class StormscaleSwordItem extends UniqueSwordItem implements UniqueWeapon
         @ValidatedFloat.Restrict(min = 0.0F)
         public float pulseDamageScaling = 0.4F;
         @ValidatedFloat.Restrict(min = 0.0F)
-        public float pulseSpellScaling = 0.8F;
+        public float pulseSpellScaling = 1.8592F;
     }
 }

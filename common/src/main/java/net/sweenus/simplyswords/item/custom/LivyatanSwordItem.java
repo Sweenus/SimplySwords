@@ -1,5 +1,7 @@
 package net.sweenus.simplyswords.item.custom;
 
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedDouble;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
@@ -90,7 +92,7 @@ public class LivyatanSwordItem extends UniqueSwordItem implements UniqueWeaponAc
 
         user.swingHand(hand);
 
-        user.getItemCooldownManager().set(this, 1);
+        SimplySwordsAPI.setWeaponCooldown(user, itemStack, 1);
         return TypedActionResult.success(itemStack, world.isClient());
     }
 
@@ -120,7 +122,7 @@ public class LivyatanSwordItem extends UniqueSwordItem implements UniqueWeaponAc
 
     @Override
     public int getActivationCooldownTicks(ItemStack stack, WeaponAbilityContext context) {
-        return 20;
+        return Math.max(1, Config.uniqueEffects.livyatan.cooldown);
     }
 
     @Override
@@ -150,10 +152,12 @@ public class LivyatanSwordItem extends UniqueSwordItem implements UniqueWeaponAc
             super(new ItemStackTooltipAppender(ItemsRegistry.LIVYATAN::get));
         }
 
+        @ValidatedInt.Restrict(min = 1)
+        public int cooldown = 65;
         @ValidatedFloat.Restrict(min = 0)
         public float returnDamageScaling = 0.64f;
         @ValidatedFloat.Restrict(min = 0)
-        public float returnSpellScaling = 1.28f;
+        public float returnSpellScaling = 3.32f;
         @ValidatedFloat.Restrict(min = 0f)
         public float damageScaling = 0.64f;
         @ValidatedInt.Restrict(min = 0)
@@ -161,7 +165,7 @@ public class LivyatanSwordItem extends UniqueSwordItem implements UniqueWeaponAc
         @ValidatedDouble.Restrict(min = 0.5)
         public double radius = 6.0;
         @ValidatedFloat.Restrict(min = 0f)
-        public float spellScaling = 1.36f;
+        public float spellScaling = 3.32f;
 
         @ValidatedFloat.Restrict(min = 0f)
         public float waveDamageScaling = 0.64f;
@@ -191,7 +195,7 @@ public class LivyatanSwordItem extends UniqueSwordItem implements UniqueWeaponAc
         @ValidatedFloat.Restrict(min = 0f)
         public float returnLightningDamageScaling = 0.35f;
         @ValidatedFloat.Restrict(min = 0f)
-        public float returnLightningSpellScaling = 0.8f;
+        public float returnLightningSpellScaling = 1.82f;
         @ValidatedDouble.Restrict(min = 1.0)
         public double returnLightningSkyHeight = 12.0;
     }

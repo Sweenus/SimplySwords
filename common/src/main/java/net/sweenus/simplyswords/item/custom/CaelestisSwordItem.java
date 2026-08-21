@@ -91,7 +91,7 @@ public class CaelestisSwordItem extends UniqueSwordItem implements UniqueWeaponA
         tooltip.add(Text.translatable("item.simplyswords.caelestissworditem.tooltip8",
                 Config.uniqueEffects.caelestis.collapseDuration / 20,
                 Config.uniqueEffects.caelestis.betrayalChance).setStyle(Styles.TEXT));
-        appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.caelestis.cooldown);
+        appendAbilityCooldownTooltip(tooltip, itemStack, Config.uniqueEffects.caelestis.cooldown);
 
         super.appendTooltip(itemStack, world, tooltip, tooltipContext);
         net.sweenus.simplyswords.client.util.TooltipUtils.appendSpellScaleTooltip(tooltip, "eldritch");
@@ -140,7 +140,7 @@ public class CaelestisSwordItem extends UniqueSwordItem implements UniqueWeaponA
         @ValidatedFloat.Restrict(min = 0f)
         public float minionDamageScaling = 0.30f;
         @ValidatedFloat.Restrict(min = 0f)
-        public float minionSpellScaling = 0.55f;
+        public float minionSpellScaling = 2.8f;
         @ValidatedFloat.Restrict(min = 0f)
         public float unboundDamageMultiplier = 1.25f;
         @ValidatedInt.Restrict(min = 0)

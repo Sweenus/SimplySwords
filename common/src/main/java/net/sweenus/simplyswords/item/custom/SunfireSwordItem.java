@@ -1,5 +1,7 @@
 package net.sweenus.simplyswords.item.custom;
 
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.entity.Entity;
@@ -62,7 +64,7 @@ public class SunfireSwordItem extends UniqueSwordItem implements UniqueWeaponAct
     public TypedActionResult<ItemStack> startPlayerAbility(World world, PlayerEntity user, Hand hand) {
         if (!user.getWorld().isClient()) {
             if (spawnSunfireStandard((ServerWorld) user.getWorld(), user) != null) {
-                user.getItemCooldownManager().set(this.getDefaultStack().getItem(), Config.uniqueEffects.sunfire.cooldown);
+                SimplySwordsAPI.setWeaponCooldown(user, user.getStackInHand(hand), Config.uniqueEffects.sunfire.cooldown);
             }
         }
         return super.use(world, user, hand);
@@ -130,7 +132,7 @@ public class SunfireSwordItem extends UniqueSwordItem implements UniqueWeaponAct
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.sunfiresworditem.tooltip3").setStyle(Styles.TEXT));
-        appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.sunfire.cooldown);
+        appendAbilityCooldownTooltip(tooltip, itemStack, Config.uniqueEffects.sunfire.cooldown);
         super.appendTooltip(itemStack, world, tooltip, tooltipContext);
         TooltipUtils.appendSpellScaleTooltip(tooltip, "healing_fire");
     }
@@ -150,9 +152,9 @@ public class SunfireSwordItem extends UniqueSwordItem implements UniqueWeaponAct
         @ValidatedFloat.Restrict(min = 0)
         public float healScaling = 0.33f;
         @ValidatedFloat.Restrict(min = 0)
-        public float spellScaling = 0.88f;
+        public float spellScaling = 1.8509f;
         @ValidatedFloat.Restrict(min = 0)
-        public float spellScalingHeal = 1.3f;
+        public float spellScalingHeal = 1.38f;
 
     }
 }

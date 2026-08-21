@@ -1,5 +1,7 @@
 package net.sweenus.simplyswords.item.custom;
 
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.entity.Entity;
@@ -46,13 +48,13 @@ public class ThunderbrandSwordItem extends UniqueSwordItem implements TwoHandedW
         if (!attacker.getWorld().isClient()) {
             int chargeChance = Config.uniqueEffects.thunderbrand.chance;
             if (attacker.getRandom().nextInt(100) <= chargeChance && (attacker instanceof PlayerEntity player) && player.getItemCooldownManager().getCooldownProgress(this, 1f) > 0) {
-                player.getItemCooldownManager().set(this, 0);
+                SimplySwordsAPI.setWeaponCooldown(player, stack, 0);
                 attacker.getWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_BLOCK_01.get(),
                         attacker.getSoundCategory(), 0.7f, 1f);
             } else if (attacker.getRandom().nextInt(100) <= chargeChance
                     && attacker.getWorld() instanceof ServerWorld
                     && !(attacker instanceof PlayerEntity)) {
-                WeaponAbilityCooldownManager.clearCooldown(attacker, stack);
+                SimplySwordsAPI.setWeaponCooldown(attacker, stack, 0);
                 attacker.getWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_BLOCK_01.get(),
                         attacker.getSoundCategory(), 0.7f, 1f);
             }
@@ -148,7 +150,7 @@ public class ThunderbrandSwordItem extends UniqueSwordItem implements TwoHandedW
         tooltip.add(Text.translatable("item.simplyswords.thunderbrandsworditem.tooltip3").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.thunderbrandsworditem.tooltip5").setStyle(Styles.TEXT));
-        appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.thunderbrand.cooldown);
+        appendAbilityCooldownTooltip(tooltip, itemStack, Config.uniqueEffects.thunderbrand.cooldown);
         super.appendTooltip(itemStack, world, tooltip, tooltipContext);
         TooltipUtils.appendSpellScaleTooltip(tooltip, "lightning");
     }
@@ -168,7 +170,7 @@ public class ThunderbrandSwordItem extends UniqueSwordItem implements TwoHandedW
         @ValidatedInt.Restrict(min = 1)
         public int radius = 2;
         @ValidatedFloat.Restrict(min = 0f)
-        public float spellScaling = 1.36f;
+        public float spellScaling = 1.23f;
         @ValidatedInt.Restrict(min = 1)
         public int chargeDuration = 40;
         @ValidatedInt.Restrict(min = 1)

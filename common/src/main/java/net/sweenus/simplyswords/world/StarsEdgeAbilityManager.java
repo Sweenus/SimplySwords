@@ -1,5 +1,7 @@
 package net.sweenus.simplyswords.world;
 
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
@@ -549,11 +551,7 @@ public final class StarsEdgeAbilityManager {
         }
         active.cooldownApplied = true;
         int cooldown = Math.max(1, Config.uniqueEffects.stars_edge.cooldown);
-        if (actor instanceof PlayerEntity player) {
-            player.getItemCooldownManager().set(active.stack.getItem(), cooldown);
-        } else {
-            WeaponAbilityCooldownManager.setCooldown(world, actor, active.stack, cooldown);
-        }
+        SimplySwordsAPI.setWeaponCooldown(actor, active.stack, cooldown);
     }
 
     private static void applyMissingOwnerCooldown(ServerWorld world, ActiveReprise active) {

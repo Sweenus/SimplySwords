@@ -90,7 +90,7 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
             }
 
             performSoulReap(sworld, serverPlayer, itemStack, target, strikePos, stacks);
-            serverPlayer.getItemCooldownManager().set(itemStack.getItem(), Config.uniqueEffects.soulstealer.cooldown);
+            SimplySwordsAPI.setWeaponCooldown(serverPlayer, itemStack, Config.uniqueEffects.soulstealer.cooldown);
         }
         return TypedActionResult.success(itemStack, world.isClient());
     }
@@ -351,7 +351,7 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.stealsworditem.tooltip5").setStyle(Styles.TEXT));
-        appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.soulstealer.cooldown);
+        appendAbilityCooldownTooltip(tooltip, itemStack, Config.uniqueEffects.soulstealer.cooldown);
         super.appendTooltip(itemStack, world, tooltip, tooltipContext);
         net.sweenus.simplyswords.client.util.TooltipUtils.appendSpellScaleTooltip(tooltip, "soul");
     }
@@ -379,6 +379,6 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
         @ValidatedFloat.Restrict(min = 0f)
         public float maxBackstabMultiplier = 5.0f;
         @ValidatedFloat.Restrict(min = 0f)
-        public float spellScalingPerMultiplier = 2.0f;
+        public float spellScalingPerMultiplier = 3.098f;
     }
 }

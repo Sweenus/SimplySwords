@@ -1,5 +1,7 @@
 package net.sweenus.simplyswords.item.custom;
 
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedDouble;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.entity.Entity;
@@ -16,7 +18,9 @@ import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.UseAction;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.AwakeningApi;
+import net.sweenus.simplyswords.api.SpellScalingProfile;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
+import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
@@ -26,6 +30,7 @@ import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
+import net.sweenus.simplyswords.util.WeaponManaCost;
 import net.sweenus.simplyswords.util.Styles;
 import net.sweenus.simplyswords.world.DawnquiverAbilityManager;
 import net.sweenus.simplyswords.world.PlayerWeaponAbilityChannelManager;
@@ -87,6 +92,11 @@ public final class DawnquiverSwordItem extends UniqueSwordItem implements TwoHan
     }
 
     @Override
+    public boolean chargesManaOnRelease() {
+        return true;
+    }
+
+    @Override
     public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
         if (world.isClient() || !(world instanceof ServerWorld serverWorld)) {
             return;
@@ -97,8 +107,9 @@ public final class DawnquiverSwordItem extends UniqueSwordItem implements TwoHan
         }
         float chargeRatio = chargeRatio(stack, user, remainingUseTicks);
         int cooldown = DawnquiverAbilityManager.release(serverWorld, user, stack, chargeRatio);
+        WeaponManaCost.spend(user, stack);
         if (user instanceof PlayerEntity player) {
-            player.getItemCooldownManager().set(stack.getItem(), cooldown);
+            SimplySwordsAPI.setWeaponCooldown(player, stack, cooldown);
         }
     }
 
@@ -159,14 +170,18 @@ public final class DawnquiverSwordItem extends UniqueSwordItem implements TwoHan
         tooltip.add(Text.translatable("item.simplyswords.dawnquiversworditem.tooltip4").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.dawnquiversworditem.tooltip5",
-                Config.uniqueEffects.dawnquiver.quickCooldown / 20.0F).setStyle(Styles.TEXT));
+                TooltipUtils.getEffectiveWeaponCooldownTicks(stack,
+                        Config.uniqueEffects.dawnquiver.quickCooldown) / 20.0F).setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.dawnquiversworditem.tooltip6",
-                Config.uniqueEffects.dawnquiver.piercingCooldown / 20.0F).setStyle(Styles.TEXT));
+                TooltipUtils.getEffectiveWeaponCooldownTicks(stack,
+                        Config.uniqueEffects.dawnquiver.piercingCooldown) / 20.0F).setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.dawnquiversworditem.tooltip7",
-                Config.uniqueEffects.dawnquiver.cooldown / 20.0F).setStyle(Styles.TEXT));
+                TooltipUtils.getEffectiveWeaponCooldownTicks(stack,
+                        Config.uniqueEffects.dawnquiver.cooldown) / 20.0F).setStyle(Styles.TEXT));
         super.appendTooltip(stack, world, tooltip, tooltipContext);
+        TooltipUtils.appendSpellScaleTooltip(tooltip, SpellScalingProfile.HEALING);
     }
 
     @Override
@@ -194,15 +209,15 @@ public final class DawnquiverSwordItem extends UniqueSwordItem implements TwoHan
         @ValidatedDouble.Restrict(min = 0.0, max = 45.0) public double homingStrength = 9.0;
         @ValidatedDouble.Restrict(min = 0.0, max = 8.0) public double impactRadius = 2.0;
         @ValidatedDouble.Restrict(min = 0.0) public double initialDamageScaling = 0.4;
-        @ValidatedDouble.Restrict(min = 0.0) public double initialSpellScaling = 0.8;
+        @ValidatedDouble.Restrict(min = 0.0) public double initialSpellScaling = 2.45;
         @ValidatedDouble.Restrict(min = 0.0) public double maxChargeDamageScaling = 2.6;
-        @ValidatedDouble.Restrict(min = 0.0) public double maxChargeSpellScaling = 5.0;
+        @ValidatedDouble.Restrict(min = 0.0) public double maxChargeSpellScaling = 15.91;
         @ValidatedInt.Restrict(min = 1) public int passiveInterval = 100;
         @ValidatedInt.Restrict(min = 1) public int passiveLockout = 80;
         @ValidatedDouble.Restrict(min = 0.0, max = 1.0) public double passiveChorusChance = 0.35;
         @ValidatedDouble.Restrict(min = 1.0, max = 64.0) public double passiveRange = 24.0;
         @ValidatedDouble.Restrict(min = 0.0) public double passiveDamageScaling = 0.5;
-        @ValidatedDouble.Restrict(min = 0.0) public double passiveSpellScaling = 1.0;
+        @ValidatedDouble.Restrict(min = 0.0) public double passiveSpellScaling = 3.06;
         @ValidatedDouble.Restrict(min = 0.1, max = 2.0) public double passiveArrowScale = 0.45;
         @ValidatedDouble.Restrict(min = 0.1, max = 2.0) public double passiveBowScale = 0.45;
         @ValidatedInt.Restrict(min = 1, max = 12) public int piercingMaxTargets = 4;

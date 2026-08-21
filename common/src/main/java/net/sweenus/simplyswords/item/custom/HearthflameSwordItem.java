@@ -94,7 +94,7 @@ public class HearthflameSwordItem extends UniqueSwordItem implements TwoHandedWe
         tooltip.add(Text.translatable("item.simplyswords.volcanicfurysworditem.tooltip7").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.volcanicfurysworditem.tooltip8").setStyle(Styles.TEXT));
-        appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.hearthflame.cooldown);
+        appendAbilityCooldownTooltip(tooltip, itemStack, Config.uniqueEffects.hearthflame.cooldown);
         super.appendTooltip(itemStack, world, tooltip, tooltipContext);
         TooltipUtils.appendSpellScaleTooltip(tooltip, "fire");
     }
@@ -128,15 +128,15 @@ public class HearthflameSwordItem extends UniqueSwordItem implements TwoHandedWe
         @ValidatedFloat.Restrict(min = 0.0F)
         public float echoDamageScaling = 0.20F;
         @ValidatedFloat.Restrict(min = 0.0F)
-        public float echoSpellScaling = 0.40F;
+        public float echoSpellScaling = 1.9084F;
         @ValidatedFloat.Restrict(min = 0.0F)
         public float snapDamageScaling = 0.55F;
         @ValidatedFloat.Restrict(min = 0.0F)
-        public float snapSpellScaling = 0.85F;
+        public float snapSpellScaling = 4.0553F;
         @ValidatedFloat.Restrict(min = 0.0F)
         public float finalDamageScaling = 0.90F;
         @ValidatedFloat.Restrict(min = 0.0F)
-        public float finalSpellScaling = 1.25F;
+        public float finalSpellScaling = 5.9638F;
         @ValidatedDouble.Restrict(min = 0.1)
         public double snapRadius = 2.5;
         @ValidatedInt.Restrict(min = 0)

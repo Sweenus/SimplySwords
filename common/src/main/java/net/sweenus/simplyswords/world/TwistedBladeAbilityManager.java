@@ -250,6 +250,13 @@ public final class TwistedBladeAbilityManager {
                 Math.max(0.0F, Config.uniqueEffects.twisted_blade.empoweredMaximumDamageScaling)
         )
                 : Math.max(0.0F, Config.uniqueEffects.twisted_blade.crescendoDamageScaling);
+        float spellScaling = empowered
+                ? MathHelper.lerp(
+                stackFraction,
+                Math.max(0.0F, Config.uniqueEffects.twisted_blade.empoweredMinimumSpellScaling),
+                Math.max(0.0F, Config.uniqueEffects.twisted_blade.empoweredMaximumSpellScaling)
+        )
+                : Math.max(0.0F, Config.uniqueEffects.twisted_blade.crescendoSpellScaling);
         double radius = empowered
                 ? MathHelper.lerp(
                 stackFraction,
@@ -271,7 +278,7 @@ public final class TwistedBladeAbilityManager {
                 0.0
         );
         Vec3d facing = horizontalDirection(impactTarget.getPos().subtract(actor.getPos()), actor);
-        float damage = HelperMethods.attackScaledDamage(actor, stack, damageScaling);
+        float damage = HelperMethods.abilityScaledDamage("soul", actor, stack, damageScaling, spellScaling);
         Box area = new Box(
                 center.x - radius,
                 center.y - radius,

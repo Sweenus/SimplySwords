@@ -14,7 +14,7 @@ import net.sweenus.simplyswords.util.HelperMethods;
 
 public class FireVortexEffect extends OrbitingEffect {
     public LivingEntity sourceEntity;
-    public int additionalData;
+    public float scaledDamage;
     public FireVortexEffect(StatusEffectCategory statusEffectCategory, int color) {
         super (statusEffectCategory, color);
         setParticleType(ParticleTypes.SMOKE);
@@ -22,20 +22,16 @@ public class FireVortexEffect extends OrbitingEffect {
     public void setSourcePlayer(LivingEntity livingEntity) {
         sourceEntity = livingEntity;
     }
-    public void setAdditionalData(int data) {
-        additionalData = data;
-    }
-
     @Override
     public void applyUpdateEffect(LivingEntity livingEntity, int amplifier) {
         if (!livingEntity.getWorld().isClient()) {
             ServerWorld serverWorld = (ServerWorld) livingEntity.getWorld();
 			if (livingEntity.getStatusEffect(EffectRegistry.getReference(EffectRegistry.FIRE_VORTEX)) instanceof SimplySwordsStatusEffectInstance statusEffect) {
                 sourceEntity = statusEffect.getSourceEntity();
-                additionalData = statusEffect.getAdditionalData();
+                scaledDamage = statusEffect.getScaledDamage();
             }
 
-            if (livingEntity.age % Math.max(1, (15 - (amplifier))) == 0 && additionalData != 0) {
+            if (livingEntity.age % Math.max(1, (15 - (amplifier))) == 0 && scaledDamage > 0.0F) {
                 DamageSource damageSource = livingEntity.getDamageSources().magic();
                 livingEntity.timeUntilRegen = 0;
 				if (sourceEntity != null) {
@@ -43,7 +39,7 @@ public class FireVortexEffect extends OrbitingEffect {
                     if (livingEntity instanceof PlayerEntity && sourceEntity instanceof PlayerEntity sourcePlayer)
                         damageSource = livingEntity.getDamageSources().playerAttack(sourcePlayer);
                 }
-                float damage = HelperMethods.applyNonPlayerAbilityDamageModifier(sourceEntity, additionalData + ((float) amplifier / 4));
+                float damage = HelperMethods.applyNonPlayerAbilityDamageModifier(sourceEntity, scaledDamage + ((float) amplifier / 4));
                 livingEntity.damage(damageSource, damage);
             }
 

@@ -100,7 +100,7 @@ public class MoltenEdgeSwordItem extends UniqueSwordItem implements UniqueWeapon
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.moltenedgesworditem.tooltip5").setStyle(Styles.TEXT));
-        appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.molten_edge.cooldown);
+        appendAbilityCooldownTooltip(tooltip, itemStack, Config.uniqueEffects.molten_edge.cooldown);
         super.appendTooltip(itemStack, world, tooltip, tooltipContext);
         TooltipUtils.appendSpellScaleTooltip(tooltip, "fire");
     }
@@ -126,7 +126,7 @@ public class MoltenEdgeSwordItem extends UniqueSwordItem implements UniqueWeapon
         @ValidatedFloat.Restrict(min = 0.0F)
         public float shockwaveDamageScaling = 0.8F;
         @ValidatedFloat.Restrict(min = 0.0F)
-        public float shockwaveSpellScaling = 1.12F;
+        public float shockwaveSpellScaling = 4.1306F;
         @ValidatedDouble.Restrict(min = 0.0)
         public double shockwaveKnockback = 0.9;
         @ValidatedInt.Restrict(min = 0)
@@ -134,7 +134,7 @@ public class MoltenEdgeSwordItem extends UniqueSwordItem implements UniqueWeapon
         @ValidatedFloat.Restrict(min = 0.0F)
         public float ruptureDamageScaling = 0.65F;
         @ValidatedFloat.Restrict(min = 0.0F)
-        public float ruptureSpellScaling = 0.82F;
+        public float ruptureSpellScaling = 3.0242F;
         @ValidatedDouble.Restrict(min = 1.0)
         public double ruptureLength = 7.0;
         @ValidatedDouble.Restrict(min = 0.5)

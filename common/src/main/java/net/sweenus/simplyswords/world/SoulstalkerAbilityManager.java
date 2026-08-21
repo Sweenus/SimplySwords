@@ -28,6 +28,7 @@ import net.sweenus.simplyswords.entity.SoulstalkerTentacleVisualEntity;
 import net.sweenus.simplyswords.registry.EntityRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
+import net.sweenus.simplyswords.api.SpellScalingProfile;
 import net.sweenus.simplyswords.util.HelperMethods;
 import org.joml.Vector3f;
 
@@ -119,7 +120,7 @@ public final class SoulstalkerAbilityManager {
         if (stride == null || owner.getVehicle() != stride) {
             return;
         }
-        if (!isCleaveReady(world, owner)) {
+        if (!isCleaveReady(world, owner, active.stackSnapshot)) {
             return;
         }
         Vec3d direction = owner.getRotationVec(1.0F);
@@ -133,7 +134,9 @@ public final class SoulstalkerAbilityManager {
                 world, owner, active.stackSnapshot, origin, direction,
                 Math.max(1.0, Config.uniqueEffects.soulstalker.cleaveRange),
                 Math.max(0.05, Config.uniqueEffects.soulstalker.cleaveSpeed),
-                Math.max(1.0F, (float) HelperMethods.getEntityAttackDamage(owner)),
+                Math.max(1.0F, HelperMethods.abilityScaledDamage(SpellScalingProfile.SOUL, owner, active.stackSnapshot,
+                        Config.uniqueEffects.soulstalker.strikeDamageScaling,
+                        Config.uniqueEffects.soulstalker.strikeSpellScaling)),
                 (float) Math.max(0.25, Config.uniqueEffects.soulstalker.cleaveInitialWidth),
                 (float) Math.max(0.25, Config.uniqueEffects.soulstalker.cleaveFinalWidth));
         world.spawnEntity(cleave);
@@ -148,22 +151,23 @@ public final class SoulstalkerAbilityManager {
                 SoundCategory.PLAYERS, 0.28F, 1.45F + world.random.nextFloat() * 0.1F);
     }
 
-    private static boolean isCleaveReady(ServerWorld world, LivingEntity user) {
+    private static boolean isCleaveReady(ServerWorld world, LivingEntity user, ItemStack stack) {
         long now = world.getTime();
         if (now % 200L == 0L) {
-            LAST_CLEAVE.entrySet().removeIf(entry -> now - entry.getValue() > 1200L);
+            LAST_CLEAVE.entrySet().removeIf(entry -> entry.getValue() <= now);
         }
         // Better Combat paces its own attacks and never hits the vanilla swingHand path, so its
         // swings would otherwise be dropped by the attack-speed gate below.
+        int cooldown = SimplySwordsAPI.getEffectiveWeaponCooldownTicks(stack, user, getCleaveCooldownTicks(user));
         if (RunicSlashManager.isIgnoringAttackReady()) {
-            LAST_CLEAVE.put(user.getUuid(), now);
+            LAST_CLEAVE.put(user.getUuid(), now + cooldown);
             return true;
         }
-        Long last = LAST_CLEAVE.get(user.getUuid());
-        if (last != null && now - last < getCleaveCooldownTicks(user)) {
+        Long nextEligible = LAST_CLEAVE.get(user.getUuid());
+        if (nextEligible != null && now < nextEligible) {
             return false;
         }
-        LAST_CLEAVE.put(user.getUuid(), now);
+        LAST_CLEAVE.put(user.getUuid(), now + cooldown);
         return true;
     }
 
@@ -211,9 +215,12 @@ public final class SoulstalkerAbilityManager {
         world.spawnEntity(visual);
         PENDING_STRIKES.computeIfAbsent(world, ignored -> new ArrayList<>())
                 .add(new PendingStrike(owner.getUuid(), target.getUuid(), visual.getUuid(),
-                        stack.copy(), Math.max(1.0F, (float) HelperMethods.getEntityAttackDamage(owner)),
+                        stack.copy(), Math.max(1.0F, HelperMethods.abilityScaledDamage(SpellScalingProfile.SOUL, owner, stack,
+                                Config.uniqueEffects.soulstalker.strikeDamageScaling,
+                                Config.uniqueEffects.soulstalker.strikeSpellScaling)),
                         now + PASSIVE_IMPACT_DELAY));
-        lockouts.put(owner.getUuid(), now + Math.max(1, Config.uniqueEffects.soulstalker.passiveLockout));
+        lockouts.put(owner.getUuid(), now + SimplySwordsAPI.getEffectiveWeaponCooldownTicks(
+                stack, owner, Config.uniqueEffects.soulstalker.passiveLockout));
         Vec3d root = owner.getPos().add(0.0, owner.getHeight() * 0.68, 0.0);
         world.spawnParticles(GLOAM_DUST, root.x, root.y, root.z,
                 10, 0.18, 0.22, 0.18, 0.02);

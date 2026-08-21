@@ -135,7 +135,7 @@ public class RunicSwordItem extends SwordItem {
 
             user.swingHand(hand);
 
-            user.getItemCooldownManager().set(this, 1);
+            SimplySwordsAPI.setWeaponCooldown(user, itemStack, 1);
             return TypedActionResult.success(itemStack, world.isClient());
         }
 
