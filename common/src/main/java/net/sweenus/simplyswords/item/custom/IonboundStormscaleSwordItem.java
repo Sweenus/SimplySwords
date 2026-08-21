@@ -75,7 +75,7 @@ public final class IonboundStormscaleSwordItem extends UniqueSwordItem implement
         appendAbilityCooldownTooltip(tooltip, stack, Config.uniqueEffects.ionbound_stormscale.cooldown);
         appendAbilityManaCostTooltip(tooltip, stack);
         super.appendTooltip(stack, context, tooltip, type);
-        TooltipUtils.appendSpellScaleTooltip(tooltip, "lightning");
+        TooltipUtils.appendWeaponSpellScaleTooltip(tooltip, stack, "lightning");
     }
 
     public static final class EffectSettings extends TooltipSettings {

@@ -15,6 +15,7 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.api.AwakeningApi;
+import net.sweenus.simplyswords.compat.SpellScalingComponents;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.registry.SoundRegistry;
@@ -66,7 +67,7 @@ public final class EvocationFangManager {
             return;
         }
 
-        float damage = HelperMethods.gemPowerScaledDamage("evocation", owner, stack,
+        float damage = HelperMethods.gemPowerScaledDamage(SpellScalingComponents.power("evocation"), owner, stack,
                 Config.gemPowers.evocation.damageScaling,
                 Config.gemPowers.evocation.spellScaling);
         if (damage <= 0.0F) {

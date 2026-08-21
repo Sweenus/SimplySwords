@@ -12,6 +12,7 @@ import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.Box;
 import net.sweenus.simplyswords.config.Config;
+import net.sweenus.simplyswords.compat.SpellScalingComponents;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 
@@ -35,7 +36,7 @@ public class MagislamEffect extends OrbitingEffect {
                 double leapVelocity = 1.5;
                 double height = 0.9;
                 double descentVelocity = 1;
-                double damage = HelperMethods.abilityScaledDamage("arcane", livingEntity, livingEntity.getMainHandStack(),
+                double damage = HelperMethods.abilityScaledDamage(SpellScalingComponents.id("magispear"), livingEntity, livingEntity.getMainHandStack(),
                         Config.uniqueEffects.magispear.damageScaling, Config.uniqueEffects.magispear.spellScaling);
 
                 if (ability_timer >= 60) {

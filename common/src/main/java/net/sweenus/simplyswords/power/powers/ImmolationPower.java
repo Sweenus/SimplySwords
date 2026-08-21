@@ -16,6 +16,7 @@ import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
 import net.sweenus.simplyswords.effect.ImmolationEffect;
+import net.sweenus.simplyswords.compat.SpellScalingComponents;
 import net.sweenus.simplyswords.power.RunicGemPower;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.GemPowerRegistry;
@@ -35,7 +36,8 @@ public class ImmolationPower extends RunicGemPower {
 		user.setCurrentHand(hand);
 		user.addStatusEffect(ImmolationEffect.createScaledInstance(user, itemStack,
 				AwakeningApi.scaleGemPowerDuration(itemStack, 800), 3,
-				Config.gemPowers.immolation.spellScaling), user);
+				Config.gemPowers.immolation.spellScaling,
+				SpellScalingComponents.power("immolation")), user);
 		SimplySwordsAPI.setWeaponCooldown(user, itemStack, 40);
 		world.playSoundFromEntity(null, user, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
 				user.getSoundCategory(), 0.3f, 0.6f);
@@ -55,7 +57,7 @@ public class ImmolationPower extends RunicGemPower {
 			tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
 			tooltip.add(Text.literal("").append(Text.translatable("item.simplyswords.immolationsworditem.tooltip2")).setStyle(Styles.RUNIC_DESCRIPTION));
 		}
-		TooltipUtils.appendSpellScaleTooltip(tooltip, "fire");
+        TooltipUtils.appendGemPowerSpellScaleTooltip(tooltip, "immolation");
 	}
 
 	public static class Settings extends TooltipSettings {

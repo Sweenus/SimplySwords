@@ -14,6 +14,7 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.api.AwakeningApi;
+import net.sweenus.simplyswords.compat.SpellScalingComponents;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.DancingBladeVisualEntity;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -47,7 +48,7 @@ public final class DancingBladeManager {
             return false;
         }
 
-        float damage = HelperMethods.gemPowerScaledDamage("evocation", player, stack,
+        float damage = HelperMethods.gemPowerScaledDamage(SpellScalingComponents.power("dancing_blades"), player, stack,
                 Config.gemPowers.dancingBlades.damageScaling,
                 Config.gemPowers.dancingBlades.spellScaling);
         DancingBladeVisualEntity blade = new DancingBladeVisualEntity(

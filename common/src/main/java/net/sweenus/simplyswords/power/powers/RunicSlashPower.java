@@ -41,7 +41,7 @@ public class RunicSlashPower extends RunefusedGemPower {
         if (TooltipUtils.shouldDisplayTooltip(itemStack, null)) {
             tooltip.add(Text.literal("").append(Text.translatable("item.simplyswords.runicslashsworditem.tooltip2")).setStyle(Styles.RUNIC_DESCRIPTION));
         }
-        TooltipUtils.appendSpellScaleTooltip(tooltip, "arcane");
+        TooltipUtils.appendGemPowerSpellScaleTooltip(tooltip, "runic_slash");
     }
 
     public static class Settings extends TooltipSettings {

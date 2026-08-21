@@ -131,7 +131,7 @@ public class HiveheartSwordItem extends UniqueSwordItem implements UniqueWeaponA
         appendAbilityCooldownTooltip(tooltip, itemStack, Config.uniqueEffects.hiveheart.activeCooldown);
         appendAbilityManaCostTooltip(tooltip, itemStack);
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
-        net.sweenus.simplyswords.client.util.TooltipUtils.appendSpellScaleTooltip(tooltip, "nature");
+        net.sweenus.simplyswords.client.util.TooltipUtils.appendWeaponSpellScaleTooltip(tooltip, itemStack, "nature");
     }
 
     public static class EffectSettings extends TooltipSettings {

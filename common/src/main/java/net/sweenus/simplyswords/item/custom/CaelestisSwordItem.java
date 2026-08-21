@@ -96,7 +96,7 @@ public class CaelestisSwordItem extends UniqueSwordItem implements UniqueWeaponA
         appendAbilityManaCostTooltip(tooltip, itemStack);
 
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
-        net.sweenus.simplyswords.client.util.TooltipUtils.appendSpellScaleTooltip(tooltip, "eldritch");
+        net.sweenus.simplyswords.client.util.TooltipUtils.appendWeaponSpellScaleTooltip(tooltip, itemStack, "eldritch");
     }
 
     public static class EffectSettings extends TooltipSettings {

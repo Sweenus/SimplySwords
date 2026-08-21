@@ -16,6 +16,7 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.config.Config;
+import net.sweenus.simplyswords.compat.SpellScalingComponents;
 import net.sweenus.simplyswords.effect.instance.SimplySwordsStatusEffectInstance;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
@@ -61,7 +62,7 @@ public class FlameSeedEffect extends OrbitingEffect {
                 this.additionalData = statusEffect.getAdditionalData();
             }
             if (this.sourceEntity != null) {
-                abilityDamage = HelperMethods.abilityScaledDamage("fire", this.sourceEntity, this.sourceEntity.getMainHandStack(),
+                abilityDamage = HelperMethods.abilityScaledDamage(SpellScalingComponents.id("flamewind"), this.sourceEntity, this.sourceEntity.getMainHandStack(),
                         Config.uniqueEffects.flamewind.damageScaling, Config.uniqueEffects.flamewind.spellScaling);
             }
             FlamewindVisualManager.refreshSeed(serverWorld, livingEntity);
@@ -75,7 +76,7 @@ public class FlameSeedEffect extends OrbitingEffect {
                     triggerDetonation(serverWorld, livingEntity, this.sourceEntity, this.additionalData);
                     livingEntity.removeStatusEffect(EffectRegistry.getReference(EffectRegistry.FLAMESEED));
                     expiryDetonation = true;
-                    abilityDamage = HelperMethods.abilityScaledDamage("fire", this.sourceEntity,
+                    abilityDamage = HelperMethods.abilityScaledDamage(SpellScalingComponents.id("flamewind"), this.sourceEntity,
                             this.sourceEntity == null ? null : this.sourceEntity.getMainHandStack(),
                             Config.uniqueEffects.flamewind.detonationDamageScaling,
                             Config.uniqueEffects.flamewind.detonationSpellScaling);
@@ -206,7 +207,7 @@ public class FlameSeedEffect extends OrbitingEffect {
         serverWorld.spawnParticles(ParticleTypes.EXPLOSION, center.x, center.y + 0.35, center.z, 2, 0.35, 0.2, 0.35, 0.01);
         serverWorld.spawnParticles(ParticleTypes.WARPED_SPORE, center.x, center.y + 0.35, center.z, 10, 0.8, 0.35, 0.8, 0.02);
 
-        float abilityDamage = HelperMethods.abilityScaledDamage("fire", sourceEntity,
+        float abilityDamage = HelperMethods.abilityScaledDamage(SpellScalingComponents.id("flamewind"), sourceEntity,
                 sourceEntity == null ? null : sourceEntity.getMainHandStack(),
                 Config.uniqueEffects.flamewind.detonationDamageScaling,
                 Config.uniqueEffects.flamewind.detonationSpellScaling);

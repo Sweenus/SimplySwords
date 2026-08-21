@@ -27,6 +27,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.Config;
+import net.sweenus.simplyswords.compat.SpellScalingComponents;
 import net.sweenus.simplyswords.SimplySwordsExpectPlatform;
 import net.sweenus.simplyswords.api.render.*;
 import net.sweenus.simplyswords.entity.BattleStandardEntity;
@@ -670,14 +671,16 @@ public class SimplySwordsAPI {
                 || !HelperMethods.checkAbilityTarget(target, actor)) {
             return false;
         }
-        DamageSource source = SimplySwordsExpectPlatform.getAbilityMagicDamageSource(world, actor, scalingProfileId);
+        ItemStack scalingStack = stack == null ? ItemStack.EMPTY : stack;
+        Identifier effectiveScalingId = SpellScalingComponents.weaponComponent(scalingStack, scalingProfileId);
+        DamageSource source = SimplySwordsExpectPlatform.getAbilityMagicDamageSource(world, actor, effectiveScalingId);
         if (source == null) {
             source = world.getDamageSources().indirectMagic(actor, actor);
         }
         float finalDamage = HelperMethods.applyAbilityDamageEnchantments(
-                world, stack == null ? ItemStack.EMPTY : stack, target, source, Math.max(0.0F, damage));
+                world, scalingStack, target, source, Math.max(0.0F, damage));
         float resistance = Math.max(0.0F,
-                SimplySwordsExpectPlatform.getAbilityMagicResistanceMultiplier(target, scalingProfileId));
+                SimplySwordsExpectPlatform.getAbilityMagicResistanceMultiplier(target, effectiveScalingId));
         float adjustedDamage = finalDamage * resistance;
         DamageSource resolvedSource = source;
         boolean[] damaged = {false};

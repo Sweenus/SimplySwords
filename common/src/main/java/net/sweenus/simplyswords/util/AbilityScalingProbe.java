@@ -2,6 +2,7 @@ package net.sweenus.simplyswords.util;
 
 import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.api.SpellScalingProfile;
+import net.sweenus.simplyswords.compat.SpellScalingComponents;
 
 public final class AbilityScalingProbe {
 
@@ -36,6 +37,8 @@ public final class AbilityScalingProbe {
 
     static float choose(Identifier profileId, BranchKind kind, float spellBranch, float meleeBranch) {
         return SpellScalingProfile.fromRegistryId(profileId)
+                .or(() -> SpellScalingComponents.get(profileId)
+                        .map(SpellScalingComponents.Definition::defaultProfile))
                 .map(profile -> choose(profile, kind, spellBranch, meleeBranch))
                 .orElseGet(() -> Math.max(spellBranch, meleeBranch));
     }

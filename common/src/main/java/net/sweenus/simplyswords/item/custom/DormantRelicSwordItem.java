@@ -21,6 +21,7 @@ import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.api.AwakeningFormRegistry;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
+import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.BattleStandardDarkEntity;
 import net.sweenus.simplyswords.entity.BattleStandardEntity;
@@ -96,6 +97,9 @@ public class DormantRelicSwordItem extends UniqueSwordItem implements UniqueWeap
             standard.ownerEntity = context.actor();
             standard.decayRate = 3;
             standard.standardType = "sunfire";
+            standard.spellScalingOwner = AwakeningApi.getFormId(context.stack())
+                    .map(Identifier::getPath)
+                    .orElse("sunfire");
             standard.setCustomName(Text.translatable("entity.simplyswords.battlestandard.name",
                     context.actor().getName()));
             return true;
@@ -163,6 +167,11 @@ public class DormantRelicSwordItem extends UniqueSwordItem implements UniqueWeap
             }
         }
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        if (sunForm) {
+            TooltipUtils.appendWeaponSpellScaleTooltip(tooltip, itemStack, "healing_fire");
+        } else if (harbingerForm) {
+            TooltipUtils.appendWeaponSpellScaleTooltip(tooltip, itemStack, "soul");
+        }
         if (this.asItem().equals(ItemsRegistry.DECAYING_RELIC.get())) {
             if (Screen.hasAltDown()) {
                 tooltip.add(Text.translatable("item.simplyswords.decayingrelicsworditem.tooltip1").formatted(Formatting.GRAY));

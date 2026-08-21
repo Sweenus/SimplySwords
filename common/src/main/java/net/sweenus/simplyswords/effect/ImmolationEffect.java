@@ -11,10 +11,10 @@ import net.minecraft.item.SwordItem;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.sound.SoundCategory;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Box;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.api.AwakeningApi;
-import net.sweenus.simplyswords.api.SpellScalingProfile;
 import net.sweenus.simplyswords.effect.instance.SimplySwordsStatusEffectInstance;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
@@ -97,14 +97,15 @@ public class ImmolationEffect extends WideOrbitingEffect {
     }
 
     public static SimplySwordsStatusEffectInstance createScaledInstance(
-            LivingEntity owner, ItemStack stack, int duration, int amplifier, float spellScaling) {
+            LivingEntity owner, ItemStack stack, int duration, int amplifier, float spellScaling,
+            Identifier scalingComponentId) {
         SimplySwordsStatusEffectInstance instance = new SimplySwordsStatusEffectInstance(
                 EffectRegistry.getReference(EffectRegistry.IMMOLATION), duration, amplifier,
                 false, true, true);
         instance.setSourceEntity(owner);
         float multiplier = AwakeningApi.getGemPowerMultiplier(stack);
         float spellDamage = HelperMethods.commonSpellAttributeScaling(
-                spellScaling, owner, SpellScalingProfile.FIRE) * multiplier;
+                spellScaling, owner, scalingComponentId) * multiplier;
         int packedMultiplier = Math.clamp(Math.round(multiplier * SCALE_PRECISION), 0, 0xFFFF);
         int packedSpell = Math.clamp(Math.round(spellDamage * SPELL_PRECISION), 0, 0xFFFF);
         instance.setAdditionalData((packedMultiplier << 16) | packedSpell);

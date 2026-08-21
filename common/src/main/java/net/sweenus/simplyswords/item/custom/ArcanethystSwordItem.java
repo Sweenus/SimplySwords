@@ -117,7 +117,7 @@ public class ArcanethystSwordItem extends UniqueSwordItem implements TwoHandedWe
         appendAbilityCooldownTooltip(tooltip, itemStack, Config.uniqueEffects.arcanethyst.cooldown);
         appendAbilityManaCostTooltip(tooltip, itemStack);
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
-        TooltipUtils.appendSpellScaleTooltip(tooltip, "arcane");
+        TooltipUtils.appendWeaponSpellScaleTooltip(tooltip, itemStack, "arcane");
     }
 
     public static class EffectSettings extends TooltipSettings {

@@ -10,8 +10,8 @@ import net.minecraft.registry.Registries;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.SimplySwords;
+import net.sweenus.simplyswords.SimplySwordsExpectPlatform;
 import net.sweenus.simplyswords.api.AwakeningFormRegistry;
-import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.api.SpellScalingProfile;
 import net.sweenus.simplyswords.config.Config;
 
@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Collections;
 import java.util.function.BiConsumer;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Supplies optional Spell Power modifiers through the item attribute pipeline.
@@ -43,6 +45,8 @@ public final class SpellPowerWeaponAttributes {
             SpellScalingProfile.FROST, SpellScalingProfile.FIRE);
     private static final List<SpellScalingProfile> HEALING_FIRE = List.of(
             SpellScalingProfile.HEALING, SpellScalingProfile.FIRE);
+    private static final List<SpellScalingProfile> FROST_LIGHTNING = List.of(
+            SpellScalingProfile.FROST, SpellScalingProfile.LIGHTNING);
 
     private static final Map<Identifier, WeaponDefinition> DEFINITIONS = createDefinitions();
 
@@ -120,27 +124,27 @@ public final class SpellPowerWeaponAttributes {
             return;
         }
 
-        for (SpellScalingProfile profile : profiles(stack)) {
-            SimplySwordsAPI.getSpellScalingDefinition(profile.registryId())
-                    .map(definition -> definition.spellPowerTarget())
-                    .flatMap(target -> target == null
-                            ? java.util.Optional.empty()
-                            : Registries.ATTRIBUTE.getEntry(target.schoolId()))
-                    .ifPresent(attribute -> consumer.accept(
-                            attribute,
-                            new EntityAttributeModifier(
-                                    modifierId(itemId, profile, slotName),
-                                    amount,
-                                    EntityAttributeModifier.Operation.ADD_VALUE
-                            )
-                    ));
+        Set<RegistryEntry<EntityAttribute>> appliedAttributes = new HashSet<>();
+        for (SpellScalingComponents.Definition component : SpellScalingComponents.weaponComponents(stack)) {
+            RegistryEntry<EntityAttribute> attribute =
+                    SimplySwordsExpectPlatform.getSpellPowerAttribute(component.id());
+            if (attribute != null && appliedAttributes.add(attribute)) {
+                consumer.accept(
+                        attribute,
+                        new EntityAttributeModifier(
+                                modifierId(itemId, component.id(), slotName),
+                                amount,
+                                EntityAttributeModifier.Operation.ADD_VALUE
+                        )
+                );
+            }
         }
     }
 
-    private static Identifier modifierId(Identifier itemId, SpellScalingProfile profile, String slotName) {
+    private static Identifier modifierId(Identifier itemId, Identifier componentId, String slotName) {
         return Identifier.of(
                 SimplySwords.MOD_ID,
-                "spell_power/" + itemId.getPath() + "/" + profile.id() + "/" + slotName
+                "spell_power/" + itemId.getPath() + "/" + componentId.getPath() + "/" + slotName
         );
     }
 
@@ -167,7 +171,7 @@ public final class SpellPowerWeaponAttributes {
         add(definitions, "soulpyre", SOUL, true);
         add(definitions, "frostfall", FROST, false);
         add(definitions, "molten_edge", FIRE, false);
-        add(definitions, "livyatan", FROST, false);
+        add(definitions, "livyatan", FROST_LIGHTNING, false);
         add(definitions, "icewhisper", FROST, true);
         add(definitions, "arcanethyst", ARCANE, true);
         add(definitions, "thunderbrand", LIGHTNING, true);

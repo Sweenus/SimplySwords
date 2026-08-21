@@ -136,7 +136,7 @@ public class HarbingerSwordItem extends UniqueSwordItem implements UniqueWeaponA
         appendAbilityCooldownTooltip(tooltip, itemStack, Config.uniqueEffects.harbinger.cooldown);
         appendAbilityManaCostTooltip(tooltip, itemStack);
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
-        TooltipUtils.appendSpellScaleTooltip(tooltip, "soul");
+        TooltipUtils.appendWeaponSpellScaleTooltip(tooltip, itemStack, "soul");
     }
 
     public static class EffectSettings extends TooltipSettings {

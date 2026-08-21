@@ -10,6 +10,7 @@ import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.api.AwakeningApi;
+import net.sweenus.simplyswords.compat.SpellScalingComponents;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.SimplySwordsGoatStampedeEntity;
 import net.sweenus.simplyswords.entity.SimplySwordsMinion;
@@ -75,7 +76,7 @@ public final class GoatStampedeManager {
             anyScreaming |= screaming;
             double damageScaling = screaming ? Config.gemPowers.goatStampede.screamingDamageScaling : Config.gemPowers.goatStampede.damageScaling;
             double spellScaling = screaming ? Config.gemPowers.goatStampede.screamingSpellScaling : Config.gemPowers.goatStampede.spellScaling;
-            float damage = HelperMethods.gemPowerScaledDamage("nature", attacker, stack,
+            float damage = HelperMethods.gemPowerScaledDamage(SpellScalingComponents.power("goat_stampede"), attacker, stack,
                     (float) damageScaling, (float) spellScaling);
 
             goat.refreshPositionAndAngles(spawnPos.x, spawnPos.y, spawnPos.z, attacker.getYaw(), 0.0F);

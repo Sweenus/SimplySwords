@@ -25,6 +25,10 @@ class SpellPowerWeaponAttributesTest {
     @Test
     void hybridsGrantTheFullBonusToBothSchools() {
         assertEquals(
+                List.of(SpellScalingProfile.FROST, SpellScalingProfile.LIGHTNING),
+                SpellPowerWeaponAttributes.profiles(id("livyatan"))
+        );
+        assertEquals(
                 List.of(SpellScalingProfile.FROST, SpellScalingProfile.FIRE),
                 SpellPowerWeaponAttributes.profiles(id("tempest"))
         );

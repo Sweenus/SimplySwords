@@ -85,7 +85,7 @@ public class StormscaleSwordItem extends UniqueSwordItem implements UniqueWeapon
         appendAbilityCooldownTooltip(tooltip, itemStack, Config.uniqueEffects.stormscale.cooldown);
         appendAbilityManaCostTooltip(tooltip, itemStack);
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
-        TooltipUtils.appendSpellScaleTooltip(tooltip, "lightning");
+        TooltipUtils.appendWeaponSpellScaleTooltip(tooltip, itemStack, "lightning");
     }
 
     public static class EffectSettings extends TooltipSettings {

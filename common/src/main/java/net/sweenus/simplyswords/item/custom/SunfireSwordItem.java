@@ -136,7 +136,7 @@ public class SunfireSwordItem extends UniqueSwordItem implements UniqueWeaponAct
         appendAbilityCooldownTooltip(tooltip, itemStack, Config.uniqueEffects.sunfire.cooldown);
         appendAbilityManaCostTooltip(tooltip, itemStack);
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
-        TooltipUtils.appendSpellScaleTooltip(tooltip, "healing_fire");
+        TooltipUtils.appendWeaponSpellScaleTooltip(tooltip, itemStack, "healing_fire");
     }
 
     public static class EffectSettings extends TooltipSettings {

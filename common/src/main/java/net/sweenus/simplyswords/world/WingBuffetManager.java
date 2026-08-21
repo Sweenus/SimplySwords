@@ -13,6 +13,7 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.api.AwakeningApi;
+import net.sweenus.simplyswords.compat.SpellScalingComponents;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.DragonWingBuffetVisualEntity;
@@ -38,7 +39,7 @@ public final class WingBuffetManager {
         Vec3d center = attacker.getPos().add(0.0, attacker.getHeight() * 0.55, 0.0);
         double range = Math.max(0.5, Config.gemPowers.wingBuffet.range);
         double halfAngleCos = Math.cos(Math.toRadians(MathHelper.clamp(Config.gemPowers.wingBuffet.coneAngleDegrees, 1.0, 180.0) * 0.5));
-        float damage = HelperMethods.gemPowerScaledDamage("evocation", attacker, stack,
+        float damage = HelperMethods.gemPowerScaledDamage(SpellScalingComponents.power("wing_buffet"), attacker, stack,
                 Config.gemPowers.wingBuffet.damageScaling,
                 Config.gemPowers.wingBuffet.spellScaling);
         DamageSource damageSource = SimplySwordsAPI.getWeaponDamageSource(attacker);

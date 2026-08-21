@@ -25,6 +25,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.Config;
+import net.sweenus.simplyswords.compat.SpellScalingComponents;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -38,6 +39,7 @@ public class BattleStandardEntity extends PathAwareEntity {
     private static final TrackedData<String> TRACKED_STANDARD_TYPE = DataTracker.registerData(BattleStandardEntity.class, TrackedDataHandlerRegistry.STRING);
     public LivingEntity ownerEntity;
     public String standardType;
+    public String spellScalingOwner = "sunfire";
     public int decayRate;
     public String positiveEffect;
     public String positiveEffectSecondary;
@@ -107,7 +109,7 @@ public class BattleStandardEntity extends PathAwareEntity {
                 if (!ownerEntity.isAlive())
                     this.setHealth(this.getHealth() - 1000);
                 int radius = 6;
-                float abilityDamage = HelperMethods.abilityScaledDamage("fire", ownerEntity, ownerEntity.getMainHandStack(),
+                float abilityDamage = HelperMethods.abilityScaledDamage(SpellScalingComponents.component(spellScalingOwner, "damage"), ownerEntity, ownerEntity.getMainHandStack(),
                         Config.uniqueEffects.sunfire.damageScaling, Config.uniqueEffects.sunfire.spellScaling);
                 // AOE Aura
                 //living entity, ownerEntity, abilityDamage,
@@ -196,7 +198,7 @@ public class BattleStandardEntity extends PathAwareEntity {
                             this.getX() - radius, this.getY() - (float) radius / 3, this.getZ() - radius);
                     for (Entity entities : getWorld().getOtherEntities(this, box, EntityPredicates.VALID_LIVING_ENTITY)) {
                         if (entities instanceof LivingEntity le && !HelperMethods.checkFriendlyFire(le, ownerEntity)) {
-                            float abilityHeal = HelperMethods.abilityScaledDamage("healing", ownerEntity, ownerEntity.getMainHandStack(),
+                            float abilityHeal = HelperMethods.abilityScaledDamage(SpellScalingComponents.component(spellScalingOwner, "healing"), ownerEntity, ownerEntity.getMainHandStack(),
                                     Config.uniqueEffects.sunfire.healScaling, Config.uniqueEffects.sunfire.spellScalingHeal);
                             //Sunfire positive effects
                             switch (standardType) {

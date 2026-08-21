@@ -12,6 +12,7 @@ import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
 import net.sweenus.simplyswords.effect.ImmolationEffect;
+import net.sweenus.simplyswords.compat.SpellScalingComponents;
 import net.sweenus.simplyswords.power.NetherGemPower;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.GemPowerRegistry;
@@ -30,7 +31,8 @@ public class RadiancePower extends NetherGemPower {
 		if (target.hasStatusEffect(StatusEffects.WEAKNESS)) {
 			attacker.addStatusEffect(ImmolationEffect.createScaledInstance(attacker, stack,
 					AwakeningApi.scaleGemPowerDuration(stack, 200), 4,
-					Config.gemPowers.radiance.spellScaling), attacker);
+					Config.gemPowers.radiance.spellScaling,
+					SpellScalingComponents.power("radiance")), attacker);
 		}
 	}
 
@@ -41,7 +43,7 @@ public class RadiancePower extends NetherGemPower {
 		if (TooltipUtils.shouldDisplayTooltip(itemStack, null)) {
 			tooltip.add(Text.literal("").append(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.radiance.description")).setStyle(Styles.NETHERFUSED_DESCRIPTION));
 		}
-		TooltipUtils.appendSpellScaleTooltip(tooltip, "fire");
+        TooltipUtils.appendGemPowerSpellScaleTooltip(tooltip, "radiance");
 	}
 
 	public static class Settings extends TooltipSettings {

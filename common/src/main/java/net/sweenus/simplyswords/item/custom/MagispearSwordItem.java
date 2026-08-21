@@ -132,7 +132,7 @@ public class MagispearSwordItem extends UniqueSwordItem implements UniqueWeaponA
         appendAbilityManaCostTooltip(tooltip, itemStack);
 
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
-        net.sweenus.simplyswords.client.util.TooltipUtils.appendSpellScaleTooltip(tooltip, "arcane");
+        net.sweenus.simplyswords.client.util.TooltipUtils.appendWeaponSpellScaleTooltip(tooltip, itemStack, "arcane");
     }
 
     public static class EffectSettings extends TooltipSettings {

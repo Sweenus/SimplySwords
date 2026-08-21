@@ -3,12 +3,17 @@ package net.sweenus.simplyswords;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import dev.architectury.platform.Platform;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.api.SpellScalingProfile;
+import net.sweenus.simplyswords.compat.SpellSchoolDisplay;
+import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Path;
+import java.util.List;
 
 public class SimplySwordsExpectPlatform {
     /**
@@ -53,6 +58,27 @@ public class SimplySwordsExpectPlatform {
 
     public static String getSpellSchoolDisplayKey(String legacySchool) {
         return getSpellSchoolDisplayKey(SpellScalingProfile.fromLegacyName(legacySchool).registryId());
+    }
+
+    @ExpectPlatform
+    public static List<Identifier> getSpellPowerSchoolIds() {
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
+    public static List<Identifier> getIronsSpellSchoolIds() {
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
+    public static SpellSchoolDisplay getActiveSpellSchoolDisplay(Identifier scalingId) {
+        throw new AssertionError();
+    }
+
+    @Nullable
+    @ExpectPlatform
+    public static RegistryEntry<EntityAttribute> getSpellPowerAttribute(Identifier scalingId) {
+        throw new AssertionError();
     }
 
     @ExpectPlatform

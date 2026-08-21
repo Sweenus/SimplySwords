@@ -145,7 +145,7 @@ public class LivyatanSwordItem extends UniqueSwordItem implements UniqueWeaponAc
         tooltip.add(Text.translatable("item.simplyswords.livyatansworditem.tooltip4").setStyle(Styles.TEXT));
         appendAbilityManaCostTooltip(tooltip, itemStack);
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
-        TooltipUtils.appendSpellScaleTooltip(tooltip, "frost");
+        TooltipUtils.appendWeaponSpellScaleTooltip(tooltip, itemStack, "frost_lightning");
     }
 
     public static class EffectSettings extends TooltipSettings {

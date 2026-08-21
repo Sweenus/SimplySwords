@@ -110,7 +110,7 @@ public abstract class WatcherSwordItem extends UniqueSwordItem implements Unique
         }
 
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
-        TooltipUtils.appendSpellScaleTooltip(tooltip, "soul");
+        TooltipUtils.appendWeaponSpellScaleTooltip(tooltip, itemStack, "soul");
     }
 
     @Override

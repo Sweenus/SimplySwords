@@ -114,7 +114,7 @@ public class WhisperwindSwordItem extends UniqueSwordItem implements TwoHandedWe
         appendAbilityManaCostTooltip(tooltip, itemStack);
 
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
-        net.sweenus.simplyswords.client.util.TooltipUtils.appendSpellScaleTooltip(tooltip, "evocation");
+        net.sweenus.simplyswords.client.util.TooltipUtils.appendWeaponSpellScaleTooltip(tooltip, itemStack, "evocation");
     }
 
     public static class EffectSettings extends TooltipSettings {

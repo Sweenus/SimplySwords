@@ -217,7 +217,7 @@ public class TempestSwordItem extends UniqueSwordItem implements UniqueWeaponAct
         appendAbilityCooldownTooltip(tooltip, itemStack, 200);
         appendAbilityManaCostTooltip(tooltip, itemStack);
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
-        TooltipUtils.appendSpellScaleTooltip(tooltip, "frost_fire");
+        TooltipUtils.appendWeaponSpellScaleTooltip(tooltip, itemStack, "frost_fire");
     }
 
     public static class EffectSettings extends TooltipSettings {

@@ -83,7 +83,7 @@ public final class DevourerClaymoreItem extends UniqueSwordItem implements Uniqu
         appendAbilityCooldownTooltip(tooltip, stack, Config.uniqueEffects.devourer.cooldown);
         appendAbilityManaCostTooltip(tooltip, stack);
         super.appendTooltip(stack, context, tooltip, type);
-        TooltipUtils.appendSpellScaleTooltip(tooltip, SpellScalingProfile.SOUL);
+        TooltipUtils.appendWeaponSpellScaleTooltip(tooltip, stack, SpellScalingProfile.SOUL);
     }
 
     @Override

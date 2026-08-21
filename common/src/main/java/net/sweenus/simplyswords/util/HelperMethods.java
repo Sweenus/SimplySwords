@@ -43,6 +43,7 @@ import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.api.DelegatedWeaponHitContext;
 import net.sweenus.simplyswords.api.SpellScalingProfile;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
+import net.sweenus.simplyswords.compat.SpellScalingComponents;
 import net.sweenus.simplyswords.compat.opac.OpacCompat;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.effect.instance.SimplySwordsStatusEffectInstance;
@@ -522,7 +523,8 @@ public class HelperMethods {
 
     public static float abilityScaledDamage(Identifier scalingProfileId, LivingEntity actor, ItemStack stack, float attackScaling, float spellScaling) {
         ItemStack scalingStack = stack == null ? ItemStack.EMPTY : stack;
-        Identifier profileId = scalingProfileId == null ? SpellScalingProfile.ARCANE.registryId() : scalingProfileId;
+        Identifier requestedProfileId = scalingProfileId == null ? SpellScalingProfile.ARCANE.registryId() : scalingProfileId;
+        Identifier profileId = SpellScalingComponents.weaponComponent(scalingStack, requestedProfileId);
         float spellDamage = commonSpellAttributeScaling(spellScaling, actor, profileId);
         float attackDamage = attackScaledDamage(actor, scalingStack, attackScaling);
         spellDamage = applySpellDamageDiminishingReturns(spellDamage, attackDamage);
@@ -545,7 +547,8 @@ public class HelperMethods {
 
     public static float abilityScaledValue(Identifier scalingProfileId, LivingEntity actor, ItemStack stack, float fullValue, float spellScaling) {
         ItemStack scalingStack = stack == null ? ItemStack.EMPTY : stack;
-        Identifier profileId = scalingProfileId == null ? SpellScalingProfile.ARCANE.registryId() : scalingProfileId;
+        Identifier requestedProfileId = scalingProfileId == null ? SpellScalingProfile.ARCANE.registryId() : scalingProfileId;
+        Identifier profileId = SpellScalingComponents.weaponComponent(scalingStack, requestedProfileId);
         float spellValue = commonSpellAttributeScaling(spellScaling, actor, profileId);
         return AwakeningApi.scaleEffect(scalingStack, AbilityScalingProbe.choose(profileId,
                 AbilityScalingProbe.BranchKind.VALUE, spellValue, fullValue));
@@ -558,7 +561,8 @@ public class HelperMethods {
 
     public static float abilityScaledDamageFromValue(Identifier scalingProfileId, LivingEntity actor, ItemStack stack, float attackDamage, float spellScaling) {
         ItemStack scalingStack = stack == null ? ItemStack.EMPTY : stack;
-        Identifier profileId = scalingProfileId == null ? SpellScalingProfile.ARCANE.registryId() : scalingProfileId;
+        Identifier requestedProfileId = scalingProfileId == null ? SpellScalingProfile.ARCANE.registryId() : scalingProfileId;
+        Identifier profileId = SpellScalingComponents.weaponComponent(scalingStack, requestedProfileId);
         float spellDamage = commonSpellAttributeScaling(spellScaling, actor, profileId);
         spellDamage = applySpellDamageDiminishingReturns(spellDamage, attackDamage);
         return AwakeningApi.scaleEffect(scalingStack, AbilityScalingProbe.choose(profileId,

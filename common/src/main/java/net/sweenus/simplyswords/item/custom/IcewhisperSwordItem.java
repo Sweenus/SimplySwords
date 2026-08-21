@@ -166,7 +166,7 @@ public class IcewhisperSwordItem extends UniqueSwordItem implements TwoHandedWea
         appendAbilityCooldownTooltip(tooltip, itemStack, Config.uniqueEffects.icewhisper.cooldown);
         appendAbilityManaCostTooltip(tooltip, itemStack);
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
-        TooltipUtils.appendSpellScaleTooltip(tooltip, "frost");
+        TooltipUtils.appendWeaponSpellScaleTooltip(tooltip, itemStack, "frost");
     }
 
     public static class EffectSettings extends TooltipSettings {

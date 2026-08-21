@@ -284,7 +284,7 @@ public class LichbladeSwordItem extends UniqueSwordItem implements TwoHandedWeap
             }
         }
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
-        TooltipUtils.appendSpellScaleTooltip(tooltip, "soul");
+        TooltipUtils.appendWeaponSpellScaleTooltip(tooltip, itemStack, "soul");
     }
 
     @Override

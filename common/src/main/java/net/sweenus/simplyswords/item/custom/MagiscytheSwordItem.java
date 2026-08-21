@@ -132,7 +132,7 @@ public class MagiscytheSwordItem extends UniqueSwordItem implements UniqueWeapon
         appendAbilityCooldownTooltip(tooltip, itemStack, Config.uniqueEffects.magiscythe.cooldown);
         appendAbilityManaCostTooltip(tooltip, itemStack);
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
-        TooltipUtils.appendSpellScaleTooltip(tooltip, "arcane");
+        TooltipUtils.appendWeaponSpellScaleTooltip(tooltip, itemStack, "arcane");
     }
 
     public static class EffectSettings extends TooltipSettings {

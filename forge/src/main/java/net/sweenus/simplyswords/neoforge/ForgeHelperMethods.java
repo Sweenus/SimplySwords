@@ -9,8 +9,11 @@ import io.redspace.ironsspellbooks.api.util.Utils;
 import io.redspace.ironsspellbooks.damage.DamageSources;
 import io.redspace.ironsspellbooks.network.SyncManaPacket;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.attribute.EntityAttribute;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.minecraft.entity.LivingEntity;
@@ -19,9 +22,17 @@ import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.api.SpellScalingDefinition;
 import net.sweenus.simplyswords.api.SpellScalingProfile;
 import net.sweenus.simplyswords.api.SpellScalingTarget;
+import net.sweenus.simplyswords.compat.SpellScalingAssignments;
+import net.sweenus.simplyswords.compat.SpellSchoolDisplay;
 import net.sweenus.simplyswords.config.Config;
 
+import java.util.Comparator;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+
 public class ForgeHelperMethods {
+    private static final Set<Identifier> WARNED_MISSING_IRONS_SCHOOLS = ConcurrentHashMap.newKeySet();
     public static String spellSchoolDisplayKey(Identifier scalingProfileId) {
         return activeTarget(scalingProfileId)
                 .map(SpellScalingTarget::displayTranslationKey)
@@ -74,13 +85,54 @@ public class ForgeHelperMethods {
         return hasManaSystem() ? Utils.applyCooldownReduction(baseTicks, actor) : baseTicks;
     }
 
+    public static List<Identifier> spellPowerSchoolIds() {
+        return hasSpellPowerSystem() ? NeoForgeSpellPowerCompat.schoolIds() : List.of();
+    }
+
+    public static List<Identifier> ironsSpellSchoolIds() {
+        if (!hasManaSystem()) {
+            return List.of();
+        }
+        return SchoolRegistry.REGISTRY.getIds().stream()
+                .sorted(Comparator.comparing(Identifier::toString))
+                .toList();
+    }
+
+    public static SpellSchoolDisplay activeSpellSchoolDisplay(Identifier scalingId) {
+        if (hasManaSystem()) {
+            SchoolType school = resolveSchool(scalingId);
+            if (school != null) {
+                return new SpellSchoolDisplay(school.getId(), school.getDisplayName());
+            }
+            Identifier fallback = SpellScalingAssignments.defaultIronsSchool(scalingId)
+                    .orElse(Identifier.of("irons_spellbooks", "ender"));
+            return new SpellSchoolDisplay(fallback, Text.literal(fallback.toString()));
+        }
+        if (hasSpellPowerSystem()) {
+            return NeoForgeSpellPowerCompat.display(scalingId);
+        }
+        Identifier fallback = Identifier.of("simplyswords", "arcane");
+        return new SpellSchoolDisplay(fallback, Text.literal(fallback.toString()));
+    }
+
+    public static RegistryEntry<EntityAttribute> spellPowerAttribute(Identifier scalingId) {
+        return hasSpellPowerSystem() ? NeoForgeSpellPowerCompat.attribute(scalingId) : null;
+    }
+
     private static SchoolType resolveSchool(Identifier scalingProfileId) {
         if (!hasManaSystem()) {
             return null;
         }
-        return ironsTarget(scalingProfileId)
-                .map(target -> SchoolRegistry.getSchool(target.schoolId()))
-                .orElse(null);
+        Identifier configured = SpellScalingAssignments.ironsSchool(scalingProfileId).orElse(null);
+        SchoolType school = configured == null ? null : SchoolRegistry.getSchool(configured);
+        if (school != null) {
+            return school;
+        }
+        if (configured != null && WARNED_MISSING_IRONS_SCHOOLS.add(configured)) {
+            SimplySwords.LOGGER.warn("Unknown Iron's Spells school {}; using the default for {}", configured, scalingProfileId);
+        }
+        Identifier fallback = SpellScalingAssignments.defaultIronsSchool(scalingProfileId).orElse(null);
+        return fallback == null ? null : SchoolRegistry.getSchool(fallback);
     }
 
     private static java.util.Optional<SpellScalingTarget> activeTarget(Identifier scalingProfileId) {

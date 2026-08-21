@@ -44,7 +44,7 @@ public class WingBuffetPower extends NetherGemPower {
         if (TooltipUtils.shouldDisplayTooltip(itemStack, null)) {
             tooltip.add(Text.literal("").append(Text.translatable("item.simplyswords.uniquesworditem.netherfused_power.wing_buffet.description")).setStyle(Styles.NETHERFUSED_DESCRIPTION));
         }
-        TooltipUtils.appendSpellScaleTooltip(tooltip, "evocation");
+        TooltipUtils.appendGemPowerSpellScaleTooltip(tooltip, "wing_buffet");
     }
 
     public static class Settings extends TooltipSettings {

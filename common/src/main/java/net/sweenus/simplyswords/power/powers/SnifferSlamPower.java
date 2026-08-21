@@ -71,7 +71,7 @@ public class SnifferSlamPower extends RunefusedGemPower {
         if (TooltipUtils.shouldDisplayTooltip(itemStack, null)) {
             tooltip.add(Text.literal("").append(Text.translatable("item.simplyswords.snifferslamsworditem.tooltip2")).setStyle(Styles.RUNIC_DESCRIPTION));
         }
-        TooltipUtils.appendSpellScaleTooltip(tooltip, "nature");
+        TooltipUtils.appendGemPowerSpellScaleTooltip(tooltip, "sniffer_slam");
     }
 
     public static class Settings extends TooltipSettings {

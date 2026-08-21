@@ -182,7 +182,7 @@ public final class DawnquiverSwordItem extends UniqueSwordItem implements TwoHan
                         Config.uniqueEffects.dawnquiver.cooldown) / 20.0F).setStyle(Styles.TEXT));
         appendAbilityManaCostTooltip(tooltip, stack);
         super.appendTooltip(stack, context, tooltip, type);
-        TooltipUtils.appendSpellScaleTooltip(tooltip, SpellScalingProfile.HEALING);
+        TooltipUtils.appendWeaponSpellScaleTooltip(tooltip, stack, SpellScalingProfile.HEALING);
     }
 
     @Override

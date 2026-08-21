@@ -21,6 +21,7 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.api.AwakeningApi;
+import net.sweenus.simplyswords.compat.SpellScalingComponents;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.VerdantTrailVisualEntity;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -133,7 +134,7 @@ public final class VerdantTrailManager {
 
     private static void createSegment(ServerWorld world, LivingEntity owner, Vec3d center, ItemStack stack) {
         int duration = Math.max(1, Config.gemPowers.verdantTrail.duration);
-        float damage = HelperMethods.gemPowerScaledDamage("nature", owner, stack,
+        float damage = HelperMethods.gemPowerScaledDamage(SpellScalingComponents.power("verdant_trail"), owner, stack,
                 Config.gemPowers.verdantTrail.damageScaling,
                 Config.gemPowers.verdantTrail.spellScaling);
         int regenerationDuration = AwakeningApi.scaleGemPowerDuration(

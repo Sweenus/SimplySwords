@@ -6,6 +6,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.api.AwakeningApi;
+import net.sweenus.simplyswords.compat.SpellScalingComponents;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.SimplySwordsCreeperHeadEntity;
 import net.sweenus.simplyswords.registry.EntityRegistry;
@@ -54,7 +55,7 @@ public final class BaneheadSwarmManager {
         double orbitBaseAngle = activeCount * ((Math.PI * 2.0) / maxActiveHeads);
         double orbitRadius = Config.gemPowers.baneheadSwarm.orbitRadius;
         double orbitHeight = Config.gemPowers.baneheadSwarm.orbitHeight;
-        float damage = HelperMethods.gemPowerScaledDamage("eldritch", user, stack,
+        float damage = HelperMethods.gemPowerScaledDamage(SpellScalingComponents.power("banehead_swarm"), user, stack,
                 (float) Config.gemPowers.baneheadSwarm.damageScaling,
                 (float) Config.gemPowers.baneheadSwarm.spellScaling);
 

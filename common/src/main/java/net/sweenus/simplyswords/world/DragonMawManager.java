@@ -11,6 +11,7 @@ import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.Box;
 import net.sweenus.simplyswords.api.AwakeningApi;
+import net.sweenus.simplyswords.compat.SpellScalingComponents;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.DragonMawHeadVisualEntity;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -56,7 +57,7 @@ public final class DragonMawManager {
             return;
         }
 
-        float damage = HelperMethods.gemPowerScaledDamage("fire", owner, stack,
+        float damage = HelperMethods.gemPowerScaledDamage(SpellScalingComponents.power("dragon_maw"), owner, stack,
                 Config.gemPowers.dragonMaw.damageScaling,
                 Config.gemPowers.dragonMaw.spellScaling);
         if (damage <= 0.0F) {

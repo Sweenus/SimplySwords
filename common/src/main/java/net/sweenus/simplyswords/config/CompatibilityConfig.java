@@ -16,12 +16,14 @@ import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.SimplySwords;
+import net.sweenus.simplyswords.SimplySwordsExpectPlatform;
+import net.sweenus.simplyswords.compat.SpellScalingComponents;
 import net.sweenus.simplyswords.compat.SpellPowerWeaponAttributes;
 
 import static net.sweenus.simplyswords.SimplySwords.minimumSpellPowerVersion;
 import static net.sweenus.simplyswords.SimplySwords.minimumSpellbookVersion;
 
-@Version(version = 1)
+@Version(version = 2)
 public class CompatibilityConfig extends Config {
     static final float DEFAULT_DIMINISHING_RETURNS_START = 1.40F;
     static final float DEFAULT_DIMINISHING_RETURNS_STRENGTH = 10.0F;
@@ -72,6 +74,14 @@ public class CompatibilityConfig extends Config {
                         .valueHandler(new ValidatedDouble(2.0D, 10000.0D, 0.0D))
                         .defaults(SpellPowerWeaponAttributes.defaultBonuses())
                         .build();
+        public ValidatedIdentifierMap<Identifier> weaponAbilitySchools = schoolMap(
+                SpellScalingComponents.Kind.WEAPON,
+                true
+        );
+        public ValidatedIdentifierMap<Identifier> gemPowerSchools = schoolMap(
+                SpellScalingComponents.Kind.GEM_POWER,
+                true
+        );
     }
 
     public static final class IronsSpellsSettings extends ConfigSection {
@@ -85,6 +95,37 @@ public class CompatibilityConfig extends Config {
                         .valueHandler(new ValidatedInt(0, 10000, 0))
                         .defaults(defaultWeaponManaCosts())
                         .build();
+        public ValidatedIdentifierMap<Identifier> weaponAbilitySchools = schoolMap(
+                SpellScalingComponents.Kind.WEAPON,
+                false
+        );
+        public ValidatedIdentifierMap<Identifier> gemPowerSchools = schoolMap(
+                SpellScalingComponents.Kind.GEM_POWER,
+                false
+        );
+    }
+
+    private static ValidatedIdentifierMap<Identifier> schoolMap(
+            SpellScalingComponents.Kind kind,
+            boolean spellPower
+    ) {
+        Identifier defaultComponent = SpellScalingComponents.componentIds(kind).getFirst();
+        Identifier defaultSchool = spellPower
+                ? Identifier.of("spell_power", "arcane")
+                : Identifier.of("irons_spellbooks", "ender");
+        return new ValidatedIdentifierMap.Builder<Identifier>()
+                .keyHandler(ValidatedIdentifier.ofSuppliedList(
+                        defaultComponent,
+                        () -> SpellScalingComponents.componentIds(kind)))
+                .valueHandler(ValidatedIdentifier.ofSuppliedList(
+                        defaultSchool,
+                        spellPower
+                                ? SimplySwordsExpectPlatform::getSpellPowerSchoolIds
+                                : SimplySwordsExpectPlatform::getIronsSpellSchoolIds))
+                .defaults(spellPower
+                        ? SpellScalingComponents.defaultSpellPowerSchools(kind)
+                        : SpellScalingComponents.defaultIronsSchools(kind))
+                .build();
     }
 
     static ImmutableMap<Identifier, Integer> defaultWeaponManaCosts() {
