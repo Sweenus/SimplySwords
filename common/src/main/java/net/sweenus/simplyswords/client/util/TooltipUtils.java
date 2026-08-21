@@ -140,7 +140,29 @@ public class TooltipUtils {
 
     public static void appendSpellScaleTooltip(List<Text> tooltip, SpellScalingProfile profile) {
         appendSpellScaleTooltip(tooltip,
-                (profile == null ? SpellScalingProfile.ARCANE : profile).id());
+                (profile == null ? SpellScalingProfile.ARCANE : profile).registryId());
+    }
+
+    public static void appendSpellScaleTooltip(List<Text> tooltip, Identifier scalingProfileId) {
+        if ((Platform.isModLoaded("spell_power") || Platform.isModLoaded("irons_spellbooks"))
+                && Screen.hasAltDown() && !Screen.hasControlDown()) {
+            Identifier profileId = scalingProfileId == null
+                    ? SpellScalingProfile.ARCANE.registryId()
+                    : scalingProfileId;
+            tooltip.add(Text.literal(""));
+            tooltip.add(Text.translatable("item.simplyswords.compat.spellScaling").setStyle(Styles.COMMON));
+            tooltip.add(Text.literal(schoolGlyph(profileId.getPath()))
+                    .append(Text.translatable(SimplySwordsExpectPlatform.getSpellSchoolDisplayKey(profileId))));
+            tooltip.add(Text.literal(""));
+        }
+    }
+
+    public static int getEffectiveWeaponCooldownTicks(ItemStack stack, int baseCooldownTicks) {
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client == null || client.player == null) {
+            return Math.max(0, baseCooldownTicks);
+        }
+        return SimplySwordsAPI.getEffectiveWeaponCooldownTicks(stack, client.player, baseCooldownTicks);
     }
 
     public static boolean shouldDisplayTooltip(ItemStack stack, Identifier tagId) {

@@ -16,7 +16,7 @@ Use `SimplySwordsAPI` as the preferred common-side facade and
 | Unique loot | `UniqueLootRegistry`, `SimplySwordsAPI.registerUniqueLoot` | [Unique loot](unique-loot.md) |
 | Weapon implicits | `WeaponImplicitDefinition`, `WeaponImplicitRegistry` | [Weapon implicits](weapon-implicits.md) |
 | Weapon hits | `DelegatedWeaponHitContext`, hit helpers on `SimplySwordsAPI` | [Combat and damage](combat-and-damage.md) |
-| Spell scaling and targeting | `SpellScalingProfile`, ability helpers on `SimplySwordsAPI` | [Combat and damage](combat-and-damage.md) |
+| Spell scaling and targeting | `SpellScalingProfile`, `SpellScalingDefinition`, ability helpers on `SimplySwordsAPI` | [Combat and damage](combat-and-damage.md) |
 | Remnant transformations | `SimplySwordsAPI.registerTransformation` | [Contained Remnants](contained-remnants.md) |
 | Battle Standards | `SimplySwordsAPI.spawnBattleStandard` | [Battle Standards](battle-standards.md) |
 | Observer status effects | `SimplySwordsAPI.registerObserverSyncedStatusEffect`, `ObserverStatusEffectClientApi` | [Observer status effects](observer-status-effects.md) |
@@ -28,7 +28,7 @@ Use `SimplySwordsAPI` as the preferred common-side facade and
 
 `SimplySwordsAPI` exposes:
 
-- ability validation, activation, and cooldown dispatch;
+- ability validation, activation, and default-on Iron's cooldown dispatch;
 - awakening profile and form-family registration;
 - unique pity-loot registration;
 - gem socket hooks;

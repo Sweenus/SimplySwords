@@ -1,5 +1,7 @@
 package net.sweenus.simplyswords.world;
 
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
@@ -105,7 +107,7 @@ public final class StormbringerParryManager {
             stack.set(ComponentTypeRegistry.PARRY.get(), parryComponent.resetFull());
         }
 
-        player.getItemCooldownManager().set(stack.getItem(), skillCooldown);
+        SimplySwordsAPI.setWeaponCooldown(player, stack, skillCooldown);
     }
 
     private static boolean isStillUsingStormbringer(ServerPlayerEntity player, Hand hand) {

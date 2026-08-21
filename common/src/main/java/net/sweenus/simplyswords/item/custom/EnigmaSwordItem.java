@@ -1,5 +1,7 @@
 package net.sweenus.simplyswords.item.custom;
 
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+
 import dev.architectury.platform.Platform;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedDouble;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
@@ -66,7 +68,7 @@ public class EnigmaSwordItem extends UniqueSwordItem implements UniqueWeaponActi
     public TypedActionResult<ItemStack> startPlayerAbility(World world, PlayerEntity user, Hand hand) {
         if (!user.getWorld().isClient()) {
             if (spawnEnigmaStandard((ServerWorld) user.getWorld(), user, user.getStackInHand(hand)) != null) {
-                user.getItemCooldownManager().set(this, Config.uniqueEffects.enigma.enigmaCooldown);
+                SimplySwordsAPI.setWeaponCooldown(user, user.getStackInHand(hand), Config.uniqueEffects.enigma.enigmaCooldown);
             }
         }
         return super.use(world, user, hand);
@@ -174,7 +176,7 @@ public class EnigmaSwordItem extends UniqueSwordItem implements UniqueWeaponActi
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.enigmasworditem.tooltip4").setStyle(Styles.TEXT));
-        appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.enigma.enigmaCooldown);
+        appendAbilityCooldownTooltip(tooltip, itemStack, Config.uniqueEffects.enigma.enigmaCooldown);
         appendAbilityManaCostTooltip(tooltip, itemStack);
 
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);

@@ -123,7 +123,7 @@ public final class SoulstalkerAbilityManager {
         if (stride == null || owner.getVehicle() != stride) {
             return;
         }
-        if (!isCleaveReady(world, owner)) {
+        if (!isCleaveReady(world, owner, active.stackSnapshot)) {
             return;
         }
         Vec3d direction = owner.getRotationVec(1.0F);
@@ -154,20 +154,21 @@ public final class SoulstalkerAbilityManager {
                 SoundCategory.PLAYERS, 0.28F, 1.45F + world.random.nextFloat() * 0.1F);
     }
 
-    private static boolean isCleaveReady(ServerWorld world, LivingEntity user) {
+    private static boolean isCleaveReady(ServerWorld world, LivingEntity user, ItemStack stack) {
         long now = world.getTime();
         if (now % 200L == 0L) {
-            LAST_CLEAVE.entrySet().removeIf(entry -> now - entry.getValue() > 1200L);
+            LAST_CLEAVE.entrySet().removeIf(entry -> entry.getValue() <= now);
         }
+        int cooldown = SimplySwordsAPI.getEffectiveWeaponCooldownTicks(stack, user, getCleaveCooldownTicks(user));
         if (RunicSlashManager.isIgnoringAttackReady()) {
-            LAST_CLEAVE.put(user.getUuid(), now);
+            LAST_CLEAVE.put(user.getUuid(), now + cooldown);
             return true;
         }
-        Long last = LAST_CLEAVE.get(user.getUuid());
-        if (last != null && now - last < getCleaveCooldownTicks(user)) {
+        Long nextEligible = LAST_CLEAVE.get(user.getUuid());
+        if (nextEligible != null && now < nextEligible) {
             return false;
         }
-        LAST_CLEAVE.put(user.getUuid(), now);
+        LAST_CLEAVE.put(user.getUuid(), now + cooldown);
         return true;
     }
 
@@ -219,7 +220,8 @@ public final class SoulstalkerAbilityManager {
                                 Config.uniqueEffects.soulstalker.strikeDamageScaling,
                                 Config.uniqueEffects.soulstalker.strikeSpellScaling)),
                         now + PASSIVE_IMPACT_DELAY));
-        lockouts.put(owner.getUuid(), now + Math.max(1, Config.uniqueEffects.soulstalker.passiveLockout));
+        lockouts.put(owner.getUuid(), now + SimplySwordsAPI.getEffectiveWeaponCooldownTicks(
+                stack, owner, Config.uniqueEffects.soulstalker.passiveLockout));
         Vec3d root = owner.getPos().add(0.0, owner.getHeight() * 0.68, 0.0);
         world.spawnParticles(GLOAM_DUST, root.x, root.y, root.z,
                 10, 0.18, 0.22, 0.18, 0.02);

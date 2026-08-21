@@ -20,6 +20,8 @@ import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+import net.sweenus.simplyswords.api.SpellScalingProfile;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
@@ -65,7 +67,7 @@ public class IcewhisperSwordItem extends UniqueSwordItem implements TwoHandedWea
 
         if (world instanceof ServerWorld serverWorld) {
             activateIcewhisper(serverWorld, user, itemStack);
-            user.getItemCooldownManager().set(itemStack.getItem(), Config.uniqueEffects.icewhisper.cooldown);
+            SimplySwordsAPI.setWeaponCooldown(user, itemStack, Config.uniqueEffects.icewhisper.cooldown);
         }
         user.swingHand(hand);
         return TypedActionResult.success(itemStack, world.isClient());
@@ -125,8 +127,8 @@ public class IcewhisperSwordItem extends UniqueSwordItem implements TwoHandedWea
                 world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_BOW_ICE_SHOOT_IMPACT_03.get(), le.getSoundCategory(), 0.1f, choose);
                 float abilityDamage = HelperMethods.abilityScaledDamage("frost", user, stack,
                         Config.uniqueEffects.icewhisper.damageScaling, Config.uniqueEffects.icewhisper.spellScaling);
-                var damageSource = user.getDamageSources().indirectMagic(user, user);
-                le.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments(world, stack, le, damageSource, abilityDamage));
+                SimplySwordsAPI.applyAbilityMagicDamage(
+                        world, user, stack, le, abilityDamage, SpellScalingProfile.FROST);
                 FrostfallIceSpikeFieldManager.createTargetBurst(world, le.getPos(), 4, 0.9F);
             }
         }
@@ -161,7 +163,7 @@ public class IcewhisperSwordItem extends UniqueSwordItem implements TwoHandedWea
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.icewhispersworditem.tooltip4").setStyle(Styles.TEXT));
-        appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.icewhisper.cooldown);
+        appendAbilityCooldownTooltip(tooltip, itemStack, Config.uniqueEffects.icewhisper.cooldown);
         appendAbilityManaCostTooltip(tooltip, itemStack);
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
         TooltipUtils.appendSpellScaleTooltip(tooltip, "frost");

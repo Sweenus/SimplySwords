@@ -69,7 +69,7 @@ public final class DreadwhisperSwordItem extends UniqueSwordItem implements TwoH
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.gloam.tooltip").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
-        appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.dreadwhisper.cooldown);
+        appendAbilityCooldownTooltip(tooltip, stack, Config.uniqueEffects.dreadwhisper.cooldown);
         appendAbilityManaCostTooltip(tooltip, stack);
         super.appendTooltip(stack, context, tooltip, type);
         TooltipUtils.appendSpellScaleTooltip(tooltip, SpellScalingProfile.SOUL);

@@ -1,5 +1,7 @@
 package net.sweenus.simplyswords.world;
 
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
@@ -69,14 +71,15 @@ public final class VerdantTrailManager {
         UUID ownerId = user.getUuid();
         LastPlacement previous = placements.get(ownerId);
         long now = world.getTime();
-        int cooldown = Math.max(1, Config.gemPowers.verdantTrail.placementCooldown);
+        int cooldown = SimplySwordsAPI.getEffectiveWeaponCooldownTicks(
+                stack, user, Config.gemPowers.verdantTrail.placementCooldown);
         double spacing = Math.max(0.1, Config.gemPowers.verdantTrail.placementSpacing);
         if (previous != null
-                && (now - previous.tick() < cooldown || previous.position().squaredDistanceTo(ground) < spacing * spacing)) {
+                && (now < previous.nextEligibleTick() || previous.position().squaredDistanceTo(ground) < spacing * spacing)) {
             return;
         }
 
-        placements.put(ownerId, new LastPlacement(ground, now));
+        placements.put(ownerId, new LastPlacement(ground, now, now + cooldown));
         createSegment(world, user, ground, stack);
     }
 
@@ -85,7 +88,8 @@ public final class VerdantTrailManager {
         if (now % 80L == 0L) {
             Map<UUID, LastPlacement> placements = LAST_PLACEMENTS.get(world);
             if (placements != null) {
-                placements.entrySet().removeIf(entry -> now - entry.getValue().tick() > Math.max(200, Config.gemPowers.verdantTrail.duration));
+                placements.entrySet().removeIf(entry -> now - entry.getValue().placedTick()
+                        > Math.max(200, Config.gemPowers.verdantTrail.duration));
                 if (placements.isEmpty()) {
                     LAST_PLACEMENTS.remove(world);
                 }
@@ -293,6 +297,6 @@ public final class VerdantTrailManager {
             List<UUID> visualIds) {
     }
 
-    private record LastPlacement(Vec3d position, long tick) {
+    private record LastPlacement(Vec3d position, long placedTick, long nextEligibleTick) {
     }
 }

@@ -1,5 +1,7 @@
 package net.sweenus.simplyswords.item.custom;
 
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.entity.LivingEntity;
@@ -53,11 +55,7 @@ public class ChompolotlSwordItem extends UniqueSwordItem implements UniqueWeapon
                     : WeaponAbilityCooldownManager.isCoolingDown(serverWorld, attacker, stack);
             if (!coolingDown && target != null && HelperMethods.checkAbilityTarget(target, attacker)) {
                 if (spawnAxolotl(serverWorld, attacker, target, stack, skillDamage, false) != null) {
-                    if (attacker instanceof PlayerEntity player) {
-                        player.getItemCooldownManager().set(stack.getItem(), skillCooldown);
-                    } else {
-                        WeaponAbilityCooldownManager.setCooldown(serverWorld, attacker, stack, skillCooldown);
-                    }
+                    SimplySwordsAPI.setWeaponCooldown(attacker, stack, skillCooldown);
                 }
             }
         }
@@ -95,7 +93,7 @@ public class ChompolotlSwordItem extends UniqueSwordItem implements UniqueWeapon
                         speedAttribute.setBaseValue(2.0);
                     world.playSound(null, user.getBlockPos(), SoundRegistry.ELEMENTAL_BOW_WATER_SHOOT_IMPACT_01.get(),
                             user.getSoundCategory(), 0.4f, 1f);
-                    player.getItemCooldownManager().set(stack.getItem(), skillCooldown * 10);
+                    SimplySwordsAPI.setWeaponCooldown(player, stack, skillCooldown * 10);
                 }
             }
         }
@@ -156,7 +154,7 @@ public class ChompolotlSwordItem extends UniqueSwordItem implements UniqueWeapon
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.chompolotlsworditem.tooltip7").setStyle(Styles.TEXT));
-        appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.chompolotl.cooldown * 10);
+        appendAbilityCooldownTooltip(tooltip, itemStack, Config.uniqueEffects.chompolotl.cooldown * 10);
         appendAbilityManaCostTooltip(tooltip, itemStack);
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
         net.sweenus.simplyswords.client.util.TooltipUtils.appendSpellScaleTooltip(tooltip, "nature");

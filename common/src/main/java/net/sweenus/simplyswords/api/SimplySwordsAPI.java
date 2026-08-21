@@ -27,6 +27,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.Config;
+import net.sweenus.simplyswords.SimplySwordsExpectPlatform;
 import net.sweenus.simplyswords.api.render.*;
 import net.sweenus.simplyswords.entity.BattleStandardEntity;
 import net.sweenus.simplyswords.entity.SimplySwordsSkeletonMinionEntity;
@@ -204,6 +205,14 @@ public class SimplySwordsAPI {
         ObserverStatusVisualRegistry.register(effectId, style);
     }
 
+    public static void registerSpellScalingDefinition(SpellScalingDefinition definition) {
+        SpellScalingRegistry.register(definition);
+    }
+
+    public static Optional<SpellScalingDefinition> getSpellScalingDefinition(Identifier id) {
+        return id == null ? Optional.empty() : SpellScalingRegistry.get(id);
+    }
+
     // Returns neutral when input has not been received recently.
     public static PlayerMovementIntent getPlayerMovementIntent(ServerPlayerEntity player) {
         return PlayerMovementIntentManager.get(player);
@@ -245,7 +254,7 @@ public class SimplySwordsAPI {
                 || !(context.stack().getItem() instanceof UniqueWeaponActiveAbility ability)) {
             return 20;
         }
-        return ability.getActivationCooldownTicks(context.stack(), context);
+        return resolveWeaponAbilityCooldownTicks(ability, context);
     }
 
     public static boolean tryActivateWeaponAbility(WeaponAbilityContext context) {
@@ -269,13 +278,52 @@ public class SimplySwordsAPI {
             return false;
         }
 
-        int cooldown = Math.max(1, ability.getActivationCooldownTicks(context.stack(), context));
-        if (context.actor() instanceof ServerPlayerEntity player) {
-            player.getItemCooldownManager().set(context.stack().getItem(), cooldown);
-        } else {
-            WeaponAbilityCooldownManager.setCooldown(context.world(), context.actor(), context.stack(), cooldown);
-        }
+        setWeaponCooldown(context.actor(), context.stack(), ability.getActivationCooldownTicks(context.stack(), context));
         return true;
+    }
+
+    private static int resolveWeaponAbilityCooldownTicks(UniqueWeaponActiveAbility ability,
+                                                         WeaponAbilityContext context) {
+        return getEffectiveWeaponCooldownTicks(
+                context.stack(), context.actor(), ability.getActivationCooldownTicks(context.stack(), context));
+    }
+
+    public static int getEffectiveWeaponCooldownTicks(ItemStack stack, LivingEntity actor, int baseCooldownTicks) {
+        if (baseCooldownTicks <= 0) {
+            return 0;
+        }
+
+        int cooldown = Math.max(1, baseCooldownTicks);
+        if (stack == null || stack.isEmpty() || actor == null
+                || !Config.general.compatEnableIronsCooldownReduction.get()) {
+            return cooldown;
+        }
+        if (stack.getItem() instanceof UniqueWeaponActiveAbility ability
+                && !ability.usesSpellCooldownReduction(stack)) {
+            return cooldown;
+        }
+        return Math.max(1, SimplySwordsExpectPlatform.applySpellCooldownReduction(cooldown, actor));
+    }
+
+    public static void setWeaponCooldown(LivingEntity actor, ItemStack stack, int baseCooldownTicks) {
+        if (actor == null || stack == null || stack.isEmpty() || baseCooldownTicks < 0) {
+            return;
+        }
+        if (baseCooldownTicks == 0) {
+            if (actor instanceof PlayerEntity player) {
+                player.getItemCooldownManager().set(stack.getItem(), 0);
+            } else {
+                WeaponAbilityCooldownManager.clearCooldown(actor, stack);
+            }
+            return;
+        }
+
+        int cooldown = getEffectiveWeaponCooldownTicks(stack, actor, baseCooldownTicks);
+        if (actor instanceof PlayerEntity player) {
+            player.getItemCooldownManager().set(stack.getItem(), cooldown);
+        } else if (actor.getWorld() instanceof ServerWorld world) {
+            WeaponAbilityCooldownManager.setCooldown(world, actor, stack, cooldown);
+        }
     }
 
     private static boolean isWeaponAbilityCoolingDown(WeaponAbilityContext context) {
@@ -564,14 +612,79 @@ public class SimplySwordsAPI {
         return HelperMethods.abilityScaledDamage(school, actor, stack, attackScaling, spellScaling);
     }
 
+    public static float scaleAbilityDamage(Identifier scalingProfileId, LivingEntity actor, ItemStack stack,
+                                           float attackScaling, float spellScaling) {
+        return HelperMethods.abilityScaledDamage(scalingProfileId, actor, stack, attackScaling, spellScaling);
+    }
+
     public static float scaleAbilityValue(SpellScalingProfile school, LivingEntity actor, ItemStack stack,
                                           float baseValue, float spellScaling) {
         return HelperMethods.abilityScaledValue(school, actor, stack, baseValue, spellScaling);
     }
 
+    public static float scaleAbilityValue(Identifier scalingProfileId, LivingEntity actor, ItemStack stack,
+                                          float baseValue, float spellScaling) {
+        return HelperMethods.abilityScaledValue(scalingProfileId, actor, stack, baseValue, spellScaling);
+    }
+
     public static float scaleAbilityDamageFromValue(SpellScalingProfile school, LivingEntity actor, ItemStack stack,
                                                      float attackDamage, float spellScaling) {
         return HelperMethods.abilityScaledDamageFromValue(school, actor, stack, attackDamage, spellScaling);
+    }
+
+    public static float scaleAbilityDamageFromValue(Identifier scalingProfileId, LivingEntity actor, ItemStack stack,
+                                                     float attackDamage, float spellScaling) {
+        return HelperMethods.abilityScaledDamageFromValue(scalingProfileId, actor, stack, attackDamage, spellScaling);
+    }
+
+    public static boolean applyAbilityMagicDamage(ServerWorld world, LivingEntity actor, ItemStack stack,
+                                                   LivingEntity target, float damage, SpellScalingProfile profile) {
+        SpellScalingProfile resolved = profile == null ? SpellScalingProfile.ARCANE : profile;
+        return applyAbilityMagicDamage(world, actor, stack, target, damage, resolved.registryId());
+    }
+
+    public static boolean applyAbilityMagicDamage(ServerWorld world, LivingEntity actor, ItemStack stack,
+                                                   LivingEntity target, float damage, Identifier scalingProfileId) {
+        return applyAbilityMagicDamageInternal(world, actor, stack, target, damage, scalingProfileId, false);
+    }
+
+    public static boolean applyAbilityMagicDamageThroughIframes(ServerWorld world, LivingEntity actor, ItemStack stack,
+                                                                 LivingEntity target, float damage,
+                                                                 SpellScalingProfile profile) {
+        SpellScalingProfile resolved = profile == null ? SpellScalingProfile.ARCANE : profile;
+        return applyAbilityMagicDamageThroughIframes(world, actor, stack, target, damage, resolved.registryId());
+    }
+
+    public static boolean applyAbilityMagicDamageThroughIframes(ServerWorld world, LivingEntity actor, ItemStack stack,
+                                                                 LivingEntity target, float damage,
+                                                                 Identifier scalingProfileId) {
+        return applyAbilityMagicDamageInternal(world, actor, stack, target, damage, scalingProfileId, true);
+    }
+
+    private static boolean applyAbilityMagicDamageInternal(ServerWorld world, LivingEntity actor, ItemStack stack,
+                                                            LivingEntity target, float damage,
+                                                            Identifier scalingProfileId, boolean bypassIframes) {
+        if (world == null || actor == null || target == null || scalingProfileId == null
+                || actor.getWorld() != world || target.getWorld() != world
+                || !actor.isAlive() || !target.isAlive()
+                || !HelperMethods.checkAbilityTarget(target, actor)) {
+            return false;
+        }
+        DamageSource source = SimplySwordsExpectPlatform.getAbilityMagicDamageSource(world, actor, scalingProfileId);
+        if (source == null) {
+            source = world.getDamageSources().indirectMagic(actor, actor);
+        }
+        float finalDamage = HelperMethods.applyAbilityDamageEnchantments(
+                world, stack == null ? ItemStack.EMPTY : stack, target, source, Math.max(0.0F, damage));
+        float resistance = Math.max(0.0F,
+                SimplySwordsExpectPlatform.getAbilityMagicResistanceMultiplier(target, scalingProfileId));
+        float adjustedDamage = finalDamage * resistance;
+        DamageSource resolvedSource = source;
+        boolean[] damaged = {false};
+        WeaponImplicitRegistry.runSuppressed(() -> damaged[0] = bypassIframes
+                ? HelperMethods.damageThroughIframes(target, resolvedSource, adjustedDamage)
+                : target.damage(resolvedSource, adjustedDamage));
+        return damaged[0];
     }
 
     public static LivingEntity findLenientAbilityTarget(PlayerEntity player, double range,

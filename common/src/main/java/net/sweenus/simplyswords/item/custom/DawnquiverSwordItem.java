@@ -1,5 +1,7 @@
 package net.sweenus.simplyswords.item.custom;
 
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedDouble;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.entity.Entity;
@@ -108,7 +110,7 @@ public final class DawnquiverSwordItem extends UniqueSwordItem implements TwoHan
         int cooldown = DawnquiverAbilityManager.release(serverWorld, user, stack, chargeRatio);
         WeaponManaCost.spend(user, stack);
         if (user instanceof PlayerEntity player) {
-            player.getItemCooldownManager().set(stack.getItem(), cooldown);
+            SimplySwordsAPI.setWeaponCooldown(player, stack, cooldown);
         }
     }
 
@@ -168,13 +170,16 @@ public final class DawnquiverSwordItem extends UniqueSwordItem implements TwoHan
         tooltip.add(Text.translatable("item.simplyswords.dawnquiversworditem.tooltip4").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.dawnquiversworditem.tooltip5",
-                Config.uniqueEffects.dawnquiver.quickCooldown / 20.0F).setStyle(Styles.TEXT));
+                TooltipUtils.getEffectiveWeaponCooldownTicks(stack,
+                        Config.uniqueEffects.dawnquiver.quickCooldown) / 20.0F).setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.dawnquiversworditem.tooltip6",
-                Config.uniqueEffects.dawnquiver.piercingCooldown / 20.0F).setStyle(Styles.TEXT));
+                TooltipUtils.getEffectiveWeaponCooldownTicks(stack,
+                        Config.uniqueEffects.dawnquiver.piercingCooldown) / 20.0F).setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.dawnquiversworditem.tooltip7",
-                Config.uniqueEffects.dawnquiver.cooldown / 20.0F).setStyle(Styles.TEXT));
+                TooltipUtils.getEffectiveWeaponCooldownTicks(stack,
+                        Config.uniqueEffects.dawnquiver.cooldown) / 20.0F).setStyle(Styles.TEXT));
         appendAbilityManaCostTooltip(tooltip, stack);
         super.appendTooltip(stack, context, tooltip, type);
         TooltipUtils.appendSpellScaleTooltip(tooltip, SpellScalingProfile.HEALING);

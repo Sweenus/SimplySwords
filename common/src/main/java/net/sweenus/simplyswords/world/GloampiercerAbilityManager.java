@@ -1,5 +1,7 @@
 package net.sweenus.simplyswords.world;
 
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
@@ -91,8 +93,8 @@ public final class GloampiercerAbilityManager {
         }
         long now = world.getTime();
         Map<UUID, Long> cooldowns = LAST_PASSIVE.computeIfAbsent(world, ignored -> new HashMap<>());
-        Long previous = cooldowns.get(owner.getUuid());
-        if (previous != null && now - previous < Math.max(1, Config.uniqueEffects.gloampiercer.passiveCooldown)) {
+        Long nextEligible = cooldowns.get(owner.getUuid());
+        if (nextEligible != null && now < nextEligible) {
             return;
         }
         LivingEntity target = findPassiveTarget(world, owner);
@@ -112,7 +114,8 @@ public final class GloampiercerAbilityManager {
                         Math.max(1.0F, HelperMethods.abilityScaledDamage(SpellScalingProfile.SOUL, owner, stack,
                                 Config.uniqueEffects.gloampiercer.strikeDamageScaling,
                                 Config.uniqueEffects.gloampiercer.strikeSpellScaling))));
-        cooldowns.put(owner.getUuid(), now);
+        cooldowns.put(owner.getUuid(), now + SimplySwordsAPI.getEffectiveWeaponCooldownTicks(
+                stack, owner, Config.uniqueEffects.gloampiercer.passiveCooldown));
         spawnCloneMaterialization(world, clonePosition);
     }
 
@@ -140,7 +143,7 @@ public final class GloampiercerAbilityManager {
             Map<UUID, Long> cooldowns = LAST_PASSIVE.get(world);
             if (cooldowns != null) {
                 long now = world.getTime();
-                cooldowns.values().removeIf(tick -> now - tick > 1200L);
+                cooldowns.values().removeIf(tick -> tick <= now);
                 if (cooldowns.isEmpty()) {
                     LAST_PASSIVE.remove(world);
                 }

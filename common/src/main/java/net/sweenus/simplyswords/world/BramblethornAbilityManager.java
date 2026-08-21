@@ -162,7 +162,8 @@ public final class BramblethornAbilityManager {
         long nextProcAt = previousMark.nextProcAt;
         if (inRange && now >= nextProcAt) {
             launchHunt(world, attacker, stack, previousTarget, target);
-            nextProcAt = now + Math.max(0, Config.uniqueEffects.bramblethorn.huntCooldown);
+            nextProcAt = now + SimplySwordsAPI.getEffectiveWeaponCooldownTicks(
+                    stack, attacker, Config.uniqueEffects.bramblethorn.huntCooldown);
         } else {
             spawnHuntMarkEffects(world, target, true);
         }

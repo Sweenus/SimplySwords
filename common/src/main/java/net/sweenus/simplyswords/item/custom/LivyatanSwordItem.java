@@ -1,5 +1,7 @@
 package net.sweenus.simplyswords.item.custom;
 
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedDouble;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
@@ -91,7 +93,7 @@ public class LivyatanSwordItem extends UniqueSwordItem implements UniqueWeaponAc
 
         user.swingHand(hand);
 
-        user.getItemCooldownManager().set(this, 1);
+        SimplySwordsAPI.setWeaponCooldown(user, itemStack, 1);
         return TypedActionResult.success(itemStack, world.isClient());
     }
 

@@ -1,5 +1,7 @@
 package net.sweenus.simplyswords.item.custom;
 
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.entity.Entity;
@@ -120,7 +122,7 @@ public class TempestSwordItem extends UniqueSwordItem implements UniqueWeaponAct
     public TypedActionResult<ItemStack> startPlayerAbility(World world, PlayerEntity user, Hand hand) {
         if (!user.getWorld().isClient() && world instanceof  ServerWorld serverWorld) {
             if (consumeTempestMarks(serverWorld, user) > 0) {
-                user.getItemCooldownManager().set(this, 200);
+                SimplySwordsAPI.setWeaponCooldown(user, user.getStackInHand(hand), 200);
             }
         }
 
@@ -212,7 +214,7 @@ public class TempestSwordItem extends UniqueSwordItem implements UniqueWeaponAct
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.tempestsworditem.tooltip7").setStyle(Styles.TEXT));
-        appendAbilityCooldownTooltip(tooltip, 200);
+        appendAbilityCooldownTooltip(tooltip, itemStack, 200);
         appendAbilityManaCostTooltip(tooltip, itemStack);
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
         TooltipUtils.appendSpellScaleTooltip(tooltip, "frost_fire");

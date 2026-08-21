@@ -24,6 +24,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RaycastContext;
 import net.sweenus.simplyswords.api.SpellScalingProfile;
+import net.sweenus.simplyswords.api.StackReplacement;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
 import net.sweenus.simplyswords.api.AwakeningApi;
@@ -372,16 +373,16 @@ public final class DevourerAbilityManager {
         ItemStack result;
         Identifier route;
         if (source.isOf(ItemsRegistry.WRAITHFANG.get())) {
-            result = source.copyComponentsToNewStack(ItemsRegistry.WRAITHMAW.get(), source.getCount());
+            result = StackReplacement.copyTo(source, ItemsRegistry.WRAITHMAW.get());
             route = AwakeningFormRegistry.WRAITHMAW_ROUTE;
         } else if (source.isOf(ItemsRegistry.WICKPIERCER.get())) {
-            result = source.copyComponentsToNewStack(ItemsRegistry.GLOAMPIERCER.get(), source.getCount());
+            result = StackReplacement.copyTo(source, ItemsRegistry.GLOAMPIERCER.get());
             route = AwakeningFormRegistry.GLOAMPIERCER_ROUTE;
         } else if (source.isOf(ItemsRegistry.SOULRENDER.get())) {
-            result = source.copyComponentsToNewStack(ItemsRegistry.SOULSTALKER.get(), source.getCount());
+            result = StackReplacement.copyTo(source, ItemsRegistry.SOULSTALKER.get());
             route = AwakeningFormRegistry.SOULSTALKER_ROUTE;
         } else if (source.isOf(ItemsRegistry.WHISPERWIND.get())) {
-            result = source.copyComponentsToNewStack(ItemsRegistry.DREADWHISPER.get(), source.getCount());
+            result = StackReplacement.copyTo(source, ItemsRegistry.DREADWHISPER.get());
             route = AwakeningFormRegistry.DREADWHISPER_ROUTE;
         } else {
             return false;

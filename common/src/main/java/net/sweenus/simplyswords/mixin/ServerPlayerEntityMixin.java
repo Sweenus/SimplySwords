@@ -24,6 +24,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
 import net.sweenus.simplyswords.api.AwakeningApi;
+import net.sweenus.simplyswords.api.StackReplacement;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.LootConfig;
 import net.sweenus.simplyswords.item.ContainedRemnantItem;
@@ -117,8 +118,7 @@ public abstract class ServerPlayerEntityMixin {
                 for (int i = 0; i < serverPlayer.getInventory().size(); i++) {
                     ItemStack stackInSlot = serverPlayer.getInventory().getStack(i);
                     if (stackInSlot.isOf(ItemsRegistry.DECAYING_RELIC.get())) {
-                        ItemStack newItemStack = new ItemStack(ItemsRegistry.MAGISCYTHE.get());
-                        newItemStack.applyComponentsFrom(stackInSlot.getComponents());
+                        ItemStack newItemStack = StackReplacement.copyTo(stackInSlot, ItemsRegistry.MAGISCYTHE.get());
                         AwakeningApi.setLevel(newItemStack, AwakeningApi.getLevel(stackInSlot));
                         serverPlayer.getInventory().setStack(i, newItemStack);
                         serverPlayer.getWorld().playSoundFromEntity(null, serverPlayer, SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_IMPACT_02.get(),
@@ -239,8 +239,7 @@ public abstract class ServerPlayerEntityMixin {
 
                     // Magiblade trigger
                     if (chance < 15 && playerStandingBlock.isOf(Blocks.SCULK_SENSOR) && stackInSlot.isOf(decayingRelic.getItem())) {
-                        ItemStack newItemStack = new ItemStack(ItemsRegistry.MAGIBLADE.get());
-                        newItemStack.applyComponentsFrom(stackInSlot.getComponents());
+                        ItemStack newItemStack = StackReplacement.copyTo(stackInSlot, ItemsRegistry.MAGIBLADE.get());
                         AwakeningApi.setLevel(newItemStack, AwakeningApi.getLevel(stackInSlot));
                         serverPlayer.getInventory().setStack(i, newItemStack);
                         serverPlayer.getWorld().playSoundFromEntity(null, serverPlayer, SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_IMPACT_02.get(),
@@ -252,8 +251,7 @@ public abstract class ServerPlayerEntityMixin {
                     // Magispear trigger
                     if (stackInSlot.isOf(decayingRelic.getItem()) && player.hasStatusEffect(StatusEffects.DARKNESS)) {
                         if (chance < 2) {
-                            ItemStack newItemStack = new ItemStack(ItemsRegistry.MAGISPEAR.get());
-                            newItemStack.applyComponentsFrom(stackInSlot.getComponents());
+                            ItemStack newItemStack = StackReplacement.copyTo(stackInSlot, ItemsRegistry.MAGISPEAR.get());
                             AwakeningApi.setLevel(newItemStack, AwakeningApi.getLevel(stackInSlot));
                             serverPlayer.getInventory().setStack(i, newItemStack);
                             serverPlayer.getWorld().playSoundFromEntity(null, serverPlayer, SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_IMPACT_02.get(),

@@ -1,5 +1,7 @@
 package net.sweenus.simplyswords.item.custom;
 
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedDouble;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.entity.Entity;
@@ -59,7 +61,7 @@ public class SoulkeeperSwordItem extends UniqueSwordItem implements TwoHandedWea
                 return TypedActionResult.fail(itemStack);
             }
             SoulkeeperLanternManager.activate(serverPlayer, itemStack);
-            serverPlayer.getItemCooldownManager().set(itemStack.getItem(), Config.uniqueEffects.soulkeeper.cooldown);
+            SimplySwordsAPI.setWeaponCooldown(serverPlayer, itemStack, Config.uniqueEffects.soulkeeper.cooldown);
         }
         return TypedActionResult.success(itemStack, world.isClient());
     }
@@ -94,7 +96,7 @@ public class SoulkeeperSwordItem extends UniqueSwordItem implements TwoHandedWea
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.soulsworditem.tooltip4").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
-        appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.soulkeeper.cooldown);
+        appendAbilityCooldownTooltip(tooltip, itemStack, Config.uniqueEffects.soulkeeper.cooldown);
         appendAbilityManaCostTooltip(tooltip, itemStack);
 
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);

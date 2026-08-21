@@ -1,5 +1,7 @@
 package net.sweenus.simplyswords.item.custom;
 
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import net.fabricmc.api.EnvType;
@@ -85,7 +87,7 @@ public class WraithfangSwordItem extends UniqueSwordItem implements UniqueWeapon
 
         user.swingHand(hand);
 
-        user.getItemCooldownManager().set(this, 1);
+        SimplySwordsAPI.setWeaponCooldown(user, itemStack, 1);
         return TypedActionResult.success(itemStack, world.isClient());
     }
 

@@ -92,7 +92,7 @@ public class CaelestisSwordItem extends UniqueSwordItem implements UniqueWeaponA
         tooltip.add(Text.translatable("item.simplyswords.caelestissworditem.tooltip8",
                 Config.uniqueEffects.caelestis.collapseDuration / 20,
                 Config.uniqueEffects.caelestis.betrayalChance).setStyle(Styles.TEXT));
-        appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.caelestis.cooldown);
+        appendAbilityCooldownTooltip(tooltip, itemStack, Config.uniqueEffects.caelestis.cooldown);
         appendAbilityManaCostTooltip(tooltip, itemStack);
 
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);

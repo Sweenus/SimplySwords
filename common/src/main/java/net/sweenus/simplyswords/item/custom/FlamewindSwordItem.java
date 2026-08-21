@@ -61,13 +61,7 @@ public class FlamewindSwordItem extends UniqueSwordItem implements UniqueWeaponA
 
     @Override
     public TypedActionResult<ItemStack> startPlayerAbility(World world, PlayerEntity user, Hand hand) {
-        if (!user.getWorld().isClient() && world instanceof  ServerWorld serverWorld) {
-            LivingEntity target = findFlamewindTarget(serverWorld, user);
-            if (target != null && activateFlamewind(serverWorld, user, target)) {
-                user.getItemCooldownManager().set(this, Config.uniqueEffects.flamewind.cooldown);
-            }
-        }
-        return super.use(world, user, hand);
+        return UniqueWeaponActiveAbility.super.startPlayerAbility(world, user, hand);
     }
 
     @Override
@@ -153,7 +147,7 @@ public class FlamewindSwordItem extends UniqueSwordItem implements UniqueWeaponA
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.flamewindsworditem.tooltip7").setStyle(Styles.TEXT));
         tooltip.add(Text.translatable("item.simplyswords.flamewindsworditem.tooltip11", Config.uniqueEffects.flamewind.spreadCap).setStyle(Styles.TEXT));
-        appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.flamewind.cooldown);
+        appendAbilityCooldownTooltip(tooltip, itemStack, Config.uniqueEffects.flamewind.cooldown);
         appendAbilityManaCostTooltip(tooltip, itemStack);
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
         TooltipUtils.appendSpellScaleTooltip(tooltip, "fire");

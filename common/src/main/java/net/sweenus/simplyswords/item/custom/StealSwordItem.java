@@ -91,7 +91,7 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
             }
 
             performSoulReap(sworld, serverPlayer, itemStack, target, strikePos, stacks);
-            serverPlayer.getItemCooldownManager().set(itemStack.getItem(), Config.uniqueEffects.soulstealer.cooldown);
+            SimplySwordsAPI.setWeaponCooldown(serverPlayer, itemStack, Config.uniqueEffects.soulstealer.cooldown);
         }
         return TypedActionResult.success(itemStack, world.isClient());
     }
@@ -352,7 +352,7 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.stealsworditem.tooltip5").setStyle(Styles.TEXT));
-        appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.soulstealer.cooldown);
+        appendAbilityCooldownTooltip(tooltip, itemStack, Config.uniqueEffects.soulstealer.cooldown);
         appendAbilityManaCostTooltip(tooltip, itemStack);
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
         net.sweenus.simplyswords.client.util.TooltipUtils.appendSpellScaleTooltip(tooltip, "soul");

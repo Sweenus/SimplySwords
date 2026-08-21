@@ -12,6 +12,8 @@ import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.*;
 import net.sweenus.simplyswords.config.Config;
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+import net.sweenus.simplyswords.api.SpellScalingProfile;
 import net.sweenus.simplyswords.entity.IcewhisperCometVisualEntity;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -157,9 +159,8 @@ public final class IcewhisperCometManager {
         for (Entity entity : world.getOtherEntities(owner, box, EntityPredicates.VALID_LIVING_ENTITY)) {
             if (entity instanceof LivingEntity target && HelperMethods.checkAbilityTarget(target, owner)
                     && target.squaredDistanceTo(impact) <= splashRadius * splashRadius) {
-                var damageSource = world.getDamageSources().indirectMagic(owner, owner);
-                float damage = HelperMethods.applyAbilityDamageEnchantments(world, comet.stack(), target, damageSource, comet.damage());
-                HelperMethods.damageThroughIframes(target, damageSource, damage);
+                SimplySwordsAPI.applyAbilityMagicDamageThroughIframes(
+                        world, owner, comet.stack(), target, comet.damage(), SpellScalingProfile.FROST);
             }
         }
 

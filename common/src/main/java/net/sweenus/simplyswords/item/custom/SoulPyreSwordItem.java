@@ -86,7 +86,7 @@ public class SoulPyreSwordItem extends UniqueSwordItem implements TwoHandedWeapo
         tooltip.add(Text.translatable("item.simplyswords.soulpyresworditem.tooltip7").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.soulpyresworditem.tooltip6").setStyle(Styles.TEXT));
-        appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.soulpyre.cooldown);
+        appendAbilityCooldownTooltip(tooltip, itemStack, Config.uniqueEffects.soulpyre.cooldown);
         appendAbilityManaCostTooltip(tooltip, itemStack);
 
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);

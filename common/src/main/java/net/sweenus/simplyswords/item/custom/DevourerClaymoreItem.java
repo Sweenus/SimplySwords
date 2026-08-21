@@ -80,7 +80,7 @@ public final class DevourerClaymoreItem extends UniqueSwordItem implements Uniqu
                 Config.uniqueEffects.devourer.duration / 20.0F).setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.gloam.tooltip").setStyle(Styles.TEXT));
-        appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.devourer.cooldown);
+        appendAbilityCooldownTooltip(tooltip, stack, Config.uniqueEffects.devourer.cooldown);
         appendAbilityManaCostTooltip(tooltip, stack);
         super.appendTooltip(stack, context, tooltip, type);
         TooltipUtils.appendSpellScaleTooltip(tooltip, SpellScalingProfile.SOUL);

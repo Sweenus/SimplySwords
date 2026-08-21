@@ -1,5 +1,7 @@
 package net.sweenus.simplyswords.world;
 
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
@@ -119,8 +121,8 @@ public final class RiftmaneAbilityManager {
         RiftmaneSwordItem.EffectSettings settings = Config.uniqueEffects.riftmane;
         long now = world.getTime();
         Map<UUID, Long> lockouts = LAST_PASSIVE.get(world);
-        Long previous = lockouts == null ? null : lockouts.get(owner.getUuid());
-        if (previous != null && now - previous < Math.max(1, settings.passiveLockout)) {
+        Long nextEligible = lockouts == null ? null : lockouts.get(owner.getUuid());
+        if (nextEligible != null && now < nextEligible) {
             return;
         }
         if (owner.getRandom().nextInt(100) >= AwakeningApi.scaleChance(stack, settings.passiveChance)) {
@@ -143,7 +145,9 @@ public final class RiftmaneAbilityManager {
             }
         }
 
-        LAST_PASSIVE.computeIfAbsent(world, ignored -> new HashMap<>()).put(owner.getUuid(), now);
+        LAST_PASSIVE.computeIfAbsent(world, ignored -> new HashMap<>()).put(
+                owner.getUuid(), now + SimplySwordsAPI.getEffectiveWeaponCooldownTicks(
+                        stack, owner, settings.passiveLockout));
         world.spawnParticles(RIFT_DUST, position.x, position.y + 0.9, position.z, 20, 0.5, 0.5, 0.5, 0.03);
         world.playSound(null, owner.getBlockPos(), SoundRegistry.DISTORTION_ARC_01.get(),
                 SoundCategory.PLAYERS, 0.4F, 1.15F + world.random.nextFloat() * 0.15F);
@@ -163,7 +167,7 @@ public final class RiftmaneAbilityManager {
             return;
         }
         long now = world.getTime();
-        lockouts.values().removeIf(tick -> now - tick > 1200L);
+        lockouts.values().removeIf(tick -> tick <= now);
         if (lockouts.isEmpty()) {
             LAST_PASSIVE.remove(world);
         }

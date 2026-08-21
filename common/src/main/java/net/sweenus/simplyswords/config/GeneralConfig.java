@@ -68,6 +68,13 @@ public class GeneralConfig extends Config {
                     () -> false
             ).withFailTitle(Text.translatable("simplyswords.general.compatEnableSpellPowerScaling.failTitle"));
 
+    public ValidatedCondition<Boolean> compatEnableIronsCooldownReduction = new ValidatedBoolean(true)
+            .toCondition(
+                    () -> SimplySwords.passVersionCheck("irons_spellbooks", minimumSpellbookVersion),
+                    Text.translatable("simplyswords.general.compatEnableIronsCooldownReduction.condition"),
+                    () -> false
+            ).withFailTitle(Text.translatable("simplyswords.general.compatEnableIronsCooldownReduction.failTitle"));
+
     @ValidatedFloat.Restrict(min = 0f)
     public float ironsSpellBasePower = 2.17f;
 

@@ -72,7 +72,7 @@ public final class IonboundStormscaleSwordItem extends UniqueSwordItem implement
         tooltip.add(Text.translatable("item.simplyswords.ionbound_stormscalesworditem.tooltip5").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.ionbound_stormscalesworditem.tooltip6").setStyle(Styles.TEXT));
-        appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.ionbound_stormscale.cooldown);
+        appendAbilityCooldownTooltip(tooltip, stack, Config.uniqueEffects.ionbound_stormscale.cooldown);
         appendAbilityManaCostTooltip(tooltip, stack);
         super.appendTooltip(stack, context, tooltip, type);
         TooltipUtils.appendSpellScaleTooltip(tooltip, "lightning");

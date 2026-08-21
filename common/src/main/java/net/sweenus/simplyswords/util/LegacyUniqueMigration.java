@@ -6,6 +6,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.api.AwakeningFormRegistry;
+import net.sweenus.simplyswords.api.StackReplacement;
 import net.sweenus.simplyswords.item.component.AwakeningRouteComponent;
 import net.sweenus.simplyswords.item.component.RelicAttunementComponent;
 import net.sweenus.simplyswords.registry.ComponentTypeRegistry;
@@ -21,27 +22,27 @@ public final class LegacyUniqueMigration {
         int route = RelicAttunementComponent.NONE;
         Identifier awakeningRoute = null;
         if (source.isOf(ItemsRegistry.WAKING_LICHBLADE.get())) {
-            result = source.copyComponentsToNewStack(ItemsRegistry.SLUMBERING_LICHBLADE.get(), source.getCount());
+            result = StackReplacement.copyTo(source, ItemsRegistry.SLUMBERING_LICHBLADE.get());
             level = 4;
             awakeningRoute = AwakeningFormRegistry.LICHBLADE_ROUTE;
         } else if (source.isOf(ItemsRegistry.AWAKENED_LICHBLADE.get())) {
-            result = source.copyComponentsToNewStack(ItemsRegistry.SLUMBERING_LICHBLADE.get(), source.getCount());
+            result = StackReplacement.copyTo(source, ItemsRegistry.SLUMBERING_LICHBLADE.get());
             level = 8;
             awakeningRoute = AwakeningFormRegistry.LICHBLADE_ROUTE;
         } else if (source.isOf(ItemsRegistry.RIGHTEOUS_RELIC.get())) {
-            result = source.copyComponentsToNewStack(ItemsRegistry.DORMANT_RELIC.get(), source.getCount());
+            result = StackReplacement.copyTo(source, ItemsRegistry.DORMANT_RELIC.get());
             level = 4;
             route = RelicAttunementComponent.SUN;
         } else if (source.isOf(ItemsRegistry.TAINTED_RELIC.get())) {
-            result = source.copyComponentsToNewStack(ItemsRegistry.DORMANT_RELIC.get(), source.getCount());
+            result = StackReplacement.copyTo(source, ItemsRegistry.DORMANT_RELIC.get());
             level = 4;
             route = RelicAttunementComponent.HARBINGER;
         } else if (source.isOf(ItemsRegistry.SUNFIRE.get())) {
-            result = source.copyComponentsToNewStack(ItemsRegistry.DORMANT_RELIC.get(), source.getCount());
+            result = StackReplacement.copyTo(source, ItemsRegistry.DORMANT_RELIC.get());
             level = 8;
             route = RelicAttunementComponent.SUN;
         } else if (source.isOf(ItemsRegistry.HARBINGER.get())) {
-            result = source.copyComponentsToNewStack(ItemsRegistry.DORMANT_RELIC.get(), source.getCount());
+            result = StackReplacement.copyTo(source, ItemsRegistry.DORMANT_RELIC.get());
             level = 8;
             route = RelicAttunementComponent.HARBINGER;
         } else {

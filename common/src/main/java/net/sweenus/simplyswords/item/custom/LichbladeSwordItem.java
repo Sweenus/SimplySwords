@@ -1,5 +1,7 @@
 package net.sweenus.simplyswords.item.custom;
 
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedDouble;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
@@ -156,7 +158,7 @@ public class LichbladeSwordItem extends UniqueSwordItem implements TwoHandedWeap
     public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
         TargetedLocationComponent targetLocation = stack.get(ComponentTypeRegistry.TARGETED_LOCATION.get());
         if (!world.isClient && (user instanceof PlayerEntity player) && targetLocation != null && ((ServerWorld)world).getEntity(targetLocation.uuid()) != null) {
-            player.getItemCooldownManager().set(stack.getItem(), Config.uniqueEffects.lichblade.cooldown);
+            SimplySwordsAPI.setWeaponCooldown(player, stack, Config.uniqueEffects.lichblade.cooldown);
         }
         stack.set(ComponentTypeRegistry.STORED_CHARGE.get(), null);
         stack.set(ComponentTypeRegistry.TARGETED_LOCATION.get(), null);
@@ -273,7 +275,7 @@ public class LichbladeSwordItem extends UniqueSwordItem implements TwoHandedWeap
             tooltip.add(Text.literal(""));
             tooltip.add(Text.translatable("item.simplyswords.onrightclickheld").setStyle(Styles.RIGHT_CLICK));
             tooltip.add(Text.translatable("item.simplyswords.lichbladesworditem.tooltip4").setStyle(Styles.TEXT));
-            appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.lichblade.cooldown);
+            appendAbilityCooldownTooltip(tooltip, itemStack, Config.uniqueEffects.lichblade.cooldown);
             appendAbilityManaCostTooltip(tooltip, itemStack);
 
             if (awakening >= 8) {

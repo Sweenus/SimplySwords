@@ -371,7 +371,7 @@ public final class AwakeningFormRegistry {
         syncLegacyRoute(family, result, route);
         AwakeningFormStage stage = family.resolveStage(route, targetLevel);
         if (result.getItem() != stage.item()) {
-            result = result.copyComponentsToNewStack(stage.item(), result.getCount());
+            result = StackReplacement.copyTo(result, stage.item());
         }
         AwakeningApi.setLevel(result, targetLevel);
         clampDamage(result);
@@ -418,7 +418,7 @@ public final class AwakeningFormRegistry {
         stack.remove(ComponentTypeRegistry.AWAKENING_ROUTE.get());
         clearLegacyRoute(family, stack);
         if (stack.getItem() != family.baseItem()) {
-            stack = stack.copyComponentsToNewStack(family.baseItem(), stack.getCount());
+            stack = StackReplacement.copyTo(stack, family.baseItem());
         }
         if (family.baseItem() == ItemsRegistry.STORMSCALE.get()) {
             stack.remove(ComponentTypeRegistry.ION_CUBES.get());

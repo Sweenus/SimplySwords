@@ -117,7 +117,7 @@ public class MagibladeSwordItem extends UniqueSwordItem implements UniqueWeaponA
                 "item.simplyswords.magibladesworditem.tooltip5",
                 Math.max(1, Config.uniqueEffects.magiblade.summonDuration) / 20.0F
         ).setStyle(Styles.TEXT));
-        appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.magiblade.cooldown);
+        appendAbilityCooldownTooltip(tooltip, itemStack, Config.uniqueEffects.magiblade.cooldown);
         appendAbilityManaCostTooltip(tooltip, itemStack);
 
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);

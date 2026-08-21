@@ -1,5 +1,7 @@
 package net.sweenus.simplyswords.item.custom;
 
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedDouble;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
@@ -54,7 +56,7 @@ public class BrimstoneClaymoreItem extends UniqueSwordItem implements TwoHandedW
             if (target == null || !activateBrimstone(serverWorld, serverPlayer, target, itemStack)) {
                 return TypedActionResult.fail(itemStack);
             }
-            serverPlayer.getItemCooldownManager().set(itemStack.getItem(), Config.uniqueEffects.brimstone_claymore.cooldown);
+            SimplySwordsAPI.setWeaponCooldown(serverPlayer, itemStack, Config.uniqueEffects.brimstone_claymore.cooldown);
         }
         user.swingHand(hand);
         return TypedActionResult.success(itemStack, world.isClient());
@@ -147,7 +149,7 @@ public class BrimstoneClaymoreItem extends UniqueSwordItem implements TwoHandedW
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.brimstoneclaymoreitem.tooltip4").setStyle(Styles.TEXT));
-        appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.brimstone_claymore.cooldown);
+        appendAbilityCooldownTooltip(tooltip, itemStack, Config.uniqueEffects.brimstone_claymore.cooldown);
         appendAbilityManaCostTooltip(tooltip, itemStack);
 
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);

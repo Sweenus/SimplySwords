@@ -1,5 +1,7 @@
 package net.sweenus.simplyswords.entity;
 
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -89,7 +91,7 @@ public class ThrownSwordEntity extends PersistentProjectileEntity {
         if (this.isNoClip()) {
             float cooldown = player.getItemCooldownManager().getCooldownProgress(this.asItemStack().getItem(), 0);
             if (cooldown == 0 && offhandThrow) cooldown = 4;
-            player.getItemCooldownManager().set(this.asItemStack().getItem(), (int) cooldown);
+            SimplySwordsAPI.setWeaponCooldown(player, this.asItemStack(), (int) cooldown);
 
             if (this.pickupType != PickupPermission.ALLOWED) return true;
 

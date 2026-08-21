@@ -1,5 +1,7 @@
 package net.sweenus.simplyswords.item.custom;
 
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedDouble;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
@@ -72,7 +74,7 @@ public class FrostfallSwordItem extends UniqueSwordItem implements UniqueWeaponA
         user.swingHand(hand);
 
 
-        user.getItemCooldownManager().set(this, Config.uniqueEffects.frostfall.cooldown);
+        SimplySwordsAPI.setWeaponCooldown(user, itemStack, Config.uniqueEffects.frostfall.cooldown);
         return TypedActionResult.success(itemStack, world.isClient());
     }
 
@@ -132,7 +134,7 @@ public class FrostfallSwordItem extends UniqueSwordItem implements UniqueWeaponA
         tooltip.add(Text.translatable("item.simplyswords.frostfallsworditem.tooltip2").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.frostfallsworditem.tooltip4").setStyle(Styles.TEXT));
-        appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.frostfall.cooldown);
+        appendAbilityCooldownTooltip(tooltip, itemStack, Config.uniqueEffects.frostfall.cooldown);
         appendAbilityManaCostTooltip(tooltip, itemStack);
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
         TooltipUtils.appendSpellScaleTooltip(tooltip, "frost");

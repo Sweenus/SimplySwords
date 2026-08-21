@@ -1,5 +1,7 @@
 package net.sweenus.simplyswords.power.powers;
 
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
@@ -34,7 +36,7 @@ public class ImmolationPower extends RunicGemPower {
 		user.addStatusEffect(ImmolationEffect.createScaledInstance(user, itemStack,
 				AwakeningApi.scaleGemPowerDuration(itemStack, 800), 3,
 				Config.gemPowers.immolation.spellScaling), user);
-		user.getItemCooldownManager().set(itemStack.getItem(), 40);
+		SimplySwordsAPI.setWeaponCooldown(user, itemStack, 40);
 		world.playSoundFromEntity(null, user, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
 				user.getSoundCategory(), 0.3f, 0.6f);
 		return TypedActionResult.consume(itemStack);

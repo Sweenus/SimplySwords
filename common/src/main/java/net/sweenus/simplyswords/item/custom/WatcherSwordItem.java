@@ -96,7 +96,7 @@ public abstract class WatcherSwordItem extends UniqueSwordItem implements Unique
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         if (getWatcherWeaponType() == WatcherWeaponType.WARGLAIVE) {
             tooltip.add(Text.translatable("item.simplyswords.watchersworditem.warglaive.tooltip2").setStyle(Styles.TEXT));
-            appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.watcher.warglaiveCooldown);
+            appendAbilityCooldownTooltip(tooltip, itemStack, Config.uniqueEffects.watcher.warglaiveCooldown);
             appendAbilityManaCostTooltip(tooltip, itemStack);
         } else {
             tooltip.add(Text.translatable("item.simplyswords.watchersworditem.claymore.tooltip2").setStyle(Styles.TEXT));
@@ -105,7 +105,7 @@ public abstract class WatcherSwordItem extends UniqueSwordItem implements Unique
                     Math.round(Config.uniqueEffects.watcher.omenInstantKillThreshold * 100.0F)).setStyle(Styles.TEXT));
             tooltip.add(Text.literal(""));
             tooltip.add(Text.translatable("item.simplyswords.watchersworditem.claymore.tooltip4").setStyle(Styles.TEXT));
-            appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.watcher.claymoreCooldown);
+            appendAbilityCooldownTooltip(tooltip, itemStack, Config.uniqueEffects.watcher.claymoreCooldown);
             appendAbilityManaCostTooltip(tooltip, itemStack);
         }
 

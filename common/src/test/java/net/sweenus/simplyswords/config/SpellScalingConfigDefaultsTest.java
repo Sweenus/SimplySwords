@@ -16,6 +16,7 @@ class SpellScalingConfigDefaultsTest {
                 () -> assertEquals(2.17F, settings.ironsSpellBasePower),
                 () -> assertEquals(1.40F, settings.spellScalingDiminishingReturnsStart),
                 () -> assertEquals(10.0F, settings.spellScalingDiminishingReturnsStrength),
+                () -> assertTrue(settings.compatEnableIronsCooldownReduction.getUnconditional()),
                 () -> assertTrue(settings.ironsSpellBasePower > 0.0F),
                 () -> assertTrue(settings.spellScalingDiminishingReturnsStart >= 1.0F),
                 () -> assertTrue(settings.spellScalingDiminishingReturnsStrength >= 0.0F)

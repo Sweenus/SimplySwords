@@ -105,6 +105,10 @@ public interface UniqueWeaponActiveAbility {
         return getEntityActivationCooldownTicks(stack);
     }
 
+    default boolean usesSpellCooldownReduction(ItemStack stack) {
+        return true;
+    }
+
     @Deprecated
     default boolean canActivateFromEntity(ItemStack stack, ServerWorld world, ServerPlayerEntity owner,
                                           LivingEntity actor, LivingEntity target) {

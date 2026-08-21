@@ -1,5 +1,7 @@
 package net.sweenus.simplyswords.world;
 
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
@@ -364,7 +366,8 @@ public final class DawnquiverAbilityManager {
                 DawnquiverArrowEntity.MODE_PASSIVE, 1, 1.0);
         world.spawnEntity(arrow);
 
-        lockouts.put(owner.getUuid(), now + Math.max(1, settings.passiveLockout));
+        lockouts.put(owner.getUuid(), now + SimplySwordsAPI.getEffectiveWeaponCooldownTicks(
+                stack, owner, settings.passiveLockout));
         world.spawnParticles(DAWN_DUST, anchor.x, anchor.y, anchor.z, 10, 0.2, 0.2, 0.2, 0.03);
         world.playSound(null, owner.getBlockPos(), SoundRegistry.MAGIC_BOW_PULL_BACK_SHORT_VERSION_01.get(),
                 SoundCategory.PLAYERS, 0.3F, 1.25F);

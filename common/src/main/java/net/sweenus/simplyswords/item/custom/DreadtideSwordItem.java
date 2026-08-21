@@ -1,5 +1,7 @@
 package net.sweenus.simplyswords.item.custom;
 
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+
 import elocindev.necronomicon.api.text.TextAPI;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
@@ -106,7 +108,7 @@ public class DreadtideSwordItem extends UniqueSwordItem {
                                     Config.uniqueEffects.dreadtide.get().spellScaling));
                             ee.addStatusEffect(voidAssaultEffect);
                             user.removeStatusEffect(EffectRegistry.getReference(EffectRegistry.VOIDCLOAK));
-                            user.getItemCooldownManager().set(this, skillCooldown);
+                            SimplySwordsAPI.setWeaponCooldown(user, stack, skillCooldown);
                         }
                     }
                 }
@@ -144,7 +146,7 @@ public class DreadtideSwordItem extends UniqueSwordItem {
         tooltip.add(Text.literal(""));
         tooltip.add(ability_icon.append(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.CORRUPTED_LIGHT)));
         tooltip.add(Text.translatable("item.simplyswords.dreadtidesworditem.tooltip8").setStyle(Styles.TEXT));
-        appendAbilityCooldownTooltip(tooltip, 20);
+        appendAbilityCooldownTooltip(tooltip, itemStack, 20);
         appendAbilityManaCostTooltip(tooltip, itemStack);
         tooltip.add(Text.literal(""));
         tooltip.add(Text.literal("\uA999 ").append(Text.translatable("item.simplyswords.dreadtidesworditem.tooltip12").setStyle(Styles.CORRUPTED)));

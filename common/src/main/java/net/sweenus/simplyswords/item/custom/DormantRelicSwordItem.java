@@ -156,7 +156,7 @@ public class DormantRelicSwordItem extends UniqueSwordItem implements UniqueWeap
                 tooltip.add(Text.literal(""));
                 tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
                 tooltip.add(Text.translatable("item.simplyswords." + path + "sworditem.tooltip3").setStyle(Styles.TEXT));
-                appendAbilityCooldownTooltip(tooltip, sunForm
+                appendAbilityCooldownTooltip(tooltip, itemStack, sunForm
                         ? Config.uniqueEffects.sunfire.cooldown
                         : Config.uniqueEffects.harbinger.cooldown);
                 appendAbilityManaCostTooltip(tooltip, itemStack);

@@ -62,7 +62,7 @@ public final class GloampiercerSwordItem extends UniqueSwordItem implements Uniq
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.gloam.tooltip").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
-        appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.gloampiercer.cooldown);
+        appendAbilityCooldownTooltip(tooltip, stack, Config.uniqueEffects.gloampiercer.cooldown);
         appendAbilityManaCostTooltip(tooltip, stack);
         super.appendTooltip(stack, context, tooltip, type);
         TooltipUtils.appendSpellScaleTooltip(tooltip, SpellScalingProfile.SOUL);

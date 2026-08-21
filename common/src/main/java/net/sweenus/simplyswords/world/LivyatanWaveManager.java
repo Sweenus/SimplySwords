@@ -1,8 +1,11 @@
 package net.sweenus.simplyswords.world;
 
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
+import net.minecraft.item.ItemStack;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.particle.ParticleTypes;
@@ -58,7 +61,7 @@ public final class LivyatanWaveManager {
         if (world == null || caster == null || stack == null || stack.isEmpty() || !caster.isAlive()) {
             return;
         }
-        if (!isAttackReady(world, caster)) {
+        if (!isAttackReady(world, caster, stack)) {
             return;
         }
 
@@ -277,20 +280,22 @@ public final class LivyatanWaveManager {
         }
     }
 
-    private static boolean isAttackReady(ServerWorld world, LivingEntity user) {
+    private static boolean isAttackReady(ServerWorld world, LivingEntity user, ItemStack stack) {
         long now = world.getTime();
         if (now % 200L == 0L) {
             purgeOldSwingEntries(now);
         }
+        int cooldown = SimplySwordsAPI.getEffectiveWeaponCooldownTicks(
+                stack, user, getAttackReadyCooldownTicks(user));
         if (RunicSlashManager.isIgnoringAttackReady()) {
-            LAST_ACTIVATION.put(user.getUuid(), now);
+            LAST_ACTIVATION.put(user.getUuid(), now + cooldown);
             return true;
         }
-        Long last = LAST_ACTIVATION.get(user.getUuid());
-        if (last != null && now - last < getAttackReadyCooldownTicks(user)) {
+        Long nextEligible = LAST_ACTIVATION.get(user.getUuid());
+        if (nextEligible != null && now < nextEligible) {
             return false;
         }
-        LAST_ACTIVATION.put(user.getUuid(), now);
+        LAST_ACTIVATION.put(user.getUuid(), now + cooldown);
         return true;
     }
 
@@ -306,7 +311,7 @@ public final class LivyatanWaveManager {
     private static void purgeOldSwingEntries(long now) {
         Iterator<Map.Entry<UUID, Long>> iterator = LAST_ACTIVATION.entrySet().iterator();
         while (iterator.hasNext()) {
-            if (now - iterator.next().getValue() > 1200L) {
+            if (iterator.next().getValue() <= now) {
                 iterator.remove();
             }
         }

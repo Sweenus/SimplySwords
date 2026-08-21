@@ -1,5 +1,7 @@
 package net.sweenus.simplyswords.item.custom;
 
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedDouble;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
@@ -54,12 +56,12 @@ public class StormsEdgeSwordItem extends UniqueSwordItem implements UniqueWeapon
 
         boolean refreshed = false;
         if (attacker instanceof PlayerEntity player && player.getItemCooldownManager().isCoolingDown(this)) {
-            player.getItemCooldownManager().set(this, 0);
+            SimplySwordsAPI.setWeaponCooldown(player, stack, 0);
             refreshed = true;
         } else if (!(attacker instanceof PlayerEntity)
                 && attacker.getWorld() instanceof ServerWorld serverWorld
                 && WeaponAbilityCooldownManager.isCoolingDown(serverWorld, attacker, stack)) {
-            WeaponAbilityCooldownManager.clearCooldown(attacker, stack);
+            SimplySwordsAPI.setWeaponCooldown(attacker, stack, 0);
             refreshed = true;
         }
         if (refreshed) {
@@ -126,7 +128,7 @@ public class StormsEdgeSwordItem extends UniqueSwordItem implements UniqueWeapon
         tooltip.add(Text.translatable("item.simplyswords.stormsedgesworditem.tooltip3").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.stormsedgesworditem.tooltip4").setStyle(Styles.TEXT));
-        appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.storms_edge.cooldown);
+        appendAbilityCooldownTooltip(tooltip, itemStack, Config.uniqueEffects.storms_edge.cooldown);
         appendAbilityManaCostTooltip(tooltip, itemStack);
 
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);

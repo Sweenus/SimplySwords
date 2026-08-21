@@ -1,5 +1,7 @@
 package net.sweenus.simplyswords.power.powers;
 
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+
 import me.fzzyhmstrs.fzzy_config.annotations.Translation;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.entity.EquipmentSlot;
@@ -53,7 +55,7 @@ public class MomentumPower extends RunicGemPower {
 				user.setVelocity(user.getVelocity().x, 0, user.getVelocity().z); // Prevent player flying to the heavens
 				user.velocityModified = true;
 				if (user instanceof PlayerEntity player) {
-					player.getItemCooldownManager().set(stack.getItem(), skillCooldown);
+					SimplySwordsAPI.setWeaponCooldown(player, stack, skillCooldown);
 				}
 			}
 		}

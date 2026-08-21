@@ -1,5 +1,7 @@
 package net.sweenus.simplyswords.entity;
 
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -57,7 +59,7 @@ public class WraithfangEntity extends ThrownSpearEntity {
             player.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, Config.uniqueEffects.wraithfang.duration, Config.uniqueEffects.wraithfang.hasteAmplifier, false, false, true));
 
             int cooldown = 10;
-            player.getItemCooldownManager().set(this.asItemStack().getItem(), cooldown);
+            SimplySwordsAPI.setWeaponCooldown(player, this.asItemStack(), cooldown);
         }
 
         return canPickup;

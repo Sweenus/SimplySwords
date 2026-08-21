@@ -3,64 +3,86 @@ package net.sweenus.simplyswords.neoforge;
 import dev.architectury.platform.Platform;
 import io.redspace.ironsspellbooks.api.magic.MagicData;
 import io.redspace.ironsspellbooks.api.registry.AttributeRegistry;
+import io.redspace.ironsspellbooks.api.registry.SchoolRegistry;
+import io.redspace.ironsspellbooks.api.spells.SchoolType;
+import io.redspace.ironsspellbooks.api.util.Utils;
+import io.redspace.ironsspellbooks.damage.DamageSources;
 import io.redspace.ironsspellbooks.network.SyncManaPacket;
+import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.Identifier;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.minecraft.entity.LivingEntity;
 import net.sweenus.simplyswords.SimplySwords;
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+import net.sweenus.simplyswords.api.SpellScalingDefinition;
+import net.sweenus.simplyswords.api.SpellScalingProfile;
+import net.sweenus.simplyswords.api.SpellScalingTarget;
 import net.sweenus.simplyswords.config.Config;
 
 public class ForgeHelperMethods {
-    public static String spellSchoolDisplayKey(String magicSchool) {
-        String school = magicSchool == null ? "" : magicSchool;
-        String name;
-        if (school.contains("lightning")) name = "scaleLightning";
-        else if (school.contains("fire")) name = "scaleFire";
-        else if (school.contains("frost")) name = "scaleIce";
-        else if (school.contains("arcane")) name = "scaleEnder";
-        else if (school.contains("soul")) name = "scaleBlood";
-        else if (school.contains("healing")) name = "scaleHoly";
-        else if (school.contains("nature")) name = "scaleNature";
-        else if (school.contains("evocation")) name = "scaleEvocation";
-        else if (school.contains("eldritch")) name = "scaleEldritch";
-        else name = "scaleEnder";
-        return "item.simplyswords.compat." + name;
+    public static String spellSchoolDisplayKey(Identifier scalingProfileId) {
+        return target(scalingProfileId)
+                .map(SpellScalingTarget::displayTranslationKey)
+                .filter(key -> !key.isBlank())
+                .orElse("item.simplyswords.compat.scaleEnder");
     }
 
-    public static float useSpellAttributeScaling(float damageModifier, LivingEntity player, String magicSchool) {
-        if (Platform.isForgeLike() && SimplySwords.passVersionCheck("irons_spellbooks", SimplySwords.minimumSpellbookVersion)) {
+    public static String spellSchoolDisplayKey(String legacySchool) {
+        return spellSchoolDisplayKey(SpellScalingProfile.fromLegacyName(legacySchool).registryId());
+    }
+
+    public static float useSpellAttributeScaling(float damageModifier, LivingEntity player, Identifier scalingProfileId) {
+        if (hasManaSystem()) {
             if (player != null && !player.getWorld().isClient) {
                 double spellPower = player.getAttributes().hasAttribute(AttributeRegistry.SPELL_POWER) ? player.getAttributeValue(AttributeRegistry.SPELL_POWER) : 1.f;
-                double attributePower = 1.f;
-
-                // Iron's spell-power attributes are multiplicative and have a neutral value of 1.
-
-                if (magicSchool.contains("lightning"))
-                    attributePower = player.getAttributes().hasAttribute(AttributeRegistry.LIGHTNING_SPELL_POWER) ? player.getAttributeValue(AttributeRegistry.LIGHTNING_SPELL_POWER) : 1.f;
-                else if (magicSchool.contains("fire"))
-                    attributePower = player.getAttributes().hasAttribute(AttributeRegistry.FIRE_SPELL_POWER) ? player.getAttributeValue(AttributeRegistry.FIRE_SPELL_POWER) : 1.f;
-                else if (magicSchool.contains("frost"))
-                    attributePower = player.getAttributes().hasAttribute(AttributeRegistry.ICE_SPELL_POWER) ? player.getAttributeValue(AttributeRegistry.ICE_SPELL_POWER) : 1.f;
-                else if (magicSchool.contains("arcane"))
-                    attributePower = player.getAttributes().hasAttribute(AttributeRegistry.ENDER_SPELL_POWER) ? player.getAttributeValue(AttributeRegistry.ENDER_SPELL_POWER) : 1.f;
-                else if (magicSchool.contains("soul")) //there is no equivalent to soul school in spellbook, blood is closest
-                    attributePower = player.getAttributes().hasAttribute(AttributeRegistry.BLOOD_SPELL_POWER) ? player.getAttributeValue(AttributeRegistry.BLOOD_SPELL_POWER) : 1.f;
-                else if (magicSchool.contains("healing"))
-                    attributePower = player.getAttributes().hasAttribute(AttributeRegistry.HOLY_SPELL_POWER) ? player.getAttributeValue(AttributeRegistry.HOLY_SPELL_POWER) : 1.f;
-                else if (magicSchool.contains("nature"))
-                    attributePower = player.getAttributes().hasAttribute(AttributeRegistry.NATURE_SPELL_POWER) ? player.getAttributeValue(AttributeRegistry.NATURE_SPELL_POWER) : 1.f;
-                else if (magicSchool.contains("evocation"))
-                    attributePower = player.getAttributes().hasAttribute(AttributeRegistry.EVOCATION_SPELL_POWER) ? player.getAttributeValue(AttributeRegistry.EVOCATION_SPELL_POWER) : 1.f;
-                else if (magicSchool.contains("eldritch"))
-                    attributePower = player.getAttributes().hasAttribute(AttributeRegistry.ELDRITCH_SPELL_POWER) ? player.getAttributeValue(AttributeRegistry.ELDRITCH_SPELL_POWER) : 1.f;
-
-                return (float) (damageModifier
-                        * Math.max(0.f, Config.general.ironsSpellBasePower)
-                        * spellPower
-                        * attributePower);
+                SchoolType school = resolveSchool(scalingProfileId);
+                if (school != null) {
+                    return (float) (damageModifier
+                            * Math.max(0.f, Config.general.ironsSpellBasePower)
+                            * spellPower
+                            * school.getPowerFor(player));
+                }
             }
         }
         return 0;
+    }
+
+    public static float useSpellAttributeScaling(float damageModifier, LivingEntity player, String legacySchool) {
+        return useSpellAttributeScaling(
+                damageModifier, player, SpellScalingProfile.fromLegacyName(legacySchool).registryId());
+    }
+
+    public static DamageSource getAbilityMagicDamageSource(ServerWorld world, LivingEntity actor,
+                                                            Identifier scalingProfileId) {
+        SchoolType school = resolveSchool(scalingProfileId);
+        return school == null
+                ? world.getDamageSources().indirectMagic(actor, actor)
+                : world.getDamageSources().create(school.getDamageType(), actor);
+    }
+
+    public static float getAbilityMagicResistanceMultiplier(LivingEntity target, Identifier scalingProfileId) {
+        SchoolType school = resolveSchool(scalingProfileId);
+        return school == null ? 1.0F : DamageSources.getResist(target, school);
+    }
+
+    public static int applySpellCooldownReduction(int baseTicks, LivingEntity actor) {
+        return hasManaSystem() ? Utils.applyCooldownReduction(baseTicks, actor) : baseTicks;
+    }
+
+    private static SchoolType resolveSchool(Identifier scalingProfileId) {
+        if (!hasManaSystem()) {
+            return null;
+        }
+        return target(scalingProfileId)
+                .map(target -> SchoolRegistry.getSchool(target.schoolId()))
+                .orElse(null);
+    }
+
+    private static java.util.Optional<SpellScalingTarget> target(Identifier scalingProfileId) {
+        return SimplySwordsAPI.getSpellScalingDefinition(scalingProfileId)
+                .map(SpellScalingDefinition::ironsTarget);
     }
 
     public static boolean hasManaSystem() {

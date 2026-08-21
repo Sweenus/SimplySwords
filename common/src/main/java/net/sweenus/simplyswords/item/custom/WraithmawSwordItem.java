@@ -66,7 +66,7 @@ public final class WraithmawSwordItem extends UniqueSwordItem implements UniqueW
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.gloam.tooltip").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
-        appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.wraithmaw.cooldown);
+        appendAbilityCooldownTooltip(tooltip, stack, Config.uniqueEffects.wraithmaw.cooldown);
         appendAbilityManaCostTooltip(tooltip, stack);
         super.appendTooltip(stack, context, tooltip, type);
         TooltipUtils.appendSpellScaleTooltip(tooltip, SpellScalingProfile.SOUL);

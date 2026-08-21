@@ -117,6 +117,10 @@ public class SimplySwordsClientAPI {
         TooltipUtils.appendSpellScaleTooltip(tooltip, spellSchool);
     }
 
+    public static int getEffectiveWeaponCooldownTicks(ItemStack stack, int baseCooldownTicks) {
+        return TooltipUtils.getEffectiveWeaponCooldownTicks(stack, baseCooldownTicks);
+    }
+
     private static boolean isInfoButtonScreen(Screen screen) {
         return screen instanceof InventoryScreen || screen instanceof CreativeInventoryScreen;
     }

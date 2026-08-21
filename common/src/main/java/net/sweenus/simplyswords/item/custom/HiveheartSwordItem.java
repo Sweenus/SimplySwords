@@ -1,5 +1,7 @@
 package net.sweenus.simplyswords.item.custom;
 
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedDouble;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
@@ -67,7 +69,7 @@ public class HiveheartSwordItem extends UniqueSwordItem implements UniqueWeaponA
                     EntityAttributeInstance attackAttribute = beeEntity.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE);
                     if (attackAttribute != null)
                         attackAttribute.setBaseValue(attackDamage);
-                    player.getItemCooldownManager().set(stack.getItem(), skillCooldown);
+                    SimplySwordsAPI.setWeaponCooldown(player, stack, skillCooldown);
                 }
             }
         }
@@ -87,7 +89,7 @@ public class HiveheartSwordItem extends UniqueSwordItem implements UniqueWeaponA
                 return TypedActionResult.fail(stack);
             }
             HivemindSwarmManager.activate(serverWorld, serverPlayer);
-            serverPlayer.getItemCooldownManager().set(stack.getItem(), Config.uniqueEffects.hiveheart.activeCooldown);
+            SimplySwordsAPI.setWeaponCooldown(serverPlayer, stack, Config.uniqueEffects.hiveheart.activeCooldown);
         }
 
         return TypedActionResult.success(stack, world.isClient());
@@ -120,11 +122,13 @@ public class HiveheartSwordItem extends UniqueSwordItem implements UniqueWeaponA
         tooltip.add(Text.translatable("item.simplyswords.hiveheartsworditem.tooltip1").setStyle(Styles.ABILITY));
         tooltip.add(Text.translatable("item.simplyswords.hiveheartsworditem.tooltip2").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
-        tooltip.add(Text.translatable("item.simplyswords.hiveheartsworditem.tooltip5", Config.uniqueEffects.hiveheart.cooldown / 20).setStyle(Styles.TEXT));
+        tooltip.add(Text.translatable("item.simplyswords.hiveheartsworditem.tooltip5",
+                net.sweenus.simplyswords.client.util.TooltipUtils.getEffectiveWeaponCooldownTicks(
+                        itemStack, Config.uniqueEffects.hiveheart.cooldown) / 20).setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.hiveheartsworditem.tooltip7").setStyle(Styles.TEXT));
-        appendAbilityCooldownTooltip(tooltip, Config.uniqueEffects.hiveheart.activeCooldown);
+        appendAbilityCooldownTooltip(tooltip, itemStack, Config.uniqueEffects.hiveheart.activeCooldown);
         appendAbilityManaCostTooltip(tooltip, itemStack);
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
         net.sweenus.simplyswords.client.util.TooltipUtils.appendSpellScaleTooltip(tooltip, "nature");

@@ -1,5 +1,7 @@
 package net.sweenus.simplyswords.item.custom;
 
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+
 import me.fzzyhmstrs.fzzy_config.annotations.Translation;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
@@ -109,7 +111,7 @@ public class EmberIreSwordItem extends UniqueSwordItem implements UniqueWeaponAc
                 DamageSource damageSource = user.getDamageSources().generic();
                 if (user instanceof PlayerEntity player) {
                     damageSource = user.getDamageSources().playerAttack(player);
-                    player.getItemCooldownManager().set(stack.getItem(), 10);
+                    SimplySwordsAPI.setWeaponCooldown(player, stack, 10);
                 }
 
                 final float minAdditionalDamage = 0.0f;
@@ -227,7 +229,7 @@ public class EmberIreSwordItem extends UniqueSwordItem implements UniqueWeaponAc
         tooltip.add(Text.translatable("item.simplyswords.emberiresworditem.tooltip6").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.emberiresworditem.tooltip9").setStyle(Styles.TEXT));
-        appendAbilityCooldownTooltip(tooltip, 10);
+        appendAbilityCooldownTooltip(tooltip, itemStack, 10);
         appendAbilityManaCostTooltip(tooltip, itemStack);
 
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);

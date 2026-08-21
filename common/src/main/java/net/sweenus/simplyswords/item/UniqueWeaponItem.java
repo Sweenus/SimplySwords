@@ -24,6 +24,7 @@ import net.sweenus.simplyswords.api.AwakeningFormStage;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
 import net.sweenus.simplyswords.client.api.SimplySwordsClientAPI;
+import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.LegacyUniqueMigration;
@@ -174,9 +175,18 @@ public abstract class UniqueWeaponItem extends SwordItem {
         generateDynamicTooltip(itemStack, tooltipContext, tooltip, type);
     }
 
-    protected static void appendAbilityCooldownTooltip(List<Text> tooltip, int cooldownTicks) {
-        tooltip.add(Text.translatable("tooltip.simplyswords.ability_cooldown", formatCooldown(cooldownTicks))
+    protected static void appendAbilityCooldownTooltip(List<Text> tooltip, ItemStack stack, int cooldownTicks) {
+        int effectiveCooldown = TooltipUtils.getEffectiveWeaponCooldownTicks(stack, cooldownTicks);
+        tooltip.add(Text.translatable("tooltip.simplyswords.ability_cooldown", formatCooldown(effectiveCooldown))
                 .setStyle(Styles.COOLDOWN));
+    }
+
+    /**
+     * @deprecated Pass the displayed weapon stack so compatibility modifiers can be reflected.
+     */
+    @Deprecated
+    protected static void appendAbilityCooldownTooltip(List<Text> tooltip, int cooldownTicks) {
+        appendAbilityCooldownTooltip(tooltip, ItemStack.EMPTY, cooldownTicks);
     }
 
     protected static void appendAbilityManaCostTooltip(List<Text> tooltip, ItemStack stack) {
