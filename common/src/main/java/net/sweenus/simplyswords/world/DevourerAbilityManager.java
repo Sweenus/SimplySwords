@@ -35,6 +35,7 @@ import net.sweenus.simplyswords.entity.DevourerMassVisualEntity;
 import net.sweenus.simplyswords.entity.DevourerTendrilVisualEntity;
 import net.sweenus.simplyswords.item.component.AwakeningRouteComponent;
 import net.sweenus.simplyswords.registry.ComponentTypeRegistry;
+import net.sweenus.simplyswords.registry.DevourerMassVoice;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -57,6 +58,10 @@ public final class DevourerAbilityManager {
     private static final int ACQUISITION_INTERVAL = 4;
     private static final int LOOSE_LAUNCH_DELAY_MIN = 3;
     private static final int LOOSE_LAUNCH_DELAY_VARIANCE = 6;
+    private static final int VOICE_INITIAL_DELAY_MIN = 20;
+    private static final int VOICE_INITIAL_DELAY_VARIANCE = 61;
+    private static final int VOICE_GAP_MIN = 60;
+    private static final int VOICE_GAP_VARIANCE = 81;
     private static final double LOOSE_PULL_SPEED_SCALE = 0.5;
     private static final int LOST_SIGHT_GRACE = 8;
     private static final double RELEASE_BUFFER = 3.0;
@@ -166,6 +171,7 @@ public final class DevourerAbilityManager {
                 now + TRAVEL_TICKS + BLOOM_TICKS + duration,
                 now + TRAVEL_TICKS + BLOOM_TICKS + duration + COLLAPSE_TICKS,
                 damage, visual.getUuid());
+        mass.nextVoiceTick = mass.activeStartTick + voiceInitialDelay(world);
         ACTIVE.computeIfAbsent(world, ignored -> new HashMap<>()).put(actor.getUuid(), mass);
         DevourerStainManager.begin(world, actor.getUuid(), mass.sourcePlayerId,
                 visual.getUuid(), center, mass.seedArrivalTick,
@@ -203,6 +209,7 @@ public final class DevourerAbilityManager {
                 continue;
             }
             if (now < mass.activeEndTick) {
+                tickVoice(world, mass, visual, now);
                 boolean acquisitionTick = (now - mass.activeStartTick) % ACQUISITION_INTERVAL == 0L;
                 if (acquisitionTick) {
                     acquireTargets(world, actor, mass, visual);
@@ -269,6 +276,25 @@ public final class DevourerAbilityManager {
 
     private static int looseLaunchDelay(ServerWorld world) {
         return LOOSE_LAUNCH_DELAY_MIN + world.random.nextInt(LOOSE_LAUNCH_DELAY_VARIANCE);
+    }
+
+    private static int voiceInitialDelay(ServerWorld world) {
+        return VOICE_INITIAL_DELAY_MIN + world.random.nextInt(VOICE_INITIAL_DELAY_VARIANCE);
+    }
+
+    private static int voiceGap(ServerWorld world) {
+        return VOICE_GAP_MIN + world.random.nextInt(VOICE_GAP_VARIANCE);
+    }
+
+    private static void tickVoice(ServerWorld world, ActiveMass mass,
+                                  DevourerMassVisualEntity visual, long now) {
+        if (now < mass.nextVoiceTick) {
+            return;
+        }
+        DevourerMassVoice voice = DevourerMassVoice.randomDifferent(world.random, mass.lastVoiceIndex);
+        mass.lastVoiceIndex = voice.ordinal();
+        mass.nextVoiceTick = now + voice.getDurationTicks() + voiceGap(world);
+        visual.cueVoice(mass.lastVoiceIndex);
     }
 
     private static boolean isAvailableLooseTarget(ServerWorld world, ActiveMass mass,
@@ -903,6 +929,8 @@ public final class DevourerAbilityManager {
         private final Map<UUID, CapturedTarget> targets = new HashMap<>();
         private final Map<UUID, CapturedLoot> looseTargets = new HashMap<>();
         private long nextLooseLaunchTick;
+        private long nextVoiceTick;
+        private int lastVoiceIndex = -1;
         private boolean bloomed;
         private boolean collapsing;
 

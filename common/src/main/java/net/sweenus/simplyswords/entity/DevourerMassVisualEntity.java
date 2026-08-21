@@ -26,6 +26,8 @@ public final class DevourerMassVisualEntity extends Entity {
     private static final TrackedData<Integer> FEED_COUNT = DataTracker.registerData(DevourerMassVisualEntity.class, TrackedDataHandlerRegistry.INTEGER);
     private static final TrackedData<Integer> LAST_FEED_AGE = DataTracker.registerData(DevourerMassVisualEntity.class, TrackedDataHandlerRegistry.INTEGER);
     private static final TrackedData<Integer> SEED = DataTracker.registerData(DevourerMassVisualEntity.class, TrackedDataHandlerRegistry.INTEGER);
+    private static final TrackedData<Integer> VOICE_INDEX = DataTracker.registerData(DevourerMassVisualEntity.class, TrackedDataHandlerRegistry.INTEGER);
+    private static final TrackedData<Integer> VOICE_SEQUENCE = DataTracker.registerData(DevourerMassVisualEntity.class, TrackedDataHandlerRegistry.INTEGER);
 
     public DevourerMassVisualEntity(EntityType<? extends DevourerMassVisualEntity> type, World world) {
         super(type, world);
@@ -64,6 +66,8 @@ public final class DevourerMassVisualEntity extends Entity {
         this.dataTracker.startTracking(FEED_COUNT, 0);
         this.dataTracker.startTracking(LAST_FEED_AGE, -1000);
         this.dataTracker.startTracking(SEED, 0);
+        this.dataTracker.startTracking(VOICE_INDEX, -1);
+        this.dataTracker.startTracking(VOICE_SEQUENCE, 0);
     }
 
     @Override
@@ -121,9 +125,18 @@ public final class DevourerMassVisualEntity extends Entity {
         return MathHelper.clamp((age + tickDelta - collapseStart) / getCollapseTicks(), 0.0F, 1.0F);
     }
 
+    public boolean isCollapsing() {
+        return age >= getTravelTicks() + getBloomTicks() + getActiveTicks();
+    }
+
     public void feed() {
         dataTracker.set(FEED_COUNT, Math.min(24, getFeedCount() + 1));
         dataTracker.set(LAST_FEED_AGE, age);
+    }
+
+    public void cueVoice(int voiceIndex) {
+        dataTracker.set(VOICE_INDEX, voiceIndex);
+        dataTracker.set(VOICE_SEQUENCE, getVoiceSequence() + 1);
     }
 
     public int getTravelTicks() { return dataTracker.get(TRAVEL_TICKS); }
@@ -135,6 +148,8 @@ public final class DevourerMassVisualEntity extends Entity {
     public int getFeedCount() { return dataTracker.get(FEED_COUNT); }
     public int getLastFeedAge() { return dataTracker.get(LAST_FEED_AGE); }
     public int getSeed() { return dataTracker.get(SEED); }
+    public int getVoiceIndex() { return dataTracker.get(VOICE_INDEX); }
+    public int getVoiceSequence() { return dataTracker.get(VOICE_SEQUENCE); }
 
     public int getTotalLifetime() {
         return getTravelTicks() + getBloomTicks() + getActiveTicks() + getCollapseTicks();
@@ -173,6 +188,8 @@ public final class DevourerMassVisualEntity extends Entity {
         dataTracker.set(FEED_COUNT, nbt.getInt("feed_count"));
         dataTracker.set(LAST_FEED_AGE, nbt.getInt("last_feed_age"));
         dataTracker.set(SEED, nbt.getInt("seed"));
+        dataTracker.set(VOICE_INDEX, nbt.getInt("voice_index"));
+        dataTracker.set(VOICE_SEQUENCE, nbt.getInt("voice_sequence"));
     }
 
     @Override
@@ -189,6 +206,8 @@ public final class DevourerMassVisualEntity extends Entity {
         nbt.putInt("feed_count", getFeedCount());
         nbt.putInt("last_feed_age", getLastFeedAge());
         nbt.putInt("seed", getSeed());
+        nbt.putInt("voice_index", getVoiceIndex());
+        nbt.putInt("voice_sequence", getVoiceSequence());
     }
 
     private static float ease(float value) {

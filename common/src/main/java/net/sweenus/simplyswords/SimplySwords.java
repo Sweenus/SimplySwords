@@ -39,9 +39,11 @@ import net.sweenus.simplyswords.client.renderer.model.CaelestisRiftlingModel;
 import net.sweenus.simplyswords.client.renderer.model.CaelestisTentacleModel;
 import net.sweenus.simplyswords.client.AbilityKeybindHandler;
 import net.sweenus.simplyswords.client.CaelestisBreachAmbience;
+import net.sweenus.simplyswords.client.DevourerMassVoiceClientState;
 import net.sweenus.simplyswords.client.LocalStormVisualManager;
 import net.sweenus.simplyswords.client.hud.WeaponHudRenderer;
 import net.sweenus.simplyswords.client.IonboundBeamClientState;
+import net.sweenus.simplyswords.client.SoulstalkerVoiceClientState;
 import net.sweenus.simplyswords.command.SimplySwordsCommands;
 import net.sweenus.simplyswords.compat.MythicMetalsCompat;
 import net.sweenus.simplyswords.compat.bettercombat.BetterCombatCompat;
@@ -206,12 +208,14 @@ public class SimplySwords {
         public static void initializeClient() {
             AbilityKeybindHandler.init();
             CaelestisBreachAmbience.init();
+            DevourerMassVoiceClientState.init();
             ObserverStatusEffectClientApi.init();
             LocalStormVisualManager.init();
             // Not a mixin on InGameHud#render: Forge 1.20.1 substitutes ForgeGui, which overrides
             // render without calling super, so such a mixin never runs on Forge.
             ClientGuiEvent.RENDER_HUD.register(WeaponHudRenderer::render);
             IonboundBeamClientState.init();
+            SoulstalkerVoiceClientState.init();
             // Entity
             EntityRendererRegistry.register(EntityRegistry.BATTLESTANDARD, BattleStandardRenderer::new);
             EntityModelLayerRegistry.register(BATTLESTANDARD_MODEL, BattleStandardModel::getTexturedModelData);

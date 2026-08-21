@@ -37,6 +37,7 @@ import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.network.SoulstalkerLeapLaunchPacket;
 import net.sweenus.simplyswords.registry.SoundRegistry;
+import net.sweenus.simplyswords.registry.SoulstalkerVoice;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.world.GloamStainManager;
 import org.joml.Vector3f;
@@ -61,6 +62,10 @@ public final class SoulstalkerStrideEntity extends MobEntity implements JumpingM
     private static final int REATTACH_GRACE = 14;
     private static final int LEAP_RELEASE_GRACE = 14;
     private static final int LEAP_ARC_TICKS = 10;
+    private static final int IDLE_INITIAL_DELAY_MIN = 20;
+    private static final int IDLE_INITIAL_DELAY_VARIANCE = 61;
+    private static final int IDLE_GAP_MIN = 60;
+    private static final int IDLE_GAP_VARIANCE = 81;
     private static final double WALL_LATCH_ALIGNMENT = 0.55;
     private static final double CEILING_LATCH_ALIGNMENT = 0.45;
     private static final int WALL_COYOTE = 8;
@@ -93,6 +98,10 @@ public final class SoulstalkerStrideEntity extends MobEntity implements JumpingM
             DataTracker.registerData(SoulstalkerStrideEntity.class, TrackedDataHandlerRegistry.INTEGER);
     private static final TrackedData<Boolean> LEAPING =
             DataTracker.registerData(SoulstalkerStrideEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+    private static final TrackedData<Integer> VOICE_INDEX =
+            DataTracker.registerData(SoulstalkerStrideEntity.class, TrackedDataHandlerRegistry.INTEGER);
+    private static final TrackedData<Integer> VOICE_SEQUENCE =
+            DataTracker.registerData(SoulstalkerStrideEntity.class, TrackedDataHandlerRegistry.INTEGER);
     private static final TrackedData<Boolean> CEILING_FORWARD_LOCKED =
             DataTracker.registerData(SoulstalkerStrideEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
     private static final DustColorTransitionParticleEffect GLOAM_DUST =
@@ -120,6 +129,10 @@ public final class SoulstalkerStrideEntity extends MobEntity implements JumpingM
     private double leapTravelDistance;
     private boolean leapDepartureConfirmed;
     private int leapTicks;
+    private long nextIdleVoiceTick = Long.MIN_VALUE;
+    private long activeVoiceEndTick = Long.MIN_VALUE;
+    private int lastIdleVoiceIndex = -1;
+    private boolean voiceLeapWasActive;
     private int wallLostTicks;
     private int cornerTicks;
     private int lateralSign = 1;
@@ -180,6 +193,8 @@ public final class SoulstalkerStrideEntity extends MobEntity implements JumpingM
         this.dataTracker.startTracking(STEP_LEG, (byte) 0);
         this.dataTracker.startTracking(LEAP_SEQUENCE, 0);
         this.dataTracker.startTracking(LEAPING, false);
+        this.dataTracker.startTracking(VOICE_INDEX, -1);
+        this.dataTracker.startTracking(VOICE_SEQUENCE, 0);
         this.dataTracker.startTracking(CEILING_FORWARD_LOCKED, false);
     }
 
@@ -1261,6 +1276,7 @@ public final class SoulstalkerStrideEntity extends MobEntity implements JumpingM
                 target.velocityModified = true;
             }
         }
+        cueVoice(SoulstalkerVoice.LEAP_ATTACK_LAND);
         if (createStain) {
             GloamStainManager.createPatch(world, owner.getUuid(), impact,
                     Math.max(0.25, Config.uniqueEffects.soulstalker.leapImpactStainRadius),
@@ -1481,6 +1497,56 @@ public final class SoulstalkerStrideEntity extends MobEntity implements JumpingM
         } else if (!getWorld().isClient() && ++passengerlessTicks > 10) {
             discard();
         }
+        if (!getWorld().isClient() && getWorld() instanceof ServerWorld world) {
+            tickVoiceSchedule(world);
+        }
+    }
+
+    private void tickVoiceSchedule(ServerWorld world) {
+        LivingEntity controller = getControllingPassenger();
+        if (controller == null || !controller.isAlive()) {
+            nextIdleVoiceTick = Long.MIN_VALUE;
+            activeVoiceEndTick = Long.MIN_VALUE;
+            lastIdleVoiceIndex = -1;
+            voiceLeapWasActive = false;
+            return;
+        }
+
+        long now = world.getTime();
+        if (nextIdleVoiceTick == Long.MIN_VALUE) {
+            nextIdleVoiceTick = now + idleInitialDelay(world);
+        }
+        if (isLeapInProgress()) {
+            voiceLeapWasActive = true;
+            return;
+        }
+        if (voiceLeapWasActive) {
+            voiceLeapWasActive = false;
+            nextIdleVoiceTick = Math.max(now, activeVoiceEndTick) + idleInitialDelay(world);
+            return;
+        }
+        if (now < activeVoiceEndTick || now < nextIdleVoiceTick) {
+            return;
+        }
+
+        SoulstalkerVoice voice = SoulstalkerVoice.randomIdleDifferent(world.random, lastIdleVoiceIndex);
+        lastIdleVoiceIndex = voice.ordinal();
+        cueVoice(voice);
+        nextIdleVoiceTick = activeVoiceEndTick + idleGap(world);
+    }
+
+    private void cueVoice(SoulstalkerVoice voice) {
+        dataTracker.set(VOICE_INDEX, voice.ordinal());
+        dataTracker.set(VOICE_SEQUENCE, getVoiceSequence() + 1);
+        activeVoiceEndTick = getWorld().getTime() + voice.getDurationTicks();
+    }
+
+    private static int idleInitialDelay(ServerWorld world) {
+        return IDLE_INITIAL_DELAY_MIN + world.random.nextInt(IDLE_INITIAL_DELAY_VARIANCE);
+    }
+
+    private static int idleGap(ServerWorld world) {
+        return IDLE_GAP_MIN + world.random.nextInt(IDLE_GAP_VARIANCE);
     }
 
     @Override
@@ -1520,8 +1586,16 @@ public final class SoulstalkerStrideEntity extends MobEntity implements JumpingM
         return dataTracker.get(LEAP_SEQUENCE);
     }
 
-    private boolean isLeapInProgress() {
+    public boolean isLeapInProgress() {
         return dataTracker.get(LEAPING);
+    }
+
+    public int getVoiceIndex() {
+        return dataTracker.get(VOICE_INDEX);
+    }
+
+    public int getVoiceSequence() {
+        return dataTracker.get(VOICE_SEQUENCE);
     }
 
     public int getSeed() {
