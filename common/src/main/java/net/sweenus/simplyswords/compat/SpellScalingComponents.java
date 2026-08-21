@@ -30,7 +30,8 @@ public final class SpellScalingComponents {
     }
 
     public record Definition(Identifier id, Identifier ownerId, Kind kind,
-                             SpellScalingProfile defaultProfile, String effectTranslationKey) {
+                             SpellScalingProfile defaultProfile, Identifier defaultIronsSchool,
+                             String effectTranslationKey) {
     }
 
     private static final Map<Identifier, Definition> DEFINITIONS = new LinkedHashMap<>();
@@ -38,84 +39,84 @@ public final class SpellScalingComponents {
     private static final Map<Identifier, Definition> POWERS = new LinkedHashMap<>();
 
     static {
-        weapon("brimstone_claymore", SpellScalingProfile.FIRE);
-        weapon("watcher_claymore", SpellScalingProfile.SOUL);
-        weapon("the_devourer", SpellScalingProfile.SOUL);
-        weapon("storms_edge", SpellScalingProfile.LIGHTNING);
-        weapon("stormscale", SpellScalingProfile.LIGHTNING);
-        weapon("awakened_stormscale", SpellScalingProfile.LIGHTNING);
-        weapon("ionbound_stormscale", SpellScalingProfile.LIGHTNING);
-        weapon("stormbringer", SpellScalingProfile.LIGHTNING);
-        weapon("bramblethorn", SpellScalingProfile.NATURE);
-        weapon("watching_warglaive", SpellScalingProfile.SOUL);
-        weapon("toxic_longsword", SpellScalingProfile.SOUL);
-        weapon("emberblade", SpellScalingProfile.FIRE);
-        weapon("hearthflame", SpellScalingProfile.FIRE);
-        weapon("soulkeeper", SpellScalingProfile.SOUL);
-        weapon("twisted_blade", SpellScalingProfile.SOUL);
-        weapon("soulstealer", SpellScalingProfile.SOUL);
-        weapon("soulrender", SpellScalingProfile.SOUL);
-        weapon("soulstalker", SpellScalingProfile.SOUL);
-        weapon("soulpyre", SpellScalingProfile.SOUL);
-        weapon("frostfall", SpellScalingProfile.FROST);
-        weapon("molten_edge", SpellScalingProfile.FIRE);
-        compositeWeapon("livyatan", "frost", SpellScalingProfile.FROST);
-        compositeWeapon("livyatan", "lightning", SpellScalingProfile.LIGHTNING);
-        weapon("icewhisper", SpellScalingProfile.FROST);
-        weapon("arcanethyst", SpellScalingProfile.ARCANE);
-        weapon("thunderbrand", SpellScalingProfile.LIGHTNING);
-        weapon("mjolnir", SpellScalingProfile.LIGHTNING);
-        weapon("slumbering_lichblade", SpellScalingProfile.SOUL);
-        weapon("waking_lichblade", SpellScalingProfile.SOUL);
-        weapon("awakened_lichblade", SpellScalingProfile.SOUL);
-        weapon("shadowsting", SpellScalingProfile.SOUL);
-        compositeWeapon("righteous_relic", "damage", SpellScalingProfile.FIRE);
-        compositeWeapon("righteous_relic", "healing", SpellScalingProfile.HEALING);
-        compositeWeapon("sunfire", "damage", SpellScalingProfile.FIRE);
-        compositeWeapon("sunfire", "healing", SpellScalingProfile.HEALING);
-        weapon("tainted_relic", SpellScalingProfile.SOUL);
-        weapon("harbinger", SpellScalingProfile.SOUL);
-        weapon("whisperwind", SpellScalingProfile.EVOCATION);
-        weapon("dreadwhisper", SpellScalingProfile.SOUL);
-        weapon("emberlash", SpellScalingProfile.FIRE);
-        weapon("waxweaver", SpellScalingProfile.FIRE);
-        weapon("hiveheart", SpellScalingProfile.NATURE);
-        weapon("stars_edge", SpellScalingProfile.ARCANE);
-        weapon("wickpiercer", SpellScalingProfile.FIRE);
-        weapon("gloampiercer", SpellScalingProfile.SOUL);
-        compositeWeapon("tempest", "fire", SpellScalingProfile.FIRE);
-        compositeWeapon("tempest", "frost", SpellScalingProfile.FROST);
-        weapon("flamewind", SpellScalingProfile.FIRE);
-        weapon("magiscythe", SpellScalingProfile.ARCANE);
-        weapon("enigma", SpellScalingProfile.EVOCATION);
-        weapon("magispear", SpellScalingProfile.ARCANE);
-        weapon("magiblade", SpellScalingProfile.ARCANE);
-        weapon("caelestis", SpellScalingProfile.ELDRITCH);
-        weapon("dawnquiver", SpellScalingProfile.HEALING);
-        weapon("riftmane", SpellScalingProfile.ARCANE);
-        weapon("wraithfang", SpellScalingProfile.SOUL);
-        weapon("wraithmaw", SpellScalingProfile.SOUL);
-        weapon("bloodwake", SpellScalingProfile.SOUL);
-        weapon("chompolotl", SpellScalingProfile.NATURE);
+        weapon("brimstone_claymore", SpellScalingProfile.FIRE, "fire");
+        weapon("watcher_claymore", SpellScalingProfile.SOUL, "blood");
+        weapon("the_devourer", SpellScalingProfile.SOUL, "eldritch");
+        weapon("storms_edge", SpellScalingProfile.LIGHTNING, "lightning");
+        weapon("stormscale", SpellScalingProfile.LIGHTNING, "lightning");
+        weapon("awakened_stormscale", SpellScalingProfile.LIGHTNING, "lightning");
+        weapon("ionbound_stormscale", SpellScalingProfile.LIGHTNING, "lightning");
+        weapon("stormbringer", SpellScalingProfile.LIGHTNING, "lightning");
+        weapon("bramblethorn", SpellScalingProfile.NATURE, "nature");
+        weapon("watching_warglaive", SpellScalingProfile.SOUL, "blood");
+        weapon("toxic_longsword", SpellScalingProfile.SOUL, "nature");
+        weapon("emberblade", SpellScalingProfile.FIRE, "fire");
+        weapon("hearthflame", SpellScalingProfile.FIRE, "fire");
+        weapon("soulkeeper", SpellScalingProfile.SOUL, "blood");
+        weapon("twisted_blade", SpellScalingProfile.SOUL, "blood");
+        weapon("soulstealer", SpellScalingProfile.SOUL, "blood");
+        weapon("soulrender", SpellScalingProfile.SOUL, "blood");
+        weapon("soulstalker", SpellScalingProfile.SOUL, "eldritch");
+        weapon("soulpyre", SpellScalingProfile.SOUL, "blood");
+        weapon("frostfall", SpellScalingProfile.FROST, "ice");
+        weapon("molten_edge", SpellScalingProfile.FIRE, "fire");
+        compositeWeapon("livyatan", "frost", SpellScalingProfile.FROST, "ice");
+        compositeWeapon("livyatan", "lightning", SpellScalingProfile.LIGHTNING, "lightning");
+        weapon("icewhisper", SpellScalingProfile.FROST, "ice");
+        weapon("arcanethyst", SpellScalingProfile.ARCANE, "eldritch");
+        weapon("thunderbrand", SpellScalingProfile.LIGHTNING, "lightning");
+        weapon("mjolnir", SpellScalingProfile.LIGHTNING, "lightning");
+        weapon("slumbering_lichblade", SpellScalingProfile.SOUL, "blood");
+        weapon("waking_lichblade", SpellScalingProfile.SOUL, "blood");
+        weapon("awakened_lichblade", SpellScalingProfile.SOUL, "blood");
+        weapon("shadowsting", SpellScalingProfile.SOUL, "ender");
+        compositeWeapon("righteous_relic", "damage", SpellScalingProfile.FIRE, "fire");
+        compositeWeapon("righteous_relic", "healing", SpellScalingProfile.HEALING, "holy");
+        compositeWeapon("sunfire", "damage", SpellScalingProfile.FIRE, "fire");
+        compositeWeapon("sunfire", "healing", SpellScalingProfile.HEALING, "holy");
+        weapon("tainted_relic", SpellScalingProfile.SOUL, "eldritch");
+        weapon("harbinger", SpellScalingProfile.SOUL, "eldritch");
+        weapon("whisperwind", SpellScalingProfile.EVOCATION, "evocation");
+        weapon("dreadwhisper", SpellScalingProfile.SOUL, "eldritch");
+        weapon("emberlash", SpellScalingProfile.FIRE, "fire");
+        weapon("waxweaver", SpellScalingProfile.FIRE, "fire");
+        weapon("hiveheart", SpellScalingProfile.NATURE, "nature");
+        weapon("stars_edge", SpellScalingProfile.ARCANE, "ender");
+        weapon("wickpiercer", SpellScalingProfile.FIRE, "fire");
+        weapon("gloampiercer", SpellScalingProfile.SOUL, "eldritch");
+        compositeWeapon("tempest", "fire", SpellScalingProfile.FIRE, "fire");
+        compositeWeapon("tempest", "frost", SpellScalingProfile.FROST, "ice");
+        weapon("flamewind", SpellScalingProfile.FIRE, "fire");
+        weapon("magiscythe", SpellScalingProfile.ARCANE, "ender");
+        weapon("enigma", SpellScalingProfile.EVOCATION, "evocation");
+        weapon("magispear", SpellScalingProfile.ARCANE, "evocation");
+        weapon("magiblade", SpellScalingProfile.ARCANE, "eldritch");
+        weapon("caelestis", SpellScalingProfile.ELDRITCH, "eldritch");
+        weapon("dawnquiver", SpellScalingProfile.HEALING, "holy");
+        weapon("riftmane", SpellScalingProfile.ARCANE, "evocation");
+        weapon("wraithfang", SpellScalingProfile.SOUL, "ender");
+        weapon("wraithmaw", SpellScalingProfile.SOUL, "ender");
+        weapon("bloodwake", SpellScalingProfile.SOUL, "blood");
+        weapon("chompolotl", SpellScalingProfile.NATURE, "nature");
         // Kept for the optional Eldritch End weapon if its registration is enabled.
-        weapon("dreadtide", SpellScalingProfile.ELDRITCH);
+        weapon("dreadtide", SpellScalingProfile.ELDRITCH, "eldritch");
 
-        power("banehead_swarm", SpellScalingProfile.ELDRITCH);
-        power("dancing_blades", SpellScalingProfile.EVOCATION);
-        power("dragon_maw", SpellScalingProfile.FIRE);
-        power("evocation", SpellScalingProfile.EVOCATION);
-        power("faultline", SpellScalingProfile.NATURE);
-        power("goat_stampede", SpellScalingProfile.NATURE);
-        power("imbued", SpellScalingProfile.ARCANE);
-        power("immolation", SpellScalingProfile.FIRE);
-        power("necromantic_arsenal", SpellScalingProfile.SOUL);
-        power("radiance", SpellScalingProfile.FIRE);
-        power("runic_slash", SpellScalingProfile.ARCANE);
-        power("sniffer_slam", SpellScalingProfile.NATURE);
-        power("stormlash", SpellScalingProfile.LIGHTNING);
-        power("verdant_trail", SpellScalingProfile.NATURE);
-        power("wing_buffet", SpellScalingProfile.EVOCATION);
-        power("wolf_pack", SpellScalingProfile.NATURE);
+        power("banehead_swarm", SpellScalingProfile.ELDRITCH, "evocation");
+        power("dancing_blades", SpellScalingProfile.EVOCATION, "ender");
+        power("dragon_maw", SpellScalingProfile.FIRE, "fire");
+        power("evocation", SpellScalingProfile.EVOCATION, "evocation");
+        power("faultline", SpellScalingProfile.NATURE, "nature");
+        power("goat_stampede", SpellScalingProfile.NATURE, "nature");
+        power("imbued", SpellScalingProfile.ARCANE, "ender");
+        power("immolation", SpellScalingProfile.FIRE, "fire");
+        power("necromantic_arsenal", SpellScalingProfile.SOUL, "blood");
+        power("radiance", SpellScalingProfile.FIRE, "fire");
+        power("runic_slash", SpellScalingProfile.ARCANE, "ender");
+        power("sniffer_slam", SpellScalingProfile.NATURE, "nature");
+        power("stormlash", SpellScalingProfile.LIGHTNING, "lightning");
+        power("verdant_trail", SpellScalingProfile.NATURE, "nature");
+        power("wing_buffet", SpellScalingProfile.EVOCATION, "evocation");
+        power("wolf_pack", SpellScalingProfile.NATURE, "nature");
     }
 
     private SpellScalingComponents() {
@@ -193,7 +194,7 @@ public final class SpellScalingComponents {
     }
 
     public static Optional<Identifier> defaultIronsSchool(Identifier componentId) {
-        return defaultSchool(componentId, false);
+        return get(componentId).map(Definition::defaultIronsSchool);
     }
 
     private static Map<Identifier, Identifier> defaultSchools(Kind kind, boolean spellPower) {
@@ -206,33 +207,42 @@ public final class SpellScalingComponents {
     }
 
     private static Optional<Identifier> defaultSchool(Identifier componentId, boolean spellPower) {
+        if (!spellPower) {
+            return defaultIronsSchool(componentId);
+        }
         return get(componentId)
                 .flatMap(definition -> SimplySwordsAPI.getSpellScalingDefinition(
                         definition.defaultProfile().registryId()))
-                .map(definition -> spellPower
-                        ? definition.spellPowerTarget()
-                        : definition.ironsTarget())
+                .map(definition -> definition.spellPowerTarget())
                 .map(SpellScalingTarget::schoolId);
     }
 
-    private static void weapon(String ownerPath, SpellScalingProfile profile) {
-        register(new Definition(id(ownerPath), id(ownerPath), Kind.WEAPON, profile, ""));
+    private static void weapon(String ownerPath, SpellScalingProfile profile, String ironsSchool) {
+        register(new Definition(
+                id(ownerPath), id(ownerPath), Kind.WEAPON, profile, ironsSchool(ironsSchool), ""));
     }
 
-    private static void compositeWeapon(String ownerPath, String effectPath, SpellScalingProfile profile) {
+    private static void compositeWeapon(String ownerPath, String effectPath, SpellScalingProfile profile,
+                                        String ironsSchool) {
         register(new Definition(
                 component(ownerPath, effectPath),
                 id(ownerPath),
                 Kind.WEAPON,
                 profile,
+                ironsSchool(ironsSchool),
                 "item.simplyswords.compat.component." + ownerPath + "." + effectPath
         ));
     }
 
-    private static void power(String powerPath, SpellScalingProfile profile) {
-        Definition definition = new Definition(id(powerPath), id(powerPath), Kind.GEM_POWER, profile, "");
+    private static void power(String powerPath, SpellScalingProfile profile, String ironsSchool) {
+        Definition definition = new Definition(
+                id(powerPath), id(powerPath), Kind.GEM_POWER, profile, ironsSchool(ironsSchool), "");
         register(definition);
         POWERS.put(definition.ownerId(), definition);
+    }
+
+    private static Identifier ironsSchool(String path) {
+        return Identifier.of("irons_spellbooks", path);
     }
 
     private static void register(Definition definition) {
