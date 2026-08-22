@@ -1,11 +1,12 @@
 package net.sweenus.simplyswords.config;
 
 
-import me.fzzyhmstrs.fzzy_config.config.Config;
+import me.fzzyhmstrs.fzzy_config.annotations.Version;
 import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.SimplySwords;
 
-public class StatusEffectsConfig extends Config {
+@Version(version = ResettingConfig.CURRENT_SCHEMA_VERSION)
+public class StatusEffectsConfig extends ResettingConfig {
 
     public StatusEffectsConfig() {
         super(new Identifier(SimplySwords.MOD_ID, "status_effects"));

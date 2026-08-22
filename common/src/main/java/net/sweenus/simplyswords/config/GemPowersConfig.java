@@ -1,7 +1,7 @@
 package net.sweenus.simplyswords.config;
 
 import dev.architectury.platform.Platform;
-import me.fzzyhmstrs.fzzy_config.config.Config;
+import me.fzzyhmstrs.fzzy_config.annotations.Version;
 import me.fzzyhmstrs.fzzy_config.config.ConfigSection;
 import me.fzzyhmstrs.fzzy_config.validation.collection.ValidatedSet;
 import me.fzzyhmstrs.fzzy_config.validation.minecraft.ValidatedIdentifier;
@@ -13,7 +13,8 @@ import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.power.powers.*;
 import net.sweenus.simplyswords.registry.GemPowerRegistry;
 
-public class GemPowersConfig extends Config {
+@Version(version = ResettingConfig.CURRENT_SCHEMA_VERSION)
+public class GemPowersConfig extends ResettingConfig {
 
 	public GemPowersConfig() {
 		super(new Identifier(SimplySwords.MOD_ID, "gem_powers"));

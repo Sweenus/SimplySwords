@@ -109,7 +109,7 @@ public class SoulPyreSwordItem extends UniqueSwordItem implements TwoHandedWeapo
         public float startingRadius = 3.0f;
         @ValidatedFloat.Restrict(min = 0f)
         public float radiusGrowthPerKill = 1.0f;
-        @ValidatedDouble.Restrict(min = 11.0)
+        @ValidatedDouble.Restrict(min = 1.0)
         public double radius = 8.0;
         @ValidatedFloat.Restrict(min = 2.0f)
         public float verticalRange = 8.0f;

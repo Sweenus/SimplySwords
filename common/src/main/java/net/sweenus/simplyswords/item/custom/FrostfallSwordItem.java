@@ -149,7 +149,7 @@ public class FrostfallSwordItem extends UniqueSwordItem implements UniqueWeaponA
         public int chance = 25;
         @ValidatedInt.Restrict(min = 1)
         public int cooldown = 60;
-        @ValidatedFloat.Restrict(min = 1f)
+        @ValidatedFloat.Restrict(min = 0f)
         public float damageScaling = 0.8f;
         @ValidatedFloat.Restrict(min = 0f)
         public float pulseDamageScaling = 0.8f;

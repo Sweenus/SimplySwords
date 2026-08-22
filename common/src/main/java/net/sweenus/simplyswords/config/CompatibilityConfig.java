@@ -2,7 +2,6 @@ package net.sweenus.simplyswords.config;
 
 import com.google.common.collect.ImmutableMap;
 import me.fzzyhmstrs.fzzy_config.annotations.Version;
-import me.fzzyhmstrs.fzzy_config.config.Config;
 import me.fzzyhmstrs.fzzy_config.config.ConfigSection;
 import me.fzzyhmstrs.fzzy_config.validation.collection.ValidatedIdentifierMap;
 import me.fzzyhmstrs.fzzy_config.validation.minecraft.ValidatedIdentifier;
@@ -23,8 +22,8 @@ import net.sweenus.simplyswords.compat.SpellPowerWeaponAttributes;
 import static net.sweenus.simplyswords.SimplySwords.minimumSpellPowerVersion;
 import static net.sweenus.simplyswords.SimplySwords.minimumSpellbookVersion;
 
-@Version(version = 2)
-public class CompatibilityConfig extends Config {
+@Version(version = ResettingConfig.CURRENT_SCHEMA_VERSION)
+public class CompatibilityConfig extends ResettingConfig {
     static final float DEFAULT_DIMINISHING_RETURNS_START = 1.40F;
     static final float DEFAULT_DIMINISHING_RETURNS_STRENGTH = 10.0F;
     static final float DEFAULT_SPELL_POWER_API_SCALING_MULTIPLIER = 0.50F;
