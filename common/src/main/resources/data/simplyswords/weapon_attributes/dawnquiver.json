@@ -1,6 +1,6 @@
 {
   "attributes": {
-    "range_bonus": 1,
+    "attack_range": 4,
     "two_handed": true,
     "pose": "simplyswords:pose_greatsword",
     "category": "claymore",
