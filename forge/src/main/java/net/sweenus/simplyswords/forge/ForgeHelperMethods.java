@@ -7,8 +7,6 @@ import io.redspace.ironsspellbooks.api.registry.SchoolRegistry;
 import io.redspace.ironsspellbooks.api.spells.SchoolType;
 import io.redspace.ironsspellbooks.api.util.Utils;
 import io.redspace.ironsspellbooks.damage.DamageSources;
-import io.redspace.ironsspellbooks.network.SyncManaPacket;
-import io.redspace.ironsspellbooks.setup.PacketDistributor;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.damage.DamageSource;
@@ -82,7 +80,13 @@ public class ForgeHelperMethods {
     }
 
     public static int applySpellCooldownReduction(int baseTicks, LivingEntity actor) {
-        return hasManaSystem() ? Utils.applyCooldownReduction(baseTicks, actor) : baseTicks;
+        if (!hasManaSystem()) {
+            return baseTicks;
+        }
+        double reduction = actor == null
+                ? 1.0
+                : actor.getAttributeValue(AttributeRegistry.COOLDOWN_REDUCTION.get());
+        return (int) (baseTicks * (2.0 - Utils.softCapFormula(reduction)));
     }
 
     public static List<Identifier> spellPowerSchoolIds() {
@@ -156,7 +160,7 @@ public class ForgeHelperMethods {
         MagicData magicData = MagicData.getPlayerMagicData(entity);
         magicData.setMana(Math.max(0.0F, magicData.getMana() - amount));
         if (entity instanceof ServerPlayerEntity serverPlayer) {
-            PacketDistributor.sendToPlayer(serverPlayer, new SyncManaPacket(magicData));
+            IronsManaSyncCompat.sync(serverPlayer, magicData);
         }
     }
 }

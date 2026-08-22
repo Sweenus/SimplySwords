@@ -95,7 +95,7 @@ public class SimplySwords {
 
     public static String minimumEldritchEndVersion = "0.2.40";
     public static String minimumSpellPowerVersion = "0.10.0+1.20.1";
-    public static String minimumSpellbookVersion = "1.20.1-3.16.2";
+    public static String minimumSpellbookVersion = "1.20.1-3.4.0";
     public static String minimumMythicMetalsVersion = "0.24.0+1.21";
 
     public static void init() {
@@ -185,12 +185,8 @@ public class SimplySwords {
     }
 
     public static boolean passVersionCheck(String modId, String requiredVersion) {
-        if (Platform.isModLoaded(modId)) {
-            if (Platform.getMod(modId).getVersion().compareTo(requiredVersion) >= 0) {
-                return true;
-            }
-        }
-        return false;
+        return Platform.isModLoaded(modId)
+                && VersionHelper.meetsMinimum(Platform.getMod(modId).getVersion(), requiredVersion);
     }
 
     @Environment(EnvType.CLIENT)
