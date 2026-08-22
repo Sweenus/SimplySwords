@@ -14,7 +14,6 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.client.render.IrisCompat;
-import net.sweenus.simplyswords.client.render.LightningRenderLayers;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.DawnquiverBowVisualEntity;
 import org.joml.Matrix4f;
@@ -109,22 +108,30 @@ public final class DawnquiverBowVisualEntityRenderer extends EntityRenderer<Dawn
         matrices.scale(scale, scale, scale);
         Matrix4f matrix = matrices.peek().getPositionMatrix();
 
-        VertexConsumer body = consumers.getBuffer(LightningRenderLayers.BLOCKY_LIGHTNING);
-        VertexConsumer glow = consumers.getBuffer(LightningRenderLayers.LIGHTNING);
-
-        drawBow(body, glow, matrix, age, draw, formation, snap, opacity);
-        if (Config.general.enableModernFieldEffects) {
-            drawFeatherBloom(body, glow, matrix, age, formation, snap, opacity, entity.getSeed());
-            drawChargeHalo(glow, matrix, age, draw, snap, opacity);
-        }
-        drawString(body, glow, matrix, draw, snap, opacity);
-        drawEnergyArrow(body, glow, matrix, age, draw, snap, opacity);
-        if (released) {
-            drawReleaseFlare(glow, matrix, age, snap, opacity);
-        }
+        drawPass(DawnquiverRenderPass.BODY, DawnquiverRenderPass.BODY.getBuffer(consumers), matrix,
+                age, draw, formation, snap, opacity, entity.getSeed(), released);
+        drawPass(DawnquiverRenderPass.GLOW, DawnquiverRenderPass.GLOW.getBuffer(consumers), matrix,
+                age, draw, formation, snap, opacity, entity.getSeed(), released);
 
         matrices.pop();
         super.render(entity, yaw, tickDelta, matrices, consumers, light);
+    }
+
+    private static void drawPass(DawnquiverRenderPass pass, VertexConsumer vertices, Matrix4f matrix,
+                                 float age, float draw, float formation, float snap, float opacity,
+                                 int seed, boolean released) {
+        drawBow(pass, vertices, matrix, age, draw, formation, snap, opacity);
+        if (Config.general.enableModernFieldEffects) {
+            drawFeatherBloom(pass, vertices, matrix, age, formation, snap, opacity, seed);
+            if (pass.isGlow()) {
+                drawChargeHalo(vertices, matrix, age, draw, snap, opacity);
+            }
+        }
+        drawString(pass, vertices, matrix, draw, snap, opacity);
+        drawEnergyArrow(pass, vertices, matrix, age, draw, snap, opacity);
+        if (released && pass.isGlow()) {
+            drawReleaseFlare(vertices, matrix, age, snap, opacity);
+        }
     }
 
     private static boolean isFirstPersonOwner(LivingEntity owner) {
@@ -207,8 +214,10 @@ public final class DawnquiverBowVisualEntityRenderer extends EntityRenderer<Dawn
         return (float) -Math.toDegrees(Math.atan2(direction.y, horizontal));
     }
 
-    private static void drawBow(VertexConsumer body, VertexConsumer glow, Matrix4f matrix,
+    private static void drawBow(DawnquiverRenderPass pass, VertexConsumer vertices, Matrix4f matrix,
                                 float age, float draw, float formation, float snap, float opacity) {
+        VertexConsumer body = pass.isBody() ? vertices : null;
+        VertexConsumer glow = pass.isGlow() ? vertices : null;
         for (float sign : new float[]{-1.0F, 1.0F}) {
             Vec3d[] path = limbPath(sign, draw, formation, snap);
             double[] widths = limbWidths(draw, snap);
@@ -240,7 +249,7 @@ public final class DawnquiverBowVisualEntityRenderer extends EntityRenderer<Dawn
                     255, 255, 248, 255, 232, 142,
                     Math.round(240 * opacity), Math.round(195 * opacity));
 
-            drawLimbProngs(body, glow, matrix, path, sign, opacity, snap);
+            drawLimbProngs(pass, vertices, matrix, path, sign, opacity, snap);
         }
 
         float pulse = 0.94F + MathHelper.sin(age * 0.45F) * 0.06F;
@@ -293,8 +302,10 @@ public final class DawnquiverBowVisualEntityRenderer extends EntityRenderer<Dawn
         return result;
     }
 
-    private static void drawLimbProngs(VertexConsumer body, VertexConsumer glow, Matrix4f matrix,
+    private static void drawLimbProngs(DawnquiverRenderPass pass, VertexConsumer vertices, Matrix4f matrix,
                                        Vec3d[] path, float sign, float opacity, float snap) {
+        VertexConsumer body = pass.isBody() ? vertices : null;
+        VertexConsumer glow = pass.isGlow() ? vertices : null;
         for (int branch = 0; branch < 2; branch++) {
             int index = branch == 0 ? 8 : 12;
             Vec3d root = path[index];
@@ -315,8 +326,10 @@ public final class DawnquiverBowVisualEntityRenderer extends EntityRenderer<Dawn
         }
     }
 
-    private static void drawFeatherBloom(VertexConsumer body, VertexConsumer glow, Matrix4f matrix,
+    private static void drawFeatherBloom(DawnquiverRenderPass pass, VertexConsumer vertices, Matrix4f matrix,
                                          float age, float formation, float snap, float opacity, int seed) {
+        VertexConsumer body = pass.isBody() ? vertices : null;
+        VertexConsumer glow = pass.isGlow() ? vertices : null;
         float form = MathHelper.clamp(formation, 0.0F, 1.0F);
         float bloom = MathHelper.clamp(age / 4.0F, 0.0F, 1.0F) * (1.0F - snap);
         for (float sign : new float[]{-1.0F, 1.0F}) {
@@ -361,7 +374,7 @@ public final class DawnquiverBowVisualEntityRenderer extends EntityRenderer<Dawn
         return path;
     }
 
-    private static void drawString(VertexConsumer body, VertexConsumer glow, Matrix4f matrix,
+    private static void drawString(DawnquiverRenderPass pass, VertexConsumer vertices, Matrix4f matrix,
                                    float draw, float snap, float opacity) {
         if (snap >= 0.98F) {
             return;
@@ -371,6 +384,8 @@ public final class DawnquiverBowVisualEntityRenderer extends EntityRenderer<Dawn
         Vec3d nock = nockPoint(draw, snap);
         int bodyAlpha = Math.round(185 * opacity * (1.0F - snap));
         int glowAlpha = Math.round(100 * opacity * (1.0F - snap));
+        VertexConsumer body = pass.isBody() ? vertices : null;
+        VertexConsumer glow = pass.isGlow() ? vertices : null;
         stringSegment(glow, matrix, upper[upper.length - 1], nock, 0.018, 115, 238, 255, glowAlpha);
         stringSegment(glow, matrix, lower[lower.length - 1], nock, 0.018, 115, 238, 255, glowAlpha);
         stringSegment(body, matrix, upper[upper.length - 1], nock, 0.007, 235, 255, 255, bodyAlpha);
@@ -393,8 +408,10 @@ public final class DawnquiverBowVisualEntityRenderer extends EntityRenderer<Dawn
         }
     }
 
-    private static void drawEnergyArrow(VertexConsumer body, VertexConsumer glow, Matrix4f matrix,
+    private static void drawEnergyArrow(DawnquiverRenderPass pass, VertexConsumer vertices, Matrix4f matrix,
                                         float age, float draw, float snap, float opacity) {
+        VertexConsumer body = pass.isBody() ? vertices : null;
+        VertexConsumer glow = pass.isGlow() ? vertices : null;
         float charge = MathHelper.clamp((draw - 0.08F) / 0.92F, 0.0F, 1.0F);
         float visible = Math.max(0.18F, charge) * (1.0F - snap);
         Vec3d nock = nockPoint(draw, snap);

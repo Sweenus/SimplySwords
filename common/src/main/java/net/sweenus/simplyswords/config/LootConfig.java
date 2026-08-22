@@ -3,8 +3,8 @@ package net.sweenus.simplyswords.config;
 import com.google.common.collect.ImmutableMap;
 import me.fzzyhmstrs.fzzy_config.annotations.Action;
 import me.fzzyhmstrs.fzzy_config.annotations.RequiresAction;
+import me.fzzyhmstrs.fzzy_config.annotations.Version;
 import me.fzzyhmstrs.fzzy_config.api.ConfigApiJava;
-import me.fzzyhmstrs.fzzy_config.config.Config;
 import me.fzzyhmstrs.fzzy_config.validation.collection.ValidatedIdentifierMap;
 import me.fzzyhmstrs.fzzy_config.validation.collection.ValidatedSet;
 import me.fzzyhmstrs.fzzy_config.validation.minecraft.ValidatedIdentifier;
@@ -25,7 +25,10 @@ import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.TagRegistry;
 
 @RequiresAction(action = Action.RELOAD_DATA)
-public class LootConfig extends Config {
+@Version(version = ResettingConfig.CURRENT_SCHEMA_VERSION)
+public class LootConfig extends ResettingConfig {
+
+    public static void init() {}
 
     public LootConfig() {
         super(Identifier.of(SimplySwords.MOD_ID, "loot"));

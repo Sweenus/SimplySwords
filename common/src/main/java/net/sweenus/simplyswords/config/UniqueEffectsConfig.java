@@ -1,7 +1,6 @@
 package net.sweenus.simplyswords.config;
 
 import me.fzzyhmstrs.fzzy_config.annotations.Version;
-import me.fzzyhmstrs.fzzy_config.config.Config;
 import me.fzzyhmstrs.fzzy_config.config.ConfigSection;
 import me.fzzyhmstrs.fzzy_config.validation.misc.ValidatedAny;
 import me.fzzyhmstrs.fzzy_config.validation.misc.ValidatedCondition;
@@ -12,8 +11,8 @@ import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.item.custom.*;
 
-@Version(version = 1)
-public class UniqueEffectsConfig extends Config {
+@Version(version = ResettingConfig.CURRENT_SCHEMA_VERSION)
+public class UniqueEffectsConfig extends ResettingConfig {
 
     public UniqueEffectsConfig() {
         super(Identifier.of(SimplySwords.MOD_ID, "unique_effects"));

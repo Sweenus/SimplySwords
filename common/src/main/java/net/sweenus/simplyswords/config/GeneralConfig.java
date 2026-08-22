@@ -1,7 +1,6 @@
 package net.sweenus.simplyswords.config;
 
 import me.fzzyhmstrs.fzzy_config.annotations.Version;
-import me.fzzyhmstrs.fzzy_config.config.Config;
 import me.fzzyhmstrs.fzzy_config.validation.collection.ValidatedSet;
 import me.fzzyhmstrs.fzzy_config.validation.misc.ValidatedString;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
@@ -9,8 +8,8 @@ import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.SimplySwords;
 
-@Version(version = 1)
-public class GeneralConfig extends Config {
+@Version(version = ResettingConfig.CURRENT_SCHEMA_VERSION)
+public class GeneralConfig extends ResettingConfig {
 
     public GeneralConfig() {
         super(Identifier.of(SimplySwords.MOD_ID, "general"));

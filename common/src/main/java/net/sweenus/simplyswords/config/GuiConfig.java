@@ -1,12 +1,13 @@
 package net.sweenus.simplyswords.config;
 
-import me.fzzyhmstrs.fzzy_config.config.Config;
+import me.fzzyhmstrs.fzzy_config.annotations.Version;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.SimplySwords;
 
-public class GuiConfig extends Config {
+@Version(version = ResettingConfig.CURRENT_SCHEMA_VERSION)
+public class GuiConfig extends ResettingConfig {
 
     public GuiConfig() {
         super(Identifier.of(SimplySwords.MOD_ID, "gui"));

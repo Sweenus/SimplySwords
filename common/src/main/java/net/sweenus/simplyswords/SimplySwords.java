@@ -47,6 +47,7 @@ import net.sweenus.simplyswords.compat.MythicMetalsCompat;
 import net.sweenus.simplyswords.compat.bettercombat.BetterCombatCompat;
 import net.sweenus.simplyswords.compat.eldritch_end.EldritchEndCompatRegistry;
 import net.sweenus.simplyswords.config.Config;
+import net.sweenus.simplyswords.config.LootConfig;
 import net.sweenus.simplyswords.entity.BattleStandardDarkEntity;
 import net.sweenus.simplyswords.entity.BattleStandardEntity;
 import net.sweenus.simplyswords.entity.CaelestisDreadglareEntity;
@@ -104,6 +105,7 @@ public class SimplySwords {
         SimplySwords.TABS.register();
         BlocksRegistry.BLOCKS.register();
         ItemsRegistry.ITEM.register();
+        LifecycleEvent.SETUP.register(LootConfig::init);
         SoundRegistry.SOUND.register();
         EffectRegistry.EFFECT.register();
         RecipeTypeRegistry.RECIPES.register();

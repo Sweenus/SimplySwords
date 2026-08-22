@@ -3,7 +3,7 @@ package net.sweenus.simplyswords.config;
 import dev.architectury.platform.Platform;
 import me.fzzyhmstrs.fzzy_config.annotations.Action;
 import me.fzzyhmstrs.fzzy_config.annotations.RequiresAction;
-import me.fzzyhmstrs.fzzy_config.config.Config;
+import me.fzzyhmstrs.fzzy_config.annotations.Version;
 import me.fzzyhmstrs.fzzy_config.config.ConfigSection;
 import me.fzzyhmstrs.fzzy_config.validation.misc.ValidatedCondition;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
@@ -12,7 +12,8 @@ import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.SimplySwords;
 
 @RequiresAction(action = Action.RESTART)
-public class WeaponAttributesConfig extends Config {
+@Version(version = ResettingConfig.CURRENT_SCHEMA_VERSION)
+public class WeaponAttributesConfig extends ResettingConfig {
 
     public WeaponAttributesConfig() {
         super(Identifier.of(SimplySwords.MOD_ID, "weapon_attributes"));

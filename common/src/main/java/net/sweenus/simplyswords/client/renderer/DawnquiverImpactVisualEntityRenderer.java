@@ -10,7 +10,6 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.client.render.IrisCompat;
-import net.sweenus.simplyswords.client.render.LightningRenderLayers;
 import net.sweenus.simplyswords.entity.DawnquiverImpactVisualEntity;
 import org.joml.Matrix4f;
 
@@ -46,8 +45,19 @@ public final class DawnquiverImpactVisualEntityRenderer extends EntityRenderer<D
         float eased = DawnquiverRenderGeometry.easeOutCubic(progress);
         float fade = MathHelper.clamp((1.0F - progress) * 1.4F, 0.0F, 1.0F);
         float scale = entity.getScale();
-        VertexConsumer body = consumers.getBuffer(LightningRenderLayers.BLOCKY_LIGHTNING);
-        VertexConsumer glow = consumers.getBuffer(LightningRenderLayers.LIGHTNING);
+        drawPass(DawnquiverRenderPass.BODY, DawnquiverRenderPass.BODY.getBuffer(consumers), entity,
+                matrices, age, progress, eased, fade, scale);
+        drawPass(DawnquiverRenderPass.GLOW, DawnquiverRenderPass.GLOW.getBuffer(consumers), entity,
+                matrices, age, progress, eased, fade, scale);
+
+        super.render(entity, yaw, tickDelta, matrices, consumers, light);
+    }
+
+    private void drawPass(DawnquiverRenderPass pass, VertexConsumer vertices,
+                          DawnquiverImpactVisualEntity entity, MatrixStack matrices,
+                          float age, float progress, float eased, float fade, float scale) {
+        VertexConsumer body = pass.isBody() ? vertices : null;
+        VertexConsumer glow = pass.isGlow() ? vertices : null;
 
         matrices.push();
         matrices.scale(scale, scale, scale);
@@ -81,7 +91,5 @@ public final class DawnquiverImpactVisualEntityRenderer extends EntityRenderer<D
                 entity.getSeed() * 0.01F + age * 0.035F,
                 255, 203, 76, Math.round(210 * fade), 0);
         matrices.pop();
-
-        super.render(entity, yaw, tickDelta, matrices, consumers, light);
     }
 }

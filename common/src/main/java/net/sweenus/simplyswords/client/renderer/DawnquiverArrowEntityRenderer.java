@@ -10,7 +10,6 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.client.render.IrisCompat;
-import net.sweenus.simplyswords.client.render.LightningRenderLayers;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.DawnquiverArrowEntity;
 import org.joml.Matrix4f;
@@ -57,31 +56,42 @@ public final class DawnquiverArrowEntityRenderer extends EntityRenderer<Dawnquiv
         float scale = entity.getScale();
         float age = entity.age + tickDelta;
         float pulse = 0.92F + MathHelper.sin(age * 0.72F + entity.getSeed()) * 0.08F;
-        VertexConsumer body = consumers.getBuffer(LightningRenderLayers.BLOCKY_LIGHTNING);
-        VertexConsumer glow = consumers.getBuffer(LightningRenderLayers.LIGHTNING);
+        drawPass(DawnquiverRenderPass.BODY, DawnquiverRenderPass.BODY.getBuffer(consumers), entity,
+                matrices, forward, side, up, scale, age, pulse);
+        drawPass(DawnquiverRenderPass.GLOW, DawnquiverRenderPass.GLOW.getBuffer(consumers), entity,
+                matrices, forward, side, up, scale, age, pulse);
 
+        super.render(entity, yaw, tickDelta, matrices, consumers, light);
+    }
+
+    private void drawPass(DawnquiverRenderPass pass, VertexConsumer vertices,
+                          DawnquiverArrowEntity entity, MatrixStack matrices,
+                          Vec3d forward, Vec3d side, Vec3d up,
+                          float scale, float age, float pulse) {
         matrices.push();
         Matrix4f matrix = matrices.peek().getPositionMatrix();
         if (Config.general.enableModernFieldEffects) {
-            drawTrail(body, glow, matrix, forward, side, up, scale, age, entity.getSeed());
-            drawReleaseWisps(glow, matrix, forward, side, up, scale, age);
+            drawTrail(pass, vertices, matrix, forward, side, up, scale, age, entity.getSeed());
+            if (pass.isGlow()) {
+                drawReleaseWisps(vertices, matrix, forward, side, up, scale, age);
+            }
         }
-        drawShaft(body, glow, matrix, forward, side, up, scale * pulse);
+        drawShaft(pass, vertices, matrix, forward, side, up, scale * pulse);
         if (entity.getMode() == DawnquiverArrowEntity.MODE_PIERCING) {
-            drawPiercingLances(body, glow, matrix, forward, side, up, scale, age);
+            drawPiercingLances(pass, vertices, matrix, forward, side, up, scale, age);
         }
         matrices.pop();
 
         matrices.push();
         matrices.multiply(this.dispatcher.getRotation());
-        drawHead(body, glow, matrices.peek().getPositionMatrix(), scale, pulse);
+        drawHead(pass, vertices, matrices.peek().getPositionMatrix(), scale, pulse);
         matrices.pop();
-
-        super.render(entity, yaw, tickDelta, matrices, consumers, light);
     }
 
-    private static void drawShaft(VertexConsumer body, VertexConsumer glow, Matrix4f matrix,
+    private static void drawShaft(DawnquiverRenderPass pass, VertexConsumer vertices, Matrix4f matrix,
                                   Vec3d forward, Vec3d side, Vec3d up, float scale) {
+        VertexConsumer body = pass.isBody() ? vertices : null;
+        VertexConsumer glow = pass.isGlow() ? vertices : null;
         Vec3d head = forward.multiply(1.58 * scale);
         Vec3d tail = forward.multiply(-1.05 * scale);
         double outer = 0.30 * scale;
@@ -97,8 +107,10 @@ public final class DawnquiverArrowEntityRenderer extends EntityRenderer<Dawnquiv
                 255, 250, 216, 250);
     }
 
-    private static void drawHead(VertexConsumer body, VertexConsumer glow, Matrix4f matrix,
+    private static void drawHead(DawnquiverRenderPass pass, VertexConsumer vertices, Matrix4f matrix,
                                  float scale, float pulse) {
+        VertexConsumer body = pass.isBody() ? vertices : null;
+        VertexConsumer glow = pass.isGlow() ? vertices : null;
         float outer = 0.78F * scale * pulse;
         DawnquiverRenderGeometry.billboardLens(glow, matrix, Vec3d.ZERO, outer, outer * 0.82F,
                 255, 167, 35, 190);
@@ -113,9 +125,11 @@ public final class DawnquiverArrowEntityRenderer extends EntityRenderer<Dawnquiv
                 255, 206, 75, 145, 0);
     }
 
-    private static void drawPiercingLances(VertexConsumer body, VertexConsumer glow, Matrix4f matrix,
+    private static void drawPiercingLances(DawnquiverRenderPass pass, VertexConsumer vertices, Matrix4f matrix,
                                            Vec3d forward, Vec3d side, Vec3d up,
                                            float scale, float age) {
+        VertexConsumer body = pass.isBody() ? vertices : null;
+        VertexConsumer glow = pass.isGlow() ? vertices : null;
         double separation = (0.22 + MathHelper.sin(age * 0.3F) * 0.035) * scale;
         Vec3d tail = forward.multiply(-1.25 * scale);
         Vec3d head = forward.multiply(1.95 * scale);
@@ -128,9 +142,11 @@ public final class DawnquiverArrowEntityRenderer extends EntityRenderer<Dawnquiv
         }
     }
 
-    private static void drawTrail(VertexConsumer body, VertexConsumer glow, Matrix4f matrix,
+    private static void drawTrail(DawnquiverRenderPass pass, VertexConsumer vertices, Matrix4f matrix,
                                   Vec3d forward, Vec3d side, Vec3d up,
                                   float scale, float age, int seed) {
+        VertexConsumer body = pass.isBody() ? vertices : null;
+        VertexConsumer glow = pass.isGlow() ? vertices : null;
         Vec3d[] path = new Vec3d[TRAIL_SPANS + 1];
         for (int span = 0; span <= TRAIL_SPANS; span++) {
             float t = span / (float) TRAIL_SPANS;
