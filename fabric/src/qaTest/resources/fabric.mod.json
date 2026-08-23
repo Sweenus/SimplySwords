@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "id": "simplyswords_qa",
+  "version": "1",
+  "name": "Simply Swords QA Companion",
+  "environment": "*",
+  "entrypoints": {
+    "main": ["net.sweenus.simplyswords.qa.fabric.SimplySwordsQaFabric"],
+    "client": ["net.sweenus.simplyswords.qa.fabric.SimplySwordsQaFabric$Client"]
+  },
+  "depends": {
+    "fabricloader": ">=0.14.0",
+    "minecraft": "1.20.1",
+    "simplyswords": "*",
+    "architectury": "*"
+  }
+}

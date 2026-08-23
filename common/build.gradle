@@ -5,6 +5,17 @@ architectury {
 loom {
     accessWidenerPath = file("src/main/resources/simplyswords.accesswidener")
 }
+
+sourceSets {
+    qaTest {
+        compileClasspath += sourceSets.main.output + configurations.compileClasspath
+        runtimeClasspath += output + configurations.runtimeClasspath
+    }
+}
+
+loom {
+    createRemapConfigurations(sourceSets.qaTest)
+}
 repositories {
     maven {
         url "https://www.cursemaven.com"

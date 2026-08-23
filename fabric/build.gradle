@@ -19,6 +19,23 @@ configurations {
     developmentFabric.extendsFrom common
 }
 
+sourceSets {
+    qaTest {
+        compileClasspath += sourceSets.main.output + configurations.compileClasspath + project(":common").sourceSets.qaTest.output
+        runtimeClasspath += output + sourceSets.main.output + configurations.runtimeClasspath + project(":common").sourceSets.qaTest.output
+    }
+}
+
+loom {
+    createRemapConfigurations(sourceSets.qaTest)
+    mods {
+        simplyswords_qa {
+            sourceSet sourceSets.qaTest
+            sourceSet "qaTest", ":common"
+        }
+    }
+}
+
 repositories {
     maven {
         url "https://www.cursemaven.com"
@@ -69,6 +86,20 @@ dependencies {
     modRuntimeOnly "me.shedaniel:RoughlyEnoughItems-fabric:${rei_version}"
     modLocalRuntime "dev.emi:emi-fabric:${emi_version}"
 
+}
+
+tasks.register("qaJar", Jar) {
+    dependsOn tasks.named("qaTestClasses")
+    archiveClassifier.set("qa-dev")
+    from sourceSets.qaTest.output
+    from project(":common").sourceSets.qaTest.output
+}
+
+tasks.register("remapQaJar", net.fabricmc.loom.task.RemapJarTask) {
+    dependsOn tasks.named("qaJar")
+    inputFile.set(tasks.named("qaJar", Jar).flatMap { it.archiveFile })
+    archiveClassifier.set("qa")
+    addNestedDependencies.set(false)
 }
 
 processResources {

@@ -50,6 +50,23 @@ configurations {
     developmentForge.extendsFrom common
 }
 
+sourceSets {
+    qaTest {
+        compileClasspath += sourceSets.main.output + configurations.compileClasspath + project(":common").sourceSets.qaTest.output
+        runtimeClasspath += output + sourceSets.main.output + configurations.runtimeClasspath + project(":common").sourceSets.qaTest.output
+    }
+}
+
+loom {
+    createRemapConfigurations(sourceSets.qaTest)
+    mods {
+        simplyswords_qa {
+            sourceSet sourceSets.qaTest
+            sourceSet "qaTest", ":common"
+        }
+    }
+}
+
 dependencies {
     forge "net.minecraftforge:forge:$rootProject.forge_version"
 
@@ -79,6 +96,20 @@ dependencies {
     //modImplementation ("curse.maven:gobber-301700:4007899")
     modCompileOnly "io.redspace:irons_spellbooks:${irons_spells_version}"
     modRuntimeOnly "me.shedaniel:RoughlyEnoughItems-forge:${rei_version}"
+}
+
+tasks.register("qaJar", Jar) {
+    dependsOn tasks.named("qaTestClasses")
+    archiveClassifier.set("qa-dev")
+    from sourceSets.qaTest.output
+    from project(":common").sourceSets.qaTest.output
+}
+
+tasks.register("remapQaJar", net.fabricmc.loom.task.RemapJarTask) {
+    dependsOn tasks.named("qaJar")
+    inputFile.set(tasks.named("qaJar", Jar).flatMap { it.archiveFile })
+    archiveClassifier.set("qa")
+    addNestedDependencies.set(false)
 }
 
 processResources {

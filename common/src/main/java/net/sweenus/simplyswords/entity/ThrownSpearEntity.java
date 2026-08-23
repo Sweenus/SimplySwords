@@ -38,7 +38,7 @@ public class ThrownSpearEntity extends PersistentProjectileEntity {
     private static final TrackedData<Byte> LOYALTY;
     private static final TrackedData<Boolean> ENCHANTED;
     private static final TrackedData<ItemStack> ITEM_STACK;
-    public ItemStack stack;
+    public ItemStack stack = ItemStack.EMPTY;
     public int returnTimer;
     public boolean hasYaw = false;
     private Float initialYaw = null; // Store the initial yaw
@@ -359,7 +359,7 @@ public class ThrownSpearEntity extends PersistentProjectileEntity {
     }
 
     private void applyKnockback(LivingEntity target) {
-        int level = EnchantmentHelper.getLevel(Enchantments.KNOCKBACK, this.stack);
+        int level = EnchantmentHelper.getLevel(Enchantments.KNOCKBACK, this.getItemStack());
         if (level > 0) {
             target.takeKnockback(level * 0.5F,
                     this.getX() - target.getX(), this.getZ() - target.getZ());
