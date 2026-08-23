@@ -12,6 +12,10 @@ sourceSets {
         compileClasspath += sourceSets.main.output + configurations.compileClasspath + project(":common").sourceSets.balanceTest.output
         runtimeClasspath += output + sourceSets.main.output + configurations.runtimeClasspath + project(":common").sourceSets.balanceTest.output
     }
+    qaTest {
+        compileClasspath += sourceSets.main.output + configurations.compileClasspath + project(":common").sourceSets.qaTest.output
+        runtimeClasspath += output + sourceSets.main.output + configurations.runtimeClasspath + project(":common").sourceSets.qaTest.output
+    }
 }
 
 def balanceIsFiltered = ["balanceQuick", "balanceWeapon", "balanceBuild", "balanceScenario"].any { project.hasProperty(it) }
@@ -22,6 +26,7 @@ def balanceReportDir = { String loader ->
 loom {
     accessWidenerPath = project(":common").loom.accessWidenerPath
     createRemapConfigurations(sourceSets.balanceTest)
+    createRemapConfigurations(sourceSets.qaTest)
 
     mods {
         simplyswords {
@@ -30,6 +35,10 @@ loom {
         simplyswords_balance_test {
             sourceSet sourceSets.balanceTest
             sourceSet "balanceTest", ":common"
+        }
+        simplyswords_qa {
+            sourceSet sourceSets.qaTest
+            sourceSet "qaTest", ":common"
         }
     }
 
@@ -133,6 +142,25 @@ dependencies {
 
 tasks.named("compileBalanceTestJava") {
     dependsOn project(":common").tasks.named("compileBalanceTestJava")
+}
+
+tasks.named("compileQaTestJava") {
+    dependsOn project(":common").tasks.named("compileQaTestJava")
+}
+
+tasks.register("qaJar", Jar) {
+    dependsOn tasks.named("qaTestClasses")
+    archiveClassifier.set("qa-dev")
+    from sourceSets.qaTest.output
+    from project(":common").sourceSets.qaTest.output
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+tasks.register("remapQaJar", net.fabricmc.loom.task.RemapJarTask) {
+    dependsOn tasks.named("qaJar")
+    inputFile.set(tasks.named("qaJar", Jar).flatMap { it.archiveFile })
+    archiveClassifier.set("qa")
+    addNestedDependencies.set(false)
 }
 
 processResources {

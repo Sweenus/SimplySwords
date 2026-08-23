@@ -7,11 +7,16 @@ sourceSets {
         compileClasspath += sourceSets.main.output + configurations.compileClasspath
         runtimeClasspath += output + configurations.runtimeClasspath
     }
+    qaTest {
+        compileClasspath += sourceSets.main.output + configurations.compileClasspath
+        runtimeClasspath += output + configurations.runtimeClasspath
+    }
 }
 
 loom {
     accessWidenerPath = file("src/main/resources/simplyswords.accesswidener")
     createRemapConfigurations(sourceSets.balanceTest)
+    createRemapConfigurations(sourceSets.qaTest)
 }
 repositories {
     maven {
