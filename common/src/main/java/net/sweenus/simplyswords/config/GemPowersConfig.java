@@ -10,8 +10,8 @@ import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.SimplySwords;
+import net.sweenus.simplyswords.power.GemPower;
 import net.sweenus.simplyswords.power.powers.*;
-import net.sweenus.simplyswords.registry.GemPowerRegistry;
 
 @Version(version = ResettingConfig.CURRENT_SCHEMA_VERSION)
 public class GemPowersConfig extends ResettingConfig {
@@ -20,8 +20,12 @@ public class GemPowersConfig extends ResettingConfig {
 		super(Identifier.of(SimplySwords.MOD_ID, "gem_powers"));
 	}
 
-	@SuppressWarnings("deprecation")
-	public ValidatedSet<Identifier> disabledPowers = ValidatedIdentifier.ofRegistryKey(GemPowerRegistry.REGISTRY.key()).toSet();
+	public ValidatedSet<Identifier> disabledPowers = createDisabledPowers();
+
+	static ValidatedSet<Identifier> createDisabledPowers() {
+		// The custom registry does not exist yet when Forge constructs configs.
+		return new ValidatedIdentifier(GemPower.EMPTY_ID).toSet();
+	}
 
 	public ActiveDefencePower.Settings activeDefence = new ActiveDefencePower.Settings();
 	public FloatPower.Settings         floating = new FloatPower.Settings();
