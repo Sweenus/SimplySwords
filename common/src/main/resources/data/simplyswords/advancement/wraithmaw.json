@@ -1,0 +1,38 @@
+{
+  "display": {
+    "icon": {
+      "id": "simplyswords:wraithmaw"
+    },
+    "title": {
+      "translate": "advancements.simplyswords.wraithmaw.title",
+      "with": []
+    },
+    "description": {
+      "translate": "advancements.simplyswords.find_unique.description",
+      "with": [
+        {
+          "translate": "item.simplyswords.wraithmaw"
+        }
+      ]
+    },
+    "hidden": true,
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "parent": "simplyswords:wraithfang",
+  "criteria": {
+    "requirement": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "simplyswords:wraithmaw"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

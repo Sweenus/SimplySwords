@@ -12,6 +12,7 @@ import net.minecraft.recipe.input.SmithingRecipeInput;
 import net.minecraft.registry.RegistryWrapper;
 import net.sweenus.simplyswords.registry.ComponentTypeRegistry;
 import net.sweenus.simplyswords.registry.RecipeTypeRegistry;
+import net.sweenus.simplyswords.api.StackReplacement;
 
 public class RunicRerollRecipe extends SmithingTransformRecipe {
     final Ingredient template;
@@ -30,7 +31,8 @@ public class RunicRerollRecipe extends SmithingTransformRecipe {
 
     @Override
     public ItemStack craft(SmithingRecipeInput smithingRecipeInput, RegistryWrapper.WrapperLookup wrapperLookup) {
-        ItemStack itemStack = smithingRecipeInput.base().copyComponentsToNewStack(this.result.getItem(), this.result.getCount());
+        ItemStack itemStack = StackReplacement.copyTo(
+                smithingRecipeInput.base(), this.result.getItem(), this.result.getCount());
         itemStack.applyUnvalidatedChanges(this.result.getComponentChanges());
         itemStack.remove(ComponentTypeRegistry.GEM_POWER.get());
         return itemStack;

@@ -18,6 +18,16 @@ public class ParticlesRegistry {
             () -> new SimpleParticleType(true) {}
     );
 
+    public static final RegistrySupplier<SimpleParticleType> DRIPPING_BLOOD = PARTICLES.register(
+            "dripping_blood",
+            () -> new SimpleParticleType(true) {}
+    );
+
+    public static final RegistrySupplier<SimpleParticleType> BLOOD_SPRAY = PARTICLES.register(
+            "blood_spray",
+            () -> new SimpleParticleType(true) {}
+    );
+
     public static void registerParticles() {
         PARTICLES.register();
     }

@@ -3,7 +3,7 @@ package net.sweenus.simplyswords.config;
 import dev.architectury.platform.Platform;
 import me.fzzyhmstrs.fzzy_config.annotations.Action;
 import me.fzzyhmstrs.fzzy_config.annotations.RequiresAction;
-import me.fzzyhmstrs.fzzy_config.config.Config;
+import me.fzzyhmstrs.fzzy_config.annotations.Version;
 import me.fzzyhmstrs.fzzy_config.config.ConfigSection;
 import me.fzzyhmstrs.fzzy_config.validation.misc.ValidatedCondition;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
@@ -12,7 +12,8 @@ import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.SimplySwords;
 
 @RequiresAction(action = Action.RESTART)
-public class WeaponAttributesConfig extends Config {
+@Version(version = ResettingConfig.CURRENT_SCHEMA_VERSION)
+public class WeaponAttributesConfig extends ResettingConfig {
 
     public WeaponAttributesConfig() {
         super(Identifier.of(SimplySwords.MOD_ID, "weapon_attributes"));
@@ -133,20 +134,24 @@ public class WeaponAttributesConfig extends Config {
         public float mjolnir_damageModifier = 3.0f;
         public float moltenedge_damageModifier = 4.0f;
         public float ribboncleaver_damageModifier = 7.0f;
-        public float shadowsting_damageModifier = -2.0f;
+        public float riftmane_damageModifier = 6.0f;
+        public float dawnquiver_damageModifier = 6.0f;
+        public float shadowsting_damageModifier = 1.0f;
         public float soulkeeper_damageModifier = 8.0f;
         public float soulpyre_damageModifier = 7.0f;
         public float soulrender_damageModifier = 3.0f;
         public float soulstealer_damageModifier = 0.0f;
         public float starsedge_damageModifier = 3.0f;
         public float stormsedge_damageModifier = 3.0f;
+        public float stormscale_damageModifier = 3.0f;
+        public float bloodwake_damageModifier = 1.0f;
         public float stormbringer_damageModifier = 3.0f;
         public float sunfire_damageModifier = 3.0f;
         public float swordonastick_damageModifier = 5.0f;
         public float tempest_damageModifier = 0.0f;
         public float thewatcher_damageModifier = 6.0f;
         public float thunderbrand_damageModifier = 7.0f;
-        public float twistedblade_damageModifier = 4.0f;
+        public float twistedblade_damageModifier = 0.0f;
         public float watchingwarglaive_damageModifier = 3.0f;
         public float waxweaver_damageModifier = 6.0f;
         public float whisperwind_damageModifier = 3.0f;
@@ -187,6 +192,8 @@ public class WeaponAttributesConfig extends Config {
         public float magispear_attackSpeed = -2.5f;
         public float moltenedge_attackSpeed = -2.1f;
         public float ribboncleaver_attackSpeed = -3.2f;
+        public float riftmane_attackSpeed = -2.9f;
+        public float dawnquiver_attackSpeed = -2.9f;
         public float shadowsting_attackSpeed = -1.7f;
         public float soulkeeper_attackSpeed = -2.9f;
         public float soulpyre_attackSpeed = -3.0f;
@@ -194,6 +201,8 @@ public class WeaponAttributesConfig extends Config {
         public float soulstealer_attackSpeed = -1.5f;
         public float starsedge_attackSpeed = -2.0f;
         public float stormsedge_attackSpeed = -2.0f;
+        public float stormscale_attackSpeed = -2.6f;
+        public float bloodwake_attackSpeed = -2.0f;
         public float stormbringer_attackSpeed = -2.4f;
         public float sunfire_attackSpeed = -2.4f;
         public float swordonastick_attackSpeed = -2.6f;

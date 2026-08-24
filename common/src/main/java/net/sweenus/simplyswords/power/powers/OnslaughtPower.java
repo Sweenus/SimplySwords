@@ -7,6 +7,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.text.Text;
+import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.power.NetherGemPower;
 import net.sweenus.simplyswords.registry.EffectRegistry;
@@ -23,7 +24,10 @@ public class OnslaughtPower extends NetherGemPower {
 	@Override
 	public void postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
 		if (target.hasStatusEffect(StatusEffects.SLOWNESS) && !attacker.hasStatusEffect(StatusEffects.WEAKNESS)) {
-			attacker.addStatusEffect(new StatusEffectInstance(EffectRegistry.getReference(EffectRegistry.ONSLAUGHT), 80, 0), attacker);
+			attacker.addStatusEffect(new StatusEffectInstance(
+					EffectRegistry.getReference(EffectRegistry.ONSLAUGHT),
+					AwakeningApi.scaleGemPowerDuration(stack, 80),
+					0), attacker);
 		}
 	}
 

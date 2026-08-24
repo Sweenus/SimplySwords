@@ -5,6 +5,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.text.Text;
+import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.power.NetherGemPower;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -20,10 +21,12 @@ public class BerserkPower extends NetherGemPower {
 
 	@Override
 	public void postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-		int amp = HelperMethods.isUniqueTwohanded(stack) ? 4 : 2;
+		float damage = AwakeningApi.scaleGemPower(stack, HelperMethods.isUniqueTwohanded(stack) ? 4.0F : 2.0F);
 		if (attacker.getArmor() < 10) {
-			target.setHealth(target.getHealth() - amp);
-			attacker.heal((float) amp / 2);
+			damage = HelperMethods.applyNonPlayerWeaponHitDamageModifier(attacker, damage);
+			damage = HelperMethods.applyWeaponAbilityDamageToPlayersModifier(target, damage);
+			target.setHealth(target.getHealth() - damage);
+			attacker.heal(damage / 2.0F);
 		}
 	}
 

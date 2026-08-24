@@ -4,17 +4,18 @@ import dev.architectury.platform.Platform;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.AttributeModifierSlot;
 import net.minecraft.component.type.AttributeModifiersComponent;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
+import java.util.UUID;
 import net.minecraft.entity.Tameable;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.decoration.ArmorStandEntity;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.passive.VillagerEntity;
+import net.minecraft.entity.mob.Monster;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileUtil;
 import net.minecraft.item.Item;
@@ -34,15 +35,21 @@ import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.SimplySwordsExpectPlatform;
+import net.sweenus.simplyswords.api.AwakeningApi;
+import net.sweenus.simplyswords.api.DelegatedWeaponHitContext;
+import net.sweenus.simplyswords.api.SpellScalingProfile;
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+import net.sweenus.simplyswords.compat.SpellScalingComponents;
 import net.sweenus.simplyswords.compat.opac.OpacCompat;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.effect.instance.SimplySwordsStatusEffectInstance;
 import net.sweenus.simplyswords.entity.BattleStandardDarkEntity;
 import net.sweenus.simplyswords.entity.BattleStandardEntity;
-import net.sweenus.simplyswords.item.TwoHandedWeapon;
+import net.sweenus.simplyswords.item.interfaces.TwoHandedWeapon;
 import net.sweenus.simplyswords.registry.ParticlesRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 
@@ -85,10 +92,15 @@ public class HelperMethods {
     public static boolean checkFriendlyFire (LivingEntity livingEntity, LivingEntity attackingEntity) {
         if (livingEntity == null || attackingEntity == null)
             return false;
+        if (livingEntity instanceof PlayerEntity player && (player.isCreative() || player.isSpectator()))
+            return false;
         if (!checkEntityBlacklist(livingEntity, attackingEntity))
             return false;
         if (livingEntity == attackingEntity)
             return false;
+        if (isMonsterFaction(attackingEntity) && isMonsterFaction(livingEntity)) {
+            return false;
+        }
 
         // Check if the player and the living entity are on the same team
         AbstractTeam playerTeam = attackingEntity.getScoreboardTeam();
@@ -109,37 +121,100 @@ public class HelperMethods {
                 return false;
             return playerEntity.shouldDamagePlayer(player);
         }
+        if (attackingEntity instanceof Tameable attackingTameable) {
+            UUID attackerOwnerUuid = attackingTameable.getOwnerUuid();
+            if (attackerOwnerUuid != null) {
+                if (attackerOwnerUuid.equals(livingEntity.getUuid())) {
+                    return false;
+                }
+                if (livingEntity instanceof Tameable targetTameable) {
+                    UUID targetOwnerUuid = targetTameable.getOwnerUuid();
+                    if (targetOwnerUuid != null && targetOwnerUuid.equals(attackerOwnerUuid)) {
+                        return false;
+                    }
+                }
+            }
+        }
         if (livingEntity instanceof Tameable tameable) {
-            if (tameable.getOwner() != null) {
-                if (tameable.getOwner() != attackingEntity
-                        && (tameable.getOwner() instanceof PlayerEntity ownerPlayer)
-                && attackingEntity instanceof PlayerEntity playerEntity) {
+            UUID ownerUuid = tameable.getOwnerUuid();
+            if (ownerUuid != null) {
+                if (ownerUuid.equals(attackingEntity.getUuid())) {
+                    return false;
+                }
+                if (attackingEntity instanceof Tameable attackingTameable) {
+                    UUID attackerOwnerUuid = attackingTameable.getOwnerUuid();
+                    if (attackerOwnerUuid != null && attackerOwnerUuid.equals(ownerUuid)) {
+                        return false;
+                    }
+                }
+                LivingEntity owner = tameable.getOwner();
+                if (owner != null && owner != attackingEntity
+                        && (owner instanceof PlayerEntity ownerPlayer)
+                        && attackingEntity instanceof PlayerEntity playerEntity) {
                     if (HelperMethods.isOpacLoaded()) {
-                        // Is OpenPAC loaded? And is the pet owner a team/ally member?
                         return OpacCompat.checkOpacFriendlyFire(ownerPlayer, playerEntity);
                     }
                     return playerEntity.shouldDamagePlayer(ownerPlayer);
                 }
-                return tameable.getOwner() != attackingEntity;
+                return !ownerUuid.equals(attackingEntity.getUuid());
             }
             return true;
         }
         return true;
     }
 
+    public static boolean checkAbilityTarget(LivingEntity livingEntity, LivingEntity attackingEntity) {
+        return checkFriendlyFire(livingEntity, attackingEntity);
+    }
+
+    public static boolean isMonsterFaction(LivingEntity entity) {
+        if (entity instanceof Monster) {
+            if (entity instanceof Tameable tameable) {
+                LivingEntity owner = tameable.getOwner();
+                if (owner != null) {
+                    return isMonsterFaction(owner);
+                }
+                UUID ownerUuid = tameable.getOwnerUuid();
+                if (ownerUuid != null && entity.getWorld() instanceof ServerWorld world) {
+                    Entity ownerEntity = world.getEntity(ownerUuid);
+                    if (ownerEntity instanceof LivingEntity ownerLiving) {
+                        return isMonsterFaction(ownerLiving);
+                    }
+                }
+                return false;
+            }
+            return true;
+        }
+        if (entity instanceof Tameable tameable) {
+            LivingEntity owner = tameable.getOwner();
+            if (owner != null) {
+                return isMonsterFaction(owner);
+            }
+            UUID ownerUuid = tameable.getOwnerUuid();
+            if (ownerUuid != null && entity.getWorld() instanceof ServerWorld world) {
+                Entity ownerEntity = world.getEntity(ownerUuid);
+                if (ownerEntity instanceof LivingEntity ownerLiving) {
+                    return isMonsterFaction(ownerLiving);
+                }
+            }
+        }
+        return false;
+    }
+
     public static boolean isOpacLoaded() {
         return Platform.isModLoaded("openpartiesandclaims");
     }
 
-    //Check if the target matches blacklisted entities (expand this to be configurable if there is demand)
+    //Check if the target matches blacklisted entities. Armour stands, villagers and any other
+    //excluded entity live in the abilityIgnoredEntities config; our own utility entities do not.
     public static boolean checkEntityBlacklist(LivingEntity target, LivingEntity player) {
         if (target == null || player == null) {
             return false;
         }
-        return !(target instanceof ArmorStandEntity)
-                && !(target instanceof VillagerEntity)
-                && !(target instanceof BattleStandardEntity)
-                && !(target instanceof BattleStandardDarkEntity);
+        if (target instanceof BattleStandardEntity || target instanceof BattleStandardDarkEntity) {
+            return false;
+        }
+        return !IgnoredEntities.isIgnored(target);
     }
 
     //spawnParticle - spawns particles across both client & server
@@ -291,8 +366,19 @@ public class HelperMethods {
     // createFootfalls - creates weapon footfall particle effects (footsteps)
     public static void createFootfalls(Entity entity, ItemStack stack, World world, ParticleEffect particle,
                                        ParticleEffect sprintParticle, ParticleEffect passiveParticle, boolean passiveParticles) {
+        createFootfalls(entity, stack, world, particle, sprintParticle, passiveParticle, passiveParticles, false);
+    }
+
+    public static void createFootfalls(Entity entity, ItemStack stack, World world, ParticleEffect particle,
+                                       ParticleEffect sprintParticle, ParticleEffect passiveParticle, boolean passiveParticles,
+                                       boolean includeOffHand) {
         int stepMod = 7 - (int)(world.getTime() % 7);
-        if ((entity instanceof PlayerEntity player) && Config.general.enableWeaponFootfalls && player.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
+        if ((entity instanceof PlayerEntity player)
+                && Config.general.enableWeaponFootfalls
+                && (player.getEquippedStack(EquipmentSlot.MAINHAND) == stack
+                || (includeOffHand
+                && player.getEquippedStack(EquipmentSlot.OFFHAND) == stack
+                && !player.getEquippedStack(EquipmentSlot.MAINHAND).isOf(stack.getItem())))) {
             if (isWalking(player) && !player.isSwimming() && player.isOnGround()) {
                 if (stepMod == 6) {
                     if (player.isSprinting()) {
@@ -426,10 +512,192 @@ public class HelperMethods {
         return scaling > 0 ? scaling : damageFallback;
     }
 
+    public static float abilityScaledDamage(String spellSchool, LivingEntity actor, ItemStack stack, float attackScaling, float spellScaling) {
+        return abilityScaledDamage(SpellScalingProfile.fromLegacyName(spellSchool), actor, stack, attackScaling, spellScaling);
+    }
+
+    public static float abilityScaledDamage(SpellScalingProfile spellSchool, LivingEntity actor, ItemStack stack, float attackScaling, float spellScaling) {
+        SpellScalingProfile profile = spellSchool == null ? SpellScalingProfile.ARCANE : spellSchool;
+        return abilityScaledDamage(profile.registryId(), actor, stack, attackScaling, spellScaling);
+    }
+
+    public static float abilityScaledDamage(Identifier scalingProfileId, LivingEntity actor, ItemStack stack, float attackScaling, float spellScaling) {
+        ItemStack scalingStack = stack == null ? ItemStack.EMPTY : stack;
+        Identifier requestedProfileId = scalingProfileId == null ? SpellScalingProfile.ARCANE.registryId() : scalingProfileId;
+        Identifier profileId = SpellScalingComponents.weaponComponent(scalingStack, requestedProfileId);
+        float spellDamage = commonSpellAttributeScaling(spellScaling, actor, profileId);
+        float attackDamage = attackScaledDamage(actor, scalingStack, attackScaling);
+        spellDamage = applySpellDamageDiminishingReturns(spellDamage, attackDamage);
+        return AwakeningApi.scaleEffect(scalingStack, AbilityScalingProbe.choose(profileId,
+                AbilityScalingProbe.BranchKind.DAMAGE, spellDamage, attackDamage));
+    }
+
+    public static float abilityScaledDamage(String spellSchool, LivingEntity actor, float attackScaling, float spellScaling) {
+        return abilityScaledDamage(spellSchool, actor, actor == null ? ItemStack.EMPTY : actor.getMainHandStack(), attackScaling, spellScaling);
+    }
+
+    public static float abilityScaledDamage(SpellScalingProfile spellSchool, LivingEntity actor, float attackScaling, float spellScaling) {
+        return abilityScaledDamage(spellSchool, actor, actor == null ? ItemStack.EMPTY : actor.getMainHandStack(), attackScaling, spellScaling);
+    }
+
+    public static float abilityScaledValue(SpellScalingProfile spellSchool, LivingEntity actor, ItemStack stack, float fullValue, float spellScaling) {
+        SpellScalingProfile profile = spellSchool == null ? SpellScalingProfile.ARCANE : spellSchool;
+        return abilityScaledValue(profile.registryId(), actor, stack, fullValue, spellScaling);
+    }
+
+    public static float abilityScaledValue(Identifier scalingProfileId, LivingEntity actor, ItemStack stack, float fullValue, float spellScaling) {
+        ItemStack scalingStack = stack == null ? ItemStack.EMPTY : stack;
+        Identifier requestedProfileId = scalingProfileId == null ? SpellScalingProfile.ARCANE.registryId() : scalingProfileId;
+        Identifier profileId = SpellScalingComponents.weaponComponent(scalingStack, requestedProfileId);
+        float spellValue = commonSpellAttributeScaling(spellScaling, actor, profileId);
+        return AwakeningApi.scaleEffect(scalingStack, AbilityScalingProbe.choose(profileId,
+                AbilityScalingProbe.BranchKind.VALUE, spellValue, fullValue));
+    }
+
+    public static float abilityScaledDamageFromValue(SpellScalingProfile spellSchool, LivingEntity actor, ItemStack stack, float attackDamage, float spellScaling) {
+        SpellScalingProfile profile = spellSchool == null ? SpellScalingProfile.ARCANE : spellSchool;
+        return abilityScaledDamageFromValue(profile.registryId(), actor, stack, attackDamage, spellScaling);
+    }
+
+    public static float abilityScaledDamageFromValue(Identifier scalingProfileId, LivingEntity actor, ItemStack stack, float attackDamage, float spellScaling) {
+        ItemStack scalingStack = stack == null ? ItemStack.EMPTY : stack;
+        Identifier requestedProfileId = scalingProfileId == null ? SpellScalingProfile.ARCANE.registryId() : scalingProfileId;
+        Identifier profileId = SpellScalingComponents.weaponComponent(scalingStack, requestedProfileId);
+        float spellDamage = commonSpellAttributeScaling(spellScaling, actor, profileId);
+        spellDamage = applySpellDamageDiminishingReturns(spellDamage, attackDamage);
+        return AwakeningApi.scaleEffect(scalingStack, AbilityScalingProbe.choose(profileId,
+                AbilityScalingProbe.BranchKind.DAMAGE, spellDamage, attackDamage));
+    }
+
+    public static float gemPowerScaledDamage(String spellSchool, LivingEntity actor, ItemStack stack, float attackScaling, float spellScaling) {
+        return gemPowerScaledDamage(SpellScalingProfile.fromLegacyName(spellSchool), actor, stack, attackScaling, spellScaling);
+    }
+
+    public static float gemPowerScaledDamage(SpellScalingProfile spellSchool, LivingEntity actor, ItemStack stack, float attackScaling, float spellScaling) {
+        SpellScalingProfile profile = spellSchool == null ? SpellScalingProfile.ARCANE : spellSchool;
+        return gemPowerScaledDamage(profile.registryId(), actor, stack, attackScaling, spellScaling);
+    }
+
+    public static float gemPowerScaledDamage(Identifier scalingProfileId, LivingEntity actor, ItemStack stack, float attackScaling, float spellScaling) {
+        ItemStack scalingStack = stack == null ? ItemStack.EMPTY : stack;
+        Identifier profileId = scalingProfileId == null ? SpellScalingProfile.ARCANE.registryId() : scalingProfileId;
+        float spellDamage = commonSpellAttributeScaling(spellScaling, actor, profileId);
+        float attackDamage = attackScaledDamage(actor, scalingStack, attackScaling);
+        spellDamage = applySpellDamageDiminishingReturns(spellDamage, attackDamage);
+        return AwakeningApi.scaleGemPower(scalingStack, AbilityScalingProbe.choose(profileId,
+                AbilityScalingProbe.BranchKind.DAMAGE, spellDamage, attackDamage));
+    }
+
+    public static float gemPowerScaledValue(SpellScalingProfile spellSchool, LivingEntity actor, ItemStack stack, float fullValue, float spellScaling) {
+        SpellScalingProfile profile = spellSchool == null ? SpellScalingProfile.ARCANE : spellSchool;
+        return gemPowerScaledValue(profile.registryId(), actor, stack, fullValue, spellScaling);
+    }
+
+    public static float gemPowerScaledValue(Identifier scalingProfileId, LivingEntity actor, ItemStack stack, float fullValue, float spellScaling) {
+        ItemStack scalingStack = stack == null ? ItemStack.EMPTY : stack;
+        Identifier profileId = scalingProfileId == null ? SpellScalingProfile.ARCANE.registryId() : scalingProfileId;
+        float spellValue = commonSpellAttributeScaling(spellScaling, actor, profileId);
+        return AwakeningApi.scaleGemPower(scalingStack, AbilityScalingProbe.choose(profileId,
+                AbilityScalingProbe.BranchKind.VALUE, spellValue, fullValue));
+    }
+
+    public static float attackScaledDamage(LivingEntity actor, ItemStack stack, float attackScaling) {
+        double attackDamage = actor == null ? 0.0 : getEntityAttackDamage(actor);
+        if (attackDamage <= 0.0 && stack != null && !stack.isEmpty()) {
+            attackDamage = Math.max(1.0, 1.0 + getAttackFromStack(stack, AttributeModifierSlot.MAINHAND));
+        }
+        return (float) Math.max(0.0, attackDamage * attackScaling);
+    }
+
+    public static float applySpellDamageDiminishingReturns(float spellDamage, float attackDamage) {
+        return applySpellDamageDiminishingReturns(
+                spellDamage,
+                attackDamage,
+                Config.compatibility.spellScalingDiminishingReturnsStart.get(),
+                Config.compatibility.spellScalingDiminishingReturnsStrength.get()
+        );
+    }
+
+    static float applySpellDamageDiminishingReturns(float spellDamage, float attackDamage, float start, float strength) {
+        if (spellDamage <= 0.0F || attackDamage <= 0.0F || strength <= 0.0F) {
+            return spellDamage;
+        }
+
+        float rawRatio = spellDamage / attackDamage;
+        if (rawRatio <= start) {
+            return spellDamage;
+        }
+
+        double excess = (double) spellDamage / attackDamage - start;
+        double adjustedRatio = start + Math.log1p(strength * excess) / strength;
+        return Math.min(spellDamage, (float) (attackDamage * adjustedRatio));
+    }
+
+    public static float applyAbilityDamageEnchantments(ServerWorld world, ItemStack stack, Entity target, DamageSource damageSource, float damage) {
+        float finalDamage = damage;
+        if (Config.general.enableAbilityDamageEnchantScaling && world != null && stack != null && !stack.isEmpty() && target != null && damageSource != null) {
+            finalDamage = EnchantmentHelper.getDamage(world, stack, target, damageSource, finalDamage);
+        }
+        finalDamage = applyNonPlayerAbilityDamageModifier(resolveAbilityDamageActor(damageSource), finalDamage);
+        finalDamage = applyWeaponAbilityDamageToPlayersModifier(target, finalDamage);
+        return finalDamage;
+    }
+
+    public static float applyNonPlayerAbilityDamageModifier(LivingEntity actor, float damage) {
+        if (actor instanceof PlayerEntity || actor == null) {
+            return damage;
+        }
+        return Math.max(0.0F, damage * Math.max(0.0F, Config.general.nonPlayerWeaponAbilityDamageModifier));
+    }
+
+    public static float applyWeaponAbilityDamageToPlayersModifier(Entity target, float damage) {
+        if (target instanceof PlayerEntity) {
+            return Math.max(0.0F, damage * Math.max(0.0F, Config.general.weaponAbilityDamageToPlayersModifier));
+        }
+        return damage;
+    }
+
+    public static float applyNonPlayerWeaponHitDamageModifier(LivingEntity actor, float damage) {
+        if (actor instanceof PlayerEntity || actor == null) {
+            return damage;
+        }
+        return Math.max(0.0F, damage * Math.max(0.0F, Config.general.nonPlayerWeaponHitDamageModifier));
+    }
+
+    public static LivingEntity resolveAbilityDamageActor(DamageSource damageSource) {
+        DelegatedWeaponHitContext delegatedContext = SimplySwordsAPI.getDelegatedWeaponHitContext();
+        if (delegatedContext != null && delegatedContext.actor() != null) {
+            return delegatedContext.actor();
+        }
+        if (damageSource != null && damageSource.getAttacker() instanceof LivingEntity livingEntity) {
+            return livingEntity;
+        }
+        return null;
+    }
+
     public static float commonSpellAttributeScaling(float damageModifier, Entity entity, String magicSchool) {
-        if ((entity instanceof PlayerEntity player) && Config.general.compatEnableSpellPowerScaling.get())
-            return SimplySwordsExpectPlatform.getSpellPowerDamage(damageModifier, player, magicSchool);
+        return commonSpellAttributeScaling(damageModifier, entity, SpellScalingProfile.fromLegacyName(magicSchool));
+    }
+
+    public static float commonSpellAttributeScaling(float damageModifier, Entity entity, SpellScalingProfile magicSchool) {
+        SpellScalingProfile profile = magicSchool == null ? SpellScalingProfile.ARCANE : magicSchool;
+        return commonSpellAttributeScaling(damageModifier, entity, profile.registryId());
+    }
+
+    public static float commonSpellAttributeScaling(float damageModifier, Entity entity, Identifier scalingProfileId) {
+        if ((entity instanceof LivingEntity livingEntity) && Config.compatibility.enableSpellPowerScaling.get())
+            return SimplySwordsExpectPlatform.getSpellPowerDamage(damageModifier, livingEntity,
+                    scalingProfileId == null ? SpellScalingProfile.ARCANE.registryId() : scalingProfileId);
         return 0f;
+    }
+
+    public static float applySpellPowerApiScalingMultiplier(float value) {
+        return applySpellPowerApiScalingMultiplier(
+                value, Config.compatibility.spellPowerApi.get().scalingMultiplier.get());
+    }
+
+    static float applySpellPowerApiScalingMultiplier(float value, float multiplier) {
+        return value * MathHelper.clamp(multiplier, 0.0F, 1.0F);
     }
 
     public static Optional<LivingEntity> findClosestTarget(LivingEntity livingEntity, double maxDistance, double width) {
@@ -486,7 +754,23 @@ public class HelperMethods {
         return new double[] {attackValue, attackSpeedValue};
     }
 
+    public static double getAttackFromStack(ItemStack stack, AttributeModifierSlot slot) {
+        double attackValue = 0;
+        if (stack != null && !stack.isEmpty()) {
+            AttributeModifiersComponent attributeModifiersComponent = stack.getOrDefault(DataComponentTypes.ATTRIBUTE_MODIFIERS, AttributeModifiersComponent.DEFAULT);
+            for (AttributeModifiersComponent.Entry entry : attributeModifiersComponent.modifiers()) {
+                if (entry.attribute() == EntityAttributes.GENERIC_ATTACK_DAMAGE && entry.slot() == slot) {
+                    attackValue += entry.modifier().value();
+                }
+            }
+        }
+        return attackValue;
+    }
+
     public static void applyDamageWithoutKnockback(LivingEntity target, DamageSource source, float amount) {
+        if (IgnoredEntities.isIgnored(target)) {
+            return;
+        }
         EntityAttributeInstance knockbackResistance = target.getAttributeInstance(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE);
         double originalKnockbackResistance = 0;
         if (knockbackResistance != null) {
@@ -527,7 +811,21 @@ public class HelperMethods {
         }
     }
 
+    public static void spawnDirectionalParticles(ServerWorld world, ParticleEffect particle, Entity entity, Vec3d direction, int count, double distance) {
+        Vec3d startPos = entity.getPos().add(0, entity.getHeight() / 2.0, 0);
+        Vec3d normalizedDirection = direction.normalize();
+        for (int i = 0; i < count; i++) {
+            double lerpFactor = count <= 1 ? 0.0 : (double) i / (count - 1);
+            Vec3d currentPos = startPos.add(normalizedDirection.multiply(distance * lerpFactor));
+            world.spawnParticles(particle, currentPos.x, currentPos.y, currentPos.z, 1, 0, 0, 0, 0.0);
+        }
+    }
+
     public static void damageEntitiesInTrajectory(ServerWorld world, Entity sourceEntity, double distance, float damage, DamageSource damageSource) {
+        damageEntitiesInTrajectory(world, sourceEntity, ItemStack.EMPTY, distance, damage, damageSource);
+    }
+
+    public static void damageEntitiesInTrajectory(ServerWorld world, Entity sourceEntity, ItemStack stack, double distance, float damage, DamageSource damageSource) {
         Vec3d startPos = sourceEntity.getPos().add(0, sourceEntity.getHeight() / 2.0, 0);
         float pitch = sourceEntity.getPitch(1.0F);
         float yaw = sourceEntity.getYaw(1.0F);
@@ -551,18 +849,45 @@ public class HelperMethods {
                 if ((sourceEntity instanceof PlayerEntity livingEntity)
                         && (entity instanceof LivingEntity livingTarget)
                         && HelperMethods.checkFriendlyFire(livingTarget, livingEntity)) {
-                    livingTarget.damage(damageSource, damage);
+                    livingTarget.damage(damageSource, applyAbilityDamageEnchantments(world, stack, livingTarget, damageSource, damage));
                 }
+            }
+        }
+    }
+
+    public static void damageEntitiesInTrajectory(ServerWorld world, LivingEntity sourceEntity, Vec3d direction, double distance, float damage, DamageSource damageSource) {
+        damageEntitiesInTrajectory(world, sourceEntity, ItemStack.EMPTY, direction, distance, damage, damageSource);
+    }
+
+    public static void damageEntitiesInTrajectory(ServerWorld world, LivingEntity sourceEntity, ItemStack stack, Vec3d direction, double distance, float damage, DamageSource damageSource) {
+        Vec3d startPos = sourceEntity.getPos().add(0, sourceEntity.getHeight() / 2.0, 0);
+        Vec3d normalizedDirection = direction.normalize();
+        Vec3d endPos = startPos.add(normalizedDirection.multiply(distance));
+        Box searchBox = new Box(startPos, endPos).expand(0.5);
+
+        for (Entity entity : world.getOtherEntities(sourceEntity, searchBox)) {
+            Box entityBox = entity.getBoundingBox().expand(entity.getTargetingMargin());
+            if (entityBox.intersects(searchBox)
+                    && entity instanceof LivingEntity livingTarget
+                    && HelperMethods.checkAbilityTarget(livingTarget, sourceEntity)) {
+                livingTarget.damage(damageSource, applyAbilityDamageEnchantments(world, stack, livingTarget, damageSource, damage));
             }
         }
     }
 
     // Ignore iFrames without resetting them entirely
     public static boolean damageThroughIframes(Entity targetEntity, DamageSource damageSource, float damage) {
+        if (targetEntity instanceof PlayerEntity player && (player.isCreative() || player.isSpectator()))
+            return false;
+        if (IgnoredEntities.isIgnored(targetEntity))
+            return false;
         int iframes = targetEntity.timeUntilRegen;
-        boolean result = targetEntity.damage(damageSource, damage);
-        targetEntity.timeUntilRegen = iframes;
-        return result;
+        try {
+            targetEntity.timeUntilRegen = 0;
+            return targetEntity.damage(damageSource, damage);
+        } finally {
+            targetEntity.timeUntilRegen = iframes;
+        }
     }
 
     public static boolean isInTag(ItemStack stack, Identifier tagId) {

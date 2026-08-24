@@ -1,14 +1,14 @@
 package net.sweenus.simplyswords.item.custom;
 
+import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.Config;
@@ -18,6 +18,7 @@ import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
+import net.sweenus.simplyswords.world.DeathKnellAbilityManager;
 
 import java.util.List;
 
@@ -28,82 +29,12 @@ public class PlagueSwordItem extends UniqueSwordItem {
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        int hitChance = Config.uniqueEffects.toxic_longsword.chance;
-        HelperMethods.playHitSounds(attacker, target);
-
-        if (attacker.getRandom().nextInt(100) <= hitChance) {
-
-            //Convert Haste
-            if (target.hasStatusEffect(StatusEffects.HASTE)) {
-                var statdur = (target.getStatusEffect(StatusEffects.HASTE).getDuration());
-                var statamp = (target.getStatusEffect(StatusEffects.HASTE).getAmplifier());
-                target.addStatusEffect(new StatusEffectInstance(StatusEffects.MINING_FATIGUE, statdur, statamp), attacker);
-                target.removeStatusEffect(StatusEffects.HASTE);
-            }
-
-            //Convert Regeneration
-            if (target.hasStatusEffect(StatusEffects.REGENERATION)) {
-                var statdur = (target.getStatusEffect(StatusEffects.REGENERATION).getDuration());
-                var statamp = (target.getStatusEffect(StatusEffects.REGENERATION).getAmplifier());
-                target.addStatusEffect(new StatusEffectInstance(StatusEffects.WITHER, statdur, statamp), attacker);
-                target.removeStatusEffect(StatusEffects.REGENERATION);
-            }
-
-            //Convert Strength
-            if (target.hasStatusEffect(StatusEffects.STRENGTH)) {
-                var statdur = (target.getStatusEffect(StatusEffects.STRENGTH).getDuration());
-                var statamp = (target.getStatusEffect(StatusEffects.STRENGTH).getAmplifier());
-                target.addStatusEffect(new StatusEffectInstance(StatusEffects.WEAKNESS, statdur, statamp), attacker);
-                target.removeStatusEffect(StatusEffects.STRENGTH);
-            }
-
-            //Convert Speed
-            if (target.hasStatusEffect(StatusEffects.SPEED)) {
-                var statdur = (target.getStatusEffect(StatusEffects.SPEED).getDuration());
-                var statamp = (target.getStatusEffect(StatusEffects.SPEED).getAmplifier());
-                target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, statdur, statamp), attacker);
-                target.removeStatusEffect(StatusEffects.SPEED);
-            }
-
-            //Convert Invisibility
-            if (target.hasStatusEffect(StatusEffects.INVISIBILITY)) {
-                var statdur = (target.getStatusEffect(StatusEffects.INVISIBILITY).getDuration());
-                var statamp = (target.getStatusEffect(StatusEffects.INVISIBILITY).getAmplifier());
-                target.addStatusEffect(new StatusEffectInstance(StatusEffects.GLOWING, statdur, statamp), attacker);
-                target.removeStatusEffect(StatusEffects.INVISIBILITY);
-            }
-
-            //Convert Resistance
-            if (target.hasStatusEffect(StatusEffects.RESISTANCE)) {
-                var statdur = (target.getStatusEffect(StatusEffects.RESISTANCE).getDuration());
-                var statamp = (target.getStatusEffect(StatusEffects.RESISTANCE).getAmplifier());
-                target.addStatusEffect(new StatusEffectInstance(StatusEffects.NAUSEA, statdur, statamp), attacker);
-                target.removeStatusEffect(StatusEffects.RESISTANCE);
-            }
-
-            //Convert Saturation
-            if (target.hasStatusEffect(StatusEffects.SATURATION)) {
-                var statdur = (target.getStatusEffect(StatusEffects.SATURATION).getDuration());
-                var statamp = (target.getStatusEffect(StatusEffects.SATURATION).getAmplifier());
-                target.addStatusEffect(new StatusEffectInstance(StatusEffects.HUNGER, statdur, statamp), attacker);
-                target.removeStatusEffect(StatusEffects.SATURATION);
-            }
-
-            //Convert Fire Resistance
-            if (target.hasStatusEffect(StatusEffects.FIRE_RESISTANCE)) {
-                var statdur = (target.getStatusEffect(StatusEffects.FIRE_RESISTANCE).getDuration());
-                var statamp = (target.getStatusEffect(StatusEffects.FIRE_RESISTANCE).getAmplifier());
-                target.addStatusEffect(new StatusEffectInstance(StatusEffects.POISON, statdur, statamp), attacker);
-                target.removeStatusEffect(StatusEffects.FIRE_RESISTANCE);
-            }
-
-            //Convert Absorption
-            if (target.hasStatusEffect(StatusEffects.ABSORPTION)) {
-                var statdur = (target.getStatusEffect(StatusEffects.ABSORPTION).getDuration());
-                var statamp = (target.getStatusEffect(StatusEffects.ABSORPTION).getAmplifier() / 2);
-                target.addStatusEffect(new StatusEffectInstance(StatusEffects.INSTANT_DAMAGE, 0, statamp), attacker);
-                target.removeStatusEffect(StatusEffects.ABSORPTION);
-            }
+        if (!net.sweenus.simplyswords.api.AwakeningApi.isAbilityUnlocked(stack)) {
+            return super.postHit(stack, target, attacker);
+        }
+        if (attacker.getWorld() instanceof ServerWorld serverWorld) {
+            HelperMethods.playHitSounds(attacker, target);
+            DeathKnellAbilityManager.onMeleeHit(serverWorld, stack, attacker, target);
         }
         return super.postHit(stack, target, attacker);
     }
@@ -119,9 +50,16 @@ public class PlagueSwordItem extends UniqueSwordItem {
     public void appendTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.plaguesworditem.tooltip1").setStyle(Styles.ABILITY));
-        tooltip.add(Text.translatable("item.simplyswords.plaguesworditem.tooltip2").setStyle(Styles.TEXT));
+        tooltip.add(Text.translatable("item.simplyswords.plaguesworditem.tooltip2",
+                Config.uniqueEffects.toxic_longsword.feverThreshold).setStyle(Styles.TEXT));
+        tooltip.add(Text.literal(""));
+        tooltip.add(Text.translatable("item.simplyswords.plaguesworditem.tooltip3",
+                Config.uniqueEffects.toxic_longsword.maxCascadeTolls).setStyle(Styles.TEXT));
+        tooltip.add(Text.literal(""));
+        tooltip.add(Text.translatable("item.simplyswords.plaguesworditem.tooltip4").setStyle(Styles.TEXT));
 
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        net.sweenus.simplyswords.client.util.TooltipUtils.appendWeaponSpellScaleTooltip(tooltip, itemStack, "soul");
     }
 
     public static class EffectSettings extends TooltipSettings {
@@ -132,6 +70,26 @@ public class PlagueSwordItem extends UniqueSwordItem {
 
         @ValidatedInt.Restrict(min = 0, max = 100)
         public int chance = 55;
+        @ValidatedInt.Restrict(min = 0)
+        public int feverPerHit = 1;
+        @ValidatedInt.Restrict(min = 0)
+        public int conversionFeverBonus = 2;
+        @ValidatedInt.Restrict(min = 1)
+        public int feverThreshold = 5;
+        @ValidatedInt.Restrict(min = 1)
+        public int feverDuration = 120;
+        @ValidatedFloat.Restrict(min = 0.0F)
+        public float tollDamageScaling = 0.60F;
+        @ValidatedFloat.Restrict(min = 0.0F)
+        public float tollSpellScaling = 2.75F;
+        @ValidatedFloat.Restrict(min = 0.1F)
+        public float tollRadius = 5.0F;
+        @ValidatedInt.Restrict(min = 0)
+        public int tollFeverSpread = 2;
+        @ValidatedInt.Restrict(min = 1)
+        public int maxCascadeTolls = 6;
+        @ValidatedFloat.Restrict(min = 0.0F, max = 1.0F)
+        public float copiedAilmentDurationMultiplier = 0.50F;
 
     }
 }

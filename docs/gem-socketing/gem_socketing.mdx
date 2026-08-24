@@ -3,27 +3,32 @@ title: Gem Socketing
 icon: simplyswords:runefused_gem
 ---
 
-Unique weapons in Simply Swords have a chance to contain Netherfused & Runefused gem sockets that can be socketed with a matching gem to add additional abilities to the weapon.
+Runefused and Netherfused gems add a second power to compatible weapons. Each gem requires a matching socket.
 
 ## How do I know if my weapon has gem sockets?
-While viewing the weapon tooltip, hold ALT. If any sockets are present on the weapon they will appear in the tooltip.
+Hold **Alt** while viewing the weapon tooltip. Any Runefused or Netherfused socket appears in the extended information.
 
+With gem sockets enabled, built-in Unique weapons receive both socket types by default. Modpack authors can also grant sockets to vanilla or modded items by adding item IDs or item tags to the `additionalGemSocketItems` configuration list.
 
-## Why doesn't my weapon have gem sockets?
-Not all unique weapons will have gem sockets. When a unique weapon is generated in the world, it has a 50% chance to receive a Rune and/or Nether gem socket. See Unique Weapons for a list of compatible weapons.
+## How do I obtain a gem?
 
+Create a gem in a smithing table with the following ingredients:
 
-## How do I obtain/craft a gem?
-Gems can be crafted by combining a few expensive ingredients in a smithing table:
+- **Runefused Gem:** Runic Tablet template, Empowered Remnant base, and Crying Obsidian addition.
+- **Netherfused Gem:** Runic Tablet template, Empowered Remnant base, and Netherite Ingot addition.
 
-◆ Netherfused gem: Runic Tablet + Empowered Remnant + Netherite Ingot.
-◆ Runefused gem: Runic Tablet + Empowered Remnant + Crying Obsidian.
-An Empowered Remnant can be obtained by smelting down any unique weapon.
+Smelting a Unique weapon produces an Empowered Remnant. A newly created gem rolls a power from its corresponding power pool.
 
+## How do I socket or replace a gem?
 
-## How do I socket a Runefused/Netherfused gem?
-To socket a gem, you just need to anchor the gem to the mouse by clicking on it in your inventory, then click on a unique weapon with a matching gem socket. If the gem isn't socketing, you might not have a matching socket available on the weapon.
+Pick up the gem with the cursor in your inventory, then click a compatible weapon. If that socket already contains a gem, the new gem replaces it and the old gem is returned to your inventory. This works in both Survival and Creative mode.
 
+The **Runic Forge** provides an alternative. Inserting a weapon extracts its current gems into the two forge slots. You can then add, remove, or exchange them before taking the previewed weapon.
 
-## Can I remove/replace a socketed gem?
-Once socketed, gems cannot be removed. Be sure to choose carefully.
+## How does awakening affect gem powers?
+
+Gem powers on Unique weapons scale with the weapon's awakening level in the same way as its Unique ability. Runic weapons always use full Runic-power strength, equivalent to a fully awakened Unique weapon.
+
+## How do active powers work?
+
+Active weapon powers use the **Use Mainhand Weapon Ability** and **Use Offhand Weapon Ability** controls. If these controls are left unbound, compatible powers retain their normal item-use activation. Separate controls allow active powers to function correctly while dual wielding.

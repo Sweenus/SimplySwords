@@ -1,20 +1,25 @@
 package net.sweenus.simplyswords.config;
 
-import me.fzzyhmstrs.fzzy_config.config.Config;
+import me.fzzyhmstrs.fzzy_config.annotations.Version;
+import me.fzzyhmstrs.fzzy_config.config.ConfigSection;
 import me.fzzyhmstrs.fzzy_config.validation.misc.ValidatedAny;
 import me.fzzyhmstrs.fzzy_config.validation.misc.ValidatedCondition;
+import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedDouble;
+import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.item.custom.*;
 
-public class UniqueEffectsConfig extends Config {
+@Version(version = ResettingConfig.CURRENT_SCHEMA_VERSION)
+public class UniqueEffectsConfig extends ResettingConfig {
 
     public UniqueEffectsConfig() {
         super(Identifier.of(SimplySwords.MOD_ID, "unique_effects"));
     }
 
     public float abilityAbsorptionCap = 20f;
+    public GloamSettings gloam = new GloamSettings();
 
     public HarbingerSwordItem.EffectSettings harbinger = new HarbingerSwordItem.EffectSettings();
     public ArcanethystSwordItem.EffectSettings arcanethyst = new ArcanethystSwordItem.EffectSettings();
@@ -26,8 +31,10 @@ public class UniqueEffectsConfig extends Config {
     public FlamewindSwordItem.EffectSettings flamewind = new FlamewindSwordItem.EffectSettings();
     public EnigmaSwordItem.EffectSettings        enigma = new EnigmaSwordItem.EffectSettings();
     public WhisperwindSwordItem.EffectSettings whisperwind = new WhisperwindSwordItem.EffectSettings();
+    public DreadwhisperSwordItem.EffectSettings dreadwhisper = new DreadwhisperSwordItem.EffectSettings();
     public TwistedBladeItem.EffectSettings twisted_blade = new TwistedBladeItem.EffectSettings();
     public WickpiercerSwordItem.EffectSettings wickpiercer = new WickpiercerSwordItem.EffectSettings();
+    public GloampiercerSwordItem.EffectSettings gloampiercer = new GloampiercerSwordItem.EffectSettings();
     public FrostfallSwordItem.EffectSettings frostfall = new FrostfallSwordItem.EffectSettings();
     public LivyatanSwordItem.EffectSettings livyatan = new LivyatanSwordItem.EffectSettings();
     public HiveheartSwordItem.EffectSettings hiveheart = new HiveheartSwordItem.EffectSettings();
@@ -38,13 +45,19 @@ public class UniqueEffectsConfig extends Config {
     public IcewhisperSwordItem.EffectSettings icewhisper = new IcewhisperSwordItem.EffectSettings();
     public PlagueSwordItem.EffectSettings toxic_longsword = new PlagueSwordItem.EffectSettings();
     public RibboncleaverSwordItem.EffectSettings ribboncleaver = new RibboncleaverSwordItem.EffectSettings();
+    public RiftmaneSwordItem.EffectSettings riftmane = new RiftmaneSwordItem.EffectSettings();
+    public DawnquiverSwordItem.EffectSettings dawnquiver = new DawnquiverSwordItem.EffectSettings();
     public SunfireSwordItem.EffectSettings sunfire = new SunfireSwordItem.EffectSettings();
     public ShadowstingSwordItem.EffectSettings shadowsting = new ShadowstingSwordItem.EffectSettings();
     public StormbringerSwordItem.EffectSettings stormbringer = new StormbringerSwordItem.EffectSettings();
+    public StormscaleSwordItem.EffectSettings stormscale = new StormscaleSwordItem.EffectSettings();
+    public IonboundStormscaleSwordItem.EffectSettings ionbound_stormscale = new IonboundStormscaleSwordItem.EffectSettings();
+    public BloodwakeSwordItem.EffectSettings bloodwake = new BloodwakeSwordItem.EffectSettings();
     public EmberlashSwordItem.EffectSettings emberlash = new EmberlashSwordItem.EffectSettings();
     public LichbladeSwordItem.EffectSettings lichblade = new LichbladeSwordItem.EffectSettings();
     public SoulkeeperSwordItem.EffectSettings    soulkeeper = new SoulkeeperSwordItem.EffectSettings();
     public SoulrenderSwordItem.EffectSettings soulrender = new SoulrenderSwordItem.EffectSettings();
+    public SoulstalkerSwordItem.EffectSettings soulstalker = new SoulstalkerSwordItem.EffectSettings();
     public SoulPyreSwordItem.EffectSettings soulpyre = new SoulPyreSwordItem.EffectSettings();
     public StealSwordItem.EffectSettings soulstealer = new StealSwordItem.EffectSettings();
     public StormSwordItem.EffectSettings mjolnir = new StormSwordItem.EffectSettings();
@@ -53,9 +66,23 @@ public class UniqueEffectsConfig extends Config {
     public HearthflameSwordItem.EffectSettings hearthflame = new HearthflameSwordItem.EffectSettings();
     public TempestSwordItem.EffectSettings tempest = new TempestSwordItem.EffectSettings();
     public WatcherSwordItem.EffectSettings       watcher = new WatcherSwordItem.EffectSettings();
+    public DevourerClaymoreItem.EffectSettings devourer = new DevourerClaymoreItem.EffectSettings();
     public WaxweaverSwordItem.EffectSettings waxweaver = new WaxweaverSwordItem.EffectSettings();
     public WraithfangSwordItem.EffectSettings wraithfang = new WraithfangSwordItem.EffectSettings();
+    public WraithmawSwordItem.EffectSettings wraithmaw = new WraithmawSwordItem.EffectSettings();
     public ChompolotlSwordItem.EffectSettings chompolotl = new ChompolotlSwordItem.EffectSettings();
+
+    public static final class GloamSettings extends ConfigSection {
+        @ValidatedInt.Restrict(min = 10) public int exposureBuildTicks = 40;
+        @ValidatedInt.Restrict(min = 1) public int exposureDecayTicks = 80;
+        @ValidatedInt.Restrict(min = 0, max = 4) public int maximumSlowBonus = 3;
+        @ValidatedInt.Restrict(min = 1) public int graspDuration = 75;
+        @ValidatedInt.Restrict(min = 0) public int graspImmunityDuration = 70;
+        @ValidatedDouble.Restrict(min = 0.25, max = 4.0) public double growthRadius = 2.5;
+        @ValidatedInt.Restrict(min = 20) public int growthDuration = 160;
+        @ValidatedInt.Restrict(min = 1) public int growthFadeDuration = 30;
+        @ValidatedInt.Restrict(min = 1, max = 32) public int growthPatchCap = 8;
+    }
 
     // eldritch end compat
     public ValidatedCondition<DreadtideSwordItem.EffectSettings> dreadtide = new ValidatedAny<>(new DreadtideSwordItem.EffectSettings())

@@ -1,5 +1,7 @@
 package net.sweenus.simplyswords.item;
 
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -43,7 +45,7 @@ public class SimplySwordsThrowableItem extends SimplySwordsSwordItem {
 
         user.swingHand(hand);
 
-        user.getItemCooldownManager().set(this, 1);
+        SimplySwordsAPI.setWeaponCooldown(user, itemStack, 1);
         return TypedActionResult.success(itemStack, world.isClient());
     }
 

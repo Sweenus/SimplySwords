@@ -1,0 +1,38 @@
+{
+  "display": {
+    "icon": {
+      "id": "simplyswords:soulstalker"
+    },
+    "title": {
+      "translate": "advancements.simplyswords.soulstalker.title",
+      "with": []
+    },
+    "description": {
+      "translate": "advancements.simplyswords.find_unique.description",
+      "with": [
+        {
+          "translate": "item.simplyswords.soulstalker"
+        }
+      ]
+    },
+    "hidden": true,
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "parent": "simplyswords:soulrender",
+  "criteria": {
+    "requirement": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "simplyswords:soulstalker"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

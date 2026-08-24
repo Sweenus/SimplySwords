@@ -1,5 +1,7 @@
 package net.sweenus.simplyswords.power.powers;
 
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
@@ -27,7 +29,7 @@ public class WardPower extends RunicGemPower {
 	public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand, ItemStack itemStack) {
 		user.setCurrentHand(hand);
 		user.addStatusEffect(new StatusEffectInstance(EffectRegistry.getReference(EffectRegistry.WARD), 120, 0), user);
-		user.getItemCooldownManager().set(itemStack.getItem(), 120);
+		SimplySwordsAPI.setWeaponCooldown(user, itemStack, 120);
 		user.setHealth(user.getHealth() / 2);
 		world.playSoundFromEntity(null, user, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
 				user.getSoundCategory(), 0.3f, 1.2f);

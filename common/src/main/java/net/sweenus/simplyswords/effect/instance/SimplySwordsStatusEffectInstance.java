@@ -9,6 +9,7 @@ public class SimplySwordsStatusEffectInstance extends StatusEffectInstance {
 
     public LivingEntity sourceEntity;
     public int additionalData;
+    private float scaledDamage;
 
     public SimplySwordsStatusEffectInstance(RegistryEntry<StatusEffect> type, int duration, int amplifier, boolean ambient, boolean showParticles, boolean showIcon) {
         super(type, duration, amplifier, ambient, showParticles, showIcon);
@@ -38,5 +39,12 @@ public class SimplySwordsStatusEffectInstance extends StatusEffectInstance {
             additionalData = data;
     }
 
+    public float getScaledDamage() {
+        return scaledDamage;
+    }
+
+    public void setScaledDamage(float scaledDamage) {
+        this.scaledDamage = scaledDamage;
+    }
 
 }

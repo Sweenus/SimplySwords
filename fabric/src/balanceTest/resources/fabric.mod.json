@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "id": "simplyswords_balance_test",
+  "version": "1.0.0",
+  "name": "Simply Swords Balance Tests",
+  "environment": "*",
+  "entrypoints": {
+    "fabric-gametest": [
+      "net.sweenus.simplyswords.fabric.gametest.SimplySwordsBalanceGameTests"
+    ]
+  },
+  "depends": {
+    "fabricloader": "*",
+    "fabric-gametest-api-v1": "*",
+    "minecraft": "1.21.1",
+    "simplyswords": "*"
+  }
+}

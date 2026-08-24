@@ -4,6 +4,7 @@
     "simplyswords:watcher_claymore",
     "simplyswords:brimstone_claymore",
     "simplyswords:storms_edge",
+    "simplyswords:stormscale",
     "simplyswords:stormbringer",
     "simplyswords:bramblethorn",
     "simplyswords:watching_warglaive",
@@ -33,7 +34,10 @@
     "simplyswords:tempest",
     "simplyswords:flamewind",
     "simplyswords:ribboncleaver",
+    "simplyswords:riftmane",
+    "simplyswords:dawnquiver",
     "simplyswords:caelestis",
-    "simplyswords:wraithfang"
+    "simplyswords:wraithfang",
+    "simplyswords:bloodwake"
   ]
 }

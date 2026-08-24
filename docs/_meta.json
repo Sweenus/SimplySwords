@@ -2,9 +2,10 @@
   "main.mdx": "Introduction",
   "friendly-fire.mdx": "Friendly Fire",
   "weapon-types": "Weapon Types",
+  "awakening": "Awakening & Runic Forge",
+  "gem-socketing": "Gem Socketing",
   "runic-powers": "Runic Powers",
   "nether-powers": "Nether Powers",
-  "gem-socketing": "Gem Socketing",
   "unique-weapons": {
     "name": "Unique Weapons",
     "icon": null

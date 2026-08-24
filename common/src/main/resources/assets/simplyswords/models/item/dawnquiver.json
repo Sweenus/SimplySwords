@@ -1,0 +1,7 @@
+{
+	"parent": "simplyswords:item/template_claymore",
+	"textures": {
+		"layer0": "simplyswords:item/blue_greatsword_hilt",
+		"layer1": "simplyswords:item/white_greatsword_blade"
+	}
+}

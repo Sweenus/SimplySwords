@@ -12,6 +12,7 @@ import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.Box;
 import net.sweenus.simplyswords.config.Config;
+import net.sweenus.simplyswords.compat.SpellScalingComponents;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 
@@ -35,8 +36,8 @@ public class MagislamEffect extends OrbitingEffect {
                 double leapVelocity = 1.5;
                 double height = 0.9;
                 double descentVelocity = 1;
-                double damage_multiplier = Config.uniqueEffects.magispear.damageModifier;
-                double damage = (HelperMethods.getEntityAttackDamage(livingEntity) * damage_multiplier);
+                double damage = HelperMethods.abilityScaledDamage(SpellScalingComponents.id("magispear"), livingEntity, livingEntity.getMainHandStack(),
+                        Config.uniqueEffects.magispear.damageScaling, Config.uniqueEffects.magispear.spellScaling);
 
                 if (ability_timer >= 60) {
                     player.setVelocity(livingEntity.getRotationVector().multiply(+leapVelocity));
@@ -53,7 +54,8 @@ public class MagislamEffect extends OrbitingEffect {
                             if (entities != null) {
                                 if ((entities instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, player)) {
                                     le.setVelocity((le.getX() - player.getX()) / 4, (le.getY() - player.getY()) / 4, (le.getZ() - player.getZ()) / 4);
-                                    le.damage(player.getDamageSources().playerAttack(player), (float) damage);
+                                    var damageSource = player.getDamageSources().playerAttack(player);
+                                    le.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments((ServerWorld) player.getWorld(), player.getMainHandStack(), le, damageSource, (float) damage));
                                 }
                             }
                         }

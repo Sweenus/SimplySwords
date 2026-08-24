@@ -1,7 +1,7 @@
 plugins {
-    id 'dev.architectury.loom' version '1.7.412' apply false
-    id 'architectury-plugin' version '3.4-SNAPSHOT'
-    id 'com.github.johnrengelman.shadow' version '8.1.1' apply false
+    id 'dev.architectury.loom' version '1.13.469' apply false
+    id 'architectury-plugin' version '3.4.164'
+    id 'com.gradleup.shadow' version '8.3.11' apply false
     id 'org.moddedmc.wiki.toolkit' version '0.2.7'
 }
 
@@ -48,6 +48,7 @@ subprojects {
         mappings loom.layered {
             it.mappings("net.fabricmc:yarn:$rootProject.yarn_mappings:v2")
             it.mappings("dev.architectury:yarn-mappings-patch-neoforge:$rootProject.yarn_mappings_patch_neoforge_version")
+            it.mappings(file("$rootDir/mappings/neoforge-runtime-compat.tiny"))
         }
     }
 
@@ -90,6 +91,7 @@ subprojects {
         from("$rootDir/docs") {
             into "assets/oracle_index/books/simplyswords"
             exclude '.assets/item/**'   // items are rendered ingame as actual item components, no need to include them here
+            exclude '.assets/simplyswords/unique-tooltips/**' // generated docs media; keep it out of the mod jar
             exclude 'introduction.mdx'   // Markdown heavy doc - not supported by Oracle Index
         }
         doLast {

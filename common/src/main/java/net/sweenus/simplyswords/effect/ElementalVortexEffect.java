@@ -48,11 +48,10 @@ public class ElementalVortexEffect extends OrbitingEffect {
 
                         if (additionalData != 0) {
                             DamageSource damageSource = livingEntity.getDamageSources().indirectMagic(livingEntity, sourceEntity);
-                            float spellScalingModifier = Config.uniqueEffects.tempest.spellScaling;
-							float abilityDamageFrost = HelperMethods.commonSpellAttributeScaling(spellScalingModifier, sourceEntity, "frost");
-							float abilityDamageFire = HelperMethods.commonSpellAttributeScaling(spellScalingModifier, sourceEntity, "fire");
 							le.timeUntilRegen = 0;
-                            le.damage(damageSource, (3 + ((float) amplifier / 2)) + (abilityDamageFire + abilityDamageFrost));
+                            float damage = HelperMethods.applyNonPlayerAbilityDamageModifier(sourceEntity,
+                                    additionalData + ((float) amplifier / 2));
+                            le.damage(damageSource, damage);
                         }
 
                     }

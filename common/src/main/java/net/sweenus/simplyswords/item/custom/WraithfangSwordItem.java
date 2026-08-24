@@ -1,10 +1,15 @@
 package net.sweenus.simplyswords.item.custom;
 
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
+import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
@@ -13,25 +18,34 @@ import net.minecraft.particle.ParticleTypes;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.sweenus.simplyswords.api.WeaponAbilityContext;
+import net.sweenus.simplyswords.api.SpellScalingProfile;
+import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
 import net.sweenus.simplyswords.entity.WraithfangEntity;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
+import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
+import net.sweenus.simplyswords.world.LivingEntityAbilityMovementManager;
 
 import java.util.List;
 
-public class WraithfangSwordItem extends UniqueSwordItem {
+public class WraithfangSwordItem extends UniqueSwordItem implements UniqueWeaponActiveAbility {
     public WraithfangSwordItem(ToolMaterial toolMaterial, Settings settings) {
         super(toolMaterial, settings);
     }
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        if (!net.sweenus.simplyswords.api.AwakeningApi.isAbilityUnlocked(stack)) {
+            return super.postHit(stack, target, attacker);
+        }
         if (attacker.getWorld().isClient()) return super.postHit(stack, target, attacker);
         HelperMethods.playHitSounds(attacker, target);
 
@@ -40,6 +54,11 @@ public class WraithfangSwordItem extends UniqueSwordItem {
 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
+        return useFromDefaultInput(world, user, hand);
+    }
+
+    @Override
+    public TypedActionResult<ItemStack> startPlayerAbility(World world, PlayerEntity user, Hand hand) {
         ItemStack itemStack = user.getStackInHand(hand);
         if (!world.isClient) {
             itemStack = user.getStackInHand(hand);
@@ -48,7 +67,9 @@ public class WraithfangSwordItem extends UniqueSwordItem {
             wraithfangEntity.setVelocity(user, user.getPitch(), user.getYaw(), 0.0F, 1.5F, 1.0F);
             wraithfangEntity.setYaw(user.getYaw());
             wraithfangEntity.setPitch(user.getPitch());
-            wraithfangEntity.primaryBaseDamage = (float) damage[0];
+            wraithfangEntity.primaryBaseDamage = HelperMethods.abilityScaledDamageFromValue(
+                    SpellScalingProfile.SOUL, user, itemStack, (float) damage[0],
+                    Config.uniqueEffects.wraithfang.spellScaling);
             wraithfangEntity.hasLoyalty = 1;
             if (hand == Hand.OFF_HAND)
                 wraithfangEntity.offhandThrow = true;
@@ -66,8 +87,39 @@ public class WraithfangSwordItem extends UniqueSwordItem {
 
         user.swingHand(hand);
 
-        user.getItemCooldownManager().set(this, 1);
+        SimplySwordsAPI.setWeaponCooldown(user, itemStack, 1);
         return TypedActionResult.success(itemStack, world.isClient());
+    }
+
+    @Override
+    public boolean activate(WeaponAbilityContext context) {
+        if (context.target() == null || !HelperMethods.checkAbilityTarget(context.target(), context.actor())) {
+            return false;
+        }
+        LivingEntity actor = context.actor();
+        WraithfangEntity wraithfangEntity = new WraithfangEntity(context.world(), actor, context.stack().copy());
+        Vec3d direction = LivingEntityAbilityMovementManager.getLobbedTargetDirection(actor, context.target());
+        wraithfangEntity.setVelocity(direction.x, direction.y, direction.z, 1.65F, 1.0F);
+        wraithfangEntity.setYaw(actor.getYaw());
+        wraithfangEntity.setPitch(actor.getPitch());
+        float weaponDamage = (float) Math.max(1.0, HelperMethods.getAttackFromStack(
+                context.stack(), net.minecraft.component.type.AttributeModifierSlot.MAINHAND));
+        wraithfangEntity.primaryBaseDamage = HelperMethods.abilityScaledDamageFromValue(
+                SpellScalingProfile.SOUL, actor, context.stack(), weaponDamage,
+                Config.uniqueEffects.wraithfang.spellScaling);
+        wraithfangEntity.hasLoyalty = 0;
+        wraithfangEntity.setPos(actor.getX(), actor.getEyeY() - 0.5, actor.getZ());
+        wraithfangEntity.markNonReturning(80);
+        context.world().spawnEntity(wraithfangEntity);
+        LivingEntityAbilityMovementManager.dashTowardTarget(context.world(), actor, context.target(), 1.35, 10);
+        actor.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, 80, 1), actor);
+        context.world().playSound(wraithfangEntity, actor.getBlockPos(), SoundRegistry.DARK_SWORD_SPELL.get(), actor.getSoundCategory(), 0.1f, 1.0f);
+        return true;
+    }
+
+    @Override
+    public int getActivationCooldownTicks(ItemStack stack, WeaponAbilityContext context) {
+        return 20;
     }
 
     @Override
@@ -87,7 +139,9 @@ public class WraithfangSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.wraithfangsworditem.tooltip2").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.wraithfangsworditem.tooltip5").setStyle(Styles.TEXT));
+        appendAbilityManaCostTooltip(tooltip, itemStack);
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        net.sweenus.simplyswords.client.util.TooltipUtils.appendWeaponSpellScaleTooltip(tooltip, itemStack, "soul");
     }
 
     public static class EffectSettings extends TooltipSettings {
@@ -100,5 +154,7 @@ public class WraithfangSwordItem extends UniqueSwordItem {
         public int hasteAmplifier = 1;
         @ValidatedInt.Restrict(min = 10)
         public int duration = 80;
+        @ValidatedFloat.Restrict(min = 0)
+        public float spellScaling = 3.10f;
     }
 }

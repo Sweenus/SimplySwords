@@ -1,7 +1,11 @@
 {
   "display": {
     "icon": {
-      "id": "simplyswords:sunfire"
+      "id": "simplyswords:dormant_relic",
+      "components": {
+        "simplyswords:awakening": 8,
+        "simplyswords:relic_attunement": 1
+      }
     },
     "title": {
       "translate": "advancements.simplyswords.sunfire.title",
@@ -28,8 +32,12 @@
         "items": [
           {
             "items": [
-              "simplyswords:sunfire"
-            ]
+              "simplyswords:dormant_relic"
+            ],
+            "components": {
+              "simplyswords:awakening": 8,
+              "simplyswords:relic_attunement": 1
+            }
           }
         ]
       }

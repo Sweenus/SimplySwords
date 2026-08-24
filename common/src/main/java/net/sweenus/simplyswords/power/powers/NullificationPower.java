@@ -10,6 +10,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
+import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.entity.BattleStandardEntity;
 import net.sweenus.simplyswords.power.NetherGemPower;
@@ -45,6 +46,7 @@ public class NullificationPower extends NetherGemPower {
 						banner.ownerEntity = attacker;
 						banner.decayRate = 3;
 						banner.standardType = "nullification";
+						banner.setHealth(AwakeningApi.scaleGemPower(stack, banner.getMaxHealth()));
 						banner.setCustomName(Text.translatable("entity.simplyswords.battlestandard.name", attacker.getName()));
 					}
 					attacker.addStatusEffect(new StatusEffectInstance(EffectRegistry.getReference(EffectRegistry.BATTLE_FATIGUE), 800, 0), attacker);

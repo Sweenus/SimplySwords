@@ -15,6 +15,13 @@ import net.sweenus.simplyswords.effect.*;
 
 public class EffectRegistry {
 
+    public static final Identifier SHADOW_DANCE_ID = Identifier.of(SimplySwords.MOD_ID, "shadow_dance");
+    public static final Identifier BLOOD_PLAGUE_ID = Identifier.of(SimplySwords.MOD_ID, "blood_plague");
+    public static final Identifier ION_PARALYSIS_ID = Identifier.of(SimplySwords.MOD_ID, "ion_paralysis");
+    public static final Identifier CORRUPTED_WOUND_ID = Identifier.of(SimplySwords.MOD_ID, "corrupted_wound");
+    public static final Identifier GLOAM_EXPOSURE_ID = Identifier.of(SimplySwords.MOD_ID, "gloam_exposure");
+    public static final Identifier GLOAM_GRASP_ID = Identifier.of(SimplySwords.MOD_ID, "gloam_grasp");
+
     public static final DeferredRegister<StatusEffect> EFFECT = DeferredRegister.create(SimplySwords.MOD_ID, RegistryKeys.STATUS_EFFECT);
 
     //This is currently REQUIRED as a wrapper around a call to one of the effects below, since Architectury has a bug involving RegistrySuppliers not being able to save properly.
@@ -30,6 +37,8 @@ public class EffectRegistry {
 
     public static final RegistrySupplier<StatusEffect> FREEZE = EFFECT.register("freeze", () ->
             new FreezeEffect(StatusEffectCategory.HARMFUL, 1124687));
+    public static final RegistrySupplier<StatusEffect> WAX_ENCASED = EFFECT.register("wax_encased", () ->
+            new WaxEncasedEffect(StatusEffectCategory.HARMFUL, 0xE7B84B));
     public static final RegistrySupplier<StatusEffect> WARD = EFFECT.register("ward", () ->
             new WardEffect(StatusEffectCategory.BENEFICIAL, 1124687));
     public static final RegistrySupplier<StatusEffect> IMMOLATION = EFFECT.register("immolation", () ->
@@ -50,6 +59,8 @@ public class EffectRegistry {
                             Identifier.of("54e1b9b9-6de9-49bb-a716-564b3d375892"),
                             0.3,
                             EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+    public static final RegistrySupplier<StatusEffect> FEROCITY = EFFECT.register("ferocity", () ->
+            new FerocityEffect(StatusEffectCategory.BENEFICIAL, 0x9D63C4));
     public static final RegistrySupplier<StatusEffect> VOIDCLOAK = EFFECT.register("voidcloak", () ->
             new VoidcloakEffect(StatusEffectCategory.BENEFICIAL, 1124687)
                     .addAttributeModifier(EntityAttributes.GENERIC_ATTACK_SPEED,
@@ -128,5 +139,34 @@ public class EffectRegistry {
                             Identifier.of("b15ae1eb-36cd-451a-b8c1-7d747b327934"),
                             1,
                             EntityAttributeModifier.Operation.ADD_VALUE));
+
+    public static final RegistrySupplier<StatusEffect> SHADOW_DANCE = EFFECT.register(SHADOW_DANCE_ID.getPath(), () ->
+            new ShadowDanceEffect(StatusEffectCategory.BENEFICIAL, 1315860));
+    public static final RegistrySupplier<StatusEffect> BLEED = EFFECT.register("bleed", () ->
+            new BleedEffect(StatusEffectCategory.HARMFUL, 0x8f1f1f));
+    public static final RegistrySupplier<StatusEffect> BLOOD_PLAGUE = EFFECT.register(BLOOD_PLAGUE_ID.getPath(), () ->
+            new BloodPlagueEffect(StatusEffectCategory.HARMFUL, 0x710515));
+    public static final RegistrySupplier<StatusEffect> BLOODWAKE_FRENZY = EFFECT.register("bloodwake_frenzy", () ->
+            new BloodFrenzyEffect(StatusEffectCategory.BENEFICIAL, 0xB3122C)
+                    .addAttributeModifier(EntityAttributes.GENERIC_ATTACK_SPEED,
+                            Identifier.of("5b780a25-d6cb-42a7-a55f-096bcdb4b67a"),
+                            0.10,
+                            EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+    public static final RegistrySupplier<StatusEffect> ION_PARALYSIS = EFFECT.register(ION_PARALYSIS_ID.getPath(), () ->
+            new IonParalysisEffect(StatusEffectCategory.HARMFUL, 0x2F8CFF));
+    public static final RegistrySupplier<StatusEffect> CORRUPTED_WOUND = EFFECT.register(CORRUPTED_WOUND_ID.getPath(), () ->
+            new CorruptedWoundEffect(StatusEffectCategory.HARMFUL, 0x6F21A8));
+    public static final RegistrySupplier<StatusEffect> GLOAM_EXPOSURE = EFFECT.register(GLOAM_EXPOSURE_ID.getPath(), () ->
+            new GloamExposureEffect(StatusEffectCategory.HARMFUL, 0x6F2B91));
+    public static final RegistrySupplier<StatusEffect> GLOAM_GRASP = EFFECT.register(GLOAM_GRASP_ID.getPath(), () ->
+            new GloamGraspEffect(StatusEffectCategory.HARMFUL, 0x281039)
+                    .addAttributeModifier(EntityAttributes.GENERIC_MOVEMENT_SPEED,
+                            Identifier.of("4fef6cd9-37d4-4d97-9e09-405eed8069e6"),
+                            -1.0,
+                            EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+    public static final RegistrySupplier<StatusEffect> SUNDERED_ARMOR = EFFECT.register("sundered_armor", () ->
+            new SunderedArmorEffect(StatusEffectCategory.HARMFUL, 0x7f7366));
+    public static final RegistrySupplier<StatusEffect> IMPLICIT_HASTE = EFFECT.register("implicit_haste", () ->
+            new ImplicitHasteEffect(StatusEffectCategory.BENEFICIAL, 0x66d9d9));
 
 }

@@ -2,20 +2,39 @@ package net.sweenus.simplyswords.mixin;
 
 import net.minecraft.entity.player.PlayerAbilities;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.ItemEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.util.math.Vec3d;
+import net.sweenus.simplyswords.item.component.MoltenHeatComponent;
+import net.sweenus.simplyswords.registry.ComponentTypeRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
+import net.sweenus.simplyswords.world.MoltenEdgeAbilityManager;
+import net.sweenus.simplyswords.world.WaxweaverEncasementManager;
+import net.sweenus.simplyswords.api.IncapacitatingStatusEffectRegistry;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(PlayerEntity.class)
 public abstract class PlayerEntityMixin {
+
+    @Inject(at = @At("HEAD"), method = "attack", cancellable = true)
+    private void simplyswords$preventWaxEncasedAttack(Entity target, CallbackInfo ci) {
+        PlayerEntity player = (PlayerEntity) (Object) this;
+        if (WaxweaverEncasementManager.isEncased(player)
+                || IncapacitatingStatusEffectRegistry.isIncapacitated(player)) {
+            ci.cancel();
+        }
+    }
 
     @Shadow protected abstract void dropShoulderEntities();
 
@@ -91,8 +110,24 @@ public abstract class PlayerEntityMixin {
     @Inject(at = @At("TAIL"), method = "tickMovement")
     public void simplyswords$tickMovement(CallbackInfo ci) {
         PlayerEntity player = (PlayerEntity) (Object) this;
+        if (WaxweaverEncasementManager.isEncased(player)) {
+            player.setVelocity(Vec3d.ZERO);
+            player.fallDistance = 0.0F;
+        }
         if (!player.getWorld().isClient() && (player.isTouchingWater() || player.isSneaking())) {
             simplyswords$dropSimplyAxolotls();
+        }
+    }
+
+    @Inject(
+            method = "dropItem(Lnet/minecraft/item/ItemStack;ZZ)Lnet/minecraft/entity/ItemEntity;",
+            at = @At("HEAD")
+    )
+    private void simplyswords$resetDroppedMoltenEdge(ItemStack stack, boolean throwRandomly, boolean retainOwnership, CallbackInfoReturnable<ItemEntity> cir) {
+        PlayerEntity player = (PlayerEntity) (Object) this;
+        if (!player.getWorld().isClient() && stack.isOf(ItemsRegistry.MOLTEN_EDGE.get())) {
+            stack.set(ComponentTypeRegistry.MOLTEN_HEAT.get(), MoltenHeatComponent.DEFAULT);
+            MoltenEdgeAbilityManager.cancelVent(player, stack);
         }
     }
 }

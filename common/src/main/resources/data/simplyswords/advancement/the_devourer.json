@@ -1,0 +1,38 @@
+{
+  "display": {
+    "icon": {
+      "id": "simplyswords:the_devourer"
+    },
+    "title": {
+      "translate": "advancements.simplyswords.the_devourer.title",
+      "with": []
+    },
+    "description": {
+      "translate": "advancements.simplyswords.find_unique.description",
+      "with": [
+        {
+          "translate": "item.simplyswords.the_devourer"
+        }
+      ]
+    },
+    "hidden": true,
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "parent": "simplyswords:the_watcher",
+  "criteria": {
+    "requirement": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "simplyswords:the_devourer"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

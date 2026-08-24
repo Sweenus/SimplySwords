@@ -24,22 +24,28 @@ import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
-import net.sweenus.simplyswords.item.TwoHandedWeapon;
+import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
+import net.sweenus.simplyswords.item.interfaces.TwoHandedWeapon;
+import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
+import net.sweenus.simplyswords.world.SoulrenderMarkVisualManager;
 
 import java.util.List;
 
-public class SoulrenderSwordItem extends UniqueSwordItem implements TwoHandedWeapon {
+public class SoulrenderSwordItem extends UniqueSwordItem implements TwoHandedWeapon, UniqueWeaponActiveAbility {
     public SoulrenderSwordItem(ToolMaterial toolMaterial, Settings settings) {
         super(toolMaterial, settings);
     }
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        if (!net.sweenus.simplyswords.api.AwakeningApi.isAbilityUnlocked(stack)) {
+            return super.postHit(stack, target, attacker);
+        }
         if (!attacker.getWorld().isClient()) {
             ServerWorld world = (ServerWorld) attacker.getWorld();
             int hitChance = Config.uniqueEffects.soulrender.chance;
@@ -64,25 +70,29 @@ public class SoulrenderSwordItem extends UniqueSwordItem implements TwoHandedWea
                     world.playSoundFromEntity(null, target, SoundRegistry.DARK_SWORD_ATTACK_WITH_BLOOD_03.get(),
                             target.getSoundCategory(), 0.4f, 1.5f);
 
-                if (target.hasStatusEffect(StatusEffects.WEAKNESS)) {
-                    int a = (target.getStatusEffect(StatusEffects.WEAKNESS).getAmplifier() + 1);
+                StatusEffectInstance weakness = target.getStatusEffect(StatusEffects.WEAKNESS);
+                if (weakness != null) {
+                    int a = (weakness.getAmplifier() + 1);
 
-                    if ((target.getStatusEffect(StatusEffects.WEAKNESS).getAmplifier() <= 0)) {
+                    if ((weakness.getAmplifier() <= 0)) {
                         target.addStatusEffect(new StatusEffectInstance(StatusEffects.WEAKNESS, duration, a), attacker);
                     }
                 } else {
                     target.addStatusEffect(new StatusEffectInstance(StatusEffects.WEAKNESS, duration, 0), attacker);
                 }
 
-                if (target.hasStatusEffect(StatusEffects.SLOWNESS)) {
-                    int a = (target.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier() + 1);
+                StatusEffectInstance slowness = target.getStatusEffect(StatusEffects.SLOWNESS);
+                if (slowness != null) {
+                    int a = (slowness.getAmplifier() + 1);
 
-                    if ((target.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier() < maxStacks)) {
+                    if ((slowness.getAmplifier() < maxStacks)) {
                         target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, duration, a), attacker);
                     }
                 } else {
                     target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, duration, 0), attacker);
                 }
+
+                SoulrenderMarkVisualManager.refreshMark(world, target, duration);
             }
             HelperMethods.spawnWaistHeightParticles(world, particleSelect, attacker, target, particleCount);
         }
@@ -91,41 +101,83 @@ public class SoulrenderSwordItem extends UniqueSwordItem implements TwoHandedWea
 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
+        return useFromDefaultInput(world, user, hand);
+    }
+
+    @Override
+    public TypedActionResult<ItemStack> startPlayerAbility(World world, PlayerEntity user, Hand hand) {
         if (!user.getWorld().isClient()) {
-            float heal_amount = Config.uniqueEffects.soulrender.healMulti;
-            int healamp = 0;
-            double hradius = Config.uniqueEffects.soulrender.radius;
-            double vradius = Config.uniqueEffects.soulrender.radius / 2.0;
-            double x = user.getX();
-            double y = user.getY();
-            double z = user.getZ();
-            ServerWorld sworld = (ServerWorld) user.getWorld();
-            Box box = new Box(x + hradius, y + vradius, z + hradius, x - hradius, y - vradius, z - hradius);
-
-            for (Entity entity : sworld.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY)) {
-                if ((entity instanceof LivingEntity le) && le.hasStatusEffect(StatusEffects.SLOWNESS)
-                        && le.hasStatusEffect(StatusEffects.WEAKNESS) && HelperMethods.checkFriendlyFire(le, user)) {
-
-                    healamp += (le.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier());
-                    float scaling = HelperMethods.commonSpellAttributeScaling(Config.uniqueEffects.soulrender.spellScaling, entity, "soul");
-                    float multiplier = scaling > 0f ? scaling : Config.uniqueEffects.soulrender.damageMulti;
-                    le.damage(user.getDamageSources().indirectMagic(user, user), le.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier() * multiplier);
-                    le.removeStatusEffect(StatusEffects.WEAKNESS);
-                    le.removeStatusEffect(StatusEffects.SLOWNESS);
-                    world.playSoundFromEntity(null, entity, SoundRegistry.DARK_SWORD_SPELL.get(),
-                            entity.getSoundCategory(), 0.1f, 2f);
-                }
-            }
-            if (healamp > 0) {
-                float heal = ((float)healamp * heal_amount);
-
-                if (heal < 1f) heal = 1f;
-                else if (heal > 6f) heal = 6f;
-
-                user.heal(heal);
-            }
+            consumeSoulrenderMarks((ServerWorld) user.getWorld(), user, user.getStackInHand(hand));
         }
         return super.use(world, user, hand);
+    }
+
+    @Override
+    public boolean canActivate(WeaponAbilityContext context) {
+        return context != null
+                && context.stack() != null
+                && !context.stack().isEmpty()
+                && context.world() != null
+                && context.actor() != null
+                && context.actor().isAlive()
+                && context.stack().getDamage() < context.stack().getMaxDamage() - 1
+                && hasSoulrenderMarks(context.world(), context.actor());
+    }
+
+    @Override
+    public boolean activate(WeaponAbilityContext context) {
+        return consumeSoulrenderMarks(context.world(), context.actor(), context.stack()) > 0;
+    }
+
+    private boolean hasSoulrenderMarks(ServerWorld world, LivingEntity user) {
+        double hradius = Config.uniqueEffects.soulrender.radius;
+        double vradius = Config.uniqueEffects.soulrender.radius / 2.0;
+        Box box = new Box(user.getX() + hradius, user.getY() + vradius, user.getZ() + hradius,
+                user.getX() - hradius, user.getY() - vradius, user.getZ() - hradius);
+        return world.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY).stream()
+                .anyMatch(entity -> entity instanceof LivingEntity le
+                        && HelperMethods.checkAbilityTarget(le, user)
+                        && le.hasStatusEffect(StatusEffects.SLOWNESS)
+                        && le.hasStatusEffect(StatusEffects.WEAKNESS));
+    }
+
+    private int consumeSoulrenderMarks(ServerWorld world, LivingEntity user, ItemStack stack) {
+        float healAmount = Config.uniqueEffects.soulrender.healMulti;
+        int healAmp = 0;
+        int consumed = 0;
+        double hradius = Config.uniqueEffects.soulrender.radius;
+        double vradius = Config.uniqueEffects.soulrender.radius / 2.0;
+        Box box = new Box(user.getX() + hradius, user.getY() + vradius, user.getZ() + hradius,
+                user.getX() - hradius, user.getY() - vradius, user.getZ() - hradius);
+
+        for (Entity entity : world.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY)) {
+            if ((entity instanceof LivingEntity le) && HelperMethods.checkAbilityTarget(le, user)) {
+                StatusEffectInstance slowness = le.getStatusEffect(StatusEffects.SLOWNESS);
+                StatusEffectInstance weakness = le.getStatusEffect(StatusEffects.WEAKNESS);
+                if (slowness == null || weakness == null) {
+                    continue;
+                }
+
+                healAmp += slowness.getAmplifier();
+                float damage = HelperMethods.abilityScaledDamage("soul", user, stack,
+                        Config.uniqueEffects.soulrender.damageScaling, Config.uniqueEffects.soulrender.spellScaling);
+                SoulrenderMarkVisualManager.consumeMark(world, le, user);
+                var damageSource = user.getDamageSources().indirectMagic(user, user);
+                le.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments(world, stack, le, damageSource, slowness.getAmplifier() * damage));
+                le.removeStatusEffect(StatusEffects.WEAKNESS);
+                le.removeStatusEffect(StatusEffects.SLOWNESS);
+                world.playSoundFromEntity(null, entity, SoundRegistry.DARK_SWORD_SPELL.get(),
+                        entity.getSoundCategory(), 0.1f, 2f);
+                consumed++;
+            }
+        }
+        if (healAmp > 0) {
+            float heal = (float) healAmp * healAmount;
+            if (heal < 1f) heal = 1f;
+            else if (heal > 6f) heal = 6f;
+            user.heal(heal);
+        }
+        return consumed;
     }
 
     @Override
@@ -143,8 +195,9 @@ public class SoulrenderSwordItem extends UniqueSwordItem implements TwoHandedWea
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.rendsworditem.tooltip4").setStyle(Styles.TEXT));
+        appendAbilityManaCostTooltip(tooltip, itemStack);
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
-        TooltipUtils.appendSpellScaleTooltip(tooltip, "soul");
+        TooltipUtils.appendWeaponSpellScaleTooltip(tooltip, itemStack, "soul");
     }
 
     public static class EffectSettings extends TooltipSettings {
@@ -165,8 +218,8 @@ public class SoulrenderSwordItem extends UniqueSwordItem implements TwoHandedWea
         @ValidatedFloat.Restrict(min = 0f)
         public float healMulti = 0.5f;
         @ValidatedFloat.Restrict(min = 0f)
-        public float damageMulti = 3f;
+        public float damageScaling = 0.26f;
         @ValidatedFloat.Restrict(min = 0f)
-        public float spellScaling = 0.4f;
+        public float spellScaling = 1.31f;
     }
 }

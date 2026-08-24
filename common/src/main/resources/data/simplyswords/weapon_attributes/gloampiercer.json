@@ -1,0 +1,6 @@
+{
+  "parent": "bettercombat:trident",
+  "attributes": {
+    "range_bonus": 0.7
+  }
+}

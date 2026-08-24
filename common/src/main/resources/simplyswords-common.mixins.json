@@ -3,15 +3,40 @@
   "minVersion": "0.8",
   "package": "net.sweenus.simplyswords.mixin",
   "compatibilityLevel": "JAVA_21",
+  "plugin": "net.sweenus.simplyswords.mixin.SimplySwordsCommonMixinPlugin",
   "client": [
+    "client.GameRendererMixin",
+    "client.HeldItemRendererMixin",
+    "client.InGameHudMixin",
+    "client.BipedEntityModelMixin",
     "client.PlayerEntityRendererMixin",
-    "client.LivingEntityRendererAccessor"
+    "client.LivingEntityRendererAccessor",
+    "client.WaxEncasedLivingEntityRendererMixin",
+    "client.WorldRendererMixin",
+    "client.MinecraftClientMixin",
+    "client.MouseMixin",
+    "client.ClientPlayerEntityMixin",
+    "client.WorldWeatherMixin",
+    "client.compat.SpellEngineSpellHotbarMixin"
   ],
   "mixins": [
+    "EntityMixin",
+    "ExperienceOrbEntityMixin",
+    "ItemEntityMixin",
+    "ItemStackMixin",
     "LivingEntityMixin",
     "ServerPlayerEntityMixin",
+    "ServerPlayerPityMixin",
+    "LootableInventoryMixin",
+    "ServerPlayerInteractionManagerMixin",
+    "ServerPlayNetworkHandlerMixin",
     "PlayerEntityMixin",
-    "AnimalEntityMixin"
+    "AnimalEntityMixin",
+    "ServerWorldMixin",
+    "MobEntityMixin",
+    "EvokerFangsEntityMixin",
+    "TargetPredicateMixin",
+    "compat.BetterCombatServerNetworkMixin"
   ],
   "injectors": {
     "defaultRequire": 1

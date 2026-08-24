@@ -1,5 +1,7 @@
 package net.sweenus.simplyswords.entity;
 
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -9,7 +11,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.Hand;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.registry.EffectRegistry;
@@ -50,21 +51,18 @@ public class WraithfangEntity extends ThrownSpearEntity {
 
     @Override
     protected boolean tryPickup(PlayerEntity player) {
-        if (this.isNoClip() && this.isOwner(player)) {
+        boolean canPickup = super.tryPickup(player);
+
+        if (canPickup) {
             player.getWorld().playSound(this, this.getBlockPos(), SoundRegistry.ELEMENTAL_BOW_WIND_SHOOT_IMPACT_02.get(),
                     this.getSoundCategory(), 0.1f, 1.2f);
             player.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, Config.uniqueEffects.wraithfang.duration, Config.uniqueEffects.wraithfang.hasteAmplifier, false, false, true));
+
             int cooldown = 10;
-            player.getItemCooldownManager().set(this.asItemStack().getItem(), cooldown);
-            if (offhandThrow && player.getOffHandStack().isEmpty()) {
-                // Send the ItemStack to the player's offhand slot if it's free
-                player.setStackInHand(Hand.OFF_HAND, this.asItemStack());
-                return true;
-            } else {
-                return player.getInventory().insertStack(this.asItemStack());
-            }
+            SimplySwordsAPI.setWeaponCooldown(player, this.asItemStack(), cooldown);
         }
-        return super.tryPickup(player);
+
+        return canPickup;
     }
 
     @Override

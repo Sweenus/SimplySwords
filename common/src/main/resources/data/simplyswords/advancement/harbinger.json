@@ -1,7 +1,11 @@
 {
   "display": {
     "icon": {
-      "id": "simplyswords:harbinger"
+      "id": "simplyswords:dormant_relic",
+      "components": {
+        "simplyswords:awakening": 8,
+        "simplyswords:relic_attunement": 2
+      }
     },
     "title": {
       "translate": "advancements.simplyswords.harbinger.title",
@@ -28,8 +32,12 @@
         "items": [
           {
             "items": [
-              "simplyswords:harbinger"
-            ]
+              "simplyswords:dormant_relic"
+            ],
+            "components": {
+              "simplyswords:awakening": 8,
+              "simplyswords:relic_attunement": 2
+            }
           }
         ]
       }

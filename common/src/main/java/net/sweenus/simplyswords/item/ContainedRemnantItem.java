@@ -22,6 +22,7 @@ import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.client.api.SimplySwordsClientAPI;
 import net.sweenus.simplyswords.config.LootConfig;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
+import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
@@ -69,7 +70,7 @@ public class ContainedRemnantItem extends Item {
                 if (LootConfig.INSTANCE.disabledUniqueWeaponLoot.contains(transformedItem))
                     return ActionResult.PASS;
 
-                ItemStack newItem = new ItemStack(transformedItem);
+                ItemStack newItem = AwakeningApi.initializeNaturalDrop(new ItemStack(transformedItem));
                 heldStack.decrement(1);
                 HelperMethods.spawnOrbitParticles(serverWorld, player.getPos(), ParticleTypes.CAMPFIRE_COSY_SMOKE, 1, 6);
                 player.getWorld().playSound(null, player.getBlockPos(), SoundRegistry.DARK_ACTIVATION_DISTORTED.get(),

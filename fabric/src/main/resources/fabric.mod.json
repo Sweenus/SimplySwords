@@ -12,6 +12,7 @@
   ],
   "authors": [
     "Sweenus",
+    "Hootea (Art)",
     "Konsyliarz42 (Art)"
   ],
   "contact": {
@@ -37,13 +38,14 @@
   "depends": {
     "fabric": "*",
     "minecraft": ">=1.21.1 <=1.21.1",
-    "architectury": ">=7.1.0",
+    "architectury": ">=13.0.11",
     "fzzy_config": ">=0.6.6",
     "simplytooltips": "*"
   },
   "suggests": {
     "mythicmetals": ">=0.18.2",
-    "gobber2": ">=2.6.43"
+    "gobber2": ">=2.6.43",
+    "spell_power": ">=1.6.0+1.21.1"
   },
   "recommends": {
     "bettercombat": ">=1.7.2",

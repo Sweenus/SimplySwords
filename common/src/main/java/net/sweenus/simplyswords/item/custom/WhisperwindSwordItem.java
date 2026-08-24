@@ -1,5 +1,7 @@
 package net.sweenus.simplyswords.item.custom;
 
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.entity.Entity;
@@ -11,24 +13,29 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
+import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
-import net.sweenus.simplyswords.item.TwoHandedWeapon;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
+import net.sweenus.simplyswords.item.interfaces.TwoHandedWeapon;
+import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
+import net.sweenus.simplyswords.world.LivingEntityAbilityMovementManager;
+import net.sweenus.simplyswords.world.WhisperwindVisualManager;
 
 import java.util.List;
 
-public class WhisperwindSwordItem extends UniqueSwordItem implements TwoHandedWeapon {
+public class WhisperwindSwordItem extends UniqueSwordItem implements TwoHandedWeapon, UniqueWeaponActiveAbility {
 
     public WhisperwindSwordItem(ToolMaterial toolMaterial, Settings settings) {
         super(toolMaterial, settings);
@@ -36,12 +43,15 @@ public class WhisperwindSwordItem extends UniqueSwordItem implements TwoHandedWe
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        if (!net.sweenus.simplyswords.api.AwakeningApi.isAbilityUnlocked(stack)) {
+            return super.postHit(stack, target, attacker);
+        }
         HelperMethods.playHitSounds(attacker, target);
         if (!attacker.getWorld().isClient()) {
             if (attacker.getRandom().nextInt(100) <= Config.uniqueEffects.whisperwind.chance && (attacker instanceof PlayerEntity player)) {
                 attacker.getWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
                         attacker.getSoundCategory(), 0.3f, 1.8f);
-                player.getItemCooldownManager().set(this.getDefaultStack().getItem(), 0);
+                SimplySwordsAPI.setWeaponCooldown(player, stack, 0);
             }
         }
         return super.postHit(stack, target, attacker);
@@ -49,13 +59,40 @@ public class WhisperwindSwordItem extends UniqueSwordItem implements TwoHandedWe
 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
+        return useFromDefaultInput(world, user, hand);
+    }
+
+    @Override
+    public TypedActionResult<ItemStack> startPlayerAbility(World world, PlayerEntity user, Hand hand) {
+        ItemStack stack = user.getStackInHand(hand);
         world.playSoundFromEntity(null, user, SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_IMPACT_01.get(),
                 user.getSoundCategory(), 0.6f, 1.0f);
+        if (!world.isClient() && world instanceof ServerWorld serverWorld) {
+            WhisperwindVisualManager.startDash(serverWorld, user, stack);
+        }
         user.addStatusEffect(new StatusEffectInstance(EffectRegistry.getReference(EffectRegistry.FATAL_FLICKER), 12));
         user.addStatusEffect(new StatusEffectInstance(StatusEffects.ABSORPTION, 100));
-        user.getItemCooldownManager().set(this.getDefaultStack().getItem(), Config.uniqueEffects.whisperwind.cooldown);
+        SimplySwordsAPI.setWeaponCooldown(user, user.getStackInHand(hand), Config.uniqueEffects.whisperwind.cooldown);
 
         return super.use(world, user, hand);
+    }
+
+    @Override
+    public boolean activate(WeaponAbilityContext context) {
+        if (context.target() == null || !HelperMethods.checkAbilityTarget(context.target(), context.actor())) {
+            return false;
+        }
+        LivingEntityAbilityMovementManager.dashTowardTarget(context.world(), context.actor(), context.target(),
+                Config.uniqueEffects.whisperwind.dashVelocity, 8);
+        WhisperwindVisualManager.scheduleTargetStrike(context.world(), context.actor(), context.target(), context.stack());
+        context.actor().addStatusEffect(new StatusEffectInstance(EffectRegistry.getReference(EffectRegistry.FATAL_FLICKER), 12));
+        context.actor().addStatusEffect(new StatusEffectInstance(StatusEffects.ABSORPTION, 100));
+        return true;
+    }
+
+    @Override
+    public int getActivationCooldownTicks(ItemStack stack, WeaponAbilityContext context) {
+        return Config.uniqueEffects.whisperwind.cooldown;
     }
 
     @Override
@@ -73,8 +110,11 @@ public class WhisperwindSwordItem extends UniqueSwordItem implements TwoHandedWe
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
         tooltip.add(Text.translatable("item.simplyswords.whisperwindsworditem.tooltip3").setStyle(Styles.TEXT));
+        appendAbilityCooldownTooltip(tooltip, itemStack, Config.uniqueEffects.whisperwind.cooldown);
+        appendAbilityManaCostTooltip(tooltip, itemStack);
 
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        net.sweenus.simplyswords.client.util.TooltipUtils.appendWeaponSpellScaleTooltip(tooltip, itemStack, "evocation");
     }
 
     public static class EffectSettings extends TooltipSettings {
@@ -93,6 +133,16 @@ public class WhisperwindSwordItem extends UniqueSwordItem implements TwoHandedWe
         public int radius = 3;
         @ValidatedFloat.Restrict(min = 0f)
         public float dashVelocity = 3f;
+        @ValidatedFloat.Restrict(min = 0f)
+        public float delayedDamageScaling = 0.54f;
+        @ValidatedFloat.Restrict(min = 0f)
+        public float delayedSpellScaling = 2.48f;
+        @ValidatedFloat.Restrict(min = 0f)
+        public float delayedDamagePerTargetScaling = 0.09f;
+        @ValidatedFloat.Restrict(min = 0f)
+        public float delayedSpellPerTargetScaling = 0.18f;
+        @ValidatedInt.Restrict(min = 0)
+        public int delayedDamageDelay = 20;
 
     }
 }

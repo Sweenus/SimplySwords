@@ -1,22 +1,18 @@
 package net.sweenus.simplyswords.power;
 
-import com.mojang.datafixers.util.Pair;
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.DataResult;
-import com.mojang.serialization.DynamicOps;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.tooltip.TooltipAppender;
 import net.minecraft.item.tooltip.TooltipType;
-import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
-import net.sweenus.simplyswords.registry.GemPowerRegistry;
+import net.sweenus.simplyswords.SimplySwords;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -55,6 +51,7 @@ public class GemPower implements TooltipAppender {
 
 	public void appendTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Text> tooltip, TooltipType type, boolean isRunic) {}
 	public void postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {}
+	public void onSwing(ItemStack stack, ServerWorld world, LivingEntity user, Hand hand) {}
 	public void inventoryTick(ItemStack stack, World world, LivingEntity user, int slot, boolean selected) {}
 
 	TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand, ItemStack itemStack) { return TypedActionResult.fail(itemStack); }
@@ -68,6 +65,15 @@ public class GemPower implements TooltipAppender {
 
 	public static GemPower EMPTY = new EmptyGemPower();
 
+	//
+	// Id of #EMPTY, and the default id of the gem power registry.
+	//
+	// Lives here rather than on GemPowerRegistry so that reading it does not force
+	// the registry to initialise — GemPowerComponent.DEFAULT needs it at class-init
+	// time, well before any registry exists.
+	//
+	public static final Identifier EMPTY_ID = Identifier.of(SimplySwords.MOD_ID, "empty_power");
+
 	private static class EmptyGemPower extends GemPower {
 
 		public EmptyGemPower() {
@@ -80,33 +86,4 @@ public class GemPower implements TooltipAppender {
 		}
 	}
 
-	public final static class GemPowerCodec implements Codec<RegistryEntry<GemPower>> {
-
-		@Override
-		public <T> DataResult<Pair<RegistryEntry<GemPower>, T>> decode(DynamicOps<T> ops, T input) {
-			return  Identifier.CODEC.decode(ops, input).flatMap(pair -> {
-				Identifier identifier = pair.getFirst();
-				RegistryEntry<GemPower> entry = GemPowerRegistry.REGISTRY.getHolder(identifier);
-				if (entry != null) {
-					return DataResult.success(Pair.of(entry, pair.getSecond()));
-				} else {
-					return DataResult.error(() -> "Unknown decoded power type " + input + " in registry " + GemPowerRegistry.REGISTRY.key());
-				}
-			});
-
-		}
-
-		@Override
-		public <T> DataResult<T> encode(RegistryEntry<GemPower> input, DynamicOps<T> ops, T prefix) {
-			try {
-				Identifier id = GemPowerRegistry.REGISTRY.getId(input.value());
-				if (id == null) {
-					return DataResult.error(() -> "Unknown encoded power type " + input + " in registry " + GemPowerRegistry.REGISTRY.key());
-				}
-				return Identifier.CODEC.encode(id, ops, prefix);
-			} catch (Throwable e) {
-				return DataResult.error(() -> "Can't access registry " + GemPowerRegistry.REGISTRY.key());
-			}
-		}
-	}
 }

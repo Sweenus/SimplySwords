@@ -3,6 +3,7 @@ package net.sweenus.simplyswords.registry;
 import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
 import net.minecraft.item.Item;
+import net.minecraft.item.BlockItem;
 import net.minecraft.item.SwordItem;
 import net.minecraft.item.ToolMaterials;
 import net.minecraft.registry.RegistryKeys;
@@ -55,6 +56,8 @@ public class ItemsRegistry {
     static float brimstone_attackspeed = Config.weaponAttribute.uniqueAttackSpeed.brimstone_attackSpeed;
     static float thewatcher_attackspeed = Config.weaponAttribute.uniqueAttackSpeed.thewatcher_attackSpeed;
     static float stormsedge_attackspeed = Config.weaponAttribute.uniqueAttackSpeed.stormsedge_attackSpeed;
+    static float stormscale_attackspeed = Config.weaponAttribute.uniqueAttackSpeed.stormscale_attackSpeed;
+    static float bloodwake_attackspeed = Config.weaponAttribute.uniqueAttackSpeed.bloodwake_attackSpeed;
     static float stormbringer_attackspeed = Config.weaponAttribute.uniqueAttackSpeed.stormbringer_attackSpeed;
     static float swordonastick_attackspeed = Config.weaponAttribute.uniqueAttackSpeed.swordonastick_attackSpeed;
     static float bramblethorn_attackspeed = Config.weaponAttribute.uniqueAttackSpeed.bramblethorn_attackSpeed;
@@ -94,10 +97,14 @@ public class ItemsRegistry {
     static float caelestis_attackspeed = Config.weaponAttribute.uniqueAttackSpeed.caelestis_attackSpeed;
     static float wraithfang_attackspeed = Config.weaponAttribute.uniqueAttackSpeed.wraithfang_attackSpeed;
     static float chompolotl_attackspeed = Config.weaponAttribute.uniqueAttackSpeed.chompolotl_attackSpeed;
+    static float riftmane_attackspeed = Config.weaponAttribute.uniqueAttackSpeed.riftmane_attackSpeed;
+    static float dawnquiver_attackspeed = Config.weaponAttribute.uniqueAttackSpeed.dawnquiver_attackSpeed;
 
     static float brimstone_damage_modifier = Config.weaponAttribute.uniqueDamageModifier.brimstone_damageModifier;
     static float thewatcher_damage_modifier = Config.weaponAttribute.uniqueDamageModifier.thewatcher_damageModifier;
     static float stormsedge_damage_modifier = Config.weaponAttribute.uniqueDamageModifier.stormsedge_damageModifier;
+    static float stormscale_damage_modifier = Config.weaponAttribute.uniqueDamageModifier.stormscale_damageModifier;
+    static float bloodwake_damage_modifier = Config.weaponAttribute.uniqueDamageModifier.bloodwake_damageModifier;
     static float stormbringer_damage_modifier = Config.weaponAttribute.uniqueDamageModifier.stormbringer_damageModifier;
     static float swordonastick_damage_modifier = Config.weaponAttribute.uniqueDamageModifier.swordonastick_damageModifier;
     static float bramblethorn_damage_modifier = Config.weaponAttribute.uniqueDamageModifier.bramblethorn_damageModifier;
@@ -137,9 +144,14 @@ public class ItemsRegistry {
     static float caelestis_damage_modifier = Config.weaponAttribute.uniqueDamageModifier.caelestis_damageModifier;
     static float wraithfang_damage_modifier = Config.weaponAttribute.uniqueDamageModifier.wraithfang_damageModifier;
     static float chompolotl_damage_modifier = Config.weaponAttribute.uniqueDamageModifier.chompolotl_damageModifier;
+    static float riftmane_damage_modifier = Config.weaponAttribute.uniqueDamageModifier.riftmane_damageModifier;
+    static float dawnquiver_damage_modifier = Config.weaponAttribute.uniqueDamageModifier.dawnquiver_damageModifier;
 
     public static final DeferredRegister<Item> ITEM = DeferredRegister.create(SimplySwords.MOD_ID, RegistryKeys.ITEM);
 
+    public static final RegistrySupplier<BlockItem> RUNIC_FORGE = ITEM.register("runic_forge", () ->
+            new BlockItem(BlocksRegistry.RUNIC_FORGE.get(),
+                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS)));
     public static final RegistrySupplier<RunicTabletItem> RUNIC_TABLET = ITEM.register("runic_tablet", RunicTabletItem::new);
     public static final RegistrySupplier<RunefusedGemItem> RUNEFUSED_GEM = ITEM.register("runefused_gem", RunefusedGemItem::new);
     public static final RegistrySupplier<NetherfusedGemItem> NETHERFUSED_GEM = ITEM.register("netherfused_gem", NetherfusedGemItem::new);
@@ -691,12 +703,33 @@ public class ItemsRegistry {
                             .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.UNIQUE,
                                     (int) thewatcher_damage_modifier, thewatcher_attackspeed))));
 
+    public static final RegistrySupplier<DevourerClaymoreItem> THE_DEVOURER = ITEM.register("the_devourer", () ->
+            new DevourerClaymoreItem(
+                    ModToolMaterial.UNIQUE,
+                    new Item.Settings().fireproof()
+                            .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.UNIQUE,
+                                    (int) thewatcher_damage_modifier, thewatcher_attackspeed))));
+
     public static final RegistrySupplier<StormsEdgeSwordItem> STORMS_EDGE = ITEM.register("storms_edge", () ->
             new StormsEdgeSwordItem(
                     ModToolMaterial.UNIQUE,
                     new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).fireproof()
                             .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.UNIQUE,
                                     (int) stormsedge_damage_modifier, stormsedge_attackspeed))));
+
+    public static final RegistrySupplier<StormscaleSwordItem> STORMSCALE = ITEM.register("stormscale", () ->
+            new StormscaleSwordItem(
+                    ModToolMaterial.UNIQUE,
+                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).fireproof()
+                            .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.UNIQUE,
+                                    (int) stormscale_damage_modifier, stormscale_attackspeed))));
+
+    public static final RegistrySupplier<IonboundStormscaleSwordItem> IONBOUND_STORMSCALE = ITEM.register("ionbound_stormscale", () ->
+            new IonboundStormscaleSwordItem(
+                    ModToolMaterial.UNIQUE,
+                    new Item.Settings().fireproof()
+                            .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.UNIQUE,
+                                    (int) stormscale_damage_modifier, stormscale_attackspeed))));
 
     public static final RegistrySupplier<StormbringerSwordItem> STORMBRINGER = ITEM.register("stormbringer", () ->
             new StormbringerSwordItem(
@@ -775,6 +808,13 @@ public class ItemsRegistry {
                             .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.UNIQUE,
                                     (int) soulrender_damage_modifier, soulrender_attackspeed))));
 
+    public static final RegistrySupplier<SoulstalkerSwordItem> SOULSTALKER = ITEM.register("soulstalker", () ->
+            new SoulstalkerSwordItem(
+                    ModToolMaterial.UNIQUE,
+                    new Item.Settings().fireproof()
+                            .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.UNIQUE,
+                                    (int) soulrender_damage_modifier, soulrender_attackspeed))));
+
     public static final RegistrySupplier<SoulPyreSwordItem> SOULPYRE = ITEM.register("soulpyre", () ->
             new SoulPyreSwordItem(
                     ModToolMaterial.UNIQUE,
@@ -841,14 +881,14 @@ public class ItemsRegistry {
     public static final RegistrySupplier<LichbladeSwordItem> WAKING_LICHBLADE = ITEM.register("waking_lichblade", () ->
             new LichbladeSwordItem(
                     ModToolMaterial.UNIQUE,
-                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).fireproof()
+                    new Item.Settings().fireproof()
                             .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.UNIQUE,
                                     (int) lichblade_damage_modifier, lichblade_attackspeed))));
 
     public static final RegistrySupplier<LichbladeSwordItem> AWAKENED_LICHBLADE = ITEM.register("awakened_lichblade", () ->
             new LichbladeSwordItem(
                     ModToolMaterial.UNIQUE,
-                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).fireproof()
+                    new Item.Settings().fireproof()
                             .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.UNIQUE,
                                     (int) lichblade_damage_modifier, lichblade_attackspeed))));
 
@@ -869,28 +909,28 @@ public class ItemsRegistry {
     public static final RegistrySupplier<RighteousRelicSwordItem> RIGHTEOUS_RELIC = ITEM.register("righteous_relic", () ->
             new RighteousRelicSwordItem(
                     ModToolMaterial.UNIQUE,
-                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).fireproof()
+                    new Item.Settings().fireproof()
                             .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.UNIQUE,
                                     (int) sunfire_damage_modifier, sunfire_attackspeed))));
 
     public static final RegistrySupplier<TaintedRelicSwordItem> TAINTED_RELIC = ITEM.register("tainted_relic", () ->
             new TaintedRelicSwordItem(
                     ModToolMaterial.UNIQUE,
-                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).fireproof()
+                    new Item.Settings().fireproof()
                             .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.UNIQUE,
                                     (int) harbinger_damage_modifier, harbinger_attackspeed))));
 
     public static final RegistrySupplier<SunfireSwordItem> SUNFIRE = ITEM.register("sunfire", () ->
             new SunfireSwordItem(
                     ModToolMaterial.UNIQUE,
-                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).fireproof()
+                    new Item.Settings().fireproof()
                             .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.UNIQUE,
                                             (int) sunfire_damage_modifier, sunfire_attackspeed))));
 
     public static final RegistrySupplier<HarbingerSwordItem> HARBINGER = ITEM.register("harbinger", () ->
             new HarbingerSwordItem(
                     ModToolMaterial.UNIQUE,
-                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).fireproof()
+                    new Item.Settings().fireproof()
                             .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.UNIQUE,
                                     (int) harbinger_damage_modifier, harbinger_attackspeed))));
 
@@ -898,6 +938,13 @@ public class ItemsRegistry {
             new WhisperwindSwordItem(
                     ModToolMaterial.UNIQUE,
                     new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).fireproof()
+                            .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.UNIQUE,
+                                    (int) whisperwind_damage_modifier, whisperwind_attackspeed))));
+
+    public static final RegistrySupplier<DreadwhisperSwordItem> DREADWHISPER = ITEM.register("dreadwhisper", () ->
+            new DreadwhisperSwordItem(
+                    ModToolMaterial.UNIQUE,
+                    new Item.Settings().fireproof()
                             .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.UNIQUE,
                                     (int) whisperwind_damage_modifier, whisperwind_attackspeed))));
 
@@ -933,6 +980,13 @@ public class ItemsRegistry {
             new WickpiercerSwordItem(
                     ModToolMaterial.UNIQUE,
                     new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).fireproof()
+                            .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.UNIQUE,
+                                    (int) wickpiercer_damage_modifier, wickpiercer_attackspeed))));
+
+    public static final RegistrySupplier<GloampiercerSwordItem> GLOAMPIERCER = ITEM.register("gloampiercer", () ->
+            new GloampiercerSwordItem(
+                    ModToolMaterial.UNIQUE,
+                    new Item.Settings().fireproof()
                             .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.UNIQUE,
                                     (int) wickpiercer_damage_modifier, wickpiercer_attackspeed))));
 
@@ -999,6 +1053,20 @@ public class ItemsRegistry {
                             .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.UNIQUE,
                                     (int) caelestis_damage_modifier, caelestis_attackspeed))));
 
+    public static final RegistrySupplier<DawnquiverSwordItem> DAWNQUIVER = ITEM.register("dawnquiver", () ->
+            new DawnquiverSwordItem(
+                    ModToolMaterial.UNIQUE,
+                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).fireproof()
+                            .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.UNIQUE,
+                                    (int) dawnquiver_damage_modifier, dawnquiver_attackspeed))));
+
+    public static final RegistrySupplier<RiftmaneSwordItem> RIFTMANE = ITEM.register("riftmane", () ->
+            new RiftmaneSwordItem(
+                    ModToolMaterial.UNIQUE,
+                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).fireproof()
+                            .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.UNIQUE,
+                                    (int) riftmane_damage_modifier, riftmane_attackspeed))));
+
     public static final RegistrySupplier<WraithfangSwordItem> WRAITHFANG = ITEM.register("wraithfang", () ->
             new WraithfangSwordItem(
                     ModToolMaterial.UNIQUE,
@@ -1006,10 +1074,25 @@ public class ItemsRegistry {
                             .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.UNIQUE,
                                     (int) wraithfang_damage_modifier, wraithfang_attackspeed))));
 
+    public static final RegistrySupplier<WraithmawSwordItem> WRAITHMAW = ITEM.register("wraithmaw", () ->
+            new WraithmawSwordItem(
+                    ModToolMaterial.UNIQUE,
+                    new Item.Settings().fireproof()
+                            .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.UNIQUE,
+                                    (int) wraithfang_damage_modifier, wraithfang_attackspeed))));
+
+    public static final RegistrySupplier<BloodwakeSwordItem> BLOODWAKE = ITEM.register("bloodwake", () ->
+            new BloodwakeSwordItem(
+                    ModToolMaterial.UNIQUE,
+                    new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).fireproof()
+                            .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.UNIQUE,
+                                    (int) bloodwake_damage_modifier, bloodwake_attackspeed))));
+
     public static final RegistrySupplier<ChompolotlSwordItem> CHOMPOLOTL = ITEM.register("chompolotl", () ->
             new ChompolotlSwordItem(
                     ModToolMaterial.UNIQUE,
                     new Item.Settings().arch$tab(SimplySwords.SIMPLYSWORDS).fireproof()
                             .attributeModifiers(SwordItem.createAttributeModifiers(ModToolMaterial.UNIQUE,
                                     (int) chompolotl_damage_modifier, chompolotl_attackspeed))));
+
 }

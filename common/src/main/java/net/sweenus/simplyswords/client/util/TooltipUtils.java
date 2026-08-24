@@ -7,20 +7,24 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.tooltip.TooltipType;
-import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.text.Style;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.text.TextColor;
 import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.SimplySwords;
-import net.sweenus.simplyswords.SimplySwordsExpectPlatform;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
-import net.sweenus.simplyswords.power.GemPower;
+import net.sweenus.simplyswords.SimplySwordsExpectPlatform;
+import net.sweenus.simplyswords.api.SpellScalingProfile;
+import net.sweenus.simplyswords.compat.SpellScalingComponents;
+import net.sweenus.simplyswords.compat.SpellSchoolDisplay;
 import net.sweenus.simplyswords.power.GemPowerComponent;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class TooltipUtils {
@@ -104,52 +108,112 @@ public class TooltipUtils {
 
 
 
+    private static String schoolGlyph(String school) {
+        if (school.contains("lightning")) return "\uAB44";
+        if (school.contains("fire")) return "\uAB42";
+        if (school.contains("frost")) return "\uAB43";
+        if (school.contains("soul") || school.contains("eldritch")) return "\uAB45";
+        if (school.contains("arcane") || school.contains("evocation")) return "\uAB46";
+        return "\uAB47";
+    }
+
     public static void appendSpellScaleTooltip(List<Text> tooltip, String spellSchool) {
         if (Platform.isModLoaded("spell_power") || Platform.isModLoaded("irons_spellbooks")) {
             if (Screen.hasAltDown() && !Screen.hasControlDown()) {
                 tooltip.add(Text.literal(""));
                 tooltip.add(Text.translatable("item.simplyswords.compat.spellScaling").setStyle(Styles.COMMON));
-                switch (spellSchool) {
-                    case "fire" ->
-                            tooltip.add(Text.literal("\uAB42").append(Text.translatable("item.simplyswords.compat.scaleFire")));
-                    case "frost" ->
-                            tooltip.add(Text.literal("\uAB43").append(Text.translatable("item.simplyswords.compat.scaleFrost")));
-                    case "lightning" ->
-                            tooltip.add(Text.literal("\uAB44").append(Text.translatable("item.simplyswords.compat.scaleLightning")));
-                    case "soul" ->
-                            tooltip.add(Text.literal("\uAB45").append(Text.translatable("item.simplyswords.compat.scaleSoul")));
-                    case "arcane" ->
-                            tooltip.add(Text.literal("\uAB46").append(Text.translatable("item.simplyswords.compat.scaleArcane")));
-                    case "frost_fire" ->
-                            tooltip.add(Text.literal("\uAB43").append(Text.translatable("item.simplyswords.compat.scaleFrost")).append(Text.literal("   \uAB42")).append(Text.translatable("item.simplyswords.compat.scaleFire")));
-                    case "healing_fire" ->
-                            tooltip.add(Text.literal("\uAB47").append(Text.translatable("item.simplyswords.compat.scaleHealing")).append(Text.literal("   \uAB42")).append(Text.translatable("item.simplyswords.compat.scaleFire")));
+                MutableText line = Text.empty();
+                String[] parts = (spellSchool == null ? "" : spellSchool).split("_");
+                for (int index = 0; index < parts.length; index++) {
+                    String part = parts[index];
+                    if (part.isEmpty()) {
+                        continue;
+                    }
+                    if (index > 0) {
+                        line.append(Text.literal("   "));
+                    }
+                    line.append(Text.literal(schoolGlyph(part)))
+                            .append(Text.translatable(SimplySwordsExpectPlatform.getSpellSchoolDisplayKey(part)));
                 }
+                tooltip.add(line);
                 tooltip.add(Text.literal(""));
             }
         }
     }
 
+    public static void appendSpellScaleTooltip(List<Text> tooltip, SpellScalingProfile profile) {
+        appendSpellScaleTooltip(tooltip,
+                (profile == null ? SpellScalingProfile.ARCANE : profile).registryId());
+    }
+
+    public static void appendWeaponSpellScaleTooltip(List<Text> tooltip, ItemStack stack, String spellSchools) {
+        String[] parts = (spellSchools == null ? "" : spellSchools).split("_");
+        List<Identifier> components = new ArrayList<>();
+        for (String part : parts) {
+            if (!part.isEmpty()) {
+                components.add(SpellScalingComponents.weaponComponent(
+                        stack, SpellScalingProfile.fromLegacyName(part)));
+            }
+        }
+        appendSpellScaleTooltip(tooltip, components.toArray(Identifier[]::new));
+    }
+
+    public static void appendWeaponSpellScaleTooltip(List<Text> tooltip, ItemStack stack,
+                                                      SpellScalingProfile... profiles) {
+        SpellScalingProfile[] requested = profiles == null || profiles.length == 0
+                ? new SpellScalingProfile[]{SpellScalingProfile.ARCANE}
+                : profiles;
+        appendSpellScaleTooltip(tooltip, Arrays.stream(requested)
+                .map(profile -> SpellScalingComponents.weaponComponent(stack, profile))
+                .distinct()
+                .toArray(Identifier[]::new));
+    }
+
+    public static void appendGemPowerSpellScaleTooltip(List<Text> tooltip, String powerPath) {
+        appendSpellScaleTooltip(tooltip, SpellScalingComponents.power(powerPath));
+    }
+
+    public static void appendSpellScaleTooltip(List<Text> tooltip, Identifier... scalingProfileIds) {
+        if ((Platform.isModLoaded("spell_power") || Platform.isModLoaded("irons_spellbooks"))
+                && Screen.hasAltDown() && !Screen.hasControlDown()) {
+            Identifier[] profileIds = scalingProfileIds == null || scalingProfileIds.length == 0
+                    ? new Identifier[]{SpellScalingProfile.ARCANE.registryId()}
+                    : scalingProfileIds;
+            tooltip.add(Text.literal(""));
+            tooltip.add(Text.translatable("item.simplyswords.compat.spellScaling").setStyle(Styles.COMMON));
+            for (Identifier profileId : profileIds) {
+                if (profileId == null) {
+                    continue;
+                }
+                SpellSchoolDisplay display = SimplySwordsExpectPlatform.getActiveSpellSchoolDisplay(profileId);
+                MutableText line = Text.empty();
+                SpellScalingComponents.get(profileId)
+                        .map(SpellScalingComponents.Definition::effectTranslationKey)
+                        .filter(key -> !key.isBlank())
+                        .ifPresent(key -> line.append(Text.translatable(key)).append(Text.literal(": ")));
+                line.append(Text.literal(schoolGlyph(display.schoolId().getPath())))
+                        .append(display.name());
+                tooltip.add(line);
+            }
+            tooltip.add(Text.literal(""));
+        }
+    }
+
+    public static int getEffectiveWeaponCooldownTicks(ItemStack stack, int baseCooldownTicks) {
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client == null || client.player == null) {
+            return Math.max(0, baseCooldownTicks);
+        }
+        return SimplySwordsAPI.getEffectiveWeaponCooldownTicks(stack, client.player, baseCooldownTicks);
+    }
+
     public static boolean shouldDisplayTooltip(ItemStack stack, Identifier tagId) {
         return (Screen.hasAltDown() && !Screen.hasControlDown()) // Don't hide info on these items
-                || HelperMethods.isInTag(stack, tagId)
+                || (tagId != null && HelperMethods.isInTag(stack, tagId))
                 || stack.isOf(ItemsRegistry.RUNEFUSED_GEM.get())
                 || stack.isOf(ItemsRegistry.NETHERFUSED_GEM.get());
     }
 
-
-    public static void openPatchouli(Identifier entry) {
-        if (Platform.isModLoaded("patchouli")) {
-            if (entry.getPath().contains("lichblade"))
-                entry = Identifier.of("simplyswords:uniques/entry_slumbering_lichblade");
-            if (entry.getPath().contains("righteous_relic"))
-                entry = Identifier.of("simplyswords:uniques/entry_dormant_relic");
-            if (entry.getPath().contains("tainted_relic"))
-                entry = Identifier.of("simplyswords:uniques/entry_dormant_relic");
-
-            commonPatchouli(entry);
-        }
-    }
 
     public static void openFzzyConfig(String path) {
         if (!ConfigApiJava.isScreenOpen("simplyswords.unique_effects.")) {
@@ -164,34 +228,47 @@ public class TooltipUtils {
     }
 
     public static Identifier handleUniqueSwordTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Text> tooltip, TooltipType type, String uniquePath) {
-        tooltip.add(Text.literal(""));
-
-        SimplySwordsAPI.appendTooltipGemSocketLogic(itemStack, tooltipContext, tooltip, type);
+        List<Text> lines = new ArrayList<>();
+        SimplySwordsAPI.appendTooltipGemSocketLogic(itemStack, tooltipContext, lines, type);
+        appendWithSeparator(tooltip, lines);
 
         return Identifier.of(uniquePath + "/" +
                 itemStack.getItem().getRegistryEntry().registryKey().getValue().getPath() + ".mdx");
     }
 
     public static Identifier handleRunicSwordTooltip(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Text> tooltip, TooltipType type, String itemPath, String runicPath) {
-        tooltip.add(Text.literal(""));
+        List<Text> lines = new ArrayList<>();
+        Identifier entry = generateDefaultTooltipEntry(itemStack, itemPath);
 
         GemPowerComponent component = SimplySwordsAPI.getComponent(itemStack);
         if (component.isEmpty()) {
-            tooltip.add(Text.translatable("item.simplyswords.unidentifiedsworditem.tooltip1").setStyle(Styles.RUNIC));
-            tooltip.add(Text.translatable("item.simplyswords.unidentifiedsworditem.tooltip2").setStyle(Styles.TEXT));
+            lines.add(Text.translatable("item.simplyswords.unidentifiedsworditem.tooltip1").setStyle(Styles.RUNIC));
+            lines.add(Text.translatable("item.simplyswords.unidentifiedsworditem.tooltip2").setStyle(Styles.TEXT));
         } else {
-            component.appendTooltip(itemStack, tooltipContext, tooltip, type, true);
+            component.appendTooltip(itemStack, tooltipContext, lines, type, true);
 
-            if (!Platform.isNeoForge()) { // NeoForge / Architectury 1.21.1 conflict. Have to disable this on NeoForge. Can re-enable post 1.21.3 :/
-                RegistryEntry<GemPower> mainComponent = component.runicPower();
-                String powerId = mainComponent.getIdAsString()
-                        .replaceAll("[A-Za-z0-9_-]+:", "")
-                        .replace("greater_", "");
-                return Identifier.of(runicPath + "/" + powerId + ".mdx");
+            if (component.hasRunicSlotFilled()) {
+                String powerId = component.runicPower().getPath().replace("greater_", "");
+                entry = Identifier.of(runicPath + "/" + powerId + ".mdx");
             }
         }
 
-        return generateDefaultTooltipEntry(itemStack, itemPath);
+        appendWithSeparator(tooltip, lines);
+        return entry;
+    }
+
+    // Appends a single blank separator line followed by the given lines, and does nothing at
+    // all when there is nothing to append.
+    private static void appendWithSeparator(List<Text> tooltip, List<Text> lines) {
+        int start = 0;
+        while (start < lines.size() && lines.get(start).getString().isEmpty()) {
+            start++;
+        }
+        if (start == lines.size()) {
+            return;
+        }
+        tooltip.add(Text.literal(""));
+        tooltip.addAll(lines.subList(start, lines.size()));
     }
 
     public static void processCtrlAltNavigation(Identifier entry, String modId, Identifier customConfigPath, ItemStack itemStack, List<Text> tooltip) {
@@ -231,11 +308,6 @@ public class TooltipUtils {
         } else {
             ctrlKeyPressTimestamp = 0;
         }
-    }
-
-
-    public static void commonPatchouli(Identifier entry) {
-        SimplySwordsExpectPlatform.openPatchouli(entry);
     }
 
 

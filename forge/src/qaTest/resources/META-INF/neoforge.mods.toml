@@ -1,0 +1,23 @@
+modLoader="javafml"
+loaderVersion="[4,)"
+license="All Rights Reserved"
+
+[[mods]]
+modId="simplyswords_qa"
+version="1"
+displayName="Simply Swords QA Companion"
+description='''QA-only automation companion. Not for distribution.'''
+
+[[dependencies.simplyswords_qa]]
+modId="minecraft"
+type="required"
+versionRange="[1.21.1,1.21.2)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.simplyswords_qa]]
+modId="simplyswords"
+type="required"
+versionRange="[0,)"
+ordering="AFTER"
+side="BOTH"

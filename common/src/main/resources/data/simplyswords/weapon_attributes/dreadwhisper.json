@@ -1,0 +1,70 @@
+{
+  "attributes": {
+    "range_bonus": 0.1,
+    "pose": "bettercombat:pose_two_handed_katana",
+    "two_handed": true,
+    "category": "katana",
+    "attacks": [
+      {
+        "hitbox": "HORIZONTAL_PLANE",
+        "damage_multiplier": 0.8,
+        "angle": 120,
+        "upswing": 0.5,
+        "animation": "bettercombat:two_handed_slash_horizontal_right",
+        "swing_sound": {
+          "id": "simplyswords:dark_sword_whoosh_01",
+          "volume": 0.3,
+          "pitch": 1.2
+        }
+      },
+      {
+        "hitbox": "VERTICAL_PLANE",
+        "damage_multiplier": 1.2,
+        "angle": 120,
+        "upswing": 0.5,
+        "animation": "bettercombat:two_handed_slash_vertical_left",
+        "swing_sound": {
+          "id": "simplyswords:dark_sword_whoosh_02",
+          "volume": 0.3,
+          "pitch": 1.1
+        }
+      },
+      {
+        "hitbox": "VERTICAL_PLANE",
+        "damage_multiplier": 1.2,
+        "angle": 120,
+        "upswing": 0.5,
+        "animation": "bettercombat:two_handed_slash_vertical_right",
+        "swing_sound": {
+          "id": "simplyswords:dark_sword_whoosh_02",
+          "volume": 0.3,
+          "pitch": 1.3
+        }
+      },
+      {
+        "hitbox": "HORIZONTAL_PLANE",
+        "damage_multiplier": 0.8,
+        "angle": 120,
+        "upswing": 0.5,
+        "animation": "bettercombat:two_handed_slash_horizontal_left",
+        "swing_sound": {
+          "id": "simplyswords:dark_sword_whoosh_03",
+          "volume": 0.3,
+          "pitch": 1.3
+        }
+      },
+      {
+        "hitbox": "FORWARD_BOX",
+        "damage_multiplier": 2,
+        "angle": 0,
+        "upswing": 0.5,
+        "animation": "bettercombat:two_handed_stab_right",
+        "swing_sound": {
+          "id": "simplyswords:dark_sword_whoosh_04",
+          "volume": 0.3,
+          "pitch": 1
+        }
+      }
+    ]
+  }
+}

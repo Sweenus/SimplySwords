@@ -789,5 +789,6 @@
   "item.simplyswords.harbingersworditem.tooltip3": "Призывает боевой символ Бездны, который",
   "item.simplyswords.harbingersworditem.tooltip4": "притягивает, наносит урон и замедляет врагов,",
   "item.simplyswords.harbingersworditem.tooltip5": "а также периодически наделяет спешкой",
-  "item.simplyswords.harbingersworditem.tooltip6": "дружественных игроков, находящихся поблизости"
+  "item.simplyswords.harbingersworditem.tooltip6": "дружественных игроков, находящихся поблизости",
+  "tooltip.simplyswords.ability_cooldown": "⌛ %s"
 }

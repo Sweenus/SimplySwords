@@ -1,5 +1,7 @@
 package net.sweenus.simplyswords.item;
 
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -9,7 +11,9 @@ import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.minecraft.world.World;
 import net.sweenus.simplyswords.SimplySwords;
+import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
 import net.sweenus.simplyswords.client.api.SimplySwordsClientAPI;
 import net.sweenus.simplyswords.util.HelperMethods;
 
@@ -52,8 +56,17 @@ public class SimplySwordsSwordItem extends SwordItem {
     }
 
     @Override
+    public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
+        if (!world.isClient) {
+            WeaponImplicitRegistry.getOrCreateWeaponImplicit(stack);
+        }
+        super.inventoryTick(stack, world, entity, slot, selected);
+    }
+
+    @Override
     public void appendTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        tooltip.addAll(WeaponImplicitRegistry.buildTooltipLines(itemStack, Screen.hasAltDown()));
         generateDynamicTooltip(itemStack, tooltipContext, tooltip, type);
     }
 

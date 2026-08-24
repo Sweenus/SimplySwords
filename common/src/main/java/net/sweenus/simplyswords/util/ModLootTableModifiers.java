@@ -10,13 +10,15 @@ import net.minecraft.loot.LootTable;
 import net.minecraft.loot.condition.RandomChanceLootCondition;
 import net.minecraft.loot.entry.ItemEntry;
 import net.minecraft.loot.function.EnchantRandomlyLootFunction;
+import net.minecraft.loot.function.SetComponentsLootFunction;
 import net.minecraft.loot.provider.number.ConstantLootNumberProvider;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.tag.EnchantmentTags;
 import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.config.LootConfig;
-import net.sweenus.simplyswords.item.UniqueSwordItem;
+import net.sweenus.simplyswords.item.UniqueWeaponItem;
+import net.sweenus.simplyswords.item.component.AwakeningComponent;
+import net.sweenus.simplyswords.registry.ComponentTypeRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 
 import java.util.List;
@@ -26,7 +28,7 @@ import java.util.stream.Collectors;
 public class ModLootTableModifiers {
 
     //supplies a list of every unique sword item currently registered
-    private static final Supplier<List<Item>> swords = Suppliers.memoize(() -> Registries.ITEM.stream().filter(it -> it instanceof UniqueSwordItem).toList());
+    private static final Supplier<List<Item>> swords = Suppliers.memoize(() -> Registries.ITEM.stream().filter(it -> it instanceof UniqueWeaponItem).toList());
 
 
 
@@ -108,20 +110,6 @@ public class ModLootTableModifiers {
             }
         }));
 
-        //Runic / Rare 2
-        LootEvent.MODIFY_LOOT_TABLE.register(((RegistryKey<LootTable> key, LootEvent.LootTableModificationContext context, boolean builtin) -> {
-            Identifier id = key.getValue();
-            if (LootConfig.INSTANCE.enableLootDrops.get() && id.getPath().contains("chests") && !id.getPath().contains("spectrum")) {
-                if (LootConfig.INSTANCE.enableLootInVillages.get() || !id.getPath().contains("village")) {
-                    LootPool.Builder pool = LootPool.builder()
-                            .rolls(ConstantLootNumberProvider.create(1))
-                            .conditionally(RandomChanceLootCondition.builder(LootConfig.INSTANCE.runicLootTableWeight.get() / 100))
-                            .with(ItemEntry.builder(ItemsRegistry.RUNIC_TABLET.get()));
-                    context.addPool(pool);
-                }
-            }
-        }));
-
         //UNIQUE
         // Check each loot table against the listed namespaces in the loot_config.json, if there's a match modify the
         // table according to the config. Otherwise, use the loot global loot modifiers set in the general_config.json
@@ -130,11 +118,13 @@ public class ModLootTableModifiers {
             Identifier id = key.getValue();
             if (LootConfig.INSTANCE.enableLootDrops.get()) {
                 Float lootChance = LootConfig.INSTANCE.uniqueLootTableOptions.get(id);
-                if (lootChance != null && lootChance > 0f) {
+                if (lootChance != null && lootChance > 0f && !id.getPath().contains("chests")) {
 
                     LootPool.Builder pool = LootPool.builder()
                             .rolls(ConstantLootNumberProvider.create(1))
-                            .conditionally(RandomChanceLootCondition.builder(lootChance / 100));
+                            .conditionally(RandomChanceLootCondition.builder(lootChance / 100))
+                            .apply(SetComponentsLootFunction.builder(
+                                    ComponentTypeRegistry.AWAKENING.get(), AwakeningComponent.DORMANT));
 
                     swords.get().stream()
                             .filter(item ->
@@ -149,28 +139,6 @@ public class ModLootTableModifiers {
 
                     context.addPool(pool);
                 }
-                else {
-                    if (id.getPath().contains("chests") && !id.getPath().contains("spectrum")) {
-                        LootPool.Builder pool = LootPool.builder()
-                                .rolls(ConstantLootNumberProvider.create(1))
-                                .conditionally(RandomChanceLootCondition.builder(LootConfig.INSTANCE.uniqueLootTableWeight.get() / 100));
-
-                        swords.get().stream()
-                                .filter(item ->
-                                        // Check if the item is not disabled in the loot configuration
-                                        !LootConfig.INSTANCE.disabledUniqueWeaponLoot.contains(item)
-                                                // Filter out non-lootable uniques
-                                                && isLootableUnique(item)
-                                )
-                                .forEach(item ->
-                                        pool.with(ItemEntry.builder(item))
-                                );
-
-
-
-                        context.addPool(pool);
-                    }
-                }
             }
         }));
 
@@ -181,6 +149,7 @@ public class ModLootTableModifiers {
             ItemsRegistry.WATCHER_CLAYMORE,
             ItemsRegistry.BRIMSTONE_CLAYMORE,
             ItemsRegistry.STORMS_EDGE,
+            ItemsRegistry.STORMSCALE,
             ItemsRegistry.STORMBRINGER,
             ItemsRegistry.BRAMBLETHORN,
             ItemsRegistry.WATCHING_WARGLAIVE,
@@ -211,6 +180,8 @@ public class ModLootTableModifiers {
             ItemsRegistry.TEMPEST,
             ItemsRegistry.FLAMEWIND,
             ItemsRegistry.RIBBONCLEAVER,
+            ItemsRegistry.RIFTMANE,
+            ItemsRegistry.DAWNQUIVER,
             ItemsRegistry.CAELESTIS,
             ItemsRegistry.WRAITHFANG
     );

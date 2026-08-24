@@ -1,0 +1,11 @@
+tiny	2	0	intermediary	named
+c	net/minecraft/class_1814	net/minecraft/util/Rarity
+	m	()[Lnet/minecraft/class_1814;	method_36683	$values
+c	net/minecraft/class_572$class_573	net/minecraft/client/render/entity/model/BipedEntityModel$ArmPose
+	m	()[Lnet/minecraft/class_572$class_573;	method_36892	$values
+c	net/minecraft/class_3499	net/minecraft/structure/StructureTemplate
+	f	Ljava/util/List;	field_15586	palettes
+	f	Ljava/util/List;	field_15589	entityInfoList
+c	net/minecraft/class_3485	net/minecraft/structure/StructureTemplateManager
+	f	Ljava/util/List;	field_39417	sources
+c	net/minecraft/class_3485$class_7514	net/minecraft/structure/StructureTemplateManager$Source

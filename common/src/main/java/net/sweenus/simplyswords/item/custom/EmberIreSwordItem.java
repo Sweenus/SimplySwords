@@ -1,5 +1,7 @@
 package net.sweenus.simplyswords.item.custom;
 
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+
 import me.fzzyhmstrs.fzzy_config.annotations.Translation;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
@@ -21,19 +23,23 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.UseAction;
 import net.minecraft.world.World;
+import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ChanceDurationSettings;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
+import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
+import net.sweenus.simplyswords.util.WeaponManaCost;
 import net.sweenus.simplyswords.util.Styles;
 
 import java.util.List;
-import java.util.Optional;
 
-public class EmberIreSwordItem extends UniqueSwordItem {
+public class EmberIreSwordItem extends UniqueSwordItem implements UniqueWeaponActiveAbility {
+    private static final double TARGET_RANGE = 18.0;
+
     public EmberIreSwordItem(ToolMaterial toolMaterial, Settings settings) {
         super(toolMaterial, settings);
     }
@@ -44,6 +50,9 @@ public class EmberIreSwordItem extends UniqueSwordItem {
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        if (!net.sweenus.simplyswords.api.AwakeningApi.isAbilityUnlocked(stack)) {
+            return super.postHit(stack, target, attacker);
+        }
         if (!attacker.getWorld().isClient()) {
             HelperMethods.playHitSounds(attacker, target);
 
@@ -53,6 +62,11 @@ public class EmberIreSwordItem extends UniqueSwordItem {
 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
+        return useFromDefaultInput(world, user, hand);
+    }
+
+    @Override
+    public TypedActionResult<ItemStack> startPlayerAbility(World world, PlayerEntity user, Hand hand) {
         ItemStack itemStack = user.getStackInHand(hand);
         if (itemStack.getDamage() >= itemStack.getMaxDamage() - 1) {
             return TypedActionResult.fail(itemStack);
@@ -75,12 +89,18 @@ public class EmberIreSwordItem extends UniqueSwordItem {
     }
 
     @Override
+    public boolean chargesManaOnRelease() {
+        return true;
+    }
+
+    @Override
     public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
         if (!world.isClient && user.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
-            Optional<LivingEntity> targetEntityReturn = HelperMethods.findClosestTarget(user, 18, 3);
-            double damageAmount = HelperMethods.getEntityAttackDamage(user) * 0.3;
-            if (targetEntityReturn.isPresent() && HelperMethods.checkFriendlyFire(targetEntityReturn.get(), user)) {
-                LivingEntity targetEntity = targetEntityReturn.get();
+            WeaponManaCost.spend(user, stack);
+            LivingEntity targetEntity = user instanceof PlayerEntity player ? findPlayerTarget(player) : null;
+            double damageAmount = HelperMethods.abilityScaledDamage("fire", user, stack,
+                    Config.uniqueEffects.emberblade.initialDamageScaling, Config.uniqueEffects.emberblade.initialSpellScaling);
+            if (targetEntity != null) {
                 SoundEvent soundSelect = SoundRegistry.ELEMENTAL_BOW_FIRE_SHOOT_IMPACT_03.get();
                 int particleCount = 20;
                 HelperMethods.spawnWaistHeightParticles((ServerWorld) world, ParticleTypes.SMOKE, user, targetEntity, particleCount);
@@ -91,16 +111,17 @@ public class EmberIreSwordItem extends UniqueSwordItem {
                 DamageSource damageSource = user.getDamageSources().generic();
                 if (user instanceof PlayerEntity player) {
                     damageSource = user.getDamageSources().playerAttack(player);
-                    player.getItemCooldownManager().set(stack.getItem(), 10);
+                    SimplySwordsAPI.setWeaponCooldown(player, stack, 10);
                 }
 
                 final float minAdditionalDamage = 0.0f;
-                final float maxAdditionalDamage = (float) (HelperMethods.getEntityAttackDamage(user) * 3);
+                final float maxAdditionalDamage = HelperMethods.abilityScaledDamage("fire", user, stack,
+                        Config.uniqueEffects.emberblade.maxChargeDamageScaling, Config.uniqueEffects.emberblade.maxChargeSpellScaling);
                 float chargeRatio = 1.0f - ((float) remainingUseTicks / getMaxUseTime(stack, user));
                 float additionalDamage = minAdditionalDamage + (maxAdditionalDamage - minAdditionalDamage) * chargeRatio;
                 float finalDamage = (float) damageAmount + additionalDamage;
                 targetEntity.timeUntilRegen = 0;
-                targetEntity.damage(damageSource, finalDamage);
+                targetEntity.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments((ServerWorld) world, stack, targetEntity, damageSource, finalDamage));
 
                 world.playSound(null, targetEntity.getBlockPos(), SoundEvents.ENTITY_GENERIC_EXPLODE.value(),
                         user.getSoundCategory(), 0.4f, 1.1f);
@@ -126,6 +147,51 @@ public class EmberIreSwordItem extends UniqueSwordItem {
 
             }
         }
+    }
+
+    public static LivingEntity findPlayerTarget(PlayerEntity player) {
+        return StealSwordItem.findLenientTarget(player, TARGET_RANGE);
+    }
+
+    @Override
+    public boolean activate(WeaponAbilityContext context) {
+        LivingEntity actor = context.actor();
+        LivingEntity target = context.target();
+        if (target == null || !HelperMethods.checkAbilityTarget(target, actor)) {
+            return false;
+        }
+        ServerWorld world = context.world();
+        double damageAmount = HelperMethods.abilityScaledDamage("fire", actor, context.stack(),
+                Config.uniqueEffects.emberblade.initialDamageScaling, Config.uniqueEffects.emberblade.initialSpellScaling);
+        float finalDamage = (float) (damageAmount + HelperMethods.abilityScaledDamage("fire", actor, context.stack(),
+                Config.uniqueEffects.emberblade.maxChargeDamageScaling, Config.uniqueEffects.emberblade.maxChargeSpellScaling));
+        SoundEvent soundSelect = SoundRegistry.ELEMENTAL_BOW_FIRE_SHOOT_IMPACT_03.get();
+        HelperMethods.spawnWaistHeightParticles(world, ParticleTypes.SMOKE, actor, target, 20);
+        HelperMethods.spawnWaistHeightParticles(world, ParticleTypes.POOF, actor, target, 20);
+        HelperMethods.spawnWaistHeightParticles(world, ParticleTypes.ASH, actor, target, 20);
+        world.playSound(null, actor.getBlockPos(), soundSelect, actor.getSoundCategory(), 0.4f, 1.5f);
+        target.timeUntilRegen = 0;
+        DamageSource damageSource = actor.getDamageSources().mobAttack(actor);
+        target.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments(world, context.stack(), target, damageSource, finalDamage));
+        world.playSound(null, target.getBlockPos(), SoundEvents.ENTITY_GENERIC_EXPLODE.value(), actor.getSoundCategory(), 0.4f, 1.1f);
+        HelperMethods.spawnOrbitParticles(world, target.getPos(), ParticleTypes.EXPLOSION, 1, 1);
+        HelperMethods.spawnOrbitParticles(world, target.getPos(), ParticleTypes.POOF, 1, 20);
+
+        int hitChance = Config.uniqueEffects.emberblade.chance;
+        int duration = Config.uniqueEffects.emberblade.duration;
+        if (actor.getRandom().nextInt(150) <= hitChance) {
+            actor.addStatusEffect(new StatusEffectInstance(StatusEffects.STRENGTH, duration, 0), actor);
+            actor.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, duration, 1), actor);
+            actor.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, duration, 0), actor);
+            world.playSoundFromEntity(null, actor, SoundRegistry.MAGIC_SWORD_SPELL_01.get(),
+                    actor.getSoundCategory(), 0.5f, 2f);
+        }
+        return true;
+    }
+
+    @Override
+    public int getActivationCooldownTicks(ItemStack stack, WeaponAbilityContext context) {
+        return Math.max(1, Config.uniqueEffects.emberblade.cooldown);
     }
 
     @Override
@@ -163,8 +229,11 @@ public class EmberIreSwordItem extends UniqueSwordItem {
         tooltip.add(Text.translatable("item.simplyswords.emberiresworditem.tooltip6").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.emberiresworditem.tooltip9").setStyle(Styles.TEXT));
+        appendAbilityCooldownTooltip(tooltip, itemStack, 10);
+        appendAbilityManaCostTooltip(tooltip, itemStack);
 
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        net.sweenus.simplyswords.client.util.TooltipUtils.appendWeaponSpellScaleTooltip(tooltip, itemStack, "fire");
     }
 
     @Translation(prefix = "", negate = true)
@@ -173,5 +242,11 @@ public class EmberIreSwordItem extends UniqueSwordItem {
         public EffectSettings() {
             super(30, 150, new ItemStackTooltipAppender(ItemsRegistry.EMBERBLADE::get));
         }
+
+        public int cooldown = 60;
+        public float initialDamageScaling = 0.24f;
+        public float initialSpellScaling = 0.9593f;
+        public float maxChargeDamageScaling = 2.4f;
+        public float maxChargeSpellScaling = 9.5935f;
     }
 }

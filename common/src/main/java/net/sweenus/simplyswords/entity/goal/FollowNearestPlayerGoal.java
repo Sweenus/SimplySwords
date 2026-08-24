@@ -1,7 +1,7 @@
 package net.sweenus.simplyswords.entity.goal;
 
 import net.minecraft.entity.ai.goal.Goal;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.entity.SimplySwordsAxolotlEntity;
@@ -10,7 +10,7 @@ import java.util.EnumSet;
 
 public class FollowNearestPlayerGoal extends Goal {
     private final SimplySwordsAxolotlEntity axolotl;
-    private PlayerEntity targetPlayer;
+    private LivingEntity owner;
     private final double followSpeed;
     private final double searchRadius;
     private final double stopDistance;
@@ -27,13 +27,9 @@ public class FollowNearestPlayerGoal extends Goal {
     @Override
     public boolean canStart() {
         if (axolotl.getWorld() instanceof ServerWorld) {
-            // Find the closest player within the search radius
-            PlayerEntity nearestPlayer = axolotl.getWorld()
-                    .getClosestPlayer(axolotl.getX(), axolotl.getY(), axolotl.getZ(), searchRadius, false);
-
-            // Set it as the current target
-            if (nearestPlayer != null) {
-                this.targetPlayer = nearestPlayer;
+            LivingEntity owner = axolotl.getOwner();
+            if (owner != null && owner.isAlive() && axolotl.squaredDistanceTo(owner) <= searchRadius * searchRadius) {
+                this.owner = owner;
                 return true;
             }
         }
@@ -42,32 +38,29 @@ public class FollowNearestPlayerGoal extends Goal {
 
     @Override
     public boolean shouldContinue() {
-        // Continue following while the target player
-        return this.targetPlayer != null
-                && this.targetPlayer.isAlive()
-                && this.axolotl.squaredDistanceTo(this.targetPlayer) > (stopDistance * stopDistance);
+        return this.owner != null
+                && this.owner.isAlive()
+                && this.axolotl.squaredDistanceTo(this.owner) > (stopDistance * stopDistance);
     }
 
     @Override
     public void stop() {
         // Clear the target
-        this.targetPlayer = null;
+        this.owner = null;
         axolotl.getNavigation().stop();
     }
 
     @Override
     public void tick() {
-        if (this.targetPlayer != null) {
-            // Navigate toward the player
+        if (this.owner != null) {
             axolotl.getNavigation().startMovingTo(
-                    this.targetPlayer.getX(),
-                    this.targetPlayer.getY(),
-                    this.targetPlayer.getZ(),
+                    this.owner.getX(),
+                    this.owner.getY(),
+                    this.owner.getZ(),
                     this.followSpeed
             );
 
-            // Look at the player
-            Vec3d targetPosition = this.targetPlayer.getPos();
+            Vec3d targetPosition = this.owner.getPos();
             this.axolotl.getLookControl().lookAt(targetPosition.x, targetPosition.y, targetPosition.z);
         }
     }

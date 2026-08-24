@@ -1,5 +1,6 @@
 package net.sweenus.simplyswords.item;
 
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
@@ -22,6 +23,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
+import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
 import net.sweenus.simplyswords.client.api.SimplySwordsClientAPI;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.ThrownSpearEntity;
@@ -32,6 +34,7 @@ import net.sweenus.simplyswords.registry.GemPowerRegistry;
 import net.sweenus.simplyswords.registry.TagRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
+import net.sweenus.simplyswords.world.PlayerWeaponAbilityManager;
 
 import java.util.List;
 
@@ -43,13 +46,25 @@ public class RunicSwordItem extends SwordItem {
 
     @Override
     public boolean onClicked(ItemStack stack, ItemStack otherStack, Slot slot, ClickType clickType, PlayerEntity player, StackReference cursorStackReference) {
-        if(!stack.contains(ComponentTypeRegistry.GEM_POWER.get())) {
-            String[] blacklist = {"simplyswords:gem_power@simplyswords:throwing"}; // Should be replaced with a modular blacklisting system at a later date
-            if (TagRegistry.isInTag(TagRegistry.spearsTag, asItem()))
-                stack.set(ComponentTypeRegistry.GEM_POWER.get(), GemPowerComponent.runic(GemPowerRegistry.gemRandomPower(PowerType.RUNIC, blacklist)));
-            else stack.set(ComponentTypeRegistry.GEM_POWER.get(), GemPowerComponent.runic(GemPowerRegistry.gemRandomPower(PowerType.RUNIC)));
+        if (!player.getWorld().isClient) {
+            WeaponImplicitRegistry.getOrCreateWeaponImplicit(stack);
         }
+        // Must roll on BOTH sides - see the note in RunefusedGemItem#onClicked. In creative
+        // the client owns the stack and a server-only roll is discarded.
+        rollRunicPower(stack);
         return false;
+    }
+
+    // Should be replaced with a modular blacklisting system at a later date
+    private static final Identifier[] SPEAR_POWER_BLACKLIST = {Identifier.of(SimplySwords.MOD_ID, "throwing")};
+
+    private void rollRunicPower(ItemStack stack) {
+        if (!SimplySwordsAPI.needsGemPowerRoll(stack)) return;
+
+        Identifier power = TagRegistry.isInTag(TagRegistry.spearsTag, asItem())
+                ? GemPowerRegistry.gemRandomPower(PowerType.RUNIC, SPEAR_POWER_BLACKLIST)
+                : GemPowerRegistry.gemRandomPower(PowerType.RUNIC);
+        stack.set(ComponentTypeRegistry.GEM_POWER.get(), GemPowerComponent.runic(power));
     }
 
     @Override
@@ -107,20 +122,27 @@ public class RunicSwordItem extends SwordItem {
                 world.spawnEntity(thrownSwordEntity);
 
                 GemPowerComponent component = SimplySwordsAPI.getComponent(itemStack);
+                boolean skipDefaultAbilityUse = PlayerWeaponAbilityManager.shouldSkipDefaultAbilityUse(world, user, hand, itemStack);
 
                 if (!user.getAbilities().creativeMode) {
                     itemStack.decrement(1);
+                }
+                if (skipDefaultAbilityUse) {
+                    return TypedActionResult.success(itemStack, world.isClient());
                 }
                 return component.use(world, user, hand);
             }
 
             user.swingHand(hand);
 
-            user.getItemCooldownManager().set(this, 1);
+            SimplySwordsAPI.setWeaponCooldown(user, itemStack, 1);
             return TypedActionResult.success(itemStack, world.isClient());
         }
 
         if (itemStack.getDamage() < itemStack.getMaxDamage() - 1) {
+            if (PlayerWeaponAbilityManager.shouldSkipDefaultAbilityUse(world, user, hand, itemStack)) {
+                return TypedActionResult.pass(itemStack);
+            }
             GemPowerComponent component = SimplySwordsAPI.getComponent(itemStack);
             return component.use(world, user, hand);
         }
@@ -134,6 +156,9 @@ public class RunicSwordItem extends SwordItem {
 
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
+        if (!world.isClient) {
+            WeaponImplicitRegistry.getOrCreateWeaponImplicit(stack);
+        }
         if ((entity instanceof LivingEntity user) && (user.getEquippedStack(EquipmentSlot.MAINHAND) == stack || user.getEquippedStack(EquipmentSlot.OFFHAND) == stack)) {
             if (entity.age % 4 == 0 && Config.general.enablePassiveParticles) {
                 float randomx = (float) (Math.random() * 6);
@@ -157,12 +182,8 @@ public class RunicSwordItem extends SwordItem {
     public void onCraft(ItemStack stack, World world) {
         if (world.isClient) return;
 
-        if(!stack.contains(ComponentTypeRegistry.GEM_POWER.get())) {
-            String[] blacklist = {"simplyswords:gem_power@simplyswords:throwing"};
-            if (TagRegistry.isInTag(TagRegistry.spearsTag, asItem()))
-                stack.set(ComponentTypeRegistry.GEM_POWER.get(), GemPowerComponent.runic(GemPowerRegistry.gemRandomPower(PowerType.RUNIC, blacklist)));
-            else stack.set(ComponentTypeRegistry.GEM_POWER.get(), GemPowerComponent.runic(GemPowerRegistry.gemRandomPower(PowerType.RUNIC)));
-        }
+        WeaponImplicitRegistry.getOrCreateWeaponImplicit(stack);
+        rollRunicPower(stack);
     }
 
     @Override
@@ -172,6 +193,7 @@ public class RunicSwordItem extends SwordItem {
 
     @Override
     public void appendTooltip(ItemStack itemStack, TooltipContext tooltipContext, List<Text> tooltip, TooltipType type) {
+        tooltip.addAll(WeaponImplicitRegistry.buildTooltipLines(itemStack, Screen.hasAltDown()));
         generateDynamicTooltip(itemStack, tooltipContext, tooltip, type);
     }
 

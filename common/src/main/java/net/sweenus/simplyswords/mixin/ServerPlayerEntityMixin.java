@@ -12,8 +12,8 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.particle.ParticleTypes;
-import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -21,17 +21,32 @@ import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
+import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
+import net.sweenus.simplyswords.api.AwakeningApi;
+import net.sweenus.simplyswords.api.StackReplacement;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.LootConfig;
 import net.sweenus.simplyswords.item.ContainedRemnantItem;
-import net.sweenus.simplyswords.item.custom.CaelestisSwordItem;
+import net.sweenus.simplyswords.item.custom.WickpiercerSwordItem;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.AbilityMethods;
 import net.sweenus.simplyswords.util.HelperMethods;
+import net.sweenus.simplyswords.world.NecromanticArsenalManager;
+import net.sweenus.simplyswords.world.WolfPackManager;
+import net.sweenus.simplyswords.util.MinionTargeting;
+import net.sweenus.simplyswords.world.PlayerWeaponAbilityChannelManager;
+import net.sweenus.simplyswords.world.RevivalCandleVisualManager;
+import net.sweenus.simplyswords.world.MagispearAbilityManager;
+import net.sweenus.simplyswords.world.IonboundStormscaleAbilityManager;
+import net.sweenus.simplyswords.world.ShadowstingShadowDanceManager;
+import net.sweenus.simplyswords.world.SoulkeeperLanternManager;
+import net.sweenus.simplyswords.world.StormbringerParryManager;
+import net.sweenus.simplyswords.world.StormsEdgeAbilityManager;
+import net.sweenus.simplyswords.world.DreadwhisperAbilityManager;
+import net.sweenus.simplyswords.world.ThunderbrandAbilityManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -39,7 +54,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 
@@ -52,34 +66,51 @@ public abstract class ServerPlayerEntityMixin {
     public void simplyswords$damage(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
         PlayerEntity player = (PlayerEntity) (Object) this;
         if (player instanceof ServerPlayerEntity serverPlayer) {
-
-            //Effect Resilience
-            if (serverPlayer.hasStatusEffect(EffectRegistry.getReference(EffectRegistry.RESILIENCE))) {
-                HelperMethods.decrementStatusEffect(serverPlayer, EffectRegistry.getReference(EffectRegistry.RESILIENCE));
+            if (IonboundStormscaleAbilityManager.handleIncomingDamage(serverPlayer, source, amount)) {
                 cir.setReturnValue(false);
-                if (player.hasStatusEffect(EffectRegistry.getReference(EffectRegistry.RIBBONCLEAVE)))
-                    serverPlayer.getWorld().playSoundFromEntity(null, serverPlayer, SoundRegistry.MAGIC_SWORD_PARRY_03.get(),
-                        SoundCategory.PLAYERS, 0.7f, 0.5f + (serverPlayer.getRandom().nextBetween(1, 5) * 0.1f));
+                return;
             }
-
-            if (serverPlayer.hasStatusEffect(EffectRegistry.getReference(EffectRegistry.ASTRAL_SHIFT))) {
-                StatusEffectInstance astralShiftInstance = player.getStatusEffect(EffectRegistry.getReference(EffectRegistry.ASTRAL_SHIFT));
-                if (astralShiftInstance != null) {
-                    int duration = astralShiftInstance.getDuration();
-
-                    if (duration > 10) {
-                        HelperMethods.incrementStatusEffect(serverPlayer, EffectRegistry.getReference(EffectRegistry.ASTRAL_SHIFT), duration, (int) Math.max(1, (amount / 10)), 99);
-                        AbilityMethods.astralShiftSounds(serverPlayer);
-                        cir.setReturnValue(false);
-                    }
-                }
+            if (MagispearAbilityManager.blocksIncomingDamage(serverPlayer, source)) {
+                cir.setReturnValue(false);
+                return;
             }
-
-            if (serverPlayer.getMainHandStack().getItem() instanceof CaelestisSwordItem) {
-                if (AbilityMethods.astralShiftPassive(serverPlayer)) {
-                    AbilityMethods.astralShiftSounds(serverPlayer);
+            if (StormsEdgeAbilityManager.blocksIncomingDamage(serverPlayer, source)) {
+                cir.setReturnValue(false);
+                return;
+            }
+            if (DreadwhisperAbilityManager.blocksIncomingDamage(serverPlayer, source)) {
+                cir.setReturnValue(false);
+                return;
+            }
+            if (ThunderbrandAbilityManager.handleIncomingDamage(serverPlayer, source, amount)) {
+                cir.setReturnValue(false);
+                return;
+            }
+            if (!source.isIn(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
+                if (ShadowstingShadowDanceManager.isActive(serverPlayer)) {
                     cir.setReturnValue(false);
+                    return;
                 }
+
+                if (StormbringerParryManager.handleIncomingDamage(serverPlayer, source)) {
+                    cir.setReturnValue(false);
+                    return;
+                }
+
+                if (WeaponImplicitRegistry.tryDeflectIncomingDamage(serverPlayer, source, amount)) {
+                    cir.setReturnValue(false);
+                    return;
+                }
+
+                //Effect Resilience
+                if (serverPlayer.hasStatusEffect(EffectRegistry.getReference(EffectRegistry.RESILIENCE))) {
+                    HelperMethods.decrementStatusEffect(serverPlayer, EffectRegistry.getReference(EffectRegistry.RESILIENCE));
+                    cir.setReturnValue(false);
+                    if (player.hasStatusEffect(EffectRegistry.getReference(EffectRegistry.RIBBONCLEAVE)))
+                        serverPlayer.getWorld().playSoundFromEntity(null, serverPlayer, SoundRegistry.MAGIC_SWORD_PARRY_03.get(),
+                            SoundCategory.PLAYERS, 0.7f, 0.5f + (serverPlayer.getRandom().nextBetween(1, 5) * 0.1f));
+                }
+
             }
 
             // Magiscythe trigger
@@ -87,8 +118,8 @@ public abstract class ServerPlayerEntityMixin {
                 for (int i = 0; i < serverPlayer.getInventory().size(); i++) {
                     ItemStack stackInSlot = serverPlayer.getInventory().getStack(i);
                     if (stackInSlot.isOf(ItemsRegistry.DECAYING_RELIC.get())) {
-                        ItemStack newItemStack = new ItemStack(ItemsRegistry.MAGISCYTHE.get());
-                        newItemStack.applyComponentsFrom(stackInSlot.getComponents());
+                        ItemStack newItemStack = StackReplacement.copyTo(stackInSlot, ItemsRegistry.MAGISCYTHE.get());
+                        AwakeningApi.setLevel(newItemStack, AwakeningApi.getLevel(stackInSlot));
                         serverPlayer.getInventory().setStack(i, newItemStack);
                         serverPlayer.getWorld().playSoundFromEntity(null, serverPlayer, SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_IMPACT_02.get(),
                                 serverPlayer.getSoundCategory(), 0.6f, 0.6f);
@@ -101,14 +132,34 @@ public abstract class ServerPlayerEntityMixin {
         }
     }
 
+    @Inject(at = @At("TAIL"), method = "damage")
+    public void simplyswords$retargetNecromanticArsenalMinions(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
+        if (!Boolean.TRUE.equals(cir.getReturnValue())) {
+            return;
+        }
+        if ((Object) this instanceof ServerPlayerEntity serverPlayer
+                && source.getAttacker() instanceof LivingEntity attacker
+                && attacker != serverPlayer) {
+            NecromanticArsenalManager.retargetMinions(serverPlayer, attacker);
+            WolfPackManager.retargetMinions(serverPlayer, attacker);
+        }
+    }
 
     @Inject(at = @At("HEAD"), method = "tick")
     public void simplyswords$tick(CallbackInfo ci) {
         PlayerEntity player = (PlayerEntity) (Object) this;
         if (player instanceof ServerPlayerEntity serverPlayer) {
+            RevivalCandleVisualManager.tickPlayer(serverPlayer);
+            ShadowstingShadowDanceManager.tickPlayer(serverPlayer);
+            SoulkeeperLanternManager.tickPlayer(serverPlayer);
+            PlayerWeaponAbilityChannelManager.tickPlayer(serverPlayer);
+            StormbringerParryManager.tickPlayer(serverPlayer);
 
             //Ribboncleaver movespeed debuff
-            if (serverPlayer.getMainHandStack().isOf(ItemsRegistry.RIBBONCLEAVER.get()) || serverPlayer.getMainHandStack().isOf(ItemsRegistry.ENIGMA.get())) {
+            ItemStack heldUnique = serverPlayer.getMainHandStack();
+            if (AwakeningApi.isAbilityUnlocked(heldUnique)
+                    && (heldUnique.isOf(ItemsRegistry.RIBBONCLEAVER.get())
+                    || heldUnique.isOf(ItemsRegistry.ENIGMA.get()))) {
                 int frequency = 6;
                 if (serverPlayer.age % 20 == 0 && serverPlayer.getMainHandStack().isOf(ItemsRegistry.RIBBONCLEAVER.get()))
                     serverPlayer.addStatusEffect(new StatusEffectInstance(EffectRegistry.getReference(EffectRegistry.RIBBONWRATH),
@@ -119,39 +170,6 @@ public abstract class ServerPlayerEntityMixin {
                     float pitch = 1.0f + player.getRandom().nextBetween(1, 5) * 0.1f;
                     player.getWorld().playSound(null, player.getBlockPos(),
                             SoundRegistry.OBJECT_IMPACT_THUD.get(), SoundCategory.PLAYERS,volume, pitch);
-                }
-            }
-
-            //Magiblade repellent
-            if (serverPlayer.getMainHandStack().isOf(ItemsRegistry.MAGIBLADE.get())) {
-                int frequency = 8;
-                double radius = Config.uniqueEffects.magiblade.repelRadius;
-                int chance = Config.uniqueEffects.magiblade.repelChance;
-                int totalChance = new Random().nextInt(100);
-                if (serverPlayer.age % frequency == 0 && totalChance < chance) {
-                    Box box = HelperMethods.createBox(player, radius);
-                    Entity closestEntity = player.getWorld().getOtherEntities(player, box, EntityPredicates.VALID_LIVING_ENTITY).stream()
-                            .filter(entity -> {
-                                if (entity instanceof LivingEntity livingEntity)
-                                    return HelperMethods.checkFriendlyFire(livingEntity, player);
-                                return false;
-                            })
-                            .min(Comparator.comparingDouble(entity -> entity.squaredDistanceTo(player)))
-                            .orElse(null);
-
-                    if (closestEntity != null) {
-                        if ((closestEntity instanceof LivingEntity le)) {
-                            if (le.distanceTo(player) > 1) {
-                                closestEntity.setVelocity((closestEntity.getX() - player.getX()) / 2, 0, (closestEntity.getZ() - player.getZ()) / 2);
-                                float volume = 0.8f;
-                                float pitch = 1.0f + player.getRandom().nextBetween(1, 5) * 0.1f;
-                                player.getWorld().playSound(null, player.getBlockPos(),
-                                        SoundEvents.BLOCK_SCULK_SENSOR_CLICKING, SoundCategory.PLAYERS, volume, pitch);
-                                HelperMethods.spawnWaistHeightParticles((ServerWorld) player.getWorld(), ParticleTypes.ENCHANT, closestEntity, player, 10);
-                                HelperMethods.spawnOrbitParticles((ServerWorld) closestEntity.getWorld(), closestEntity.getPos().add(0, closestEntity.getHeight() / 2, 0), ParticleTypes.SCULK_CHARGE_POP, 0.5, 6);
-                            }
-                        }
-                    }
                 }
             }
 
@@ -197,6 +215,7 @@ public abstract class ServerPlayerEntityMixin {
                                     serverPlayer.sendMessageToClient(Text.translatable("item.simplyswords.contained_remnant.event"), true);
                                 }
                                 ItemStack newItemStack = new ItemStack(randomItem);
+                                AwakeningApi.initializeNaturalDrop(newItemStack);
                                 serverPlayer.getInventory().setStack(i, newItemStack);
                                 break;
                             }
@@ -220,8 +239,8 @@ public abstract class ServerPlayerEntityMixin {
 
                     // Magiblade trigger
                     if (chance < 15 && playerStandingBlock.isOf(Blocks.SCULK_SENSOR) && stackInSlot.isOf(decayingRelic.getItem())) {
-                        ItemStack newItemStack = new ItemStack(ItemsRegistry.MAGIBLADE.get());
-                        newItemStack.applyComponentsFrom(stackInSlot.getComponents());
+                        ItemStack newItemStack = StackReplacement.copyTo(stackInSlot, ItemsRegistry.MAGIBLADE.get());
+                        AwakeningApi.setLevel(newItemStack, AwakeningApi.getLevel(stackInSlot));
                         serverPlayer.getInventory().setStack(i, newItemStack);
                         serverPlayer.getWorld().playSoundFromEntity(null, serverPlayer, SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_IMPACT_02.get(),
                                 serverPlayer.getSoundCategory(), 0.6f, 0.6f);
@@ -232,8 +251,8 @@ public abstract class ServerPlayerEntityMixin {
                     // Magispear trigger
                     if (stackInSlot.isOf(decayingRelic.getItem()) && player.hasStatusEffect(StatusEffects.DARKNESS)) {
                         if (chance < 2) {
-                            ItemStack newItemStack = new ItemStack(ItemsRegistry.MAGISPEAR.get());
-                            newItemStack.applyComponentsFrom(stackInSlot.getComponents());
+                            ItemStack newItemStack = StackReplacement.copyTo(stackInSlot, ItemsRegistry.MAGISPEAR.get());
+                            AwakeningApi.setLevel(newItemStack, AwakeningApi.getLevel(stackInSlot));
                             serverPlayer.getInventory().setStack(i, newItemStack);
                             serverPlayer.getWorld().playSoundFromEntity(null, serverPlayer, SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_IMPACT_02.get(),
                                     serverPlayer.getSoundCategory(), 0.6f, 0.6f);
@@ -269,7 +288,8 @@ public abstract class ServerPlayerEntityMixin {
     public void simplyswords$attack(Entity target, CallbackInfo ci) {
         PlayerEntity player = (PlayerEntity) (Object) this;
         if (player instanceof ServerPlayerEntity serverPlayer) {
-            if (target.isAttackable() && target instanceof LivingEntity) {
+            if (target.isAttackable() && target instanceof LivingEntity livingTarget) {
+                MinionTargeting.recordLastAttack(serverPlayer, livingTarget);
                 if (!target.handleAttack(player)) {
                     ServerWorld serverWorld = (ServerWorld) player.getWorld();
                     //Ribboncleaver Cleave buff
@@ -283,8 +303,27 @@ public abstract class ServerPlayerEntityMixin {
                                 SoundRegistry.MAGIC_SWORD_PARRY_01.get(), SoundCategory.PLAYERS,0.8f, 1.0f);
                     }
 
+                    if (serverPlayer.getMainHandStack().getItem() instanceof WickpiercerSwordItem
+                            && serverPlayer.hasStatusEffect(EffectRegistry.getReference(EffectRegistry.FRENZY))) {
+                        ItemStack wickpiercerStack = serverPlayer.getMainHandStack();
+                        float damageModifier = HelperMethods.abilityScaledDamage("fire",
+                                serverPlayer, wickpiercerStack, Config.uniqueEffects.wickpiercer.damageScaling,
+                                Config.uniqueEffects.wickpiercer.spellScaling);
+                        DamageSource damageSource = serverPlayer.getDamageSources().playerAttack(serverPlayer);
+                        target.timeUntilRegen = 0;
+                        HelperMethods.decrementStatusEffect(serverPlayer, EffectRegistry.getReference(EffectRegistry.FRENZY));
+                        target.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments(
+                                serverWorld, wickpiercerStack, target, damageSource, damageModifier));
+                    }
                 }
             }
+        }
+    }
+
+    @Inject(at = @At("HEAD"), method = "attack", cancellable = true)
+    public void simplyswords$preventShadowDanceAttack(Entity target, CallbackInfo ci) {
+        if (ShadowstingShadowDanceManager.isActive((ServerPlayerEntity) (Object) this)) {
+            ci.cancel();
         }
     }
 

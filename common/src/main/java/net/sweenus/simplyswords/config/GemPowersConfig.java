@@ -1,7 +1,7 @@
 package net.sweenus.simplyswords.config;
 
 import dev.architectury.platform.Platform;
-import me.fzzyhmstrs.fzzy_config.config.Config;
+import me.fzzyhmstrs.fzzy_config.annotations.Version;
 import me.fzzyhmstrs.fzzy_config.config.ConfigSection;
 import me.fzzyhmstrs.fzzy_config.validation.collection.ValidatedSet;
 import me.fzzyhmstrs.fzzy_config.validation.minecraft.ValidatedIdentifier;
@@ -13,7 +13,8 @@ import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.power.powers.*;
 import net.sweenus.simplyswords.registry.GemPowerRegistry;
 
-public class GemPowersConfig extends Config {
+@Version(version = ResettingConfig.CURRENT_SCHEMA_VERSION)
+public class GemPowersConfig extends ResettingConfig {
 
 	public GemPowersConfig() {
 		super(Identifier.of(SimplySwords.MOD_ID, "gem_powers"));
@@ -26,10 +27,14 @@ public class GemPowersConfig extends Config {
 	public FloatPower.Settings         floating = new FloatPower.Settings();
 	public FreezePower.Settings        freeze = new FreezePower.Settings();
 	public FrostWardPower.Settings     frostWard = new FrostWardPower.Settings();
+	public DancingBladesPower.Settings dancingBlades = new DancingBladesPower.Settings();
 	public ImbuedPower.Settings        imbued = new ImbuedPower.Settings();
+	public ImmolationPower.Settings    immolation = new ImmolationPower.Settings();
+	public RadiancePower.Settings      radiance = new RadiancePower.Settings();
 	public MomentumPower.Settings      momentum = new MomentumPower.Settings();
 	public ShieldingPower.Settings     shielding = new ShieldingPower.Settings();
 	public SlowPower.Settings          slow = new SlowPower.Settings();
+	public StormlashPower.Settings     stormlash = new StormlashPower.Settings();
 	public StoneskinPower.Settings     stoneskin = new StoneskinPower.Settings();
 	public SwiftnessPower.Settings     swiftness = new SwiftnessPower.Settings();
 	public TrailblazePower.Settings    trailblaze = new TrailblazePower.Settings();
@@ -37,6 +42,17 @@ public class GemPowersConfig extends Config {
 	public WeakenPower.Settings        weaken = new WeakenPower.Settings();
 	public WildfirePower.Settings      wildfire = new WildfirePower.Settings();
 	public ZephyrPower.Settings        zephyr = new ZephyrPower.Settings();
+	public VerdantTrailPower.Settings  verdantTrail = new VerdantTrailPower.Settings();
+	public FaultlinePower.Settings  faultline = new FaultlinePower.Settings();
+	public NecromanticArsenalPower.Settings necromanticArsenal = new NecromanticArsenalPower.Settings();
+	public WolfPackPower.Settings wolfPack = new WolfPackPower.Settings();
+	public GoatStampedePower.Settings goatStampede = new GoatStampedePower.Settings();
+	public BaneheadSwarmPower.Settings baneheadSwarm = new BaneheadSwarmPower.Settings();
+	public WingBuffetPower.Settings wingBuffet = new WingBuffetPower.Settings();
+	public DragonMawPower.Settings dragonMaw = new DragonMawPower.Settings();
+	public RunicSlashPower.Settings runicSlash = new RunicSlashPower.Settings();
+	public EvocationPower.Settings evocation = new EvocationPower.Settings();
+	public SnifferSlamPower.Settings snifferSlam = new SnifferSlamPower.Settings();
 
 	public SimplySkills simplySkills = new SimplySkills();
 

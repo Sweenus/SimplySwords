@@ -1,5 +1,7 @@
 package net.sweenus.simplyswords.item.custom;
 
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+
 import elocindev.necronomicon.api.text.TextAPI;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
@@ -45,6 +47,9 @@ public class DreadtideSwordItem extends UniqueSwordItem {
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        if (!net.sweenus.simplyswords.api.AwakeningApi.isAbilityUnlocked(stack)) {
+            return super.postHit(stack, target, attacker);
+        }
         if (!attacker.getWorld().isClient()) {
             HelperMethods.playHitSounds(attacker, target);
 
@@ -54,9 +59,13 @@ public class DreadtideSwordItem extends UniqueSwordItem {
 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
+        ItemStack stack = user.getStackInHand(hand);
+        if (!net.sweenus.simplyswords.api.AwakeningApi.isAbilityUnlocked(stack)) {
+            return TypedActionResult.pass(stack);
+        }
         if (!user.getWorld().isClient() && world instanceof  ServerWorld serverWorld) {
             int voidcallerDuration = Config.uniqueEffects.dreadtide.get().duration;
-            float voidcallerDamageModifier = Config.uniqueEffects.dreadtide.get().damageModifier;
+            float voidcallerDamageModifier = Config.uniqueEffects.dreadtide.get().damageScaling;
             int skillCooldown = 20;
 
             Box box = HelperMethods.createBox(user, 10);
@@ -94,10 +103,12 @@ public class DreadtideSwordItem extends UniqueSwordItem {
                                     EffectRegistry.getReference(EffectRegistry.VOIDASSAULT), voidcallerDuration, voidcloakEffect.getAmplifier(), false,
                                     false, true);
                             voidAssaultEffect.setSourceEntity(user);
-                            voidAssaultEffect.setAdditionalData((int) (HelperMethods.getEntityAttackDamage(user) * voidcallerDamageModifier));
+                            voidAssaultEffect.setAdditionalData((int) HelperMethods.abilityScaledDamage(
+                                    "eldritch", user, stack, voidcallerDamageModifier,
+                                    Config.uniqueEffects.dreadtide.get().spellScaling));
                             ee.addStatusEffect(voidAssaultEffect);
                             user.removeStatusEffect(EffectRegistry.getReference(EffectRegistry.VOIDCLOAK));
-                            user.getItemCooldownManager().set(this, skillCooldown);
+                            SimplySwordsAPI.setWeaponCooldown(user, stack, skillCooldown);
                         }
                     }
                 }
@@ -135,10 +146,13 @@ public class DreadtideSwordItem extends UniqueSwordItem {
         tooltip.add(Text.literal(""));
         tooltip.add(ability_icon.append(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.CORRUPTED_LIGHT)));
         tooltip.add(Text.translatable("item.simplyswords.dreadtidesworditem.tooltip8").setStyle(Styles.TEXT));
+        appendAbilityCooldownTooltip(tooltip, itemStack, 20);
+        appendAbilityManaCostTooltip(tooltip, itemStack);
         tooltip.add(Text.literal(""));
         tooltip.add(Text.literal("\uA999 ").append(Text.translatable("item.simplyswords.dreadtidesworditem.tooltip12").setStyle(Styles.CORRUPTED)));
 
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        net.sweenus.simplyswords.client.util.TooltipUtils.appendWeaponSpellScaleTooltip(tooltip, itemStack, "eldritch");
     }
 
     public static class EffectSettings extends TooltipSettings {
@@ -148,7 +162,9 @@ public class DreadtideSwordItem extends UniqueSwordItem {
         }
 
         @ValidatedFloat.Restrict(min = 0)
-        public float damageModifier = 1.0f;
+        public float damageScaling = 0.8f;
+        @ValidatedFloat.Restrict(min = 0)
+        public float spellScaling = 4.03f;
         @ValidatedInt.Restrict(min = 0)
         public int duration = 250;
         @ValidatedInt.Restrict(min = 1)

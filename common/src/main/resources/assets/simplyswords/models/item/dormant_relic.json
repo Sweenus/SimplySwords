@@ -2,5 +2,23 @@
 	"parent": "simplyswords:item/template_longsword",
 	"textures": {
 		"layer0": "simplyswords:item/unique_longsword_dull"
-	}
+	},
+	"overrides": [
+		{
+			"predicate": {"simplyswords:relic_form": 0.25},
+			"model": "simplyswords:item/righteous_relic"
+		},
+		{
+			"predicate": {"simplyswords:relic_form": 0.5},
+			"model": "simplyswords:item/tainted_relic"
+		},
+		{
+			"predicate": {"simplyswords:relic_form": 0.75},
+			"model": "simplyswords:item/sunfire"
+		},
+		{
+			"predicate": {"simplyswords:relic_form": 1.0},
+			"model": "simplyswords:item/harbinger"
+		}
+	]
 }

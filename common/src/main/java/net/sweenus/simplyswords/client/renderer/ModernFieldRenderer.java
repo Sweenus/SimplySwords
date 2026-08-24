@@ -1,0 +1,410 @@
+package net.sweenus.simplyswords.client.renderer;
+
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.VertexConsumer;
+import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
+import net.sweenus.simplyswords.config.Config;
+import org.joml.Matrix4f;
+
+@Environment(EnvType.CLIENT)
+public final class ModernFieldRenderer {
+
+    private static final double FIELD_RADIUS = 6.0;
+    private static final float BORDER_HALF_THICKNESS = 0.12F;
+    private static final float Y_OFFSET = 0.055F;
+    private static final float WAVE_HALF_THICKNESS = 0.055F;
+    private static final float WAVE_START_RADIUS = 0.75F;
+    private static final int WAVE_INTERVAL_TICKS = 40;
+    private static final float WAVE_DURATION_TICKS = 28.0F;
+    private static final int CIRCLE_SEGMENTS = 96;
+
+    private ModernFieldRenderer() {
+    }
+
+    public static boolean isEnabled() {
+        return Config.general.enableModernFieldEffects;
+    }
+
+    public static void renderSunfire(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int age) {
+        if (!isEnabled()) {
+            return;
+        }
+        renderRing(matrices, vertexConsumers, age, 255, 179, 64);
+    }
+
+    public static void renderHarbinger(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int age) {
+        if (!isEnabled()) {
+            return;
+        }
+        renderRing(matrices, vertexConsumers, age, 157, 98, 202);
+    }
+
+    public static void renderImmolation(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int age, float radius) {
+        if (!isEnabled()) {
+            return;
+        }
+        renderCircle(matrices, vertexConsumers, age, Math.max(0.75F, radius), 255, 179, 64);
+    }
+
+    public static void renderBrimstoneCircle(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int age, float radius) {
+        if (!isEnabled()) {
+            return;
+        }
+        renderCircle(matrices, vertexConsumers, age, Math.max(0.75F, radius), 255, 91, 28);
+    }
+
+    public static void renderStormscaleCircle(MatrixStack matrices, VertexConsumerProvider vertexConsumers,
+                                              float age, float pulseAge, float radius) {
+        if (!isEnabled()) {
+            return;
+        }
+
+        Matrix4f matrix = matrices.peek().getPositionMatrix();
+        VertexConsumer vertices = vertexConsumers.getBuffer(RenderLayer.getDebugQuads());
+        float clampedRadius = Math.max(0.75F, radius);
+        float borderPulse = 0.78F + 0.16F * MathHelper.sin(age * 0.19F);
+        int borderAlpha = MathHelper.clamp((int) (190.0F * borderPulse), 110, 210);
+        drawCircleBand(vertices, matrix, clampedRadius, 0.095F,
+                66, 200, 255, borderAlpha);
+        drawCircleBand(vertices, matrix, Math.max(0.3F, clampedRadius * 0.34F), 0.045F,
+                221, 250, 255, MathHelper.clamp((int) (115.0F * borderPulse), 55, 130));
+
+        if (pulseAge < 0.0F || pulseAge > 14.0F) {
+            return;
+        }
+        float progress = MathHelper.clamp(pulseAge / 14.0F, 0.0F, 1.0F);
+        float eased = 1.0F - (1.0F - progress) * (1.0F - progress);
+        float waveRadius = MathHelper.lerp(eased, 0.25F, clampedRadius);
+        float fade = 1.0F - progress;
+        drawCircleBand(vertices, matrix, waveRadius, 0.11F,
+                235, 253, 255, MathHelper.clamp((int) (230.0F * fade), 0, 230));
+        for (int trail = 1; trail <= 4; trail++) {
+            float trailRadius = waveRadius - trail * 0.24F;
+            if (trailRadius <= 0.12F) {
+                continue;
+            }
+            float trailFade = fade * (1.0F - trail * 0.16F);
+            drawCircleBand(vertices, matrix, trailRadius, 0.052F,
+                    66, 200, 255, MathHelper.clamp((int) (145.0F * trailFade), 0, 145));
+        }
+    }
+
+    public static void renderParchmentTargetLine(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int age, Vec3d targetOffset) {
+        renderTargetLine(matrices, vertexConsumers, age, targetOffset, 242, 216, 154, 255, 236, 176);
+    }
+
+    public static void renderParchmentTargetRing(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int age, Vec3d targetOffset, float targetWidth) {
+        renderTargetRing(matrices, vertexConsumers, age, targetOffset, targetWidth, 242, 216, 154, 255, 236, 176);
+    }
+
+    public static void renderSoulstealerTargetLine(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int age, Vec3d targetOffset) {
+        renderTargetLine(matrices, vertexConsumers, age, targetOffset, 118, 238, 218, 157, 98, 202);
+    }
+
+    public static void renderEmberTargetLine(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int age, Vec3d targetOffset) {
+        renderTargetLine(matrices, vertexConsumers, age, targetOffset, 255, 176, 48, 255, 58, 18);
+    }
+
+    public static void renderBrimstoneTargetLine(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int age, Vec3d targetOffset) {
+        renderTargetLine(matrices, vertexConsumers, age, targetOffset, 255, 142, 48, 255, 64, 24);
+    }
+
+    public static void renderWatcherTargetLine(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int age, Vec3d targetOffset) {
+        renderTargetLine(matrices, vertexConsumers, age, targetOffset, 88, 34, 112, 174, 58, 214);
+    }
+
+    public static void renderWaxTargetLine(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int age, Vec3d targetOffset) {
+        renderTargetLine(matrices, vertexConsumers, age, targetOffset, 255, 184, 52, 255, 236, 148);
+    }
+
+    public static void renderBrambleTargetLine(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int age, Vec3d targetOffset) {
+        renderTargetLine(matrices, vertexConsumers, age, targetOffset, 52, 103, 43, 162, 226, 91);
+    }
+
+    public static void renderTargetLine(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int age, Vec3d targetOffset, int coreRed, int coreGreen, int coreBlue, int pulseRed, int pulseGreen, int pulseBlue) {
+        if (!isEnabled()) {
+            return;
+        }
+
+        Vec3d horizontalOffset = new Vec3d(targetOffset.x, 0.0, targetOffset.z);
+        if (horizontalOffset.horizontalLengthSquared() < 0.01) {
+            return;
+        }
+
+        Matrix4f matrix = matrices.peek().getPositionMatrix();
+        VertexConsumer vertices = vertexConsumers.getBuffer(RenderLayer.getDebugQuads());
+        Vec3d line = new Vec3d(targetOffset.x, targetOffset.y, targetOffset.z);
+        Vec3d direction = line.normalize();
+        Vec3d horizontalDirection = horizontalOffset.normalize();
+        Vec3d side = new Vec3d(-horizontalDirection.z, 0.0, horizontalDirection.x);
+        double length = horizontalOffset.horizontalLength();
+        double startInset = Math.min(0.85, length * 0.18);
+        double endInset = Math.min(0.75, length * 0.14);
+        if (length <= startInset + endInset + 0.25) {
+            return;
+        }
+
+        double fullLength = line.length();
+        double startDistance = fullLength * (startInset / length);
+        double endDistance = fullLength * ((length - endInset) / length);
+        Vec3d start = direction.multiply(startDistance);
+        Vec3d end = direction.multiply(endDistance);
+        float pulse = 0.72F + 0.16F * MathHelper.sin(age * 0.16F);
+        int coreAlpha = MathHelper.clamp((int) (155.0F * pulse), 95, 180);
+
+        drawLineBand(vertices, matrix, start, end, side, 0.09F, coreRed, coreGreen, coreBlue, coreAlpha);
+        drawLinePulse(vertices, matrix, age, start, end, side, pulseRed, pulseGreen, pulseBlue);
+    }
+
+    public static void renderSoulstealerTargetRing(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int age, Vec3d targetOffset, float targetWidth) {
+        renderTargetRing(matrices, vertexConsumers, age, targetOffset, targetWidth, 118, 238, 218, 157, 98, 202);
+    }
+
+    public static void renderEmberTargetRing(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int age, Vec3d targetOffset, float targetWidth) {
+        renderTargetRing(matrices, vertexConsumers, age, targetOffset, targetWidth, 255, 176, 48, 255, 58, 18);
+    }
+
+    public static void renderBrimstoneTargetRing(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int age, Vec3d targetOffset, float targetWidth) {
+        renderTargetRing(matrices, vertexConsumers, age, targetOffset, targetWidth, 255, 142, 48, 255, 64, 24);
+    }
+
+    public static void renderWatcherTargetRing(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int age, Vec3d targetOffset, float targetWidth) {
+        renderTargetRing(matrices, vertexConsumers, age, targetOffset, targetWidth, 88, 34, 112, 174, 58, 214);
+    }
+
+    public static void renderWaxTargetRing(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int age, Vec3d targetOffset, float targetWidth) {
+        renderTargetRing(matrices, vertexConsumers, age, targetOffset, targetWidth, 255, 184, 52, 255, 236, 148);
+    }
+
+    public static void renderBrambleTargetRing(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int age, Vec3d targetOffset, float targetWidth) {
+        renderTargetRing(matrices, vertexConsumers, age, targetOffset, targetWidth, 52, 103, 43, 162, 226, 91);
+    }
+
+    public static void renderTargetRing(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int age, Vec3d targetOffset, float targetWidth, int borderRed, int borderGreen, int borderBlue, int waveRed, int waveGreen, int waveBlue) {
+        if (!isEnabled()) {
+            return;
+        }
+
+        Matrix4f matrix = matrices.peek().getPositionMatrix();
+        VertexConsumer vertices = vertexConsumers.getBuffer(RenderLayer.getDebugQuads());
+        Vec3d center = new Vec3d(targetOffset.x, targetOffset.y, targetOffset.z);
+        float radius = Math.max(0.75F, targetWidth * 0.72F + 0.35F);
+        float borderPulse = 0.76F + 0.12F * MathHelper.sin(age * 0.14F);
+        int borderAlpha = MathHelper.clamp((int) (165.0F * borderPulse), 90, 185);
+
+        drawOffsetCircleWave(vertices, matrix, center, age, radius, waveRed, waveGreen, waveBlue);
+        drawOffsetCircleBand(vertices, matrix, center, radius, 0.08F, borderRed, borderGreen, borderBlue, borderAlpha);
+    }
+
+    public static void renderRing(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int age, int red, int green, int blue) {
+        Matrix4f matrix = matrices.peek().getPositionMatrix();
+        VertexConsumer vertices = vertexConsumers.getBuffer(RenderLayer.getDebugQuads());
+        float borderPulse = 0.76F + 0.12F * MathHelper.sin(age * 0.12F);
+        int borderAlpha = MathHelper.clamp((int) (170.0F * borderPulse), 95, 190);
+        float radius = (float) FIELD_RADIUS;
+
+        drawWave(vertices, matrix, age, radius, red, green, blue);
+        drawQuad(vertices, matrix, -radius, radius - BORDER_HALF_THICKNESS, radius, radius + BORDER_HALF_THICKNESS, red, green, blue, borderAlpha);
+        drawQuad(vertices, matrix, -radius, -radius - BORDER_HALF_THICKNESS, radius, -radius + BORDER_HALF_THICKNESS, red, green, blue, borderAlpha);
+        drawQuad(vertices, matrix, -radius - BORDER_HALF_THICKNESS, -radius, -radius + BORDER_HALF_THICKNESS, radius, red, green, blue, borderAlpha);
+        drawQuad(vertices, matrix, radius - BORDER_HALF_THICKNESS, -radius, radius + BORDER_HALF_THICKNESS, radius, red, green, blue, borderAlpha);
+    }
+
+    private static void drawWave(VertexConsumer vertices, Matrix4f matrix, int age, float radius, int red, int green, int blue) {
+        int ticksSinceWaveStart = Math.floorMod(age, WAVE_INTERVAL_TICKS);
+        if (ticksSinceWaveStart >= WAVE_DURATION_TICKS) {
+            return;
+        }
+
+        float progress = ticksSinceWaveStart / WAVE_DURATION_TICKS;
+        float waveRadius = MathHelper.lerp(progress, WAVE_START_RADIUS, radius);
+        float fade = 1.0F - progress;
+
+        drawWaveRing(vertices, matrix, waveRadius, WAVE_HALF_THICKNESS, red, green, blue, MathHelper.clamp((int) (120.0F * fade), 0, 120));
+        for (int trailIndex = 1; trailIndex <= 3; trailIndex++) {
+            float trailRadius = waveRadius - trailIndex * 0.45F;
+            if (trailRadius <= WAVE_START_RADIUS) {
+                continue;
+            }
+
+            float trailFade = fade * (1.0F - trailIndex * 0.22F);
+            int trailAlpha = MathHelper.clamp((int) (70.0F * trailFade), 0, 70);
+            drawWaveRing(vertices, matrix, trailRadius, WAVE_HALF_THICKNESS, red, green, blue, trailAlpha);
+        }
+    }
+
+    private static void drawWaveRing(VertexConsumer vertices, Matrix4f matrix, float radius, float halfThickness, int red, int green, int blue, int alpha) {
+        if (alpha <= 0) {
+            return;
+        }
+
+        drawQuad(vertices, matrix, -radius, radius - halfThickness, radius, radius + halfThickness, red, green, blue, alpha);
+        drawQuad(vertices, matrix, -radius, -radius - halfThickness, radius, -radius + halfThickness, red, green, blue, alpha);
+        drawQuad(vertices, matrix, -radius - halfThickness, -radius, -radius + halfThickness, radius, red, green, blue, alpha);
+        drawQuad(vertices, matrix, radius - halfThickness, -radius, radius + halfThickness, radius, red, green, blue, alpha);
+    }
+
+    public static void renderCircle(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int age, float radius, int red, int green, int blue) {
+        Matrix4f matrix = matrices.peek().getPositionMatrix();
+        VertexConsumer vertices = vertexConsumers.getBuffer(RenderLayer.getDebugQuads());
+        float borderPulse = 0.76F + 0.12F * MathHelper.sin(age * 0.12F);
+        int borderAlpha = MathHelper.clamp((int) (170.0F * borderPulse), 95, 190);
+
+        drawCircleWave(vertices, matrix, age, radius, red, green, blue);
+        drawCircleBand(vertices, matrix, radius, BORDER_HALF_THICKNESS, red, green, blue, borderAlpha);
+    }
+
+    private static void drawCircleWave(VertexConsumer vertices, Matrix4f matrix, int age, float radius, int red, int green, int blue) {
+        int ticksSinceWaveStart = Math.floorMod(age, WAVE_INTERVAL_TICKS);
+        if (ticksSinceWaveStart >= WAVE_DURATION_TICKS) {
+            return;
+        }
+
+        float progress = ticksSinceWaveStart / WAVE_DURATION_TICKS;
+        float waveRadius = MathHelper.lerp(progress, Math.min(WAVE_START_RADIUS, radius * 0.35F), radius);
+        float fade = 1.0F - progress;
+
+        drawCircleBand(vertices, matrix, waveRadius, WAVE_HALF_THICKNESS, red, green, blue, MathHelper.clamp((int) (120.0F * fade), 0, 120));
+        for (int trailIndex = 1; trailIndex <= 3; trailIndex++) {
+            float trailRadius = waveRadius - trailIndex * 0.32F;
+            if (trailRadius <= 0.2F) {
+                continue;
+            }
+
+            float trailFade = fade * (1.0F - trailIndex * 0.22F);
+            int trailAlpha = MathHelper.clamp((int) (70.0F * trailFade), 0, 70);
+            drawCircleBand(vertices, matrix, trailRadius, WAVE_HALF_THICKNESS, red, green, blue, trailAlpha);
+        }
+    }
+
+    private static void drawCircleBand(VertexConsumer vertices, Matrix4f matrix, float radius, float halfThickness, int red, int green, int blue, int alpha) {
+        if (alpha <= 0) {
+            return;
+        }
+
+        float innerRadius = Math.max(0.0F, radius - halfThickness);
+        float outerRadius = radius + halfThickness;
+        for (int i = 0; i < CIRCLE_SEGMENTS; i++) {
+            double angle = (Math.PI * 2.0 * i) / CIRCLE_SEGMENTS;
+            double nextAngle = (Math.PI * 2.0 * (i + 1)) / CIRCLE_SEGMENTS;
+            float innerX = (float) (Math.cos(angle) * innerRadius);
+            float innerZ = (float) (Math.sin(angle) * innerRadius);
+            float outerX = (float) (Math.cos(angle) * outerRadius);
+            float outerZ = (float) (Math.sin(angle) * outerRadius);
+            float nextInnerX = (float) (Math.cos(nextAngle) * innerRadius);
+            float nextInnerZ = (float) (Math.sin(nextAngle) * innerRadius);
+            float nextOuterX = (float) (Math.cos(nextAngle) * outerRadius);
+            float nextOuterZ = (float) (Math.sin(nextAngle) * outerRadius);
+
+            vertices.vertex(matrix, innerX, Y_OFFSET, innerZ).color(red, green, blue, alpha);
+            vertices.vertex(matrix, outerX, Y_OFFSET, outerZ).color(red, green, blue, alpha);
+            vertices.vertex(matrix, nextOuterX, Y_OFFSET, nextOuterZ).color(red, green, blue, alpha);
+            vertices.vertex(matrix, nextInnerX, Y_OFFSET, nextInnerZ).color(red, green, blue, alpha);
+        }
+    }
+
+    private static void drawOffsetCircleWave(VertexConsumer vertices, Matrix4f matrix, Vec3d center, int age, float radius, int red, int green, int blue) {
+        int ticksSinceWaveStart = Math.floorMod(age, WAVE_INTERVAL_TICKS);
+        if (ticksSinceWaveStart >= WAVE_DURATION_TICKS) {
+            return;
+        }
+
+        float progress = ticksSinceWaveStart / WAVE_DURATION_TICKS;
+        float waveRadius = MathHelper.lerp(progress, Math.min(WAVE_START_RADIUS, radius * 0.35F), radius);
+        float fade = 1.0F - progress;
+
+        drawOffsetCircleBand(vertices, matrix, center, waveRadius, WAVE_HALF_THICKNESS, red, green, blue, MathHelper.clamp((int) (110.0F * fade), 0, 110));
+        for (int trailIndex = 1; trailIndex <= 2; trailIndex++) {
+            float trailRadius = waveRadius - trailIndex * 0.24F;
+            if (trailRadius <= 0.2F) {
+                continue;
+            }
+
+            float trailFade = fade * (1.0F - trailIndex * 0.25F);
+            int trailAlpha = MathHelper.clamp((int) (60.0F * trailFade), 0, 60);
+            drawOffsetCircleBand(vertices, matrix, center, trailRadius, WAVE_HALF_THICKNESS, red, green, blue, trailAlpha);
+        }
+    }
+
+    private static void drawOffsetCircleBand(VertexConsumer vertices, Matrix4f matrix, Vec3d center, float radius, float halfThickness, int red, int green, int blue, int alpha) {
+        if (alpha <= 0) {
+            return;
+        }
+
+        float innerRadius = Math.max(0.0F, radius - halfThickness);
+        float outerRadius = radius + halfThickness;
+        float y = (float) center.y + Y_OFFSET;
+        for (int i = 0; i < CIRCLE_SEGMENTS; i++) {
+            double angle = (Math.PI * 2.0 * i) / CIRCLE_SEGMENTS;
+            double nextAngle = (Math.PI * 2.0 * (i + 1)) / CIRCLE_SEGMENTS;
+            float innerX = (float) center.x + (float) (Math.cos(angle) * innerRadius);
+            float innerZ = (float) center.z + (float) (Math.sin(angle) * innerRadius);
+            float outerX = (float) center.x + (float) (Math.cos(angle) * outerRadius);
+            float outerZ = (float) center.z + (float) (Math.sin(angle) * outerRadius);
+            float nextInnerX = (float) center.x + (float) (Math.cos(nextAngle) * innerRadius);
+            float nextInnerZ = (float) center.z + (float) (Math.sin(nextAngle) * innerRadius);
+            float nextOuterX = (float) center.x + (float) (Math.cos(nextAngle) * outerRadius);
+            float nextOuterZ = (float) center.z + (float) (Math.sin(nextAngle) * outerRadius);
+
+            vertices.vertex(matrix, innerX, y, innerZ).color(red, green, blue, alpha);
+            vertices.vertex(matrix, outerX, y, outerZ).color(red, green, blue, alpha);
+            vertices.vertex(matrix, nextOuterX, y, nextOuterZ).color(red, green, blue, alpha);
+            vertices.vertex(matrix, nextInnerX, y, nextInnerZ).color(red, green, blue, alpha);
+        }
+    }
+
+    private static void drawLinePulse(VertexConsumer vertices, Matrix4f matrix, int age, Vec3d start, Vec3d end, Vec3d side, int red, int green, int blue) {
+        Vec3d line = end.subtract(start);
+        double length = line.length();
+        if (length <= 0.01) {
+            return;
+        }
+
+        Vec3d direction = line.normalize();
+        int ticksSinceWaveStart = Math.floorMod(age, WAVE_INTERVAL_TICKS);
+        if (ticksSinceWaveStart >= WAVE_DURATION_TICKS) {
+            return;
+        }
+
+        float progress = ticksSinceWaveStart / WAVE_DURATION_TICKS;
+        double centerDistance = MathHelper.lerp(progress, 0.0F, (float) length);
+        float fade = 1.0F - progress;
+        for (int trailIndex = 0; trailIndex <= 3; trailIndex++) {
+            double trailDistance = centerDistance - trailIndex * 0.42;
+            if (trailDistance < 0.0 || trailDistance > length) {
+                continue;
+            }
+
+            double halfLength = trailIndex == 0 ? 0.42 : 0.32;
+            Vec3d pulseStart = start.add(direction.multiply(Math.max(0.0, trailDistance - halfLength)));
+            Vec3d pulseEnd = start.add(direction.multiply(Math.min(length, trailDistance + halfLength)));
+            float trailFade = fade * (1.0F - trailIndex * 0.2F);
+            int alpha = MathHelper.clamp((int) (120.0F * trailFade), 0, 120);
+            drawLineBand(vertices, matrix, pulseStart, pulseEnd, side, 0.16F, red, green, blue, alpha);
+        }
+    }
+
+    private static void drawLineBand(VertexConsumer vertices, Matrix4f matrix, Vec3d start, Vec3d end, Vec3d side, float halfThickness, int red, int green, int blue, int alpha) {
+        if (alpha <= 0) {
+            return;
+        }
+
+        Vec3d offset = side.multiply(halfThickness);
+        vertices.vertex(matrix, (float) (start.x + offset.x), (float) start.y + Y_OFFSET, (float) (start.z + offset.z)).color(red, green, blue, alpha);
+        vertices.vertex(matrix, (float) (end.x + offset.x), (float) end.y + Y_OFFSET, (float) (end.z + offset.z)).color(red, green, blue, alpha);
+        vertices.vertex(matrix, (float) (end.x - offset.x), (float) end.y + Y_OFFSET, (float) (end.z - offset.z)).color(red, green, blue, alpha);
+        vertices.vertex(matrix, (float) (start.x - offset.x), (float) start.y + Y_OFFSET, (float) (start.z - offset.z)).color(red, green, blue, alpha);
+    }
+
+    private static void drawQuad(VertexConsumer vertices, Matrix4f matrix, float minX, float minZ, float maxX, float maxZ, int red, int green, int blue, int alpha) {
+        vertices.vertex(matrix, minX, Y_OFFSET, minZ).color(red, green, blue, alpha);
+        vertices.vertex(matrix, minX, Y_OFFSET, maxZ).color(red, green, blue, alpha);
+        vertices.vertex(matrix, maxX, Y_OFFSET, maxZ).color(red, green, blue, alpha);
+        vertices.vertex(matrix, maxX, Y_OFFSET, minZ).color(red, green, blue, alpha);
+    }
+}

@@ -1,5 +1,6 @@
 package net.sweenus.simplyswords.client.renderer;
 
+import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.client.render.entity.EntityRendererFactory;
@@ -43,7 +44,7 @@ public class ThrownSwordEntityRenderer extends EntityRenderer<ThrownSwordEntity>
                     matrices,
                     vertexConsumers,
                     light,
-                    0,
+                    OverlayTexture.DEFAULT_UV,
                     model
             );
 

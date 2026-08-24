@@ -4,17 +4,28 @@ icon: simplyswords:runic_tablet
 ---
 
 ## How do I prevent my weapon abilities from hurting my friends?
-Simply Swords utilises Vanilla Minecraft Teams. To ensure you do not damage your friends, you will need ot join the same team using the in-game commands below:
+Simply Swords respects vanilla Minecraft teams. To prevent weapon abilities from damaging your friends, join the same team using commands such as:
 ```
 /team add teamname
 /team join teamname
 ```
 
-Alternatively, you can also use Open Parties and Claims to manage friendly fire in the same way by joining a party.
-## How do I allow my weapon abilities to buff/heal my friends?
-See the commands above ^
+Open Parties and Claims can also provide team relationships when it is installed.
 
+## How do I stop weapon abilities from hitting my animals?
 
-### Note:  
-  
-Disabling PvP on the server will have the same effect.
+The `abilityIgnoredEntities` option in the general config lists everything that weapon and gem abilities will never target or damage. It defaults to `passive`, `minecraft:armor_stand` and `minecraft:villager`, so farm animals are left alone out of the box.
+
+Each entry can be one of three things:
+
+- An entity ID, such as `minecraft:cow`.
+- An entity tag, prefixed with `#`, such as `#minecraft:skeletons`.
+- A category keyword: `passive`, `animal`, `villager`, `hostile`, `water`, `ambient`, `golem`, `player` or `tameable`.
+
+`passive` covers breedable and ageing mobs, which does not include squid, bats or golems — add `water`, `ambient` or `golem` if you want those excluded too.
+
+Ignored entities can still be attacked normally. Only ability targeting and ability damage skip them, so you can still kill a cow by hitting it.
+
+## How do I allow weapon abilities to buff or heal my friends?
+
+Use the same team or party setup. Friendly effects recognise allies through the same relationship used to prevent friendly fire. Disabling PvP on the server also prevents player-on-player ability damage.

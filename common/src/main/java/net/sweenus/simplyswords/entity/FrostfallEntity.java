@@ -10,11 +10,14 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
+import net.sweenus.simplyswords.world.FrostfallIceSpikeFieldManager;
 
 public class FrostfallEntity extends ThrownSwordEntity {
     private int remainingDetonations = 5;
@@ -51,6 +54,24 @@ public class FrostfallEntity extends ThrownSwordEntity {
     }
 
     @Override
+    protected void onEntityHit(EntityHitResult entityHitResult) {
+        Entity entity = entityHitResult.getEntity();
+        if (this.getOwner() instanceof LivingEntity owner && entity instanceof LivingEntity target
+                && !HelperMethods.checkAbilityTarget(target, owner)) {
+            return;
+        }
+        boolean wasNonReturning = this.nonReturning;
+        this.nonReturning = false;
+        super.onEntityHit(entityHitResult);
+        this.nonReturning = wasNonReturning;
+        if (!this.isRemoved()) {
+            this.inGround = true;
+            this.setVelocity(Vec3d.ZERO);
+            this.velocityModified = true;
+        }
+    }
+
+    @Override
     protected void doOnTick(Entity entity) {
         super.doOnTick(entity);
 
@@ -69,12 +90,16 @@ public class FrostfallEntity extends ThrownSwordEntity {
                 if ((age % detonateDelay == 0) && remainingDetonations > 0) {
                     int detonateCount = remainingDetonations;
 
+                    float pulseMultiplier = (6.0f - detonateCount) / 5.0f;
+                    float pulseDamage = detonateDamage * pulseMultiplier;
+
                     Box box = HelperMethods.createBox(this, detonateRadius - detonateCount);
 
                     for (Entity otherEntity : world.getOtherEntities(this, box, EntityPredicates.VALID_LIVING_ENTITY)) {
                         if ((otherEntity instanceof LivingEntity le) &&
                                 HelperMethods.checkFriendlyFire(le, livingEntity)) {
-                            HelperMethods.damageThroughIframes(le, damageSource, detonateDamage - detonateCount);
+                            float damage = HelperMethods.applyAbilityDamageEnchantments(world, stack, le, damageSource, pulseDamage);
+                            HelperMethods.damageThroughIframes(le, damageSource, damage);
                             le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, duration, Math.min( 3, 6-detonateCount)), livingEntity);
                             if (le.distanceTo(this) > 1)
                                 le.setVelocity((this.getX() - le.getX()) / 8, (this.getY() - le.getY()) / 8, (this.getZ() - le.getZ()) / 8);
@@ -97,6 +122,7 @@ public class FrostfallEntity extends ThrownSwordEntity {
                     HelperMethods.spawnOrbitParticles(world, this.getPos(), ParticleTypes.CRIT, 6f - detonateCount, 15 - detonateCount);
                     HelperMethods.spawnOrbitParticles(world, this.getPos(), ParticleTypes.ITEM_SNOWBALL, 6f - detonateCount, 10 - detonateCount);
                     HelperMethods.spawnOrbitParticles(world, this.getPos().add(0, 1, 0), ParticleTypes.WHITE_ASH, 6f - detonateCount, 40 - detonateCount);
+                    FrostfallIceSpikeFieldManager.createPulse(world, this.getPos(), detonateRadius - detonateCount, detonateCount);
 
                     if (random.nextInt(100) > chance)
                         remainingDetonations--;

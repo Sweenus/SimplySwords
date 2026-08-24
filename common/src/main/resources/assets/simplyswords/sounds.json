@@ -823,5 +823,82 @@
     "sounds": [
       "simplyswords:distortion_arc_03"
     ]
+  },
+  "devourer_mass_aggressive_snarl": {
+    "sounds": [
+      "simplyswords:devourer_mass_aggressive_snarl"
+    ]
+  },
+  "devourer_mass_bellow_variation_01": {
+    "sounds": [
+      "simplyswords:devourer_mass_bellow_variation_01"
+    ]
+  },
+  "devourer_mass_bellow_variation_02": {
+    "sounds": [
+      "simplyswords:devourer_mass_bellow_variation_02"
+    ]
+  },
+  "devourer_mass_heavy_breathing": {
+    "sounds": [
+      "simplyswords:devourer_mass_heavy_breathing"
+    ]
+  },
+  "devourer_mass_warning_rumble": {
+    "sounds": [
+      "simplyswords:devourer_mass_warning_rumble"
+    ]
+  },
+  "soulstalker_leap_attack_land": {
+    "sounds": [
+      "simplyswords:soulstalker_leap_attack_land"
+    ]
+  },
+  "soulstalker_idle_warning_rattle": {
+    "sounds": [
+      "simplyswords:soulstalker_idle_warning_rattle"
+    ]
+  },
+  "soulstalker_idle_wet_breathing": {
+    "sounds": [
+      "simplyswords:soulstalker_idle_wet_breathing"
+    ]
+  },
+  "soulstalker_idle_low_hiss": {
+    "sounds": [
+      "simplyswords:soulstalker_idle_low_hiss"
+    ]
+  },
+  "caelestis_creature_ambient": {
+    "sounds": [
+      "simplyswords:caelestis_creature_ambient_01",
+      "simplyswords:caelestis_creature_ambient_02",
+      "simplyswords:caelestis_creature_ambient_03"
+    ]
+  },
+  "caelestis_creature_hurt": {
+    "sounds": [
+      "simplyswords:caelestis_creature_hurt_01",
+      "simplyswords:caelestis_creature_hurt_02"
+    ]
+  },
+  "caelestis_creature_attack": {
+    "sounds": [
+      "simplyswords:caelestis_creature_attack_01",
+      "simplyswords:caelestis_creature_attack_02"
+    ]
+  },
+  "caelestis_creature_arrival": {
+    "sounds": [
+      "simplyswords:caelestis_creature_arrival"
+    ]
+  },
+  "caelestis_breach_ambience": {
+    "sounds": [
+      {
+        "name": "simplyswords:caelestis_breach_ambience",
+        "stream": true
+      }
+    ]
   }
 }

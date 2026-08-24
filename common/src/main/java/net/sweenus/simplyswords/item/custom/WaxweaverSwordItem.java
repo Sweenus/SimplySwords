@@ -1,14 +1,17 @@
 package net.sweenus.simplyswords.item.custom;
 
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
+import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
@@ -17,19 +20,29 @@ import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
+import net.sweenus.simplyswords.item.interfaces.RevivalWeapon;
+import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
+import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
+import net.sweenus.simplyswords.world.RevivalCandleVisualManager;
+import net.sweenus.simplyswords.world.RevivalCooldownManager;
+import net.sweenus.simplyswords.world.WaxweaverEncasementManager;
+import net.sweenus.simplyswords.api.WeaponAbilityContext;
 
 import java.util.List;
 
-public class WaxweaverSwordItem extends UniqueSwordItem {
+public class WaxweaverSwordItem extends UniqueSwordItem implements RevivalWeapon, UniqueWeaponActiveAbility {
     public WaxweaverSwordItem(ToolMaterial toolMaterial, Settings settings) {
         super(toolMaterial, settings);
     }
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        if (!net.sweenus.simplyswords.api.AwakeningApi.isAbilityUnlocked(stack)) {
+            return super.postHit(stack, target, attacker);
+        }
         if (!attacker.getWorld().isClient()) {
             int maximum_stacks = Config.uniqueEffects.waxweaver.maxStacks;
             HelperMethods.playHitSounds(attacker, target);
@@ -44,9 +57,55 @@ public class WaxweaverSwordItem extends UniqueSwordItem {
     }
 
     @Override
-    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
+    public boolean canRevive(LivingEntity entity, ItemStack stack, DamageSource source) {
+        if (!net.sweenus.simplyswords.api.AwakeningApi.isAbilityUnlocked(stack)
+                || source.isIn(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
+            return false;
+        }
+        return entity.getWorld() instanceof net.minecraft.server.world.ServerWorld serverWorld
+                && !RevivalCooldownManager.isCoolingDown(serverWorld, entity, stack);
+    }
 
-        return super.use(world, user, hand);
+    @Override
+    public void postRevive(LivingEntity entity, ItemStack stack, DamageSource source) {
+        int skillCooldown = Config.uniqueEffects.waxweaver.cooldown;
+        if (entity instanceof net.minecraft.server.network.ServerPlayerEntity serverPlayer) {
+            RevivalCandleVisualManager.activate(serverPlayer, stack);
+        }
+        if (entity.getWorld() instanceof net.minecraft.server.world.ServerWorld serverWorld)
+            RevivalCooldownManager.setCooldown(serverWorld, entity, stack, skillCooldown);
+        HelperMethods.incrementStatusEffect(entity, StatusEffects.RESISTANCE, 100, 2, 3);
+
+        World world = entity.getWorld();
+        world.playSound(null, entity.getBlockPos(), SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
+                entity.getSoundCategory(), 0.7f, 1.0f);
+        world.playSound(null, entity.getBlockPos(), SoundRegistry.SPELL_MISC_02.get(),
+                entity.getSoundCategory(), 0.8f, 1.0f);
+    }
+
+    @Override
+    public float getReviveHealth(LivingEntity entity, ItemStack stack, DamageSource source) {
+        return entity.getMaxHealth();
+    }
+
+    @Override
+    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
+        return useFromDefaultInput(world, user, hand);
+    }
+
+    @Override
+    public boolean canActivate(WeaponAbilityContext context) {
+        return WaxweaverEncasementManager.canStart(context);
+    }
+
+    @Override
+    public boolean activate(WeaponAbilityContext context) {
+        return WaxweaverEncasementManager.start(context);
+    }
+
+    @Override
+    public int getActivationCooldownTicks(ItemStack stack, WeaponAbilityContext context) {
+        return Config.uniqueEffects.waxweaver.activeCooldown;
     }
 
     @Override
@@ -64,9 +123,21 @@ public class WaxweaverSwordItem extends UniqueSwordItem {
         tooltip.add(Text.literal(""));
         tooltip.add(Text.translatable("item.simplyswords.waxweaversworditem.tooltip4").setStyle(Styles.TEXT));
         tooltip.add(Text.literal(""));
-        tooltip.add(Text.translatable("item.simplyswords.waxweaversworditem.tooltip8", Config.uniqueEffects.waxweaver.cooldown / 20).setStyle(Styles.TEXT));
+        tooltip.add(Text.translatable("item.simplyswords.waxweaversworditem.tooltip8",
+                net.sweenus.simplyswords.client.util.TooltipUtils.getEffectiveWeaponCooldownTicks(
+                        itemStack, Config.uniqueEffects.waxweaver.cooldown) / 20).setStyle(Styles.TEXT));
+        tooltip.add(Text.literal(""));
+        tooltip.add(Text.translatable("item.simplyswords.onrightclick").setStyle(Styles.RIGHT_CLICK));
+        tooltip.add(Text.translatable("item.simplyswords.waxweaversworditem.tooltip3").setStyle(Styles.TEXT));
+        tooltip.add(Text.literal(""));
+        tooltip.add(Text.translatable("item.simplyswords.waxweaversworditem.tooltip5").setStyle(Styles.TEXT));
+
+        appendAbilityCooldownTooltip(tooltip, itemStack, Config.uniqueEffects.waxweaver.activeCooldown);
+
+        appendAbilityManaCostTooltip(tooltip, itemStack);
 
         super.appendTooltip(itemStack, tooltipContext, tooltip, type);
+        net.sweenus.simplyswords.client.util.TooltipUtils.appendWeaponSpellScaleTooltip(tooltip, itemStack, "fire");
     }
 
     public static class EffectSettings extends TooltipSettings {
@@ -79,6 +150,33 @@ public class WaxweaverSwordItem extends UniqueSwordItem {
         public int cooldown = 1200;
         @ValidatedInt.Restrict(min = 1)
         public int maxStacks = 3;
+        @ValidatedInt.Restrict(min = 0)
+        public int activeCooldown = 260;
+        @ValidatedFloat.Restrict(min = 1.0F)
+        public float targetRange = 12.0F;
+        @ValidatedInt.Restrict(min = 1)
+        public int encasementDuration = 120;
+        @ValidatedFloat.Restrict(min = 0.1F)
+        public float maximumTargetWidth = 0.9F;
+        @ValidatedFloat.Restrict(min = 0.1F)
+        public float maximumTargetHeight = 2.1F;
+        @ValidatedInt.Restrict(min = 1)
+        public int tauntInterval = 10;
+        @ValidatedFloat.Restrict(min = 1.0F)
+        public float tauntRadius = 10.0F;
+        @ValidatedInt.Restrict(min = 0)
+        public int tauntMaxTargets = 10;
+        @ValidatedInt.Restrict(min = 1)
+        @ValidatedFloat.Restrict(min = 0.0F)
+        public float explosionDamageScaling = 0.55F;
+        @ValidatedFloat.Restrict(min = 0.0F)
+        public float spellScaling = 6.196F;
+        @ValidatedFloat.Restrict(min = 0.5F)
+        public float explosionRadius = 4.0F;
+        @ValidatedFloat.Restrict(min = 0.0F)
+        public float explosionKnockback = 0.4F;
+        @ValidatedInt.Restrict(min = 0)
+        public int explosionIgniteSeconds = 4;
 
     }
 }

@@ -2,5 +2,15 @@
 	"parent": "simplyswords:item/template_claymore",
 	"textures": {
 		"layer0": "simplyswords:item/lichblade"
-	}
+	},
+	"overrides": [
+		{
+			"predicate": {"simplyswords:awakening": 0.5},
+			"model": "simplyswords:item/waking_lichblade"
+		},
+		{
+			"predicate": {"simplyswords:awakening": 1.0},
+			"model": "simplyswords:item/awakened_lichblade"
+		}
+	]
 }

@@ -5,23 +5,32 @@ import net.minecraft.item.SwordItem;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import net.sweenus.simplyswords.item.UniqueSwordItem;
-import net.sweenus.simplytooltips.api.*;
+import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
+import net.sweenus.simplyswords.api.AwakeningApi;
+import net.sweenus.simplyswords.client.api.SimplySwordsClientAPI;
+import net.sweenus.simplyswords.item.component.AwakeningComponent;
+import net.sweenus.simplyswords.item.UniqueWeaponItem;
+import net.sweenus.simplytooltips.api.ItemFrameProgress;
+import net.sweenus.simplytooltips.api.ModernTooltipModel;
+import net.sweenus.simplytooltips.api.TooltipBorderStyle;
+import net.sweenus.simplytooltips.api.TooltipProvider;
+import net.sweenus.simplytooltips.api.TooltipTheme;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Bridge provider that renders Simply Swords items using the Simply Tooltips engine.
- * Intercepts all simplyswords-namespace SwordItem instances.
- */
 public final class SimplySwordsTooltipProvider implements TooltipProvider {
 
     @Override
     public boolean supports(ItemStack stack) {
-        if (stack == null || stack.isEmpty() || !(stack.getItem() instanceof SwordItem)) return false;
+        if (stack == null || stack.isEmpty()) return false;
         Identifier id = Registries.ITEM.getId(stack.getItem());
-        return id != null && "simplyswords".equals(id.getNamespace());
+        if (id == null) return false;
+        if ("simplyswords".equals(id.getNamespace())) {
+            return stack.getItem() instanceof SwordItem;
+        }
+        return stack.getItem() instanceof UniqueWeaponItem
+                && SimplySwordsClientAPI.isUniqueTooltipNamespace(id.getNamespace());
     }
 
     @Override
@@ -33,12 +42,20 @@ public final class SimplySwordsTooltipProvider implements TooltipProvider {
 
         // ---- Badges: weapon type + rarity ----
         List<String> badges = new ArrayList<>();
-        for (String type : WEAPON_TYPES) {
-            if (path.contains(type)) { badges.add(type.toUpperCase()); break; }
+        if (stack.getItem() instanceof UniqueWeaponItem uniqueWeapon) {
+            String type = uniqueWeapon.getTooltipWeaponType(stack);
+            if (type != null && !type.isBlank()) {
+                badges.add(type.toUpperCase());
+            }
+        }
+        if (badges.isEmpty()) {
+            for (String type : WEAPON_TYPES) {
+                if (path.contains(type)) { badges.add(type.toUpperCase()); break; }
+            }
         }
         String rarityBadge = "COMMON";
-        if (stack.getItem() instanceof UniqueSwordItem u) {
-            rarityBadge = u.getItemRarity(); // "UNIQUE" or "LEGENDARY"
+        if (stack.getItem() instanceof UniqueWeaponItem u) {
+            rarityBadge = u.getItemRarity(stack); // "UNIQUE" or "LEGENDARY"
             badges.add(rarityBadge);
         }
 
@@ -49,6 +66,32 @@ public final class SimplySwordsTooltipProvider implements TooltipProvider {
 
         // ---- Parse ability + attribute lines from rawLines ----
         List<String> abilityLines = parseAbilityLines(rawLines);
+        ItemFrameProgress frameProgress = null;
+        String animKeyExtra = null;
+        if (stack.getItem() instanceof UniqueWeaponItem
+                && AwakeningApi.usesAwakeningProgression(stack)) {
+            int awakeningLevel = AwakeningApi.getLevel(stack);
+            animKeyExtra = "|awakening:" + awakeningLevel;
+            frameProgress = new ItemFrameProgress(
+                    awakeningLevel,
+                    AwakeningComponent.MAX_LEVEL,
+                    0xFF74E7FF,
+                    0xFFFFFFFF,
+                    Text.literal(Integer.toString(awakeningLevel))
+            );
+            if (altDown) {
+                badges.clear();
+                badges.add(Text.translatable(
+                        "tooltip.simplyswords.awakening.alt_badge", awakeningLevel).getString());
+            }
+            if (!AwakeningApi.isAbilityUnlocked(stack)) {
+                abilityLines = buildLockedAbilityLines(abilityLines, stack);
+            }
+        }
+        List<String> implicitLines = parseImplicitLines(stack, altDown);
+        if (!implicitLines.isEmpty()) {
+            abilityLines.addAll(0, implicitLines);
+        }
         List<Text>   extraLines   = parseExtraLines(rawLines);
         Text         hint         = parseHintLine(rawLines);
 
@@ -61,9 +104,11 @@ public final class SimplySwordsTooltipProvider implements TooltipProvider {
                 extraLines,
                 TooltipTheme.defaultTheme(),
                 null,
-                null,
+                animKeyExtra,
                 themeKey,
-                hint
+                hint,
+                List.of(),
+                frameProgress
         );
     }
 
@@ -93,6 +138,33 @@ public final class SimplySwordsTooltipProvider implements TooltipProvider {
 
     // --- Parsing helpers ---
 
+    private static List<String> buildLockedAbilityLines(List<String> parsedLines, ItemStack stack) {
+        List<String> lockedLines = new ArrayList<>();
+        String abilityNameLine = null;
+        for (String line : parsedLines) {
+            if (line == null || line.isBlank()) continue;
+            String content = line.startsWith(ModernTooltipModel.SECTION_MARKER)
+                    ? line.substring(ModernTooltipModel.SECTION_MARKER.length())
+                    : line;
+            if (content.toLowerCase().contains("unique effect:")) {
+                abilityNameLine = content;
+                break;
+            }
+        }
+        if (abilityNameLine != null) {
+            lockedLines.add(abilityNameLine);
+        } else {
+            lockedLines.add(Text.translatable(
+                    "tooltip.simplyswords.awakening.locked_ability").getString());
+        }
+        lockedLines.add(Text.translatable(
+                "tooltip.simplyswords.awakening.unlock_level",
+                AwakeningApi.getAbilityUnlockLevel(stack)).getString());
+        lockedLines.add(Text.translatable(
+                "tooltip.simplyswords.awakening.upgrade_at_forge").getString());
+        return lockedLines;
+    }
+
     /**
      * Collects ability description lines from rawLines[1..N].
      * Stops at the vanilla attribute block header ("When in Main Hand" / "When in Off Hand").
@@ -104,23 +176,41 @@ public final class SimplySwordsTooltipProvider implements TooltipProvider {
         List<String> result = new ArrayList<>();
         String attrMain = Text.translatable("item.modifiers.mainhand").getString();
         String attrOff  = Text.translatable("item.modifiers.offhand").getString();
+        String implicitHeader = Text.translatable("tooltip.simplyswords.implicit.header").getString();
+        String runicHeader = "Runic Power";
 
         boolean seenContent = false;
+        boolean inRunicSection = false;
 
         for (int i = 1; i < rawLines.size(); i++) {
             String s = rawLines.get(i).getString();
             if (s.equals(attrMain) || s.equals(attrOff)) break;
             if (isButtonHint(s)) continue;
+            if (s.equals(implicitHeader)) {
+                i = skipImplicitValue(rawLines, i, attrMain, attrOff);
+                continue;
+            }
 
             if (s.isBlank()) {
                 if (seenContent) result.add("");  // blank line between paragraphs → visual gap
-            } else if (isSectionHeader(s)) {
+            } else if (isRunicPowerLine(s) || isRunicModifierLine(s)) {
+                if (!inRunicSection) {
+                    if (!result.isEmpty() && result.get(result.size() - 1).isBlank()) {
+                        result.remove(result.size() - 1);
+                    }
+                    result.add(ModernTooltipModel.SECTION_MARKER + runicHeader);
+                    inRunicSection = true;
+                }
+                result.add(formatRunicLine(s));
+                seenContent = true;
+            } else if (isSectionHeader(s) && !inRunicSection) {
                 // Consume the preceding blank (separator replaces the visual gap)
                 if (!result.isEmpty() && result.get(result.size() - 1).isBlank()) {
                     result.remove(result.size() - 1);
                 }
                 result.add(ModernTooltipModel.SECTION_MARKER + s);
                 seenContent = true;
+                inRunicSection = false;
             } else {
                 seenContent = true;
                 result.add(s);
@@ -131,6 +221,18 @@ public final class SimplySwordsTooltipProvider implements TooltipProvider {
             result.remove(result.size() - 1);
         }
         return result;
+    }
+
+    private static int skipImplicitValue(List<Text> rawLines, int headerIndex, String attrMain, String attrOff) {
+        int i = headerIndex;
+        for (int j = headerIndex + 1; j < rawLines.size(); j++) {
+            String line = rawLines.get(j).getString();
+            if (line.isBlank() || line.equals(attrMain) || line.equals(attrOff) || isSectionHeader(line) || isButtonHint(line)) {
+                break;
+            }
+            i = j;
+        }
+        return i;
     }
 
     /**
@@ -149,6 +251,17 @@ public final class SimplySwordsTooltipProvider implements TooltipProvider {
             if (inAttr) result.add(rawLines.get(i));
         }
         return result;
+    }
+
+    private static List<String> parseImplicitLines(ItemStack stack, boolean altDown) {
+        Text implicit = WeaponImplicitRegistry.formatTooltip(stack, altDown);
+        if (implicit == null) {
+            return List.of();
+        }
+        return List.of(
+                ModernTooltipModel.SECTION_MARKER + Text.translatable("tooltip.simplyswords.implicit.header").getString(),
+                implicit.getString()
+        );
     }
 
     /**
@@ -194,5 +307,20 @@ public final class SimplySwordsTooltipProvider implements TooltipProvider {
             if (lower.contains(prefix)) return true;
         }
         return false;
+    }
+
+    private static boolean isRunicPowerLine(String s) {
+        return s != null && s.startsWith("Runic Power:");
+    }
+
+    private static boolean isRunicModifierLine(String s) {
+        return "Greater".equals(s);
+    }
+
+    private static String formatRunicLine(String s) {
+        if (isRunicPowerLine(s)) {
+            return s.substring("Runic Power:".length()).trim();
+        }
+        return s;
     }
 }

@@ -5,8 +5,9 @@ import net.minecraft.entity.ai.TargetPredicate;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.mob.HostileEntity;
 import net.minecraft.entity.mob.PathAwareEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.sweenus.simplyswords.entity.SimplySwordsAxolotlEntity;
+import net.sweenus.simplyswords.util.HelperMethods;
 
 import java.util.EnumSet;
 
@@ -14,7 +15,7 @@ public class AttackHostileMobsGoal extends Goal {
     private final PathAwareEntity entity;
     private final TargetPredicate hostileMobTargetPredicate;
     private LivingEntity targetMob;
-    private PlayerEntity targetPlayer;
+    private LivingEntity owner;
     private final double attackRange;
     private final double playerCheckRange;
     private final double speed;
@@ -32,27 +33,40 @@ public class AttackHostileMobsGoal extends Goal {
     public boolean canStart() {
         if (!(entity.getWorld() instanceof ServerWorld serverWorld)) return false;
 
-        // Find the nearest player within the playerCheckRange
-        targetPlayer = serverWorld.getClosestPlayer(entity.getX(), entity.getY(), entity.getZ(), playerCheckRange, false);
-        if (targetPlayer == null) return false;
+        owner = entity instanceof SimplySwordsAxolotlEntity axolotl ? axolotl.getOwner() : null;
+        if (owner == null || !owner.isAlive() || entity.squaredDistanceTo(owner) > playerCheckRange * playerCheckRange) return false;
 
-        // Look for the nearest hostile mob within the attack range
-        targetMob = serverWorld.getClosestEntity(HostileEntity.class, hostileMobTargetPredicate, entity, entity.getX(), entity.getY(), entity.getZ(), entity.getBoundingBox().expand(attackRange));
+        if (owner instanceof net.minecraft.entity.mob.MobEntity mobOwner
+                && mobOwner.getTarget() != null
+                && mobOwner.getTarget().isAlive()
+                && HelperMethods.checkAbilityTarget(mobOwner.getTarget(), owner)) {
+            targetMob = mobOwner.getTarget();
+            return true;
+        }
+
+        targetMob = serverWorld.getEntitiesByClass(HostileEntity.class, entity.getBoundingBox().expand(attackRange),
+                        hostile -> hostileMobTargetPredicate.test(entity, hostile)
+                                && HelperMethods.checkAbilityTarget(hostile, owner))
+                .stream()
+                .min((first, second) -> Double.compare(first.squaredDistanceTo(entity), second.squaredDistanceTo(entity)))
+                .orElse(null);
         return targetMob != null;
     }
 
     @Override
     public boolean shouldContinue() {
-        // Continue attacking if the hostile mob is valid and the player is within range
         return targetMob != null
                 && targetMob.isAlive()
-                && targetPlayer != null
-                && entity.squaredDistanceTo(targetPlayer) <= (playerCheckRange * playerCheckRange);
+                && owner != null
+                && owner.isAlive()
+                && entity.squaredDistanceTo(owner) <= (playerCheckRange * playerCheckRange)
+                && HelperMethods.checkAbilityTarget(targetMob, owner);
     }
 
     @Override
     public void stop() {
         targetMob = null;
+        owner = null;
         entity.getNavigation().stop();
     }
 
@@ -66,12 +80,10 @@ public class AttackHostileMobsGoal extends Goal {
             entity.getLookControl().lookAt(targetMob, 30.0F, 30.0F);
 
             // Attack the hostile mob
-            if (entity.squaredDistanceTo(targetMob) <= 2.0 * 2.0 && targetMob.timeUntilRegen < 10) {
+            if (entity.squaredDistanceTo(targetMob) <= 2.0 * 2.0 && targetMob.timeUntilRegen < 10
+                    && owner != null && HelperMethods.checkAbilityTarget(targetMob, owner)) {
                 entity.tryAttack(targetMob);
             }
         }
     }
 }
-
-
-

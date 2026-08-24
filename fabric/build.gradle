@@ -1,5 +1,5 @@
 plugins {
-    id 'com.github.johnrengelman.shadow'
+    id 'com.gradleup.shadow'
 }
 
 architectury {
@@ -7,8 +7,60 @@ architectury {
     fabric()
 }
 
+sourceSets {
+    balanceTest {
+        compileClasspath += sourceSets.main.output + configurations.compileClasspath + project(":common").sourceSets.balanceTest.output
+        runtimeClasspath += output + sourceSets.main.output + configurations.runtimeClasspath + project(":common").sourceSets.balanceTest.output
+    }
+    qaTest {
+        compileClasspath += sourceSets.main.output + configurations.compileClasspath + project(":common").sourceSets.qaTest.output
+        runtimeClasspath += output + sourceSets.main.output + configurations.runtimeClasspath + project(":common").sourceSets.qaTest.output
+    }
+}
+
+def balanceIsFiltered = ["balanceQuick", "balanceWeapon", "balanceBuild", "balanceScenario"].any { project.hasProperty(it) }
+def balanceReportDir = { String loader ->
+    file("${rootProject.buildDir}/reports/simplyswords-balance/${loader}" + (balanceIsFiltered ? "/scratch" : ""))
+}
+
 loom {
     accessWidenerPath = project(":common").loom.accessWidenerPath
+    createRemapConfigurations(sourceSets.balanceTest)
+    createRemapConfigurations(sourceSets.qaTest)
+
+    mods {
+        simplyswords {
+            sourceSet sourceSets.main
+        }
+        simplyswords_balance_test {
+            sourceSet sourceSets.balanceTest
+            sourceSet "balanceTest", ":common"
+        }
+        simplyswords_qa {
+            sourceSet sourceSets.qaTest
+            sourceSet "qaTest", ":common"
+        }
+    }
+
+    runs {
+        balanceTestServer {
+            server()
+            source sourceSets.main
+            source sourceSets.balanceTest
+            property "fabric-api.gametest"
+            property "fabric-api.gametest.report-file", new File(balanceReportDir("fabric"), "gametest-results.xml").absolutePath
+            vmArg "-Dsimplyswords.balance-report-dir=${balanceReportDir("fabric").absolutePath}"
+            if (project.hasProperty("balanceQuick")) {
+                vmArg "-Dsimplyswords.balance.isolated-repetitions=1"
+                vmArg "-Dsimplyswords.balance.rotation-repetitions=1"
+                vmArg "-Dsimplyswords.balance.reliability-repetitions=1"
+            }
+            if (project.hasProperty("balanceWeapon")) vmArg "-Dsimplyswords.balance.weapon=${project.property("balanceWeapon")}"
+            if (project.hasProperty("balanceBuild")) vmArg "-Dsimplyswords.balance.build=${project.property("balanceBuild")}"
+            if (project.hasProperty("balanceScenario")) vmArg "-Dsimplyswords.balance.scenario=${project.property("balanceScenario")}"
+            runDir "build/balance-gametest"
+        }
+    }
 }
 
 configurations {
@@ -17,6 +69,19 @@ configurations {
     compileClasspath.extendsFrom common
     runtimeClasspath.extendsFrom common
     developmentFabric.extendsFrom common
+}
+
+def spellPowerTinyConfig = providers.provider {
+    def spellPowerJar = configurations.modImplementation.resolve().find {
+        it.name.startsWith("spell-power-") && it.name.endsWith(".jar")
+    }
+    def output = layout.buildDirectory.file("balance-libs/tiny-config-3.1.0-fabric.jar").get().asFile
+    def archive = new java.util.zip.ZipFile(spellPowerJar)
+    def entry = archive.getEntry("META-INF/jars/tiny-config-3.1.0-fabric.jar")
+    output.parentFile.mkdirs()
+    output.withOutputStream { stream -> archive.getInputStream(entry).transferTo(stream) }
+    archive.close()
+    return output
 }
 
 repositories {
@@ -54,22 +119,48 @@ dependencies {
     // Remove the next line if you don't want to depend on the API
     modApi "dev.architectury:architectury-fabric:${rootProject.architectury_api_version}"
     modCompileOnly("com.terraformersmc:modmenu:${rootProject.mod_menu_version}") { transitive false }
-    modImplementation "maven.modrinth:spell-power:${rootProject.spellpower_version}-fabric"
+    modImplementation "curse.maven:spell-power-771265:${rootProject.spellpower_fabric_file}"
     //modImplementation "curse.maven:lambdynamiclights-393442:${rootProject.lambdynlights_version}"
     //include modImplementation("dev.lambdaurora:spruceui:${rootProject.spruceui_version}") 1.21
     //modImplementation "curse.maven:eldritch-end-877553:${rootProject.eldritch_end_version}" 1.21
     //modImplementation "curse.maven:amethyst-imbuement-608261:4514358"
-    modImplementation "vazkii.patchouli:Patchouli:1.21-87-FABRIC"
     //modImplementation(annotationProcessor("com.github.llamalad7.mixinextras:mixinextras-fabric:${rootProject.mixin_extras_version}")) 1.21
 
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
 
     modImplementation "me.fzzyhmstrs:fzzy_config:${project.fzz_config_version}"
-    modRuntimeOnly "com.github.ZsoltMolnarrr:TinyConfig:2.3.2"
     modRuntimeOnly "me.shedaniel:RoughlyEnoughItems-fabric:${rei_version}"
+    modRuntimeOnly "com.github.ZsoltMolnarrr:TinyConfig:2.3.2"
     modLocalRuntime "dev.emi:emi-fabric:${emi_version}"
 
+    modBalanceTestImplementation "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
+    modBalanceTestRuntimeOnly files("${rootDir}/../simplytooltips/fabric/build/libs/SimplyTooltips-fabric-0.1.5.jar")
+    modBalanceTestRuntimeOnly files(spellPowerTinyConfig)
+
+}
+
+tasks.named("compileBalanceTestJava") {
+    dependsOn project(":common").tasks.named("compileBalanceTestJava")
+}
+
+tasks.named("compileQaTestJava") {
+    dependsOn project(":common").tasks.named("compileQaTestJava")
+}
+
+tasks.register("qaJar", Jar) {
+    dependsOn tasks.named("qaTestClasses")
+    archiveClassifier.set("qa-dev")
+    from sourceSets.qaTest.output
+    from project(":common").sourceSets.qaTest.output
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+tasks.register("remapQaJar", net.fabricmc.loom.task.RemapJarTask) {
+    dependsOn tasks.named("qaJar")
+    inputFile.set(tasks.named("qaJar", Jar).flatMap { it.archiveFile })
+    archiveClassifier.set("qa")
+    addNestedDependencies.set(false)
 }
 
 processResources {
@@ -122,4 +213,11 @@ publications {
 repositories {
     // Add repositories to publish to here.
 }
+}
+
+// Persisted fzzy_config overrides the Java defaults, so drop it before each run.
+tasks.matching { it.name == "runBalanceTestServer" }.configureEach {
+    doFirst {
+        project.delete("${project.projectDir}/build/balance-gametest/config/simplyswords")
+    }
 }
