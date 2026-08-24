@@ -39,7 +39,7 @@ public final class Config {
         //With fzzy config, I decided to make sets of disabled things, rather than a collection of booleans for everything being enabled
         //if a things id is in the set, it's disabled
         //Example
-            // ValidatedSet<Identifier> disabledPowers = ValidatedIdentifier.ofRegistryKey(GemPowerRegistry.REGISTRY.key()).toSet();
+            // ValidatedSet<Identifier> disabledPowers = new ValidatedIdentifier(GemPower.EMPTY_ID).toSet();
         //To see if a thing is enabled, I check that it's id isn't in the set
             // !Config.gemPowers.disabledPowers.contains(entry.getId()));
 
