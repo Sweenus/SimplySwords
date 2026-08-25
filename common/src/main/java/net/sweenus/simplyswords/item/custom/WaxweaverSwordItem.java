@@ -5,6 +5,7 @@ import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -12,6 +13,7 @@ import net.minecraft.item.ToolMaterial;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.tag.DamageTypeTags;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
@@ -30,6 +32,11 @@ import net.sweenus.simplyswords.world.RevivalCandleVisualManager;
 import net.sweenus.simplyswords.world.RevivalCooldownManager;
 import net.sweenus.simplyswords.world.WaxweaverEncasementManager;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
+import net.sweenus.simplyswords.api.ability.Phase7AbilityTuning;
+import net.sweenus.simplyswords.api.ability.Phase7UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
+import net.sweenus.simplyswords.world.Phase7CombatManager;
 
 import java.util.List;
 
@@ -44,13 +51,39 @@ public class WaxweaverSwordItem extends UniqueSwordItem implements RevivalWeapon
             return super.postHit(stack, target, attacker);
         }
         if (!attacker.getWorld().isClient()) {
-            int maximum_stacks = Config.uniqueEffects.waxweaver.maxStacks;
+            ServerWorld serverWorld = (ServerWorld) attacker.getWorld();
+            UniqueAbilityExecution execution = Phase7CombatManager.beginPassive(
+                    Phase7UniqueAbilities.WAXWEAVER_TEMPO, serverWorld, stack, attacker, target);
+            Phase7AbilityTuning tuning = Phase7UniqueAbilities.tuning(execution);
+            int maximumStacks = Math.max(1, tuning.integer(Phase7AbilityTuning.Setting.STACK_CAP,
+                    Config.uniqueEffects.waxweaver.maxStacks));
+            int duration = Math.max(1, tuning.integer(Phase7AbilityTuning.Setting.DURATION_TICKS, 60));
+            if (tuning.flag(1 << 16)) duration = tuning.integer(Phase7AbilityTuning.Setting.LOCKOUT_TICKS, 30);
             HelperMethods.playHitSounds(attacker, target);
 
             if (target.isOnFire()) {
-                HelperMethods.incrementStatusEffect(attacker, StatusEffects.STRENGTH, 60, 1, maximum_stacks + 1);
-                HelperMethods.incrementStatusEffect(attacker, StatusEffects.HASTE, 60, 1, maximum_stacks + 1);
+                HelperMethods.incrementStatusEffect(attacker, StatusEffects.STRENGTH, duration, 1, maximumStacks + 1);
+                HelperMethods.incrementStatusEffect(attacker, StatusEffects.HASTE, duration, 1, maximumStacks + 1);
+                StatusEffectInstance haste = attacker.getStatusEffect(StatusEffects.HASTE);
+                if (haste != null && haste.getAmplifier() + 1 >= maximumStacks) {
+                    WaxweaverEncasementManager.primeFlashWax(attacker, tuning);
+                    if (tuning.flag(1 << 12)) {
+                        Phase7CombatManager.applyWaxRhythm(serverWorld, attacker, duration,
+                                tuning.get(Phase7AbilityTuning.Setting.SPEED, 1.08) - 1);
+                    }
+                }
+                int speedDuration = tuning.integer(Phase7AbilityTuning.Setting.STATUS_DURATION_TICKS, 0);
+                if (speedDuration > 0) {
+                    attacker.addStatusEffect(new net.minecraft.entity.effect.StatusEffectInstance(
+                            StatusEffects.SPEED, speedDuration, 0, false, true, true));
+                }
+                WaxweaverEncasementManager.reduceActiveCooldown(attacker, stack, tuning);
             }
+            if (WaxweaverEncasementManager.isEncased(target)) {
+                int fireTicks = tuning.integer(Phase7AbilityTuning.Setting.FIRE_TICKS, 0);
+                if (fireTicks > 0) target.setOnFireFor((fireTicks + 19) / 20);
+            }
+            UniqueAbilityApi.finish(execution, Phase7UniqueAbilities.FINISH, target.isOnFire() ? 1 : 0);
 
         }
         return super.postHit(stack, target, attacker);
@@ -68,13 +101,47 @@ public class WaxweaverSwordItem extends UniqueSwordItem implements RevivalWeapon
 
     @Override
     public void postRevive(LivingEntity entity, ItemStack stack, DamageSource source) {
-        int skillCooldown = Config.uniqueEffects.waxweaver.cooldown;
+        ServerWorld serverWorld = (ServerWorld) entity.getWorld();
+        UniqueAbilityExecution execution = Phase7CombatManager.beginPassive(
+                Phase7UniqueAbilities.WAXWEAVER_REVIVAL, serverWorld, stack, entity, null);
+        Phase7AbilityTuning tuning = Phase7UniqueAbilities.tuning(execution);
+        int skillCooldown = tuning.integer(Phase7AbilityTuning.Setting.COOLDOWN_TICKS,
+                Config.uniqueEffects.waxweaver.cooldown);
         if (entity instanceof net.minecraft.server.network.ServerPlayerEntity serverPlayer) {
             RevivalCandleVisualManager.activate(serverPlayer, stack);
         }
-        if (entity.getWorld() instanceof net.minecraft.server.world.ServerWorld serverWorld)
-            RevivalCooldownManager.setCooldown(serverWorld, entity, stack, skillCooldown);
-        HelperMethods.incrementStatusEffect(entity, StatusEffects.RESISTANCE, 100, 2, 3);
+        RevivalCooldownManager.setCooldown(serverWorld, entity, stack, skillCooldown);
+        int resistanceDuration = tuning.integer(Phase7AbilityTuning.Setting.STATUS_DURATION_TICKS, 100);
+        if (resistanceDuration > 0) {
+            HelperMethods.incrementStatusEffect(entity, StatusEffects.RESISTANCE, resistanceDuration,
+                    tuning.flag(1 << 25) ? 3 : 2, 4);
+        }
+        double radius = tuning.get(Phase7AbilityTuning.Setting.RADIUS, 0);
+        int fireTicks = tuning.integer(Phase7AbilityTuning.Setting.FIRE_TICKS, 0);
+        if (radius > 0 && fireTicks > 0) {
+            serverWorld.getEntitiesByClass(LivingEntity.class, entity.getBoundingBox().expand(radius),
+                            target -> target != entity && HelperMethods.checkAbilityTarget(target, entity))
+                    .stream().limit(tuning.integer(Phase7AbilityTuning.Setting.TARGET_CAP, 8))
+                    .forEach(target -> target.setOnFireFor((fireTicks + 19) / 20));
+        }
+        if (tuning.flag(1 << 24)) {
+            Phase7CombatManager.scheduleSecondSkin(serverWorld, entity, resistanceDuration,
+                    tuning.integer(Phase7AbilityTuning.Setting.DURATION_TICKS, 100),
+                    tuning.integer(Phase7AbilityTuning.Setting.ABSORPTION, 6));
+        }
+        if (tuning.flag(1 << 26)) {
+            double blastRadius = tuning.get(Phase7AbilityTuning.Setting.RADIUS, 6);
+            float damage = HelperMethods.abilityScaledDamage("fire", entity, stack,
+                    Config.uniqueEffects.waxweaver.explosionDamageScaling,
+                    Config.uniqueEffects.waxweaver.spellScaling)
+                    * (float) tuning.get(Phase7AbilityTuning.Setting.FINAL_DAMAGE_MULTIPLIER, 1.25);
+            DamageSource blast = serverWorld.getDamageSources().indirectMagic(entity, entity);
+            serverWorld.getEntitiesByClass(LivingEntity.class, entity.getBoundingBox().expand(blastRadius),
+                            target -> target != entity && HelperMethods.checkAbilityTarget(target, entity))
+                    .stream().limit(tuning.integer(Phase7AbilityTuning.Setting.TARGET_CAP, 16))
+                    .forEach(target -> target.damage(blast, damage));
+        }
+        UniqueAbilityApi.finish(execution, Phase7UniqueAbilities.FINISH, 1);
 
         World world = entity.getWorld();
         world.playSound(null, entity.getBlockPos(), SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
@@ -85,7 +152,13 @@ public class WaxweaverSwordItem extends UniqueSwordItem implements RevivalWeapon
 
     @Override
     public float getReviveHealth(LivingEntity entity, ItemStack stack, DamageSource source) {
-        return entity.getMaxHealth();
+        if (!(entity.getWorld() instanceof ServerWorld serverWorld)) return entity.getMaxHealth();
+        UniqueAbilityExecution execution = Phase7CombatManager.beginPassive(
+                Phase7UniqueAbilities.WAXWEAVER_REVIVAL, serverWorld, stack, entity, null);
+        float health = entity.getMaxHealth() * (float) Phase7UniqueAbilities.tuning(execution)
+                .get(Phase7AbilityTuning.Setting.HEALTH_THRESHOLD, 1);
+        UniqueAbilityApi.finish(execution, Phase7UniqueAbilities.FINISH, 0);
+        return health;
     }
 
     @Override

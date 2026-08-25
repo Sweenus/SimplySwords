@@ -23,6 +23,11 @@ import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.api.WeaponAbilityActivationSource;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
+import net.sweenus.simplyswords.api.ability.Phase7AbilityTuning;
+import net.sweenus.simplyswords.api.ability.Phase7UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityPhase;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.BrambleRootVisualEntity;
 import net.sweenus.simplyswords.item.custom.StealSwordItem;
@@ -30,6 +35,7 @@ import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 
 import java.util.ArrayList;
+import java.util.ArrayDeque;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -54,6 +60,7 @@ public final class BramblethornAbilityManager {
     private static final Map<ServerWorld, Map<UUID, ActiveGrasp>> ACTIVE = new HashMap<>();
     private static final Map<ServerWorld, Map<UUID, HuntMark>> HUNT_MARKS = new HashMap<>();
     private static final Map<ServerWorld, List<ActiveHunt>> ACTIVE_HUNTS = new HashMap<>();
+    private static final Map<ServerWorld, Map<UUID, ArrayDeque<HuntStep>>> HUNT_STEPS = new HashMap<>();
     private static final ThreadLocal<Boolean> PROPAGATING_DAMAGE = ThreadLocal.withInitial(() -> false);
 
     private BramblethornAbilityManager() {
@@ -84,9 +91,19 @@ public final class BramblethornAbilityManager {
         ServerWorld world = context.world();
         LivingEntity actor = context.actor();
         LivingEntity principal = context.sourcePlayer() == null ? actor : context.sourcePlayer();
+        UniqueAbilityExecution execution = Phase7CombatManager.beginActive(
+                Phase7UniqueAbilities.BRAMBLE_GRASP, context, Config.uniqueEffects.bramblethorn.cooldown);
+        Phase7AbilityTuning tuning = Phase7UniqueAbilities.tuning(execution);
+        double targetRange = tuning.get(Phase7AbilityTuning.Setting.RANGE,
+                Config.uniqueEffects.bramblethorn.targetRange);
+        if (actor.squaredDistanceTo(anchorTarget) > targetRange * targetRange) {
+            UniqueAbilityApi.cancel(execution);
+            return false;
+        }
         Vec3d center = anchorTarget.getPos();
-        List<LivingEntity> targets = findTargets(context, anchorTarget, center);
+        List<LivingEntity> targets = findTargets(context, anchorTarget, center, tuning);
         if (targets.isEmpty()) {
+            UniqueAbilityApi.cancel(execution);
             return false;
         }
 
@@ -95,12 +112,16 @@ public final class BramblethornAbilityManager {
                 SpellScalingProfile.NATURE, actor, stack,
                 Math.max(0.0F, Config.uniqueEffects.bramblethorn.slamDamageScaling),
                 Math.max(0.0F, Config.uniqueEffects.bramblethorn.slamSpellScaling));
+        slamDamage *= (float) tuning.get(Phase7AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1);
+        slamDamage *= (float) tuning.get(Phase7AbilityTuning.Setting.FINAL_DAMAGE_MULTIPLIER, 1);
         long now = world.getTime();
-        int growingTicks = Math.max(1, Config.uniqueEffects.bramblethorn.rootTravelTicks);
-        int bindingTicks = Math.max(1, Config.uniqueEffects.bramblethorn.bindingDuration);
+        int growingTicks = Math.max(1, tuning.integer(Phase7AbilityTuning.Setting.INTERVAL_TICKS,
+                Config.uniqueEffects.bramblethorn.rootTravelTicks));
+        int bindingTicks = Math.max(1, tuning.integer(Phase7AbilityTuning.Setting.DURATION_TICKS,
+                Config.uniqueEffects.bramblethorn.bindingDuration));
         ActiveGrasp grasp = new ActiveGrasp(
                 actor.getUuid(), principal.getUuid(), stack, center, now,
-                now + growingTicks, now + growingTicks + bindingTicks, slamDamage);
+                now + growingTicks, now + growingTicks + bindingTicks, slamDamage, tuning, execution);
 
         int lifetime = growingTicks + bindingTicks + LIFT_TICKS + SLAM_TIMEOUT_TICKS + FADE_TICKS + 10;
         BrambleRootVisualEntity core = new BrambleRootVisualEntity(
@@ -125,6 +146,17 @@ public final class BramblethornAbilityManager {
         }
 
         ACTIVE.computeIfAbsent(world, ignored -> new HashMap<>()).put(actor.getUuid(), grasp);
+        UniqueAbilityApi.start(execution);
+        if (tuning.flag(1 << 18) && !tuning.flag(1 << 26)) {
+            actor.setAbsorptionAmount(Math.max(actor.getAbsorptionAmount(),
+                    tuning.integer(Phase7AbilityTuning.Setting.ABSORPTION, 4)));
+        }
+        if (tuning.flag(1 << 23) && !tuning.flag(1 << 26)
+                && targets.size() >= tuning.integer(Phase7AbilityTuning.Setting.COUNT, 6)) {
+            actor.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE,
+                    tuning.integer(Phase7AbilityTuning.Setting.STATUS_DURATION_TICKS, 100),
+                    tuning.integer(Phase7AbilityTuning.Setting.STATUS_AMPLIFIER, 0), false, true, true));
+        }
         actor.swingHand(context.hand() == null ? net.minecraft.util.Hand.MAIN_HAND : context.hand(), true);
         spawnActivationEffects(world, actor, center);
         return true;
@@ -142,7 +174,11 @@ public final class BramblethornAbilityManager {
         }
 
         long now = world.getTime();
-        int memoryDuration = Math.max(1, Config.uniqueEffects.bramblethorn.huntMemoryDuration);
+        UniqueAbilityExecution execution = Phase7CombatManager.beginPassive(
+                Phase7UniqueAbilities.BRAMBLE_HUNT, world, stack, attacker, target);
+        Phase7AbilityTuning tuning = Phase7UniqueAbilities.tuning(execution);
+        int memoryDuration = Math.max(1, tuning.integer(Phase7AbilityTuning.Setting.DURATION_TICKS,
+                Config.uniqueEffects.bramblethorn.huntMemoryDuration));
         Map<UUID, HuntMark> marks = HUNT_MARKS.computeIfAbsent(world, ignored -> new HashMap<>());
         HuntMark previousMark = marks.get(attacker.getUuid());
         LivingEntity previousTarget = previousMark == null || previousMark.expiresAt <= now
@@ -154,18 +190,32 @@ public final class BramblethornAbilityManager {
             marks.put(attacker.getUuid(),
                     new HuntMark(target.getUuid(), now + memoryDuration, nextProcAt));
             spawnHuntMarkEffects(world, target, previousTarget != target);
+            UniqueAbilityApi.finish(execution, Phase7UniqueAbilities.FINISH, 0);
             return;
         }
 
-        double maximumRange = Math.max(0.5, Config.uniqueEffects.bramblethorn.huntMaximumRange);
+        double maximumRange = Math.max(0.5, tuning.get(Phase7AbilityTuning.Setting.RANGE,
+                Config.uniqueEffects.bramblethorn.huntMaximumRange));
         boolean inRange = previousTarget.squaredDistanceTo(target) <= maximumRange * maximumRange;
         long nextProcAt = previousMark.nextProcAt;
         if (inRange && now >= nextProcAt) {
-            launchHunt(world, attacker, stack, previousTarget, target);
+            float sequenceMultiplier = huntSequenceMultiplier(world, attacker, target, tuning);
+            float projectileMultiplier = tuning.flag(1 << 16)
+                    ? (float) tuning.get(Phase7AbilityTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, .55) : 1.0F;
+            launchHunt(world, attacker, stack, previousTarget, target, tuning, execution,
+                    sequenceMultiplier * projectileMultiplier);
+            if (tuning.flag(1 << 16)) {
+                UniqueAbilityExecution second = Phase7CombatManager.beginPassive(
+                        Phase7UniqueAbilities.BRAMBLE_HUNT, world, stack, attacker, target);
+                launchHunt(world, attacker, stack, previousTarget, target,
+                        Phase7UniqueAbilities.tuning(second), second, projectileMultiplier);
+            }
             nextProcAt = now + SimplySwordsAPI.getEffectiveWeaponCooldownTicks(
-                    stack, attacker, Config.uniqueEffects.bramblethorn.huntCooldown);
+                    stack, attacker, Math.max(4, tuning.integer(Phase7AbilityTuning.Setting.COOLDOWN_TICKS,
+                            Config.uniqueEffects.bramblethorn.huntCooldown)));
         } else {
             spawnHuntMarkEffects(world, target, true);
+            UniqueAbilityApi.finish(execution, Phase7UniqueAbilities.FINISH, 0);
         }
 
         marks.put(attacker.getUuid(),
@@ -176,7 +226,7 @@ public final class BramblethornAbilityManager {
         if (player == null || !player.isAlive()) {
             return null;
         }
-        double range = Math.max(1.0, Config.uniqueEffects.bramblethorn.targetRange);
+        double range = Math.max(1.0, Config.uniqueEffects.bramblethorn.targetRange + 4.0);
         return StealSwordItem.findLenientTarget(player, range,
                 target -> isEligibleTarget(player, null, player.getWorld(), target));
     }
@@ -214,6 +264,7 @@ public final class BramblethornAbilityManager {
             Entity ownerEntity = world.getEntity(grasp.actorId);
             if (!(ownerEntity instanceof LivingEntity actor) || !actor.isAlive() || actor.isRemoved()) {
                 fadeVisuals(world, grasp);
+                UniqueAbilityApi.finish(grasp.execution, Phase7UniqueAbilities.FINISH, grasp.targets.size());
                 iterator.remove();
                 continue;
             }
@@ -221,6 +272,7 @@ public final class BramblethornAbilityManager {
             removeInvalidTargets(world, grasp);
             if (grasp.targets.isEmpty()) {
                 fadeVisuals(world, grasp);
+                UniqueAbilityApi.finish(grasp.execution, Phase7UniqueAbilities.FINISH, 0);
                 iterator.remove();
                 continue;
             }
@@ -241,6 +293,14 @@ public final class BramblethornAbilityManager {
             if (grasp.phase == PHASE_BINDING) {
                 tickBinding(world, actor, grasp);
                 if (now >= grasp.bindingEndsAt) {
+                    if (grasp.tuning.flag(1 << 26)) {
+                        applyBriarSacrifice(world, actor, grasp);
+                        fadeVisuals(world, grasp);
+                        UniqueAbilityApi.finish(grasp.execution, Phase7UniqueAbilities.FINISH,
+                                grasp.targets.size());
+                        iterator.remove();
+                        continue;
+                    }
                     beginLift(world, grasp);
                 }
             } else if (grasp.phase == PHASE_LIFTING) {
@@ -250,6 +310,7 @@ public final class BramblethornAbilityManager {
                 }
             } else if (grasp.phase == PHASE_SLAMMING && tickSlam(world, actor, grasp)) {
                 fadeVisuals(world, grasp);
+                UniqueAbilityApi.finish(grasp.execution, Phase7UniqueAbilities.FINISH, grasp.targets.size());
                 iterator.remove();
             }
         }
@@ -260,14 +321,19 @@ public final class BramblethornAbilityManager {
     }
 
     private static void launchHunt(ServerWorld world, LivingEntity attacker, ItemStack stack,
-                                   LivingEntity previousTarget, LivingEntity target) {
+                                   LivingEntity previousTarget, LivingEntity target,
+                                   Phase7AbilityTuning tuning, UniqueAbilityExecution execution,
+                                   float damageMultiplier) {
         int travelTicks = Math.max(1, Config.uniqueEffects.bramblethorn.huntTravelTicks);
         float damage = HelperMethods.abilityScaledDamage(
                 SpellScalingProfile.NATURE, attacker, stack,
                 Math.max(0.0F, Config.uniqueEffects.bramblethorn.huntDamageScaling),
                 Math.max(0.0F, Config.uniqueEffects.bramblethorn.huntSpellScaling));
+        damage *= (float) tuning.get(Phase7AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1);
+        damage *= damageMultiplier;
         float effectMultiplier = AwakeningApi.getEffectMultiplier(stack);
-        int configuredSlowDuration = Math.max(0, Config.uniqueEffects.bramblethorn.huntSlowDuration);
+        int configuredSlowDuration = Math.max(0, tuning.integer(Phase7AbilityTuning.Setting.STATUS_DURATION_TICKS,
+                Config.uniqueEffects.bramblethorn.huntSlowDuration));
         int slowDuration = configuredSlowDuration <= 0 || effectMultiplier <= 0.0F
                 ? 0 : Math.max(1, Math.round(configuredSlowDuration * effectMultiplier));
         Vec3d origin = previousTarget.getPos();
@@ -281,10 +347,13 @@ public final class BramblethornAbilityManager {
         ActiveHunt hunt = new ActiveHunt(
                 attacker.getUuid(), target.getUuid(), stack.copy(), origin,
                 world.getTime(), travelTicks,
-                Math.max(0.1, Config.uniqueEffects.bramblethorn.huntHitRadius),
+                Math.max(0.1, tuning.get(Phase7AbilityTuning.Setting.WIDTH,
+                        Config.uniqueEffects.bramblethorn.huntHitRadius)),
                 damage, slowDuration,
-                Math.max(0, Config.uniqueEffects.bramblethorn.huntSlowAmplifier),
-                visualId);
+                Math.max(0, tuning.integer(Phase7AbilityTuning.Setting.STATUS_AMPLIFIER,
+                        Config.uniqueEffects.bramblethorn.huntSlowAmplifier)),
+                Math.max(1, tuning.integer(Phase7AbilityTuning.Setting.TARGET_CAP, 1)),
+                tuning.flag(1 << 17), visualId, execution);
         ACTIVE_HUNTS.computeIfAbsent(world, ignored -> new ArrayList<>()).add(hunt);
 
         world.spawnParticles(new BlockStateParticleEffect(ParticleTypes.BLOCK,
@@ -314,6 +383,7 @@ public final class BramblethornAbilityManager {
             if (attacker == null || !attacker.isAlive() || attacker.isRemoved()
                     || target == null || !target.isAlive() || target.isRemoved()) {
                 discardHuntVisual(world, hunt.visualId);
+                UniqueAbilityApi.finish(hunt.execution, Phase7UniqueAbilities.FINISH, hunt.hitTargets.size());
                 iterator.remove();
                 continue;
             }
@@ -329,6 +399,7 @@ public final class BramblethornAbilityManager {
             }
 
             if (progress >= 1.0F) {
+                UniqueAbilityApi.finish(hunt.execution, Phase7UniqueAbilities.FINISH, hunt.hitTargets.size());
                 iterator.remove();
             }
         }
@@ -344,6 +415,8 @@ public final class BramblethornAbilityManager {
         for (LivingEntity candidate : world.getEntitiesByClass(
                 LivingEntity.class, searchBox, EntityPredicates.VALID_LIVING_ENTITY)) {
             if (candidate == attacker || hunt.hitTargets.contains(candidate.getUuid())
+                    || hunt.hitTargets.size() >= hunt.targetCap
+                    || hunt.targetOnly && !candidate.getUuid().equals(hunt.targetId)
                     || !HelperMethods.checkAbilityTarget(candidate, attacker)) {
                 continue;
             }
@@ -387,6 +460,8 @@ public final class BramblethornAbilityManager {
                     StatusEffects.SLOWNESS, hunt.slowDuration, hunt.slowAmplifier,
                     false, true, true), attacker);
         }
+        UniqueAbilityApi.emit(hunt.execution, UniqueAbilityPhase.HIT, Phase7UniqueAbilities.HIT,
+                target, damaged ? 1 : 0, hunt.damage);
 
         Vec3d center = target.getBoundingBox().getCenter();
         world.spawnParticles(new BlockStateParticleEffect(ParticleTypes.BLOCK,
@@ -475,6 +550,27 @@ public final class BramblethornAbilityManager {
         return 1.0F - inverse * inverse * inverse;
     }
 
+    private static float huntSequenceMultiplier(ServerWorld world, LivingEntity attacker,
+                                                LivingEntity target, Phase7AbilityTuning tuning) {
+        if (!tuning.flag(1 << 15)) return 1.0F;
+        long now = world.getTime();
+        ArrayDeque<HuntStep> steps = HUNT_STEPS.computeIfAbsent(world, ignored -> new HashMap<>())
+                .computeIfAbsent(attacker.getUuid(), ignored -> new ArrayDeque<>());
+        while (!steps.isEmpty() && now - steps.getFirst().tick > 100) steps.removeFirst();
+        steps.addLast(new HuntStep(target.getUuid(), now));
+        while (steps.size() > 3) steps.removeFirst();
+        if (steps.size() < 3) return 1.0F;
+        HuntStep[] sequence = steps.toArray(HuntStep[]::new);
+        boolean distinct = !sequence[0].targetId.equals(sequence[1].targetId)
+                && !sequence[0].targetId.equals(sequence[2].targetId)
+                && !sequence[1].targetId.equals(sequence[2].targetId);
+        if (distinct) {
+            steps.clear();
+            return (float) tuning.get(Phase7AbilityTuning.Setting.FINAL_DAMAGE_MULTIPLIER, 1.35);
+        }
+        return 1.0F;
+    }
+
     public static void onBoundTargetDamaged(LivingEntity damagedTarget, DamageSource source, float amount) {
         if (damagedTarget == null || source == null || amount <= 0.0F
                 || damagedTarget.getWorld().isClient()
@@ -505,8 +601,9 @@ public final class BramblethornAbilityManager {
         }
 
         grasp.lastPropagationTick = world.getTime();
-        float sharedDamage = amount * MathHelper.clamp(
-                Config.uniqueEffects.bramblethorn.sharedDamageRatio, 0.0F, 1.0F);
+        float sharedDamage = amount * (float) MathHelper.clamp(
+                grasp.tuning.get(Phase7AbilityTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER,
+                        Config.uniqueEffects.bramblethorn.sharedDamageRatio), 0.0, 1.0);
         if (sharedDamage <= 0.0F) {
             return;
         }
@@ -542,13 +639,50 @@ public final class BramblethornAbilityManager {
         spawnPropagationEffects(world, damagedTarget);
     }
 
+    public static float modifyIncomingDamage(LivingEntity target, DamageSource source, float amount) {
+        if (!(target.getWorld() instanceof ServerWorld world)) return amount;
+        Map<UUID, ActiveGrasp> states = ACTIVE.get(world);
+        if (states == null) return amount;
+        ActiveGrasp own = states.get(target.getUuid());
+        if (own != null && own.phase == PHASE_BINDING && own.tuning.flag(1 << 19)
+                && !own.tuning.flag(1 << 26)
+                && own.targets.size() >= own.tuning.integer(Phase7AbilityTuning.Setting.COUNT, 3)
+                && !source.isIn(net.minecraft.registry.tag.DamageTypeTags.IS_PROJECTILE)) {
+            amount *= own.tuning.get(Phase7AbilityTuning.Setting.INCOMING_MULTIPLIER, .88);
+        }
+        if (own != null && own.phase == PHASE_BINDING && own.tuning.flag(1 << 20)
+                && !own.tuning.flag(1 << 26) && source.getAttacker() instanceof LivingEntity attacker
+                && own.containsTarget(attacker.getUuid())
+                && world.getTime() >= own.retortCooldowns.getOrDefault(attacker.getUuid(), 0L)) {
+            own.retortCooldowns.put(attacker.getUuid(), world.getTime()
+                    + own.tuning.integer(Phase7AbilityTuning.Setting.LOCKOUT_TICKS, 30));
+            float huntDamage = HelperMethods.abilityScaledDamage(SpellScalingProfile.NATURE, target,
+                    own.stack, Config.uniqueEffects.bramblethorn.huntDamageScaling,
+                    Config.uniqueEffects.bramblethorn.huntSpellScaling)
+                    * (float) own.tuning.get(Phase7AbilityTuning.Setting.PER_STACK_MULTIPLIER, .2);
+            attacker.damage(world.getDamageSources().indirectMagic(target, target), huntDamage);
+        }
+        if (source.getAttacker() instanceof LivingEntity attacker) {
+            for (ActiveGrasp grasp : states.values()) {
+                LivingEntity owner = resolveLiving(world, grasp.actorId);
+                if (owner != null && grasp.tuning.flag(1 << 22) && !grasp.tuning.flag(1 << 26)
+                        && grasp.containsTarget(attacker.getUuid())
+                        && (target == owner || !HelperMethods.checkAbilityTarget(target, owner))) {
+                    amount *= grasp.tuning.get(Phase7AbilityTuning.Setting.OUTGOING_MULTIPLIER, .9);
+                    break;
+                }
+            }
+        }
+        return amount;
+    }
+
     private static void tickBinding(ServerWorld world, LivingEntity actor, ActiveGrasp grasp) {
         for (BoundTarget bound : grasp.targets) {
             LivingEntity target = resolveLiving(world, bound.targetId);
             if (target == null) {
                 continue;
             }
-            pullTarget(target, bound.slot);
+            pullTarget(target, bound.slot, grasp.tuning);
             if ((world.getTime() + target.getId()) % 8L == 0L) {
                 world.spawnParticles(ParticleTypes.SPORE_BLOSSOM_AIR,
                         target.getX(), target.getBodyY(0.45), target.getZ(),
@@ -567,7 +701,8 @@ public final class BramblethornAbilityManager {
         grasp.phase = PHASE_LIFTING;
         grasp.phaseStartedAt = world.getTime();
         setAllVisualPhases(world, grasp, BrambleRootVisualEntity.PHASE_LIFT);
-        double liftForce = Math.max(0.0, Config.uniqueEffects.bramblethorn.liftForce);
+        double liftForce = Math.max(0.0, Config.uniqueEffects.bramblethorn.liftForce)
+                * grasp.tuning.get(Phase7AbilityTuning.Setting.SPEED, 1);
         for (BoundTarget bound : grasp.targets) {
             LivingEntity target = resolveLiving(world, bound.targetId);
             if (target == null) {
@@ -661,9 +796,11 @@ public final class BramblethornAbilityManager {
         } finally {
             PROPAGATING_DAMAGE.set(false);
         }
+        UniqueAbilityApi.emit(grasp.execution, UniqueAbilityPhase.HIT, Phase7UniqueAbilities.HIT,
+                target, 1, damage);
     }
 
-    private static void pullTarget(LivingEntity target, Vec3d slot) {
+    private static void pullTarget(LivingEntity target, Vec3d slot, Phase7AbilityTuning tuning) {
         Vec3d offset = slot.subtract(target.getPos());
         double horizontalDistance = offset.horizontalLength();
         if (horizontalDistance < 0.18) {
@@ -676,7 +813,8 @@ public final class BramblethornAbilityManager {
                 target.getAttributeValue(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE), 0.0, 1.0);
         double multiplier = MathHelper.clamp(1.0 / (size * (1.0 + resistance * 2.0)), 0.12, 1.0);
         double strength = Math.min(0.38,
-                Math.max(0.0, Config.uniqueEffects.bramblethorn.pullStrength)
+                Math.max(0.0, tuning.get(Phase7AbilityTuning.Setting.PULL_STRENGTH,
+                        Config.uniqueEffects.bramblethorn.pullStrength))
                         * multiplier * Math.min(2.0, 0.75 + horizontalDistance * 0.18));
         Vec3d direction = new Vec3d(offset.x, 0.0, offset.z).normalize();
         target.addVelocity(direction.x * strength, 0.0, direction.z * strength);
@@ -705,9 +843,12 @@ public final class BramblethornAbilityManager {
     }
 
     private static List<LivingEntity> findTargets(WeaponAbilityContext context,
-                                                   LivingEntity anchorTarget, Vec3d center) {
-        double radius = Math.max(0.5, Config.uniqueEffects.bramblethorn.captureRadius);
-        int maximum = Math.max(1, Config.uniqueEffects.bramblethorn.maximumTargets);
+                                                   LivingEntity anchorTarget, Vec3d center,
+                                                   Phase7AbilityTuning tuning) {
+        double radius = Math.max(0.5, tuning.get(Phase7AbilityTuning.Setting.RADIUS,
+                Config.uniqueEffects.bramblethorn.captureRadius));
+        int maximum = Math.max(1, tuning.integer(Phase7AbilityTuning.Setting.TARGET_CAP,
+                Config.uniqueEffects.bramblethorn.maximumTargets));
         Box box = Box.of(center.add(0.0, anchorTarget.getHeight() * 0.5, 0.0),
                 radius * 2.0, Math.max(4.0, radius * 1.5), radius * 2.0);
         List<LivingEntity> candidates = new ArrayList<>(context.world().getEntitiesByClass(
@@ -759,8 +900,47 @@ public final class BramblethornAbilityManager {
             if (target != null && target.isAlive() && !target.isRemoved()) {
                 continue;
             }
+            if (target != null && !target.isAlive()) applyBindKill(world, grasp);
             beginVisualFade(world, bound.visualId);
             iterator.remove();
+        }
+    }
+
+    private static void applyBindKill(ServerWorld world, ActiveGrasp grasp) {
+        LivingEntity actor = resolveLiving(world, grasp.actorId);
+        if (actor == null || grasp.tuning.flag(1 << 26)) return;
+        if (grasp.tuning.flag(1 << 21)) {
+            int cap = grasp.tuning.integer(Phase7AbilityTuning.Setting.STACK_CAP, 8);
+            actor.setAbsorptionAmount(Math.min(cap, actor.getAbsorptionAmount()
+                    + grasp.tuning.integer(Phase7AbilityTuning.Setting.ABSORPTION, 2)));
+        }
+        if (grasp.tuning.flag(1 << 24)) {
+            grasp.refunded = Math.min(grasp.tuning.integer(Phase7AbilityTuning.Setting.STACK_CAP, 48),
+                    grasp.refunded + grasp.tuning.integer(Phase7AbilityTuning.Setting.REFUND_TICKS, 12));
+            SimplySwordsAPI.setWeaponCooldown(actor, grasp.stack,
+                    Math.max(0, grasp.execution.cooldownTicks(Config.uniqueEffects.bramblethorn.cooldown)
+                            - grasp.refunded));
+        }
+        UniqueAbilityApi.emit(grasp.execution, UniqueAbilityPhase.HIT, Phase7UniqueAbilities.KILL,
+                null, 1, grasp.refunded);
+    }
+
+    private static void applyBriarSacrifice(ServerWorld world, LivingEntity actor, ActiveGrasp grasp) {
+        LivingEntity principal = resolveLiving(world, grasp.principalId);
+        if (principal == null) principal = actor;
+        LivingEntity damagePrincipal = principal;
+        double radius = grasp.tuning.get(Phase7AbilityTuning.Setting.RADIUS, 2);
+        float damage = grasp.slamDamage;
+        for (BoundTarget bound : grasp.targets) {
+            LivingEntity center = resolveLiving(world, bound.targetId);
+            if (center == null || !center.isAlive()) continue;
+            for (LivingEntity target : world.getEntitiesByClass(LivingEntity.class,
+                    center.getBoundingBox().expand(radius), candidate -> candidate.isAlive()
+                            && HelperMethods.checkAbilityTarget(candidate, actor))) {
+                DamageSource source = world.getDamageSources().indirectMagic(actor, damagePrincipal);
+                WeaponImplicitRegistry.runSuppressed(() ->
+                        HelperMethods.damageThroughIframes(target, source, damage));
+            }
         }
     }
 
@@ -869,15 +1049,20 @@ public final class BramblethornAbilityManager {
         private final long growthEndsAt;
         private final long bindingEndsAt;
         private final float slamDamage;
+        private final Phase7AbilityTuning tuning;
+        private final UniqueAbilityExecution execution;
         private final List<BoundTarget> targets = new ArrayList<>();
         private UUID coreVisualId;
         private int phase = PHASE_GROWING;
         private long phaseStartedAt;
         private long lastPropagationTick = Long.MIN_VALUE;
+        private int refunded;
+        private final Map<UUID, Long> retortCooldowns = new HashMap<>();
 
         private ActiveGrasp(UUID actorId, UUID principalId, ItemStack stack, Vec3d center,
                             long startedAt, long growthEndsAt, long bindingEndsAt,
-                            float slamDamage) {
+                            float slamDamage, Phase7AbilityTuning tuning,
+                            UniqueAbilityExecution execution) {
             this.actorId = actorId;
             this.principalId = principalId;
             this.stack = stack;
@@ -886,6 +1071,8 @@ public final class BramblethornAbilityManager {
             this.growthEndsAt = growthEndsAt;
             this.bindingEndsAt = bindingEndsAt;
             this.slamDamage = slamDamage;
+            this.tuning = tuning;
+            this.execution = execution;
             this.phaseStartedAt = startedAt;
         }
 
@@ -937,13 +1124,17 @@ public final class BramblethornAbilityManager {
         private final int slowDuration;
         private final int slowAmplifier;
         private final UUID visualId;
+        private final int targetCap;
+        private final boolean targetOnly;
+        private final UniqueAbilityExecution execution;
         private final Set<UUID> hitTargets = new HashSet<>();
         private float previousProgress;
 
         private ActiveHunt(UUID attackerId, UUID targetId, ItemStack stack,
                            Vec3d origin, long startedAt, int travelTicks,
                            double hitRadius, float damage, int slowDuration,
-                           int slowAmplifier, UUID visualId) {
+                           int slowAmplifier, int targetCap, boolean targetOnly, UUID visualId,
+                           UniqueAbilityExecution execution) {
             this.attackerId = attackerId;
             this.targetId = targetId;
             this.stack = stack;
@@ -954,7 +1145,13 @@ public final class BramblethornAbilityManager {
             this.damage = damage;
             this.slowDuration = slowDuration;
             this.slowAmplifier = slowAmplifier;
+            this.targetCap = targetCap;
+            this.targetOnly = targetOnly;
             this.visualId = visualId;
+            this.execution = execution;
         }
+    }
+
+    private record HuntStep(UUID targetId, long tick) {
     }
 }

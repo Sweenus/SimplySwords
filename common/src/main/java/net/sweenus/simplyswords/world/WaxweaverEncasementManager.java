@@ -16,9 +16,15 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.api.SpellScalingProfile;
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.api.WeaponAbilityActivationSource;
 import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
+import net.sweenus.simplyswords.api.ability.Phase7AbilityTuning;
+import net.sweenus.simplyswords.api.ability.Phase7UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityPhase;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.WaxweaverWaxVisualEntity;
 import net.sweenus.simplyswords.registry.EffectRegistry;
@@ -40,6 +46,9 @@ public final class WaxweaverEncasementManager {
     public static final int FORMATION_TICKS = 10;
     private static final double PLAYER_FALLBACK_RANGE = 8.0;
     private static final Map<ServerWorld, Map<UUID, ActiveEncasement>> ACTIVE = new HashMap<>();
+    private static final Map<UUID, Long> FLASH_WAX = new HashMap<>();
+    private static final Map<UUID, RefundWindow> TEMPO_REFUNDS = new HashMap<>();
+    private static final Map<UUID, Long> REACTIVE_COOLDOWN = new HashMap<>();
 
     private WaxweaverEncasementManager() {
     }
@@ -63,23 +72,41 @@ public final class WaxweaverEncasementManager {
 
         ServerWorld world = context.world();
         LivingEntity actor = context.actor();
+        UniqueAbilityExecution execution = Phase7CombatManager.beginActive(
+                Phase7UniqueAbilities.WAXWEAVER_PRISON, context, Config.uniqueEffects.waxweaver.activeCooldown);
+        Phase7AbilityTuning tuning = Phase7UniqueAbilities.tuning(execution);
+        double targetRange = tuning.get(Phase7AbilityTuning.Setting.RANGE,
+                Config.uniqueEffects.waxweaver.targetRange);
+        if (actor.squaredDistanceTo(target) > targetRange * targetRange) {
+            UniqueAbilityApi.cancel(execution);
+            return false;
+        }
         UUID principalId = context.sourcePlayer() == null ? actor.getUuid() : context.sourcePlayer().getUuid();
         float attack = HelperMethods.abilityScaledDamage(SpellScalingProfile.FIRE, actor, context.stack(),
                 1.0F, Config.uniqueEffects.waxweaver.spellScaling);
-        int duration = Math.max(1, Config.uniqueEffects.waxweaver.encasementDuration);
+        int duration = Math.max(1, tuning.integer(Phase7AbilityTuning.Setting.DURATION_TICKS,
+                Config.uniqueEffects.waxweaver.encasementDuration));
         Vec3d anchor = target.getPos();
 
         target.stopRiding();
         ActiveEncasement state = new ActiveEncasement(
                 actor.getUuid(), principalId, target.getUuid(), context.stack().copy(),
                 anchor, world.getTime(), world.getTime() + duration, attack, target.hasNoGravity(),
-                target instanceof MobEntity mob && mob.isAiDisabled());
+                target instanceof MobEntity mob && mob.isAiDisabled(), tuning, execution,
+                target.getHealth(), true, true);
         WaxweaverWaxVisualEntity visual = new WaxweaverWaxVisualEntity(
                 world, WaxweaverWaxVisualEntity.MODE_ENCASE, actor, target,
                 anchor.x, anchor.y, anchor.z, Math.max(target.getWidth(), target.getHeight()), duration);
         if (world.spawnEntity(visual)) state.visualId = visual.getUuid();
 
         ACTIVE.computeIfAbsent(world, ignored -> new HashMap<>()).put(actor.getUuid(), state);
+        UniqueAbilityApi.start(execution);
+        int absorption = tuning.integer(Phase7AbilityTuning.Setting.ABSORPTION, 0);
+        if (absorption > 0 && tuning.flag(1 << 20)) {
+            actor.addStatusEffect(new StatusEffectInstance(net.minecraft.entity.effect.StatusEffects.ABSORPTION,
+                    tuning.integer(Phase7AbilityTuning.Setting.STATUS_DURATION_TICKS, 60),
+                    Math.max(0, absorption / 4 - 1), false, true, true));
+        }
         applyPrison(world, target, state);
         spawnEncasementEffects(world, target);
         return true;
@@ -113,7 +140,7 @@ public final class WaxweaverEncasementManager {
 
     public static LivingEntity findPlayerTarget(PlayerEntity player) {
         if (player == null || !player.isAlive()) return null;
-        double range = Math.max(1.0, Config.uniqueEffects.waxweaver.targetRange);
+        double range = Math.max(1.0, Config.uniqueEffects.waxweaver.targetRange + 3.0);
         return StealSwordItem.findLenientTarget(player, range,
                 target -> isEligibleTarget(player, null, player.getWorld(), target));
     }
@@ -124,7 +151,7 @@ public final class WaxweaverEncasementManager {
         ActiveEncasement state = findByTarget(world, target.getUuid());
         if (states == null || state == null) return;
         states.remove(state.ownerId);
-        finish(world, state, target, true);
+        finish(world, state, target, state.detonates && !state.tuning.flag(1 << 7));
         if (states.isEmpty()) ACTIVE.remove(world);
     }
 
@@ -148,17 +175,26 @@ public final class WaxweaverEncasementManager {
             }
             if (!target.isAlive()) {
                 states.remove(state.ownerId);
-                finish(world, state, target, true);
+                finish(world, state, target, state.detonates && !state.tuning.flag(1 << 7));
                 continue;
             }
             if (world.getTime() >= state.expiresAt) {
                 states.remove(state.ownerId);
-                finish(world, state, target, true);
+                finish(world, state, target, state.detonates);
                 continue;
             }
 
             applyPrison(world, target, state);
-            tickTaunt(world, owner, target, state);
+            if (state.tuning.flag(1 << 6) && !state.tuning.flag(1 << 7)) {
+                int steps = Math.min(5, (int) ((state.initialHealth - target.getHealth())
+                        / Math.max(1.0F, target.getMaxHealth()) * 5.0F));
+                if (steps > state.brittleSteps) {
+                    state.expiresAt -= (long) (steps - state.brittleSteps)
+                            * state.tuning.integer(Phase7AbilityTuning.Setting.INTERVAL_TICKS, 10);
+                    state.brittleSteps = steps;
+                }
+            }
+            if (state.taunts) tickTaunt(world, owner, target, state);
             tickPrisonEffects(world, target, state);
         }
         if (states.isEmpty()) ACTIVE.remove(world);
@@ -183,7 +219,8 @@ public final class WaxweaverEncasementManager {
 
     private static void tickTaunt(ServerWorld world, LivingEntity owner, LivingEntity prisoner,
                                   ActiveEncasement state) {
-        int interval = Math.max(1, Config.uniqueEffects.waxweaver.tauntInterval);
+        int interval = Math.max(1, state.tuning.integer(Phase7AbilityTuning.Setting.INTERVAL_TICKS,
+                Config.uniqueEffects.waxweaver.tauntInterval));
         if ((world.getTime() - state.startedAt) % interval != 0L) return;
 
         Iterator<Map.Entry<UUID, UUID>> taunted = state.previousTargets.entrySet().iterator();
@@ -197,11 +234,13 @@ public final class WaxweaverEncasementManager {
             mob.setTarget(prisoner);
         }
 
-        int maximum = Math.max(0, Config.uniqueEffects.waxweaver.tauntMaxTargets);
+        int maximum = Math.max(0, state.tuning.integer(Phase7AbilityTuning.Setting.TARGET_CAP,
+                Config.uniqueEffects.waxweaver.tauntMaxTargets));
         int remaining = maximum - state.previousTargets.size();
         if (remaining <= 0) return;
 
-        double radius = Math.max(1.0, Config.uniqueEffects.waxweaver.tauntRadius);
+        double radius = Math.max(1.0, state.tuning.get(Phase7AbilityTuning.Setting.WIDTH,
+                Config.uniqueEffects.waxweaver.tauntRadius));
         List<MobEntity> candidates = new ArrayList<>(world.getEntitiesByClass(
                 MobEntity.class,
                 prisoner.getBoundingBox().expand(radius, radius * 0.5, radius),
@@ -232,6 +271,7 @@ public final class WaxweaverEncasementManager {
         }
         if (!detonate) {
             if (prisoner != null) spawnReleaseEffects(world, prisoner.getPos());
+            UniqueAbilityApi.finish(state.execution, Phase7UniqueAbilities.FINISH, 0);
             return;
         }
         Vec3d center = prisoner == null ? state.anchor : prisoner.getPos();
@@ -260,12 +300,20 @@ public final class WaxweaverEncasementManager {
         if (principal == null) principal = owner;
         LivingEntity damagePrincipal = principal;
 
-        double radius = Math.max(0.5, Config.uniqueEffects.waxweaver.explosionRadius);
-        float damage = state.attack * Math.max(0.0F, Config.uniqueEffects.waxweaver.explosionDamageScaling);
+        double radius = Math.max(0.5, state.tuning.get(Phase7AbilityTuning.Setting.RADIUS,
+                Config.uniqueEffects.waxweaver.explosionRadius));
+        float damage = state.attack * Math.max(0.0F, Config.uniqueEffects.waxweaver.explosionDamageScaling)
+                * (float) state.tuning.get(Phase7AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1);
+        damage *= state.flashMultiplier;
+        damage *= 1.0F + state.brittleSteps
+                * (float) state.tuning.get(Phase7AbilityTuning.Setting.PER_STACK_MULTIPLIER, 0);
         Box box = new Box(center.x - radius, center.y - radius * 0.5, center.z - radius,
                 center.x + radius, center.y + radius, center.z + radius);
+        int affected = 0;
+        int maximum = Math.max(1, state.tuning.integer(Phase7AbilityTuning.Setting.TARGET_CAP, 64));
         for (LivingEntity target : world.getEntitiesByClass(LivingEntity.class, box,
                 target -> target.isAlive() && isValidTarget(owner, damagePrincipal, target))) {
+            if (affected >= maximum) break;
             if (target.getPos().squaredDistanceTo(center) > radius * radius) continue;
             DamageSource source = world.getDamageSources().indirectMagic(owner, damagePrincipal);
             float finalDamage = HelperMethods.applyAbilityDamageEnchantments(
@@ -274,8 +322,13 @@ public final class WaxweaverEncasementManager {
             WeaponImplicitRegistry.runSuppressed(() -> damaged[0] =
                     HelperMethods.damageThroughIframes(target, source, finalDamage));
             if (!damaged[0]) continue;
+            affected++;
+            UniqueAbilityApi.emit(state.execution, UniqueAbilityPhase.HIT, Phase7UniqueAbilities.HIT,
+                    target, 1, finalDamage);
 
-            target.setOnFireFor(Math.max(0, Config.uniqueEffects.waxweaver.explosionIgniteSeconds));
+            int fireTicks = state.tuning.integer(Phase7AbilityTuning.Setting.FIRE_TICKS,
+                    Config.uniqueEffects.waxweaver.explosionIgniteSeconds * 20);
+            target.setOnFireFor(Math.max(0, (fireTicks + 19) / 20));
             Vec3d outward = target.getPos().subtract(center);
             if (outward.lengthSquared() > 0.001) {
                 double strength = Math.max(0.0, Config.uniqueEffects.waxweaver.explosionKnockback);
@@ -285,6 +338,7 @@ public final class WaxweaverEncasementManager {
             }
         }
         spawnDetonationEffects(world, center);
+        UniqueAbilityApi.finish(state.execution, Phase7UniqueAbilities.FINISH, affected);
     }
 
     private static boolean isValidTarget(LivingEntity actor, LivingEntity principal,
@@ -293,6 +347,76 @@ public final class WaxweaverEncasementManager {
                 && target != principal
                 && HelperMethods.checkAbilityTarget(target, actor)
                 && (principal == actor || HelperMethods.checkAbilityTarget(target, principal));
+    }
+
+    public static float modifyIncomingDamage(LivingEntity target, DamageSource source, float amount) {
+        if (!(target.getWorld() instanceof ServerWorld world)) return amount;
+        Map<UUID, ActiveEncasement> states = ACTIVE.get(world);
+        if (states == null) return amount;
+        ActiveEncasement own = states.get(target.getUuid());
+        if (own != null && own.tuning.flag(1 << 23)
+                && source.isIn(net.minecraft.registry.tag.DamageTypeTags.IS_PROJECTILE)) {
+            amount *= own.tuning.get(Phase7AbilityTuning.Setting.INCOMING_MULTIPLIER, .85);
+        }
+        if (source.getAttacker() instanceof LivingEntity attacker) {
+            for (ActiveEncasement state : states.values()) {
+                if (state.tuning.flag(1 << 7) && state.previousTargets.containsKey(attacker.getUuid())) {
+                    amount *= state.tuning.get(Phase7AbilityTuning.Setting.OUTGOING_MULTIPLIER, .75);
+                    break;
+                }
+            }
+        }
+        return amount;
+    }
+
+    public static void primeFlashWax(LivingEntity actor, Phase7AbilityTuning tuning) {
+        if (actor != null && tuning.flag(1 << 15)) {
+            FLASH_WAX.put(actor.getUuid(), actor.getWorld().getTime()
+                    + tuning.integer(Phase7AbilityTuning.Setting.LOCKOUT_TICKS, 120));
+        }
+    }
+
+    public static void reduceActiveCooldown(LivingEntity actor, ItemStack stack,
+                                            Phase7AbilityTuning tuning) {
+        int refund = tuning.integer(Phase7AbilityTuning.Setting.REFUND_TICKS, 0);
+        if (refund <= 0 || !(actor instanceof PlayerEntity player)) return;
+        long now = actor.getWorld().getTime();
+        RefundWindow window = TEMPO_REFUNDS.get(actor.getUuid());
+        int limit = tuning.integer(Phase7AbilityTuning.Setting.STACK_CAP, 24);
+        int used = window == null || now - window.startedAt > tuning.integer(
+                Phase7AbilityTuning.Setting.LOCKOUT_TICKS, 80) ? 0 : window.used;
+        int applied = Math.min(refund, Math.max(0, limit - used));
+        if (applied <= 0) return;
+        int total = SimplySwordsAPI.getEffectiveWeaponCooldownTicks(stack, actor,
+                Config.uniqueEffects.waxweaver.activeCooldown);
+        int remaining = Math.round(player.getItemCooldownManager().getCooldownProgress(stack.getItem(), 0) * total);
+        player.getItemCooldownManager().set(stack.getItem(), Math.max(0, remaining - applied));
+        TEMPO_REFUNDS.put(actor.getUuid(), new RefundWindow(used == 0 ? now : window.startedAt, used + applied));
+    }
+
+    public static boolean tryReactiveShell(ServerWorld world, LivingEntity owner, LivingEntity attacker,
+                                           ItemStack stack, Phase7AbilityTuning tuning,
+                                           UniqueAbilityExecution execution) {
+        if (!tuning.flag(1 << 21) || owner.getHealth() / owner.getMaxHealth()
+                >= tuning.get(Phase7AbilityTuning.Setting.CHANCE, 35) / 100.0
+                || world.getTime() < REACTIVE_COOLDOWN.getOrDefault(owner.getUuid(), 0L)
+                || isCasterActive(owner) || !HelperMethods.checkAbilityTarget(attacker, owner)) return false;
+        int duration = tuning.integer(Phase7AbilityTuning.Setting.INTERVAL_TICKS, 40);
+        Vec3d anchor = attacker.getPos();
+        ActiveEncasement state = new ActiveEncasement(owner.getUuid(), owner.getUuid(), attacker.getUuid(),
+                stack.copy(), anchor, world.getTime(), world.getTime() + duration, 0,
+                attacker.hasNoGravity(), attacker instanceof MobEntity mob && mob.isAiDisabled(),
+                tuning, execution, attacker.getHealth(), false, false);
+        WaxweaverWaxVisualEntity visual = new WaxweaverWaxVisualEntity(world,
+                WaxweaverWaxVisualEntity.MODE_ENCASE, owner, attacker, anchor.x, anchor.y, anchor.z,
+                Math.max(attacker.getWidth(), attacker.getHeight()), duration);
+        if (world.spawnEntity(visual)) state.visualId = visual.getUuid();
+        ACTIVE.computeIfAbsent(world, ignored -> new HashMap<>()).put(owner.getUuid(), state);
+        REACTIVE_COOLDOWN.put(owner.getUuid(), world.getTime()
+                + tuning.integer(Phase7AbilityTuning.Setting.LOCKOUT_TICKS, 200));
+        applyPrison(world, attacker, state);
+        spawnEncasementEffects(world, attacker);
+        return true;
     }
 
     private static LivingEntity resolveTarget(WeaponAbilityContext context) {
@@ -459,17 +583,26 @@ public final class WaxweaverEncasementManager {
         private final ItemStack stack;
         private final Vec3d anchor;
         private final long startedAt;
-        private final long expiresAt;
+        private long expiresAt;
         private final float attack;
         private final boolean hadNoGravity;
         private final boolean hadAiDisabled;
+        private final Phase7AbilityTuning tuning;
+        private final UniqueAbilityExecution execution;
+        private final float initialHealth;
+        private final float flashMultiplier;
+        private final boolean taunts;
+        private final boolean detonates;
+        private int brittleSteps;
         private final Map<UUID, UUID> previousTargets = new HashMap<>();
         private UUID visualId;
 
         private ActiveEncasement(UUID ownerId, UUID principalId, UUID targetId,
                                  ItemStack stack, Vec3d anchor, long startedAt,
                                  long expiresAt, float attack, boolean hadNoGravity,
-                                 boolean hadAiDisabled) {
+                                 boolean hadAiDisabled, Phase7AbilityTuning tuning,
+                                 UniqueAbilityExecution execution, float initialHealth,
+                                 boolean taunts, boolean detonates) {
             this.ownerId = ownerId;
             this.principalId = principalId;
             this.targetId = targetId;
@@ -480,6 +613,17 @@ public final class WaxweaverEncasementManager {
             this.attack = attack;
             this.hadNoGravity = hadNoGravity;
             this.hadAiDisabled = hadAiDisabled;
+            this.tuning = tuning;
+            this.execution = execution;
+            this.initialHealth = initialHealth;
+            Long flashUntil = detonates ? FLASH_WAX.remove(ownerId) : null;
+            this.flashMultiplier = flashUntil != null && flashUntil >= startedAt
+                    ? (float) tuning.get(Phase7AbilityTuning.Setting.FINAL_DAMAGE_MULTIPLIER, 1.3) : 1.0F;
+            this.taunts = taunts;
+            this.detonates = detonates;
         }
+    }
+
+    private record RefundWindow(long startedAt, int used) {
     }
 }

@@ -7,6 +7,8 @@ import net.minecraft.entity.Tameable;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
@@ -17,6 +19,9 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+import net.sweenus.simplyswords.config.Config;
+import net.sweenus.simplyswords.registry.ItemsRegistry;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
@@ -39,6 +44,13 @@ public class SimplySwordsBeeEntity extends BeeEntity implements Tameable {
     private boolean swarmPassStung;
     private UUID swarmLineupTargetUuid;
     private Vec3d swarmLineupPos;
+    private double masterySwarmRadius;
+    private int masteryStingInterval;
+    private int masterySlowAmplifier = -1;
+    private int masteryPoisonTicks;
+    private int masteryMode;
+    private int masteryCooldownRefund;
+    private int masterySearchCap;
 
     public SimplySwordsBeeEntity(EntityType<? extends BeeEntity> entityType, World world) {
         super(entityType, world);
@@ -86,6 +98,23 @@ public class SimplySwordsBeeEntity extends BeeEntity implements Tameable {
         Vec3d velocity = target.getVelocity();
         target.timeUntilRegen = 0;
         boolean attacked = super.tryAttack(target);
+        if (attacked && masteryPoisonTicks > 0 && target instanceof LivingEntity living) {
+            living.addStatusEffect(new StatusEffectInstance(StatusEffects.POISON,
+                    masteryPoisonTicks, 0, false, true, true), this);
+        }
+        Entity owner = ownerUuid != null && getWorld() instanceof ServerWorld serverWorld
+                ? serverWorld.getEntity(ownerUuid) : null;
+        if (attacked && masteryCooldownRefund > 0 && target instanceof LivingEntity living
+                && !living.isAlive() && owner instanceof PlayerEntity player) {
+            int total = SimplySwordsAPI.getEffectiveWeaponCooldownTicks(
+                    new net.minecraft.item.ItemStack(ItemsRegistry.HIVEHEART.get()), player,
+                    Config.uniqueEffects.hiveheart.cooldown);
+            int remaining = Math.round(player.getItemCooldownManager().getCooldownProgress(
+                    ItemsRegistry.HIVEHEART.get(), 0) * total);
+            player.getItemCooldownManager().set(ItemsRegistry.HIVEHEART.get(),
+                    Math.max(0, remaining - masteryCooldownRefund));
+            masteryCooldownRefund = 0;
+        }
         target.setVelocity(velocity);
         target.velocityModified = true;
         return attacked;
@@ -297,6 +326,54 @@ public class SimplySwordsBeeEntity extends BeeEntity implements Tameable {
         this.swarmLineupPos = null;
     }
 
+    public double getMasterySwarmRadius() {
+        return masterySwarmRadius;
+    }
+
+    public void setMasterySwarmRadius(double masterySwarmRadius) {
+        this.masterySwarmRadius = Math.max(0, masterySwarmRadius);
+    }
+
+    public int getMasteryStingInterval() {
+        return masteryStingInterval;
+    }
+
+    public void setMasteryStingInterval(int masteryStingInterval) {
+        this.masteryStingInterval = Math.max(0, masteryStingInterval);
+    }
+
+    public int getMasterySlowAmplifier() {
+        return masterySlowAmplifier;
+    }
+
+    public void setMasterySlowAmplifier(int masterySlowAmplifier) {
+        this.masterySlowAmplifier = Math.max(-1, masterySlowAmplifier);
+    }
+
+    public void setMasteryPoisonTicks(int masteryPoisonTicks) {
+        this.masteryPoisonTicks = Math.max(0, masteryPoisonTicks);
+    }
+
+    public int getMasteryMode() {
+        return masteryMode;
+    }
+
+    public void setMasteryMode(int masteryMode) {
+        this.masteryMode = Math.max(0, masteryMode);
+    }
+
+    public void setMasteryCooldownRefund(int masteryCooldownRefund) {
+        this.masteryCooldownRefund = Math.max(0, masteryCooldownRefund);
+    }
+
+    public int getMasterySearchCap() {
+        return masterySearchCap;
+    }
+
+    public void setMasterySearchCap(int masterySearchCap) {
+        this.masterySearchCap = Math.max(0, masterySearchCap);
+    }
+
     @Override
     public void readCustomDataFromNbt(NbtCompound nbt) {
         super.readCustomDataFromNbt(nbt);
@@ -334,6 +411,14 @@ public class SimplySwordsBeeEntity extends BeeEntity implements Tameable {
             );
         }
         this.swarmPassStung = nbt.getBoolean("swarm_pass_stung");
+        this.masterySwarmRadius = nbt.getDouble("mastery_swarm_radius");
+        this.masteryStingInterval = nbt.getInt("mastery_sting_interval");
+        this.masterySlowAmplifier = nbt.contains("mastery_slow_amplifier")
+                ? nbt.getInt("mastery_slow_amplifier") : -1;
+        this.masteryPoisonTicks = nbt.getInt("mastery_poison_ticks");
+        this.masteryMode = nbt.getInt("mastery_mode");
+        this.masteryCooldownRefund = nbt.getInt("mastery_cooldown_refund");
+        this.masterySearchCap = nbt.getInt("mastery_search_cap");
         if (nbt.containsUuid("swarm_lineup_target_uuid")) {
             this.swarmLineupTargetUuid = nbt.getUuid("swarm_lineup_target_uuid");
         }
@@ -379,6 +464,13 @@ public class SimplySwordsBeeEntity extends BeeEntity implements Tameable {
             nbt.putDouble("swarm_pass_exit_z", this.swarmPassExitPos.z);
         }
         nbt.putBoolean("swarm_pass_stung", this.swarmPassStung);
+        nbt.putDouble("mastery_swarm_radius", this.masterySwarmRadius);
+        nbt.putInt("mastery_sting_interval", this.masteryStingInterval);
+        nbt.putInt("mastery_slow_amplifier", this.masterySlowAmplifier);
+        nbt.putInt("mastery_poison_ticks", this.masteryPoisonTicks);
+        nbt.putInt("mastery_mode", this.masteryMode);
+        nbt.putInt("mastery_cooldown_refund", this.masteryCooldownRefund);
+        nbt.putInt("mastery_search_cap", this.masterySearchCap);
         if (this.swarmLineupTargetUuid != null) {
             nbt.putUuid("swarm_lineup_target_uuid", this.swarmLineupTargetUuid);
         }

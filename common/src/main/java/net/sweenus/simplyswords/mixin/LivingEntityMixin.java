@@ -30,6 +30,7 @@ import net.sweenus.simplyswords.world.RunicSlashManager;
 import net.sweenus.simplyswords.world.BramblethornAbilityManager;
 import net.sweenus.simplyswords.world.BloodwakeAbilityManager;
 import net.sweenus.simplyswords.world.IonboundStormscaleAbilityManager;
+import net.sweenus.simplyswords.world.HivemindSwarmManager;
 import net.sweenus.simplyswords.world.MagispearAbilityManager;
 import net.sweenus.simplyswords.world.MoltenEdgeAbilityManager;
 import net.sweenus.simplyswords.world.ObserverStatusEffectSyncManager;
@@ -37,6 +38,7 @@ import net.sweenus.simplyswords.world.Phase4PassiveManager;
 import net.sweenus.simplyswords.world.Phase4LichbladeManager;
 import net.sweenus.simplyswords.world.Phase4StandardManager;
 import net.sweenus.simplyswords.world.Phase5CombatManager;
+import net.sweenus.simplyswords.world.Phase7CombatManager;
 import net.sweenus.simplyswords.world.DreadwhisperAbilityManager;
 import net.sweenus.simplyswords.world.GloamMechanicsManager;
 import net.sweenus.simplyswords.world.SoulPyreAbilityManager;
@@ -194,6 +196,10 @@ public abstract class LivingEntityMixin {
             amount = Phase4StandardManager.modifyIncomingDamage(livingEntity, source, amount);
             amount = Phase4PassiveManager.modifyIncomingDamage(livingEntity, source, amount);
             amount = Phase5CombatManager.modifyIncomingDamage(livingEntity, source, amount);
+            amount = WaxweaverEncasementManager.modifyIncomingDamage(livingEntity, source, amount);
+            amount = BramblethornAbilityManager.modifyIncomingDamage(livingEntity, source, amount);
+            amount = HivemindSwarmManager.modifyIncomingDamage(livingEntity, source, amount);
+            amount = Phase7CombatManager.modifyIncomingDamage(livingEntity, source, amount);
         }
         return amount;
     }
@@ -209,6 +215,8 @@ public abstract class LivingEntityMixin {
             Phase4PassiveManager.onDamageApplied(livingEntity, source);
             Phase4LichbladeManager.onOwnerDamaged(livingEntity);
             Phase5CombatManager.onDamageApplied(livingEntity, source);
+            HivemindSwarmManager.onOwnerDamaged(livingEntity, source);
+            Phase7CombatManager.onDamageApplied(livingEntity, source);
             if (source.isIn(DamageTypeTags.IS_PLAYER_ATTACK) && source.getAttacker() instanceof ServerPlayerEntity player) {
                 ItemStack stack = source.getWeaponStack();
                 if (stack == null || !stack.isOf(ItemsRegistry.STORMBRINGER.get())) {

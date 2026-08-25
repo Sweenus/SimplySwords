@@ -160,6 +160,9 @@ public abstract class ServerWorldMixin {
         if (BramblethornAbilityManager.hasActive(world)) {
             BramblethornAbilityManager.tick(world);
         }
+        if (Phase7CombatManager.hasScheduled(world)) {
+            Phase7CombatManager.tick(world);
+        }
         if (EvocationFangManager.hasActive(world)) {
             EvocationFangManager.tick(world);
         }
