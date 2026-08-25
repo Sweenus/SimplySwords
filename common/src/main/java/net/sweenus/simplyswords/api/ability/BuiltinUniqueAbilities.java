@@ -341,6 +341,7 @@ public final class BuiltinUniqueAbilities {
         UniqueAbilityApi.registerDefinition(BRIMSTONE_RITE);
         Phase2UniqueAbilities.register();
         Phase3UniqueAbilities.register();
+        Phase4UniqueAbilities.register();
     }
 
     private static Identifier id(String path) {

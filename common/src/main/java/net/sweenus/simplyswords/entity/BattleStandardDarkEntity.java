@@ -28,6 +28,8 @@ import net.sweenus.simplyswords.effect.instance.SimplySwordsStatusEffectInstance
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
+import net.sweenus.simplyswords.world.Phase4StandardManager;
 
 import java.util.Comparator;
 import java.util.HashMap;
@@ -44,6 +46,7 @@ public class BattleStandardDarkEntity extends PathAwareEntity {
     public String standardType;
     public int decayRate;
     public ItemStack abilityStack = ItemStack.EMPTY;
+    private UniqueAbilityExecution phase4Execution;
     private final Map<UUID, EnigmaTornadoTarget> enigmaTornadoTargets = new HashMap<>();
     private final Map<UUID, Long> enigmaTornadoCooldowns = new HashMap<>();
     private static final double ENIGMA_PULL_STRENGTH = 0.18;
@@ -71,6 +74,11 @@ public class BattleStandardDarkEntity extends PathAwareEntity {
     public String getStandardType() {
         String trackedType = this.dataTracker.get(TRACKED_STANDARD_TYPE);
         return trackedType == null || trackedType.isBlank() ? this.standardType : trackedType;
+    }
+
+    public void configurePhase4(UniqueAbilityExecution execution, ItemStack stack) {
+        this.phase4Execution = execution;
+        this.abilityStack = stack.copy();
     }
 
     @Override
@@ -103,6 +111,11 @@ public class BattleStandardDarkEntity extends PathAwareEntity {
                     HelperMethods.incrementStatusEffect(ownerEntity, StatusEffects.HASTE, 60, 1, 7);
             }
             if (ownerEntity != null && standardType != null) {
+                if (standardType.equals("harbinger") && phase4Execution != null
+                        && Phase4StandardManager.tickHarbinger(this, phase4Execution, abilityStack)) {
+                    super.baseTick();
+                    return;
+                }
                 if (!ownerEntity.isAlive())
                     this.setHealth(this.getHealth() - 1000);
                 int radius = 6;

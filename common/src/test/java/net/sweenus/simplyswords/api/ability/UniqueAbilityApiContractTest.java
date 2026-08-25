@@ -133,6 +133,28 @@ final class UniqueAbilityApiContractTest {
         assertEquals(0.0, tuning.get(Phase3AbilityTuning.Setting.SPEED, 1));
     }
 
+    @Test
+    void phase4DefinitionsAreAdditiveTypedAndBounded() {
+        List<UniqueAbilityDefinition> definitions = List.of(
+                Phase4UniqueAbilities.LICHBLADE_AURA, Phase4UniqueAbilities.LICHBLADE_CHANNEL,
+                Phase4UniqueAbilities.SUNFIRE_STANDARD, Phase4UniqueAbilities.SUNFIRE_REGEN,
+                Phase4UniqueAbilities.HARBINGER_STANDARD, Phase4UniqueAbilities.HARBINGER_OMEN);
+        assertEquals(6, definitions.stream().map(UniqueAbilityDefinition::id).distinct().count());
+        for (UniqueAbilityDefinition definition : definitions) {
+            assertTrue(definition.supports(Phase4UniqueAbilities.TUNING));
+            assertTrue(definition.supportsEvent(Phase4UniqueAbilities.HIT));
+            assertTrue(definition.supportsEvent(Phase4UniqueAbilities.SUPPORT));
+            assertTrue(definition.supportsEvent(Phase4UniqueAbilities.FINISH));
+        }
+        Phase4AbilityTuning tuning = Phase4AbilityTuning.EMPTY
+                .with(Phase4AbilityTuning.Setting.CHANCE, 500)
+                .with(Phase4AbilityTuning.Setting.TARGET_CAP, 500)
+                .with(Phase4AbilityTuning.Setting.SPEED, Double.NaN);
+        assertEquals(100, tuning.integer(Phase4AbilityTuning.Setting.CHANCE, 0));
+        assertEquals(64, tuning.integer(Phase4AbilityTuning.Setting.TARGET_CAP, 0));
+        assertEquals(0.0, tuning.get(Phase4AbilityTuning.Setting.SPEED, 1));
+    }
+
     private static Identifier id(String path) {
         return Identifier.of("simplyswords_test", path);
     }

@@ -33,6 +33,9 @@ import net.sweenus.simplyswords.world.IonboundStormscaleAbilityManager;
 import net.sweenus.simplyswords.world.MagispearAbilityManager;
 import net.sweenus.simplyswords.world.MoltenEdgeAbilityManager;
 import net.sweenus.simplyswords.world.ObserverStatusEffectSyncManager;
+import net.sweenus.simplyswords.world.Phase4PassiveManager;
+import net.sweenus.simplyswords.world.Phase4LichbladeManager;
+import net.sweenus.simplyswords.world.Phase4StandardManager;
 import net.sweenus.simplyswords.world.DreadwhisperAbilityManager;
 import net.sweenus.simplyswords.world.GloamMechanicsManager;
 import net.sweenus.simplyswords.world.SoulPyreAbilityManager;
@@ -169,6 +172,7 @@ public abstract class LivingEntityMixin {
         }
         if (!livingEntity.getWorld().isClient()) {
             amount = MoltenEdgeAbilityManager.modifyOutgoingDamage(source, amount);
+            amount = Phase4PassiveManager.modifyOutgoingDamage(livingEntity, source, amount);
             StatusEffectInstance voidcloakEffect = livingEntity.getStatusEffect(EffectRegistry.getReference(EffectRegistry.VOIDCLOAK));
             StatusEffectInstance ribbonwrathEffect = livingEntity.getStatusEffect(EffectRegistry.getReference(EffectRegistry.RIBBONWRATH));
             StatusEffectInstance soulTetherEffect = livingEntity.getStatusEffect(EffectRegistry.getReference(EffectRegistry.SOULTETHER));
@@ -189,6 +193,8 @@ public abstract class LivingEntityMixin {
             amount = WeaponImplicitRegistry.modifyDamage(livingEntity, source, amount);
             amount = DreadwhisperAbilityManager.modifyIncomingDamage(livingEntity, source, amount);
             amount = MoltenEdgeAbilityManager.modifyIncomingDamage(livingEntity, amount);
+            amount = Phase4StandardManager.modifyIncomingDamage(livingEntity, source, amount);
+            amount = Phase4PassiveManager.modifyIncomingDamage(livingEntity, source, amount);
         }
         return amount;
     }
@@ -201,6 +207,8 @@ public abstract class LivingEntityMixin {
             MoltenEdgeAbilityManager.gainHeatFromIncomingDamage(livingEntity, amount, true);
             WeaponImplicitRegistry.onDamageApplied(livingEntity, source, amount);
             BloodwakeAbilityManager.onTargetDamaged(livingEntity, source);
+            Phase4PassiveManager.onDamageApplied(livingEntity, source);
+            Phase4LichbladeManager.onOwnerDamaged(livingEntity);
             if (source.isIn(DamageTypeTags.IS_PLAYER_ATTACK) && source.getAttacker() instanceof ServerPlayerEntity player) {
                 ItemStack stack = source.getWeaponStack();
                 if (stack == null || !stack.isOf(ItemsRegistry.STORMBRINGER.get())) {

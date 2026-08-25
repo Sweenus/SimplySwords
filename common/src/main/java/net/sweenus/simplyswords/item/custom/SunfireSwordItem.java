@@ -25,6 +25,11 @@ import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
+import net.sweenus.simplyswords.api.ability.Phase4AbilityTuning;
+import net.sweenus.simplyswords.api.ability.Phase4UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityContext;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.entity.BattleStandardEntity;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
@@ -33,6 +38,7 @@ import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
+import net.sweenus.simplyswords.world.Phase4PassiveManager;
 
 import java.util.List;
 
@@ -48,11 +54,7 @@ public class SunfireSwordItem extends UniqueSwordItem implements UniqueWeaponAct
             return super.postHit(stack, target, attacker);
         }
         HelperMethods.playHitSounds(attacker, target);
-        if (!attacker.getWorld().isClient() && attacker.getRandom().nextInt(100) <= Config.uniqueEffects.sunfire.chance) {
-            attacker.getWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
-                    attacker.getSoundCategory(), 0.3f, 1.7f);
-            attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.REGENERATION, 40, 1), attacker);
-        }
+        if (!attacker.getWorld().isClient()) Phase4PassiveManager.sunfireMelee(stack, target, attacker);
         return super.postHit(stack, target, attacker);
     }
 
@@ -63,12 +65,7 @@ public class SunfireSwordItem extends UniqueSwordItem implements UniqueWeaponAct
 
     @Override
     public TypedActionResult<ItemStack> startPlayerAbility(World world, PlayerEntity user, Hand hand) {
-        if (!user.getWorld().isClient()) {
-            if (spawnSunfireStandard((ServerWorld) user.getWorld(), user) != null) {
-                SimplySwordsAPI.setWeaponCooldown(user, user.getStackInHand(hand), Config.uniqueEffects.sunfire.cooldown);
-            }
-        }
-        return super.use(world, user, hand);
+        return UniqueWeaponActiveAbility.super.startPlayerAbility(world, user, hand);
     }
 
     @Override
@@ -85,7 +82,15 @@ public class SunfireSwordItem extends UniqueSwordItem implements UniqueWeaponAct
 
     @Override
     public boolean activate(WeaponAbilityContext context) {
-        return spawnSunfireStandard(context.world(), context.actor()) != null;
+        UniqueAbilityExecution execution = UniqueAbilityApi.begin(Phase4UniqueAbilities.SUNFIRE_STANDARD,
+                UniqueAbilityContext.active(context), tuning -> tuning
+                        .set(Phase4UniqueAbilities.TUNING, Phase4AbilityTuning.EMPTY)
+                        .set(Phase4UniqueAbilities.COOLDOWN_TICKS, Config.uniqueEffects.sunfire.cooldown));
+        BattleStandardEntity standard = spawnSunfireStandard(context.world(), context.actor());
+        if (standard == null) return false;
+        if (Phase4UniqueAbilities.tuning(execution).isEmpty()) UniqueAbilityApi.cancel(execution);
+        else standard.configurePhase4(execution, context.stack());
+        return true;
     }
 
     @Override
@@ -113,6 +118,7 @@ public class SunfireSwordItem extends UniqueSwordItem implements UniqueWeaponAct
             banner.ownerEntity = user;
             banner.decayRate = 3;
             banner.standardType = "sunfire";
+            banner.spellScalingOwner = "sunfire";
             banner.setCustomName(Text.translatable("entity.simplyswords.battlestandard.name", user.getName()));
         }
         return banner;
@@ -120,6 +126,9 @@ public class SunfireSwordItem extends UniqueSwordItem implements UniqueWeaponAct
 
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
+        if (!world.isClient() && selected && entity instanceof LivingEntity living) {
+            Phase4PassiveManager.tickHeld(stack, living);
+        }
         HelperMethods.createFootfalls(entity, stack, world, ParticleTypes.MYCELIUM, ParticleTypes.MYCELIUM,
                 ParticleTypes.MYCELIUM, true);
         super.inventoryTick(stack, world, entity, slot, selected);

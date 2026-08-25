@@ -24,11 +24,14 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
+import net.minecraft.item.ItemStack;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.compat.SpellScalingComponents;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
+import net.sweenus.simplyswords.world.Phase4StandardManager;
 
 import java.util.Objects;
 import java.util.function.Supplier;
@@ -49,6 +52,8 @@ public class BattleStandardEntity extends PathAwareEntity {
     public int negativeEffectAmplifier;
     public boolean dealsDamage = true;
     public boolean doesHealing = true;
+    private UniqueAbilityExecution phase4Execution;
+    private ItemStack phase4Stack = ItemStack.EMPTY;
     private static boolean errorLogged = false;
 
     public static DefaultAttributeContainer.Builder createBattleStandardAttributes() {
@@ -71,6 +76,11 @@ public class BattleStandardEntity extends PathAwareEntity {
     public String getStandardType() {
         String trackedType = this.dataTracker.get(TRACKED_STANDARD_TYPE);
         return trackedType == null || trackedType.isBlank() ? this.standardType : trackedType;
+    }
+
+    public void configurePhase4(UniqueAbilityExecution execution, ItemStack stack) {
+        this.phase4Execution = execution;
+        this.phase4Stack = stack.copy();
     }
 
     private static void errorCatch(String identifier) {
@@ -106,6 +116,11 @@ public class BattleStandardEntity extends PathAwareEntity {
                 if (ownerEntity == null) this.setHealth(this.getHealth() - 1000);
             }
             if (ownerEntity != null && standardType != null) {
+                if (standardType.equals("sunfire") && phase4Execution != null
+                        && Phase4StandardManager.tickSunfire(this, phase4Execution, phase4Stack)) {
+                    super.baseTick();
+                    return;
+                }
                 if (!ownerEntity.isAlive())
                     this.setHealth(this.getHealth() - 1000);
                 int radius = 6;
