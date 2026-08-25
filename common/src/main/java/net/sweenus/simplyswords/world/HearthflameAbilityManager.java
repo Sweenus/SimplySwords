@@ -15,6 +15,10 @@ import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.api.DelegatedWeaponHitContext;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
+import net.sweenus.simplyswords.api.ability.Phase5AbilityTuning;
+import net.sweenus.simplyswords.api.ability.Phase5UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.FurnaceChainVisualEntity;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
@@ -77,7 +81,8 @@ public final class HearthflameAbilityManager {
                 || isActive(context.world(), context.actor())) {
             return false;
         }
-        return !findTargets(context).isEmpty();
+        return !findTargets(context, Phase5AbilityTuning.EMPTY.with(
+                Phase5AbilityTuning.Setting.RANGE, Config.uniqueEffects.hearthflame.radius + 2)).isEmpty();
     }
 
     public static boolean activate(WeaponAbilityContext context) {
@@ -85,15 +90,22 @@ public final class HearthflameAbilityManager {
             return false;
         }
 
-        List<LivingEntity> targets = findTargets(context);
+        UniqueAbilityExecution execution = Phase5CombatManager.beginActive(Phase5UniqueAbilities.HEARTHFLAME_CHAINS,
+                context, Config.uniqueEffects.hearthflame.cooldown);
+        Phase5AbilityTuning tuning = Phase5UniqueAbilities.tuning(execution);
+        List<LivingEntity> targets = findTargets(context, tuning);
         if (targets.isEmpty()) {
+            UniqueAbilityApi.cancel(execution);
+            UniqueAbilityApi.clearStartedExecution();
             return false;
         }
+        UniqueAbilityApi.start(execution);
 
         ServerWorld world = context.world();
         LivingEntity actor = context.actor();
         long now = world.getTime();
-        int duration = Math.max(1, Config.uniqueEffects.hearthflame.duration);
+        int duration = tuning.integer(Phase5AbilityTuning.Setting.DURATION_TICKS,
+                Config.uniqueEffects.hearthflame.duration);
         ActiveChains ability = new ActiveChains(
                 actor.getUuid(),
                 context.sourcePlayer() == null ? null : context.sourcePlayer().getUuid(),
@@ -106,21 +118,23 @@ public final class HearthflameAbilityManager {
                         context.stack(),
                         Config.uniqueEffects.hearthflame.echoDamageScaling,
                         Config.uniqueEffects.hearthflame.echoSpellScaling
-                ),
+                ) * (float) tuning.get(Phase5AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1),
                 HelperMethods.abilityScaledDamage(
                         "fire",
                         actor,
                         context.stack(),
                         Config.uniqueEffects.hearthflame.snapDamageScaling,
                         Config.uniqueEffects.hearthflame.snapSpellScaling
-                ),
+                ) * (float) tuning.get(Phase5AbilityTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, 1),
                 HelperMethods.abilityScaledDamage(
                         "fire",
                         actor,
                         context.stack(),
                         Config.uniqueEffects.hearthflame.finalDamageScaling,
                         Config.uniqueEffects.hearthflame.finalSpellScaling
-                )
+                ) * (float) tuning.get(Phase5AbilityTuning.Setting.FINAL_DAMAGE_MULTIPLIER, 1),
+                tuning,
+                execution
         );
 
         FurnaceChainVisualEntity coreVisual = spawnVisual(
@@ -150,6 +164,15 @@ public final class HearthflameAbilityManager {
         }
 
         ACTIVE.computeIfAbsent(world, ignored -> new HashMap<>()).put(actor.getUuid(), ability);
+        if (tuning.flag(1 << 9)) actor.setAbsorptionAmount(Math.max(actor.getAbsorptionAmount(), 4));
+        if (tuning.flag(1 << 16)) {
+            actor.addStatusEffect(new net.minecraft.entity.effect.StatusEffectInstance(
+                    net.minecraft.entity.effect.StatusEffects.RESISTANCE, duration, 1), actor);
+            actor.addStatusEffect(new net.minecraft.entity.effect.StatusEffectInstance(
+                    net.minecraft.entity.effect.StatusEffects.SLOWNESS, duration, 0), actor);
+        }
+        if (tuning.flag(1 << 17)) actor.addStatusEffect(new net.minecraft.entity.effect.StatusEffectInstance(
+                net.minecraft.entity.effect.StatusEffects.SPEED, duration, 0), actor);
         updateVisuals(world, actor, ability);
         spawnActivationEffects(world, actor, targets);
         return true;
@@ -189,25 +212,35 @@ public final class HearthflameAbilityManager {
         if (ability != null && struckChain != null) {
             echoHit(world, actor, sourceOwner, ability, target);
             struckChain.tension = Math.min(MAX_TENSION, struckChain.tension + HIT_TENSION);
-            ability.pressure = Math.min(maximumPressure(), ability.pressure + HIT_PRESSURE);
+            ability.pressure = Math.min(maximumPressure(ability), ability.pressure + HIT_PRESSURE);
             pulseChains(world, ability);
 
-            if (rollBrand(actor)) {
+            if (rollBrand(actor, ability.tuning)) {
                 struckChain.tension = Math.min(MAX_TENSION, struckChain.tension + BRAND_PROC_TENSION);
             }
             if (struckChain.tension >= MAX_TENSION) {
                 snapChain(world, actor, sourceOwner, ability, struckChain);
                 ability.chains.remove(struckChain);
-                ability.pressure = Math.min(maximumPressure(), ability.pressure + SNAP_PRESSURE);
+                ability.pressure = Math.min(maximumPressure(ability), ability.pressure + SNAP_PRESSURE);
             }
             updatePrimed(world, actor, ability);
             updateVisuals(world, actor, ability);
             return;
         }
 
-        if (rollBrand(actor)) {
-            applyBrand(world, actor, sourceOwner, target);
+        UniqueAbilityExecution brandExecution = Phase5CombatManager.beginPassive(Phase5UniqueAbilities.HEARTHFLAME_BRAND,
+                world, stack, actor, target);
+        Phase5AbilityTuning brandTuning = Phase5UniqueAbilities.tuning(brandExecution);
+        if (hasBrand(world, actor, target) && brandTuning.flag(1 << 20)) {
+            applyAbilityDamage(world, actor, sourceOwner, stack, target,
+                    (float) actor.getAttributeValue(EntityAttributes.GENERIC_ATTACK_DAMAGE) * .12F, true);
+            target.setOnFireFor(1);
         }
+        if (hasBrand(world, actor, target) && brandTuning.flag(1 << 13)) {
+            actor.setAbsorptionAmount(Math.max(actor.getAbsorptionAmount(), 2));
+        }
+        if (rollBrand(actor, brandTuning)) applyBrand(world, actor, sourceOwner, target, brandTuning);
+        UniqueAbilityApi.finish(brandExecution, Phase5UniqueAbilities.FINISH, 1);
     }
 
     public static void tick(ServerWorld world) {
@@ -279,12 +312,14 @@ public final class HearthflameAbilityManager {
                     || (ability.sourceOwnerId != null && sourceOwner == null)
                     || !isWieldingHearthflame(actor)) {
                 discardAbilityVisuals(world, ability);
+                UniqueAbilityApi.cancel(ability.execution);
                 abilityIterator.remove();
                 continue;
             }
 
             if (ability.chains.isEmpty()) {
                 discardAbilityVisuals(world, ability);
+                UniqueAbilityApi.cancel(ability.execution);
                 abilityIterator.remove();
                 continue;
             }
@@ -327,12 +362,12 @@ public final class HearthflameAbilityManager {
                 if (chain.tension >= MAX_TENSION) {
                     snapChain(world, actor, sourceOwner, ability, chain);
                     chainIterator.remove();
-                    ability.pressure = Math.min(maximumPressure(), ability.pressure + SNAP_PRESSURE);
+                    ability.pressure = Math.min(maximumPressure(ability), ability.pressure + SNAP_PRESSURE);
                 }
             }
 
             if (tensionSamples > 0) {
-                ability.pressure = Math.min(maximumPressure(), ability.pressure + totalTensionGain / tensionSamples);
+                ability.pressure = Math.min(maximumPressure(ability), ability.pressure + totalTensionGain / tensionSamples);
             }
             updatePrimed(world, actor, ability);
             updateVisuals(world, actor, ability);
@@ -365,6 +400,8 @@ public final class HearthflameAbilityManager {
                 continue;
             }
             applyAbilityDamage(world, actor, sourceOwner, ability.stack, echoTarget, ability.echoDamage, true);
+            int fireTicks = ability.tuning.integer(Phase5AbilityTuning.Setting.FIRE_TICKS, 0);
+            if (fireTicks > 0) echoTarget.setOnFireFor(Math.max(1, fireTicks / 20));
             spawnEchoEffects(world, echoTarget);
         }
         world.playSoundFromEntity(
@@ -387,7 +424,8 @@ public final class HearthflameAbilityManager {
                     sourceOwner,
                     ability.stack,
                     target.getPos().add(0.0, target.getHeight() * 0.45, 0.0),
-                    Math.max(0.1, Config.uniqueEffects.hearthflame.snapRadius),
+                    ability.tuning.get(Phase5AbilityTuning.Setting.RADIUS,
+                            Config.uniqueEffects.hearthflame.snapRadius),
                     ability.snapDamage,
                     new HashSet<>()
             );
@@ -408,7 +446,8 @@ public final class HearthflameAbilityManager {
                         sourceOwner,
                         ability.stack,
                         target.getPos().add(0.0, target.getHeight() * 0.45, 0.0),
-                        Math.max(0.1, Config.uniqueEffects.hearthflame.snapRadius),
+                        ability.tuning.get(Phase5AbilityTuning.Setting.RADIUS,
+                                Config.uniqueEffects.hearthflame.snapRadius),
                         ability.finalDamage * MathHelper.clamp(strength, 0.0F, 1.0F),
                         damaged
                 );
@@ -426,6 +465,7 @@ public final class HearthflameAbilityManager {
                 MathHelper.clamp(strength, 0.0F, 1.0F)
         );
         spawnFinaleEffects(world, actor, strength, struckFinale);
+        UniqueAbilityApi.finish(ability.execution, Phase5UniqueAbilities.FINISH, damaged.size());
     }
 
     private static void damageArea(ServerWorld world, LivingEntity actor, LivingEntity sourceOwner,
@@ -469,7 +509,11 @@ public final class HearthflameAbilityManager {
         direction = direction.normalize();
         double strength = Math.min(
                 0.35,
-                Math.max(0.0, Config.uniqueEffects.hearthflame.pullStrength)
+                (getActive((ServerWorld) actor.getWorld(), actor) == null
+                        ? Math.max(0.0, Config.uniqueEffects.hearthflame.pullStrength)
+                        : getActive((ServerWorld) actor.getWorld(), actor).tuning.get(
+                                Phase5AbilityTuning.Setting.PULL_STRENGTH,
+                                Config.uniqueEffects.hearthflame.pullStrength))
                         * pullMultiplier
                         * Math.min(2.0, 0.75 + excess * 0.25)
         );
@@ -491,12 +535,17 @@ public final class HearthflameAbilityManager {
     }
 
     private static List<LivingEntity> findTargets(WeaponAbilityContext context) {
+        return findTargets(context, Phase5AbilityTuning.EMPTY);
+    }
+
+    private static List<LivingEntity> findTargets(WeaponAbilityContext context, Phase5AbilityTuning tuning) {
         ServerWorld world = context.world();
         LivingEntity actor = context.actor();
         LivingEntity sourceOwner = context.sourcePlayer();
-        double radius = Math.max(0.5, Config.uniqueEffects.hearthflame.radius);
+        double radius = tuning.get(Phase5AbilityTuning.Setting.RANGE, Config.uniqueEffects.hearthflame.radius);
         double brandedRadius = radius + Math.max(0.0, Config.uniqueEffects.hearthflame.brandedRangeBonus);
-        int maxChains = Math.max(1, Config.uniqueEffects.hearthflame.maxChains);
+        int maxChains = tuning.integer(Phase5AbilityTuning.Setting.TARGET_CAP,
+                Config.uniqueEffects.hearthflame.maxChains);
         Box box = Box.of(actor.getPos().add(0.0, actor.getHeight() * 0.5, 0.0),
                 brandedRadius * 2.0, brandedRadius * 2.0, brandedRadius * 2.0);
 
@@ -568,7 +617,7 @@ public final class HearthflameAbilityManager {
 
     private static void updatePrimed(ServerWorld world, LivingEntity actor, ActiveChains ability) {
         boolean wasPrimed = ability.primed;
-        ability.primed = ability.pressure >= maximumPressure();
+        ability.primed = ability.pressure >= maximumPressure(ability);
         if (ability.primed && !wasPrimed) {
             world.playSoundFromEntity(
                     null,
@@ -591,13 +640,14 @@ public final class HearthflameAbilityManager {
         }
     }
 
-    private static boolean rollBrand(LivingEntity actor) {
-        int chance = Math.clamp(Config.uniqueEffects.hearthflame.chance, 0, 100);
+    private static boolean rollBrand(LivingEntity actor, Phase5AbilityTuning tuning) {
+        int chance = tuning.integer(Phase5AbilityTuning.Setting.CHANCE,
+                Math.clamp(Config.uniqueEffects.hearthflame.chance, 0, 100));
         return chance > 0 && actor.getRandom().nextInt(100) < chance;
     }
 
     private static void applyBrand(ServerWorld world, LivingEntity owner,
-                                   LivingEntity sourceOwner, LivingEntity target) {
+                                   LivingEntity sourceOwner, LivingEntity target, Phase5AbilityTuning tuning) {
         BrandKey key = new BrandKey(owner.getUuid(), target.getUuid());
         Map<BrandKey, FurnaceBrand> brands = BRANDS.computeIfAbsent(world, ignored -> new HashMap<>());
         FurnaceBrand previous = brands.remove(key);
@@ -605,7 +655,8 @@ public final class HearthflameAbilityManager {
             discardVisual(world, previous.visualId);
         }
 
-        int duration = Math.max(1, Config.uniqueEffects.hearthflame.brandDuration);
+        int duration = tuning.integer(Phase5AbilityTuning.Setting.DURATION_TICKS,
+                Config.uniqueEffects.hearthflame.brandDuration);
         FurnaceChainVisualEntity visual = spawnVisual(
                 world,
                 owner,
@@ -728,8 +779,12 @@ public final class HearthflameAbilityManager {
         return Math.max(1.0F, Config.uniqueEffects.hearthflame.maximumPressure);
     }
 
+    private static float maximumPressure(ActiveChains ability) {
+        return (float) ability.tuning.get(Phase5AbilityTuning.Setting.MAX_PRESSURE, maximumPressure());
+    }
+
     private static float pressureFraction(ActiveChains ability) {
-        return MathHelper.clamp(ability.pressure / maximumPressure(), 0.0F, 1.0F);
+        return MathHelper.clamp(ability.pressure / maximumPressure(ability), 0.0F, 1.0F);
     }
 
     private static void beginVisualTransition(ServerWorld world, UUID visualId,
@@ -861,6 +916,8 @@ public final class HearthflameAbilityManager {
         private final float echoDamage;
         private final float snapDamage;
         private final float finalDamage;
+        private final Phase5AbilityTuning tuning;
+        private final UniqueAbilityExecution execution;
         private final List<FurnaceChain> chains = new ArrayList<>();
         private UUID coreVisualId;
         private float pressure;
@@ -868,7 +925,8 @@ public final class HearthflameAbilityManager {
 
         private ActiveChains(UUID actorId, UUID sourceOwnerId, ItemStack stack,
                              long startedAt, long expiresAt,
-                             float echoDamage, float snapDamage, float finalDamage) {
+                             float echoDamage, float snapDamage, float finalDamage,
+                             Phase5AbilityTuning tuning, UniqueAbilityExecution execution) {
             this.actorId = actorId;
             this.sourceOwnerId = sourceOwnerId;
             this.stack = stack;
@@ -877,6 +935,8 @@ public final class HearthflameAbilityManager {
             this.echoDamage = echoDamage;
             this.snapDamage = snapDamage;
             this.finalDamage = finalDamage;
+            this.tuning = tuning;
+            this.execution = execution;
         }
     }
 

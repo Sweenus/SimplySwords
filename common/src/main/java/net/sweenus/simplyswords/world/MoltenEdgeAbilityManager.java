@@ -23,6 +23,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.api.AwakeningApi;
+import net.sweenus.simplyswords.api.ability.Phase5AbilityTuning;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.MoltenRuptureVisualEntity;
 import net.sweenus.simplyswords.item.component.MoltenHeatComponent;
@@ -128,9 +129,15 @@ public final class MoltenEdgeAbilityManager {
         if (heat.isVentingAt(now, getVentDrainPerTick())) {
             return;
         }
-        MoltenHeatComponent increased = heat.normalizedAt(now, getVentDrainPerTick())
-                .addHeat(Config.uniqueEffects.molten_edge.heatPerHit);
+        Phase5AbilityTuning tuning = Phase5MoltenManager.heat((ServerWorld) attacker.getWorld(), stack, attacker);
+        int gain = tuning.integer(Phase5AbilityTuning.Setting.HEAT_GAIN, Config.uniqueEffects.molten_edge.heatPerHit);
+        int maximum = tuning.integer(Phase5AbilityTuning.Setting.HEAT_MAX, MoltenHeatComponent.MAX_HEAT);
+        MoltenHeatComponent increased = heat.normalizedAt(now, getVentDrainPerTick()).addHeat(gain);
+        if (increased.heat() > maximum) increased = new MoltenHeatComponent(maximum, false);
         stack.set(ComponentTypeRegistry.MOLTEN_HEAT.get(), increased);
+        if (tuning.flag(1 << 4) && increased.heat() / 20 > heat.heat() / 20) {
+            attacker.setAbsorptionAmount(Math.min(6, attacker.getAbsorptionAmount() + 2));
+        }
         igniteAtMaximumHeat(attacker, increased);
     }
 
@@ -149,8 +156,12 @@ public final class MoltenEdgeAbilityManager {
             if (heat.isVentingAt(now, getVentDrainPerTick())) {
                 continue;
             }
-            MoltenHeatComponent increased = heat.normalizedAt(now, getVentDrainPerTick())
-                    .addHeat(Config.uniqueEffects.molten_edge.heatPerDamageTaken);
+            Phase5AbilityTuning tuning = Phase5MoltenManager.heat((ServerWorld) target.getWorld(), stack, target);
+            int gain = tuning.flag(1 << 1) ? tuning.integer(Phase5AbilityTuning.Setting.COUNT, 7)
+                    : Config.uniqueEffects.molten_edge.heatPerDamageTaken;
+            int maximum = tuning.integer(Phase5AbilityTuning.Setting.HEAT_MAX, MoltenHeatComponent.MAX_HEAT);
+            MoltenHeatComponent increased = heat.normalizedAt(now, getVentDrainPerTick()).addHeat(gain);
+            if (increased.heat() > maximum) increased = new MoltenHeatComponent(maximum, false);
             stack.set(ComponentTypeRegistry.MOLTEN_HEAT.get(), increased);
             igniteAtMaximumHeat(target, increased);
         }
@@ -165,7 +176,14 @@ public final class MoltenEdgeAbilityManager {
         if (heat <= 0) {
             return amount;
         }
-        return amount * (1.0F + heat / 200.0F);
+        ItemStack stack = attacker == null ? null : getHeldMoltenEdges(attacker).stream().findFirst().orElse(null);
+        Phase5AbilityTuning tuning = stack == null || !(attacker.getWorld() instanceof ServerWorld world)
+                ? Phase5AbilityTuning.EMPTY : Phase5MoltenManager.heat(world, stack, attacker);
+        float multiplier = 1 + heat / 200F;
+        if (heat >= 75 && tuning.flag(1 << 3)) multiplier *= 1.1F;
+        if (heat >= tuning.integer(Phase5AbilityTuning.Setting.HEAT_MAX, 100) && tuning.flag(1 << 6)) multiplier *= 1.12F;
+        if (tuning.flag(1 << 8)) multiplier = Math.min(multiplier, 1.35F);
+        return amount * multiplier;
     }
 
     public static float modifyIncomingDamage(LivingEntity target, float amount) {
@@ -176,7 +194,13 @@ public final class MoltenEdgeAbilityManager {
         if (heat <= 0) {
             return amount;
         }
-        return amount * (1.0F + heat / 100.0F);
+        ItemStack stack = getHeldMoltenEdges(target).stream().findFirst().orElse(null);
+        Phase5AbilityTuning tuning = stack == null || !(target.getWorld() instanceof ServerWorld world)
+                ? Phase5AbilityTuning.EMPTY : Phase5MoltenManager.heat(world, stack, target);
+        float amplification = heat / 100F;
+        if (tuning.flag(1 << 2)) amplification *= .85F;
+        if (tuning.flag(1 << 8)) amplification = Math.min(amplification, .5F);
+        return amount * (1 + amplification);
     }
 
     public static boolean startVent(WeaponAbilityContext context) {
@@ -203,6 +227,8 @@ public final class MoltenEdgeAbilityManager {
             return false;
         }
 
+        Phase5MoltenManager.Snapshot mastery = Phase5MoltenManager.beginVent(context);
+        Phase5AbilityTuning tuning = mastery.tuning();
         MoltenHeatComponent ventingHeat = new MoltenHeatComponent(currentHeat, false).startVenting(now);
         heldStack.set(ComponentTypeRegistry.MOLTEN_HEAT.get(), ventingHeat);
         vents.put(actor.getUuid(), new ActiveVent(actor.getUuid(), heldStack));
@@ -214,7 +240,7 @@ public final class MoltenEdgeAbilityManager {
                 heldStack,
                 Config.uniqueEffects.molten_edge.shockwaveDamageScaling,
                 Config.uniqueEffects.molten_edge.shockwaveSpellScaling
-        ) * heatFraction;
+        ) * heatFraction * (float) tuning.get(Phase5AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1);
         ACTIVE_SHOCKWAVES.computeIfAbsent(world, ignored -> new ArrayList<>()).add(new ActiveShockwave(
                 actor.getUuid(),
                 heldStack.copy(),
@@ -248,6 +274,8 @@ public final class MoltenEdgeAbilityManager {
             return;
         }
 
+        Phase5AbilityTuning tuning = Phase5MoltenManager.rupture(world, stack, wielder);
+        if (Phase5MoltenManager.vent(wielder.getUuid()).flag(1 << 17)) return;
         Vec3d forward = horizontalDirection(wielder);
         Vec3d right = new Vec3d(-forward.z, 0.0, forward.x).normalize();
         Vec3d origin = wielder.getPos().add(forward.multiply(0.65));
@@ -257,9 +285,9 @@ public final class MoltenEdgeAbilityManager {
                 stack,
                 Config.uniqueEffects.molten_edge.ruptureDamageScaling,
                 Config.uniqueEffects.molten_edge.ruptureSpellScaling
-        );
+        ) * (float) tuning.get(Phase5AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1);
         int steps = Math.max(1, (int) Math.ceil(
-                Math.max(1.0, Config.uniqueEffects.molten_edge.ruptureLength)
+                tuning.get(Phase5AbilityTuning.Setting.RUPTURE_LENGTH, Config.uniqueEffects.molten_edge.ruptureLength)
                         / Math.max(0.25, Config.uniqueEffects.molten_edge.ruptureStepDistance)
         ));
         ACTIVE_RUPTURES.computeIfAbsent(world, ignored -> new ArrayList<>()).add(new ActiveRupture(
@@ -383,6 +411,7 @@ public final class MoltenEdgeAbilityManager {
             int effectiveHeat = getEffectiveHeat(heat, world.getTime());
             if (!heat.isVentingAt(world.getTime(), getVentDrainPerTick()) || effectiveHeat <= 0) {
                 spawnVentEndEffects(world, owner);
+                Phase5MoltenManager.finish(owner.getUuid(), 0);
                 iterator.remove();
                 continue;
             }
@@ -415,7 +444,8 @@ public final class MoltenEdgeAbilityManager {
                 return true;
             }
 
-            double maxRadius = Math.max(1.0, Config.uniqueEffects.molten_edge.radius);
+            Phase5AbilityTuning tuning = Phase5MoltenManager.vent(shockwave.ownerId);
+            double maxRadius = tuning.get(Phase5AbilityTuning.Setting.RADIUS, Config.uniqueEffects.molten_edge.radius);
             double previousRadius = maxRadius * shockwave.step / totalTicks;
             shockwave.step++;
             double currentRadius = maxRadius * shockwave.step / totalTicks;
@@ -497,7 +527,8 @@ public final class MoltenEdgeAbilityManager {
     }
 
     private static void damageRuptureTargets(ServerWorld world, LivingEntity owner, ActiveRupture rupture, Vec3d center, double segmentLength) {
-        double width = Math.max(0.5, Config.uniqueEffects.molten_edge.ruptureWidth);
+        Phase5AbilityTuning tuning = Phase5MoltenManager.rupture(rupture.ownerId);
+        double width = tuning.get(Phase5AbilityTuning.Setting.RUPTURE_WIDTH, Config.uniqueEffects.molten_edge.ruptureWidth);
         double xSize = Math.abs(rupture.forward.x) * segmentLength * 2.0 + Math.abs(rupture.right.x) * width + 2.0;
         double zSize = Math.abs(rupture.forward.z) * segmentLength * 2.0 + Math.abs(rupture.right.z) * width + 2.0;
         Box box = Box.of(center.add(0.0, 0.75, 0.0), xSize, 3.0, zSize);
@@ -523,8 +554,10 @@ public final class MoltenEdgeAbilityManager {
             if (!HelperMethods.damageThroughIframes(target, source, damage)) {
                 continue;
             }
-            target.setOnFireFor(Math.max(0, Config.uniqueEffects.molten_edge.ruptureIgniteSeconds));
-            target.addVelocity(rupture.forward.x * 0.18, Math.max(0.0, Config.uniqueEffects.molten_edge.ruptureKnockUp), rupture.forward.z * 0.18);
+            target.setOnFireFor(Math.max(0, tuning.integer(Phase5AbilityTuning.Setting.FIRE_TICKS,
+                    Config.uniqueEffects.molten_edge.ruptureIgniteSeconds * 20) / 20));
+            target.addVelocity(rupture.forward.x * 0.18, tuning.get(Phase5AbilityTuning.Setting.RUPTURE_KNOCK_UP,
+                    Config.uniqueEffects.molten_edge.ruptureKnockUp), rupture.forward.z * 0.18);
             target.velocityModified = true;
             target.velocityDirty = true;
             world.spawnParticles(ParticleTypes.LAVA, target.getX(), target.getBodyY(0.45), target.getZ(), 5, 0.25, 0.25, 0.25, 0.04);
@@ -533,7 +566,8 @@ public final class MoltenEdgeAbilityManager {
     }
 
     private static void spawnRuptureStepEffects(ServerWorld world, ActiveRupture rupture, Vec3d center) {
-        double width = Math.max(0.5, Config.uniqueEffects.molten_edge.ruptureWidth);
+        double width = Phase5MoltenManager.rupture(rupture.ownerId).get(
+                Phase5AbilityTuning.Setting.RUPTURE_WIDTH, Config.uniqueEffects.molten_edge.ruptureWidth);
         double edgeOffset = width * 0.34;
         spawnRuptureVisual(world, center, 0.85F);
         spawnRuptureVisual(world, center.add(rupture.right.multiply(edgeOffset)), 0.48F);

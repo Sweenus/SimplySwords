@@ -32,6 +32,7 @@ import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
 import net.sweenus.simplyswords.world.LivingEntityAbilityMovementManager;
 import net.sweenus.simplyswords.world.EmberlashSmoulderVisualManager;
+import net.sweenus.simplyswords.world.Phase5CombatManager;
 
 import java.util.List;
 
@@ -49,27 +50,8 @@ public class EmberlashSwordItem extends UniqueSwordItem implements UniqueWeaponA
         }
         if (!attacker.getWorld().isClient()) {
             ServerWorld world = (ServerWorld) attacker.getWorld();
-
             HelperMethods.playHitSounds(attacker, target);
-
-            if (target.hasStatusEffect(EffectRegistry.getReference(EffectRegistry.SMOULDERING))) {
-                target.timeUntilRegen = 0;
-                StatusEffectInstance smoulderingEffect = target.getStatusEffect(EffectRegistry.getReference(EffectRegistry.SMOULDERING));
-                if (smoulderingEffect != null) {
-                    DamageSource damageSource = attacker instanceof PlayerEntity player ? player.getDamageSources().playerAttack(player) : world.getDamageSources().generic();
-                    float abilityDamage = HelperMethods.abilityScaledDamage("fire", attacker, stack,
-                            Config.uniqueEffects.emberlash.smoulderDamageScaling, Config.uniqueEffects.emberlash.spellScaling);
-                    float damageMultiplier = smoulderingEffect.getAmplifier();
-                    target.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments(world, stack, target, damageSource, abilityDamage * damageMultiplier));
-                    HelperMethods.spawnOrbitParticles(world, target.getPos(), ParticleTypes.LAVA, 0.2, smoulderingEffect.getAmplifier());
-                    world.playSound(target, target.getBlockPos(), SoundRegistry.SPELL_FIRE.get(),
-                            target.getSoundCategory(), 0.1f, 1.5f);
-                }
-            }
-            int maximum_stacks = Config.uniqueEffects.emberlash.maxStacks;
-            HelperMethods.incrementStatusEffect(target, EffectRegistry.getReference(EffectRegistry.SMOULDERING), 100, 1, maximum_stacks + 1);
-            EmberlashSmoulderVisualManager.refresh(world, target);
-
+            Phase5CombatManager.onEmberlashHit(world, stack, attacker, target);
         }
         return super.postHit(stack, target, attacker);
     }
@@ -81,31 +63,12 @@ public class EmberlashSwordItem extends UniqueSwordItem implements UniqueWeaponA
 
     @Override
     public TypedActionResult<ItemStack> startPlayerAbility(World world, PlayerEntity user, Hand hand) {
-        user.swingHand(hand);
-        world.playSound(null, user.getBlockPos(), SoundRegistry.SPELL_FIRE.get(),
-                user.getSoundCategory(), 0.5f, 1.0f);
-
-        user.setVelocity(user.getRotationVector().negate().multiply(+1.5));
-        user.setVelocity(user.getVelocity().x, 0, user.getVelocity().z); // Prevent user flying to the heavens
-        user.velocityModified = true;
-        user.heal(user.getMaxHealth() * Config.uniqueEffects.emberlash.heal / 100f);
-        SimplySwordsAPI.setWeaponCooldown(user, user.getStackInHand(hand), Config.uniqueEffects.emberlash.cooldown);
-
-        return super.use(world, user, hand);
+        return UniqueWeaponActiveAbility.super.startPlayerAbility(world, user, hand);
     }
 
     @Override
     public boolean activate(WeaponAbilityContext context) {
-        LivingEntity actor = context.actor();
-        if (context.target() == null || !HelperMethods.checkAbilityTarget(context.target(), actor)) {
-            return false;
-        }
-        LivingEntityAbilityMovementManager.dashAwayFromTarget(context.world(), actor, context.target(), 1.5, 8);
-        context.world().playSound(null, actor.getBlockPos(), SoundRegistry.SPELL_FIRE.get(),
-                actor.getSoundCategory(), 0.5f, 1.0f);
-        actor.heal(actor.getMaxHealth() * Config.uniqueEffects.emberlash.heal / 100f);
-        context.world().spawnParticles(ParticleTypes.FLAME, actor.getX(), actor.getBodyY(0.5), actor.getZ(), 16, 0.45, 0.45, 0.45, 0.04);
-        return true;
+        return Phase5CombatManager.activateEmberlash(context);
     }
 
     @Override

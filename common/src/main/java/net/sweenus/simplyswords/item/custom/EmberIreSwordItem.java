@@ -34,6 +34,7 @@ import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.WeaponManaCost;
 import net.sweenus.simplyswords.util.Styles;
+import net.sweenus.simplyswords.world.Phase5CombatManager;
 
 import java.util.List;
 
@@ -98,54 +99,8 @@ public class EmberIreSwordItem extends UniqueSwordItem implements UniqueWeaponAc
         if (!world.isClient && user.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
             WeaponManaCost.spend(user, stack);
             LivingEntity targetEntity = user instanceof PlayerEntity player ? findPlayerTarget(player) : null;
-            double damageAmount = HelperMethods.abilityScaledDamage("fire", user, stack,
-                    Config.uniqueEffects.emberblade.initialDamageScaling, Config.uniqueEffects.emberblade.initialSpellScaling);
-            if (targetEntity != null) {
-                SoundEvent soundSelect = SoundRegistry.ELEMENTAL_BOW_FIRE_SHOOT_IMPACT_03.get();
-                int particleCount = 20;
-                HelperMethods.spawnWaistHeightParticles((ServerWorld) world, ParticleTypes.SMOKE, user, targetEntity, particleCount);
-                HelperMethods.spawnWaistHeightParticles((ServerWorld) world, ParticleTypes.POOF, user, targetEntity, particleCount);
-                HelperMethods.spawnWaistHeightParticles((ServerWorld) world, ParticleTypes.ASH, user, targetEntity, particleCount);
-                world.playSound(null, user.getBlockPos(), soundSelect,
-                        user.getSoundCategory(), 0.4f, 1.5f);
-                DamageSource damageSource = user.getDamageSources().generic();
-                if (user instanceof PlayerEntity player) {
-                    damageSource = user.getDamageSources().playerAttack(player);
-                    SimplySwordsAPI.setWeaponCooldown(player, stack, 10);
-                }
-
-                final float minAdditionalDamage = 0.0f;
-                final float maxAdditionalDamage = HelperMethods.abilityScaledDamage("fire", user, stack,
-                        Config.uniqueEffects.emberblade.maxChargeDamageScaling, Config.uniqueEffects.emberblade.maxChargeSpellScaling);
-                float chargeRatio = 1.0f - ((float) remainingUseTicks / getMaxUseTime(stack, user));
-                float additionalDamage = minAdditionalDamage + (maxAdditionalDamage - minAdditionalDamage) * chargeRatio;
-                float finalDamage = (float) damageAmount + additionalDamage;
-                targetEntity.timeUntilRegen = 0;
-                targetEntity.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments((ServerWorld) world, stack, targetEntity, damageSource, finalDamage));
-
-                world.playSound(null, targetEntity.getBlockPos(), SoundEvents.ENTITY_GENERIC_EXPLODE.value(),
-                        user.getSoundCategory(), 0.4f, 1.1f);
-                HelperMethods.spawnOrbitParticles((ServerWorld) world, targetEntity.getPos(), ParticleTypes.EXPLOSION, 1, 1 );
-                HelperMethods.spawnOrbitParticles((ServerWorld) world, targetEntity.getPos(), ParticleTypes.POOF, 1, 20 );
-                user.setVelocity(user.getRotationVector().negate().multiply(+1.1));
-                user.setVelocity(user.getVelocity().x, 0, user.getVelocity().z);
-                user.velocityModified = true;
-
-                int hitChance = Config.uniqueEffects.emberblade.chance;
-                int duration = Config.uniqueEffects.emberblade.duration;
-
-                if (user.getRandom().nextInt((int) (250 - (chargeRatio * 100))) <= hitChance) {
-                    user.addStatusEffect(new StatusEffectInstance(StatusEffects.STRENGTH, duration, 0), user);
-                    user.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, duration, 1), user);
-                    user.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, duration, 0), user);
-                    world.playSoundFromEntity(null, user, SoundRegistry.MAGIC_SWORD_SPELL_01.get(),
-                            user.getSoundCategory(), 0.5f, 2f);
-                    particlePassive = ParticleTypes.LAVA;
-                    particleWalk = ParticleTypes.CAMPFIRE_COSY_SMOKE;
-                    particleSprint = ParticleTypes.CAMPFIRE_COSY_SMOKE;
-                }
-
-            }
+            float chargeRatio = 1.0f - ((float) remainingUseTicks / getMaxUseTime(stack, user));
+            Phase5CombatManager.releaseEmberbladeCharge((ServerWorld) world, stack, user, targetEntity, chargeRatio);
         }
     }
 
@@ -155,38 +110,7 @@ public class EmberIreSwordItem extends UniqueSwordItem implements UniqueWeaponAc
 
     @Override
     public boolean activate(WeaponAbilityContext context) {
-        LivingEntity actor = context.actor();
-        LivingEntity target = context.target();
-        if (target == null || !HelperMethods.checkAbilityTarget(target, actor)) {
-            return false;
-        }
-        ServerWorld world = context.world();
-        double damageAmount = HelperMethods.abilityScaledDamage("fire", actor, context.stack(),
-                Config.uniqueEffects.emberblade.initialDamageScaling, Config.uniqueEffects.emberblade.initialSpellScaling);
-        float finalDamage = (float) (damageAmount + HelperMethods.abilityScaledDamage("fire", actor, context.stack(),
-                Config.uniqueEffects.emberblade.maxChargeDamageScaling, Config.uniqueEffects.emberblade.maxChargeSpellScaling));
-        SoundEvent soundSelect = SoundRegistry.ELEMENTAL_BOW_FIRE_SHOOT_IMPACT_03.get();
-        HelperMethods.spawnWaistHeightParticles(world, ParticleTypes.SMOKE, actor, target, 20);
-        HelperMethods.spawnWaistHeightParticles(world, ParticleTypes.POOF, actor, target, 20);
-        HelperMethods.spawnWaistHeightParticles(world, ParticleTypes.ASH, actor, target, 20);
-        world.playSound(null, actor.getBlockPos(), soundSelect, actor.getSoundCategory(), 0.4f, 1.5f);
-        target.timeUntilRegen = 0;
-        DamageSource damageSource = actor.getDamageSources().mobAttack(actor);
-        target.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments(world, context.stack(), target, damageSource, finalDamage));
-        world.playSound(null, target.getBlockPos(), SoundEvents.ENTITY_GENERIC_EXPLODE.value(), actor.getSoundCategory(), 0.4f, 1.1f);
-        HelperMethods.spawnOrbitParticles(world, target.getPos(), ParticleTypes.EXPLOSION, 1, 1);
-        HelperMethods.spawnOrbitParticles(world, target.getPos(), ParticleTypes.POOF, 1, 20);
-
-        int hitChance = Config.uniqueEffects.emberblade.chance;
-        int duration = Config.uniqueEffects.emberblade.duration;
-        if (actor.getRandom().nextInt(150) <= hitChance) {
-            actor.addStatusEffect(new StatusEffectInstance(StatusEffects.STRENGTH, duration, 0), actor);
-            actor.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, duration, 1), actor);
-            actor.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, duration, 0), actor);
-            world.playSoundFromEntity(null, actor, SoundRegistry.MAGIC_SWORD_SPELL_01.get(),
-                    actor.getSoundCategory(), 0.5f, 2f);
-        }
-        return true;
+        return Phase5CombatManager.releaseEmberblade(context);
     }
 
     @Override

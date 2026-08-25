@@ -20,6 +20,11 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
+import net.sweenus.simplyswords.api.ability.Phase5AbilityTuning;
+import net.sweenus.simplyswords.api.ability.Phase5UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityPhase;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.SoulPyreVisualEntity;
 import net.sweenus.simplyswords.entity.SoulPyreWispEntity;
@@ -140,12 +145,19 @@ public final class SoulPyreAbilityManager {
 
         ServerWorld world = context.world();
         LivingEntity actor = context.actor();
-        int pulseCount = Math.max(1, Config.uniqueEffects.soulpyre.pulseCount);
-        int duration = Math.max(pulseCount, Config.uniqueEffects.soulpyre.duration);
-        int collapseDuration = Math.max(1, Config.uniqueEffects.soulpyre.collapseDuration);
+        UniqueAbilityExecution execution = Phase5CombatManager.beginActive(Phase5UniqueAbilities.SOUL_PYRE_TETHER,
+                context, Config.uniqueEffects.soulpyre.cooldown);
+        UniqueAbilityApi.start(execution);
+        Phase5AbilityTuning tuning = Phase5UniqueAbilities.tuning(execution);
+        int pulseCount = tuning.integer(Phase5AbilityTuning.Setting.PULSE_COUNT,
+                Config.uniqueEffects.soulpyre.pulseCount);
+        int duration = Math.max(pulseCount, tuning.integer(Phase5AbilityTuning.Setting.DURATION_TICKS,
+                Config.uniqueEffects.soulpyre.duration));
+        int collapseDuration = tuning.integer(Phase5AbilityTuning.Setting.COLLAPSE_DURATION_TICKS,
+                Config.uniqueEffects.soulpyre.collapseDuration);
         float maxRadius = (float) Math.max(1.5, Config.uniqueEffects.soulpyre.radius);
         float startRadius = MathHelper.clamp(
-                Config.uniqueEffects.soulpyre.startingRadius,
+                (float) tuning.get(Phase5AbilityTuning.Setting.RADIUS, Config.uniqueEffects.soulpyre.startingRadius),
                 1.5F,
                 maxRadius
         );
@@ -182,6 +194,9 @@ public final class SoulPyreAbilityManager {
                         "soul", actor, context.stack(),
                         Config.uniqueEffects.soulpyre.damageScaling,
                         Config.uniqueEffects.soulpyre.spellScaling)
+                        * (float) tuning.get(Phase5AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1),
+                tuning,
+                execution
         );
         ACTIVE.computeIfAbsent(world, ignored -> new HashMap<>()).put(actor.getUuid(), pyre);
         actor.addStatusEffect(new StatusEffectInstance(
@@ -212,6 +227,21 @@ public final class SoulPyreAbilityManager {
                 0.035
         );
         return true;
+    }
+
+    public static float modifyIncomingDamage(LivingEntity target, DamageSource source, float amount) {
+        if (!(target.getWorld() instanceof ServerWorld world)) return amount;
+        Map<UUID, ActivePyre> active = ACTIVE.get(world);
+        ActivePyre pyre = active == null ? null : active.get(target.getUuid());
+        if (pyre == null || pyre.collapsing) return amount;
+        if (pyre.tuning.flag(1 << 25) && pyre.souls >= 10 && amount >= target.getHealth()) {
+            pyre.souls -= 10;
+            target.addStatusEffect(new StatusEffectInstance(net.minecraft.entity.effect.StatusEffects.RESISTANCE,
+                    60, 2), target);
+            pyre.cancelled = true;
+            return Math.max(0, target.getHealth() - 1);
+        }
+        return amount * (1F - (float) pyre.tuning.get(Phase5AbilityTuning.Setting.DAMAGE_REDUCTION, .5));
     }
 
     public static void tick(ServerWorld world) {
@@ -377,7 +407,8 @@ public final class SoulPyreAbilityManager {
         );
         float soulBonus = Math.max(
                 0.0F,
-                Config.uniqueEffects.soulpyre.pulseDamageBonusPerSoul
+                (float) pyre.tuning.get(Phase5AbilityTuning.Setting.PER_STACK_MULTIPLIER,
+                        Config.uniqueEffects.soulpyre.pulseDamageBonusPerSoul)
         );
         float damage = basePulseDamage * (1.0F + pyre.souls * soulBonus);
 
@@ -414,7 +445,8 @@ public final class SoulPyreAbilityManager {
         );
         float soulBonus = Math.max(
                 0.0F,
-                Config.uniqueEffects.soulpyre.requiemDamageBonusPerSoul
+                (float) pyre.tuning.get(Phase5AbilityTuning.Setting.PER_STACK_MULTIPLIER,
+                        Config.uniqueEffects.soulpyre.requiemDamageBonusPerSoul)
         );
         float damage = finalBaseDamage * (1.0F + requiemSouls * soulBonus);
 
@@ -463,15 +495,14 @@ public final class SoulPyreAbilityManager {
             return false;
         }
         discardVisual(world, pyre.visualId);
+        UniqueAbilityApi.finish(pyre.execution, Phase5UniqueAbilities.FINISH, pyre.pulsesCompleted);
         return true;
     }
 
     private static void growRadius(ServerWorld world, LivingEntity actor,
                                    ActivePyre pyre) {
-        float growth = Math.max(
-                0.0F,
-                Config.uniqueEffects.soulpyre.radiusGrowthPerKill
-        );
+        float growth = (float) pyre.tuning.get(Phase5AbilityTuning.Setting.RADIUS_GROWTH,
+                Config.uniqueEffects.soulpyre.radiusGrowthPerKill);
         float nextRadius = Math.min(pyre.maxRadius, pyre.targetRadius + growth);
         if (nextRadius <= pyre.targetRadius + 1.0E-4F) {
             return;
@@ -540,7 +571,11 @@ public final class SoulPyreAbilityManager {
                                     LivingEntity actor, ActivePyre pyre) {
         int harvestedCount = pyre.souls + 1;
         pyre.souls++;
-        int volleySize = Math.max(1, Config.uniqueEffects.soulpyre.wispVolleySize);
+        if (pyre.tuning.flag(1 << 6) && harvestedCount <= 3) {
+            actor.setAbsorptionAmount(Math.min(6, actor.getAbsorptionAmount() + 2));
+        }
+        int volleySize = pyre.tuning.integer(Phase5AbilityTuning.Setting.WISP_COUNT,
+                Config.uniqueEffects.soulpyre.wispVolleySize);
         while (pyre.souls >= volleySize) {
             pyre.souls -= volleySize;
             pyre.pendingVolleys++;
@@ -556,7 +591,8 @@ public final class SoulPyreAbilityManager {
 
     private static void launchPendingVolleys(ServerWorld world, LivingEntity actor,
                                              ActivePyre pyre) {
-        int volleySize = Math.max(1, Config.uniqueEffects.soulpyre.wispVolleySize);
+        int volleySize = pyre.tuning.integer(Phase5AbilityTuning.Setting.WISP_COUNT,
+                Config.uniqueEffects.soulpyre.wispVolleySize);
         while (pyre.pendingVolleys > 0) {
             launchWispVolley(
                     world,
@@ -614,8 +650,8 @@ public final class SoulPyreAbilityManager {
                 sourceOwner,
                 searchRadius
         );
-        float damage = pyre.baseDamage
-                * Math.max(0.0F, Config.uniqueEffects.soulpyre.wispDamageMultiplier);
+        float damage = pyre.baseDamage * Math.max(0.0F, Config.uniqueEffects.soulpyre.wispDamageMultiplier)
+                * (float) pyre.tuning.get(Phase5AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1);
 
         for (int i = 0; i < soulCount; i++) {
             double angle = MathHelper.TAU * i / Math.max(1, soulCount);
@@ -650,7 +686,8 @@ public final class SoulPyreAbilityManager {
                             pyre.stack.copy(),
                             damage,
                             searchRadius,
-                            world.getTime() + WISP_LIFETIME
+                            world.getTime() + WISP_LIFETIME,
+                            pyre.tuning
                     )
             );
         }
@@ -716,6 +753,7 @@ public final class SoulPyreAbilityManager {
                         target,
                         wisp.damage
                 );
+                if (wisp.tuning.flag(1 << 13)) target.setOnFireFor(3);
                 world.spawnParticles(
                         ParticleTypes.SOUL_FIRE_FLAME,
                         targetPos.x,
@@ -1130,6 +1168,8 @@ public final class SoulPyreAbilityManager {
         private final float startRadius;
         private final float maxRadius;
         private final float baseDamage;
+        private final Phase5AbilityTuning tuning;
+        private final UniqueAbilityExecution execution;
         private int pulsesCompleted;
         private int souls;
         private int pendingVolleys;
@@ -1148,7 +1188,8 @@ public final class SoulPyreAbilityManager {
         private ActivePyre(UUID actorId, UUID sourceOwnerId, ItemStack stack,
                            UUID visualId, long startTick, long endTick,
                            int pulseCount, int duration, int collapseDuration,
-                           float startRadius, float maxRadius, float baseDamage) {
+                           float startRadius, float maxRadius, float baseDamage,
+                           Phase5AbilityTuning tuning, UniqueAbilityExecution execution) {
             this.actorId = actorId;
             this.sourceOwnerId = sourceOwnerId;
             this.stack = stack;
@@ -1161,6 +1202,8 @@ public final class SoulPyreAbilityManager {
             this.startRadius = startRadius;
             this.maxRadius = maxRadius;
             this.baseDamage = baseDamage;
+            this.tuning = tuning;
+            this.execution = execution;
             this.currentRadius = startRadius;
             this.targetRadius = startRadius;
             this.growthStartRadius = startRadius;
@@ -1176,10 +1219,11 @@ public final class SoulPyreAbilityManager {
         private final float damage;
         private final double searchRadius;
         private final long expiresAt;
+        private final Phase5AbilityTuning tuning;
 
         private ActiveWisp(UUID visualId, UUID actorId, UUID sourceOwnerId,
                            UUID targetId, ItemStack stack, float damage,
-                           double searchRadius, long expiresAt) {
+                           double searchRadius, long expiresAt, Phase5AbilityTuning tuning) {
             this.visualId = visualId;
             this.actorId = actorId;
             this.sourceOwnerId = sourceOwnerId;
@@ -1188,6 +1232,7 @@ public final class SoulPyreAbilityManager {
             this.damage = damage;
             this.searchRadius = searchRadius;
             this.expiresAt = expiresAt;
+            this.tuning = tuning;
         }
     }
 

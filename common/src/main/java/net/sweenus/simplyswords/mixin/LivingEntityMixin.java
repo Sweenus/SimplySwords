@@ -36,6 +36,7 @@ import net.sweenus.simplyswords.world.ObserverStatusEffectSyncManager;
 import net.sweenus.simplyswords.world.Phase4PassiveManager;
 import net.sweenus.simplyswords.world.Phase4LichbladeManager;
 import net.sweenus.simplyswords.world.Phase4StandardManager;
+import net.sweenus.simplyswords.world.Phase5CombatManager;
 import net.sweenus.simplyswords.world.DreadwhisperAbilityManager;
 import net.sweenus.simplyswords.world.GloamMechanicsManager;
 import net.sweenus.simplyswords.world.SoulPyreAbilityManager;
@@ -186,15 +187,13 @@ public abstract class LivingEntityMixin {
                 float reductionFactor = 0.85f;
                 amount *= reductionFactor;
             }
-            if (soulTetherEffect != null) {
-                float reductionFactor = 0.50f;
-                amount *= reductionFactor;
-            }
+            if (soulTetherEffect != null) amount = SoulPyreAbilityManager.modifyIncomingDamage(livingEntity, source, amount);
             amount = WeaponImplicitRegistry.modifyDamage(livingEntity, source, amount);
             amount = DreadwhisperAbilityManager.modifyIncomingDamage(livingEntity, source, amount);
             amount = MoltenEdgeAbilityManager.modifyIncomingDamage(livingEntity, amount);
             amount = Phase4StandardManager.modifyIncomingDamage(livingEntity, source, amount);
             amount = Phase4PassiveManager.modifyIncomingDamage(livingEntity, source, amount);
+            amount = Phase5CombatManager.modifyIncomingDamage(livingEntity, source, amount);
         }
         return amount;
     }
@@ -209,6 +208,7 @@ public abstract class LivingEntityMixin {
             BloodwakeAbilityManager.onTargetDamaged(livingEntity, source);
             Phase4PassiveManager.onDamageApplied(livingEntity, source);
             Phase4LichbladeManager.onOwnerDamaged(livingEntity);
+            Phase5CombatManager.onDamageApplied(livingEntity, source);
             if (source.isIn(DamageTypeTags.IS_PLAYER_ATTACK) && source.getAttacker() instanceof ServerPlayerEntity player) {
                 ItemStack stack = source.getWeaponStack();
                 if (stack == null || !stack.isOf(ItemsRegistry.STORMBRINGER.get())) {
