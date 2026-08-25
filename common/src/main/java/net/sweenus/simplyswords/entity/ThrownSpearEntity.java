@@ -30,6 +30,10 @@ import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
+
 // This thing is honestly so cursed (many issues with saving/load item stack from entity nbt). It finally seems to work, but the code needs cleaning up and I don't want to touch it
 public class ThrownSpearEntity extends PersistentProjectileEntity {
     private boolean dealtDamage;
@@ -52,6 +56,8 @@ public class ThrownSpearEntity extends PersistentProjectileEntity {
     public float weightValue = 0.05f;
     public boolean nonReturning = false;
     public int nonReturningMaxAge = 80;
+    private int successfulHits;
+    private final Set<UUID> piercedTargets = new HashSet<>();
 
 
 
@@ -243,6 +249,7 @@ public class ThrownSpearEntity extends PersistentProjectileEntity {
     @Override
     protected void onEntityHit(EntityHitResult entityHitResult) {
         Entity entity = entityHitResult.getEntity();
+        if (piercedTargets.contains(entity.getUuid())) return;
         if (this.getOwner() instanceof LivingEntity owner && entity instanceof LivingEntity target
                 && !HelperMethods.checkAbilityTarget(target, owner)) {
             return;
@@ -251,11 +258,14 @@ public class ThrownSpearEntity extends PersistentProjectileEntity {
         float baseDamage = primaryBaseDamage;
         Entity entity2 = this.getOwner();
         DamageSource damageSource = this.getDamageSources().trident(this, (Entity) (entity2 == null ? this : entity2));
-        float agedDamage = doExtraDamage(entity, baseDamage, damageSource);
+        float agedDamage = doExtraDamage(entity, baseDamage, damageSource)
+                * (successfulHits == 0 ? 1.0F : getPierceDamageMultiplier());
         World world = this.getWorld();
+        Vec3d incomingVelocity = this.getVelocity();
 
         this.dealtDamage = true;
-        if (HelperMethods.damageThroughIframes(entity, damageSource, agedDamage)) {
+        boolean damaged = HelperMethods.damageThroughIframes(entity, damageSource, agedDamage);
+        if (damaged) {
             if (entity.getType() == EntityType.ENDERMAN) {
                 return;
             }
@@ -267,6 +277,7 @@ public class ThrownSpearEntity extends PersistentProjectileEntity {
             if (entity instanceof LivingEntity livingEntity) {
                 this.knockback(livingEntity, damageSource);
                 this.onHit(livingEntity);
+                this.onSuccessfulHit(livingEntity, agedDamage);
                 // Get the ItemStack and call postHit if it's defined on the associated Item
                 if (stack != null &&  !stack.isEmpty() && this.getOwner() instanceof LivingEntity livingOwner) {
                     Item weaponItem = stack.getItem();
@@ -276,11 +287,23 @@ public class ThrownSpearEntity extends PersistentProjectileEntity {
                 }
 
             }
+            piercedTargets.add(entity.getUuid());
+            successfulHits++;
         }
 
-        this.setVelocity(this.getVelocity().multiply(-0.01, -0.1, -0.01));
+        boolean continues = damaged && successfulHits <= getAdditionalPierces();
+        if (continues) {
+            this.dealtDamage = false;
+            this.setVelocity(incomingVelocity);
+            if (incomingVelocity.lengthSquared() > 1.0E-6) {
+                Vec3d direction = incomingVelocity.normalize();
+                this.setPosition(this.getPos().add(direction.multiply(entity.getWidth() + 0.35)));
+            }
+        } else {
+            this.setVelocity(this.getVelocity().multiply(-0.01, -0.1, -0.01));
+        }
         this.playSound(getEntityHitSound(), 1.0F, 1.0F);
-        if (!this.getWorld().isClient && nonReturning) {
+        if (!continues && !this.getWorld().isClient && nonReturning) {
             damageOnReturn(primaryReturnDamageRadius, primaryReturnDamage);
             this.discard();
         }
@@ -297,6 +320,17 @@ public class ThrownSpearEntity extends PersistentProjectileEntity {
             agedDamage = HelperMethods.applyNonPlayerAbilityDamageModifier(livingOwner, agedDamage);
         }
         return agedDamage;
+    }
+
+    protected void onSuccessfulHit(LivingEntity target, float damage) {
+    }
+
+    protected int getAdditionalPierces() {
+        return 0;
+    }
+
+    protected float getPierceDamageMultiplier() {
+        return 1.0F;
     }
 
     protected void doEffects(ServerWorld serverWorld, float baseDamage, Entity entity) {

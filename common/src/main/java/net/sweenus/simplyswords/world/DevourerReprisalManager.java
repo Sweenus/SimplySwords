@@ -19,6 +19,11 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RaycastContext;
 import net.sweenus.simplyswords.api.SpellScalingProfile;
+import net.sweenus.simplyswords.api.ability.Phase2AbilityTuning;
+import net.sweenus.simplyswords.api.ability.Phase2UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityContext;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.DevourerReprisalVisualEntity;
@@ -67,18 +72,34 @@ public final class DevourerReprisalManager {
             return;
         }
 
-        double radius = Math.max(0.5, Config.uniqueEffects.devourer.reprisalRadius);
-        int targetCap = Math.max(1, Config.uniqueEffects.devourer.reprisalTargetCap);
+        UniqueAbilityExecution execution = UniqueAbilityApi.begin(Phase2UniqueAbilities.DEVOURER_REPRISAL,
+                UniqueAbilityContext.passive(world, stack, bearer, attacker, null), builder -> builder
+                        .set(Phase2UniqueAbilities.TUNING, Phase2AbilityTuning.EMPTY
+                                .with(Phase2AbilityTuning.Setting.REPRISAL_RADIUS, Config.uniqueEffects.devourer.reprisalRadius)
+                                .with(Phase2AbilityTuning.Setting.REPRISAL_TARGET_CAP, Config.uniqueEffects.devourer.reprisalTargetCap)
+                                .with(Phase2AbilityTuning.Setting.REPRISAL_PULL, Config.uniqueEffects.devourer.reprisalPullStrength)
+                                .with(Phase2AbilityTuning.Setting.REPRISAL_DAMAGE_MULTIPLIER, 1)));
+        UniqueAbilityApi.takeStartedExecution();
+        UniqueAbilityApi.start(execution);
+        Phase2AbilityTuning tuning = Phase2UniqueAbilities.tuning(execution);
+
+        double radius = Math.max(0.5, tuning.get(Phase2AbilityTuning.Setting.REPRISAL_RADIUS,
+                Config.uniqueEffects.devourer.reprisalRadius));
+        int targetCap = Math.max(1, tuning.integer(Phase2AbilityTuning.Setting.REPRISAL_TARGET_CAP,
+                Config.uniqueEffects.devourer.reprisalTargetCap));
         Vec3d center = resolveMawCenter(world, attacker);
         List<LivingEntity> targets = collectTargets(world, bearer, attacker, center, radius, targetCap);
         float damage = HelperMethods.abilityScaledDamage(SpellScalingProfile.SOUL, bearer, stack,
                 Config.uniqueEffects.devourer.reprisalDamageScaling,
-                Config.uniqueEffects.devourer.reprisalSpellScaling);
+                Config.uniqueEffects.devourer.reprisalSpellScaling)
+                * (float) tuning.get(Phase2AbilityTuning.Setting.REPRISAL_DAMAGE_MULTIPLIER, 1);
         DevourerAbilityManager.ReprisalRedirect redirect =
                 DevourerAbilityManager.feedFromReprisal(world, bearer.getUuid(), center,
                         attacker, Math.max(10, Config.uniqueEffects.devourer.reprisalDragDuration + 7));
         for (LivingEntity target : targets) {
             damageTarget(world, bearer, stack, target, damage);
+            UniqueAbilityApi.emit(execution, net.sweenus.simplyswords.api.ability.UniqueAbilityPhase.HIT,
+                    Phase2UniqueAbilities.HIT, target, 1, damage);
         }
         Vec3d destination = redirect == null ? center : redirect.destination();
         UUID tendrilId = redirect == null ? null : redirect.tendrilId();
@@ -97,7 +118,7 @@ public final class DevourerReprisalManager {
         long cleanupTick = Math.max(dragEndTick, now + CLOSING_EFFECT_TICK + 1L);
         ActiveReprisal reprisal = new ActiveReprisal(bearer.getUuid(), center, destination,
                 redirect != null, targetIds, dragEndTick, cleanupTick,
-                now + CLOSING_EFFECT_TICK, now + TENDRIL_RETRACT_TICK, tendrilId);
+                now + CLOSING_EFFECT_TICK, now + TENDRIL_RETRACT_TICK, tendrilId, execution);
         ACTIVE.computeIfAbsent(world, ignored -> new ArrayList<>()).add(reprisal);
     }
 
@@ -124,6 +145,8 @@ public final class DevourerReprisalManager {
             }
             if (now >= reprisal.cleanupTick) {
                 beginTendrilRetraction(world, reprisal);
+                UniqueAbilityApi.finish(reprisal.execution, reprisal.execution.definition().id(),
+                        reprisal.targetIds.size());
                 iterator.remove();
             }
         }
@@ -274,13 +297,14 @@ public final class DevourerReprisalManager {
         private final long closingEffectTick;
         private final long tendrilRetractTick;
         private final UUID tendrilId;
+        private final UniqueAbilityExecution execution;
         private boolean closingEffectsPlayed;
         private boolean tendrilRetracting;
 
         private ActiveReprisal(UUID bearerId, Vec3d mawCenter, Vec3d destination,
                                boolean redirected, List<UUID> targetIds,
                                long dragEndTick, long cleanupTick, long closingEffectTick,
-                               long tendrilRetractTick, UUID tendrilId) {
+                               long tendrilRetractTick, UUID tendrilId, UniqueAbilityExecution execution) {
             this.bearerId = bearerId;
             this.mawCenter = mawCenter;
             this.destination = destination;
@@ -291,6 +315,7 @@ public final class DevourerReprisalManager {
             this.closingEffectTick = closingEffectTick;
             this.tendrilRetractTick = tendrilRetractTick;
             this.tendrilId = tendrilId;
+            this.execution = execution;
         }
     }
 }

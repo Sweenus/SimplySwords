@@ -62,8 +62,20 @@ public final class DevourerStainManager {
     public static void begin(ServerWorld world, UUID ownerId, UUID sourcePlayerId,
                              UUID massVisualId, Vec3d center,
                              long activeStartTick, long activeEndTick, long collapseEndTick) {
+        begin(world, ownerId, sourcePlayerId, massVisualId, center, activeStartTick, activeEndTick,
+                collapseEndTick, Config.uniqueEffects.devourer.stainCarrierCap,
+                Config.uniqueEffects.devourer.stainTrailWidth,
+                Config.uniqueEffects.devourer.stainSpreadDuration,
+                Config.uniqueEffects.devourer.stainSlowAmplifier);
+    }
+
+    public static void begin(ServerWorld world, UUID ownerId, UUID sourcePlayerId,
+                             UUID massVisualId, Vec3d center, long activeStartTick,
+                             long activeEndTick, long collapseEndTick, int carrierCap,
+                             double trailWidth, int spreadDuration, int slowAmplifier) {
         ActiveField field = new ActiveField(ownerId, sourcePlayerId, massVisualId,
-                center, activeStartTick, activeEndTick, collapseEndTick);
+                center, activeStartTick, activeEndTick, collapseEndTick,
+                carrierCap, trailWidth, spreadDuration, slowAmplifier);
         ACTIVE.computeIfAbsent(world, ignored -> new HashMap<>()).put(massVisualId, field);
     }
 
@@ -156,11 +168,11 @@ public final class DevourerStainManager {
                 continue;
             }
             insideNow.put(target.getUuid(), target.getPos());
-            applySlow(world, owner, target);
+            applySlow(world, owner, target, field.slowAmplifier);
             slowed.add(target.getUuid());
         }
 
-        int carrierCap = Math.max(1, Config.uniqueEffects.devourer.stainCarrierCap);
+        int carrierCap = field.carrierCap;
         int segmentCap = carrierCap * MAX_SEGMENTS_PER_CARRIER;
         for (Map.Entry<UUID, Vec3d> previous : field.insideMain.entrySet()) {
             if (insideNow.containsKey(previous.getKey())
@@ -178,7 +190,7 @@ public final class DevourerStainManager {
                     > MAX_CARRIER_STEP * MAX_CARRIER_STEP) {
                 continue;
             }
-            int duration = Math.max(1, Config.uniqueEffects.devourer.stainSpreadDuration);
+            int duration = field.spreadDuration;
             Vec3d origin = groundPosition(world, mainBoundaryCrossing(
                     field.center, previous.getValue(), target.getPos(), mainRadius));
             field.carriers.put(target.getUuid(), new Carrier(
@@ -214,8 +226,7 @@ public final class DevourerStainManager {
             StainSegment segment = carrier.currentSegment;
             if (segment == null || segment.direction.dotProduct(direction) < TURN_COSINE
                     && carrier.segmentCount < MAX_SEGMENTS_PER_CARRIER) {
-                int segmentCap = Math.max(1, Config.uniqueEffects.devourer.stainCarrierCap)
-                        * MAX_SEGMENTS_PER_CARRIER;
+                int segmentCap = field.carrierCap * MAX_SEGMENTS_PER_CARRIER;
                 if (field.segments.size() >= segmentCap) {
                     if (segment == null) {
                         iterator.remove();
@@ -248,7 +259,7 @@ public final class DevourerStainManager {
             return null;
         }
         float radius = (float) Math.max(0.25,
-                Config.uniqueEffects.devourer.stainTrailWidth * 0.5);
+                field.trailWidth * 0.5);
         Vec3d center = new Vec3d((start.x + end.x) * 0.5,
                 (start.y + end.y) * 0.5, (start.z + end.z) * 0.5);
         int lifetime = Math.max(1, (int) (field.collapseEndTick - world.getTime()));
@@ -308,7 +319,7 @@ public final class DevourerStainManager {
             if (alreadySlowed.contains(target.getUuid()) || !containsTrail(field.segments, target.getPos())) {
                 continue;
             }
-            applySlow(world, owner, target);
+            applySlow(world, owner, target, field.slowAmplifier);
             alreadySlowed.add(target.getUuid());
         }
     }
@@ -338,8 +349,8 @@ public final class DevourerStainManager {
         return false;
     }
 
-    private static void applySlow(ServerWorld world, LivingEntity owner, LivingEntity target) {
-        int amplifier = Math.clamp(Config.uniqueEffects.devourer.stainSlowAmplifier, 0, 4);
+    private static void applySlow(ServerWorld world, LivingEntity owner, LivingEntity target, int configuredAmplifier) {
+        int amplifier = Math.clamp(configuredAmplifier, 0, 4);
         GloamMechanicsManager.recordContact(world, owner, target, amplifier);
     }
 
@@ -419,13 +430,18 @@ public final class DevourerStainManager {
         private final long activeStartTick;
         private final long activeEndTick;
         private final long collapseEndTick;
+        private final int carrierCap;
+        private final double trailWidth;
+        private final int spreadDuration;
+        private final int slowAmplifier;
         private final Map<UUID, Vec3d> insideMain = new HashMap<>();
         private final Map<UUID, Carrier> carriers = new HashMap<>();
         private final List<StainSegment> segments = new ArrayList<>();
 
         private ActiveField(UUID ownerId, UUID sourcePlayerId, UUID massVisualId,
                             Vec3d center, long activeStartTick,
-                            long activeEndTick, long collapseEndTick) {
+                            long activeEndTick, long collapseEndTick, int carrierCap,
+                            double trailWidth, int spreadDuration, int slowAmplifier) {
             this.ownerId = ownerId;
             this.sourcePlayerId = sourcePlayerId;
             this.massVisualId = massVisualId;
@@ -433,6 +449,10 @@ public final class DevourerStainManager {
             this.activeStartTick = activeStartTick;
             this.activeEndTick = activeEndTick;
             this.collapseEndTick = collapseEndTick;
+            this.carrierCap = Math.max(1, carrierCap);
+            this.trailWidth = Math.max(.5, trailWidth);
+            this.spreadDuration = Math.max(1, spreadDuration);
+            this.slowAmplifier = Math.clamp(slowAmplifier, 0, 4);
         }
     }
 

@@ -19,6 +19,11 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RaycastContext;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
+import net.sweenus.simplyswords.api.ability.Phase2AbilityTuning;
+import net.sweenus.simplyswords.api.ability.Phase2UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityContext;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.GloampiercerCloneVisualEntity;
 import net.sweenus.simplyswords.entity.GloampiercerSpearEntity;
@@ -46,6 +51,7 @@ public final class GloampiercerAbilityManager {
     private static final Map<ServerWorld, Map<UUID, ActiveChannel>> ACTIVE = new HashMap<>();
     private static final Map<ServerWorld, List<PendingPassiveStrike>> PASSIVE_STRIKES = new HashMap<>();
     private static final Map<ServerWorld, Map<UUID, Long>> LAST_PASSIVE = new HashMap<>();
+    private static final Map<ServerWorld, Map<UUID, Integer>> PASSIVE_PROCS = new HashMap<>();
 
     private GloampiercerAbilityManager() {
     }
@@ -72,14 +78,25 @@ public final class GloampiercerAbilityManager {
         }
         ServerWorld world = context.world();
         LivingEntity owner = context.actor();
-        int duration = Math.clamp(Config.uniqueEffects.gloampiercer.channelDuration, 20, 120);
-        int cloneCount = Math.clamp(Config.uniqueEffects.gloampiercer.cloneCount, 1, 8);
+        UniqueAbilityExecution execution = UniqueAbilityApi.begin(Phase2UniqueAbilities.GLOAMPIERCER_BARRAGE,
+                UniqueAbilityContext.active(context), builder -> builder
+                        .set(Phase2UniqueAbilities.COOLDOWN_TICKS, Config.uniqueEffects.gloampiercer.cooldown)
+                        .set(Phase2UniqueAbilities.TUNING, baseTuning(Config.uniqueEffects.gloampiercer.cooldown,
+                                Config.uniqueEffects.gloampiercer.channelDuration,
+                                Config.uniqueEffects.gloampiercer.spearCount,
+                                Config.uniqueEffects.gloampiercer.cloneCount)));
+        Phase2AbilityTuning tuning = Phase2UniqueAbilities.tuning(execution);
+        int duration = Math.clamp(tuning.integer(Phase2AbilityTuning.Setting.CHANNEL_DURATION_TICKS,
+                Config.uniqueEffects.gloampiercer.channelDuration), 20, 120);
+        int cloneCount = Math.clamp(tuning.integer(Phase2AbilityTuning.Setting.CLONE_COUNT,
+                Config.uniqueEffects.gloampiercer.cloneCount), 1, 8);
         double lift = findLiftHeight(world, owner, Math.max(0.0, Config.uniqueEffects.gloampiercer.liftHeight));
         ActiveChannel channel = new ActiveChannel(owner.getUuid(), context.stack().copy(), context.hand(),
                 owner.getPos(), center, owner.getY() + lift, world.getTime(), duration,
                 Math.max(1.0F, HelperMethods.abilityScaledDamage(SpellScalingProfile.SOUL, owner, context.stack(),
                         Config.uniqueEffects.gloampiercer.strikeDamageScaling,
-                        Config.uniqueEffects.gloampiercer.strikeSpellScaling)));
+                        Config.uniqueEffects.gloampiercer.strikeSpellScaling))
+                        * (float) tuning.get(Phase2AbilityTuning.Setting.PROJECTILE_DAMAGE_MULTIPLIER, 1), execution);
         spawnActiveClones(world, owner, channel, cloneCount);
         ACTIVE.computeIfAbsent(world, ignored -> new HashMap<>()).put(owner.getUuid(), channel);
         spawnActivationEffects(world, owner, center);
@@ -97,26 +114,48 @@ public final class GloampiercerAbilityManager {
         if (nextEligible != null && now < nextEligible) {
             return;
         }
-        LivingEntity target = findPassiveTarget(world, owner);
-        if (target == null) {
+        UniqueAbilityExecution execution = UniqueAbilityApi.begin(Phase2UniqueAbilities.GLOAMPIERCER_AMBUSH,
+                UniqueAbilityContext.passive(world, stack, owner, null, null), builder -> builder
+                        .set(Phase2UniqueAbilities.TUNING, baseTuning(0, 0, 1, 1)));
+        UniqueAbilityApi.takeStartedExecution();
+        UniqueAbilityApi.start(execution);
+        Phase2AbilityTuning tuning = Phase2UniqueAbilities.tuning(execution);
+        int mode = tuning.integer(Phase2AbilityTuning.Setting.MODE, 0);
+        Map<UUID, Integer> procCounts = PASSIVE_PROCS.computeIfAbsent(world, ignored -> new HashMap<>());
+        int proc = Math.floorMod(procCounts.getOrDefault(owner.getUuid(), 0), 3) + 1;
+        procCounts.put(owner.getUuid(), proc);
+        int cloneCount = Math.clamp(tuning.integer(Phase2AbilityTuning.Setting.CLONE_COUNT, 1), 1, 3);
+        if ((mode & 1) != 0 && proc != 3) cloneCount = 1;
+        List<LivingEntity> targets = findPassiveTargets(world, owner, tuning, cloneCount);
+        if (targets.isEmpty()) {
+            UniqueAbilityApi.cancel(execution);
             return;
         }
         int seed = owner.getRandom().nextInt();
-        Vec3d clonePosition = passiveClonePosition(owner, target, seed);
-        float yaw = yawToward(clonePosition, target.getPos());
-        int throwTick = 9;
-        GloampiercerCloneVisualEntity clone = new GloampiercerCloneVisualEntity(
-                world, clonePosition.x, clonePosition.y, clonePosition.z, yaw, 22, throwTick, 0, seed);
-        world.spawnEntity(clone);
-        PASSIVE_STRIKES.computeIfAbsent(world, ignored -> new ArrayList<>())
-                .add(new PendingPassiveStrike(owner.getUuid(), target.getUuid(), clone.getUuid(),
-                        stack.copy(), cloneHandOrigin(clonePosition, target.getPos()), now + throwTick,
-                        Math.max(1.0F, HelperMethods.abilityScaledDamage(SpellScalingProfile.SOUL, owner, stack,
-                                Config.uniqueEffects.gloampiercer.strikeDamageScaling,
-                                Config.uniqueEffects.gloampiercer.strikeSpellScaling))));
-        cooldowns.put(owner.getUuid(), now + SimplySwordsAPI.getEffectiveWeaponCooldownTicks(
-                stack, owner, Config.uniqueEffects.gloampiercer.passiveCooldown));
-        spawnCloneMaterialization(world, clonePosition);
+        int throwTick = tuning.integer(Phase2AbilityTuning.Setting.FIRE_DELAY_TICKS, 9);
+        float baseDamage = Math.max(1.0F, HelperMethods.abilityScaledDamage(SpellScalingProfile.SOUL, owner, stack,
+                Config.uniqueEffects.gloampiercer.strikeDamageScaling,
+                Config.uniqueEffects.gloampiercer.strikeSpellScaling))
+                * (float) tuning.get(Phase2AbilityTuning.Setting.PROJECTILE_DAMAGE_MULTIPLIER, 1);
+        for (int index = 0; index < targets.size(); index++) {
+            LivingEntity target = targets.get(index);
+            int cloneSeed = seed + index * 7919;
+            Vec3d clonePosition = passiveClonePosition(owner, target, cloneSeed);
+            GloampiercerCloneVisualEntity clone = new GloampiercerCloneVisualEntity(world,
+                    clonePosition.x, clonePosition.y, clonePosition.z, yawToward(clonePosition, target.getPos()),
+                    22, throwTick, 0, cloneSeed);
+            world.spawnEntity(clone);
+            float damage = index == 0 ? baseDamage : baseDamage * (float) tuning.get(
+                    Phase2AbilityTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, 1);
+            PASSIVE_STRIKES.computeIfAbsent(world, ignored -> new ArrayList<>())
+                    .add(new PendingPassiveStrike(owner.getUuid(), target.getUuid(), clone.getUuid(),
+                            stack.copy(), cloneHandOrigin(clonePosition, target.getPos()), now + throwTick,
+                            damage, execution));
+            spawnCloneMaterialization(world, clonePosition);
+        }
+        cooldowns.put(owner.getUuid(), now + SimplySwordsAPI.getEffectiveWeaponCooldownTicks(stack, owner,
+                tuning.integer(Phase2AbilityTuning.Setting.PASSIVE_COOLDOWN_TICKS,
+                        Config.uniqueEffects.gloampiercer.passiveCooldown)));
     }
 
     public static boolean isActive(LivingEntity owner) {
@@ -143,7 +182,13 @@ public final class GloampiercerAbilityManager {
             Map<UUID, Long> cooldowns = LAST_PASSIVE.get(world);
             if (cooldowns != null) {
                 long now = world.getTime();
-                cooldowns.values().removeIf(tick -> tick <= now);
+                Map<UUID, Integer> procs = PASSIVE_PROCS.get(world);
+                cooldowns.entrySet().removeIf(entry -> {
+                    if (entry.getValue() > now) return false;
+                    if (procs != null) procs.remove(entry.getKey());
+                    return true;
+                });
+                if (procs != null && procs.isEmpty()) PASSIVE_PROCS.remove(world);
                 if (cooldowns.isEmpty()) {
                     LAST_PASSIVE.remove(world);
                 }
@@ -172,6 +217,7 @@ public final class GloampiercerAbilityManager {
             if (age >= channel.duration) {
                 owner.setVelocity(owner.getVelocity().x, Math.min(owner.getVelocity().y, -0.04), owner.getVelocity().z);
                 owner.velocityModified = true;
+                UniqueAbilityApi.finish(channel.execution, channel.execution.definition().id(), channel.fired);
                 iterator.remove();
             }
         }
@@ -198,11 +244,13 @@ public final class GloampiercerAbilityManager {
                     && targetEntity instanceof LivingEntity target && target.isAlive() && !target.isRemoved()
                     && HelperMethods.checkAbilityTarget(target, owner)) {
                 launchSpear(world, owner, strike.stack, strike.origin,
-                        target.getPos().add(0.0, target.getHeight() * 0.55, 0.0), target, strike.damage);
+                        target.getPos().add(0.0, target.getHeight() * 0.55, 0.0), target, strike.damage,
+                        strike.execution);
                 world.playSound(null, strike.origin.x, strike.origin.y, strike.origin.z,
                         SoundRegistry.DARK_SWORD_WHOOSH_02.get(), SoundCategory.PLAYERS,
                         0.56F, 1.35F + world.random.nextFloat() * 0.12F);
             } else {
+                UniqueAbilityApi.cancel(strike.execution);
                 discard(world, strike.cloneId);
             }
             iterator.remove();
@@ -215,7 +263,9 @@ public final class GloampiercerAbilityManager {
     private static void guideOwner(LivingEntity owner, ActiveChannel channel, long age) {
         int liftTicks = Math.min(10, Math.max(4, channel.duration / 4));
         int releaseTick = Math.max(liftTicks, channel.duration - 8);
-        double retention = MathHelper.clamp(Config.uniqueEffects.gloampiercer.movementRetention, 0.0, 1.0);
+        double retention = MathHelper.clamp(Phase2UniqueAbilities.tuning(channel.execution).get(
+                Phase2AbilityTuning.Setting.MOVEMENT_RETENTION,
+                Config.uniqueEffects.gloampiercer.movementRetention), 0.0, 1.0);
         Vec3d velocity = owner.getVelocity();
         if (age < releaseTick) {
             double targetY;
@@ -239,13 +289,17 @@ public final class GloampiercerAbilityManager {
 
     private static void fireScheduledSpears(ServerWorld world, LivingEntity owner,
                                              ActiveChannel channel, long age) {
-        int count = Math.clamp(Config.uniqueEffects.gloampiercer.spearCount, 3, 36);
-        int endTick = Math.max(FIRE_START_TICK + 1, channel.duration - FIRE_END_MARGIN);
-        if (age < FIRE_START_TICK) {
+        int count = Math.clamp(Phase2UniqueAbilities.tuning(channel.execution).integer(
+                Phase2AbilityTuning.Setting.SPEAR_COUNT, Config.uniqueEffects.gloampiercer.spearCount), 3, 36);
+        Phase2AbilityTuning tuning = Phase2UniqueAbilities.tuning(channel.execution);
+        int startTick = tuning.integer(Phase2AbilityTuning.Setting.FIRE_DELAY_TICKS, FIRE_START_TICK);
+        int endMargin = tuning.integer(Phase2AbilityTuning.Setting.THRESHOLD, FIRE_END_MARGIN);
+        int endTick = Math.max(startTick + 1, channel.duration - endMargin);
+        if (age < startTick) {
             return;
         }
-        double progress = MathHelper.clamp((double) (age - FIRE_START_TICK + 1)
-                / Math.max(1, endTick - FIRE_START_TICK), 0.0, 1.0);
+        double progress = MathHelper.clamp((double) (age - startTick + 1)
+                / Math.max(1, endTick - startTick), 0.0, 1.0);
         int expected = Math.min(count, (int) Math.floor(progress * count));
         while (channel.fired < expected) {
             fireSpear(world, owner, channel, channel.fired, count);
@@ -260,11 +314,16 @@ public final class GloampiercerAbilityManager {
         Vec3d origin = sourceIndex == 0
                 ? owner.getPos().add(0.0, owner.getHeight() * 0.68, 0.0)
                 : cloneHandOrigin(channel.clonePositions.get(sourceIndex - 1), channel.center);
-        LivingEntity target = index % 3 == 2 ? null : selectBarrageTarget(world, owner, channel, index);
+        Phase2AbilityTuning tuning = Phase2UniqueAbilities.tuning(channel.execution);
+        int mode = tuning.integer(Phase2AbilityTuning.Setting.MODE, 0);
+        int groundInterval = tuning.integer(Phase2AbilityTuning.Setting.INTERVAL_TICKS, 3);
+        boolean groundStrike = (mode & 16) != 0 || (mode & 32) == 0 && index % groundInterval == groundInterval - 1;
+        LivingEntity target = groundStrike ? null : selectBarrageTarget(world, owner, channel, index);
         Vec3d destination = target == null
-                ? groundStrikePosition(world, channel.center, index, count)
+                ? groundStrikePosition(world, channel.center, index, count,
+                tuning.get(Phase2AbilityTuning.Setting.RADIUS, Config.uniqueEffects.gloampiercer.barrageRadius))
                 : target.getPos().add(0.0, target.getHeight() * 0.55, 0.0);
-        launchSpear(world, owner, channel.stack, origin, destination, target, channel.damage);
+        launchSpear(world, owner, channel.stack, origin, destination, target, channel.damage, channel.execution);
         if (sourceIndex == 0) {
             Hand hand = channel.hand == null ? Hand.MAIN_HAND : channel.hand;
             RunicSlashManager.runSuppressed(() -> owner.swingHand(hand, true));
@@ -276,10 +335,13 @@ public final class GloampiercerAbilityManager {
     }
 
     private static void launchSpear(ServerWorld world, LivingEntity owner, ItemStack stack,
-                                    Vec3d origin, Vec3d destination, LivingEntity target, float damage) {
+                                    Vec3d origin, Vec3d destination, LivingEntity target, float damage,
+                                    UniqueAbilityExecution execution) {
+        Phase2AbilityTuning tuning = Phase2UniqueAbilities.tuning(execution);
         GloampiercerSpearEntity spear = new GloampiercerSpearEntity(world, owner, stack,
                 origin, destination, target, damage,
-                Math.max(0.1, Config.uniqueEffects.gloampiercer.projectileSpeed));
+                Math.max(0.1, tuning.get(Phase2AbilityTuning.Setting.PROJECTILE_SPEED,
+                        Config.uniqueEffects.gloampiercer.projectileSpeed)), execution);
         world.spawnEntity(spear);
     }
 
@@ -298,8 +360,9 @@ public final class GloampiercerAbilityManager {
         return targets.isEmpty() ? null : targets.get(Math.floorMod(index / 3 + index, targets.size()));
     }
 
-    private static Vec3d groundStrikePosition(ServerWorld world, Vec3d center, int index, int count) {
-        double radius = Math.max(1.0, Config.uniqueEffects.gloampiercer.barrageRadius);
+    private static Vec3d groundStrikePosition(ServerWorld world, Vec3d center, int index, int count,
+                                              double configuredRadius) {
+        double radius = Math.max(1.0, configuredRadius);
         double fraction = Math.sqrt((index + 0.5) / Math.max(1, count));
         double angle = index * GOLDEN_ANGLE + Math.floorMod(index * 31, 17) * 0.037;
         double distance = radius * fraction * (0.78 + Math.floorMod(index * 13, 19) / 90.0);
@@ -309,13 +372,16 @@ public final class GloampiercerAbilityManager {
         return new Vec3d(x, y + 0.05, z);
     }
 
-    private static LivingEntity findPassiveTarget(ServerWorld world, LivingEntity owner) {
+    private static List<LivingEntity> findPassiveTargets(ServerWorld world, LivingEntity owner,
+                                                          Phase2AbilityTuning tuning, int cap) {
         double minimum = Math.max(0.0, Config.uniqueEffects.gloampiercer.passiveMinRange);
-        double maximum = Math.max(minimum + 0.1, Config.uniqueEffects.gloampiercer.passiveMaxRange);
+        double maximum = Math.max(minimum + 0.1, tuning.get(Phase2AbilityTuning.Setting.RANGE,
+                Config.uniqueEffects.gloampiercer.passiveMaxRange));
         double minimumSquared = minimum * minimum;
         double maximumSquared = maximum * maximum;
         double threshold = Math.cos(Math.toRadians(
-                MathHelper.clamp(Config.uniqueEffects.gloampiercer.passiveConeDegrees, 1.0, 180.0) * 0.5));
+                MathHelper.clamp(tuning.get(Phase2AbilityTuning.Setting.CONE_DEGREES,
+                        Config.uniqueEffects.gloampiercer.passiveConeDegrees), 1.0, 180.0) * 0.5));
         Vec3d look = owner.getRotationVec(1.0F).normalize();
         return world.getEntitiesByClass(LivingEntity.class, owner.getBoundingBox().expand(maximum),
                         entity -> entity != owner && entity.isAlive() && !entity.isRemoved()
@@ -326,11 +392,12 @@ public final class GloampiercerAbilityManager {
                                 && owner.canSee(entity))
                 .stream()
                 .filter(entity -> directionTo(owner, entity).dotProduct(look) >= threshold)
-                .min(Comparator.comparingDouble(entity -> {
+                .sorted(Comparator.comparingDouble(entity -> {
                     double alignment = directionTo(owner, entity).dotProduct(look);
                     return (1.0 - alignment) * 100.0 + owner.squaredDistanceTo(entity) * 0.02;
                 }))
-                .orElse(null);
+                .limit(cap)
+                .toList();
     }
 
     private static Vec3d directionTo(LivingEntity owner, LivingEntity target) {
@@ -367,15 +434,19 @@ public final class GloampiercerAbilityManager {
                     .add(0.0, height, 0.0);
             channel.clonePositions.add(position);
             int seed = owner.getRandom().nextInt();
-            int spearCount = Math.clamp(Config.uniqueEffects.gloampiercer.spearCount, 3, 36);
+            int spearCount = Math.clamp(Phase2UniqueAbilities.tuning(channel.execution).integer(
+                    Phase2AbilityTuning.Setting.SPEAR_COUNT, Config.uniqueEffects.gloampiercer.spearCount), 3, 36);
             int sourceCount = cloneCount + 1;
+            Phase2AbilityTuning tuning = Phase2UniqueAbilities.tuning(channel.execution);
+            int startTick = tuning.integer(Phase2AbilityTuning.Setting.FIRE_DELAY_TICKS, FIRE_START_TICK);
+            int endMargin = tuning.integer(Phase2AbilityTuning.Setting.THRESHOLD, FIRE_END_MARGIN);
             int firstSpear = index + 1;
             int firstThrow = firstSpear < spearCount
-                    ? scheduledFireTick(firstSpear, spearCount, channel.duration)
+                    ? scheduledFireTick(firstSpear, spearCount, channel.duration, startTick, endMargin)
                     : channel.duration + 8;
             int nextSpear = firstSpear + sourceCount;
             int throwInterval = nextSpear < spearCount
-                    ? scheduledFireTick(nextSpear, spearCount, channel.duration) - firstThrow
+                    ? scheduledFireTick(nextSpear, spearCount, channel.duration, startTick, endMargin) - firstThrow
                     : 0;
             GloampiercerCloneVisualEntity clone = new GloampiercerCloneVisualEntity(
                     world, position.x, position.y, position.z, yawToward(position, channel.center),
@@ -386,10 +457,11 @@ public final class GloampiercerAbilityManager {
         }
     }
 
-    private static int scheduledFireTick(int spearIndex, int spearCount, int duration) {
-        int endTick = Math.max(FIRE_START_TICK + 1, duration - FIRE_END_MARGIN);
-        int span = Math.max(1, endTick - FIRE_START_TICK);
-        return FIRE_START_TICK - 1
+    private static int scheduledFireTick(int spearIndex, int spearCount, int duration,
+                                         int startTick, int endMargin) {
+        int endTick = Math.max(startTick + 1, duration - endMargin);
+        int span = Math.max(1, endTick - startTick);
+        return startTick - 1
                 + (int) Math.ceil((spearIndex + 1) * span / (double) Math.max(1, spearCount));
     }
 
@@ -448,6 +520,7 @@ public final class GloampiercerAbilityManager {
     }
 
     private static void cancel(ServerWorld world, ActiveChannel channel) {
+        UniqueAbilityApi.cancel(channel.execution);
         for (UUID cloneId : channel.cloneIds) {
             discard(world, cloneId);
         }
@@ -506,12 +579,14 @@ public final class GloampiercerAbilityManager {
         private final long startedAt;
         private final int duration;
         private final float damage;
+        private final UniqueAbilityExecution execution;
         private final List<Vec3d> clonePositions = new ArrayList<>();
         private final List<UUID> cloneIds = new ArrayList<>();
         private int fired;
 
         private ActiveChannel(UUID ownerId, ItemStack stack, Hand hand, Vec3d start, Vec3d center,
-                              double hoverY, long startedAt, int duration, float damage) {
+                              double hoverY, long startedAt, int duration, float damage,
+                              UniqueAbilityExecution execution) {
             this.ownerId = ownerId;
             this.stack = stack;
             this.hand = hand;
@@ -521,10 +596,32 @@ public final class GloampiercerAbilityManager {
             this.startedAt = startedAt;
             this.duration = duration;
             this.damage = damage;
+            this.execution = execution;
         }
     }
 
     private record PendingPassiveStrike(UUID ownerId, UUID targetId, UUID cloneId, ItemStack stack,
-                                        Vec3d origin, long triggerAt, float damage) {
+                                        Vec3d origin, long triggerAt, float damage,
+                                        UniqueAbilityExecution execution) {
+    }
+
+    private static Phase2AbilityTuning baseTuning(int cooldown, int duration, int spears, int clones) {
+        return Phase2AbilityTuning.EMPTY
+                .with(Phase2AbilityTuning.Setting.COOLDOWN_TICKS, cooldown)
+                .with(Phase2AbilityTuning.Setting.CHANNEL_DURATION_TICKS, duration)
+                .with(Phase2AbilityTuning.Setting.SPEAR_COUNT, spears)
+                .with(Phase2AbilityTuning.Setting.CLONE_COUNT, clones)
+                .with(Phase2AbilityTuning.Setting.PROJECTILE_SPEED, Config.uniqueEffects.gloampiercer.projectileSpeed)
+                .with(Phase2AbilityTuning.Setting.PROJECTILE_DAMAGE_MULTIPLIER, 1)
+                .with(Phase2AbilityTuning.Setting.PASSIVE_COOLDOWN_TICKS, Config.uniqueEffects.gloampiercer.passiveCooldown)
+                .with(Phase2AbilityTuning.Setting.FIRE_DELAY_TICKS, 9)
+                .with(Phase2AbilityTuning.Setting.CONE_DEGREES, Config.uniqueEffects.gloampiercer.passiveConeDegrees)
+                .with(Phase2AbilityTuning.Setting.RANGE, Config.uniqueEffects.gloampiercer.passiveMaxRange)
+                .with(Phase2AbilityTuning.Setting.EXPLOSION_RADIUS, Config.uniqueEffects.gloampiercer.explosionRadius)
+                .with(Phase2AbilityTuning.Setting.TRIGGER_RADIUS, Config.uniqueEffects.gloampiercer.triggerRadius)
+                .with(Phase2AbilityTuning.Setting.EMBEDDED_DURATION_TICKS, Config.uniqueEffects.gloampiercer.embeddedDuration)
+                .with(Phase2AbilityTuning.Setting.STAIN_RADIUS, Config.uniqueEffects.gloampiercer.stainRadius)
+                .with(Phase2AbilityTuning.Setting.STAIN_DURATION_TICKS, Config.uniqueEffects.gloampiercer.stainDuration)
+                .with(Phase2AbilityTuning.Setting.STAIN_AMPLIFIER, Config.uniqueEffects.gloampiercer.stainSlowAmplifier);
     }
 }

@@ -20,6 +20,11 @@ import net.sweenus.simplyswords.entity.WraithmawCutlassEntity;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.api.SpellScalingProfile;
+import net.sweenus.simplyswords.api.ability.Phase2AbilityTuning;
+import net.sweenus.simplyswords.api.ability.Phase2UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityContext;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.util.HelperMethods;
 import org.joml.Vector3f;
 
@@ -31,10 +36,12 @@ import java.util.UUID;
 
 public final class WraithmawAbilityManager {
     private static final double GOLDEN_ANGLE = 2.399963229728653;
+    private static final int MAX_ACTIVE_CASTS_PER_WORLD = 32;
     private static final DustColorTransitionParticleEffect SPECTRAL_DUST =
             new DustColorTransitionParticleEffect(new Vector3f(0.06F, 0.008F, 0.13F),
                     new Vector3f(0.62F, 0.12F, 0.96F), 1.35F);
     private static final Map<ServerWorld, Map<UUID, Long>> SUPPRESSED_SWINGS = new HashMap<>();
+    private static final Map<ServerWorld, Map<Long, ActiveCast>> ACTIVE_CASTS = new HashMap<>();
 
     private WraithmawAbilityManager() {
     }
@@ -60,13 +67,38 @@ public final class WraithmawAbilityManager {
         }
         ServerWorld world = context.world();
         LivingEntity actor = context.actor();
+        UniqueAbilityExecution execution = UniqueAbilityApi.begin(Phase2UniqueAbilities.WRAITHMAW_MUSTER,
+                UniqueAbilityContext.active(context), builder -> builder
+                        .set(Phase2UniqueAbilities.COOLDOWN_TICKS, Config.uniqueEffects.wraithmaw.cooldown)
+                        .set(Phase2UniqueAbilities.TUNING, Phase2AbilityTuning.EMPTY
+                                .with(Phase2AbilityTuning.Setting.COOLDOWN_TICKS, Config.uniqueEffects.wraithmaw.cooldown)
+                                .with(Phase2AbilityTuning.Setting.SPEAR_COUNT, Config.uniqueEffects.wraithmaw.cutlassCount)
+                                .with(Phase2AbilityTuning.Setting.RADIUS, Config.uniqueEffects.wraithmaw.stormRadius)
+                                .with(Phase2AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1)
+                                .with(Phase2AbilityTuning.Setting.MATERIALIZE_TICKS, 12)
+                                .with(Phase2AbilityTuning.Setting.FALL_SPEED, 1.25)
+                                .with(Phase2AbilityTuning.Setting.ORBIT_CAP, Config.uniqueEffects.wraithmaw.maxRecovered)
+                                .with(Phase2AbilityTuning.Setting.RECOVERY_RADIUS, 1.5)
+                                .with(Phase2AbilityTuning.Setting.ORBIT_DURATION_TICKS, Config.uniqueEffects.wraithmaw.recoveredDuration)
+                                .with(Phase2AbilityTuning.Setting.LAUNCH_SPEED, Config.uniqueEffects.wraithmaw.launchSpeed)
+                                .with(Phase2AbilityTuning.Setting.LAUNCH_RANGE, Config.uniqueEffects.wraithmaw.launchRange)
+                                .with(Phase2AbilityTuning.Setting.PROJECTILE_LIFETIME, 80)
+                                .with(Phase2AbilityTuning.Setting.HOMING_RANGE, Config.uniqueEffects.wraithmaw.homingRange)
+                                .with(Phase2AbilityTuning.Setting.HOMING_TURN_DEGREES, Config.uniqueEffects.wraithmaw.homingTurnRate)
+                                .with(Phase2AbilityTuning.Setting.STAIN_RADIUS, Config.uniqueEffects.wraithmaw.stainRadius)
+                                .with(Phase2AbilityTuning.Setting.STAIN_DURATION_TICKS, Config.uniqueEffects.wraithmaw.stainDuration)
+                                .with(Phase2AbilityTuning.Setting.EMBEDDED_DURATION_TICKS, Config.uniqueEffects.wraithmaw.embeddedDuration)));
+        Phase2AbilityTuning tuning = Phase2UniqueAbilities.tuning(execution);
         Vec3d origin = actor.getPos();
-        int count = Math.clamp(Config.uniqueEffects.wraithmaw.cutlassCount, 1, 32);
-        double radius = Math.max(0.5, Config.uniqueEffects.wraithmaw.stormRadius);
+        int count = Math.clamp(tuning.integer(Phase2AbilityTuning.Setting.SPEAR_COUNT,
+                Config.uniqueEffects.wraithmaw.cutlassCount), 1, 32);
+        double radius = Math.max(0.5, tuning.get(Phase2AbilityTuning.Setting.RADIUS,
+                Config.uniqueEffects.wraithmaw.stormRadius));
         ItemStack snapshot = context.stack().copy();
         float damage = Math.max(1.0F, HelperMethods.abilityScaledDamage(SpellScalingProfile.SOUL, actor, snapshot,
                 Config.uniqueEffects.wraithmaw.cutlassDamageScaling,
-                Config.uniqueEffects.wraithmaw.cutlassSpellScaling));
+                Config.uniqueEffects.wraithmaw.cutlassSpellScaling))
+                * (float) tuning.get(Phase2AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1);
         for (int index = 0; index < count; index++) {
             double fraction = Math.sqrt((index + 0.5) / count);
             double angle = index * GOLDEN_ANGLE + actor.getRandom().nextDouble() * 0.28;
@@ -76,10 +108,11 @@ public final class WraithmawAbilityManager {
             double y = LivyatanWaveManager.findGroundTopY(world, x, z, center.y + 2.0);
             Vec3d landing = new Vec3d(x, y, z);
             WraithmawCutlassEntity cutlass = new WraithmawCutlassEntity(
-                    world, actor, snapshot, origin, landing, index, damage);
+                    world, actor, snapshot, origin, landing, index, damage, execution);
             world.spawnEntity(cutlass);
         }
         spawnActivation(world, actor, center, count);
+        registerCast(world, new ActiveCast(execution, world.getTime() + 1200));
         if (context.activationSource() == WeaponAbilityActivationSource.MOB) {
             SUPPRESSED_SWINGS.computeIfAbsent(world, ignored -> new HashMap<>())
                     .put(actor.getUuid(), world.getTime());
@@ -97,22 +130,27 @@ public final class WraithmawAbilityManager {
             if (suppressed.isEmpty()) SUPPRESSED_SWINGS.remove(world);
             if (suppressedAt != null && suppressedAt == world.getTime()) return;
         }
-        WraithmawCutlassEntity cutlass = ownedCutlasses(world, actor).stream()
+        List<WraithmawCutlassEntity> available = ownedCutlasses(world, actor).stream()
                 .filter(entity -> entity.getState() == WraithmawCutlassEntity.STATE_ORBITING)
-                .min(Comparator.comparingLong(WraithmawCutlassEntity::getExpiresAtTick)
+                .sorted(Comparator.comparingLong(WraithmawCutlassEntity::getExpiresAtTick)
                         .thenComparingInt(WraithmawCutlassEntity::getOrbitSlot))
-                .orElse(null);
-        if (cutlass == null) {
+                .toList();
+        if (available.isEmpty()) {
             return;
         }
         Vec3d direction = actor.getRotationVec(1.0F);
         if (direction.lengthSquared() < 1.0E-6) {
             direction = Vec3d.fromPolar(0.0F, actor.getYaw());
         }
-        Vec3d start = orbitPosition(actor, cutlass.getOrbitSlot(), world.getTime());
-        cutlass.launch(start, direction, Math.max(0.1, Config.uniqueEffects.wraithmaw.launchSpeed));
-        world.spawnParticles(SPECTRAL_DUST, start.x, start.y, start.z,
-                10, 0.16, 0.16, 0.16, 0.03);
+        int launchCount = (available.getFirst().getMasterySetting(Phase2AbilityTuning.Setting.MODE, 0) & 4) != 0 ? 2 : 1;
+        for (int index = 0; index < Math.min(launchCount, available.size()); index++) {
+            WraithmawCutlassEntity cutlass = available.get(index);
+            Vec3d start = orbitPosition(actor, cutlass.getOrbitSlot(), world.getTime());
+            cutlass.launch(start, direction, Math.max(0.1, cutlass.getMasterySetting(
+                    Phase2AbilityTuning.Setting.LAUNCH_SPEED, Config.uniqueEffects.wraithmaw.launchSpeed)));
+            world.spawnParticles(SPECTRAL_DUST, start.x, start.y, start.z,
+                    10, 0.16, 0.16, 0.16, 0.03);
+        }
         world.playSound(null, actor.getBlockPos(), SoundRegistry.MAGIC_SWORD_WHOOSH_05.get(),
                 SoundCategory.PLAYERS, 0.48F, 1.4F + actor.getRandom().nextFloat() * 0.12F);
     }
@@ -123,7 +161,8 @@ public final class WraithmawAbilityManager {
                 || candidate.getOwnerUuid() == null || !candidate.getOwnerUuid().equals(owner.getUuid())) {
             return false;
         }
-        int maximum = Math.clamp(Config.uniqueEffects.wraithmaw.maxRecovered, 1, 8);
+        int maximum = Math.clamp(candidate.getMasterySetting(Phase2AbilityTuning.Setting.ORBIT_CAP,
+                Config.uniqueEffects.wraithmaw.maxRecovered), 1, 12);
         boolean[] occupied = new boolean[maximum];
         int count = 0;
         for (WraithmawCutlassEntity cutlass : ownedCutlasses(world, owner)) {
@@ -139,6 +178,11 @@ public final class WraithmawAbilityManager {
         if (count >= maximum) {
             return false;
         }
+        double storedBonus = candidate.getMasterySetting(Phase2AbilityTuning.Setting.BONUS_PER_TRIGGER, 0);
+        double storedCap = candidate.getMasterySetting(Phase2AbilityTuning.Setting.BONUS_CAP, 0);
+        if (storedBonus > 0 && storedCap > 0) {
+            candidate.multiplyDamage(1 + Math.min(storedCap, count * storedBonus));
+        }
         int slot = 0;
         while (slot < occupied.length && occupied[slot]) {
             slot++;
@@ -146,7 +190,9 @@ public final class WraithmawAbilityManager {
         if (slot >= occupied.length) {
             return false;
         }
-        candidate.recover(slot, world.getTime() + Math.max(20, Config.uniqueEffects.wraithmaw.recoveredDuration));
+        candidate.recover(slot, world.getTime() + Math.max(20, candidate.getMasterySetting(
+                Phase2AbilityTuning.Setting.ORBIT_DURATION_TICKS,
+                Config.uniqueEffects.wraithmaw.recoveredDuration)));
         return true;
     }
 
@@ -172,15 +218,41 @@ public final class WraithmawAbilityManager {
     }
 
     public static boolean hasActive(ServerWorld world) {
-        return !SUPPRESSED_SWINGS.getOrDefault(world, Map.of()).isEmpty();
+        return !SUPPRESSED_SWINGS.getOrDefault(world, Map.of()).isEmpty()
+                || !ACTIVE_CASTS.getOrDefault(world, Map.of()).isEmpty();
     }
 
     public static void tick(ServerWorld world) {
         Map<UUID, Long> suppressed = SUPPRESSED_SWINGS.get(world);
-        if (suppressed == null) return;
         long now = world.getTime();
-        suppressed.values().removeIf(tick -> tick < now);
-        if (suppressed.isEmpty()) SUPPRESSED_SWINGS.remove(world);
+        if (suppressed != null) {
+            suppressed.values().removeIf(tick -> tick < now);
+            if (suppressed.isEmpty()) SUPPRESSED_SWINGS.remove(world);
+        }
+        Map<Long, ActiveCast> casts = ACTIVE_CASTS.get(world);
+        if (casts != null) {
+            casts.values().removeIf(cast -> {
+                if (cast.expiresAt > now) return false;
+                UniqueAbilityApi.finish(cast.execution, cast.execution.definition().id(), 0);
+                return true;
+            });
+            if (casts.isEmpty()) ACTIVE_CASTS.remove(world);
+        }
+    }
+
+    private static void registerCast(ServerWorld world, ActiveCast cast) {
+        Map<Long, ActiveCast> casts = ACTIVE_CASTS.computeIfAbsent(world, ignored -> new HashMap<>());
+        if (casts.size() >= MAX_ACTIVE_CASTS_PER_WORLD) {
+            ActiveCast oldest = casts.values().stream()
+                    .min(Comparator.comparingLong(ActiveCast::expiresAt)
+                            .thenComparingLong(value -> value.execution().id()))
+                    .orElse(null);
+            if (oldest != null) {
+                casts.remove(oldest.execution().id());
+                UniqueAbilityApi.cancel(oldest.execution());
+            }
+        }
+        casts.put(cast.execution().id(), cast);
     }
 
     private static List<WraithmawCutlassEntity> ownedCutlasses(ServerWorld world, LivingEntity owner) {
@@ -226,5 +298,8 @@ public final class WraithmawAbilityManager {
                 SoundCategory.PLAYERS, 0.82F, 1.02F);
         world.playSound(null, center.x, center.y, center.z, SoundEvents.BLOCK_RESPAWN_ANCHOR_CHARGE,
                 SoundCategory.PLAYERS, 0.58F, 0.72F);
+    }
+
+    private record ActiveCast(UniqueAbilityExecution execution, long expiresAt) {
     }
 }

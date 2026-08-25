@@ -7,7 +7,6 @@ import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
@@ -20,6 +19,11 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
+import net.sweenus.simplyswords.api.WeaponAbilityActivationSource;
+import net.sweenus.simplyswords.api.ability.BuiltinUniqueAbilities;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityContext;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
@@ -27,10 +31,10 @@ import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.item.interfaces.TwoHandedWeapon;
 import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
-import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
 import net.sweenus.simplyswords.world.BrimstoneClaymoreAbilityManager;
+import net.sweenus.simplyswords.world.BrimstoneEruptionManager;
 
 import java.util.List;
 
@@ -53,10 +57,12 @@ public class BrimstoneClaymoreItem extends UniqueSwordItem implements TwoHandedW
 
         if (!world.isClient() && world instanceof ServerWorld serverWorld && user instanceof ServerPlayerEntity serverPlayer) {
             LivingEntity target = StealSwordItem.findLenientTarget(user, Config.uniqueEffects.brimstone_claymore.range);
-            if (target == null || !activateBrimstone(serverWorld, serverPlayer, target, itemStack)) {
+            if (target == null) {
                 return TypedActionResult.fail(itemStack);
             }
-            SimplySwordsAPI.setWeaponCooldown(serverPlayer, itemStack, Config.uniqueEffects.brimstone_claymore.cooldown);
+            WeaponAbilityContext context = WeaponAbilityContext.of(serverWorld, itemStack, serverPlayer, null,
+                    target, hand, WeaponAbilityActivationSource.PLAYER);
+            if (!SimplySwordsAPI.tryActivateWeaponAbility(context)) return TypedActionResult.fail(itemStack);
         }
         user.swingHand(hand);
         return TypedActionResult.success(itemStack, world.isClient());
@@ -67,20 +73,12 @@ public class BrimstoneClaymoreItem extends UniqueSwordItem implements TwoHandedW
         if (!canActivate(context)) {
             return false;
         }
-        return activateBrimstone(context.world(), context.actor(), context.target(), context.stack());
+        return BrimstoneClaymoreAbilityManager.start(context);
     }
 
     @Override
     public int getActivationCooldownTicks(ItemStack stack, WeaponAbilityContext context) {
         return Config.uniqueEffects.brimstone_claymore.cooldown;
-    }
-
-    private static boolean activateBrimstone(ServerWorld world, LivingEntity owner, LivingEntity target, ItemStack stack) {
-        if (target == null || !target.isAlive() || !HelperMethods.checkAbilityTarget(target, owner)) {
-            return false;
-        }
-        BrimstoneClaymoreAbilityManager.start(world, owner, target, stack);
-        return true;
     }
 
     @Override
@@ -90,48 +88,32 @@ public class BrimstoneClaymoreItem extends UniqueSwordItem implements TwoHandedW
         }
         if (!attacker.getWorld().isClient()) {
             ServerWorld world = (ServerWorld) attacker.getWorld();
-            int fhitchance = Config.uniqueEffects.brimstone_claymore.chance;
             HelperMethods.playHitSounds(attacker, target);
-
-            if (attacker.getRandom().nextInt(100) <= fhitchance && attacker instanceof PlayerEntity player) {
-                int choose_sound = (int) (Math.random() * 3);
-                List<LivingEntity> nearbyEntities = HelperMethods.getNearbyLivingEntities(world, target.getPos(), 3);
-                DamageSource damageSource = player.getDamageSources().indirectMagic(player, player);
-
-                for (LivingEntity livingEntity : nearbyEntities) {
-                    if (HelperMethods.checkAbilityTarget(livingEntity, attacker)) {
-                        HelperMethods.spawnWaistHeightParticles(world, ParticleTypes.LAVA, attacker, target, 3);
-                        HelperMethods.spawnOrbitParticles(world, livingEntity.getPos(), ParticleTypes.LAVA, 1, 3);
-                        HelperMethods.spawnOrbitParticles(world, livingEntity.getPos(), ParticleTypes.CAMPFIRE_SIGNAL_SMOKE, 2, 6);
-                        HelperMethods.spawnOrbitParticles(world, livingEntity.getPos(), ParticleTypes.POOF, 1, 10);
-                        HelperMethods.spawnOrbitParticles(world, livingEntity.getPos(), ParticleTypes.EXPLOSION, 0.5, 2);
-                        HelperMethods.spawnOrbitParticles(world, livingEntity.getPos(), ParticleTypes.WARPED_SPORE, 1, 10);
-                        livingEntity.setOnFireFor(3);
-                        livingEntity.takeKnockback(1, 0.1, 0.1);
-                        livingEntity.timeUntilRegen = 0;
-                        float damage = HelperMethods.abilityScaledDamage("fire", attacker, stack,
-                                Config.uniqueEffects.brimstone_claymore.hitDamageScaling,
-                                Config.uniqueEffects.brimstone_claymore.hitSpellScaling);
-                        livingEntity.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments(world, stack, livingEntity, damageSource, damage));
-                        livingEntity.timeUntilRegen = 0;
-                    }
-                }
-
-                if (choose_sound <= 1) {
-                    world.playSoundFromEntity(null, target, SoundRegistry.ELEMENTAL_BOW_FIRE_SHOOT_IMPACT_01.get(),
-                            target.getSoundCategory(), 0.5f, 1.2f);
-                }
-                if (choose_sound == 2) {
-                    world.playSoundFromEntity(null, target, SoundRegistry.ELEMENTAL_BOW_FIRE_SHOOT_IMPACT_02.get(),
-                            target.getSoundCategory(), 0.7f, 1.1f);
-                }
-                if (choose_sound == 3) {
-                    world.playSoundFromEntity(null, target, SoundRegistry.ELEMENTAL_BOW_FIRE_SHOOT_IMPACT_03.get(),
-                            target.getSoundCategory(), 0.9f, 1f);
-                }
+            UniqueAbilityExecution execution = UniqueAbilityApi.begin(
+                    BuiltinUniqueAbilities.BRIMSTONE_ERUPTION,
+                    UniqueAbilityContext.passive(world, stack, attacker, target, null),
+                    tuning -> tuning
+                            .set(BuiltinUniqueAbilities.BRIMSTONE_PROC_CHANCE,
+                                    Math.clamp(Config.uniqueEffects.brimstone_claymore.chance, 0, 100))
+                            .set(BuiltinUniqueAbilities.BRIMSTONE_ERUPTION_DAMAGE_SCALING,
+                                    (double) Config.uniqueEffects.brimstone_claymore.hitDamageScaling)
+                            .set(BuiltinUniqueAbilities.BRIMSTONE_ERUPTION_SPELL_SCALING,
+                                    (double) Config.uniqueEffects.brimstone_claymore.hitSpellScaling));
+            UniqueAbilityApi.takeStartedExecution();
+            int chance = execution.tuning().get(BuiltinUniqueAbilities.BRIMSTONE_PROC_CHANCE);
+            if (!passesEruptionRoll(chance, attacker.getRandom().nextInt(100))) {
+                UniqueAbilityApi.cancel(execution);
+            } else {
+                UniqueAbilityApi.start(execution);
+                int affected = BrimstoneEruptionManager.erupt(execution);
+                UniqueAbilityApi.finish(execution, execution.definition().id(), affected);
             }
         }
         return super.postHit(stack, target, attacker);
+    }
+
+    static boolean passesEruptionRoll(int chance, int roll) {
+        return chance > 0 && roll >= 0 && roll < Math.min(100, chance);
     }
 
     @Override

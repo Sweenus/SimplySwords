@@ -18,9 +18,15 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
+import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
+import net.sweenus.simplyswords.api.ability.Phase2AbilityTuning;
+import net.sweenus.simplyswords.api.ability.Phase2UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityContext;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
@@ -36,10 +42,18 @@ import net.sweenus.simplyswords.util.Styles;
 import net.sweenus.simplyswords.world.LivingEntityAbilityMovementManager;
 import net.sweenus.simplyswords.world.RevivalCandleVisualManager;
 import net.sweenus.simplyswords.world.WeaponAbilityCooldownManager;
+import net.sweenus.simplyswords.world.Phase2CombatStateManager;
 
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 public class WickpiercerSwordItem extends UniqueSwordItem implements RevivalWeapon, UniqueWeaponActiveAbility {
+    private static final int MAX_PENDING_REVIVALS = 128;
+    private static final Map<UUID, UniqueAbilityExecution> PENDING_REVIVALS = new LinkedHashMap<>();
+
     public WickpiercerSwordItem(ToolMaterial toolMaterial, Settings settings) {
         super(toolMaterial, settings);
     }
@@ -77,14 +91,26 @@ public class WickpiercerSwordItem extends UniqueSwordItem implements RevivalWeap
         ItemStack itemStack = user.getStackInHand(hand);
         if (!world.isClient) {
             itemStack = user.getStackInHand(hand);
+            UniqueAbilityExecution execution = beginThrow((ServerWorld) world, itemStack, user, null, hand,
+                    1.5, Config.uniqueEffects.wickpiercer.cooldown, Config.uniqueEffects.wickpiercer.duration);
+            UniqueAbilityApi.takeStartedExecution();
+            UniqueAbilityApi.start(execution);
+            Phase2AbilityTuning tuning = Phase2UniqueAbilities.tuning(execution);
+            effectDuration = tuning.integer(Phase2AbilityTuning.Setting.STACK_DURATION_TICKS, effectDuration);
+            Phase2CombatStateManager.recordWick((ServerWorld) world, user, tuning, effectDuration);
+            HelperMethods.incrementStatusEffect(user, EffectRegistry.getReference(EffectRegistry.FRENZY),
+                    effectDuration, 0, tuning.integer(Phase2AbilityTuning.Setting.STACK_CAP, 4));
             WickpiercerEntity wickpiercerEntity = new WickpiercerEntity(world, user, itemStack.copy() );
-            wickpiercerEntity.setVelocity(user, user.getPitch(), user.getYaw(), 0.0F, 1.5F, 1.0F);
+            wickpiercerEntity.setVelocity(user, user.getPitch(), user.getYaw(), 0.0F,
+                    (float) tuning.get(Phase2AbilityTuning.Setting.PROJECTILE_SPEED, 1.5), 1.0F);
             wickpiercerEntity.setYaw(user.getYaw());
             wickpiercerEntity.setPitch(user.getPitch()-90);
             wickpiercerEntity.primaryBaseDamage = HelperMethods.abilityScaledDamage("fire", user, itemStack,
                     Config.uniqueEffects.wickpiercer.throwDamageScaling,
-                    Config.uniqueEffects.wickpiercer.throwSpellScaling);
-            wickpiercerEntity.hasLoyalty = 3;
+                    Config.uniqueEffects.wickpiercer.throwSpellScaling)
+                    * (float) tuning.get(Phase2AbilityTuning.Setting.PROJECTILE_DAMAGE_MULTIPLIER, 1);
+            wickpiercerEntity.hasLoyalty = tuning.integer(Phase2AbilityTuning.Setting.LOYALTY, 3);
+            wickpiercerEntity.setAbilityExecution(execution);
             if (hand == Hand.OFF_HAND)
                 wickpiercerEntity.offhandThrow = true;
             wickpiercerEntity.setPos(user.getX(), user.getEyeY() - 0.5, user.getZ());
@@ -106,19 +132,30 @@ public class WickpiercerSwordItem extends UniqueSwordItem implements RevivalWeap
             return false;
         }
         LivingEntity actor = context.actor();
+        UniqueAbilityExecution execution = beginThrow(context.world(), context.stack(), actor, context.target(),
+                context.hand(), 1.65, Config.uniqueEffects.wickpiercer.cooldown,
+                Config.uniqueEffects.wickpiercer.duration);
+        Phase2AbilityTuning tuning = Phase2UniqueAbilities.tuning(execution);
+        int frenzyDuration = tuning.integer(Phase2AbilityTuning.Setting.STACK_DURATION_TICKS,
+                Config.uniqueEffects.wickpiercer.duration);
+        Phase2CombatStateManager.recordWick(context.world(), actor, tuning, frenzyDuration);
         HelperMethods.incrementStatusEffect(actor, EffectRegistry.getReference(EffectRegistry.FRENZY),
-                Config.uniqueEffects.wickpiercer.duration, 1, 4);
+                frenzyDuration, 1,
+                tuning.integer(Phase2AbilityTuning.Setting.STACK_CAP, 4));
         WickpiercerEntity wickpiercerEntity = new WickpiercerEntity(context.world(), actor, context.stack().copy());
         Vec3d direction = LivingEntityAbilityMovementManager.getLobbedTargetDirection(actor, context.target());
-        wickpiercerEntity.setVelocity(direction.x, direction.y, direction.z, 1.65F, 1.0F);
+        wickpiercerEntity.setVelocity(direction.x, direction.y, direction.z,
+                (float) tuning.get(Phase2AbilityTuning.Setting.PROJECTILE_SPEED, 1.65), 1.0F);
         wickpiercerEntity.setYaw(actor.getYaw());
         wickpiercerEntity.setPitch(actor.getPitch() - 90);
         wickpiercerEntity.primaryBaseDamage = HelperMethods.abilityScaledDamage("fire", actor, context.stack(),
                 Config.uniqueEffects.wickpiercer.throwDamageScaling,
-                Config.uniqueEffects.wickpiercer.throwSpellScaling);
-        wickpiercerEntity.hasLoyalty = 0;
+                Config.uniqueEffects.wickpiercer.throwSpellScaling)
+                * (float) tuning.get(Phase2AbilityTuning.Setting.PROJECTILE_DAMAGE_MULTIPLIER, 1);
+        wickpiercerEntity.hasLoyalty = tuning.integer(Phase2AbilityTuning.Setting.LOYALTY, 0);
+        wickpiercerEntity.setAbilityExecution(execution);
         wickpiercerEntity.setPos(actor.getX(), actor.getEyeY() - 0.5, actor.getZ());
-        wickpiercerEntity.markNonReturning(80);
+        wickpiercerEntity.markNonReturning(tuning.integer(Phase2AbilityTuning.Setting.PROJECTILE_LIFETIME, 80));
         context.world().spawnEntity(wickpiercerEntity);
         return true;
     }
@@ -126,6 +163,22 @@ public class WickpiercerSwordItem extends UniqueSwordItem implements RevivalWeap
     @Override
     public int getActivationCooldownTicks(ItemStack stack, WeaponAbilityContext context) {
         return Math.max(1, Config.uniqueEffects.wickpiercer.cooldown);
+    }
+
+    private static UniqueAbilityExecution beginThrow(ServerWorld world, ItemStack stack, LivingEntity actor,
+                                                      LivingEntity target, Hand hand, double speed,
+                                                      int cooldown, int frenzyDuration) {
+        return UniqueAbilityApi.begin(Phase2UniqueAbilities.WICKPIERCER_THROW,
+                UniqueAbilityContext.passive(world, stack, actor, target, hand), builder -> builder
+                        .set(Phase2UniqueAbilities.COOLDOWN_TICKS, cooldown)
+                        .set(Phase2UniqueAbilities.TUNING, Phase2AbilityTuning.EMPTY
+                                .with(Phase2AbilityTuning.Setting.COOLDOWN_TICKS, cooldown)
+                                .with(Phase2AbilityTuning.Setting.PROJECTILE_SPEED, speed)
+                                .with(Phase2AbilityTuning.Setting.PROJECTILE_DAMAGE_MULTIPLIER, 1)
+                                .with(Phase2AbilityTuning.Setting.PROJECTILE_LIFETIME, 80)
+                                .with(Phase2AbilityTuning.Setting.LOYALTY, speed <= 1.5 ? 3 : 0)
+                                .with(Phase2AbilityTuning.Setting.STACK_DURATION_TICKS, frenzyDuration)
+                                .with(Phase2AbilityTuning.Setting.STACK_CAP, 4)));
     }
 
     @Override
@@ -172,11 +225,32 @@ public class WickpiercerSwordItem extends UniqueSwordItem implements RevivalWeap
     @Override
     public void postRevive(LivingEntity entity, ItemStack stack, DamageSource source) {
         int skillCooldown = Config.uniqueEffects.waxweaver.cooldown;
+        UniqueAbilityExecution execution = PENDING_REVIVALS.remove(entity.getUuid());
+        if (execution == null && entity.getWorld() instanceof ServerWorld serverWorld) {
+            execution = beginRevive(serverWorld, entity, stack, skillCooldown);
+        }
+        Phase2AbilityTuning tuning = execution == null
+                ? Phase2AbilityTuning.EMPTY : Phase2UniqueAbilities.tuning(execution);
+        int mode = tuning.integer(Phase2AbilityTuning.Setting.MODE, 0);
         if (entity instanceof net.minecraft.server.network.ServerPlayerEntity serverPlayer) {
             RevivalCandleVisualManager.activate(serverPlayer, stack);
         }
-        SimplySwordsAPI.setWeaponCooldown(entity, stack, skillCooldown);
-        HelperMethods.incrementStatusEffect(entity, StatusEffects.RESISTANCE, 100, 2, 3);
+        double cooldownMultiplier = tuning.get(Phase2AbilityTuning.Setting.REVIVE_COOLDOWN_MULTIPLIER, 1);
+        int cooldownFloor = cooldownMultiplier < 1 ? 600 : 1;
+        SimplySwordsAPI.setWeaponCooldown(entity, stack,
+                Math.max(cooldownFloor, (int) Math.round(skillCooldown * cooldownMultiplier)));
+        if ((mode & 4096) == 0) {
+            HelperMethods.incrementStatusEffect(entity, StatusEffects.RESISTANCE,
+                    tuning.integer(Phase2AbilityTuning.Setting.STATUS_DURATION_TICKS, 100),
+                    tuning.integer(Phase2AbilityTuning.Setting.STATUS_AMPLIFIER, 2), 3);
+        }
+        float absorption = (float) tuning.get(Phase2AbilityTuning.Setting.REVIVE_ABSORPTION, 0);
+        if (absorption > 0) entity.setAbsorptionAmount(Math.max(entity.getAbsorptionAmount(), absorption));
+        if (entity.getWorld() instanceof ServerWorld world) {
+            if ((mode & 512) != 0) regenerateAllies(world, entity, tuning);
+            if ((mode & 4096) != 0) funeralPyre(world, entity, stack, tuning);
+        }
+        if (execution != null) UniqueAbilityApi.finish(execution, execution.definition().id(), 1);
 
         World world = entity.getWorld();
         world.playSound(null, entity.getBlockPos(), SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
@@ -187,7 +261,64 @@ public class WickpiercerSwordItem extends UniqueSwordItem implements RevivalWeap
 
     @Override
     public float getReviveHealth(LivingEntity entity, ItemStack stack, DamageSource source) {
-        return entity.getMaxHealth();
+        if (!(entity.getWorld() instanceof ServerWorld world)) return entity.getMaxHealth();
+        UniqueAbilityExecution execution = PENDING_REVIVALS.computeIfAbsent(entity.getUuid(), ignored -> {
+            if (PENDING_REVIVALS.size() >= MAX_PENDING_REVIVALS) {
+                UUID oldest = PENDING_REVIVALS.keySet().iterator().next();
+                UniqueAbilityApi.cancel(PENDING_REVIVALS.remove(oldest));
+            }
+            return beginRevive(world, entity, stack, Config.uniqueEffects.waxweaver.cooldown);
+        });
+        double multiplier = Phase2UniqueAbilities.tuning(execution).get(
+                Phase2AbilityTuning.Setting.REVIVE_HEALTH_MULTIPLIER, 1);
+        return Math.max(1, entity.getMaxHealth() * (float) multiplier);
+    }
+
+    private static UniqueAbilityExecution beginRevive(ServerWorld world, LivingEntity entity,
+                                                       ItemStack stack, int cooldown) {
+        UniqueAbilityExecution execution = UniqueAbilityApi.begin(Phase2UniqueAbilities.WICKPIERCER_REVIVE,
+                UniqueAbilityContext.passive(world, stack, entity, null, null), builder -> builder
+                        .set(Phase2UniqueAbilities.TUNING, Phase2AbilityTuning.EMPTY
+                                .with(Phase2AbilityTuning.Setting.COOLDOWN_TICKS, cooldown)
+                                .with(Phase2AbilityTuning.Setting.STATUS_DURATION_TICKS, 100)
+                                .with(Phase2AbilityTuning.Setting.STATUS_AMPLIFIER, 2)
+                                .with(Phase2AbilityTuning.Setting.REVIVE_HEALTH_MULTIPLIER, 1)
+                                .with(Phase2AbilityTuning.Setting.REVIVE_COOLDOWN_MULTIPLIER, 1)));
+        UniqueAbilityApi.takeStartedExecution();
+        UniqueAbilityApi.start(execution);
+        return execution;
+    }
+
+    private static void regenerateAllies(ServerWorld world, LivingEntity owner, Phase2AbilityTuning tuning) {
+        double radius = tuning.get(Phase2AbilityTuning.Setting.RADIUS, 6);
+        int cap = tuning.integer(Phase2AbilityTuning.Setting.TARGET_CAP, 8);
+        var allies = world.getEntitiesByClass(LivingEntity.class,
+                new Box(owner.getPos(), owner.getPos()).expand(radius), candidate -> candidate != owner
+                        && candidate.isAlive() && !HelperMethods.checkAbilityTarget(candidate, owner));
+        allies.sort(Comparator.comparingDouble(candidate -> candidate.squaredDistanceTo(owner)));
+        for (int index = 0; index < Math.min(cap, allies.size()); index++) {
+            allies.get(index).addStatusEffect(new net.minecraft.entity.effect.StatusEffectInstance(
+                    StatusEffects.REGENERATION,
+                    tuning.integer(Phase2AbilityTuning.Setting.STATUS_DURATION_TICKS, 80), 1), owner);
+        }
+    }
+
+    private static void funeralPyre(ServerWorld world, LivingEntity owner, ItemStack stack,
+                                    Phase2AbilityTuning tuning) {
+        double radius = tuning.get(Phase2AbilityTuning.Setting.IMPACT_RADIUS, 5);
+        int cap = tuning.integer(Phase2AbilityTuning.Setting.IMPACT_TARGET_CAP, 12);
+        float damage = HelperMethods.abilityScaledDamage("fire", owner, stack,
+                Config.uniqueEffects.wickpiercer.throwDamageScaling,
+                Config.uniqueEffects.wickpiercer.throwSpellScaling)
+                * (float) tuning.get(Phase2AbilityTuning.Setting.IMPACT_DAMAGE_MULTIPLIER, 2);
+        var targets = world.getEntitiesByClass(LivingEntity.class,
+                new Box(owner.getPos(), owner.getPos()).expand(radius), candidate -> candidate != owner
+                        && candidate.isAlive() && HelperMethods.checkAbilityTarget(candidate, owner));
+        targets.sort(Comparator.comparingDouble(candidate -> candidate.squaredDistanceTo(owner)));
+        for (int index = 0; index < Math.min(cap, targets.size()); index++) {
+            SimplySwordsAPI.applyAbilityMagicDamageThroughIframes(world, owner, stack,
+                    targets.get(index), damage, net.sweenus.simplyswords.api.SpellScalingProfile.FIRE);
+        }
     }
 
     public static class EffectSettings extends TooltipSettings {

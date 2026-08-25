@@ -47,6 +47,7 @@ import net.sweenus.simplyswords.world.StormbringerParryManager;
 import net.sweenus.simplyswords.world.StormsEdgeAbilityManager;
 import net.sweenus.simplyswords.world.DreadwhisperAbilityManager;
 import net.sweenus.simplyswords.world.ThunderbrandAbilityManager;
+import net.sweenus.simplyswords.world.Phase2CombatStateManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -309,11 +310,9 @@ public abstract class ServerPlayerEntityMixin {
                         float damageModifier = HelperMethods.abilityScaledDamage("fire",
                                 serverPlayer, wickpiercerStack, Config.uniqueEffects.wickpiercer.damageScaling,
                                 Config.uniqueEffects.wickpiercer.spellScaling);
-                        DamageSource damageSource = serverPlayer.getDamageSources().playerAttack(serverPlayer);
                         target.timeUntilRegen = 0;
-                        HelperMethods.decrementStatusEffect(serverPlayer, EffectRegistry.getReference(EffectRegistry.FRENZY));
-                        target.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments(
-                                serverWorld, wickpiercerStack, target, damageSource, damageModifier));
+                        Phase2CombatStateManager.applyWickFrenzyHit(serverPlayer, livingTarget,
+                                wickpiercerStack, damageModifier);
                     }
                 }
             }

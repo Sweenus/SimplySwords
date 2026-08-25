@@ -22,6 +22,11 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.api.SpellScalingProfile;
+import net.sweenus.simplyswords.api.ability.Phase2AbilityTuning;
+import net.sweenus.simplyswords.api.ability.Phase2UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityContext;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
@@ -62,15 +67,23 @@ public class WraithfangSwordItem extends UniqueSwordItem implements UniqueWeapon
         ItemStack itemStack = user.getStackInHand(hand);
         if (!world.isClient) {
             itemStack = user.getStackInHand(hand);
+            UniqueAbilityExecution execution = beginThrow((net.minecraft.server.world.ServerWorld) world,
+                    itemStack, user, null, hand, 1.5, 1);
+            UniqueAbilityApi.takeStartedExecution();
+            UniqueAbilityApi.start(execution);
+            Phase2AbilityTuning tuning = Phase2UniqueAbilities.tuning(execution);
             double[] damage = HelperMethods.getAttackFromSlot(user, itemStack, user.getActiveHand());
             WraithfangEntity wraithfangEntity = new WraithfangEntity(world, user, itemStack.copy() );
-            wraithfangEntity.setVelocity(user, user.getPitch(), user.getYaw(), 0.0F, 1.5F, 1.0F);
+            wraithfangEntity.setVelocity(user, user.getPitch(), user.getYaw(), 0.0F,
+                    (float) tuning.get(Phase2AbilityTuning.Setting.PROJECTILE_SPEED, 1.5), 1.0F);
             wraithfangEntity.setYaw(user.getYaw());
             wraithfangEntity.setPitch(user.getPitch());
             wraithfangEntity.primaryBaseDamage = HelperMethods.abilityScaledDamageFromValue(
                     SpellScalingProfile.SOUL, user, itemStack, (float) damage[0],
-                    Config.uniqueEffects.wraithfang.spellScaling);
-            wraithfangEntity.hasLoyalty = 1;
+                    Config.uniqueEffects.wraithfang.spellScaling)
+                    * (float) tuning.get(Phase2AbilityTuning.Setting.PROJECTILE_DAMAGE_MULTIPLIER, 1);
+            wraithfangEntity.hasLoyalty = tuning.integer(Phase2AbilityTuning.Setting.LOYALTY, 1);
+            wraithfangEntity.setAbilityExecution(execution);
             if (hand == Hand.OFF_HAND)
                 wraithfangEntity.offhandThrow = true;
             wraithfangEntity.setPos(user.getX(), user.getEyeY() - 0.5, user.getZ());
@@ -97,22 +110,33 @@ public class WraithfangSwordItem extends UniqueSwordItem implements UniqueWeapon
             return false;
         }
         LivingEntity actor = context.actor();
+        UniqueAbilityExecution execution = beginThrow(context.world(), context.stack(), actor,
+                context.target(), context.hand(), 1.65, 0);
+        Phase2AbilityTuning tuning = Phase2UniqueAbilities.tuning(execution);
         WraithfangEntity wraithfangEntity = new WraithfangEntity(context.world(), actor, context.stack().copy());
         Vec3d direction = LivingEntityAbilityMovementManager.getLobbedTargetDirection(actor, context.target());
-        wraithfangEntity.setVelocity(direction.x, direction.y, direction.z, 1.65F, 1.0F);
+        wraithfangEntity.setVelocity(direction.x, direction.y, direction.z,
+                (float) tuning.get(Phase2AbilityTuning.Setting.PROJECTILE_SPEED, 1.65), 1.0F);
         wraithfangEntity.setYaw(actor.getYaw());
         wraithfangEntity.setPitch(actor.getPitch());
         float weaponDamage = (float) Math.max(1.0, HelperMethods.getAttackFromStack(
                 context.stack(), net.minecraft.component.type.AttributeModifierSlot.MAINHAND));
         wraithfangEntity.primaryBaseDamage = HelperMethods.abilityScaledDamageFromValue(
                 SpellScalingProfile.SOUL, actor, context.stack(), weaponDamage,
-                Config.uniqueEffects.wraithfang.spellScaling);
-        wraithfangEntity.hasLoyalty = 0;
+                Config.uniqueEffects.wraithfang.spellScaling)
+                * (float) tuning.get(Phase2AbilityTuning.Setting.PROJECTILE_DAMAGE_MULTIPLIER, 1)
+                * (float) tuning.get(Phase2AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1);
+        wraithfangEntity.hasLoyalty = tuning.integer(Phase2AbilityTuning.Setting.LOYALTY, 0);
+        wraithfangEntity.setAbilityExecution(execution);
         wraithfangEntity.setPos(actor.getX(), actor.getEyeY() - 0.5, actor.getZ());
-        wraithfangEntity.markNonReturning(80);
+        wraithfangEntity.markNonReturning(tuning.integer(Phase2AbilityTuning.Setting.PROJECTILE_LIFETIME, 80));
         context.world().spawnEntity(wraithfangEntity);
-        LivingEntityAbilityMovementManager.dashTowardTarget(context.world(), actor, context.target(), 1.35, 10);
-        actor.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, 80, 1), actor);
+        LivingEntityAbilityMovementManager.dashTowardTarget(context.world(), actor, context.target(),
+                tuning.get(Phase2AbilityTuning.Setting.DASH_SPEED, 1.35),
+                tuning.integer(Phase2AbilityTuning.Setting.DASH_DURATION_TICKS, 10));
+        int hasteDuration = tuning.integer(Phase2AbilityTuning.Setting.HASTE_DURATION_TICKS, 80);
+        if (hasteDuration > 0) actor.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE,
+                hasteDuration, tuning.integer(Phase2AbilityTuning.Setting.HASTE_AMPLIFIER, 1)), actor);
         context.world().playSound(wraithfangEntity, actor.getBlockPos(), SoundRegistry.DARK_SWORD_SPELL.get(), actor.getSoundCategory(), 0.1f, 1.0f);
         return true;
     }
@@ -120,6 +144,25 @@ public class WraithfangSwordItem extends UniqueSwordItem implements UniqueWeapon
     @Override
     public int getActivationCooldownTicks(ItemStack stack, WeaponAbilityContext context) {
         return 20;
+    }
+
+    private static UniqueAbilityExecution beginThrow(net.minecraft.server.world.ServerWorld world,
+                                                      ItemStack stack, LivingEntity actor,
+                                                      LivingEntity target, Hand hand,
+                                                      double speed, int loyalty) {
+        return UniqueAbilityApi.begin(Phase2UniqueAbilities.WRAITHFANG_THROW,
+                UniqueAbilityContext.passive(world, stack, actor, target, hand), builder -> builder
+                        .set(Phase2UniqueAbilities.COOLDOWN_TICKS, 20)
+                        .set(Phase2UniqueAbilities.TUNING, Phase2AbilityTuning.EMPTY
+                                .with(Phase2AbilityTuning.Setting.COOLDOWN_TICKS, 20)
+                                .with(Phase2AbilityTuning.Setting.PROJECTILE_SPEED, speed)
+                                .with(Phase2AbilityTuning.Setting.PROJECTILE_DAMAGE_MULTIPLIER, 1)
+                                .with(Phase2AbilityTuning.Setting.PROJECTILE_LIFETIME, 80)
+                                .with(Phase2AbilityTuning.Setting.LOYALTY, loyalty)
+                                .with(Phase2AbilityTuning.Setting.DASH_SPEED, 1.35)
+                                .with(Phase2AbilityTuning.Setting.DASH_DURATION_TICKS, 10)
+                                .with(Phase2AbilityTuning.Setting.HASTE_DURATION_TICKS, 80)
+                                .with(Phase2AbilityTuning.Setting.HASTE_AMPLIFIER, 1)));
     }
 
     @Override

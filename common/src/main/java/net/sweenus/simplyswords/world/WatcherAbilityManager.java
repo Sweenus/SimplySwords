@@ -16,11 +16,17 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Hand;
+import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.api.WeaponAbilityActivationSource;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
+import net.sweenus.simplyswords.api.ability.Phase2AbilityTuning;
+import net.sweenus.simplyswords.api.ability.Phase2UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityContext;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.WatcherBatEntity;
 import net.sweenus.simplyswords.registry.SoundRegistry;
@@ -68,31 +74,117 @@ public final class WatcherAbilityManager {
     }
 
     public static void addDread(ServerWorld world, LivingEntity actor, LivingEntity target, WatcherWeaponType type) {
+        addDread(world, actor, target, type, ItemStack.EMPTY);
+    }
+
+    public static void addDread(ServerWorld world, LivingEntity actor, LivingEntity target, WatcherWeaponType type,
+                                ItemStack stack) {
         if (world == null || actor == null || target == null || type == null
                 || !actor.isAlive() || !isValidTarget(world, actor, null, target)) {
             return;
         }
 
+        UniqueAbilityExecution execution = null;
+        Phase2AbilityTuning tuning = Phase2AbilityTuning.EMPTY;
+        if (type == WatcherWeaponType.CLAYMORE && stack != null && !stack.isEmpty()) {
+            execution = UniqueAbilityApi.begin(Phase2UniqueAbilities.WATCHER_DREAD,
+                    UniqueAbilityContext.passive(world, stack, actor, target, null), builder -> builder
+                            .set(Phase2UniqueAbilities.TUNING, Phase2AbilityTuning.EMPTY
+                                    .with(Phase2AbilityTuning.Setting.STACK_DURATION_TICKS,
+                                            Config.uniqueEffects.watcher.dreadDuration)
+                                    .with(Phase2AbilityTuning.Setting.STACK_CAP,
+                                            Config.uniqueEffects.watcher.maxDread)
+                                    .with(Phase2AbilityTuning.Setting.MARKED_TARGET_CAP,
+                                            Config.uniqueEffects.watcher.maxMarkedTargets)));
+            UniqueAbilityApi.takeStartedExecution();
+            UniqueAbilityApi.start(execution);
+            tuning = Phase2UniqueAbilities.tuning(execution);
+        }
+
         Map<MarkKey, DreadMark> marks = ACTIVE_MARKS.computeIfAbsent(world, ignored -> new HashMap<>());
         MarkKey key = new MarkKey(actor.getUuid(), target.getUuid(), type);
         long now = world.getTime();
-        int maxDread = Math.max(1, Config.uniqueEffects.watcher.maxDread);
+        int mode = tuning.integer(Phase2AbilityTuning.Setting.MODE, 0);
+        if ((mode & 16) != 0) {
+            Iterator<DreadMark> iterator = marks.values().iterator();
+            while (iterator.hasNext()) {
+                DreadMark existing = iterator.next();
+                if (existing.key.ownerId.equals(actor.getUuid()) && existing.key.type == type
+                        && !existing.key.targetId.equals(target.getUuid())) {
+                    discardBats(world, existing.batIds);
+                    iterator.remove();
+                }
+            }
+        }
+        int maxDread = Math.max(1, tuning.integer(Phase2AbilityTuning.Setting.STACK_CAP,
+                Config.uniqueEffects.watcher.maxDread));
         DreadMark mark = marks.get(key);
         if (mark == null) {
-            evictOldestMarkIfNeeded(world, marks, actor.getUuid(), type);
+            evictOldestMarkIfNeeded(world, marks, actor.getUuid(), type,
+                    Math.max(1, tuning.integer(Phase2AbilityTuning.Setting.MARKED_TARGET_CAP,
+                            Config.uniqueEffects.watcher.maxMarkedTargets)));
             mark = new DreadMark(key, now);
             marks.put(key, mark);
         }
 
-        mark.expiryTick = now + Math.max(1, Config.uniqueEffects.watcher.dreadDuration);
-        if (mark.dread < maxDread) {
-            mark.dread++;
+        double bonusPerStack = tuning.get(Phase2AbilityTuning.Setting.MELEE_BONUS_PER_STACK, 0);
+        double bonusCap = tuning.get(Phase2AbilityTuning.Setting.MELEE_BONUS_CAP, 0);
+        if (mark.dread > 0 && bonusPerStack > 0 && bonusCap > 0 && stack != null && !stack.isEmpty()) {
+            float weaponDamage = (float) HelperMethods.getAttackFromStack(stack,
+                    net.minecraft.component.type.AttributeModifierSlot.MAINHAND);
+            damageTarget(world, actor, stack, target,
+                    weaponDamage * (float) Math.min(bonusCap, mark.dread * bonusPerStack));
+        }
+        mark.expiryTick = now + Math.max(1, tuning.integer(Phase2AbilityTuning.Setting.STACK_DURATION_TICKS,
+                Config.uniqueEffects.watcher.dreadDuration));
+        int dreadGain = 1;
+        if ((mode & 2) != 0 && now - mark.lastHitTick <= tuning.integer(
+                Phase2AbilityTuning.Setting.THRESHOLD, 30) && now >= mark.unblinkingReadyTick) {
+            dreadGain = 2;
+            mark.unblinkingReadyTick = now + tuning.integer(Phase2AbilityTuning.Setting.LOCKOUT_TICKS, 80);
+        }
+        mark.lastHitTick = now;
+        int previousDread = mark.dread;
+        mark.dread = Math.min(maxDread, mark.dread + dreadGain);
+        for (int added = previousDread; added < mark.dread; added++) {
             WatcherBatEntity bat = spawnBat(world, actor, target, type, WatcherBatEntity.MODE_MARK,
                     target.getPos().add(0.0, target.getHeight() * 0.7, 0.0));
             if (bat != null) {
                 mark.batIds.add(bat.getUuid());
             }
-            spawnDreadGainEffects(world, target, mark.dread, maxDread);
+        }
+        if (mark.dread > previousDread) spawnDreadGainEffects(world, target, mark.dread, maxDread);
+        if ((mode & 1) != 0 && mark.dread >= tuning.integer(Phase2AbilityTuning.Setting.THRESHOLD, 4)
+                && now >= mark.sharedTerrorReadyTick) {
+            double radius = tuning.get(Phase2AbilityTuning.Setting.RANGE, 4);
+            LivingEntity shared = world.getEntitiesByClass(LivingEntity.class,
+                            new Box(target.getPos(), target.getPos()).expand(radius), candidate -> candidate != actor
+                                    && candidate != target && candidate.isAlive()
+                                    && candidate.squaredDistanceTo(target) <= radius * radius
+                                    && isValidTarget(world, actor, null, candidate)
+                                    && !marks.containsKey(new MarkKey(actor.getUuid(), candidate.getUuid(), type)))
+                    .stream().min(Comparator.comparingDouble(candidate -> candidate.squaredDistanceTo(target)))
+                    .orElse(null);
+            long ownedMarks = marks.values().stream().filter(existing -> existing.key.ownerId.equals(actor.getUuid())
+                    && existing.key.type == type).count();
+            int markedCap = tuning.integer(Phase2AbilityTuning.Setting.MARKED_TARGET_CAP,
+                    Config.uniqueEffects.watcher.maxMarkedTargets);
+            if (shared != null && ownedMarks < markedCap) {
+                MarkKey sharedKey = new MarkKey(actor.getUuid(), shared.getUuid(), type);
+                DreadMark sharedMark = new DreadMark(sharedKey, now);
+                sharedMark.dread = 1;
+                sharedMark.expiryTick = now + 160;
+                WatcherBatEntity bat = spawnBat(world, actor, shared, type, WatcherBatEntity.MODE_MARK,
+                        shared.getPos().add(0, shared.getHeight() * .7, 0));
+                if (bat != null) sharedMark.batIds.add(bat.getUuid());
+                marks.put(sharedKey, sharedMark);
+                mark.sharedTerrorReadyTick = now + tuning.integer(Phase2AbilityTuning.Setting.LOCKOUT_TICKS, 40);
+            }
+        }
+        if (execution != null) {
+            UniqueAbilityApi.emit(execution, net.sweenus.simplyswords.api.ability.UniqueAbilityPhase.HIT,
+                    Phase2UniqueAbilities.HIT, target, 1, mark.dread);
+            UniqueAbilityApi.finish(execution, execution.definition().id(), 1);
         }
     }
 
@@ -374,10 +466,35 @@ public final class WatcherAbilityManager {
 
     private static boolean startFinalOmen(WeaponAbilityContext context, LivingEntity target) {
         ServerWorld world = context.world();
+        UniqueAbilityExecution execution = UniqueAbilityApi.begin(Phase2UniqueAbilities.WATCHER_OMEN,
+                UniqueAbilityContext.active(context), builder -> builder
+                        .set(Phase2UniqueAbilities.COOLDOWN_TICKS, Config.uniqueEffects.watcher.claymoreCooldown)
+                        .set(Phase2UniqueAbilities.TUNING, Phase2AbilityTuning.EMPTY
+                                .with(Phase2AbilityTuning.Setting.COOLDOWN_TICKS,
+                                        Config.uniqueEffects.watcher.claymoreCooldown)
+                                .with(Phase2AbilityTuning.Setting.DURATION_TICKS,
+                                        Config.uniqueEffects.watcher.claymoreSwoopDuration)
+                                .with(Phase2AbilityTuning.Setting.STATUS_DURATION_TICKS,
+                                        Config.uniqueEffects.watcher.claymoreSwoopDuration + 10)
+                                .with(Phase2AbilityTuning.Setting.SWOOP_COUNT_BASE,
+                                        Config.uniqueEffects.watcher.claymoreMinimumSwoops)
+                                .with(Phase2AbilityTuning.Setting.TARGET_CAP,
+                                        Config.uniqueEffects.watcher.claymoreMaximumSwoops)
+                                .with(Phase2AbilityTuning.Setting.SWOOP_DAMAGE_MULTIPLIER, 1)
+                                .with(Phase2AbilityTuning.Setting.FINAL_DAMAGE_MULTIPLIER, 1)
+                                .with(Phase2AbilityTuning.Setting.MISSING_HEALTH_BONUS_CAP,
+                                        Config.uniqueEffects.watcher.claymoreMissingHealthBonus)
+                                .with(Phase2AbilityTuning.Setting.EXECUTE_THRESHOLD,
+                                        Config.uniqueEffects.watcher.omenInstantKillThreshold)
+                                .with(Phase2AbilityTuning.Setting.ABSORPTION_MULTIPLIER, 1)
+                                .with(Phase2AbilityTuning.Setting.STACK_CAP,
+                                        Config.uniqueEffects.watcher.maxDread)));
+        Phase2AbilityTuning tuning = Phase2UniqueAbilities.tuning(execution);
         MarkKey key = new MarkKey(context.actor().getUuid(), target.getUuid(), WatcherWeaponType.CLAYMORE);
         Map<MarkKey, DreadMark> marks = ACTIVE_MARKS.get(world);
         DreadMark mark = marks == null ? null : marks.remove(key);
         if (mark == null || mark.dread <= 0) {
+            UniqueAbilityApi.cancel(execution);
             return false;
         }
 
@@ -389,8 +506,9 @@ public final class WatcherAbilityManager {
             }
         }
 
-        int duration = Math.max(20, Config.uniqueEffects.watcher.claymoreSwoopDuration);
-        int slowDuration = duration + 10;
+        int duration = Math.max(20, tuning.integer(Phase2AbilityTuning.Setting.DURATION_TICKS,
+                Config.uniqueEffects.watcher.claymoreSwoopDuration));
+        int slowDuration = tuning.integer(Phase2AbilityTuning.Setting.STATUS_DURATION_TICKS, duration + 10);
         StatusEffectInstance currentSlowness = target.getStatusEffect(StatusEffects.SLOWNESS);
         if (currentSlowness == null || currentSlowness.getAmplifier() < 3
                 || currentSlowness.getDuration() < slowDuration) {
@@ -398,19 +516,23 @@ public final class WatcherAbilityManager {
                     slowDuration, 3, false, false, true), context.actor());
         }
 
-        int maxDread = Math.max(1, Config.uniqueEffects.watcher.maxDread);
-        int minimumSwoops = Math.max(1, Config.uniqueEffects.watcher.claymoreMinimumSwoops);
-        int maximumSwoops = Math.max(minimumSwoops, Config.uniqueEffects.watcher.claymoreMaximumSwoops);
+        int maxDread = Math.max(1, tuning.integer(Phase2AbilityTuning.Setting.STACK_CAP,
+                Config.uniqueEffects.watcher.maxDread));
+        int minimumSwoops = Math.max(0, tuning.integer(Phase2AbilityTuning.Setting.SWOOP_COUNT_BASE,
+                Config.uniqueEffects.watcher.claymoreMinimumSwoops));
+        int maximumSwoops = Math.max(minimumSwoops, tuning.integer(Phase2AbilityTuning.Setting.TARGET_CAP,
+                Config.uniqueEffects.watcher.claymoreMaximumSwoops));
         float dreadProgress = maxDread <= 1 ? 1.0F
                 : MathHelper.clamp((float) (mark.dread - 1) / (maxDread - 1), 0.0F, 1.0F);
-        int totalSwoops = Math.max(1, Math.round(MathHelper.lerp(dreadProgress, minimumSwoops, maximumSwoops)));
+        int totalSwoops = Math.max(0, Math.round(MathHelper.lerp(dreadProgress, minimumSwoops, maximumSwoops))
+                + mark.dread * tuning.integer(Phase2AbilityTuning.Setting.SWOOPS_PER_STACK, 0));
         float swoopDamage = HelperMethods.abilityScaledDamage(
                 "soul",
                 context.actor(),
                 context.stack(),
                 Config.uniqueEffects.watcher.claymoreSwoopDamageScaling,
                 Config.uniqueEffects.watcher.claymoreSwoopSpellScaling
-        );
+        ) * (float) tuning.get(Phase2AbilityTuning.Setting.SWOOP_DAMAGE_MULTIPLIER, 1);
         long now = world.getTime();
         ACTIVE_OMENS.computeIfAbsent(world, ignored -> new ArrayList<>()).add(new ActiveOmen(
                 context.actor().getUuid(),
@@ -425,7 +547,7 @@ public final class WatcherAbilityManager {
                 totalSwoops,
                 swoopDamage,
                 new ArrayList<>(mark.batIds),
-                new ArrayList<>(mark.batIds)
+                new ArrayList<>(mark.batIds), execution
         ));
         Vec3d pos = target.getPos().add(0.0, target.getHeight() * 0.55, 0.0);
         world.spawnParticles(ParticleTypes.SCULK_SOUL, pos.x, pos.y, pos.z,
@@ -449,12 +571,26 @@ public final class WatcherAbilityManager {
             if (actor == null || !actor.isAlive() || target == null || !target.isAlive()
                     || actor.squaredDistanceTo(target) > OMEN_MAX_TETHER_SQUARED
                     || !isValidTarget(world, actor, omen.sourcePlayerId, target)) {
+                UniqueAbilityApi.cancel(omen.execution);
                 discardBats(world, omen.batIds);
                 iterator.remove();
                 continue;
             }
 
             long elapsed = Math.max(0L, world.getTime() - omen.startedTick);
+            Phase2AbilityTuning tuning = Phase2UniqueAbilities.tuning(omen.execution);
+            if (!omen.noEscapeTriggered
+                    && (tuning.integer(Phase2AbilityTuning.Setting.MODE, 0) & 32) != 0
+                    && actor.squaredDistanceTo(target) > Math.pow(tuning.get(
+                    Phase2AbilityTuning.Setting.RANGE, 12), 2)) {
+                Vec3d pull = actor.getPos().subtract(target.getPos());
+                if (pull.lengthSquared() > 1.0E-6) {
+                    target.setVelocity(target.getVelocity().add(pull.normalize().multiply(
+                            tuning.get(Phase2AbilityTuning.Setting.PULL_STRENGTH, 2))));
+                    target.velocityModified = true;
+                }
+                omen.noEscapeTriggered = true;
+            }
             while (omen.spawnedSwoops < omen.totalSwoops
                     && elapsed >= scheduledSwoopTick(omen, omen.spawnedSwoops)) {
                 spawnOmenSwoop(world, actor, target, omen);
@@ -585,8 +721,16 @@ public final class WatcherAbilityManager {
         if (!damageTargetWithoutKnockback(world, actor, omen.stack, target, omen.swoopDamage)) {
             return;
         }
+        omen.successfulSwoops++;
+        UniqueAbilityApi.emit(omen.execution, net.sweenus.simplyswords.api.ability.UniqueAbilityPhase.HIT,
+                Phase2UniqueAbilities.HIT, target, 1, omen.swoopDamage);
         if (!target.isAlive()) {
             resetClaymoreCooldown(actor, omen.stack);
+            if ((Phase2UniqueAbilities.tuning(omen.execution).integer(
+                    Phase2AbilityTuning.Setting.MODE, 0) & 512) != 0) {
+                actor.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE,
+                        60, 0, false, false, true));
+            }
         }
         Vec3d pos = target.getPos().add(0.0, target.getHeight() * 0.55, 0.0);
         world.spawnParticles(ParticleTypes.SCULK_SOUL, pos.x, pos.y, pos.z,
@@ -599,6 +743,7 @@ public final class WatcherAbilityManager {
     }
 
     private static void resolveFinalOmen(ServerWorld world, LivingEntity actor, LivingEntity target, ActiveOmen omen) {
+        Phase2AbilityTuning tuning = Phase2UniqueAbilities.tuning(omen.execution);
         actor.swingHand(omen.hand, true);
         float missingHealth = 1.0F - MathHelper.clamp(target.getHealth() / Math.max(1.0F, target.getMaxHealth()), 0.0F, 1.0F);
         float baseDamage = HelperMethods.abilityScaledDamage(
@@ -610,17 +755,36 @@ public final class WatcherAbilityManager {
         );
         float dreadMultiplier = 1.0F + Math.max(0, omen.dread - 1)
                 * Math.max(0.0F, Config.uniqueEffects.watcher.claymoreDreadBonusPerStack);
-        float missingHealthMultiplier = 1.0F + missingHealth
-                * Math.max(0.0F, Config.uniqueEffects.watcher.claymoreMissingHealthBonus);
+        float missingHealthMultiplier = 1.0F + missingHealth * (float) tuning.get(
+                Phase2AbilityTuning.Setting.MISSING_HEALTH_BONUS_CAP,
+                Config.uniqueEffects.watcher.claymoreMissingHealthBonus);
+        float gathered = Math.min((float) tuning.get(Phase2AbilityTuning.Setting.BONUS_CAP, 0),
+                omen.successfulSwoops * (float) tuning.get(Phase2AbilityTuning.Setting.BONUS_PER_TRIGGER, 0));
         float vitalityBefore = target.getHealth() + target.getAbsorptionAmount();
-        boolean damaged = damageTarget(world, actor, omen.stack, target,
-                baseDamage * dreadMultiplier * missingHealthMultiplier);
+        int maxDread = Math.max(1, tuning.integer(Phase2AbilityTuning.Setting.STACK_CAP,
+                Config.uniqueEffects.watcher.maxDread));
+        float threshold = (float) tuning.get(Phase2AbilityTuning.Setting.EXECUTE_THRESHOLD,
+                Config.uniqueEffects.watcher.omenInstantKillThreshold)
+                * target.getMaxHealth();
+        int mode = tuning.integer(Phase2AbilityTuning.Setting.MODE, 0);
+        boolean mercy = (mode & 8192) != 0;
+        boolean absolute = (mode & 16384) != 0;
+        boolean absoluteReady = !absolute || omen.dread >= Math.max(1,
+                tuning.integer(Phase2AbilityTuning.Setting.THRESHOLD, 6));
+        float finalDamage = baseDamage * dreadMultiplier * missingHealthMultiplier * (1 + gathered)
+                * (float) tuning.get(Phase2AbilityTuning.Setting.FINAL_DAMAGE_MULTIPLIER, 1)
+                * (1 + omen.dread * (float) tuning.get(Phase2AbilityTuning.Setting.FINAL_PER_STACK_MULTIPLIER, 0));
+        if (absolute && (!absoluteReady || target.getHealth() > threshold)) {
+            finalDamage *= (float) tuning.get(Phase2AbilityTuning.Setting.DAMAGE_MULTIPLIER, .7);
+        }
+        if (mercy && omen.dread >= maxDread && target.getHealth() <= threshold) {
+            finalDamage = Math.min(finalDamage, Math.max(0, vitalityBefore - 1));
+        }
+        boolean damaged = damageTarget(world, actor, omen.stack, target, finalDamage);
 
         boolean executed = false;
-        int maxDread = Math.max(1, Config.uniqueEffects.watcher.maxDread);
-        float threshold = MathHelper.clamp(Config.uniqueEffects.watcher.omenInstantKillThreshold, 0.0F, 1.0F)
-                * target.getMaxHealth();
-        if (damaged && omen.dread >= maxDread && (!target.isAlive() || target.getHealth() <= threshold)) {
+        if (!mercy && absoluteReady && damaged && omen.dread >= maxDread
+                && (!target.isAlive() || target.getHealth() <= threshold)) {
             executed = true;
             if (target.isAlive()) {
                 float lethalDamage = Math.max(1000.0F,
@@ -629,20 +793,47 @@ public final class WatcherAbilityManager {
             }
         }
 
+        if (mercy && damaged && omen.dread >= maxDread && target.isAlive() && target.getHealth() <= threshold) {
+            target.setHealth(Math.max(1, target.getHealth()));
+            target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS,
+                    tuning.integer(Phase2AbilityTuning.Setting.STATUS_DURATION_TICKS, 60),
+                    9, false, false, true), actor);
+        }
+
         if (executed) {
             float removed = Math.max(0.0F,
                     vitalityBefore - (target.getHealth() + target.getAbsorptionAmount()));
             float cap = Math.min(Math.max(0.0F, Config.uniqueEffects.watcher.omenAbsorptionCap),
                     Math.max(0.0F, Config.uniqueEffects.abilityAbsorptionCap));
             if (actor.getAbsorptionAmount() < cap) {
-                actor.setAbsorptionAmount(Math.min(cap, actor.getAbsorptionAmount() + removed));
+                actor.setAbsorptionAmount(Math.min(cap, actor.getAbsorptionAmount() + removed
+                        * (float) tuning.get(Phase2AbilityTuning.Setting.ABSORPTION_MULTIPLIER, 1)));
             }
+        } else if (damaged && (mode & 256) != 0 && target.isAlive()) {
+            float removed = Math.max(0, vitalityBefore - target.getHealth() - target.getAbsorptionAmount());
+            float reserve = (float) Math.min(tuning.get(Phase2AbilityTuning.Setting.REVIVE_ABSORPTION, 4),
+                    Math.floor(removed / Math.max(1, target.getMaxHealth() * .1F)));
+            actor.setAbsorptionAmount(Math.max(actor.getAbsorptionAmount(), reserve));
         }
 
         if (!target.isAlive()) {
-            resetClaymoreCooldown(actor, omen.stack);
+            if (!mercy) resetClaymoreCooldown(actor, omen.stack);
+            if ((mode & 512) != 0) actor.addStatusEffect(new StatusEffectInstance(
+                    StatusEffects.RESISTANCE, 60, 0, false, false, true));
+        } else if ((mode & 4) != 0 && omen.dread >= maxDread) {
+            SimplySwordsAPI.setWeaponCooldown(actor, omen.stack, Math.max(0,
+                    tuning.integer(Phase2AbilityTuning.Setting.COOLDOWN_TICKS,
+                            Config.uniqueEffects.watcher.claymoreCooldown) - omen.durationTicks
+                            - tuning.integer(Phase2AbilityTuning.Setting.COOLDOWN_REFUND_TICKS, 30)));
+        } else if (absolute && (!absoluteReady || target.getHealth() > threshold)) {
+            SimplySwordsAPI.setWeaponCooldown(actor, omen.stack, Math.max(0,
+                    tuning.integer(Phase2AbilityTuning.Setting.COOLDOWN_TICKS,
+                            Config.uniqueEffects.watcher.claymoreCooldown) - omen.durationTicks + 100));
         }
         spawnFinalOmenEffects(world, actor, target, executed);
+        UniqueAbilityApi.emit(omen.execution, net.sweenus.simplyswords.api.ability.UniqueAbilityPhase.HIT,
+                Phase2UniqueAbilities.HIT, target, damaged ? 1 : 0, baseDamage);
+        UniqueAbilityApi.finish(omen.execution, omen.execution.definition().id(), damaged ? 1 : 0);
     }
 
     private static boolean damageTarget(ServerWorld world, LivingEntity actor, ItemStack stack,
@@ -726,8 +917,7 @@ public final class WatcherAbilityManager {
     }
 
     private static void evictOldestMarkIfNeeded(ServerWorld world, Map<MarkKey, DreadMark> marks,
-                                                 UUID ownerId, WatcherWeaponType type) {
-        int limit = Math.max(1, Config.uniqueEffects.watcher.maxMarkedTargets);
+                                                 UUID ownerId, WatcherWeaponType type, int limit) {
         List<DreadMark> owned = marks.values().stream()
                 .filter(mark -> mark.key.ownerId.equals(ownerId) && mark.key.type == type)
                 .sorted(Comparator.comparingLong(mark -> mark.createdTick))
@@ -903,6 +1093,9 @@ public final class WatcherAbilityManager {
         private final List<UUID> batIds = new ArrayList<>();
         private int dread;
         private long expiryTick;
+        private long lastHitTick = Long.MIN_VALUE / 2;
+        private long unblinkingReadyTick;
+        private long sharedTerrorReadyTick;
 
         private DreadMark(MarkKey key, long createdTick) {
             this.key = key;
@@ -964,12 +1157,15 @@ public final class WatcherAbilityManager {
         private final List<UUID> batIds;
         private final List<UUID> waitingBatIds;
         private final List<OmenSwoop> activeSwoops = new ArrayList<>();
+        private final UniqueAbilityExecution execution;
         private int spawnedSwoops;
+        private int successfulSwoops;
+        private boolean noEscapeTriggered;
 
         private ActiveOmen(UUID actorId, UUID sourcePlayerId, UUID targetId, ItemStack stack,
                            Hand hand, int dread, long startedTick, long impactTick, int durationTicks,
                            int totalSwoops, float swoopDamage, List<UUID> batIds,
-                           List<UUID> waitingBatIds) {
+                           List<UUID> waitingBatIds, UniqueAbilityExecution execution) {
             this.actorId = actorId;
             this.sourcePlayerId = sourcePlayerId;
             this.targetId = targetId;
@@ -983,6 +1179,7 @@ public final class WatcherAbilityManager {
             this.swoopDamage = swoopDamage;
             this.batIds = batIds;
             this.waitingBatIds = waitingBatIds;
+            this.execution = execution;
         }
     }
 

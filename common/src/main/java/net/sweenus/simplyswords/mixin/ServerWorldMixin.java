@@ -52,6 +52,9 @@ public abstract class ServerWorldMixin {
         if (GloampiercerAbilityManager.hasActive(world)) {
             GloampiercerAbilityManager.tick(world);
         }
+        if (Phase2CombatStateManager.hasActive(world)) {
+            Phase2CombatStateManager.tick(world);
+        }
         if (SoulstalkerAbilityManager.hasActive(world)) {
             SoulstalkerAbilityManager.tick(world);
         }

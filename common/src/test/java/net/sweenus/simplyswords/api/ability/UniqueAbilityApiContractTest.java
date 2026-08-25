@@ -67,6 +67,48 @@ final class UniqueAbilityApiContractTest {
         assertTrue(BuiltinUniqueAbilities.STORMS_EDGE_MELEE.supportsEvent(BuiltinUniqueAbilities.MELEE_HIT));
     }
 
+    @Test
+    void brimstoneDefinitionsPreserveBaselineAndDisableAdditions() {
+        UniqueAbilityTuning eruption = new UniqueAbilityTuning.Builder(
+                BuiltinUniqueAbilities.BRIMSTONE_ERUPTION).build();
+        UniqueAbilityTuning rite = new UniqueAbilityTuning.Builder(BuiltinUniqueAbilities.BRIMSTONE_RITE).build();
+
+        assertEquals(15, eruption.get(BuiltinUniqueAbilities.BRIMSTONE_PROC_CHANCE));
+        assertEquals(3.0, eruption.get(BuiltinUniqueAbilities.BRIMSTONE_ERUPTION_RADIUS));
+        assertEquals(0, eruption.get(BuiltinUniqueAbilities.BRIMSTONE_CINDER_COUNT));
+        assertEquals(0, eruption.get(BuiltinUniqueAbilities.BRIMSTONE_CHAIN_MAX_DETONATIONS));
+        assertEquals(120, rite.get(BuiltinUniqueAbilities.BRIMSTONE_RITE_DURATION_TICKS));
+        assertEquals(20, rite.get(BuiltinUniqueAbilities.BRIMSTONE_RITE_PULSE_INTERVAL_TICKS));
+        assertEquals(0, rite.get(BuiltinUniqueAbilities.BRIMSTONE_WAKE_DURATION_TICKS));
+        assertTrue(BuiltinUniqueAbilities.BRIMSTONE_ERUPTION.supportsEvent(
+                BuiltinUniqueAbilities.BRIMSTONE_ERUPTION_HIT));
+        assertTrue(BuiltinUniqueAbilities.BRIMSTONE_RITE.supportsEvent(
+                BuiltinUniqueAbilities.BRIMSTONE_EMERGENCY_PLUNGE));
+    }
+
+    @Test
+    void phase2DefinitionsAreAdditiveTypedAndBounded() {
+        List<UniqueAbilityDefinition> definitions = List.of(
+                Phase2UniqueAbilities.WATCHER_DREAD, Phase2UniqueAbilities.WATCHER_OMEN,
+                Phase2UniqueAbilities.DEVOURER_MASS, Phase2UniqueAbilities.DEVOURER_REPRISAL,
+                Phase2UniqueAbilities.WICKPIERCER_THROW, Phase2UniqueAbilities.WICKPIERCER_REVIVE,
+                Phase2UniqueAbilities.GLOAMPIERCER_AMBUSH, Phase2UniqueAbilities.GLOAMPIERCER_BARRAGE,
+                Phase2UniqueAbilities.WRAITHFANG_THROW, Phase2UniqueAbilities.WRAITHMAW_MUSTER);
+        assertEquals(10, definitions.stream().map(UniqueAbilityDefinition::id).distinct().count());
+        for (UniqueAbilityDefinition definition : definitions) {
+            assertTrue(definition.supports(Phase2UniqueAbilities.TUNING));
+            assertTrue(definition.supportsEvent(Phase2UniqueAbilities.HIT));
+            assertTrue(definition.supportsEvent(Phase2UniqueAbilities.COLLAPSE));
+        }
+        Phase2AbilityTuning tuning = Phase2AbilityTuning.EMPTY
+                .with(Phase2AbilityTuning.Setting.EXECUTE_THRESHOLD, 5)
+                .with(Phase2AbilityTuning.Setting.TARGET_CAP, 500)
+                .with(Phase2AbilityTuning.Setting.PROJECTILE_SPEED, Double.NaN);
+        assertEquals(1.0, tuning.get(Phase2AbilityTuning.Setting.EXECUTE_THRESHOLD, 0));
+        assertEquals(64, tuning.integer(Phase2AbilityTuning.Setting.TARGET_CAP, 0));
+        assertEquals(0.0, tuning.get(Phase2AbilityTuning.Setting.PROJECTILE_SPEED, 1));
+    }
+
     private static Identifier id(String path) {
         return Identifier.of("simplyswords_test", path);
     }

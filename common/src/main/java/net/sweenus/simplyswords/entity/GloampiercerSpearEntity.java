@@ -22,6 +22,10 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RaycastContext;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
+import net.sweenus.simplyswords.api.ability.Phase2AbilityTuning;
+import net.sweenus.simplyswords.api.ability.Phase2UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.registry.EntityRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
@@ -29,6 +33,7 @@ import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.world.GloamStainManager;
 import org.joml.Vector3f;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Comparator;
 import java.util.Optional;
@@ -63,6 +68,7 @@ public final class GloampiercerSpearEntity extends Entity {
     private long detonateAtTick;
     private double traveled;
     private int missingOwnerTicks;
+    private @Nullable UniqueAbilityExecution abilityExecution;
 
     public GloampiercerSpearEntity(EntityType<? extends GloampiercerSpearEntity> type, World world) {
         super(type, world);
@@ -73,6 +79,13 @@ public final class GloampiercerSpearEntity extends Entity {
     public GloampiercerSpearEntity(ServerWorld world, LivingEntity owner, ItemStack stack,
                                    Vec3d origin, Vec3d destination, LivingEntity target,
                                    float weaponDamage, double speed) {
+        this(world, owner, stack, origin, destination, target, weaponDamage, speed, null);
+    }
+
+    public GloampiercerSpearEntity(ServerWorld world, LivingEntity owner, ItemStack stack,
+                                   Vec3d origin, Vec3d destination, LivingEntity target,
+                                   float weaponDamage, double speed,
+                                   @Nullable UniqueAbilityExecution execution) {
         this(EntityRegistry.GLOAMPIERCER_SPEAR.get(), world);
         setOwnerUuid(owner.getUuid());
         setOwnerId(owner.getId());
@@ -87,6 +100,7 @@ public final class GloampiercerSpearEntity extends Entity {
         }
         setFlightDirection(direction.normalize());
         setVelocity(direction.normalize().multiply(Math.max(0.1, speed)));
+        abilityExecution = execution;
     }
 
     @Override
@@ -132,7 +146,9 @@ public final class GloampiercerSpearEntity extends Entity {
             if (desired.lengthSquared() > 1.0E-6) {
                 double turn = Math.toRadians(6.0);
                 Vec3d direction = turnToward(velocity.normalize(), desired.normalize(), turn);
-                velocity = direction.multiply(Math.max(0.1, Config.uniqueEffects.gloampiercer.projectileSpeed));
+                velocity = direction.multiply(Math.max(0.1, setting(
+                        Phase2AbilityTuning.Setting.PROJECTILE_SPEED,
+                        Config.uniqueEffects.gloampiercer.projectileSpeed)));
                 setVelocity(velocity);
                 setFlightDirection(direction);
             }
@@ -179,7 +195,8 @@ public final class GloampiercerSpearEntity extends Entity {
             explode(world, owner, null);
             return;
         }
-        double trigger = Math.max(0.1, Config.uniqueEffects.gloampiercer.triggerRadius);
+        double trigger = Math.max(0.1, setting(Phase2AbilityTuning.Setting.TRIGGER_RADIUS,
+                Config.uniqueEffects.gloampiercer.triggerRadius));
         Box box = getBoundingBox().expand(trigger, Math.max(1.0, trigger), trigger);
         boolean triggered = !world.getEntitiesByClass(LivingEntity.class, box,
                 entity -> entity != owner && entity.isAlive() && !entity.isRemoved()
@@ -217,7 +234,9 @@ public final class GloampiercerSpearEntity extends Entity {
         setPosition(impact);
         setVelocity(Vec3d.ZERO);
         setState(STATE_EMBEDDED);
-        detonateAtTick = world.getTime() + Math.max(20, Config.uniqueEffects.gloampiercer.embeddedDuration);
+        detonateAtTick = world.getTime() + Math.max(20, (int) setting(
+                Phase2AbilityTuning.Setting.EMBEDDED_DURATION_TICKS,
+                Config.uniqueEffects.gloampiercer.embeddedDuration));
         createStain(world, impact);
         world.spawnParticles(GLOAM_DUST, impact.x, impact.y + 0.12, impact.z,
                 12, 0.3, 0.12, 0.3, 0.035);
@@ -227,20 +246,31 @@ public final class GloampiercerSpearEntity extends Entity {
 
     private void explode(ServerWorld world, LivingEntity owner, UUID directTarget) {
         Vec3d center = getPos();
-        double radius = Math.max(0.25, Config.uniqueEffects.gloampiercer.explosionRadius);
+        double radius = Math.max(0.25, setting(Phase2AbilityTuning.Setting.EXPLOSION_RADIUS,
+                Config.uniqueEffects.gloampiercer.explosionRadius));
         Box box = Box.of(center, radius * 2.0, radius * 2.0, radius * 2.0);
         ItemStack stack = getWeaponStack();
-        for (LivingEntity target : world.getEntitiesByClass(LivingEntity.class, box,
+        java.util.List<LivingEntity> targets = world.getEntitiesByClass(LivingEntity.class, box,
                 entity -> entity != owner && entity.isAlive() && !entity.isRemoved()
                         && EntityPredicates.VALID_LIVING_ENTITY.test(entity)
                         && !entity.getUuid().equals(directTarget)
                         && HelperMethods.checkAbilityTarget(entity, owner)
-                        && entity.squaredDistanceTo(center) <= radius * radius)) {
+                        && entity.squaredDistanceTo(center) <= radius * radius).stream()
+                .sorted(Comparator.comparingDouble(entity -> entity.squaredDistanceTo(center)))
+                .limit((long) setting(Phase2AbilityTuning.Setting.SECONDARY_TARGET_CAP, 64)).toList();
+        for (LivingEntity target : targets) {
             if (!stack.isEmpty()) {
                 SimplySwordsAPI.applyEntityWeaponHit(stack, target, owner, weaponDamage);
             }
         }
         setWeaponStack(stack);
+        if (abilityExecution != null) {
+            UniqueAbilityApi.emit(abilityExecution, net.sweenus.simplyswords.api.ability.UniqueAbilityPhase.HIT,
+                    Phase2UniqueAbilities.HIT, null, targets.size(), weaponDamage);
+            if (abilityExecution.definition() == Phase2UniqueAbilities.GLOAMPIERCER_AMBUSH) {
+                UniqueAbilityApi.finish(abilityExecution, abilityExecution.definition().id(), targets.size());
+            }
+        }
         createStain(world, center);
         world.spawnParticles(GLOAM_DUST, center.x, center.y + 0.18, center.z,
                 30, radius * 0.38, radius * 0.24, radius * 0.38, 0.08);
@@ -257,16 +287,24 @@ public final class GloampiercerSpearEntity extends Entity {
 
     private void createStain(ServerWorld world, Vec3d center) {
         GloamStainManager.createPatch(world, getOwnerUuid(), center,
-                Math.max(0.25, Config.uniqueEffects.gloampiercer.stainRadius),
-                Math.max(20, Config.uniqueEffects.gloampiercer.stainDuration),
+                Math.max(0.25, setting(Phase2AbilityTuning.Setting.STAIN_RADIUS,
+                        Config.uniqueEffects.gloampiercer.stainRadius)),
+                Math.max(20, (int) setting(Phase2AbilityTuning.Setting.STAIN_DURATION_TICKS,
+                        Config.uniqueEffects.gloampiercer.stainDuration)),
                 Math.max(1, Config.uniqueEffects.gloampiercer.stainFadeDuration),
-                Math.clamp(Config.uniqueEffects.gloampiercer.stainSlowAmplifier, 0, 4));
+                Math.clamp((int) setting(Phase2AbilityTuning.Setting.STAIN_AMPLIFIER,
+                        Config.uniqueEffects.gloampiercer.stainSlowAmplifier), 0, 4));
     }
 
     private void dissipate(ServerWorld world, Vec3d position) {
         world.spawnParticles(GLOAM_DUST, position.x, position.y, position.z,
                 8, 0.18, 0.18, 0.18, 0.025);
         discard();
+    }
+
+    private double setting(Phase2AbilityTuning.Setting setting, double fallback) {
+        return abilityExecution == null ? fallback
+                : Phase2UniqueAbilities.tuning(abilityExecution).get(setting, fallback);
     }
 
     private LivingEntity resolveOwner(ServerWorld world) {

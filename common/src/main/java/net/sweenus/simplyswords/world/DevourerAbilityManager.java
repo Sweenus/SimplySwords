@@ -29,6 +29,11 @@ import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
 import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.api.AwakeningFormRegistry;
+import net.sweenus.simplyswords.api.ability.Phase2AbilityTuning;
+import net.sweenus.simplyswords.api.ability.Phase2UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityContext;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.DevourerMassVisualEntity;
 import net.sweenus.simplyswords.entity.DevourerTendrilVisualEntity;
@@ -149,12 +154,33 @@ public final class DevourerAbilityManager {
 
         ServerWorld world = context.world();
         LivingEntity actor = context.actor();
+        UniqueAbilityExecution execution = UniqueAbilityApi.begin(Phase2UniqueAbilities.DEVOURER_MASS,
+                UniqueAbilityContext.active(context), builder -> builder
+                        .set(Phase2UniqueAbilities.COOLDOWN_TICKS, Config.uniqueEffects.devourer.cooldown)
+                        .set(Phase2UniqueAbilities.TUNING, Phase2AbilityTuning.EMPTY
+                                .with(Phase2AbilityTuning.Setting.COOLDOWN_TICKS, Config.uniqueEffects.devourer.cooldown)
+                                .with(Phase2AbilityTuning.Setting.DURATION_TICKS, Config.uniqueEffects.devourer.duration)
+                                .with(Phase2AbilityTuning.Setting.RADIUS, Config.uniqueEffects.devourer.maximumMassRadius)
+                                .with(Phase2AbilityTuning.Setting.SCAN_RADIUS, Config.uniqueEffects.devourer.targetingRadius)
+                                .with(Phase2AbilityTuning.Setting.TARGET_CAP, Config.uniqueEffects.devourer.maxTargets)
+                                .with(Phase2AbilityTuning.Setting.PULL_STRENGTH, Config.uniqueEffects.devourer.pullStrength)
+                                .with(Phase2AbilityTuning.Setting.PULSE_INTERVAL_TICKS, Config.uniqueEffects.devourer.damageInterval)
+                                .with(Phase2AbilityTuning.Setting.LOOSE_TARGET_CAP, Config.uniqueEffects.devourer.looseTargetCap)
+                                .with(Phase2AbilityTuning.Setting.TENDRIL_CAP, Config.uniqueEffects.devourer.looseTendrilCap)
+                                .with(Phase2AbilityTuning.Setting.LAUNCH_SPEED, Config.uniqueEffects.devourer.loosePullStrength)
+                                .with(Phase2AbilityTuning.Setting.STAIN_RADIUS, Config.uniqueEffects.devourer.stainTrailWidth)
+                                .with(Phase2AbilityTuning.Setting.STAIN_DURATION_TICKS, Config.uniqueEffects.devourer.stainSpreadDuration)
+                                .with(Phase2AbilityTuning.Setting.STAIN_AMPLIFIER, Config.uniqueEffects.devourer.stainSlowAmplifier)
+                                .with(Phase2AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1)));
+        Phase2AbilityTuning tuning = Phase2UniqueAbilities.tuning(execution);
         Vec3d facing = context.facing().lengthSquared() < 1.0E-5
                 ? actor.getRotationVec(1.0F) : context.facing().normalize();
         Vec3d start = actor.getEyePos().add(facing.multiply(0.55)).add(0.0, -0.18, 0.0);
-        int duration = Math.max(1, Config.uniqueEffects.devourer.duration);
+        int duration = Math.max(1, tuning.integer(Phase2AbilityTuning.Setting.DURATION_TICKS,
+                Config.uniqueEffects.devourer.duration));
         float startingRadius = Math.max(0.2F, Config.uniqueEffects.devourer.startingMassRadius);
-        float maximumRadius = Math.max(startingRadius, Config.uniqueEffects.devourer.maximumMassRadius);
+        float maximumRadius = Math.max(startingRadius, (float) tuning.get(Phase2AbilityTuning.Setting.RADIUS,
+                Config.uniqueEffects.devourer.maximumMassRadius));
         DevourerMassVisualEntity visual = new DevourerMassVisualEntity(world, start, center,
                 TRAVEL_TICKS, BLOOM_TICKS, duration, COLLAPSE_TICKS, startingRadius, maximumRadius);
         world.spawnEntity(visual);
@@ -169,12 +195,22 @@ public final class DevourerAbilityManager {
                 now + TRAVEL_TICKS, now + TRAVEL_TICKS + BLOOM_TICKS,
                 now + TRAVEL_TICKS + BLOOM_TICKS + duration,
                 now + TRAVEL_TICKS + BLOOM_TICKS + duration + COLLAPSE_TICKS,
-                damage, visual.getUuid());
+                damage * (float) tuning.get(Phase2AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1),
+                visual.getUuid(), execution);
         mass.nextVoiceTick = mass.activeStartTick + voiceInitialDelay(world);
         ACTIVE.computeIfAbsent(world, ignored -> new HashMap<>()).put(actor.getUuid(), mass);
-        DevourerStainManager.begin(world, actor.getUuid(), mass.sourcePlayerId,
-                visual.getUuid(), center, mass.seedArrivalTick,
-                mass.activeEndTick, mass.collapseEndTick);
+        if ((tuning.integer(Phase2AbilityTuning.Setting.MODE, 0) & 64) == 0) {
+            DevourerStainManager.begin(world, actor.getUuid(), mass.sourcePlayerId,
+                    visual.getUuid(), center, mass.seedArrivalTick, mass.activeEndTick, mass.collapseEndTick,
+                    tuning.integer(Phase2AbilityTuning.Setting.STAIN_TARGET_CAP,
+                            Config.uniqueEffects.devourer.stainCarrierCap),
+                    tuning.get(Phase2AbilityTuning.Setting.STAIN_RADIUS,
+                            Config.uniqueEffects.devourer.stainTrailWidth),
+                    tuning.integer(Phase2AbilityTuning.Setting.STAIN_DURATION_TICKS,
+                            Config.uniqueEffects.devourer.stainSpreadDuration),
+                    tuning.integer(Phase2AbilityTuning.Setting.STAIN_AMPLIFIER,
+                            Config.uniqueEffects.devourer.stainSlowAmplifier));
+        }
         spawnCastEffects(world, actor, start);
         return true;
     }
@@ -194,6 +230,7 @@ public final class DevourerAbilityManager {
             DevourerMassVisualEntity visual = resolveMassVisual(world, mass.visualId);
             if (actor == null || visual == null || actor.getStackInHand(mass.hand) != mass.stackReference
                     || !mass.stackReference.isOf(ItemsRegistry.THE_DEVOURER.get())) {
+                UniqueAbilityApi.cancel(mass.execution);
                 cancel(world, mass, visual);
                 iterator.remove();
                 continue;
@@ -230,10 +267,14 @@ public final class DevourerAbilityManager {
             if (!mass.collapsing) {
                 mass.collapsing = true;
                 releaseLooseTargets(world, mass, true);
+                collapseDamage(world, actor, mass);
                 spawnCollapseEffects(world, mass.center);
             }
             if (now >= mass.collapseEndTick) {
                 cleanupVisuals(world, mass, true);
+                UniqueAbilityApi.emit(mass.execution, net.sweenus.simplyswords.api.ability.UniqueAbilityPhase.HIT,
+                        Phase2UniqueAbilities.COLLAPSE, null, mass.targets.size(), mass.damage);
+                UniqueAbilityApi.finish(mass.execution, mass.execution.definition().id(), mass.targets.size());
                 iterator.remove();
             }
         }
@@ -244,8 +285,12 @@ public final class DevourerAbilityManager {
 
     private static boolean acquireLooseTarget(ServerWorld world, ActiveMass mass,
                                               DevourerMassVisualEntity visual) {
-        int totalCap = Math.max(1, Config.uniqueEffects.devourer.looseTargetCap);
-        int tendrilCap = Math.clamp(Config.uniqueEffects.devourer.looseTendrilCap, 1, 3);
+        Phase2AbilityTuning tuning = Phase2UniqueAbilities.tuning(mass.execution);
+        if ((tuning.integer(Phase2AbilityTuning.Setting.MODE, 0) & 64) != 0) return false;
+        int totalCap = Math.max(1, tuning.integer(Phase2AbilityTuning.Setting.LOOSE_TARGET_CAP,
+                Config.uniqueEffects.devourer.looseTargetCap));
+        int tendrilCap = Math.clamp(tuning.integer(Phase2AbilityTuning.Setting.TENDRIL_CAP,
+                Config.uniqueEffects.devourer.looseTendrilCap), 1, 5);
         long incoming = mass.looseTargets.values().stream().filter(target -> !target.stored).count();
         int available = Math.min(totalCap - mass.looseTargets.size(), tendrilCap - (int) incoming);
         if (available <= 0) {
@@ -363,7 +408,7 @@ public final class DevourerAbilityManager {
             Vec3d slot = captured.stored
                     ? looseStoredSlot(mass.center, radius, captured, target, now)
                     : looseDeliverySlot(mass.center, radius, captured, target);
-            boolean delivered = pullLooseTowardSlot(target, slot, !captured.stored);
+            boolean delivered = pullLooseTowardSlot(target, slot, !captured.stored, mass);
             if (!captured.stored && delivered) {
                 if (corruptWeapon(world, target, mass.center)) {
                     visual.feed();
@@ -450,10 +495,11 @@ public final class DevourerAbilityManager {
         return center.add(Math.cos(angle) * orbitRadius, vertical, Math.sin(angle) * orbitRadius);
     }
 
-    private static boolean pullLooseTowardSlot(Entity target, Vec3d slot, boolean inbound) {
+    private static boolean pullLooseTowardSlot(Entity target, Vec3d slot, boolean inbound, ActiveMass mass) {
         Vec3d offset = slot.subtract(target.getPos());
         double distance = offset.length();
-        double configured = Math.max(0.0, Config.uniqueEffects.devourer.loosePullStrength);
+        double configured = Math.max(0.0, Phase2UniqueAbilities.tuning(mass.execution).get(
+                Phase2AbilityTuning.Setting.LAUNCH_SPEED, Config.uniqueEffects.devourer.loosePullStrength));
         double speedScale = inbound ? LOOSE_PULL_SPEED_SCALE : 1.0;
         Vec3d current = target.getVelocity();
         Vec3d velocity;
@@ -478,11 +524,14 @@ public final class DevourerAbilityManager {
 
     private static void acquireTargets(ServerWorld world, LivingEntity actor,
                                        ActiveMass mass, DevourerMassVisualEntity visual) {
-        int cap = Math.max(1, Config.uniqueEffects.devourer.maxTargets);
+        Phase2AbilityTuning tuning = Phase2UniqueAbilities.tuning(mass.execution);
+        int cap = Math.max(1, tuning.integer(Phase2AbilityTuning.Setting.TARGET_CAP,
+                Config.uniqueEffects.devourer.maxTargets));
         if (mass.targets.size() >= cap) {
             return;
         }
-        double radius = Math.max(1.0, Config.uniqueEffects.devourer.targetingRadius);
+        double radius = Math.max(1.0, tuning.get(Phase2AbilityTuning.Setting.SCAN_RADIUS,
+                Config.uniqueEffects.devourer.targetingRadius));
         double vertical = Math.max(1.0, Config.uniqueEffects.devourer.verticalRange);
         Box search = new Box(mass.center.x - radius, mass.center.y - vertical, mass.center.z - radius,
                 mass.center.x + radius, mass.center.y + vertical, mass.center.z + radius);
@@ -508,7 +557,7 @@ public final class DevourerAbilityManager {
 
     private static void tickTargets(ServerWorld world, LivingEntity actor,
                                     ActiveMass mass, DevourerMassVisualEntity visual, long now) {
-        boolean damageTick = (now - mass.activeStartTick) % Math.max(1, Config.uniqueEffects.devourer.damageInterval) == 0L;
+        Phase2AbilityTuning tuning = Phase2UniqueAbilities.tuning(mass.execution);
         boolean fed = false;
         Iterator<CapturedTarget> iterator = mass.targets.values().iterator();
         while (iterator.hasNext()) {
@@ -536,18 +585,40 @@ public final class DevourerAbilityManager {
             }
 
             Vec3d slot = holdingSlot(mass.center, visual.getCurrentRadius(0.0F), captured, target);
-            boolean held = pullTowardSlot(target, slot);
+            boolean held = pullTowardSlot(target, slot, mass);
             if (held && !captured.ingested) {
                 captured.ingested = true;
+                captured.ingestedAt = now;
+                captured.nextDamageTick = now;
                 if (tendril != null) {
                     tendril.discard();
                 }
                 captured.tendrilId = null;
             }
-            if (held && damageTick && damageTarget(world, actor, mass.stackSnapshot, target, mass.damage)) {
+            int acceleratedAfter = tuning.integer(Phase2AbilityTuning.Setting.ACCELERATE_THRESHOLD_TICKS, 0);
+            int pulseInterval = acceleratedAfter > 0 && now - captured.ingestedAt >= acceleratedAfter
+                    ? tuning.integer(Phase2AbilityTuning.Setting.PULSE_INTERVAL_TICKS, 16)
+                    : Config.uniqueEffects.devourer.damageInterval;
+            float compression = 1 + (float) Math.min(
+                    tuning.get(Phase2AbilityTuning.Setting.BONUS_CAP, 0),
+                    Math.max(0, mass.targets.size() - 1)
+                            * tuning.get(Phase2AbilityTuning.Setting.BONUS_PER_TRIGGER, 0));
+            float pulseDamage = mass.damage * compression;
+            boolean pulse = held && now >= captured.nextDamageTick;
+            if (pulse) captured.nextDamageTick = now + Math.max(1, pulseInterval);
+            if (pulse && damageTarget(world, actor, mass.stackSnapshot, target, pulseDamage)) {
                 fed = true;
+                UniqueAbilityApi.emit(mass.execution, net.sweenus.simplyswords.api.ability.UniqueAbilityPhase.HIT,
+                        Phase2UniqueAbilities.PULSE, target, 1, pulseDamage);
                 spawnFeedingEffects(world, target, mass.center);
-                pullTowardSlot(target, slot);
+                pullTowardSlot(target, slot, mass);
+            }
+            int ruptureAfter = tuning.integer(Phase2AbilityTuning.Setting.RUPTURE_THRESHOLD_TICKS, 0);
+            if (held && !captured.ruptured && ruptureAfter > 0
+                    && now - captured.ingestedAt >= ruptureAfter) {
+                captured.ruptured = true;
+                damageTarget(world, actor, mass.stackSnapshot, target, pulseDamage * (float) tuning.get(
+                        Phase2AbilityTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, .75));
             }
         }
         if (fed) {
@@ -567,7 +638,7 @@ public final class DevourerAbilityManager {
         return center.add(Math.cos(angle) * core, vertical, Math.sin(angle) * core);
     }
 
-    private static boolean pullTowardSlot(LivingEntity target, Vec3d bodySlot) {
+    private static boolean pullTowardSlot(LivingEntity target, Vec3d bodySlot, ActiveMass mass) {
         Vec3d desiredBase = bodySlot.subtract(0.0, target.getHeight() * 0.5, 0.0);
         Vec3d offset = desiredBase.subtract(target.getPos());
         double distance = offset.length();
@@ -575,7 +646,8 @@ public final class DevourerAbilityManager {
         double resistance = MathHelper.clamp(
                 target.getAttributeValue(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE), 0.0, 1.0);
         double response = MathHelper.clamp(1.0 / (size * (1.0 + resistance * 2.0)), 0.12, 1.0);
-        double configured = Math.max(0.0, Config.uniqueEffects.devourer.pullStrength);
+        double configured = Math.max(0.0, Phase2UniqueAbilities.tuning(mass.execution).get(
+                Phase2AbilityTuning.Setting.PULL_STRENGTH, Config.uniqueEffects.devourer.pullStrength));
         if (distance <= 0.34 + target.getWidth() * 0.18) {
             Vec3d hold = offset.multiply(0.28 * response);
             target.setVelocity(hold.x, MathHelper.clamp(hold.y, -0.18, 0.18), hold.z);
@@ -608,6 +680,22 @@ public final class DevourerAbilityManager {
         WeaponImplicitRegistry.runSuppressed(
                 () -> damaged[0] = HelperMethods.damageThroughIframes(target, source, damage));
         return damaged[0];
+    }
+
+    private static void collapseDamage(ServerWorld world, LivingEntity actor, ActiveMass mass) {
+        Phase2AbilityTuning tuning = Phase2UniqueAbilities.tuning(mass.execution);
+        double radius = tuning.get(Phase2AbilityTuning.Setting.IMPACT_RADIUS, 0);
+        int cap = tuning.integer(Phase2AbilityTuning.Setting.IMPACT_TARGET_CAP, 0);
+        float damage = mass.damage * (float) tuning.get(Phase2AbilityTuning.Setting.IMPACT_DAMAGE_MULTIPLIER, 0);
+        if (radius <= 0 || cap <= 0 || damage <= 0) return;
+        List<LivingEntity> targets = world.getEntitiesByClass(LivingEntity.class,
+                new Box(mass.center, mass.center).expand(radius), target -> target != actor && target.isAlive()
+                        && target.squaredDistanceTo(mass.center) <= radius * radius
+                        && HelperMethods.checkAbilityTarget(target, actor));
+        targets.sort(Comparator.comparingDouble(target -> target.squaredDistanceTo(mass.center)));
+        for (int index = 0; index < Math.min(cap, targets.size()); index++) {
+            damageTarget(world, actor, mass.stackSnapshot, targets.get(index), damage);
+        }
     }
 
     private static Vec3d resolveCastCenter(WeaponAbilityContext context) {
@@ -925,6 +1013,7 @@ public final class DevourerAbilityManager {
         private final long collapseEndTick;
         private final float damage;
         private final UUID visualId;
+        private final UniqueAbilityExecution execution;
         private final Map<UUID, CapturedTarget> targets = new HashMap<>();
         private final Map<UUID, CapturedLoot> looseTargets = new HashMap<>();
         private long nextLooseLaunchTick;
@@ -936,7 +1025,8 @@ public final class DevourerAbilityManager {
         private ActiveMass(UUID actorId, UUID sourcePlayerId, Hand hand,
                            ItemStack stackReference, ItemStack stackSnapshot, Vec3d center,
                            long seedArrivalTick, long activeStartTick,
-                           long activeEndTick, long collapseEndTick, float damage, UUID visualId) {
+                           long activeEndTick, long collapseEndTick, float damage, UUID visualId,
+                           UniqueAbilityExecution execution) {
             this.actorId = actorId;
             this.sourcePlayerId = sourcePlayerId;
             this.hand = hand;
@@ -950,6 +1040,7 @@ public final class DevourerAbilityManager {
             this.collapseEndTick = collapseEndTick;
             this.damage = damage;
             this.visualId = visualId;
+            this.execution = execution;
         }
     }
 
@@ -959,6 +1050,9 @@ public final class DevourerAbilityManager {
         private Vec3d lastPosition;
         private int blockedTicks;
         private boolean ingested;
+        private boolean ruptured;
+        private long ingestedAt;
+        private long nextDamageTick;
 
         private CapturedTarget(UUID targetId, UUID tendrilId, Vec3d lastPosition) {
             this.targetId = targetId;

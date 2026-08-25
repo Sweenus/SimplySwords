@@ -50,7 +50,7 @@ public abstract class WatcherSwordItem extends UniqueSwordItem implements Unique
             LivingEntity effectiveActor = delegated == null ? attacker : delegated.actor();
             if (delegated == null || delegated.owner() == null
                     || target != delegated.owner() && HelperMethods.checkAbilityTarget(target, delegated.owner())) {
-                WatcherAbilityManager.addDread(world, effectiveActor, target, getWatcherWeaponType());
+                WatcherAbilityManager.addDread(world, effectiveActor, target, getWatcherWeaponType(), stack);
             }
         }
         return super.postHit(stack, target, attacker);
