@@ -109,6 +109,30 @@ final class UniqueAbilityApiContractTest {
         assertEquals(0.0, tuning.get(Phase2AbilityTuning.Setting.PROJECTILE_SPEED, 1));
     }
 
+    @Test
+    void phase3DefinitionsAreAdditiveTypedAndBounded() {
+        List<UniqueAbilityDefinition> definitions = List.of(
+                Phase3UniqueAbilities.STORMSCALE_ROD, Phase3UniqueAbilities.IONBOUND_CRUSHER,
+                Phase3UniqueAbilities.IONBOUND_BEAM, Phase3UniqueAbilities.IONBOUND_SHIELD,
+                Phase3UniqueAbilities.SOULRENDER_MARK, Phase3UniqueAbilities.SOULRENDER_REAP,
+                Phase3UniqueAbilities.SOULSTALKER_TENDRIL, Phase3UniqueAbilities.SOULSTALKER_STRIDE,
+                Phase3UniqueAbilities.WHISPERWIND_DASH, Phase3UniqueAbilities.WHISPERWIND_RESET,
+                Phase3UniqueAbilities.DREADWHISPER_REAVE, Phase3UniqueAbilities.DREADWHISPER_WOUND);
+        assertEquals(12, definitions.stream().map(UniqueAbilityDefinition::id).distinct().count());
+        for (UniqueAbilityDefinition definition : definitions) {
+            assertTrue(definition.supports(Phase3UniqueAbilities.TUNING));
+            assertTrue(definition.supportsEvent(Phase3UniqueAbilities.HIT));
+            assertTrue(definition.supportsEvent(Phase3UniqueAbilities.FINISH));
+        }
+        Phase3AbilityTuning tuning = Phase3AbilityTuning.EMPTY
+                .with(Phase3AbilityTuning.Setting.CHANCE, 500)
+                .with(Phase3AbilityTuning.Setting.TARGET_CAP, 500)
+                .with(Phase3AbilityTuning.Setting.SPEED, Double.NaN);
+        assertEquals(100, tuning.integer(Phase3AbilityTuning.Setting.CHANCE, 0));
+        assertEquals(64, tuning.integer(Phase3AbilityTuning.Setting.TARGET_CAP, 0));
+        assertEquals(0.0, tuning.get(Phase3AbilityTuning.Setting.SPEED, 1));
+    }
+
     private static Identifier id(String path) {
         return Identifier.of("simplyswords_test", path);
     }

@@ -26,6 +26,12 @@ import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.api.SpellScalingProfile;
 import net.sweenus.simplyswords.util.HelperMethods;
+import net.sweenus.simplyswords.api.ability.Phase3AbilityTuning;
+import net.sweenus.simplyswords.api.ability.Phase3UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityContext;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityPhase;
 import org.joml.Vector3f;
 
 import java.util.HashMap;
@@ -73,31 +79,40 @@ public final class DreadwhisperAbilityManager {
         }
 
         LivingEntity actor = context.actor();
+        UniqueAbilityExecution execution = UniqueAbilityApi.begin(Phase3UniqueAbilities.DREADWHISPER_REAVE,
+                UniqueAbilityContext.active(context), builder -> builder
+                        .set(Phase3UniqueAbilities.TUNING, Phase3AbilityTuning.EMPTY)
+                        .set(Phase3UniqueAbilities.COOLDOWN_TICKS, Config.uniqueEffects.dreadwhisper.cooldown));
+        Phase3AbilityTuning tuning = Phase3UniqueAbilities.tuning(execution);
         Vec3d direction = resolveDirection(context);
         if (direction.horizontalLengthSquared() < 0.0001) {
             return false;
         }
 
-        int maximumTicks = maximumDashTicks();
+        int maximumTicks = maximumDashTicks(tuning);
         DreadwhisperVisualEntity visual = DreadwhisperVisualEntity.reaveFront(
                 context.world(), actor, direction,
-                (float) Math.max(1.0, Config.uniqueEffects.dreadwhisper.frontWidth),
-                (float) Math.max(0.5, Config.uniqueEffects.dreadwhisper.frontHeight),
+                (float) Math.max(1.0, tuning.get(Phase3AbilityTuning.Setting.WIDTH,
+                        Config.uniqueEffects.dreadwhisper.frontWidth)),
+                (float) Math.max(0.5, tuning.get(Phase3AbilityTuning.Setting.HEIGHT,
+                        Config.uniqueEffects.dreadwhisper.frontHeight)),
                 maximumTicks + COLLAPSE_LIFETIME + 4);
         context.world().spawnEntity(visual);
 
         UUID stainId = GloamStainManager.beginTrail(
                 context.world(), actor.getUuid(), groundPosition(context.world(), actor.getPos()),
-                direction, Math.max(1.0, Config.uniqueEffects.dreadwhisper.frontWidth),
-                Math.max(20, Config.uniqueEffects.dreadwhisper.stainDuration),
+                direction, Math.max(1.0, tuning.get(Phase3AbilityTuning.Setting.WIDTH,
+                        Config.uniqueEffects.dreadwhisper.frontWidth)),
+                Math.max(20, tuning.integer(Phase3AbilityTuning.Setting.STAIN_DURATION_TICKS,
+                        Config.uniqueEffects.dreadwhisper.stainDuration)),
                 Math.max(1, Config.uniqueEffects.dreadwhisper.stainFadeDuration),
                 Math.clamp(Config.uniqueEffects.dreadwhisper.stainSlowAmplifier, 0, 4));
 
         ActiveRend active = new ActiveRend(
                 actor.getUuid(), context.stack().copy(), direction, actor.getPos(),
-                context.world().getTime(), visual.getUuid(), stainId);
+                context.world().getTime(), visual.getUuid(), stainId, tuning, execution);
         ACTIVE.computeIfAbsent(context.world(), ignored -> new HashMap<>()).put(actor.getUuid(), active);
-        applyDashVelocity(actor, direction);
+        applyDashVelocity(actor, direction, tuning);
         spawnActivationEffects(context.world(), actor);
         return true;
     }
@@ -170,13 +185,23 @@ public final class DreadwhisperAbilityManager {
             return amount;
         }
 
+        ServerWorld world = (ServerWorld) target.getWorld();
+        UniqueAbilityExecution execution = UniqueAbilityApi.begin(Phase3UniqueAbilities.DREADWHISPER_WOUND,
+                UniqueAbilityContext.passive(world, stack, attacker, target, null), builder -> builder
+                        .set(Phase3UniqueAbilities.TUNING, Phase3AbilityTuning.EMPTY));
+        UniqueAbilityApi.takeStartedExecution();
+        UniqueAbilityApi.start(execution);
+        Phase3AbilityTuning tuning = Phase3UniqueAbilities.tuning(execution);
+
         target.removeStatusEffect(EffectRegistry.getReference(EffectRegistry.CORRUPTED_WOUND));
-        if (target.getWorld() instanceof ServerWorld world) {
-            spawnWoundBurst(world, target, attacker);
-        }
-        return isNaturalCritical(attacker)
+        spawnWoundBurst(world, target, attacker);
+        float result = isNaturalCritical(attacker)
                 ? amount
-                : amount * Math.max(1.0F, Config.uniqueEffects.dreadwhisper.criticalMultiplier);
+                : amount * Math.max(1.0F, Config.uniqueEffects.dreadwhisper.criticalMultiplier)
+                * (float) tuning.get(Phase3AbilityTuning.Setting.WOUND_DAMAGE_MULTIPLIER, 1);
+        UniqueAbilityApi.emit(execution, UniqueAbilityPhase.HIT, Phase3UniqueAbilities.HIT, target, 1, result);
+        UniqueAbilityApi.finish(execution, Phase3UniqueAbilities.FINISH, 1);
+        return result;
     }
 
     private static boolean tickDash(ServerWorld world, LivingEntity owner, ActiveRend active) {
@@ -193,24 +218,28 @@ public final class DreadwhisperAbilityManager {
 
         long elapsed = world.getTime() - active.startedAt;
         if ((elapsed > 1L && owner.horizontalCollision)
-                || active.distanceTravelled >= Math.max(1.0, Config.uniqueEffects.dreadwhisper.dashDistance)
-                || elapsed >= maximumDashTicks()) {
+                || active.distanceTravelled >= Math.max(1.0, active.tuning.get(Phase3AbilityTuning.Setting.RANGE,
+                        Config.uniqueEffects.dreadwhisper.dashDistance))
+                || elapsed >= maximumDashTicks(active.tuning)) {
             finishDash(world, owner, active);
             return true;
         }
 
-        applyDashVelocity(owner, active.direction);
+        applyDashVelocity(owner, active.direction, active.tuning);
         return false;
     }
 
     private static void damageDashTargets(ServerWorld world, LivingEntity owner, ActiveRend active,
                                           Vec3d start, Vec3d end) {
-        double halfWidth = Math.max(1.0, Config.uniqueEffects.dreadwhisper.frontWidth) * 0.5;
-        double height = Math.max(0.5, Config.uniqueEffects.dreadwhisper.frontHeight);
+        double halfWidth = Math.max(1.0, active.tuning.get(Phase3AbilityTuning.Setting.WIDTH,
+                Config.uniqueEffects.dreadwhisper.frontWidth)) * 0.5;
+        double height = Math.max(0.5, active.tuning.get(Phase3AbilityTuning.Setting.HEIGHT,
+                Config.uniqueEffects.dreadwhisper.frontHeight));
         Box search = segmentBox(start, end, height, halfWidth);
         float weaponDamage = HelperMethods.abilityScaledDamage(SpellScalingProfile.SOUL, owner, active.stack,
                 Math.max(0.0F, Config.uniqueEffects.dreadwhisper.weaponHitScaling),
-                Math.max(0.0F, Config.uniqueEffects.dreadwhisper.weaponHitSpellScaling));
+                Math.max(0.0F, Config.uniqueEffects.dreadwhisper.weaponHitSpellScaling))
+                * (float) active.tuning.get(Phase3AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1);
         for (LivingEntity target : world.getEntitiesByClass(LivingEntity.class, search,
                 candidate -> validTarget(candidate, owner)
                         && !active.hitTargets.contains(candidate.getUuid())
@@ -226,21 +255,28 @@ public final class DreadwhisperAbilityManager {
             }
 
             float removedHealth = Math.max(0.0F, healthBefore - target.getHealth());
-            float healing = removedHealth * MathHelper.clamp(Config.uniqueEffects.dreadwhisper.healRatio, 0.0F, 1.0F);
+            float healing = removedHealth * (float) MathHelper.clamp(
+                    active.tuning.get(Phase3AbilityTuning.Setting.HEAL_RATIO,
+                            Config.uniqueEffects.dreadwhisper.healRatio), 0, 1);
             if (healing > 0.0F) {
                 owner.heal(healing);
             }
             if (target.isAlive()) {
-                applyWound(target);
+                applyWound(target, active.tuning);
             }
+            UniqueAbilityApi.emit(active.execution, UniqueAbilityPhase.HIT, Phase3UniqueAbilities.HIT,
+                    target, 1, weaponDamage);
             spawnContactEffects(world, target, owner, removedHealth > 0.0F);
+            if (active.tuning.has(Phase3AbilityTuning.Setting.TARGET_CAP)
+                    && active.hitTargets.size() >= active.tuning.integer(Phase3AbilityTuning.Setting.TARGET_CAP, 64)) break;
         }
     }
 
-    private static void applyWound(LivingEntity target) {
+    private static void applyWound(LivingEntity target, Phase3AbilityTuning tuning) {
         target.addStatusEffect(new StatusEffectInstance(
                 EffectRegistry.getReference(EffectRegistry.CORRUPTED_WOUND),
-                Math.max(1, Config.uniqueEffects.dreadwhisper.woundDuration),
+                Math.max(1, tuning.integer(Phase3AbilityTuning.Setting.WOUND_DURATION_TICKS,
+                        Config.uniqueEffects.dreadwhisper.woundDuration)),
                 0, false, false, false));
     }
 
@@ -265,6 +301,7 @@ public final class DreadwhisperAbilityManager {
         world.spawnParticles(ParticleTypes.REVERSE_PORTAL, center.x, center.y, center.z, 8, 0.5, 0.55, 0.5, 0.055);
         world.playSound(null, owner.getBlockPos(), SoundRegistry.DARK_SWORD_BREAKS.get(),
                 SoundCategory.PLAYERS, 0.72F, 0.76F);
+        UniqueAbilityApi.finish(active.execution, Phase3UniqueAbilities.FINISH, active.hitTargets.size());
     }
 
     private static void spawnActivationEffects(ServerWorld world, LivingEntity owner) {
@@ -315,14 +352,17 @@ public final class DreadwhisperAbilityManager {
                 SoundCategory.PLAYERS, 0.75F, 0.72F);
     }
 
-    private static int maximumDashTicks() {
+    private static int maximumDashTicks(Phase3AbilityTuning tuning) {
         return Math.max(6, (int) Math.ceil(
-                Math.max(1.0, Config.uniqueEffects.dreadwhisper.dashDistance)
-                        / Math.max(0.1, Config.uniqueEffects.dreadwhisper.dashSpeed)) + 6);
+                Math.max(1.0, tuning.get(Phase3AbilityTuning.Setting.RANGE,
+                        Config.uniqueEffects.dreadwhisper.dashDistance))
+                        / Math.max(0.1, tuning.get(Phase3AbilityTuning.Setting.SPEED,
+                        Config.uniqueEffects.dreadwhisper.dashSpeed))) + 6);
     }
 
-    private static void applyDashVelocity(LivingEntity owner, Vec3d direction) {
-        double speed = Math.max(0.1, Config.uniqueEffects.dreadwhisper.dashSpeed);
+    private static void applyDashVelocity(LivingEntity owner, Vec3d direction, Phase3AbilityTuning tuning) {
+        double speed = Math.max(0.1, tuning.get(Phase3AbilityTuning.Setting.SPEED,
+                Config.uniqueEffects.dreadwhisper.dashSpeed));
         owner.setVelocity(direction.x * speed, owner.getVelocity().y, direction.z * speed);
         owner.velocityModified = true;
     }
@@ -343,6 +383,7 @@ public final class DreadwhisperAbilityManager {
         if (visual != null) {
             visual.discard();
         }
+        UniqueAbilityApi.cancel(active.execution);
     }
 
     private static ActiveRend getActive(ServerWorld world, UUID ownerId) {
@@ -468,9 +509,12 @@ public final class DreadwhisperAbilityManager {
         private final Set<UUID> hitTargets = new HashSet<>();
         private Vec3d previousPosition;
         private double distanceTravelled;
+        private final Phase3AbilityTuning tuning;
+        private final UniqueAbilityExecution execution;
 
         private ActiveRend(UUID ownerId, ItemStack stack, Vec3d direction,
-                           Vec3d previousPosition, long startedAt, UUID visualId, UUID stainId) {
+                           Vec3d previousPosition, long startedAt, UUID visualId, UUID stainId,
+                           Phase3AbilityTuning tuning, UniqueAbilityExecution execution) {
             this.ownerId = ownerId;
             this.stack = stack;
             this.direction = direction;
@@ -478,6 +522,8 @@ public final class DreadwhisperAbilityManager {
             this.startedAt = startedAt;
             this.visualId = visualId;
             this.stainId = stainId;
+            this.tuning = tuning;
+            this.execution = execution;
         }
     }
 }

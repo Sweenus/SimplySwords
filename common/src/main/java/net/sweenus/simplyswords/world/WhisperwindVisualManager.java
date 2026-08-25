@@ -12,6 +12,11 @@ import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.WhisperwindSlashVisualEntity;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
+import net.sweenus.simplyswords.api.ability.Phase3AbilityTuning;
+import net.sweenus.simplyswords.api.ability.Phase3UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityPhase;
 
 import java.util.*;
 
@@ -37,7 +42,14 @@ public final class WhisperwindVisualManager {
         }
 
         ACTIVE_DASHES.computeIfAbsent(world, ignored -> new HashMap<>())
-                .put(user.getUuid(), new ActiveDash(user.getPos(), user.getPos(), stack.copy()));
+                .put(user.getUuid(), new ActiveDash(user.getPos(), user.getPos(), stack.copy(), null,
+                        Phase3AbilityTuning.EMPTY));
+    }
+
+    public static void startDash(ServerWorld world, LivingEntity user, ItemStack stack,
+                                 UniqueAbilityExecution execution, Phase3AbilityTuning tuning) {
+        ACTIVE_DASHES.computeIfAbsent(world, ignored -> new HashMap<>())
+                .put(user.getUuid(), new ActiveDash(user.getPos(), user.getPos(), stack.copy(), execution, tuning));
     }
 
     public static void recordDashTick(ServerWorld world, LivingEntity user, Iterable<? extends Entity> entities) {
@@ -48,7 +60,8 @@ public final class WhisperwindVisualManager {
 
         ActiveDash dash = dashes.get(user.getUuid());
         if (dash == null) {
-            dash = new ActiveDash(user.getPos(), user.getPos(), user.getMainHandStack().copy());
+            dash = new ActiveDash(user.getPos(), user.getPos(), user.getMainHandStack().copy(), null,
+                    Phase3AbilityTuning.EMPTY);
             dashes.put(user.getUuid(), dash);
         }
         dash.end = user.getPos();
@@ -75,9 +88,14 @@ public final class WhisperwindVisualManager {
                 SoundRegistry.SWING_SMALL.get(),
                 SoundCategory.PLAYERS, 0.45F, 1.65F + world.random.nextFloat() * 0.12F);
         if (!dash.targets.isEmpty()) {
-            long triggerTick = world.getTime() + Config.uniqueEffects.whisperwind.delayedDamageDelay;
+            int delay = dash.tuning.integer(Phase3AbilityTuning.Setting.DELAY_TICKS,
+                    Config.uniqueEffects.whisperwind.delayedDamageDelay);
+            long triggerTick = world.getTime() + delay;
             PENDING_STRIKES.computeIfAbsent(world, ignored -> new HashSet<>())
-                    .add(new PendingStrike(user.getUuid(), dash.stack.copy(), dash.start, dash.end, new HashSet<>(dash.targets), triggerTick));
+                    .add(new PendingStrike(user.getUuid(), dash.stack.copy(), dash.start, dash.end,
+                            new HashSet<>(dash.targets), triggerTick, dash.execution, dash.tuning));
+        } else if (dash.execution != null) {
+            UniqueAbilityApi.finish(dash.execution, Phase3UniqueAbilities.FINISH, 0);
         }
         if (dashes.isEmpty()) {
             ACTIVE_DASHES.remove(world);
@@ -85,6 +103,11 @@ public final class WhisperwindVisualManager {
     }
 
     public static void scheduleTargetStrike(ServerWorld world, LivingEntity user, LivingEntity target, ItemStack stack) {
+        scheduleTargetStrike(world, user, target, stack, null, Phase3AbilityTuning.EMPTY);
+    }
+
+    public static void scheduleTargetStrike(ServerWorld world, LivingEntity user, LivingEntity target, ItemStack stack,
+                                            UniqueAbilityExecution execution, Phase3AbilityTuning tuning) {
         if (world == null || user == null || target == null || !user.isAlive()
                 || !target.isAlive() || !HelperMethods.checkAbilityTarget(target, user)) {
             return;
@@ -95,7 +118,8 @@ public final class WhisperwindVisualManager {
         targets.add(target.getUuid());
         PENDING_STRIKES.computeIfAbsent(world, ignored -> new HashSet<>())
                 .add(new PendingStrike(user.getUuid(), stack.copy(), start, end, targets,
-                        world.getTime() + Config.uniqueEffects.whisperwind.delayedDamageDelay));
+                        world.getTime() + tuning.integer(Phase3AbilityTuning.Setting.DELAY_TICKS,
+                                Config.uniqueEffects.whisperwind.delayedDamageDelay), execution, tuning));
         world.playSound(null, start.x, start.y, start.z, SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_IMPACT_01.get(),
                 SoundCategory.PLAYERS, 0.6F, 1.0F);
     }
@@ -126,14 +150,20 @@ public final class WhisperwindVisualManager {
     private static void applyStrike(ServerWorld world, PendingStrike strike) {
         Entity sourceEntity = world.getEntity(strike.sourceId);
         if (!(sourceEntity instanceof LivingEntity source) || !source.isAlive()) {
+            if (strike.execution != null) UniqueAbilityApi.cancel(strike.execution);
             return;
         }
 
+        int mode = strike.tuning.integer(Phase3AbilityTuning.Setting.MODE, 0);
+        int targetCap = strike.tuning.has(Phase3AbilityTuning.Setting.TARGET_CAP)
+                ? strike.tuning.integer(Phase3AbilityTuning.Setting.TARGET_CAP, 64) : Integer.MAX_VALUE;
+        float multiplier = (float) strike.tuning.get(Phase3AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1);
         float damage = HelperMethods.abilityScaledDamage("evocation", source, strike.stack,
                 Config.uniqueEffects.whisperwind.delayedDamageScaling
                         + strike.targetIds.size() * Config.uniqueEffects.whisperwind.delayedDamagePerTargetScaling,
                 Config.uniqueEffects.whisperwind.delayedSpellScaling
-                        + strike.targetIds.size() * Config.uniqueEffects.whisperwind.delayedSpellPerTargetScaling);
+                        + strike.targetIds.size() * Config.uniqueEffects.whisperwind.delayedSpellPerTargetScaling) * multiplier;
+        int affected = 0;
         for (UUID targetId : strike.targetIds) {
             Entity entity = world.getEntity(targetId);
             if (!(entity instanceof LivingEntity target) || !target.isAlive() || !HelperMethods.checkAbilityTarget(target, source)) {
@@ -142,9 +172,20 @@ public final class WhisperwindVisualManager {
 
             target.timeUntilRegen = 0;
             var damageSource = world.getDamageSources().indirectMagic(source, source);
-            target.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments(world, strike.stack, target, damageSource, damage));
+            if (target.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments(world, strike.stack, target, damageSource, damage))) {
+                affected++;
+                if (strike.tuning.integer(Phase3AbilityTuning.Setting.WEAKNESS_DURATION_TICKS, 0) > 0) {
+                    target.addStatusEffect(new net.minecraft.entity.effect.StatusEffectInstance(
+                            net.minecraft.entity.effect.StatusEffects.WEAKNESS,
+                            strike.tuning.integer(Phase3AbilityTuning.Setting.WEAKNESS_DURATION_TICKS, 0), 0), source);
+                }
+                if (strike.execution != null) UniqueAbilityApi.emit(strike.execution, UniqueAbilityPhase.HIT,
+                        Phase3UniqueAbilities.HIT, target, 1, damage);
+            }
             spawnBlossoms(world, target);
+            if (affected >= targetCap || (mode & 512) != 0) break;
         }
+        if (strike.execution != null) UniqueAbilityApi.finish(strike.execution, Phase3UniqueAbilities.FINISH, affected);
 
         world.playSound(null, strike.end.x, strike.end.y, strike.end.z,
                 SoundRegistry.ELEMENTAL_SWORD_WIND_ATTACK_03.get(),
@@ -214,15 +255,21 @@ public final class WhisperwindVisualManager {
         private final Vec3d start;
         private final Set<UUID> targets = new HashSet<>();
         private final ItemStack stack;
+        private final UniqueAbilityExecution execution;
+        private final Phase3AbilityTuning tuning;
         private Vec3d end;
 
-        private ActiveDash(Vec3d start, Vec3d end, ItemStack stack) {
+        private ActiveDash(Vec3d start, Vec3d end, ItemStack stack,
+                           UniqueAbilityExecution execution, Phase3AbilityTuning tuning) {
             this.start = start;
             this.end = end;
             this.stack = stack;
+            this.execution = execution;
+            this.tuning = tuning;
         }
     }
 
-    private record PendingStrike(UUID sourceId, ItemStack stack, Vec3d start, Vec3d end, Set<UUID> targetIds, long triggerTick) {
+    private record PendingStrike(UUID sourceId, ItemStack stack, Vec3d start, Vec3d end, Set<UUID> targetIds,
+                                 long triggerTick, UniqueAbilityExecution execution, Phase3AbilityTuning tuning) {
     }
 }

@@ -11,6 +11,9 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.SoulrenderMarkVisualEntity;
+import net.sweenus.simplyswords.api.ability.Phase3UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -35,6 +38,7 @@ public final class SoulrenderMarkVisualManager {
     private static final float MAX_MARK_SCALE = 1.85F;
 
     private static final Map<ServerWorld, Map<UUID, ActiveSoulrenderMark>> ACTIVE_MARKS = new HashMap<>();
+    private static final Map<ServerWorld, Map<UniqueAbilityExecution, Integer>> PENDING_FINISH = new HashMap<>();
 
     private SoulrenderMarkVisualManager() {
     }
@@ -118,6 +122,9 @@ public final class SoulrenderMarkVisualManager {
     }
 
     public static void tick(ServerWorld world) {
+        Map<UniqueAbilityExecution, Integer> finishing = PENDING_FINISH.remove(world);
+        if (finishing != null) finishing.forEach((execution, affected) ->
+                UniqueAbilityApi.finish(execution, Phase3UniqueAbilities.FINISH, affected));
         Map<UUID, ActiveSoulrenderMark> marks = ACTIVE_MARKS.get(world);
         if (marks == null || marks.isEmpty()) {
             if (world.getTime() % 20L == 0L) {
@@ -155,6 +162,10 @@ public final class SoulrenderMarkVisualManager {
         if (marks.isEmpty()) {
             ACTIVE_MARKS.remove(world);
         }
+    }
+
+    public static void finishNextTick(ServerWorld world, UniqueAbilityExecution execution, int affected) {
+        PENDING_FINISH.computeIfAbsent(world, ignored -> new HashMap<>()).put(execution, affected);
     }
 
     private static void updateOrbit(ServerWorld world, SoulrenderMarkVisualEntity visual, LivingEntity target, ActiveSoulrenderMark mark) {

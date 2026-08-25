@@ -52,14 +52,15 @@ public class StormscaleSwordItem extends UniqueSwordItem implements UniqueWeapon
 
     @Override
     public int getActivationCooldownTicks(ItemStack stack, WeaponAbilityContext context) {
-        return Config.uniqueEffects.stormscale.cooldown;
+        return StormscaleLightningRodManager.hasPendingReactivation(context.world(), context.actor())
+                ? 1 : Config.uniqueEffects.stormscale.cooldown;
     }
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         if (AwakeningApi.isAbilityUnlocked(stack) && attacker.getWorld() instanceof ServerWorld world) {
             HelperMethods.playHitSounds(attacker, target);
-            StormscaleLightningRodManager.onMeleeHit(world, stack, attacker);
+            StormscaleLightningRodManager.onMeleeHit(world, stack, attacker, target);
         }
         return super.postHit(stack, target, attacker);
     }

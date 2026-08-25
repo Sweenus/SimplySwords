@@ -19,6 +19,12 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
+import net.sweenus.simplyswords.api.ability.Phase3AbilityTuning;
+import net.sweenus.simplyswords.api.ability.Phase3UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityContext;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityPhase;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
@@ -47,12 +53,24 @@ public class WhisperwindSwordItem extends UniqueSwordItem implements TwoHandedWe
             return super.postHit(stack, target, attacker);
         }
         HelperMethods.playHitSounds(attacker, target);
-        if (!attacker.getWorld().isClient()) {
-            if (attacker.getRandom().nextInt(100) <= Config.uniqueEffects.whisperwind.chance && (attacker instanceof PlayerEntity player)) {
+        if (attacker.getWorld() instanceof ServerWorld world) {
+            UniqueAbilityExecution execution = UniqueAbilityApi.begin(Phase3UniqueAbilities.WHISPERWIND_RESET,
+                    UniqueAbilityContext.passive(world, stack, attacker, target, null), builder -> builder
+                            .set(Phase3UniqueAbilities.TUNING, Phase3AbilityTuning.EMPTY));
+            UniqueAbilityApi.takeStartedExecution();
+            UniqueAbilityApi.start(execution);
+            Phase3AbilityTuning tuning = Phase3UniqueAbilities.tuning(execution);
+            int chance = tuning.integer(Phase3AbilityTuning.Setting.CHANCE, Config.uniqueEffects.whisperwind.chance);
+            boolean reset = tuning.has(Phase3AbilityTuning.Setting.CHANCE)
+                    ? chance >= 100 || chance > 0 && attacker.getRandom().nextInt(100) < chance
+                    : attacker.getRandom().nextInt(100) <= Config.uniqueEffects.whisperwind.chance;
+            if (reset && attacker instanceof PlayerEntity player) {
                 attacker.getWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
                         attacker.getSoundCategory(), 0.3f, 1.8f);
                 SimplySwordsAPI.setWeaponCooldown(player, stack, 0);
+                UniqueAbilityApi.emit(execution, UniqueAbilityPhase.HIT, Phase3UniqueAbilities.HIT, target, 1, chance);
             }
+            UniqueAbilityApi.finish(execution, Phase3UniqueAbilities.FINISH, 1);
         }
         return super.postHit(stack, target, attacker);
     }
@@ -68,11 +86,18 @@ public class WhisperwindSwordItem extends UniqueSwordItem implements TwoHandedWe
         world.playSoundFromEntity(null, user, SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_IMPACT_01.get(),
                 user.getSoundCategory(), 0.6f, 1.0f);
         if (!world.isClient() && world instanceof ServerWorld serverWorld) {
-            WhisperwindVisualManager.startDash(serverWorld, user, stack);
+            UniqueAbilityExecution execution = UniqueAbilityApi.begin(Phase3UniqueAbilities.WHISPERWIND_DASH,
+                    UniqueAbilityContext.passive(serverWorld, stack, user, null, hand), builder -> builder
+                            .set(Phase3UniqueAbilities.TUNING, Phase3AbilityTuning.EMPTY)
+                            .set(Phase3UniqueAbilities.COOLDOWN_TICKS, Config.uniqueEffects.whisperwind.cooldown));
+            UniqueAbilityApi.takeStartedExecution();
+            UniqueAbilityApi.start(execution);
+            Phase3AbilityTuning tuning = Phase3UniqueAbilities.tuning(execution);
+            WhisperwindVisualManager.startDash(serverWorld, user, stack, execution, tuning);
+            SimplySwordsAPI.setWeaponCooldown(user, stack, execution.cooldownTicks(Config.uniqueEffects.whisperwind.cooldown));
         }
         user.addStatusEffect(new StatusEffectInstance(EffectRegistry.getReference(EffectRegistry.FATAL_FLICKER), 12));
         user.addStatusEffect(new StatusEffectInstance(StatusEffects.ABSORPTION, 100));
-        SimplySwordsAPI.setWeaponCooldown(user, user.getStackInHand(hand), Config.uniqueEffects.whisperwind.cooldown);
 
         return super.use(world, user, hand);
     }
@@ -82,11 +107,20 @@ public class WhisperwindSwordItem extends UniqueSwordItem implements TwoHandedWe
         if (context.target() == null || !HelperMethods.checkAbilityTarget(context.target(), context.actor())) {
             return false;
         }
+        UniqueAbilityExecution execution = UniqueAbilityApi.begin(Phase3UniqueAbilities.WHISPERWIND_DASH,
+                UniqueAbilityContext.active(context), builder -> builder
+                        .set(Phase3UniqueAbilities.TUNING, Phase3AbilityTuning.EMPTY)
+                        .set(Phase3UniqueAbilities.COOLDOWN_TICKS, Config.uniqueEffects.whisperwind.cooldown));
+        Phase3AbilityTuning tuning = Phase3UniqueAbilities.tuning(execution);
         LivingEntityAbilityMovementManager.dashTowardTarget(context.world(), context.actor(), context.target(),
-                Config.uniqueEffects.whisperwind.dashVelocity, 8);
-        WhisperwindVisualManager.scheduleTargetStrike(context.world(), context.actor(), context.target(), context.stack());
-        context.actor().addStatusEffect(new StatusEffectInstance(EffectRegistry.getReference(EffectRegistry.FATAL_FLICKER), 12));
-        context.actor().addStatusEffect(new StatusEffectInstance(StatusEffects.ABSORPTION, 100));
+                tuning.get(Phase3AbilityTuning.Setting.SPEED, Config.uniqueEffects.whisperwind.dashVelocity), 8);
+        WhisperwindVisualManager.scheduleTargetStrike(context.world(), context.actor(), context.target(), context.stack(),
+                execution, tuning);
+        context.actor().addStatusEffect(new StatusEffectInstance(EffectRegistry.getReference(EffectRegistry.FATAL_FLICKER),
+                tuning.integer(Phase3AbilityTuning.Setting.FLICKER_DURATION_TICKS, 12)));
+        context.actor().addStatusEffect(new StatusEffectInstance(StatusEffects.ABSORPTION,
+                tuning.integer(Phase3AbilityTuning.Setting.ABSORPTION_DURATION_TICKS, 100),
+                tuning.integer(Phase3AbilityTuning.Setting.ABSORPTION, 2) >= 4 ? 1 : 0));
         return true;
     }
 

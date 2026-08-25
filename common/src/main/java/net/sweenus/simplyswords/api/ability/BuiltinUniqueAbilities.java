@@ -340,6 +340,7 @@ public final class BuiltinUniqueAbilities {
         UniqueAbilityApi.registerDefinition(BRIMSTONE_ERUPTION);
         UniqueAbilityApi.registerDefinition(BRIMSTONE_RITE);
         Phase2UniqueAbilities.register();
+        Phase3UniqueAbilities.register();
     }
 
     private static Identifier id(String path) {
