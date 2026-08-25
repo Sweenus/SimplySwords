@@ -8,6 +8,8 @@ import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.item.ItemStack;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
@@ -21,6 +23,11 @@ import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.LivyatanWaveVisualEntity;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
+import net.sweenus.simplyswords.api.ability.Phase6AbilityTuning;
+import net.sweenus.simplyswords.api.ability.Phase6UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityPhase;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -61,7 +68,11 @@ public final class LivyatanWaveManager {
         if (world == null || caster == null || stack == null || stack.isEmpty() || !caster.isAlive()) {
             return;
         }
-        if (!isAttackReady(world, caster, stack)) {
+        UniqueAbilityExecution execution = Phase6CombatManager.beginPassive(
+                Phase6UniqueAbilities.LIVYATAN_WAVE, world, stack, caster, null);
+        Phase6AbilityTuning tuning = Phase6UniqueAbilities.tuning(execution);
+        if (tuning.flag(1 << 26) || !isAttackReady(world, caster, stack, tuning)) {
+            UniqueAbilityApi.finish(execution, Phase6UniqueAbilities.FINISH, 0);
             return;
         }
 
@@ -75,8 +86,13 @@ public final class LivyatanWaveManager {
 
         Vec3d right = new Vec3d(-horizontalForward.z, 0.0, horizontalForward.x).normalize();
         Vec3d start = caster.getPos().add(horizontalForward.multiply(waveForwardStartOffset()));
-        float damage = HelperMethods.abilityScaledDamage("frost", caster, stack, Config.uniqueEffects.livyatan.waveDamageScaling, Config.uniqueEffects.livyatan.spellScaling);
-        ActiveWave wave = new ActiveWave(start, horizontalForward, right, caster.getUuid(), stack.copy(), world.getTime(), baseLengthSteps(), damage, waveKnockback());
+        float damage = HelperMethods.abilityScaledDamage("frost", caster, stack,
+                Config.uniqueEffects.livyatan.waveDamageScaling, Config.uniqueEffects.livyatan.spellScaling)
+                * (float) tuning.get(s("DAMAGE_MULTIPLIER"), 1);
+        ActiveWave wave = new ActiveWave(start, horizontalForward, right, caster.getUuid(), stack.copy(),
+                world.getTime(), tuning.integer(s("LENGTH"), baseLengthSteps()), damage,
+                tuning.get(s("KNOCKBACK"), waveKnockback()), tuning.get(s("WIDTH"), waveWidthBlocks()),
+                tuning, execution);
         ACTIVE_WAVES.computeIfAbsent(world, ignored -> new ArrayList<>()).add(wave);
 
         world.playSound(null, start.x, start.y, start.z, SoundEvents.ENTITY_DOLPHIN_SPLASH, SoundCategory.PLAYERS, 0.85F, 0.9F + world.random.nextFloat() * 0.15F);
@@ -128,6 +144,7 @@ public final class LivyatanWaveManager {
 
         int step = wave.currentStep++;
         if (step > wave.maxSteps) {
+            UniqueAbilityApi.finish(wave.execution, Phase6UniqueAbilities.FINISH, wave.hitEntities.size());
             return true;
         }
 
@@ -149,14 +166,19 @@ public final class LivyatanWaveManager {
             return;
         }
 
-        Box hitBox = Box.of(center.add(0.0, 0.5, 0.0), waveSegmentThickness() * 2.0, 2.2, waveWidthBlocks());
+        Box hitBox = Box.of(center.add(0.0, 0.5, 0.0), waveSegmentThickness() * 2.0, 2.2, wave.width);
         DamageSource damageSource = world.getDamageSources().indirectMagic(owner, owner);
+        int affected = 0;
+        int cap = wave.tuning.has(s("TARGET_CAP"))
+                ? wave.tuning.integer(s("TARGET_CAP"), 8) : Integer.MAX_VALUE;
         for (LivingEntity candidate : world.getEntitiesByClass(LivingEntity.class, hitBox, LivingEntity::isAlive)) {
             if (!wave.hitEntities.add(candidate.getUuid()) || !HelperMethods.checkAbilityTarget(candidate, owner)) {
                 continue;
             }
 
-            float damage = HelperMethods.applyAbilityDamageEnchantments(world, wave.stack, candidate, damageSource, wave.damage);
+            float rawDamage = wave.damage * (wave.currentStep >= wave.maxSteps
+                    ? (float) wave.tuning.get(s("FINAL_DAMAGE_MULTIPLIER"), 1) : 1);
+            float damage = HelperMethods.applyAbilityDamageEnchantments(world, wave.stack, candidate, damageSource, rawDamage);
             if (!HelperMethods.damageThroughIframes(candidate, damageSource, damage)) {
                 continue;
             }
@@ -164,15 +186,25 @@ public final class LivyatanWaveManager {
             candidate.addVelocity(push.x, waveKnockUp(), push.z);
             candidate.velocityModified = true;
             candidate.velocityDirty = true;
+            int slow = wave.tuning.integer(s("STATUS_DURATION_TICKS"), 0);
+            if (slow > 0) candidate.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, slow, 0), owner);
+            UniqueAbilityApi.emit(wave.execution, UniqueAbilityPhase.HIT, Phase6UniqueAbilities.HIT,
+                    candidate, 1, damage);
+            if (++affected >= cap) break;
         }
     }
 
     private static void spawnWaveVisualSegments(ServerWorld world, Vec3d center, ActiveWave wave, int step) {
-        spawnWaveVisualSegments(world, center, wave.right, step, 2.0F, wave.visuals);
+        spawnWaveVisualSegments(world, center, wave.right, wave.width, step, 2.0F, wave.visuals);
     }
 
     private static void spawnWaveVisualSegments(ServerWorld world, Vec3d center, Vec3d right, int step, float crestHeight, List<WaveVisual> visuals) {
-        int laneCount = visualLaneCount();
+        spawnWaveVisualSegments(world, center, right, waveWidthBlocks(), step, crestHeight, visuals);
+    }
+
+    private static void spawnWaveVisualSegments(ServerWorld world, Vec3d center, Vec3d right, double width,
+                                                int step, float crestHeight, List<WaveVisual> visuals) {
+        int laneCount = Math.max(1, (int) Math.ceil(width));
         double laneSpacing = visualLaneSpacing();
         for (int lane = 0; lane < laneCount; lane++) {
             float laneCenter = (laneCount - 1) * 0.5F;
@@ -249,7 +281,7 @@ public final class LivyatanWaveManager {
     }
 
     private static void spawnWaveParticles(ServerWorld world, Vec3d center, ActiveWave wave, int step) {
-        spawnWaveParticles(world, center, wave.right, waveWidthBlocks(), step);
+        spawnWaveParticles(world, center, wave.right, wave.width, step);
     }
 
     private static void spawnWaveParticles(ServerWorld world, Vec3d center, Vec3d right, double width, int step) {
@@ -280,13 +312,14 @@ public final class LivyatanWaveManager {
         }
     }
 
-    private static boolean isAttackReady(ServerWorld world, LivingEntity user, ItemStack stack) {
+    private static boolean isAttackReady(ServerWorld world, LivingEntity user, ItemStack stack,
+                                         Phase6AbilityTuning tuning) {
         long now = world.getTime();
         if (now % 200L == 0L) {
             purgeOldSwingEntries(now);
         }
-        int cooldown = SimplySwordsAPI.getEffectiveWeaponCooldownTicks(
-                stack, user, getAttackReadyCooldownTicks(user));
+        int cooldown = SimplySwordsAPI.getEffectiveWeaponCooldownTicks(stack, user,
+                tuning.integer(s("COOLDOWN_TICKS"), getAttackReadyCooldownTicks(user)));
         if (RunicSlashManager.isIgnoringAttackReady()) {
             LAST_ACTIVATION.put(user.getUuid(), now + cooldown);
             return true;
@@ -429,11 +462,17 @@ public final class LivyatanWaveManager {
         private final int maxSteps;
         private final float damage;
         private final double knockback;
+        private final double width;
+        private final Phase6AbilityTuning tuning;
+        private final UniqueAbilityExecution execution;
         private final Set<UUID> hitEntities = new HashSet<>();
         private final List<WaveVisual> visuals = new ArrayList<>();
         private int currentStep;
 
-        private ActiveWave(Vec3d start, Vec3d forward, Vec3d right, UUID ownerId, net.minecraft.item.ItemStack stack, long spawnTick, int maxSteps, float damage, double knockback) {
+        private ActiveWave(Vec3d start, Vec3d forward, Vec3d right, UUID ownerId,
+                           net.minecraft.item.ItemStack stack, long spawnTick, int maxSteps, float damage,
+                           double knockback, double width, Phase6AbilityTuning tuning,
+                           UniqueAbilityExecution execution) {
             this.start = start;
             this.forward = forward;
             this.right = right;
@@ -443,6 +482,9 @@ public final class LivyatanWaveManager {
             this.maxSteps = maxSteps;
             this.damage = damage;
             this.knockback = knockback;
+            this.width = width;
+            this.tuning = tuning;
+            this.execution = execution;
             this.currentStep = 0;
         }
     }
@@ -463,5 +505,9 @@ public final class LivyatanWaveManager {
             this.spawnTick = spawnTick;
             this.spawnStep = spawnStep;
         }
+    }
+
+    private static Phase6AbilityTuning.Setting s(String name) {
+        return Phase6AbilityTuning.Setting.valueOf(name);
     }
 }

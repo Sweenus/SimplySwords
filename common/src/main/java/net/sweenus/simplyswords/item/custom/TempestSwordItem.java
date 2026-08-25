@@ -28,6 +28,11 @@ import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
+import net.sweenus.simplyswords.api.WeaponAbilityActivationSource;
+import net.sweenus.simplyswords.api.ability.Phase6AbilityTuning;
+import net.sweenus.simplyswords.api.ability.Phase6UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.effect.instance.SimplySwordsStatusEffectInstance;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
@@ -36,6 +41,7 @@ import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
+import net.sweenus.simplyswords.world.Phase6CombatManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,8 +58,11 @@ public class TempestSwordItem extends UniqueSwordItem implements UniqueWeaponAct
         }
         if (!attacker.getWorld().isClient()) {
 
-            int vortexMaxStacks = Config.uniqueEffects.tempest.maxStacks;
             ServerWorld serverWorld = (ServerWorld) attacker.getWorld();
+            UniqueAbilityExecution execution = Phase6CombatManager.beginPassive(
+                    Phase6UniqueAbilities.TEMPEST_MARK, serverWorld, stack, attacker, target);
+            Phase6AbilityTuning tuning = Phase6UniqueAbilities.tuning(execution);
+            int vortexMaxStacks = tuning.integer(s("STACK_CAP"), Config.uniqueEffects.tempest.maxStacks);
             HelperMethods.playHitSounds(attacker, target);
             SoundEvent soundSelect;
             ParticleEffect particleSelect;
@@ -89,7 +98,7 @@ public class TempestSwordItem extends UniqueSwordItem implements UniqueWeaponAct
                     attacker.getSoundCategory(), 0.2f, 1.3f);
 
             SimplySwordsStatusEffectInstance effect = HelperMethods.incrementSimplySwordsStatusEffect(
-                    target, statusSelect, 500, 1, vortexMaxStacks);
+                    target, statusSelect, tuning.integer(s("DURATION_TICKS"), 500), 1, vortexMaxStacks);
 
             effect.setSourceEntity(attacker);
             float scaledDamage;
@@ -106,8 +115,9 @@ public class TempestSwordItem extends UniqueSwordItem implements UniqueWeaponAct
                         HelperMethods.abilityScaledDamage("frost", attacker, stack,
                                 Config.uniqueEffects.tempest.damageScaling, Config.uniqueEffects.tempest.spellScaling));
             }
-            effect.setScaledDamage(Math.max(1.0F, scaledDamage));
+            effect.setScaledDamage(Math.max(1.0F, scaledDamage * (float) tuning.get(s("DAMAGE_MULTIPLIER"), 1)));
             target.addStatusEffect(effect);
+            UniqueAbilityApi.finish(execution, Phase6UniqueAbilities.FINISH, 1);
 
         }
         return super.postHit(stack, target, attacker);
@@ -121,8 +131,17 @@ public class TempestSwordItem extends UniqueSwordItem implements UniqueWeaponAct
     @Override
     public TypedActionResult<ItemStack> startPlayerAbility(World world, PlayerEntity user, Hand hand) {
         if (!user.getWorld().isClient() && world instanceof  ServerWorld serverWorld) {
-            if (consumeTempestMarks(serverWorld, user) > 0) {
-                SimplySwordsAPI.setWeaponCooldown(user, user.getStackInHand(hand), 200);
+            ItemStack stack = user.getStackInHand(hand);
+            if (hasTempestMarks(serverWorld, user)) {
+                WeaponAbilityContext context = WeaponAbilityContext.of(serverWorld, stack, user,
+                        user instanceof net.minecraft.server.network.ServerPlayerEntity player ? player : null,
+                        null, hand, WeaponAbilityActivationSource.PLAYER);
+                Phase6AbilityTuning tuning = Phase6CombatManager.startTempestVortex(context);
+                UniqueAbilityApi.takeStartedExecution();
+                if (consumeTempestMarks(serverWorld, user, tuning) > 0) {
+                    SimplySwordsAPI.setWeaponCooldown(user, stack,
+                            tuning.integer(s("COOLDOWN_TICKS"), 200));
+                }
             }
         }
 
@@ -143,7 +162,9 @@ public class TempestSwordItem extends UniqueSwordItem implements UniqueWeaponAct
 
     @Override
     public boolean activate(WeaponAbilityContext context) {
-        return consumeTempestMarks(context.world(), context.actor()) > 0;
+        if (!hasTempestMarks(context.world(), context.actor())) return false;
+        Phase6AbilityTuning tuning = Phase6CombatManager.startTempestVortex(context);
+        return consumeTempestMarks(context.world(), context.actor(), tuning) > 0;
     }
 
     @Override
@@ -160,9 +181,9 @@ public class TempestSwordItem extends UniqueSwordItem implements UniqueWeaponAct
                         && le.hasStatusEffect(EffectRegistry.getReference(EffectRegistry.FROST_VORTEX)));
     }
 
-    private int consumeTempestMarks(ServerWorld serverWorld, LivingEntity user) {
-        int vortexMaxSize = Config.uniqueEffects.tempest.maxSize;
-        int vortexDuration = Config.uniqueEffects.tempest.duration;
+    private int consumeTempestMarks(ServerWorld serverWorld, LivingEntity user, Phase6AbilityTuning tuning) {
+        int vortexMaxSize = tuning.integer(s("STACK_CAP"), Config.uniqueEffects.tempest.maxSize);
+        int vortexDuration = tuning.integer(s("DURATION_TICKS"), Config.uniqueEffects.tempest.duration);
         Box box = HelperMethods.createBox(user, 15);
         boolean soundHasPlayed = false;
         int consumed = 0;
@@ -187,6 +208,10 @@ public class TempestSwordItem extends UniqueSwordItem implements UniqueWeaponAct
                     SimplySwordsStatusEffectInstance status = HelperMethods.incrementSimplySwordsStatusEffect(user, EffectRegistry.getReference(EffectRegistry.ELEMENTAL_VORTEX), vortexDuration, totalAmplifier, vortexMaxSize);
                     status.setAdditionalData(Math.max(1, totalAmplifier));
                     status.setSourceEntity(user);
+                    if (tuning.get(s("ABSORPTION"), 0) > 0 && totalAmplifier >= tuning.integer(s("COUNT"), 5)) {
+                        user.setAbsorptionAmount(Math.max(user.getAbsorptionAmount(),
+                                (float) tuning.get(s("ABSORPTION"), 0)));
+                    }
                     le.removeStatusEffect(EffectRegistry.getReference(EffectRegistry.FIRE_VORTEX));
                     le.removeStatusEffect(EffectRegistry.getReference(EffectRegistry.FROST_VORTEX));
                     consumed++;
@@ -237,5 +262,9 @@ public class TempestSwordItem extends UniqueSwordItem implements UniqueWeaponAct
         @ValidatedFloat.Restrict(min = 0f)
         public float spellScaling = 1.2266f;
 
+    }
+
+    private static Phase6AbilityTuning.Setting s(String name) {
+        return Phase6AbilityTuning.Setting.valueOf(name);
     }
 }

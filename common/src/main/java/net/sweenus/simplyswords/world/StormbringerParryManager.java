@@ -5,6 +5,8 @@ import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.ItemStack;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
@@ -16,6 +18,13 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.config.Config;
+import net.sweenus.simplyswords.api.WeaponAbilityActivationSource;
+import net.sweenus.simplyswords.api.WeaponAbilityContext;
+import net.sweenus.simplyswords.api.ability.Phase6AbilityTuning;
+import net.sweenus.simplyswords.api.ability.Phase6UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityPhase;
 import net.sweenus.simplyswords.item.component.ParryComponent;
 import net.sweenus.simplyswords.registry.ComponentTypeRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
@@ -36,9 +45,19 @@ public final class StormbringerParryManager {
     public static void activate(ServerPlayerEntity player, Hand hand) {
         ServerWorld world = player.getServerWorld();
         long now = world.getTime();
-        int blockDuration = Math.max(1, Config.uniqueEffects.stormbringer.blockDuration);
-        int parryDuration = Math.clamp(Config.uniqueEffects.stormbringer.parryDuration, 1, blockDuration);
-        ACTIVE_PARRIES.put(player.getUuid(), new ActiveParry(hand, now + blockDuration, now + parryDuration));
+        ItemStack stack = player.getStackInHand(hand);
+        WeaponAbilityContext context = WeaponAbilityContext.of(world, stack, player, player, null, hand,
+                WeaponAbilityActivationSource.PLAYER);
+        UniqueAbilityExecution execution = Phase6CombatManager.beginActive(
+                Phase6UniqueAbilities.STORMBRINGER_GUARD, context, Config.uniqueEffects.stormbringer.cooldown);
+        UniqueAbilityApi.takeStartedExecution();
+        UniqueAbilityApi.start(execution);
+        Phase6AbilityTuning tuning = Phase6UniqueAbilities.tuning(execution);
+        int blockDuration = tuning.integer(s("DURATION_TICKS"), Math.max(1, Config.uniqueEffects.stormbringer.blockDuration));
+        int parryDuration = Math.clamp(tuning.integer(s("INTERVAL_TICKS"),
+                Config.uniqueEffects.stormbringer.parryDuration), 1, blockDuration);
+        ACTIVE_PARRIES.put(player.getUuid(), new ActiveParry(hand, now + blockDuration,
+                now + parryDuration, tuning, execution));
         spawnActivationEffects(world, player);
     }
 
@@ -51,6 +70,7 @@ public final class StormbringerParryManager {
         ServerWorld world = player.getServerWorld();
         if (!player.isAlive() || world.getTime() > active.expiresAt || !isStillUsingStormbringer(player, active.hand)) {
             ACTIVE_PARRIES.remove(player.getUuid());
+            UniqueAbilityApi.cancel(active.execution);
             return;
         }
 
@@ -79,14 +99,21 @@ public final class StormbringerParryManager {
         if (world.getTime() <= active.parryExpiresAt && isValidParryAttacker(player, attacker)) {
             ItemStack stack = player.getStackInHand(active.hand);
             ParryComponent parryComponent = stack.getOrDefault(ComponentTypeRegistry.PARRY.get(), ParryComponent.DEFAULT)
-                    .gainStormCharges(Config.uniqueEffects.stormbringer.stormChargesPerParry, Config.uniqueEffects.stormbringer.maxStormCharges);
+                    .gainStormCharges(active.tuning.integer(s("PULSE_COUNT"), Config.uniqueEffects.stormbringer.stormChargesPerParry),
+                            active.tuning.integer(s("CHARGE_CAP"), Config.uniqueEffects.stormbringer.maxStormCharges));
             stack.set(ComponentTypeRegistry.PARRY.get(), parryComponent);
+            if (active.tuning.flag(1 << 3)) {
+                player.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE,
+                        active.tuning.integer(s("STATUS_DURATION_TICKS"), 30), 0), player);
+            }
             spawnParryCatchEffects(world, player, attacker, parryComponent);
             player.stopUsingItem();
         } else {
             ItemStack stack = player.getStackInHand(active.hand);
             ParryComponent parryComponent = stack.getOrDefault(ComponentTypeRegistry.PARRY.get(), ParryComponent.DEFAULT)
-                    .gainBlockedStormCharges(Config.uniqueEffects.stormbringer.stormChargesPerBlock, Config.uniqueEffects.stormbringer.maxStormCharges);
+                    .gainBlockedStormCharges(active.tuning.flag(1 << 7) ? 0
+                                    : active.tuning.integer(s("COUNT"), Config.uniqueEffects.stormbringer.stormChargesPerBlock),
+                            active.tuning.integer(s("CHARGE_CAP"), Config.uniqueEffects.stormbringer.maxStormCharges));
             stack.set(ComponentTypeRegistry.PARRY.get(), parryComponent);
             spawnBlockedHitEffects(world, player);
         }
@@ -95,12 +122,13 @@ public final class StormbringerParryManager {
     }
 
     public static void finishUse(ServerPlayerEntity player, ItemStack stack) {
-        ACTIVE_PARRIES.remove(player.getUuid());
+        ActiveParry active = ACTIVE_PARRIES.remove(player.getUuid());
 
         int skillCooldown = Math.max(0, Config.uniqueEffects.stormbringer.cooldown);
         ParryComponent parryComponent = stack.getOrDefault(ComponentTypeRegistry.PARRY.get(), ParryComponent.DEFAULT);
         if (parryComponent.parried()) {
-            performCounterattack(player);
+            performCounterattack(player, active == null ? Phase6AbilityTuning.EMPTY : active.tuning,
+                    active == null ? null : active.execution);
             stack.set(ComponentTypeRegistry.PARRY.get(), parryComponent.resetParry());
         } else {
             spawnMissEffects(player.getServerWorld(), player);
@@ -108,6 +136,7 @@ public final class StormbringerParryManager {
         }
 
         SimplySwordsAPI.setWeaponCooldown(player, stack, skillCooldown);
+        if (active != null) UniqueAbilityApi.finish(active.execution, Phase6UniqueAbilities.FINISH, 0);
     }
 
     private static boolean isStillUsingStormbringer(ServerPlayerEntity player, Hand hand) {
@@ -126,28 +155,39 @@ public final class StormbringerParryManager {
         return attacker.squaredDistanceTo(player) <= radius * radius;
     }
 
-    private static void performCounterattack(ServerPlayerEntity player) {
+    private static void performCounterattack(ServerPlayerEntity player, Phase6AbilityTuning tuning,
+                                             UniqueAbilityExecution execution) {
         ServerWorld world = player.getServerWorld();
-        double radius = Math.max(0.5, Config.uniqueEffects.stormbringer.radius);
+        double radius = tuning.get(s("RADIUS"), Math.max(0.5, Config.uniqueEffects.stormbringer.radius));
         ItemStack stack = player.getMainHandStack();
         float abilityDamage = HelperMethods.abilityScaledDamage("lightning", player, stack,
                 Config.uniqueEffects.stormbringer.damageScaling, Config.uniqueEffects.stormbringer.spellScaling);
+        abilityDamage *= (float) tuning.get(s("DAMAGE_MULTIPLIER"), 1);
         Box box = player.getBoundingBox().expand(radius, radius, radius);
-
+        int affected = 0;
+        int cap = tuning.has(s("TARGET_CAP")) ? tuning.integer(s("TARGET_CAP"), 10) : Integer.MAX_VALUE;
         for (Entity entity : world.getOtherEntities(player, box, EntityPredicates.VALID_LIVING_ENTITY)) {
             if (!(entity instanceof LivingEntity target) || !HelperMethods.checkFriendlyFire(target, player)) {
                 continue;
             }
 
             DamageSource damageSource = player.getDamageSources().indirectMagic(player, player);
-            target.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments(world, stack, target, damageSource, abilityDamage));
+            float damage = HelperMethods.applyAbilityDamageEnchantments(world, stack, target, damageSource, abilityDamage);
+            if (!target.damage(damageSource, damage)) continue;
+            affected++;
             Vec3d direction = target.getPos().subtract(player.getPos());
             if (direction.lengthSquared() > 0.0001) {
                 direction = direction.normalize();
             }
-            target.setVelocity(direction.x * 1.15, 0.35, direction.z * 1.15);
+            double knockback = tuning.get(s("KNOCKBACK"), 1);
+            target.setVelocity(direction.x * 1.15 * knockback, 0.35, direction.z * 1.15 * knockback);
+            int fireTicks = tuning.integer(s("FIRE_TICKS"), 0);
+            if (fireTicks > 0) target.setOnFireFor(Math.max(1, fireTicks / 20));
             target.velocityModified = true;
             spawnTargetHitEffects(world, target);
+            if (execution != null) UniqueAbilityApi.emit(execution, UniqueAbilityPhase.HIT,
+                    Phase6UniqueAbilities.HIT, target, 1, damage);
+            if (affected >= cap) break;
         }
 
         Vec3d recoil = player.getRotationVector().multiply(-0.75);
@@ -207,6 +247,11 @@ public final class StormbringerParryManager {
         world.spawnParticles(ParticleTypes.SMOKE, pos.x, pos.y, pos.z, 5, 0.22, 0.18, 0.22, 0.01);
     }
 
-    private record ActiveParry(Hand hand, long expiresAt, long parryExpiresAt) {
+    private static Phase6AbilityTuning.Setting s(String name) {
+        return Phase6AbilityTuning.Setting.valueOf(name);
+    }
+
+    private record ActiveParry(Hand hand, long expiresAt, long parryExpiresAt,
+                               Phase6AbilityTuning tuning, UniqueAbilityExecution execution) {
     }
 }

@@ -20,6 +20,11 @@ import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.UseAction;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
+import net.sweenus.simplyswords.api.ability.Phase6AbilityTuning;
+import net.sweenus.simplyswords.api.ability.Phase6UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityPhase;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
@@ -34,6 +39,7 @@ import net.sweenus.simplyswords.util.WeaponManaCost;
 import net.sweenus.simplyswords.util.Styles;
 import net.sweenus.simplyswords.world.ChainLightningVisualManager;
 import net.sweenus.simplyswords.world.PlayerWeaponAbilityChannelManager;
+import net.sweenus.simplyswords.world.Phase6CombatManager;
 import net.sweenus.simplyswords.world.StormbringerParryManager;
 
 import java.util.HashMap;
@@ -45,6 +51,7 @@ public class StormbringerSwordItem extends UniqueSwordItem implements UniqueWeap
 
     private static final ThreadLocal<Boolean> SUPPRESS_STORMBRINGER_CHAIN = ThreadLocal.withInitial(() -> false);
     private static final Map<UUID, Long> NEXT_CHAIN_TICK = new HashMap<>();
+    private static final Map<UUID, Long> NEXT_FREE_CHAIN_TICK = new HashMap<>();
 
     public StormbringerSwordItem(ToolMaterial toolMaterial, Settings settings) {
         super(toolMaterial, settings);
@@ -77,25 +84,48 @@ public class StormbringerSwordItem extends UniqueSwordItem implements UniqueWeap
             return;
         }
 
+        UniqueAbilityExecution execution = Phase6CombatManager.beginPassive(
+                Phase6UniqueAbilities.STORMBRINGER_CHAIN, player.getServerWorld(), stack, player, target);
+        Phase6AbilityTuning tuning = Phase6UniqueAbilities.tuning(execution);
         ParryComponent component = stack.getOrDefault(ComponentTypeRegistry.PARRY.get(), ParryComponent.DEFAULT);
-        int stormCharges = Math.clamp(component.stormCharges(), 0, Math.max(0, Config.uniqueEffects.stormbringer.maxStormCharges));
+        int chargeCap = tuning.integer(s("CHARGE_CAP"), Math.max(0, Config.uniqueEffects.stormbringer.maxStormCharges));
+        int stormCharges = Math.clamp(component.stormCharges(), 0, chargeCap);
         if (stormCharges <= 0) {
+            UniqueAbilityApi.finish(execution, Phase6UniqueAbilities.FINISH, 0);
             return;
         }
 
         float damage = HelperMethods.abilityScaledDamage("lightning", player, stack,
                 Config.uniqueEffects.stormbringer.chainLightningDamageScaling,
-                Config.uniqueEffects.stormbringer.chainLightningSpellScaling);
+                Config.uniqueEffects.stormbringer.chainLightningSpellScaling)
+                * (float) tuning.get(s("DAMAGE_MULTIPLIER"), 1);
+        if (tuning.flag(1 << 15) && stormCharges >= chargeCap) damage *= 1.25F;
+        int targets = tuning.integer(s("TARGET_CAP"), stormCharges);
+        double range = tuning.get(s("RANGE"), Config.uniqueEffects.stormbringer.chainLightningRange);
         SUPPRESS_STORMBRINGER_CHAIN.set(true);
         try {
-            int damaged = ChainLightningVisualManager.damageStormbringerChain(player.getServerWorld(), player, target, stormCharges, damage, Config.uniqueEffects.stormbringer.chainLightningRange);
+            int damaged = ChainLightningVisualManager.damageStormbringerChain(player.getServerWorld(), player,
+                    target, Math.min(stormCharges, targets), damage, range);
             if (damaged > 0) {
-                stack.set(ComponentTypeRegistry.PARRY.get(), component.consumeStormCharge());
+                boolean free = tuning.flag(1 << 10)
+                        && now >= NEXT_FREE_CHAIN_TICK.getOrDefault(player.getUuid(), Long.MIN_VALUE);
+                int consumed = tuning.flag(1 << 15) && stormCharges >= chargeCap ? 2 : 1;
+                ParryComponent updated = component;
+                if (free) {
+                    NEXT_FREE_CHAIN_TICK.put(player.getUuid(), now + tuning.integer(s("LOCKOUT_TICKS"), 80));
+                } else {
+                    for (int i = 0; i < consumed; i++) updated = updated.consumeStormCharge();
+                }
+                stack.set(ComponentTypeRegistry.PARRY.get(), updated);
+                int cooldown = tuning.integer(s("COOLDOWN_TICKS"), Config.uniqueEffects.stormbringer.chainLightningCooldown);
                 NEXT_CHAIN_TICK.put(player.getUuid(), now + SimplySwordsAPI.getEffectiveWeaponCooldownTicks(
-                        stack, player, Config.uniqueEffects.stormbringer.chainLightningCooldown));
+                        stack, player, cooldown));
+                UniqueAbilityApi.emit(execution, UniqueAbilityPhase.HIT, Phase6UniqueAbilities.HIT,
+                        target, damaged, damage);
             }
         } finally {
             SUPPRESS_STORMBRINGER_CHAIN.set(false);
+            UniqueAbilityApi.finish(execution, Phase6UniqueAbilities.FINISH, 0);
         }
     }
 
@@ -143,12 +173,17 @@ public class StormbringerSwordItem extends UniqueSwordItem implements UniqueWeap
     public boolean activate(WeaponAbilityContext context) {
         LivingEntity actor = context.actor();
         ItemStack stack = context.stack();
+        UniqueAbilityExecution execution = Phase6CombatManager.beginActive(
+                Phase6UniqueAbilities.STORMBRINGER_GUARD, context, Config.uniqueEffects.stormbringer.cooldown);
+        Phase6AbilityTuning tuning = Phase6UniqueAbilities.tuning(execution);
         actor.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE,
-                Math.max(1, Config.uniqueEffects.stormbringer.blockDuration), 5), actor);
+                tuning.integer(s("DURATION_TICKS"), Math.max(1, Config.uniqueEffects.stormbringer.blockDuration)), 5), actor);
         ParryComponent parryComponent = stack.getOrDefault(ComponentTypeRegistry.PARRY.get(), ParryComponent.DEFAULT)
-                .gainBlockedStormCharges(Config.uniqueEffects.stormbringer.stormChargesPerBlock, Config.uniqueEffects.stormbringer.maxStormCharges);
+                .gainBlockedStormCharges(tuning.integer(s("COUNT"), Config.uniqueEffects.stormbringer.stormChargesPerBlock),
+                        tuning.integer(s("CHARGE_CAP"), Config.uniqueEffects.stormbringer.maxStormCharges));
         stack.set(ComponentTypeRegistry.PARRY.get(), parryComponent);
         context.world().spawnParticles(ParticleTypes.ELECTRIC_SPARK, actor.getX(), actor.getBodyY(0.5), actor.getZ(), 18, 0.35, 0.38, 0.35, 0.06);
+        UniqueAbilityApi.finish(execution, Phase6UniqueAbilities.FINISH, 0);
         return true;
     }
 
@@ -224,5 +259,9 @@ public class StormbringerSwordItem extends UniqueSwordItem implements UniqueWeap
         @ValidatedFloat.Restrict(min = 0f)
         public float chainLightningSpellScaling = 1.65f;
 
+    }
+
+    private static Phase6AbilityTuning.Setting s(String name) {
+        return Phase6AbilityTuning.Setting.valueOf(name);
     }
 }

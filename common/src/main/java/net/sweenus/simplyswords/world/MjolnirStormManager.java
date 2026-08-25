@@ -5,6 +5,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.particle.ParticleTypes;
@@ -19,6 +20,11 @@ import net.sweenus.simplyswords.api.DelegatedWeaponHitContext;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
+import net.sweenus.simplyswords.api.ability.Phase6AbilityTuning;
+import net.sweenus.simplyswords.api.ability.Phase6UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityPhase;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
@@ -87,7 +93,11 @@ public final class MjolnirStormManager {
         ServerWorld world = context.world();
         LivingEntity actor = context.actor();
         long now = world.getTime();
-        int duration = Math.max(0, Config.uniqueEffects.mjolnir.duration);
+        UniqueAbilityExecution execution = Phase6CombatManager.beginActive(
+                Phase6UniqueAbilities.MJOLNIR_STORM, context, Config.uniqueEffects.mjolnir.cooldown);
+        UniqueAbilityApi.start(execution);
+        Phase6AbilityTuning tuning = Phase6UniqueAbilities.tuning(execution);
+        int duration = tuning.integer(s("DURATION_TICKS"), Math.max(0, Config.uniqueEffects.mjolnir.duration));
         float boltDamage = HelperMethods.abilityScaledDamage(
                 "lightning",
                 actor,
@@ -110,6 +120,8 @@ public final class MjolnirStormManager {
                 Config.uniqueEffects.mjolnir.finalThunderclapSpellScaling
         );
 
+        boltDamage *= (float) tuning.get(s("DAMAGE_MULTIPLIER"), 1);
+        finalThunderclapDamage *= (float) tuning.get(s("FINAL_DAMAGE_MULTIPLIER"), 1);
         ActiveStorm storm = new ActiveStorm(
                 actor.getUuid(),
                 context.sourcePlayer() == null ? null : context.sourcePlayer().getUuid(),
@@ -119,9 +131,18 @@ public final class MjolnirStormManager {
                 now + duration,
                 boltDamage,
                 conductiveBurstDamage,
-                finalThunderclapDamage
+                finalThunderclapDamage,
+                tuning,
+                execution
         );
         ACTIVE_STORMS.computeIfAbsent(world, ignored -> new HashMap<>()).put(actor.getUuid(), storm);
+        int buffDuration = tuning.integer(s("STATUS_DURATION_TICKS"), 0);
+        if (tuning.get(s("ABSORPTION"), 0) > 0) {
+            actor.setAbsorptionAmount(Math.max(actor.getAbsorptionAmount(), (float) tuning.get(s("ABSORPTION"), 0)));
+        }
+        if (tuning.flag(1 << 9) && buffDuration > 0) {
+            actor.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, buffDuration, 0), actor);
+        }
         spawnActivationEffects(world, actor);
         return true;
     }
@@ -146,10 +167,13 @@ public final class MjolnirStormManager {
             return;
         }
 
+        UniqueAbilityExecution execution = Phase6CombatManager.beginPassive(
+                Phase6UniqueAbilities.MJOLNIR_STORM, world, stack, actor, target);
+        Phase6AbilityTuning tuning = Phase6UniqueAbilities.tuning(execution);
         target.addStatusEffect(
                 new StatusEffectInstance(
                         EffectRegistry.getReference(EffectRegistry.STORM),
-                        Math.max(1, Config.uniqueEffects.mjolnir.conductiveDuration),
+                        tuning.integer(s("STATUS_DURATION_TICKS"), Math.max(1, Config.uniqueEffects.mjolnir.conductiveDuration)),
                         0,
                         false,
                         false,
@@ -157,6 +181,7 @@ public final class MjolnirStormManager {
                 ),
                 actor
         );
+        UniqueAbilityApi.finish(execution, Phase6UniqueAbilities.FINISH, 1);
     }
 
     public static void tick(ServerWorld world) {
@@ -206,12 +231,13 @@ public final class MjolnirStormManager {
             if (!storm.finishing) {
                 if (now >= storm.nextPulseAt) {
                     strikePulse(world, actor, sourceOwner, storm);
-                    storm.nextPulseAt = now + Math.max(1, Config.uniqueEffects.mjolnir.frequency);
+                    storm.nextPulseAt = now + storm.tuning.integer(s("INTERVAL_TICKS"),
+                            Math.max(1, Config.uniqueEffects.mjolnir.frequency));
                 }
                 continue;
             }
 
-            int finalBoltCount = Math.max(0, Config.uniqueEffects.mjolnir.finalBoltCount);
+            int finalBoltCount = storm.tuning.integer(s("COUNT"), Math.max(0, Config.uniqueEffects.mjolnir.finalBoltCount));
             if (storm.finalBoltsReleased < finalBoltCount && now >= storm.nextFinalBoltAt) {
                 strikePulse(world, actor, sourceOwner, storm);
                 storm.finalBoltsReleased++;
@@ -219,6 +245,7 @@ public final class MjolnirStormManager {
             }
             if (storm.finalBoltsReleased >= finalBoltCount) {
                 releaseFinalThunderclap(world, actor, sourceOwner, storm);
+                UniqueAbilityApi.finish(storm.execution, Phase6UniqueAbilities.FINISH, storm.distinctTargets.size());
                 iterator.remove();
             }
         }
@@ -272,6 +299,7 @@ public final class MjolnirStormManager {
         }
 
         storm.struckThisCycle.add(target.getUuid());
+        storm.distinctTargets.add(target.getUuid());
         boolean conductive = target.hasStatusEffect(EffectRegistry.getReference(EffectRegistry.STORM));
         Vec3d impact = target.getPos().add(0.0, Math.max(0.45, target.getHeight() * 0.58), 0.0);
         spawnSkyBolt(world, impact);
@@ -282,6 +310,8 @@ public final class MjolnirStormManager {
         }
 
         damageTarget(world, actor, storm.stack, target, storm.boltDamage);
+        UniqueAbilityApi.emit(storm.execution, UniqueAbilityPhase.HIT, Phase6UniqueAbilities.HIT,
+                target, 1, storm.boltDamage);
         if (conductive) {
             releaseConductiveBurst(world, actor, sourceOwner, storm, impact);
         }
@@ -289,7 +319,7 @@ public final class MjolnirStormManager {
 
     private static LivingEntity selectTarget(ServerWorld world, LivingEntity actor,
                                              LivingEntity sourceOwner, ActiveStorm storm) {
-        double radius = Math.max(0.5, Config.uniqueEffects.mjolnir.radius);
+        double radius = storm.tuning.get(s("RADIUS"), Math.max(0.5, Config.uniqueEffects.mjolnir.radius));
         double verticalRadius = Math.max(1.0, radius * 0.5);
         Box box = actor.getBoundingBox().expand(radius, verticalRadius, radius);
         List<LivingEntity> targets = world.getEntitiesByClass(
@@ -357,7 +387,10 @@ public final class MjolnirStormManager {
     private static void releaseFinalThunderclap(ServerWorld world, LivingEntity actor,
                                                 LivingEntity sourceOwner, ActiveStorm storm) {
         Vec3d center = actor.getPos();
-        double radius = Math.max(0.1, Config.uniqueEffects.mjolnir.finalThunderclapRadius);
+        double radius = storm.tuning.get(s("RADIUS"), Math.max(0.1, Config.uniqueEffects.mjolnir.finalThunderclapRadius));
+        float damage = storm.finalThunderclapDamage * (1 + Math.min(
+                storm.tuning.integer(s("STACK_CAP"), 0), storm.distinctTargets.size())
+                * (float) storm.tuning.get(s("PER_STACK_MULTIPLIER"), 0));
         damageArea(
                 world,
                 actor,
@@ -365,8 +398,9 @@ public final class MjolnirStormManager {
                 storm.stack,
                 center,
                 radius,
-                storm.finalThunderclapDamage,
-                Math.max(0.0, Config.uniqueEffects.mjolnir.finalThunderclapKnockback),
+                damage,
+                Math.max(0.0, Config.uniqueEffects.mjolnir.finalThunderclapKnockback)
+                        * storm.tuning.get(s("KNOCKBACK"), 1),
                 Math.max(0.0, Config.uniqueEffects.mjolnir.finalThunderclapKnockUp)
         );
         addRing(world, center, radius, FINAL_RING_LIFETIME, true);
@@ -621,6 +655,10 @@ public final class MjolnirStormManager {
         return horizontal.normalize();
     }
 
+    private static Phase6AbilityTuning.Setting s(String name) {
+        return Phase6AbilityTuning.Setting.valueOf(name);
+    }
+
     private static final class ActiveStorm {
         private final UUID actorId;
         private final UUID sourceOwnerId;
@@ -630,7 +668,10 @@ public final class MjolnirStormManager {
         private final float boltDamage;
         private final float conductiveBurstDamage;
         private final float finalThunderclapDamage;
+        private final Phase6AbilityTuning tuning;
+        private final UniqueAbilityExecution execution;
         private final Set<UUID> struckThisCycle = new HashSet<>();
+        private final Set<UUID> distinctTargets = new HashSet<>();
         private long nextPulseAt;
         private long nextFinalBoltAt;
         private int finalBoltsReleased;
@@ -639,7 +680,8 @@ public final class MjolnirStormManager {
         private ActiveStorm(UUID actorId, UUID sourceOwnerId, ItemStack stack,
                             long startedAt, long nextPulseAt, long expiresAt,
                             float boltDamage, float conductiveBurstDamage,
-                            float finalThunderclapDamage) {
+                            float finalThunderclapDamage, Phase6AbilityTuning tuning,
+                            UniqueAbilityExecution execution) {
             this.actorId = actorId;
             this.sourceOwnerId = sourceOwnerId;
             this.stack = stack;
@@ -649,6 +691,8 @@ public final class MjolnirStormManager {
             this.boltDamage = boltDamage;
             this.conductiveBurstDamage = conductiveBurstDamage;
             this.finalThunderclapDamage = finalThunderclapDamage;
+            this.tuning = tuning;
+            this.execution = execution;
         }
     }
 

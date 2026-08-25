@@ -20,6 +20,11 @@ import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
+import net.sweenus.simplyswords.api.WeaponAbilityActivationSource;
+import net.sweenus.simplyswords.api.ability.Phase6AbilityTuning;
+import net.sweenus.simplyswords.api.ability.Phase6UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
@@ -31,6 +36,7 @@ import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
 import net.sweenus.simplyswords.world.LivingEntityAbilityMovementManager;
+import net.sweenus.simplyswords.world.Phase6CombatManager;
 
 import java.util.List;
 
@@ -59,9 +65,20 @@ public class FrostfallSwordItem extends UniqueSwordItem implements UniqueWeaponA
         if (user.getWorld().isClient()) return super.use(world, user, hand);
 
         ItemStack itemStack = user.getStackInHand(hand);
+        int cooldown = Config.uniqueEffects.frostfall.cooldown;
         if (!world.isClient) {
             itemStack = user.getStackInHand(hand);
-            FrostfallEntity frostfallEntity = createFrostfallEntity(world, user, itemStack.copy());
+            var serverWorld = (net.minecraft.server.world.ServerWorld) world;
+            WeaponAbilityContext context = WeaponAbilityContext.of(serverWorld, itemStack, user,
+                    user instanceof net.minecraft.server.network.ServerPlayerEntity player ? player : null,
+                    null, hand, WeaponAbilityActivationSource.PLAYER);
+            UniqueAbilityExecution execution = Phase6CombatManager.beginActive(
+                    Phase6UniqueAbilities.FROSTFALL_THROW, context, Config.uniqueEffects.frostfall.cooldown);
+            UniqueAbilityApi.takeStartedExecution();
+            UniqueAbilityApi.start(execution);
+            Phase6AbilityTuning tuning = Phase6UniqueAbilities.tuning(execution);
+            cooldown = tuning.integer(s("COOLDOWN_TICKS"), cooldown);
+            FrostfallEntity frostfallEntity = createFrostfallEntity(world, user, itemStack.copy(), tuning, execution);
             if (hand == Hand.OFF_HAND)
                 frostfallEntity.offhandThrow = true;
             world.spawnEntity(frostfallEntity);
@@ -74,11 +91,13 @@ public class FrostfallSwordItem extends UniqueSwordItem implements UniqueWeaponA
         user.swingHand(hand);
 
 
-        SimplySwordsAPI.setWeaponCooldown(user, itemStack, Config.uniqueEffects.frostfall.cooldown);
+        SimplySwordsAPI.setWeaponCooldown(user, itemStack, cooldown);
         return TypedActionResult.success(itemStack, world.isClient());
     }
 
-    private static FrostfallEntity createFrostfallEntity(World world, LivingEntity user, ItemStack stack) {
+    private static FrostfallEntity createFrostfallEntity(World world, LivingEntity user, ItemStack stack,
+                                                         Phase6AbilityTuning tuning,
+                                                         UniqueAbilityExecution execution) {
         float abilityDamage = HelperMethods.abilityScaledDamage("frost", user, stack,
                 Config.uniqueEffects.frostfall.damageScaling, Config.uniqueEffects.frostfall.spellScaling);
         float pulseDamage = HelperMethods.abilityScaledDamage("frost", user, stack,
@@ -87,11 +106,12 @@ public class FrostfallSwordItem extends UniqueSwordItem implements UniqueWeaponA
         frostfallEntity.setVelocity(user, user.getPitch(), user.getYaw(), 0.0F, 1.5F, 1.0F);
         frostfallEntity.setYaw(user.getYaw());
         frostfallEntity.setPitch(user.getPitch());
-        frostfallEntity.primaryBaseDamage = abilityDamage;
-        frostfallEntity.detonateDamage = pulseDamage;
+        frostfallEntity.primaryBaseDamage = abilityDamage * (float) tuning.get(s("DAMAGE_MULTIPLIER"), 1);
+        frostfallEntity.detonateDamage = pulseDamage * (float) tuning.get(s("DAMAGE_MULTIPLIER"), 1);
         frostfallEntity.addedChance = Config.uniqueEffects.frostfall.chance;
-        frostfallEntity.detonateRadius = Config.uniqueEffects.frostfall.radius;
-        frostfallEntity.duration = Config.uniqueEffects.frostfall.duration;
+        frostfallEntity.detonateRadius = tuning.get(s("RADIUS"), Config.uniqueEffects.frostfall.radius);
+        frostfallEntity.duration = tuning.integer(s("STATUS_DURATION_TICKS"), Config.uniqueEffects.frostfall.duration);
+        frostfallEntity.setMastery(tuning, execution);
         frostfallEntity.setPos(user.getX(), user.getEyeY() - 0.5, user.getZ());
         return frostfallEntity;
     }
@@ -101,7 +121,11 @@ public class FrostfallSwordItem extends UniqueSwordItem implements UniqueWeaponA
         if (context.target() == null || !HelperMethods.checkAbilityTarget(context.target(), context.actor())) {
             return false;
         }
-        FrostfallEntity frostfallEntity = createFrostfallEntity(context.world(), context.actor(), context.stack().copy());
+        UniqueAbilityExecution execution = Phase6CombatManager.beginActive(
+                Phase6UniqueAbilities.FROSTFALL_THROW, context, Config.uniqueEffects.frostfall.cooldown);
+        Phase6AbilityTuning tuning = Phase6UniqueAbilities.tuning(execution);
+        FrostfallEntity frostfallEntity = createFrostfallEntity(context.world(), context.actor(),
+                context.stack().copy(), tuning, execution);
         Vec3d direction = LivingEntityAbilityMovementManager.getLobbedTargetDirection(context.actor(), context.target());
         frostfallEntity.setVelocity(direction.x, direction.y, direction.z, 1.65F, 1.0F);
         frostfallEntity.setYaw(context.actor().getYaw());
@@ -160,5 +184,9 @@ public class FrostfallSwordItem extends UniqueSwordItem implements UniqueWeaponA
         public double radius = 8.0;
         @ValidatedFloat.Restrict(min = 0f)
         public float spellScaling = 4.61f;
+    }
+
+    private static Phase6AbilityTuning.Setting s(String name) {
+        return Phase6AbilityTuning.Setting.valueOf(name);
     }
 }

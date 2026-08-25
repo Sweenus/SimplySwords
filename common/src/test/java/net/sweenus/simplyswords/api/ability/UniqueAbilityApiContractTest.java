@@ -174,6 +174,25 @@ final class UniqueAbilityApiContractTest {
         assertEquals(0.0, tuning.get(Phase5AbilityTuning.Setting.SPEED, 1));
     }
 
+    @Test
+    void phase6DefinitionsAreAdditiveTypedAndBounded() {
+        List<UniqueAbilityDefinition> definitions = Phase6UniqueAbilities.definitions();
+        assertEquals(13, definitions.stream().map(UniqueAbilityDefinition::id).distinct().count());
+        for (UniqueAbilityDefinition definition : definitions) {
+            assertTrue(definition.supports(Phase6UniqueAbilities.TUNING));
+            assertTrue(definition.supportsEvent(Phase6UniqueAbilities.HIT));
+            assertTrue(definition.supportsEvent(Phase6UniqueAbilities.PULSE));
+            assertTrue(definition.supportsEvent(Phase6UniqueAbilities.FINISH));
+        }
+        Phase6AbilityTuning tuning = Phase6AbilityTuning.EMPTY
+                .with(Phase6AbilityTuning.Setting.CHANCE, 500)
+                .with(Phase6AbilityTuning.Setting.TARGET_CAP, 500)
+                .with(Phase6AbilityTuning.Setting.SPEED, Double.NaN);
+        assertEquals(100, tuning.integer(Phase6AbilityTuning.Setting.CHANCE, 0));
+        assertEquals(64, tuning.integer(Phase6AbilityTuning.Setting.TARGET_CAP, 0));
+        assertEquals(0.0, tuning.get(Phase6AbilityTuning.Setting.SPEED, 1));
+    }
+
     private static Identifier id(String path) {
         return Identifier.of("simplyswords_test", path);
     }

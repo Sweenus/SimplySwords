@@ -15,6 +15,8 @@ import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.SoundHelper;
+import net.sweenus.simplyswords.api.ability.Phase6AbilityTuning;
+import net.sweenus.simplyswords.world.Phase6CombatManager;
 
 public class ElementalVortexEffect extends OrbitingEffect {
     public LivingEntity sourceEntity; // The player who applied the effect
@@ -41,8 +43,13 @@ public class ElementalVortexEffect extends OrbitingEffect {
                 additionalData = statusEffect.getAdditionalData();
             }
 
-            if (livingEntity.age % 10 == 0) {
-                Box box = HelperMethods.createBox(livingEntity, 1 + (amplifier / 6));
+            Phase6AbilityTuning tuning = Phase6CombatManager.tempestTuning(livingEntity);
+            int interval = tuning.integer(s("INTERVAL_TICKS"), 10);
+            if (livingEntity.age % interval == 0) {
+                double radius = tuning.get(s("RADIUS"), 1 + (amplifier / 6.0));
+                Box box = HelperMethods.createBox(livingEntity, radius);
+                int affected = 0;
+                int cap = tuning.has(s("SEARCH_CAP")) ? tuning.integer(s("SEARCH_CAP"), 64) : Integer.MAX_VALUE;
                 for (Entity entity : serverWorld.getOtherEntities(livingEntity, box, EntityPredicates.VALID_LIVING_ENTITY)) {
                     if ((entity instanceof LivingEntity le) && HelperMethods.checkFriendlyFire(le, livingEntity)) {
 
@@ -50,10 +57,19 @@ public class ElementalVortexEffect extends OrbitingEffect {
                             DamageSource damageSource = livingEntity.getDamageSources().indirectMagic(livingEntity, sourceEntity);
 							le.timeUntilRegen = 0;
                             float damage = HelperMethods.applyNonPlayerAbilityDamageModifier(sourceEntity,
-                                    additionalData + ((float) amplifier / 2));
+                                    additionalData + ((float) amplifier / 2))
+                                    * (float) tuning.get(s("DAMAGE_MULTIPLIER"), 1);
                             le.damage(damageSource, damage);
                         }
-
+                        double pull = tuning.get(s("PULL_STRENGTH"), 0);
+                        if (pull > 0) {
+                            var direction = livingEntity.getPos().subtract(le.getPos()).multiply(1, 0, 1);
+                            if (direction.lengthSquared() > .0001) {
+                                le.addVelocity(direction.normalize().multiply(.08 * pull));
+                                le.velocityModified = true;
+                            }
+                        }
+                        if (++affected >= cap) break;
                     }
                 }
             }
@@ -78,5 +94,9 @@ public class ElementalVortexEffect extends OrbitingEffect {
     @Override
     public boolean canApplyUpdateEffect(int pDuration, int pAmplifier) {
         return super.canApplyUpdateEffect(pDuration, pAmplifier);
+    }
+
+    private static Phase6AbilityTuning.Setting s(String name) {
+        return Phase6AbilityTuning.Setting.valueOf(name);
     }
 }

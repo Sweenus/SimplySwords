@@ -16,11 +16,13 @@ import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 public final class Phase5FlamewindManager {
-    private static final Map<UUID, SeedSnapshot> SEEDS = new HashMap<>();
+    private static final Map<ServerWorld, Map<UUID, SeedSnapshot>> SEEDS = new HashMap<>();
 
     private Phase5FlamewindManager() {
     }
@@ -47,7 +49,7 @@ public final class Phase5FlamewindManager {
         effect.setSourceEntity(context.actor());
         effect.setAdditionalData(spread);
         target.addStatusEffect(effect);
-        SEEDS.put(target.getUuid(), new SeedSnapshot(context.actor().getUuid(), context.stack().copy(),
+        seeds(context.world()).put(target.getUuid(), new SeedSnapshot(context.actor().getUuid(), context.stack().copy(),
                 tuning, execution, 0));
         FlamewindVisualManager.refreshSeed(context.world(), target);
         UniqueAbilityApi.emit(execution, UniqueAbilityPhase.HIT, Phase5UniqueAbilities.HIT, target, 1, 0);
@@ -55,21 +57,65 @@ public final class Phase5FlamewindManager {
     }
 
     public static SeedSnapshot snapshot(LivingEntity target) {
-        return target == null ? null : SEEDS.get(target.getUuid());
+        if (target == null || !(target.getWorld() instanceof ServerWorld world)) return null;
+        Map<UUID, SeedSnapshot> seeds = SEEDS.get(world);
+        return seeds == null ? null : seeds.get(target.getUuid());
     }
 
     public static void inherit(LivingEntity source, LivingEntity target) {
         SeedSnapshot snapshot = snapshot(source);
-        if (snapshot != null) SEEDS.put(target.getUuid(), snapshot.nextGeneration());
+        if (snapshot != null && target.getWorld() instanceof ServerWorld world) {
+            seeds(world).put(target.getUuid(), snapshot.nextGeneration());
+        }
     }
 
     public static void remove(UUID targetId) {
-        SEEDS.remove(targetId);
+        if (targetId == null) return;
+        SEEDS.values().forEach(seeds -> seeds.remove(targetId));
+        SEEDS.entrySet().removeIf(entry -> entry.getValue().isEmpty());
+    }
+
+    public static void remove(ServerWorld world, UUID targetId) {
+        if (world == null || targetId == null) return;
+        Map<UUID, SeedSnapshot> seeds = SEEDS.get(world);
+        if (seeds == null) return;
+        seeds.remove(targetId);
+        if (seeds.isEmpty()) SEEDS.remove(world);
     }
 
     public static boolean hasOwned(LivingEntity actor) {
-        if (actor == null) return false;
-        return SEEDS.values().stream().anyMatch(seed -> seed.ownerId.equals(actor.getUuid()));
+        return actor != null && actor.getWorld() instanceof ServerWorld world
+                && !ownedSeeds(world, actor, 1).isEmpty();
+    }
+
+    public static List<LivingEntity> ownedSeeds(ServerWorld world, LivingEntity owner, int limit) {
+        if (world == null || owner == null || limit <= 0) return List.of();
+        Map<UUID, SeedSnapshot> seeds = SEEDS.get(world);
+        if (seeds == null || seeds.isEmpty()) return List.of();
+        pruneSeeds(seeds, targetId -> world.getEntity(targetId) instanceof LivingEntity target
+                && target.isAlive()
+                && target.hasStatusEffect(EffectRegistry.getReference(EffectRegistry.FLAMESEED)));
+        if (seeds.isEmpty()) {
+            SEEDS.remove(world);
+            return List.of();
+        }
+        return seeds.entrySet().stream()
+                .filter(entry -> entry.getValue().ownerId.equals(owner.getUuid()))
+                .map(entry -> world.getEntity(entry.getKey()))
+                .filter(LivingEntity.class::isInstance)
+                .map(LivingEntity.class::cast)
+                .sorted(java.util.Comparator.comparingDouble((LivingEntity target) -> owner.squaredDistanceTo(target))
+                        .thenComparing(target -> target.getUuid().toString()))
+                .limit(Math.min(64, limit))
+                .toList();
+    }
+
+    private static Map<UUID, SeedSnapshot> seeds(ServerWorld world) {
+        return SEEDS.computeIfAbsent(world, ignored -> new HashMap<>());
+    }
+
+    static void pruneSeeds(Map<UUID, SeedSnapshot> seeds, Predicate<UUID> isLive) {
+        seeds.keySet().removeIf(targetId -> !isLive.test(targetId));
     }
 
     public record SeedSnapshot(UUID ownerId, ItemStack stack, Phase5AbilityTuning tuning,

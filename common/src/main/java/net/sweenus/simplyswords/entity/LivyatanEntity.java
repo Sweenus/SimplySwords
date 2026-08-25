@@ -23,6 +23,11 @@ import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.world.ChainLightningVisualManager;
 import net.sweenus.simplyswords.world.LivyatanWaveManager;
+import net.sweenus.simplyswords.api.ability.Phase6AbilityTuning;
+import net.sweenus.simplyswords.api.ability.Phase6UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityPhase;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -31,6 +36,8 @@ import java.util.UUID;
 public class LivyatanEntity extends ThrownSwordEntity {
     public int slownessDuration;
     private final Set<UUID> returnLightningRolledTargets = new HashSet<>();
+    private Phase6AbilityTuning masteryTuning = Phase6AbilityTuning.EMPTY;
+    private UniqueAbilityExecution masteryExecution;
 
     // Base Constructor
     public LivyatanEntity(EntityType<? extends LivyatanEntity> entityType, World world) {
@@ -41,6 +48,11 @@ public class LivyatanEntity extends ThrownSwordEntity {
     public LivyatanEntity(World world, LivingEntity owner, ItemStack stack) {
         super(world, owner, stack);
         this.stack = stack;
+    }
+
+    public void setMastery(Phase6AbilityTuning tuning, UniqueAbilityExecution execution) {
+        masteryTuning = tuning == null ? Phase6AbilityTuning.EMPTY : tuning;
+        masteryExecution = execution;
     }
     @Override
     public void tick() {
@@ -68,44 +80,54 @@ public class LivyatanEntity extends ThrownSwordEntity {
         }
         LivyatanWaveManager.spawnReturnPulse(world, this.getPos(), horizontalToOwner, this.returnTimer);
 
-        double waveRadius = Math.max(0.5, radius);
+        double waveRadius = masteryTuning.get(s("RADIUS"), Math.max(0.5, radius));
         Box box = Box.of(this.getPos().add(0.0, 0.5, 0.0), waveRadius * 2.0, 3.0, waveRadius * 2.0);
         DamageSource damageSource = user.getDamageSources().trident(this, user);
         boolean damageTick = this.returnTimer % 5 == 0;
         float lightningDamage = 0.0F;
         boolean calculatedLightningDamage = false;
+        int affected = 0;
+        int cap = masteryTuning.has(s("TARGET_CAP"))
+                ? masteryTuning.integer(s("TARGET_CAP"), 16) : Integer.MAX_VALUE;
         for (LivingEntity target : world.getEntitiesByClass(LivingEntity.class, box, LivingEntity::isAlive)) {
             if (!HelperMethods.checkAbilityTarget(target, user) || horizontalDistanceSquared(target.getPos(), this.getPos()) > waveRadius * waveRadius) {
                 continue;
             }
 
-            pullTargetTowardOwner(target, user);
+            pullTargetTowardOwner(target, user, masteryTuning.get(s("PULL_STRENGTH"),
+                    Config.uniqueEffects.livyatan.returnWavePullStrength));
             if (damageTick) {
-                float returnDamage = HelperMethods.applyAbilityDamageEnchantments(world, stack, target, damageSource, damage);
+                float tunedDamage = damage * (float) masteryTuning.get(s("DAMAGE_MULTIPLIER"), 1);
+                float returnDamage = HelperMethods.applyAbilityDamageEnchantments(world, stack, target, damageSource, tunedDamage);
                 if (HelperMethods.damageThroughIframes(target, damageSource, returnDamage)) {
                     world.playSoundFromEntity(null, user, SoundRegistry.ELEMENTAL_SWORD_ICE_ATTACK_01.get(), user.getSoundCategory(), 0.2f, 1.5f);
                     target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, slownessDuration, 2), user);
                     HelperMethods.spawnOrbitParticles(world, this.getPos(), ParticleTypes.POOF, 0.5f, 3);
+                    if (masteryExecution != null) UniqueAbilityApi.emit(masteryExecution, UniqueAbilityPhase.HIT,
+                            Phase6UniqueAbilities.HIT, target, 1, returnDamage);
                 }
             }
+            int chance = masteryTuning.integer(s("CHANCE"), Config.uniqueEffects.livyatan.returnLightningChance);
             if (this.returnLightningRolledTargets.add(target.getUuid())
-                    && world.random.nextInt(100) < MathHelper.clamp(Config.uniqueEffects.livyatan.returnLightningChance, 0, 100)) {
+                    && (chance >= 100 || chance > 0 && world.random.nextInt(100) < chance)) {
                 if (!calculatedLightningDamage) {
                     lightningDamage = HelperMethods.abilityScaledDamage("lightning", user, stack,
                             Config.uniqueEffects.livyatan.returnLightningDamageScaling,
                             Config.uniqueEffects.livyatan.returnLightningSpellScaling);
                     calculatedLightningDamage = true;
                 }
-                ChainLightningVisualManager.damageSkyBolt(world, user, stack, target, lightningDamage,
+                ChainLightningVisualManager.damageSkyBolt(world, user, stack, target,
+                        lightningDamage * (float) masteryTuning.get(s("SECONDARY_DAMAGE_MULTIPLIER"), 1),
                         Config.uniqueEffects.livyatan.returnLightningSkyHeight,
                         ChainLightningVisualManager.STORMBRINGER_SETTINGS);
             }
+            if (++affected >= cap) break;
         }
         pullLooseEntitiesTowardOwner(world, user, box, this.getPos(), waveRadius);
     }
 
-    private static void pullTargetTowardOwner(LivingEntity target, LivingEntity owner) {
-        double strength = Math.max(0.0, Config.uniqueEffects.livyatan.returnWavePullStrength) * getLivingPullScale(target);
+    private static void pullTargetTowardOwner(LivingEntity target, LivingEntity owner, double rawStrength) {
+        double strength = Math.max(0.0, rawStrength) * getLivingPullScale(target);
         pullEntityTowardOwner(target, owner, strength, true);
         target.fallDistance = 0.0F;
     }
@@ -199,6 +221,10 @@ public class LivyatanEntity extends ThrownSwordEntity {
         if ((this.stack == null || this.stack.isEmpty()) && nbt.contains("item")) {
             this.stack = ItemStack.fromNbt(this.getRegistryManager(), nbt.getCompound("item")).orElse(this.getDefaultItemStack());
         }
+    }
+
+    private static Phase6AbilityTuning.Setting s(String name) {
+        return Phase6AbilityTuning.Setting.valueOf(name);
     }
 
 }

@@ -14,6 +14,11 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
+import net.sweenus.simplyswords.api.ability.Phase6AbilityTuning;
+import net.sweenus.simplyswords.api.ability.Phase6UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityPhase;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
@@ -56,16 +61,26 @@ public final class ThunderbrandAbilityManager {
         Vec3d facing = horizontalDirection(context.facing(), actor);
         UUID targetId = isValidTarget(context.target(), actor) ? context.target().getUuid() : null;
         Hand hand = context.hand() == null ? Hand.MAIN_HAND : context.hand();
-        active.put(actor.getUuid(), new ActiveThunderBlitz(
+        UniqueAbilityExecution execution = Phase6CombatManager.beginActive(
+                Phase6UniqueAbilities.THUNDERBRAND_BLITZ, context, Config.uniqueEffects.thunderbrand.cooldown);
+        UniqueAbilityApi.start(execution);
+        Phase6AbilityTuning tuning = Phase6UniqueAbilities.tuning(execution);
+        ActiveThunderBlitz ability = new ActiveThunderBlitz(
                 actor.getUuid(),
                 targetId,
                 context.stack().copy(),
                 hand,
                 facing,
-                world.getTime()
-        ));
+                world.getTime(),
+                tuning,
+                execution
+        );
+        if (tuning.flag(1 << 17)) {
+            ability.storedDamageInstances = Math.max(1, tuning.integer(s("CHARGE_CAP"), MAX_STORED_DAMAGE_INSTANCES));
+        }
+        active.put(actor.getUuid(), ability);
 
-        int chargeDuration = chargeDuration();
+        int chargeDuration = chargeDuration(ability);
         actor.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, chargeDuration + 2, 3), actor);
         actor.addStatusEffect(new StatusEffectInstance(StatusEffects.MINING_FATIGUE, chargeDuration + 2, 3), actor);
         spawnChargeStartEffects(world, actor);
@@ -96,11 +111,20 @@ public final class ThunderbrandAbilityManager {
             return false;
         }
 
-        if (ability.storedDamageInstances < MAX_STORED_DAMAGE_INSTANCES) {
+        if (ability.tuning.flag(1 << 17)) return true;
+        if (ability.tuning.flag(1 << 16)) {
+            actor.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, chargeDuration(ability) + 2, 2), actor);
+        }
+        int cap = ability.tuning.integer(s("CHARGE_CAP"), MAX_STORED_DAMAGE_INSTANCES);
+        if (ability.storedDamageInstances < cap) {
             ability.storedDamageInstances++;
         }
+        if (ability.tuning.flag(1 << 12)) {
+            actor.setAbsorptionAmount(Math.max(actor.getAbsorptionAmount(),
+                    Math.min(ability.tuning.integer(s("TARGET_CAP"), 8), ability.storedDamageInstances * 2)));
+        }
         spawnAbsorbEffects(world, actor, ability.storedDamageInstances);
-        return true;
+        return !ability.tuning.flag(1 << 16);
     }
 
     public static void cancelCharging(LivingEntity actor) {
@@ -115,6 +139,7 @@ public final class ThunderbrandAbilityManager {
         }
 
         active.remove(actor.getUuid());
+        UniqueAbilityApi.cancel(ability.execution);
         if (active.isEmpty()) {
             ACTIVE_ABILITIES.remove(world);
         }
@@ -141,6 +166,7 @@ public final class ThunderbrandAbilityManager {
                     || !isStillHolding(actor, ability)
                     || ability.phase == Phase.CHARGING && !isPlayerStillCharging(actor, ability)) {
                 stopDashMovement(actorFor(world, ability));
+                UniqueAbilityApi.cancel(ability.execution);
                 iterator.remove();
                 continue;
             }
@@ -164,7 +190,7 @@ public final class ThunderbrandAbilityManager {
         if ((now - ability.startedAt) % 3L == 0L) {
             spawnChargingEffects(world, actor, ability.storedDamageInstances);
         }
-        if (now - ability.startedAt >= chargeDuration()) {
+        if (now - ability.startedAt >= chargeDuration(ability)) {
             beginDash(world, actor, ability, now);
         }
     }
@@ -175,7 +201,7 @@ public final class ThunderbrandAbilityManager {
         ability.previousPosition = actor.getPos();
         ability.dashDirection = resolveDashDirection(world, actor, ability);
 
-        double speed = Math.max(0.1, Config.uniqueEffects.thunderbrand.dashSpeed);
+        double speed = ability.tuning.get(s("SPEED"), Math.max(0.1, Config.uniqueEffects.thunderbrand.dashSpeed));
         actor.setVelocity(ability.dashDirection.x * speed, 0.0, ability.dashDirection.z * speed);
         actor.velocityModified = true;
         actor.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, 80, 2), actor);
@@ -191,12 +217,14 @@ public final class ThunderbrandAbilityManager {
     }
 
     private static boolean tickDashing(ServerWorld world, LivingEntity actor, ActiveThunderBlitz ability, long now) {
-        int dashDuration = dashDuration();
+        int dashDuration = dashDuration(ability);
         int dashTick = (int) Math.max(0L, now - ability.dashStartedAt);
         if (dashTick >= dashDuration) {
             damageDashTargets(world, actor, ability);
+            releaseFinalBurst(world, actor, ability);
             stopDashMovement(actor);
             spawnDashEndEffects(world, actor);
+            UniqueAbilityApi.finish(ability.execution, Phase6UniqueAbilities.FINISH, ability.dashHitTargets.size());
             return false;
         }
 
@@ -211,7 +239,7 @@ public final class ThunderbrandAbilityManager {
         Vec3d previousPosition = ability.previousPosition == null ? currentPosition : ability.previousPosition;
         Box currentBox = actor.getBoundingBox();
         Box previousBox = currentBox.offset(previousPosition.subtract(currentPosition));
-        double radius = Math.max(0.1, Config.uniqueEffects.thunderbrand.radius);
+        double radius = ability.tuning.get(s("RADIUS"), Math.max(0.1, Config.uniqueEffects.thunderbrand.radius));
         Box sweptBox = new Box(
                 Math.min(currentBox.minX, previousBox.minX) - radius,
                 Math.min(currentBox.minY, previousBox.minY) - Math.max(0.5, radius * 0.5),
@@ -231,16 +259,23 @@ public final class ThunderbrandAbilityManager {
             float baseDamage = HelperMethods.abilityScaledDamage("lightning", actor, ability.stack,
                     Config.uniqueEffects.thunderbrand.damageScaling,
                     Config.uniqueEffects.thunderbrand.spellScaling);
-            float damage = HelperMethods.applyAbilityDamageEnchantments(world, ability.stack, target, source, baseDamage * 3.0F);
+            float multiplier = 3.0F * (float) ability.tuning.get(s("DAMAGE_MULTIPLIER"), 1);
+            if (ability.storedDamageInstances >= 8 && ability.tuning.flag(1 << 14)) multiplier *= 1.2F;
+            if (ability.tuning.flag(1 << 16)) multiplier *= 1 + ability.storedDamageInstances
+                    * (float) ability.tuning.get(s("PER_STACK_MULTIPLIER"), .12);
+            float damage = HelperMethods.applyAbilityDamageEnchantments(world, ability.stack, target, source, baseDamage * multiplier);
             if (target.damage(source, damage)) {
                 spawnDashHitEffects(world, target);
+                UniqueAbilityApi.emit(ability.execution, UniqueAbilityPhase.HIT, Phase6UniqueAbilities.HIT,
+                        target, 1, damage);
             }
         }
     }
 
     private static void releaseScheduledChains(ServerWorld world, LivingEntity actor, ActiveThunderBlitz ability,
                                                int dashTick, int dashDuration) {
-        int totalChains = Math.clamp(ability.storedDamageInstances, 0, MAX_STORED_DAMAGE_INSTANCES);
+        int totalChains = Math.clamp(ability.storedDamageInstances, 0,
+                ability.tuning.integer(s("CHARGE_CAP"), MAX_STORED_DAMAGE_INSTANCES));
         if (totalChains <= 0) {
             return;
         }
@@ -257,7 +292,7 @@ public final class ThunderbrandAbilityManager {
     }
 
     private static void releaseChain(ServerWorld world, LivingEntity actor, ActiveThunderBlitz ability) {
-        double range = Math.max(0.5, Config.uniqueEffects.thunderbrand.chainRange);
+        double range = ability.tuning.get(s("RANGE"), Math.max(0.5, Config.uniqueEffects.thunderbrand.chainRange));
         LivingEntity firstTarget = findNearestChainTarget(world, actor, range);
         if (firstTarget == null) {
             spawnDissipatedChainEffects(world, actor);
@@ -266,14 +301,15 @@ public final class ThunderbrandAbilityManager {
 
         float damage = HelperMethods.abilityScaledDamage("lightning", actor, ability.stack,
                 Config.uniqueEffects.thunderbrand.damageScaling,
-                Config.uniqueEffects.thunderbrand.spellScaling);
+                Config.uniqueEffects.thunderbrand.spellScaling)
+                * (float) ability.tuning.get(s("SECONDARY_DAMAGE_MULTIPLIER"), 1);
         ChainLightningVisualManager.damageChain(
                 world,
                 actor,
                 actor,
                 ability.stack,
                 firstTarget,
-                Math.max(1, Config.uniqueEffects.thunderbrand.chainTargets),
+                ability.tuning.integer(s("TARGET_CAP"), Math.max(1, Config.uniqueEffects.thunderbrand.chainTargets)),
                 damage,
                 range,
                 ChainLightningVisualManager.STORMBRINGER_SETTINGS
@@ -302,6 +338,27 @@ public final class ThunderbrandAbilityManager {
             }
         }
         return horizontalDirection(actor instanceof PlayerEntity ? actor.getRotationVec(1.0F) : ability.fallbackDirection, actor);
+    }
+
+    private static void releaseFinalBurst(ServerWorld world, LivingEntity actor, ActiveThunderBlitz ability) {
+        float multiplier = (float) ability.tuning.get(s("FINAL_DAMAGE_MULTIPLIER"), 0);
+        if (multiplier <= 0) return;
+        double radius = ability.tuning.get(s("RADIUS"), 3);
+        int cap = ability.tuning.integer(s("TARGET_CAP"), 10);
+        float base = HelperMethods.abilityScaledDamage("lightning", actor, ability.stack,
+                Config.uniqueEffects.thunderbrand.damageScaling, Config.uniqueEffects.thunderbrand.spellScaling);
+        int affected = 0;
+        for (LivingEntity target : world.getEntitiesByClass(LivingEntity.class,
+                actor.getBoundingBox().expand(radius), target -> target != actor && target.isAlive()
+                        && HelperMethods.checkAbilityTarget(target, actor))) {
+            DamageSource source = actor.getDamageSources().indirectMagic(actor, actor);
+            float damage = HelperMethods.applyAbilityDamageEnchantments(world, ability.stack, target, source,
+                    base * multiplier);
+            if (target.damage(source, damage)) affected++;
+            if (affected >= cap) break;
+        }
+        UniqueAbilityApi.emit(ability.execution, UniqueAbilityPhase.HIT, Phase6UniqueAbilities.PULSE,
+                null, affected, base * multiplier);
     }
 
     private static Vec3d horizontalDirection(Vec3d direction, LivingEntity actor) {
@@ -344,12 +401,16 @@ public final class ThunderbrandAbilityManager {
         actor.velocityModified = true;
     }
 
-    private static int chargeDuration() {
-        return Math.max(1, Config.uniqueEffects.thunderbrand.chargeDuration);
+    private static int chargeDuration(ActiveThunderBlitz ability) {
+        return ability.tuning.integer(s("DURATION_TICKS"), Math.max(1, Config.uniqueEffects.thunderbrand.chargeDuration));
     }
 
-    private static int dashDuration() {
-        return Math.max(1, Config.uniqueEffects.thunderbrand.dashDuration);
+    private static int dashDuration(ActiveThunderBlitz ability) {
+        return ability.tuning.integer(s("COUNT"), Math.max(1, Config.uniqueEffects.thunderbrand.dashDuration));
+    }
+
+    private static Phase6AbilityTuning.Setting s(String name) {
+        return Phase6AbilityTuning.Setting.valueOf(name);
     }
 
     private static void spawnChargeStartEffects(ServerWorld world, LivingEntity actor) {
@@ -419,6 +480,8 @@ public final class ThunderbrandAbilityManager {
         private final Hand hand;
         private final Vec3d fallbackDirection;
         private final long startedAt;
+        private final Phase6AbilityTuning tuning;
+        private final UniqueAbilityExecution execution;
         private final Set<UUID> dashHitTargets = new HashSet<>();
         private Phase phase = Phase.CHARGING;
         private int storedDamageInstances;
@@ -428,13 +491,16 @@ public final class ThunderbrandAbilityManager {
         private int chainsReleased;
 
         private ActiveThunderBlitz(UUID actorId, UUID targetId, ItemStack stack, Hand hand,
-                                   Vec3d fallbackDirection, long startedAt) {
+                                   Vec3d fallbackDirection, long startedAt, Phase6AbilityTuning tuning,
+                                   UniqueAbilityExecution execution) {
             this.actorId = actorId;
             this.targetId = targetId;
             this.stack = stack;
             this.hand = hand;
             this.fallbackDirection = fallbackDirection;
             this.startedAt = startedAt;
+            this.tuning = tuning;
+            this.execution = execution;
         }
     }
 }

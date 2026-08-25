@@ -21,6 +21,11 @@ import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
+import net.sweenus.simplyswords.api.WeaponAbilityActivationSource;
+import net.sweenus.simplyswords.api.ability.Phase6AbilityTuning;
+import net.sweenus.simplyswords.api.ability.Phase6UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
@@ -33,6 +38,7 @@ import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
 import net.sweenus.simplyswords.world.LivingEntityAbilityMovementManager;
 import net.sweenus.simplyswords.world.LivyatanWaveManager;
+import net.sweenus.simplyswords.world.Phase6CombatManager;
 
 import java.util.List;
 
@@ -64,23 +70,23 @@ public class LivyatanSwordItem extends UniqueSwordItem implements UniqueWeaponAc
     @Override
     public TypedActionResult<ItemStack> startPlayerAbility(World world, PlayerEntity user, Hand hand) {
         ItemStack itemStack = user.getStackInHand(hand);
-        float abilityDamage = HelperMethods.abilityScaledDamage("frost", user, itemStack,
-                Config.uniqueEffects.livyatan.damageScaling, Config.uniqueEffects.livyatan.spellScaling);
-        int duration = Config.uniqueEffects.livyatan.duration;
-        float returnDamage = HelperMethods.abilityScaledDamage("frost", user, itemStack,
-                Config.uniqueEffects.livyatan.returnDamageScaling,
-                Config.uniqueEffects.livyatan.returnSpellScaling);
-        double radius = Config.uniqueEffects.livyatan.radius;
+        int cooldown = 1;
         if (!world.isClient) {
             itemStack = user.getStackInHand(hand);
-            LivyatanEntity livyatanEntity = new LivyatanEntity(world, user, itemStack.copy() );
+            ServerWorld serverWorld = (ServerWorld) world;
+            WeaponAbilityContext context = WeaponAbilityContext.of(serverWorld, itemStack, user,
+                    user instanceof net.minecraft.server.network.ServerPlayerEntity player ? player : null,
+                    null, hand, WeaponAbilityActivationSource.PLAYER);
+            UniqueAbilityExecution execution = Phase6CombatManager.beginActive(
+                    Phase6UniqueAbilities.LIVYATAN_THROW, context, Config.uniqueEffects.livyatan.cooldown);
+            UniqueAbilityApi.takeStartedExecution();
+            UniqueAbilityApi.start(execution);
+            Phase6AbilityTuning tuning = Phase6UniqueAbilities.tuning(execution);
+            if (tuning.has(s("COOLDOWN_TICKS"))) cooldown = tuning.integer(s("COOLDOWN_TICKS"), 1);
+            LivyatanEntity livyatanEntity = createEntity(world, user, itemStack.copy(), tuning, execution);
             livyatanEntity.setVelocity(user, user.getPitch(), user.getYaw(), 0.0F, 1.5F, 1.0F);
             livyatanEntity.setYaw(user.getYaw());
             livyatanEntity.setPitch(user.getPitch());
-            livyatanEntity.primaryBaseDamage = abilityDamage;
-            livyatanEntity.slownessDuration = duration;
-            livyatanEntity.primaryReturnDamage = returnDamage;
-            livyatanEntity.primaryReturnDamageRadius = radius;
             if (hand == Hand.OFF_HAND)
                 livyatanEntity.offhandThrow = true;
             livyatanEntity.setPos(user.getX(), user.getEyeY() - 0.5, user.getZ());
@@ -93,7 +99,7 @@ public class LivyatanSwordItem extends UniqueSwordItem implements UniqueWeaponAc
 
         user.swingHand(hand);
 
-        SimplySwordsAPI.setWeaponCooldown(user, itemStack, 1);
+        SimplySwordsAPI.setWeaponCooldown(user, itemStack, cooldown);
         return TypedActionResult.success(itemStack, world.isClient());
     }
 
@@ -102,23 +108,34 @@ public class LivyatanSwordItem extends UniqueSwordItem implements UniqueWeaponAc
         if (context.target() == null || !HelperMethods.checkAbilityTarget(context.target(), context.actor())) {
             return false;
         }
-        float abilityDamage = HelperMethods.abilityScaledDamage("frost", context.actor(), context.stack(),
-                Config.uniqueEffects.livyatan.damageScaling, Config.uniqueEffects.livyatan.spellScaling);
-        LivyatanEntity livyatanEntity = new LivyatanEntity(context.world(), context.actor(), context.stack().copy());
+        UniqueAbilityExecution execution = Phase6CombatManager.beginActive(
+                Phase6UniqueAbilities.LIVYATAN_THROW, context, Config.uniqueEffects.livyatan.cooldown);
+        Phase6AbilityTuning tuning = Phase6UniqueAbilities.tuning(execution);
+        LivyatanEntity livyatanEntity = createEntity(context.world(), context.actor(),
+                context.stack().copy(), tuning, execution);
         Vec3d direction = LivingEntityAbilityMovementManager.getLobbedTargetDirection(context.actor(), context.target());
         livyatanEntity.setVelocity(direction.x, direction.y, direction.z, 1.65F, 1.0F);
         livyatanEntity.setYaw(context.actor().getYaw());
         livyatanEntity.setPitch(context.actor().getPitch());
-        livyatanEntity.primaryBaseDamage = abilityDamage;
-        livyatanEntity.slownessDuration = Config.uniqueEffects.livyatan.duration;
-        livyatanEntity.primaryReturnDamage = HelperMethods.abilityScaledDamage("frost", context.actor(), context.stack(),
-                Config.uniqueEffects.livyatan.returnDamageScaling,
-                Config.uniqueEffects.livyatan.returnSpellScaling);
-        livyatanEntity.primaryReturnDamageRadius = Config.uniqueEffects.livyatan.radius;
         livyatanEntity.setPos(context.actor().getX(), context.actor().getEyeY() - 0.5, context.actor().getZ());
         livyatanEntity.markNonReturning(Config.uniqueEffects.livyatan.duration + 80);
         context.world().spawnEntity(livyatanEntity);
         return true;
+    }
+
+    private static LivyatanEntity createEntity(World world, LivingEntity actor, ItemStack stack,
+                                               Phase6AbilityTuning tuning, UniqueAbilityExecution execution) {
+        LivyatanEntity entity = new LivyatanEntity(world, actor, stack);
+        entity.primaryBaseDamage = HelperMethods.abilityScaledDamage("frost", actor, stack,
+                Config.uniqueEffects.livyatan.damageScaling, Config.uniqueEffects.livyatan.spellScaling)
+                * (float) tuning.get(s("DAMAGE_MULTIPLIER"), 1);
+        entity.slownessDuration = tuning.integer(s("STATUS_DURATION_TICKS"), Config.uniqueEffects.livyatan.duration);
+        entity.primaryReturnDamage = HelperMethods.abilityScaledDamage("frost", actor, stack,
+                Config.uniqueEffects.livyatan.returnDamageScaling, Config.uniqueEffects.livyatan.returnSpellScaling)
+                * (float) tuning.get(s("DAMAGE_MULTIPLIER"), 1);
+        entity.primaryReturnDamageRadius = tuning.get(s("RADIUS"), Config.uniqueEffects.livyatan.radius);
+        entity.setMastery(tuning, execution);
+        return entity;
     }
 
     @Override
@@ -199,5 +216,9 @@ public class LivyatanSwordItem extends UniqueSwordItem implements UniqueWeaponAc
         public float returnLightningSpellScaling = 1.82f;
         @ValidatedDouble.Restrict(min = 1.0)
         public double returnLightningSkyHeight = 12.0;
+    }
+
+    private static Phase6AbilityTuning.Setting s(String name) {
+        return Phase6AbilityTuning.Setting.valueOf(name);
     }
 }

@@ -207,7 +207,7 @@ public class FlameSeedEffect extends OrbitingEffect {
     private static void triggerDetonation(ServerWorld serverWorld, LivingEntity livingEntity, LivingEntity sourceEntity, int spreadRemaining) {
         triggerDetonation(serverWorld, livingEntity.getPos(), livingEntity.getUuid(), sourceEntity, spreadRemaining);
         FlamewindVisualManager.removeSeed(serverWorld, livingEntity);
-        Phase5FlamewindManager.remove(livingEntity.getUuid());
+        Phase5FlamewindManager.remove(serverWorld, livingEntity.getUuid());
     }
 
     private static void triggerDetonation(ServerWorld serverWorld, Vec3d center, UUID excludedTargetId, LivingEntity sourceEntity, int spreadRemaining) {
@@ -286,16 +286,7 @@ public class FlameSeedEffect extends OrbitingEffect {
     }
 
     public static int detonateOwned(ServerWorld world, LivingEntity owner, int limit) {
-        List<LivingEntity> targets = world.getEntitiesByClass(LivingEntity.class,
-                        owner.getBoundingBox().expand(64), EntityPredicates.VALID_LIVING_ENTITY).stream()
-                .filter(target -> {
-                    StatusEffectInstance effect = target.getStatusEffect(EffectRegistry.getReference(EffectRegistry.FLAMESEED));
-                    return effect instanceof SimplySwordsStatusEffectInstance seeded
-                            && seeded.getSourceEntity() == owner;
-                })
-                .sorted(Comparator.comparingDouble((LivingEntity target) -> owner.squaredDistanceTo(target))
-                        .thenComparing(target -> target.getUuid().toString()))
-                .limit(Math.min(64, limit)).toList();
+        List<LivingEntity> targets = Phase5FlamewindManager.ownedSeeds(world, owner, limit);
         for (LivingEntity target : targets) {
             StatusEffectInstance effect = target.getStatusEffect(EffectRegistry.getReference(EffectRegistry.FLAMESEED));
             int remaining = effect instanceof SimplySwordsStatusEffectInstance seeded ? seeded.getAdditionalData() : 0;
@@ -310,7 +301,7 @@ public class FlameSeedEffect extends OrbitingEffect {
         LivingEntity livingEntity = getEntityFromAttributeContainer(attributes);
         if (livingEntity != null && !livingEntity.getWorld().isClient() && livingEntity.getWorld() instanceof ServerWorld serverWorld) {
             FlamewindVisualManager.removeSeed(serverWorld, livingEntity);
-            Phase5FlamewindManager.remove(livingEntity.getUuid());
+            Phase5FlamewindManager.remove(serverWorld, livingEntity.getUuid());
         }
         super.onRemoved(attributes);
     }

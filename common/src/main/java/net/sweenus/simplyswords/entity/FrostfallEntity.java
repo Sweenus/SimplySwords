@@ -18,6 +18,11 @@ import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.world.FrostfallIceSpikeFieldManager;
+import net.sweenus.simplyswords.api.ability.Phase6AbilityTuning;
+import net.sweenus.simplyswords.api.ability.Phase6UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityPhase;
 
 public class FrostfallEntity extends ThrownSwordEntity {
     private int remainingDetonations = 5;
@@ -25,6 +30,8 @@ public class FrostfallEntity extends ThrownSwordEntity {
     public float detonateDamage = 11;
     public int duration = 40;
     public int addedChance = 0;
+    private Phase6AbilityTuning masteryTuning = Phase6AbilityTuning.EMPTY;
+    private UniqueAbilityExecution masteryExecution;
 
     // Base Constructor
     public FrostfallEntity(EntityType<? extends FrostfallEntity> entityType, World world) {
@@ -35,6 +42,12 @@ public class FrostfallEntity extends ThrownSwordEntity {
     public FrostfallEntity(World world, LivingEntity owner, ItemStack stack) {
         super(world, owner, stack);
         this.stack = stack;
+    }
+
+    public void setMastery(Phase6AbilityTuning tuning, UniqueAbilityExecution execution) {
+        masteryTuning = tuning == null ? Phase6AbilityTuning.EMPTY : tuning;
+        masteryExecution = execution;
+        remainingDetonations = masteryTuning.integer(s("PULSE_COUNT"), 5);
     }
 
     @Override
@@ -63,6 +76,14 @@ public class FrostfallEntity extends ThrownSwordEntity {
         boolean wasNonReturning = this.nonReturning;
         this.nonReturning = false;
         super.onEntityHit(entityHitResult);
+        if (entity instanceof LivingEntity target && this.getOwner() instanceof LivingEntity owner) {
+            int slow = masteryTuning.integer(s("STATUS_DURATION_TICKS"), 0);
+            if (slow > 0) target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, slow, 0), owner);
+            int freeze = masteryTuning.integer(s("FREEZE_TICKS"), 0);
+            if (freeze > 0) target.setFrozenTicks(Math.min(target.getMinFreezeDamageTicks(), target.getFrozenTicks() + freeze));
+            if (masteryExecution != null) UniqueAbilityApi.emit(masteryExecution, UniqueAbilityPhase.HIT,
+                    Phase6UniqueAbilities.HIT, target, 1, primaryBaseDamage);
+        }
         this.nonReturning = wasNonReturning;
         if (!this.isRemoved()) {
             this.inGround = true;
@@ -83,18 +104,25 @@ public class FrostfallEntity extends ThrownSwordEntity {
                 DamageSource damageSource = this.getDamageSources().trident(this, entity);
 
                 if (remainingDetonations <= 0) {
-                    //remainingDetonations = 5; // For Cycling effect
                     returnToPlayer = true;
+                    if (masteryExecution != null) {
+                        UniqueAbilityApi.finish(masteryExecution, Phase6UniqueAbilities.FINISH, 0);
+                        masteryExecution = null;
+                    }
                 }
 
                 if ((age % detonateDelay == 0) && remainingDetonations > 0) {
                     int detonateCount = remainingDetonations;
 
                     float pulseMultiplier = (6.0f - detonateCount) / 5.0f;
-                    float pulseDamage = detonateDamage * pulseMultiplier;
+                    float pulseDamage = detonateDamage * pulseMultiplier
+                            * (float) masteryTuning.get(s("FINAL_DAMAGE_MULTIPLIER"), 1);
 
                     Box box = HelperMethods.createBox(this, detonateRadius - detonateCount);
 
+                    int affected = 0;
+                    int cap = masteryTuning.has(s("TARGET_CAP"))
+                            ? masteryTuning.integer(s("TARGET_CAP"), 64) : Integer.MAX_VALUE;
                     for (Entity otherEntity : world.getOtherEntities(this, box, EntityPredicates.VALID_LIVING_ENTITY)) {
                         if ((otherEntity instanceof LivingEntity le) &&
                                 HelperMethods.checkFriendlyFire(le, livingEntity)) {
@@ -102,7 +130,11 @@ public class FrostfallEntity extends ThrownSwordEntity {
                             HelperMethods.damageThroughIframes(le, damageSource, damage);
                             le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, duration, Math.min( 3, 6-detonateCount)), livingEntity);
                             if (le.distanceTo(this) > 1)
-                                le.setVelocity((this.getX() - le.getX()) / 8, (this.getY() - le.getY()) / 8, (this.getZ() - le.getZ()) / 8);
+                                le.setVelocity((this.getX() - le.getX()) / 8 * masteryTuning.get(s("PULL_STRENGTH"), 1),
+                                        (this.getY() - le.getY()) / 8,
+                                        (this.getZ() - le.getZ()) / 8 * masteryTuning.get(s("PULL_STRENGTH"), 1));
+                            affected++;
+                            if (affected >= cap) break;
                         }
                     }
                     for (Entity otherEntity2 : world.getOtherEntities(this, box, EntityPredicates.VALID_ENTITY)) {
@@ -123,6 +155,8 @@ public class FrostfallEntity extends ThrownSwordEntity {
                     HelperMethods.spawnOrbitParticles(world, this.getPos(), ParticleTypes.ITEM_SNOWBALL, 6f - detonateCount, 10 - detonateCount);
                     HelperMethods.spawnOrbitParticles(world, this.getPos().add(0, 1, 0), ParticleTypes.WHITE_ASH, 6f - detonateCount, 40 - detonateCount);
                     FrostfallIceSpikeFieldManager.createPulse(world, this.getPos(), detonateRadius - detonateCount, detonateCount);
+                    if (masteryExecution != null) UniqueAbilityApi.emit(masteryExecution, UniqueAbilityPhase.HIT,
+                            Phase6UniqueAbilities.PULSE, null, affected, pulseDamage);
 
                     if (random.nextInt(100) > chance)
                         remainingDetonations--;
@@ -139,6 +173,10 @@ public class FrostfallEntity extends ThrownSwordEntity {
         } else {
             return 0;
         }
+    }
+
+    private static Phase6AbilityTuning.Setting s(String name) {
+        return Phase6AbilityTuning.Setting.valueOf(name);
     }
 
 
