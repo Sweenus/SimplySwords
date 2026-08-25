@@ -30,6 +30,8 @@ import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.compat.SpellScalingComponents;
 import net.sweenus.simplyswords.SimplySwordsExpectPlatform;
 import net.sweenus.simplyswords.api.render.*;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.entity.BattleStandardEntity;
 import net.sweenus.simplyswords.entity.SimplySwordsSkeletonMinionEntity;
 import net.sweenus.simplyswords.entity.SimplySwordsWolfMinionEntity;
@@ -275,11 +277,31 @@ public class SimplySwordsAPI {
             return false;
         }
 
-        if (!ability.activate(context)) {
+        UniqueAbilityApi.clearStartedExecution();
+        boolean activated;
+        try {
+            activated = ability.activate(context);
+        } catch (RuntimeException exception) {
+            UniqueAbilityExecution failedExecution = UniqueAbilityApi.takeStartedExecution();
+            if (failedExecution != null) {
+                UniqueAbilityApi.cancel(failedExecution);
+            }
+            throw exception;
+        }
+        UniqueAbilityExecution execution = UniqueAbilityApi.takeStartedExecution();
+        if (!activated) {
+            if (execution != null) {
+                UniqueAbilityApi.cancel(execution);
+            }
             return false;
         }
 
-        setWeaponCooldown(context.actor(), context.stack(), ability.getActivationCooldownTicks(context.stack(), context));
+        int cooldown = ability.getActivationCooldownTicks(context.stack(), context);
+        if (execution != null) {
+            UniqueAbilityApi.start(execution);
+            cooldown = execution.cooldownTicks(cooldown);
+        }
+        setWeaponCooldown(context.actor(), context.stack(), cooldown);
         return true;
     }
 

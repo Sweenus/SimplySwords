@@ -27,6 +27,7 @@ import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
 import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.api.AwakeningFormRegistry;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
+import net.sweenus.simplyswords.api.ability.BuiltinUniqueAbilities;
 import net.sweenus.simplyswords.api.render.ObserverStatusVisualShape;
 import net.sweenus.simplyswords.api.render.ObserverStatusVisualStyle;
 import net.sweenus.simplyswords.client.api.ObserverStatusEffectClientApi;
@@ -114,6 +115,7 @@ public class SimplySwords {
         ScreenHandlerRegistry.SCREEN_HANDLERS.register();
         GemPowerRegistry.register();
         WeaponImplicitRegistry.registerBuiltins();
+        BuiltinUniqueAbilities.register();
         ParticlesRegistry.PARTICLES.register();
         TransformationRegistry.register();
         LifecycleEvent.SETUP.register(AwakeningFormRegistry::registerBuiltins);

@@ -17,6 +17,9 @@ int getActivationCooldownTicks(ItemStack stack, WeaponAbilityContext context);
 Return `true` from `activate` only after the ability has actually started.
 Simply Swords applies the cooldown after a successful return.
 
+Abilities that need addon-controlled tuning or lifecycle observation can opt
+into the additive [unique ability modifier API](unique-ability-modifiers.md).
+
 The interface's default `canActivate` requires a living target. Override it for
 self-buffs, movement, area effects, or other targetless abilities. Always check
 that the actor is alive, the stack is usable, and any chosen target passes

@@ -1,0 +1,147 @@
+package net.sweenus.simplyswords.api.ability;
+
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.util.Identifier;
+import net.sweenus.simplyswords.SimplySwords;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Consumer;
+
+public final class UniqueAbilityApi {
+    private static final AtomicLong NEXT_EXECUTION_ID = new AtomicLong();
+    private static final Map<Identifier, UniqueAbilityDefinition> DEFINITIONS = new LinkedHashMap<>();
+    private static final Map<Identifier, ModifierEntry> MODIFIERS = new LinkedHashMap<>();
+    private static final ThreadLocal<UniqueAbilityExecution> STARTED_EXECUTION = new ThreadLocal<>();
+
+    private UniqueAbilityApi() {
+    }
+
+    public static synchronized void registerDefinition(UniqueAbilityDefinition definition) {
+        Objects.requireNonNull(definition);
+        UniqueAbilityDefinition existing = DEFINITIONS.putIfAbsent(definition.id(), definition);
+        if (existing != null && existing != definition) {
+            throw new IllegalStateException("Ability definition already registered: " + definition.id());
+        }
+    }
+
+    public static synchronized void registerModifier(Identifier ownerId, int priority,
+                                                     UniqueAbilityModifier modifier) {
+        Objects.requireNonNull(ownerId);
+        Objects.requireNonNull(modifier);
+        if (MODIFIERS.putIfAbsent(ownerId, new ModifierEntry(ownerId, priority, modifier)) != null) {
+            throw new IllegalStateException("Ability modifier already registered: " + ownerId);
+        }
+    }
+
+    public static synchronized boolean isDefinitionRegistered(Identifier id) {
+        return DEFINITIONS.containsKey(id);
+    }
+
+    public static synchronized Optional<UniqueAbilityDefinition> definition(Identifier id) {
+        return Optional.ofNullable(DEFINITIONS.get(id));
+    }
+
+    public static synchronized List<UniqueAbilityDefinition> definitions() {
+        return List.copyOf(DEFINITIONS.values());
+    }
+
+    public static UniqueAbilityExecution begin(UniqueAbilityDefinition definition, UniqueAbilityContext context,
+                                               Consumer<UniqueAbilityTuning.Builder> baseTuning) {
+        Objects.requireNonNull(definition);
+        Objects.requireNonNull(context);
+        Objects.requireNonNull(baseTuning);
+        UniqueAbilityTuning.Builder tuning = new UniqueAbilityTuning.Builder(definition);
+        baseTuning.accept(tuning);
+        List<UniqueAbilityObserver> observers = new ArrayList<>();
+        for (ModifierEntry entry : modifierSnapshot()) {
+            try {
+                UniqueAbilityObserver observer = entry.modifier.prepare(context, definition, tuning);
+                if (observer != null && observer != UniqueAbilityObserver.NONE) {
+                    observers.add(observer);
+                }
+            } catch (RuntimeException exception) {
+                SimplySwords.LOGGER.error("Unique ability modifier {} failed for {}", entry.ownerId, definition.id(), exception);
+            }
+        }
+        UniqueAbilityExecution execution = new UniqueAbilityExecution(
+                NEXT_EXECUTION_ID.incrementAndGet(), definition, context, tuning.build(), observers);
+        STARTED_EXECUTION.set(execution);
+        emit(execution, UniqueAbilityPhase.ATTEMPT, definition.id(), null, 0, 0.0);
+        return execution;
+    }
+
+    public static void start(UniqueAbilityExecution execution) {
+        if (execution == null || execution.isStarted() || execution.isTerminal()) {
+            return;
+        }
+        execution.markStarted();
+        emit(execution, UniqueAbilityPhase.START, execution.definition().id(), null, 0, 0.0);
+    }
+
+    public static void emit(UniqueAbilityExecution execution, UniqueAbilityPhase phase, Identifier eventId,
+                            @Nullable LivingEntity target, int affectedTargets, double magnitude) {
+        Objects.requireNonNull(execution);
+        Objects.requireNonNull(phase);
+        Objects.requireNonNull(eventId);
+        if (execution.isTerminal()) {
+            return;
+        }
+        if (eventId != execution.definition().id() && !eventId.equals(execution.definition().id())
+                && !execution.definition().supportsEvent(eventId)) {
+            throw new IllegalArgumentException("unsupported event " + eventId);
+        }
+        UniqueAbilityEvent event = new UniqueAbilityEvent(execution, phase, eventId, target,
+                Math.max(0, affectedTargets), magnitude);
+        for (UniqueAbilityObserver observer : execution.observers()) {
+            try {
+                observer.onEvent(event);
+            } catch (RuntimeException exception) {
+                SimplySwords.LOGGER.error("Unique ability observer failed for {}", execution.definition().id(), exception);
+            }
+        }
+    }
+
+    public static void finish(UniqueAbilityExecution execution, Identifier eventId, int affectedTargets) {
+        terminate(execution, UniqueAbilityPhase.FINISH, eventId, affectedTargets);
+    }
+
+    public static void cancel(UniqueAbilityExecution execution) {
+        terminate(execution, UniqueAbilityPhase.CANCEL, execution.definition().id(), 0);
+    }
+
+    public static void clearStartedExecution() {
+        STARTED_EXECUTION.remove();
+    }
+
+    public static @Nullable UniqueAbilityExecution takeStartedExecution() {
+        UniqueAbilityExecution execution = STARTED_EXECUTION.get();
+        STARTED_EXECUTION.remove();
+        return execution;
+    }
+
+    private static void terminate(UniqueAbilityExecution execution, UniqueAbilityPhase phase,
+                                  Identifier eventId, int affectedTargets) {
+        if (execution == null || execution.isTerminal()) {
+            return;
+        }
+        emit(execution, phase, eventId, null, affectedTargets, 0.0);
+        execution.markTerminal();
+    }
+
+    private static synchronized List<ModifierEntry> modifierSnapshot() {
+        return MODIFIERS.values().stream()
+                .sorted(Comparator.comparingInt(ModifierEntry::priority).thenComparing(entry -> entry.ownerId.toString()))
+                .toList();
+    }
+
+    private record ModifierEntry(Identifier ownerId, int priority, UniqueAbilityModifier modifier) {
+    }
+}

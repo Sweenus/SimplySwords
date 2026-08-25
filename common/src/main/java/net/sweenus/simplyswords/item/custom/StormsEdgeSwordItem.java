@@ -18,6 +18,11 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
+import net.sweenus.simplyswords.api.ability.BuiltinUniqueAbilities;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityContext;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityPhase;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
@@ -49,8 +54,29 @@ public class StormsEdgeSwordItem extends UniqueSwordItem implements UniqueWeapon
             return super.postHit(stack, target, attacker);
         }
 
-        int refreshChance = Math.clamp(Config.uniqueEffects.storms_edge.chance, 0, 100);
+        ServerWorld serverWorld = (ServerWorld) attacker.getWorld();
+        UniqueAbilityExecution melee = UniqueAbilityApi.begin(
+                BuiltinUniqueAbilities.STORMS_EDGE_MELEE,
+                UniqueAbilityContext.passive(serverWorld, stack, attacker, target, null),
+                StormsEdgeSwordItem::setDamageReferences);
+        UniqueAbilityApi.takeStartedExecution();
+        UniqueAbilityApi.start(melee);
+        UniqueAbilityApi.emit(melee, UniqueAbilityPhase.HIT,
+                BuiltinUniqueAbilities.MELEE_HIT, target, 1, 0.0);
+        UniqueAbilityApi.finish(melee, melee.definition().id(), 1);
+
+        UniqueAbilityExecution execution = UniqueAbilityApi.begin(
+                BuiltinUniqueAbilities.STORMS_EDGE_REFRESH,
+                UniqueAbilityContext.passive(serverWorld, stack, attacker, target, null),
+                tuning -> {
+                    setDamageReferences(tuning);
+                    tuning.set(BuiltinUniqueAbilities.REFRESH_CHANCE,
+                            Math.clamp(Config.uniqueEffects.storms_edge.chance, 0, 100));
+                });
+        UniqueAbilityApi.takeStartedExecution();
+        int refreshChance = execution.tuning().get(BuiltinUniqueAbilities.REFRESH_CHANCE);
         if (refreshChance <= 0 || attacker.getRandom().nextInt(100) >= refreshChance) {
+            UniqueAbilityApi.cancel(execution);
             return super.postHit(stack, target, attacker);
         }
 
@@ -59,16 +85,32 @@ public class StormsEdgeSwordItem extends UniqueSwordItem implements UniqueWeapon
             SimplySwordsAPI.setWeaponCooldown(player, stack, 0);
             refreshed = true;
         } else if (!(attacker instanceof PlayerEntity)
-                && attacker.getWorld() instanceof ServerWorld serverWorld
                 && WeaponAbilityCooldownManager.isCoolingDown(serverWorld, attacker, stack)) {
             SimplySwordsAPI.setWeaponCooldown(attacker, stack, 0);
             refreshed = true;
         }
         if (refreshed) {
+            UniqueAbilityApi.start(execution);
+            UniqueAbilityApi.emit(execution, UniqueAbilityPhase.HIT,
+                    BuiltinUniqueAbilities.REFRESH_PROC, target, 1, refreshChance);
             attacker.getWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_BLOCK_01.get(),
                     attacker.getSoundCategory(), 0.7f, 1f);
+            UniqueAbilityApi.finish(execution, execution.definition().id(), 1);
+        } else {
+            UniqueAbilityApi.cancel(execution);
         }
         return super.postHit(stack, target, attacker);
+    }
+
+    private static void setDamageReferences(net.sweenus.simplyswords.api.ability.UniqueAbilityTuning.Builder tuning) {
+        tuning.set(BuiltinUniqueAbilities.CORRIDOR_DAMAGE_SCALING,
+                        (double) Config.uniqueEffects.storms_edge.damageScaling)
+                .set(BuiltinUniqueAbilities.CORRIDOR_SPELL_SCALING,
+                        (double) Config.uniqueEffects.storms_edge.spellScaling)
+                .set(BuiltinUniqueAbilities.THUNDERCLAP_DAMAGE_SCALING,
+                        (double) Config.uniqueEffects.storms_edge.thunderclapDamageScaling)
+                .set(BuiltinUniqueAbilities.THUNDERCLAP_SPELL_SCALING,
+                        (double) Config.uniqueEffects.storms_edge.thunderclapSpellScaling);
     }
 
     @Override
