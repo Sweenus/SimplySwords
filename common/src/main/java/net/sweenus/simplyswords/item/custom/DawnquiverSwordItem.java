@@ -73,7 +73,7 @@ public final class DawnquiverSwordItem extends UniqueSwordItem implements TwoHan
         }
         int maxUseTime = getMaxUseTime(stack, user);
         int useTicks = Math.max(0, maxUseTime - remainingUseTicks);
-        int drawDuration = Math.max(4, Config.uniqueEffects.dawnquiver.drawDuration);
+        int drawDuration = DawnquiverAbilityManager.drawDuration(serverWorld, user);
         float chargeRatio = chargeRatio(stack, user, remainingUseTicks);
         DawnquiverAbilityManager.tickDraw(serverWorld, user, chargeRatio);
 
@@ -149,7 +149,9 @@ public final class DawnquiverSwordItem extends UniqueSwordItem implements TwoHan
 
     private float chargeRatio(ItemStack stack, LivingEntity user, int remainingUseTicks) {
         int maxUseTime = getMaxUseTime(stack, user);
-        int drawDuration = Math.max(4, Config.uniqueEffects.dawnquiver.drawDuration);
+        int drawDuration = user.getWorld() instanceof ServerWorld serverWorld
+                ? DawnquiverAbilityManager.drawDuration(serverWorld, user)
+                : Math.max(4, Config.uniqueEffects.dawnquiver.drawDuration);
         int useTicks = Math.max(0, maxUseTime - remainingUseTicks);
         float progress = net.minecraft.util.math.MathHelper.clamp(
                 (float) useTicks / drawDuration, 0.0F, 1.0F);

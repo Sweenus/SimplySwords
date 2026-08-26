@@ -9,6 +9,7 @@ import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.effect.instance.SimplySwordsStatusEffectInstance;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
+import net.sweenus.simplyswords.world.Phase10WeaponManager;
 
 public class VoidAssaultEffect extends OrbitingEffect {
     public LivingEntity sourceEntity; // The player who applied the effect
@@ -32,6 +33,11 @@ public class VoidAssaultEffect extends OrbitingEffect {
             if (livingEntity.getStatusEffect(EffectRegistry.getReference(EffectRegistry.VOIDASSAULT)) instanceof SimplySwordsStatusEffectInstance statusEffect) {
                 sourceEntity = statusEffect.getSourceEntity();
                 additionalData = statusEffect.getAdditionalData();
+            }
+
+            if (Phase10WeaponManager.tickAssault(livingEntity, amplifier, additionalData)) {
+                super.applyUpdateEffect(livingEntity, amplifier);
+                return true;
             }
 
             if (livingEntity.age % Math.max(1, (voidcallerStartingTickFrequency - (amplifier * 2))) == 0 && additionalData != 0) {

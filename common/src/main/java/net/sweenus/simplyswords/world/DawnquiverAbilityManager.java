@@ -16,6 +16,10 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.api.SpellScalingProfile;
+import net.sweenus.simplyswords.api.ability.Phase10AbilityTuning;
+import net.sweenus.simplyswords.api.ability.Phase10UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.DawnquiverArrowEntity;
 import net.sweenus.simplyswords.entity.DawnquiverBowVisualEntity;
@@ -36,6 +40,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.WeakHashMap;
 
 public final class DawnquiverAbilityManager {
 
@@ -52,6 +57,10 @@ public final class DawnquiverAbilityManager {
     private static final Map<ServerWorld, Map<UUID, Long>> PASSIVE_LOCKOUT = new HashMap<>();
     private static final Map<ServerWorld, List<ScheduledShot>> SCHEDULED_SHOTS = new HashMap<>();
     private static final Map<ServerWorld, List<ScheduledBloom>> SCHEDULED_BLOOMS = new HashMap<>();
+    private static final Map<ItemStack, Integer> CHORUS_CAP = new WeakHashMap<>();
+    private static final Map<ItemStack, Phase10AbilityTuning> CHORUS_TUNING = new WeakHashMap<>();
+    private static final Map<ItemStack, Phase10AbilityTuning> LESSER_TUNING = new WeakHashMap<>();
+    private static final Map<UUID, Phase10AbilityTuning> DRAW_TUNING = new HashMap<>();
 
     private DawnquiverAbilityManager() {
     }
@@ -60,7 +69,7 @@ public final class DawnquiverAbilityManager {
         if (stack == null || stack.isEmpty() || !stack.isOf(ItemsRegistry.DAWNQUIVER.get())) {
             return 0;
         }
-        return Math.min(Math.max(1, Config.uniqueEffects.dawnquiver.maxChorus),
+        return Math.min(CHORUS_CAP.getOrDefault(stack, Math.max(1, Config.uniqueEffects.dawnquiver.maxChorus)),
                 Math.max(0, stack.getOrDefault(ComponentTypeRegistry.STORED_CHARGE.get(),
                         StoredChargeComponent.DEFAULT).charge()));
     }
@@ -84,6 +93,13 @@ public final class DawnquiverAbilityManager {
         return MathHelper.clamp(progress, 0.0F, maximumDrawProgress(stack));
     }
 
+    public static int drawDuration(ServerWorld world, LivingEntity owner) {
+        ActiveDraw draw = activeDraw(world, owner.getUuid());
+        return Math.max(4, draw == null ? Config.uniqueEffects.dawnquiver.drawDuration
+                : draw.tuning.integer(Phase10AbilityTuning.Setting.WINDUP_TICKS,
+                Config.uniqueEffects.dawnquiver.drawDuration));
+    }
+
     public static int affordableDrawTier(ItemStack stack, float progress) {
         int maximumTier = Math.min(2, getChorus(stack) - 1);
         return Math.min(drawTier(progress, Config.uniqueEffects.dawnquiver), maximumTier);
@@ -96,9 +112,14 @@ public final class DawnquiverAbilityManager {
         }
         DawnquiverSwordItem.EffectSettings settings = Config.uniqueEffects.dawnquiver;
         cancel(world, owner.getUuid());
+        UniqueAbilityExecution execution = Phase10CombatManager.beginDirectActive(
+                Phase10UniqueAbilities.DAWN_DRAW, world, owner, stack, hand, settings.cooldown);
+        Phase10AbilityTuning tuning = Phase10UniqueAbilities.tuning(execution);
+        DRAW_TUNING.put(owner.getUuid(), tuning);
 
         int seed = owner.getRandom().nextInt(4096);
-        int lifetime = Math.max(20, settings.drawDuration) + BOW_TRAILING_TICKS;
+        int lifetime = Math.max(20, tuning.integer(Phase10AbilityTuning.Setting.WINDUP_TICKS,
+                settings.drawDuration)) + BOW_TRAILING_TICKS;
         LivingEntity target = findActiveTarget(world, owner, settings);
         Vec3d aimDirection = activeAimDirection(owner, target);
         Vec3d anchor = bowAnchor(owner, aimDirection, settings.bowDistance);
@@ -108,11 +129,12 @@ public final class DawnquiverAbilityManager {
         bow.setTarget(target);
         if (!world.spawnEntity(bow)) {
             bow.discard();
+            UniqueAbilityApi.cancel(execution);
             return false;
         }
 
         ACTIVE.computeIfAbsent(world, ignored -> new HashMap<>())
-                .put(owner.getUuid(), new ActiveDraw(bow.getUuid(), hand));
+                .put(owner.getUuid(), new ActiveDraw(bow.getUuid(), hand, tuning, execution));
 
         world.spawnParticles(DAWN_DUST, anchor.x, anchor.y, anchor.z, 30, 0.5, 0.5, 0.5, 0.05);
         world.playSound(null, owner.getBlockPos(), SoundRegistry.MAGIC_SHAMANIC_VOICE_15.get(),
@@ -124,6 +146,7 @@ public final class DawnquiverAbilityManager {
 
     public static void tickDraw(ServerWorld world, LivingEntity owner, float drawProgress) {
         ActiveDraw drawState = activeDraw(world, owner.getUuid());
+        Phase10AbilityTuning tuning = drawState == null ? Phase10AbilityTuning.EMPTY : drawState.tuning;
         DawnquiverBowVisualEntity bow = resolveBow(world, owner.getUuid());
         if (bow == null || drawState == null) {
             return;
@@ -158,6 +181,7 @@ public final class DawnquiverAbilityManager {
         DawnquiverSwordItem.EffectSettings settings = Config.uniqueEffects.dawnquiver;
         chargeRatio = capDrawProgress(stack, chargeRatio);
         ActiveDraw drawState = activeDraw(world, owner.getUuid());
+        Phase10AbilityTuning tuning = drawState == null ? Phase10AbilityTuning.EMPTY : drawState.tuning;
         Hand hand = drawState == null ? heldHand(owner, stack) : drawState.hand;
         DawnquiverBowVisualEntity bow = resolveBow(world, owner.getUuid());
         LivingEntity target = findActiveTarget(world, owner, settings);
@@ -170,7 +194,8 @@ public final class DawnquiverAbilityManager {
         }
         clear(world, owner.getUuid());
 
-        float minimumDraw = MathHelper.clamp((float) settings.minimumDraw, 0.0F, 1.0F);
+        float minimumDraw = MathHelper.clamp((float) tuning.get(
+                Phase10AbilityTuning.Setting.HEALTH_THRESHOLD, settings.minimumDraw), 0.0F, 1.0F);
         if (chargeRatio < minimumDraw) {
             if (bow != null) {
                 bow.discard();
@@ -179,13 +204,21 @@ public final class DawnquiverAbilityManager {
                     8, 0.25, 0.25, 0.25, 0.01);
             world.playSound(null, owner.getBlockPos(), SoundRegistry.MAGIC_BOW_SHOOT_MISS_02.get(),
                     SoundCategory.PLAYERS, 0.35F, 1.15F);
+            if (drawState != null) Phase10CombatManager.finish(drawState.execution, 0);
             return Math.max(1, settings.cooldown / 4);
         }
 
         int tier = affordableDrawTier(stack, chargeRatio);
-        int stackCost = Math.max(0, tier + 1);
         int chorus = getChorus(stack);
-        boolean empowered = tier >= 0 && chorus >= stackCost;
+        Phase10AbilityTuning chorusTuning = CHORUS_TUNING.getOrDefault(stack, Phase10AbilityTuning.EMPTY);
+        boolean heaven = tuning.flag(1 << 25);
+        int stackCost = heaven ? chorus : Math.max(0, tier + 1);
+        boolean empowered = heaven ? chorus >= 2 : tier >= 0 && chorus >= stackCost;
+        if (heaven && !empowered) {
+            if (bow != null) bow.discard();
+            if (drawState != null) Phase10CombatManager.finish(drawState.execution, 0);
+            return Math.max(1, settings.cooldown / 4);
+        }
         Vec3d direction = target != null ? aimPoint(target).subtract(origin).normalize() : aimDirection;
         float damage = HelperMethods.abilityScaledDamage(SpellScalingProfile.HEALING, owner, stack,
                 (float) MathHelper.lerp(chargeRatio, (float) settings.initialDamageScaling,
@@ -194,33 +227,58 @@ public final class DawnquiverAbilityManager {
                         (float) settings.maxChargeSpellScaling));
         float lesserDamage = HelperMethods.abilityScaledDamage(SpellScalingProfile.HEALING, owner, stack,
                 (float) settings.passiveDamageScaling, (float) settings.passiveSpellScaling);
+        damage *= (float) tuning.get(tier >= 2 ? Phase10AbilityTuning.Setting.FINAL_DAMAGE_MULTIPLIER
+                : Phase10AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1);
+        damage *= (float) chorusTuning.get(Phase10AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1);
+        lesserDamage *= (float) tuning.get(Phase10AbilityTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, 1);
 
         int arrowMode = DawnquiverArrowEntity.MODE_NORMAL;
         int maximumPiercingTargets = 1;
         double retention = 1.0;
-        if (empowered && tier == 1) {
+        if (heaven || empowered && tier == 1) {
             arrowMode = DawnquiverArrowEntity.MODE_PIERCING;
-            maximumPiercingTargets = Math.max(1, settings.piercingMaxTargets);
-            retention = MathHelper.clamp(settings.piercingDamageRetention, 0.0, 1.0);
+            maximumPiercingTargets = Math.max(1, tuning.integer(Phase10AbilityTuning.Setting.TARGET_CAP,
+                    settings.piercingMaxTargets));
+            retention = MathHelper.clamp(tuning.get(Phase10AbilityTuning.Setting.OUTGOING_MULTIPLIER,
+                    settings.piercingDamageRetention), 0.0, 1.0);
         } else if (empowered && tier == 2) {
             arrowMode = DawnquiverArrowEntity.MODE_FULL_PRIMARY;
         }
+        int arrowCount = Math.max(1, tuning.integer(Phase10AbilityTuning.Setting.COUNT, 1));
+        if (arrowCount > 1) arrowMode = DawnquiverArrowEntity.MODE_NORMAL;
+        if (arrowMode != DawnquiverArrowEntity.MODE_FULL_PRIMARY) DRAW_TUNING.remove(owner.getUuid());
 
         DawnquiverArrowEntity arrow = new DawnquiverArrowEntity(world, owner, stack, hand,
                 origin, direction, target, damage, lesserDamage,
                 settings.arrowSpeed, settings.homingStrength,
-                0.7 + chargeRatio * 0.8, AwakeningApi.scaleEffect(stack, settings.impactRadius),
+                0.7 + chargeRatio * 0.8, tuning.get(Phase10AbilityTuning.Setting.RADIUS,
+                AwakeningApi.scaleEffect(stack, settings.impactRadius)),
                 72.0, arrowMode, maximumPiercingTargets, retention);
         if (!world.spawnEntity(arrow)) {
             arrow.discard();
             if (bow != null) {
                 bow.discard();
             }
+            if (drawState != null) Phase10CombatManager.finish(drawState.execution, 0);
             return cooldownForTier(tier, settings);
+        }
+        if (arrowCount > 1) {
+            double spread = Math.toRadians(tuning.get(Phase10AbilityTuning.Setting.ANGLE, 12));
+            for (int index = 0; index < arrowCount; index++) {
+                float angle = (float) (-spread * .5 + spread * index / (arrowCount - 1));
+                if (Math.abs(angle) < 1.0E-4) continue;
+                DawnquiverArrowEntity extra = new DawnquiverArrowEntity(world, owner, stack, hand,
+                        origin, direction.rotateY(angle), target, damage, lesserDamage,
+                        settings.arrowSpeed, settings.homingStrength, 0.7 + chargeRatio * 0.8,
+                        tuning.get(Phase10AbilityTuning.Setting.RADIUS,
+                                AwakeningApi.scaleEffect(stack, settings.impactRadius)),
+                        72.0, DawnquiverArrowEntity.MODE_NORMAL, 1, 1);
+                world.spawnEntity(extra);
+            }
         }
 
         if (empowered) {
-            setChorus(stack, chorus - stackCost);
+            if (!chorusTuning.flag(1 << 16)) setChorus(stack, chorus - stackCost);
             if (tier == 0) {
                 scheduleQuickVolley(world, owner, stack, hand, target, lesserDamage);
             }
@@ -237,38 +295,66 @@ public final class DawnquiverAbilityManager {
                 SoundCategory.PLAYERS, 0.75F, 0.95F + world.random.nextFloat() * 0.1F);
         world.playSound(null, owner.getBlockPos(), SoundRegistry.MAGIC_BOW_SHOOT_FLYBY_02.get(),
                 SoundCategory.PLAYERS, empowered ? 0.72F : 0.55F, empowered ? 1.12F : 1.0F);
-        return cooldownForTier(tier, settings);
+        if (drawState != null) Phase10CombatManager.finish(drawState.execution, 1);
+        return tuning.integer(Phase10AbilityTuning.Setting.COOLDOWN_TICKS, cooldownForTier(tier, settings));
     }
 
     public static void onPassiveArrowHit(ServerWorld world, LivingEntity owner, Hand hand) {
+        onChorusHit(world, owner, hand, false);
+    }
+
+    private static void onChorusHit(ServerWorld world, LivingEntity owner, Hand hand, boolean fullImpact) {
         ItemStack stack = owner.getStackInHand(hand);
         if (!stack.isOf(ItemsRegistry.DAWNQUIVER.get())
                 || !AwakeningApi.isAbilityUnlocked(stack)) {
             return;
         }
-        int maximum = Math.max(1, Config.uniqueEffects.dawnquiver.maxChorus);
+        UniqueAbilityExecution execution = Phase10CombatManager.beginPassive(
+                Phase10UniqueAbilities.DAWN_CHORUS, world, stack, owner, null);
+        Phase10AbilityTuning tuning = Phase10UniqueAbilities.tuning(execution);
+        CHORUS_TUNING.put(stack, tuning);
+        int maximum = Math.max(1, tuning.integer(Phase10AbilityTuning.Setting.STACK_CAP,
+                Config.uniqueEffects.dawnquiver.maxChorus));
+        CHORUS_CAP.put(stack, maximum);
         int current = getChorus(stack);
         if (current >= maximum) {
+            Phase10CombatManager.finish(execution, 0);
             return;
         }
-        double chance = MathHelper.clamp(Config.uniqueEffects.dawnquiver.passiveChorusChance, 0.0, 1.0);
+        Phase10AbilityTuning lesser = LESSER_TUNING.getOrDefault(stack, Phase10AbilityTuning.EMPTY);
+        double chance = MathHelper.clamp((tuning.get(Phase10AbilityTuning.Setting.CHANCE,
+                Config.uniqueEffects.dawnquiver.passiveChorusChance * 100)
+                + Math.max(0, lesser.get(Phase10AbilityTuning.Setting.CHANCE,
+                Config.uniqueEffects.dawnquiver.passiveChorusChance * 100)
+                - Config.uniqueEffects.dawnquiver.passiveChorusChance * 100)
+                + (fullImpact ? tuning.get(Phase10AbilityTuning.Setting.PITY_CHANCE, 0) : 0)) / 100, 0.0, 1.0);
         if (world.random.nextDouble() >= chance) {
+            Phase10CombatManager.finish(execution, 0);
             return;
         }
-        setChorus(stack, current + 1);
+        setChorus(stack, current + 1, maximum);
+        if (tuning.has(Phase10AbilityTuning.Setting.ABSORPTION))
+            owner.setAbsorptionAmount(Math.min(owner.getAbsorptionAmount()
+                    + (float) tuning.get(Phase10AbilityTuning.Setting.ABSORPTION, 4), 4));
         Vec3d position = owner.getPos().add(0.0, owner.getHeight() * 0.78, 0.0);
         world.spawnParticles(DAWN_DUST, position.x, position.y, position.z,
                 18, 0.42, 0.36, 0.42, 0.045);
         world.playSound(null, owner.getBlockPos(), SoundRegistry.MAGIC_BOW_PULL_BACK_SHORT_VERSION_03.get(),
                 owner.getSoundCategory(), 0.42F, 1.05F + current * 0.12F);
+        Phase10CombatManager.finish(execution, 1);
     }
 
     public static void onFullArrowImpact(ServerWorld world, LivingEntity owner, ItemStack stack,
                                          Hand hand, Vec3d center, @Nullable LivingEntity preferredTarget,
                                          float lesserDamage) {
         DawnquiverSwordItem.EffectSettings settings = Config.uniqueEffects.dawnquiver;
-        int formationDelay = Math.max(1, settings.convergenceFormationDelay);
-        int stagger = Math.max(1, settings.convergenceFiringStagger);
+        Phase10AbilityTuning tuning = DRAW_TUNING.remove(owner.getUuid());
+        if (tuning == null) tuning = Phase10AbilityTuning.EMPTY;
+        int formationDelay = Math.max(1, tuning.integer(Phase10AbilityTuning.Setting.DELAY_TICKS,
+                settings.convergenceFormationDelay));
+        int stagger = Math.max(1, tuning.integer(Phase10AbilityTuning.Setting.INTERVAL_TICKS,
+                settings.convergenceFiringStagger));
+        onChorusHit(world, owner, hand, true);
         double radius = Math.max(1.0, settings.convergenceRadius);
         Vec3d reference = horizontalDirection(center.subtract(owner.getPos()), owner);
         double baseAngle = Math.atan2(reference.z, reference.x);
@@ -305,10 +391,12 @@ public final class DawnquiverAbilityManager {
     }
 
     public static void cancel(ServerWorld world, UUID ownerUuid) {
+        ActiveDraw draw = activeDraw(world, ownerUuid);
         DawnquiverBowVisualEntity bow = resolveBow(world, ownerUuid);
         if (bow != null) {
             bow.discard();
         }
+        if (draw != null) UniqueAbilityApi.cancel(draw.execution);
         clear(world, ownerUuid);
     }
 
@@ -330,17 +418,26 @@ public final class DawnquiverAbilityManager {
         lastTicks.put(owner.getUuid(), now);
 
         DawnquiverSwordItem.EffectSettings settings = Config.uniqueEffects.dawnquiver;
-        int interval = Math.max(1, settings.passiveInterval);
+        UniqueAbilityExecution execution = Phase10CombatManager.beginPassive(
+                Phase10UniqueAbilities.DAWN_LESSER, world, stack, owner, null);
+        Phase10AbilityTuning tuning = Phase10UniqueAbilities.tuning(execution);
+        LESSER_TUNING.put(stack, tuning);
+        int interval = Math.max(1, tuning.integer(Phase10AbilityTuning.Setting.INTERVAL_TICKS,
+                settings.passiveInterval));
         if (Math.floorMod(owner.age + owner.getId(), interval) != 0) {
+            Phase10CombatManager.finish(execution, 0);
             return;
         }
         Map<UUID, Long> lockouts = PASSIVE_LOCKOUT.computeIfAbsent(world, ignored -> new HashMap<>());
         if (now < lockouts.getOrDefault(owner.getUuid(), Long.MIN_VALUE)) {
+            Phase10CombatManager.finish(execution, 0);
             return;
         }
 
-        LivingEntity target = findFurthestTarget(world, owner, settings.passiveRange);
+        LivingEntity target = findFurthestTarget(world, owner,
+                tuning.get(Phase10AbilityTuning.Setting.RANGE, settings.passiveRange));
         if (target == null) {
+            Phase10CombatManager.finish(execution, 0);
             return;
         }
 
@@ -358,6 +455,9 @@ public final class DawnquiverAbilityManager {
 
         float damage = HelperMethods.abilityScaledDamage(SpellScalingProfile.HEALING, owner, stack,
                 (float) settings.passiveDamageScaling, (float) settings.passiveSpellScaling);
+        damage *= (float) tuning.get(Phase10AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1)
+                * (1 + getChorus(stack) * (float) tuning.get(
+                Phase10AbilityTuning.Setting.PER_STACK_MULTIPLIER, 0));
         Vec3d direction = aimPoint(target).subtract(anchor).normalize();
         DawnquiverArrowEntity arrow = new DawnquiverArrowEntity(world, owner, stack, hand,
                 anchor, direction, target, damage, 0.0F,
@@ -365,12 +465,18 @@ public final class DawnquiverAbilityManager {
                 settings.passiveArrowScale, 0.0, settings.passiveRange * 2.0,
                 DawnquiverArrowEntity.MODE_PASSIVE, 1, 1.0);
         world.spawnEntity(arrow);
+        if (tuning.has(Phase10AbilityTuning.Setting.STATUS_DURATION_TICKS))
+            target.addStatusEffect(new net.minecraft.entity.effect.StatusEffectInstance(
+                    net.minecraft.entity.effect.StatusEffects.GLOWING,
+                    tuning.integer(Phase10AbilityTuning.Setting.STATUS_DURATION_TICKS, 60), 0), owner);
 
         lockouts.put(owner.getUuid(), now + SimplySwordsAPI.getEffectiveWeaponCooldownTicks(
-                stack, owner, settings.passiveLockout));
+                stack, owner, tuning.integer(Phase10AbilityTuning.Setting.LOCKOUT_TICKS,
+                        settings.passiveLockout)));
         world.spawnParticles(DAWN_DUST, anchor.x, anchor.y, anchor.z, 10, 0.2, 0.2, 0.2, 0.03);
         world.playSound(null, owner.getBlockPos(), SoundRegistry.MAGIC_BOW_PULL_BACK_SHORT_VERSION_01.get(),
                 SoundCategory.PLAYERS, 0.3F, 1.25F);
+        Phase10CombatManager.finish(execution, 1);
     }
 
     public static boolean hasActive(ServerWorld world) {
@@ -543,7 +649,11 @@ public final class DawnquiverAbilityManager {
     }
 
     private static void setChorus(ItemStack stack, int chorus) {
-        int maximum = Math.max(1, Config.uniqueEffects.dawnquiver.maxChorus);
+        setChorus(stack, chorus, CHORUS_CAP.getOrDefault(stack,
+                Math.max(1, Config.uniqueEffects.dawnquiver.maxChorus)));
+    }
+
+    private static void setChorus(ItemStack stack, int chorus, int maximum) {
         stack.set(ComponentTypeRegistry.STORED_CHARGE.get(),
                 new StoredChargeComponent(MathHelper.clamp(chorus, 0, maximum)));
     }
@@ -746,11 +856,16 @@ public final class DawnquiverAbilityManager {
     private static final class ActiveDraw {
         private final UUID bowUuid;
         private final Hand hand;
+        private final Phase10AbilityTuning tuning;
+        private final UniqueAbilityExecution execution;
         private int lastTier = -1;
 
-        private ActiveDraw(UUID bowUuid, Hand hand) {
+        private ActiveDraw(UUID bowUuid, Hand hand, Phase10AbilityTuning tuning,
+                           UniqueAbilityExecution execution) {
             this.bowUuid = bowUuid;
             this.hand = hand;
+            this.tuning = tuning;
+            this.execution = execution;
         }
     }
 

@@ -35,6 +35,7 @@ import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
+import net.sweenus.simplyswords.world.Phase10WeaponManager;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -52,6 +53,7 @@ public class DreadtideSwordItem extends UniqueSwordItem {
         }
         if (!attacker.getWorld().isClient()) {
             HelperMethods.playHitSounds(attacker, target);
+            Phase10WeaponManager.onDreadtideHit(attacker, target, stack);
 
         }
         return super.postHit(stack, target, attacker);
@@ -64,6 +66,8 @@ public class DreadtideSwordItem extends UniqueSwordItem {
             return TypedActionResult.pass(stack);
         }
         if (!user.getWorld().isClient() && world instanceof  ServerWorld serverWorld) {
+            if (Phase10WeaponManager.activateDreadtide(serverWorld, user, stack))
+                return super.use(world, user, hand);
             int voidcallerDuration = Config.uniqueEffects.dreadtide.get().duration;
             float voidcallerDamageModifier = Config.uniqueEffects.dreadtide.get().damageScaling;
             int skillCooldown = 20;
@@ -120,6 +124,7 @@ public class DreadtideSwordItem extends UniqueSwordItem {
 
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
+        if (entity instanceof LivingEntity livingEntity) Phase10WeaponManager.tickDreadtide(livingEntity, stack);
         HelperMethods.createFootfalls(entity, stack, world, ParticleTypes.MYCELIUM,
                 ParticleTypes.MYCELIUM, ParticleTypes.MYCELIUM, true);
 

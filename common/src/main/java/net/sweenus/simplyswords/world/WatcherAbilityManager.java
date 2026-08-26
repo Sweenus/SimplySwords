@@ -24,6 +24,8 @@ import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
 import net.sweenus.simplyswords.api.ability.Phase2AbilityTuning;
 import net.sweenus.simplyswords.api.ability.Phase2UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.Phase10AbilityTuning;
+import net.sweenus.simplyswords.api.ability.Phase10UniqueAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityContext;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
@@ -86,6 +88,8 @@ public final class WatcherAbilityManager {
 
         UniqueAbilityExecution execution = null;
         Phase2AbilityTuning tuning = Phase2AbilityTuning.EMPTY;
+        UniqueAbilityExecution wargExecution = null;
+        Phase10AbilityTuning warg = Phase10AbilityTuning.EMPTY;
         if (type == WatcherWeaponType.CLAYMORE && stack != null && !stack.isEmpty()) {
             execution = UniqueAbilityApi.begin(Phase2UniqueAbilities.WATCHER_DREAD,
                     UniqueAbilityContext.passive(world, stack, actor, target, null), builder -> builder
@@ -99,12 +103,28 @@ public final class WatcherAbilityManager {
             UniqueAbilityApi.takeStartedExecution();
             UniqueAbilityApi.start(execution);
             tuning = Phase2UniqueAbilities.tuning(execution);
+        } else if (type == WatcherWeaponType.WARGLAIVE && stack != null && !stack.isEmpty()) {
+            wargExecution = Phase10CombatManager.beginPassive(
+                    Phase10UniqueAbilities.WARG_MARK, world, stack, actor, target);
+            warg = Phase10UniqueAbilities.tuning(wargExecution);
         }
 
         Map<MarkKey, DreadMark> marks = ACTIVE_MARKS.computeIfAbsent(world, ignored -> new HashMap<>());
         MarkKey key = new MarkKey(actor.getUuid(), target.getUuid(), type);
         long now = world.getTime();
         int mode = tuning.integer(Phase2AbilityTuning.Setting.MODE, 0);
+        int wargMode = warg.integer(Phase10AbilityTuning.Setting.MODE, 0);
+        if ((wargMode & (1 << 7)) != 0) {
+            Iterator<DreadMark> iterator = marks.values().iterator();
+            while (iterator.hasNext()) {
+                DreadMark existing = iterator.next();
+                if (existing.key.ownerId.equals(actor.getUuid()) && existing.key.type == type
+                        && !existing.key.targetId.equals(target.getUuid())) {
+                    discardBats(world, existing.batIds);
+                    iterator.remove();
+                }
+            }
+        }
         if ((mode & 16) != 0) {
             Iterator<DreadMark> iterator = marks.values().iterator();
             while (iterator.hasNext()) {
@@ -116,13 +136,19 @@ public final class WatcherAbilityManager {
                 }
             }
         }
-        int maxDread = Math.max(1, tuning.integer(Phase2AbilityTuning.Setting.STACK_CAP,
+        int maxDread = type == WatcherWeaponType.WARGLAIVE
+                ? Math.max(1, warg.integer(Phase10AbilityTuning.Setting.STACK_CAP,
+                Config.uniqueEffects.watcher.maxDread))
+                : Math.max(1, tuning.integer(Phase2AbilityTuning.Setting.STACK_CAP,
                 Config.uniqueEffects.watcher.maxDread));
         DreadMark mark = marks.get(key);
         if (mark == null) {
-            evictOldestMarkIfNeeded(world, marks, actor.getUuid(), type,
-                    Math.max(1, tuning.integer(Phase2AbilityTuning.Setting.MARKED_TARGET_CAP,
-                            Config.uniqueEffects.watcher.maxMarkedTargets)));
+            int targetCap = type == WatcherWeaponType.WARGLAIVE
+                    ? Math.max(1, warg.integer(Phase10AbilityTuning.Setting.TARGET_CAP,
+                    Config.uniqueEffects.watcher.maxMarkedTargets))
+                    : Math.max(1, tuning.integer(Phase2AbilityTuning.Setting.MARKED_TARGET_CAP,
+                    Config.uniqueEffects.watcher.maxMarkedTargets));
+            evictOldestMarkIfNeeded(world, marks, actor.getUuid(), type, targetCap);
             mark = new DreadMark(key, now);
             marks.put(key, mark);
         }
@@ -135,9 +161,15 @@ public final class WatcherAbilityManager {
             damageTarget(world, actor, stack, target,
                     weaponDamage * (float) Math.min(bonusCap, mark.dread * bonusPerStack));
         }
-        mark.expiryTick = now + Math.max(1, tuning.integer(Phase2AbilityTuning.Setting.STACK_DURATION_TICKS,
-                Config.uniqueEffects.watcher.dreadDuration));
+        mark.expiryTick = now + (type == WatcherWeaponType.WARGLAIVE
+                ? Math.max(1, warg.integer(Phase10AbilityTuning.Setting.DURATION_TICKS,
+                Config.uniqueEffects.watcher.dreadDuration))
+                : Math.max(1, tuning.integer(Phase2AbilityTuning.Setting.STACK_DURATION_TICKS,
+                Config.uniqueEffects.watcher.dreadDuration)));
         int dreadGain = 1;
+        mark.hitCount++;
+        if (type == WatcherWeaponType.WARGLAIVE && warg.flag(1 << 2) && mark.hitCount % 3 == 0) dreadGain++;
+        if (type == WatcherWeaponType.WARGLAIVE && warg.flag(1 << 7)) dreadGain = 2;
         if ((mode & 2) != 0 && now - mark.lastHitTick <= tuning.integer(
                 Phase2AbilityTuning.Setting.THRESHOLD, 30) && now >= mark.unblinkingReadyTick) {
             dreadGain = 2;
@@ -154,6 +186,16 @@ public final class WatcherAbilityManager {
             }
         }
         if (mark.dread > previousDread) spawnDreadGainEffects(world, target, mark.dread, maxDread);
+        if (type == WatcherWeaponType.WARGLAIVE && warg.flag(1 << 4))
+            target.addStatusEffect(new StatusEffectInstance(StatusEffects.GLOWING, 20, 0, false, false, true), actor);
+        if (type == WatcherWeaponType.WARGLAIVE && warg.flag(1 << 6) && mark.dread >= maxDread)
+            target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 40, 0), actor);
+        if (type == WatcherWeaponType.WARGLAIVE && warg.flag(1 << 3) && mark.dread >= maxDread
+                && now >= mark.sharedTerrorReadyTick) {
+            spreadDread(world, actor, target, marks, type, warg.get(Phase10AbilityTuning.Setting.RADIUS, 3),
+                    warg.integer(Phase10AbilityTuning.Setting.TARGET_CAP, Config.uniqueEffects.watcher.maxMarkedTargets));
+            mark.sharedTerrorReadyTick = now + warg.integer(Phase10AbilityTuning.Setting.LOCKOUT_TICKS, 20);
+        }
         if ((mode & 1) != 0 && mark.dread >= tuning.integer(Phase2AbilityTuning.Setting.THRESHOLD, 4)
                 && now >= mark.sharedTerrorReadyTick) {
             double radius = tuning.get(Phase2AbilityTuning.Setting.RANGE, 4);
@@ -186,6 +228,26 @@ public final class WatcherAbilityManager {
                     Phase2UniqueAbilities.HIT, target, 1, mark.dread);
             UniqueAbilityApi.finish(execution, execution.definition().id(), 1);
         }
+        if (wargExecution != null) Phase10CombatManager.finish(wargExecution, 1);
+    }
+
+    private static void spreadDread(ServerWorld world, LivingEntity actor, LivingEntity target,
+                                    Map<MarkKey, DreadMark> marks, WatcherWeaponType type,
+                                    double radius, int targetCap) {
+        LivingEntity shared = world.getEntitiesByClass(LivingEntity.class, target.getBoundingBox().expand(radius),
+                        candidate -> candidate != target && isValidTarget(world, actor, null, candidate))
+                .stream().filter(candidate -> !marks.containsKey(new MarkKey(actor.getUuid(), candidate.getUuid(), type)))
+                .min(Comparator.comparingDouble(target::squaredDistanceTo)).orElse(null);
+        long count = marks.values().stream().filter(mark -> mark.key.ownerId.equals(actor.getUuid())
+                && mark.key.type == type).count();
+        if (shared == null || count >= targetCap) return;
+        DreadMark sharedMark = new DreadMark(new MarkKey(actor.getUuid(), shared.getUuid(), type), world.getTime());
+        sharedMark.dread = 1;
+        sharedMark.expiryTick = world.getTime() + Config.uniqueEffects.watcher.dreadDuration;
+        WatcherBatEntity bat = spawnBat(world, actor, shared, type, WatcherBatEntity.MODE_MARK,
+                shared.getPos().add(0, shared.getHeight() * .7, 0));
+        if (bat != null) sharedMark.batIds.add(bat.getUuid());
+        marks.put(sharedMark.key, sharedMark);
     }
 
     public static boolean canActivate(WeaponAbilityContext context, WatcherWeaponType type) {
@@ -280,13 +342,23 @@ public final class WatcherAbilityManager {
 
     private static boolean startNightPursuit(WeaponAbilityContext context, LivingEntity primaryTarget) {
         ServerWorld world = context.world();
+        UniqueAbilityExecution execution = Phase10CombatManager.beginActive(
+                Phase10UniqueAbilities.WARG_HUNT, context, Config.uniqueEffects.watcher.warglaiveCooldown);
+        Phase10AbilityTuning tuning = Phase10UniqueAbilities.tuning(execution);
+        UniqueAbilityExecution markExecution = Phase10CombatManager.beginPassive(
+                Phase10UniqueAbilities.WARG_MARK, world, context.stack(), context.actor(), primaryTarget);
+        Phase10AbilityTuning markTuning = Phase10UniqueAbilities.tuning(markExecution);
+        Phase10CombatManager.finish(markExecution, 0);
         Map<MarkKey, DreadMark> marks = ACTIVE_MARKS.get(world);
         if (marks == null || marks.isEmpty()) {
+            UniqueAbilityApi.cancel(execution);
             return false;
         }
 
-        double radius = Math.max(1.0, Config.uniqueEffects.watcher.warglaiveHuntRadius);
-        int maxTargets = Math.max(1, Config.uniqueEffects.watcher.warglaiveMaxTargets);
+        double radius = Math.max(1.0, tuning.get(Phase10AbilityTuning.Setting.RADIUS,
+                Config.uniqueEffects.watcher.warglaiveHuntRadius));
+        int maxTargets = Math.max(1, tuning.integer(Phase10AbilityTuning.Setting.TARGET_CAP,
+                Config.uniqueEffects.watcher.warglaiveMaxTargets));
         List<DreadMark> selected = marks.values().stream()
                 .filter(mark -> mark.key.ownerId.equals(context.actor().getUuid())
                         && mark.key.type == WatcherWeaponType.WARGLAIVE)
@@ -305,6 +377,7 @@ public final class WatcherAbilityManager {
                 .limit(maxTargets)
                 .toList();
         if (selected.isEmpty()) {
+            UniqueAbilityApi.cancel(execution);
             return false;
         }
 
@@ -324,6 +397,7 @@ public final class WatcherAbilityManager {
             }
         }
         if (batIds.isEmpty()) {
+            UniqueAbilityApi.cancel(execution);
             return false;
         }
         while (destinationSlots.size() < batIds.size()) {
@@ -356,6 +430,8 @@ public final class WatcherAbilityManager {
                 Config.uniqueEffects.watcher.warglaiveDamageScaling,
                 Config.uniqueEffects.watcher.warglaiveSpellScaling
         );
+        baseDamage *= (float) tuning.get(Phase10AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1);
+        if (markTuning.flag(1 << 7)) baseDamage *= 1.5F;
         ActiveHunt hunt = new ActiveHunt(
                 context.actor().getUuid(),
                 sourcePlayerId(context),
@@ -363,7 +439,9 @@ public final class WatcherAbilityManager {
                 now,
                 now + HUNT_MAX_TICKS,
                 baseDamage,
-                orders
+                orders,
+                tuning,
+                execution
         );
         ACTIVE_HUNTS.computeIfAbsent(world, ignored -> new ArrayList<>()).add(hunt);
         world.playSound(null, context.actor().getX(), context.actor().getY(), context.actor().getZ(),
@@ -400,7 +478,8 @@ public final class WatcherAbilityManager {
                 if (order.returning) {
                     bat.setWatcherMode(WatcherBatEntity.MODE_RETURN);
                     Vec3d returnPoint = actor.getPos().add(0.0, actor.getHeight() * 0.65, 0.0);
-                    moveBatToward(bat, returnPoint, Config.uniqueEffects.watcher.warglaiveBatSpeed);
+                    moveBatToward(bat, returnPoint, Config.uniqueEffects.watcher.warglaiveBatSpeed
+                            * hunt.tuning.get(Phase10AbilityTuning.Setting.SPEED, 1));
                     if (bat.squaredDistanceTo(returnPoint) <= RETURN_REACH_SQUARED) {
                         spawnReturnEffects(world, actor, bat);
                         discardBat(world, bat);
@@ -410,7 +489,8 @@ public final class WatcherAbilityManager {
                 }
 
                 if (world.getTime() < order.readyTick) {
-                    moveBatToward(bat, order.stagePos, Config.uniqueEffects.watcher.warglaiveBatSpeed);
+                    moveBatToward(bat, order.stagePos, Config.uniqueEffects.watcher.warglaiveBatSpeed
+                            * hunt.tuning.get(Phase10AbilityTuning.Setting.SPEED, 1));
                     continue;
                 }
 
@@ -422,7 +502,8 @@ public final class WatcherAbilityManager {
                 }
 
                 Vec3d strikePoint = target.getPos().add(0.0, target.getHeight() * 0.55, 0.0);
-                moveBatToward(bat, strikePoint, Config.uniqueEffects.watcher.warglaiveBatSpeed);
+                moveBatToward(bat, strikePoint, Config.uniqueEffects.watcher.warglaiveBatSpeed
+                        * hunt.tuning.get(Phase10AbilityTuning.Setting.SPEED, 1));
                 if (bat.squaredDistanceTo(strikePoint) <= BAT_REACH_SQUARED) {
                     applyHuntStrike(world, actor, target, hunt);
                     order.returning = true;
@@ -430,6 +511,7 @@ public final class WatcherAbilityManager {
             }
 
             if (hunt.bats.isEmpty()) {
+                Phase10CombatManager.finish(hunt.execution, hunt.struckTargets.size());
                 iterator.remove();
             }
         }
@@ -440,19 +522,35 @@ public final class WatcherAbilityManager {
     }
 
     private static void applyHuntStrike(ServerWorld world, LivingEntity actor, LivingEntity target, ActiveHunt hunt) {
+        float distinctMultiplier = 1 + Math.min(hunt.tuning.integer(Phase10AbilityTuning.Setting.STACK_CAP, 5),
+                hunt.struckTargets.size()) * (float) hunt.tuning.get(
+                Phase10AbilityTuning.Setting.PER_STACK_MULTIPLIER, 0);
         float beforeVitality = target.getHealth() + target.getAbsorptionAmount();
-        if (damageTarget(world, actor, hunt.stack, target, hunt.baseDamage)) {
+        if (damageTarget(world, actor, hunt.stack, target, hunt.baseDamage * distinctMultiplier)) {
+            hunt.struckTargets.add(target.getUuid());
+            if (hunt.tuning.has(Phase10AbilityTuning.Setting.STATUS_DURATION_TICKS))
+                target.addStatusEffect(new StatusEffectInstance(
+                        hunt.tuning.flag(1 << 26) ? StatusEffects.WITHER : StatusEffects.SLOWNESS,
+                        hunt.tuning.integer(Phase10AbilityTuning.Setting.STATUS_DURATION_TICKS, 20),
+                        hunt.tuning.integer(Phase10AbilityTuning.Setting.STATUS_AMPLIFIER, 1)), actor);
             float afterVitality = target.getHealth() + target.getAbsorptionAmount();
             float removed = Math.max(0.0F, beforeVitality - afterVitality);
             float healCap = actor.getMaxHealth() * MathHelper.clamp(
-                    Config.uniqueEffects.watcher.warglaiveHealCap, 0.0F, 1.0F);
+                    (float) hunt.tuning.get(Phase10AbilityTuning.Setting.HEALTH_THRESHOLD,
+                            Config.uniqueEffects.watcher.warglaiveHealCap), 0.0F, 1.0F);
             float remainingCap = Math.max(0.0F, healCap - hunt.healed);
             float heal = Math.min(remainingCap,
-                    removed * Math.max(0.0F, Config.uniqueEffects.watcher.warglaiveLifeSteal));
+                    removed * Math.max(0.0F, Config.uniqueEffects.watcher.warglaiveLifeSteal)
+                            * (float) hunt.tuning.get(Phase10AbilityTuning.Setting.HEAL_MULTIPLIER, 1));
             if (heal > 0.0F) {
                 actor.heal(heal);
                 hunt.healed += heal;
             }
+            if (hunt.tuning.flag(1 << 22) && heal > 0 && actor.getHealth() >= actor.getMaxHealth())
+                actor.setAbsorptionAmount(Math.min(actor.getAbsorptionAmount() + heal,
+                        (float) hunt.tuning.get(Phase10AbilityTuning.Setting.ABSORPTION, 8)));
+            if (hunt.tuning.flag(1 << 23) && hunt.struckTargets.size() >= 3)
+                actor.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, 60, 0), actor);
             Vec3d pos = target.getPos().add(0.0, target.getHeight() * 0.55, 0.0);
             world.spawnParticles(ParticleTypes.SCULK_SOUL, pos.x, pos.y, pos.z,
                     6, 0.24, 0.28, 0.24, 0.035);
@@ -964,6 +1062,7 @@ public final class WatcherAbilityManager {
                 unregisterBat(world, order.batId);
             }
         }
+        Phase10CombatManager.finish(hunt.execution, hunt.struckTargets.size());
     }
 
     private static void discardBats(ServerWorld world, List<UUID> batIds) {
@@ -1096,6 +1195,7 @@ public final class WatcherAbilityManager {
         private long lastHitTick = Long.MIN_VALUE / 2;
         private long unblinkingReadyTick;
         private long sharedTerrorReadyTick;
+        private int hitCount;
 
         private DreadMark(MarkKey key, long createdTick) {
             this.key = key;
@@ -1113,10 +1213,14 @@ public final class WatcherAbilityManager {
         private final long expiryTick;
         private final float baseDamage;
         private final List<HuntBat> bats;
+        private final Phase10AbilityTuning tuning;
+        private final UniqueAbilityExecution execution;
+        private final Set<UUID> struckTargets = new HashSet<>();
         private float healed;
 
         private ActiveHunt(UUID actorId, UUID sourcePlayerId, ItemStack stack, long startedTick,
-                           long expiryTick, float baseDamage, List<HuntBat> bats) {
+                           long expiryTick, float baseDamage, List<HuntBat> bats,
+                           Phase10AbilityTuning tuning, UniqueAbilityExecution execution) {
             this.actorId = actorId;
             this.sourcePlayerId = sourcePlayerId;
             this.stack = stack;
@@ -1124,6 +1228,8 @@ public final class WatcherAbilityManager {
             this.expiryTick = expiryTick;
             this.baseDamage = baseDamage;
             this.bats = bats;
+            this.tuning = tuning;
+            this.execution = execution;
         }
     }
 

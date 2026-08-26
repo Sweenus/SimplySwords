@@ -347,6 +347,7 @@ public final class BuiltinUniqueAbilities {
         Phase7UniqueAbilities.register();
         Phase8UniqueAbilities.register();
         Phase9UniqueAbilities.register();
+        Phase10UniqueAbilities.register();
     }
 
     private static Identifier id(String path) {

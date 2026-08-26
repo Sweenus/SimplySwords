@@ -33,6 +33,7 @@ import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
 import net.sweenus.simplyswords.world.LivingEntityAbilityMovementManager;
+import net.sweenus.simplyswords.world.Phase10WeaponManager;
 
 import java.util.List;
 
@@ -47,9 +48,9 @@ public class RibboncleaverSwordItem extends UniqueSwordItem implements UniqueWea
             return super.postHit(stack, target, attacker);
         }
         if (!attacker.getWorld().isClient()) {
-
             HelperMethods.playHitSounds(attacker, target);
-
+            if (attacker.getWorld() instanceof net.minecraft.server.world.ServerWorld serverWorld)
+                Phase10WeaponManager.onRibbonHit(serverWorld, attacker, target, stack);
         }
         return super.postHit(stack, target, attacker);
     }
@@ -61,23 +62,13 @@ public class RibboncleaverSwordItem extends UniqueSwordItem implements UniqueWea
 
     @Override
     public TypedActionResult<ItemStack> startPlayerAbility(World world, PlayerEntity user, Hand hand) {
-        int skillCooldown = Config.uniqueEffects.ribboncleaver.cooldown;
-        int resilienceAmplifier = Config.uniqueEffects.ribboncleaver.resilienceAmplifier;
-
-
         world.playSound(null, user.getBlockPos(), SoundRegistry.ELEMENTAL_BOW_EARTH_SHOOT_IMPACT_03.get(),
                 user.getSoundCategory(), 0.4f, 1.3f);
         if (user.isOnGround())
             world.playSound(null, user.getBlockPos(), SoundRegistry.OBJECT_IMPACT_THUD_REPEAT.get(),
                     user.getSoundCategory(), 0.5f, 1.2f);
-        user.setVelocity(user.getRotationVector().multiply(+1.7));
-        user.setVelocity(user.getVelocity().x, 0, user.getVelocity().z); // Prevent user flying to the heavens
-        user.velocityModified = true;
-        user.addStatusEffect(new StatusEffectInstance(EffectRegistry.getReference(EffectRegistry.RIBBONCLEAVE),
-                60, 0, false, false, true));
-        user.addStatusEffect(new StatusEffectInstance(EffectRegistry.getReference(EffectRegistry.RESILIENCE),
-                15, resilienceAmplifier, false, false, true));
-        SimplySwordsAPI.setWeaponCooldown(user, user.getStackInHand(hand), skillCooldown);
+        if (world instanceof net.minecraft.server.world.ServerWorld serverWorld)
+            Phase10WeaponManager.ribbonRush(serverWorld, user, user.getStackInHand(hand), null);
 
         return super.use(world, user, hand);
     }
@@ -85,17 +76,11 @@ public class RibboncleaverSwordItem extends UniqueSwordItem implements UniqueWea
     @Override
     public boolean activate(WeaponAbilityContext context) {
         LivingEntity actor = context.actor();
-        if (context.target() == null || !HelperMethods.checkAbilityTarget(context.target(), actor)) {
-            return false;
-        }
-        int resilienceAmplifier = Config.uniqueEffects.ribboncleaver.resilienceAmplifier;
-        LivingEntityAbilityMovementManager.dashTowardTarget(context.world(), actor, context.target(), 1.7, 8);
+        LivingEntity target = context.target() != null && HelperMethods.checkAbilityTarget(context.target(), actor)
+                ? context.target() : null;
+        Phase10WeaponManager.ribbonRush(context.world(), actor, context.stack(), target);
         context.world().playSound(null, actor.getBlockPos(), SoundRegistry.ELEMENTAL_BOW_EARTH_SHOOT_IMPACT_03.get(),
                 actor.getSoundCategory(), 0.4f, 1.3f);
-        actor.addStatusEffect(new StatusEffectInstance(EffectRegistry.getReference(EffectRegistry.RIBBONCLEAVE),
-                60, 0, false, false, true));
-        actor.addStatusEffect(new StatusEffectInstance(EffectRegistry.getReference(EffectRegistry.RESILIENCE),
-                15, resilienceAmplifier, false, false, true));
         context.world().spawnParticles(ParticleTypes.POOF, actor.getX(), actor.getY() + 0.15, actor.getZ(), 12, 0.55, 0.08, 0.55, 0.03);
         return true;
     }
@@ -107,6 +92,7 @@ public class RibboncleaverSwordItem extends UniqueSwordItem implements UniqueWea
 
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
+        if (entity instanceof LivingEntity livingEntity) Phase10WeaponManager.tickRibbon(livingEntity, stack);
 
         //Drag weapon particles
         if (entity.isOnGround() && Platform.isModLoaded("bettercombat") && HelperMethods.isWalking(entity)
