@@ -40,6 +40,11 @@ public class ThrownSpearEntity extends PersistentProjectileEntity {
     private static final TrackedData<Byte> LOYALTY;
     private static final TrackedData<Boolean> ENCHANTED;
     private static final TrackedData<ItemStack> ITEM_STACK;
+    private static final TrackedData<Integer> ORBIT_TARGET_ID;
+    private static final TrackedData<Integer> ORBIT_START_TICK;
+    private static final TrackedData<Integer> ORBIT_DURATION_TICKS;
+    private static final TrackedData<Integer> ORBIT_INTERVAL_TICKS;
+    private static final TrackedData<Float> ORBIT_PHASE;
     public ItemStack stack;
     public int returnTimer;
     public boolean hasYaw = false;
@@ -88,6 +93,11 @@ public class ThrownSpearEntity extends PersistentProjectileEntity {
         builder.add(LOYALTY, (byte)0);
         builder.add(ENCHANTED, false);
         builder.add(ITEM_STACK, ItemStack.EMPTY);
+        builder.add(ORBIT_TARGET_ID, -1);
+        builder.add(ORBIT_START_TICK, 0);
+        builder.add(ORBIT_DURATION_TICKS, 0);
+        builder.add(ORBIT_INTERVAL_TICKS, 20);
+        builder.add(ORBIT_PHASE, 0.0F);
     }
 
     @Override
@@ -385,6 +395,45 @@ public class ThrownSpearEntity extends PersistentProjectileEntity {
         return this.getItemStack();
     }
 
+    public boolean hasOrbitPresentation() {
+        return this.dataTracker.get(ORBIT_TARGET_ID) >= 0
+                && this.dataTracker.get(ORBIT_DURATION_TICKS) > 0;
+    }
+
+    public int getOrbitTargetId() {
+        return this.dataTracker.get(ORBIT_TARGET_ID);
+    }
+
+    public int getOrbitStartTick() {
+        return this.dataTracker.get(ORBIT_START_TICK);
+    }
+
+    public int getOrbitDurationTicks() {
+        return this.dataTracker.get(ORBIT_DURATION_TICKS);
+    }
+
+    public int getOrbitIntervalTicks() {
+        return Math.max(1, this.dataTracker.get(ORBIT_INTERVAL_TICKS));
+    }
+
+    public float getOrbitPhase() {
+        return this.dataTracker.get(ORBIT_PHASE);
+    }
+
+    protected void setOrbitPresentation(LivingEntity target, int durationTicks,
+                                        int intervalTicks, float phase) {
+        this.dataTracker.set(ORBIT_TARGET_ID, target.getId());
+        this.dataTracker.set(ORBIT_START_TICK, (int) this.getWorld().getTime());
+        this.dataTracker.set(ORBIT_DURATION_TICKS, Math.max(1, durationTicks));
+        this.dataTracker.set(ORBIT_INTERVAL_TICKS, Math.max(1, intervalTicks));
+        this.dataTracker.set(ORBIT_PHASE, phase);
+    }
+
+    protected void clearOrbitPresentation() {
+        this.dataTracker.set(ORBIT_TARGET_ID, -1);
+        this.dataTracker.set(ORBIT_DURATION_TICKS, 0);
+    }
+
 
 
     protected void damageOnReturn(double radius, float damage) {
@@ -420,5 +469,10 @@ public class ThrownSpearEntity extends PersistentProjectileEntity {
         LOYALTY = DataTracker.registerData(ThrownSpearEntity.class, TrackedDataHandlerRegistry.BYTE);
         ENCHANTED = DataTracker.registerData(ThrownSpearEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
         ITEM_STACK = DataTracker.registerData(ThrownSpearEntity.class, TrackedDataHandlerRegistry.ITEM_STACK);
+        ORBIT_TARGET_ID = DataTracker.registerData(ThrownSpearEntity.class, TrackedDataHandlerRegistry.INTEGER);
+        ORBIT_START_TICK = DataTracker.registerData(ThrownSpearEntity.class, TrackedDataHandlerRegistry.INTEGER);
+        ORBIT_DURATION_TICKS = DataTracker.registerData(ThrownSpearEntity.class, TrackedDataHandlerRegistry.INTEGER);
+        ORBIT_INTERVAL_TICKS = DataTracker.registerData(ThrownSpearEntity.class, TrackedDataHandlerRegistry.INTEGER);
+        ORBIT_PHASE = DataTracker.registerData(ThrownSpearEntity.class, TrackedDataHandlerRegistry.FLOAT);
     }
 }

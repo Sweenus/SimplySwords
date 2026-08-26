@@ -3,6 +3,7 @@ package net.sweenus.simplyswords.entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
@@ -28,14 +29,15 @@ import java.util.UUID;
 
 public class WickpiercerEntity extends ThrownSpearEntity {
     private static final int ORBIT_MODE = 2;
-    private static final double ORBIT_RADIUS = 1.6;
 
     public int slownessDuration;
     private @Nullable UniqueAbilityExecution abilityExecution;
     private boolean impactBurstUsed;
     private @Nullable LivingEntity orbitTarget;
+    private int orbitStartAge;
     private int orbitEndAge;
     private int nextOrbitStrike;
+    private float orbitPhase;
     private boolean orbitUsed;
     private boolean loyaltyRestored;
     private final Set<UUID> trailTargets = new HashSet<>();
@@ -107,8 +109,23 @@ public class WickpiercerEntity extends ThrownSpearEntity {
                 || (tuning.integer(Phase2AbilityTuning.Setting.MODE, 0) & ORBIT_MODE) == 0) return;
         orbitUsed = true;
         orbitTarget = target;
+        orbitStartAge = age;
         orbitEndAge = age + duration;
-        nextOrbitStrike = WickpiercerThrowMath.nextStrikeAge(age, orbitInterval(tuning));
+        int interval = orbitInterval(tuning);
+        nextOrbitStrike = WickpiercerThrowMath.nextStrikeAge(age, interval);
+        orbitPhase = initialOrbitPhase(target);
+        setOrbitPresentation(target, duration, interval, orbitPhase);
+    }
+
+    private float initialOrbitPhase(LivingEntity target) {
+        Vec3d direction = getVelocity().multiply(1.0, 0.0, 1.0);
+        if (direction.lengthSquared() < 1.0E-6 && getOwner() instanceof LivingEntity owner) {
+            direction = target.getPos().subtract(owner.getPos()).multiply(1.0, 0.0, 1.0);
+        }
+        if (direction.lengthSquared() < 1.0E-6) {
+            return 0.0F;
+        }
+        return (float) Math.atan2(direction.z, direction.x);
     }
 
     private int orbitInterval(Phase2AbilityTuning tuning) {
@@ -119,22 +136,32 @@ public class WickpiercerEntity extends ThrownSpearEntity {
         if (orbitTarget == null) return;
         if (!isOrbiting()) {
             orbitTarget = null;
+            clearOrbitPresentation();
             setNoClip(true);
             return;
         }
         Phase2AbilityTuning tuning = tuning();
-        double angle = age * 0.35;
-        setPos(orbitTarget.getX() + Math.cos(angle) * ORBIT_RADIUS,
-                orbitTarget.getBodyY(0.55),
-                orbitTarget.getZ() + Math.sin(angle) * ORBIT_RADIUS);
+        int interval = orbitInterval(tuning);
+        Vec3d offset = WickpiercerThrowMath.orbitOffset(
+                age - orbitStartAge, interval, orbitPhase, WickpiercerThrowMath.DEFAULT_ORBIT_RADIUS);
+        setPos(orbitTarget.getX() + offset.x,
+                orbitTarget.getBodyY(0.55) + offset.y,
+                orbitTarget.getZ() + offset.z);
         if (age < nextOrbitStrike || !(getWorld() instanceof ServerWorld world)
                 || !(getOwner() instanceof LivingEntity owner)) return;
-        nextOrbitStrike = WickpiercerThrowMath.nextStrikeAge(age, orbitInterval(tuning));
+        nextOrbitStrike = WickpiercerThrowMath.nextStrikeAge(age, interval);
         float damage = primaryBaseDamage
                 * (float) tuning.get(Phase2AbilityTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, 0);
         if (damage <= 0 || !HelperMethods.checkAbilityTarget(orbitTarget, owner)) return;
-        SimplySwordsAPI.applyAbilityMagicDamageThroughIframes(world, owner, stack, orbitTarget,
-                damage, SpellScalingProfile.FIRE);
+        if (SimplySwordsAPI.applyAbilityMagicDamageThroughIframes(world, owner, stack, orbitTarget,
+                damage, SpellScalingProfile.FIRE)) {
+            world.spawnParticles(ParticleTypes.SMALL_FLAME,
+                    orbitTarget.getX(), orbitTarget.getBodyY(0.55), orbitTarget.getZ(),
+                    5, 0.18, 0.18, 0.18, 0.015);
+            world.spawnParticles(ParticleTypes.WAX_OFF,
+                    orbitTarget.getX(), orbitTarget.getBodyY(0.55), orbitTarget.getZ(),
+                    3, 0.14, 0.16, 0.14, 0.01);
+        }
     }
 
     private void tickDelayedReturn() {
@@ -188,6 +215,7 @@ public class WickpiercerEntity extends ThrownSpearEntity {
 
     @Override
     protected boolean tryPickup(PlayerEntity player) {
+        if (isOrbiting()) return false;
         boolean pickedUp = super.tryPickup(player);
         if (pickedUp) finishExecution(1);
         return pickedUp;
