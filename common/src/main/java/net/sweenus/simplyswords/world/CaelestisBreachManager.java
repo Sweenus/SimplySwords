@@ -22,6 +22,9 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+import net.sweenus.simplyswords.api.ability.Phase9AbilityTuning;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.CaelestisBreachCreature;
 import net.sweenus.simplyswords.entity.CaelestisBreachVisualEntity;
@@ -85,7 +88,27 @@ public final class CaelestisBreachManager {
         return breaches.values().stream().anyMatch(breach -> actorId.equals(breach.actorId));
     }
 
+    public static void onWeaponHit(ServerWorld world, LivingEntity actor, LivingEntity target) {
+        MinionTargeting.recordLastAttack(actor, target);
+        Map<UUID, ActiveBreach> breaches = ACTIVE.get(world);
+        if (breaches == null) return;
+        for (ActiveBreach breach : breaches.values()) {
+            if (!breach.actorId.equals(actor.getUuid()) || !breach.tuning.flag(1 << 5)) continue;
+            breach.creatureIds.stream().map(world::getEntity)
+                    .filter(MobEntity.class::isInstance).map(MobEntity.class::cast)
+                    .filter(mob -> mob.isAlive() && mob instanceof CaelestisBreachCreature creature
+                            && !creature.isUnbound())
+                    .sorted(Comparator.comparingDouble(mob -> mob.squaredDistanceTo(target)))
+                    .limit(8).forEach(mob -> mob.setTarget(target));
+        }
+    }
+
     public static boolean start(WeaponAbilityContext context) {
+        return start(context, Phase9AbilityTuning.EMPTY, null);
+    }
+
+    public static boolean start(WeaponAbilityContext context, Phase9AbilityTuning tuning,
+                                UniqueAbilityExecution execution) {
         if (context == null || context.world() == null || context.actor() == null
                 || !context.actor().isAlive() || context.stack() == null || context.stack().isEmpty()
                 || hasActiveForActor(context.world(), context.actor().getUuid())) {
@@ -99,11 +122,13 @@ public final class CaelestisBreachManager {
         int seed = world.random.nextInt();
         Vec3d center = findAnchorPosition(world, context.origin());
         long now = world.getTime();
-        BreachProfile profile = BreachProfile.capture(actor instanceof PlayerEntity);
+        Phase9AbilityTuning resolvedTuning = tuning == null ? Phase9AbilityTuning.EMPTY : tuning;
+        BreachProfile profile = BreachProfile.capture(actor instanceof PlayerEntity, resolvedTuning);
         int duration = profile.duration;
         boolean betrayalPending = world.random.nextInt(100)
-                < Math.clamp(Config.uniqueEffects.caelestis.betrayalChance, 0, 100);
-        long betrayalTick = now + getBetrayalDelay(world, profile);
+                < betrayalChance(resolvedTuning);
+        long betrayalTick = now + getBetrayalDelay(world, profile)
+                + (resolvedTuning.flag(1 << 19) ? 60 : 0);
         float baseDamage = HelperMethods.abilityScaledDamage(
                 "eldritch",
                 actor,
@@ -130,7 +155,8 @@ public final class CaelestisBreachManager {
                 now,
                 now + duration,
                 now + 20L,
-                now + Math.max(1, Config.uniqueEffects.caelestis.tentacleSpawnInterval),
+                now + Math.max(20, Config.uniqueEffects.caelestis.tentacleSpawnInterval
+                        - (resolvedTuning.flag(1 << 12) ? 5 : 0)),
                 betrayalTick,
                 betrayalPending,
                 false,
@@ -139,6 +165,8 @@ public final class CaelestisBreachManager {
                 ownerAttackValue,
                 seed,
                 profile,
+                resolvedTuning,
+                execution,
                 new HashSet<>(),
                 new HashSet<>()
         );
@@ -199,19 +227,27 @@ public final class CaelestisBreachManager {
         if (phase != CaelestisBreachVisualEntity.PHASE_COLLAPSING
                 && now >= breach.nextSpawnTick) {
             spawnWave(world, breach);
-            breach.nextSpawnTick = now + Math.max(1, Config.uniqueEffects.caelestis.spawnInterval);
+            int spawnInterval = Config.uniqueEffects.caelestis.spawnInterval;
+            if (breach.tuning.flag(1 << 1)) spawnInterval = Math.max(20, spawnInterval - 4);
+            if (breach.tuning.flag(1 << 26)) spawnInterval = Math.max(20, Math.round(spawnInterval * 1.15F));
+            breach.nextSpawnTick = now + spawnInterval;
         }
         if (phase != CaelestisBreachVisualEntity.PHASE_COLLAPSING
                 && now >= breach.nextTentacleSpawnTick) {
             spawnTentacle(world, breach, radius);
-            breach.nextTentacleSpawnTick = now
-                    + Math.max(1, Config.uniqueEffects.caelestis.tentacleSpawnInterval);
+            int interval = breach.tuning.flag(1 << 12)
+                    ? Math.max(20, Config.uniqueEffects.caelestis.tentacleSpawnInterval - 5)
+                    : Config.uniqueEffects.caelestis.tentacleSpawnInterval;
+            breach.nextTentacleSpawnTick = now + Math.max(1, interval);
         }
         if (breach.betrayalPending && !breach.betrayalSpawned
                 && phase != CaelestisBreachVisualEntity.PHASE_COLLAPSING
                 && now >= breach.betrayalTick) {
             breach.betrayalSpawned = spawnUnbound(world, breach);
         }
+        if (breach.betrayalPending && !breach.betrayalSpawned && breach.tuning.flag(1 << 21)
+                && actor.squaredDistanceTo(breach.center) <= 64) actor.addStatusEffect(
+                new StatusEffectInstance(StatusEffects.RESISTANCE, 20, 0), actor);
         if (!breach.forcedCollapse
                 && Math.floorMod(now + breach.seed, AGGRO_PULSE_INTERVAL) == 0L) {
             redirectAggroToBoundMinions(world, breach);
@@ -250,6 +286,8 @@ public final class CaelestisBreachManager {
         int min = breach.profile.minSpawnPerWave;
         int max = breach.profile.maxSpawnPerWave;
         int count = min + world.random.nextInt(max - min + 1);
+        if (breach.tuning.flag(1 << 7)) count++;
+        if (breach.tuning.flag(1 << 8)) count = 1;
         count = Math.min(count, cap - friendlyCount);
         float radius = radiusAt(world.getTime(), breach);
         for (int i = 0; i < count; i++) {
@@ -260,7 +298,16 @@ public final class CaelestisBreachManager {
     private static boolean spawnUnbound(ServerWorld world, ActiveBreach breach) {
         float radius = radiusAt(world.getTime(), breach);
         int archetype = world.random.nextBoolean() ? 1 : 2;
-        return spawnCreature(world, breach, radius, archetype, true);
+        boolean spawned = spawnCreature(world, breach, radius, archetype, true);
+        if (spawned && breach.tuning.flag(1 << 22)) {
+            breach.creatureIds.stream().map(world::getEntity)
+                    .filter(entity -> entity instanceof LivingEntity
+                            && entity instanceof CaelestisBreachCreature creature && creature.isUnbound())
+                    .map(LivingEntity.class::cast).findFirst().ifPresent(living -> living.addStatusEffect(
+                            new StatusEffectInstance(StatusEffects.GLOWING, 120, 0),
+                            getLiving(world, breach.actorId)));
+        }
+        return spawned;
     }
 
     private static int chooseArchetype(ServerWorld world) {
@@ -296,7 +343,7 @@ public final class CaelestisBreachManager {
         }
         creature.configureBreachCreature(
                 breach.id, breach.actorId, breach.principalId, unbound, world.random.nextInt());
-        applyScaledCreatureHealth(mob, breach.ownerAttackValue);
+        applyScaledCreatureHealth(mob, breach.ownerAttackValue, breach.profile.healthMultiplier);
         mob.setPersistent();
         if (!world.spawnEntity(mob)) {
             return false;
@@ -403,14 +450,15 @@ public final class CaelestisBreachManager {
         return true;
     }
 
-    private static void applyScaledCreatureHealth(MobEntity mob, float ownerAttackValue) {
+    private static void applyScaledCreatureHealth(MobEntity mob, float ownerAttackValue,
+                                                  float masteryMultiplier) {
         EntityAttributeInstance health = mob.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH);
         if (health == null) {
             return;
         }
         double scaling = Math.max(0.0F, Config.uniqueEffects.caelestis.minionHealthScaling);
         double multiplier = 1.0 + Math.max(0.0F, ownerAttackValue) * scaling;
-        health.setBaseValue(health.getBaseValue() * multiplier);
+        health.setBaseValue(health.getBaseValue() * multiplier * masteryMultiplier);
         mob.setHealth(mob.getMaxHealth());
     }
 
@@ -578,7 +626,9 @@ public final class CaelestisBreachManager {
                 candidate -> candidate.isAlive()
                         && candidate.getBoundingBox().intersects(contactBox)
                         && isTentacleHostile(world, breach, candidate))) {
-            int duration = Math.max(1, Config.uniqueEffects.caelestis.tentacleSlowDuration);
+            int duration = Math.max(1, breach.tuning.integer(
+                    Phase9AbilityTuning.Setting.STATUS_DURATION_TICKS,
+                    Config.uniqueEffects.caelestis.tentacleSlowDuration));
             int amplifier = Math.clamp(
                     Config.uniqueEffects.caelestis.tentacleSlowAmplifier, 0, 4);
             target.addStatusEffect(
@@ -953,6 +1003,7 @@ public final class CaelestisBreachManager {
             visual.discard();
         }
         spawnClosingEffects(world, breach.center);
+        Phase9CombatManager.finish(breach.execution, breach.creatureIds.size());
     }
 
     private static void dissolveCreature(ServerWorld world, MobEntity mob, boolean unbound) {
@@ -973,6 +1024,16 @@ public final class CaelestisBreachManager {
             return;
         }
         mob.addCommandTag(UNBOUND_REWARD_ROLLED_TAG);
+        ActiveBreach breach = get(world, creature.getBreachId());
+        if (breach != null) {
+            int refund = 0;
+            if (breach.tuning.flag(1 << 20)) refund += 60;
+            if (breach.tuning.flag(1 << 23)) refund += 120;
+            if (breach.tuning.flag(1 << 25)) refund = Math.max(refund, 180);
+            LivingEntity actor = getLiving(world, breach.actorId);
+            if (actor != null && refund > 0) SimplySwordsAPI.setWeaponCooldown(actor, breach.stack,
+                    Math.max(0, Config.uniqueEffects.caelestis.cooldown - refund));
+        }
         int chance = Math.clamp(Config.uniqueEffects.caelestis.unboundTabletDropChance, 0, 100);
         if (chance > 0 && world.random.nextInt(100) < chance) {
             mob.dropStack(new ItemStack(ItemsRegistry.RUNIC_TABLET.get()), mob.getHeight() * 0.5F);
@@ -1079,6 +1140,13 @@ public final class CaelestisBreachManager {
         int earliest = Math.min(latest, Math.max(1, Math.round(180.0F * scale)));
         int upper = Math.min(latest, Math.max(earliest, Math.round(460.0F * scale)));
         return earliest + world.random.nextInt(upper - earliest + 1);
+    }
+
+    private static int betrayalChance(Phase9AbilityTuning tuning) {
+        if (tuning.flag(1 << 26)) return 0;
+        if (tuning.flag(1 << 25)) return 100;
+        return Math.clamp(Config.uniqueEffects.caelestis.betrayalChance
+                - (tuning.flag(1 << 18) ? 1 : 0), 0, 100);
     }
 
     private static float radiusAt(long age, BreachProfile profile) {
@@ -1211,6 +1279,8 @@ public final class CaelestisBreachManager {
         private final float ownerAttackValue;
         private final int seed;
         private final BreachProfile profile;
+        private final Phase9AbilityTuning tuning;
+        private final UniqueAbilityExecution execution;
         private final Set<UUID> creatureIds;
         private final Set<UUID> tentacleIds;
         private boolean forcedCollapse;
@@ -1223,7 +1293,8 @@ public final class CaelestisBreachManager {
                              long nextTentacleSpawnTick, long betrayalTick,
                              boolean betrayalPending, boolean betrayalSpawned, UUID visualId,
                              float baseDamage, float ownerAttackValue, int seed,
-                             BreachProfile profile, Set<UUID> creatureIds,
+                             BreachProfile profile, Phase9AbilityTuning tuning,
+                             UniqueAbilityExecution execution, Set<UUID> creatureIds,
                              Set<UUID> tentacleIds) {
             this.id = id;
             this.actorId = actorId;
@@ -1242,6 +1313,8 @@ public final class CaelestisBreachManager {
             this.ownerAttackValue = ownerAttackValue;
             this.seed = seed;
             this.profile = profile;
+            this.tuning = tuning;
+            this.execution = execution;
             this.creatureIds = creatureIds;
             this.tentacleIds = tentacleIds;
         }
@@ -1259,11 +1332,12 @@ public final class CaelestisBreachManager {
         private final int maxMinions;
         private final int maxTentacles;
         private final float damageMultiplier;
+        private final float healthMultiplier;
 
         private BreachProfile(boolean reduced, int duration, int expansionTimeScale,
                               int collapseTicks, float maxRadius, float verticalRange,
                               int minSpawnPerWave, int maxSpawnPerWave, int maxMinions,
-                              int maxTentacles, float damageMultiplier) {
+                              int maxTentacles, float damageMultiplier, float healthMultiplier) {
             this.reduced = reduced;
             this.duration = duration;
             this.expansionTimeScale = expansionTimeScale;
@@ -1275,19 +1349,25 @@ public final class CaelestisBreachManager {
             this.maxMinions = maxMinions;
             this.maxTentacles = maxTentacles;
             this.damageMultiplier = damageMultiplier;
+            this.healthMultiplier = healthMultiplier;
         }
 
-        private static BreachProfile capture(boolean playerCast) {
+        private static BreachProfile capture(boolean playerCast, Phase9AbilityTuning tuning) {
             boolean reduced = !playerCast;
             float scale = reduced ? 0.5F : 1.0F;
-            int duration = Math.max(2, Math.round(Math.max(2,
-                    Config.uniqueEffects.caelestis.duration) * scale));
+            int tunedDuration = Config.uniqueEffects.caelestis.duration
+                    + (tuning.flag(1 << 7) ? 120 : 0)
+                    + (tuning.flag(1 << 10) ? 80 : 0)
+                    - (tuning.flag(1 << 17) ? 120 : 0);
+            int duration = Math.max(2, Math.round(Math.max(2, tunedDuration) * scale));
             int collapse = Math.clamp(Math.max(1, Math.round(
-                            Config.uniqueEffects.caelestis.collapseDuration * scale)),
+                            (Config.uniqueEffects.caelestis.collapseDuration
+                                    + (tuning.flag(1 << 16) ? 60 : 0)) * scale)),
                     1, duration - 1);
             int preCollapse = Math.max(1, duration - collapse);
             int expansion = Math.clamp(Math.max(1, Math.round(
-                            Config.uniqueEffects.caelestis.expansionDuration * scale)),
+                            tuning.integer(Phase9AbilityTuning.Setting.WINDUP_TICKS,
+                                    Config.uniqueEffects.caelestis.expansionDuration) * scale)),
                     1, preCollapse);
             int minWave = scaledCount(Config.uniqueEffects.caelestis.minSpawnPerWave, scale);
             int maxWave = Math.max(minWave,
@@ -1297,13 +1377,18 @@ public final class CaelestisBreachManager {
                     duration,
                     expansion,
                     collapse,
-                    Math.max(1.0F, Config.uniqueEffects.caelestis.maxRadius * scale),
+                    Math.max(1.0F, (Config.uniqueEffects.caelestis.maxRadius
+                            + (tuning.flag(1 << 9) ? 2 : 0)) * scale),
                     Math.max(2.0F, Config.uniqueEffects.caelestis.verticalRange * scale),
                     minWave,
                     maxWave,
-                    scaledCount(Config.uniqueEffects.caelestis.maxMinions, scale),
-                    scaledOptionalCount(Config.uniqueEffects.caelestis.maxTentacles, scale),
-                    scale
+                    scaledCount(tuning.flag(1 << 8) ? 5 : Config.uniqueEffects.caelestis.maxMinions
+                            + (tuning.flag(1 << 2) ? 2 : 0), scale),
+                    tuning.flag(1 << 17) ? 0 : scaledOptionalCount(
+                            Config.uniqueEffects.caelestis.maxTentacles
+                                    + (tuning.flag(1 << 11) ? 2 : 0), scale),
+                    scale * (float) tuning.get(Phase9AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1),
+                    (float) tuning.get(Phase9AbilityTuning.Setting.INCOMING_MULTIPLIER, 1)
             );
         }
 

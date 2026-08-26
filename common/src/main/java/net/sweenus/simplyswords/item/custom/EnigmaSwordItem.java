@@ -28,6 +28,9 @@ import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
+import net.sweenus.simplyswords.api.ability.Phase9AbilityTuning;
+import net.sweenus.simplyswords.api.ability.Phase9UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.effect.instance.SimplySwordsStatusEffectInstance;
 import net.sweenus.simplyswords.entity.BattleStandardDarkEntity;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
@@ -38,6 +41,7 @@ import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
+import net.sweenus.simplyswords.world.Phase9CombatManager;
 
 import java.util.List;
 
@@ -66,12 +70,7 @@ public class EnigmaSwordItem extends UniqueSwordItem implements UniqueWeaponActi
 
     @Override
     public TypedActionResult<ItemStack> startPlayerAbility(World world, PlayerEntity user, Hand hand) {
-        if (!user.getWorld().isClient()) {
-            if (spawnEnigmaStandard((ServerWorld) user.getWorld(), user, user.getStackInHand(hand)) != null) {
-                SimplySwordsAPI.setWeaponCooldown(user, user.getStackInHand(hand), Config.uniqueEffects.enigma.enigmaCooldown);
-            }
-        }
-        return super.use(world, user, hand);
+        return UniqueWeaponActiveAbility.super.startPlayerAbility(world, user, hand);
     }
 
     @Override
@@ -88,7 +87,16 @@ public class EnigmaSwordItem extends UniqueSwordItem implements UniqueWeaponActi
 
     @Override
     public boolean activate(WeaponAbilityContext context) {
-        return spawnEnigmaStandard(context.world(), context.actor(), context.stack()) != null;
+        if (!canActivate(context)) return false;
+        UniqueAbilityExecution execution = Phase9CombatManager.beginActive(
+                Phase9UniqueAbilities.ENIGMA_STORMCHASER, context,
+                Config.uniqueEffects.enigma.enigmaCooldown);
+        Phase9AbilityTuning tuning = Phase9UniqueAbilities.tuning(execution);
+        BattleStandardDarkEntity standard = spawnEnigmaStandard(
+                context.world(), context.actor(), context.stack(), tuning);
+        if (standard == null) return false;
+        Phase9CombatManager.scheduleFinish(context.world(), execution, 900, 0);
+        return true;
     }
 
     @Override
@@ -101,6 +109,11 @@ public class EnigmaSwordItem extends UniqueSwordItem implements UniqueWeaponActi
     }
 
     private BattleStandardDarkEntity spawnEnigmaStandard(ServerWorld world, LivingEntity user, ItemStack stack) {
+        return spawnEnigmaStandard(world, user, stack, Phase9AbilityTuning.EMPTY);
+    }
+
+    private BattleStandardDarkEntity spawnEnigmaStandard(ServerWorld world, LivingEntity user, ItemStack stack,
+                                                          Phase9AbilityTuning tuning) {
         BlockPos pos = getStandardPosition(user);
         if (!world.getBlockState(pos).isAir()) {
             return null;
@@ -117,6 +130,7 @@ public class EnigmaSwordItem extends UniqueSwordItem implements UniqueWeaponActi
             banner.abilityStack = stack.copy();
             banner.decayRate = Config.uniqueEffects.enigma.enigmaDecayRate;
             banner.standardType = "enigma";
+            banner.configurePhase9(tuning);
             banner.setCustomName(Text.translatable("entity.simplyswords.battlestandard.name", user.getName()));
             banner.setCustomNameVisible(false);
             banner.setInvisible(true);

@@ -16,6 +16,7 @@ import net.sweenus.simplyswords.item.custom.MagiscytheSwordItem;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
+import net.sweenus.simplyswords.world.MagiscytheMasteryManager;
 
 import java.util.List;
 import java.util.Random;
@@ -32,49 +33,8 @@ public class MagistormEffect extends HighOrbitingEffect {
     @Override
     public boolean applyUpdateEffect(LivingEntity livingEntity, int amplifier) {
         if (!livingEntity.getWorld().isClient()) {
-            ServerWorld world = (ServerWorld) livingEntity.getWorld();
-            double x = livingEntity.getX();
-            double y = livingEntity.getY();
-            double z = livingEntity.getZ();
-            double radius = Config.uniqueEffects.magiscythe.radius;
-            float duration = Config.uniqueEffects.magiscythe.duration;
-            int frequency = Math.max(3, 10 - amplifier);
-
-            float damage = HelperMethods.abilityScaledDamage(SpellScalingComponents.id("magiscythe"), livingEntity, livingEntity.getMainHandStack(),
-                    Config.uniqueEffects.magiscythe.damageScaling, Config.uniqueEffects.magiscythe.spellScaling);
-
-            DamageSource damageSource =  livingEntity.getDamageSources().indirectMagic(livingEntity, livingEntity);
-            if (livingEntity.age % frequency == 0) {
-                Box box = new Box(x - radius, y - 1, z - radius, x + radius, y + 1, z + radius);
-                List<Entity> nearbyEntities = world.getOtherEntities(livingEntity, box, EntityPredicates.VALID_LIVING_ENTITY);
-
-                if (!nearbyEntities.isEmpty() && livingEntity.getMainHandStack().getItem() instanceof MagiscytheSwordItem) {
-                    List<LivingEntity> validTargets = nearbyEntities.stream()
-                            .filter(entity -> entity instanceof LivingEntity)
-                            .map(entity -> (LivingEntity) entity)
-                            .filter(target -> HelperMethods.checkAbilityTarget(target, livingEntity))
-                            .toList();
-                    if (!validTargets.isEmpty()) {
-                        LivingEntity target = validTargets.get(livingEntity.getRandom().nextInt(validTargets.size()));
-                        if (target instanceof PlayerEntity && livingEntity instanceof PlayerEntity player)
-                            damageSource = livingEntity.getDamageSources().playerAttack(player);
-                        target.timeUntilRegen = 0;
-                        float enchantedDamage = HelperMethods.applyAbilityDamageEnchantments(world, livingEntity.getMainHandStack(), target, damageSource, damage);
-                        HelperMethods.applyDamageWithoutKnockback(target, damageSource, enchantedDamage);
-                        target.timeUntilRegen = 0;
-                        HelperMethods.spawnRainingParticles(world, ParticleTypes.ENCHANT, target, 20, yOffset);
-                        HelperMethods.spawnRainingParticles(world, ParticleTypes.GLOW, target, 4, yOffset);
-                        HelperMethods.spawnOrbitParticles(world, target.getPos(), ParticleTypes.GLOW, 0.5, 6);
-                        livingEntity.getWorld().playSoundFromEntity(null, livingEntity, SoundRegistry.ELEMENTAL_BOW_HOLY_SHOOT_IMPACT_03.get(),
-                                SoundCategory.PLAYERS, 0.1f, 1.0f + (livingEntity.getRandom().nextFloat()));
-
-                        if (new Random().nextInt(100) < 5)
-                            HelperMethods.incrementStatusEffect(livingEntity, EffectRegistry.getReference(EffectRegistry.MAGISTORM), (int) duration, 1, 10);
-                    }
-                }
-            }
+            MagiscytheMasteryManager.tick(livingEntity);
         }
-
         super.applyUpdateEffect(livingEntity, amplifier);
         return true;
     }

@@ -127,6 +127,9 @@ public abstract class ServerWorldMixin {
         if (MagibladeAbilityManager.hasActive(world)) {
             MagibladeAbilityManager.tick(world);
         }
+        if (MagiscytheMasteryManager.hasActive(world)) {
+            MagiscytheMasteryManager.tickWorld(world);
+        }
         if (StormsEdgeAbilityManager.hasActive(world)) {
             StormsEdgeAbilityManager.tick(world);
         }
@@ -165,6 +168,9 @@ public abstract class ServerWorldMixin {
         }
         if (Phase8CombatManager.hasScheduled(world)) {
             Phase8CombatManager.tick(world);
+        }
+        if (Phase9CombatManager.hasScheduled(world)) {
+            Phase9CombatManager.tick(world);
         }
         if (EvocationFangManager.hasActive(world)) {
             EvocationFangManager.tick(world);

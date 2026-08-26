@@ -3,6 +3,8 @@ package net.sweenus.simplyswords.world;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.ItemStack;
 import net.minecraft.particle.BlockStateParticleEffect;
 import net.minecraft.particle.ParticleTypes;
@@ -14,6 +16,9 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.config.Config;
+import net.sweenus.simplyswords.api.ability.Phase9AbilityTuning;
+import net.sweenus.simplyswords.api.ability.Phase9UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 
@@ -22,6 +27,10 @@ import java.util.*;
 public final class ArcanethystAssaultManager {
 
     private static final Map<ServerWorld, List<ActiveAssault>> ACTIVE_ASSAULTS = new HashMap<>();
+    private static final Map<ServerWorld, List<PendingPulse>> PENDING_PULSES = new HashMap<>();
+    private static final Map<UUID, Map<UUID, Long>> ARCANE_BRANDS = new HashMap<>();
+    private static final Map<UUID, Integer> PASSIVE_PROCS = new HashMap<>();
+    private static final Map<UUID, Long> OVERFLOW_LOCKOUTS = new HashMap<>();
     private static final int TARGET_SCAN_INTERVAL_TICKS = 5;
     private static final double PLAYER_WIDTH_LIMIT = 1.6001;
     private static final double PLAYER_HEIGHT_LIMIT = 2.8001;
@@ -31,10 +40,16 @@ public final class ArcanethystAssaultManager {
 
     public static boolean hasActive(ServerWorld world) {
         List<ActiveAssault> assaults = ACTIVE_ASSAULTS.get(world);
-        return assaults != null && !assaults.isEmpty();
+        return assaults != null && !assaults.isEmpty()
+                || !PENDING_PULSES.getOrDefault(world, List.of()).isEmpty();
     }
 
     public static void start(ServerWorld world, LivingEntity owner, ItemStack stack, double radius, float damage) {
+        start(world, owner, stack, radius, damage, Phase9AbilityTuning.EMPTY, null);
+    }
+
+    public static void start(ServerWorld world, LivingEntity owner, ItemStack stack, double radius, float damage,
+                             Phase9AbilityTuning suspension, UniqueAbilityExecution execution) {
         if (owner == null || !owner.isAlive()) {
             return;
         }
@@ -46,9 +61,15 @@ public final class ArcanethystAssaultManager {
                 return false;
             }
             restoreTargets(world, assault);
+            Phase9CombatManager.finish(assault.execution, assault.processedTargets.size());
             return true;
         });
-        ActiveAssault assault = new ActiveAssault(owner.getUuid(), stack.copy(), now, now + Math.max(1, Config.uniqueEffects.arcanethyst.duration), now, radius, damage, new ArrayList<>(), new HashSet<>());
+        Phase9AbilityTuning impact = suspension;
+        ActiveAssault assault = new ActiveAssault(owner.getUuid(), stack.copy(), now,
+                now + Math.max(1, suspension.integer(Phase9AbilityTuning.Setting.SECONDARY_DURATION_TICKS,
+                        Config.uniqueEffects.arcanethyst.duration)), now,
+                suspension.get(Phase9AbilityTuning.Setting.RADIUS, radius), damage,
+                new ArrayList<>(), new HashSet<>(), suspension, impact, execution);
         scanForTargets(world, owner, assault);
         assaults.add(assault);
         spawnCastParticles(world, owner.getPos());
@@ -56,6 +77,7 @@ public final class ArcanethystAssaultManager {
     }
 
     public static void tick(ServerWorld world) {
+        tickPendingPulses(world);
         List<ActiveAssault> assaults = ACTIVE_ASSAULTS.get(world);
         if (assaults == null || assaults.isEmpty()) {
             return;
@@ -65,6 +87,7 @@ public final class ArcanethystAssaultManager {
         while (iterator.hasNext()) {
             ActiveAssault assault = iterator.next();
             if (tickAssault(world, assault)) {
+                Phase9CombatManager.finish(assault.execution, assault.processedTargets.size());
                 iterator.remove();
             }
         }
@@ -97,9 +120,12 @@ public final class ArcanethystAssaultManager {
     }
 
     private static boolean tickTargets(ServerWorld world, LivingEntity owner, ActiveAssault assault) {
-        int liftTicks = Math.max(1, Config.uniqueEffects.arcanethyst.liftTicks);
-        int suspendTicks = Math.max(0, Config.uniqueEffects.arcanethyst.suspendTicks);
-        int slamTicks = Math.max(1, Config.uniqueEffects.arcanethyst.slamTicks);
+        int liftTicks = Math.max(1, assault.suspension().integer(
+                Phase9AbilityTuning.Setting.WINDUP_TICKS, Config.uniqueEffects.arcanethyst.liftTicks));
+        int suspendTicks = Math.max(0, assault.suspension().integer(
+                Phase9AbilityTuning.Setting.DURATION_TICKS, Config.uniqueEffects.arcanethyst.suspendTicks));
+        int slamTicks = Math.max(6, assault.impact().integer(
+                Phase9AbilityTuning.Setting.INTERVAL_TICKS, Config.uniqueEffects.arcanethyst.slamTicks));
 
         assault.targets().removeIf(active -> {
             Entity entity = world.getEntity(active.targetId());
@@ -111,11 +137,11 @@ public final class ArcanethystAssaultManager {
             long age = world.getTime() - active.startTick();
             target.fallDistance = 0.0F;
             if (age < liftTicks) {
-                tickLift(world, target, active, age, liftTicks);
+                tickLift(world, owner, target, active, age, liftTicks, assault.suspension());
                 return false;
             }
             if (age < liftTicks + suspendTicks) {
-                tickSuspend(world, target, active);
+                tickSuspend(world, owner, target, active, assault.suspension());
                 return false;
             }
 
@@ -125,7 +151,7 @@ public final class ArcanethystAssaultManager {
                 target.setNoGravity(false);
                 world.playSound(null, target.getX(), target.getY(), target.getZ(), SoundRegistry.ELEMENTAL_SWORD_SCIFI_ATTACK_03.get(), SoundCategory.PLAYERS, 0.35F, 0.85F + world.random.nextFloat() * 0.2F);
             }
-            return tickSlam(world, owner, assault.stack(), target, active, slamAge, slamTicks, assault.damage());
+            return tickSlam(world, owner, assault, target, active, slamAge, slamTicks);
         });
 
         return assault.targets().isEmpty();
@@ -139,7 +165,10 @@ public final class ArcanethystAssaultManager {
         for (Entity entity : world.getOtherEntities(owner, box, EntityPredicates.VALID_LIVING_ENTITY)) {
             if (entity instanceof LivingEntity target && canTarget(owner, target, assault)) {
                 assault.processedTargets().add(target.getUuid());
-                assault.targets().add(new ActiveTarget(target.getUuid(), world.getTime(), target.getY(), target.getY() + Config.uniqueEffects.arcanethyst.liftHeight, target.hasNoGravity()));
+                double height = assault.suspension().get(Phase9AbilityTuning.Setting.HEIGHT,
+                        Config.uniqueEffects.arcanethyst.liftHeight);
+                assault.targets().add(new ActiveTarget(target.getUuid(), world.getTime(), target.getY(),
+                        target.getY() + height, target.hasNoGravity()));
                 target.setNoGravity(true);
                 target.fallDistance = 0.0F;
                 spawnLiftStartParticles(world, target);
@@ -154,7 +183,15 @@ public final class ArcanethystAssaultManager {
                 && target.getHeight() <= PLAYER_HEIGHT_LIMIT;
     }
 
-    private static void tickLift(ServerWorld world, LivingEntity target, ActiveTarget active, long age, int liftTicks) {
+    private static void tickLift(ServerWorld world, LivingEntity owner, LivingEntity target, ActiveTarget active,
+                                 long age, int liftTicks, Phase9AbilityTuning tuning) {
+        if (tuning.flag(1 << 17)) {
+            Vec3d pull = owner.getPos().subtract(target.getPos()).multiply(1, 0, 1);
+            target.setVelocity(pull.lengthSquared() == 0 ? Vec3d.ZERO : pull.normalize().multiply(
+                    tuning.get(Phase9AbilityTuning.Setting.PULL_STRENGTH, .18)));
+            target.velocityModified = true;
+            return;
+        }
         double t = MathHelper.clamp((double) age / (double) liftTicks, 0.0, 1.0);
         double eased = 1.0 - Math.pow(1.0 - t, 3.0);
         double wantedY = MathHelper.lerp(eased, active.startY(), active.hoverY());
@@ -163,13 +200,18 @@ public final class ArcanethystAssaultManager {
         spawnLiftParticles(world, target);
     }
 
-    private static void tickSuspend(ServerWorld world, LivingEntity target, ActiveTarget active) {
-        target.setVelocity(0.0, (active.hoverY() - target.getY()) * 0.28, 0.0);
+    private static void tickSuspend(ServerWorld world, LivingEntity owner, LivingEntity target,
+                                    ActiveTarget active, Phase9AbilityTuning tuning) {
+        Vec3d velocity = target.getVelocity();
+        double horizontal = tuning.flag(1 << 13) ? .3 : 0;
+        target.setVelocity(velocity.x * horizontal, (active.hoverY() - target.getY()) * 0.28,
+                velocity.z * horizontal);
         target.velocityModified = true;
         spawnSuspendParticles(world, target);
     }
 
-    private static boolean tickSlam(ServerWorld world, LivingEntity owner, ItemStack stack, LivingEntity target, ActiveTarget active, long slamAge, int slamTicks, float damage) {
+    private static boolean tickSlam(ServerWorld world, LivingEntity owner, ActiveAssault assault,
+                                    LivingEntity target, ActiveTarget active, long slamAge, int slamTicks) {
         target.setVelocity(0.0, -1.75, 0.0);
         target.velocityModified = true;
         spawnSlamTrail(world, target);
@@ -177,13 +219,118 @@ public final class ArcanethystAssaultManager {
             restoreTarget(world, active);
             target.fallDistance = 0.0F;
             var damageSource = world.getDamageSources().indirectMagic(owner, owner);
-            float slamDamage = HelperMethods.applyAbilityDamageEnchantments(world, stack, target, damageSource,
-                    damage * Config.uniqueEffects.arcanethyst.slamDamageMultiplier);
+            float multiplier = (float) assault.impact().get(Phase9AbilityTuning.Setting.FINAL_DAMAGE_MULTIPLIER,
+                    Config.uniqueEffects.arcanethyst.slamDamageMultiplier);
+            Map<UUID, Long> brands = ARCANE_BRANDS.get(owner.getUuid());
+            if (brands != null && brands.getOrDefault(target.getUuid(), 0L) > world.getTime()) multiplier *= 1.1F;
+            if (assault.suspension().flag(1 << 15)) multiplier *= 1 + Math.min(8,
+                    assault.targets().size()) * assault.suspension().get(
+                    Phase9AbilityTuning.Setting.PER_STACK_MULTIPLIER, .03);
+            if (assault.suspension().flag(1 << 16)) multiplier *= assault.suspension().get(
+                    Phase9AbilityTuning.Setting.FINAL_DAMAGE_MULTIPLIER, 1.4);
+            float slamDamage = HelperMethods.applyAbilityDamageEnchantments(world, assault.stack(), target,
+                    damageSource, assault.damage() * multiplier);
             HelperMethods.damageThroughIframes(target, damageSource, slamDamage);
+            applyImpact(world, owner, assault, target, slamDamage);
+            if (assault.suspension().flag(1 << 14)) target.addStatusEffect(new StatusEffectInstance(
+                    StatusEffects.SLOWNESS, assault.suspension().integer(
+                    Phase9AbilityTuning.Setting.STATUS_DURATION_TICKS, 30), 2), owner);
             spawnImpact(world, target.getPos());
             return true;
         }
         return false;
+    }
+
+    public static void markTarget(ServerWorld world, LivingEntity owner, LivingEntity target,
+                                  Phase9AbilityTuning tuning) {
+        if (!tuning.flag(1 << 3)) return;
+        Map<UUID, Long> brands = ARCANE_BRANDS.computeIfAbsent(owner.getUuid(), ignored -> new HashMap<>());
+        brands.put(target.getUuid(), world.getTime() + tuning.integer(
+                Phase9AbilityTuning.Setting.DURATION_TICKS, 60));
+        if (brands.size() > 32) brands.entrySet().stream().min(Map.Entry.comparingByValue())
+                .ifPresent(entry -> brands.remove(entry.getKey()));
+    }
+
+    public static void onPassiveProc(ServerWorld world, LivingEntity owner, LivingEntity target, ItemStack stack,
+                                     Phase9AbilityTuning tuning) {
+        if (tuning.flag(1 << 5)) target.addStatusEffect(new StatusEffectInstance(
+                StatusEffects.WEAKNESS, tuning.integer(Phase9AbilityTuning.Setting.STATUS_DURATION_TICKS, 40), 0), owner);
+        if (tuning.flag(1 << 6) && owner.getHealth() >= owner.getMaxHealth()
+                && OVERFLOW_LOCKOUTS.getOrDefault(owner.getUuid(), 0L) <= world.getTime()) {
+            owner.addStatusEffect(new StatusEffectInstance(StatusEffects.ABSORPTION,
+                    tuning.integer(Phase9AbilityTuning.Setting.STATUS_DURATION_TICKS, 60), 0), owner);
+            OVERFLOW_LOCKOUTS.put(owner.getUuid(), world.getTime()
+                    + tuning.integer(Phase9AbilityTuning.Setting.LOCKOUT_TICKS, 100));
+        }
+        int proc = PASSIVE_PROCS.merge(owner.getUuid(), 1, Integer::sum);
+        if (tuning.flag(1 << 4) && proc % 4 == 0) PENDING_PULSES.computeIfAbsent(world,
+                ignored -> new ArrayList<>()).add(new PendingPulse(owner.getUuid(), target.getUuid(), stack.copy(),
+                world.getTime() + tuning.integer(Phase9AbilityTuning.Setting.DELAY_TICKS, 6), tuning, false));
+        if (tuning.flag(1 << 7)) PENDING_PULSES.computeIfAbsent(world, ignored -> new ArrayList<>()).add(
+                new PendingPulse(owner.getUuid(), target.getUuid(), stack.copy(), world.getTime() + 1, tuning, true));
+    }
+
+    private static void applyImpact(ServerWorld world, LivingEntity owner, ActiveAssault assault,
+                                    LivingEntity primary, float slamDamage) {
+        Phase9AbilityTuning tuning = assault.impact();
+        if (tuning.flag(1 << 21)) {
+            primary.addStatusEffect(new StatusEffectInstance(StatusEffects.GLOWING, 40, 0), owner);
+            primary.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 40, 0), owner);
+        }
+        double radius = tuning.get(Phase9AbilityTuning.Setting.SECONDARY_RADIUS, 0);
+        if (radius > 0) {
+            world.getEntitiesByClass(LivingEntity.class, primary.getBoundingBox().expand(radius),
+                            entity -> entity != primary && HelperMethods.checkAbilityTarget(entity, owner))
+                    .stream().limit(tuning.integer(Phase9AbilityTuning.Setting.TARGET_CAP, 6)).forEach(entity -> {
+                        HelperMethods.damageThroughIframes(entity, world.getDamageSources().indirectMagic(owner, owner),
+                                slamDamage * (float) tuning.get(
+                                        Phase9AbilityTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, .35));
+                        if (tuning.flag(1 << 23)) {
+                            Vec3d push = entity.getPos().subtract(primary.getPos()).multiply(1, 0, 1);
+                            if (push.lengthSquared() > 0) entity.addVelocity(push.normalize().multiply(
+                                    tuning.get(Phase9AbilityTuning.Setting.KNOCKBACK, .5)));
+                        }
+                    });
+        }
+        if (tuning.flag(1 << 24)) PENDING_PULSES.computeIfAbsent(world, ignored -> new ArrayList<>()).add(
+                new PendingPulse(owner.getUuid(), primary.getUuid(), assault.stack().copy(), world.getTime()
+                        + tuning.integer(Phase9AbilityTuning.Setting.DELAY_TICKS, 12), tuning, false));
+    }
+
+    private static void tickPendingPulses(ServerWorld world) {
+        List<PendingPulse> pulses = PENDING_PULSES.get(world);
+        if (pulses == null) return;
+        pulses.removeIf(pulse -> {
+            if (world.getTime() < pulse.at()) return false;
+            Entity ownerEntity = world.getEntity(pulse.ownerId());
+            Entity targetEntity = world.getEntity(pulse.targetId());
+            if (ownerEntity instanceof LivingEntity owner && targetEntity instanceof LivingEntity target
+                    && owner.isAlive() && target.isAlive()) {
+                if (pulse.extraLevitation()) {
+                    world.getEntitiesByClass(LivingEntity.class, target.getBoundingBox().expand(4),
+                                    entity -> entity != target && HelperMethods.checkAbilityTarget(entity, owner))
+                            .stream().findFirst().ifPresent(entity -> entity.addStatusEffect(
+                                    new StatusEffectInstance(StatusEffects.LEVITATION,
+                                            pulse.tuning().integer(Phase9AbilityTuning.Setting.SECONDARY_DURATION_TICKS, 36), 1), owner));
+                } else {
+                    float damage = HelperMethods.abilityScaledDamage("arcane", owner, pulse.stack(),
+                            Config.uniqueEffects.arcanethyst.damageScaling * (float) pulse.tuning().get(
+                                    Phase9AbilityTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, .4),
+                            Config.uniqueEffects.arcanethyst.spellScaling);
+                    world.getEntitiesByClass(LivingEntity.class, target.getBoundingBox().expand(
+                                            pulse.tuning().get(Phase9AbilityTuning.Setting.SECONDARY_RADIUS, 3)),
+                                    entity -> HelperMethods.checkAbilityTarget(entity, owner))
+                            .forEach(entity -> HelperMethods.damageThroughIframes(entity,
+                                    world.getDamageSources().indirectMagic(owner, owner), damage));
+                }
+            }
+            return true;
+        });
+        if (pulses.isEmpty()) PENDING_PULSES.remove(world);
+        OVERFLOW_LOCKOUTS.entrySet().removeIf(entry -> entry.getValue() <= world.getTime());
+        ARCANE_BRANDS.values().forEach(brands -> brands.entrySet().removeIf(
+                entry -> entry.getValue() <= world.getTime()));
+        ARCANE_BRANDS.entrySet().removeIf(entry -> entry.getValue().isEmpty());
     }
 
     private static void restoreTargets(ServerWorld world, ActiveAssault assault) {
@@ -265,8 +412,14 @@ public final class ArcanethystAssaultManager {
         private final float damage;
         private final List<ActiveTarget> targets;
         private final Set<UUID> processedTargets;
+        private final Phase9AbilityTuning suspension;
+        private final Phase9AbilityTuning impact;
+        private final UniqueAbilityExecution execution;
 
-        private ActiveAssault(UUID ownerId, ItemStack stack, long startTick, long expiryTick, long nextScanTick, double radius, float damage, List<ActiveTarget> targets, Set<UUID> processedTargets) {
+        private ActiveAssault(UUID ownerId, ItemStack stack, long startTick, long expiryTick, long nextScanTick,
+                              double radius, float damage, List<ActiveTarget> targets, Set<UUID> processedTargets,
+                              Phase9AbilityTuning suspension, Phase9AbilityTuning impact,
+                              UniqueAbilityExecution execution) {
             this.ownerId = ownerId;
             this.stack = stack;
             this.startTick = startTick;
@@ -276,6 +429,9 @@ public final class ArcanethystAssaultManager {
             this.damage = damage;
             this.targets = targets;
             this.processedTargets = processedTargets;
+            this.suspension = suspension;
+            this.impact = impact;
+            this.execution = execution;
         }
 
         private UUID ownerId() {
@@ -313,6 +469,13 @@ public final class ArcanethystAssaultManager {
         private Set<UUID> processedTargets() {
             return this.processedTargets;
         }
+
+        private Phase9AbilityTuning suspension() { return suspension; }
+        private Phase9AbilityTuning impact() { return impact; }
+    }
+
+    private record PendingPulse(UUID ownerId, UUID targetId, ItemStack stack, long at,
+                                Phase9AbilityTuning tuning, boolean extraLevitation) {
     }
 
     private static final class ActiveTarget {

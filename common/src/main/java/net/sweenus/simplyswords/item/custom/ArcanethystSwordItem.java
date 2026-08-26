@@ -23,6 +23,9 @@ import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
+import net.sweenus.simplyswords.api.ability.Phase9AbilityTuning;
+import net.sweenus.simplyswords.api.ability.Phase9UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
@@ -34,6 +37,7 @@ import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
 import net.sweenus.simplyswords.world.ArcanethystAssaultManager;
+import net.sweenus.simplyswords.world.Phase9CombatManager;
 
 import java.util.List;
 
@@ -49,11 +53,22 @@ public class ArcanethystSwordItem extends UniqueSwordItem implements TwoHandedWe
         }
         if (!attacker.getWorld().isClient()) {
             HelperMethods.playHitSounds(attacker, target);
-            if (attacker.getRandom().nextInt(100) <= Config.uniqueEffects.arcanethyst.chance) {
-                target.addStatusEffect(new StatusEffectInstance(StatusEffects.LEVITATION, 60, 1), attacker);
+            ServerWorld serverWorld = (ServerWorld) attacker.getWorld();
+            UniqueAbilityExecution execution = Phase9CombatManager.beginPassive(
+                    Phase9UniqueAbilities.ARCANETHYST_SPARK, serverWorld, stack, attacker, target);
+            Phase9AbilityTuning tuning = Phase9UniqueAbilities.tuning(execution);
+            ArcanethystAssaultManager.markTarget(serverWorld, attacker, target, tuning);
+            int chance = tuning.integer(Phase9AbilityTuning.Setting.CHANCE,
+                    Config.uniqueEffects.arcanethyst.chance);
+            if (attacker.getRandom().nextInt(100) < chance) {
+                int duration = tuning.integer(Phase9AbilityTuning.Setting.STATUS_DURATION_TICKS, 60);
+                int amplifier = tuning.integer(Phase9AbilityTuning.Setting.STATUS_AMPLIFIER, 1);
+                target.addStatusEffect(new StatusEffectInstance(StatusEffects.LEVITATION, duration, amplifier), attacker);
+                ArcanethystAssaultManager.onPassiveProc(serverWorld, attacker, target, stack, tuning);
                 attacker.getWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_BOW_SHOOT_IMPACT_01.get(),
                         attacker.getSoundCategory(), 0.5f, 1.2f);
             }
+            Phase9CombatManager.finish(execution, 1);
         }
         return super.postHit(stack, target, attacker);
     }
@@ -65,16 +80,7 @@ public class ArcanethystSwordItem extends UniqueSwordItem implements TwoHandedWe
 
     @Override
     public TypedActionResult<ItemStack> startPlayerAbility(World world, PlayerEntity user, Hand hand) {
-        ItemStack itemStack = user.getStackInHand(hand);
-        if (itemStack.getDamage() >= itemStack.getMaxDamage() - 1) {
-            return TypedActionResult.fail(itemStack);
-        }
-        if (world instanceof ServerWorld serverWorld) {
-        activateArcanethyst(serverWorld, user, itemStack);
-            SimplySwordsAPI.setWeaponCooldown(user, itemStack, Config.uniqueEffects.arcanethyst.cooldown);
-        }
-        user.swingHand(hand);
-        return TypedActionResult.success(itemStack, world.isClient());
+        return UniqueWeaponActiveAbility.super.startPlayerAbility(world, user, hand);
     }
 
     @Override
@@ -82,7 +88,10 @@ public class ArcanethystSwordItem extends UniqueSwordItem implements TwoHandedWe
         if (!canActivate(context)) {
             return false;
         }
-        activateArcanethyst(context.world(), context.actor(), context.stack());
+        UniqueAbilityExecution execution = Phase9CombatManager.beginActive(
+                Phase9UniqueAbilities.ARCANETHYST_SUSPENSION, context, Config.uniqueEffects.arcanethyst.cooldown);
+        activateArcanethyst(context.world(), context.actor(), context.stack(),
+                Phase9UniqueAbilities.tuning(execution), execution);
         return true;
     }
 
@@ -92,10 +101,15 @@ public class ArcanethystSwordItem extends UniqueSwordItem implements TwoHandedWe
     }
 
     private static void activateArcanethyst(ServerWorld serverWorld, LivingEntity actor, ItemStack stack) {
+        activateArcanethyst(serverWorld, actor, stack, Phase9AbilityTuning.EMPTY, null);
+    }
+
+    private static void activateArcanethyst(ServerWorld serverWorld, LivingEntity actor, ItemStack stack,
+                                            Phase9AbilityTuning suspension, UniqueAbilityExecution execution) {
         int radius = Config.uniqueEffects.arcanethyst.radius;
         float abilityDamage = HelperMethods.abilityScaledDamage("arcane", actor, stack,
                 Config.uniqueEffects.arcanethyst.damageScaling, Config.uniqueEffects.arcanethyst.spellScaling);
-        ArcanethystAssaultManager.start(serverWorld, actor, stack, radius, abilityDamage);
+        ArcanethystAssaultManager.start(serverWorld, actor, stack, radius, abilityDamage, suspension, execution);
     }
 
     @Override

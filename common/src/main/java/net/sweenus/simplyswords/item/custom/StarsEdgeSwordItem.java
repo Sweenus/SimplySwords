@@ -5,7 +5,6 @@ import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
@@ -40,26 +39,7 @@ public class StarsEdgeSwordItem extends UniqueSwordItem implements UniqueWeaponA
             return super.postHit(stack, target, attacker);
         }
         if (!attacker.getWorld().isClient()) {
-            float skillDamageModifier = Config.uniqueEffects.stars_edge.damageScaling;
-            float skillLifestealModifier = Config.uniqueEffects.stars_edge.lifestealModifier;
-            ServerWorld world = (ServerWorld) attacker.getWorld();
-            DamageSource damageSource = world.getDamageSources().generic();
-            float abilityDamage = HelperMethods.abilityScaledDamage("arcane", attacker, stack,
-                    skillDamageModifier, Config.uniqueEffects.stars_edge.spellScaling);
-            abilityDamage = HelperMethods.applyNonPlayerWeaponHitDamageModifier(attacker, abilityDamage);
-            if (attacker instanceof PlayerEntity player)
-                damageSource = attacker.getDamageSources().playerAttack(player);
-
-            HelperMethods.playHitSounds(attacker, target);
-
-            if (world.isDay()) {
-                target.timeUntilRegen = 0;
-                target.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments(world, stack, target, damageSource, abilityDamage));
-            }
-            else if (world.isNight()) {
-                attacker.heal(abilityDamage * skillLifestealModifier);
-            }
-
+            StarsEdgeAbilityManager.onMeleeHit((ServerWorld) attacker.getWorld(), stack, attacker, target);
         }
         return super.postHit(stack, target, attacker);
     }

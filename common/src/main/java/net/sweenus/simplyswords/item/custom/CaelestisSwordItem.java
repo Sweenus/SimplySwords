@@ -14,6 +14,9 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
+import net.sweenus.simplyswords.api.ability.Phase9AbilityTuning;
+import net.sweenus.simplyswords.api.ability.Phase9UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
@@ -23,6 +26,7 @@ import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
 import net.sweenus.simplyswords.world.CaelestisBreachManager;
+import net.sweenus.simplyswords.world.Phase9CombatManager;
 
 import java.util.List;
 
@@ -39,6 +43,8 @@ public class CaelestisSwordItem extends UniqueSwordItem implements UniqueWeaponA
         if (!attacker.getWorld().isClient()) {
 
             HelperMethods.playHitSounds(attacker, target);
+            CaelestisBreachManager.onWeaponHit((net.minecraft.server.world.ServerWorld) attacker.getWorld(),
+                    attacker, target);
 
         }
         return super.postHit(stack, target, attacker);
@@ -63,7 +69,11 @@ public class CaelestisSwordItem extends UniqueSwordItem implements UniqueWeaponA
 
     @Override
     public boolean activate(WeaponAbilityContext context) {
-        return CaelestisBreachManager.start(context);
+        if (!canActivate(context)) return false;
+        UniqueAbilityExecution execution = Phase9CombatManager.beginActive(
+                Phase9UniqueAbilities.CAELESTIS_HOST, context,
+                Math.max(1, Config.uniqueEffects.caelestis.cooldown));
+        return CaelestisBreachManager.start(context, Phase9UniqueAbilities.tuning(execution), execution);
     }
 
     @Override

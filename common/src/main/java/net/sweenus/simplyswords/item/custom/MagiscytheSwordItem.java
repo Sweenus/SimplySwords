@@ -24,6 +24,8 @@ import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
+import net.sweenus.simplyswords.api.ability.Phase9UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
 import net.sweenus.simplyswords.registry.EffectRegistry;
@@ -31,6 +33,8 @@ import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
+import net.sweenus.simplyswords.world.MagiscytheMasteryManager;
+import net.sweenus.simplyswords.world.Phase9CombatManager;
 
 import java.util.List;
 import java.util.Random;
@@ -49,22 +53,7 @@ public class MagiscytheSwordItem extends UniqueSwordItem implements UniqueWeapon
             HelperMethods.playHitSounds(attacker, target);
             ServerWorld world = (ServerWorld) attacker.getWorld();
 
-            if (attacker.hasStatusEffect(EffectRegistry.getReference(EffectRegistry.MAGISTORM))) {
-                world.playSound(null, attacker.getBlockPos(), SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_IMPACT_03.get(),
-                        attacker.getSoundCategory(), 0.1f, 1.9f);
-
-                float repairChance = Config.uniqueEffects.magiscythe.repairChance;
-                Random random = new Random();
-                for (EquipmentSlot slot : EquipmentSlot.values()) {
-                    if (slot.getType() == EquipmentSlot.Type.HUMANOID_ARMOR || slot == EquipmentSlot.MAINHAND || slot == EquipmentSlot.OFFHAND) {
-                        ItemStack item = attacker.getEquippedStack(slot);
-                        if (!item.isEmpty() && random.nextFloat() < repairChance && item.getDamage() > 0) {
-                            item.setDamage((int) (item.getDamage() - HelperMethods.getEntityAttackDamage(attacker)));
-                            break;
-                        }
-                    }
-                }
-            }
+            MagiscytheMasteryManager.onWeaponHit(world, attacker, stack, target);
         }
         return super.postHit(stack, target, attacker);
     }
@@ -76,10 +65,7 @@ public class MagiscytheSwordItem extends UniqueSwordItem implements UniqueWeapon
 
     @Override
     public TypedActionResult<ItemStack> startPlayerAbility(World world, PlayerEntity user, Hand hand) {
-        activateMagistorm(world, user);
-        SimplySwordsAPI.setWeaponCooldown(user, user.getStackInHand(hand), Config.uniqueEffects.magiscythe.cooldown);
-
-        return super.use(world, user, hand);
+        return UniqueWeaponActiveAbility.super.startPlayerAbility(world, user, hand);
     }
 
     @Override
@@ -95,7 +81,9 @@ public class MagiscytheSwordItem extends UniqueSwordItem implements UniqueWeapon
 
     @Override
     public boolean activate(WeaponAbilityContext context) {
-        activateMagistorm(context.world(), context.actor());
+        UniqueAbilityExecution execution = Phase9CombatManager.beginActive(
+                Phase9UniqueAbilities.MAGISCYTHE_STORM, context, Config.uniqueEffects.magiscythe.cooldown);
+        activateMagistorm(context.world(), context.actor(), context.stack(), execution);
         return true;
     }
 
@@ -105,7 +93,15 @@ public class MagiscytheSwordItem extends UniqueSwordItem implements UniqueWeapon
     }
 
     private void activateMagistorm(World world, LivingEntity user) {
+        activateMagistorm(world, user, user.getMainHandStack(), null);
+    }
+
+    private void activateMagistorm(World world, LivingEntity user, ItemStack stack,
+                                   UniqueAbilityExecution execution) {
         int baseEffectDuration = Config.uniqueEffects.magiscythe.duration;
+        if (world instanceof ServerWorld serverWorld && execution != null) baseEffectDuration =
+                MagiscytheMasteryManager.start(serverWorld, user, stack,
+                        Phase9UniqueAbilities.tuning(execution), execution);
 
         world.playSound(null, user.getBlockPos(), SoundRegistry.MAGIC_SHAMANIC_NORDIC_22.get(),
                 user.getSoundCategory(), 0.2f, 1.1f);

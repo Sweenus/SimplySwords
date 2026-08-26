@@ -29,6 +29,8 @@ import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
+import net.sweenus.simplyswords.api.ability.Phase9AbilityTuning;
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.world.Phase4StandardManager;
 
 import java.util.Comparator;
@@ -47,6 +49,9 @@ public class BattleStandardDarkEntity extends PathAwareEntity {
     public int decayRate;
     public ItemStack abilityStack = ItemStack.EMPTY;
     private UniqueAbilityExecution phase4Execution;
+    private Phase9AbilityTuning phase9Tuning = Phase9AbilityTuning.EMPTY;
+    private boolean phase9OwnerNear;
+    private int phase9Refunded;
     private final Map<UUID, EnigmaTornadoTarget> enigmaTornadoTargets = new HashMap<>();
     private final Map<UUID, Long> enigmaTornadoCooldowns = new HashMap<>();
     private static final double ENIGMA_PULL_STRENGTH = 0.18;
@@ -81,6 +86,10 @@ public class BattleStandardDarkEntity extends PathAwareEntity {
         this.abilityStack = stack.copy();
     }
 
+    public void configurePhase9(Phase9AbilityTuning tuning) {
+        this.phase9Tuning = tuning == null ? Phase9AbilityTuning.EMPTY : tuning;
+    }
+
     @Override
     protected boolean isImmobile() {
         return true;
@@ -109,6 +118,18 @@ public class BattleStandardDarkEntity extends PathAwareEntity {
                 HelperMethods.spawnOrbitParticles((ServerWorld) this.getWorld(), this.getPos(), ParticleTypes.CAMPFIRE_COSY_SMOKE, 0.5, 6);
                 if (ownerEntity != null && this.distanceTo(ownerEntity) < 3)
                     HelperMethods.incrementStatusEffect(ownerEntity, StatusEffects.HASTE, 60, 1, 7);
+                if (ownerEntity != null && standardType != null && standardType.equals("enigma")) {
+                    double proximity = phase9Tuning.get(Phase9AbilityTuning.Setting.RADIUS,
+                            Config.uniqueEffects.enigma.enigmaTornadoRadius);
+                    boolean near = this.distanceTo(ownerEntity) <= proximity;
+                    if (near && phase9Tuning.flag(1 << 19)) ownerEntity.addStatusEffect(
+                            new StatusEffectInstance(StatusEffects.SPEED, 20, 0), this);
+                    if (near && this.distanceTo(ownerEntity) <= 2 && phase9Tuning.flag(1 << 22))
+                        ownerEntity.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, 20, 0), this);
+                    if (!near && phase9OwnerNear && phase9Tuning.flag(1 << 18)) ownerEntity.addStatusEffect(
+                            new StatusEffectInstance(StatusEffects.SPEED, 40, 0), this);
+                    phase9OwnerNear = near;
+                }
             }
             if (ownerEntity != null && standardType != null) {
                 if (standardType.equals("harbinger") && phase4Execution != null
@@ -124,7 +145,8 @@ public class BattleStandardDarkEntity extends PathAwareEntity {
 
                 if (standardType.equals("enigma")) {
                     radius = 2;
-                    double moveRadius = Config.uniqueEffects.enigma.enigmaChaseRadius;
+                    double moveRadius = phase9Tuning.get(Phase9AbilityTuning.Setting.RANGE,
+                            Config.uniqueEffects.enigma.enigmaChaseRadius);
                     Box box = HelperMethods.createBox(this, moveRadius);
                     Entity closestEntity = this.getWorld().getOtherEntities(this, box, EntityPredicates.VALID_LIVING_ENTITY).stream()
                             .filter(entity -> {
@@ -132,14 +154,21 @@ public class BattleStandardDarkEntity extends PathAwareEntity {
                                     return HelperMethods.checkAbilityTarget(livingEntity, ownerEntity);
                                 return false;
                             })
-                            .min(Comparator.comparingDouble(entity -> entity.squaredDistanceTo(this)))
+                            .min(Comparator.comparingDouble(entity -> phase9Tuning.flag(1 << 3)
+                                    && entity instanceof LivingEntity living
+                                    && living.getHealth() < living.getMaxHealth() * .5F
+                                    ? entity.squaredDistanceTo(this) - moveRadius * moveRadius
+                                    : entity.squaredDistanceTo(this)))
                             .orElse(null);
 
                     if (closestEntity != null) {
                         if ((closestEntity instanceof LivingEntity le)) {
                             if (!(le instanceof BattleStandardEntity) && !(le instanceof BattleStandardDarkEntity)) {
                                 if (le.distanceTo(this) > 1 && this.isOnGround())
-                                    this.setVelocity((le.getX() - this.getX()) / 20, 0, (le.getZ() - this.getZ()) / 20);
+                                    this.setVelocity((le.getX() - this.getX()) / 20
+                                                    * phase9Tuning.get(Phase9AbilityTuning.Setting.SPEED, 1),
+                                            0, (le.getZ() - this.getZ()) / 20
+                                                    * phase9Tuning.get(Phase9AbilityTuning.Setting.SPEED, 1));
                             }
                         }
                     }
@@ -150,6 +179,7 @@ public class BattleStandardDarkEntity extends PathAwareEntity {
                 float abilityDamage = standardType.equals("enigma")
                         ? HelperMethods.abilityScaledDamage(SpellScalingComponents.id("enigma"), ownerEntity, damageStack,
                                 Config.uniqueEffects.enigma.damageScaling, Config.uniqueEffects.enigma.spellScaling)
+                                * (float) phase9Tuning.get(Phase9AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1)
                         : HelperMethods.abilityScaledDamage(SpellScalingComponents.id("harbinger"), ownerEntity, damageStack,
                                 Config.uniqueEffects.harbinger.damageScaling, Config.uniqueEffects.harbinger.spellScaling);
 
@@ -242,10 +272,13 @@ public class BattleStandardDarkEntity extends PathAwareEntity {
 
         long now = world.getTime();
         enigmaTornadoCooldowns.entrySet().removeIf(entry -> entry.getValue() <= now);
-        double radius = Math.max(1.0, Config.uniqueEffects.enigma.enigmaTornadoRadius);
+        double radius = Math.max(1.0, phase9Tuning.get(Phase9AbilityTuning.Setting.RADIUS,
+                Config.uniqueEffects.enigma.enigmaTornadoRadius));
         Box box = new Box(this.getX() + radius, this.getY() + radius, this.getZ() + radius,
                 this.getX() - radius, this.getY() - radius, this.getZ() - radius);
+        int targetCap = phase9Tuning.integer(Phase9AbilityTuning.Setting.TARGET_CAP, 64);
         for (Entity entity : world.getOtherEntities(this, box, EntityPredicates.VALID_LIVING_ENTITY)) {
+            if (enigmaTornadoTargets.size() >= targetCap) break;
             if (!(entity instanceof LivingEntity target)
                     || target == ownerEntity
                     || target instanceof BattleStandardEntity
@@ -254,7 +287,11 @@ public class BattleStandardDarkEntity extends PathAwareEntity {
                     || enigmaTornadoCooldowns.containsKey(target.getUuid())) {
                 continue;
             }
-            enigmaTornadoTargets.computeIfAbsent(target.getUuid(), ignored -> new EnigmaTornadoTarget(now, target.getY() + target.getHeight() * 0.5));
+            enigmaTornadoTargets.computeIfAbsent(target.getUuid(), ignored -> {
+                if (phase9Tuning.flag(1 << 5)) target.addStatusEffect(
+                        new StatusEffectInstance(StatusEffects.SLOWNESS, 30, 1), ownerEntity);
+                return new EnigmaTornadoTarget(now, target.getY() + target.getHeight() * 0.5);
+            });
         }
 
         Iterator<Map.Entry<UUID, EnigmaTornadoTarget>> iterator = enigmaTornadoTargets.entrySet().iterator();
@@ -271,7 +308,8 @@ public class BattleStandardDarkEntity extends PathAwareEntity {
 
             EnigmaTornadoTarget state = entry.getValue();
             long age = now - state.startTick();
-            if (age >= Math.max(1, Config.uniqueEffects.enigma.enigmaOrbitTicks)) {
+            if (age >= Math.max(1, phase9Tuning.integer(Phase9AbilityTuning.Setting.DURATION_TICKS,
+                    Config.uniqueEffects.enigma.enigmaOrbitTicks))) {
                 flingEnigmaTarget(target);
                 enigmaTornadoCooldowns.put(target.getUuid(), now + ENIGMA_RECAPTURE_COOLDOWN_TICKS);
                 iterator.remove();
@@ -284,7 +322,9 @@ public class BattleStandardDarkEntity extends PathAwareEntity {
     private void orbitEnigmaTarget(LivingEntity target, EnigmaTornadoTarget state, long age) {
         Vec3d center = this.getPos().add(0.0, 1.15, 0.0);
         Vec3d toCenter = center.subtract(target.getPos());
-        double pullScale = Math.min(1.0, toCenter.length() / Math.max(0.1, Config.uniqueEffects.enigma.enigmaTornadoRadius));
+        double pullScale = Math.min(1.0, toCenter.length() / Math.max(0.1,
+                phase9Tuning.get(Phase9AbilityTuning.Setting.RADIUS,
+                        Config.uniqueEffects.enigma.enigmaTornadoRadius)));
         double angle = state.initialAngle() + age * ENIGMA_ORBIT_SPEED;
         double heightOffset = Math.sin(age * 0.24) * 0.55;
         Vec3d orbitPoint = new Vec3d(
@@ -293,10 +333,17 @@ public class BattleStandardDarkEntity extends PathAwareEntity {
                 center.z + Math.sin(angle) * ENIGMA_ORBIT_RADIUS
         );
         Vec3d desiredVelocity = orbitPoint.subtract(target.getPos()).multiply(0.32)
-                .add(toCenter.normalize().multiply(ENIGMA_PULL_STRENGTH * pullScale));
+                .add(toCenter.normalize().multiply(ENIGMA_PULL_STRENGTH * pullScale
+                        * phase9Tuning.get(Phase9AbilityTuning.Setting.PULL_STRENGTH, 1)));
         target.setVelocity(desiredVelocity.x, Math.clamp(desiredVelocity.y, -0.35, 0.55), desiredVelocity.z);
         target.velocityModified = true;
         target.fallDistance = 0.0F;
+        if (phase9Tuning.flag(1 << 23) && phase9Refunded < 48) {
+            int refund = Math.min(8, 48 - phase9Refunded);
+            phase9Refunded += refund;
+            SimplySwordsAPI.setWeaponCooldown(ownerEntity, abilityStack,
+                    Math.max(0, Config.uniqueEffects.enigma.enigmaCooldown - phase9Refunded));
+        }
     }
 
     private void flingEnigmaTarget(LivingEntity target) {
@@ -306,7 +353,8 @@ public class BattleStandardDarkEntity extends PathAwareEntity {
                 ? new Vec3d(1.0, 0.0, 0.0)
                 : new Vec3d(away.x / horizontalLength, 0.0, away.z / horizontalLength);
         target.setVelocity(horizontal.multiply(Config.uniqueEffects.enigma.enigmaFlingStrength)
-                .add(0.0, Config.uniqueEffects.enigma.enigmaFlingUpwardStrength, 0.0));
+                .add(0.0, Config.uniqueEffects.enigma.enigmaFlingUpwardStrength
+                        * phase9Tuning.get(Phase9AbilityTuning.Setting.KNOCKBACK, 1), 0.0));
         target.velocityModified = true;
         target.fallDistance = 0.0F;
         this.getWorld().playSoundFromEntity(null, target, SoundRegistry.DARK_SWORD_WHOOSH_02.get(),

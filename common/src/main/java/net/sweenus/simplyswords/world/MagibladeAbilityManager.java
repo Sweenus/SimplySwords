@@ -21,6 +21,9 @@ import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
+import net.sweenus.simplyswords.api.ability.Phase9AbilityTuning;
+import net.sweenus.simplyswords.api.ability.Phase9UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.MagibladeWardenHeadVisualEntity;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
@@ -46,6 +49,7 @@ public final class MagibladeAbilityManager {
     private static final Map<ServerWorld, Map<UUID, ChargeState>> ACTIVE_CHARGES = new HashMap<>();
     private static final Map<ServerWorld, Map<UUID, HeadState>> ACTIVE_HEADS = new HashMap<>();
     private static final Map<ServerWorld, Map<UUID, Long>> LAST_PASSIVE_TICKS = new HashMap<>();
+    private static final Map<UUID, RepulsionState> REPULSION_STATES = new HashMap<>();
 
     private MagibladeAbilityManager() {
     }
@@ -75,6 +79,9 @@ public final class MagibladeAbilityManager {
             return false;
         }
 
+        UniqueAbilityExecution execution = Phase9CombatManager.beginActive(
+                Phase9UniqueAbilities.MAGIBLADE_WARDEN, context, Config.uniqueEffects.magiblade.cooldown);
+        Phase9AbilityTuning tuning = Phase9UniqueAbilities.tuning(execution);
         LivingEntity actor = context.actor();
         Hand hand = context.hand() == null ? Hand.MAIN_HAND : context.hand();
         ChargeState charge = new ChargeState(
@@ -83,7 +90,9 @@ public final class MagibladeAbilityManager {
                 context.target() == null ? null : context.target().getUuid(),
                 context.stack().copy(),
                 hand,
-                context.world().getTime()
+                context.world().getTime(),
+                tuning,
+                execution
         );
         ACTIVE_CHARGES.computeIfAbsent(context.world(), ignored -> new HashMap<>())
                 .put(actor.getUuid(), charge);
@@ -107,6 +116,7 @@ public final class MagibladeAbilityManager {
         if (clearCooldown) {
             clearCooldown(actor, removed.stack);
         }
+        Phase9CombatManager.finish(removed.execution, 0);
         spawnCancelledChargeEffects(world, actor);
     }
 
@@ -123,6 +133,14 @@ public final class MagibladeAbilityManager {
         }
 
         long now = world.getTime();
+        RepulsionState passive = REPULSION_STATES.computeIfAbsent(actor.getUuid(), ignored -> new RepulsionState());
+        if (now >= passive.refreshAt) {
+            passive.refreshAt = now + 20;
+            UniqueAbilityExecution execution = Phase9CombatManager.beginPassive(
+                    Phase9UniqueAbilities.MAGIBLADE_REPULSION, world, stack, actor, null);
+            passive.tuning = Phase9UniqueAbilities.tuning(execution);
+            Phase9CombatManager.finish(execution, 0);
+        }
         Map<UUID, Long> lastTicks = LAST_PASSIVE_TICKS.computeIfAbsent(world, ignored -> new HashMap<>());
         if (lastTicks.getOrDefault(actor.getUuid(), Long.MIN_VALUE) == now) {
             return;
@@ -135,16 +153,19 @@ public final class MagibladeAbilityManager {
             }
         }
 
-        int frequency = Math.max(1, Config.uniqueEffects.magiblade.repelFrequency);
+        int frequency = Math.max(1, passive.tuning.integer(
+                Phase9AbilityTuning.Setting.INTERVAL_TICKS, Config.uniqueEffects.magiblade.repelFrequency));
         if ((actor.age + actor.getId()) % frequency != 0) {
             return;
         }
-        int chance = Math.clamp(Config.uniqueEffects.magiblade.repelChance, 0, 100);
+        int chance = Math.clamp(passive.tuning.integer(
+                Phase9AbilityTuning.Setting.CHANCE, Config.uniqueEffects.magiblade.repelChance), 0, 100);
         if (chance <= 0 || actor.getRandom().nextInt(100) >= chance) {
             return;
         }
 
-        double radius = Math.max(0.5, Config.uniqueEffects.magiblade.repelRadius);
+        double radius = Math.max(0.5, passive.tuning.get(
+                Phase9AbilityTuning.Setting.RADIUS, Config.uniqueEffects.magiblade.repelRadius));
         Box searchBox = actor.getBoundingBox().expand(radius, Math.max(1.0, radius * 0.5), radius);
         LivingEntity closest = world.getEntitiesByClass(
                         LivingEntity.class,
@@ -157,11 +178,25 @@ public final class MagibladeAbilityManager {
             return;
         }
 
+        double knockback = .5 * passive.tuning.get(Phase9AbilityTuning.Setting.KNOCKBACK, 1);
         closest.setVelocity(
-                (closest.getX() - actor.getX()) * 0.5,
+                (closest.getX() - actor.getX()) * knockback,
                 closest.getVelocity().y,
-                (closest.getZ() - actor.getZ()) * 0.5
+                (closest.getZ() - actor.getZ()) * knockback
         );
+        if (passive.tuning.flag(1 << 4)) closest.addStatusEffect(new net.minecraft.entity.effect.StatusEffectInstance(
+                net.minecraft.entity.effect.StatusEffects.SLOWNESS, 30, 1), actor);
+        if (passive.tuning.flag(1 << 6)) actor.addStatusEffect(new net.minecraft.entity.effect.StatusEffectInstance(
+                net.minecraft.entity.effect.StatusEffects.RESISTANCE, 20, 0), actor);
+        if (passive.tuning.flag(1 << 8)) {
+            float damage = HelperMethods.abilityScaledDamage("arcane", actor, stack,
+                    Config.uniqueEffects.magiblade.damageScaling * .6F,
+                    Config.uniqueEffects.magiblade.spellScaling);
+            world.getEntitiesByClass(LivingEntity.class, searchBox,
+                            target -> isValidEnemy(world, actor, null, target))
+                    .stream().limit(6).forEach(target -> target.damage(
+                            world.getDamageSources().indirectMagic(actor, actor), damage));
+        }
         closest.velocityModified = true;
         world.playSound(null, actor.getBlockPos(), SoundEvents.BLOCK_SCULK_SENSOR_CLICKING,
                 actor.getSoundCategory(), 0.8F, 1.0F + actor.getRandom().nextFloat() * 0.5F);
@@ -207,6 +242,7 @@ public final class MagibladeAbilityManager {
                     clearCooldown(actor, charge.stack);
                     spawnCancelledChargeEffects(world, actor);
                 }
+                Phase9CombatManager.finish(charge.execution, 0);
                 continue;
             }
 
@@ -214,7 +250,7 @@ public final class MagibladeAbilityManager {
             if (elapsed % 4L == 0L) {
                 spawnChargingEffects(world, actor, elapsed);
             }
-            if (elapsed < chargeDuration()) {
+            if (elapsed < chargeDuration(charge.tuning)) {
                 continue;
             }
 
@@ -248,6 +284,7 @@ public final class MagibladeAbilityManager {
                 if (visual != null) {
                     beginDismissal(world, actor, visual);
                 }
+                Phase9CombatManager.finish(head.execution, head.affectedTargets);
                 iterator.remove();
                 continue;
             }
@@ -255,6 +292,7 @@ public final class MagibladeAbilityManager {
             if (visual == null) {
                 visual = spawnVisual(world, actor, head);
                 if (visual == null) {
+                    Phase9CombatManager.finish(head.execution, head.affectedTargets);
                     iterator.remove();
                     continue;
                 }
@@ -273,15 +311,19 @@ public final class MagibladeAbilityManager {
     private static void completeCharge(ServerWorld world, LivingEntity actor, LivingEntity sourceOwner,
                                        ChargeState charge, long now) {
         float damage = HelperMethods.abilityScaledDamage("arcane", actor, charge.stack,
-                Config.uniqueEffects.magiblade.damageScaling,
+                Config.uniqueEffects.magiblade.damageScaling * (float) charge.tuning.get(
+                        Phase9AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1),
                 Config.uniqueEffects.magiblade.spellScaling);
         Map<UUID, HeadState> heads = ACTIVE_HEADS.computeIfAbsent(world, ignored -> new HashMap<>());
         HeadState existing = heads.get(actor.getUuid());
         if (existing != null) {
+            Phase9CombatManager.finish(existing.execution, existing.affectedTargets);
             existing.sourceOwnerId = sourceOwner == null ? null : sourceOwner.getUuid();
             existing.stack = charge.stack.copy();
             existing.damage = Math.max(0.0F, damage);
-            existing.expiresAt = now + summonDuration();
+            existing.expiresAt = now + summonDuration(charge.tuning);
+            existing.tuning = charge.tuning;
+            existing.execution = charge.execution;
             if (existing.targetId == null && charge.preferredTargetId != null) {
                 existing.targetId = charge.preferredTargetId;
             }
@@ -300,13 +342,16 @@ public final class MagibladeAbilityManager {
                 charge.preferredTargetId,
                 charge.stack.copy(),
                 now,
-                now + summonDuration(),
+                now + summonDuration(charge.tuning),
                 now,
                 Math.max(0.0F, damage),
-                Math.floorMod(actor.getUuid().hashCode(), 360) * MathHelper.RADIANS_PER_DEGREE
+                Math.floorMod(actor.getUuid().hashCode(), 360) * MathHelper.RADIANS_PER_DEGREE,
+                charge.tuning,
+                charge.execution
         );
         MagibladeWardenHeadVisualEntity visual = spawnVisual(world, actor, head);
         if (visual == null) {
+            Phase9CombatManager.finish(charge.execution, 0);
             return;
         }
         heads.put(actor.getUuid(), head);
@@ -342,8 +387,11 @@ public final class MagibladeAbilityManager {
 
     private static Vec3d orbitPosition(LivingEntity actor, HeadState head, long now) {
         double elapsed = Math.max(0L, now - head.spawnedAt);
-        double angle = head.orbitPhase + elapsed * Math.max(0.001, Config.uniqueEffects.magiblade.headOrbitSpeed);
-        double radius = Math.max(0.0, Config.uniqueEffects.magiblade.headOrbitRadius);
+        double angle = head.orbitPhase + elapsed * Math.max(0.001,
+                Config.uniqueEffects.magiblade.headOrbitSpeed * head.tuning.get(
+                        Phase9AbilityTuning.Setting.SPEED, 1));
+        double radius = Math.max(0.0, head.tuning.get(
+                Phase9AbilityTuning.Setting.RADIUS, Config.uniqueEffects.magiblade.headOrbitRadius));
         double bob = MathHelper.sin((float) (elapsed * ORBIT_BOB_SPEED + head.orbitPhase)) * ORBIT_BOB_HEIGHT;
         return new Vec3d(
                 actor.getX() + Math.cos(angle) * radius,
@@ -365,14 +413,14 @@ public final class MagibladeAbilityManager {
         }
 
         if (head.fireAt < 0L && now >= head.nextCycleAt) {
-            target = findTarget(world, actor, sourceOwner, target);
+            target = findTarget(world, actor, sourceOwner, target, head);
             if (target == null) {
                 head.targetId = null;
                 head.nextCycleAt = now + TARGET_RETRY_TICKS;
             } else {
                 head.targetId = target.getUuid();
-                head.fireAt = now + sonicChargeDuration();
-                head.nextCycleAt = now + sonicInterval();
+                head.fireAt = now + sonicChargeDuration(head.tuning);
+                head.nextCycleAt = now + sonicInterval(head.tuning);
                 beginSonicCharge(world, actor, visual);
             }
         }
@@ -394,7 +442,8 @@ public final class MagibladeAbilityManager {
     }
 
     private static LivingEntity findTarget(ServerWorld world, LivingEntity actor,
-                                           LivingEntity sourceOwner, LivingEntity currentTarget) {
+                                           LivingEntity sourceOwner, LivingEntity currentTarget,
+                                           HeadState head) {
         if (isValidEnemyInRange(world, actor, sourceOwner, currentTarget)) {
             return currentTarget;
         }
@@ -403,7 +452,7 @@ public final class MagibladeAbilityManager {
             return mob.getTarget();
         }
 
-        double range = sonicRange();
+        double range = sonicRange(head.tuning);
         Box searchBox = actor.getBoundingBox().expand(range, Math.max(2.0, range * 0.5), range);
         return world.getEntitiesByClass(
                         LivingEntity.class,
@@ -435,7 +484,8 @@ public final class MagibladeAbilityManager {
         double horizontal = Math.sqrt(direction.x * direction.x + direction.z * direction.z);
         float desiredYaw = (float) (MathHelper.atan2(direction.z, direction.x) * MathHelper.DEGREES_PER_RADIAN) - 90.0F;
         float desiredPitch = (float) (-(MathHelper.atan2(direction.y, horizontal) * MathHelper.DEGREES_PER_RADIAN));
-        float turnSpeed = Math.max(0.1F, Config.uniqueEffects.magiblade.headTurnSpeedDegreesPerTick);
+        float turnSpeed = Math.max(0.1F, Config.uniqueEffects.magiblade.headTurnSpeedDegreesPerTick
+                * (float) head.tuning.get(Phase9AbilityTuning.Setting.SPEED, 1));
         visual.setTargetYaw(MathHelper.stepUnwrappedAngleTowards(visual.getTargetYaw(), desiredYaw, turnSpeed));
         visual.setTargetPitch(MathHelper.stepTowards(
                 visual.getTargetPitch(),
@@ -465,13 +515,15 @@ public final class MagibladeAbilityManager {
 
         LivingEntity attributedOwner = sourceOwner == null ? actor : sourceOwner;
         DamageSource source = attributedOwner.getDamageSources().sonicBoom(attributedOwner);
-        Box searchBox = new Box(start, end).expand(SONIC_BEAM_WIDTH);
+        double beamWidth = head.tuning.get(Phase9AbilityTuning.Setting.WIDTH, SONIC_BEAM_WIDTH);
+        Box searchBox = new Box(start, end).expand(beamWidth);
+        int hitIndex = 0;
         for (LivingEntity target : world.getEntitiesByClass(
                 LivingEntity.class,
                 searchBox,
                 candidate -> isValidEnemy(world, actor, sourceOwner, candidate)
         )) {
-            Box hitbox = target.getBoundingBox().expand(SONIC_BEAM_WIDTH);
+            Box hitbox = target.getBoundingBox().expand(beamWidth);
             if (!hitbox.contains(start) && hitbox.raycast(start, end).isEmpty()) {
                 continue;
             }
@@ -481,11 +533,16 @@ public final class MagibladeAbilityManager {
                     head.stack,
                     target,
                     source,
-                    head.damage
+                    head.damage * (head.tuning.flag(1 << 23) && hitIndex < 3 ? 1.2F : 1)
             );
             boolean[] damaged = {false};
             WeaponImplicitRegistry.runSuppressed(() -> damaged[0] = target.damage(source, damage));
             if (damaged[0]) {
+                hitIndex++;
+                head.affectedTargets++;
+                if (head.tuning.flag(1 << 22)) target.addStatusEffect(
+                        new net.minecraft.entity.effect.StatusEffectInstance(
+                                net.minecraft.entity.effect.StatusEffects.WEAKNESS, 50, 0), actor);
                 spawnSonicImpactEffects(world, target);
             }
         }
@@ -735,20 +792,41 @@ public final class MagibladeAbilityManager {
         return Math.max(1, Config.uniqueEffects.magiblade.chargeDuration);
     }
 
+    private static int chargeDuration(Phase9AbilityTuning tuning) {
+        return Math.max(1, tuning.integer(Phase9AbilityTuning.Setting.WINDUP_TICKS, chargeDuration()));
+    }
+
     private static int summonDuration() {
         return Math.max(1, Config.uniqueEffects.magiblade.summonDuration);
+    }
+
+    private static int summonDuration(Phase9AbilityTuning tuning) {
+        return Math.max(1, tuning.integer(Phase9AbilityTuning.Setting.DURATION_TICKS, summonDuration()));
     }
 
     private static int sonicInterval() {
         return Math.max(1, Config.uniqueEffects.magiblade.sonicInterval);
     }
 
+    private static int sonicInterval(Phase9AbilityTuning tuning) {
+        return Math.max(1, tuning.integer(Phase9AbilityTuning.Setting.INTERVAL_TICKS, sonicInterval()));
+    }
+
     private static int sonicChargeDuration() {
         return Math.max(1, Config.uniqueEffects.magiblade.sonicChargeDuration);
     }
 
+    private static int sonicChargeDuration(Phase9AbilityTuning tuning) {
+        return Math.max(1, tuning.integer(Phase9AbilityTuning.Setting.SECONDARY_INTERVAL_TICKS,
+                tuning.integer(Phase9AbilityTuning.Setting.WINDUP_TICKS, sonicChargeDuration())));
+    }
+
     private static double sonicRange() {
         return Math.max(1.0, Config.uniqueEffects.magiblade.sonicDistance);
+    }
+
+    private static double sonicRange(Phase9AbilityTuning tuning) {
+        return Math.max(1, tuning.get(Phase9AbilityTuning.Setting.RANGE, sonicRange()));
     }
 
     private static final class ChargeState {
@@ -758,15 +836,20 @@ public final class MagibladeAbilityManager {
         private final ItemStack stack;
         private final Hand hand;
         private final long startedAt;
+        private final Phase9AbilityTuning tuning;
+        private final UniqueAbilityExecution execution;
 
         private ChargeState(UUID actorId, UUID sourceOwnerId, UUID preferredTargetId,
-                            ItemStack stack, Hand hand, long startedAt) {
+                            ItemStack stack, Hand hand, long startedAt,
+                            Phase9AbilityTuning tuning, UniqueAbilityExecution execution) {
             this.actorId = actorId;
             this.sourceOwnerId = sourceOwnerId;
             this.preferredTargetId = preferredTargetId;
             this.stack = stack;
             this.hand = hand;
             this.startedAt = startedAt;
+            this.tuning = tuning;
+            this.execution = execution;
         }
     }
 
@@ -782,10 +865,16 @@ public final class MagibladeAbilityManager {
         private float damage;
         private final double orbitPhase;
         private UUID visualId;
+        private Phase9AbilityTuning tuning;
+        private UniqueAbilityExecution execution;
+        private int affectedTargets;
+        private static final HeadState EMPTY = new HeadState(null, null, null, ItemStack.EMPTY,
+                0, 0, 0, 0, 0, Phase9AbilityTuning.EMPTY, null);
 
         private HeadState(UUID actorId, UUID sourceOwnerId, UUID targetId,
                           ItemStack stack, long spawnedAt, long expiresAt,
-                          long nextCycleAt, float damage, double orbitPhase) {
+                          long nextCycleAt, float damage, double orbitPhase,
+                          Phase9AbilityTuning tuning, UniqueAbilityExecution execution) {
             this.actorId = actorId;
             this.sourceOwnerId = sourceOwnerId;
             this.targetId = targetId;
@@ -795,6 +884,13 @@ public final class MagibladeAbilityManager {
             this.nextCycleAt = nextCycleAt;
             this.damage = damage;
             this.orbitPhase = orbitPhase;
+            this.tuning = tuning;
+            this.execution = execution;
         }
+    }
+
+    private static final class RepulsionState {
+        private long refreshAt;
+        private Phase9AbilityTuning tuning = Phase9AbilityTuning.EMPTY;
     }
 }

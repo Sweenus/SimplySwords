@@ -4,6 +4,8 @@ import net.sweenus.simplyswords.api.SimplySwordsAPI;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -16,6 +18,9 @@ import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
+import net.sweenus.simplyswords.api.ability.Phase9AbilityTuning;
+import net.sweenus.simplyswords.api.ability.Phase9UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.StarsEdgeConstellationVisualEntity;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
@@ -39,6 +44,7 @@ public final class StarsEdgeAbilityManager {
     private static final int PHASE_DETONATING = 2;
 
     private static final Map<ServerWorld, Map<UUID, ActiveReprise>> ACTIVE = new HashMap<>();
+    private static final Map<UUID, RepriseState> REPRISE_STATES = new HashMap<>();
 
     private StarsEdgeAbilityManager() {
     }
@@ -82,7 +88,97 @@ public final class StarsEdgeAbilityManager {
             beginDetonation(context.world(), context.actor(), existing);
             return true;
         }
-        return start(context);
+        UniqueAbilityExecution execution = Phase9CombatManager.beginActive(
+                Phase9UniqueAbilities.STARS_CONSTELLATION, context, Config.uniqueEffects.stars_edge.cooldown);
+        return start(context, Phase9UniqueAbilities.tuning(execution), execution);
+    }
+
+    public static void onMeleeHit(ServerWorld world, ItemStack stack, LivingEntity attacker, LivingEntity target) {
+        HelperMethods.playHitSounds(attacker, target);
+        boolean day = world.isDay();
+        UniqueAbilityExecution execution = Phase9CombatManager.beginPassive(day
+                ? Phase9UniqueAbilities.STARS_SOLAR : Phase9UniqueAbilities.STARS_LUNAR,
+                world, stack, attacker, target);
+        Phase9AbilityTuning tuning = Phase9UniqueAbilities.tuning(execution);
+        RepriseState state = REPRISE_STATES.computeIfAbsent(attacker.getUuid(), ignored -> new RepriseState());
+        float abilityDamage = HelperMethods.abilityScaledDamage("arcane", attacker, stack,
+                Config.uniqueEffects.stars_edge.damageScaling * (float) tuning.get(
+                        Phase9AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1),
+                Config.uniqueEffects.stars_edge.spellScaling);
+        abilityDamage = HelperMethods.applyNonPlayerWeaponHitDamageModifier(attacker, abilityDamage);
+        DamageSource source = attacker instanceof PlayerEntity player
+                ? attacker.getDamageSources().playerAttack(player) : world.getDamageSources().generic();
+        if (day) {
+            if (tuning.flag(1 << 2)) {
+                if (world.getTime() - state.lastSolarHit > tuning.integer(
+                        Phase9AbilityTuning.Setting.LOCKOUT_TICKS, 40)) state.solarChain = 0;
+                state.solarChain = Math.min(tuning.integer(Phase9AbilityTuning.Setting.STACK_CAP, 4),
+                        state.solarChain + 1);
+                abilityDamage *= 1 + state.solarChain * tuning.get(
+                        Phase9AbilityTuning.Setting.PER_STACK_MULTIPLIER, .03);
+                state.lastSolarHit = world.getTime();
+            }
+            if (tuning.flag(1 << 3)) {
+                long time = world.getTimeOfDay() % 24000;
+                if (time >= 5000 && time <= 7000) abilityDamage *= tuning.get(
+                        Phase9AbilityTuning.Setting.OUTGOING_MULTIPLIER, 1.15);
+            }
+            if (tuning.flag(1 << 7)) {
+                state.solarCharge += tuning.integer(Phase9AbilityTuning.Setting.COUNT, 5);
+                if (state.solarCharge >= tuning.integer(Phase9AbilityTuning.Setting.STACK_CAP, 25)) {
+                    state.solarCharge = 0;
+                    pulse(world, attacker, stack, target, abilityDamage * (float) tuning.get(
+                            Phase9AbilityTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, 1.5),
+                            tuning.get(Phase9AbilityTuning.Setting.RADIUS, 5), 64);
+                }
+            }
+            target.timeUntilRegen = 0;
+            boolean damaged = target.damage(source, HelperMethods.applyAbilityDamageEnchantments(
+                    world, stack, target, source, abilityDamage));
+            if (damaged && tuning.flag(1 << 1)) target.addStatusEffect(new StatusEffectInstance(
+                    StatusEffects.GLOWING, tuning.integer(Phase9AbilityTuning.Setting.STATUS_DURATION_TICKS, 60), 0), attacker);
+            if (damaged && tuning.flag(1 << 4) && ++state.solarHits % 5 == 0) pulse(world, attacker, stack,
+                    target, abilityDamage * .3F, 2, 5);
+            if (damaged && tuning.flag(1 << 6)) target.setOnFireFor(2);
+            if (!target.isAlive() && tuning.flag(1 << 5)) attacker.addStatusEffect(new StatusEffectInstance(
+                    StatusEffects.SPEED, 60, 0), attacker);
+        } else {
+            if (tuning.flag(1 << 8)) {
+                abilityDamage *= (float) tuning.get(Phase9AbilityTuning.Setting.OUTGOING_MULTIPLIER, .6);
+            }
+            float heal = abilityDamage * Config.uniqueEffects.stars_edge.lifestealModifier
+                    * (float) tuning.get(Phase9AbilityTuning.Setting.HEAL_MULTIPLIER, 1);
+            if (tuning.flag(1 << 12) && attacker.getHealth() / attacker.getMaxHealth()
+                    < tuning.get(Phase9AbilityTuning.Setting.HEALTH_THRESHOLD, .4)) heal *= 1.25F;
+            float missing = attacker.getMaxHealth() - attacker.getHealth();
+            attacker.heal(heal);
+            if (tuning.flag(1 << 15) && heal > missing) attacker.addStatusEffect(new StatusEffectInstance(
+                    StatusEffects.ABSORPTION, 80,
+                    Math.min(1, Math.max(0, (int) ((heal - missing) / 4)))), attacker);
+            if (tuning.flag(1 << 10) && world.getTime() >= state.guardAt) {
+                state.guardAt = world.getTime() + 40;
+                attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.ABSORPTION, 40, 0), attacker);
+            }
+            if (tuning.flag(1 << 9) && target.hasStatusEffect(StatusEffects.GLOWING)) attacker.addStatusEffect(
+                    new StatusEffectInstance(StatusEffects.SPEED, 30, 0), attacker);
+            if (!target.isAlive() && tuning.flag(1 << 16)) attacker.addStatusEffect(
+                    new StatusEffectInstance(StatusEffects.INVISIBILITY, 40, 0), attacker);
+            float sharedHeal = heal * .35F;
+            if (tuning.flag(1 << 17)) world.getEntitiesByClass(LivingEntity.class,
+                            attacker.getBoundingBox().expand(5), ally -> ally != attacker
+                                    && !HelperMethods.checkAbilityTarget(ally, attacker))
+                    .stream().limit(2).forEach(ally -> ally.heal(sharedHeal));
+        }
+        Phase9CombatManager.finish(execution, 1);
+    }
+
+    private static void pulse(ServerWorld world, LivingEntity actor, ItemStack stack, LivingEntity center,
+                              float damage, double radius, int cap) {
+        DamageSource source = world.getDamageSources().indirectMagic(actor, actor);
+        world.getEntitiesByClass(LivingEntity.class, center.getBoundingBox().expand(radius),
+                        target -> HelperMethods.checkAbilityTarget(target, actor))
+                .stream().limit(cap).forEach(target -> HelperMethods.damageThroughIframes(target, source,
+                        HelperMethods.applyAbilityDamageEnchantments(world, stack, target, source, damage)));
     }
 
     public static boolean isActive(LivingEntity actor) {
@@ -110,6 +206,7 @@ public final class StarsEdgeAbilityManager {
             if (!(ownerEntity instanceof LivingEntity actor) || !actor.isAlive() || actor.isRemoved()) {
                 applyMissingOwnerCooldown(world, active);
                 fadeVisuals(world, active);
+                Phase9CombatManager.finish(active.execution, active.affectedTargets);
                 iterator.remove();
                 continue;
             }
@@ -119,11 +216,13 @@ public final class StarsEdgeAbilityManager {
                 applyCooldown(world, actor, active);
                 fadeVisuals(world, active);
                 spawnCancellationEffects(world, actor);
+                Phase9CombatManager.finish(active.execution, active.affectedTargets);
                 iterator.remove();
                 continue;
             }
 
             if (tickActive(world, actor, active)) {
+                Phase9CombatManager.finish(active.execution, active.affectedTargets);
                 iterator.remove();
             }
         }
@@ -133,7 +232,8 @@ public final class StarsEdgeAbilityManager {
         }
     }
 
-    private static boolean start(WeaponAbilityContext context) {
+    private static boolean start(WeaponAbilityContext context, Phase9AbilityTuning tuning,
+                                 UniqueAbilityExecution execution) {
         LivingEntity actor = context.actor();
         Vec3d direction = resolveDirection(context);
         if (direction.lengthSquared() < 0.0001) {
@@ -152,12 +252,15 @@ public final class StarsEdgeAbilityManager {
                 direction,
                 actor.getPos(),
                 now,
-                constellationDamage
+                constellationDamage * (float) tuning.get(Phase9AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1),
+                tuning,
+                execution
         );
         ACTIVE.computeIfAbsent(context.world(), ignored -> new HashMap<>())
                 .put(actor.getUuid(), active);
         appendNode(context.world(), active, actor.getPos());
-        applyForcedVelocity(actor, direction, Math.max(0.1, Config.uniqueEffects.stars_edge.initialDashSpeed));
+        applyForcedVelocity(actor, direction, Math.max(0.1, Config.uniqueEffects.stars_edge.initialDashSpeed)
+                * tuning.get(Phase9AbilityTuning.Setting.RANGE, 1));
         spawnActivationEffects(context.world(), actor);
         return true;
     }
@@ -210,7 +313,8 @@ public final class StarsEdgeAbilityManager {
             return false;
         }
 
-        int recordingDuration = Math.max(1, Config.uniqueEffects.stars_edge.recordingDuration);
+        int recordingDuration = Math.max(1, active.tuning.integer(
+                Phase9AbilityTuning.Setting.DURATION_TICKS, Config.uniqueEffects.stars_edge.recordingDuration));
         if (world.getTime() - active.phaseStartedAt >= recordingDuration) {
             sealCurrentEndpoint(world, actor, active);
             beginDetonation(world, actor, active);
@@ -248,14 +352,17 @@ public final class StarsEdgeAbilityManager {
         }
 
         damageConstellationOnContact(world, actor, active, phaseAge);
-        active.nextExplosionTick = world.getTime()
-                + Math.max(1, Config.uniqueEffects.stars_edge.segmentExplosionInterval);
+        active.nextExplosionTick = world.getTime() + Math.max(3, active.tuning.integer(
+                Phase9AbilityTuning.Setting.INTERVAL_TICKS,
+                Config.uniqueEffects.stars_edge.segmentExplosionInterval));
         return false;
     }
 
     private static boolean recordMovement(ServerWorld world, ActiveReprise active, Vec3d current) {
-        double spacing = Math.max(0.25, Config.uniqueEffects.stars_edge.nodeSpacing);
-        int maxNodes = Math.clamp(Config.uniqueEffects.stars_edge.maxNodes, 2, 16);
+        double spacing = Math.max(0.25, Config.uniqueEffects.stars_edge.nodeSpacing
+                * active.tuning.get(Phase9AbilityTuning.Setting.WIDTH, 1));
+        int maxNodes = Math.clamp(active.tuning.integer(
+                Phase9AbilityTuning.Setting.COUNT, Config.uniqueEffects.stars_edge.maxNodes), 2, 16);
         RouteNode lastNode = active.nodes.getLast();
         Vec3d remaining = current.subtract(lastNode.position);
         while (remaining.length() >= spacing && active.nodes.size() < maxNodes) {
@@ -270,7 +377,8 @@ public final class StarsEdgeAbilityManager {
     private static void sealCurrentEndpoint(ServerWorld world, LivingEntity actor, ActiveReprise active) {
         Vec3d current = actor.getPos();
         recordMovement(world, active, current);
-        int maxNodes = Math.clamp(Config.uniqueEffects.stars_edge.maxNodes, 2, 16);
+        int maxNodes = Math.clamp(active.tuning.integer(
+                Phase9AbilityTuning.Setting.COUNT, Config.uniqueEffects.stars_edge.maxNodes), 2, 16);
         if (active.nodes.size() < maxNodes && active.nodes.getLast().position.distanceTo(current) > 0.25) {
             appendNode(world, active, current);
         }
@@ -285,7 +393,8 @@ public final class StarsEdgeAbilityManager {
         active.phaseStartedAt = world.getTime();
         active.nextSegmentIndex = 1;
         active.nextExplosionTick = world.getTime()
-                + Math.max(1, Config.uniqueEffects.stars_edge.constellationDuration);
+                + Math.max(1, active.tuning.integer(Phase9AbilityTuning.Setting.SECONDARY_DURATION_TICKS,
+                Config.uniqueEffects.stars_edge.constellationDuration));
         applyCooldown(world, actor, active);
         setAllVisualPhases(world, active, StarsEdgeConstellationVisualEntity.PHASE_ARMED);
         spawnCompletionEffects(world, actor, actor.getPos());
@@ -347,19 +456,22 @@ public final class StarsEdgeAbilityManager {
     private static void detonateSegment(ServerWorld world, LivingEntity actor, ActiveReprise active,
                                         Vec3d start, Vec3d end) {
         damageSegmentExplosion(world, actor, active, start, end,
-                Math.max(0.1, Config.uniqueEffects.stars_edge.segmentExplosionRadius),
+                Math.max(0.1, active.tuning.get(Phase9AbilityTuning.Setting.RADIUS,
+                        Config.uniqueEffects.stars_edge.segmentExplosionRadius)),
                 active.constellationDamage);
         spawnSegmentExplosionEffects(world, actor, start, end);
     }
 
     private static void damageConstellationOnContact(ServerWorld world, LivingEntity actor,
                                                       ActiveReprise active, long phaseAge) {
-        int interval = Math.max(1, Config.uniqueEffects.stars_edge.constellationDamageInterval);
+        int interval = Math.max(1, active.tuning.integer(Phase9AbilityTuning.Setting.SECONDARY_INTERVAL_TICKS,
+                Config.uniqueEffects.stars_edge.constellationDamageInterval));
         if (phaseAge % interval != 0L || active.constellationDamage <= 0.0F) {
             return;
         }
 
-        double width = Math.max(0.1, Config.uniqueEffects.stars_edge.constellationDamageWidth);
+        double width = Math.max(0.1, active.tuning.get(Phase9AbilityTuning.Setting.WIDTH,
+                Config.uniqueEffects.stars_edge.constellationDamageWidth));
         Set<UUID> pulseHitTargets = new HashSet<>();
         for (int segmentIndex = active.nextSegmentIndex;
              segmentIndex < active.nodes.size();
@@ -405,6 +517,9 @@ public final class StarsEdgeAbilityManager {
                 continue;
             }
             damageTarget(world, actor, active.stack, target, active.constellationDamage, true);
+            active.affectedTargets++;
+            if (active.tuning.flag(1 << 24)) target.addStatusEffect(new StatusEffectInstance(
+                    StatusEffects.SLOWNESS, 30, 1), actor);
         }
     }
 
@@ -440,6 +555,7 @@ public final class StarsEdgeAbilityManager {
                 continue;
             }
             damageTarget(world, actor, active.stack, target, baseDamage, false);
+            active.affectedTargets++;
         }
     }
 
@@ -670,17 +786,31 @@ public final class StarsEdgeAbilityManager {
         private int nextSegmentIndex;
         private long nextExplosionTick;
         private boolean cooldownApplied;
+        private int affectedTargets;
+        private final Phase9AbilityTuning tuning;
+        private final UniqueAbilityExecution execution;
 
         private ActiveReprise(UUID actorId, ItemStack stack, Vec3d initialDirection,
                               Vec3d previousPosition, long startedAt,
-                              float constellationDamage) {
+                              float constellationDamage, Phase9AbilityTuning tuning,
+                              UniqueAbilityExecution execution) {
             this.actorId = actorId;
             this.stack = stack;
             this.initialDirection = initialDirection;
             this.previousPosition = previousPosition;
             this.phaseStartedAt = startedAt;
             this.constellationDamage = constellationDamage;
+            this.tuning = tuning;
+            this.execution = execution;
         }
+    }
+
+    private static final class RepriseState {
+        private int solarHits;
+        private int solarChain;
+        private int solarCharge;
+        private long lastSolarHit;
+        private long guardAt;
     }
 
     private record RouteNode(Vec3d position, UUID nodeVisualId, UUID linkVisualId) {

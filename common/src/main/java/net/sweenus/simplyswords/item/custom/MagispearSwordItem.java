@@ -20,6 +20,9 @@ import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.api.WeaponAbilityActivationSource;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
+import net.sweenus.simplyswords.api.ability.Phase9AbilityTuning;
+import net.sweenus.simplyswords.api.ability.Phase9UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
@@ -30,11 +33,17 @@ import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
 import net.sweenus.simplyswords.world.MagispearAbilityManager;
+import net.sweenus.simplyswords.world.Phase9CombatManager;
 
 import java.util.List;
 import java.util.Random;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public class MagispearSwordItem extends UniqueSwordItem implements UniqueWeaponActiveAbility {
+    private static final Map<UUID, Integer> MELEE_HITS = new HashMap<>();
+    private static final Map<UUID, Long> PIN_LOCKOUTS = new HashMap<>();
     public MagispearSwordItem(ToolMaterial toolMaterial, Settings settings) {
         super(toolMaterial, settings);
     }
@@ -47,19 +56,41 @@ public class MagispearSwordItem extends UniqueSwordItem implements UniqueWeaponA
         if (!attacker.getWorld().isClient()) {
             HelperMethods.playHitSounds(attacker, target);
             ServerWorld world = (ServerWorld) attacker.getWorld();
-            float hitChance = Config.uniqueEffects.magispear.magicChance;
-            int random = new Random().nextInt(100);
-            if (random < hitChance) {
+            UniqueAbilityExecution execution = Phase9CombatManager.beginPassive(
+                    Phase9UniqueAbilities.MAGISPEAR_SPELLPOINT, world, stack, attacker, target);
+            Phase9AbilityTuning tuning = Phase9UniqueAbilities.tuning(execution);
+            int hitChance = tuning.integer(Phase9AbilityTuning.Setting.CHANCE,
+                    Config.uniqueEffects.magispear.magicChance);
+            int hits = MELEE_HITS.merge(attacker.getUuid(), 1, Integer::sum);
+            boolean guaranteed = tuning.flag(1 << 7) && hits % 3 == 0;
+            if (attacker.isSprinting() && tuning.flag(1 << 3)) hitChance = Math.min(100, hitChance + 12);
+            if (guaranteed || attacker.getRandom().nextInt(100) < hitChance) {
                 float damage = HelperMethods.abilityScaledDamage("arcane", attacker, stack,
-                        Config.uniqueEffects.magispear.magicDamageScaling,
+                        Config.uniqueEffects.magispear.magicDamageScaling * (float) tuning.get(
+                                Phase9AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1),
                         Config.uniqueEffects.magispear.magicSpellScaling);
+                if (tuning.has(Phase9AbilityTuning.Setting.ARMOR_IGNORE)) damage += Math.min(
+                        damage * .5F, target.getArmor() * (float) tuning.get(
+                                Phase9AbilityTuning.Setting.ARMOR_IGNORE, .1));
                 DamageSource damageSource = attacker.getDamageSources().indirectMagic(attacker, attacker);
                 target.timeUntilRegen = 0;
+                if (tuning.flag(1 << 4)) target.addStatusEffect(new net.minecraft.entity.effect.StatusEffectInstance(
+                        net.minecraft.entity.effect.StatusEffects.GLOWING, 50, 0), attacker);
+                if (tuning.flag(1 << 6) && PIN_LOCKOUTS.getOrDefault(target.getUuid(), 0L) <= world.getTime()) {
+                    target.addStatusEffect(new net.minecraft.entity.effect.StatusEffectInstance(
+                            net.minecraft.entity.effect.StatusEffects.SLOWNESS, 25, 1), attacker);
+                    PIN_LOCKOUTS.put(target.getUuid(), world.getTime() + 40);
+                }
+                if (tuning.flag(1 << 8)) target.addStatusEffect(new net.minecraft.entity.effect.StatusEffectInstance(
+                        net.minecraft.entity.effect.StatusEffects.LEVITATION, 12, 0), attacker);
                 target.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments(world, stack, target, damageSource, damage));
                 target.timeUntilRegen = 0;
                 world.playSound(null, attacker.getBlockPos(), SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
                         attacker.getSoundCategory(), 0.2f, 1.1f);
             }
+            Phase9CombatManager.finish(execution, 1);
+            if (MELEE_HITS.size() > 64) MELEE_HITS.clear();
+            PIN_LOCKOUTS.entrySet().removeIf(entry -> entry.getValue() <= world.getTime());
         }
         return super.postHit(stack, target, attacker);
     }
