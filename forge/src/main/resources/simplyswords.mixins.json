@@ -6,6 +6,8 @@
   "client": [
   ],
   "mixins": [
+    "compat.LootrBlockEntityMixin",
+    "compat.LootrChestMinecartMixin"
   ],
   "injectors": {
     "defaultRequire": 1
