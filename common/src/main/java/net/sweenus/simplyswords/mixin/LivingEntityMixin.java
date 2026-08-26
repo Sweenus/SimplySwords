@@ -196,6 +196,8 @@ public abstract class LivingEntityMixin {
             amount = DreadwhisperAbilityManager.modifyIncomingDamage(livingEntity, source, amount);
             amount = MoltenEdgeAbilityManager.modifyIncomingDamage(livingEntity, amount);
             amount = WatcherAbilityManager.modifyIncomingDamage(livingEntity, source, amount);
+            amount = net.sweenus.simplyswords.world.Phase2CombatStateManager.modifyIncomingDamage(
+                    livingEntity, source, amount);
             amount = Phase4StandardManager.modifyIncomingDamage(livingEntity, source, amount);
             amount = Phase4PassiveManager.modifyIncomingDamage(livingEntity, source, amount);
             amount = Phase5CombatManager.modifyIncomingDamage(livingEntity, source, amount);

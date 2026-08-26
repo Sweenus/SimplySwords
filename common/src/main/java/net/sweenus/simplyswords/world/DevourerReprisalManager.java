@@ -4,6 +4,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.particle.DustColorTransitionParticleEffect;
@@ -48,6 +50,8 @@ public final class DevourerReprisalManager {
             new DustColorTransitionParticleEffect(new Vector3f(0.025F, 0.006F, 0.055F),
                     new Vector3f(0.48F, 0.08F, 0.78F), 1.45F);
     private static final Map<ServerWorld, List<ActiveReprisal>> ACTIVE = new HashMap<>();
+    private static final Map<ServerWorld, Map<UUID, Long>> LOCKOUTS = new HashMap<>();
+    private static final int MAX_LOCKOUTS = 256;
 
     private DevourerReprisalManager() {
     }
@@ -71,6 +75,9 @@ public final class DevourerReprisalManager {
         if (attacker.squaredDistanceTo(bearer) > reach * reach) {
             return;
         }
+        if (!lockoutReady(world, bearer.getUuid())) {
+            return;
+        }
 
         UniqueAbilityExecution execution = UniqueAbilityApi.begin(Phase2UniqueAbilities.DEVOURER_REPRISAL,
                 UniqueAbilityContext.passive(world, stack, bearer, attacker, null), builder -> builder
@@ -83,6 +90,10 @@ public final class DevourerReprisalManager {
         UniqueAbilityApi.start(execution);
         Phase2AbilityTuning tuning = Phase2UniqueAbilities.tuning(execution);
 
+        int mode = tuning.integer(Phase2AbilityTuning.Setting.MODE, 0);
+        boolean guarding = (mode & 512) != 0;
+        applyLockout(world, bearer.getUuid(),
+                tuning.integer(Phase2AbilityTuning.Setting.LOCKOUT_TICKS, 0));
         double radius = Math.max(0.5, tuning.get(Phase2AbilityTuning.Setting.REPRISAL_RADIUS,
                 Config.uniqueEffects.devourer.reprisalRadius));
         int targetCap = Math.max(1, tuning.integer(Phase2AbilityTuning.Setting.REPRISAL_TARGET_CAP,
@@ -93,14 +104,24 @@ public final class DevourerReprisalManager {
                 Config.uniqueEffects.devourer.reprisalDamageScaling,
                 Config.uniqueEffects.devourer.reprisalSpellScaling)
                 * (float) tuning.get(Phase2AbilityTuning.Setting.REPRISAL_DAMAGE_MULTIPLIER, 1);
-        DevourerAbilityManager.ReprisalRedirect redirect =
-                DevourerAbilityManager.feedFromReprisal(world, bearer.getUuid(), center,
-                        attacker, Math.max(10, Config.uniqueEffects.devourer.reprisalDragDuration + 7));
-        for (LivingEntity target : targets) {
-            damageTarget(world, bearer, stack, target, damage);
-            UniqueAbilityApi.emit(execution, net.sweenus.simplyswords.api.ability.UniqueAbilityPhase.HIT,
-                    Phase2UniqueAbilities.HIT, target, 1, damage);
+        double secondary = tuning.get(Phase2AbilityTuning.Setting.REPRISAL_SECONDARY_MULTIPLIER, 1);
+        DevourerAbilityManager.ReprisalRedirect redirect = guarding ? null
+                : DevourerAbilityManager.feedFromReprisal(world, bearer.getUuid(), center, attacker,
+                        Math.max(10, Config.uniqueEffects.devourer.reprisalDragDuration + 7),
+                        tuning.get(Phase2AbilityTuning.Setting.RANGE, 0));
+        if (redirect != null) {
+            DevourerAbilityManager.markRouted(world, bearer.getUuid(), attacker.getUuid(),
+                    Math.max(20, Config.uniqueEffects.devourer.reprisalDragDuration + 40));
         }
+        for (LivingEntity target : targets) {
+            float scaled = targetDamage(damage, target == attacker, secondary);
+            damageTarget(world, bearer, stack, target, scaled);
+            applyReprisalStatus(bearer, target == attacker ? attacker : null, tuning);
+            UniqueAbilityApi.emit(execution, net.sweenus.simplyswords.api.ability.UniqueAbilityPhase.HIT,
+                    Phase2UniqueAbilities.HIT, target, 1, scaled);
+        }
+        grantReprisalAbsorption(bearer, tuning, mode);
+        if (guarding) applyGuardianBoon(bearer, tuning);
         Vec3d destination = redirect == null ? center : redirect.destination();
         UUID tendrilId = redirect == null ? null : redirect.tendrilId();
         DevourerReprisalVisualEntity visual = new DevourerReprisalVisualEntity(world, center,
@@ -117,7 +138,7 @@ public final class DevourerReprisalManager {
         long dragEndTick = now + dragDuration;
         long cleanupTick = Math.max(dragEndTick, now + CLOSING_EFFECT_TICK + 1L);
         ActiveReprisal reprisal = new ActiveReprisal(bearer.getUuid(), center, destination,
-                redirect != null, targetIds, dragEndTick, cleanupTick,
+                redirect != null, guarding, targetIds, dragEndTick, cleanupTick,
                 now + CLOSING_EFFECT_TICK, now + TENDRIL_RETRACT_TICK, tendrilId, execution);
         ACTIVE.computeIfAbsent(world, ignored -> new ArrayList<>()).add(reprisal);
     }
@@ -179,7 +200,12 @@ public final class DevourerReprisalManager {
     }
 
     private static void tickPull(ServerWorld world, LivingEntity bearer, ActiveReprisal reprisal) {
-        double configured = Math.max(0.0, Config.uniqueEffects.devourer.reprisalPullStrength);
+        Phase2AbilityTuning tuning = Phase2UniqueAbilities.tuning(reprisal.execution);
+        double configured = Math.max(0.0, reprisal.pushing
+                ? tuning.get(Phase2AbilityTuning.Setting.REPRISAL_PUSH_STRENGTH, 0)
+                : tuning.get(Phase2AbilityTuning.Setting.REPRISAL_PULL,
+                        Config.uniqueEffects.devourer.reprisalPullStrength));
+        if (configured <= 0.0) return;
         for (UUID targetId : reprisal.targetIds) {
             LivingEntity target = resolveLiving(world, targetId);
             if (target == null || isInvulnerablePlayer(target)
@@ -194,6 +220,7 @@ public final class DevourerReprisalManager {
                 offset = new Vec3d(reprisal.destination.x - target.getX(), 0.0,
                         reprisal.destination.z - target.getZ());
             }
+            if (reprisal.pushing) offset = offset.multiply(-1.0);
             double distance = offset.length();
             if (distance < 0.08) {
                 continue;
@@ -211,6 +238,51 @@ public final class DevourerReprisalManager {
             target.velocityModified = true;
             target.fallDistance = 0.0F;
         }
+    }
+
+    static float targetDamage(float damage, boolean primary, double secondaryMultiplier) {
+        if (primary || secondaryMultiplier <= 0.0) return damage;
+        return damage * (float) secondaryMultiplier;
+    }
+
+    private static void applyReprisalStatus(LivingEntity bearer, LivingEntity attacker,
+                                            Phase2AbilityTuning tuning) {
+        if (attacker == null) return;
+        int duration = tuning.integer(Phase2AbilityTuning.Setting.STATUS_DURATION_TICKS, 0);
+        if (duration <= 0) return;
+        attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, duration,
+                tuning.integer(Phase2AbilityTuning.Setting.STATUS_AMPLIFIER, 0),
+                false, false, true), bearer);
+    }
+
+    private static void grantReprisalAbsorption(LivingEntity bearer, Phase2AbilityTuning tuning, int mode) {
+        if ((mode & 256) == 0) return;
+        float points = (float) tuning.get(Phase2AbilityTuning.Setting.REVIVE_ABSORPTION, 0);
+        float cap = Math.max(0.0F, Config.uniqueEffects.abilityAbsorptionCap);
+        if (points <= 0.0F || bearer.getAbsorptionAmount() >= Math.min(points, cap)) return;
+        bearer.setAbsorptionAmount(Math.min(cap, points));
+    }
+
+    private static void applyGuardianBoon(LivingEntity bearer, Phase2AbilityTuning tuning) {
+        int duration = tuning.integer(Phase2AbilityTuning.Setting.REPRISAL_GUARD_TICKS, 0);
+        if (duration <= 0) return;
+        bearer.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, duration, 0,
+                false, false, true));
+    }
+
+    private static boolean lockoutReady(ServerWorld world, UUID bearerId) {
+        Map<UUID, Long> lockouts = LOCKOUTS.get(world);
+        Long ready = lockouts == null ? null : lockouts.get(bearerId);
+        return ready == null || world.getTime() >= ready;
+    }
+
+    private static void applyLockout(ServerWorld world, UUID bearerId, int lockoutTicks) {
+        if (lockoutTicks <= 0) return;
+        Map<UUID, Long> lockouts = LOCKOUTS.computeIfAbsent(world, ignored -> new HashMap<>());
+        long now = world.getTime();
+        lockouts.values().removeIf(ready -> ready < now);
+        if (lockouts.size() >= MAX_LOCKOUTS && !lockouts.containsKey(bearerId)) lockouts.clear();
+        lockouts.put(bearerId, now + lockoutTicks);
     }
 
     private static void damageTarget(ServerWorld world, LivingEntity bearer, ItemStack stack,
@@ -291,6 +363,7 @@ public final class DevourerReprisalManager {
         private final Vec3d mawCenter;
         private final Vec3d destination;
         private final boolean redirected;
+        private final boolean pushing;
         private final List<UUID> targetIds;
         private final long dragEndTick;
         private final long cleanupTick;
@@ -302,13 +375,14 @@ public final class DevourerReprisalManager {
         private boolean tendrilRetracting;
 
         private ActiveReprisal(UUID bearerId, Vec3d mawCenter, Vec3d destination,
-                               boolean redirected, List<UUID> targetIds,
+                               boolean redirected, boolean pushing, List<UUID> targetIds,
                                long dragEndTick, long cleanupTick, long closingEffectTick,
                                long tendrilRetractTick, UUID tendrilId, UniqueAbilityExecution execution) {
             this.bearerId = bearerId;
             this.mawCenter = mawCenter;
             this.destination = destination;
             this.redirected = redirected;
+            this.pushing = pushing;
             this.targetIds = targetIds;
             this.dragEndTick = dragEndTick;
             this.cleanupTick = cleanupTick;

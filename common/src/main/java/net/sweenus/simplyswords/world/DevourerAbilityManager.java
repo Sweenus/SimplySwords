@@ -26,6 +26,7 @@ import net.minecraft.world.RaycastContext;
 import net.sweenus.simplyswords.api.SpellScalingProfile;
 import net.sweenus.simplyswords.api.StackReplacement;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
 import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.api.AwakeningFormRegistry;
@@ -59,6 +60,7 @@ public final class DevourerAbilityManager {
     private static final int TRAVEL_TICKS = 8;
     private static final int BLOOM_TICKS = 10;
     private static final int COLLAPSE_TICKS = 8;
+    private static final int MAX_ROUTED_TARGETS = 32;
     private static final int ACQUISITION_INTERVAL = 4;
     private static final int LOOSE_LAUNCH_DELAY_MIN = 3;
     private static final int LOOSE_LAUNCH_DELAY_VARIANCE = 6;
@@ -102,14 +104,20 @@ public final class DevourerAbilityManager {
     public static ReprisalRedirect feedFromReprisal(ServerWorld world, UUID actorId,
                                                      Vec3d origin, LivingEntity primaryTarget,
                                                      int tendrilLifetime) {
+        return feedFromReprisal(world, actorId, origin, primaryTarget, tendrilLifetime, 0.0);
+    }
+
+    public static ReprisalRedirect feedFromReprisal(ServerWorld world, UUID actorId,
+                                                     Vec3d origin, LivingEntity primaryTarget,
+                                                     int tendrilLifetime, double dragRange) {
         Map<UUID, ActiveMass> active = ACTIVE.get(world);
         ActiveMass mass = active == null ? null : active.get(actorId);
         if (mass == null || primaryTarget == null || !primaryTarget.isAlive()) {
             return null;
         }
         long now = world.getTime();
-        double radius = Math.max(1.0, Config.uniqueEffects.devourer.targetingRadius);
-        double vertical = Math.max(1.0, Config.uniqueEffects.devourer.verticalRange);
+        double radius = Math.max(Math.max(1.0, Config.uniqueEffects.devourer.targetingRadius), dragRange);
+        double vertical = Math.max(Math.max(1.0, Config.uniqueEffects.devourer.verticalRange), dragRange);
         if (now < mass.activeStartTick || now >= mass.activeEndTick
                 || horizontalDistanceSquared(origin, mass.center) > radius * radius
                 || Math.abs(origin.y - mass.center.y) > vertical) {
@@ -245,6 +253,7 @@ public final class DevourerAbilityManager {
                 continue;
             }
             if (now < mass.activeEndTick) {
+                tickFollow(world, actor, mass, visual);
                 tickVoice(world, mass, visual, now);
                 boolean acquisitionTick = (now - mass.activeStartTick) % ACQUISITION_INTERVAL == 0L;
                 if (acquisitionTick) {
@@ -595,15 +604,18 @@ public final class DevourerAbilityManager {
                 }
                 captured.tendrilId = null;
             }
-            int acceleratedAfter = tuning.integer(Phase2AbilityTuning.Setting.ACCELERATE_THRESHOLD_TICKS, 0);
-            int pulseInterval = acceleratedAfter > 0 && now - captured.ingestedAt >= acceleratedAfter
-                    ? tuning.integer(Phase2AbilityTuning.Setting.PULSE_INTERVAL_TICKS, 16)
-                    : Config.uniqueEffects.devourer.damageInterval;
+            int pulseInterval = pulseInterval(
+                    tuning.integer(Phase2AbilityTuning.Setting.ACCELERATE_THRESHOLD_TICKS, 0),
+                    now - captured.ingestedAt,
+                    tuning.integer(Phase2AbilityTuning.Setting.ACCELERATED_INTERVAL_TICKS, 16),
+                    tuning.integer(Phase2AbilityTuning.Setting.PULSE_INTERVAL_TICKS,
+                            Config.uniqueEffects.devourer.damageInterval));
             float compression = 1 + (float) Math.min(
                     tuning.get(Phase2AbilityTuning.Setting.BONUS_CAP, 0),
                     Math.max(0, mass.targets.size() - 1)
                             * tuning.get(Phase2AbilityTuning.Setting.BONUS_PER_TRIGGER, 0));
-            float pulseDamage = mass.damage * compression;
+            float pulseDamage = mass.damage * compression * routedBonus(mass, captured.targetId, now,
+                    tuning.get(Phase2AbilityTuning.Setting.ROUTED_DAMAGE_BONUS, 0));
             boolean pulse = held && now >= captured.nextDamageTick;
             if (pulse) captured.nextDamageTick = now + Math.max(1, pulseInterval);
             if (pulse && damageTarget(world, actor, mass.stackSnapshot, target, pulseDamage)) {
@@ -612,6 +624,7 @@ public final class DevourerAbilityManager {
                         Phase2UniqueAbilities.PULSE, target, 1, pulseDamage);
                 spawnFeedingEffects(world, target, mass.center);
                 pullTowardSlot(target, slot, mass);
+                if (!target.isAlive()) onMassKill(world, actor, mass, target, tuning, now);
             }
             int ruptureAfter = tuning.integer(Phase2AbilityTuning.Setting.RUPTURE_THRESHOLD_TICKS, 0);
             if (held && !captured.ruptured && ruptureAfter > 0
@@ -666,6 +679,81 @@ public final class DevourerAbilityManager {
             target.fallDistance = 0.0F;
         }
         return false;
+    }
+
+    static int pulseInterval(int accelerateThreshold, long heldTicks, int acceleratedInterval, int baseInterval) {
+        int base = Math.max(1, baseInterval);
+        if (accelerateThreshold <= 0 || heldTicks < accelerateThreshold) return base;
+        return Math.max(1, acceleratedInterval);
+    }
+
+    static long extendedEnd(long currentEnd, long baseEnd, int bonusTicks, int capTicks) {
+        if (bonusTicks <= 0 || capTicks <= 0) return currentEnd;
+        return Math.min(baseEnd + capTicks, currentEnd + bonusTicks);
+    }
+
+    static int refundedCooldown(int cooldownTicks, long elapsedTicks, int refundTicks) {
+        return (int) Math.max(0L, cooldownTicks - elapsedTicks - Math.max(0, refundTicks));
+    }
+
+    private static float routedBonus(ActiveMass mass, UUID targetId, long now, double bonus) {
+        if (bonus <= 0.0) return 1.0F;
+        Long deadline = mass.routedTargets.get(targetId);
+        if (deadline == null) return 1.0F;
+        mass.routedTargets.remove(targetId);
+        return now <= deadline ? 1.0F + (float) bonus : 1.0F;
+    }
+
+    private static void onMassKill(ServerWorld world, LivingEntity actor, ActiveMass mass,
+                                   LivingEntity target, Phase2AbilityTuning tuning, long now) {
+        UniqueAbilityApi.emit(mass.execution, net.sweenus.simplyswords.api.ability.UniqueAbilityPhase.HIT,
+                Phase2UniqueAbilities.KILL, target, 1, mass.damage);
+        long extended = extendedEnd(mass.activeEndTick, mass.baseActiveEndTick,
+                tuning.integer(Phase2AbilityTuning.Setting.DURATION_BONUS_TICKS, 0),
+                tuning.integer(Phase2AbilityTuning.Setting.EXTRA_DURATION_CAP, 0));
+        if (extended != mass.activeEndTick) {
+            mass.collapseEndTick += extended - mass.activeEndTick;
+            mass.activeEndTick = extended;
+        }
+        int refundPerKill = tuning.integer(Phase2AbilityTuning.Setting.COOLDOWN_REFUND_TICKS, 0);
+        int refundCap = tuning.integer(Phase2AbilityTuning.Setting.COOLDOWN_REFUND_CAP_TICKS, 0);
+        if (refundPerKill <= 0 || refundCap <= 0) return;
+        mass.cooldownRefund = Math.min(refundCap, mass.cooldownRefund + refundPerKill);
+        SimplySwordsAPI.setWeaponCooldown(actor, mass.stackReference, refundedCooldown(
+                tuning.integer(Phase2AbilityTuning.Setting.COOLDOWN_TICKS,
+                        Config.uniqueEffects.devourer.cooldown),
+                now - mass.castTick, mass.cooldownRefund));
+    }
+
+    private static void tickFollow(ServerWorld world, LivingEntity actor, ActiveMass mass,
+                                   DevourerMassVisualEntity visual) {
+        Phase2AbilityTuning tuning = Phase2UniqueAbilities.tuning(mass.execution);
+        if ((tuning.integer(Phase2AbilityTuning.Setting.MODE, 0) & 2) == 0) return;
+        double range = tuning.get(Phase2AbilityTuning.Setting.FOLLOW_RANGE, 0);
+        double speed = tuning.get(Phase2AbilityTuning.Setting.MOVEMENT_SPEED, 0);
+        if (range <= 0.0 || speed <= 0.0) return;
+        Box search = new Box(mass.center, mass.center).expand(range);
+        LivingEntity nearest = world.getEntitiesByClass(LivingEntity.class, search,
+                        candidate -> isValidTarget(world, actor, mass.sourcePlayerId, candidate)
+                                && candidate.squaredDistanceTo(mass.center) <= range * range).stream()
+                .min(Comparator.comparingDouble(candidate -> candidate.squaredDistanceTo(mass.center)))
+                .orElse(null);
+        if (nearest == null) return;
+        Vec3d desired = nearest.getPos().add(0.0, Math.max(0.6, nearest.getHeight() * 0.5), 0.0);
+        Vec3d offset = desired.subtract(mass.center);
+        double distance = offset.length();
+        if (distance < 0.05) return;
+        mass.center = mass.center.add(offset.normalize().multiply(Math.min(speed, distance)));
+        visual.setPos(mass.center.x, mass.center.y, mass.center.z);
+        DevourerStainManager.moveField(world, mass.visualId, mass.center);
+    }
+
+    public static void markRouted(ServerWorld world, UUID actorId, UUID targetId, int windowTicks) {
+        Map<UUID, ActiveMass> active = ACTIVE.get(world);
+        ActiveMass mass = active == null ? null : active.get(actorId);
+        if (mass == null || targetId == null || windowTicks <= 0) return;
+        if (mass.routedTargets.size() >= MAX_ROUTED_TARGETS) mass.routedTargets.clear();
+        mass.routedTargets.put(targetId, world.getTime() + windowTicks);
     }
 
     private static boolean damageTarget(ServerWorld world, LivingEntity actor, ItemStack stack,
@@ -1006,16 +1094,20 @@ public final class DevourerAbilityManager {
         private final Hand hand;
         private final ItemStack stackReference;
         private final ItemStack stackSnapshot;
-        private final Vec3d center;
+        private Vec3d center;
         private final long seedArrivalTick;
         private final long activeStartTick;
-        private final long activeEndTick;
-        private final long collapseEndTick;
+        private final long castTick;
+        private final long baseActiveEndTick;
+        private long activeEndTick;
+        private long collapseEndTick;
         private final float damage;
         private final UUID visualId;
         private final UniqueAbilityExecution execution;
         private final Map<UUID, CapturedTarget> targets = new HashMap<>();
         private final Map<UUID, CapturedLoot> looseTargets = new HashMap<>();
+        private final Map<UUID, Long> routedTargets = new HashMap<>();
+        private int cooldownRefund;
         private long nextLooseLaunchTick;
         private long nextVoiceTick;
         private int lastVoiceIndex = -1;
@@ -1035,7 +1127,9 @@ public final class DevourerAbilityManager {
             this.center = center;
             this.seedArrivalTick = seedArrivalTick;
             this.activeStartTick = activeStartTick;
+            this.castTick = seedArrivalTick - TRAVEL_TICKS;
             this.nextLooseLaunchTick = activeStartTick;
+            this.baseActiveEndTick = activeEndTick;
             this.activeEndTick = activeEndTick;
             this.collapseEndTick = collapseEndTick;
             this.damage = damage;

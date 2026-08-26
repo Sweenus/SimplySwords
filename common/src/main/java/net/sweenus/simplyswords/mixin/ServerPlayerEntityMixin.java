@@ -304,15 +304,18 @@ public abstract class ServerPlayerEntityMixin {
                                 SoundRegistry.MAGIC_SWORD_PARRY_01.get(), SoundCategory.PLAYERS,0.8f, 1.0f);
                     }
 
-                    if (serverPlayer.getMainHandStack().getItem() instanceof WickpiercerSwordItem
-                            && serverPlayer.hasStatusEffect(EffectRegistry.getReference(EffectRegistry.FRENZY))) {
+                    if (serverPlayer.getMainHandStack().getItem() instanceof WickpiercerSwordItem) {
                         ItemStack wickpiercerStack = serverPlayer.getMainHandStack();
                         float damageModifier = HelperMethods.abilityScaledDamage("fire",
                                 serverPlayer, wickpiercerStack, Config.uniqueEffects.wickpiercer.damageScaling,
                                 Config.uniqueEffects.wickpiercer.spellScaling);
-                        target.timeUntilRegen = 0;
-                        Phase2CombatStateManager.applyWickFrenzyHit(serverPlayer, livingTarget,
+                        Phase2CombatStateManager.applyPhoenixBlow(serverPlayer, livingTarget,
                                 wickpiercerStack, damageModifier);
+                        if (serverPlayer.hasStatusEffect(EffectRegistry.getReference(EffectRegistry.FRENZY))) {
+                            target.timeUntilRegen = 0;
+                            Phase2CombatStateManager.applyWickFrenzyHit(serverPlayer, livingTarget,
+                                    wickpiercerStack, damageModifier);
+                        }
                     }
                 }
             }

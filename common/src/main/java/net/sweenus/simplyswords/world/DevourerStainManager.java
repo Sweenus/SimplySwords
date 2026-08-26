@@ -79,6 +79,12 @@ public final class DevourerStainManager {
         ACTIVE.computeIfAbsent(world, ignored -> new HashMap<>()).put(massVisualId, field);
     }
 
+    public static void moveField(ServerWorld world, UUID massVisualId, Vec3d center) {
+        Map<UUID, ActiveField> fields = ACTIVE.get(world);
+        ActiveField field = fields == null ? null : fields.get(massVisualId);
+        if (field != null) field.center = center;
+    }
+
     public static void cancel(ServerWorld world, UUID massVisualId) {
         Map<UUID, ActiveField> fields = ACTIVE.get(world);
         ActiveField field = fields == null ? null : fields.remove(massVisualId);
@@ -426,7 +432,7 @@ public final class DevourerStainManager {
         private final UUID ownerId;
         private final UUID sourcePlayerId;
         private final UUID massVisualId;
-        private final Vec3d center;
+        private Vec3d center;
         private final long activeStartTick;
         private final long activeEndTick;
         private final long collapseEndTick;
