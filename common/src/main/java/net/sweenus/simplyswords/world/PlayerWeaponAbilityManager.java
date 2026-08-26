@@ -3,12 +3,15 @@ package net.sweenus.simplyswords.world;
 import net.minecraft.item.ItemStack;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.item.RunicSwordItem;
 import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
+import net.sweenus.simplyswords.item.interfaces.UniqueWeaponSecondaryAction;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
+import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.api.IncapacitatingStatusEffectRegistry;
 import net.sweenus.simplyswords.power.GemPowerComponent;
 
@@ -30,11 +33,22 @@ public final class PlayerWeaponAbilityManager {
 
     public static boolean start(ServerPlayerEntity player, Hand hand) {
         ItemStack stack = player.getStackInHand(hand);
-        if (!canUse(player, stack)) {
+        if (!canUseBeforeCooldown(player, stack)) {
             return false;
         }
 
         if (stack.getItem() instanceof UniqueWeaponActiveAbility) {
+            if (AwakeningApi.isAbilityUnlocked(stack)
+                    && stack.getItem() instanceof UniqueWeaponSecondaryAction secondaryAction) {
+                TypedActionResult<ItemStack> secondary = secondaryAction.startPlayerSecondaryAbility(
+                        player.getWorld(), player, hand);
+                if (secondary.getResult() != ActionResult.PASS) {
+                    return secondary.getResult().isAccepted();
+                }
+            }
+            if (player.getItemCooldownManager().isCoolingDown(stack.getItem())) {
+                return false;
+            }
             TypedActionResult<ItemStack> result = ((UniqueWeaponActiveAbility) stack.getItem()).startPlayerAbility(player.getWorld(), player, hand);
             if (result.getResult().isAccepted()) {
                 PlayerWeaponAbilityChannelManager.start(player, hand, player.getStackInHand(hand));
@@ -76,14 +90,13 @@ public final class PlayerWeaponAbilityManager {
                 && PlayerWeaponAbilityKeybindState.isHandRebound(world, player, hand);
     }
 
-    private static boolean canUse(ServerPlayerEntity player, ItemStack stack) {
+    private static boolean canUseBeforeCooldown(ServerPlayerEntity player, ItemStack stack) {
         return player != null
                 && player.isAlive()
                 && !IncapacitatingStatusEffectRegistry.isIncapacitated(player)
                 && stack != null
                 && !stack.isEmpty()
-                && stack.getDamage() < stack.getMaxDamage() - 1
-                && !player.getItemCooldownManager().isCoolingDown(stack.getItem());
+                && stack.getDamage() < stack.getMaxDamage() - 1;
     }
 
 }

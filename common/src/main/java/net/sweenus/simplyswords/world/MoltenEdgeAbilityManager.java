@@ -409,6 +409,16 @@ public final class MoltenEdgeAbilityManager {
 
             MoltenHeatComponent heat = getHeatComponent(vent.stackReference);
             int effectiveHeat = getEffectiveHeat(heat, world.getTime());
+            int heatFloor = Math.min(heat.heat(), Phase5MoltenManager.vent(vent.ownerId)
+                    .integer(Phase5AbilityTuning.Setting.HEAT_FLOOR, 0));
+            if (heatFloor > 0 && effectiveHeat <= heatFloor) {
+                vent.stackReference.set(ComponentTypeRegistry.MOLTEN_HEAT.get(),
+                        new MoltenHeatComponent(heatFloor, false));
+                spawnVentEndEffects(world, owner);
+                Phase5MoltenManager.finish(owner.getUuid(), 0);
+                iterator.remove();
+                continue;
+            }
             if (!heat.isVentingAt(world.getTime(), getVentDrainPerTick()) || effectiveHeat <= 0) {
                 spawnVentEndEffects(world, owner);
                 Phase5MoltenManager.finish(owner.getUuid(), 0);

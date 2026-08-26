@@ -315,7 +315,10 @@ public final class StormsEdgeAbilityManager {
                         && HelperMethods.checkAbilityTarget(target, actor)
                         && isInsideThunderclap(target, center, radius, verticalRadius))) {
             if (damageTarget(world, actor, stormbreak.stack, target, baseDamage)) {
-                if (!focused) {
+                if (focused) {
+                    applyKnockback(target, Vec3d.ZERO, 0.0,
+                            stormbreak.tuning(BuiltinUniqueAbilities.THUNDERCLAP_KNOCK_UP));
+                } else {
                     if (BuiltinUniqueAbilities.MODE_THUNDERHEAD.equals(stormbreak.mode())) {
                         knockToward(target, center,
                                 stormbreak.tuning(BuiltinUniqueAbilities.THUNDERCLAP_KNOCKBACK),

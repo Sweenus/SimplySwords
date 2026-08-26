@@ -104,6 +104,14 @@ public final class ChainLightningVisualManager {
         return buildChain(world, player, firstTarget, chainCount, Math.max(0.5, range));
     }
 
+    public static List<LivingEntity> chainTargetsFromPosition(ServerWorld world, LivingEntity player, Vec3d origin,
+                                                              int chainCount, double range) {
+        if (world == null || player == null || origin == null || chainCount <= 0) return List.of();
+        double resolvedRange = Math.max(0.5, range);
+        LivingEntity first = findNextTarget(world, player, origin, Set.of(), resolvedRange);
+        return first == null ? List.of() : buildChain(world, player, first, chainCount, resolvedRange);
+    }
+
     public static boolean damageSkyBolt(ServerWorld world, LivingEntity player, ItemStack stack, LivingEntity target, float damage, double skyHeight, LightningVisualSettings settings) {
         if (world == null || player == null || target == null || !player.isAlive() || !target.isAlive() || !HelperMethods.checkAbilityTarget(target, player)) {
             return false;
@@ -179,6 +187,17 @@ public final class ChainLightningVisualManager {
 
     private static LivingEntity findNextTarget(ServerWorld world, LivingEntity player, LivingEntity current, Set<UUID> visited, double range) {
         Box box = current.getBoundingBox().expand(range, range * 0.5, range);
+        return findNextTarget(world, player, current.getPos(), box, visited);
+    }
+
+    private static LivingEntity findNextTarget(ServerWorld world, LivingEntity player, Vec3d origin,
+                                               Set<UUID> visited, double range) {
+        return findNextTarget(world, player, origin,
+                new Box(origin, origin).expand(range, range * 0.5, range), visited);
+    }
+
+    private static LivingEntity findNextTarget(ServerWorld world, LivingEntity player, Vec3d origin,
+                                               Box box, Set<UUID> visited) {
         return world.getEntitiesByClass(LivingEntity.class, box, target ->
                         target != player
                                 && target.isAlive()
@@ -186,7 +205,7 @@ public final class ChainLightningVisualManager {
                                 && EntityPredicates.VALID_LIVING_ENTITY.test(target)
                                 && HelperMethods.checkFriendlyFire(target, player))
                 .stream()
-                .min(Comparator.comparingDouble(target -> target.squaredDistanceTo(current)))
+                .min(Comparator.comparingDouble(target -> target.squaredDistanceTo(origin)))
                 .orElse(null);
     }
 

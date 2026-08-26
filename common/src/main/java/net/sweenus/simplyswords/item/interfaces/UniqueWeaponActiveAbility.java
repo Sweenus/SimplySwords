@@ -6,6 +6,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
@@ -24,6 +25,12 @@ public interface UniqueWeaponActiveAbility {
         }
         if (PlayerWeaponAbilityManager.shouldSkipDefaultAbilityUse(world, user, hand, stack)) {
             return TypedActionResult.pass(stack);
+        }
+        if (this instanceof UniqueWeaponSecondaryAction secondaryAction) {
+            TypedActionResult<ItemStack> secondary = secondaryAction.startPlayerSecondaryAbility(world, user, hand);
+            if (secondary.getResult() != ActionResult.PASS) {
+                return secondary;
+            }
         }
         if (!WeaponManaCost.canAfford(user, stack)) {
             return TypedActionResult.fail(stack);

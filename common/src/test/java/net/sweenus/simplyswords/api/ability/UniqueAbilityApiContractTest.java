@@ -1,9 +1,13 @@
 package net.sweenus.simplyswords.api.ability;
 
 import net.minecraft.util.Identifier;
+import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
+import net.sweenus.simplyswords.item.interfaces.UniqueWeaponSecondaryAction;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -11,6 +15,28 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 final class UniqueAbilityApiContractTest {
+
+    @Test
+    void secondaryActionsAreSeparateAndOptIn() throws NoSuchMethodException {
+        assertTrue(Modifier.isPublic(UniqueWeaponSecondaryAction.class.getModifiers()));
+        assertTrue(!UniqueWeaponSecondaryAction.class.isAssignableFrom(UniqueWeaponActiveAbility.class));
+        assertEquals(net.minecraft.util.TypedActionResult.class,
+                UniqueWeaponSecondaryAction.class.getMethod("startPlayerSecondaryAbility",
+                        net.minecraft.world.World.class, net.minecraft.entity.player.PlayerEntity.class,
+                        net.minecraft.util.Hand.class).getReturnType());
+    }
+
+    @Test
+    void defeatedOriginChainTargetingIsAdditive() throws NoSuchMethodException {
+        assertEquals(List.class, net.sweenus.simplyswords.api.SimplySwordsAPI.class.getMethod(
+                "findAbilityChainTargetsFromPosition", net.minecraft.server.world.ServerWorld.class,
+                net.minecraft.entity.LivingEntity.class, net.minecraft.util.math.Vec3d.class,
+                int.class, double.class).getReturnType());
+        assertEquals(List.class, net.sweenus.simplyswords.api.SimplySwordsAPI.class.getMethod(
+                "findAbilityChainTargets", net.minecraft.server.world.ServerWorld.class,
+                net.minecraft.entity.LivingEntity.class, net.minecraft.entity.LivingEntity.class,
+                int.class, double.class).getReturnType());
+    }
 
     @Test
     void tuningKeysClampAndRejectForeignDefinitions() {
@@ -168,9 +194,11 @@ final class UniqueAbilityApiContractTest {
         Phase5AbilityTuning tuning = Phase5AbilityTuning.EMPTY
                 .with(Phase5AbilityTuning.Setting.CHANCE, 500)
                 .with(Phase5AbilityTuning.Setting.TARGET_CAP, 500)
+                .with(Phase5AbilityTuning.Setting.HEAT_FLOOR, 75)
                 .with(Phase5AbilityTuning.Setting.SPEED, Double.NaN);
         assertEquals(100, tuning.integer(Phase5AbilityTuning.Setting.CHANCE, 0));
         assertEquals(64, tuning.integer(Phase5AbilityTuning.Setting.TARGET_CAP, 0));
+        assertEquals(75, tuning.integer(Phase5AbilityTuning.Setting.HEAT_FLOOR, 0));
         assertEquals(0.0, tuning.get(Phase5AbilityTuning.Setting.SPEED, 1));
     }
 
@@ -187,9 +215,11 @@ final class UniqueAbilityApiContractTest {
         Phase6AbilityTuning tuning = Phase6AbilityTuning.EMPTY
                 .with(Phase6AbilityTuning.Setting.CHANCE, 500)
                 .with(Phase6AbilityTuning.Setting.TARGET_CAP, 500)
+                .with(Phase6AbilityTuning.Setting.FREEZE_CAP_TICKS, 100)
                 .with(Phase6AbilityTuning.Setting.SPEED, Double.NaN);
         assertEquals(100, tuning.integer(Phase6AbilityTuning.Setting.CHANCE, 0));
         assertEquals(64, tuning.integer(Phase6AbilityTuning.Setting.TARGET_CAP, 0));
+        assertEquals(100, tuning.integer(Phase6AbilityTuning.Setting.FREEZE_CAP_TICKS, 0));
         assertEquals(0.0, tuning.get(Phase6AbilityTuning.Setting.SPEED, 1));
     }
 
@@ -225,9 +255,11 @@ final class UniqueAbilityApiContractTest {
         Phase8AbilityTuning tuning = Phase8AbilityTuning.EMPTY
                 .with(Phase8AbilityTuning.Setting.CHANCE, 500)
                 .with(Phase8AbilityTuning.Setting.TARGET_CAP, 500)
+                .with(Phase8AbilityTuning.Setting.DURATION_CAP_TICKS, 120)
                 .with(Phase8AbilityTuning.Setting.SPEED, Double.NaN);
         assertEquals(100, tuning.integer(Phase8AbilityTuning.Setting.CHANCE, 0));
         assertEquals(64, tuning.integer(Phase8AbilityTuning.Setting.TARGET_CAP, 0));
+        assertEquals(120, tuning.integer(Phase8AbilityTuning.Setting.DURATION_CAP_TICKS, 0));
         assertEquals(0.0, tuning.get(Phase8AbilityTuning.Setting.SPEED, 1));
     }
 
@@ -267,6 +299,36 @@ final class UniqueAbilityApiContractTest {
         assertEquals(100, tuning.integer(Phase10AbilityTuning.Setting.CHANCE, 0));
         assertEquals(64, tuning.integer(Phase10AbilityTuning.Setting.TARGET_CAP, 0));
         assertEquals(0.0, tuning.get(Phase10AbilityTuning.Setting.SPEED, 1));
+    }
+
+    @Test
+    void masteryAbilityDefinitionsAreGloballyUnique() {
+        List<UniqueAbilityDefinition> definitions = new ArrayList<>();
+        definitions.addAll(List.of(
+                Phase2UniqueAbilities.WATCHER_DREAD, Phase2UniqueAbilities.WATCHER_OMEN,
+                Phase2UniqueAbilities.DEVOURER_MASS, Phase2UniqueAbilities.DEVOURER_REPRISAL,
+                Phase2UniqueAbilities.WICKPIERCER_THROW, Phase2UniqueAbilities.WICKPIERCER_REVIVE,
+                Phase2UniqueAbilities.GLOAMPIERCER_AMBUSH, Phase2UniqueAbilities.GLOAMPIERCER_BARRAGE,
+                Phase2UniqueAbilities.WRAITHFANG_THROW, Phase2UniqueAbilities.WRAITHMAW_MUSTER,
+                Phase3UniqueAbilities.STORMSCALE_ROD, Phase3UniqueAbilities.IONBOUND_CRUSHER,
+                Phase3UniqueAbilities.IONBOUND_BEAM, Phase3UniqueAbilities.IONBOUND_SHIELD,
+                Phase3UniqueAbilities.SOULRENDER_MARK, Phase3UniqueAbilities.SOULRENDER_REAP,
+                Phase3UniqueAbilities.SOULSTALKER_TENDRIL, Phase3UniqueAbilities.SOULSTALKER_STRIDE,
+                Phase3UniqueAbilities.WHISPERWIND_DASH, Phase3UniqueAbilities.WHISPERWIND_RESET,
+                Phase3UniqueAbilities.DREADWHISPER_REAVE, Phase3UniqueAbilities.DREADWHISPER_WOUND,
+                Phase4UniqueAbilities.LICHBLADE_AURA, Phase4UniqueAbilities.LICHBLADE_CHANNEL,
+                Phase4UniqueAbilities.SUNFIRE_STANDARD, Phase4UniqueAbilities.SUNFIRE_REGEN,
+                Phase4UniqueAbilities.HARBINGER_STANDARD, Phase4UniqueAbilities.HARBINGER_OMEN));
+        definitions.addAll(Phase5UniqueAbilities.definitions());
+        definitions.addAll(Phase6UniqueAbilities.definitions());
+        definitions.addAll(Phase7UniqueAbilities.definitions());
+        definitions.addAll(Phase8UniqueAbilities.definitions());
+        definitions.addAll(Phase9UniqueAbilities.definitions());
+        definitions.addAll(Phase10UniqueAbilities.definitions());
+
+        assertEquals(116, definitions.size());
+        assertEquals(definitions.size(), definitions.stream().map(UniqueAbilityDefinition::id)
+                .collect(java.util.stream.Collectors.toCollection(HashSet::new)).size());
     }
 
     private static Identifier id(String path) {

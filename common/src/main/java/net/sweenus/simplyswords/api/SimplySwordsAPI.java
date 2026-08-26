@@ -722,6 +722,11 @@ public class SimplySwordsAPI {
         return ChainLightningVisualManager.chainTargets(world, actor, firstTarget, count, range);
     }
 
+    public static List<LivingEntity> findAbilityChainTargetsFromPosition(ServerWorld world, LivingEntity actor,
+                                                                         Vec3d origin, int count, double range) {
+        return ChainLightningVisualManager.chainTargetsFromPosition(world, actor, origin, count, range);
+    }
+
     public static boolean applyAbilityBoltDamage(ServerWorld world, LivingEntity actor, ItemStack stack,
                                                  LivingEntity target, float damage) {
         return ChainLightningVisualManager.damageBoltTarget(world, actor, stack, target, damage);

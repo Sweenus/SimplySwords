@@ -155,7 +155,9 @@ public class IcewhisperSwordItem extends UniqueSwordItem implements TwoHandedWea
                             tuning.integer(s("STATUS_DURATION_TICKS"), 120), 0), user);
                 }
                 int freeze = tuning.integer(s("FREEZE_TICKS"), 0);
-                if (freeze > 0) le.setFrozenTicks(Math.min(tuning.integer(s("STACK_CAP"), 100),
+                if (freeze > 0) le.setFrozenTicks(Math.min(tuning.has(s("FREEZE_CAP_TICKS"))
+                                ? tuning.integer(s("FREEZE_CAP_TICKS"), 100)
+                                : tuning.integer(s("STACK_CAP"), 100),
                         le.getFrozenTicks() + freeze));
                 float choose = (float) (Math.random() * 1);
                 world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_BOW_ICE_SHOOT_IMPACT_03.get(), le.getSoundCategory(), 0.1f, choose);

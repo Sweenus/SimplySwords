@@ -30,6 +30,7 @@ import java.util.UUID;
 import java.util.WeakHashMap;
 
 public final class Phase10WeaponManager {
+    private static final int MAX_ASSAULTS = 256;
     private static final Map<UUID, HeldState> RIBBON = new HashMap<>();
     private static final Map<UUID, HeldState> DREAD = new HashMap<>();
     private static final Map<UUID, AssaultState> ASSAULTS = new HashMap<>();
@@ -44,7 +45,12 @@ public final class Phase10WeaponManager {
     }
 
     public static void tickRibbon(LivingEntity actor, ItemStack stack) {
-        if (!(actor.getWorld() instanceof ServerWorld world) || !HelperMethods.isHolding(stack, actor)) return;
+        if (!(actor.getWorld() instanceof ServerWorld world)) return;
+        if (!HelperMethods.isHolding(stack, actor)) {
+            RIBBON.remove(actor.getUuid());
+            removeRibbonAttributes(actor);
+            return;
+        }
         HeldState state = refresh(RIBBON, Phase10UniqueAbilities.RIBBON_HEAVY, world, actor, stack);
         Phase10AbilityTuning tuning = state.tuning;
         var speed = actor.getAttributeInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED);
@@ -76,7 +82,10 @@ public final class Phase10WeaponManager {
             HeldState state = DREAD.get(actor.getUuid());
             int duration = state == null ? 1200 : state.tuning.integer(
                     Phase10AbilityTuning.Setting.SECONDARY_DURATION_TICKS, 1200);
-            if (world.getTime() - since >= duration) setCorruption(stack, 0);
+            if (world.getTime() - since >= duration) {
+                setCorruption(stack, 0);
+                DREAD.remove(actor.getUuid());
+            }
             return;
         }
         DREAD_UNWIELDED.remove(stack);
@@ -269,6 +278,13 @@ public final class Phase10WeaponManager {
         if (health != null) health.removeModifier(DREAD_HEALTH);
     }
 
+    private static void removeRibbonAttributes(LivingEntity actor) {
+        var speed = actor.getAttributeInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED);
+        if (speed != null) speed.removeModifier(RIBBON_SPEED);
+        var knockback = actor.getAttributeInstance(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE);
+        if (knockback != null) knockback.removeModifier(RIBBON_KNOCKBACK);
+    }
+
     public static boolean activateDreadtide(ServerWorld world, LivingEntity actor, ItemStack stack) {
         HeldState cloakState = refresh(DREAD, Phase10UniqueAbilities.DREAD_CLOAK, world, actor, stack);
         if (cloakState.tuning.integer(Phase10AbilityTuning.Setting.MODE, 0) == 0) return false;
@@ -299,6 +315,12 @@ public final class Phase10WeaponManager {
         assault.setSourceEntity(actor);
         assault.setAdditionalData((int) damage);
         target.addStatusEffect(assault);
+        if (!ASSAULTS.containsKey(target.getUuid()) && ASSAULTS.size() >= MAX_ASSAULTS) {
+            UUID oldest = ASSAULTS.entrySet().stream().min(Comparator.comparingLong(entry -> entry.getValue().expiresAt))
+                    .map(Map.Entry::getKey).orElse(null);
+            AssaultState removed = oldest == null ? null : ASSAULTS.remove(oldest);
+            if (removed != null) Phase10CombatManager.finish(removed.execution, 0);
+        }
         ASSAULTS.put(target.getUuid(), new AssaultState(tuning, execution, actor.getUuid(), stack.copy(),
                 world.getTime() + duration));
         int removed = cloakState.tuning.flag(1 << 26) ? corruption(stack)

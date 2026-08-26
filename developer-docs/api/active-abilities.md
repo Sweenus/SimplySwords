@@ -53,6 +53,30 @@ default-input path to prevent two casts from one action.
 
 The hotkeys begin unbound. Players choose them in Minecraft's controls screen.
 
+## Secondary actions during cooldown
+
+An active weapon can also implement `UniqueWeaponSecondaryAction` when player
+input should operate on an execution that is already running:
+
+```java
+TypedActionResult<ItemStack> startPlayerSecondaryAbility(
+        World world,
+        PlayerEntity user,
+        Hand hand
+);
+```
+
+Return `pass` when no secondary action applies so normal activation can
+continue, `fail` when an applicable action is currently locked, and `success`
+after the action completes. Simply Swords checks this hook before the normal
+item cooldown and mana gates for both right-click and the ability hotkey.
+
+The hook is player-only and does not spend mana, start a new execution, or
+replace the existing cooldown automatically. The implementation must validate
+its live execution state and apply any intended cooldown adjustment itself.
+Existing active weapons are unaffected unless they implement the opt-in
+interface.
+
 ## Understanding the context
 
 `WeaponAbilityContext` contains:

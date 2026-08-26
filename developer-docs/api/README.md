@@ -8,7 +8,7 @@ Use `SimplySwordsAPI` as the preferred common-side facade and
 | System | Main types | Guide |
 | --- | --- | --- |
 | Unique item lifecycle | `UniqueWeaponItem`, `UniqueSwordItem` | [Unique weapon walkthrough](../unique-weapon-walkthrough.md) |
-| Active abilities | `UniqueWeaponActiveAbility`, `WeaponAbilityContext`, `WeaponAbilityActivationSource` | [Active abilities](active-abilities.md) |
+| Active abilities | `UniqueWeaponActiveAbility`, `UniqueWeaponSecondaryAction`, `WeaponAbilityContext`, `WeaponAbilityActivationSource` | [Active abilities](active-abilities.md) |
 | Unique ability modifiers | `UniqueAbilityApi`, `UniqueAbilityDefinition`, `UniqueAbilityModifier` | [Unique ability modifiers](unique-ability-modifiers.md) |
 | Awakening | `AwakeningApi`, `AwakeningProfile`, `AwakeningProfileRegistry` | [Awakening](awakening.md) |
 | Branching forms | `AwakeningFormFamily`, `AwakeningFormStage`, `AwakeningFormRoute`, `AwakeningFormHandler`, `AwakeningFormRegistry` | [Awakening forms](awakening-forms.md) |

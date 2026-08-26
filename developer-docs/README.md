@@ -22,6 +22,7 @@ The following classes are also intended for addon use:
 - `UniqueWeaponItem`
 - `UniqueSwordItem`
 - `UniqueWeaponActiveAbility`
+- `UniqueWeaponSecondaryAction`
 - `GemPower`, `RunicGemPower`, `RunefusedGemPower`, and `NetherGemPower`
 - `GemPowerRegistry`
 - the parchment render-data interfaces and their matching client renderers

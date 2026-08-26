@@ -308,7 +308,10 @@ public final class TwistedBladeAbilityManager {
         int duration = Math.max(1, tuning.integer(Phase8AbilityTuning.Setting.DURATION_TICKS,
                 Config.uniqueEffects.twisted_blade.duration));
         if (tuning.flag(1 << 4) && currentStacks >= tuning.integer(Phase8AbilityTuning.Setting.STACK_CAP, 8)) {
-            state.bonusDuration = Math.min(tuning.integer(Phase8AbilityTuning.Setting.TARGET_CAP, 120),
+            int durationCap = tuning.has(Phase8AbilityTuning.Setting.DURATION_CAP_TICKS)
+                    ? tuning.integer(Phase8AbilityTuning.Setting.DURATION_CAP_TICKS, 120)
+                    : tuning.integer(Phase8AbilityTuning.Setting.TARGET_CAP, 120);
+            state.bonusDuration = Math.min(durationCap,
                     state.bonusDuration + 40);
             duration += state.bonusDuration;
         }
