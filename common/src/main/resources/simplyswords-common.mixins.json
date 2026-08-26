@@ -36,7 +36,8 @@
     "MobEntityMixin",
     "EvokerFangsEntityMixin",
     "TargetPredicateMixin",
-    "compat.BetterCombatServerNetworkMixin"
+    "compat.BetterCombatServerNetworkMixin",
+    "compat.LootrDefaultLootFillerMixin"
   ],
   "injectors": {
     "defaultRequire": 1
