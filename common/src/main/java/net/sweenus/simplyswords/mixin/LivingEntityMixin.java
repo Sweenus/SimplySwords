@@ -27,6 +27,7 @@ import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.world.RunicSlashManager;
+import net.sweenus.simplyswords.world.WatcherAbilityManager;
 import net.sweenus.simplyswords.world.BramblethornAbilityManager;
 import net.sweenus.simplyswords.world.BloodwakeAbilityManager;
 import net.sweenus.simplyswords.world.IonboundStormscaleAbilityManager;
@@ -194,6 +195,7 @@ public abstract class LivingEntityMixin {
             amount = WeaponImplicitRegistry.modifyDamage(livingEntity, source, amount);
             amount = DreadwhisperAbilityManager.modifyIncomingDamage(livingEntity, source, amount);
             amount = MoltenEdgeAbilityManager.modifyIncomingDamage(livingEntity, amount);
+            amount = WatcherAbilityManager.modifyIncomingDamage(livingEntity, source, amount);
             amount = Phase4StandardManager.modifyIncomingDamage(livingEntity, source, amount);
             amount = Phase4PassiveManager.modifyIncomingDamage(livingEntity, source, amount);
             amount = Phase5CombatManager.modifyIncomingDamage(livingEntity, source, amount);

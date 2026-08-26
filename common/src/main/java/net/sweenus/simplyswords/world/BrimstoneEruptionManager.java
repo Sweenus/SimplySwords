@@ -36,7 +36,8 @@ public final class BrimstoneEruptionManager {
         ServerWorld world = context.world();
         LivingEntity actor = context.actor();
         LivingEntity primary = context.target();
-        if (primary == null || !primary.isAlive()) return 0;
+        if (!canErupt(primary != null, primary != null && primary.isRemoved())) return 0;
+        Vec3d origin = primary.getPos();
         double radius = execution.tuning().get(BuiltinUniqueAbilities.BRIMSTONE_ERUPTION_RADIUS)
                 * execution.tuning().get(BuiltinUniqueAbilities.BRIMSTONE_ERUPTION_RADIUS_MULTIPLIER);
         float baseDamage = HelperMethods.abilityScaledDamage("fire", actor, context.stack(),
@@ -46,18 +47,19 @@ public final class BrimstoneEruptionManager {
         List<LivingEntity> killed = new ArrayList<>();
         Set<UUID> directHits = new HashSet<>();
         int affected = 0;
-        for (LivingEntity target : targets(world, actor, primary.getPos(), radius)) {
+        for (LivingEntity target : targets(world, actor, origin, radius)) {
             if (affected >= MAX_AREA_TARGETS) break;
             boolean burning = target.isOnFire();
             float damage = baseDamage;
             if (burning) damage *= execution.tuning().get(BuiltinUniqueAbilities.BRIMSTONE_BURNING_DAMAGE_MULTIPLIER).floatValue();
             if (target == primary) damage *= execution.tuning().get(BuiltinUniqueAbilities.BRIMSTONE_PRIMARY_DAMAGE_MULTIPLIER).floatValue();
             ignite(target, execution.tuning().get(BuiltinUniqueAbilities.BRIMSTONE_ERUPTION_FIRE_TICKS));
-            applyForce(execution, primary, target);
+            applyOutwardForce(execution, target);
             int slow = execution.tuning().get(BuiltinUniqueAbilities.BRIMSTONE_SLOWNESS_TICKS);
             if (slow > 0) target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, slow, 0,
                     false, true, true), actor);
             if (damage(world, actor, context, target, damage)) {
+                applyBackdraftPull(execution, origin, target);
                 directHits.add(target.getUuid());
                 affected++;
                 spawnHit(world, actor, primary, target);
@@ -66,22 +68,22 @@ public final class BrimstoneEruptionManager {
                 if (!target.isAlive()) killed.add(target);
             }
         }
-        affected += scatterCinders(execution, primary, baseDamage, directHits);
+        affected += scatterCinders(execution, origin, baseDamage, directHits);
         affected += chainReactions(execution, killed, baseDamage, directHits);
         playSound(world, primary);
         return affected;
     }
 
-    private static int scatterCinders(UniqueAbilityExecution execution, LivingEntity primary, float baseDamage,
+    private static int scatterCinders(UniqueAbilityExecution execution, Vec3d origin, float baseDamage,
                                       Set<UUID> excluded) {
         int count = execution.tuning().get(BuiltinUniqueAbilities.BRIMSTONE_CINDER_COUNT);
         double multiplier = execution.tuning().get(BuiltinUniqueAbilities.BRIMSTONE_CINDER_DAMAGE_MULTIPLIER);
         if (count <= 0 || multiplier <= 0.0) return 0;
         UniqueAbilityContext context = execution.context();
-        List<LivingEntity> candidates = targets(context.world(), context.actor(), primary.getPos(),
+        List<LivingEntity> candidates = targets(context.world(), context.actor(), origin,
                 execution.tuning().get(BuiltinUniqueAbilities.BRIMSTONE_CINDER_RANGE)).stream()
                 .filter(target -> !excluded.contains(target.getUuid()))
-                .sorted(Comparator.comparingDouble(target -> target.squaredDistanceTo(primary)))
+                .sorted(Comparator.comparingDouble(target -> target.squaredDistanceTo(origin)))
                 .limit(count)
                 .toList();
         int affected = 0;
@@ -146,18 +148,29 @@ public final class BrimstoneEruptionManager {
         return damaged[0];
     }
 
-    private static void applyForce(UniqueAbilityExecution execution, LivingEntity primary, LivingEntity target) {
-        if (BuiltinUniqueAbilities.BRIMSTONE_FORCE_BACKDRAFT.equals(
-                execution.tuning().get(BuiltinUniqueAbilities.BRIMSTONE_FORCE_MODE))) {
-            double pull = execution.tuning().get(BuiltinUniqueAbilities.BRIMSTONE_BACKDRAFT_PULL);
-            Vec3d delta = primary.getPos().subtract(target.getPos());
-            double length = delta.horizontalLength();
-            if (pull > 0.0 && length > 0.001) {
-                target.setVelocity(target.getVelocity().add(delta.x / length * pull, 0.05, delta.z / length * pull));
-                target.velocityModified = true;
-            }
-        } else {
-            target.takeKnockback(1.0, 0.1, 0.1);
+    static boolean canErupt(boolean primaryPresent, boolean primaryRemoved) {
+        return primaryPresent && !primaryRemoved;
+    }
+
+    private static boolean isBackdraft(UniqueAbilityExecution execution) {
+        return BuiltinUniqueAbilities.BRIMSTONE_FORCE_BACKDRAFT.equals(
+                execution.tuning().get(BuiltinUniqueAbilities.BRIMSTONE_FORCE_MODE));
+    }
+
+    private static void applyOutwardForce(UniqueAbilityExecution execution, LivingEntity target) {
+        if (isBackdraft(execution)) return;
+        target.takeKnockback(1.0, 0.1, 0.1);
+    }
+
+    // Applied after the damage call so vanilla knockback cannot halve the pull.
+    private static void applyBackdraftPull(UniqueAbilityExecution execution, Vec3d origin, LivingEntity target) {
+        if (!isBackdraft(execution)) return;
+        double pull = execution.tuning().get(BuiltinUniqueAbilities.BRIMSTONE_BACKDRAFT_PULL);
+        Vec3d delta = origin.subtract(target.getPos());
+        double length = delta.horizontalLength();
+        if (pull > 0.0 && length > 0.001) {
+            target.setVelocity(target.getVelocity().add(delta.x / length * pull, 0.05, delta.z / length * pull));
+            target.velocityModified = true;
         }
     }
 

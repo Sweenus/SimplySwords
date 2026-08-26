@@ -247,9 +247,9 @@ public final class BrimstoneClaymoreAbilityManager {
                     instance.overpressure + value(instance.execution, BuiltinUniqueAbilities.BRIMSTONE_OVERPRESSURE_PER_PULSE).floatValue());
             if (BuiltinUniqueAbilities.BRIMSTONE_RITE_PERPETUAL.equals(
                     value(instance.execution, BuiltinUniqueAbilities.BRIMSTONE_RITE_DURATION_MODE))) {
-                instance.pulseMultiplier = Math.min(
-                        value(instance.execution, BuiltinUniqueAbilities.BRIMSTONE_PERPETUAL_CAP).floatValue(),
-                        instance.pulseMultiplier + value(instance.execution, BuiltinUniqueAbilities.BRIMSTONE_PERPETUAL_PER_PULSE).floatValue());
+                instance.pulseMultiplier = grownPulseMultiplier(instance.pulseMultiplier,
+                        value(instance.execution, BuiltinUniqueAbilities.BRIMSTONE_PERPETUAL_PER_PULSE).floatValue(),
+                        value(instance.execution, BuiltinUniqueAbilities.BRIMSTONE_PERPETUAL_CAP).floatValue());
             }
         }
         UniqueAbilityApi.emit(instance.execution, UniqueAbilityPhase.HIT,
@@ -346,9 +346,19 @@ public final class BrimstoneClaymoreAbilityManager {
         int duration = value(instance.execution, BuiltinUniqueAbilities.BRIMSTONE_WAKE_DURATION_TICKS);
         double damage = value(instance.execution, BuiltinUniqueAbilities.BRIMSTONE_WAKE_DAMAGE_MULTIPLIER);
         double minimum = value(instance.execution, BuiltinUniqueAbilities.BRIMSTONE_WAKE_MIN_MOVE);
-        if (duration <= 0 || damage <= 0.0 || previous.squaredDistanceTo(instance.pos) < minimum * minimum) return;
+        if (duration <= 0 || damage <= 0.0) return;
+        if (!shouldCreateWake(instance.lastWakePos, instance.pos, minimum)) return;
+        instance.lastWakePos = instance.pos;
         if (instance.wakes.size() >= MAX_WAKES) instance.wakes.remove(0);
         instance.wakes.add(new Wake(previous, world.getTime() + duration, world.getTime()));
+    }
+
+    static boolean shouldCreateWake(Vec3d lastWake, Vec3d current, double minimum) {
+        return lastWake == null || lastWake.squaredDistanceTo(current) >= minimum * minimum;
+    }
+
+    static float grownPulseMultiplier(float current, float perPulse, float cap) {
+        return Math.min(cap, current + perPulse);
     }
 
     private static void tickWakes(ServerWorld world, LivingEntity owner, ActiveBrimstoneClaymore instance) {
@@ -482,6 +492,7 @@ public final class BrimstoneClaymoreAbilityManager {
         private final float weaponDamage;
         private final UniqueAbilityExecution execution;
         private final List<Wake> wakes = new ArrayList<>();
+        private Vec3d lastWakePos;
         private float overpressure;
         private float pulseMultiplier;
         private double previousHealthRatio;
@@ -496,6 +507,7 @@ public final class BrimstoneClaymoreAbilityManager {
             this.targetId = targetId;
             this.visualId = visualId;
             this.pos = pos;
+            this.lastWakePos = pos;
             this.expiryTick = expiryTick;
             this.nextPulseTick = nextPulseTick;
             this.radius = radius;

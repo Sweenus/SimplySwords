@@ -121,6 +121,14 @@ public final class UniqueAbilityApi {
         STARTED_EXECUTION.remove();
     }
 
+    public static void publishStartedExecution(UniqueAbilityExecution execution) {
+        if (execution == null) {
+            STARTED_EXECUTION.remove();
+            return;
+        }
+        STARTED_EXECUTION.set(execution);
+    }
+
     public static @Nullable UniqueAbilityExecution takeStartedExecution() {
         UniqueAbilityExecution execution = STARTED_EXECUTION.get();
         STARTED_EXECUTION.remove();

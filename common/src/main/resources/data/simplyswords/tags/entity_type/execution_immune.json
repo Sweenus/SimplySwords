@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "minecraft:wither",
+      "required": false
+    },
+    {
+      "id": "minecraft:ender_dragon",
+      "required": false
+    }
+  ]
+}

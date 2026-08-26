@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -36,6 +37,44 @@ final class UniqueAbilityApiContractTest {
                 "findAbilityChainTargets", net.minecraft.server.world.ServerWorld.class,
                 net.minecraft.entity.LivingEntity.class, net.minecraft.entity.LivingEntity.class,
                 int.class, double.class).getReturnType());
+    }
+
+    @Test
+    void startedExecutionHandoffIsAdditiveAndClearsAfterOneTake() {
+        UniqueAbilityDefinition definition = UniqueAbilityDefinition.builder(id("handoff"),
+                UniqueAbilityKind.ACTIVE).build();
+        UniqueAbilityExecution execution = new UniqueAbilityExecution(1, definition, null,
+                new UniqueAbilityTuning.Builder(definition).build(), List.of());
+        UniqueAbilityApi.clearStartedExecution();
+
+        assertNull(UniqueAbilityApi.takeStartedExecution());
+
+        UniqueAbilityApi.publishStartedExecution(execution);
+
+        assertEquals(execution, UniqueAbilityApi.takeStartedExecution());
+        assertNull(UniqueAbilityApi.takeStartedExecution());
+
+        UniqueAbilityApi.publishStartedExecution(execution);
+        UniqueAbilityApi.publishStartedExecution(null);
+
+        assertNull(UniqueAbilityApi.takeStartedExecution());
+    }
+
+    @Test
+    void phase2SettingAdditionsAreDisabledByDefaultAndDoNotDisturbExistingOnes() {
+        Phase2AbilityTuning tuning = Phase2AbilityTuning.EMPTY;
+
+        assertEquals(0.0, tuning.get(Phase2AbilityTuning.Setting.REPEAT_WINDOW_TICKS, 0));
+        assertEquals(0.0, tuning.get(Phase2AbilityTuning.Setting.INCOMING_DREAD_THRESHOLD, 0));
+        assertEquals(0.0, tuning.get(Phase2AbilityTuning.Setting.LOW_HEALTH_PERCENT, 0));
+        assertEquals(0.0, tuning.get(Phase2AbilityTuning.Setting.EXECUTE_DREAD_THRESHOLD, 0));
+        assertEquals(0.0, tuning.get(Phase2AbilityTuning.Setting.CLAIM_BONUS_CAP, 0));
+        assertEquals(30.0, tuning.get(Phase2AbilityTuning.Setting.REPEAT_WINDOW_TICKS, 30));
+        assertEquals(100.0, tuning.get(Phase2AbilityTuning.Setting.LOW_HEALTH_PERCENT, 140));
+        assertEquals(4.0, tuning.with(Phase2AbilityTuning.Setting.THRESHOLD, 4)
+                .get(Phase2AbilityTuning.Setting.THRESHOLD, 0));
+        assertEquals(0.0, tuning.with(Phase2AbilityTuning.Setting.REPEAT_WINDOW_TICKS, 30)
+                .get(Phase2AbilityTuning.Setting.THRESHOLD, 0));
     }
 
     @Test

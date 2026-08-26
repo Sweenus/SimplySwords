@@ -18,6 +18,10 @@ public final class UniqueAbilityTuning {
         return definition;
     }
 
+    public static Builder builder(UniqueAbilityDefinition definition) {
+        return new Builder(definition);
+    }
+
     public <T> T get(UniqueAbilityKey<T> key) {
         ensureSupported(key);
         Object value = values.get(key);
