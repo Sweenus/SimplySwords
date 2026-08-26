@@ -43,7 +43,7 @@ public class SoulkeeperSwordItem extends UniqueSwordItem implements TwoHandedWea
         }
         if (!attacker.getWorld().isClient()) {
             HelperMethods.playHitSounds(attacker, target);
-            SoulkeeperLanternManager.onSoulkeeperHit(attacker);
+            SoulkeeperLanternManager.onSoulkeeperHit(attacker, target, stack);
         }
         return super.postHit(stack, target, attacker);
     }
@@ -55,20 +55,19 @@ public class SoulkeeperSwordItem extends UniqueSwordItem implements TwoHandedWea
 
     @Override
     public TypedActionResult<ItemStack> startPlayerAbility(World world, PlayerEntity user, Hand hand) {
-        ItemStack itemStack = user.getStackInHand(hand);
-        if (!world.isClient() && world instanceof ServerWorld && user instanceof ServerPlayerEntity serverPlayer) {
-            if (hand != Hand.MAIN_HAND || serverPlayer.getItemCooldownManager().isCoolingDown(itemStack.getItem())) {
-                return TypedActionResult.fail(itemStack);
-            }
-            SoulkeeperLanternManager.activate(serverPlayer, itemStack);
-            SimplySwordsAPI.setWeaponCooldown(serverPlayer, itemStack, Config.uniqueEffects.soulkeeper.cooldown);
-        }
-        return TypedActionResult.success(itemStack, world.isClient());
+        return UniqueWeaponActiveAbility.super.startPlayerAbility(world, user, hand);
+    }
+
+    @Override
+    public boolean canActivate(WeaponAbilityContext context) {
+        return context != null && context.actor() != null && context.actor().isAlive()
+                && context.stack() != null && !context.stack().isEmpty()
+                && context.stack().getDamage() < context.stack().getMaxDamage() - 1;
     }
 
     @Override
     public boolean activate(WeaponAbilityContext context) {
-        SoulkeeperLanternManager.activate(context.actor(), context.stack());
+        SoulkeeperLanternManager.activate(context);
         return true;
     }
 

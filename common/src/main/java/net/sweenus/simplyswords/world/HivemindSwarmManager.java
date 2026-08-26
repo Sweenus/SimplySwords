@@ -86,7 +86,11 @@ public final class HivemindSwarmManager {
     }
 
     public static boolean activateBloodFlies(ServerWorld world, LivingEntity actor) {
-        int flyCount = Math.max(1, Config.uniqueEffects.bloodwake.bloodFlyCount);
+        return activateBloodFlies(world, actor, Config.uniqueEffects.bloodwake.bloodFlyCount);
+    }
+
+    public static boolean activateBloodFlies(ServerWorld world, LivingEntity actor, int requestedCount) {
+        int flyCount = Math.clamp(requestedCount, 1, 12);
         int contacts = Math.max(1, Config.uniqueEffects.bloodwake.bloodFlyContacts);
         long now = world.getTime();
         long expiry = now + Math.max(20, Config.uniqueEffects.bloodwake.bloodFlyLifetime);

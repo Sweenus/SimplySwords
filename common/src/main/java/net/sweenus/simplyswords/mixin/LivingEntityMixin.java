@@ -39,6 +39,7 @@ import net.sweenus.simplyswords.world.Phase4LichbladeManager;
 import net.sweenus.simplyswords.world.Phase4StandardManager;
 import net.sweenus.simplyswords.world.Phase5CombatManager;
 import net.sweenus.simplyswords.world.Phase7CombatManager;
+import net.sweenus.simplyswords.world.Phase8CombatManager;
 import net.sweenus.simplyswords.world.DreadwhisperAbilityManager;
 import net.sweenus.simplyswords.world.GloamMechanicsManager;
 import net.sweenus.simplyswords.world.SoulPyreAbilityManager;
@@ -200,6 +201,7 @@ public abstract class LivingEntityMixin {
             amount = BramblethornAbilityManager.modifyIncomingDamage(livingEntity, source, amount);
             amount = HivemindSwarmManager.modifyIncomingDamage(livingEntity, source, amount);
             amount = Phase7CombatManager.modifyIncomingDamage(livingEntity, source, amount);
+            amount = Phase8CombatManager.modifyIncomingDamage(livingEntity, source, amount);
         }
         return amount;
     }

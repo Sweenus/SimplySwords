@@ -163,6 +163,9 @@ public abstract class ServerWorldMixin {
         if (Phase7CombatManager.hasScheduled(world)) {
             Phase7CombatManager.tick(world);
         }
+        if (Phase8CombatManager.hasScheduled(world)) {
+            Phase8CombatManager.tick(world);
+        }
         if (EvocationFangManager.hasActive(world)) {
             EvocationFangManager.tick(world);
         }

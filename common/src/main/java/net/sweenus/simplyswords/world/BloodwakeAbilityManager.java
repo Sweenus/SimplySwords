@@ -17,6 +17,10 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.api.SpellScalingProfile;
+import net.sweenus.simplyswords.api.ability.Phase8AbilityTuning;
+import net.sweenus.simplyswords.api.ability.Phase8UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.effect.instance.SimplySwordsStatusEffectInstance;
 import net.sweenus.simplyswords.entity.BloodwakeBladeVisualEntity;
@@ -51,6 +55,10 @@ public final class BloodwakeAbilityManager {
     private static final Map<ServerWorld, List<ActiveBlade>> ACTIVE_BLADES = new HashMap<>();
     private static final Map<ServerWorld, List<ActiveScream>> ACTIVE_SCREAMS = new HashMap<>();
     private static final Map<ServerWorld, Map<UUID, ActiveDeluge>> ACTIVE_DELUGES = new HashMap<>();
+    private static final Map<UUID, Integer> HIT_COUNTERS = new HashMap<>();
+    private static final Map<UUID, Integer> BURST_COUNTERS = new HashMap<>();
+    private static final Map<UUID, RiteMemory> RITE_MEMORY = new HashMap<>();
+    private static final Map<ServerWorld, List<ChainBurst>> CHAIN_BURSTS = new HashMap<>();
     private static final ThreadLocal<Boolean> SUPPRESS_PLAGUE_SPREAD = ThreadLocal.withInitial(() -> false);
 
     private BloodwakeAbilityManager() {
@@ -88,29 +96,88 @@ public final class BloodwakeAbilityManager {
                 SoundCategory.PLAYERS, 0.42F, 0.92F + (before * 0.12F));
     }
 
+    public static void recordRite(ServerWorld world, LivingEntity actor, ItemStack stack, int tier,
+                                  Phase8AbilityTuning tuning) {
+        if (!tuning.flag(1 << 15)) return;
+        RiteMemory memory = RITE_MEMORY.computeIfAbsent(actor.getUuid(), ignored -> new RiteMemory());
+        long now = world.getTime();
+        if (now >= memory.expiresAt) memory.mask = 0;
+        memory.expiresAt = now + tuning.integer(Phase8AbilityTuning.Setting.DURATION_TICKS, 300);
+        memory.mask |= 1 << Math.clamp(tier, 1, 5);
+        if (Integer.bitCount(memory.mask) >= 3) {
+            memory.mask = 0;
+            addFrenzy(stack, actor, actor);
+        }
+    }
+
     public static void triggerPassiveHit(ServerWorld world, ItemStack stack, LivingEntity attacker, LivingEntity target) {
+        UniqueAbilityExecution execution = Phase8CombatManager.beginPassive(
+                Phase8UniqueAbilities.BLOOD_BURST, world, stack, attacker, target);
+        Phase8AbilityTuning tuning = Phase8UniqueAbilities.tuning(execution);
         if (BleedHelper.getStacks(target) >= BleedHelper.MAX_STACKS) {
             BleedHelper.clear(target);
-            triggerBloodBurst(world, stack, attacker, target);
+            triggerBloodBurst(world, stack, attacker, target, tuning);
             addFrenzy(stack, attacker, target);
+            if (tuning.flag(1 << 4) && BURST_COUNTERS.merge(attacker.getUuid(), 1, Integer::sum) % 2 == 0) {
+                addFrenzy(stack, attacker, target);
+            }
+            if (tuning.flag(1 << 8)) {
+                addFrenzy(stack, attacker, target);
+                attacker.addStatusEffect(new StatusEffectInstance(net.minecraft.entity.effect.StatusEffects.ABSORPTION,
+                        80, 1), attacker);
+            }
+            UniqueAbilityApi.finish(execution, Phase8UniqueAbilities.FINISH, 1);
             return;
         }
-        BleedHelper.apply(target, attacker, (float) HelperMethods.getEntityAttackDamage(attacker));
+        int added = tuning.flag(1) && HIT_COUNTERS.merge(attacker.getUuid(), 1, Integer::sum) % 3 == 0 ? 2 : 1;
+        BleedHelper.apply(target, attacker, (float) HelperMethods.getEntityAttackDamage(attacker), added,
+                BleedHelper.DEFAULT_DURATION);
+        UniqueAbilityApi.finish(execution, Phase8UniqueAbilities.FINISH, 0);
     }
 
     private static void triggerBloodBurst(ServerWorld world, ItemStack stack, LivingEntity attacker, LivingEntity primary) {
-        double radius = Math.max(0.5, Config.uniqueEffects.bloodwake.burstRadius);
+        triggerBloodBurst(world, stack, attacker, primary, Phase8AbilityTuning.EMPTY);
+    }
+
+    private static void triggerBloodBurst(ServerWorld world, ItemStack stack, LivingEntity attacker,
+                                          LivingEntity primary, Phase8AbilityTuning tuning) {
+        double radius = Math.max(0.5, tuning.get(Phase8AbilityTuning.Setting.RADIUS,
+                Config.uniqueEffects.bloodwake.burstRadius));
         float damage = HelperMethods.abilityScaledDamage(SpellScalingProfile.SOUL, attacker, stack,
-                Config.uniqueEffects.bloodwake.burstDamageScaling,
+                Config.uniqueEffects.bloodwake.burstDamageScaling * (float) tuning.get(
+                        Phase8AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1),
                 Config.uniqueEffects.bloodwake.burstSpellScaling);
         DamageSource source = world.getDamageSources().indirectMagic(attacker, attacker);
-        Box box = primary.getBoundingBox().expand(radius, radius * 0.65, radius);
+        Box box = (tuning.flag(1 << 7) ? attacker.getBoundingBox() : primary.getBoundingBox())
+                .expand(radius, radius * 0.65, radius);
+        int affected = 0;
+        int cap = tuning.has(Phase8AbilityTuning.Setting.TARGET_CAP)
+                ? tuning.integer(Phase8AbilityTuning.Setting.TARGET_CAP, 64) : Integer.MAX_VALUE;
+        boolean cone = tuning.flag(1 << 7);
+        Vec3d facing = attacker.getRotationVec(1).multiply(1, 0, 1).normalize();
         for (LivingEntity candidate : world.getEntitiesByClass(LivingEntity.class, box,
                 candidate -> candidate.isAlive() && HelperMethods.checkAbilityTarget(candidate, attacker))) {
+            if (affected >= cap) break;
+            if (cone) {
+                Vec3d to = candidate.getPos().subtract(attacker.getPos()).multiply(1, 0, 1).normalize();
+                if (facing.dotProduct(to) < .35) continue;
+            }
+            affected++;
             float enchanted = HelperMethods.applyAbilityDamageEnchantments(world, stack, candidate, source, damage);
+            enchanted *= BloodStainManager.ownerStainDamageMultiplier(world, attacker, candidate);
+            if (tuning.flag(1 << 5) && candidate.getHealth() / candidate.getMaxHealth()
+                    < tuning.get(Phase8AbilityTuning.Setting.HEALTH_THRESHOLD, .35)) enchanted *= 1.25F;
             HelperMethods.applyDamageWithoutKnockback(candidate, source, enchanted);
-            if (candidate != primary && candidate.isAlive()) {
-                BleedHelper.apply(candidate, attacker, damage);
+            if (!cone && candidate != primary && candidate.isAlive()) {
+                int stacks = BleedHelper.apply(candidate, attacker, damage, 1,
+                        tuning.integer(Phase8AbilityTuning.Setting.DURATION_TICKS, BleedHelper.DEFAULT_DURATION));
+                if (stacks >= BleedHelper.MAX_STACKS && tuning.flag(1 << 6)
+                        && CHAIN_BURSTS.getOrDefault(world, List.of()).stream()
+                        .filter(chain -> chain.actorId.equals(attacker.getUuid())).count() < 4) {
+                    CHAIN_BURSTS.computeIfAbsent(world, ignored -> new ArrayList<>()).add(new ChainBurst(
+                            attacker.getUuid(), candidate.getUuid(), stack.copy(), world.getTime()
+                            + tuning.integer(Phase8AbilityTuning.Setting.DELAY_TICKS, 8), tuning));
+                }
             }
         }
         Vec3d center = primary.getPos().add(0.0, Math.max(0.3, primary.getHeight() * 0.45), 0.0);
@@ -127,26 +194,44 @@ public final class BloodwakeAbilityManager {
     }
 
     public static boolean activate(ServerWorld world, LivingEntity actor, ItemStack stack, Hand hand, Vec3d facing, int tier) {
+        return activate(world, actor, stack, hand, facing, tier, Phase8AbilityTuning.EMPTY);
+    }
+
+    public static boolean activate(ServerWorld world, LivingEntity actor, ItemStack stack, Hand hand,
+                                   Vec3d facing, int tier, Phase8AbilityTuning tuning) {
+        if (tuning.flag(1 << 16)) tier = Math.min(5, tier + 1);
         return switch (tier) {
-            case 1 -> launchCrimsonWake(world, actor, facing);
-            case 2 -> unleashScream(world, actor);
-            case 3 -> summonJudgment(world, actor, stack, hand);
-            case 4 -> HivemindSwarmManager.activateBloodFlies(world, actor);
-            case 5 -> beginDeluge(world, actor, hand);
+            case 1 -> launchCrimsonWake(world, actor, facing, tuning);
+            case 2 -> unleashScream(world, actor, tuning);
+            case 3 -> summonJudgment(world, actor, stack, hand, tuning);
+            case 4 -> HivemindSwarmManager.activateBloodFlies(world, actor,
+                    tuning.integer(Phase8AbilityTuning.Setting.COUNT,
+                            Config.uniqueEffects.bloodwake.bloodFlyCount));
+            case 5 -> beginDeluge(world, actor, hand, tuning);
             default -> false;
         };
     }
 
     private static boolean launchCrimsonWake(ServerWorld world, LivingEntity actor, Vec3d facing) {
+        return launchCrimsonWake(world, actor, facing, Phase8AbilityTuning.EMPTY);
+    }
+
+    private static boolean launchCrimsonWake(ServerWorld world, LivingEntity actor, Vec3d facing,
+                                             Phase8AbilityTuning tuning) {
         Vec3d direction = horizontalDirection(facing, actor.getYaw());
-        launchBloodWave(world, actor, direction, 0, false);
+        launchBloodWave(world, actor, direction, 0, false, tuning);
         playWaveCast(world, actor, 0.95F);
         return true;
     }
 
     private static boolean unleashScream(ServerWorld world, LivingEntity actor) {
+        return unleashScream(world, actor, Phase8AbilityTuning.EMPTY);
+    }
+
+    private static boolean unleashScream(ServerWorld world, LivingEntity actor, Phase8AbilityTuning tuning) {
         List<LivingEntity> bleeding = findBleedingTargets(world, actor, Config.uniqueEffects.bloodwake.targetingRadius,
-                Math.max(1, Config.uniqueEffects.bloodwake.maximumScreamTargets));
+                Math.max(1, tuning.integer(Phase8AbilityTuning.Setting.TARGET_CAP,
+                        Config.uniqueEffects.bloodwake.maximumScreamTargets)));
         if (bleeding.isEmpty()) {
             fail(world, actor);
             return false;
@@ -166,6 +251,11 @@ public final class BloodwakeAbilityManager {
     }
 
     private static boolean summonJudgment(ServerWorld world, LivingEntity actor, ItemStack stack, Hand hand) {
+        return summonJudgment(world, actor, stack, hand, Phase8AbilityTuning.EMPTY);
+    }
+
+    private static boolean summonJudgment(ServerWorld world, LivingEntity actor, ItemStack stack, Hand hand,
+                                          Phase8AbilityTuning tuning) {
         List<LivingEntity> targets = findBleedingTargets(world, actor, Config.uniqueEffects.bloodwake.targetingRadius,
                 Math.max(1, Config.uniqueEffects.bloodwake.bladeTargetCap));
         if (targets.isEmpty()) {
@@ -173,7 +263,8 @@ public final class BloodwakeAbilityManager {
             return false;
         }
         long now = world.getTime();
-        int hoverTicks = Math.max(1, Config.uniqueEffects.bloodwake.bladeHoverTicks);
+        int hoverTicks = Math.max(1, tuning.integer(Phase8AbilityTuning.Setting.WINDUP_TICKS,
+                Config.uniqueEffects.bloodwake.bladeHoverTicks));
         int plungeTicks = Math.max(1, Config.uniqueEffects.bloodwake.bladePlungeTicks);
         float weaponDamage = (float) Math.max(1.0, HelperMethods.getEntityAttackDamage(actor));
         List<ActiveBlade> blades = ACTIVE_BLADES.computeIfAbsent(world, ignored -> new ArrayList<>());
@@ -186,7 +277,7 @@ public final class BloodwakeAbilityManager {
             visual.addCommandTag(BLADE_VISUAL_TAG);
             if (world.spawnEntity(visual)) {
                 blades.add(new ActiveBlade(actor.getUuid(), target.getUuid(), visual.getUuid(), stack.copy(), hand,
-                        now, hoverTicks, plungeTicks, weaponDamage, i));
+                        now, hoverTicks, plungeTicks, weaponDamage, i, tuning));
                 spawnCrimsonTrail(world,
                         target.getPos().add(0.0, target.getHeight() * 0.55, 0.0), pos, 9);
                 world.spawnParticles(ParticleTypes.ENCHANTED_HIT, pos.x, pos.y, pos.z,
@@ -198,6 +289,11 @@ public final class BloodwakeAbilityManager {
     }
 
     private static boolean beginDeluge(ServerWorld world, LivingEntity actor, Hand hand) {
+        return beginDeluge(world, actor, hand, Phase8AbilityTuning.EMPTY);
+    }
+
+    private static boolean beginDeluge(ServerWorld world, LivingEntity actor, Hand hand,
+                                       Phase8AbilityTuning tuning) {
         Map<UUID, ActiveDeluge> deluges = ACTIVE_DELUGES.computeIfAbsent(world, ignored -> new HashMap<>());
         ActiveDeluge activeDeluge = deluges.get(actor.getUuid());
         if (activeDeluge != null) {
@@ -212,9 +308,9 @@ public final class BloodwakeAbilityManager {
         }
         int duration = Math.max(20, Config.uniqueEffects.bloodwake.delugeDuration);
         ActiveDeluge deluge = new ActiveDeluge(actor.getUuid(), hand,
-                world.getTime(), world.getTime() + duration, 0);
+                world.getTime(), world.getTime() + duration, 0, tuning);
         deluges.put(actor.getUuid(), deluge);
-        deluge.previousTargetId = spawnDelugeWave(world, actor, 0, null);
+        deluge.previousTargetId = spawnDelugeWave(world, actor, 0, null, tuning);
         world.playSound(null, actor.getBlockPos(), SoundRegistry.DARK_ACTIVATION_DISTORTED.get(), SoundCategory.PLAYERS, 0.9F, 0.58F);
         return true;
     }
@@ -228,6 +324,7 @@ public final class BloodwakeAbilityManager {
         return !ACTIVE_VOLLEYS.getOrDefault(world, List.of()).isEmpty()
                 || !ACTIVE_BLADES.getOrDefault(world, List.of()).isEmpty()
                 || !ACTIVE_SCREAMS.getOrDefault(world, List.of()).isEmpty()
+                || !CHAIN_BURSTS.getOrDefault(world, List.of()).isEmpty()
                 || !ACTIVE_DELUGES.getOrDefault(world, Map.of()).isEmpty()
                 || world.getTime() % 40L == 0L;
     }
@@ -237,6 +334,7 @@ public final class BloodwakeAbilityManager {
         tickVolleys(world);
         tickBlades(world);
         tickScreams(world);
+        tickChainBursts(world);
         if (world.getTime() % 40L == 0L) {
             purgeOrphanVisuals(world);
         }
@@ -260,10 +358,12 @@ public final class BloodwakeAbilityManager {
                 iterator.remove();
                 continue;
             }
-            int interval = Math.max(1, Config.uniqueEffects.bloodwake.delugeVolleyInterval);
+            int interval = Math.max(8, deluge.tuning.integer(Phase8AbilityTuning.Setting.INTERVAL_TICKS,
+                    Config.uniqueEffects.bloodwake.delugeVolleyInterval));
             if (now > deluge.startedAt && (now - deluge.startedAt) % interval == 0L) {
                 deluge.volleyIndex++;
-                deluge.previousTargetId = spawnDelugeWave(world, actor, deluge.volleyIndex, deluge.previousTargetId);
+                deluge.previousTargetId = spawnDelugeWave(world, actor, deluge.volleyIndex,
+                        deluge.previousTargetId, deluge.tuning);
             }
             if (now % 5L == 0L) {
                 world.spawnParticles(CRIMSON_DUST, actor.getX(), actor.getBodyY(0.48), actor.getZ(), 8, 0.65, 0.2, 0.65, 0.025);
@@ -275,6 +375,11 @@ public final class BloodwakeAbilityManager {
     }
 
     private static UUID spawnDelugeWave(ServerWorld world, LivingEntity actor, int volleyIndex, UUID previousTargetId) {
+        return spawnDelugeWave(world, actor, volleyIndex, previousTargetId, Phase8AbilityTuning.EMPTY);
+    }
+
+    private static UUID spawnDelugeWave(ServerWorld world, LivingEntity actor, int volleyIndex,
+                                        UUID previousTargetId, Phase8AbilityTuning tuning) {
         LivingEntity target = chooseDelugeTarget(world, actor, previousTargetId);
         Vec3d direction;
         if (target == null) {
@@ -283,7 +388,7 @@ public final class BloodwakeAbilityManager {
         } else {
             direction = horizontalDirection(target.getPos().subtract(actor.getPos()), actor.getYaw());
         }
-        launchBloodWave(world, actor, direction, volleyIndex, true);
+        launchBloodWave(world, actor, direction, volleyIndex, true, tuning);
         world.playSound(null, actor.getBlockPos(), SoundRegistry.MAGIC_SWORD_ATTACK_WITH_BLOOD_03.get(),
                 SoundCategory.PLAYERS, 0.36F, 0.66F + (volleyIndex % 4) * 0.055F);
         world.playSound(null, actor.getBlockPos(), SoundEvents.ENTITY_PLAYER_SPLASH_HIGH_SPEED,
@@ -304,20 +409,31 @@ public final class BloodwakeAbilityManager {
 
     private static void launchBloodWave(ServerWorld world, LivingEntity actor, Vec3d facing,
                                         int volleyIndex, boolean redTide) {
+        launchBloodWave(world, actor, facing, volleyIndex, redTide, Phase8AbilityTuning.EMPTY);
+    }
+
+    private static void launchBloodWave(ServerWorld world, LivingEntity actor, Vec3d facing,
+                                        int volleyIndex, boolean redTide, Phase8AbilityTuning tuning) {
         Vec3d direction = horizontalDirection(facing, actor.getYaw());
         spawnVolley(world, actor, actor.getPos().add(direction.multiply(1.2)),
-                List.of(direction), volleyIndex, redTide);
+                List.of(direction), volleyIndex, redTide, tuning);
     }
 
     private static void spawnVolley(ServerWorld world, LivingEntity actor, Vec3d origin,
                                     List<Vec3d> directions, int volleyIndex, boolean redTide) {
+        spawnVolley(world, actor, origin, directions, volleyIndex, redTide, Phase8AbilityTuning.EMPTY);
+    }
+
+    private static void spawnVolley(ServerWorld world, LivingEntity actor, Vec3d origin,
+                                    List<Vec3d> directions, int volleyIndex, boolean redTide,
+                                    Phase8AbilityTuning tuning) {
         List<UUID> stainIds = directions.stream()
                 .map(direction -> BloodStainManager.beginTrail(
                         world, actor, origin, direction, LivyatanWaveManager.waveWidthBlocks()))
                 .toList();
         ACTIVE_VOLLEYS.computeIfAbsent(world, ignored -> new ArrayList<>()).add(new ActiveVolley(
                 actor.getUuid(), origin, directions, stainIds,
-                world.getTime(), volleyIndex, redTide));
+                world.getTime(), volleyIndex, redTide, tuning));
     }
 
     private static void tickVolleys(ServerWorld world) {
@@ -326,10 +442,11 @@ public final class BloodwakeAbilityManager {
             return;
         }
         int interval = Math.max(1, Config.uniqueEffects.bloodwake.waveStepInterval);
-        int maxSteps = Math.max(1, Config.uniqueEffects.bloodwake.waveLengthSteps);
         long now = world.getTime();
         volleys.removeIf(volley -> {
             LivingEntity owner = resolveLiving(world, volley.ownerId);
+            int maxSteps = Math.max(1, volley.tuning.integer(Phase8AbilityTuning.Setting.RANGE,
+                    Config.uniqueEffects.bloodwake.waveLengthSteps));
             if (owner == null) {
                 volley.finishStains(world);
                 return true;
@@ -549,7 +666,9 @@ public final class BloodwakeAbilityManager {
         }
 
         int bleedStacks = BleedHelper.getStacks(target);
-        float damage = blade.weaponDamage * (1.0F + Math.max(0.0F, Config.uniqueEffects.bloodwake.bladeDamagePerBleedStack) * bleedStacks);
+        float damage = blade.weaponDamage * (1.0F + Math.max(0.0F,
+                Config.uniqueEffects.bloodwake.bladeDamagePerBleedStack) * bleedStacks)
+                * (float) blade.tuning.get(Phase8AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1);
         int before = getFrenzy(blade.stack);
         boolean hit = SimplySwordsAPI.applyEntityWeaponHit(blade.stack, target, owner, damage);
         int earned = Math.max(0, getFrenzy(blade.stack) - before);
@@ -698,6 +817,25 @@ public final class BloodwakeAbilityManager {
         }
     }
 
+    private static void tickChainBursts(ServerWorld world) {
+        List<ChainBurst> chains = CHAIN_BURSTS.get(world);
+        if (chains == null) return;
+        chains.removeIf(chain -> {
+            if (world.getTime() < chain.at) return false;
+            LivingEntity actor = resolveLiving(world, chain.actorId);
+            LivingEntity target = resolveLiving(world, chain.targetId);
+            if (actor != null && target != null) {
+                Phase8AbilityTuning tuning = chain.tuning.multiply(
+                        Phase8AbilityTuning.Setting.DAMAGE_MULTIPLIER,
+                        chain.tuning.get(Phase8AbilityTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, .55), 1);
+                BleedHelper.clear(target);
+                triggerBloodBurst(world, chain.stack, actor, target, tuning);
+            }
+            return true;
+        });
+        if (chains.isEmpty()) CHAIN_BURSTS.remove(world);
+    }
+
     private static void spawnCrimsonTrail(ServerWorld world, Vec3d from, Vec3d to, int points) {
         for (int i = 1; i < Math.max(2, points); i++) {
             Vec3d point = from.lerp(to, i / (double) Math.max(2, points));
@@ -743,12 +881,13 @@ public final class BloodwakeAbilityManager {
         private final long startedAt;
         private final int volleyIndex;
         private final boolean redTide;
+        private final Phase8AbilityTuning tuning;
         private final Set<UUID> hitEntities = new HashSet<>();
         private int currentStep;
 
         private ActiveVolley(UUID ownerId, Vec3d origin, List<Vec3d> directions,
                              List<UUID> stainIds,
-                             long startedAt, int volleyIndex, boolean redTide) {
+                             long startedAt, int volleyIndex, boolean redTide, Phase8AbilityTuning tuning) {
             this.ownerId = ownerId;
             this.origin = origin;
             this.directions = directions;
@@ -756,6 +895,7 @@ public final class BloodwakeAbilityManager {
             this.startedAt = startedAt;
             this.volleyIndex = volleyIndex;
             this.redTide = redTide;
+            this.tuning = tuning;
         }
 
         private void finishStains(ServerWorld world) {
@@ -766,7 +906,8 @@ public final class BloodwakeAbilityManager {
     }
 
     private record ActiveBlade(UUID ownerId, UUID targetId, UUID visualId, ItemStack stack, Hand hand,
-                               long startedAt, int hoverTicks, int plungeTicks, float weaponDamage, int index) {
+                               long startedAt, int hoverTicks, int plungeTicks, float weaponDamage, int index,
+                               Phase8AbilityTuning tuning) {
     }
 
     private record ActiveScream(UUID ownerId, List<UUID> targetIds, long startedAt) {
@@ -779,13 +920,25 @@ public final class BloodwakeAbilityManager {
         private long expiryTick;
         private int volleyIndex;
         private UUID previousTargetId;
+        private final Phase8AbilityTuning tuning;
 
-        private ActiveDeluge(UUID ownerId, Hand hand, long startedAt, long expiryTick, int volleyIndex) {
+        private ActiveDeluge(UUID ownerId, Hand hand, long startedAt, long expiryTick, int volleyIndex,
+                             Phase8AbilityTuning tuning) {
             this.ownerId = ownerId;
             this.hand = hand;
             this.startedAt = startedAt;
             this.expiryTick = expiryTick;
             this.volleyIndex = volleyIndex;
+            this.tuning = tuning;
         }
+    }
+
+    private record ChainBurst(UUID actorId, UUID targetId, ItemStack stack, long at,
+                              Phase8AbilityTuning tuning) {
+    }
+
+    private static final class RiteMemory {
+        private int mask;
+        private long expiresAt;
     }
 }

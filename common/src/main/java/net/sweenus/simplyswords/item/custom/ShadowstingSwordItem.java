@@ -18,6 +18,10 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
+import net.sweenus.simplyswords.api.ability.Phase8AbilityTuning;
+import net.sweenus.simplyswords.api.ability.Phase8UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
@@ -27,6 +31,7 @@ import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
 import net.sweenus.simplyswords.world.ShadowstingShadowDanceManager;
+import net.sweenus.simplyswords.world.Phase8CombatManager;
 
 import java.util.List;
 
@@ -45,9 +50,17 @@ public class ShadowstingSwordItem extends UniqueSwordItem implements UniqueWeapo
         if (!attacker.getWorld().isClient()
                 && attacker instanceof ServerPlayerEntity serverPlayer
                 && attacker.getWorld() instanceof ServerWorld serverWorld
-                && target.isAlive()
-                && attacker.getRandom().nextInt(100) < Config.uniqueEffects.shadowsting.chance) {
-            ShadowstingShadowDanceManager.schedulePassiveCloneStrike(serverWorld, serverPlayer, target);
+                && target.isAlive()) {
+            UniqueAbilityExecution execution = Phase8CombatManager.beginPassive(
+                    Phase8UniqueAbilities.SHADOW_ECHO, serverWorld, stack, attacker, target);
+            Phase8AbilityTuning tuning = Phase8UniqueAbilities.tuning(execution);
+            ShadowstingShadowDanceManager.applyUmbralMarkBonus(serverWorld, serverPlayer, target, tuning);
+            if (ShadowstingShadowDanceManager.canPassiveProc(serverWorld, serverPlayer, tuning)
+                    && attacker.getRandom().nextInt(100) < tuning.integer(
+                    Phase8AbilityTuning.Setting.CHANCE, Config.uniqueEffects.shadowsting.chance)) {
+                ShadowstingShadowDanceManager.schedulePassiveCloneStrike(serverWorld, serverPlayer, target, tuning);
+            }
+            UniqueAbilityApi.finish(execution, Phase8UniqueAbilities.FINISH, 1);
         }
         return super.postHit(stack, target, attacker);
     }
@@ -59,21 +72,36 @@ public class ShadowstingSwordItem extends UniqueSwordItem implements UniqueWeapo
 
     @Override
     public TypedActionResult<ItemStack> startPlayerAbility(World world, PlayerEntity user, Hand hand) {
-        ItemStack itemStack = user.getStackInHand(hand);
-        if (!world.isClient() && world instanceof ServerWorld serverWorld && user instanceof ServerPlayerEntity serverPlayer) {
-            if (!ShadowstingShadowDanceManager.start(serverWorld, serverPlayer, itemStack)) {
-                return TypedActionResult.fail(itemStack);
-            }
-            SimplySwordsAPI.setWeaponCooldown(user, itemStack, Config.uniqueEffects.shadowsting.cooldown);
+        return UniqueWeaponActiveAbility.super.startPlayerAbility(world, user, hand);
+    }
+
+    @Override
+    public boolean canActivate(WeaponAbilityContext context) {
+        if (context == null || context.actor() == null || !context.actor().isAlive()
+                || context.stack() == null || context.stack().isEmpty()
+                || context.stack().getDamage() >= context.stack().getMaxDamage() - 1) return false;
+        if (context.actor() instanceof ServerPlayerEntity player) {
+            return !ShadowstingShadowDanceManager.isActive(player);
         }
-        return TypedActionResult.success(itemStack, world.isClient());
+        return context.target() != null && context.target().isAlive()
+                && HelperMethods.checkAbilityTarget(context.target(), context.actor());
     }
 
     @Override
     public boolean activate(WeaponAbilityContext context) {
-        return context.target() != null
-                && HelperMethods.checkAbilityTarget(context.target(), context.actor())
-                && ShadowstingShadowDanceManager.start(context.world(), context.actor(), context.target(), context.stack());
+        UniqueAbilityExecution execution = Phase8CombatManager.beginActive(
+                Phase8UniqueAbilities.SHADOW_DANCE, context, Config.uniqueEffects.shadowsting.cooldown);
+        Phase8AbilityTuning tuning = Phase8UniqueAbilities.tuning(execution);
+        boolean started;
+        if (context.actor() instanceof ServerPlayerEntity player) {
+            started = ShadowstingShadowDanceManager.start(context.world(), player, context.stack(), tuning);
+        } else {
+            started = context.target() != null && HelperMethods.checkAbilityTarget(context.target(), context.actor())
+                    && ShadowstingShadowDanceManager.start(context.world(), context.actor(), context.target(), context.stack(), tuning);
+        }
+        if (started) Phase8CombatManager.scheduleFinish(context.world(), execution,
+                tuning.integer(Phase8AbilityTuning.Setting.DURATION_TICKS, 50) + 10, 1);
+        return started;
     }
 
     @Override

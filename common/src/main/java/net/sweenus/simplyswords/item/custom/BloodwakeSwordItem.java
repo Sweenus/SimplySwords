@@ -5,6 +5,8 @@ import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.NbtComponent;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.server.world.ServerWorld;
@@ -14,6 +16,9 @@ import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
+import net.sweenus.simplyswords.api.ability.Phase8AbilityTuning;
+import net.sweenus.simplyswords.api.ability.Phase8UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
@@ -22,10 +27,12 @@ import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.Styles;
 import net.sweenus.simplyswords.world.BloodwakeAbilityManager;
+import net.sweenus.simplyswords.world.Phase8CombatManager;
 
 import java.util.List;
 
 public class BloodwakeSwordItem extends UniqueSwordItem implements UniqueWeaponActiveAbility {
+    private static final String SELECTED_RITE = "simplyswords_bloodwake_selected_rite";
     public BloodwakeSwordItem(ToolMaterial material, Settings settings) {
         super(material, settings);
     }
@@ -51,7 +58,7 @@ public class BloodwakeSwordItem extends UniqueSwordItem implements UniqueWeaponA
             return false;
         }
         int tier = BloodwakeAbilityManager.getFrenzy(context.stack());
-        return tier > 0;
+        return tier > 0 || context.actor().isSneaking();
     }
 
     @Override
@@ -60,13 +67,40 @@ public class BloodwakeSwordItem extends UniqueSwordItem implements UniqueWeaponA
             return false;
         }
         int tier = BloodwakeAbilityManager.getFrenzy(context.stack());
+        UniqueAbilityExecution execution = Phase8CombatManager.beginActive(
+                Phase8UniqueAbilities.BLOOD_RITES, context, Config.uniqueEffects.bloodwake.cooldown);
+        Phase8AbilityTuning tuning = Phase8UniqueAbilities.tuning(execution);
+        if (tuning.flag(1 << 17)) {
+            int selected = selectedRite(context.stack());
+            if (context.actor().isSneaking()) {
+                int next = selected % 5 + 1;
+                NbtComponent.set(DataComponentTypes.CUSTOM_DATA, context.stack(), nbt -> nbt.putInt(SELECTED_RITE, next));
+                context.actor().swingHand(context.hand() == null ? Hand.MAIN_HAND : context.hand(), true);
+                Phase8CombatManager.scheduleFinish(context.world(), execution, 0);
+                return true;
+            }
+            if (tier < selected) return false;
+            tier = selected;
+        }
         if (!BloodwakeAbilityManager.activate(context.world(), context.actor(), context.stack(),
-                context.hand(), context.facing(), tier)) {
+                context.hand(), context.facing(), tier, tuning)) {
             return false;
         }
-        BloodwakeAbilityManager.setFrenzy(context.stack(), 0);
+        Phase8CombatManager.scheduleFinish(context.world(), execution, 1, 1);
+        BloodwakeAbilityManager.setFrenzy(context.stack(), tuning.flag(1 << 17) ? getFrenzyAfterCost(context.stack(), tier) : 0);
+        BloodwakeAbilityManager.recordRite(context.world(), context.actor(), context.stack(), tier, tuning);
         context.actor().swingHand(context.hand() == null ? Hand.MAIN_HAND : context.hand(), true);
         return true;
+    }
+
+    private static int selectedRite(ItemStack stack) {
+        int selected = stack.getOrDefault(DataComponentTypes.CUSTOM_DATA, NbtComponent.DEFAULT)
+                .copyNbt().getInt(SELECTED_RITE);
+        return Math.clamp(selected == 0 ? 1 : selected, 1, 5);
+    }
+
+    private static int getFrenzyAfterCost(ItemStack stack, int cost) {
+        return Math.max(0, BloodwakeAbilityManager.getFrenzy(stack) - cost);
     }
 
     @Override

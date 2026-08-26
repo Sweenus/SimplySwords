@@ -3,6 +3,9 @@ package net.sweenus.simplyswords.world;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.projectile.ProjectileEntity;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.ItemStack;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -13,6 +16,11 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
 import net.sweenus.simplyswords.api.AwakeningApi;
+import net.sweenus.simplyswords.api.WeaponAbilityContext;
+import net.sweenus.simplyswords.api.ability.Phase8AbilityTuning;
+import net.sweenus.simplyswords.api.ability.Phase8UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.SoulkeeperLanternVisualEntity;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
@@ -95,6 +103,17 @@ public final class SoulkeeperLanternManager {
         }
     }
 
+    public static void onSoulkeeperHit(LivingEntity attacker, LivingEntity target, ItemStack stack) {
+        onSoulkeeperHit(attacker);
+        ActiveLanterns active = ACTIVE_LANTERNS.get(attacker.getUuid());
+        if (active == null || target == null || !(attacker.getWorld() instanceof ServerWorld world)) return;
+        if (active.soulbrandUntil.getOrDefault(target.getUuid(), 0L) > world.getTime()) {
+            float bonus = (float) (HelperMethods.getEntityAttackDamage(attacker)
+                    * (active.lanternTuning.get(Phase8AbilityTuning.Setting.OUTGOING_MULTIPLIER, 1) - 1));
+            if (bonus > 0) target.damage(attacker.getDamageSources().mobAttack(attacker), bonus);
+        }
+    }
+
     public static void activate(ServerPlayerEntity player, ItemStack stack) {
         activate((LivingEntity) player, stack);
     }
@@ -108,14 +127,49 @@ public final class SoulkeeperLanternManager {
         if (!(player.getWorld() instanceof ServerWorld world)) {
             return;
         }
-        active.extraLanternsUntilTick = world.getTime() + Config.uniqueEffects.soulkeeper.activeExtraLanternDuration;
+        active.extraLanternsUntilTick = world.getTime() + active.conclaveTuning.integer(
+                Phase8AbilityTuning.Setting.DURATION_TICKS,
+                Config.uniqueEffects.soulkeeper.activeExtraLanternDuration);
         increaseSpeed(active);
+        int absorption = active.conclaveTuning.integer(Phase8AbilityTuning.Setting.ABSORPTION, 0);
+        if (absorption > 0) {
+            player.addStatusEffect(new StatusEffectInstance(StatusEffects.ABSORPTION,
+                    active.conclaveTuning.integer(Phase8AbilityTuning.Setting.STATUS_DURATION_TICKS, 80),
+                    Math.max(0, absorption / 4 - 1)), player);
+        }
 
         Vec3d pos = player.getPos().add(0.0, 1.0, 0.0);
         world.spawnParticles(ParticleTypes.SOUL_FIRE_FLAME, pos.x, pos.y, pos.z, 18, 0.55, 0.35, 0.55, 0.03);
         world.spawnParticles(ParticleTypes.SCULK_SOUL, pos.x, pos.y, pos.z, 8, 0.45, 0.3, 0.45, 0.02);
         world.playSound(null, player.getBlockPos(), SoundRegistry.MAGIC_SWORD_SPELL_03.get(), SoundCategory.PLAYERS, 0.75F, 0.8F + player.getRandom().nextFloat() * 0.2F);
         tickActive(world, player, stack);
+    }
+
+    public static void activate(WeaponAbilityContext context) {
+        UniqueAbilityExecution execution = Phase8CombatManager.beginActive(
+                Phase8UniqueAbilities.SOULKEEPER_CONCLAVE, context, Config.uniqueEffects.soulkeeper.cooldown);
+        ActiveLanterns active = ACTIVE_LANTERNS.computeIfAbsent(context.actor().getUuid(), ignored -> new ActiveLanterns());
+        active.conclaveTuning = Phase8UniqueAbilities.tuning(execution);
+        if (context.actor().isSneaking() && active.velocityTuning.flag(1 << 17)
+                && active.speedMultiplier > 1 && context.actor().getWorld() instanceof ServerWorld world) {
+            float consumed = active.speedMultiplier - 1;
+            float damage = HelperMethods.abilityScaledDamage("soul", context.actor(), context.stack(),
+                    consumed * (float) active.velocityTuning.get(Phase8AbilityTuning.Setting.PER_STACK_MULTIPLIER, .18), 0);
+            world.getEntitiesByClass(LivingEntity.class, context.actor().getBoundingBox().expand(4),
+                            target -> HelperMethods.checkAbilityTarget(target, context.actor()))
+                    .forEach(target -> target.damage(world.getDamageSources().indirectMagic(
+                            context.actor(), context.actor()), damage));
+            active.speedMultiplier = 1;
+            active.extraLanternsUntilTick = 0;
+            Phase8CombatManager.scheduleFinish(world, execution, 1);
+            return;
+        }
+        activate(context.actor(), context.stack());
+        UniqueAbilityApi.emit(execution, net.sweenus.simplyswords.api.ability.UniqueAbilityPhase.HIT,
+                Phase8UniqueAbilities.HIT, null, 0, 0);
+        Phase8CombatManager.scheduleFinish(context.world(), execution,
+                active.conclaveTuning.integer(Phase8AbilityTuning.Setting.DURATION_TICKS,
+                        Config.uniqueEffects.soulkeeper.activeExtraLanternDuration), 0);
     }
 
     private static void tickActivePlayer(ServerPlayerEntity player, ItemStack stack) {
@@ -125,9 +179,12 @@ public final class SoulkeeperLanternManager {
     private static void tickActive(ServerWorld world, LivingEntity player, ItemStack stack) {
         UUID ownerId = player.getUuid();
         ActiveLanterns active = ACTIVE_LANTERNS.computeIfAbsent(ownerId, ignored -> new ActiveLanterns());
+        refreshTunings(world, player, stack, active);
         active.tick(world);
 
-        int lanternCount = active.hasExtraLanterns(world) ? ACTIVE_LANTERN_COUNT : BASE_LANTERN_COUNT;
+        int lanternCount = active.hasExtraLanterns(world)
+                ? active.conclaveTuning.integer(Phase8AbilityTuning.Setting.COUNT, ACTIVE_LANTERN_COUNT)
+                : BASE_LANTERN_COUNT;
         SoulkeeperLanternVisualEntity visual = resolveTracked(world, active.visualId, ownerId);
         if (visual == null) {
             Vec3d start = player.getPos();
@@ -143,19 +200,47 @@ public final class SoulkeeperLanternManager {
         visual.setOwnerEntityId(player.getId());
         visual.setLanternCount(lanternCount);
         visual.setSpeedMultiplier(active.speedMultiplier);
-        visual.setOrbitRadius((float) Config.uniqueEffects.soulkeeper.orbitRadius);
+        visual.setOrbitRadius((float) active.lanternTuning.get(Phase8AbilityTuning.Setting.RADIUS,
+                Config.uniqueEffects.soulkeeper.orbitRadius));
         visual.setOrbitPhase((float) active.orbitPhase);
 
         damageCollidingTargets(world, player, stack, active, lanternCount);
+        if (active.hasExtraLanterns(world) && active.conclaveTuning.flag(1 << 22)
+                && world.getTime() - active.lastIntercept >= active.conclaveTuning.integer(
+                Phase8AbilityTuning.Setting.INTERVAL_TICKS, 40)) {
+            world.getEntitiesByClass(ProjectileEntity.class, player.getBoundingBox().expand(1),
+                            projectile -> projectile.getOwner() != player)
+                    .stream().findFirst().ifPresent(projectile -> {
+                        projectile.discard();
+                        active.lastIntercept = world.getTime();
+                    });
+        }
+        if (active.hasExtraLanterns(world) && active.conclaveTuning.flag(1 << 23)) {
+            world.getEntitiesByClass(LivingEntity.class, player.getBoundingBox().expand(5),
+                            ally -> ally != player && !HelperMethods.checkAbilityTarget(ally, player))
+                    .stream().limit(4).forEach(ally -> ally.addStatusEffect(
+                            new StatusEffectInstance(StatusEffects.RESISTANCE, 20, 0), player));
+        }
+        if (active.hasExtraLanterns(world) && active.conclaveTuning.flag(1 << 26)
+                && world.getTime() - active.lastBastionPulse >= 30) {
+            active.lastBastionPulse = world.getTime();
+            player.addStatusEffect(new StatusEffectInstance(StatusEffects.ABSORPTION, 40, 0), player);
+        }
     }
 
     private static void damageCollidingTargets(ServerWorld world, LivingEntity player, ItemStack stack, ActiveLanterns active, int lanternCount) {
         float damage = getLanternDamage(player, stack);
+        damage = damage * (float) active.lanternTuning.get(Phase8AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1)
+                + active.lanternTuning.integer(Phase8AbilityTuning.Setting.FLAT_DAMAGE, 0);
+        if (active.hasExtraLanterns(world)) {
+            damage *= active.conclaveTuning.get(Phase8AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1);
+        }
         if (damage <= 0.0F || lanternCount <= 0) {
             return;
         }
 
-        double orbitRadius = Math.max(0.25, Config.uniqueEffects.soulkeeper.orbitRadius);
+        double orbitRadius = Math.max(0.25, active.lanternTuning.get(Phase8AbilityTuning.Setting.RADIUS,
+                Config.uniqueEffects.soulkeeper.orbitRadius));
         double searchRadius = orbitRadius + CONTACT_RADIUS + 1.0;
         Box searchBox = player.getBoundingBox().expand(searchRadius, 2.5, searchRadius);
         Set<UUID> currentlyColliding = new HashSet<>();
@@ -171,12 +256,68 @@ public final class SoulkeeperLanternManager {
 
             UUID targetId = target.getUuid();
             currentlyColliding.add(targetId);
-            if (active.collidingTargets.contains(targetId)) {
+            long lastContact = active.lastContact.getOrDefault(targetId, Long.MIN_VALUE / 2);
+            int repeatDelay = active.lanternTuning.integer(Phase8AbilityTuning.Setting.DELAY_TICKS, Integer.MAX_VALUE);
+            if (active.collidingTargets.contains(targetId) && world.getTime() - lastContact < repeatDelay) {
                 continue;
             }
 
-            if (damageTarget(world, player, target, damage)) {
-                increaseSpeed(active);
+            float contactDamage = damage;
+            if (active.velocityTuning.flag(1 << 12) && active.speedMultiplier > 3) {
+                contactDamage *= 1 + Math.min(.12F, (active.speedMultiplier - 3) * .03F);
+            }
+            if (active.lanternTuning.flag(1 << 3) && world.getTime() - lastContact <= 20) {
+                contactDamage *= 1.2F;
+            }
+            active.contactCounter++;
+            if (active.lanternTuning.flag(1 << 6) && active.contactCounter % 5 == 0) {
+                contactDamage *= 1.5F;
+            }
+            if (damageTarget(world, player, target, contactDamage)) {
+                active.lastContact.put(targetId, world.getTime());
+                if (active.lastContact.size() > 32) active.lastContact.entrySet().stream()
+                        .min(Map.Entry.comparingByValue()).ifPresent(entry -> active.lastContact.remove(entry.getKey()));
+                if (!active.lanternTuning.flag(1 << 7)) increaseSpeed(active);
+                if (active.lanternTuning.flag(1 << 2)) {
+                    target.addStatusEffect(new StatusEffectInstance(StatusEffects.GLOWING, 40, 0), player);
+                }
+                if (active.lanternTuning.flag(1 << 4)) {
+                    active.soulbrandUntil.put(targetId, world.getTime()
+                            + active.lanternTuning.integer(Phase8AbilityTuning.Setting.DURATION_TICKS, 40));
+                    if (active.soulbrandUntil.size() > 32) active.soulbrandUntil.entrySet().stream()
+                            .min(Map.Entry.comparingByValue()).ifPresent(entry -> active.soulbrandUntil.remove(entry.getKey()));
+                }
+                if (!target.isAlive() && active.velocityTuning.flag(1 << 14)) {
+                    active.capturedUntil = world.getTime()
+                            + active.velocityTuning.integer(Phase8AbilityTuning.Setting.DURATION_TICKS, 60);
+                }
+                if (active.velocityTuning.flag(1 << 15)
+                        && active.speedMultiplier >= active.velocityTuning.get(
+                        Phase8AbilityTuning.Setting.STACK_CAP, Config.uniqueEffects.soulkeeper.maxSpeedMultiplier)) {
+                    Vec3d pull = player.getPos().subtract(target.getPos()).multiply(1, 0, 1);
+                    if (pull.lengthSquared() > 0) target.addVelocity(pull.normalize().multiply(
+                            active.velocityTuning.get(Phase8AbilityTuning.Setting.PULL_STRENGTH, .25)));
+                }
+                if (active.hasExtraLanterns(world) && active.conclaveTuning.flag(1 << 24)
+                        && !active.recallUsed && active.extraLanternsUntilTick - world.getTime() <= 60) {
+                    active.recallUsed = true;
+                    active.extraLanternsUntilTick += active.conclaveTuning.integer(
+                            Phase8AbilityTuning.Setting.SECONDARY_DURATION_TICKS, 80);
+                }
+                if (active.lanternTuning.flag(1 << 8)) {
+                    double cleaveRadius = active.lanternTuning.get(
+                            Phase8AbilityTuning.Setting.SECONDARY_RADIUS, 1.5);
+                    float primaryMultiplier = (float) active.lanternTuning.get(
+                            Phase8AbilityTuning.Setting.DAMAGE_MULTIPLIER, .75);
+                    float cleaveDamage = contactDamage / Math.max(.01F, primaryMultiplier)
+                            * (float) active.lanternTuning.get(
+                            Phase8AbilityTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, .6);
+                    world.getEntitiesByClass(LivingEntity.class, target.getBoundingBox().expand(cleaveRadius),
+                                    other -> other != target && other != player && other.isAlive()
+                                            && HelperMethods.checkAbilityTarget(other, player))
+                            .stream().limit(2).forEach(other -> damageTarget(
+                                    world, player, other, cleaveDamage));
+                }
                 spawnLanternHitEffects(world, target);
             }
         }
@@ -242,8 +383,28 @@ public final class SoulkeeperLanternManager {
     }
 
     private static void increaseSpeed(ActiveLanterns active) {
-        active.speedMultiplier = Math.min((float) Config.uniqueEffects.soulkeeper.maxSpeedMultiplier,
-                active.speedMultiplier + (float) Config.uniqueEffects.soulkeeper.speedIncreasePerHit);
+        float maximum = (float) active.velocityTuning.get(Phase8AbilityTuning.Setting.STACK_CAP,
+                Config.uniqueEffects.soulkeeper.maxSpeedMultiplier);
+        float gain = (float) active.velocityTuning.get(Phase8AbilityTuning.Setting.SPEED,
+                Config.uniqueEffects.soulkeeper.speedIncreasePerHit);
+        active.speedMultiplier = Math.min(maximum, active.speedMultiplier + gain);
+        if (active.velocityTuning.flag(1 << 13) && active.speedMultiplier >= 4 && active.owner != null) {
+            active.owner.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, 40, 0), active.owner);
+        }
+    }
+
+    private static void refreshTunings(ServerWorld world, LivingEntity owner, ItemStack stack, ActiveLanterns active) {
+        if (world.getTime() < active.refreshAt) return;
+        active.refreshAt = world.getTime() + 20;
+        active.owner = owner;
+        UniqueAbilityExecution lanterns = Phase8CombatManager.beginPassive(
+                Phase8UniqueAbilities.SOULKEEPER_LANTERNS, world, stack, owner, null);
+        active.lanternTuning = Phase8UniqueAbilities.tuning(lanterns);
+        UniqueAbilityApi.finish(lanterns, Phase8UniqueAbilities.FINISH, 0);
+        UniqueAbilityExecution velocity = Phase8CombatManager.beginPassive(
+                Phase8UniqueAbilities.SOULKEEPER_VELOCITY, world, stack, owner, null);
+        active.velocityTuning = Phase8UniqueAbilities.tuning(velocity);
+        UniqueAbilityApi.finish(velocity, Phase8UniqueAbilities.FINISH, 0);
     }
 
     private static void spawnLanternHitEffects(ServerWorld world, LivingEntity target) {
@@ -297,6 +458,18 @@ public final class SoulkeeperLanternManager {
         private float speedMultiplier = 1.0F;
         private double orbitPhase;
         private long extraLanternsUntilTick;
+        private long refreshAt;
+        private long capturedUntil;
+        private long lastBastionPulse;
+        private long lastIntercept;
+        private int contactCounter;
+        private boolean recallUsed;
+        private LivingEntity owner;
+        private final Map<UUID, Long> lastContact = new HashMap<>();
+        private final Map<UUID, Long> soulbrandUntil = new HashMap<>();
+        private Phase8AbilityTuning lanternTuning = Phase8AbilityTuning.EMPTY;
+        private Phase8AbilityTuning velocityTuning = Phase8AbilityTuning.EMPTY;
+        private Phase8AbilityTuning conclaveTuning = Phase8AbilityTuning.EMPTY;
         private final Set<UUID> collidingTargets = new HashSet<>();
 
         private void tick(ServerWorld world) {
@@ -305,8 +478,11 @@ public final class SoulkeeperLanternManager {
                 orbitPhase -= Math.PI * 2.0;
             }
             if (speedMultiplier > 1.0F) {
-                speedMultiplier = Math.max(1.0F, speedMultiplier - (float) Config.uniqueEffects.soulkeeper.speedLossPerSecond / 20.0F);
+                if (world.getTime() >= capturedUntil) speedMultiplier = Math.max(1.0F,
+                        speedMultiplier - (float) velocityTuning.get(Phase8AbilityTuning.Setting.PER_STACK_MULTIPLIER,
+                                Config.uniqueEffects.soulkeeper.speedLossPerSecond) / 20.0F);
             }
+            if (velocityTuning.flag(1 << 16)) speedMultiplier = Math.max(3, Math.min(4, speedMultiplier));
             if (extraLanternsUntilTick > 0L && world.getTime() > extraLanternsUntilTick) {
                 extraLanternsUntilTick = 0L;
             }

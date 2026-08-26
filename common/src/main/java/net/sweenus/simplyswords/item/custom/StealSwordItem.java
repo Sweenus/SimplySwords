@@ -25,6 +25,11 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
+import net.sweenus.simplyswords.api.WeaponAbilityActivationSource;
+import net.sweenus.simplyswords.api.ability.Phase8AbilityTuning;
+import net.sweenus.simplyswords.api.ability.Phase8UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
@@ -38,8 +43,12 @@ import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
+import net.sweenus.simplyswords.world.Phase8CombatManager;
 
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import java.util.Optional;
 import java.util.function.Predicate;
 
@@ -47,6 +56,8 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
     private static final double BACKSTAB_DISTANCE = 1.35;
     private static final double TARGET_LENIENCY = 0.75;
     private static final ThreadLocal<Boolean> SUPPRESS_SOUL_DEBT_GAIN = ThreadLocal.withInitial(() -> false);
+    private static final Map<UUID, Integer> DEBT_PROC_COUNTERS = new HashMap<>();
+    private static final Map<UUID, Map<UUID, MarkedAsset>> MARKED_ASSETS = new HashMap<>();
 
     public StealSwordItem(ToolMaterial toolMaterial, Settings settings) {
         super(toolMaterial, settings);
@@ -60,15 +71,47 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
         if (!attacker.getWorld().isClient()) {
             ServerWorld sworld = (ServerWorld) attacker.getWorld();
             HelperMethods.playHitSounds(attacker, target);
+            UniqueAbilityExecution execution = Phase8CombatManager.beginPassive(
+                    Phase8UniqueAbilities.SOULSTEALER_DEBT, sworld, stack, attacker, target);
+            Phase8AbilityTuning tuning = Phase8UniqueAbilities.tuning(execution);
 
-            if (!SUPPRESS_SOUL_DEBT_GAIN.get() && attacker.getRandom().nextInt(100) < Config.uniqueEffects.soulstealer.chance) {
-                addSoulDebt(stack, Config.uniqueEffects.soulstealer.hitStacks);
+            int chance = tuning.integer(Phase8AbilityTuning.Setting.CHANCE, Config.uniqueEffects.soulstealer.chance);
+            Map<UUID, MarkedAsset> assets = MARKED_ASSETS.computeIfAbsent(attacker.getUuid(), ignored -> new HashMap<>());
+            assets.entrySet().removeIf(entry -> entry.getValue().expiry <= sworld.getTime());
+            MarkedAsset asset = assets.get(target.getUuid());
+            int hits = asset == null ? 1 : asset.hits + 1;
+            if (tuning.flag(1 << 5) && hits >= tuning.integer(Phase8AbilityTuning.Setting.COUNT, 2)) {
+                chance = Math.min(100, chance + 15);
+                assets.put(target.getUuid(), new MarkedAsset(hits,
+                        sworld.getTime() + tuning.integer(Phase8AbilityTuning.Setting.DURATION_TICKS, 80)));
+            } else if (tuning.flag(1 << 5)) {
+                assets.put(target.getUuid(), new MarkedAsset(hits, sworld.getTime() + 80));
+            }
+            if (assets.size() > 32) assets.entrySet().stream()
+                    .min(Map.Entry.comparingByValue(java.util.Comparator.comparingLong(MarkedAsset::expiry)))
+                    .ifPresent(entry -> assets.remove(entry.getKey()));
+            if (assets.isEmpty()) MARKED_ASSETS.remove(attacker.getUuid());
+            if (!SUPPRESS_SOUL_DEBT_GAIN.get() && attacker.getRandom().nextInt(100) < chance) {
+                int before = getSoulDebt(stack);
+                addSoulDebt(stack, Config.uniqueEffects.soulstealer.hitStacks, tuning);
+                if (tuning.flag(1 << 3) && DEBT_PROC_COUNTERS.merge(attacker.getUuid(), 1, Integer::sum) % 3 == 0) {
+                    addSoulDebt(stack, 1, tuning);
+                }
+                int after = getSoulDebt(stack);
+                if (tuning.flag(1 << 6) && after > Config.uniqueEffects.soulstealer.maxStacks
+                        && after > before) {
+                    attacker.addStatusEffect(new net.minecraft.entity.effect.StatusEffectInstance(
+                            net.minecraft.entity.effect.StatusEffects.ABSORPTION,
+                            Math.min(120, (after - Config.uniqueEffects.soulstealer.maxStacks) * 40), 0), attacker);
+                }
                 spawnSoulDebtGainEffects(sworld, target, attacker, stack);
             }
             if (!SUPPRESS_SOUL_DEBT_GAIN.get() && !target.isAlive() && Config.uniqueEffects.soulstealer.killStacks > 0) {
-                addSoulDebt(stack, Config.uniqueEffects.soulstealer.killStacks);
+                addSoulDebt(stack, tuning.integer(Phase8AbilityTuning.Setting.COUNT,
+                        Config.uniqueEffects.soulstealer.killStacks), tuning);
                 spawnSoulDebtGainEffects(sworld, target, attacker, stack);
             }
+            UniqueAbilityApi.finish(execution, Phase8UniqueAbilities.FINISH, 1);
         }
         return super.postHit(stack, target, attacker);
     }
@@ -80,20 +123,17 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
 
     @Override
     public TypedActionResult<ItemStack> startPlayerAbility(World world, PlayerEntity user, Hand hand) {
-        ItemStack itemStack = user.getStackInHand(hand);
-        if (!world.isClient() && world instanceof ServerWorld sworld && user instanceof ServerPlayerEntity serverPlayer) {
-            int stacks = getSoulDebt(itemStack);
-            LivingEntity target = stacks <= 0 ? null : findBackstabTarget(sworld, serverPlayer);
-            Vec3d strikePos = target == null ? null : findBackstabPosition(sworld, serverPlayer, target);
-            if (stacks <= 0 || target == null || strikePos == null) {
-                spawnFailEffects(sworld, serverPlayer);
-                return TypedActionResult.fail(itemStack);
-            }
-
-            performSoulReap(sworld, serverPlayer, itemStack, target, strikePos, stacks);
-            SimplySwordsAPI.setWeaponCooldown(serverPlayer, itemStack, Config.uniqueEffects.soulstealer.cooldown);
+        ItemStack stack = user.getStackInHand(hand);
+        if (!world.isClient() && world instanceof ServerWorld serverWorld
+                && user instanceof ServerPlayerEntity player) {
+            LivingEntity target = findBackstabTarget(serverWorld, player);
+            if (target == null) return TypedActionResult.fail(stack);
+            WeaponAbilityContext context = WeaponAbilityContext.of(serverWorld, stack, player, null,
+                    target, hand, WeaponAbilityActivationSource.PLAYER);
+            return SimplySwordsAPI.tryActivateWeaponAbility(context)
+                    ? TypedActionResult.success(stack, false) : TypedActionResult.fail(stack);
         }
-        return TypedActionResult.success(itemStack, world.isClient());
+        return TypedActionResult.success(stack, true);
     }
 
     @Override
@@ -103,8 +143,7 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
         }
         int stacks = getSoulDebt(context.stack());
         return stacks > 0 && context.target() != null
-                && isValidSoulstealerTarget(context.target(), context.actor())
-                && findBackstabPosition(context.world(), context.actor(), context.target()) != null;
+                && isValidSoulstealerTarget(context.target(), context.actor());
     }
 
     @Override
@@ -113,11 +152,15 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
             return false;
         }
         int stacks = getSoulDebt(context.stack());
-        Vec3d strikePos = findBackstabPosition(context.world(), context.actor(), context.target());
-        if (strikePos == null) {
-            return false;
-        }
-        return performSoulReap(context.world(), context.actor(), context.stack(), context.target(), strikePos, stacks);
+        UniqueAbilityExecution execution = Phase8CombatManager.beginActive(
+                Phase8UniqueAbilities.SOULSTEALER_REAP, context, Config.uniqueEffects.soulstealer.cooldown);
+        Phase8AbilityTuning tuning = Phase8UniqueAbilities.tuning(execution);
+        Vec3d strikePos = findBackstabPosition(context.world(), context.actor(), context.target(), tuning);
+        if (strikePos == null) return false;
+        boolean reaped = performSoulReap(context.world(), context.actor(), context.stack(), context.target(),
+                strikePos, stacks, tuning);
+        if (reaped) Phase8CombatManager.scheduleFinish(context.world(), execution, 1, 1);
+        return reaped;
     }
 
     @Override
@@ -126,6 +169,13 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
     }
 
     private static boolean performSoulReap(ServerWorld world, LivingEntity actor, ItemStack stack, LivingEntity target, Vec3d strikePos, int stacks) {
+        return performSoulReap(world, actor, stack, target, strikePos, stacks, Phase8AbilityTuning.EMPTY);
+    }
+
+    private static boolean performSoulReap(ServerWorld world, LivingEntity actor, ItemStack stack,
+                                           LivingEntity target, Vec3d strikePos, int stacks,
+                                           Phase8AbilityTuning tuning) {
+        Vec3d departure = actor.getPos();
         Vec3d lookTarget = target.getPos().add(0.0, Math.max(0.35, target.getHeight() * 0.55), 0.0);
         Vec3d strikeEyePos = strikePos.add(0.0, actor.getEyeHeight(actor.getPose()), 0.0);
         float[] rotation = getFacingRotation(strikeEyePos, lookTarget);
@@ -144,14 +194,30 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
         actor.velocityModified = true;
 
         float multiplier = getBackstabMultiplier(stacks);
+        if (tuning.has(Phase8AbilityTuning.Setting.PER_STACK_MULTIPLIER)) {
+            multiplier *= 1.0F + (float) tuning.get(Phase8AbilityTuning.Setting.PER_STACK_MULTIPLIER, 0) * stacks;
+        }
+        if (tuning.flag(1 << 22) && stacks >= tuning.integer(Phase8AbilityTuning.Setting.STACK_CAP,
+                Config.uniqueEffects.soulstealer.maxStacks)) {
+            multiplier *= tuning.get(Phase8AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1.25);
+        }
+        multiplier *= tuning.get(Phase8AbilityTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, 1);
+        if (tuning.flag(1 << 17)) multiplier *= .75F;
         float damage = HelperMethods.abilityScaledDamage("soul", actor, stack,
-                multiplier, multiplier * Config.uniqueEffects.soulstealer.spellScalingPerMultiplier);
+                multiplier, multiplier * Config.uniqueEffects.soulstealer.spellScalingPerMultiplier
+                        * (float) tuning.get(Phase8AbilityTuning.Setting.SPELL_MULTIPLIER, 1));
+        if (tuning.has(Phase8AbilityTuning.Setting.ARMOR_IGNORE)) {
+            damage += Math.min(damage * .5F, target.getArmor()
+                    * (float) tuning.get(Phase8AbilityTuning.Setting.ARMOR_IGNORE, .1));
+        }
         damage = HelperMethods.applyNonPlayerAbilityDamageModifier(actor, damage);
         DamageSource damageSource = SimplySwordsAPI.getWeaponDamageSource(actor);
         target.timeUntilRegen = 0;
         boolean damaged = target.damage(damageSource, damage);
         if (damaged) {
-            setSoulDebt(stack, 0);
+            int consumed = tuning.flag(1 << 26)
+                    ? Math.min(stacks, tuning.integer(Phase8AbilityTuning.Setting.COUNT, stacks)) : stacks;
+            setSoulDebt(stack, Math.max(0, stacks - consumed));
             SUPPRESS_SOUL_DEBT_GAIN.set(true);
             try {
                 stack.getItem().postHit(stack, target, actor);
@@ -159,13 +225,40 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
                 SUPPRESS_SOUL_DEBT_GAIN.set(false);
             }
             if (!target.isAlive() && Config.uniqueEffects.soulstealer.killStacks > 0) {
-                addSoulDebt(stack, Config.uniqueEffects.soulstealer.killStacks);
+                addSoulDebt(stack, Config.uniqueEffects.soulstealer.killStacks, tuning);
+                if (tuning.flag(1 << 24)) {
+                    addSoulDebt(stack, tuning.integer(Phase8AbilityTuning.Setting.COUNT, 2), tuning);
+                }
+                int refund = 0;
+                if (tuning.flag(1 << 15)) refund += 80;
+                if (tuning.flag(1 << 24)) refund += tuning.integer(
+                        Phase8AbilityTuning.Setting.REFUND_TICKS, 40);
+                Phase8CombatManager.scheduleCooldownRefund(world, actor, stack, refund);
+            }
+            if (tuning.flag(1 << 21)) {
+                target.addStatusEffect(new net.minecraft.entity.effect.StatusEffectInstance(
+                        net.minecraft.entity.effect.StatusEffects.WITHER, 60, 0), actor);
+            }
+            if (tuning.flag(1 << 12)) {
+                actor.addStatusEffect(new net.minecraft.entity.effect.StatusEffectInstance(
+                        net.minecraft.entity.effect.StatusEffects.INVISIBILITY, 20, 0), actor);
+            }
+            if (tuning.flag(1 << 13)) {
+                target.addStatusEffect(new net.minecraft.entity.effect.StatusEffectInstance(
+                        net.minecraft.entity.effect.StatusEffects.SLOWNESS, 30, 2), actor);
+            }
+            if (tuning.flag(1 << 23)) addSoulDebt(stack, 1, tuning);
+            if (tuning.flag(1 << 17)) {
+                Phase8CombatManager.scheduleReturn(world, actor, departure,
+                        tuning.integer(Phase8AbilityTuning.Setting.DELAY_TICKS, 12),
+                        tuning.integer(Phase8AbilityTuning.Setting.STATUS_DURATION_TICKS, 40));
             }
             spawnBackstabEffects(world, target, actor, stacks);
             world.playSound(null, target.getX(), target.getY(), target.getZ(), SoundRegistry.DARK_SWORD_ATTACK_WITH_BLOOD_03.get(),
                     SoundCategory.PLAYERS, 0.65F, 0.75F + world.random.nextFloat() * 0.2F);
             return true;
         } else {
+            if (tuning.flag(1 << 25)) setSoulDebt(stack, stacks / 2);
             spawnFailEffects(world, actor);
         }
         return false;
@@ -227,6 +320,11 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
     }
 
     private static Vec3d findBackstabPosition(ServerWorld world, LivingEntity actor, LivingEntity target) {
+        return findBackstabPosition(world, actor, target, Phase8AbilityTuning.EMPTY);
+    }
+
+    private static Vec3d findBackstabPosition(ServerWorld world, LivingEntity actor, LivingEntity target,
+                                              Phase8AbilityTuning tuning) {
         Vec3d behind = target.getRotationVec(1.0F);
         behind = new Vec3d(behind.x, 0.0, behind.z);
         if (behind.horizontalLengthSquared() < 0.001) {
@@ -237,12 +335,17 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
         }
         behind = behind.normalize().multiply(-BACKSTAB_DISTANCE);
         Vec3d side = new Vec3d(-behind.z, 0.0, behind.x).normalize();
-        Vec3d[] candidates = new Vec3d[]{
-                target.getPos().add(behind),
-                target.getPos().add(behind).add(side.multiply(0.45)),
-                target.getPos().add(behind).subtract(side.multiply(0.45)),
-                target.getPos().add(behind.normalize().multiply(BACKSTAB_DISTANCE * 0.75))
-        };
+        List<Vec3d> candidates = new java.util.ArrayList<>();
+        candidates.add(target.getPos().add(behind));
+        candidates.add(target.getPos().add(behind).add(side.multiply(0.45)));
+        candidates.add(target.getPos().add(behind).subtract(side.multiply(0.45)));
+        candidates.add(target.getPos().add(behind.normalize().multiply(BACKSTAB_DISTANCE * 0.75)));
+        int checks = Math.clamp(tuning.integer(Phase8AbilityTuning.Setting.SEARCH_CAP, 4), 4, 24);
+        for (int i = 4; i < checks; i++) {
+            double angle = MathHelper.TAU * i / checks;
+            candidates.add(target.getPos().add(Math.cos(angle) * BACKSTAB_DISTANCE, 0,
+                    Math.sin(angle) * BACKSTAB_DISTANCE));
+        }
 
         for (Vec3d candidate : candidates) {
             Vec3d grounded = new Vec3d(candidate.x, target.getY(), candidate.z);
@@ -282,10 +385,15 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
     }
 
     private static void addSoulDebt(ItemStack stack, int amount) {
+        addSoulDebt(stack, amount, Phase8AbilityTuning.EMPTY);
+    }
+
+    private static void addSoulDebt(ItemStack stack, int amount, Phase8AbilityTuning tuning) {
         if (amount <= 0) {
             return;
         }
-        int maxStacks = Math.max(1, Config.uniqueEffects.soulstealer.maxStacks);
+        int maxStacks = Math.max(1, tuning.integer(Phase8AbilityTuning.Setting.STACK_CAP,
+                Config.uniqueEffects.soulstealer.maxStacks));
         int current = getSoulDebt(stack);
         setSoulDebt(stack, Math.min(maxStacks, current + amount));
     }
@@ -335,6 +443,9 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
         world.spawnParticles(ParticleTypes.SMOKE, pos.x, pos.y, pos.z, 3, 0.12, 0.1, 0.12, 0.006);
         world.playSound(null, actor.getX(), actor.getY(), actor.getZ(), SoundRegistry.DARK_SWORD_BLOCK.get(),
                 SoundCategory.PLAYERS, 0.35F, 1.55F);
+    }
+
+    private record MarkedAsset(int hits, long expiry) {
     }
 
     @Override
