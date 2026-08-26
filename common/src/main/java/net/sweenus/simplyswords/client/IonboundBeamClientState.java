@@ -7,6 +7,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.sound.MovingSoundInstance;
 import net.minecraft.client.sound.SoundInstance;
+import net.minecraft.client.util.SmoothUtil;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.sound.SoundCategory;
@@ -31,11 +32,15 @@ public final class IonboundBeamClientState {
     private static final double MAX_FOV_ADDITION = 10.0;
 
     private static final Map<UUID, BeamChannelSound> CHANNEL_SOUNDS = new HashMap<>();
+    private static final SmoothUtil LOOK_X_SMOOTHER = new SmoothUtil();
+    private static final SmoothUtil LOOK_Y_SMOOTHER = new SmoothUtil();
     private static ClientWorld activeWorld;
     private static boolean ownedBeamActive;
     private static float previousFovIntensity;
     private static float fovIntensity;
     private static boolean initialized;
+    private static double lookTimeDelta;
+    private static boolean lookSmoothingActive;
 
     private IonboundBeamClientState() {
     }
@@ -81,8 +86,34 @@ public final class IonboundBeamClientState {
         updateFovIntensity();
     }
 
-    public static double scaleLookDelta(double delta) {
-        return ownedBeamActive ? delta * LOOK_SCALE : delta;
+    public static void updateLookTiming(double timeDelta) {
+        lookTimeDelta = timeDelta;
+        if (ownedBeamActive == lookSmoothingActive) return;
+        lookSmoothingActive = ownedBeamActive;
+        clearLookSmoothing();
+    }
+
+    public static double scaleLookDeltaX(double delta) {
+        return smoothAndScaleLookDelta(LOOK_X_SMOOTHER, delta);
+    }
+
+    public static double scaleLookDeltaY(double delta) {
+        return smoothAndScaleLookDelta(LOOK_Y_SMOOTHER, delta);
+    }
+
+    private static double smoothAndScaleLookDelta(SmoothUtil smoother, double delta) {
+        MinecraftClient client = MinecraftClient.getInstance();
+        double value = delta;
+        if (client.options != null && !client.options.smoothCameraEnabled) {
+            double sensitivity = client.options.getMouseSensitivity().getValue() * 0.6 + 0.2;
+            value = smoother.smooth(delta, lookTimeDelta * sensitivity * sensitivity * sensitivity * 8.0);
+        }
+        return value * LOOK_SCALE;
+    }
+
+    private static void clearLookSmoothing() {
+        LOOK_X_SMOOTHER.clear();
+        LOOK_Y_SMOOTHER.clear();
     }
 
     public static boolean isOwnedBeamActive() {
@@ -112,6 +143,9 @@ public final class IonboundBeamClientState {
         activeWorld = null;
         previousFovIntensity = 0.0F;
         fovIntensity = 0.0F;
+        lookTimeDelta = 0.0;
+        lookSmoothingActive = false;
+        clearLookSmoothing();
     }
 
     private static final class BeamChannelSound extends MovingSoundInstance {

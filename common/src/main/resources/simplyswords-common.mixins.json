@@ -14,6 +14,7 @@
     "client.WorldRendererMixin",
     "client.MinecraftClientMixin",
     "client.MouseMixin",
+    "client.EntityLookMixin",
     "client.ClientPlayerEntityMixin",
     "client.WorldWeatherMixin",
     "client.compat.SpellEngineSpellHotbarMixin"
