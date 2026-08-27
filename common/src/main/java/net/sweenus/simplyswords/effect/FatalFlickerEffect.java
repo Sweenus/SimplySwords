@@ -11,6 +11,7 @@ import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
+import net.sweenus.simplyswords.api.ability.Phase3AbilityTuning;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -25,7 +26,12 @@ public class FatalFlickerEffect extends StatusEffect {
     }
 
     public static void performDash(LivingEntity user, World world, int radius) {
-        float dashDistance = Config.uniqueEffects.whisperwind.dashVelocity;
+        Phase3AbilityTuning tuning = world instanceof ServerWorld tuned
+                ? WhisperwindVisualManager.dashTuning(tuned, user) : Phase3AbilityTuning.EMPTY;
+        float dashDistance = (float) (tuning.get(Phase3AbilityTuning.Setting.DASH_SPEED,
+                Config.uniqueEffects.whisperwind.dashVelocity)
+                * tuning.get(Phase3AbilityTuning.Setting.DASH_RANGE_MULTIPLIER, 1));
+        radius = Math.max(1, tuning.integer(Phase3AbilityTuning.Setting.DASH_RADIUS, radius));
 
         user.setVelocity(user.getRotationVector().multiply(+dashDistance));
         user.setVelocity(user.getVelocity().x, 0, user.getVelocity().z);
@@ -52,11 +58,20 @@ public class FatalFlickerEffect extends StatusEffect {
             int radius = Config.uniqueEffects.whisperwind.radius;
 
             //Player dash forward
+            int extra = world instanceof ServerWorld tuned
+                    ? WhisperwindVisualManager.extraDashTicks(tuned, user) : 0;
             if (ability_timer >= 5) {
+                performDash(user, world, radius);
+            } else if (extra > 0 && user.getStatusEffect(
+                    EffectRegistry.getReference(EffectRegistry.FATAL_FLICKER)) != null) {
+                user.addStatusEffect(new StatusEffectInstance(
+                        EffectRegistry.getReference(EffectRegistry.FATAL_FLICKER), ability_timer + extra));
                 performDash(user, world, radius);
             } else {
                 if (world instanceof ServerWorld serverWorld) {
                     WhisperwindVisualManager.finishDash(serverWorld, user);
+                    net.sweenus.simplyswords.world.WhisperwindRhythmManager.startWake(serverWorld, user,
+                            WhisperwindVisualManager.dashTuning(serverWorld, user));
                 }
                 user.setVelocity(0, 0, 0); // Stop user at end of charges
                 user.velocityModified = true;

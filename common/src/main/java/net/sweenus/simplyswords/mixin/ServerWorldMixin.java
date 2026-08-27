@@ -94,6 +94,9 @@ public abstract class ServerWorldMixin {
         if (WhisperwindVisualManager.hasActive(world)) {
             WhisperwindVisualManager.tick(world);
         }
+        if (net.sweenus.simplyswords.world.DreadwhisperTrailManager.hasActive(world)) {
+            net.sweenus.simplyswords.world.DreadwhisperTrailManager.tick(world);
+        }
         if (DreadwhisperAbilityManager.hasActive(world)) {
             DreadwhisperAbilityManager.tick(world);
         }

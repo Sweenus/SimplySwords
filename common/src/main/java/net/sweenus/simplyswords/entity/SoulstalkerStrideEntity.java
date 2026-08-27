@@ -38,6 +38,7 @@ import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.network.SoulstalkerLeapLaunchPacket;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.registry.SoulstalkerVoice;
+import net.sweenus.simplyswords.api.ability.Phase3AbilityTuning;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.world.GloamStainManager;
 import org.joml.Vector3f;
@@ -108,6 +109,10 @@ public final class SoulstalkerStrideEntity extends MobEntity implements JumpingM
             new DustColorTransitionParticleEffect(new Vector3f(0.015F, 0.004F, 0.035F),
                     new Vector3f(0.24F, 0.035F, 0.38F), 1.1F);
 
+    private Phase3AbilityTuning tuning = Phase3AbilityTuning.EMPTY;
+    private double cleaveHitBonus;
+    private boolean chargedLeapPending;
+    private boolean momentumActive;
     private final List<PendingFootfall> pendingFootfalls = new ArrayList<>();
     private final Map<UUID, Long> footfallImmunity = new HashMap<>();
     private boolean jumpQueued;
@@ -198,6 +203,35 @@ public final class SoulstalkerStrideEntity extends MobEntity implements JumpingM
         builder.add(VOICE_INDEX, -1);
         builder.add(VOICE_SEQUENCE, 0);
         builder.add(CEILING_FORWARD_LOCKED, false);
+    }
+
+    public void setTuning(Phase3AbilityTuning tuning) {
+        this.tuning = tuning == null ? Phase3AbilityTuning.EMPTY : tuning;
+    }
+
+    public Phase3AbilityTuning getTuning() {
+        return tuning;
+    }
+
+    public void setMomentumActive(boolean active) {
+        this.momentumActive = active;
+    }
+
+    // Rift Stride reads this once per fully charged launch.
+    public boolean consumeChargedLeap() {
+        boolean charged = chargedLeapPending;
+        chargedLeapPending = false;
+        return charged;
+    }
+
+    // Gathering Hunger accumulates on cleave hits and is spent by the next leap impact.
+    public void addCleaveHitBonus() {
+        double perHit = tuning.get(Phase3AbilityTuning.Setting.CLEAVE_HIT_BONUS, 0);
+        if (perHit <= 0) return;
+        int stackCap = Math.max(1, tuning.integer(Phase3AbilityTuning.Setting.CLEAVE_HIT_STACK_CAP, 1));
+        double cap = Math.min(tuning.get(Phase3AbilityTuning.Setting.CLEAVE_HIT_BONUS_CAP, 0),
+                perHit * stackCap);
+        cleaveHitBonus = Math.min(cap, cleaveHitBonus + perHit);
     }
 
     public void setOwner(LivingEntity owner) {
@@ -485,7 +519,8 @@ public final class SoulstalkerStrideEntity extends MobEntity implements JumpingM
             }
             lastWallNormal = normal;
             Vec3d motion = wallMotion(controller, normal);
-            double speed = MathHelper.clamp(Config.uniqueEffects.soulstalker.climbSpeed, 0.05, 1.0);
+            double speed = MathHelper.clamp(tuning.get(Phase3AbilityTuning.Setting.CLIMB_SPEED,
+                    Config.uniqueEffects.soulstalker.climbSpeed), 0.05, 1.0);
             Vec3d velocity = motion.multiply(speed);
             boolean climbing = motion.y > 0.05;
             if (tickStandoff(normal, climbing)) {
@@ -1035,6 +1070,7 @@ public final class SoulstalkerStrideEntity extends MobEntity implements JumpingM
 
     private void performLeap(LivingEntity controller) {
         jumpQueued = false;
+        chargedLeapPending = jumpScale >= tuning.get(Phase3AbilityTuning.Setting.LEAP_CHARGE_THRESHOLD, 1);
         byte mode = queuedLeapSurfaceMode == Byte.MIN_VALUE
                 ? getSurfaceMode() : queuedLeapSurfaceMode;
         Vec3d sourceNormal = queuedLeapSurfaceNormal.lengthSquared() < 1.0E-6
@@ -1046,6 +1082,7 @@ public final class SoulstalkerStrideEntity extends MobEntity implements JumpingM
         queuedLeapLook = Vec3d.ZERO;
         if (!isAnchoredSurface(mode) && !nearGround) {
             jumpScale = 0.6F;
+            chargedLeapPending = false;
             return;
         }
         BlockHitResult sourceContact = mode == SURFACE_WALL
@@ -1242,11 +1279,25 @@ public final class SoulstalkerStrideEntity extends MobEntity implements JumpingM
 
     private void resolveLeapImpact(ServerWorld world, LivingEntity owner, Vec3d impact,
                                    Vec3d surfaceNormal, boolean createStain) {
-        double radius = Math.max(0.25, Config.uniqueEffects.soulstalker.leapImpactRadius);
+        boolean charged = jumpScale >= tuning.get(Phase3AbilityTuning.Setting.LEAP_CHARGE_THRESHOLD, 1);
+        double chargedMultiplier = tuning.get(Phase3AbilityTuning.Setting.LEAP_CHARGED_DAMAGE_MULTIPLIER, 0);
+        double chargedRadius = tuning.get(Phase3AbilityTuning.Setting.LEAP_CHARGED_RADIUS, 0);
+        double radius = Math.max(0.25, charged && chargedRadius > 0 ? chargedRadius
+                : tuning.get(Phase3AbilityTuning.Setting.LEAP_IMPACT_RADIUS,
+                        Config.uniqueEffects.soulstalker.leapImpactRadius));
+        double damageMultiplier = (charged && chargedMultiplier > 0 ? chargedMultiplier
+                : tuning.get(Phase3AbilityTuning.Setting.LEAP_IMPACT_DAMAGE_MULTIPLIER, 1))
+                + cleaveHitBonus;
         float damage = Math.max(0.0F, (float) (HelperMethods.getEntityAttackDamage(owner)
-                * Math.max(0.0, Config.uniqueEffects.soulstalker.leapImpactDamageScaling)));
-        double knockback = Math.max(0.0, Config.uniqueEffects.soulstalker.leapImpactKnockback);
-        double lift = Math.max(0.0, Config.uniqueEffects.soulstalker.leapImpactLift);
+                * Math.max(0.0, Config.uniqueEffects.soulstalker.leapImpactDamageScaling) * damageMultiplier));
+        double knockback = Math.max(0.0, tuning.get(Phase3AbilityTuning.Setting.LEAP_IMPACT_KNOCKBACK,
+                Config.uniqueEffects.soulstalker.leapImpactKnockback));
+        double lift = Math.max(0.0, tuning.get(Phase3AbilityTuning.Setting.LEAP_IMPACT_LIFT,
+                Config.uniqueEffects.soulstalker.leapImpactLift));
+        int targetCap = Math.max(1, tuning.integer(Phase3AbilityTuning.Setting.LEAP_IMPACT_TARGET_CAP,
+                Config.uniqueEffects.soulstalker.leapImpactTargetCap));
+        cleaveHitBonus = 0;
+        int affected = 0;
         Box search = Box.of(impact, radius * 2.0, radius * 2.0, radius * 2.0);
         DamageSource source = world.getDamageSources().indirectMagic(owner, owner);
         for (LivingEntity target : world.getEntitiesByClass(LivingEntity.class, search,
@@ -1259,6 +1310,9 @@ public final class SoulstalkerStrideEntity extends MobEntity implements JumpingM
             WeaponImplicitRegistry.runSuppressed(() -> damaged[0] = target.damage(source, resolvedDamage));
             if (!damaged[0]) {
                 continue;
+            }
+            if (++affected > targetCap) {
+                break;
             }
             Vec3d outward = target.getPos().subtract(impact).multiply(1.0, 0.0, 1.0);
             if (outward.horizontalLengthSquared() < 1.0E-4) {
@@ -1279,10 +1333,15 @@ public final class SoulstalkerStrideEntity extends MobEntity implements JumpingM
             }
         }
         cueVoice(SoulstalkerVoice.LEAP_ATTACK_LAND);
-        if (createStain) {
+        double meteorStain = charged ? tuning.get(Phase3AbilityTuning.Setting.LEAP_STAIN_RADIUS, 0) : 0.0;
+        if (createStain || meteorStain > 0) {
             GloamStainManager.createPatch(world, owner.getUuid(), impact,
-                    Math.max(0.25, Config.uniqueEffects.soulstalker.leapImpactStainRadius),
-                    Math.max(20, Config.uniqueEffects.soulstalker.stainDuration),
+                    Math.max(0.25, Math.max(meteorStain,
+                            Config.uniqueEffects.soulstalker.leapImpactStainRadius)),
+                    Math.max(20, meteorStain > 0
+                            ? tuning.integer(Phase3AbilityTuning.Setting.LEAP_STAIN_DURATION_TICKS,
+                                    Config.uniqueEffects.soulstalker.stainDuration)
+                            : Config.uniqueEffects.soulstalker.stainDuration),
                     Math.max(1, Config.uniqueEffects.soulstalker.stainFadeDuration),
                     Math.clamp(Config.uniqueEffects.soulstalker.stainSlowAmplifier, 0, 4));
         }
@@ -1380,9 +1439,12 @@ public final class SoulstalkerStrideEntity extends MobEntity implements JumpingM
         }
         world.spawnParticles(GLOAM_DUST, footfall.position.x, footfall.position.y, footfall.position.z,
                 4, 0.16, 0.08, 0.16, 0.012);
-        double radius = Math.max(0.1, Config.uniqueEffects.soulstalker.footfallRadius);
+        double radius = Math.max(0.1, tuning.get(Phase3AbilityTuning.Setting.FOOTFALL_RADIUS,
+                Config.uniqueEffects.soulstalker.footfallRadius));
         float damage = Math.max(0.0F, (float) (HelperMethods.getEntityAttackDamage(owner)
-                * Math.max(0.0, Config.uniqueEffects.soulstalker.footfallDamageScaling)));
+                * Math.max(0.0, Config.uniqueEffects.soulstalker.footfallDamageScaling)
+                * tuning.get(Phase3AbilityTuning.Setting.FOOTFALL_DAMAGE_MULTIPLIER, 1)
+                * (momentumActive ? 1.0 + tuning.get(Phase3AbilityTuning.Setting.MOMENTUM_BONUS, 0) : 1.0)));
         if (damage <= 0.0F) {
             return;
         }

@@ -244,6 +244,13 @@ public final class GloamStainManager {
     public static UUID beginTrail(ServerWorld world, UUID ownerId, Vec3d origin,
                                   Vec3d direction, double width, int durationTicks,
                                   int fadeTicks, int slowAmplifier) {
+        return beginTrail(world, ownerId, origin, direction, width, durationTicks, fadeTicks,
+                slowAmplifier, PatchBehavior.NONE);
+    }
+
+    public static UUID beginTrail(ServerWorld world, UUID ownerId, Vec3d origin,
+                                  Vec3d direction, double width, int durationTicks,
+                                  int fadeTicks, int slowAmplifier, PatchBehavior behavior) {
         if (world == null || ownerId == null || origin == null || direction == null || width <= 0.0) {
             return null;
         }
@@ -268,8 +275,10 @@ public final class GloamStainManager {
         List<ActivePatch> patches = ACTIVE.computeIfAbsent(world, ignored -> new ArrayList<>());
         enforceOwnerCap(world, patches, ownerId);
         UUID trailId = UUID.randomUUID();
-        patches.add(ActivePatch.trail(trailId, ownerId, visual.getUuid(), origin,
-                horizontal, radius, world.getTime() + duration, duration, fade, amplifier));
+        ActivePatch trail = ActivePatch.trail(trailId, ownerId, visual.getUuid(), origin,
+                horizontal, radius, world.getTime() + duration, duration, fade, amplifier);
+        trail.mergeBehavior(behavior);
+        patches.add(trail);
         return trailId;
     }
 

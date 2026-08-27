@@ -38,11 +38,16 @@ import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
+import net.sweenus.simplyswords.world.SoulrenderAbilityManager;
 import net.sweenus.simplyswords.world.SoulrenderMarkVisualManager;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class SoulrenderSwordItem extends UniqueSwordItem implements TwoHandedWeapon, UniqueWeaponActiveAbility {
+    private static final int MODE_PALLBEARER = 4;
+
     public SoulrenderSwordItem(ToolMaterial toolMaterial, Settings settings) {
         super(toolMaterial, settings);
     }
@@ -60,15 +65,21 @@ public class SoulrenderSwordItem extends UniqueSwordItem implements TwoHandedWea
             UniqueAbilityApi.takeStartedExecution();
             UniqueAbilityApi.start(execution);
             Phase3AbilityTuning tuning = Phase3UniqueAbilities.tuning(execution);
-            int hitChance = tuning.integer(Phase3AbilityTuning.Setting.CHANCE, Config.uniqueEffects.soulrender.chance);
             int duration = tuning.integer(Phase3AbilityTuning.Setting.MARK_DURATION_TICKS, Config.uniqueEffects.soulrender.duration);
             int maxStacks = tuning.integer(Phase3AbilityTuning.Setting.STACK_CAP, Config.uniqueEffects.soulrender.maxStacks);
             ParticleEffect particleSelect  = ParticleTypes.ASH;
             int particleCount = 8; // Number of particles along the line
 
-            boolean mark = tuning.has(Phase3AbilityTuning.Setting.CHANCE)
-                    ? hitChance >= 100 || hitChance > 0 && attacker.getRandom().nextInt(100) < hitChance
-                    : attacker.getRandom().nextInt(100) <= hitChance;
+            boolean afflicted = SoulrenderAbilityManager.isMarked(target);
+            int hitChance = tuning.integer(Phase3AbilityTuning.Setting.CHANCE,
+                    Config.uniqueEffects.soulrender.chance)
+                    + tuning.integer(Phase3AbilityTuning.Setting.CHANCE_BONUS, 0);
+            if (afflicted) {
+                hitChance -= tuning.integer(Phase3AbilityTuning.Setting.REPEAT_CHANCE_PENALTY, 0);
+            }
+            boolean guaranteed = !afflicted
+                    && (tuning.integer(Phase3AbilityTuning.Setting.MODE, 0) & MODE_PALLBEARER) != 0;
+            boolean mark = guaranteed || hitChance >= 0 && attacker.getRandom().nextInt(100) <= hitChance;
             if (mark) {
                 particleSelect  = ParticleTypes.SMOKE;
                 HelperMethods.spawnOrbitParticles(world, target.getPos(), particleSelect, 0.5f, particleCount);
@@ -86,35 +97,29 @@ public class SoulrenderSwordItem extends UniqueSwordItem implements TwoHandedWea
                             target.getSoundCategory(), 0.4f, 1.5f);
 
                 StatusEffectInstance weakness = target.getStatusEffect(StatusEffects.WEAKNESS);
-                if (weakness != null) {
-                    int a = (weakness.getAmplifier() + 1);
-
-                    if ((weakness.getAmplifier() <= 0)) {
-                        target.addStatusEffect(new StatusEffectInstance(StatusEffects.WEAKNESS, duration, a), attacker);
-                    }
-                } else {
-                    target.addStatusEffect(new StatusEffectInstance(StatusEffects.WEAKNESS, duration, 0), attacker);
-                }
+                int weaknessAmplifier = weakness == null ? 0 : Math.min(1, weakness.getAmplifier() + 1);
+                target.addStatusEffect(new StatusEffectInstance(StatusEffects.WEAKNESS, duration,
+                        weaknessAmplifier), attacker);
 
                 StatusEffectInstance slowness = target.getStatusEffect(StatusEffects.SLOWNESS);
-                if (slowness != null) {
-                    int a = (slowness.getAmplifier() + 1);
-
-                    if ((slowness.getAmplifier() < maxStacks)) {
-                        target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, duration, a), attacker);
-                    }
-                } else {
-                    target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, duration, 0), attacker);
-                }
+                int granted = slowness == null
+                        ? SoulrenderAbilityManager.openingStacks(world, target, tuning) : 1;
+                int slownessAmplifier = slowness == null
+                        ? Math.min(maxStacks, granted - 1)
+                        : Math.min(maxStacks, slowness.getAmplifier() + granted);
+                target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, duration,
+                        slownessAmplifier), attacker);
 
                 SoulrenderMarkVisualManager.refreshMark(world, target, duration);
+                SoulrenderAbilityManager.echoMark(world, attacker, target, tuning);
                 UniqueAbilityApi.emit(execution, UniqueAbilityPhase.HIT, Phase3UniqueAbilities.HIT,
                         target, 1, maxStacks);
             }
             int amplifier = target.hasStatusEffect(StatusEffects.SLOWNESS)
                     ? target.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier() + 1 : 0;
-            float bonus = (float) Math.min(tuning.get(Phase3AbilityTuning.Setting.MELEE_BONUS_CAP, 0),
-                    amplifier * tuning.get(Phase3AbilityTuning.Setting.MELEE_BONUS_PER_STACK, 0));
+            float bonus = (float) (Math.min(tuning.get(Phase3AbilityTuning.Setting.MELEE_BONUS_CAP, 0),
+                    amplifier * tuning.get(Phase3AbilityTuning.Setting.MELEE_BONUS_PER_STACK, 0))
+                    + SoulrenderAbilityManager.takeTitheBonus(world, attacker));
             if (bonus > 0) {
                 var source = attacker.getDamageSources().indirectMagic(attacker, attacker);
                 target.damage(source, HelperMethods.applyAbilityDamageEnchantments(world, stack, target, source,
@@ -140,8 +145,7 @@ public class SoulrenderSwordItem extends UniqueSwordItem implements TwoHandedWea
                 && context.world() != null
                 && context.actor() != null
                 && context.actor().isAlive()
-                && context.stack().getDamage() < context.stack().getMaxDamage() - 1
-                && hasSoulrenderMarks(context.world(), context.actor());
+                && context.stack().getDamage() < context.stack().getMaxDamage() - 1;
     }
 
     @Override
@@ -156,78 +160,95 @@ public class SoulrenderSwordItem extends UniqueSwordItem implements TwoHandedWea
         return consumed > 0;
     }
 
-    private boolean hasSoulrenderMarks(ServerWorld world, LivingEntity user) {
-        double hradius = Config.uniqueEffects.soulrender.radius;
-        double vradius = Config.uniqueEffects.soulrender.radius / 2.0;
-        Box box = new Box(user.getX() + hradius, user.getY() + vradius, user.getZ() + hradius,
-                user.getX() - hradius, user.getY() - vradius, user.getZ() - hradius);
-        return world.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY).stream()
-                .anyMatch(entity -> entity instanceof LivingEntity le
-                        && HelperMethods.checkAbilityTarget(le, user)
-                        && le.hasStatusEffect(StatusEffects.SLOWNESS)
-                        && le.hasStatusEffect(StatusEffects.WEAKNESS));
-    }
-
-    private int consumeSoulrenderMarks(ServerWorld world, LivingEntity user, ItemStack stack) {
-        return consumeSoulrenderMarks(world, user, stack, Phase3AbilityTuning.EMPTY, null);
-    }
-
     private int consumeSoulrenderMarks(ServerWorld world, LivingEntity user, ItemStack stack,
                                        Phase3AbilityTuning tuning, UniqueAbilityExecution execution) {
-        float healAmount = (float) tuning.get(Phase3AbilityTuning.Setting.HEAL_RATIO,
-                Config.uniqueEffects.soulrender.healMulti);
-        int healAmp = 0;
-        int consumed = 0;
         double hradius = tuning.get(Phase3AbilityTuning.Setting.RADIUS, Config.uniqueEffects.soulrender.radius);
-        double vradius = hradius / 2.0;
-        Box box = new Box(user.getX() + hradius, user.getY() + vradius, user.getZ() + hradius,
-                user.getX() - hradius, user.getY() - vradius, user.getZ() - hradius);
+        int targetCap = Math.max(1, tuning.integer(Phase3AbilityTuning.Setting.REAP_TARGET_CAP,
+                Config.uniqueEffects.soulrender.targetCap));
+        SoulrenderAbilityManager.reachPull(world, user, hradius, tuning);
 
-        int targetCap = tuning.has(Phase3AbilityTuning.Setting.TARGET_CAP)
-                ? tuning.integer(Phase3AbilityTuning.Setting.TARGET_CAP, 64) : Integer.MAX_VALUE;
-        for (Entity entity : world.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY)) {
-            if ((entity instanceof LivingEntity le) && HelperMethods.checkAbilityTarget(le, user)) {
-                StatusEffectInstance slowness = le.getStatusEffect(StatusEffects.SLOWNESS);
-                StatusEffectInstance weakness = le.getStatusEffect(StatusEffects.WEAKNESS);
-                if (slowness == null || weakness == null) {
-                    continue;
-                }
+        double stackBonus = tuning.get(Phase3AbilityTuning.Setting.REAP_STACK_BONUS, 0);
+        double stackBonusCap = tuning.get(Phase3AbilityTuning.Setting.REAP_STACK_BONUS_CAP, 0);
+        double damageMultiplier = tuning.get(Phase3AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1);
+        double quietusThreshold = tuning.get(Phase3AbilityTuning.Setting.QUIETUS_HEALTH_THRESHOLD, 0);
+        int quietusPerMark = tuning.integer(Phase3AbilityTuning.Setting.QUIETUS_ABSORPTION, 0);
+        int quietusCap = tuning.integer(Phase3AbilityTuning.Setting.QUIETUS_ABSORPTION_CAP, 0);
 
-                healAmp += slowness.getAmplifier();
-                float damage = HelperMethods.abilityScaledDamage("soul", user, stack,
-                        Config.uniqueEffects.soulrender.damageScaling, Config.uniqueEffects.soulrender.spellScaling);
-                SoulrenderMarkVisualManager.consumeMark(world, le, user);
-                var damageSource = user.getDamageSources().indirectMagic(user, user);
-                int stacks = slowness.getAmplifier() + 1;
-                float multiplier = (float) (tuning.get(Phase3AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1)
-                        + Math.min(tuning.get(Phase3AbilityTuning.Setting.BONUS_CAP, 0),
-                        stacks * tuning.get(Phase3AbilityTuning.Setting.PER_STACK_BONUS, 0)));
-                float dealt = stacks * damage * multiplier;
-                le.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments(world, stack, le, damageSource, dealt));
+        SoulrenderAbilityManager.OwnerReapState reap = new SoulrenderAbilityManager.OwnerReapState();
+        int healStacks = 0;
+        int consumed = 0;
+        int kills = 0;
+        int quietusAbsorption = 0;
+        float totalDealt = 0f;
+        for (LivingEntity le : markedTargets(world, user, hradius, targetCap)) {
+            StatusEffectInstance slowness = le.getStatusEffect(StatusEffects.SLOWNESS);
+            if (slowness == null || !le.isAlive()) continue;
+            int stacks = slowness.getAmplifier() + 1;
+            healStacks += stacks;
+            boolean lowHealth = quietusPerMark > 0 && quietusThreshold > 0
+                    && le.getHealth() <= le.getMaxHealth() * quietusThreshold;
+
+            float damage = HelperMethods.abilityScaledDamage("soul", user, stack,
+                    Config.uniqueEffects.soulrender.damageScaling, Config.uniqueEffects.soulrender.spellScaling);
+            SoulrenderMarkVisualManager.consumeMark(world, le, user);
+            var damageSource = user.getDamageSources().indirectMagic(user, user);
+            float multiplier = (float) (damageMultiplier + Math.min(stackBonusCap, stacks * stackBonus));
+            float dealt = stacks * damage * multiplier;
+            le.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments(world, stack, le, damageSource, dealt));
+            totalDealt += dealt;
+            if (execution != null) UniqueAbilityApi.emit(execution, UniqueAbilityPhase.HIT,
+                    Phase3UniqueAbilities.HIT, le, 1, dealt);
+            if (!le.isAlive()) {
+                kills++;
                 if (execution != null) UniqueAbilityApi.emit(execution, UniqueAbilityPhase.HIT,
-                        Phase3UniqueAbilities.HIT, le, 1, dealt);
-                le.removeStatusEffect(StatusEffects.WEAKNESS);
-                le.removeStatusEffect(StatusEffects.SLOWNESS);
-                world.playSoundFromEntity(null, entity, SoundRegistry.DARK_SWORD_SPELL.get(),
-                        entity.getSoundCategory(), 0.1f, 2f);
-                consumed++;
-                if (consumed >= targetCap) break;
+                        Phase3UniqueAbilities.KILL, le, 1, dealt);
+                SoulrenderAbilityManager.sharedEnding(world, user, stack, le, dealt, tuning, reap);
+            }
+            if (lowHealth) quietusAbsorption = Math.min(quietusCap, quietusAbsorption + quietusPerMark);
+            le.removeStatusEffect(StatusEffects.WEAKNESS);
+            le.removeStatusEffect(StatusEffects.SLOWNESS);
+            world.playSoundFromEntity(null, le, SoundRegistry.DARK_SWORD_SPELL.get(),
+                    le.getSoundCategory(), 0.1f, 2f);
+            consumed++;
+        }
+        if (healStacks > 0) {
+            double ratio = (tuning.get(Phase3AbilityTuning.Setting.HEAL_RATIO,
+                    Config.uniqueEffects.soulrender.healMulti)
+                    + tuning.get(Phase3AbilityTuning.Setting.HEAL_RATIO_BONUS, 0))
+                    * tuning.get(Phase3AbilityTuning.Setting.HEAL_MULTIPLIER, 1);
+            float heal = (float) (healStacks * ratio);
+            if (heal > 0f && heal < 1f) heal = 1f;
+            float cap = (float) tuning.get(Phase3AbilityTuning.Setting.HEAL_CAP, 6);
+            if (heal > cap) heal = cap;
+            if (heal > 0f) user.heal(heal);
+        }
+        SoulrenderAbilityManager.recordReap(world, user, tuning, consumed, totalDealt, kills, quietusAbsorption);
+        return consumed;
+    }
+
+    private List<LivingEntity> markedTargets(ServerWorld world, LivingEntity user, double radius, int limit) {
+        double vradius = radius / 2.0;
+        Box box = new Box(user.getX() + radius, user.getY() + vradius, user.getZ() + radius,
+                user.getX() - radius, user.getY() - vradius, user.getZ() - radius);
+        List<LivingEntity> found = new ArrayList<>();
+        for (Entity entity : world.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY)) {
+            if (entity instanceof LivingEntity le && HelperMethods.checkAbilityTarget(le, user)
+                    && SoulrenderAbilityManager.isMarked(le)) {
+                found.add(le);
             }
         }
-        if (healAmp > 0) {
-            float heal = (float) healAmp * healAmount;
-            if (heal < 1f) heal = 1f;
-            else if (heal > tuning.get(Phase3AbilityTuning.Setting.HEAL_CAP, 6))
-                heal = (float) tuning.get(Phase3AbilityTuning.Setting.HEAL_CAP, 6);
-            user.heal(heal);
-        }
-        return consumed;
+        found.sort(Comparator.comparingDouble(user::squaredDistanceTo));
+        return found.size() > limit ? found.subList(0, limit) : found;
     }
 
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
         HelperMethods.createFootfalls(entity, stack, world, ParticleTypes.SOUL, ParticleTypes.SCULK_SOUL,
                 ParticleTypes.WARPED_SPORE, true);
+        if (world instanceof ServerWorld serverWorld && entity instanceof LivingEntity holder
+                && (selected || holder.getOffHandStack() == stack)) {
+            SoulrenderAbilityManager.tickHolder(serverWorld, holder, stack);
+        }
         super.inventoryTick(stack, world, entity, slot, selected);
     }
 
@@ -258,6 +279,8 @@ public class SoulrenderSwordItem extends UniqueSwordItem implements TwoHandedWea
         public int maxStacks = 8;
         @ValidatedDouble.Restrict(min = 1.0)
         public double radius = 10.0;
+        @ValidatedInt.Restrict(min = 1, max = 64)
+        public int targetCap = 32;
 
         @ValidatedFloat.Restrict(min = 0f)
         public float healMulti = 0.5f;

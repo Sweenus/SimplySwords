@@ -56,6 +56,8 @@ public final class SoulstalkerCleaveEntity extends Entity {
     private double maxDistance = 10.0;
     private double traveled;
     private float weaponDamage;
+    private int targetCap = Integer.MAX_VALUE;
+    private java.util.UUID strideId;
 
     public SoulstalkerCleaveEntity(EntityType<? extends SoulstalkerCleaveEntity> type, World world) {
         super(type, world);
@@ -65,7 +67,8 @@ public final class SoulstalkerCleaveEntity extends Entity {
 
     public SoulstalkerCleaveEntity(ServerWorld world, LivingEntity owner, ItemStack stack,
                                    Vec3d origin, Vec3d direction, double distance, double speed,
-                                   float damage, float initialWidth, float finalWidth) {
+                                   float damage, float initialWidth, float finalWidth,
+                                   int targetCap, java.util.UUID strideId) {
         this(EntityRegistry.SOULSTALKER_CLEAVE.get(), world);
         Vec3d normalized = direction.lengthSquared() < 1.0E-6
                 ? Vec3d.fromPolar(owner.getPitch(), owner.getYaw()) : direction.normalize();
@@ -78,6 +81,8 @@ public final class SoulstalkerCleaveEntity extends Entity {
         dataTracker.set(SEED, world.random.nextInt());
         maxDistance = Math.max(1.0, distance);
         weaponDamage = Math.max(0.0F, damage);
+        this.targetCap = Math.max(1, targetCap);
+        this.strideId = strideId;
         setPosition(origin);
         setVelocity(normalized.multiply(Math.max(0.05, speed)));
         setYaw(owner.getYaw());
@@ -143,10 +148,17 @@ public final class SoulstalkerCleaveEntity extends Entity {
                 entity -> entity != owner && entity.isAlive() && !entity.isRemoved()
                         && EntityPredicates.VALID_LIVING_ENTITY.test(entity)
                         && HelperMethods.checkAbilityTarget(entity, owner))) {
+            if (hitTargets.size() >= targetCap) {
+                break;
+            }
             if (!hitTargets.add(target.getUuid())) {
                 continue;
             }
             if (SimplySwordsAPI.applyEntityWeaponHit(stack, target, owner, weaponDamage)) {
+                if (strideId != null
+                        && world.getEntity(strideId) instanceof SoulstalkerStrideEntity stride) {
+                    stride.addCleaveHitBonus();
+                }
                 world.spawnParticles(GLOAM_DUST, target.getX(), target.getBodyY(0.58), target.getZ(),
                         12, 0.32, 0.26, 0.32, 0.04);
                 world.spawnParticles(ParticleTypes.SWEEP_ATTACK,

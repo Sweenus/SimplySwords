@@ -10,6 +10,7 @@ public final class Phase3UniqueAbilities {
     public static final Identifier IONBOUND_SHIELD_ID = id("ionbound_stormscale/ion_reserve");
     public static final Identifier SOULRENDER_MARK_ID = id("soulrender/rendmark");
     public static final Identifier SOULRENDER_REAP_ID = id("soulrender/reaping");
+    public static final Identifier SOULRENDER_GRAVE_ID = id("soulrender/gravebound");
     public static final Identifier SOULSTALKER_TENDRIL_ID = id("soulstalker/hunting_tendrils");
     public static final Identifier SOULSTALKER_STRIDE_ID = id("soulstalker/gloam_stride");
     public static final Identifier WHISPERWIND_DASH_ID = id("whisperwind/petal_step");
@@ -31,6 +32,7 @@ public final class Phase3UniqueAbilities {
     public static final UniqueAbilityDefinition IONBOUND_SHIELD = passive(IONBOUND_SHIELD_ID);
     public static final UniqueAbilityDefinition SOULRENDER_MARK = passive(SOULRENDER_MARK_ID);
     public static final UniqueAbilityDefinition SOULRENDER_REAP = active(SOULRENDER_REAP_ID);
+    public static final UniqueAbilityDefinition SOULRENDER_GRAVE = passive(SOULRENDER_GRAVE_ID);
     public static final UniqueAbilityDefinition SOULSTALKER_TENDRIL = passive(SOULSTALKER_TENDRIL_ID);
     public static final UniqueAbilityDefinition SOULSTALKER_STRIDE = active(SOULSTALKER_STRIDE_ID);
     public static final UniqueAbilityDefinition WHISPERWIND_DASH = active(WHISPERWIND_DASH_ID);
@@ -48,6 +50,7 @@ public final class Phase3UniqueAbilities {
         UniqueAbilityApi.registerDefinition(IONBOUND_SHIELD);
         UniqueAbilityApi.registerDefinition(SOULRENDER_MARK);
         UniqueAbilityApi.registerDefinition(SOULRENDER_REAP);
+        UniqueAbilityApi.registerDefinition(SOULRENDER_GRAVE);
         UniqueAbilityApi.registerDefinition(SOULSTALKER_TENDRIL);
         UniqueAbilityApi.registerDefinition(SOULSTALKER_STRIDE);
         UniqueAbilityApi.registerDefinition(WHISPERWIND_DASH);

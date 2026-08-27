@@ -52,6 +52,24 @@ public final class WhisperwindVisualManager {
                 .put(user.getUuid(), new ActiveDash(user.getPos(), user.getPos(), stack.copy(), execution, tuning));
     }
 
+    public static Phase3AbilityTuning dashTuning(ServerWorld world, LivingEntity user) {
+        Map<UUID, ActiveDash> dashes = ACTIVE_DASHES.get(world);
+        ActiveDash dash = dashes == null || user == null ? null : dashes.get(user.getUuid());
+        return dash == null ? Phase3AbilityTuning.EMPTY : dash.tuning;
+    }
+
+    // Crosswind lengthens the dash once, by how many enemies it swept.
+    public static int extraDashTicks(ServerWorld world, LivingEntity user) {
+        Map<UUID, ActiveDash> dashes = ACTIVE_DASHES.get(world);
+        ActiveDash dash = dashes == null || user == null ? null : dashes.get(user.getUuid());
+        if (dash == null || dash.extended) return 0;
+        double perTarget = dash.tuning.get(Phase3AbilityTuning.Setting.DASH_EXTENSION_PER_TARGET, 0);
+        if (perTarget <= 0) return 0;
+        dash.extended = true;
+        double cap = dash.tuning.get(Phase3AbilityTuning.Setting.DASH_EXTENSION_CAP, 0);
+        return (int) Math.round(Math.min(cap, dash.targets.size() * perTarget));
+    }
+
     public static void recordDashTick(ServerWorld world, LivingEntity user, Iterable<? extends Entity> entities) {
         Map<UUID, ActiveDash> dashes = ACTIVE_DASHES.get(world);
         if (dashes == null || user == null) {
@@ -66,9 +84,19 @@ public final class WhisperwindVisualManager {
         }
         dash.end = user.getPos();
 
+        double passingCut = dash.tuning.get(Phase3AbilityTuning.Setting.PASSING_CUT_MULTIPLIER, 0);
+        int passingCap = dash.tuning.integer(Phase3AbilityTuning.Setting.PASSING_CUT_TARGET_CAP, 0);
         for (Entity entity : entities) {
             if (entity instanceof LivingEntity target && target.isAlive() && EntityPredicates.VALID_LIVING_ENTITY.test(target) && HelperMethods.checkFriendlyFire(target, user)) {
-                dash.targets.add(target.getUuid());
+                if (dash.targets.add(target.getUuid()) && passingCut > 0 && dash.passingCuts < passingCap) {
+                    dash.passingCuts++;
+                    float immediate = (float) (HelperMethods.abilityScaledDamage("evocation", user, dash.stack,
+                            Config.uniqueEffects.whisperwind.delayedDamageScaling,
+                            Config.uniqueEffects.whisperwind.delayedSpellScaling) * passingCut);
+                    var source = world.getDamageSources().indirectMagic(user, user);
+                    target.damage(source, HelperMethods.applyAbilityDamageEnchantments(
+                            world, dash.stack, target, source, immediate));
+                }
             }
         }
     }
@@ -154,43 +182,130 @@ public final class WhisperwindVisualManager {
             return;
         }
 
-        int mode = strike.tuning.integer(Phase3AbilityTuning.Setting.MODE, 0);
-        int targetCap = strike.tuning.has(Phase3AbilityTuning.Setting.TARGET_CAP)
-                ? strike.tuning.integer(Phase3AbilityTuning.Setting.TARGET_CAP, 64) : Integer.MAX_VALUE;
-        float multiplier = (float) strike.tuning.get(Phase3AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1);
+        boolean stillWind = strike.tuning.integer(Phase3AbilityTuning.Setting.STILL_WIND_THRESHOLD, 0) > 0
+                && WhisperwindRhythmManager.consumeStillWind(world, source);
+        boolean nearestOnly = strike.tuning.get(Phase3AbilityTuning.Setting.STRIKE_NEAREST_ONLY, 0) >= 1;
+        int targetCap = strike.tuning.has(Phase3AbilityTuning.Setting.STRIKE_TARGET_CAP)
+                ? strike.tuning.integer(Phase3AbilityTuning.Setting.STRIKE_TARGET_CAP, 64) : Integer.MAX_VALUE;
+        if (nearestOnly || stillWind) targetCap = 1;
+
+        List<LivingEntity> targets = new ArrayList<>();
+        for (UUID targetId : strike.targetIds) {
+            if (world.getEntity(targetId) instanceof LivingEntity target && target.isAlive()
+                    && HelperMethods.checkAbilityTarget(target, source)) {
+                targets.add(target);
+            }
+        }
+        targets.sort(Comparator.comparingDouble(target -> target.squaredDistanceTo(strike.end)));
+
+        float multiplier = (float) strike.tuning.get(Phase3AbilityTuning.Setting.STRIKE_DAMAGE_MULTIPLIER, 1);
+        if (stillWind) {
+            multiplier *= (float) strike.tuning.get(Phase3AbilityTuning.Setting.STILL_WIND_MULTIPLIER, 1);
+        }
+        multiplier *= (float) (1.0 + arrangementBonus(strike, targets.size(), stillWind));
+        multiplier *= (float) (1.0 + WhisperwindRhythmManager.tempoBonus(world, source, strike.tuning));
+
+        double perTargetBonus = stillWind ? 0
+                : strike.tuning.get(Phase3AbilityTuning.Setting.BOUQUET_PER_TARGET_BONUS, 0);
+        int bouquetCap = strike.tuning.integer(Phase3AbilityTuning.Setting.BOUQUET_TARGET_CAP, 64);
+        int scalingTargets = Math.min(targets.size(), bouquetCap);
         float damage = HelperMethods.abilityScaledDamage("evocation", source, strike.stack,
                 Config.uniqueEffects.whisperwind.delayedDamageScaling
-                        + strike.targetIds.size() * Config.uniqueEffects.whisperwind.delayedDamagePerTargetScaling,
+                        + scalingTargets * Config.uniqueEffects.whisperwind.delayedDamagePerTargetScaling
+                        * (float) (1.0 + perTargetBonus),
                 Config.uniqueEffects.whisperwind.delayedSpellScaling
-                        + strike.targetIds.size() * Config.uniqueEffects.whisperwind.delayedSpellPerTargetScaling) * multiplier;
-        int affected = 0;
-        for (UUID targetId : strike.targetIds) {
-            Entity entity = world.getEntity(targetId);
-            if (!(entity instanceof LivingEntity target) || !target.isAlive() || !HelperMethods.checkAbilityTarget(target, source)) {
-                continue;
-            }
+                        + scalingTargets * Config.uniqueEffects.whisperwind.delayedSpellPerTargetScaling
+                        * (float) (1.0 + perTargetBonus)) * multiplier;
 
+        int hits = Math.max(1, strike.tuning.integer(Phase3AbilityTuning.Setting.STRIKE_COUNT, 1));
+        int affected = 0;
+        int kills = 0;
+        for (LivingEntity target : targets) {
             target.timeUntilRegen = 0;
             var damageSource = world.getDamageSources().indirectMagic(source, source);
-            if (target.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments(world, strike.stack, target, damageSource, damage))) {
+            float resolved = applyArmorIgnore(target, strike.tuning, damage);
+            boolean damaged = false;
+            for (int hit = 0; hit < hits; hit++) {
+                if (hit > 0) target.timeUntilRegen = 0;
+                damaged |= target.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments(
+                        world, strike.stack, target, damageSource, resolved));
+                if (!target.isAlive()) break;
+            }
+            if (damaged) {
                 affected++;
                 if (strike.tuning.integer(Phase3AbilityTuning.Setting.WEAKNESS_DURATION_TICKS, 0) > 0) {
                     target.addStatusEffect(new net.minecraft.entity.effect.StatusEffectInstance(
                             net.minecraft.entity.effect.StatusEffects.WEAKNESS,
                             strike.tuning.integer(Phase3AbilityTuning.Setting.WEAKNESS_DURATION_TICKS, 0), 0), source);
                 }
+                if (!target.isAlive()) {
+                    kills++;
+                    secondFlowering(world, source, strike, target, resolved);
+                }
                 if (strike.execution != null) UniqueAbilityApi.emit(strike.execution, UniqueAbilityPhase.HIT,
-                        Phase3UniqueAbilities.HIT, target, 1, damage);
+                        Phase3UniqueAbilities.HIT, target, 1, resolved);
             }
             spawnBlossoms(world, target);
-            if (affected >= targetCap || (mode & 512) != 0) break;
+            if (affected >= targetCap) break;
         }
+        if (kills > 0) WhisperwindRhythmManager.recordStrikeKill(world, source, strike.tuning);
+        refundOnWideStrike(source, strike, affected);
         if (strike.execution != null) UniqueAbilityApi.finish(strike.execution, Phase3UniqueAbilities.FINISH, affected);
 
         world.playSound(null, strike.end.x, strike.end.y, strike.end.z,
                 SoundRegistry.ELEMENTAL_SWORD_WIND_ATTACK_03.get(),
                 SoundCategory.PLAYERS, 0.75F, 1.25F + world.random.nextFloat() * 0.18F);
         spawnSlash(world, strike.start, strike.end);
+    }
+
+
+    // Perfect Arrangement: a lone target or a crowd both sharpen the strike.
+    private static double arrangementBonus(PendingStrike strike, int targets, boolean stillWind) {
+        if (stillWind) return 0;
+        if (targets <= 1) return strike.tuning.get(Phase3AbilityTuning.Setting.SOLO_DAMAGE_BONUS, 0);
+        int threshold = strike.tuning.integer(Phase3AbilityTuning.Setting.CROWD_THRESHOLD, 0);
+        return threshold > 0 && targets >= threshold
+                ? strike.tuning.get(Phase3AbilityTuning.Setting.CROWD_DAMAGE_BONUS, 0) : 0;
+    }
+
+    // Wind Shear: a bounded share of the target's armour is ignored.
+    private static float applyArmorIgnore(LivingEntity target, Phase3AbilityTuning tuning, float damage) {
+        double ratio = tuning.get(Phase3AbilityTuning.Setting.ARMOR_IGNORE_RATIO, 0);
+        if (ratio <= 0) return damage;
+        double armor = target.getArmor();
+        if (armor <= 0) return damage;
+        double ignored = Math.min(tuning.get(Phase3AbilityTuning.Setting.ARMOR_IGNORE_CAP, 0), armor * ratio);
+        return (float) (damage * (1.0 + ignored * 0.04));
+    }
+
+    // Second Flowering: a lethal strike spills into nearby caught enemies.
+    private static void secondFlowering(ServerWorld world, LivingEntity source, PendingStrike strike,
+                                        LivingEntity victim, float dealt) {
+        double multiplier = strike.tuning.get(Phase3AbilityTuning.Setting.FLOWERING_MULTIPLIER, 0);
+        double radius = strike.tuning.get(Phase3AbilityTuning.Setting.FLOWERING_RADIUS, 0);
+        if (multiplier <= 0 || radius <= 0 || dealt <= 0) return;
+        int cap = Math.max(1, strike.tuning.integer(Phase3AbilityTuning.Setting.FLOWERING_TARGET_CAP, 3));
+        int splashed = 0;
+        var damageSource = world.getDamageSources().indirectMagic(source, source);
+        for (LivingEntity nearby : world.getEntitiesByClass(LivingEntity.class,
+                victim.getBoundingBox().expand(radius),
+                entity -> entity != source && entity != victim && entity.isAlive()
+                        && EntityPredicates.VALID_LIVING_ENTITY.test(entity)
+                        && HelperMethods.checkAbilityTarget(entity, source))) {
+            nearby.timeUntilRegen = 0;
+            nearby.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments(
+                    world, strike.stack, nearby, damageSource, (float) (dealt * multiplier)));
+            if (++splashed >= cap) break;
+        }
+    }
+
+    // Wind's Return: a wide strike returns part of the cooldown.
+    private static void refundOnWideStrike(LivingEntity source, PendingStrike strike, int affected) {
+        int threshold = strike.tuning.integer(Phase3AbilityTuning.Setting.RETURN_THRESHOLD, 0);
+        int refund = strike.tuning.integer(Phase3AbilityTuning.Setting.RETURN_REFUND_TICKS, 0);
+        if (threshold <= 0 || refund <= 0 || affected < threshold) return;
+        net.sweenus.simplyswords.api.SimplySwordsAPI.reduceWeaponCooldown(source, strike.stack,
+                Config.uniqueEffects.whisperwind.cooldown, refund);
     }
 
     private static void spawnDelayCue(ServerWorld world, PendingStrike strike) {
@@ -243,6 +358,36 @@ public final class WhisperwindVisualManager {
         world.spawnEntity(slash);
     }
 
+    public static void clear(ServerWorld world) {
+        Map<UUID, ActiveDash> dashes = ACTIVE_DASHES.remove(world);
+        if (dashes != null) {
+            for (ActiveDash dash : dashes.values()) {
+                if (dash.execution != null) UniqueAbilityApi.cancel(dash.execution);
+            }
+        }
+        Set<PendingStrike> strikes = PENDING_STRIKES.remove(world);
+        if (strikes != null) {
+            for (PendingStrike strike : strikes) {
+                if (strike.execution != null) UniqueAbilityApi.cancel(strike.execution);
+            }
+        }
+    }
+
+    public static void clearAll() {
+        for (Map<UUID, ActiveDash> dashes : ACTIVE_DASHES.values()) {
+            for (ActiveDash dash : dashes.values()) {
+                if (dash.execution != null) UniqueAbilityApi.cancel(dash.execution);
+            }
+        }
+        for (Set<PendingStrike> strikes : PENDING_STRIKES.values()) {
+            for (PendingStrike strike : strikes) {
+                if (strike.execution != null) UniqueAbilityApi.cancel(strike.execution);
+            }
+        }
+        ACTIVE_DASHES.clear();
+        PENDING_STRIKES.clear();
+    }
+
     private static void purgeOrphanSlashes(ServerWorld world) {
         for (Entity entity : world.iterateEntities()) {
             if (entity instanceof WhisperwindSlashVisualEntity && entity.getCommandTags().contains(SLASH_VISUAL_TAG) && entity.age > SLASH_LIFETIME + 4) {
@@ -252,6 +397,8 @@ public final class WhisperwindVisualManager {
     }
 
     private static final class ActiveDash {
+        private int passingCuts;
+        private boolean extended;
         private final Vec3d start;
         private final Set<UUID> targets = new HashSet<>();
         private final ItemStack stack;

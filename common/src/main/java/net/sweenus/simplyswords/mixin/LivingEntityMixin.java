@@ -107,6 +107,10 @@ public abstract class LivingEntityMixin {
         LivingEntity livingEntity = (LivingEntity) (Object) this;
         if(!livingEntity.getWorld().isClient()) {
             ItemStack mainhand = livingEntity.getStackInHand(Hand.MAIN_HAND);
+            if (net.sweenus.simplyswords.world.SoulrenderAbilityManager.tryUnbrokenReaper(livingEntity, source)) {
+                cir.setReturnValue(true);
+                return;
+            }
             if (mainhand.getItem() instanceof RevivalWeapon revivalWeapon) {
                 if(revivalWeapon.canRevive(livingEntity, mainhand, source)) {
                     livingEntity.setHealth(revivalWeapon.getReviveHealth(livingEntity, mainhand, source));
@@ -195,11 +199,17 @@ public abstract class LivingEntityMixin {
             if (soulTetherEffect != null) amount = SoulPyreAbilityManager.modifyIncomingDamage(livingEntity, source, amount);
             amount = WeaponImplicitRegistry.modifyDamage(livingEntity, source, amount);
             amount = DreadwhisperAbilityManager.modifyIncomingDamage(livingEntity, source, amount);
+            amount = net.sweenus.simplyswords.world.DreadwhisperTrailManager.modifyIncomingDamage(
+                    livingEntity, source, amount);
             amount = MoltenEdgeAbilityManager.modifyIncomingDamage(livingEntity, amount);
             amount = WatcherAbilityManager.modifyIncomingDamage(livingEntity, source, amount);
             amount = net.sweenus.simplyswords.world.StormscaleLightningRodManager.modifyIncomingDamage(
                     livingEntity, source, amount);
             amount = net.sweenus.simplyswords.world.Phase2CombatStateManager.modifyIncomingDamage(
+                    livingEntity, source, amount);
+            amount = net.sweenus.simplyswords.world.SoulrenderAbilityManager.modifyIncomingDamage(
+                    livingEntity, source, amount);
+            amount = net.sweenus.simplyswords.world.WhisperwindRhythmManager.modifyIncomingDamage(
                     livingEntity, source, amount);
             amount = WraithfangAbilityManager.modifyIncomingDamage(livingEntity, source, amount);
             amount = WraithfangAbilityManager.modifyOutgoingDamage(livingEntity, source, amount);
@@ -259,6 +269,8 @@ public abstract class LivingEntityMixin {
         FlameSeedEffect.triggerDeathDetonation(livingEntity);
         GloamMechanicsManager.onTargetDeath(livingEntity);
         WraithfangAbilityManager.onTargetDeath(livingEntity, damageSource);
+        net.sweenus.simplyswords.world.SoulrenderAbilityManager.onTargetDeath(livingEntity, damageSource);
+        net.sweenus.simplyswords.world.SoulrenderAbilityManager.removeActor(livingEntity);
     }
 
     @Inject(method = "jump", at = @At("HEAD"), cancellable = true)

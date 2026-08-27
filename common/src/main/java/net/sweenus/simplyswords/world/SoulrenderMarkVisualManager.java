@@ -168,6 +168,25 @@ public final class SoulrenderMarkVisualManager {
         PENDING_FINISH.computeIfAbsent(world, ignored -> new HashMap<>()).put(execution, affected);
     }
 
+    public static void clear(ServerWorld world) {
+        Map<UniqueAbilityExecution, Integer> finishing = PENDING_FINISH.remove(world);
+        if (finishing != null) finishing.keySet().forEach(UniqueAbilityApi::cancel);
+        Map<UUID, ActiveSoulrenderMark> marks = ACTIVE_MARKS.remove(world);
+        if (marks != null) {
+            for (ActiveSoulrenderMark mark : marks.values()) {
+                if (world.getEntity(mark.visualId) instanceof SoulrenderMarkVisualEntity visual) visual.discard();
+            }
+        }
+    }
+
+    public static void clearAll() {
+        for (Map<UniqueAbilityExecution, Integer> finishing : PENDING_FINISH.values()) {
+            finishing.keySet().forEach(UniqueAbilityApi::cancel);
+        }
+        PENDING_FINISH.clear();
+        ACTIVE_MARKS.clear();
+    }
+
     private static void updateOrbit(ServerWorld world, SoulrenderMarkVisualEntity visual, LivingEntity target, ActiveSoulrenderMark mark) {
         long ticksRemaining = mark.expiryTick - world.getTime();
         float fade = MathHelper.clamp((float) ticksRemaining / FADE_OUT_TICKS, 0.0F, 1.0F);
