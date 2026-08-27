@@ -17,6 +17,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RaycastContext;
 import net.sweenus.simplyswords.api.AwakeningApi;
@@ -77,8 +78,8 @@ public final class StormscaleLightningRodManager {
         Hand hand = context.hand() == null ? Hand.MAIN_HAND : context.hand();
         ItemStack held = context.actor().getStackInHand(hand);
         if (!held.isOf(ItemsRegistry.STORMSCALE.get()) || !AwakeningApi.isAbilityUnlocked(held)) return false;
-        ActiveRod rod = active(context.world(), context.actor().getUuid());
-        return rod == null ? resolveAnchor(context) != null : canReactivate(context, rod);
+        return active(context.world(), context.actor().getUuid()) == null
+                && resolveAnchor(context) != null;
     }
 
     public static boolean start(WeaponAbilityContext context) {
@@ -88,8 +89,6 @@ public final class StormscaleLightningRodManager {
 
         ServerWorld world = context.world();
         LivingEntity actor = context.actor();
-        ActiveRod existing = active(world, actor.getUuid());
-        if (existing != null) return reactivate(context, existing);
 
         UniqueAbilityExecution execution = UniqueAbilityApi.begin(Phase3UniqueAbilities.STORMSCALE_ROD,
                 UniqueAbilityContext.active(context), builder -> builder
@@ -109,6 +108,10 @@ public final class StormscaleLightningRodManager {
                 Config.uniqueEffects.stormscale.pulseGrowthPerHit));
         float maximumGrowth = (float) Math.max(0, tuning.get(Phase3AbilityTuning.Setting.GROWTH_CAP,
                 Config.uniqueEffects.stormscale.maximumPulseGrowth));
+        if (tuning.has(Phase3AbilityTuning.Setting.GROWTH_CAP_LIMIT)) {
+            maximumGrowth = Math.min(maximumGrowth,
+                    (float) tuning.get(Phase3AbilityTuning.Setting.GROWTH_CAP_LIMIT, maximumGrowth));
+        }
         double pullStrength = tuning.get(Phase3AbilityTuning.Setting.PULL_STRENGTH,
                 Config.uniqueEffects.stormscale.pulsePullStrength);
         Hand hand = context.hand() == null ? Hand.MAIN_HAND : context.hand();
@@ -144,8 +147,8 @@ public final class StormscaleLightningRodManager {
                         Config.uniqueEffects.stormscale.pulseDamageScaling,
                         Config.uniqueEffects.stormscale.pulseSpellScaling
                 ) * (float) tuning.get(Phase3AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1),
-                tuning.has(Phase3AbilityTuning.Setting.TARGET_CAP)
-                        ? tuning.integer(Phase3AbilityTuning.Setting.TARGET_CAP, 64) : Integer.MAX_VALUE,
+                Math.max(1, tuning.integer(Phase3AbilityTuning.Setting.TARGET_CAP,
+                        Config.uniqueEffects.stormscale.pulseTargetCap)),
                 tuning.integer(Phase3AbilityTuning.Setting.SLOW_DURATION_TICKS, 0),
                 tuning.integer(Phase3AbilityTuning.Setting.MODE, 0),
                 tuning,
@@ -153,7 +156,8 @@ public final class StormscaleLightningRodManager {
         );
         ACTIVE.computeIfAbsent(world, ignored -> new HashMap<>()).put(actor.getUuid(), activeRod);
         if ((activeRod.mode & 1) != 0) {
-            pulse(world, actor, activeRod, radius, activeRod.baseDamage * .7F);
+            pulse(world, actor, activeRod, radius, activeRod.baseDamage
+                    * (float) tuning.get(Phase3AbilityTuning.Setting.PLANT_DAMAGE_MULTIPLIER, .7));
         }
         spawnActivationEffects(world, actor, anchor);
         return true;
@@ -172,10 +176,107 @@ public final class StormscaleLightningRodManager {
         return active != null && active.containsKey(actor.getUuid());
     }
 
-    public static boolean hasPendingReactivation(ServerWorld world, LivingEntity actor) {
-        ActiveRod rod = world == null || actor == null ? null : active(world, actor.getUuid());
-        return rod != null && ((rod.mode & 2) != 0 && !rod.repositioned
-                || (rod.mode & 512) != 0 || (rod.mode & 4096) != 0);
+    public static boolean tryReactivate(ServerWorld world, LivingEntity actor, ItemStack stack) {
+        if (world == null || actor == null || !actor.isAlive() || stack == null || stack.isEmpty()
+                || !stack.isOf(ItemsRegistry.STORMSCALE.get())
+                || !AwakeningApi.isAbilityUnlocked(stack)) {
+            return false;
+        }
+        ActiveRod rod = active(world, actor.getUuid());
+        if (rod == null || world.getTime() >= rod.expiresAt) {
+            return false;
+        }
+        long now = world.getTime();
+        if ((rod.mode & 4096) != 0 && actor.isSneaking() && now >= rod.reverseReady) {
+            rod.reverseNext = true;
+            rod.reverseReady = now + Math.max(1, rod.tuning.integer(
+                    Phase3AbilityTuning.Setting.REVERSE_LOCKOUT_TICKS, 60));
+            return true;
+        }
+        if ((rod.mode & 512) != 0 && rod.supercellCharges > 0 && rod.supercellExpires >= now) {
+            int charges = rod.supercellCharges;
+            rod.supercellCharges = 0;
+            pulse(world, actor, rod,
+                    (float) rod.tuning.get(Phase3AbilityTuning.Setting.STORED_PULSE_RADIUS, 6),
+                    rod.baseDamage * (float) rod.tuning.get(
+                            Phase3AbilityTuning.Setting.STORED_PULSE_MULTIPLIER, .35) * charges);
+            return true;
+        }
+        if ((rod.mode & 2) == 0 || rod.repositioned || (rod.mode & 8) != 0) {
+            return false;
+        }
+        Vec3d anchor = resolveAnchor(world, actor,
+                rod.tuning.get(Phase3AbilityTuning.Setting.REPOSITION_RANGE, 14));
+        if (anchor == null) {
+            return false;
+        }
+        rod.anchor = anchor;
+        rod.repositioned = true;
+        rod.expiresAt = Math.max(now + 1, rod.expiresAt - Math.max(0, rod.tuning.integer(
+                Phase3AbilityTuning.Setting.REPOSITION_DURATION_COST_TICKS, 80)));
+        Entity visual = world.getEntity(rod.rodVisualId);
+        if (visual != null) visual.setPosition(anchor);
+        spawnActivationEffects(world, actor, anchor);
+        return true;
+    }
+
+    public static float modifyIncomingDamage(LivingEntity target, DamageSource source, float amount) {
+        if (target == null || !(target.getWorld() instanceof ServerWorld world)
+                || source == null || !source.isIn(DamageTypeTags.IS_PROJECTILE)) {
+            return amount;
+        }
+        ActiveRod rod = active(world, target.getUuid());
+        if (rod == null || world.getTime() >= rod.expiresAt) {
+            return amount;
+        }
+        double reduction = rod.tuning.get(Phase3AbilityTuning.Setting.DAMAGE_REDUCTION, 0);
+        if (reduction <= 0) {
+            return amount;
+        }
+        float radius = rod.baseRadius * (1.0F + Math.min(rod.maximumGrowth,
+                rod.arrivedHits * rod.growthPerHit));
+        return horizontalDistance(target.getPos(), rod.anchor) > cappedRadius(rod, radius)
+                ? amount : amount * (1.0F - (float) Math.min(1, reduction));
+    }
+
+    public static void clear(ServerWorld world) {
+        Map<UUID, ActiveRod> rods = ACTIVE.remove(world);
+        if (rods == null) {
+            return;
+        }
+        for (ActiveRod rod : rods.values()) {
+            Entity visual = world.getEntity(rod.rodVisualId);
+            if (visual != null) visual.discard();
+            AbilityVisualManager.discard(world, rod.tetherVisualId);
+            for (PendingPulse pending : rod.pending) {
+                if (pending.visualId != null) AbilityVisualManager.discard(world, pending.visualId);
+            }
+            UniqueAbilityApi.cancel(rod.execution);
+        }
+    }
+
+    public static void clearAll() {
+        for (Map.Entry<ServerWorld, Map<UUID, ActiveRod>> entry : ACTIVE.entrySet()) {
+            for (ActiveRod rod : entry.getValue().values()) {
+                UniqueAbilityApi.cancel(rod.execution);
+            }
+        }
+        ACTIVE.clear();
+    }
+
+    static boolean isCriticalAttack(LivingEntity actor) {
+        return actor.fallDistance > 0.0F
+                && !actor.isOnGround()
+                && !actor.isClimbing()
+                && !actor.isTouchingWater()
+                && !actor.hasStatusEffect(StatusEffects.BLINDNESS)
+                && !actor.hasVehicle()
+                && !actor.isSprinting();
+    }
+
+    static float cappedRadius(ActiveRod rod, float radius) {
+        double cap = rod.tuning.get(Phase3AbilityTuning.Setting.RADIUS_CAP, 0);
+        return cap > 0 ? (float) Math.min(cap, radius) : radius;
     }
 
     public static void onMeleeHit(ServerWorld world, ItemStack stack, LivingEntity reportedAttacker) {
@@ -218,21 +319,25 @@ public final class StormscaleLightningRodManager {
         rod.lastLaunchTick = now;
         int travelTicks = rod.travelTicks;
         if (target != null && rod.conductive.getOrDefault(target.getUuid(), 0L) >= now) {
-            travelTicks = Math.max(1, travelTicks - 4);
+            travelTicks = Math.max(1, travelTicks
+                    - rod.tuning.integer(Phase3AbilityTuning.Setting.DELAY_TICKS, 4));
         }
         if ((rod.mode & 256) != 0) {
             rod.arrivedHits++;
             float growth = Math.min(rod.maximumGrowth, rod.arrivedHits * rod.growthPerHit);
-            pulse(world, actor, rod, Math.min(4.5F, rod.baseRadius * (1 + growth)),
-                    rod.baseDamage * (1 + growth) * .55F);
+            pulse(world, actor, rod, cappedRadius(rod, rod.baseRadius * (1 + growth)),
+                    rod.baseDamage * (1 + growth) * (float) rod.tuning.get(
+                            Phase3AbilityTuning.Setting.INSTANT_PULSE_MULTIPLIER, .55));
         } else {
             UUID pulseVisualId = spawnTravellingPulse(world, actor, rodVisual, travelTicks);
             rod.pending.add(new PendingPulse(now + travelTicks, pulseVisualId, 1, 1));
         }
-        if ((rod.mode & 16) != 0 && actor.fallDistance > 0 && !actor.isOnGround()
-                && now >= rod.doubleChargeReady) {
-            rod.doubleChargeReady = now + 10;
-            rod.pending.add(new PendingPulse(now + travelTicks + 1, null, .5F, .5F));
+        if ((rod.mode & 16) != 0 && isCriticalAttack(actor) && now >= rod.doubleChargeReady) {
+            rod.doubleChargeReady = now + rod.tuning.integer(
+                    Phase3AbilityTuning.Setting.DOUBLE_CHARGE_LOCKOUT_TICKS, 10);
+            float second = (float) rod.tuning.get(
+                    Phase3AbilityTuning.Setting.SECOND_CHARGE_MULTIPLIER, .5);
+            rod.pending.add(new PendingPulse(now + travelTicks + 1, null, second, second));
         }
         spawnLaunchEffects(world, actor);
     }
@@ -276,7 +381,9 @@ public final class StormscaleLightningRodManager {
         rod.conductive.entrySet().removeIf(entry -> entry.getValue() < now);
         if (rod.supercellExpires < now) rod.supercellCharges = 0;
         if ((rod.mode & 4) != 0) {
-            rod.anchor = rod.anchor.lerp(actor.getPos(), Math.min(1, 0.3 / Math.max(.01, rod.anchor.distanceTo(actor.getPos()))));
+            double followSpeed = Math.max(.01, rod.tuning.get(Phase3AbilityTuning.Setting.MOVEMENT_SPEED, .3));
+            rod.anchor = rod.anchor.lerp(actor.getPos(),
+                    Math.min(1, followSpeed / Math.max(.01, rod.anchor.distanceTo(actor.getPos()))));
             rodVisual.setPosition(rod.anchor);
         }
         Iterator<PendingPulse> pulses = rod.pending.iterator();
@@ -284,23 +391,31 @@ public final class StormscaleLightningRodManager {
             PendingPulse pulse = pulses.next();
             if (pulse.arrivalTick <= now) {
                 if ((rod.mode & 512) != 0) {
-                    rod.supercellCharges = Math.min(10, rod.supercellCharges + 1);
-                    rod.supercellExpires = now + 120;
+                    rod.supercellCharges = Math.min(
+                            rod.tuning.integer(Phase3AbilityTuning.Setting.COUNT, 10),
+                            rod.supercellCharges + 1);
+                    rod.supercellExpires = now + rod.tuning.integer(
+                            Phase3AbilityTuning.Setting.DURATION_TICKS, 120);
                     pulses.remove();
                     continue;
                 }
                 boolean capped = rod.arrivedHits * rod.growthPerHit >= rod.maximumGrowth;
                 rod.arrivedHits += pulse.growth;
-                if (capped && (rod.mode & 64) != 0) rod.overflow = Math.min(4, rod.overflow + 1);
+                if ((rod.mode & 64) != 0) {
+                    if (capped) rod.overflow = Math.min(rod.overflowCap, rod.overflow + rod.overflowStep);
+                    else rod.overflow = 0;
+                }
                 float growth = Math.min(rod.maximumGrowth, rod.arrivedHits * rod.growthPerHit);
-                float radius = rod.baseRadius * (1.0F + growth);
-                float damage = rod.baseDamage * (1.0F + growth) * pulse.damage * (1 + rod.overflow * .05F);
+                float radius = cappedRadius(rod, rod.baseRadius * (1.0F + growth));
+                float damage = rod.baseDamage * (1.0F + growth) * pulse.damage * (1 + rod.overflow);
                 pulse(world, actor, rod, radius, damage);
-                rod.overflow = 0;
                 rod.arrivals++;
-                if ((rod.mode & 128) != 0 && rod.arrivals % 5 == 0 && rod.extraPulseTick != now) {
+                int surgeInterval = rod.tuning.integer(Phase3AbilityTuning.Setting.SURGE_INTERVAL, 5);
+                if ((rod.mode & 128) != 0 && surgeInterval > 0 && rod.arrivals % surgeInterval == 0
+                        && rod.extraPulseTick != now) {
                     rod.extraPulseTick = now;
-                    pulse(world, actor, rod, radius, rod.baseDamage * (1 + growth) * .6F);
+                    pulse(world, actor, rod, radius, rod.baseDamage * (1 + growth)
+                            * (float) rod.tuning.get(Phase3AbilityTuning.Setting.EXTRA_PULSE_MULTIPLIER, .6));
                 }
                 UniqueAbilityApi.emit(rod.execution, UniqueAbilityPhase.HIT, Phase3UniqueAbilities.PULSE,
                         null, 0, damage);
@@ -344,7 +459,10 @@ public final class StormscaleLightningRodManager {
             double distance = horizontalDistance(target.getPos(), rod.anchor);
             float adjusted = baseDamage;
             double centerRadius = rod.tuning.get(Phase3AbilityTuning.Setting.CENTER_RADIUS, 1.5);
-            if ((rod.mode & 2048) != 0 && distance <= centerRadius) adjusted *= 1.2F;
+            if ((rod.mode & 2048) != 0 && distance <= centerRadius) {
+                adjusted *= (float) (1 + rod.tuning.get(
+                        Phase3AbilityTuning.Setting.CENTER_DAMAGE_BONUS, .2));
+            }
             if ((rod.mode & 32768) != 0) {
                 if (distance >= radius * .75) {
                     adjusted *= (float) (1 + rod.tuning.get(Phase3AbilityTuning.Setting.EDGE_BONUS, .35));
@@ -366,25 +484,33 @@ public final class StormscaleLightningRodManager {
                 pullTowardRod(target, rod.anchor, reverse ? -Math.max(reverseStrength,
                         Math.abs(rod.pullStrength)) : rod.pullStrength);
                 if ((rod.mode & 2048) != 0 && distance <= centerRadius) {
-                    target.addVelocity(0, .2, 0);
+                    target.addVelocity(0, rod.tuning.get(Phase3AbilityTuning.Setting.IMPACT_LIFT, .2), 0);
                 }
                 if ((rod.mode & 16384) != 0 && distance <= rod.tuning.get(
                         Phase3AbilityTuning.Setting.ROOT_RADIUS, 2.5)
                         && rooted < rod.tuning.integer(Phase3AbilityTuning.Setting.ROOT_TARGET_CAP, 8)) {
                     target.setVelocity(0, target.getVelocity().y, 0);
-                    target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 20, 9,
+                    target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS,
+                            Math.max(1, rod.tuning.integer(
+                                    Phase3AbilityTuning.Setting.ROOT_DURATION_TICKS, 20)), 9,
                             false, true, true), actor);
                     rooted++;
                 }
                 if (rod.reverseNext) target.addStatusEffect(new StatusEffectInstance(
-                        StatusEffects.WEAKNESS, 60, 0, false, true, true), actor);
+                        StatusEffects.WEAKNESS, Math.max(1, rod.tuning.integer(
+                                Phase3AbilityTuning.Setting.REVERSE_WEAKNESS_TICKS, 60)),
+                        0, false, true, true), actor);
                 damaged++;
                 hitTargets.add(target.getUuid());
-                if ((rod.mode & 32) != 0 && rod.conductive.size() < 12) {
-                    rod.conductive.put(target.getUuid(), world.getTime() + 60);
+                if ((rod.mode & 32) != 0 && rod.conductive.size() < rod.tuning.integer(
+                        Phase3AbilityTuning.Setting.CONDUCTIVE_TARGET_CAP, 12)) {
+                    rod.conductive.put(target.getUuid(), world.getTime() + Math.max(1,
+                            rod.tuning.integer(Phase3AbilityTuning.Setting.CONDUCTIVE_DURATION_TICKS, 60)));
                 }
-                if (rod.slowTicks > 0) target.addStatusEffect(new net.minecraft.entity.effect.StatusEffectInstance(
-                        net.minecraft.entity.effect.StatusEffects.SLOWNESS, rod.slowTicks, 0, false, true, true), actor);
+                if (rod.slowTicks > 0) target.addStatusEffect(new StatusEffectInstance(
+                        StatusEffects.SLOWNESS, rod.slowTicks,
+                        Math.clamp(rod.tuning.integer(Phase3AbilityTuning.Setting.STATUS_AMPLIFIER, 0), 0, 9),
+                        false, true, true), actor);
                 UniqueAbilityApi.emit(rod.execution, UniqueAbilityPhase.HIT, Phase3UniqueAbilities.HIT,
                         target, 1, damage);
                 if (damaged >= rod.targetCap) break;
@@ -393,11 +519,22 @@ public final class StormscaleLightningRodManager {
         if ((rod.mode & 1024) != 0 && damaged > 0) {
             chainBeyondPulse(world, actor, sourceOwner, rod, radius, baseDamage, hitTargets);
         }
-        if ((rod.mode & 8192) != 0 && damaged >= 6 && world.getTime() >= rod.eyeReady) {
-            rod.eyeReady = world.getTime() + 100;
-            actor.setAbsorptionAmount(Math.max(actor.getAbsorptionAmount(), 3));
-            SimplySwordsAPI.setWeaponCooldown(actor, rod.stack, Math.max(0,
-                    rod.execution.cooldownTicks(Config.uniqueEffects.stormscale.cooldown) - 20));
+        if ((rod.mode & 8192) != 0
+                && damaged >= rod.tuning.integer(Phase3AbilityTuning.Setting.WARD_TARGET_THRESHOLD, 6)
+                && world.getTime() >= rod.eyeReady) {
+            rod.eyeReady = world.getTime() + Math.max(1, rod.tuning.integer(
+                    Phase3AbilityTuning.Setting.WARD_LOCKOUT_TICKS, 100));
+            int absorption = Math.max(0, rod.tuning.integer(Phase3AbilityTuning.Setting.ABSORPTION, 3));
+            int buffTicks = Math.max(1, rod.tuning.integer(
+                    Phase3AbilityTuning.Setting.BUFF_DURATION_TICKS, 80));
+            if (absorption > 0) {
+                actor.addStatusEffect(new StatusEffectInstance(StatusEffects.ABSORPTION,
+                        buffTicks, Math.clamp(absorption / 4, 0, 9), false, true, true), actor);
+                actor.setAbsorptionAmount(Math.max(actor.getAbsorptionAmount(), absorption));
+            }
+            SimplySwordsAPI.reduceWeaponCooldown(actor, rod.stack,
+                    rod.execution.cooldownTicks(Config.uniqueEffects.stormscale.cooldown),
+                    rod.tuning.integer(Phase3AbilityTuning.Setting.REFUND_TICKS, 20));
         }
         rod.reverseNext = false;
 
@@ -543,14 +680,22 @@ public final class StormscaleLightningRodManager {
                 && actor.squaredDistanceTo(target) <= range * range) {
             return findGroundPosition(world, target.getX(), target.getZ(), target.getY());
         }
+        Vec3d facing = context.facing().lengthSquared() < 0.0001
+                ? actor.getRotationVec(1.0F)
+                : context.facing().normalize();
+        return raycastAnchor(world, actor, facing, range);
+    }
+
+    private static Vec3d resolveAnchor(ServerWorld world, LivingEntity actor, double configuredRange) {
+        return raycastAnchor(world, actor, actor.getRotationVec(1.0F), Math.max(1.0, configuredRange));
+    }
+
+    private static Vec3d raycastAnchor(ServerWorld world, LivingEntity actor, Vec3d facing, double range) {
         if (!(actor instanceof net.minecraft.entity.player.PlayerEntity)) {
             return null;
         }
 
         Vec3d start = actor.getEyePos();
-        Vec3d facing = context.facing().lengthSquared() < 0.0001
-                ? actor.getRotationVec(1.0F)
-                : context.facing().normalize();
         Vec3d end = start.add(facing.multiply(range));
         HitResult result = world.raycast(new RaycastContext(
                 start, end, RaycastContext.ShapeType.COLLIDER,
@@ -662,48 +807,11 @@ public final class StormscaleLightningRodManager {
         }
         if (snapped) UniqueAbilityApi.cancel(rod.execution);
         else UniqueAbilityApi.finish(rod.execution, Phase3UniqueAbilities.FINISH, Math.round(rod.arrivedHits));
-        if ((rod.mode & (2 | 512 | 4096)) != 0) {
-            LivingEntity actor = resolveLiving(world, rod.actorId);
-            if (actor != null) SimplySwordsAPI.setWeaponCooldown(actor, rod.stack,
-                    rod.execution.cooldownTicks(Config.uniqueEffects.stormscale.cooldown));
-        }
     }
 
     private static ActiveRod active(ServerWorld world, UUID actorId) {
         Map<UUID, ActiveRod> rods = ACTIVE.get(world);
         return rods == null ? null : rods.get(actorId);
-    }
-
-    private static boolean canReactivate(WeaponAbilityContext context, ActiveRod rod) {
-        long now = context.world().getTime();
-        if ((rod.mode & 4096) != 0 && context.actor().isSneaking() && now >= rod.reverseReady) return true;
-        if ((rod.mode & 512) != 0 && rod.supercellCharges > 0 && rod.supercellExpires >= now) return true;
-        return (rod.mode & 2) != 0 && !rod.repositioned
-                && resolveAnchor(context, rod.tuning.get(Phase3AbilityTuning.Setting.REPOSITION_RANGE, 14)) != null;
-    }
-
-    private static boolean reactivate(WeaponAbilityContext context, ActiveRod rod) {
-        long now = context.world().getTime();
-        if ((rod.mode & 4096) != 0 && context.actor().isSneaking() && now >= rod.reverseReady) {
-            rod.reverseNext = true;
-            rod.reverseReady = now + 60;
-            return true;
-        }
-        if ((rod.mode & 512) != 0 && rod.supercellCharges > 0 && rod.supercellExpires >= now) {
-            int charges = rod.supercellCharges;
-            rod.supercellCharges = 0;
-            pulse(context.world(), context.actor(), rod, 6, rod.baseDamage * .35F * charges);
-            return true;
-        }
-        Vec3d anchor = resolveAnchor(context, rod.tuning.get(Phase3AbilityTuning.Setting.REPOSITION_RANGE, 14));
-        if ((rod.mode & 2) == 0 || rod.repositioned || anchor == null) return false;
-        rod.anchor = anchor;
-        rod.repositioned = true;
-        rod.expiresAt = Math.max(now + 1, rod.expiresAt - 80);
-        Entity visual = context.world().getEntity(rod.rodVisualId);
-        if (visual != null) visual.setPosition(anchor);
-        spawnActivationEffects(context.world(), context.actor(), anchor);
-        return true;
     }
 
     private static Comparator<LivingEntity> targetOrder(Vec3d origin) {
@@ -730,7 +838,8 @@ public final class StormscaleLightningRodManager {
             LivingEntity target = targets.get(index);
             DamageSource source = world.getDamageSources().indirectMagic(actor, attributedOwner);
             float damage = HelperMethods.applyAbilityDamageEnchantments(world, rod.stack, target, source,
-                    baseDamage * .25F);
+                    baseDamage * (float) rod.tuning.get(
+                            Phase3AbilityTuning.Setting.CHAIN_DAMAGE_MULTIPLIER, .25));
             WeaponImplicitRegistry.runSuppressed(() -> HelperMethods.damageThroughIframes(target, source, damage));
         }
     }
@@ -775,7 +884,9 @@ public final class StormscaleLightningRodManager {
         private long extraPulseTick = Long.MIN_VALUE;
         private float arrivedHits;
         private int arrivals;
-        private int overflow;
+        private float overflow;
+        private final float overflowStep;
+        private final float overflowCap;
         private int supercellCharges;
         private boolean repositioned;
         private boolean reverseNext;
@@ -807,6 +918,10 @@ public final class StormscaleLightningRodManager {
             this.mode = mode;
             this.tuning = tuning;
             this.execution = execution;
+            this.overflowStep = (float) Math.max(0, tuning.get(
+                    Phase3AbilityTuning.Setting.PER_STACK_BONUS, .05));
+            this.overflowCap = (float) Math.max(0, tuning.get(
+                    Phase3AbilityTuning.Setting.BONUS_CAP, .2));
         }
     }
 

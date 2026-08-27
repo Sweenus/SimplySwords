@@ -50,8 +50,28 @@ public final class GloamMechanicsManager {
         return states != null && !states.isEmpty();
     }
 
+    public static void clear(ServerWorld world) {
+        ACTIVE.remove(world);
+    }
+
+    public static void clearAll() {
+        ACTIVE.clear();
+    }
+
     public static void recordContact(ServerWorld world, LivingEntity owner,
                                      LivingEntity target, int baseSlowAmplifier) {
+        recordContact(world, owner, target, baseSlowAmplifier, CONTACT_INTERVAL * 2 + 1);
+    }
+
+    public static void recordContact(ServerWorld world, LivingEntity owner,
+                                     LivingEntity target, int baseSlowAmplifier,
+                                     int slowDurationTicks) {
+        recordContact(world, owner, target, baseSlowAmplifier, slowDurationTicks, true);
+    }
+
+    public static void recordContact(ServerWorld world, LivingEntity owner,
+                                     LivingEntity target, int baseSlowAmplifier,
+                                     int slowDurationTicks, boolean appliesSlowness) {
         if (world == null || owner == null || target == null || !owner.isAlive()
                 || !target.isAlive() || target.isRemoved()) {
             return;
@@ -70,9 +90,13 @@ public final class GloamMechanicsManager {
         if (state.contactTick != now) {
             state.contactTick = now;
             state.baseSlowAmplifier = Math.clamp(baseSlowAmplifier, 0, 4);
+            state.slowDurationTicks = Math.max(1, slowDurationTicks);
+            state.appliesSlowness = appliesSlowness;
         } else {
             state.baseSlowAmplifier = Math.max(
                     state.baseSlowAmplifier, Math.clamp(baseSlowAmplifier, 0, 4));
+            state.slowDurationTicks = Math.max(state.slowDurationTicks, Math.max(1, slowDurationTicks));
+            state.appliesSlowness |= appliesSlowness;
         }
         state.lastContactTick = now;
     }
@@ -100,8 +124,8 @@ public final class GloamMechanicsManager {
             if (now < state.immunityEndTick) {
                 state.exposure = 0.0F;
                 updateExposureEffect(target, 0, owner);
-                if (touching && now % CONTACT_INTERVAL == 0L) {
-                    applySlow(target, owner, state.baseSlowAmplifier);
+                if (touching && state.appliesSlowness && now % CONTACT_INTERVAL == 0L) {
+                    applySlow(target, owner, state.baseSlowAmplifier, state.slowDurationTicks);
                 }
                 continue;
             }
@@ -114,10 +138,11 @@ public final class GloamMechanicsManager {
             }
             int visualStage = Math.clamp(MathHelper.floor(state.exposure * 4.0F), 0, 3);
             updateExposureEffect(target, visualStage, owner);
-            if (touching && now % CONTACT_INTERVAL == 0L) {
+            if (touching && state.appliesSlowness && now % CONTACT_INTERVAL == 0L) {
                 int maximumBonus = Math.clamp(Config.uniqueEffects.gloam.maximumSlowBonus, 0, 4);
                 applySlow(target, owner,
-                        Math.clamp(state.baseSlowAmplifier + Math.min(visualStage, maximumBonus), 0, 4));
+                        Math.clamp(state.baseSlowAmplifier + Math.min(visualStage, maximumBonus), 0, 4),
+                        state.slowDurationTicks);
             }
             if (!touching && state.exposure <= 0.0F) {
                 updateExposureEffect(target, 0, owner);
@@ -189,9 +214,9 @@ public final class GloamMechanicsManager {
         }
     }
 
-    private static void applySlow(LivingEntity target, LivingEntity owner, int amplifier) {
+    private static void applySlow(LivingEntity target, LivingEntity owner, int amplifier, int durationTicks) {
         target.addStatusEffect(new StatusEffectInstance(
-                StatusEffects.SLOWNESS, CONTACT_INTERVAL * 2 + 1,
+                StatusEffects.SLOWNESS, Math.max(1, durationTicks),
                 Math.clamp(amplifier, 0, 4), false, false, true), owner);
     }
 
@@ -217,6 +242,8 @@ public final class GloamMechanicsManager {
         private long immunityEndTick;
         private float exposure;
         private int baseSlowAmplifier;
+        private int slowDurationTicks = CONTACT_INTERVAL * 2 + 1;
+        private boolean appliesSlowness = true;
 
         private ExposureState(UUID ownerId, long lastContactTick) {
             this.ownerId = ownerId;

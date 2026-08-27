@@ -70,6 +70,12 @@ import net.sweenus.simplyswords.util.FileCopier;
 import net.sweenus.simplyswords.util.ModLootTableModifiers;
 import net.sweenus.simplyswords.world.ObserverStatusEffectSyncManager;
 import net.sweenus.simplyswords.world.GloamMechanicsManager;
+import net.sweenus.simplyswords.world.GloamStainManager;
+import net.sweenus.simplyswords.world.GloampiercerAbilityManager;
+import net.sweenus.simplyswords.world.WraithfangAbilityManager;
+import net.sweenus.simplyswords.world.WraithmawAbilityManager;
+import net.sweenus.simplyswords.world.StormscaleLightningRodManager;
+import net.sweenus.simplyswords.world.IonboundStormscaleAbilityManager;
 import net.sweenus.simplyswords.world.ShadowstingShadowDanceManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -123,6 +129,24 @@ public class SimplySwords {
             if (Platform.isModLoaded("bettercombat")) {
                 BetterCombatCompat.verifyAttackHookTarget();
             }
+        });
+        LifecycleEvent.SERVER_LEVEL_UNLOAD.register(world -> {
+            GloampiercerAbilityManager.clear(world);
+            GloamStainManager.clear(world);
+            GloamMechanicsManager.clear(world);
+            WraithfangAbilityManager.clear(world);
+            WraithmawAbilityManager.clear(world);
+            StormscaleLightningRodManager.clear(world);
+            IonboundStormscaleAbilityManager.clear(world);
+        });
+        LifecycleEvent.SERVER_STOPPED.register(server -> {
+            GloampiercerAbilityManager.clearAll();
+            GloamStainManager.clearAll();
+            GloamMechanicsManager.clearAll();
+            WraithfangAbilityManager.clearAll();
+            WraithmawAbilityManager.clearAll();
+            StormscaleLightningRodManager.clearAll();
+            IonboundStormscaleAbilityManager.clearAll();
         });
         SimplySwordsNetwork.init();
         SimplySwordsAPI.registerObserverSyncedStatusEffect(EffectRegistry.SHADOW_DANCE_ID);

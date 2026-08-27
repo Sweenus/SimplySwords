@@ -99,6 +99,8 @@ public final class IonboundStormscaleSwordItem extends UniqueSwordItem implement
         @ValidatedInt.Restrict(min = 1) public int slowDuration = 80;
         @ValidatedInt.Restrict(min = 0, max = 4) public int slowAmplifier = 1;
         @ValidatedInt.Restrict(min = 1) public int followupWindow = 20;
+        @ValidatedInt.Restrict(min = 1, max = 64) public int corridorTargetCap = 24;
+        @ValidatedInt.Restrict(min = 1, max = 64) public int beamTargetCap = 16;
         @ValidatedDouble.Restrict(min = 0.1) public double beamWidth = 1.1;
         @ValidatedInt.Restrict(min = 1) public int beamDuration = 60;
         @ValidatedInt.Restrict(min = 1) public int beamDamageInterval = 5;

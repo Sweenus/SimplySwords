@@ -42,6 +42,8 @@ public final class WraithmawAbilityManager {
                     new Vector3f(0.62F, 0.12F, 0.96F), 1.35F);
     private static final Map<ServerWorld, Map<UUID, Long>> SUPPRESSED_SWINGS = new HashMap<>();
     private static final Map<ServerWorld, Map<Long, ActiveCast>> ACTIVE_CASTS = new HashMap<>();
+    private static final Map<ServerWorld, Map<UUID, Long>> RECOVERY_LOCKOUTS = new HashMap<>();
+    private static final Map<ServerWorld, Map<UUID, LastCast>> LAST_CASTS = new HashMap<>();
 
     private WraithmawAbilityManager() {
     }
@@ -89,6 +91,8 @@ public final class WraithmawAbilityManager {
                                 .with(Phase2AbilityTuning.Setting.STAIN_DURATION_TICKS, Config.uniqueEffects.wraithmaw.stainDuration)
                                 .with(Phase2AbilityTuning.Setting.EMBEDDED_DURATION_TICKS, Config.uniqueEffects.wraithmaw.embeddedDuration)));
         Phase2AbilityTuning tuning = Phase2UniqueAbilities.tuning(execution);
+        WraithmawTuningSnapshot castTuning = WraithmawTuningSnapshot.from(execution);
+        boolean singleTarget = castTuning.hasMode(WraithmawTuningSnapshot.MODE_SINGLE_TARGET);
         Vec3d origin = actor.getPos();
         int count = Math.clamp(tuning.integer(Phase2AbilityTuning.Setting.SPEAR_COUNT,
                 Config.uniqueEffects.wraithmaw.cutlassCount), 1, 32);
@@ -102,7 +106,8 @@ public final class WraithmawAbilityManager {
         for (int index = 0; index < count; index++) {
             double fraction = Math.sqrt((index + 0.5) / count);
             double angle = index * GOLDEN_ANGLE + actor.getRandom().nextDouble() * 0.28;
-            double distance = index == 0 ? 0.0 : radius * fraction * (0.82 + actor.getRandom().nextDouble() * 0.18);
+            double distance = singleTarget ? actor.getRandom().nextDouble() * 0.35
+                    : index == 0 ? 0.0 : radius * fraction * (0.82 + actor.getRandom().nextDouble() * 0.18);
             double x = center.x + Math.cos(angle) * distance;
             double z = center.z + Math.sin(angle) * distance;
             double y = LivyatanWaveManager.findGroundTopY(world, x, z, center.y + 2.0);
@@ -113,6 +118,10 @@ public final class WraithmawAbilityManager {
         }
         spawnActivation(world, actor, center, count);
         registerCast(world, new ActiveCast(execution, world.getTime() + 1200));
+        if (castTuning.detonatesEmbedded()) {
+            LAST_CASTS.computeIfAbsent(world, ignored -> new HashMap<>())
+                    .put(actor.getUuid(), new LastCast(world.getTime(), castTuning));
+        }
         if (context.activationSource() == WeaponAbilityActivationSource.MOB) {
             SUPPRESSED_SWINGS.computeIfAbsent(world, ignored -> new HashMap<>())
                     .put(actor.getUuid(), world.getTime());
@@ -142,12 +151,11 @@ public final class WraithmawAbilityManager {
         if (direction.lengthSquared() < 1.0E-6) {
             direction = Vec3d.fromPolar(0.0F, actor.getYaw());
         }
-        int launchCount = (available.getFirst().getMasterySetting(Phase2AbilityTuning.Setting.MODE, 0) & 4) != 0 ? 2 : 1;
+        int launchCount = available.getFirst().getTuning().launchCount();
         for (int index = 0; index < Math.min(launchCount, available.size()); index++) {
             WraithmawCutlassEntity cutlass = available.get(index);
             Vec3d start = orbitPosition(actor, cutlass.getOrbitSlot(), world.getTime());
-            cutlass.launch(start, direction, Math.max(0.1, cutlass.getMasterySetting(
-                    Phase2AbilityTuning.Setting.LAUNCH_SPEED, Config.uniqueEffects.wraithmaw.launchSpeed)));
+            cutlass.launch(start, direction, cutlass.getTuning().launchSpeed());
             world.spawnParticles(SPECTRAL_DUST, start.x, start.y, start.z,
                     10, 0.16, 0.16, 0.16, 0.03);
         }
@@ -161,8 +169,15 @@ public final class WraithmawAbilityManager {
                 || candidate.getOwnerUuid() == null || !candidate.getOwnerUuid().equals(owner.getUuid())) {
             return false;
         }
-        int maximum = Math.clamp(candidate.getMasterySetting(Phase2AbilityTuning.Setting.ORBIT_CAP,
-                Config.uniqueEffects.wraithmaw.maxRecovered), 1, 12);
+        WraithmawTuningSnapshot tuning = candidate.getTuning();
+        if (tuning.walksToEnemies()) {
+            return false;
+        }
+        Map<UUID, Long> lockouts = RECOVERY_LOCKOUTS.get(world);
+        if (recoveryLocked(world.getTime(), lockouts == null ? null : lockouts.get(owner.getUuid()))) {
+            return false;
+        }
+        int maximum = tuning.orbitCap();
         boolean[] occupied = new boolean[maximum];
         int count = 0;
         for (WraithmawCutlassEntity cutlass : ownedCutlasses(world, owner)) {
@@ -178,22 +193,71 @@ public final class WraithmawAbilityManager {
         if (count >= maximum) {
             return false;
         }
-        double storedBonus = candidate.getMasterySetting(Phase2AbilityTuning.Setting.BONUS_PER_TRIGGER, 0);
-        double storedCap = candidate.getMasterySetting(Phase2AbilityTuning.Setting.BONUS_CAP, 0);
-        if (storedBonus > 0 && storedCap > 0) {
-            candidate.multiplyDamage(1 + Math.min(storedCap, count * storedBonus));
-        }
-        int slot = 0;
-        while (slot < occupied.length && occupied[slot]) {
-            slot++;
-        }
-        if (slot >= occupied.length) {
+        candidate.multiplyDamage(storedMaliceMultiplier(
+                tuning.storedBonusPerCutlass(), tuning.storedBonusCap(), count));
+        int slot = nextFreeSlot(occupied);
+        if (slot < 0) {
             return false;
         }
-        candidate.recover(slot, world.getTime() + Math.max(20, candidate.getMasterySetting(
-                Phase2AbilityTuning.Setting.ORBIT_DURATION_TICKS,
-                Config.uniqueEffects.wraithmaw.recoveredDuration)));
+        candidate.recover(slot, world.getTime() + tuning.orbitDurationTicks());
+        if (tuning.recoveryLockoutTicks() > 0) {
+            RECOVERY_LOCKOUTS.computeIfAbsent(world, ignored -> new HashMap<>())
+                    .put(owner.getUuid(), world.getTime() + tuning.recoveryLockoutTicks());
+        }
         return true;
+    }
+
+    public static boolean tryDetonate(ServerWorld world, LivingEntity owner) {
+        if (world == null || owner == null || !owner.isAlive()) {
+            return false;
+        }
+        Map<UUID, LastCast> casts = LAST_CASTS.get(world);
+        LastCast last = casts == null ? null : casts.get(owner.getUuid());
+        if (last == null) {
+            return false;
+        }
+        WraithmawTuningSnapshot tuning = last.tuning();
+        if (!tuning.detonatesEmbedded()
+                || !withinBurstWindow(world.getTime(), last.castTick(), tuning.burstWindowTicks())) {
+            return false;
+        }
+        List<WraithmawCutlassEntity> embedded = ownedCutlasses(world, owner).stream()
+                .filter(entity -> entity.getState() == WraithmawCutlassEntity.STATE_EMBEDDED)
+                .filter(entity -> entity.squaredDistanceTo(owner)
+                        <= tuning.burstRange() * tuning.burstRange())
+                .sorted(Comparator.comparingDouble(entity -> entity.squaredDistanceTo(owner)))
+                .limit(tuning.burstTargetCap())
+                .toList();
+        if (embedded.isEmpty()) {
+            return false;
+        }
+        casts.remove(owner.getUuid());
+        if (casts.isEmpty()) LAST_CASTS.remove(world);
+        for (WraithmawCutlassEntity cutlass : embedded) {
+            cutlass.detonate(world, owner);
+        }
+        world.playSound(null, owner.getBlockPos(), SoundRegistry.DARK_ACTIVATION_DISTORTED.get(),
+                SoundCategory.PLAYERS, 0.68F, 0.7F);
+        return true;
+    }
+
+    public static void clear(ServerWorld world) {
+        SUPPRESSED_SWINGS.remove(world);
+        RECOVERY_LOCKOUTS.remove(world);
+        LAST_CASTS.remove(world);
+        Map<Long, ActiveCast> casts = ACTIVE_CASTS.remove(world);
+        if (casts != null) {
+            casts.values().forEach(cast -> UniqueAbilityApi.cancel(cast.execution()));
+        }
+    }
+
+    public static void clearAll() {
+        SUPPRESSED_SWINGS.clear();
+        RECOVERY_LOCKOUTS.clear();
+        LAST_CASTS.clear();
+        ACTIVE_CASTS.values().forEach(casts ->
+                casts.values().forEach(cast -> UniqueAbilityApi.cancel(cast.execution())));
+        ACTIVE_CASTS.clear();
     }
 
     public static Vec3d orbitPosition(LivingEntity owner, int slot, long time) {
@@ -205,7 +269,11 @@ public final class WraithmawAbilityManager {
                 {0.31, 2.24, 0.14},
                 {0.92, 2.02, 0.10},
                 {-0.52, 2.62, 0.18},
-                {0.52, 2.62, 0.18}
+                {0.52, 2.62, 0.18},
+                {-1.08, 1.72, -0.16},
+                {1.08, 1.72, -0.16},
+                {-0.78, 2.92, -0.12},
+                {0.78, 2.92, -0.12}
         };
         int index = Math.floorMod(slot, slots.length);
         double localX = slots[index][0];
@@ -219,7 +287,9 @@ public final class WraithmawAbilityManager {
 
     public static boolean hasActive(ServerWorld world) {
         return !SUPPRESSED_SWINGS.getOrDefault(world, Map.of()).isEmpty()
-                || !ACTIVE_CASTS.getOrDefault(world, Map.of()).isEmpty();
+                || !ACTIVE_CASTS.getOrDefault(world, Map.of()).isEmpty()
+                || !RECOVERY_LOCKOUTS.getOrDefault(world, Map.of()).isEmpty()
+                || !LAST_CASTS.getOrDefault(world, Map.of()).isEmpty();
     }
 
     public static void tick(ServerWorld world) {
@@ -238,6 +308,40 @@ public final class WraithmawAbilityManager {
             });
             if (casts.isEmpty()) ACTIVE_CASTS.remove(world);
         }
+        Map<UUID, Long> lockouts = RECOVERY_LOCKOUTS.get(world);
+        if (lockouts != null) {
+            lockouts.values().removeIf(tick -> tick <= now);
+            if (lockouts.isEmpty()) RECOVERY_LOCKOUTS.remove(world);
+        }
+        Map<UUID, LastCast> lastCasts = LAST_CASTS.get(world);
+        if (lastCasts != null) {
+            lastCasts.values().removeIf(cast -> now - cast.castTick() > cast.tuning().burstWindowTicks());
+            if (lastCasts.isEmpty()) LAST_CASTS.remove(world);
+        }
+    }
+
+    static double storedMaliceMultiplier(double bonusPerCutlass, double cap, int orbiting) {
+        if (bonusPerCutlass <= 0 || cap <= 0 || orbiting <= 0) {
+            return 1;
+        }
+        return 1 + Math.min(cap, orbiting * bonusPerCutlass);
+    }
+
+    static int nextFreeSlot(boolean[] occupied) {
+        for (int slot = 0; slot < occupied.length; slot++) {
+            if (!occupied[slot]) {
+                return slot;
+            }
+        }
+        return -1;
+    }
+
+    static boolean recoveryLocked(long now, Long lockedUntil) {
+        return lockedUntil != null && now < lockedUntil;
+    }
+
+    static boolean withinBurstWindow(long now, long castTick, int windowTicks) {
+        return windowTicks > 0 && now >= castTick && now - castTick <= windowTicks;
     }
 
     private static void registerCast(ServerWorld world, ActiveCast cast) {
@@ -301,5 +405,8 @@ public final class WraithmawAbilityManager {
     }
 
     private record ActiveCast(UniqueAbilityExecution execution, long expiresAt) {
+    }
+
+    private record LastCast(long castTick, WraithmawTuningSnapshot tuning) {
     }
 }

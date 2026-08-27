@@ -109,9 +109,8 @@ public class ThrownSpearEntity extends PersistentProjectileEntity {
         if (!this.isOwner(player)) return false;
 
         if (this.isNoClip()) {
-            int cooldown = 1;
-            if (offhandThrow) cooldown = 4;
-            SimplySwordsAPI.setWeaponCooldown(player, this.asItemStack(), cooldown);
+            int cooldown = getReturnPickupCooldownTicks();
+            if (cooldown >= 0) SimplySwordsAPI.setWeaponCooldown(player, this.asItemStack(), cooldown);
 
             if (this.pickupType != PickupPermission.ALLOWED) return true;
 
@@ -124,6 +123,14 @@ public class ThrownSpearEntity extends PersistentProjectileEntity {
             }
         }
         return super.tryPickup(player);
+    }
+
+    protected int getReturnPickupCooldownTicks() {
+        return offhandThrow ? 4 : 1;
+    }
+
+    protected void beginReturn() {
+        this.dealtDamage = true;
     }
 
 

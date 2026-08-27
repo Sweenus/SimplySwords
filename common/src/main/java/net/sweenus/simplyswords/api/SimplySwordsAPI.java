@@ -311,6 +311,26 @@ public class SimplySwordsAPI {
                 context.stack(), context.actor(), ability.getActivationCooldownTicks(context.stack(), context));
     }
 
+    //Shortens an existing weapon cooldown instead of replacing it.
+    public static void reduceWeaponCooldown(LivingEntity actor, ItemStack stack,
+                                            int totalCooldownTicks, int reductionTicks) {
+        if (actor == null || stack == null || stack.isEmpty()
+                || totalCooldownTicks <= 0 || reductionTicks <= 0) {
+            return;
+        }
+        if (actor instanceof PlayerEntity player) {
+            int total = getEffectiveWeaponCooldownTicks(stack, actor, totalCooldownTicks);
+            int remaining = Math.round(player.getItemCooldownManager()
+                    .getCooldownProgress(stack.getItem(), 0.0F) * total);
+            if (remaining <= 0) {
+                return;
+            }
+            player.getItemCooldownManager().set(stack.getItem(), Math.max(0, remaining - reductionTicks));
+        } else if (actor.getWorld() instanceof ServerWorld world) {
+            WeaponAbilityCooldownManager.reduceCooldown(world, actor, stack, reductionTicks);
+        }
+    }
+
     public static int getEffectiveWeaponCooldownTicks(ItemStack stack, LivingEntity actor, int baseCooldownTicks) {
         if (baseCooldownTicks <= 0) {
             return 0;

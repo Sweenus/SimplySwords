@@ -52,6 +52,7 @@ public final class GloampiercerAbilityManager {
     private static final Map<ServerWorld, List<PendingPassiveStrike>> PASSIVE_STRIKES = new HashMap<>();
     private static final Map<ServerWorld, Map<UUID, Long>> LAST_PASSIVE = new HashMap<>();
     private static final Map<ServerWorld, Map<UUID, Integer>> PASSIVE_PROCS = new HashMap<>();
+    private static final Map<ServerWorld, Map<UUID, StoredPassive>> STORED_PASSIVES = new HashMap<>();
 
     private GloampiercerAbilityManager() {
     }
@@ -97,6 +98,12 @@ public final class GloampiercerAbilityManager {
                         Config.uniqueEffects.gloampiercer.strikeDamageScaling,
                         Config.uniqueEffects.gloampiercer.strikeSpellScaling))
                         * (float) tuning.get(Phase2AbilityTuning.Setting.PROJECTILE_DAMAGE_MULTIPLIER, 1), execution);
+        if ((tuning.integer(Phase2AbilityTuning.Setting.MODE, 0) & 32) != 0) {
+            LivingEntity royalTarget = findNearestBarrageTarget(world, owner, center);
+            channel.royalTargetId = royalTarget == null ? null : royalTarget.getUuid();
+            channel.royalDestination = royalTarget == null ? center
+                    : royalTarget.getPos().add(0, royalTarget.getHeight() * .55, 0);
+        }
         spawnActiveClones(world, owner, channel, cloneCount);
         ACTIVE.computeIfAbsent(world, ignored -> new HashMap<>()).put(owner.getUuid(), channel);
         spawnActivationEffects(world, owner, center);
@@ -109,8 +116,8 @@ public final class GloampiercerAbilityManager {
             return;
         }
         long now = world.getTime();
-        Map<UUID, Long> cooldowns = LAST_PASSIVE.computeIfAbsent(world, ignored -> new HashMap<>());
-        Long nextEligible = cooldowns.get(owner.getUuid());
+        Map<UUID, Long> cooldowns = LAST_PASSIVE.get(world);
+        Long nextEligible = cooldowns == null ? null : cooldowns.get(owner.getUuid());
         if (nextEligible != null && now < nextEligible) {
             return;
         }
@@ -121,41 +128,52 @@ public final class GloampiercerAbilityManager {
         UniqueAbilityApi.start(execution);
         Phase2AbilityTuning tuning = Phase2UniqueAbilities.tuning(execution);
         int mode = tuning.integer(Phase2AbilityTuning.Setting.MODE, 0);
-        Map<UUID, Integer> procCounts = PASSIVE_PROCS.computeIfAbsent(world, ignored -> new HashMap<>());
-        int proc = Math.floorMod(procCounts.getOrDefault(owner.getUuid(), 0), 3) + 1;
-        procCounts.put(owner.getUuid(), proc);
-        int cloneCount = Math.clamp(tuning.integer(Phase2AbilityTuning.Setting.CLONE_COUNT, 1), 1, 3);
-        if ((mode & 1) != 0 && proc != 3) cloneCount = 1;
+        Map<UUID, Integer> procCounts = PASSIVE_PROCS.get(world);
+        int proc = nextPassiveProc(procCounts == null ? 0 : procCounts.getOrDefault(owner.getUuid(), 0));
+        int cloneCount = passiveCloneCount(mode, proc,
+                tuning.integer(Phase2AbilityTuning.Setting.CLONE_COUNT, 1));
         List<LivingEntity> targets = findPassiveTargets(world, owner, tuning, cloneCount);
         if (targets.isEmpty()) {
-            UniqueAbilityApi.cancel(execution);
+            if ((mode & 2) == 0) {
+                UniqueAbilityApi.cancel(execution);
+                return;
+            }
+            int duration = Math.max(1, tuning.integer(Phase2AbilityTuning.Setting.DURATION_TICKS, 80));
+            STORED_PASSIVES.computeIfAbsent(world, ignored -> new HashMap<>())
+                    .put(owner.getUuid(), new StoredPassive(stack, now + duration));
+            commitPassiveActivation(world, owner, stack, tuning, proc, now);
+            UniqueAbilityApi.finish(execution, execution.definition().id(), 0);
             return;
         }
+        commitPassiveActivation(world, owner, stack, tuning, proc, now);
+        StoredPassive stored = takeStoredPassive(world, owner, stack, now);
         int seed = owner.getRandom().nextInt();
         int throwTick = tuning.integer(Phase2AbilityTuning.Setting.FIRE_DELAY_TICKS, 9);
         float baseDamage = Math.max(1.0F, HelperMethods.abilityScaledDamage(SpellScalingProfile.SOUL, owner, stack,
                 Config.uniqueEffects.gloampiercer.strikeDamageScaling,
                 Config.uniqueEffects.gloampiercer.strikeSpellScaling))
                 * (float) tuning.get(Phase2AbilityTuning.Setting.PROJECTILE_DAMAGE_MULTIPLIER, 1);
+        List<PassiveTarget> strikes = new ArrayList<>();
         for (int index = 0; index < targets.size(); index++) {
-            LivingEntity target = targets.get(index);
+            strikes.add(new PassiveTarget(targets.get(index), index == 0 ? 1.0F
+                    : (float) tuning.get(Phase2AbilityTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, 1)));
+        }
+        if (stored != null) strikes.add(new PassiveTarget(targets.getFirst(), 1.0F));
+        for (int index = 0; index < strikes.size(); index++) {
+            LivingEntity target = strikes.get(index).target;
             int cloneSeed = seed + index * 7919;
             Vec3d clonePosition = passiveClonePosition(owner, target, cloneSeed);
             GloampiercerCloneVisualEntity clone = new GloampiercerCloneVisualEntity(world,
                     clonePosition.x, clonePosition.y, clonePosition.z, yawToward(clonePosition, target.getPos()),
                     22, throwTick, 0, cloneSeed);
             world.spawnEntity(clone);
-            float damage = index == 0 ? baseDamage : baseDamage * (float) tuning.get(
-                    Phase2AbilityTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, 1);
+            float damage = baseDamage * strikes.get(index).damageMultiplier;
             PASSIVE_STRIKES.computeIfAbsent(world, ignored -> new ArrayList<>())
                     .add(new PendingPassiveStrike(owner.getUuid(), target.getUuid(), clone.getUuid(),
                             stack.copy(), cloneHandOrigin(clonePosition, target.getPos()), now + throwTick,
                             damage, execution));
             spawnCloneMaterialization(world, clonePosition);
         }
-        cooldowns.put(owner.getUuid(), now + SimplySwordsAPI.getEffectiveWeaponCooldownTicks(stack, owner,
-                tuning.integer(Phase2AbilityTuning.Setting.PASSIVE_COOLDOWN_TICKS,
-                        Config.uniqueEffects.gloampiercer.passiveCooldown)));
     }
 
     public static boolean isActive(LivingEntity owner) {
@@ -170,14 +188,17 @@ public final class GloampiercerAbilityManager {
         Map<UUID, ActiveChannel> channels = ACTIVE.get(world);
         List<PendingPassiveStrike> strikes = PASSIVE_STRIKES.get(world);
         Map<UUID, Long> cooldowns = LAST_PASSIVE.get(world);
+        Map<UUID, StoredPassive> stored = STORED_PASSIVES.get(world);
         return channels != null && !channels.isEmpty()
                 || strikes != null && !strikes.isEmpty()
-                || cooldowns != null && !cooldowns.isEmpty();
+                || cooldowns != null && !cooldowns.isEmpty()
+                || stored != null && !stored.isEmpty();
     }
 
     public static void tick(ServerWorld world) {
         tickChannels(world);
         tickPassiveStrikes(world);
+        tickStoredPassives(world);
         if (world.getTime() % 200L == 0L) {
             Map<UUID, Long> cooldowns = LAST_PASSIVE.get(world);
             if (cooldowns != null) {
@@ -194,6 +215,61 @@ public final class GloampiercerAbilityManager {
                 }
             }
         }
+    }
+
+    public static void clear(ServerWorld world) {
+        Map<UUID, ActiveChannel> channels = ACTIVE.remove(world);
+        if (channels != null) channels.values().forEach(channel -> UniqueAbilityApi.cancel(channel.execution));
+        List<PendingPassiveStrike> strikes = PASSIVE_STRIKES.remove(world);
+        if (strikes != null) strikes.forEach(strike -> UniqueAbilityApi.cancel(strike.execution));
+        LAST_PASSIVE.remove(world);
+        PASSIVE_PROCS.remove(world);
+        STORED_PASSIVES.remove(world);
+    }
+
+    public static void clearAll() {
+        ACTIVE.values().forEach(channels -> channels.values()
+                .forEach(channel -> UniqueAbilityApi.cancel(channel.execution)));
+        PASSIVE_STRIKES.values().forEach(strikes -> strikes
+                .forEach(strike -> UniqueAbilityApi.cancel(strike.execution)));
+        ACTIVE.clear();
+        PASSIVE_STRIKES.clear();
+        LAST_PASSIVE.clear();
+        PASSIVE_PROCS.clear();
+        STORED_PASSIVES.clear();
+    }
+
+    private static void tickStoredPassives(ServerWorld world) {
+        Map<UUID, StoredPassive> stored = STORED_PASSIVES.get(world);
+        if (stored == null) return;
+        long now = world.getTime();
+        stored.entrySet().removeIf(entry -> {
+            Entity entity = world.getEntity(entry.getKey());
+            if (!(entity instanceof LivingEntity owner) || !owner.isAlive() || owner.isRemoved()) return true;
+            StoredPassive value = entry.getValue();
+            return now >= value.expiresAt || owner.getMainHandStack() != value.stack
+                    && owner.getOffHandStack() != value.stack;
+        });
+        if (stored.isEmpty()) STORED_PASSIVES.remove(world);
+    }
+
+    private static void commitPassiveActivation(ServerWorld world, LivingEntity owner, ItemStack stack,
+                                                Phase2AbilityTuning tuning, int proc, long now) {
+        PASSIVE_PROCS.computeIfAbsent(world, ignored -> new HashMap<>()).put(owner.getUuid(), proc);
+        int cooldown = SimplySwordsAPI.getEffectiveWeaponCooldownTicks(stack, owner,
+                tuning.integer(Phase2AbilityTuning.Setting.PASSIVE_COOLDOWN_TICKS,
+                        Config.uniqueEffects.gloampiercer.passiveCooldown));
+        LAST_PASSIVE.computeIfAbsent(world, ignored -> new HashMap<>())
+                .put(owner.getUuid(), now + cooldown);
+    }
+
+    private static StoredPassive takeStoredPassive(ServerWorld world, LivingEntity owner,
+                                                   ItemStack stack, long now) {
+        Map<UUID, StoredPassive> stored = STORED_PASSIVES.get(world);
+        if (stored == null) return null;
+        StoredPassive value = stored.remove(owner.getUuid());
+        if (stored.isEmpty()) STORED_PASSIVES.remove(world);
+        return value != null && value.stack == stack && now < value.expiresAt ? value : null;
     }
 
     private static void tickChannels(ServerWorld world) {
@@ -319,9 +395,13 @@ public final class GloampiercerAbilityManager {
         int groundInterval = tuning.integer(Phase2AbilityTuning.Setting.INTERVAL_TICKS, 3);
         boolean groundStrike = (mode & 16) != 0 || (mode & 32) == 0 && index % groundInterval == groundInterval - 1;
         LivingEntity target = groundStrike ? null : selectBarrageTarget(world, owner, channel, index);
+        if (target != null && (mode & 32) != 0) {
+            channel.royalDestination = target.getPos().add(0, target.getHeight() * .55, 0);
+        }
         Vec3d destination = target == null
-                ? groundStrikePosition(world, channel.center, index, count,
-                tuning.get(Phase2AbilityTuning.Setting.RADIUS, Config.uniqueEffects.gloampiercer.barrageRadius))
+                ? (mode & 32) != 0 && channel.royalDestination != null ? channel.royalDestination
+                : groundStrikePosition(world, channel.center, index, count,
+                        tuning.get(Phase2AbilityTuning.Setting.RADIUS, Config.uniqueEffects.gloampiercer.barrageRadius))
                 : target.getPos().add(0.0, target.getHeight() * 0.55, 0.0);
         launchSpear(world, owner, channel.stack, origin, destination, target, channel.damage, channel.execution);
         if (sourceIndex == 0) {
@@ -347,6 +427,11 @@ public final class GloampiercerAbilityManager {
 
     private static LivingEntity selectBarrageTarget(ServerWorld world, LivingEntity owner,
                                                      ActiveChannel channel, int index) {
+        if (channel.royalDestination != null) {
+            Entity entity = channel.royalTargetId == null ? null : world.getEntity(channel.royalTargetId);
+            return entity instanceof LivingEntity living && living.isAlive() && !living.isRemoved()
+                    && HelperMethods.checkAbilityTarget(living, owner) ? living : null;
+        }
         double radius = Math.max(1.0, Config.uniqueEffects.gloampiercer.barrageRadius);
         Box box = Box.of(channel.center, radius * 2.0, 8.0, radius * 2.0);
         List<LivingEntity> targets = world.getEntitiesByClass(LivingEntity.class, box,
@@ -358,6 +443,16 @@ public final class GloampiercerAbilityManager {
                 .sorted(Comparator.comparingDouble(entity -> entity.squaredDistanceTo(channel.center)))
                 .toList();
         return targets.isEmpty() ? null : targets.get(Math.floorMod(index / 3 + index, targets.size()));
+    }
+
+    private static LivingEntity findNearestBarrageTarget(ServerWorld world, LivingEntity owner, Vec3d center) {
+        double radius = Math.max(1, Config.uniqueEffects.gloampiercer.barrageRadius);
+        return world.getEntitiesByClass(LivingEntity.class, Box.of(center, radius * 2, 8, radius * 2),
+                        entity -> entity != owner && entity.isAlive() && !entity.isRemoved()
+                                && EntityPredicates.VALID_LIVING_ENTITY.test(entity)
+                                && HelperMethods.checkAbilityTarget(entity, owner)
+                                && horizontalDistanceSquared(entity.getPos(), center) <= radius * radius)
+                .stream().min(Comparator.comparingDouble(entity -> entity.squaredDistanceTo(center))).orElse(null);
     }
 
     private static Vec3d groundStrikePosition(ServerWorld world, Vec3d center, int index, int count,
@@ -382,6 +477,7 @@ public final class GloampiercerAbilityManager {
         double threshold = Math.cos(Math.toRadians(
                 MathHelper.clamp(tuning.get(Phase2AbilityTuning.Setting.CONE_DEGREES,
                         Config.uniqueEffects.gloampiercer.passiveConeDegrees), 1.0, 180.0) * 0.5));
+        boolean nearestFirst = (tuning.integer(Phase2AbilityTuning.Setting.MODE, 0) & 8) != 0;
         Vec3d look = owner.getRotationVec(1.0F).normalize();
         return world.getEntitiesByClass(LivingEntity.class, owner.getBoundingBox().expand(maximum),
                         entity -> entity != owner && entity.isAlive() && !entity.isRemoved()
@@ -392,10 +488,10 @@ public final class GloampiercerAbilityManager {
                                 && owner.canSee(entity))
                 .stream()
                 .filter(entity -> directionTo(owner, entity).dotProduct(look) >= threshold)
-                .sorted(Comparator.comparingDouble(entity -> {
-                    double alignment = directionTo(owner, entity).dotProduct(look);
-                    return (1.0 - alignment) * 100.0 + owner.squaredDistanceTo(entity) * 0.02;
-                }))
+                .sorted(Comparator.comparingDouble(entity -> nearestFirst
+                        ? owner.squaredDistanceTo(entity)
+                        : (1.0 - directionTo(owner, entity).dotProduct(look)) * 100.0
+                        + owner.squaredDistanceTo(entity) * 0.02))
                 .limit(cap)
                 .toList();
     }
@@ -569,6 +665,15 @@ public final class GloampiercerAbilityManager {
         return x * x + z * z;
     }
 
+    static int nextPassiveProc(int current) {
+        return Math.floorMod(current, 3) + 1;
+    }
+
+    static int passiveCloneCount(int mode, int proc, int tunedCount) {
+        int count = Math.clamp(tunedCount, 1, 3);
+        return (mode & 1) != 0 && proc != 3 ? 1 : count;
+    }
+
     private static final class ActiveChannel {
         private final UUID ownerId;
         private final ItemStack stack;
@@ -582,6 +687,8 @@ public final class GloampiercerAbilityManager {
         private final UniqueAbilityExecution execution;
         private final List<Vec3d> clonePositions = new ArrayList<>();
         private final List<UUID> cloneIds = new ArrayList<>();
+        private UUID royalTargetId;
+        private Vec3d royalDestination;
         private int fired;
 
         private ActiveChannel(UUID ownerId, ItemStack stack, Hand hand, Vec3d start, Vec3d center,
@@ -603,6 +710,12 @@ public final class GloampiercerAbilityManager {
     private record PendingPassiveStrike(UUID ownerId, UUID targetId, UUID cloneId, ItemStack stack,
                                         Vec3d origin, long triggerAt, float damage,
                                         UniqueAbilityExecution execution) {
+    }
+
+    private record PassiveTarget(LivingEntity target, float damageMultiplier) {
+    }
+
+    private record StoredPassive(ItemStack stack, long expiresAt) {
     }
 
     private static Phase2AbilityTuning baseTuning(int cooldown, int duration, int spears, int clones) {

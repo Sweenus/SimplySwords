@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -69,12 +70,44 @@ final class UniqueAbilityApiContractTest {
         assertEquals(0.0, tuning.get(Phase2AbilityTuning.Setting.LOW_HEALTH_PERCENT, 0));
         assertEquals(0.0, tuning.get(Phase2AbilityTuning.Setting.EXECUTE_DREAD_THRESHOLD, 0));
         assertEquals(0.0, tuning.get(Phase2AbilityTuning.Setting.CLAIM_BONUS_CAP, 0));
+        assertEquals(0.0, tuning.get(Phase2AbilityTuning.Setting.CHAIN_RANGE, 0));
+        assertEquals(0.0, tuning.get(Phase2AbilityTuning.Setting.CHAIN_DELAY_TICKS, 0));
+        assertEquals(0.0, tuning.get(Phase2AbilityTuning.Setting.GLOAM_MOVE_RANGE, 0));
+        assertEquals(0.0, tuning.get(Phase2AbilityTuning.Setting.GLOAM_VULNERABILITY_BONUS, 0));
+        assertEquals(0.0, tuning.get(Phase2AbilityTuning.Setting.HAUNT_RANGE, 0));
+        assertEquals(0.0, tuning.get(Phase2AbilityTuning.Setting.BURIAL_RANGE, 0));
+        assertEquals(0.0, tuning.get(Phase2AbilityTuning.Setting.RECALL_RANGE, 0));
+        assertEquals(0.0, tuning.get(Phase2AbilityTuning.Setting.GRAVEWALK_RANGE, 0));
+        assertEquals(0.0, tuning.get(Phase2AbilityTuning.Setting.BURST_RANGE, 0));
+        assertEquals(0.0, tuning.get(Phase2AbilityTuning.Setting.BURST_WINDOW_TICKS, 0));
+        assertEquals(1.0, tuning.get(Phase2AbilityTuning.Setting.LAUNCH_COUNT, 1));
+        assertEquals(2.0, tuning.with(Phase2AbilityTuning.Setting.HAUNT_INTERVAL_TICKS, 40)
+                .get(Phase2AbilityTuning.Setting.INTERVAL_TICKS, 2));
         assertEquals(30.0, tuning.get(Phase2AbilityTuning.Setting.REPEAT_WINDOW_TICKS, 30));
         assertEquals(100.0, tuning.get(Phase2AbilityTuning.Setting.LOW_HEALTH_PERCENT, 140));
         assertEquals(4.0, tuning.with(Phase2AbilityTuning.Setting.THRESHOLD, 4)
                 .get(Phase2AbilityTuning.Setting.THRESHOLD, 0));
         assertEquals(0.0, tuning.with(Phase2AbilityTuning.Setting.REPEAT_WINDOW_TICKS, 30)
                 .get(Phase2AbilityTuning.Setting.THRESHOLD, 0));
+    }
+
+    @Test
+    void phase3SettingAdditionsAreDisabledByDefaultAndDoNotDisturbExistingOnes() {
+        net.sweenus.simplyswords.api.ability.Phase3AbilityTuning tuning =
+                net.sweenus.simplyswords.api.ability.Phase3AbilityTuning.EMPTY;
+        var setting = net.sweenus.simplyswords.api.ability.Phase3AbilityTuning.Setting.class;
+
+        assertEquals(0.0, tuning.get(Enum.valueOf(setting, "RADIUS_CAP"), 0));
+        assertEquals(0.0, tuning.get(Enum.valueOf(setting, "GROWTH_CAP_LIMIT"), 0));
+        assertEquals(0.0, tuning.get(Enum.valueOf(setting, "COOLDOWN_BASE_TICKS"), 0));
+        assertEquals(0.0, tuning.get(Enum.valueOf(setting, "PLANT_DAMAGE_MULTIPLIER"), 0));
+        assertEquals(0.0, tuning.get(Enum.valueOf(setting, "CHAIN_DAMAGE_MULTIPLIER"), 0));
+        assertEquals(0.0, tuning.get(Enum.valueOf(setting, "WARD_LOCKOUT_TICKS"), 0));
+        assertFalse(tuning.has(Enum.valueOf(setting, "RADIUS_CAP")));
+        assertEquals(3.5, tuning.with(Enum.valueOf(setting, "RADIUS_CAP"), 4.5)
+                .get(Enum.valueOf(setting, "RADIUS"), 3.5));
+        assertEquals(0.0, tuning.with(Enum.valueOf(setting, "CONDUCTIVE_TARGET_CAP"), 12)
+                .get(Enum.valueOf(setting, "TARGET_CAP"), 0));
     }
 
     @Test

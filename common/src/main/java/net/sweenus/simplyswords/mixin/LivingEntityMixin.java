@@ -47,6 +47,7 @@ import net.sweenus.simplyswords.world.SoulPyreAbilityManager;
 import net.sweenus.simplyswords.world.StormsEdgeAbilityManager;
 import net.sweenus.simplyswords.world.ThunderbrandAbilityManager;
 import net.sweenus.simplyswords.world.WaxweaverEncasementManager;
+import net.sweenus.simplyswords.world.WraithfangAbilityManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -196,8 +197,12 @@ public abstract class LivingEntityMixin {
             amount = DreadwhisperAbilityManager.modifyIncomingDamage(livingEntity, source, amount);
             amount = MoltenEdgeAbilityManager.modifyIncomingDamage(livingEntity, amount);
             amount = WatcherAbilityManager.modifyIncomingDamage(livingEntity, source, amount);
+            amount = net.sweenus.simplyswords.world.StormscaleLightningRodManager.modifyIncomingDamage(
+                    livingEntity, source, amount);
             amount = net.sweenus.simplyswords.world.Phase2CombatStateManager.modifyIncomingDamage(
                     livingEntity, source, amount);
+            amount = WraithfangAbilityManager.modifyIncomingDamage(livingEntity, source, amount);
+            amount = WraithfangAbilityManager.modifyOutgoingDamage(livingEntity, source, amount);
             amount = Phase4StandardManager.modifyIncomingDamage(livingEntity, source, amount);
             amount = Phase4PassiveManager.modifyIncomingDamage(livingEntity, source, amount);
             amount = Phase5CombatManager.modifyIncomingDamage(livingEntity, source, amount);
@@ -223,6 +228,7 @@ public abstract class LivingEntityMixin {
             Phase5CombatManager.onDamageApplied(livingEntity, source);
             HivemindSwarmManager.onOwnerDamaged(livingEntity, source);
             Phase7CombatManager.onDamageApplied(livingEntity, source);
+            WraithfangAbilityManager.onMeleeDamageApplied(livingEntity, source);
             if (source.isIn(DamageTypeTags.IS_PLAYER_ATTACK) && source.getAttacker() instanceof ServerPlayerEntity player) {
                 ItemStack stack = source.getWeaponStack();
                 if (stack == null || !stack.isOf(ItemsRegistry.STORMBRINGER.get())) {
@@ -252,6 +258,7 @@ public abstract class LivingEntityMixin {
         SoulPyreAbilityManager.onDeath(livingEntity, damageSource);
         FlameSeedEffect.triggerDeathDetonation(livingEntity);
         GloamMechanicsManager.onTargetDeath(livingEntity);
+        WraithfangAbilityManager.onTargetDeath(livingEntity, damageSource);
     }
 
     @Inject(method = "jump", at = @At("HEAD"), cancellable = true)

@@ -12,6 +12,8 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.ActionResult;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.api.SpellScalingProfile;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
@@ -20,13 +22,15 @@ import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
+import net.sweenus.simplyswords.item.interfaces.UniqueWeaponSecondaryAction;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.Styles;
 import net.sweenus.simplyswords.world.WraithmawAbilityManager;
 
 import java.util.List;
 
-public final class WraithmawSwordItem extends UniqueSwordItem implements UniqueWeaponActiveAbility {
+public final class WraithmawSwordItem extends UniqueSwordItem
+        implements UniqueWeaponActiveAbility, UniqueWeaponSecondaryAction {
     public WraithmawSwordItem(ToolMaterial material, Settings settings) {
         super(material, settings);
     }
@@ -34,6 +38,18 @@ public final class WraithmawSwordItem extends UniqueSwordItem implements UniqueW
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         return useFromDefaultInput(world, user, hand);
+    }
+
+    @Override
+    public TypedActionResult<ItemStack> startPlayerSecondaryAbility(World world, PlayerEntity user, Hand hand) {
+        ItemStack stack = user.getStackInHand(hand);
+        if (world.isClient() || !(world instanceof ServerWorld serverWorld)
+                || stack.getDamage() >= stack.getMaxDamage() - 1
+                || !WraithmawAbilityManager.tryDetonate(serverWorld, user)) {
+            return TypedActionResult.pass(stack);
+        }
+        user.swingHand(hand, true);
+        return new TypedActionResult<>(ActionResult.SUCCESS, stack);
     }
 
     @Override

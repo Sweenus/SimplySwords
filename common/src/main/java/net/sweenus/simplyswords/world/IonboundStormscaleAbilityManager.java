@@ -60,6 +60,18 @@ public final class IonboundStormscaleAbilityManager {
     private static final Map<ServerWorld, Map<UUID, ActiveBeam>> BEAMS = new HashMap<>();
     private static final Map<ServerWorld, Map<UUID, UUID>> ORBIT_VISUALS = new HashMap<>();
     private static final Map<ServerWorld, Map<UUID, WielderRecharge>> RECHARGE = new HashMap<>();
+    private static final Map<ServerWorld, Map<UUID, ReserveState>> RESERVES = new HashMap<>();
+    private static final int MODE_ION_REBOUND = 1;
+    private static final int MODE_STORED_CHARGE = 2;
+    private static final int MODE_EMERGENCY_CELL = 4;
+    private static final int MODE_RECYCLED_CURRENT = 8;
+    private static final int MODE_AEGIS_REACTOR = 16;
+    private static final int MODE_OVERCHARGED_CORE = 32;
+    private static final int MODE_CRUSHING_FOCUS = 64;
+    private static final int MODE_ION_COFFIN = 128;
+    private static final int MODE_REPULSOR_GATE = 256;
+    private static final int MODE_DISINTEGRATION = 1024;
+    private static final int MODE_PARALYTIC_WALLS = 2048;
 
     private IonboundStormscaleAbilityManager() {
     }
@@ -86,16 +98,25 @@ public final class IonboundStormscaleAbilityManager {
         }
 
         RechargeState state = getOrCreateRechargeState(serverWorld, actor, hand, stack);
+        tickEmergencyCell(serverWorld, actor, stack, state.tuning);
         IonCubeComponent cubes = getCubes(stack);
         if (cubes.cubes() >= IonCubeComponent.MAX_CUBES) {
             state.rechargeTicks = 0;
+            grantStoredCharge(serverWorld, actor, state.tuning);
         } else if (state.lastAdvancedTick != serverWorld.getTime()) {
             state.lastAdvancedTick = serverWorld.getTime();
             state.rechargeTicks++;
-            if (state.rechargeTicks >= Math.max(1, state.tuning.integer(Phase3AbilityTuning.Setting.INTERVAL_TICKS,
-                    Config.uniqueEffects.ionbound_stormscale.rechargeInterval))) {
+            ReserveState reserve = reserve(serverWorld, actor.getUuid());
+            int interval = Math.max(1, state.tuning.integer(
+                    Phase3AbilityTuning.Setting.RESERVE_INTERVAL_TICKS,
+                    Config.uniqueEffects.ionbound_stormscale.rechargeInterval));
+            if (reserve != null && reserve.rechargeRefund > 0) {
+                interval = Math.max(1, interval - reserve.rechargeRefund);
+            }
+            if (state.rechargeTicks >= interval) {
                 cubes = new IonCubeComponent(cubes.cubes() + 1, 0);
                 state.rechargeTicks = 0;
+                if (reserve != null) reserve.rechargeRefund = 0;
                 stack.set(ComponentTypeRegistry.ION_CUBES.get(), cubes);
                 spawnCubeGeneratedEffects(serverWorld, actor, cubes.cubes());
             }
@@ -112,6 +133,7 @@ public final class IonboundStormscaleAbilityManager {
         ActiveCorridor corridor = getCorridor(context.world(), context.actor().getUuid());
         if (corridor != null) {
             return corridor.slammed && context.world().getTime() <= corridor.followupEnds
+                    && (corridor.tuning.integer(Phase3AbilityTuning.Setting.MODE, 0) & MODE_ION_COFFIN) == 0
                     && getCubes(context.stack()).cubes() > 0;
         }
         return getCubes(context.stack()).cubes() > 0;
@@ -161,8 +183,12 @@ public final class IonboundStormscaleAbilityManager {
         UniqueAbilityApi.takeStartedExecution();
         UniqueAbilityApi.start(execution);
         Phase3AbilityTuning tuning = Phase3UniqueAbilities.tuning(execution);
-        if (amount <= actor.getMaxHealth() * tuning.get(Phase3AbilityTuning.Setting.THRESHOLD,
-                Config.uniqueEffects.ionbound_stormscale.shieldTriggerHealthFraction) || !consumeCube(stack)) {
+        int mode = tuning.integer(Phase3AbilityTuning.Setting.MODE, 0);
+        int cost = Math.max(1, tuning.integer(Phase3AbilityTuning.Setting.SHIELD_CUBE_COST, 1));
+        if ((mode & MODE_OVERCHARGED_CORE) != 0
+                || amount <= actor.getMaxHealth() * tuning.get(Phase3AbilityTuning.Setting.SHIELD_THRESHOLD,
+                        Config.uniqueEffects.ionbound_stormscale.shieldTriggerHealthFraction)
+                || !consumeCubes(stack, cost)) {
             UniqueAbilityApi.cancel(execution);
             return false;
         }
@@ -176,6 +202,19 @@ public final class IonboundStormscaleAbilityManager {
                 new ActiveShield(actor.getUuid(), world.getTime() + duration, visual.getUuid()));
         updateOrbit(world, actor);
         spawnShieldStartEffects(world, actor);
+        double push = tuning.get(Phase3AbilityTuning.Setting.SHIELD_PUSH_STRENGTH, 0);
+        if ((mode & MODE_ION_REBOUND) != 0 && push > 0
+                && source.getAttacker() instanceof LivingEntity attacker && attacker != actor) {
+            Vec3d offset = attacker.getPos().subtract(actor.getPos());
+            Vec3d horizontal = new Vec3d(offset.x, 0.0, offset.z);
+            if (horizontal.lengthSquared() > 1.0E-6) {
+                double resistance = MathHelper.clamp(attacker.getAttributeValue(
+                        EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE), 0.0, 1.0);
+                Vec3d shove = horizontal.normalize().multiply(push * (1.0 - resistance) * 0.25);
+                attacker.addVelocity(shove.x, 0.18, shove.z);
+                attacker.velocityModified = true;
+            }
+        }
         UniqueAbilityApi.emit(execution, UniqueAbilityPhase.HIT, Phase3UniqueAbilities.HIT,
                 source.getAttacker() instanceof LivingEntity target ? target : null, 1, amount);
         UniqueAbilityApi.finish(execution, Phase3UniqueAbilities.FINISH, 1);
@@ -229,6 +268,8 @@ public final class IonboundStormscaleAbilityManager {
                 context.world().getTime(), context.world().getTime() + materialize + hold + close,
                 tuning, execution);
         CORRIDORS.computeIfAbsent(context.world(), ignored -> new HashMap<>()).put(actor.getUuid(), corridor);
+        orCreateReserve(context.world(), actor.getUuid()).beamWidthMultiplier =
+                tuning.get(Phase3AbilityTuning.Setting.BEAM_WIDTH_MULTIPLIER, 0);
 
         float yaw = (float) Math.toDegrees(Math.atan2(-forward.x, forward.z));
         IonboundStormscaleVisualEntity visual = IonboundStormscaleVisualEntity.corridor(context.world(), origin, yaw,
@@ -288,32 +329,63 @@ public final class IonboundStormscaleAbilityManager {
         corridor.slammed = true;
         corridor.followupEnds = world.getTime() + Math.max(1, corridor.tuning.integer(
                 Phase3AbilityTuning.Setting.LOCKOUT_TICKS, Config.uniqueEffects.ionbound_stormscale.followupWindow));
+        int mode = corridor.tuning.integer(Phase3AbilityTuning.Setting.MODE, 0);
+        ReserveState reserve = reserve(world, actor.getUuid());
         float damage = HelperMethods.abilityScaledDamage(SpellScalingProfile.LIGHTNING, actor, corridor.stackSnapshot,
                 Config.uniqueEffects.ionbound_stormscale.slamDamageScaling,
                 Config.uniqueEffects.ionbound_stormscale.slamSpellScaling)
-                * (float) corridor.tuning.get(Phase3AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1);
+                * (float) corridor.tuning.get(Phase3AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1)
+                * abilityDamageFactor(world, actor, corridor.stackReference, corridor.tuning)
+                * storedChargeFactor(world, actor, corridor.tuning);
+        if (reserve != null) reserve.storedCharges = 0;
+        double laneWidth = corridor.tuning.get(Phase3AbilityTuning.Setting.FOCUS_LANE_WIDTH, 0);
+        double focusBonus = corridor.tuning.get(Phase3AbilityTuning.Setting.FOCUS_DAMAGE_BONUS, 0);
+        double burst = corridor.tuning.get(Phase3AbilityTuning.Setting.BURST_STRENGTH, 0);
+        double trapSpeed = corridor.tuning.get(Phase3AbilityTuning.Setting.TRAP_MOVEMENT_SPEED, 0);
         int affected = 0;
         for (LivingEntity target : targetsInCorridor(world, actor, corridor,
                 Math.max(0.55, corridor.tuning.get(Phase3AbilityTuning.Setting.WIDTH,
                         Config.uniqueEffects.ionbound_stormscale.corridorWidth) * 0.5))) {
-            if (damageTarget(world, actor, corridor.stackSnapshot, target, damage, false)) {
-                target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS,
-                        Math.max(1, corridor.tuning.integer(Phase3AbilityTuning.Setting.STATUS_DURATION_TICKS,
-                                Config.uniqueEffects.ionbound_stormscale.slowDuration)),
-                        Math.max(0, Config.uniqueEffects.ionbound_stormscale.slowAmplifier), false, true, true), actor);
+            float targetDamage = damage;
+            if ((mode & MODE_CRUSHING_FOCUS) != 0 && laneWidth > 0 && focusBonus > 0
+                    && Math.abs(target.getPos().subtract(corridor.origin).dotProduct(corridor.right))
+                            <= laneWidth * 0.5) {
+                targetDamage *= (float) (1 + focusBonus);
+            }
+            if (damageTarget(world, actor, corridor.stackSnapshot, target, targetDamage, false)) {
+                int statusTicks = Math.max(1, corridor.tuning.integer(
+                        Phase3AbilityTuning.Setting.STATUS_DURATION_TICKS,
+                        Config.uniqueEffects.ionbound_stormscale.slowDuration));
+                if ((mode & MODE_REPULSOR_GATE) == 0) {
+                    target.addStatusEffect(new StatusEffectInstance(
+                            (mode & MODE_PARALYTIC_WALLS) != 0
+                                    ? EffectRegistry.getReference(EffectRegistry.ION_PARALYSIS)
+                                    : StatusEffects.SLOWNESS,
+                            statusTicks, Math.max(0, Config.uniqueEffects.ionbound_stormscale.slowAmplifier),
+                            false, true, true), actor);
+                }
+                if ((mode & MODE_ION_COFFIN) != 0 && trapSpeed > 0) {
+                    target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS,
+                            statusTicks, trapAmplifier(trapSpeed), false, true, true), actor);
+                }
+                if ((mode & MODE_REPULSOR_GATE) != 0 && burst > 0) {
+                    pushOutward(target, corridor, burst);
+                }
                 spawnSlamTargetEffects(world, target);
                 affected++;
                 UniqueAbilityApi.emit(corridor.execution, UniqueAbilityPhase.HIT,
-                        Phase3UniqueAbilities.HIT, target, 1, damage);
-                if (corridor.tuning.has(Phase3AbilityTuning.Setting.TARGET_CAP)
-                        && affected >= corridor.tuning.integer(Phase3AbilityTuning.Setting.TARGET_CAP, 64)) break;
+                        Phase3UniqueAbilities.HIT, target, 1, targetDamage);
+                if (affected >= corridor.tuning.integer(Phase3AbilityTuning.Setting.CORRIDOR_TARGET_CAP,
+                        Config.uniqueEffects.ionbound_stormscale.corridorTargetCap)) break;
             }
         }
         spawnSlamEffects(world, corridor);
     }
 
     private static boolean startBeam(ServerWorld world, LivingEntity actor, ItemStack heldStack, ActiveCorridor corridor) {
-        if (!corridor.slammed || world.getTime() > corridor.followupEnds || !consumeCube(heldStack)) return false;
+        if (!corridor.slammed || world.getTime() > corridor.followupEnds
+                || (corridor.tuning.integer(Phase3AbilityTuning.Setting.MODE, 0) & MODE_ION_COFFIN) != 0
+                || !consumeCube(heldStack)) return false;
         UniqueAbilityExecution execution = UniqueAbilityApi.begin(Phase3UniqueAbilities.IONBOUND_BEAM,
                 UniqueAbilityContext.passive(world, heldStack, actor, null, heldHand(actor, heldStack)), builder -> builder
                         .set(Phase3UniqueAbilities.TUNING, Phase3AbilityTuning.EMPTY)
@@ -324,8 +396,7 @@ public final class IonboundStormscaleAbilityManager {
         IonboundStormscaleVisualEntity visual = IonboundStormscaleVisualEntity.beam(world, actor,
                 (float) tuning.get(Phase3AbilityTuning.Setting.RANGE,
                         Config.uniqueEffects.ionbound_stormscale.corridorLength),
-                (float) tuning.get(Phase3AbilityTuning.Setting.WIDTH,
-                        Config.uniqueEffects.ionbound_stormscale.beamWidth),
+                (float) beamWidth(world, actor, tuning),
                 duration);
         visual.addCommandTag(VISUAL_TAG);
         world.spawnEntity(visual);
@@ -360,7 +431,10 @@ public final class IonboundStormscaleAbilityManager {
                     if (actor != null) spawnBeamEndEffects(world, actor);
                 }
                 if (actor == null) UniqueAbilityApi.cancel(beam.execution);
-                else UniqueAbilityApi.finish(beam.execution, Phase3UniqueAbilities.FINISH, 0);
+                else {
+                    UniqueAbilityApi.finish(beam.execution, Phase3UniqueAbilities.FINISH, 0);
+                    grantRechargeRefund(world, beam.actorId, beam.tuning);
+                }
                 iterator.remove();
                 continue;
             }
@@ -391,16 +465,18 @@ public final class IonboundStormscaleAbilityManager {
                 Config.uniqueEffects.ionbound_stormscale.beamSpellScaling);
         float damage = baseDamage * Math.max(0.0F, Config.uniqueEffects.ionbound_stormscale.beamTotalDamageMultiplier)
                 * (float) beam.tuning.get(Phase3AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1)
+                * abilityDamageFactor(world, actor, beam.stackReference, beam.tuning)
                 / pulses;
+        double armorIgnore = beam.tuning.get(Phase3AbilityTuning.Setting.ARMOR_IGNORE, 0);
         Vec3d start = beamOrigin(actor);
         Vec3d direction = actor.getRotationVec(1.0F).normalize();
         Vec3d end = start.add(direction.multiply(Math.max(1.0, beam.tuning.get(Phase3AbilityTuning.Setting.RANGE,
                 Config.uniqueEffects.ionbound_stormscale.corridorLength))));
-        double halfWidth = Math.max(0.1, beam.tuning.get(Phase3AbilityTuning.Setting.WIDTH,
-                Config.uniqueEffects.ionbound_stormscale.beamWidth) * 0.5);
+        double halfWidth = Math.max(0.1, beamWidth(world, actor, beam.tuning) * 0.5);
         int affected = 0;
         for (LivingEntity target : targetsAlongBeam(world, actor, start, end, halfWidth)) {
-            if (damageTarget(world, actor, beam.stackSnapshot, target, damage, true)) {
+            if (damageTarget(world, actor, beam.stackSnapshot, target,
+                    armorIgnore > 0 ? damage * (float) (1 + Math.min(1, armorIgnore / 20.0)) : damage, true)) {
                 target.stopUsingItem();
                 target.addStatusEffect(new StatusEffectInstance(EffectRegistry.getReference(EffectRegistry.ION_PARALYSIS),
                         Math.max(1, beam.tuning.integer(Phase3AbilityTuning.Setting.STATUS_DURATION_TICKS,
@@ -410,8 +486,8 @@ public final class IonboundStormscaleAbilityManager {
                 affected++;
                 UniqueAbilityApi.emit(beam.execution, UniqueAbilityPhase.HIT,
                         Phase3UniqueAbilities.PULSE, target, 1, damage);
-                if (beam.tuning.has(Phase3AbilityTuning.Setting.TARGET_CAP)
-                        && affected >= beam.tuning.integer(Phase3AbilityTuning.Setting.TARGET_CAP, 64)) break;
+                if (affected >= beam.tuning.integer(Phase3AbilityTuning.Setting.BEAM_TARGET_CAP,
+                        Config.uniqueEffects.ionbound_stormscale.beamTargetCap)) break;
             }
         }
         world.spawnParticles(ParticleTypes.ELECTRIC_SPARK, end.x, end.y, end.z,
@@ -564,10 +640,158 @@ public final class IonboundStormscaleAbilityManager {
     }
 
     private static boolean consumeCube(ItemStack stack) {
+        return consumeCubes(stack, 1);
+    }
+
+    private static boolean consumeCubes(ItemStack stack, int count) {
         IonCubeComponent cubes = getCubes(stack);
-        if (cubes.cubes() <= 0) return false;
-        stack.set(ComponentTypeRegistry.ION_CUBES.get(), cubes.consume());
+        if (cubes.cubes() < Math.max(1, count)) return false;
+        IonCubeComponent remaining = cubes;
+        for (int index = 0; index < Math.max(1, count); index++) {
+            remaining = remaining.consume();
+        }
+        stack.set(ComponentTypeRegistry.ION_CUBES.get(), remaining);
         return true;
+    }
+
+    private static ReserveState reserve(ServerWorld world, UUID actorId) {
+        Map<UUID, ReserveState> states = RESERVES.get(world);
+        return states == null ? null : states.get(actorId);
+    }
+
+    private static ReserveState orCreateReserve(ServerWorld world, UUID actorId) {
+        return RESERVES.computeIfAbsent(world, ignored -> new HashMap<>())
+                .computeIfAbsent(actorId, ignored -> new ReserveState());
+    }
+
+    private static void grantStoredCharge(ServerWorld world, LivingEntity actor, Phase3AbilityTuning tuning) {
+        int mode = tuning.integer(Phase3AbilityTuning.Setting.MODE, 0);
+        int cap = tuning.integer(Phase3AbilityTuning.Setting.RESERVE_STACK_CAP, 0);
+        int duration = tuning.integer(Phase3AbilityTuning.Setting.RESERVE_STACK_DURATION_TICKS, 0);
+        if ((mode & MODE_STORED_CHARGE) == 0 || cap <= 0 || duration <= 0) return;
+        ReserveState state = orCreateReserve(world, actor.getUuid());
+        long now = world.getTime();
+        if (now < state.storedChargeNext) return;
+        if (now >= state.storedChargeExpires) state.storedCharges = 0;
+        state.storedCharges = Math.min(cap, state.storedCharges + 1);
+        state.storedChargeExpires = now + duration;
+        state.storedChargeNext = now + duration;
+    }
+
+    private static float storedChargeFactor(ServerWorld world, LivingEntity actor, Phase3AbilityTuning tuning) {
+        ReserveState state = reserve(world, actor.getUuid());
+        double bonus = tuning.get(Phase3AbilityTuning.Setting.RESERVE_STACK_BONUS, 0);
+        if (state == null || bonus <= 0 || state.storedCharges <= 0
+                || world.getTime() >= state.storedChargeExpires) {
+            return 1.0F;
+        }
+        return (float) (1 + state.storedCharges * bonus);
+    }
+
+    private static float abilityDamageFactor(ServerWorld world, LivingEntity actor,
+                                             ItemStack stack, Phase3AbilityTuning tuning) {
+        double factor = 1.0;
+        double penalty = tuning.get(Phase3AbilityTuning.Setting.ABILITY_DAMAGE_PENALTY, 0);
+        if (penalty > 0) factor *= 1 - Math.min(1, penalty);
+        double perCube = tuning.get(Phase3AbilityTuning.Setting.ABILITY_DAMAGE_PER_CUBE, 0);
+        double cubeCap = tuning.get(Phase3AbilityTuning.Setting.ABILITY_DAMAGE_CUBE_CAP, 0);
+        if (perCube > 0 && cubeCap > 0) {
+            factor *= 1 + Math.min(cubeCap, getCubes(stack).cubes() * perCube);
+        }
+        return (float) Math.max(0, factor);
+    }
+
+    private static double beamWidth(ServerWorld world, LivingEntity actor, Phase3AbilityTuning tuning) {
+        double width = Math.max(0.1, tuning.get(Phase3AbilityTuning.Setting.WIDTH,
+                Config.uniqueEffects.ionbound_stormscale.beamWidth));
+        ReserveState state = reserve(world, actor.getUuid());
+        if (state != null && state.beamWidthMultiplier > 0) width *= state.beamWidthMultiplier;
+        return Math.max(0.1, width);
+    }
+
+    private static void grantRechargeRefund(ServerWorld world, UUID actorId, Phase3AbilityTuning tuning) {
+        int mode = tuning.integer(Phase3AbilityTuning.Setting.MODE, 0);
+        int refund = tuning.integer(Phase3AbilityTuning.Setting.RESERVE_REFUND_TICKS, 0);
+        if ((mode & MODE_RECYCLED_CURRENT) == 0 || refund <= 0) return;
+        orCreateReserve(world, actorId).rechargeRefund = refund;
+    }
+
+    private static void tickEmergencyCell(ServerWorld world, LivingEntity actor,
+                                          ItemStack stack, Phase3AbilityTuning tuning) {
+        int mode = tuning.integer(Phase3AbilityTuning.Setting.MODE, 0);
+        double threshold = tuning.get(Phase3AbilityTuning.Setting.SHIELD_LOW_HEALTH_THRESHOLD, 0);
+        int lockout = tuning.integer(Phase3AbilityTuning.Setting.SHIELD_LOCKOUT_TICKS, 0);
+        if ((mode & MODE_EMERGENCY_CELL) == 0 || threshold <= 0 || lockout <= 0
+                || getCubes(stack).cubes() > 0
+                || actor.getHealth() > actor.getMaxHealth() * threshold) {
+            return;
+        }
+        ReserveState state = orCreateReserve(world, actor.getUuid());
+        long now = world.getTime();
+        if (now < state.emergencyReady) return;
+        state.emergencyReady = now + lockout;
+        stack.set(ComponentTypeRegistry.ION_CUBES.get(), new IonCubeComponent(1, 0));
+        spawnCubeGeneratedEffects(world, actor, 1);
+    }
+
+    private static int trapAmplifier(double movementSpeed) {
+        double reduction = MathHelper.clamp(1 - movementSpeed, 0.0, 1.0);
+        return Math.clamp((int) Math.round(reduction / 0.15) - 1, 0, 9);
+    }
+
+    private static void pushOutward(LivingEntity target, ActiveCorridor corridor, double strength) {
+        double side = target.getPos().subtract(corridor.origin).dotProduct(corridor.right);
+        double resistance = MathHelper.clamp(
+                target.getAttributeValue(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE), 0.0, 1.0);
+        double applied = strength * (1.0 - resistance) * 0.25;
+        double direction = side == 0 ? 1 : Math.signum(side);
+        target.addVelocity(corridor.right.x * direction * applied, 0.22,
+                corridor.right.z * direction * applied);
+        target.velocityModified = true;
+    }
+
+    public static void clear(ServerWorld world) {
+        Map<UUID, ActiveCorridor> corridors = CORRIDORS.remove(world);
+        if (corridors != null) {
+            for (ActiveCorridor corridor : corridors.values()) {
+                discardVisual(world, corridor.visualId);
+                UniqueAbilityApi.cancel(corridor.execution);
+            }
+        }
+        Map<UUID, ActiveBeam> beams = BEAMS.remove(world);
+        if (beams != null) {
+            for (ActiveBeam beam : beams.values()) {
+                discardVisual(world, beam.visualId);
+                LivingEntity actor = resolveLivingForCleanup(world, beam.actorId);
+                if (actor != null) removeBeamMovementSlow(actor);
+                UniqueAbilityApi.cancel(beam.execution);
+            }
+        }
+        Map<UUID, ActiveShield> shields = SHIELDS.remove(world);
+        if (shields != null) {
+            for (ActiveShield shield : shields.values()) discardVisual(world, shield.visualId());
+        }
+        Map<UUID, UUID> orbits = ORBIT_VISUALS.remove(world);
+        if (orbits != null) {
+            for (UUID visualId : orbits.values()) discardVisual(world, visualId);
+        }
+        RECHARGE.remove(world);
+        RESERVES.remove(world);
+    }
+
+    public static void clearAll() {
+        for (Map<UUID, ActiveCorridor> corridors : CORRIDORS.values()) {
+            for (ActiveCorridor corridor : corridors.values()) UniqueAbilityApi.cancel(corridor.execution);
+        }
+        for (Map<UUID, ActiveBeam> beams : BEAMS.values()) {
+            for (ActiveBeam beam : beams.values()) UniqueAbilityApi.cancel(beam.execution);
+        }
+        CORRIDORS.clear();
+        BEAMS.clear();
+        SHIELDS.clear();
+        ORBIT_VISUALS.clear();
+        RECHARGE.clear();
+        RESERVES.clear();
     }
 
     private static RechargeState getOrCreateRechargeState(ServerWorld world, LivingEntity actor,
@@ -932,6 +1156,15 @@ public final class IonboundStormscaleAbilityManager {
     }
 
     private record ActiveShield(UUID actorId, long expiresAt, UUID visualId) {
+    }
+
+    private static final class ReserveState {
+        private int storedCharges;
+        private long storedChargeExpires = Long.MIN_VALUE;
+        private long storedChargeNext = Long.MIN_VALUE;
+        private long emergencyReady = Long.MIN_VALUE;
+        private int rechargeRefund;
+        private double beamWidthMultiplier;
     }
 
     private static final class WielderRecharge {

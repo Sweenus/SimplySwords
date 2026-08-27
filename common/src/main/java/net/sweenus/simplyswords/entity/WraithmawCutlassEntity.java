@@ -23,7 +23,6 @@ import net.minecraft.world.RaycastContext;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.api.SpellScalingProfile;
-import net.sweenus.simplyswords.api.ability.Phase2AbilityTuning;
 import net.sweenus.simplyswords.api.ability.Phase2UniqueAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
@@ -31,14 +30,15 @@ import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.registry.EntityRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
+import net.sweenus.simplyswords.world.LivyatanWaveManager;
 import net.sweenus.simplyswords.world.WraithmawAbilityManager;
+import net.sweenus.simplyswords.world.WraithmawTuningSnapshot;
 import net.sweenus.simplyswords.world.GloamStainManager;
 import org.joml.Vector3f;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 public final class WraithmawCutlassEntity extends Entity {
@@ -51,7 +51,7 @@ public final class WraithmawCutlassEntity extends Entity {
 
     private static final int MUSTER_TICKS = 12;
     private static final int POSITION_TICKS = 10;
-    private static final double RAIN_SPEED = 1.25;
+    private static final int DETONATION_TARGET_CAP = 8;
     private static final TrackedData<Integer> STATE = DataTracker.registerData(
             WraithmawCutlassEntity.class, TrackedDataHandlerRegistry.INTEGER);
     private static final TrackedData<Integer> STATE_START_AGE = DataTracker.registerData(
@@ -79,7 +79,9 @@ public final class WraithmawCutlassEntity extends Entity {
     private boolean impactBurstUsed;
     private boolean launchMultiplierApplied;
     private boolean loadedFromNbt;
+    private boolean gravewalkStruck;
     private int missingOwnerTicks;
+    private WraithmawTuningSnapshot tuning = WraithmawTuningSnapshot.from(null);
     private @Nullable UniqueAbilityExecution abilityExecution;
 
     public WraithmawCutlassEntity(EntityType<? extends WraithmawCutlassEntity> type, World world) {
@@ -107,6 +109,7 @@ public final class WraithmawCutlassEntity extends Entity {
         this.setSeed(world.random.nextInt());
         this.setPosition(castOrigin);
         this.abilityExecution = execution;
+        this.tuning = WraithmawTuningSnapshot.from(execution);
     }
 
     @Override
@@ -159,7 +162,7 @@ public final class WraithmawCutlassEntity extends Entity {
         if (age % 3 == 0) {
             world.spawnParticles(SPECTRAL_DUST, getX(), getY(), getZ(), 1, 0.03, 0.03, 0.03, 0.0);
         }
-        if (age >= settingInt(Phase2AbilityTuning.Setting.MATERIALIZE_TICKS, MUSTER_TICKS)) {
+        if (age >= tuning.materializeTicks()) {
             setState(STATE_POSITIONING);
         }
     }
@@ -181,9 +184,9 @@ public final class WraithmawCutlassEntity extends Entity {
             world.spawnParticles(ParticleTypes.REVERSE_PORTAL, getX(), getY(), getZ(), 1,
                     0.04, 0.04, 0.04, 0.01);
         }
-        int sequenceDelay = settingInt(Phase2AbilityTuning.Setting.INTERVAL_TICKS, 2);
+        int sequenceDelay = tuning.fallIntervalTicks();
         if (stateAge >= POSITION_TICKS + sequence * sequenceDelay) {
-            setVelocity(0.0, -setting(Phase2AbilityTuning.Setting.FALL_SPEED, RAIN_SPEED), 0.0);
+            setVelocity(0.0, -tuning.fallSpeed(), 0.0);
             setState(STATE_FALLING);
         }
     }
@@ -198,7 +201,7 @@ public final class WraithmawCutlassEntity extends Entity {
         Vec3d correction = new Vec3d(landing.x - current.x, 0.0, landing.z - current.z).multiply(0.2);
         Vec3d velocity = new Vec3d(
                 MathHelper.clamp(correction.x, -0.18, 0.18),
-                -setting(Phase2AbilityTuning.Setting.FALL_SPEED, RAIN_SPEED),
+                -tuning.fallSpeed(),
                 MathHelper.clamp(correction.z, -0.18, 0.18));
         Vec3d next = current.add(velocity);
         BlockHitResult blockHit = world.raycast(new RaycastContext(current, next,
@@ -209,9 +212,10 @@ public final class WraithmawCutlassEntity extends Entity {
             if (target != null) {
                 struckEntity = true;
                 ItemStack stack = getWeaponStack();
-                if (!stack.isEmpty() && SimplySwordsAPI.applyEntityWeaponHit(stack, target, owner, damage)) {
+                float amount = gloamAdjustedDamage(world, target);
+                if (!stack.isEmpty() && SimplySwordsAPI.applyEntityWeaponHit(stack, target, owner, amount)) {
                     setWeaponStack(stack);
-                    emitHit(target, damage);
+                    recordHit(world, target, amount);
                     spawnEntityImpact(world, target);
                     burst(world, owner, target.getPos(), target);
                 }
@@ -237,14 +241,128 @@ public final class WraithmawCutlassEntity extends Entity {
             return;
         }
         LivingEntity owner = resolveOwner(world);
-        double recovery = setting(Phase2AbilityTuning.Setting.RECOVERY_RADIUS, 1.5);
-        if (owner != null && owner.squaredDistanceTo(this) <= recovery * recovery
-                && WraithmawAbilityManager.tryRecover(world, owner, this)) {
-            world.spawnParticles(SPECTRAL_DUST, getX(), getY() + 0.35, getZ(),
-                    18, 0.28, 0.34, 0.28, 0.02);
-            world.playSound(null, getBlockPos(), SoundRegistry.DARK_SWORD_UNFOLD.get(),
-                    SoundCategory.PLAYERS, 0.55F, 1.45F);
+        if (owner == null) {
+            return;
         }
+        if (tuning.hauntsEnemies()) {
+            tickHaunt(world, owner);
+        }
+        if (tuning.walksToEnemies()) {
+            tickGravewalk(world, owner);
+            return;
+        }
+        double recovery = tuning.recoveryRadius();
+        if (owner.squaredDistanceTo(this) <= recovery * recovery
+                && WraithmawAbilityManager.tryRecover(world, owner, this)) {
+            onRecovered(world, owner);
+        }
+    }
+
+    private void onRecovered(ServerWorld world, LivingEntity owner) {
+        world.spawnParticles(SPECTRAL_DUST, getX(), getY() + 0.35, getZ(),
+                18, 0.28, 0.34, 0.28, 0.02);
+        world.playSound(null, getBlockPos(), SoundRegistry.DARK_SWORD_UNFOLD.get(),
+                SoundCategory.PLAYERS, 0.55F, 1.45F);
+        if (abilityExecution != null) {
+            UniqueAbilityApi.emit(abilityExecution,
+                    net.sweenus.simplyswords.api.ability.UniqueAbilityPhase.HIT,
+                    Phase2UniqueAbilities.RECOVER, null, 1, 0.0);
+        }
+        if (!tuning.pullsOnRecovery()) {
+            return;
+        }
+        Vec3d center = getPos();
+        double range = tuning.recallRange();
+        List<LivingEntity> pulled = gloamTargets(world, owner, center, range, tuning.recallTargetCap());
+        for (LivingEntity target : pulled) {
+            Vec3d offset = center.subtract(target.getPos());
+            if (offset.lengthSquared() < 1.0E-6) {
+                continue;
+            }
+            Vec3d step = offset.normalize().multiply(
+                    Math.min(tuning.recallPullStrength(), offset.length()));
+            target.setPosition(target.getPos().add(step.x, 0.0, step.z));
+            target.velocityModified = true;
+            world.spawnParticles(SPECTRAL_DUST, target.getX(), target.getY() + 0.4, target.getZ(),
+                    5, 0.18, 0.24, 0.18, 0.02);
+        }
+    }
+
+    private void tickHaunt(ServerWorld world, LivingEntity owner) {
+        int stateAge = getStateAge();
+        if (stateAge <= 0 || stateAge % tuning.hauntIntervalTicks() != 0) {
+            return;
+        }
+        LivingEntity target = gloamTargets(world, owner, getPos(),
+                tuning.hauntRange(), tuning.hauntTargetCap()).stream().findFirst().orElse(null);
+        if (target == null) {
+            return;
+        }
+        ItemStack stack = getWeaponStack();
+        float amount = damage * (float) tuning.hauntDamageMultiplier();
+        if (!stack.isEmpty() && amount > 0
+                && SimplySwordsAPI.applyEntityWeaponHit(stack, target, owner, amount)) {
+            setWeaponStack(stack);
+            recordHit(world, target, amount);
+            spawnEntityImpact(world, target);
+        }
+    }
+
+    private void tickGravewalk(ServerWorld world, LivingEntity owner) {
+        LivingEntity target = gloamTargets(world, owner, getPos(),
+                tuning.gravewalkRange(), 8).stream().findFirst().orElse(null);
+        if (target == null) {
+            return;
+        }
+        Vec3d offset = target.getPos().subtract(getPos());
+        double horizontal = offset.horizontalLength();
+        if (horizontal <= Math.max(0.6, target.getWidth() * 0.5 + 0.4)) {
+            strikeGravewalk(world, owner, target);
+            return;
+        }
+        Vec3d step = new Vec3d(offset.x, 0.0, offset.z).normalize()
+                .multiply(Math.min(tuning.gravewalkSpeed(), horizontal));
+        double x = getX() + step.x;
+        double z = getZ() + step.z;
+        setPosition(x, LivyatanWaveManager.findGroundTopY(world, x, z, getY() + 1.5) + 0.16, z);
+        if (age % 3 == 0) {
+            world.spawnParticles(SPECTRAL_DUST, getX(), getY() + 0.2, getZ(),
+                    2, 0.1, 0.12, 0.1, 0.01);
+        }
+    }
+
+    private void strikeGravewalk(ServerWorld world, LivingEntity owner, LivingEntity target) {
+        if (gravewalkStruck) {
+            return;
+        }
+        gravewalkStruck = true;
+        ItemStack stack = getWeaponStack();
+        float amount = damage * (float) tuning.gravewalkDamageMultiplier();
+        if (!stack.isEmpty() && amount > 0
+                && SimplySwordsAPI.applyEntityWeaponHit(stack, target, owner, amount)) {
+            setWeaponStack(stack);
+            recordHit(world, target, amount);
+            spawnEntityImpact(world, target);
+        }
+        dissipate(world, target.getPos().add(0.0, target.getHeight() * 0.4, 0.0), true);
+    }
+
+    private List<LivingEntity> gloamTargets(ServerWorld world, LivingEntity owner, Vec3d center,
+                                            double range, int cap) {
+        if (range <= 0 || cap <= 0 || ownerUuid == null) {
+            return List.of();
+        }
+        return world.getEntitiesByClass(LivingEntity.class,
+                        Box.of(center, range * 2.0, range * 2.0, range * 2.0),
+                        candidate -> candidate != owner && candidate.isAlive() && !candidate.isRemoved()
+                                && EntityPredicates.VALID_LIVING_ENTITY.test(candidate)
+                                && HelperMethods.checkAbilityTarget(candidate, owner)
+                                && candidate.squaredDistanceTo(center) <= range * range
+                                && GloamStainManager.isOnOwnerGloam(world, ownerUuid, candidate))
+                .stream()
+                .sorted(Comparator.comparingDouble(candidate -> candidate.squaredDistanceTo(center)))
+                .limit(cap)
+                .toList();
     }
 
     private void tickOrbiting(ServerWorld world) {
@@ -285,10 +403,8 @@ public final class WraithmawCutlassEntity extends Entity {
             Vec3d desired = homingTarget.getPos().add(0.0, homingTarget.getHeight() * 0.58, 0.0)
                     .subtract(current).normalize();
             Vec3d turned = turnToward(velocity.normalize(), desired,
-                    Math.toRadians(Math.max(0.0, setting(Phase2AbilityTuning.Setting.HOMING_TURN_DEGREES,
-                            Config.uniqueEffects.wraithmaw.homingTurnRate))));
-            velocity = turned.multiply(Math.max(0.1, setting(Phase2AbilityTuning.Setting.LAUNCH_SPEED,
-                    Config.uniqueEffects.wraithmaw.launchSpeed)));
+                    Math.toRadians(tuning.homingTurnDegrees()));
+            velocity = turned.multiply(tuning.launchSpeed());
             setVelocity(velocity);
         }
         Vec3d next = current.add(velocity);
@@ -298,9 +414,11 @@ public final class WraithmawCutlassEntity extends Entity {
         LivingEntity target = findCollisionTarget(world, owner, current, segmentEnd);
         if (target != null) {
             ItemStack stack = getWeaponStack();
-            if (!stack.isEmpty() && SimplySwordsAPI.applyEntityWeaponHit(stack, target, owner, damage)) {
+            float amount = gloamAdjustedDamage(world, target);
+            if (!stack.isEmpty() && SimplySwordsAPI.applyEntityWeaponHit(stack, target, owner, amount)) {
+                setWeaponStack(stack);
                 spawnEntityImpact(world, target);
-                emitHit(target, damage);
+                recordHit(world, target, amount);
             }
             dissipate(world, target.getPos().add(0.0, target.getHeight() * 0.55, 0.0), true);
             return;
@@ -312,9 +430,8 @@ public final class WraithmawCutlassEntity extends Entity {
                     2, 0.05, 0.05, 0.05, 0.0);
         }
         if (blockHit.getType() != HitResult.Type.MISS
-                || traveled >= Math.max(1.0, setting(Phase2AbilityTuning.Setting.LAUNCH_RANGE,
-                        Config.uniqueEffects.wraithmaw.launchRange))
-                || getStateAge() > settingInt(Phase2AbilityTuning.Setting.PROJECTILE_LIFETIME, 80)) {
+                || traveled >= tuning.launchRange()
+                || getStateAge() > tuning.projectileLifetimeTicks()) {
             dissipate(world, segmentEnd, blockHit.getType() != HitResult.Type.MISS);
         }
     }
@@ -336,8 +453,7 @@ public final class WraithmawCutlassEntity extends Entity {
 
     private LivingEntity findHomingTarget(ServerWorld world, LivingEntity owner,
                                           Vec3d origin, Vec3d direction) {
-        double range = Math.max(0.0, setting(Phase2AbilityTuning.Setting.HOMING_RANGE,
-                Config.uniqueEffects.wraithmaw.homingRange));
+        double range = tuning.homingRange();
         if (range <= 0.0) {
             return null;
         }
@@ -364,25 +480,31 @@ public final class WraithmawCutlassEntity extends Entity {
     }
 
     private void embed(ServerWorld world, Vec3d impact) {
-        if ((settingInt(Phase2AbilityTuning.Setting.MODE, 0) & 1) != 0) {
+        createGloam(world, impact);
+        if (tuning.hasMode(WraithmawTuningSnapshot.MODE_NO_EMBED)) {
             dissipate(world, impact, true);
             return;
         }
         setPosition(impact.add(0.0, 0.16, 0.0));
         setVelocity(Vec3d.ZERO);
         setState(STATE_EMBEDDED);
-        expiresAtTick = world.getTime() + Math.max(20, settingInt(
-                Phase2AbilityTuning.Setting.EMBEDDED_DURATION_TICKS,
-                Config.uniqueEffects.wraithmaw.embeddedDuration));
-        GloamStainManager.createPatch(world, ownerUuid, impact,
-                Math.max(0.25, setting(Phase2AbilityTuning.Setting.STAIN_RADIUS,
-                        Config.uniqueEffects.wraithmaw.stainRadius)));
+        expiresAtTick = world.getTime() + tuning.embeddedDurationTicks();
         world.spawnParticles(SPECTRAL_DUST, impact.x, impact.y + 0.12, impact.z,
                 16, 0.38, 0.12, 0.38, 0.04);
         world.spawnParticles(ParticleTypes.SCULK_SOUL, impact.x, impact.y + 0.18, impact.z,
                 5, 0.24, 0.14, 0.24, 0.015);
         world.playSound(null, impact.x, impact.y, impact.z, SoundRegistry.OBJECT_IMPACT_THUD.get(),
                 SoundCategory.PLAYERS, 0.68F, 1.25F + world.random.nextFloat() * 0.12F);
+    }
+
+    private void createGloam(ServerWorld world, Vec3d impact) {
+        GloamStainManager.createPatch(world, ownerUuid, impact, tuning.stainRadius(),
+                tuning.stainDurationTicks(),
+                Math.max(1, Config.uniqueEffects.wraithmaw.stainFadeDuration),
+                tuning.stainAmplifier(),
+                new GloamStainManager.PatchBehavior(getWeaponStack(), damage,
+                        tuning.slowDurationTicks(), tuning.appliesSlowness(),
+                        0, 0, 0, 0, 0));
     }
 
     private void spawnEntityImpact(ServerWorld world, LivingEntity target) {
@@ -396,9 +518,9 @@ public final class WraithmawCutlassEntity extends Entity {
     }
 
     private void burst(ServerWorld world, LivingEntity owner, Vec3d center, @Nullable LivingEntity directTarget) {
-        double radius = setting(Phase2AbilityTuning.Setting.IMPACT_RADIUS, 0);
-        int cap = settingInt(Phase2AbilityTuning.Setting.IMPACT_TARGET_CAP, 0);
-        float burstDamage = damage * (float) setting(Phase2AbilityTuning.Setting.IMPACT_DAMAGE_MULTIPLIER, 0);
+        double radius = tuning.impactRadius();
+        int cap = tuning.impactTargetCap();
+        float burstDamage = damage * (float) tuning.impactDamageMultiplier();
         if (impactBurstUsed || radius <= 0 || cap <= 0 || burstDamage <= 0) return;
         impactBurstUsed = true;
         List<LivingEntity> targets = world.getEntitiesByClass(LivingEntity.class,
@@ -424,20 +546,28 @@ public final class WraithmawCutlassEntity extends Entity {
         discard();
     }
 
-    private double setting(Phase2AbilityTuning.Setting setting, double fallback) {
-        return abilityExecution == null ? fallback
-                : Phase2UniqueAbilities.tuning(abilityExecution).get(setting, fallback);
+    private float gloamAdjustedDamage(ServerWorld world, LivingEntity target) {
+        if (tuning.gloamVulnerabilityBonus() <= 0 || ownerUuid == null
+                || !GloamStainManager.isOnOwnerGloam(world, ownerUuid, target)) {
+            return damage;
+        }
+        return damage * (float) (1 + tuning.gloamVulnerabilityBonus());
     }
 
-    private int settingInt(Phase2AbilityTuning.Setting setting, int fallback) {
-        return abilityExecution == null ? fallback
-                : Phase2UniqueAbilities.tuning(abilityExecution).integer(setting, fallback);
-    }
-
-    private void emitHit(LivingEntity target, float amount) {
+    private void recordHit(ServerWorld world, LivingEntity target, float amount) {
         if (abilityExecution != null) UniqueAbilityApi.emit(abilityExecution,
                 net.sweenus.simplyswords.api.ability.UniqueAbilityPhase.HIT,
                 Phase2UniqueAbilities.HIT, target, 1, amount);
+        if (target.isAlive()) {
+            return;
+        }
+        if (abilityExecution != null) UniqueAbilityApi.emit(abilityExecution,
+                net.sweenus.simplyswords.api.ability.UniqueAbilityPhase.HIT,
+                Phase2UniqueAbilities.KILL, target, 1, amount);
+        if (tuning.extendsGloamOnKill()) {
+            GloamStainManager.extendPatches(world, ownerUuid, target.getPos(), tuning.burialRange(),
+                    tuning.stainExtensionTicks(), tuning.extraDurationCapTicks());
+        }
     }
 
     private Vec3d musterAnchor() {
@@ -478,6 +608,38 @@ public final class WraithmawCutlassEntity extends Entity {
         return null;
     }
 
+    public void detonate(ServerWorld world, LivingEntity owner) {
+        Vec3d center = getPos();
+        ItemStack stack = getWeaponStack();
+        float amount = damage * (float) tuning.burstDamageMultiplier();
+        double radius = Math.max(0.5, tuning.stainRadius());
+        if (!stack.isEmpty() && amount > 0) {
+            List<LivingEntity> targets = world.getEntitiesByClass(LivingEntity.class,
+                            Box.of(center, radius * 2.0, radius * 2.0, radius * 2.0),
+                            candidate -> candidate != owner && candidate.isAlive() && !candidate.isRemoved()
+                                    && EntityPredicates.VALID_LIVING_ENTITY.test(candidate)
+                                    && HelperMethods.checkAbilityTarget(candidate, owner)
+                                    && candidate.squaredDistanceTo(center) <= radius * radius)
+                    .stream()
+                    .sorted(Comparator.comparingDouble(candidate -> candidate.squaredDistanceTo(center)))
+                    .limit(DETONATION_TARGET_CAP)
+                    .toList();
+            for (LivingEntity target : targets) {
+                if (SimplySwordsAPI.applyEntityWeaponHit(stack, target, owner, amount)) {
+                    recordHit(world, target, amount);
+                }
+            }
+            setWeaponStack(stack);
+        }
+        world.spawnParticles(SPECTRAL_DUST, center.x, center.y + 0.3, center.z,
+                24, 0.5, 0.35, 0.5, 0.08);
+        world.spawnParticles(ParticleTypes.SCULK_SOUL, center.x, center.y + 0.4, center.z,
+                8, 0.35, 0.3, 0.35, 0.03);
+        world.playSound(null, center.x, center.y, center.z, SoundEvents.BLOCK_RESPAWN_ANCHOR_DEPLETE,
+                SoundCategory.PLAYERS, 0.7F, 0.72F);
+        dissipate(world, center, true);
+    }
+
     public void recover(int slot, long expiresAtTick) {
         setOrbitSlot(slot);
         this.expiresAtTick = expiresAtTick;
@@ -487,7 +649,7 @@ public final class WraithmawCutlassEntity extends Entity {
 
     public void launch(Vec3d origin, Vec3d direction, double speed) {
         if (!launchMultiplierApplied) {
-            damage *= (float) setting(Phase2AbilityTuning.Setting.PROJECTILE_DAMAGE_MULTIPLIER, 1);
+            damage *= (float) tuning.projectileDamageMultiplier();
             launchMultiplierApplied = true;
         }
         setPosition(origin);
@@ -551,12 +713,12 @@ public final class WraithmawCutlassEntity extends Entity {
         return expiresAtTick;
     }
 
-    public int getMasterySetting(Phase2AbilityTuning.Setting setting, int fallback) {
-        return settingInt(setting, fallback);
+    public WraithmawTuningSnapshot getTuning() {
+        return tuning;
     }
 
-    public double getMasterySetting(Phase2AbilityTuning.Setting setting, double fallback) {
-        return this.setting(setting, fallback);
+    public float getDamage() {
+        return damage;
     }
 
     public void multiplyDamage(double multiplier) {
@@ -595,6 +757,10 @@ public final class WraithmawCutlassEntity extends Entity {
         expiresAtTick = nbt.getLong("expires_at");
         traveled = nbt.getDouble("traveled");
         struckEntity = nbt.getBoolean("struck_entity");
+        impactBurstUsed = nbt.getBoolean("impact_burst_used");
+        launchMultiplierApplied = nbt.getBoolean("launch_multiplier_applied");
+        gravewalkStruck = nbt.getBoolean("gravewalk_struck");
+        tuning = WraithmawTuningSnapshot.read(nbt);
         if (nbt.contains("weapon")) {
             setWeaponStack(ItemStack.fromNbt(getRegistryManager(), nbt.getCompound("weapon")).orElse(ItemStack.EMPTY));
         }
@@ -621,6 +787,10 @@ public final class WraithmawCutlassEntity extends Entity {
         nbt.putLong("expires_at", expiresAtTick);
         nbt.putDouble("traveled", traveled);
         nbt.putBoolean("struck_entity", struckEntity);
+        nbt.putBoolean("impact_burst_used", impactBurstUsed);
+        nbt.putBoolean("launch_multiplier_applied", launchMultiplierApplied);
+        nbt.putBoolean("gravewalk_struck", gravewalkStruck);
+        tuning.write(nbt);
         ItemStack stack = getWeaponStack();
         if (!stack.isEmpty()) {
             nbt.put("weapon", stack.encode(getRegistryManager()));
