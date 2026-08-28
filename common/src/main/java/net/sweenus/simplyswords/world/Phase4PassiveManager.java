@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.UUID;
 
 public final class Phase4PassiveManager {
+    private static final int HELD_RESOLVE_INTERVAL = 5;
     private static final Map<UUID, PassiveState> STATES = new HashMap<>();
     private static final Map<UUID, AllyCharge> ALLY_CHARGES = new HashMap<>();
     private static final Map<UUID, OwnerBonus> OWNER_BONUSES = new HashMap<>();
@@ -48,10 +49,11 @@ public final class Phase4PassiveManager {
         if (tuning.flag(131072)) {
             if (world.getTime() > state.comboDeadline) state.combo = 0;
             state.combo++;
-            state.comboDeadline = world.getTime() + 80;
-            if (state.combo >= 3 && world.getTime() >= state.flareReadyAt) {
+            state.comboDeadline = world.getTime() + tuning.integer(s("COMBO_WINDOW_TICKS"), 80);
+            if (state.combo >= Math.max(1, tuning.integer(s("COMBO_COUNT"), 3))
+                    && world.getTime() >= state.flareReadyAt) {
                 state.combo = 0;
-                state.flareReadyAt = world.getTime() + tuning.integer(s("LOCKOUT_TICKS"), 40);
+                state.flareReadyAt = world.getTime() + tuning.integer(s("FLARE_LOCKOUT_TICKS"), 40);
                 flare(world, stack, attacker, target.getPos(), tuning);
                 attacker.heal((float) tuning.get(s("HEAL_AMOUNT"), 1));
                 UniqueAbilityApi.start(execution);
@@ -64,8 +66,11 @@ public final class Phase4PassiveManager {
             attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.REGENERATION,
                     tuning.integer(s("STATUS_DURATION_TICKS"), 40), 1), attacker);
             state.regenUntil = world.getTime() + tuning.integer(s("STATUS_DURATION_TICKS"), 40);
-            if (attacker.getHealth() >= attacker.getMaxHealth()) state.reserve = Math.min(4, state.reserve + 1);
-            if (tuning.flag(2048)) attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.FIRE_RESISTANCE, 80, 0), attacker);
+            if (tuning.flag(4096) && attacker.getHealth() >= attacker.getMaxHealth()) {
+                state.reserve = Math.min(tuning.integer(s("RESERVE_CAP"), 4), state.reserve + 1);
+            }
+            if (tuning.flag(2048)) attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.FIRE_RESISTANCE,
+                    tuning.integer(s("FIRE_RESISTANCE_TICKS"), 80), 0), attacker);
             UniqueAbilityApi.start(execution);
             UniqueAbilityApi.emit(execution, UniqueAbilityPhase.HIT, Phase4UniqueAbilities.HIT,
                     target, 1, chance);
@@ -100,25 +105,31 @@ public final class Phase4PassiveManager {
                 }
                 state.counterTarget = target.getUuid();
                 state.omenCounter++;
-                state.omenCounterDeadline = world.getTime() + 200;
-                if (state.omenCounter % 3 == 0) amplifier = 1;
+                state.omenCounterDeadline = world.getTime() + tuning.integer(s("OMEN_WINDOW_TICKS"), 200);
+                if (state.omenCounter % Math.max(1, tuning.integer(s("OMEN_UPGRADE_COUNT"), 3)) == 0) amplifier = 1;
             }
             target.addStatusEffect(new StatusEffectInstance(StatusEffects.WEAKNESS,
-                    amplifier == 1 ? 80 : tuning.integer(s("STATUS_DURATION_TICKS"), 160), amplifier), attacker);
+                    amplifier == 1 ? tuning.integer(s("OMEN_UPGRADE_TICKS"), 80)
+                            : tuning.integer(s("STATUS_DURATION_TICKS"), 160), amplifier), attacker);
             UniqueAbilityApi.start(execution);
             UniqueAbilityApi.emit(execution, UniqueAbilityPhase.HIT, Phase4UniqueAbilities.HIT,
                     target, 1, chance);
         }
-        if (tuning.flag(8192)) {
+        if (tuning.flag(8192) && target.hasStatusEffect(StatusEffects.WEAKNESS)) {
             Vec3d standard = Phase4StandardManager.standardPosition(attacker.getUuid(), false);
-            if (standard != null && target.getPos().squaredDistanceTo(standard) <= 100
-                    && world.getTime() >= state.pullReadyAt) {
-                state.pullReadyAt = world.getTime() + tuning.integer(s("LOCKOUT_TICKS"), 20);
+            double range = tuning.get(s("DOOM_PULL_RANGE"), 10);
+            if (standard != null && target.getPos().squaredDistanceTo(standard) <= range * range
+                    && state.pullLocks.getOrDefault(target.getUuid(), 0L) <= world.getTime()) {
+                state.pullLocks.put(target.getUuid(), world.getTime()
+                        + tuning.integer(s("DOOM_PULL_LOCKOUT_TICKS"), 20));
+                state.pullLocks.entrySet().removeIf(entry -> entry.getValue() <= world.getTime());
                 pull(target, standard, tuning.get(s("PULL_STRENGTH"), .75));
             }
         }
         if (target.isDead() && target.hasStatusEffect(StatusEffects.WEAKNESS) && tuning.flag(16384)) {
-            Phase4StandardManager.reduceCooldown(attacker.getUuid(), tuning.integer(s("REFUND_TICKS"), 20));
+            Phase4StandardManager.reduceCooldown(attacker.getUuid(), false,
+                    tuning.integer(s("REFUND_TICKS"), 20),
+                    tuning.integer(s("PROPHECY_REFUND_CAP_TICKS"), 100));
             UniqueAbilityApi.emit(execution, UniqueAbilityPhase.HIT, Phase4UniqueAbilities.KILL, target, 1, 0);
         }
         if (execution.isStarted()) UniqueAbilityApi.finish(execution, Phase4UniqueAbilities.FINISH, 1);
@@ -127,19 +138,27 @@ public final class Phase4PassiveManager {
 
     public static void tickHeld(ItemStack stack, LivingEntity owner) {
         if (!(owner.getWorld() instanceof ServerWorld world)) return;
+        Phase4AbsorptionTracker.tick(owner);
         PassiveState state = state(owner, world.getTime());
-        if (state.reserve > 0 && owner.getHealth() / owner.getMaxHealth() < .5F) {
-            owner.setAbsorptionAmount(Math.max(owner.getAbsorptionAmount(), state.reserve));
-            state.reserve = 0;
-        }
+        if (owner.age % HELD_RESOLVE_INTERVAL != 0) return;
         UniqueAbilityExecution execution = begin(Phase4UniqueAbilities.SUNFIRE_REGEN, world, stack, owner, null);
         Phase4AbilityTuning tuning = Phase4UniqueAbilities.tuning(execution);
         state.sunfireTuning = tuning;
-        if (tuning.flag(32768) && owner.getHealth() / owner.getMaxHealth() < .3F
+        if (tuning.flag(4096) && state.reserve > 0
+                && owner.getHealth() / owner.getMaxHealth() < tuning.get(s("RESERVE_THRESHOLD"), .5)) {
+            Phase4AbsorptionTracker.grant(owner, state.reserve,
+                    tuning.integer(s("RESERVE_ABSORPTION_TICKS"), 100), state.reserve);
+            state.reserve = 0;
+            UniqueAbilityApi.start(execution);
+        }
+        if (tuning.flag(32768)
+                && owner.getHealth() / owner.getMaxHealth() < tuning.get(s("REKINDLE_THRESHOLD"), .3)
                 && world.getTime() >= state.rekindleReadyAt) {
-            state.rekindleReadyAt = world.getTime() + tuning.integer(s("LOCKOUT_TICKS"), 600);
-            owner.addStatusEffect(new StatusEffectInstance(StatusEffects.REGENERATION, 100, 1), owner);
-            owner.setAbsorptionAmount(Math.max(owner.getAbsorptionAmount(), 4));
+            state.rekindleReadyAt = world.getTime() + tuning.integer(s("REKINDLE_LOCKOUT_TICKS"), 600);
+            int duration = tuning.integer(s("REKINDLE_DURATION_TICKS"), 100);
+            owner.addStatusEffect(new StatusEffectInstance(StatusEffects.REGENERATION, duration, 1), owner);
+            Phase4AbsorptionTracker.grant(owner, (float) tuning.get(s("REKINDLE_ABSORPTION"), 4), duration,
+                    (float) tuning.get(s("REKINDLE_ABSORPTION"), 4));
             UniqueAbilityApi.start(execution);
         }
         if (execution.isStarted()) UniqueAbilityApi.finish(execution, Phase4UniqueAbilities.FINISH, 1);
@@ -157,9 +176,9 @@ public final class Phase4PassiveManager {
                     world, weapon, attacker, target);
             Phase4AbilityTuning tuning = Phase4UniqueAbilities.tuning(execution);
             double multiplier = tuning.get(s("MELEE_DAMAGE_MULTIPLIER"), 1);
-            if (tuning.flag(65536)) multiplier *= tuning.get(s("WEAKENED_DAMAGE_MULTIPLIER"), .8);
+            if (tuning.flag(65536)) multiplier *= tuning.get(s("PLAGUE_DAMAGE_MULTIPLIER"), .8);
             if (tuning.flag(131072) && isExecutionOmen(attacker, target)) {
-                multiplier *= tuning.get(s("WEAKENED_DAMAGE_MULTIPLIER"), 1.4);
+                multiplier *= tuning.get(s("EXECUTION_DAMAGE_MULTIPLIER"), 1.4);
             }
             amount *= (float) multiplier;
             UniqueAbilityApi.cancel(execution);
@@ -192,10 +211,10 @@ public final class Phase4PassiveManager {
                 && source.getAttacker() instanceof LivingEntity attacker
                 && source.getSource() == attacker
                 && state.attackerLocks.getOrDefault(attacker.getUuid(), 0L) <= world.getTime()) {
-            attacker.setOnFireFor(Math.max(1, state.sunfireTuning.integer(s("FIRE_TICKS"), 40) / 20));
+            attacker.setOnFireFor(Math.max(1, state.sunfireTuning.integer(s("REPRISAL_FIRE_TICKS"), 40) / 20));
             state.attackerLocks.put(attacker.getUuid(), world.getTime()
-                    + state.sunfireTuning.integer(s("LOCKOUT_TICKS"), 40));
-            trim(state.attackerLocks, 8);
+                    + state.sunfireTuning.integer(s("REPRISAL_LOCKOUT_TICKS"), 40));
+            state.attackerLocks.entrySet().removeIf(entry -> entry.getValue() <= world.getTime());
         }
         return amount;
     }
@@ -204,7 +223,8 @@ public final class Phase4PassiveManager {
         if (!(source.getAttacker() instanceof LivingEntity attacker)) return;
         AllyCharge charge = ALLY_CHARGES.get(attacker.getUuid());
         if (charge != null && charge.pendingWeakness) {
-            target.addStatusEffect(new StatusEffectInstance(StatusEffects.WEAKNESS, 60, 0), attacker);
+            target.addStatusEffect(new StatusEffectInstance(StatusEffects.WEAKNESS,
+                    Math.max(1, charge.weaknessTicks), 0), attacker);
             charge.pendingWeakness = false;
         }
         if (charge != null && charge.pendingFireTicks > 0) {
@@ -226,7 +246,8 @@ public final class Phase4PassiveManager {
                 ? (float) tuning.get(s("SUPPORT_DAMAGE_BONUS"), .15)
                 : tuning.flag(512) ? (float) tuning.get(s("SUPPORT_DAMAGE_BONUS"), .1) : 0;
         if (weakness || bonus > 0) {
-            ALLY_CHARGES.put(ally.getUuid(), new AllyCharge(tick + 80, weakness, bonus, weakness, 0));
+            ALLY_CHARGES.put(ally.getUuid(), new AllyCharge(tick + tuning.integer(s("ALLY_CHARGE_TICKS"), 80),
+                    weakness, bonus, weakness, 0, tuning.integer(s("ALLY_WEAKNESS_TICKS"), 60)));
             trim(ALLY_CHARGES, 32);
         }
     }
@@ -261,7 +282,8 @@ public final class Phase4PassiveManager {
         int cap = tuning.integer(s("TARGET_CAP"), 8);
         Box box = new Box(center.x + radius, center.y + radius, center.z + radius,
                 center.x - radius, center.y - radius, center.z - radius);
-        float base = (float) owner.getAttributeValue(EntityAttributes.GENERIC_ATTACK_DAMAGE)
+        float base = HelperMethods.abilityScaledDamage("healing_fire", owner, stack,
+                Config.uniqueEffects.sunfire.damageScaling, Config.uniqueEffects.sunfire.spellScaling)
                 * (float) tuning.get(s("FLARE_DAMAGE_MULTIPLIER"), .7);
         world.getOtherEntities(owner, box).stream().filter(LivingEntity.class::isInstance)
                 .map(LivingEntity.class::cast).filter(target -> HelperMethods.checkAbilityTarget(target, owner))
@@ -271,13 +293,6 @@ public final class Phase4PassiveManager {
                     DamageSource source = owner.getDamageSources().indirectMagic(owner, owner);
                     target.damage(source, HelperMethods.applyAbilityDamageEnchantments(world, stack, target, source, base));
                 });
-    }
-
-    private static void dealBonus(LivingEntity attacker, LivingEntity target, ItemStack stack, float ratio) {
-        if (!(attacker.getWorld() instanceof ServerWorld world) || ratio <= 0) return;
-        float amount = (float) attacker.getAttributeValue(EntityAttributes.GENERIC_ATTACK_DAMAGE) * ratio;
-        DamageSource source = attacker.getDamageSources().indirectMagic(attacker, attacker);
-        target.damage(source, HelperMethods.applyAbilityDamageEnchantments(world, stack, target, source, amount));
     }
 
     private static void pull(LivingEntity target, Vec3d center, double strength) {
@@ -302,6 +317,19 @@ public final class Phase4PassiveManager {
                 .toList().forEach(map::remove);
     }
 
+    public static void clear(ServerWorld world) {
+        if (world == null) return;
+        STATES.keySet().removeIf(uuid -> world.getEntity(uuid) != null);
+        ALLY_CHARGES.keySet().removeIf(uuid -> world.getEntity(uuid) != null);
+        OWNER_BONUSES.keySet().removeIf(uuid -> world.getEntity(uuid) != null);
+    }
+
+    public static void clearAll() {
+        STATES.clear();
+        ALLY_CHARGES.clear();
+        OWNER_BONUSES.clear();
+    }
+
     private static Phase4AbilityTuning.Setting s(String name) {
         return Phase4AbilityTuning.Setting.valueOf(name);
     }
@@ -313,7 +341,7 @@ public final class Phase4PassiveManager {
         private long flareReadyAt;
         private long rekindleReadyAt;
         private long omenCounterDeadline;
-        private long pullReadyAt;
+        private final Map<UUID, Long> pullLocks = new HashMap<>();
         private int reserve;
         private int combo;
         private int omenCounter;
@@ -329,15 +357,22 @@ public final class Phase4PassiveManager {
         private final float damageBonus;
         private final boolean singleUse;
         private final int fireTicks;
+        private final int weaknessTicks;
         private boolean pendingWeakness;
         private int pendingFireTicks;
 
         private AllyCharge(long expiresAt, boolean weakness, float damageBonus, boolean singleUse, int fireTicks) {
+            this(expiresAt, weakness, damageBonus, singleUse, fireTicks, 60);
+        }
+
+        private AllyCharge(long expiresAt, boolean weakness, float damageBonus, boolean singleUse,
+                           int fireTicks, int weaknessTicks) {
             this.expiresAt = expiresAt;
             this.weakness = weakness;
             this.damageBonus = damageBonus;
             this.singleUse = singleUse;
             this.fireTicks = fireTicks;
+            this.weaknessTicks = weaknessTicks;
         }
     }
 

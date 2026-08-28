@@ -16,6 +16,12 @@ public abstract class ServerWorldMixin {
     @Inject(method = "tick(Ljava/util/function/BooleanSupplier;)V", at = @At("HEAD"))
     private void simplyswords$tickFieldManagers(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
         ServerWorld world = (ServerWorld) (Object) this;
+        if (Phase4AbsorptionTracker.hasActive(world)) {
+            Phase4AbsorptionTracker.sweep(world);
+        }
+        if (EmberbladeAbilityManager.hasActive(world)) {
+            EmberbladeAbilityManager.tick(world);
+        }
         if (FrostfallIceSpikeFieldManager.hasActive(world)) {
             FrostfallIceSpikeFieldManager.tick(world);
         }

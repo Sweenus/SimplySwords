@@ -7,6 +7,8 @@ import net.minecraft.network.DisconnectionInfo;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.sweenus.simplyswords.world.ShadowstingShadowDanceManager;
+import net.sweenus.simplyswords.world.EmberbladeAbilityManager;
+import net.sweenus.simplyswords.world.EmberlashAbilityManager;
 import net.sweenus.simplyswords.world.IonboundStormscaleAbilityManager;
 import net.sweenus.simplyswords.world.MoltenEdgeAbilityManager;
 import net.sweenus.simplyswords.world.WaxweaverEncasementManager;
@@ -47,6 +49,8 @@ public abstract class ServerPlayNetworkHandlerMixin {
     private void simplyswords$resetMoltenHeatOnDisconnect(DisconnectionInfo info, CallbackInfo ci) {
         IonboundStormscaleAbilityManager.flushWielder(player);
         MoltenEdgeAbilityManager.resetWielder(player);
+        EmberbladeAbilityManager.clear(player.getServerWorld(), player);
+        EmberlashAbilityManager.clear(player.getServerWorld(), player);
         PlayerMovementIntentManager.clear(player);
     }
 }

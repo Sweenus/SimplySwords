@@ -106,6 +106,12 @@ public class BattleStandardDarkEntity extends PathAwareEntity {
     }
 
     @Override
+    public void remove(RemovalReason reason) {
+        if (!this.getWorld().isClient()) Phase4StandardManager.onStandardRemoved(this.getUuid());
+        super.remove(reason);
+    }
+
+    @Override
     public void baseTick() {
         if (!this.getWorld().isClient()) {
             if (this.standardType != null && !this.standardType.equals(this.dataTracker.get(TRACKED_STANDARD_TYPE))) {

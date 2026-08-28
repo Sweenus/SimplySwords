@@ -84,6 +84,23 @@ public final class EmberlashSmoulderVisualManager {
         }
     }
 
+    public static void clear(ServerWorld world) {
+        if (world == null) return;
+        Map<UUID, UUID> visuals = ACTIVE_VISUALS.remove(world);
+        if (visuals != null) {
+            for (UUID visualId : visuals.values()) {
+                EmberlashSmoulderVisualEntity visual = resolveVisual(world, visualId);
+                if (visual != null) visual.discard();
+            }
+        }
+        purgeOrphanVisuals(world);
+    }
+
+    public static void clearAll() {
+        for (ServerWorld world : java.util.List.copyOf(ACTIVE_VISUALS.keySet())) clear(world);
+        ACTIVE_VISUALS.clear();
+    }
+
     private static void updateVisual(ServerWorld world, EmberlashSmoulderVisualEntity visual, LivingEntity target) {
         Vec3d desired = visualPosition(target, world.getTime());
         Vec3d smoothed = visual.getPos().lerp(desired, FOLLOW_LERP);
@@ -107,7 +124,7 @@ public final class EmberlashSmoulderVisualManager {
 
     private static int getStacks(LivingEntity target) {
         StatusEffectInstance effect = target.getStatusEffect(EffectRegistry.getReference(EffectRegistry.SMOULDERING));
-        return effect == null ? 1 : Math.max(1, effect.getAmplifier());
+        return effect == null ? 1 : Math.max(1, effect.getAmplifier() + 1);
     }
 
     private static float getDurationScale(LivingEntity target) {

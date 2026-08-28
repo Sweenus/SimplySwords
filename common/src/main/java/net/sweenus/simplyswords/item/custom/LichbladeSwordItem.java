@@ -79,7 +79,6 @@ public class LichbladeSwordItem extends UniqueSwordItem implements TwoHandedWeap
             return TypedActionResult.pass(itemStack);
         }
         if (!world.isClient()) {
-            if (Phase4LichbladeManager.recall(user, itemStack)) return TypedActionResult.success(itemStack, false);
             LivingEntity abilityTarget = Phase4LichbladeManager.beginChannel((ServerWorld) world, user, itemStack);
             if (abilityTarget == null) {
                 return TypedActionResult.fail(itemStack);
@@ -159,9 +158,7 @@ public class LichbladeSwordItem extends UniqueSwordItem implements TwoHandedWeap
 
     @Override
     public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
-        if (!world.isClient && Phase4LichbladeManager.finish(user, stack, true)) {
-            stack.set(ComponentTypeRegistry.STORED_CHARGE.get(), null);
-            stack.set(ComponentTypeRegistry.TARGETED_LOCATION.get(), null);
+        if (!world.isClient && Phase4LichbladeManager.releaseChannel(user, stack)) {
             return;
         }
         TargetedLocationComponent targetLocation = stack.get(ComponentTypeRegistry.TARGETED_LOCATION.get());

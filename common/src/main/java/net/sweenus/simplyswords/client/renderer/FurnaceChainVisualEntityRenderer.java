@@ -101,12 +101,11 @@ public class FurnaceChainVisualEntityRenderer extends EntityRenderer<FurnaceChai
                                    Vec3d entityPos, Matrix4f matrix,
                                    VertexConsumer dark, VertexConsumer glow) {
         Entity owner = visual.getWorld().getEntityById(visual.getOwnerId());
-        if (!(owner instanceof LivingEntity living)) {
-            return;
-        }
-        Vec3d center = lerpedPosition(living, tickDelta)
+        Vec3d center = owner instanceof LivingEntity living
+                ? lerpedPosition(living, tickDelta)
                 .add(0.0, living.getHeight() * 0.43, 0.0)
-                .subtract(entityPos);
+                .subtract(entityPos)
+                : new Vec3d(0.0, 0.43, 0.0);
         float heat = visual.getHeat();
         float pulse = 0.78F + MathHelper.sin(time * (0.12F + heat * 0.18F)) * (0.08F + heat * 0.08F);
         float radius = 0.65F + heat * 0.35F;
@@ -136,11 +135,13 @@ public class FurnaceChainVisualEntityRenderer extends EntityRenderer<FurnaceChai
                                     VertexConsumer dark, VertexConsumer glow) {
         Entity ownerEntity = visual.getWorld().getEntityById(visual.getOwnerId());
         Entity targetEntity = visual.getWorld().getEntityById(visual.getTargetId());
-        if (!(ownerEntity instanceof LivingEntity owner) || !(targetEntity instanceof LivingEntity target)) {
+        if (!(targetEntity instanceof LivingEntity target)) {
             return;
         }
 
-        Vec3d start = weaponSideAnchor(owner, tickDelta).subtract(entityPos);
+        Vec3d start = ownerEntity instanceof LivingEntity owner
+                ? weaponSideAnchor(owner, tickDelta).subtract(entityPos)
+                : new Vec3d(0.0, 0.75, 0.0);
         Vec3d end = lerpedPosition(target, tickDelta)
                 .add(0.0, target.getHeight() * 0.52, 0.0)
                 .subtract(entityPos);

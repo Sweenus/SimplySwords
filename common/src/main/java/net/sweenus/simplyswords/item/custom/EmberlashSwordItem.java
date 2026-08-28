@@ -1,13 +1,9 @@
 package net.sweenus.simplyswords.item.custom;
 
-import net.sweenus.simplyswords.api.SimplySwordsAPI;
-
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
@@ -25,14 +21,10 @@ import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
-import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
-import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
-import net.sweenus.simplyswords.world.LivingEntityAbilityMovementManager;
-import net.sweenus.simplyswords.world.EmberlashSmoulderVisualManager;
-import net.sweenus.simplyswords.world.Phase5CombatManager;
+import net.sweenus.simplyswords.world.EmberlashAbilityManager;
 
 import java.util.List;
 
@@ -51,7 +43,7 @@ public class EmberlashSwordItem extends UniqueSwordItem implements UniqueWeaponA
         if (!attacker.getWorld().isClient()) {
             ServerWorld world = (ServerWorld) attacker.getWorld();
             HelperMethods.playHitSounds(attacker, target);
-            Phase5CombatManager.onEmberlashHit(world, stack, attacker, target);
+            EmberlashAbilityManager.onHit(world, stack, attacker, target);
         }
         return super.postHit(stack, target, attacker);
     }
@@ -68,7 +60,18 @@ public class EmberlashSwordItem extends UniqueSwordItem implements UniqueWeaponA
 
     @Override
     public boolean activate(WeaponAbilityContext context) {
-        return Phase5CombatManager.activateEmberlash(context);
+        return EmberlashAbilityManager.activate(context);
+    }
+
+    @Override
+    public boolean canActivate(WeaponAbilityContext context) {
+        if (context == null || context.stack() == null || context.stack().isEmpty()
+                || context.world() == null || context.actor() == null || !context.actor().isAlive()
+                || context.stack().getDamage() >= context.stack().getMaxDamage() - 1) {
+            return false;
+        }
+        return context.sourcePlayer() == null || context.sourcePlayer().isAlive()
+                && context.actor().getWorld() == context.sourcePlayer().getWorld();
     }
 
     @Override

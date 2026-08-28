@@ -37,6 +37,7 @@ import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.world.NecromanticArsenalManager;
 import net.sweenus.simplyswords.world.WolfPackManager;
 import net.sweenus.simplyswords.util.MinionTargeting;
+import net.sweenus.simplyswords.world.Phase4LichbladeManager;
 import net.sweenus.simplyswords.world.PlayerWeaponAbilityChannelManager;
 import net.sweenus.simplyswords.world.RevivalCandleVisualManager;
 import net.sweenus.simplyswords.world.MagispearAbilityManager;
@@ -154,6 +155,7 @@ public abstract class ServerPlayerEntityMixin {
             ShadowstingShadowDanceManager.tickPlayer(serverPlayer);
             SoulkeeperLanternManager.tickPlayer(serverPlayer);
             PlayerWeaponAbilityChannelManager.tickPlayer(serverPlayer);
+            Phase4LichbladeManager.tickOwner(serverPlayer);
             StormbringerParryManager.tickPlayer(serverPlayer);
 
             //Ribboncleaver movespeed debuff

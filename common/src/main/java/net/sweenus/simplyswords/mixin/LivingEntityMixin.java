@@ -38,11 +38,13 @@ import net.sweenus.simplyswords.world.ObserverStatusEffectSyncManager;
 import net.sweenus.simplyswords.world.Phase4PassiveManager;
 import net.sweenus.simplyswords.world.Phase4LichbladeManager;
 import net.sweenus.simplyswords.world.Phase4StandardManager;
-import net.sweenus.simplyswords.world.Phase5CombatManager;
 import net.sweenus.simplyswords.world.Phase7CombatManager;
 import net.sweenus.simplyswords.world.Phase8CombatManager;
 import net.sweenus.simplyswords.world.DreadwhisperAbilityManager;
+import net.sweenus.simplyswords.world.EmberbladeAbilityManager;
+import net.sweenus.simplyswords.world.EmberlashAbilityManager;
 import net.sweenus.simplyswords.world.GloamMechanicsManager;
+import net.sweenus.simplyswords.world.HearthflameAbilityManager;
 import net.sweenus.simplyswords.world.SoulPyreAbilityManager;
 import net.sweenus.simplyswords.world.StormsEdgeAbilityManager;
 import net.sweenus.simplyswords.world.ThunderbrandAbilityManager;
@@ -183,6 +185,9 @@ public abstract class LivingEntityMixin {
         if (!livingEntity.getWorld().isClient()) {
             amount = MoltenEdgeAbilityManager.modifyOutgoingDamage(source, amount);
             amount = Phase4PassiveManager.modifyOutgoingDamage(livingEntity, source, amount);
+            if (source.getAttacker() instanceof LivingEntity attacker) {
+                amount = EmberbladeAbilityManager.modifyOutgoingDamage(attacker, source, amount);
+            }
             StatusEffectInstance voidcloakEffect = livingEntity.getStatusEffect(EffectRegistry.getReference(EffectRegistry.VOIDCLOAK));
             StatusEffectInstance ribbonwrathEffect = livingEntity.getStatusEffect(EffectRegistry.getReference(EffectRegistry.RIBBONWRATH));
             StatusEffectInstance soulTetherEffect = livingEntity.getStatusEffect(EffectRegistry.getReference(EffectRegistry.SOULTETHER));
@@ -215,7 +220,9 @@ public abstract class LivingEntityMixin {
             amount = WraithfangAbilityManager.modifyOutgoingDamage(livingEntity, source, amount);
             amount = Phase4StandardManager.modifyIncomingDamage(livingEntity, source, amount);
             amount = Phase4PassiveManager.modifyIncomingDamage(livingEntity, source, amount);
-            amount = Phase5CombatManager.modifyIncomingDamage(livingEntity, source, amount);
+            amount = HearthflameAbilityManager.modifyIncomingDamage(livingEntity, source, amount);
+            amount = EmberbladeAbilityManager.modifyIncomingDamage(livingEntity, source, amount);
+            amount = EmberlashAbilityManager.modifyIncomingDamage(livingEntity, source, amount);
             amount = WaxweaverEncasementManager.modifyIncomingDamage(livingEntity, source, amount);
             amount = BramblethornAbilityManager.modifyIncomingDamage(livingEntity, source, amount);
             amount = HivemindSwarmManager.modifyIncomingDamage(livingEntity, source, amount);
@@ -235,7 +242,9 @@ public abstract class LivingEntityMixin {
             BloodwakeAbilityManager.onTargetDamaged(livingEntity, source);
             Phase4PassiveManager.onDamageApplied(livingEntity, source);
             Phase4LichbladeManager.onOwnerDamaged(livingEntity);
-            Phase5CombatManager.onDamageApplied(livingEntity, source);
+            HearthflameAbilityManager.onDamageApplied(livingEntity, source);
+            EmberbladeAbilityManager.onDamageTaken((ServerWorld) livingEntity.getWorld(), livingEntity);
+            EmberlashAbilityManager.onDamageApplied(livingEntity, source);
             HivemindSwarmManager.onOwnerDamaged(livingEntity, source);
             Phase7CombatManager.onDamageApplied(livingEntity, source);
             WraithfangAbilityManager.onMeleeDamageApplied(livingEntity, source);
@@ -266,6 +275,7 @@ public abstract class LivingEntityMixin {
         WaxweaverEncasementManager.onTargetDeath(livingEntity);
         MoltenEdgeAbilityManager.resetWielder(livingEntity);
         SoulPyreAbilityManager.onDeath(livingEntity, damageSource);
+        EmberlashAbilityManager.onKill(livingEntity, damageSource);
         FlameSeedEffect.triggerDeathDetonation(livingEntity);
         GloamMechanicsManager.onTargetDeath(livingEntity);
         WraithfangAbilityManager.onTargetDeath(livingEntity, damageSource);

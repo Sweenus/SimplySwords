@@ -1,10 +1,10 @@
 package net.sweenus.simplyswords.item.custom;
 
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
+import net.sweenus.simplyswords.api.AwakeningApi;
 
 import me.fzzyhmstrs.fzzy_config.annotations.Translation;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffectInstance;
@@ -15,6 +15,7 @@ import net.minecraft.item.ToolMaterial;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.particle.SimpleParticleType;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
@@ -32,9 +33,9 @@ import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
-import net.sweenus.simplyswords.util.WeaponManaCost;
 import net.sweenus.simplyswords.util.Styles;
-import net.sweenus.simplyswords.world.Phase5CombatManager;
+import net.sweenus.simplyswords.world.EmberbladeAbilityManager;
+import net.sweenus.simplyswords.world.PlayerWeaponAbilityChannelManager;
 
 import java.util.List;
 
@@ -56,7 +57,9 @@ public class EmberIreSwordItem extends UniqueSwordItem implements UniqueWeaponAc
         }
         if (!attacker.getWorld().isClient()) {
             HelperMethods.playHitSounds(attacker, target);
-
+            if (attacker.getWorld() instanceof ServerWorld serverWorld) {
+                EmberbladeAbilityManager.onMeleeHit(serverWorld, stack, attacker, target);
+            }
         }
         return super.postHit(stack, target, attacker);
     }
@@ -72,20 +75,33 @@ public class EmberIreSwordItem extends UniqueSwordItem implements UniqueWeaponAc
         if (itemStack.getDamage() >= itemStack.getMaxDamage() - 1) {
             return TypedActionResult.fail(itemStack);
         }
+        if (!AwakeningApi.isAbilityUnlocked(itemStack)) {
+            return TypedActionResult.fail(itemStack);
+        }
+        if (user.getItemCooldownManager().isCoolingDown(itemStack.getItem())) {
+            return TypedActionResult.fail(itemStack);
+        }
+        if (!world.isClient && (!(world instanceof ServerWorld serverWorld)
+                || !(user instanceof ServerPlayerEntity serverPlayer)
+                || !EmberbladeAbilityManager.startChannel(serverWorld, serverPlayer, itemStack, hand))) {
+            return TypedActionResult.fail(itemStack);
+        }
         user.setCurrentHand(hand);
         return TypedActionResult.consume(itemStack);
     }
 
     @Override
     public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
-        if (!world.isClient && remainingUseTicks %10 == 0 && remainingUseTicks < getMaxUseTime(stack, user) - 5) {
+        if (!world.isClient && remainingUseTicks % 10 == 0 && remainingUseTicks < getMaxUseTime(stack, user) - 5) {
             world.playSoundFromEntity(null, user, SoundRegistry.ELEMENTAL_BOW_RECHARGE.get(),
                     user.getSoundCategory(), 0.2f, 1.1f - (remainingUseTicks * 0.001f));
-
-            if (remainingUseTicks < 20) {
-                onStoppedUsing(stack, world, user, remainingUseTicks);
+        }
+        if (!world.isClient && world instanceof ServerWorld serverWorld
+                && EmberbladeAbilityManager.isFullyCharged(serverWorld, user)) {
+            if (!(user instanceof ServerPlayerEntity serverPlayer)
+                    || !PlayerWeaponAbilityChannelManager.finishEarly(serverPlayer, stack)) {
+                user.stopUsingItem();
             }
-
         }
     }
 
@@ -96,11 +112,9 @@ public class EmberIreSwordItem extends UniqueSwordItem implements UniqueWeaponAc
 
     @Override
     public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
-        if (!world.isClient && user.getEquippedStack(EquipmentSlot.MAINHAND) == stack) {
-            WeaponManaCost.spend(user, stack);
+        if (!world.isClient && world instanceof ServerWorld serverWorld) {
             LivingEntity targetEntity = user instanceof PlayerEntity player ? findPlayerTarget(player) : null;
-            float chargeRatio = 1.0f - ((float) remainingUseTicks / getMaxUseTime(stack, user));
-            Phase5CombatManager.releaseEmberbladeCharge((ServerWorld) world, stack, user, targetEntity, chargeRatio);
+            EmberbladeAbilityManager.releaseChannel(serverWorld, stack, user, targetEntity);
         }
     }
 
@@ -110,7 +124,7 @@ public class EmberIreSwordItem extends UniqueSwordItem implements UniqueWeaponAc
 
     @Override
     public boolean activate(WeaponAbilityContext context) {
-        return Phase5CombatManager.releaseEmberblade(context);
+        return EmberbladeAbilityManager.releaseDelegated(context);
     }
 
     @Override
@@ -120,7 +134,8 @@ public class EmberIreSwordItem extends UniqueSwordItem implements UniqueWeaponAc
 
     @Override
     public int getMaxUseTime(ItemStack stack, LivingEntity user) {
-        return 80;
+        return user.getWorld() instanceof ServerWorld serverWorld
+                ? EmberbladeAbilityManager.channelTicks(serverWorld, user) : 100;
     }
 
     @Override
