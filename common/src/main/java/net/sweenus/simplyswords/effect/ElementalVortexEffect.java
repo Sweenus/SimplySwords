@@ -17,6 +17,7 @@ import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.SoundHelper;
 import net.sweenus.simplyswords.api.ability.Phase6AbilityTuning;
 import net.sweenus.simplyswords.world.Phase6CombatManager;
+import net.sweenus.simplyswords.world.TempestAbilityManager;
 
 public class ElementalVortexEffect extends OrbitingEffect {
     public LivingEntity sourceEntity; // The player who applied the effect
@@ -37,6 +38,17 @@ public class ElementalVortexEffect extends OrbitingEffect {
         if (!livingEntity.getWorld().isClient()) {
             ServerWorld serverWorld = (ServerWorld) livingEntity.getWorld();
 			SoundHelper.loopSound(livingEntity, SoundRegistry.AMBIENCE_WIND_LOOP.getId(), 6, 20);
+
+            if (TempestAbilityManager.hasManagedVortex(livingEntity)) {
+                if (livingEntity.age % 40 == 0) {
+                    HelperMethods.spawnOrbitParticles(serverWorld, livingEntity.getPos().add(0,
+                            livingEntity.getHeight() / 3, 0), ParticleTypes.LAVA, .5, 4);
+                    HelperMethods.spawnOrbitParticles(serverWorld, livingEntity.getPos().add(0,
+                            livingEntity.getHeight() / 2, 0), ParticleTypes.SNOWFLAKE, 1, 6);
+                }
+                super.applyUpdateEffect(livingEntity, amplifier);
+                return true;
+            }
 
             if (livingEntity.getStatusEffect(EffectRegistry.getReference(EffectRegistry.ELEMENTAL_VORTEX)) instanceof SimplySwordsStatusEffectInstance statusEffect) {
                 sourceEntity = statusEffect.getSourceEntity();

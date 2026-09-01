@@ -1,7 +1,5 @@
 package net.sweenus.simplyswords.item.custom;
 
-import net.sweenus.simplyswords.api.SimplySwordsAPI;
-
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.entity.Entity;
@@ -24,7 +22,6 @@ import net.sweenus.simplyswords.api.ability.Phase6AbilityTuning;
 import net.sweenus.simplyswords.api.ability.Phase6UniqueAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
-import net.sweenus.simplyswords.api.ability.UniqueAbilityPhase;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
@@ -37,21 +34,14 @@ import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.WeaponManaCost;
 import net.sweenus.simplyswords.util.Styles;
-import net.sweenus.simplyswords.world.ChainLightningVisualManager;
 import net.sweenus.simplyswords.world.PlayerWeaponAbilityChannelManager;
 import net.sweenus.simplyswords.world.Phase6CombatManager;
+import net.sweenus.simplyswords.world.StormbringerAbilityManager;
 import net.sweenus.simplyswords.world.StormbringerParryManager;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 public class StormbringerSwordItem extends UniqueSwordItem implements UniqueWeaponActiveAbility {
-
-    private static final ThreadLocal<Boolean> SUPPRESS_STORMBRINGER_CHAIN = ThreadLocal.withInitial(() -> false);
-    private static final Map<UUID, Long> NEXT_CHAIN_TICK = new HashMap<>();
-    private static final Map<UUID, Long> NEXT_FREE_CHAIN_TICK = new HashMap<>();
 
     public StormbringerSwordItem(ToolMaterial toolMaterial, Settings settings) {
         super(toolMaterial, settings);
@@ -62,71 +52,15 @@ public class StormbringerSwordItem extends UniqueSwordItem implements UniqueWeap
         if (!net.sweenus.simplyswords.api.AwakeningApi.isAbilityUnlocked(stack)) {
             return super.postHit(stack, target, attacker);
         }
-        if (!attacker.getWorld().isClient() && attacker instanceof ServerPlayerEntity player && !SUPPRESS_STORMBRINGER_CHAIN.get()) {
-            tryTriggerChainLightning(stack, target, player);
+        if (!attacker.getWorld().isClient() && attacker instanceof ServerPlayerEntity player) {
+            StormbringerAbilityManager.tryTriggerChainLightning(stack, target, player);
         }
-        if (!SUPPRESS_STORMBRINGER_CHAIN.get()) {
-            HelperMethods.playHitSounds(attacker, target);
-        }
+        HelperMethods.playHitSounds(attacker, target);
         return super.postHit(stack, target, attacker);
     }
 
     public static void tryTriggerChainLightningOnMeleeDamage(ItemStack stack, LivingEntity target, ServerPlayerEntity player) {
-        if (!SUPPRESS_STORMBRINGER_CHAIN.get() && stack.isOf(ItemsRegistry.STORMBRINGER.get())) {
-            tryTriggerChainLightning(stack, target, player);
-        }
-    }
-
-    private static void tryTriggerChainLightning(ItemStack stack, LivingEntity target, ServerPlayerEntity player) {
-        long now = player.getServerWorld().getTime();
-        long nextTriggerTick = NEXT_CHAIN_TICK.getOrDefault(player.getUuid(), Long.MIN_VALUE);
-        if (now < nextTriggerTick) {
-            return;
-        }
-
-        UniqueAbilityExecution execution = Phase6CombatManager.beginPassive(
-                Phase6UniqueAbilities.STORMBRINGER_CHAIN, player.getServerWorld(), stack, player, target);
-        Phase6AbilityTuning tuning = Phase6UniqueAbilities.tuning(execution);
-        ParryComponent component = stack.getOrDefault(ComponentTypeRegistry.PARRY.get(), ParryComponent.DEFAULT);
-        int chargeCap = tuning.integer(s("CHARGE_CAP"), Math.max(0, Config.uniqueEffects.stormbringer.maxStormCharges));
-        int stormCharges = Math.clamp(component.stormCharges(), 0, chargeCap);
-        if (stormCharges <= 0) {
-            UniqueAbilityApi.finish(execution, Phase6UniqueAbilities.FINISH, 0);
-            return;
-        }
-
-        float damage = HelperMethods.abilityScaledDamage("lightning", player, stack,
-                Config.uniqueEffects.stormbringer.chainLightningDamageScaling,
-                Config.uniqueEffects.stormbringer.chainLightningSpellScaling)
-                * (float) tuning.get(s("DAMAGE_MULTIPLIER"), 1);
-        if (tuning.flag(1 << 15) && stormCharges >= chargeCap) damage *= 1.25F;
-        int targets = tuning.integer(s("TARGET_CAP"), stormCharges);
-        double range = tuning.get(s("RANGE"), Config.uniqueEffects.stormbringer.chainLightningRange);
-        SUPPRESS_STORMBRINGER_CHAIN.set(true);
-        try {
-            int damaged = ChainLightningVisualManager.damageStormbringerChain(player.getServerWorld(), player,
-                    target, Math.min(stormCharges, targets), damage, range);
-            if (damaged > 0) {
-                boolean free = tuning.flag(1 << 10)
-                        && now >= NEXT_FREE_CHAIN_TICK.getOrDefault(player.getUuid(), Long.MIN_VALUE);
-                int consumed = tuning.flag(1 << 15) && stormCharges >= chargeCap ? 2 : 1;
-                ParryComponent updated = component;
-                if (free) {
-                    NEXT_FREE_CHAIN_TICK.put(player.getUuid(), now + tuning.integer(s("LOCKOUT_TICKS"), 80));
-                } else {
-                    for (int i = 0; i < consumed; i++) updated = updated.consumeStormCharge();
-                }
-                stack.set(ComponentTypeRegistry.PARRY.get(), updated);
-                int cooldown = tuning.integer(s("COOLDOWN_TICKS"), Config.uniqueEffects.stormbringer.chainLightningCooldown);
-                NEXT_CHAIN_TICK.put(player.getUuid(), now + SimplySwordsAPI.getEffectiveWeaponCooldownTicks(
-                        stack, player, cooldown));
-                UniqueAbilityApi.emit(execution, UniqueAbilityPhase.HIT, Phase6UniqueAbilities.HIT,
-                        target, damaged, damage);
-            }
-        } finally {
-            SUPPRESS_STORMBRINGER_CHAIN.set(false);
-            UniqueAbilityApi.finish(execution, Phase6UniqueAbilities.FINISH, 0);
-        }
+        StormbringerAbilityManager.tryTriggerChainLightning(stack, target, player);
     }
 
     @Override
@@ -177,10 +111,14 @@ public class StormbringerSwordItem extends UniqueSwordItem implements UniqueWeap
                 Phase6UniqueAbilities.STORMBRINGER_GUARD, context, Config.uniqueEffects.stormbringer.cooldown);
         Phase6AbilityTuning tuning = Phase6UniqueAbilities.tuning(execution);
         actor.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE,
-                tuning.integer(s("DURATION_TICKS"), Math.max(1, Config.uniqueEffects.stormbringer.blockDuration)), 5), actor);
+                scopedInteger(tuning, "STORMBRINGER_BLOCK_DURATION_TICKS", "DURATION_TICKS",
+                        Math.max(1, Config.uniqueEffects.stormbringer.blockDuration)), 5), actor);
+        int gain = scopedInteger(tuning, "STORMBRINGER_NORMAL_CHARGE_GAIN", "COUNT",
+                Config.uniqueEffects.stormbringer.stormChargesPerBlock);
+        gain = (int) Math.ceil(gain * scoped(tuning, "STORMBRINGER_CHARGE_GAIN_MULTIPLIER", null, 1));
         ParryComponent parryComponent = stack.getOrDefault(ComponentTypeRegistry.PARRY.get(), ParryComponent.DEFAULT)
-                .gainBlockedStormCharges(tuning.integer(s("COUNT"), Config.uniqueEffects.stormbringer.stormChargesPerBlock),
-                        tuning.integer(s("CHARGE_CAP"), Config.uniqueEffects.stormbringer.maxStormCharges));
+                .gainBlockedStormCharges(gain, scopedInteger(tuning, "STORMBRINGER_CHARGE_CAP", "CHARGE_CAP",
+                        Config.uniqueEffects.stormbringer.maxStormCharges));
         stack.set(ComponentTypeRegistry.PARRY.get(), parryComponent);
         context.world().spawnParticles(ParticleTypes.ELECTRIC_SPARK, actor.getX(), actor.getBodyY(0.5), actor.getZ(), 18, 0.35, 0.38, 0.35, 0.06);
         UniqueAbilityApi.finish(execution, Phase6UniqueAbilities.FINISH, 0);
@@ -194,7 +132,7 @@ public class StormbringerSwordItem extends UniqueSwordItem implements UniqueWeap
 
     @Override
     public int getMaxUseTime(ItemStack stack, LivingEntity user) {
-        return Math.max(1, Config.uniqueEffects.stormbringer.blockDuration);
+        return StormbringerParryManager.maxUseTime(user, stack);
     }
 
     @Override
@@ -258,7 +196,21 @@ public class StormbringerSwordItem extends UniqueSwordItem implements UniqueWeap
         public float chainLightningDamageScaling = 0.35f;
         @ValidatedFloat.Restrict(min = 0f)
         public float chainLightningSpellScaling = 1.65f;
+        @ValidatedInt.Restrict(min = 1, max = 64)
+        public int counterTargetCap = 10;
+        @ValidatedInt.Restrict(min = 1, max = 64)
+        public int chainSearchCap = 24;
 
+    }
+
+    private static double scoped(Phase6AbilityTuning tuning, String scoped, String generic, double fallback) {
+        Phase6AbilityTuning.Setting scopedSetting = s(scoped);
+        if (tuning.has(scopedSetting)) return tuning.get(scopedSetting, fallback);
+        return generic == null ? fallback : tuning.get(s(generic), fallback);
+    }
+
+    private static int scopedInteger(Phase6AbilityTuning tuning, String scoped, String generic, int fallback) {
+        return (int) Math.round(scoped(tuning, scoped, generic, fallback));
     }
 
     private static Phase6AbilityTuning.Setting s(String name) {

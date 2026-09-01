@@ -45,6 +45,7 @@ import net.sweenus.simplyswords.world.IonboundStormscaleAbilityManager;
 import net.sweenus.simplyswords.world.ShadowstingShadowDanceManager;
 import net.sweenus.simplyswords.world.SoulkeeperLanternManager;
 import net.sweenus.simplyswords.world.StormbringerParryManager;
+import net.sweenus.simplyswords.world.StormbringerAbilityManager;
 import net.sweenus.simplyswords.world.StormsEdgeAbilityManager;
 import net.sweenus.simplyswords.world.DreadwhisperAbilityManager;
 import net.sweenus.simplyswords.world.ThunderbrandAbilityManager;
@@ -157,6 +158,7 @@ public abstract class ServerPlayerEntityMixin {
             PlayerWeaponAbilityChannelManager.tickPlayer(serverPlayer);
             Phase4LichbladeManager.tickOwner(serverPlayer);
             StormbringerParryManager.tickPlayer(serverPlayer);
+            StormbringerAbilityManager.tickPlayer(serverPlayer);
 
             //Ribboncleaver movespeed debuff
             ItemStack heldUnique = serverPlayer.getMainHandStack();

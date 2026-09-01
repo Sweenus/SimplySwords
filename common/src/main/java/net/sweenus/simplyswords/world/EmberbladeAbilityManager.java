@@ -41,7 +41,7 @@ import java.util.Set;
 import java.util.UUID;
 
 public final class EmberbladeAbilityManager {
-    private static final Identifier CHANNEL_SLOW = Identifier.of("simplyswords", "emberblade_channel_slow");
+    private static final int CHANNEL_SLOW_GRACE_TICKS = 20;
     private static final int BASE_CHANNEL_TICKS = 80;
     private static final Map<ServerWorld, Map<UUID, State>> STATES = new HashMap<>();
 
@@ -84,7 +84,7 @@ public final class EmberbladeAbilityManager {
         prune(state, world.getTime());
         state.channel = new Channel(execution, tuning, stack.copy(), hand, world.getTime(),
                 channelTicks(tuning));
-        if (tuning.flag(1 << 7)) applyChannelSlow(actor);
+        if (tuning.flag(1 << 7)) applyChannelSlow(actor, state.channel);
         return true;
     }
 
@@ -95,7 +95,7 @@ public final class EmberbladeAbilityManager {
         Channel channel = state.channel;
         channel.released = true;
         state.channel = null;
-        removeChannelSlow(actor);
+        removeChannelSlow(actor, channel);
         long now = world.getTime();
         int elapsed = elapsedTicks(now, channel.startedAt, channel.channelTicks);
         if (!ItemStack.areItemsEqual(channel.stack, stack) || !validTarget(actor, target)
@@ -185,7 +185,8 @@ public final class EmberbladeAbilityManager {
             prune(state, now);
             state.flameBank = (float) Math.min(tuning.get(s("EMBERBLADE_BANK_CAP"), .25),
                     state.flameBank + gain);
-            state.flameBankUntil = now + tuning.integer(s("EMBERBLADE_BANK_DURATION_TICKS"), 100);
+            state.flameBankUntil = now
+                    + tuning.integer(s("EMBERBLADE_FLAME_BANK_DURATION_TICKS"), 100);
         }
         UniqueAbilityApi.finish(execution, Phase5UniqueAbilities.FINISH, 0);
     }
@@ -234,8 +235,10 @@ public final class EmberbladeAbilityManager {
         if (world == null || actor == null) return;
         Map<UUID, State> states = STATES.get(world);
         State state = states == null ? null : states.remove(actor.getUuid());
-        if (state != null) cancelChannel(actor, state);
-        removeChannelSlow(actor);
+        if (state != null) {
+            removeChannelSlow(actor, state.channel);
+            cancelChannel(actor, state);
+        }
         if (states != null && states.isEmpty()) STATES.remove(world);
     }
 
@@ -244,8 +247,8 @@ public final class EmberbladeAbilityManager {
         if (states == null) return;
         states.forEach((id, state) -> {
             if (world.getEntity(id) instanceof LivingEntity actor) {
+                removeChannelSlow(actor, state.channel);
                 cancelChannel(actor, state);
-                removeChannelSlow(actor);
             } else if (state.channel != null) {
                 UniqueAbilityApi.cancel(state.channel.execution);
             }
@@ -266,8 +269,8 @@ public final class EmberbladeAbilityManager {
                 Config.uniqueEffects.emberblade.initialSpellScaling)
                 * (float) tuned(tuning, s("EMBERBLADE_MIN_DAMAGE_MULTIPLIER"), s("DAMAGE_MULTIPLIER"), 1);
         double maximumMultiplier = tuned(tuning, s("EMBERBLADE_MAX_DAMAGE_MULTIPLIER"),
-                s("FINAL_DAMAGE_MULTIPLIER"), 1);
-        if (tuning.flag(1 << 6) && !finalWindow) maximumMultiplier /= 1.25;
+                s("FINAL_DAMAGE_MULTIPLIER"), 1)
+                * fullChargeBonus(finalWindow, tuning.get(s("EMBERBLADE_FULL_CHARGE_MULTIPLIER"), 1));
         float maximum = HelperMethods.abilityScaledDamage("fire", actor, stack,
                 Config.uniqueEffects.emberblade.maxChargeDamageScaling,
                 Config.uniqueEffects.emberblade.maxChargeSpellScaling)
@@ -310,7 +313,7 @@ public final class EmberbladeAbilityManager {
 
         boolean fullCharge = charge >= .9999F;
         if (fullCharge) affected += fragments(execution, world, actor, stack, target, damage, tuning);
-        applyRewards(world, actor, stack, target, tuning, charge, elapsed, fullCharge, affected > 0);
+        applyRewards(execution, world, actor, stack, target, tuning, charge, elapsed, fullCharge, affected);
         if (!duelist || primaryHit) applyReleaseMovement(actor, target, tuning, world.getTime());
         UniqueAbilityApi.emit(execution, UniqueAbilityPhase.HIT, Phase5UniqueAbilities.HIT,
                 target, affected, damage);
@@ -363,10 +366,10 @@ public final class EmberbladeAbilityManager {
         return affected;
     }
 
-    private static void applyRewards(ServerWorld world, LivingEntity actor, ItemStack stack, LivingEntity target,
-                                     Phase5AbilityTuning tuning, float charge, int elapsed,
-                                     boolean fullCharge, boolean hit) {
-        if (!hit) return;
+    private static void applyRewards(UniqueAbilityExecution execution, ServerWorld world, LivingEntity actor,
+                                     ItemStack stack, LivingEntity target, Phase5AbilityTuning tuning,
+                                     float charge, int elapsed, boolean fullCharge, int affected) {
+        if (affected <= 0) return;
         State state = state(world, actor);
         long now = world.getTime();
         int duration = ireDuration(tuning.integer(s("STATUS_DURATION_TICKS"),
@@ -409,12 +412,12 @@ public final class EmberbladeAbilityManager {
         int flashCount = tuning.integer(s("EMBERBLADE_FLASHOVER_COUNT"), 0);
         if (flashCount > 0) {
             if (state.flashoverUntil < now) state.flashoverHits = 0;
-            state.flashoverHits++;
+            state.flashoverHits += affected;
             state.flashoverUntil = now + tuning.integer(s("EMBERBLADE_FLASHOVER_WINDOW_TICKS"), 100);
             if (state.flashoverHits >= flashCount) {
                 float blast = HelperMethods.abilityScaledDamage("fire", actor, stack, 1F, 0)
                         * (float) tuning.get(s("EMBERBLADE_FLASHOVER_DAMAGE_MULTIPLIER"), .4);
-                splash(null, world, actor, stack, target,
+                splash(execution, world, actor, stack, target,
                         tuning.get(s("EMBERBLADE_FLASHOVER_RADIUS"), 3),
                         tuning.integer(s("EMBERBLADE_FLASHOVER_TARGET_CAP"), 8), blast, tuning);
                 state.flashoverHits = 0;
@@ -516,23 +519,34 @@ public final class EmberbladeAbilityManager {
         state.interruptedBankUntil = now + duration;
     }
 
-    private static void applyChannelSlow(LivingEntity actor) {
-        EntityAttributeInstance speed = actor.getAttributeInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED);
-        if (speed == null) return;
-        speed.removeModifier(CHANNEL_SLOW);
-        speed.addTemporaryModifier(new EntityAttributeModifier(CHANNEL_SLOW, -.3,
-                EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+    static double fullChargeBonus(boolean finalWindow, double multiplier) {
+        return finalWindow ? Math.max(0, multiplier) : 1;
     }
 
-    private static void removeChannelSlow(LivingEntity actor) {
-        EntityAttributeInstance speed = actor.getAttributeInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED);
-        if (speed != null) speed.removeModifier(CHANNEL_SLOW);
+    private static void applyChannelSlow(LivingEntity actor, Channel channel) {
+        StatusEffectInstance existing = actor.getStatusEffect(StatusEffects.SLOWNESS);
+        channel.previousSlowness = existing == null ? null : new StatusEffectInstance(existing);
+        channel.slowed = true;
+        actor.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS,
+                channel.channelTicks + CHANNEL_SLOW_GRACE_TICKS, 1), actor);
+    }
+
+    // Only clears the channel's own Slowness, restoring whatever the wielder already had.
+    private static void removeChannelSlow(LivingEntity actor, Channel channel) {
+        if (channel == null || !channel.slowed) return;
+        channel.slowed = false;
+        StatusEffectInstance current = actor.getStatusEffect(StatusEffects.SLOWNESS);
+        if (current != null && current.getAmplifier() == 1
+                && current.getDuration() <= channel.channelTicks + CHANNEL_SLOW_GRACE_TICKS) {
+            actor.removeStatusEffect(StatusEffects.SLOWNESS);
+            if (channel.previousSlowness != null) actor.addStatusEffect(channel.previousSlowness, actor);
+        }
     }
 
     private static void cancelChannel(LivingEntity actor, State state) {
         Channel channel = state.channel;
         state.channel = null;
-        removeChannelSlow(actor);
+        removeChannelSlow(actor, channel);
         if (channel != null && !channel.execution.isTerminal()) UniqueAbilityApi.cancel(channel.execution);
     }
 
@@ -645,6 +659,8 @@ public final class EmberbladeAbilityManager {
         private final long startedAt;
         private final int channelTicks;
         private boolean released;
+        private boolean slowed;
+        private StatusEffectInstance previousSlowness;
 
         private Channel(UniqueAbilityExecution execution, Phase5AbilityTuning tuning, ItemStack stack,
                         Hand hand, long startedAt, int channelTicks) {

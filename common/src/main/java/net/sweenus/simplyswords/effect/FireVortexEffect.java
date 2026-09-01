@@ -11,6 +11,7 @@ import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.effect.instance.SimplySwordsStatusEffectInstance;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
+import net.sweenus.simplyswords.world.TempestAbilityManager;
 
 public class FireVortexEffect extends OrbitingEffect {
     public LivingEntity sourceEntity;
@@ -26,6 +27,13 @@ public class FireVortexEffect extends OrbitingEffect {
     public boolean applyUpdateEffect(LivingEntity livingEntity, int amplifier) {
         if (!livingEntity.getWorld().isClient()) {
             ServerWorld serverWorld = (ServerWorld) livingEntity.getWorld();
+			if (TempestAbilityManager.hasManagedMark(livingEntity, TempestAbilityManager.Element.FIRE)) {
+                if (livingEntity.age % 40 == 0) {
+                    HelperMethods.spawnOrbitParticles(serverWorld, livingEntity.getPos(), ParticleTypes.LAVA, 1, 4);
+                }
+                super.applyUpdateEffect(livingEntity, amplifier);
+                return true;
+            }
 			if (livingEntity.getStatusEffect(EffectRegistry.getReference(EffectRegistry.FIRE_VORTEX)) instanceof SimplySwordsStatusEffectInstance statusEffect) {
                 sourceEntity = statusEffect.getSourceEntity();
                 scaledDamage = statusEffect.getScaledDamage();

@@ -1,6 +1,7 @@
 package net.sweenus.simplyswords;
 
 import dev.architectury.event.events.common.LifecycleEvent;
+import dev.architectury.event.events.common.PlayerEvent;
 import dev.architectury.platform.Platform;
 import dev.architectury.registry.CreativeTabRegistry;
 import dev.architectury.registry.client.level.entity.EntityModelLayerRegistry;
@@ -85,9 +86,21 @@ import net.sweenus.simplyswords.world.DreadwhisperAbilityManager;
 import net.sweenus.simplyswords.world.DreadwhisperTrailManager;
 import net.sweenus.simplyswords.world.EmberbladeAbilityManager;
 import net.sweenus.simplyswords.world.EmberlashAbilityManager;
+import net.sweenus.simplyswords.world.Phase5FlamewindManager;
+import net.sweenus.simplyswords.world.MoltenEdgeAbilityManager;
+import net.sweenus.simplyswords.world.StormbringerAbilityManager;
+import net.sweenus.simplyswords.world.MjolnirCombatManager;
+import net.sweenus.simplyswords.world.MjolnirStormManager;
+import net.sweenus.simplyswords.world.ThunderbrandAbilityManager;
+import net.sweenus.simplyswords.world.TempestAbilityManager;
+import net.sweenus.simplyswords.world.FrostfallAbilityManager;
+import net.sweenus.simplyswords.world.IcewhisperCometManager;
+import net.sweenus.simplyswords.world.FrostfallIceSpikeFieldManager;
+import net.sweenus.simplyswords.world.StormbringerParryManager;
 import net.sweenus.simplyswords.world.EmberlashSmoulderVisualManager;
 import net.sweenus.simplyswords.world.HearthflameAbilityManager;
 import net.sweenus.simplyswords.world.SoulstalkerAbilityManager;
+import net.sweenus.simplyswords.world.SoulPyreAbilityManager;
 import net.sweenus.simplyswords.world.WhisperwindRhythmManager;
 import net.sweenus.simplyswords.world.WhisperwindVisualManager;
 import net.sweenus.simplyswords.world.ShadowstingShadowDanceManager;
@@ -138,6 +151,7 @@ public class SimplySwords {
         BuiltinUniqueAbilities.register();
         ParticlesRegistry.PARTICLES.register();
         TransformationRegistry.register();
+        TempestAbilityManager.init();
         LifecycleEvent.SETUP.register(AwakeningFormRegistry::registerBuiltins);
         LifecycleEvent.SETUP.register(() -> {
             if (Platform.isModLoaded("bettercombat")) {
@@ -145,6 +159,7 @@ public class SimplySwords {
             }
         });
         LifecycleEvent.SERVER_LEVEL_UNLOAD.register(world -> {
+            SoulPyreAbilityManager.clear(world);
             GloampiercerAbilityManager.clear(world);
             GloamStainManager.clear(world);
             GloamMechanicsManager.clear(world);
@@ -165,9 +180,21 @@ public class SimplySwords {
             HearthflameAbilityManager.clear(world);
             EmberbladeAbilityManager.clearAll(world);
             EmberlashAbilityManager.clear(world);
+            Phase5FlamewindManager.clear(world);
+            MoltenEdgeAbilityManager.clear(world);
             EmberlashSmoulderVisualManager.clear(world);
+            StormbringerAbilityManager.clear(world);
+            StormbringerParryManager.clear(world);
+            MjolnirStormManager.clear(world);
+            MjolnirCombatManager.clear(world);
+            ThunderbrandAbilityManager.clear(world);
+            TempestAbilityManager.clear(world);
+            FrostfallAbilityManager.clear(world);
+            FrostfallIceSpikeFieldManager.clear(world);
+            IcewhisperCometManager.clear(world);
         });
         LifecycleEvent.SERVER_STOPPED.register(server -> {
+            SoulPyreAbilityManager.clearAll();
             GloampiercerAbilityManager.clearAll();
             GloamStainManager.clearAll();
             GloamMechanicsManager.clearAll();
@@ -188,7 +215,29 @@ public class SimplySwords {
             HearthflameAbilityManager.clearAll();
             server.getWorlds().forEach(EmberbladeAbilityManager::clearAll);
             EmberlashAbilityManager.clearAll();
+            Phase5FlamewindManager.clearAll();
+            MoltenEdgeAbilityManager.clearAll();
             EmberlashSmoulderVisualManager.clearAll();
+            StormbringerAbilityManager.clearAll();
+            StormbringerParryManager.clearAll();
+            MjolnirStormManager.clearAll();
+            MjolnirCombatManager.clearAll();
+            ThunderbrandAbilityManager.clearAll();
+            TempestAbilityManager.clearAll();
+            FrostfallAbilityManager.clearAll();
+            FrostfallIceSpikeFieldManager.clearAll();
+            IcewhisperCometManager.clearAll();
+        });
+        PlayerEvent.PLAYER_QUIT.register(player -> {
+            SoulPyreAbilityManager.clear(player.getServerWorld(), player);
+            StormbringerAbilityManager.clearActor(player);
+            StormbringerParryManager.clearActor(player);
+            MjolnirStormManager.clearActor(player);
+            MjolnirCombatManager.clearActor(player);
+            ThunderbrandAbilityManager.clearActor(player);
+            TempestAbilityManager.clearActor(player);
+            FrostfallAbilityManager.clearActor(player);
+            IcewhisperCometManager.clearActor(player);
         });
         SimplySwordsNetwork.init();
         SimplySwordsAPI.registerObserverSyncedStatusEffect(EffectRegistry.SHADOW_DANCE_ID);

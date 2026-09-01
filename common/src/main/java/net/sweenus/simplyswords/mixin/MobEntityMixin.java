@@ -18,7 +18,6 @@ import net.sweenus.simplyswords.entity.SimplySwordsWolfMinionEntity;
 import net.sweenus.simplyswords.item.RunicSwordItem;
 import net.sweenus.simplyswords.item.SimplySwordsSwordItem;
 import net.sweenus.simplyswords.item.UniqueWeaponItem;
-import net.sweenus.simplyswords.item.custom.IcewhisperSwordItem;
 import net.sweenus.simplyswords.item.custom.LichbladeSwordItem;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.ComponentTypeRegistry;
@@ -82,9 +81,6 @@ public abstract class MobEntityMixin {
         ItemStack stack = mob.getMainHandStack();
         if (!stack.isEmpty()) {
             stack.inventoryTick(world, mob, 0, true);
-        }
-        if (AwakeningApi.isAbilityUnlocked(stack) && stack.isOf(ItemsRegistry.ICEWHISPER.get())) {
-            IcewhisperSwordItem.tickPassiveAura(world, mob, stack);
         }
         if (AwakeningApi.isAbilityUnlocked(stack) && stack.isOf(ItemsRegistry.SOULKEEPER.get())) {
             SoulkeeperLanternManager.tickFromItem(mob, stack);

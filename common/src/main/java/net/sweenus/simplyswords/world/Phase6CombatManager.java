@@ -29,12 +29,17 @@ public final class Phase6CombatManager {
 
     public static UniqueAbilityExecution beginPassive(UniqueAbilityDefinition definition, ServerWorld world,
                                                       ItemStack stack, LivingEntity actor, LivingEntity target) {
-        UniqueAbilityExecution execution = UniqueAbilityApi.begin(definition,
-                UniqueAbilityContext.passive(world, stack, actor, target, null),
-                tuning -> tuning.set(Phase6UniqueAbilities.TUNING, Phase6AbilityTuning.EMPTY));
+        UniqueAbilityExecution execution = preparePassive(definition, world, stack, actor, target);
         UniqueAbilityApi.takeStartedExecution();
         UniqueAbilityApi.start(execution);
         return execution;
+    }
+
+    public static UniqueAbilityExecution preparePassive(UniqueAbilityDefinition definition, ServerWorld world,
+                                                         ItemStack stack, LivingEntity actor, LivingEntity target) {
+        return UniqueAbilityApi.begin(definition,
+                UniqueAbilityContext.passive(world, stack, actor, target, null),
+                tuning -> tuning.set(Phase6UniqueAbilities.TUNING, Phase6AbilityTuning.EMPTY));
     }
 
     public static Phase6AbilityTuning startTempestVortex(WeaponAbilityContext context) {

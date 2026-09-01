@@ -1,49 +1,39 @@
 package net.sweenus.simplyswords.item.custom;
 
-import net.sweenus.simplyswords.api.SimplySwordsAPI;
-
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.effect.StatusEffect;
-import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.item.tooltip.TooltipType;
-import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleTypes;
-import net.minecraft.predicate.entity.EntityPredicates;
-import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundEvent;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
-import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
-import net.sweenus.simplyswords.api.WeaponAbilityActivationSource;
 import net.sweenus.simplyswords.api.ability.Phase6AbilityTuning;
 import net.sweenus.simplyswords.api.ability.Phase6UniqueAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
-import net.sweenus.simplyswords.effect.instance.SimplySwordsStatusEffectInstance;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
-import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
+import net.sweenus.simplyswords.util.WeaponManaCost;
 import net.sweenus.simplyswords.world.Phase6CombatManager;
+import net.sweenus.simplyswords.world.PlayerWeaponAbilityManager;
+import net.sweenus.simplyswords.world.TempestAbilityManager;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class TempestSwordItem extends UniqueSwordItem implements UniqueWeaponActiveAbility {
@@ -62,61 +52,20 @@ public class TempestSwordItem extends UniqueSwordItem implements UniqueWeaponAct
             UniqueAbilityExecution execution = Phase6CombatManager.beginPassive(
                     Phase6UniqueAbilities.TEMPEST_MARK, serverWorld, stack, attacker, target);
             Phase6AbilityTuning tuning = Phase6UniqueAbilities.tuning(execution);
-            int vortexMaxStacks = tuning.integer(s("STACK_CAP"), Config.uniqueEffects.tempest.maxStacks);
             HelperMethods.playHitSounds(attacker, target);
-            SoundEvent soundSelect;
-            ParticleEffect particleSelect;
-            RegistryEntry<StatusEffect> statusSelect;
-
-            List<SoundEvent> sounds = new ArrayList<>();
-            sounds.add(SoundRegistry.SPELL_FIRE.get());
-            sounds.add(SoundRegistry.ELEMENTAL_SWORD_WATER_ATTACK_03.get());
-            sounds.add(SoundRegistry.ELEMENTAL_BOW_FIRE_SHOOT_IMPACT_03.get());
-            sounds.add(SoundRegistry.ELEMENTAL_BOW_WATER_SHOOT_IMPACT_02.get());
-
-            List<ParticleEffect> particles = new ArrayList<>();
-            particles.add(ParticleTypes.SMOKE);
-            particles.add(ParticleTypes.CLOUD);
-            particles.add(ParticleTypes.SMOKE);
-            particles.add(ParticleTypes.CLOUD);
-
-            List<RegistryEntry<StatusEffect>> status = new ArrayList<>();
-            status.add(EffectRegistry.getReference(EffectRegistry.FIRE_VORTEX));
-            status.add(EffectRegistry.getReference(EffectRegistry.FROST_VORTEX));
-            status.add(EffectRegistry.getReference(EffectRegistry.FIRE_VORTEX));
-            status.add(EffectRegistry.getReference(EffectRegistry.FROST_VORTEX));
-
-            int random      = attacker.getRandom().nextInt(3);
-            soundSelect     = sounds.get(random);
-            particleSelect  = particles.get(random);
-            statusSelect    = status.get(random);
-
-
-            int particleCount = 10; // Number of particles along the line
-            HelperMethods.spawnWaistHeightParticles(serverWorld, particleSelect, attacker, target, particleCount);
-            serverWorld.playSound(null, attacker.getBlockPos(), soundSelect,
+            float fireDamage = Math.max(1, HelperMethods.abilityScaledDamage("fire", attacker, stack,
+                    Config.uniqueEffects.tempest.damageScaling, Config.uniqueEffects.tempest.spellScaling));
+            float frostDamage = Math.max(1, HelperMethods.abilityScaledDamage("frost", attacker, stack,
+                    Config.uniqueEffects.tempest.damageScaling, Config.uniqueEffects.tempest.spellScaling));
+            TempestAbilityManager.MarkApplication application = TempestAbilityManager.applyMark(
+                    serverWorld, attacker, target, tuning, fireDamage, frostDamage, 500,
+                    Config.uniqueEffects.tempest.maxStacks);
+            boolean fire = application.primary() == TempestAbilityManager.Element.FIRE;
+            HelperMethods.spawnWaistHeightParticles(serverWorld,
+                    fire ? ParticleTypes.SMOKE : ParticleTypes.CLOUD, attacker, target, 10);
+            serverWorld.playSound(null, attacker.getBlockPos(),
+                    fire ? SoundRegistry.SPELL_FIRE.get() : SoundRegistry.ELEMENTAL_SWORD_WATER_ATTACK_03.get(),
                     attacker.getSoundCategory(), 0.2f, 1.3f);
-
-            SimplySwordsStatusEffectInstance effect = HelperMethods.incrementSimplySwordsStatusEffect(
-                    target, statusSelect, tuning.integer(s("DURATION_TICKS"), 500), 1, vortexMaxStacks);
-
-            effect.setSourceEntity(attacker);
-            float scaledDamage;
-            if (statusSelect == EffectRegistry.getReference(EffectRegistry.FIRE_VORTEX)) {
-                scaledDamage = HelperMethods.abilityScaledDamage("fire", attacker, stack,
-                        Config.uniqueEffects.tempest.damageScaling, Config.uniqueEffects.tempest.spellScaling);
-            } else if (statusSelect == EffectRegistry.getReference(EffectRegistry.FROST_VORTEX)) {
-                scaledDamage = HelperMethods.abilityScaledDamage("frost", attacker, stack,
-                        Config.uniqueEffects.tempest.damageScaling, Config.uniqueEffects.tempest.spellScaling);
-            } else {
-                scaledDamage = Math.max(
-                        HelperMethods.abilityScaledDamage("fire", attacker, stack,
-                                Config.uniqueEffects.tempest.damageScaling, Config.uniqueEffects.tempest.spellScaling),
-                        HelperMethods.abilityScaledDamage("frost", attacker, stack,
-                                Config.uniqueEffects.tempest.damageScaling, Config.uniqueEffects.tempest.spellScaling));
-            }
-            effect.setScaledDamage(Math.max(1.0F, scaledDamage * (float) tuning.get(s("DAMAGE_MULTIPLIER"), 1)));
-            target.addStatusEffect(effect);
             UniqueAbilityApi.finish(execution, Phase6UniqueAbilities.FINISH, 1);
 
         }
@@ -130,22 +79,12 @@ public class TempestSwordItem extends UniqueSwordItem implements UniqueWeaponAct
 
     @Override
     public TypedActionResult<ItemStack> startPlayerAbility(World world, PlayerEntity user, Hand hand) {
-        if (!user.getWorld().isClient() && world instanceof  ServerWorld serverWorld) {
-            ItemStack stack = user.getStackInHand(hand);
-            if (hasTempestMarks(serverWorld, user)) {
-                WeaponAbilityContext context = WeaponAbilityContext.of(serverWorld, stack, user,
-                        user instanceof net.minecraft.server.network.ServerPlayerEntity player ? player : null,
-                        null, hand, WeaponAbilityActivationSource.PLAYER);
-                Phase6AbilityTuning tuning = Phase6CombatManager.startTempestVortex(context);
-                UniqueAbilityApi.takeStartedExecution();
-                if (consumeTempestMarks(serverWorld, user, tuning) > 0) {
-                    SimplySwordsAPI.setWeaponCooldown(user, stack,
-                            tuning.integer(s("COOLDOWN_TICKS"), 200));
-                }
-            }
-        }
-
-        return super.use(world, user, hand);
+        ItemStack stack = user.getStackInHand(hand);
+        boolean reboundInput = PlayerWeaponAbilityManager.shouldSkipDefaultAbilityUse(world, user, hand, stack);
+        if (reboundInput && !WeaponManaCost.canAfford(user, stack)) return TypedActionResult.fail(stack);
+        TypedActionResult<ItemStack> result = UniqueWeaponActiveAbility.super.startPlayerAbility(world, user, hand);
+        if (reboundInput && result.getResult().isAccepted()) WeaponManaCost.spend(user, stack);
+        return result;
     }
 
     @Override
@@ -157,68 +96,21 @@ public class TempestSwordItem extends UniqueSwordItem implements UniqueWeaponAct
                 && context.actor() != null
                 && context.actor().isAlive()
                 && context.stack().getDamage() < context.stack().getMaxDamage() - 1
-                && hasTempestMarks(context.world(), context.actor());
+                && TempestAbilityManager.hasConsumableMarks(context.world(), context.actor(), 15);
     }
 
     @Override
     public boolean activate(WeaponAbilityContext context) {
-        if (!hasTempestMarks(context.world(), context.actor())) return false;
-        Phase6AbilityTuning tuning = Phase6CombatManager.startTempestVortex(context);
-        return consumeTempestMarks(context.world(), context.actor(), tuning) > 0;
+        if (!TempestAbilityManager.hasConsumableMarks(context.world(), context.actor(), 15)) return false;
+        UniqueAbilityExecution execution = Phase6CombatManager.beginActive(
+                Phase6UniqueAbilities.TEMPEST_VORTEX, context, 200);
+        return TempestAbilityManager.startVortex(context, Phase6UniqueAbilities.tuning(execution), execution,
+                Config.uniqueEffects.tempest.duration, Config.uniqueEffects.tempest.maxSize);
     }
 
     @Override
     public int getActivationCooldownTicks(ItemStack stack, WeaponAbilityContext context) {
         return 200;
-    }
-
-    private boolean hasTempestMarks(ServerWorld world, LivingEntity user) {
-        Box box = HelperMethods.createBox(user, 15);
-        return world.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY).stream()
-                .anyMatch(entity -> entity instanceof LivingEntity le
-                        && HelperMethods.checkAbilityTarget(le, user)
-                        && le.hasStatusEffect(EffectRegistry.getReference(EffectRegistry.FIRE_VORTEX))
-                        && le.hasStatusEffect(EffectRegistry.getReference(EffectRegistry.FROST_VORTEX)));
-    }
-
-    private int consumeTempestMarks(ServerWorld serverWorld, LivingEntity user, Phase6AbilityTuning tuning) {
-        int vortexMaxSize = tuning.integer(s("STACK_CAP"), Config.uniqueEffects.tempest.maxSize);
-        int vortexDuration = tuning.integer(s("DURATION_TICKS"), Config.uniqueEffects.tempest.duration);
-        Box box = HelperMethods.createBox(user, 15);
-        boolean soundHasPlayed = false;
-        int consumed = 0;
-        for (Entity entity : serverWorld.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY)) {
-            if ((entity instanceof LivingEntity le) && HelperMethods.checkAbilityTarget(le, user)) {
-
-                if (le.hasStatusEffect(EffectRegistry.getReference(EffectRegistry.FIRE_VORTEX)) && le.hasStatusEffect(EffectRegistry.getReference(EffectRegistry.FROST_VORTEX))) {
-                    StatusEffectInstance frostVortex = le.getStatusEffect(EffectRegistry.getReference(EffectRegistry.FROST_VORTEX));
-                    StatusEffectInstance fireVortex  = le.getStatusEffect(EffectRegistry.getReference(EffectRegistry.FIRE_VORTEX));
-                    int totalAmplifier = 0;
-                    if (fireVortex != null && frostVortex != null)
-                        totalAmplifier = fireVortex.getAmplifier() + frostVortex.getAmplifier();
-
-                    int particleCount = 10;
-                    HelperMethods.spawnWaistHeightParticles(serverWorld, ParticleTypes.CLOUD, le, user, particleCount);
-                    if (!soundHasPlayed) {
-                        serverWorld.playSound(null, le.getBlockPos(), SoundRegistry.MAGIC_SHAMANIC_NORDIC_22.get(),
-                                le.getSoundCategory(), 0.4f, 1.3f);
-                        soundHasPlayed = true;
-                    }
-
-                    SimplySwordsStatusEffectInstance status = HelperMethods.incrementSimplySwordsStatusEffect(user, EffectRegistry.getReference(EffectRegistry.ELEMENTAL_VORTEX), vortexDuration, totalAmplifier, vortexMaxSize);
-                    status.setAdditionalData(Math.max(1, totalAmplifier));
-                    status.setSourceEntity(user);
-                    if (tuning.get(s("ABSORPTION"), 0) > 0 && totalAmplifier >= tuning.integer(s("COUNT"), 5)) {
-                        user.setAbsorptionAmount(Math.max(user.getAbsorptionAmount(),
-                                (float) tuning.get(s("ABSORPTION"), 0)));
-                    }
-                    le.removeStatusEffect(EffectRegistry.getReference(EffectRegistry.FIRE_VORTEX));
-                    le.removeStatusEffect(EffectRegistry.getReference(EffectRegistry.FROST_VORTEX));
-                    consumed++;
-                }
-            }
-        }
-        return consumed;
     }
 
     @Override

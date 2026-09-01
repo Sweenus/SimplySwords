@@ -8,6 +8,9 @@ import java.util.List;
 public final class Phase6UniqueAbilities {
     public static final Identifier HIT = id("phase6/hit");
     public static final Identifier PULSE = id("phase6/pulse");
+    public static final Identifier RETURN_HIT = id("phase6/return_hit");
+    public static final Identifier CATCH = id("phase6/catch");
+    public static final Identifier RECALL = id("phase6/recall");
     public static final Identifier FINISH = id("phase6/finish");
     public static final UniqueAbilityKey<Phase6AbilityTuning> TUNING = UniqueAbilityKey.value(
             id("phase6/tuning"), Phase6AbilityTuning.class, Phase6AbilityTuning.EMPTY);
@@ -17,6 +20,7 @@ public final class Phase6UniqueAbilities {
     public static final UniqueAbilityDefinition STORMBRINGER_GUARD = active("stormbringer/shock_deflect");
     public static final UniqueAbilityDefinition STORMBRINGER_CHAIN = passive("stormbringer/chain_tempest");
     public static final UniqueAbilityDefinition MJOLNIR_STORM = active("mjolnir/storm");
+    public static final UniqueAbilityDefinition THUNDERBRAND_REFRESH = passive("thunderbrand/refresh");
     public static final UniqueAbilityDefinition THUNDERBRAND_BLITZ = active("thunderbrand/thunder_blitz");
     public static final UniqueAbilityDefinition TEMPEST_MARK = passive("tempest/elemental_cadence");
     public static final UniqueAbilityDefinition TEMPEST_VORTEX = active("tempest/elemental_vortex");
@@ -36,7 +40,8 @@ public final class Phase6UniqueAbilities {
     }
 
     public static List<UniqueAbilityDefinition> definitions() {
-        return List.of(STORMBRINGER_GUARD, STORMBRINGER_CHAIN, MJOLNIR_STORM, THUNDERBRAND_BLITZ,
+        return List.of(STORMBRINGER_GUARD, STORMBRINGER_CHAIN, MJOLNIR_STORM, THUNDERBRAND_REFRESH,
+                THUNDERBRAND_BLITZ,
                 TEMPEST_MARK, TEMPEST_VORTEX, FROSTFALL_THROW, FROSTFALL_FIELD, ICEWHISPER_AURA,
                 ICEWHISPER_COMETS, LIVYATAN_THROW, LIVYATAN_RETURN, LIVYATAN_WAVE);
     }
@@ -54,7 +59,8 @@ public final class Phase6UniqueAbilities {
     }
 
     private static UniqueAbilityDefinition.Builder base(String path, UniqueAbilityKind kind) {
-        return UniqueAbilityDefinition.builder(id(path), kind).key(TUNING).event(HIT).event(PULSE).event(FINISH);
+        return UniqueAbilityDefinition.builder(id(path), kind).key(TUNING).event(HIT).event(PULSE)
+                .event(RETURN_HIT).event(CATCH).event(RECALL).event(FINISH);
     }
 
     private static Identifier id(String path) {

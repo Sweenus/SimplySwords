@@ -98,10 +98,15 @@ public final class ChainLightningVisualManager {
 
     public static List<LivingEntity> chainTargets(ServerWorld world, LivingEntity player, LivingEntity firstTarget,
                                                   int chainCount, double range) {
+        return chainTargets(world, player, firstTarget, chainCount, range, Integer.MAX_VALUE);
+    }
+
+    public static List<LivingEntity> chainTargets(ServerWorld world, LivingEntity player, LivingEntity firstTarget,
+                                                  int chainCount, double range, int searchCap) {
         if (world == null || player == null || firstTarget == null || !firstTarget.isAlive() || chainCount <= 0) {
             return List.of();
         }
-        return buildChain(world, player, firstTarget, chainCount, Math.max(0.5, range));
+        return buildChain(world, player, firstTarget, chainCount, Math.max(0.5, range), Math.max(1, searchCap));
     }
 
     public static List<LivingEntity> chainTargetsFromPosition(ServerWorld world, LivingEntity player, Vec3d origin,
@@ -174,30 +179,45 @@ public final class ChainLightningVisualManager {
     }
 
     private static List<LivingEntity> buildChain(ServerWorld world, LivingEntity player, LivingEntity firstTarget, int chainCount, double range) {
+        return buildChain(world, player, firstTarget, chainCount, range, Integer.MAX_VALUE);
+    }
+
+    private static List<LivingEntity> buildChain(ServerWorld world, LivingEntity player, LivingEntity firstTarget,
+                                                  int chainCount, double range, int searchCap) {
         List<LivingEntity> chain = new ArrayList<>();
         Set<UUID> visited = new HashSet<>();
         LivingEntity current = firstTarget;
         for (int i = 0; i < chainCount && current != null; i++) {
             chain.add(current);
             visited.add(current.getUuid());
-            current = findNextTarget(world, player, current, visited, range);
+            current = findNextTarget(world, player, current, visited, range, searchCap);
         }
         return chain;
     }
 
     private static LivingEntity findNextTarget(ServerWorld world, LivingEntity player, LivingEntity current, Set<UUID> visited, double range) {
+        return findNextTarget(world, player, current, visited, range, Integer.MAX_VALUE);
+    }
+
+    private static LivingEntity findNextTarget(ServerWorld world, LivingEntity player, LivingEntity current,
+                                                Set<UUID> visited, double range, int searchCap) {
         Box box = current.getBoundingBox().expand(range, range * 0.5, range);
-        return findNextTarget(world, player, current.getPos(), box, visited);
+        return findNextTarget(world, player, current.getPos(), box, visited, searchCap);
     }
 
     private static LivingEntity findNextTarget(ServerWorld world, LivingEntity player, Vec3d origin,
                                                Set<UUID> visited, double range) {
         return findNextTarget(world, player, origin,
-                new Box(origin, origin).expand(range, range * 0.5, range), visited);
+                new Box(origin, origin).expand(range, range * 0.5, range), visited, Integer.MAX_VALUE);
     }
 
     private static LivingEntity findNextTarget(ServerWorld world, LivingEntity player, Vec3d origin,
                                                Box box, Set<UUID> visited) {
+        return findNextTarget(world, player, origin, box, visited, Integer.MAX_VALUE);
+    }
+
+    private static LivingEntity findNextTarget(ServerWorld world, LivingEntity player, Vec3d origin,
+                                                Box box, Set<UUID> visited, int searchCap) {
         return world.getEntitiesByClass(LivingEntity.class, box, target ->
                         target != player
                                 && target.isAlive()
@@ -205,8 +225,41 @@ public final class ChainLightningVisualManager {
                                 && EntityPredicates.VALID_LIVING_ENTITY.test(target)
                                 && HelperMethods.checkFriendlyFire(target, player))
                 .stream()
-                .min(Comparator.comparingDouble(target -> target.squaredDistanceTo(origin)))
+                .sorted(Comparator.comparing(LivingEntity::getUuid))
+                .limit(Math.max(1, searchCap))
+                .min(Comparator.comparingDouble((LivingEntity target) -> target.squaredDistanceTo(origin))
+                        .thenComparing(LivingEntity::getUuid))
                 .orElse(null);
+    }
+
+    public static void spawnStormbringerChainEffects(ServerWorld world, LivingEntity source,
+                                                      List<LivingEntity> targets) {
+        if (world == null || source == null || targets == null || targets.isEmpty()) return;
+        List<Vec3d> points = new ArrayList<>();
+        points.add(source.getPos().add(0.0, Math.max(0.55, source.getHeight() * 0.6), 0.0));
+        int hitIndex = 0;
+        for (LivingEntity target : targets) {
+            if (target == null) continue;
+            points.add(target.getPos().add(0.0, Math.max(0.45, target.getHeight() * 0.58), 0.0));
+            spawnImpactEffects(world, target);
+            playTargetCrackle(world, target, ++hitIndex);
+        }
+        spawnChain(world, points, STORMBRINGER_SETTINGS);
+        playChainStartSounds(world, source, targets.getFirst());
+    }
+
+    public static void spawnStormbringerBurstEffects(ServerWorld world, LivingEntity origin,
+                                                      List<LivingEntity> targets) {
+        if (world == null || origin == null || targets == null || targets.isEmpty()) return;
+        Vec3d start = origin.getPos().add(0.0, Math.max(0.45, origin.getHeight() * 0.58), 0.0);
+        int hitIndex = 0;
+        for (LivingEntity target : targets) {
+            if (target == null) continue;
+            Vec3d end = target.getPos().add(0.0, Math.max(0.45, target.getHeight() * 0.58), 0.0);
+            spawnBolt(world, start, end, STORMBRINGER_SETTINGS);
+            spawnImpactEffects(world, target);
+            playTargetCrackle(world, target, ++hitIndex);
+        }
     }
 
     private static void spawnImpactEffects(ServerWorld world, LivingEntity target) {

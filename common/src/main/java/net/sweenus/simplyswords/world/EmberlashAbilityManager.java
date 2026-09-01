@@ -90,7 +90,8 @@ public final class EmberlashAbilityManager {
             currentStacks = 0;
         } else if (currentStacks > 0) {
             deal(world, attacker, stack, target, sustained);
-            if (withinEndlessCadence) deal(world, attacker, stack, target, sustained * .5F);
+            if (withinEndlessCadence) deal(world, attacker, stack, target, sustained
+                    * (float) tuning.get(s("EMBERLASH_ECHO_DAMAGE_MULTIPLIER"), .5));
         }
 
         int added = empoweredStacks(owner, now);
@@ -277,7 +278,8 @@ public final class EmberlashAbilityManager {
         Phase5AbilityTuning tuning = Phase5UniqueAbilities.tuning(execution);
         WorldState worldState = state(world);
         if (tuning.flag(FINAL_COAL) && isAtMarkedCap(worldState, target, attacker.getUuid())) {
-            SimplySwordsAPI.reduceWeaponCooldown(attacker, stack, Config.uniqueEffects.emberlash.cooldown,
+            SimplySwordsAPI.reduceWeaponCooldown(attacker, stack,
+                    tuning.integer(s("COOLDOWN_TICKS"), Config.uniqueEffects.emberlash.cooldown),
                     tuning.integer(s("EMBERLASH_KILL_REFUND_TICKS"), 20));
             UniqueAbilityApi.emit(execution, UniqueAbilityPhase.HIT, Phase5UniqueAbilities.KILL, target, 1, 0);
         }
@@ -362,9 +364,10 @@ public final class EmberlashAbilityManager {
         if (tuning.flag(ASH_BURST)) {
             int affected = 0;
             int cap = tuning.integer(s("EMBERLASH_ASH_TARGET_CAP"), 8);
-            int smoulderCap = tuning.integer(s("EMBERLASH_SMOULDER_STACK_CAP"),
+            int smoulderCap = tunedInteger(tuning, s("EMBERLASH_SMOULDER_STACK_CAP"), s("STACK_CAP"),
                     Config.uniqueEffects.emberlash.maxStacks);
-            int duration = tuning.integer(s("EMBERLASH_SMOULDER_DURATION_TICKS"), 100);
+            int duration = tunedInteger(tuning, s("EMBERLASH_SMOULDER_DURATION_TICKS"),
+                    s("DURATION_TICKS"), 100);
             for (LivingEntity enemy : smoulderingTargets(world, attacker, target.getPos(),
                     tuning.get(s("EMBERLASH_ASH_RADIUS"), 2.5), cap)) {
                 int stacks = stackCount(enemy);
@@ -499,7 +502,13 @@ public final class EmberlashAbilityManager {
 
     private static boolean isSweepAttack(LivingEntity attacker) {
         return attacker instanceof PlayerEntity player && player.isOnGround() && !player.isSprinting()
-                && player.getAttackCooldownProgress(.5F) > .9F;
+                && player.getAttackCooldownProgress(.5F) > .9F
+                && sweepMovement(player.horizontalSpeed, player.prevHorizontalSpeed,
+                        player.getMovementSpeed());
+    }
+
+    static boolean sweepMovement(float horizontalSpeed, float previousHorizontalSpeed, float movementSpeed) {
+        return horizontalSpeed - previousHorizontalSpeed < movementSpeed;
     }
 
     private static boolean isMelee(DamageSource source) {

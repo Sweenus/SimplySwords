@@ -277,21 +277,32 @@ final class UniqueAbilityApiContractTest {
     @Test
     void phase6DefinitionsAreAdditiveTypedAndBounded() {
         List<UniqueAbilityDefinition> definitions = Phase6UniqueAbilities.definitions();
-        assertEquals(13, definitions.stream().map(UniqueAbilityDefinition::id).distinct().count());
+        assertEquals(14, definitions.stream().map(UniqueAbilityDefinition::id).distinct().count());
         for (UniqueAbilityDefinition definition : definitions) {
             assertTrue(definition.supports(Phase6UniqueAbilities.TUNING));
             assertTrue(definition.supportsEvent(Phase6UniqueAbilities.HIT));
             assertTrue(definition.supportsEvent(Phase6UniqueAbilities.PULSE));
+            assertTrue(definition.supportsEvent(Phase6UniqueAbilities.RETURN_HIT));
+            assertTrue(definition.supportsEvent(Phase6UniqueAbilities.CATCH));
+            assertTrue(definition.supportsEvent(Phase6UniqueAbilities.RECALL));
             assertTrue(definition.supportsEvent(Phase6UniqueAbilities.FINISH));
         }
         Phase6AbilityTuning tuning = Phase6AbilityTuning.EMPTY
                 .with(Phase6AbilityTuning.Setting.CHANCE, 500)
                 .with(Phase6AbilityTuning.Setting.TARGET_CAP, 500)
                 .with(Phase6AbilityTuning.Setting.FREEZE_CAP_TICKS, 100)
+                .with(Phase6AbilityTuning.Setting.FROSTFALL_DEADFALL_ANGLE_DEGREES, 120)
+                .with(Phase6AbilityTuning.Setting.FROSTFALL_PULSE_TARGET_CAP, 500)
+                .with(Phase6AbilityTuning.Setting.ICEWHISPER_LAST_SNOW_HEALTH_PERCENT, 500)
+                .with(Phase6AbilityTuning.Setting.ICEWHISPER_AURA_TARGET_CAP, 500)
                 .with(Phase6AbilityTuning.Setting.SPEED, Double.NaN);
         assertEquals(100, tuning.integer(Phase6AbilityTuning.Setting.CHANCE, 0));
         assertEquals(64, tuning.integer(Phase6AbilityTuning.Setting.TARGET_CAP, 0));
         assertEquals(100, tuning.integer(Phase6AbilityTuning.Setting.FREEZE_CAP_TICKS, 0));
+        assertEquals(90, tuning.integer(Phase6AbilityTuning.Setting.FROSTFALL_DEADFALL_ANGLE_DEGREES, 0));
+        assertEquals(64, tuning.integer(Phase6AbilityTuning.Setting.FROSTFALL_PULSE_TARGET_CAP, 0));
+        assertEquals(100, tuning.integer(Phase6AbilityTuning.Setting.ICEWHISPER_LAST_SNOW_HEALTH_PERCENT, 0));
+        assertEquals(64, tuning.integer(Phase6AbilityTuning.Setting.ICEWHISPER_AURA_TARGET_CAP, 0));
         assertEquals(0.0, tuning.get(Phase6AbilityTuning.Setting.SPEED, 1));
     }
 
@@ -398,7 +409,7 @@ final class UniqueAbilityApiContractTest {
         definitions.addAll(Phase9UniqueAbilities.definitions());
         definitions.addAll(Phase10UniqueAbilities.definitions());
 
-        assertEquals(116, definitions.size());
+        assertEquals(117, definitions.size());
         assertEquals(definitions.size(), definitions.stream().map(UniqueAbilityDefinition::id)
                 .collect(java.util.stream.Collectors.toCollection(HashSet::new)).size());
     }

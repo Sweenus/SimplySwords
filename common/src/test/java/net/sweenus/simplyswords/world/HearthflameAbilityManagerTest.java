@@ -8,9 +8,35 @@ final class HearthflameAbilityManagerTest {
 
     @Test
     void sixfoldSentenceRequiresAllSixInitialBindings() {
-        assertEquals(10, HearthflameAbilityManager.gatedFinalDamage(12.5F, 5, true), 1.0E-6);
-        assertEquals(12.5F, HearthflameAbilityManager.gatedFinalDamage(12.5F, 6, true), 1.0E-6);
-        assertEquals(12.5F, HearthflameAbilityManager.gatedFinalDamage(12.5F, 1, false), 1.0E-6);
+        assertEquals(10, HearthflameAbilityManager.gatedFinalDamage(10, 5, 6, 1.25), 1.0E-6);
+        assertEquals(12.5F, HearthflameAbilityManager.gatedFinalDamage(10, 6, 6, 1.25), 1.0E-6);
+        assertEquals(12.5F, HearthflameAbilityManager.gatedFinalDamage(10, 8, 6, 1.25), 1.0E-6);
+        assertEquals(10, HearthflameAbilityManager.gatedFinalDamage(10, 8, 0, 1.25), 1.0E-6);
+    }
+
+    @Test
+    void sixfoldSentenceNeedsNoConstantMirroredInTheMasteryDefinition() {
+        assertEquals(15, HearthflameAbilityManager.gatedFinalDamage(10, 6, 6, 1.5), 1.0E-6);
+        assertEquals(10, HearthflameAbilityManager.gatedFinalDamage(10, 5, 6, 1.5), 1.0E-6);
+        assertEquals(10, HearthflameAbilityManager.gatedFinalDamage(10, 1, 1, 1.0), 1.0E-6);
+    }
+
+    @Test
+    void tunedFireDurationsExtendTheWeaponIgniteInsteadOfBeingSwallowed() {
+        assertEquals(4, HearthflameAbilityManager.igniteSeconds(4, 0));
+        assertEquals(4, HearthflameAbilityManager.igniteSeconds(4, 40));
+        assertEquals(6, HearthflameAbilityManager.igniteSeconds(4, 120));
+        assertEquals(4, HearthflameAbilityManager.igniteSeconds(4, -20));
+        assertEquals(6, HearthflameAbilityManager.igniteSeconds(0, 120));
+    }
+
+    @Test
+    void chainPullIsBoundedAndScalesWithExcessLength() {
+        assertEquals(0, HearthflameAbilityManager.pullStrength(0, 1, 4), 1.0E-6);
+        assertEquals(.16 * .75, HearthflameAbilityManager.pullStrength(.16, 1, 0), 1.0E-6);
+        assertEquals(.16 * 1.25, HearthflameAbilityManager.pullStrength(.16, 1, 2), 1.0E-6);
+        assertEquals(.32, HearthflameAbilityManager.pullStrength(.16, 1, 100), 1.0E-6);
+        assertEquals(.35, HearthflameAbilityManager.pullStrength(1, 1, 100), 1.0E-6);
     }
 
     @Test

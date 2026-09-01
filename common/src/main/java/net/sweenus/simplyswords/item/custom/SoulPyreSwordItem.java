@@ -113,6 +113,8 @@ public class SoulPyreSwordItem extends UniqueSwordItem implements TwoHandedWeapo
         public double radius = 8.0;
         @ValidatedFloat.Restrict(min = 2.0f)
         public float verticalRange = 8.0f;
+        @ValidatedInt.Restrict(min = 1)
+        public int pulseTargetCap = 32;
         @ValidatedFloat.Restrict(min = 0f)
         public float damageScaling = 0.74f;
         @ValidatedFloat.Restrict(min = 0f)
@@ -121,6 +123,8 @@ public class SoulPyreSwordItem extends UniqueSwordItem implements TwoHandedWeapo
         public int heal = 1;
         @ValidatedInt.Restrict(min = 1)
         public int wispVolleySize = 5;
+        @ValidatedInt.Restrict(min = 1)
+        public int wispSearchCap = 24;
         @ValidatedFloat.Restrict(min = 0f)
         public float pulseDamageBonusPerSoul = 0.05f;
         @ValidatedFloat.Restrict(min = 0f)

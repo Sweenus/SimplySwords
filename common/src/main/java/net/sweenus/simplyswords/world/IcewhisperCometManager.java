@@ -32,9 +32,11 @@ public final class IcewhisperCometManager {
     private static final int GROUND_SCAN_UP = 8;
     private static final int GROUND_SCAN_DOWN = 24;
     private static final double SPAWN_HEIGHT = 18.0;
+    public static final int MAX_COMETS_PER_WAVE = 8;
     private static final String COMET_VISUAL_TAG = "simplyswords_icewhisper_comet_visual";
     private static final Map<ServerWorld, List<ActiveComet>> ACTIVE_COMETS = new HashMap<>();
     private static final Map<ServerWorld, List<ActiveStorm>> ACTIVE_STORMS = new HashMap<>();
+    private static final Set<ServerWorld> PENDING_PURGE = new HashSet<>();
 
     private IcewhisperCometManager() {
     }
@@ -42,10 +44,14 @@ public final class IcewhisperCometManager {
     public static boolean hasActive(ServerWorld world) {
         List<ActiveComet> comets = ACTIVE_COMETS.get(world);
         List<ActiveStorm> storms = ACTIVE_STORMS.get(world);
-        return (comets != null && !comets.isEmpty()) || (storms != null && !storms.isEmpty()) || (world.getTime() % 20L == 0L);
+        return (comets != null && !comets.isEmpty())
+                || (storms != null && !storms.isEmpty())
+                || PENDING_PURGE.contains(world)
+                || IcewhisperAbilityManager.hasPending();
     }
 
-    public static void startStorm(ServerWorld world, LivingEntity owner, ItemStack stack, double radius, float damage, int durationTicks) {
+    public static void startStorm(ServerWorld world, LivingEntity owner, ItemStack stack, double radius, float damage,
+                                  int durationTicks) {
         startStorm(world, owner, stack, radius, damage, durationTicks, Phase6AbilityTuning.EMPTY, null);
     }
 
@@ -56,36 +62,135 @@ public final class IcewhisperCometManager {
         }
 
         List<ActiveStorm> storms = ACTIVE_STORMS.computeIfAbsent(world, w -> new ArrayList<>());
-        storms.removeIf(storm -> storm.ownerId().equals(owner.getUuid()));
-        int duration = tuning.integer(s("DURATION_TICKS"), durationTicks);
-        storms.add(new ActiveStorm(owner.getUuid(), stack.copy(), world.getTime() + duration, world.getTime(),
-                tuning.get(s("RADIUS"), radius), damage * (float) tuning.get(s("DAMAGE_MULTIPLIER"), 1),
-                tuning, execution));
+        storms.removeIf(storm -> {
+            if (!storm.ownerId.equals(owner.getUuid())) {
+                return false;
+            }
+            finishStorm(storm);
+            return true;
+        });
+        int duration = stormDuration(tuning, durationTicks);
+        long expiry = world.getTime() + duration;
+        storms.add(new ActiveStorm(owner.getUuid(), stack.copy(), expiry, world.getTime(), radius,
+                damage * (float) tuning.get(s("ICEWHISPER_COMET_DAMAGE_MULTIPLIER"), 1), tuning, execution));
+        IcewhisperAbilityManager.onStormStarted(owner, tuning, expiry);
+        int globe = tuning.integer(s("ICEWHISPER_GLOBE_RESISTANCE_TICKS"), duration);
+        if (tuning.flag(IcewhisperAbilityManager.MODE_SNOWGLOBE) && globe > 0
+                && !tuning.flag(IcewhisperAbilityManager.MODE_BLACK_ICE)) {
+            owner.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, globe,
+                    tuning.integer(s("ICEWHISPER_GLOBE_AMPLIFIER"), 0)), owner);
+        }
     }
 
-    public static void spawnWave(ServerWorld world, LivingEntity owner, ItemStack stack, double radius, float damage) {
-        spawnWave(world, owner, stack, radius, damage, Phase6AbilityTuning.EMPTY, null);
+    // Extinction Comet's absolute count is authoritative and suppresses Twin Wake's extra comet.
+    public static int cometCount(Phase6AbilityTuning tuning, int configured, int waveIndex) {
+        if (tuning.has(s("ICEWHISPER_COMET_COUNT"))) {
+            return Math.clamp(tuning.integer(s("ICEWHISPER_COMET_COUNT"), configured), 0, MAX_COMETS_PER_WAVE);
+        }
+        int base = (int) Math.round(Math.max(0, configured)
+                * tuning.get(s("ICEWHISPER_COMET_COUNT_MULTIPLIER"), 1));
+        int interval = tuning.integer(s("ICEWHISPER_EXTRA_COMET_WAVE_INTERVAL"), 0);
+        int extra = tuning.flag(IcewhisperAbilityManager.MODE_TWIN_WAKE) && interval > 0
+                && (waveIndex + 1) % interval == 0
+                ? tuning.integer(s("ICEWHISPER_EXTRA_COMET_COUNT"), 0) : 0;
+        return Math.clamp(base + extra, 0, MAX_COMETS_PER_WAVE);
     }
 
-    private static void spawnWave(ServerWorld world, LivingEntity owner, ItemStack stack, double radius, float damage,
-                                  Phase6AbilityTuning tuning, UniqueAbilityExecution execution) {
-        int cometCount = tuning.integer(s("COUNT"), Math.max(0, Config.uniqueEffects.icewhisper.cometsPerWave));
+    public static int waveInterval(Phase6AbilityTuning tuning, int configured) {
+        return Math.max(1, tuning.integer(s("ICEWHISPER_WAVE_INTERVAL_TICKS"), Math.max(1, configured)));
+    }
+
+    public static int fallTicks(Phase6AbilityTuning tuning, int configured) {
+        return Math.max(1, configured - tuning.integer(s("ICEWHISPER_FALL_REDUCTION_TICKS"), 0));
+    }
+
+    public static double splashRadius(Phase6AbilityTuning tuning, double configured) {
+        return tuning.has(s("ICEWHISPER_SPLASH_RADIUS"))
+                ? tuning.get(s("ICEWHISPER_SPLASH_RADIUS"), configured)
+                : Math.max(0, configured) + tuning.get(s("ICEWHISPER_SPLASH_RADIUS_BONUS"), 0);
+    }
+
+    public static int stormDuration(Phase6AbilityTuning tuning, int configured) {
+        return Math.max(1, configured + tuning.integer(s("ICEWHISPER_STORM_DURATION_BONUS_TICKS"), 0));
+    }
+
+    private static void spawnWave(ServerWorld world, LivingEntity owner, ActiveStorm storm) {
+        Phase6AbilityTuning tuning = storm.tuning;
+        int cometCount = cometCount(tuning, Math.max(0, Config.uniqueEffects.icewhisper.cometsPerWave),
+                storm.waveIndex);
+        storm.waveIndex++;
         if (cometCount <= 0 || owner == null) {
             return;
         }
 
+        double radius = tuning.flag(IcewhisperAbilityManager.MODE_SNOWGLOBE)
+                ? IcewhisperAbilityManager.auraRadius(owner, storm.radius) : storm.radius;
+        int hunters = tuning.flag(IcewhisperAbilityManager.MODE_HUNTERS_SKY)
+                ? Math.min(cometCount, tuning.integer(s("ICEWHISPER_HUNTER_COMET_COUNT"), 1)) : 0;
+        boolean lastSnow = lastSnowReady(owner, tuning);
+
         for (int i = 0; i < cometCount; i++) {
-            Vec3d impact = chooseImpactPosition(world, owner.getPos(), radius);
-            spawnComet(world, owner, stack, impact, damage, tuning, execution);
+            boolean self = false;
+            Vec3d impact;
+            if (lastSnow) {
+                impact = groundAt(world, owner.getX(), owner.getZ(), owner.getY());
+                lastSnow = false;
+                self = true;
+            } else if (i < hunters) {
+                impact = hunterImpact(world, owner, tuning).orElseGet(
+                        () -> chooseImpactPosition(world, owner.getPos(), radius));
+            } else {
+                impact = chooseImpactPosition(world, owner.getPos(), radius);
+            }
+            spawnComet(world, owner, storm, impact, self);
         }
+    }
+
+    private static boolean lastSnowReady(LivingEntity owner, Phase6AbilityTuning tuning) {
+        if (!tuning.flag(IcewhisperAbilityManager.MODE_LAST_SNOW)) {
+            return false;
+        }
+        double percent = tuning.get(s("ICEWHISPER_LAST_SNOW_HEALTH_PERCENT"), 0);
+        if (percent <= 0 || owner.getMaxHealth() <= 0
+                || owner.getHealth() > owner.getMaxHealth() * (percent / 100.0)) {
+            return false;
+        }
+        return IcewhisperAbilityManager.consumeLastSnow(owner);
+    }
+
+    // Hunter's Sky retargets one comet onto the nearest enemy Permafrost is currently holding.
+    private static Optional<Vec3d> hunterImpact(ServerWorld world, LivingEntity owner, Phase6AbilityTuning tuning) {
+        double range = tuning.get(s("ICEWHISPER_HUNTER_RANGE"), 0);
+        if (range <= 0) {
+            return Optional.empty();
+        }
+        Box box = owner.getBoundingBox().expand(range);
+        LivingEntity best = null;
+        double bestDistance = range * range;
+        for (Entity entity : world.getOtherEntities(owner, box, EntityPredicates.VALID_LIVING_ENTITY)) {
+            if (!(entity instanceof LivingEntity target)
+                    || !HelperMethods.checkAbilityTarget(target, owner)
+                    || !IcewhisperAbilityManager.isAuraAffected(owner, target)) {
+                continue;
+            }
+            double distance = target.squaredDistanceTo(owner);
+            if (distance <= bestDistance) {
+                bestDistance = distance;
+                best = target;
+            }
+        }
+        return best == null ? Optional.empty()
+                : Optional.of(groundAt(world, best.getX(), best.getZ(), best.getY()));
     }
 
     public static void tick(ServerWorld world) {
         tickStorms(world);
+        IcewhisperAbilityManager.sweepAttackSlows(world);
 
         List<ActiveComet> comets = ACTIVE_COMETS.get(world);
         if (comets == null || comets.isEmpty()) {
-            if (world.getTime() % 20L == 0L) {
+            ACTIVE_COMETS.remove(world);
+            if (PENDING_PURGE.remove(world)) {
                 purgeOrphanCometVisuals(world);
             }
             return;
@@ -94,7 +199,9 @@ public final class IcewhisperCometManager {
         comets.removeIf(comet -> tickComet(world, comet));
         if (comets.isEmpty()) {
             ACTIVE_COMETS.remove(world);
-            purgeOrphanCometVisuals(world);
+            if (PENDING_PURGE.remove(world)) {
+                purgeOrphanCometVisuals(world);
+            }
         }
     }
 
@@ -105,19 +212,16 @@ public final class IcewhisperCometManager {
         }
 
         storms.removeIf(storm -> {
-            if (world.getTime() >= storm.expiryTick()) {
-                if (storm.execution != null) UniqueAbilityApi.finish(storm.execution,
-                        Phase6UniqueAbilities.FINISH, 0);
+            Entity ownerEntity = world.getEntity(storm.ownerId);
+            if (world.getTime() >= storm.expiryTick
+                    || !(ownerEntity instanceof LivingEntity owner) || !owner.isAlive()) {
+                finishStorm(storm);
                 return true;
             }
-            Entity ownerEntity = world.getEntity(storm.ownerId());
-            if (!(ownerEntity instanceof LivingEntity owner) || !owner.isAlive()) {
-                return true;
-            }
-            if (world.getTime() >= storm.nextWaveTick()) {
-                spawnWave(world, owner, storm.stack(), storm.radius(), storm.damage(), storm.tuning, storm.execution);
-                storm.setNextWaveTick(world.getTime() + storm.tuning.integer(s("INTERVAL_TICKS"),
-                        Math.max(1, Config.uniqueEffects.icewhisper.cometInterval)));
+            if (world.getTime() >= storm.nextWaveTick) {
+                spawnWave(world, owner, storm);
+                storm.nextWaveTick = world.getTime()
+                        + waveInterval(storm.tuning, Config.uniqueEffects.icewhisper.cometInterval);
             }
             return false;
         });
@@ -127,10 +231,17 @@ public final class IcewhisperCometManager {
         }
     }
 
-    private static void spawnComet(ServerWorld world, LivingEntity owner, ItemStack stack, Vec3d impact, float damage,
-                                   Phase6AbilityTuning tuning, UniqueAbilityExecution execution) {
+    private static void finishStorm(ActiveStorm storm) {
+        if (storm.execution != null) {
+            UniqueAbilityApi.finish(storm.execution, Phase6UniqueAbilities.FINISH, 0);
+        }
+        IcewhisperAbilityManager.onStormEnded(storm.ownerId);
+    }
+
+    private static void spawnComet(ServerWorld world, LivingEntity owner, ActiveStorm storm, Vec3d impact,
+                                   boolean selfTargeted) {
         long startTick = world.getTime();
-        int fallTicks = tuning.integer(s("LOCKOUT_TICKS"), Math.max(1, Config.uniqueEffects.icewhisper.cometFallTicks));
+        int fallTicks = fallTicks(storm.tuning, Math.max(1, Config.uniqueEffects.icewhisper.cometFallTicks));
         Vec3d start = impact.add(
                 -1.75 + world.random.nextDouble() * 3.5,
                 SPAWN_HEIGHT,
@@ -143,10 +254,11 @@ public final class IcewhisperCometManager {
             visual.addCommandTag(COMET_VISUAL_TAG);
             world.spawnEntity(visual);
             visualId = visual.getUuid();
+            PENDING_PURGE.add(world);
         }
 
-        ActiveComet comet = new ActiveComet(owner.getUuid(), stack.copy(), visualId, start, impact,
-                startTick, fallTicks, damage, tuning, execution);
+        ActiveComet comet = new ActiveComet(owner.getUuid(), storm.stack, visualId, start, impact,
+                startTick, fallTicks, storm.damage, selfTargeted, storm.tuning, storm.execution);
         ACTIVE_COMETS.computeIfAbsent(world, w -> new ArrayList<>()).add(comet);
     }
 
@@ -175,29 +287,47 @@ public final class IcewhisperCometManager {
             return;
         }
 
+        Phase6AbilityTuning tuning = comet.tuning;
         Vec3d impact = comet.impact();
-        float splashRadius = (float) comet.tuning.get(s("WIDTH"),
+        float splashRadius = (float) splashRadius(tuning,
                 Math.max(0.0F, Config.uniqueEffects.icewhisper.cometSplashRadius));
         Box box = new Box(
                 impact.x - splashRadius, impact.y - splashRadius, impact.z - splashRadius,
                 impact.x + splashRadius, impact.y + splashRadius, impact.z + splashRadius
         );
         int affected = 0;
-        int cap = comet.tuning.has(s("TARGET_CAP"))
-                ? comet.tuning.integer(s("TARGET_CAP"), 8) : Integer.MAX_VALUE;
+        int cap = tuning.has(s("ICEWHISPER_SPLASH_TARGET_CAP"))
+                ? tuning.integer(s("ICEWHISPER_SPLASH_TARGET_CAP"), 8) : Integer.MAX_VALUE;
+        boolean blackIce = tuning.flag(IcewhisperAbilityManager.MODE_BLACK_ICE);
+        double blackIceMultiplier = tuning.get(s("ICEWHISPER_BLACK_ICE_MULTIPLIER"), 1);
+        int blind = tuning.flag(IcewhisperAbilityManager.MODE_SNOWBLIND)
+                ? tuning.integer(s("ICEWHISPER_BLIND_TICKS"), 30) : 0;
+        double fracture = -1;
         for (Entity entity : world.getOtherEntities(owner, box, EntityPredicates.VALID_LIVING_ENTITY)) {
             if (entity instanceof LivingEntity target && HelperMethods.checkAbilityTarget(target, owner)
                     && target.squaredDistanceTo(impact) <= splashRadius * splashRadius) {
+                if (fracture < 0) {
+                    fracture = tuning.flag(IcewhisperAbilityManager.MODE_FRACTURE)
+                            ? IcewhisperAbilityManager.fractureMultiplier(owner, world.getTime(), tuning) : 1;
+                }
+                boolean frozen = target.getFrozenTicks() > 0;
+                float damage = comet.damage() * (float) fracture;
+                if (blackIce && frozen) {
+                    damage *= (float) blackIceMultiplier;
+                }
                 SimplySwordsAPI.applyAbilityMagicDamageThroughIframes(
-                        world, owner, comet.stack(), target, comet.damage(), SpellScalingProfile.FROST);
-                int blind = comet.tuning.flag(1 << 19)
-                        ? comet.tuning.integer(s("STATUS_DURATION_TICKS"), 30) : 0;
+                        world, owner, comet.stack(), target, damage, SpellScalingProfile.FROST);
+                if (blackIce && frozen) {
+                    target.setFrozenTicks(0);
+                }
                 if (blind > 0) target.addStatusEffect(new StatusEffectInstance(StatusEffects.BLINDNESS, blind, 0), owner);
                 if (comet.execution != null) UniqueAbilityApi.emit(comet.execution, UniqueAbilityPhase.HIT,
-                        Phase6UniqueAbilities.HIT, target, 1, comet.damage());
+                        Phase6UniqueAbilities.HIT, target, 1, damage);
                 if (++affected >= cap) break;
             }
         }
+
+        grantImpactBuffs(owner, comet, impact);
 
         if (Config.general.enableModernFieldEffects) {
             FrostfallIceSpikeFieldManager.createTargetBurst(world, impact, 5, 1.25F);
@@ -215,6 +345,79 @@ public final class IcewhisperCometManager {
         }
     }
 
+    private static void grantImpactBuffs(LivingEntity owner, ActiveComet comet, Vec3d impact) {
+        Phase6AbilityTuning tuning = comet.tuning;
+        if (tuning.flag(IcewhisperAbilityManager.MODE_BLACK_ICE)) {
+            return;
+        }
+        int speed = tuning.integer(s("ICEWHISPER_STEP_SPEED_TICKS"), 0);
+        double stepRadius = tuning.get(s("ICEWHISPER_STEP_RADIUS"), 0);
+        if (tuning.flag(IcewhisperAbilityManager.MODE_WINTER_STEP) && speed > 0 && stepRadius > 0
+                && owner.squaredDistanceTo(impact) <= stepRadius * stepRadius) {
+            owner.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, speed,
+                    tuning.integer(s("ICEWHISPER_STEP_SPEED_AMPLIFIER"), 0)), owner);
+        }
+        int resistance = tuning.integer(s("ICEWHISPER_LAST_SNOW_RESISTANCE_TICKS"), 0);
+        if (comet.selfTargeted() && tuning.flag(IcewhisperAbilityManager.MODE_LAST_SNOW) && resistance > 0) {
+            owner.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, resistance,
+                    tuning.integer(s("ICEWHISPER_LAST_SNOW_AMPLIFIER"), 1)), owner);
+        }
+    }
+
+    public static void clear(ServerWorld world) {
+        if (world == null) {
+            return;
+        }
+        List<ActiveStorm> storms = ACTIVE_STORMS.remove(world);
+        if (storms != null) {
+            storms.forEach(IcewhisperCometManager::finishStorm);
+        }
+        List<ActiveComet> comets = ACTIVE_COMETS.remove(world);
+        if (comets != null) {
+            comets.forEach(comet -> removeVisual(world, comet.visualId()));
+        }
+        if (PENDING_PURGE.remove(world)) {
+            purgeOrphanCometVisuals(world);
+        }
+        IcewhisperAbilityManager.clear(world);
+    }
+
+    public static void clearAll() {
+        ACTIVE_STORMS.values().forEach(storms -> storms.forEach(IcewhisperCometManager::finishStorm));
+        ACTIVE_STORMS.clear();
+        ACTIVE_COMETS.clear();
+        PENDING_PURGE.clear();
+        IcewhisperAbilityManager.clearAll();
+    }
+
+    public static void clearActor(LivingEntity actor) {
+        if (actor == null) {
+            return;
+        }
+        UUID id = actor.getUuid();
+        ACTIVE_STORMS.values().forEach(storms -> storms.removeIf(storm -> {
+            if (!storm.ownerId.equals(id)) {
+                return false;
+            }
+            finishStorm(storm);
+            return true;
+        }));
+        ACTIVE_STORMS.values().removeIf(List::isEmpty);
+        if (actor.getWorld() instanceof ServerWorld world) {
+            List<ActiveComet> comets = ACTIVE_COMETS.get(world);
+            if (comets != null) {
+                comets.removeIf(comet -> {
+                    if (!comet.ownerId().equals(id)) {
+                        return false;
+                    }
+                    removeVisual(world, comet.visualId());
+                    return true;
+                });
+            }
+        }
+        IcewhisperAbilityManager.clearActor(actor);
+    }
+
     private static void removeVisual(ServerWorld world, UUID visualId) {
         if (visualId == null) {
             return;
@@ -230,8 +433,11 @@ public final class IcewhisperCometManager {
         double distance = Math.sqrt(world.random.nextDouble()) * Math.max(1.0, radius);
         double x = center.x + Math.cos(angle) * distance;
         double z = center.z + Math.sin(angle) * distance;
-        double y = findGroundTopY(world, x, z, center.y);
-        return new Vec3d(x, y, z);
+        return groundAt(world, x, z, center.y);
+    }
+
+    private static Vec3d groundAt(ServerWorld world, double x, double z, double centerY) {
+        return new Vec3d(x, findGroundTopY(world, x, z, centerY), z);
     }
 
     private static double findGroundTopY(ServerWorld world, double x, double z, double centerY) {
@@ -258,19 +464,20 @@ public final class IcewhisperCometManager {
     }
 
     private record ActiveComet(UUID ownerId, ItemStack stack, UUID visualId, Vec3d start, Vec3d impact,
-                               long startTick, int fallTicks, float damage, Phase6AbilityTuning tuning,
-                               UniqueAbilityExecution execution) {
+                               long startTick, int fallTicks, float damage, boolean selfTargeted,
+                               Phase6AbilityTuning tuning, UniqueAbilityExecution execution) {
     }
 
     private static final class ActiveStorm {
         private final UUID ownerId;
         private final ItemStack stack;
         private final long expiryTick;
-        private long nextWaveTick;
         private final double radius;
         private final float damage;
         private final Phase6AbilityTuning tuning;
         private final UniqueAbilityExecution execution;
+        private long nextWaveTick;
+        private int waveIndex;
 
         private ActiveStorm(UUID ownerId, ItemStack stack, long expiryTick, long nextWaveTick, double radius,
                             float damage, Phase6AbilityTuning tuning, UniqueAbilityExecution execution) {
@@ -284,33 +491,6 @@ public final class IcewhisperCometManager {
             this.execution = execution;
         }
 
-        private UUID ownerId() {
-            return this.ownerId;
-        }
-
-        private ItemStack stack() {
-            return this.stack;
-        }
-
-        private long expiryTick() {
-            return this.expiryTick;
-        }
-
-        private long nextWaveTick() {
-            return this.nextWaveTick;
-        }
-
-        private void setNextWaveTick(long nextWaveTick) {
-            this.nextWaveTick = nextWaveTick;
-        }
-
-        private double radius() {
-            return this.radius;
-        }
-
-        private float damage() {
-            return this.damage;
-        }
     }
 
     private static Phase6AbilityTuning.Setting s(String name) {

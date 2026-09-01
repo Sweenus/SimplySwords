@@ -1,7 +1,5 @@
 package net.sweenus.simplyswords.item.custom;
 
-import net.sweenus.simplyswords.api.SimplySwordsAPI;
-
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedDouble;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
@@ -37,6 +35,8 @@ import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
 import net.sweenus.simplyswords.world.LivingEntityAbilityMovementManager;
 import net.sweenus.simplyswords.world.Phase6CombatManager;
+import net.sweenus.simplyswords.world.PlayerWeaponAbilityManager;
+import net.sweenus.simplyswords.util.WeaponManaCost;
 
 import java.util.List;
 
@@ -62,37 +62,12 @@ public class FrostfallSwordItem extends UniqueSwordItem implements UniqueWeaponA
 
     @Override
     public TypedActionResult<ItemStack> startPlayerAbility(World world, PlayerEntity user, Hand hand) {
-        if (user.getWorld().isClient()) return super.use(world, user, hand);
-
-        ItemStack itemStack = user.getStackInHand(hand);
-        int cooldown = Config.uniqueEffects.frostfall.cooldown;
-        if (!world.isClient) {
-            itemStack = user.getStackInHand(hand);
-            var serverWorld = (net.minecraft.server.world.ServerWorld) world;
-            WeaponAbilityContext context = WeaponAbilityContext.of(serverWorld, itemStack, user,
-                    user instanceof net.minecraft.server.network.ServerPlayerEntity player ? player : null,
-                    null, hand, WeaponAbilityActivationSource.PLAYER);
-            UniqueAbilityExecution execution = Phase6CombatManager.beginActive(
-                    Phase6UniqueAbilities.FROSTFALL_THROW, context, Config.uniqueEffects.frostfall.cooldown);
-            UniqueAbilityApi.takeStartedExecution();
-            UniqueAbilityApi.start(execution);
-            Phase6AbilityTuning tuning = Phase6UniqueAbilities.tuning(execution);
-            cooldown = tuning.integer(s("COOLDOWN_TICKS"), cooldown);
-            FrostfallEntity frostfallEntity = createFrostfallEntity(world, user, itemStack.copy(), tuning, execution);
-            if (hand == Hand.OFF_HAND)
-                frostfallEntity.offhandThrow = true;
-            world.spawnEntity(frostfallEntity);
-
-            if (!user.getAbilities().creativeMode) {
-                itemStack.decrement(1);
-            }
-        }
-
-        user.swingHand(hand);
-
-
-        SimplySwordsAPI.setWeaponCooldown(user, itemStack, cooldown);
-        return TypedActionResult.success(itemStack, world.isClient());
+        ItemStack stack = user.getStackInHand(hand);
+        boolean reboundInput = PlayerWeaponAbilityManager.shouldSkipDefaultAbilityUse(world, user, hand, stack);
+        if (reboundInput && !WeaponManaCost.canAfford(user, stack)) return TypedActionResult.fail(stack);
+        TypedActionResult<ItemStack> result = UniqueWeaponActiveAbility.super.startPlayerAbility(world, user, hand);
+        if (reboundInput && result.getResult().isAccepted()) WeaponManaCost.spend(user, stack);
+        return result;
     }
 
     private static FrostfallEntity createFrostfallEntity(World world, LivingEntity user, ItemStack stack,
@@ -106,32 +81,59 @@ public class FrostfallSwordItem extends UniqueSwordItem implements UniqueWeaponA
         frostfallEntity.setVelocity(user, user.getPitch(), user.getYaw(), 0.0F, 1.5F, 1.0F);
         frostfallEntity.setYaw(user.getYaw());
         frostfallEntity.setPitch(user.getPitch());
-        frostfallEntity.primaryBaseDamage = abilityDamage * (float) tuning.get(s("DAMAGE_MULTIPLIER"), 1);
-        frostfallEntity.detonateDamage = pulseDamage * (float) tuning.get(s("DAMAGE_MULTIPLIER"), 1);
+        frostfallEntity.primaryBaseDamage = abilityDamage;
+        frostfallEntity.detonateDamage = pulseDamage;
         frostfallEntity.addedChance = Config.uniqueEffects.frostfall.chance;
-        frostfallEntity.detonateRadius = tuning.get(s("RADIUS"), Config.uniqueEffects.frostfall.radius);
-        frostfallEntity.duration = tuning.integer(s("STATUS_DURATION_TICKS"), Config.uniqueEffects.frostfall.duration);
+        frostfallEntity.detonateRadius = Config.uniqueEffects.frostfall.radius;
+        frostfallEntity.duration = Config.uniqueEffects.frostfall.duration;
         frostfallEntity.setMastery(tuning, execution);
         frostfallEntity.setPos(user.getX(), user.getEyeY() - 0.5, user.getZ());
         return frostfallEntity;
     }
 
     @Override
+    public boolean canActivate(WeaponAbilityContext context) {
+        if (context == null || context.world() == null || context.actor() == null || !context.actor().isAlive()
+                || context.stack() == null || context.stack().isEmpty()
+                || context.stack().getDamage() >= context.stack().getMaxDamage() - 1) return false;
+        if (context.target() == null) return context.actor() instanceof PlayerEntity;
+        return HelperMethods.checkAbilityTarget(context.target(), context.actor())
+                && (context.sourcePlayer() == null || context.target() != context.sourcePlayer()
+                && HelperMethods.checkFriendlyFire(context.target(), context.sourcePlayer()));
+    }
+
+    @Override
     public boolean activate(WeaponAbilityContext context) {
-        if (context.target() == null || !HelperMethods.checkAbilityTarget(context.target(), context.actor())) {
-            return false;
-        }
         UniqueAbilityExecution execution = Phase6CombatManager.beginActive(
                 Phase6UniqueAbilities.FROSTFALL_THROW, context, Config.uniqueEffects.frostfall.cooldown);
         Phase6AbilityTuning tuning = Phase6UniqueAbilities.tuning(execution);
+        UniqueAbilityExecution fieldExecution = Phase6CombatManager.preparePassive(
+                Phase6UniqueAbilities.FROSTFALL_FIELD, context.world(), context.stack(), context.actor(), context.target());
+        UniqueAbilityApi.takeStartedExecution();
+        UniqueAbilityApi.publishStartedExecution(execution);
         FrostfallEntity frostfallEntity = createFrostfallEntity(context.world(), context.actor(),
                 context.stack().copy(), tuning, execution);
-        Vec3d direction = LivingEntityAbilityMovementManager.getLobbedTargetDirection(context.actor(), context.target());
-        frostfallEntity.setVelocity(direction.x, direction.y, direction.z, 1.65F, 1.0F);
+        frostfallEntity.setFieldMastery(Phase6UniqueAbilities.tuning(fieldExecution), fieldExecution);
+        boolean playerThrow = context.actor() instanceof PlayerEntity && !context.isDelegated();
+        if (!playerThrow && context.target() != null) {
+            Vec3d direction = LivingEntityAbilityMovementManager.getLobbedTargetDirection(context.actor(), context.target());
+            frostfallEntity.setVelocity(direction.x, direction.y, direction.z, 1.65F, 1.0F);
+            frostfallEntity.markNonReturning(Config.uniqueEffects.frostfall.duration + 80);
+        } else {
+            frostfallEntity.setVelocity(context.actor(), context.actor().getPitch(), context.actor().getYaw(),
+                    0.0F, 1.5F, 1.0F);
+        }
         frostfallEntity.setYaw(context.actor().getYaw());
         frostfallEntity.setPitch(context.actor().getPitch());
-        frostfallEntity.markNonReturning(Config.uniqueEffects.frostfall.duration + 80);
+        frostfallEntity.setLaunchState(context.actor().getPos(), context.actor().getPitch(),
+                execution.cooldownTicks(Config.uniqueEffects.frostfall.cooldown));
+        if (context.hand() == Hand.OFF_HAND) frostfallEntity.offhandThrow = true;
         context.world().spawnEntity(frostfallEntity);
+        if (playerThrow && context.actor() instanceof PlayerEntity player
+                && !player.getAbilities().creativeMode && context.hand() != null) {
+            player.setStackInHand(context.hand(), ItemStack.EMPTY);
+        }
+        context.actor().swingHand(context.hand() == null ? Hand.MAIN_HAND : context.hand());
         return true;
     }
 

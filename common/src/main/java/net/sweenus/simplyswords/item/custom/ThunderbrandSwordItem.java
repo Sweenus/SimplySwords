@@ -12,8 +12,10 @@ import net.minecraft.item.ToolMaterial;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.UseAction;
 import net.minecraft.world.World;
@@ -25,6 +27,7 @@ import net.sweenus.simplyswords.config.settings.TooltipSettings;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.item.interfaces.TwoHandedWeapon;
 import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
+import net.sweenus.simplyswords.item.interfaces.UniqueWeaponSecondaryAction;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -34,7 +37,8 @@ import net.sweenus.simplyswords.world.WeaponAbilityCooldownManager;
 
 import java.util.List;
 
-public class ThunderbrandSwordItem extends UniqueSwordItem implements TwoHandedWeapon, UniqueWeaponActiveAbility {
+public class ThunderbrandSwordItem extends UniqueSwordItem implements TwoHandedWeapon, UniqueWeaponActiveAbility,
+        UniqueWeaponSecondaryAction {
 
     public ThunderbrandSwordItem(ToolMaterial toolMaterial, Settings settings) {
         super(toolMaterial, settings);
@@ -47,7 +51,7 @@ public class ThunderbrandSwordItem extends UniqueSwordItem implements TwoHandedW
         }
         HelperMethods.playHitSounds(attacker, target);
         if (!attacker.getWorld().isClient()) {
-            int chargeChance = Config.uniqueEffects.thunderbrand.chance;
+            int chargeChance = ThunderbrandAbilityManager.refreshChance(worldFor(attacker), stack, attacker, target);
             if (attacker.getRandom().nextInt(100) <= chargeChance && (attacker instanceof PlayerEntity player) && player.getItemCooldownManager().getCooldownProgress(this, 1f) > 0) {
                 SimplySwordsAPI.setWeaponCooldown(player, stack, 0);
                 attacker.getWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_BLOCK_01.get(),
@@ -89,6 +93,19 @@ public class ThunderbrandSwordItem extends UniqueSwordItem implements TwoHandedW
     @Override
     public boolean activate(WeaponAbilityContext context) {
         return ThunderbrandAbilityManager.start(context);
+    }
+
+    @Override
+    public TypedActionResult<ItemStack> startPlayerSecondaryAbility(World world, PlayerEntity user, Hand hand) {
+        ItemStack stack = user.getStackInHand(hand);
+        if (world.isClient() || !(world instanceof ServerWorld serverWorld)
+                || !(user instanceof ServerPlayerEntity serverPlayer)
+                || stack.getDamage() >= stack.getMaxDamage() - 1
+                || !ThunderbrandAbilityManager.resume(serverWorld, serverPlayer, hand, stack)) {
+            return TypedActionResult.pass(stack);
+        }
+        user.setCurrentHand(hand);
+        return new TypedActionResult<>(ActionResult.SUCCESS, stack);
     }
 
     @Override
@@ -183,5 +200,9 @@ public class ThunderbrandSwordItem extends UniqueSwordItem implements TwoHandedW
         public int chainTargets = 4;
         @ValidatedFloat.Restrict(min = 0.5f)
         public float chainRange = 6.0f;
+    }
+
+    private static ServerWorld worldFor(LivingEntity entity) {
+        return entity.getWorld() instanceof ServerWorld world ? world : null;
     }
 }

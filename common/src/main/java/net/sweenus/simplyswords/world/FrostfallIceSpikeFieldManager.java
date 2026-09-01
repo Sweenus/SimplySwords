@@ -107,6 +107,17 @@ public final class FrostfallIceSpikeFieldManager {
         }
     }
 
+    public static void clear(ServerWorld world) {
+        List<ActiveIceSpikePulse> pulses = ACTIVE_PULSES.remove(world);
+        if (pulses != null) pulses.forEach(pulse -> removePulse(world, pulse));
+        purgeOrphanSpikeVisuals(world);
+    }
+
+    public static void clearAll() {
+        new ArrayList<>(ACTIVE_PULSES.keySet()).forEach(FrostfallIceSpikeFieldManager::clear);
+        ACTIVE_PULSES.clear();
+    }
+
     private static void spawnSpikeRing(ServerWorld world, ActiveIceSpikePulse pulse, Vec3d center, double radius, int detonationIndex, long spawnTick) {
         int pointCount = MathHelper.clamp((int) Math.ceil(radius * Math.PI * 1.6), MIN_RING_POINTS, MAX_RING_POINTS);
         double phase = world.random.nextDouble() * Math.PI * 2.0;

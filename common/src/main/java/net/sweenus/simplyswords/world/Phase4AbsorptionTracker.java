@@ -71,6 +71,14 @@ public final class Phase4AbsorptionTracker {
         GRANTS.entrySet().removeIf(entry -> entry.getValue().world.equals(world.getRegistryKey()));
     }
 
+    public static void clear(LivingEntity owner) {
+        if (owner == null) return;
+        Grant grant = GRANTS.remove(owner.getUuid());
+        if (grant != null) {
+            owner.setAbsorptionAmount(Math.max(0, owner.getAbsorptionAmount() - grant.amount));
+        }
+    }
+
     public static void clearAll() {
         GRANTS.clear();
     }

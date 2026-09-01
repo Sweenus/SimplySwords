@@ -23,7 +23,6 @@ import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.api.SpellScalingProfile;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
-import net.sweenus.simplyswords.api.WeaponAbilityActivationSource;
 import net.sweenus.simplyswords.api.ability.Phase6AbilityTuning;
 import net.sweenus.simplyswords.api.ability.Phase6UniqueAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
@@ -38,13 +37,19 @@ import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
+import net.sweenus.simplyswords.util.WeaponManaCost;
 import net.sweenus.simplyswords.world.FrostfallIceSpikeFieldManager;
+import net.sweenus.simplyswords.world.IcewhisperAbilityManager;
 import net.sweenus.simplyswords.world.IcewhisperCometManager;
+import net.sweenus.simplyswords.world.Phase4AbsorptionTracker;
 import net.sweenus.simplyswords.world.Phase6CombatManager;
+import net.sweenus.simplyswords.world.PlayerWeaponAbilityManager;
 
 import java.util.List;
 
 public class IcewhisperSwordItem extends UniqueSwordItem implements TwoHandedWeapon, UniqueWeaponActiveAbility {
+    public static final int BASE_SLOW_TICKS = 120;
+
     public IcewhisperSwordItem(ToolMaterial toolMaterial, Settings settings) {
         super(toolMaterial, settings);
     }
@@ -65,27 +70,23 @@ public class IcewhisperSwordItem extends UniqueSwordItem implements TwoHandedWea
 
     @Override
     public TypedActionResult<ItemStack> startPlayerAbility(World world, PlayerEntity user, Hand hand) {
-        ItemStack itemStack = user.getStackInHand(hand);
+        ItemStack stack = user.getStackInHand(hand);
+        boolean reboundInput = PlayerWeaponAbilityManager.shouldSkipDefaultAbilityUse(world, user, hand, stack);
+        if (reboundInput && !WeaponManaCost.canAfford(user, stack)) return TypedActionResult.fail(stack);
+        TypedActionResult<ItemStack> result = UniqueWeaponActiveAbility.super.startPlayerAbility(world, user, hand);
+        if (reboundInput && result.getResult().isAccepted()) WeaponManaCost.spend(user, stack);
+        return result;
+    }
 
-        if (itemStack.getDamage() >= itemStack.getMaxDamage() - 1) {
-            return TypedActionResult.fail(itemStack);
-        }
-
-        if (world instanceof ServerWorld serverWorld) {
-            WeaponAbilityContext context = WeaponAbilityContext.of(serverWorld, itemStack, user,
-                    user instanceof net.minecraft.server.network.ServerPlayerEntity player ? player : null,
-                    null, hand, WeaponAbilityActivationSource.PLAYER);
-            UniqueAbilityExecution execution = Phase6CombatManager.beginActive(
-                    Phase6UniqueAbilities.ICEWHISPER_COMETS, context, Config.uniqueEffects.icewhisper.cooldown);
-            UniqueAbilityApi.takeStartedExecution();
-            UniqueAbilityApi.start(execution);
-            Phase6AbilityTuning tuning = Phase6UniqueAbilities.tuning(execution);
-            activateIcewhisper(serverWorld, user, itemStack, tuning, execution);
-            SimplySwordsAPI.setWeaponCooldown(user, itemStack,
-                    tuning.integer(s("COOLDOWN_TICKS"), Config.uniqueEffects.icewhisper.cooldown));
-        }
-        user.swingHand(hand);
-        return TypedActionResult.success(itemStack, world.isClient());
+    @Override
+    public boolean canActivate(WeaponAbilityContext context) {
+        return context != null
+                && context.stack() != null
+                && !context.stack().isEmpty()
+                && context.world() != null
+                && context.actor() != null
+                && context.actor().isAlive()
+                && context.stack().getDamage() < context.stack().getMaxDamage() - 1;
     }
 
     @Override
@@ -107,15 +108,34 @@ public class IcewhisperSwordItem extends UniqueSwordItem implements TwoHandedWea
 
     private static void activateIcewhisper(ServerWorld serverWorld, LivingEntity actor, ItemStack stack,
                                            Phase6AbilityTuning tuning, UniqueAbilityExecution execution) {
-        double radius = tuning.get(s("RADIUS"), Config.uniqueEffects.icewhisper.radius * 2);
+        double radius = stormRadius(tuning, Config.uniqueEffects.icewhisper.radius * 2.0);
         float abilityDamage = HelperMethods.abilityScaledDamage("frost", actor, stack,
                 Config.uniqueEffects.icewhisper.damageScaling, Config.uniqueEffects.icewhisper.spellScaling);
-        if (tuning.get(s("ABSORPTION"), 0) > 0) {
-            actor.setAbsorptionAmount(Math.max(actor.getAbsorptionAmount(), (float) tuning.get(s("ABSORPTION"), 0)));
+        int absorption = tuning.integer(s("ICEWHISPER_WARD_ABSORPTION"), 0);
+        if (tuning.flag(IcewhisperAbilityManager.MODE_FROST_WARD) && absorption > 0
+                && !tuning.flag(IcewhisperAbilityManager.MODE_BLACK_ICE)) {
+            Phase4AbsorptionTracker.grant(actor, absorption,
+                    tuning.integer(s("ICEWHISPER_WARD_DURATION_TICKS"), 80), absorption);
         }
         IcewhisperCometManager.startStorm(serverWorld, actor, stack, radius,
                 abilityDamage * Config.uniqueEffects.icewhisper.cometDamageMultiplier,
                 Config.uniqueEffects.icewhisper.duration, tuning, execution);
+    }
+
+    // Radius composes against the live configuration instead of a literal the config can drift from.
+    public static double stormRadius(Phase6AbilityTuning tuning, double configured) {
+        return Math.max(1, (configured + tuning.get(s("ICEWHISPER_STORM_RADIUS_BONUS"), 0))
+                * tuning.get(s("ICEWHISPER_STORM_RADIUS_MULTIPLIER"), 1));
+    }
+
+    public static double auraRadius(Phase6AbilityTuning tuning, double configured) {
+        return Math.max(1, (configured + tuning.get(s("ICEWHISPER_AURA_RADIUS_BONUS"), 0))
+                * tuning.get(s("ICEWHISPER_AURA_RADIUS_MULTIPLIER"), 1));
+    }
+
+    // Base Permafrost steps its slow up one level per pulse and stops at the resolved cap.
+    public static int slowAmplifier(int current, boolean present, int cap) {
+        return present ? Math.min(cap, current + 1) : 0;
     }
 
     @Override
@@ -138,46 +158,78 @@ public class IcewhisperSwordItem extends UniqueSwordItem implements TwoHandedWea
         UniqueAbilityExecution execution = Phase6CombatManager.beginPassive(
                 Phase6UniqueAbilities.ICEWHISPER_AURA, world, stack, user, null);
         Phase6AbilityTuning tuning = Phase6UniqueAbilities.tuning(execution);
-        int radius = tuning.integer(s("RADIUS"), Config.uniqueEffects.icewhisper.radius);
+        double radius = auraRadius(tuning, Config.uniqueEffects.icewhisper.radius);
+        long now = world.getTime();
+        IcewhisperAbilityManager.onAuraPulse(world, user, tuning, radius);
+        Phase4AbsorptionTracker.tick(user);
+        int slowDuration = Math.max(1, BASE_SLOW_TICKS
+                + tuning.integer(s("ICEWHISPER_AURA_SLOW_BONUS_TICKS"), 0));
+        int amplifierCap = tuning.integer(s("ICEWHISPER_AURA_AMPLIFIER_CAP"), 2);
+        double innerRadius = tuning.get(s("ICEWHISPER_INNER_RADIUS"), 0);
+        int innerAmplifier = tuning.integer(s("ICEWHISPER_INNER_AMPLIFIER"), 0);
+        double slowRadius = tuning.flag(IcewhisperAbilityManager.MODE_KILLING_COLD)
+                ? tuning.get(s("ICEWHISPER_SLOW_RADIUS"), radius) : radius;
+        int freezePerPulse = tuning.integer(s("ICEWHISPER_FREEZE_PER_PULSE_TICKS"), 0);
+        int freezeCap = tuning.integer(s("ICEWHISPER_FREEZE_CAP_TICKS"), 100);
+        int frozenThreshold = tuning.integer(s("ICEWHISPER_FROZEN_THRESHOLD_TICKS"), 0);
+        double frozenMultiplier = tuning.get(s("ICEWHISPER_FROZEN_DAMAGE_MULTIPLIER"), 1);
+        double attackSlow = tuning.get(s("ICEWHISPER_SLOW_ATTACK_MULTIPLIER"), 1);
+        int attackSlowTicks = tuning.integer(s("ICEWHISPER_SLOW_ATTACK_TICKS"), 0);
+        float abilityDamage = HelperMethods.abilityScaledDamage("frost", user, stack,
+                Config.uniqueEffects.icewhisper.damageScaling, Config.uniqueEffects.icewhisper.spellScaling);
+        float pulseDamage = abilityDamage * (float) tuning.get(s("ICEWHISPER_AURA_DAMAGE_MULTIPLIER"), 1);
+
         Box box = new Box(user.getX() + radius, user.getY() + radius, user.getZ() + radius,
                 user.getX() - radius, user.getY() - radius, user.getZ() - radius);
         int affected = 0;
-        int cap = tuning.has(s("TARGET_CAP")) ? tuning.integer(s("TARGET_CAP"), 20) : Integer.MAX_VALUE;
+        int cap = tuning.has(s("ICEWHISPER_AURA_TARGET_CAP"))
+                ? tuning.integer(s("ICEWHISPER_AURA_TARGET_CAP"), 20) : Integer.MAX_VALUE;
         for (Entity otherEntity : world.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY)) {
-            if ((otherEntity instanceof LivingEntity le) && HelperMethods.checkAbilityTarget(le, user)) {
-                StatusEffectInstance slowness = le.getStatusEffect(StatusEffects.SLOWNESS);
-                if (slowness != null) {
-                    int a = (slowness.getAmplifier() + 1);
-                    le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS,
-                            tuning.integer(s("STATUS_DURATION_TICKS"), 120), Math.max(a, 3)), user);
-                } else {
-                    le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS,
-                            tuning.integer(s("STATUS_DURATION_TICKS"), 120), 0), user);
-                }
-                int freeze = tuning.integer(s("FREEZE_TICKS"), 0);
-                if (freeze > 0) le.setFrozenTicks(Math.min(tuning.has(s("FREEZE_CAP_TICKS"))
-                                ? tuning.integer(s("FREEZE_CAP_TICKS"), 100)
-                                : tuning.integer(s("STACK_CAP"), 100),
-                        le.getFrozenTicks() + freeze));
-                float choose = (float) (Math.random() * 1);
-                world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_BOW_ICE_SHOOT_IMPACT_03.get(), le.getSoundCategory(), 0.1f, choose);
-                float abilityDamage = HelperMethods.abilityScaledDamage("frost", user, stack,
-                        Config.uniqueEffects.icewhisper.damageScaling, Config.uniqueEffects.icewhisper.spellScaling);
-                SimplySwordsAPI.applyAbilityMagicDamage(
-                        world, user, stack, le, abilityDamage * (float) tuning.get(s("DAMAGE_MULTIPLIER"), 1),
-                        SpellScalingProfile.FROST);
-                FrostfallIceSpikeFieldManager.createTargetBurst(world, le.getPos(), 4, 0.9F);
-                if (++affected >= cap) break;
+            if (!(otherEntity instanceof LivingEntity le) || !HelperMethods.checkAbilityTarget(le, user)) {
+                continue;
             }
+            IcewhisperAbilityManager.markAffected(user, le, now);
+            int frozenBefore = le.getFrozenTicks();
+            double distance = Math.sqrt(le.squaredDistanceTo(user.getX(), le.getY(), user.getZ()));
+            if (distance <= slowRadius) {
+                StatusEffectInstance slowness = le.getStatusEffect(StatusEffects.SLOWNESS);
+                int amplifier = innerAmplifier > 0 && distance <= innerRadius
+                        ? innerAmplifier
+                        : slowAmplifier(slowness != null ? slowness.getAmplifier() : 0,
+                                slowness != null, amplifierCap);
+                le.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, slowDuration, amplifier), user);
+                if (attackSlowTicks > 0 && attackSlow < 1) {
+                    IcewhisperAbilityManager.applyAttackSlow(le, attackSlow, attackSlowTicks, now);
+                }
+            }
+            if (freezePerPulse > 0) {
+                le.setFrozenTicks(IcewhisperAbilityManager.accrueFreeze(user, le, now, freezePerPulse, freezeCap));
+            }
+            float choose = (float) (Math.random() * 1);
+            world.playSoundFromEntity(null, le, SoundRegistry.ELEMENTAL_BOW_ICE_SHOOT_IMPACT_03.get(),
+                    le.getSoundCategory(), 0.1f, choose);
+            float damage = pulseDamage;
+            if (frozenThreshold > 0 && frozenBefore > frozenThreshold) {
+                damage *= (float) frozenMultiplier;
+            }
+            SimplySwordsAPI.applyAbilityMagicDamage(world, user, stack, le, damage, SpellScalingProfile.FROST);
+            double dwell = IcewhisperAbilityManager.dwellMultiplier(user, le, now, tuning);
+            if (dwell > 0 && le.isAlive()) {
+                SimplySwordsAPI.applyAbilityMagicDamageThroughIframes(world, user, stack, le,
+                        pulseDamage * (float) dwell, SpellScalingProfile.FROST);
+            }
+            FrostfallIceSpikeFieldManager.createTargetBurst(world, le.getPos(), 4, 0.9F);
+            if (++affected >= cap) break;
         }
         world.playSoundFromEntity(null, user, SoundRegistry.ELEMENTAL_SWORD_ICE_ATTACK_02.get(),
                 user.getSoundCategory(), 0.1f, 0.6f);
-        double xpos = user.getX() - (radius + 1);
+        int particleRadius = (int) Math.ceil(radius);
+        double xpos = user.getX() - (particleRadius + 1);
         double ypos = user.getY();
-        double zpos = user.getZ() - (radius + 1);
+        double zpos = user.getZ() - (particleRadius + 1);
 
-        for (int i = radius * 2; i > 0; i--) {
-            for (int j = radius * 2; j > 0; j--) {
+        for (int i = particleRadius * 2; i > 0; i--) {
+            for (int j = particleRadius * 2; j > 0; j--) {
                 float choose = (float) (Math.random() * 1);
                 HelperMethods.spawnParticle(world, ParticleTypes.SNOWFLAKE,
                         xpos + i + choose, ypos + 0.4, zpos + j + choose,

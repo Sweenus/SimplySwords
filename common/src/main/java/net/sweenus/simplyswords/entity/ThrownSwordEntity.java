@@ -142,7 +142,7 @@ public class ThrownSwordEntity extends PersistentProjectileEntity {
                     this.lastRenderY = this.getY();
                 }
 
-                double d = 0.05 * (double)i;
+                double d = 0.05 * (double)i * getReturnSpeedMultiplier();
                 this.setVelocity(this.getVelocity().multiply(0.95).add(vec3d.normalize().multiply(d)));
                 if (this.returnTimer == 0) {
                     this.playSound(getReturnSound(), 0.2F, 1.2F);
@@ -297,9 +297,10 @@ public class ThrownSwordEntity extends PersistentProjectileEntity {
         super.readCustomDataFromNbt(nbt);
         this.dealtDamage = nbt.getBoolean("DealtDamage");
         this.dataTracker.set(LOYALTY, this.getLoyalty());
-        if (nbt.contains("Stack")) {
+        if (nbt.contains("item") || nbt.contains("Stack")) {
+            String key = nbt.contains("item") ? "item" : "Stack";
+            this.stack = ItemStack.fromNbt(this.getRegistryManager(), nbt.getCompound(key)).orElse(this.getDefaultItemStack());
             this.dataTracker.set(ITEM_STACK, this.stack);
-            this.stack = ItemStack.fromNbt(this.getRegistryManager(), nbt.getCompound("item")).orElse(this.getDefaultItemStack());
         } else {
             this.stack = ItemStack.EMPTY;
         }
@@ -339,6 +340,10 @@ public class ThrownSwordEntity extends PersistentProjectileEntity {
 
     protected void damageOnReturn(double radius, float damage) {
         // For Override
+    }
+
+    protected double getReturnSpeedMultiplier() {
+        return 1.0;
     }
 
 

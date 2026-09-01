@@ -75,6 +75,9 @@ public class FlameSeedEffect extends OrbitingEffect {
             abilityDamage *= (float) tuning.get(Phase5AbilityTuning.Setting.PERIODIC_DAMAGE_MULTIPLIER, 1);
             frequency = tuning.integer(Phase5AbilityTuning.Setting.INTERVAL_TICKS, frequency);
             FlamewindVisualManager.refreshSeed(serverWorld, livingEntity);
+            if (this.sourceEntity != null && livingEntity.age % 20 == 0) {
+                Phase5FlamewindManager.refreshDraft(serverWorld, this.sourceEntity, tuning);
+            }
 
             if (livingEntity.age % frequency == 0 && this.additionalData != 0) {
                 DamageSource damageSource = livingEntity.getDamageSources().magic();
@@ -89,7 +92,9 @@ public class FlameSeedEffect extends OrbitingEffect {
                             this.sourceEntity == null ? null : this.sourceEntity.getMainHandStack(),
                             Config.uniqueEffects.flamewind.detonationDamageScaling,
                             Config.uniqueEffects.flamewind.detonationSpellScaling);
-                    abilityDamage *= (float) tuning.get(Phase5AbilityTuning.Setting.FINAL_DAMAGE_MULTIPLIER, 1);
+                    abilityDamage *= (float) tuning.get(Phase5AbilityTuning.Setting.FINAL_DAMAGE_MULTIPLIER, 1)
+                            * (float) tuning.get(
+                                    Phase5AbilityTuning.Setting.FLAMEWIND_DEATH_DAMAGE_MULTIPLIER, 1);
                     volume = 0.6f;
                     pitch = 1.0f;
                     soundEvent = SoundRegistry.SPELL_FIRE.get();
@@ -228,8 +233,15 @@ public class FlameSeedEffect extends OrbitingEffect {
         abilityDamage *= (float) tuning.get(Phase5AbilityTuning.Setting.FINAL_DAMAGE_MULTIPLIER, 1);
         if (center.distanceTo(sourceEntity.getPos()) < 30) {
             int maxHaste = Config.uniqueEffects.flamewind.maxHaste;
-            HelperMethods.incrementStatusEffect(sourceEntity, StatusEffects.HASTE, 120, 1, maxHaste);
+            HelperMethods.incrementStatusEffect(sourceEntity, StatusEffects.HASTE,
+                    tuning.integer(Phase5AbilityTuning.Setting.FLAMEWIND_HASTE_DURATION_TICKS, 120),
+                    tuning.integer(Phase5AbilityTuning.Setting.FLAMEWIND_HASTE_AMPLIFIER, 1), maxHaste);
         }
+        abilityDamage *= (float) Phase5FlamewindManager.chainBonus(serverWorld, sourceEntity, tuning);
+        abilityDamage *= (float) Phase5FlamewindManager.generationMultiplier(
+                tuning.get(Phase5AbilityTuning.Setting.FLAMEWIND_GENERATION_MULTIPLIER, 0),
+                snapshot == null ? 0 : snapshot.generation(),
+                tuning.integer(Phase5AbilityTuning.Setting.FLAMEWIND_GENERATION_CAP, 0));
 
         DamageSource damageSource = serverWorld.getDamageSources().magic();
         double detonationRadius = tuning.get(Phase5AbilityTuning.Setting.RADIUS,
@@ -243,6 +255,9 @@ public class FlameSeedEffect extends OrbitingEffect {
                 center.z + detonationRadius
         );
         int remaining = Math.min(spreadRemaining, tuning.integer(Phase5AbilityTuning.Setting.SPREAD_CAP, spreadRemaining));
+        int generationCap = tuning.integer(Phase5AbilityTuning.Setting.FLAMEWIND_GENERATION_CAP, 0);
+        if (generationCap > 0 && snapshot != null && snapshot.generation() >= generationCap) remaining = 0;
+        double spreadRange = tuning.get(Phase5AbilityTuning.Setting.FLAMEWIND_SPREAD_RANGE, detonationRadius);
         int affected = 0;
         int targetCap = tuning.integer(Phase5AbilityTuning.Setting.TARGET_CAP, 10);
         for (LivingEntity le : serverWorld.getEntitiesByClass(LivingEntity.class, box, EntityPredicates.VALID_LIVING_ENTITY)
@@ -254,35 +269,47 @@ public class FlameSeedEffect extends OrbitingEffect {
 
             float damage = sourceEntity == null ? abilityDamage
                     : HelperMethods.applyAbilityDamageEnchantments(serverWorld, sourceEntity.getMainHandStack(), le, damageSource, abilityDamage);
-            le.damage(damageSource, damage);
+            boolean lethal = le.damage(damageSource, damage) && !le.isAlive();
+            if (lethal) Phase5FlamewindManager.onReleaseKill(serverWorld, sourceEntity);
             affected++;
             int fireTicks = tuning.integer(Phase5AbilityTuning.Setting.FIRE_TICKS, 0);
             if (fireTicks > 0) le.setOnFireFor(Math.max(1, fireTicks / 20));
-            if (!le.hasStatusEffect(EffectRegistry.getReference(EffectRegistry.FLAMESEED)) && remaining > 0) {
+            if (!le.hasStatusEffect(EffectRegistry.getReference(EffectRegistry.FLAMESEED)) && remaining > 0
+                    && le.getPos().squaredDistanceTo(center) <= spreadRange * spreadRange) {
                 remaining -= 1;
                 SimplySwordsStatusEffectInstance flameSeedEffect = new SimplySwordsStatusEffectInstance(
-                        EffectRegistry.getReference(EffectRegistry.FLAMESEED), FLAME_SEED_DURATION, 0, false,
-                        false, true);
+                        EffectRegistry.getReference(EffectRegistry.FLAMESEED),
+                        Phase5FlamewindManager.spreadDuration(FLAME_SEED_DURATION,
+                                tuning.get(Phase5AbilityTuning.Setting.FLAMEWIND_SPREAD_DURATION_FRACTION, 0)),
+                        0, false, false, true);
                 flameSeedEffect.setSourceEntity(sourceEntity);
                 flameSeedEffect.setAdditionalData(remaining);
                 le.addStatusEffect(flameSeedEffect);
                 if (excludedTargetId != null && serverWorld.getEntity(excludedTargetId) instanceof LivingEntity seeded) {
                     Phase5FlamewindManager.inherit(seeded, le);
                 }
-                Vec3d knockback = new Vec3d(le.getX() - center.x, 0.0, le.getZ() - center.z);
-                if (knockback.lengthSquared() > 0.0001) {
-                    double direction = tuning.get(Phase5AbilityTuning.Setting.PULL_STRENGTH, 0) > 0 ? -1 : 1;
-                    knockback = knockback.normalize().multiply(0.28 * direction);
-                }
-                le.setVelocity(knockback.x, 0.12, knockback.z);
                 FlamewindVisualManager.refreshSeed(serverWorld, le);
                 FlamewindVisualManager.spawnSpreadArc(serverWorld, center, le);
             }
+            applyDetonationKnockback(le, center, tuning);
         }
         if (snapshot != null) {
+            Phase5FlamewindManager.onDetonation(serverWorld, sourceEntity, snapshot.stack(), tuning);
             UniqueAbilityApi.emit(snapshot.execution(), UniqueAbilityPhase.HIT, Phase5UniqueAbilities.PULSE,
                     null, affected, abilityDamage);
         }
+    }
+
+
+    private static void applyDetonationKnockback(LivingEntity target, Vec3d center, Phase5AbilityTuning tuning) {
+        Vec3d away = new Vec3d(target.getX() - center.x, 0.0, target.getZ() - center.z);
+        if (away.lengthSquared() <= 0.0001) return;
+        double strength = Phase5FlamewindManager.detonationKnockback(
+                tuning.get(Phase5AbilityTuning.Setting.PULL_STRENGTH, 0),
+                tuning.get(Phase5AbilityTuning.Setting.FLAMEWIND_KNOCKBACK_MULTIPLIER, 1));
+        Vec3d push = away.normalize().multiply(strength);
+        target.setVelocity(push.x, 0.12, push.z);
+        target.velocityModified = true;
     }
 
     public static int detonateOwned(ServerWorld world, LivingEntity owner, int limit) {

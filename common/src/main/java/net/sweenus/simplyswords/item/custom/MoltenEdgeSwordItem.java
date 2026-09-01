@@ -42,7 +42,7 @@ public class MoltenEdgeSwordItem extends UniqueSwordItem implements UniqueWeapon
         }
         if (!attacker.getWorld().isClient()) {
             HelperMethods.playHitSounds(attacker, target);
-            MoltenEdgeAbilityManager.gainHeatFromMelee(stack, attacker);
+            MoltenEdgeAbilityManager.gainHeatFromMelee(stack, attacker, target);
         }
         return super.postHit(stack, target, attacker);
     }
@@ -124,6 +124,8 @@ public class MoltenEdgeSwordItem extends UniqueSwordItem implements UniqueWeapon
         @ValidatedDouble.Restrict(min = 1.0)
         public double radius = 5.0;
         @ValidatedInt.Restrict(min = 1)
+        public int shockwaveTargetCap = 16;
+        @ValidatedInt.Restrict(min = 1)
         public int shockwaveTicks = 8;
         @ValidatedFloat.Restrict(min = 0.0F)
         public float shockwaveDamageScaling = 0.8F;
@@ -141,6 +143,8 @@ public class MoltenEdgeSwordItem extends UniqueSwordItem implements UniqueWeapon
         public double ruptureLength = 7.0;
         @ValidatedDouble.Restrict(min = 0.5)
         public double ruptureWidth = 2.0;
+        @ValidatedInt.Restrict(min = 1)
+        public int ruptureSegmentTargetCap = 8;
         @ValidatedDouble.Restrict(min = 0.25)
         public double ruptureStepDistance = 1.0;
         @ValidatedDouble.Restrict(min = 0.0)

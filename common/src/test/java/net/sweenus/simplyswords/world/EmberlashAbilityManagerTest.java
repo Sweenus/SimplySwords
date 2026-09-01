@@ -51,4 +51,12 @@ final class EmberlashAbilityManagerTest {
         assertEquals(4, EmberlashAbilityManager.segmentDistanceSquared(
                 new Vec3d(0, 64, -5), start, end), 1.0E-8);
     }
+
+    @Test
+    void coalRakeOnlyCountsAttacksThatVanillaWouldSweep() {
+        assertTrue(EmberlashAbilityManager.sweepMovement(10F, 10F, .1F));
+        assertTrue(EmberlashAbilityManager.sweepMovement(10.05F, 10F, .1F));
+        assertFalse(EmberlashAbilityManager.sweepMovement(10.2F, 10F, .1F));
+        assertFalse(EmberlashAbilityManager.sweepMovement(10.1F, 10F, .1F));
+    }
 }

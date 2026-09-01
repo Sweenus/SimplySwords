@@ -16,7 +16,6 @@ import java.util.UUID;
 
 public final class Phase5MoltenManager {
     private static final Map<UUID, Snapshot> VENTS = new HashMap<>();
-    private static final Map<UUID, Phase5AbilityTuning> RUPTURES = new HashMap<>();
 
     private Phase5MoltenManager() {
     }
@@ -38,13 +37,10 @@ public final class Phase5MoltenManager {
         return snapshot;
     }
 
-    public static Phase5AbilityTuning rupture(ServerWorld world, ItemStack stack, LivingEntity actor) {
+    public static Snapshot beginRupture(ServerWorld world, ItemStack stack, LivingEntity actor) {
         UniqueAbilityExecution execution = Phase5CombatManager.beginPassive(Phase5UniqueAbilities.MOLTEN_EDGE_RUPTURE,
                 world, stack, actor, null);
-        Phase5AbilityTuning tuning = Phase5UniqueAbilities.tuning(execution);
-        RUPTURES.put(actor.getUuid(), tuning);
-        UniqueAbilityApi.finish(execution, Phase5UniqueAbilities.FINISH, 0);
-        return tuning;
+        return new Snapshot(execution, Phase5UniqueAbilities.tuning(execution));
     }
 
     public static Phase5AbilityTuning vent(UUID ownerId) {
@@ -52,14 +48,38 @@ public final class Phase5MoltenManager {
         return snapshot == null ? Phase5AbilityTuning.EMPTY : snapshot.tuning;
     }
 
-    public static Phase5AbilityTuning rupture(UUID ownerId) {
-        return RUPTURES.getOrDefault(ownerId, Phase5AbilityTuning.EMPTY);
-    }
-
     public static void finish(UUID ownerId, int hits) {
         Snapshot snapshot = VENTS.remove(ownerId);
-        RUPTURES.remove(ownerId);
         if (snapshot != null) UniqueAbilityApi.finish(snapshot.execution, Phase5UniqueAbilities.FINISH, hits);
+    }
+
+    public static void cancel(UUID ownerId) {
+        Snapshot snapshot = VENTS.remove(ownerId);
+        if (snapshot != null) UniqueAbilityApi.cancel(snapshot.execution);
+    }
+
+    public static void finishRupture(Snapshot snapshot, int hits) {
+        if (snapshot != null && !snapshot.execution.isTerminal()) {
+            UniqueAbilityApi.finish(snapshot.execution, Phase5UniqueAbilities.FINISH, hits);
+        }
+    }
+
+    public static void cancelRupture(Snapshot snapshot) {
+        if (snapshot != null && !snapshot.execution.isTerminal()) UniqueAbilityApi.cancel(snapshot.execution);
+    }
+
+    public static void clear(ServerWorld world) {
+        VENTS.entrySet().removeIf(entry -> {
+            Snapshot snapshot = entry.getValue();
+            if (snapshot.execution.context().world() != world) return false;
+            UniqueAbilityApi.cancel(snapshot.execution);
+            return true;
+        });
+    }
+
+    public static void clearAll() {
+        VENTS.values().forEach(snapshot -> UniqueAbilityApi.cancel(snapshot.execution));
+        VENTS.clear();
     }
 
     public record Snapshot(UniqueAbilityExecution execution, Phase5AbilityTuning tuning) {

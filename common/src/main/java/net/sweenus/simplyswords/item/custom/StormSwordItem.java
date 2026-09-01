@@ -12,6 +12,7 @@ import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
@@ -22,14 +23,16 @@ import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
+import net.sweenus.simplyswords.item.interfaces.UniqueWeaponSecondaryAction;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
+import net.sweenus.simplyswords.world.MjolnirCombatManager;
 import net.sweenus.simplyswords.world.MjolnirStormManager;
 
 import java.util.List;
 
-public class StormSwordItem extends UniqueSwordItem implements UniqueWeaponActiveAbility {
+public class StormSwordItem extends UniqueSwordItem implements UniqueWeaponActiveAbility, UniqueWeaponSecondaryAction {
     public StormSwordItem(ToolMaterial toolMaterial, Settings settings) {
         super(toolMaterial, settings);
     }
@@ -52,6 +55,18 @@ public class StormSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
     }
 
     @Override
+    public TypedActionResult<ItemStack> startPlayerSecondaryAbility(World world, PlayerEntity user, Hand hand) {
+        ItemStack stack = user.getStackInHand(hand);
+        if (world.isClient() || !(world instanceof ServerWorld serverWorld)
+                || stack.getDamage() >= stack.getMaxDamage() - 1
+                || !MjolnirStormManager.tryEarlyRelease(serverWorld, user)) {
+            return TypedActionResult.pass(stack);
+        }
+        user.swingHand(hand, true);
+        return new TypedActionResult<>(ActionResult.SUCCESS, stack);
+    }
+
+    @Override
     public boolean canActivate(WeaponAbilityContext context) {
         return MjolnirStormManager.canActivate(context);
     }
@@ -69,6 +84,9 @@ public class StormSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
         HelperMethods.createFootfalls(entity, stack, world, ParticleTypes.FIREWORK, ParticleTypes.FIREWORK, ParticleTypes.ELECTRIC_SPARK, false);
+        if (selected && !world.isClient() && entity instanceof LivingEntity living) {
+            MjolnirCombatManager.tickHeld(stack, living);
+        }
         super.inventoryTick(stack, world, entity, slot, selected);
     }
 

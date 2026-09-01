@@ -47,6 +47,8 @@ import net.sweenus.simplyswords.world.GloamMechanicsManager;
 import net.sweenus.simplyswords.world.HearthflameAbilityManager;
 import net.sweenus.simplyswords.world.SoulPyreAbilityManager;
 import net.sweenus.simplyswords.world.StormsEdgeAbilityManager;
+import net.sweenus.simplyswords.world.StormbringerAbilityManager;
+import net.sweenus.simplyswords.world.StormbringerParryManager;
 import net.sweenus.simplyswords.world.ThunderbrandAbilityManager;
 import net.sweenus.simplyswords.world.WaxweaverEncasementManager;
 import net.sweenus.simplyswords.world.WraithfangAbilityManager;
@@ -109,6 +111,10 @@ public abstract class LivingEntityMixin {
         LivingEntity livingEntity = (LivingEntity) (Object) this;
         if(!livingEntity.getWorld().isClient()) {
             ItemStack mainhand = livingEntity.getStackInHand(Hand.MAIN_HAND);
+            if (SoulPyreAbilityManager.tryUndyingDominion(livingEntity, source)) {
+                cir.setReturnValue(true);
+                return;
+            }
             if (net.sweenus.simplyswords.world.SoulrenderAbilityManager.tryUnbrokenReaper(livingEntity, source)) {
                 cir.setReturnValue(true);
                 return;
@@ -188,6 +194,9 @@ public abstract class LivingEntityMixin {
             if (source.getAttacker() instanceof LivingEntity attacker) {
                 amount = EmberbladeAbilityManager.modifyOutgoingDamage(attacker, source, amount);
             }
+            amount = StormbringerAbilityManager.modifyOutgoingMeleeDamage(livingEntity, source, amount);
+            amount = net.sweenus.simplyswords.world.FrostfallAbilityManager.modifyOutgoingMeleeDamage(
+                    livingEntity, source, amount);
             StatusEffectInstance voidcloakEffect = livingEntity.getStatusEffect(EffectRegistry.getReference(EffectRegistry.VOIDCLOAK));
             StatusEffectInstance ribbonwrathEffect = livingEntity.getStatusEffect(EffectRegistry.getReference(EffectRegistry.RIBBONWRATH));
             StatusEffectInstance soulTetherEffect = livingEntity.getStatusEffect(EffectRegistry.getReference(EffectRegistry.SOULTETHER));
@@ -228,6 +237,12 @@ public abstract class LivingEntityMixin {
             amount = HivemindSwarmManager.modifyIncomingDamage(livingEntity, source, amount);
             amount = Phase7CombatManager.modifyIncomingDamage(livingEntity, source, amount);
             amount = Phase8CombatManager.modifyIncomingDamage(livingEntity, source, amount);
+            amount = net.sweenus.simplyswords.world.MjolnirCombatManager.modifyIncomingDamage(
+                    livingEntity, source, amount);
+            amount = net.sweenus.simplyswords.world.MjolnirCombatManager.modifyOutgoingDamage(
+                    livingEntity, source, amount);
+            amount = net.sweenus.simplyswords.world.IcewhisperAbilityManager.modifyIncomingDamage(
+                    livingEntity, source, amount);
         }
         return amount;
     }
@@ -248,6 +263,9 @@ public abstract class LivingEntityMixin {
             HivemindSwarmManager.onOwnerDamaged(livingEntity, source);
             Phase7CombatManager.onDamageApplied(livingEntity, source);
             WraithfangAbilityManager.onMeleeDamageApplied(livingEntity, source);
+            StormbringerAbilityManager.onDamageApplied(livingEntity);
+            net.sweenus.simplyswords.world.MjolnirCombatManager.onDamageApplied(livingEntity, source);
+            net.sweenus.simplyswords.world.IcewhisperAbilityManager.onDamageApplied(livingEntity, source);
             if (source.isIn(DamageTypeTags.IS_PLAYER_ATTACK) && source.getAttacker() instanceof ServerPlayerEntity player) {
                 ItemStack stack = source.getWeaponStack();
                 if (stack == null || !stack.isOf(ItemsRegistry.STORMBRINGER.get())) {
@@ -279,6 +297,14 @@ public abstract class LivingEntityMixin {
         FlameSeedEffect.triggerDeathDetonation(livingEntity);
         GloamMechanicsManager.onTargetDeath(livingEntity);
         WraithfangAbilityManager.onTargetDeath(livingEntity, damageSource);
+        StormbringerAbilityManager.clearActor(livingEntity);
+        StormbringerParryManager.clearActor(livingEntity);
+        net.sweenus.simplyswords.world.MjolnirCombatManager.onDeath(livingEntity, damageSource);
+        net.sweenus.simplyswords.world.MjolnirStormManager.clearActor(livingEntity);
+        net.sweenus.simplyswords.world.MjolnirCombatManager.clearActor(livingEntity);
+        net.sweenus.simplyswords.world.TempestAbilityManager.clearActor(livingEntity);
+        net.sweenus.simplyswords.world.FrostfallAbilityManager.clearActor(livingEntity);
+        net.sweenus.simplyswords.world.IcewhisperCometManager.clearActor(livingEntity);
         net.sweenus.simplyswords.world.SoulrenderAbilityManager.onTargetDeath(livingEntity, damageSource);
         net.sweenus.simplyswords.world.SoulrenderAbilityManager.removeActor(livingEntity);
     }

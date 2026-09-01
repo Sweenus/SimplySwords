@@ -54,6 +54,24 @@ final class EmberbladeAbilityManagerTest {
     }
 
     @Test
+    void whiteHeatBonusAppliesOnlyInsideTheFinalWindow() {
+        assertEquals(1.25, EmberbladeAbilityManager.fullChargeBonus(true, 1.25), 1.0E-6);
+        assertEquals(1, EmberbladeAbilityManager.fullChargeBonus(false, 1.25), 1.0E-6);
+        assertEquals(1, EmberbladeAbilityManager.fullChargeBonus(true, 1), 1.0E-6);
+        assertEquals(1.5, EmberbladeAbilityManager.fullChargeBonus(true, 1.5), 1.0E-6);
+    }
+
+    @Test
+    void bankDurationsAreIndependentPerSource() {
+        Phase5AbilityTuning both = Phase5AbilityTuning.EMPTY
+                .with(Phase5AbilityTuning.Setting.EMBERBLADE_BANK_DURATION_TICKS, 60)
+                .with(Phase5AbilityTuning.Setting.EMBERBLADE_FLAME_BANK_DURATION_TICKS, 100);
+
+        assertEquals(60, both.integer(Phase5AbilityTuning.Setting.EMBERBLADE_BANK_DURATION_TICKS, 0));
+        assertEquals(100, both.integer(Phase5AbilityTuning.Setting.EMBERBLADE_FLAME_BANK_DURATION_TICKS, 0));
+    }
+
+    @Test
     void lingeringFuryComposesWithBaseAndIncarnateDurations() {
         assertEquals(150, EmberbladeAbilityManager.ireDuration(150, 0));
         assertEquals(190, EmberbladeAbilityManager.ireDuration(150, 40));

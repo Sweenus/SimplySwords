@@ -191,7 +191,8 @@ public final class HearthflameAbilityManager {
         if (tuning.has(Phase5AbilityTuning.Setting.HEARTH_CAST_ABSORPTION)) {
             grantTimedAbsorption(world, actor,
                     (float) tuning.get(Phase5AbilityTuning.Setting.HEARTH_CAST_ABSORPTION, 4),
-                    tuning.integer(Phase5AbilityTuning.Setting.HEARTH_CAST_ABSORPTION_DURATION_TICKS, 80));
+                    tuning.integer(Phase5AbilityTuning.Setting.HEARTH_CAST_ABSORPTION_DURATION_TICKS, 80),
+                    (float) tuning.get(Phase5AbilityTuning.Setting.HEARTH_BRAND_ABSORPTION_CAP, 8));
         }
         if (ability.bastion) {
             StatusEffectInstance existing = actor.getStatusEffect(StatusEffects.RESISTANCE);
@@ -278,18 +279,19 @@ public final class HearthflameAbilityManager {
             applyAbilityDamage(world, actor, sourceOwner, stack, target,
                     (float) actor.getAttributeValue(EntityAttributes.GENERIC_ATTACK_DAMAGE)
                             * ((float) brandTuning.get(
-                            Phase5AbilityTuning.Setting.HEARTH_BRAND_HIT_DAMAGE_MULTIPLIER, 1) - 1.0F), true);
-            int fireTicks = brandTuning.integer(
-                    Phase5AbilityTuning.Setting.HEARTH_BRAND_HIT_FIRE_TICKS, 20);
-            if (fireTicks > 0) target.setOnFireFor(Math.max(1, fireTicks / 20));
+                            Phase5AbilityTuning.Setting.HEARTH_BRAND_HIT_DAMAGE_MULTIPLIER, 1) - 1.0F), true,
+                    brandTuning.integer(Phase5AbilityTuning.Setting.HEARTH_BRAND_HIT_FIRE_TICKS, 0));
         }
         if (hasBrand(world, actor, target)
                 && brandTuning.has(Phase5AbilityTuning.Setting.HEARTH_BRAND_ABSORPTION)
                 && claimLockout(BRAND_SHELTER_LOCKOUTS, world,
                 new BrandKey(actor.getUuid(), target.getUuid()),
                 brandTuning.integer(Phase5AbilityTuning.Setting.HEARTH_BRAND_ABSORPTION_LOCKOUT_TICKS, 40))) {
-            actor.setAbsorptionAmount(actor.getAbsorptionAmount() + (float) brandTuning.get(
-                    Phase5AbilityTuning.Setting.HEARTH_BRAND_ABSORPTION, 2));
+            grantTimedAbsorption(world, actor,
+                    (float) brandTuning.get(Phase5AbilityTuning.Setting.HEARTH_BRAND_ABSORPTION, 2),
+                    brandTuning.integer(
+                            Phase5AbilityTuning.Setting.HEARTH_BRAND_ABSORPTION_DURATION_TICKS, 200),
+                    (float) brandTuning.get(Phase5AbilityTuning.Setting.HEARTH_BRAND_ABSORPTION_CAP, 8));
         }
         if (rollBrand(actor, brandTuning)) applyBrand(world, actor, sourceOwner, target, brandTuning);
         UniqueAbilityApi.finish(brandExecution, Phase5UniqueAbilities.FINISH, 1);
@@ -423,7 +425,7 @@ public final class HearthflameAbilityManager {
                     double excess = Math.max(0.0, distance - restLength);
                     SizeResponse response = getSizeResponse(target);
                     if (excess > 0.0) {
-                        pullTarget(actor, anchor, target, excess, response.pullMultiplier);
+                        pullTarget(ability.tuning, anchor, actor, target, excess, response.pullMultiplier);
                         float tensionGain = (float) (excess * TENSION_PER_EXCESS_BLOCK * response.tensionMultiplier);
                         chain.tension = Math.min(MAX_TENSION, chain.tension + tensionGain);
                         totalTensionGain += tensionGain;
@@ -478,11 +480,9 @@ public final class HearthflameAbilityManager {
                 continue;
             }
             applyAbilityDamage(world, actor, sourceOwner, ability.stack, echoTarget,
-                    ability.echoDamage * chain.damageMultiplier, true);
-            int fireTicks = tunedInteger(ability.tuning,
-                    Phase5AbilityTuning.Setting.HEARTH_ECHO_FIRE_TICKS,
-                    Phase5AbilityTuning.Setting.FIRE_TICKS, 0);
-            if (fireTicks > 0) echoTarget.setOnFireFor(Math.max(1, fireTicks / 20));
+                    ability.echoDamage * chain.damageMultiplier, true,
+                    tunedInteger(ability.tuning, Phase5AbilityTuning.Setting.HEARTH_ECHO_FIRE_TICKS,
+                            Phase5AbilityTuning.Setting.FIRE_TICKS, 0));
             spawnEchoEffects(world, echoTarget);
         }
         world.playSoundFromEntity(
@@ -529,14 +529,17 @@ public final class HearthflameAbilityManager {
             if (target != null && isValidTarget(actor, sourceOwner, target)) {
                 ability.completedChains++;
                 float finalDamage = gatedFinalDamage(ability.finalDamage * chain.damageMultiplier,
-                        ability.initialChainCount, ability.tuning.flag(1 << 6));
+                        ability.initialChainCount,
+                        ability.tuning.integer(Phase5AbilityTuning.Setting.HEARTH_FINAL_CHAIN_REQUIREMENT, 0),
+                        ability.tuning.get(Phase5AbilityTuning.Setting.HEARTH_FINAL_CHAIN_MULTIPLIER, 1));
                 damageArea(
                         world,
                         actor,
                         sourceOwner,
                         ability.stack,
                         target.getPos().add(0.0, target.getHeight() * 0.45, 0.0),
-                        ability.tuning.get(Phase5AbilityTuning.Setting.RADIUS,
+                        tuned(ability.tuning, Phase5AbilityTuning.Setting.HEARTH_SNAP_RADIUS,
+                                Phase5AbilityTuning.Setting.RADIUS,
                                 Config.uniqueEffects.hearthflame.snapRadius),
                         finalDamage * MathHelper.clamp(strength, 0.0F, 1.0F),
                         damaged,
@@ -589,7 +592,14 @@ public final class HearthflameAbilityManager {
     }
 
     private static boolean applyAbilityDamage(ServerWorld world, LivingEntity actor, LivingEntity sourceOwner,
-                                              ItemStack stack, LivingEntity target, float damage, boolean preserveVelocity) {
+                                              ItemStack stack, LivingEntity target, float damage,
+                                              boolean preserveVelocity) {
+        return applyAbilityDamage(world, actor, sourceOwner, stack, target, damage, preserveVelocity, 0);
+    }
+
+    private static boolean applyAbilityDamage(ServerWorld world, LivingEntity actor, LivingEntity sourceOwner,
+                                              ItemStack stack, LivingEntity target, float damage,
+                                              boolean preserveVelocity, int igniteTicks) {
         LivingEntity attributedOwner = sourceOwner == null ? actor : sourceOwner;
         DamageSource source = world.getDamageSources().indirectMagic(actor, attributedOwner);
         float finalDamage = HelperMethods.applyAbilityDamageEnchantments(world, stack, target, source, damage);
@@ -601,29 +611,23 @@ public final class HearthflameAbilityManager {
             target.velocityDirty = true;
         }
         if (damaged) {
-            target.setOnFireFor(Math.max(0, Config.uniqueEffects.hearthflame.igniteSeconds));
+            target.setOnFireFor(igniteSeconds(Config.uniqueEffects.hearthflame.igniteSeconds, igniteTicks));
         }
         return damaged;
     }
 
-    private static void pullTarget(LivingEntity actor, Vec3d anchor, LivingEntity target,
-                                   double excess, double pullMultiplier) {
+    private static void pullTarget(Phase5AbilityTuning tuning, Vec3d anchor, LivingEntity actor,
+                                   LivingEntity target, double excess, double pullMultiplier) {
         Vec3d direction = anchor.add(0.0, actor.getHeight() * 0.45, 0.0)
                 .subtract(target.getPos().add(0.0, target.getHeight() * 0.45, 0.0));
         if (direction.lengthSquared() < 0.0001) {
             return;
         }
         direction = direction.normalize();
-        double strength = Math.min(
-                0.35,
-                (getActive((ServerWorld) actor.getWorld(), actor) == null
-                        ? Math.max(0.0, Config.uniqueEffects.hearthflame.pullStrength)
-                        : getActive((ServerWorld) actor.getWorld(), actor).tuning.get(
-                                Phase5AbilityTuning.Setting.PULL_STRENGTH,
-                                Config.uniqueEffects.hearthflame.pullStrength))
-                        * pullMultiplier
-                        * Math.min(2.0, 0.75 + excess * 0.25)
-        );
+        double strength = pullStrength(
+                tuning.get(Phase5AbilityTuning.Setting.PULL_STRENGTH,
+                        Config.uniqueEffects.hearthflame.pullStrength),
+                pullMultiplier, excess);
         target.addVelocity(direction.x * strength, MathHelper.clamp(direction.y * strength, -0.08, 0.08), direction.z * strength);
         target.velocityModified = true;
         target.velocityDirty = true;
@@ -1053,8 +1057,13 @@ public final class HearthflameAbilityManager {
                 extendedResistanceTicks(existingDuration, grant, cap), 0), actor);
     }
 
-    static float gatedFinalDamage(float tunedDamage, int initialChains, boolean sixfoldSentence) {
-        return sixfoldSentence && initialChains < 6 ? tunedDamage / 1.25F : tunedDamage;
+    static float gatedFinalDamage(float tunedDamage, int initialChains, int requiredChains, double multiplier) {
+        return requiredChains > 0 && initialChains >= requiredChains
+                ? tunedDamage * (float) multiplier : tunedDamage;
+    }
+
+    static int igniteSeconds(int baseSeconds, int tunedIgniteTicks) {
+        return Math.max(Math.max(0, baseSeconds), Math.max(0, tunedIgniteTicks) / 20);
     }
 
     static float rebindDamageMultiplier(double perGeneration, int generation) {
@@ -1065,13 +1074,19 @@ public final class HearthflameAbilityManager {
         return Math.min(Math.max(grant, cap), Math.max(0, existing) + Math.max(0, grant));
     }
 
+    static double pullStrength(double tuned, double pullMultiplier, double excess) {
+        return Math.min(0.35, Math.max(0.0, tuned) * pullMultiplier * Math.min(2.0, 0.75 + excess * 0.25));
+    }
+
     static float reducedDamage(float amount, double reduction) {
         return Math.max(0, amount) * (1.0F - (float) MathHelper.clamp(reduction, 0.0, 1.0));
     }
 
-    private static void grantTimedAbsorption(ServerWorld world, LivingEntity actor, float amount, int ticks) {
+    // Every Hearthflame grant tops up one tracked, bounded pool so no source can stack without limit.
+    private static void grantTimedAbsorption(ServerWorld world, LivingEntity actor, float amount, int ticks,
+                                             float cap) {
         if (amount <= 0 || ticks <= 0) return;
-        Phase4AbsorptionTracker.grant(actor, amount, ticks, amount);
+        Phase4AbsorptionTracker.grant(actor, amount, ticks, Math.max(amount, cap));
         ABSORPTION_SWEEP_UNTIL.merge(world, world.getTime() + ticks, Math::max);
     }
 
@@ -1083,7 +1098,8 @@ public final class HearthflameAbilityManager {
         grantTimedAbsorption(world, actor,
                 (float) ability.tuning.get(Phase5AbilityTuning.Setting.HEARTH_COMPLETION_ABSORPTION, 4),
                 ability.tuning.integer(
-                        Phase5AbilityTuning.Setting.HEARTH_COMPLETION_ABSORPTION_DURATION_TICKS, 60));
+                        Phase5AbilityTuning.Setting.HEARTH_COMPLETION_ABSORPTION_DURATION_TICKS, 60),
+                (float) ability.tuning.get(Phase5AbilityTuning.Setting.HEARTH_BRAND_ABSORPTION_CAP, 8));
     }
 
     private static void applyBastionMovementPenalty(LivingEntity actor, Phase5AbilityTuning tuning) {
