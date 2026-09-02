@@ -35,8 +35,11 @@ import net.sweenus.simplyswords.util.HelperMethods;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -53,7 +56,10 @@ public final class RiftmaneAbilityManager {
     private static final int SUPPORT_SCAN_UP = 4;
     private static final int SUPPORT_SCAN_DOWN = 12;
 
+    private static final int MAX_RANK = 12;
+
     private static final Map<ServerWorld, Map<UUID, Long>> LAST_PASSIVE = new HashMap<>();
+    private static final Map<ServerWorld, List<PendingRank>> PENDING_RANKS = new HashMap<>();
 
     private RiftmaneAbilityManager() {
     }
@@ -76,60 +82,195 @@ public final class RiftmaneAbilityManager {
         LivingEntity owner = context.actor();
         RiftmaneSwordItem.EffectSettings settings = Config.uniqueEffects.riftmane;
         UniqueAbilityExecution execution = Phase10CombatManager.beginActive(
-                Phase10UniqueAbilities.RIFTMANE_RANK, context, settings.cooldown);
+                Phase10UniqueAbilities.RIFTMANE_RANK, context, settings.cooldown,
+                rankBase(settings, context.stack()));
         Phase10AbilityTuning tuning = Phase10UniqueAbilities.tuning(execution);
 
         Vec3d forward = horizontal(context.facing(), owner.getYaw());
         Vec3d side = new Vec3d(-forward.z, 0.0, forward.x);
-        int count = Math.max(1, tuning.integer(Phase10AbilityTuning.Setting.COUNT, settings.chargerCount));
+        int count = Math.clamp(tuning.integer(Phase10AbilityTuning.Setting.COUNT, settings.chargerCount), 1, MAX_RANK);
         double spacing = count > 1 ? Math.max(0.5, tuning.get(
                 Phase10AbilityTuning.Setting.WIDTH, settings.rankWidth)) / (count - 1) : 0.0;
         float damage = HelperMethods.abilityScaledDamage(SpellScalingProfile.ARCANE, owner, context.stack(),
                 (float) settings.damageScaling, (float) settings.spellScaling);
-        damage *= (float) tuning.get(Phase10AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1);
+        float rankDamage = damage * (float) tuning.get(Phase10AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1);
 
         boolean waterWalk = settings.waterWalking && !owner.isSubmergedInWater();
         ServerPlayerEntity rider = context.actor() instanceof ServerPlayerEntity player
                 && player.isSprinting() && !player.hasVehicle() ? player : null;
         int mountIndex = rider == null ? -1 : count / 2;
+        UniqueAbilityExecution riderExecution = rider == null ? null
+                : Phase10CombatManager.beginPassive(Phase10UniqueAbilities.RIFTMANE_RIDER, world,
+                        context.stack(), owner, null, riderBase(settings, context.stack()));
+        Phase10AbilityTuning riderTuning = riderExecution == null
+                ? Phase10AbilityTuning.EMPTY : Phase10UniqueAbilities.tuning(riderExecution);
 
         int spawned = 0;
         for (int index = 0; index < count; index++) {
+            boolean mounted = index == mountIndex;
+            Phase10AbilityTuning applied = mounted ? riderTuning : tuning;
             double lateral = (index - (count - 1) * 0.5) * spacing;
             Vec3d lane = owner.getPos().add(side.multiply(lateral));
             Vec3d ahead = lane.add(forward.multiply(Math.max(0.0, settings.spawnOffset)));
-            double distanceMultiplier = index == mountIndex
-                    ? Math.max(1.0, tuning.get(Phase10AbilityTuning.Setting.SECONDARY_RADIUS,
+            double distanceMultiplier = mounted
+                    ? Math.max(1.0, riderTuning.get(Phase10AbilityTuning.Setting.SECONDARY_RADIUS,
                     settings.mountedDistanceMultiplier)) : 1.0;
+            float applance = mounted
+                    ? damage * (float) riderTuning.get(Phase10AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1)
+                    : rankDamage;
             boolean audioLead = spawned == 0;
             RiftmaneChargerEntity charger = summon(world, owner, context.stack(), ahead, forward,
-                    damage, settings, waterWalk, distanceMultiplier, audioLead, tuning);
+                    applance, settings, waterWalk, distanceMultiplier, audioLead, applied);
             if (charger == null) {
                 charger = summon(world, owner, context.stack(), lane, forward,
-                        damage, settings, waterWalk, distanceMultiplier, audioLead, tuning);
+                        applance, settings, waterWalk, distanceMultiplier, audioLead, applied);
             }
             if (charger == null) {
                 continue;
             }
             spawned++;
-            if (index == mountIndex) {
+            if (mounted) {
+                configureRider(charger, riderTuning);
                 rider.startRiding(charger, true);
             }
         }
         if (spawned == 0) {
+            if (riderExecution != null) Phase10CombatManager.finish(riderExecution, 0);
             UniqueAbilityApi.cancel(execution);
             return false;
         }
 
-        if (rider != null && tuning.has(Phase10AbilityTuning.Setting.STATUS_AMPLIFIER))
+        if (rider != null && riderTuning.has(Phase10AbilityTuning.Setting.STATUS_AMPLIFIER))
             rider.addStatusEffect(new net.minecraft.entity.effect.StatusEffectInstance(
                     net.minecraft.entity.effect.StatusEffects.RESISTANCE,
                     Math.max(20, settings.rearDuration + 20),
-                    tuning.integer(Phase10AbilityTuning.Setting.STATUS_AMPLIFIER, 1)), owner);
+                    riderTuning.integer(Phase10AbilityTuning.Setting.STATUS_AMPLIFIER, 1)), owner);
+        if (tuning.has(Phase10AbilityTuning.Setting.DELAY_TICKS)) {
+            PENDING_RANKS.computeIfAbsent(world, ignored -> new ArrayList<>()).add(new PendingRank(
+                    owner.getUuid(), context.stack().copy(), forward,
+                    world.getTime() + Math.max(1, tuning.integer(Phase10AbilityTuning.Setting.DELAY_TICKS, 10)),
+                    Math.clamp(tuning.integer(Phase10AbilityTuning.Setting.TARGET_CAP, 3), 1, MAX_RANK),
+                    damage * (float) tuning.get(Phase10AbilityTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, .55),
+                    spacing, tuning));
+        }
 
         spawnActivationEffects(world, owner, forward);
+        if (riderExecution != null) Phase10CombatManager.finish(riderExecution, 1);
         Phase10CombatManager.finish(execution, spawned);
         return true;
+    }
+
+    private static void configureRider(RiftmaneChargerEntity charger, Phase10AbilityTuning tuning) {
+        charger.setPhasing(tuning.flag(1 << 25));
+        charger.setRiderGuard(tuning.has(Phase10AbilityTuning.Setting.STATUS_AMPLIFIER)
+                        ? tuning.integer(Phase10AbilityTuning.Setting.STATUS_AMPLIFIER, 1) : -1,
+                tuning.integer(Phase10AbilityTuning.Setting.STATUS_DURATION_TICKS, 20));
+        charger.setImpactBonus(tuning.get(Phase10AbilityTuning.Setting.OUTGOING_MULTIPLIER, 1),
+                tuning.integer(Phase10AbilityTuning.Setting.TARGET_CAP, 0),
+                tuning.get(Phase10AbilityTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, 1));
+    }
+
+    private static void tickPendingRanks(ServerWorld world) {
+        List<PendingRank> pending = PENDING_RANKS.get(world);
+        if (pending == null || pending.isEmpty()) {
+            return;
+        }
+        RiftmaneSwordItem.EffectSettings settings = Config.uniqueEffects.riftmane;
+        Iterator<PendingRank> iterator = pending.iterator();
+        while (iterator.hasNext()) {
+            PendingRank rank = iterator.next();
+            if (world.getTime() < rank.readyTick) continue;
+            iterator.remove();
+            if (!(world.getEntity(rank.ownerId) instanceof LivingEntity owner) || !owner.isAlive()) continue;
+            boolean waterWalk = settings.waterWalking && !owner.isSubmergedInWater();
+            Vec3d side = new Vec3d(-rank.forward.z, 0.0, rank.forward.x);
+            for (int index = 0; index < rank.count; index++) {
+                double lateral = (index - (rank.count - 1) * 0.5) * Math.max(0.5, rank.spacing);
+                Vec3d lane = owner.getPos().add(side.multiply(lateral));
+                Vec3d ahead = lane.add(rank.forward.multiply(Math.max(0.0, settings.spawnOffset)));
+                summon(world, owner, rank.stack, ahead, rank.forward, rank.damage, settings,
+                        waterWalk, 1.0, index == 0, rank.tuning);
+            }
+        }
+        if (pending.isEmpty()) PENDING_RANKS.remove(world);
+    }
+
+    public static void onChargerKill(ServerWorld world, LivingEntity owner, ItemStack stack, LivingEntity victim,
+                                     double radius, double damageMultiplier, int refundTicks) {
+        if (owner == null || !owner.isAlive() || stack == null || stack.isEmpty()) {
+            return;
+        }
+        Map<UUID, Long> lockouts = LAST_PASSIVE.get(world);
+        if (lockouts != null && refundTicks > 0) {
+            Long next = lockouts.get(owner.getUuid());
+            if (next != null) lockouts.put(owner.getUuid(),
+                    Math.max(world.getTime(), next - refundTicks));
+        }
+        if (radius <= 0) return;
+        RiftmaneSwordItem.EffectSettings settings = Config.uniqueEffects.riftmane;
+        LivingEntity next = world.getEntitiesByClass(LivingEntity.class,
+                        victim.getBoundingBox().expand(radius),
+                        candidate -> candidate != victim && candidate.isAlive()
+                                && HelperMethods.checkAbilityTarget(candidate, owner))
+                .stream().min(Comparator.comparingDouble(victim::squaredDistanceTo)).orElse(null);
+        if (next == null) return;
+        Vec3d forward = horizontal(next.getPos().subtract(owner.getPos()), owner.getYaw());
+        Vec3d position = owner.getPos().add(forward.multiply(Math.max(0.0, settings.spawnOffset)));
+        float damage = HelperMethods.abilityScaledDamage(SpellScalingProfile.ARCANE, owner, stack,
+                (float) settings.damageScaling, (float) settings.spellScaling);
+        summon(world, owner, stack, position, forward, damage * (float) damageMultiplier, settings,
+                settings.waterWalking && !owner.isSubmergedInWater(), 1.0, true,
+                harrierBase(settings, stack).with(Phase10AbilityTuning.Setting.SEARCH_RADIUS, 0));
+    }
+
+    public static Phase10AbilityTuning chargerBase(double chargeDistance, double knockback, double hitRadius,
+                                                  double stepHeight, int rearDuration) {
+        return Phase10AbilityTuning.EMPTY
+                .with(Phase10AbilityTuning.Setting.RANGE, chargeDistance)
+                .with(Phase10AbilityTuning.Setting.SPEED, 1)
+                .with(Phase10AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1)
+                .with(Phase10AbilityTuning.Setting.KNOCKBACK, knockback)
+                .with(Phase10AbilityTuning.Setting.RADIUS, hitRadius)
+                .with(Phase10AbilityTuning.Setting.HEIGHT, stepHeight)
+                .with(Phase10AbilityTuning.Setting.WINDUP_TICKS, rearDuration);
+    }
+
+    public static Phase10AbilityTuning harrierBase(Phase10AbilityTuning charger, int chance, int lockout,
+                                                  double maxRange, double minRange, double cone) {
+        return charger
+                .with(Phase10AbilityTuning.Setting.CHANCE, chance)
+                .with(Phase10AbilityTuning.Setting.LOCKOUT_TICKS, lockout)
+                .with(Phase10AbilityTuning.Setting.SEARCH_RANGE, maxRange)
+                .with(Phase10AbilityTuning.Setting.SECONDARY_RADIUS, minRange)
+                .with(Phase10AbilityTuning.Setting.ANGLE, cone)
+                .with(Phase10AbilityTuning.Setting.COUNT, 1);
+    }
+
+    public static Phase10AbilityTuning rankBase(Phase10AbilityTuning charger, int count, double width) {
+        return charger.with(Phase10AbilityTuning.Setting.COUNT, count).with(Phase10AbilityTuning.Setting.WIDTH, width);
+    }
+
+    public static Phase10AbilityTuning riderBase(Phase10AbilityTuning charger, double mountedMultiplier) {
+        return charger.with(Phase10AbilityTuning.Setting.SECONDARY_RADIUS, mountedMultiplier);
+    }
+
+    private static Phase10AbilityTuning chargerBase(RiftmaneSwordItem.EffectSettings settings, ItemStack stack) {
+        return chargerBase(settings.chargeDistance,
+                AwakeningApi.scaleEffect(stack, settings.knockbackStrength),
+                settings.hitRadius, settings.stepHeight, settings.rearDuration);
+    }
+
+    private static Phase10AbilityTuning harrierBase(RiftmaneSwordItem.EffectSettings settings, ItemStack stack) {
+        return harrierBase(chargerBase(settings, stack), settings.passiveChance, settings.passiveLockout,
+                settings.passiveMaxRange, settings.passiveMinRange, settings.passiveConeDegrees);
+    }
+
+    private static Phase10AbilityTuning rankBase(RiftmaneSwordItem.EffectSettings settings, ItemStack stack) {
+        return rankBase(chargerBase(settings, stack), settings.chargerCount, settings.rankWidth);
+    }
+
+    private static Phase10AbilityTuning riderBase(RiftmaneSwordItem.EffectSettings settings, ItemStack stack) {
+        return riderBase(chargerBase(settings, stack), settings.mountedDistanceMultiplier);
     }
 
     public static void onSwing(ItemStack stack, ServerWorld world, LivingEntity owner) {
@@ -138,7 +279,8 @@ public final class RiftmaneAbilityManager {
         }
         RiftmaneSwordItem.EffectSettings settings = Config.uniqueEffects.riftmane;
         UniqueAbilityExecution execution = Phase10CombatManager.beginPassive(
-                Phase10UniqueAbilities.RIFTMANE_HARRIER, world, stack, owner, null);
+                Phase10UniqueAbilities.RIFTMANE_HARRIER, world, stack, owner, null,
+                harrierBase(settings, stack));
         Phase10AbilityTuning tuning = Phase10UniqueAbilities.tuning(execution);
         long now = world.getTime();
         Map<UUID, Long> lockouts = LAST_PASSIVE.get(world);
@@ -189,10 +331,12 @@ public final class RiftmaneAbilityManager {
 
     public static boolean hasActive(ServerWorld world) {
         Map<UUID, Long> lockouts = LAST_PASSIVE.get(world);
-        return lockouts != null && !lockouts.isEmpty();
+        List<PendingRank> pending = PENDING_RANKS.get(world);
+        return lockouts != null && !lockouts.isEmpty() || pending != null && !pending.isEmpty();
     }
 
     public static void tick(ServerWorld world) {
+        tickPendingRanks(world);
         if (world.getTime() % LOCKOUT_PRUNE_INTERVAL != 0L) {
             return;
         }
@@ -205,6 +349,27 @@ public final class RiftmaneAbilityManager {
         if (lockouts.isEmpty()) {
             LAST_PASSIVE.remove(world);
         }
+    }
+
+    public static void clear(ServerWorld world) {
+        LAST_PASSIVE.remove(world);
+        PENDING_RANKS.remove(world);
+    }
+
+    public static void clearActor(LivingEntity actor) {
+        if (actor == null) return;
+        LAST_PASSIVE.values().forEach(lockouts -> lockouts.remove(actor.getUuid()));
+        PENDING_RANKS.values().forEach(pending ->
+                pending.removeIf(rank -> rank.ownerId.equals(actor.getUuid())));
+    }
+
+    public static void clearAll() {
+        LAST_PASSIVE.clear();
+        PENDING_RANKS.clear();
+    }
+
+    private record PendingRank(UUID ownerId, ItemStack stack, Vec3d forward, long readyTick,
+                               int count, float damage, double spacing, Phase10AbilityTuning tuning) {
     }
 
     @Nullable
@@ -247,6 +412,9 @@ public final class RiftmaneAbilityManager {
                         AwakeningApi.scaleEffect(stack, settings.knockbackStrength)),
                 speed, tuning.get(Phase10AbilityTuning.Setting.RADIUS, settings.hitRadius),
                 tuning.get(Phase10AbilityTuning.Setting.HEIGHT, settings.stepHeight));
+        charger.setKillFollowUp(tuning.get(Phase10AbilityTuning.Setting.SEARCH_RADIUS, 0),
+                tuning.get(Phase10AbilityTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, .5),
+                tuning.integer(Phase10AbilityTuning.Setting.REFUND_TICKS, 0));
         if (!world.spawnEntity(charger)) {
             charger.discard();
             return null;
@@ -302,7 +470,7 @@ public final class RiftmaneAbilityManager {
                                                   Phase10AbilityTuning tuning) {
         double minimum = Math.max(0.0, tuning.get(Phase10AbilityTuning.Setting.SECONDARY_RADIUS,
                 settings.passiveMinRange));
-        double maximum = Math.max(minimum + 0.1, tuning.get(Phase10AbilityTuning.Setting.RANGE,
+        double maximum = Math.max(minimum + 0.1, tuning.get(Phase10AbilityTuning.Setting.SEARCH_RANGE,
                 settings.passiveMaxRange));
         double minimumSquared = minimum * minimum;
         double maximumSquared = maximum * maximum;

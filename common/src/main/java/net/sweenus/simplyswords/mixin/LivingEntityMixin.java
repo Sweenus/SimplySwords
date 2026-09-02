@@ -252,6 +252,7 @@ public abstract class LivingEntityMixin {
         LivingEntity livingEntity = (LivingEntity) (Object) this;
         if (Boolean.TRUE.equals(cir.getReturnValue()) && !livingEntity.getWorld().isClient()) {
             BramblethornAbilityManager.onBoundTargetDamaged(livingEntity, source, amount);
+            BramblethornAbilityManager.onDamageApplied(livingEntity, source);
             MoltenEdgeAbilityManager.gainHeatFromIncomingDamage(livingEntity, amount, true);
             WeaponImplicitRegistry.onDamageApplied(livingEntity, source, amount);
             BloodwakeAbilityManager.onTargetDamaged(livingEntity, source);
@@ -262,6 +263,7 @@ public abstract class LivingEntityMixin {
             EmberlashAbilityManager.onDamageApplied(livingEntity, source);
             HivemindSwarmManager.onOwnerDamaged(livingEntity, source);
             Phase7CombatManager.onDamageApplied(livingEntity, source);
+            Phase8CombatManager.onDamageApplied(livingEntity);
             WraithfangAbilityManager.onMeleeDamageApplied(livingEntity, source);
             StormbringerAbilityManager.onDamageApplied(livingEntity);
             net.sweenus.simplyswords.world.MjolnirCombatManager.onDamageApplied(livingEntity, source);
@@ -305,6 +307,12 @@ public abstract class LivingEntityMixin {
         net.sweenus.simplyswords.world.TempestAbilityManager.clearActor(livingEntity);
         net.sweenus.simplyswords.world.FrostfallAbilityManager.clearActor(livingEntity);
         net.sweenus.simplyswords.world.IcewhisperCometManager.clearActor(livingEntity);
+        net.sweenus.simplyswords.world.LivyatanWaveManager.clearActor(livingEntity);
+        BramblethornAbilityManager.clearActor(livingEntity);
+        WaxweaverEncasementManager.clearActor(livingEntity);
+        Phase7CombatManager.clearActor(livingEntity);
+        Phase8CombatManager.onDamageApplied(livingEntity);
+        Phase8CombatManager.clearActor(livingEntity);
         net.sweenus.simplyswords.world.SoulrenderAbilityManager.onTargetDeath(livingEntity, damageSource);
         net.sweenus.simplyswords.world.SoulrenderAbilityManager.removeActor(livingEntity);
     }

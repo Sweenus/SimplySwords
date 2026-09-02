@@ -15,7 +15,9 @@ public final class Phase10AbilityTuning {
         WIDTH(0, 64), HEIGHT(0, 64), ANGLE(0, 360), SPEED(0, 16), KNOCKBACK(0, 16),
         TARGET_CAP(0, 64), SEARCH_CAP(0, 64), COUNT(0, 64), STACK_CAP(0, 64),
         STATUS_DURATION_TICKS(0, 72000), STATUS_AMPLIFIER(0, 10), ABSORPTION(0, 40),
-        HEALTH_THRESHOLD(0, 1), ARMOR_IGNORE(0, 1), CORRUPTION(0, 100), MODE(0, Integer.MAX_VALUE);
+        HEALTH_THRESHOLD(0, 1), ARMOR_IGNORE(0, 1), CORRUPTION(0, 100),
+        SEARCH_RANGE(0, 128), SEARCH_RADIUS(0, 64), SECONDARY_CORRUPTION(0, 100),
+        FINAL_CORRUPTION(0, 100), MODE(0, Integer.MAX_VALUE);
 
         private final double minimum;
         private final double maximum;

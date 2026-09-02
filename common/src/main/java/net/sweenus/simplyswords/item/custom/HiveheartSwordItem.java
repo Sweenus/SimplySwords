@@ -40,6 +40,7 @@ import net.sweenus.simplyswords.world.HivemindSwarmManager;
 import net.sweenus.simplyswords.world.Phase7CombatManager;
 
 import java.util.List;
+import java.util.UUID;
 
 public class HiveheartSwordItem extends UniqueSwordItem implements UniqueWeaponActiveAbility {
     public HiveheartSwordItem(ToolMaterial toolMaterial, Settings settings) {
@@ -56,8 +57,7 @@ public class HiveheartSwordItem extends UniqueSwordItem implements UniqueWeaponA
             UniqueAbilityExecution execution = Phase7CombatManager.beginPassive(
                     Phase7UniqueAbilities.HIVEHEART_PROC, serverWorld, stack, attacker, target);
             Phase7AbilityTuning tuning = Phase7UniqueAbilities.tuning(execution);
-            int skillCooldown = tuning.integer(Phase7AbilityTuning.Setting.COOLDOWN_TICKS,
-                    Config.uniqueEffects.hiveheart.cooldown);
+            int skillCooldown = procCooldown(Config.uniqueEffects.hiveheart.cooldown, tuning);
             float skillDamage = Config.uniqueEffects.hiveheart.beeDamageScaling;
             HelperMethods.playHitSounds(attacker, target);
 
@@ -69,15 +69,16 @@ public class HiveheartSwordItem extends UniqueSwordItem implements UniqueWeaponA
                         if (entity instanceof SimplySwordsBeeEntity bee && !bee.isHivemindSwarmBee()
                                 && attacker.getUuid().equals(bee.getOwnerUuid())) existing++;
                     }
-                    if (existing >= tuning.integer(Phase7AbilityTuning.Setting.TARGET_CAP, 4)) {
+                    if (existing >= tuning.integer(Phase7AbilityTuning.Setting.HIVE_BUSY_BEE_CAP, 4)) {
                         UniqueAbilityApi.finish(execution, Phase7UniqueAbilities.FINISH, 0);
                         return super.postHit(stack, target, attacker);
                     }
                 }
                 int proc = Phase7CombatManager.nextHiveProc(attacker);
                 int count = tuning.flag(1 << 5) && proc == 3
-                        ? Math.max(2, tuning.integer(Phase7AbilityTuning.Setting.COUNT, 2)) : 1;
+                        ? Math.max(2, tuning.integer(Phase7AbilityTuning.Setting.HIVE_TWIN_COUNT, 2)) : 1;
                 boolean spawned = false;
+                UUID releaseId = UUID.randomUUID();
                 for (int i = 0; i < count; i++) {
                     SimplySwordsBeeEntity beeEntity = EntityRegistry.SIMPLYBEEENTITY.get().spawn(
                             serverWorld, attacker.getBlockPos().up(4).offset(attacker.getMovementDirection(), 3),
@@ -90,19 +91,32 @@ public class HiveheartSwordItem extends UniqueSwordItem implements UniqueWeaponA
                     beeEntity.setInvulnerable(true);
                     beeEntity.setOwner(attacker);
                     beeEntity.setMasteryPoisonTicks(tuning.integer(
-                            Phase7AbilityTuning.Setting.STATUS_DURATION_TICKS, 0));
+                            Phase7AbilityTuning.Setting.HIVE_PROC_POISON_TICKS, 0));
                     beeEntity.setMasteryCooldownRefund(tuning.integer(
-                            Phase7AbilityTuning.Setting.REFUND_TICKS, 0));
+                            Phase7AbilityTuning.Setting.HIVE_KILL_REFUND_TICKS, 0));
+                    beeEntity.setMasteryReleaseId(releaseId);
+                    beeEntity.setMasteryTargetRangeBonus(tuning.get(
+                            Phase7AbilityTuning.Setting.HIVE_PROC_RANGE_BONUS, 0));
+                    beeEntity.configureMasteryPreferredTarget(target.getUuid(),
+                            serverWorld.getTime() + tuning.integer(
+                                    Phase7AbilityTuning.Setting.HIVE_SHARED_TARGET_TICKS, 0),
+                            tuning.get(Phase7AbilityTuning.Setting.HIVE_SHARED_TARGET_MULTIPLIER, 1));
                     double attackDamage = 1 + HelperMethods.abilityScaledDamage("nature", attacker, stack,
                             skillDamage, Config.uniqueEffects.hiveheart.beeSpellScaling);
-                    attackDamage *= tuning.get(Phase7AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1);
-                    attackDamage *= tuning.get(Phase7AbilityTuning.Setting.OUTGOING_MULTIPLIER, 1);
-                    if (tuning.flag(1 << 7) && target.getHealth() / target.getMaxHealth()
-                            >= tuning.get(Phase7AbilityTuning.Setting.HEALTH_THRESHOLD, .35)) {
-                        attackDamage /= 2.2;
+                    attackDamage *= tuning.get(Phase7AbilityTuning.Setting.HIVE_PROC_DAMAGE_MULTIPLIER, 1);
+                    if (tuning.flag(1 << 7)) {
+                        EntityAttributeInstance scale = beeEntity.getAttributeInstance(EntityAttributes.GENERIC_SCALE);
+                        if (scale != null) scale.setBaseValue(1.6);
+                        if (target.getHealth() / target.getMaxHealth()
+                                < tuning.get(Phase7AbilityTuning.Setting.HIVE_EXECUTION_HEALTH_THRESHOLD, .35)) {
+                            attackDamage *= tuning.get(
+                                    Phase7AbilityTuning.Setting.HIVE_EXECUTION_DAMAGE_MULTIPLIER, 2.2);
+                        }
                     }
                     if (count > 1) attackDamage *= tuning.get(
-                            Phase7AbilityTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, 1);
+                            Phase7AbilityTuning.Setting.HIVE_TWIN_DAMAGE_MULTIPLIER, 1);
+                    if (tuning.flag(1 << 8)) attackDamage *= tuning.get(
+                            Phase7AbilityTuning.Setting.HIVE_BUSY_DAMAGE_MULTIPLIER, 1);
                     EntityAttributeInstance attackAttribute = beeEntity.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE);
                     if (attackAttribute != null)
                         attackAttribute.setBaseValue(attackDamage);
@@ -148,6 +162,16 @@ public class HiveheartSwordItem extends UniqueSwordItem implements UniqueWeaponA
     @Override
     public int getActivationCooldownTicks(ItemStack stack, WeaponAbilityContext context) {
         return Config.uniqueEffects.hiveheart.activeCooldown;
+    }
+
+    static int procCooldown(int configuredCooldown, Phase7AbilityTuning tuning) {
+        int cooldown = Math.max(0, configuredCooldown + tuning.integer(
+                Phase7AbilityTuning.Setting.HIVE_PROC_COOLDOWN_BONUS_TICKS, 0));
+        if (tuning.flag(1 << 7)) {
+            cooldown = (int) Math.round(cooldown * tuning.get(
+                    Phase7AbilityTuning.Setting.HIVE_EXECUTION_COOLDOWN_MULTIPLIER, 1));
+        }
+        return Math.max(0, cooldown);
     }
 
     @Override

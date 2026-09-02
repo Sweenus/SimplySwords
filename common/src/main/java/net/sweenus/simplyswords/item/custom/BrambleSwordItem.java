@@ -10,15 +10,11 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.particle.ParticleTypes;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.AwakeningApi;
-import net.sweenus.simplyswords.api.SimplySwordsAPI;
-import net.sweenus.simplyswords.api.WeaponAbilityActivationSource;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
@@ -28,7 +24,9 @@ import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
+import net.sweenus.simplyswords.util.WeaponManaCost;
 import net.sweenus.simplyswords.world.BramblethornAbilityManager;
+import net.sweenus.simplyswords.world.PlayerWeaponAbilityManager;
 
 import java.util.List;
 
@@ -54,21 +52,11 @@ public class BrambleSwordItem extends UniqueSwordItem implements UniqueWeaponAct
     @Override
     public TypedActionResult<ItemStack> startPlayerAbility(World world, PlayerEntity user, Hand hand) {
         ItemStack stack = user.getStackInHand(hand);
-        if (stack.isEmpty()
-                || !AwakeningApi.isAbilityUnlocked(stack)
-                || stack.getDamage() >= stack.getMaxDamage() - 1) {
-            return TypedActionResult.fail(stack);
-        }
-        if (world instanceof ServerWorld serverWorld && user instanceof ServerPlayerEntity player) {
-            LivingEntity target = BramblethornAbilityManager.findPlayerTarget(player);
-            WeaponAbilityContext context = WeaponAbilityContext.of(
-                    serverWorld, stack, player, player, target, hand,
-                    WeaponAbilityActivationSource.PLAYER);
-            if (!SimplySwordsAPI.tryActivateWeaponAbility(context)) {
-                return TypedActionResult.fail(stack);
-            }
-        }
-        return TypedActionResult.success(stack, world.isClient());
+        boolean reboundInput = PlayerWeaponAbilityManager.shouldSkipDefaultAbilityUse(world, user, hand, stack);
+        if (reboundInput && !WeaponManaCost.canAfford(user, stack)) return TypedActionResult.fail(stack);
+        TypedActionResult<ItemStack> result = UniqueWeaponActiveAbility.super.startPlayerAbility(world, user, hand);
+        if (reboundInput && result.getResult().isAccepted()) WeaponManaCost.spend(user, stack);
+        return result;
     }
 
     @Override

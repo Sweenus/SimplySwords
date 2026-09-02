@@ -17,27 +17,40 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
-import net.sweenus.simplyswords.world.ChainLightningVisualManager;
 import net.sweenus.simplyswords.world.LivyatanWaveManager;
+import net.sweenus.simplyswords.world.LivyatanAbilityManager;
 import net.sweenus.simplyswords.api.ability.Phase6AbilityTuning;
 import net.sweenus.simplyswords.api.ability.Phase6UniqueAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityPhase;
 
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
 public class LivyatanEntity extends ThrownSwordEntity {
     public int slownessDuration;
     private final Set<UUID> returnLightningRolledTargets = new HashSet<>();
-    private Phase6AbilityTuning masteryTuning = Phase6AbilityTuning.EMPTY;
-    private UniqueAbilityExecution masteryExecution;
+    private final Set<UUID> returnHitTargets = new HashSet<>();
+    private final Map<UUID, Integer> maelstromRounds = new HashMap<>();
+    private Phase6AbilityTuning throwTuning = Phase6AbilityTuning.EMPTY;
+    private Phase6AbilityTuning returnTuning = Phase6AbilityTuning.EMPTY;
+    private UniqueAbilityExecution throwExecution;
+    private UniqueAbilityExecution returnExecution;
+    private int configuredCooldown;
+    private float lastImpactDamage;
+    private boolean returnStarted;
+    private boolean caught;
 
     // Base Constructor
     public LivyatanEntity(EntityType<? extends LivyatanEntity> entityType, World world) {
@@ -50,9 +63,14 @@ public class LivyatanEntity extends ThrownSwordEntity {
         this.stack = stack;
     }
 
-    public void setMastery(Phase6AbilityTuning tuning, UniqueAbilityExecution execution) {
-        masteryTuning = tuning == null ? Phase6AbilityTuning.EMPTY : tuning;
-        masteryExecution = execution;
+    public void setMastery(Phase6AbilityTuning tuning, UniqueAbilityExecution execution,
+                           Phase6AbilityTuning tunedReturn, UniqueAbilityExecution returnExecution,
+                           int cooldown) {
+        throwTuning = tuning == null ? Phase6AbilityTuning.EMPTY : tuning;
+        throwExecution = execution;
+        returnTuning = tunedReturn == null ? Phase6AbilityTuning.EMPTY : tunedReturn;
+        this.returnExecution = returnExecution;
+        configuredCooldown = Math.max(0, cooldown);
     }
     @Override
     public void tick() {
@@ -71,6 +89,11 @@ public class LivyatanEntity extends ThrownSwordEntity {
             return;
         }
 
+        if (!returnStarted) {
+            returnStarted = true;
+            if (returnExecution != null) UniqueAbilityApi.start(returnExecution);
+        }
+
         Vec3d toOwner = user.getEyePos().subtract(this.getPos());
         Vec3d horizontalToOwner = new Vec3d(toOwner.x, 0.0, toOwner.z);
         if (horizontalToOwner.lengthSquared() <= 1.0E-6) {
@@ -78,56 +101,69 @@ public class LivyatanEntity extends ThrownSwordEntity {
         } else {
             horizontalToOwner = horizontalToOwner.normalize();
         }
-        LivyatanWaveManager.spawnReturnPulse(world, this.getPos(), horizontalToOwner, this.returnTimer);
+        int maelstromDuration = returnTuning.integer(s("LIVYATAN_MAELSTROM_DURATION_TICKS"), 0);
+        int rotations = returnTuning.integer(s("LIVYATAN_MAELSTROM_ROTATIONS"), 0);
+        boolean maelstrom = maelstromDuration > 0 && rotations > 0;
+        Vec3d waveCenter = this.getPos();
+        if (maelstrom) {
+            double progress = Math.min(1, (double) returnTimer / maelstromDuration);
+            double angle = progress * rotations * Math.PI * 2;
+            double orbitRadius = Math.max(1.5, primaryReturnDamageRadius * .55);
+            waveCenter = user.getPos().add(Math.cos(angle) * orbitRadius, .2, Math.sin(angle) * orbitRadius);
+        }
+        LivyatanWaveManager.spawnReturnPulse(world, waveCenter, horizontalToOwner, this.returnTimer,
+                Math.max(2, primaryReturnDamageRadius));
 
-        double waveRadius = masteryTuning.get(s("RADIUS"), Math.max(0.5, radius));
-        Box box = Box.of(this.getPos().add(0.0, 0.5, 0.0), waveRadius * 2.0, 3.0, waveRadius * 2.0);
+        double waveRadius = Math.max(.5, radius);
+        Box box = Box.of(waveCenter.add(0.0, 0.5, 0.0), waveRadius * 2.0, 3.0, waveRadius * 2.0);
         DamageSource damageSource = user.getDamageSources().trident(this, user);
         boolean damageTick = this.returnTimer % 5 == 0;
-        float lightningDamage = 0.0F;
-        boolean calculatedLightningDamage = false;
-        int affected = 0;
-        int cap = masteryTuning.has(s("TARGET_CAP"))
-                ? masteryTuning.integer(s("TARGET_CAP"), 16) : Integer.MAX_VALUE;
-        for (LivingEntity target : world.getEntitiesByClass(LivingEntity.class, box, LivingEntity::isAlive)) {
-            if (!HelperMethods.checkAbilityTarget(target, user) || horizontalDistanceSquared(target.getPos(), this.getPos()) > waveRadius * waveRadius) {
-                continue;
-            }
-
-            pullTargetTowardOwner(target, user, masteryTuning.get(s("PULL_STRENGTH"),
-                    Config.uniqueEffects.livyatan.returnWavePullStrength));
-            if (damageTick) {
-                float tunedDamage = damage * (float) masteryTuning.get(s("DAMAGE_MULTIPLIER"), 1);
+        int cap = Config.uniqueEffects.livyatan.returnWaveTargetCap;
+        int thunderheadCap = returnTuning.integer(s("LIVYATAN_THUNDERHEAD_TARGET_CAP"), Integer.MAX_VALUE);
+        int round = maelstrom ? Math.min(rotations - 1,
+                (int) ((long) returnTimer * rotations / Math.max(1, maelstromDuration))) : -1;
+        Vec3d resolvedWaveCenter = waveCenter;
+        var targets = world.getEntitiesByClass(LivingEntity.class, box, LivingEntity::isAlive).stream()
+                .filter(target -> HelperMethods.checkAbilityTarget(target, user))
+                .filter(target -> horizontalDistanceSquared(target.getPos(), resolvedWaveCenter) <= waveRadius * waveRadius)
+                .sorted(Comparator.comparingDouble(target -> target.squaredDistanceTo(resolvedWaveCenter)))
+                .limit(Math.max(1, cap)).toList();
+        for (LivingEntity target : targets) {
+            double pull = LivyatanAbilityManager.returnPull(
+                    Config.uniqueEffects.livyatan.returnWavePullStrength, returnTuning);
+            pullTargetTowardOwner(target, user, pull);
+            LivyatanAbilityManager.recordPull(world, user, target, returnTuning);
+            boolean canDamageRound = !maelstrom || maelstromRounds.getOrDefault(target.getUuid(), -1) < round;
+            if (damageTick && canDamageRound) {
+                float tunedDamage = damage * (float) returnTuning.get(s("LIVYATAN_MAELSTROM_DAMAGE_MULTIPLIER"), 1);
                 float returnDamage = HelperMethods.applyAbilityDamageEnchantments(world, stack, target, damageSource, tunedDamage);
                 if (HelperMethods.damageThroughIframes(target, damageSource, returnDamage)) {
+                    if (maelstrom) maelstromRounds.put(target.getUuid(), round);
+                    returnHitTargets.add(target.getUuid());
                     world.playSoundFromEntity(null, user, SoundRegistry.ELEMENTAL_SWORD_ICE_ATTACK_01.get(), user.getSoundCategory(), 0.2f, 1.5f);
                     target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, slownessDuration, 2), user);
-                    HelperMethods.spawnOrbitParticles(world, this.getPos(), ParticleTypes.POOF, 0.5f, 3);
-                    if (masteryExecution != null) UniqueAbilityApi.emit(masteryExecution, UniqueAbilityPhase.HIT,
-                            Phase6UniqueAbilities.HIT, target, 1, returnDamage);
+                    HelperMethods.spawnOrbitParticles(world, waveCenter, ParticleTypes.POOF, 0.5f, 3);
+                    if (returnExecution != null) UniqueAbilityApi.emit(returnExecution, UniqueAbilityPhase.HIT,
+                            Phase6UniqueAbilities.RETURN_HIT, target, 1, returnDamage);
+                    LivyatanAbilityManager.recordReturnHit(world, user, stack, target, returnTuning);
                 }
             }
-            int chance = masteryTuning.integer(s("CHANCE"), Config.uniqueEffects.livyatan.returnLightningChance);
+            int chance = LivyatanAbilityManager.returnLightningChance(
+                    Config.uniqueEffects.livyatan.returnLightningChance, returnTuning);
             if (this.returnLightningRolledTargets.add(target.getUuid())
+                    && this.returnLightningRolledTargets.size() <= thunderheadCap
                     && (chance >= 100 || chance > 0 && world.random.nextInt(100) < chance)) {
-                if (!calculatedLightningDamage) {
-                    lightningDamage = HelperMethods.abilityScaledDamage("lightning", user, stack,
-                            Config.uniqueEffects.livyatan.returnLightningDamageScaling,
-                            Config.uniqueEffects.livyatan.returnLightningSpellScaling);
-                    calculatedLightningDamage = true;
-                }
-                ChainLightningVisualManager.damageSkyBolt(world, user, stack, target,
-                        lightningDamage * (float) masteryTuning.get(s("SECONDARY_DAMAGE_MULTIPLIER"), 1),
-                        Config.uniqueEffects.livyatan.returnLightningSkyHeight,
-                        ChainLightningVisualManager.STORMBRINGER_SETTINGS);
+                LivyatanAbilityManager.strikeLightning(world, user, stack, target,
+                        LivyatanAbilityManager.returnLightningDamage(user, stack, returnTuning), returnTuning);
             }
-            if (++affected >= cap) break;
         }
-        pullLooseEntitiesTowardOwner(world, user, box, this.getPos(), waveRadius);
+        pullLooseEntitiesTowardOwner(world, user, box, waveCenter, waveRadius);
+        if (nonReturning) finishExecutions();
     }
 
     private static void pullTargetTowardOwner(LivingEntity target, LivingEntity owner, double rawStrength) {
         double strength = Math.max(0.0, rawStrength) * getLivingPullScale(target);
+        if (strength <= 0) return;
         pullEntityTowardOwner(target, owner, strength, true);
         target.fallDistance = 0.0F;
     }
@@ -191,6 +227,31 @@ public class LivyatanEntity extends ThrownSwordEntity {
     }
 
     @Override
+    protected float doExtraDamage(Entity entity, float baseDamage, DamageSource damageSource) {
+        lastImpactDamage = super.doExtraDamage(entity, baseDamage, damageSource);
+        return lastImpactDamage;
+    }
+
+    @Override
+    protected void onHit(LivingEntity target) {
+        super.onHit(target);
+        if (!(getWorld() instanceof ServerWorld world) || !(getOwner() instanceof LivingEntity owner)
+                || !HelperMethods.checkAbilityTarget(target, owner)) return;
+        if (throwExecution != null) UniqueAbilityApi.emit(throwExecution, UniqueAbilityPhase.HIT,
+                Phase6UniqueAbilities.HIT, target, 1, lastImpactDamage);
+        LivyatanAbilityManager.recordThrowHit(world, owner, stack, target, throwTuning);
+        double splashRadius = throwTuning.get(s("LIVYATAN_SPLASH_RADIUS"), 0);
+        int splashCap = throwTuning.integer(s("LIVYATAN_SPLASH_TARGET_CAP"), 0);
+        float splashDamage = lastImpactDamage
+                * (float) throwTuning.get(s("LIVYATAN_SPLASH_DAMAGE_MULTIPLIER"), 0);
+        DamageSource source = owner.getDamageSources().trident(this, owner);
+        for (LivingEntity splash : LivyatanAbilityManager.targets(world, target.getPos(), splashRadius,
+                owner, splashCap, target.getUuid())) {
+            WeaponImplicitRegistry.runSuppressed(() -> HelperMethods.damageThroughIframes(splash, source, splashDamage));
+        }
+    }
+
+    @Override
     protected SoundEvent getReturnSound() {
         return SoundRegistry.ELEMENTAL_BOW_ICE_SHOOT_IMPACT_01.get();
     }
@@ -216,10 +277,125 @@ public class LivyatanEntity extends ThrownSwordEntity {
     }
 
     @Override
+    protected double getReturnSpeedMultiplier() {
+        return returnTuning.get(s("LIVYATAN_RETURN_SPEED_MULTIPLIER"), 1);
+    }
+
+    @Override
+    protected boolean tryPickup(net.minecraft.entity.player.PlayerEntity player) {
+        int maelstromDuration = returnTuning.integer(s("LIVYATAN_MAELSTROM_DURATION_TICKS"), 0);
+        if (maelstromDuration > 0 && returnTimer < maelstromDuration) return false;
+        int totalCooldown = SimplySwordsAPI.getEffectiveWeaponCooldownTicks(asItemStack(), player, configuredCooldown);
+        int remainingCooldown = Math.round(player.getItemCooldownManager()
+                .getCooldownProgress(asItemStack().getItem(), 0) * totalCooldown);
+        boolean pickedUp = super.tryPickup(player);
+        if (pickedUp && !caught && isOwner(player)) {
+            caught = true;
+            int refund = returnHitTargets.size() >= returnTuning.integer(s("LIVYATAN_CATCH_HIT_THRESHOLD"), Integer.MAX_VALUE)
+                    ? returnTuning.integer(s("LIVYATAN_CATCH_REFUND_TICKS"), 0) : 0;
+            player.getItemCooldownManager().set(asItemStack().getItem(), Math.max(0, remainingCooldown - refund));
+            if (returnExecution != null) UniqueAbilityApi.emit(returnExecution, UniqueAbilityPhase.HIT,
+                    Phase6UniqueAbilities.CATCH, player, returnHitTargets.size(), refund);
+            finishExecutions();
+            if (getWorld() instanceof ServerWorld world) LivyatanAbilityManager.finishReturn(world, player.getUuid());
+        }
+        return pickedUp;
+    }
+
+    @Override
     public void readCustomDataFromNbt(NbtCompound nbt) {
         super.readCustomDataFromNbt(nbt);
         if ((this.stack == null || this.stack.isEmpty()) && nbt.contains("item")) {
             this.stack = ItemStack.fromNbt(this.getRegistryManager(), nbt.getCompound("item")).orElse(this.getDefaultItemStack());
+        }
+        throwTuning = Phase6AbilityTuning.fromNbt(nbt.getCompound("LivyatanThrowTuning"));
+        returnTuning = Phase6AbilityTuning.fromNbt(nbt.getCompound("LivyatanReturnTuning"));
+        primaryBaseDamage = nbt.getFloat("LivyatanPrimaryDamage");
+        primaryReturnDamage = nbt.getFloat("LivyatanReturnDamage");
+        primaryReturnDamageRadius = nbt.getDouble("LivyatanReturnRadius");
+        slownessDuration = nbt.getInt("LivyatanSlowTicks");
+        configuredCooldown = nbt.getInt("LivyatanCooldown");
+        returnTimer = nbt.getInt("LivyatanReturnTimer");
+        returnStarted = nbt.getBoolean("LivyatanReturnStarted");
+        returnToPlayer = nbt.getBoolean("LivyatanReturning");
+        nonReturning = nbt.getBoolean("LivyatanNonReturning");
+        if (nbt.contains("LivyatanNonReturningAge")) nonReturningMaxAge = nbt.getInt("LivyatanNonReturningAge");
+        readUuidSet(nbt, "LivyatanLightning", returnLightningRolledTargets);
+        readUuidSet(nbt, "LivyatanReturnHits", returnHitTargets);
+        readRoundMap(nbt);
+    }
+
+    @Override
+    public void writeCustomDataToNbt(NbtCompound nbt) {
+        super.writeCustomDataToNbt(nbt);
+        nbt.put("LivyatanThrowTuning", throwTuning.toNbt());
+        nbt.put("LivyatanReturnTuning", returnTuning.toNbt());
+        nbt.putFloat("LivyatanPrimaryDamage", primaryBaseDamage);
+        nbt.putFloat("LivyatanReturnDamage", primaryReturnDamage);
+        nbt.putDouble("LivyatanReturnRadius", primaryReturnDamageRadius);
+        nbt.putInt("LivyatanSlowTicks", slownessDuration);
+        nbt.putInt("LivyatanCooldown", configuredCooldown);
+        nbt.putInt("LivyatanReturnTimer", returnTimer);
+        nbt.putBoolean("LivyatanReturnStarted", returnStarted);
+        nbt.putBoolean("LivyatanReturning", returnToPlayer);
+        nbt.putBoolean("LivyatanNonReturning", nonReturning);
+        nbt.putInt("LivyatanNonReturningAge", nonReturningMaxAge);
+        writeUuidSet(nbt, "LivyatanLightning", returnLightningRolledTargets);
+        writeUuidSet(nbt, "LivyatanReturnHits", returnHitTargets);
+        nbt.putInt("LivyatanRoundCount", maelstromRounds.size());
+        int roundIndex = 0;
+        for (Map.Entry<UUID, Integer> entry : maelstromRounds.entrySet()) {
+            nbt.putUuid("LivyatanRoundTarget" + roundIndex, entry.getKey());
+            nbt.putInt("LivyatanRoundValue" + roundIndex, entry.getValue());
+            roundIndex++;
+        }
+    }
+
+    @Override
+    public void remove(RemovalReason reason) {
+        if (!getWorld().isClient()) {
+            if (throwExecution != null) UniqueAbilityApi.cancel(throwExecution);
+            if (returnExecution != null) UniqueAbilityApi.cancel(returnExecution);
+            throwExecution = null;
+            returnExecution = null;
+        }
+        super.remove(reason);
+    }
+
+    private void finishExecutions() {
+        if (throwExecution != null) {
+            UniqueAbilityApi.finish(throwExecution, Phase6UniqueAbilities.FINISH, returnHitTargets.size());
+            throwExecution = null;
+        }
+        if (returnExecution != null) {
+            UniqueAbilityApi.finish(returnExecution, Phase6UniqueAbilities.FINISH, returnHitTargets.size());
+            returnExecution = null;
+        }
+    }
+
+    private static void writeUuidSet(NbtCompound nbt, String key, Set<UUID> values) {
+        nbt.putInt(key + "Count", values.size());
+        int index = 0;
+        for (UUID value : values) nbt.putUuid(key + index++, value);
+    }
+
+    private static void readUuidSet(NbtCompound nbt, String key, Set<UUID> values) {
+        values.clear();
+        int count = nbt.getInt(key + "Count");
+        for (int index = 0; index < count; index++) {
+            String entry = key + index;
+            if (nbt.containsUuid(entry)) values.add(nbt.getUuid(entry));
+        }
+    }
+
+    private void readRoundMap(NbtCompound nbt) {
+        maelstromRounds.clear();
+        int count = nbt.getInt("LivyatanRoundCount");
+        for (int index = 0; index < count; index++) {
+            String target = "LivyatanRoundTarget" + index;
+            if (nbt.containsUuid(target)) {
+                maelstromRounds.put(nbt.getUuid(target), nbt.getInt("LivyatanRoundValue" + index));
+            }
         }
     }
 

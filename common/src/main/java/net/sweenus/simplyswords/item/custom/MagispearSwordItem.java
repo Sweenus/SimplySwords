@@ -57,7 +57,9 @@ public class MagispearSwordItem extends UniqueSwordItem implements UniqueWeaponA
             HelperMethods.playHitSounds(attacker, target);
             ServerWorld world = (ServerWorld) attacker.getWorld();
             UniqueAbilityExecution execution = Phase9CombatManager.beginPassive(
-                    Phase9UniqueAbilities.MAGISPEAR_SPELLPOINT, world, stack, attacker, target);
+                    Phase9UniqueAbilities.MAGISPEAR_SPELLPOINT, world, stack, attacker, target,
+                    net.sweenus.simplyswords.world.MagispearAbilityManager.spellpointBase(
+                            Config.uniqueEffects.magispear.magicChance));
             Phase9AbilityTuning tuning = Phase9UniqueAbilities.tuning(execution);
             int hitChance = tuning.integer(Phase9AbilityTuning.Setting.CHANCE,
                     Config.uniqueEffects.magispear.magicChance);

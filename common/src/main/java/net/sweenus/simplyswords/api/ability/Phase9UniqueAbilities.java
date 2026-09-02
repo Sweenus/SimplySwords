@@ -55,7 +55,7 @@ public final class Phase9UniqueAbilities {
     }
 
     public static Phase9AbilityTuning tuning(UniqueAbilityExecution execution) {
-        return execution.tuning().get(TUNING);
+        return execution == null ? Phase9AbilityTuning.EMPTY : execution.tuning().get(TUNING);
     }
 
     private static UniqueAbilityDefinition active(String path) {

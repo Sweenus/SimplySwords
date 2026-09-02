@@ -90,10 +90,20 @@ public class EnigmaSwordItem extends UniqueSwordItem implements UniqueWeaponActi
         if (!canActivate(context)) return false;
         UniqueAbilityExecution execution = Phase9CombatManager.beginActive(
                 Phase9UniqueAbilities.ENIGMA_STORMCHASER, context,
-                Config.uniqueEffects.enigma.enigmaCooldown);
+                Config.uniqueEffects.enigma.enigmaCooldown, chaseBase());
         Phase9AbilityTuning tuning = Phase9UniqueAbilities.tuning(execution);
+        UniqueAbilityExecution vortexExecution = Phase9CombatManager.beginPassive(
+                Phase9UniqueAbilities.ENIGMA_VORTEX, context.world(), context.stack(),
+                context.actor(), null, vortexBase());
+        Phase9AbilityTuning vortex = Phase9UniqueAbilities.tuning(vortexExecution);
+        Phase9CombatManager.finish(vortexExecution, 0);
+        UniqueAbilityExecution auraExecution = Phase9CombatManager.beginPassive(
+                Phase9UniqueAbilities.ENIGMA_TAILWIND, context.world(), context.stack(),
+                context.actor(), null, Phase9AbilityTuning.EMPTY);
+        Phase9AbilityTuning aura = Phase9UniqueAbilities.tuning(auraExecution);
+        Phase9CombatManager.finish(auraExecution, 0);
         BattleStandardDarkEntity standard = spawnEnigmaStandard(
-                context.world(), context.actor(), context.stack(), tuning);
+                context.world(), context.actor(), context.stack(), tuning, vortex, aura);
         if (standard == null) return false;
         Phase9CombatManager.scheduleFinish(context.world(), execution, 900, 0);
         return true;
@@ -108,12 +118,31 @@ public class EnigmaSwordItem extends UniqueSwordItem implements UniqueWeaponActi
         return user.getBlockPos().up(1).offset(user.getMovementDirection(), 2);
     }
 
+    public static Phase9AbilityTuning chaseBase() {
+        return Phase9AbilityTuning.EMPTY
+                .with(Phase9AbilityTuning.Setting.RANGE, Config.uniqueEffects.enigma.enigmaChaseRadius)
+                .with(Phase9AbilityTuning.Setting.SPEED, 1)
+                .with(Phase9AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1);
+    }
+
+    public static Phase9AbilityTuning vortexBase() {
+        return Phase9AbilityTuning.EMPTY
+                .with(Phase9AbilityTuning.Setting.RADIUS, Config.uniqueEffects.enigma.enigmaTornadoRadius)
+                .with(Phase9AbilityTuning.Setting.DURATION_TICKS, Config.uniqueEffects.enigma.enigmaOrbitTicks)
+                .with(Phase9AbilityTuning.Setting.PULL_STRENGTH, 1)
+                .with(Phase9AbilityTuning.Setting.KNOCKBACK, 1)
+                .with(Phase9AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1);
+    }
+
     private BattleStandardDarkEntity spawnEnigmaStandard(ServerWorld world, LivingEntity user, ItemStack stack) {
-        return spawnEnigmaStandard(world, user, stack, Phase9AbilityTuning.EMPTY);
+        return spawnEnigmaStandard(world, user, stack, Phase9AbilityTuning.EMPTY,
+                Phase9AbilityTuning.EMPTY, Phase9AbilityTuning.EMPTY);
     }
 
     private BattleStandardDarkEntity spawnEnigmaStandard(ServerWorld world, LivingEntity user, ItemStack stack,
-                                                          Phase9AbilityTuning tuning) {
+                                                          Phase9AbilityTuning tuning,
+                                                          Phase9AbilityTuning vortex,
+                                                          Phase9AbilityTuning aura) {
         BlockPos pos = getStandardPosition(user);
         if (!world.getBlockState(pos).isAir()) {
             return null;
@@ -130,7 +159,7 @@ public class EnigmaSwordItem extends UniqueSwordItem implements UniqueWeaponActi
             banner.abilityStack = stack.copy();
             banner.decayRate = Config.uniqueEffects.enigma.enigmaDecayRate;
             banner.standardType = "enigma";
-            banner.configurePhase9(tuning);
+            banner.configurePhase9(tuning, vortex, aura);
             banner.setCustomName(Text.translatable("entity.simplyswords.battlestandard.name", user.getName()));
             banner.setCustomNameVisible(false);
             banner.setInvisible(true);

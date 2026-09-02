@@ -54,6 +54,8 @@ public final class HivemindSwarmManager {
     private static final Map<UUID, FocusState> SWARM_FOCUS = new HashMap<>();
     private static final Map<UUID, Integer> ROYAL_STINGS = new HashMap<>();
     private static final Map<UUID, Long> RETORT_COOLDOWN = new HashMap<>();
+    private static final Map<UUID, Long> WARNING_COOLDOWN = new HashMap<>();
+    private static final Map<UUID, LastAttacker> LAST_ATTACKERS = new HashMap<>();
 
     private HivemindSwarmManager() {
     }
@@ -76,10 +78,10 @@ public final class HivemindSwarmManager {
                 Phase7UniqueAbilities.HIVEHEART_SWARM, context, Config.uniqueEffects.hiveheart.activeCooldown);
         Phase7AbilityTuning tuning = Phase7UniqueAbilities.tuning(execution);
         boolean spawned = activate(context.world(), context.actor(), getStingDamage(context.actor()), tuning, execution);
-        if (spawned && tuning.flag(1 << 18)) {
-            context.actor().addStatusEffect(new StatusEffectInstance(StatusEffects.ABSORPTION,
-                    tuning.integer(Phase7AbilityTuning.Setting.STATUS_DURATION_TICKS, 80), 0,
-                    false, true, true));
+        if (spawned && tuning.flag(1 << 18) && !tuning.flag(1 << 26)) {
+            int absorption = tuning.integer(Phase7AbilityTuning.Setting.HIVE_WARD_ABSORPTION, 4);
+            Phase4AbsorptionTracker.grant(context.actor(), absorption,
+                    tuning.integer(Phase7AbilityTuning.Setting.HIVE_WARD_DURATION_TICKS, 80), absorption);
         }
         if (!spawned) UniqueAbilityApi.cancel(execution);
         return spawned;
@@ -133,21 +135,18 @@ public final class HivemindSwarmManager {
     private static boolean activate(ServerWorld world, LivingEntity actor, float stingDamage,
                                     Phase7AbilityTuning tuning, UniqueAbilityExecution execution) {
         long now = world.getTime();
-        int beeCount = Math.max(0, tuning.integer(Phase7AbilityTuning.Setting.COUNT,
-                Config.uniqueEffects.hiveheart.swarmBeeCount));
+        int beeCount = swarmCount(Config.uniqueEffects.hiveheart.swarmBeeCount, tuning);
         if (beeCount <= 0 || actor == null || !actor.isAlive()) {
             return false;
         }
-        int stings = Math.max(1, tuning.integer(Phase7AbilityTuning.Setting.STACK_CAP,
-                Config.uniqueEffects.hiveheart.stingsPerBee));
-        long expiryTick = now + Math.max(20, tuning.integer(Phase7AbilityTuning.Setting.DURATION_TICKS,
-                Config.uniqueEffects.hiveheart.swarmLifetime));
-        double radius = tuning.get(Phase7AbilityTuning.Setting.RADIUS, Config.uniqueEffects.hiveheart.swarmRadius);
-        int interval = tuning.integer(Phase7AbilityTuning.Setting.INTERVAL_TICKS,
+        int stings = swarmStings(Config.uniqueEffects.hiveheart.stingsPerBee, tuning);
+        long expiryTick = now + swarmDuration(Config.uniqueEffects.hiveheart.swarmLifetime, tuning);
+        double radius = swarmRadius(Config.uniqueEffects.hiveheart.swarmRadius, tuning);
+        int interval = tuning.integer(Phase7AbilityTuning.Setting.HIVE_SWARM_STING_INTERVAL_TICKS,
                 Config.uniqueEffects.hiveheart.stingIntervalTicks);
-        int slow = tuning.integer(Phase7AbilityTuning.Setting.STATUS_AMPLIFIER,
-                Config.uniqueEffects.hiveheart.maxSlowAmplifier);
-        stingDamage *= (float) tuning.get(Phase7AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1);
+        int slow = Math.max(0, Config.uniqueEffects.hiveheart.maxSlowAmplifier + tuning.integer(
+                Phase7AbilityTuning.Setting.HIVE_SWARM_SLOW_AMPLIFIER_BONUS, 0));
+        stingDamage *= (float) swarmDamageMultiplier(tuning);
         int spawned = 0;
 
         for (int i = 0; i < beeCount; i++) {
@@ -169,7 +168,31 @@ public final class HivemindSwarmManager {
             bee.setMasteryStingInterval(interval);
             bee.setMasterySlowAmplifier(slow);
             bee.setMasteryMode(tuning.integer(Phase7AbilityTuning.Setting.MODE, 0));
-            bee.setMasterySearchCap(tuning.integer(Phase7AbilityTuning.Setting.SEARCH_CAP, 0));
+            bee.setMasteryGuardDrone(tuning.flag(1 << 19) && !tuning.flag(1 << 26) && i == 0);
+            bee.setMasterySearchCap(tuning.integer(Phase7AbilityTuning.Setting.HIVE_SWARM_SEARCH_CAP, 0));
+            bee.configureMasterySwarmCombat(
+                    tuning.integer(Phase7AbilityTuning.Setting.HIVE_FOCUS_REQUIRED_STINGS, 0),
+                    tuning.get(Phase7AbilityTuning.Setting.HIVE_FOCUS_DAMAGE_MULTIPLIER, 1),
+                    tuning.integer(Phase7AbilityTuning.Setting.HIVE_FOCUS_DURATION_TICKS, 0),
+                    tuning.get(Phase7AbilityTuning.Setting.HIVE_GUARD_RANGE, 0),
+                    tuning.get(Phase7AbilityTuning.Setting.HIVE_GUARD_INCOMING_MULTIPLIER, 1),
+                    tuning.integer(Phase7AbilityTuning.Setting.HIVE_GUARD_LOCKOUT_TICKS, 0),
+                    tuning.get(Phase7AbilityTuning.Setting.HIVE_WARNING_RADIUS, 0),
+                    tuning.integer(Phase7AbilityTuning.Setting.HIVE_WARNING_DURATION_TICKS, 0),
+                    tuning.integer(Phase7AbilityTuning.Setting.HIVE_WARNING_LOCKOUT_TICKS, 0),
+                    tuning.get(Phase7AbilityTuning.Setting.HIVE_RETORT_DAMAGE_MULTIPLIER, 0),
+                    tuning.integer(Phase7AbilityTuning.Setting.HIVE_RETORT_LOCKOUT_TICKS, 0));
+            bee.configureMasteryRoyalGuard(
+                    tuning.integer(Phase7AbilityTuning.Setting.HIVE_RALLY_STING_COUNT, 0),
+                    tuning.integer(Phase7AbilityTuning.Setting.HIVE_RALLY_RESISTANCE_TICKS, 0),
+                    tuning.integer(Phase7AbilityTuning.Setting.HIVE_ESCORT_BEE_COUNT, 0),
+                    tuning.get(Phase7AbilityTuning.Setting.HIVE_ESCORT_SPEED_MULTIPLIER, 1),
+                    tuning.get(Phase7AbilityTuning.Setting.HIVE_SAVE_HEALTH_THRESHOLD, 0),
+                    tuning.integer(Phase7AbilityTuning.Setting.HIVE_SAVE_ABSORPTION_PER_BEE, 0),
+                    tuning.integer(Phase7AbilityTuning.Setting.HIVE_SAVE_ABSORPTION_CAP, 0),
+                    tuning.get(Phase7AbilityTuning.Setting.HIVE_PHALANX_RANGE, 0),
+                    tuning.integer(Phase7AbilityTuning.Setting.HIVE_PHALANX_BEE_COUNT, 0),
+                    tuning.integer(Phase7AbilityTuning.Setting.HIVE_PHALANX_RESISTANCE_AMPLIFIER, 0));
             bee.setSwarmNextDiveTick(now + randomDiveDelay(world));
             bee.setInvulnerable(true);
             bee.setNoGravity(true);
@@ -187,6 +210,59 @@ public final class HivemindSwarmManager {
         return spawned > 0;
     }
 
+    static int swarmCount(int configuredCount, Phase7AbilityTuning tuning) {
+        int count = Math.max(0, configuredCount + tuning.integer(
+                Phase7AbilityTuning.Setting.HIVE_SWARM_COUNT_BONUS, 0));
+        int cap = tuning.integer(Phase7AbilityTuning.Setting.HIVE_SWARM_COUNT_CAP, 0);
+        if (cap > 0) count = Math.min(count, cap);
+        if (tuning.flag(1 << 16)) count = tuning.integer(
+                Phase7AbilityTuning.Setting.HIVE_CLOUD_COUNT, count);
+        if (tuning.flag(1 << 17)) count = tuning.integer(
+                Phase7AbilityTuning.Setting.HIVE_HUNT_COUNT, count);
+        return Math.max(0, count);
+    }
+
+    static int swarmDuration(int configuredDuration, Phase7AbilityTuning tuning) {
+        double duration = Math.max(20, configuredDuration + tuning.integer(
+                Phase7AbilityTuning.Setting.HIVE_SWARM_DURATION_BONUS_TICKS, 0));
+        if (tuning.flag(1 << 16)) duration *= tuning.get(
+                Phase7AbilityTuning.Setting.HIVE_CLOUD_DURATION_MULTIPLIER, 1);
+        if (tuning.flag(1 << 17)) duration = tuning.integer(
+                Phase7AbilityTuning.Setting.HIVE_HUNT_DURATION_TICKS, (int) Math.round(duration));
+        return Math.max(20, (int) Math.round(duration));
+    }
+
+    static int swarmStings(int configuredStings, Phase7AbilityTuning tuning) {
+        int stings = tuning.integer(Phase7AbilityTuning.Setting.HIVE_SWARM_STING_COUNT,
+                configuredStings);
+        if (tuning.flag(1 << 17)) stings = tuning.integer(
+                Phase7AbilityTuning.Setting.HIVE_HUNT_STING_COUNT, stings);
+        return Math.max(1, stings);
+    }
+
+    static double swarmRadius(double configuredRadius, Phase7AbilityTuning tuning) {
+        double radius = Math.max(1, configuredRadius + tuning.get(
+                Phase7AbilityTuning.Setting.HIVE_SWARM_RADIUS_BONUS, 0));
+        if (tuning.flag(1 << 16)) radius = tuning.get(
+                Phase7AbilityTuning.Setting.HIVE_CLOUD_RADIUS, radius);
+        if (tuning.flag(1 << 17)) radius = tuning.get(
+                Phase7AbilityTuning.Setting.HIVE_HUNT_RADIUS, radius);
+        if (tuning.flag(1 << 26)) radius = tuning.get(
+                Phase7AbilityTuning.Setting.HIVE_VENGEFUL_RANGE, radius);
+        return Math.max(1, radius);
+    }
+
+    static double swarmDamageMultiplier(Phase7AbilityTuning tuning) {
+        double multiplier = 1;
+        if (tuning.flag(1 << 16)) multiplier *= tuning.get(
+                Phase7AbilityTuning.Setting.HIVE_CLOUD_DAMAGE_MULTIPLIER, 1);
+        if (tuning.flag(1 << 17)) multiplier *= tuning.get(
+                Phase7AbilityTuning.Setting.HIVE_HUNT_DAMAGE_MULTIPLIER, 1);
+        if (tuning.flag(1 << 26)) multiplier *= tuning.get(
+                Phase7AbilityTuning.Setting.HIVE_VENGEFUL_DAMAGE_MULTIPLIER, 1);
+        return multiplier;
+    }
+
     public static boolean hasActive(ServerWorld world) {
         for (Entity entity : world.iterateEntities()) {
             if (entity instanceof SimplySwordsBeeEntity bee && bee.isHivemindSwarmBee()) {
@@ -197,6 +273,12 @@ public final class HivemindSwarmManager {
     }
 
     public static void tick(ServerWorld world) {
+        long now = world.getTime();
+        GUARD_RECHARGE.entrySet().removeIf(entry -> entry.getValue() <= now);
+        RETORT_COOLDOWN.entrySet().removeIf(entry -> entry.getValue() <= now);
+        WARNING_COOLDOWN.entrySet().removeIf(entry -> entry.getValue() <= now);
+        LAST_ATTACKERS.entrySet().removeIf(entry -> entry.getValue().expiresAt <= now);
+        SWARM_FOCUS.entrySet().removeIf(entry -> entry.getValue().expiresAt <= now);
         List<SimplySwordsBeeEntity> bees = getSwarmBees(world);
         if (bees.isEmpty()) {
             return;
@@ -215,6 +297,14 @@ public final class HivemindSwarmManager {
                 bee.setSwarmTargetUuid(null);
                 bee.clearSwarmPass();
                 bee.clearSwarmLineup();
+                continue;
+            }
+
+            if (bee.isMasteryGuardDrone()) {
+                bee.setSwarmTargetUuid(null);
+                bee.clearSwarmPass();
+                bee.clearSwarmLineup();
+                hoverNearAnchor(bee, anchor);
                 continue;
             }
             targetCounts.merge(target.getUuid(), 1, Integer::sum);
@@ -272,11 +362,12 @@ public final class HivemindSwarmManager {
         if (now < GUARD_RECHARGE.getOrDefault(target.getUuid(), 0L)) return amount;
         for (SimplySwordsBeeEntity bee : getSwarmBees(world)) {
             if (!bee.isBloodwakeFly() && target.getUuid().equals(bee.getOwnerUuid())
-                    && (bee.getMasteryMode() & (1 << 19)) != 0
+                    && bee.isMasteryGuardDrone()
                     && (bee.getMasteryMode() & (1 << 26)) == 0
-                    && bee.squaredDistanceTo(target) <= 9) {
-                GUARD_RECHARGE.put(target.getUuid(), now + 40);
-                return amount * .75F;
+                    && bee.squaredDistanceTo(target) <= bee.getMasteryGuardRange()
+                    * bee.getMasteryGuardRange()) {
+                GUARD_RECHARGE.put(target.getUuid(), now + bee.getMasteryGuardLockout());
+                return amount * bee.getMasteryGuardMultiplier();
             }
         }
         return amount;
@@ -284,16 +375,17 @@ public final class HivemindSwarmManager {
 
     public static void onOwnerDamaged(LivingEntity owner, DamageSource source) {
         if (!(owner.getWorld() instanceof ServerWorld world)
-                || !(source.getAttacker() instanceof LivingEntity attacker)
-                || source.isIn(net.minecraft.registry.tag.DamageTypeTags.IS_PROJECTILE)
+                || !(source.getAttacker() instanceof LivingEntity attacker)) return;
+        LAST_ATTACKERS.put(owner.getUuid(), new LastAttacker(attacker.getUuid(), world.getTime() + 200));
+        if (source.isIn(net.minecraft.registry.tag.DamageTypeTags.IS_PROJECTILE)
                 || world.getTime() < RETORT_COOLDOWN.getOrDefault(owner.getUuid(), 0L)) return;
         for (SimplySwordsBeeEntity bee : getSwarmBees(world)) {
             if (!bee.isBloodwakeFly() && owner.getUuid().equals(bee.getOwnerUuid())
                     && (bee.getMasteryMode() & (1 << 21)) != 0
                     && (bee.getMasteryMode() & (1 << 26)) == 0) {
-                RETORT_COOLDOWN.put(owner.getUuid(), world.getTime() + 30);
+                RETORT_COOLDOWN.put(owner.getUuid(), world.getTime() + bee.getMasteryRetortLockout());
                 attacker.damage(world.getDamageSources().indirectMagic(owner, owner),
-                        bee.getSwarmStingDamage() * .25F);
+                        bee.getSwarmStingDamage() * bee.getMasteryRetortMultiplier());
                 return;
             }
         }
@@ -312,22 +404,33 @@ public final class HivemindSwarmManager {
             if (!(entity instanceof LivingEntity owner)) continue;
             int mode = entry.getValue().getFirst().getMasteryMode();
             if ((mode & (1 << 26)) != 0) continue;
-            if ((mode & (1 << 23)) != 0 && entry.getValue().size() >= 4) {
-                owner.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, 15, 0, false, false, true));
+            SimplySwordsBeeEntity sample = entry.getValue().getFirst();
+            if ((mode & (1 << 23)) != 0 && entry.getValue().size() >= sample.getMasteryEscortCount()) {
+                Phase7CombatManager.applyHiveEscort(world, owner, 15,
+                        sample.getMasteryEscortSpeedMultiplier());
             }
-            if ((mode & (1 << 25)) != 0 && entry.getValue().size() >= 6) {
-                owner.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, 15, 1, false, false, true));
+            if ((mode & (1 << 25)) != 0 && entry.getValue().size() >= sample.getMasteryPhalanxCount()) {
+                owner.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, 15,
+                        sample.getMasteryPhalanxAmplifier(), false, false, true));
             }
-            if ((mode & (1 << 20)) != 0 && world.getTime() % 60L == 0L) {
-                for (LivingEntity hostile : world.getEntitiesByClass(LivingEntity.class,
-                        owner.getBoundingBox().expand(4), candidate -> HelperMethods.checkAbilityTarget(candidate, owner))) {
-                    hostile.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 30, 0,
+            if ((mode & (1 << 20)) != 0
+                    && world.getTime() >= WARNING_COOLDOWN.getOrDefault(owner.getUuid(), 0L)) {
+                List<LivingEntity> hostiles = world.getEntitiesByClass(LivingEntity.class,
+                        owner.getBoundingBox().expand(sample.getMasteryWarningRadius()),
+                        candidate -> HelperMethods.checkAbilityTarget(candidate, owner));
+                if (!hostiles.isEmpty()) {
+                    WARNING_COOLDOWN.put(owner.getUuid(), world.getTime() + sample.getMasteryWarningLockout());
+                }
+                for (LivingEntity hostile : hostiles) {
+                    hostile.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS,
+                            sample.getMasteryWarningDuration(), 0,
                             false, true, true), owner);
                 }
             }
-            if ((mode & (1 << 24)) != 0 && owner.getHealth() / owner.getMaxHealth() < .3F) {
-                owner.setAbsorptionAmount(Math.min(10, owner.getAbsorptionAmount()
-                        + entry.getValue().size() * 2));
+            if ((mode & (1 << 24)) != 0 && owner.getHealth() / owner.getMaxHealth()
+                    < sample.getMasterySaveThreshold()) {
+                owner.setAbsorptionAmount(Math.min(sample.getMasterySaveCap(), owner.getAbsorptionAmount()
+                        + entry.getValue().size() * sample.getMasterySaveAbsorption()));
                 entry.getValue().forEach(Entity::discard);
             }
         }
@@ -381,12 +484,46 @@ public final class HivemindSwarmManager {
         return entity instanceof LivingEntity livingEntity ? livingEntity : null;
     }
 
+    private static LivingEntity lastAttacker(ServerWorld world, LivingEntity owner, double range) {
+        LastAttacker last = LAST_ATTACKERS.get(owner.getUuid());
+        if (last == null || last.expiresAt < world.getTime()) return null;
+        Entity entity = world.getEntity(last.attackerId);
+        if (!(entity instanceof LivingEntity attacker) || !attacker.isAlive()
+                || attacker.squaredDistanceTo(owner) > range * range
+                || !HelperMethods.checkAbilityTarget(attacker, owner)) return null;
+        return attacker;
+    }
+
+    public static void clearActor(LivingEntity actor) {
+        if (actor == null) return;
+        UUID id = actor.getUuid();
+        GUARD_RECHARGE.remove(id);
+        RETORT_COOLDOWN.remove(id);
+        WARNING_COOLDOWN.remove(id);
+        LAST_ATTACKERS.remove(id);
+        ROYAL_STINGS.remove(id);
+        SWARM_FOCUS.entrySet().removeIf(entry -> entry.getValue().ownerId.equals(id));
+    }
+
+    public static void clearAll() {
+        GUARD_RECHARGE.clear();
+        SWARM_FOCUS.clear();
+        ROYAL_STINGS.clear();
+        RETORT_COOLDOWN.clear();
+        WARNING_COOLDOWN.clear();
+        LAST_ATTACKERS.clear();
+    }
+
     private static boolean isValidTarget(SimplySwordsBeeEntity bee, LivingEntity owner, LivingEntity anchor, LivingEntity target) {
         double radius = bee.isBloodwakeFly()
                 ? Math.max(1.0, Config.uniqueEffects.bloodwake.targetingRadius)
                 : Math.max(1.0, bee.getMasterySwarmRadius() > 0
                 ? bee.getMasterySwarmRadius() : Config.uniqueEffects.hiveheart.swarmRadius);
-        if (!bee.isBloodwakeFly() && (bee.getMasteryMode() & (1 << 25)) != 0) radius = Math.min(radius, 4);
+        if (!bee.isBloodwakeFly() && (bee.getMasteryMode() & (1 << 25)) != 0) {
+            radius = Math.min(radius, bee.getMasteryPhalanxRange());
+        }
+        if (!bee.isBloodwakeFly() && (bee.getMasteryMode() & (1 << 26)) != 0
+                && target != lastAttacker((ServerWorld) bee.getWorld(), owner, radius)) return false;
         return target != null
                 && target.isAlive()
                 && target != owner
@@ -400,7 +537,12 @@ public final class HivemindSwarmManager {
                 ? Math.max(1.0, Config.uniqueEffects.bloodwake.targetingRadius)
                 : Math.max(1.0, bee.getMasterySwarmRadius() > 0
                 ? bee.getMasterySwarmRadius() : Config.uniqueEffects.hiveheart.swarmRadius);
-        if (!bee.isBloodwakeFly() && (bee.getMasteryMode() & (1 << 25)) != 0) radius = Math.min(radius, 4);
+        if (!bee.isBloodwakeFly() && (bee.getMasteryMode() & (1 << 25)) != 0) {
+            radius = Math.min(radius, bee.getMasteryPhalanxRange());
+        }
+        if (!bee.isBloodwakeFly() && (bee.getMasteryMode() & (1 << 26)) != 0) {
+            return lastAttacker(world, owner, radius);
+        }
         Box searchBox = anchor.getBoundingBox().expand(radius, radius * 0.5, radius);
         LivingEntity selected = null;
         int selectedCount = Integer.MAX_VALUE;
@@ -615,8 +757,9 @@ public final class HivemindSwarmManager {
         float damage = HelperMethods.applyAbilityDamageEnchantments(world, stack, target, damageSource, bee.getSwarmStingDamage());
         if ((bee.getMasteryMode() & (1 << 15)) != 0) {
             FocusState focus = SWARM_FOCUS.get(target.getUuid());
-            if (focus != null && focus.ownerId.equals(owner.getUuid()) && focus.stings >= 3
-                    && focus.expiresAt >= world.getTime()) damage *= 1.2F;
+            if (focus != null && focus.ownerId.equals(owner.getUuid())
+                    && focus.stings >= bee.getMasteryFocusStings()
+                    && focus.expiresAt >= world.getTime()) damage *= bee.getMasteryFocusMultiplier();
         }
         float finalDamage = damage;
         WeaponImplicitRegistry.runSuppressed(() -> damaged[0] = target.damage(damageSource, finalDamage));
@@ -629,13 +772,14 @@ public final class HivemindSwarmManager {
                 int stings = current != null && current.ownerId.equals(owner.getUuid())
                         && current.expiresAt >= world.getTime() ? current.stings + 1 : 1;
                 SWARM_FOCUS.put(target.getUuid(), new FocusState(owner.getUuid(), stings,
-                        world.getTime() + 80));
+                        world.getTime() + bee.getMasteryFocusTicks()));
             }
             if ((bee.getMasteryMode() & (1 << 22)) != 0) {
                 int stings = ROYAL_STINGS.merge(owner.getUuid(), 1, Integer::sum);
-                if (stings >= 8) {
+                if (stings >= bee.getMasteryRallyStings()) {
                     ROYAL_STINGS.put(owner.getUuid(), 0);
-                    owner.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, 40, 0,
+                    owner.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE,
+                            bee.getMasteryRallyDuration(), 0,
                             false, true, true));
                 }
             }
@@ -685,5 +829,8 @@ public final class HivemindSwarmManager {
     }
 
     private record FocusState(UUID ownerId, int stings, long expiresAt) {
+    }
+
+    private record LastAttacker(UUID attackerId, long expiresAt) {
     }
 }

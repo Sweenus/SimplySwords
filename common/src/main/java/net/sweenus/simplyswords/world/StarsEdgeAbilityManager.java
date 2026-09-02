@@ -20,6 +20,7 @@ import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
 import net.sweenus.simplyswords.api.ability.Phase9AbilityTuning;
 import net.sweenus.simplyswords.api.ability.Phase9UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.StarsEdgeConstellationVisualEntity;
@@ -45,6 +46,62 @@ public final class StarsEdgeAbilityManager {
 
     private static final Map<ServerWorld, Map<UUID, ActiveReprise>> ACTIVE = new HashMap<>();
     private static final Map<UUID, RepriseState> REPRISE_STATES = new HashMap<>();
+
+    public static Phase9AbilityTuning solarBase() {
+        return Phase9AbilityTuning.EMPTY
+                .with(Phase9AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1);
+    }
+
+    public static Phase9AbilityTuning lunarBase() {
+        return Phase9AbilityTuning.EMPTY
+                .with(Phase9AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1)
+                .with(Phase9AbilityTuning.Setting.HEAL_MULTIPLIER, 1);
+    }
+
+    public static Phase9AbilityTuning constellationBase(int recordingDuration, int constellationDuration,
+                                                        int segmentInterval, int contactInterval,
+                                                        double segmentRadius, double contactWidth, int maxNodes) {
+        return Phase9AbilityTuning.EMPTY
+                .with(Phase9AbilityTuning.Setting.DURATION_TICKS, recordingDuration)
+                .with(Phase9AbilityTuning.Setting.SECONDARY_DURATION_TICKS, constellationDuration)
+                .with(Phase9AbilityTuning.Setting.INTERVAL_TICKS, segmentInterval)
+                .with(Phase9AbilityTuning.Setting.SECONDARY_INTERVAL_TICKS, contactInterval)
+                .with(Phase9AbilityTuning.Setting.RADIUS, segmentRadius)
+                .with(Phase9AbilityTuning.Setting.SECONDARY_RADIUS, contactWidth)
+                .with(Phase9AbilityTuning.Setting.COUNT, maxNodes)
+                .with(Phase9AbilityTuning.Setting.WIDTH, 1)
+                .with(Phase9AbilityTuning.Setting.RANGE, 1)
+                .with(Phase9AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1);
+    }
+
+    private static Phase9AbilityTuning constellationBase() {
+        return constellationBase(Config.uniqueEffects.stars_edge.recordingDuration, Config.uniqueEffects.stars_edge.constellationDuration,
+                Config.uniqueEffects.stars_edge.segmentExplosionInterval, Config.uniqueEffects.stars_edge.constellationDamageInterval,
+                Config.uniqueEffects.stars_edge.segmentExplosionRadius, Config.uniqueEffects.stars_edge.constellationDamageWidth,
+                Config.uniqueEffects.stars_edge.maxNodes);
+    }
+
+    public static void clear(ServerWorld world) {
+        Map<UUID, ActiveReprise> active = ACTIVE.remove(world);
+        if (active != null) active.values().forEach(reprise ->
+                UniqueAbilityApi.cancel(reprise.execution));
+    }
+
+    public static void clearActor(LivingEntity actor) {
+        if (actor == null) return;
+        REPRISE_STATES.remove(actor.getUuid());
+        ACTIVE.values().forEach(map -> {
+            ActiveReprise reprise = map.remove(actor.getUuid());
+            if (reprise != null) UniqueAbilityApi.cancel(reprise.execution);
+        });
+    }
+
+    public static void clearAll() {
+        ACTIVE.values().forEach(map -> map.values().forEach(reprise ->
+                UniqueAbilityApi.cancel(reprise.execution)));
+        ACTIVE.clear();
+        REPRISE_STATES.clear();
+    }
 
     private StarsEdgeAbilityManager() {
     }
@@ -89,7 +146,8 @@ public final class StarsEdgeAbilityManager {
             return true;
         }
         UniqueAbilityExecution execution = Phase9CombatManager.beginActive(
-                Phase9UniqueAbilities.STARS_CONSTELLATION, context, Config.uniqueEffects.stars_edge.cooldown);
+                Phase9UniqueAbilities.STARS_CONSTELLATION, context, Config.uniqueEffects.stars_edge.cooldown,
+                constellationBase());
         return start(context, Phase9UniqueAbilities.tuning(execution), execution);
     }
 
@@ -98,8 +156,15 @@ public final class StarsEdgeAbilityManager {
         boolean day = world.isDay();
         UniqueAbilityExecution execution = Phase9CombatManager.beginPassive(day
                 ? Phase9UniqueAbilities.STARS_SOLAR : Phase9UniqueAbilities.STARS_LUNAR,
-                world, stack, attacker, target);
+                world, stack, attacker, target, day ? solarBase() : lunarBase());
         Phase9AbilityTuning tuning = Phase9UniqueAbilities.tuning(execution);
+        Phase9AbilityTuning carryOver = Phase9AbilityTuning.EMPTY;
+        if (!day) {
+            UniqueAbilityExecution solarExecution = Phase9CombatManager.beginPassive(
+                    Phase9UniqueAbilities.STARS_SOLAR, world, stack, attacker, target, solarBase());
+            carryOver = Phase9UniqueAbilities.tuning(solarExecution);
+            Phase9CombatManager.finish(solarExecution, 0);
+        }
         RepriseState state = REPRISE_STATES.computeIfAbsent(attacker.getUuid(), ignored -> new RepriseState());
         float abilityDamage = HelperMethods.abilityScaledDamage("arcane", attacker, stack,
                 Config.uniqueEffects.stars_edge.damageScaling * (float) tuning.get(
@@ -125,7 +190,7 @@ public final class StarsEdgeAbilityManager {
             }
             if (tuning.flag(1 << 7)) {
                 state.solarCharge += tuning.integer(Phase9AbilityTuning.Setting.COUNT, 5);
-                if (state.solarCharge >= tuning.integer(Phase9AbilityTuning.Setting.STACK_CAP, 25)) {
+                if (state.solarCharge >= tuning.integer(Phase9AbilityTuning.Setting.FLAT_DAMAGE, 25)) {
                     state.solarCharge = 0;
                     pulse(world, attacker, stack, target, abilityDamage * (float) tuning.get(
                             Phase9AbilityTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, 1.5),
@@ -143,13 +208,34 @@ public final class StarsEdgeAbilityManager {
             if (!target.isAlive() && tuning.flag(1 << 5)) attacker.addStatusEffect(new StatusEffectInstance(
                     StatusEffects.SPEED, 60, 0), attacker);
         } else {
-            if (tuning.flag(1 << 8)) {
-                abilityDamage *= (float) tuning.get(Phase9AbilityTuning.Setting.OUTGOING_MULTIPLIER, .6);
+            boolean endlessDay = carryOver.flag(1 << 8);
+            if (state.markedTarget != null && state.markedTarget.equals(target.getUuid())
+                    && world.getTime() < state.markExpiresAt) {
+                abilityDamage *= (float) tuning.get(Phase9AbilityTuning.Setting.PER_STACK_MULTIPLIER, 1.08);
+                state.markedTarget = null;
             }
-            float heal = abilityDamage * Config.uniqueEffects.stars_edge.lifestealModifier
+            if (state.ambushReady && tuning.flag(1 << 16)) {
+                abilityDamage *= (float) tuning.get(Phase9AbilityTuning.Setting.OUTGOING_MULTIPLIER, 1.35);
+                state.ambushReady = false;
+            }
+            if (endlessDay) {
+                float nightDamage = abilityDamage
+                        * (float) carryOver.get(Phase9AbilityTuning.Setting.OUTGOING_MULTIPLIER, .6);
+                target.timeUntilRegen = 0;
+                target.damage(source, HelperMethods.applyAbilityDamageEnchantments(
+                        world, stack, target, source, nightDamage));
+            }
+            float heal = endlessDay ? 0.0F : abilityDamage
+                    * Config.uniqueEffects.stars_edge.lifestealModifier
                     * (float) tuning.get(Phase9AbilityTuning.Setting.HEAL_MULTIPLIER, 1);
             if (tuning.flag(1 << 12) && attacker.getHealth() / attacker.getMaxHealth()
-                    < tuning.get(Phase9AbilityTuning.Setting.HEALTH_THRESHOLD, .4)) heal *= 1.25F;
+                    < tuning.get(Phase9AbilityTuning.Setting.HEALTH_THRESHOLD, .4))
+                heal *= (float) tuning.get(Phase9AbilityTuning.Setting.INCOMING_MULTIPLIER, 1.25);
+            if (heal > 0 && tuning.flag(1 << 13)) {
+                state.markedTarget = target.getUuid();
+                state.markExpiresAt = world.getTime()
+                        + tuning.integer(Phase9AbilityTuning.Setting.DURATION_TICKS, 60);
+            }
             float missing = attacker.getMaxHealth() - attacker.getHealth();
             attacker.heal(heal);
             if (tuning.flag(1 << 15) && heal > missing) attacker.addStatusEffect(new StatusEffectInstance(
@@ -161,8 +247,21 @@ public final class StarsEdgeAbilityManager {
             }
             if (tuning.flag(1 << 9) && target.hasStatusEffect(StatusEffects.GLOWING)) attacker.addStatusEffect(
                     new StatusEffectInstance(StatusEffects.SPEED, 30, 0), attacker);
-            if (!target.isAlive() && tuning.flag(1 << 16)) attacker.addStatusEffect(
-                    new StatusEffectInstance(StatusEffects.INVISIBILITY, 40, 0), attacker);
+            if (!target.isAlive() && tuning.flag(1 << 16)) {
+                attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.INVISIBILITY,
+                        tuning.integer(Phase9AbilityTuning.Setting.STATUS_DURATION_TICKS, 40), 0), attacker);
+                state.ambushReady = true;
+            }
+            if (!target.isAlive() && tuning.flag(1 << 14)) {
+                int refund = tuning.integer(Phase9AbilityTuning.Setting.REFUND_TICKS, 10);
+                int cap = tuning.integer(Phase9AbilityTuning.Setting.STACK_CAP, 60);
+                int granted = Math.min(refund, Math.max(0, cap - state.nightRefunded));
+                if (granted > 0) {
+                    state.nightRefunded += granted;
+                    SimplySwordsAPI.reduceWeaponCooldown(attacker, stack,
+                            Config.uniqueEffects.stars_edge.cooldown, granted);
+                }
+            }
             float sharedHeal = heal * .35F;
             if (tuning.flag(1 << 17)) world.getEntitiesByClass(LivingEntity.class,
                             attacker.getBoundingBox().expand(5), ally -> ally != attacker
@@ -338,6 +437,23 @@ public final class StarsEdgeAbilityManager {
             return false;
         }
 
+        if (active.tuning.flag(1 << 26)) {
+            fadeVisuals(world, active);
+            return true;
+        }
+        if (active.tuning.flag(1 << 25)) {
+            Set<UUID> struck = new HashSet<>();
+            for (int index = 1; index < active.nodes.size(); index++) {
+                RouteNode from = active.nodes.get(index - 1);
+                RouteNode to = active.nodes.get(index);
+                detonateSegment(world, actor, active, from.position, to.position, struck);
+                setVisualPhase(world, from.nodeVisualId, StarsEdgeConstellationVisualEntity.PHASE_DETONATE);
+                setVisualPhase(world, to.linkVisualId, StarsEdgeConstellationVisualEntity.PHASE_DETONATE);
+                setVisualPhase(world, to.nodeVisualId, StarsEdgeConstellationVisualEntity.PHASE_DETONATE);
+            }
+            active.nextSegmentIndex = active.nodes.size();
+            return true;
+        }
         int segmentIndex = active.nextSegmentIndex;
         RouteNode startNode = active.nodes.get(segmentIndex - 1);
         RouteNode endNode = active.nodes.get(segmentIndex);
@@ -455,10 +571,15 @@ public final class StarsEdgeAbilityManager {
 
     private static void detonateSegment(ServerWorld world, LivingEntity actor, ActiveReprise active,
                                         Vec3d start, Vec3d end) {
+        detonateSegment(world, actor, active, start, end, null);
+    }
+
+    private static void detonateSegment(ServerWorld world, LivingEntity actor, ActiveReprise active,
+                                        Vec3d start, Vec3d end, Set<UUID> struck) {
         damageSegmentExplosion(world, actor, active, start, end,
                 Math.max(0.1, active.tuning.get(Phase9AbilityTuning.Setting.RADIUS,
                         Config.uniqueEffects.stars_edge.segmentExplosionRadius)),
-                active.constellationDamage);
+                active.constellationDamage, struck);
         spawnSegmentExplosionEffects(world, actor, start, end);
     }
 
@@ -470,7 +591,7 @@ public final class StarsEdgeAbilityManager {
             return;
         }
 
-        double width = Math.max(0.1, active.tuning.get(Phase9AbilityTuning.Setting.WIDTH,
+        double width = Math.max(0.1, active.tuning.get(Phase9AbilityTuning.Setting.SECONDARY_RADIUS,
                 Config.uniqueEffects.stars_edge.constellationDamageWidth));
         Set<UUID> pulseHitTargets = new HashSet<>();
         for (int segmentIndex = active.nextSegmentIndex;
@@ -525,7 +646,7 @@ public final class StarsEdgeAbilityManager {
 
     private static void damageSegmentExplosion(ServerWorld world, LivingEntity actor, ActiveReprise active,
                                                Vec3d start, Vec3d end, double radius,
-                                               float baseDamage) {
+                                               float baseDamage, Set<UUID> shared) {
         if (baseDamage <= 0.0F || start.squaredDistanceTo(end) < 0.0001) {
             return;
         }
@@ -533,7 +654,7 @@ public final class StarsEdgeAbilityManager {
         Vec3d bodyStart = start.add(0.0, 0.85, 0.0);
         Vec3d bodyEnd = end.add(0.0, 0.85, 0.0);
         Box search = new Box(bodyStart, bodyEnd).expand(radius + 1.0);
-        Set<UUID> segmentHitTargets = new HashSet<>();
+        Set<UUID> segmentHitTargets = shared == null ? new HashSet<>() : shared;
 
         for (LivingEntity target : world.getEntitiesByClass(LivingEntity.class, search,
                 target -> target != actor
@@ -811,6 +932,10 @@ public final class StarsEdgeAbilityManager {
         private int solarCharge;
         private long lastSolarHit;
         private long guardAt;
+        private UUID markedTarget;
+        private long markExpiresAt;
+        private boolean ambushReady;
+        private int nightRefunded;
     }
 
     private record RouteNode(Vec3d position, UUID nodeVisualId, UUID linkVisualId) {

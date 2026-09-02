@@ -1,0 +1,55 @@
+package net.sweenus.simplyswords.world;
+
+import net.sweenus.simplyswords.api.ability.Phase8AbilityTuning;
+
+public final class Phase8TuningMath {
+    private Phase8TuningMath() {
+    }
+
+    public static int conversionChance(int configured, Phase8AbilityTuning tuning) {
+        return Math.clamp(configured + tuning.integer(
+                Phase8AbilityTuning.Setting.PLAGUE_CONVERSION_CHANCE_BONUS, 0), 0, 100);
+    }
+
+    public static int feverDuration(int configured, Phase8AbilityTuning tuning) {
+        return Math.max(1, configured + tuning.integer(
+                Phase8AbilityTuning.Setting.PLAGUE_FEVER_DURATION_BONUS_TICKS, 0));
+    }
+
+    public static int conversionFever(int configured, Phase8AbilityTuning tuning) {
+        return Math.max(0, configured + tuning.integer(
+                Phase8AbilityTuning.Setting.PLAGUE_CONVERSION_FEVER_BONUS, 0));
+    }
+
+    public static double tollRadius(double configured, Phase8AbilityTuning tuning) {
+        return Math.max(.1, configured + tuning.get(
+                Phase8AbilityTuning.Setting.PLAGUE_TOLL_RADIUS_BONUS, 0));
+    }
+
+    public static int feverSpread(int configured, Phase8AbilityTuning tuning) {
+        return Math.max(0, configured + tuning.integer(
+                Phase8AbilityTuning.Setting.PLAGUE_FEVER_SPREAD_BONUS, 0));
+    }
+
+    public static int maximumTolls(int configured, Phase8AbilityTuning tuning) {
+        if (tuning.flag(1 << 26)) return 1;
+        int result = Math.max(1, configured + tuning.integer(
+                Phase8AbilityTuning.Setting.PLAGUE_CASCADE_TOLL_BONUS, 0));
+        if (tuning.flag(1 << 25)) result = Math.max(1, result - tuning.integer(
+                Phase8AbilityTuning.Setting.PLAGUE_REVISIT_TOLL_PENALTY, 2));
+        int cap = tuning.integer(Phase8AbilityTuning.Setting.PLAGUE_CASCADE_TOLL_CAP, 0);
+        return cap > 0 ? Math.min(result, cap) : result;
+    }
+
+    public static float carriedDurationMultiplier(float configured, Phase8AbilityTuning pestilence,
+                                                  Phase8AbilityTuning outbreak) {
+        return (float) Math.clamp(configured
+                + pestilence.get(Phase8AbilityTuning.Setting.PLAGUE_CARRIED_DURATION_BONUS, 0)
+                + outbreak.get(Phase8AbilityTuning.Setting.PLAGUE_CARRIED_DURATION_BONUS, 0), 0, 1);
+    }
+
+    public static boolean criticalCondition(int stacks, int threshold, double fraction) {
+        return stacks >= Math.max(1, (int) Math.ceil(Math.max(1, threshold)
+                * Math.clamp(fraction, 0, 1)));
+    }
+}

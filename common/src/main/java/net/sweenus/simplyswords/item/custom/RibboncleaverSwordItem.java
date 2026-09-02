@@ -61,16 +61,14 @@ public class RibboncleaverSwordItem extends UniqueSwordItem implements UniqueWea
     }
 
     @Override
-    public TypedActionResult<ItemStack> startPlayerAbility(World world, PlayerEntity user, Hand hand) {
-        world.playSound(null, user.getBlockPos(), SoundRegistry.ELEMENTAL_BOW_EARTH_SHOOT_IMPACT_03.get(),
-                user.getSoundCategory(), 0.4f, 1.3f);
-        if (user.isOnGround())
-            world.playSound(null, user.getBlockPos(), SoundRegistry.OBJECT_IMPACT_THUD_REPEAT.get(),
-                    user.getSoundCategory(), 0.5f, 1.2f);
-        if (world instanceof net.minecraft.server.world.ServerWorld serverWorld)
-            Phase10WeaponManager.ribbonRush(serverWorld, user, user.getStackInHand(hand), null);
-
-        return super.use(world, user, hand);
+    public boolean canActivate(WeaponAbilityContext context) {
+        return context != null
+                && context.world() != null
+                && context.actor() != null
+                && context.actor().isAlive()
+                && context.stack() != null
+                && !context.stack().isEmpty()
+                && context.stack().getDamage() < context.stack().getMaxDamage() - 1;
     }
 
     @Override
@@ -81,6 +79,9 @@ public class RibboncleaverSwordItem extends UniqueSwordItem implements UniqueWea
         Phase10WeaponManager.ribbonRush(context.world(), actor, context.stack(), target);
         context.world().playSound(null, actor.getBlockPos(), SoundRegistry.ELEMENTAL_BOW_EARTH_SHOOT_IMPACT_03.get(),
                 actor.getSoundCategory(), 0.4f, 1.3f);
+        if (actor.isOnGround())
+            context.world().playSound(null, actor.getBlockPos(), SoundRegistry.OBJECT_IMPACT_THUD_REPEAT.get(),
+                    actor.getSoundCategory(), 0.5f, 1.2f);
         context.world().spawnParticles(ParticleTypes.POOF, actor.getX(), actor.getY() + 0.15, actor.getZ(), 12, 0.55, 0.08, 0.55, 0.03);
         return true;
     }

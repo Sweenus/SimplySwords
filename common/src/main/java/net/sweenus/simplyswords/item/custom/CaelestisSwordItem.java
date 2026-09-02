@@ -69,6 +69,11 @@ public class CaelestisSwordItem extends UniqueSwordItem implements UniqueWeaponA
 
     @Override
     public boolean activate(WeaponAbilityContext context) {
+        if (context != null && context.actor() != null && context.actor().isSneaking()
+                && context.world() != null
+                && CaelestisBreachManager.tryForcedRecall(context.world(), context.actor())) {
+            return false;
+        }
         if (!canActivate(context)) return false;
         UniqueAbilityExecution execution = Phase9CombatManager.beginActive(
                 Phase9UniqueAbilities.CAELESTIS_HOST, context,

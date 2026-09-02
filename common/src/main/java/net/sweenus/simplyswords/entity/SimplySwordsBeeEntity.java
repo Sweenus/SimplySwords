@@ -5,6 +5,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.Tameable;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
+import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffectInstance;
@@ -51,6 +52,32 @@ public class SimplySwordsBeeEntity extends BeeEntity implements Tameable {
     private int masteryMode;
     private int masteryCooldownRefund;
     private int masterySearchCap;
+    private UUID masteryReleaseId;
+    private UUID masteryPreferredTargetUuid;
+    private long masteryPreferredTargetExpiry;
+    private double masteryPreferredTargetMultiplier = 1;
+    private int masteryFocusStings;
+    private float masteryFocusMultiplier = 1;
+    private int masteryFocusTicks;
+    private double masteryGuardRange;
+    private float masteryGuardMultiplier = 1;
+    private int masteryGuardLockout;
+    private double masteryWarningRadius;
+    private int masteryWarningDuration;
+    private int masteryWarningLockout;
+    private float masteryRetortMultiplier;
+    private int masteryRetortLockout;
+    private int masteryRallyStings;
+    private int masteryRallyDuration;
+    private int masteryEscortCount;
+    private float masteryEscortSpeedMultiplier = 1;
+    private float masterySaveThreshold;
+    private int masterySaveAbsorption;
+    private int masterySaveCap;
+    private double masteryPhalanxRange;
+    private int masteryPhalanxCount;
+    private int masteryPhalanxAmplifier;
+    private boolean masteryGuardDrone;
 
     public SimplySwordsBeeEntity(EntityType<? extends BeeEntity> entityType, World world) {
         super(entityType, world);
@@ -97,7 +124,15 @@ public class SimplySwordsBeeEntity extends BeeEntity implements Tameable {
         }
         Vec3d velocity = target.getVelocity();
         target.timeUntilRegen = 0;
+        EntityAttributeInstance attackDamage = getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE);
+        double baseDamage = attackDamage == null ? 0 : attackDamage.getBaseValue();
+        if (attackDamage != null && masteryPreferredTargetUuid != null
+                && masteryPreferredTargetUuid.equals(target.getUuid())
+                && getWorld().getTime() <= masteryPreferredTargetExpiry) {
+            attackDamage.setBaseValue(baseDamage * masteryPreferredTargetMultiplier);
+        }
         boolean attacked = super.tryAttack(target);
+        if (attackDamage != null) attackDamage.setBaseValue(baseDamage);
         if (attacked && masteryPoisonTicks > 0 && target instanceof LivingEntity living) {
             living.addStatusEffect(new StatusEffectInstance(StatusEffects.POISON,
                     masteryPoisonTicks, 0, false, true, true), this);
@@ -105,14 +140,13 @@ public class SimplySwordsBeeEntity extends BeeEntity implements Tameable {
         Entity owner = ownerUuid != null && getWorld() instanceof ServerWorld serverWorld
                 ? serverWorld.getEntity(ownerUuid) : null;
         if (attacked && masteryCooldownRefund > 0 && target instanceof LivingEntity living
-                && !living.isAlive() && owner instanceof PlayerEntity player) {
-            int total = SimplySwordsAPI.getEffectiveWeaponCooldownTicks(
-                    new net.minecraft.item.ItemStack(ItemsRegistry.HIVEHEART.get()), player,
-                    Config.uniqueEffects.hiveheart.cooldown);
-            int remaining = Math.round(player.getItemCooldownManager().getCooldownProgress(
-                    ItemsRegistry.HIVEHEART.get(), 0) * total);
-            player.getItemCooldownManager().set(ItemsRegistry.HIVEHEART.get(),
-                    Math.max(0, remaining - masteryCooldownRefund));
+                && !living.isAlive() && owner instanceof PlayerEntity player
+                && getWorld() instanceof ServerWorld world
+                && net.sweenus.simplyswords.world.Phase7CombatManager.claimHiveRefund(
+                        world, masteryReleaseId, world.getTime() + lifespan)) {
+            SimplySwordsAPI.reduceWeaponCooldown(player,
+                    new net.minecraft.item.ItemStack(ItemsRegistry.HIVEHEART.get()),
+                    Config.uniqueEffects.hiveheart.cooldown, masteryCooldownRefund);
             masteryCooldownRefund = 0;
         }
         target.setVelocity(velocity);
@@ -374,6 +408,79 @@ public class SimplySwordsBeeEntity extends BeeEntity implements Tameable {
         this.masterySearchCap = Math.max(0, masterySearchCap);
     }
 
+    public void setMasteryReleaseId(@Nullable UUID masteryReleaseId) {
+        this.masteryReleaseId = masteryReleaseId;
+    }
+
+    public void setMasteryTargetRangeBonus(double bonus) {
+        EntityAttributeInstance range = getAttributeInstance(EntityAttributes.GENERIC_FOLLOW_RANGE);
+        if (range != null) range.setBaseValue(48 + Math.max(0, bonus));
+    }
+
+    public void configureMasteryPreferredTarget(@Nullable UUID targetUuid, long expiry,
+                                                double damageMultiplier) {
+        this.masteryPreferredTargetUuid = targetUuid;
+        this.masteryPreferredTargetExpiry = Math.max(0, expiry);
+        this.masteryPreferredTargetMultiplier = Math.max(1, damageMultiplier);
+    }
+
+    public void configureMasterySwarmCombat(int focusStings, double focusMultiplier, int focusTicks,
+                                            double guardRange, double guardMultiplier, int guardLockout,
+                                            double warningRadius, int warningDuration, int warningLockout,
+                                            double retortMultiplier, int retortLockout) {
+        masteryFocusStings = Math.max(0, focusStings);
+        masteryFocusMultiplier = (float) Math.max(1, focusMultiplier);
+        masteryFocusTicks = Math.max(0, focusTicks);
+        masteryGuardRange = Math.max(0, guardRange);
+        masteryGuardMultiplier = (float) Math.clamp(guardMultiplier, 0, 1);
+        masteryGuardLockout = Math.max(0, guardLockout);
+        masteryWarningRadius = Math.max(0, warningRadius);
+        masteryWarningDuration = Math.max(0, warningDuration);
+        masteryWarningLockout = Math.max(0, warningLockout);
+        masteryRetortMultiplier = (float) Math.max(0, retortMultiplier);
+        masteryRetortLockout = Math.max(0, retortLockout);
+    }
+
+    public void configureMasteryRoyalGuard(int rallyStings, int rallyDuration, int escortCount,
+                                           double escortSpeedMultiplier, double saveThreshold,
+                                           int saveAbsorption, int saveCap, double phalanxRange,
+                                           int phalanxCount, int phalanxAmplifier) {
+        masteryRallyStings = Math.max(0, rallyStings);
+        masteryRallyDuration = Math.max(0, rallyDuration);
+        masteryEscortCount = Math.max(0, escortCount);
+        masteryEscortSpeedMultiplier = (float) Math.max(1, escortSpeedMultiplier);
+        masterySaveThreshold = (float) Math.clamp(saveThreshold, 0, 1);
+        masterySaveAbsorption = Math.max(0, saveAbsorption);
+        masterySaveCap = Math.max(0, saveCap);
+        masteryPhalanxRange = Math.max(0, phalanxRange);
+        masteryPhalanxCount = Math.max(0, phalanxCount);
+        masteryPhalanxAmplifier = Math.max(0, phalanxAmplifier);
+    }
+
+    public int getMasteryFocusStings() { return masteryFocusStings; }
+    public float getMasteryFocusMultiplier() { return masteryFocusMultiplier; }
+    public int getMasteryFocusTicks() { return masteryFocusTicks; }
+    public double getMasteryGuardRange() { return masteryGuardRange; }
+    public float getMasteryGuardMultiplier() { return masteryGuardMultiplier; }
+    public int getMasteryGuardLockout() { return masteryGuardLockout; }
+    public double getMasteryWarningRadius() { return masteryWarningRadius; }
+    public int getMasteryWarningDuration() { return masteryWarningDuration; }
+    public int getMasteryWarningLockout() { return masteryWarningLockout; }
+    public float getMasteryRetortMultiplier() { return masteryRetortMultiplier; }
+    public int getMasteryRetortLockout() { return masteryRetortLockout; }
+    public int getMasteryRallyStings() { return masteryRallyStings; }
+    public int getMasteryRallyDuration() { return masteryRallyDuration; }
+    public int getMasteryEscortCount() { return masteryEscortCount; }
+    public float getMasteryEscortSpeedMultiplier() { return masteryEscortSpeedMultiplier; }
+    public float getMasterySaveThreshold() { return masterySaveThreshold; }
+    public int getMasterySaveAbsorption() { return masterySaveAbsorption; }
+    public int getMasterySaveCap() { return masterySaveCap; }
+    public double getMasteryPhalanxRange() { return masteryPhalanxRange; }
+    public int getMasteryPhalanxCount() { return masteryPhalanxCount; }
+    public int getMasteryPhalanxAmplifier() { return masteryPhalanxAmplifier; }
+    public boolean isMasteryGuardDrone() { return masteryGuardDrone; }
+    public void setMasteryGuardDrone(boolean guardDrone) { masteryGuardDrone = guardDrone; }
+
     @Override
     public void readCustomDataFromNbt(NbtCompound nbt) {
         super.readCustomDataFromNbt(nbt);
@@ -419,6 +526,35 @@ public class SimplySwordsBeeEntity extends BeeEntity implements Tameable {
         this.masteryMode = nbt.getInt("mastery_mode");
         this.masteryCooldownRefund = nbt.getInt("mastery_cooldown_refund");
         this.masterySearchCap = nbt.getInt("mastery_search_cap");
+        this.masteryReleaseId = nbt.containsUuid("mastery_release_id")
+                ? nbt.getUuid("mastery_release_id") : null;
+        this.masteryPreferredTargetUuid = nbt.containsUuid("mastery_preferred_target_uuid")
+                ? nbt.getUuid("mastery_preferred_target_uuid") : null;
+        this.masteryPreferredTargetExpiry = nbt.getLong("mastery_preferred_target_expiry");
+        this.masteryPreferredTargetMultiplier = nbt.contains("mastery_preferred_target_multiplier")
+                ? nbt.getDouble("mastery_preferred_target_multiplier") : 1;
+        masteryFocusStings = nbt.getInt("mastery_focus_stings");
+        masteryFocusMultiplier = nbt.contains("mastery_focus_multiplier") ? nbt.getFloat("mastery_focus_multiplier") : 1;
+        masteryFocusTicks = nbt.getInt("mastery_focus_ticks");
+        masteryGuardRange = nbt.getDouble("mastery_guard_range");
+        masteryGuardMultiplier = nbt.contains("mastery_guard_multiplier") ? nbt.getFloat("mastery_guard_multiplier") : 1;
+        masteryGuardLockout = nbt.getInt("mastery_guard_lockout");
+        masteryWarningRadius = nbt.getDouble("mastery_warning_radius");
+        masteryWarningDuration = nbt.getInt("mastery_warning_duration");
+        masteryWarningLockout = nbt.getInt("mastery_warning_lockout");
+        masteryRetortMultiplier = nbt.getFloat("mastery_retort_multiplier");
+        masteryRetortLockout = nbt.getInt("mastery_retort_lockout");
+        masteryRallyStings = nbt.getInt("mastery_rally_stings");
+        masteryRallyDuration = nbt.getInt("mastery_rally_duration");
+        masteryEscortCount = nbt.getInt("mastery_escort_count");
+        masteryEscortSpeedMultiplier = nbt.contains("mastery_escort_speed") ? nbt.getFloat("mastery_escort_speed") : 1;
+        masterySaveThreshold = nbt.getFloat("mastery_save_threshold");
+        masterySaveAbsorption = nbt.getInt("mastery_save_absorption");
+        masterySaveCap = nbt.getInt("mastery_save_cap");
+        masteryPhalanxRange = nbt.getDouble("mastery_phalanx_range");
+        masteryPhalanxCount = nbt.getInt("mastery_phalanx_count");
+        masteryPhalanxAmplifier = nbt.getInt("mastery_phalanx_amplifier");
+        masteryGuardDrone = nbt.getBoolean("mastery_guard_drone");
         if (nbt.containsUuid("swarm_lineup_target_uuid")) {
             this.swarmLineupTargetUuid = nbt.getUuid("swarm_lineup_target_uuid");
         }
@@ -471,6 +607,34 @@ public class SimplySwordsBeeEntity extends BeeEntity implements Tameable {
         nbt.putInt("mastery_mode", this.masteryMode);
         nbt.putInt("mastery_cooldown_refund", this.masteryCooldownRefund);
         nbt.putInt("mastery_search_cap", this.masterySearchCap);
+        if (this.masteryReleaseId != null) nbt.putUuid("mastery_release_id", this.masteryReleaseId);
+        if (this.masteryPreferredTargetUuid != null) {
+            nbt.putUuid("mastery_preferred_target_uuid", this.masteryPreferredTargetUuid);
+        }
+        nbt.putLong("mastery_preferred_target_expiry", this.masteryPreferredTargetExpiry);
+        nbt.putDouble("mastery_preferred_target_multiplier", this.masteryPreferredTargetMultiplier);
+        nbt.putInt("mastery_focus_stings", masteryFocusStings);
+        nbt.putFloat("mastery_focus_multiplier", masteryFocusMultiplier);
+        nbt.putInt("mastery_focus_ticks", masteryFocusTicks);
+        nbt.putDouble("mastery_guard_range", masteryGuardRange);
+        nbt.putFloat("mastery_guard_multiplier", masteryGuardMultiplier);
+        nbt.putInt("mastery_guard_lockout", masteryGuardLockout);
+        nbt.putDouble("mastery_warning_radius", masteryWarningRadius);
+        nbt.putInt("mastery_warning_duration", masteryWarningDuration);
+        nbt.putInt("mastery_warning_lockout", masteryWarningLockout);
+        nbt.putFloat("mastery_retort_multiplier", masteryRetortMultiplier);
+        nbt.putInt("mastery_retort_lockout", masteryRetortLockout);
+        nbt.putInt("mastery_rally_stings", masteryRallyStings);
+        nbt.putInt("mastery_rally_duration", masteryRallyDuration);
+        nbt.putInt("mastery_escort_count", masteryEscortCount);
+        nbt.putFloat("mastery_escort_speed", masteryEscortSpeedMultiplier);
+        nbt.putFloat("mastery_save_threshold", masterySaveThreshold);
+        nbt.putInt("mastery_save_absorption", masterySaveAbsorption);
+        nbt.putInt("mastery_save_cap", masterySaveCap);
+        nbt.putDouble("mastery_phalanx_range", masteryPhalanxRange);
+        nbt.putInt("mastery_phalanx_count", masteryPhalanxCount);
+        nbt.putInt("mastery_phalanx_amplifier", masteryPhalanxAmplifier);
+        nbt.putBoolean("mastery_guard_drone", masteryGuardDrone);
         if (this.swarmLineupTargetUuid != null) {
             nbt.putUuid("swarm_lineup_target_uuid", this.swarmLineupTargetUuid);
         }

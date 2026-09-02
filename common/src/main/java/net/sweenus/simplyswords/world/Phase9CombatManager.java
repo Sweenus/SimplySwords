@@ -23,23 +23,46 @@ public final class Phase9CombatManager {
 
     public static UniqueAbilityExecution beginActive(UniqueAbilityDefinition definition,
                                                      WeaponAbilityContext context, int cooldown) {
+        return beginActive(definition, context, cooldown, Phase9AbilityTuning.EMPTY);
+    }
+
+    public static UniqueAbilityExecution beginActive(UniqueAbilityDefinition definition,
+                                                     WeaponAbilityContext context, int cooldown,
+                                                     Phase9AbilityTuning base) {
+        Phase9AbilityTuning seeded = base.with(Phase9AbilityTuning.Setting.COOLDOWN_TICKS, cooldown);
         return UniqueAbilityApi.begin(definition, UniqueAbilityContext.active(context), tuning -> tuning
-                .set(Phase9UniqueAbilities.TUNING, Phase9AbilityTuning.EMPTY)
+                .set(Phase9UniqueAbilities.TUNING, seeded)
                 .set(Phase9UniqueAbilities.COOLDOWN_TICKS, cooldown));
     }
 
     public static UniqueAbilityExecution beginPassive(UniqueAbilityDefinition definition, ServerWorld world,
                                                       ItemStack stack, LivingEntity actor, LivingEntity target) {
+        return beginPassive(definition, world, stack, actor, target, Phase9AbilityTuning.EMPTY);
+    }
+
+    public static UniqueAbilityExecution beginPassive(UniqueAbilityDefinition definition, ServerWorld world,
+                                                      ItemStack stack, LivingEntity actor, LivingEntity target,
+                                                      Phase9AbilityTuning base) {
+        UniqueAbilityExecution outer = UniqueAbilityApi.takeStartedExecution();
         UniqueAbilityExecution execution = UniqueAbilityApi.begin(definition,
                 UniqueAbilityContext.passive(world, stack, actor, target, null),
-                tuning -> tuning.set(Phase9UniqueAbilities.TUNING, Phase9AbilityTuning.EMPTY));
+                tuning -> tuning.set(Phase9UniqueAbilities.TUNING, base));
         UniqueAbilityApi.takeStartedExecution();
         UniqueAbilityApi.start(execution);
+        if (outer != null) UniqueAbilityApi.publishStartedExecution(outer);
         return execution;
     }
 
     public static void finish(UniqueAbilityExecution execution, int affectedTargets) {
-        UniqueAbilityApi.finish(execution, Phase9UniqueAbilities.FINISH, affectedTargets);
+        if (execution != null) UniqueAbilityApi.finish(execution, Phase9UniqueAbilities.FINISH, affectedTargets);
+    }
+
+    public static void clear(ServerWorld world) {
+        FINISHES.remove(world);
+    }
+
+    public static void clearAll() {
+        FINISHES.clear();
     }
 
     public static void scheduleFinish(ServerWorld world, UniqueAbilityExecution execution, int delay,

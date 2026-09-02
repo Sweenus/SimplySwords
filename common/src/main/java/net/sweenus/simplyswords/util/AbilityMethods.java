@@ -89,13 +89,20 @@ public class AbilityMethods {
         }
 
         if (player.age % 40 == 0) {
+            double leftRadius = hasLeftAxolotl && axolotlDataLeft.contains("MasteryShoulderAuraRadius")
+                    ? axolotlDataLeft.getDouble("MasteryShoulderAuraRadius") : 5;
+            double rightRadius = hasRightAxolotl && axolotlDataRight.contains("MasteryShoulderAuraRadius")
+                    ? axolotlDataRight.getDouble("MasteryShoulderAuraRadius") : 5;
+            double radius = Math.max(leftRadius, rightRadius);
             Box area = new Box(
-                    player.getX() - 5, player.getY() - 3, player.getZ() - 5,
-                    player.getX() + 5, player.getY() + 3, player.getZ() + 5
+                    player.getX() - radius, player.getY() - 3, player.getZ() - radius,
+                    player.getX() + radius, player.getY() + 3, player.getZ() + radius
             );
 
             int leftVariant = hasLeftAxolotl ? axolotlDataLeft.getInt("Variant") : -1;
             int rightVariant = hasRightAxolotl ? axolotlDataRight.getInt("Variant") : -1;
+            boolean leftEternal = hasLeftAxolotl && axolotlDataLeft.getBoolean("MasteryEternalAura");
+            boolean rightEternal = hasRightAxolotl && axolotlDataRight.getBoolean("MasteryEternalAura");
 
             boolean areVariantsMatching = hasLeftAxolotl && hasRightAxolotl && leftVariant == rightVariant;
 
@@ -112,12 +119,14 @@ public class AbilityMethods {
                 case 3 ->
                         new StatusEffectInstance(StatusEffects.STRENGTH, 50, amplifierBoost, false, false, true);     // Cyan
                 case 4 ->
-                        new StatusEffectInstance(StatusEffects.SPEED, 50, amplifierBoost, false, false, true);            // Blue
+                        new StatusEffectInstance(leftEternal ? StatusEffects.DOLPHINS_GRACE : StatusEffects.SPEED,
+                                50, leftEternal ? 0 : amplifierBoost, false, false, true);
                 default -> null;
             } : null;
 
             StatusEffectInstance leftSecondaryEffect = (hasLeftAxolotl && leftVariant == 4)
-                    ? new StatusEffectInstance(StatusEffects.LUCK, 50, amplifierBoost, false, false, true)
+                    ? new StatusEffectInstance(leftEternal ? StatusEffects.RESISTANCE : StatusEffects.LUCK,
+                    50, leftEternal ? 0 : amplifierBoost, false, false, true)
                     : null;
 
             StatusEffectInstance rightPrimaryEffect = hasRightAxolotl ? switch (rightVariant) {
@@ -130,12 +139,14 @@ public class AbilityMethods {
                 case 3 ->
                         new StatusEffectInstance(StatusEffects.STRENGTH, 50, amplifierBoost, false, false, true);     // Cyan
                 case 4 ->
-                        new StatusEffectInstance(StatusEffects.SPEED, 50, amplifierBoost, false, false, true);            // Blue
+                        new StatusEffectInstance(rightEternal ? StatusEffects.DOLPHINS_GRACE : StatusEffects.SPEED,
+                                50, rightEternal ? 0 : amplifierBoost, false, false, true);
                 default -> null;
             } : null;
 
             StatusEffectInstance rightSecondaryEffect = (hasRightAxolotl && rightVariant == 4)
-                    ? new StatusEffectInstance(StatusEffects.LUCK, 50, amplifierBoost, false, false, true)
+                    ? new StatusEffectInstance(rightEternal ? StatusEffects.RESISTANCE : StatusEffects.LUCK,
+                    50, rightEternal ? 0 : amplifierBoost, false, false, true)
                     : null;
 
             List<PlayerEntity> entities = player.getWorld().getEntitiesByClass(

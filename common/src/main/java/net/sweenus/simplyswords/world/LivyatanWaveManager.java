@@ -61,7 +61,7 @@ public final class LivyatanWaveManager {
         List<WaveVisual> returnVisuals = RETURN_VISUALS.get(world);
         return (waves != null && !waves.isEmpty())
                 || (returnVisuals != null && !returnVisuals.isEmpty())
-                || world.getTime() % 20L == 0L;
+                || LivyatanAbilityManager.hasExpiringState(world);
     }
 
     public static void tryFire(ServerWorld world, LivingEntity caster, net.minecraft.item.ItemStack stack) {
@@ -71,7 +71,7 @@ public final class LivyatanWaveManager {
         UniqueAbilityExecution execution = Phase6CombatManager.beginPassive(
                 Phase6UniqueAbilities.LIVYATAN_WAVE, world, stack, caster, null);
         Phase6AbilityTuning tuning = Phase6UniqueAbilities.tuning(execution);
-        if (tuning.flag(1 << 26) || !isAttackReady(world, caster, stack, tuning)) {
+        if (tuning.get(s("LIVYATAN_SUPPRESS_WAVES"), 0) > 0 || !isAttackReady(world, caster, stack, tuning)) {
             UniqueAbilityApi.finish(execution, Phase6UniqueAbilities.FINISH, 0);
             return;
         }
@@ -84,16 +84,29 @@ public final class LivyatanWaveManager {
             horizontalForward = horizontalForward.normalize();
         }
 
-        Vec3d right = new Vec3d(-horizontalForward.z, 0.0, horizontalForward.x).normalize();
         Vec3d start = caster.getPos().add(horizontalForward.multiply(waveForwardStartOffset()));
-        float damage = HelperMethods.abilityScaledDamage("frost", caster, stack,
+        LivyatanAbilityManager.WavePlan plan = LivyatanAbilityManager.prepareWave(world, caster, tuning);
+        String school = plan.lightning() ? "lightning" : "frost";
+        float damage = HelperMethods.abilityScaledDamage(school, caster, stack,
                 Config.uniqueEffects.livyatan.waveDamageScaling, Config.uniqueEffects.livyatan.spellScaling)
-                * (float) tuning.get(s("DAMAGE_MULTIPLIER"), 1);
-        ActiveWave wave = new ActiveWave(start, horizontalForward, right, caster.getUuid(), stack.copy(),
-                world.getTime(), tuning.integer(s("LENGTH"), baseLengthSteps()), damage,
-                tuning.get(s("KNOCKBACK"), waveKnockback()), tuning.get(s("WIDTH"), waveWidthBlocks()),
-                tuning, execution);
-        ACTIVE_WAVES.computeIfAbsent(world, ignored -> new ArrayList<>()).add(wave);
+                * (float) waveDamageMultiplier(tuning);
+        int length = waveLength(baseLengthSteps(), tuning);
+        double width = waveWidth(waveWidthBlocks(), tuning);
+        double knockback = waveKnockback(waveKnockback(), tuning);
+        int targetCap = tuning.integer(s("LIVYATAN_WALL_TARGET_CAP"),
+                Config.uniqueEffects.livyatan.waveTargetCap);
+        List<ActiveWave> active = ACTIVE_WAVES.computeIfAbsent(world, ignored -> new ArrayList<>());
+        ActiveWave wave = new ActiveWave(start, horizontalForward, caster.getUuid(), stack.copy(),
+                world.getTime(), Math.max(1, length), damage, knockback, Math.max(.5, width),
+                Math.max(1, targetCap), plan.lightning(), tuning, execution, !plan.secondary());
+        active.add(wave);
+        if (plan.secondary()) {
+            int delay = tuning.integer(s("LIVYATAN_DOUBLE_DELAY_TICKS"), 6);
+            float secondaryDamage = damage * (float) tuning.get(s("LIVYATAN_DOUBLE_DAMAGE_MULTIPLIER"), .55);
+            active.add(new ActiveWave(start, horizontalForward, caster.getUuid(), stack.copy(),
+                    world.getTime() + delay, Math.max(1, length), secondaryDamage, knockback,
+                    Math.max(.5, width), Math.max(1, targetCap), plan.lightning(), tuning, execution, true));
+        }
 
         world.playSound(null, start.x, start.y, start.z, SoundEvents.ENTITY_DOLPHIN_SPLASH, SoundCategory.PLAYERS, 0.85F, 0.9F + world.random.nextFloat() * 0.15F);
         world.playSound(null, start.x, start.y, start.z, SoundEvents.ENTITY_PLAYER_SPLASH_HIGH_SPEED, SoundCategory.PLAYERS, 0.8F, 0.9F + world.random.nextFloat() * 0.1F);
@@ -101,13 +114,10 @@ public final class LivyatanWaveManager {
     }
 
     public static void tick(ServerWorld world) {
+        LivyatanAbilityManager.tick(world);
         List<ActiveWave> waves = ACTIVE_WAVES.get(world);
         if (waves == null || waves.isEmpty()) {
             animateReturnVisuals(world);
-            List<WaveVisual> returnVisuals = RETURN_VISUALS.get(world);
-            if ((returnVisuals == null || returnVisuals.isEmpty()) && world.getTime() % 20L == 0L) {
-                purgeOrphanVisuals(world);
-            }
             return;
         }
 
@@ -120,6 +130,10 @@ public final class LivyatanWaveManager {
     }
 
     public static void spawnReturnPulse(ServerWorld world, Vec3d center, Vec3d forward, int step) {
+        spawnReturnPulse(world, center, forward, step, waveWidthBlocks());
+    }
+
+    public static void spawnReturnPulse(ServerWorld world, Vec3d center, Vec3d forward, int step, double width) {
         Vec3d horizontalForward = new Vec3d(forward.x, 0.0, forward.z);
         if (horizontalForward.lengthSquared() <= 1.0E-6) {
             horizontalForward = Vec3d.fromPolar(0.0F, 0.0F);
@@ -129,14 +143,16 @@ public final class LivyatanWaveManager {
         Vec3d right = new Vec3d(-horizontalForward.z, 0.0, horizontalForward.x).normalize();
         double groundY = findGroundTopY(world, center.x, center.z, center.y);
         Vec3d groundedCenter = new Vec3d(center.x, groundY, center.z);
-        spawnWaveParticles(world, groundedCenter, right, waveWidthBlocks(), step);
-        spawnWaveVisualSegments(world, groundedCenter, right, step, 1.55F, RETURN_VISUALS.computeIfAbsent(world, ignored -> new ArrayList<>()));
+        spawnWaveParticles(world, groundedCenter, right, Math.max(.5, width), step);
+        spawnWaveVisualSegments(world, groundedCenter, right, Math.max(.5, width), step, 1.55F,
+                RETURN_VISUALS.computeIfAbsent(world, ignored -> new ArrayList<>()));
         if (step % 3 == 0) {
             world.playSound(null, center.x, center.y, center.z, SoundEvents.ENTITY_PLAYER_SPLASH, SoundCategory.PLAYERS, 0.28F, 0.82F + world.random.nextFloat() * 0.18F);
         }
     }
 
     private static boolean tickWave(ServerWorld world, ActiveWave wave) {
+        if (wave.completed) return true;
         long age = world.getTime() - wave.spawnTick;
         if (age < 0 || age % waveStepIntervalTicks() != 0L) {
             return false;
@@ -144,12 +160,25 @@ public final class LivyatanWaveManager {
 
         int step = wave.currentStep++;
         if (step > wave.maxSteps) {
-            UniqueAbilityApi.finish(wave.execution, Phase6UniqueAbilities.FINISH, wave.hitEntities.size());
+            if (wave.finishesExecution) {
+                UniqueAbilityApi.finish(wave.execution, Phase6UniqueAbilities.FINISH, wave.hitEntities.size());
+            }
+            wave.completed = true;
             return true;
         }
 
-        double travel = step * waveStepDistance();
-        Vec3d center = wave.start.add(wave.forward.multiply(travel));
+        Entity ownerEntity = world.getEntity(wave.ownerId);
+        if (!(ownerEntity instanceof LivingEntity owner) || !owner.isAlive()) {
+            UniqueAbilityApi.cancel(wave.execution);
+            wave.completed = true;
+            return true;
+        }
+        if (step > 0) {
+            wave.forward = LivyatanAbilityManager.steer(world, owner, wave.center, wave.forward, wave.tuning);
+            wave.right = new Vec3d(-wave.forward.z, 0, wave.forward.x).normalize();
+            wave.center = wave.center.add(wave.forward.multiply(waveStepDistance()));
+        }
+        Vec3d center = wave.center;
         spawnWaveParticles(world, center, wave, step);
         spawnWaveVisualSegments(world, center, wave, step);
         applyWaveDamage(world, center, wave);
@@ -162,22 +191,20 @@ public final class LivyatanWaveManager {
 
     private static void applyWaveDamage(ServerWorld world, Vec3d center, ActiveWave wave) {
         Entity ownerEntity = world.getEntity(wave.ownerId);
-        if (!(ownerEntity instanceof LivingEntity owner) || !owner.isAlive()) {
-            return;
-        }
+        if (!(ownerEntity instanceof LivingEntity owner) || !owner.isAlive()) return;
 
         Box hitBox = Box.of(center.add(0.0, 0.5, 0.0), waveSegmentThickness() * 2.0, 2.2, wave.width);
         DamageSource damageSource = world.getDamageSources().indirectMagic(owner, owner);
         int affected = 0;
-        int cap = wave.tuning.has(s("TARGET_CAP"))
-                ? wave.tuning.integer(s("TARGET_CAP"), 8) : Integer.MAX_VALUE;
         for (LivingEntity candidate : world.getEntitiesByClass(LivingEntity.class, hitBox, LivingEntity::isAlive)) {
             if (!wave.hitEntities.add(candidate.getUuid()) || !HelperMethods.checkAbilityTarget(candidate, owner)) {
                 continue;
             }
 
-            float rawDamage = wave.damage * (wave.currentStep >= wave.maxSteps
-                    ? (float) wave.tuning.get(s("FINAL_DAMAGE_MULTIPLIER"), 1) : 1);
+            float rawDamage = wave.damage
+                    * (float) LivyatanAbilityManager.waveDamageMultiplier(world, owner, candidate, wave.tuning)
+                    * (wave.currentStep - 1 == wave.maxSteps
+                    ? (float) wave.tuning.get(s("LIVYATAN_WAVE_FINAL_DAMAGE_MULTIPLIER"), 1) : 1);
             float damage = HelperMethods.applyAbilityDamageEnchantments(world, wave.stack, candidate, damageSource, rawDamage);
             if (!HelperMethods.damageThroughIframes(candidate, damageSource, damage)) {
                 continue;
@@ -186,11 +213,12 @@ public final class LivyatanWaveManager {
             candidate.addVelocity(push.x, waveKnockUp(), push.z);
             candidate.velocityModified = true;
             candidate.velocityDirty = true;
-            int slow = wave.tuning.integer(s("STATUS_DURATION_TICKS"), 0);
+            int slow = wave.tuning.integer(s("LIVYATAN_WAVE_SLOW_TICKS"), 0);
             if (slow > 0) candidate.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, slow, 0), owner);
             UniqueAbilityApi.emit(wave.execution, UniqueAbilityPhase.HIT, Phase6UniqueAbilities.HIT,
                     candidate, 1, damage);
-            if (++affected >= cap) break;
+            LivyatanAbilityManager.recordWaveHit(world, owner, wave.stack, candidate, wave.tuning);
+            if (++affected >= wave.targetCap) break;
         }
     }
 
@@ -282,6 +310,10 @@ public final class LivyatanWaveManager {
 
     private static void spawnWaveParticles(ServerWorld world, Vec3d center, ActiveWave wave, int step) {
         spawnWaveParticles(world, center, wave.right, wave.width, step);
+        if (wave.lightning) {
+            world.spawnParticles(ParticleTypes.ELECTRIC_SPARK, center.x, center.y + .45, center.z,
+                    6, wave.width * .3, .15, .2, .03);
+        }
     }
 
     private static void spawnWaveParticles(ServerWorld world, Vec3d center, Vec3d right, double width, int step) {
@@ -318,8 +350,8 @@ public final class LivyatanWaveManager {
         if (now % 200L == 0L) {
             purgeOldSwingEntries(now);
         }
-        int cooldown = SimplySwordsAPI.getEffectiveWeaponCooldownTicks(stack, user,
-                tuning.integer(s("COOLDOWN_TICKS"), getAttackReadyCooldownTicks(user)));
+        int cooldown = swingCooldown(getAttackReadyCooldownTicks(user), tuning);
+        cooldown = SimplySwordsAPI.getEffectiveWeaponCooldownTicks(stack, user, Math.max(1, cooldown));
         if (RunicSlashManager.isIgnoringAttackReady()) {
             LAST_ACTIVATION.put(user.getUuid(), now + cooldown);
             return true;
@@ -444,18 +476,84 @@ public final class LivyatanWaveManager {
         return centerY;
     }
 
-    private static void purgeOrphanVisuals(ServerWorld world) {
-        for (Entity entity : world.iterateEntities()) {
-            if (entity instanceof LivyatanWaveVisualEntity && entity.getCommandTags().contains(WAVE_VISUAL_TAG)) {
-                entity.discard();
-            }
+    public static void clear(ServerWorld world) {
+        List<ActiveWave> waves = ACTIVE_WAVES.remove(world);
+        if (waves != null) waves.forEach(wave -> {
+            UniqueAbilityApi.cancel(wave.execution);
+            wave.visuals.forEach(visual -> {
+                Entity entity = world.getEntity(visual.id);
+                if (entity != null) entity.discard();
+            });
+        });
+        List<WaveVisual> visuals = RETURN_VISUALS.remove(world);
+        if (visuals != null) visuals.forEach(visual -> {
+            Entity entity = world.getEntity(visual.id);
+            if (entity != null) entity.discard();
+        });
+        LivyatanAbilityManager.clear(world);
+    }
+
+    public static void clearActor(LivingEntity actor) {
+        if (!(actor.getWorld() instanceof ServerWorld world)) return;
+        List<ActiveWave> waves = ACTIVE_WAVES.get(world);
+        if (waves != null) {
+            waves.removeIf(wave -> {
+                if (!wave.ownerId.equals(actor.getUuid())) return false;
+                UniqueAbilityApi.cancel(wave.execution);
+                wave.visuals.forEach(visual -> {
+                    Entity entity = world.getEntity(visual.id);
+                    if (entity != null) entity.discard();
+                });
+                return true;
+            });
+            if (waves.isEmpty()) ACTIVE_WAVES.remove(world);
         }
+        LAST_ACTIVATION.remove(actor.getUuid());
+        LivyatanAbilityManager.clearActor(actor);
+    }
+
+    public static void clearAll() {
+        new ArrayList<>(ACTIVE_WAVES.keySet()).forEach(LivyatanWaveManager::clear);
+        new ArrayList<>(RETURN_VISUALS.keySet()).forEach(LivyatanWaveManager::clear);
+        LAST_ACTIVATION.clear();
+        LivyatanAbilityManager.clearAll();
+    }
+
+    public static double waveDamageMultiplier(Phase6AbilityTuning tuning) {
+        return tuning.get(s("LIVYATAN_WAVE_DAMAGE_MULTIPLIER"), 1)
+                * tuning.get(s("LIVYATAN_WALL_DAMAGE_MULTIPLIER"), 1)
+                * tuning.get(s("LIVYATAN_LANCE_DAMAGE_MULTIPLIER"), 1)
+                * tuning.get(s("LIVYATAN_UNBOUND_WAVE_DAMAGE_MULTIPLIER"), 1);
+    }
+
+    public static double waveWidth(double configured, Phase6AbilityTuning tuning) {
+        return tuning.has(s("LIVYATAN_LANCE_WIDTH"))
+                ? tuning.get(s("LIVYATAN_LANCE_WIDTH"), configured)
+                : configured + tuning.get(s("LIVYATAN_WAVE_WIDTH_BONUS"), 0)
+                + tuning.get(s("LIVYATAN_WALL_WIDTH_BONUS"), 0);
+    }
+
+    public static int waveLength(int configured, Phase6AbilityTuning tuning) {
+        return Math.max(1, (int) Math.round((configured
+                + tuning.get(s("LIVYATAN_WAVE_LENGTH_BONUS_STEPS"), 0))
+                * tuning.get(s("LIVYATAN_LANCE_LENGTH_MULTIPLIER"), 1)));
+    }
+
+    public static double waveKnockback(double configured, Phase6AbilityTuning tuning) {
+        return configured * tuning.get(s("LIVYATAN_WAVE_KNOCKBACK_MULTIPLIER"), 1)
+                * tuning.get(s("LIVYATAN_WALL_KNOCKBACK_MULTIPLIER"), 1)
+                * tuning.get(s("LIVYATAN_LANCE_KNOCKBACK_MULTIPLIER"), 1);
+    }
+
+    public static int swingCooldown(int configured, Phase6AbilityTuning tuning) {
+        return Math.max(1, (int) Math.round(configured
+                * tuning.get(s("LIVYATAN_UNBOUND_COOLDOWN_MULTIPLIER"), 1)));
     }
 
     private static final class ActiveWave {
-        private final Vec3d start;
-        private final Vec3d forward;
-        private final Vec3d right;
+        private Vec3d center;
+        private Vec3d forward;
+        private Vec3d right;
         private final UUID ownerId;
         private final net.minecraft.item.ItemStack stack;
         private final long spawnTick;
@@ -463,19 +561,24 @@ public final class LivyatanWaveManager {
         private final float damage;
         private final double knockback;
         private final double width;
+        private final int targetCap;
+        private final boolean lightning;
         private final Phase6AbilityTuning tuning;
         private final UniqueAbilityExecution execution;
+        private final boolean finishesExecution;
         private final Set<UUID> hitEntities = new HashSet<>();
         private final List<WaveVisual> visuals = new ArrayList<>();
         private int currentStep;
+        private boolean completed;
 
-        private ActiveWave(Vec3d start, Vec3d forward, Vec3d right, UUID ownerId,
+        private ActiveWave(Vec3d start, Vec3d forward, UUID ownerId,
                            net.minecraft.item.ItemStack stack, long spawnTick, int maxSteps, float damage,
-                           double knockback, double width, Phase6AbilityTuning tuning,
-                           UniqueAbilityExecution execution) {
-            this.start = start;
+                           double knockback, double width, int targetCap, boolean lightning,
+                           Phase6AbilityTuning tuning, UniqueAbilityExecution execution,
+                           boolean finishesExecution) {
+            this.center = start;
             this.forward = forward;
-            this.right = right;
+            this.right = new Vec3d(-forward.z, 0, forward.x).normalize();
             this.ownerId = ownerId;
             this.stack = stack;
             this.spawnTick = spawnTick;
@@ -483,8 +586,11 @@ public final class LivyatanWaveManager {
             this.damage = damage;
             this.knockback = knockback;
             this.width = width;
+            this.targetCap = targetCap;
+            this.lightning = lightning;
             this.tuning = tuning;
             this.execution = execution;
+            this.finishesExecution = finishesExecution;
             this.currentStep = 0;
         }
     }

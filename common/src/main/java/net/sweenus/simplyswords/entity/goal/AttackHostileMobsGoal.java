@@ -13,7 +13,6 @@ import java.util.EnumSet;
 
 public class AttackHostileMobsGoal extends Goal {
     private final PathAwareEntity entity;
-    private final TargetPredicate hostileMobTargetPredicate;
     private LivingEntity targetMob;
     private LivingEntity owner;
     private final double attackRange;
@@ -25,7 +24,6 @@ public class AttackHostileMobsGoal extends Goal {
         this.attackRange = attackRange;
         this.speed = speed;
         this.playerCheckRange = playerCheckRange;
-        this.hostileMobTargetPredicate = TargetPredicate.createAttackable().setBaseMaxDistance(attackRange);
         this.setControls(EnumSet.of(Control.MOVE, Control.LOOK, Control.TARGET));
     }
 
@@ -44,10 +42,17 @@ public class AttackHostileMobsGoal extends Goal {
             return true;
         }
 
-        targetMob = serverWorld.getEntitiesByClass(HostileEntity.class, entity.getBoundingBox().expand(attackRange),
-                        hostile -> hostileMobTargetPredicate.test(entity, hostile)
+        double range = entity instanceof SimplySwordsAxolotlEntity axolotl
+                ? axolotl.getMasteryTargetRange(attackRange) : attackRange;
+        int cap = entity instanceof SimplySwordsAxolotlEntity axolotl
+                ? axolotl.getMasteryTargetSearchCap() : 0;
+        TargetPredicate predicate = TargetPredicate.createAttackable().setBaseMaxDistance(range);
+        var targets = serverWorld.getEntitiesByClass(HostileEntity.class, entity.getBoundingBox().expand(range),
+                        hostile -> predicate.test(entity, hostile)
                                 && HelperMethods.checkAbilityTarget(hostile, owner))
-                .stream()
+                .stream();
+        if (cap > 0) targets = targets.limit(cap);
+        targetMob = targets
                 .min((first, second) -> Double.compare(first.squaredDistanceTo(entity), second.squaredDistanceTo(entity)))
                 .orElse(null);
         return targetMob != null;

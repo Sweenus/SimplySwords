@@ -5,7 +5,10 @@ import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
@@ -47,6 +50,7 @@ import net.sweenus.simplyswords.world.Phase8CombatManager;
 
 import java.util.List;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.Optional;
@@ -56,8 +60,10 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
     private static final double BACKSTAB_DISTANCE = 1.35;
     private static final double TARGET_LENIENCY = 0.75;
     private static final ThreadLocal<Boolean> SUPPRESS_SOUL_DEBT_GAIN = ThreadLocal.withInitial(() -> false);
-    private static final Map<UUID, Integer> DEBT_PROC_COUNTERS = new HashMap<>();
+    private static final Map<UUID, IdentityHashMap<ItemStack, Integer>> DEBT_PROC_COUNTERS = new HashMap<>();
     private static final Map<UUID, Map<UUID, MarkedAsset>> MARKED_ASSETS = new HashMap<>();
+    private static final Map<UUID, Long> VEILED_ACTORS = new HashMap<>();
+    private static final Map<UUID, ServerWorld> STATE_WORLDS = new HashMap<>();
 
     public StealSwordItem(ToolMaterial toolMaterial, Settings settings) {
         super(toolMaterial, settings);
@@ -68,47 +74,50 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
         if (!net.sweenus.simplyswords.api.AwakeningApi.isAbilityUnlocked(stack)) {
             return super.postHit(stack, target, attacker);
         }
-        if (!attacker.getWorld().isClient()) {
+        if (!attacker.getWorld().isClient() && !SUPPRESS_SOUL_DEBT_GAIN.get()) {
             ServerWorld sworld = (ServerWorld) attacker.getWorld();
+            STATE_WORLDS.put(attacker.getUuid(), sworld);
             HelperMethods.playHitSounds(attacker, target);
             UniqueAbilityExecution execution = Phase8CombatManager.beginPassive(
                     Phase8UniqueAbilities.SOULSTEALER_DEBT, sworld, stack, attacker, target);
             Phase8AbilityTuning tuning = Phase8UniqueAbilities.tuning(execution);
 
-            int chance = tuning.integer(Phase8AbilityTuning.Setting.CHANCE, Config.uniqueEffects.soulstealer.chance);
+            int chance = soulDebtChance(Config.uniqueEffects.soulstealer.chance, tuning);
             Map<UUID, MarkedAsset> assets = MARKED_ASSETS.computeIfAbsent(attacker.getUuid(), ignored -> new HashMap<>());
             assets.entrySet().removeIf(entry -> entry.getValue().expiry <= sworld.getTime());
             MarkedAsset asset = assets.get(target.getUuid());
             int hits = asset == null ? 1 : asset.hits + 1;
-            if (tuning.flag(1 << 5) && hits >= tuning.integer(Phase8AbilityTuning.Setting.COUNT, 2)) {
-                chance = Math.min(100, chance + 15);
-                assets.put(target.getUuid(), new MarkedAsset(hits,
-                        sworld.getTime() + tuning.integer(Phase8AbilityTuning.Setting.DURATION_TICKS, 80)));
-            } else if (tuning.flag(1 << 5)) {
-                assets.put(target.getUuid(), new MarkedAsset(hits, sworld.getTime() + 80));
+            if (tuning.flag(1 << 5)) {
+                int markHits = tuning.integer(s("SOULSTEALER_MARK_HITS"), 2);
+                int markDuration = tuning.integer(s("SOULSTEALER_MARK_DURATION_TICKS"), 80);
+                if (hits >= markHits) {
+                    chance = Math.min(100, chance + tuning.integer(s("SOULSTEALER_MARK_CHANCE_BONUS"), 15));
+                }
+                assets.put(target.getUuid(), new MarkedAsset(hits, sworld.getTime() + markDuration));
             }
             if (assets.size() > 32) assets.entrySet().stream()
                     .min(Map.Entry.comparingByValue(java.util.Comparator.comparingLong(MarkedAsset::expiry)))
                     .ifPresent(entry -> assets.remove(entry.getKey()));
             if (assets.isEmpty()) MARKED_ASSETS.remove(attacker.getUuid());
-            if (!SUPPRESS_SOUL_DEBT_GAIN.get() && attacker.getRandom().nextInt(100) < chance) {
-                int before = getSoulDebt(stack);
-                addSoulDebt(stack, Config.uniqueEffects.soulstealer.hitStacks, tuning);
-                if (tuning.flag(1 << 3) && DEBT_PROC_COUNTERS.merge(attacker.getUuid(), 1, Integer::sum) % 3 == 0) {
-                    addSoulDebt(stack, 1, tuning);
-                }
-                int after = getSoulDebt(stack);
-                if (tuning.flag(1 << 6) && after > Config.uniqueEffects.soulstealer.maxStacks
-                        && after > before) {
-                    attacker.addStatusEffect(new net.minecraft.entity.effect.StatusEffectInstance(
-                            net.minecraft.entity.effect.StatusEffects.ABSORPTION,
-                            Math.min(120, (after - Config.uniqueEffects.soulstealer.maxStacks) * 40), 0), attacker);
+            if (attacker.getRandom().nextInt(100) < chance) {
+                int hitDebt = tuning.has(s("SOULSTEALER_HIT_DEBT_OVERRIDE"))
+                        ? tuning.integer(s("SOULSTEALER_HIT_DEBT_OVERRIDE"), 1)
+                        : Config.uniqueEffects.soulstealer.hitStacks;
+                addSoulDebt(stack, hitDebt, tuning, attacker);
+                if (tuning.flag(1 << 3)) {
+                    IdentityHashMap<ItemStack, Integer> counters = DEBT_PROC_COUNTERS.computeIfAbsent(
+                            attacker.getUuid(), ignored -> new IdentityHashMap<>());
+                    int count = counters.merge(stack, 1, Integer::sum);
+                    int interval = tuning.integer(s("SOULSTEALER_COMPOUND_INTERVAL"), 3);
+                    if (count >= interval) {
+                        counters.put(stack, 0);
+                        addSoulDebt(stack, tuning.integer(s("SOULSTEALER_COMPOUND_DEBT"), 1), tuning, attacker);
+                    }
                 }
                 spawnSoulDebtGainEffects(sworld, target, attacker, stack);
             }
-            if (!SUPPRESS_SOUL_DEBT_GAIN.get() && !target.isAlive() && Config.uniqueEffects.soulstealer.killStacks > 0) {
-                addSoulDebt(stack, tuning.integer(Phase8AbilityTuning.Setting.COUNT,
-                        Config.uniqueEffects.soulstealer.killStacks), tuning);
+            if (!target.isAlive()) {
+                addSoulDebt(stack, killDebt(tuning), tuning, attacker);
                 spawnSoulDebtGainEffects(sworld, target, attacker, stack);
             }
             UniqueAbilityApi.finish(execution, Phase8UniqueAbilities.FINISH, 1);
@@ -126,10 +135,8 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
         ItemStack stack = user.getStackInHand(hand);
         if (!world.isClient() && world instanceof ServerWorld serverWorld
                 && user instanceof ServerPlayerEntity player) {
-            LivingEntity target = findBackstabTarget(serverWorld, player);
-            if (target == null) return TypedActionResult.fail(stack);
             WeaponAbilityContext context = WeaponAbilityContext.of(serverWorld, stack, player, null,
-                    target, hand, WeaponAbilityActivationSource.PLAYER);
+                    null, hand, WeaponAbilityActivationSource.PLAYER);
             return SimplySwordsAPI.tryActivateWeaponAbility(context)
                     ? TypedActionResult.success(stack, false) : TypedActionResult.fail(stack);
         }
@@ -141,9 +148,7 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
         if (context == null || !UniqueWeaponActiveAbility.super.canActivate(context)) {
             return false;
         }
-        int stacks = getSoulDebt(context.stack());
-        return stacks > 0 && context.target() != null
-                && isValidSoulstealerTarget(context.target(), context.actor());
+        return getSoulDebt(context.stack()) > 0;
     }
 
     @Override
@@ -152,15 +157,39 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
             return false;
         }
         int stacks = getSoulDebt(context.stack());
-        UniqueAbilityExecution execution = Phase8CombatManager.beginActive(
-                Phase8UniqueAbilities.SOULSTEALER_REAP, context, Config.uniqueEffects.soulstealer.cooldown);
-        Phase8AbilityTuning tuning = Phase8UniqueAbilities.tuning(execution);
-        Vec3d strikePos = findBackstabPosition(context.world(), context.actor(), context.target(), tuning);
-        if (strikePos == null) return false;
-        boolean reaped = performSoulReap(context.world(), context.actor(), context.stack(), context.target(),
-                strikePos, stacks, tuning);
-        if (reaped) Phase8CombatManager.scheduleFinish(context.world(), execution, 1, 1);
-        return reaped;
+        UniqueAbilityExecution approach = Phase8CombatManager.beginActive(
+                Phase8UniqueAbilities.SOULSTEALER_APPROACH, context, Config.uniqueEffects.soulstealer.cooldown);
+        UniqueAbilityApi.takeStartedExecution();
+        Phase8AbilityTuning approachTuning = Phase8UniqueAbilities.tuning(approach);
+        LivingEntity target = findSoulstealerTarget(context.actor(), context.target(), approachTuning);
+        if (target == null) {
+            UniqueAbilityApi.cancel(approach);
+            return false;
+        }
+        Vec3d strikePos = findBackstabPosition(context.world(), context.actor(), target, approachTuning);
+        if (strikePos == null) {
+            UniqueAbilityApi.cancel(approach);
+            return false;
+        }
+        UniqueAbilityApi.start(approach);
+        WeaponAbilityContext resolved = WeaponAbilityContext.of(context.world(), context.stack(), context.actor(),
+                context.sourcePlayer(), target, context.hand(), context.activationSource());
+        UniqueAbilityExecution reap = Phase8CombatManager.beginActive(
+                Phase8UniqueAbilities.SOULSTEALER_REAP, resolved, Config.uniqueEffects.soulstealer.cooldown);
+        Phase8AbilityTuning reapTuning = Phase8UniqueAbilities.tuning(reap);
+        if (approachTuning.flag(1 << 12)) grantVeil(context.actor(), context.world(), approachTuning);
+        Vec3d targetOrigin = target.getPos();
+        Runnable action = () -> completeSoulReap(context.world(), context.actor(), context.stack(), target,
+                strikePos, targetOrigin, stacks, approachTuning, reapTuning, approach, reap);
+        if (approachTuning.flag(1 << 14)) {
+            Phase8CombatManager.scheduleAction(context.world(), context.actor(), 1, action, () -> {
+                UniqueAbilityApi.cancel(approach);
+                UniqueAbilityApi.cancel(reap);
+            });
+        } else {
+            action.run();
+        }
+        return true;
     }
 
     @Override
@@ -168,14 +197,51 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
         return Config.uniqueEffects.soulstealer.cooldown;
     }
 
-    private static boolean performSoulReap(ServerWorld world, LivingEntity actor, ItemStack stack, LivingEntity target, Vec3d strikePos, int stacks) {
-        return performSoulReap(world, actor, stack, target, strikePos, stacks, Phase8AbilityTuning.EMPTY);
+    private static void completeSoulReap(ServerWorld world, LivingEntity actor, ItemStack stack,
+                                         LivingEntity target, Vec3d strikePos, Vec3d targetOrigin, int stacks,
+                                         Phase8AbilityTuning approachTuning, Phase8AbilityTuning reapTuning,
+                                         UniqueAbilityExecution approach, UniqueAbilityExecution reap) {
+        if (!actor.isAlive() || !target.isAlive() || actor.getWorld() != world || target.getWorld() != world) {
+            applyFailedReapCost(stack, stacks, reapTuning);
+            UniqueAbilityApi.finish(approach, Phase8UniqueAbilities.FINISH, 0);
+            Phase8CombatManager.scheduleFinish(world, reap, 1, 0);
+            return;
+        }
+        Vec3d resolvedStrike = strikePos;
+        if (approachTuning.flag(1 << 14)) {
+            double followRange = approachTuning.get(s("SOULSTEALER_TETHER_RANGE"), 3);
+            Vec3d movement = target.getPos().subtract(targetOrigin);
+            if (movement.lengthSquared() > followRange * followRange) {
+                movement = movement.normalize().multiply(followRange);
+            }
+            Vec3d followed = strikePos.add(movement);
+            if (isSafePosition(world, actor, followed)) resolvedStrike = followed;
+        }
+        if (!isSafePosition(world, actor, resolvedStrike)) {
+            applyFailedReapCost(stack, stacks, reapTuning);
+            spawnFailEffects(world, actor);
+            UniqueAbilityApi.finish(approach, Phase8UniqueAbilities.FINISH, 0);
+            Phase8CombatManager.scheduleFinish(world, reap, 1, 0);
+            return;
+        }
+        Vec3d departure = actor.getPos();
+        boolean damaged = performSoulReap(world, actor, stack, target, resolvedStrike, stacks,
+                approachTuning, reapTuning, reap);
+        if (approachTuning.flag(1 << 17)) {
+            Phase8CombatManager.scheduleReturn(world, actor, departure,
+                    approachTuning.integer(s("SOULSTEALER_RETURN_DELAY_TICKS"), 12),
+                    approachTuning.integer(s("SOULSTEALER_RETURN_RESISTANCE_TICKS"), 40),
+                    approachTuning.integer(s("SOULSTEALER_RETURN_RESISTANCE_AMPLIFIER"), 1));
+        }
+        UniqueAbilityApi.finish(approach, Phase8UniqueAbilities.FINISH, damaged ? 1 : 0);
+        Phase8CombatManager.scheduleFinish(world, reap, 1, damaged ? 1 : 0);
     }
 
     private static boolean performSoulReap(ServerWorld world, LivingEntity actor, ItemStack stack,
                                            LivingEntity target, Vec3d strikePos, int stacks,
-                                           Phase8AbilityTuning tuning) {
-        Vec3d departure = actor.getPos();
+                                           Phase8AbilityTuning approachTuning,
+                                           Phase8AbilityTuning reapTuning,
+                                           UniqueAbilityExecution execution) {
         Vec3d lookTarget = target.getPos().add(0.0, Math.max(0.35, target.getHeight() * 0.55), 0.0);
         Vec3d strikeEyePos = strikePos.add(0.0, actor.getEyeHeight(actor.getPose()), 0.0);
         float[] rotation = getFacingRotation(strikeEyePos, lookTarget);
@@ -193,30 +259,24 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
         actor.setVelocity(0.0, 0.0, 0.0);
         actor.velocityModified = true;
 
-        float multiplier = getBackstabMultiplier(stacks);
-        if (tuning.has(Phase8AbilityTuning.Setting.PER_STACK_MULTIPLIER)) {
-            multiplier *= 1.0F + (float) tuning.get(Phase8AbilityTuning.Setting.PER_STACK_MULTIPLIER, 0) * stacks;
-        }
-        if (tuning.flag(1 << 22) && stacks >= tuning.integer(Phase8AbilityTuning.Setting.STACK_CAP,
-                Config.uniqueEffects.soulstealer.maxStacks)) {
-            multiplier *= tuning.get(Phase8AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1.25);
-        }
-        multiplier *= tuning.get(Phase8AbilityTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, 1);
-        if (tuning.flag(1 << 17)) multiplier *= .75F;
+        ReapProfile profile = reapProfile(stacks, approachTuning, reapTuning);
+        int consumed = profile.consumed;
+        float multiplier = profile.multiplier;
         float damage = HelperMethods.abilityScaledDamage("soul", actor, stack,
                 multiplier, multiplier * Config.uniqueEffects.soulstealer.spellScalingPerMultiplier
-                        * (float) tuning.get(Phase8AbilityTuning.Setting.SPELL_MULTIPLIER, 1));
-        if (tuning.has(Phase8AbilityTuning.Setting.ARMOR_IGNORE)) {
-            damage += Math.min(damage * .5F, target.getArmor()
-                    * (float) tuning.get(Phase8AbilityTuning.Setting.ARMOR_IGNORE, .1));
+                        * (float) reapTuning.get(s("SOULSTEALER_SPELL_MULTIPLIER"), 1));
+        if (reapTuning.has(s("SOULSTEALER_ARMOR_IGNORE_RATIO"))) {
+            float toughness = target.getAttributeValue(EntityAttributes.GENERIC_ARMOR_TOUGHNESS) > 0
+                    ? (float) target.getAttributeValue(EntityAttributes.GENERIC_ARMOR_TOUGHNESS) : 0;
+            float ignored = target.getArmor()
+                    * (float) reapTuning.get(s("SOULSTEALER_ARMOR_IGNORE_RATIO"), .1);
+            damage *= armorIgnoreMultiplier(damage, target.getArmor(), toughness, ignored);
         }
         damage = HelperMethods.applyNonPlayerAbilityDamageModifier(actor, damage);
         DamageSource damageSource = SimplySwordsAPI.getWeaponDamageSource(actor);
         target.timeUntilRegen = 0;
         boolean damaged = target.damage(damageSource, damage);
         if (damaged) {
-            int consumed = tuning.flag(1 << 26)
-                    ? Math.min(stacks, tuning.integer(Phase8AbilityTuning.Setting.COUNT, stacks)) : stacks;
             setSoulDebt(stack, Math.max(0, stacks - consumed));
             SUPPRESS_SOUL_DEBT_GAIN.set(true);
             try {
@@ -224,52 +284,143 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
             } finally {
                 SUPPRESS_SOUL_DEBT_GAIN.set(false);
             }
-            if (!target.isAlive() && Config.uniqueEffects.soulstealer.killStacks > 0) {
-                addSoulDebt(stack, Config.uniqueEffects.soulstealer.killStacks, tuning);
-                if (tuning.flag(1 << 24)) {
-                    addSoulDebt(stack, tuning.integer(Phase8AbilityTuning.Setting.COUNT, 2), tuning);
+            if (!target.isAlive()) {
+                addSoulDebt(stack, killDebt(reapTuning), reapTuning, actor);
+                if (reapTuning.flag(1 << 24)) {
+                    addSoulDebt(stack, reapTuning.integer(s("SOULSTEALER_DEATH_TAX_DEBT"), 2),
+                            reapTuning, actor);
                 }
                 int refund = 0;
-                if (tuning.flag(1 << 15)) refund += 80;
-                if (tuning.flag(1 << 24)) refund += tuning.integer(
-                        Phase8AbilityTuning.Setting.REFUND_TICKS, 40);
+                if (approachTuning.flag(1 << 15)) refund += approachTuning.integer(
+                        s("SOULSTEALER_PREDATORY_REFUND_TICKS"), 80);
+                if (reapTuning.flag(1 << 24)) refund += reapTuning.integer(
+                        s("SOULSTEALER_DEATH_TAX_REFUND_TICKS"), 40);
                 Phase8CombatManager.scheduleCooldownRefund(world, actor, stack, refund);
+                UniqueAbilityApi.emit(execution, net.sweenus.simplyswords.api.ability.UniqueAbilityPhase.HIT,
+                        Phase8UniqueAbilities.KILL, target, 1, damage);
             }
-            if (tuning.flag(1 << 21)) {
-                target.addStatusEffect(new net.minecraft.entity.effect.StatusEffectInstance(
-                        net.minecraft.entity.effect.StatusEffects.WITHER, 60, 0), actor);
+            if (reapTuning.flag(1 << 21)) {
+                target.addStatusEffect(new StatusEffectInstance(StatusEffects.WITHER,
+                        reapTuning.integer(s("SOULSTEALER_WITHER_DURATION_TICKS"), 60),
+                        reapTuning.integer(s("SOULSTEALER_WITHER_AMPLIFIER"), 0)), actor);
             }
-            if (tuning.flag(1 << 12)) {
-                actor.addStatusEffect(new net.minecraft.entity.effect.StatusEffectInstance(
-                        net.minecraft.entity.effect.StatusEffects.INVISIBILITY, 20, 0), actor);
+            if (approachTuning.flag(1 << 13)) {
+                target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS,
+                        approachTuning.integer(s("SOULSTEALER_HAMSTRING_DURATION_TICKS"), 30),
+                        approachTuning.integer(s("SOULSTEALER_HAMSTRING_AMPLIFIER"), 2)), actor);
             }
-            if (tuning.flag(1 << 13)) {
-                target.addStatusEffect(new net.minecraft.entity.effect.StatusEffectInstance(
-                        net.minecraft.entity.effect.StatusEffects.SLOWNESS, 30, 2), actor);
+            if (reapTuning.flag(1 << 23)) {
+                addSoulDebt(stack, reapTuning.integer(s("SOULSTEALER_RESIDUAL_DEBT"), 1),
+                        reapTuning, actor);
             }
-            if (tuning.flag(1 << 23)) addSoulDebt(stack, 1, tuning);
-            if (tuning.flag(1 << 17)) {
-                Phase8CombatManager.scheduleReturn(world, actor, departure,
-                        tuning.integer(Phase8AbilityTuning.Setting.DELAY_TICKS, 12),
-                        tuning.integer(Phase8AbilityTuning.Setting.STATUS_DURATION_TICKS, 40));
-            }
+            UniqueAbilityApi.emit(execution, net.sweenus.simplyswords.api.ability.UniqueAbilityPhase.HIT,
+                    Phase8UniqueAbilities.HIT, target, 1, damage);
             spawnBackstabEffects(world, target, actor, stacks);
             world.playSound(null, target.getX(), target.getY(), target.getZ(), SoundRegistry.DARK_SWORD_ATTACK_WITH_BLOOD_03.get(),
                     SoundCategory.PLAYERS, 0.65F, 0.75F + world.random.nextFloat() * 0.2F);
             return true;
         } else {
-            if (tuning.flag(1 << 25)) setSoulDebt(stack, stacks / 2);
+            applyFailedReapCost(stack, stacks, reapTuning);
             spawnFailEffects(world, actor);
         }
         return false;
     }
 
-    private static LivingEntity findBackstabTarget(ServerWorld world, ServerPlayerEntity player) {
-        return findSoulstealerTarget(player);
+    static ReapProfile reapProfile(int stacks, Phase8AbilityTuning approachTuning,
+                                   Phase8AbilityTuning reapTuning) {
+        return reapProfile(stacks, approachTuning, reapTuning,
+                Config.uniqueEffects.soulstealer.maxStacks,
+                Config.uniqueEffects.soulstealer.minBackstabMultiplier,
+                Config.uniqueEffects.soulstealer.maxBackstabMultiplier);
+    }
+
+    static ReapProfile reapProfile(int stacks, Phase8AbilityTuning approachTuning,
+                                   Phase8AbilityTuning reapTuning, int configuredMaximum,
+                                   float minimumMultiplier, float maximumMultiplier) {
+        int maximum = maximumDebt(configuredMaximum, reapTuning);
+        int consumed = reapTuning.flag(1 << 26)
+                ? Math.min(stacks, reapTuning.integer(s("SOULSTEALER_INSTALLMENT_MAX_SPEND"), 3)) : stacks;
+        float multiplier = getBackstabMultiplier(consumed, maximum, minimumMultiplier, maximumMultiplier);
+        double debtBonus = reapTuning.get(s("SOULSTEALER_DAMAGE_PER_DEBT_BONUS"), 0) * consumed;
+        if (reapTuning.flag(1 << 25)) {
+            int foreclosureCap = reapTuning.integer(s("SOULSTEALER_FORECLOSURE_STACK_CAP"), 12);
+            debtBonus += reapTuning.get(s("SOULSTEALER_FORECLOSURE_DAMAGE_PER_DEBT"), .2)
+                    * Math.min(consumed, foreclosureCap);
+        }
+        multiplier *= 1.0F + (float) debtBonus;
+        if (reapTuning.flag(1 << 22) && stacks == maximum && consumed == stacks) {
+            multiplier *= reapTuning.get(s("SOULSTEALER_EXACT_PAYMENT_MULTIPLIER"), 1.25);
+        }
+        if (reapTuning.flag(1 << 26)) {
+            multiplier *= reapTuning.get(s("SOULSTEALER_INSTALLMENT_DAMAGE_MULTIPLIER"), .8);
+        }
+        if (approachTuning.flag(1 << 16)) {
+            multiplier = Math.min(multiplier,
+                    (float) approachTuning.get(s("SOULSTEALER_PURSUIT_DAMAGE_CAP"), 3));
+        }
+        if (approachTuning.flag(1 << 17)) {
+            multiplier *= approachTuning.get(s("SOULSTEALER_ESCAPE_DAMAGE_MULTIPLIER"), .75);
+        }
+        return new ReapProfile(consumed, multiplier);
+    }
+
+    private static void applyFailedReapCost(ItemStack stack, int stacks, Phase8AbilityTuning tuning) {
+        if (!tuning.flag(1 << 25)) return;
+        int spent = (int) Math.ceil(stacks * tuning.get(
+                s("SOULSTEALER_FORECLOSURE_FAILURE_SPEND"), .5));
+        setSoulDebt(stack, Math.max(0, stacks - spent));
     }
 
     public static LivingEntity findSoulstealerTarget(PlayerEntity player) {
-        return findLenientTarget(player, Config.uniqueEffects.soulstealer.range);
+        return findSoulstealerTarget(player, null, Phase8AbilityTuning.EMPTY);
+    }
+
+    private static LivingEntity findSoulstealerTarget(LivingEntity actor, LivingEntity preferred,
+                                                       Phase8AbilityTuning tuning) {
+        double visibleRange = Config.uniqueEffects.soulstealer.range
+                + tuning.get(s("SOULSTEALER_TARGET_RANGE_BONUS"), 0);
+        double pursuitRange = tuning.flag(1 << 16)
+                ? tuning.get(s("SOULSTEALER_PURSUIT_RANGE"), 8) : 0;
+        double searchRange = Math.max(visibleRange, pursuitRange);
+        if (preferred != null && isTargetInApproach(actor, preferred, visibleRange, pursuitRange, tuning)) {
+            return preferred;
+        }
+        Vec3d origin = actor.getEyePos();
+        Vec3d facing = actor.getRotationVec(1.0F).normalize();
+        LivingEntity best = null;
+        double bestScore = Double.MAX_VALUE;
+        for (Entity entity : actor.getWorld().getOtherEntities(actor,
+                actor.getBoundingBox().expand(searchRange), candidate -> candidate instanceof LivingEntity)) {
+            if (!(entity instanceof LivingEntity target)
+                    || !isTargetInApproach(actor, target, visibleRange, pursuitRange, tuning)) {
+                continue;
+            }
+            Vec3d offset = target.getBoundingBox().getCenter().subtract(origin);
+            double distance = offset.length();
+            if (distance <= 0.001) continue;
+            double angle = Math.acos(MathHelper.clamp(facing.dotProduct(offset.normalize()), -1, 1));
+            double score = angle * angle * 16 + distance * distance;
+            if (score < bestScore) {
+                bestScore = score;
+                best = target;
+            }
+        }
+        return best;
+    }
+
+    private static boolean isTargetInApproach(LivingEntity actor, LivingEntity target, double visibleRange,
+                                               double pursuitRange, Phase8AbilityTuning tuning) {
+        if (!isValidSoulstealerTarget(target, actor)) return false;
+        Vec3d offset = target.getBoundingBox().getCenter().subtract(actor.getEyePos());
+        double distance = offset.length();
+        boolean visible = actor.canSee(target);
+        if (visible ? distance > visibleRange : pursuitRange <= 0 || distance > pursuitRange) return false;
+        Vec3d facing = actor.getRotationVec(1.0F).normalize();
+        double angle = Math.toDegrees(Math.acos(MathHelper.clamp(
+                facing.dotProduct(offset.normalize()), -1, 1)));
+        double base = Math.toDegrees(Math.atan((target.getWidth() * .5 + TARGET_LENIENCY)
+                / Math.max(.001, distance)));
+        return angle <= base + tuning.get(s("SOULSTEALER_TARGET_ANGLE_BONUS"), 0);
     }
 
     public static LivingEntity findLenientTarget(PlayerEntity player, double range) {
@@ -340,7 +491,9 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
         candidates.add(target.getPos().add(behind).add(side.multiply(0.45)));
         candidates.add(target.getPos().add(behind).subtract(side.multiply(0.45)));
         candidates.add(target.getPos().add(behind.normalize().multiply(BACKSTAB_DISTANCE * 0.75)));
-        int checks = Math.clamp(tuning.integer(Phase8AbilityTuning.Setting.SEARCH_CAP, 4), 4, 24);
+        int searchCap = tuning.integer(s("SOULSTEALER_SEARCH_CAP"), 24);
+        int checks = Math.clamp((int) Math.round(4
+                * tuning.get(s("SOULSTEALER_SEARCH_MULTIPLIER"), 1)), 4, searchCap);
         for (int i = 4; i < checks; i++) {
             double angle = MathHelper.TAU * i / checks;
             candidates.add(target.getPos().add(Math.cos(angle) * BACKSTAB_DISTANCE, 0,
@@ -369,10 +522,15 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
         return new float[]{yaw, pitch};
     }
 
-    private static float getBackstabMultiplier(int stacks) {
-        int maxStacks = Math.max(1, Config.uniqueEffects.soulstealer.maxStacks);
-        float minMultiplier = Config.uniqueEffects.soulstealer.minBackstabMultiplier;
-        float maxMultiplier = Math.max(minMultiplier, Config.uniqueEffects.soulstealer.maxBackstabMultiplier);
+    static float getBackstabMultiplier(int stacks, int maxStacks) {
+        return getBackstabMultiplier(stacks, maxStacks,
+                Config.uniqueEffects.soulstealer.minBackstabMultiplier,
+                Config.uniqueEffects.soulstealer.maxBackstabMultiplier);
+    }
+
+    static float getBackstabMultiplier(int stacks, int maxStacks, float minMultiplier, float maxMultiplier) {
+        maxStacks = Math.max(1, maxStacks);
+        maxMultiplier = Math.max(minMultiplier, maxMultiplier);
         if (maxStacks <= 1) {
             return maxMultiplier;
         }
@@ -380,26 +538,124 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
         return MathHelper.lerp(progress, minMultiplier, maxMultiplier);
     }
 
-    private static int getSoulDebt(ItemStack stack) {
+    public static int getSoulDebt(ItemStack stack) {
         return stack.getOrDefault(ComponentTypeRegistry.STORED_CHARGE.get(), StoredChargeComponent.DEFAULT).charge();
     }
 
-    private static void addSoulDebt(ItemStack stack, int amount) {
-        addSoulDebt(stack, amount, Phase8AbilityTuning.EMPTY);
+    public static int maximumDebt(Phase8AbilityTuning tuning) {
+        return maximumDebt(Config.uniqueEffects.soulstealer.maxStacks, tuning);
     }
 
-    private static void addSoulDebt(ItemStack stack, int amount, Phase8AbilityTuning tuning) {
+    static int maximumDebt(int configuredMaximum, Phase8AbilityTuning tuning) {
+        return Math.max(1, configuredMaximum
+                + tuning.integer(s("SOULSTEALER_MAX_DEBT_BONUS"), 0));
+    }
+
+    private static void addSoulDebt(ItemStack stack, int amount, Phase8AbilityTuning tuning,
+                                    LivingEntity collector) {
         if (amount <= 0) {
             return;
         }
-        int maxStacks = Math.max(1, tuning.integer(Phase8AbilityTuning.Setting.STACK_CAP,
-                Config.uniqueEffects.soulstealer.maxStacks));
+        int maxStacks = maximumDebt(tuning);
         int current = getSoulDebt(stack);
-        setSoulDebt(stack, Math.min(maxStacks, current + amount));
+        int updated = Math.min(maxStacks, current + amount);
+        setSoulDebt(stack, updated);
+        if (collector != null && tuning.flag(1 << 6) && updated > current) {
+            int baseMaximum = Math.max(1, Config.uniqueEffects.soulstealer.maxStacks);
+            int overflow = Math.max(0, updated - baseMaximum) - Math.max(0, current - baseMaximum);
+            if (overflow > 0) {
+                int perStack = tuning.integer(s("SOULSTEALER_COLLECTOR_TICKS_PER_STACK"), 40);
+                int cap = tuning.integer(s("SOULSTEALER_COLLECTOR_DURATION_CAP_TICKS"), 120);
+                StatusEffectInstance existing = collector.getStatusEffect(StatusEffects.ABSORPTION);
+                int remaining = existing == null || existing.getAmplifier() > 0 ? 0 : existing.getDuration();
+                collector.addStatusEffect(new StatusEffectInstance(StatusEffects.ABSORPTION,
+                        Math.min(cap, remaining + overflow * perStack), 0), collector);
+            }
+        }
     }
 
-    private static void setSoulDebt(ItemStack stack, int amount) {
+    public static void setSoulDebt(ItemStack stack, int amount) {
         stack.set(ComponentTypeRegistry.STORED_CHARGE.get(), new StoredChargeComponent(Math.max(0, amount)));
+    }
+
+    static int soulDebtChance(int configuredChance, Phase8AbilityTuning tuning) {
+        if (tuning.flag(1 << 7)) return 100;
+        double chance = configuredChance + tuning.get(s("SOULSTEALER_CHANCE_BONUS"), 0);
+        chance *= tuning.get(s("SOULSTEALER_CHANCE_MULTIPLIER"), 1);
+        return Math.clamp((int) Math.round(chance), 0, 100);
+    }
+
+    static int killDebt(Phase8AbilityTuning tuning) {
+        return killDebt(Config.uniqueEffects.soulstealer.killStacks, tuning);
+    }
+
+    static int killDebt(int configuredKillDebt, Phase8AbilityTuning tuning) {
+        int base = tuning.has(s("SOULSTEALER_KILL_DEBT_OVERRIDE"))
+                ? tuning.integer(s("SOULSTEALER_KILL_DEBT_OVERRIDE"), 3)
+                : configuredKillDebt;
+        return Math.max(0, base + tuning.integer(s("SOULSTEALER_KILL_DEBT_BONUS"), 0));
+    }
+
+    static float armorIgnoreMultiplier(float damage, float armor, float toughness, float ignored) {
+        if (ignored <= 0 || armor <= 0 || damage <= 0) return 1.0F;
+        float full = afterArmor(damage, armor, toughness);
+        if (full <= 0) return 1.0F;
+        return afterArmor(damage, Math.max(0, armor - ignored), toughness) / full;
+    }
+
+    private static float afterArmor(float damage, float armor, float toughness) {
+        float divisor = 2.0F + toughness / 4.0F;
+        float effective = MathHelper.clamp(armor - damage / divisor, armor * .2F, 20.0F);
+        return damage * (1.0F - effective / 25.0F);
+    }
+
+    private static void grantVeil(LivingEntity actor, ServerWorld world, Phase8AbilityTuning tuning) {
+        int duration = tuning.integer(s("SOULSTEALER_VEIL_DURATION_TICKS"), 20);
+        if (actor.addStatusEffect(new StatusEffectInstance(StatusEffects.INVISIBILITY, duration, 0), actor)) {
+            VEILED_ACTORS.put(actor.getUuid(), world.getTime() + duration);
+            STATE_WORLDS.put(actor.getUuid(), world);
+        }
+    }
+
+    public static void onAttack(LivingEntity actor) {
+        if (actor == null || !(actor.getWorld() instanceof ServerWorld world)) return;
+        Long expiry = VEILED_ACTORS.remove(actor.getUuid());
+        if (expiry != null && expiry >= world.getTime()) actor.removeStatusEffect(StatusEffects.INVISIBILITY);
+    }
+
+    public static void clearActor(LivingEntity actor) {
+        if (actor == null) return;
+        UUID actorId = actor.getUuid();
+        DEBT_PROC_COUNTERS.remove(actorId);
+        MARKED_ASSETS.remove(actorId);
+        VEILED_ACTORS.remove(actorId);
+        STATE_WORLDS.remove(actorId);
+        MARKED_ASSETS.values().forEach(assets -> assets.remove(actorId));
+        MARKED_ASSETS.entrySet().removeIf(entry -> entry.getValue().isEmpty());
+    }
+
+    public static void clearAllState() {
+        DEBT_PROC_COUNTERS.clear();
+        MARKED_ASSETS.clear();
+        VEILED_ACTORS.clear();
+        STATE_WORLDS.clear();
+    }
+
+    public static void clearWorld(ServerWorld world) {
+        if (world == null) return;
+        List<UUID> actors = STATE_WORLDS.entrySet().stream()
+                .filter(entry -> entry.getValue() == world)
+                .map(Map.Entry::getKey).toList();
+        actors.forEach(actorId -> {
+            DEBT_PROC_COUNTERS.remove(actorId);
+            MARKED_ASSETS.remove(actorId);
+            VEILED_ACTORS.remove(actorId);
+            STATE_WORLDS.remove(actorId);
+        });
+    }
+
+    private static Phase8AbilityTuning.Setting s(String name) {
+        return Phase8AbilityTuning.Setting.valueOf(name);
     }
 
     private static void spawnSoulDebtGainEffects(ServerWorld world, LivingEntity target, LivingEntity attacker, ItemStack stack) {
@@ -446,6 +702,9 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
     }
 
     private record MarkedAsset(int hits, long expiry) {
+    }
+
+    record ReapProfile(int consumed, float multiplier) {
     }
 
     @Override

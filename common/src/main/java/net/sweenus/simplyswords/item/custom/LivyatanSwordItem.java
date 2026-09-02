@@ -1,7 +1,5 @@
 package net.sweenus.simplyswords.item.custom;
 
-import net.sweenus.simplyswords.api.SimplySwordsAPI;
-
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedDouble;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
@@ -21,7 +19,6 @@ import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
-import net.sweenus.simplyswords.api.WeaponAbilityActivationSource;
 import net.sweenus.simplyswords.api.ability.Phase6AbilityTuning;
 import net.sweenus.simplyswords.api.ability.Phase6UniqueAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
@@ -38,7 +35,10 @@ import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
 import net.sweenus.simplyswords.world.LivingEntityAbilityMovementManager;
 import net.sweenus.simplyswords.world.LivyatanWaveManager;
+import net.sweenus.simplyswords.world.LivyatanAbilityManager;
 import net.sweenus.simplyswords.world.Phase6CombatManager;
+import net.sweenus.simplyswords.world.PlayerWeaponAbilityManager;
+import net.sweenus.simplyswords.util.WeaponManaCost;
 
 import java.util.List;
 
@@ -69,38 +69,23 @@ public class LivyatanSwordItem extends UniqueSwordItem implements UniqueWeaponAc
 
     @Override
     public TypedActionResult<ItemStack> startPlayerAbility(World world, PlayerEntity user, Hand hand) {
-        ItemStack itemStack = user.getStackInHand(hand);
-        int cooldown = 1;
-        if (!world.isClient) {
-            itemStack = user.getStackInHand(hand);
-            ServerWorld serverWorld = (ServerWorld) world;
-            WeaponAbilityContext context = WeaponAbilityContext.of(serverWorld, itemStack, user,
-                    user instanceof net.minecraft.server.network.ServerPlayerEntity player ? player : null,
-                    null, hand, WeaponAbilityActivationSource.PLAYER);
-            UniqueAbilityExecution execution = Phase6CombatManager.beginActive(
-                    Phase6UniqueAbilities.LIVYATAN_THROW, context, Config.uniqueEffects.livyatan.cooldown);
-            UniqueAbilityApi.takeStartedExecution();
-            UniqueAbilityApi.start(execution);
-            Phase6AbilityTuning tuning = Phase6UniqueAbilities.tuning(execution);
-            if (tuning.has(s("COOLDOWN_TICKS"))) cooldown = tuning.integer(s("COOLDOWN_TICKS"), 1);
-            LivyatanEntity livyatanEntity = createEntity(world, user, itemStack.copy(), tuning, execution);
-            livyatanEntity.setVelocity(user, user.getPitch(), user.getYaw(), 0.0F, 1.5F, 1.0F);
-            livyatanEntity.setYaw(user.getYaw());
-            livyatanEntity.setPitch(user.getPitch());
-            if (hand == Hand.OFF_HAND)
-                livyatanEntity.offhandThrow = true;
-            livyatanEntity.setPos(user.getX(), user.getEyeY() - 0.5, user.getZ());
-            world.spawnEntity(livyatanEntity);
+        ItemStack stack = user.getStackInHand(hand);
+        boolean reboundInput = PlayerWeaponAbilityManager.shouldSkipDefaultAbilityUse(world, user, hand, stack);
+        if (reboundInput && !WeaponManaCost.canAfford(user, stack)) return TypedActionResult.fail(stack);
+        TypedActionResult<ItemStack> result = UniqueWeaponActiveAbility.super.startPlayerAbility(world, user, hand);
+        if (reboundInput && result.getResult().isAccepted()) WeaponManaCost.spend(user, stack);
+        return result;
+    }
 
-            if (!user.getAbilities().creativeMode) {
-                itemStack.decrement(1);
-            }
-        }
-
-        user.swingHand(hand);
-
-        SimplySwordsAPI.setWeaponCooldown(user, itemStack, cooldown);
-        return TypedActionResult.success(itemStack, world.isClient());
+    @Override
+    public boolean canActivate(WeaponAbilityContext context) {
+        if (context == null || context.world() == null || context.actor() == null || !context.actor().isAlive()
+                || context.stack() == null || context.stack().isEmpty()
+                || context.stack().getDamage() >= context.stack().getMaxDamage() - 1) return false;
+        if (context.target() == null) return context.actor() instanceof PlayerEntity;
+        return HelperMethods.checkAbilityTarget(context.target(), context.actor())
+                && (context.sourcePlayer() == null || context.target() != context.sourcePlayer()
+                && HelperMethods.checkFriendlyFire(context.target(), context.sourcePlayer()));
     }
 
     @Override
@@ -111,30 +96,52 @@ public class LivyatanSwordItem extends UniqueSwordItem implements UniqueWeaponAc
         UniqueAbilityExecution execution = Phase6CombatManager.beginActive(
                 Phase6UniqueAbilities.LIVYATAN_THROW, context, Config.uniqueEffects.livyatan.cooldown);
         Phase6AbilityTuning tuning = Phase6UniqueAbilities.tuning(execution);
+        UniqueAbilityExecution returnExecution = Phase6CombatManager.preparePassive(
+                Phase6UniqueAbilities.LIVYATAN_RETURN, context.world(), context.stack(), context.actor(), context.target());
+        Phase6AbilityTuning returnTuning = Phase6UniqueAbilities.tuning(returnExecution);
+        UniqueAbilityApi.takeStartedExecution();
+        UniqueAbilityApi.publishStartedExecution(execution);
         LivyatanEntity livyatanEntity = createEntity(context.world(), context.actor(),
-                context.stack().copy(), tuning, execution);
-        Vec3d direction = LivingEntityAbilityMovementManager.getLobbedTargetDirection(context.actor(), context.target());
-        livyatanEntity.setVelocity(direction.x, direction.y, direction.z, 1.65F, 1.0F);
+                context.stack().copy(), tuning, execution, returnTuning, returnExecution,
+                execution.cooldownTicks(Config.uniqueEffects.livyatan.cooldown));
+        boolean playerThrow = context.actor() instanceof PlayerEntity && !context.isDelegated();
+        if (!playerThrow && context.target() != null) {
+            Vec3d direction = LivingEntityAbilityMovementManager.getLobbedTargetDirection(context.actor(), context.target());
+            livyatanEntity.setVelocity(direction.x, direction.y, direction.z, 1.65F, 1.0F);
+            livyatanEntity.markNonReturning(Config.uniqueEffects.livyatan.duration + 80);
+        } else {
+            livyatanEntity.setVelocity(context.actor(), context.actor().getPitch(), context.actor().getYaw(),
+                    0.0F, 1.5F, 1.0F);
+        }
         livyatanEntity.setYaw(context.actor().getYaw());
         livyatanEntity.setPitch(context.actor().getPitch());
+        if (context.hand() == Hand.OFF_HAND) livyatanEntity.offhandThrow = true;
         livyatanEntity.setPos(context.actor().getX(), context.actor().getEyeY() - 0.5, context.actor().getZ());
-        livyatanEntity.markNonReturning(Config.uniqueEffects.livyatan.duration + 80);
         context.world().spawnEntity(livyatanEntity);
+        if (playerThrow && context.actor() instanceof PlayerEntity player
+                && !player.getAbilities().creativeMode && context.hand() != null) {
+            player.setStackInHand(context.hand(), ItemStack.EMPTY);
+        }
+        context.actor().swingHand(context.hand() == null ? Hand.MAIN_HAND : context.hand());
         return true;
     }
 
     private static LivyatanEntity createEntity(World world, LivingEntity actor, ItemStack stack,
-                                               Phase6AbilityTuning tuning, UniqueAbilityExecution execution) {
+                                               Phase6AbilityTuning tuning, UniqueAbilityExecution execution,
+                                               Phase6AbilityTuning returnTuning,
+                                               UniqueAbilityExecution returnExecution, int cooldown) {
         LivyatanEntity entity = new LivyatanEntity(world, actor, stack);
         entity.primaryBaseDamage = HelperMethods.abilityScaledDamage("frost", actor, stack,
                 Config.uniqueEffects.livyatan.damageScaling, Config.uniqueEffects.livyatan.spellScaling)
-                * (float) tuning.get(s("DAMAGE_MULTIPLIER"), 1);
-        entity.slownessDuration = tuning.integer(s("STATUS_DURATION_TICKS"), Config.uniqueEffects.livyatan.duration);
+                * (float) tuning.get(s("LIVYATAN_THROW_DAMAGE_MULTIPLIER"), 1)
+                * (float) tuning.get(s("LIVYATAN_CALM_DAMAGE_MULTIPLIER"), 1);
+        entity.slownessDuration = Config.uniqueEffects.livyatan.duration;
         entity.primaryReturnDamage = HelperMethods.abilityScaledDamage("frost", actor, stack,
                 Config.uniqueEffects.livyatan.returnDamageScaling, Config.uniqueEffects.livyatan.returnSpellScaling)
-                * (float) tuning.get(s("DAMAGE_MULTIPLIER"), 1);
-        entity.primaryReturnDamageRadius = tuning.get(s("RADIUS"), Config.uniqueEffects.livyatan.radius);
-        entity.setMastery(tuning, execution);
+                * (float) returnTuning.get(s("LIVYATAN_CALM_DAMAGE_MULTIPLIER"), 1);
+        entity.primaryReturnDamageRadius = LivyatanAbilityManager.returnRadius(
+                Config.uniqueEffects.livyatan.radius, returnTuning);
+        entity.setMastery(tuning, execution, returnTuning, returnExecution, cooldown);
         return entity;
     }
 
@@ -201,6 +208,8 @@ public class LivyatanSwordItem extends UniqueSwordItem implements UniqueWeaponAc
         public double waveForwardStartOffset = 1.2;
         @ValidatedInt.Restrict(min = 1)
         public int waveLengthSteps = 7;
+        @ValidatedInt.Restrict(min = 1, max = 64)
+        public int waveTargetCap = 8;
         @ValidatedDouble.Restrict(min = 0.0)
         public double waveKnockback = 0.52;
         @ValidatedDouble.Restrict(min = 0.0)
@@ -208,6 +217,8 @@ public class LivyatanSwordItem extends UniqueSwordItem implements UniqueWeaponAc
 
         @ValidatedDouble.Restrict(min = 0.0)
         public double returnWavePullStrength = 0.42;
+        @ValidatedInt.Restrict(min = 1, max = 64)
+        public int returnWaveTargetCap = 16;
         @ValidatedInt.Restrict(min = 0, max = 100)
         public int returnLightningChance = 20;
         @ValidatedFloat.Restrict(min = 0f)

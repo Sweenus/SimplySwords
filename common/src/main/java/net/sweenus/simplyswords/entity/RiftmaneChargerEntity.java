@@ -33,6 +33,7 @@ import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.registry.SoundRegistry;
+import net.sweenus.simplyswords.world.RiftmaneAbilityManager;
 import net.sweenus.simplyswords.util.HelperMethods;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
@@ -70,6 +71,15 @@ public class RiftmaneChargerEntity extends HorseEntity implements SimplySwordsMi
     private double knockbackStrength;
     private double chargeSpeed;
     private double hitRadius = 1.1;
+    private boolean phasing;
+    private int riderGuardAmplifier = -1;
+    private int riderGuardTrailingTicks;
+    private double firstHitMultiplier = 1.0;
+    private int trampleTargets;
+    private double trampleMultiplier = 1.0;
+    private double killFollowUpRadius;
+    private double killFollowUpMultiplier = 0.5;
+    private int killRefundTicks;
     private Vec3d direction = Vec3d.ZERO;
     private ItemStack sourceStack = ItemStack.EMPTY;
     private final Set<UUID> hitTargets = new HashSet<>();
@@ -98,6 +108,27 @@ public class RiftmaneChargerEntity extends HorseEntity implements SimplySwordsMi
 
     public void setAudioLead(boolean audioLead) {
         this.audioLead = audioLead;
+    }
+
+    public void setPhasing(boolean phasing) {
+        this.phasing = phasing;
+    }
+
+    public void setRiderGuard(int amplifier, int trailingTicks) {
+        this.riderGuardAmplifier = amplifier;
+        this.riderGuardTrailingTicks = Math.max(0, trailingTicks);
+    }
+
+    public void setImpactBonus(double firstHitMultiplier, int trampleTargets, double trampleMultiplier) {
+        this.firstHitMultiplier = Math.max(0.0, firstHitMultiplier);
+        this.trampleTargets = Math.max(0, trampleTargets);
+        this.trampleMultiplier = Math.max(0.0, trampleMultiplier);
+    }
+
+    public void setKillFollowUp(double radius, double damageMultiplier, int refundTicks) {
+        this.killFollowUpRadius = Math.max(0.0, radius);
+        this.killFollowUpMultiplier = Math.max(0.0, damageMultiplier);
+        this.killRefundTicks = Math.max(0, refundTicks);
     }
 
     public boolean getWaterWalk() {
@@ -233,6 +264,13 @@ public class RiftmaneChargerEntity extends HorseEntity implements SimplySwordsMi
             passenger.fallDistance = 0.0F;
         }
 
+        if (this.riderGuardAmplifier >= 0) {
+            for (Entity passenger : this.getPassengerList()) {
+                if (passenger instanceof LivingEntity rider) rider.addStatusEffect(new StatusEffectInstance(
+                        StatusEffects.RESISTANCE, 10, this.riderGuardAmplifier, false, false, true));
+            }
+        }
+
         int rearTicks = this.getRearTicks();
         if (this.age < rearTicks) {
             tickRear(world, rearTicks);
@@ -259,9 +297,16 @@ public class RiftmaneChargerEntity extends HorseEntity implements SimplySwordsMi
             if (!this.hitTargets.add(target.getUuid())) {
                 continue;
             }
+            float applied = this.damage;
+            if (this.hitTargets.size() == 1) applied *= (float) this.firstHitMultiplier;
+            else if (this.hitTargets.size() <= this.trampleTargets) applied *= (float) this.trampleMultiplier;
             boolean damaged = owner != null
-                    && SimplySwordsAPI.applyDelegatedWeaponHit(this.sourceStack, target, owner, this, this.damage);
+                    && SimplySwordsAPI.applyDelegatedWeaponHit(this.sourceStack, target, owner, this, applied);
             if (damaged) {
+                if (!target.isAlive() && this.killFollowUpRadius > 0) {
+                    RiftmaneAbilityManager.onChargerKill(world, owner, this.sourceStack, target,
+                            this.killFollowUpRadius, this.killFollowUpMultiplier, this.killRefundTicks);
+                }
                 target.takeKnockback(this.knockbackStrength, this.getX() - target.getX(), this.getZ() - target.getZ());
                 Vec3d hitPos = target.getPos().add(0.0, Math.max(0.35, target.getHeight() * 0.55), 0.0);
                 world.spawnParticles(ParticleTypes.CRIT, hitPos.x, hitPos.y, hitPos.z, 8, 0.24, 0.2, 0.24, 0.06);
@@ -338,6 +383,9 @@ public class RiftmaneChargerEntity extends HorseEntity implements SimplySwordsMi
     }
 
     private boolean blockedByWall(Vec3d travel) {
+        if (this.phasing) {
+            return false;
+        }
         double stepHeight = Math.max(0.0, this.getStepHeight());
         double clearance = this.getY() + stepHeight + 0.08;
         double ceiling = this.getY() + WALL_HEIGHT;
@@ -414,6 +462,9 @@ public class RiftmaneChargerEntity extends HorseEntity implements SimplySwordsMi
             rider.fallDistance = 0.0F;
             rider.addStatusEffect(new StatusEffectInstance(
                     StatusEffects.SLOW_FALLING, 40, 0, false, false, false), rider);
+            if (this.riderGuardAmplifier >= 0 && this.riderGuardTrailingTicks > 0)
+                rider.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE,
+                        this.riderGuardTrailingTicks, this.riderGuardAmplifier, false, false, true), rider);
             world.playSound(null, rider.getBlockPos(), SoundRegistry.DARK_ACTIVATION_DISTORTED.get(),
                     SoundCategory.PLAYERS, 0.5F, 1.35F);
         }

@@ -82,7 +82,9 @@ public class MagiscytheSwordItem extends UniqueSwordItem implements UniqueWeapon
     @Override
     public boolean activate(WeaponAbilityContext context) {
         UniqueAbilityExecution execution = Phase9CombatManager.beginActive(
-                Phase9UniqueAbilities.MAGISCYTHE_STORM, context, Config.uniqueEffects.magiscythe.cooldown);
+                Phase9UniqueAbilities.MAGISCYTHE_STORM, context, Config.uniqueEffects.magiscythe.cooldown,
+                MagiscytheMasteryManager.stormBase(Config.uniqueEffects.magiscythe.duration,
+                        Config.uniqueEffects.magiscythe.radius, 5));
         activateMagistorm(context.world(), context.actor(), context.stack(), execution);
         return true;
     }

@@ -26,7 +26,6 @@ import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.MinionTargeting;
 import net.sweenus.simplyswords.world.ShadowstingShadowDanceManager;
 import net.sweenus.simplyswords.world.GloamMechanicsManager;
-import net.sweenus.simplyswords.world.SoulkeeperLanternManager;
 import net.sweenus.simplyswords.world.WaxweaverEncasementManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -82,9 +81,6 @@ public abstract class MobEntityMixin {
         if (!stack.isEmpty()) {
             stack.inventoryTick(world, mob, 0, true);
         }
-        if (AwakeningApi.isAbilityUnlocked(stack) && stack.isOf(ItemsRegistry.SOULKEEPER.get())) {
-            SoulkeeperLanternManager.tickFromItem(mob, stack);
-        }
         if (AwakeningApi.isAbilityUnlocked(stack) && stack.getItem() instanceof LichbladeSwordItem) {
             LichbladeSwordItem.tickPassiveAura(world, mob, stack);
         }
@@ -121,6 +117,8 @@ public abstract class MobEntityMixin {
                 || !(target instanceof LivingEntity livingTarget)) {
             return;
         }
+
+        net.sweenus.simplyswords.item.custom.StealSwordItem.onAttack(mob);
 
         ItemStack stack = mob.getMainHandStack();
         if (AdditionalGemSocketApi.ensureInitialized(stack)) {

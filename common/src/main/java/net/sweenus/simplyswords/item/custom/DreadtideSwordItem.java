@@ -1,7 +1,5 @@
 package net.sweenus.simplyswords.item.custom;
 
-import net.sweenus.simplyswords.api.SimplySwordsAPI;
-
 import elocindev.necronomicon.api.text.TextAPI;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
@@ -13,7 +11,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.particle.ParticleTypes;
-import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.registry.Registries;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvent;
@@ -23,14 +20,14 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.TypedActionResult;
-import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
-import net.sweenus.simplyswords.effect.instance.SimplySwordsStatusEffectInstance;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
+import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
+import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -38,10 +35,9 @@ import net.sweenus.simplyswords.util.Styles;
 import net.sweenus.simplyswords.world.Phase10WeaponManager;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
-public class DreadtideSwordItem extends UniqueSwordItem {
+public class DreadtideSwordItem extends UniqueSwordItem implements UniqueWeaponActiveAbility {
     public DreadtideSwordItem(ToolMaterial toolMaterial, Settings settings) {
         super(toolMaterial, settings);
     }
@@ -61,65 +57,47 @@ public class DreadtideSwordItem extends UniqueSwordItem {
 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
-        ItemStack stack = user.getStackInHand(hand);
-        if (!net.sweenus.simplyswords.api.AwakeningApi.isAbilityUnlocked(stack)) {
-            return TypedActionResult.pass(stack);
+        return useFromDefaultInput(world, user, hand);
+    }
+
+    @Override
+    public boolean canActivate(WeaponAbilityContext context) {
+        return context != null
+                && context.world() != null
+                && context.actor() != null
+                && context.actor().isAlive()
+                && context.stack() != null
+                && !context.stack().isEmpty()
+                && Phase10WeaponManager.canActivateDreadtide(context.world(), context.actor(), context.stack());
+    }
+
+    @Override
+    public boolean activate(WeaponAbilityContext context) {
+        LivingEntity actor = context.actor();
+        ServerWorld world = context.world();
+        if (!Phase10WeaponManager.activateDreadtide(world, actor, context.stack())) {
+            return false;
         }
-        if (!user.getWorld().isClient() && world instanceof  ServerWorld serverWorld) {
-            if (Phase10WeaponManager.activateDreadtide(serverWorld, user, stack))
-                return super.use(world, user, hand);
-            int voidcallerDuration = Config.uniqueEffects.dreadtide.get().duration;
-            float voidcallerDamageModifier = Config.uniqueEffects.dreadtide.get().damageScaling;
-            int skillCooldown = 20;
+        LivingEntity target = context.target();
+        StatusEffectInstance voidcloakEffect = actor.getStatusEffect(
+                EffectRegistry.getReference(EffectRegistry.VOIDCLOAK));
+        int amplifier = voidcloakEffect == null ? 0 : voidcloakEffect.getAmplifier();
+        List<SoundEvent> sounds = new ArrayList<>();
+        sounds.add(SoundRegistry.MAGIC_SHAMANIC_VOICE_04.get());
+        sounds.add(SoundRegistry.MAGIC_SHAMANIC_VOICE_12.get());
+        sounds.add(SoundRegistry.MAGIC_SHAMANIC_VOICE_15.get());
+        sounds.add(SoundRegistry.MAGIC_SHAMANIC_VOICE_20.get());
+        sounds.add(SoundRegistry.MAGIC_SHAMANIC_NORDIC_02.get());
+        sounds.add(SoundRegistry.MAGIC_SHAMANIC_NORDIC_02.get());
+        world.playSound(null, actor.getBlockPos(), sounds.get(Math.clamp(amplifier, 0, sounds.size() - 1)),
+                actor.getSoundCategory(), 0.3f, 1.3f);
+        if (target != null) HelperMethods.spawnWaistHeightParticles(world, ParticleTypes.SMOKE, actor, target, 20);
+        return true;
+    }
 
-            Box box = HelperMethods.createBox(user, 10);
-            Entity closestEntity = world.getOtherEntities(user, box, EntityPredicates.VALID_LIVING_ENTITY).stream()
-                    .min(Comparator.comparingDouble(entity -> entity.squaredDistanceTo(user)))
-                    .orElse(null);
-
-            if (closestEntity != null) {
-                if ((closestEntity instanceof LivingEntity ee)) {
-                    if (HelperMethods.checkFriendlyFire(ee, user)) {
-
-                        StatusEffectInstance voidcloakEffect = user.getStatusEffect(EffectRegistry.getReference(EffectRegistry.VOIDCLOAK));
-                        if (voidcloakEffect != null) {
-                            SoundEvent soundSelect = SoundRegistry.MAGIC_SHAMANIC_VOICE_04.get();
-                            List<SoundEvent> sounds = new ArrayList<>();
-                            sounds.add(SoundRegistry.MAGIC_SHAMANIC_VOICE_04.get());
-                            sounds.add(SoundRegistry.MAGIC_SHAMANIC_VOICE_12.get());
-                            sounds.add(SoundRegistry.MAGIC_SHAMANIC_VOICE_15.get());
-                            sounds.add(SoundRegistry.MAGIC_SHAMANIC_VOICE_20.get());
-                            sounds.add(SoundRegistry.MAGIC_SHAMANIC_NORDIC_02.get());
-                            sounds.add(SoundRegistry.MAGIC_SHAMANIC_NORDIC_02.get());
-                            sounds.add(SoundRegistry.MAGIC_SHAMANIC_NORDIC_02.get());
-                            if (sounds.get(voidcloakEffect.getAmplifier()) != null)
-                                soundSelect = sounds.get(Math.min(5, voidcloakEffect.getAmplifier()));
-
-                            int particleCount = 20; // Number of particles along the line
-
-                            HelperMethods.spawnWaistHeightParticles(serverWorld, ParticleTypes.SMOKE, user, ee, particleCount);
-
-
-                            world.playSound(null, user.getBlockPos(), soundSelect,
-                                    user.getSoundCategory(), 0.3f, 1.3f);
-
-                            SimplySwordsStatusEffectInstance voidAssaultEffect = new SimplySwordsStatusEffectInstance(
-                                    EffectRegistry.getReference(EffectRegistry.VOIDASSAULT), voidcallerDuration, voidcloakEffect.getAmplifier(), false,
-                                    false, true);
-                            voidAssaultEffect.setSourceEntity(user);
-                            voidAssaultEffect.setAdditionalData((int) HelperMethods.abilityScaledDamage(
-                                    "eldritch", user, stack, voidcallerDamageModifier,
-                                    Config.uniqueEffects.dreadtide.get().spellScaling));
-                            ee.addStatusEffect(voidAssaultEffect);
-                            user.removeStatusEffect(EffectRegistry.getReference(EffectRegistry.VOIDCLOAK));
-                            SimplySwordsAPI.setWeaponCooldown(user, stack, skillCooldown);
-                        }
-                    }
-                }
-            }
-        }
-
-        return super.use(world, user, hand);
+    @Override
+    public int getActivationCooldownTicks(ItemStack stack, WeaponAbilityContext context) {
+        return 20;
     }
 
     @Override

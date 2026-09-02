@@ -5,6 +5,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.Tameable;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
+import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffectInstance;
@@ -27,6 +28,7 @@ import net.sweenus.simplyswords.entity.goal.AttackHostileMobsGoal;
 import net.sweenus.simplyswords.entity.goal.FollowNearestPlayerGoal;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
+import net.sweenus.simplyswords.util.MinionTargeting;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -38,6 +40,7 @@ public class SimplySwordsAxolotlEntity extends AxolotlEntity implements Tameable
     private static final int READY_TO_SIT_COOLDOWN = 20;
     private int ticksSinceSitAttempt = 0;
     private int masteryLifespan;
+    private double masteryLowHealthThreshold;
     private float masteryLowHealthBonus;
     private float masterySplashMultiplier;
     private double masterySplashRadius;
@@ -47,7 +50,11 @@ public class SimplySwordsAxolotlEntity extends AxolotlEntity implements Tameable
     private double masteryAuraRadius = 16.0;
     private int masteryGraceDuration = 200;
     private double masteryGuardRadius;
+    private float masteryGuardMultiplier = 1;
     private boolean masteryRescue;
+    private double masteryRescueThreshold;
+    private int masteryRescueDuration;
+    private int masteryRescueAmplifier;
     private double masteryPackRange;
     private float masteryPackBonus;
     private int masteryPackCap;
@@ -60,6 +67,14 @@ public class SimplySwordsAxolotlEntity extends AxolotlEntity implements Tameable
     private int masteryVictoryRefund;
     private double masteryPounceRange;
     private int masteryPounceInterval;
+    private double masteryTargetRange = 8;
+    private int masteryTargetSearchCap;
+    private float masteryCoordinatedBonus;
+    private double masteryShoulderAuraRadius = 5;
+    private int masteryHelpfulAbsorption;
+    private int masteryHelpfulDuration;
+    private int masteryHelpfulLockout;
+    private boolean masteryEternalAura;
     public SimplySwordsAxolotlEntity(EntityType<? extends AxolotlEntity> entityType, World world) {
         super(entityType, world);
     }
@@ -121,7 +136,8 @@ public class SimplySwordsAxolotlEntity extends AxolotlEntity implements Tameable
                         0.1,
                         0.2
                 );
-                if (this.isTouchingWater() && Config.uniqueEffects.chompolotl.dolphinsGrace && (this.age % 20 == 0)) {
+                if (masteryAuraRadius > 0 && this.isTouchingWater()
+                        && Config.uniqueEffects.chompolotl.dolphinsGrace && this.age % 20 == 0) {
 
                     double radius = masteryAuraRadius;
                     Box box = new Box(
@@ -141,13 +157,19 @@ public class SimplySwordsAxolotlEntity extends AxolotlEntity implements Tameable
                     }
                 }
                 LivingEntity owner = getOwner();
-                if (owner != null && masteryRescue && owner.getHealth() / owner.getMaxHealth() < .35F) {
-                    owner.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, 60, 1,
+                if (owner != null && masteryRescue && owner.getHealth() / owner.getMaxHealth()
+                        < masteryRescueThreshold) {
+                    owner.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE,
+                            masteryRescueDuration, masteryRescueAmplifier,
                             false, true, true));
                     discard();
-                } else if (owner != null && !masteryCanAttack && masteryAuraRadius > 0 && age % 20 == 0) {
-                    owner.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, 30, 0,
-                            false, false, true));
+                } else if (masteryEternalAura && masteryAuraRadius > 0 && age % 20 == 0) {
+                    Box aura = getBoundingBox().expand(masteryAuraRadius);
+                    for (PlayerEntity player : serverWorld.getEntitiesByClass(
+                            PlayerEntity.class, aura, player -> true)) {
+                        player.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, 30, 0,
+                                false, false, true));
+                    }
                 }
             }
         }
@@ -185,25 +207,33 @@ public class SimplySwordsAxolotlEntity extends AxolotlEntity implements Tameable
     public boolean tryAttack(Entity target) {
         if (!masteryCanAttack) return false;
         target.timeUntilRegen = 0;
+        EntityAttributeInstance attackDamage = getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE);
+        double baseDamage = attackDamage == null ? 0 : attackDamage.getBaseValue();
+        double multiplier = 1;
+        LivingEntity owner = getOwner();
+        if (target instanceof LivingEntity living && masteryLowHealthBonus > 0
+                && living.getHealth() / living.getMaxHealth() < masteryLowHealthThreshold) {
+            multiplier *= 1 + masteryLowHealthBonus;
+        }
+        if (owner != null && getWorld() instanceof ServerWorld serverWorld
+                && target == MinionTargeting.getOwnerCurrentTarget(serverWorld, owner)) {
+            multiplier *= 1 + masteryCoordinatedBonus;
+        }
+        double strikeDamage = baseDamage * multiplier;
+        if (attackDamage != null) attackDamage.setBaseValue(strikeDamage);
         boolean attacked = super.tryAttack(target);
+        if (attackDamage != null) attackDamage.setBaseValue(baseDamage);
         if (attacked && target instanceof LivingEntity living && getWorld() instanceof ServerWorld world) {
-            LivingEntity owner = getOwner();
             if (owner != null && masteryPackBonus > 0 && masteryPackRange > 0) {
                 long allies = world.getEntitiesByClass(SimplySwordsAxolotlEntity.class,
                                 getBoundingBox().expand(masteryPackRange), other -> other != this
                                         && owner.getUuid().equals(other.getOwnerUuid()))
                         .stream().limit(masteryPackCap).count();
                 if (allies > 0) {
-                    living.timeUntilRegen = 0;
+                        living.timeUntilRegen = 0;
                     living.damage(world.getDamageSources().indirectMagic(this, owner),
-                            (float) getAttributeValue(EntityAttributes.GENERIC_ATTACK_DAMAGE)
-                                    * masteryPackBonus * allies);
+                            (float) strikeDamage * masteryPackBonus * allies);
                 }
-            }
-            if (owner != null && masteryLowHealthBonus > 0 && living.getHealth() / living.getMaxHealth() < .4F) {
-                living.timeUntilRegen = 0;
-                living.damage(world.getDamageSources().indirectMagic(this, owner),
-                        (float) getAttributeValue(EntityAttributes.GENERIC_ATTACK_DAMAGE) * masteryLowHealthBonus);
             }
             if (owner != null && masterySplashMultiplier > 0 && masterySplashRadius > 0) {
                 world.getEntitiesByClass(LivingEntity.class, living.getBoundingBox().expand(masterySplashRadius),
@@ -211,17 +241,18 @@ public class SimplySwordsAxolotlEntity extends AxolotlEntity implements Tameable
                         .stream().limit(masterySplashCap).forEach(other -> {
                             other.timeUntilRegen = 0;
                             other.damage(world.getDamageSources().indirectMagic(this, owner),
-                                    (float) getAttributeValue(EntityAttributes.GENERIC_ATTACK_DAMAGE)
-                                            * masterySplashMultiplier);
+                                    (float) strikeDamage * masterySplashMultiplier);
                         });
             }
             if (owner != null && !living.isAlive() && !masteryChainUsed && masteryChainRange > 0) {
-                masteryChainUsed = true;
                 world.getEntitiesByClass(LivingEntity.class, living.getBoundingBox().expand(masteryChainRange),
                                 other -> other.isAlive() && HelperMethods.checkAbilityTarget(other, owner))
                         .stream().min(java.util.Comparator.comparingDouble(this::squaredDistanceTo))
-                        .ifPresent(this::setTarget);
-                masteryLifespan += masteryChainExtension;
+                        .ifPresent(next -> {
+                            masteryChainUsed = true;
+                            setTarget(next);
+                            masteryLifespan += masteryChainExtension;
+                        });
             }
             if (owner != null && !living.isAlive() && masteryVictoryRequired > 0) {
                 net.sweenus.simplyswords.world.Phase7CombatManager.onAxolotlKill(world, owner,
@@ -231,10 +262,10 @@ public class SimplySwordsAxolotlEntity extends AxolotlEntity implements Tameable
                 int total = net.sweenus.simplyswords.api.SimplySwordsAPI.getEffectiveWeaponCooldownTicks(
                         new net.minecraft.item.ItemStack(ItemsRegistry.CHOMPOLOTL.get()), owner,
                         Config.uniqueEffects.chompolotl.cooldown * 10);
-                int remaining = Math.round(player.getItemCooldownManager().getCooldownProgress(
-                        ItemsRegistry.CHOMPOLOTL.get(), 0) * total);
-                player.getItemCooldownManager().set(ItemsRegistry.CHOMPOLOTL.get(),
-                        Math.max(0, remaining - total * masteryCooldownRefundPercent / 100));
+                net.sweenus.simplyswords.api.SimplySwordsAPI.reduceWeaponCooldown(player,
+                        new net.minecraft.item.ItemStack(ItemsRegistry.CHOMPOLOTL.get()),
+                        Config.uniqueEffects.chompolotl.cooldown * 10,
+                        total * masteryCooldownRefundPercent / 100);
                 masteryCooldownRefundPercent = 0;
             }
         }
@@ -289,10 +320,15 @@ public class SimplySwordsAxolotlEntity extends AxolotlEntity implements Tameable
         this.ownerUuid = livingEntity != null ? livingEntity.getUuid() : null;
     }
 
-    public void configureMastery(int lifespan, float lowHealthBonus, float splashMultiplier,
+    public void configureMastery(int lifespan, double lowHealthThreshold, float lowHealthBonus,
+                                 float splashMultiplier,
                                  double splashRadius, int splashCap, boolean canPerch,
-                                 boolean canAttack, double auraRadius, int graceDuration) {
+                                 boolean canAttack, double auraRadius, double shoulderAuraRadius,
+                                 int graceDuration, double targetRange, int targetSearchCap,
+                                 float coordinatedBonus, int helpfulAbsorption,
+                                 int helpfulDuration, int helpfulLockout, boolean eternalAura) {
         this.masteryLifespan = Math.max(0, lifespan);
+        this.masteryLowHealthThreshold = Math.clamp(lowHealthThreshold, 0, 1);
         this.masteryLowHealthBonus = Math.max(0, lowHealthBonus);
         this.masterySplashMultiplier = Math.max(0, splashMultiplier);
         this.masterySplashRadius = Math.max(0, splashRadius);
@@ -300,12 +336,25 @@ public class SimplySwordsAxolotlEntity extends AxolotlEntity implements Tameable
         this.masteryCanPerch = canPerch;
         this.masteryCanAttack = canAttack;
         this.masteryAuraRadius = Math.max(0, auraRadius);
+        this.masteryShoulderAuraRadius = Math.max(0, shoulderAuraRadius);
         this.masteryGraceDuration = Math.max(1, graceDuration);
+        this.masteryTargetRange = Math.max(0, targetRange);
+        this.masteryTargetSearchCap = Math.max(0, targetSearchCap);
+        this.masteryCoordinatedBonus = Math.max(0, coordinatedBonus);
+        this.masteryHelpfulAbsorption = Math.max(0, helpfulAbsorption);
+        this.masteryHelpfulDuration = Math.max(0, helpfulDuration);
+        this.masteryHelpfulLockout = Math.max(0, helpfulLockout);
+        this.masteryEternalAura = eternalAura;
     }
 
-    public void configureGuardian(double guardRadius, boolean rescue) {
+    public void configureGuardian(double guardRadius, double guardMultiplier, boolean rescue,
+                                  double rescueThreshold, int rescueDuration, int rescueAmplifier) {
         this.masteryGuardRadius = Math.max(0, guardRadius);
+        this.masteryGuardMultiplier = (float) Math.clamp(guardMultiplier, 0, 1);
         this.masteryRescue = rescue;
+        this.masteryRescueThreshold = Math.clamp(rescueThreshold, 0, 1);
+        this.masteryRescueDuration = Math.max(0, rescueDuration);
+        this.masteryRescueAmplifier = Math.max(0, rescueAmplifier);
     }
 
     public void configurePack(double range, float bonus, int cap, double chainRange,
@@ -331,6 +380,12 @@ public class SimplySwordsAxolotlEntity extends AxolotlEntity implements Tameable
         return masteryGuardRadius;
     }
 
+    public float getMasteryGuardMultiplier() { return masteryGuardMultiplier; }
+    public double getMasteryTargetRange(double fallback) {
+        return masteryTargetRange > 0 ? masteryTargetRange : fallback;
+    }
+    public int getMasteryTargetSearchCap() { return masteryTargetSearchCap; }
+
     @Override
     public NbtCompound writeNbt(NbtCompound nbt) {
         super.writeNbt(nbt);
@@ -338,6 +393,7 @@ public class SimplySwordsAxolotlEntity extends AxolotlEntity implements Tameable
             nbt.putUuid("Owner", this.ownerUuid);
         }
         nbt.putInt("MasteryLifespan", masteryLifespan);
+        nbt.putDouble("MasteryLowHealthThreshold", masteryLowHealthThreshold);
         nbt.putFloat("MasteryLowHealthBonus", masteryLowHealthBonus);
         nbt.putFloat("MasterySplashMultiplier", masterySplashMultiplier);
         nbt.putDouble("MasterySplashRadius", masterySplashRadius);
@@ -345,9 +401,14 @@ public class SimplySwordsAxolotlEntity extends AxolotlEntity implements Tameable
         nbt.putBoolean("MasteryCanPerch", masteryCanPerch);
         nbt.putBoolean("MasteryCanAttack", masteryCanAttack);
         nbt.putDouble("MasteryAuraRadius", masteryAuraRadius);
+        nbt.putDouble("MasteryShoulderAuraRadius", masteryShoulderAuraRadius);
         nbt.putInt("MasteryGraceDuration", masteryGraceDuration);
         nbt.putDouble("MasteryGuardRadius", masteryGuardRadius);
+        nbt.putFloat("MasteryGuardMultiplier", masteryGuardMultiplier);
         nbt.putBoolean("MasteryRescue", masteryRescue);
+        nbt.putDouble("MasteryRescueThreshold", masteryRescueThreshold);
+        nbt.putInt("MasteryRescueDuration", masteryRescueDuration);
+        nbt.putInt("MasteryRescueAmplifier", masteryRescueAmplifier);
         nbt.putDouble("MasteryPackRange", masteryPackRange);
         nbt.putFloat("MasteryPackBonus", masteryPackBonus);
         nbt.putInt("MasteryPackCap", masteryPackCap);
@@ -360,6 +421,13 @@ public class SimplySwordsAxolotlEntity extends AxolotlEntity implements Tameable
         nbt.putInt("MasteryVictoryRefund", masteryVictoryRefund);
         nbt.putDouble("MasteryPounceRange", masteryPounceRange);
         nbt.putInt("MasteryPounceInterval", masteryPounceInterval);
+        nbt.putDouble("MasteryTargetRange", masteryTargetRange);
+        nbt.putInt("MasteryTargetSearchCap", masteryTargetSearchCap);
+        nbt.putFloat("MasteryCoordinatedBonus", masteryCoordinatedBonus);
+        nbt.putInt("MasteryHelpfulAbsorption", masteryHelpfulAbsorption);
+        nbt.putInt("MasteryHelpfulDuration", masteryHelpfulDuration);
+        nbt.putInt("MasteryHelpfulLockout", masteryHelpfulLockout);
+        nbt.putBoolean("MasteryEternalAura", masteryEternalAura);
         return nbt;
     }
 
@@ -368,6 +436,7 @@ public class SimplySwordsAxolotlEntity extends AxolotlEntity implements Tameable
         super.readNbt(nbt);
         this.ownerUuid = nbt.containsUuid("Owner") ? nbt.getUuid("Owner") : null;
         masteryLifespan = nbt.getInt("MasteryLifespan");
+        masteryLowHealthThreshold = nbt.getDouble("MasteryLowHealthThreshold");
         masteryLowHealthBonus = nbt.getFloat("MasteryLowHealthBonus");
         masterySplashMultiplier = nbt.getFloat("MasterySplashMultiplier");
         masterySplashRadius = nbt.getDouble("MasterySplashRadius");
@@ -375,9 +444,16 @@ public class SimplySwordsAxolotlEntity extends AxolotlEntity implements Tameable
         if (nbt.contains("MasteryCanPerch")) masteryCanPerch = nbt.getBoolean("MasteryCanPerch");
         if (nbt.contains("MasteryCanAttack")) masteryCanAttack = nbt.getBoolean("MasteryCanAttack");
         if (nbt.contains("MasteryAuraRadius")) masteryAuraRadius = nbt.getDouble("MasteryAuraRadius");
+        if (nbt.contains("MasteryShoulderAuraRadius")) {
+            masteryShoulderAuraRadius = nbt.getDouble("MasteryShoulderAuraRadius");
+        }
         if (nbt.contains("MasteryGraceDuration")) masteryGraceDuration = nbt.getInt("MasteryGraceDuration");
         masteryGuardRadius = nbt.getDouble("MasteryGuardRadius");
+        if (nbt.contains("MasteryGuardMultiplier")) masteryGuardMultiplier = nbt.getFloat("MasteryGuardMultiplier");
         masteryRescue = nbt.getBoolean("MasteryRescue");
+        masteryRescueThreshold = nbt.getDouble("MasteryRescueThreshold");
+        masteryRescueDuration = nbt.getInt("MasteryRescueDuration");
+        masteryRescueAmplifier = nbt.getInt("MasteryRescueAmplifier");
         masteryPackRange = nbt.getDouble("MasteryPackRange");
         masteryPackBonus = nbt.getFloat("MasteryPackBonus");
         masteryPackCap = nbt.getInt("MasteryPackCap");
@@ -390,6 +466,13 @@ public class SimplySwordsAxolotlEntity extends AxolotlEntity implements Tameable
         masteryVictoryRefund = nbt.getInt("MasteryVictoryRefund");
         masteryPounceRange = nbt.getDouble("MasteryPounceRange");
         masteryPounceInterval = nbt.getInt("MasteryPounceInterval");
+        if (nbt.contains("MasteryTargetRange")) masteryTargetRange = nbt.getDouble("MasteryTargetRange");
+        masteryTargetSearchCap = nbt.getInt("MasteryTargetSearchCap");
+        masteryCoordinatedBonus = nbt.getFloat("MasteryCoordinatedBonus");
+        masteryHelpfulAbsorption = nbt.getInt("MasteryHelpfulAbsorption");
+        masteryHelpfulDuration = nbt.getInt("MasteryHelpfulDuration");
+        masteryHelpfulLockout = nbt.getInt("MasteryHelpfulLockout");
+        masteryEternalAura = nbt.getBoolean("MasteryEternalAura");
     }
 
 

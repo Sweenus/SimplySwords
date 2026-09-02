@@ -142,13 +142,13 @@ public final class DeathKnellAbilityManager {
         UniqueAbilityExecution outbreakExecution = Phase8CombatManager.beginPassive(
                 Phase8UniqueAbilities.PLAGUE_OUTBREAK, world, stack, actor, target);
         Phase8AbilityTuning outbreakTuning = Phase8UniqueAbilities.tuning(outbreakExecution);
-        List<CarriedAilment> converted = tryConvertEffects(world, actor, target, now, pestilence);
         FeverKey key = new FeverKey(actor.getUuid(), target.getUuid());
         if (pestilence.flag(1 << 8) && PATIENT_ZERO_LOCKOUTS.getOrDefault(world, Map.of())
                 .getOrDefault(key, 0L) > now) {
             finishAll(pestilenceExecution, knellExecution, outbreakExecution);
             return;
         }
+        List<CarriedAilment> converted = tryConvertEffects(world, actor, target, now, pestilence);
         PendingToll armedToll = findPendingToll(world, key);
         if (armedToll != null) {
             mergeAilments(armedToll.ailments, converted);
@@ -166,37 +166,42 @@ public final class DeathKnellAbilityManager {
         state.knell = knell;
         state.outbreak = outbreakTuning;
         state.sourcePlayerId = sourcePlayer == null ? null : sourcePlayer.getUuid();
-        state.expiresAt = now + Math.max(1, pestilence.integer(Phase8AbilityTuning.Setting.DURATION_TICKS,
-                Config.uniqueEffects.toxic_longsword.feverDuration));
+        state.expiresAt = now + feverDuration(
+                Config.uniqueEffects.toxic_longsword.feverDuration, pestilence);
         if (firstFever && pestilence.flag(1 << 5)) {
             Map<FeverKey, Long> lockouts = INCUBATION_LOCKOUTS.computeIfAbsent(world, ignored -> new HashMap<>());
             if (lockouts.getOrDefault(key, 0L) <= now) {
-                state.expiresAt += pestilence.integer(Phase8AbilityTuning.Setting.STATUS_DURATION_TICKS, 80);
-                lockouts.put(key, now + pestilence.integer(Phase8AbilityTuning.Setting.LOCKOUT_TICKS, 100));
+                state.expiresAt += pestilence.integer(
+                        Phase8AbilityTuning.Setting.PLAGUE_INCUBATION_DURATION_BONUS_TICKS, 80);
+                lockouts.put(key, now + pestilence.integer(
+                        Phase8AbilityTuning.Setting.PLAGUE_INCUBATION_LOCKOUT_TICKS, 100));
             }
         }
         mergeAilments(state.ailments, converted);
 
         int feverGain = Math.max(0, Config.uniqueEffects.toxic_longsword.feverPerHit);
         if (!converted.isEmpty()) {
-            feverGain += Math.max(0, pestilence.integer(Phase8AbilityTuning.Setting.FEVER,
-                    Config.uniqueEffects.toxic_longsword.conversionFeverBonus));
+            feverGain += conversionFever(Config.uniqueEffects.toxic_longsword.conversionFeverBonus, pestilence);
+            feverGain += pestilence.integer(
+                    Phase8AbilityTuning.Setting.PLAGUE_APOTHEOSIS_FEVER_BONUS, 0);
         }
         int threshold = feverThreshold();
         if (pestilence.flag(1 << 8) && state.stacks == 0) {
             feverGain = threshold;
             PATIENT_ZERO_LOCKOUTS.computeIfAbsent(world, ignored -> new HashMap<>())
-                    .put(key, now + pestilence.integer(Phase8AbilityTuning.Setting.LOCKOUT_TICKS, 200));
+                    .put(key, now + pestilence.integer(
+                            Phase8AbilityTuning.Setting.PLAGUE_PATIENT_ZERO_LOCKOUT_TICKS, 200));
         }
         state.stacks = Math.min(threshold, state.stacks + feverGain);
         if (pestilence.flag(1 << 4)) {
-            target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 30, 0), actor);
+            target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS,
+                    pestilence.integer(Phase8AbilityTuning.Setting.PLAGUE_SYMPTOM_DURATION_TICKS, 30), 0), actor);
         }
-        if (pestilence.flag(1 << 6) && target.getHealth() / target.getMaxHealth()
-                >= pestilence.get(Phase8AbilityTuning.Setting.HEALTH_THRESHOLD, .8)) {
+        if (pestilence.flag(1 << 6) && criticalCondition(state.stacks, threshold,
+                pestilence.get(Phase8AbilityTuning.Setting.PLAGUE_CRITICAL_FEVER_THRESHOLD, .8))) {
             DamageSource source = SimplySwordsAPI.getWeaponDamageSource(actor);
             float bonus = (float) (HelperMethods.getEntityAttackDamage(actor)
-                    * (pestilence.get(Phase8AbilityTuning.Setting.OUTGOING_MULTIPLIER, 1) - 1));
+                    * (pestilence.get(Phase8AbilityTuning.Setting.PLAGUE_CRITICAL_DAMAGE_MULTIPLIER, 1) - 1));
             WeaponImplicitRegistry.runSuppressed(() -> HelperMethods.damageThroughIframes(target, source, bonus));
         }
 
@@ -219,8 +224,7 @@ public final class DeathKnellAbilityManager {
     private static List<CarriedAilment> tryConvertEffects(ServerWorld world, LivingEntity actor,
                                                            LivingEntity target, long now,
                                                            Phase8AbilityTuning tuning) {
-        int chance = Math.clamp(tuning.integer(Phase8AbilityTuning.Setting.CHANCE,
-                Config.uniqueEffects.toxic_longsword.chance), 0, 100);
+        int chance = conversionChance(Config.uniqueEffects.toxic_longsword.chance, tuning);
         if (chance <= 0 || actor.getRandom().nextInt(100) >= chance) {
             return List.of();
         }
@@ -251,10 +255,8 @@ public final class DeathKnellAbilityManager {
 
     private static void startOutbreak(ServerWorld world, FeverKey key, FeverState state,
                                       LivingEntity actor, LivingEntity target) {
-        int maximumTolls = state.knell.flag(1 << 16) ? 2 : Math.max(1, state.outbreak.integer(
-                Phase8AbilityTuning.Setting.COUNT,
-                Config.uniqueEffects.toxic_longsword.maxCascadeTolls));
-        if (state.outbreak.flag(1 << 25)) maximumTolls++;
+        int maximumTolls = maximumTolls(Config.uniqueEffects.toxic_longsword.maxCascadeTolls,
+                state.outbreak);
         Outbreak outbreak = new Outbreak(
                 actor.getUuid(),
                 state.sourcePlayerId,
@@ -266,11 +268,15 @@ public final class DeathKnellAbilityManager {
         );
         ACTIVE_OUTBREAKS.computeIfAbsent(world, ignored -> new ArrayList<>()).add(outbreak);
         scheduleToll(world, outbreak, key, target, state.ailments, 0,
-                outbreak.knell.integer(Phase8AbilityTuning.Setting.WINDUP_TICKS, TOLL_WINDUP_TICKS));
+                outbreak.knell.integer(Phase8AbilityTuning.Setting.PLAGUE_FIRST_TOLL_WINDUP_TICKS,
+                        TOLL_WINDUP_TICKS));
         if (outbreak.knell.flag(1 << 16)) {
             scheduleRepeatedToll(world, outbreak, key, target, state.ailments, 0,
-                    outbreak.knell.integer(Phase8AbilityTuning.Setting.WINDUP_TICKS, TOLL_WINDUP_TICKS)
-                            + outbreak.knell.integer(Phase8AbilityTuning.Setting.DELAY_TICKS, 6), 1);
+                    outbreak.knell.integer(Phase8AbilityTuning.Setting.PLAGUE_FIRST_TOLL_WINDUP_TICKS,
+                            TOLL_WINDUP_TICKS)
+                            + outbreak.knell.integer(Phase8AbilityTuning.Setting.PLAGUE_PAIRED_DELAY_TICKS, 6),
+                    outbreak.knell.get(Phase8AbilityTuning.Setting.PLAGUE_PAIRED_DAMAGE_MULTIPLIER, .65),
+                    outbreak.knell.get(Phase8AbilityTuning.Setting.PLAGUE_PAIRED_RADIUS_MULTIPLIER, .8));
         }
     }
 
@@ -286,7 +292,7 @@ public final class DeathKnellAbilityManager {
         DeathKnellVisualEntity visual = DeathKnellVisualEntity.toll(
                 world,
                 target,
-                Math.max(0.1F, Config.uniqueEffects.toxic_longsword.tollRadius),
+                (float) tollRadius(Config.uniqueEffects.toxic_longsword.tollRadius, outbreak.knell),
                 Math.max(1, windupTicks),
                 TOLL_VISUAL_LIFETIME,
                 depth
@@ -306,16 +312,15 @@ public final class DeathKnellAbilityManager {
     private static void scheduleRepeatedToll(ServerWorld world, Outbreak outbreak, FeverKey key,
                                              LivingEntity target,
                                              Map<RegistryEntry<StatusEffect>, CarriedAilment> ailments,
-                                             int depth, int windupTicks, double damageMultiplier) {
-        if (outbreak.scheduledTolls >= outbreak.maximumTolls) return;
+                                             int depth, int windupTicks, double damageMultiplier,
+                                             double radiusMultiplier) {
         DeathKnellVisualEntity visual = DeathKnellVisualEntity.toll(world, target,
-                Math.max(.1F, (float) outbreak.knell.get(Phase8AbilityTuning.Setting.RADIUS,
-                        Config.uniqueEffects.toxic_longsword.tollRadius)), Math.max(1, windupTicks),
+                Math.max(.1F, (float) (tollRadius(Config.uniqueEffects.toxic_longsword.tollRadius,
+                        outbreak.knell) * radiusMultiplier)), Math.max(1, windupTicks),
                 TOLL_VISUAL_LIFETIME, depth);
         UUID visualId = world.spawnEntity(visual) ? visual.getUuid() : null;
         outbreak.pendingTolls.add(new PendingToll(key, target.getUuid(), world.getTime() + Math.max(1, windupTicks),
-                depth, new HashMap<>(ailments), visualId, damageMultiplier));
-        outbreak.scheduledTolls++;
+                depth, new HashMap<>(ailments), visualId, damageMultiplier, radiusMultiplier, true));
     }
 
     private static void tickFeverStates(ServerWorld world) {
@@ -426,22 +431,31 @@ public final class DeathKnellAbilityManager {
         }
 
         outbreak.tolledTargetIds.add(target.getUuid());
-        float radius = Math.max(0.1F, (float) outbreak.knell.get(Phase8AbilityTuning.Setting.RADIUS,
-                Config.uniqueEffects.toxic_longsword.tollRadius));
+        float radius = (float) (tollRadius(Config.uniqueEffects.toxic_longsword.tollRadius,
+                outbreak.knell) * pending.radiusMultiplier);
         boolean quarantine = outbreak.outbreak.flag(1 << 26) && outbreak.executedTolls == 0;
-        if (quarantine) radius = (float) outbreak.outbreak.get(Phase8AbilityTuning.Setting.RADIUS, 7);
-        boolean finalChime = outbreak.knell.flag(1 << 15)
-                && outbreak.scheduledTolls >= outbreak.maximumTolls
-                && outbreak.executedTolls + 1 >= outbreak.scheduledTolls && outbreak.pendingTolls.isEmpty();
-        if (finalChime) radius *= outbreak.knell.get(Phase8AbilityTuning.Setting.SECONDARY_RADIUS, 1.25);
-        final float pulseRadius = radius;
-        double verticalRadius = Math.max(2.0, radius * 0.65);
+        if (quarantine) radius = (float) outbreak.outbreak.get(
+                Phase8AbilityTuning.Setting.PLAGUE_QUARANTINE_RADIUS, 7);
+        double candidateRadius = radius * (outbreak.knell.flag(1 << 15)
+                ? outbreak.knell.get(Phase8AbilityTuning.Setting.PLAGUE_FINAL_RADIUS_MULTIPLIER, 1.3) : 1);
+        double verticalRadius = Math.max(2.0, candidateRadius * 0.65);
         Vec3d center = target.getPos().add(0.0, target.getHeight() * 0.5, 0.0);
-        double cascadeRadius = radius + outbreak.outbreak.get(Phase8AbilityTuning.Setting.RANGE, 0);
+        double cascadeRadius = candidateRadius + outbreak.outbreak.get(
+                Phase8AbilityTuning.Setting.PLAGUE_CASCADE_RANGE_BONUS, 0);
         Box searchBox = Box.of(center, cascadeRadius * 2.0, verticalRadius * 2.0, cascadeRadius * 2.0);
         List<LivingEntity> cascadeCandidates = world.getEntitiesByClass(LivingEntity.class, searchBox,
                 candidate -> candidate.isAlive() && EntityPredicates.VALID_LIVING_ENTITY.test(candidate)
                         && isValidTarget(candidate, actor, sourcePlayer));
+        cascadeCandidates.sort(Comparator.comparingDouble(candidate -> candidate.squaredDistanceTo(center)));
+        int feverSpread = feverSpread(Config.uniqueEffects.toxic_longsword.tollFeverSpread,
+                outbreak.outbreak);
+        boolean finalChime = !pending.secondary && outbreak.knell.flag(1 << 15)
+                && outbreak.pendingTolls.stream().noneMatch(other -> !other.secondary)
+                && !canSchedulePrimary(world, outbreak, actor, sourcePlayer, target,
+                cascadeCandidates, feverSpread);
+        if (finalChime) radius *= outbreak.knell.get(
+                Phase8AbilityTuning.Setting.PLAGUE_FINAL_RADIUS_MULTIPLIER, 1.3);
+        final float pulseRadius = radius;
         List<LivingEntity> affected = world.getEntitiesByClass(
                 LivingEntity.class,
                 searchBox,
@@ -456,30 +470,37 @@ public final class DeathKnellAbilityManager {
                 "soul", actor, outbreak.stack,
                 Math.max(0.0F, Config.uniqueEffects.toxic_longsword.tollDamageScaling),
                 Math.max(0.0F, Config.uniqueEffects.toxic_longsword.tollSpellScaling));
-        baseDamage = baseDamage * (float) outbreak.knell.get(Phase8AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1)
-                + outbreak.knell.integer(Phase8AbilityTuning.Setting.FLAT_DAMAGE, 0);
+        baseDamage *= (float) outbreak.knell.get(
+                Phase8AbilityTuning.Setting.PLAGUE_TOLL_DAMAGE_MULTIPLIER, 1);
+        baseDamage *= (float) outbreak.pestilence.get(
+                Phase8AbilityTuning.Setting.PLAGUE_TOLL_DAMAGE_MULTIPLIER, 1);
         baseDamage *= pending.damageMultiplier;
-        if (outbreak.pestilence.flag(1 << 7)) baseDamage *= .8F;
-        if (outbreak.knell.flag(1 << 14)) baseDamage *= 1 + Math.min(5, pending.depth) * .05F;
-        if (finalChime) baseDamage *= outbreak.knell.get(Phase8AbilityTuning.Setting.FINAL_DAMAGE_MULTIPLIER, 1.3);
-        int targetCap = outbreak.knell.has(Phase8AbilityTuning.Setting.TARGET_CAP)
-                ? outbreak.knell.integer(Phase8AbilityTuning.Setting.TARGET_CAP, 64) : Integer.MAX_VALUE;
+        if (outbreak.knell.flag(1 << 14)) baseDamage *= 1 + Math.min(
+                outbreak.knell.integer(Phase8AbilityTuning.Setting.PLAGUE_CASCADE_STEP_CAP, 5), pending.depth)
+                * outbreak.knell.get(Phase8AbilityTuning.Setting.PLAGUE_DAMAGE_PER_CASCADE_STEP, .05);
+        if (finalChime) baseDamage *= outbreak.knell.get(
+                Phase8AbilityTuning.Setting.PLAGUE_FINAL_DAMAGE_MULTIPLIER, 1.25);
+        int targetCap = outbreak.knell.flag(1 << 17)
+                ? outbreak.knell.integer(Phase8AbilityTuning.Setting.PLAGUE_SINGLE_TARGET_CAP, 1)
+                : Integer.MAX_VALUE;
         int damagedCount = 0;
         for (LivingEntity candidate : affected) {
-            if (damagedCount < targetCap && (outbreak.knell.flag(1 << 16)
+            if (damagedCount < targetCap && (pending.secondary
                     || outbreak.damagedTargetIds.add(candidate.getUuid()))) {
                 float candidateDamage = baseDamage;
                 if (candidate.getHealth() / candidate.getMaxHealth() < outbreak.knell.get(
-                        Phase8AbilityTuning.Setting.HEALTH_THRESHOLD, 0)) {
+                        Phase8AbilityTuning.Setting.PLAGUE_LOW_HEALTH_THRESHOLD, 0)) {
                     candidateDamage *= outbreak.knell.get(
-                            Phase8AbilityTuning.Setting.OUTGOING_MULTIPLIER, 1);
+                            Phase8AbilityTuning.Setting.PLAGUE_LOW_HEALTH_DAMAGE_MULTIPLIER, 1);
                 }
                 damageTarget(world, actor, outbreak.stack, candidate, candidateDamage);
                 if (outbreak.knell.flag(1 << 13)) candidate.addStatusEffect(
-                        new StatusEffectInstance(StatusEffects.WEAKNESS, 40, 0), actor);
+                        new StatusEffectInstance(StatusEffects.WEAKNESS, outbreak.knell.integer(
+                                Phase8AbilityTuning.Setting.PLAGUE_WEAKNESS_DURATION_TICKS, 40), 0), actor);
                 damagedCount++;
                 if (candidate != target) {
-                    applyCarriedAilments(world, actor, candidate, pending.ailments, outbreak.pestilence);
+                    applyCarriedAilments(world, actor, candidate, pending.ailments,
+                            outbreak.pestilence, outbreak.outbreak);
                 }
             }
             spawnSpreadTrail(world, center, candidate.getPos().add(0.0, candidate.getHeight() * 0.5, 0.0));
@@ -488,31 +509,34 @@ public final class DeathKnellAbilityManager {
         if (target.isAlive() && outbreak.outbreak.flag(1 << 23)
                 && outbreak.relapsedTargetIds.add(target.getUuid())) {
             outbreak.pendingRelapses.add(new PendingRelapse(target.getUuid(), world.getTime()
-                    + outbreak.outbreak.integer(Phase8AbilityTuning.Setting.DELAY_TICKS, 40), 1));
+                    + outbreak.outbreak.integer(Phase8AbilityTuning.Setting.PLAGUE_RELAPSE_DELAY_TICKS, 40),
+                    outbreak.outbreak.integer(Phase8AbilityTuning.Setting.PLAGUE_RELAPSE_FEVER, 1)));
         }
         if (target.isAlive() && outbreak.outbreak.flag(1 << 25)
                 && outbreak.revisitedTargetIds.add(target.getUuid())) {
             scheduleRepeatedToll(world, outbreak, pending.key, target, pending.ailments, pending.depth,
-                    outbreak.outbreak.integer(Phase8AbilityTuning.Setting.DELAY_TICKS, 20),
-                    outbreak.outbreak.get(Phase8AbilityTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, .5));
+                    outbreak.outbreak.integer(Phase8AbilityTuning.Setting.PLAGUE_REVISIT_DELAY_TICKS, 20),
+                    outbreak.outbreak.get(Phase8AbilityTuning.Setting.PLAGUE_REVISIT_DAMAGE_MULTIPLIER, .5), 1);
         }
         if (outbreak.outbreak.flag(1 << 22)) {
-            world.getEntitiesByClass(LivingEntity.class, target.getBoundingBox().expand(2.5),
+            double wakeRadius = outbreak.outbreak.get(Phase8AbilityTuning.Setting.PLAGUE_WAKE_RADIUS, 2.5);
+            world.getEntitiesByClass(LivingEntity.class, target.getBoundingBox().expand(wakeRadius),
                             candidate -> isValidTarget(candidate, actor, sourcePlayer))
                     .stream().sorted(Comparator.comparingDouble(candidate -> candidate.squaredDistanceTo(target)))
-                    .limit(6).forEach(candidate -> candidate.addStatusEffect(
-                            new StatusEffectInstance(StatusEffects.POISON, 30, 0), actor));
+                    .limit(outbreak.outbreak.integer(Phase8AbilityTuning.Setting.PLAGUE_WAKE_TARGET_CAP, 6))
+                    .forEach(candidate -> candidate.addStatusEffect(new StatusEffectInstance(StatusEffects.POISON,
+                            outbreak.outbreak.integer(Phase8AbilityTuning.Setting.PLAGUE_WAKE_DURATION_TICKS, 30),
+                            0), actor));
         }
 
         playTollSound(world, center, pending.depth);
         spawnTollEffects(world, center, radius, pending.depth);
 
-        int feverSpread = Math.max(0, outbreak.outbreak.integer(Phase8AbilityTuning.Setting.FEVER,
-                Config.uniqueEffects.toxic_longsword.tollFeverSpread));
         if (quarantine) {
-            affected.stream().limit(outbreak.outbreak.integer(Phase8AbilityTuning.Setting.TARGET_CAP, 12))
+            affected.stream().limit(outbreak.outbreak.integer(
+                            Phase8AbilityTuning.Setting.PLAGUE_QUARANTINE_TARGET_CAP, 12))
                     .forEach(candidate -> addSpreadFever(world, outbreak, actor, sourcePlayer, candidate,
-                            outbreak.outbreak.integer(Phase8AbilityTuning.Setting.FEVER, 3), 1));
+                            outbreak.outbreak.integer(Phase8AbilityTuning.Setting.PLAGUE_QUARANTINE_FEVER, 3), 1));
             return;
         }
         if (outbreak.knell.flag(1 << 17)) return;
@@ -542,7 +566,11 @@ public final class DeathKnellAbilityManager {
         FeverState state = states.computeIfAbsent(key, ignored -> new FeverState());
         state.stack = outbreak.stack.copy();
         state.sourcePlayerId = sourcePlayer == null ? null : sourcePlayer.getUuid();
-        state.expiresAt = world.getTime() + Math.max(1, Config.uniqueEffects.toxic_longsword.feverDuration);
+        state.expiresAt = world.getTime() + feverDuration(
+                Config.uniqueEffects.toxic_longsword.feverDuration, outbreak.pestilence);
+        state.pestilence = outbreak.pestilence;
+        state.knell = outbreak.knell;
+        state.outbreak = outbreak.outbreak;
         int threshold = feverThreshold();
         state.stacks = Math.min(threshold, state.stacks + feverGain);
 
@@ -585,17 +613,15 @@ public final class DeathKnellAbilityManager {
     private static void applyCarriedAilments(ServerWorld world, LivingEntity actor,
                                               LivingEntity target,
                                               Map<RegistryEntry<StatusEffect>, CarriedAilment> ailments,
-                                              Phase8AbilityTuning tuning) {
+                                              Phase8AbilityTuning pestilence,
+                                              Phase8AbilityTuning outbreak) {
         if (ailments.isEmpty()) {
             return;
         }
         long now = world.getTime();
-        float multiplier = (float) Math.clamp(
-                tuning.get(Phase8AbilityTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER,
-                        Config.uniqueEffects.toxic_longsword.copiedAilmentDurationMultiplier),
-                0.0F,
-                1.0F
-        );
+        float multiplier = carriedDurationMultiplier(
+                Config.uniqueEffects.toxic_longsword.copiedAilmentDurationMultiplier,
+                pestilence, outbreak);
         if (multiplier <= 0.0F) {
             return;
         }
@@ -707,6 +733,106 @@ public final class DeathKnellAbilityManager {
 
     private static int feverThreshold() {
         return Math.max(1, Config.uniqueEffects.toxic_longsword.feverThreshold);
+    }
+
+    public static int conversionChance(int configured, Phase8AbilityTuning tuning) {
+        return Phase8TuningMath.conversionChance(configured, tuning);
+    }
+
+    public static int feverDuration(int configured, Phase8AbilityTuning tuning) {
+        return Phase8TuningMath.feverDuration(configured, tuning);
+    }
+
+    public static int conversionFever(int configured, Phase8AbilityTuning tuning) {
+        return Phase8TuningMath.conversionFever(configured, tuning);
+    }
+
+    public static double tollRadius(double configured, Phase8AbilityTuning tuning) {
+        return Phase8TuningMath.tollRadius(configured, tuning);
+    }
+
+    public static int feverSpread(int configured, Phase8AbilityTuning tuning) {
+        return Phase8TuningMath.feverSpread(configured, tuning);
+    }
+
+    public static int maximumTolls(int configured, Phase8AbilityTuning tuning) {
+        return Phase8TuningMath.maximumTolls(configured, tuning);
+    }
+
+    public static float carriedDurationMultiplier(float configured, Phase8AbilityTuning pestilence,
+                                                   Phase8AbilityTuning outbreak) {
+        return Phase8TuningMath.carriedDurationMultiplier(configured, pestilence, outbreak);
+    }
+
+    public static boolean criticalCondition(int stacks, int threshold, double fraction) {
+        return Phase8TuningMath.criticalCondition(stacks, threshold, fraction);
+    }
+
+    private static boolean canSchedulePrimary(ServerWorld world, Outbreak outbreak,
+                                              LivingEntity actor, ServerPlayerEntity sourcePlayer,
+                                              LivingEntity origin, List<LivingEntity> candidates,
+                                              int feverGain) {
+        if (feverGain <= 0 || outbreak.scheduledTolls >= outbreak.maximumTolls) return false;
+        Map<FeverKey, FeverState> states = FEVER_STATES.getOrDefault(world, Map.of());
+        for (LivingEntity candidate : candidates) {
+            if (candidate == origin || outbreak.tolledTargetIds.contains(candidate.getUuid())
+                    || outbreak.queuedTargetIds.contains(candidate.getUuid())
+                    || !isValidTarget(candidate, actor, sourcePlayer)) continue;
+            FeverKey key = new FeverKey(actor.getUuid(), candidate.getUuid());
+            FeverState state = states.get(key);
+            int stacks = state == null ? 0 : state.stacks;
+            if (stacks + feverGain >= feverThreshold()) return true;
+        }
+        return false;
+    }
+
+    public static void clear(ServerWorld world) {
+        if (world == null) return;
+        Map<FeverKey, FeverState> states = FEVER_STATES.remove(world);
+        if (states != null) states.values().forEach(state -> discardVisual(world, state.visualId));
+        List<Outbreak> outbreaks = ACTIVE_OUTBREAKS.remove(world);
+        if (outbreaks != null) outbreaks.forEach(outbreak -> discardPendingVisuals(world, outbreak));
+        INCUBATION_LOCKOUTS.remove(world);
+        PATIENT_ZERO_LOCKOUTS.remove(world);
+    }
+
+    public static void clearActor(LivingEntity actor) {
+        if (actor == null || !(actor.getWorld() instanceof ServerWorld world)) return;
+        UUID actorId = actor.getUuid();
+        Map<FeverKey, FeverState> states = FEVER_STATES.get(world);
+        if (states != null) {
+            states.entrySet().removeIf(entry -> {
+                if (!entry.getKey().actorId.equals(actorId) && !entry.getKey().targetId.equals(actorId)) return false;
+                discardVisual(world, entry.getValue().visualId);
+                return true;
+            });
+            if (states.isEmpty()) FEVER_STATES.remove(world);
+        }
+        List<Outbreak> outbreaks = ACTIVE_OUTBREAKS.get(world);
+        if (outbreaks != null) {
+            outbreaks.removeIf(outbreak -> {
+                if (!outbreak.actorId.equals(actorId)) return false;
+                discardPendingVisuals(world, outbreak);
+                return true;
+            });
+            if (outbreaks.isEmpty()) ACTIVE_OUTBREAKS.remove(world);
+        }
+        for (Map<ServerWorld, Map<FeverKey, Long>> ledgers : List.of(
+                INCUBATION_LOCKOUTS, PATIENT_ZERO_LOCKOUTS)) {
+            Map<FeverKey, Long> entries = ledgers.get(world);
+            if (entries != null) {
+                entries.keySet().removeIf(key -> key.actorId.equals(actorId) || key.targetId.equals(actorId));
+                if (entries.isEmpty()) ledgers.remove(world);
+            }
+        }
+    }
+
+    public static void clearAll() {
+        Set<ServerWorld> worlds = new HashSet<>(FEVER_STATES.keySet());
+        worlds.addAll(ACTIVE_OUTBREAKS.keySet());
+        worlds.forEach(DeathKnellAbilityManager::clear);
+        INCUBATION_LOCKOUTS.clear();
+        PATIENT_ZERO_LOCKOUTS.clear();
     }
 
     private static void finishAll(UniqueAbilityExecution... executions) {
@@ -935,16 +1061,19 @@ public final class DeathKnellAbilityManager {
         private final Map<RegistryEntry<StatusEffect>, CarriedAilment> ailments;
         private final UUID visualId;
         private final double damageMultiplier;
+        private final double radiusMultiplier;
+        private final boolean secondary;
 
         private PendingToll(FeverKey key, UUID targetId, long executeAt, int depth,
                             Map<RegistryEntry<StatusEffect>, CarriedAilment> ailments,
                             UUID visualId) {
-            this(key, targetId, executeAt, depth, ailments, visualId, 1);
+            this(key, targetId, executeAt, depth, ailments, visualId, 1, 1, false);
         }
 
         private PendingToll(FeverKey key, UUID targetId, long executeAt, int depth,
                             Map<RegistryEntry<StatusEffect>, CarriedAilment> ailments,
-                            UUID visualId, double damageMultiplier) {
+                            UUID visualId, double damageMultiplier, double radiusMultiplier,
+                            boolean secondary) {
             this.key = key;
             this.targetId = targetId;
             this.executeAt = executeAt;
@@ -952,6 +1081,8 @@ public final class DeathKnellAbilityManager {
             this.ailments = ailments;
             this.visualId = visualId;
             this.damageMultiplier = damageMultiplier;
+            this.radiusMultiplier = radiusMultiplier;
+            this.secondary = secondary;
         }
     }
 

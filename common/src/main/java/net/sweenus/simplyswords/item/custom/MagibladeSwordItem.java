@@ -38,8 +38,15 @@ public class MagibladeSwordItem extends UniqueSwordItem implements UniqueWeaponA
         if (!net.sweenus.simplyswords.api.AwakeningApi.isAbilityUnlocked(stack)) {
             return super.postHit(stack, target, attacker);
         }
-        if (!attacker.getWorld().isClient()) {
+        if (!attacker.getWorld().isClient()
+                && attacker.getWorld() instanceof net.minecraft.server.world.ServerWorld serverWorld) {
             HelperMethods.playHitSounds(attacker, target);
+            float bonus = MagibladeAbilityManager.countertoneMultiplier(serverWorld, attacker, target);
+            if (bonus > 1.0F) {
+                float extra = (float) HelperMethods.getEntityAttackDamage(attacker) * (bonus - 1.0F);
+                if (extra > 0) HelperMethods.damageThroughIframes(target,
+                        attacker.getDamageSources().indirectMagic(attacker, attacker), extra);
+            }
         }
         return super.postHit(stack, target, attacker);
     }

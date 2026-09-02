@@ -50,6 +50,8 @@ import net.sweenus.simplyswords.world.StormsEdgeAbilityManager;
 import net.sweenus.simplyswords.world.DreadwhisperAbilityManager;
 import net.sweenus.simplyswords.world.ThunderbrandAbilityManager;
 import net.sweenus.simplyswords.world.Phase2CombatStateManager;
+import net.sweenus.simplyswords.world.Phase7CombatManager;
+import net.sweenus.simplyswords.world.WaxweaverEncasementManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -64,6 +66,14 @@ import java.util.Random;
 public abstract class ServerPlayerEntityMixin {
 
     @Shadow public abstract ServerWorld getServerWorld();
+
+    @Inject(at = @At("HEAD"), method = "moveToWorld")
+    private void simplyswords$clearWaxweaverOnDimensionChange(ServerWorld destination,
+                                                               CallbackInfoReturnable<Entity> cir) {
+        ServerPlayerEntity player = (ServerPlayerEntity) (Object) this;
+        WaxweaverEncasementManager.clearActor(player);
+        Phase7CombatManager.clearActor(player);
+    }
 
     @Inject(at = @At("HEAD"), method = "damage", cancellable = true)
     public void simplyswords$damage(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
@@ -159,6 +169,7 @@ public abstract class ServerPlayerEntityMixin {
             Phase4LichbladeManager.tickOwner(serverPlayer);
             StormbringerParryManager.tickPlayer(serverPlayer);
             StormbringerAbilityManager.tickPlayer(serverPlayer);
+            net.sweenus.simplyswords.world.Phase10WeaponManager.sweepHolder(serverPlayer);
 
             //Ribboncleaver movespeed debuff
             ItemStack heldUnique = serverPlayer.getMainHandStack();
@@ -330,7 +341,9 @@ public abstract class ServerPlayerEntityMixin {
     public void simplyswords$preventShadowDanceAttack(Entity target, CallbackInfo ci) {
         if (ShadowstingShadowDanceManager.isActive((ServerPlayerEntity) (Object) this)) {
             ci.cancel();
+            return;
         }
+        net.sweenus.simplyswords.item.custom.StealSwordItem.onAttack((ServerPlayerEntity) (Object) this);
     }
 
 
