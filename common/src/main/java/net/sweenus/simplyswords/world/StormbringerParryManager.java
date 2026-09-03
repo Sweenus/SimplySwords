@@ -22,8 +22,8 @@ import net.minecraft.world.World;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.api.WeaponAbilityActivationSource;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
-import net.sweenus.simplyswords.api.ability.Phase6AbilityTuning;
-import net.sweenus.simplyswords.api.ability.Phase6UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.StormFrostWaterMasteryTuning;
+import net.sweenus.simplyswords.api.ability.StormFrostWaterMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityPhase;
@@ -53,11 +53,11 @@ public final class StormbringerParryManager {
         ItemStack stack = player.getStackInHand(hand);
         WeaponAbilityContext context = WeaponAbilityContext.of(world, stack, player, player, null, hand,
                 WeaponAbilityActivationSource.PLAYER);
-        UniqueAbilityExecution execution = Phase6CombatManager.beginActive(
-                Phase6UniqueAbilities.STORMBRINGER_GUARD, context, Config.uniqueEffects.stormbringer.cooldown);
+        UniqueAbilityExecution execution = StormFrostWaterMasteryCombatManager.beginActive(
+                StormFrostWaterMasteryAbilities.STORMBRINGER_GUARD, context, Config.uniqueEffects.stormbringer.cooldown);
         UniqueAbilityApi.takeStartedExecution();
         UniqueAbilityApi.start(execution);
-        Phase6AbilityTuning tuning = Phase6UniqueAbilities.tuning(execution);
+        StormFrostWaterMasteryTuning tuning = StormFrostWaterMasteryAbilities.tuning(execution);
         StormbringerAbilityManager.observeTuning(player, tuning);
         int blockDuration = integer(tuning, s("STORMBRINGER_BLOCK_DURATION_TICKS"),
                 s("DURATION_TICKS"), Math.max(1, Config.uniqueEffects.stormbringer.blockDuration));
@@ -139,7 +139,7 @@ public final class StormbringerParryManager {
         int skillCooldown = Math.max(0, Config.uniqueEffects.stormbringer.cooldown);
         ParryComponent parryComponent = stack.getOrDefault(ComponentTypeRegistry.PARRY.get(), ParryComponent.DEFAULT);
         if (parryComponent.parried()) {
-            performCounterattack(player, active == null ? Phase6AbilityTuning.EMPTY : active.tuning,
+            performCounterattack(player, active == null ? StormFrostWaterMasteryTuning.EMPTY : active.tuning,
                     active == null ? null : active.execution);
             stack.set(ComponentTypeRegistry.PARRY.get(), parryComponent.resetParry());
         } else {
@@ -152,7 +152,7 @@ public final class StormbringerParryManager {
             SimplySwordsAPI.reduceWeaponCooldown(player, stack, skillCooldown,
                     integer(active.tuning, s("STORMBRINGER_ACTIVE_REFUND_TICKS"), s("REFUND_TICKS"), 30));
         }
-        if (active != null) UniqueAbilityApi.finish(active.execution, Phase6UniqueAbilities.FINISH, 0);
+        if (active != null) UniqueAbilityApi.finish(active.execution, StormFrostWaterMasteryAbilities.FINISH, 0);
     }
 
     public static int maxUseTime(LivingEntity user, ItemStack stack) {
@@ -206,7 +206,7 @@ public final class StormbringerParryManager {
         return attacker.squaredDistanceTo(player) <= radius * radius;
     }
 
-    private static void performCounterattack(ServerPlayerEntity player, Phase6AbilityTuning tuning,
+    private static void performCounterattack(ServerPlayerEntity player, StormFrostWaterMasteryTuning tuning,
                                              UniqueAbilityExecution execution) {
         ServerWorld world = player.getServerWorld();
         double radius = value(tuning, s("STORMBRINGER_COUNTER_RADIUS"), s("RADIUS"),
@@ -244,7 +244,7 @@ public final class StormbringerParryManager {
             target.velocityModified = true;
             spawnTargetHitEffects(world, target);
             if (execution != null) UniqueAbilityApi.emit(execution, UniqueAbilityPhase.HIT,
-                    Phase6UniqueAbilities.HIT, target, 1, damage);
+                    StormFrostWaterMasteryAbilities.HIT, target, 1, damage);
             if (affected >= cap) break;
         }
 
@@ -305,29 +305,29 @@ public final class StormbringerParryManager {
         world.spawnParticles(ParticleTypes.SMOKE, pos.x, pos.y, pos.z, 5, 0.22, 0.18, 0.22, 0.01);
     }
 
-    private static Phase6AbilityTuning.Setting s(String name) {
-        return Phase6AbilityTuning.Setting.valueOf(name);
+    private static StormFrostWaterMasteryTuning.Setting s(String name) {
+        return StormFrostWaterMasteryTuning.Setting.valueOf(name);
     }
 
-    private static void applyWard(ServerPlayerEntity player, Phase6AbilityTuning tuning) {
+    private static void applyWard(ServerPlayerEntity player, StormFrostWaterMasteryTuning tuning) {
         if (!tuning.flag(1 << 3)) return;
         player.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE,
                 integer(tuning, s("STORMBRINGER_BLOCK_RESISTANCE_TICKS"),
                         s("STATUS_DURATION_TICKS"), 30), 0), player);
     }
 
-    private static double value(Phase6AbilityTuning tuning, Phase6AbilityTuning.Setting scoped,
-                                Phase6AbilityTuning.Setting generic, double fallback) {
+    private static double value(StormFrostWaterMasteryTuning tuning, StormFrostWaterMasteryTuning.Setting scoped,
+                                StormFrostWaterMasteryTuning.Setting generic, double fallback) {
         return tuning.has(scoped) ? tuning.get(scoped, fallback) : tuning.get(generic, fallback);
     }
 
-    private static int integer(Phase6AbilityTuning tuning, Phase6AbilityTuning.Setting scoped,
-                               Phase6AbilityTuning.Setting generic, int fallback) {
+    private static int integer(StormFrostWaterMasteryTuning tuning, StormFrostWaterMasteryTuning.Setting scoped,
+                               StormFrostWaterMasteryTuning.Setting generic, int fallback) {
         return (int) Math.round(value(tuning, scoped, generic, fallback));
     }
 
     private record ActiveParry(Hand hand, ItemStack stack, RegistryKey<World> world,
                                long expiresAt, long parryExpiresAt,
-                               Phase6AbilityTuning tuning, UniqueAbilityExecution execution) {
+                               StormFrostWaterMasteryTuning tuning, UniqueAbilityExecution execution) {
     }
 }

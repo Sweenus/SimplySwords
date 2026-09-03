@@ -4,7 +4,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.server.world.ServerWorld;
-import net.sweenus.simplyswords.api.ability.Phase6AbilityTuning;
+import net.sweenus.simplyswords.api.ability.StormFrostWaterMasteryTuning;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -51,7 +51,7 @@ public final class FrostfallAbilityManager {
         EMPOWERMENTS.clear();
     }
 
-    public static double resolveDirectMultiplier(Phase6AbilityTuning tuning, int flightTicks,
+    public static double resolveDirectMultiplier(StormFrostWaterMasteryTuning tuning, int flightTicks,
                                                  boolean slowed, boolean deadfall) {
         double multiplier = tuning.get(s("DAMAGE_MULTIPLIER"), 1)
                 * tuning.get(s("FROSTFALL_DIRECT_DAMAGE_MULTIPLIER"), 1)
@@ -64,26 +64,26 @@ public final class FrostfallAbilityManager {
         return multiplier;
     }
 
-    public static int resolvePulseCount(Phase6AbilityTuning tuning) {
+    public static int resolvePulseCount(StormFrostWaterMasteryTuning tuning) {
         return tuning.integer(s("FROSTFALL_FIELD_PULSE_COUNT"),
                 tuning.integer(s("PULSE_COUNT"), 5));
     }
 
-    public static int resolvePulseCount(Phase6AbilityTuning throwTuning, Phase6AbilityTuning fieldTuning) {
+    public static int resolvePulseCount(StormFrostWaterMasteryTuning throwTuning, StormFrostWaterMasteryTuning fieldTuning) {
         if (fieldTuning.has(s("FROSTFALL_FIELD_PULSE_COUNT")))
             return fieldTuning.integer(s("FROSTFALL_FIELD_PULSE_COUNT"), 5);
         if (fieldTuning.has(s("PULSE_COUNT"))) return fieldTuning.integer(s("PULSE_COUNT"), 5);
         return throwTuning.integer(s("PULSE_COUNT"), 5);
     }
 
-    public static int resolveFieldDuration(Phase6AbilityTuning tuning, int pulseCount) {
+    public static int resolveFieldDuration(StormFrostWaterMasteryTuning tuning, int pulseCount) {
         int fallback = Math.max(1, pulseCount) * 20;
         return tuning.integer(s("FROSTFALL_FIELD_DURATION_TICKS"),
                 tuning.integer(s("DURATION_TICKS"), fallback));
     }
 
-    public static int resolveFieldDuration(Phase6AbilityTuning throwTuning,
-                                           Phase6AbilityTuning fieldTuning, int pulseCount) {
+    public static int resolveFieldDuration(StormFrostWaterMasteryTuning throwTuning,
+                                           StormFrostWaterMasteryTuning fieldTuning, int pulseCount) {
         if (fieldTuning.has(s("FROSTFALL_FIELD_DURATION_TICKS")))
             return fieldTuning.integer(s("FROSTFALL_FIELD_DURATION_TICKS"), Math.max(1, pulseCount) * 20);
         if (fieldTuning.has(s("DURATION_TICKS")))
@@ -91,13 +91,13 @@ public final class FrostfallAbilityManager {
         return throwTuning.integer(s("DURATION_TICKS"), Math.max(1, pulseCount) * 20);
     }
 
-    public static int pulseDueTick(Phase6AbilityTuning tuning, int pulseIndex, int pulseCount, int fieldDuration) {
+    public static int pulseDueTick(StormFrostWaterMasteryTuning tuning, int pulseIndex, int pulseCount, int fieldDuration) {
         int glacierDelay = tuning.integer(s("FROSTFALL_GLACIER_DELAY_TICKS"), 0);
         if (pulseCount == 1 && glacierDelay > 0) return glacierDelay;
         return Math.max(1, (int) Math.ceil((double) pulseIndex * fieldDuration / Math.max(1, pulseCount)));
     }
 
-    public static double resolvePulseRadius(Phase6AbilityTuning tuning, double configuredRadius,
+    public static double resolvePulseRadius(StormFrostWaterMasteryTuning tuning, double configuredRadius,
                                             int pulseIndex, int pulseCount) {
         double base = tuning.get(s("RADIUS"), configuredRadius)
                 + tuning.get(s("FROSTFALL_PULSE_RADIUS_BONUS"), 0);
@@ -105,7 +105,7 @@ public final class FrostfallAbilityManager {
         return Math.max(.75, base - 5 + 4 * progress);
     }
 
-    public static double resolvePulseRadius(Phase6AbilityTuning throwTuning, Phase6AbilityTuning fieldTuning,
+    public static double resolvePulseRadius(StormFrostWaterMasteryTuning throwTuning, StormFrostWaterMasteryTuning fieldTuning,
                                             double configuredRadius, int pulseIndex, int pulseCount) {
         double base = fieldTuning.has(s("RADIUS")) ? fieldTuning.get(s("RADIUS"), configuredRadius)
                 : throwTuning.get(s("RADIUS"), configuredRadius);
@@ -114,8 +114,8 @@ public final class FrostfallAbilityManager {
         return Math.max(.75, base - 5 + 4 * progress);
     }
 
-    public static double resolvePulseMultiplier(Phase6AbilityTuning throwTuning,
-                                                Phase6AbilityTuning fieldTuning,
+    public static double resolvePulseMultiplier(StormFrostWaterMasteryTuning throwTuning,
+                                                StormFrostWaterMasteryTuning fieldTuning,
                                                 int pulseIndex, int pulseCount,
                                                 boolean deadfall, boolean shatter) {
         double generic = fieldTuning.has(s("DAMAGE_MULTIPLIER"))
@@ -131,21 +131,21 @@ public final class FrostfallAbilityManager {
         return multiplier;
     }
 
-    public static int resolvePulseSlowTicks(Phase6AbilityTuning tuning, int configuredTicks) {
+    public static int resolvePulseSlowTicks(StormFrostWaterMasteryTuning tuning, int configuredTicks) {
         return Math.max(1, tuning.integer(s("STATUS_DURATION_TICKS"), configuredTicks)
                 + tuning.integer(s("FROSTFALL_PULSE_SLOW_BONUS_TICKS"), 0));
     }
 
-    public static int resolvePulseSlowTicks(Phase6AbilityTuning throwTuning,
-                                            Phase6AbilityTuning fieldTuning, int configuredTicks) {
+    public static int resolvePulseSlowTicks(StormFrostWaterMasteryTuning throwTuning,
+                                            StormFrostWaterMasteryTuning fieldTuning, int configuredTicks) {
         int base = fieldTuning.has(s("STATUS_DURATION_TICKS"))
                 ? fieldTuning.integer(s("STATUS_DURATION_TICKS"), configuredTicks)
                 : throwTuning.integer(s("STATUS_DURATION_TICKS"), configuredTicks);
         return Math.max(1, base + fieldTuning.integer(s("FROSTFALL_PULSE_SLOW_BONUS_TICKS"), 0));
     }
 
-    private static Phase6AbilityTuning.Setting s(String name) {
-        return Phase6AbilityTuning.Setting.valueOf(name);
+    private static StormFrostWaterMasteryTuning.Setting s(String name) {
+        return StormFrostWaterMasteryTuning.Setting.valueOf(name);
     }
 
     private record Empowerment(double multiplier, long expiresAt) {

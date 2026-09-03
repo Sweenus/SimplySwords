@@ -255,7 +255,7 @@ public class SimplySwordsAxolotlEntity extends AxolotlEntity implements Tameable
                         });
             }
             if (owner != null && !living.isAlive() && masteryVictoryRequired > 0) {
-                net.sweenus.simplyswords.world.Phase7CombatManager.onAxolotlKill(world, owner,
+                net.sweenus.simplyswords.world.NatureSwarmMasteryCombatManager.onAxolotlKill(world, owner,
                         masteryVictoryRequired, masteryVictoryWindow, masteryVictoryRefund);
             }
             if (owner instanceof PlayerEntity player && masteryCooldownRefundPercent > 0) {

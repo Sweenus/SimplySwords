@@ -1,7 +1,7 @@
 package net.sweenus.simplyswords.world;
 
 import net.minecraft.nbt.NbtCompound;
-import net.sweenus.simplyswords.api.ability.Phase6AbilityTuning;
+import net.sweenus.simplyswords.api.ability.StormFrostWaterMasteryTuning;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 final class FrostfallAbilityManagerTest {
     @Test
     void directDamageModifiersStayScopedAndHighArcAddsFrozenBaseDamage() {
-        Phase6AbilityTuning tuning = Phase6AbilityTuning.EMPTY
+        StormFrostWaterMasteryTuning tuning = StormFrostWaterMasteryTuning.EMPTY
                 .with(s("DAMAGE_MULTIPLIER"), 1.1)
                 .with(s("FROSTFALL_DIRECT_DAMAGE_MULTIPLIER"), 1.12)
                 .with(s("FROSTFALL_SKIRMISHER_DAMAGE_MULTIPLIER"), .7)
@@ -28,35 +28,35 @@ final class FrostfallAbilityManagerTest {
 
     @Test
     void pulseFormsUseDeterministicImpactRelativeSchedules() {
-        Phase6AbilityTuning base = Phase6AbilityTuning.EMPTY;
+        StormFrostWaterMasteryTuning base = StormFrostWaterMasteryTuning.EMPTY;
         assertEquals(5, FrostfallAbilityManager.resolvePulseCount(base));
         assertEquals(100, FrostfallAbilityManager.resolveFieldDuration(base, 5));
         assertEquals(20, FrostfallAbilityManager.pulseDueTick(base, 1, 5, 100));
         assertEquals(100, FrostfallAbilityManager.pulseDueTick(base, 5, 5, 100));
 
-        Phase6AbilityTuning avalanche = base.with(s("FROSTFALL_FIELD_PULSE_COUNT"), 8)
+        StormFrostWaterMasteryTuning avalanche = base.with(s("FROSTFALL_FIELD_PULSE_COUNT"), 8)
                 .with(s("FROSTFALL_FIELD_DURATION_TICKS"), 100);
         assertEquals(13, FrostfallAbilityManager.pulseDueTick(avalanche, 1, 8, 100));
         assertEquals(100, FrostfallAbilityManager.pulseDueTick(avalanche, 8, 8, 100));
 
-        Phase6AbilityTuning glacier = base.with(s("FROSTFALL_FIELD_PULSE_COUNT"), 1)
+        StormFrostWaterMasteryTuning glacier = base.with(s("FROSTFALL_FIELD_PULSE_COUNT"), 1)
                 .with(s("FROSTFALL_GLACIER_DELAY_TICKS"), 30);
         assertEquals(30, FrostfallAbilityManager.pulseDueTick(glacier, 1, 1, 100));
     }
 
     @Test
     void transformedPulseDamageNeverUsesTheLegacyNegativeFormula() {
-        Phase6AbilityTuning avalanche = Phase6AbilityTuning.EMPTY
+        StormFrostWaterMasteryTuning avalanche = StormFrostWaterMasteryTuning.EMPTY
                 .with(s("FROSTFALL_AVALANCHE_DAMAGE_MULTIPLIER"), .65);
         assertEquals(.65 / 8, FrostfallAbilityManager.resolvePulseMultiplier(
-                Phase6AbilityTuning.EMPTY, avalanche, 1, 8, false, false), 1.0E-6);
+                StormFrostWaterMasteryTuning.EMPTY, avalanche, 1, 8, false, false), 1.0E-6);
         assertEquals(.65, FrostfallAbilityManager.resolvePulseMultiplier(
-                Phase6AbilityTuning.EMPTY, avalanche, 8, 8, false, false), 1.0E-6);
+                StormFrostWaterMasteryTuning.EMPTY, avalanche, 8, 8, false, false), 1.0E-6);
     }
 
     @Test
     void radiusCompositionIsConfigRelativeForEveryPulseCount() {
-        Phase6AbilityTuning wide = Phase6AbilityTuning.EMPTY
+        StormFrostWaterMasteryTuning wide = StormFrostWaterMasteryTuning.EMPTY
                 .with(s("FROSTFALL_PULSE_RADIUS_BONUS"), 1);
         assertEquals(4, FrostfallAbilityManager.resolvePulseRadius(wide, 8, 1, 5), 1.0E-6);
         assertEquals(8, FrostfallAbilityManager.resolvePulseRadius(wide, 8, 5, 5), 1.0E-6);
@@ -65,12 +65,12 @@ final class FrostfallAbilityManagerTest {
 
     @Test
     void tuningSnapshotsRoundTripDedicatedAndGenericAddonValues() {
-        Phase6AbilityTuning tuning = Phase6AbilityTuning.EMPTY
+        StormFrostWaterMasteryTuning tuning = StormFrostWaterMasteryTuning.EMPTY
                 .with(s("DAMAGE_MULTIPLIER"), 1.4)
                 .with(s("FROSTFALL_RETURN_SPEED_MULTIPLIER"), 1.4375)
                 .with(s("FROSTFALL_FIELD_PULSE_COUNT"), 8);
         NbtCompound nbt = tuning.toNbt();
-        Phase6AbilityTuning restored = Phase6AbilityTuning.fromNbt(nbt);
+        StormFrostWaterMasteryTuning restored = StormFrostWaterMasteryTuning.fromNbt(nbt);
 
         assertTrue(restored.has(s("DAMAGE_MULTIPLIER")));
         assertTrue(restored.has(s("FROSTFALL_RETURN_SPEED_MULTIPLIER")));
@@ -82,12 +82,12 @@ final class FrostfallAbilityManagerTest {
 
     @Test
     void historicalThrowGenericValuesRemainSingleFallbacksForTheField() {
-        Phase6AbilityTuning throwTuning = Phase6AbilityTuning.EMPTY
+        StormFrostWaterMasteryTuning throwTuning = StormFrostWaterMasteryTuning.EMPTY
                 .with(s("DAMAGE_MULTIPLIER"), 1.4)
                 .with(s("DURATION_TICKS"), 140)
                 .with(s("PULSE_COUNT"), 7)
                 .with(s("RADIUS"), 10);
-        Phase6AbilityTuning fieldTuning = Phase6AbilityTuning.EMPTY;
+        StormFrostWaterMasteryTuning fieldTuning = StormFrostWaterMasteryTuning.EMPTY;
 
         assertEquals(7, FrostfallAbilityManager.resolvePulseCount(throwTuning, fieldTuning));
         assertEquals(140, FrostfallAbilityManager.resolveFieldDuration(throwTuning, fieldTuning, 7));
@@ -96,12 +96,12 @@ final class FrostfallAbilityManagerTest {
         assertEquals(1.4, FrostfallAbilityManager.resolvePulseMultiplier(
                 throwTuning, fieldTuning, 7, 7, false, false), 1.0E-6);
 
-        Phase6AbilityTuning duplicateField = fieldTuning.with(s("DAMAGE_MULTIPLIER"), 1.4);
+        StormFrostWaterMasteryTuning duplicateField = fieldTuning.with(s("DAMAGE_MULTIPLIER"), 1.4);
         assertEquals(1.4, FrostfallAbilityManager.resolvePulseMultiplier(
                 throwTuning, duplicateField, 7, 7, false, false), 1.0E-6);
     }
 
-    private static Phase6AbilityTuning.Setting s(String name) {
-        return Phase6AbilityTuning.Setting.valueOf(name);
+    private static StormFrostWaterMasteryTuning.Setting s(String name) {
+        return StormFrostWaterMasteryTuning.Setting.valueOf(name);
     }
 }

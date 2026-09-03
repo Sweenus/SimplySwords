@@ -1,6 +1,6 @@
 package net.sweenus.simplyswords.world;
 
-import net.sweenus.simplyswords.api.ability.Phase5AbilityTuning;
+import net.sweenus.simplyswords.api.ability.FireForgeMasteryTuning;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -11,12 +11,12 @@ final class EmberbladeAbilityManagerTest {
 
     @Test
     void channelDurationUsesOnlyTheEmberbladeSetting() {
-        Phase5AbilityTuning unrelated = Phase5AbilityTuning.EMPTY
-                .with(Phase5AbilityTuning.Setting.DURATION_TICKS, 999);
-        Phase5AbilityTuning siege = unrelated
-                .with(Phase5AbilityTuning.Setting.EMBERBLADE_CHANNEL_TICKS, 100);
-        Phase5AbilityTuning hairTrigger = unrelated
-                .with(Phase5AbilityTuning.Setting.EMBERBLADE_CHANNEL_TICKS, 40);
+        FireForgeMasteryTuning unrelated = FireForgeMasteryTuning.EMPTY
+                .with(FireForgeMasteryTuning.Setting.DURATION_TICKS, 999);
+        FireForgeMasteryTuning siege = unrelated
+                .with(FireForgeMasteryTuning.Setting.EMBERBLADE_CHANNEL_TICKS, 100);
+        FireForgeMasteryTuning hairTrigger = unrelated
+                .with(FireForgeMasteryTuning.Setting.EMBERBLADE_CHANNEL_TICKS, 40);
 
         assertEquals(80, EmberbladeAbilityManager.channelTicks(unrelated));
         assertEquals(100, EmberbladeAbilityManager.channelTicks(siege));
@@ -63,12 +63,12 @@ final class EmberbladeAbilityManagerTest {
 
     @Test
     void bankDurationsAreIndependentPerSource() {
-        Phase5AbilityTuning both = Phase5AbilityTuning.EMPTY
-                .with(Phase5AbilityTuning.Setting.EMBERBLADE_BANK_DURATION_TICKS, 60)
-                .with(Phase5AbilityTuning.Setting.EMBERBLADE_FLAME_BANK_DURATION_TICKS, 100);
+        FireForgeMasteryTuning both = FireForgeMasteryTuning.EMPTY
+                .with(FireForgeMasteryTuning.Setting.EMBERBLADE_BANK_DURATION_TICKS, 60)
+                .with(FireForgeMasteryTuning.Setting.EMBERBLADE_FLAME_BANK_DURATION_TICKS, 100);
 
-        assertEquals(60, both.integer(Phase5AbilityTuning.Setting.EMBERBLADE_BANK_DURATION_TICKS, 0));
-        assertEquals(100, both.integer(Phase5AbilityTuning.Setting.EMBERBLADE_FLAME_BANK_DURATION_TICKS, 0));
+        assertEquals(60, both.integer(FireForgeMasteryTuning.Setting.EMBERBLADE_BANK_DURATION_TICKS, 0));
+        assertEquals(100, both.integer(FireForgeMasteryTuning.Setting.EMBERBLADE_FLAME_BANK_DURATION_TICKS, 0));
     }
 
     @Test

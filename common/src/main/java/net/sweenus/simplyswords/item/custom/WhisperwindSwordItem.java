@@ -19,8 +19,8 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
-import net.sweenus.simplyswords.api.ability.Phase3AbilityTuning;
-import net.sweenus.simplyswords.api.ability.Phase3UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.StormSoulMasteryTuning;
+import net.sweenus.simplyswords.api.ability.StormSoulMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityContext;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
@@ -55,19 +55,19 @@ public class WhisperwindSwordItem extends UniqueSwordItem implements TwoHandedWe
         }
         HelperMethods.playHitSounds(attacker, target);
         if (attacker.getWorld() instanceof ServerWorld world) {
-            UniqueAbilityExecution execution = UniqueAbilityApi.begin(Phase3UniqueAbilities.WHISPERWIND_RESET,
+            UniqueAbilityExecution execution = UniqueAbilityApi.begin(StormSoulMasteryAbilities.WHISPERWIND_RESET,
                     UniqueAbilityContext.passive(world, stack, attacker, target, null), builder -> builder
-                            .set(Phase3UniqueAbilities.TUNING, Phase3AbilityTuning.EMPTY));
+                            .set(StormSoulMasteryAbilities.TUNING, StormSoulMasteryTuning.EMPTY));
             UniqueAbilityApi.takeStartedExecution();
             UniqueAbilityApi.start(execution);
-            Phase3AbilityTuning tuning = Phase3UniqueAbilities.tuning(execution);
-            boolean stillWind = tuning.integer(Phase3AbilityTuning.Setting.STILL_WIND_THRESHOLD, 0) > 0;
+            StormSoulMasteryTuning tuning = StormSoulMasteryAbilities.tuning(execution);
+            boolean stillWind = tuning.integer(StormSoulMasteryTuning.Setting.STILL_WIND_THRESHOLD, 0) > 0;
             if (stillWind) {
                 WhisperwindRhythmManager.primeStillWind(world, attacker, tuning);
             }
             int chance = WhisperwindRhythmManager.resolveChance(world, attacker, tuning,
-                    tuning.integer(Phase3AbilityTuning.Setting.CHANCE, Config.uniqueEffects.whisperwind.chance));
-            boolean reset = !stillWind && (tuning.has(Phase3AbilityTuning.Setting.CHANCE)
+                    tuning.integer(StormSoulMasteryTuning.Setting.CHANCE, Config.uniqueEffects.whisperwind.chance));
+            boolean reset = !stillWind && (tuning.has(StormSoulMasteryTuning.Setting.CHANCE)
                     ? chance >= 100 || chance > 0 && attacker.getRandom().nextInt(100) < chance
                     : attacker.getRandom().nextInt(100) <= chance);
             WhisperwindRhythmManager.recordRefreshResult(world, attacker, reset);
@@ -79,9 +79,9 @@ public class WhisperwindSwordItem extends UniqueSwordItem implements TwoHandedWe
                     SimplySwordsAPI.setWeaponCooldown(player, stack, 0);
                 }
                 WhisperwindRhythmManager.recordRefresh(world, player);
-                UniqueAbilityApi.emit(execution, UniqueAbilityPhase.HIT, Phase3UniqueAbilities.HIT, target, 1, chance);
+                UniqueAbilityApi.emit(execution, UniqueAbilityPhase.HIT, StormSoulMasteryAbilities.HIT, target, 1, chance);
             }
-            UniqueAbilityApi.finish(execution, Phase3UniqueAbilities.FINISH, 1);
+            UniqueAbilityApi.finish(execution, StormSoulMasteryAbilities.FINISH, 1);
         }
         return super.postHit(stack, target, attacker);
     }
@@ -96,25 +96,25 @@ public class WhisperwindSwordItem extends UniqueSwordItem implements TwoHandedWe
         ItemStack stack = user.getStackInHand(hand);
         world.playSoundFromEntity(null, user, SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_IMPACT_01.get(),
                 user.getSoundCategory(), 0.6f, 1.0f);
-        Phase3AbilityTuning playerTuning = Phase3AbilityTuning.EMPTY;
+        StormSoulMasteryTuning playerTuning = StormSoulMasteryTuning.EMPTY;
         if (!world.isClient() && world instanceof ServerWorld serverWorld) {
-            UniqueAbilityExecution execution = UniqueAbilityApi.begin(Phase3UniqueAbilities.WHISPERWIND_DASH,
+            UniqueAbilityExecution execution = UniqueAbilityApi.begin(StormSoulMasteryAbilities.WHISPERWIND_DASH,
                     UniqueAbilityContext.passive(serverWorld, stack, user, null, hand), builder -> builder
-                            .set(Phase3UniqueAbilities.TUNING, Phase3AbilityTuning.EMPTY)
-                            .set(Phase3UniqueAbilities.COOLDOWN_TICKS, Config.uniqueEffects.whisperwind.cooldown));
+                            .set(StormSoulMasteryAbilities.TUNING, StormSoulMasteryTuning.EMPTY)
+                            .set(StormSoulMasteryAbilities.COOLDOWN_TICKS, Config.uniqueEffects.whisperwind.cooldown));
             UniqueAbilityApi.takeStartedExecution();
             UniqueAbilityApi.start(execution);
-            Phase3AbilityTuning tuning = Phase3UniqueAbilities.tuning(execution);
+            StormSoulMasteryTuning tuning = StormSoulMasteryAbilities.tuning(execution);
             playerTuning = tuning;
             WhisperwindVisualManager.startDash(serverWorld, user, stack, execution, tuning);
             WhisperwindRhythmManager.startWindbreak(serverWorld, user, tuning);
             SimplySwordsAPI.setWeaponCooldown(user, stack, execution.cooldownTicks(Config.uniqueEffects.whisperwind.cooldown));
         }
         user.addStatusEffect(new StatusEffectInstance(EffectRegistry.getReference(EffectRegistry.FATAL_FLICKER),
-                playerTuning.integer(Phase3AbilityTuning.Setting.DASH_TICKS, 12)));
+                playerTuning.integer(StormSoulMasteryTuning.Setting.DASH_TICKS, 12)));
         user.addStatusEffect(new StatusEffectInstance(StatusEffects.ABSORPTION,
-                playerTuning.integer(Phase3AbilityTuning.Setting.DASH_ABSORPTION_TICKS, 100),
-                playerTuning.integer(Phase3AbilityTuning.Setting.DASH_ABSORPTION, 2) >= 4 ? 1 : 0));
+                playerTuning.integer(StormSoulMasteryTuning.Setting.DASH_ABSORPTION_TICKS, 100),
+                playerTuning.integer(StormSoulMasteryTuning.Setting.DASH_ABSORPTION, 2) >= 4 ? 1 : 0));
 
         return super.use(world, user, hand);
     }
@@ -124,20 +124,20 @@ public class WhisperwindSwordItem extends UniqueSwordItem implements TwoHandedWe
         if (context.target() == null || !HelperMethods.checkAbilityTarget(context.target(), context.actor())) {
             return false;
         }
-        UniqueAbilityExecution execution = UniqueAbilityApi.begin(Phase3UniqueAbilities.WHISPERWIND_DASH,
+        UniqueAbilityExecution execution = UniqueAbilityApi.begin(StormSoulMasteryAbilities.WHISPERWIND_DASH,
                 UniqueAbilityContext.active(context), builder -> builder
-                        .set(Phase3UniqueAbilities.TUNING, Phase3AbilityTuning.EMPTY)
-                        .set(Phase3UniqueAbilities.COOLDOWN_TICKS, Config.uniqueEffects.whisperwind.cooldown));
-        Phase3AbilityTuning tuning = Phase3UniqueAbilities.tuning(execution);
+                        .set(StormSoulMasteryAbilities.TUNING, StormSoulMasteryTuning.EMPTY)
+                        .set(StormSoulMasteryAbilities.COOLDOWN_TICKS, Config.uniqueEffects.whisperwind.cooldown));
+        StormSoulMasteryTuning tuning = StormSoulMasteryAbilities.tuning(execution);
         LivingEntityAbilityMovementManager.dashTowardTarget(context.world(), context.actor(), context.target(),
-                tuning.get(Phase3AbilityTuning.Setting.DASH_SPEED, Config.uniqueEffects.whisperwind.dashVelocity), 8);
+                tuning.get(StormSoulMasteryTuning.Setting.DASH_SPEED, Config.uniqueEffects.whisperwind.dashVelocity), 8);
         WhisperwindVisualManager.scheduleTargetStrike(context.world(), context.actor(), context.target(), context.stack(),
                 execution, tuning);
         context.actor().addStatusEffect(new StatusEffectInstance(EffectRegistry.getReference(EffectRegistry.FATAL_FLICKER),
-                tuning.integer(Phase3AbilityTuning.Setting.DASH_TICKS, 12)));
+                tuning.integer(StormSoulMasteryTuning.Setting.DASH_TICKS, 12)));
         context.actor().addStatusEffect(new StatusEffectInstance(StatusEffects.ABSORPTION,
-                tuning.integer(Phase3AbilityTuning.Setting.DASH_ABSORPTION_TICKS, 100),
-                tuning.integer(Phase3AbilityTuning.Setting.DASH_ABSORPTION, 2) >= 4 ? 1 : 0));
+                tuning.integer(StormSoulMasteryTuning.Setting.DASH_ABSORPTION_TICKS, 100),
+                tuning.integer(StormSoulMasteryTuning.Setting.DASH_ABSORPTION, 2) >= 4 ? 1 : 0));
         return true;
     }
 
@@ -152,14 +152,14 @@ public class WhisperwindSwordItem extends UniqueSwordItem implements TwoHandedWe
                 ParticleTypes.MYCELIUM, true);
         if (world instanceof ServerWorld serverWorld && entity instanceof LivingEntity holder && selected
                 && world.getTime() % 20L == 0L && net.sweenus.simplyswords.api.AwakeningApi.isAbilityUnlocked(stack)) {
-            UniqueAbilityExecution held = UniqueAbilityApi.begin(Phase3UniqueAbilities.WHISPERWIND_RESET,
+            UniqueAbilityExecution held = UniqueAbilityApi.begin(StormSoulMasteryAbilities.WHISPERWIND_RESET,
                     UniqueAbilityContext.passive(serverWorld, stack, holder, null, null), builder -> builder
-                            .set(Phase3UniqueAbilities.TUNING, Phase3AbilityTuning.EMPTY));
+                            .set(StormSoulMasteryAbilities.TUNING, StormSoulMasteryTuning.EMPTY));
             UniqueAbilityApi.takeStartedExecution();
             UniqueAbilityApi.start(held);
             WhisperwindRhythmManager.tickHolder(serverWorld, holder, stack,
-                    Phase3UniqueAbilities.tuning(held));
-            UniqueAbilityApi.finish(held, Phase3UniqueAbilities.FINISH, 0);
+                    StormSoulMasteryAbilities.tuning(held));
+            UniqueAbilityApi.finish(held, StormSoulMasteryAbilities.FINISH, 0);
         }
         super.inventoryTick(stack, world, entity, slot, selected);
     }

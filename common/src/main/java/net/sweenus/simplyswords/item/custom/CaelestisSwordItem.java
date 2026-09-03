@@ -14,8 +14,8 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
-import net.sweenus.simplyswords.api.ability.Phase9AbilityTuning;
-import net.sweenus.simplyswords.api.ability.Phase9UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.ArcaneCosmicMasteryTuning;
+import net.sweenus.simplyswords.api.ability.ArcaneCosmicMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
@@ -26,7 +26,7 @@ import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
 import net.sweenus.simplyswords.world.CaelestisBreachManager;
-import net.sweenus.simplyswords.world.Phase9CombatManager;
+import net.sweenus.simplyswords.world.ArcaneCosmicMasteryCombatManager;
 
 import java.util.List;
 
@@ -75,10 +75,10 @@ public class CaelestisSwordItem extends UniqueSwordItem implements UniqueWeaponA
             return false;
         }
         if (!canActivate(context)) return false;
-        UniqueAbilityExecution execution = Phase9CombatManager.beginActive(
-                Phase9UniqueAbilities.CAELESTIS_HOST, context,
+        UniqueAbilityExecution execution = ArcaneCosmicMasteryCombatManager.beginActive(
+                ArcaneCosmicMasteryAbilities.CAELESTIS_HOST, context,
                 Math.max(1, Config.uniqueEffects.caelestis.cooldown));
-        return CaelestisBreachManager.start(context, Phase9UniqueAbilities.tuning(execution), execution);
+        return CaelestisBreachManager.start(context, ArcaneCosmicMasteryAbilities.tuning(execution), execution);
     }
 
     @Override

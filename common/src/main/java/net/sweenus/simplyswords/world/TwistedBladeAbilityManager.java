@@ -21,8 +21,8 @@ import net.sweenus.simplyswords.api.DelegatedWeaponHitContext;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
-import net.sweenus.simplyswords.api.ability.Phase8AbilityTuning;
-import net.sweenus.simplyswords.api.ability.Phase8UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.DeathShadowBloodMasteryTuning;
+import net.sweenus.simplyswords.api.ability.DeathShadowBloodMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.config.Config;
@@ -70,7 +70,7 @@ public final class TwistedBladeAbilityManager {
 
             WielderState state = entry.getValue();
             if (state.armed != null && now >= state.armed.expiresAt) {
-                UniqueAbilityApi.finish(state.armed.execution, Phase8UniqueAbilities.FINISH,
+                UniqueAbilityApi.finish(state.armed.execution, DeathShadowBloodMasteryAbilities.FINISH,
                         state.armed.affectedTargets);
                 state.armed = null;
                 state.hitCounter = 0;
@@ -103,7 +103,7 @@ public final class TwistedBladeAbilityManager {
                 EntityAttributeInstance attackSpeed = actor.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_SPEED);
                 if (attackSpeed != null) attackSpeed.removeModifier(MASTERY_ATTACK_SPEED);
             } else if (state.ferocityTuning.flag(1 << 7) && now - state.lastHitTick <= state.ferocityTuning.integer(
-                    Phase8AbilityTuning.Setting.TWISTED_ENDLESS_HIT_WINDOW_TICKS, 40)) {
+                    DeathShadowBloodMasteryTuning.Setting.TWISTED_ENDLESS_HIT_WINDOW_TICKS, 40)) {
                 StatusEffectInstance current = actor.getStatusEffect(EffectRegistry.getReference(EffectRegistry.FEROCITY));
                 if (current != null && current.getDuration() < 3) {
                     actor.addStatusEffect(new StatusEffectInstance(
@@ -115,7 +115,7 @@ public final class TwistedBladeAbilityManager {
             maintainFootwork(actor, state.ferocityTuning);
             updateMasteryAttackSpeed(actor, getFerocityStacks(actor), state.ferocityTuning);
             int woundWindow = state.crescendoTuning.integer(
-                    Phase8AbilityTuning.Setting.TWISTED_WOUND_WINDOW_TICKS, 60);
+                    DeathShadowBloodMasteryTuning.Setting.TWISTED_WOUND_WINDOW_TICKS, 60);
             state.wounds.entrySet().removeIf(wound -> now - wound.getValue().lastHit > woundWindow);
             if (state.armed == null && state.hitCounter <= 0 && getFerocityStacks(actor) <= 0
                     && state.pendingCrescendos.isEmpty() && state.ferocityRefundAt <= 0) {
@@ -169,15 +169,15 @@ public final class TwistedBladeAbilityManager {
             return false;
         }
 
-        UniqueAbilityExecution execution = Phase8CombatManager.beginActive(
-                Phase8UniqueAbilities.TWISTED_FINALE, context, 0);
-        Phase8AbilityTuning finaleTuning = Phase8UniqueAbilities.tuning(execution);
+        UniqueAbilityExecution execution = DeathShadowBloodMasteryCombatManager.beginActive(
+                DeathShadowBloodMasteryAbilities.TWISTED_FINALE, context, 0);
+        DeathShadowBloodMasteryTuning finaleTuning = DeathShadowBloodMasteryAbilities.tuning(execution);
         LivingEntity actor = context.actor();
         int originalStacks = getFerocityStacks(actor);
         boolean sustained = finaleTuning.flag(1 << 26);
         int consumedStacks = sustained
                 ? sustainedConsumption(originalStacks, finaleTuning.get(
-                Phase8AbilityTuning.Setting.TWISTED_SUSTAINED_CONSUME_RATIO, .5))
+                DeathShadowBloodMasteryTuning.Setting.TWISTED_SUSTAINED_CONSUME_RATIO, .5))
                 : originalStacks;
         if (consumedStacks <= 0) {
             return false;
@@ -201,7 +201,7 @@ public final class TwistedBladeAbilityManager {
                 finaleTuning,
                 context.world().getTime(),
                 sustained ? finaleTuning.integer(
-                        Phase8AbilityTuning.Setting.TWISTED_SUSTAINED_HIT_COUNT, 3) : 1,
+                        DeathShadowBloodMasteryTuning.Setting.TWISTED_SUSTAINED_HIT_COUNT, 3) : 1,
                 execution
         );
         spawnActivationCue(context.world(), actor, consumedStacks,
@@ -229,12 +229,12 @@ public final class TwistedBladeAbilityManager {
 
         WielderState existingState = getState(world, actor);
         if (existingState == null) existingState = state(world, actor);
-        UniqueAbilityExecution ferocityExecution = Phase8CombatManager.beginPassive(
-                Phase8UniqueAbilities.TWISTED_FEROCITY, world, stack, actor, target);
-        existingState.ferocityTuning = Phase8UniqueAbilities.tuning(ferocityExecution);
-        UniqueAbilityExecution crescendoExecution = Phase8CombatManager.beginPassive(
-                Phase8UniqueAbilities.TWISTED_CRESCENDO, world, stack, actor, target);
-        existingState.crescendoTuning = Phase8UniqueAbilities.tuning(crescendoExecution);
+        UniqueAbilityExecution ferocityExecution = DeathShadowBloodMasteryCombatManager.beginPassive(
+                DeathShadowBloodMasteryAbilities.TWISTED_FEROCITY, world, stack, actor, target);
+        existingState.ferocityTuning = DeathShadowBloodMasteryAbilities.tuning(ferocityExecution);
+        UniqueAbilityExecution crescendoExecution = DeathShadowBloodMasteryCombatManager.beginPassive(
+                DeathShadowBloodMasteryAbilities.TWISTED_CRESCENDO, world, stack, actor, target);
+        existingState.crescendoTuning = DeathShadowBloodMasteryAbilities.tuning(crescendoExecution);
         ArmedCrescendo armed = existingState.armed;
         boolean empowered = armed != null && world.getTime() < armed.expiresAt;
         if (empowered) {
@@ -254,19 +254,19 @@ public final class TwistedBladeAbilityManager {
             armed.affectedTargets += result.affectedTargets;
             if (result.affectedTargets > 0) UniqueAbilityApi.emit(armed.execution,
                     net.sweenus.simplyswords.api.ability.UniqueAbilityPhase.HIT,
-                    Phase8UniqueAbilities.HIT, target, result.affectedTargets, result.damage);
+                    DeathShadowBloodMasteryAbilities.HIT, target, result.affectedTargets, result.damage);
             if (result.kills > 0) UniqueAbilityApi.emit(armed.execution,
                     net.sweenus.simplyswords.api.ability.UniqueAbilityPhase.HIT,
-                    Phase8UniqueAbilities.KILL, target, result.kills, result.damage);
+                    DeathShadowBloodMasteryAbilities.KILL, target, result.kills, result.damage);
             if (result.kills > 0 && armed.tuning.flag(1 << 23)) {
                 existingState.ferocityRefundAt = world.getTime()
-                        + armed.tuning.integer(Phase8AbilityTuning.Setting.TWISTED_ENCORE_DELAY_TICKS, 20);
+                        + armed.tuning.integer(DeathShadowBloodMasteryTuning.Setting.TWISTED_ENCORE_DELAY_TICKS, 20);
                 existingState.ferocityRefundStacks = armed.tuning.integer(
-                        Phase8AbilityTuning.Setting.TWISTED_ENCORE_REFUND_STACKS, 4);
+                        DeathShadowBloodMasteryTuning.Setting.TWISTED_ENCORE_REFUND_STACKS, 4);
             }
             if (armed.remainingHits <= 0) {
                 existingState.armed = null;
-                UniqueAbilityApi.finish(armed.execution, Phase8UniqueAbilities.FINISH, armed.affectedTargets);
+                UniqueAbilityApi.finish(armed.execution, DeathShadowBloodMasteryAbilities.FINISH, armed.affectedTargets);
             }
             existingState.hitCounter = 0;
         }
@@ -274,10 +274,10 @@ public final class TwistedBladeAbilityManager {
         existingState.lastHitTick = world.getTime();
         int previousStacks = getFerocityStacks(actor);
         int stacks = tryGainFerocity(world, actor, existingState);
-        UniqueAbilityApi.finish(ferocityExecution, Phase8UniqueAbilities.FINISH,
+        UniqueAbilityApi.finish(ferocityExecution, DeathShadowBloodMasteryAbilities.FINISH,
                 stacks > previousStacks ? 1 : 0);
         if (empowered || stacks <= 0) {
-            UniqueAbilityApi.finish(crescendoExecution, Phase8UniqueAbilities.FINISH, 0);
+            UniqueAbilityApi.finish(crescendoExecution, DeathShadowBloodMasteryAbilities.FINISH, 0);
             return;
         }
 
@@ -286,7 +286,7 @@ public final class TwistedBladeAbilityManager {
         int interval = getCrescendoInterval(stacks, state.crescendoTuning,
                 maximumStacks(Config.uniqueEffects.twisted_blade.maxStacks, state.ferocityTuning));
         if (state.hitCounter < interval) {
-            UniqueAbilityApi.finish(crescendoExecution, Phase8UniqueAbilities.FINISH, 0);
+            UniqueAbilityApi.finish(crescendoExecution, DeathShadowBloodMasteryAbilities.FINISH, 0);
             return;
         }
 
@@ -296,48 +296,48 @@ public final class TwistedBladeAbilityManager {
                 state.crescendoTuning);
         if (result.affectedTargets > 0) UniqueAbilityApi.emit(crescendoExecution,
                 net.sweenus.simplyswords.api.ability.UniqueAbilityPhase.HIT,
-                Phase8UniqueAbilities.HIT, target, result.affectedTargets, result.damage);
+                DeathShadowBloodMasteryAbilities.HIT, target, result.affectedTargets, result.damage);
         if (result.kills > 0) UniqueAbilityApi.emit(crescendoExecution,
                 net.sweenus.simplyswords.api.ability.UniqueAbilityPhase.HIT,
-                Phase8UniqueAbilities.KILL, target, result.kills, result.damage);
-        UniqueAbilityApi.finish(crescendoExecution, Phase8UniqueAbilities.FINISH, result.affectedTargets);
+                DeathShadowBloodMasteryAbilities.KILL, target, result.kills, result.damage);
+        UniqueAbilityApi.finish(crescendoExecution, DeathShadowBloodMasteryAbilities.FINISH, result.affectedTargets);
         state.crescendoCounter++;
         int maximumStacks = maximumStacks(Config.uniqueEffects.twisted_blade.maxStacks,
                 state.ferocityTuning);
         if (state.crescendoTuning.flag(1 << 15) && stacks >= maximumStacks
                 && state.crescendoCounter % state.crescendoTuning.integer(
-                Phase8AbilityTuning.Setting.TWISTED_DOUBLE_INTERVAL, 3) == 0) {
+                DeathShadowBloodMasteryTuning.Setting.TWISTED_DOUBLE_INTERVAL, 3) == 0) {
             state.pendingCrescendos.add(new PendingCrescendo(target.getUuid(),
                     sourceOwner == null ? null : sourceOwner.getUuid(), stack.copy(), stacks,
                     world.getTime() + state.crescendoTuning.integer(
-                    Phase8AbilityTuning.Setting.TWISTED_DOUBLE_DELAY_TICKS, 4), state.crescendoTuning));
+                    DeathShadowBloodMasteryTuning.Setting.TWISTED_DOUBLE_DELAY_TICKS, 4), state.crescendoTuning));
         }
     }
 
     private static int tryGainFerocity(ServerWorld world, LivingEntity actor, WielderState state) {
-        Phase8AbilityTuning tuning = state.ferocityTuning;
+        DeathShadowBloodMasteryTuning tuning = state.ferocityTuning;
         int chance = ferocityChance(Config.uniqueEffects.twisted_blade.chance, tuning);
         int currentStacks = getFerocityStacks(actor);
         state.meleeCounter++;
         boolean guaranteed = tuning.flag(1 << 3) && state.meleeCounter % tuning.integer(
-                Phase8AbilityTuning.Setting.TWISTED_GUARANTEED_HIT_INTERVAL, 5) == 0;
+                DeathShadowBloodMasteryTuning.Setting.TWISTED_GUARANTEED_HIT_INTERVAL, 5) == 0;
         if (!guaranteed && (chance <= 0 || actor.getRandom().nextInt(100) >= chance)) {
             return currentStacks;
         }
 
         int maximumStacks = maximumStacks(Config.uniqueEffects.twisted_blade.maxStacks, tuning);
         int gain = tuning.flag(1 << 8) && actor.getHealth() / actor.getMaxHealth()
-                < tuning.get(Phase8AbilityTuning.Setting.TWISTED_FEVER_HEALTH_THRESHOLD, .5)
-                ? tuning.integer(Phase8AbilityTuning.Setting.TWISTED_FEVER_GAIN, 2) : 1;
+                < tuning.get(DeathShadowBloodMasteryTuning.Setting.TWISTED_FEVER_HEALTH_THRESHOLD, .5)
+                ? tuning.integer(DeathShadowBloodMasteryTuning.Setting.TWISTED_FEVER_GAIN, 2) : 1;
         int newStacks = Math.min(maximumStacks, currentStacks + gain);
         int duration = ferocityDuration(Config.uniqueEffects.twisted_blade.duration, tuning);
         if (tuning.flag(1 << 4) && currentStacks >= tuning.integer(
-                Phase8AbilityTuning.Setting.TWISTED_CADENCE_THRESHOLD, 8)) {
+                DeathShadowBloodMasteryTuning.Setting.TWISTED_CADENCE_THRESHOLD, 8)) {
             int durationCap = tuning.integer(
-                    Phase8AbilityTuning.Setting.TWISTED_CADENCE_BONUS_CAP_TICKS, 120);
+                    DeathShadowBloodMasteryTuning.Setting.TWISTED_CADENCE_BONUS_CAP_TICKS, 120);
             state.bonusDuration = Math.min(durationCap,
                     state.bonusDuration + tuning.integer(
-                            Phase8AbilityTuning.Setting.TWISTED_CADENCE_BONUS_TICKS, 40));
+                            DeathShadowBloodMasteryTuning.Setting.TWISTED_CADENCE_BONUS_TICKS, 40));
             duration += state.bonusDuration;
         }
         setFerocityStacks(actor, newStacks, duration, tuning);
@@ -346,7 +346,7 @@ public final class TwistedBladeAbilityManager {
         return newStacks;
     }
 
-    private static void updateMasteryAttackSpeed(LivingEntity actor, int stacks, Phase8AbilityTuning tuning) {
+    private static void updateMasteryAttackSpeed(LivingEntity actor, int stacks, DeathShadowBloodMasteryTuning tuning) {
         EntityAttributeInstance attackSpeed = actor.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_SPEED);
         if (attackSpeed == null) return;
         attackSpeed.removeModifier(MASTERY_ATTACK_SPEED);
@@ -357,7 +357,7 @@ public final class TwistedBladeAbilityManager {
                 MASTERY_ATTACK_SPEED, correction, EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
     }
 
-    private static int getCrescendoInterval(int stacks, Phase8AbilityTuning tuning, int maximumStacks) {
+    private static int getCrescendoInterval(int stacks, DeathShadowBloodMasteryTuning tuning, int maximumStacks) {
         int tier = stacks >= maximumStacks
                 ? 3
                 : Math.min(3, Math.max(0, (Math.max(1, stacks) - 1) * 4 / maximumStacks));
@@ -370,77 +370,77 @@ public final class TwistedBladeAbilityManager {
         return Math.max(minimumInterval, Math.round(MathHelper.lerp(tier / 3.0F, baseInterval, minimumInterval)));
     }
 
-    static int ferocityChance(int configuredChance, Phase8AbilityTuning tuning) {
+    static int ferocityChance(int configuredChance, DeathShadowBloodMasteryTuning tuning) {
         return Math.clamp(configuredChance + tuning.integer(
-                Phase8AbilityTuning.Setting.TWISTED_CHANCE_BONUS, 0), 0, 100);
+                DeathShadowBloodMasteryTuning.Setting.TWISTED_CHANCE_BONUS, 0), 0, 100);
     }
 
-    static int maximumStacks(int configuredMaximum, Phase8AbilityTuning tuning) {
+    static int maximumStacks(int configuredMaximum, DeathShadowBloodMasteryTuning tuning) {
         if (tuning.flag(1 << 7)) return tuning.integer(
-                Phase8AbilityTuning.Setting.TWISTED_ENDLESS_MAX_STACKS, 10);
+                DeathShadowBloodMasteryTuning.Setting.TWISTED_ENDLESS_MAX_STACKS, 10);
         if (tuning.flag(1 << 8)) return tuning.integer(
-                Phase8AbilityTuning.Setting.TWISTED_FEVER_MAX_STACKS, 20);
+                DeathShadowBloodMasteryTuning.Setting.TWISTED_FEVER_MAX_STACKS, 20);
         return Math.max(1, configuredMaximum + tuning.integer(
-                Phase8AbilityTuning.Setting.TWISTED_MAX_STACK_BONUS, 0));
+                DeathShadowBloodMasteryTuning.Setting.TWISTED_MAX_STACK_BONUS, 0));
     }
 
-    static int ferocityDuration(int configuredDuration, Phase8AbilityTuning tuning) {
+    static int ferocityDuration(int configuredDuration, DeathShadowBloodMasteryTuning tuning) {
         if (tuning.flag(1 << 8)) return tuning.integer(
-                Phase8AbilityTuning.Setting.TWISTED_FEVER_DURATION_TICKS, 80);
+                DeathShadowBloodMasteryTuning.Setting.TWISTED_FEVER_DURATION_TICKS, 80);
         return Math.max(1, configuredDuration + tuning.integer(
-                Phase8AbilityTuning.Setting.TWISTED_DURATION_BONUS_TICKS, 0));
+                DeathShadowBloodMasteryTuning.Setting.TWISTED_DURATION_BONUS_TICKS, 0));
     }
 
-    static double attackSpeedBonus(int stacks, double configuredPerStack, Phase8AbilityTuning tuning) {
+    static double attackSpeedBonus(int stacks, double configuredPerStack, DeathShadowBloodMasteryTuning tuning) {
         double ordinary = configuredPerStack + tuning.get(
-                Phase8AbilityTuning.Setting.TWISTED_ATTACK_SPEED_PER_STACK_BONUS, 0);
+                DeathShadowBloodMasteryTuning.Setting.TWISTED_ATTACK_SPEED_PER_STACK_BONUS, 0);
         if (!tuning.flag(1 << 6)) return Math.max(0, ordinary) * stacks;
-        int threshold = tuning.integer(Phase8AbilityTuning.Setting.TWISTED_OVERFLOW_THRESHOLD, 15);
+        int threshold = tuning.integer(DeathShadowBloodMasteryTuning.Setting.TWISTED_OVERFLOW_THRESHOLD, 15);
         double overflow = tuning.get(
-                Phase8AbilityTuning.Setting.TWISTED_OVERFLOW_ATTACK_SPEED_PER_STACK, .05);
+                DeathShadowBloodMasteryTuning.Setting.TWISTED_OVERFLOW_ATTACK_SPEED_PER_STACK, .05);
         return Math.max(0, ordinary) * Math.min(stacks, threshold)
                 + Math.max(0, overflow) * Math.max(0, stacks - threshold);
     }
 
-    static double crescendoRadius(double configuredRadius, Phase8AbilityTuning tuning) {
+    static double crescendoRadius(double configuredRadius, DeathShadowBloodMasteryTuning tuning) {
         double radius = Math.max(.1, configuredRadius) + tuning.get(
-                Phase8AbilityTuning.Setting.TWISTED_CRESCENDO_RADIUS_BONUS, 0);
+                DeathShadowBloodMasteryTuning.Setting.TWISTED_CRESCENDO_RADIUS_BONUS, 0);
         if (tuning.flag(1 << 17)) radius *= tuning.get(
-                Phase8AbilityTuning.Setting.TWISTED_ORCHESTRA_RADIUS_MULTIPLIER, 1.75);
+                DeathShadowBloodMasteryTuning.Setting.TWISTED_ORCHESTRA_RADIUS_MULTIPLIER, 1.75);
         return Math.max(.1, radius);
     }
 
-    static int crescendoBaseInterval(int configuredInterval, Phase8AbilityTuning tuning) {
+    static int crescendoBaseInterval(int configuredInterval, DeathShadowBloodMasteryTuning tuning) {
         return Math.max(1, configuredInterval + tuning.integer(
-                Phase8AbilityTuning.Setting.TWISTED_CRESCENDO_INTERVAL_BONUS, 0));
+                DeathShadowBloodMasteryTuning.Setting.TWISTED_CRESCENDO_INTERVAL_BONUS, 0));
     }
 
-    static float crescendoScaling(float configuredScaling, Phase8AbilityTuning tuning,
+    static float crescendoScaling(float configuredScaling, DeathShadowBloodMasteryTuning tuning,
                                    boolean secondary) {
         float scaling = Math.max(0, configuredScaling) * (float) tuning.get(
-                Phase8AbilityTuning.Setting.TWISTED_CRESCENDO_DAMAGE_MULTIPLIER, 1);
+                DeathShadowBloodMasteryTuning.Setting.TWISTED_CRESCENDO_DAMAGE_MULTIPLIER, 1);
         if (tuning.flag(1 << 16)) scaling *= (float) tuning.get(
-                Phase8AbilityTuning.Setting.TWISTED_SOLO_DAMAGE_MULTIPLIER, 1.9);
+                DeathShadowBloodMasteryTuning.Setting.TWISTED_SOLO_DAMAGE_MULTIPLIER, 1.9);
         if (tuning.flag(1 << 17)) scaling *= (float) tuning.get(
-                Phase8AbilityTuning.Setting.TWISTED_ORCHESTRA_DAMAGE_MULTIPLIER, .65);
+                DeathShadowBloodMasteryTuning.Setting.TWISTED_ORCHESTRA_DAMAGE_MULTIPLIER, .65);
         if (secondary) scaling *= (float) tuning.get(
-                Phase8AbilityTuning.Setting.TWISTED_DOUBLE_DAMAGE_MULTIPLIER, .6);
+                DeathShadowBloodMasteryTuning.Setting.TWISTED_DOUBLE_DAMAGE_MULTIPLIER, .6);
         return scaling;
     }
 
-    static double crescendoKnockback(double configuredKnockback, Phase8AbilityTuning tuning) {
+    static double crescendoKnockback(double configuredKnockback, DeathShadowBloodMasteryTuning tuning) {
         double knockback = Math.max(0, configuredKnockback) + tuning.get(
-                Phase8AbilityTuning.Setting.TWISTED_CRESCENDO_KNOCKBACK_BONUS, 0);
+                DeathShadowBloodMasteryTuning.Setting.TWISTED_CRESCENDO_KNOCKBACK_BONUS, 0);
         if (tuning.flag(1 << 17)) knockback *= tuning.get(
-                Phase8AbilityTuning.Setting.TWISTED_ORCHESTRA_KNOCKBACK_MULTIPLIER, 0);
+                DeathShadowBloodMasteryTuning.Setting.TWISTED_ORCHESTRA_KNOCKBACK_MULTIPLIER, 0);
         return Math.max(0, knockback);
     }
 
-    static int finaleWindow(int configuredWindow, Phase8AbilityTuning tuning) {
+    static int finaleWindow(int configuredWindow, DeathShadowBloodMasteryTuning tuning) {
         if (tuning.flag(1 << 25)) return tuning.integer(
-                Phase8AbilityTuning.Setting.TWISTED_SHATTER_WINDOW_TICKS, 40);
+                DeathShadowBloodMasteryTuning.Setting.TWISTED_SHATTER_WINDOW_TICKS, 40);
         return Math.max(1, configuredWindow + tuning.integer(
-                Phase8AbilityTuning.Setting.TWISTED_FINALE_WINDOW_BONUS_TICKS, 0));
+                DeathShadowBloodMasteryTuning.Setting.TWISTED_FINALE_WINDOW_BONUS_TICKS, 0));
     }
 
     static int sustainedConsumption(int stacks, double ratio) {
@@ -448,37 +448,37 @@ public final class TwistedBladeAbilityManager {
     }
 
     static float finaleDamageScaling(float fraction, float configuredMinimum, float configuredMaximum,
-                                     Phase8AbilityTuning tuning) {
+                                     DeathShadowBloodMasteryTuning tuning) {
         float minimum = Math.max(0, configuredMinimum) * (float) tuning.get(
-                Phase8AbilityTuning.Setting.TWISTED_FINALE_MIN_DAMAGE_MULTIPLIER, 1);
+                DeathShadowBloodMasteryTuning.Setting.TWISTED_FINALE_MIN_DAMAGE_MULTIPLIER, 1);
         float maximum = Math.max(0, configuredMaximum) * (float) tuning.get(
-                Phase8AbilityTuning.Setting.TWISTED_FINALE_MAX_DAMAGE_MULTIPLIER, 1);
+                DeathShadowBloodMasteryTuning.Setting.TWISTED_FINALE_MAX_DAMAGE_MULTIPLIER, 1);
         float damage = MathHelper.lerp(MathHelper.clamp(fraction, 0, 1), minimum, maximum);
         if (tuning.flag(1 << 26)) damage *= (float) tuning.get(
-                Phase8AbilityTuning.Setting.TWISTED_SUSTAINED_DAMAGE_MULTIPLIER, .55);
+                DeathShadowBloodMasteryTuning.Setting.TWISTED_SUSTAINED_DAMAGE_MULTIPLIER, .55);
         return damage;
     }
 
     static double finaleRadius(float fraction, double configuredMinimum, double configuredMaximum,
-                               Phase8AbilityTuning tuning) {
+                               DeathShadowBloodMasteryTuning tuning) {
         if (tuning.flag(1 << 25)) return tuning.get(
-                Phase8AbilityTuning.Setting.TWISTED_SHATTER_RADIUS, 5);
+                DeathShadowBloodMasteryTuning.Setting.TWISTED_SHATTER_RADIUS, 5);
         return Math.max(.1, MathHelper.lerp(MathHelper.clamp(fraction, 0, 1),
                 Math.max(.1, configuredMinimum), Math.max(.1, configuredMaximum))
-                + tuning.get(Phase8AbilityTuning.Setting.TWISTED_FINALE_RADIUS_BONUS, 0));
+                + tuning.get(DeathShadowBloodMasteryTuning.Setting.TWISTED_FINALE_RADIUS_BONUS, 0));
     }
 
     static double finaleKnockback(float fraction, double configuredMinimum, double configuredMaximum,
-                                  Phase8AbilityTuning tuning) {
+                                  DeathShadowBloodMasteryTuning tuning) {
         return Math.max(0, MathHelper.lerp(MathHelper.clamp(fraction, 0, 1),
                 Math.max(0, configuredMinimum), Math.max(0, configuredMaximum))
-                + tuning.get(Phase8AbilityTuning.Setting.TWISTED_FINALE_KNOCKBACK_BONUS, 0));
+                + tuning.get(DeathShadowBloodMasteryTuning.Setting.TWISTED_FINALE_KNOCKBACK_BONUS, 0));
     }
 
     private static CrescendoResult triggerCrescendo(ServerWorld world, ItemStack stack, LivingEntity actor,
                                                     LivingEntity sourceOwner, LivingEntity impactTarget,
                                                     boolean empowered, boolean secondary, int stacks,
-                                                    WielderState state, Phase8AbilityTuning tuning) {
+                                                    WielderState state, DeathShadowBloodMasteryTuning tuning) {
         int maximumStacks = maximumStacks(Config.uniqueEffects.twisted_blade.maxStacks,
                 state.ferocityTuning);
         float stackFraction = tuning.flag(1 << 25) ? 1 : MathHelper.clamp(
@@ -517,9 +517,9 @@ public final class TwistedBladeAbilityManager {
         float damage = HelperMethods.abilityScaledDamage("soul", actor, stack, damageScaling, spellScaling);
         if (empowered && tuning.flag(1 << 24) && state.armed != null
                 && world.getTime() - state.armed.armedAt <= tuning.integer(
-                Phase8AbilityTuning.Setting.TWISTED_PERFECT_WINDOW_TICKS, 20)) {
+                DeathShadowBloodMasteryTuning.Setting.TWISTED_PERFECT_WINDOW_TICKS, 20)) {
             damage *= (float) tuning.get(
-                    Phase8AbilityTuning.Setting.TWISTED_PERFECT_DAMAGE_MULTIPLIER, 1.2);
+                    DeathShadowBloodMasteryTuning.Setting.TWISTED_PERFECT_DAMAGE_MULTIPLIER, 1.2);
         }
         Box area = new Box(
                 center.x - radius,
@@ -532,13 +532,13 @@ public final class TwistedBladeAbilityManager {
         DamageSource source = SimplySwordsAPI.getWeaponDamageSource(actor);
 
         int targetCap = empowered && tuning.flag(1 << 25)
-                ? tuning.integer(Phase8AbilityTuning.Setting.TWISTED_SHATTER_TARGET_CAP, 16)
+                ? tuning.integer(DeathShadowBloodMasteryTuning.Setting.TWISTED_SHATTER_TARGET_CAP, 16)
                 : empowered && tuning.flag(1 << 26)
                 ? 1
                 : tuning.flag(1 << 16)
-                ? tuning.integer(Phase8AbilityTuning.Setting.TWISTED_SOLO_TARGET_CAP, 1)
+                ? tuning.integer(DeathShadowBloodMasteryTuning.Setting.TWISTED_SOLO_TARGET_CAP, 1)
                 : tuning.flag(1 << 17)
-                ? tuning.integer(Phase8AbilityTuning.Setting.TWISTED_ORCHESTRA_TARGET_CAP, 16)
+                ? tuning.integer(DeathShadowBloodMasteryTuning.Setting.TWISTED_ORCHESTRA_TARGET_CAP, 16)
                 : Integer.MAX_VALUE;
         int affected = 0;
         int kills = 0;
@@ -546,7 +546,7 @@ public final class TwistedBladeAbilityManager {
         if (empowered && tuning.flag(1 << 26)) {
             candidates = new java.util.ArrayList<>(java.util.List.of(impactTarget));
         } else if (!empowered && tuning.flag(1 << 16)) {
-            double range = tuning.get(Phase8AbilityTuning.Setting.TWISTED_SOLO_RANGE, 5);
+            double range = tuning.get(DeathShadowBloodMasteryTuning.Setting.TWISTED_SOLO_RANGE, 5);
             Vec3d actorCenter = actor.getPos().add(0, actor.getHeight() * .5, 0);
             Box soloArea = new Box(actorCenter.x - range, actorCenter.y - range, actorCenter.z - range,
                     actorCenter.x + range, actorCenter.y + range, actorCenter.z + range);
@@ -561,19 +561,19 @@ public final class TwistedBladeAbilityManager {
         }
         boolean syncopated = !empowered && !secondary && tuning.flag(1 << 13)
                 && (state.crescendoCounter + 1) % tuning.integer(
-                Phase8AbilityTuning.Setting.TWISTED_SYNC_INTERVAL, 2) == 0;
+                DeathShadowBloodMasteryTuning.Setting.TWISTED_SYNC_INTERVAL, 2) == 0;
         if (syncopated) damage *= (float) tuning.get(
-                Phase8AbilityTuning.Setting.TWISTED_SYNC_DAMAGE_MULTIPLIER, 1.15);
+                DeathShadowBloodMasteryTuning.Setting.TWISTED_SYNC_DAMAGE_MULTIPLIER, 1.15);
         for (LivingEntity candidate : candidates) {
             if (affected >= targetCap) break;
             double woundMultiplier = 1;
             WoundState wound = state.wounds.get(candidate.getUuid());
             if (!empowered && tuning.flag(1 << 14) && wound != null
                     && world.getTime() - wound.lastHit <= tuning.integer(
-                    Phase8AbilityTuning.Setting.TWISTED_WOUND_WINDOW_TICKS, 60)
-                    && wound.hits >= tuning.integer(Phase8AbilityTuning.Setting.TWISTED_WOUND_HITS, 2)) {
+                    DeathShadowBloodMasteryTuning.Setting.TWISTED_WOUND_WINDOW_TICKS, 60)
+                    && wound.hits >= tuning.integer(DeathShadowBloodMasteryTuning.Setting.TWISTED_WOUND_HITS, 2)) {
                 woundMultiplier = tuning.get(
-                        Phase8AbilityTuning.Setting.TWISTED_WOUND_DAMAGE_MULTIPLIER, 1.1);
+                        DeathShadowBloodMasteryTuning.Setting.TWISTED_WOUND_DAMAGE_MULTIPLIER, 1.1);
                 wound.hits = 0;
             }
             float enchantedDamage = HelperMethods.applyAbilityDamageEnchantments(
@@ -593,14 +593,14 @@ public final class TwistedBladeAbilityManager {
                 if (!empowered && tuning.flag(1 << 14)) {
                     WoundState updated = woundState(state, candidate.getUuid());
                     if (world.getTime() - updated.lastHit > tuning.integer(
-                            Phase8AbilityTuning.Setting.TWISTED_WOUND_WINDOW_TICKS, 60)) updated.hits = 0;
+                            DeathShadowBloodMasteryTuning.Setting.TWISTED_WOUND_WINDOW_TICKS, 60)) updated.hits = 0;
                     updated.hits++;
                     updated.lastHit = world.getTime();
                 }
                 if (syncopated) {
                     Vec3d pull = center.subtract(candidate.getPos()).multiply(1, 0, 1);
                     if (pull.lengthSquared() > 0) candidate.addVelocity(pull.normalize().multiply(tuning.get(
-                            Phase8AbilityTuning.Setting.TWISTED_SYNC_PULL_STRENGTH, .2)));
+                            DeathShadowBloodMasteryTuning.Setting.TWISTED_SYNC_PULL_STRENGTH, .2)));
                 } else knockAway(candidate, center, facing, knockback, empowered ? 0.16 : 0.08);
             }
         }
@@ -631,7 +631,7 @@ public final class TwistedBladeAbilityManager {
     }
 
     private static void setFerocityStacks(LivingEntity actor, int stacks, int duration,
-                                          Phase8AbilityTuning tuning) {
+                                          DeathShadowBloodMasteryTuning tuning) {
         if (stacks <= 0) {
             actor.removeStatusEffect(EffectRegistry.getReference(EffectRegistry.FEROCITY));
             updateMasteryAttackSpeed(actor, 0, tuning);
@@ -648,9 +648,9 @@ public final class TwistedBladeAbilityManager {
         updateMasteryAttackSpeed(actor, stacks, tuning);
     }
 
-    private static void maintainFootwork(LivingEntity actor, Phase8AbilityTuning tuning) {
+    private static void maintainFootwork(LivingEntity actor, DeathShadowBloodMasteryTuning tuning) {
         if (!tuning.flag(1 << 5) || getFerocityStacks(actor) < tuning.integer(
-                Phase8AbilityTuning.Setting.TWISTED_FOOTWORK_THRESHOLD, 8)) return;
+                DeathShadowBloodMasteryTuning.Setting.TWISTED_FOOTWORK_THRESHOLD, 8)) return;
         StatusEffectInstance speed = actor.getStatusEffect(StatusEffects.SPEED);
         if (speed == null || speed.getAmplifier() == 0 && speed.getDuration() < 3) {
             actor.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, 3, 0,
@@ -883,20 +883,20 @@ public final class TwistedBladeAbilityManager {
         private ArmedCrescendo armed;
         private final java.util.List<PendingCrescendo> pendingCrescendos = new java.util.ArrayList<>();
         private final Map<UUID, WoundState> wounds = new HashMap<>();
-        private Phase8AbilityTuning ferocityTuning = Phase8AbilityTuning.EMPTY;
-        private Phase8AbilityTuning crescendoTuning = Phase8AbilityTuning.EMPTY;
+        private DeathShadowBloodMasteryTuning ferocityTuning = DeathShadowBloodMasteryTuning.EMPTY;
+        private DeathShadowBloodMasteryTuning crescendoTuning = DeathShadowBloodMasteryTuning.EMPTY;
     }
 
     private static final class ArmedCrescendo {
         private final int consumedStacks;
         private final long expiresAt;
-        private final Phase8AbilityTuning tuning;
+        private final DeathShadowBloodMasteryTuning tuning;
         private final long armedAt;
         private int remainingHits;
         private final UniqueAbilityExecution execution;
         private int affectedTargets;
 
-        private ArmedCrescendo(int consumedStacks, long expiresAt, Phase8AbilityTuning tuning,
+        private ArmedCrescendo(int consumedStacks, long expiresAt, DeathShadowBloodMasteryTuning tuning,
                               long armedAt, int remainingHits, UniqueAbilityExecution execution) {
             this.consumedStacks = consumedStacks;
             this.expiresAt = expiresAt;
@@ -908,7 +908,7 @@ public final class TwistedBladeAbilityManager {
     }
 
     private record PendingCrescendo(UUID targetId, UUID sourceOwnerId, ItemStack stack, int stacks,
-                                    long at, Phase8AbilityTuning tuning) {
+                                    long at, DeathShadowBloodMasteryTuning tuning) {
     }
 
     private static final class WoundState {

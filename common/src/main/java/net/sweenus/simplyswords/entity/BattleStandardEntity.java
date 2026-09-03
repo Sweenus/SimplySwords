@@ -31,7 +31,7 @@ import net.sweenus.simplyswords.compat.SpellScalingComponents;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
-import net.sweenus.simplyswords.world.Phase4StandardManager;
+import net.sweenus.simplyswords.world.BattleStandardMasteryManager;
 
 import java.util.Objects;
 import java.util.function.Supplier;
@@ -52,8 +52,8 @@ public class BattleStandardEntity extends PathAwareEntity {
     public int negativeEffectAmplifier;
     public boolean dealsDamage = true;
     public boolean doesHealing = true;
-    private UniqueAbilityExecution phase4Execution;
-    private ItemStack phase4Stack = ItemStack.EMPTY;
+    private UniqueAbilityExecution masteryExecution;
+    private ItemStack masteryStack = ItemStack.EMPTY;
     private static boolean errorLogged = false;
 
     public static DefaultAttributeContainer.Builder createBattleStandardAttributes() {
@@ -78,9 +78,9 @@ public class BattleStandardEntity extends PathAwareEntity {
         return trackedType == null || trackedType.isBlank() ? this.standardType : trackedType;
     }
 
-    public void configurePhase4(UniqueAbilityExecution execution, ItemStack stack) {
-        this.phase4Execution = execution;
-        this.phase4Stack = stack.copy();
+    public void configureMastery(UniqueAbilityExecution execution, ItemStack stack) {
+        this.masteryExecution = execution;
+        this.masteryStack = stack.copy();
     }
 
     private static void errorCatch(String identifier) {
@@ -107,7 +107,7 @@ public class BattleStandardEntity extends PathAwareEntity {
 
     @Override
     public void remove(RemovalReason reason) {
-        if (!this.getWorld().isClient()) Phase4StandardManager.onStandardRemoved(this.getUuid());
+        if (!this.getWorld().isClient()) BattleStandardMasteryManager.onStandardRemoved(this.getUuid());
         super.remove(reason);
     }
 
@@ -122,8 +122,8 @@ public class BattleStandardEntity extends PathAwareEntity {
                 if (ownerEntity == null) this.setHealth(this.getHealth() - 1000);
             }
             if (ownerEntity != null && standardType != null) {
-                if (standardType.equals("sunfire") && phase4Execution != null
-                        && Phase4StandardManager.tickSunfire(this, phase4Execution, phase4Stack)) {
+                if (standardType.equals("sunfire") && masteryExecution != null
+                        && BattleStandardMasteryManager.tickSunfire(this, masteryExecution, masteryStack)) {
                     super.baseTick();
                     return;
                 }

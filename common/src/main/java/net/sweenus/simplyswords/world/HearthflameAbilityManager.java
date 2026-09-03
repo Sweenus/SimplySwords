@@ -22,8 +22,8 @@ import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.api.DelegatedWeaponHitContext;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
-import net.sweenus.simplyswords.api.ability.Phase5AbilityTuning;
-import net.sweenus.simplyswords.api.ability.Phase5UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.FireForgeMasteryTuning;
+import net.sweenus.simplyswords.api.ability.FireForgeMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.config.Config;
@@ -94,8 +94,8 @@ public final class HearthflameAbilityManager {
                 || isActive(context.world(), context.actor())) {
             return false;
         }
-        return !findTargets(context, Phase5AbilityTuning.EMPTY.with(
-                Phase5AbilityTuning.Setting.HEARTH_BIND_RANGE,
+        return !findTargets(context, FireForgeMasteryTuning.EMPTY.with(
+                FireForgeMasteryTuning.Setting.HEARTH_BIND_RANGE,
                 Config.uniqueEffects.hearthflame.radius + 2)).isEmpty();
     }
 
@@ -104,9 +104,9 @@ public final class HearthflameAbilityManager {
             return false;
         }
 
-        UniqueAbilityExecution execution = Phase5CombatManager.beginActive(Phase5UniqueAbilities.HEARTHFLAME_CHAINS,
+        UniqueAbilityExecution execution = EmberWeaponsMasteryManager.beginActive(FireForgeMasteryAbilities.HEARTHFLAME_CHAINS,
                 context, Config.uniqueEffects.hearthflame.cooldown);
-        Phase5AbilityTuning tuning = Phase5UniqueAbilities.tuning(execution);
+        FireForgeMasteryTuning tuning = FireForgeMasteryAbilities.tuning(execution);
         List<LivingEntity> targets = findTargets(context, tuning);
         if (targets.isEmpty()) {
             UniqueAbilityApi.cancel(execution);
@@ -118,8 +118,8 @@ public final class HearthflameAbilityManager {
         ServerWorld world = context.world();
         LivingEntity actor = context.actor();
         long now = world.getTime();
-        int duration = tunedInteger(tuning, Phase5AbilityTuning.Setting.HEARTH_CHAIN_DURATION_TICKS,
-                Phase5AbilityTuning.Setting.DURATION_TICKS, Config.uniqueEffects.hearthflame.duration);
+        int duration = tunedInteger(tuning, FireForgeMasteryTuning.Setting.HEARTH_CHAIN_DURATION_TICKS,
+                FireForgeMasteryTuning.Setting.DURATION_TICKS, Config.uniqueEffects.hearthflame.duration);
         ActiveChains ability = new ActiveChains(
                 actor.getUuid(),
                 context.sourcePlayer() == null ? null : context.sourcePlayer().getUuid(),
@@ -132,24 +132,24 @@ public final class HearthflameAbilityManager {
                         context.stack(),
                         Config.uniqueEffects.hearthflame.echoDamageScaling,
                         Config.uniqueEffects.hearthflame.echoSpellScaling
-                ) * (float) tuned(tuning, Phase5AbilityTuning.Setting.HEARTH_ECHO_DAMAGE_MULTIPLIER,
-                        Phase5AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1),
+                ) * (float) tuned(tuning, FireForgeMasteryTuning.Setting.HEARTH_ECHO_DAMAGE_MULTIPLIER,
+                        FireForgeMasteryTuning.Setting.DAMAGE_MULTIPLIER, 1),
                 HelperMethods.abilityScaledDamage(
                         "fire",
                         actor,
                         context.stack(),
                         Config.uniqueEffects.hearthflame.snapDamageScaling,
                         Config.uniqueEffects.hearthflame.snapSpellScaling
-                ) * (float) tuned(tuning, Phase5AbilityTuning.Setting.HEARTH_SNAP_DAMAGE_MULTIPLIER,
-                        Phase5AbilityTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, 1),
+                ) * (float) tuned(tuning, FireForgeMasteryTuning.Setting.HEARTH_SNAP_DAMAGE_MULTIPLIER,
+                        FireForgeMasteryTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, 1),
                 HelperMethods.abilityScaledDamage(
                         "fire",
                         actor,
                         context.stack(),
                         Config.uniqueEffects.hearthflame.finalDamageScaling,
                         Config.uniqueEffects.hearthflame.finalSpellScaling
-                ) * (float) tuned(tuning, Phase5AbilityTuning.Setting.HEARTH_FINAL_DAMAGE_MULTIPLIER,
-                        Phase5AbilityTuning.Setting.FINAL_DAMAGE_MULTIPLIER, 1),
+                ) * (float) tuned(tuning, FireForgeMasteryTuning.Setting.HEARTH_FINAL_DAMAGE_MULTIPLIER,
+                        FireForgeMasteryTuning.Setting.FINAL_DAMAGE_MULTIPLIER, 1),
                 tuning,
                 execution,
                 actor.getPos()
@@ -188,11 +188,11 @@ public final class HearthflameAbilityManager {
         ability.initialChainCount = ability.chains.size();
 
         ACTIVE.computeIfAbsent(world, ignored -> new HashMap<>()).put(actor.getUuid(), ability);
-        if (tuning.has(Phase5AbilityTuning.Setting.HEARTH_CAST_ABSORPTION)) {
+        if (tuning.has(FireForgeMasteryTuning.Setting.HEARTH_CAST_ABSORPTION)) {
             grantTimedAbsorption(world, actor,
-                    (float) tuning.get(Phase5AbilityTuning.Setting.HEARTH_CAST_ABSORPTION, 4),
-                    tuning.integer(Phase5AbilityTuning.Setting.HEARTH_CAST_ABSORPTION_DURATION_TICKS, 80),
-                    (float) tuning.get(Phase5AbilityTuning.Setting.HEARTH_BRAND_ABSORPTION_CAP, 8));
+                    (float) tuning.get(FireForgeMasteryTuning.Setting.HEARTH_CAST_ABSORPTION, 4),
+                    tuning.integer(FireForgeMasteryTuning.Setting.HEARTH_CAST_ABSORPTION_DURATION_TICKS, 80),
+                    (float) tuning.get(FireForgeMasteryTuning.Setting.HEARTH_BRAND_ABSORPTION_CAP, 8));
         }
         if (ability.bastion) {
             StatusEffectInstance existing = actor.getStatusEffect(StatusEffects.RESISTANCE);
@@ -254,7 +254,7 @@ public final class HearthflameAbilityManager {
             if (struckChain.tension >= MAX_TENSION) {
                 long now = world.getTime();
                 int preserveTicks = ability.tuning.integer(
-                        Phase5AbilityTuning.Setting.HEARTH_CHAIN_PRESERVE_TICKS, 0);
+                        FireForgeMasteryTuning.Setting.HEARTH_CHAIN_PRESERVE_TICKS, 0);
                 if (preserveTicks > 0 && !struckChain.preserved) {
                     struckChain.preserved = true;
                     struckChain.preserveUntil = now + preserveTicks;
@@ -271,34 +271,34 @@ public final class HearthflameAbilityManager {
             return;
         }
 
-        UniqueAbilityExecution brandExecution = Phase5CombatManager.beginPassive(Phase5UniqueAbilities.HEARTHFLAME_BRAND,
+        UniqueAbilityExecution brandExecution = EmberWeaponsMasteryManager.beginPassive(FireForgeMasteryAbilities.HEARTHFLAME_BRAND,
                 world, stack, actor, target);
-        Phase5AbilityTuning brandTuning = Phase5UniqueAbilities.tuning(brandExecution);
+        FireForgeMasteryTuning brandTuning = FireForgeMasteryAbilities.tuning(brandExecution);
         if (hasBrand(world, actor, target)
-                && brandTuning.has(Phase5AbilityTuning.Setting.HEARTH_BRAND_HIT_DAMAGE_MULTIPLIER)) {
+                && brandTuning.has(FireForgeMasteryTuning.Setting.HEARTH_BRAND_HIT_DAMAGE_MULTIPLIER)) {
             applyAbilityDamage(world, actor, sourceOwner, stack, target,
                     (float) actor.getAttributeValue(EntityAttributes.GENERIC_ATTACK_DAMAGE)
                             * ((float) brandTuning.get(
-                            Phase5AbilityTuning.Setting.HEARTH_BRAND_HIT_DAMAGE_MULTIPLIER, 1) - 1.0F), true,
-                    brandTuning.integer(Phase5AbilityTuning.Setting.HEARTH_BRAND_HIT_FIRE_TICKS, 0));
+                            FireForgeMasteryTuning.Setting.HEARTH_BRAND_HIT_DAMAGE_MULTIPLIER, 1) - 1.0F), true,
+                    brandTuning.integer(FireForgeMasteryTuning.Setting.HEARTH_BRAND_HIT_FIRE_TICKS, 0));
         }
         if (hasBrand(world, actor, target)
-                && brandTuning.has(Phase5AbilityTuning.Setting.HEARTH_BRAND_ABSORPTION)
+                && brandTuning.has(FireForgeMasteryTuning.Setting.HEARTH_BRAND_ABSORPTION)
                 && claimLockout(BRAND_SHELTER_LOCKOUTS, world,
                 new BrandKey(actor.getUuid(), target.getUuid()),
-                brandTuning.integer(Phase5AbilityTuning.Setting.HEARTH_BRAND_ABSORPTION_LOCKOUT_TICKS, 40))) {
+                brandTuning.integer(FireForgeMasteryTuning.Setting.HEARTH_BRAND_ABSORPTION_LOCKOUT_TICKS, 40))) {
             grantTimedAbsorption(world, actor,
-                    (float) brandTuning.get(Phase5AbilityTuning.Setting.HEARTH_BRAND_ABSORPTION, 2),
+                    (float) brandTuning.get(FireForgeMasteryTuning.Setting.HEARTH_BRAND_ABSORPTION, 2),
                     brandTuning.integer(
-                            Phase5AbilityTuning.Setting.HEARTH_BRAND_ABSORPTION_DURATION_TICKS, 200),
-                    (float) brandTuning.get(Phase5AbilityTuning.Setting.HEARTH_BRAND_ABSORPTION_CAP, 8));
+                            FireForgeMasteryTuning.Setting.HEARTH_BRAND_ABSORPTION_DURATION_TICKS, 200),
+                    (float) brandTuning.get(FireForgeMasteryTuning.Setting.HEARTH_BRAND_ABSORPTION_CAP, 8));
         }
         if (rollBrand(actor, brandTuning)) applyBrand(world, actor, sourceOwner, target, brandTuning);
-        UniqueAbilityApi.finish(brandExecution, Phase5UniqueAbilities.FINISH, 1);
+        UniqueAbilityApi.finish(brandExecution, FireForgeMasteryAbilities.FINISH, 1);
     }
 
     public static void tick(ServerWorld world) {
-        Phase4AbsorptionTracker.sweep(world);
+        MasteryAbsorptionTracker.sweep(world);
         tickBrands(world);
         tickAbilities(world);
         pruneTimedState(world);
@@ -395,7 +395,7 @@ public final class HearthflameAbilityManager {
                     continue;
                 }
                 Vec3d anchor = anchor(ability, actor);
-                double breakRange = ability.tuning.get(Phase5AbilityTuning.Setting.HEARTH_BREAK_RANGE,
+                double breakRange = ability.tuning.get(FireForgeMasteryTuning.Setting.HEARTH_BREAK_RANGE,
                         MAX_BREAK_DISTANCE);
                 if (anchor.squaredDistanceTo(target.getPos()) > breakRange * breakRange) {
                     discardVisual(world, chain.visualId);
@@ -453,7 +453,7 @@ public final class HearthflameAbilityManager {
                 discardAbilityVisuals(world, ability);
                 grantCompletionAbsorption(world, actor, ability);
                 cleanupActor(actor, ability);
-                UniqueAbilityApi.finish(ability.execution, Phase5UniqueAbilities.FINISH, ability.completedChains);
+                UniqueAbilityApi.finish(ability.execution, FireForgeMasteryAbilities.FINISH, ability.completedChains);
                 abilityIterator.remove();
                 continue;
             }
@@ -481,8 +481,8 @@ public final class HearthflameAbilityManager {
             }
             applyAbilityDamage(world, actor, sourceOwner, ability.stack, echoTarget,
                     ability.echoDamage * chain.damageMultiplier, true,
-                    tunedInteger(ability.tuning, Phase5AbilityTuning.Setting.HEARTH_ECHO_FIRE_TICKS,
-                            Phase5AbilityTuning.Setting.FIRE_TICKS, 0));
+                    tunedInteger(ability.tuning, FireForgeMasteryTuning.Setting.HEARTH_ECHO_FIRE_TICKS,
+                            FireForgeMasteryTuning.Setting.FIRE_TICKS, 0));
             spawnEchoEffects(world, echoTarget);
         }
         world.playSoundFromEntity(
@@ -505,8 +505,8 @@ public final class HearthflameAbilityManager {
                     sourceOwner,
                     ability.stack,
                     target.getPos().add(0.0, target.getHeight() * 0.45, 0.0),
-                    tuned(ability.tuning, Phase5AbilityTuning.Setting.HEARTH_SNAP_RADIUS,
-                            Phase5AbilityTuning.Setting.RADIUS,
+                    tuned(ability.tuning, FireForgeMasteryTuning.Setting.HEARTH_SNAP_RADIUS,
+                            FireForgeMasteryTuning.Setting.RADIUS,
                             Config.uniqueEffects.hearthflame.snapRadius),
                     ability.snapDamage * chain.damageMultiplier,
                     new HashSet<>(),
@@ -530,23 +530,23 @@ public final class HearthflameAbilityManager {
                 ability.completedChains++;
                 float finalDamage = gatedFinalDamage(ability.finalDamage * chain.damageMultiplier,
                         ability.initialChainCount,
-                        ability.tuning.integer(Phase5AbilityTuning.Setting.HEARTH_FINAL_CHAIN_REQUIREMENT, 0),
-                        ability.tuning.get(Phase5AbilityTuning.Setting.HEARTH_FINAL_CHAIN_MULTIPLIER, 1));
+                        ability.tuning.integer(FireForgeMasteryTuning.Setting.HEARTH_FINAL_CHAIN_REQUIREMENT, 0),
+                        ability.tuning.get(FireForgeMasteryTuning.Setting.HEARTH_FINAL_CHAIN_MULTIPLIER, 1));
                 damageArea(
                         world,
                         actor,
                         sourceOwner,
                         ability.stack,
                         target.getPos().add(0.0, target.getHeight() * 0.45, 0.0),
-                        tuned(ability.tuning, Phase5AbilityTuning.Setting.HEARTH_SNAP_RADIUS,
-                                Phase5AbilityTuning.Setting.RADIUS,
+                        tuned(ability.tuning, FireForgeMasteryTuning.Setting.HEARTH_SNAP_RADIUS,
+                                FireForgeMasteryTuning.Setting.RADIUS,
                                 Config.uniqueEffects.hearthflame.snapRadius),
                         finalDamage * MathHelper.clamp(strength, 0.0F, 1.0F),
                         damaged,
                         anchor(ability, actor),
-                        ability.tuning.has(Phase5AbilityTuning.Setting.HEARTH_FINAL_KNOCKBACK_MULTIPLIER)
+                        ability.tuning.has(FireForgeMasteryTuning.Setting.HEARTH_FINAL_KNOCKBACK_MULTIPLIER)
                                 ? ability.tuning.get(
-                                Phase5AbilityTuning.Setting.HEARTH_FINAL_KNOCKBACK_MULTIPLIER, 1) : 0.0
+                                FireForgeMasteryTuning.Setting.HEARTH_FINAL_KNOCKBACK_MULTIPLIER, 1) : 0.0
                 );
                 spawnFinalTargetEffects(world, target);
             }
@@ -564,7 +564,7 @@ public final class HearthflameAbilityManager {
         spawnFinaleEffects(world, actor, anchor(ability, actor), strength, struckFinale);
         grantCompletionAbsorption(world, actor, ability);
         cleanupActor(actor, ability);
-        UniqueAbilityApi.finish(ability.execution, Phase5UniqueAbilities.FINISH, damaged.size());
+        UniqueAbilityApi.finish(ability.execution, FireForgeMasteryAbilities.FINISH, damaged.size());
     }
 
     private static void damageArea(ServerWorld world, LivingEntity actor, LivingEntity sourceOwner,
@@ -616,7 +616,7 @@ public final class HearthflameAbilityManager {
         return damaged;
     }
 
-    private static void pullTarget(Phase5AbilityTuning tuning, Vec3d anchor, LivingEntity actor,
+    private static void pullTarget(FireForgeMasteryTuning tuning, Vec3d anchor, LivingEntity actor,
                                    LivingEntity target, double excess, double pullMultiplier) {
         Vec3d direction = anchor.add(0.0, actor.getHeight() * 0.45, 0.0)
                 .subtract(target.getPos().add(0.0, target.getHeight() * 0.45, 0.0));
@@ -625,7 +625,7 @@ public final class HearthflameAbilityManager {
         }
         direction = direction.normalize();
         double strength = pullStrength(
-                tuning.get(Phase5AbilityTuning.Setting.PULL_STRENGTH,
+                tuning.get(FireForgeMasteryTuning.Setting.PULL_STRENGTH,
                         Config.uniqueEffects.hearthflame.pullStrength),
                 pullMultiplier, excess);
         target.addVelocity(direction.x * strength, MathHelper.clamp(direction.y * strength, -0.08, 0.08), direction.z * strength);
@@ -653,16 +653,16 @@ public final class HearthflameAbilityManager {
         ActiveChains ability = getActive(world, target);
         if (ability != null) {
             if (source.isIn(DamageTypeTags.IS_FIRE)
-                    && ability.tuning.has(Phase5AbilityTuning.Setting.HEARTH_FIRE_DAMAGE_REDUCTION)) {
+                    && ability.tuning.has(FireForgeMasteryTuning.Setting.HEARTH_FIRE_DAMAGE_REDUCTION)) {
                 amount = reducedDamage(amount, ability.tuning.get(
-                        Phase5AbilityTuning.Setting.HEARTH_FIRE_DAMAGE_REDUCTION, 0.3));
+                        FireForgeMasteryTuning.Setting.HEARTH_FIRE_DAMAGE_REDUCTION, 0.3));
             }
             if (source.getAttacker() instanceof LivingEntity attacker
                     && findChain(ability, attacker.getUuid()) != null
                     && target.squaredDistanceTo(attacker) <= MathHelper.square(ability.tuning.get(
-                    Phase5AbilityTuning.Setting.HEARTH_BOUND_DAMAGE_REDUCTION_RANGE, 6))) {
+                    FireForgeMasteryTuning.Setting.HEARTH_BOUND_DAMAGE_REDUCTION_RANGE, 6))) {
                 amount = reducedDamage(amount, ability.tuning.get(
-                        Phase5AbilityTuning.Setting.HEARTH_BOUND_DAMAGE_REDUCTION, 0));
+                        FireForgeMasteryTuning.Setting.HEARTH_BOUND_DAMAGE_REDUCTION, 0));
             }
         }
 
@@ -678,29 +678,29 @@ public final class HearthflameAbilityManager {
         }
         ItemStack stack = heldHearthflame(target);
         if (stack == null) return;
-        UniqueAbilityExecution execution = Phase5CombatManager.beginPassive(
-                Phase5UniqueAbilities.HEARTHFLAME_BRAND, world, stack, target, attacker);
-        Phase5AbilityTuning tuning = Phase5UniqueAbilities.tuning(execution);
-        int duration = tuning.integer(Phase5AbilityTuning.Setting.HEARTH_REACTIVE_BRAND_DURATION_TICKS, 0);
+        UniqueAbilityExecution execution = EmberWeaponsMasteryManager.beginPassive(
+                FireForgeMasteryAbilities.HEARTHFLAME_BRAND, world, stack, target, attacker);
+        FireForgeMasteryTuning tuning = FireForgeMasteryAbilities.tuning(execution);
+        int duration = tuning.integer(FireForgeMasteryTuning.Setting.HEARTH_REACTIVE_BRAND_DURATION_TICKS, 0);
         boolean applied = duration > 0 && isValidTarget(target, null, attacker)
                 && claimLockout(REACTIVE_BRAND_LOCKOUTS, world, target.getUuid(),
-                tuning.integer(Phase5AbilityTuning.Setting.HEARTH_REACTIVE_BRAND_LOCKOUT_TICKS, 60));
+                tuning.integer(FireForgeMasteryTuning.Setting.HEARTH_REACTIVE_BRAND_LOCKOUT_TICKS, 60));
         if (applied) applyBrand(world, target, null, attacker, tuning, duration);
-        UniqueAbilityApi.finish(execution, Phase5UniqueAbilities.FINISH, applied ? 1 : 0);
+        UniqueAbilityApi.finish(execution, FireForgeMasteryAbilities.FINISH, applied ? 1 : 0);
     }
 
     private static List<LivingEntity> findTargets(WeaponAbilityContext context) {
-        return findTargets(context, Phase5AbilityTuning.EMPTY);
+        return findTargets(context, FireForgeMasteryTuning.EMPTY);
     }
 
-    private static List<LivingEntity> findTargets(WeaponAbilityContext context, Phase5AbilityTuning tuning) {
+    private static List<LivingEntity> findTargets(WeaponAbilityContext context, FireForgeMasteryTuning tuning) {
         ServerWorld world = context.world();
         LivingEntity actor = context.actor();
         LivingEntity sourceOwner = context.sourcePlayer();
-        double radius = tuned(tuning, Phase5AbilityTuning.Setting.HEARTH_BIND_RANGE,
-                Phase5AbilityTuning.Setting.RANGE, Config.uniqueEffects.hearthflame.radius);
+        double radius = tuned(tuning, FireForgeMasteryTuning.Setting.HEARTH_BIND_RANGE,
+                FireForgeMasteryTuning.Setting.RANGE, Config.uniqueEffects.hearthflame.radius);
         double brandedRadius = radius + Math.max(0.0, Config.uniqueEffects.hearthflame.brandedRangeBonus);
-        int maxChains = tuning.integer(Phase5AbilityTuning.Setting.TARGET_CAP,
+        int maxChains = tuning.integer(FireForgeMasteryTuning.Setting.TARGET_CAP,
                 Config.uniqueEffects.hearthflame.maxChains);
         Box box = Box.of(actor.getPos().add(0.0, actor.getHeight() * 0.5, 0.0),
                 brandedRadius * 2.0, brandedRadius * 2.0, brandedRadius * 2.0);
@@ -808,23 +808,23 @@ public final class HearthflameAbilityManager {
         }
     }
 
-    private static boolean rollBrand(LivingEntity actor, Phase5AbilityTuning tuning) {
-        int chance = tuning.integer(Phase5AbilityTuning.Setting.CHANCE,
+    private static boolean rollBrand(LivingEntity actor, FireForgeMasteryTuning tuning) {
+        int chance = tuning.integer(FireForgeMasteryTuning.Setting.CHANCE,
                 Math.clamp(Config.uniqueEffects.hearthflame.chance, 0, 100));
         return chance > 0 && actor.getRandom().nextInt(100) < chance;
     }
 
     private static void applyBrand(ServerWorld world, LivingEntity owner,
-                                   LivingEntity sourceOwner, LivingEntity target, Phase5AbilityTuning tuning) {
+                                   LivingEntity sourceOwner, LivingEntity target, FireForgeMasteryTuning tuning) {
         applyBrand(world, owner, sourceOwner, target, tuning,
-                tunedInteger(tuning, Phase5AbilityTuning.Setting.HEARTH_BRAND_DURATION_TICKS,
-                        Phase5AbilityTuning.Setting.DURATION_TICKS,
+                tunedInteger(tuning, FireForgeMasteryTuning.Setting.HEARTH_BRAND_DURATION_TICKS,
+                        FireForgeMasteryTuning.Setting.DURATION_TICKS,
                         Config.uniqueEffects.hearthflame.brandDuration));
     }
 
     private static void applyBrand(ServerWorld world, LivingEntity owner,
                                    LivingEntity sourceOwner, LivingEntity target,
-                                   Phase5AbilityTuning tuning, int duration) {
+                                   FireForgeMasteryTuning tuning, int duration) {
         BrandKey key = new BrandKey(owner.getUuid(), target.getUuid());
         Map<BrandKey, FurnaceBrand> brands = BRANDS.computeIfAbsent(world, ignored -> new HashMap<>());
         FurnaceBrand previous = brands.remove(key);
@@ -885,11 +885,11 @@ public final class HearthflameAbilityManager {
     private static void spreadBrand(ServerWorld world, LivingEntity actor, LivingEntity sourceOwner,
                                     ActiveChains ability, FurnaceChain snapped, LivingEntity center) {
         if (!snapped.branded) return;
-        int count = ability.tuning.integer(Phase5AbilityTuning.Setting.HEARTH_BRAND_SPREAD_COUNT, 0);
+        int count = ability.tuning.integer(FireForgeMasteryTuning.Setting.HEARTH_BRAND_SPREAD_COUNT, 0);
         if (count <= 0) return;
-        double range = ability.tuning.get(Phase5AbilityTuning.Setting.HEARTH_BRAND_SPREAD_RANGE, 4);
+        double range = ability.tuning.get(FireForgeMasteryTuning.Setting.HEARTH_BRAND_SPREAD_RANGE, 4);
         int duration = ability.tuning.integer(
-                Phase5AbilityTuning.Setting.HEARTH_BRAND_SPREAD_DURATION_TICKS, 100);
+                FireForgeMasteryTuning.Setting.HEARTH_BRAND_SPREAD_DURATION_TICKS, 100);
         Box box = Box.of(center.getPos(), range * 2, range * 2, range * 2);
         world.getEntitiesByClass(LivingEntity.class, box,
                         candidate -> candidate != center && isValidTarget(actor, sourceOwner, candidate))
@@ -903,9 +903,9 @@ public final class HearthflameAbilityManager {
 
     private static FurnaceChain createReboundChain(ServerWorld world, LivingEntity actor, LivingEntity sourceOwner,
                                                     ActiveChains ability, FurnaceChain snapped, LivingEntity center) {
-        int maximumGeneration = ability.tuning.integer(Phase5AbilityTuning.Setting.HEARTH_REBIND_COUNT, 0);
+        int maximumGeneration = ability.tuning.integer(FireForgeMasteryTuning.Setting.HEARTH_REBIND_COUNT, 0);
         if (snapped.generation >= maximumGeneration) return null;
-        double range = ability.tuning.get(Phase5AbilityTuning.Setting.HEARTH_REBIND_RANGE, 5);
+        double range = ability.tuning.get(FireForgeMasteryTuning.Setting.HEARTH_REBIND_RANGE, 5);
         Map<BrandKey, FurnaceBrand> brands = BRANDS.get(world);
         if (brands == null || brands.isEmpty()) return null;
 
@@ -924,7 +924,7 @@ public final class HearthflameAbilityManager {
         FurnaceChainVisualEntity visual = spawnVisual(world, actor, reboundTarget,
                 FurnaceChainVisualEntity.MODE_CHAIN, duration + SNAP_VISUAL_TICKS + 20);
         double generationMultiplier = ability.tuning.get(
-                Phase5AbilityTuning.Setting.HEARTH_REBIND_DAMAGE_MULTIPLIER, 0.75);
+                FireForgeMasteryTuning.Setting.HEARTH_REBIND_DAMAGE_MULTIPLIER, 0.75);
         return new FurnaceChain(
                 reboundTarget.getUuid(),
                 visual == null ? null : visual.getUuid(),
@@ -1015,29 +1015,29 @@ public final class HearthflameAbilityManager {
         return ability.bastion ? ability.castAnchor : actor.getPos();
     }
 
-    private static double minimumLength(Phase5AbilityTuning tuning) {
-        return Math.max(0.5, tuning.get(Phase5AbilityTuning.Setting.HEARTH_MIN_LENGTH,
+    private static double minimumLength(FireForgeMasteryTuning tuning) {
+        return Math.max(0.5, tuning.get(FireForgeMasteryTuning.Setting.HEARTH_MIN_LENGTH,
                 Config.uniqueEffects.hearthflame.minimumChainLength));
     }
 
-    private static double tuned(Phase5AbilityTuning tuning, Phase5AbilityTuning.Setting scoped,
-                                Phase5AbilityTuning.Setting legacy, double fallback) {
+    private static double tuned(FireForgeMasteryTuning tuning, FireForgeMasteryTuning.Setting scoped,
+                                FireForgeMasteryTuning.Setting legacy, double fallback) {
         return tuning.has(scoped) ? tuning.get(scoped, fallback) : tuning.get(legacy, fallback);
     }
 
-    private static int tunedInteger(Phase5AbilityTuning tuning, Phase5AbilityTuning.Setting scoped,
-                                    Phase5AbilityTuning.Setting legacy, int fallback) {
+    private static int tunedInteger(FireForgeMasteryTuning tuning, FireForgeMasteryTuning.Setting scoped,
+                                    FireForgeMasteryTuning.Setting legacy, int fallback) {
         return tuning.has(scoped) ? tuning.integer(scoped, fallback) : tuning.integer(legacy, fallback);
     }
 
-    private static long forcedSnapAt(long now, Phase5AbilityTuning tuning) {
-        int ticks = tuning.integer(Phase5AbilityTuning.Setting.HEARTH_FORCED_SNAP_TICKS, 0);
+    private static long forcedSnapAt(long now, FireForgeMasteryTuning tuning) {
+        int ticks = tuning.integer(FireForgeMasteryTuning.Setting.HEARTH_FORCED_SNAP_TICKS, 0);
         return ticks <= 0 ? 0 : now + ticks;
     }
 
     private static void addSnapPressure(ActiveChains ability) {
         float multiplier = (float) ability.tuning.get(
-                Phase5AbilityTuning.Setting.HEARTH_SNAP_PRESSURE_MULTIPLIER, 1);
+                FireForgeMasteryTuning.Setting.HEARTH_SNAP_PRESSURE_MULTIPLIER, 1);
         ability.pressure = pressureAfterSnap(ability.pressure, maximumPressure(ability), multiplier);
     }
 
@@ -1047,10 +1047,10 @@ public final class HearthflameAbilityManager {
 
     private static void grantSnapResistance(LivingEntity actor, ActiveChains ability) {
         int grant = ability.tuning.integer(
-                Phase5AbilityTuning.Setting.HEARTH_SNAP_RESISTANCE_DURATION_TICKS, 0);
+                FireForgeMasteryTuning.Setting.HEARTH_SNAP_RESISTANCE_DURATION_TICKS, 0);
         if (grant <= 0) return;
         int cap = Math.max(grant, ability.tuning.integer(
-                Phase5AbilityTuning.Setting.HEARTH_SNAP_RESISTANCE_MAX_TICKS, grant));
+                FireForgeMasteryTuning.Setting.HEARTH_SNAP_RESISTANCE_MAX_TICKS, grant));
         StatusEffectInstance existing = actor.getStatusEffect(StatusEffects.RESISTANCE);
         int existingDuration = existing != null && existing.getAmplifier() == 0 ? existing.getDuration() : 0;
         actor.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE,
@@ -1086,27 +1086,27 @@ public final class HearthflameAbilityManager {
     private static void grantTimedAbsorption(ServerWorld world, LivingEntity actor, float amount, int ticks,
                                              float cap) {
         if (amount <= 0 || ticks <= 0) return;
-        Phase4AbsorptionTracker.grant(actor, amount, ticks, Math.max(amount, cap));
+        MasteryAbsorptionTracker.grant(actor, amount, ticks, Math.max(amount, cap));
         ABSORPTION_SWEEP_UNTIL.merge(world, world.getTime() + ticks, Math::max);
     }
 
     private static void grantCompletionAbsorption(ServerWorld world, LivingEntity actor, ActiveChains ability) {
         int completionMinimum = ability.tuning.integer(
-                Phase5AbilityTuning.Setting.HEARTH_COMPLETION_MIN_CHAINS, Integer.MAX_VALUE);
+                FireForgeMasteryTuning.Setting.HEARTH_COMPLETION_MIN_CHAINS, Integer.MAX_VALUE);
         if (ability.completedChains < completionMinimum
-                || !ability.tuning.has(Phase5AbilityTuning.Setting.HEARTH_COMPLETION_ABSORPTION)) return;
+                || !ability.tuning.has(FireForgeMasteryTuning.Setting.HEARTH_COMPLETION_ABSORPTION)) return;
         grantTimedAbsorption(world, actor,
-                (float) ability.tuning.get(Phase5AbilityTuning.Setting.HEARTH_COMPLETION_ABSORPTION, 4),
+                (float) ability.tuning.get(FireForgeMasteryTuning.Setting.HEARTH_COMPLETION_ABSORPTION, 4),
                 ability.tuning.integer(
-                        Phase5AbilityTuning.Setting.HEARTH_COMPLETION_ABSORPTION_DURATION_TICKS, 60),
-                (float) ability.tuning.get(Phase5AbilityTuning.Setting.HEARTH_BRAND_ABSORPTION_CAP, 8));
+                        FireForgeMasteryTuning.Setting.HEARTH_COMPLETION_ABSORPTION_DURATION_TICKS, 60),
+                (float) ability.tuning.get(FireForgeMasteryTuning.Setting.HEARTH_BRAND_ABSORPTION_CAP, 8));
     }
 
-    private static void applyBastionMovementPenalty(LivingEntity actor, Phase5AbilityTuning tuning) {
+    private static void applyBastionMovementPenalty(LivingEntity actor, FireForgeMasteryTuning tuning) {
         EntityAttributeInstance movement = actor.getAttributeInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED);
         if (movement == null) return;
         movement.removeModifier(BASTION_SPEED_ID);
-        double multiplier = tuning.get(Phase5AbilityTuning.Setting.HEARTH_ANCHOR_SPEED_MULTIPLIER, 0.75);
+        double multiplier = tuning.get(FireForgeMasteryTuning.Setting.HEARTH_ANCHOR_SPEED_MULTIPLIER, 0.75);
         movement.addTemporaryModifier(new EntityAttributeModifier(BASTION_SPEED_ID,
                 -MathHelper.clamp(1.0 - multiplier, 0.0, 0.99),
                 EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
@@ -1224,7 +1224,7 @@ public final class HearthflameAbilityManager {
     }
 
     private static float maximumPressure(ActiveChains ability) {
-        return (float) ability.tuning.get(Phase5AbilityTuning.Setting.MAX_PRESSURE, maximumPressure());
+        return (float) ability.tuning.get(FireForgeMasteryTuning.Setting.MAX_PRESSURE, maximumPressure());
     }
 
     private static float pressureFraction(ActiveChains ability) {
@@ -1361,7 +1361,7 @@ public final class HearthflameAbilityManager {
         private final float echoDamage;
         private final float snapDamage;
         private final float finalDamage;
-        private final Phase5AbilityTuning tuning;
+        private final FireForgeMasteryTuning tuning;
         private final UniqueAbilityExecution execution;
         private final Vec3d castAnchor;
         private final List<FurnaceChain> chains = new ArrayList<>();
@@ -1378,7 +1378,7 @@ public final class HearthflameAbilityManager {
         private ActiveChains(UUID actorId, UUID sourceOwnerId, ItemStack stack,
                              long startedAt, long expiresAt,
                              float echoDamage, float snapDamage, float finalDamage,
-                             Phase5AbilityTuning tuning, UniqueAbilityExecution execution,
+                             FireForgeMasteryTuning tuning, UniqueAbilityExecution execution,
                              Vec3d castAnchor) {
             this.actorId = actorId;
             this.sourceOwnerId = sourceOwnerId;

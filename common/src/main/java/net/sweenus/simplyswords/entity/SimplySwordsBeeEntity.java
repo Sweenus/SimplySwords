@@ -142,7 +142,7 @@ public class SimplySwordsBeeEntity extends BeeEntity implements Tameable {
         if (attacked && masteryCooldownRefund > 0 && target instanceof LivingEntity living
                 && !living.isAlive() && owner instanceof PlayerEntity player
                 && getWorld() instanceof ServerWorld world
-                && net.sweenus.simplyswords.world.Phase7CombatManager.claimHiveRefund(
+                && net.sweenus.simplyswords.world.NatureSwarmMasteryCombatManager.claimHiveRefund(
                         world, masteryReleaseId, world.getTime() + lifespan)) {
             SimplySwordsAPI.reduceWeaponCooldown(player,
                     new net.minecraft.item.ItemStack(ItemsRegistry.HIVEHEART.get()),

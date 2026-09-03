@@ -11,7 +11,7 @@ import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
-import net.sweenus.simplyswords.api.ability.Phase3AbilityTuning;
+import net.sweenus.simplyswords.api.ability.StormSoulMasteryTuning;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -26,12 +26,12 @@ public class FatalFlickerEffect extends StatusEffect {
     }
 
     public static void performDash(LivingEntity user, World world, int radius) {
-        Phase3AbilityTuning tuning = world instanceof ServerWorld tuned
-                ? WhisperwindVisualManager.dashTuning(tuned, user) : Phase3AbilityTuning.EMPTY;
-        float dashDistance = (float) (tuning.get(Phase3AbilityTuning.Setting.DASH_SPEED,
+        StormSoulMasteryTuning tuning = world instanceof ServerWorld tuned
+                ? WhisperwindVisualManager.dashTuning(tuned, user) : StormSoulMasteryTuning.EMPTY;
+        float dashDistance = (float) (tuning.get(StormSoulMasteryTuning.Setting.DASH_SPEED,
                 Config.uniqueEffects.whisperwind.dashVelocity)
-                * tuning.get(Phase3AbilityTuning.Setting.DASH_RANGE_MULTIPLIER, 1));
-        radius = Math.max(1, tuning.integer(Phase3AbilityTuning.Setting.DASH_RADIUS, radius));
+                * tuning.get(StormSoulMasteryTuning.Setting.DASH_RANGE_MULTIPLIER, 1));
+        radius = Math.max(1, tuning.integer(StormSoulMasteryTuning.Setting.DASH_RADIUS, radius));
 
         user.setVelocity(user.getRotationVector().multiply(+dashDistance));
         user.setVelocity(user.getVelocity().x, 0, user.getVelocity().z);

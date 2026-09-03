@@ -19,8 +19,8 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RaycastContext;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
-import net.sweenus.simplyswords.api.ability.Phase2AbilityTuning;
-import net.sweenus.simplyswords.api.ability.Phase2UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.AbyssalSpectralMasteryTuning;
+import net.sweenus.simplyswords.api.ability.AbyssalSpectralMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityContext;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
@@ -79,17 +79,17 @@ public final class GloampiercerAbilityManager {
         }
         ServerWorld world = context.world();
         LivingEntity owner = context.actor();
-        UniqueAbilityExecution execution = UniqueAbilityApi.begin(Phase2UniqueAbilities.GLOAMPIERCER_BARRAGE,
+        UniqueAbilityExecution execution = UniqueAbilityApi.begin(AbyssalSpectralMasteryAbilities.GLOAMPIERCER_BARRAGE,
                 UniqueAbilityContext.active(context), builder -> builder
-                        .set(Phase2UniqueAbilities.COOLDOWN_TICKS, Config.uniqueEffects.gloampiercer.cooldown)
-                        .set(Phase2UniqueAbilities.TUNING, baseTuning(Config.uniqueEffects.gloampiercer.cooldown,
+                        .set(AbyssalSpectralMasteryAbilities.COOLDOWN_TICKS, Config.uniqueEffects.gloampiercer.cooldown)
+                        .set(AbyssalSpectralMasteryAbilities.TUNING, baseTuning(Config.uniqueEffects.gloampiercer.cooldown,
                                 Config.uniqueEffects.gloampiercer.channelDuration,
                                 Config.uniqueEffects.gloampiercer.spearCount,
                                 Config.uniqueEffects.gloampiercer.cloneCount)));
-        Phase2AbilityTuning tuning = Phase2UniqueAbilities.tuning(execution);
-        int duration = Math.clamp(tuning.integer(Phase2AbilityTuning.Setting.CHANNEL_DURATION_TICKS,
+        AbyssalSpectralMasteryTuning tuning = AbyssalSpectralMasteryAbilities.tuning(execution);
+        int duration = Math.clamp(tuning.integer(AbyssalSpectralMasteryTuning.Setting.CHANNEL_DURATION_TICKS,
                 Config.uniqueEffects.gloampiercer.channelDuration), 20, 120);
-        int cloneCount = Math.clamp(tuning.integer(Phase2AbilityTuning.Setting.CLONE_COUNT,
+        int cloneCount = Math.clamp(tuning.integer(AbyssalSpectralMasteryTuning.Setting.CLONE_COUNT,
                 Config.uniqueEffects.gloampiercer.cloneCount), 1, 8);
         double lift = findLiftHeight(world, owner, Math.max(0.0, Config.uniqueEffects.gloampiercer.liftHeight));
         ActiveChannel channel = new ActiveChannel(owner.getUuid(), context.stack().copy(), context.hand(),
@@ -97,8 +97,8 @@ public final class GloampiercerAbilityManager {
                 Math.max(1.0F, HelperMethods.abilityScaledDamage(SpellScalingProfile.SOUL, owner, context.stack(),
                         Config.uniqueEffects.gloampiercer.strikeDamageScaling,
                         Config.uniqueEffects.gloampiercer.strikeSpellScaling))
-                        * (float) tuning.get(Phase2AbilityTuning.Setting.PROJECTILE_DAMAGE_MULTIPLIER, 1), execution);
-        if ((tuning.integer(Phase2AbilityTuning.Setting.MODE, 0) & 32) != 0) {
+                        * (float) tuning.get(AbyssalSpectralMasteryTuning.Setting.PROJECTILE_DAMAGE_MULTIPLIER, 1), execution);
+        if ((tuning.integer(AbyssalSpectralMasteryTuning.Setting.MODE, 0) & 32) != 0) {
             LivingEntity royalTarget = findNearestBarrageTarget(world, owner, center);
             channel.royalTargetId = royalTarget == null ? null : royalTarget.getUuid();
             channel.royalDestination = royalTarget == null ? center
@@ -121,24 +121,24 @@ public final class GloampiercerAbilityManager {
         if (nextEligible != null && now < nextEligible) {
             return;
         }
-        UniqueAbilityExecution execution = UniqueAbilityApi.begin(Phase2UniqueAbilities.GLOAMPIERCER_AMBUSH,
+        UniqueAbilityExecution execution = UniqueAbilityApi.begin(AbyssalSpectralMasteryAbilities.GLOAMPIERCER_AMBUSH,
                 UniqueAbilityContext.passive(world, stack, owner, null, null), builder -> builder
-                        .set(Phase2UniqueAbilities.TUNING, baseTuning(0, 0, 1, 1)));
+                        .set(AbyssalSpectralMasteryAbilities.TUNING, baseTuning(0, 0, 1, 1)));
         UniqueAbilityApi.takeStartedExecution();
         UniqueAbilityApi.start(execution);
-        Phase2AbilityTuning tuning = Phase2UniqueAbilities.tuning(execution);
-        int mode = tuning.integer(Phase2AbilityTuning.Setting.MODE, 0);
+        AbyssalSpectralMasteryTuning tuning = AbyssalSpectralMasteryAbilities.tuning(execution);
+        int mode = tuning.integer(AbyssalSpectralMasteryTuning.Setting.MODE, 0);
         Map<UUID, Integer> procCounts = PASSIVE_PROCS.get(world);
         int proc = nextPassiveProc(procCounts == null ? 0 : procCounts.getOrDefault(owner.getUuid(), 0));
         int cloneCount = passiveCloneCount(mode, proc,
-                tuning.integer(Phase2AbilityTuning.Setting.CLONE_COUNT, 1));
+                tuning.integer(AbyssalSpectralMasteryTuning.Setting.CLONE_COUNT, 1));
         List<LivingEntity> targets = findPassiveTargets(world, owner, tuning, cloneCount);
         if (targets.isEmpty()) {
             if ((mode & 2) == 0) {
                 UniqueAbilityApi.cancel(execution);
                 return;
             }
-            int duration = Math.max(1, tuning.integer(Phase2AbilityTuning.Setting.DURATION_TICKS, 80));
+            int duration = Math.max(1, tuning.integer(AbyssalSpectralMasteryTuning.Setting.DURATION_TICKS, 80));
             STORED_PASSIVES.computeIfAbsent(world, ignored -> new HashMap<>())
                     .put(owner.getUuid(), new StoredPassive(stack, now + duration));
             commitPassiveActivation(world, owner, stack, tuning, proc, now);
@@ -148,15 +148,15 @@ public final class GloampiercerAbilityManager {
         commitPassiveActivation(world, owner, stack, tuning, proc, now);
         StoredPassive stored = takeStoredPassive(world, owner, stack, now);
         int seed = owner.getRandom().nextInt();
-        int throwTick = tuning.integer(Phase2AbilityTuning.Setting.FIRE_DELAY_TICKS, 9);
+        int throwTick = tuning.integer(AbyssalSpectralMasteryTuning.Setting.FIRE_DELAY_TICKS, 9);
         float baseDamage = Math.max(1.0F, HelperMethods.abilityScaledDamage(SpellScalingProfile.SOUL, owner, stack,
                 Config.uniqueEffects.gloampiercer.strikeDamageScaling,
                 Config.uniqueEffects.gloampiercer.strikeSpellScaling))
-                * (float) tuning.get(Phase2AbilityTuning.Setting.PROJECTILE_DAMAGE_MULTIPLIER, 1);
+                * (float) tuning.get(AbyssalSpectralMasteryTuning.Setting.PROJECTILE_DAMAGE_MULTIPLIER, 1);
         List<PassiveTarget> strikes = new ArrayList<>();
         for (int index = 0; index < targets.size(); index++) {
             strikes.add(new PassiveTarget(targets.get(index), index == 0 ? 1.0F
-                    : (float) tuning.get(Phase2AbilityTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, 1)));
+                    : (float) tuning.get(AbyssalSpectralMasteryTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, 1)));
         }
         if (stored != null) strikes.add(new PassiveTarget(targets.getFirst(), 1.0F));
         for (int index = 0; index < strikes.size(); index++) {
@@ -254,10 +254,10 @@ public final class GloampiercerAbilityManager {
     }
 
     private static void commitPassiveActivation(ServerWorld world, LivingEntity owner, ItemStack stack,
-                                                Phase2AbilityTuning tuning, int proc, long now) {
+                                                AbyssalSpectralMasteryTuning tuning, int proc, long now) {
         PASSIVE_PROCS.computeIfAbsent(world, ignored -> new HashMap<>()).put(owner.getUuid(), proc);
         int cooldown = SimplySwordsAPI.getEffectiveWeaponCooldownTicks(stack, owner,
-                tuning.integer(Phase2AbilityTuning.Setting.PASSIVE_COOLDOWN_TICKS,
+                tuning.integer(AbyssalSpectralMasteryTuning.Setting.PASSIVE_COOLDOWN_TICKS,
                         Config.uniqueEffects.gloampiercer.passiveCooldown));
         LAST_PASSIVE.computeIfAbsent(world, ignored -> new HashMap<>())
                 .put(owner.getUuid(), now + cooldown);
@@ -339,8 +339,8 @@ public final class GloampiercerAbilityManager {
     private static void guideOwner(LivingEntity owner, ActiveChannel channel, long age) {
         int liftTicks = Math.min(10, Math.max(4, channel.duration / 4));
         int releaseTick = Math.max(liftTicks, channel.duration - 8);
-        double retention = MathHelper.clamp(Phase2UniqueAbilities.tuning(channel.execution).get(
-                Phase2AbilityTuning.Setting.MOVEMENT_RETENTION,
+        double retention = MathHelper.clamp(AbyssalSpectralMasteryAbilities.tuning(channel.execution).get(
+                AbyssalSpectralMasteryTuning.Setting.MOVEMENT_RETENTION,
                 Config.uniqueEffects.gloampiercer.movementRetention), 0.0, 1.0);
         Vec3d velocity = owner.getVelocity();
         if (age < releaseTick) {
@@ -365,11 +365,11 @@ public final class GloampiercerAbilityManager {
 
     private static void fireScheduledSpears(ServerWorld world, LivingEntity owner,
                                              ActiveChannel channel, long age) {
-        int count = Math.clamp(Phase2UniqueAbilities.tuning(channel.execution).integer(
-                Phase2AbilityTuning.Setting.SPEAR_COUNT, Config.uniqueEffects.gloampiercer.spearCount), 3, 36);
-        Phase2AbilityTuning tuning = Phase2UniqueAbilities.tuning(channel.execution);
-        int startTick = tuning.integer(Phase2AbilityTuning.Setting.FIRE_DELAY_TICKS, FIRE_START_TICK);
-        int endMargin = tuning.integer(Phase2AbilityTuning.Setting.THRESHOLD, FIRE_END_MARGIN);
+        int count = Math.clamp(AbyssalSpectralMasteryAbilities.tuning(channel.execution).integer(
+                AbyssalSpectralMasteryTuning.Setting.SPEAR_COUNT, Config.uniqueEffects.gloampiercer.spearCount), 3, 36);
+        AbyssalSpectralMasteryTuning tuning = AbyssalSpectralMasteryAbilities.tuning(channel.execution);
+        int startTick = tuning.integer(AbyssalSpectralMasteryTuning.Setting.FIRE_DELAY_TICKS, FIRE_START_TICK);
+        int endMargin = tuning.integer(AbyssalSpectralMasteryTuning.Setting.THRESHOLD, FIRE_END_MARGIN);
         int endTick = Math.max(startTick + 1, channel.duration - endMargin);
         if (age < startTick) {
             return;
@@ -390,9 +390,9 @@ public final class GloampiercerAbilityManager {
         Vec3d origin = sourceIndex == 0
                 ? owner.getPos().add(0.0, owner.getHeight() * 0.68, 0.0)
                 : cloneHandOrigin(channel.clonePositions.get(sourceIndex - 1), channel.center);
-        Phase2AbilityTuning tuning = Phase2UniqueAbilities.tuning(channel.execution);
-        int mode = tuning.integer(Phase2AbilityTuning.Setting.MODE, 0);
-        int groundInterval = tuning.integer(Phase2AbilityTuning.Setting.INTERVAL_TICKS, 3);
+        AbyssalSpectralMasteryTuning tuning = AbyssalSpectralMasteryAbilities.tuning(channel.execution);
+        int mode = tuning.integer(AbyssalSpectralMasteryTuning.Setting.MODE, 0);
+        int groundInterval = tuning.integer(AbyssalSpectralMasteryTuning.Setting.INTERVAL_TICKS, 3);
         boolean groundStrike = (mode & 16) != 0 || (mode & 32) == 0 && index % groundInterval == groundInterval - 1;
         LivingEntity target = groundStrike ? null : selectBarrageTarget(world, owner, channel, index);
         if (target != null && (mode & 32) != 0) {
@@ -401,7 +401,7 @@ public final class GloampiercerAbilityManager {
         Vec3d destination = target == null
                 ? (mode & 32) != 0 && channel.royalDestination != null ? channel.royalDestination
                 : groundStrikePosition(world, channel.center, index, count,
-                        tuning.get(Phase2AbilityTuning.Setting.RADIUS, Config.uniqueEffects.gloampiercer.barrageRadius))
+                        tuning.get(AbyssalSpectralMasteryTuning.Setting.RADIUS, Config.uniqueEffects.gloampiercer.barrageRadius))
                 : target.getPos().add(0.0, target.getHeight() * 0.55, 0.0);
         launchSpear(world, owner, channel.stack, origin, destination, target, channel.damage, channel.execution);
         if (sourceIndex == 0) {
@@ -417,10 +417,10 @@ public final class GloampiercerAbilityManager {
     private static void launchSpear(ServerWorld world, LivingEntity owner, ItemStack stack,
                                     Vec3d origin, Vec3d destination, LivingEntity target, float damage,
                                     UniqueAbilityExecution execution) {
-        Phase2AbilityTuning tuning = Phase2UniqueAbilities.tuning(execution);
+        AbyssalSpectralMasteryTuning tuning = AbyssalSpectralMasteryAbilities.tuning(execution);
         GloampiercerSpearEntity spear = new GloampiercerSpearEntity(world, owner, stack,
                 origin, destination, target, damage,
-                Math.max(0.1, tuning.get(Phase2AbilityTuning.Setting.PROJECTILE_SPEED,
+                Math.max(0.1, tuning.get(AbyssalSpectralMasteryTuning.Setting.PROJECTILE_SPEED,
                         Config.uniqueEffects.gloampiercer.projectileSpeed)), execution);
         world.spawnEntity(spear);
     }
@@ -468,16 +468,16 @@ public final class GloampiercerAbilityManager {
     }
 
     private static List<LivingEntity> findPassiveTargets(ServerWorld world, LivingEntity owner,
-                                                          Phase2AbilityTuning tuning, int cap) {
+                                                          AbyssalSpectralMasteryTuning tuning, int cap) {
         double minimum = Math.max(0.0, Config.uniqueEffects.gloampiercer.passiveMinRange);
-        double maximum = Math.max(minimum + 0.1, tuning.get(Phase2AbilityTuning.Setting.RANGE,
+        double maximum = Math.max(minimum + 0.1, tuning.get(AbyssalSpectralMasteryTuning.Setting.RANGE,
                 Config.uniqueEffects.gloampiercer.passiveMaxRange));
         double minimumSquared = minimum * minimum;
         double maximumSquared = maximum * maximum;
         double threshold = Math.cos(Math.toRadians(
-                MathHelper.clamp(tuning.get(Phase2AbilityTuning.Setting.CONE_DEGREES,
+                MathHelper.clamp(tuning.get(AbyssalSpectralMasteryTuning.Setting.CONE_DEGREES,
                         Config.uniqueEffects.gloampiercer.passiveConeDegrees), 1.0, 180.0) * 0.5));
-        boolean nearestFirst = (tuning.integer(Phase2AbilityTuning.Setting.MODE, 0) & 8) != 0;
+        boolean nearestFirst = (tuning.integer(AbyssalSpectralMasteryTuning.Setting.MODE, 0) & 8) != 0;
         Vec3d look = owner.getRotationVec(1.0F).normalize();
         return world.getEntitiesByClass(LivingEntity.class, owner.getBoundingBox().expand(maximum),
                         entity -> entity != owner && entity.isAlive() && !entity.isRemoved()
@@ -530,12 +530,12 @@ public final class GloampiercerAbilityManager {
                     .add(0.0, height, 0.0);
             channel.clonePositions.add(position);
             int seed = owner.getRandom().nextInt();
-            int spearCount = Math.clamp(Phase2UniqueAbilities.tuning(channel.execution).integer(
-                    Phase2AbilityTuning.Setting.SPEAR_COUNT, Config.uniqueEffects.gloampiercer.spearCount), 3, 36);
+            int spearCount = Math.clamp(AbyssalSpectralMasteryAbilities.tuning(channel.execution).integer(
+                    AbyssalSpectralMasteryTuning.Setting.SPEAR_COUNT, Config.uniqueEffects.gloampiercer.spearCount), 3, 36);
             int sourceCount = cloneCount + 1;
-            Phase2AbilityTuning tuning = Phase2UniqueAbilities.tuning(channel.execution);
-            int startTick = tuning.integer(Phase2AbilityTuning.Setting.FIRE_DELAY_TICKS, FIRE_START_TICK);
-            int endMargin = tuning.integer(Phase2AbilityTuning.Setting.THRESHOLD, FIRE_END_MARGIN);
+            AbyssalSpectralMasteryTuning tuning = AbyssalSpectralMasteryAbilities.tuning(channel.execution);
+            int startTick = tuning.integer(AbyssalSpectralMasteryTuning.Setting.FIRE_DELAY_TICKS, FIRE_START_TICK);
+            int endMargin = tuning.integer(AbyssalSpectralMasteryTuning.Setting.THRESHOLD, FIRE_END_MARGIN);
             int firstSpear = index + 1;
             int firstThrow = firstSpear < spearCount
                     ? scheduledFireTick(firstSpear, spearCount, channel.duration, startTick, endMargin)
@@ -718,23 +718,23 @@ public final class GloampiercerAbilityManager {
     private record StoredPassive(ItemStack stack, long expiresAt) {
     }
 
-    private static Phase2AbilityTuning baseTuning(int cooldown, int duration, int spears, int clones) {
-        return Phase2AbilityTuning.EMPTY
-                .with(Phase2AbilityTuning.Setting.COOLDOWN_TICKS, cooldown)
-                .with(Phase2AbilityTuning.Setting.CHANNEL_DURATION_TICKS, duration)
-                .with(Phase2AbilityTuning.Setting.SPEAR_COUNT, spears)
-                .with(Phase2AbilityTuning.Setting.CLONE_COUNT, clones)
-                .with(Phase2AbilityTuning.Setting.PROJECTILE_SPEED, Config.uniqueEffects.gloampiercer.projectileSpeed)
-                .with(Phase2AbilityTuning.Setting.PROJECTILE_DAMAGE_MULTIPLIER, 1)
-                .with(Phase2AbilityTuning.Setting.PASSIVE_COOLDOWN_TICKS, Config.uniqueEffects.gloampiercer.passiveCooldown)
-                .with(Phase2AbilityTuning.Setting.FIRE_DELAY_TICKS, 9)
-                .with(Phase2AbilityTuning.Setting.CONE_DEGREES, Config.uniqueEffects.gloampiercer.passiveConeDegrees)
-                .with(Phase2AbilityTuning.Setting.RANGE, Config.uniqueEffects.gloampiercer.passiveMaxRange)
-                .with(Phase2AbilityTuning.Setting.EXPLOSION_RADIUS, Config.uniqueEffects.gloampiercer.explosionRadius)
-                .with(Phase2AbilityTuning.Setting.TRIGGER_RADIUS, Config.uniqueEffects.gloampiercer.triggerRadius)
-                .with(Phase2AbilityTuning.Setting.EMBEDDED_DURATION_TICKS, Config.uniqueEffects.gloampiercer.embeddedDuration)
-                .with(Phase2AbilityTuning.Setting.STAIN_RADIUS, Config.uniqueEffects.gloampiercer.stainRadius)
-                .with(Phase2AbilityTuning.Setting.STAIN_DURATION_TICKS, Config.uniqueEffects.gloampiercer.stainDuration)
-                .with(Phase2AbilityTuning.Setting.STAIN_AMPLIFIER, Config.uniqueEffects.gloampiercer.stainSlowAmplifier);
+    private static AbyssalSpectralMasteryTuning baseTuning(int cooldown, int duration, int spears, int clones) {
+        return AbyssalSpectralMasteryTuning.EMPTY
+                .with(AbyssalSpectralMasteryTuning.Setting.COOLDOWN_TICKS, cooldown)
+                .with(AbyssalSpectralMasteryTuning.Setting.CHANNEL_DURATION_TICKS, duration)
+                .with(AbyssalSpectralMasteryTuning.Setting.SPEAR_COUNT, spears)
+                .with(AbyssalSpectralMasteryTuning.Setting.CLONE_COUNT, clones)
+                .with(AbyssalSpectralMasteryTuning.Setting.PROJECTILE_SPEED, Config.uniqueEffects.gloampiercer.projectileSpeed)
+                .with(AbyssalSpectralMasteryTuning.Setting.PROJECTILE_DAMAGE_MULTIPLIER, 1)
+                .with(AbyssalSpectralMasteryTuning.Setting.PASSIVE_COOLDOWN_TICKS, Config.uniqueEffects.gloampiercer.passiveCooldown)
+                .with(AbyssalSpectralMasteryTuning.Setting.FIRE_DELAY_TICKS, 9)
+                .with(AbyssalSpectralMasteryTuning.Setting.CONE_DEGREES, Config.uniqueEffects.gloampiercer.passiveConeDegrees)
+                .with(AbyssalSpectralMasteryTuning.Setting.RANGE, Config.uniqueEffects.gloampiercer.passiveMaxRange)
+                .with(AbyssalSpectralMasteryTuning.Setting.EXPLOSION_RADIUS, Config.uniqueEffects.gloampiercer.explosionRadius)
+                .with(AbyssalSpectralMasteryTuning.Setting.TRIGGER_RADIUS, Config.uniqueEffects.gloampiercer.triggerRadius)
+                .with(AbyssalSpectralMasteryTuning.Setting.EMBEDDED_DURATION_TICKS, Config.uniqueEffects.gloampiercer.embeddedDuration)
+                .with(AbyssalSpectralMasteryTuning.Setting.STAIN_RADIUS, Config.uniqueEffects.gloampiercer.stainRadius)
+                .with(AbyssalSpectralMasteryTuning.Setting.STAIN_DURATION_TICKS, Config.uniqueEffects.gloampiercer.stainDuration)
+                .with(AbyssalSpectralMasteryTuning.Setting.STAIN_AMPLIFIER, Config.uniqueEffects.gloampiercer.stainSlowAmplifier);
     }
 }

@@ -1,8 +1,8 @@
 package net.sweenus.simplyswords.world;
 
 import net.minecraft.nbt.NbtCompound;
-import net.sweenus.simplyswords.api.ability.Phase2AbilityTuning;
-import net.sweenus.simplyswords.api.ability.Phase2AbilityTuning.Setting;
+import net.sweenus.simplyswords.api.ability.AbyssalSpectralMasteryTuning;
+import net.sweenus.simplyswords.api.ability.AbyssalSpectralMasteryTuning.Setting;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -12,7 +12,7 @@ final class WraithfangTuningSnapshotTest {
 
     @Test
     void everyPersistentMasteryFamilySurvivesNbtRoundTrip() {
-        Phase2AbilityTuning tuning = Phase2AbilityTuning.EMPTY
+        AbyssalSpectralMasteryTuning tuning = AbyssalSpectralMasteryTuning.EMPTY
                 .with(Setting.PROJECTILE_DAMAGE_MULTIPLIER, 2.475)
                 .with(Setting.FLIGHT_DAMAGE_PER_TICK, .65)
                 .with(Setting.FLIGHT_DAMAGE_CAP_TICKS, 40)
@@ -40,7 +40,7 @@ final class WraithfangTuningSnapshotTest {
     @Test
     void snapshotUsesIndependentDamageAndDurationSettings() {
         WraithfangTuningSnapshot snapshot = WraithfangTuningSnapshot.fromTuning(
-                Phase2AbilityTuning.EMPTY
+                AbyssalSpectralMasteryTuning.EMPTY
                         .with(Setting.STATUS_DURATION_TICKS, 60)
                         .with(Setting.DASH_STATUS_DURATION_TICKS, 20)
                         .with(Setting.IMPACT_DAMAGE_MULTIPLIER, .35)

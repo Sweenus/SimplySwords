@@ -8,7 +8,7 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
-import net.sweenus.simplyswords.api.ability.Phase6AbilityTuning;
+import net.sweenus.simplyswords.api.ability.StormFrostWaterMasteryTuning;
 import net.sweenus.simplyswords.util.HelperMethods;
 
 import java.util.Comparator;
@@ -52,7 +52,7 @@ public final class IcewhisperAbilityManager {
     }
 
     // Permafrost resolves its tuning once per pulse; every owner-side node reads that snapshot.
-    public static void onAuraPulse(ServerWorld world, LivingEntity owner, Phase6AbilityTuning tuning, double radius) {
+    public static void onAuraPulse(ServerWorld world, LivingEntity owner, StormFrostWaterMasteryTuning tuning, double radius) {
         if (owner == null || world == null) {
             return;
         }
@@ -107,7 +107,7 @@ public final class IcewhisperAbilityManager {
 
     // Cold Snap: an enemy that has been in Permafrost for the dwell window takes one extra pulse.
     public static double dwellMultiplier(LivingEntity owner, LivingEntity target, long now,
-                                         Phase6AbilityTuning tuning) {
+                                         StormFrostWaterMasteryTuning tuning) {
         double multiplier = tuning.get(s("ICEWHISPER_DWELL_DAMAGE_MULTIPLIER"), 0);
         int dwell = tuning.integer(s("ICEWHISPER_DWELL_TICKS"), 0);
         if (owner == null || target == null || multiplier <= 0 || dwell <= 0) {
@@ -181,7 +181,7 @@ public final class IcewhisperAbilityManager {
         }
     }
 
-    public static void onStormStarted(LivingEntity owner, Phase6AbilityTuning tuning, long expiresAt) {
+    public static void onStormStarted(LivingEntity owner, StormFrostWaterMasteryTuning tuning, long expiresAt) {
         if (owner == null || !(owner.getWorld() instanceof ServerWorld world)) {
             return;
         }
@@ -225,7 +225,7 @@ public final class IcewhisperAbilityManager {
     }
 
     // Fracture reads the stacks built by earlier hits and then counts this one.
-    public static double fractureMultiplier(LivingEntity owner, long now, Phase6AbilityTuning tuning) {
+    public static double fractureMultiplier(LivingEntity owner, long now, StormFrostWaterMasteryTuning tuning) {
         double perStack = tuning.get(s("ICEWHISPER_FRACTURE_PER_STACK_MULTIPLIER"), 0);
         int window = tuning.integer(s("ICEWHISPER_FRACTURE_WINDOW_TICKS"), 0);
         int cap = tuning.integer(s("ICEWHISPER_FRACTURE_STACK_CAP"), 0);
@@ -352,8 +352,8 @@ public final class IcewhisperAbilityManager {
         return state;
     }
 
-    private static Phase6AbilityTuning.Setting s(String name) {
-        return Phase6AbilityTuning.Setting.valueOf(name);
+    private static StormFrostWaterMasteryTuning.Setting s(String name) {
+        return StormFrostWaterMasteryTuning.Setting.valueOf(name);
     }
 
     private static final class FreezeFloor {
@@ -369,10 +369,10 @@ public final class IcewhisperAbilityManager {
         private final Map<UUID, Long> dwellSince = new HashMap<>();
         private final Map<UUID, Long> dwellReadyAt = new HashMap<>();
         private final Map<UUID, FreezeFloor> freezeFloor = new HashMap<>();
-        private Phase6AbilityTuning auraTuning;
+        private StormFrostWaterMasteryTuning auraTuning;
         private long auraTuningExpiresAt;
         private double auraRadius;
-        private Phase6AbilityTuning stormTuning;
+        private StormFrostWaterMasteryTuning stormTuning;
         private long stormExpiresAt;
         private long rebukeReadyAt;
         private long fractureExpiresAt;

@@ -19,8 +19,8 @@ import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
-import net.sweenus.simplyswords.api.ability.Phase6AbilityTuning;
-import net.sweenus.simplyswords.api.ability.Phase6UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.StormFrostWaterMasteryTuning;
+import net.sweenus.simplyswords.api.ability.StormFrostWaterMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
@@ -36,7 +36,7 @@ import net.sweenus.simplyswords.util.Styles;
 import net.sweenus.simplyswords.world.LivingEntityAbilityMovementManager;
 import net.sweenus.simplyswords.world.LivyatanWaveManager;
 import net.sweenus.simplyswords.world.LivyatanAbilityManager;
-import net.sweenus.simplyswords.world.Phase6CombatManager;
+import net.sweenus.simplyswords.world.StormFrostWaterMasteryCombatManager;
 import net.sweenus.simplyswords.world.PlayerWeaponAbilityManager;
 import net.sweenus.simplyswords.util.WeaponManaCost;
 
@@ -93,12 +93,12 @@ public class LivyatanSwordItem extends UniqueSwordItem implements UniqueWeaponAc
         if (context.target() == null || !HelperMethods.checkAbilityTarget(context.target(), context.actor())) {
             return false;
         }
-        UniqueAbilityExecution execution = Phase6CombatManager.beginActive(
-                Phase6UniqueAbilities.LIVYATAN_THROW, context, Config.uniqueEffects.livyatan.cooldown);
-        Phase6AbilityTuning tuning = Phase6UniqueAbilities.tuning(execution);
-        UniqueAbilityExecution returnExecution = Phase6CombatManager.preparePassive(
-                Phase6UniqueAbilities.LIVYATAN_RETURN, context.world(), context.stack(), context.actor(), context.target());
-        Phase6AbilityTuning returnTuning = Phase6UniqueAbilities.tuning(returnExecution);
+        UniqueAbilityExecution execution = StormFrostWaterMasteryCombatManager.beginActive(
+                StormFrostWaterMasteryAbilities.LIVYATAN_THROW, context, Config.uniqueEffects.livyatan.cooldown);
+        StormFrostWaterMasteryTuning tuning = StormFrostWaterMasteryAbilities.tuning(execution);
+        UniqueAbilityExecution returnExecution = StormFrostWaterMasteryCombatManager.preparePassive(
+                StormFrostWaterMasteryAbilities.LIVYATAN_RETURN, context.world(), context.stack(), context.actor(), context.target());
+        StormFrostWaterMasteryTuning returnTuning = StormFrostWaterMasteryAbilities.tuning(returnExecution);
         UniqueAbilityApi.takeStartedExecution();
         UniqueAbilityApi.publishStartedExecution(execution);
         LivyatanEntity livyatanEntity = createEntity(context.world(), context.actor(),
@@ -127,8 +127,8 @@ public class LivyatanSwordItem extends UniqueSwordItem implements UniqueWeaponAc
     }
 
     private static LivyatanEntity createEntity(World world, LivingEntity actor, ItemStack stack,
-                                               Phase6AbilityTuning tuning, UniqueAbilityExecution execution,
-                                               Phase6AbilityTuning returnTuning,
+                                               StormFrostWaterMasteryTuning tuning, UniqueAbilityExecution execution,
+                                               StormFrostWaterMasteryTuning returnTuning,
                                                UniqueAbilityExecution returnExecution, int cooldown) {
         LivyatanEntity entity = new LivyatanEntity(world, actor, stack);
         entity.primaryBaseDamage = HelperMethods.abilityScaledDamage("frost", actor, stack,
@@ -229,7 +229,7 @@ public class LivyatanSwordItem extends UniqueSwordItem implements UniqueWeaponAc
         public double returnLightningSkyHeight = 12.0;
     }
 
-    private static Phase6AbilityTuning.Setting s(String name) {
-        return Phase6AbilityTuning.Setting.valueOf(name);
+    private static StormFrostWaterMasteryTuning.Setting s(String name) {
+        return StormFrostWaterMasteryTuning.Setting.valueOf(name);
     }
 }

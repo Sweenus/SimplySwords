@@ -1,8 +1,8 @@
 package net.sweenus.simplyswords.world;
 
 import net.minecraft.nbt.NbtCompound;
-import net.sweenus.simplyswords.api.ability.Phase2AbilityTuning;
-import net.sweenus.simplyswords.api.ability.Phase2UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.AbyssalSpectralMasteryTuning;
+import net.sweenus.simplyswords.api.ability.AbyssalSpectralMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.config.Config;
 
@@ -35,60 +35,60 @@ public record WraithmawTuningSnapshot(
     private static final String NBT_KEY = "wraithmaw_tuning";
 
     public static WraithmawTuningSnapshot from(UniqueAbilityExecution execution) {
-        return fromTuning(execution == null ? Phase2AbilityTuning.EMPTY
-                : Phase2UniqueAbilities.tuning(execution));
+        return fromTuning(execution == null ? AbyssalSpectralMasteryTuning.EMPTY
+                : AbyssalSpectralMasteryAbilities.tuning(execution));
     }
 
-    static WraithmawTuningSnapshot fromTuning(Phase2AbilityTuning t) {
+    static WraithmawTuningSnapshot fromTuning(AbyssalSpectralMasteryTuning t) {
         var config = Config.uniqueEffects.wraithmaw;
         return new WraithmawTuningSnapshot(
-                Math.max(0, t.integer(Phase2AbilityTuning.Setting.MATERIALIZE_TICKS, 12)),
-                Math.max(1, t.integer(Phase2AbilityTuning.Setting.INTERVAL_TICKS, 2)),
-                Math.max(0.05, t.get(Phase2AbilityTuning.Setting.FALL_SPEED, 1.25)),
-                Math.max(0, t.get(Phase2AbilityTuning.Setting.IMPACT_RADIUS, 0)),
-                Math.max(0, t.get(Phase2AbilityTuning.Setting.IMPACT_DAMAGE_MULTIPLIER, 0)),
-                Math.clamp(t.integer(Phase2AbilityTuning.Setting.IMPACT_TARGET_CAP, 0), 0, 64),
-                Math.max(20, t.integer(Phase2AbilityTuning.Setting.EMBEDDED_DURATION_TICKS,
+                Math.max(0, t.integer(AbyssalSpectralMasteryTuning.Setting.MATERIALIZE_TICKS, 12)),
+                Math.max(1, t.integer(AbyssalSpectralMasteryTuning.Setting.INTERVAL_TICKS, 2)),
+                Math.max(0.05, t.get(AbyssalSpectralMasteryTuning.Setting.FALL_SPEED, 1.25)),
+                Math.max(0, t.get(AbyssalSpectralMasteryTuning.Setting.IMPACT_RADIUS, 0)),
+                Math.max(0, t.get(AbyssalSpectralMasteryTuning.Setting.IMPACT_DAMAGE_MULTIPLIER, 0)),
+                Math.clamp(t.integer(AbyssalSpectralMasteryTuning.Setting.IMPACT_TARGET_CAP, 0), 0, 64),
+                Math.max(20, t.integer(AbyssalSpectralMasteryTuning.Setting.EMBEDDED_DURATION_TICKS,
                         config.embeddedDuration)),
-                Math.max(0.25, t.get(Phase2AbilityTuning.Setting.STAIN_RADIUS, config.stainRadius)),
-                Math.max(20, t.integer(Phase2AbilityTuning.Setting.STAIN_DURATION_TICKS,
+                Math.max(0.25, t.get(AbyssalSpectralMasteryTuning.Setting.STAIN_RADIUS, config.stainRadius)),
+                Math.max(20, t.integer(AbyssalSpectralMasteryTuning.Setting.STAIN_DURATION_TICKS,
                         config.stainDuration)),
-                Math.clamp(t.integer(Phase2AbilityTuning.Setting.STAIN_AMPLIFIER,
+                Math.clamp(t.integer(AbyssalSpectralMasteryTuning.Setting.STAIN_AMPLIFIER,
                         config.stainSlowAmplifier), 0, 4),
-                Math.max(1, t.integer(Phase2AbilityTuning.Setting.STATUS_DURATION_TICKS, 11)),
-                t.integer(Phase2AbilityTuning.Setting.MODE, 0),
-                Math.clamp(t.integer(Phase2AbilityTuning.Setting.ORBIT_CAP, config.maxRecovered), 1, 12),
-                Math.max(0.1, t.get(Phase2AbilityTuning.Setting.RECOVERY_RADIUS, 1.5)),
-                Math.max(20, t.integer(Phase2AbilityTuning.Setting.ORBIT_DURATION_TICKS,
+                Math.max(1, t.integer(AbyssalSpectralMasteryTuning.Setting.STATUS_DURATION_TICKS, 11)),
+                t.integer(AbyssalSpectralMasteryTuning.Setting.MODE, 0),
+                Math.clamp(t.integer(AbyssalSpectralMasteryTuning.Setting.ORBIT_CAP, config.maxRecovered), 1, 12),
+                Math.max(0.1, t.get(AbyssalSpectralMasteryTuning.Setting.RECOVERY_RADIUS, 1.5)),
+                Math.max(20, t.integer(AbyssalSpectralMasteryTuning.Setting.ORBIT_DURATION_TICKS,
                         config.recoveredDuration)),
-                Math.max(0, t.integer(Phase2AbilityTuning.Setting.LOCKOUT_TICKS, 0)),
-                Math.max(0.1, t.get(Phase2AbilityTuning.Setting.LAUNCH_SPEED, config.launchSpeed)),
-                Math.max(1, t.get(Phase2AbilityTuning.Setting.LAUNCH_RANGE, config.launchRange)),
-                Math.max(1, t.integer(Phase2AbilityTuning.Setting.PROJECTILE_LIFETIME, 80)),
-                Math.max(0, t.get(Phase2AbilityTuning.Setting.HOMING_RANGE, config.homingRange)),
-                Math.max(0, t.get(Phase2AbilityTuning.Setting.HOMING_TURN_DEGREES, config.homingTurnRate)),
-                Math.max(0, t.get(Phase2AbilityTuning.Setting.PROJECTILE_DAMAGE_MULTIPLIER, 1)),
-                Math.clamp(t.integer(Phase2AbilityTuning.Setting.LAUNCH_COUNT, 1), 1, 16),
-                Math.max(0, t.get(Phase2AbilityTuning.Setting.BONUS_PER_TRIGGER, 0)),
-                Math.max(0, t.get(Phase2AbilityTuning.Setting.BONUS_CAP, 0)),
-                Math.max(0, t.get(Phase2AbilityTuning.Setting.GLOAM_VULNERABILITY_BONUS, 0)),
-                Math.max(0, t.get(Phase2AbilityTuning.Setting.HAUNT_RANGE, 0)),
-                Math.max(1, t.integer(Phase2AbilityTuning.Setting.HAUNT_INTERVAL_TICKS, 40)),
-                Math.max(0, t.get(Phase2AbilityTuning.Setting.HAUNT_DAMAGE_MULTIPLIER, 0)),
-                Math.clamp(t.integer(Phase2AbilityTuning.Setting.HAUNT_TARGET_CAP, 0), 0, 64),
-                Math.max(0, t.get(Phase2AbilityTuning.Setting.BURIAL_RANGE, 0)),
-                Math.max(0, t.integer(Phase2AbilityTuning.Setting.STAIN_EXTENSION_TICKS, 0)),
-                Math.max(0, t.integer(Phase2AbilityTuning.Setting.EXTRA_DURATION_CAP, 0)),
-                Math.max(0, t.get(Phase2AbilityTuning.Setting.RECALL_RANGE, 0)),
-                Math.clamp(t.integer(Phase2AbilityTuning.Setting.RECALL_TARGET_CAP, 0), 0, 64),
-                Math.max(0, t.get(Phase2AbilityTuning.Setting.RECALL_PULL_STRENGTH, 0)),
-                Math.max(0, t.get(Phase2AbilityTuning.Setting.GRAVEWALK_RANGE, 0)),
-                Math.max(0, t.get(Phase2AbilityTuning.Setting.GRAVEWALK_SPEED, 0)),
-                Math.max(0, t.get(Phase2AbilityTuning.Setting.GRAVEWALK_DAMAGE_MULTIPLIER, 0)),
-                Math.max(0, t.get(Phase2AbilityTuning.Setting.BURST_RANGE, 0)),
-                Math.clamp(t.integer(Phase2AbilityTuning.Setting.BURST_TARGET_CAP, 0), 0, 64),
-                Math.max(0, t.get(Phase2AbilityTuning.Setting.BURST_DAMAGE_MULTIPLIER, 0)),
-                Math.max(0, t.integer(Phase2AbilityTuning.Setting.BURST_WINDOW_TICKS, 0)));
+                Math.max(0, t.integer(AbyssalSpectralMasteryTuning.Setting.LOCKOUT_TICKS, 0)),
+                Math.max(0.1, t.get(AbyssalSpectralMasteryTuning.Setting.LAUNCH_SPEED, config.launchSpeed)),
+                Math.max(1, t.get(AbyssalSpectralMasteryTuning.Setting.LAUNCH_RANGE, config.launchRange)),
+                Math.max(1, t.integer(AbyssalSpectralMasteryTuning.Setting.PROJECTILE_LIFETIME, 80)),
+                Math.max(0, t.get(AbyssalSpectralMasteryTuning.Setting.HOMING_RANGE, config.homingRange)),
+                Math.max(0, t.get(AbyssalSpectralMasteryTuning.Setting.HOMING_TURN_DEGREES, config.homingTurnRate)),
+                Math.max(0, t.get(AbyssalSpectralMasteryTuning.Setting.PROJECTILE_DAMAGE_MULTIPLIER, 1)),
+                Math.clamp(t.integer(AbyssalSpectralMasteryTuning.Setting.LAUNCH_COUNT, 1), 1, 16),
+                Math.max(0, t.get(AbyssalSpectralMasteryTuning.Setting.BONUS_PER_TRIGGER, 0)),
+                Math.max(0, t.get(AbyssalSpectralMasteryTuning.Setting.BONUS_CAP, 0)),
+                Math.max(0, t.get(AbyssalSpectralMasteryTuning.Setting.GLOAM_VULNERABILITY_BONUS, 0)),
+                Math.max(0, t.get(AbyssalSpectralMasteryTuning.Setting.HAUNT_RANGE, 0)),
+                Math.max(1, t.integer(AbyssalSpectralMasteryTuning.Setting.HAUNT_INTERVAL_TICKS, 40)),
+                Math.max(0, t.get(AbyssalSpectralMasteryTuning.Setting.HAUNT_DAMAGE_MULTIPLIER, 0)),
+                Math.clamp(t.integer(AbyssalSpectralMasteryTuning.Setting.HAUNT_TARGET_CAP, 0), 0, 64),
+                Math.max(0, t.get(AbyssalSpectralMasteryTuning.Setting.BURIAL_RANGE, 0)),
+                Math.max(0, t.integer(AbyssalSpectralMasteryTuning.Setting.STAIN_EXTENSION_TICKS, 0)),
+                Math.max(0, t.integer(AbyssalSpectralMasteryTuning.Setting.EXTRA_DURATION_CAP, 0)),
+                Math.max(0, t.get(AbyssalSpectralMasteryTuning.Setting.RECALL_RANGE, 0)),
+                Math.clamp(t.integer(AbyssalSpectralMasteryTuning.Setting.RECALL_TARGET_CAP, 0), 0, 64),
+                Math.max(0, t.get(AbyssalSpectralMasteryTuning.Setting.RECALL_PULL_STRENGTH, 0)),
+                Math.max(0, t.get(AbyssalSpectralMasteryTuning.Setting.GRAVEWALK_RANGE, 0)),
+                Math.max(0, t.get(AbyssalSpectralMasteryTuning.Setting.GRAVEWALK_SPEED, 0)),
+                Math.max(0, t.get(AbyssalSpectralMasteryTuning.Setting.GRAVEWALK_DAMAGE_MULTIPLIER, 0)),
+                Math.max(0, t.get(AbyssalSpectralMasteryTuning.Setting.BURST_RANGE, 0)),
+                Math.clamp(t.integer(AbyssalSpectralMasteryTuning.Setting.BURST_TARGET_CAP, 0), 0, 64),
+                Math.max(0, t.get(AbyssalSpectralMasteryTuning.Setting.BURST_DAMAGE_MULTIPLIER, 0)),
+                Math.max(0, t.integer(AbyssalSpectralMasteryTuning.Setting.BURST_WINDOW_TICKS, 0)));
     }
 
     public boolean hasMode(int bit) {

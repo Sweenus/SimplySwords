@@ -16,8 +16,8 @@ import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
-import net.sweenus.simplyswords.api.ability.Phase8AbilityTuning;
-import net.sweenus.simplyswords.api.ability.Phase8UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.DeathShadowBloodMasteryTuning;
+import net.sweenus.simplyswords.api.ability.DeathShadowBloodMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
@@ -28,7 +28,7 @@ import net.sweenus.simplyswords.item.interfaces.UniqueWeaponSecondaryAction;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.Styles;
 import net.sweenus.simplyswords.world.BloodwakeAbilityManager;
-import net.sweenus.simplyswords.world.Phase8CombatManager;
+import net.sweenus.simplyswords.world.DeathShadowBloodMasteryCombatManager;
 
 import java.util.List;
 
@@ -83,9 +83,9 @@ public class BloodwakeSwordItem extends UniqueSwordItem
             return false;
         }
         int tier = BloodwakeAbilityManager.getFrenzy(context.stack());
-        UniqueAbilityExecution execution = Phase8CombatManager.beginActive(
-                Phase8UniqueAbilities.BLOOD_RITES, context, Config.uniqueEffects.bloodwake.cooldown);
-        Phase8AbilityTuning tuning = Phase8UniqueAbilities.tuning(execution);
+        UniqueAbilityExecution execution = DeathShadowBloodMasteryCombatManager.beginActive(
+                DeathShadowBloodMasteryAbilities.BLOOD_RITES, context, Config.uniqueEffects.bloodwake.cooldown);
+        DeathShadowBloodMasteryTuning tuning = DeathShadowBloodMasteryAbilities.tuning(execution);
         if (tuning.flag(1 << 17)) {
             int selected = selectedRite(context.stack());
             if (tier < selected) return false;
@@ -95,7 +95,7 @@ public class BloodwakeSwordItem extends UniqueSwordItem
                 context.hand(), context.facing(), tier, tuning)) {
             return false;
         }
-        Phase8CombatManager.scheduleFinish(context.world(), execution, 1, 1);
+        DeathShadowBloodMasteryCombatManager.scheduleFinish(context.world(), execution, 1, 1);
         BloodwakeAbilityManager.setFrenzy(context.stack(), tuning.flag(1 << 17) ? getFrenzyAfterCost(context.stack(), tier) : 0);
         BloodwakeAbilityManager.recordRite(context.world(), context.actor(), context.stack(), tier, tuning);
         context.actor().swingHand(context.hand() == null ? Hand.MAIN_HAND : context.hand(), true);

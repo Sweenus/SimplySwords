@@ -339,15 +339,15 @@ public final class BuiltinUniqueAbilities {
         UniqueAbilityApi.registerDefinition(STORMS_EDGE_MELEE);
         UniqueAbilityApi.registerDefinition(BRIMSTONE_ERUPTION);
         UniqueAbilityApi.registerDefinition(BRIMSTONE_RITE);
-        Phase2UniqueAbilities.register();
-        Phase3UniqueAbilities.register();
-        Phase4UniqueAbilities.register();
-        Phase5UniqueAbilities.register();
-        Phase6UniqueAbilities.register();
-        Phase7UniqueAbilities.register();
-        Phase8UniqueAbilities.register();
-        Phase9UniqueAbilities.register();
-        Phase10UniqueAbilities.register();
+        AbyssalSpectralMasteryAbilities.register();
+        StormSoulMasteryAbilities.register();
+        LongPathFinalFormsMasteryAbilities.register();
+        FireForgeMasteryAbilities.register();
+        StormFrostWaterMasteryAbilities.register();
+        NatureSwarmMasteryAbilities.register();
+        DeathShadowBloodMasteryAbilities.register();
+        ArcaneCosmicMasteryAbilities.register();
+        MartialCommandEldritchMasteryAbilities.register();
     }
 
     private static Identifier id(String path) {

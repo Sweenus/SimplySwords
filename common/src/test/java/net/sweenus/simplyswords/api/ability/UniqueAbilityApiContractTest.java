@@ -62,40 +62,40 @@ final class UniqueAbilityApiContractTest {
     }
 
     @Test
-    void phase2SettingAdditionsAreDisabledByDefaultAndDoNotDisturbExistingOnes() {
-        Phase2AbilityTuning tuning = Phase2AbilityTuning.EMPTY;
+    void abyssalSpectralSettingAdditionsAreDisabledByDefaultAndDoNotDisturbExistingOnes() {
+        AbyssalSpectralMasteryTuning tuning = AbyssalSpectralMasteryTuning.EMPTY;
 
-        assertEquals(0.0, tuning.get(Phase2AbilityTuning.Setting.REPEAT_WINDOW_TICKS, 0));
-        assertEquals(0.0, tuning.get(Phase2AbilityTuning.Setting.INCOMING_DREAD_THRESHOLD, 0));
-        assertEquals(0.0, tuning.get(Phase2AbilityTuning.Setting.LOW_HEALTH_PERCENT, 0));
-        assertEquals(0.0, tuning.get(Phase2AbilityTuning.Setting.EXECUTE_DREAD_THRESHOLD, 0));
-        assertEquals(0.0, tuning.get(Phase2AbilityTuning.Setting.CLAIM_BONUS_CAP, 0));
-        assertEquals(0.0, tuning.get(Phase2AbilityTuning.Setting.CHAIN_RANGE, 0));
-        assertEquals(0.0, tuning.get(Phase2AbilityTuning.Setting.CHAIN_DELAY_TICKS, 0));
-        assertEquals(0.0, tuning.get(Phase2AbilityTuning.Setting.GLOAM_MOVE_RANGE, 0));
-        assertEquals(0.0, tuning.get(Phase2AbilityTuning.Setting.GLOAM_VULNERABILITY_BONUS, 0));
-        assertEquals(0.0, tuning.get(Phase2AbilityTuning.Setting.HAUNT_RANGE, 0));
-        assertEquals(0.0, tuning.get(Phase2AbilityTuning.Setting.BURIAL_RANGE, 0));
-        assertEquals(0.0, tuning.get(Phase2AbilityTuning.Setting.RECALL_RANGE, 0));
-        assertEquals(0.0, tuning.get(Phase2AbilityTuning.Setting.GRAVEWALK_RANGE, 0));
-        assertEquals(0.0, tuning.get(Phase2AbilityTuning.Setting.BURST_RANGE, 0));
-        assertEquals(0.0, tuning.get(Phase2AbilityTuning.Setting.BURST_WINDOW_TICKS, 0));
-        assertEquals(1.0, tuning.get(Phase2AbilityTuning.Setting.LAUNCH_COUNT, 1));
-        assertEquals(2.0, tuning.with(Phase2AbilityTuning.Setting.HAUNT_INTERVAL_TICKS, 40)
-                .get(Phase2AbilityTuning.Setting.INTERVAL_TICKS, 2));
-        assertEquals(30.0, tuning.get(Phase2AbilityTuning.Setting.REPEAT_WINDOW_TICKS, 30));
-        assertEquals(100.0, tuning.get(Phase2AbilityTuning.Setting.LOW_HEALTH_PERCENT, 140));
-        assertEquals(4.0, tuning.with(Phase2AbilityTuning.Setting.THRESHOLD, 4)
-                .get(Phase2AbilityTuning.Setting.THRESHOLD, 0));
-        assertEquals(0.0, tuning.with(Phase2AbilityTuning.Setting.REPEAT_WINDOW_TICKS, 30)
-                .get(Phase2AbilityTuning.Setting.THRESHOLD, 0));
+        assertEquals(0.0, tuning.get(AbyssalSpectralMasteryTuning.Setting.REPEAT_WINDOW_TICKS, 0));
+        assertEquals(0.0, tuning.get(AbyssalSpectralMasteryTuning.Setting.INCOMING_DREAD_THRESHOLD, 0));
+        assertEquals(0.0, tuning.get(AbyssalSpectralMasteryTuning.Setting.LOW_HEALTH_PERCENT, 0));
+        assertEquals(0.0, tuning.get(AbyssalSpectralMasteryTuning.Setting.EXECUTE_DREAD_THRESHOLD, 0));
+        assertEquals(0.0, tuning.get(AbyssalSpectralMasteryTuning.Setting.CLAIM_BONUS_CAP, 0));
+        assertEquals(0.0, tuning.get(AbyssalSpectralMasteryTuning.Setting.CHAIN_RANGE, 0));
+        assertEquals(0.0, tuning.get(AbyssalSpectralMasteryTuning.Setting.CHAIN_DELAY_TICKS, 0));
+        assertEquals(0.0, tuning.get(AbyssalSpectralMasteryTuning.Setting.GLOAM_MOVE_RANGE, 0));
+        assertEquals(0.0, tuning.get(AbyssalSpectralMasteryTuning.Setting.GLOAM_VULNERABILITY_BONUS, 0));
+        assertEquals(0.0, tuning.get(AbyssalSpectralMasteryTuning.Setting.HAUNT_RANGE, 0));
+        assertEquals(0.0, tuning.get(AbyssalSpectralMasteryTuning.Setting.BURIAL_RANGE, 0));
+        assertEquals(0.0, tuning.get(AbyssalSpectralMasteryTuning.Setting.RECALL_RANGE, 0));
+        assertEquals(0.0, tuning.get(AbyssalSpectralMasteryTuning.Setting.GRAVEWALK_RANGE, 0));
+        assertEquals(0.0, tuning.get(AbyssalSpectralMasteryTuning.Setting.BURST_RANGE, 0));
+        assertEquals(0.0, tuning.get(AbyssalSpectralMasteryTuning.Setting.BURST_WINDOW_TICKS, 0));
+        assertEquals(1.0, tuning.get(AbyssalSpectralMasteryTuning.Setting.LAUNCH_COUNT, 1));
+        assertEquals(2.0, tuning.with(AbyssalSpectralMasteryTuning.Setting.HAUNT_INTERVAL_TICKS, 40)
+                .get(AbyssalSpectralMasteryTuning.Setting.INTERVAL_TICKS, 2));
+        assertEquals(30.0, tuning.get(AbyssalSpectralMasteryTuning.Setting.REPEAT_WINDOW_TICKS, 30));
+        assertEquals(100.0, tuning.get(AbyssalSpectralMasteryTuning.Setting.LOW_HEALTH_PERCENT, 140));
+        assertEquals(4.0, tuning.with(AbyssalSpectralMasteryTuning.Setting.THRESHOLD, 4)
+                .get(AbyssalSpectralMasteryTuning.Setting.THRESHOLD, 0));
+        assertEquals(0.0, tuning.with(AbyssalSpectralMasteryTuning.Setting.REPEAT_WINDOW_TICKS, 30)
+                .get(AbyssalSpectralMasteryTuning.Setting.THRESHOLD, 0));
     }
 
     @Test
-    void phase3SettingAdditionsAreDisabledByDefaultAndDoNotDisturbExistingOnes() {
-        net.sweenus.simplyswords.api.ability.Phase3AbilityTuning tuning =
-                net.sweenus.simplyswords.api.ability.Phase3AbilityTuning.EMPTY;
-        var setting = net.sweenus.simplyswords.api.ability.Phase3AbilityTuning.Setting.class;
+    void stormSoulSettingAdditionsAreDisabledByDefaultAndDoNotDisturbExistingOnes() {
+        net.sweenus.simplyswords.api.ability.StormSoulMasteryTuning tuning =
+                net.sweenus.simplyswords.api.ability.StormSoulMasteryTuning.EMPTY;
+        var setting = net.sweenus.simplyswords.api.ability.StormSoulMasteryTuning.Setting.class;
 
         assertEquals(0.0, tuning.get(Enum.valueOf(setting, "RADIUS_CAP"), 0));
         assertEquals(0.0, tuning.get(Enum.valueOf(setting, "GROWTH_CAP_LIMIT"), 0));
@@ -185,233 +185,250 @@ final class UniqueAbilityApiContractTest {
     }
 
     @Test
-    void phase2DefinitionsAreAdditiveTypedAndBounded() {
+    void abyssalSpectralDefinitionsAreAdditiveTypedAndBounded() {
         List<UniqueAbilityDefinition> definitions = List.of(
-                Phase2UniqueAbilities.WATCHER_DREAD, Phase2UniqueAbilities.WATCHER_OMEN,
-                Phase2UniqueAbilities.DEVOURER_MASS, Phase2UniqueAbilities.DEVOURER_REPRISAL,
-                Phase2UniqueAbilities.WICKPIERCER_THROW, Phase2UniqueAbilities.WICKPIERCER_REVIVE,
-                Phase2UniqueAbilities.GLOAMPIERCER_AMBUSH, Phase2UniqueAbilities.GLOAMPIERCER_BARRAGE,
-                Phase2UniqueAbilities.WRAITHFANG_THROW, Phase2UniqueAbilities.WRAITHMAW_MUSTER);
+                AbyssalSpectralMasteryAbilities.WATCHER_DREAD, AbyssalSpectralMasteryAbilities.WATCHER_OMEN,
+                AbyssalSpectralMasteryAbilities.DEVOURER_MASS, AbyssalSpectralMasteryAbilities.DEVOURER_REPRISAL,
+                AbyssalSpectralMasteryAbilities.WICKPIERCER_THROW, AbyssalSpectralMasteryAbilities.WICKPIERCER_REVIVE,
+                AbyssalSpectralMasteryAbilities.GLOAMPIERCER_AMBUSH, AbyssalSpectralMasteryAbilities.GLOAMPIERCER_BARRAGE,
+                AbyssalSpectralMasteryAbilities.WRAITHFANG_THROW, AbyssalSpectralMasteryAbilities.WRAITHMAW_MUSTER);
         assertEquals(10, definitions.stream().map(UniqueAbilityDefinition::id).distinct().count());
         for (UniqueAbilityDefinition definition : definitions) {
-            assertTrue(definition.supports(Phase2UniqueAbilities.TUNING));
-            assertTrue(definition.supportsEvent(Phase2UniqueAbilities.HIT));
-            assertTrue(definition.supportsEvent(Phase2UniqueAbilities.COLLAPSE));
+            assertTrue(definition.supports(AbyssalSpectralMasteryAbilities.TUNING));
+            assertTrue(definition.supportsEvent(AbyssalSpectralMasteryAbilities.HIT));
+            assertTrue(definition.supportsEvent(AbyssalSpectralMasteryAbilities.COLLAPSE));
         }
-        Phase2AbilityTuning tuning = Phase2AbilityTuning.EMPTY
-                .with(Phase2AbilityTuning.Setting.EXECUTE_THRESHOLD, 5)
-                .with(Phase2AbilityTuning.Setting.TARGET_CAP, 500)
-                .with(Phase2AbilityTuning.Setting.PROJECTILE_SPEED, Double.NaN);
-        assertEquals(1.0, tuning.get(Phase2AbilityTuning.Setting.EXECUTE_THRESHOLD, 0));
-        assertEquals(64, tuning.integer(Phase2AbilityTuning.Setting.TARGET_CAP, 0));
-        assertEquals(0.0, tuning.get(Phase2AbilityTuning.Setting.PROJECTILE_SPEED, 1));
+        AbyssalSpectralMasteryTuning tuning = AbyssalSpectralMasteryTuning.EMPTY
+                .with(AbyssalSpectralMasteryTuning.Setting.EXECUTE_THRESHOLD, 5)
+                .with(AbyssalSpectralMasteryTuning.Setting.TARGET_CAP, 500)
+                .with(AbyssalSpectralMasteryTuning.Setting.PROJECTILE_SPEED, Double.NaN);
+        assertEquals(1.0, tuning.get(AbyssalSpectralMasteryTuning.Setting.EXECUTE_THRESHOLD, 0));
+        assertEquals(64, tuning.integer(AbyssalSpectralMasteryTuning.Setting.TARGET_CAP, 0));
+        assertEquals(0.0, tuning.get(AbyssalSpectralMasteryTuning.Setting.PROJECTILE_SPEED, 1));
     }
 
     @Test
-    void phase3DefinitionsAreAdditiveTypedAndBounded() {
+    void stormSoulDefinitionsAreAdditiveTypedAndBounded() {
         List<UniqueAbilityDefinition> definitions = List.of(
-                Phase3UniqueAbilities.STORMSCALE_ROD, Phase3UniqueAbilities.IONBOUND_CRUSHER,
-                Phase3UniqueAbilities.IONBOUND_BEAM, Phase3UniqueAbilities.IONBOUND_SHIELD,
-                Phase3UniqueAbilities.SOULRENDER_MARK, Phase3UniqueAbilities.SOULRENDER_REAP,
-                Phase3UniqueAbilities.SOULSTALKER_TENDRIL, Phase3UniqueAbilities.SOULSTALKER_STRIDE,
-                Phase3UniqueAbilities.WHISPERWIND_DASH, Phase3UniqueAbilities.WHISPERWIND_RESET,
-                Phase3UniqueAbilities.DREADWHISPER_REAVE, Phase3UniqueAbilities.DREADWHISPER_WOUND);
+                StormSoulMasteryAbilities.STORMSCALE_ROD, StormSoulMasteryAbilities.IONBOUND_CRUSHER,
+                StormSoulMasteryAbilities.IONBOUND_BEAM, StormSoulMasteryAbilities.IONBOUND_SHIELD,
+                StormSoulMasteryAbilities.SOULRENDER_MARK, StormSoulMasteryAbilities.SOULRENDER_REAP,
+                StormSoulMasteryAbilities.SOULSTALKER_TENDRIL, StormSoulMasteryAbilities.SOULSTALKER_STRIDE,
+                StormSoulMasteryAbilities.WHISPERWIND_DASH, StormSoulMasteryAbilities.WHISPERWIND_RESET,
+                StormSoulMasteryAbilities.DREADWHISPER_REAVE, StormSoulMasteryAbilities.DREADWHISPER_WOUND);
         assertEquals(12, definitions.stream().map(UniqueAbilityDefinition::id).distinct().count());
         for (UniqueAbilityDefinition definition : definitions) {
-            assertTrue(definition.supports(Phase3UniqueAbilities.TUNING));
-            assertTrue(definition.supportsEvent(Phase3UniqueAbilities.HIT));
-            assertTrue(definition.supportsEvent(Phase3UniqueAbilities.FINISH));
+            assertTrue(definition.supports(StormSoulMasteryAbilities.TUNING));
+            assertTrue(definition.supportsEvent(StormSoulMasteryAbilities.HIT));
+            assertTrue(definition.supportsEvent(StormSoulMasteryAbilities.FINISH));
         }
-        Phase3AbilityTuning tuning = Phase3AbilityTuning.EMPTY
-                .with(Phase3AbilityTuning.Setting.CHANCE, 500)
-                .with(Phase3AbilityTuning.Setting.TARGET_CAP, 500)
-                .with(Phase3AbilityTuning.Setting.SPEED, Double.NaN);
-        assertEquals(100, tuning.integer(Phase3AbilityTuning.Setting.CHANCE, 0));
-        assertEquals(64, tuning.integer(Phase3AbilityTuning.Setting.TARGET_CAP, 0));
-        assertEquals(0.0, tuning.get(Phase3AbilityTuning.Setting.SPEED, 1));
+        StormSoulMasteryTuning tuning = StormSoulMasteryTuning.EMPTY
+                .with(StormSoulMasteryTuning.Setting.CHANCE, 500)
+                .with(StormSoulMasteryTuning.Setting.TARGET_CAP, 500)
+                .with(StormSoulMasteryTuning.Setting.SPEED, Double.NaN);
+        assertEquals(100, tuning.integer(StormSoulMasteryTuning.Setting.CHANCE, 0));
+        assertEquals(64, tuning.integer(StormSoulMasteryTuning.Setting.TARGET_CAP, 0));
+        assertEquals(0.0, tuning.get(StormSoulMasteryTuning.Setting.SPEED, 1));
     }
 
     @Test
-    void phase4DefinitionsAreAdditiveTypedAndBounded() {
+    void longPathFinalFormsDefinitionsAreAdditiveTypedAndBounded() {
         List<UniqueAbilityDefinition> definitions = List.of(
-                Phase4UniqueAbilities.LICHBLADE_AURA, Phase4UniqueAbilities.LICHBLADE_CHANNEL,
-                Phase4UniqueAbilities.SUNFIRE_STANDARD, Phase4UniqueAbilities.SUNFIRE_REGEN,
-                Phase4UniqueAbilities.HARBINGER_STANDARD, Phase4UniqueAbilities.HARBINGER_OMEN);
+                LongPathFinalFormsMasteryAbilities.LICHBLADE_AURA, LongPathFinalFormsMasteryAbilities.LICHBLADE_CHANNEL,
+                LongPathFinalFormsMasteryAbilities.SUNFIRE_STANDARD, LongPathFinalFormsMasteryAbilities.SUNFIRE_REGEN,
+                LongPathFinalFormsMasteryAbilities.HARBINGER_STANDARD, LongPathFinalFormsMasteryAbilities.HARBINGER_OMEN);
         assertEquals(6, definitions.stream().map(UniqueAbilityDefinition::id).distinct().count());
         for (UniqueAbilityDefinition definition : definitions) {
-            assertTrue(definition.supports(Phase4UniqueAbilities.TUNING));
-            assertTrue(definition.supportsEvent(Phase4UniqueAbilities.HIT));
-            assertTrue(definition.supportsEvent(Phase4UniqueAbilities.SUPPORT));
-            assertTrue(definition.supportsEvent(Phase4UniqueAbilities.FINISH));
+            assertTrue(definition.supports(LongPathFinalFormsMasteryAbilities.TUNING));
+            assertTrue(definition.supportsEvent(LongPathFinalFormsMasteryAbilities.HIT));
+            assertTrue(definition.supportsEvent(LongPathFinalFormsMasteryAbilities.SUPPORT));
+            assertTrue(definition.supportsEvent(LongPathFinalFormsMasteryAbilities.FINISH));
         }
-        Phase4AbilityTuning tuning = Phase4AbilityTuning.EMPTY
-                .with(Phase4AbilityTuning.Setting.CHANCE, 500)
-                .with(Phase4AbilityTuning.Setting.TARGET_CAP, 500)
-                .with(Phase4AbilityTuning.Setting.SPEED, Double.NaN);
-        assertEquals(100, tuning.integer(Phase4AbilityTuning.Setting.CHANCE, 0));
-        assertEquals(64, tuning.integer(Phase4AbilityTuning.Setting.TARGET_CAP, 0));
-        assertEquals(0.0, tuning.get(Phase4AbilityTuning.Setting.SPEED, 1));
+        LongPathFinalFormsMasteryTuning tuning = LongPathFinalFormsMasteryTuning.EMPTY
+                .with(LongPathFinalFormsMasteryTuning.Setting.CHANCE, 500)
+                .with(LongPathFinalFormsMasteryTuning.Setting.TARGET_CAP, 500)
+                .with(LongPathFinalFormsMasteryTuning.Setting.SPEED, Double.NaN);
+        assertEquals(100, tuning.integer(LongPathFinalFormsMasteryTuning.Setting.CHANCE, 0));
+        assertEquals(64, tuning.integer(LongPathFinalFormsMasteryTuning.Setting.TARGET_CAP, 0));
+        assertEquals(0.0, tuning.get(LongPathFinalFormsMasteryTuning.Setting.SPEED, 1));
     }
 
     @Test
-    void phase5DefinitionsAreAdditiveTypedAndBounded() {
-        List<UniqueAbilityDefinition> definitions = Phase5UniqueAbilities.definitions();
+    void fireForgeDefinitionsAreAdditiveTypedAndBounded() {
+        List<UniqueAbilityDefinition> definitions = FireForgeMasteryAbilities.definitions();
         assertEquals(11, definitions.stream().map(UniqueAbilityDefinition::id).distinct().count());
         for (UniqueAbilityDefinition definition : definitions) {
-            assertTrue(definition.supports(Phase5UniqueAbilities.TUNING));
-            assertTrue(definition.supportsEvent(Phase5UniqueAbilities.HIT));
-            assertTrue(definition.supportsEvent(Phase5UniqueAbilities.PULSE));
-            assertTrue(definition.supportsEvent(Phase5UniqueAbilities.FINISH));
+            assertTrue(definition.supports(FireForgeMasteryAbilities.TUNING));
+            assertTrue(definition.supportsEvent(FireForgeMasteryAbilities.HIT));
+            assertTrue(definition.supportsEvent(FireForgeMasteryAbilities.PULSE));
+            assertTrue(definition.supportsEvent(FireForgeMasteryAbilities.FINISH));
         }
-        Phase5AbilityTuning tuning = Phase5AbilityTuning.EMPTY
-                .with(Phase5AbilityTuning.Setting.CHANCE, 500)
-                .with(Phase5AbilityTuning.Setting.TARGET_CAP, 500)
-                .with(Phase5AbilityTuning.Setting.HEAT_FLOOR, 75)
-                .with(Phase5AbilityTuning.Setting.SPEED, Double.NaN);
-        assertEquals(100, tuning.integer(Phase5AbilityTuning.Setting.CHANCE, 0));
-        assertEquals(64, tuning.integer(Phase5AbilityTuning.Setting.TARGET_CAP, 0));
-        assertEquals(75, tuning.integer(Phase5AbilityTuning.Setting.HEAT_FLOOR, 0));
-        assertEquals(0.0, tuning.get(Phase5AbilityTuning.Setting.SPEED, 1));
+        FireForgeMasteryTuning tuning = FireForgeMasteryTuning.EMPTY
+                .with(FireForgeMasteryTuning.Setting.CHANCE, 500)
+                .with(FireForgeMasteryTuning.Setting.TARGET_CAP, 500)
+                .with(FireForgeMasteryTuning.Setting.HEAT_FLOOR, 75)
+                .with(FireForgeMasteryTuning.Setting.SPEED, Double.NaN);
+        assertEquals(100, tuning.integer(FireForgeMasteryTuning.Setting.CHANCE, 0));
+        assertEquals(64, tuning.integer(FireForgeMasteryTuning.Setting.TARGET_CAP, 0));
+        assertEquals(75, tuning.integer(FireForgeMasteryTuning.Setting.HEAT_FLOOR, 0));
+        assertEquals(0.0, tuning.get(FireForgeMasteryTuning.Setting.SPEED, 1));
     }
 
     @Test
-    void phase6DefinitionsAreAdditiveTypedAndBounded() {
-        List<UniqueAbilityDefinition> definitions = Phase6UniqueAbilities.definitions();
+    void stormFrostWaterDefinitionsAreAdditiveTypedAndBounded() {
+        List<UniqueAbilityDefinition> definitions = StormFrostWaterMasteryAbilities.definitions();
         assertEquals(14, definitions.stream().map(UniqueAbilityDefinition::id).distinct().count());
         for (UniqueAbilityDefinition definition : definitions) {
-            assertTrue(definition.supports(Phase6UniqueAbilities.TUNING));
-            assertTrue(definition.supportsEvent(Phase6UniqueAbilities.HIT));
-            assertTrue(definition.supportsEvent(Phase6UniqueAbilities.PULSE));
-            assertTrue(definition.supportsEvent(Phase6UniqueAbilities.RETURN_HIT));
-            assertTrue(definition.supportsEvent(Phase6UniqueAbilities.CATCH));
-            assertTrue(definition.supportsEvent(Phase6UniqueAbilities.RECALL));
-            assertTrue(definition.supportsEvent(Phase6UniqueAbilities.FINISH));
+            assertTrue(definition.supports(StormFrostWaterMasteryAbilities.TUNING));
+            assertTrue(definition.supportsEvent(StormFrostWaterMasteryAbilities.HIT));
+            assertTrue(definition.supportsEvent(StormFrostWaterMasteryAbilities.PULSE));
+            assertTrue(definition.supportsEvent(StormFrostWaterMasteryAbilities.RETURN_HIT));
+            assertTrue(definition.supportsEvent(StormFrostWaterMasteryAbilities.CATCH));
+            assertTrue(definition.supportsEvent(StormFrostWaterMasteryAbilities.RECALL));
+            assertTrue(definition.supportsEvent(StormFrostWaterMasteryAbilities.FINISH));
         }
-        Phase6AbilityTuning tuning = Phase6AbilityTuning.EMPTY
-                .with(Phase6AbilityTuning.Setting.CHANCE, 500)
-                .with(Phase6AbilityTuning.Setting.TARGET_CAP, 500)
-                .with(Phase6AbilityTuning.Setting.FREEZE_CAP_TICKS, 100)
-                .with(Phase6AbilityTuning.Setting.FROSTFALL_DEADFALL_ANGLE_DEGREES, 120)
-                .with(Phase6AbilityTuning.Setting.FROSTFALL_PULSE_TARGET_CAP, 500)
-                .with(Phase6AbilityTuning.Setting.ICEWHISPER_LAST_SNOW_HEALTH_PERCENT, 500)
-                .with(Phase6AbilityTuning.Setting.ICEWHISPER_AURA_TARGET_CAP, 500)
-                .with(Phase6AbilityTuning.Setting.SPEED, Double.NaN);
-        assertEquals(100, tuning.integer(Phase6AbilityTuning.Setting.CHANCE, 0));
-        assertEquals(64, tuning.integer(Phase6AbilityTuning.Setting.TARGET_CAP, 0));
-        assertEquals(100, tuning.integer(Phase6AbilityTuning.Setting.FREEZE_CAP_TICKS, 0));
-        assertEquals(90, tuning.integer(Phase6AbilityTuning.Setting.FROSTFALL_DEADFALL_ANGLE_DEGREES, 0));
-        assertEquals(64, tuning.integer(Phase6AbilityTuning.Setting.FROSTFALL_PULSE_TARGET_CAP, 0));
-        assertEquals(100, tuning.integer(Phase6AbilityTuning.Setting.ICEWHISPER_LAST_SNOW_HEALTH_PERCENT, 0));
-        assertEquals(64, tuning.integer(Phase6AbilityTuning.Setting.ICEWHISPER_AURA_TARGET_CAP, 0));
-        assertEquals(0.0, tuning.get(Phase6AbilityTuning.Setting.SPEED, 1));
+        StormFrostWaterMasteryTuning tuning = StormFrostWaterMasteryTuning.EMPTY
+                .with(StormFrostWaterMasteryTuning.Setting.CHANCE, 500)
+                .with(StormFrostWaterMasteryTuning.Setting.TARGET_CAP, 500)
+                .with(StormFrostWaterMasteryTuning.Setting.FREEZE_CAP_TICKS, 100)
+                .with(StormFrostWaterMasteryTuning.Setting.FROSTFALL_DEADFALL_ANGLE_DEGREES, 120)
+                .with(StormFrostWaterMasteryTuning.Setting.FROSTFALL_PULSE_TARGET_CAP, 500)
+                .with(StormFrostWaterMasteryTuning.Setting.ICEWHISPER_LAST_SNOW_HEALTH_PERCENT, 500)
+                .with(StormFrostWaterMasteryTuning.Setting.ICEWHISPER_AURA_TARGET_CAP, 500)
+                .with(StormFrostWaterMasteryTuning.Setting.SPEED, Double.NaN);
+        assertEquals(100, tuning.integer(StormFrostWaterMasteryTuning.Setting.CHANCE, 0));
+        assertEquals(64, tuning.integer(StormFrostWaterMasteryTuning.Setting.TARGET_CAP, 0));
+        assertEquals(100, tuning.integer(StormFrostWaterMasteryTuning.Setting.FREEZE_CAP_TICKS, 0));
+        assertEquals(90, tuning.integer(StormFrostWaterMasteryTuning.Setting.FROSTFALL_DEADFALL_ANGLE_DEGREES, 0));
+        assertEquals(64, tuning.integer(StormFrostWaterMasteryTuning.Setting.FROSTFALL_PULSE_TARGET_CAP, 0));
+        assertEquals(100, tuning.integer(StormFrostWaterMasteryTuning.Setting.ICEWHISPER_LAST_SNOW_HEALTH_PERCENT, 0));
+        assertEquals(64, tuning.integer(StormFrostWaterMasteryTuning.Setting.ICEWHISPER_AURA_TARGET_CAP, 0));
+        assertEquals(0.0, tuning.get(StormFrostWaterMasteryTuning.Setting.SPEED, 1));
     }
 
     @Test
-    void phase7DefinitionsAreAdditiveTypedAndBounded() {
-        List<UniqueAbilityDefinition> definitions = Phase7UniqueAbilities.definitions();
+    void natureSwarmDefinitionsAreAdditiveTypedAndBounded() {
+        List<UniqueAbilityDefinition> definitions = NatureSwarmMasteryAbilities.definitions();
         assertEquals(10, definitions.stream().map(UniqueAbilityDefinition::id).distinct().count());
         for (UniqueAbilityDefinition definition : definitions) {
-            assertTrue(definition.supports(Phase7UniqueAbilities.TUNING));
-            assertTrue(definition.supportsEvent(Phase7UniqueAbilities.HIT));
-            assertTrue(definition.supportsEvent(Phase7UniqueAbilities.KILL));
-            assertTrue(definition.supportsEvent(Phase7UniqueAbilities.FINISH));
+            assertTrue(definition.supports(NatureSwarmMasteryAbilities.TUNING));
+            assertTrue(definition.supportsEvent(NatureSwarmMasteryAbilities.HIT));
+            assertTrue(definition.supportsEvent(NatureSwarmMasteryAbilities.KILL));
+            assertTrue(definition.supportsEvent(NatureSwarmMasteryAbilities.FINISH));
         }
-        Phase7AbilityTuning tuning = Phase7AbilityTuning.EMPTY
-                .with(Phase7AbilityTuning.Setting.CHANCE, 500)
-                .with(Phase7AbilityTuning.Setting.TARGET_CAP, 500)
-                .with(Phase7AbilityTuning.Setting.SPEED, Double.NaN);
-        assertEquals(100, tuning.integer(Phase7AbilityTuning.Setting.CHANCE, 0));
-        assertEquals(64, tuning.integer(Phase7AbilityTuning.Setting.TARGET_CAP, 0));
-        assertEquals(0.0, tuning.get(Phase7AbilityTuning.Setting.SPEED, 1));
+        NatureSwarmMasteryTuning tuning = NatureSwarmMasteryTuning.EMPTY
+                .with(NatureSwarmMasteryTuning.Setting.CHANCE, 500)
+                .with(NatureSwarmMasteryTuning.Setting.TARGET_CAP, 500)
+                .with(NatureSwarmMasteryTuning.Setting.SPEED, Double.NaN);
+        assertEquals(100, tuning.integer(NatureSwarmMasteryTuning.Setting.CHANCE, 0));
+        assertEquals(64, tuning.integer(NatureSwarmMasteryTuning.Setting.TARGET_CAP, 0));
+        assertEquals(0.0, tuning.get(NatureSwarmMasteryTuning.Setting.SPEED, 1));
     }
 
     @Test
-    void phase8DefinitionsAreAdditiveTypedAndBounded() {
-        List<UniqueAbilityDefinition> definitions = Phase8UniqueAbilities.definitions();
+    void deathShadowBloodDefinitionsAreAdditiveTypedAndBounded() {
+        List<UniqueAbilityDefinition> definitions = DeathShadowBloodMasteryAbilities.definitions();
         assertEquals(18, definitions.stream().map(UniqueAbilityDefinition::id).distinct().count());
         for (UniqueAbilityDefinition definition : definitions) {
-            assertTrue(definition.supports(Phase8UniqueAbilities.TUNING));
-            assertTrue(definition.supportsEvent(Phase8UniqueAbilities.HIT));
-            assertTrue(definition.supportsEvent(Phase8UniqueAbilities.KILL));
-            assertTrue(definition.supportsEvent(Phase8UniqueAbilities.FINISH));
+            assertTrue(definition.supports(DeathShadowBloodMasteryAbilities.TUNING));
+            assertTrue(definition.supportsEvent(DeathShadowBloodMasteryAbilities.HIT));
+            assertTrue(definition.supportsEvent(DeathShadowBloodMasteryAbilities.KILL));
+            assertTrue(definition.supportsEvent(DeathShadowBloodMasteryAbilities.FINISH));
         }
-        Phase8AbilityTuning tuning = Phase8AbilityTuning.EMPTY
-                .with(Phase8AbilityTuning.Setting.CHANCE, 500)
-                .with(Phase8AbilityTuning.Setting.TARGET_CAP, 500)
-                .with(Phase8AbilityTuning.Setting.DURATION_CAP_TICKS, 120)
-                .with(Phase8AbilityTuning.Setting.SPEED, Double.NaN);
-        assertEquals(100, tuning.integer(Phase8AbilityTuning.Setting.CHANCE, 0));
-        assertEquals(64, tuning.integer(Phase8AbilityTuning.Setting.TARGET_CAP, 0));
-        assertEquals(120, tuning.integer(Phase8AbilityTuning.Setting.DURATION_CAP_TICKS, 0));
-        assertEquals(0.0, tuning.get(Phase8AbilityTuning.Setting.SPEED, 1));
+        DeathShadowBloodMasteryTuning tuning = DeathShadowBloodMasteryTuning.EMPTY
+                .with(DeathShadowBloodMasteryTuning.Setting.CHANCE, 500)
+                .with(DeathShadowBloodMasteryTuning.Setting.TARGET_CAP, 500)
+                .with(DeathShadowBloodMasteryTuning.Setting.DURATION_CAP_TICKS, 120)
+                .with(DeathShadowBloodMasteryTuning.Setting.SPEED, Double.NaN);
+        assertEquals(100, tuning.integer(DeathShadowBloodMasteryTuning.Setting.CHANCE, 0));
+        assertEquals(64, tuning.integer(DeathShadowBloodMasteryTuning.Setting.TARGET_CAP, 0));
+        assertEquals(120, tuning.integer(DeathShadowBloodMasteryTuning.Setting.DURATION_CAP_TICKS, 0));
+        assertEquals(0.0, tuning.get(DeathShadowBloodMasteryTuning.Setting.SPEED, 1));
     }
 
     @Test
-    void phase9DefinitionsAreAdditiveTypedAndBounded() {
-        List<UniqueAbilityDefinition> definitions = Phase9UniqueAbilities.definitions();
+    void arcaneCosmicDefinitionsAreAdditiveTypedAndBounded() {
+        List<UniqueAbilityDefinition> definitions = ArcaneCosmicMasteryAbilities.definitions();
         assertEquals(21, definitions.stream().map(UniqueAbilityDefinition::id).distinct().count());
         for (UniqueAbilityDefinition definition : definitions) {
-            assertTrue(definition.supports(Phase9UniqueAbilities.TUNING));
-            assertTrue(definition.supportsEvent(Phase9UniqueAbilities.HIT));
-            assertTrue(definition.supportsEvent(Phase9UniqueAbilities.KILL));
-            assertTrue(definition.supportsEvent(Phase9UniqueAbilities.FINISH));
+            assertTrue(definition.supports(ArcaneCosmicMasteryAbilities.TUNING));
+            assertTrue(definition.supportsEvent(ArcaneCosmicMasteryAbilities.HIT));
+            assertTrue(definition.supportsEvent(ArcaneCosmicMasteryAbilities.KILL));
+            assertTrue(definition.supportsEvent(ArcaneCosmicMasteryAbilities.FINISH));
         }
-        Phase9AbilityTuning tuning = Phase9AbilityTuning.EMPTY
-                .with(Phase9AbilityTuning.Setting.CHANCE, 500)
-                .with(Phase9AbilityTuning.Setting.TARGET_CAP, 500)
-                .with(Phase9AbilityTuning.Setting.SPEED, Double.NaN);
-        assertEquals(100, tuning.integer(Phase9AbilityTuning.Setting.CHANCE, 0));
-        assertEquals(64, tuning.integer(Phase9AbilityTuning.Setting.TARGET_CAP, 0));
-        assertEquals(0.0, tuning.get(Phase9AbilityTuning.Setting.SPEED, 1));
+        ArcaneCosmicMasteryTuning tuning = ArcaneCosmicMasteryTuning.EMPTY
+                .with(ArcaneCosmicMasteryTuning.Setting.CHANCE, 500)
+                .with(ArcaneCosmicMasteryTuning.Setting.TARGET_CAP, 500)
+                .with(ArcaneCosmicMasteryTuning.Setting.SPEED, Double.NaN);
+        assertEquals(100, tuning.integer(ArcaneCosmicMasteryTuning.Setting.CHANCE, 0));
+        assertEquals(64, tuning.integer(ArcaneCosmicMasteryTuning.Setting.TARGET_CAP, 0));
+        assertEquals(0.0, tuning.get(ArcaneCosmicMasteryTuning.Setting.SPEED, 1));
     }
 
     @Test
-    void phase10DefinitionsAreAdditiveTypedAndBounded() {
-        List<UniqueAbilityDefinition> definitions = Phase10UniqueAbilities.definitions();
+    void martialCommandEldritchDefinitionsAreAdditiveTypedAndBounded() {
+        List<UniqueAbilityDefinition> definitions = MartialCommandEldritchMasteryAbilities.definitions();
         assertEquals(15, definitions.stream().map(UniqueAbilityDefinition::id).distinct().count());
         for (UniqueAbilityDefinition definition : definitions) {
-            assertTrue(definition.supports(Phase10UniqueAbilities.TUNING));
-            assertTrue(definition.supportsEvent(Phase10UniqueAbilities.HIT));
-            assertTrue(definition.supportsEvent(Phase10UniqueAbilities.KILL));
-            assertTrue(definition.supportsEvent(Phase10UniqueAbilities.FINISH));
+            assertTrue(definition.supports(MartialCommandEldritchMasteryAbilities.TUNING));
+            assertTrue(definition.supportsEvent(MartialCommandEldritchMasteryAbilities.HIT));
+            assertTrue(definition.supportsEvent(MartialCommandEldritchMasteryAbilities.KILL));
+            assertTrue(definition.supportsEvent(MartialCommandEldritchMasteryAbilities.FINISH));
         }
-        Phase10AbilityTuning tuning = Phase10AbilityTuning.EMPTY
-                .with(Phase10AbilityTuning.Setting.CHANCE, 500)
-                .with(Phase10AbilityTuning.Setting.TARGET_CAP, 500)
-                .with(Phase10AbilityTuning.Setting.SPEED, Double.NaN);
-        assertEquals(100, tuning.integer(Phase10AbilityTuning.Setting.CHANCE, 0));
-        assertEquals(64, tuning.integer(Phase10AbilityTuning.Setting.TARGET_CAP, 0));
-        assertEquals(0.0, tuning.get(Phase10AbilityTuning.Setting.SPEED, 1));
+        MartialCommandEldritchMasteryTuning tuning = MartialCommandEldritchMasteryTuning.EMPTY
+                .with(MartialCommandEldritchMasteryTuning.Setting.CHANCE, 500)
+                .with(MartialCommandEldritchMasteryTuning.Setting.TARGET_CAP, 500)
+                .with(MartialCommandEldritchMasteryTuning.Setting.SPEED, Double.NaN);
+        assertEquals(100, tuning.integer(MartialCommandEldritchMasteryTuning.Setting.CHANCE, 0));
+        assertEquals(64, tuning.integer(MartialCommandEldritchMasteryTuning.Setting.TARGET_CAP, 0));
+        assertEquals(0.0, tuning.get(MartialCommandEldritchMasteryTuning.Setting.SPEED, 1));
     }
 
     @Test
     void masteryAbilityDefinitionsAreGloballyUnique() {
         List<UniqueAbilityDefinition> definitions = new ArrayList<>();
         definitions.addAll(List.of(
-                Phase2UniqueAbilities.WATCHER_DREAD, Phase2UniqueAbilities.WATCHER_OMEN,
-                Phase2UniqueAbilities.DEVOURER_MASS, Phase2UniqueAbilities.DEVOURER_REPRISAL,
-                Phase2UniqueAbilities.WICKPIERCER_THROW, Phase2UniqueAbilities.WICKPIERCER_REVIVE,
-                Phase2UniqueAbilities.GLOAMPIERCER_AMBUSH, Phase2UniqueAbilities.GLOAMPIERCER_BARRAGE,
-                Phase2UniqueAbilities.WRAITHFANG_THROW, Phase2UniqueAbilities.WRAITHMAW_MUSTER,
-                Phase3UniqueAbilities.STORMSCALE_ROD, Phase3UniqueAbilities.IONBOUND_CRUSHER,
-                Phase3UniqueAbilities.IONBOUND_BEAM, Phase3UniqueAbilities.IONBOUND_SHIELD,
-                Phase3UniqueAbilities.SOULRENDER_MARK, Phase3UniqueAbilities.SOULRENDER_REAP,
-                Phase3UniqueAbilities.SOULSTALKER_TENDRIL, Phase3UniqueAbilities.SOULSTALKER_STRIDE,
-                Phase3UniqueAbilities.WHISPERWIND_DASH, Phase3UniqueAbilities.WHISPERWIND_RESET,
-                Phase3UniqueAbilities.DREADWHISPER_REAVE, Phase3UniqueAbilities.DREADWHISPER_WOUND,
-                Phase4UniqueAbilities.LICHBLADE_AURA, Phase4UniqueAbilities.LICHBLADE_CHANNEL,
-                Phase4UniqueAbilities.SUNFIRE_STANDARD, Phase4UniqueAbilities.SUNFIRE_REGEN,
-                Phase4UniqueAbilities.HARBINGER_STANDARD, Phase4UniqueAbilities.HARBINGER_OMEN));
-        definitions.addAll(Phase5UniqueAbilities.definitions());
-        definitions.addAll(Phase6UniqueAbilities.definitions());
-        definitions.addAll(Phase7UniqueAbilities.definitions());
-        definitions.addAll(Phase8UniqueAbilities.definitions());
-        definitions.addAll(Phase9UniqueAbilities.definitions());
-        definitions.addAll(Phase10UniqueAbilities.definitions());
+                AbyssalSpectralMasteryAbilities.WATCHER_DREAD, AbyssalSpectralMasteryAbilities.WATCHER_OMEN,
+                AbyssalSpectralMasteryAbilities.DEVOURER_MASS, AbyssalSpectralMasteryAbilities.DEVOURER_REPRISAL,
+                AbyssalSpectralMasteryAbilities.WICKPIERCER_THROW, AbyssalSpectralMasteryAbilities.WICKPIERCER_REVIVE,
+                AbyssalSpectralMasteryAbilities.GLOAMPIERCER_AMBUSH, AbyssalSpectralMasteryAbilities.GLOAMPIERCER_BARRAGE,
+                AbyssalSpectralMasteryAbilities.WRAITHFANG_THROW, AbyssalSpectralMasteryAbilities.WRAITHMAW_MUSTER,
+                StormSoulMasteryAbilities.STORMSCALE_ROD, StormSoulMasteryAbilities.IONBOUND_CRUSHER,
+                StormSoulMasteryAbilities.IONBOUND_BEAM, StormSoulMasteryAbilities.IONBOUND_SHIELD,
+                StormSoulMasteryAbilities.SOULRENDER_MARK, StormSoulMasteryAbilities.SOULRENDER_REAP,
+                StormSoulMasteryAbilities.SOULSTALKER_TENDRIL, StormSoulMasteryAbilities.SOULSTALKER_STRIDE,
+                StormSoulMasteryAbilities.WHISPERWIND_DASH, StormSoulMasteryAbilities.WHISPERWIND_RESET,
+                StormSoulMasteryAbilities.DREADWHISPER_REAVE, StormSoulMasteryAbilities.DREADWHISPER_WOUND,
+                LongPathFinalFormsMasteryAbilities.LICHBLADE_AURA, LongPathFinalFormsMasteryAbilities.LICHBLADE_CHANNEL,
+                LongPathFinalFormsMasteryAbilities.SUNFIRE_STANDARD, LongPathFinalFormsMasteryAbilities.SUNFIRE_REGEN,
+                LongPathFinalFormsMasteryAbilities.HARBINGER_STANDARD, LongPathFinalFormsMasteryAbilities.HARBINGER_OMEN));
+        definitions.addAll(FireForgeMasteryAbilities.definitions());
+        definitions.addAll(StormFrostWaterMasteryAbilities.definitions());
+        definitions.addAll(NatureSwarmMasteryAbilities.definitions());
+        definitions.addAll(DeathShadowBloodMasteryAbilities.definitions());
+        definitions.addAll(ArcaneCosmicMasteryAbilities.definitions());
+        definitions.addAll(MartialCommandEldritchMasteryAbilities.definitions());
 
         assertEquals(117, definitions.size());
         assertEquals(definitions.size(), definitions.stream().map(UniqueAbilityDefinition::id)
                 .collect(java.util.stream.Collectors.toCollection(HashSet::new)).size());
+    }
+
+    @Test
+    void masteryCohortKeysUseStableSemanticPaths() {
+        List<UniqueAbilityKey<?>> keys = List.of(
+                AbyssalSpectralMasteryAbilities.TUNING,
+                StormSoulMasteryAbilities.TUNING,
+                LongPathFinalFormsMasteryAbilities.TUNING,
+                FireForgeMasteryAbilities.TUNING,
+                StormFrostWaterMasteryAbilities.TUNING,
+                NatureSwarmMasteryAbilities.TUNING,
+                DeathShadowBloodMasteryAbilities.TUNING,
+                ArcaneCosmicMasteryAbilities.TUNING,
+                MartialCommandEldritchMasteryAbilities.TUNING);
+        assertEquals(9, keys.stream().map(UniqueAbilityKey::id).distinct().count());
+        assertTrue(keys.stream().allMatch(key -> key.id().getPath().startsWith("mastery/")));
+        assertTrue(keys.stream().noneMatch(key -> key.id().getPath().matches("phase\\d+/.*")));
     }
 
     private static Identifier id(String path) {

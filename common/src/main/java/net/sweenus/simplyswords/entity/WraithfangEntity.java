@@ -23,7 +23,7 @@ import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
-import net.sweenus.simplyswords.api.ability.Phase2UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.AbyssalSpectralMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.api.SpellScalingProfile;
@@ -115,7 +115,7 @@ public class WraithfangEntity extends ThrownSpearEntity {
                 false, false, true), getOwner());
         if (abilityExecution != null) {
             UniqueAbilityApi.emit(abilityExecution, net.sweenus.simplyswords.api.ability.UniqueAbilityPhase.HIT,
-                    Phase2UniqueAbilities.HIT, target, 1, damage);
+                    AbyssalSpectralMasteryAbilities.HIT, target, 1, damage);
         }
         stopPiercing = target.getType().isIn(PIERCE_IMMUNE);
         burst(target, damage, tuning);
@@ -123,7 +123,7 @@ public class WraithfangEntity extends ThrownSpearEntity {
                 && getOwner() instanceof LivingEntity actor) {
             if (abilityExecution != null) {
                 UniqueAbilityApi.emit(abilityExecution, net.sweenus.simplyswords.api.ability.UniqueAbilityPhase.HIT,
-                        Phase2UniqueAbilities.KILL, target, 1, damage);
+                        AbyssalSpectralMasteryAbilities.KILL, target, 1, damage);
             }
             WraithfangAbilityManager.onThrownKill(world, actor, stack, tuning);
         }
@@ -181,7 +181,7 @@ public class WraithfangEntity extends ThrownSpearEntity {
             }
             if (abilityExecution != null) {
                 UniqueAbilityApi.emit(abilityExecution, net.sweenus.simplyswords.api.ability.UniqueAbilityPhase.HIT,
-                        Phase2UniqueAbilities.RETURN, player, 1, 0);
+                        AbyssalSpectralMasteryAbilities.RETURN, player, 1, 0);
                 UniqueAbilityApi.finish(abilityExecution, abilityExecution.definition().id(), 1);
             }
         }

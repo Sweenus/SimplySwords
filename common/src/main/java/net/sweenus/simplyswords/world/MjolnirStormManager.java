@@ -20,8 +20,8 @@ import net.sweenus.simplyswords.api.DelegatedWeaponHitContext;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
-import net.sweenus.simplyswords.api.ability.Phase6AbilityTuning;
-import net.sweenus.simplyswords.api.ability.Phase6UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.StormFrostWaterMasteryTuning;
+import net.sweenus.simplyswords.api.ability.StormFrostWaterMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityPhase;
@@ -112,10 +112,10 @@ public final class MjolnirStormManager {
         ServerWorld world = context.world();
         LivingEntity actor = context.actor();
         long now = world.getTime();
-        UniqueAbilityExecution execution = Phase6CombatManager.beginActive(
-                Phase6UniqueAbilities.MJOLNIR_STORM, context, Config.uniqueEffects.mjolnir.cooldown);
+        UniqueAbilityExecution execution = StormFrostWaterMasteryCombatManager.beginActive(
+                StormFrostWaterMasteryAbilities.MJOLNIR_STORM, context, Config.uniqueEffects.mjolnir.cooldown);
         UniqueAbilityApi.start(execution);
-        Phase6AbilityTuning tuning = Phase6UniqueAbilities.tuning(execution);
+        StormFrostWaterMasteryTuning tuning = StormFrostWaterMasteryAbilities.tuning(execution);
         int duration = resolveDuration(tuning);
         float boltDamage = HelperMethods.abilityScaledDamage(
                 "lightning",
@@ -165,7 +165,7 @@ public final class MjolnirStormManager {
         if (grantsDefensiveBuffs(tuning)) {
             float shell = (float) tuning.get(s("MJOLNIR_SHELL_ABSORPTION"), 0);
             if (tuning.flag(MODE_STATIC_SHELL) && shell > 0) {
-                Phase4AbsorptionTracker.grant(actor, shell,
+                MasteryAbsorptionTracker.grant(actor, shell,
                         tuning.integer(s("MJOLNIR_SHELL_DURATION_TICKS"), 80), shell);
             }
         }
@@ -220,11 +220,11 @@ public final class MjolnirStormManager {
             return;
         }
 
-        UniqueAbilityExecution execution = Phase6CombatManager.beginPassive(
-                Phase6UniqueAbilities.MJOLNIR_STORM, world, stack, actor, target);
-        Phase6AbilityTuning tuning = Phase6UniqueAbilities.tuning(execution);
+        UniqueAbilityExecution execution = StormFrostWaterMasteryCombatManager.beginPassive(
+                StormFrostWaterMasteryAbilities.MJOLNIR_STORM, world, stack, actor, target);
+        StormFrostWaterMasteryTuning tuning = StormFrostWaterMasteryAbilities.tuning(execution);
         applyConductive(world, actor, target, tuning);
-        UniqueAbilityApi.finish(execution, Phase6UniqueAbilities.FINISH, 1);
+        UniqueAbilityApi.finish(execution, StormFrostWaterMasteryAbilities.FINISH, 1);
     }
 
     public static void tick(ServerWorld world) {
@@ -276,7 +276,7 @@ public final class MjolnirStormManager {
     }
 
     private static void abandon(ActiveStorm storm) {
-        UniqueAbilityApi.finish(storm.execution, Phase6UniqueAbilities.FINISH, storm.distinctTargets.size());
+        UniqueAbilityApi.finish(storm.execution, StormFrostWaterMasteryAbilities.FINISH, storm.distinctTargets.size());
     }
 
     private static void tickStorms(ServerWorld world) {
@@ -340,7 +340,7 @@ public final class MjolnirStormManager {
             }
             if (storm.finalBoltsReleased >= finalBoltCount) {
                 releaseFinalThunderclap(world, actor, sourceOwner, storm);
-                UniqueAbilityApi.finish(storm.execution, Phase6UniqueAbilities.FINISH, storm.distinctTargets.size());
+                UniqueAbilityApi.finish(storm.execution, StormFrostWaterMasteryAbilities.FINISH, storm.distinctTargets.size());
                 iterator.remove();
             }
         }
@@ -499,7 +499,7 @@ public final class MjolnirStormManager {
         }
 
         damageTarget(world, actor, storm.stack, target, storm.boltDamage);
-        UniqueAbilityApi.emit(storm.execution, UniqueAbilityPhase.HIT, Phase6UniqueAbilities.HIT,
+        UniqueAbilityApi.emit(storm.execution, UniqueAbilityPhase.HIT, StormFrostWaterMasteryAbilities.HIT,
                 target, 1, storm.boltDamage);
         applyBoltRewards(world, actor, storm, target);
         if (conductive) {
@@ -559,16 +559,16 @@ public final class MjolnirStormManager {
         fork.removeStatusEffect(EffectRegistry.getReference(EffectRegistry.STORM));
         float damage = storm.boltDamage * (float) storm.tuning.get(s("MJOLNIR_FORK_DAMAGE_MULTIPLIER"), 0.6);
         damageTarget(world, actor, storm.stack, fork, damage);
-        UniqueAbilityApi.emit(storm.execution, UniqueAbilityPhase.HIT, Phase6UniqueAbilities.HIT,
+        UniqueAbilityApi.emit(storm.execution, UniqueAbilityPhase.HIT, StormFrostWaterMasteryAbilities.HIT,
                 fork, 1, damage);
         releaseConductiveBurst(world, actor, sourceOwner, storm, impact);
     }
 
-    private static double stormRadius(Phase6AbilityTuning tuning) {
+    private static double stormRadius(StormFrostWaterMasteryTuning tuning) {
         return stormRadius(tuning, Config.uniqueEffects.mjolnir.radius);
     }
 
-    public static double stormRadius(Phase6AbilityTuning tuning, double configured) {
+    public static double stormRadius(StormFrostWaterMasteryTuning tuning, double configured) {
         if (tuning.has(s("RADIUS"))) {
             return Math.max(0.5, tuning.get(s("RADIUS"), configured));
         }
@@ -576,17 +576,17 @@ public final class MjolnirStormManager {
         return Math.max(0.5, base * tuning.get(s("MJOLNIR_STORM_RADIUS_MULTIPLIER"), 1));
     }
 
-    public static double finalRadius(Phase6AbilityTuning tuning, double configured) {
+    public static double finalRadius(StormFrostWaterMasteryTuning tuning, double configured) {
         return tuning.has(s("RADIUS"))
                 ? tuning.get(s("RADIUS"), configured)
                 : Math.max(0.1, configured) + tuning.get(s("MJOLNIR_FINAL_RADIUS_BONUS"), 0);
     }
 
-    private static int resolveDuration(Phase6AbilityTuning tuning) {
+    private static int resolveDuration(StormFrostWaterMasteryTuning tuning) {
         return resolveDuration(tuning, Config.uniqueEffects.mjolnir.duration);
     }
 
-    public static int resolveDuration(Phase6AbilityTuning tuning, int configuredDuration) {
+    public static int resolveDuration(StormFrostWaterMasteryTuning tuning, int configuredDuration) {
         int configured = Math.max(0, configuredDuration);
         if (tuning.has(s("MJOLNIR_DURATION_TICKS"))) {
             return tuning.integer(s("MJOLNIR_DURATION_TICKS"), configured);
@@ -597,7 +597,7 @@ public final class MjolnirStormManager {
         return (int) Math.round(base * tuning.get(s("MJOLNIR_DURATION_MULTIPLIER"), 1));
     }
 
-    public static int conductiveDuration(Phase6AbilityTuning tuning, int configuredDuration) {
+    public static int conductiveDuration(StormFrostWaterMasteryTuning tuning, int configuredDuration) {
         int configured = Math.max(1, configuredDuration);
         if (tuning.has(s("MJOLNIR_CONDUCTIVE_DURATION_TICKS"))) {
             return tuning.integer(s("MJOLNIR_CONDUCTIVE_DURATION_TICKS"), configured);
@@ -607,27 +607,27 @@ public final class MjolnirStormManager {
                 : configured + tuning.integer(s("MJOLNIR_CONDUCTIVE_BONUS_TICKS"), 0);
     }
 
-    public static float finaleDamage(Phase6AbilityTuning tuning, float base, int conductiveTargets) {
+    public static float finaleDamage(StormFrostWaterMasteryTuning tuning, float base, int conductiveTargets) {
         return base * (1 + Math.min(
                 scopedInt(tuning, s("MJOLNIR_FINALE_TARGET_CAP"), s("STACK_CAP"), 0), conductiveTargets)
                 * (float) scoped(tuning, s("MJOLNIR_FINALE_PER_TARGET_MULTIPLIER"),
                 s("PER_STACK_MULTIPLIER"), 0));
     }
 
-    public static int finalBoltCount(Phase6AbilityTuning tuning, int configured) {
+    public static int finalBoltCount(StormFrostWaterMasteryTuning tuning, int configured) {
         return scopedInt(tuning, s("MJOLNIR_FINAL_BOLT_COUNT"), s("COUNT"), Math.max(0, configured));
     }
 
-    public static int pulseInterval(Phase6AbilityTuning tuning, int configured) {
+    public static int pulseInterval(StormFrostWaterMasteryTuning tuning, int configured) {
         return scopedInt(tuning, s("MJOLNIR_PULSE_INTERVAL_TICKS"), s("INTERVAL_TICKS"),
                 Math.max(1, configured));
     }
 
-    public static boolean suppressesFinalClap(Phase6AbilityTuning tuning) {
+    public static boolean suppressesFinalClap(StormFrostWaterMasteryTuning tuning) {
         return tuning.flag(MODE_ENDLESS_SQUALL);
     }
 
-    public static boolean grantsDefensiveBuffs(Phase6AbilityTuning tuning) {
+    public static boolean grantsDefensiveBuffs(StormFrostWaterMasteryTuning tuning) {
         return !tuning.flag(MODE_WRATH_OF_THUNDER);
     }
 
@@ -700,7 +700,7 @@ public final class MjolnirStormManager {
     }
 
     private static void applyConductive(ServerWorld world, LivingEntity actor, LivingEntity target,
-                                        Phase6AbilityTuning tuning) {
+                                        StormFrostWaterMasteryTuning tuning) {
         int duration = conductiveDuration(tuning, Config.uniqueEffects.mjolnir.conductiveDuration);
         if (duration <= 0) {
             return;
@@ -789,14 +789,14 @@ public final class MjolnirStormManager {
                 actor.getSoundCategory(), 0.9F, 0.68F);
     }
 
-    private static void grantAegis(LivingEntity actor, Phase6AbilityTuning tuning) {
+    private static void grantAegis(LivingEntity actor, StormFrostWaterMasteryTuning tuning) {
         if (!grantsDefensiveBuffs(tuning)) {
             return;
         }
         int duration = tuning.integer(s("MJOLNIR_AEGIS_DURATION_TICKS"), 120);
         float absorption = (float) tuning.get(s("MJOLNIR_AEGIS_ABSORPTION"), 8);
         if (absorption > 0 && duration > 0) {
-            Phase4AbsorptionTracker.grant(actor, absorption, duration, absorption);
+            MasteryAbsorptionTracker.grant(actor, absorption, duration, absorption);
         }
         if (duration > 0) {
             actor.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, duration,
@@ -1047,18 +1047,18 @@ public final class MjolnirStormManager {
         return horizontal.normalize();
     }
 
-    private static double scoped(Phase6AbilityTuning tuning, Phase6AbilityTuning.Setting scoped,
-                                 Phase6AbilityTuning.Setting legacy, double fallback) {
+    private static double scoped(StormFrostWaterMasteryTuning tuning, StormFrostWaterMasteryTuning.Setting scoped,
+                                 StormFrostWaterMasteryTuning.Setting legacy, double fallback) {
         return tuning.has(scoped) ? tuning.get(scoped, fallback) : tuning.get(legacy, fallback);
     }
 
-    private static int scopedInt(Phase6AbilityTuning tuning, Phase6AbilityTuning.Setting scoped,
-                                 Phase6AbilityTuning.Setting legacy, int fallback) {
+    private static int scopedInt(StormFrostWaterMasteryTuning tuning, StormFrostWaterMasteryTuning.Setting scoped,
+                                 StormFrostWaterMasteryTuning.Setting legacy, int fallback) {
         return tuning.has(scoped) ? tuning.integer(scoped, fallback) : tuning.integer(legacy, fallback);
     }
 
-    private static Phase6AbilityTuning.Setting s(String name) {
-        return Phase6AbilityTuning.Setting.valueOf(name);
+    private static StormFrostWaterMasteryTuning.Setting s(String name) {
+        return StormFrostWaterMasteryTuning.Setting.valueOf(name);
     }
 
     private static final class ActiveStorm {
@@ -1070,7 +1070,7 @@ public final class MjolnirStormManager {
         private final float boltDamage;
         private final float conductiveBurstDamage;
         private final float finalThunderclapDamage;
-        private final Phase6AbilityTuning tuning;
+        private final StormFrostWaterMasteryTuning tuning;
         private final UniqueAbilityExecution execution;
         private final Set<UUID> struckThisCycle = new HashSet<>();
         private final Set<UUID> distinctTargets = new HashSet<>();
@@ -1093,7 +1093,7 @@ public final class MjolnirStormManager {
         private ActiveStorm(UUID actorId, UUID sourceOwnerId, ItemStack stack,
                             long startedAt, long nextPulseAt, long expiresAt,
                             float boltDamage, float conductiveBurstDamage,
-                            float finalThunderclapDamage, Phase6AbilityTuning tuning,
+                            float finalThunderclapDamage, StormFrostWaterMasteryTuning tuning,
                             UniqueAbilityExecution execution) {
             this.actorId = actorId;
             this.sourceOwnerId = sourceOwnerId;

@@ -44,8 +44,8 @@ supported typed tuning keys, lifecycle events, and an optional cooldown key.
 Keys validate and clamp values when a modifier writes them. A modifier can only
 read or write keys declared by that definition.
 
-Definitions can be registered and inspected through `UniqueAbilityApi`.
-`BuiltinUniqueAbilities`.
+Definitions can be registered and inspected through `UniqueAbilityApi`; the
+original built-ins remain available from `BuiltinUniqueAbilities`.
 
 ## Lifecycle
 
@@ -87,8 +87,9 @@ behaviour for existing integrations.
 ## Reaching spawned entities with tuning
 
 An ability that spawns a long-lived entity must hand that entity the tuning it
-was created with. Simply Swords does this by passing the frozen
-`Phase*AbilityTuning` into the entity at spawn time — `SoulstalkerStrideEntity`
+was created with. Simply Swords does this by passing the frozen semantic
+cohort tuning type, such as `StormSoulMasteryTuning`, into the entity at spawn
+time — `SoulstalkerStrideEntity`
 is the reference: without it, the entity falls back to config and every modifier
 aimed at its behaviour silently does nothing.
 

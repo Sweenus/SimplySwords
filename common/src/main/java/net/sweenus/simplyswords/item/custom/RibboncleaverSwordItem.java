@@ -33,7 +33,7 @@ import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
 import net.sweenus.simplyswords.world.LivingEntityAbilityMovementManager;
-import net.sweenus.simplyswords.world.Phase10WeaponManager;
+import net.sweenus.simplyswords.world.RibboncleaverDreadtideMasteryManager;
 
 import java.util.List;
 
@@ -50,7 +50,7 @@ public class RibboncleaverSwordItem extends UniqueSwordItem implements UniqueWea
         if (!attacker.getWorld().isClient()) {
             HelperMethods.playHitSounds(attacker, target);
             if (attacker.getWorld() instanceof net.minecraft.server.world.ServerWorld serverWorld)
-                Phase10WeaponManager.onRibbonHit(serverWorld, attacker, target, stack);
+                RibboncleaverDreadtideMasteryManager.onRibbonHit(serverWorld, attacker, target, stack);
         }
         return super.postHit(stack, target, attacker);
     }
@@ -76,7 +76,7 @@ public class RibboncleaverSwordItem extends UniqueSwordItem implements UniqueWea
         LivingEntity actor = context.actor();
         LivingEntity target = context.target() != null && HelperMethods.checkAbilityTarget(context.target(), actor)
                 ? context.target() : null;
-        Phase10WeaponManager.ribbonRush(context.world(), actor, context.stack(), target);
+        RibboncleaverDreadtideMasteryManager.ribbonRush(context.world(), actor, context.stack(), target);
         context.world().playSound(null, actor.getBlockPos(), SoundRegistry.ELEMENTAL_BOW_EARTH_SHOOT_IMPACT_03.get(),
                 actor.getSoundCategory(), 0.4f, 1.3f);
         if (actor.isOnGround())
@@ -93,7 +93,7 @@ public class RibboncleaverSwordItem extends UniqueSwordItem implements UniqueWea
 
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
-        if (entity instanceof LivingEntity livingEntity) Phase10WeaponManager.tickRibbon(livingEntity, stack);
+        if (entity instanceof LivingEntity livingEntity) RibboncleaverDreadtideMasteryManager.tickRibbon(livingEntity, stack);
 
         //Drag weapon particles
         if (entity.isOnGround() && Platform.isModLoaded("bettercombat") && HelperMethods.isWalking(entity)

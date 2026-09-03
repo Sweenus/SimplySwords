@@ -26,8 +26,8 @@ import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.api.SpellScalingProfile;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
-import net.sweenus.simplyswords.api.ability.Phase3AbilityTuning;
-import net.sweenus.simplyswords.api.ability.Phase3UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.StormSoulMasteryTuning;
+import net.sweenus.simplyswords.api.ability.StormSoulMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityContext;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
@@ -90,29 +90,29 @@ public final class StormscaleLightningRodManager {
         ServerWorld world = context.world();
         LivingEntity actor = context.actor();
 
-        UniqueAbilityExecution execution = UniqueAbilityApi.begin(Phase3UniqueAbilities.STORMSCALE_ROD,
+        UniqueAbilityExecution execution = UniqueAbilityApi.begin(StormSoulMasteryAbilities.STORMSCALE_ROD,
                 UniqueAbilityContext.active(context), builder -> builder
-                        .set(Phase3UniqueAbilities.TUNING, Phase3AbilityTuning.EMPTY)
-                        .set(Phase3UniqueAbilities.COOLDOWN_TICKS, Config.uniqueEffects.stormscale.cooldown));
-        Phase3AbilityTuning tuning = Phase3UniqueAbilities.tuning(execution);
-        Vec3d anchor = resolveAnchor(context, tuning.get(Phase3AbilityTuning.Setting.RANGE,
+                        .set(StormSoulMasteryAbilities.TUNING, StormSoulMasteryTuning.EMPTY)
+                        .set(StormSoulMasteryAbilities.COOLDOWN_TICKS, Config.uniqueEffects.stormscale.cooldown));
+        StormSoulMasteryTuning tuning = StormSoulMasteryAbilities.tuning(execution);
+        Vec3d anchor = resolveAnchor(context, tuning.get(StormSoulMasteryTuning.Setting.RANGE,
                 Config.uniqueEffects.stormscale.targetingRange));
         if (anchor == null) return false;
-        int duration = Math.max(1, tuning.integer(Phase3AbilityTuning.Setting.ROD_DURATION_TICKS,
+        int duration = Math.max(1, tuning.integer(StormSoulMasteryTuning.Setting.ROD_DURATION_TICKS,
                 Config.uniqueEffects.stormscale.duration));
-        int travelTicks = Math.max(1, tuning.integer(Phase3AbilityTuning.Setting.TRAVEL_TICKS,
+        int travelTicks = Math.max(1, tuning.integer(StormSoulMasteryTuning.Setting.TRAVEL_TICKS,
                 Config.uniqueEffects.stormscale.energyTravelTicks));
-        float radius = (float) Math.max(0.1, tuning.get(Phase3AbilityTuning.Setting.RADIUS,
+        float radius = (float) Math.max(0.1, tuning.get(StormSoulMasteryTuning.Setting.RADIUS,
                 Config.uniqueEffects.stormscale.pulseRadius));
-        float growthPerHit = (float) Math.max(0, tuning.get(Phase3AbilityTuning.Setting.GROWTH_PER_HIT,
+        float growthPerHit = (float) Math.max(0, tuning.get(StormSoulMasteryTuning.Setting.GROWTH_PER_HIT,
                 Config.uniqueEffects.stormscale.pulseGrowthPerHit));
-        float maximumGrowth = (float) Math.max(0, tuning.get(Phase3AbilityTuning.Setting.GROWTH_CAP,
+        float maximumGrowth = (float) Math.max(0, tuning.get(StormSoulMasteryTuning.Setting.GROWTH_CAP,
                 Config.uniqueEffects.stormscale.maximumPulseGrowth));
-        if (tuning.has(Phase3AbilityTuning.Setting.GROWTH_CAP_LIMIT)) {
+        if (tuning.has(StormSoulMasteryTuning.Setting.GROWTH_CAP_LIMIT)) {
             maximumGrowth = Math.min(maximumGrowth,
-                    (float) tuning.get(Phase3AbilityTuning.Setting.GROWTH_CAP_LIMIT, maximumGrowth));
+                    (float) tuning.get(StormSoulMasteryTuning.Setting.GROWTH_CAP_LIMIT, maximumGrowth));
         }
-        double pullStrength = tuning.get(Phase3AbilityTuning.Setting.PULL_STRENGTH,
+        double pullStrength = tuning.get(StormSoulMasteryTuning.Setting.PULL_STRENGTH,
                 Config.uniqueEffects.stormscale.pulsePullStrength);
         Hand hand = context.hand() == null ? Hand.MAIN_HAND : context.hand();
         long now = world.getTime();
@@ -138,7 +138,7 @@ public final class StormscaleLightningRodManager {
                 growthPerHit,
                 maximumGrowth,
                 pullStrength,
-                Math.max(1.0, tuning.get(Phase3AbilityTuning.Setting.TETHER_RANGE,
+                Math.max(1.0, tuning.get(StormSoulMasteryTuning.Setting.TETHER_RANGE,
                         Config.uniqueEffects.stormscale.maxTetherDistance)),
                 HelperMethods.abilityScaledDamage(
                         SpellScalingProfile.LIGHTNING,
@@ -146,18 +146,18 @@ public final class StormscaleLightningRodManager {
                         context.stack(),
                         Config.uniqueEffects.stormscale.pulseDamageScaling,
                         Config.uniqueEffects.stormscale.pulseSpellScaling
-                ) * (float) tuning.get(Phase3AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1),
-                Math.max(1, tuning.integer(Phase3AbilityTuning.Setting.TARGET_CAP,
+                ) * (float) tuning.get(StormSoulMasteryTuning.Setting.DAMAGE_MULTIPLIER, 1),
+                Math.max(1, tuning.integer(StormSoulMasteryTuning.Setting.TARGET_CAP,
                         Config.uniqueEffects.stormscale.pulseTargetCap)),
-                tuning.integer(Phase3AbilityTuning.Setting.SLOW_DURATION_TICKS, 0),
-                tuning.integer(Phase3AbilityTuning.Setting.MODE, 0),
+                tuning.integer(StormSoulMasteryTuning.Setting.SLOW_DURATION_TICKS, 0),
+                tuning.integer(StormSoulMasteryTuning.Setting.MODE, 0),
                 tuning,
                 execution
         );
         ACTIVE.computeIfAbsent(world, ignored -> new HashMap<>()).put(actor.getUuid(), activeRod);
         if ((activeRod.mode & 1) != 0) {
             pulse(world, actor, activeRod, radius, activeRod.baseDamage
-                    * (float) tuning.get(Phase3AbilityTuning.Setting.PLANT_DAMAGE_MULTIPLIER, .7));
+                    * (float) tuning.get(StormSoulMasteryTuning.Setting.PLANT_DAMAGE_MULTIPLIER, .7));
         }
         spawnActivationEffects(world, actor, anchor);
         return true;
@@ -190,30 +190,30 @@ public final class StormscaleLightningRodManager {
         if ((rod.mode & 4096) != 0 && actor.isSneaking() && now >= rod.reverseReady) {
             rod.reverseNext = true;
             rod.reverseReady = now + Math.max(1, rod.tuning.integer(
-                    Phase3AbilityTuning.Setting.REVERSE_LOCKOUT_TICKS, 60));
+                    StormSoulMasteryTuning.Setting.REVERSE_LOCKOUT_TICKS, 60));
             return true;
         }
         if ((rod.mode & 512) != 0 && rod.supercellCharges > 0 && rod.supercellExpires >= now) {
             int charges = rod.supercellCharges;
             rod.supercellCharges = 0;
             pulse(world, actor, rod,
-                    (float) rod.tuning.get(Phase3AbilityTuning.Setting.STORED_PULSE_RADIUS, 6),
+                    (float) rod.tuning.get(StormSoulMasteryTuning.Setting.STORED_PULSE_RADIUS, 6),
                     rod.baseDamage * (float) rod.tuning.get(
-                            Phase3AbilityTuning.Setting.STORED_PULSE_MULTIPLIER, .35) * charges);
+                            StormSoulMasteryTuning.Setting.STORED_PULSE_MULTIPLIER, .35) * charges);
             return true;
         }
         if ((rod.mode & 2) == 0 || rod.repositioned || (rod.mode & 8) != 0) {
             return false;
         }
         Vec3d anchor = resolveAnchor(world, actor,
-                rod.tuning.get(Phase3AbilityTuning.Setting.REPOSITION_RANGE, 14));
+                rod.tuning.get(StormSoulMasteryTuning.Setting.REPOSITION_RANGE, 14));
         if (anchor == null) {
             return false;
         }
         rod.anchor = anchor;
         rod.repositioned = true;
         rod.expiresAt = Math.max(now + 1, rod.expiresAt - Math.max(0, rod.tuning.integer(
-                Phase3AbilityTuning.Setting.REPOSITION_DURATION_COST_TICKS, 80)));
+                StormSoulMasteryTuning.Setting.REPOSITION_DURATION_COST_TICKS, 80)));
         Entity visual = world.getEntity(rod.rodVisualId);
         if (visual != null) visual.setPosition(anchor);
         spawnActivationEffects(world, actor, anchor);
@@ -229,7 +229,7 @@ public final class StormscaleLightningRodManager {
         if (rod == null || world.getTime() >= rod.expiresAt) {
             return amount;
         }
-        double reduction = rod.tuning.get(Phase3AbilityTuning.Setting.DAMAGE_REDUCTION, 0);
+        double reduction = rod.tuning.get(StormSoulMasteryTuning.Setting.DAMAGE_REDUCTION, 0);
         if (reduction <= 0) {
             return amount;
         }
@@ -275,7 +275,7 @@ public final class StormscaleLightningRodManager {
     }
 
     static float cappedRadius(ActiveRod rod, float radius) {
-        double cap = rod.tuning.get(Phase3AbilityTuning.Setting.RADIUS_CAP, 0);
+        double cap = rod.tuning.get(StormSoulMasteryTuning.Setting.RADIUS_CAP, 0);
         return cap > 0 ? (float) Math.min(cap, radius) : radius;
     }
 
@@ -320,23 +320,23 @@ public final class StormscaleLightningRodManager {
         int travelTicks = rod.travelTicks;
         if (target != null && rod.conductive.getOrDefault(target.getUuid(), 0L) >= now) {
             travelTicks = Math.max(1, travelTicks
-                    - rod.tuning.integer(Phase3AbilityTuning.Setting.DELAY_TICKS, 4));
+                    - rod.tuning.integer(StormSoulMasteryTuning.Setting.DELAY_TICKS, 4));
         }
         if ((rod.mode & 256) != 0) {
             rod.arrivedHits++;
             float growth = Math.min(rod.maximumGrowth, rod.arrivedHits * rod.growthPerHit);
             pulse(world, actor, rod, cappedRadius(rod, rod.baseRadius * (1 + growth)),
                     rod.baseDamage * (1 + growth) * (float) rod.tuning.get(
-                            Phase3AbilityTuning.Setting.INSTANT_PULSE_MULTIPLIER, .55));
+                            StormSoulMasteryTuning.Setting.INSTANT_PULSE_MULTIPLIER, .55));
         } else {
             UUID pulseVisualId = spawnTravellingPulse(world, actor, rodVisual, travelTicks);
             rod.pending.add(new PendingPulse(now + travelTicks, pulseVisualId, 1, 1));
         }
         if ((rod.mode & 16) != 0 && isCriticalAttack(actor) && now >= rod.doubleChargeReady) {
             rod.doubleChargeReady = now + rod.tuning.integer(
-                    Phase3AbilityTuning.Setting.DOUBLE_CHARGE_LOCKOUT_TICKS, 10);
+                    StormSoulMasteryTuning.Setting.DOUBLE_CHARGE_LOCKOUT_TICKS, 10);
             float second = (float) rod.tuning.get(
-                    Phase3AbilityTuning.Setting.SECOND_CHARGE_MULTIPLIER, .5);
+                    StormSoulMasteryTuning.Setting.SECOND_CHARGE_MULTIPLIER, .5);
             rod.pending.add(new PendingPulse(now + travelTicks + 1, null, second, second));
         }
         spawnLaunchEffects(world, actor);
@@ -381,7 +381,7 @@ public final class StormscaleLightningRodManager {
         rod.conductive.entrySet().removeIf(entry -> entry.getValue() < now);
         if (rod.supercellExpires < now) rod.supercellCharges = 0;
         if ((rod.mode & 4) != 0) {
-            double followSpeed = Math.max(.01, rod.tuning.get(Phase3AbilityTuning.Setting.MOVEMENT_SPEED, .3));
+            double followSpeed = Math.max(.01, rod.tuning.get(StormSoulMasteryTuning.Setting.MOVEMENT_SPEED, .3));
             rod.anchor = rod.anchor.lerp(actor.getPos(),
                     Math.min(1, followSpeed / Math.max(.01, rod.anchor.distanceTo(actor.getPos()))));
             rodVisual.setPosition(rod.anchor);
@@ -392,10 +392,10 @@ public final class StormscaleLightningRodManager {
             if (pulse.arrivalTick <= now) {
                 if ((rod.mode & 512) != 0) {
                     rod.supercellCharges = Math.min(
-                            rod.tuning.integer(Phase3AbilityTuning.Setting.COUNT, 10),
+                            rod.tuning.integer(StormSoulMasteryTuning.Setting.COUNT, 10),
                             rod.supercellCharges + 1);
                     rod.supercellExpires = now + rod.tuning.integer(
-                            Phase3AbilityTuning.Setting.DURATION_TICKS, 120);
+                            StormSoulMasteryTuning.Setting.DURATION_TICKS, 120);
                     pulses.remove();
                     continue;
                 }
@@ -410,14 +410,14 @@ public final class StormscaleLightningRodManager {
                 float damage = rod.baseDamage * (1.0F + growth) * pulse.damage * (1 + rod.overflow);
                 pulse(world, actor, rod, radius, damage);
                 rod.arrivals++;
-                int surgeInterval = rod.tuning.integer(Phase3AbilityTuning.Setting.SURGE_INTERVAL, 5);
+                int surgeInterval = rod.tuning.integer(StormSoulMasteryTuning.Setting.SURGE_INTERVAL, 5);
                 if ((rod.mode & 128) != 0 && surgeInterval > 0 && rod.arrivals % surgeInterval == 0
                         && rod.extraPulseTick != now) {
                     rod.extraPulseTick = now;
                     pulse(world, actor, rod, radius, rod.baseDamage * (1 + growth)
-                            * (float) rod.tuning.get(Phase3AbilityTuning.Setting.EXTRA_PULSE_MULTIPLIER, .6));
+                            * (float) rod.tuning.get(StormSoulMasteryTuning.Setting.EXTRA_PULSE_MULTIPLIER, .6));
                 }
-                UniqueAbilityApi.emit(rod.execution, UniqueAbilityPhase.HIT, Phase3UniqueAbilities.PULSE,
+                UniqueAbilityApi.emit(rod.execution, UniqueAbilityPhase.HIT, StormSoulMasteryAbilities.PULSE,
                         null, 0, damage);
                 pulses.remove();
             }
@@ -458,14 +458,14 @@ public final class StormscaleLightningRodManager {
             DamageSource source = world.getDamageSources().indirectMagic(actor, attributedOwner);
             double distance = horizontalDistance(target.getPos(), rod.anchor);
             float adjusted = baseDamage;
-            double centerRadius = rod.tuning.get(Phase3AbilityTuning.Setting.CENTER_RADIUS, 1.5);
+            double centerRadius = rod.tuning.get(StormSoulMasteryTuning.Setting.CENTER_RADIUS, 1.5);
             if ((rod.mode & 2048) != 0 && distance <= centerRadius) {
                 adjusted *= (float) (1 + rod.tuning.get(
-                        Phase3AbilityTuning.Setting.CENTER_DAMAGE_BONUS, .2));
+                        StormSoulMasteryTuning.Setting.CENTER_DAMAGE_BONUS, .2));
             }
             if ((rod.mode & 32768) != 0) {
                 if (distance >= radius * .75) {
-                    adjusted *= (float) (1 + rod.tuning.get(Phase3AbilityTuning.Setting.EDGE_BONUS, .35));
+                    adjusted *= (float) (1 + rod.tuning.get(StormSoulMasteryTuning.Setting.EDGE_BONUS, .35));
                 } else if (distance <= 2) {
                     adjusted *= .7F;
                 }
@@ -480,38 +480,38 @@ public final class StormscaleLightningRodManager {
                 target.setVelocity(previousVelocity);
                 target.velocityModified = true;
                 target.velocityDirty = true;
-                double reverseStrength = rod.tuning.get(Phase3AbilityTuning.Setting.REVERSE_STRENGTH, 1.5);
+                double reverseStrength = rod.tuning.get(StormSoulMasteryTuning.Setting.REVERSE_STRENGTH, 1.5);
                 pullTowardRod(target, rod.anchor, reverse ? -Math.max(reverseStrength,
                         Math.abs(rod.pullStrength)) : rod.pullStrength);
                 if ((rod.mode & 2048) != 0 && distance <= centerRadius) {
-                    target.addVelocity(0, rod.tuning.get(Phase3AbilityTuning.Setting.IMPACT_LIFT, .2), 0);
+                    target.addVelocity(0, rod.tuning.get(StormSoulMasteryTuning.Setting.IMPACT_LIFT, .2), 0);
                 }
                 if ((rod.mode & 16384) != 0 && distance <= rod.tuning.get(
-                        Phase3AbilityTuning.Setting.ROOT_RADIUS, 2.5)
-                        && rooted < rod.tuning.integer(Phase3AbilityTuning.Setting.ROOT_TARGET_CAP, 8)) {
+                        StormSoulMasteryTuning.Setting.ROOT_RADIUS, 2.5)
+                        && rooted < rod.tuning.integer(StormSoulMasteryTuning.Setting.ROOT_TARGET_CAP, 8)) {
                     target.setVelocity(0, target.getVelocity().y, 0);
                     target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS,
                             Math.max(1, rod.tuning.integer(
-                                    Phase3AbilityTuning.Setting.ROOT_DURATION_TICKS, 20)), 9,
+                                    StormSoulMasteryTuning.Setting.ROOT_DURATION_TICKS, 20)), 9,
                             false, true, true), actor);
                     rooted++;
                 }
                 if (rod.reverseNext) target.addStatusEffect(new StatusEffectInstance(
                         StatusEffects.WEAKNESS, Math.max(1, rod.tuning.integer(
-                                Phase3AbilityTuning.Setting.REVERSE_WEAKNESS_TICKS, 60)),
+                                StormSoulMasteryTuning.Setting.REVERSE_WEAKNESS_TICKS, 60)),
                         0, false, true, true), actor);
                 damaged++;
                 hitTargets.add(target.getUuid());
                 if ((rod.mode & 32) != 0 && rod.conductive.size() < rod.tuning.integer(
-                        Phase3AbilityTuning.Setting.CONDUCTIVE_TARGET_CAP, 12)) {
+                        StormSoulMasteryTuning.Setting.CONDUCTIVE_TARGET_CAP, 12)) {
                     rod.conductive.put(target.getUuid(), world.getTime() + Math.max(1,
-                            rod.tuning.integer(Phase3AbilityTuning.Setting.CONDUCTIVE_DURATION_TICKS, 60)));
+                            rod.tuning.integer(StormSoulMasteryTuning.Setting.CONDUCTIVE_DURATION_TICKS, 60)));
                 }
                 if (rod.slowTicks > 0) target.addStatusEffect(new StatusEffectInstance(
                         StatusEffects.SLOWNESS, rod.slowTicks,
-                        Math.clamp(rod.tuning.integer(Phase3AbilityTuning.Setting.STATUS_AMPLIFIER, 0), 0, 9),
+                        Math.clamp(rod.tuning.integer(StormSoulMasteryTuning.Setting.STATUS_AMPLIFIER, 0), 0, 9),
                         false, true, true), actor);
-                UniqueAbilityApi.emit(rod.execution, UniqueAbilityPhase.HIT, Phase3UniqueAbilities.HIT,
+                UniqueAbilityApi.emit(rod.execution, UniqueAbilityPhase.HIT, StormSoulMasteryAbilities.HIT,
                         target, 1, damage);
                 if (damaged >= rod.targetCap) break;
             }
@@ -520,13 +520,13 @@ public final class StormscaleLightningRodManager {
             chainBeyondPulse(world, actor, sourceOwner, rod, radius, baseDamage, hitTargets);
         }
         if ((rod.mode & 8192) != 0
-                && damaged >= rod.tuning.integer(Phase3AbilityTuning.Setting.WARD_TARGET_THRESHOLD, 6)
+                && damaged >= rod.tuning.integer(StormSoulMasteryTuning.Setting.WARD_TARGET_THRESHOLD, 6)
                 && world.getTime() >= rod.eyeReady) {
             rod.eyeReady = world.getTime() + Math.max(1, rod.tuning.integer(
-                    Phase3AbilityTuning.Setting.WARD_LOCKOUT_TICKS, 100));
-            int absorption = Math.max(0, rod.tuning.integer(Phase3AbilityTuning.Setting.ABSORPTION, 3));
+                    StormSoulMasteryTuning.Setting.WARD_LOCKOUT_TICKS, 100));
+            int absorption = Math.max(0, rod.tuning.integer(StormSoulMasteryTuning.Setting.ABSORPTION, 3));
             int buffTicks = Math.max(1, rod.tuning.integer(
-                    Phase3AbilityTuning.Setting.BUFF_DURATION_TICKS, 80));
+                    StormSoulMasteryTuning.Setting.BUFF_DURATION_TICKS, 80));
             if (absorption > 0) {
                 actor.addStatusEffect(new StatusEffectInstance(StatusEffects.ABSORPTION,
                         buffTicks, Math.clamp(absorption / 4, 0, 9), false, true, true), actor);
@@ -534,7 +534,7 @@ public final class StormscaleLightningRodManager {
             }
             SimplySwordsAPI.reduceWeaponCooldown(actor, rod.stack,
                     rod.execution.cooldownTicks(Config.uniqueEffects.stormscale.cooldown),
-                    rod.tuning.integer(Phase3AbilityTuning.Setting.REFUND_TICKS, 20));
+                    rod.tuning.integer(StormSoulMasteryTuning.Setting.REFUND_TICKS, 20));
         }
         rod.reverseNext = false;
 
@@ -806,7 +806,7 @@ public final class StormscaleLightningRodManager {
                     10, 0.3, 0.45, 0.3, 0.08);
         }
         if (snapped) UniqueAbilityApi.cancel(rod.execution);
-        else UniqueAbilityApi.finish(rod.execution, Phase3UniqueAbilities.FINISH, Math.round(rod.arrivedHits));
+        else UniqueAbilityApi.finish(rod.execution, StormSoulMasteryAbilities.FINISH, Math.round(rod.arrivedHits));
     }
 
     private static ActiveRod active(ServerWorld world, UUID actorId) {
@@ -825,7 +825,7 @@ public final class StormscaleLightningRodManager {
 
     private static void chainBeyondPulse(ServerWorld world, LivingEntity actor, LivingEntity sourceOwner,
                                          ActiveRod rod, float radius, float baseDamage, HashSet<UUID> excluded) {
-        double chainRange = rod.tuning.get(Phase3AbilityTuning.Setting.CHAIN_RANGE, 3);
+        double chainRange = rod.tuning.get(StormSoulMasteryTuning.Setting.CHAIN_RANGE, 3);
         List<LivingEntity> targets = world.getEntitiesByClass(LivingEntity.class,
                 new Box(rod.anchor, rod.anchor).expand(radius + chainRange), target ->
                         isValidTarget(world, actor, sourceOwner, target)
@@ -833,13 +833,13 @@ public final class StormscaleLightningRodManager {
                                 && horizontalDistance(target.getPos(), rod.anchor) > radius);
         targets.sort(targetOrder(rod.anchor));
         LivingEntity attributedOwner = sourceOwner == null ? actor : sourceOwner;
-        int cap = rod.tuning.integer(Phase3AbilityTuning.Setting.CHAIN_TARGET_CAP, 3);
+        int cap = rod.tuning.integer(StormSoulMasteryTuning.Setting.CHAIN_TARGET_CAP, 3);
         for (int index = 0; index < Math.min(cap, targets.size()); index++) {
             LivingEntity target = targets.get(index);
             DamageSource source = world.getDamageSources().indirectMagic(actor, attributedOwner);
             float damage = HelperMethods.applyAbilityDamageEnchantments(world, rod.stack, target, source,
                     baseDamage * (float) rod.tuning.get(
-                            Phase3AbilityTuning.Setting.CHAIN_DAMAGE_MULTIPLIER, .25));
+                            StormSoulMasteryTuning.Setting.CHAIN_DAMAGE_MULTIPLIER, .25));
             WeaponImplicitRegistry.runSuppressed(() -> HelperMethods.damageThroughIframes(target, source, damage));
         }
     }
@@ -872,7 +872,7 @@ public final class StormscaleLightningRodManager {
         private final int targetCap;
         private final int slowTicks;
         private final int mode;
-        private final Phase3AbilityTuning tuning;
+        private final StormSoulMasteryTuning tuning;
         private final UniqueAbilityExecution execution;
         private final List<PendingPulse> pending = new ArrayList<>();
         private final Map<UUID, Long> conductive = new HashMap<>();
@@ -897,7 +897,7 @@ public final class StormscaleLightningRodManager {
                           float growthPerHit, float maximumGrowth,
                           double pullStrength,
                           double maxTetherDistance, float baseDamage, int targetCap, int slowTicks,
-                          int mode, Phase3AbilityTuning tuning, UniqueAbilityExecution execution) {
+                          int mode, StormSoulMasteryTuning tuning, UniqueAbilityExecution execution) {
             this.actorId = actorId;
             this.sourceOwnerId = sourceOwnerId;
             this.stack = stack;
@@ -919,9 +919,9 @@ public final class StormscaleLightningRodManager {
             this.tuning = tuning;
             this.execution = execution;
             this.overflowStep = (float) Math.max(0, tuning.get(
-                    Phase3AbilityTuning.Setting.PER_STACK_BONUS, .05));
+                    StormSoulMasteryTuning.Setting.PER_STACK_BONUS, .05));
             this.overflowCap = (float) Math.max(0, tuning.get(
-                    Phase3AbilityTuning.Setting.BONUS_CAP, .2));
+                    StormSoulMasteryTuning.Setting.BONUS_CAP, .2));
         }
     }
 

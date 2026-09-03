@@ -21,8 +21,8 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RaycastContext;
 import net.sweenus.simplyswords.api.SpellScalingProfile;
-import net.sweenus.simplyswords.api.ability.Phase2AbilityTuning;
-import net.sweenus.simplyswords.api.ability.Phase2UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.AbyssalSpectralMasteryTuning;
+import net.sweenus.simplyswords.api.ability.AbyssalSpectralMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityContext;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
@@ -79,36 +79,36 @@ public final class DevourerReprisalManager {
             return;
         }
 
-        UniqueAbilityExecution execution = UniqueAbilityApi.begin(Phase2UniqueAbilities.DEVOURER_REPRISAL,
+        UniqueAbilityExecution execution = UniqueAbilityApi.begin(AbyssalSpectralMasteryAbilities.DEVOURER_REPRISAL,
                 UniqueAbilityContext.passive(world, stack, bearer, attacker, null), builder -> builder
-                        .set(Phase2UniqueAbilities.TUNING, Phase2AbilityTuning.EMPTY
-                                .with(Phase2AbilityTuning.Setting.REPRISAL_RADIUS, Config.uniqueEffects.devourer.reprisalRadius)
-                                .with(Phase2AbilityTuning.Setting.REPRISAL_TARGET_CAP, Config.uniqueEffects.devourer.reprisalTargetCap)
-                                .with(Phase2AbilityTuning.Setting.REPRISAL_PULL, Config.uniqueEffects.devourer.reprisalPullStrength)
-                                .with(Phase2AbilityTuning.Setting.REPRISAL_DAMAGE_MULTIPLIER, 1)));
+                        .set(AbyssalSpectralMasteryAbilities.TUNING, AbyssalSpectralMasteryTuning.EMPTY
+                                .with(AbyssalSpectralMasteryTuning.Setting.REPRISAL_RADIUS, Config.uniqueEffects.devourer.reprisalRadius)
+                                .with(AbyssalSpectralMasteryTuning.Setting.REPRISAL_TARGET_CAP, Config.uniqueEffects.devourer.reprisalTargetCap)
+                                .with(AbyssalSpectralMasteryTuning.Setting.REPRISAL_PULL, Config.uniqueEffects.devourer.reprisalPullStrength)
+                                .with(AbyssalSpectralMasteryTuning.Setting.REPRISAL_DAMAGE_MULTIPLIER, 1)));
         UniqueAbilityApi.takeStartedExecution();
         UniqueAbilityApi.start(execution);
-        Phase2AbilityTuning tuning = Phase2UniqueAbilities.tuning(execution);
+        AbyssalSpectralMasteryTuning tuning = AbyssalSpectralMasteryAbilities.tuning(execution);
 
-        int mode = tuning.integer(Phase2AbilityTuning.Setting.MODE, 0);
+        int mode = tuning.integer(AbyssalSpectralMasteryTuning.Setting.MODE, 0);
         boolean guarding = (mode & 512) != 0;
         applyLockout(world, bearer.getUuid(),
-                tuning.integer(Phase2AbilityTuning.Setting.LOCKOUT_TICKS, 0));
-        double radius = Math.max(0.5, tuning.get(Phase2AbilityTuning.Setting.REPRISAL_RADIUS,
+                tuning.integer(AbyssalSpectralMasteryTuning.Setting.LOCKOUT_TICKS, 0));
+        double radius = Math.max(0.5, tuning.get(AbyssalSpectralMasteryTuning.Setting.REPRISAL_RADIUS,
                 Config.uniqueEffects.devourer.reprisalRadius));
-        int targetCap = Math.max(1, tuning.integer(Phase2AbilityTuning.Setting.REPRISAL_TARGET_CAP,
+        int targetCap = Math.max(1, tuning.integer(AbyssalSpectralMasteryTuning.Setting.REPRISAL_TARGET_CAP,
                 Config.uniqueEffects.devourer.reprisalTargetCap));
         Vec3d center = resolveMawCenter(world, attacker);
         List<LivingEntity> targets = collectTargets(world, bearer, attacker, center, radius, targetCap);
         float damage = HelperMethods.abilityScaledDamage(SpellScalingProfile.SOUL, bearer, stack,
                 Config.uniqueEffects.devourer.reprisalDamageScaling,
                 Config.uniqueEffects.devourer.reprisalSpellScaling)
-                * (float) tuning.get(Phase2AbilityTuning.Setting.REPRISAL_DAMAGE_MULTIPLIER, 1);
-        double secondary = tuning.get(Phase2AbilityTuning.Setting.REPRISAL_SECONDARY_MULTIPLIER, 1);
+                * (float) tuning.get(AbyssalSpectralMasteryTuning.Setting.REPRISAL_DAMAGE_MULTIPLIER, 1);
+        double secondary = tuning.get(AbyssalSpectralMasteryTuning.Setting.REPRISAL_SECONDARY_MULTIPLIER, 1);
         DevourerAbilityManager.ReprisalRedirect redirect = guarding ? null
                 : DevourerAbilityManager.feedFromReprisal(world, bearer.getUuid(), center, attacker,
                         Math.max(10, Config.uniqueEffects.devourer.reprisalDragDuration + 7),
-                        tuning.get(Phase2AbilityTuning.Setting.RANGE, 0));
+                        tuning.get(AbyssalSpectralMasteryTuning.Setting.RANGE, 0));
         if (redirect != null) {
             DevourerAbilityManager.markRouted(world, bearer.getUuid(), attacker.getUuid(),
                     Math.max(20, Config.uniqueEffects.devourer.reprisalDragDuration + 40));
@@ -118,7 +118,7 @@ public final class DevourerReprisalManager {
             damageTarget(world, bearer, stack, target, scaled);
             applyReprisalStatus(bearer, target == attacker ? attacker : null, tuning);
             UniqueAbilityApi.emit(execution, net.sweenus.simplyswords.api.ability.UniqueAbilityPhase.HIT,
-                    Phase2UniqueAbilities.HIT, target, 1, scaled);
+                    AbyssalSpectralMasteryAbilities.HIT, target, 1, scaled);
         }
         grantReprisalAbsorption(bearer, tuning, mode);
         if (guarding) applyGuardianBoon(bearer, tuning);
@@ -200,10 +200,10 @@ public final class DevourerReprisalManager {
     }
 
     private static void tickPull(ServerWorld world, LivingEntity bearer, ActiveReprisal reprisal) {
-        Phase2AbilityTuning tuning = Phase2UniqueAbilities.tuning(reprisal.execution);
+        AbyssalSpectralMasteryTuning tuning = AbyssalSpectralMasteryAbilities.tuning(reprisal.execution);
         double configured = Math.max(0.0, reprisal.pushing
-                ? tuning.get(Phase2AbilityTuning.Setting.REPRISAL_PUSH_STRENGTH, 0)
-                : tuning.get(Phase2AbilityTuning.Setting.REPRISAL_PULL,
+                ? tuning.get(AbyssalSpectralMasteryTuning.Setting.REPRISAL_PUSH_STRENGTH, 0)
+                : tuning.get(AbyssalSpectralMasteryTuning.Setting.REPRISAL_PULL,
                         Config.uniqueEffects.devourer.reprisalPullStrength));
         if (configured <= 0.0) return;
         for (UUID targetId : reprisal.targetIds) {
@@ -246,25 +246,25 @@ public final class DevourerReprisalManager {
     }
 
     private static void applyReprisalStatus(LivingEntity bearer, LivingEntity attacker,
-                                            Phase2AbilityTuning tuning) {
+                                            AbyssalSpectralMasteryTuning tuning) {
         if (attacker == null) return;
-        int duration = tuning.integer(Phase2AbilityTuning.Setting.STATUS_DURATION_TICKS, 0);
+        int duration = tuning.integer(AbyssalSpectralMasteryTuning.Setting.STATUS_DURATION_TICKS, 0);
         if (duration <= 0) return;
         attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, duration,
-                tuning.integer(Phase2AbilityTuning.Setting.STATUS_AMPLIFIER, 0),
+                tuning.integer(AbyssalSpectralMasteryTuning.Setting.STATUS_AMPLIFIER, 0),
                 false, false, true), bearer);
     }
 
-    private static void grantReprisalAbsorption(LivingEntity bearer, Phase2AbilityTuning tuning, int mode) {
+    private static void grantReprisalAbsorption(LivingEntity bearer, AbyssalSpectralMasteryTuning tuning, int mode) {
         if ((mode & 256) == 0) return;
-        float points = (float) tuning.get(Phase2AbilityTuning.Setting.REVIVE_ABSORPTION, 0);
+        float points = (float) tuning.get(AbyssalSpectralMasteryTuning.Setting.REVIVE_ABSORPTION, 0);
         float cap = Math.max(0.0F, Config.uniqueEffects.abilityAbsorptionCap);
         if (points <= 0.0F || bearer.getAbsorptionAmount() >= Math.min(points, cap)) return;
         bearer.setAbsorptionAmount(Math.min(cap, points));
     }
 
-    private static void applyGuardianBoon(LivingEntity bearer, Phase2AbilityTuning tuning) {
-        int duration = tuning.integer(Phase2AbilityTuning.Setting.REPRISAL_GUARD_TICKS, 0);
+    private static void applyGuardianBoon(LivingEntity bearer, AbyssalSpectralMasteryTuning tuning) {
+        int duration = tuning.integer(AbyssalSpectralMasteryTuning.Setting.REPRISAL_GUARD_TICKS, 0);
         if (duration <= 0) return;
         bearer.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, duration, 0,
                 false, false, true));

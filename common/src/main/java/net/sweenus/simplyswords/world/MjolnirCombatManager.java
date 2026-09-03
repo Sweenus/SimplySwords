@@ -8,8 +8,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.server.world.ServerWorld;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
-import net.sweenus.simplyswords.api.ability.Phase6AbilityTuning;
-import net.sweenus.simplyswords.api.ability.Phase6UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.StormFrostWaterMasteryTuning;
+import net.sweenus.simplyswords.api.ability.StormFrostWaterMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.config.Config;
@@ -39,7 +39,7 @@ public final class MjolnirCombatManager {
         if (owner == null || !(owner.getWorld() instanceof ServerWorld world)) {
             return;
         }
-        Phase4AbsorptionTracker.tick(owner);
+        MasteryAbsorptionTracker.tick(owner);
         long now = world.getTime();
         OwnerState state = state(owner, now);
         state.conductiveMemory.values().removeIf(deadline -> deadline <= now);
@@ -49,14 +49,14 @@ public final class MjolnirCombatManager {
         if (owner.age % RESOLVE_INTERVAL != 0) {
             return;
         }
-        UniqueAbilityExecution execution = Phase6CombatManager.beginPassive(
-                Phase6UniqueAbilities.MJOLNIR_STORM, world, stack, owner, null);
-        state.tuning = Phase6UniqueAbilities.tuning(execution);
+        UniqueAbilityExecution execution = StormFrostWaterMasteryCombatManager.beginPassive(
+                StormFrostWaterMasteryAbilities.MJOLNIR_STORM, world, stack, owner, null);
+        state.tuning = StormFrostWaterMasteryAbilities.tuning(execution);
         state.tuningExpiresAt = now + RESOLVE_INTERVAL * 4L;
-        UniqueAbilityApi.finish(execution, Phase6UniqueAbilities.FINISH, 0);
+        UniqueAbilityApi.finish(execution, StormFrostWaterMasteryAbilities.FINISH, 0);
     }
 
-    public static void onStormStarted(LivingEntity owner, Phase6AbilityTuning tuning) {
+    public static void onStormStarted(LivingEntity owner, StormFrostWaterMasteryTuning tuning) {
         if (owner == null || !(owner.getWorld() instanceof ServerWorld world)) {
             return;
         }
@@ -248,23 +248,23 @@ public final class MjolnirCombatManager {
         return state;
     }
 
-    private static double scoped(Phase6AbilityTuning tuning, Phase6AbilityTuning.Setting scoped,
-                                 Phase6AbilityTuning.Setting legacy, double fallback) {
+    private static double scoped(StormFrostWaterMasteryTuning tuning, StormFrostWaterMasteryTuning.Setting scoped,
+                                 StormFrostWaterMasteryTuning.Setting legacy, double fallback) {
         return tuning.has(scoped) ? tuning.get(scoped, fallback) : tuning.get(legacy, fallback);
     }
 
-    private static int scopedInt(Phase6AbilityTuning tuning, Phase6AbilityTuning.Setting scoped,
-                                 Phase6AbilityTuning.Setting legacy, int fallback) {
+    private static int scopedInt(StormFrostWaterMasteryTuning tuning, StormFrostWaterMasteryTuning.Setting scoped,
+                                 StormFrostWaterMasteryTuning.Setting legacy, int fallback) {
         return tuning.has(scoped) ? tuning.integer(scoped, fallback) : tuning.integer(legacy, fallback);
     }
 
-    private static Phase6AbilityTuning.Setting s(String name) {
-        return Phase6AbilityTuning.Setting.valueOf(name);
+    private static StormFrostWaterMasteryTuning.Setting s(String name) {
+        return StormFrostWaterMasteryTuning.Setting.valueOf(name);
     }
 
     private static final class OwnerState {
         private final Map<UUID, Long> conductiveMemory = new HashMap<>();
-        private Phase6AbilityTuning tuning;
+        private StormFrostWaterMasteryTuning tuning;
         private long tuningExpiresAt;
         private long expiresAt;
         private long fallProtectionUntil;

@@ -19,8 +19,8 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.api.AwakeningApi;
-import net.sweenus.simplyswords.api.ability.Phase3AbilityTuning;
-import net.sweenus.simplyswords.api.ability.Phase3UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.StormSoulMasteryTuning;
+import net.sweenus.simplyswords.api.ability.StormSoulMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityContext;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
@@ -51,10 +51,10 @@ public final class SoulrenderAbilityManager {
     }
 
     // Rendmarks: Fresh Ink grants extra opening stacks against an unafflicted enemy.
-    public static int openingStacks(ServerWorld world, LivingEntity target, Phase3AbilityTuning tuning) {
-        int stacks = tuning.integer(Phase3AbilityTuning.Setting.FRESH_INK_STACKS, 1);
+    public static int openingStacks(ServerWorld world, LivingEntity target, StormSoulMasteryTuning tuning) {
+        int stacks = tuning.integer(StormSoulMasteryTuning.Setting.FRESH_INK_STACKS, 1);
         if (stacks <= 1 || world == null || target == null) return 1;
-        int lockout = Math.max(1, tuning.integer(Phase3AbilityTuning.Setting.FRESH_INK_LOCKOUT_TICKS, 80));
+        int lockout = Math.max(1, tuning.integer(StormSoulMasteryTuning.Setting.FRESH_INK_LOCKOUT_TICKS, 80));
         Map<UUID, Long> ready = FRESH_INK.computeIfAbsent(world, ignored -> new HashMap<>());
         long now = world.getTime();
         Long next = ready.get(target.getUuid());
@@ -65,18 +65,18 @@ public final class SoulrenderAbilityManager {
 
     // Rendmarks: Echoed Curse copies a mark to the nearest other enemy.
     public static void echoMark(ServerWorld world, LivingEntity attacker, LivingEntity target,
-                                Phase3AbilityTuning tuning) {
-        int chance = tuning.integer(Phase3AbilityTuning.Setting.ECHO_CHANCE, 0);
-        double range = tuning.get(Phase3AbilityTuning.Setting.ECHO_RANGE, 0);
+                                StormSoulMasteryTuning tuning) {
+        int chance = tuning.integer(StormSoulMasteryTuning.Setting.ECHO_CHANCE, 0);
+        double range = tuning.get(StormSoulMasteryTuning.Setting.ECHO_RANGE, 0);
         if (chance <= 0 || range <= 0 || world == null || attacker == null || target == null) return;
         OwnerState state = owner(world, attacker.getUuid());
         long now = world.getTime();
         if (now < state.echoReady) return;
         if (attacker.getRandom().nextInt(100) >= chance) return;
-        state.echoReady = now + Math.max(1, tuning.integer(Phase3AbilityTuning.Setting.ECHO_LOCKOUT_TICKS, 20));
+        state.echoReady = now + Math.max(1, tuning.integer(StormSoulMasteryTuning.Setting.ECHO_LOCKOUT_TICKS, 20));
 
-        int cap = Math.max(1, tuning.integer(Phase3AbilityTuning.Setting.ECHO_TARGET_CAP, 1));
-        int duration = Math.max(1, tuning.integer(Phase3AbilityTuning.Setting.ECHO_DURATION_TICKS, 300));
+        int cap = Math.max(1, tuning.integer(StormSoulMasteryTuning.Setting.ECHO_TARGET_CAP, 1));
+        int duration = Math.max(1, tuning.integer(StormSoulMasteryTuning.Setting.ECHO_DURATION_TICKS, 300));
         int copied = 0;
         for (LivingEntity nearby : nearestTargets(world, attacker, target.getPos(), range, cap + 1)) {
             if (nearby == target) continue;
@@ -90,11 +90,11 @@ public final class SoulrenderAbilityManager {
     }
 
     // The Reaping: enemies just beyond the radius are dragged inward before the harvest.
-    public static void reachPull(ServerWorld world, LivingEntity user, double radius, Phase3AbilityTuning tuning) {
-        double bonus = tuning.get(Phase3AbilityTuning.Setting.REACH_BONUS_RANGE, 0);
-        double strength = tuning.get(Phase3AbilityTuning.Setting.REACH_PULL_STRENGTH, 0);
+    public static void reachPull(ServerWorld world, LivingEntity user, double radius, StormSoulMasteryTuning tuning) {
+        double bonus = tuning.get(StormSoulMasteryTuning.Setting.REACH_BONUS_RANGE, 0);
+        double strength = tuning.get(StormSoulMasteryTuning.Setting.REACH_PULL_STRENGTH, 0);
         if (bonus <= 0 || strength <= 0 || world == null || user == null) return;
-        int cap = Math.max(1, tuning.integer(Phase3AbilityTuning.Setting.REACH_TARGET_CAP, 8));
+        int cap = Math.max(1, tuning.integer(StormSoulMasteryTuning.Setting.REACH_TARGET_CAP, 8));
         int pulled = 0;
         for (LivingEntity target : nearestTargets(world, user, user.getPos(), radius + bonus, cap * 2)) {
             if (!isMarked(target) || user.squaredDistanceTo(target) <= radius * radius) continue;
@@ -114,11 +114,11 @@ public final class SoulrenderAbilityManager {
 
     // The Reaping: Shared Ending splits a lethal harvest into the nearest surviving mark.
     public static void sharedEnding(ServerWorld world, LivingEntity user, ItemStack stack, LivingEntity victim,
-                                    float dealt, Phase3AbilityTuning tuning, OwnerReapState reap) {
-        double multiplier = tuning.get(Phase3AbilityTuning.Setting.SHARED_END_DAMAGE_MULTIPLIER, 0);
-        double range = tuning.get(Phase3AbilityTuning.Setting.SHARED_END_RANGE, 0);
+                                    float dealt, StormSoulMasteryTuning tuning, OwnerReapState reap) {
+        double multiplier = tuning.get(StormSoulMasteryTuning.Setting.SHARED_END_DAMAGE_MULTIPLIER, 0);
+        double range = tuning.get(StormSoulMasteryTuning.Setting.SHARED_END_RANGE, 0);
         if (multiplier <= 0 || range <= 0 || dealt <= 0 || reap == null) return;
-        int cap = Math.max(1, tuning.integer(Phase3AbilityTuning.Setting.SHARED_END_TARGET_CAP, 6));
+        int cap = Math.max(1, tuning.integer(StormSoulMasteryTuning.Setting.SHARED_END_TARGET_CAP, 6));
         if (reap.sharedEndings >= cap) return;
         for (LivingEntity nearby : nearestTargets(world, user, victim.getPos(), range, 4)) {
             if (nearby == victim || !nearby.isAlive() || !isMarked(nearby)) continue;
@@ -131,62 +131,62 @@ public final class SoulrenderAbilityManager {
     }
 
     // Gravebound: records what a completed harvest leaves behind on its wielder.
-    public static void recordReap(ServerWorld world, LivingEntity user, Phase3AbilityTuning tuning,
+    public static void recordReap(ServerWorld world, LivingEntity user, StormSoulMasteryTuning tuning,
                                   int consumed, float dealt, int kills, int quietusAbsorption) {
         if (world == null || user == null || consumed <= 0) return;
         long now = world.getTime();
 
-        int sheath = tuning.integer(Phase3AbilityTuning.Setting.SHEATH_ABSORPTION, 0);
+        int sheath = tuning.integer(StormSoulMasteryTuning.Setting.SHEATH_ABSORPTION, 0);
         if (sheath > 0) {
             grantAbsorption(user, sheath,
-                    Math.max(1, tuning.integer(Phase3AbilityTuning.Setting.SHEATH_DURATION_TICKS, 80)));
+                    Math.max(1, tuning.integer(StormSoulMasteryTuning.Setting.SHEATH_DURATION_TICKS, 80)));
         }
         if (quietusAbsorption > 0) {
             grantAbsorption(user, quietusAbsorption,
-                    Math.max(1, tuning.integer(Phase3AbilityTuning.Setting.SHEATH_DURATION_TICKS, 80)));
+                    Math.max(1, tuning.integer(StormSoulMasteryTuning.Setting.SHEATH_DURATION_TICKS, 80)));
         }
 
-        double shelterRatio = tuning.get(Phase3AbilityTuning.Setting.SHELTER_ABSORPTION_RATIO, 0);
+        double shelterRatio = tuning.get(StormSoulMasteryTuning.Setting.SHELTER_ABSORPTION_RATIO, 0);
         if (shelterRatio > 0 && dealt > 0) {
-            int amount = (int) Math.min(tuning.get(Phase3AbilityTuning.Setting.SHELTER_ABSORPTION_CAP, 8),
+            int amount = (int) Math.min(tuning.get(StormSoulMasteryTuning.Setting.SHELTER_ABSORPTION_CAP, 8),
                     Math.round(dealt * shelterRatio));
             if (amount > 0) {
                 grantAbsorption(user, amount,
-                        Math.max(1, tuning.integer(Phase3AbilityTuning.Setting.SHELTER_DURATION_TICKS, 120)));
+                        Math.max(1, tuning.integer(StormSoulMasteryTuning.Setting.SHELTER_DURATION_TICKS, 120)));
             }
         }
 
-        int speedThreshold = tuning.integer(Phase3AbilityTuning.Setting.REAP_SPEED_THRESHOLD, 0);
+        int speedThreshold = tuning.integer(StormSoulMasteryTuning.Setting.REAP_SPEED_THRESHOLD, 0);
         if (speedThreshold > 0 && consumed >= speedThreshold) {
             user.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED,
-                    Math.max(1, tuning.integer(Phase3AbilityTuning.Setting.REAP_SPEED_DURATION_TICKS, 60)),
+                    Math.max(1, tuning.integer(StormSoulMasteryTuning.Setting.REAP_SPEED_DURATION_TICKS, 60)),
                     0, false, true, true), user);
         }
-        int hasteThreshold = tuning.integer(Phase3AbilityTuning.Setting.REAP_HASTE_THRESHOLD, 0);
+        int hasteThreshold = tuning.integer(StormSoulMasteryTuning.Setting.REAP_HASTE_THRESHOLD, 0);
         if (hasteThreshold > 0 && consumed >= hasteThreshold) {
             user.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE,
-                    Math.max(1, tuning.integer(Phase3AbilityTuning.Setting.REAP_HASTE_DURATION_TICKS, 100)),
-                    Math.max(0, tuning.integer(Phase3AbilityTuning.Setting.REAP_HASTE_AMPLIFIER, 1)),
+                    Math.max(1, tuning.integer(StormSoulMasteryTuning.Setting.REAP_HASTE_DURATION_TICKS, 100)),
+                    Math.max(0, tuning.integer(StormSoulMasteryTuning.Setting.REAP_HASTE_AMPLIFIER, 1)),
                     false, true, true), user);
         }
 
         OwnerState state = owner(world, user.getUuid());
-        double reserveRatio = tuning.get(Phase3AbilityTuning.Setting.GRAVE_RESERVE_RATIO, 0);
+        double reserveRatio = tuning.get(StormSoulMasteryTuning.Setting.GRAVE_RESERVE_RATIO, 0);
         if (reserveRatio > 0 && dealt > 0) {
-            state.reserveStored = (float) Math.min(tuning.get(Phase3AbilityTuning.Setting.GRAVE_RESERVE_CAP, 6),
+            state.reserveStored = (float) Math.min(tuning.get(StormSoulMasteryTuning.Setting.GRAVE_RESERVE_CAP, 6),
                     state.reserveStored + dealt * reserveRatio);
-            state.reserveThreshold = tuning.get(Phase3AbilityTuning.Setting.GRAVE_RESERVE_HEALTH_THRESHOLD, 0.35);
+            state.reserveThreshold = tuning.get(StormSoulMasteryTuning.Setting.GRAVE_RESERVE_HEALTH_THRESHOLD, 0.35);
             state.reserveDuration = Math.max(1,
-                    tuning.integer(Phase3AbilityTuning.Setting.GRAVE_RESERVE_DURATION_TICKS, 100));
+                    tuning.integer(StormSoulMasteryTuning.Setting.GRAVE_RESERVE_DURATION_TICKS, 100));
         }
 
-        double titheBonus = tuning.get(Phase3AbilityTuning.Setting.TITHE_KILL_BONUS, 0);
+        double titheBonus = tuning.get(StormSoulMasteryTuning.Setting.TITHE_KILL_BONUS, 0);
         if (titheBonus > 0 && kills > 0) {
-            double cap = tuning.get(Phase3AbilityTuning.Setting.TITHE_BONUS_CAP, 0.5);
+            double cap = tuning.get(StormSoulMasteryTuning.Setting.TITHE_BONUS_CAP, 0.5);
             if (now >= state.titheExpires) state.titheBonus = 0;
             state.titheBonus = Math.min(cap, state.titheBonus + titheBonus * kills);
             state.titheExpires = now + Math.max(1,
-                    tuning.integer(Phase3AbilityTuning.Setting.TITHE_DURATION_TICKS, 100));
+                    tuning.integer(StormSoulMasteryTuning.Setting.TITHE_DURATION_TICKS, 100));
         }
     }
 
@@ -216,12 +216,12 @@ public final class SoulrenderAbilityManager {
         OwnerState state = owner(world, actor.getUuid());
         long now = world.getTime();
         if (now < state.coldGripReady) return amount;
-        Phase3AbilityTuning tuning = graveTuning(world, actor, stack, attacker);
-        int slowTicks = tuning.integer(Phase3AbilityTuning.Setting.COLD_GRIP_SLOW_TICKS, 0);
+        StormSoulMasteryTuning tuning = graveTuning(world, actor, stack, attacker);
+        int slowTicks = tuning.integer(StormSoulMasteryTuning.Setting.COLD_GRIP_SLOW_TICKS, 0);
         if (slowTicks <= 0) return amount;
         state.coldGripReady = now + Math.max(1,
-                tuning.integer(Phase3AbilityTuning.Setting.COLD_GRIP_LOCKOUT_TICKS, 40));
-        int cap = Math.max(1, tuning.integer(Phase3AbilityTuning.Setting.COLD_GRIP_TARGET_CAP, 8));
+                tuning.integer(StormSoulMasteryTuning.Setting.COLD_GRIP_LOCKOUT_TICKS, 40));
+        int cap = Math.max(1, tuning.integer(StormSoulMasteryTuning.Setting.COLD_GRIP_TARGET_CAP, 8));
         int affected = 0;
         for (LivingEntity nearby : nearestTargets(world, actor, actor.getPos(), 6.0, cap * 2)) {
             if (!isMarked(nearby)) continue;
@@ -248,11 +248,11 @@ public final class SoulrenderAbilityManager {
         long now = world.getTime();
         if (now < state.unbrokenReady) return false;
 
-        Phase3AbilityTuning tuning = graveTuning(world, actor, stack, null);
-        int threshold = tuning.integer(Phase3AbilityTuning.Setting.UNBROKEN_MARK_THRESHOLD, 0);
-        double range = tuning.get(Phase3AbilityTuning.Setting.UNBROKEN_RANGE, 0);
+        StormSoulMasteryTuning tuning = graveTuning(world, actor, stack, null);
+        int threshold = tuning.integer(StormSoulMasteryTuning.Setting.UNBROKEN_MARK_THRESHOLD, 0);
+        double range = tuning.get(StormSoulMasteryTuning.Setting.UNBROKEN_RANGE, 0);
         if (threshold <= 0 || range <= 0) return false;
-        int cap = Math.max(threshold, tuning.integer(Phase3AbilityTuning.Setting.UNBROKEN_TARGET_CAP, threshold));
+        int cap = Math.max(threshold, tuning.integer(StormSoulMasteryTuning.Setting.UNBROKEN_TARGET_CAP, threshold));
 
         List<LivingEntity> marked = new ArrayList<>();
         for (LivingEntity nearby : nearestTargets(world, actor, actor.getPos(), range, cap * 2)) {
@@ -263,7 +263,7 @@ public final class SoulrenderAbilityManager {
         if (marked.size() < threshold) return false;
 
         state.unbrokenReady = now + Math.max(1,
-                tuning.integer(Phase3AbilityTuning.Setting.UNBROKEN_LOCKOUT_TICKS, 1200));
+                tuning.integer(StormSoulMasteryTuning.Setting.UNBROKEN_LOCKOUT_TICKS, 1200));
         for (LivingEntity consumed : marked) {
             SoulrenderMarkVisualManager.consumeMark(world, consumed, actor);
             consumed.removeStatusEffect(StatusEffects.SLOWNESS);
@@ -271,7 +271,7 @@ public final class SoulrenderAbilityManager {
         }
         actor.setHealth(1.0F);
         actor.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE,
-                Math.max(1, tuning.integer(Phase3AbilityTuning.Setting.UNBROKEN_RESIST_TICKS, 40)),
+                Math.max(1, tuning.integer(StormSoulMasteryTuning.Setting.UNBROKEN_RESIST_TICKS, 40)),
                 1, false, true, true), actor);
         world.spawnParticles(ParticleTypes.SOUL_FIRE_FLAME, actor.getX(), actor.getBodyY(0.6), actor.getZ(),
                 24, 0.4, 0.6, 0.4, 0.02);
@@ -289,11 +289,11 @@ public final class SoulrenderAbilityManager {
         OwnerState state = owner(world, killer.getUuid());
         long now = world.getTime();
         if (now < state.borrowedTimeReady) return;
-        Phase3AbilityTuning tuning = graveTuning(world, killer, stack, victim);
-        int duration = tuning.integer(Phase3AbilityTuning.Setting.BORROWED_TIME_TICKS, 0);
+        StormSoulMasteryTuning tuning = graveTuning(world, killer, stack, victim);
+        int duration = tuning.integer(StormSoulMasteryTuning.Setting.BORROWED_TIME_TICKS, 0);
         if (duration <= 0) return;
         state.borrowedTimeReady = now + Math.max(1,
-                tuning.integer(Phase3AbilityTuning.Setting.BORROWED_TIME_LOCKOUT_TICKS, 40));
+                tuning.integer(StormSoulMasteryTuning.Setting.BORROWED_TIME_LOCKOUT_TICKS, 40));
         killer.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, duration, 0,
                 false, true, true), killer);
     }
@@ -302,10 +302,10 @@ public final class SoulrenderAbilityManager {
     public static void tickHolder(ServerWorld world, LivingEntity holder, ItemStack stack) {
         if (world == null || holder == null || stack.isEmpty() || !AwakeningApi.isAbilityUnlocked(stack)) return;
         if (world.getTime() % PATIENCE_INTERVAL_TICKS != 0) return;
-        Phase3AbilityTuning tuning = graveTuning(world, holder, stack, null);
+        StormSoulMasteryTuning tuning = graveTuning(world, holder, stack, null);
 
-        double range = tuning.get(Phase3AbilityTuning.Setting.PATIENCE_RANGE, 0);
-        double resistance = tuning.get(Phase3AbilityTuning.Setting.KNOCKBACK_RESISTANCE_BONUS, 0);
+        double range = tuning.get(StormSoulMasteryTuning.Setting.PATIENCE_RANGE, 0);
+        double resistance = tuning.get(StormSoulMasteryTuning.Setting.KNOCKBACK_RESISTANCE_BONUS, 0);
         if (range > 0 && resistance > 0 && anyMarkedWithin(world, holder, range)) {
             applyPatience(holder, resistance);
         } else {
@@ -403,15 +403,15 @@ public final class SoulrenderAbilityManager {
         return found.size() > limit ? found.subList(0, limit) : found;
     }
 
-    private static Phase3AbilityTuning graveTuning(ServerWorld world, LivingEntity owner, ItemStack stack,
+    private static StormSoulMasteryTuning graveTuning(ServerWorld world, LivingEntity owner, ItemStack stack,
                                                    LivingEntity other) {
-        UniqueAbilityExecution execution = UniqueAbilityApi.begin(Phase3UniqueAbilities.SOULRENDER_GRAVE,
+        UniqueAbilityExecution execution = UniqueAbilityApi.begin(StormSoulMasteryAbilities.SOULRENDER_GRAVE,
                 UniqueAbilityContext.passive(world, stack, owner, other, null), builder -> builder
-                        .set(Phase3UniqueAbilities.TUNING, Phase3AbilityTuning.EMPTY));
+                        .set(StormSoulMasteryAbilities.TUNING, StormSoulMasteryTuning.EMPTY));
         UniqueAbilityApi.takeStartedExecution();
         UniqueAbilityApi.start(execution);
-        Phase3AbilityTuning tuning = Phase3UniqueAbilities.tuning(execution);
-        UniqueAbilityApi.finish(execution, Phase3UniqueAbilities.FINISH, 0);
+        StormSoulMasteryTuning tuning = StormSoulMasteryAbilities.tuning(execution);
+        UniqueAbilityApi.finish(execution, StormSoulMasteryAbilities.FINISH, 0);
         return tuning;
     }
 

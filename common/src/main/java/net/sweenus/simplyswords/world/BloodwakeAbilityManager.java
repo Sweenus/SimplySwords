@@ -17,8 +17,8 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.api.SpellScalingProfile;
-import net.sweenus.simplyswords.api.ability.Phase8AbilityTuning;
-import net.sweenus.simplyswords.api.ability.Phase8UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.DeathShadowBloodMasteryTuning;
+import net.sweenus.simplyswords.api.ability.DeathShadowBloodMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.config.Config;
@@ -97,55 +97,55 @@ public final class BloodwakeAbilityManager {
                 SoundCategory.PLAYERS, 0.42F, 0.92F + (before * 0.12F));
     }
 
-    public static double burstRadius(double configured, Phase8AbilityTuning tuning) {
-        double radius = configured + tuning.get(Phase8AbilityTuning.Setting.BLOOD_BURST_RADIUS_BONUS, 0);
-        if (tuning.flag(1 << 8)) radius *= tuning.get(Phase8AbilityTuning.Setting.BLOOD_SACRAMENT_RADIUS_MULTIPLIER, .65);
+    public static double burstRadius(double configured, DeathShadowBloodMasteryTuning tuning) {
+        double radius = configured + tuning.get(DeathShadowBloodMasteryTuning.Setting.BLOOD_BURST_RADIUS_BONUS, 0);
+        if (tuning.flag(1 << 8)) radius *= tuning.get(DeathShadowBloodMasteryTuning.Setting.BLOOD_SACRAMENT_RADIUS_MULTIPLIER, .65);
         return Math.max(0.5, radius);
     }
 
-    public static double burstDamageMultiplier(Phase8AbilityTuning tuning) {
-        double multiplier = tuning.get(Phase8AbilityTuning.Setting.BLOOD_BURST_DAMAGE_MULTIPLIER, 1);
-        if (tuning.flag(1 << 7)) multiplier *= tuning.get(Phase8AbilityTuning.Setting.BLOOD_SPRAY_DAMAGE_MULTIPLIER, 1.35);
-        if (tuning.flag(1 << 8)) multiplier *= tuning.get(Phase8AbilityTuning.Setting.BLOOD_SACRAMENT_DAMAGE_MULTIPLIER, .7);
+    public static double burstDamageMultiplier(DeathShadowBloodMasteryTuning tuning) {
+        double multiplier = tuning.get(DeathShadowBloodMasteryTuning.Setting.BLOOD_BURST_DAMAGE_MULTIPLIER, 1);
+        if (tuning.flag(1 << 7)) multiplier *= tuning.get(DeathShadowBloodMasteryTuning.Setting.BLOOD_SPRAY_DAMAGE_MULTIPLIER, 1.35);
+        if (tuning.flag(1 << 8)) multiplier *= tuning.get(DeathShadowBloodMasteryTuning.Setting.BLOOD_SACRAMENT_DAMAGE_MULTIPLIER, .7);
         return multiplier;
     }
 
-    public static int burstBleedDuration(int configured, Phase8AbilityTuning tuning) {
-        return Math.max(1, configured + tuning.integer(Phase8AbilityTuning.Setting.BLOOD_BLEED_DURATION_BONUS_TICKS, 0));
+    public static int burstBleedDuration(int configured, DeathShadowBloodMasteryTuning tuning) {
+        return Math.max(1, configured + tuning.integer(DeathShadowBloodMasteryTuning.Setting.BLOOD_BLEED_DURATION_BONUS_TICKS, 0));
     }
 
-    public static double riteDamageMultiplier(Phase8AbilityTuning tuning) {
-        return tuning.get(Phase8AbilityTuning.Setting.BLOOD_RITE_DAMAGE_MULTIPLIER, 1);
+    public static double riteDamageMultiplier(DeathShadowBloodMasteryTuning tuning) {
+        return tuning.get(DeathShadowBloodMasteryTuning.Setting.BLOOD_RITE_DAMAGE_MULTIPLIER, 1);
     }
 
-    public static int riteCooldown(int configured, Phase8AbilityTuning tuning) {
-        return Math.max(1, configured + tuning.integer(Phase8AbilityTuning.Setting.BLOOD_COOLDOWN_BONUS_TICKS, 0));
+    public static int riteCooldown(int configured, DeathShadowBloodMasteryTuning tuning) {
+        return Math.max(1, configured + tuning.integer(DeathShadowBloodMasteryTuning.Setting.BLOOD_COOLDOWN_BONUS_TICKS, 0));
     }
 
-    public static int waveSteps(int configured, Phase8AbilityTuning tuning) {
-        return Math.max(1, configured + tuning.integer(Phase8AbilityTuning.Setting.BLOOD_WAVE_STEP_BONUS, 0));
+    public static int waveSteps(int configured, DeathShadowBloodMasteryTuning tuning) {
+        return Math.max(1, configured + tuning.integer(DeathShadowBloodMasteryTuning.Setting.BLOOD_WAVE_STEP_BONUS, 0));
     }
 
-    public static int screamTargets(int configured, Phase8AbilityTuning tuning) {
-        return Math.max(1, configured + tuning.integer(Phase8AbilityTuning.Setting.BLOOD_SCREAM_TARGET_BONUS, 0));
+    public static int screamTargets(int configured, DeathShadowBloodMasteryTuning tuning) {
+        return Math.max(1, configured + tuning.integer(DeathShadowBloodMasteryTuning.Setting.BLOOD_SCREAM_TARGET_BONUS, 0));
     }
 
-    public static int bladeHoverTicks(int configured, Phase8AbilityTuning tuning) {
-        return Math.max(1, configured + tuning.integer(Phase8AbilityTuning.Setting.BLOOD_BLADE_HOVER_BONUS_TICKS, 0));
+    public static int bladeHoverTicks(int configured, DeathShadowBloodMasteryTuning tuning) {
+        return Math.max(1, configured + tuning.integer(DeathShadowBloodMasteryTuning.Setting.BLOOD_BLADE_HOVER_BONUS_TICKS, 0));
     }
 
-    public static double bladeDamageMultiplier(Phase8AbilityTuning tuning) {
-        return tuning.get(Phase8AbilityTuning.Setting.BLOOD_BLADE_DAMAGE_MULTIPLIER, 1) * riteDamageMultiplier(tuning);
+    public static double bladeDamageMultiplier(DeathShadowBloodMasteryTuning tuning) {
+        return tuning.get(DeathShadowBloodMasteryTuning.Setting.BLOOD_BLADE_DAMAGE_MULTIPLIER, 1) * riteDamageMultiplier(tuning);
     }
 
-    public static int bloodFlyCount(int configured, Phase8AbilityTuning tuning) {
-        return Math.clamp(configured + tuning.integer(Phase8AbilityTuning.Setting.BLOOD_FLY_COUNT_BONUS, 0),
-                1, tuning.integer(Phase8AbilityTuning.Setting.BLOOD_FLY_COUNT_CAP, 12));
+    public static int bloodFlyCount(int configured, DeathShadowBloodMasteryTuning tuning) {
+        return Math.clamp(configured + tuning.integer(DeathShadowBloodMasteryTuning.Setting.BLOOD_FLY_COUNT_BONUS, 0),
+                1, tuning.integer(DeathShadowBloodMasteryTuning.Setting.BLOOD_FLY_COUNT_CAP, 12));
     }
 
-    public static int delugeInterval(int configured, Phase8AbilityTuning tuning) {
-        return Math.max(tuning.integer(Phase8AbilityTuning.Setting.BLOOD_DELUGE_INTERVAL_FLOOR, 8),
-                configured + tuning.integer(Phase8AbilityTuning.Setting.BLOOD_DELUGE_INTERVAL_BONUS, 0));
+    public static int delugeInterval(int configured, DeathShadowBloodMasteryTuning tuning) {
+        return Math.max(tuning.integer(DeathShadowBloodMasteryTuning.Setting.BLOOD_DELUGE_INTERVAL_FLOOR, 8),
+                configured + tuning.integer(DeathShadowBloodMasteryTuning.Setting.BLOOD_DELUGE_INTERVAL_BONUS, 0));
     }
 
     public static boolean crimsonChoiceEnabled(ItemStack stack, LivingEntity actor) {
@@ -153,10 +153,10 @@ public final class BloodwakeAbilityManager {
                 || !(actor.getWorld() instanceof ServerWorld world)) {
             return false;
         }
-        UniqueAbilityExecution execution = Phase8CombatManager.beginPassive(
-                Phase8UniqueAbilities.BLOOD_RITES, world, stack, actor, null);
-        boolean enabled = Phase8UniqueAbilities.tuning(execution).flag(1 << 17);
-        UniqueAbilityApi.finish(execution, Phase8UniqueAbilities.FINISH, 0);
+        UniqueAbilityExecution execution = DeathShadowBloodMasteryCombatManager.beginPassive(
+                DeathShadowBloodMasteryAbilities.BLOOD_RITES, world, stack, actor, null);
+        boolean enabled = DeathShadowBloodMasteryAbilities.tuning(execution).flag(1 << 17);
+        UniqueAbilityApi.finish(execution, DeathShadowBloodMasteryAbilities.FINISH, 0);
         return enabled;
     }
 
@@ -214,64 +214,64 @@ public final class BloodwakeAbilityManager {
     }
 
     public static void recordRite(ServerWorld world, LivingEntity actor, ItemStack stack, int tier,
-                                  Phase8AbilityTuning tuning) {
+                                  DeathShadowBloodMasteryTuning tuning) {
         if (!tuning.flag(1 << 15)) return;
         RiteMemory memory = RITE_MEMORY.computeIfAbsent(actor.getUuid(), ignored -> new RiteMemory());
         long now = world.getTime();
         if (now >= memory.expiresAt) memory.mask = 0;
-        memory.expiresAt = now + tuning.integer(Phase8AbilityTuning.Setting.BLOOD_MEMORY_WINDOW_TICKS, 300);
+        memory.expiresAt = now + tuning.integer(DeathShadowBloodMasteryTuning.Setting.BLOOD_MEMORY_WINDOW_TICKS, 300);
         memory.mask |= 1 << Math.clamp(tier, 1, 5);
-        if (Integer.bitCount(memory.mask) >= tuning.integer(Phase8AbilityTuning.Setting.BLOOD_MEMORY_RITES, 3)) {
+        if (Integer.bitCount(memory.mask) >= tuning.integer(DeathShadowBloodMasteryTuning.Setting.BLOOD_MEMORY_RITES, 3)) {
             memory.mask = 0;
-            for (int i = 0; i < tuning.integer(Phase8AbilityTuning.Setting.BLOOD_MEMORY_FRENZY, 1); i++) {
+            for (int i = 0; i < tuning.integer(DeathShadowBloodMasteryTuning.Setting.BLOOD_MEMORY_FRENZY, 1); i++) {
                 addFrenzy(stack, actor, actor);
             }
         }
     }
 
     public static void triggerPassiveHit(ServerWorld world, ItemStack stack, LivingEntity attacker, LivingEntity target) {
-        UniqueAbilityExecution execution = Phase8CombatManager.beginPassive(
-                Phase8UniqueAbilities.BLOOD_BURST, world, stack, attacker, target);
-        Phase8AbilityTuning tuning = Phase8UniqueAbilities.tuning(execution);
+        UniqueAbilityExecution execution = DeathShadowBloodMasteryCombatManager.beginPassive(
+                DeathShadowBloodMasteryAbilities.BLOOD_BURST, world, stack, attacker, target);
+        DeathShadowBloodMasteryTuning tuning = DeathShadowBloodMasteryAbilities.tuning(execution);
         if (BleedHelper.getStacks(target) >= BleedHelper.MAX_STACKS) {
             BleedHelper.clear(target);
             triggerBloodBurst(world, stack, attacker, target, tuning);
             addFrenzy(stack, attacker, target);
             if (tuning.flag(1 << 4) && BURST_COUNTERS.merge(attacker.getUuid(), 1, Integer::sum)
-                    % Math.max(1, tuning.integer(Phase8AbilityTuning.Setting.BLOOD_FEAST_INTERVAL, 2)) == 0) {
-                for (int i = 0; i < tuning.integer(Phase8AbilityTuning.Setting.BLOOD_FEAST_FRENZY, 1); i++) {
+                    % Math.max(1, tuning.integer(DeathShadowBloodMasteryTuning.Setting.BLOOD_FEAST_INTERVAL, 2)) == 0) {
+                for (int i = 0; i < tuning.integer(DeathShadowBloodMasteryTuning.Setting.BLOOD_FEAST_FRENZY, 1); i++) {
                     addFrenzy(stack, attacker, target);
                 }
             }
             if (tuning.flag(1 << 8)) {
-                for (int i = 0; i < tuning.integer(Phase8AbilityTuning.Setting.BLOOD_SACRAMENT_FRENZY, 1); i++) {
+                for (int i = 0; i < tuning.integer(DeathShadowBloodMasteryTuning.Setting.BLOOD_SACRAMENT_FRENZY, 1); i++) {
                     addFrenzy(stack, attacker, target);
                 }
-                int absorption = tuning.integer(Phase8AbilityTuning.Setting.BLOOD_SACRAMENT_ABSORPTION, 8);
+                int absorption = tuning.integer(DeathShadowBloodMasteryTuning.Setting.BLOOD_SACRAMENT_ABSORPTION, 8);
                 if (absorption > 0) attacker.addStatusEffect(new StatusEffectInstance(
                         net.minecraft.entity.effect.StatusEffects.ABSORPTION, 80,
                         Math.max(0, absorption / 4 - 1)), attacker);
             }
-            UniqueAbilityApi.finish(execution, Phase8UniqueAbilities.FINISH, 1);
+            UniqueAbilityApi.finish(execution, DeathShadowBloodMasteryAbilities.FINISH, 1);
             return;
         }
         int added = tuning.flag(1) && HIT_COUNTERS.merge(attacker.getUuid(), 1, Integer::sum)
-                % Math.max(1, tuning.integer(Phase8AbilityTuning.Setting.BLOOD_VEIN_INTERVAL, 3)) == 0
-                ? 1 + tuning.integer(Phase8AbilityTuning.Setting.BLOOD_VEIN_BONUS_STACKS, 1) : 1;
+                % Math.max(1, tuning.integer(DeathShadowBloodMasteryTuning.Setting.BLOOD_VEIN_INTERVAL, 3)) == 0
+                ? 1 + tuning.integer(DeathShadowBloodMasteryTuning.Setting.BLOOD_VEIN_BONUS_STACKS, 1) : 1;
         BleedHelper.apply(target, attacker, (float) HelperMethods.getEntityAttackDamage(attacker), added,
                 BleedHelper.DEFAULT_DURATION);
-        UniqueAbilityApi.finish(execution, Phase8UniqueAbilities.FINISH, 0);
+        UniqueAbilityApi.finish(execution, DeathShadowBloodMasteryAbilities.FINISH, 0);
     }
 
     private static void triggerBloodBurst(ServerWorld world, ItemStack stack, LivingEntity attacker, LivingEntity primary) {
-        triggerBloodBurst(world, stack, attacker, primary, Phase8AbilityTuning.EMPTY);
+        triggerBloodBurst(world, stack, attacker, primary, DeathShadowBloodMasteryTuning.EMPTY);
     }
 
     private static void triggerBloodBurst(ServerWorld world, ItemStack stack, LivingEntity attacker,
-                                          LivingEntity primary, Phase8AbilityTuning tuning) {
+                                          LivingEntity primary, DeathShadowBloodMasteryTuning tuning) {
         boolean cone = tuning.flag(1 << 7);
         double radius = burstRadius(Config.uniqueEffects.bloodwake.burstRadius, tuning);
-        double reach = cone ? Math.max(radius, tuning.get(Phase8AbilityTuning.Setting.BLOOD_CONE_RANGE, 7)) : radius;
+        double reach = cone ? Math.max(radius, tuning.get(DeathShadowBloodMasteryTuning.Setting.BLOOD_CONE_RANGE, 7)) : radius;
         float damage = HelperMethods.abilityScaledDamage(SpellScalingProfile.SOUL, attacker, stack,
                 Config.uniqueEffects.bloodwake.burstDamageScaling * (float) burstDamageMultiplier(tuning),
                 Config.uniqueEffects.bloodwake.burstSpellScaling);
@@ -279,9 +279,9 @@ public final class BloodwakeAbilityManager {
         Box box = (cone ? attacker.getBoundingBox() : primary.getBoundingBox())
                 .expand(reach, reach * 0.65, reach);
         int affected = 0;
-        int cap = cone ? tuning.integer(Phase8AbilityTuning.Setting.BLOOD_CONE_TARGET_CAP, 12) : Integer.MAX_VALUE;
-        double coneDot = tuning.get(Phase8AbilityTuning.Setting.BLOOD_CONE_DOT, .35);
-        int chainCap = tuning.integer(Phase8AbilityTuning.Setting.BLOOD_CHAIN_CAP, 4);
+        int cap = cone ? tuning.integer(DeathShadowBloodMasteryTuning.Setting.BLOOD_CONE_TARGET_CAP, 12) : Integer.MAX_VALUE;
+        double coneDot = tuning.get(DeathShadowBloodMasteryTuning.Setting.BLOOD_CONE_DOT, .35);
+        int chainCap = tuning.integer(DeathShadowBloodMasteryTuning.Setting.BLOOD_CHAIN_CAP, 4);
         Vec3d facing = attacker.getRotationVec(1).multiply(1, 0, 1).normalize();
         for (LivingEntity candidate : world.getEntitiesByClass(LivingEntity.class, box,
                 candidate -> candidate.isAlive() && HelperMethods.checkAbilityTarget(candidate, attacker))) {
@@ -294,8 +294,8 @@ public final class BloodwakeAbilityManager {
             float enchanted = HelperMethods.applyAbilityDamageEnchantments(world, stack, candidate, source, damage);
             enchanted *= BloodStainManager.ownerStainDamageMultiplier(world, attacker, candidate);
             if (tuning.flag(1 << 5) && candidate.getHealth() / candidate.getMaxHealth()
-                    < tuning.get(Phase8AbilityTuning.Setting.BLOOD_HEMORRHAGE_THRESHOLD, .35)) {
-                enchanted *= (float) tuning.get(Phase8AbilityTuning.Setting.BLOOD_HEMORRHAGE_MULTIPLIER, 1.25);
+                    < tuning.get(DeathShadowBloodMasteryTuning.Setting.BLOOD_HEMORRHAGE_THRESHOLD, .35)) {
+                enchanted *= (float) tuning.get(DeathShadowBloodMasteryTuning.Setting.BLOOD_HEMORRHAGE_MULTIPLIER, 1.25);
             }
             HelperMethods.applyDamageWithoutKnockback(candidate, source, enchanted);
             if (!cone && candidate != primary && candidate.isAlive()) {
@@ -306,7 +306,7 @@ public final class BloodwakeAbilityManager {
                         .filter(chain -> chain.actorId.equals(attacker.getUuid())).count() < chainCap) {
                     CHAIN_BURSTS.computeIfAbsent(world, ignored -> new ArrayList<>()).add(new ChainBurst(
                             attacker.getUuid(), candidate.getUuid(), stack.copy(), world.getTime()
-                            + tuning.integer(Phase8AbilityTuning.Setting.BLOOD_CHAIN_DELAY_TICKS, 8), tuning));
+                            + tuning.integer(DeathShadowBloodMasteryTuning.Setting.BLOOD_CHAIN_DELAY_TICKS, 8), tuning));
                 }
             }
         }
@@ -324,11 +324,11 @@ public final class BloodwakeAbilityManager {
     }
 
     public static boolean activate(ServerWorld world, LivingEntity actor, ItemStack stack, Hand hand, Vec3d facing, int tier) {
-        return activate(world, actor, stack, hand, facing, tier, Phase8AbilityTuning.EMPTY);
+        return activate(world, actor, stack, hand, facing, tier, DeathShadowBloodMasteryTuning.EMPTY);
     }
 
     public static boolean activate(ServerWorld world, LivingEntity actor, ItemStack stack, Hand hand,
-                                   Vec3d facing, int tier, Phase8AbilityTuning tuning) {
+                                   Vec3d facing, int tier, DeathShadowBloodMasteryTuning tuning) {
         if (tuning.flag(1 << 16)) tier = Math.min(5, tier + 1);
         return switch (tier) {
             case 1 -> launchCrimsonWake(world, actor, facing, tuning);
@@ -343,11 +343,11 @@ public final class BloodwakeAbilityManager {
     }
 
     private static boolean launchCrimsonWake(ServerWorld world, LivingEntity actor, Vec3d facing) {
-        return launchCrimsonWake(world, actor, facing, Phase8AbilityTuning.EMPTY);
+        return launchCrimsonWake(world, actor, facing, DeathShadowBloodMasteryTuning.EMPTY);
     }
 
     private static boolean launchCrimsonWake(ServerWorld world, LivingEntity actor, Vec3d facing,
-                                             Phase8AbilityTuning tuning) {
+                                             DeathShadowBloodMasteryTuning tuning) {
         Vec3d direction = horizontalDirection(facing, actor.getYaw());
         launchBloodWave(world, actor, direction, 0, false, tuning);
         playWaveCast(world, actor, 0.95F);
@@ -355,10 +355,10 @@ public final class BloodwakeAbilityManager {
     }
 
     private static boolean unleashScream(ServerWorld world, LivingEntity actor) {
-        return unleashScream(world, actor, Phase8AbilityTuning.EMPTY);
+        return unleashScream(world, actor, DeathShadowBloodMasteryTuning.EMPTY);
     }
 
-    private static boolean unleashScream(ServerWorld world, LivingEntity actor, Phase8AbilityTuning tuning) {
+    private static boolean unleashScream(ServerWorld world, LivingEntity actor, DeathShadowBloodMasteryTuning tuning) {
         int targetCap = screamTargets(Config.uniqueEffects.bloodwake.maximumScreamTargets, tuning);
         List<LivingEntity> bleeding = findBleedingTargets(world, actor,
                 Config.uniqueEffects.bloodwake.targetingRadius, targetCap);
@@ -381,11 +381,11 @@ public final class BloodwakeAbilityManager {
     }
 
     private static boolean summonJudgment(ServerWorld world, LivingEntity actor, ItemStack stack, Hand hand) {
-        return summonJudgment(world, actor, stack, hand, Phase8AbilityTuning.EMPTY);
+        return summonJudgment(world, actor, stack, hand, DeathShadowBloodMasteryTuning.EMPTY);
     }
 
     private static boolean summonJudgment(ServerWorld world, LivingEntity actor, ItemStack stack, Hand hand,
-                                          Phase8AbilityTuning tuning) {
+                                          DeathShadowBloodMasteryTuning tuning) {
         List<LivingEntity> targets = findBleedingTargets(world, actor, Config.uniqueEffects.bloodwake.targetingRadius,
                 Math.max(1, Config.uniqueEffects.bloodwake.bladeTargetCap));
         if (targets.isEmpty()) {
@@ -419,11 +419,11 @@ public final class BloodwakeAbilityManager {
     }
 
     private static boolean beginDeluge(ServerWorld world, LivingEntity actor, Hand hand) {
-        return beginDeluge(world, actor, hand, Phase8AbilityTuning.EMPTY);
+        return beginDeluge(world, actor, hand, DeathShadowBloodMasteryTuning.EMPTY);
     }
 
     private static boolean beginDeluge(ServerWorld world, LivingEntity actor, Hand hand,
-                                       Phase8AbilityTuning tuning) {
+                                       DeathShadowBloodMasteryTuning tuning) {
         Map<UUID, ActiveDeluge> deluges = ACTIVE_DELUGES.computeIfAbsent(world, ignored -> new HashMap<>());
         ActiveDeluge activeDeluge = deluges.get(actor.getUuid());
         if (activeDeluge != null) {
@@ -507,11 +507,11 @@ public final class BloodwakeAbilityManager {
     }
 
     private static UUID spawnDelugeWave(ServerWorld world, LivingEntity actor, int volleyIndex, UUID previousTargetId) {
-        return spawnDelugeWave(world, actor, volleyIndex, previousTargetId, Phase8AbilityTuning.EMPTY);
+        return spawnDelugeWave(world, actor, volleyIndex, previousTargetId, DeathShadowBloodMasteryTuning.EMPTY);
     }
 
     private static UUID spawnDelugeWave(ServerWorld world, LivingEntity actor, int volleyIndex,
-                                        UUID previousTargetId, Phase8AbilityTuning tuning) {
+                                        UUID previousTargetId, DeathShadowBloodMasteryTuning tuning) {
         LivingEntity target = chooseDelugeTarget(world, actor, previousTargetId);
         Vec3d direction;
         if (target == null) {
@@ -541,11 +541,11 @@ public final class BloodwakeAbilityManager {
 
     private static void launchBloodWave(ServerWorld world, LivingEntity actor, Vec3d facing,
                                         int volleyIndex, boolean redTide) {
-        launchBloodWave(world, actor, facing, volleyIndex, redTide, Phase8AbilityTuning.EMPTY);
+        launchBloodWave(world, actor, facing, volleyIndex, redTide, DeathShadowBloodMasteryTuning.EMPTY);
     }
 
     private static void launchBloodWave(ServerWorld world, LivingEntity actor, Vec3d facing,
-                                        int volleyIndex, boolean redTide, Phase8AbilityTuning tuning) {
+                                        int volleyIndex, boolean redTide, DeathShadowBloodMasteryTuning tuning) {
         Vec3d direction = horizontalDirection(facing, actor.getYaw());
         spawnVolley(world, actor, actor.getPos().add(direction.multiply(1.2)),
                 List.of(direction), volleyIndex, redTide, tuning);
@@ -553,12 +553,12 @@ public final class BloodwakeAbilityManager {
 
     private static void spawnVolley(ServerWorld world, LivingEntity actor, Vec3d origin,
                                     List<Vec3d> directions, int volleyIndex, boolean redTide) {
-        spawnVolley(world, actor, origin, directions, volleyIndex, redTide, Phase8AbilityTuning.EMPTY);
+        spawnVolley(world, actor, origin, directions, volleyIndex, redTide, DeathShadowBloodMasteryTuning.EMPTY);
     }
 
     private static void spawnVolley(ServerWorld world, LivingEntity actor, Vec3d origin,
                                     List<Vec3d> directions, int volleyIndex, boolean redTide,
-                                    Phase8AbilityTuning tuning) {
+                                    DeathShadowBloodMasteryTuning tuning) {
         List<UUID> stainIds = directions.stream()
                 .map(direction -> BloodStainManager.beginTrail(
                         world, actor, origin, direction, LivyatanWaveManager.waveWidthBlocks()))
@@ -956,9 +956,9 @@ public final class BloodwakeAbilityManager {
             LivingEntity actor = resolveLiving(world, chain.actorId);
             LivingEntity target = resolveLiving(world, chain.targetId);
             if (actor != null && target != null) {
-                Phase8AbilityTuning tuning = chain.tuning.multiply(
-                        Phase8AbilityTuning.Setting.BLOOD_BURST_DAMAGE_MULTIPLIER,
-                        chain.tuning.get(Phase8AbilityTuning.Setting.BLOOD_CHAIN_DAMAGE_MULTIPLIER, .55), 1);
+                DeathShadowBloodMasteryTuning tuning = chain.tuning.multiply(
+                        DeathShadowBloodMasteryTuning.Setting.BLOOD_BURST_DAMAGE_MULTIPLIER,
+                        chain.tuning.get(DeathShadowBloodMasteryTuning.Setting.BLOOD_CHAIN_DAMAGE_MULTIPLIER, .55), 1);
                 BleedHelper.clear(target);
                 triggerBloodBurst(world, chain.stack, actor, target, tuning);
             }
@@ -1012,13 +1012,13 @@ public final class BloodwakeAbilityManager {
         private final long startedAt;
         private final int volleyIndex;
         private final boolean redTide;
-        private final Phase8AbilityTuning tuning;
+        private final DeathShadowBloodMasteryTuning tuning;
         private final Set<UUID> hitEntities = new HashSet<>();
         private int currentStep;
 
         private ActiveVolley(UUID ownerId, Vec3d origin, List<Vec3d> directions,
                              List<UUID> stainIds,
-                             long startedAt, int volleyIndex, boolean redTide, Phase8AbilityTuning tuning) {
+                             long startedAt, int volleyIndex, boolean redTide, DeathShadowBloodMasteryTuning tuning) {
             this.ownerId = ownerId;
             this.origin = origin;
             this.directions = directions;
@@ -1038,7 +1038,7 @@ public final class BloodwakeAbilityManager {
 
     private record ActiveBlade(UUID ownerId, UUID targetId, UUID visualId, ItemStack stack, Hand hand,
                                long startedAt, int hoverTicks, int plungeTicks, float weaponDamage, int index,
-                               Phase8AbilityTuning tuning) {
+                               DeathShadowBloodMasteryTuning tuning) {
     }
 
     private record ActiveScream(UUID ownerId, List<UUID> targetIds, long startedAt) {
@@ -1051,10 +1051,10 @@ public final class BloodwakeAbilityManager {
         private long expiryTick;
         private int volleyIndex;
         private UUID previousTargetId;
-        private final Phase8AbilityTuning tuning;
+        private final DeathShadowBloodMasteryTuning tuning;
 
         private ActiveDeluge(UUID ownerId, Hand hand, long startedAt, long expiryTick, int volleyIndex,
-                             Phase8AbilityTuning tuning) {
+                             DeathShadowBloodMasteryTuning tuning) {
             this.ownerId = ownerId;
             this.hand = hand;
             this.startedAt = startedAt;
@@ -1065,7 +1065,7 @@ public final class BloodwakeAbilityManager {
     }
 
     private record ChainBurst(UUID actorId, UUID targetId, ItemStack stack, long at,
-                              Phase8AbilityTuning tuning) {
+                              DeathShadowBloodMasteryTuning tuning) {
     }
 
     private static final class RiteMemory {

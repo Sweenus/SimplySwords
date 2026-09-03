@@ -11,8 +11,8 @@ import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.api.SpellScalingProfile;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
-import net.sweenus.simplyswords.api.ability.Phase2AbilityTuning;
-import net.sweenus.simplyswords.api.ability.Phase2UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.AbyssalSpectralMasteryTuning;
+import net.sweenus.simplyswords.api.ability.AbyssalSpectralMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.minecraft.entity.player.PlayerEntity;
@@ -72,30 +72,30 @@ public class WickpiercerEntity extends ThrownSpearEntity {
         this.abilityExecution = execution;
     }
 
-    private Phase2AbilityTuning tuning() {
-        return abilityExecution == null ? Phase2AbilityTuning.EMPTY : Phase2UniqueAbilities.tuning(abilityExecution);
+    private AbyssalSpectralMasteryTuning tuning() {
+        return abilityExecution == null ? AbyssalSpectralMasteryTuning.EMPTY : AbyssalSpectralMasteryAbilities.tuning(abilityExecution);
     }
 
     @Override
     protected void onSuccessfulHit(LivingEntity target, float damage) {
         if (abilityExecution == null || !(getWorld() instanceof ServerWorld)) return;
-        Phase2AbilityTuning tuning = tuning();
-        int fireTicks = tuning.integer(Phase2AbilityTuning.Setting.PROJECTILE_FIRE_TICKS, 0);
+        AbyssalSpectralMasteryTuning tuning = tuning();
+        int fireTicks = tuning.integer(AbyssalSpectralMasteryTuning.Setting.PROJECTILE_FIRE_TICKS, 0);
         if (fireTicks > 0) target.setOnFireFor(WickpiercerThrowMath.scaledFireSeconds(fireTicks));
         UniqueAbilityApi.emit(abilityExecution, net.sweenus.simplyswords.api.ability.UniqueAbilityPhase.HIT,
-                Phase2UniqueAbilities.HIT, target, 1, damage);
+                AbyssalSpectralMasteryAbilities.HIT, target, 1, damage);
         burst(target, damage, tuning);
         startOrbit(target, tuning);
     }
 
     @Override
     protected int getAdditionalPierces() {
-        return tuning().integer(Phase2AbilityTuning.Setting.PIERCE_COUNT, 0);
+        return tuning().integer(AbyssalSpectralMasteryTuning.Setting.PIERCE_COUNT, 0);
     }
 
     @Override
     protected float getPierceDamageMultiplier() {
-        return (float) tuning().get(Phase2AbilityTuning.Setting.PIERCE_DAMAGE_MULTIPLIER, 1);
+        return (float) tuning().get(AbyssalSpectralMasteryTuning.Setting.PIERCE_DAMAGE_MULTIPLIER, 1);
     }
 
     private boolean isOrbiting() {
@@ -103,10 +103,10 @@ public class WickpiercerEntity extends ThrownSpearEntity {
                 && WickpiercerThrowMath.orbitContinues(age, orbitEndAge, orbitTarget.isAlive() && !orbitTarget.isRemoved());
     }
 
-    private void startOrbit(LivingEntity target, Phase2AbilityTuning tuning) {
-        int duration = tuning.integer(Phase2AbilityTuning.Setting.ORBIT_DURATION_TICKS, 0);
+    private void startOrbit(LivingEntity target, AbyssalSpectralMasteryTuning tuning) {
+        int duration = tuning.integer(AbyssalSpectralMasteryTuning.Setting.ORBIT_DURATION_TICKS, 0);
         if (orbitUsed || nonReturning || duration <= 0 || target.isRemoved()
-                || (tuning.integer(Phase2AbilityTuning.Setting.MODE, 0) & ORBIT_MODE) == 0) return;
+                || (tuning.integer(AbyssalSpectralMasteryTuning.Setting.MODE, 0) & ORBIT_MODE) == 0) return;
         orbitUsed = true;
         orbitTarget = target;
         orbitStartAge = age;
@@ -128,8 +128,8 @@ public class WickpiercerEntity extends ThrownSpearEntity {
         return (float) Math.atan2(direction.z, direction.x);
     }
 
-    private int orbitInterval(Phase2AbilityTuning tuning) {
-        return Math.max(1, tuning.integer(Phase2AbilityTuning.Setting.INTERVAL_TICKS, 20));
+    private int orbitInterval(AbyssalSpectralMasteryTuning tuning) {
+        return Math.max(1, tuning.integer(AbyssalSpectralMasteryTuning.Setting.INTERVAL_TICKS, 20));
     }
 
     private void tickOrbit() {
@@ -140,7 +140,7 @@ public class WickpiercerEntity extends ThrownSpearEntity {
             setNoClip(true);
             return;
         }
-        Phase2AbilityTuning tuning = tuning();
+        AbyssalSpectralMasteryTuning tuning = tuning();
         int interval = orbitInterval(tuning);
         Vec3d offset = WickpiercerThrowMath.orbitOffset(
                 age - orbitStartAge, interval, orbitPhase, WickpiercerThrowMath.DEFAULT_ORBIT_RADIUS);
@@ -151,7 +151,7 @@ public class WickpiercerEntity extends ThrownSpearEntity {
                 || !(getOwner() instanceof LivingEntity owner)) return;
         nextOrbitStrike = WickpiercerThrowMath.nextStrikeAge(age, interval);
         float damage = primaryBaseDamage
-                * (float) tuning.get(Phase2AbilityTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, 0);
+                * (float) tuning.get(AbyssalSpectralMasteryTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, 0);
         if (damage <= 0 || !HelperMethods.checkAbilityTarget(orbitTarget, owner)) return;
         if (SimplySwordsAPI.applyAbilityMagicDamageThroughIframes(world, owner, stack, orbitTarget,
                 damage, SpellScalingProfile.FIRE)) {
@@ -165,17 +165,17 @@ public class WickpiercerEntity extends ThrownSpearEntity {
     }
 
     private void tickDelayedReturn() {
-        int delay = tuning().integer(Phase2AbilityTuning.Setting.RETURN_DELAY_TICKS, 0);
+        int delay = tuning().integer(AbyssalSpectralMasteryTuning.Setting.RETURN_DELAY_TICKS, 0);
         if (loyaltyRestored || nonReturning || delay <= 0 || hasLoyalty > 0 || age < delay) return;
         loyaltyRestored = true;
         hasLoyalty = 3;
         setNoClip(true);
     }
 
-    private void burst(LivingEntity directTarget, float damage, Phase2AbilityTuning tuning) {
-        double radius = tuning.get(Phase2AbilityTuning.Setting.IMPACT_RADIUS, 0);
-        int cap = tuning.integer(Phase2AbilityTuning.Setting.IMPACT_TARGET_CAP, 0);
-        float burstDamage = damage * (float) tuning.get(Phase2AbilityTuning.Setting.IMPACT_DAMAGE_MULTIPLIER, 0);
+    private void burst(LivingEntity directTarget, float damage, AbyssalSpectralMasteryTuning tuning) {
+        double radius = tuning.get(AbyssalSpectralMasteryTuning.Setting.IMPACT_RADIUS, 0);
+        int cap = tuning.integer(AbyssalSpectralMasteryTuning.Setting.IMPACT_TARGET_CAP, 0);
+        float burstDamage = damage * (float) tuning.get(AbyssalSpectralMasteryTuning.Setting.IMPACT_DAMAGE_MULTIPLIER, 0);
         if (impactBurstUsed || radius <= 0 || cap <= 0 || burstDamage <= 0
                 || !(getWorld() instanceof ServerWorld world) || !(getOwner() instanceof LivingEntity owner)) return;
         impactBurstUsed = true;
@@ -193,11 +193,11 @@ public class WickpiercerEntity extends ThrownSpearEntity {
 
     @Override
     protected void damageOnReturn(double ignoredRadius, float ignoredDamage) {
-        Phase2AbilityTuning tuning = tuning();
-        double radius = tuning.get(Phase2AbilityTuning.Setting.RETURN_TRAIL_RADIUS, 0);
+        AbyssalSpectralMasteryTuning tuning = tuning();
+        double radius = tuning.get(AbyssalSpectralMasteryTuning.Setting.RETURN_TRAIL_RADIUS, 0);
         float damage = primaryBaseDamage
-                * (float) tuning.get(Phase2AbilityTuning.Setting.RETURN_TRAIL_DAMAGE_MULTIPLIER, 0);
-        int fireTicks = tuning.integer(Phase2AbilityTuning.Setting.PROJECTILE_FIRE_TICKS, 0);
+                * (float) tuning.get(AbyssalSpectralMasteryTuning.Setting.RETURN_TRAIL_DAMAGE_MULTIPLIER, 0);
+        int fireTicks = tuning.integer(AbyssalSpectralMasteryTuning.Setting.PROJECTILE_FIRE_TICKS, 0);
         if (radius <= 0 || damage <= 0 || !(getWorld() instanceof ServerWorld world)
                 || !(getOwner() instanceof LivingEntity owner)) return;
         List<LivingEntity> targets = world.getEntitiesByClass(LivingEntity.class,

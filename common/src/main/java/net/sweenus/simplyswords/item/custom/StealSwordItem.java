@@ -29,8 +29,8 @@ import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.api.WeaponAbilityActivationSource;
-import net.sweenus.simplyswords.api.ability.Phase8AbilityTuning;
-import net.sweenus.simplyswords.api.ability.Phase8UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.DeathShadowBloodMasteryTuning;
+import net.sweenus.simplyswords.api.ability.DeathShadowBloodMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.config.Config;
@@ -46,7 +46,7 @@ import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
-import net.sweenus.simplyswords.world.Phase8CombatManager;
+import net.sweenus.simplyswords.world.DeathShadowBloodMasteryCombatManager;
 
 import java.util.List;
 import java.util.HashMap;
@@ -78,9 +78,9 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
             ServerWorld sworld = (ServerWorld) attacker.getWorld();
             STATE_WORLDS.put(attacker.getUuid(), sworld);
             HelperMethods.playHitSounds(attacker, target);
-            UniqueAbilityExecution execution = Phase8CombatManager.beginPassive(
-                    Phase8UniqueAbilities.SOULSTEALER_DEBT, sworld, stack, attacker, target);
-            Phase8AbilityTuning tuning = Phase8UniqueAbilities.tuning(execution);
+            UniqueAbilityExecution execution = DeathShadowBloodMasteryCombatManager.beginPassive(
+                    DeathShadowBloodMasteryAbilities.SOULSTEALER_DEBT, sworld, stack, attacker, target);
+            DeathShadowBloodMasteryTuning tuning = DeathShadowBloodMasteryAbilities.tuning(execution);
 
             int chance = soulDebtChance(Config.uniqueEffects.soulstealer.chance, tuning);
             Map<UUID, MarkedAsset> assets = MARKED_ASSETS.computeIfAbsent(attacker.getUuid(), ignored -> new HashMap<>());
@@ -120,7 +120,7 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
                 addSoulDebt(stack, killDebt(tuning), tuning, attacker);
                 spawnSoulDebtGainEffects(sworld, target, attacker, stack);
             }
-            UniqueAbilityApi.finish(execution, Phase8UniqueAbilities.FINISH, 1);
+            UniqueAbilityApi.finish(execution, DeathShadowBloodMasteryAbilities.FINISH, 1);
         }
         return super.postHit(stack, target, attacker);
     }
@@ -157,10 +157,10 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
             return false;
         }
         int stacks = getSoulDebt(context.stack());
-        UniqueAbilityExecution approach = Phase8CombatManager.beginActive(
-                Phase8UniqueAbilities.SOULSTEALER_APPROACH, context, Config.uniqueEffects.soulstealer.cooldown);
+        UniqueAbilityExecution approach = DeathShadowBloodMasteryCombatManager.beginActive(
+                DeathShadowBloodMasteryAbilities.SOULSTEALER_APPROACH, context, Config.uniqueEffects.soulstealer.cooldown);
         UniqueAbilityApi.takeStartedExecution();
-        Phase8AbilityTuning approachTuning = Phase8UniqueAbilities.tuning(approach);
+        DeathShadowBloodMasteryTuning approachTuning = DeathShadowBloodMasteryAbilities.tuning(approach);
         LivingEntity target = findSoulstealerTarget(context.actor(), context.target(), approachTuning);
         if (target == null) {
             UniqueAbilityApi.cancel(approach);
@@ -174,15 +174,15 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
         UniqueAbilityApi.start(approach);
         WeaponAbilityContext resolved = WeaponAbilityContext.of(context.world(), context.stack(), context.actor(),
                 context.sourcePlayer(), target, context.hand(), context.activationSource());
-        UniqueAbilityExecution reap = Phase8CombatManager.beginActive(
-                Phase8UniqueAbilities.SOULSTEALER_REAP, resolved, Config.uniqueEffects.soulstealer.cooldown);
-        Phase8AbilityTuning reapTuning = Phase8UniqueAbilities.tuning(reap);
+        UniqueAbilityExecution reap = DeathShadowBloodMasteryCombatManager.beginActive(
+                DeathShadowBloodMasteryAbilities.SOULSTEALER_REAP, resolved, Config.uniqueEffects.soulstealer.cooldown);
+        DeathShadowBloodMasteryTuning reapTuning = DeathShadowBloodMasteryAbilities.tuning(reap);
         if (approachTuning.flag(1 << 12)) grantVeil(context.actor(), context.world(), approachTuning);
         Vec3d targetOrigin = target.getPos();
         Runnable action = () -> completeSoulReap(context.world(), context.actor(), context.stack(), target,
                 strikePos, targetOrigin, stacks, approachTuning, reapTuning, approach, reap);
         if (approachTuning.flag(1 << 14)) {
-            Phase8CombatManager.scheduleAction(context.world(), context.actor(), 1, action, () -> {
+            DeathShadowBloodMasteryCombatManager.scheduleAction(context.world(), context.actor(), 1, action, () -> {
                 UniqueAbilityApi.cancel(approach);
                 UniqueAbilityApi.cancel(reap);
             });
@@ -199,12 +199,12 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
 
     private static void completeSoulReap(ServerWorld world, LivingEntity actor, ItemStack stack,
                                          LivingEntity target, Vec3d strikePos, Vec3d targetOrigin, int stacks,
-                                         Phase8AbilityTuning approachTuning, Phase8AbilityTuning reapTuning,
+                                         DeathShadowBloodMasteryTuning approachTuning, DeathShadowBloodMasteryTuning reapTuning,
                                          UniqueAbilityExecution approach, UniqueAbilityExecution reap) {
         if (!actor.isAlive() || !target.isAlive() || actor.getWorld() != world || target.getWorld() != world) {
             applyFailedReapCost(stack, stacks, reapTuning);
-            UniqueAbilityApi.finish(approach, Phase8UniqueAbilities.FINISH, 0);
-            Phase8CombatManager.scheduleFinish(world, reap, 1, 0);
+            UniqueAbilityApi.finish(approach, DeathShadowBloodMasteryAbilities.FINISH, 0);
+            DeathShadowBloodMasteryCombatManager.scheduleFinish(world, reap, 1, 0);
             return;
         }
         Vec3d resolvedStrike = strikePos;
@@ -220,27 +220,27 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
         if (!isSafePosition(world, actor, resolvedStrike)) {
             applyFailedReapCost(stack, stacks, reapTuning);
             spawnFailEffects(world, actor);
-            UniqueAbilityApi.finish(approach, Phase8UniqueAbilities.FINISH, 0);
-            Phase8CombatManager.scheduleFinish(world, reap, 1, 0);
+            UniqueAbilityApi.finish(approach, DeathShadowBloodMasteryAbilities.FINISH, 0);
+            DeathShadowBloodMasteryCombatManager.scheduleFinish(world, reap, 1, 0);
             return;
         }
         Vec3d departure = actor.getPos();
         boolean damaged = performSoulReap(world, actor, stack, target, resolvedStrike, stacks,
                 approachTuning, reapTuning, reap);
         if (approachTuning.flag(1 << 17)) {
-            Phase8CombatManager.scheduleReturn(world, actor, departure,
+            DeathShadowBloodMasteryCombatManager.scheduleReturn(world, actor, departure,
                     approachTuning.integer(s("SOULSTEALER_RETURN_DELAY_TICKS"), 12),
                     approachTuning.integer(s("SOULSTEALER_RETURN_RESISTANCE_TICKS"), 40),
                     approachTuning.integer(s("SOULSTEALER_RETURN_RESISTANCE_AMPLIFIER"), 1));
         }
-        UniqueAbilityApi.finish(approach, Phase8UniqueAbilities.FINISH, damaged ? 1 : 0);
-        Phase8CombatManager.scheduleFinish(world, reap, 1, damaged ? 1 : 0);
+        UniqueAbilityApi.finish(approach, DeathShadowBloodMasteryAbilities.FINISH, damaged ? 1 : 0);
+        DeathShadowBloodMasteryCombatManager.scheduleFinish(world, reap, 1, damaged ? 1 : 0);
     }
 
     private static boolean performSoulReap(ServerWorld world, LivingEntity actor, ItemStack stack,
                                            LivingEntity target, Vec3d strikePos, int stacks,
-                                           Phase8AbilityTuning approachTuning,
-                                           Phase8AbilityTuning reapTuning,
+                                           DeathShadowBloodMasteryTuning approachTuning,
+                                           DeathShadowBloodMasteryTuning reapTuning,
                                            UniqueAbilityExecution execution) {
         Vec3d lookTarget = target.getPos().add(0.0, Math.max(0.35, target.getHeight() * 0.55), 0.0);
         Vec3d strikeEyePos = strikePos.add(0.0, actor.getEyeHeight(actor.getPose()), 0.0);
@@ -295,9 +295,9 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
                         s("SOULSTEALER_PREDATORY_REFUND_TICKS"), 80);
                 if (reapTuning.flag(1 << 24)) refund += reapTuning.integer(
                         s("SOULSTEALER_DEATH_TAX_REFUND_TICKS"), 40);
-                Phase8CombatManager.scheduleCooldownRefund(world, actor, stack, refund);
+                DeathShadowBloodMasteryCombatManager.scheduleCooldownRefund(world, actor, stack, refund);
                 UniqueAbilityApi.emit(execution, net.sweenus.simplyswords.api.ability.UniqueAbilityPhase.HIT,
-                        Phase8UniqueAbilities.KILL, target, 1, damage);
+                        DeathShadowBloodMasteryAbilities.KILL, target, 1, damage);
             }
             if (reapTuning.flag(1 << 21)) {
                 target.addStatusEffect(new StatusEffectInstance(StatusEffects.WITHER,
@@ -314,7 +314,7 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
                         reapTuning, actor);
             }
             UniqueAbilityApi.emit(execution, net.sweenus.simplyswords.api.ability.UniqueAbilityPhase.HIT,
-                    Phase8UniqueAbilities.HIT, target, 1, damage);
+                    DeathShadowBloodMasteryAbilities.HIT, target, 1, damage);
             spawnBackstabEffects(world, target, actor, stacks);
             world.playSound(null, target.getX(), target.getY(), target.getZ(), SoundRegistry.DARK_SWORD_ATTACK_WITH_BLOOD_03.get(),
                     SoundCategory.PLAYERS, 0.65F, 0.75F + world.random.nextFloat() * 0.2F);
@@ -326,16 +326,16 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
         return false;
     }
 
-    static ReapProfile reapProfile(int stacks, Phase8AbilityTuning approachTuning,
-                                   Phase8AbilityTuning reapTuning) {
+    static ReapProfile reapProfile(int stacks, DeathShadowBloodMasteryTuning approachTuning,
+                                   DeathShadowBloodMasteryTuning reapTuning) {
         return reapProfile(stacks, approachTuning, reapTuning,
                 Config.uniqueEffects.soulstealer.maxStacks,
                 Config.uniqueEffects.soulstealer.minBackstabMultiplier,
                 Config.uniqueEffects.soulstealer.maxBackstabMultiplier);
     }
 
-    static ReapProfile reapProfile(int stacks, Phase8AbilityTuning approachTuning,
-                                   Phase8AbilityTuning reapTuning, int configuredMaximum,
+    static ReapProfile reapProfile(int stacks, DeathShadowBloodMasteryTuning approachTuning,
+                                   DeathShadowBloodMasteryTuning reapTuning, int configuredMaximum,
                                    float minimumMultiplier, float maximumMultiplier) {
         int maximum = maximumDebt(configuredMaximum, reapTuning);
         int consumed = reapTuning.flag(1 << 26)
@@ -364,7 +364,7 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
         return new ReapProfile(consumed, multiplier);
     }
 
-    private static void applyFailedReapCost(ItemStack stack, int stacks, Phase8AbilityTuning tuning) {
+    private static void applyFailedReapCost(ItemStack stack, int stacks, DeathShadowBloodMasteryTuning tuning) {
         if (!tuning.flag(1 << 25)) return;
         int spent = (int) Math.ceil(stacks * tuning.get(
                 s("SOULSTEALER_FORECLOSURE_FAILURE_SPEND"), .5));
@@ -372,11 +372,11 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
     }
 
     public static LivingEntity findSoulstealerTarget(PlayerEntity player) {
-        return findSoulstealerTarget(player, null, Phase8AbilityTuning.EMPTY);
+        return findSoulstealerTarget(player, null, DeathShadowBloodMasteryTuning.EMPTY);
     }
 
     private static LivingEntity findSoulstealerTarget(LivingEntity actor, LivingEntity preferred,
-                                                       Phase8AbilityTuning tuning) {
+                                                       DeathShadowBloodMasteryTuning tuning) {
         double visibleRange = Config.uniqueEffects.soulstealer.range
                 + tuning.get(s("SOULSTEALER_TARGET_RANGE_BONUS"), 0);
         double pursuitRange = tuning.flag(1 << 16)
@@ -409,7 +409,7 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
     }
 
     private static boolean isTargetInApproach(LivingEntity actor, LivingEntity target, double visibleRange,
-                                               double pursuitRange, Phase8AbilityTuning tuning) {
+                                               double pursuitRange, DeathShadowBloodMasteryTuning tuning) {
         if (!isValidSoulstealerTarget(target, actor)) return false;
         Vec3d offset = target.getBoundingBox().getCenter().subtract(actor.getEyePos());
         double distance = offset.length();
@@ -471,11 +471,11 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
     }
 
     private static Vec3d findBackstabPosition(ServerWorld world, LivingEntity actor, LivingEntity target) {
-        return findBackstabPosition(world, actor, target, Phase8AbilityTuning.EMPTY);
+        return findBackstabPosition(world, actor, target, DeathShadowBloodMasteryTuning.EMPTY);
     }
 
     private static Vec3d findBackstabPosition(ServerWorld world, LivingEntity actor, LivingEntity target,
-                                              Phase8AbilityTuning tuning) {
+                                              DeathShadowBloodMasteryTuning tuning) {
         Vec3d behind = target.getRotationVec(1.0F);
         behind = new Vec3d(behind.x, 0.0, behind.z);
         if (behind.horizontalLengthSquared() < 0.001) {
@@ -542,16 +542,16 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
         return stack.getOrDefault(ComponentTypeRegistry.STORED_CHARGE.get(), StoredChargeComponent.DEFAULT).charge();
     }
 
-    public static int maximumDebt(Phase8AbilityTuning tuning) {
+    public static int maximumDebt(DeathShadowBloodMasteryTuning tuning) {
         return maximumDebt(Config.uniqueEffects.soulstealer.maxStacks, tuning);
     }
 
-    static int maximumDebt(int configuredMaximum, Phase8AbilityTuning tuning) {
+    static int maximumDebt(int configuredMaximum, DeathShadowBloodMasteryTuning tuning) {
         return Math.max(1, configuredMaximum
                 + tuning.integer(s("SOULSTEALER_MAX_DEBT_BONUS"), 0));
     }
 
-    private static void addSoulDebt(ItemStack stack, int amount, Phase8AbilityTuning tuning,
+    private static void addSoulDebt(ItemStack stack, int amount, DeathShadowBloodMasteryTuning tuning,
                                     LivingEntity collector) {
         if (amount <= 0) {
             return;
@@ -578,18 +578,18 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
         stack.set(ComponentTypeRegistry.STORED_CHARGE.get(), new StoredChargeComponent(Math.max(0, amount)));
     }
 
-    static int soulDebtChance(int configuredChance, Phase8AbilityTuning tuning) {
+    static int soulDebtChance(int configuredChance, DeathShadowBloodMasteryTuning tuning) {
         if (tuning.flag(1 << 7)) return 100;
         double chance = configuredChance + tuning.get(s("SOULSTEALER_CHANCE_BONUS"), 0);
         chance *= tuning.get(s("SOULSTEALER_CHANCE_MULTIPLIER"), 1);
         return Math.clamp((int) Math.round(chance), 0, 100);
     }
 
-    static int killDebt(Phase8AbilityTuning tuning) {
+    static int killDebt(DeathShadowBloodMasteryTuning tuning) {
         return killDebt(Config.uniqueEffects.soulstealer.killStacks, tuning);
     }
 
-    static int killDebt(int configuredKillDebt, Phase8AbilityTuning tuning) {
+    static int killDebt(int configuredKillDebt, DeathShadowBloodMasteryTuning tuning) {
         int base = tuning.has(s("SOULSTEALER_KILL_DEBT_OVERRIDE"))
                 ? tuning.integer(s("SOULSTEALER_KILL_DEBT_OVERRIDE"), 3)
                 : configuredKillDebt;
@@ -609,7 +609,7 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
         return damage * (1.0F - effective / 25.0F);
     }
 
-    private static void grantVeil(LivingEntity actor, ServerWorld world, Phase8AbilityTuning tuning) {
+    private static void grantVeil(LivingEntity actor, ServerWorld world, DeathShadowBloodMasteryTuning tuning) {
         int duration = tuning.integer(s("SOULSTEALER_VEIL_DURATION_TICKS"), 20);
         if (actor.addStatusEffect(new StatusEffectInstance(StatusEffects.INVISIBILITY, duration, 0), actor)) {
             VEILED_ACTORS.put(actor.getUuid(), world.getTime() + duration);
@@ -654,8 +654,8 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
         });
     }
 
-    private static Phase8AbilityTuning.Setting s(String name) {
-        return Phase8AbilityTuning.Setting.valueOf(name);
+    private static DeathShadowBloodMasteryTuning.Setting s(String name) {
+        return DeathShadowBloodMasteryTuning.Setting.valueOf(name);
     }
 
     private static void spawnSoulDebtGainEffects(ServerWorld world, LivingEntity target, LivingEntity attacker, ItemStack stack) {

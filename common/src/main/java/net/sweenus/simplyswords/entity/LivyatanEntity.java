@@ -25,8 +25,8 @@ import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.world.LivyatanWaveManager;
 import net.sweenus.simplyswords.world.LivyatanAbilityManager;
-import net.sweenus.simplyswords.api.ability.Phase6AbilityTuning;
-import net.sweenus.simplyswords.api.ability.Phase6UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.StormFrostWaterMasteryTuning;
+import net.sweenus.simplyswords.api.ability.StormFrostWaterMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityPhase;
@@ -43,8 +43,8 @@ public class LivyatanEntity extends ThrownSwordEntity {
     private final Set<UUID> returnLightningRolledTargets = new HashSet<>();
     private final Set<UUID> returnHitTargets = new HashSet<>();
     private final Map<UUID, Integer> maelstromRounds = new HashMap<>();
-    private Phase6AbilityTuning throwTuning = Phase6AbilityTuning.EMPTY;
-    private Phase6AbilityTuning returnTuning = Phase6AbilityTuning.EMPTY;
+    private StormFrostWaterMasteryTuning throwTuning = StormFrostWaterMasteryTuning.EMPTY;
+    private StormFrostWaterMasteryTuning returnTuning = StormFrostWaterMasteryTuning.EMPTY;
     private UniqueAbilityExecution throwExecution;
     private UniqueAbilityExecution returnExecution;
     private int configuredCooldown;
@@ -63,12 +63,12 @@ public class LivyatanEntity extends ThrownSwordEntity {
         this.stack = stack;
     }
 
-    public void setMastery(Phase6AbilityTuning tuning, UniqueAbilityExecution execution,
-                           Phase6AbilityTuning tunedReturn, UniqueAbilityExecution returnExecution,
+    public void setMastery(StormFrostWaterMasteryTuning tuning, UniqueAbilityExecution execution,
+                           StormFrostWaterMasteryTuning tunedReturn, UniqueAbilityExecution returnExecution,
                            int cooldown) {
-        throwTuning = tuning == null ? Phase6AbilityTuning.EMPTY : tuning;
+        throwTuning = tuning == null ? StormFrostWaterMasteryTuning.EMPTY : tuning;
         throwExecution = execution;
-        returnTuning = tunedReturn == null ? Phase6AbilityTuning.EMPTY : tunedReturn;
+        returnTuning = tunedReturn == null ? StormFrostWaterMasteryTuning.EMPTY : tunedReturn;
         this.returnExecution = returnExecution;
         configuredCooldown = Math.max(0, cooldown);
     }
@@ -144,7 +144,7 @@ public class LivyatanEntity extends ThrownSwordEntity {
                     target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, slownessDuration, 2), user);
                     HelperMethods.spawnOrbitParticles(world, waveCenter, ParticleTypes.POOF, 0.5f, 3);
                     if (returnExecution != null) UniqueAbilityApi.emit(returnExecution, UniqueAbilityPhase.HIT,
-                            Phase6UniqueAbilities.RETURN_HIT, target, 1, returnDamage);
+                            StormFrostWaterMasteryAbilities.RETURN_HIT, target, 1, returnDamage);
                     LivyatanAbilityManager.recordReturnHit(world, user, stack, target, returnTuning);
                 }
             }
@@ -238,7 +238,7 @@ public class LivyatanEntity extends ThrownSwordEntity {
         if (!(getWorld() instanceof ServerWorld world) || !(getOwner() instanceof LivingEntity owner)
                 || !HelperMethods.checkAbilityTarget(target, owner)) return;
         if (throwExecution != null) UniqueAbilityApi.emit(throwExecution, UniqueAbilityPhase.HIT,
-                Phase6UniqueAbilities.HIT, target, 1, lastImpactDamage);
+                StormFrostWaterMasteryAbilities.HIT, target, 1, lastImpactDamage);
         LivyatanAbilityManager.recordThrowHit(world, owner, stack, target, throwTuning);
         double splashRadius = throwTuning.get(s("LIVYATAN_SPLASH_RADIUS"), 0);
         int splashCap = throwTuning.integer(s("LIVYATAN_SPLASH_TARGET_CAP"), 0);
@@ -295,7 +295,7 @@ public class LivyatanEntity extends ThrownSwordEntity {
                     ? returnTuning.integer(s("LIVYATAN_CATCH_REFUND_TICKS"), 0) : 0;
             player.getItemCooldownManager().set(asItemStack().getItem(), Math.max(0, remainingCooldown - refund));
             if (returnExecution != null) UniqueAbilityApi.emit(returnExecution, UniqueAbilityPhase.HIT,
-                    Phase6UniqueAbilities.CATCH, player, returnHitTargets.size(), refund);
+                    StormFrostWaterMasteryAbilities.CATCH, player, returnHitTargets.size(), refund);
             finishExecutions();
             if (getWorld() instanceof ServerWorld world) LivyatanAbilityManager.finishReturn(world, player.getUuid());
         }
@@ -308,8 +308,8 @@ public class LivyatanEntity extends ThrownSwordEntity {
         if ((this.stack == null || this.stack.isEmpty()) && nbt.contains("item")) {
             this.stack = ItemStack.fromNbt(this.getRegistryManager(), nbt.getCompound("item")).orElse(this.getDefaultItemStack());
         }
-        throwTuning = Phase6AbilityTuning.fromNbt(nbt.getCompound("LivyatanThrowTuning"));
-        returnTuning = Phase6AbilityTuning.fromNbt(nbt.getCompound("LivyatanReturnTuning"));
+        throwTuning = StormFrostWaterMasteryTuning.fromNbt(nbt.getCompound("LivyatanThrowTuning"));
+        returnTuning = StormFrostWaterMasteryTuning.fromNbt(nbt.getCompound("LivyatanReturnTuning"));
         primaryBaseDamage = nbt.getFloat("LivyatanPrimaryDamage");
         primaryReturnDamage = nbt.getFloat("LivyatanReturnDamage");
         primaryReturnDamageRadius = nbt.getDouble("LivyatanReturnRadius");
@@ -364,11 +364,11 @@ public class LivyatanEntity extends ThrownSwordEntity {
 
     private void finishExecutions() {
         if (throwExecution != null) {
-            UniqueAbilityApi.finish(throwExecution, Phase6UniqueAbilities.FINISH, returnHitTargets.size());
+            UniqueAbilityApi.finish(throwExecution, StormFrostWaterMasteryAbilities.FINISH, returnHitTargets.size());
             throwExecution = null;
         }
         if (returnExecution != null) {
-            UniqueAbilityApi.finish(returnExecution, Phase6UniqueAbilities.FINISH, returnHitTargets.size());
+            UniqueAbilityApi.finish(returnExecution, StormFrostWaterMasteryAbilities.FINISH, returnHitTargets.size());
             returnExecution = null;
         }
     }
@@ -399,8 +399,8 @@ public class LivyatanEntity extends ThrownSwordEntity {
         }
     }
 
-    private static Phase6AbilityTuning.Setting s(String name) {
-        return Phase6AbilityTuning.Setting.valueOf(name);
+    private static StormFrostWaterMasteryTuning.Setting s(String name) {
+        return StormFrostWaterMasteryTuning.Setting.valueOf(name);
     }
 
 }

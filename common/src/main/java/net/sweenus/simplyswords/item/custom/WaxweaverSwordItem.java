@@ -32,11 +32,11 @@ import net.sweenus.simplyswords.world.RevivalCandleVisualManager;
 import net.sweenus.simplyswords.world.RevivalCooldownManager;
 import net.sweenus.simplyswords.world.WaxweaverEncasementManager;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
-import net.sweenus.simplyswords.api.ability.Phase7AbilityTuning;
-import net.sweenus.simplyswords.api.ability.Phase7UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.NatureSwarmMasteryTuning;
+import net.sweenus.simplyswords.api.ability.NatureSwarmMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
-import net.sweenus.simplyswords.world.Phase7CombatManager;
+import net.sweenus.simplyswords.world.NatureSwarmMasteryCombatManager;
 
 import java.util.Comparator;
 import java.util.List;
@@ -53,10 +53,10 @@ public class WaxweaverSwordItem extends UniqueSwordItem implements RevivalWeapon
         }
         if (!attacker.getWorld().isClient()) {
             ServerWorld serverWorld = (ServerWorld) attacker.getWorld();
-            UniqueAbilityExecution execution = Phase7CombatManager.beginPassive(
-                    Phase7UniqueAbilities.WAXWEAVER_TEMPO, serverWorld, stack, attacker, target);
-            Phase7AbilityTuning tuning = Phase7UniqueAbilities.tuning(execution);
-            int maximumStacks = Math.max(1, tuning.integer(Phase7AbilityTuning.Setting.WAX_TEMPO_STACK_CAP,
+            UniqueAbilityExecution execution = NatureSwarmMasteryCombatManager.beginPassive(
+                    NatureSwarmMasteryAbilities.WAXWEAVER_TEMPO, serverWorld, stack, attacker, target);
+            NatureSwarmMasteryTuning tuning = NatureSwarmMasteryAbilities.tuning(execution);
+            int maximumStacks = Math.max(1, tuning.integer(NatureSwarmMasteryTuning.Setting.WAX_TEMPO_STACK_CAP,
                     Config.uniqueEffects.waxweaver.maxStacks));
             int duration = tempoDuration(tuning);
             HelperMethods.playHitSounds(attacker, target);
@@ -76,16 +76,16 @@ public class WaxweaverSwordItem extends UniqueSwordItem implements RevivalWeapon
                     WaxweaverEncasementManager.primeFlashWax(attacker, tuning);
                 }
                 if (stacks >= maximumStacks && tuning.flag(1 << 12)) {
-                    Phase7CombatManager.applyWaxRhythm(serverWorld, attacker, duration,
-                            tuning.get(Phase7AbilityTuning.Setting.WAX_RHYTHM_SPEED_BONUS, .08));
+                    NatureSwarmMasteryCombatManager.applyWaxRhythm(serverWorld, attacker, duration,
+                            tuning.get(NatureSwarmMasteryTuning.Setting.WAX_RHYTHM_SPEED_BONUS, .08));
                 }
                 if (tuning.flag(1 << 16)) {
-                    Phase7CombatManager.applyWaxFrenzy(serverWorld, attacker, duration, stacks,
-                            tuning.get(Phase7AbilityTuning.Setting.WAX_FRENZY_BONUS_MULTIPLIER, 1.5));
+                    NatureSwarmMasteryCombatManager.applyWaxFrenzy(serverWorld, attacker, duration, stacks,
+                            tuning.get(NatureSwarmMasteryTuning.Setting.WAX_FRENZY_BONUS_MULTIPLIER, 1.5));
                 } else {
-                    Phase7CombatManager.clearWaxFrenzy(attacker);
+                    NatureSwarmMasteryCombatManager.clearWaxFrenzy(attacker);
                 }
-                int speedDuration = tuning.integer(Phase7AbilityTuning.Setting.WAX_CANDLE_STEP_TICKS, 0);
+                int speedDuration = tuning.integer(NatureSwarmMasteryTuning.Setting.WAX_CANDLE_STEP_TICKS, 0);
                 if (gainedStack && speedDuration > 0) {
                     attacker.addStatusEffect(new net.minecraft.entity.effect.StatusEffectInstance(
                             StatusEffects.SPEED, speedDuration, 0, false, true, true));
@@ -93,10 +93,10 @@ public class WaxweaverSwordItem extends UniqueSwordItem implements RevivalWeapon
                 WaxweaverEncasementManager.reduceActiveCooldown(attacker, stack, tuning);
             }
             if (WaxweaverEncasementManager.isEncased(target)) {
-                int fireTicks = tuning.integer(Phase7AbilityTuning.Setting.WAX_ENCASED_FIRE_TICKS, 0);
+                int fireTicks = tuning.integer(NatureSwarmMasteryTuning.Setting.WAX_ENCASED_FIRE_TICKS, 0);
                 if (fireTicks > 0) target.setOnFireFor((fireTicks + 19) / 20);
             }
-            UniqueAbilityApi.finish(execution, Phase7UniqueAbilities.FINISH, target.isOnFire() ? 1 : 0);
+            UniqueAbilityApi.finish(execution, NatureSwarmMasteryAbilities.FINISH, target.isOnFire() ? 1 : 0);
 
         }
         return super.postHit(stack, target, attacker);
@@ -115,9 +115,9 @@ public class WaxweaverSwordItem extends UniqueSwordItem implements RevivalWeapon
     @Override
     public void postRevive(LivingEntity entity, ItemStack stack, DamageSource source) {
         ServerWorld serverWorld = (ServerWorld) entity.getWorld();
-        UniqueAbilityExecution execution = Phase7CombatManager.beginPassive(
-                Phase7UniqueAbilities.WAXWEAVER_REVIVAL, serverWorld, stack, entity, null);
-        Phase7AbilityTuning tuning = Phase7UniqueAbilities.tuning(execution);
+        UniqueAbilityExecution execution = NatureSwarmMasteryCombatManager.beginPassive(
+                NatureSwarmMasteryAbilities.WAXWEAVER_REVIVAL, serverWorld, stack, entity, null);
+        NatureSwarmMasteryTuning tuning = NatureSwarmMasteryAbilities.tuning(execution);
         int skillCooldown = revivalCooldown(Config.uniqueEffects.waxweaver.cooldown, tuning);
         if (entity instanceof net.minecraft.server.network.ServerPlayerEntity serverPlayer) {
             RevivalCandleVisualManager.activate(serverPlayer, stack);
@@ -126,29 +126,29 @@ public class WaxweaverSwordItem extends UniqueSwordItem implements RevivalWeapon
         int resistanceDuration = resistanceDuration(tuning);
         if (resistanceDuration > 0) {
             int amplifier = tuning.flag(1 << 25)
-                    ? tuning.integer(Phase7AbilityTuning.Setting.WAX_QUEEN_RESISTANCE_AMPLIFIER, 3) : 2;
+                    ? tuning.integer(NatureSwarmMasteryTuning.Setting.WAX_QUEEN_RESISTANCE_AMPLIFIER, 3) : 2;
             entity.addStatusEffect(new StatusEffectInstance(
                     StatusEffects.RESISTANCE, resistanceDuration, amplifier, false, true, true));
         }
-        double radius = tuning.get(Phase7AbilityTuning.Setting.WAX_MOLTEN_RADIUS, 0);
-        int fireTicks = tuning.integer(Phase7AbilityTuning.Setting.WAX_MOLTEN_FIRE_TICKS, 0);
+        double radius = tuning.get(NatureSwarmMasteryTuning.Setting.WAX_MOLTEN_RADIUS, 0);
+        int fireTicks = tuning.integer(NatureSwarmMasteryTuning.Setting.WAX_MOLTEN_FIRE_TICKS, 0);
         if (radius > 0 && fireTicks > 0) {
             serverWorld.getEntitiesByClass(LivingEntity.class, entity.getBoundingBox().expand(radius),
                             target -> target != entity && target.squaredDistanceTo(entity) <= radius * radius
                                     && HelperMethods.checkAbilityTarget(target, entity))
                     .stream().sorted(Comparator.comparingDouble(entity::squaredDistanceTo))
-                    .limit(tuning.integer(Phase7AbilityTuning.Setting.WAX_MOLTEN_TARGET_CAP, 8))
+                    .limit(tuning.integer(NatureSwarmMasteryTuning.Setting.WAX_MOLTEN_TARGET_CAP, 8))
                     .forEach(target -> target.setOnFireFor((fireTicks + 19) / 20));
         }
         if (tuning.flag(1 << 24)) {
-            Phase7CombatManager.scheduleSecondSkin(serverWorld, entity, resistanceDuration,
-                    tuning.integer(Phase7AbilityTuning.Setting.WAX_SECOND_SKIN_DURATION_TICKS, 100),
-                    tuning.integer(Phase7AbilityTuning.Setting.WAX_SECOND_SKIN_ABSORPTION, 6));
+            NatureSwarmMasteryCombatManager.scheduleSecondSkin(serverWorld, entity, resistanceDuration,
+                    tuning.integer(NatureSwarmMasteryTuning.Setting.WAX_SECOND_SKIN_DURATION_TICKS, 100),
+                    tuning.integer(NatureSwarmMasteryTuning.Setting.WAX_SECOND_SKIN_ABSORPTION, 6));
         }
         int affected = tuning.flag(1 << 26)
                 ? WaxweaverEncasementManager.detonateRevival(
                 serverWorld, entity, stack, tuning, execution) : 1;
-        UniqueAbilityApi.finish(execution, Phase7UniqueAbilities.FINISH, affected);
+        UniqueAbilityApi.finish(execution, NatureSwarmMasteryAbilities.FINISH, affected);
 
         World world = entity.getWorld();
         world.playSound(null, entity.getBlockPos(), SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
@@ -160,39 +160,39 @@ public class WaxweaverSwordItem extends UniqueSwordItem implements RevivalWeapon
     @Override
     public float getReviveHealth(LivingEntity entity, ItemStack stack, DamageSource source) {
         if (!(entity.getWorld() instanceof ServerWorld serverWorld)) return entity.getMaxHealth();
-        UniqueAbilityExecution execution = Phase7CombatManager.beginPassive(
-                Phase7UniqueAbilities.WAXWEAVER_REVIVAL, serverWorld, stack, entity, null);
-        float health = entity.getMaxHealth() * (float) Phase7UniqueAbilities.tuning(execution)
-                .get(Phase7AbilityTuning.Setting.WAX_QUEEN_HEALTH_THRESHOLD, 1);
-        UniqueAbilityApi.finish(execution, Phase7UniqueAbilities.FINISH, 0);
+        UniqueAbilityExecution execution = NatureSwarmMasteryCombatManager.beginPassive(
+                NatureSwarmMasteryAbilities.WAXWEAVER_REVIVAL, serverWorld, stack, entity, null);
+        float health = entity.getMaxHealth() * (float) NatureSwarmMasteryAbilities.tuning(execution)
+                .get(NatureSwarmMasteryTuning.Setting.WAX_QUEEN_HEALTH_THRESHOLD, 1);
+        UniqueAbilityApi.finish(execution, NatureSwarmMasteryAbilities.FINISH, 0);
         return health;
     }
 
-    public static int tempoDuration(Phase7AbilityTuning tuning) {
+    public static int tempoDuration(NatureSwarmMasteryTuning tuning) {
         int base = tuning.flag(1 << 16)
-                ? tuning.integer(Phase7AbilityTuning.Setting.WAX_FRENZY_DURATION_TICKS, 30)
+                ? tuning.integer(NatureSwarmMasteryTuning.Setting.WAX_FRENZY_DURATION_TICKS, 30)
                 : tuning.flag(1 << 17)
-                ? tuning.integer(Phase7AbilityTuning.Setting.WAX_PATIENT_DURATION_TICKS, 160) : 60;
+                ? tuning.integer(NatureSwarmMasteryTuning.Setting.WAX_PATIENT_DURATION_TICKS, 160) : 60;
         return Math.max(1, base + tuning.integer(
-                Phase7AbilityTuning.Setting.WAX_TEMPO_DURATION_BONUS_TICKS, 0));
+                NatureSwarmMasteryTuning.Setting.WAX_TEMPO_DURATION_BONUS_TICKS, 0));
     }
 
     public static int nextTempoStacks(int current, int maximum) {
         return Math.min(Math.max(1, maximum), Math.max(0, current) + 1);
     }
 
-    public static int revivalCooldown(int configured, Phase7AbilityTuning tuning) {
+    public static int revivalCooldown(int configured, NatureSwarmMasteryTuning tuning) {
         return Math.max(0, configured
-                + tuning.integer(Phase7AbilityTuning.Setting.WAX_REVIVE_COOLDOWN_BONUS_TICKS, 0)
-                + tuning.integer(Phase7AbilityTuning.Setting.WAX_QUEEN_COOLDOWN_BONUS_TICKS, 0));
+                + tuning.integer(NatureSwarmMasteryTuning.Setting.WAX_REVIVE_COOLDOWN_BONUS_TICKS, 0)
+                + tuning.integer(NatureSwarmMasteryTuning.Setting.WAX_QUEEN_COOLDOWN_BONUS_TICKS, 0));
     }
 
-    public static int resistanceDuration(Phase7AbilityTuning tuning) {
+    public static int resistanceDuration(NatureSwarmMasteryTuning tuning) {
         if (tuning.flag(1 << 26)) return 0;
         int base = tuning.flag(1 << 25)
-                ? tuning.integer(Phase7AbilityTuning.Setting.WAX_QUEEN_RESISTANCE_TICKS, 100) : 100;
+                ? tuning.integer(NatureSwarmMasteryTuning.Setting.WAX_QUEEN_RESISTANCE_TICKS, 100) : 100;
         return Math.max(0, base + tuning.integer(
-                Phase7AbilityTuning.Setting.WAX_REVIVE_RESISTANCE_BONUS_TICKS, 0));
+                NatureSwarmMasteryTuning.Setting.WAX_REVIVE_RESISTANCE_BONUS_TICKS, 0));
     }
 
     @Override

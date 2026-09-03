@@ -1,6 +1,6 @@
 package net.sweenus.simplyswords.world;
 
-import net.sweenus.simplyswords.api.ability.Phase7AbilityTuning;
+import net.sweenus.simplyswords.api.ability.NatureSwarmMasteryTuning;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 final class BramblethornAbilityManagerTest {
     @Test
     void graspGeometryComposesAgainstConfiguredValues() {
-        Phase7AbilityTuning tuning = Phase7AbilityTuning.EMPTY
+        NatureSwarmMasteryTuning tuning = NatureSwarmMasteryTuning.EMPTY
                 .with(s("BRAMBLE_GRASP_RANGE_BONUS"), 4)
                 .with(s("BRAMBLE_GRASP_RADIUS_BONUS"), 1.5)
                 .with(s("BRAMBLE_GRASP_TRAVEL_TICK_BONUS"), -3)
@@ -22,7 +22,7 @@ final class BramblethornAbilityManagerTest {
 
     @Test
     void signatureDamageAndControlChannelsComposeIndependently() {
-        Phase7AbilityTuning tuning = Phase7AbilityTuning.EMPTY
+        NatureSwarmMasteryTuning tuning = NatureSwarmMasteryTuning.EMPTY
                 .with(s("BRAMBLE_PULL_MULTIPLIER"), 1.2)
                 .with(s("BRAMBLE_SHARED_DAMAGE_RATIO"), .42)
                 .with(s("BRAMBLE_SLAM_DAMAGE_MULTIPLIER"), 1.2)
@@ -36,7 +36,7 @@ final class BramblethornAbilityManagerTest {
 
     @Test
     void graspCapstonesDoNotOverwriteConfiguredCaptureRadius() {
-        Phase7AbilityTuning tangled = Phase7AbilityTuning.EMPTY
+        NatureSwarmMasteryTuning tangled = NatureSwarmMasteryTuning.EMPTY
                 .with(s("BRAMBLE_GRASP_RADIUS_BONUS"), 1.5)
                 .with(s("BRAMBLE_TANGLED_TARGET_CAP"), 10)
                 .with(s("BRAMBLE_TANGLED_SHARED_DAMAGE_RATIO"), .25);
@@ -44,7 +44,7 @@ final class BramblethornAbilityManagerTest {
         assertEquals(10, BramblethornAbilityManager.graspTargetCap(12, tangled));
         assertEquals(.25, BramblethornAbilityManager.sharedDamageRatio(.6, tangled), 1.0E-6);
 
-        Phase7AbilityTuning hangman = Phase7AbilityTuning.EMPTY
+        NatureSwarmMasteryTuning hangman = NatureSwarmMasteryTuning.EMPTY
                 .with(s("BRAMBLE_HANGMAN_TARGET_CAP"), 1)
                 .with(s("BRAMBLE_HANGMAN_LIFT_FORCE_MULTIPLIER"), 1.4)
                 .with(s("BRAMBLE_HANGMAN_SLAM_DAMAGE_MULTIPLIER"), 2.25);
@@ -55,7 +55,7 @@ final class BramblethornAbilityManagerTest {
 
     @Test
     void huntBonusesUseConfigurationAndPreserveStrongerSlow() {
-        Phase7AbilityTuning tuning = Phase7AbilityTuning.EMPTY
+        NatureSwarmMasteryTuning tuning = NatureSwarmMasteryTuning.EMPTY
                 .with(s("BRAMBLE_HUNT_MEMORY_BONUS_TICKS"), 40)
                 .with(s("BRAMBLE_HUNT_COOLDOWN_BONUS_TICKS"), -2)
                 .with(s("BRAMBLE_HUNT_RANGE_BONUS"), 2)
@@ -74,7 +74,7 @@ final class BramblethornAbilityManagerTest {
 
     @Test
     void huntCapstonesComposeWithoutLeakingIntoGraspDamage() {
-        Phase7AbilityTuning waltz = Phase7AbilityTuning.EMPTY
+        NatureSwarmMasteryTuning waltz = NatureSwarmMasteryTuning.EMPTY
                 .with(s("BRAMBLE_HUNT_DAMAGE_MULTIPLIER"), 1.1)
                 .with(s("BRAMBLE_WALTZ_PROJECTILE_COUNT"), 2)
                 .with(s("BRAMBLE_WALTZ_DISABLE_SLOW"), 1);
@@ -82,7 +82,7 @@ final class BramblethornAbilityManagerTest {
         assertEquals(0, BramblethornAbilityManager.huntSlowDuration(50, waltz));
         assertEquals(1, BramblethornAbilityManager.slamDamageMultiplier(waltz), 1.0E-6);
 
-        Phase7AbilityTuning predator = Phase7AbilityTuning.EMPTY
+        NatureSwarmMasteryTuning predator = NatureSwarmMasteryTuning.EMPTY
                 .with(s("BRAMBLE_HUNT_DAMAGE_MULTIPLIER"), 1.1)
                 .with(s("BRAMBLE_PREDATOR_DAMAGE_MULTIPLIER"), 1.8)
                 .with(s("BRAMBLE_PREDATOR_MEMORY_TICKS"), 30)
@@ -100,7 +100,7 @@ final class BramblethornAbilityManagerTest {
         assertEquals(0, BramblethornAbilityManager.remainingCooldown(240, 220, 48));
     }
 
-    private static Phase7AbilityTuning.Setting s(String name) {
-        return Phase7AbilityTuning.Setting.valueOf(name);
+    private static NatureSwarmMasteryTuning.Setting s(String name) {
+        return NatureSwarmMasteryTuning.Setting.valueOf(name);
     }
 }

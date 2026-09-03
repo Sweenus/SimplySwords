@@ -20,8 +20,8 @@ import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.api.SpellScalingProfile;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
-import net.sweenus.simplyswords.api.ability.Phase10AbilityTuning;
-import net.sweenus.simplyswords.api.ability.Phase10UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.MartialCommandEldritchMasteryTuning;
+import net.sweenus.simplyswords.api.ability.MartialCommandEldritchMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.config.Config;
@@ -81,42 +81,42 @@ public final class RiftmaneAbilityManager {
         ServerWorld world = context.world();
         LivingEntity owner = context.actor();
         RiftmaneSwordItem.EffectSettings settings = Config.uniqueEffects.riftmane;
-        UniqueAbilityExecution execution = Phase10CombatManager.beginActive(
-                Phase10UniqueAbilities.RIFTMANE_RANK, context, settings.cooldown,
+        UniqueAbilityExecution execution = MartialCommandEldritchMasteryCombatManager.beginActive(
+                MartialCommandEldritchMasteryAbilities.RIFTMANE_RANK, context, settings.cooldown,
                 rankBase(settings, context.stack()));
-        Phase10AbilityTuning tuning = Phase10UniqueAbilities.tuning(execution);
+        MartialCommandEldritchMasteryTuning tuning = MartialCommandEldritchMasteryAbilities.tuning(execution);
 
         Vec3d forward = horizontal(context.facing(), owner.getYaw());
         Vec3d side = new Vec3d(-forward.z, 0.0, forward.x);
-        int count = Math.clamp(tuning.integer(Phase10AbilityTuning.Setting.COUNT, settings.chargerCount), 1, MAX_RANK);
+        int count = Math.clamp(tuning.integer(MartialCommandEldritchMasteryTuning.Setting.COUNT, settings.chargerCount), 1, MAX_RANK);
         double spacing = count > 1 ? Math.max(0.5, tuning.get(
-                Phase10AbilityTuning.Setting.WIDTH, settings.rankWidth)) / (count - 1) : 0.0;
+                MartialCommandEldritchMasteryTuning.Setting.WIDTH, settings.rankWidth)) / (count - 1) : 0.0;
         float damage = HelperMethods.abilityScaledDamage(SpellScalingProfile.ARCANE, owner, context.stack(),
                 (float) settings.damageScaling, (float) settings.spellScaling);
-        float rankDamage = damage * (float) tuning.get(Phase10AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1);
+        float rankDamage = damage * (float) tuning.get(MartialCommandEldritchMasteryTuning.Setting.DAMAGE_MULTIPLIER, 1);
 
         boolean waterWalk = settings.waterWalking && !owner.isSubmergedInWater();
         ServerPlayerEntity rider = context.actor() instanceof ServerPlayerEntity player
                 && player.isSprinting() && !player.hasVehicle() ? player : null;
         int mountIndex = rider == null ? -1 : count / 2;
         UniqueAbilityExecution riderExecution = rider == null ? null
-                : Phase10CombatManager.beginPassive(Phase10UniqueAbilities.RIFTMANE_RIDER, world,
+                : MartialCommandEldritchMasteryCombatManager.beginPassive(MartialCommandEldritchMasteryAbilities.RIFTMANE_RIDER, world,
                         context.stack(), owner, null, riderBase(settings, context.stack()));
-        Phase10AbilityTuning riderTuning = riderExecution == null
-                ? Phase10AbilityTuning.EMPTY : Phase10UniqueAbilities.tuning(riderExecution);
+        MartialCommandEldritchMasteryTuning riderTuning = riderExecution == null
+                ? MartialCommandEldritchMasteryTuning.EMPTY : MartialCommandEldritchMasteryAbilities.tuning(riderExecution);
 
         int spawned = 0;
         for (int index = 0; index < count; index++) {
             boolean mounted = index == mountIndex;
-            Phase10AbilityTuning applied = mounted ? riderTuning : tuning;
+            MartialCommandEldritchMasteryTuning applied = mounted ? riderTuning : tuning;
             double lateral = (index - (count - 1) * 0.5) * spacing;
             Vec3d lane = owner.getPos().add(side.multiply(lateral));
             Vec3d ahead = lane.add(forward.multiply(Math.max(0.0, settings.spawnOffset)));
             double distanceMultiplier = mounted
-                    ? Math.max(1.0, riderTuning.get(Phase10AbilityTuning.Setting.SECONDARY_RADIUS,
+                    ? Math.max(1.0, riderTuning.get(MartialCommandEldritchMasteryTuning.Setting.SECONDARY_RADIUS,
                     settings.mountedDistanceMultiplier)) : 1.0;
             float applance = mounted
-                    ? damage * (float) riderTuning.get(Phase10AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1)
+                    ? damage * (float) riderTuning.get(MartialCommandEldritchMasteryTuning.Setting.DAMAGE_MULTIPLIER, 1)
                     : rankDamage;
             boolean audioLead = spawned == 0;
             RiftmaneChargerEntity charger = summon(world, owner, context.stack(), ahead, forward,
@@ -135,39 +135,39 @@ public final class RiftmaneAbilityManager {
             }
         }
         if (spawned == 0) {
-            if (riderExecution != null) Phase10CombatManager.finish(riderExecution, 0);
+            if (riderExecution != null) MartialCommandEldritchMasteryCombatManager.finish(riderExecution, 0);
             UniqueAbilityApi.cancel(execution);
             return false;
         }
 
-        if (rider != null && riderTuning.has(Phase10AbilityTuning.Setting.STATUS_AMPLIFIER))
+        if (rider != null && riderTuning.has(MartialCommandEldritchMasteryTuning.Setting.STATUS_AMPLIFIER))
             rider.addStatusEffect(new net.minecraft.entity.effect.StatusEffectInstance(
                     net.minecraft.entity.effect.StatusEffects.RESISTANCE,
                     Math.max(20, settings.rearDuration + 20),
-                    riderTuning.integer(Phase10AbilityTuning.Setting.STATUS_AMPLIFIER, 1)), owner);
-        if (tuning.has(Phase10AbilityTuning.Setting.DELAY_TICKS)) {
+                    riderTuning.integer(MartialCommandEldritchMasteryTuning.Setting.STATUS_AMPLIFIER, 1)), owner);
+        if (tuning.has(MartialCommandEldritchMasteryTuning.Setting.DELAY_TICKS)) {
             PENDING_RANKS.computeIfAbsent(world, ignored -> new ArrayList<>()).add(new PendingRank(
                     owner.getUuid(), context.stack().copy(), forward,
-                    world.getTime() + Math.max(1, tuning.integer(Phase10AbilityTuning.Setting.DELAY_TICKS, 10)),
-                    Math.clamp(tuning.integer(Phase10AbilityTuning.Setting.TARGET_CAP, 3), 1, MAX_RANK),
-                    damage * (float) tuning.get(Phase10AbilityTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, .55),
+                    world.getTime() + Math.max(1, tuning.integer(MartialCommandEldritchMasteryTuning.Setting.DELAY_TICKS, 10)),
+                    Math.clamp(tuning.integer(MartialCommandEldritchMasteryTuning.Setting.TARGET_CAP, 3), 1, MAX_RANK),
+                    damage * (float) tuning.get(MartialCommandEldritchMasteryTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, .55),
                     spacing, tuning));
         }
 
         spawnActivationEffects(world, owner, forward);
-        if (riderExecution != null) Phase10CombatManager.finish(riderExecution, 1);
-        Phase10CombatManager.finish(execution, spawned);
+        if (riderExecution != null) MartialCommandEldritchMasteryCombatManager.finish(riderExecution, 1);
+        MartialCommandEldritchMasteryCombatManager.finish(execution, spawned);
         return true;
     }
 
-    private static void configureRider(RiftmaneChargerEntity charger, Phase10AbilityTuning tuning) {
+    private static void configureRider(RiftmaneChargerEntity charger, MartialCommandEldritchMasteryTuning tuning) {
         charger.setPhasing(tuning.flag(1 << 25));
-        charger.setRiderGuard(tuning.has(Phase10AbilityTuning.Setting.STATUS_AMPLIFIER)
-                        ? tuning.integer(Phase10AbilityTuning.Setting.STATUS_AMPLIFIER, 1) : -1,
-                tuning.integer(Phase10AbilityTuning.Setting.STATUS_DURATION_TICKS, 20));
-        charger.setImpactBonus(tuning.get(Phase10AbilityTuning.Setting.OUTGOING_MULTIPLIER, 1),
-                tuning.integer(Phase10AbilityTuning.Setting.TARGET_CAP, 0),
-                tuning.get(Phase10AbilityTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, 1));
+        charger.setRiderGuard(tuning.has(MartialCommandEldritchMasteryTuning.Setting.STATUS_AMPLIFIER)
+                        ? tuning.integer(MartialCommandEldritchMasteryTuning.Setting.STATUS_AMPLIFIER, 1) : -1,
+                tuning.integer(MartialCommandEldritchMasteryTuning.Setting.STATUS_DURATION_TICKS, 20));
+        charger.setImpactBonus(tuning.get(MartialCommandEldritchMasteryTuning.Setting.OUTGOING_MULTIPLIER, 1),
+                tuning.integer(MartialCommandEldritchMasteryTuning.Setting.TARGET_CAP, 0),
+                tuning.get(MartialCommandEldritchMasteryTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, 1));
     }
 
     private static void tickPendingRanks(ServerWorld world) {
@@ -220,56 +220,56 @@ public final class RiftmaneAbilityManager {
                 (float) settings.damageScaling, (float) settings.spellScaling);
         summon(world, owner, stack, position, forward, damage * (float) damageMultiplier, settings,
                 settings.waterWalking && !owner.isSubmergedInWater(), 1.0, true,
-                harrierBase(settings, stack).with(Phase10AbilityTuning.Setting.SEARCH_RADIUS, 0));
+                harrierBase(settings, stack).with(MartialCommandEldritchMasteryTuning.Setting.SEARCH_RADIUS, 0));
     }
 
-    public static Phase10AbilityTuning chargerBase(double chargeDistance, double knockback, double hitRadius,
+    public static MartialCommandEldritchMasteryTuning chargerBase(double chargeDistance, double knockback, double hitRadius,
                                                   double stepHeight, int rearDuration) {
-        return Phase10AbilityTuning.EMPTY
-                .with(Phase10AbilityTuning.Setting.RANGE, chargeDistance)
-                .with(Phase10AbilityTuning.Setting.SPEED, 1)
-                .with(Phase10AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1)
-                .with(Phase10AbilityTuning.Setting.KNOCKBACK, knockback)
-                .with(Phase10AbilityTuning.Setting.RADIUS, hitRadius)
-                .with(Phase10AbilityTuning.Setting.HEIGHT, stepHeight)
-                .with(Phase10AbilityTuning.Setting.WINDUP_TICKS, rearDuration);
+        return MartialCommandEldritchMasteryTuning.EMPTY
+                .with(MartialCommandEldritchMasteryTuning.Setting.RANGE, chargeDistance)
+                .with(MartialCommandEldritchMasteryTuning.Setting.SPEED, 1)
+                .with(MartialCommandEldritchMasteryTuning.Setting.DAMAGE_MULTIPLIER, 1)
+                .with(MartialCommandEldritchMasteryTuning.Setting.KNOCKBACK, knockback)
+                .with(MartialCommandEldritchMasteryTuning.Setting.RADIUS, hitRadius)
+                .with(MartialCommandEldritchMasteryTuning.Setting.HEIGHT, stepHeight)
+                .with(MartialCommandEldritchMasteryTuning.Setting.WINDUP_TICKS, rearDuration);
     }
 
-    public static Phase10AbilityTuning harrierBase(Phase10AbilityTuning charger, int chance, int lockout,
+    public static MartialCommandEldritchMasteryTuning harrierBase(MartialCommandEldritchMasteryTuning charger, int chance, int lockout,
                                                   double maxRange, double minRange, double cone) {
         return charger
-                .with(Phase10AbilityTuning.Setting.CHANCE, chance)
-                .with(Phase10AbilityTuning.Setting.LOCKOUT_TICKS, lockout)
-                .with(Phase10AbilityTuning.Setting.SEARCH_RANGE, maxRange)
-                .with(Phase10AbilityTuning.Setting.SECONDARY_RADIUS, minRange)
-                .with(Phase10AbilityTuning.Setting.ANGLE, cone)
-                .with(Phase10AbilityTuning.Setting.COUNT, 1);
+                .with(MartialCommandEldritchMasteryTuning.Setting.CHANCE, chance)
+                .with(MartialCommandEldritchMasteryTuning.Setting.LOCKOUT_TICKS, lockout)
+                .with(MartialCommandEldritchMasteryTuning.Setting.SEARCH_RANGE, maxRange)
+                .with(MartialCommandEldritchMasteryTuning.Setting.SECONDARY_RADIUS, minRange)
+                .with(MartialCommandEldritchMasteryTuning.Setting.ANGLE, cone)
+                .with(MartialCommandEldritchMasteryTuning.Setting.COUNT, 1);
     }
 
-    public static Phase10AbilityTuning rankBase(Phase10AbilityTuning charger, int count, double width) {
-        return charger.with(Phase10AbilityTuning.Setting.COUNT, count).with(Phase10AbilityTuning.Setting.WIDTH, width);
+    public static MartialCommandEldritchMasteryTuning rankBase(MartialCommandEldritchMasteryTuning charger, int count, double width) {
+        return charger.with(MartialCommandEldritchMasteryTuning.Setting.COUNT, count).with(MartialCommandEldritchMasteryTuning.Setting.WIDTH, width);
     }
 
-    public static Phase10AbilityTuning riderBase(Phase10AbilityTuning charger, double mountedMultiplier) {
-        return charger.with(Phase10AbilityTuning.Setting.SECONDARY_RADIUS, mountedMultiplier);
+    public static MartialCommandEldritchMasteryTuning riderBase(MartialCommandEldritchMasteryTuning charger, double mountedMultiplier) {
+        return charger.with(MartialCommandEldritchMasteryTuning.Setting.SECONDARY_RADIUS, mountedMultiplier);
     }
 
-    private static Phase10AbilityTuning chargerBase(RiftmaneSwordItem.EffectSettings settings, ItemStack stack) {
+    private static MartialCommandEldritchMasteryTuning chargerBase(RiftmaneSwordItem.EffectSettings settings, ItemStack stack) {
         return chargerBase(settings.chargeDistance,
                 AwakeningApi.scaleEffect(stack, settings.knockbackStrength),
                 settings.hitRadius, settings.stepHeight, settings.rearDuration);
     }
 
-    private static Phase10AbilityTuning harrierBase(RiftmaneSwordItem.EffectSettings settings, ItemStack stack) {
+    private static MartialCommandEldritchMasteryTuning harrierBase(RiftmaneSwordItem.EffectSettings settings, ItemStack stack) {
         return harrierBase(chargerBase(settings, stack), settings.passiveChance, settings.passiveLockout,
                 settings.passiveMaxRange, settings.passiveMinRange, settings.passiveConeDegrees);
     }
 
-    private static Phase10AbilityTuning rankBase(RiftmaneSwordItem.EffectSettings settings, ItemStack stack) {
+    private static MartialCommandEldritchMasteryTuning rankBase(RiftmaneSwordItem.EffectSettings settings, ItemStack stack) {
         return rankBase(chargerBase(settings, stack), settings.chargerCount, settings.rankWidth);
     }
 
-    private static Phase10AbilityTuning riderBase(RiftmaneSwordItem.EffectSettings settings, ItemStack stack) {
+    private static MartialCommandEldritchMasteryTuning riderBase(RiftmaneSwordItem.EffectSettings settings, ItemStack stack) {
         return riderBase(chargerBase(settings, stack), settings.mountedDistanceMultiplier);
     }
 
@@ -278,25 +278,25 @@ public final class RiftmaneAbilityManager {
             return;
         }
         RiftmaneSwordItem.EffectSettings settings = Config.uniqueEffects.riftmane;
-        UniqueAbilityExecution execution = Phase10CombatManager.beginPassive(
-                Phase10UniqueAbilities.RIFTMANE_HARRIER, world, stack, owner, null,
+        UniqueAbilityExecution execution = MartialCommandEldritchMasteryCombatManager.beginPassive(
+                MartialCommandEldritchMasteryAbilities.RIFTMANE_HARRIER, world, stack, owner, null,
                 harrierBase(settings, stack));
-        Phase10AbilityTuning tuning = Phase10UniqueAbilities.tuning(execution);
+        MartialCommandEldritchMasteryTuning tuning = MartialCommandEldritchMasteryAbilities.tuning(execution);
         long now = world.getTime();
         Map<UUID, Long> lockouts = LAST_PASSIVE.get(world);
         Long nextEligible = lockouts == null ? null : lockouts.get(owner.getUuid());
         if (nextEligible != null && now < nextEligible) {
-            Phase10CombatManager.finish(execution, 0);
+            MartialCommandEldritchMasteryCombatManager.finish(execution, 0);
             return;
         }
         if (owner.getRandom().nextInt(100) >= AwakeningApi.scaleChance(stack,
-                tuning.integer(Phase10AbilityTuning.Setting.CHANCE, settings.passiveChance))) {
-            Phase10CombatManager.finish(execution, 0);
+                tuning.integer(MartialCommandEldritchMasteryTuning.Setting.CHANCE, settings.passiveChance))) {
+            MartialCommandEldritchMasteryCombatManager.finish(execution, 0);
             return;
         }
         LivingEntity target = findPassiveTarget(world, owner, settings, tuning);
         if (target == null) {
-            Phase10CombatManager.finish(execution, 0);
+            MartialCommandEldritchMasteryCombatManager.finish(execution, 0);
             return;
         }
 
@@ -305,8 +305,8 @@ public final class RiftmaneAbilityManager {
         Vec3d position = owner.getPos().add(forward.multiply(Math.max(0.0, settings.spawnOffset)));
         float damage = HelperMethods.abilityScaledDamage(SpellScalingProfile.ARCANE, owner, stack,
                 (float) settings.damageScaling, (float) settings.spellScaling);
-        damage *= (float) tuning.get(Phase10AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1);
-        int count = Math.max(1, tuning.integer(Phase10AbilityTuning.Setting.COUNT, 1));
+        damage *= (float) tuning.get(MartialCommandEldritchMasteryTuning.Setting.DAMAGE_MULTIPLIER, 1);
+        int count = Math.max(1, tuning.integer(MartialCommandEldritchMasteryTuning.Setting.COUNT, 1));
         int spawned = 0;
         Vec3d side = new Vec3d(-forward.z, 0, forward.x);
         for (int i = 0; i < count; i++) {
@@ -315,18 +315,18 @@ public final class RiftmaneAbilityManager {
                     spawned == 0, tuning) != null) spawned++;
         }
         if (spawned == 0) {
-            Phase10CombatManager.finish(execution, 0);
+            MartialCommandEldritchMasteryCombatManager.finish(execution, 0);
             return;
         }
 
         LAST_PASSIVE.computeIfAbsent(world, ignored -> new HashMap<>()).put(
                 owner.getUuid(), now + SimplySwordsAPI.getEffectiveWeaponCooldownTicks(
-                        stack, owner, tuning.integer(Phase10AbilityTuning.Setting.LOCKOUT_TICKS,
+                        stack, owner, tuning.integer(MartialCommandEldritchMasteryTuning.Setting.LOCKOUT_TICKS,
                                 settings.passiveLockout)));
         world.spawnParticles(RIFT_DUST, position.x, position.y + 0.9, position.z, 20, 0.5, 0.5, 0.5, 0.03);
         world.playSound(null, owner.getBlockPos(), SoundRegistry.DISTORTION_ARC_01.get(),
                 SoundCategory.PLAYERS, 0.4F, 1.15F + world.random.nextFloat() * 0.15F);
-        Phase10CombatManager.finish(execution, spawned);
+        MartialCommandEldritchMasteryCombatManager.finish(execution, spawned);
     }
 
     public static boolean hasActive(ServerWorld world) {
@@ -369,7 +369,7 @@ public final class RiftmaneAbilityManager {
     }
 
     private record PendingRank(UUID ownerId, ItemStack stack, Vec3d forward, long readyTick,
-                               int count, float damage, double spacing, Phase10AbilityTuning tuning) {
+                               int count, float damage, double spacing, MartialCommandEldritchMasteryTuning tuning) {
     }
 
     @Nullable
@@ -379,7 +379,7 @@ public final class RiftmaneAbilityManager {
                                                 boolean waterWalk, double distanceMultiplier,
                                                 boolean audioLead) {
         return summon(world, owner, stack, position, forward, damage, settings, waterWalk,
-                distanceMultiplier, audioLead, Phase10AbilityTuning.EMPTY);
+                distanceMultiplier, audioLead, MartialCommandEldritchMasteryTuning.EMPTY);
     }
 
     @Nullable
@@ -387,12 +387,12 @@ public final class RiftmaneAbilityManager {
                                                 Vec3d position, Vec3d forward, float damage,
                                                 RiftmaneSwordItem.EffectSettings settings,
                                                 boolean waterWalk, double distanceMultiplier,
-                                                boolean audioLead, Phase10AbilityTuning tuning) {
+                                                boolean audioLead, MartialCommandEldritchMasteryTuning tuning) {
         double speed = Math.max(0.05, settings.chargeSpeed
-                * tuning.get(Phase10AbilityTuning.Setting.SPEED, 1));
-        double distance = Math.max(1.0, tuning.get(Phase10AbilityTuning.Setting.RANGE,
+                * tuning.get(MartialCommandEldritchMasteryTuning.Setting.SPEED, 1));
+        double distance = Math.max(1.0, tuning.get(MartialCommandEldritchMasteryTuning.Setting.RANGE,
                 settings.chargeDistance)) * Math.max(1.0, distanceMultiplier);
-        int rearTicks = Math.max(0, tuning.integer(Phase10AbilityTuning.Setting.WINDUP_TICKS,
+        int rearTicks = Math.max(0, tuning.integer(MartialCommandEldritchMasteryTuning.Setting.WINDUP_TICKS,
                 settings.rearDuration));
         int lifetime = rearTicks + (int) Math.ceil(distance / speed) + LIFETIME_MARGIN;
         double groundY = findSupportTopY(world, position.x, position.z, owner.getY() + 1.0, waterWalk);
@@ -408,13 +408,13 @@ public final class RiftmaneAbilityManager {
             return null;
         }
         charger.initializeCharge(owner, stack, forward, lifetime, rearTicks, seed, damage,
-                tuning.get(Phase10AbilityTuning.Setting.KNOCKBACK,
+                tuning.get(MartialCommandEldritchMasteryTuning.Setting.KNOCKBACK,
                         AwakeningApi.scaleEffect(stack, settings.knockbackStrength)),
-                speed, tuning.get(Phase10AbilityTuning.Setting.RADIUS, settings.hitRadius),
-                tuning.get(Phase10AbilityTuning.Setting.HEIGHT, settings.stepHeight));
-        charger.setKillFollowUp(tuning.get(Phase10AbilityTuning.Setting.SEARCH_RADIUS, 0),
-                tuning.get(Phase10AbilityTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, .5),
-                tuning.integer(Phase10AbilityTuning.Setting.REFUND_TICKS, 0));
+                speed, tuning.get(MartialCommandEldritchMasteryTuning.Setting.RADIUS, settings.hitRadius),
+                tuning.get(MartialCommandEldritchMasteryTuning.Setting.HEIGHT, settings.stepHeight));
+        charger.setKillFollowUp(tuning.get(MartialCommandEldritchMasteryTuning.Setting.SEARCH_RADIUS, 0),
+                tuning.get(MartialCommandEldritchMasteryTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, .5),
+                tuning.integer(MartialCommandEldritchMasteryTuning.Setting.REFUND_TICKS, 0));
         if (!world.spawnEntity(charger)) {
             charger.discard();
             return null;
@@ -467,15 +467,15 @@ public final class RiftmaneAbilityManager {
 
     private static LivingEntity findPassiveTarget(ServerWorld world, LivingEntity owner,
                                                   RiftmaneSwordItem.EffectSettings settings,
-                                                  Phase10AbilityTuning tuning) {
-        double minimum = Math.max(0.0, tuning.get(Phase10AbilityTuning.Setting.SECONDARY_RADIUS,
+                                                  MartialCommandEldritchMasteryTuning tuning) {
+        double minimum = Math.max(0.0, tuning.get(MartialCommandEldritchMasteryTuning.Setting.SECONDARY_RADIUS,
                 settings.passiveMinRange));
-        double maximum = Math.max(minimum + 0.1, tuning.get(Phase10AbilityTuning.Setting.SEARCH_RANGE,
+        double maximum = Math.max(minimum + 0.1, tuning.get(MartialCommandEldritchMasteryTuning.Setting.SEARCH_RANGE,
                 settings.passiveMaxRange));
         double minimumSquared = minimum * minimum;
         double maximumSquared = maximum * maximum;
         double threshold = Math.cos(Math.toRadians(
-                MathHelper.clamp(tuning.get(Phase10AbilityTuning.Setting.ANGLE,
+                MathHelper.clamp(tuning.get(MartialCommandEldritchMasteryTuning.Setting.ANGLE,
                         settings.passiveConeDegrees), 1.0, 180.0) * 0.5));
         Vec3d look = owner.getRotationVec(1.0F).normalize();
         return world.getEntitiesByClass(LivingEntity.class, owner.getBoundingBox().expand(maximum),

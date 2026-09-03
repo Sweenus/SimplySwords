@@ -23,8 +23,8 @@ import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.api.SpellScalingProfile;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
-import net.sweenus.simplyswords.api.ability.Phase6AbilityTuning;
-import net.sweenus.simplyswords.api.ability.Phase6UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.StormFrostWaterMasteryTuning;
+import net.sweenus.simplyswords.api.ability.StormFrostWaterMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.config.Config;
@@ -41,8 +41,8 @@ import net.sweenus.simplyswords.util.WeaponManaCost;
 import net.sweenus.simplyswords.world.FrostfallIceSpikeFieldManager;
 import net.sweenus.simplyswords.world.IcewhisperAbilityManager;
 import net.sweenus.simplyswords.world.IcewhisperCometManager;
-import net.sweenus.simplyswords.world.Phase4AbsorptionTracker;
-import net.sweenus.simplyswords.world.Phase6CombatManager;
+import net.sweenus.simplyswords.world.MasteryAbsorptionTracker;
+import net.sweenus.simplyswords.world.StormFrostWaterMasteryCombatManager;
 import net.sweenus.simplyswords.world.PlayerWeaponAbilityManager;
 
 import java.util.List;
@@ -94,10 +94,10 @@ public class IcewhisperSwordItem extends UniqueSwordItem implements TwoHandedWea
         if (!canActivate(context)) {
             return false;
         }
-        UniqueAbilityExecution execution = Phase6CombatManager.beginActive(
-                Phase6UniqueAbilities.ICEWHISPER_COMETS, context, Config.uniqueEffects.icewhisper.cooldown);
+        UniqueAbilityExecution execution = StormFrostWaterMasteryCombatManager.beginActive(
+                StormFrostWaterMasteryAbilities.ICEWHISPER_COMETS, context, Config.uniqueEffects.icewhisper.cooldown);
         activateIcewhisper(context.world(), context.actor(), context.stack(),
-                Phase6UniqueAbilities.tuning(execution), execution);
+                StormFrostWaterMasteryAbilities.tuning(execution), execution);
         return true;
     }
 
@@ -107,14 +107,14 @@ public class IcewhisperSwordItem extends UniqueSwordItem implements TwoHandedWea
     }
 
     private static void activateIcewhisper(ServerWorld serverWorld, LivingEntity actor, ItemStack stack,
-                                           Phase6AbilityTuning tuning, UniqueAbilityExecution execution) {
+                                           StormFrostWaterMasteryTuning tuning, UniqueAbilityExecution execution) {
         double radius = stormRadius(tuning, Config.uniqueEffects.icewhisper.radius * 2.0);
         float abilityDamage = HelperMethods.abilityScaledDamage("frost", actor, stack,
                 Config.uniqueEffects.icewhisper.damageScaling, Config.uniqueEffects.icewhisper.spellScaling);
         int absorption = tuning.integer(s("ICEWHISPER_WARD_ABSORPTION"), 0);
         if (tuning.flag(IcewhisperAbilityManager.MODE_FROST_WARD) && absorption > 0
                 && !tuning.flag(IcewhisperAbilityManager.MODE_BLACK_ICE)) {
-            Phase4AbsorptionTracker.grant(actor, absorption,
+            MasteryAbsorptionTracker.grant(actor, absorption,
                     tuning.integer(s("ICEWHISPER_WARD_DURATION_TICKS"), 80), absorption);
         }
         IcewhisperCometManager.startStorm(serverWorld, actor, stack, radius,
@@ -123,12 +123,12 @@ public class IcewhisperSwordItem extends UniqueSwordItem implements TwoHandedWea
     }
 
     // Radius composes against the live configuration instead of a literal the config can drift from.
-    public static double stormRadius(Phase6AbilityTuning tuning, double configured) {
+    public static double stormRadius(StormFrostWaterMasteryTuning tuning, double configured) {
         return Math.max(1, (configured + tuning.get(s("ICEWHISPER_STORM_RADIUS_BONUS"), 0))
                 * tuning.get(s("ICEWHISPER_STORM_RADIUS_MULTIPLIER"), 1));
     }
 
-    public static double auraRadius(Phase6AbilityTuning tuning, double configured) {
+    public static double auraRadius(StormFrostWaterMasteryTuning tuning, double configured) {
         return Math.max(1, (configured + tuning.get(s("ICEWHISPER_AURA_RADIUS_BONUS"), 0))
                 * tuning.get(s("ICEWHISPER_AURA_RADIUS_MULTIPLIER"), 1));
     }
@@ -155,13 +155,13 @@ public class IcewhisperSwordItem extends UniqueSwordItem implements TwoHandedWea
                 || user.age % 35 != 0) {
             return;
         }
-        UniqueAbilityExecution execution = Phase6CombatManager.beginPassive(
-                Phase6UniqueAbilities.ICEWHISPER_AURA, world, stack, user, null);
-        Phase6AbilityTuning tuning = Phase6UniqueAbilities.tuning(execution);
+        UniqueAbilityExecution execution = StormFrostWaterMasteryCombatManager.beginPassive(
+                StormFrostWaterMasteryAbilities.ICEWHISPER_AURA, world, stack, user, null);
+        StormFrostWaterMasteryTuning tuning = StormFrostWaterMasteryAbilities.tuning(execution);
         double radius = auraRadius(tuning, Config.uniqueEffects.icewhisper.radius);
         long now = world.getTime();
         IcewhisperAbilityManager.onAuraPulse(world, user, tuning, radius);
-        Phase4AbsorptionTracker.tick(user);
+        MasteryAbsorptionTracker.tick(user);
         int slowDuration = Math.max(1, BASE_SLOW_TICKS
                 + tuning.integer(s("ICEWHISPER_AURA_SLOW_BONUS_TICKS"), 0));
         int amplifierCap = tuning.integer(s("ICEWHISPER_AURA_AMPLIFIER_CAP"), 2);
@@ -242,7 +242,7 @@ public class IcewhisperSwordItem extends UniqueSwordItem implements TwoHandedWea
                         0, 0, 0);
             }
         }
-        UniqueAbilityApi.finish(execution, Phase6UniqueAbilities.FINISH, affected);
+        UniqueAbilityApi.finish(execution, StormFrostWaterMasteryAbilities.FINISH, affected);
     }
 
     @Override
@@ -288,7 +288,7 @@ public class IcewhisperSwordItem extends UniqueSwordItem implements TwoHandedWea
         public float cometDamageMultiplier = 16.0f;
     }
 
-    private static Phase6AbilityTuning.Setting s(String name) {
-        return Phase6AbilityTuning.Setting.valueOf(name);
+    private static StormFrostWaterMasteryTuning.Setting s(String name) {
+        return StormFrostWaterMasteryTuning.Setting.valueOf(name);
     }
 }

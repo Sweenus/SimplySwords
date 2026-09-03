@@ -28,8 +28,8 @@ import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
-import net.sweenus.simplyswords.api.ability.Phase9AbilityTuning;
-import net.sweenus.simplyswords.api.ability.Phase9UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.ArcaneCosmicMasteryTuning;
+import net.sweenus.simplyswords.api.ability.ArcaneCosmicMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.effect.instance.SimplySwordsStatusEffectInstance;
 import net.sweenus.simplyswords.entity.BattleStandardDarkEntity;
@@ -41,7 +41,7 @@ import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
-import net.sweenus.simplyswords.world.Phase9CombatManager;
+import net.sweenus.simplyswords.world.ArcaneCosmicMasteryCombatManager;
 
 import java.util.List;
 
@@ -88,24 +88,24 @@ public class EnigmaSwordItem extends UniqueSwordItem implements UniqueWeaponActi
     @Override
     public boolean activate(WeaponAbilityContext context) {
         if (!canActivate(context)) return false;
-        UniqueAbilityExecution execution = Phase9CombatManager.beginActive(
-                Phase9UniqueAbilities.ENIGMA_STORMCHASER, context,
+        UniqueAbilityExecution execution = ArcaneCosmicMasteryCombatManager.beginActive(
+                ArcaneCosmicMasteryAbilities.ENIGMA_STORMCHASER, context,
                 Config.uniqueEffects.enigma.enigmaCooldown, chaseBase());
-        Phase9AbilityTuning tuning = Phase9UniqueAbilities.tuning(execution);
-        UniqueAbilityExecution vortexExecution = Phase9CombatManager.beginPassive(
-                Phase9UniqueAbilities.ENIGMA_VORTEX, context.world(), context.stack(),
+        ArcaneCosmicMasteryTuning tuning = ArcaneCosmicMasteryAbilities.tuning(execution);
+        UniqueAbilityExecution vortexExecution = ArcaneCosmicMasteryCombatManager.beginPassive(
+                ArcaneCosmicMasteryAbilities.ENIGMA_VORTEX, context.world(), context.stack(),
                 context.actor(), null, vortexBase());
-        Phase9AbilityTuning vortex = Phase9UniqueAbilities.tuning(vortexExecution);
-        Phase9CombatManager.finish(vortexExecution, 0);
-        UniqueAbilityExecution auraExecution = Phase9CombatManager.beginPassive(
-                Phase9UniqueAbilities.ENIGMA_TAILWIND, context.world(), context.stack(),
-                context.actor(), null, Phase9AbilityTuning.EMPTY);
-        Phase9AbilityTuning aura = Phase9UniqueAbilities.tuning(auraExecution);
-        Phase9CombatManager.finish(auraExecution, 0);
+        ArcaneCosmicMasteryTuning vortex = ArcaneCosmicMasteryAbilities.tuning(vortexExecution);
+        ArcaneCosmicMasteryCombatManager.finish(vortexExecution, 0);
+        UniqueAbilityExecution auraExecution = ArcaneCosmicMasteryCombatManager.beginPassive(
+                ArcaneCosmicMasteryAbilities.ENIGMA_TAILWIND, context.world(), context.stack(),
+                context.actor(), null, ArcaneCosmicMasteryTuning.EMPTY);
+        ArcaneCosmicMasteryTuning aura = ArcaneCosmicMasteryAbilities.tuning(auraExecution);
+        ArcaneCosmicMasteryCombatManager.finish(auraExecution, 0);
         BattleStandardDarkEntity standard = spawnEnigmaStandard(
                 context.world(), context.actor(), context.stack(), tuning, vortex, aura);
         if (standard == null) return false;
-        Phase9CombatManager.scheduleFinish(context.world(), execution, 900, 0);
+        ArcaneCosmicMasteryCombatManager.scheduleFinish(context.world(), execution, 900, 0);
         return true;
     }
 
@@ -118,31 +118,31 @@ public class EnigmaSwordItem extends UniqueSwordItem implements UniqueWeaponActi
         return user.getBlockPos().up(1).offset(user.getMovementDirection(), 2);
     }
 
-    public static Phase9AbilityTuning chaseBase() {
-        return Phase9AbilityTuning.EMPTY
-                .with(Phase9AbilityTuning.Setting.RANGE, Config.uniqueEffects.enigma.enigmaChaseRadius)
-                .with(Phase9AbilityTuning.Setting.SPEED, 1)
-                .with(Phase9AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1);
+    public static ArcaneCosmicMasteryTuning chaseBase() {
+        return ArcaneCosmicMasteryTuning.EMPTY
+                .with(ArcaneCosmicMasteryTuning.Setting.RANGE, Config.uniqueEffects.enigma.enigmaChaseRadius)
+                .with(ArcaneCosmicMasteryTuning.Setting.SPEED, 1)
+                .with(ArcaneCosmicMasteryTuning.Setting.DAMAGE_MULTIPLIER, 1);
     }
 
-    public static Phase9AbilityTuning vortexBase() {
-        return Phase9AbilityTuning.EMPTY
-                .with(Phase9AbilityTuning.Setting.RADIUS, Config.uniqueEffects.enigma.enigmaTornadoRadius)
-                .with(Phase9AbilityTuning.Setting.DURATION_TICKS, Config.uniqueEffects.enigma.enigmaOrbitTicks)
-                .with(Phase9AbilityTuning.Setting.PULL_STRENGTH, 1)
-                .with(Phase9AbilityTuning.Setting.KNOCKBACK, 1)
-                .with(Phase9AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1);
+    public static ArcaneCosmicMasteryTuning vortexBase() {
+        return ArcaneCosmicMasteryTuning.EMPTY
+                .with(ArcaneCosmicMasteryTuning.Setting.RADIUS, Config.uniqueEffects.enigma.enigmaTornadoRadius)
+                .with(ArcaneCosmicMasteryTuning.Setting.DURATION_TICKS, Config.uniqueEffects.enigma.enigmaOrbitTicks)
+                .with(ArcaneCosmicMasteryTuning.Setting.PULL_STRENGTH, 1)
+                .with(ArcaneCosmicMasteryTuning.Setting.KNOCKBACK, 1)
+                .with(ArcaneCosmicMasteryTuning.Setting.DAMAGE_MULTIPLIER, 1);
     }
 
     private BattleStandardDarkEntity spawnEnigmaStandard(ServerWorld world, LivingEntity user, ItemStack stack) {
-        return spawnEnigmaStandard(world, user, stack, Phase9AbilityTuning.EMPTY,
-                Phase9AbilityTuning.EMPTY, Phase9AbilityTuning.EMPTY);
+        return spawnEnigmaStandard(world, user, stack, ArcaneCosmicMasteryTuning.EMPTY,
+                ArcaneCosmicMasteryTuning.EMPTY, ArcaneCosmicMasteryTuning.EMPTY);
     }
 
     private BattleStandardDarkEntity spawnEnigmaStandard(ServerWorld world, LivingEntity user, ItemStack stack,
-                                                          Phase9AbilityTuning tuning,
-                                                          Phase9AbilityTuning vortex,
-                                                          Phase9AbilityTuning aura) {
+                                                          ArcaneCosmicMasteryTuning tuning,
+                                                          ArcaneCosmicMasteryTuning vortex,
+                                                          ArcaneCosmicMasteryTuning aura) {
         BlockPos pos = getStandardPosition(user);
         if (!world.getBlockState(pos).isAir()) {
             return null;
@@ -159,7 +159,7 @@ public class EnigmaSwordItem extends UniqueSwordItem implements UniqueWeaponActi
             banner.abilityStack = stack.copy();
             banner.decayRate = Config.uniqueEffects.enigma.enigmaDecayRate;
             banner.standardType = "enigma";
-            banner.configurePhase9(tuning, vortex, aura);
+            banner.configureEnigmaMastery(tuning, vortex, aura);
             banner.setCustomName(Text.translatable("entity.simplyswords.battlestandard.name", user.getName()));
             banner.setCustomNameVisible(false);
             banner.setInvisible(true);

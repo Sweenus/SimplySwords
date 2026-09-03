@@ -1,6 +1,6 @@
 package net.sweenus.simplyswords.world;
 
-import net.sweenus.simplyswords.api.ability.Phase6AbilityTuning;
+import net.sweenus.simplyswords.api.ability.StormFrostWaterMasteryTuning;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 final class TempestAbilityManagerTest {
     @Test
     void markAndVortexDurationsStayDefinitionScopedAndConfigRelative() {
-        Phase6AbilityTuning tuning = Phase6AbilityTuning.EMPTY
+        StormFrostWaterMasteryTuning tuning = StormFrostWaterMasteryTuning.EMPTY
                 .with(s("TEMPEST_MARK_DURATION_BONUS_TICKS"), 200)
                 .with(s("TEMPEST_DURATION_BONUS_TICKS"), 40)
                 .with(s("TEMPEST_SINGULARITY_DURATION_MULTIPLIER"), .5);
@@ -19,7 +19,7 @@ final class TempestAbilityManagerTest {
 
     @Test
     void startingRadiusBonusRetainsStackGrowth() {
-        Phase6AbilityTuning tuning = Phase6AbilityTuning.EMPTY
+        StormFrostWaterMasteryTuning tuning = StormFrostWaterMasteryTuning.EMPTY
                 .with(s("TEMPEST_START_RADIUS_BONUS"), 1)
                 .with(s("TEMPEST_RADIUS_PER_STACK_MULTIPLIER"), 1.1);
 
@@ -29,7 +29,7 @@ final class TempestAbilityManagerTest {
 
     @Test
     void stormCrownOnlyChangesCadenceAtMaximumSize() {
-        Phase6AbilityTuning tuning = Phase6AbilityTuning.EMPTY
+        StormFrostWaterMasteryTuning tuning = StormFrostWaterMasteryTuning.EMPTY
                 .with(s("TEMPEST_MAX_CADENCE_INTERVAL_TICKS"), 8);
 
         assertEquals(10, TempestAbilityManager.resolvePulseInterval(tuning, 29, 30));
@@ -38,7 +38,7 @@ final class TempestAbilityManagerTest {
 
     @Test
     void capstonesComposeWithoutOverwritingConfiguredSizeOrDamage() {
-        Phase6AbilityTuning tuning = Phase6AbilityTuning.EMPTY
+        StormFrostWaterMasteryTuning tuning = StormFrostWaterMasteryTuning.EMPTY
                 .with(s("TEMPEST_MAX_SIZE_MULTIPLIER"), 1.35)
                 .with(s("TEMPEST_VORTEX_DAMAGE_MULTIPLIER"), 1.1)
                 .with(s("TEMPEST_SINGULARITY_DAMAGE_MULTIPLIER"), 1.8)
@@ -60,7 +60,7 @@ final class TempestAbilityManagerTest {
 
     @Test
     void historicalGenericAddonKeysRemainFallbacks() {
-        Phase6AbilityTuning tuning = Phase6AbilityTuning.EMPTY
+        StormFrostWaterMasteryTuning tuning = StormFrostWaterMasteryTuning.EMPTY
                 .with(s("DURATION_TICKS"), 800)
                 .with(s("STACK_CAP"), 20)
                 .with(s("RADIUS"), 5)
@@ -76,7 +76,7 @@ final class TempestAbilityManagerTest {
         assertEquals(1.4, TempestAbilityManager.resolveDamageMultiplier(tuning, 0, false), 1.0E-6);
     }
 
-    private static Phase6AbilityTuning.Setting s(String name) {
-        return Phase6AbilityTuning.Setting.valueOf(name);
+    private static StormFrostWaterMasteryTuning.Setting s(String name) {
+        return StormFrostWaterMasteryTuning.Setting.valueOf(name);
     }
 }

@@ -11,7 +11,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
-import net.sweenus.simplyswords.api.ability.Phase3AbilityTuning;
+import net.sweenus.simplyswords.api.ability.StormSoulMasteryTuning;
 import net.sweenus.simplyswords.util.HelperMethods;
 
 import java.util.HashMap;
@@ -27,25 +27,25 @@ public final class DreadwhisperTrailManager {
 
     // Living Shadow: the trail follows its owner and keeps biting after the dash ends.
     public static void start(ServerWorld world, LivingEntity owner, ItemStack stack,
-                             Phase3AbilityTuning tuning, Vec3d origin, float baseDamage) {
-        int ticks = tuning.integer(Phase3AbilityTuning.Setting.LIVING_SHADOW_TICKS, 0);
-        double multiplier = tuning.get(Phase3AbilityTuning.Setting.LIVING_SHADOW_MULTIPLIER, 0);
+                             StormSoulMasteryTuning tuning, Vec3d origin, float baseDamage) {
+        int ticks = tuning.integer(StormSoulMasteryTuning.Setting.LIVING_SHADOW_TICKS, 0);
+        double multiplier = tuning.get(StormSoulMasteryTuning.Setting.LIVING_SHADOW_MULTIPLIER, 0);
         if (ticks <= 0 || multiplier <= 0) return;
         TrailState state = state(world, owner.getUuid());
         state.expiresAt = world.getTime() + ticks;
-        state.interval = Math.max(1, tuning.integer(Phase3AbilityTuning.Setting.LIVING_SHADOW_INTERVAL, 20));
+        state.interval = Math.max(1, tuning.integer(StormSoulMasteryTuning.Setting.LIVING_SHADOW_INTERVAL, 20));
         state.nextPulse = world.getTime() + state.interval;
         state.damage = (float) (baseDamage * multiplier);
-        state.targetCap = Math.max(1, tuning.integer(Phase3AbilityTuning.Setting.LIVING_SHADOW_TARGET_CAP, 12));
+        state.targetCap = Math.max(1, tuning.integer(StormSoulMasteryTuning.Setting.LIVING_SHADOW_TARGET_CAP, 12));
         state.stack = stack.copy();
-        state.stainRadius = Math.max(1.0, tuning.get(Phase3AbilityTuning.Setting.REND_WIDTH, 4.5));
+        state.stainRadius = Math.max(1.0, tuning.get(StormSoulMasteryTuning.Setting.REND_WIDTH, 4.5));
         state.lastPosition = origin;
     }
 
     // Veiled Passage and Fading Footprint both persist briefly past the dash.
-    public static void startVeil(ServerWorld world, LivingEntity owner, Phase3AbilityTuning tuning) {
-        int veil = tuning.integer(Phase3AbilityTuning.Setting.VEIL_DURATION_TICKS, 0);
-        int footprint = tuning.integer(Phase3AbilityTuning.Setting.FOOTPRINT_TICKS, 0);
+    public static void startVeil(ServerWorld world, LivingEntity owner, StormSoulMasteryTuning tuning) {
+        int veil = tuning.integer(StormSoulMasteryTuning.Setting.VEIL_DURATION_TICKS, 0);
+        int footprint = tuning.integer(StormSoulMasteryTuning.Setting.FOOTPRINT_TICKS, 0);
         if (veil <= 0 && footprint <= 0) return;
         TrailState state = state(world, owner.getUuid());
         long now = world.getTime();
@@ -53,7 +53,7 @@ public final class DreadwhisperTrailManager {
         if (footprint > 0) {
             state.footprintUntil = now + footprint;
             state.footprintReduction = tuning.get(
-                    Phase3AbilityTuning.Setting.FOOTPRINT_PROJECTILE_REDUCTION, 0);
+                    StormSoulMasteryTuning.Setting.FOOTPRINT_PROJECTILE_REDUCTION, 0);
         }
     }
 

@@ -32,7 +32,7 @@ import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
-import net.sweenus.simplyswords.world.Phase10WeaponManager;
+import net.sweenus.simplyswords.world.RibboncleaverDreadtideMasteryManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,7 +49,7 @@ public class DreadtideSwordItem extends UniqueSwordItem implements UniqueWeaponA
         }
         if (!attacker.getWorld().isClient()) {
             HelperMethods.playHitSounds(attacker, target);
-            Phase10WeaponManager.onDreadtideHit(attacker, target, stack);
+            RibboncleaverDreadtideMasteryManager.onDreadtideHit(attacker, target, stack);
 
         }
         return super.postHit(stack, target, attacker);
@@ -68,14 +68,14 @@ public class DreadtideSwordItem extends UniqueSwordItem implements UniqueWeaponA
                 && context.actor().isAlive()
                 && context.stack() != null
                 && !context.stack().isEmpty()
-                && Phase10WeaponManager.canActivateDreadtide(context.world(), context.actor(), context.stack());
+                && RibboncleaverDreadtideMasteryManager.canActivateDreadtide(context.world(), context.actor(), context.stack());
     }
 
     @Override
     public boolean activate(WeaponAbilityContext context) {
         LivingEntity actor = context.actor();
         ServerWorld world = context.world();
-        if (!Phase10WeaponManager.activateDreadtide(world, actor, context.stack())) {
+        if (!RibboncleaverDreadtideMasteryManager.activateDreadtide(world, actor, context.stack())) {
             return false;
         }
         LivingEntity target = context.target();
@@ -102,7 +102,7 @@ public class DreadtideSwordItem extends UniqueSwordItem implements UniqueWeaponA
 
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
-        if (entity instanceof LivingEntity livingEntity) Phase10WeaponManager.tickDreadtide(livingEntity, stack);
+        if (entity instanceof LivingEntity livingEntity) RibboncleaverDreadtideMasteryManager.tickDreadtide(livingEntity, stack);
         HelperMethods.createFootfalls(entity, stack, world, ParticleTypes.MYCELIUM,
                 ParticleTypes.MYCELIUM, ParticleTypes.MYCELIUM, true);
 

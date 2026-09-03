@@ -19,8 +19,8 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.api.WeaponAbilityActivationSource;
-import net.sweenus.simplyswords.api.ability.Phase6AbilityTuning;
-import net.sweenus.simplyswords.api.ability.Phase6UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.StormFrostWaterMasteryTuning;
+import net.sweenus.simplyswords.api.ability.StormFrostWaterMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
@@ -34,7 +34,7 @@ import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
 import net.sweenus.simplyswords.world.LivingEntityAbilityMovementManager;
-import net.sweenus.simplyswords.world.Phase6CombatManager;
+import net.sweenus.simplyswords.world.StormFrostWaterMasteryCombatManager;
 import net.sweenus.simplyswords.world.PlayerWeaponAbilityManager;
 import net.sweenus.simplyswords.util.WeaponManaCost;
 
@@ -71,7 +71,7 @@ public class FrostfallSwordItem extends UniqueSwordItem implements UniqueWeaponA
     }
 
     private static FrostfallEntity createFrostfallEntity(World world, LivingEntity user, ItemStack stack,
-                                                         Phase6AbilityTuning tuning,
+                                                         StormFrostWaterMasteryTuning tuning,
                                                          UniqueAbilityExecution execution) {
         float abilityDamage = HelperMethods.abilityScaledDamage("frost", user, stack,
                 Config.uniqueEffects.frostfall.damageScaling, Config.uniqueEffects.frostfall.spellScaling);
@@ -104,16 +104,16 @@ public class FrostfallSwordItem extends UniqueSwordItem implements UniqueWeaponA
 
     @Override
     public boolean activate(WeaponAbilityContext context) {
-        UniqueAbilityExecution execution = Phase6CombatManager.beginActive(
-                Phase6UniqueAbilities.FROSTFALL_THROW, context, Config.uniqueEffects.frostfall.cooldown);
-        Phase6AbilityTuning tuning = Phase6UniqueAbilities.tuning(execution);
-        UniqueAbilityExecution fieldExecution = Phase6CombatManager.preparePassive(
-                Phase6UniqueAbilities.FROSTFALL_FIELD, context.world(), context.stack(), context.actor(), context.target());
+        UniqueAbilityExecution execution = StormFrostWaterMasteryCombatManager.beginActive(
+                StormFrostWaterMasteryAbilities.FROSTFALL_THROW, context, Config.uniqueEffects.frostfall.cooldown);
+        StormFrostWaterMasteryTuning tuning = StormFrostWaterMasteryAbilities.tuning(execution);
+        UniqueAbilityExecution fieldExecution = StormFrostWaterMasteryCombatManager.preparePassive(
+                StormFrostWaterMasteryAbilities.FROSTFALL_FIELD, context.world(), context.stack(), context.actor(), context.target());
         UniqueAbilityApi.takeStartedExecution();
         UniqueAbilityApi.publishStartedExecution(execution);
         FrostfallEntity frostfallEntity = createFrostfallEntity(context.world(), context.actor(),
                 context.stack().copy(), tuning, execution);
-        frostfallEntity.setFieldMastery(Phase6UniqueAbilities.tuning(fieldExecution), fieldExecution);
+        frostfallEntity.setFieldMastery(StormFrostWaterMasteryAbilities.tuning(fieldExecution), fieldExecution);
         boolean playerThrow = context.actor() instanceof PlayerEntity && !context.isDelegated();
         if (!playerThrow && context.target() != null) {
             Vec3d direction = LivingEntityAbilityMovementManager.getLobbedTargetDirection(context.actor(), context.target());
@@ -188,7 +188,7 @@ public class FrostfallSwordItem extends UniqueSwordItem implements UniqueWeaponA
         public float spellScaling = 4.61f;
     }
 
-    private static Phase6AbilityTuning.Setting s(String name) {
-        return Phase6AbilityTuning.Setting.valueOf(name);
+    private static StormFrostWaterMasteryTuning.Setting s(String name) {
+        return StormFrostWaterMasteryTuning.Setting.valueOf(name);
     }
 }

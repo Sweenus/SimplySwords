@@ -14,8 +14,8 @@ import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
-import net.sweenus.simplyswords.api.ability.Phase6AbilityTuning;
-import net.sweenus.simplyswords.api.ability.Phase6UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.StormFrostWaterMasteryTuning;
+import net.sweenus.simplyswords.api.ability.StormFrostWaterMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityPhase;
@@ -56,9 +56,9 @@ public final class StormbringerAbilityManager {
         state.lastAttemptTick = now;
         if (now < state.nextChainTick) return;
 
-        UniqueAbilityExecution execution = Phase6CombatManager.beginPassive(
-                Phase6UniqueAbilities.STORMBRINGER_CHAIN, world, stack, player, target);
-        Phase6AbilityTuning tuning = Phase6UniqueAbilities.tuning(execution);
+        UniqueAbilityExecution execution = StormFrostWaterMasteryCombatManager.beginPassive(
+                StormFrostWaterMasteryAbilities.STORMBRINGER_CHAIN, world, stack, player, target);
+        StormFrostWaterMasteryTuning tuning = StormFrostWaterMasteryAbilities.tuning(execution);
         observeTuning(player, tuning);
         try {
             int chargeCap = chargeCap(tuning);
@@ -179,11 +179,11 @@ public final class StormbringerAbilityManager {
             }
             state.nextChainTick = now + SimplySwordsAPI.getEffectiveWeaponCooldownTicks(stack, player, cooldown);
             markCombat(player);
-            UniqueAbilityApi.emit(execution, UniqueAbilityPhase.HIT, Phase6UniqueAbilities.HIT,
+            UniqueAbilityApi.emit(execution, UniqueAbilityPhase.HIT, StormFrostWaterMasteryAbilities.HIT,
                     target, damaged.size(), baseDamage);
         } finally {
             SUPPRESS_CHAIN.set(false);
-            UniqueAbilityApi.finish(execution, Phase6UniqueAbilities.FINISH, 0);
+            UniqueAbilityApi.finish(execution, StormFrostWaterMasteryAbilities.FINISH, 0);
         }
     }
 
@@ -193,7 +193,7 @@ public final class StormbringerAbilityManager {
         ItemStack stack = source.getWeaponStack();
         if (stack == null || !stack.isOf(ItemsRegistry.STORMBRINGER.get())) stack = player.getMainHandStack();
         if (!stack.isOf(ItemsRegistry.STORMBRINGER.get()) || !AwakeningApi.isAbilityUnlocked(stack)) return amount;
-        Phase6AbilityTuning tuning = resolveChainTuning(player, stack, target);
+        StormFrostWaterMasteryTuning tuning = resolveChainTuning(player, stack, target);
         int charges = Math.min(stack.getOrDefault(ComponentTypeRegistry.PARRY.get(), ParryComponent.DEFAULT).stormCharges(),
                 chargeCap(tuning));
         if (!tuning.flag(1 << 11) || charges < integer(tuning,
@@ -204,7 +204,7 @@ public final class StormbringerAbilityManager {
     }
 
     public static ParryComponent gainStormCharges(ServerPlayerEntity player, ItemStack stack,
-                                                   Phase6AbilityTuning tuning, int amount, boolean perfect) {
+                                                   StormFrostWaterMasteryTuning tuning, int amount, boolean perfect) {
         int cap = chargeCap(tuning);
         ParryComponent component = normalizeCharges(stack, cap);
         int resolved = scaledChargeGain(amount, value(tuning,
@@ -218,7 +218,7 @@ public final class StormbringerAbilityManager {
                     s("ABSORPTION"), 2);
             int duration = integer(tuning, s("STORMBRINGER_OVERFLOW_DURATION_TICKS"),
                     s("STATUS_DURATION_TICKS"), 60);
-            Phase4AbsorptionTracker.grant(player, absorption, duration, absorption);
+            MasteryAbsorptionTracker.grant(player, absorption, duration, absorption);
             state.nextOverflowTick = now + integer(tuning,
                     s("STORMBRINGER_OVERFLOW_LOCKOUT_TICKS"), s("LOCKOUT_TICKS"), 40);
         }
@@ -237,7 +237,7 @@ public final class StormbringerAbilityManager {
     }
 
     public static void tickPlayer(ServerPlayerEntity player) {
-        Phase4AbsorptionTracker.tick(player);
+        MasteryAbsorptionTracker.tick(player);
         long now = player.getServerWorld().getTime();
         if (player.age % 20 == 0) {
             RegistryKey<World> key = player.getWorld().getRegistryKey();
@@ -254,7 +254,7 @@ public final class StormbringerAbilityManager {
             state.tuning = resolveChainTuning(player, stack, null);
             state.nextTuningRefreshTick = now + 20;
         }
-        Phase6AbilityTuning tuning = state.tuning;
+        StormFrostWaterMasteryTuning tuning = state.tuning;
         int cap = chargeCap(tuning);
         component = normalizeCharges(stack, cap);
         if (!tuning.flag(1 << 16) || component.stormCharges() <= 0) return;
@@ -272,7 +272,7 @@ public final class StormbringerAbilityManager {
         stack.set(ComponentTypeRegistry.PARRY.get(), component);
     }
 
-    public static void observeTuning(ServerPlayerEntity player, Phase6AbilityTuning tuning) {
+    public static void observeTuning(ServerPlayerEntity player, StormFrostWaterMasteryTuning tuning) {
         OwnerState state = ownerState(player);
         state.tuning = tuning;
         state.nextTuningRefreshTick = player.getServerWorld().getTime() + 20;
@@ -299,7 +299,7 @@ public final class StormbringerAbilityManager {
         UUID id = actor.getUuid();
         OWNERS.remove(id);
         MARKS.entrySet().removeIf(entry -> entry.getKey().owner.equals(id) || entry.getKey().target.equals(id));
-        Phase4AbsorptionTracker.clear(actor);
+        MasteryAbsorptionTracker.clear(actor);
     }
 
     public static void clearAll() {
@@ -344,7 +344,7 @@ public final class StormbringerAbilityManager {
     }
 
     private static void damageGroundCurrent(ServerWorld world, ServerPlayerEntity player, ItemStack stack,
-                                            List<LivingEntity> chain, float baseDamage, Phase6AbilityTuning tuning,
+                                            List<LivingEntity> chain, float baseDamage, StormFrostWaterMasteryTuning tuning,
                                             Set<UUID> damaged, Set<UUID> killed) {
         LivingEntity origin = chain.getLast();
         double radius = value(tuning, s("STORMBRINGER_BURST_RADIUS"), s("RADIUS"), 2);
@@ -386,7 +386,7 @@ public final class StormbringerAbilityManager {
     }
 
     private static void applyMark(ServerWorld world, ServerPlayerEntity owner, LivingEntity target,
-                                  Phase6AbilityTuning tuning) {
+                                  StormFrostWaterMasteryTuning tuning) {
         if (!tuning.flag(1 << 21) || !target.isAlive()) return;
         int duration = integer(tuning, s("STORMBRINGER_MARK_DURATION_TICKS"),
                 s("STATUS_DURATION_TICKS"), 80);
@@ -405,7 +405,7 @@ public final class StormbringerAbilityManager {
         return true;
     }
 
-    private static void recordSpentCharges(ServerPlayerEntity player, Phase6AbilityTuning tuning, int spent) {
+    private static void recordSpentCharges(ServerPlayerEntity player, StormFrostWaterMasteryTuning tuning, int spent) {
         OwnerState state = ownerState(player);
         long now = player.getServerWorld().getTime();
         int window = integer(tuning, s("STORMBRINGER_RHYTHM_WINDOW_TICKS"), s("LOCKOUT_TICKS"), 100);
@@ -420,16 +420,16 @@ public final class StormbringerAbilityManager {
         }
     }
 
-    private static Phase6AbilityTuning resolveChainTuning(ServerPlayerEntity player, ItemStack stack,
+    private static StormFrostWaterMasteryTuning resolveChainTuning(ServerPlayerEntity player, ItemStack stack,
                                                            LivingEntity target) {
-        UniqueAbilityExecution execution = Phase6CombatManager.beginPassive(
-                Phase6UniqueAbilities.STORMBRINGER_CHAIN, player.getServerWorld(), stack, player, target);
+        UniqueAbilityExecution execution = StormFrostWaterMasteryCombatManager.beginPassive(
+                StormFrostWaterMasteryAbilities.STORMBRINGER_CHAIN, player.getServerWorld(), stack, player, target);
         try {
-            Phase6AbilityTuning tuning = Phase6UniqueAbilities.tuning(execution);
+            StormFrostWaterMasteryTuning tuning = StormFrostWaterMasteryAbilities.tuning(execution);
             observeTuning(player, tuning);
             return tuning;
         } finally {
-            UniqueAbilityApi.finish(execution, Phase6UniqueAbilities.FINISH, 0);
+            UniqueAbilityApi.finish(execution, StormFrostWaterMasteryAbilities.FINISH, 0);
         }
     }
 
@@ -458,24 +458,24 @@ public final class StormbringerAbilityManager {
         return normalized;
     }
 
-    private static int chargeCap(Phase6AbilityTuning tuning) {
+    private static int chargeCap(StormFrostWaterMasteryTuning tuning) {
         return integer(tuning, s("STORMBRINGER_CHARGE_CAP"), s("CHARGE_CAP"),
                 Math.max(1, Config.uniqueEffects.stormbringer.maxStormCharges));
     }
 
-    private static double value(Phase6AbilityTuning tuning, Phase6AbilityTuning.Setting scoped,
-                                Phase6AbilityTuning.Setting generic, double fallback) {
+    private static double value(StormFrostWaterMasteryTuning tuning, StormFrostWaterMasteryTuning.Setting scoped,
+                                StormFrostWaterMasteryTuning.Setting generic, double fallback) {
         if (tuning.has(scoped)) return tuning.get(scoped, fallback);
         return generic != null ? tuning.get(generic, fallback) : fallback;
     }
 
-    private static int integer(Phase6AbilityTuning tuning, Phase6AbilityTuning.Setting scoped,
-                               Phase6AbilityTuning.Setting generic, int fallback) {
+    private static int integer(StormFrostWaterMasteryTuning tuning, StormFrostWaterMasteryTuning.Setting scoped,
+                               StormFrostWaterMasteryTuning.Setting generic, int fallback) {
         return (int) Math.round(value(tuning, scoped, generic, fallback));
     }
 
-    private static Phase6AbilityTuning.Setting s(String name) {
-        return Phase6AbilityTuning.Setting.valueOf(name);
+    private static StormFrostWaterMasteryTuning.Setting s(String name) {
+        return StormFrostWaterMasteryTuning.Setting.valueOf(name);
     }
 
     private record MarkKey(UUID owner, UUID target) {
@@ -493,7 +493,7 @@ public final class StormbringerAbilityManager {
         private long nextTuningRefreshTick = Long.MIN_VALUE;
         private long lastCombatTick = Long.MIN_VALUE;
         private long lastAttemptTick = Long.MIN_VALUE;
-        private Phase6AbilityTuning tuning;
+        private StormFrostWaterMasteryTuning tuning;
         private final Deque<Long> spentAt = new ArrayDeque<>();
 
         private OwnerState(RegistryKey<World> world) {

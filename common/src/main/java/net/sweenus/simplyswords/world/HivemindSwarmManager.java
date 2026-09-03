@@ -18,8 +18,8 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
-import net.sweenus.simplyswords.api.ability.Phase7AbilityTuning;
-import net.sweenus.simplyswords.api.ability.Phase7UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.NatureSwarmMasteryTuning;
+import net.sweenus.simplyswords.api.ability.NatureSwarmMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityPhase;
@@ -74,14 +74,14 @@ public final class HivemindSwarmManager {
 
     public static boolean activate(WeaponAbilityContext context) {
         if (context == null || context.actor() == null || !context.actor().isAlive()) return false;
-        UniqueAbilityExecution execution = Phase7CombatManager.beginActive(
-                Phase7UniqueAbilities.HIVEHEART_SWARM, context, Config.uniqueEffects.hiveheart.activeCooldown);
-        Phase7AbilityTuning tuning = Phase7UniqueAbilities.tuning(execution);
+        UniqueAbilityExecution execution = NatureSwarmMasteryCombatManager.beginActive(
+                NatureSwarmMasteryAbilities.HIVEHEART_SWARM, context, Config.uniqueEffects.hiveheart.activeCooldown);
+        NatureSwarmMasteryTuning tuning = NatureSwarmMasteryAbilities.tuning(execution);
         boolean spawned = activate(context.world(), context.actor(), getStingDamage(context.actor()), tuning, execution);
         if (spawned && tuning.flag(1 << 18) && !tuning.flag(1 << 26)) {
-            int absorption = tuning.integer(Phase7AbilityTuning.Setting.HIVE_WARD_ABSORPTION, 4);
-            Phase4AbsorptionTracker.grant(context.actor(), absorption,
-                    tuning.integer(Phase7AbilityTuning.Setting.HIVE_WARD_DURATION_TICKS, 80), absorption);
+            int absorption = tuning.integer(NatureSwarmMasteryTuning.Setting.HIVE_WARD_ABSORPTION, 4);
+            MasteryAbsorptionTracker.grant(context.actor(), absorption,
+                    tuning.integer(NatureSwarmMasteryTuning.Setting.HIVE_WARD_DURATION_TICKS, 80), absorption);
         }
         if (!spawned) UniqueAbilityApi.cancel(execution);
         return spawned;
@@ -135,11 +135,11 @@ public final class HivemindSwarmManager {
     }
 
     private static void activate(ServerWorld world, LivingEntity actor, float stingDamage) {
-        activate(world, actor, stingDamage, Phase7AbilityTuning.EMPTY, null);
+        activate(world, actor, stingDamage, NatureSwarmMasteryTuning.EMPTY, null);
     }
 
     private static boolean activate(ServerWorld world, LivingEntity actor, float stingDamage,
-                                    Phase7AbilityTuning tuning, UniqueAbilityExecution execution) {
+                                    NatureSwarmMasteryTuning tuning, UniqueAbilityExecution execution) {
         long now = world.getTime();
         int beeCount = swarmCount(Config.uniqueEffects.hiveheart.swarmBeeCount, tuning);
         if (beeCount <= 0 || actor == null || !actor.isAlive()) {
@@ -148,10 +148,10 @@ public final class HivemindSwarmManager {
         int stings = swarmStings(Config.uniqueEffects.hiveheart.stingsPerBee, tuning);
         long expiryTick = now + swarmDuration(Config.uniqueEffects.hiveheart.swarmLifetime, tuning);
         double radius = swarmRadius(Config.uniqueEffects.hiveheart.swarmRadius, tuning);
-        int interval = tuning.integer(Phase7AbilityTuning.Setting.HIVE_SWARM_STING_INTERVAL_TICKS,
+        int interval = tuning.integer(NatureSwarmMasteryTuning.Setting.HIVE_SWARM_STING_INTERVAL_TICKS,
                 Config.uniqueEffects.hiveheart.stingIntervalTicks);
         int slow = Math.max(0, Config.uniqueEffects.hiveheart.maxSlowAmplifier + tuning.integer(
-                Phase7AbilityTuning.Setting.HIVE_SWARM_SLOW_AMPLIFIER_BONUS, 0));
+                NatureSwarmMasteryTuning.Setting.HIVE_SWARM_SLOW_AMPLIFIER_BONUS, 0));
         stingDamage *= (float) swarmDamageMultiplier(tuning);
         int spawned = 0;
 
@@ -173,32 +173,32 @@ public final class HivemindSwarmManager {
             bee.setMasterySwarmRadius(radius);
             bee.setMasteryStingInterval(interval);
             bee.setMasterySlowAmplifier(slow);
-            bee.setMasteryMode(tuning.integer(Phase7AbilityTuning.Setting.MODE, 0));
+            bee.setMasteryMode(tuning.integer(NatureSwarmMasteryTuning.Setting.MODE, 0));
             bee.setMasteryGuardDrone(tuning.flag(1 << 19) && !tuning.flag(1 << 26) && i == 0);
-            bee.setMasterySearchCap(tuning.integer(Phase7AbilityTuning.Setting.HIVE_SWARM_SEARCH_CAP, 0));
+            bee.setMasterySearchCap(tuning.integer(NatureSwarmMasteryTuning.Setting.HIVE_SWARM_SEARCH_CAP, 0));
             bee.configureMasterySwarmCombat(
-                    tuning.integer(Phase7AbilityTuning.Setting.HIVE_FOCUS_REQUIRED_STINGS, 0),
-                    tuning.get(Phase7AbilityTuning.Setting.HIVE_FOCUS_DAMAGE_MULTIPLIER, 1),
-                    tuning.integer(Phase7AbilityTuning.Setting.HIVE_FOCUS_DURATION_TICKS, 0),
-                    tuning.get(Phase7AbilityTuning.Setting.HIVE_GUARD_RANGE, 0),
-                    tuning.get(Phase7AbilityTuning.Setting.HIVE_GUARD_INCOMING_MULTIPLIER, 1),
-                    tuning.integer(Phase7AbilityTuning.Setting.HIVE_GUARD_LOCKOUT_TICKS, 0),
-                    tuning.get(Phase7AbilityTuning.Setting.HIVE_WARNING_RADIUS, 0),
-                    tuning.integer(Phase7AbilityTuning.Setting.HIVE_WARNING_DURATION_TICKS, 0),
-                    tuning.integer(Phase7AbilityTuning.Setting.HIVE_WARNING_LOCKOUT_TICKS, 0),
-                    tuning.get(Phase7AbilityTuning.Setting.HIVE_RETORT_DAMAGE_MULTIPLIER, 0),
-                    tuning.integer(Phase7AbilityTuning.Setting.HIVE_RETORT_LOCKOUT_TICKS, 0));
+                    tuning.integer(NatureSwarmMasteryTuning.Setting.HIVE_FOCUS_REQUIRED_STINGS, 0),
+                    tuning.get(NatureSwarmMasteryTuning.Setting.HIVE_FOCUS_DAMAGE_MULTIPLIER, 1),
+                    tuning.integer(NatureSwarmMasteryTuning.Setting.HIVE_FOCUS_DURATION_TICKS, 0),
+                    tuning.get(NatureSwarmMasteryTuning.Setting.HIVE_GUARD_RANGE, 0),
+                    tuning.get(NatureSwarmMasteryTuning.Setting.HIVE_GUARD_INCOMING_MULTIPLIER, 1),
+                    tuning.integer(NatureSwarmMasteryTuning.Setting.HIVE_GUARD_LOCKOUT_TICKS, 0),
+                    tuning.get(NatureSwarmMasteryTuning.Setting.HIVE_WARNING_RADIUS, 0),
+                    tuning.integer(NatureSwarmMasteryTuning.Setting.HIVE_WARNING_DURATION_TICKS, 0),
+                    tuning.integer(NatureSwarmMasteryTuning.Setting.HIVE_WARNING_LOCKOUT_TICKS, 0),
+                    tuning.get(NatureSwarmMasteryTuning.Setting.HIVE_RETORT_DAMAGE_MULTIPLIER, 0),
+                    tuning.integer(NatureSwarmMasteryTuning.Setting.HIVE_RETORT_LOCKOUT_TICKS, 0));
             bee.configureMasteryRoyalGuard(
-                    tuning.integer(Phase7AbilityTuning.Setting.HIVE_RALLY_STING_COUNT, 0),
-                    tuning.integer(Phase7AbilityTuning.Setting.HIVE_RALLY_RESISTANCE_TICKS, 0),
-                    tuning.integer(Phase7AbilityTuning.Setting.HIVE_ESCORT_BEE_COUNT, 0),
-                    tuning.get(Phase7AbilityTuning.Setting.HIVE_ESCORT_SPEED_MULTIPLIER, 1),
-                    tuning.get(Phase7AbilityTuning.Setting.HIVE_SAVE_HEALTH_THRESHOLD, 0),
-                    tuning.integer(Phase7AbilityTuning.Setting.HIVE_SAVE_ABSORPTION_PER_BEE, 0),
-                    tuning.integer(Phase7AbilityTuning.Setting.HIVE_SAVE_ABSORPTION_CAP, 0),
-                    tuning.get(Phase7AbilityTuning.Setting.HIVE_PHALANX_RANGE, 0),
-                    tuning.integer(Phase7AbilityTuning.Setting.HIVE_PHALANX_BEE_COUNT, 0),
-                    tuning.integer(Phase7AbilityTuning.Setting.HIVE_PHALANX_RESISTANCE_AMPLIFIER, 0));
+                    tuning.integer(NatureSwarmMasteryTuning.Setting.HIVE_RALLY_STING_COUNT, 0),
+                    tuning.integer(NatureSwarmMasteryTuning.Setting.HIVE_RALLY_RESISTANCE_TICKS, 0),
+                    tuning.integer(NatureSwarmMasteryTuning.Setting.HIVE_ESCORT_BEE_COUNT, 0),
+                    tuning.get(NatureSwarmMasteryTuning.Setting.HIVE_ESCORT_SPEED_MULTIPLIER, 1),
+                    tuning.get(NatureSwarmMasteryTuning.Setting.HIVE_SAVE_HEALTH_THRESHOLD, 0),
+                    tuning.integer(NatureSwarmMasteryTuning.Setting.HIVE_SAVE_ABSORPTION_PER_BEE, 0),
+                    tuning.integer(NatureSwarmMasteryTuning.Setting.HIVE_SAVE_ABSORPTION_CAP, 0),
+                    tuning.get(NatureSwarmMasteryTuning.Setting.HIVE_PHALANX_RANGE, 0),
+                    tuning.integer(NatureSwarmMasteryTuning.Setting.HIVE_PHALANX_BEE_COUNT, 0),
+                    tuning.integer(NatureSwarmMasteryTuning.Setting.HIVE_PHALANX_RESISTANCE_AMPLIFIER, 0));
             bee.setSwarmNextDiveTick(now + randomDiveDelay(world));
             bee.setInvulnerable(true);
             bee.setNoGravity(true);
@@ -210,62 +210,62 @@ public final class HivemindSwarmManager {
         world.spawnParticles(ParticleTypes.FALLING_HONEY, actor.getX(), actor.getBodyY(0.6), actor.getZ(), 18, 0.55, 0.35, 0.55, 0.04);
         if (spawned > 0 && execution != null) {
             UniqueAbilityApi.start(execution);
-            UniqueAbilityApi.emit(execution, UniqueAbilityPhase.HIT, Phase7UniqueAbilities.PULSE,
+            UniqueAbilityApi.emit(execution, UniqueAbilityPhase.HIT, NatureSwarmMasteryAbilities.PULSE,
                     null, spawned, stingDamage);
         }
         return spawned > 0;
     }
 
-    static int swarmCount(int configuredCount, Phase7AbilityTuning tuning) {
+    static int swarmCount(int configuredCount, NatureSwarmMasteryTuning tuning) {
         int count = Math.max(0, configuredCount + tuning.integer(
-                Phase7AbilityTuning.Setting.HIVE_SWARM_COUNT_BONUS, 0));
-        int cap = tuning.integer(Phase7AbilityTuning.Setting.HIVE_SWARM_COUNT_CAP, 0);
+                NatureSwarmMasteryTuning.Setting.HIVE_SWARM_COUNT_BONUS, 0));
+        int cap = tuning.integer(NatureSwarmMasteryTuning.Setting.HIVE_SWARM_COUNT_CAP, 0);
         if (cap > 0) count = Math.min(count, cap);
         if (tuning.flag(1 << 16)) count = tuning.integer(
-                Phase7AbilityTuning.Setting.HIVE_CLOUD_COUNT, count);
+                NatureSwarmMasteryTuning.Setting.HIVE_CLOUD_COUNT, count);
         if (tuning.flag(1 << 17)) count = tuning.integer(
-                Phase7AbilityTuning.Setting.HIVE_HUNT_COUNT, count);
+                NatureSwarmMasteryTuning.Setting.HIVE_HUNT_COUNT, count);
         return Math.max(0, count);
     }
 
-    static int swarmDuration(int configuredDuration, Phase7AbilityTuning tuning) {
+    static int swarmDuration(int configuredDuration, NatureSwarmMasteryTuning tuning) {
         double duration = Math.max(20, configuredDuration + tuning.integer(
-                Phase7AbilityTuning.Setting.HIVE_SWARM_DURATION_BONUS_TICKS, 0));
+                NatureSwarmMasteryTuning.Setting.HIVE_SWARM_DURATION_BONUS_TICKS, 0));
         if (tuning.flag(1 << 16)) duration *= tuning.get(
-                Phase7AbilityTuning.Setting.HIVE_CLOUD_DURATION_MULTIPLIER, 1);
+                NatureSwarmMasteryTuning.Setting.HIVE_CLOUD_DURATION_MULTIPLIER, 1);
         if (tuning.flag(1 << 17)) duration = tuning.integer(
-                Phase7AbilityTuning.Setting.HIVE_HUNT_DURATION_TICKS, (int) Math.round(duration));
+                NatureSwarmMasteryTuning.Setting.HIVE_HUNT_DURATION_TICKS, (int) Math.round(duration));
         return Math.max(20, (int) Math.round(duration));
     }
 
-    static int swarmStings(int configuredStings, Phase7AbilityTuning tuning) {
-        int stings = tuning.integer(Phase7AbilityTuning.Setting.HIVE_SWARM_STING_COUNT,
+    static int swarmStings(int configuredStings, NatureSwarmMasteryTuning tuning) {
+        int stings = tuning.integer(NatureSwarmMasteryTuning.Setting.HIVE_SWARM_STING_COUNT,
                 configuredStings);
         if (tuning.flag(1 << 17)) stings = tuning.integer(
-                Phase7AbilityTuning.Setting.HIVE_HUNT_STING_COUNT, stings);
+                NatureSwarmMasteryTuning.Setting.HIVE_HUNT_STING_COUNT, stings);
         return Math.max(1, stings);
     }
 
-    static double swarmRadius(double configuredRadius, Phase7AbilityTuning tuning) {
+    static double swarmRadius(double configuredRadius, NatureSwarmMasteryTuning tuning) {
         double radius = Math.max(1, configuredRadius + tuning.get(
-                Phase7AbilityTuning.Setting.HIVE_SWARM_RADIUS_BONUS, 0));
+                NatureSwarmMasteryTuning.Setting.HIVE_SWARM_RADIUS_BONUS, 0));
         if (tuning.flag(1 << 16)) radius = tuning.get(
-                Phase7AbilityTuning.Setting.HIVE_CLOUD_RADIUS, radius);
+                NatureSwarmMasteryTuning.Setting.HIVE_CLOUD_RADIUS, radius);
         if (tuning.flag(1 << 17)) radius = tuning.get(
-                Phase7AbilityTuning.Setting.HIVE_HUNT_RADIUS, radius);
+                NatureSwarmMasteryTuning.Setting.HIVE_HUNT_RADIUS, radius);
         if (tuning.flag(1 << 26)) radius = tuning.get(
-                Phase7AbilityTuning.Setting.HIVE_VENGEFUL_RANGE, radius);
+                NatureSwarmMasteryTuning.Setting.HIVE_VENGEFUL_RANGE, radius);
         return Math.max(1, radius);
     }
 
-    static double swarmDamageMultiplier(Phase7AbilityTuning tuning) {
+    static double swarmDamageMultiplier(NatureSwarmMasteryTuning tuning) {
         double multiplier = 1;
         if (tuning.flag(1 << 16)) multiplier *= tuning.get(
-                Phase7AbilityTuning.Setting.HIVE_CLOUD_DAMAGE_MULTIPLIER, 1);
+                NatureSwarmMasteryTuning.Setting.HIVE_CLOUD_DAMAGE_MULTIPLIER, 1);
         if (tuning.flag(1 << 17)) multiplier *= tuning.get(
-                Phase7AbilityTuning.Setting.HIVE_HUNT_DAMAGE_MULTIPLIER, 1);
+                NatureSwarmMasteryTuning.Setting.HIVE_HUNT_DAMAGE_MULTIPLIER, 1);
         if (tuning.flag(1 << 26)) multiplier *= tuning.get(
-                Phase7AbilityTuning.Setting.HIVE_VENGEFUL_DAMAGE_MULTIPLIER, 1);
+                NatureSwarmMasteryTuning.Setting.HIVE_VENGEFUL_DAMAGE_MULTIPLIER, 1);
         return multiplier;
     }
 
@@ -412,7 +412,7 @@ public final class HivemindSwarmManager {
             if ((mode & (1 << 26)) != 0) continue;
             SimplySwordsBeeEntity sample = entry.getValue().getFirst();
             if ((mode & (1 << 23)) != 0 && entry.getValue().size() >= sample.getMasteryEscortCount()) {
-                Phase7CombatManager.applyHiveEscort(world, owner, 15,
+                NatureSwarmMasteryCombatManager.applyHiveEscort(world, owner, 15,
                         sample.getMasteryEscortSpeedMultiplier());
             }
             if ((mode & (1 << 25)) != 0 && entry.getValue().size() >= sample.getMasteryPhalanxCount()) {

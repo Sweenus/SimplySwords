@@ -23,7 +23,7 @@ import net.minecraft.world.RaycastContext;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.api.SpellScalingProfile;
-import net.sweenus.simplyswords.api.ability.Phase2UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.AbyssalSpectralMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.config.Config;
@@ -266,7 +266,7 @@ public final class WraithmawCutlassEntity extends Entity {
         if (abilityExecution != null) {
             UniqueAbilityApi.emit(abilityExecution,
                     net.sweenus.simplyswords.api.ability.UniqueAbilityPhase.HIT,
-                    Phase2UniqueAbilities.RECOVER, null, 1, 0.0);
+                    AbyssalSpectralMasteryAbilities.RECOVER, null, 1, 0.0);
         }
         if (!tuning.pullsOnRecovery()) {
             return;
@@ -557,13 +557,13 @@ public final class WraithmawCutlassEntity extends Entity {
     private void recordHit(ServerWorld world, LivingEntity target, float amount) {
         if (abilityExecution != null) UniqueAbilityApi.emit(abilityExecution,
                 net.sweenus.simplyswords.api.ability.UniqueAbilityPhase.HIT,
-                Phase2UniqueAbilities.HIT, target, 1, amount);
+                AbyssalSpectralMasteryAbilities.HIT, target, 1, amount);
         if (target.isAlive()) {
             return;
         }
         if (abilityExecution != null) UniqueAbilityApi.emit(abilityExecution,
                 net.sweenus.simplyswords.api.ability.UniqueAbilityPhase.HIT,
-                Phase2UniqueAbilities.KILL, target, 1, amount);
+                AbyssalSpectralMasteryAbilities.KILL, target, 1, amount);
         if (tuning.extendsGloamOnKill()) {
             GloamStainManager.extendPatches(world, ownerUuid, target.getPos(), tuning.burialRange(),
                     tuning.stainExtensionTicks(), tuning.extraDurationCapTicks());

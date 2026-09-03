@@ -31,7 +31,7 @@ import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
 import net.sweenus.simplyswords.world.FlamewindVisualManager;
-import net.sweenus.simplyswords.world.Phase5FlamewindManager;
+import net.sweenus.simplyswords.world.FlamewindMasteryManager;
 
 import java.util.Comparator;
 import java.util.List;
@@ -74,13 +74,13 @@ public class FlamewindSwordItem extends UniqueSwordItem implements UniqueWeaponA
                 && context.actor() != null
                 && context.actor().isAlive()
                 && context.stack().getDamage() < context.stack().getMaxDamage() - 1
-                && (getContextTarget(context) != null || Phase5FlamewindManager.hasOwned(context.actor()));
+                && (getContextTarget(context) != null || FlamewindMasteryManager.hasOwned(context.actor()));
     }
 
     @Override
     public boolean activate(WeaponAbilityContext context) {
         LivingEntity target = getContextTarget(context);
-        return Phase5FlamewindManager.activate(context, target);
+        return FlamewindMasteryManager.activate(context, target);
     }
 
     @Override

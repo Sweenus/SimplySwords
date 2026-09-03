@@ -23,8 +23,8 @@ import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
-import net.sweenus.simplyswords.api.ability.Phase9AbilityTuning;
-import net.sweenus.simplyswords.api.ability.Phase9UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.ArcaneCosmicMasteryTuning;
+import net.sweenus.simplyswords.api.ability.ArcaneCosmicMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
@@ -37,7 +37,7 @@ import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
 import net.sweenus.simplyswords.world.ArcanethystAssaultManager;
-import net.sweenus.simplyswords.world.Phase9CombatManager;
+import net.sweenus.simplyswords.world.ArcaneCosmicMasteryCombatManager;
 
 import java.util.List;
 
@@ -54,22 +54,22 @@ public class ArcanethystSwordItem extends UniqueSwordItem implements TwoHandedWe
         if (!attacker.getWorld().isClient()) {
             HelperMethods.playHitSounds(attacker, target);
             ServerWorld serverWorld = (ServerWorld) attacker.getWorld();
-            UniqueAbilityExecution execution = Phase9CombatManager.beginPassive(
-                    Phase9UniqueAbilities.ARCANETHYST_SPARK, serverWorld, stack, attacker, target,
+            UniqueAbilityExecution execution = ArcaneCosmicMasteryCombatManager.beginPassive(
+                    ArcaneCosmicMasteryAbilities.ARCANETHYST_SPARK, serverWorld, stack, attacker, target,
                     ArcanethystAssaultManager.sparkBase());
-            Phase9AbilityTuning tuning = Phase9UniqueAbilities.tuning(execution);
+            ArcaneCosmicMasteryTuning tuning = ArcaneCosmicMasteryAbilities.tuning(execution);
             ArcanethystAssaultManager.markTarget(serverWorld, attacker, target, tuning);
-            int chance = tuning.integer(Phase9AbilityTuning.Setting.CHANCE,
+            int chance = tuning.integer(ArcaneCosmicMasteryTuning.Setting.CHANCE,
                     Config.uniqueEffects.arcanethyst.chance);
             if (attacker.getRandom().nextInt(100) < chance) {
-                int duration = tuning.integer(Phase9AbilityTuning.Setting.STATUS_DURATION_TICKS, 60);
-                int amplifier = tuning.integer(Phase9AbilityTuning.Setting.STATUS_AMPLIFIER, 1);
+                int duration = tuning.integer(ArcaneCosmicMasteryTuning.Setting.STATUS_DURATION_TICKS, 60);
+                int amplifier = tuning.integer(ArcaneCosmicMasteryTuning.Setting.STATUS_AMPLIFIER, 1);
                 target.addStatusEffect(new StatusEffectInstance(StatusEffects.LEVITATION, duration, amplifier), attacker);
                 ArcanethystAssaultManager.onPassiveProc(serverWorld, attacker, target, stack, tuning);
                 attacker.getWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_BOW_SHOOT_IMPACT_01.get(),
                         attacker.getSoundCategory(), 0.5f, 1.2f);
             }
-            Phase9CombatManager.finish(execution, 1);
+            ArcaneCosmicMasteryCombatManager.finish(execution, 1);
         }
         return super.postHit(stack, target, attacker);
     }
@@ -84,16 +84,16 @@ public class ArcanethystSwordItem extends UniqueSwordItem implements TwoHandedWe
         if (!canActivate(context)) {
             return false;
         }
-        UniqueAbilityExecution execution = Phase9CombatManager.beginActive(
-                Phase9UniqueAbilities.ARCANETHYST_SUSPENSION, context, Config.uniqueEffects.arcanethyst.cooldown,
+        UniqueAbilityExecution execution = ArcaneCosmicMasteryCombatManager.beginActive(
+                ArcaneCosmicMasteryAbilities.ARCANETHYST_SUSPENSION, context, Config.uniqueEffects.arcanethyst.cooldown,
                 ArcanethystAssaultManager.suspensionBase());
-        UniqueAbilityExecution sparkExecution = Phase9CombatManager.beginPassive(
-                Phase9UniqueAbilities.ARCANETHYST_SPARK, context.world(), context.stack(),
+        UniqueAbilityExecution sparkExecution = ArcaneCosmicMasteryCombatManager.beginPassive(
+                ArcaneCosmicMasteryAbilities.ARCANETHYST_SPARK, context.world(), context.stack(),
                 context.actor(), null, ArcanethystAssaultManager.sparkBase());
-        Phase9AbilityTuning spark = Phase9UniqueAbilities.tuning(sparkExecution);
-        Phase9CombatManager.finish(sparkExecution, 0);
+        ArcaneCosmicMasteryTuning spark = ArcaneCosmicMasteryAbilities.tuning(sparkExecution);
+        ArcaneCosmicMasteryCombatManager.finish(sparkExecution, 0);
         activateArcanethyst(context.world(), context.actor(), context.stack(),
-                Phase9UniqueAbilities.tuning(execution), spark, execution);
+                ArcaneCosmicMasteryAbilities.tuning(execution), spark, execution);
         return true;
     }
 
@@ -103,15 +103,15 @@ public class ArcanethystSwordItem extends UniqueSwordItem implements TwoHandedWe
     }
 
     private static void activateArcanethyst(ServerWorld serverWorld, LivingEntity actor, ItemStack stack,
-                                            Phase9AbilityTuning suspension, Phase9AbilityTuning spark,
+                                            ArcaneCosmicMasteryTuning suspension, ArcaneCosmicMasteryTuning spark,
                                             UniqueAbilityExecution execution) {
-        double radius = suspension.get(Phase9AbilityTuning.Setting.RADIUS,
+        double radius = suspension.get(ArcaneCosmicMasteryTuning.Setting.RADIUS,
                 Config.uniqueEffects.arcanethyst.radius);
         float abilityDamage = HelperMethods.abilityScaledDamage("arcane", actor, stack,
                 Config.uniqueEffects.arcanethyst.damageScaling
-                        * (float) spark.get(Phase9AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1),
+                        * (float) spark.get(ArcaneCosmicMasteryTuning.Setting.DAMAGE_MULTIPLIER, 1),
                 Config.uniqueEffects.arcanethyst.spellScaling
-                        * (float) spark.get(Phase9AbilityTuning.Setting.SPELL_MULTIPLIER, 1));
+                        * (float) spark.get(ArcaneCosmicMasteryTuning.Setting.SPELL_MULTIPLIER, 1));
         ArcanethystAssaultManager.start(serverWorld, actor, stack, radius, abilityDamage, suspension, execution);
     }
 

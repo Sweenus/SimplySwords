@@ -20,8 +20,8 @@ import net.sweenus.simplyswords.entity.WraithmawCutlassEntity;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.api.SpellScalingProfile;
-import net.sweenus.simplyswords.api.ability.Phase2AbilityTuning;
-import net.sweenus.simplyswords.api.ability.Phase2UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.AbyssalSpectralMasteryTuning;
+import net.sweenus.simplyswords.api.ability.AbyssalSpectralMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityContext;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
@@ -69,40 +69,40 @@ public final class WraithmawAbilityManager {
         }
         ServerWorld world = context.world();
         LivingEntity actor = context.actor();
-        UniqueAbilityExecution execution = UniqueAbilityApi.begin(Phase2UniqueAbilities.WRAITHMAW_MUSTER,
+        UniqueAbilityExecution execution = UniqueAbilityApi.begin(AbyssalSpectralMasteryAbilities.WRAITHMAW_MUSTER,
                 UniqueAbilityContext.active(context), builder -> builder
-                        .set(Phase2UniqueAbilities.COOLDOWN_TICKS, Config.uniqueEffects.wraithmaw.cooldown)
-                        .set(Phase2UniqueAbilities.TUNING, Phase2AbilityTuning.EMPTY
-                                .with(Phase2AbilityTuning.Setting.COOLDOWN_TICKS, Config.uniqueEffects.wraithmaw.cooldown)
-                                .with(Phase2AbilityTuning.Setting.SPEAR_COUNT, Config.uniqueEffects.wraithmaw.cutlassCount)
-                                .with(Phase2AbilityTuning.Setting.RADIUS, Config.uniqueEffects.wraithmaw.stormRadius)
-                                .with(Phase2AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1)
-                                .with(Phase2AbilityTuning.Setting.MATERIALIZE_TICKS, 12)
-                                .with(Phase2AbilityTuning.Setting.FALL_SPEED, 1.25)
-                                .with(Phase2AbilityTuning.Setting.ORBIT_CAP, Config.uniqueEffects.wraithmaw.maxRecovered)
-                                .with(Phase2AbilityTuning.Setting.RECOVERY_RADIUS, 1.5)
-                                .with(Phase2AbilityTuning.Setting.ORBIT_DURATION_TICKS, Config.uniqueEffects.wraithmaw.recoveredDuration)
-                                .with(Phase2AbilityTuning.Setting.LAUNCH_SPEED, Config.uniqueEffects.wraithmaw.launchSpeed)
-                                .with(Phase2AbilityTuning.Setting.LAUNCH_RANGE, Config.uniqueEffects.wraithmaw.launchRange)
-                                .with(Phase2AbilityTuning.Setting.PROJECTILE_LIFETIME, 80)
-                                .with(Phase2AbilityTuning.Setting.HOMING_RANGE, Config.uniqueEffects.wraithmaw.homingRange)
-                                .with(Phase2AbilityTuning.Setting.HOMING_TURN_DEGREES, Config.uniqueEffects.wraithmaw.homingTurnRate)
-                                .with(Phase2AbilityTuning.Setting.STAIN_RADIUS, Config.uniqueEffects.wraithmaw.stainRadius)
-                                .with(Phase2AbilityTuning.Setting.STAIN_DURATION_TICKS, Config.uniqueEffects.wraithmaw.stainDuration)
-                                .with(Phase2AbilityTuning.Setting.EMBEDDED_DURATION_TICKS, Config.uniqueEffects.wraithmaw.embeddedDuration)));
-        Phase2AbilityTuning tuning = Phase2UniqueAbilities.tuning(execution);
+                        .set(AbyssalSpectralMasteryAbilities.COOLDOWN_TICKS, Config.uniqueEffects.wraithmaw.cooldown)
+                        .set(AbyssalSpectralMasteryAbilities.TUNING, AbyssalSpectralMasteryTuning.EMPTY
+                                .with(AbyssalSpectralMasteryTuning.Setting.COOLDOWN_TICKS, Config.uniqueEffects.wraithmaw.cooldown)
+                                .with(AbyssalSpectralMasteryTuning.Setting.SPEAR_COUNT, Config.uniqueEffects.wraithmaw.cutlassCount)
+                                .with(AbyssalSpectralMasteryTuning.Setting.RADIUS, Config.uniqueEffects.wraithmaw.stormRadius)
+                                .with(AbyssalSpectralMasteryTuning.Setting.DAMAGE_MULTIPLIER, 1)
+                                .with(AbyssalSpectralMasteryTuning.Setting.MATERIALIZE_TICKS, 12)
+                                .with(AbyssalSpectralMasteryTuning.Setting.FALL_SPEED, 1.25)
+                                .with(AbyssalSpectralMasteryTuning.Setting.ORBIT_CAP, Config.uniqueEffects.wraithmaw.maxRecovered)
+                                .with(AbyssalSpectralMasteryTuning.Setting.RECOVERY_RADIUS, 1.5)
+                                .with(AbyssalSpectralMasteryTuning.Setting.ORBIT_DURATION_TICKS, Config.uniqueEffects.wraithmaw.recoveredDuration)
+                                .with(AbyssalSpectralMasteryTuning.Setting.LAUNCH_SPEED, Config.uniqueEffects.wraithmaw.launchSpeed)
+                                .with(AbyssalSpectralMasteryTuning.Setting.LAUNCH_RANGE, Config.uniqueEffects.wraithmaw.launchRange)
+                                .with(AbyssalSpectralMasteryTuning.Setting.PROJECTILE_LIFETIME, 80)
+                                .with(AbyssalSpectralMasteryTuning.Setting.HOMING_RANGE, Config.uniqueEffects.wraithmaw.homingRange)
+                                .with(AbyssalSpectralMasteryTuning.Setting.HOMING_TURN_DEGREES, Config.uniqueEffects.wraithmaw.homingTurnRate)
+                                .with(AbyssalSpectralMasteryTuning.Setting.STAIN_RADIUS, Config.uniqueEffects.wraithmaw.stainRadius)
+                                .with(AbyssalSpectralMasteryTuning.Setting.STAIN_DURATION_TICKS, Config.uniqueEffects.wraithmaw.stainDuration)
+                                .with(AbyssalSpectralMasteryTuning.Setting.EMBEDDED_DURATION_TICKS, Config.uniqueEffects.wraithmaw.embeddedDuration)));
+        AbyssalSpectralMasteryTuning tuning = AbyssalSpectralMasteryAbilities.tuning(execution);
         WraithmawTuningSnapshot castTuning = WraithmawTuningSnapshot.from(execution);
         boolean singleTarget = castTuning.hasMode(WraithmawTuningSnapshot.MODE_SINGLE_TARGET);
         Vec3d origin = actor.getPos();
-        int count = Math.clamp(tuning.integer(Phase2AbilityTuning.Setting.SPEAR_COUNT,
+        int count = Math.clamp(tuning.integer(AbyssalSpectralMasteryTuning.Setting.SPEAR_COUNT,
                 Config.uniqueEffects.wraithmaw.cutlassCount), 1, 32);
-        double radius = Math.max(0.5, tuning.get(Phase2AbilityTuning.Setting.RADIUS,
+        double radius = Math.max(0.5, tuning.get(AbyssalSpectralMasteryTuning.Setting.RADIUS,
                 Config.uniqueEffects.wraithmaw.stormRadius));
         ItemStack snapshot = context.stack().copy();
         float damage = Math.max(1.0F, HelperMethods.abilityScaledDamage(SpellScalingProfile.SOUL, actor, snapshot,
                 Config.uniqueEffects.wraithmaw.cutlassDamageScaling,
                 Config.uniqueEffects.wraithmaw.cutlassSpellScaling))
-                * (float) tuning.get(Phase2AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1);
+                * (float) tuning.get(AbyssalSpectralMasteryTuning.Setting.DAMAGE_MULTIPLIER, 1);
         for (int index = 0; index < count; index++) {
             double fraction = Math.sqrt((index + 0.5) / count);
             double angle = index * GOLDEN_ANGLE + actor.getRandom().nextDouble() * 0.28;

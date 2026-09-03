@@ -12,8 +12,8 @@ import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.WhisperwindSlashVisualEntity;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
-import net.sweenus.simplyswords.api.ability.Phase3AbilityTuning;
-import net.sweenus.simplyswords.api.ability.Phase3UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.StormSoulMasteryTuning;
+import net.sweenus.simplyswords.api.ability.StormSoulMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityPhase;
@@ -43,19 +43,19 @@ public final class WhisperwindVisualManager {
 
         ACTIVE_DASHES.computeIfAbsent(world, ignored -> new HashMap<>())
                 .put(user.getUuid(), new ActiveDash(user.getPos(), user.getPos(), stack.copy(), null,
-                        Phase3AbilityTuning.EMPTY));
+                        StormSoulMasteryTuning.EMPTY));
     }
 
     public static void startDash(ServerWorld world, LivingEntity user, ItemStack stack,
-                                 UniqueAbilityExecution execution, Phase3AbilityTuning tuning) {
+                                 UniqueAbilityExecution execution, StormSoulMasteryTuning tuning) {
         ACTIVE_DASHES.computeIfAbsent(world, ignored -> new HashMap<>())
                 .put(user.getUuid(), new ActiveDash(user.getPos(), user.getPos(), stack.copy(), execution, tuning));
     }
 
-    public static Phase3AbilityTuning dashTuning(ServerWorld world, LivingEntity user) {
+    public static StormSoulMasteryTuning dashTuning(ServerWorld world, LivingEntity user) {
         Map<UUID, ActiveDash> dashes = ACTIVE_DASHES.get(world);
         ActiveDash dash = dashes == null || user == null ? null : dashes.get(user.getUuid());
-        return dash == null ? Phase3AbilityTuning.EMPTY : dash.tuning;
+        return dash == null ? StormSoulMasteryTuning.EMPTY : dash.tuning;
     }
 
     // Crosswind lengthens the dash once, by how many enemies it swept.
@@ -63,10 +63,10 @@ public final class WhisperwindVisualManager {
         Map<UUID, ActiveDash> dashes = ACTIVE_DASHES.get(world);
         ActiveDash dash = dashes == null || user == null ? null : dashes.get(user.getUuid());
         if (dash == null || dash.extended) return 0;
-        double perTarget = dash.tuning.get(Phase3AbilityTuning.Setting.DASH_EXTENSION_PER_TARGET, 0);
+        double perTarget = dash.tuning.get(StormSoulMasteryTuning.Setting.DASH_EXTENSION_PER_TARGET, 0);
         if (perTarget <= 0) return 0;
         dash.extended = true;
-        double cap = dash.tuning.get(Phase3AbilityTuning.Setting.DASH_EXTENSION_CAP, 0);
+        double cap = dash.tuning.get(StormSoulMasteryTuning.Setting.DASH_EXTENSION_CAP, 0);
         return (int) Math.round(Math.min(cap, dash.targets.size() * perTarget));
     }
 
@@ -79,13 +79,13 @@ public final class WhisperwindVisualManager {
         ActiveDash dash = dashes.get(user.getUuid());
         if (dash == null) {
             dash = new ActiveDash(user.getPos(), user.getPos(), user.getMainHandStack().copy(), null,
-                    Phase3AbilityTuning.EMPTY);
+                    StormSoulMasteryTuning.EMPTY);
             dashes.put(user.getUuid(), dash);
         }
         dash.end = user.getPos();
 
-        double passingCut = dash.tuning.get(Phase3AbilityTuning.Setting.PASSING_CUT_MULTIPLIER, 0);
-        int passingCap = dash.tuning.integer(Phase3AbilityTuning.Setting.PASSING_CUT_TARGET_CAP, 0);
+        double passingCut = dash.tuning.get(StormSoulMasteryTuning.Setting.PASSING_CUT_MULTIPLIER, 0);
+        int passingCap = dash.tuning.integer(StormSoulMasteryTuning.Setting.PASSING_CUT_TARGET_CAP, 0);
         for (Entity entity : entities) {
             if (entity instanceof LivingEntity target && target.isAlive() && EntityPredicates.VALID_LIVING_ENTITY.test(target) && HelperMethods.checkFriendlyFire(target, user)) {
                 if (dash.targets.add(target.getUuid()) && passingCut > 0 && dash.passingCuts < passingCap) {
@@ -116,14 +116,14 @@ public final class WhisperwindVisualManager {
                 SoundRegistry.SWING_SMALL.get(),
                 SoundCategory.PLAYERS, 0.45F, 1.65F + world.random.nextFloat() * 0.12F);
         if (!dash.targets.isEmpty()) {
-            int delay = dash.tuning.integer(Phase3AbilityTuning.Setting.DELAY_TICKS,
+            int delay = dash.tuning.integer(StormSoulMasteryTuning.Setting.DELAY_TICKS,
                     Config.uniqueEffects.whisperwind.delayedDamageDelay);
             long triggerTick = world.getTime() + delay;
             PENDING_STRIKES.computeIfAbsent(world, ignored -> new HashSet<>())
                     .add(new PendingStrike(user.getUuid(), dash.stack.copy(), dash.start, dash.end,
                             new HashSet<>(dash.targets), triggerTick, dash.execution, dash.tuning));
         } else if (dash.execution != null) {
-            UniqueAbilityApi.finish(dash.execution, Phase3UniqueAbilities.FINISH, 0);
+            UniqueAbilityApi.finish(dash.execution, StormSoulMasteryAbilities.FINISH, 0);
         }
         if (dashes.isEmpty()) {
             ACTIVE_DASHES.remove(world);
@@ -131,11 +131,11 @@ public final class WhisperwindVisualManager {
     }
 
     public static void scheduleTargetStrike(ServerWorld world, LivingEntity user, LivingEntity target, ItemStack stack) {
-        scheduleTargetStrike(world, user, target, stack, null, Phase3AbilityTuning.EMPTY);
+        scheduleTargetStrike(world, user, target, stack, null, StormSoulMasteryTuning.EMPTY);
     }
 
     public static void scheduleTargetStrike(ServerWorld world, LivingEntity user, LivingEntity target, ItemStack stack,
-                                            UniqueAbilityExecution execution, Phase3AbilityTuning tuning) {
+                                            UniqueAbilityExecution execution, StormSoulMasteryTuning tuning) {
         if (world == null || user == null || target == null || !user.isAlive()
                 || !target.isAlive() || !HelperMethods.checkAbilityTarget(target, user)) {
             return;
@@ -146,7 +146,7 @@ public final class WhisperwindVisualManager {
         targets.add(target.getUuid());
         PENDING_STRIKES.computeIfAbsent(world, ignored -> new HashSet<>())
                 .add(new PendingStrike(user.getUuid(), stack.copy(), start, end, targets,
-                        world.getTime() + tuning.integer(Phase3AbilityTuning.Setting.DELAY_TICKS,
+                        world.getTime() + tuning.integer(StormSoulMasteryTuning.Setting.DELAY_TICKS,
                                 Config.uniqueEffects.whisperwind.delayedDamageDelay), execution, tuning));
         world.playSound(null, start.x, start.y, start.z, SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_IMPACT_01.get(),
                 SoundCategory.PLAYERS, 0.6F, 1.0F);
@@ -182,11 +182,11 @@ public final class WhisperwindVisualManager {
             return;
         }
 
-        boolean stillWind = strike.tuning.integer(Phase3AbilityTuning.Setting.STILL_WIND_THRESHOLD, 0) > 0
+        boolean stillWind = strike.tuning.integer(StormSoulMasteryTuning.Setting.STILL_WIND_THRESHOLD, 0) > 0
                 && WhisperwindRhythmManager.consumeStillWind(world, source);
-        boolean nearestOnly = strike.tuning.get(Phase3AbilityTuning.Setting.STRIKE_NEAREST_ONLY, 0) >= 1;
-        int targetCap = strike.tuning.has(Phase3AbilityTuning.Setting.STRIKE_TARGET_CAP)
-                ? strike.tuning.integer(Phase3AbilityTuning.Setting.STRIKE_TARGET_CAP, 64) : Integer.MAX_VALUE;
+        boolean nearestOnly = strike.tuning.get(StormSoulMasteryTuning.Setting.STRIKE_NEAREST_ONLY, 0) >= 1;
+        int targetCap = strike.tuning.has(StormSoulMasteryTuning.Setting.STRIKE_TARGET_CAP)
+                ? strike.tuning.integer(StormSoulMasteryTuning.Setting.STRIKE_TARGET_CAP, 64) : Integer.MAX_VALUE;
         if (nearestOnly || stillWind) targetCap = 1;
 
         List<LivingEntity> targets = new ArrayList<>();
@@ -198,16 +198,16 @@ public final class WhisperwindVisualManager {
         }
         targets.sort(Comparator.comparingDouble(target -> target.squaredDistanceTo(strike.end)));
 
-        float multiplier = (float) strike.tuning.get(Phase3AbilityTuning.Setting.STRIKE_DAMAGE_MULTIPLIER, 1);
+        float multiplier = (float) strike.tuning.get(StormSoulMasteryTuning.Setting.STRIKE_DAMAGE_MULTIPLIER, 1);
         if (stillWind) {
-            multiplier *= (float) strike.tuning.get(Phase3AbilityTuning.Setting.STILL_WIND_MULTIPLIER, 1);
+            multiplier *= (float) strike.tuning.get(StormSoulMasteryTuning.Setting.STILL_WIND_MULTIPLIER, 1);
         }
         multiplier *= (float) (1.0 + arrangementBonus(strike, targets.size(), stillWind));
         multiplier *= (float) (1.0 + WhisperwindRhythmManager.tempoBonus(world, source, strike.tuning));
 
         double perTargetBonus = stillWind ? 0
-                : strike.tuning.get(Phase3AbilityTuning.Setting.BOUQUET_PER_TARGET_BONUS, 0);
-        int bouquetCap = strike.tuning.integer(Phase3AbilityTuning.Setting.BOUQUET_TARGET_CAP, 64);
+                : strike.tuning.get(StormSoulMasteryTuning.Setting.BOUQUET_PER_TARGET_BONUS, 0);
+        int bouquetCap = strike.tuning.integer(StormSoulMasteryTuning.Setting.BOUQUET_TARGET_CAP, 64);
         int scalingTargets = Math.min(targets.size(), bouquetCap);
         float damage = HelperMethods.abilityScaledDamage("evocation", source, strike.stack,
                 Config.uniqueEffects.whisperwind.delayedDamageScaling
@@ -217,7 +217,7 @@ public final class WhisperwindVisualManager {
                         + scalingTargets * Config.uniqueEffects.whisperwind.delayedSpellPerTargetScaling
                         * (float) (1.0 + perTargetBonus)) * multiplier;
 
-        int hits = Math.max(1, strike.tuning.integer(Phase3AbilityTuning.Setting.STRIKE_COUNT, 1));
+        int hits = Math.max(1, strike.tuning.integer(StormSoulMasteryTuning.Setting.STRIKE_COUNT, 1));
         int affected = 0;
         int kills = 0;
         for (LivingEntity target : targets) {
@@ -233,24 +233,24 @@ public final class WhisperwindVisualManager {
             }
             if (damaged) {
                 affected++;
-                if (strike.tuning.integer(Phase3AbilityTuning.Setting.WEAKNESS_DURATION_TICKS, 0) > 0) {
+                if (strike.tuning.integer(StormSoulMasteryTuning.Setting.WEAKNESS_DURATION_TICKS, 0) > 0) {
                     target.addStatusEffect(new net.minecraft.entity.effect.StatusEffectInstance(
                             net.minecraft.entity.effect.StatusEffects.WEAKNESS,
-                            strike.tuning.integer(Phase3AbilityTuning.Setting.WEAKNESS_DURATION_TICKS, 0), 0), source);
+                            strike.tuning.integer(StormSoulMasteryTuning.Setting.WEAKNESS_DURATION_TICKS, 0), 0), source);
                 }
                 if (!target.isAlive()) {
                     kills++;
                     secondFlowering(world, source, strike, target, resolved);
                 }
                 if (strike.execution != null) UniqueAbilityApi.emit(strike.execution, UniqueAbilityPhase.HIT,
-                        Phase3UniqueAbilities.HIT, target, 1, resolved);
+                        StormSoulMasteryAbilities.HIT, target, 1, resolved);
             }
             spawnBlossoms(world, target);
             if (affected >= targetCap) break;
         }
         if (kills > 0) WhisperwindRhythmManager.recordStrikeKill(world, source, strike.tuning);
         refundOnWideStrike(source, strike, affected);
-        if (strike.execution != null) UniqueAbilityApi.finish(strike.execution, Phase3UniqueAbilities.FINISH, affected);
+        if (strike.execution != null) UniqueAbilityApi.finish(strike.execution, StormSoulMasteryAbilities.FINISH, affected);
 
         world.playSound(null, strike.end.x, strike.end.y, strike.end.z,
                 SoundRegistry.ELEMENTAL_SWORD_WIND_ATTACK_03.get(),
@@ -262,29 +262,29 @@ public final class WhisperwindVisualManager {
     // Perfect Arrangement: a lone target or a crowd both sharpen the strike.
     private static double arrangementBonus(PendingStrike strike, int targets, boolean stillWind) {
         if (stillWind) return 0;
-        if (targets <= 1) return strike.tuning.get(Phase3AbilityTuning.Setting.SOLO_DAMAGE_BONUS, 0);
-        int threshold = strike.tuning.integer(Phase3AbilityTuning.Setting.CROWD_THRESHOLD, 0);
+        if (targets <= 1) return strike.tuning.get(StormSoulMasteryTuning.Setting.SOLO_DAMAGE_BONUS, 0);
+        int threshold = strike.tuning.integer(StormSoulMasteryTuning.Setting.CROWD_THRESHOLD, 0);
         return threshold > 0 && targets >= threshold
-                ? strike.tuning.get(Phase3AbilityTuning.Setting.CROWD_DAMAGE_BONUS, 0) : 0;
+                ? strike.tuning.get(StormSoulMasteryTuning.Setting.CROWD_DAMAGE_BONUS, 0) : 0;
     }
 
     // Wind Shear: a bounded share of the target's armour is ignored.
-    private static float applyArmorIgnore(LivingEntity target, Phase3AbilityTuning tuning, float damage) {
-        double ratio = tuning.get(Phase3AbilityTuning.Setting.ARMOR_IGNORE_RATIO, 0);
+    private static float applyArmorIgnore(LivingEntity target, StormSoulMasteryTuning tuning, float damage) {
+        double ratio = tuning.get(StormSoulMasteryTuning.Setting.ARMOR_IGNORE_RATIO, 0);
         if (ratio <= 0) return damage;
         double armor = target.getArmor();
         if (armor <= 0) return damage;
-        double ignored = Math.min(tuning.get(Phase3AbilityTuning.Setting.ARMOR_IGNORE_CAP, 0), armor * ratio);
+        double ignored = Math.min(tuning.get(StormSoulMasteryTuning.Setting.ARMOR_IGNORE_CAP, 0), armor * ratio);
         return (float) (damage * (1.0 + ignored * 0.04));
     }
 
     // Second Flowering: a lethal strike spills into nearby caught enemies.
     private static void secondFlowering(ServerWorld world, LivingEntity source, PendingStrike strike,
                                         LivingEntity victim, float dealt) {
-        double multiplier = strike.tuning.get(Phase3AbilityTuning.Setting.FLOWERING_MULTIPLIER, 0);
-        double radius = strike.tuning.get(Phase3AbilityTuning.Setting.FLOWERING_RADIUS, 0);
+        double multiplier = strike.tuning.get(StormSoulMasteryTuning.Setting.FLOWERING_MULTIPLIER, 0);
+        double radius = strike.tuning.get(StormSoulMasteryTuning.Setting.FLOWERING_RADIUS, 0);
         if (multiplier <= 0 || radius <= 0 || dealt <= 0) return;
-        int cap = Math.max(1, strike.tuning.integer(Phase3AbilityTuning.Setting.FLOWERING_TARGET_CAP, 3));
+        int cap = Math.max(1, strike.tuning.integer(StormSoulMasteryTuning.Setting.FLOWERING_TARGET_CAP, 3));
         int splashed = 0;
         var damageSource = world.getDamageSources().indirectMagic(source, source);
         for (LivingEntity nearby : world.getEntitiesByClass(LivingEntity.class,
@@ -301,8 +301,8 @@ public final class WhisperwindVisualManager {
 
     // Wind's Return: a wide strike returns part of the cooldown.
     private static void refundOnWideStrike(LivingEntity source, PendingStrike strike, int affected) {
-        int threshold = strike.tuning.integer(Phase3AbilityTuning.Setting.RETURN_THRESHOLD, 0);
-        int refund = strike.tuning.integer(Phase3AbilityTuning.Setting.RETURN_REFUND_TICKS, 0);
+        int threshold = strike.tuning.integer(StormSoulMasteryTuning.Setting.RETURN_THRESHOLD, 0);
+        int refund = strike.tuning.integer(StormSoulMasteryTuning.Setting.RETURN_REFUND_TICKS, 0);
         if (threshold <= 0 || refund <= 0 || affected < threshold) return;
         net.sweenus.simplyswords.api.SimplySwordsAPI.reduceWeaponCooldown(source, strike.stack,
                 Config.uniqueEffects.whisperwind.cooldown, refund);
@@ -403,11 +403,11 @@ public final class WhisperwindVisualManager {
         private final Set<UUID> targets = new HashSet<>();
         private final ItemStack stack;
         private final UniqueAbilityExecution execution;
-        private final Phase3AbilityTuning tuning;
+        private final StormSoulMasteryTuning tuning;
         private Vec3d end;
 
         private ActiveDash(Vec3d start, Vec3d end, ItemStack stack,
-                           UniqueAbilityExecution execution, Phase3AbilityTuning tuning) {
+                           UniqueAbilityExecution execution, StormSoulMasteryTuning tuning) {
             this.start = start;
             this.end = end;
             this.stack = stack;
@@ -417,6 +417,6 @@ public final class WhisperwindVisualManager {
     }
 
     private record PendingStrike(UUID sourceId, ItemStack stack, Vec3d start, Vec3d end, Set<UUID> targetIds,
-                                 long triggerTick, UniqueAbilityExecution execution, Phase3AbilityTuning tuning) {
+                                 long triggerTick, UniqueAbilityExecution execution, StormSoulMasteryTuning tuning) {
     }
 }

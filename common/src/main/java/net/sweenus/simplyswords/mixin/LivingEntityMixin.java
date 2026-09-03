@@ -35,11 +35,11 @@ import net.sweenus.simplyswords.world.HivemindSwarmManager;
 import net.sweenus.simplyswords.world.MagispearAbilityManager;
 import net.sweenus.simplyswords.world.MoltenEdgeAbilityManager;
 import net.sweenus.simplyswords.world.ObserverStatusEffectSyncManager;
-import net.sweenus.simplyswords.world.Phase4PassiveManager;
-import net.sweenus.simplyswords.world.Phase4LichbladeManager;
-import net.sweenus.simplyswords.world.Phase4StandardManager;
-import net.sweenus.simplyswords.world.Phase7CombatManager;
-import net.sweenus.simplyswords.world.Phase8CombatManager;
+import net.sweenus.simplyswords.world.LongPathFinalFormsMasteryCombatManager;
+import net.sweenus.simplyswords.world.LichbladeMasteryManager;
+import net.sweenus.simplyswords.world.BattleStandardMasteryManager;
+import net.sweenus.simplyswords.world.NatureSwarmMasteryCombatManager;
+import net.sweenus.simplyswords.world.DeathShadowBloodMasteryCombatManager;
 import net.sweenus.simplyswords.world.DreadwhisperAbilityManager;
 import net.sweenus.simplyswords.world.EmberbladeAbilityManager;
 import net.sweenus.simplyswords.world.EmberlashAbilityManager;
@@ -190,7 +190,7 @@ public abstract class LivingEntityMixin {
         }
         if (!livingEntity.getWorld().isClient()) {
             amount = MoltenEdgeAbilityManager.modifyOutgoingDamage(source, amount);
-            amount = Phase4PassiveManager.modifyOutgoingDamage(livingEntity, source, amount);
+            amount = LongPathFinalFormsMasteryCombatManager.modifyOutgoingDamage(livingEntity, source, amount);
             if (source.getAttacker() instanceof LivingEntity attacker) {
                 amount = EmberbladeAbilityManager.modifyOutgoingDamage(attacker, source, amount);
             }
@@ -201,13 +201,13 @@ public abstract class LivingEntityMixin {
             StatusEffectInstance ribbonwrathEffect = livingEntity.getStatusEffect(EffectRegistry.getReference(EffectRegistry.RIBBONWRATH));
             StatusEffectInstance soulTetherEffect = livingEntity.getStatusEffect(EffectRegistry.getReference(EffectRegistry.SOULTETHER));
             if (voidcloakEffect != null) {
-                amount = net.sweenus.simplyswords.world.Phase10WeaponManager.modifyVoidcloakDamage(
+                amount = net.sweenus.simplyswords.world.RibboncleaverDreadtideMasteryManager.modifyVoidcloakDamage(
                         livingEntity, source, amount, voidcloakEffect);
             }
             if (ribbonwrathEffect != null) {
                 float reductionFactor = 0.85f;
                 amount *= reductionFactor;
-                amount = net.sweenus.simplyswords.world.Phase10WeaponManager.modifyIncomingDamage(
+                amount = net.sweenus.simplyswords.world.RibboncleaverDreadtideMasteryManager.modifyIncomingDamage(
                         livingEntity, source, amount);
             }
             if (soulTetherEffect != null) amount = SoulPyreAbilityManager.modifyIncomingDamage(livingEntity, source, amount);
@@ -219,7 +219,7 @@ public abstract class LivingEntityMixin {
             amount = WatcherAbilityManager.modifyIncomingDamage(livingEntity, source, amount);
             amount = net.sweenus.simplyswords.world.StormscaleLightningRodManager.modifyIncomingDamage(
                     livingEntity, source, amount);
-            amount = net.sweenus.simplyswords.world.Phase2CombatStateManager.modifyIncomingDamage(
+            amount = net.sweenus.simplyswords.world.WickpiercerMasteryStateManager.modifyIncomingDamage(
                     livingEntity, source, amount);
             amount = net.sweenus.simplyswords.world.SoulrenderAbilityManager.modifyIncomingDamage(
                     livingEntity, source, amount);
@@ -227,16 +227,16 @@ public abstract class LivingEntityMixin {
                     livingEntity, source, amount);
             amount = WraithfangAbilityManager.modifyIncomingDamage(livingEntity, source, amount);
             amount = WraithfangAbilityManager.modifyOutgoingDamage(livingEntity, source, amount);
-            amount = Phase4StandardManager.modifyIncomingDamage(livingEntity, source, amount);
-            amount = Phase4PassiveManager.modifyIncomingDamage(livingEntity, source, amount);
+            amount = BattleStandardMasteryManager.modifyIncomingDamage(livingEntity, source, amount);
+            amount = LongPathFinalFormsMasteryCombatManager.modifyIncomingDamage(livingEntity, source, amount);
             amount = HearthflameAbilityManager.modifyIncomingDamage(livingEntity, source, amount);
             amount = EmberbladeAbilityManager.modifyIncomingDamage(livingEntity, source, amount);
             amount = EmberlashAbilityManager.modifyIncomingDamage(livingEntity, source, amount);
             amount = WaxweaverEncasementManager.modifyIncomingDamage(livingEntity, source, amount);
             amount = BramblethornAbilityManager.modifyIncomingDamage(livingEntity, source, amount);
             amount = HivemindSwarmManager.modifyIncomingDamage(livingEntity, source, amount);
-            amount = Phase7CombatManager.modifyIncomingDamage(livingEntity, source, amount);
-            amount = Phase8CombatManager.modifyIncomingDamage(livingEntity, source, amount);
+            amount = NatureSwarmMasteryCombatManager.modifyIncomingDamage(livingEntity, source, amount);
+            amount = DeathShadowBloodMasteryCombatManager.modifyIncomingDamage(livingEntity, source, amount);
             amount = net.sweenus.simplyswords.world.MjolnirCombatManager.modifyIncomingDamage(
                     livingEntity, source, amount);
             amount = net.sweenus.simplyswords.world.MjolnirCombatManager.modifyOutgoingDamage(
@@ -256,14 +256,14 @@ public abstract class LivingEntityMixin {
             MoltenEdgeAbilityManager.gainHeatFromIncomingDamage(livingEntity, amount, true);
             WeaponImplicitRegistry.onDamageApplied(livingEntity, source, amount);
             BloodwakeAbilityManager.onTargetDamaged(livingEntity, source);
-            Phase4PassiveManager.onDamageApplied(livingEntity, source);
-            Phase4LichbladeManager.onOwnerDamaged(livingEntity);
+            LongPathFinalFormsMasteryCombatManager.onDamageApplied(livingEntity, source);
+            LichbladeMasteryManager.onOwnerDamaged(livingEntity);
             HearthflameAbilityManager.onDamageApplied(livingEntity, source);
             EmberbladeAbilityManager.onDamageTaken((ServerWorld) livingEntity.getWorld(), livingEntity);
             EmberlashAbilityManager.onDamageApplied(livingEntity, source);
             HivemindSwarmManager.onOwnerDamaged(livingEntity, source);
-            Phase7CombatManager.onDamageApplied(livingEntity, source);
-            Phase8CombatManager.onDamageApplied(livingEntity);
+            NatureSwarmMasteryCombatManager.onDamageApplied(livingEntity, source);
+            DeathShadowBloodMasteryCombatManager.onDamageApplied(livingEntity);
             WraithfangAbilityManager.onMeleeDamageApplied(livingEntity, source);
             StormbringerAbilityManager.onDamageApplied(livingEntity);
             net.sweenus.simplyswords.world.MjolnirCombatManager.onDamageApplied(livingEntity, source);
@@ -310,9 +310,9 @@ public abstract class LivingEntityMixin {
         net.sweenus.simplyswords.world.LivyatanWaveManager.clearActor(livingEntity);
         BramblethornAbilityManager.clearActor(livingEntity);
         WaxweaverEncasementManager.clearActor(livingEntity);
-        Phase7CombatManager.clearActor(livingEntity);
-        Phase8CombatManager.onDamageApplied(livingEntity);
-        Phase8CombatManager.clearActor(livingEntity);
+        NatureSwarmMasteryCombatManager.clearActor(livingEntity);
+        DeathShadowBloodMasteryCombatManager.onDamageApplied(livingEntity);
+        DeathShadowBloodMasteryCombatManager.clearActor(livingEntity);
         net.sweenus.simplyswords.world.SoulrenderAbilityManager.onTargetDeath(livingEntity, damageSource);
         net.sweenus.simplyswords.world.SoulrenderAbilityManager.removeActor(livingEntity);
     }

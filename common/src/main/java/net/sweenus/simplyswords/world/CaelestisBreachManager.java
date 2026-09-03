@@ -23,7 +23,7 @@ import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
-import net.sweenus.simplyswords.api.ability.Phase9AbilityTuning;
+import net.sweenus.simplyswords.api.ability.ArcaneCosmicMasteryTuning;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.CaelestisBreachCreature;
@@ -101,7 +101,7 @@ public final class CaelestisBreachManager {
                     .filter(mob -> mob.isAlive() && mob instanceof CaelestisBreachCreature creature
                             && !creature.isUnbound())
                     .sorted(Comparator.comparingDouble(mob -> mob.squaredDistanceTo(target)))
-                    .limit(breach.tuning.integer(Phase9AbilityTuning.Setting.SECONDARY_TARGET_CAP, 8))
+                    .limit(breach.tuning.integer(ArcaneCosmicMasteryTuning.Setting.SECONDARY_TARGET_CAP, 8))
                     .forEach(mob -> mob.setTarget(target));
         }
     }
@@ -112,8 +112,8 @@ public final class CaelestisBreachManager {
         ActiveBreach breach = breaches.get(actor.getUuid());
         if (breach == null || !breach.tuning.flag(1 << 24) || breach.recallUsed) return false;
         breach.recallUsed = true;
-        double range = breach.tuning.get(Phase9AbilityTuning.Setting.RANGE, 20);
-        int chance = breach.tuning.integer(Phase9AbilityTuning.Setting.PITY_CHANCE, 50);
+        double range = breach.tuning.get(ArcaneCosmicMasteryTuning.Setting.RANGE, 20);
+        int chance = breach.tuning.integer(ArcaneCosmicMasteryTuning.Setting.PITY_CHANCE, 50);
         if (world.random.nextInt(100) >= chance) return true;
         breach.creatureIds.stream().map(world::getEntity)
                 .filter(entity -> entity instanceof CaelestisBreachCreature creature && creature.isUnbound())
@@ -123,10 +123,10 @@ public final class CaelestisBreachManager {
     }
 
     public static boolean start(WeaponAbilityContext context) {
-        return start(context, Phase9AbilityTuning.EMPTY, null);
+        return start(context, ArcaneCosmicMasteryTuning.EMPTY, null);
     }
 
-    public static boolean start(WeaponAbilityContext context, Phase9AbilityTuning tuning,
+    public static boolean start(WeaponAbilityContext context, ArcaneCosmicMasteryTuning tuning,
                                 UniqueAbilityExecution execution) {
         if (context == null || context.world() == null || context.actor() == null
                 || !context.actor().isAlive() || context.stack() == null || context.stack().isEmpty()
@@ -141,14 +141,14 @@ public final class CaelestisBreachManager {
         int seed = world.random.nextInt();
         Vec3d center = findAnchorPosition(world, context.origin());
         long now = world.getTime();
-        Phase9AbilityTuning resolvedTuning = tuning == null ? Phase9AbilityTuning.EMPTY : tuning;
+        ArcaneCosmicMasteryTuning resolvedTuning = tuning == null ? ArcaneCosmicMasteryTuning.EMPTY : tuning;
         BreachProfile profile = BreachProfile.capture(actor instanceof PlayerEntity, resolvedTuning);
         int duration = profile.duration;
         boolean betrayalPending = world.random.nextInt(100)
                 < betrayalChance(resolvedTuning);
         long betrayalTick = now + getBetrayalDelay(world, profile)
                 + (resolvedTuning.flag(1 << 19)
-                        ? resolvedTuning.integer(Phase9AbilityTuning.Setting.DELAY_TICKS, 100) - 40 : 0);
+                        ? resolvedTuning.integer(ArcaneCosmicMasteryTuning.Setting.DELAY_TICKS, 100) - 40 : 0);
         float baseDamage = HelperMethods.abilityScaledDamage(
                 "eldritch",
                 actor,
@@ -177,7 +177,7 @@ public final class CaelestisBreachManager {
                 now + 20L,
                 now + Math.max(20, Config.uniqueEffects.caelestis.tentacleSpawnInterval
                         - (resolvedTuning.flag(1 << 12) ? Config.uniqueEffects.caelestis.tentacleSpawnInterval
-                                - resolvedTuning.integer(Phase9AbilityTuning.Setting.SECONDARY_INTERVAL_TICKS,
+                                - resolvedTuning.integer(ArcaneCosmicMasteryTuning.Setting.SECONDARY_INTERVAL_TICKS,
                                         Config.uniqueEffects.caelestis.tentacleSpawnInterval) : 0)),
                 betrayalTick,
                 betrayalPending,
@@ -251,7 +251,7 @@ public final class CaelestisBreachManager {
             spawnWave(world, breach);
             int spawnInterval = Config.uniqueEffects.caelestis.spawnInterval;
             if (breach.tuning.flag(1 << 1) || breach.tuning.flag(1 << 26))
-                spawnInterval = Math.max(20, breach.tuning.integer(Phase9AbilityTuning.Setting.INTERVAL_TICKS,
+                spawnInterval = Math.max(20, breach.tuning.integer(ArcaneCosmicMasteryTuning.Setting.INTERVAL_TICKS,
                         Config.uniqueEffects.caelestis.spawnInterval));
             breach.nextSpawnTick = now + spawnInterval;
         }
@@ -259,7 +259,7 @@ public final class CaelestisBreachManager {
                 && now >= breach.nextTentacleSpawnTick) {
             spawnTentacle(world, breach, radius);
             int interval = breach.tuning.flag(1 << 12)
-                    ? Math.max(20, breach.tuning.integer(Phase9AbilityTuning.Setting.SECONDARY_INTERVAL_TICKS,
+                    ? Math.max(20, breach.tuning.integer(ArcaneCosmicMasteryTuning.Setting.SECONDARY_INTERVAL_TICKS,
                             Config.uniqueEffects.caelestis.tentacleSpawnInterval))
                     : Config.uniqueEffects.caelestis.tentacleSpawnInterval;
             breach.nextTentacleSpawnTick = now + Math.max(1, interval);
@@ -270,10 +270,10 @@ public final class CaelestisBreachManager {
             breach.betrayalSpawned = spawnUnbound(world, breach);
         }
         if (breach.betrayalPending && !breach.betrayalSpawned && breach.tuning.flag(1 << 21)) {
-            double ward = breach.tuning.get(Phase9AbilityTuning.Setting.SECONDARY_RADIUS, 8);
+            double ward = breach.tuning.get(ArcaneCosmicMasteryTuning.Setting.SECONDARY_RADIUS, 8);
             if (actor.squaredDistanceTo(breach.center) <= ward * ward) actor.addStatusEffect(
                     new StatusEffectInstance(StatusEffects.RESISTANCE, breach.tuning.integer(
-                            Phase9AbilityTuning.Setting.TERTIARY_STATUS_DURATION_TICKS, 20), 0), actor);
+                            ArcaneCosmicMasteryTuning.Setting.TERTIARY_STATUS_DURATION_TICKS, 20), 0), actor);
         }
         if (!breach.forcedCollapse
                 && Math.floorMod(now + breach.seed, AGGRO_PULSE_INTERVAL) == 0L) {
@@ -315,13 +315,13 @@ public final class CaelestisBreachManager {
         int max = breach.profile.maxSpawnPerWave;
         int count = min + world.random.nextInt(max - min + 1);
         if (breach.tuning.flag(1 << 7)) count += Math.max(0,
-                breach.tuning.integer(Phase9AbilityTuning.Setting.COUNT, 1));
+                breach.tuning.integer(ArcaneCosmicMasteryTuning.Setting.COUNT, 1));
         if (breach.tuning.flag(1 << 8)) count = Math.max(1,
-                breach.tuning.integer(Phase9AbilityTuning.Setting.COUNT, 1));
+                breach.tuning.integer(ArcaneCosmicMasteryTuning.Setting.COUNT, 1));
         count = Math.min(count, cap - friendlyCount);
         float radius = radiusAt(world.getTime(), breach);
         int dreadglares = 0;
-        int dreadglareCap = breach.tuning.integer(Phase9AbilityTuning.Setting.STACK_CAP, 2);
+        int dreadglareCap = breach.tuning.integer(ArcaneCosmicMasteryTuning.Setting.STACK_CAP, 2);
         for (int i = 0; i < count; i++) {
             int archetype = breach.tuning.flag(1 << 6)
                     ? mixedArchetype(i, dreadglares, dreadglareCap)
@@ -339,13 +339,13 @@ public final class CaelestisBreachManager {
 
     private static void tickCollapseRim(ServerWorld world, ActiveBreach breach, LivingEntity actor,
                                         float radius, long now) {
-        double pull = breach.tuning.get(Phase9AbilityTuning.Setting.PULL_STRENGTH, 0);
-        double damageFraction = breach.tuning.get(Phase9AbilityTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, 0);
+        double pull = breach.tuning.get(ArcaneCosmicMasteryTuning.Setting.PULL_STRENGTH, 0);
+        double damageFraction = breach.tuning.get(ArcaneCosmicMasteryTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, 0);
         if (pull <= 0 && damageFraction <= 0) return;
-        int cap = breach.tuning.integer(Phase9AbilityTuning.Setting.SEARCH_CAP, 12);
+        int cap = breach.tuning.integer(ArcaneCosmicMasteryTuning.Setting.SEARCH_CAP, 12);
         if (cap <= 0) return;
-        int pullInterval = Math.max(1, breach.tuning.integer(Phase9AbilityTuning.Setting.TERTIARY_INTERVAL_TICKS, 10));
-        int damageInterval = Math.max(1, breach.tuning.integer(Phase9AbilityTuning.Setting.LOCKOUT_TICKS, 20));
+        int pullInterval = Math.max(1, breach.tuning.integer(ArcaneCosmicMasteryTuning.Setting.TERTIARY_INTERVAL_TICKS, 10));
+        int damageInterval = Math.max(1, breach.tuning.integer(ArcaneCosmicMasteryTuning.Setting.LOCKOUT_TICKS, 20));
         boolean doPull = pull > 0 && now % pullInterval == 0;
         boolean doDamage = damageFraction > 0 && now % damageInterval == 0;
         if (!doPull && !doDamage) return;
@@ -382,7 +382,7 @@ public final class CaelestisBreachManager {
                     .map(LivingEntity.class::cast).findFirst().ifPresent(living -> living.addStatusEffect(
                             new StatusEffectInstance(StatusEffects.GLOWING,
                                     breach.tuning.integer(
-                                            Phase9AbilityTuning.Setting.SECONDARY_STATUS_DURATION_TICKS, 120), 0),
+                                            ArcaneCosmicMasteryTuning.Setting.SECONDARY_STATUS_DURATION_TICKS, 120), 0),
                             getLiving(world, breach.actorId)));
         }
         return spawned;
@@ -705,7 +705,7 @@ public final class CaelestisBreachManager {
                         && candidate.getBoundingBox().intersects(contactBox)
                         && isTentacleHostile(world, breach, candidate))) {
             int duration = Math.max(1, breach.tuning.integer(
-                    Phase9AbilityTuning.Setting.STATUS_DURATION_TICKS,
+                    ArcaneCosmicMasteryTuning.Setting.STATUS_DURATION_TICKS,
                     Config.uniqueEffects.caelestis.tentacleSlowDuration));
             int amplifier = Math.clamp(
                     Config.uniqueEffects.caelestis.tentacleSlowAmplifier, 0, 4);
@@ -1081,7 +1081,7 @@ public final class CaelestisBreachManager {
             visual.discard();
         }
         spawnClosingEffects(world, breach.center);
-        Phase9CombatManager.finish(breach.execution, breach.creatureIds.size());
+        ArcaneCosmicMasteryCombatManager.finish(breach.execution, breach.creatureIds.size());
     }
 
     private static void dissolveCreature(ServerWorld world, MobEntity mob, boolean unbound) {
@@ -1105,11 +1105,11 @@ public final class CaelestisBreachManager {
         ActiveBreach breach = get(world, creature.getBreachId());
         if (breach != null) {
             int refund = 0;
-            if (breach.tuning.flag(1 << 20)) refund += breach.tuning.integer(Phase9AbilityTuning.Setting.REFUND_TICKS, 60);
+            if (breach.tuning.flag(1 << 20)) refund += breach.tuning.integer(ArcaneCosmicMasteryTuning.Setting.REFUND_TICKS, 60);
             if (breach.tuning.flag(1 << 23)) refund += breach.tuning.integer(
-                    Phase9AbilityTuning.Setting.SECONDARY_REFUND_TICKS, 120);
+                    ArcaneCosmicMasteryTuning.Setting.SECONDARY_REFUND_TICKS, 120);
             if (breach.tuning.flag(1 << 25)) refund = Math.max(refund,
-                    breach.tuning.integer(Phase9AbilityTuning.Setting.TERTIARY_REFUND_TICKS, 180));
+                    breach.tuning.integer(ArcaneCosmicMasteryTuning.Setting.TERTIARY_REFUND_TICKS, 180));
             LivingEntity actor = getLiving(world, breach.actorId);
             if (actor != null && refund > 0) SimplySwordsAPI.setWeaponCooldown(actor, breach.stack,
                     Math.max(0, Config.uniqueEffects.caelestis.cooldown - refund));
@@ -1222,12 +1222,12 @@ public final class CaelestisBreachManager {
         return earliest + world.random.nextInt(upper - earliest + 1);
     }
 
-    private static int betrayalChance(Phase9AbilityTuning tuning) {
+    private static int betrayalChance(ArcaneCosmicMasteryTuning tuning) {
         if (tuning.flag(1 << 26)) return 0;
         if (tuning.flag(1 << 25)) return 100;
         return Math.clamp(Config.uniqueEffects.caelestis.betrayalChance
                 - (tuning.flag(1 << 18) ? Config.uniqueEffects.caelestis.betrayalChance
-                        - tuning.integer(Phase9AbilityTuning.Setting.CHANCE, Config.uniqueEffects.caelestis.betrayalChance - 1) : 0), 0, 100);
+                        - tuning.integer(ArcaneCosmicMasteryTuning.Setting.CHANCE, Config.uniqueEffects.caelestis.betrayalChance - 1) : 0), 0, 100);
     }
 
     private static float radiusAt(long age, BreachProfile profile) {
@@ -1361,7 +1361,7 @@ public final class CaelestisBreachManager {
         private final float ownerAttackValue;
         private final int seed;
         private final BreachProfile profile;
-        private final Phase9AbilityTuning tuning;
+        private final ArcaneCosmicMasteryTuning tuning;
         private final UniqueAbilityExecution execution;
         private final Set<UUID> creatureIds;
         private final Set<UUID> tentacleIds;
@@ -1375,7 +1375,7 @@ public final class CaelestisBreachManager {
                              long nextTentacleSpawnTick, long betrayalTick,
                              boolean betrayalPending, boolean betrayalSpawned, UUID visualId,
                              float baseDamage, float ownerAttackValue, int seed,
-                             BreachProfile profile, Phase9AbilityTuning tuning,
+                             BreachProfile profile, ArcaneCosmicMasteryTuning tuning,
                              UniqueAbilityExecution execution, Set<UUID> creatureIds,
                              Set<UUID> tentacleIds) {
             this.id = id;
@@ -1434,19 +1434,19 @@ public final class CaelestisBreachManager {
             this.healthMultiplier = healthMultiplier;
         }
 
-        private static BreachProfile capture(boolean playerCast, Phase9AbilityTuning tuning) {
+        private static BreachProfile capture(boolean playerCast, ArcaneCosmicMasteryTuning tuning) {
             boolean reduced = !playerCast;
             float scale = reduced ? 0.5F : 1.0F;
-            int tunedDuration = tuning.integer(Phase9AbilityTuning.Setting.DURATION_TICKS,
+            int tunedDuration = tuning.integer(ArcaneCosmicMasteryTuning.Setting.DURATION_TICKS,
                     Config.uniqueEffects.caelestis.duration);
             int duration = Math.max(2, Math.round(Math.max(2, tunedDuration) * scale));
             int collapse = Math.clamp(Math.max(1, Math.round(
-                            tuning.integer(Phase9AbilityTuning.Setting.SECONDARY_DURATION_TICKS,
+                            tuning.integer(ArcaneCosmicMasteryTuning.Setting.SECONDARY_DURATION_TICKS,
                                     Config.uniqueEffects.caelestis.collapseDuration) * scale)),
                     1, duration - 1);
             int preCollapse = Math.max(1, duration - collapse);
             int expansion = Math.clamp(Math.max(1, Math.round(
-                            tuning.integer(Phase9AbilityTuning.Setting.WINDUP_TICKS,
+                            tuning.integer(ArcaneCosmicMasteryTuning.Setting.WINDUP_TICKS,
                                     Config.uniqueEffects.caelestis.expansionDuration) * scale)),
                     1, preCollapse);
             int minWave = scaledCount(Config.uniqueEffects.caelestis.minSpawnPerWave, scale);
@@ -1457,18 +1457,18 @@ public final class CaelestisBreachManager {
                     duration,
                     expansion,
                     collapse,
-                    Math.max(1.0F, (float) tuning.get(Phase9AbilityTuning.Setting.RADIUS,
+                    Math.max(1.0F, (float) tuning.get(ArcaneCosmicMasteryTuning.Setting.RADIUS,
                             Config.uniqueEffects.caelestis.maxRadius) * scale),
                     Math.max(2.0F, Config.uniqueEffects.caelestis.verticalRange * scale),
                     minWave,
                     maxWave,
-                    scaledCount(Math.clamp(tuning.integer(Phase9AbilityTuning.Setting.TARGET_CAP,
+                    scaledCount(Math.clamp(tuning.integer(ArcaneCosmicMasteryTuning.Setting.TARGET_CAP,
                             Config.uniqueEffects.caelestis.maxMinions), 1, MAX_BOUND_CREATURES), scale),
                     tuning.flag(1 << 17) ? 0 : scaledOptionalCount(Math.clamp(
-                            tuning.integer(Phase9AbilityTuning.Setting.SECONDARY_COUNT,
+                            tuning.integer(ArcaneCosmicMasteryTuning.Setting.SECONDARY_COUNT,
                                     Config.uniqueEffects.caelestis.maxTentacles), 0, MAX_TENTACLES), scale),
-                    scale * (float) tuning.get(Phase9AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1),
-                    (float) tuning.get(Phase9AbilityTuning.Setting.INCOMING_MULTIPLIER, 1)
+                    scale * (float) tuning.get(ArcaneCosmicMasteryTuning.Setting.DAMAGE_MULTIPLIER, 1),
+                    (float) tuning.get(ArcaneCosmicMasteryTuning.Setting.INCOMING_MULTIPLIER, 1)
             );
         }
 

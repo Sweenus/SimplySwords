@@ -42,7 +42,7 @@ import net.sweenus.simplyswords.util.AbilityMethods;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
 import net.sweenus.simplyswords.world.PlayerWeaponAbilityChannelManager;
-import net.sweenus.simplyswords.world.Phase4LichbladeManager;
+import net.sweenus.simplyswords.world.LichbladeMasteryManager;
 
 import java.util.List;
 
@@ -79,7 +79,7 @@ public class LichbladeSwordItem extends UniqueSwordItem implements TwoHandedWeap
             return TypedActionResult.pass(itemStack);
         }
         if (!world.isClient()) {
-            LivingEntity abilityTarget = Phase4LichbladeManager.beginChannel((ServerWorld) world, user, itemStack);
+            LivingEntity abilityTarget = LichbladeMasteryManager.beginChannel((ServerWorld) world, user, itemStack);
             if (abilityTarget == null) {
                 return TypedActionResult.fail(itemStack);
             }
@@ -94,7 +94,7 @@ public class LichbladeSwordItem extends UniqueSwordItem implements TwoHandedWeap
     @Override
     public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
         if (world.isClient) return;
-        if (Phase4LichbladeManager.tickChannel((ServerWorld) world, user, stack)) return;
+        if (LichbladeMasteryManager.tickChannel((ServerWorld) world, user, stack)) return;
         TargetedLocationComponent targetLocation = stack.getOrDefault(ComponentTypeRegistry.TARGETED_LOCATION.get(), TargetedLocationComponent.DEFAULT);
         LivingEntity abilityTarget = targetLocation.getEntity((ServerWorld) world);
         if (user.getEquippedStack(EquipmentSlot.MAINHAND) == stack && abilityTarget != null) {
@@ -148,7 +148,7 @@ public class LichbladeSwordItem extends UniqueSwordItem implements TwoHandedWeap
 
     @Override
     public int getMaxUseTime(ItemStack stack, LivingEntity user) {
-        return Phase4LichbladeManager.maxUseTime(user);
+        return LichbladeMasteryManager.maxUseTime(user);
     }
 
     @Override
@@ -158,7 +158,7 @@ public class LichbladeSwordItem extends UniqueSwordItem implements TwoHandedWeap
 
     @Override
     public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
-        if (!world.isClient && Phase4LichbladeManager.releaseChannel(user, stack)) {
+        if (!world.isClient && LichbladeMasteryManager.releaseChannel(user, stack)) {
             return;
         }
         TargetedLocationComponent targetLocation = stack.get(ComponentTypeRegistry.TARGETED_LOCATION.get());
@@ -184,7 +184,7 @@ public class LichbladeSwordItem extends UniqueSwordItem implements TwoHandedWeap
         if (target == null || !HelperMethods.checkAbilityTarget(target, actor) || !AwakeningApi.isAbilityUnlocked(stack)) {
             return false;
         }
-        if (Phase4LichbladeManager.activateOnce(context)) return true;
+        if (LichbladeMasteryManager.activateOnce(context)) return true;
         float abilityDamage = HelperMethods.abilityScaledDamage("soul", actor, stack,
                 Config.uniqueEffects.lichblade.damageScaling, Config.uniqueEffects.lichblade.spellScaling);
         float healAmount = Config.uniqueEffects.lichblade.heal;
@@ -227,7 +227,7 @@ public class LichbladeSwordItem extends UniqueSwordItem implements TwoHandedWeap
     public static void tickPassiveAura(ServerWorld world, LivingEntity livingUser, ItemStack stack) {
         if (livingUser != null && stack != null && !stack.isEmpty()
                 && AwakeningApi.isAbilityUnlocked(stack)
-                && Phase4LichbladeManager.tickPassive(world, livingUser, stack)) return;
+                && LichbladeMasteryManager.tickPassive(world, livingUser, stack)) return;
         if (livingUser == null
                 || stack == null
                 || stack.isEmpty()

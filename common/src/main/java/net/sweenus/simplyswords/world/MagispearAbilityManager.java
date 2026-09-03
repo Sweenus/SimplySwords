@@ -18,8 +18,8 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RaycastContext;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
-import net.sweenus.simplyswords.api.ability.Phase9AbilityTuning;
-import net.sweenus.simplyswords.api.ability.Phase9UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.ArcaneCosmicMasteryTuning;
+import net.sweenus.simplyswords.api.ability.ArcaneCosmicMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.MagispearFallingSpearVisualEntity;
@@ -55,53 +55,53 @@ public final class MagispearAbilityManager {
 
     private static final Map<ServerWorld, Map<UUID, ActiveMagislam>> ACTIVE = new HashMap<>();
 
-    public static Phase9AbilityTuning spellpointBase(int chance) {
-        return Phase9AbilityTuning.EMPTY
-                .with(Phase9AbilityTuning.Setting.CHANCE, chance)
-                .with(Phase9AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1);
+    public static ArcaneCosmicMasteryTuning spellpointBase(int chance) {
+        return ArcaneCosmicMasteryTuning.EMPTY
+                .with(ArcaneCosmicMasteryTuning.Setting.CHANCE, chance)
+                .with(ArcaneCosmicMasteryTuning.Setting.DAMAGE_MULTIPLIER, 1);
     }
 
-    public static Phase9AbilityTuning rainBase(int waveCount, double radius, double pull) {
-        return Phase9AbilityTuning.EMPTY
-                .with(Phase9AbilityTuning.Setting.STACK_CAP, waveCount)
-                .with(Phase9AbilityTuning.Setting.RADIUS, radius)
-                .with(Phase9AbilityTuning.Setting.PULL_STRENGTH, pull)
-                .with(Phase9AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1)
-                .with(Phase9AbilityTuning.Setting.FINAL_DAMAGE_MULTIPLIER, 1);
+    public static ArcaneCosmicMasteryTuning rainBase(int waveCount, double radius, double pull) {
+        return ArcaneCosmicMasteryTuning.EMPTY
+                .with(ArcaneCosmicMasteryTuning.Setting.STACK_CAP, waveCount)
+                .with(ArcaneCosmicMasteryTuning.Setting.RADIUS, radius)
+                .with(ArcaneCosmicMasteryTuning.Setting.PULL_STRENGTH, pull)
+                .with(ArcaneCosmicMasteryTuning.Setting.DAMAGE_MULTIPLIER, 1)
+                .with(ArcaneCosmicMasteryTuning.Setting.FINAL_DAMAGE_MULTIPLIER, 1);
     }
 
-    public static Phase9AbilityTuning slamBase(double slamRadius, double diveHeight) {
-        return Phase9AbilityTuning.EMPTY
-                .with(Phase9AbilityTuning.Setting.SECONDARY_RADIUS, slamRadius)
-                .with(Phase9AbilityTuning.Setting.HEIGHT, diveHeight)
-                .with(Phase9AbilityTuning.Setting.FINAL_DAMAGE_MULTIPLIER, 1);
+    public static ArcaneCosmicMasteryTuning slamBase(double slamRadius, double diveHeight) {
+        return ArcaneCosmicMasteryTuning.EMPTY
+                .with(ArcaneCosmicMasteryTuning.Setting.SECONDARY_RADIUS, slamRadius)
+                .with(ArcaneCosmicMasteryTuning.Setting.HEIGHT, diveHeight)
+                .with(ArcaneCosmicMasteryTuning.Setting.FINAL_DAMAGE_MULTIPLIER, 1);
     }
 
-    private static Phase9AbilityTuning rainBase() {
+    private static ArcaneCosmicMasteryTuning rainBase() {
         return rainBase(Config.uniqueEffects.magispear.rainWaveCount, Config.uniqueEffects.magispear.radius,
                 Config.uniqueEffects.magispear.inwardPushStrength);
     }
 
-    private static Phase9AbilityTuning slamBase() {
+    private static ArcaneCosmicMasteryTuning slamBase() {
         return slamBase(Config.uniqueEffects.magispear.radius, Config.uniqueEffects.magispear.diveHeight);
     }
 
     public static void clear(ServerWorld world) {
         Map<UUID, ActiveMagislam> active = ACTIVE.remove(world);
-        if (active != null) active.values().forEach(m -> Phase9CombatManager.finish(m.execution, 0));
+        if (active != null) active.values().forEach(m -> ArcaneCosmicMasteryCombatManager.finish(m.execution, 0));
     }
 
     public static void clearActor(LivingEntity actor) {
         if (actor == null) return;
         ACTIVE.values().forEach(map -> {
             ActiveMagislam m = map.remove(actor.getUuid());
-            if (m != null) Phase9CombatManager.finish(m.execution, 0);
+            if (m != null) ArcaneCosmicMasteryCombatManager.finish(m.execution, 0);
         });
     }
 
     public static void clearAll() {
         ACTIVE.values().forEach(map -> map.values().forEach(
-                m -> Phase9CombatManager.finish(m.execution, 0)));
+                m -> ArcaneCosmicMasteryCombatManager.finish(m.execution, 0)));
         ACTIVE.clear();
     }
 
@@ -133,18 +133,18 @@ public final class MagispearAbilityManager {
             return false;
         }
 
-        UniqueAbilityExecution execution = Phase9CombatManager.beginActive(
-                Phase9UniqueAbilities.MAGISPEAR_RAIN, context, Config.uniqueEffects.magispear.cooldown,
+        UniqueAbilityExecution execution = ArcaneCosmicMasteryCombatManager.beginActive(
+                ArcaneCosmicMasteryAbilities.MAGISPEAR_RAIN, context, Config.uniqueEffects.magispear.cooldown,
                 rainBase());
-        Phase9AbilityTuning tuning = Phase9UniqueAbilities.tuning(execution);
-        UniqueAbilityExecution slamExecution = Phase9CombatManager.beginPassive(
-                Phase9UniqueAbilities.MAGISPEAR_SLAM, world, context.stack(), actor, null, slamBase());
-        Phase9AbilityTuning slam = Phase9UniqueAbilities.tuning(slamExecution);
-        Phase9CombatManager.finish(slamExecution, 0);
-        int waveCount = MathHelper.clamp(tuning.integer(Phase9AbilityTuning.Setting.STACK_CAP,
+        ArcaneCosmicMasteryTuning tuning = ArcaneCosmicMasteryAbilities.tuning(execution);
+        UniqueAbilityExecution slamExecution = ArcaneCosmicMasteryCombatManager.beginPassive(
+                ArcaneCosmicMasteryAbilities.MAGISPEAR_SLAM, world, context.stack(), actor, null, slamBase());
+        ArcaneCosmicMasteryTuning slam = ArcaneCosmicMasteryAbilities.tuning(slamExecution);
+        ArcaneCosmicMasteryCombatManager.finish(slamExecution, 0);
+        int waveCount = MathHelper.clamp(tuning.integer(ArcaneCosmicMasteryTuning.Setting.STACK_CAP,
                 Config.uniqueEffects.magispear.rainWaveCount), 1, 12);
         float radius = (float) Math.max(1.0, tuning.get(
-                Phase9AbilityTuning.Setting.RADIUS, Config.uniqueEffects.magispear.radius));
+                ArcaneCosmicMasteryTuning.Setting.RADIUS, Config.uniqueEffects.magispear.radius));
         ActiveMagislam magislam = new ActiveMagislam(
                 actor.getUuid(), context.stack().copy(), center, world.getTime(), waveCount,
                 new boolean[waveCount], new boolean[waveCount], tuning, execution
@@ -214,7 +214,7 @@ public final class MagispearAbilityManager {
             }
 
             if (tickMagislam(world, owner, magislam)) {
-                Phase9CombatManager.finish(magislam.execution, magislam.hitTargets.size());
+                ArcaneCosmicMasteryCombatManager.finish(magislam.execution, magislam.hitTargets.size());
                 iterator.remove();
             }
         }
@@ -230,7 +230,7 @@ public final class MagispearAbilityManager {
 
         if (age >= LEAP_START_TICK && age < PLUNGE_START_TICK) {
             guideOwner(owner, magislam.center.add(0.0,
-                    Math.max(1.0, magislam.slam.get(Phase9AbilityTuning.Setting.HEIGHT,
+                    Math.max(1.0, magislam.slam.get(ArcaneCosmicMasteryTuning.Setting.HEIGHT,
                             Config.uniqueEffects.magispear.diveHeight)), 0.0),
                     (int) Math.max(1L, PLUNGE_START_TICK - age));
             magislam.movementObstructed |= owner.horizontalCollision;
@@ -314,7 +314,7 @@ public final class MagispearAbilityManager {
         float waveScaling = Config.uniqueEffects.magispear.throwDamageScaling / Math.max(1, magislam.waveCount);
         float waveSpellScaling = Config.uniqueEffects.magispear.throwSpellScaling / Math.max(1, magislam.waveCount);
         float baseDamage = HelperMethods.abilityScaledDamage("arcane", owner, magislam.stack,
-                waveScaling * (float) magislam.tuning.get(Phase9AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1),
+                waveScaling * (float) magislam.tuning.get(ArcaneCosmicMasteryTuning.Setting.DAMAGE_MULTIPLIER, 1),
                 waveSpellScaling);
         damageRainArea(world, owner, magislam, first, splashRadius, baseDamage, hitThisWave);
         damageRainArea(world, owner, magislam, opposite, splashRadius, baseDamage, hitThisWave);
@@ -335,11 +335,11 @@ public final class MagispearAbilityManager {
                         && hitThisWave.add(entity.getUuid()))) {
             float damage = magislam.marked.contains(target.getUuid())
                     ? baseDamage * (float) magislam.tuning.get(
-                    Phase9AbilityTuning.Setting.OUTGOING_MULTIPLIER, 1) : baseDamage;
+                    ArcaneCosmicMasteryTuning.Setting.OUTGOING_MULTIPLIER, 1) : baseDamage;
             if (damageTarget(world, owner, magislam.stack, target, damage)) {
                 magislam.hitTargets.add(target.getUuid());
                 pullTowardCenter(target, magislam.center,
-                        Math.max(0.0, magislam.tuning.get(Phase9AbilityTuning.Setting.PULL_STRENGTH,
+                        Math.max(0.0, magislam.tuning.get(ArcaneCosmicMasteryTuning.Setting.PULL_STRENGTH,
                                 Config.uniqueEffects.magispear.inwardPushStrength)));
                 int hits = magislam.waveHits.merge(target.getUuid(), 1, Integer::sum);
                 if (hits >= 2 && magislam.tuning.flag(1 << 15)) magislam.marked.add(target.getUuid());
@@ -356,15 +356,15 @@ public final class MagispearAbilityManager {
         owner.fallDistance = 0.0F;
 
         double radius = Math.max(1.0, magislam.slam.get(
-                Phase9AbilityTuning.Setting.SECONDARY_RADIUS, Config.uniqueEffects.magispear.radius));
+                ArcaneCosmicMasteryTuning.Setting.SECONDARY_RADIUS, Config.uniqueEffects.magispear.radius));
         float baseDamage = HelperMethods.abilityScaledDamage(
                 "arcane", owner, magislam.stack,
                 Config.uniqueEffects.magispear.damageScaling * (float) magislam.slam.get(
-                        Phase9AbilityTuning.Setting.FINAL_DAMAGE_MULTIPLIER, 1)
-                        * (float) magislam.tuning.get(Phase9AbilityTuning.Setting.FINAL_DAMAGE_MULTIPLIER, 1),
+                        ArcaneCosmicMasteryTuning.Setting.FINAL_DAMAGE_MULTIPLIER, 1)
+                        * (float) magislam.tuning.get(ArcaneCosmicMasteryTuning.Setting.FINAL_DAMAGE_MULTIPLIER, 1),
                 Config.uniqueEffects.magispear.spellScaling);
-        if (magislam.tuning.get(Phase9AbilityTuning.Setting.FINAL_DAMAGE_MULTIPLIER, 1) <= 0
-                || magislam.slam.get(Phase9AbilityTuning.Setting.FINAL_DAMAGE_MULTIPLIER, 1) <= 0) {
+        if (magislam.tuning.get(ArcaneCosmicMasteryTuning.Setting.FINAL_DAMAGE_MULTIPLIER, 1) <= 0
+                || magislam.slam.get(ArcaneCosmicMasteryTuning.Setting.FINAL_DAMAGE_MULTIPLIER, 1) <= 0) {
             spawnFinalImpactEffects(world, impact, radius);
             return;
         }
@@ -382,8 +382,8 @@ public final class MagispearAbilityManager {
                 if (magislam.slam.flag(1 << 24)) target.addStatusEffect(
                         new net.minecraft.entity.effect.StatusEffectInstance(
                                 net.minecraft.entity.effect.StatusEffects.SLOWNESS,
-                                magislam.slam.integer(Phase9AbilityTuning.Setting.SECONDARY_DURATION_TICKS, 50),
-                                magislam.slam.integer(Phase9AbilityTuning.Setting.STATUS_AMPLIFIER, 1)), owner);
+                                magislam.slam.integer(ArcaneCosmicMasteryTuning.Setting.SECONDARY_DURATION_TICKS, 50),
+                                magislam.slam.integer(ArcaneCosmicMasteryTuning.Setting.STATUS_AMPLIFIER, 1)), owner);
             }
         }
         spawnFinalImpactEffects(world, impact, radius);
@@ -435,7 +435,7 @@ public final class MagispearAbilityManager {
     private static Vec3d getStrikePosition(ServerWorld world, ActiveMagislam magislam,
                                            int wave, boolean opposite) {
         double radius = Math.max(1.0, magislam.tuning.get(
-                Phase9AbilityTuning.Setting.RADIUS, Config.uniqueEffects.magispear.radius)) * 0.78;
+                ArcaneCosmicMasteryTuning.Setting.RADIUS, Config.uniqueEffects.magispear.radius)) * 0.78;
         double angle = MathHelper.TAU * wave / (magislam.waveCount * 2.0)
                 + (opposite ? Math.PI : 0.0);
         Vec3d rough = magislam.center.add(Math.cos(angle) * radius, 0.0, Math.sin(angle) * radius);
@@ -512,7 +512,7 @@ public final class MagispearAbilityManager {
                 visual.discard();
             }
         }
-        Phase9CombatManager.finish(magislam.execution, magislam.hitTargets.size());
+        ArcaneCosmicMasteryCombatManager.finish(magislam.execution, magislam.hitTargets.size());
     }
 
     private static void spawnActivationEffects(ServerWorld world, LivingEntity actor, Vec3d center) {
@@ -571,7 +571,7 @@ public final class MagispearAbilityManager {
     }
 
     private static final class ActiveMagislam {
-        private Phase9AbilityTuning slam = Phase9AbilityTuning.EMPTY;
+        private ArcaneCosmicMasteryTuning slam = ArcaneCosmicMasteryTuning.EMPTY;
         private final UUID ownerId;
         private final net.minecraft.item.ItemStack stack;
         private Vec3d center;
@@ -583,7 +583,7 @@ public final class MagispearAbilityManager {
         private UUID fieldVisualId;
         private boolean finalSpearSpawned;
         private boolean movementObstructed;
-        private final Phase9AbilityTuning tuning;
+        private final ArcaneCosmicMasteryTuning tuning;
         private final UniqueAbilityExecution execution;
         private final Map<UUID, Integer> waveHits = new HashMap<>();
         private final Set<UUID> marked = new HashSet<>();
@@ -592,7 +592,7 @@ public final class MagispearAbilityManager {
         private ActiveMagislam(UUID ownerId, net.minecraft.item.ItemStack stack, Vec3d center,
                                long startedAt, int waveCount,
                                boolean[] waveSpawned, boolean[] waveImpacted,
-                               Phase9AbilityTuning tuning, UniqueAbilityExecution execution) {
+                               ArcaneCosmicMasteryTuning tuning, UniqueAbilityExecution execution) {
             this.ownerId = ownerId;
             this.stack = stack;
             this.center = center;

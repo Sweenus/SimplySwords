@@ -9,7 +9,7 @@ import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.effect.instance.SimplySwordsStatusEffectInstance;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
-import net.sweenus.simplyswords.world.Phase10WeaponManager;
+import net.sweenus.simplyswords.world.RibboncleaverDreadtideMasteryManager;
 
 public class VoidAssaultEffect extends OrbitingEffect {
     public LivingEntity sourceEntity; // The player who applied the effect
@@ -35,7 +35,7 @@ public class VoidAssaultEffect extends OrbitingEffect {
                 additionalData = statusEffect.getAdditionalData();
             }
 
-            if (Phase10WeaponManager.tickAssault(livingEntity, amplifier, additionalData)) {
+            if (RibboncleaverDreadtideMasteryManager.tickAssault(livingEntity, amplifier, additionalData)) {
                 super.applyUpdateEffect(livingEntity, amplifier);
                 return true;
             }

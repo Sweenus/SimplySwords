@@ -3,8 +3,8 @@ package net.sweenus.simplyswords.world;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
-import net.sweenus.simplyswords.api.ability.Phase2AbilityTuning;
-import net.sweenus.simplyswords.api.ability.Phase2UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.AbyssalSpectralMasteryTuning;
+import net.sweenus.simplyswords.api.ability.AbyssalSpectralMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.config.Config;
 
@@ -37,42 +37,42 @@ public record GloampiercerTuningSnapshot(
     private static final String NBT_KEY = "gloampiercer_tuning";
 
     public static GloampiercerTuningSnapshot from(UniqueAbilityExecution execution) {
-        Phase2AbilityTuning tuning = execution == null
-                ? Phase2AbilityTuning.EMPTY : Phase2UniqueAbilities.tuning(execution);
-        double lifetime = tuning.get(Phase2AbilityTuning.Setting.PROJECTILE_LIFETIME, 0);
+        AbyssalSpectralMasteryTuning tuning = execution == null
+                ? AbyssalSpectralMasteryTuning.EMPTY : AbyssalSpectralMasteryAbilities.tuning(execution);
+        double lifetime = tuning.get(AbyssalSpectralMasteryTuning.Setting.PROJECTILE_LIFETIME, 0);
         boolean tunedLifetime = lifetime > 0;
         return new GloampiercerTuningSnapshot(
-                Math.max(.1, tuning.get(Phase2AbilityTuning.Setting.PROJECTILE_SPEED,
+                Math.max(.1, tuning.get(AbyssalSpectralMasteryTuning.Setting.PROJECTILE_SPEED,
                         Config.uniqueEffects.gloampiercer.projectileSpeed)),
-                Math.max(0, tuning.get(Phase2AbilityTuning.Setting.HOMING_TURN_DEGREES, 6)),
+                Math.max(0, tuning.get(AbyssalSpectralMasteryTuning.Setting.HOMING_TURN_DEGREES, 6)),
                 tunedLifetime ? Math.max(1, (int) Math.round(lifetime)) : 120,
                 tunedLifetime ? Double.MAX_VALUE : 48,
-                Math.max(20, tuning.integer(Phase2AbilityTuning.Setting.EMBEDDED_DURATION_TICKS,
+                Math.max(20, tuning.integer(AbyssalSpectralMasteryTuning.Setting.EMBEDDED_DURATION_TICKS,
                         Config.uniqueEffects.gloampiercer.embeddedDuration)),
-                Math.max(.1, tuning.get(Phase2AbilityTuning.Setting.TRIGGER_RADIUS,
+                Math.max(.1, tuning.get(AbyssalSpectralMasteryTuning.Setting.TRIGGER_RADIUS,
                         Config.uniqueEffects.gloampiercer.triggerRadius)),
-                Math.max(.25, tuning.get(Phase2AbilityTuning.Setting.EXPLOSION_RADIUS,
+                Math.max(.25, tuning.get(AbyssalSpectralMasteryTuning.Setting.EXPLOSION_RADIUS,
                         Config.uniqueEffects.gloampiercer.explosionRadius)),
-                Math.clamp(tuning.integer(Phase2AbilityTuning.Setting.SECONDARY_TARGET_CAP, 64), 0, 64),
-                Math.max(.25, tuning.get(Phase2AbilityTuning.Setting.STAIN_RADIUS,
+                Math.clamp(tuning.integer(AbyssalSpectralMasteryTuning.Setting.SECONDARY_TARGET_CAP, 64), 0, 64),
+                Math.max(.25, tuning.get(AbyssalSpectralMasteryTuning.Setting.STAIN_RADIUS,
                         Config.uniqueEffects.gloampiercer.stainRadius)),
-                Math.max(20, tuning.integer(Phase2AbilityTuning.Setting.STAIN_DURATION_TICKS,
+                Math.max(20, tuning.integer(AbyssalSpectralMasteryTuning.Setting.STAIN_DURATION_TICKS,
                         Config.uniqueEffects.gloampiercer.stainDuration)),
-                Math.clamp(tuning.integer(Phase2AbilityTuning.Setting.STAIN_AMPLIFIER,
+                Math.clamp(tuning.integer(AbyssalSpectralMasteryTuning.Setting.STAIN_AMPLIFIER,
                         Config.uniqueEffects.gloampiercer.stainSlowAmplifier), 0, 4),
-                Math.max(1, tuning.integer(Phase2AbilityTuning.Setting.STATUS_DURATION_TICKS, 11)),
-                tuning.integer(Phase2AbilityTuning.Setting.MODE, 0),
-                Math.max(0, tuning.get(Phase2AbilityTuning.Setting.BONUS_PER_TRIGGER, 0)),
-                Math.clamp(tuning.integer(Phase2AbilityTuning.Setting.TARGET_CAP, 0), 0, 64),
-                Math.max(0, tuning.get(Phase2AbilityTuning.Setting.PULL_STRENGTH, 0)),
-                Math.max(0, tuning.get(Phase2AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1)),
-                Math.max(0, tuning.get(Phase2AbilityTuning.Setting.CHAIN_RANGE, 0)),
-                Math.max(0, tuning.integer(Phase2AbilityTuning.Setting.CHAIN_DELAY_TICKS, 0)),
-                Math.max(0, tuning.get(Phase2AbilityTuning.Setting.GLOAM_MOVE_RANGE, 0)),
-                Math.max(0, tuning.get(Phase2AbilityTuning.Setting.MOVEMENT_SPEED, 0)),
-                Math.max(0, tuning.get(Phase2AbilityTuning.Setting.IMPACT_DAMAGE_MULTIPLIER, 0)),
-                Math.max(0, tuning.get(Phase2AbilityTuning.Setting.IMPACT_RADIUS, 0)),
-                Math.clamp(tuning.integer(Phase2AbilityTuning.Setting.IMPACT_TARGET_CAP, 0), 0, 64));
+                Math.max(1, tuning.integer(AbyssalSpectralMasteryTuning.Setting.STATUS_DURATION_TICKS, 11)),
+                tuning.integer(AbyssalSpectralMasteryTuning.Setting.MODE, 0),
+                Math.max(0, tuning.get(AbyssalSpectralMasteryTuning.Setting.BONUS_PER_TRIGGER, 0)),
+                Math.clamp(tuning.integer(AbyssalSpectralMasteryTuning.Setting.TARGET_CAP, 0), 0, 64),
+                Math.max(0, tuning.get(AbyssalSpectralMasteryTuning.Setting.PULL_STRENGTH, 0)),
+                Math.max(0, tuning.get(AbyssalSpectralMasteryTuning.Setting.DAMAGE_MULTIPLIER, 1)),
+                Math.max(0, tuning.get(AbyssalSpectralMasteryTuning.Setting.CHAIN_RANGE, 0)),
+                Math.max(0, tuning.integer(AbyssalSpectralMasteryTuning.Setting.CHAIN_DELAY_TICKS, 0)),
+                Math.max(0, tuning.get(AbyssalSpectralMasteryTuning.Setting.GLOAM_MOVE_RANGE, 0)),
+                Math.max(0, tuning.get(AbyssalSpectralMasteryTuning.Setting.MOVEMENT_SPEED, 0)),
+                Math.max(0, tuning.get(AbyssalSpectralMasteryTuning.Setting.IMPACT_DAMAGE_MULTIPLIER, 0)),
+                Math.max(0, tuning.get(AbyssalSpectralMasteryTuning.Setting.IMPACT_RADIUS, 0)),
+                Math.clamp(tuning.integer(AbyssalSpectralMasteryTuning.Setting.IMPACT_TARGET_CAP, 0), 0, 64));
     }
 
     public void write(NbtCompound parent) {

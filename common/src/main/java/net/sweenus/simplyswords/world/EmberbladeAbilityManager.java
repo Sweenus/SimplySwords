@@ -21,8 +21,8 @@ import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.api.WeaponAbilityActivationSource;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
-import net.sweenus.simplyswords.api.ability.Phase5AbilityTuning;
-import net.sweenus.simplyswords.api.ability.Phase5UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.FireForgeMasteryTuning;
+import net.sweenus.simplyswords.api.ability.FireForgeMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityPhase;
@@ -76,11 +76,11 @@ public final class EmberbladeAbilityManager {
         cancelChannel(actor, state);
         WeaponAbilityContext context = WeaponAbilityContext.of(world, stack, actor, actor, null, hand,
                 WeaponAbilityActivationSource.PLAYER);
-        UniqueAbilityExecution execution = Phase5CombatManager.beginActive(
-                Phase5UniqueAbilities.EMBERBLADE_SHRAPNEL, context, Config.uniqueEffects.emberblade.cooldown);
+        UniqueAbilityExecution execution = EmberWeaponsMasteryManager.beginActive(
+                FireForgeMasteryAbilities.EMBERBLADE_SHRAPNEL, context, Config.uniqueEffects.emberblade.cooldown);
         UniqueAbilityApi.takeStartedExecution();
         UniqueAbilityApi.start(execution);
-        Phase5AbilityTuning tuning = Phase5UniqueAbilities.tuning(execution);
+        FireForgeMasteryTuning tuning = FireForgeMasteryAbilities.tuning(execution);
         prune(state, world.getTime());
         state.channel = new Channel(execution, tuning, stack.copy(), hand, world.getTime(),
                 channelTicks(tuning));
@@ -131,8 +131,8 @@ public final class EmberbladeAbilityManager {
 
     public static boolean releaseDelegated(WeaponAbilityContext context) {
         if (context == null || !validTarget(context.actor(), context.target())) return false;
-        UniqueAbilityExecution execution = Phase5CombatManager.beginActive(
-                Phase5UniqueAbilities.EMBERBLADE_SHRAPNEL, context, Config.uniqueEffects.emberblade.cooldown);
+        UniqueAbilityExecution execution = EmberWeaponsMasteryManager.beginActive(
+                FireForgeMasteryAbilities.EMBERBLADE_SHRAPNEL, context, Config.uniqueEffects.emberblade.cooldown);
         UniqueAbilityApi.start(execution);
         boolean released = release(execution, context.world(), context.stack(), context.actor(), context.target(),
                 1, BASE_CHANNEL_TICKS, true);
@@ -175,9 +175,9 @@ public final class EmberbladeAbilityManager {
 
     public static void onMeleeHit(ServerWorld world, ItemStack stack, LivingEntity actor, LivingEntity target) {
         if (world == null || actor == null || target == null || !target.isOnFire()) return;
-        UniqueAbilityExecution execution = Phase5CombatManager.beginPassive(
-                Phase5UniqueAbilities.EMBERBLADE_SHRAPNEL, world, stack, actor, target);
-        Phase5AbilityTuning tuning = Phase5UniqueAbilities.tuning(execution);
+        UniqueAbilityExecution execution = EmberWeaponsMasteryManager.beginPassive(
+                FireForgeMasteryAbilities.EMBERBLADE_SHRAPNEL, world, stack, actor, target);
+        FireForgeMasteryTuning tuning = FireForgeMasteryAbilities.tuning(execution);
         double gain = tuning.get(s("EMBERBLADE_BANK_GAIN"), 0);
         if (gain > 0) {
             State state = state(world, actor);
@@ -188,7 +188,7 @@ public final class EmberbladeAbilityManager {
             state.flameBankUntil = now
                     + tuning.integer(s("EMBERBLADE_FLAME_BANK_DURATION_TICKS"), 100);
         }
-        UniqueAbilityApi.finish(execution, Phase5UniqueAbilities.FINISH, 0);
+        UniqueAbilityApi.finish(execution, FireForgeMasteryAbilities.FINISH, 0);
     }
 
     public static float modifyOutgoingDamage(LivingEntity actor, DamageSource source, float amount) {
@@ -263,7 +263,7 @@ public final class EmberbladeAbilityManager {
             return false;
         }
         UniqueAbilityApi.start(execution);
-        Phase5AbilityTuning tuning = Phase5UniqueAbilities.tuning(execution);
+        FireForgeMasteryTuning tuning = FireForgeMasteryAbilities.tuning(execution);
         float minimum = HelperMethods.abilityScaledDamage("fire", actor, stack,
                 Config.uniqueEffects.emberblade.initialDamageScaling,
                 Config.uniqueEffects.emberblade.initialSpellScaling)
@@ -315,16 +315,16 @@ public final class EmberbladeAbilityManager {
         if (fullCharge) affected += fragments(execution, world, actor, stack, target, damage, tuning);
         applyRewards(execution, world, actor, stack, target, tuning, charge, elapsed, fullCharge, affected);
         if (!duelist || primaryHit) applyReleaseMovement(actor, target, tuning, world.getTime());
-        UniqueAbilityApi.emit(execution, UniqueAbilityPhase.HIT, Phase5UniqueAbilities.HIT,
+        UniqueAbilityApi.emit(execution, UniqueAbilityPhase.HIT, FireForgeMasteryAbilities.HIT,
                 target, affected, damage);
-        UniqueAbilityApi.finish(execution, Phase5UniqueAbilities.FINISH, affected);
+        UniqueAbilityApi.finish(execution, FireForgeMasteryAbilities.FINISH, affected);
         world.spawnParticles(ParticleTypes.LAVA, target.getX(), target.getBodyY(.5), target.getZ(),
                 12, .35, .35, .35, .04);
         return true;
     }
 
     private static int fragments(UniqueAbilityExecution execution, ServerWorld world, LivingEntity actor,
-                                 ItemStack stack, LivingEntity primary, float damage, Phase5AbilityTuning tuning) {
+                                 ItemStack stack, LivingEntity primary, float damage, FireForgeMasteryTuning tuning) {
         int count = tunedInteger(tuning, s("EMBERBLADE_FRAGMENT_COUNT"), s("COUNT"), 0);
         if (count <= 0) return 0;
         double range = tuning.get(s("EMBERBLADE_FRAGMENT_RANGE"), 5);
@@ -367,7 +367,7 @@ public final class EmberbladeAbilityManager {
     }
 
     private static void applyRewards(UniqueAbilityExecution execution, ServerWorld world, LivingEntity actor,
-                                     ItemStack stack, LivingEntity target, Phase5AbilityTuning tuning,
+                                     ItemStack stack, LivingEntity target, FireForgeMasteryTuning tuning,
                                      float charge, int elapsed, boolean fullCharge, int affected) {
         if (affected <= 0) return;
         State state = state(world, actor);
@@ -426,7 +426,7 @@ public final class EmberbladeAbilityManager {
         }
     }
 
-    private static void startMovementReward(State state, LivingEntity actor, Phase5AbilityTuning tuning,
+    private static void startMovementReward(State state, LivingEntity actor, FireForgeMasteryTuning tuning,
                                             long now, int buffDuration) {
         double required = tuning.get(s("EMBERBLADE_MOVE_DISTANCE"), 0);
         if (required <= 0) return;
@@ -439,7 +439,7 @@ public final class EmberbladeAbilityManager {
     }
 
     private static void applyReleaseMovement(LivingEntity actor, LivingEntity target,
-                                             Phase5AbilityTuning tuning, long now) {
+                                             FireForgeMasteryTuning tuning, long now) {
         State state = state((ServerWorld) actor.getWorld(), actor);
         if (tuning.flag(1 << 16)) {
             Vec3d side = target.getPos().subtract(actor.getPos()).normalize().multiply(-1.2);
@@ -460,7 +460,7 @@ public final class EmberbladeAbilityManager {
 
     private static int splash(UniqueAbilityExecution execution, ServerWorld world, LivingEntity actor,
                               ItemStack stack, LivingEntity center, double radius, int cap, float damage,
-                              Phase5AbilityTuning tuning) {
+                              FireForgeMasteryTuning tuning) {
         if (radius <= 0 || cap <= 0 || damage <= 0) return 0;
         int affected = 0;
         for (LivingEntity target : targets(world, actor, center.getPos(), radius, cap + 1)) {
@@ -475,10 +475,10 @@ public final class EmberbladeAbilityManager {
 
     private static boolean dealAndRecord(UniqueAbilityExecution execution, ServerWorld world, LivingEntity actor,
                                          ItemStack stack, LivingEntity target, float damage,
-                                         Phase5AbilityTuning tuning) {
+                                         FireForgeMasteryTuning tuning) {
         boolean hit = deal(world, actor, stack, target, damage);
         if (hit && !target.isAlive()) {
-            UniqueAbilityApi.emit(execution, UniqueAbilityPhase.HIT, Phase5UniqueAbilities.KILL, target, 1, damage);
+            UniqueAbilityApi.emit(execution, UniqueAbilityPhase.HIT, FireForgeMasteryAbilities.KILL, target, 1, damage);
             if (tuning.flag(1 << 15)) {
                 actor.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED,
                         tuning.integer(s("EMBERBLADE_PURSUIT_SPEED_TICKS"), 40), 1), actor);
@@ -510,7 +510,7 @@ public final class EmberbladeAbilityManager {
                 .limit(Math.min(64, cap)).toList();
     }
 
-    private static void bankInterrupted(State state, Phase5AbilityTuning tuning, int elapsed,
+    private static void bankInterrupted(State state, FireForgeMasteryTuning tuning, int elapsed,
                                         int channelTicks, long now) {
         int duration = tuning.integer(s("EMBERBLADE_BANK_DURATION_TICKS"), 0);
         if (duration <= 0 || elapsed < 40) return;
@@ -573,7 +573,7 @@ public final class EmberbladeAbilityManager {
                 actor.getRotationVec(1).normalize().dotProduct(direction), -1, 1)));
     }
 
-    static int channelTicks(Phase5AbilityTuning tuning) {
+    static int channelTicks(FireForgeMasteryTuning tuning) {
         return Math.max(1, tuning.integer(s("EMBERBLADE_CHANNEL_TICKS"), BASE_CHANNEL_TICKS));
     }
 
@@ -637,23 +637,23 @@ public final class EmberbladeAbilityManager {
         return states == null ? null : states.get(actor.getUuid());
     }
 
-    private static Phase5AbilityTuning.Setting s(String name) {
-        return Phase5AbilityTuning.Setting.valueOf(name);
+    private static FireForgeMasteryTuning.Setting s(String name) {
+        return FireForgeMasteryTuning.Setting.valueOf(name);
     }
 
-    private static double tuned(Phase5AbilityTuning tuning, Phase5AbilityTuning.Setting scoped,
-                                Phase5AbilityTuning.Setting legacy, double fallback) {
+    private static double tuned(FireForgeMasteryTuning tuning, FireForgeMasteryTuning.Setting scoped,
+                                FireForgeMasteryTuning.Setting legacy, double fallback) {
         return tuning.has(scoped) ? tuning.get(scoped, fallback) : tuning.get(legacy, fallback);
     }
 
-    private static int tunedInteger(Phase5AbilityTuning tuning, Phase5AbilityTuning.Setting scoped,
-                                    Phase5AbilityTuning.Setting legacy, int fallback) {
+    private static int tunedInteger(FireForgeMasteryTuning tuning, FireForgeMasteryTuning.Setting scoped,
+                                    FireForgeMasteryTuning.Setting legacy, int fallback) {
         return tuning.has(scoped) ? tuning.integer(scoped, fallback) : tuning.integer(legacy, fallback);
     }
 
     private static final class Channel {
         private final UniqueAbilityExecution execution;
-        private final Phase5AbilityTuning tuning;
+        private final FireForgeMasteryTuning tuning;
         private final ItemStack stack;
         private final Hand hand;
         private final long startedAt;
@@ -662,7 +662,7 @@ public final class EmberbladeAbilityManager {
         private boolean slowed;
         private StatusEffectInstance previousSlowness;
 
-        private Channel(UniqueAbilityExecution execution, Phase5AbilityTuning tuning, ItemStack stack,
+        private Channel(UniqueAbilityExecution execution, FireForgeMasteryTuning tuning, ItemStack stack,
                         Hand hand, long startedAt, int channelTicks) {
             this.execution = execution;
             this.tuning = tuning;

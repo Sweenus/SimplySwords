@@ -19,8 +19,8 @@ import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
-import net.sweenus.simplyswords.api.ability.Phase6AbilityTuning;
-import net.sweenus.simplyswords.api.ability.Phase6UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.StormFrostWaterMasteryTuning;
+import net.sweenus.simplyswords.api.ability.StormFrostWaterMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
@@ -30,7 +30,7 @@ import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
 import net.sweenus.simplyswords.util.WeaponManaCost;
-import net.sweenus.simplyswords.world.Phase6CombatManager;
+import net.sweenus.simplyswords.world.StormFrostWaterMasteryCombatManager;
 import net.sweenus.simplyswords.world.PlayerWeaponAbilityManager;
 import net.sweenus.simplyswords.world.TempestAbilityManager;
 
@@ -49,9 +49,9 @@ public class TempestSwordItem extends UniqueSwordItem implements UniqueWeaponAct
         if (!attacker.getWorld().isClient()) {
 
             ServerWorld serverWorld = (ServerWorld) attacker.getWorld();
-            UniqueAbilityExecution execution = Phase6CombatManager.beginPassive(
-                    Phase6UniqueAbilities.TEMPEST_MARK, serverWorld, stack, attacker, target);
-            Phase6AbilityTuning tuning = Phase6UniqueAbilities.tuning(execution);
+            UniqueAbilityExecution execution = StormFrostWaterMasteryCombatManager.beginPassive(
+                    StormFrostWaterMasteryAbilities.TEMPEST_MARK, serverWorld, stack, attacker, target);
+            StormFrostWaterMasteryTuning tuning = StormFrostWaterMasteryAbilities.tuning(execution);
             HelperMethods.playHitSounds(attacker, target);
             float fireDamage = Math.max(1, HelperMethods.abilityScaledDamage("fire", attacker, stack,
                     Config.uniqueEffects.tempest.damageScaling, Config.uniqueEffects.tempest.spellScaling));
@@ -66,7 +66,7 @@ public class TempestSwordItem extends UniqueSwordItem implements UniqueWeaponAct
             serverWorld.playSound(null, attacker.getBlockPos(),
                     fire ? SoundRegistry.SPELL_FIRE.get() : SoundRegistry.ELEMENTAL_SWORD_WATER_ATTACK_03.get(),
                     attacker.getSoundCategory(), 0.2f, 1.3f);
-            UniqueAbilityApi.finish(execution, Phase6UniqueAbilities.FINISH, 1);
+            UniqueAbilityApi.finish(execution, StormFrostWaterMasteryAbilities.FINISH, 1);
 
         }
         return super.postHit(stack, target, attacker);
@@ -102,9 +102,9 @@ public class TempestSwordItem extends UniqueSwordItem implements UniqueWeaponAct
     @Override
     public boolean activate(WeaponAbilityContext context) {
         if (!TempestAbilityManager.hasConsumableMarks(context.world(), context.actor(), 15)) return false;
-        UniqueAbilityExecution execution = Phase6CombatManager.beginActive(
-                Phase6UniqueAbilities.TEMPEST_VORTEX, context, 200);
-        return TempestAbilityManager.startVortex(context, Phase6UniqueAbilities.tuning(execution), execution,
+        UniqueAbilityExecution execution = StormFrostWaterMasteryCombatManager.beginActive(
+                StormFrostWaterMasteryAbilities.TEMPEST_VORTEX, context, 200);
+        return TempestAbilityManager.startVortex(context, StormFrostWaterMasteryAbilities.tuning(execution), execution,
                 Config.uniqueEffects.tempest.duration, Config.uniqueEffects.tempest.maxSize);
     }
 
@@ -156,7 +156,7 @@ public class TempestSwordItem extends UniqueSwordItem implements UniqueWeaponAct
 
     }
 
-    private static Phase6AbilityTuning.Setting s(String name) {
-        return Phase6AbilityTuning.Setting.valueOf(name);
+    private static StormFrostWaterMasteryTuning.Setting s(String name) {
+        return StormFrostWaterMasteryTuning.Setting.valueOf(name);
     }
 }

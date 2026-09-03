@@ -19,8 +19,8 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
-import net.sweenus.simplyswords.api.ability.Phase7AbilityTuning;
-import net.sweenus.simplyswords.api.ability.Phase7UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.NatureSwarmMasteryTuning;
+import net.sweenus.simplyswords.api.ability.NatureSwarmMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.config.Config;
@@ -35,7 +35,7 @@ import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
 import net.sweenus.simplyswords.world.WeaponAbilityCooldownManager;
-import net.sweenus.simplyswords.world.Phase7CombatManager;
+import net.sweenus.simplyswords.world.NatureSwarmMasteryCombatManager;
 
 import java.util.List;
 
@@ -51,9 +51,9 @@ public class ChompolotlSwordItem extends UniqueSwordItem implements UniqueWeapon
         }
         if (!attacker.getWorld().isClient()) {
             ServerWorld serverWorld = (ServerWorld) attacker.getWorld();
-            UniqueAbilityExecution execution = Phase7CombatManager.beginPassive(
-                    Phase7UniqueAbilities.CHOMPOLOTL_PROC, serverWorld, stack, attacker, target);
-            Phase7AbilityTuning tuning = Phase7UniqueAbilities.tuning(execution);
+            UniqueAbilityExecution execution = NatureSwarmMasteryCombatManager.beginPassive(
+                    NatureSwarmMasteryAbilities.CHOMPOLOTL_PROC, serverWorld, stack, attacker, target);
+            NatureSwarmMasteryTuning tuning = NatureSwarmMasteryAbilities.tuning(execution);
             int skillCooldown = procCooldown(Config.uniqueEffects.chompolotl.cooldown, tuning);
             float skillDamage = Config.uniqueEffects.chompolotl.damageScaling;
             HelperMethods.playHitSounds(attacker, target);
@@ -72,7 +72,7 @@ public class ChompolotlSwordItem extends UniqueSwordItem implements UniqueWeapon
                     SimplySwordsAPI.setWeaponCooldown(attacker, stack, skillCooldown);
                 }
             }
-            UniqueAbilityApi.finish(execution, Phase7UniqueAbilities.FINISH, 0);
+            UniqueAbilityApi.finish(execution, NatureSwarmMasteryAbilities.FINISH, 0);
         }
         return super.postHit(stack, target, attacker);
     }
@@ -100,17 +100,17 @@ public class ChompolotlSwordItem extends UniqueSwordItem implements UniqueWeapon
         LivingEntity summonTarget = context.target() != null
                 && HelperMethods.checkAbilityTarget(context.target(), context.actor())
                 ? context.target() : context.actor();
-        UniqueAbilityExecution execution = Phase7CombatManager.beginActive(
-                Phase7UniqueAbilities.CHOMPOLOTL_RALLY, context, Config.uniqueEffects.chompolotl.cooldown * 10);
-        Phase7AbilityTuning tuning = Phase7UniqueAbilities.tuning(execution);
+        UniqueAbilityExecution execution = NatureSwarmMasteryCombatManager.beginActive(
+                NatureSwarmMasteryAbilities.CHOMPOLOTL_RALLY, context, Config.uniqueEffects.chompolotl.cooldown * 10);
+        NatureSwarmMasteryTuning tuning = NatureSwarmMasteryAbilities.tuning(execution);
         if (tuning.flag(1 << 10)) {
             for (net.minecraft.entity.Entity entity : context.world().iterateEntities()) {
                 if (entity instanceof SimplySwordsAxolotlEntity axolotl
                         && context.actor().getUuid().equals(axolotl.getOwnerUuid())) {
                     axolotl.addStatusEffect(new net.minecraft.entity.effect.StatusEffectInstance(
                             net.minecraft.entity.effect.StatusEffects.SPEED,
-                            tuning.integer(Phase7AbilityTuning.Setting.CHOMP_RALLY_SPEED_DURATION_TICKS, 100),
-                            tuning.integer(Phase7AbilityTuning.Setting.CHOMP_RALLY_SPEED_AMPLIFIER, 1),
+                            tuning.integer(NatureSwarmMasteryTuning.Setting.CHOMP_RALLY_SPEED_DURATION_TICKS, 100),
+                            tuning.integer(NatureSwarmMasteryTuning.Setting.CHOMP_RALLY_SPEED_AMPLIFIER, 1),
                             false, true, true));
                 }
             }
@@ -123,7 +123,7 @@ public class ChompolotlSwordItem extends UniqueSwordItem implements UniqueWeapon
         }
         if (spawned) {
             UniqueAbilityApi.start(execution);
-            UniqueAbilityApi.finish(execution, Phase7UniqueAbilities.FINISH, count);
+            UniqueAbilityApi.finish(execution, NatureSwarmMasteryAbilities.FINISH, count);
         } else {
             UniqueAbilityApi.cancel(execution);
         }
@@ -137,7 +137,7 @@ public class ChompolotlSwordItem extends UniqueSwordItem implements UniqueWeapon
 
     private static SimplySwordsAxolotlEntity spawnAxolotl(ServerWorld serverWorld, LivingEntity owner,
                                                           LivingEntity target, ItemStack stack, float skillDamage,
-                                                          boolean activeSummon, Phase7AbilityTuning tuning) {
+                                                          boolean activeSummon, NatureSwarmMasteryTuning tuning) {
         SimplySwordsAxolotlEntity axolotlEntity = EntityRegistry.SIMPLYAXOLOTLENTITY.get().spawn(
                 serverWorld,
                 owner.getBlockPos().up(2).offset(owner.getMovementDirection(), 3),
@@ -173,128 +173,128 @@ public class ChompolotlSwordItem extends UniqueSwordItem implements UniqueWeapon
         boolean canPerch = !(tuning.flag(1 << 8) || tuning.flag(1 << 17) || tuning.flag(1 << 26));
         boolean canAttack = !(tuning.flag(1 << 16) || tuning.flag(1 << 25));
         double auraRadius = tuning.flag(1 << 25)
-                ? tuning.get(Phase7AbilityTuning.Setting.CHOMP_ETERNAL_AURA_RADIUS, 6) : 16;
+                ? tuning.get(NatureSwarmMasteryTuning.Setting.CHOMP_ETERNAL_AURA_RADIUS, 6) : 16;
         if (tuning.flag(1 << 26)) auraRadius = 0;
         int graceDuration = 200 + tuning.integer(
-                Phase7AbilityTuning.Setting.CHOMP_GRACE_DURATION_BONUS_TICKS, 0);
+                NatureSwarmMasteryTuning.Setting.CHOMP_GRACE_DURATION_BONUS_TICKS, 0);
         double shoulderAuraRadius = shoulderAuraRadius(tuning);
         axolotlEntity.configureMastery(duration,
-                tuning.get(Phase7AbilityTuning.Setting.CHOMP_LOW_HEALTH_THRESHOLD, 0),
+                tuning.get(NatureSwarmMasteryTuning.Setting.CHOMP_LOW_HEALTH_THRESHOLD, 0),
                 (float) Math.max(0, tuning.get(
-                        Phase7AbilityTuning.Setting.CHOMP_LOW_HEALTH_DAMAGE_MULTIPLIER, 1) - 1),
+                        NatureSwarmMasteryTuning.Setting.CHOMP_LOW_HEALTH_DAMAGE_MULTIPLIER, 1) - 1),
                 splashMultiplier(tuning), splashRadius(tuning), splashCap(tuning), canPerch, canAttack,
                 auraRadius, shoulderAuraRadius, graceDuration,
-                8 + tuning.get(Phase7AbilityTuning.Setting.CHOMP_TARGET_RANGE_BONUS, 0),
-                tuning.integer(Phase7AbilityTuning.Setting.CHOMP_TARGET_SEARCH_CAP, 0),
+                8 + tuning.get(NatureSwarmMasteryTuning.Setting.CHOMP_TARGET_RANGE_BONUS, 0),
+                tuning.integer(NatureSwarmMasteryTuning.Setting.CHOMP_TARGET_SEARCH_CAP, 0),
                 (float) Math.max(0, tuning.get(
-                        Phase7AbilityTuning.Setting.CHOMP_COORDINATED_DAMAGE_MULTIPLIER, 1) - 1),
-                tuning.integer(Phase7AbilityTuning.Setting.CHOMP_HELPFUL_ABSORPTION, 0),
-                tuning.integer(Phase7AbilityTuning.Setting.CHOMP_HELPFUL_DURATION_TICKS, 0),
-                tuning.integer(Phase7AbilityTuning.Setting.CHOMP_HELPFUL_LOCKOUT_TICKS, 0),
+                        NatureSwarmMasteryTuning.Setting.CHOMP_COORDINATED_DAMAGE_MULTIPLIER, 1) - 1),
+                tuning.integer(NatureSwarmMasteryTuning.Setting.CHOMP_HELPFUL_ABSORPTION, 0),
+                tuning.integer(NatureSwarmMasteryTuning.Setting.CHOMP_HELPFUL_DURATION_TICKS, 0),
+                tuning.integer(NatureSwarmMasteryTuning.Setting.CHOMP_HELPFUL_LOCKOUT_TICKS, 0),
                 activeSummon && tuning.flag(1 << 25) && !tuning.flag(1 << 26));
         axolotlEntity.configureGuardian(tuning.flag(1 << 21) && !tuning.flag(1 << 26)
-                        ? tuning.get(Phase7AbilityTuning.Setting.CHOMP_GUARD_RANGE, 6) : 0,
-                tuning.get(Phase7AbilityTuning.Setting.CHOMP_GUARD_INCOMING_MULTIPLIER, 1),
+                        ? tuning.get(NatureSwarmMasteryTuning.Setting.CHOMP_GUARD_RANGE, 6) : 0,
+                tuning.get(NatureSwarmMasteryTuning.Setting.CHOMP_GUARD_INCOMING_MULTIPLIER, 1),
                 tuning.flag(1 << 23) && !tuning.flag(1 << 26),
-                tuning.get(Phase7AbilityTuning.Setting.CHOMP_RESCUE_HEALTH_THRESHOLD, 0),
-                tuning.integer(Phase7AbilityTuning.Setting.CHOMP_RESCUE_DURATION_TICKS, 0),
-                tuning.integer(Phase7AbilityTuning.Setting.CHOMP_RESCUE_RESISTANCE_AMPLIFIER, 0));
-        axolotlEntity.configurePack(tuning.get(Phase7AbilityTuning.Setting.CHOMP_PACK_RANGE, 0),
-                (float) tuning.get(Phase7AbilityTuning.Setting.CHOMP_PACK_DAMAGE_PER_ALLY, 0),
-                tuning.integer(Phase7AbilityTuning.Setting.CHOMP_PACK_ALLY_CAP, 0),
-                tuning.flag(1 << 6) ? tuning.get(Phase7AbilityTuning.Setting.CHOMP_CHAIN_RANGE, 8) : 0,
+                tuning.get(NatureSwarmMasteryTuning.Setting.CHOMP_RESCUE_HEALTH_THRESHOLD, 0),
+                tuning.integer(NatureSwarmMasteryTuning.Setting.CHOMP_RESCUE_DURATION_TICKS, 0),
+                tuning.integer(NatureSwarmMasteryTuning.Setting.CHOMP_RESCUE_RESISTANCE_AMPLIFIER, 0));
+        axolotlEntity.configurePack(tuning.get(NatureSwarmMasteryTuning.Setting.CHOMP_PACK_RANGE, 0),
+                (float) tuning.get(NatureSwarmMasteryTuning.Setting.CHOMP_PACK_DAMAGE_PER_ALLY, 0),
+                tuning.integer(NatureSwarmMasteryTuning.Setting.CHOMP_PACK_ALLY_CAP, 0),
+                tuning.flag(1 << 6) ? tuning.get(NatureSwarmMasteryTuning.Setting.CHOMP_CHAIN_RANGE, 8) : 0,
                 tuning.flag(1 << 6) ? tuning.integer(
-                        Phase7AbilityTuning.Setting.CHOMP_CHAIN_EXTENSION_TICKS, 60) : 0,
+                        NatureSwarmMasteryTuning.Setting.CHOMP_CHAIN_EXTENSION_TICKS, 60) : 0,
                 activeSummon && tuning.flag(1 << 24)
-                        ? tuning.integer(Phase7AbilityTuning.Setting.CHOMP_FIRST_BITE_REFUND_PERCENT, 25) : 0);
+                        ? tuning.integer(NatureSwarmMasteryTuning.Setting.CHOMP_FIRST_BITE_REFUND_PERCENT, 25) : 0);
         axolotlEntity.configureRally(tuning.flag(1 << 15)
-                        ? tuning.integer(Phase7AbilityTuning.Setting.CHOMP_VICTORY_KILL_COUNT, 3) : 0,
+                        ? tuning.integer(NatureSwarmMasteryTuning.Setting.CHOMP_VICTORY_KILL_COUNT, 3) : 0,
                 tuning.flag(1 << 15) ? tuning.integer(
-                        Phase7AbilityTuning.Setting.CHOMP_VICTORY_WINDOW_TICKS, 200) : 0,
+                        NatureSwarmMasteryTuning.Setting.CHOMP_VICTORY_WINDOW_TICKS, 200) : 0,
                 tuning.flag(1 << 15) ? tuning.integer(
-                        Phase7AbilityTuning.Setting.CHOMP_VICTORY_REFUND_TICKS, 100) : 0,
-                tuning.flag(1 << 14) ? tuning.get(Phase7AbilityTuning.Setting.CHOMP_POUNCE_RANGE, 4) : 0,
+                        NatureSwarmMasteryTuning.Setting.CHOMP_VICTORY_REFUND_TICKS, 100) : 0,
+                tuning.flag(1 << 14) ? tuning.get(NatureSwarmMasteryTuning.Setting.CHOMP_POUNCE_RANGE, 4) : 0,
                 tuning.flag(1 << 14) ? tuning.integer(
-                        Phase7AbilityTuning.Setting.CHOMP_POUNCE_INTERVAL_TICKS, 40) : 0);
+                        NatureSwarmMasteryTuning.Setting.CHOMP_POUNCE_INTERVAL_TICKS, 40) : 0);
         if (activeSummon && tuning.flag(1 << 22) && !tuning.flag(1 << 26)) {
-            Phase7CombatManager.cleanse(owner,
-                    tuning.integer(Phase7AbilityTuning.Setting.CHOMP_CLEANSE_EFFECT_COUNT, 1),
-                    tuning.integer(Phase7AbilityTuning.Setting.CHOMP_CLEANSE_LOCKOUT_TICKS, 400));
+            NatureSwarmMasteryCombatManager.cleanse(owner,
+                    tuning.integer(NatureSwarmMasteryTuning.Setting.CHOMP_CLEANSE_EFFECT_COUNT, 1),
+                    tuning.integer(NatureSwarmMasteryTuning.Setting.CHOMP_CLEANSE_LOCKOUT_TICKS, 400));
         }
         return axolotlEntity;
     }
 
-    static int procCooldown(int configuredCooldown, Phase7AbilityTuning tuning) {
+    static int procCooldown(int configuredCooldown, NatureSwarmMasteryTuning tuning) {
         int cooldown = Math.max(0, configuredCooldown + tuning.integer(
-                Phase7AbilityTuning.Setting.CHOMP_PROC_COOLDOWN_BONUS_TICKS, 0));
+                NatureSwarmMasteryTuning.Setting.CHOMP_PROC_COOLDOWN_BONUS_TICKS, 0));
         return tuning.flag(1 << 7) ? (int) Math.round(cooldown * tuning.get(
-                Phase7AbilityTuning.Setting.CHOMP_COLOSSAL_COOLDOWN_MULTIPLIER, 1)) : cooldown;
+                NatureSwarmMasteryTuning.Setting.CHOMP_COLOSSAL_COOLDOWN_MULTIPLIER, 1)) : cooldown;
     }
 
-    static int passiveSummonCount(Phase7AbilityTuning tuning) {
+    static int passiveSummonCount(NatureSwarmMasteryTuning tuning) {
         if (tuning.flag(1 << 8)) return Math.max(1, tuning.integer(
-                Phase7AbilityTuning.Setting.CHOMP_RELEASE_COUNT, 4));
+                NatureSwarmMasteryTuning.Setting.CHOMP_RELEASE_COUNT, 4));
         return 1;
     }
 
-    static int activeSummonCount(Phase7AbilityTuning tuning) {
+    static int activeSummonCount(NatureSwarmMasteryTuning tuning) {
         if (tuning.flag(1 << 17)) return Math.max(1, tuning.integer(
-                Phase7AbilityTuning.Setting.CHOMP_HUNTER_COUNT, 3));
+                NatureSwarmMasteryTuning.Setting.CHOMP_HUNTER_COUNT, 3));
         if (tuning.flag(1 << 16)) return Math.max(1, tuning.integer(
-                Phase7AbilityTuning.Setting.CHOMP_BRIGADE_COUNT, 3));
+                NatureSwarmMasteryTuning.Setting.CHOMP_BRIGADE_COUNT, 3));
         return 1;
     }
 
-    static double summonDamageMultiplier(boolean active, Phase7AbilityTuning tuning) {
-        double multiplier = tuning.get(Phase7AbilityTuning.Setting.CHOMP_PROC_DAMAGE_MULTIPLIER, 1);
+    static double summonDamageMultiplier(boolean active, NatureSwarmMasteryTuning tuning) {
+        double multiplier = tuning.get(NatureSwarmMasteryTuning.Setting.CHOMP_PROC_DAMAGE_MULTIPLIER, 1);
         if (!active && tuning.flag(1 << 7)) multiplier *= tuning.get(
-                Phase7AbilityTuning.Setting.CHOMP_COLOSSAL_DAMAGE_MULTIPLIER, 1);
+                NatureSwarmMasteryTuning.Setting.CHOMP_COLOSSAL_DAMAGE_MULTIPLIER, 1);
         if (!active && tuning.flag(1 << 8)) multiplier *= tuning.get(
-                Phase7AbilityTuning.Setting.CHOMP_RELEASE_DAMAGE_MULTIPLIER, 1);
-        if (active) multiplier *= tuning.get(Phase7AbilityTuning.Setting.CHOMP_BLUE_DAMAGE_MULTIPLIER, 1);
+                NatureSwarmMasteryTuning.Setting.CHOMP_RELEASE_DAMAGE_MULTIPLIER, 1);
+        if (active) multiplier *= tuning.get(NatureSwarmMasteryTuning.Setting.CHOMP_BLUE_DAMAGE_MULTIPLIER, 1);
         if (active && tuning.flag(1 << 17)) multiplier *= tuning.get(
-                Phase7AbilityTuning.Setting.CHOMP_HUNTER_DAMAGE_MULTIPLIER, 1);
+                NatureSwarmMasteryTuning.Setting.CHOMP_HUNTER_DAMAGE_MULTIPLIER, 1);
         if (active && tuning.flag(1 << 26)) multiplier *= tuning.get(
-                Phase7AbilityTuning.Setting.CHOMP_RAVAGER_DAMAGE_MULTIPLIER, 1);
+                NatureSwarmMasteryTuning.Setting.CHOMP_RAVAGER_DAMAGE_MULTIPLIER, 1);
         return multiplier;
     }
 
-    static int summonDuration(int configuredDuration, boolean active, Phase7AbilityTuning tuning) {
-        int bonus = active ? tuning.integer(Phase7AbilityTuning.Setting.CHOMP_BLUE_LIFESPAN_BONUS_TICKS, 0)
-                : tuning.integer(Phase7AbilityTuning.Setting.CHOMP_LIFESPAN_BONUS_TICKS, 0);
+    static int summonDuration(int configuredDuration, boolean active, NatureSwarmMasteryTuning tuning) {
+        int bonus = active ? tuning.integer(NatureSwarmMasteryTuning.Setting.CHOMP_BLUE_LIFESPAN_BONUS_TICKS, 0)
+                : tuning.integer(NatureSwarmMasteryTuning.Setting.CHOMP_LIFESPAN_BONUS_TICKS, 0);
         int duration = configuredDuration + bonus;
         if (!active && tuning.flag(1 << 8)) duration = tuning.integer(
-                Phase7AbilityTuning.Setting.CHOMP_RELEASE_LIFESPAN_TICKS, duration);
+                NatureSwarmMasteryTuning.Setting.CHOMP_RELEASE_LIFESPAN_TICKS, duration);
         if (active && tuning.flag(1 << 17)) duration = tuning.integer(
-                Phase7AbilityTuning.Setting.CHOMP_HUNTER_LIFESPAN_TICKS, duration) + bonus;
+                NatureSwarmMasteryTuning.Setting.CHOMP_HUNTER_LIFESPAN_TICKS, duration) + bonus;
         if (active && tuning.flag(1 << 25)) duration = tuning.integer(
-                Phase7AbilityTuning.Setting.CHOMP_ETERNAL_LIFESPAN_TICKS, duration);
+                NatureSwarmMasteryTuning.Setting.CHOMP_ETERNAL_LIFESPAN_TICKS, duration);
         return Math.max(20, duration);
     }
 
-    static float splashMultiplier(Phase7AbilityTuning tuning) {
+    static float splashMultiplier(NatureSwarmMasteryTuning tuning) {
         return (float) (tuning.flag(1 << 7)
-                ? tuning.get(Phase7AbilityTuning.Setting.CHOMP_COLOSSAL_SPLASH_MULTIPLIER, 0)
-                : tuning.get(Phase7AbilityTuning.Setting.CHOMP_SPLASH_DAMAGE_MULTIPLIER, 0));
+                ? tuning.get(NatureSwarmMasteryTuning.Setting.CHOMP_COLOSSAL_SPLASH_MULTIPLIER, 0)
+                : tuning.get(NatureSwarmMasteryTuning.Setting.CHOMP_SPLASH_DAMAGE_MULTIPLIER, 0));
     }
 
-    static double splashRadius(Phase7AbilityTuning tuning) {
+    static double splashRadius(NatureSwarmMasteryTuning tuning) {
         return tuning.flag(1 << 7)
-                ? tuning.get(Phase7AbilityTuning.Setting.CHOMP_COLOSSAL_SPLASH_RADIUS, 0)
-                : tuning.get(Phase7AbilityTuning.Setting.CHOMP_SPLASH_RADIUS, 0);
+                ? tuning.get(NatureSwarmMasteryTuning.Setting.CHOMP_COLOSSAL_SPLASH_RADIUS, 0)
+                : tuning.get(NatureSwarmMasteryTuning.Setting.CHOMP_SPLASH_RADIUS, 0);
     }
 
-    static int splashCap(Phase7AbilityTuning tuning) {
+    static int splashCap(NatureSwarmMasteryTuning tuning) {
         return tuning.flag(1 << 7) ? 64 : tuning.integer(
-                Phase7AbilityTuning.Setting.CHOMP_SPLASH_TARGET_CAP, 0);
+                NatureSwarmMasteryTuning.Setting.CHOMP_SPLASH_TARGET_CAP, 0);
     }
 
-    static double shoulderAuraRadius(Phase7AbilityTuning tuning) {
-        double radius = 5 + tuning.get(Phase7AbilityTuning.Setting.CHOMP_SHOULDER_AURA_BONUS, 0);
+    static double shoulderAuraRadius(NatureSwarmMasteryTuning tuning) {
+        double radius = 5 + tuning.get(NatureSwarmMasteryTuning.Setting.CHOMP_SHOULDER_AURA_BONUS, 0);
         if (tuning.flag(1 << 16)) radius *= tuning.get(
-                Phase7AbilityTuning.Setting.CHOMP_BRIGADE_AURA_MULTIPLIER, 1);
+                NatureSwarmMasteryTuning.Setting.CHOMP_BRIGADE_AURA_MULTIPLIER, 1);
         if (tuning.flag(1 << 25)) radius = tuning.get(
-                Phase7AbilityTuning.Setting.CHOMP_ETERNAL_AURA_RADIUS, radius);
+                NatureSwarmMasteryTuning.Setting.CHOMP_ETERNAL_AURA_RADIUS, radius);
         return radius;
     }
 

@@ -17,8 +17,8 @@ import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
-import net.sweenus.simplyswords.api.ability.Phase5AbilityTuning;
-import net.sweenus.simplyswords.api.ability.Phase5UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.FireForgeMasteryTuning;
+import net.sweenus.simplyswords.api.ability.FireForgeMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityPhase;
@@ -65,9 +65,9 @@ public final class EmberlashAbilityManager {
     public static void onHit(ServerWorld world, ItemStack stack, LivingEntity attacker, LivingEntity target) {
         if (world == null || stack == null || stack.isEmpty() || attacker == null || target == null
                 || !target.isAlive() || !AwakeningApi.isAbilityUnlocked(stack)) return;
-        UniqueAbilityExecution execution = Phase5CombatManager.beginPassive(Phase5UniqueAbilities.EMBERLASH_SMOULDER,
+        UniqueAbilityExecution execution = EmberWeaponsMasteryManager.beginPassive(FireForgeMasteryAbilities.EMBERLASH_SMOULDER,
                 world, stack, attacker, target);
-        Phase5AbilityTuning tuning = Phase5UniqueAbilities.tuning(execution);
+        FireForgeMasteryTuning tuning = FireForgeMasteryAbilities.tuning(execution);
         WorldState worldState = state(world);
         OwnerState owner = worldState.owners.computeIfAbsent(attacker.getUuid(), ignored -> new OwnerState());
         long now = world.getTime();
@@ -128,17 +128,17 @@ public final class EmberlashAbilityManager {
         }
 
         consumeReprisal(world, worldState, owner, execution, tuning, attacker, target, stack, now);
-        UniqueAbilityApi.emit(execution, UniqueAbilityPhase.HIT, Phase5UniqueAbilities.HIT,
+        UniqueAbilityApi.emit(execution, UniqueAbilityPhase.HIT, FireForgeMasteryAbilities.HIT,
                 target, 1, resultingStacks);
-        UniqueAbilityApi.finish(execution, Phase5UniqueAbilities.FINISH, 1);
+        UniqueAbilityApi.finish(execution, FireForgeMasteryAbilities.FINISH, 1);
     }
 
     public static boolean activate(WeaponAbilityContext context) {
         if (context == null || context.world() == null || context.actor() == null) return false;
-        UniqueAbilityExecution execution = Phase5CombatManager.beginActive(Phase5UniqueAbilities.EMBERLASH_CAUTERY,
+        UniqueAbilityExecution execution = EmberWeaponsMasteryManager.beginActive(FireForgeMasteryAbilities.EMBERLASH_CAUTERY,
                 context, Config.uniqueEffects.emberlash.cooldown);
         UniqueAbilityApi.start(execution);
-        Phase5AbilityTuning tuning = Phase5UniqueAbilities.tuning(execution);
+        FireForgeMasteryTuning tuning = FireForgeMasteryAbilities.tuning(execution);
         ServerWorld world = context.world();
         LivingEntity actor = context.actor();
         LivingEntity target = context.target();
@@ -160,7 +160,7 @@ public final class EmberlashAbilityManager {
             phoenixStep(world, actor, context.stack(), direction, distance, tuning);
         }
         if (tuning.flag(SEALED_WOUNDS)) {
-            Phase4AbsorptionTracker.grant(actor,
+            MasteryAbsorptionTracker.grant(actor,
                     (float) tuning.get(s("EMBERLASH_CAUTERY_ABSORPTION"), 4),
                     tuning.integer(s("EMBERLASH_CAUTERY_ABSORPTION_TICKS"), 60),
                     (float) tuning.get(s("EMBERLASH_CAUTERY_ABSORPTION"), 4));
@@ -195,7 +195,7 @@ public final class EmberlashAbilityManager {
                 if (++affected >= cap) break;
             }
         }
-        UniqueAbilityApi.finish(execution, Phase5UniqueAbilities.FINISH, 0);
+        UniqueAbilityApi.finish(execution, FireForgeMasteryAbilities.FINISH, 0);
         UniqueAbilityApi.publishStartedExecution(execution);
         return true;
     }
@@ -216,9 +216,9 @@ public final class EmberlashAbilityManager {
 
         ItemStack stack = heldEmberlash(target);
         if (stack == null || !AwakeningApi.isAbilityUnlocked(stack)) return amount;
-        UniqueAbilityExecution execution = Phase5CombatManager.beginPassive(Phase5UniqueAbilities.EMBERLASH_SMOULDER,
+        UniqueAbilityExecution execution = EmberWeaponsMasteryManager.beginPassive(FireForgeMasteryAbilities.EMBERLASH_SMOULDER,
                 world, stack, target, source.getAttacker() instanceof LivingEntity living ? living : null);
-        Phase5AbilityTuning tuning = Phase5UniqueAbilities.tuning(execution);
+        FireForgeMasteryTuning tuning = FireForgeMasteryAbilities.tuning(execution);
         OwnerState owner = state(world).owners.get(target.getUuid());
         int charges = liveReprisalCharges(owner, now);
         if (charges > 0 && tuning.flag(SPITEFIRE)) {
@@ -226,7 +226,7 @@ public final class EmberlashAbilityManager {
                     tuned(tuning, s("EMBERLASH_INCOMING_PER_CHARGE_MULTIPLIER"),
                             s("INCOMING_MULTIPLIER"), 1.04));
         }
-        UniqueAbilityApi.finish(execution, Phase5UniqueAbilities.FINISH, 0);
+        UniqueAbilityApi.finish(execution, FireForgeMasteryAbilities.FINISH, 0);
         return amount;
     }
 
@@ -235,9 +235,9 @@ public final class EmberlashAbilityManager {
         ItemStack stack = heldEmberlash(target);
         if (stack == null || !AwakeningApi.isAbilityUnlocked(stack)) return;
         LivingEntity attacker = source.getAttacker() instanceof LivingEntity living ? living : null;
-        UniqueAbilityExecution execution = Phase5CombatManager.beginPassive(Phase5UniqueAbilities.EMBERLASH_SMOULDER,
+        UniqueAbilityExecution execution = EmberWeaponsMasteryManager.beginPassive(FireForgeMasteryAbilities.EMBERLASH_SMOULDER,
                 world, stack, target, attacker);
-        Phase5AbilityTuning tuning = Phase5UniqueAbilities.tuning(execution);
+        FireForgeMasteryTuning tuning = FireForgeMasteryAbilities.tuning(execution);
         WorldState worldState = state(world);
         OwnerState owner = worldState.owners.computeIfAbsent(target.getUuid(), ignored -> new OwnerState());
         long now = world.getTime();
@@ -265,7 +265,7 @@ public final class EmberlashAbilityManager {
                     tuning.integer(s("EMBERLASH_LASHBACK_DURATION_TICKS"), 40),
                     tuning.integer(s("EMBERLASH_LASHBACK_AMPLIFIER"), 1)), target);
         }
-        UniqueAbilityApi.finish(execution, Phase5UniqueAbilities.FINISH, 0);
+        UniqueAbilityApi.finish(execution, FireForgeMasteryAbilities.FINISH, 0);
     }
 
     public static void onKill(LivingEntity target, DamageSource source) {
@@ -273,17 +273,17 @@ public final class EmberlashAbilityManager {
                 || !(source.getAttacker() instanceof LivingEntity attacker)) return;
         ItemStack stack = heldEmberlash(attacker);
         if (stack == null || !AwakeningApi.isAbilityUnlocked(stack)) return;
-        UniqueAbilityExecution execution = Phase5CombatManager.beginPassive(Phase5UniqueAbilities.EMBERLASH_SMOULDER,
+        UniqueAbilityExecution execution = EmberWeaponsMasteryManager.beginPassive(FireForgeMasteryAbilities.EMBERLASH_SMOULDER,
                 world, stack, attacker, target);
-        Phase5AbilityTuning tuning = Phase5UniqueAbilities.tuning(execution);
+        FireForgeMasteryTuning tuning = FireForgeMasteryAbilities.tuning(execution);
         WorldState worldState = state(world);
         if (tuning.flag(FINAL_COAL) && isAtMarkedCap(worldState, target, attacker.getUuid())) {
             SimplySwordsAPI.reduceWeaponCooldown(attacker, stack,
                     tuning.integer(s("COOLDOWN_TICKS"), Config.uniqueEffects.emberlash.cooldown),
                     tuning.integer(s("EMBERLASH_KILL_REFUND_TICKS"), 20));
-            UniqueAbilityApi.emit(execution, UniqueAbilityPhase.HIT, Phase5UniqueAbilities.KILL, target, 1, 0);
+            UniqueAbilityApi.emit(execution, UniqueAbilityPhase.HIT, FireForgeMasteryAbilities.KILL, target, 1, 0);
         }
-        UniqueAbilityApi.finish(execution, Phase5UniqueAbilities.FINISH, 0);
+        UniqueAbilityApi.finish(execution, FireForgeMasteryAbilities.FINISH, 0);
     }
 
     public static void clear(ServerWorld world) {
@@ -314,7 +314,7 @@ public final class EmberlashAbilityManager {
     }
 
     private static int applyStacks(ServerWorld world, WorldState worldState, LivingEntity owner, LivingEntity target,
-                                   int added, int cap, int duration, Phase5AbilityTuning tuning, long now) {
+                                   int added, int cap, int duration, FireForgeMasteryTuning tuning, long now) {
         if (target == null || !target.isAlive()) return 0;
         prepareApplication(world, worldState, owner, target, tuning);
         int stacks = nextStackCount(stackCount(target), added, cap);
@@ -336,7 +336,7 @@ public final class EmberlashAbilityManager {
     }
 
     private static void prepareApplication(ServerWorld world, WorldState worldState, LivingEntity owner,
-                                           LivingEntity target, Phase5AbilityTuning tuning) {
+                                           LivingEntity target, FireForgeMasteryTuning tuning) {
         TargetState existingMark = worldState.targets.get(target.getUuid());
         if (existingMark != null && !owner.getUuid().equals(existingMark.ownerId)) {
             clearSmoulder(worldState, target);
@@ -351,7 +351,7 @@ public final class EmberlashAbilityManager {
     }
 
     private static void consumeReprisal(ServerWorld world, WorldState worldState, OwnerState owner,
-                                        UniqueAbilityExecution execution, Phase5AbilityTuning tuning,
+                                        UniqueAbilityExecution execution, FireForgeMasteryTuning tuning,
                                         LivingEntity attacker, LivingEntity target, ItemStack stack, long now) {
         int charges = liveReprisalCharges(owner, now);
         if (!tuning.flag(CRACKLING_RETORT)
@@ -383,13 +383,13 @@ public final class EmberlashAbilityManager {
                 }
                 if (affected >= cap) break;
             }
-            UniqueAbilityApi.emit(execution, UniqueAbilityPhase.HIT, Phase5UniqueAbilities.PULSE,
+            UniqueAbilityApi.emit(execution, UniqueAbilityPhase.HIT, FireForgeMasteryAbilities.PULSE,
                     target, affected, charges);
         }
     }
 
     private static void phoenixStep(ServerWorld world, LivingEntity actor, ItemStack stack, Vec3d direction,
-                                    double distance, Phase5AbilityTuning tuning) {
+                                    double distance, FireForgeMasteryTuning tuning) {
         Vec3d start = actor.getPos();
         Vec3d end = start.add(direction.multiply(distance));
         int affected = 0;
@@ -578,17 +578,17 @@ public final class EmberlashAbilityManager {
         });
     }
 
-    private static Phase5AbilityTuning.Setting s(String name) {
-        return Phase5AbilityTuning.Setting.valueOf(name);
+    private static FireForgeMasteryTuning.Setting s(String name) {
+        return FireForgeMasteryTuning.Setting.valueOf(name);
     }
 
-    private static double tuned(Phase5AbilityTuning tuning, Phase5AbilityTuning.Setting scoped,
-                                Phase5AbilityTuning.Setting legacy, double fallback) {
+    private static double tuned(FireForgeMasteryTuning tuning, FireForgeMasteryTuning.Setting scoped,
+                                FireForgeMasteryTuning.Setting legacy, double fallback) {
         return tuning.has(scoped) ? tuning.get(scoped, fallback) : tuning.get(legacy, fallback);
     }
 
-    private static int tunedInteger(Phase5AbilityTuning tuning, Phase5AbilityTuning.Setting scoped,
-                                    Phase5AbilityTuning.Setting legacy, int fallback) {
+    private static int tunedInteger(FireForgeMasteryTuning tuning, FireForgeMasteryTuning.Setting scoped,
+                                    FireForgeMasteryTuning.Setting legacy, int fallback) {
         return tuning.has(scoped) ? tuning.integer(scoped, fallback) : tuning.integer(legacy, fallback);
     }
 

@@ -11,7 +11,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.SoulrenderMarkVisualEntity;
-import net.sweenus.simplyswords.api.ability.Phase3UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.StormSoulMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 
@@ -124,7 +124,7 @@ public final class SoulrenderMarkVisualManager {
     public static void tick(ServerWorld world) {
         Map<UniqueAbilityExecution, Integer> finishing = PENDING_FINISH.remove(world);
         if (finishing != null) finishing.forEach((execution, affected) ->
-                UniqueAbilityApi.finish(execution, Phase3UniqueAbilities.FINISH, affected));
+                UniqueAbilityApi.finish(execution, StormSoulMasteryAbilities.FINISH, affected));
         Map<UUID, ActiveSoulrenderMark> marks = ACTIVE_MARKS.get(world);
         if (marks == null || marks.isEmpty()) {
             if (world.getTime() % 20L == 0L) {

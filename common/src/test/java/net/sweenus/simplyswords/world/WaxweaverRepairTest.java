@@ -1,6 +1,6 @@
 package net.sweenus.simplyswords.world;
 
-import net.sweenus.simplyswords.api.ability.Phase7AbilityTuning;
+import net.sweenus.simplyswords.api.ability.NatureSwarmMasteryTuning;
 import net.sweenus.simplyswords.item.custom.WaxweaverSwordItem;
 import org.junit.jupiter.api.Test;
 
@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 final class WaxweaverRepairTest {
     @Test
     void prisonBonusesComposeAgainstConfigurationAndRemainIndependent() {
-        Phase7AbilityTuning tuning = Phase7AbilityTuning.EMPTY
+        NatureSwarmMasteryTuning tuning = NatureSwarmMasteryTuning.EMPTY
                 .with(s("WAX_PRISON_RANGE_BONUS"), 3)
                 .with(s("WAX_PRISON_DURATION_BONUS_TICKS"), 20)
                 .with(s("WAX_TAUNT_RADIUS_BONUS"), 2)
@@ -29,13 +29,13 @@ final class WaxweaverRepairTest {
 
     @Test
     void prisonCapstonesRetainThePrerequisiteDurationAndDamageComposition() {
-        Phase7AbilityTuning iron = Phase7AbilityTuning.EMPTY
+        NatureSwarmMasteryTuning iron = NatureSwarmMasteryTuning.EMPTY
                 .with(s("MODE"), 1 << 7)
                 .with(s("WAX_PRISON_DURATION_BONUS_TICKS"), 20)
                 .with(s("WAX_IRON_DURATION_TICKS"), 200)
                 .with(s("WAX_EXPLOSION_DAMAGE_MULTIPLIER"), 1.12)
                 .with(s("WAX_IRON_DAMAGE_MULTIPLIER"), .6);
-        Phase7AbilityTuning volatileWax = Phase7AbilityTuning.EMPTY
+        NatureSwarmMasteryTuning volatileWax = NatureSwarmMasteryTuning.EMPTY
                 .with(s("MODE"), 1 << 8)
                 .with(s("WAX_PRISON_DURATION_BONUS_TICKS"), 20)
                 .with(s("WAX_TAUNT_RADIUS_BONUS"), 2)
@@ -52,11 +52,11 @@ final class WaxweaverRepairTest {
 
     @Test
     void tempoCapsDurationsAndFrenzyBonusesAreExact() {
-        Phase7AbilityTuning frenzy = Phase7AbilityTuning.EMPTY
+        NatureSwarmMasteryTuning frenzy = NatureSwarmMasteryTuning.EMPTY
                 .with(s("MODE"), 1 << 16)
                 .with(s("WAX_TEMPO_DURATION_BONUS_TICKS"), 20)
                 .with(s("WAX_FRENZY_DURATION_TICKS"), 30);
-        Phase7AbilityTuning patient = Phase7AbilityTuning.EMPTY
+        NatureSwarmMasteryTuning patient = NatureSwarmMasteryTuning.EMPTY
                 .with(s("MODE"), 1 << 17)
                 .with(s("WAX_TEMPO_DURATION_BONUS_TICKS"), 20)
                 .with(s("WAX_PATIENT_DURATION_TICKS"), 160);
@@ -66,13 +66,13 @@ final class WaxweaverRepairTest {
         assertEquals(4, WaxweaverSwordItem.nextTempoStacks(3, 4));
         assertEquals(50, WaxweaverSwordItem.tempoDuration(frenzy));
         assertEquals(180, WaxweaverSwordItem.tempoDuration(patient));
-        assertEquals(10.5, Phase7CombatManager.frenzyDamageBonus(6, 1.5), 1.0E-6);
-        assertEquals(.35, Phase7CombatManager.frenzySpeedBonus(6, 1.5), 1.0E-6);
+        assertEquals(10.5, NatureSwarmMasteryCombatManager.frenzyDamageBonus(6, 1.5), 1.0E-6);
+        assertEquals(.35, NatureSwarmMasteryCombatManager.frenzySpeedBonus(6, 1.5), 1.0E-6);
     }
 
     @Test
     void revivalBonusesComposeWithoutSharingAreaSettings() {
-        Phase7AbilityTuning queen = Phase7AbilityTuning.EMPTY
+        NatureSwarmMasteryTuning queen = NatureSwarmMasteryTuning.EMPTY
                 .with(s("MODE"), 1 << 25)
                 .with(s("WAX_REVIVE_RESISTANCE_BONUS_TICKS"), 40)
                 .with(s("WAX_REVIVE_COOLDOWN_BONUS_TICKS"), -100)
@@ -90,11 +90,11 @@ final class WaxweaverRepairTest {
         assertEquals(6, queen.get(s("WAX_EMERGENCE_RADIUS"), 0), 1.0E-6);
         assertEquals(16, queen.integer(s("WAX_EMERGENCE_TARGET_CAP"), 0));
 
-        Phase7AbilityTuning emergence = queen.with(s("MODE"), 1 << 26);
+        NatureSwarmMasteryTuning emergence = queen.with(s("MODE"), 1 << 26);
         assertEquals(0, WaxweaverSwordItem.resistanceDuration(emergence));
     }
 
-    private static Phase7AbilityTuning.Setting s(String name) {
-        return Phase7AbilityTuning.Setting.valueOf(name);
+    private static NatureSwarmMasteryTuning.Setting s(String name) {
+        return NatureSwarmMasteryTuning.Setting.valueOf(name);
     }
 }

@@ -30,8 +30,8 @@ import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.api.SpellScalingProfile;
 import net.sweenus.simplyswords.util.HelperMethods;
-import net.sweenus.simplyswords.api.ability.Phase3AbilityTuning;
-import net.sweenus.simplyswords.api.ability.Phase3UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.StormSoulMasteryTuning;
+import net.sweenus.simplyswords.api.ability.StormSoulMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityContext;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
@@ -87,11 +87,11 @@ public final class SoulstalkerAbilityManager {
         }
         ServerWorld world = context.world();
         LivingEntity owner = context.actor();
-        UniqueAbilityExecution execution = UniqueAbilityApi.begin(Phase3UniqueAbilities.SOULSTALKER_STRIDE,
+        UniqueAbilityExecution execution = UniqueAbilityApi.begin(StormSoulMasteryAbilities.SOULSTALKER_STRIDE,
                 UniqueAbilityContext.active(context), builder -> builder
-                        .set(Phase3UniqueAbilities.TUNING, Phase3AbilityTuning.EMPTY)
-                        .set(Phase3UniqueAbilities.COOLDOWN_TICKS, Config.uniqueEffects.soulstalker.cooldown));
-        Phase3AbilityTuning tuning = Phase3UniqueAbilities.tuning(execution);
+                        .set(StormSoulMasteryAbilities.TUNING, StormSoulMasteryTuning.EMPTY)
+                        .set(StormSoulMasteryAbilities.COOLDOWN_TICKS, Config.uniqueEffects.soulstalker.cooldown));
+        StormSoulMasteryTuning tuning = StormSoulMasteryAbilities.tuning(execution);
         Hand hand = context.hand() == null ? Hand.MAIN_HAND : context.hand();
         ItemStack heldStack = owner.getStackInHand(hand);
         SoulstalkerStrideEntity stride = new SoulstalkerStrideEntity(EntityRegistry.SOULSTALKER_STRIDE.get(), world);
@@ -101,7 +101,7 @@ public final class SoulstalkerAbilityManager {
         EntityAttributeInstance movement = stride.getAttributeInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED);
         EntityAttributeInstance step = stride.getAttributeInstance(EntityAttributes.GENERIC_STEP_HEIGHT);
         if (movement != null) {
-            movement.setBaseValue(MathHelper.clamp(tuning.get(Phase3AbilityTuning.Setting.MOVEMENT_SPEED,
+            movement.setBaseValue(MathHelper.clamp(tuning.get(StormSoulMasteryTuning.Setting.MOVEMENT_SPEED,
                     Config.uniqueEffects.soulstalker.movementSpeed), 0.05, 1.0));
         }
         if (step != null) {
@@ -118,7 +118,7 @@ public final class SoulstalkerAbilityManager {
         long now = world.getTime();
         ActiveStride active = new ActiveStride(owner.getUuid(), stride.getUuid(), hand,
                 heldStack, heldStack.copy(), now,
-                now + Math.max(20, tuning.integer(Phase3AbilityTuning.Setting.STRIDE_DURATION_TICKS,
+                now + Math.max(20, tuning.integer(StormSoulMasteryTuning.Setting.STRIDE_DURATION_TICKS,
                         Config.uniqueEffects.soulstalker.duration)),
                 context.activationSource() == WeaponAbilityActivationSource.MOB ? now : Long.MIN_VALUE,
                 owner.getPos(), tuning, execution);
@@ -152,18 +152,18 @@ public final class SoulstalkerAbilityManager {
                 .add(direction.multiply(0.72));
         SoulstalkerCleaveEntity cleave = new SoulstalkerCleaveEntity(
                 world, owner, active.stackSnapshot, origin, direction,
-                Math.max(1.0, active.tuning.get(Phase3AbilityTuning.Setting.CLEAVE_RANGE,
+                Math.max(1.0, active.tuning.get(StormSoulMasteryTuning.Setting.CLEAVE_RANGE,
                         Config.uniqueEffects.soulstalker.cleaveRange)),
                 Math.max(0.05, Config.uniqueEffects.soulstalker.cleaveSpeed),
                 (float) Math.max(1.0F, HelperMethods.abilityScaledDamage(SpellScalingProfile.SOUL, owner, active.stackSnapshot,
                         Config.uniqueEffects.soulstalker.strikeDamageScaling,
                         Config.uniqueEffects.soulstalker.strikeSpellScaling)
-                        * active.tuning.get(Phase3AbilityTuning.Setting.CLEAVE_DAMAGE_MULTIPLIER, 1)
+                        * active.tuning.get(StormSoulMasteryTuning.Setting.CLEAVE_DAMAGE_MULTIPLIER, 1)
                         * momentumMultiplier(world, owner, active)),
                 (float) Math.max(0.25, Config.uniqueEffects.soulstalker.cleaveInitialWidth),
-                (float) Math.max(0.25, active.tuning.get(Phase3AbilityTuning.Setting.CLEAVE_FINAL_WIDTH,
+                (float) Math.max(0.25, active.tuning.get(StormSoulMasteryTuning.Setting.CLEAVE_FINAL_WIDTH,
                         Config.uniqueEffects.soulstalker.cleaveFinalWidth)),
-                active.tuning.integer(Phase3AbilityTuning.Setting.CLEAVE_TARGET_CAP,
+                active.tuning.integer(StormSoulMasteryTuning.Setting.CLEAVE_TARGET_CAP,
                         Config.uniqueEffects.soulstalker.cleaveTargetCap),
                 active.strideId);
         world.spawnEntity(cleave);
@@ -179,7 +179,7 @@ public final class SoulstalkerAbilityManager {
     }
 
     private static boolean isCleaveReady(ServerWorld world, LivingEntity user, ItemStack stack,
-                                         Phase3AbilityTuning tuning) {
+                                         StormSoulMasteryTuning tuning) {
         long now = world.getTime();
         if (now % 200L == 0L) {
             LAST_CLEAVE.entrySet().removeIf(entry -> entry.getValue() <= now);
@@ -198,21 +198,21 @@ public final class SoulstalkerAbilityManager {
         return true;
     }
 
-    private static int getCleaveCooldownTicks(LivingEntity user, Phase3AbilityTuning tuning) {
+    private static int getCleaveCooldownTicks(LivingEntity user, StormSoulMasteryTuning tuning) {
         EntityAttributeInstance attackSpeed = user.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_SPEED);
         double value = attackSpeed == null ? 4.0 : attackSpeed.getValue();
         if (value <= 0.0) {
             value = 4.0;
         }
-        int minimum = Math.max(1, tuning.integer(Phase3AbilityTuning.Setting.CLEAVE_SWING_COOLDOWN_TICKS,
+        int minimum = Math.max(1, tuning.integer(StormSoulMasteryTuning.Setting.CLEAVE_SWING_COOLDOWN_TICKS,
                 Config.uniqueEffects.soulstalker.cleaveMinimumSwingCooldownTicks));
         return Math.max(minimum, (int) Math.ceil(20.0 / value));
     }
 
     // Predatory Momentum: distance ridden without stopping raises cleave and footfall damage.
     private static double momentumMultiplier(ServerWorld world, LivingEntity owner, ActiveStride active) {
-        double required = active.tuning.get(Phase3AbilityTuning.Setting.MOMENTUM_DISTANCE, 0);
-        double bonus = active.tuning.get(Phase3AbilityTuning.Setting.MOMENTUM_BONUS, 0);
+        double required = active.tuning.get(StormSoulMasteryTuning.Setting.MOMENTUM_DISTANCE, 0);
+        double bonus = active.tuning.get(StormSoulMasteryTuning.Setting.MOMENTUM_BONUS, 0);
         if (required <= 0 || bonus <= 0) return 1.0;
         return active.momentum >= required ? 1.0 + bonus : 1.0;
     }
@@ -230,13 +230,13 @@ public final class SoulstalkerAbilityManager {
         if (previousCheck != null && previousCheck == now) {
             return;
         }
-        UniqueAbilityExecution execution = UniqueAbilityApi.begin(Phase3UniqueAbilities.SOULSTALKER_TENDRIL,
+        UniqueAbilityExecution execution = UniqueAbilityApi.begin(StormSoulMasteryAbilities.SOULSTALKER_TENDRIL,
                 UniqueAbilityContext.passive(world, stack, owner, null, heldHand(owner, stack)), builder -> builder
-                        .set(Phase3UniqueAbilities.TUNING, Phase3AbilityTuning.EMPTY));
+                        .set(StormSoulMasteryAbilities.TUNING, StormSoulMasteryTuning.EMPTY));
         UniqueAbilityApi.takeStartedExecution();
         UniqueAbilityApi.start(execution);
-        Phase3AbilityTuning tuning = Phase3UniqueAbilities.tuning(execution);
-        int interval = Math.max(1, tuning.integer(Phase3AbilityTuning.Setting.INTERVAL_TICKS,
+        StormSoulMasteryTuning tuning = StormSoulMasteryAbilities.tuning(execution);
+        int interval = Math.max(1, tuning.integer(StormSoulMasteryTuning.Setting.INTERVAL_TICKS,
                 Config.uniqueEffects.soulstalker.passiveCheckInterval));
         if (Math.floorMod(now + owner.getId(), interval) != 0L) {
             UniqueAbilityApi.cancel(execution);
@@ -247,17 +247,17 @@ public final class SoulstalkerAbilityManager {
             UniqueAbilityApi.cancel(execution);
             return;
         }
-        int chance = Math.clamp(tuning.integer(Phase3AbilityTuning.Setting.CHANCE,
+        int chance = Math.clamp(tuning.integer(StormSoulMasteryTuning.Setting.CHANCE,
                 Config.uniqueEffects.soulstalker.passiveChance), 0, 100);
         if (chance <= 0 || owner.getRandom().nextInt(100) >= chance) {
             UniqueAbilityApi.cancel(execution);
             return;
         }
-        double range = tuning.get(Phase3AbilityTuning.Setting.TENDRIL_RANGE,
+        double range = tuning.get(StormSoulMasteryTuning.Setting.TENDRIL_RANGE,
                 Config.uniqueEffects.soulstalker.passiveRange);
-        int count = Math.max(1, tuning.integer(Phase3AbilityTuning.Setting.TENDRIL_COUNT, 1));
+        int count = Math.max(1, tuning.integer(StormSoulMasteryTuning.Setting.TENDRIL_COUNT, 1));
         List<LivingEntity> targets = findPassiveTargets(world, owner, range, count,
-                (tuning.integer(Phase3AbilityTuning.Setting.MODE, 0) & MODE_HUNGERING) != 0);
+                (tuning.integer(StormSoulMasteryTuning.Setting.MODE, 0) & MODE_HUNGERING) != 0);
         if (targets.isEmpty()) {
             UniqueAbilityApi.cancel(execution);
             return;
@@ -266,7 +266,7 @@ public final class SoulstalkerAbilityManager {
                 SpellScalingProfile.SOUL, owner, stack,
                 Config.uniqueEffects.soulstalker.strikeDamageScaling,
                 Config.uniqueEffects.soulstalker.strikeSpellScaling)
-                * tuning.get(Phase3AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1));
+                * tuning.get(StormSoulMasteryTuning.Setting.DAMAGE_MULTIPLIER, 1));
         for (LivingEntity target : targets) {
             SoulstalkerTentacleVisualEntity visual = new SoulstalkerTentacleVisualEntity(
                     world, owner, target, PASSIVE_IMPACT_DELAY, PASSIVE_VISUAL_LIFETIME);
@@ -277,7 +277,7 @@ public final class SoulstalkerAbilityManager {
                             target == targets.getFirst() ? execution : null));
         }
         lockouts.put(owner.getUuid(), now + SimplySwordsAPI.getEffectiveWeaponCooldownTicks(
-                stack, owner, tuning.integer(Phase3AbilityTuning.Setting.TENDRIL_LOCKOUT_TICKS,
+                stack, owner, tuning.integer(StormSoulMasteryTuning.Setting.TENDRIL_LOCKOUT_TICKS,
                         Config.uniqueEffects.soulstalker.passiveLockout)));
         Vec3d root = owner.getPos().add(0.0, owner.getHeight() * 0.68, 0.0);
         world.spawnParticles(GLOAM_DUST, root.x, root.y, root.z,
@@ -347,7 +347,7 @@ public final class SoulstalkerAbilityManager {
             }
             LivingEntity owner = resolveLiving(world, strike.ownerId);
             LivingEntity target = resolveLiving(world, strike.targetId);
-            double range = Math.max(1.0, strike.tuning.get(Phase3AbilityTuning.Setting.TENDRIL_RANGE,
+            double range = Math.max(1.0, strike.tuning.get(StormSoulMasteryTuning.Setting.TENDRIL_RANGE,
                     Config.uniqueEffects.soulstalker.passiveRange)) + 2.0;
             if (owner != null && (target == null || !target.isAlive())) {
                 target = redirectStrike(world, owner, strike);
@@ -357,7 +357,7 @@ public final class SoulstalkerAbilityManager {
                     && owner.squaredDistanceTo(target) <= range * range
                     && owner.canSee(target) && HelperMethods.checkAbilityTarget(target, owner)) {
                 float damage = strike.damage;
-                double gloamBonus = strike.tuning.get(Phase3AbilityTuning.Setting.GLOAM_DAMAGE_BONUS, 0);
+                double gloamBonus = strike.tuning.get(StormSoulMasteryTuning.Setting.GLOAM_DAMAGE_BONUS, 0);
                 if (gloamBonus > 0 && GloamStainManager.isOnOwnerGloam(world, owner.getUuid(), target)) {
                     damage *= (float) (1.0 + gloamBonus);
                 }
@@ -372,15 +372,15 @@ public final class SoulstalkerAbilityManager {
                             SoundCategory.PLAYERS, 0.72F, 0.62F + world.random.nextFloat() * 0.1F);
                     world.playSound(null, target.getBlockPos(), SoundEvents.ENTITY_WARDEN_TENDRIL_CLICKS,
                             SoundCategory.PLAYERS, 0.42F, 0.8F);
-                    int statusTicks = strike.tuning.integer(Phase3AbilityTuning.Setting.TENDRIL_SLOW_TICKS, 0);
+                    int statusTicks = strike.tuning.integer(StormSoulMasteryTuning.Setting.TENDRIL_SLOW_TICKS, 0);
                     if (statusTicks > 0) target.addStatusEffect(new StatusEffectInstance(
                             StatusEffects.SLOWNESS, statusTicks, 0), owner);
                     applySnare(world, owner, target, strike.tuning);
                     if (!target.isAlive()) refundTendrilLockout(world, owner, strike.tuning);
                     if (strike.execution != null) {
                         UniqueAbilityApi.emit(strike.execution, UniqueAbilityPhase.HIT,
-                                Phase3UniqueAbilities.HIT, target, 1, damage);
-                        UniqueAbilityApi.finish(strike.execution, Phase3UniqueAbilities.FINISH, 1);
+                                StormSoulMasteryAbilities.HIT, target, 1, damage);
+                        UniqueAbilityApi.finish(strike.execution, StormSoulMasteryAbilities.FINISH, 1);
                     }
                 } else if (strike.execution != null) UniqueAbilityApi.cancel(strike.execution);
             } else {
@@ -413,7 +413,7 @@ public final class SoulstalkerAbilityManager {
 
     // Seeking Root: a tendril whose target died lands on the nearest enemy instead.
     private static LivingEntity redirectStrike(ServerWorld world, LivingEntity owner, PendingStrike strike) {
-        double range = strike.tuning.get(Phase3AbilityTuning.Setting.SEEKING_ROOT_RANGE, 0);
+        double range = strike.tuning.get(StormSoulMasteryTuning.Setting.SEEKING_ROOT_RANGE, 0);
         if (range <= 0) return null;
         Entity previous = strike.targetId == null ? null : world.getEntity(strike.targetId);
         Vec3d origin = previous == null ? owner.getPos() : previous.getPos();
@@ -431,23 +431,23 @@ public final class SoulstalkerAbilityManager {
 
     // Tangled Prey: a heavy, short snare with its own per-enemy lockout.
     private static void applySnare(ServerWorld world, LivingEntity owner, LivingEntity target,
-                                   Phase3AbilityTuning tuning) {
-        int ticks = tuning.integer(Phase3AbilityTuning.Setting.SNARE_SLOW_TICKS, 0);
+                                   StormSoulMasteryTuning tuning) {
+        int ticks = tuning.integer(StormSoulMasteryTuning.Setting.SNARE_SLOW_TICKS, 0);
         if (ticks <= 0 || !target.isAlive()) return;
         Map<UUID, Long> snares = SNARE_LOCKOUT.computeIfAbsent(world, ignored -> new HashMap<>());
         long now = world.getTime();
         if (now < snares.getOrDefault(target.getUuid(), Long.MIN_VALUE)) return;
         snares.put(target.getUuid(), now + Math.max(1,
-                tuning.integer(Phase3AbilityTuning.Setting.SNARE_LOCKOUT_TICKS, 80)));
+                tuning.integer(StormSoulMasteryTuning.Setting.SNARE_LOCKOUT_TICKS, 80)));
         target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, ticks,
-                Math.max(0, tuning.integer(Phase3AbilityTuning.Setting.SNARE_SLOW_AMPLIFIER, 0)),
+                Math.max(0, tuning.integer(StormSoulMasteryTuning.Setting.SNARE_SLOW_AMPLIFIER, 0)),
                 false, true, true), owner);
     }
 
     // Hungering Tendril: a kill returns part of the tendril lockout.
     private static void refundTendrilLockout(ServerWorld world, LivingEntity owner,
-                                             Phase3AbilityTuning tuning) {
-        int refund = tuning.integer(Phase3AbilityTuning.Setting.TENDRIL_REFUND_TICKS, 0);
+                                             StormSoulMasteryTuning tuning) {
+        int refund = tuning.integer(StormSoulMasteryTuning.Setting.TENDRIL_REFUND_TICKS, 0);
         if (refund <= 0) return;
         Map<UUID, Long> lockouts = PASSIVE_LOCKOUT.get(world);
         if (lockouts == null) return;
@@ -473,7 +473,7 @@ public final class SoulstalkerAbilityManager {
         double side = ((world.getTime() / TRAIL_INTERVAL) & 1L) == 0L ? -0.45 : 0.45;
         Vec3d point = new Vec3d(stride.getX(), y, stride.getZ()).add(right.multiply(side));
         createTunedPatch(world, owner, point,
-                Math.max(0.25, state.tuning.get(Phase3AbilityTuning.Setting.TRAIL_STAIN_WIDTH,
+                Math.max(0.25, state.tuning.get(StormSoulMasteryTuning.Setting.TRAIL_STAIN_WIDTH,
                         Config.uniqueEffects.soulstalker.stainTrailWidth) * 0.72), state.tuning);
         state.lastTrailPoint = stride.getPos();
         world.spawnParticles(GLOAM_DUST, point.x, point.y + 0.08, point.z,
@@ -481,22 +481,22 @@ public final class SoulstalkerAbilityManager {
     }
 
     private static void createTunedPatch(ServerWorld world, LivingEntity owner, Vec3d point,
-                                         double radius, Phase3AbilityTuning tuning) {
-        int slowAmplifier = Math.clamp(tuning.integer(Phase3AbilityTuning.Setting.TRAIL_SLOW_AMPLIFIER,
+                                         double radius, StormSoulMasteryTuning tuning) {
+        int slowAmplifier = Math.clamp(tuning.integer(StormSoulMasteryTuning.Setting.TRAIL_SLOW_AMPLIFIER,
                 Config.uniqueEffects.soulstalker.stainSlowAmplifier), 0, 4);
-        int slowTicks = tuning.integer(Phase3AbilityTuning.Setting.TRAIL_SLOW_DURATION_TICKS, 0);
+        int slowTicks = tuning.integer(StormSoulMasteryTuning.Setting.TRAIL_SLOW_DURATION_TICKS, 0);
         GloamStainManager.PatchBehavior behavior = slowTicks > 0
                 ? new GloamStainManager.PatchBehavior(ItemStack.EMPTY, 0, slowTicks, true, 0, 0, 0, 0, 0)
                 : GloamStainManager.PatchBehavior.NONE;
         GloamStainManager.createPatch(world, owner.getUuid(), point, radius,
-                Math.max(20, tuning.integer(Phase3AbilityTuning.Setting.TRAIL_STAIN_DURATION_TICKS,
+                Math.max(20, tuning.integer(StormSoulMasteryTuning.Setting.TRAIL_STAIN_DURATION_TICKS,
                         Config.uniqueEffects.soulstalker.stainDuration)),
                 Math.max(1, Config.uniqueEffects.soulstalker.stainFadeDuration),
                 slowAmplifier, behavior);
     }
 
     private static void trackMomentum(SoulstalkerStrideEntity stride, ActiveStride state) {
-        if (state.tuning.get(Phase3AbilityTuning.Setting.MOMENTUM_DISTANCE, 0) <= 0) return;
+        if (state.tuning.get(StormSoulMasteryTuning.Setting.MOMENTUM_DISTANCE, 0) <= 0) return;
         Vec3d position = stride.getPos();
         if (state.lastMomentumPoint == null) {
             state.lastMomentumPoint = position;
@@ -506,18 +506,18 @@ public final class SoulstalkerAbilityManager {
         state.lastMomentumPoint = position;
         state.momentum = moved < 0.02 ? 0.0 : state.momentum + moved;
         stride.setMomentumActive(
-                state.momentum >= state.tuning.get(Phase3AbilityTuning.Setting.MOMENTUM_DISTANCE, 0));
+                state.momentum >= state.tuning.get(StormSoulMasteryTuning.Setting.MOMENTUM_DISTANCE, 0));
     }
 
     // Rift Stride: a fully charged leap opens a short teleport along the rider's aim.
     private static void tickRiftStride(ServerWorld world, LivingEntity owner,
                                        SoulstalkerStrideEntity stride, ActiveStride state) {
-        double range = state.tuning.get(Phase3AbilityTuning.Setting.RIFT_RANGE, 0);
+        double range = state.tuning.get(StormSoulMasteryTuning.Setting.RIFT_RANGE, 0);
         if (range <= 0 || !stride.consumeChargedLeap()) return;
         long now = world.getTime();
         if (now < state.riftReady) return;
         state.riftReady = now + Math.max(1,
-                state.tuning.integer(Phase3AbilityTuning.Setting.RIFT_LOCKOUT_TICKS, 60));
+                state.tuning.integer(StormSoulMasteryTuning.Setting.RIFT_LOCKOUT_TICKS, 60));
         Vec3d aim = owner.getRotationVec(1.0F).multiply(1.0, 0.0, 1.0);
         if (aim.horizontalLengthSquared() < 1.0E-4) return;
         aim = aim.normalize();
@@ -531,7 +531,7 @@ public final class SoulstalkerAbilityManager {
         }
         if (destination.squaredDistanceTo(from) < 1.0) return;
         stride.refreshPositionAfterTeleport(destination.x, destination.y, destination.z);
-        double stainRadius = state.tuning.get(Phase3AbilityTuning.Setting.RIFT_STAIN_RADIUS, 0);
+        double stainRadius = state.tuning.get(StormSoulMasteryTuning.Setting.RIFT_STAIN_RADIUS, 0);
         if (stainRadius > 0) {
             double y = LivyatanWaveManager.findGroundTopY(world, from.x, from.z, from.y + 1.5);
             createTunedPatch(world, owner, new Vec3d(from.x, y, from.z), stainRadius, state.tuning);
@@ -579,7 +579,7 @@ public final class SoulstalkerAbilityManager {
             stride.removeAllPassengers();
             stride.discard();
         }
-        UniqueAbilityApi.finish(state.execution, Phase3UniqueAbilities.FINISH, 0);
+        UniqueAbilityApi.finish(state.execution, StormSoulMasteryAbilities.FINISH, 0);
     }
 
     private static void spawnActivation(ServerWorld world, LivingEntity owner) {
@@ -722,13 +722,13 @@ public final class SoulstalkerAbilityManager {
         private Vec3d lastMomentumPoint;
         private long riftReady = Long.MIN_VALUE;
         private long lastCleaveTick = Long.MIN_VALUE;
-        private final Phase3AbilityTuning tuning;
+        private final StormSoulMasteryTuning tuning;
         private final UniqueAbilityExecution execution;
 
         private ActiveStride(UUID ownerId, UUID strideId, Hand hand,
                              ItemStack stackReference, ItemStack stackSnapshot,
                              long startedAt, long expiresAt, long suppressedSwingTick,
-                             Vec3d lastTrailPoint, Phase3AbilityTuning tuning,
+                             Vec3d lastTrailPoint, StormSoulMasteryTuning tuning,
                              UniqueAbilityExecution execution) {
             this.ownerId = ownerId;
             this.strideId = strideId;
@@ -746,6 +746,6 @@ public final class SoulstalkerAbilityManager {
 
     private record PendingStrike(UUID ownerId, UUID targetId, UUID visualId,
                                  ItemStack stack, float damage, long impactTick,
-                                 Phase3AbilityTuning tuning, UniqueAbilityExecution execution) {
+                                 StormSoulMasteryTuning tuning, UniqueAbilityExecution execution) {
     }
 }

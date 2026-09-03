@@ -22,8 +22,8 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
-import net.sweenus.simplyswords.api.ability.Phase7AbilityTuning;
-import net.sweenus.simplyswords.api.ability.Phase7UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.NatureSwarmMasteryTuning;
+import net.sweenus.simplyswords.api.ability.NatureSwarmMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.config.Config;
@@ -37,7 +37,7 @@ import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
 import net.sweenus.simplyswords.world.HivemindSwarmManager;
-import net.sweenus.simplyswords.world.Phase7CombatManager;
+import net.sweenus.simplyswords.world.NatureSwarmMasteryCombatManager;
 
 import java.util.List;
 import java.util.UUID;
@@ -54,9 +54,9 @@ public class HiveheartSwordItem extends UniqueSwordItem implements UniqueWeaponA
         }
         if (!attacker.getWorld().isClient()) {
             ServerWorld serverWorld = (ServerWorld) attacker.getWorld();
-            UniqueAbilityExecution execution = Phase7CombatManager.beginPassive(
-                    Phase7UniqueAbilities.HIVEHEART_PROC, serverWorld, stack, attacker, target);
-            Phase7AbilityTuning tuning = Phase7UniqueAbilities.tuning(execution);
+            UniqueAbilityExecution execution = NatureSwarmMasteryCombatManager.beginPassive(
+                    NatureSwarmMasteryAbilities.HIVEHEART_PROC, serverWorld, stack, attacker, target);
+            NatureSwarmMasteryTuning tuning = NatureSwarmMasteryAbilities.tuning(execution);
             int skillCooldown = procCooldown(Config.uniqueEffects.hiveheart.cooldown, tuning);
             float skillDamage = Config.uniqueEffects.hiveheart.beeDamageScaling;
             HelperMethods.playHitSounds(attacker, target);
@@ -69,14 +69,14 @@ public class HiveheartSwordItem extends UniqueSwordItem implements UniqueWeaponA
                         if (entity instanceof SimplySwordsBeeEntity bee && !bee.isHivemindSwarmBee()
                                 && attacker.getUuid().equals(bee.getOwnerUuid())) existing++;
                     }
-                    if (existing >= tuning.integer(Phase7AbilityTuning.Setting.HIVE_BUSY_BEE_CAP, 4)) {
-                        UniqueAbilityApi.finish(execution, Phase7UniqueAbilities.FINISH, 0);
+                    if (existing >= tuning.integer(NatureSwarmMasteryTuning.Setting.HIVE_BUSY_BEE_CAP, 4)) {
+                        UniqueAbilityApi.finish(execution, NatureSwarmMasteryAbilities.FINISH, 0);
                         return super.postHit(stack, target, attacker);
                     }
                 }
-                int proc = Phase7CombatManager.nextHiveProc(attacker);
+                int proc = NatureSwarmMasteryCombatManager.nextHiveProc(attacker);
                 int count = tuning.flag(1 << 5) && proc == 3
-                        ? Math.max(2, tuning.integer(Phase7AbilityTuning.Setting.HIVE_TWIN_COUNT, 2)) : 1;
+                        ? Math.max(2, tuning.integer(NatureSwarmMasteryTuning.Setting.HIVE_TWIN_COUNT, 2)) : 1;
                 boolean spawned = false;
                 UUID releaseId = UUID.randomUUID();
                 for (int i = 0; i < count; i++) {
@@ -91,45 +91,45 @@ public class HiveheartSwordItem extends UniqueSwordItem implements UniqueWeaponA
                     beeEntity.setInvulnerable(true);
                     beeEntity.setOwner(attacker);
                     beeEntity.setMasteryPoisonTicks(tuning.integer(
-                            Phase7AbilityTuning.Setting.HIVE_PROC_POISON_TICKS, 0));
+                            NatureSwarmMasteryTuning.Setting.HIVE_PROC_POISON_TICKS, 0));
                     beeEntity.setMasteryCooldownRefund(tuning.integer(
-                            Phase7AbilityTuning.Setting.HIVE_KILL_REFUND_TICKS, 0));
+                            NatureSwarmMasteryTuning.Setting.HIVE_KILL_REFUND_TICKS, 0));
                     beeEntity.setMasteryReleaseId(releaseId);
                     beeEntity.setMasteryTargetRangeBonus(tuning.get(
-                            Phase7AbilityTuning.Setting.HIVE_PROC_RANGE_BONUS, 0));
+                            NatureSwarmMasteryTuning.Setting.HIVE_PROC_RANGE_BONUS, 0));
                     beeEntity.configureMasteryPreferredTarget(target.getUuid(),
                             serverWorld.getTime() + tuning.integer(
-                                    Phase7AbilityTuning.Setting.HIVE_SHARED_TARGET_TICKS, 0),
-                            tuning.get(Phase7AbilityTuning.Setting.HIVE_SHARED_TARGET_MULTIPLIER, 1));
+                                    NatureSwarmMasteryTuning.Setting.HIVE_SHARED_TARGET_TICKS, 0),
+                            tuning.get(NatureSwarmMasteryTuning.Setting.HIVE_SHARED_TARGET_MULTIPLIER, 1));
                     double attackDamage = 1 + HelperMethods.abilityScaledDamage("nature", attacker, stack,
                             skillDamage, Config.uniqueEffects.hiveheart.beeSpellScaling);
-                    attackDamage *= tuning.get(Phase7AbilityTuning.Setting.HIVE_PROC_DAMAGE_MULTIPLIER, 1);
+                    attackDamage *= tuning.get(NatureSwarmMasteryTuning.Setting.HIVE_PROC_DAMAGE_MULTIPLIER, 1);
                     if (tuning.flag(1 << 7)) {
                         EntityAttributeInstance scale = beeEntity.getAttributeInstance(EntityAttributes.GENERIC_SCALE);
                         if (scale != null) scale.setBaseValue(1.6);
                         if (target.getHealth() / target.getMaxHealth()
-                                < tuning.get(Phase7AbilityTuning.Setting.HIVE_EXECUTION_HEALTH_THRESHOLD, .35)) {
+                                < tuning.get(NatureSwarmMasteryTuning.Setting.HIVE_EXECUTION_HEALTH_THRESHOLD, .35)) {
                             attackDamage *= tuning.get(
-                                    Phase7AbilityTuning.Setting.HIVE_EXECUTION_DAMAGE_MULTIPLIER, 2.2);
+                                    NatureSwarmMasteryTuning.Setting.HIVE_EXECUTION_DAMAGE_MULTIPLIER, 2.2);
                         }
                     }
                     if (count > 1) attackDamage *= tuning.get(
-                            Phase7AbilityTuning.Setting.HIVE_TWIN_DAMAGE_MULTIPLIER, 1);
+                            NatureSwarmMasteryTuning.Setting.HIVE_TWIN_DAMAGE_MULTIPLIER, 1);
                     if (tuning.flag(1 << 8)) attackDamage *= tuning.get(
-                            Phase7AbilityTuning.Setting.HIVE_BUSY_DAMAGE_MULTIPLIER, 1);
+                            NatureSwarmMasteryTuning.Setting.HIVE_BUSY_DAMAGE_MULTIPLIER, 1);
                     EntityAttributeInstance attackAttribute = beeEntity.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE);
                     if (attackAttribute != null)
                         attackAttribute.setBaseValue(attackDamage);
                     spawned = true;
                     UniqueAbilityApi.emit(execution, net.sweenus.simplyswords.api.ability.UniqueAbilityPhase.HIT,
-                            Phase7UniqueAbilities.PULSE, target, 1, attackDamage);
+                            NatureSwarmMasteryAbilities.PULSE, target, 1, attackDamage);
                 }
                 }
                 if (spawned && !tuning.flag(1 << 8)) {
                     SimplySwordsAPI.setWeaponCooldown(player, stack, skillCooldown);
                 }
             }
-            UniqueAbilityApi.finish(execution, Phase7UniqueAbilities.FINISH, 0);
+            UniqueAbilityApi.finish(execution, NatureSwarmMasteryAbilities.FINISH, 0);
         }
         return super.postHit(stack, target, attacker);
     }
@@ -164,12 +164,12 @@ public class HiveheartSwordItem extends UniqueSwordItem implements UniqueWeaponA
         return Config.uniqueEffects.hiveheart.activeCooldown;
     }
 
-    static int procCooldown(int configuredCooldown, Phase7AbilityTuning tuning) {
+    static int procCooldown(int configuredCooldown, NatureSwarmMasteryTuning tuning) {
         int cooldown = Math.max(0, configuredCooldown + tuning.integer(
-                Phase7AbilityTuning.Setting.HIVE_PROC_COOLDOWN_BONUS_TICKS, 0));
+                NatureSwarmMasteryTuning.Setting.HIVE_PROC_COOLDOWN_BONUS_TICKS, 0));
         if (tuning.flag(1 << 7)) {
             cooldown = (int) Math.round(cooldown * tuning.get(
-                    Phase7AbilityTuning.Setting.HIVE_EXECUTION_COOLDOWN_MULTIPLIER, 1));
+                    NatureSwarmMasteryTuning.Setting.HIVE_EXECUTION_COOLDOWN_MULTIPLIER, 1));
         }
         return Math.max(0, cooldown);
     }

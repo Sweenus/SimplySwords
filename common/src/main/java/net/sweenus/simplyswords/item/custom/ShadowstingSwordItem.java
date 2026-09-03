@@ -18,8 +18,8 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
-import net.sweenus.simplyswords.api.ability.Phase8AbilityTuning;
-import net.sweenus.simplyswords.api.ability.Phase8UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.DeathShadowBloodMasteryTuning;
+import net.sweenus.simplyswords.api.ability.DeathShadowBloodMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.config.Config;
@@ -31,7 +31,7 @@ import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
 import net.sweenus.simplyswords.world.ShadowstingShadowDanceManager;
-import net.sweenus.simplyswords.world.Phase8CombatManager;
+import net.sweenus.simplyswords.world.DeathShadowBloodMasteryCombatManager;
 
 import java.util.List;
 
@@ -51,9 +51,9 @@ public class ShadowstingSwordItem extends UniqueSwordItem implements UniqueWeapo
                 && attacker instanceof ServerPlayerEntity serverPlayer
                 && attacker.getWorld() instanceof ServerWorld serverWorld
                 && target.isAlive()) {
-            UniqueAbilityExecution execution = Phase8CombatManager.beginPassive(
-                    Phase8UniqueAbilities.SHADOW_ECHO, serverWorld, stack, attacker, target);
-            Phase8AbilityTuning tuning = Phase8UniqueAbilities.tuning(execution);
+            UniqueAbilityExecution execution = DeathShadowBloodMasteryCombatManager.beginPassive(
+                    DeathShadowBloodMasteryAbilities.SHADOW_ECHO, serverWorld, stack, attacker, target);
+            DeathShadowBloodMasteryTuning tuning = DeathShadowBloodMasteryAbilities.tuning(execution);
             ShadowstingShadowDanceManager.consumeVeil(serverPlayer, tuning);
             ShadowstingShadowDanceManager.applyUmbralMarkBonus(serverWorld, serverPlayer, target, tuning);
             if (ShadowstingShadowDanceManager.canPassiveProc(serverWorld, serverPlayer, tuning)
@@ -61,7 +61,7 @@ public class ShadowstingSwordItem extends UniqueSwordItem implements UniqueWeapo
                     Config.uniqueEffects.shadowsting.chance, tuning)) {
                 ShadowstingShadowDanceManager.schedulePassiveCloneStrike(serverWorld, serverPlayer, target, tuning);
             }
-            UniqueAbilityApi.finish(execution, Phase8UniqueAbilities.FINISH, 1);
+            UniqueAbilityApi.finish(execution, DeathShadowBloodMasteryAbilities.FINISH, 1);
         }
         return super.postHit(stack, target, attacker);
     }
@@ -90,9 +90,9 @@ public class ShadowstingSwordItem extends UniqueSwordItem implements UniqueWeapo
 
     @Override
     public boolean activate(WeaponAbilityContext context) {
-        UniqueAbilityExecution execution = Phase8CombatManager.beginActive(
-                Phase8UniqueAbilities.SHADOW_DANCE, context, Config.uniqueEffects.shadowsting.cooldown);
-        Phase8AbilityTuning tuning = Phase8UniqueAbilities.tuning(execution);
+        UniqueAbilityExecution execution = DeathShadowBloodMasteryCombatManager.beginActive(
+                DeathShadowBloodMasteryAbilities.SHADOW_DANCE, context, Config.uniqueEffects.shadowsting.cooldown);
+        DeathShadowBloodMasteryTuning tuning = DeathShadowBloodMasteryAbilities.tuning(execution);
         boolean started;
         if (context.actor() instanceof ServerPlayerEntity player) {
             started = ShadowstingShadowDanceManager.start(context.world(), player, context.stack(), tuning);
@@ -100,7 +100,7 @@ public class ShadowstingSwordItem extends UniqueSwordItem implements UniqueWeapo
             started = context.target() != null && HelperMethods.checkAbilityTarget(context.target(), context.actor())
                     && ShadowstingShadowDanceManager.start(context.world(), context.actor(), context.target(), context.stack(), tuning);
         }
-        if (started) Phase8CombatManager.scheduleFinish(context.world(), execution,
+        if (started) DeathShadowBloodMasteryCombatManager.scheduleFinish(context.world(), execution,
                 ShadowstingShadowDanceManager.danceDuration(
                         Math.max(1, Config.uniqueEffects.shadowsting.duration / 2),
                         Math.max(1, Config.uniqueEffects.shadowsting.strikeInterval / 2), tuning)

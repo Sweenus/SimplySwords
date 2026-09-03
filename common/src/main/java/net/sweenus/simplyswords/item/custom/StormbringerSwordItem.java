@@ -18,8 +18,8 @@ import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.UseAction;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
-import net.sweenus.simplyswords.api.ability.Phase6AbilityTuning;
-import net.sweenus.simplyswords.api.ability.Phase6UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.StormFrostWaterMasteryTuning;
+import net.sweenus.simplyswords.api.ability.StormFrostWaterMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
@@ -35,7 +35,7 @@ import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.WeaponManaCost;
 import net.sweenus.simplyswords.util.Styles;
 import net.sweenus.simplyswords.world.PlayerWeaponAbilityChannelManager;
-import net.sweenus.simplyswords.world.Phase6CombatManager;
+import net.sweenus.simplyswords.world.StormFrostWaterMasteryCombatManager;
 import net.sweenus.simplyswords.world.StormbringerAbilityManager;
 import net.sweenus.simplyswords.world.StormbringerParryManager;
 
@@ -107,9 +107,9 @@ public class StormbringerSwordItem extends UniqueSwordItem implements UniqueWeap
     public boolean activate(WeaponAbilityContext context) {
         LivingEntity actor = context.actor();
         ItemStack stack = context.stack();
-        UniqueAbilityExecution execution = Phase6CombatManager.beginActive(
-                Phase6UniqueAbilities.STORMBRINGER_GUARD, context, Config.uniqueEffects.stormbringer.cooldown);
-        Phase6AbilityTuning tuning = Phase6UniqueAbilities.tuning(execution);
+        UniqueAbilityExecution execution = StormFrostWaterMasteryCombatManager.beginActive(
+                StormFrostWaterMasteryAbilities.STORMBRINGER_GUARD, context, Config.uniqueEffects.stormbringer.cooldown);
+        StormFrostWaterMasteryTuning tuning = StormFrostWaterMasteryAbilities.tuning(execution);
         actor.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE,
                 scopedInteger(tuning, "STORMBRINGER_BLOCK_DURATION_TICKS", "DURATION_TICKS",
                         Math.max(1, Config.uniqueEffects.stormbringer.blockDuration)), 5), actor);
@@ -121,7 +121,7 @@ public class StormbringerSwordItem extends UniqueSwordItem implements UniqueWeap
                         Config.uniqueEffects.stormbringer.maxStormCharges));
         stack.set(ComponentTypeRegistry.PARRY.get(), parryComponent);
         context.world().spawnParticles(ParticleTypes.ELECTRIC_SPARK, actor.getX(), actor.getBodyY(0.5), actor.getZ(), 18, 0.35, 0.38, 0.35, 0.06);
-        UniqueAbilityApi.finish(execution, Phase6UniqueAbilities.FINISH, 0);
+        UniqueAbilityApi.finish(execution, StormFrostWaterMasteryAbilities.FINISH, 0);
         return true;
     }
 
@@ -203,17 +203,17 @@ public class StormbringerSwordItem extends UniqueSwordItem implements UniqueWeap
 
     }
 
-    private static double scoped(Phase6AbilityTuning tuning, String scoped, String generic, double fallback) {
-        Phase6AbilityTuning.Setting scopedSetting = s(scoped);
+    private static double scoped(StormFrostWaterMasteryTuning tuning, String scoped, String generic, double fallback) {
+        StormFrostWaterMasteryTuning.Setting scopedSetting = s(scoped);
         if (tuning.has(scopedSetting)) return tuning.get(scopedSetting, fallback);
         return generic == null ? fallback : tuning.get(s(generic), fallback);
     }
 
-    private static int scopedInteger(Phase6AbilityTuning tuning, String scoped, String generic, int fallback) {
+    private static int scopedInteger(StormFrostWaterMasteryTuning tuning, String scoped, String generic, int fallback) {
         return (int) Math.round(scoped(tuning, scoped, generic, fallback));
     }
 
-    private static Phase6AbilityTuning.Setting s(String name) {
-        return Phase6AbilityTuning.Setting.valueOf(name);
+    private static StormFrostWaterMasteryTuning.Setting s(String name) {
+        return StormFrostWaterMasteryTuning.Setting.valueOf(name);
     }
 }

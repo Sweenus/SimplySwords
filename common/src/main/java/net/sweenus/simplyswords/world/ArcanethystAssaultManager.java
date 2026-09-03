@@ -16,8 +16,8 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.config.Config;
-import net.sweenus.simplyswords.api.ability.Phase9AbilityTuning;
-import net.sweenus.simplyswords.api.ability.Phase9UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.ArcaneCosmicMasteryTuning;
+import net.sweenus.simplyswords.api.ability.ArcaneCosmicMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -50,7 +50,7 @@ public final class ArcanethystAssaultManager {
         List<ActiveAssault> assaults = ACTIVE_ASSAULTS.remove(world);
         if (assaults != null) assaults.forEach(assault -> {
             restoreTargets(world, assault);
-            Phase9CombatManager.finish(assault.execution, assault.processedTargets.size());
+            ArcaneCosmicMasteryCombatManager.finish(assault.execution, assault.processedTargets.size());
         });
         PENDING_PULSES.remove(world);
         FIELDS.remove(world);
@@ -73,11 +73,11 @@ public final class ArcanethystAssaultManager {
     }
 
     public static void start(ServerWorld world, LivingEntity owner, ItemStack stack, double radius, float damage) {
-        start(world, owner, stack, radius, damage, Phase9AbilityTuning.EMPTY, null);
+        start(world, owner, stack, radius, damage, ArcaneCosmicMasteryTuning.EMPTY, null);
     }
 
     public static void start(ServerWorld world, LivingEntity owner, ItemStack stack, double radius, float damage,
-                             Phase9AbilityTuning suspension, UniqueAbilityExecution execution) {
+                             ArcaneCosmicMasteryTuning suspension, UniqueAbilityExecution execution) {
         if (owner == null || !owner.isAlive()) {
             return;
         }
@@ -89,17 +89,17 @@ public final class ArcanethystAssaultManager {
                 return false;
             }
             restoreTargets(world, assault);
-            Phase9CombatManager.finish(assault.execution, assault.processedTargets.size());
+            ArcaneCosmicMasteryCombatManager.finish(assault.execution, assault.processedTargets.size());
             return true;
         });
-        UniqueAbilityExecution impactExecution = Phase9CombatManager.beginPassive(
-                Phase9UniqueAbilities.ARCANETHYST_IMPACT, world, stack, owner, null, impactBase());
-        Phase9AbilityTuning impact = Phase9UniqueAbilities.tuning(impactExecution);
-        Phase9CombatManager.finish(impactExecution, 0);
+        UniqueAbilityExecution impactExecution = ArcaneCosmicMasteryCombatManager.beginPassive(
+                ArcaneCosmicMasteryAbilities.ARCANETHYST_IMPACT, world, stack, owner, null, impactBase());
+        ArcaneCosmicMasteryTuning impact = ArcaneCosmicMasteryAbilities.tuning(impactExecution);
+        ArcaneCosmicMasteryCombatManager.finish(impactExecution, 0);
         ActiveAssault assault = new ActiveAssault(owner.getUuid(), stack.copy(), now,
-                now + Math.max(1, suspension.integer(Phase9AbilityTuning.Setting.SECONDARY_DURATION_TICKS,
+                now + Math.max(1, suspension.integer(ArcaneCosmicMasteryTuning.Setting.SECONDARY_DURATION_TICKS,
                         Config.uniqueEffects.arcanethyst.duration)), now,
-                suspension.get(Phase9AbilityTuning.Setting.RADIUS, radius), damage,
+                suspension.get(ArcaneCosmicMasteryTuning.Setting.RADIUS, radius), damage,
                 new ArrayList<>(), new HashSet<>(), suspension, impact, execution);
         scanForTargets(world, owner, assault);
         assaults.add(assault);
@@ -119,7 +119,7 @@ public final class ArcanethystAssaultManager {
         while (iterator.hasNext()) {
             ActiveAssault assault = iterator.next();
             if (tickAssault(world, assault)) {
-                Phase9CombatManager.finish(assault.execution, assault.processedTargets.size());
+                ArcaneCosmicMasteryCombatManager.finish(assault.execution, assault.processedTargets.size());
                 iterator.remove();
             }
         }
@@ -153,11 +153,11 @@ public final class ArcanethystAssaultManager {
 
     private static boolean tickTargets(ServerWorld world, LivingEntity owner, ActiveAssault assault) {
         int liftTicks = Math.max(1, assault.suspension().integer(
-                Phase9AbilityTuning.Setting.WINDUP_TICKS, Config.uniqueEffects.arcanethyst.liftTicks));
+                ArcaneCosmicMasteryTuning.Setting.WINDUP_TICKS, Config.uniqueEffects.arcanethyst.liftTicks));
         int suspendTicks = Math.max(0, assault.suspension().integer(
-                Phase9AbilityTuning.Setting.DURATION_TICKS, Config.uniqueEffects.arcanethyst.suspendTicks));
+                ArcaneCosmicMasteryTuning.Setting.DURATION_TICKS, Config.uniqueEffects.arcanethyst.suspendTicks));
         int slamTicks = Math.max(6, assault.impact().integer(
-                Phase9AbilityTuning.Setting.INTERVAL_TICKS, Config.uniqueEffects.arcanethyst.slamTicks));
+                ArcaneCosmicMasteryTuning.Setting.INTERVAL_TICKS, Config.uniqueEffects.arcanethyst.slamTicks));
 
         assault.targets().removeIf(active -> {
             Entity entity = world.getEntity(active.targetId());
@@ -198,9 +198,9 @@ public final class ArcanethystAssaultManager {
             if (entity instanceof LivingEntity target && canTarget(owner, target, assault)) {
                 assault.processedTargets().add(target.getUuid());
                 double height = assault.impact().flag(1 << 25)
-                        ? assault.impact().get(Phase9AbilityTuning.Setting.HEIGHT,
+                        ? assault.impact().get(ArcaneCosmicMasteryTuning.Setting.HEIGHT,
                         Config.uniqueEffects.arcanethyst.liftHeight)
-                        : assault.suspension().get(Phase9AbilityTuning.Setting.HEIGHT,
+                        : assault.suspension().get(ArcaneCosmicMasteryTuning.Setting.HEIGHT,
                         Config.uniqueEffects.arcanethyst.liftHeight);
                 assault.targets().add(new ActiveTarget(target.getUuid(), world.getTime(), target.getY(),
                         target.getY() + height, target.hasNoGravity()));
@@ -219,11 +219,11 @@ public final class ArcanethystAssaultManager {
     }
 
     private static void tickLift(ServerWorld world, LivingEntity owner, LivingEntity target, ActiveTarget active,
-                                 long age, int liftTicks, Phase9AbilityTuning tuning) {
+                                 long age, int liftTicks, ArcaneCosmicMasteryTuning tuning) {
         if (tuning.flag(1 << 17)) {
             Vec3d pull = owner.getPos().subtract(target.getPos()).multiply(1, 0, 1);
             target.setVelocity(pull.lengthSquared() == 0 ? Vec3d.ZERO : pull.normalize().multiply(
-                    tuning.get(Phase9AbilityTuning.Setting.PULL_STRENGTH, .18)));
+                    tuning.get(ArcaneCosmicMasteryTuning.Setting.PULL_STRENGTH, .18)));
             target.velocityModified = true;
             return;
         }
@@ -236,7 +236,7 @@ public final class ArcanethystAssaultManager {
     }
 
     private static void tickSuspend(ServerWorld world, LivingEntity owner, LivingEntity target,
-                                    ActiveTarget active, Phase9AbilityTuning tuning) {
+                                    ActiveTarget active, ArcaneCosmicMasteryTuning tuning) {
         Vec3d velocity = target.getVelocity();
         double horizontal = tuning.flag(1 << 13) ? .3 : 0;
         target.setVelocity(velocity.x * horizontal, (active.hoverY() - target.getY()) * 0.28,
@@ -254,22 +254,22 @@ public final class ArcanethystAssaultManager {
             restoreTarget(world, active);
             target.fallDistance = 0.0F;
             var damageSource = world.getDamageSources().indirectMagic(owner, owner);
-            float multiplier = (float) assault.impact().get(Phase9AbilityTuning.Setting.FINAL_DAMAGE_MULTIPLIER,
+            float multiplier = (float) assault.impact().get(ArcaneCosmicMasteryTuning.Setting.FINAL_DAMAGE_MULTIPLIER,
                     Config.uniqueEffects.arcanethyst.slamDamageMultiplier);
             Map<UUID, Long> brands = ARCANE_BRANDS.get(owner.getUuid());
             if (brands != null && brands.getOrDefault(target.getUuid(), 0L) > world.getTime()) multiplier *= 1.1F;
             if (assault.suspension().flag(1 << 15)) multiplier *= 1 + Math.min(8,
                     assault.targets().size()) * assault.suspension().get(
-                    Phase9AbilityTuning.Setting.PER_STACK_MULTIPLIER, .03);
+                    ArcaneCosmicMasteryTuning.Setting.PER_STACK_MULTIPLIER, .03);
             if (assault.suspension().flag(1 << 16)) multiplier *= assault.suspension().get(
-                    Phase9AbilityTuning.Setting.FINAL_DAMAGE_MULTIPLIER, 1.4);
+                    ArcaneCosmicMasteryTuning.Setting.FINAL_DAMAGE_MULTIPLIER, 1.4);
             if (assault.suspension().flag(1 << 17)) multiplier *= assault.suspension().get(
-                    Phase9AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1);
+                    ArcaneCosmicMasteryTuning.Setting.DAMAGE_MULTIPLIER, 1);
             if (assault.impact().flag(1 << 22)) {
                 double lifted = Math.max(0, active.hoverY() - active.startY());
-                double beyond = Math.max(0, lifted - assault.impact().integer(Phase9AbilityTuning.Setting.COUNT, 4));
-                multiplier *= 1 + Math.min(beyond, assault.impact().integer(Phase9AbilityTuning.Setting.COUNT, 4))
-                        * assault.impact().get(Phase9AbilityTuning.Setting.PER_STACK_MULTIPLIER, .05);
+                double beyond = Math.max(0, lifted - assault.impact().integer(ArcaneCosmicMasteryTuning.Setting.COUNT, 4));
+                multiplier *= 1 + Math.min(beyond, assault.impact().integer(ArcaneCosmicMasteryTuning.Setting.COUNT, 4))
+                        * assault.impact().get(ArcaneCosmicMasteryTuning.Setting.PER_STACK_MULTIPLIER, .05);
             }
             float slamDamage = HelperMethods.applyAbilityDamageEnchantments(world, assault.stack(), target,
                     damageSource, assault.damage() * multiplier);
@@ -277,7 +277,7 @@ public final class ArcanethystAssaultManager {
             applyImpact(world, owner, assault, target, slamDamage);
             if (assault.suspension().flag(1 << 14)) target.addStatusEffect(new StatusEffectInstance(
                     StatusEffects.SLOWNESS, assault.suspension().integer(
-                    Phase9AbilityTuning.Setting.STATUS_DURATION_TICKS, 30), 2), owner);
+                    ArcaneCosmicMasteryTuning.Setting.STATUS_DURATION_TICKS, 30), 2), owner);
             spawnImpact(world, target.getPos());
             return true;
         }
@@ -285,70 +285,70 @@ public final class ArcanethystAssaultManager {
     }
 
     public static void markTarget(ServerWorld world, LivingEntity owner, LivingEntity target,
-                                  Phase9AbilityTuning tuning) {
+                                  ArcaneCosmicMasteryTuning tuning) {
         if (!tuning.flag(1 << 3)) return;
         Map<UUID, Long> brands = ARCANE_BRANDS.computeIfAbsent(owner.getUuid(), ignored -> new HashMap<>());
         brands.put(target.getUuid(), world.getTime() + tuning.integer(
-                Phase9AbilityTuning.Setting.DURATION_TICKS, 60));
+                ArcaneCosmicMasteryTuning.Setting.DURATION_TICKS, 60));
         if (brands.size() > 32) brands.entrySet().stream().min(Map.Entry.comparingByValue())
                 .ifPresent(entry -> brands.remove(entry.getKey()));
     }
 
-    public static float sparkDamage(Phase9AbilityTuning tuning, float base) {
-        return base * (float) tuning.get(Phase9AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1)
-                * (float) tuning.get(Phase9AbilityTuning.Setting.SPELL_MULTIPLIER, 1);
+    public static float sparkDamage(ArcaneCosmicMasteryTuning tuning, float base) {
+        return base * (float) tuning.get(ArcaneCosmicMasteryTuning.Setting.DAMAGE_MULTIPLIER, 1)
+                * (float) tuning.get(ArcaneCosmicMasteryTuning.Setting.SPELL_MULTIPLIER, 1);
     }
 
     public static void onPassiveProc(ServerWorld world, LivingEntity owner, LivingEntity target, ItemStack stack,
-                                     Phase9AbilityTuning tuning) {
+                                     ArcaneCosmicMasteryTuning tuning) {
         if (tuning.flag(1 << 5)) target.addStatusEffect(new StatusEffectInstance(
                 StatusEffects.WEAKNESS, tuning.integer(
-                        Phase9AbilityTuning.Setting.SECONDARY_STATUS_DURATION_TICKS, 40), 0), owner);
+                        ArcaneCosmicMasteryTuning.Setting.SECONDARY_STATUS_DURATION_TICKS, 40), 0), owner);
         if (tuning.flag(1 << 6) && owner.getHealth() >= owner.getMaxHealth()
                 && OVERFLOW_LOCKOUTS.getOrDefault(owner.getUuid(), 0L) <= world.getTime()) {
-            Phase4AbsorptionTracker.grant(owner, (float) tuning.get(Phase9AbilityTuning.Setting.ABSORPTION, 4),
-                    Math.max(1, tuning.integer(Phase9AbilityTuning.Setting.WINDUP_TICKS, 60)),
-                    (float) tuning.get(Phase9AbilityTuning.Setting.ABSORPTION, 4));
+            MasteryAbsorptionTracker.grant(owner, (float) tuning.get(ArcaneCosmicMasteryTuning.Setting.ABSORPTION, 4),
+                    Math.max(1, tuning.integer(ArcaneCosmicMasteryTuning.Setting.WINDUP_TICKS, 60)),
+                    (float) tuning.get(ArcaneCosmicMasteryTuning.Setting.ABSORPTION, 4));
             OVERFLOW_LOCKOUTS.put(owner.getUuid(), world.getTime()
-                    + tuning.integer(Phase9AbilityTuning.Setting.LOCKOUT_TICKS, 100));
+                    + tuning.integer(ArcaneCosmicMasteryTuning.Setting.LOCKOUT_TICKS, 100));
         }
         int proc = PASSIVE_PROCS.merge(owner.getUuid(), 1, Integer::sum);
         if (tuning.flag(1 << 4) && proc % 4 == 0) PENDING_PULSES.computeIfAbsent(world,
                 ignored -> new ArrayList<>()).add(new PendingPulse(owner.getUuid(), target.getUuid(), stack.copy(),
-                world.getTime() + tuning.integer(Phase9AbilityTuning.Setting.DELAY_TICKS, 6), tuning, false));
+                world.getTime() + tuning.integer(ArcaneCosmicMasteryTuning.Setting.DELAY_TICKS, 6), tuning, false));
         if (tuning.flag(1 << 7)) PENDING_PULSES.computeIfAbsent(world, ignored -> new ArrayList<>()).add(
                 new PendingPulse(owner.getUuid(), target.getUuid(), stack.copy(), world.getTime() + 1, tuning, true));
     }
 
     private static void applyImpact(ServerWorld world, LivingEntity owner, ActiveAssault assault,
                                     LivingEntity primary, float slamDamage) {
-        Phase9AbilityTuning tuning = assault.impact();
+        ArcaneCosmicMasteryTuning tuning = assault.impact();
         if (tuning.flag(1 << 21)) {
             primary.addStatusEffect(new StatusEffectInstance(StatusEffects.GLOWING, 40, 0), owner);
             primary.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 40, 0), owner);
         }
-        double radius = tuning.get(Phase9AbilityTuning.Setting.SECONDARY_RADIUS, 0);
+        double radius = tuning.get(ArcaneCosmicMasteryTuning.Setting.SECONDARY_RADIUS, 0);
         if (radius > 0) {
             world.getEntitiesByClass(LivingEntity.class, primary.getBoundingBox().expand(radius),
                             entity -> entity != primary && HelperMethods.checkAbilityTarget(entity, owner))
-                    .stream().limit(tuning.integer(Phase9AbilityTuning.Setting.TARGET_CAP, 6)).forEach(entity -> {
+                    .stream().limit(tuning.integer(ArcaneCosmicMasteryTuning.Setting.TARGET_CAP, 6)).forEach(entity -> {
                         HelperMethods.damageThroughIframes(entity, world.getDamageSources().indirectMagic(owner, owner),
                                 slamDamage * (float) tuning.get(
-                                        Phase9AbilityTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, .35));
+                                        ArcaneCosmicMasteryTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, .35));
                         if (tuning.flag(1 << 23)) {
                             Vec3d push = entity.getPos().subtract(primary.getPos()).multiply(1, 0, 1);
                             if (push.lengthSquared() > 0) entity.addVelocity(push.normalize().multiply(
-                                    tuning.get(Phase9AbilityTuning.Setting.KNOCKBACK, .5)));
+                                    tuning.get(ArcaneCosmicMasteryTuning.Setting.KNOCKBACK, .5)));
                         }
                     });
         }
         if (tuning.flag(1 << 24)) PENDING_PULSES.computeIfAbsent(world, ignored -> new ArrayList<>()).add(
                 new PendingPulse(owner.getUuid(), primary.getUuid(), assault.stack().copy(), world.getTime()
-                        + tuning.integer(Phase9AbilityTuning.Setting.DELAY_TICKS, 12), tuning, false));
+                        + tuning.integer(ArcaneCosmicMasteryTuning.Setting.DELAY_TICKS, 12), tuning, false));
         if (tuning.flag(1 << 26)) FIELDS.computeIfAbsent(world, ignored -> new ArrayList<>()).add(
                 new AmethystField(owner.getUuid(), assault.stack().copy(), primary.getPos(),
                         world.getTime() + Math.max(1, tuning.integer(
-                                Phase9AbilityTuning.Setting.TERTIARY_DURATION_TICKS, 80)),
+                                ArcaneCosmicMasteryTuning.Setting.TERTIARY_DURATION_TICKS, 80)),
                         world.getTime(), tuning, slamDamage));
     }
 
@@ -360,16 +360,16 @@ public final class ArcanethystAssaultManager {
             LivingEntity owner = world.getEntity(field.ownerId) instanceof LivingEntity living ? living : null;
             if (owner == null || !owner.isAlive()) return true;
             int interval = Math.max(1, field.tuning.integer(
-                    Phase9AbilityTuning.Setting.TERTIARY_INTERVAL_TICKS, 20));
+                    ArcaneCosmicMasteryTuning.Setting.TERTIARY_INTERVAL_TICKS, 20));
             if ((world.getTime() - field.startedAt) % interval != 0) return false;
-            double radius = Math.max(.5, field.tuning.get(Phase9AbilityTuning.Setting.RADIUS, 5));
+            double radius = Math.max(.5, field.tuning.get(ArcaneCosmicMasteryTuning.Setting.RADIUS, 5));
             float damage = field.slamDamage * (float) field.tuning.get(
-                    Phase9AbilityTuning.Setting.SPELL_MULTIPLIER, .2);
+                    ArcaneCosmicMasteryTuning.Setting.SPELL_MULTIPLIER, .2);
             world.getEntitiesByClass(LivingEntity.class,
                             new net.minecraft.util.math.Box(field.center, field.center).expand(radius),
                             entity -> HelperMethods.checkAbilityTarget(entity, owner))
                     .stream().limit(field.tuning.integer(
-                            Phase9AbilityTuning.Setting.TERTIARY_TARGET_CAP, 8))
+                            ArcaneCosmicMasteryTuning.Setting.TERTIARY_TARGET_CAP, 8))
                     .forEach(entity -> HelperMethods.damageThroughIframes(entity,
                             world.getDamageSources().indirectMagic(owner, owner), damage));
             spawnImpact(world, field.center);
@@ -379,44 +379,44 @@ public final class ArcanethystAssaultManager {
     }
 
     private record AmethystField(UUID ownerId, ItemStack stack, Vec3d center, long expiresAt,
-                                 long startedAt, Phase9AbilityTuning tuning, float slamDamage) {
+                                 long startedAt, ArcaneCosmicMasteryTuning tuning, float slamDamage) {
     }
 
-    public static Phase9AbilityTuning impactBase(double slamDamageMultiplier, int slamTicks) {
-        return Phase9AbilityTuning.EMPTY
-                .with(Phase9AbilityTuning.Setting.FINAL_DAMAGE_MULTIPLIER, slamDamageMultiplier)
-                .with(Phase9AbilityTuning.Setting.INTERVAL_TICKS, slamTicks);
+    public static ArcaneCosmicMasteryTuning impactBase(double slamDamageMultiplier, int slamTicks) {
+        return ArcaneCosmicMasteryTuning.EMPTY
+                .with(ArcaneCosmicMasteryTuning.Setting.FINAL_DAMAGE_MULTIPLIER, slamDamageMultiplier)
+                .with(ArcaneCosmicMasteryTuning.Setting.INTERVAL_TICKS, slamTicks);
     }
 
-    public static Phase9AbilityTuning suspensionBase(double liftHeight, int liftTicks, int suspendTicks,
+    public static ArcaneCosmicMasteryTuning suspensionBase(double liftHeight, int liftTicks, int suspendTicks,
                                                      double radius, int duration) {
-        return Phase9AbilityTuning.EMPTY
-                .with(Phase9AbilityTuning.Setting.HEIGHT, liftHeight)
-                .with(Phase9AbilityTuning.Setting.WINDUP_TICKS, liftTicks)
-                .with(Phase9AbilityTuning.Setting.DURATION_TICKS, suspendTicks)
-                .with(Phase9AbilityTuning.Setting.RADIUS, radius)
-                .with(Phase9AbilityTuning.Setting.SECONDARY_DURATION_TICKS, duration);
+        return ArcaneCosmicMasteryTuning.EMPTY
+                .with(ArcaneCosmicMasteryTuning.Setting.HEIGHT, liftHeight)
+                .with(ArcaneCosmicMasteryTuning.Setting.WINDUP_TICKS, liftTicks)
+                .with(ArcaneCosmicMasteryTuning.Setting.DURATION_TICKS, suspendTicks)
+                .with(ArcaneCosmicMasteryTuning.Setting.RADIUS, radius)
+                .with(ArcaneCosmicMasteryTuning.Setting.SECONDARY_DURATION_TICKS, duration);
     }
 
-    public static Phase9AbilityTuning sparkBase(int chance) {
-        return Phase9AbilityTuning.EMPTY
-                .with(Phase9AbilityTuning.Setting.CHANCE, chance)
-                .with(Phase9AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1)
-                .with(Phase9AbilityTuning.Setting.SPELL_MULTIPLIER, 1);
+    public static ArcaneCosmicMasteryTuning sparkBase(int chance) {
+        return ArcaneCosmicMasteryTuning.EMPTY
+                .with(ArcaneCosmicMasteryTuning.Setting.CHANCE, chance)
+                .with(ArcaneCosmicMasteryTuning.Setting.DAMAGE_MULTIPLIER, 1)
+                .with(ArcaneCosmicMasteryTuning.Setting.SPELL_MULTIPLIER, 1);
     }
 
-    public static Phase9AbilityTuning impactBase() {
+    public static ArcaneCosmicMasteryTuning impactBase() {
         return impactBase(Config.uniqueEffects.arcanethyst.slamDamageMultiplier,
                 Config.uniqueEffects.arcanethyst.slamTicks);
     }
 
-    public static Phase9AbilityTuning suspensionBase() {
+    public static ArcaneCosmicMasteryTuning suspensionBase() {
         return suspensionBase(Config.uniqueEffects.arcanethyst.liftHeight,
                 Config.uniqueEffects.arcanethyst.liftTicks, Config.uniqueEffects.arcanethyst.suspendTicks,
                 Config.uniqueEffects.arcanethyst.radius, Config.uniqueEffects.arcanethyst.duration);
     }
 
-    public static Phase9AbilityTuning sparkBase() {
+    public static ArcaneCosmicMasteryTuning sparkBase() {
         return sparkBase(Config.uniqueEffects.arcanethyst.chance);
     }
 
@@ -434,14 +434,14 @@ public final class ArcanethystAssaultManager {
                                     entity -> entity != target && HelperMethods.checkAbilityTarget(entity, owner))
                             .stream().findFirst().ifPresent(entity -> entity.addStatusEffect(
                                     new StatusEffectInstance(StatusEffects.LEVITATION,
-                                            pulse.tuning().integer(Phase9AbilityTuning.Setting.SECONDARY_DURATION_TICKS, 36), 1), owner));
+                                            pulse.tuning().integer(ArcaneCosmicMasteryTuning.Setting.SECONDARY_DURATION_TICKS, 36), 1), owner));
                 } else {
                     float damage = HelperMethods.abilityScaledDamage("arcane", owner, pulse.stack(),
                             Config.uniqueEffects.arcanethyst.damageScaling * (float) pulse.tuning().get(
-                                    Phase9AbilityTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, .4),
+                                    ArcaneCosmicMasteryTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, .4),
                             Config.uniqueEffects.arcanethyst.spellScaling);
                     world.getEntitiesByClass(LivingEntity.class, target.getBoundingBox().expand(
-                                            pulse.tuning().get(Phase9AbilityTuning.Setting.RADIUS, 3)),
+                                            pulse.tuning().get(ArcaneCosmicMasteryTuning.Setting.RADIUS, 3)),
                                     entity -> HelperMethods.checkAbilityTarget(entity, owner))
                             .forEach(entity -> HelperMethods.damageThroughIframes(entity,
                                     world.getDamageSources().indirectMagic(owner, owner), damage));
@@ -535,13 +535,13 @@ public final class ArcanethystAssaultManager {
         private final float damage;
         private final List<ActiveTarget> targets;
         private final Set<UUID> processedTargets;
-        private final Phase9AbilityTuning suspension;
-        private final Phase9AbilityTuning impact;
+        private final ArcaneCosmicMasteryTuning suspension;
+        private final ArcaneCosmicMasteryTuning impact;
         private final UniqueAbilityExecution execution;
 
         private ActiveAssault(UUID ownerId, ItemStack stack, long startTick, long expiryTick, long nextScanTick,
                               double radius, float damage, List<ActiveTarget> targets, Set<UUID> processedTargets,
-                              Phase9AbilityTuning suspension, Phase9AbilityTuning impact,
+                              ArcaneCosmicMasteryTuning suspension, ArcaneCosmicMasteryTuning impact,
                               UniqueAbilityExecution execution) {
             this.ownerId = ownerId;
             this.stack = stack;
@@ -593,12 +593,12 @@ public final class ArcanethystAssaultManager {
             return this.processedTargets;
         }
 
-        private Phase9AbilityTuning suspension() { return suspension; }
-        private Phase9AbilityTuning impact() { return impact; }
+        private ArcaneCosmicMasteryTuning suspension() { return suspension; }
+        private ArcaneCosmicMasteryTuning impact() { return impact; }
     }
 
     private record PendingPulse(UUID ownerId, UUID targetId, ItemStack stack, long at,
-                                Phase9AbilityTuning tuning, boolean extraLevitation) {
+                                ArcaneCosmicMasteryTuning tuning, boolean extraLevitation) {
     }
 
     private static final class ActiveTarget {

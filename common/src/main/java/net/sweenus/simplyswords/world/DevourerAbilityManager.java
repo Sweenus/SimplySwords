@@ -30,8 +30,8 @@ import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
 import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.api.AwakeningFormRegistry;
-import net.sweenus.simplyswords.api.ability.Phase2AbilityTuning;
-import net.sweenus.simplyswords.api.ability.Phase2UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.AbyssalSpectralMasteryTuning;
+import net.sweenus.simplyswords.api.ability.AbyssalSpectralMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityContext;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
@@ -162,32 +162,32 @@ public final class DevourerAbilityManager {
 
         ServerWorld world = context.world();
         LivingEntity actor = context.actor();
-        UniqueAbilityExecution execution = UniqueAbilityApi.begin(Phase2UniqueAbilities.DEVOURER_MASS,
+        UniqueAbilityExecution execution = UniqueAbilityApi.begin(AbyssalSpectralMasteryAbilities.DEVOURER_MASS,
                 UniqueAbilityContext.active(context), builder -> builder
-                        .set(Phase2UniqueAbilities.COOLDOWN_TICKS, Config.uniqueEffects.devourer.cooldown)
-                        .set(Phase2UniqueAbilities.TUNING, Phase2AbilityTuning.EMPTY
-                                .with(Phase2AbilityTuning.Setting.COOLDOWN_TICKS, Config.uniqueEffects.devourer.cooldown)
-                                .with(Phase2AbilityTuning.Setting.DURATION_TICKS, Config.uniqueEffects.devourer.duration)
-                                .with(Phase2AbilityTuning.Setting.RADIUS, Config.uniqueEffects.devourer.maximumMassRadius)
-                                .with(Phase2AbilityTuning.Setting.SCAN_RADIUS, Config.uniqueEffects.devourer.targetingRadius)
-                                .with(Phase2AbilityTuning.Setting.TARGET_CAP, Config.uniqueEffects.devourer.maxTargets)
-                                .with(Phase2AbilityTuning.Setting.PULL_STRENGTH, Config.uniqueEffects.devourer.pullStrength)
-                                .with(Phase2AbilityTuning.Setting.PULSE_INTERVAL_TICKS, Config.uniqueEffects.devourer.damageInterval)
-                                .with(Phase2AbilityTuning.Setting.LOOSE_TARGET_CAP, Config.uniqueEffects.devourer.looseTargetCap)
-                                .with(Phase2AbilityTuning.Setting.TENDRIL_CAP, Config.uniqueEffects.devourer.looseTendrilCap)
-                                .with(Phase2AbilityTuning.Setting.LAUNCH_SPEED, Config.uniqueEffects.devourer.loosePullStrength)
-                                .with(Phase2AbilityTuning.Setting.STAIN_RADIUS, Config.uniqueEffects.devourer.stainTrailWidth)
-                                .with(Phase2AbilityTuning.Setting.STAIN_DURATION_TICKS, Config.uniqueEffects.devourer.stainSpreadDuration)
-                                .with(Phase2AbilityTuning.Setting.STAIN_AMPLIFIER, Config.uniqueEffects.devourer.stainSlowAmplifier)
-                                .with(Phase2AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1)));
-        Phase2AbilityTuning tuning = Phase2UniqueAbilities.tuning(execution);
+                        .set(AbyssalSpectralMasteryAbilities.COOLDOWN_TICKS, Config.uniqueEffects.devourer.cooldown)
+                        .set(AbyssalSpectralMasteryAbilities.TUNING, AbyssalSpectralMasteryTuning.EMPTY
+                                .with(AbyssalSpectralMasteryTuning.Setting.COOLDOWN_TICKS, Config.uniqueEffects.devourer.cooldown)
+                                .with(AbyssalSpectralMasteryTuning.Setting.DURATION_TICKS, Config.uniqueEffects.devourer.duration)
+                                .with(AbyssalSpectralMasteryTuning.Setting.RADIUS, Config.uniqueEffects.devourer.maximumMassRadius)
+                                .with(AbyssalSpectralMasteryTuning.Setting.SCAN_RADIUS, Config.uniqueEffects.devourer.targetingRadius)
+                                .with(AbyssalSpectralMasteryTuning.Setting.TARGET_CAP, Config.uniqueEffects.devourer.maxTargets)
+                                .with(AbyssalSpectralMasteryTuning.Setting.PULL_STRENGTH, Config.uniqueEffects.devourer.pullStrength)
+                                .with(AbyssalSpectralMasteryTuning.Setting.PULSE_INTERVAL_TICKS, Config.uniqueEffects.devourer.damageInterval)
+                                .with(AbyssalSpectralMasteryTuning.Setting.LOOSE_TARGET_CAP, Config.uniqueEffects.devourer.looseTargetCap)
+                                .with(AbyssalSpectralMasteryTuning.Setting.TENDRIL_CAP, Config.uniqueEffects.devourer.looseTendrilCap)
+                                .with(AbyssalSpectralMasteryTuning.Setting.LAUNCH_SPEED, Config.uniqueEffects.devourer.loosePullStrength)
+                                .with(AbyssalSpectralMasteryTuning.Setting.STAIN_RADIUS, Config.uniqueEffects.devourer.stainTrailWidth)
+                                .with(AbyssalSpectralMasteryTuning.Setting.STAIN_DURATION_TICKS, Config.uniqueEffects.devourer.stainSpreadDuration)
+                                .with(AbyssalSpectralMasteryTuning.Setting.STAIN_AMPLIFIER, Config.uniqueEffects.devourer.stainSlowAmplifier)
+                                .with(AbyssalSpectralMasteryTuning.Setting.DAMAGE_MULTIPLIER, 1)));
+        AbyssalSpectralMasteryTuning tuning = AbyssalSpectralMasteryAbilities.tuning(execution);
         Vec3d facing = context.facing().lengthSquared() < 1.0E-5
                 ? actor.getRotationVec(1.0F) : context.facing().normalize();
         Vec3d start = actor.getEyePos().add(facing.multiply(0.55)).add(0.0, -0.18, 0.0);
-        int duration = Math.max(1, tuning.integer(Phase2AbilityTuning.Setting.DURATION_TICKS,
+        int duration = Math.max(1, tuning.integer(AbyssalSpectralMasteryTuning.Setting.DURATION_TICKS,
                 Config.uniqueEffects.devourer.duration));
         float startingRadius = Math.max(0.2F, Config.uniqueEffects.devourer.startingMassRadius);
-        float maximumRadius = Math.max(startingRadius, (float) tuning.get(Phase2AbilityTuning.Setting.RADIUS,
+        float maximumRadius = Math.max(startingRadius, (float) tuning.get(AbyssalSpectralMasteryTuning.Setting.RADIUS,
                 Config.uniqueEffects.devourer.maximumMassRadius));
         DevourerMassVisualEntity visual = new DevourerMassVisualEntity(world, start, center,
                 TRAVEL_TICKS, BLOOM_TICKS, duration, COLLAPSE_TICKS, startingRadius, maximumRadius);
@@ -203,20 +203,20 @@ public final class DevourerAbilityManager {
                 now + TRAVEL_TICKS, now + TRAVEL_TICKS + BLOOM_TICKS,
                 now + TRAVEL_TICKS + BLOOM_TICKS + duration,
                 now + TRAVEL_TICKS + BLOOM_TICKS + duration + COLLAPSE_TICKS,
-                damage * (float) tuning.get(Phase2AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1),
+                damage * (float) tuning.get(AbyssalSpectralMasteryTuning.Setting.DAMAGE_MULTIPLIER, 1),
                 visual.getUuid(), execution);
         mass.nextVoiceTick = mass.activeStartTick + voiceInitialDelay(world);
         ACTIVE.computeIfAbsent(world, ignored -> new HashMap<>()).put(actor.getUuid(), mass);
-        if ((tuning.integer(Phase2AbilityTuning.Setting.MODE, 0) & 64) == 0) {
+        if ((tuning.integer(AbyssalSpectralMasteryTuning.Setting.MODE, 0) & 64) == 0) {
             DevourerStainManager.begin(world, actor.getUuid(), mass.sourcePlayerId,
                     visual.getUuid(), center, mass.seedArrivalTick, mass.activeEndTick, mass.collapseEndTick,
-                    tuning.integer(Phase2AbilityTuning.Setting.STAIN_TARGET_CAP,
+                    tuning.integer(AbyssalSpectralMasteryTuning.Setting.STAIN_TARGET_CAP,
                             Config.uniqueEffects.devourer.stainCarrierCap),
-                    tuning.get(Phase2AbilityTuning.Setting.STAIN_RADIUS,
+                    tuning.get(AbyssalSpectralMasteryTuning.Setting.STAIN_RADIUS,
                             Config.uniqueEffects.devourer.stainTrailWidth),
-                    tuning.integer(Phase2AbilityTuning.Setting.STAIN_DURATION_TICKS,
+                    tuning.integer(AbyssalSpectralMasteryTuning.Setting.STAIN_DURATION_TICKS,
                             Config.uniqueEffects.devourer.stainSpreadDuration),
-                    tuning.integer(Phase2AbilityTuning.Setting.STAIN_AMPLIFIER,
+                    tuning.integer(AbyssalSpectralMasteryTuning.Setting.STAIN_AMPLIFIER,
                             Config.uniqueEffects.devourer.stainSlowAmplifier));
         }
         spawnCastEffects(world, actor, start);
@@ -282,7 +282,7 @@ public final class DevourerAbilityManager {
             if (now >= mass.collapseEndTick) {
                 cleanupVisuals(world, mass, true);
                 UniqueAbilityApi.emit(mass.execution, net.sweenus.simplyswords.api.ability.UniqueAbilityPhase.HIT,
-                        Phase2UniqueAbilities.COLLAPSE, null, mass.targets.size(), mass.damage);
+                        AbyssalSpectralMasteryAbilities.COLLAPSE, null, mass.targets.size(), mass.damage);
                 UniqueAbilityApi.finish(mass.execution, mass.execution.definition().id(), mass.targets.size());
                 iterator.remove();
             }
@@ -294,11 +294,11 @@ public final class DevourerAbilityManager {
 
     private static boolean acquireLooseTarget(ServerWorld world, ActiveMass mass,
                                               DevourerMassVisualEntity visual) {
-        Phase2AbilityTuning tuning = Phase2UniqueAbilities.tuning(mass.execution);
-        if ((tuning.integer(Phase2AbilityTuning.Setting.MODE, 0) & 64) != 0) return false;
-        int totalCap = Math.max(1, tuning.integer(Phase2AbilityTuning.Setting.LOOSE_TARGET_CAP,
+        AbyssalSpectralMasteryTuning tuning = AbyssalSpectralMasteryAbilities.tuning(mass.execution);
+        if ((tuning.integer(AbyssalSpectralMasteryTuning.Setting.MODE, 0) & 64) != 0) return false;
+        int totalCap = Math.max(1, tuning.integer(AbyssalSpectralMasteryTuning.Setting.LOOSE_TARGET_CAP,
                 Config.uniqueEffects.devourer.looseTargetCap));
-        int tendrilCap = Math.clamp(tuning.integer(Phase2AbilityTuning.Setting.TENDRIL_CAP,
+        int tendrilCap = Math.clamp(tuning.integer(AbyssalSpectralMasteryTuning.Setting.TENDRIL_CAP,
                 Config.uniqueEffects.devourer.looseTendrilCap), 1, 5);
         long incoming = mass.looseTargets.values().stream().filter(target -> !target.stored).count();
         int available = Math.min(totalCap - mass.looseTargets.size(), tendrilCap - (int) incoming);
@@ -507,8 +507,8 @@ public final class DevourerAbilityManager {
     private static boolean pullLooseTowardSlot(Entity target, Vec3d slot, boolean inbound, ActiveMass mass) {
         Vec3d offset = slot.subtract(target.getPos());
         double distance = offset.length();
-        double configured = Math.max(0.0, Phase2UniqueAbilities.tuning(mass.execution).get(
-                Phase2AbilityTuning.Setting.LAUNCH_SPEED, Config.uniqueEffects.devourer.loosePullStrength));
+        double configured = Math.max(0.0, AbyssalSpectralMasteryAbilities.tuning(mass.execution).get(
+                AbyssalSpectralMasteryTuning.Setting.LAUNCH_SPEED, Config.uniqueEffects.devourer.loosePullStrength));
         double speedScale = inbound ? LOOSE_PULL_SPEED_SCALE : 1.0;
         Vec3d current = target.getVelocity();
         Vec3d velocity;
@@ -533,13 +533,13 @@ public final class DevourerAbilityManager {
 
     private static void acquireTargets(ServerWorld world, LivingEntity actor,
                                        ActiveMass mass, DevourerMassVisualEntity visual) {
-        Phase2AbilityTuning tuning = Phase2UniqueAbilities.tuning(mass.execution);
-        int cap = Math.max(1, tuning.integer(Phase2AbilityTuning.Setting.TARGET_CAP,
+        AbyssalSpectralMasteryTuning tuning = AbyssalSpectralMasteryAbilities.tuning(mass.execution);
+        int cap = Math.max(1, tuning.integer(AbyssalSpectralMasteryTuning.Setting.TARGET_CAP,
                 Config.uniqueEffects.devourer.maxTargets));
         if (mass.targets.size() >= cap) {
             return;
         }
-        double radius = Math.max(1.0, tuning.get(Phase2AbilityTuning.Setting.SCAN_RADIUS,
+        double radius = Math.max(1.0, tuning.get(AbyssalSpectralMasteryTuning.Setting.SCAN_RADIUS,
                 Config.uniqueEffects.devourer.targetingRadius));
         double vertical = Math.max(1.0, Config.uniqueEffects.devourer.verticalRange);
         Box search = new Box(mass.center.x - radius, mass.center.y - vertical, mass.center.z - radius,
@@ -566,7 +566,7 @@ public final class DevourerAbilityManager {
 
     private static void tickTargets(ServerWorld world, LivingEntity actor,
                                     ActiveMass mass, DevourerMassVisualEntity visual, long now) {
-        Phase2AbilityTuning tuning = Phase2UniqueAbilities.tuning(mass.execution);
+        AbyssalSpectralMasteryTuning tuning = AbyssalSpectralMasteryAbilities.tuning(mass.execution);
         boolean fed = false;
         Iterator<CapturedTarget> iterator = mass.targets.values().iterator();
         while (iterator.hasNext()) {
@@ -605,33 +605,33 @@ public final class DevourerAbilityManager {
                 captured.tendrilId = null;
             }
             int pulseInterval = pulseInterval(
-                    tuning.integer(Phase2AbilityTuning.Setting.ACCELERATE_THRESHOLD_TICKS, 0),
+                    tuning.integer(AbyssalSpectralMasteryTuning.Setting.ACCELERATE_THRESHOLD_TICKS, 0),
                     now - captured.ingestedAt,
-                    tuning.integer(Phase2AbilityTuning.Setting.ACCELERATED_INTERVAL_TICKS, 16),
-                    tuning.integer(Phase2AbilityTuning.Setting.PULSE_INTERVAL_TICKS,
+                    tuning.integer(AbyssalSpectralMasteryTuning.Setting.ACCELERATED_INTERVAL_TICKS, 16),
+                    tuning.integer(AbyssalSpectralMasteryTuning.Setting.PULSE_INTERVAL_TICKS,
                             Config.uniqueEffects.devourer.damageInterval));
             float compression = 1 + (float) Math.min(
-                    tuning.get(Phase2AbilityTuning.Setting.BONUS_CAP, 0),
+                    tuning.get(AbyssalSpectralMasteryTuning.Setting.BONUS_CAP, 0),
                     Math.max(0, mass.targets.size() - 1)
-                            * tuning.get(Phase2AbilityTuning.Setting.BONUS_PER_TRIGGER, 0));
+                            * tuning.get(AbyssalSpectralMasteryTuning.Setting.BONUS_PER_TRIGGER, 0));
             float pulseDamage = mass.damage * compression * routedBonus(mass, captured.targetId, now,
-                    tuning.get(Phase2AbilityTuning.Setting.ROUTED_DAMAGE_BONUS, 0));
+                    tuning.get(AbyssalSpectralMasteryTuning.Setting.ROUTED_DAMAGE_BONUS, 0));
             boolean pulse = held && now >= captured.nextDamageTick;
             if (pulse) captured.nextDamageTick = now + Math.max(1, pulseInterval);
             if (pulse && damageTarget(world, actor, mass.stackSnapshot, target, pulseDamage)) {
                 fed = true;
                 UniqueAbilityApi.emit(mass.execution, net.sweenus.simplyswords.api.ability.UniqueAbilityPhase.HIT,
-                        Phase2UniqueAbilities.PULSE, target, 1, pulseDamage);
+                        AbyssalSpectralMasteryAbilities.PULSE, target, 1, pulseDamage);
                 spawnFeedingEffects(world, target, mass.center);
                 pullTowardSlot(target, slot, mass);
                 if (!target.isAlive()) onMassKill(world, actor, mass, target, tuning, now);
             }
-            int ruptureAfter = tuning.integer(Phase2AbilityTuning.Setting.RUPTURE_THRESHOLD_TICKS, 0);
+            int ruptureAfter = tuning.integer(AbyssalSpectralMasteryTuning.Setting.RUPTURE_THRESHOLD_TICKS, 0);
             if (held && !captured.ruptured && ruptureAfter > 0
                     && now - captured.ingestedAt >= ruptureAfter) {
                 captured.ruptured = true;
                 damageTarget(world, actor, mass.stackSnapshot, target, pulseDamage * (float) tuning.get(
-                        Phase2AbilityTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, .75));
+                        AbyssalSpectralMasteryTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, .75));
             }
         }
         if (fed) {
@@ -659,8 +659,8 @@ public final class DevourerAbilityManager {
         double resistance = MathHelper.clamp(
                 target.getAttributeValue(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE), 0.0, 1.0);
         double response = MathHelper.clamp(1.0 / (size * (1.0 + resistance * 2.0)), 0.12, 1.0);
-        double configured = Math.max(0.0, Phase2UniqueAbilities.tuning(mass.execution).get(
-                Phase2AbilityTuning.Setting.PULL_STRENGTH, Config.uniqueEffects.devourer.pullStrength));
+        double configured = Math.max(0.0, AbyssalSpectralMasteryAbilities.tuning(mass.execution).get(
+                AbyssalSpectralMasteryTuning.Setting.PULL_STRENGTH, Config.uniqueEffects.devourer.pullStrength));
         if (distance <= 0.34 + target.getWidth() * 0.18) {
             Vec3d hold = offset.multiply(0.28 * response);
             target.setVelocity(hold.x, MathHelper.clamp(hold.y, -0.18, 0.18), hold.z);
@@ -705,32 +705,32 @@ public final class DevourerAbilityManager {
     }
 
     private static void onMassKill(ServerWorld world, LivingEntity actor, ActiveMass mass,
-                                   LivingEntity target, Phase2AbilityTuning tuning, long now) {
+                                   LivingEntity target, AbyssalSpectralMasteryTuning tuning, long now) {
         UniqueAbilityApi.emit(mass.execution, net.sweenus.simplyswords.api.ability.UniqueAbilityPhase.HIT,
-                Phase2UniqueAbilities.KILL, target, 1, mass.damage);
+                AbyssalSpectralMasteryAbilities.KILL, target, 1, mass.damage);
         long extended = extendedEnd(mass.activeEndTick, mass.baseActiveEndTick,
-                tuning.integer(Phase2AbilityTuning.Setting.DURATION_BONUS_TICKS, 0),
-                tuning.integer(Phase2AbilityTuning.Setting.EXTRA_DURATION_CAP, 0));
+                tuning.integer(AbyssalSpectralMasteryTuning.Setting.DURATION_BONUS_TICKS, 0),
+                tuning.integer(AbyssalSpectralMasteryTuning.Setting.EXTRA_DURATION_CAP, 0));
         if (extended != mass.activeEndTick) {
             mass.collapseEndTick += extended - mass.activeEndTick;
             mass.activeEndTick = extended;
         }
-        int refundPerKill = tuning.integer(Phase2AbilityTuning.Setting.COOLDOWN_REFUND_TICKS, 0);
-        int refundCap = tuning.integer(Phase2AbilityTuning.Setting.COOLDOWN_REFUND_CAP_TICKS, 0);
+        int refundPerKill = tuning.integer(AbyssalSpectralMasteryTuning.Setting.COOLDOWN_REFUND_TICKS, 0);
+        int refundCap = tuning.integer(AbyssalSpectralMasteryTuning.Setting.COOLDOWN_REFUND_CAP_TICKS, 0);
         if (refundPerKill <= 0 || refundCap <= 0) return;
         mass.cooldownRefund = Math.min(refundCap, mass.cooldownRefund + refundPerKill);
         SimplySwordsAPI.setWeaponCooldown(actor, mass.stackReference, refundedCooldown(
-                tuning.integer(Phase2AbilityTuning.Setting.COOLDOWN_TICKS,
+                tuning.integer(AbyssalSpectralMasteryTuning.Setting.COOLDOWN_TICKS,
                         Config.uniqueEffects.devourer.cooldown),
                 now - mass.castTick, mass.cooldownRefund));
     }
 
     private static void tickFollow(ServerWorld world, LivingEntity actor, ActiveMass mass,
                                    DevourerMassVisualEntity visual) {
-        Phase2AbilityTuning tuning = Phase2UniqueAbilities.tuning(mass.execution);
-        if ((tuning.integer(Phase2AbilityTuning.Setting.MODE, 0) & 2) == 0) return;
-        double range = tuning.get(Phase2AbilityTuning.Setting.FOLLOW_RANGE, 0);
-        double speed = tuning.get(Phase2AbilityTuning.Setting.MOVEMENT_SPEED, 0);
+        AbyssalSpectralMasteryTuning tuning = AbyssalSpectralMasteryAbilities.tuning(mass.execution);
+        if ((tuning.integer(AbyssalSpectralMasteryTuning.Setting.MODE, 0) & 2) == 0) return;
+        double range = tuning.get(AbyssalSpectralMasteryTuning.Setting.FOLLOW_RANGE, 0);
+        double speed = tuning.get(AbyssalSpectralMasteryTuning.Setting.MOVEMENT_SPEED, 0);
         if (range <= 0.0 || speed <= 0.0) return;
         Box search = new Box(mass.center, mass.center).expand(range);
         LivingEntity nearest = world.getEntitiesByClass(LivingEntity.class, search,
@@ -771,10 +771,10 @@ public final class DevourerAbilityManager {
     }
 
     private static void collapseDamage(ServerWorld world, LivingEntity actor, ActiveMass mass) {
-        Phase2AbilityTuning tuning = Phase2UniqueAbilities.tuning(mass.execution);
-        double radius = tuning.get(Phase2AbilityTuning.Setting.IMPACT_RADIUS, 0);
-        int cap = tuning.integer(Phase2AbilityTuning.Setting.IMPACT_TARGET_CAP, 0);
-        float damage = mass.damage * (float) tuning.get(Phase2AbilityTuning.Setting.IMPACT_DAMAGE_MULTIPLIER, 0);
+        AbyssalSpectralMasteryTuning tuning = AbyssalSpectralMasteryAbilities.tuning(mass.execution);
+        double radius = tuning.get(AbyssalSpectralMasteryTuning.Setting.IMPACT_RADIUS, 0);
+        int cap = tuning.integer(AbyssalSpectralMasteryTuning.Setting.IMPACT_TARGET_CAP, 0);
+        float damage = mass.damage * (float) tuning.get(AbyssalSpectralMasteryTuning.Setting.IMPACT_DAMAGE_MULTIPLIER, 0);
         if (radius <= 0 || cap <= 0 || damage <= 0) return;
         List<LivingEntity> targets = world.getEntitiesByClass(LivingEntity.class,
                 new Box(mass.center, mass.center).expand(radius), target -> target != actor && target.isAlive()

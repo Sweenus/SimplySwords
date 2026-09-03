@@ -22,7 +22,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RaycastContext;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
-import net.sweenus.simplyswords.api.ability.Phase2UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.AbyssalSpectralMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.config.Config;
@@ -273,8 +273,8 @@ public final class GloampiercerSpearEntity extends Entity {
         setWeaponStack(stack);
         if (abilityExecution != null) {
             UniqueAbilityApi.emit(abilityExecution, net.sweenus.simplyswords.api.ability.UniqueAbilityPhase.HIT,
-                    Phase2UniqueAbilities.HIT, null, targets.size(), weaponDamage);
-            if (abilityExecution.definition() == Phase2UniqueAbilities.GLOAMPIERCER_AMBUSH) {
+                    AbyssalSpectralMasteryAbilities.HIT, null, targets.size(), weaponDamage);
+            if (abilityExecution.definition() == AbyssalSpectralMasteryAbilities.GLOAMPIERCER_AMBUSH) {
                 UniqueAbilityApi.finish(abilityExecution, abilityExecution.definition().id(), targets.size());
             }
         }

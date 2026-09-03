@@ -20,8 +20,8 @@ import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.api.WeaponAbilityActivationSource;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
-import net.sweenus.simplyswords.api.ability.Phase9AbilityTuning;
-import net.sweenus.simplyswords.api.ability.Phase9UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.ArcaneCosmicMasteryTuning;
+import net.sweenus.simplyswords.api.ability.ArcaneCosmicMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
@@ -33,7 +33,7 @@ import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
 import net.sweenus.simplyswords.world.MagispearAbilityManager;
-import net.sweenus.simplyswords.world.Phase9CombatManager;
+import net.sweenus.simplyswords.world.ArcaneCosmicMasteryCombatManager;
 
 import java.util.List;
 import java.util.Random;
@@ -56,12 +56,12 @@ public class MagispearSwordItem extends UniqueSwordItem implements UniqueWeaponA
         if (!attacker.getWorld().isClient()) {
             HelperMethods.playHitSounds(attacker, target);
             ServerWorld world = (ServerWorld) attacker.getWorld();
-            UniqueAbilityExecution execution = Phase9CombatManager.beginPassive(
-                    Phase9UniqueAbilities.MAGISPEAR_SPELLPOINT, world, stack, attacker, target,
+            UniqueAbilityExecution execution = ArcaneCosmicMasteryCombatManager.beginPassive(
+                    ArcaneCosmicMasteryAbilities.MAGISPEAR_SPELLPOINT, world, stack, attacker, target,
                     net.sweenus.simplyswords.world.MagispearAbilityManager.spellpointBase(
                             Config.uniqueEffects.magispear.magicChance));
-            Phase9AbilityTuning tuning = Phase9UniqueAbilities.tuning(execution);
-            int hitChance = tuning.integer(Phase9AbilityTuning.Setting.CHANCE,
+            ArcaneCosmicMasteryTuning tuning = ArcaneCosmicMasteryAbilities.tuning(execution);
+            int hitChance = tuning.integer(ArcaneCosmicMasteryTuning.Setting.CHANCE,
                     Config.uniqueEffects.magispear.magicChance);
             int hits = MELEE_HITS.merge(attacker.getUuid(), 1, Integer::sum);
             boolean guaranteed = tuning.flag(1 << 7) && hits % 3 == 0;
@@ -69,11 +69,11 @@ public class MagispearSwordItem extends UniqueSwordItem implements UniqueWeaponA
             if (guaranteed || attacker.getRandom().nextInt(100) < hitChance) {
                 float damage = HelperMethods.abilityScaledDamage("arcane", attacker, stack,
                         Config.uniqueEffects.magispear.magicDamageScaling * (float) tuning.get(
-                                Phase9AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1),
+                                ArcaneCosmicMasteryTuning.Setting.DAMAGE_MULTIPLIER, 1),
                         Config.uniqueEffects.magispear.magicSpellScaling);
-                if (tuning.has(Phase9AbilityTuning.Setting.ARMOR_IGNORE)) damage += Math.min(
+                if (tuning.has(ArcaneCosmicMasteryTuning.Setting.ARMOR_IGNORE)) damage += Math.min(
                         damage * .5F, target.getArmor() * (float) tuning.get(
-                                Phase9AbilityTuning.Setting.ARMOR_IGNORE, .1));
+                                ArcaneCosmicMasteryTuning.Setting.ARMOR_IGNORE, .1));
                 DamageSource damageSource = attacker.getDamageSources().indirectMagic(attacker, attacker);
                 target.timeUntilRegen = 0;
                 if (tuning.flag(1 << 4)) target.addStatusEffect(new net.minecraft.entity.effect.StatusEffectInstance(
@@ -90,7 +90,7 @@ public class MagispearSwordItem extends UniqueSwordItem implements UniqueWeaponA
                 world.playSound(null, attacker.getBlockPos(), SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
                         attacker.getSoundCategory(), 0.2f, 1.1f);
             }
-            Phase9CombatManager.finish(execution, 1);
+            ArcaneCosmicMasteryCombatManager.finish(execution, 1);
             if (MELEE_HITS.size() > 64) MELEE_HITS.clear();
             PIN_LOCKOUTS.entrySet().removeIf(entry -> entry.getValue() <= world.getTime());
         }

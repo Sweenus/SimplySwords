@@ -21,6 +21,7 @@ import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.minecraft.world.TeleportTarget;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
 import net.sweenus.simplyswords.api.AwakeningApi;
@@ -37,7 +38,7 @@ import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.world.NecromanticArsenalManager;
 import net.sweenus.simplyswords.world.WolfPackManager;
 import net.sweenus.simplyswords.util.MinionTargeting;
-import net.sweenus.simplyswords.world.Phase4LichbladeManager;
+import net.sweenus.simplyswords.world.LichbladeMasteryManager;
 import net.sweenus.simplyswords.world.PlayerWeaponAbilityChannelManager;
 import net.sweenus.simplyswords.world.RevivalCandleVisualManager;
 import net.sweenus.simplyswords.world.MagispearAbilityManager;
@@ -49,8 +50,8 @@ import net.sweenus.simplyswords.world.StormbringerAbilityManager;
 import net.sweenus.simplyswords.world.StormsEdgeAbilityManager;
 import net.sweenus.simplyswords.world.DreadwhisperAbilityManager;
 import net.sweenus.simplyswords.world.ThunderbrandAbilityManager;
-import net.sweenus.simplyswords.world.Phase2CombatStateManager;
-import net.sweenus.simplyswords.world.Phase7CombatManager;
+import net.sweenus.simplyswords.world.WickpiercerMasteryStateManager;
+import net.sweenus.simplyswords.world.NatureSwarmMasteryCombatManager;
 import net.sweenus.simplyswords.world.WaxweaverEncasementManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -67,12 +68,16 @@ public abstract class ServerPlayerEntityMixin {
 
     @Shadow public abstract ServerWorld getServerWorld();
 
-    @Inject(at = @At("HEAD"), method = "moveToWorld")
-    private void simplyswords$clearWaxweaverOnDimensionChange(ServerWorld destination,
+    @Inject(at = @At("HEAD"), method = "teleportTo(Lnet/minecraft/world/TeleportTarget;)Lnet/minecraft/entity/Entity;")
+    private void simplyswords$clearWaxweaverOnDimensionChange(TeleportTarget target,
                                                                CallbackInfoReturnable<Entity> cir) {
         ServerPlayerEntity player = (ServerPlayerEntity) (Object) this;
+        if (player.isRemoved()
+                || target.world().getRegistryKey().equals(player.getServerWorld().getRegistryKey())) {
+            return;
+        }
         WaxweaverEncasementManager.clearActor(player);
-        Phase7CombatManager.clearActor(player);
+        NatureSwarmMasteryCombatManager.clearActor(player);
     }
 
     @Inject(at = @At("HEAD"), method = "damage", cancellable = true)
@@ -166,10 +171,10 @@ public abstract class ServerPlayerEntityMixin {
             ShadowstingShadowDanceManager.tickPlayer(serverPlayer);
             SoulkeeperLanternManager.tickPlayer(serverPlayer);
             PlayerWeaponAbilityChannelManager.tickPlayer(serverPlayer);
-            Phase4LichbladeManager.tickOwner(serverPlayer);
+            LichbladeMasteryManager.tickOwner(serverPlayer);
             StormbringerParryManager.tickPlayer(serverPlayer);
             StormbringerAbilityManager.tickPlayer(serverPlayer);
-            net.sweenus.simplyswords.world.Phase10WeaponManager.sweepHolder(serverPlayer);
+            net.sweenus.simplyswords.world.RibboncleaverDreadtideMasteryManager.sweepHolder(serverPlayer);
 
             //Ribboncleaver movespeed debuff
             ItemStack heldUnique = serverPlayer.getMainHandStack();
@@ -324,11 +329,11 @@ public abstract class ServerPlayerEntityMixin {
                         float damageModifier = HelperMethods.abilityScaledDamage("fire",
                                 serverPlayer, wickpiercerStack, Config.uniqueEffects.wickpiercer.damageScaling,
                                 Config.uniqueEffects.wickpiercer.spellScaling);
-                        Phase2CombatStateManager.applyPhoenixBlow(serverPlayer, livingTarget,
+                        WickpiercerMasteryStateManager.applyPhoenixBlow(serverPlayer, livingTarget,
                                 wickpiercerStack, damageModifier);
                         if (serverPlayer.hasStatusEffect(EffectRegistry.getReference(EffectRegistry.FRENZY))) {
                             target.timeUntilRegen = 0;
-                            Phase2CombatStateManager.applyWickFrenzyHit(serverPlayer, livingTarget,
+                            WickpiercerMasteryStateManager.applyWickFrenzyHit(serverPlayer, livingTarget,
                                     wickpiercerStack, damageModifier);
                         }
                     }

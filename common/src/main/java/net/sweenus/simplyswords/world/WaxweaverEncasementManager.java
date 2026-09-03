@@ -20,8 +20,8 @@ import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.api.WeaponAbilityActivationSource;
 import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
-import net.sweenus.simplyswords.api.ability.Phase7AbilityTuning;
-import net.sweenus.simplyswords.api.ability.Phase7UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.NatureSwarmMasteryTuning;
+import net.sweenus.simplyswords.api.ability.NatureSwarmMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityPhase;
@@ -56,49 +56,49 @@ public final class WaxweaverEncasementManager {
     private WaxweaverEncasementManager() {
     }
 
-    public static double prisonRange(double configured, Phase7AbilityTuning tuning) {
+    public static double prisonRange(double configured, NatureSwarmMasteryTuning tuning) {
         return Math.max(1, configured + tuning.get(
-                Phase7AbilityTuning.Setting.WAX_PRISON_RANGE_BONUS, 0));
+                NatureSwarmMasteryTuning.Setting.WAX_PRISON_RANGE_BONUS, 0));
     }
 
-    public static int prisonDuration(int configured, Phase7AbilityTuning tuning) {
+    public static int prisonDuration(int configured, NatureSwarmMasteryTuning tuning) {
         int base = tuning.flag(1 << 7)
-                ? tuning.integer(Phase7AbilityTuning.Setting.WAX_IRON_DURATION_TICKS, 200)
+                ? tuning.integer(NatureSwarmMasteryTuning.Setting.WAX_IRON_DURATION_TICKS, 200)
                 : tuning.flag(1 << 8)
-                ? tuning.integer(Phase7AbilityTuning.Setting.WAX_VOLATILE_DURATION_TICKS, 60)
+                ? tuning.integer(NatureSwarmMasteryTuning.Setting.WAX_VOLATILE_DURATION_TICKS, 60)
                 : configured;
         return Math.max(1, base + tuning.integer(
-                Phase7AbilityTuning.Setting.WAX_PRISON_DURATION_BONUS_TICKS, 0));
+                NatureSwarmMasteryTuning.Setting.WAX_PRISON_DURATION_BONUS_TICKS, 0));
     }
 
-    public static int tauntInterval(int configured, Phase7AbilityTuning tuning) {
+    public static int tauntInterval(int configured, NatureSwarmMasteryTuning tuning) {
         return Math.max(1, configured + tuning.integer(
-                Phase7AbilityTuning.Setting.WAX_TAUNT_INTERVAL_BONUS_TICKS, 0));
+                NatureSwarmMasteryTuning.Setting.WAX_TAUNT_INTERVAL_BONUS_TICKS, 0));
     }
 
-    public static double tauntRadius(double configured, Phase7AbilityTuning tuning) {
-        double radius = configured + tuning.get(Phase7AbilityTuning.Setting.WAX_TAUNT_RADIUS_BONUS, 0);
+    public static double tauntRadius(double configured, NatureSwarmMasteryTuning tuning) {
+        double radius = configured + tuning.get(NatureSwarmMasteryTuning.Setting.WAX_TAUNT_RADIUS_BONUS, 0);
         return Math.max(1, radius * tuning.get(
-                Phase7AbilityTuning.Setting.WAX_VOLATILE_TAUNT_RADIUS_MULTIPLIER, 1));
+                NatureSwarmMasteryTuning.Setting.WAX_VOLATILE_TAUNT_RADIUS_MULTIPLIER, 1));
     }
 
-    public static double explosionRadius(double configured, Phase7AbilityTuning tuning) {
+    public static double explosionRadius(double configured, NatureSwarmMasteryTuning tuning) {
         return Math.max(.5, configured + tuning.get(
-                Phase7AbilityTuning.Setting.WAX_EXPLOSION_RADIUS_BONUS, 0));
+                NatureSwarmMasteryTuning.Setting.WAX_EXPLOSION_RADIUS_BONUS, 0));
     }
 
-    public static float explosionDamageMultiplier(Phase7AbilityTuning tuning) {
-        double multiplier = tuning.get(Phase7AbilityTuning.Setting.WAX_EXPLOSION_DAMAGE_MULTIPLIER, 1);
+    public static float explosionDamageMultiplier(NatureSwarmMasteryTuning tuning) {
+        double multiplier = tuning.get(NatureSwarmMasteryTuning.Setting.WAX_EXPLOSION_DAMAGE_MULTIPLIER, 1);
         if (tuning.flag(1 << 7)) multiplier *= tuning.get(
-                Phase7AbilityTuning.Setting.WAX_IRON_DAMAGE_MULTIPLIER, .6);
+                NatureSwarmMasteryTuning.Setting.WAX_IRON_DAMAGE_MULTIPLIER, .6);
         if (tuning.flag(1 << 8)) multiplier *= tuning.get(
-                Phase7AbilityTuning.Setting.WAX_VOLATILE_DAMAGE_MULTIPLIER, 1.9);
+                NatureSwarmMasteryTuning.Setting.WAX_VOLATILE_DAMAGE_MULTIPLIER, 1.9);
         return (float) multiplier;
     }
 
-    public static int explosionFireTicks(int configured, Phase7AbilityTuning tuning) {
+    public static int explosionFireTicks(int configured, NatureSwarmMasteryTuning tuning) {
         return Math.max(0, configured + tuning.integer(
-                Phase7AbilityTuning.Setting.WAX_EXPLOSION_FIRE_BONUS_TICKS, 0));
+                NatureSwarmMasteryTuning.Setting.WAX_EXPLOSION_FIRE_BONUS_TICKS, 0));
     }
 
     public static boolean canStart(WeaponAbilityContext context) {
@@ -120,9 +120,9 @@ public final class WaxweaverEncasementManager {
 
         ServerWorld world = context.world();
         LivingEntity actor = context.actor();
-        UniqueAbilityExecution execution = Phase7CombatManager.beginActive(
-                Phase7UniqueAbilities.WAXWEAVER_PRISON, context, Config.uniqueEffects.waxweaver.activeCooldown);
-        Phase7AbilityTuning tuning = Phase7UniqueAbilities.tuning(execution);
+        UniqueAbilityExecution execution = NatureSwarmMasteryCombatManager.beginActive(
+                NatureSwarmMasteryAbilities.WAXWEAVER_PRISON, context, Config.uniqueEffects.waxweaver.activeCooldown);
+        NatureSwarmMasteryTuning tuning = NatureSwarmMasteryAbilities.tuning(execution);
         double targetRange = prisonRange(Config.uniqueEffects.waxweaver.targetRange, tuning);
         if (actor.squaredDistanceTo(target) > targetRange * targetRange) {
             UniqueAbilityApi.cancel(execution);
@@ -146,10 +146,10 @@ public final class WaxweaverEncasementManager {
 
         ACTIVE.computeIfAbsent(world, ignored -> new HashMap<>()).put(actor.getUuid(), state);
         UniqueAbilityApi.start(execution);
-        int absorption = tuning.integer(Phase7AbilityTuning.Setting.WAX_FIRST_LAYER_ABSORPTION, 0);
+        int absorption = tuning.integer(NatureSwarmMasteryTuning.Setting.WAX_FIRST_LAYER_ABSORPTION, 0);
         if (absorption > 0 && tuning.flag(1 << 20)) {
             actor.addStatusEffect(new StatusEffectInstance(net.minecraft.entity.effect.StatusEffects.ABSORPTION,
-                    tuning.integer(Phase7AbilityTuning.Setting.WAX_FIRST_LAYER_DURATION_TICKS, 60),
+                    tuning.integer(NatureSwarmMasteryTuning.Setting.WAX_FIRST_LAYER_DURATION_TICKS, 60),
                     Math.max(0, absorption / 4 - 1), false, true, true));
         }
         applyPrison(world, target, state);
@@ -240,7 +240,7 @@ public final class WaxweaverEncasementManager {
                 if (steps > state.brittleSteps) {
                     state.expiresAt -= (long) (steps - state.brittleSteps)
                             * state.tuning.integer(
-                            Phase7AbilityTuning.Setting.WAX_BRITTLE_DURATION_REDUCTION_TICKS, 10);
+                            NatureSwarmMasteryTuning.Setting.WAX_BRITTLE_DURATION_REDUCTION_TICKS, 10);
                     state.brittleSteps = steps;
                 }
             }
@@ -339,7 +339,7 @@ public final class WaxweaverEncasementManager {
         }
         if (!detonate) {
             if (prisoner != null) spawnReleaseEffects(world, prisoner.getPos());
-            UniqueAbilityApi.finish(state.execution, Phase7UniqueAbilities.FINISH, 0);
+            UniqueAbilityApi.finish(state.execution, NatureSwarmMasteryAbilities.FINISH, 0);
             return;
         }
         Vec3d center = prisoner == null ? state.anchor : prisoner.getPos();
@@ -364,7 +364,7 @@ public final class WaxweaverEncasementManager {
         if (owner == null) {
             spawnDetonationEffects(world, center,
                     explosionRadius(Config.uniqueEffects.waxweaver.explosionRadius, state.tuning));
-            UniqueAbilityApi.finish(state.execution, Phase7UniqueAbilities.FINISH, 0);
+            UniqueAbilityApi.finish(state.execution, NatureSwarmMasteryAbilities.FINISH, 0);
             return;
         }
         if (principal == null) principal = owner;
@@ -376,11 +376,11 @@ public final class WaxweaverEncasementManager {
         damage *= state.flashMultiplier;
         damage *= 1.0F + state.brittleSteps
                 * (float) state.tuning.get(
-                Phase7AbilityTuning.Setting.WAX_BRITTLE_DAMAGE_PER_STEP, 0);
+                NatureSwarmMasteryTuning.Setting.WAX_BRITTLE_DAMAGE_PER_STEP, 0);
         Box box = new Box(center.x - radius, center.y - radius * 0.5, center.z - radius,
                 center.x + radius, center.y + radius, center.z + radius);
         int affected = 0;
-        int maximum = Math.max(1, state.tuning.integer(Phase7AbilityTuning.Setting.TARGET_CAP, 64));
+        int maximum = Math.max(1, state.tuning.integer(NatureSwarmMasteryTuning.Setting.TARGET_CAP, 64));
         for (LivingEntity target : world.getEntitiesByClass(LivingEntity.class, box,
                 target -> target.isAlive() && isValidTarget(owner, damagePrincipal, target))) {
             if (affected >= maximum) break;
@@ -393,7 +393,7 @@ public final class WaxweaverEncasementManager {
                     HelperMethods.damageThroughIframes(target, source, finalDamage));
             if (!damaged[0]) continue;
             affected++;
-            UniqueAbilityApi.emit(state.execution, UniqueAbilityPhase.HIT, Phase7UniqueAbilities.HIT,
+            UniqueAbilityApi.emit(state.execution, UniqueAbilityPhase.HIT, NatureSwarmMasteryAbilities.HIT,
                     target, 1, finalDamage);
 
             int fireTicks = explosionFireTicks(
@@ -408,20 +408,20 @@ public final class WaxweaverEncasementManager {
             }
         }
         spawnDetonationEffects(world, center, radius);
-        UniqueAbilityApi.finish(state.execution, Phase7UniqueAbilities.FINISH, affected);
+        UniqueAbilityApi.finish(state.execution, NatureSwarmMasteryAbilities.FINISH, affected);
     }
 
     public static int detonateRevival(ServerWorld world, LivingEntity owner, ItemStack stack,
-                                      Phase7AbilityTuning tuning, UniqueAbilityExecution execution) {
+                                      NatureSwarmMasteryTuning tuning, UniqueAbilityExecution execution) {
         double radius = Math.max(.5, tuning.get(
-                Phase7AbilityTuning.Setting.WAX_EMERGENCE_RADIUS, 6));
+                NatureSwarmMasteryTuning.Setting.WAX_EMERGENCE_RADIUS, 6));
         int maximum = Math.max(1, tuning.integer(
-                Phase7AbilityTuning.Setting.WAX_EMERGENCE_TARGET_CAP, 16));
+                NatureSwarmMasteryTuning.Setting.WAX_EMERGENCE_TARGET_CAP, 16));
         float damage = HelperMethods.abilityScaledDamage(SpellScalingProfile.FIRE, owner, stack,
                 1, Config.uniqueEffects.waxweaver.spellScaling)
                 * Math.max(0, Config.uniqueEffects.waxweaver.explosionDamageScaling)
                 * (float) tuning.get(
-                Phase7AbilityTuning.Setting.WAX_EMERGENCE_DAMAGE_MULTIPLIER, 1.25);
+                NatureSwarmMasteryTuning.Setting.WAX_EMERGENCE_DAMAGE_MULTIPLIER, 1.25);
         List<LivingEntity> targets = new ArrayList<>(world.getEntitiesByClass(
                 LivingEntity.class, owner.getBoundingBox().expand(radius),
                 target -> target.isAlive() && target != owner
@@ -440,7 +440,7 @@ public final class WaxweaverEncasementManager {
             if (!damaged[0]) continue;
             affected++;
             UniqueAbilityApi.emit(execution, UniqueAbilityPhase.HIT,
-                    Phase7UniqueAbilities.HIT, target, 1, finalDamage);
+                    NatureSwarmMasteryAbilities.HIT, target, 1, finalDamage);
             Vec3d outward = target.getPos().subtract(owner.getPos());
             if (outward.lengthSquared() <= .001) continue;
             double strength = Math.max(0, Config.uniqueEffects.waxweaver.explosionKnockback);
@@ -468,13 +468,13 @@ public final class WaxweaverEncasementManager {
         if (own != null && own.tuning.flag(1 << 23)
                 && source.isIn(net.minecraft.registry.tag.DamageTypeTags.IS_PROJECTILE)) {
             amount *= own.tuning.get(
-                    Phase7AbilityTuning.Setting.WAX_REFUGE_INCOMING_MULTIPLIER, .85);
+                    NatureSwarmMasteryTuning.Setting.WAX_REFUGE_INCOMING_MULTIPLIER, .85);
         }
         if (source.getAttacker() instanceof LivingEntity attacker) {
             for (ActiveEncasement state : states.values()) {
                 if (state.tuning.flag(1 << 7) && state.previousTargets.containsKey(attacker.getUuid())) {
                     amount *= state.tuning.get(
-                            Phase7AbilityTuning.Setting.WAX_IRON_OUTGOING_MULTIPLIER, .75);
+                            NatureSwarmMasteryTuning.Setting.WAX_IRON_OUTGOING_MULTIPLIER, .75);
                     break;
                 }
             }
@@ -482,26 +482,26 @@ public final class WaxweaverEncasementManager {
         return amount;
     }
 
-    public static void primeFlashWax(LivingEntity actor, Phase7AbilityTuning tuning) {
+    public static void primeFlashWax(LivingEntity actor, NatureSwarmMasteryTuning tuning) {
         if (actor != null && actor.getWorld() instanceof ServerWorld world && tuning.flag(1 << 15)) {
             FLASH_WAX.computeIfAbsent(world, ignored -> new HashMap<>()).put(actor.getUuid(),
                     new FlashWax(world.getTime() + tuning.integer(
-                            Phase7AbilityTuning.Setting.WAX_FLASH_WINDOW_TICKS, 120),
-                            (float) tuning.get(Phase7AbilityTuning.Setting.WAX_FLASH_MULTIPLIER, 1.3)));
+                            NatureSwarmMasteryTuning.Setting.WAX_FLASH_WINDOW_TICKS, 120),
+                            (float) tuning.get(NatureSwarmMasteryTuning.Setting.WAX_FLASH_MULTIPLIER, 1.3)));
         }
     }
 
     public static void reduceActiveCooldown(LivingEntity actor, ItemStack stack,
-                                            Phase7AbilityTuning tuning) {
-        int refund = tuning.integer(Phase7AbilityTuning.Setting.WAX_REFUND_PER_HIT_TICKS, 0);
+                                            NatureSwarmMasteryTuning tuning) {
+        int refund = tuning.integer(NatureSwarmMasteryTuning.Setting.WAX_REFUND_PER_HIT_TICKS, 0);
         if (refund <= 0 || tuning.flag(1 << 17) || !(actor instanceof PlayerEntity player)
                 || !(actor.getWorld() instanceof ServerWorld world)) return;
         long now = world.getTime();
         Map<UUID, RefundWindow> windows = TEMPO_REFUNDS.computeIfAbsent(world, ignored -> new HashMap<>());
         RefundWindow window = windows.get(actor.getUuid());
-        int limit = tuning.integer(Phase7AbilityTuning.Setting.WAX_REFUND_CAP_TICKS, 24);
+        int limit = tuning.integer(NatureSwarmMasteryTuning.Setting.WAX_REFUND_CAP_TICKS, 24);
         int used = window == null || now - window.startedAt >= tuning.integer(
-                Phase7AbilityTuning.Setting.WAX_REFUND_WINDOW_TICKS, 80) ? 0 : window.used;
+                NatureSwarmMasteryTuning.Setting.WAX_REFUND_WINDOW_TICKS, 80) ? 0 : window.used;
         int applied = Math.min(refund, Math.max(0, limit - used));
         if (applied <= 0) return;
         int total = SimplySwordsAPI.getEffectiveWeaponCooldownTicks(stack, actor,
@@ -512,14 +512,14 @@ public final class WaxweaverEncasementManager {
     }
 
     public static boolean tryReactiveShell(ServerWorld world, LivingEntity owner, LivingEntity attacker,
-                                           ItemStack stack, Phase7AbilityTuning tuning,
+                                           ItemStack stack, NatureSwarmMasteryTuning tuning,
                                            UniqueAbilityExecution execution) {
         if (!tuning.flag(1 << 21) || owner.getHealth() / owner.getMaxHealth()
-                >= tuning.get(Phase7AbilityTuning.Setting.WAX_REACTIVE_HEALTH_THRESHOLD, .35)
+                >= tuning.get(NatureSwarmMasteryTuning.Setting.WAX_REACTIVE_HEALTH_THRESHOLD, .35)
                 || isCasterActive(owner) || !HelperMethods.checkAbilityTarget(attacker, owner)) return false;
         Map<UUID, Long> cooldowns = REACTIVE_COOLDOWN.computeIfAbsent(world, ignored -> new HashMap<>());
         if (world.getTime() < cooldowns.getOrDefault(owner.getUuid(), 0L)) return false;
-        int duration = tuning.integer(Phase7AbilityTuning.Setting.WAX_REACTIVE_DURATION_TICKS, 40);
+        int duration = tuning.integer(NatureSwarmMasteryTuning.Setting.WAX_REACTIVE_DURATION_TICKS, 40);
         Vec3d anchor = attacker.getPos();
         ActiveEncasement state = new ActiveEncasement(owner.getUuid(), owner.getUuid(), attacker.getUuid(),
                 stack.copy(), anchor, world.getTime(), world.getTime() + duration, 0, tuning,
@@ -530,7 +530,7 @@ public final class WaxweaverEncasementManager {
         if (world.spawnEntity(visual)) state.visualId = visual.getUuid();
         ACTIVE.computeIfAbsent(world, ignored -> new HashMap<>()).put(owner.getUuid(), state);
         cooldowns.put(owner.getUuid(), world.getTime()
-                + tuning.integer(Phase7AbilityTuning.Setting.WAX_REACTIVE_COOLDOWN_TICKS, 200));
+                + tuning.integer(NatureSwarmMasteryTuning.Setting.WAX_REACTIVE_COOLDOWN_TICKS, 200));
         applyPrison(world, attacker, state);
         spawnEncasementEffects(world, attacker);
         return true;
@@ -762,7 +762,7 @@ public final class WaxweaverEncasementManager {
         private final long initialExpiresAt;
         private long expiresAt;
         private final float attack;
-        private final Phase7AbilityTuning tuning;
+        private final NatureSwarmMasteryTuning tuning;
         private final UniqueAbilityExecution execution;
         private final float initialHealth;
         private final float flashMultiplier;
@@ -774,7 +774,7 @@ public final class WaxweaverEncasementManager {
 
         private ActiveEncasement(UUID ownerId, UUID principalId, UUID targetId,
                                  ItemStack stack, Vec3d anchor, long startedAt,
-                                 long expiresAt, float attack, Phase7AbilityTuning tuning,
+                                 long expiresAt, float attack, NatureSwarmMasteryTuning tuning,
                                  UniqueAbilityExecution execution, float initialHealth,
                                  float flashMultiplier, boolean taunts, boolean detonates) {
             this.ownerId = ownerId;

@@ -17,8 +17,8 @@ import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
-import net.sweenus.simplyswords.api.ability.Phase6AbilityTuning;
-import net.sweenus.simplyswords.api.ability.Phase6UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.StormFrostWaterMasteryTuning;
+import net.sweenus.simplyswords.api.ability.StormFrostWaterMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityPhase;
@@ -51,12 +51,12 @@ public final class ThunderbrandAbilityManager {
     public static int refreshChance(ServerWorld world, ItemStack stack, LivingEntity actor, LivingEntity target) {
         int configured = Math.clamp(Config.uniqueEffects.thunderbrand.chance, 0, 100);
         if (world == null || stack == null || stack.isEmpty() || actor == null) return configured;
-        UniqueAbilityExecution execution = Phase6CombatManager.beginPassive(
-                Phase6UniqueAbilities.THUNDERBRAND_REFRESH, world, stack, actor, target);
-        Phase6AbilityTuning tuning = Phase6UniqueAbilities.tuning(execution);
+        UniqueAbilityExecution execution = StormFrostWaterMasteryCombatManager.beginPassive(
+                StormFrostWaterMasteryAbilities.THUNDERBRAND_REFRESH, world, stack, actor, target);
+        StormFrostWaterMasteryTuning tuning = StormFrostWaterMasteryAbilities.tuning(execution);
         int result = Math.clamp(tuning.integer(s("CHANCE"), configured)
                 + tuning.integer(s("THUNDERBRAND_REFRESH_CHANCE_BONUS"), 0), 0, 100);
-        UniqueAbilityApi.finish(execution, Phase6UniqueAbilities.FINISH, 0);
+        UniqueAbilityApi.finish(execution, StormFrostWaterMasteryAbilities.FINISH, 0);
         return result;
     }
 
@@ -69,14 +69,14 @@ public final class ThunderbrandAbilityManager {
         Map<UUID, ActiveThunderBlitz> active = ACTIVE.computeIfAbsent(world, ignored -> new HashMap<>());
         if (active.containsKey(actor.getUuid())) return false;
 
-        UniqueAbilityExecution execution = Phase6CombatManager.beginActive(
-                Phase6UniqueAbilities.THUNDERBRAND_BLITZ, context, Config.uniqueEffects.thunderbrand.cooldown);
+        UniqueAbilityExecution execution = StormFrostWaterMasteryCombatManager.beginActive(
+                StormFrostWaterMasteryAbilities.THUNDERBRAND_BLITZ, context, Config.uniqueEffects.thunderbrand.cooldown);
         UniqueAbilityApi.start(execution);
         ActiveThunderBlitz ability = new ActiveThunderBlitz(actor.getUuid(),
                 isValidTarget(context.target(), actor) ? context.target().getUuid() : null,
                 context.stack().copy(), context.hand() == null ? Hand.MAIN_HAND : context.hand(),
                 horizontalDirection(context.facing(), actor), world.getTime(),
-                Phase6UniqueAbilities.tuning(execution), execution);
+                StormFrostWaterMasteryAbilities.tuning(execution), execution);
         Memory memory = removeMemory(world, actor.getUuid());
         if (memory != null && memory.expiresAt >= world.getTime()) {
             ability.storedDamageInstances = Math.min(storedHitCap(ability),
@@ -251,7 +251,7 @@ public final class ThunderbrandAbilityManager {
             stopDashMovement(actor);
             spawnDashEndEffects(world, actor);
             refundAtCap(actor, ability);
-            UniqueAbilityApi.finish(ability.execution, Phase6UniqueAbilities.FINISH, ability.dashHitTargets.size());
+            UniqueAbilityApi.finish(ability.execution, StormFrostWaterMasteryAbilities.FINISH, ability.dashHitTargets.size());
             return false;
         }
         steer(world, actor, ability);
@@ -296,7 +296,7 @@ public final class ThunderbrandAbilityManager {
             if (damageSuppressed(target, source, damage)) {
                 if (ability.tuning.flag(1 << 21)) mark(world, actor, target, ability);
                 spawnDashHitEffects(world, target);
-                UniqueAbilityApi.emit(ability.execution, UniqueAbilityPhase.HIT, Phase6UniqueAbilities.HIT,
+                UniqueAbilityApi.emit(ability.execution, UniqueAbilityPhase.HIT, StormFrostWaterMasteryAbilities.HIT,
                         target, 1, damage);
             }
         }
@@ -409,7 +409,7 @@ public final class ThunderbrandAbilityManager {
         boolean damaged = ChainLightningVisualManager.damageBoltTargetWithoutKnockback(
                 world, actor, ability.stack, target, resolved);
         if (damaged) UniqueAbilityApi.emit(ability.execution, UniqueAbilityPhase.HIT,
-                Phase6UniqueAbilities.HIT, target, 1, resolved);
+                StormFrostWaterMasteryAbilities.HIT, target, 1, resolved);
         return damaged;
     }
 
@@ -446,7 +446,7 @@ public final class ThunderbrandAbilityManager {
             ChainLightningVisualManager.spawnBolt(world, midpoint(actor), midpoint(target),
                     ChainLightningVisualManager.STORMBRINGER_SETTINGS);
         }
-        UniqueAbilityApi.emit(ability.execution, UniqueAbilityPhase.HIT, Phase6UniqueAbilities.PULSE,
+        UniqueAbilityApi.emit(ability.execution, UniqueAbilityPhase.HIT, StormFrostWaterMasteryAbilities.PULSE,
                 null, targets.size(), damage);
     }
 
@@ -467,7 +467,7 @@ public final class ThunderbrandAbilityManager {
             float enchanted = HelperMethods.applyAbilityDamageEnchantments(world, ability.stack, target, source, damage);
             if (damageSuppressed(target, source, enchanted)) affected++;
         }
-        UniqueAbilityApi.emit(ability.execution, UniqueAbilityPhase.HIT, Phase6UniqueAbilities.PULSE,
+        UniqueAbilityApi.emit(ability.execution, UniqueAbilityPhase.HIT, StormFrostWaterMasteryAbilities.PULSE,
                 null, affected, damage);
     }
 
@@ -844,8 +844,8 @@ public final class ThunderbrandAbilityManager {
         return values != null && !values.isEmpty();
     }
 
-    private static Phase6AbilityTuning.Setting s(String name) {
-        return Phase6AbilityTuning.Setting.valueOf(name);
+    private static StormFrostWaterMasteryTuning.Setting s(String name) {
+        return StormFrostWaterMasteryTuning.Setting.valueOf(name);
     }
 
     private static void spawnChargeStartEffects(ServerWorld world, LivingEntity actor) {
@@ -909,7 +909,7 @@ public final class ThunderbrandAbilityManager {
         private final UUID actorId;
         private final UUID targetId;
         private final ItemStack stack;
-        private final Phase6AbilityTuning tuning;
+        private final StormFrostWaterMasteryTuning tuning;
         private final UniqueAbilityExecution execution;
         private final Set<UUID> dashHitTargets = new HashSet<>();
         private final Set<UUID> chainHitTargets = new HashSet<>();
@@ -929,7 +929,7 @@ public final class ThunderbrandAbilityManager {
         private StatusEffectInstance previousFatigue;
 
         private ActiveThunderBlitz(UUID actorId, UUID targetId, ItemStack stack, Hand hand,
-                                   Vec3d fallbackDirection, long startedAt, Phase6AbilityTuning tuning,
+                                   Vec3d fallbackDirection, long startedAt, StormFrostWaterMasteryTuning tuning,
                                    UniqueAbilityExecution execution) {
             this.actorId = actorId;
             this.targetId = targetId;

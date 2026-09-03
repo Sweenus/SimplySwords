@@ -19,8 +19,8 @@ import net.sweenus.simplyswords.api.SpellScalingProfile;
 import net.sweenus.simplyswords.entity.IcewhisperCometVisualEntity;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
-import net.sweenus.simplyswords.api.ability.Phase6AbilityTuning;
-import net.sweenus.simplyswords.api.ability.Phase6UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.StormFrostWaterMasteryTuning;
+import net.sweenus.simplyswords.api.ability.StormFrostWaterMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityPhase;
@@ -52,11 +52,11 @@ public final class IcewhisperCometManager {
 
     public static void startStorm(ServerWorld world, LivingEntity owner, ItemStack stack, double radius, float damage,
                                   int durationTicks) {
-        startStorm(world, owner, stack, radius, damage, durationTicks, Phase6AbilityTuning.EMPTY, null);
+        startStorm(world, owner, stack, radius, damage, durationTicks, StormFrostWaterMasteryTuning.EMPTY, null);
     }
 
     public static void startStorm(ServerWorld world, LivingEntity owner, ItemStack stack, double radius, float damage,
-                                  int durationTicks, Phase6AbilityTuning tuning, UniqueAbilityExecution execution) {
+                                  int durationTicks, StormFrostWaterMasteryTuning tuning, UniqueAbilityExecution execution) {
         if (owner == null || durationTicks <= 0) {
             return;
         }
@@ -83,7 +83,7 @@ public final class IcewhisperCometManager {
     }
 
     // Extinction Comet's absolute count is authoritative and suppresses Twin Wake's extra comet.
-    public static int cometCount(Phase6AbilityTuning tuning, int configured, int waveIndex) {
+    public static int cometCount(StormFrostWaterMasteryTuning tuning, int configured, int waveIndex) {
         if (tuning.has(s("ICEWHISPER_COMET_COUNT"))) {
             return Math.clamp(tuning.integer(s("ICEWHISPER_COMET_COUNT"), configured), 0, MAX_COMETS_PER_WAVE);
         }
@@ -96,26 +96,26 @@ public final class IcewhisperCometManager {
         return Math.clamp(base + extra, 0, MAX_COMETS_PER_WAVE);
     }
 
-    public static int waveInterval(Phase6AbilityTuning tuning, int configured) {
+    public static int waveInterval(StormFrostWaterMasteryTuning tuning, int configured) {
         return Math.max(1, tuning.integer(s("ICEWHISPER_WAVE_INTERVAL_TICKS"), Math.max(1, configured)));
     }
 
-    public static int fallTicks(Phase6AbilityTuning tuning, int configured) {
+    public static int fallTicks(StormFrostWaterMasteryTuning tuning, int configured) {
         return Math.max(1, configured - tuning.integer(s("ICEWHISPER_FALL_REDUCTION_TICKS"), 0));
     }
 
-    public static double splashRadius(Phase6AbilityTuning tuning, double configured) {
+    public static double splashRadius(StormFrostWaterMasteryTuning tuning, double configured) {
         return tuning.has(s("ICEWHISPER_SPLASH_RADIUS"))
                 ? tuning.get(s("ICEWHISPER_SPLASH_RADIUS"), configured)
                 : Math.max(0, configured) + tuning.get(s("ICEWHISPER_SPLASH_RADIUS_BONUS"), 0);
     }
 
-    public static int stormDuration(Phase6AbilityTuning tuning, int configured) {
+    public static int stormDuration(StormFrostWaterMasteryTuning tuning, int configured) {
         return Math.max(1, configured + tuning.integer(s("ICEWHISPER_STORM_DURATION_BONUS_TICKS"), 0));
     }
 
     private static void spawnWave(ServerWorld world, LivingEntity owner, ActiveStorm storm) {
-        Phase6AbilityTuning tuning = storm.tuning;
+        StormFrostWaterMasteryTuning tuning = storm.tuning;
         int cometCount = cometCount(tuning, Math.max(0, Config.uniqueEffects.icewhisper.cometsPerWave),
                 storm.waveIndex);
         storm.waveIndex++;
@@ -146,7 +146,7 @@ public final class IcewhisperCometManager {
         }
     }
 
-    private static boolean lastSnowReady(LivingEntity owner, Phase6AbilityTuning tuning) {
+    private static boolean lastSnowReady(LivingEntity owner, StormFrostWaterMasteryTuning tuning) {
         if (!tuning.flag(IcewhisperAbilityManager.MODE_LAST_SNOW)) {
             return false;
         }
@@ -159,7 +159,7 @@ public final class IcewhisperCometManager {
     }
 
     // Hunter's Sky retargets one comet onto the nearest enemy Permafrost is currently holding.
-    private static Optional<Vec3d> hunterImpact(ServerWorld world, LivingEntity owner, Phase6AbilityTuning tuning) {
+    private static Optional<Vec3d> hunterImpact(ServerWorld world, LivingEntity owner, StormFrostWaterMasteryTuning tuning) {
         double range = tuning.get(s("ICEWHISPER_HUNTER_RANGE"), 0);
         if (range <= 0) {
             return Optional.empty();
@@ -233,7 +233,7 @@ public final class IcewhisperCometManager {
 
     private static void finishStorm(ActiveStorm storm) {
         if (storm.execution != null) {
-            UniqueAbilityApi.finish(storm.execution, Phase6UniqueAbilities.FINISH, 0);
+            UniqueAbilityApi.finish(storm.execution, StormFrostWaterMasteryAbilities.FINISH, 0);
         }
         IcewhisperAbilityManager.onStormEnded(storm.ownerId);
     }
@@ -287,7 +287,7 @@ public final class IcewhisperCometManager {
             return;
         }
 
-        Phase6AbilityTuning tuning = comet.tuning;
+        StormFrostWaterMasteryTuning tuning = comet.tuning;
         Vec3d impact = comet.impact();
         float splashRadius = (float) splashRadius(tuning,
                 Math.max(0.0F, Config.uniqueEffects.icewhisper.cometSplashRadius));
@@ -322,7 +322,7 @@ public final class IcewhisperCometManager {
                 }
                 if (blind > 0) target.addStatusEffect(new StatusEffectInstance(StatusEffects.BLINDNESS, blind, 0), owner);
                 if (comet.execution != null) UniqueAbilityApi.emit(comet.execution, UniqueAbilityPhase.HIT,
-                        Phase6UniqueAbilities.HIT, target, 1, damage);
+                        StormFrostWaterMasteryAbilities.HIT, target, 1, damage);
                 if (++affected >= cap) break;
             }
         }
@@ -346,7 +346,7 @@ public final class IcewhisperCometManager {
     }
 
     private static void grantImpactBuffs(LivingEntity owner, ActiveComet comet, Vec3d impact) {
-        Phase6AbilityTuning tuning = comet.tuning;
+        StormFrostWaterMasteryTuning tuning = comet.tuning;
         if (tuning.flag(IcewhisperAbilityManager.MODE_BLACK_ICE)) {
             return;
         }
@@ -465,7 +465,7 @@ public final class IcewhisperCometManager {
 
     private record ActiveComet(UUID ownerId, ItemStack stack, UUID visualId, Vec3d start, Vec3d impact,
                                long startTick, int fallTicks, float damage, boolean selfTargeted,
-                               Phase6AbilityTuning tuning, UniqueAbilityExecution execution) {
+                               StormFrostWaterMasteryTuning tuning, UniqueAbilityExecution execution) {
     }
 
     private static final class ActiveStorm {
@@ -474,13 +474,13 @@ public final class IcewhisperCometManager {
         private final long expiryTick;
         private final double radius;
         private final float damage;
-        private final Phase6AbilityTuning tuning;
+        private final StormFrostWaterMasteryTuning tuning;
         private final UniqueAbilityExecution execution;
         private long nextWaveTick;
         private int waveIndex;
 
         private ActiveStorm(UUID ownerId, ItemStack stack, long expiryTick, long nextWaveTick, double radius,
-                            float damage, Phase6AbilityTuning tuning, UniqueAbilityExecution execution) {
+                            float damage, StormFrostWaterMasteryTuning tuning, UniqueAbilityExecution execution) {
             this.ownerId = ownerId;
             this.stack = stack;
             this.expiryTick = expiryTick;
@@ -493,7 +493,7 @@ public final class IcewhisperCometManager {
 
     }
 
-    private static Phase6AbilityTuning.Setting s(String name) {
-        return Phase6AbilityTuning.Setting.valueOf(name);
+    private static StormFrostWaterMasteryTuning.Setting s(String name) {
+        return StormFrostWaterMasteryTuning.Setting.valueOf(name);
     }
 }

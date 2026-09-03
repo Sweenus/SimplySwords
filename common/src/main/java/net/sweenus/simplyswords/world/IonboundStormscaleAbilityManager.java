@@ -30,8 +30,8 @@ import net.sweenus.simplyswords.api.IncapacitatingStatusEffectRegistry;
 import net.sweenus.simplyswords.api.SpellScalingProfile;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
-import net.sweenus.simplyswords.api.ability.Phase3AbilityTuning;
-import net.sweenus.simplyswords.api.ability.Phase3UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.StormSoulMasteryTuning;
+import net.sweenus.simplyswords.api.ability.StormSoulMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityContext;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
@@ -108,7 +108,7 @@ public final class IonboundStormscaleAbilityManager {
             state.rechargeTicks++;
             ReserveState reserve = reserve(serverWorld, actor.getUuid());
             int interval = Math.max(1, state.tuning.integer(
-                    Phase3AbilityTuning.Setting.RESERVE_INTERVAL_TICKS,
+                    StormSoulMasteryTuning.Setting.RESERVE_INTERVAL_TICKS,
                     Config.uniqueEffects.ionbound_stormscale.rechargeInterval));
             if (reserve != null && reserve.rechargeRefund > 0) {
                 interval = Math.max(1, interval - reserve.rechargeRefund);
@@ -133,7 +133,7 @@ public final class IonboundStormscaleAbilityManager {
         ActiveCorridor corridor = getCorridor(context.world(), context.actor().getUuid());
         if (corridor != null) {
             return corridor.slammed && context.world().getTime() <= corridor.followupEnds
-                    && (corridor.tuning.integer(Phase3AbilityTuning.Setting.MODE, 0) & MODE_ION_COFFIN) == 0
+                    && (corridor.tuning.integer(StormSoulMasteryTuning.Setting.MODE, 0) & MODE_ION_COFFIN) == 0
                     && getCubes(context.stack()).cubes() > 0;
         }
         return getCubes(context.stack()).cubes() > 0;
@@ -176,24 +176,24 @@ public final class IonboundStormscaleAbilityManager {
             return false;
         }
 
-        UniqueAbilityExecution execution = UniqueAbilityApi.begin(Phase3UniqueAbilities.IONBOUND_SHIELD,
+        UniqueAbilityExecution execution = UniqueAbilityApi.begin(StormSoulMasteryAbilities.IONBOUND_SHIELD,
                 UniqueAbilityContext.passive(world, stack, actor, source.getAttacker() instanceof LivingEntity target
                         ? target : null, heldHand(actor, stack)), builder -> builder
-                        .set(Phase3UniqueAbilities.TUNING, Phase3AbilityTuning.EMPTY));
+                        .set(StormSoulMasteryAbilities.TUNING, StormSoulMasteryTuning.EMPTY));
         UniqueAbilityApi.takeStartedExecution();
         UniqueAbilityApi.start(execution);
-        Phase3AbilityTuning tuning = Phase3UniqueAbilities.tuning(execution);
-        int mode = tuning.integer(Phase3AbilityTuning.Setting.MODE, 0);
-        int cost = Math.max(1, tuning.integer(Phase3AbilityTuning.Setting.SHIELD_CUBE_COST, 1));
+        StormSoulMasteryTuning tuning = StormSoulMasteryAbilities.tuning(execution);
+        int mode = tuning.integer(StormSoulMasteryTuning.Setting.MODE, 0);
+        int cost = Math.max(1, tuning.integer(StormSoulMasteryTuning.Setting.SHIELD_CUBE_COST, 1));
         if ((mode & MODE_OVERCHARGED_CORE) != 0
-                || amount <= actor.getMaxHealth() * tuning.get(Phase3AbilityTuning.Setting.SHIELD_THRESHOLD,
+                || amount <= actor.getMaxHealth() * tuning.get(StormSoulMasteryTuning.Setting.SHIELD_THRESHOLD,
                         Config.uniqueEffects.ionbound_stormscale.shieldTriggerHealthFraction)
                 || !consumeCubes(stack, cost)) {
             UniqueAbilityApi.cancel(execution);
             return false;
         }
 
-        int duration = Math.max(1, tuning.integer(Phase3AbilityTuning.Setting.SHIELD_DURATION_TICKS,
+        int duration = Math.max(1, tuning.integer(StormSoulMasteryTuning.Setting.SHIELD_DURATION_TICKS,
                 Config.uniqueEffects.ionbound_stormscale.shieldDuration));
         IonboundStormscaleVisualEntity visual = IonboundStormscaleVisualEntity.shield(world, actor, duration);
         visual.addCommandTag(VISUAL_TAG);
@@ -202,7 +202,7 @@ public final class IonboundStormscaleAbilityManager {
                 new ActiveShield(actor.getUuid(), world.getTime() + duration, visual.getUuid()));
         updateOrbit(world, actor);
         spawnShieldStartEffects(world, actor);
-        double push = tuning.get(Phase3AbilityTuning.Setting.SHIELD_PUSH_STRENGTH, 0);
+        double push = tuning.get(StormSoulMasteryTuning.Setting.SHIELD_PUSH_STRENGTH, 0);
         if ((mode & MODE_ION_REBOUND) != 0 && push > 0
                 && source.getAttacker() instanceof LivingEntity attacker && attacker != actor) {
             Vec3d offset = attacker.getPos().subtract(actor.getPos());
@@ -215,9 +215,9 @@ public final class IonboundStormscaleAbilityManager {
                 attacker.velocityModified = true;
             }
         }
-        UniqueAbilityApi.emit(execution, UniqueAbilityPhase.HIT, Phase3UniqueAbilities.HIT,
+        UniqueAbilityApi.emit(execution, UniqueAbilityPhase.HIT, StormSoulMasteryAbilities.HIT,
                 source.getAttacker() instanceof LivingEntity target ? target : null, 1, amount);
-        UniqueAbilityApi.finish(execution, Phase3UniqueAbilities.FINISH, 1);
+        UniqueAbilityApi.finish(execution, StormSoulMasteryAbilities.FINISH, 1);
         return true;
     }
 
@@ -249,35 +249,35 @@ public final class IonboundStormscaleAbilityManager {
         LivingEntity actor = context.actor();
         ItemStack stack = context.stack();
         if (!consumeCube(stack)) return false;
-        UniqueAbilityExecution execution = UniqueAbilityApi.begin(Phase3UniqueAbilities.IONBOUND_CRUSHER,
+        UniqueAbilityExecution execution = UniqueAbilityApi.begin(StormSoulMasteryAbilities.IONBOUND_CRUSHER,
                 UniqueAbilityContext.active(context), builder -> builder
-                        .set(Phase3UniqueAbilities.TUNING, Phase3AbilityTuning.EMPTY)
-                        .set(Phase3UniqueAbilities.COOLDOWN_TICKS, 1));
-        Phase3AbilityTuning tuning = Phase3UniqueAbilities.tuning(execution);
+                        .set(StormSoulMasteryAbilities.TUNING, StormSoulMasteryTuning.EMPTY)
+                        .set(StormSoulMasteryAbilities.COOLDOWN_TICKS, 1));
+        StormSoulMasteryTuning tuning = StormSoulMasteryAbilities.tuning(execution);
 
         Vec3d forward = horizontalDirection(context.facing(), actor);
         Vec3d right = new Vec3d(forward.z, 0.0, -forward.x);
         Vec3d origin = actor.getPos().add(forward.multiply(2.0));
-        int materialize = Math.max(1, tuning.integer(Phase3AbilityTuning.Setting.CORRIDOR_MATERIALIZE_TICKS,
+        int materialize = Math.max(1, tuning.integer(StormSoulMasteryTuning.Setting.CORRIDOR_MATERIALIZE_TICKS,
                 Config.uniqueEffects.ionbound_stormscale.corridorMaterializeTicks));
-        int hold = Math.max(1, tuning.integer(Phase3AbilityTuning.Setting.CORRIDOR_HOLD_TICKS,
+        int hold = Math.max(1, tuning.integer(StormSoulMasteryTuning.Setting.CORRIDOR_HOLD_TICKS,
                 Config.uniqueEffects.ionbound_stormscale.corridorHoldTicks));
-        int close = Math.max(1, tuning.integer(Phase3AbilityTuning.Setting.CORRIDOR_CLOSE_TICKS,
+        int close = Math.max(1, tuning.integer(StormSoulMasteryTuning.Setting.CORRIDOR_CLOSE_TICKS,
                 Config.uniqueEffects.ionbound_stormscale.corridorCloseTicks));
         ActiveCorridor corridor = new ActiveCorridor(actor.getUuid(), stack, stack.copy(), origin, forward, right,
                 context.world().getTime(), context.world().getTime() + materialize + hold + close,
                 tuning, execution);
         CORRIDORS.computeIfAbsent(context.world(), ignored -> new HashMap<>()).put(actor.getUuid(), corridor);
         orCreateReserve(context.world(), actor.getUuid()).beamWidthMultiplier =
-                tuning.get(Phase3AbilityTuning.Setting.BEAM_WIDTH_MULTIPLIER, 0);
+                tuning.get(StormSoulMasteryTuning.Setting.BEAM_WIDTH_MULTIPLIER, 0);
 
         float yaw = (float) Math.toDegrees(Math.atan2(-forward.x, forward.z));
         IonboundStormscaleVisualEntity visual = IonboundStormscaleVisualEntity.corridor(context.world(), origin, yaw,
-                (float) tuning.get(Phase3AbilityTuning.Setting.RANGE,
+                (float) tuning.get(StormSoulMasteryTuning.Setting.RANGE,
                         Config.uniqueEffects.ionbound_stormscale.corridorLength),
-                (float) tuning.get(Phase3AbilityTuning.Setting.WIDTH,
+                (float) tuning.get(StormSoulMasteryTuning.Setting.WIDTH,
                         Config.uniqueEffects.ionbound_stormscale.corridorWidth),
-                (float) tuning.get(Phase3AbilityTuning.Setting.HEIGHT,
+                (float) tuning.get(StormSoulMasteryTuning.Setting.HEIGHT,
                         Config.uniqueEffects.ionbound_stormscale.corridorHeight),
                 materialize, hold, close);
         visual.addCommandTag(VISUAL_TAG);
@@ -303,9 +303,9 @@ public final class IonboundStormscaleAbilityManager {
                 continue;
             }
             if (!corridor.slammed) {
-                int materialize = Math.max(1, corridor.tuning.integer(Phase3AbilityTuning.Setting.CORRIDOR_MATERIALIZE_TICKS,
+                int materialize = Math.max(1, corridor.tuning.integer(StormSoulMasteryTuning.Setting.CORRIDOR_MATERIALIZE_TICKS,
                         Config.uniqueEffects.ionbound_stormscale.corridorMaterializeTicks));
-                int hold = Math.max(1, corridor.tuning.integer(Phase3AbilityTuning.Setting.CORRIDOR_HOLD_TICKS,
+                int hold = Math.max(1, corridor.tuning.integer(StormSoulMasteryTuning.Setting.CORRIDOR_HOLD_TICKS,
                         Config.uniqueEffects.ionbound_stormscale.corridorHoldTicks));
                 long closingAt = corridor.startedAt + materialize + hold;
                 if (now >= closingAt) pullTargetsToCentre(world, actor, corridor, now - closingAt);
@@ -318,7 +318,7 @@ public final class IonboundStormscaleAbilityManager {
             }
             if (corridor.slammed && now > corridor.followupEnds) {
                 applyCooldown(world, actor, corridor.stackReference);
-                UniqueAbilityApi.finish(corridor.execution, Phase3UniqueAbilities.FINISH, 0);
+                UniqueAbilityApi.finish(corridor.execution, StormSoulMasteryAbilities.FINISH, 0);
                 iterator.remove();
             }
         }
@@ -328,23 +328,23 @@ public final class IonboundStormscaleAbilityManager {
     private static void slam(ServerWorld world, LivingEntity actor, ActiveCorridor corridor) {
         corridor.slammed = true;
         corridor.followupEnds = world.getTime() + Math.max(1, corridor.tuning.integer(
-                Phase3AbilityTuning.Setting.LOCKOUT_TICKS, Config.uniqueEffects.ionbound_stormscale.followupWindow));
-        int mode = corridor.tuning.integer(Phase3AbilityTuning.Setting.MODE, 0);
+                StormSoulMasteryTuning.Setting.LOCKOUT_TICKS, Config.uniqueEffects.ionbound_stormscale.followupWindow));
+        int mode = corridor.tuning.integer(StormSoulMasteryTuning.Setting.MODE, 0);
         ReserveState reserve = reserve(world, actor.getUuid());
         float damage = HelperMethods.abilityScaledDamage(SpellScalingProfile.LIGHTNING, actor, corridor.stackSnapshot,
                 Config.uniqueEffects.ionbound_stormscale.slamDamageScaling,
                 Config.uniqueEffects.ionbound_stormscale.slamSpellScaling)
-                * (float) corridor.tuning.get(Phase3AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1)
+                * (float) corridor.tuning.get(StormSoulMasteryTuning.Setting.DAMAGE_MULTIPLIER, 1)
                 * abilityDamageFactor(world, actor, corridor.stackReference, corridor.tuning)
                 * storedChargeFactor(world, actor, corridor.tuning);
         if (reserve != null) reserve.storedCharges = 0;
-        double laneWidth = corridor.tuning.get(Phase3AbilityTuning.Setting.FOCUS_LANE_WIDTH, 0);
-        double focusBonus = corridor.tuning.get(Phase3AbilityTuning.Setting.FOCUS_DAMAGE_BONUS, 0);
-        double burst = corridor.tuning.get(Phase3AbilityTuning.Setting.BURST_STRENGTH, 0);
-        double trapSpeed = corridor.tuning.get(Phase3AbilityTuning.Setting.TRAP_MOVEMENT_SPEED, 0);
+        double laneWidth = corridor.tuning.get(StormSoulMasteryTuning.Setting.FOCUS_LANE_WIDTH, 0);
+        double focusBonus = corridor.tuning.get(StormSoulMasteryTuning.Setting.FOCUS_DAMAGE_BONUS, 0);
+        double burst = corridor.tuning.get(StormSoulMasteryTuning.Setting.BURST_STRENGTH, 0);
+        double trapSpeed = corridor.tuning.get(StormSoulMasteryTuning.Setting.TRAP_MOVEMENT_SPEED, 0);
         int affected = 0;
         for (LivingEntity target : targetsInCorridor(world, actor, corridor,
-                Math.max(0.55, corridor.tuning.get(Phase3AbilityTuning.Setting.WIDTH,
+                Math.max(0.55, corridor.tuning.get(StormSoulMasteryTuning.Setting.WIDTH,
                         Config.uniqueEffects.ionbound_stormscale.corridorWidth) * 0.5))) {
             float targetDamage = damage;
             if ((mode & MODE_CRUSHING_FOCUS) != 0 && laneWidth > 0 && focusBonus > 0
@@ -354,7 +354,7 @@ public final class IonboundStormscaleAbilityManager {
             }
             if (damageTarget(world, actor, corridor.stackSnapshot, target, targetDamage, false)) {
                 int statusTicks = Math.max(1, corridor.tuning.integer(
-                        Phase3AbilityTuning.Setting.STATUS_DURATION_TICKS,
+                        StormSoulMasteryTuning.Setting.STATUS_DURATION_TICKS,
                         Config.uniqueEffects.ionbound_stormscale.slowDuration));
                 if ((mode & MODE_REPULSOR_GATE) == 0) {
                     target.addStatusEffect(new StatusEffectInstance(
@@ -374,8 +374,8 @@ public final class IonboundStormscaleAbilityManager {
                 spawnSlamTargetEffects(world, target);
                 affected++;
                 UniqueAbilityApi.emit(corridor.execution, UniqueAbilityPhase.HIT,
-                        Phase3UniqueAbilities.HIT, target, 1, targetDamage);
-                if (affected >= corridor.tuning.integer(Phase3AbilityTuning.Setting.CORRIDOR_TARGET_CAP,
+                        StormSoulMasteryAbilities.HIT, target, 1, targetDamage);
+                if (affected >= corridor.tuning.integer(StormSoulMasteryTuning.Setting.CORRIDOR_TARGET_CAP,
                         Config.uniqueEffects.ionbound_stormscale.corridorTargetCap)) break;
             }
         }
@@ -384,17 +384,17 @@ public final class IonboundStormscaleAbilityManager {
 
     private static boolean startBeam(ServerWorld world, LivingEntity actor, ItemStack heldStack, ActiveCorridor corridor) {
         if (!corridor.slammed || world.getTime() > corridor.followupEnds
-                || (corridor.tuning.integer(Phase3AbilityTuning.Setting.MODE, 0) & MODE_ION_COFFIN) != 0
+                || (corridor.tuning.integer(StormSoulMasteryTuning.Setting.MODE, 0) & MODE_ION_COFFIN) != 0
                 || !consumeCube(heldStack)) return false;
-        UniqueAbilityExecution execution = UniqueAbilityApi.begin(Phase3UniqueAbilities.IONBOUND_BEAM,
+        UniqueAbilityExecution execution = UniqueAbilityApi.begin(StormSoulMasteryAbilities.IONBOUND_BEAM,
                 UniqueAbilityContext.passive(world, heldStack, actor, null, heldHand(actor, heldStack)), builder -> builder
-                        .set(Phase3UniqueAbilities.TUNING, Phase3AbilityTuning.EMPTY)
-                        .set(Phase3UniqueAbilities.COOLDOWN_TICKS, Config.uniqueEffects.ionbound_stormscale.cooldown));
-        Phase3AbilityTuning tuning = Phase3UniqueAbilities.tuning(execution);
-        int duration = Math.max(1, tuning.integer(Phase3AbilityTuning.Setting.BEAM_DURATION_TICKS,
+                        .set(StormSoulMasteryAbilities.TUNING, StormSoulMasteryTuning.EMPTY)
+                        .set(StormSoulMasteryAbilities.COOLDOWN_TICKS, Config.uniqueEffects.ionbound_stormscale.cooldown));
+        StormSoulMasteryTuning tuning = StormSoulMasteryAbilities.tuning(execution);
+        int duration = Math.max(1, tuning.integer(StormSoulMasteryTuning.Setting.BEAM_DURATION_TICKS,
                 Config.uniqueEffects.ionbound_stormscale.beamDuration));
         IonboundStormscaleVisualEntity visual = IonboundStormscaleVisualEntity.beam(world, actor,
-                (float) tuning.get(Phase3AbilityTuning.Setting.RANGE,
+                (float) tuning.get(StormSoulMasteryTuning.Setting.RANGE,
                         Config.uniqueEffects.ionbound_stormscale.corridorLength),
                 (float) beamWidth(world, actor, tuning),
                 duration);
@@ -408,7 +408,7 @@ public final class IonboundStormscaleAbilityManager {
         updateOrbit(world, actor);
         spawnBeamStartEffects(world, actor);
         pulseBeam(world, actor, beam);
-        UniqueAbilityApi.finish(corridor.execution, Phase3UniqueAbilities.FINISH, 0);
+        UniqueAbilityApi.finish(corridor.execution, StormSoulMasteryAbilities.FINISH, 0);
         return true;
     }
 
@@ -432,7 +432,7 @@ public final class IonboundStormscaleAbilityManager {
                 }
                 if (actor == null) UniqueAbilityApi.cancel(beam.execution);
                 else {
-                    UniqueAbilityApi.finish(beam.execution, Phase3UniqueAbilities.FINISH, 0);
+                    UniqueAbilityApi.finish(beam.execution, StormSoulMasteryAbilities.FINISH, 0);
                     grantRechargeRefund(world, beam.actorId, beam.tuning);
                 }
                 iterator.remove();
@@ -445,7 +445,7 @@ public final class IonboundStormscaleAbilityManager {
                 visual.setYaw(actor.getYaw());
                 visual.setPitch(actor.getPitch());
             }
-            int interval = Math.max(1, beam.tuning.integer(Phase3AbilityTuning.Setting.INTERVAL_TICKS,
+            int interval = Math.max(1, beam.tuning.integer(StormSoulMasteryTuning.Setting.INTERVAL_TICKS,
                     Config.uniqueEffects.ionbound_stormscale.beamDamageInterval));
             long age = now - beam.startedAt;
             if (age > 0 && age % interval == 0) pulseBeam(world, actor, beam);
@@ -455,22 +455,22 @@ public final class IonboundStormscaleAbilityManager {
     }
 
     private static void pulseBeam(ServerWorld world, LivingEntity actor, ActiveBeam beam) {
-        int duration = Math.max(1, beam.tuning.integer(Phase3AbilityTuning.Setting.BEAM_DURATION_TICKS,
+        int duration = Math.max(1, beam.tuning.integer(StormSoulMasteryTuning.Setting.BEAM_DURATION_TICKS,
                 Config.uniqueEffects.ionbound_stormscale.beamDuration));
-        int interval = Math.max(1, beam.tuning.integer(Phase3AbilityTuning.Setting.INTERVAL_TICKS,
+        int interval = Math.max(1, beam.tuning.integer(StormSoulMasteryTuning.Setting.INTERVAL_TICKS,
                 Config.uniqueEffects.ionbound_stormscale.beamDamageInterval));
         int pulses = Math.max(1, (duration + interval - 1) / interval);
         float baseDamage = HelperMethods.abilityScaledDamage(SpellScalingProfile.LIGHTNING, actor, beam.stackSnapshot,
                 Config.uniqueEffects.ionbound_stormscale.beamDamageScaling,
                 Config.uniqueEffects.ionbound_stormscale.beamSpellScaling);
         float damage = baseDamage * Math.max(0.0F, Config.uniqueEffects.ionbound_stormscale.beamTotalDamageMultiplier)
-                * (float) beam.tuning.get(Phase3AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1)
+                * (float) beam.tuning.get(StormSoulMasteryTuning.Setting.DAMAGE_MULTIPLIER, 1)
                 * abilityDamageFactor(world, actor, beam.stackReference, beam.tuning)
                 / pulses;
-        double armorIgnore = beam.tuning.get(Phase3AbilityTuning.Setting.ARMOR_IGNORE, 0);
+        double armorIgnore = beam.tuning.get(StormSoulMasteryTuning.Setting.ARMOR_IGNORE, 0);
         Vec3d start = beamOrigin(actor);
         Vec3d direction = actor.getRotationVec(1.0F).normalize();
-        Vec3d end = start.add(direction.multiply(Math.max(1.0, beam.tuning.get(Phase3AbilityTuning.Setting.RANGE,
+        Vec3d end = start.add(direction.multiply(Math.max(1.0, beam.tuning.get(StormSoulMasteryTuning.Setting.RANGE,
                 Config.uniqueEffects.ionbound_stormscale.corridorLength))));
         double halfWidth = Math.max(0.1, beamWidth(world, actor, beam.tuning) * 0.5);
         int affected = 0;
@@ -479,14 +479,14 @@ public final class IonboundStormscaleAbilityManager {
                     armorIgnore > 0 ? damage * (float) (1 + Math.min(1, armorIgnore / 20.0)) : damage, true)) {
                 target.stopUsingItem();
                 target.addStatusEffect(new StatusEffectInstance(EffectRegistry.getReference(EffectRegistry.ION_PARALYSIS),
-                        Math.max(1, beam.tuning.integer(Phase3AbilityTuning.Setting.STATUS_DURATION_TICKS,
+                        Math.max(1, beam.tuning.integer(StormSoulMasteryTuning.Setting.STATUS_DURATION_TICKS,
                                 Config.uniqueEffects.ionbound_stormscale.paralysisDuration)),
                         0, false, false, false), actor);
                 spawnBeamTargetEffects(world, target);
                 affected++;
                 UniqueAbilityApi.emit(beam.execution, UniqueAbilityPhase.HIT,
-                        Phase3UniqueAbilities.PULSE, target, 1, damage);
-                if (affected >= beam.tuning.integer(Phase3AbilityTuning.Setting.BEAM_TARGET_CAP,
+                        StormSoulMasteryAbilities.PULSE, target, 1, damage);
+                if (affected >= beam.tuning.integer(StormSoulMasteryTuning.Setting.BEAM_TARGET_CAP,
                         Config.uniqueEffects.ionbound_stormscale.beamTargetCap)) break;
             }
         }
@@ -510,15 +510,15 @@ public final class IonboundStormscaleAbilityManager {
     }
 
     private static void pullTargetsToCentre(ServerWorld world, LivingEntity actor, ActiveCorridor corridor, long closingAge) {
-        int closeTicks = Math.max(1, corridor.tuning.integer(Phase3AbilityTuning.Setting.CORRIDOR_CLOSE_TICKS,
+        int closeTicks = Math.max(1, corridor.tuning.integer(StormSoulMasteryTuning.Setting.CORRIDOR_CLOSE_TICKS,
                 Config.uniqueEffects.ionbound_stormscale.corridorCloseTicks));
         double progress = MathHelper.clamp((closingAge + 1.0) / closeTicks, 0.0, 1.0);
-        double halfWidth = corridor.tuning.get(Phase3AbilityTuning.Setting.WIDTH,
+        double halfWidth = corridor.tuning.get(StormSoulMasteryTuning.Setting.WIDTH,
                 Config.uniqueEffects.ionbound_stormscale.corridorWidth) * 0.5 * (1.0 - progress * 0.82);
         for (LivingEntity target : targetsInCorridor(world, actor, corridor, halfWidth + 0.8)) {
             double side = target.getPos().subtract(corridor.origin).dotProduct(corridor.right);
             double resistance = MathHelper.clamp(target.getAttributeValue(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE), 0.0, 1.0);
-            double strength = Math.max(0.0, corridor.tuning.get(Phase3AbilityTuning.Setting.PULL_STRENGTH,
+            double strength = Math.max(0.0, corridor.tuning.get(StormSoulMasteryTuning.Setting.PULL_STRENGTH,
                     Config.uniqueEffects.ionbound_stormscale.corridorPullStrength)) * (1.0 - resistance);
             target.addVelocity(corridor.right.x * -Math.signum(side) * strength, 0.025,
                     corridor.right.z * -Math.signum(side) * strength);
@@ -528,9 +528,9 @@ public final class IonboundStormscaleAbilityManager {
 
     private static List<LivingEntity> targetsInCorridor(ServerWorld world, LivingEntity actor,
                                                          ActiveCorridor corridor, double halfWidth) {
-        double length = Math.max(1.0, corridor.tuning.get(Phase3AbilityTuning.Setting.RANGE,
+        double length = Math.max(1.0, corridor.tuning.get(StormSoulMasteryTuning.Setting.RANGE,
                 Config.uniqueEffects.ionbound_stormscale.corridorLength));
-        double height = Math.max(1.0, corridor.tuning.get(Phase3AbilityTuning.Setting.HEIGHT,
+        double height = Math.max(1.0, corridor.tuning.get(StormSoulMasteryTuning.Setting.HEIGHT,
                 Config.uniqueEffects.ionbound_stormscale.corridorHeight));
         Vec3d end = corridor.origin.add(corridor.forward.multiply(length));
         Box search = new Box(Math.min(corridor.origin.x, end.x), corridor.origin.y - 0.5,
@@ -664,10 +664,10 @@ public final class IonboundStormscaleAbilityManager {
                 .computeIfAbsent(actorId, ignored -> new ReserveState());
     }
 
-    private static void grantStoredCharge(ServerWorld world, LivingEntity actor, Phase3AbilityTuning tuning) {
-        int mode = tuning.integer(Phase3AbilityTuning.Setting.MODE, 0);
-        int cap = tuning.integer(Phase3AbilityTuning.Setting.RESERVE_STACK_CAP, 0);
-        int duration = tuning.integer(Phase3AbilityTuning.Setting.RESERVE_STACK_DURATION_TICKS, 0);
+    private static void grantStoredCharge(ServerWorld world, LivingEntity actor, StormSoulMasteryTuning tuning) {
+        int mode = tuning.integer(StormSoulMasteryTuning.Setting.MODE, 0);
+        int cap = tuning.integer(StormSoulMasteryTuning.Setting.RESERVE_STACK_CAP, 0);
+        int duration = tuning.integer(StormSoulMasteryTuning.Setting.RESERVE_STACK_DURATION_TICKS, 0);
         if ((mode & MODE_STORED_CHARGE) == 0 || cap <= 0 || duration <= 0) return;
         ReserveState state = orCreateReserve(world, actor.getUuid());
         long now = world.getTime();
@@ -678,9 +678,9 @@ public final class IonboundStormscaleAbilityManager {
         state.storedChargeNext = now + duration;
     }
 
-    private static float storedChargeFactor(ServerWorld world, LivingEntity actor, Phase3AbilityTuning tuning) {
+    private static float storedChargeFactor(ServerWorld world, LivingEntity actor, StormSoulMasteryTuning tuning) {
         ReserveState state = reserve(world, actor.getUuid());
-        double bonus = tuning.get(Phase3AbilityTuning.Setting.RESERVE_STACK_BONUS, 0);
+        double bonus = tuning.get(StormSoulMasteryTuning.Setting.RESERVE_STACK_BONUS, 0);
         if (state == null || bonus <= 0 || state.storedCharges <= 0
                 || world.getTime() >= state.storedChargeExpires) {
             return 1.0F;
@@ -689,38 +689,38 @@ public final class IonboundStormscaleAbilityManager {
     }
 
     private static float abilityDamageFactor(ServerWorld world, LivingEntity actor,
-                                             ItemStack stack, Phase3AbilityTuning tuning) {
+                                             ItemStack stack, StormSoulMasteryTuning tuning) {
         double factor = 1.0;
-        double penalty = tuning.get(Phase3AbilityTuning.Setting.ABILITY_DAMAGE_PENALTY, 0);
+        double penalty = tuning.get(StormSoulMasteryTuning.Setting.ABILITY_DAMAGE_PENALTY, 0);
         if (penalty > 0) factor *= 1 - Math.min(1, penalty);
-        double perCube = tuning.get(Phase3AbilityTuning.Setting.ABILITY_DAMAGE_PER_CUBE, 0);
-        double cubeCap = tuning.get(Phase3AbilityTuning.Setting.ABILITY_DAMAGE_CUBE_CAP, 0);
+        double perCube = tuning.get(StormSoulMasteryTuning.Setting.ABILITY_DAMAGE_PER_CUBE, 0);
+        double cubeCap = tuning.get(StormSoulMasteryTuning.Setting.ABILITY_DAMAGE_CUBE_CAP, 0);
         if (perCube > 0 && cubeCap > 0) {
             factor *= 1 + Math.min(cubeCap, getCubes(stack).cubes() * perCube);
         }
         return (float) Math.max(0, factor);
     }
 
-    private static double beamWidth(ServerWorld world, LivingEntity actor, Phase3AbilityTuning tuning) {
-        double width = Math.max(0.1, tuning.get(Phase3AbilityTuning.Setting.WIDTH,
+    private static double beamWidth(ServerWorld world, LivingEntity actor, StormSoulMasteryTuning tuning) {
+        double width = Math.max(0.1, tuning.get(StormSoulMasteryTuning.Setting.WIDTH,
                 Config.uniqueEffects.ionbound_stormscale.beamWidth));
         ReserveState state = reserve(world, actor.getUuid());
         if (state != null && state.beamWidthMultiplier > 0) width *= state.beamWidthMultiplier;
         return Math.max(0.1, width);
     }
 
-    private static void grantRechargeRefund(ServerWorld world, UUID actorId, Phase3AbilityTuning tuning) {
-        int mode = tuning.integer(Phase3AbilityTuning.Setting.MODE, 0);
-        int refund = tuning.integer(Phase3AbilityTuning.Setting.RESERVE_REFUND_TICKS, 0);
+    private static void grantRechargeRefund(ServerWorld world, UUID actorId, StormSoulMasteryTuning tuning) {
+        int mode = tuning.integer(StormSoulMasteryTuning.Setting.MODE, 0);
+        int refund = tuning.integer(StormSoulMasteryTuning.Setting.RESERVE_REFUND_TICKS, 0);
         if ((mode & MODE_RECYCLED_CURRENT) == 0 || refund <= 0) return;
         orCreateReserve(world, actorId).rechargeRefund = refund;
     }
 
     private static void tickEmergencyCell(ServerWorld world, LivingEntity actor,
-                                          ItemStack stack, Phase3AbilityTuning tuning) {
-        int mode = tuning.integer(Phase3AbilityTuning.Setting.MODE, 0);
-        double threshold = tuning.get(Phase3AbilityTuning.Setting.SHIELD_LOW_HEALTH_THRESHOLD, 0);
-        int lockout = tuning.integer(Phase3AbilityTuning.Setting.SHIELD_LOCKOUT_TICKS, 0);
+                                          ItemStack stack, StormSoulMasteryTuning tuning) {
+        int mode = tuning.integer(StormSoulMasteryTuning.Setting.MODE, 0);
+        double threshold = tuning.get(StormSoulMasteryTuning.Setting.SHIELD_LOW_HEALTH_THRESHOLD, 0);
+        int lockout = tuning.integer(StormSoulMasteryTuning.Setting.SHIELD_LOCKOUT_TICKS, 0);
         if ((mode & MODE_EMERGENCY_CELL) == 0 || threshold <= 0 || lockout <= 0
                 || getCubes(stack).cubes() > 0
                 || actor.getHealth() > actor.getMaxHealth() * threshold) {
@@ -809,13 +809,13 @@ public final class IonboundStormscaleAbilityManager {
         if (current == null || current.stackReference != stack) {
             checkpointRecharge(current);
             IonCubeComponent cubes = getCubes(stack);
-            UniqueAbilityExecution execution = UniqueAbilityApi.begin(Phase3UniqueAbilities.IONBOUND_SHIELD,
+            UniqueAbilityExecution execution = UniqueAbilityApi.begin(StormSoulMasteryAbilities.IONBOUND_SHIELD,
                     UniqueAbilityContext.passive(world, stack, actor, null, hand), builder -> builder
-                            .set(Phase3UniqueAbilities.TUNING, Phase3AbilityTuning.EMPTY));
+                            .set(StormSoulMasteryAbilities.TUNING, StormSoulMasteryTuning.EMPTY));
             UniqueAbilityApi.takeStartedExecution();
             UniqueAbilityApi.start(execution);
-            Phase3AbilityTuning tuning = Phase3UniqueAbilities.tuning(execution);
-            UniqueAbilityApi.finish(execution, Phase3UniqueAbilities.FINISH, 0);
+            StormSoulMasteryTuning tuning = StormSoulMasteryAbilities.tuning(execution);
+            UniqueAbilityApi.finish(execution, StormSoulMasteryAbilities.FINISH, 0);
             current = new RechargeState(stack, cubes.rechargeTicks(), tuning);
             wielder.hands.put(hand, current);
         }
@@ -910,14 +910,14 @@ public final class IonboundStormscaleAbilityManager {
     }
 
     private static void applyBeamMovementSlow(LivingEntity actor) {
-        applyBeamMovementSlow(actor, Phase3AbilityTuning.EMPTY);
+        applyBeamMovementSlow(actor, StormSoulMasteryTuning.EMPTY);
     }
 
-    private static void applyBeamMovementSlow(LivingEntity actor, Phase3AbilityTuning tuning) {
+    private static void applyBeamMovementSlow(LivingEntity actor, StormSoulMasteryTuning tuning) {
         EntityAttributeInstance movementSpeed = actor.getAttributeInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED);
         if (movementSpeed == null) return;
         double reduction = -MathHelper.clamp(
-                1 - tuning.get(Phase3AbilityTuning.Setting.MOVEMENT_SPEED,
+                1 - tuning.get(StormSoulMasteryTuning.Setting.MOVEMENT_SPEED,
                         1 - Config.uniqueEffects.ionbound_stormscale.beamMovementSpeedReduction), 0.0, 0.99);
         EntityAttributeModifier current = movementSpeed.getModifier(BEAM_MOVEMENT_SLOW_ID);
         if (current != null && current.value() == reduction
@@ -1112,12 +1112,12 @@ public final class IonboundStormscaleAbilityManager {
         private UUID visualId;
         private boolean slammed;
         private long followupEnds = Long.MIN_VALUE;
-        private final Phase3AbilityTuning tuning;
+        private final StormSoulMasteryTuning tuning;
         private final UniqueAbilityExecution execution;
 
         private ActiveCorridor(UUID actorId, ItemStack stackReference, ItemStack stackSnapshot,
                                Vec3d origin, Vec3d forward, Vec3d right, long startedAt, long slamAt,
-                               Phase3AbilityTuning tuning, UniqueAbilityExecution execution) {
+                               StormSoulMasteryTuning tuning, UniqueAbilityExecution execution) {
             this.actorId = actorId;
             this.stackReference = stackReference;
             this.stackSnapshot = stackSnapshot;
@@ -1138,12 +1138,12 @@ public final class IonboundStormscaleAbilityManager {
         private final long startedAt;
         private final long endsAt;
         private final UUID visualId;
-        private final Phase3AbilityTuning tuning;
+        private final StormSoulMasteryTuning tuning;
         private final UniqueAbilityExecution execution;
 
         private ActiveBeam(UUID actorId, ItemStack stackReference, ItemStack stackSnapshot,
                            long startedAt, long endsAt, UUID visualId,
-                           Phase3AbilityTuning tuning, UniqueAbilityExecution execution) {
+                           StormSoulMasteryTuning tuning, UniqueAbilityExecution execution) {
             this.actorId = actorId;
             this.stackReference = stackReference;
             this.stackSnapshot = stackSnapshot;
@@ -1175,9 +1175,9 @@ public final class IonboundStormscaleAbilityManager {
         private final ItemStack stackReference;
         private int rechargeTicks;
         private long lastAdvancedTick = Long.MIN_VALUE;
-        private final Phase3AbilityTuning tuning;
+        private final StormSoulMasteryTuning tuning;
 
-        private RechargeState(ItemStack stackReference, int rechargeTicks, Phase3AbilityTuning tuning) {
+        private RechargeState(ItemStack stackReference, int rechargeTicks, StormSoulMasteryTuning tuning) {
             this.stackReference = stackReference;
             this.rechargeTicks = Math.max(0, rechargeTicks);
             this.tuning = tuning;

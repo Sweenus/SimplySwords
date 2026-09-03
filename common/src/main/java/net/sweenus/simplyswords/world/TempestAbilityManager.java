@@ -15,8 +15,8 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
-import net.sweenus.simplyswords.api.ability.Phase6AbilityTuning;
-import net.sweenus.simplyswords.api.ability.Phase6UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.StormFrostWaterMasteryTuning;
+import net.sweenus.simplyswords.api.ability.StormFrostWaterMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.registry.EffectRegistry;
@@ -54,7 +54,7 @@ public final class TempestAbilityManager {
     }
 
     public static MarkApplication applyMark(ServerWorld world, LivingEntity owner, LivingEntity target,
-                                            Phase6AbilityTuning tuning, float fireDamage, float frostDamage,
+                                            StormFrostWaterMasteryTuning tuning, float fireDamage, float frostDamage,
                                             int configuredDuration, int configuredCap) {
         WorldState state = STATES.computeIfAbsent(world, ignored -> new WorldState());
         long now = world.getTime();
@@ -116,7 +116,7 @@ public final class TempestAbilityManager {
         return false;
     }
 
-    public static boolean startVortex(WeaponAbilityContext context, Phase6AbilityTuning tuning,
+    public static boolean startVortex(WeaponAbilityContext context, StormFrostWaterMasteryTuning tuning,
                                       UniqueAbilityExecution execution, int configuredDuration,
                                       int configuredMaximumSize) {
         ServerWorld world = context.world();
@@ -172,7 +172,7 @@ public final class TempestAbilityManager {
         int shellThreshold = integer(tuning, "TEMPEST_SHELL_STACK_THRESHOLD", "COUNT", 0);
         if (shellThreshold > 0 && fire + frost >= shellThreshold) {
             float absorption = (float) value(tuning, "TEMPEST_SHELL_ABSORPTION", "ABSORPTION", 0);
-            Phase4AbsorptionTracker.grant(owner, absorption,
+            MasteryAbsorptionTracker.grant(owner, absorption,
                     integer(tuning, "TEMPEST_SHELL_DURATION_TICKS", "STATUS_DURATION_TICKS", 80), absorption);
         }
         if (tuning.has(s("TEMPEST_SPEED_AMPLIFIER"))) {
@@ -238,12 +238,12 @@ public final class TempestAbilityManager {
         STATES.clear();
     }
 
-    public static int resolveMarkDuration(Phase6AbilityTuning tuning, int configured) {
+    public static int resolveMarkDuration(StormFrostWaterMasteryTuning tuning, int configured) {
         int base = tuning.integer(s("DURATION_TICKS"), configured);
         return Math.max(1, base + tuning.integer(s("TEMPEST_MARK_DURATION_BONUS_TICKS"), 0));
     }
 
-    public static int resolveMarkCap(Phase6AbilityTuning tuning, int configured) {
+    public static int resolveMarkCap(StormFrostWaterMasteryTuning tuning, int configured) {
         if (tuning.has(s("TEMPEST_PRISMATIC_STACK_CAP")))
             return tuning.integer(s("TEMPEST_PRISMATIC_STACK_CAP"), configured);
         if (tuning.has(s("TEMPEST_MARK_STACK_CAP")))
@@ -251,14 +251,14 @@ public final class TempestAbilityManager {
         return tuning.integer(s("STACK_CAP"), configured);
     }
 
-    public static int resolveVortexDuration(Phase6AbilityTuning tuning, int configured) {
+    public static int resolveVortexDuration(StormFrostWaterMasteryTuning tuning, int configured) {
         double duration = tuning.get(s("DURATION_TICKS"), configured)
                 + tuning.get(s("TEMPEST_DURATION_BONUS_TICKS"), 0);
         return Math.max(1, (int) Math.round(duration
                 * tuning.get(s("TEMPEST_SINGULARITY_DURATION_MULTIPLIER"), 1)));
     }
 
-    public static int resolveMaximumSize(Phase6AbilityTuning tuning, int configured) {
+    public static int resolveMaximumSize(StormFrostWaterMasteryTuning tuning, int configured) {
         return Math.max(1, (int) Math.round(tuning.get(s("STACK_CAP"), configured)
                 * tuning.get(s("TEMPEST_MAX_SIZE_MULTIPLIER"), 1)));
     }
@@ -268,7 +268,7 @@ public final class TempestAbilityManager {
         return retain > 0 ? Math.max(1, available - retain) : available;
     }
 
-    public static double resolveRadius(Phase6AbilityTuning tuning, int effectiveStacks, int maximumSize) {
+    public static double resolveRadius(StormFrostWaterMasteryTuning tuning, int effectiveStacks, int maximumSize) {
         if (tuning.has(s("TEMPEST_SINGULARITY_RADIUS")))
             return tuning.get(s("TEMPEST_SINGULARITY_RADIUS"), 4);
         int stacks = Math.min(Math.max(0, effectiveStacks), Math.max(1, maximumSize));
@@ -276,13 +276,13 @@ public final class TempestAbilityManager {
         return tuning.get(s("RADIUS"), growing) + tuning.get(s("TEMPEST_START_RADIUS_BONUS"), 0);
     }
 
-    public static int resolvePulseInterval(Phase6AbilityTuning tuning, int effectiveStacks, int maximumSize) {
+    public static int resolvePulseInterval(StormFrostWaterMasteryTuning tuning, int effectiveStacks, int maximumSize) {
         if (effectiveStacks >= maximumSize && tuning.has(s("TEMPEST_MAX_CADENCE_INTERVAL_TICKS")))
             return tuning.integer(s("TEMPEST_MAX_CADENCE_INTERVAL_TICKS"), 8);
         return tuning.integer(s("INTERVAL_TICKS"), 10);
     }
 
-    public static double resolveDamageMultiplier(Phase6AbilityTuning tuning, int consumedStacks,
+    public static double resolveDamageMultiplier(StormFrostWaterMasteryTuning tuning, int consumedStacks,
                                                  boolean consumedBoth) {
         double multiplier = tuning.get(s("DAMAGE_MULTIPLIER"), 1)
                 * tuning.get(s("TEMPEST_VORTEX_DAMAGE_MULTIPLIER"), 1)
@@ -339,7 +339,7 @@ public final class TempestAbilityManager {
                 continue;
             }
             Vortex vortex = entry.getValue();
-            Phase4AbsorptionTracker.tick(owner);
+            MasteryAbsorptionTracker.tick(owner);
             if (now >= vortex.expiresAt) {
                 finalConvergence(world, owner, vortex);
                 finish(world, owner, vortex, true);
@@ -397,7 +397,7 @@ public final class TempestAbilityManager {
             }
         }
         UniqueAbilityApi.emit(vortex.execution, net.sweenus.simplyswords.api.ability.UniqueAbilityPhase.HIT,
-                Phase6UniqueAbilities.PULSE, null, affected, damage);
+                StormFrostWaterMasteryAbilities.PULSE, null, affected, damage);
     }
 
     private static void thermalShock(ServerWorld world, LivingEntity owner, Vortex vortex) {
@@ -533,7 +533,7 @@ public final class TempestAbilityManager {
     }
 
     private static Element choosePrimary(LivingEntity owner, Cadence cadence,
-                                         Phase6AbilityTuning tuning, long now) {
+                                         StormFrostWaterMasteryTuning tuning, long now) {
         if (tuning.has(s("TEMPEST_SPECIALIST_LOCK_TICKS"))) {
             if (cadence.locked == null || now >= cadence.lockExpires) {
                 cadence.locked = owner.getRandom().nextBoolean() ? Element.FIRE : Element.FROST;
@@ -548,7 +548,7 @@ public final class TempestAbilityManager {
     }
 
     private static void applyPerfectSequence(LivingEntity owner, Marks marks,
-                                             Phase6AbilityTuning tuning, long now) {
+                                             StormFrostWaterMasteryTuning tuning, long now) {
         int window = tuning.integer(s("TEMPEST_SEQUENCE_WINDOW_TICKS"), 0);
         if (window <= 0 || marks.fire <= 0 || marks.frost <= 0
                 || Math.abs(marks.fireAppliedAt - marks.frostAppliedAt) > window) return;
@@ -640,7 +640,7 @@ public final class TempestAbilityManager {
                     vortex.tuning.integer(s("TEMPEST_RESISTANCE_AMPLIFIER"), 0),
                     (int) Math.max(1, vortex.expiresAt - vortex.startedAt), elapsed);
         }
-        if (completed) UniqueAbilityApi.finish(vortex.execution, Phase6UniqueAbilities.FINISH, 0);
+        if (completed) UniqueAbilityApi.finish(vortex.execution, StormFrostWaterMasteryAbilities.FINISH, 0);
         else UniqueAbilityApi.cancel(vortex.execution);
     }
 
@@ -665,16 +665,16 @@ public final class TempestAbilityManager {
         return element == Element.FIRE ? Element.FROST : Element.FIRE;
     }
 
-    private static Phase6AbilityTuning.Setting s(String name) {
-        return Phase6AbilityTuning.Setting.valueOf(name);
+    private static StormFrostWaterMasteryTuning.Setting s(String name) {
+        return StormFrostWaterMasteryTuning.Setting.valueOf(name);
     }
 
-    private static double value(Phase6AbilityTuning tuning, String scoped, String shared, double fallback) {
-        Phase6AbilityTuning.Setting scopedSetting = s(scoped);
+    private static double value(StormFrostWaterMasteryTuning tuning, String scoped, String shared, double fallback) {
+        StormFrostWaterMasteryTuning.Setting scopedSetting = s(scoped);
         return tuning.has(scopedSetting) ? tuning.get(scopedSetting, fallback) : tuning.get(s(shared), fallback);
     }
 
-    private static int integer(Phase6AbilityTuning tuning, String scoped, String shared, int fallback) {
+    private static int integer(StormFrostWaterMasteryTuning tuning, String scoped, String shared, int fallback) {
         return (int) Math.round(value(tuning, scoped, shared, fallback));
     }
 
@@ -696,7 +696,7 @@ public final class TempestAbilityManager {
         private double frostWeight;
         private double firePotency = 1;
         private double frostPotency = 1;
-        private Phase6AbilityTuning tuning = Phase6AbilityTuning.EMPTY;
+        private StormFrostWaterMasteryTuning tuning = StormFrostWaterMasteryTuning.EMPTY;
 
         private boolean hasBoth() {
             return fire > 0 && frost > 0;
@@ -717,7 +717,7 @@ public final class TempestAbilityManager {
 
     private static final class Vortex {
         private final UniqueAbilityExecution execution;
-        private final Phase6AbilityTuning tuning;
+        private final StormFrostWaterMasteryTuning tuning;
         private final Vec3d origin;
         private final long startedAt;
         private final long expiresAt;
@@ -733,7 +733,7 @@ public final class TempestAbilityManager {
         private long nextPulse;
         private int pulses;
 
-        private Vortex(UniqueAbilityExecution execution, Phase6AbilityTuning tuning, Vec3d origin,
+        private Vortex(UniqueAbilityExecution execution, StormFrostWaterMasteryTuning tuning, Vec3d origin,
                        long startedAt, long expiresAt, int fire, int frost,
                        double baseDamage, int maximumSize, StatusEffectInstance previousSpeed,
                        StatusEffectInstance previousResistance, StatusEffectInstance previousVortex) {

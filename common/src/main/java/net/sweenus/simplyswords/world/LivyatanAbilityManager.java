@@ -9,7 +9,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
-import net.sweenus.simplyswords.api.ability.Phase6AbilityTuning;
+import net.sweenus.simplyswords.api.ability.StormFrostWaterMasteryTuning;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.util.HelperMethods;
 
@@ -28,7 +28,7 @@ public final class LivyatanAbilityManager {
     private LivyatanAbilityManager() {
     }
 
-    public static WavePlan prepareWave(ServerWorld world, LivingEntity actor, Phase6AbilityTuning tuning) {
+    public static WavePlan prepareWave(ServerWorld world, LivingEntity actor, StormFrostWaterMasteryTuning tuning) {
         WorldState worldState = STATES.computeIfAbsent(world, ignored -> new WorldState());
         ActorState state = worldState.actors.computeIfAbsent(actor.getUuid(), ignored -> new ActorState());
         int required = tuning.integer(s("LIVYATAN_DOUBLE_SWING_COUNT"), 0);
@@ -47,24 +47,24 @@ public final class LivyatanAbilityManager {
     }
 
     public static double waveDamageMultiplier(ServerWorld world, LivingEntity actor, LivingEntity target,
-                                              Phase6AbilityTuning tuning) {
+                                              StormFrostWaterMasteryTuning tuning) {
         TargetState state = targetState(world, actor.getUuid(), target.getUuid(), false);
         if (state == null || state.markDeadline < world.getTime()) return 1;
         return tuning.get(s("LIVYATAN_MARK_WAVE_DAMAGE_MULTIPLIER"), 1);
     }
 
     public static void recordThrowHit(ServerWorld world, LivingEntity actor, ItemStack stack,
-                                      LivingEntity target, Phase6AbilityTuning tuning) {
+                                      LivingEntity target, StormFrostWaterMasteryTuning tuning) {
         recordSource(world, actor, stack, target, tuning, THROW_SOURCE);
     }
 
     public static void recordReturnHit(ServerWorld world, LivingEntity actor, ItemStack stack,
-                                       LivingEntity target, Phase6AbilityTuning tuning) {
+                                       LivingEntity target, StormFrostWaterMasteryTuning tuning) {
         recordSource(world, actor, stack, target, tuning, RETURN_SOURCE);
     }
 
     public static void recordWaveHit(ServerWorld world, LivingEntity actor, ItemStack stack,
-                                     LivingEntity target, Phase6AbilityTuning tuning) {
+                                     LivingEntity target, StormFrostWaterMasteryTuning tuning) {
         int required = tuning.integer(s("LIVYATAN_SURGE_HIT_COUNT"), 0);
         int window = tuning.integer(s("LIVYATAN_SURGE_WINDOW_TICKS"), 0);
         if (required > 0 && window > 0) {
@@ -84,7 +84,7 @@ public final class LivyatanAbilityManager {
     }
 
     public static void recordPull(ServerWorld world, LivingEntity actor, LivingEntity target,
-                                  Phase6AbilityTuning tuning) {
+                                  StormFrostWaterMasteryTuning tuning) {
         TargetState state = targetState(world, actor.getUuid(), target.getUuid(), true);
         long now = world.getTime();
         state.pullDeadline = now + 200;
@@ -100,40 +100,40 @@ public final class LivyatanAbilityManager {
         }
     }
 
-    public static float returnLightningDamage(LivingEntity actor, ItemStack stack, Phase6AbilityTuning tuning) {
+    public static float returnLightningDamage(LivingEntity actor, ItemStack stack, StormFrostWaterMasteryTuning tuning) {
         float base = HelperMethods.abilityScaledDamage("lightning", actor, stack,
                 Config.uniqueEffects.livyatan.returnLightningDamageScaling,
                 Config.uniqueEffects.livyatan.returnLightningSpellScaling);
         return base * (float) returnLightningMultiplier(tuning);
     }
 
-    public static double returnRadius(double configured, Phase6AbilityTuning tuning) {
+    public static double returnRadius(double configured, StormFrostWaterMasteryTuning tuning) {
         return configured + tuning.get(s("LIVYATAN_RETURN_RADIUS_BONUS"), 0);
     }
 
-    public static double returnPull(double configured, Phase6AbilityTuning tuning) {
+    public static double returnPull(double configured, StormFrostWaterMasteryTuning tuning) {
         if (tuning.has(s("LIVYATAN_THUNDERHEAD_LIGHTNING_MULTIPLIER"))) return 0;
         return configured * tuning.get(s("LIVYATAN_RETURN_PULL_MULTIPLIER"), 1)
                 * tuning.get(s("LIVYATAN_MAELSTROM_PULL_MULTIPLIER"), 1);
     }
 
-    public static int returnLightningChance(int configured, Phase6AbilityTuning tuning) {
+    public static int returnLightningChance(int configured, StormFrostWaterMasteryTuning tuning) {
         if (tuning.has(s("LIVYATAN_MAELSTROM_ROTATIONS"))) return 0;
         if (tuning.has(s("LIVYATAN_THUNDERHEAD_LIGHTNING_MULTIPLIER"))) return 100;
         return Math.clamp(configured + tuning.integer(s("LIVYATAN_RETURN_LIGHTNING_CHANCE_BONUS"), 0), 0, 100);
     }
 
-    public static double returnLightningMultiplier(Phase6AbilityTuning tuning) {
+    public static double returnLightningMultiplier(StormFrostWaterMasteryTuning tuning) {
         return tuning.get(s("LIVYATAN_RETURN_LIGHTNING_DAMAGE_MULTIPLIER"), 1)
                 * tuning.get(s("LIVYATAN_THUNDERHEAD_LIGHTNING_MULTIPLIER"), 1);
     }
 
-    public static int activeCooldown(int configured, Phase6AbilityTuning tuning) {
+    public static int activeCooldown(int configured, StormFrostWaterMasteryTuning tuning) {
         return Math.max(0, configured + tuning.integer(s("LIVYATAN_ACTIVE_COOLDOWN_BONUS_TICKS"), 0));
     }
 
     public static void strikeLightning(ServerWorld world, LivingEntity actor, ItemStack stack,
-                                       LivingEntity target, float damage, Phase6AbilityTuning tuning) {
+                                       LivingEntity target, float damage, StormFrostWaterMasteryTuning tuning) {
         if (damage <= 0 || !target.isAlive()) return;
         ChainLightningVisualManager.damageSkyBolt(world, actor, stack, target, damage,
                 Config.uniqueEffects.livyatan.returnLightningSkyHeight,
@@ -161,7 +161,7 @@ public final class LivyatanAbilityManager {
     }
 
     public static Vec3d steer(ServerWorld world, LivingEntity actor, Vec3d center, Vec3d forward,
-                              Phase6AbilityTuning tuning) {
+                              StormFrostWaterMasteryTuning tuning) {
         double range = tuning.get(s("LIVYATAN_STEERING_RANGE"), 0);
         double degrees = tuning.get(s("LIVYATAN_STEERING_DEGREES"), 0);
         if (range <= 0 || degrees <= 0) return forward;
@@ -223,7 +223,7 @@ public final class LivyatanAbilityManager {
     }
 
     private static void recordSource(ServerWorld world, LivingEntity actor, ItemStack stack,
-                                     LivingEntity target, Phase6AbilityTuning tuning, int source) {
+                                     LivingEntity target, StormFrostWaterMasteryTuning tuning, int source) {
         int window = tuning.integer(s("LIVYATAN_PERFECT_STORM_WINDOW_TICKS"), 0);
         if (window <= 0) return;
         TargetState state = targetState(world, actor.getUuid(), target.getUuid(), true);
@@ -237,7 +237,7 @@ public final class LivyatanAbilityManager {
     }
 
     private static void burst(ServerWorld world, LivingEntity actor, ItemStack stack,
-                              LivingEntity origin, Phase6AbilityTuning tuning) {
+                              LivingEntity origin, StormFrostWaterMasteryTuning tuning) {
         double radius = tuning.get(s("LIVYATAN_PERFECT_STORM_RADIUS"), 0);
         int cap = tuning.integer(s("LIVYATAN_PERFECT_STORM_TARGET_CAP"), 0);
         float base = HelperMethods.abilityScaledDamage("frost", actor, stack,
@@ -296,7 +296,7 @@ public final class LivyatanAbilityManager {
     private record ActorTarget(UUID actorId, UUID targetId) {
     }
 
-    private static Phase6AbilityTuning.Setting s(String name) {
-        return Phase6AbilityTuning.Setting.valueOf(name);
+    private static StormFrostWaterMasteryTuning.Setting s(String name) {
+        return StormFrostWaterMasteryTuning.Setting.valueOf(name);
     }
 }

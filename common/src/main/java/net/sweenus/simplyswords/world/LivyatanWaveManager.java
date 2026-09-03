@@ -23,8 +23,8 @@ import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.LivyatanWaveVisualEntity;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
-import net.sweenus.simplyswords.api.ability.Phase6AbilityTuning;
-import net.sweenus.simplyswords.api.ability.Phase6UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.StormFrostWaterMasteryTuning;
+import net.sweenus.simplyswords.api.ability.StormFrostWaterMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityPhase;
@@ -68,11 +68,11 @@ public final class LivyatanWaveManager {
         if (world == null || caster == null || stack == null || stack.isEmpty() || !caster.isAlive()) {
             return;
         }
-        UniqueAbilityExecution execution = Phase6CombatManager.beginPassive(
-                Phase6UniqueAbilities.LIVYATAN_WAVE, world, stack, caster, null);
-        Phase6AbilityTuning tuning = Phase6UniqueAbilities.tuning(execution);
+        UniqueAbilityExecution execution = StormFrostWaterMasteryCombatManager.beginPassive(
+                StormFrostWaterMasteryAbilities.LIVYATAN_WAVE, world, stack, caster, null);
+        StormFrostWaterMasteryTuning tuning = StormFrostWaterMasteryAbilities.tuning(execution);
         if (tuning.get(s("LIVYATAN_SUPPRESS_WAVES"), 0) > 0 || !isAttackReady(world, caster, stack, tuning)) {
-            UniqueAbilityApi.finish(execution, Phase6UniqueAbilities.FINISH, 0);
+            UniqueAbilityApi.finish(execution, StormFrostWaterMasteryAbilities.FINISH, 0);
             return;
         }
 
@@ -161,7 +161,7 @@ public final class LivyatanWaveManager {
         int step = wave.currentStep++;
         if (step > wave.maxSteps) {
             if (wave.finishesExecution) {
-                UniqueAbilityApi.finish(wave.execution, Phase6UniqueAbilities.FINISH, wave.hitEntities.size());
+                UniqueAbilityApi.finish(wave.execution, StormFrostWaterMasteryAbilities.FINISH, wave.hitEntities.size());
             }
             wave.completed = true;
             return true;
@@ -215,7 +215,7 @@ public final class LivyatanWaveManager {
             candidate.velocityDirty = true;
             int slow = wave.tuning.integer(s("LIVYATAN_WAVE_SLOW_TICKS"), 0);
             if (slow > 0) candidate.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, slow, 0), owner);
-            UniqueAbilityApi.emit(wave.execution, UniqueAbilityPhase.HIT, Phase6UniqueAbilities.HIT,
+            UniqueAbilityApi.emit(wave.execution, UniqueAbilityPhase.HIT, StormFrostWaterMasteryAbilities.HIT,
                     candidate, 1, damage);
             LivyatanAbilityManager.recordWaveHit(world, owner, wave.stack, candidate, wave.tuning);
             if (++affected >= wave.targetCap) break;
@@ -345,7 +345,7 @@ public final class LivyatanWaveManager {
     }
 
     private static boolean isAttackReady(ServerWorld world, LivingEntity user, ItemStack stack,
-                                         Phase6AbilityTuning tuning) {
+                                         StormFrostWaterMasteryTuning tuning) {
         long now = world.getTime();
         if (now % 200L == 0L) {
             purgeOldSwingEntries(now);
@@ -519,33 +519,33 @@ public final class LivyatanWaveManager {
         LivyatanAbilityManager.clearAll();
     }
 
-    public static double waveDamageMultiplier(Phase6AbilityTuning tuning) {
+    public static double waveDamageMultiplier(StormFrostWaterMasteryTuning tuning) {
         return tuning.get(s("LIVYATAN_WAVE_DAMAGE_MULTIPLIER"), 1)
                 * tuning.get(s("LIVYATAN_WALL_DAMAGE_MULTIPLIER"), 1)
                 * tuning.get(s("LIVYATAN_LANCE_DAMAGE_MULTIPLIER"), 1)
                 * tuning.get(s("LIVYATAN_UNBOUND_WAVE_DAMAGE_MULTIPLIER"), 1);
     }
 
-    public static double waveWidth(double configured, Phase6AbilityTuning tuning) {
+    public static double waveWidth(double configured, StormFrostWaterMasteryTuning tuning) {
         return tuning.has(s("LIVYATAN_LANCE_WIDTH"))
                 ? tuning.get(s("LIVYATAN_LANCE_WIDTH"), configured)
                 : configured + tuning.get(s("LIVYATAN_WAVE_WIDTH_BONUS"), 0)
                 + tuning.get(s("LIVYATAN_WALL_WIDTH_BONUS"), 0);
     }
 
-    public static int waveLength(int configured, Phase6AbilityTuning tuning) {
+    public static int waveLength(int configured, StormFrostWaterMasteryTuning tuning) {
         return Math.max(1, (int) Math.round((configured
                 + tuning.get(s("LIVYATAN_WAVE_LENGTH_BONUS_STEPS"), 0))
                 * tuning.get(s("LIVYATAN_LANCE_LENGTH_MULTIPLIER"), 1)));
     }
 
-    public static double waveKnockback(double configured, Phase6AbilityTuning tuning) {
+    public static double waveKnockback(double configured, StormFrostWaterMasteryTuning tuning) {
         return configured * tuning.get(s("LIVYATAN_WAVE_KNOCKBACK_MULTIPLIER"), 1)
                 * tuning.get(s("LIVYATAN_WALL_KNOCKBACK_MULTIPLIER"), 1)
                 * tuning.get(s("LIVYATAN_LANCE_KNOCKBACK_MULTIPLIER"), 1);
     }
 
-    public static int swingCooldown(int configured, Phase6AbilityTuning tuning) {
+    public static int swingCooldown(int configured, StormFrostWaterMasteryTuning tuning) {
         return Math.max(1, (int) Math.round(configured
                 * tuning.get(s("LIVYATAN_UNBOUND_COOLDOWN_MULTIPLIER"), 1)));
     }
@@ -563,7 +563,7 @@ public final class LivyatanWaveManager {
         private final double width;
         private final int targetCap;
         private final boolean lightning;
-        private final Phase6AbilityTuning tuning;
+        private final StormFrostWaterMasteryTuning tuning;
         private final UniqueAbilityExecution execution;
         private final boolean finishesExecution;
         private final Set<UUID> hitEntities = new HashSet<>();
@@ -574,7 +574,7 @@ public final class LivyatanWaveManager {
         private ActiveWave(Vec3d start, Vec3d forward, UUID ownerId,
                            net.minecraft.item.ItemStack stack, long spawnTick, int maxSteps, float damage,
                            double knockback, double width, int targetCap, boolean lightning,
-                           Phase6AbilityTuning tuning, UniqueAbilityExecution execution,
+                           StormFrostWaterMasteryTuning tuning, UniqueAbilityExecution execution,
                            boolean finishesExecution) {
             this.center = start;
             this.forward = forward;
@@ -613,7 +613,7 @@ public final class LivyatanWaveManager {
         }
     }
 
-    private static Phase6AbilityTuning.Setting s(String name) {
-        return Phase6AbilityTuning.Setting.valueOf(name);
+    private static StormFrostWaterMasteryTuning.Setting s(String name) {
+        return StormFrostWaterMasteryTuning.Setting.valueOf(name);
     }
 }

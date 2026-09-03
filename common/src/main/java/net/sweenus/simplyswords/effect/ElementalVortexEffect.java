@@ -15,8 +15,8 @@ import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.SoundHelper;
-import net.sweenus.simplyswords.api.ability.Phase6AbilityTuning;
-import net.sweenus.simplyswords.world.Phase6CombatManager;
+import net.sweenus.simplyswords.api.ability.StormFrostWaterMasteryTuning;
+import net.sweenus.simplyswords.world.StormFrostWaterMasteryCombatManager;
 import net.sweenus.simplyswords.world.TempestAbilityManager;
 
 public class ElementalVortexEffect extends OrbitingEffect {
@@ -55,7 +55,7 @@ public class ElementalVortexEffect extends OrbitingEffect {
                 additionalData = statusEffect.getAdditionalData();
             }
 
-            Phase6AbilityTuning tuning = Phase6CombatManager.tempestTuning(livingEntity);
+            StormFrostWaterMasteryTuning tuning = StormFrostWaterMasteryCombatManager.tempestTuning(livingEntity);
             int interval = tuning.integer(s("INTERVAL_TICKS"), 10);
             if (livingEntity.age % interval == 0) {
                 double radius = tuning.get(s("RADIUS"), 1 + (amplifier / 6.0));
@@ -108,7 +108,7 @@ public class ElementalVortexEffect extends OrbitingEffect {
         return super.canApplyUpdateEffect(pDuration, pAmplifier);
     }
 
-    private static Phase6AbilityTuning.Setting s(String name) {
-        return Phase6AbilityTuning.Setting.valueOf(name);
+    private static StormFrostWaterMasteryTuning.Setting s(String name) {
+        return StormFrostWaterMasteryTuning.Setting.valueOf(name);
     }
 }

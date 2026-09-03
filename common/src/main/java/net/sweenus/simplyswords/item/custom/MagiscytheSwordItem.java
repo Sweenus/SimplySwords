@@ -24,7 +24,7 @@ import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
-import net.sweenus.simplyswords.api.ability.Phase9UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.ArcaneCosmicMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
@@ -34,7 +34,7 @@ import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
 import net.sweenus.simplyswords.world.MagiscytheMasteryManager;
-import net.sweenus.simplyswords.world.Phase9CombatManager;
+import net.sweenus.simplyswords.world.ArcaneCosmicMasteryCombatManager;
 
 import java.util.List;
 import java.util.Random;
@@ -81,8 +81,8 @@ public class MagiscytheSwordItem extends UniqueSwordItem implements UniqueWeapon
 
     @Override
     public boolean activate(WeaponAbilityContext context) {
-        UniqueAbilityExecution execution = Phase9CombatManager.beginActive(
-                Phase9UniqueAbilities.MAGISCYTHE_STORM, context, Config.uniqueEffects.magiscythe.cooldown,
+        UniqueAbilityExecution execution = ArcaneCosmicMasteryCombatManager.beginActive(
+                ArcaneCosmicMasteryAbilities.MAGISCYTHE_STORM, context, Config.uniqueEffects.magiscythe.cooldown,
                 MagiscytheMasteryManager.stormBase(Config.uniqueEffects.magiscythe.duration,
                         Config.uniqueEffects.magiscythe.radius, 5));
         activateMagistorm(context.world(), context.actor(), context.stack(), execution);
@@ -103,7 +103,7 @@ public class MagiscytheSwordItem extends UniqueSwordItem implements UniqueWeapon
         int baseEffectDuration = Config.uniqueEffects.magiscythe.duration;
         if (world instanceof ServerWorld serverWorld && execution != null) baseEffectDuration =
                 MagiscytheMasteryManager.start(serverWorld, user, stack,
-                        Phase9UniqueAbilities.tuning(execution), execution);
+                        ArcaneCosmicMasteryAbilities.tuning(execution), execution);
 
         world.playSound(null, user.getBlockPos(), SoundRegistry.MAGIC_SHAMANIC_NORDIC_22.get(),
                 user.getSoundCategory(), 0.2f, 1.1f);

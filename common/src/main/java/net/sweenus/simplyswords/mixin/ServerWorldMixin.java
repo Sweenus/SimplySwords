@@ -16,8 +16,8 @@ public abstract class ServerWorldMixin {
     @Inject(method = "tick(Ljava/util/function/BooleanSupplier;)V", at = @At("HEAD"))
     private void simplyswords$tickFieldManagers(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
         ServerWorld world = (ServerWorld) (Object) this;
-        if (Phase4AbsorptionTracker.hasActive(world)) {
-            Phase4AbsorptionTracker.sweep(world);
+        if (MasteryAbsorptionTracker.hasActive(world)) {
+            MasteryAbsorptionTracker.sweep(world);
         }
         if (EmberbladeAbilityManager.hasActive(world)) {
             EmberbladeAbilityManager.tick(world);
@@ -61,8 +61,8 @@ public abstract class ServerWorldMixin {
         if (WraithfangAbilityManager.hasActive(world)) {
             WraithfangAbilityManager.tick(world);
         }
-        if (Phase2CombatStateManager.hasActive(world)) {
-            Phase2CombatStateManager.tick(world);
+        if (WickpiercerMasteryStateManager.hasActive(world)) {
+            WickpiercerMasteryStateManager.tick(world);
         }
         if (SoulstalkerAbilityManager.hasActive(world)) {
             SoulstalkerAbilityManager.tick(world);
@@ -175,14 +175,14 @@ public abstract class ServerWorldMixin {
         if (BramblethornAbilityManager.hasActive(world)) {
             BramblethornAbilityManager.tick(world);
         }
-        if (Phase7CombatManager.hasScheduled(world)) {
-            Phase7CombatManager.tick(world);
+        if (NatureSwarmMasteryCombatManager.hasScheduled(world)) {
+            NatureSwarmMasteryCombatManager.tick(world);
         }
-        if (Phase8CombatManager.hasScheduled(world)) {
-            Phase8CombatManager.tick(world);
+        if (DeathShadowBloodMasteryCombatManager.hasScheduled(world)) {
+            DeathShadowBloodMasteryCombatManager.tick(world);
         }
-        if (Phase9CombatManager.hasScheduled(world)) {
-            Phase9CombatManager.tick(world);
+        if (ArcaneCosmicMasteryCombatManager.hasScheduled(world)) {
+            ArcaneCosmicMasteryCombatManager.tick(world);
         }
         if (EvocationFangManager.hasActive(world)) {
             EvocationFangManager.tick(world);

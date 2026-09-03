@@ -51,7 +51,7 @@ public abstract class ServerPlayNetworkHandlerMixin {
         MoltenEdgeAbilityManager.resetWielder(player);
         EmberbladeAbilityManager.clear(player.getServerWorld(), player);
         EmberlashAbilityManager.clear(player.getServerWorld(), player);
-        net.sweenus.simplyswords.world.Phase8CombatManager.clearActor(player);
+        net.sweenus.simplyswords.world.DeathShadowBloodMasteryCombatManager.clearActor(player);
         PlayerMovementIntentManager.clear(player);
     }
 }

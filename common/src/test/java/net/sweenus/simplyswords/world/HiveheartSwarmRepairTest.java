@@ -1,6 +1,6 @@
 package net.sweenus.simplyswords.world;
 
-import net.sweenus.simplyswords.api.ability.Phase7AbilityTuning;
+import net.sweenus.simplyswords.api.ability.NatureSwarmMasteryTuning;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 final class HiveheartSwarmRepairTest {
     @Test
     void configuredSwarmBonusesRespectCaps() {
-        Phase7AbilityTuning tuning = Phase7AbilityTuning.EMPTY
+        NatureSwarmMasteryTuning tuning = NatureSwarmMasteryTuning.EMPTY
                 .with(s("HIVE_SWARM_COUNT_BONUS"), 2)
                 .with(s("HIVE_SWARM_COUNT_CAP"), 12)
                 .with(s("HIVE_SWARM_RADIUS_BONUS"), 2)
@@ -22,7 +22,7 @@ final class HiveheartSwarmRepairTest {
 
     @Test
     void cloudAndHuntingFlightRetainTheirOwnOverrides() {
-        Phase7AbilityTuning cloud = Phase7AbilityTuning.EMPTY
+        NatureSwarmMasteryTuning cloud = NatureSwarmMasteryTuning.EMPTY
                 .with(s("MODE"), 1 << 16)
                 .with(s("HIVE_SWARM_DURATION_BONUS_TICKS"), 60)
                 .with(s("HIVE_CLOUD_COUNT"), 16)
@@ -34,7 +34,7 @@ final class HiveheartSwarmRepairTest {
         assertEquals(180, HivemindSwarmManager.swarmDuration(240, cloud));
         assertEquals(.55, HivemindSwarmManager.swarmDamageMultiplier(cloud), 1.0E-6);
 
-        Phase7AbilityTuning hunt = Phase7AbilityTuning.EMPTY
+        NatureSwarmMasteryTuning hunt = NatureSwarmMasteryTuning.EMPTY
                 .with(s("MODE"), (1 << 17) | (1 << 26))
                 .with(s("HIVE_HUNT_COUNT"), 4)
                 .with(s("HIVE_HUNT_STING_COUNT"), 24)
@@ -50,7 +50,7 @@ final class HiveheartSwarmRepairTest {
         assertEquals(2.25, HivemindSwarmManager.swarmDamageMultiplier(hunt), 1.0E-6);
     }
 
-    private static Phase7AbilityTuning.Setting s(String name) {
-        return Phase7AbilityTuning.Setting.valueOf(name);
+    private static NatureSwarmMasteryTuning.Setting s(String name) {
+        return NatureSwarmMasteryTuning.Setting.valueOf(name);
     }
 }

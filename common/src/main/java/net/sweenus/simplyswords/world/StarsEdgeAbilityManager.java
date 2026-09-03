@@ -18,8 +18,8 @@ import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
-import net.sweenus.simplyswords.api.ability.Phase9AbilityTuning;
-import net.sweenus.simplyswords.api.ability.Phase9UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.ArcaneCosmicMasteryTuning;
+import net.sweenus.simplyswords.api.ability.ArcaneCosmicMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.config.Config;
@@ -47,34 +47,34 @@ public final class StarsEdgeAbilityManager {
     private static final Map<ServerWorld, Map<UUID, ActiveReprise>> ACTIVE = new HashMap<>();
     private static final Map<UUID, RepriseState> REPRISE_STATES = new HashMap<>();
 
-    public static Phase9AbilityTuning solarBase() {
-        return Phase9AbilityTuning.EMPTY
-                .with(Phase9AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1);
+    public static ArcaneCosmicMasteryTuning solarBase() {
+        return ArcaneCosmicMasteryTuning.EMPTY
+                .with(ArcaneCosmicMasteryTuning.Setting.DAMAGE_MULTIPLIER, 1);
     }
 
-    public static Phase9AbilityTuning lunarBase() {
-        return Phase9AbilityTuning.EMPTY
-                .with(Phase9AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1)
-                .with(Phase9AbilityTuning.Setting.HEAL_MULTIPLIER, 1);
+    public static ArcaneCosmicMasteryTuning lunarBase() {
+        return ArcaneCosmicMasteryTuning.EMPTY
+                .with(ArcaneCosmicMasteryTuning.Setting.DAMAGE_MULTIPLIER, 1)
+                .with(ArcaneCosmicMasteryTuning.Setting.HEAL_MULTIPLIER, 1);
     }
 
-    public static Phase9AbilityTuning constellationBase(int recordingDuration, int constellationDuration,
+    public static ArcaneCosmicMasteryTuning constellationBase(int recordingDuration, int constellationDuration,
                                                         int segmentInterval, int contactInterval,
                                                         double segmentRadius, double contactWidth, int maxNodes) {
-        return Phase9AbilityTuning.EMPTY
-                .with(Phase9AbilityTuning.Setting.DURATION_TICKS, recordingDuration)
-                .with(Phase9AbilityTuning.Setting.SECONDARY_DURATION_TICKS, constellationDuration)
-                .with(Phase9AbilityTuning.Setting.INTERVAL_TICKS, segmentInterval)
-                .with(Phase9AbilityTuning.Setting.SECONDARY_INTERVAL_TICKS, contactInterval)
-                .with(Phase9AbilityTuning.Setting.RADIUS, segmentRadius)
-                .with(Phase9AbilityTuning.Setting.SECONDARY_RADIUS, contactWidth)
-                .with(Phase9AbilityTuning.Setting.COUNT, maxNodes)
-                .with(Phase9AbilityTuning.Setting.WIDTH, 1)
-                .with(Phase9AbilityTuning.Setting.RANGE, 1)
-                .with(Phase9AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1);
+        return ArcaneCosmicMasteryTuning.EMPTY
+                .with(ArcaneCosmicMasteryTuning.Setting.DURATION_TICKS, recordingDuration)
+                .with(ArcaneCosmicMasteryTuning.Setting.SECONDARY_DURATION_TICKS, constellationDuration)
+                .with(ArcaneCosmicMasteryTuning.Setting.INTERVAL_TICKS, segmentInterval)
+                .with(ArcaneCosmicMasteryTuning.Setting.SECONDARY_INTERVAL_TICKS, contactInterval)
+                .with(ArcaneCosmicMasteryTuning.Setting.RADIUS, segmentRadius)
+                .with(ArcaneCosmicMasteryTuning.Setting.SECONDARY_RADIUS, contactWidth)
+                .with(ArcaneCosmicMasteryTuning.Setting.COUNT, maxNodes)
+                .with(ArcaneCosmicMasteryTuning.Setting.WIDTH, 1)
+                .with(ArcaneCosmicMasteryTuning.Setting.RANGE, 1)
+                .with(ArcaneCosmicMasteryTuning.Setting.DAMAGE_MULTIPLIER, 1);
     }
 
-    private static Phase9AbilityTuning constellationBase() {
+    private static ArcaneCosmicMasteryTuning constellationBase() {
         return constellationBase(Config.uniqueEffects.stars_edge.recordingDuration, Config.uniqueEffects.stars_edge.constellationDuration,
                 Config.uniqueEffects.stars_edge.segmentExplosionInterval, Config.uniqueEffects.stars_edge.constellationDamageInterval,
                 Config.uniqueEffects.stars_edge.segmentExplosionRadius, Config.uniqueEffects.stars_edge.constellationDamageWidth,
@@ -145,30 +145,30 @@ public final class StarsEdgeAbilityManager {
             beginDetonation(context.world(), context.actor(), existing);
             return true;
         }
-        UniqueAbilityExecution execution = Phase9CombatManager.beginActive(
-                Phase9UniqueAbilities.STARS_CONSTELLATION, context, Config.uniqueEffects.stars_edge.cooldown,
+        UniqueAbilityExecution execution = ArcaneCosmicMasteryCombatManager.beginActive(
+                ArcaneCosmicMasteryAbilities.STARS_CONSTELLATION, context, Config.uniqueEffects.stars_edge.cooldown,
                 constellationBase());
-        return start(context, Phase9UniqueAbilities.tuning(execution), execution);
+        return start(context, ArcaneCosmicMasteryAbilities.tuning(execution), execution);
     }
 
     public static void onMeleeHit(ServerWorld world, ItemStack stack, LivingEntity attacker, LivingEntity target) {
         HelperMethods.playHitSounds(attacker, target);
         boolean day = world.isDay();
-        UniqueAbilityExecution execution = Phase9CombatManager.beginPassive(day
-                ? Phase9UniqueAbilities.STARS_SOLAR : Phase9UniqueAbilities.STARS_LUNAR,
+        UniqueAbilityExecution execution = ArcaneCosmicMasteryCombatManager.beginPassive(day
+                ? ArcaneCosmicMasteryAbilities.STARS_SOLAR : ArcaneCosmicMasteryAbilities.STARS_LUNAR,
                 world, stack, attacker, target, day ? solarBase() : lunarBase());
-        Phase9AbilityTuning tuning = Phase9UniqueAbilities.tuning(execution);
-        Phase9AbilityTuning carryOver = Phase9AbilityTuning.EMPTY;
+        ArcaneCosmicMasteryTuning tuning = ArcaneCosmicMasteryAbilities.tuning(execution);
+        ArcaneCosmicMasteryTuning carryOver = ArcaneCosmicMasteryTuning.EMPTY;
         if (!day) {
-            UniqueAbilityExecution solarExecution = Phase9CombatManager.beginPassive(
-                    Phase9UniqueAbilities.STARS_SOLAR, world, stack, attacker, target, solarBase());
-            carryOver = Phase9UniqueAbilities.tuning(solarExecution);
-            Phase9CombatManager.finish(solarExecution, 0);
+            UniqueAbilityExecution solarExecution = ArcaneCosmicMasteryCombatManager.beginPassive(
+                    ArcaneCosmicMasteryAbilities.STARS_SOLAR, world, stack, attacker, target, solarBase());
+            carryOver = ArcaneCosmicMasteryAbilities.tuning(solarExecution);
+            ArcaneCosmicMasteryCombatManager.finish(solarExecution, 0);
         }
         RepriseState state = REPRISE_STATES.computeIfAbsent(attacker.getUuid(), ignored -> new RepriseState());
         float abilityDamage = HelperMethods.abilityScaledDamage("arcane", attacker, stack,
                 Config.uniqueEffects.stars_edge.damageScaling * (float) tuning.get(
-                        Phase9AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1),
+                        ArcaneCosmicMasteryTuning.Setting.DAMAGE_MULTIPLIER, 1),
                 Config.uniqueEffects.stars_edge.spellScaling);
         abilityDamage = HelperMethods.applyNonPlayerWeaponHitDamageModifier(attacker, abilityDamage);
         DamageSource source = attacker instanceof PlayerEntity player
@@ -176,32 +176,32 @@ public final class StarsEdgeAbilityManager {
         if (day) {
             if (tuning.flag(1 << 2)) {
                 if (world.getTime() - state.lastSolarHit > tuning.integer(
-                        Phase9AbilityTuning.Setting.LOCKOUT_TICKS, 40)) state.solarChain = 0;
-                state.solarChain = Math.min(tuning.integer(Phase9AbilityTuning.Setting.STACK_CAP, 4),
+                        ArcaneCosmicMasteryTuning.Setting.LOCKOUT_TICKS, 40)) state.solarChain = 0;
+                state.solarChain = Math.min(tuning.integer(ArcaneCosmicMasteryTuning.Setting.STACK_CAP, 4),
                         state.solarChain + 1);
                 abilityDamage *= 1 + state.solarChain * tuning.get(
-                        Phase9AbilityTuning.Setting.PER_STACK_MULTIPLIER, .03);
+                        ArcaneCosmicMasteryTuning.Setting.PER_STACK_MULTIPLIER, .03);
                 state.lastSolarHit = world.getTime();
             }
             if (tuning.flag(1 << 3)) {
                 long time = world.getTimeOfDay() % 24000;
                 if (time >= 5000 && time <= 7000) abilityDamage *= tuning.get(
-                        Phase9AbilityTuning.Setting.OUTGOING_MULTIPLIER, 1.15);
+                        ArcaneCosmicMasteryTuning.Setting.OUTGOING_MULTIPLIER, 1.15);
             }
             if (tuning.flag(1 << 7)) {
-                state.solarCharge += tuning.integer(Phase9AbilityTuning.Setting.COUNT, 5);
-                if (state.solarCharge >= tuning.integer(Phase9AbilityTuning.Setting.FLAT_DAMAGE, 25)) {
+                state.solarCharge += tuning.integer(ArcaneCosmicMasteryTuning.Setting.COUNT, 5);
+                if (state.solarCharge >= tuning.integer(ArcaneCosmicMasteryTuning.Setting.FLAT_DAMAGE, 25)) {
                     state.solarCharge = 0;
                     pulse(world, attacker, stack, target, abilityDamage * (float) tuning.get(
-                            Phase9AbilityTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, 1.5),
-                            tuning.get(Phase9AbilityTuning.Setting.RADIUS, 5), 64);
+                            ArcaneCosmicMasteryTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, 1.5),
+                            tuning.get(ArcaneCosmicMasteryTuning.Setting.RADIUS, 5), 64);
                 }
             }
             target.timeUntilRegen = 0;
             boolean damaged = target.damage(source, HelperMethods.applyAbilityDamageEnchantments(
                     world, stack, target, source, abilityDamage));
             if (damaged && tuning.flag(1 << 1)) target.addStatusEffect(new StatusEffectInstance(
-                    StatusEffects.GLOWING, tuning.integer(Phase9AbilityTuning.Setting.STATUS_DURATION_TICKS, 60), 0), attacker);
+                    StatusEffects.GLOWING, tuning.integer(ArcaneCosmicMasteryTuning.Setting.STATUS_DURATION_TICKS, 60), 0), attacker);
             if (damaged && tuning.flag(1 << 4) && ++state.solarHits % 5 == 0) pulse(world, attacker, stack,
                     target, abilityDamage * .3F, 2, 5);
             if (damaged && tuning.flag(1 << 6)) target.setOnFireFor(2);
@@ -211,30 +211,30 @@ public final class StarsEdgeAbilityManager {
             boolean endlessDay = carryOver.flag(1 << 8);
             if (state.markedTarget != null && state.markedTarget.equals(target.getUuid())
                     && world.getTime() < state.markExpiresAt) {
-                abilityDamage *= (float) tuning.get(Phase9AbilityTuning.Setting.PER_STACK_MULTIPLIER, 1.08);
+                abilityDamage *= (float) tuning.get(ArcaneCosmicMasteryTuning.Setting.PER_STACK_MULTIPLIER, 1.08);
                 state.markedTarget = null;
             }
             if (state.ambushReady && tuning.flag(1 << 16)) {
-                abilityDamage *= (float) tuning.get(Phase9AbilityTuning.Setting.OUTGOING_MULTIPLIER, 1.35);
+                abilityDamage *= (float) tuning.get(ArcaneCosmicMasteryTuning.Setting.OUTGOING_MULTIPLIER, 1.35);
                 state.ambushReady = false;
             }
             if (endlessDay) {
                 float nightDamage = abilityDamage
-                        * (float) carryOver.get(Phase9AbilityTuning.Setting.OUTGOING_MULTIPLIER, .6);
+                        * (float) carryOver.get(ArcaneCosmicMasteryTuning.Setting.OUTGOING_MULTIPLIER, .6);
                 target.timeUntilRegen = 0;
                 target.damage(source, HelperMethods.applyAbilityDamageEnchantments(
                         world, stack, target, source, nightDamage));
             }
             float heal = endlessDay ? 0.0F : abilityDamage
                     * Config.uniqueEffects.stars_edge.lifestealModifier
-                    * (float) tuning.get(Phase9AbilityTuning.Setting.HEAL_MULTIPLIER, 1);
+                    * (float) tuning.get(ArcaneCosmicMasteryTuning.Setting.HEAL_MULTIPLIER, 1);
             if (tuning.flag(1 << 12) && attacker.getHealth() / attacker.getMaxHealth()
-                    < tuning.get(Phase9AbilityTuning.Setting.HEALTH_THRESHOLD, .4))
-                heal *= (float) tuning.get(Phase9AbilityTuning.Setting.INCOMING_MULTIPLIER, 1.25);
+                    < tuning.get(ArcaneCosmicMasteryTuning.Setting.HEALTH_THRESHOLD, .4))
+                heal *= (float) tuning.get(ArcaneCosmicMasteryTuning.Setting.INCOMING_MULTIPLIER, 1.25);
             if (heal > 0 && tuning.flag(1 << 13)) {
                 state.markedTarget = target.getUuid();
                 state.markExpiresAt = world.getTime()
-                        + tuning.integer(Phase9AbilityTuning.Setting.DURATION_TICKS, 60);
+                        + tuning.integer(ArcaneCosmicMasteryTuning.Setting.DURATION_TICKS, 60);
             }
             float missing = attacker.getMaxHealth() - attacker.getHealth();
             attacker.heal(heal);
@@ -249,12 +249,12 @@ public final class StarsEdgeAbilityManager {
                     new StatusEffectInstance(StatusEffects.SPEED, 30, 0), attacker);
             if (!target.isAlive() && tuning.flag(1 << 16)) {
                 attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.INVISIBILITY,
-                        tuning.integer(Phase9AbilityTuning.Setting.STATUS_DURATION_TICKS, 40), 0), attacker);
+                        tuning.integer(ArcaneCosmicMasteryTuning.Setting.STATUS_DURATION_TICKS, 40), 0), attacker);
                 state.ambushReady = true;
             }
             if (!target.isAlive() && tuning.flag(1 << 14)) {
-                int refund = tuning.integer(Phase9AbilityTuning.Setting.REFUND_TICKS, 10);
-                int cap = tuning.integer(Phase9AbilityTuning.Setting.STACK_CAP, 60);
+                int refund = tuning.integer(ArcaneCosmicMasteryTuning.Setting.REFUND_TICKS, 10);
+                int cap = tuning.integer(ArcaneCosmicMasteryTuning.Setting.STACK_CAP, 60);
                 int granted = Math.min(refund, Math.max(0, cap - state.nightRefunded));
                 if (granted > 0) {
                     state.nightRefunded += granted;
@@ -268,7 +268,7 @@ public final class StarsEdgeAbilityManager {
                                     && !HelperMethods.checkAbilityTarget(ally, attacker))
                     .stream().limit(2).forEach(ally -> ally.heal(sharedHeal));
         }
-        Phase9CombatManager.finish(execution, 1);
+        ArcaneCosmicMasteryCombatManager.finish(execution, 1);
     }
 
     private static void pulse(ServerWorld world, LivingEntity actor, ItemStack stack, LivingEntity center,
@@ -305,7 +305,7 @@ public final class StarsEdgeAbilityManager {
             if (!(ownerEntity instanceof LivingEntity actor) || !actor.isAlive() || actor.isRemoved()) {
                 applyMissingOwnerCooldown(world, active);
                 fadeVisuals(world, active);
-                Phase9CombatManager.finish(active.execution, active.affectedTargets);
+                ArcaneCosmicMasteryCombatManager.finish(active.execution, active.affectedTargets);
                 iterator.remove();
                 continue;
             }
@@ -315,13 +315,13 @@ public final class StarsEdgeAbilityManager {
                 applyCooldown(world, actor, active);
                 fadeVisuals(world, active);
                 spawnCancellationEffects(world, actor);
-                Phase9CombatManager.finish(active.execution, active.affectedTargets);
+                ArcaneCosmicMasteryCombatManager.finish(active.execution, active.affectedTargets);
                 iterator.remove();
                 continue;
             }
 
             if (tickActive(world, actor, active)) {
-                Phase9CombatManager.finish(active.execution, active.affectedTargets);
+                ArcaneCosmicMasteryCombatManager.finish(active.execution, active.affectedTargets);
                 iterator.remove();
             }
         }
@@ -331,7 +331,7 @@ public final class StarsEdgeAbilityManager {
         }
     }
 
-    private static boolean start(WeaponAbilityContext context, Phase9AbilityTuning tuning,
+    private static boolean start(WeaponAbilityContext context, ArcaneCosmicMasteryTuning tuning,
                                  UniqueAbilityExecution execution) {
         LivingEntity actor = context.actor();
         Vec3d direction = resolveDirection(context);
@@ -351,7 +351,7 @@ public final class StarsEdgeAbilityManager {
                 direction,
                 actor.getPos(),
                 now,
-                constellationDamage * (float) tuning.get(Phase9AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1),
+                constellationDamage * (float) tuning.get(ArcaneCosmicMasteryTuning.Setting.DAMAGE_MULTIPLIER, 1),
                 tuning,
                 execution
         );
@@ -359,7 +359,7 @@ public final class StarsEdgeAbilityManager {
                 .put(actor.getUuid(), active);
         appendNode(context.world(), active, actor.getPos());
         applyForcedVelocity(actor, direction, Math.max(0.1, Config.uniqueEffects.stars_edge.initialDashSpeed)
-                * tuning.get(Phase9AbilityTuning.Setting.RANGE, 1));
+                * tuning.get(ArcaneCosmicMasteryTuning.Setting.RANGE, 1));
         spawnActivationEffects(context.world(), actor);
         return true;
     }
@@ -413,7 +413,7 @@ public final class StarsEdgeAbilityManager {
         }
 
         int recordingDuration = Math.max(1, active.tuning.integer(
-                Phase9AbilityTuning.Setting.DURATION_TICKS, Config.uniqueEffects.stars_edge.recordingDuration));
+                ArcaneCosmicMasteryTuning.Setting.DURATION_TICKS, Config.uniqueEffects.stars_edge.recordingDuration));
         if (world.getTime() - active.phaseStartedAt >= recordingDuration) {
             sealCurrentEndpoint(world, actor, active);
             beginDetonation(world, actor, active);
@@ -469,16 +469,16 @@ public final class StarsEdgeAbilityManager {
 
         damageConstellationOnContact(world, actor, active, phaseAge);
         active.nextExplosionTick = world.getTime() + Math.max(3, active.tuning.integer(
-                Phase9AbilityTuning.Setting.INTERVAL_TICKS,
+                ArcaneCosmicMasteryTuning.Setting.INTERVAL_TICKS,
                 Config.uniqueEffects.stars_edge.segmentExplosionInterval));
         return false;
     }
 
     private static boolean recordMovement(ServerWorld world, ActiveReprise active, Vec3d current) {
         double spacing = Math.max(0.25, Config.uniqueEffects.stars_edge.nodeSpacing
-                * active.tuning.get(Phase9AbilityTuning.Setting.WIDTH, 1));
+                * active.tuning.get(ArcaneCosmicMasteryTuning.Setting.WIDTH, 1));
         int maxNodes = Math.clamp(active.tuning.integer(
-                Phase9AbilityTuning.Setting.COUNT, Config.uniqueEffects.stars_edge.maxNodes), 2, 16);
+                ArcaneCosmicMasteryTuning.Setting.COUNT, Config.uniqueEffects.stars_edge.maxNodes), 2, 16);
         RouteNode lastNode = active.nodes.getLast();
         Vec3d remaining = current.subtract(lastNode.position);
         while (remaining.length() >= spacing && active.nodes.size() < maxNodes) {
@@ -494,7 +494,7 @@ public final class StarsEdgeAbilityManager {
         Vec3d current = actor.getPos();
         recordMovement(world, active, current);
         int maxNodes = Math.clamp(active.tuning.integer(
-                Phase9AbilityTuning.Setting.COUNT, Config.uniqueEffects.stars_edge.maxNodes), 2, 16);
+                ArcaneCosmicMasteryTuning.Setting.COUNT, Config.uniqueEffects.stars_edge.maxNodes), 2, 16);
         if (active.nodes.size() < maxNodes && active.nodes.getLast().position.distanceTo(current) > 0.25) {
             appendNode(world, active, current);
         }
@@ -509,7 +509,7 @@ public final class StarsEdgeAbilityManager {
         active.phaseStartedAt = world.getTime();
         active.nextSegmentIndex = 1;
         active.nextExplosionTick = world.getTime()
-                + Math.max(1, active.tuning.integer(Phase9AbilityTuning.Setting.SECONDARY_DURATION_TICKS,
+                + Math.max(1, active.tuning.integer(ArcaneCosmicMasteryTuning.Setting.SECONDARY_DURATION_TICKS,
                 Config.uniqueEffects.stars_edge.constellationDuration));
         applyCooldown(world, actor, active);
         setAllVisualPhases(world, active, StarsEdgeConstellationVisualEntity.PHASE_ARMED);
@@ -577,7 +577,7 @@ public final class StarsEdgeAbilityManager {
     private static void detonateSegment(ServerWorld world, LivingEntity actor, ActiveReprise active,
                                         Vec3d start, Vec3d end, Set<UUID> struck) {
         damageSegmentExplosion(world, actor, active, start, end,
-                Math.max(0.1, active.tuning.get(Phase9AbilityTuning.Setting.RADIUS,
+                Math.max(0.1, active.tuning.get(ArcaneCosmicMasteryTuning.Setting.RADIUS,
                         Config.uniqueEffects.stars_edge.segmentExplosionRadius)),
                 active.constellationDamage, struck);
         spawnSegmentExplosionEffects(world, actor, start, end);
@@ -585,13 +585,13 @@ public final class StarsEdgeAbilityManager {
 
     private static void damageConstellationOnContact(ServerWorld world, LivingEntity actor,
                                                       ActiveReprise active, long phaseAge) {
-        int interval = Math.max(1, active.tuning.integer(Phase9AbilityTuning.Setting.SECONDARY_INTERVAL_TICKS,
+        int interval = Math.max(1, active.tuning.integer(ArcaneCosmicMasteryTuning.Setting.SECONDARY_INTERVAL_TICKS,
                 Config.uniqueEffects.stars_edge.constellationDamageInterval));
         if (phaseAge % interval != 0L || active.constellationDamage <= 0.0F) {
             return;
         }
 
-        double width = Math.max(0.1, active.tuning.get(Phase9AbilityTuning.Setting.SECONDARY_RADIUS,
+        double width = Math.max(0.1, active.tuning.get(ArcaneCosmicMasteryTuning.Setting.SECONDARY_RADIUS,
                 Config.uniqueEffects.stars_edge.constellationDamageWidth));
         Set<UUID> pulseHitTargets = new HashSet<>();
         for (int segmentIndex = active.nextSegmentIndex;
@@ -908,12 +908,12 @@ public final class StarsEdgeAbilityManager {
         private long nextExplosionTick;
         private boolean cooldownApplied;
         private int affectedTargets;
-        private final Phase9AbilityTuning tuning;
+        private final ArcaneCosmicMasteryTuning tuning;
         private final UniqueAbilityExecution execution;
 
         private ActiveReprise(UUID actorId, ItemStack stack, Vec3d initialDirection,
                               Vec3d previousPosition, long startedAt,
-                              float constellationDamage, Phase9AbilityTuning tuning,
+                              float constellationDamage, ArcaneCosmicMasteryTuning tuning,
                               UniqueAbilityExecution execution) {
             this.actorId = actorId;
             this.stack = stack;

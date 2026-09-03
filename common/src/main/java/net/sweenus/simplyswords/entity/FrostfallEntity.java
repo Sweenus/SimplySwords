@@ -18,8 +18,8 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
-import net.sweenus.simplyswords.api.ability.Phase6AbilityTuning;
-import net.sweenus.simplyswords.api.ability.Phase6UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.StormFrostWaterMasteryTuning;
+import net.sweenus.simplyswords.api.ability.StormFrostWaterMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityPhase;
@@ -29,7 +29,7 @@ import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.world.FrostfallAbilityManager;
 import net.sweenus.simplyswords.world.FrostfallIceSpikeFieldManager;
-import net.sweenus.simplyswords.world.Phase6CombatManager;
+import net.sweenus.simplyswords.world.StormFrostWaterMasteryCombatManager;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -46,8 +46,8 @@ public class FrostfallEntity extends ThrownSwordEntity {
     public int duration = 80;
     public int addedChance;
 
-    private Phase6AbilityTuning throwTuning = Phase6AbilityTuning.EMPTY;
-    private Phase6AbilityTuning fieldTuning = Phase6AbilityTuning.EMPTY;
+    private StormFrostWaterMasteryTuning throwTuning = StormFrostWaterMasteryTuning.EMPTY;
+    private StormFrostWaterMasteryTuning fieldTuning = StormFrostWaterMasteryTuning.EMPTY;
     private UniqueAbilityExecution throwExecution;
     private UniqueAbilityExecution fieldExecution;
     private final Set<UUID> outboundHits = new HashSet<>();
@@ -83,13 +83,13 @@ public class FrostfallEntity extends ThrownSwordEntity {
         this.stack = stack;
     }
 
-    public void setMastery(Phase6AbilityTuning tuning, UniqueAbilityExecution execution) {
-        throwTuning = tuning == null ? Phase6AbilityTuning.EMPTY : tuning;
+    public void setMastery(StormFrostWaterMasteryTuning tuning, UniqueAbilityExecution execution) {
+        throwTuning = tuning == null ? StormFrostWaterMasteryTuning.EMPTY : tuning;
         throwExecution = execution;
     }
 
-    public void setFieldMastery(Phase6AbilityTuning tuning, UniqueAbilityExecution execution) {
-        fieldTuning = tuning == null ? Phase6AbilityTuning.EMPTY : tuning;
+    public void setFieldMastery(StormFrostWaterMasteryTuning tuning, UniqueAbilityExecution execution) {
+        fieldTuning = tuning == null ? StormFrostWaterMasteryTuning.EMPTY : tuning;
         fieldExecution = execution;
         fieldSnapshot = true;
     }
@@ -150,7 +150,7 @@ public class FrostfallEntity extends ThrownSwordEntity {
             applyDirectEffects(owner, target);
             splinter((ServerWorld) getWorld(), owner, target);
             if (throwExecution != null) UniqueAbilityApi.emit(throwExecution, UniqueAbilityPhase.HIT,
-                    Phase6UniqueAbilities.HIT, target, 1, primaryBaseDamage);
+                    StormFrostWaterMasteryAbilities.HIT, target, 1, primaryBaseDamage);
         }
         if (!isRemoved()) {
             inGround = true;
@@ -196,9 +196,9 @@ public class FrostfallEntity extends ThrownSwordEntity {
         impactAge = age;
         impactPosition = getPos();
         if (fieldExecution == null) {
-            fieldExecution = Phase6CombatManager.beginPassive(Phase6UniqueAbilities.FROSTFALL_FIELD,
+            fieldExecution = StormFrostWaterMasteryCombatManager.beginPassive(StormFrostWaterMasteryAbilities.FROSTFALL_FIELD,
                     world, stack, owner, directTarget);
-            if (!fieldSnapshot) fieldTuning = Phase6UniqueAbilities.tuning(fieldExecution);
+            if (!fieldSnapshot) fieldTuning = StormFrostWaterMasteryAbilities.tuning(fieldExecution);
         } else {
             UniqueAbilityApi.start(fieldExecution);
         }
@@ -265,7 +265,7 @@ public class FrostfallEntity extends ThrownSwordEntity {
         spike(world, owner, source, targets);
         playPulseEffects(world, radius);
         if (fieldExecution != null) UniqueAbilityApi.emit(fieldExecution, UniqueAbilityPhase.HIT,
-                Phase6UniqueAbilities.PULSE, null, affected, detonateDamage);
+                StormFrostWaterMasteryAbilities.PULSE, null, affected, detonateDamage);
     }
 
     private double fieldPullStrength() {
@@ -306,7 +306,7 @@ public class FrostfallEntity extends ThrownSwordEntity {
         if (fieldEnded) return;
         fieldEnded = true;
         if (fieldExecution != null) {
-            UniqueAbilityApi.finish(fieldExecution, Phase6UniqueAbilities.FINISH, pulseIndex);
+            UniqueAbilityApi.finish(fieldExecution, StormFrostWaterMasteryAbilities.FINISH, pulseIndex);
             fieldExecution = null;
         }
         int orbitDuration = throwTuning.integer(s("FROSTFALL_ORBIT_DURATION_TICKS"), 0);
@@ -343,7 +343,7 @@ public class FrostfallEntity extends ThrownSwordEntity {
 
     private void recall(ServerWorld world, LivingEntity owner) {
         if (fieldExecution != null) {
-            if (fieldStarted) UniqueAbilityApi.finish(fieldExecution, Phase6UniqueAbilities.RECALL, pulseIndex);
+            if (fieldStarted) UniqueAbilityApi.finish(fieldExecution, StormFrostWaterMasteryAbilities.RECALL, pulseIndex);
             else UniqueAbilityApi.cancel(fieldExecution);
             fieldExecution = null;
         }
@@ -356,7 +356,7 @@ public class FrostfallEntity extends ThrownSwordEntity {
             if (damage(target, source, baseImpactDamage() * (float) multiplier)) affected++;
         }
         if (throwExecution != null) UniqueAbilityApi.emit(throwExecution, UniqueAbilityPhase.HIT,
-                Phase6UniqueAbilities.RECALL, null, affected, primaryBaseDamage * multiplier);
+                StormFrostWaterMasteryAbilities.RECALL, null, affected, primaryBaseDamage * multiplier);
         inGround = false;
         setNoClip(true);
         returnToPlayer = true;
@@ -381,7 +381,7 @@ public class FrostfallEntity extends ThrownSwordEntity {
                 if (root > 0) target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, root, 255), owner);
             }
             if (throwExecution != null) UniqueAbilityApi.emit(throwExecution, UniqueAbilityPhase.HIT,
-                    Phase6UniqueAbilities.RETURN_HIT, target, 1, primaryBaseDamage * multiplier);
+                    StormFrostWaterMasteryAbilities.RETURN_HIT, target, 1, primaryBaseDamage * multiplier);
         }
     }
 
@@ -410,9 +410,9 @@ public class FrostfallEntity extends ThrownSwordEntity {
                         throwTuning.integer(s("FROSTFALL_PERFECT_RETURN_DURATION_TICKS"), 80));
             }
             if (throwExecution != null) {
-                UniqueAbilityApi.emit(throwExecution, UniqueAbilityPhase.HIT, Phase6UniqueAbilities.CATCH,
+                UniqueAbilityApi.emit(throwExecution, UniqueAbilityPhase.HIT, StormFrostWaterMasteryAbilities.CATCH,
                         player, 1, 0);
-                UniqueAbilityApi.finish(throwExecution, Phase6UniqueAbilities.FINISH, returnHits.size());
+                UniqueAbilityApi.finish(throwExecution, StormFrostWaterMasteryAbilities.FINISH, returnHits.size());
                 throwExecution = null;
             }
         }
@@ -528,8 +528,8 @@ public class FrostfallEntity extends ThrownSwordEntity {
     @Override
     public void readCustomDataFromNbt(NbtCompound nbt) {
         super.readCustomDataFromNbt(nbt);
-        throwTuning = Phase6AbilityTuning.fromNbt(nbt.getCompound("FrostfallThrowTuning"));
-        fieldTuning = Phase6AbilityTuning.fromNbt(nbt.getCompound("FrostfallFieldTuning"));
+        throwTuning = StormFrostWaterMasteryTuning.fromNbt(nbt.getCompound("FrostfallThrowTuning"));
+        fieldTuning = StormFrostWaterMasteryTuning.fromNbt(nbt.getCompound("FrostfallFieldTuning"));
         fieldSnapshot = nbt.contains("FrostfallFieldTuning");
         pulseIndex = nbt.getInt("FrostfallPulseIndex");
         pulseCount = nbt.getInt("FrostfallPulseCount");
@@ -584,7 +584,7 @@ public class FrostfallEntity extends ThrownSwordEntity {
         return getWorld() instanceof ServerWorld ? (byte) 3 : 0;
     }
 
-    private static Phase6AbilityTuning.Setting s(String name) {
-        return Phase6AbilityTuning.Setting.valueOf(name);
+    private static StormFrostWaterMasteryTuning.Setting s(String name) {
+        return StormFrostWaterMasteryTuning.Setting.valueOf(name);
     }
 }

@@ -26,8 +26,8 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
-import net.sweenus.simplyswords.api.ability.Phase5AbilityTuning;
-import net.sweenus.simplyswords.api.ability.Phase5UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.FireForgeMasteryTuning;
+import net.sweenus.simplyswords.api.ability.FireForgeMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityPhase;
@@ -160,35 +160,35 @@ public final class SoulPyreAbilityManager {
 
         ServerWorld world = context.world();
         LivingEntity actor = context.actor();
-        UniqueAbilityExecution execution = Phase5CombatManager.beginActive(Phase5UniqueAbilities.SOUL_PYRE_TETHER,
+        UniqueAbilityExecution execution = EmberWeaponsMasteryManager.beginActive(FireForgeMasteryAbilities.SOUL_PYRE_TETHER,
                 context, Config.uniqueEffects.soulpyre.cooldown);
         UniqueAbilityApi.start(execution);
-        Phase5AbilityTuning tuning = Phase5UniqueAbilities.tuning(execution);
-        int pulseCount = tuning.integer(Phase5AbilityTuning.Setting.PULSE_COUNT,
+        FireForgeMasteryTuning tuning = FireForgeMasteryAbilities.tuning(execution);
+        int pulseCount = tuning.integer(FireForgeMasteryTuning.Setting.PULSE_COUNT,
                 Config.uniqueEffects.soulpyre.pulseCount);
         if (tuning.flag(1 << 7)) pulseCount += tuning.integer(
-                Phase5AbilityTuning.Setting.SOULPYRE_DEVOURING_EXTRA_PULSES, 1);
+                FireForgeMasteryTuning.Setting.SOULPYRE_DEVOURING_EXTRA_PULSES, 1);
         int duration = Math.max(pulseCount, tunedInteger(tuning,
-                Phase5AbilityTuning.Setting.SOULPYRE_TETHER_DURATION_TICKS,
-                Phase5AbilityTuning.Setting.DURATION_TICKS, Config.uniqueEffects.soulpyre.duration));
+                FireForgeMasteryTuning.Setting.SOULPYRE_TETHER_DURATION_TICKS,
+                FireForgeMasteryTuning.Setting.DURATION_TICKS, Config.uniqueEffects.soulpyre.duration));
         int collapseDuration = tunedInteger(tuning,
-                Phase5AbilityTuning.Setting.SOULPYRE_COLLAPSE_DURATION_TICKS,
-                Phase5AbilityTuning.Setting.COLLAPSE_DURATION_TICKS,
+                FireForgeMasteryTuning.Setting.SOULPYRE_COLLAPSE_DURATION_TICKS,
+                FireForgeMasteryTuning.Setting.COLLAPSE_DURATION_TICKS,
                 Config.uniqueEffects.soulpyre.collapseDuration);
         float maxRadius = (float) Math.max(1.5, tuning.get(
-                Phase5AbilityTuning.Setting.SOULPYRE_MAX_RADIUS, Config.uniqueEffects.soulpyre.radius));
-        double configuredStartRadius = tuned(tuning, Phase5AbilityTuning.Setting.SOULPYRE_START_RADIUS,
-                Phase5AbilityTuning.Setting.RADIUS, Config.uniqueEffects.soulpyre.startingRadius);
+                FireForgeMasteryTuning.Setting.SOULPYRE_MAX_RADIUS, Config.uniqueEffects.soulpyre.radius));
+        double configuredStartRadius = tuned(tuning, FireForgeMasteryTuning.Setting.SOULPYRE_START_RADIUS,
+                FireForgeMasteryTuning.Setting.RADIUS, Config.uniqueEffects.soulpyre.startingRadius);
         if (tuning.flag(1 << 8)) configuredStartRadius = tuning.get(
-                Phase5AbilityTuning.Setting.SOULPYRE_CLOSED_RADIUS, 4);
+                FireForgeMasteryTuning.Setting.SOULPYRE_CLOSED_RADIUS, 4);
         float startRadius = MathHelper.clamp(
                 (float) configuredStartRadius,
                 1.5F,
                 maxRadius
         );
         int pulseTargetCap = Math.max(0, tunedInteger(tuning,
-                Phase5AbilityTuning.Setting.SOULPYRE_PULSE_TARGET_CAP,
-                Phase5AbilityTuning.Setting.TARGET_CAP,
+                FireForgeMasteryTuning.Setting.SOULPYRE_PULSE_TARGET_CAP,
+                FireForgeMasteryTuning.Setting.TARGET_CAP,
                 Config.uniqueEffects.soulpyre.pulseTargetCap));
         long now = world.getTime();
 
@@ -224,7 +224,7 @@ public final class SoulPyreAbilityManager {
                         "soul", actor, context.stack(),
                         Config.uniqueEffects.soulpyre.damageScaling,
                         Config.uniqueEffects.soulpyre.spellScaling)
-                        * (float) tuning.get(Phase5AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1),
+                        * (float) tuning.get(FireForgeMasteryTuning.Setting.DAMAGE_MULTIPLIER, 1),
                 tuning,
                 execution
         );
@@ -246,7 +246,7 @@ public final class SoulPyreAbilityManager {
             StatusEffectInstance previous = actor.getStatusEffect(StatusEffects.FIRE_RESISTANCE);
             pyre.previousFireResistance = previous == null ? null : new StatusEffectInstance(previous);
             int linger = tuning.integer(
-                    Phase5AbilityTuning.Setting.SOULPYRE_FIRE_RESISTANCE_LINGER_TICKS, 40);
+                    FireForgeMasteryTuning.Setting.SOULPYRE_FIRE_RESISTANCE_LINGER_TICKS, 40);
             int total = duration + Math.max(0, linger);
             if (previous == null || previous.getAmplifier() == 0 && previous.getDuration() < total) {
                 pyre.managedFireResistance = true;
@@ -283,9 +283,9 @@ public final class SoulPyreAbilityManager {
         ActivePyre pyre = active == null ? null : active.get(target.getUuid());
         if (pyre == null || pyre.collapsing) return amount;
         double reduction = pyre.tuning.flag(1 << 26)
-                ? pyre.tuning.get(Phase5AbilityTuning.Setting.SOULPYRE_FUNERAL_DAMAGE_REDUCTION, 0)
-                : tuned(pyre.tuning, Phase5AbilityTuning.Setting.SOULPYRE_DAMAGE_REDUCTION,
-                Phase5AbilityTuning.Setting.DAMAGE_REDUCTION, .5);
+                ? pyre.tuning.get(FireForgeMasteryTuning.Setting.SOULPYRE_FUNERAL_DAMAGE_REDUCTION, 0)
+                : tuned(pyre.tuning, FireForgeMasteryTuning.Setting.SOULPYRE_DAMAGE_REDUCTION,
+                FireForgeMasteryTuning.Setting.DAMAGE_REDUCTION, .5);
         return amount * (1F - (float) reduction);
     }
 
@@ -297,15 +297,15 @@ public final class SoulPyreAbilityManager {
         ActivePyre pyre = activePyre(world, target.getUuid());
         if (pyre == null || pyre.collapsing || !pyre.tuning.flag(1 << 25)) return false;
         int threshold = pyre.tuning.integer(
-                Phase5AbilityTuning.Setting.SOULPYRE_UNDYING_SOUL_COUNT, 10);
+                FireForgeMasteryTuning.Setting.SOULPYRE_UNDYING_SOUL_COUNT, 10);
         if (pyre.undyingReserve < threshold) return false;
         pyre.undyingReserve -= threshold;
         target.setHealth(1);
         target.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE,
                 Math.max(1, pyre.tuning.integer(
-                        Phase5AbilityTuning.Setting.SOULPYRE_UNDYING_RESISTANCE_TICKS, 60)),
+                        FireForgeMasteryTuning.Setting.SOULPYRE_UNDYING_RESISTANCE_TICKS, 60)),
                 pyre.tuning.integer(
-                        Phase5AbilityTuning.Setting.SOULPYRE_UNDYING_RESISTANCE_AMPLIFIER, 2),
+                        FireForgeMasteryTuning.Setting.SOULPYRE_UNDYING_RESISTANCE_AMPLIFIER, 2),
                 false, true, true), target);
         cancelPyre(world, target, pyre, world.getTime());
         return true;
@@ -578,24 +578,24 @@ public final class SoulPyreAbilityManager {
                 Math.max(0.0F, pyre.baseDamage - remaining)
         );
         float soulBonus = Math.max(0.0F, (float) tuned(pyre.tuning,
-                Phase5AbilityTuning.Setting.SOULPYRE_PULSE_SOUL_MULTIPLIER,
-                Phase5AbilityTuning.Setting.PER_STACK_MULTIPLIER,
+                FireForgeMasteryTuning.Setting.SOULPYRE_PULSE_SOUL_MULTIPLIER,
+                FireForgeMasteryTuning.Setting.PER_STACK_MULTIPLIER,
                 Config.uniqueEffects.soulpyre.pulseDamageBonusPerSoul));
         float damage = basePulseDamage * (1.0F + pyre.souls * soulBonus);
         if (pyre.tuning.flag(1 << 7)) damage *= (float) pyre.tuning.get(
-                Phase5AbilityTuning.Setting.SOULPYRE_DEVOURING_PULSE_DAMAGE_MULTIPLIER, .75);
+                FireForgeMasteryTuning.Setting.SOULPYRE_DEVOURING_PULSE_DAMAGE_MULTIPLIER, .75);
         if (pyre.tuning.flag(1 << 8)) damage *= (float) pyre.tuning.get(
-                Phase5AbilityTuning.Setting.SOULPYRE_CLOSED_PULSE_DAMAGE_MULTIPLIER, 1.6);
+                FireForgeMasteryTuning.Setting.SOULPYRE_CLOSED_PULSE_DAMAGE_MULTIPLIER, 1.6);
         pyre.lastPulseDamage = damage;
 
         actor.heal(Math.max(0.0F, Config.uniqueEffects.soulpyre.heal));
         int pulseNumber = pyre.pulsesCompleted + 1;
         boolean pull = pyre.tuning.flag(1 << 5) && pulseNumber % Math.max(1,
-                pyre.tuning.integer(Phase5AbilityTuning.Setting.SOULPYRE_PULL_INTERVAL, 5)) == 0;
+                pyre.tuning.integer(FireForgeMasteryTuning.Setting.SOULPYRE_PULL_INTERVAL, 5)) == 0;
         int hits = damagePulseArea(world, actor, pyre, pyre.currentRadius, damage,
                 pyre.pulseTargetCap, pull, true);
         UniqueAbilityApi.emit(pyre.execution, UniqueAbilityPhase.HIT,
-                Phase5UniqueAbilities.PULSE, actor, hits, damage);
+                FireForgeMasteryAbilities.PULSE, actor, hits, damage);
         triggerPulseVisual(world, pyre.visualId);
         spawnPulseEffects(
                 world,
@@ -627,27 +627,27 @@ public final class SoulPyreAbilityManager {
         );
         float soulBonus = Math.max(0.0F, Config.uniqueEffects.soulpyre.requiemDamageBonusPerSoul);
         int requiemCap = pyre.tuning.integer(
-                Phase5AbilityTuning.Setting.SOULPYRE_REQUIEM_SOUL_CAP, 10);
+                FireForgeMasteryTuning.Setting.SOULPYRE_REQUIEM_SOUL_CAP, 10);
         float multiplier = finalSoulMultiplier(requiemSouls, soulBonus,
                 pyre.totalSoulsHarvested,
-                pyre.tuning.get(Phase5AbilityTuning.Setting.SOULPYRE_REQUIEM_BONUS_PER_SOUL, .12),
+                pyre.tuning.get(FireForgeMasteryTuning.Setting.SOULPYRE_REQUIEM_BONUS_PER_SOUL, .12),
                 requiemCap, pyre.tuning.flag(1 << 23));
         float damage = finalBaseDamage * multiplier;
         float finalRadius = pyre.currentRadius;
         int finalTargetCap = pyre.pulseTargetCap;
         if (pyre.tuning.flag(1 << 26)) {
             damage *= (float) pyre.tuning.get(
-                    Phase5AbilityTuning.Setting.SOULPYRE_FUNERAL_DAMAGE_MULTIPLIER, 1.75);
+                    FireForgeMasteryTuning.Setting.SOULPYRE_FUNERAL_DAMAGE_MULTIPLIER, 1.75);
             finalRadius = (float) pyre.tuning.get(
-                    Phase5AbilityTuning.Setting.SOULPYRE_FUNERAL_RADIUS, 8);
+                    FireForgeMasteryTuning.Setting.SOULPYRE_FUNERAL_RADIUS, 8);
             finalTargetCap = pyre.tuning.integer(
-                    Phase5AbilityTuning.Setting.SOULPYRE_FUNERAL_TARGET_CAP, 24);
+                    FireForgeMasteryTuning.Setting.SOULPYRE_FUNERAL_TARGET_CAP, 24);
         }
 
         int hits = damagePulseArea(world, actor, pyre, finalRadius, damage,
                 Math.max(0, finalTargetCap), false, false);
         UniqueAbilityApi.emit(pyre.execution, UniqueAbilityPhase.HIT,
-                Phase5UniqueAbilities.PULSE, actor, hits, damage);
+                FireForgeMasteryAbilities.PULSE, actor, hits, damage);
         actor.heal(
                 Math.max(0.0F, Config.uniqueEffects.soulpyre.heal)
                         + requiemSouls * Math.max(
@@ -665,17 +665,17 @@ public final class SoulPyreAbilityManager {
             cancelExecution(finalPlan.execution);
         }
         if (pyre.tuning.flag(1 << 24) && pyre.totalSoulsHarvested >= pyre.tuning.integer(
-                Phase5AbilityTuning.Setting.SOULPYRE_LAST_RITES_SOUL_COUNT, 5)) {
+                FireForgeMasteryTuning.Setting.SOULPYRE_LAST_RITES_SOUL_COUNT, 5)) {
             actor.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE,
                     pyre.tuning.integer(
-                            Phase5AbilityTuning.Setting.SOULPYRE_LAST_RITES_DURATION_TICKS, 80),
+                            FireForgeMasteryTuning.Setting.SOULPYRE_LAST_RITES_DURATION_TICKS, 80),
                     0, false, true, true), actor);
         }
         if (pyre.tuning.flag(1 << 22)) {
             pyre.collapsePeriodicDamage = pyre.lastPulseDamage * (float) pyre.tuning.get(
-                    Phase5AbilityTuning.Setting.SOULPYRE_COLLAPSE_DAMAGE_MULTIPLIER, .2);
+                    FireForgeMasteryTuning.Setting.SOULPYRE_COLLAPSE_DAMAGE_MULTIPLIER, .2);
             pyre.nextCollapseDamageTick = now + pyre.tuning.integer(
-                    Phase5AbilityTuning.Setting.SOULPYRE_COLLAPSE_INTERVAL_TICKS, 20);
+                    FireForgeMasteryTuning.Setting.SOULPYRE_COLLAPSE_INTERVAL_TICKS, 20);
         }
         beginVisualCollapse(world, actor, pyre);
         spawnPulseEffects(
@@ -712,13 +712,13 @@ public final class SoulPyreAbilityManager {
         updateVisual(world, actor, pyre, pyre.currentRadius);
         if (!pyre.cancelled && pyre.collapsePeriodicDamage > 0) {
             int interval = pyre.tuning.integer(
-                    Phase5AbilityTuning.Setting.SOULPYRE_COLLAPSE_INTERVAL_TICKS, 20);
+                    FireForgeMasteryTuning.Setting.SOULPYRE_COLLAPSE_INTERVAL_TICKS, 20);
             while (pyre.nextCollapseDamageTick < pyre.collapseEndTick
                     && now >= pyre.nextCollapseDamageTick) {
                 int hits = damagePulseArea(world, actor, pyre, pyre.currentRadius,
                         pyre.collapsePeriodicDamage, pyre.pulseTargetCap, false, false);
                 UniqueAbilityApi.emit(pyre.execution, UniqueAbilityPhase.HIT,
-                        Phase5UniqueAbilities.PULSE, actor, hits, pyre.collapsePeriodicDamage);
+                        FireForgeMasteryAbilities.PULSE, actor, hits, pyre.collapsePeriodicDamage);
                 pyre.nextCollapseDamageTick += Math.max(1, interval);
             }
         }
@@ -727,7 +727,7 @@ public final class SoulPyreAbilityManager {
         }
         discardVisual(world, pyre.visualId);
         if (!pyre.cancelled) {
-            UniqueAbilityApi.finish(pyre.execution, Phase5UniqueAbilities.FINISH, pyre.pulsesCompleted);
+            UniqueAbilityApi.finish(pyre.execution, FireForgeMasteryAbilities.FINISH, pyre.pulsesCompleted);
         }
         return true;
     }
@@ -736,8 +736,8 @@ public final class SoulPyreAbilityManager {
                                    ActivePyre pyre) {
         if (pyre.tuning.flag(1 << 8)) return;
         float growth = (float) tuned(pyre.tuning,
-                Phase5AbilityTuning.Setting.SOULPYRE_RADIUS_GROWTH,
-                Phase5AbilityTuning.Setting.RADIUS_GROWTH,
+                FireForgeMasteryTuning.Setting.SOULPYRE_RADIUS_GROWTH,
+                FireForgeMasteryTuning.Setting.RADIUS_GROWTH,
                 Config.uniqueEffects.soulpyre.radiusGrowthPerKill);
         float nextRadius = Math.min(pyre.maxRadius, pyre.targetRadius + growth);
         if (nextRadius <= pyre.targetRadius + 1.0E-4F) {
@@ -809,25 +809,25 @@ public final class SoulPyreAbilityManager {
         pyre.souls++;
         if (pyre.tuning.flag(1 << 25)) {
             int threshold = pyre.tuning.integer(
-                    Phase5AbilityTuning.Setting.SOULPYRE_UNDYING_SOUL_COUNT, 10);
+                    FireForgeMasteryTuning.Setting.SOULPYRE_UNDYING_SOUL_COUNT, 10);
             pyre.undyingReserve = Math.min(threshold, pyre.undyingReserve + 1);
         }
         if (pyre.tuning.flag(1 << 6) && pyre.totalSoulsHarvested <= pyre.tuning.integer(
-                Phase5AbilityTuning.Setting.SOULPYRE_FEAST_KILL_COUNT, 3)) {
-            Phase4AbsorptionTracker.grant(actor,
+                FireForgeMasteryTuning.Setting.SOULPYRE_FEAST_KILL_COUNT, 3)) {
+            MasteryAbsorptionTracker.grant(actor,
                     (float) pyre.tuning.get(
-                            Phase5AbilityTuning.Setting.SOULPYRE_FEAST_ABSORPTION, 2),
+                            FireForgeMasteryTuning.Setting.SOULPYRE_FEAST_ABSORPTION, 2),
                     pyre.tuning.integer(
-                            Phase5AbilityTuning.Setting.SOULPYRE_FEAST_ABSORPTION_TICKS, 80),
+                            FireForgeMasteryTuning.Setting.SOULPYRE_FEAST_ABSORPTION_TICKS, 80),
                     (float) pyre.tuning.get(
-                            Phase5AbilityTuning.Setting.SOULPYRE_FEAST_ABSORPTION_CAP, 6));
+                            FireForgeMasteryTuning.Setting.SOULPYRE_FEAST_ABSORPTION_CAP, 6));
         }
         if (pyre.tuning.flag(1 << 21)) {
-            int step = pyre.tuning.integer(Phase5AbilityTuning.Setting.SOULPYRE_MANTLE_SOUL_STEP, 5);
+            int step = pyre.tuning.integer(FireForgeMasteryTuning.Setting.SOULPYRE_MANTLE_SOUL_STEP, 5);
             if (isHarvestMilestone(pyre.totalSoulsHarvested, step)) {
                 actor.setAbsorptionAmount(boundedAbsorptionAfterGrant(actor.getAbsorptionAmount(),
-                        (float) pyre.tuning.get(Phase5AbilityTuning.Setting.SOULPYRE_MANTLE_ABSORPTION, 2),
-                        (float) pyre.tuning.get(Phase5AbilityTuning.Setting.SOULPYRE_MANTLE_ABSORPTION_CAP, 8)));
+                        (float) pyre.tuning.get(FireForgeMasteryTuning.Setting.SOULPYRE_MANTLE_ABSORPTION, 2),
+                        (float) pyre.tuning.get(FireForgeMasteryTuning.Setting.SOULPYRE_MANTLE_ABSORPTION_CAP, 8)));
             }
         }
         WispPlan plan = pyre.pendingWispPlan;
@@ -850,7 +850,7 @@ public final class SoulPyreAbilityManager {
                 Math.min(volleySize, pyre.totalSoulsHarvested)
         );
         UniqueAbilityApi.emit(pyre.execution, UniqueAbilityPhase.HIT,
-                Phase5UniqueAbilities.KILL, target, 1, 0);
+                FireForgeMasteryAbilities.KILL, target, 1, 0);
     }
 
     private static int damagePulseArea(ServerWorld world, LivingEntity actor,
@@ -885,10 +885,10 @@ public final class SoulPyreAbilityManager {
                     damage)) continue;
             hits++;
             UniqueAbilityApi.emit(pyre.execution, UniqueAbilityPhase.HIT,
-                    Phase5UniqueAbilities.HIT, target, 1, damage);
+                    FireForgeMasteryAbilities.HIT, target, 1, damage);
             if (binding) recordBindingPulse(world, actor, pyre, target);
             if (pull) pullTarget(actor, target, pyre.tuning.get(
-                    Phase5AbilityTuning.Setting.SOULPYRE_PULL_STRENGTH, .3));
+                    FireForgeMasteryTuning.Setting.SOULPYRE_PULL_STRENGTH, .3));
         }
         return hits;
     }
@@ -902,12 +902,12 @@ public final class SoulPyreAbilityManager {
 
         LivingEntity sourceOwner = resolveLiving(world, pyre.sourceOwnerId);
         UniqueAbilityExecution execution = plan.execution;
-        Phase5AbilityTuning tuning = plan.tuning;
+        FireForgeMasteryTuning tuning = plan.tuning;
         double searchRadius = Math.max(1.0, fieldRadius + 4.0 + tuned(tuning,
-                Phase5AbilityTuning.Setting.SOULPYRE_WISP_RANGE_BONUS,
-                Phase5AbilityTuning.Setting.RANGE, 0));
-        int searchCap = tunedInteger(tuning, Phase5AbilityTuning.Setting.SOULPYRE_WISP_SEARCH_CAP,
-                Phase5AbilityTuning.Setting.SEARCH_CAP, Config.uniqueEffects.soulpyre.wispSearchCap);
+                FireForgeMasteryTuning.Setting.SOULPYRE_WISP_RANGE_BONUS,
+                FireForgeMasteryTuning.Setting.RANGE, 0));
+        int searchCap = tunedInteger(tuning, FireForgeMasteryTuning.Setting.SOULPYRE_WISP_SEARCH_CAP,
+                FireForgeMasteryTuning.Setting.SEARCH_CAP, Config.uniqueEffects.soulpyre.wispSearchCap);
         List<LivingEntity> targets = findWispTargets(
                 world,
                 actor,
@@ -918,17 +918,17 @@ public final class SoulPyreAbilityManager {
                 Set.of()
         );
         float damage = pyre.baseDamage * Math.max(0.0F, Config.uniqueEffects.soulpyre.wispDamageMultiplier)
-                * (float) tuned(tuning, Phase5AbilityTuning.Setting.SOULPYRE_WISP_DAMAGE_MULTIPLIER,
-                Phase5AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1);
+                * (float) tuned(tuning, FireForgeMasteryTuning.Setting.SOULPYRE_WISP_DAMAGE_MULTIPLIER,
+                FireForgeMasteryTuning.Setting.DAMAGE_MULTIPLIER, 1);
         if (tuning.flag(1 << 16)) damage *= (float) tuning.get(
-                Phase5AbilityTuning.Setting.SOULPYRE_LEGION_DAMAGE_MULTIPLIER, .55);
+                FireForgeMasteryTuning.Setting.SOULPYRE_LEGION_DAMAGE_MULTIPLIER, .55);
         boolean legion = tuning.flag(1 << 16);
         int perTargetCap = legion ? tuning.integer(
-                Phase5AbilityTuning.Setting.SOULPYRE_LEGION_PER_TARGET_CAP, 3) : Integer.MAX_VALUE;
+                FireForgeMasteryTuning.Setting.SOULPYRE_LEGION_PER_TARGET_CAP, 3) : Integer.MAX_VALUE;
         WispVolley volley = new WispVolley(execution, tuning, pyre.actorId,
                 pyre.sourceOwnerId, soulCount, Math.max(1, perTargetCap));
         boolean wailing = tuning.flag(1 << 15) && soulCount >= tuning.integer(
-                Phase5AbilityTuning.Setting.SOULPYRE_WAILING_FULL_VOLLEY_COUNT, 6);
+                FireForgeMasteryTuning.Setting.SOULPYRE_WAILING_FULL_VOLLEY_COUNT, 6);
 
         for (int i = 0; i < soulCount; i++) {
             double angle = MathHelper.TAU * i / Math.max(1, soulCount);
@@ -969,7 +969,7 @@ public final class SoulPyreAbilityManager {
                             world.getTime() + WISP_LIFETIME,
                             volley,
                             wailing && i == soulCount - 1,
-                            tuning.integer(Phase5AbilityTuning.Setting.SOULPYRE_WISP_RETARGET_COUNT, 0),
+                            tuning.integer(FireForgeMasteryTuning.Setting.SOULPYRE_WISP_RETARGET_COUNT, 0),
                             false,
                             1
                     )
@@ -982,20 +982,20 @@ public final class SoulPyreAbilityManager {
                                         WispPlan plan) {
         if (soulCount <= 0) return;
         UniqueAbilityExecution execution = plan.execution;
-        Phase5AbilityTuning tuning = plan.tuning;
-        int soulCap = tuning.integer(Phase5AbilityTuning.Setting.SOULPYRE_LANCE_SOUL_CAP, 10);
-        int targetCap = tuning.integer(Phase5AbilityTuning.Setting.SOULPYRE_LANCE_TARGET_CAP, 6);
+        FireForgeMasteryTuning tuning = plan.tuning;
+        int soulCap = tuning.integer(FireForgeMasteryTuning.Setting.SOULPYRE_LANCE_SOUL_CAP, 10);
+        int targetCap = tuning.integer(FireForgeMasteryTuning.Setting.SOULPYRE_LANCE_TARGET_CAP, 6);
         float damage = pyre.baseDamage * lanceDamageMultiplier(soulCount, soulCap, tuning.get(
-                Phase5AbilityTuning.Setting.SOULPYRE_LANCE_DAMAGE_PER_SOUL, .25))
-                * (float) tuned(tuning, Phase5AbilityTuning.Setting.SOULPYRE_WISP_DAMAGE_MULTIPLIER,
-                Phase5AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1);
+                FireForgeMasteryTuning.Setting.SOULPYRE_LANCE_DAMAGE_PER_SOUL, .25))
+                * (float) tuned(tuning, FireForgeMasteryTuning.Setting.SOULPYRE_WISP_DAMAGE_MULTIPLIER,
+                FireForgeMasteryTuning.Setting.DAMAGE_MULTIPLIER, 1);
         double searchRadius = Math.max(1, fieldRadius + 4 + tuned(tuning,
-                Phase5AbilityTuning.Setting.SOULPYRE_WISP_RANGE_BONUS,
-                Phase5AbilityTuning.Setting.RANGE, 0));
+                FireForgeMasteryTuning.Setting.SOULPYRE_WISP_RANGE_BONUS,
+                FireForgeMasteryTuning.Setting.RANGE, 0));
         LivingEntity sourceOwner = resolveLiving(world, pyre.sourceOwnerId);
         List<LivingEntity> targets = findWispTargets(world, actor, sourceOwner, actor.getPos(), searchRadius,
-                tunedInteger(tuning, Phase5AbilityTuning.Setting.SOULPYRE_WISP_SEARCH_CAP,
-                        Phase5AbilityTuning.Setting.SEARCH_CAP,
+                tunedInteger(tuning, FireForgeMasteryTuning.Setting.SOULPYRE_WISP_SEARCH_CAP,
+                        FireForgeMasteryTuning.Setting.SEARCH_CAP,
                         Config.uniqueEffects.soulpyre.wispSearchCap), Set.of());
         LivingEntity assigned = targets.isEmpty() ? null : targets.getFirst();
         Vec3d start = actor.getPos().add(0, actor.getHeight() * .62, 0);
@@ -1048,13 +1048,13 @@ public final class SoulPyreAbilityManager {
                 }
                 double range = wisp.hadTarget && !wisp.lance
                         ? tuned(wisp.volley.tuning,
-                        Phase5AbilityTuning.Setting.SOULPYRE_WISP_RETARGET_RANGE,
-                        Phase5AbilityTuning.Setting.RETARGET_RANGE, 5)
+                        FireForgeMasteryTuning.Setting.SOULPYRE_WISP_RETARGET_RANGE,
+                        FireForgeMasteryTuning.Setting.RETARGET_RANGE, 5)
                         : wisp.searchRadius;
                 Vec3d center = wisp.hadTarget ? visual.getPos() : actor.getPos();
                 int searchCap = tunedInteger(wisp.volley.tuning,
-                        Phase5AbilityTuning.Setting.SOULPYRE_WISP_SEARCH_CAP,
-                        Phase5AbilityTuning.Setting.SEARCH_CAP,
+                        FireForgeMasteryTuning.Setting.SOULPYRE_WISP_SEARCH_CAP,
+                        FireForgeMasteryTuning.Setting.SEARCH_CAP,
                         Config.uniqueEffects.soulpyre.wispSearchCap);
                 List<LivingEntity> candidates = findWispTargets(world, actor, sourceOwner, center,
                         range, searchCap, wisp.lance
@@ -1089,7 +1089,7 @@ public final class SoulPyreAbilityManager {
                 if (wisp.volley.tuning.flag(1 << 14)
                         && isWispMarked(world, wisp.volley.actorId, target.getUuid())) {
                     damage *= (float) wisp.volley.tuning.get(
-                            Phase5AbilityTuning.Setting.SOULPYRE_WISP_MARK_DAMAGE_MULTIPLIER, 1.2);
+                            FireForgeMasteryTuning.Setting.SOULPYRE_WISP_MARK_DAMAGE_MULTIPLIER, 1.2);
                 }
                 boolean damaged = applyAbilityDamage(
                         world,
@@ -1103,14 +1103,14 @@ public final class SoulPyreAbilityManager {
                 if (damaged) {
                     wisp.volley.hitTargets.add(target.getUuid());
                     UniqueAbilityApi.emit(wisp.volley.execution, UniqueAbilityPhase.HIT,
-                            Phase5UniqueAbilities.HIT, target, 1, damage);
+                            FireForgeMasteryAbilities.HIT, target, 1, damage);
                     if (wisp.volley.tuning.flag(1 << 13)) {
                         target.setOnFireForTicks(tunedInteger(wisp.volley.tuning,
-                                Phase5AbilityTuning.Setting.SOULPYRE_WISP_FIRE_TICKS,
-                                Phase5AbilityTuning.Setting.FIRE_TICKS, 60));
+                                FireForgeMasteryTuning.Setting.SOULPYRE_WISP_FIRE_TICKS,
+                                FireForgeMasteryTuning.Setting.FIRE_TICKS, 60));
                         markWispTarget(world, wisp.volley.actorId, target.getUuid(),
                                 wisp.volley.tuning.integer(
-                                        Phase5AbilityTuning.Setting.SOULPYRE_WISP_MARK_DURATION_TICKS, 80));
+                                        FireForgeMasteryTuning.Setting.SOULPYRE_WISP_MARK_DURATION_TICKS, 80));
                     }
                     if (wisp.wailing) explodeWailingWisp(world, actor, sourceOwner, wisp, target, damage);
                 }
@@ -1137,8 +1137,8 @@ public final class SoulPyreAbilityManager {
                     List<LivingEntity> candidates = findWispTargets(world, actor, sourceOwner,
                             visual.getPos(), wisp.searchRadius,
                             tunedInteger(wisp.volley.tuning,
-                                    Phase5AbilityTuning.Setting.SOULPYRE_WISP_SEARCH_CAP,
-                                    Phase5AbilityTuning.Setting.SEARCH_CAP,
+                                    FireForgeMasteryTuning.Setting.SOULPYRE_WISP_SEARCH_CAP,
+                                    FireForgeMasteryTuning.Setting.SEARCH_CAP,
                                     Config.uniqueEffects.soulpyre.wispSearchCap), wisp.volley.visitedTargets);
                     LivingEntity next = candidates.isEmpty() ? null : candidates.getFirst();
                     if (next != null) {
@@ -1203,14 +1203,14 @@ public final class SoulPyreAbilityManager {
                                            LivingEntity sourceOwner, ActiveWisp wisp,
                                            LivingEntity primary, float directDamage) {
         double radius = tuned(wisp.volley.tuning,
-                Phase5AbilityTuning.Setting.SOULPYRE_WAILING_RADIUS,
-                Phase5AbilityTuning.Setting.RADIUS, 2.5);
+                FireForgeMasteryTuning.Setting.SOULPYRE_WAILING_RADIUS,
+                FireForgeMasteryTuning.Setting.RADIUS, 2.5);
         int cap = tunedInteger(wisp.volley.tuning,
-                Phase5AbilityTuning.Setting.SOULPYRE_WAILING_TARGET_CAP,
-                Phase5AbilityTuning.Setting.TARGET_CAP, 8);
+                FireForgeMasteryTuning.Setting.SOULPYRE_WAILING_TARGET_CAP,
+                FireForgeMasteryTuning.Setting.TARGET_CAP, 8);
         float damage = directDamage * (float) tuned(wisp.volley.tuning,
-                Phase5AbilityTuning.Setting.SOULPYRE_WAILING_DAMAGE_MULTIPLIER,
-                Phase5AbilityTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, .4);
+                FireForgeMasteryTuning.Setting.SOULPYRE_WAILING_DAMAGE_MULTIPLIER,
+                FireForgeMasteryTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, .4);
         List<LivingEntity> targets = world.getEntitiesByClass(LivingEntity.class,
                         primary.getBoundingBox().expand(radius), EntityPredicates.VALID_LIVING_ENTITY)
                 .stream().filter(target -> target != primary
@@ -1224,7 +1224,7 @@ public final class SoulPyreAbilityManager {
             hits++;
             wisp.volley.hitTargets.add(target.getUuid());
             UniqueAbilityApi.emit(wisp.volley.execution, UniqueAbilityPhase.HIT,
-                    Phase5UniqueAbilities.HIT, target, 1, damage);
+                    FireForgeMasteryAbilities.HIT, target, 1, damage);
         }
         world.spawnParticles(ParticleTypes.SOUL_FIRE_FLAME, primary.getX(), primary.getBodyY(.5),
                 primary.getZ(), 24, radius * .35, .35, radius * .35, .04);
@@ -1233,16 +1233,16 @@ public final class SoulPyreAbilityManager {
     private static void recordBindingPulse(ServerWorld world, LivingEntity actor,
                                            ActivePyre pyre, LivingEntity target) {
         if (!pyre.tuning.flag(1 << 4)) return;
-        int count = pyre.tuning.integer(Phase5AbilityTuning.Setting.SOULPYRE_BINDING_HIT_COUNT, 3);
-        int window = pyre.tuning.integer(Phase5AbilityTuning.Setting.SOULPYRE_BINDING_WINDOW_TICKS, 80);
+        int count = pyre.tuning.integer(FireForgeMasteryTuning.Setting.SOULPYRE_BINDING_HIT_COUNT, 3);
+        int window = pyre.tuning.integer(FireForgeMasteryTuning.Setting.SOULPYRE_BINDING_WINDOW_TICKS, 80);
         List<Long> hits = pyre.bindingHits.computeIfAbsent(target.getUuid(), ignored -> new ArrayList<>());
         hits.removeIf(hit -> hit + window < world.getTime());
         hits.add(world.getTime());
         if (hits.size() < count) return;
         hits.clear();
         target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS,
-                pyre.tuning.integer(Phase5AbilityTuning.Setting.SOULPYRE_BINDING_SLOW_TICKS, 40),
-                pyre.tuning.integer(Phase5AbilityTuning.Setting.SOULPYRE_BINDING_SLOW_AMPLIFIER, 1),
+                pyre.tuning.integer(FireForgeMasteryTuning.Setting.SOULPYRE_BINDING_SLOW_TICKS, 40),
+                pyre.tuning.integer(FireForgeMasteryTuning.Setting.SOULPYRE_BINDING_SLOW_AMPLIFIER, 1),
                 false, true, true), actor);
     }
 
@@ -1611,9 +1611,9 @@ public final class SoulPyreAbilityManager {
 
     private static WispPlan prepareWispPlan(ServerWorld world, LivingEntity actor,
                                             ActivePyre pyre) {
-        UniqueAbilityExecution execution = Phase5CombatManager.beginPassive(
-                Phase5UniqueAbilities.SOUL_PYRE_WISP, world, pyre.stack, actor, null);
-        return new WispPlan(execution, Phase5UniqueAbilities.tuning(execution));
+        UniqueAbilityExecution execution = EmberWeaponsMasteryManager.beginPassive(
+                FireForgeMasteryAbilities.SOUL_PYRE_WISP, world, pyre.stack, actor, null);
+        return new WispPlan(execution, FireForgeMasteryAbilities.tuning(execution));
     }
 
     private static void cancelWispPlan(ActivePyre pyre) {
@@ -1622,11 +1622,11 @@ public final class SoulPyreAbilityManager {
         pyre.pendingWispPlan = null;
     }
 
-    private static int effectiveVolleySize(Phase5AbilityTuning tuning) {
-        int size = tunedInteger(tuning, Phase5AbilityTuning.Setting.SOULPYRE_WISP_VOLLEY_SIZE,
-                Phase5AbilityTuning.Setting.WISP_COUNT, Config.uniqueEffects.soulpyre.wispVolleySize);
+    private static int effectiveVolleySize(FireForgeMasteryTuning tuning) {
+        int size = tunedInteger(tuning, FireForgeMasteryTuning.Setting.SOULPYRE_WISP_VOLLEY_SIZE,
+                FireForgeMasteryTuning.Setting.WISP_COUNT, Config.uniqueEffects.soulpyre.wispVolleySize);
         return volleySize(size, tuning.flag(1 << 16), tuning.get(
-                Phase5AbilityTuning.Setting.SOULPYRE_LEGION_VOLLEY_MULTIPLIER, 2));
+                FireForgeMasteryTuning.Setting.SOULPYRE_LEGION_VOLLEY_MULTIPLIER, 2));
     }
 
     static int closedPulseInterval(int duration, int pulseCount, double multiplier) {
@@ -1662,13 +1662,13 @@ public final class SoulPyreAbilityManager {
         return Math.max(safeCurrent, Math.min(Math.max(0, cap), safeCurrent + Math.max(0, amount)));
     }
 
-    private static double tuned(Phase5AbilityTuning tuning, Phase5AbilityTuning.Setting scoped,
-                                Phase5AbilityTuning.Setting generic, double fallback) {
+    private static double tuned(FireForgeMasteryTuning tuning, FireForgeMasteryTuning.Setting scoped,
+                                FireForgeMasteryTuning.Setting generic, double fallback) {
         return tuning.has(scoped) ? tuning.get(scoped, fallback) : tuning.get(generic, fallback);
     }
 
-    private static int tunedInteger(Phase5AbilityTuning tuning, Phase5AbilityTuning.Setting scoped,
-                                    Phase5AbilityTuning.Setting generic, int fallback) {
+    private static int tunedInteger(FireForgeMasteryTuning tuning, FireForgeMasteryTuning.Setting scoped,
+                                    FireForgeMasteryTuning.Setting generic, int fallback) {
         return (int) Math.round(tuned(tuning, scoped, generic, fallback));
     }
 
@@ -1688,7 +1688,7 @@ public final class SoulPyreAbilityManager {
     private static void finishTetherDefense(ServerWorld world, LivingEntity actor,
                                             ActivePyre pyre, boolean allowLinger) {
         int knockbackLinger = allowLinger && pyre.tuning.flag(1 << 19)
-                ? pyre.tuning.integer(Phase5AbilityTuning.Setting.SOULPYRE_KNOCKBACK_LINGER_TICKS, 60) : 0;
+                ? pyre.tuning.integer(FireForgeMasteryTuning.Setting.SOULPYRE_KNOCKBACK_LINGER_TICKS, 60) : 0;
         if (knockbackLinger > 0) {
             LINGERING_KNOCKBACK.computeIfAbsent(world, ignored -> new HashMap<>())
                     .put(actor.getUuid(), world.getTime() + knockbackLinger);
@@ -1713,7 +1713,7 @@ public final class SoulPyreAbilityManager {
         }
         if (allowLinger) {
             int linger = pyre.tuning.integer(
-                    Phase5AbilityTuning.Setting.SOULPYRE_FIRE_RESISTANCE_LINGER_TICKS, 40);
+                    FireForgeMasteryTuning.Setting.SOULPYRE_FIRE_RESISTANCE_LINGER_TICKS, 40);
             if (linger > 0) actor.addStatusEffect(new StatusEffectInstance(
                     StatusEffects.FIRE_RESISTANCE, linger, 0, false, true, true), actor);
         }
@@ -1723,7 +1723,7 @@ public final class SoulPyreAbilityManager {
     private static void maintainNetherWard(ServerWorld world, LivingEntity actor, ActivePyre pyre) {
         if (!pyre.tuning.flag(1 << 20)) return;
         int linger = pyre.tuning.integer(
-                Phase5AbilityTuning.Setting.SOULPYRE_FIRE_RESISTANCE_LINGER_TICKS, 40);
+                FireForgeMasteryTuning.Setting.SOULPYRE_FIRE_RESISTANCE_LINGER_TICKS, 40);
         int required = (int) Math.max(1, pyre.endTick - world.getTime() + Math.max(0, linger));
         StatusEffectInstance current = actor.getStatusEffect(StatusEffects.FIRE_RESISTANCE);
         if (current != null && (current.getAmplifier() > 0 || current.getDuration() >= required)) return;
@@ -1759,7 +1759,7 @@ public final class SoulPyreAbilityManager {
         private final float maxRadius;
         private final int pulseTargetCap;
         private final float baseDamage;
-        private final Phase5AbilityTuning tuning;
+        private final FireForgeMasteryTuning tuning;
         private final UniqueAbilityExecution execution;
         private final Map<UUID, List<Long>> bindingHits = new HashMap<>();
         private int pulsesCompleted;
@@ -1790,7 +1790,7 @@ public final class SoulPyreAbilityManager {
                            UUID visualId, long startTick, long endTick,
                            int pulseCount, int duration, int collapseDuration,
                            float startRadius, float maxRadius, int pulseTargetCap,
-                           float baseDamage, Phase5AbilityTuning tuning,
+                           float baseDamage, FireForgeMasteryTuning tuning,
                            UniqueAbilityExecution execution) {
             this.actorId = actorId;
             this.sourceOwnerId = sourceOwnerId;
@@ -1810,7 +1810,7 @@ public final class SoulPyreAbilityManager {
             this.closedPulseInterval = SoulPyreAbilityManager.closedPulseInterval(
                     duration,
                     pulseCount,
-                    tuning.get(Phase5AbilityTuning.Setting.SOULPYRE_CLOSED_INTERVAL_MULTIPLIER, 0.8)
+                    tuning.get(FireForgeMasteryTuning.Setting.SOULPYRE_CLOSED_INTERVAL_MULTIPLIER, 0.8)
             );
             this.nextClosedPulseTick = startTick + closedPulseInterval;
             this.currentRadius = startRadius;
@@ -1854,12 +1854,12 @@ public final class SoulPyreAbilityManager {
 
     private record WispPlan(
             UniqueAbilityExecution execution,
-            Phase5AbilityTuning tuning) {
+            FireForgeMasteryTuning tuning) {
     }
 
     private static final class WispVolley {
         private final UniqueAbilityExecution execution;
-        private final Phase5AbilityTuning tuning;
+        private final FireForgeMasteryTuning tuning;
         private final UUID actorId;
         private final UUID sourceOwnerId;
         private final Map<UUID, Integer> assignments = new HashMap<>();
@@ -1869,7 +1869,7 @@ public final class SoulPyreAbilityManager {
         private int remaining;
         private boolean terminal;
 
-        private WispVolley(UniqueAbilityExecution execution, Phase5AbilityTuning tuning,
+        private WispVolley(UniqueAbilityExecution execution, FireForgeMasteryTuning tuning,
                            UUID actorId, UUID sourceOwnerId, int remaining,
                            int perTargetCap) {
             this.execution = execution;
@@ -1883,7 +1883,7 @@ public final class SoulPyreAbilityManager {
         private void wispFinished() {
             if (terminal || --remaining > 0) return;
             terminal = true;
-            UniqueAbilityApi.finish(execution, Phase5UniqueAbilities.FINISH, hitTargets.size());
+            UniqueAbilityApi.finish(execution, FireForgeMasteryAbilities.FINISH, hitTargets.size());
         }
 
         private void cancel() {

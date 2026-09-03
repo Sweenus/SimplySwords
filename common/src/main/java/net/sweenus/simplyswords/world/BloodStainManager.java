@@ -13,8 +13,8 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.config.Config;
-import net.sweenus.simplyswords.api.ability.Phase8AbilityTuning;
-import net.sweenus.simplyswords.api.ability.Phase8UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.DeathShadowBloodMasteryTuning;
+import net.sweenus.simplyswords.api.ability.DeathShadowBloodMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.entity.BloodStainVisualEntity;
@@ -49,31 +49,31 @@ public final class BloodStainManager {
                 || BLOODBOUND_OWNERS.containsKey(world);
     }
 
-    public static int stainDuration(int configured, Phase8AbilityTuning tuning) {
-        return Math.max(1, configured + tuning.integer(Phase8AbilityTuning.Setting.BLOOD_STAIN_DURATION_BONUS_TICKS, 0));
+    public static int stainDuration(int configured, DeathShadowBloodMasteryTuning tuning) {
+        return Math.max(1, configured + tuning.integer(DeathShadowBloodMasteryTuning.Setting.BLOOD_STAIN_DURATION_BONUS_TICKS, 0));
     }
 
-    public static double stainRadius(double configured, Phase8AbilityTuning tuning) {
+    public static double stainRadius(double configured, DeathShadowBloodMasteryTuning tuning) {
         double radius = configured;
-        if (tuning.flag(1 << 25)) radius *= tuning.get(Phase8AbilityTuning.Setting.BLOOD_SEA_RADIUS_MULTIPLIER, 1.6);
-        if (tuning.flag(1 << 26)) radius *= tuning.get(Phase8AbilityTuning.Setting.BLOOD_HEARTPOOL_RADIUS_MULTIPLIER, .6);
+        if (tuning.flag(1 << 25)) radius *= tuning.get(DeathShadowBloodMasteryTuning.Setting.BLOOD_SEA_RADIUS_MULTIPLIER, 1.6);
+        if (tuning.flag(1 << 26)) radius *= tuning.get(DeathShadowBloodMasteryTuning.Setting.BLOOD_HEARTPOOL_RADIUS_MULTIPLIER, .6);
         return radius;
     }
 
-    public static int slowAmplifier(int configured, Phase8AbilityTuning tuning) {
-        return Math.clamp(configured + tuning.integer(Phase8AbilityTuning.Setting.BLOOD_STAIN_SLOW_BONUS, 0),
-                0, tuning.integer(Phase8AbilityTuning.Setting.BLOOD_STAIN_SLOW_CAP, 4));
+    public static int slowAmplifier(int configured, DeathShadowBloodMasteryTuning tuning) {
+        return Math.clamp(configured + tuning.integer(DeathShadowBloodMasteryTuning.Setting.BLOOD_STAIN_SLOW_BONUS, 0),
+                0, tuning.integer(DeathShadowBloodMasteryTuning.Setting.BLOOD_STAIN_SLOW_CAP, 4));
     }
 
-    public static int healInterval(int configured, Phase8AbilityTuning tuning) {
-        return Math.max(tuning.integer(Phase8AbilityTuning.Setting.BLOOD_STAIN_HEAL_INTERVAL_FLOOR, CONTACT_INTERVAL),
-                configured + tuning.integer(Phase8AbilityTuning.Setting.BLOOD_STAIN_HEAL_INTERVAL_BONUS, 0));
+    public static int healInterval(int configured, DeathShadowBloodMasteryTuning tuning) {
+        return Math.max(tuning.integer(DeathShadowBloodMasteryTuning.Setting.BLOOD_STAIN_HEAL_INTERVAL_FLOOR, CONTACT_INTERVAL),
+                configured + tuning.integer(DeathShadowBloodMasteryTuning.Setting.BLOOD_STAIN_HEAL_INTERVAL_BONUS, 0));
     }
 
-    public static float healAmount(float configured, Phase8AbilityTuning tuning) {
-        float amount = configured + (float) tuning.get(Phase8AbilityTuning.Setting.BLOOD_STAIN_HEAL_BONUS, 0);
+    public static float healAmount(float configured, DeathShadowBloodMasteryTuning tuning) {
+        float amount = configured + (float) tuning.get(DeathShadowBloodMasteryTuning.Setting.BLOOD_STAIN_HEAL_BONUS, 0);
         if (tuning.flag(1 << 25)) return 0;
-        if (tuning.flag(1 << 26)) amount *= (float) tuning.get(Phase8AbilityTuning.Setting.BLOOD_HEARTPOOL_HEAL_MULTIPLIER, 2);
+        if (tuning.flag(1 << 26)) amount *= (float) tuning.get(DeathShadowBloodMasteryTuning.Setting.BLOOD_HEARTPOOL_HEAL_MULTIPLIER, 2);
         return Math.max(0, amount);
     }
 
@@ -119,7 +119,7 @@ public final class BloodStainManager {
             return;
         }
         Vec3d grounded = groundPosition(world, center);
-        Phase8AbilityTuning tuning = tuning(world, owner);
+        DeathShadowBloodMasteryTuning tuning = tuning(world, owner);
         float stainRadius = (float) Math.max(0.5, stainRadius(radius, tuning));
         long now = world.getTime();
         int duration = duration(tuning);
@@ -130,7 +130,7 @@ public final class BloodStainManager {
                     && stain.center.squaredDistanceTo(grounded)
                     <= MathHelper.square(Math.max(0.75F, Math.min(stain.radius, stainRadius) * 0.5F))) {
                 stain.expiryTick = tuning.flag(1 << 24)
-                        ? Math.min(now + tuning.integer(Phase8AbilityTuning.Setting.BLOOD_CONFLUENCE_CAP_TICKS, 800),
+                        ? Math.min(now + tuning.integer(DeathShadowBloodMasteryTuning.Setting.BLOOD_CONFLUENCE_CAP_TICKS, 800),
                         Math.max(stain.expiryTick, now) + Math.max(0, duration)) : now + duration;
                 stain.radius = Math.max(stain.radius, stainRadius);
                 updateCircleVisual(world, stain);
@@ -159,7 +159,7 @@ public final class BloodStainManager {
             return null;
         }
         horizontal = horizontal.normalize();
-        Phase8AbilityTuning tuning = tuning(world, owner);
+        DeathShadowBloodMasteryTuning tuning = tuning(world, owner);
         width = stainRadius(width, tuning);
         Vec3d start = groundPosition(world, origin);
         float radius = (float) Math.max(0.25, width * 0.5);
@@ -253,7 +253,7 @@ public final class BloodStainManager {
         Set<UUID> slowed = new HashSet<>();
         Set<UUID> ownersStanding = new HashSet<>();
         Set<UUID> bloodboundOwners = new HashSet<>();
-        Map<UUID, Phase8AbilityTuning> ownerTunings = new HashMap<>();
+        Map<UUID, DeathShadowBloodMasteryTuning> ownerTunings = new HashMap<>();
         for (ActiveStain stain : stains) {
             LivingEntity owner = resolveLiving(world, stain.ownerId);
             if (owner == null) {
@@ -286,7 +286,7 @@ public final class BloodStainManager {
         Map<UUID, Integer> progress = HEAL_PROGRESS.computeIfAbsent(world, ignored -> new HashMap<>());
         progress.keySet().removeIf(ownerId -> !ownersStanding.contains(ownerId));
         for (UUID ownerId : ownersStanding) {
-            Phase8AbilityTuning tuning = ownerTunings.getOrDefault(ownerId, Phase8AbilityTuning.EMPTY);
+            DeathShadowBloodMasteryTuning tuning = ownerTunings.getOrDefault(ownerId, DeathShadowBloodMasteryTuning.EMPTY);
             int interval = healInterval(Config.uniqueEffects.bloodwake.stainHealInterval, tuning);
             float amount = healAmount(Config.uniqueEffects.bloodwake.stainHealAmount, tuning);
             int accumulated = progress.getOrDefault(ownerId, 0) + CONTACT_INTERVAL;
@@ -299,8 +299,8 @@ public final class BloodStainManager {
             }
             if (tuning.flag(1 << 26)) {
                 int absorptionInterval = Math.max(CONTACT_INTERVAL, tuning.integer(
-                        Phase8AbilityTuning.Setting.BLOOD_HEARTPOOL_ABSORPTION_INTERVAL_TICKS, 80));
-                int absorption = tuning.integer(Phase8AbilityTuning.Setting.BLOOD_HEARTPOOL_ABSORPTION, 4);
+                        DeathShadowBloodMasteryTuning.Setting.BLOOD_HEARTPOOL_ABSORPTION_INTERVAL_TICKS, 80));
+                int absorption = tuning.integer(DeathShadowBloodMasteryTuning.Setting.BLOOD_HEARTPOOL_ABSORPTION, 4);
                 LivingEntity owner = resolveLiving(world, ownerId);
                 if (owner != null && absorption > 0 && world.getTime() % absorptionInterval == 0) {
                     owner.addStatusEffect(new StatusEffectInstance(StatusEffects.ABSORPTION, 80,
@@ -312,7 +312,7 @@ public final class BloodStainManager {
     }
 
     private static void refreshBloodbound(ServerWorld world, Set<UUID> current,
-                                          Map<UUID, Phase8AbilityTuning> tunings) {
+                                          Map<UUID, DeathShadowBloodMasteryTuning> tunings) {
         Set<UUID> previous = BLOODBOUND_OWNERS.computeIfAbsent(world, ignored -> new HashSet<>());
         for (UUID ownerId : new HashSet<>(previous)) {
             if (current.contains(ownerId)) continue;
@@ -332,8 +332,8 @@ public final class BloodStainManager {
             if (attribute == null) continue;
             attribute.removeModifier(BLOODBOUND);
             attribute.addTemporaryModifier(new EntityAttributeModifier(BLOODBOUND,
-                    tunings.getOrDefault(ownerId, Phase8AbilityTuning.EMPTY).get(
-                            Phase8AbilityTuning.Setting.BLOOD_BLOODBOUND_RESISTANCE, 1),
+                    tunings.getOrDefault(ownerId, DeathShadowBloodMasteryTuning.EMPTY).get(
+                            DeathShadowBloodMasteryTuning.Setting.BLOOD_BLOODBOUND_RESISTANCE, 1),
                     EntityAttributeModifier.Operation.ADD_VALUE));
             previous.add(ownerId);
         }
@@ -382,7 +382,7 @@ public final class BloodStainManager {
                 .filter(stain -> stain.ownerId.equals(owner.getUuid()) && stain.tuning.flag(1 << 23)
                         && contains(stain, target.getPos()))
                 .mapToDouble(stain -> stain.tuning.get(
-                        Phase8AbilityTuning.Setting.BLOOD_FOOTING_MULTIPLIER, 1.08))
+                        DeathShadowBloodMasteryTuning.Setting.BLOOD_FOOTING_MULTIPLIER, 1.08))
                 .max().orElse(1);
     }
 
@@ -453,16 +453,16 @@ public final class BloodStainManager {
         return Math.max(1, Config.uniqueEffects.bloodwake.stainDuration);
     }
 
-    private static int duration(Phase8AbilityTuning tuning) {
+    private static int duration(DeathShadowBloodMasteryTuning tuning) {
         return stainDuration(duration(), tuning);
     }
 
-    private static Phase8AbilityTuning tuning(ServerWorld world, LivingEntity owner) {
-        if (owner == null || owner.getMainHandStack().isEmpty()) return Phase8AbilityTuning.EMPTY;
-        UniqueAbilityExecution execution = Phase8CombatManager.beginPassive(
-                Phase8UniqueAbilities.BLOOD_GROUND, world, owner.getMainHandStack(), owner, null);
-        Phase8AbilityTuning tuning = Phase8UniqueAbilities.tuning(execution);
-        UniqueAbilityApi.finish(execution, Phase8UniqueAbilities.FINISH, 0);
+    private static DeathShadowBloodMasteryTuning tuning(ServerWorld world, LivingEntity owner) {
+        if (owner == null || owner.getMainHandStack().isEmpty()) return DeathShadowBloodMasteryTuning.EMPTY;
+        UniqueAbilityExecution execution = DeathShadowBloodMasteryCombatManager.beginPassive(
+                DeathShadowBloodMasteryAbilities.BLOOD_GROUND, world, owner.getMainHandStack(), owner, null);
+        DeathShadowBloodMasteryTuning tuning = DeathShadowBloodMasteryAbilities.tuning(execution);
+        UniqueAbilityApi.finish(execution, DeathShadowBloodMasteryAbilities.FINISH, 0);
         return tuning;
     }
 
@@ -500,12 +500,12 @@ public final class BloodStainManager {
         private double endY;
         private long expiryTick;
         private boolean finished;
-        private final Phase8AbilityTuning tuning;
+        private final DeathShadowBloodMasteryTuning tuning;
 
         private ActiveStain(UUID id, UUID ownerId, UUID visualId, int shape,
                             Vec3d start, Vec3d direction, Vec3d center,
                             float radius, double endY, long expiryTick, boolean finished,
-                            Phase8AbilityTuning tuning) {
+                            DeathShadowBloodMasteryTuning tuning) {
             this.id = id;
             this.ownerId = ownerId;
             this.visualId = visualId;
@@ -521,7 +521,7 @@ public final class BloodStainManager {
         }
 
         private static ActiveStain circle(UUID ownerId, UUID visualId, Vec3d center,
-                                          float radius, long expiryTick, Phase8AbilityTuning tuning) {
+                                          float radius, long expiryTick, DeathShadowBloodMasteryTuning tuning) {
             return new ActiveStain(UUID.randomUUID(), ownerId, visualId,
                     BloodStainVisualEntity.SHAPE_CIRCLE, center, Vec3d.ZERO,
                     center, radius, center.y, expiryTick, true, tuning);
@@ -529,7 +529,7 @@ public final class BloodStainManager {
 
         private static ActiveStain trail(UUID id, UUID ownerId, UUID visualId,
                                          Vec3d start, Vec3d direction, float radius,
-                                         Phase8AbilityTuning tuning) {
+                                         DeathShadowBloodMasteryTuning tuning) {
             return new ActiveStain(id, ownerId, visualId,
                     BloodStainVisualEntity.SHAPE_TRAIL, start, direction,
                     start, radius, start.y, Long.MAX_VALUE, false, tuning);

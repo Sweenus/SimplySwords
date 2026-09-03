@@ -16,8 +16,8 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.api.SpellScalingProfile;
-import net.sweenus.simplyswords.api.ability.Phase10AbilityTuning;
-import net.sweenus.simplyswords.api.ability.Phase10UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.MartialCommandEldritchMasteryTuning;
+import net.sweenus.simplyswords.api.ability.MartialCommandEldritchMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.config.Config;
@@ -58,9 +58,9 @@ public final class DawnquiverAbilityManager {
     private static final Map<ServerWorld, List<ScheduledShot>> SCHEDULED_SHOTS = new HashMap<>();
     private static final Map<ServerWorld, List<ScheduledBloom>> SCHEDULED_BLOOMS = new HashMap<>();
     private static final Map<ItemStack, Integer> CHORUS_CAP = new WeakHashMap<>();
-    private static final Map<ItemStack, Phase10AbilityTuning> CHORUS_TUNING = new WeakHashMap<>();
-    private static final Map<ItemStack, Phase10AbilityTuning> LESSER_TUNING = new WeakHashMap<>();
-    private static final Map<UUID, Phase10AbilityTuning> DRAW_TUNING = new HashMap<>();
+    private static final Map<ItemStack, MartialCommandEldritchMasteryTuning> CHORUS_TUNING = new WeakHashMap<>();
+    private static final Map<ItemStack, MartialCommandEldritchMasteryTuning> LESSER_TUNING = new WeakHashMap<>();
+    private static final Map<UUID, MartialCommandEldritchMasteryTuning> DRAW_TUNING = new HashMap<>();
     private static final Map<UUID, Boolean> CHORUS_READY = new HashMap<>();
     private static final Map<UUID, Integer> LESSER_SHOTS = new HashMap<>();
     private static final Map<UUID, Long> SILENCED_UNTIL = new HashMap<>();
@@ -69,71 +69,71 @@ public final class DawnquiverAbilityManager {
     private DawnquiverAbilityManager() {
     }
 
-    public static Phase10AbilityTuning lesserBase(int interval, int lockout, double range,
+    public static MartialCommandEldritchMasteryTuning lesserBase(int interval, int lockout, double range,
                                                   double chorusChancePercent) {
-        return Phase10AbilityTuning.EMPTY
-                .with(Phase10AbilityTuning.Setting.INTERVAL_TICKS, interval)
-                .with(Phase10AbilityTuning.Setting.LOCKOUT_TICKS, lockout)
-                .with(Phase10AbilityTuning.Setting.RANGE, range)
-                .with(Phase10AbilityTuning.Setting.CHANCE, chorusChancePercent)
-                .with(Phase10AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1)
-                .with(Phase10AbilityTuning.Setting.COUNT, 1);
+        return MartialCommandEldritchMasteryTuning.EMPTY
+                .with(MartialCommandEldritchMasteryTuning.Setting.INTERVAL_TICKS, interval)
+                .with(MartialCommandEldritchMasteryTuning.Setting.LOCKOUT_TICKS, lockout)
+                .with(MartialCommandEldritchMasteryTuning.Setting.RANGE, range)
+                .with(MartialCommandEldritchMasteryTuning.Setting.CHANCE, chorusChancePercent)
+                .with(MartialCommandEldritchMasteryTuning.Setting.DAMAGE_MULTIPLIER, 1)
+                .with(MartialCommandEldritchMasteryTuning.Setting.COUNT, 1);
     }
 
-    public static Phase10AbilityTuning chorusBase(int maxChorus, double chorusChancePercent) {
-        return Phase10AbilityTuning.EMPTY
-                .with(Phase10AbilityTuning.Setting.STACK_CAP, maxChorus)
-                .with(Phase10AbilityTuning.Setting.CHANCE, chorusChancePercent)
-                .with(Phase10AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1);
+    public static MartialCommandEldritchMasteryTuning chorusBase(int maxChorus, double chorusChancePercent) {
+        return MartialCommandEldritchMasteryTuning.EMPTY
+                .with(MartialCommandEldritchMasteryTuning.Setting.STACK_CAP, maxChorus)
+                .with(MartialCommandEldritchMasteryTuning.Setting.CHANCE, chorusChancePercent)
+                .with(MartialCommandEldritchMasteryTuning.Setting.DAMAGE_MULTIPLIER, 1);
     }
 
-    public static Phase10AbilityTuning drawBase(int drawDuration, double minimumDraw, int piercingTargets,
+    public static MartialCommandEldritchMasteryTuning drawBase(int drawDuration, double minimumDraw, int piercingTargets,
                                                 double piercingRetention, int formationDelay,
                                                 int firingStagger, double impactRadius) {
-        return Phase10AbilityTuning.EMPTY
-                .with(Phase10AbilityTuning.Setting.WINDUP_TICKS, drawDuration)
-                .with(Phase10AbilityTuning.Setting.HEALTH_THRESHOLD, minimumDraw)
-                .with(Phase10AbilityTuning.Setting.TARGET_CAP, piercingTargets)
-                .with(Phase10AbilityTuning.Setting.OUTGOING_MULTIPLIER, piercingRetention)
-                .with(Phase10AbilityTuning.Setting.DELAY_TICKS, formationDelay)
-                .with(Phase10AbilityTuning.Setting.INTERVAL_TICKS, firingStagger)
-                .with(Phase10AbilityTuning.Setting.RADIUS, impactRadius)
-                .with(Phase10AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1)
-                .with(Phase10AbilityTuning.Setting.FINAL_DAMAGE_MULTIPLIER, 1)
-                .with(Phase10AbilityTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, 1)
-                .with(Phase10AbilityTuning.Setting.COUNT, 1);
+        return MartialCommandEldritchMasteryTuning.EMPTY
+                .with(MartialCommandEldritchMasteryTuning.Setting.WINDUP_TICKS, drawDuration)
+                .with(MartialCommandEldritchMasteryTuning.Setting.HEALTH_THRESHOLD, minimumDraw)
+                .with(MartialCommandEldritchMasteryTuning.Setting.TARGET_CAP, piercingTargets)
+                .with(MartialCommandEldritchMasteryTuning.Setting.OUTGOING_MULTIPLIER, piercingRetention)
+                .with(MartialCommandEldritchMasteryTuning.Setting.DELAY_TICKS, formationDelay)
+                .with(MartialCommandEldritchMasteryTuning.Setting.INTERVAL_TICKS, firingStagger)
+                .with(MartialCommandEldritchMasteryTuning.Setting.RADIUS, impactRadius)
+                .with(MartialCommandEldritchMasteryTuning.Setting.DAMAGE_MULTIPLIER, 1)
+                .with(MartialCommandEldritchMasteryTuning.Setting.FINAL_DAMAGE_MULTIPLIER, 1)
+                .with(MartialCommandEldritchMasteryTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, 1)
+                .with(MartialCommandEldritchMasteryTuning.Setting.COUNT, 1);
     }
 
-    public static int releaseCooldown(Phase10AbilityTuning draw, Phase10AbilityTuning chorus,
+    public static int releaseCooldown(MartialCommandEldritchMasteryTuning draw, MartialCommandEldritchMasteryTuning chorus,
                                       boolean chorusReady, int tierCooldown) {
-        double cooldown = tierCooldown * draw.get(Phase10AbilityTuning.Setting.INCOMING_MULTIPLIER, 1);
+        double cooldown = tierCooldown * draw.get(MartialCommandEldritchMasteryTuning.Setting.INCOMING_MULTIPLIER, 1);
         if (chorusReady && chorus.flag(1 << 15))
-            cooldown *= chorus.get(Phase10AbilityTuning.Setting.INCOMING_MULTIPLIER, .8);
+            cooldown *= chorus.get(MartialCommandEldritchMasteryTuning.Setting.INCOMING_MULTIPLIER, .8);
         return Math.max(1, (int) Math.round(cooldown));
     }
 
-    public static Phase10AbilityTuning drawBase(DawnquiverSwordItem.EffectSettings settings, ItemStack stack) {
-        return Phase10AbilityTuning.EMPTY
-                .with(Phase10AbilityTuning.Setting.WINDUP_TICKS, settings.drawDuration)
-                .with(Phase10AbilityTuning.Setting.HEALTH_THRESHOLD, settings.minimumDraw)
-                .with(Phase10AbilityTuning.Setting.TARGET_CAP, settings.piercingMaxTargets)
-                .with(Phase10AbilityTuning.Setting.OUTGOING_MULTIPLIER, settings.piercingDamageRetention)
-                .with(Phase10AbilityTuning.Setting.DELAY_TICKS, settings.convergenceFormationDelay)
-                .with(Phase10AbilityTuning.Setting.INTERVAL_TICKS, settings.convergenceFiringStagger)
-                .with(Phase10AbilityTuning.Setting.RADIUS, AwakeningApi.scaleEffect(stack, settings.impactRadius))
-                .with(Phase10AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1)
-                .with(Phase10AbilityTuning.Setting.FINAL_DAMAGE_MULTIPLIER, 1)
-                .with(Phase10AbilityTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, 1)
-                .with(Phase10AbilityTuning.Setting.COUNT, 1);
+    public static MartialCommandEldritchMasteryTuning drawBase(DawnquiverSwordItem.EffectSettings settings, ItemStack stack) {
+        return MartialCommandEldritchMasteryTuning.EMPTY
+                .with(MartialCommandEldritchMasteryTuning.Setting.WINDUP_TICKS, settings.drawDuration)
+                .with(MartialCommandEldritchMasteryTuning.Setting.HEALTH_THRESHOLD, settings.minimumDraw)
+                .with(MartialCommandEldritchMasteryTuning.Setting.TARGET_CAP, settings.piercingMaxTargets)
+                .with(MartialCommandEldritchMasteryTuning.Setting.OUTGOING_MULTIPLIER, settings.piercingDamageRetention)
+                .with(MartialCommandEldritchMasteryTuning.Setting.DELAY_TICKS, settings.convergenceFormationDelay)
+                .with(MartialCommandEldritchMasteryTuning.Setting.INTERVAL_TICKS, settings.convergenceFiringStagger)
+                .with(MartialCommandEldritchMasteryTuning.Setting.RADIUS, AwakeningApi.scaleEffect(stack, settings.impactRadius))
+                .with(MartialCommandEldritchMasteryTuning.Setting.DAMAGE_MULTIPLIER, 1)
+                .with(MartialCommandEldritchMasteryTuning.Setting.FINAL_DAMAGE_MULTIPLIER, 1)
+                .with(MartialCommandEldritchMasteryTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, 1)
+                .with(MartialCommandEldritchMasteryTuning.Setting.COUNT, 1);
     }
 
-    private static Phase10AbilityTuning lesserBase() {
+    private static MartialCommandEldritchMasteryTuning lesserBase() {
         DawnquiverSwordItem.EffectSettings settings = Config.uniqueEffects.dawnquiver;
         return lesserBase(settings.passiveInterval, settings.passiveLockout, settings.passiveRange,
                 settings.passiveChorusChance * 100);
     }
 
-    private static Phase10AbilityTuning chorusBase() {
+    private static MartialCommandEldritchMasteryTuning chorusBase() {
         DawnquiverSwordItem.EffectSettings settings = Config.uniqueEffects.dawnquiver;
         return chorusBase(settings.maxChorus, settings.passiveChorusChance * 100);
     }
@@ -207,7 +207,7 @@ public final class DawnquiverAbilityManager {
     public static int drawDuration(ServerWorld world, LivingEntity owner) {
         ActiveDraw draw = activeDraw(world, owner.getUuid());
         return Math.max(4, draw == null ? Config.uniqueEffects.dawnquiver.drawDuration
-                : draw.tuning.integer(Phase10AbilityTuning.Setting.WINDUP_TICKS,
+                : draw.tuning.integer(MartialCommandEldritchMasteryTuning.Setting.WINDUP_TICKS,
                 Config.uniqueEffects.dawnquiver.drawDuration));
     }
 
@@ -223,14 +223,14 @@ public final class DawnquiverAbilityManager {
         }
         DawnquiverSwordItem.EffectSettings settings = Config.uniqueEffects.dawnquiver;
         cancel(world, owner.getUuid());
-        UniqueAbilityExecution execution = Phase10CombatManager.beginDirectActive(
-                Phase10UniqueAbilities.DAWN_DRAW, world, owner, stack, hand, settings.cooldown,
+        UniqueAbilityExecution execution = MartialCommandEldritchMasteryCombatManager.beginDirectActive(
+                MartialCommandEldritchMasteryAbilities.DAWN_DRAW, world, owner, stack, hand, settings.cooldown,
                 drawBase(settings, stack));
-        Phase10AbilityTuning tuning = Phase10UniqueAbilities.tuning(execution);
+        MartialCommandEldritchMasteryTuning tuning = MartialCommandEldritchMasteryAbilities.tuning(execution);
         DRAW_TUNING.put(owner.getUuid(), tuning);
 
         int seed = owner.getRandom().nextInt(4096);
-        int lifetime = Math.max(20, tuning.integer(Phase10AbilityTuning.Setting.WINDUP_TICKS,
+        int lifetime = Math.max(20, tuning.integer(MartialCommandEldritchMasteryTuning.Setting.WINDUP_TICKS,
                 settings.drawDuration)) + BOW_TRAILING_TICKS;
         LivingEntity target = findActiveTarget(world, owner, settings);
         Vec3d aimDirection = activeAimDirection(owner, target);
@@ -258,7 +258,7 @@ public final class DawnquiverAbilityManager {
 
     public static void tickDraw(ServerWorld world, LivingEntity owner, float drawProgress) {
         ActiveDraw drawState = activeDraw(world, owner.getUuid());
-        Phase10AbilityTuning tuning = drawState == null ? Phase10AbilityTuning.EMPTY : drawState.tuning;
+        MartialCommandEldritchMasteryTuning tuning = drawState == null ? MartialCommandEldritchMasteryTuning.EMPTY : drawState.tuning;
         DawnquiverBowVisualEntity bow = resolveBow(world, owner.getUuid());
         if (bow == null || drawState == null) {
             return;
@@ -293,7 +293,7 @@ public final class DawnquiverAbilityManager {
         DawnquiverSwordItem.EffectSettings settings = Config.uniqueEffects.dawnquiver;
         chargeRatio = capDrawProgress(stack, chargeRatio);
         ActiveDraw drawState = activeDraw(world, owner.getUuid());
-        Phase10AbilityTuning tuning = drawState == null ? Phase10AbilityTuning.EMPTY : drawState.tuning;
+        MartialCommandEldritchMasteryTuning tuning = drawState == null ? MartialCommandEldritchMasteryTuning.EMPTY : drawState.tuning;
         Hand hand = drawState == null ? heldHand(owner, stack) : drawState.hand;
         DawnquiverBowVisualEntity bow = resolveBow(world, owner.getUuid());
         LivingEntity target = findActiveTarget(world, owner, settings);
@@ -307,7 +307,7 @@ public final class DawnquiverAbilityManager {
         clear(world, owner.getUuid());
 
         float minimumDraw = MathHelper.clamp((float) tuning.get(
-                Phase10AbilityTuning.Setting.HEALTH_THRESHOLD, settings.minimumDraw), 0.0F, 1.0F);
+                MartialCommandEldritchMasteryTuning.Setting.HEALTH_THRESHOLD, settings.minimumDraw), 0.0F, 1.0F);
         if (chargeRatio < minimumDraw) {
             if (bow != null) {
                 bow.discard();
@@ -316,19 +316,19 @@ public final class DawnquiverAbilityManager {
                     8, 0.25, 0.25, 0.25, 0.01);
             world.playSound(null, owner.getBlockPos(), SoundRegistry.MAGIC_BOW_SHOOT_MISS_02.get(),
                     SoundCategory.PLAYERS, 0.35F, 1.15F);
-            if (drawState != null) Phase10CombatManager.finish(drawState.execution, 0);
+            if (drawState != null) MartialCommandEldritchMasteryCombatManager.finish(drawState.execution, 0);
             return Math.max(1, settings.cooldown / 4);
         }
 
         int tier = affordableDrawTier(stack, chargeRatio);
         int chorus = getChorus(stack);
-        Phase10AbilityTuning chorusTuning = CHORUS_TUNING.getOrDefault(stack, Phase10AbilityTuning.EMPTY);
+        MartialCommandEldritchMasteryTuning chorusTuning = CHORUS_TUNING.getOrDefault(stack, MartialCommandEldritchMasteryTuning.EMPTY);
         boolean heaven = tuning.flag(1 << 25);
         int stackCost = heaven ? chorus : Math.max(0, tier + 1);
         boolean empowered = heaven ? chorus >= 2 : tier >= 0 && chorus >= stackCost;
         if (heaven && !empowered) {
             if (bow != null) bow.discard();
-            if (drawState != null) Phase10CombatManager.finish(drawState.execution, 0);
+            if (drawState != null) MartialCommandEldritchMasteryCombatManager.finish(drawState.execution, 0);
             return Math.max(1, settings.cooldown / 4);
         }
         Vec3d direction = target != null ? aimPoint(target).subtract(origin).normalize() : aimDirection;
@@ -339,34 +339,34 @@ public final class DawnquiverAbilityManager {
                         (float) settings.maxChargeSpellScaling));
         float lesserDamage = HelperMethods.abilityScaledDamage(SpellScalingProfile.HEALING, owner, stack,
                 (float) settings.passiveDamageScaling, (float) settings.passiveSpellScaling);
-        damage *= (float) tuning.get(tier >= 2 ? Phase10AbilityTuning.Setting.FINAL_DAMAGE_MULTIPLIER
-                : Phase10AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1);
-        damage *= (float) chorusTuning.get(Phase10AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1);
+        damage *= (float) tuning.get(tier >= 2 ? MartialCommandEldritchMasteryTuning.Setting.FINAL_DAMAGE_MULTIPLIER
+                : MartialCommandEldritchMasteryTuning.Setting.DAMAGE_MULTIPLIER, 1);
+        damage *= (float) chorusTuning.get(MartialCommandEldritchMasteryTuning.Setting.DAMAGE_MULTIPLIER, 1);
         if (chorusTuning.flag(1 << 17) && stackCost >= chorusTuning.integer(
-                Phase10AbilityTuning.Setting.STACK_CAP, 6))
-            damage *= (float) chorusTuning.get(Phase10AbilityTuning.Setting.FINAL_DAMAGE_MULTIPLIER, 1);
-        lesserDamage *= (float) tuning.get(Phase10AbilityTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, 1);
+                MartialCommandEldritchMasteryTuning.Setting.STACK_CAP, 6))
+            damage *= (float) chorusTuning.get(MartialCommandEldritchMasteryTuning.Setting.FINAL_DAMAGE_MULTIPLIER, 1);
+        lesserDamage *= (float) tuning.get(MartialCommandEldritchMasteryTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, 1);
 
         int arrowMode = DawnquiverArrowEntity.MODE_NORMAL;
         int maximumPiercingTargets = 1;
         double retention = 1.0;
         if (heaven || empowered && tier == 1) {
             arrowMode = DawnquiverArrowEntity.MODE_PIERCING;
-            maximumPiercingTargets = Math.max(1, tuning.integer(Phase10AbilityTuning.Setting.TARGET_CAP,
+            maximumPiercingTargets = Math.max(1, tuning.integer(MartialCommandEldritchMasteryTuning.Setting.TARGET_CAP,
                     settings.piercingMaxTargets));
-            retention = MathHelper.clamp(tuning.get(Phase10AbilityTuning.Setting.OUTGOING_MULTIPLIER,
+            retention = MathHelper.clamp(tuning.get(MartialCommandEldritchMasteryTuning.Setting.OUTGOING_MULTIPLIER,
                     settings.piercingDamageRetention), 0.0, 1.0);
         } else if (empowered && tier == 2) {
             arrowMode = DawnquiverArrowEntity.MODE_FULL_PRIMARY;
         }
-        int arrowCount = Math.max(1, tuning.integer(Phase10AbilityTuning.Setting.COUNT, 1));
+        int arrowCount = Math.max(1, tuning.integer(MartialCommandEldritchMasteryTuning.Setting.COUNT, 1));
         if (arrowCount > 1) arrowMode = DawnquiverArrowEntity.MODE_NORMAL;
         if (arrowMode != DawnquiverArrowEntity.MODE_FULL_PRIMARY) DRAW_TUNING.remove(owner.getUuid());
 
         DawnquiverArrowEntity arrow = new DawnquiverArrowEntity(world, owner, stack, hand,
                 origin, direction, target, damage, lesserDamage,
                 settings.arrowSpeed, settings.homingStrength,
-                0.7 + chargeRatio * 0.8, tuning.get(Phase10AbilityTuning.Setting.RADIUS,
+                0.7 + chargeRatio * 0.8, tuning.get(MartialCommandEldritchMasteryTuning.Setting.RADIUS,
                 AwakeningApi.scaleEffect(stack, settings.impactRadius)),
                 72.0, arrowMode, maximumPiercingTargets, retention);
         if (!world.spawnEntity(arrow)) {
@@ -374,18 +374,18 @@ public final class DawnquiverAbilityManager {
             if (bow != null) {
                 bow.discard();
             }
-            if (drawState != null) Phase10CombatManager.finish(drawState.execution, 0);
+            if (drawState != null) MartialCommandEldritchMasteryCombatManager.finish(drawState.execution, 0);
             return cooldownForTier(tier, settings);
         }
         if (arrowCount > 1) {
-            double spread = Math.toRadians(tuning.get(Phase10AbilityTuning.Setting.ANGLE, 12));
+            double spread = Math.toRadians(tuning.get(MartialCommandEldritchMasteryTuning.Setting.ANGLE, 12));
             for (int index = 0; index < arrowCount; index++) {
                 float angle = (float) (-spread * .5 + spread * index / (arrowCount - 1));
                 if (Math.abs(angle) < 1.0E-4) continue;
                 DawnquiverArrowEntity extra = new DawnquiverArrowEntity(world, owner, stack, hand,
                         origin, direction.rotateY(angle), target, damage, lesserDamage,
                         settings.arrowSpeed, settings.homingStrength, 0.7 + chargeRatio * 0.8,
-                        tuning.get(Phase10AbilityTuning.Setting.RADIUS,
+                        tuning.get(MartialCommandEldritchMasteryTuning.Setting.RADIUS,
                                 AwakeningApi.scaleEffect(stack, settings.impactRadius)),
                         72.0, DawnquiverArrowEntity.MODE_NORMAL, 1, 1);
                 world.spawnEntity(extra);
@@ -397,14 +397,14 @@ public final class DawnquiverAbilityManager {
                 int spent = stackCost;
                 if (chorusTuning.flag(1 << 12) && spent >= 2
                         && world.random.nextDouble() < chorusTuning.get(
-                        Phase10AbilityTuning.Setting.HEALTH_THRESHOLD, .2))
-                    spent -= chorusTuning.integer(Phase10AbilityTuning.Setting.REFUND_TICKS, 1);
+                        MartialCommandEldritchMasteryTuning.Setting.HEALTH_THRESHOLD, .2))
+                    spent -= chorusTuning.integer(MartialCommandEldritchMasteryTuning.Setting.REFUND_TICKS, 1);
                 setChorus(stack, chorus - Math.max(0, spent));
             }
             if (chorusTuning.flag(1 << 17) && stackCost >= chorusTuning.integer(
-                    Phase10AbilityTuning.Setting.STACK_CAP, 6))
+                    MartialCommandEldritchMasteryTuning.Setting.STACK_CAP, 6))
                 SILENCED_UNTIL.put(owner.getUuid(), world.getTime() + Math.max(1,
-                        chorusTuning.integer(Phase10AbilityTuning.Setting.SECONDARY_DURATION_TICKS, 200)));
+                        chorusTuning.integer(MartialCommandEldritchMasteryTuning.Setting.SECONDARY_DURATION_TICKS, 200)));
             if (tier == 0) {
                 scheduleQuickVolley(world, owner, stack, hand, target, lesserDamage);
             }
@@ -421,12 +421,12 @@ public final class DawnquiverAbilityManager {
                 SoundCategory.PLAYERS, 0.75F, 0.95F + world.random.nextFloat() * 0.1F);
         world.playSound(null, owner.getBlockPos(), SoundRegistry.MAGIC_BOW_SHOOT_FLYBY_02.get(),
                 SoundCategory.PLAYERS, empowered ? 0.72F : 0.55F, empowered ? 1.12F : 1.0F);
-        if (drawState != null) Phase10CombatManager.finish(drawState.execution, 1);
+        if (drawState != null) MartialCommandEldritchMasteryCombatManager.finish(drawState.execution, 1);
         return resolveCooldown(owner, tuning, chorusTuning, tier, settings);
     }
 
-    private static int resolveCooldown(LivingEntity owner, Phase10AbilityTuning tuning,
-                                       Phase10AbilityTuning chorusTuning, int tier,
+    private static int resolveCooldown(LivingEntity owner, MartialCommandEldritchMasteryTuning tuning,
+                                       MartialCommandEldritchMasteryTuning chorusTuning, int tier,
                                        DawnquiverSwordItem.EffectSettings settings) {
         return releaseCooldown(tuning, chorusTuning,
                 Boolean.TRUE.equals(CHORUS_READY.remove(owner.getUuid())),
@@ -443,56 +443,56 @@ public final class DawnquiverAbilityManager {
                 || !AwakeningApi.isAbilityUnlocked(stack)) {
             return;
         }
-        UniqueAbilityExecution execution = Phase10CombatManager.beginPassive(
-                Phase10UniqueAbilities.DAWN_CHORUS, world, stack, owner, null, chorusBase());
-        Phase10AbilityTuning tuning = Phase10UniqueAbilities.tuning(execution);
+        UniqueAbilityExecution execution = MartialCommandEldritchMasteryCombatManager.beginPassive(
+                MartialCommandEldritchMasteryAbilities.DAWN_CHORUS, world, stack, owner, null, chorusBase());
+        MartialCommandEldritchMasteryTuning tuning = MartialCommandEldritchMasteryAbilities.tuning(execution);
         CHORUS_TUNING.put(stack, tuning);
-        int maximum = Math.max(1, tuning.integer(Phase10AbilityTuning.Setting.STACK_CAP,
+        int maximum = Math.max(1, tuning.integer(MartialCommandEldritchMasteryTuning.Setting.STACK_CAP,
                 Config.uniqueEffects.dawnquiver.maxChorus));
         CHORUS_CAP.put(stack, maximum);
         int current = getChorus(stack);
         if (current >= maximum) {
-            Phase10CombatManager.finish(execution, 0);
+            MartialCommandEldritchMasteryCombatManager.finish(execution, 0);
             return;
         }
-        Phase10AbilityTuning lesser = LESSER_TUNING.getOrDefault(stack, Phase10AbilityTuning.EMPTY);
+        MartialCommandEldritchMasteryTuning lesser = LESSER_TUNING.getOrDefault(stack, MartialCommandEldritchMasteryTuning.EMPTY);
         double baseChance = Config.uniqueEffects.dawnquiver.passiveChorusChance * 100;
-        double chance = tuning.get(Phase10AbilityTuning.Setting.CHANCE, baseChance);
+        double chance = tuning.get(MartialCommandEldritchMasteryTuning.Setting.CHANCE, baseChance);
         if (tuning.flag(1 << 10) && current > 0) chance = baseChance;
-        chance += Math.max(0, lesser.get(Phase10AbilityTuning.Setting.CHANCE, baseChance) - baseChance);
-        if (fullImpact) chance += tuning.get(Phase10AbilityTuning.Setting.PITY_CHANCE, 0);
+        chance += Math.max(0, lesser.get(MartialCommandEldritchMasteryTuning.Setting.CHANCE, baseChance) - baseChance);
+        if (fullImpact) chance += tuning.get(MartialCommandEldritchMasteryTuning.Setting.PITY_CHANCE, 0);
         if (world.random.nextDouble() >= MathHelper.clamp(chance / 100, 0.0, 1.0)) {
-            Phase10CombatManager.finish(execution, 0);
+            MartialCommandEldritchMasteryCombatManager.finish(execution, 0);
             return;
         }
         setChorus(stack, current + 1, maximum);
         if (current + 1 >= maximum) CHORUS_READY.put(owner.getUuid(), true);
         long now = world.getTime();
-        if (tuning.has(Phase10AbilityTuning.Setting.ABSORPTION)
+        if (tuning.has(MartialCommandEldritchMasteryTuning.Setting.ABSORPTION)
                 && now >= GUARD_READY.getOrDefault(owner.getUuid(), Long.MIN_VALUE)) {
-            float amount = (float) tuning.get(Phase10AbilityTuning.Setting.ABSORPTION, 4);
-            Phase4AbsorptionTracker.grant(owner, amount,
-                    Math.max(1, tuning.integer(Phase10AbilityTuning.Setting.STATUS_DURATION_TICKS, 40)), amount);
+            float amount = (float) tuning.get(MartialCommandEldritchMasteryTuning.Setting.ABSORPTION, 4);
+            MasteryAbsorptionTracker.grant(owner, amount,
+                    Math.max(1, tuning.integer(MartialCommandEldritchMasteryTuning.Setting.STATUS_DURATION_TICKS, 40)), amount);
             GUARD_READY.put(owner.getUuid(),
-                    now + Math.max(1, tuning.integer(Phase10AbilityTuning.Setting.LOCKOUT_TICKS, 40)));
+                    now + Math.max(1, tuning.integer(MartialCommandEldritchMasteryTuning.Setting.LOCKOUT_TICKS, 40)));
         }
         Vec3d position = owner.getPos().add(0.0, owner.getHeight() * 0.78, 0.0);
         world.spawnParticles(DAWN_DUST, position.x, position.y, position.z,
                 18, 0.42, 0.36, 0.42, 0.045);
         world.playSound(null, owner.getBlockPos(), SoundRegistry.MAGIC_BOW_PULL_BACK_SHORT_VERSION_03.get(),
                 owner.getSoundCategory(), 0.42F, 1.05F + current * 0.12F);
-        Phase10CombatManager.finish(execution, 1);
+        MartialCommandEldritchMasteryCombatManager.finish(execution, 1);
     }
 
     public static void onFullArrowImpact(ServerWorld world, LivingEntity owner, ItemStack stack,
                                          Hand hand, Vec3d center, @Nullable LivingEntity preferredTarget,
                                          float lesserDamage) {
         DawnquiverSwordItem.EffectSettings settings = Config.uniqueEffects.dawnquiver;
-        Phase10AbilityTuning tuning = DRAW_TUNING.remove(owner.getUuid());
-        if (tuning == null) tuning = Phase10AbilityTuning.EMPTY;
-        int formationDelay = Math.max(1, tuning.integer(Phase10AbilityTuning.Setting.DELAY_TICKS,
+        MartialCommandEldritchMasteryTuning tuning = DRAW_TUNING.remove(owner.getUuid());
+        if (tuning == null) tuning = MartialCommandEldritchMasteryTuning.EMPTY;
+        int formationDelay = Math.max(1, tuning.integer(MartialCommandEldritchMasteryTuning.Setting.DELAY_TICKS,
                 settings.convergenceFormationDelay));
-        int stagger = Math.max(1, tuning.integer(Phase10AbilityTuning.Setting.INTERVAL_TICKS,
+        int stagger = Math.max(1, tuning.integer(MartialCommandEldritchMasteryTuning.Setting.INTERVAL_TICKS,
                 settings.convergenceFiringStagger));
         onChorusHit(world, owner, hand, true);
         double radius = Math.max(1.0, settings.convergenceRadius);
@@ -558,29 +558,29 @@ public final class DawnquiverAbilityManager {
         lastTicks.put(owner.getUuid(), now);
 
         DawnquiverSwordItem.EffectSettings settings = Config.uniqueEffects.dawnquiver;
-        UniqueAbilityExecution execution = Phase10CombatManager.beginPassive(
-                Phase10UniqueAbilities.DAWN_LESSER, world, stack, owner, null, lesserBase());
-        Phase10AbilityTuning tuning = Phase10UniqueAbilities.tuning(execution);
+        UniqueAbilityExecution execution = MartialCommandEldritchMasteryCombatManager.beginPassive(
+                MartialCommandEldritchMasteryAbilities.DAWN_LESSER, world, stack, owner, null, lesserBase());
+        MartialCommandEldritchMasteryTuning tuning = MartialCommandEldritchMasteryAbilities.tuning(execution);
         LESSER_TUNING.put(stack, tuning);
-        int interval = Math.max(1, tuning.integer(Phase10AbilityTuning.Setting.INTERVAL_TICKS,
+        int interval = Math.max(1, tuning.integer(MartialCommandEldritchMasteryTuning.Setting.INTERVAL_TICKS,
                 settings.passiveInterval));
         if (Math.floorMod(owner.age + owner.getId(), interval) != 0) {
-            Phase10CombatManager.finish(execution, 0);
+            MartialCommandEldritchMasteryCombatManager.finish(execution, 0);
             return;
         }
         Map<UUID, Long> lockouts = PASSIVE_LOCKOUT.computeIfAbsent(world, ignored -> new HashMap<>());
         if (now < lockouts.getOrDefault(owner.getUuid(), Long.MIN_VALUE)
                 || now < SILENCED_UNTIL.getOrDefault(owner.getUuid(), Long.MIN_VALUE)) {
-            Phase10CombatManager.finish(execution, 0);
+            MartialCommandEldritchMasteryCombatManager.finish(execution, 0);
             return;
         }
 
-        double range = tuning.get(Phase10AbilityTuning.Setting.RANGE, settings.passiveRange);
+        double range = tuning.get(MartialCommandEldritchMasteryTuning.Setting.RANGE, settings.passiveRange);
         LivingEntity target = tuning.flag(1 << 8)
                 ? findNearestTarget(world, owner, range)
                 : findFurthestTarget(world, owner, range);
         if (target == null) {
-            Phase10CombatManager.finish(execution, 0);
+            MartialCommandEldritchMasteryCombatManager.finish(execution, 0);
             return;
         }
 
@@ -598,10 +598,10 @@ public final class DawnquiverAbilityManager {
 
         float damage = HelperMethods.abilityScaledDamage(SpellScalingProfile.HEALING, owner, stack,
                 (float) settings.passiveDamageScaling, (float) settings.passiveSpellScaling);
-        Phase10AbilityTuning chorusTuning = CHORUS_TUNING.getOrDefault(stack, Phase10AbilityTuning.EMPTY);
-        damage *= (float) tuning.get(Phase10AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1)
+        MartialCommandEldritchMasteryTuning chorusTuning = CHORUS_TUNING.getOrDefault(stack, MartialCommandEldritchMasteryTuning.EMPTY);
+        damage *= (float) tuning.get(MartialCommandEldritchMasteryTuning.Setting.DAMAGE_MULTIPLIER, 1)
                 * (1 + getChorus(stack) * (float) chorusTuning.get(
-                Phase10AbilityTuning.Setting.PER_STACK_MULTIPLIER, 0));
+                MartialCommandEldritchMasteryTuning.Setting.PER_STACK_MULTIPLIER, 0));
         Vec3d direction = aimPoint(target).subtract(anchor).normalize();
         DawnquiverArrowEntity arrow = new DawnquiverArrowEntity(world, owner, stack, hand,
                 anchor, direction, target, damage, 0.0F,
@@ -609,12 +609,12 @@ public final class DawnquiverAbilityManager {
                 settings.passiveArrowScale, 0.0, settings.passiveRange * 2.0,
                 DawnquiverArrowEntity.MODE_PASSIVE, 1, 1.0);
         world.spawnEntity(arrow);
-        if (tuning.has(Phase10AbilityTuning.Setting.STATUS_DURATION_TICKS))
+        if (tuning.has(MartialCommandEldritchMasteryTuning.Setting.STATUS_DURATION_TICKS))
             target.addStatusEffect(new net.minecraft.entity.effect.StatusEffectInstance(
                     net.minecraft.entity.effect.StatusEffects.GLOWING,
-                    tuning.integer(Phase10AbilityTuning.Setting.STATUS_DURATION_TICKS, 60), 0), owner);
+                    tuning.integer(MartialCommandEldritchMasteryTuning.Setting.STATUS_DURATION_TICKS, 60), 0), owner);
 
-        int extraBows = Math.max(0, tuning.integer(Phase10AbilityTuning.Setting.COUNT, 1) - 1);
+        int extraBows = Math.max(0, tuning.integer(MartialCommandEldritchMasteryTuning.Setting.COUNT, 1) - 1);
         for (LivingEntity extra : additionalLesserTargets(world, owner, target, range, extraBows)) {
             Vec3d extraDirection = aimPoint(extra).subtract(anchor).normalize();
             DawnquiverArrowEntity extraArrow = new DawnquiverArrowEntity(world, owner, stack, hand,
@@ -624,21 +624,21 @@ public final class DawnquiverAbilityManager {
                     DawnquiverArrowEntity.MODE_PASSIVE, 1, 1.0);
             world.spawnEntity(extraArrow);
         }
-        int twinInterval = tuning.integer(Phase10AbilityTuning.Setting.SEARCH_CAP, 0);
+        int twinInterval = tuning.integer(MartialCommandEldritchMasteryTuning.Setting.SEARCH_CAP, 0);
         int shot = LESSER_SHOTS.merge(owner.getUuid(), 1, Integer::sum);
         if (twinInterval > 0 && shot % twinInterval == 0)
             scheduleTwinHymn(world, owner, stack, hand, target,
-                    damage * (float) tuning.get(Phase10AbilityTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, .55),
-                    tuning.integer(Phase10AbilityTuning.Setting.DELAY_TICKS, 6));
-        int guaranteed = tuning.integer(Phase10AbilityTuning.Setting.STACK_CAP, 0);
+                    damage * (float) tuning.get(MartialCommandEldritchMasteryTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, .55),
+                    tuning.integer(MartialCommandEldritchMasteryTuning.Setting.DELAY_TICKS, 6));
+        int guaranteed = tuning.integer(MartialCommandEldritchMasteryTuning.Setting.STACK_CAP, 0);
         if (guaranteed > 0 && shot % guaranteed == 0) grantChorus(world, owner, stack, hand);
         lockouts.put(owner.getUuid(), now + SimplySwordsAPI.getEffectiveWeaponCooldownTicks(
-                stack, owner, tuning.integer(Phase10AbilityTuning.Setting.LOCKOUT_TICKS,
+                stack, owner, tuning.integer(MartialCommandEldritchMasteryTuning.Setting.LOCKOUT_TICKS,
                         settings.passiveLockout)));
         world.spawnParticles(DAWN_DUST, anchor.x, anchor.y, anchor.z, 10, 0.2, 0.2, 0.2, 0.03);
         world.playSound(null, owner.getBlockPos(), SoundRegistry.MAGIC_BOW_PULL_BACK_SHORT_VERSION_01.get(),
                 SoundCategory.PLAYERS, 0.3F, 1.25F);
-        Phase10CombatManager.finish(execution, 1);
+        MartialCommandEldritchMasteryCombatManager.finish(execution, 1);
     }
 
     public static boolean hasActive(ServerWorld world) {
@@ -1060,11 +1060,11 @@ public final class DawnquiverAbilityManager {
     private static final class ActiveDraw {
         private final UUID bowUuid;
         private final Hand hand;
-        private final Phase10AbilityTuning tuning;
+        private final MartialCommandEldritchMasteryTuning tuning;
         private final UniqueAbilityExecution execution;
         private int lastTier = -1;
 
-        private ActiveDraw(UUID bowUuid, Hand hand, Phase10AbilityTuning tuning,
+        private ActiveDraw(UUID bowUuid, Hand hand, MartialCommandEldritchMasteryTuning tuning,
                            UniqueAbilityExecution execution) {
             this.bowUuid = bowUuid;
             this.hand = hand;

@@ -25,8 +25,8 @@ import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
-import net.sweenus.simplyswords.api.ability.Phase3AbilityTuning;
-import net.sweenus.simplyswords.api.ability.Phase3UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.StormSoulMasteryTuning;
+import net.sweenus.simplyswords.api.ability.StormSoulMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityContext;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
@@ -59,26 +59,26 @@ public class SoulrenderSwordItem extends UniqueSwordItem implements TwoHandedWea
         }
         if (!attacker.getWorld().isClient()) {
             ServerWorld world = (ServerWorld) attacker.getWorld();
-            UniqueAbilityExecution execution = UniqueAbilityApi.begin(Phase3UniqueAbilities.SOULRENDER_MARK,
+            UniqueAbilityExecution execution = UniqueAbilityApi.begin(StormSoulMasteryAbilities.SOULRENDER_MARK,
                     UniqueAbilityContext.passive(world, stack, attacker, target, null), builder -> builder
-                            .set(Phase3UniqueAbilities.TUNING, Phase3AbilityTuning.EMPTY));
+                            .set(StormSoulMasteryAbilities.TUNING, StormSoulMasteryTuning.EMPTY));
             UniqueAbilityApi.takeStartedExecution();
             UniqueAbilityApi.start(execution);
-            Phase3AbilityTuning tuning = Phase3UniqueAbilities.tuning(execution);
-            int duration = tuning.integer(Phase3AbilityTuning.Setting.MARK_DURATION_TICKS, Config.uniqueEffects.soulrender.duration);
-            int maxStacks = tuning.integer(Phase3AbilityTuning.Setting.STACK_CAP, Config.uniqueEffects.soulrender.maxStacks);
+            StormSoulMasteryTuning tuning = StormSoulMasteryAbilities.tuning(execution);
+            int duration = tuning.integer(StormSoulMasteryTuning.Setting.MARK_DURATION_TICKS, Config.uniqueEffects.soulrender.duration);
+            int maxStacks = tuning.integer(StormSoulMasteryTuning.Setting.STACK_CAP, Config.uniqueEffects.soulrender.maxStacks);
             ParticleEffect particleSelect  = ParticleTypes.ASH;
             int particleCount = 8; // Number of particles along the line
 
             boolean afflicted = SoulrenderAbilityManager.isMarked(target);
-            int hitChance = tuning.integer(Phase3AbilityTuning.Setting.CHANCE,
+            int hitChance = tuning.integer(StormSoulMasteryTuning.Setting.CHANCE,
                     Config.uniqueEffects.soulrender.chance)
-                    + tuning.integer(Phase3AbilityTuning.Setting.CHANCE_BONUS, 0);
+                    + tuning.integer(StormSoulMasteryTuning.Setting.CHANCE_BONUS, 0);
             if (afflicted) {
-                hitChance -= tuning.integer(Phase3AbilityTuning.Setting.REPEAT_CHANCE_PENALTY, 0);
+                hitChance -= tuning.integer(StormSoulMasteryTuning.Setting.REPEAT_CHANCE_PENALTY, 0);
             }
             boolean guaranteed = !afflicted
-                    && (tuning.integer(Phase3AbilityTuning.Setting.MODE, 0) & MODE_PALLBEARER) != 0;
+                    && (tuning.integer(StormSoulMasteryTuning.Setting.MODE, 0) & MODE_PALLBEARER) != 0;
             boolean mark = guaranteed || hitChance >= 0 && attacker.getRandom().nextInt(100) <= hitChance;
             if (mark) {
                 particleSelect  = ParticleTypes.SMOKE;
@@ -112,13 +112,13 @@ public class SoulrenderSwordItem extends UniqueSwordItem implements TwoHandedWea
 
                 SoulrenderMarkVisualManager.refreshMark(world, target, duration);
                 SoulrenderAbilityManager.echoMark(world, attacker, target, tuning);
-                UniqueAbilityApi.emit(execution, UniqueAbilityPhase.HIT, Phase3UniqueAbilities.HIT,
+                UniqueAbilityApi.emit(execution, UniqueAbilityPhase.HIT, StormSoulMasteryAbilities.HIT,
                         target, 1, maxStacks);
             }
             int amplifier = target.hasStatusEffect(StatusEffects.SLOWNESS)
                     ? target.getStatusEffect(StatusEffects.SLOWNESS).getAmplifier() + 1 : 0;
-            float bonus = (float) (Math.min(tuning.get(Phase3AbilityTuning.Setting.MELEE_BONUS_CAP, 0),
-                    amplifier * tuning.get(Phase3AbilityTuning.Setting.MELEE_BONUS_PER_STACK, 0))
+            float bonus = (float) (Math.min(tuning.get(StormSoulMasteryTuning.Setting.MELEE_BONUS_CAP, 0),
+                    amplifier * tuning.get(StormSoulMasteryTuning.Setting.MELEE_BONUS_PER_STACK, 0))
                     + SoulrenderAbilityManager.takeTitheBonus(world, attacker));
             if (bonus > 0) {
                 var source = attacker.getDamageSources().indirectMagic(attacker, attacker);
@@ -126,7 +126,7 @@ public class SoulrenderSwordItem extends UniqueSwordItem implements TwoHandedWea
                         (float) attacker.getAttributeValue(net.minecraft.entity.attribute.EntityAttributes.GENERIC_ATTACK_DAMAGE)
                                 * bonus));
             }
-            UniqueAbilityApi.finish(execution, Phase3UniqueAbilities.FINISH, amplifier);
+            UniqueAbilityApi.finish(execution, StormSoulMasteryAbilities.FINISH, amplifier);
             HelperMethods.spawnWaistHeightParticles(world, particleSelect, attacker, target, particleCount);
         }
         return super.postHit(stack, target, attacker);
@@ -150,29 +150,29 @@ public class SoulrenderSwordItem extends UniqueSwordItem implements TwoHandedWea
 
     @Override
     public boolean activate(WeaponAbilityContext context) {
-        UniqueAbilityExecution execution = UniqueAbilityApi.begin(Phase3UniqueAbilities.SOULRENDER_REAP,
+        UniqueAbilityExecution execution = UniqueAbilityApi.begin(StormSoulMasteryAbilities.SOULRENDER_REAP,
                 UniqueAbilityContext.active(context), builder -> builder
-                        .set(Phase3UniqueAbilities.TUNING, Phase3AbilityTuning.EMPTY)
-                        .set(Phase3UniqueAbilities.COOLDOWN_TICKS, 0));
+                        .set(StormSoulMasteryAbilities.TUNING, StormSoulMasteryTuning.EMPTY)
+                        .set(StormSoulMasteryAbilities.COOLDOWN_TICKS, 0));
         int consumed = consumeSoulrenderMarks(context.world(), context.actor(), context.stack(),
-                Phase3UniqueAbilities.tuning(execution), execution);
+                StormSoulMasteryAbilities.tuning(execution), execution);
         if (consumed > 0) SoulrenderMarkVisualManager.finishNextTick(context.world(), execution, consumed);
         return consumed > 0;
     }
 
     private int consumeSoulrenderMarks(ServerWorld world, LivingEntity user, ItemStack stack,
-                                       Phase3AbilityTuning tuning, UniqueAbilityExecution execution) {
-        double hradius = tuning.get(Phase3AbilityTuning.Setting.RADIUS, Config.uniqueEffects.soulrender.radius);
-        int targetCap = Math.max(1, tuning.integer(Phase3AbilityTuning.Setting.REAP_TARGET_CAP,
+                                       StormSoulMasteryTuning tuning, UniqueAbilityExecution execution) {
+        double hradius = tuning.get(StormSoulMasteryTuning.Setting.RADIUS, Config.uniqueEffects.soulrender.radius);
+        int targetCap = Math.max(1, tuning.integer(StormSoulMasteryTuning.Setting.REAP_TARGET_CAP,
                 Config.uniqueEffects.soulrender.targetCap));
         SoulrenderAbilityManager.reachPull(world, user, hradius, tuning);
 
-        double stackBonus = tuning.get(Phase3AbilityTuning.Setting.REAP_STACK_BONUS, 0);
-        double stackBonusCap = tuning.get(Phase3AbilityTuning.Setting.REAP_STACK_BONUS_CAP, 0);
-        double damageMultiplier = tuning.get(Phase3AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1);
-        double quietusThreshold = tuning.get(Phase3AbilityTuning.Setting.QUIETUS_HEALTH_THRESHOLD, 0);
-        int quietusPerMark = tuning.integer(Phase3AbilityTuning.Setting.QUIETUS_ABSORPTION, 0);
-        int quietusCap = tuning.integer(Phase3AbilityTuning.Setting.QUIETUS_ABSORPTION_CAP, 0);
+        double stackBonus = tuning.get(StormSoulMasteryTuning.Setting.REAP_STACK_BONUS, 0);
+        double stackBonusCap = tuning.get(StormSoulMasteryTuning.Setting.REAP_STACK_BONUS_CAP, 0);
+        double damageMultiplier = tuning.get(StormSoulMasteryTuning.Setting.DAMAGE_MULTIPLIER, 1);
+        double quietusThreshold = tuning.get(StormSoulMasteryTuning.Setting.QUIETUS_HEALTH_THRESHOLD, 0);
+        int quietusPerMark = tuning.integer(StormSoulMasteryTuning.Setting.QUIETUS_ABSORPTION, 0);
+        int quietusCap = tuning.integer(StormSoulMasteryTuning.Setting.QUIETUS_ABSORPTION_CAP, 0);
 
         SoulrenderAbilityManager.OwnerReapState reap = new SoulrenderAbilityManager.OwnerReapState();
         int healStacks = 0;
@@ -197,11 +197,11 @@ public class SoulrenderSwordItem extends UniqueSwordItem implements TwoHandedWea
             le.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments(world, stack, le, damageSource, dealt));
             totalDealt += dealt;
             if (execution != null) UniqueAbilityApi.emit(execution, UniqueAbilityPhase.HIT,
-                    Phase3UniqueAbilities.HIT, le, 1, dealt);
+                    StormSoulMasteryAbilities.HIT, le, 1, dealt);
             if (!le.isAlive()) {
                 kills++;
                 if (execution != null) UniqueAbilityApi.emit(execution, UniqueAbilityPhase.HIT,
-                        Phase3UniqueAbilities.KILL, le, 1, dealt);
+                        StormSoulMasteryAbilities.KILL, le, 1, dealt);
                 SoulrenderAbilityManager.sharedEnding(world, user, stack, le, dealt, tuning, reap);
             }
             if (lowHealth) quietusAbsorption = Math.min(quietusCap, quietusAbsorption + quietusPerMark);
@@ -212,13 +212,13 @@ public class SoulrenderSwordItem extends UniqueSwordItem implements TwoHandedWea
             consumed++;
         }
         if (healStacks > 0) {
-            double ratio = (tuning.get(Phase3AbilityTuning.Setting.HEAL_RATIO,
+            double ratio = (tuning.get(StormSoulMasteryTuning.Setting.HEAL_RATIO,
                     Config.uniqueEffects.soulrender.healMulti)
-                    + tuning.get(Phase3AbilityTuning.Setting.HEAL_RATIO_BONUS, 0))
-                    * tuning.get(Phase3AbilityTuning.Setting.HEAL_MULTIPLIER, 1);
+                    + tuning.get(StormSoulMasteryTuning.Setting.HEAL_RATIO_BONUS, 0))
+                    * tuning.get(StormSoulMasteryTuning.Setting.HEAL_MULTIPLIER, 1);
             float heal = (float) (healStacks * ratio);
             if (heal > 0f && heal < 1f) heal = 1f;
-            float cap = (float) tuning.get(Phase3AbilityTuning.Setting.HEAL_CAP, 6);
+            float cap = (float) tuning.get(StormSoulMasteryTuning.Setting.HEAL_CAP, 6);
             if (heal > cap) heal = cap;
             if (heal > 0f) user.heal(heal);
         }

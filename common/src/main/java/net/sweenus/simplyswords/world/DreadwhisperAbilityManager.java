@@ -26,8 +26,8 @@ import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.api.SpellScalingProfile;
 import net.sweenus.simplyswords.util.HelperMethods;
-import net.sweenus.simplyswords.api.ability.Phase3AbilityTuning;
-import net.sweenus.simplyswords.api.ability.Phase3UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.StormSoulMasteryTuning;
+import net.sweenus.simplyswords.api.ability.StormSoulMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityContext;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
@@ -80,11 +80,11 @@ public final class DreadwhisperAbilityManager {
         }
 
         LivingEntity actor = context.actor();
-        UniqueAbilityExecution execution = UniqueAbilityApi.begin(Phase3UniqueAbilities.DREADWHISPER_REAVE,
+        UniqueAbilityExecution execution = UniqueAbilityApi.begin(StormSoulMasteryAbilities.DREADWHISPER_REAVE,
                 UniqueAbilityContext.active(context), builder -> builder
-                        .set(Phase3UniqueAbilities.TUNING, Phase3AbilityTuning.EMPTY)
-                        .set(Phase3UniqueAbilities.COOLDOWN_TICKS, Config.uniqueEffects.dreadwhisper.cooldown));
-        Phase3AbilityTuning tuning = Phase3UniqueAbilities.tuning(execution);
+                        .set(StormSoulMasteryAbilities.TUNING, StormSoulMasteryTuning.EMPTY)
+                        .set(StormSoulMasteryAbilities.COOLDOWN_TICKS, Config.uniqueEffects.dreadwhisper.cooldown));
+        StormSoulMasteryTuning tuning = StormSoulMasteryAbilities.tuning(execution);
         Vec3d direction = resolveDirection(context);
         if (direction.horizontalLengthSquared() < 0.0001) {
             return false;
@@ -93,21 +93,21 @@ public final class DreadwhisperAbilityManager {
         int maximumTicks = maximumDashTicks(tuning);
         DreadwhisperVisualEntity visual = DreadwhisperVisualEntity.reaveFront(
                 context.world(), actor, direction,
-                (float) Math.max(1.0, tuning.get(Phase3AbilityTuning.Setting.REND_WIDTH,
+                (float) Math.max(1.0, tuning.get(StormSoulMasteryTuning.Setting.REND_WIDTH,
                         Config.uniqueEffects.dreadwhisper.frontWidth)),
-                (float) Math.max(0.5, tuning.get(Phase3AbilityTuning.Setting.HEIGHT,
+                (float) Math.max(0.5, tuning.get(StormSoulMasteryTuning.Setting.HEIGHT,
                         Config.uniqueEffects.dreadwhisper.frontHeight)),
                 maximumTicks + COLLAPSE_LIFETIME + 4);
         context.world().spawnEntity(visual);
 
         UUID stainId = GloamStainManager.beginTrail(
                 context.world(), actor.getUuid(), groundPosition(context.world(), actor.getPos()),
-                direction, Math.max(1.0, tuning.get(Phase3AbilityTuning.Setting.REND_WIDTH,
+                direction, Math.max(1.0, tuning.get(StormSoulMasteryTuning.Setting.REND_WIDTH,
                         Config.uniqueEffects.dreadwhisper.frontWidth)),
-                Math.max(20, tuning.integer(Phase3AbilityTuning.Setting.STAIN_DURATION_TICKS,
+                Math.max(20, tuning.integer(StormSoulMasteryTuning.Setting.STAIN_DURATION_TICKS,
                         Config.uniqueEffects.dreadwhisper.stainDuration)),
                 Math.max(1, Config.uniqueEffects.dreadwhisper.stainFadeDuration),
-                Math.clamp(tuning.integer(Phase3AbilityTuning.Setting.TRAIL_SLOW_LEVEL,
+                Math.clamp(tuning.integer(StormSoulMasteryTuning.Setting.TRAIL_SLOW_LEVEL,
                         Config.uniqueEffects.dreadwhisper.stainSlowAmplifier), 0, 4),
                 trailBehavior(tuning));
 
@@ -189,19 +189,19 @@ public final class DreadwhisperAbilityManager {
         }
 
         ServerWorld world = (ServerWorld) target.getWorld();
-        UniqueAbilityExecution execution = UniqueAbilityApi.begin(Phase3UniqueAbilities.DREADWHISPER_WOUND,
+        UniqueAbilityExecution execution = UniqueAbilityApi.begin(StormSoulMasteryAbilities.DREADWHISPER_WOUND,
                 UniqueAbilityContext.passive(world, stack, attacker, target, null), builder -> builder
-                        .set(Phase3UniqueAbilities.TUNING, Phase3AbilityTuning.EMPTY));
+                        .set(StormSoulMasteryAbilities.TUNING, StormSoulMasteryTuning.EMPTY));
         UniqueAbilityApi.takeStartedExecution();
         UniqueAbilityApi.start(execution);
-        Phase3AbilityTuning tuning = Phase3UniqueAbilities.tuning(execution);
+        StormSoulMasteryTuning tuning = StormSoulMasteryAbilities.tuning(execution);
 
         StatusEffectInstance wound = target.getStatusEffect(
                 EffectRegistry.getReference(EffectRegistry.CORRUPTED_WOUND));
         target.removeStatusEffect(EffectRegistry.getReference(EffectRegistry.CORRUPTED_WOUND));
         spawnWoundBurst(world, target, attacker);
 
-        double bonus = tuning.get(Phase3AbilityTuning.Setting.WOUND_DAMAGE_MULTIPLIER, 1);
+        double bonus = tuning.get(StormSoulMasteryTuning.Setting.WOUND_DAMAGE_MULTIPLIER, 1);
         bonus *= 1.0 + woundAgeBonus(tuning, wound);
         bonus *= 1.0 + mortalBonus(tuning, target);
         bonus *= 1.0 + gloamRider(world, attacker, target, tuning);
@@ -211,64 +211,64 @@ public final class DreadwhisperAbilityManager {
                 : amount * Math.max(1.0F, Config.uniqueEffects.dreadwhisper.criticalMultiplier) * (float) bonus;
         splinterPain(world, attacker, target, stack, tuning, result - amount);
         reopenWound(world, target, tuning);
-        UniqueAbilityApi.emit(execution, UniqueAbilityPhase.HIT, Phase3UniqueAbilities.HIT, target, 1, result);
-        UniqueAbilityApi.finish(execution, Phase3UniqueAbilities.FINISH, 1);
+        UniqueAbilityApi.emit(execution, UniqueAbilityPhase.HIT, StormSoulMasteryAbilities.HIT, target, 1, result);
+        UniqueAbilityApi.finish(execution, StormSoulMasteryAbilities.FINISH, 1);
         return result;
     }
 
 
     // Clutching Shadow: the trail's slow level and how long it lingers are both tuned.
-    private static GloamStainManager.PatchBehavior trailBehavior(Phase3AbilityTuning tuning) {
-        int ticks = tuning.integer(Phase3AbilityTuning.Setting.TRAIL_SLOW_TICKS, 0);
+    private static GloamStainManager.PatchBehavior trailBehavior(StormSoulMasteryTuning tuning) {
+        int ticks = tuning.integer(StormSoulMasteryTuning.Setting.TRAIL_SLOW_TICKS, 0);
         return ticks > 0
                 ? new GloamStainManager.PatchBehavior(ItemStack.EMPTY, 0, ticks, true, 0, 0, 0, 0, 0)
                 : GloamStainManager.PatchBehavior.NONE;
     }
 
     // Reaped Momentum: each enemy already reached speeds up and sharpens the rest of the dash.
-    private static double momentumBonus(ActiveRend active, Phase3AbilityTuning.Setting perHit,
-                                        Phase3AbilityTuning.Setting cap) {
+    private static double momentumBonus(ActiveRend active, StormSoulMasteryTuning.Setting perHit,
+                                        StormSoulMasteryTuning.Setting cap) {
         double bonus = active.tuning.get(perHit, 0);
         if (bonus <= 0) return 0;
         return Math.min(active.tuning.get(cap, 0), active.hitTargets.size() * bonus);
     }
 
     // Dark Patience: an unconsumed wound sharpens as it ages.
-    private static double woundAgeBonus(Phase3AbilityTuning tuning, StatusEffectInstance wound) {
-        double perInterval = tuning.get(Phase3AbilityTuning.Setting.WOUND_AGE_BONUS, 0);
+    private static double woundAgeBonus(StormSoulMasteryTuning tuning, StatusEffectInstance wound) {
+        double perInterval = tuning.get(StormSoulMasteryTuning.Setting.WOUND_AGE_BONUS, 0);
         if (perInterval <= 0 || wound == null) return 0;
-        int total = Math.max(1, tuning.integer(Phase3AbilityTuning.Setting.WOUND_DURATION_TICKS,
+        int total = Math.max(1, tuning.integer(StormSoulMasteryTuning.Setting.WOUND_DURATION_TICKS,
                 Config.uniqueEffects.dreadwhisper.woundDuration));
         int interval = Math.max(1, tuning.integer(
-                Phase3AbilityTuning.Setting.WOUND_AGE_INTERVAL_TICKS, 20));
+                StormSoulMasteryTuning.Setting.WOUND_AGE_INTERVAL_TICKS, 20));
         int elapsed = Math.max(0, total - wound.getDuration());
-        return Math.min(tuning.get(Phase3AbilityTuning.Setting.WOUND_AGE_CAP, 0),
+        return Math.min(tuning.get(StormSoulMasteryTuning.Setting.WOUND_AGE_CAP, 0),
                 (elapsed / interval) * perInterval);
     }
 
     // Mortal Tell: a wounded enemy near death, or a boss, pays extra.
-    private static double mortalBonus(Phase3AbilityTuning tuning, LivingEntity target) {
-        double threshold = tuning.get(Phase3AbilityTuning.Setting.MORTAL_THRESHOLD, 0);
+    private static double mortalBonus(StormSoulMasteryTuning tuning, LivingEntity target) {
+        double threshold = tuning.get(StormSoulMasteryTuning.Setting.MORTAL_THRESHOLD, 0);
         if (threshold <= 0) return 0;
         if (WatcherAbilityManager.isExecutionImmune(target)) {
-            return tuning.get(Phase3AbilityTuning.Setting.MORTAL_BOSS_BONUS, 0);
+            return tuning.get(StormSoulMasteryTuning.Setting.MORTAL_BOSS_BONUS, 0);
         }
         return target.getHealth() <= target.getMaxHealth() * threshold
-                ? tuning.get(Phase3AbilityTuning.Setting.MORTAL_BONUS, 0) : 0;
+                ? tuning.get(StormSoulMasteryTuning.Setting.MORTAL_BONUS, 0) : 0;
     }
 
     // Gloam Hunger: an enemy standing in the wielder's Gloam takes more.
     private static double gloamRider(ServerWorld world, LivingEntity attacker, LivingEntity target,
-                                     Phase3AbilityTuning tuning) {
-        double rider = tuning.get(Phase3AbilityTuning.Setting.GLOAM_DAMAGE_RIDER, 0);
+                                     StormSoulMasteryTuning tuning) {
+        double rider = tuning.get(StormSoulMasteryTuning.Setting.GLOAM_DAMAGE_RIDER, 0);
         return rider > 0 && GloamStainManager.isOnOwnerGloam(world, attacker.getUuid(), target) ? rider : 0;
     }
 
     // Splintered Pain: part of the wound's bonus jumps to the nearest neighbour.
     private static void splinterPain(ServerWorld world, LivingEntity attacker, LivingEntity victim,
-                                     ItemStack stack, Phase3AbilityTuning tuning, float bonusDamage) {
-        double multiplier = tuning.get(Phase3AbilityTuning.Setting.SPLINTER_MULTIPLIER, 0);
-        double range = tuning.get(Phase3AbilityTuning.Setting.SPLINTER_RANGE, 0);
+                                     ItemStack stack, StormSoulMasteryTuning tuning, float bonusDamage) {
+        double multiplier = tuning.get(StormSoulMasteryTuning.Setting.SPLINTER_MULTIPLIER, 0);
+        double range = tuning.get(StormSoulMasteryTuning.Setting.SPLINTER_RANGE, 0);
         if (multiplier <= 0 || range <= 0 || bonusDamage <= 0) return;
         world.getEntitiesByClass(LivingEntity.class, victim.getBoundingBox().expand(range),
                         candidate -> candidate != victim && validTarget(candidate, attacker))
@@ -280,16 +280,16 @@ public final class DreadwhisperAbilityManager {
     }
 
     // Reopen: consuming a wound can leave a fresh, shorter one behind.
-    private static void reopenWound(ServerWorld world, LivingEntity target, Phase3AbilityTuning tuning) {
-        int chance = tuning.integer(Phase3AbilityTuning.Setting.REOPEN_CHANCE, 0);
-        int duration = tuning.integer(Phase3AbilityTuning.Setting.REOPEN_DURATION_TICKS, 0);
+    private static void reopenWound(ServerWorld world, LivingEntity target, StormSoulMasteryTuning tuning) {
+        int chance = tuning.integer(StormSoulMasteryTuning.Setting.REOPEN_CHANCE, 0);
+        int duration = tuning.integer(StormSoulMasteryTuning.Setting.REOPEN_DURATION_TICKS, 0);
         if (chance <= 0 || duration <= 0) return;
         long now = world.getTime();
         Long ready = REOPEN_LOCKOUT.computeIfAbsent(world, ignored -> new HashMap<>()).get(target.getUuid());
         if (ready != null && now < ready) return;
         if (world.random.nextInt(100) >= chance) return;
         REOPEN_LOCKOUT.get(world).put(target.getUuid(), now + Math.max(1,
-                tuning.integer(Phase3AbilityTuning.Setting.REOPEN_LOCKOUT_TICKS, 120)));
+                tuning.integer(StormSoulMasteryTuning.Setting.REOPEN_LOCKOUT_TICKS, 120)));
         target.addStatusEffect(new StatusEffectInstance(
                 EffectRegistry.getReference(EffectRegistry.CORRUPTED_WOUND),
                 duration, 0, false, false, false));
@@ -332,7 +332,7 @@ public final class DreadwhisperAbilityManager {
         long elapsed = world.getTime() - active.startedAt;
         if (active.stopped
                 || (elapsed > 1L && owner.horizontalCollision)
-                || active.distanceTravelled >= Math.max(1.0, active.tuning.get(Phase3AbilityTuning.Setting.REND_RANGE,
+                || active.distanceTravelled >= Math.max(1.0, active.tuning.get(StormSoulMasteryTuning.Setting.REND_RANGE,
                         Config.uniqueEffects.dreadwhisper.dashDistance))
                 || elapsed >= maximumDashTicks(active.tuning)) {
             finishDash(world, owner, active);
@@ -340,25 +340,25 @@ public final class DreadwhisperAbilityManager {
         }
 
         applyDashVelocity(owner, active.direction, active.tuning, momentumBonus(active,
-                Phase3AbilityTuning.Setting.MOMENTUM_SPEED_BONUS,
-                Phase3AbilityTuning.Setting.MOMENTUM_SPEED_CAP));
+                StormSoulMasteryTuning.Setting.MOMENTUM_SPEED_BONUS,
+                StormSoulMasteryTuning.Setting.MOMENTUM_SPEED_CAP));
         return false;
     }
 
     private static void damageDashTargets(ServerWorld world, LivingEntity owner, ActiveRend active,
                                           Vec3d start, Vec3d end) {
-        double halfWidth = Math.max(1.0, active.tuning.get(Phase3AbilityTuning.Setting.REND_WIDTH,
+        double halfWidth = Math.max(1.0, active.tuning.get(StormSoulMasteryTuning.Setting.REND_WIDTH,
                 Config.uniqueEffects.dreadwhisper.frontWidth)) * 0.5;
-        double height = Math.max(0.5, active.tuning.get(Phase3AbilityTuning.Setting.HEIGHT,
+        double height = Math.max(0.5, active.tuning.get(StormSoulMasteryTuning.Setting.HEIGHT,
                 Config.uniqueEffects.dreadwhisper.frontHeight));
         Box search = segmentBox(start, end, height, halfWidth);
         float weaponDamage = HelperMethods.abilityScaledDamage(SpellScalingProfile.SOUL, owner, active.stack,
                 Math.max(0.0F, Config.uniqueEffects.dreadwhisper.weaponHitScaling),
                 Math.max(0.0F, Config.uniqueEffects.dreadwhisper.weaponHitSpellScaling))
-                * (float) active.tuning.get(Phase3AbilityTuning.Setting.REND_DAMAGE_MULTIPLIER, 1)
+                * (float) active.tuning.get(StormSoulMasteryTuning.Setting.REND_DAMAGE_MULTIPLIER, 1)
                 * (float) (1.0 + momentumBonus(active,
-                        Phase3AbilityTuning.Setting.MOMENTUM_DAMAGE_BONUS,
-                        Phase3AbilityTuning.Setting.MOMENTUM_DAMAGE_CAP));
+                        StormSoulMasteryTuning.Setting.MOMENTUM_DAMAGE_BONUS,
+                        StormSoulMasteryTuning.Setting.MOMENTUM_DAMAGE_CAP));
         for (LivingEntity target : world.getEntitiesByClass(LivingEntity.class, search,
                 candidate -> validTarget(candidate, owner)
                         && !active.hitTargets.contains(candidate.getUuid())
@@ -375,9 +375,9 @@ public final class DreadwhisperAbilityManager {
 
             float removedHealth = Math.max(0.0F, healthBefore - target.getHealth());
             float healing = removedHealth * (float) MathHelper.clamp(
-                    active.tuning.get(Phase3AbilityTuning.Setting.LEECH_RATIO,
+                    active.tuning.get(StormSoulMasteryTuning.Setting.LEECH_RATIO,
                             Config.uniqueEffects.dreadwhisper.healRatio), 0, 1);
-            double leechCap = active.tuning.get(Phase3AbilityTuning.Setting.LEECH_CAP, 0);
+            double leechCap = active.tuning.get(StormSoulMasteryTuning.Setting.LEECH_CAP, 0);
             if (leechCap > 0) {
                 healing = (float) Math.max(0.0, Math.min(healing, leechCap - active.leeched));
             }
@@ -390,26 +390,26 @@ public final class DreadwhisperAbilityManager {
                 applyWound(target, active.tuning);
                 spreadWound(world, target, active);
             }
-            UniqueAbilityApi.emit(active.execution, UniqueAbilityPhase.HIT, Phase3UniqueAbilities.HIT,
+            UniqueAbilityApi.emit(active.execution, UniqueAbilityPhase.HIT, StormSoulMasteryAbilities.HIT,
                     target, 1, weaponDamage);
             spawnContactEffects(world, target, owner, removedHealth > 0.0F);
-            if (active.tuning.get(Phase3AbilityTuning.Setting.REND_STOP_ON_HIT, 0) >= 1) {
+            if (active.tuning.get(StormSoulMasteryTuning.Setting.REND_STOP_ON_HIT, 0) >= 1) {
                 active.stopped = true;
                 break;
             }
-            if (active.tuning.has(Phase3AbilityTuning.Setting.REND_TARGET_CAP)
+            if (active.tuning.has(StormSoulMasteryTuning.Setting.REND_TARGET_CAP)
                     && active.hitTargets.size() >= active.tuning.integer(
-                            Phase3AbilityTuning.Setting.REND_TARGET_CAP, 64)) break;
+                            StormSoulMasteryTuning.Setting.REND_TARGET_CAP, 64)) break;
         }
     }
 
-    private static void applyWound(LivingEntity target, Phase3AbilityTuning tuning) {
+    private static void applyWound(LivingEntity target, StormSoulMasteryTuning tuning) {
         target.addStatusEffect(new StatusEffectInstance(
                 EffectRegistry.getReference(EffectRegistry.CORRUPTED_WOUND),
-                Math.max(1, tuning.integer(Phase3AbilityTuning.Setting.WOUND_DURATION_TICKS,
+                Math.max(1, tuning.integer(StormSoulMasteryTuning.Setting.WOUND_DURATION_TICKS,
                         Config.uniqueEffects.dreadwhisper.woundDuration)),
                 0, false, false, false));
-        int weakness = tuning.integer(Phase3AbilityTuning.Setting.WOUND_WEAKNESS_TICKS, 0);
+        int weakness = tuning.integer(StormSoulMasteryTuning.Setting.WOUND_WEAKNESS_TICKS, 0);
         if (weakness > 0) {
             target.addStatusEffect(new StatusEffectInstance(StatusEffects.WEAKNESS, weakness, 0,
                     false, true, true));
@@ -438,7 +438,7 @@ public final class DreadwhisperAbilityManager {
         world.playSound(null, owner.getBlockPos(), SoundRegistry.DARK_SWORD_BREAKS.get(),
                 SoundCategory.PLAYERS, 0.72F, 0.76F);
         resolveDashFinish(world, owner, active);
-        UniqueAbilityApi.finish(active.execution, Phase3UniqueAbilities.FINISH, active.hitTargets.size());
+        UniqueAbilityApi.finish(active.execution, StormSoulMasteryAbilities.FINISH, active.hitTargets.size());
     }
 
     private static void resolveDashFinish(ServerWorld world, LivingEntity owner, ActiveRend active) {
@@ -447,24 +447,24 @@ public final class DreadwhisperAbilityManager {
                 Math.max(0.0F, Config.uniqueEffects.dreadwhisper.weaponHitScaling),
                 Math.max(0.0F, Config.uniqueEffects.dreadwhisper.weaponHitSpellScaling));
 
-        double collision = active.tuning.get(Phase3AbilityTuning.Setting.COLLISION_MULTIPLIER, 0);
+        double collision = active.tuning.get(StormSoulMasteryTuning.Setting.COLLISION_MULTIPLIER, 0);
         if (collision > 0 && owner.horizontalCollision) {
             burst(world, owner, active, end, (float) (base * collision),
-                    active.tuning.get(Phase3AbilityTuning.Setting.COLLISION_RADIUS, 3),
-                    active.tuning.integer(Phase3AbilityTuning.Setting.COLLISION_TARGET_CAP, 8), false);
+                    active.tuning.get(StormSoulMasteryTuning.Setting.COLLISION_RADIUS, 3),
+                    active.tuning.integer(StormSoulMasteryTuning.Setting.COLLISION_TARGET_CAP, 8), false);
         }
 
-        double voidCollapse = active.tuning.get(Phase3AbilityTuning.Setting.VOID_COLLAPSE_MULTIPLIER, 0);
+        double voidCollapse = active.tuning.get(StormSoulMasteryTuning.Setting.VOID_COLLAPSE_MULTIPLIER, 0);
         if (voidCollapse > 0) {
             burst(world, owner, active, end, (float) (base * voidCollapse),
-                    active.tuning.get(Phase3AbilityTuning.Setting.VOID_COLLAPSE_RADIUS, 12),
-                    active.tuning.integer(Phase3AbilityTuning.Setting.VOID_COLLAPSE_TARGET_CAP, 12), true);
+                    active.tuning.get(StormSoulMasteryTuning.Setting.VOID_COLLAPSE_RADIUS, 12),
+                    active.tuning.integer(StormSoulMasteryTuning.Setting.VOID_COLLAPSE_TARGET_CAP, 12), true);
         }
 
-        double recall = active.tuning.get(Phase3AbilityTuning.Setting.RECALL_STRENGTH, 0);
-        double recallRange = active.tuning.get(Phase3AbilityTuning.Setting.RECALL_RANGE, 0);
+        double recall = active.tuning.get(StormSoulMasteryTuning.Setting.RECALL_STRENGTH, 0);
+        double recallRange = active.tuning.get(StormSoulMasteryTuning.Setting.RECALL_RANGE, 0);
         if (recall > 0 && recallRange > 0) {
-            int cap = Math.max(1, active.tuning.integer(Phase3AbilityTuning.Setting.RECALL_TARGET_CAP, 8));
+            int cap = Math.max(1, active.tuning.integer(StormSoulMasteryTuning.Setting.RECALL_TARGET_CAP, 8));
             int pulled = 0;
             for (LivingEntity target : world.getEntitiesByClass(LivingEntity.class,
                     owner.getBoundingBox().expand(recallRange),
@@ -507,13 +507,13 @@ public final class DreadwhisperAbilityManager {
 
     // Umbral Shelter: each enemy the dash reaches leaves a sliver of Absorption.
     private static void grantShelter(LivingEntity owner, ActiveRend active) {
-        int perHit = active.tuning.integer(Phase3AbilityTuning.Setting.SHELTER_ABSORPTION_PER_HIT, 0);
+        int perHit = active.tuning.integer(StormSoulMasteryTuning.Setting.SHELTER_ABSORPTION_PER_HIT, 0);
         if (perHit <= 0) return;
         int limit = Math.max(perHit, active.tuning.integer(
-                Phase3AbilityTuning.Setting.SHELTER_ABSORPTION_LIMIT, perHit));
+                StormSoulMasteryTuning.Setting.SHELTER_ABSORPTION_LIMIT, perHit));
         if (active.shelterAbsorption >= limit) return;
         active.shelterAbsorption = Math.min(limit, active.shelterAbsorption + perHit);
-        int ticks = Math.max(1, active.tuning.integer(Phase3AbilityTuning.Setting.SHELTER_BUFF_TICKS, 80));
+        int ticks = Math.max(1, active.tuning.integer(StormSoulMasteryTuning.Setting.SHELTER_BUFF_TICKS, 80));
         owner.addStatusEffect(new StatusEffectInstance(StatusEffects.ABSORPTION, ticks,
                 MathHelper.clamp(active.shelterAbsorption / 4, 0, 9), false, true, true), owner);
         owner.setAbsorptionAmount(Math.max(owner.getAbsorptionAmount(),
@@ -522,11 +522,11 @@ public final class DreadwhisperAbilityManager {
 
     // Plague of Whispers: a wound from the dash seeds nearby enemies.
     private static void spreadWound(ServerWorld world, LivingEntity origin, ActiveRend active) {
-        int count = active.tuning.integer(Phase3AbilityTuning.Setting.SPREAD_COUNT, 0);
-        double range = active.tuning.get(Phase3AbilityTuning.Setting.SPREAD_RANGE, 0);
+        int count = active.tuning.integer(StormSoulMasteryTuning.Setting.SPREAD_COUNT, 0);
+        double range = active.tuning.get(StormSoulMasteryTuning.Setting.SPREAD_RANGE, 0);
         if (count <= 0 || range <= 0) return;
         int duration = Math.max(1, active.tuning.integer(
-                Phase3AbilityTuning.Setting.SPREAD_DURATION_TICKS, 120));
+                StormSoulMasteryTuning.Setting.SPREAD_DURATION_TICKS, 120));
         Entity ownerEntity = world.getEntity(active.ownerId);
         if (!(ownerEntity instanceof LivingEntity owner)) return;
         int spread = 0;
@@ -591,21 +591,21 @@ public final class DreadwhisperAbilityManager {
                 SoundCategory.PLAYERS, 0.75F, 0.72F);
     }
 
-    private static int maximumDashTicks(Phase3AbilityTuning tuning) {
+    private static int maximumDashTicks(StormSoulMasteryTuning tuning) {
         return Math.max(6, (int) Math.ceil(
-                Math.max(1.0, tuning.get(Phase3AbilityTuning.Setting.REND_RANGE,
+                Math.max(1.0, tuning.get(StormSoulMasteryTuning.Setting.REND_RANGE,
                         Config.uniqueEffects.dreadwhisper.dashDistance))
-                        / Math.max(0.1, tuning.get(Phase3AbilityTuning.Setting.REND_SPEED,
+                        / Math.max(0.1, tuning.get(StormSoulMasteryTuning.Setting.REND_SPEED,
                         Config.uniqueEffects.dreadwhisper.dashSpeed))) + 6);
     }
 
-    private static void applyDashVelocity(LivingEntity owner, Vec3d direction, Phase3AbilityTuning tuning) {
+    private static void applyDashVelocity(LivingEntity owner, Vec3d direction, StormSoulMasteryTuning tuning) {
         applyDashVelocity(owner, direction, tuning, 0);
     }
 
-    private static void applyDashVelocity(LivingEntity owner, Vec3d direction, Phase3AbilityTuning tuning,
+    private static void applyDashVelocity(LivingEntity owner, Vec3d direction, StormSoulMasteryTuning tuning,
                                           double speedBonus) {
-        double speed = Math.max(0.1, tuning.get(Phase3AbilityTuning.Setting.REND_SPEED,
+        double speed = Math.max(0.1, tuning.get(StormSoulMasteryTuning.Setting.REND_SPEED,
                 Config.uniqueEffects.dreadwhisper.dashSpeed)) * (1.0 + speedBonus);
         owner.setVelocity(direction.x * speed, owner.getVelocity().y, direction.z * speed);
         owner.velocityModified = true;
@@ -757,12 +757,12 @@ public final class DreadwhisperAbilityManager {
         private int shelterAbsorption;
         private boolean stopped;
         private Vec3d lastGroundPosition = Vec3d.ZERO;
-        private final Phase3AbilityTuning tuning;
+        private final StormSoulMasteryTuning tuning;
         private final UniqueAbilityExecution execution;
 
         private ActiveRend(UUID ownerId, ItemStack stack, Vec3d direction,
                            Vec3d previousPosition, long startedAt, UUID visualId, UUID stainId,
-                           Phase3AbilityTuning tuning, UniqueAbilityExecution execution) {
+                           StormSoulMasteryTuning tuning, UniqueAbilityExecution execution) {
             this.ownerId = ownerId;
             this.stack = stack;
             this.direction = direction;

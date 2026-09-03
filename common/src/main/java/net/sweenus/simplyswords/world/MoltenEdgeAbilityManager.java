@@ -28,8 +28,8 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.api.AwakeningApi;
-import net.sweenus.simplyswords.api.ability.Phase5AbilityTuning;
-import net.sweenus.simplyswords.api.ability.Phase5UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.FireForgeMasteryTuning;
+import net.sweenus.simplyswords.api.ability.FireForgeMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityPhase;
 import net.sweenus.simplyswords.config.Config;
@@ -147,10 +147,10 @@ public final class MoltenEdgeAbilityManager {
         if (heat.isVentingAt(now, drain)) {
             return;
         }
-        Phase5AbilityTuning tuning = Phase5MoltenManager.heat((ServerWorld) attacker.getWorld(), stack, attacker);
-        int gain = tuning.integer(Phase5AbilityTuning.Setting.MOLTEN_MELEE_HEAT_GAIN,
+        FireForgeMasteryTuning tuning = MoltenEdgeMasteryManager.heat((ServerWorld) attacker.getWorld(), stack, attacker);
+        int gain = tuning.integer(FireForgeMasteryTuning.Setting.MOLTEN_MELEE_HEAT_GAIN,
                 Config.uniqueEffects.molten_edge.heatPerHit);
-        int maximum = tuning.integer(Phase5AbilityTuning.Setting.MOLTEN_HEAT_MAX, MoltenHeatComponent.MAX_HEAT);
+        int maximum = tuning.integer(FireForgeMasteryTuning.Setting.MOLTEN_HEAT_MAX, MoltenHeatComponent.MAX_HEAT);
         MoltenHeatComponent normalized = heat.normalizedAt(now, drain);
         MoltenHeatComponent increased = normalized.addHeat(gain);
         if (increased.heat() > maximum) increased = new MoltenHeatComponent(maximum, false);
@@ -158,7 +158,7 @@ public final class MoltenEdgeAbilityManager {
         applyHeatGainRewards(attacker, stack, tuning, normalized.heat(), increased.heat());
         igniteAtMaximumHeat(attacker, increased, tuning);
         if (target != null && target.isAlive() && tuning.flag(1 << 6) && increased.heat() >= maximum) {
-            int fireTicks = tuning.integer(Phase5AbilityTuning.Setting.MOLTEN_WHITE_HOT_FIRE_TICKS, 60);
+            int fireTicks = tuning.integer(FireForgeMasteryTuning.Setting.MOLTEN_WHITE_HOT_FIRE_TICKS, 60);
             if (fireTicks > 0) target.setOnFireForTicks(fireTicks);
         }
     }
@@ -179,10 +179,10 @@ public final class MoltenEdgeAbilityManager {
             if (heat.isVentingAt(now, drain)) {
                 continue;
             }
-            Phase5AbilityTuning tuning = Phase5MoltenManager.heat((ServerWorld) target.getWorld(), stack, target);
-            int gain = tuning.integer(Phase5AbilityTuning.Setting.MOLTEN_INCOMING_HEAT_GAIN,
+            FireForgeMasteryTuning tuning = MoltenEdgeMasteryManager.heat((ServerWorld) target.getWorld(), stack, target);
+            int gain = tuning.integer(FireForgeMasteryTuning.Setting.MOLTEN_INCOMING_HEAT_GAIN,
                     Config.uniqueEffects.molten_edge.heatPerDamageTaken);
-            int maximum = tuning.integer(Phase5AbilityTuning.Setting.MOLTEN_HEAT_MAX, MoltenHeatComponent.MAX_HEAT);
+            int maximum = tuning.integer(FireForgeMasteryTuning.Setting.MOLTEN_HEAT_MAX, MoltenHeatComponent.MAX_HEAT);
             MoltenHeatComponent normalized = heat.normalizedAt(now, drain);
             MoltenHeatComponent increased = normalized.addHeat(gain);
             if (increased.heat() > maximum) increased = new MoltenHeatComponent(maximum, false);
@@ -202,25 +202,25 @@ public final class MoltenEdgeAbilityManager {
             return amount;
         }
         ItemStack stack = attacker == null ? null : getHeldMoltenEdges(attacker).stream().findFirst().orElse(null);
-        Phase5AbilityTuning tuning = stack == null || !(attacker.getWorld() instanceof ServerWorld world)
-                ? Phase5AbilityTuning.EMPTY : Phase5MoltenManager.heat(world, stack, attacker);
+        FireForgeMasteryTuning tuning = stack == null || !(attacker.getWorld() instanceof ServerWorld world)
+                ? FireForgeMasteryTuning.EMPTY : MoltenEdgeMasteryManager.heat(world, stack, attacker);
         float multiplier = 1 + heat / 200F;
         boolean moltenMelee = source.getWeaponStack() != null
                 && source.getWeaponStack().isOf(ItemsRegistry.MOLTEN_EDGE.get());
-        int maximum = tuning.integer(Phase5AbilityTuning.Setting.MOLTEN_HEAT_MAX, 100);
+        int maximum = tuning.integer(FireForgeMasteryTuning.Setting.MOLTEN_HEAT_MAX, 100);
         if (moltenMelee && tuning.flag(1 << 3)
-                && heat >= tuning.integer(Phase5AbilityTuning.Setting.MOLTEN_REDLINE_THRESHOLD, 75)) {
-            multiplier *= (float) tuning.get(Phase5AbilityTuning.Setting.MOLTEN_REDLINE_DAMAGE_MULTIPLIER, 1.1);
+                && heat >= tuning.integer(FireForgeMasteryTuning.Setting.MOLTEN_REDLINE_THRESHOLD, 75)) {
+            multiplier *= (float) tuning.get(FireForgeMasteryTuning.Setting.MOLTEN_REDLINE_DAMAGE_MULTIPLIER, 1.1);
         }
         if (moltenMelee && tuning.flag(1 << 6) && heat >= maximum) {
-            multiplier *= (float) tuning.get(Phase5AbilityTuning.Setting.MOLTEN_WHITE_HOT_DAMAGE_MULTIPLIER, 1.12);
+            multiplier *= (float) tuning.get(FireForgeMasteryTuning.Setting.MOLTEN_WHITE_HOT_DAMAGE_MULTIPLIER, 1.12);
         }
         if (tuning.flag(1 << 7) && stack.getOrDefault(ComponentTypeRegistry.MOLTEN_OVERCLOCKED.get(), false)) {
-            multiplier *= (float) tuning.get(Phase5AbilityTuning.Setting.MOLTEN_OVERCLOCK_OUTGOING_MULTIPLIER, 1.35);
+            multiplier *= (float) tuning.get(FireForgeMasteryTuning.Setting.MOLTEN_OVERCLOCK_OUTGOING_MULTIPLIER, 1.35);
         }
         if (tuning.flag(1 << 8)) {
             multiplier = Math.min(multiplier, 1 + (float) tuning.get(
-                    Phase5AbilityTuning.Setting.MOLTEN_OUTGOING_BONUS_CAP, .35));
+                    FireForgeMasteryTuning.Setting.MOLTEN_OUTGOING_BONUS_CAP, .35));
         }
         return amount * multiplier;
     }
@@ -234,32 +234,32 @@ public final class MoltenEdgeAbilityManager {
             return amount;
         }
         ItemStack stack = getHeldMoltenEdges(target).stream().findFirst().orElse(null);
-        Phase5AbilityTuning tuning = stack == null || !(target.getWorld() instanceof ServerWorld world)
-                ? Phase5AbilityTuning.EMPTY : Phase5MoltenManager.heat(world, stack, target);
+        FireForgeMasteryTuning tuning = stack == null || !(target.getWorld() instanceof ServerWorld world)
+                ? FireForgeMasteryTuning.EMPTY : MoltenEdgeMasteryManager.heat(world, stack, target);
         float amplification = heat / 100F;
         if (tuning.flag(1 << 7) && stack.getOrDefault(ComponentTypeRegistry.MOLTEN_OVERCLOCKED.get(), false)) {
             amplification = (float) tuning.get(
-                    Phase5AbilityTuning.Setting.MOLTEN_OVERCLOCK_INCOMING_AMPLIFICATION, 1);
+                    FireForgeMasteryTuning.Setting.MOLTEN_OVERCLOCK_INCOMING_AMPLIFICATION, 1);
         }
         if (tuning.flag(1 << 2)) amplification *= (float) tuning.get(
-                Phase5AbilityTuning.Setting.MOLTEN_INCOMING_PENALTY_MULTIPLIER, .85);
+                FireForgeMasteryTuning.Setting.MOLTEN_INCOMING_PENALTY_MULTIPLIER, .85);
         if (tuning.flag(1 << 8)) amplification = Math.min(amplification, (float) tuning.get(
-                Phase5AbilityTuning.Setting.MOLTEN_INCOMING_AMPLIFICATION_CAP, .5));
+                FireForgeMasteryTuning.Setting.MOLTEN_INCOMING_AMPLIFICATION_CAP, .5));
         return amount * (1 + amplification);
     }
 
-    private static void applyHeatGainRewards(LivingEntity actor, ItemStack stack, Phase5AbilityTuning tuning,
+    private static void applyHeatGainRewards(LivingEntity actor, ItemStack stack, FireForgeMasteryTuning tuning,
                                              int previousHeat, int currentHeat) {
         if (tuning.flag(1 << 7) && currentHeat >= MoltenHeatComponent.MAX_HEAT) {
             stack.set(ComponentTypeRegistry.MOLTEN_OVERCLOCKED.get(), true);
         }
         if (!tuning.flag(1 << 4) || currentHeat <= previousHeat) return;
-        int step = tuning.integer(Phase5AbilityTuning.Setting.MOLTEN_HEAT_SINK_STEP, 20);
+        int step = tuning.integer(FireForgeMasteryTuning.Setting.MOLTEN_HEAT_SINK_STEP, 20);
         if (!crossedHeatThreshold(previousHeat, currentHeat, step)) return;
-        Phase4AbsorptionTracker.grant(actor,
-                (float) tuning.get(Phase5AbilityTuning.Setting.MOLTEN_HEAT_SINK_ABSORPTION, 2),
-                tuning.integer(Phase5AbilityTuning.Setting.MOLTEN_HEAT_SINK_DURATION_TICKS, 60),
-                (float) tuning.get(Phase5AbilityTuning.Setting.MOLTEN_HEAT_SINK_CAP, 6));
+        MasteryAbsorptionTracker.grant(actor,
+                (float) tuning.get(FireForgeMasteryTuning.Setting.MOLTEN_HEAT_SINK_ABSORPTION, 2),
+                tuning.integer(FireForgeMasteryTuning.Setting.MOLTEN_HEAT_SINK_DURATION_TICKS, 60),
+                (float) tuning.get(FireForgeMasteryTuning.Setting.MOLTEN_HEAT_SINK_CAP, 6));
     }
 
     public static boolean startVent(WeaponAbilityContext context) {
@@ -286,9 +286,9 @@ public final class MoltenEdgeAbilityManager {
             return false;
         }
 
-        Phase5MoltenManager.Snapshot mastery = Phase5MoltenManager.beginVent(context);
-        Phase5AbilityTuning tuning = mastery.tuning();
-        Phase5AbilityTuning heatTuning = Phase5MoltenManager.heat(world, heldStack, actor);
+        MoltenEdgeMasteryManager.Snapshot mastery = MoltenEdgeMasteryManager.beginVent(context);
+        FireForgeMasteryTuning tuning = mastery.tuning();
+        FireForgeMasteryTuning heatTuning = MoltenEdgeMasteryManager.heat(world, heldStack, actor);
         MoltenHeatComponent ventingHeat = new MoltenHeatComponent(currentHeat, false).startVenting(now);
         heldStack.set(ComponentTypeRegistry.MOLTEN_HEAT.get(), ventingHeat);
         StatusEffectInstance resistance = actor.getStatusEffect(StatusEffects.RESISTANCE);
@@ -298,10 +298,10 @@ public final class MoltenEdgeAbilityManager {
         applyVentMovement(actor, tuning);
         if (tuning.flag(1 << 12)) {
             actor.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED,
-                    tuning.integer(Phase5AbilityTuning.Setting.MOLTEN_BLAST_SPEED_TICKS, 60), 0), actor);
+                    tuning.integer(FireForgeMasteryTuning.Setting.MOLTEN_BLAST_SPEED_TICKS, 60), 0), actor);
         }
 
-        int heatMaximum = heatTuning.integer(Phase5AbilityTuning.Setting.MOLTEN_HEAT_MAX,
+        int heatMaximum = heatTuning.integer(FireForgeMasteryTuning.Setting.MOLTEN_HEAT_MAX,
                 MoltenHeatComponent.MAX_HEAT);
         float heatFraction = shockwaveHeatFraction(currentHeat, heatMaximum);
         float shockwaveDamage = HelperMethods.abilityScaledDamage(
@@ -311,7 +311,7 @@ public final class MoltenEdgeAbilityManager {
                 Config.uniqueEffects.molten_edge.shockwaveDamageScaling,
                 Config.uniqueEffects.molten_edge.shockwaveSpellScaling
         ) * heatFraction * (float) tuning.get(
-                Phase5AbilityTuning.Setting.MOLTEN_SHOCKWAVE_DAMAGE_MULTIPLIER, 1);
+                FireForgeMasteryTuning.Setting.MOLTEN_SHOCKWAVE_DAMAGE_MULTIPLIER, 1);
         ACTIVE_SHOCKWAVES.computeIfAbsent(world, ignored -> new ArrayList<>()).add(new ActiveShockwave(
                 actor.getUuid(),
                 heldStack.copy(),
@@ -347,9 +347,9 @@ public final class MoltenEdgeAbilityManager {
             return;
         }
 
-        Phase5MoltenManager.Snapshot rupture = Phase5MoltenManager.beginRupture(world, stack, wielder);
+        MoltenEdgeMasteryManager.Snapshot rupture = MoltenEdgeMasteryManager.beginRupture(world, stack, wielder);
         if (!isAttackReady(world, wielder, stack, vent, rupture.tuning())) {
-            Phase5MoltenManager.cancelRupture(rupture);
+            MoltenEdgeMasteryManager.cancelRupture(rupture);
             return;
         }
         vent.swingCount++;
@@ -362,23 +362,23 @@ public final class MoltenEdgeAbilityManager {
     }
 
     private static void spawnRuptureCast(ServerWorld world, LivingEntity owner, ItemStack stack, ActiveVent vent,
-                                         Phase5MoltenManager.Snapshot snapshot, Vec3d requestedDirection,
+                                         MoltenEdgeMasteryManager.Snapshot snapshot, Vec3d requestedDirection,
                                          boolean swing) {
-        Phase5AbilityTuning tuning = snapshot.tuning();
+        FireForgeMasteryTuning tuning = snapshot.tuning();
         Vec3d forward = seekDirection(world, owner, requestedDirection, vent.tuning);
         float baseDamage = HelperMethods.abilityScaledDamage("fire", owner, stack,
                 Config.uniqueEffects.molten_edge.ruptureDamageScaling,
                 Config.uniqueEffects.molten_edge.ruptureSpellScaling)
-                * (float) tuning.get(Phase5AbilityTuning.Setting.MOLTEN_RUPTURE_DAMAGE_MULTIPLIER, 1);
+                * (float) tuning.get(FireForgeMasteryTuning.Setting.MOLTEN_RUPTURE_DAMAGE_MULTIPLIER, 1);
         List<LaneOrigin> origins = new ArrayList<>();
         origins.add(new LaneOrigin(forward, 1));
         boolean fissure = tuning.flag(1 << 25);
         boolean shatter = tuning.flag(1 << 26);
         if (swing && tuning.flag(1 << 23) && shouldFork(vent.swingCount,
-                tuning.integer(Phase5AbilityTuning.Setting.MOLTEN_FORK_SWING_INTERVAL, 3), fissure || shatter)) {
-            int forks = tuning.integer(Phase5AbilityTuning.Setting.MOLTEN_FORK_COUNT, 2);
-            double angle = tuning.get(Phase5AbilityTuning.Setting.MOLTEN_FORK_ANGLE_DEGREES, 18);
-            double multiplier = tuning.get(Phase5AbilityTuning.Setting.MOLTEN_FORK_DAMAGE_MULTIPLIER, .55);
+                tuning.integer(FireForgeMasteryTuning.Setting.MOLTEN_FORK_SWING_INTERVAL, 3), fissure || shatter)) {
+            int forks = tuning.integer(FireForgeMasteryTuning.Setting.MOLTEN_FORK_COUNT, 2);
+            double angle = tuning.get(FireForgeMasteryTuning.Setting.MOLTEN_FORK_ANGLE_DEGREES, 18);
+            double multiplier = tuning.get(FireForgeMasteryTuning.Setting.MOLTEN_FORK_DAMAGE_MULTIPLIER, .55);
             for (int i = 0; i < forks; i++) {
                 double sign = i % 2 == 0 ? -1 : 1;
                 double ring = i / 2 + 1;
@@ -386,20 +386,20 @@ public final class MoltenEdgeAbilityManager {
             }
         }
         int laneCount = shatter ? Math.max(1, tuning.integer(
-                Phase5AbilityTuning.Setting.MOLTEN_SHATTER_LANE_COUNT, 5)) : 1;
+                FireForgeMasteryTuning.Setting.MOLTEN_SHATTER_LANE_COUNT, 5)) : 1;
         int totalLanes = Math.max(1, origins.size() * laneCount);
         RuptureCast cast = new RuptureCast(snapshot, totalLanes, new HashSet<>());
         for (LaneOrigin laneOrigin : origins) {
             for (int lane = 0; lane < laneCount; lane++) {
                 double offset = shatter ? laneOffset(lane, laneCount, tuning.get(
-                        Phase5AbilityTuning.Setting.MOLTEN_SHATTER_LANE_ANGLE_DEGREES, 18)) : 0;
+                        FireForgeMasteryTuning.Setting.MOLTEN_SHATTER_LANE_ANGLE_DEGREES, 18)) : 0;
                 Vec3d laneForward = rotateHorizontal(laneOrigin.forward, offset);
                 double length = shatter
-                        ? tuning.get(Phase5AbilityTuning.Setting.MOLTEN_SHATTER_LANE_LENGTH, 5)
-                        : tuning.get(Phase5AbilityTuning.Setting.MOLTEN_RUPTURE_LENGTH,
+                        ? tuning.get(FireForgeMasteryTuning.Setting.MOLTEN_SHATTER_LANE_LENGTH, 5)
+                        : tuning.get(FireForgeMasteryTuning.Setting.MOLTEN_RUPTURE_LENGTH,
                         Config.uniqueEffects.molten_edge.ruptureLength);
                 double damageMultiplier = laneOrigin.damageMultiplier * (shatter
-                        ? tuning.get(Phase5AbilityTuning.Setting.MOLTEN_SHATTER_DAMAGE_MULTIPLIER, .45) : 1);
+                        ? tuning.get(FireForgeMasteryTuning.Setting.MOLTEN_SHATTER_DAMAGE_MULTIPLIER, .45) : 1);
                 spawnRuptureLane(world, owner, stack, cast, laneForward, baseDamage * (float) damageMultiplier, length);
             }
         }
@@ -428,13 +428,13 @@ public final class MoltenEdgeAbilityManager {
             return;
         }
         if (!isHeldMoltenEdge(living, stack)) {
-            Phase5AbilityTuning tuning = Phase5MoltenManager.heat((ServerWorld) world, stack, living);
+            FireForgeMasteryTuning tuning = MoltenEdgeMasteryManager.heat((ServerWorld) world, stack, living);
             int retained = getEffectiveHeat(heat, world.getTime(), getVentDrainPerTick(living, stack));
             cancelVent(living, stack);
             stack.set(ComponentTypeRegistry.MOLTEN_OVERCLOCKED.get(), false);
             if (tuning.flag(1 << 5) && retained > 0) {
                 int interval = tuning.integer(
-                        Phase5AbilityTuning.Setting.MOLTEN_UNWIELDED_DECAY_INTERVAL_TICKS, 2);
+                        FireForgeMasteryTuning.Setting.MOLTEN_UNWIELDED_DECAY_INTERVAL_TICKS, 2);
                 retained = decayedUnwieldedHeat(retained, world.getTime(), interval);
                 stack.set(ComponentTypeRegistry.MOLTEN_HEAT.get(), new MoltenHeatComponent(retained, false));
             } else {
@@ -456,8 +456,8 @@ public final class MoltenEdgeAbilityManager {
             heat = heat.normalizedAt(world.getTime(), getVentDrainPerTick(living, stack));
             stack.set(ComponentTypeRegistry.MOLTEN_HEAT.get(), heat);
         }
-        Phase5AbilityTuning tuning = Phase5MoltenManager.heat((ServerWorld) world, stack, living);
-        int maximum = tuning.integer(Phase5AbilityTuning.Setting.MOLTEN_HEAT_MAX,
+        FireForgeMasteryTuning tuning = MoltenEdgeMasteryManager.heat((ServerWorld) world, stack, living);
+        int maximum = tuning.integer(FireForgeMasteryTuning.Setting.MOLTEN_HEAT_MAX,
                 MoltenHeatComponent.MAX_HEAT);
         if (heat.heat() > maximum) {
             heat = new MoltenHeatComponent(maximum, false);
@@ -521,7 +521,7 @@ public final class MoltenEdgeAbilityManager {
             for (ActiveVent vent : vents.values()) {
                 Entity entity = world.getEntity(vent.ownerId);
                 if (entity instanceof LivingEntity owner) cleanupVent(owner, vent, false, 0);
-                else Phase5MoltenManager.cancel(vent.ownerId);
+                else MoltenEdgeMasteryManager.cancel(vent.ownerId);
             }
         }
         ACTIVE_SHOCKWAVES.remove(world);
@@ -533,7 +533,7 @@ public final class MoltenEdgeAbilityManager {
             if (entity != null) entity.discard();
         });
         SEQUENCES.remove(world);
-        Phase5MoltenManager.clear(world);
+        MoltenEdgeMasteryManager.clear(world);
     }
 
     public static void clearAll() {
@@ -548,7 +548,7 @@ public final class MoltenEdgeAbilityManager {
         ACTIVE_RUPTURES.clear();
         ACTIVE_VISUALS.clear();
         SEQUENCES.clear();
-        Phase5MoltenManager.clearAll();
+        MoltenEdgeMasteryManager.clearAll();
     }
 
     public static boolean hasActive(ServerWorld world) {
@@ -580,7 +580,7 @@ public final class MoltenEdgeAbilityManager {
             if (!(entity instanceof LivingEntity owner)) {
                 vent.stackReference.set(ComponentTypeRegistry.MOLTEN_HEAT.get(), MoltenHeatComponent.DEFAULT);
                 vent.stackReference.set(ComponentTypeRegistry.MOLTEN_OVERCLOCKED.get(), false);
-                Phase5MoltenManager.cancel(vent.ownerId);
+                MoltenEdgeMasteryManager.cancel(vent.ownerId);
                 iterator.remove();
                 continue;
             }
@@ -600,7 +600,7 @@ public final class MoltenEdgeAbilityManager {
             boolean overclocked = vent.heatTuning.flag(1 << 7)
                     && vent.stackReference.getOrDefault(ComponentTypeRegistry.MOLTEN_OVERCLOCKED.get(), false);
             int heatFloor = overclocked ? Math.min(heat.heat(), vent.heatTuning.integer(
-                    Phase5AbilityTuning.Setting.MOLTEN_OVERCLOCK_HEAT_FLOOR, 75)) : 0;
+                    FireForgeMasteryTuning.Setting.MOLTEN_OVERCLOCK_HEAT_FLOOR, 75)) : 0;
             if (heatFloor > 0 && effectiveHeat <= heatFloor) {
                 spawnVentEndEffects(world, owner);
                 cleanupVent(owner, vent, true, heatFloor);
@@ -620,15 +620,15 @@ public final class MoltenEdgeAbilityManager {
                 owner.setVelocity(0, owner.getVelocity().y, 0);
                 owner.velocityModified = true;
                 owner.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, 5,
-                        vent.tuning.integer(Phase5AbilityTuning.Setting.MOLTEN_RESISTANCE_AMPLIFIER, 1)), owner);
+                        vent.tuning.integer(FireForgeMasteryTuning.Setting.MOLTEN_RESISTANCE_AMPLIFIER, 1)), owner);
             }
             if (vent.tuning.flag(1 << 16)) {
                 int interval = vent.tuning.integer(
-                        Phase5AbilityTuning.Setting.MOLTEN_AUTO_RUPTURE_INTERVAL_TICKS, 8);
+                        FireForgeMasteryTuning.Setting.MOLTEN_AUTO_RUPTURE_INTERVAL_TICKS, 8);
                 if ((world.getTime() - vent.startedAt) % Math.max(1, interval) == 0) {
                     Vec3d movement = owner.getVelocity().multiply(1, 0, 1);
                     if (movement.lengthSquared() > .0025) {
-                        Phase5MoltenManager.Snapshot rupture = Phase5MoltenManager.beginRupture(
+                        MoltenEdgeMasteryManager.Snapshot rupture = MoltenEdgeMasteryManager.beginRupture(
                                 world, vent.stackReference, owner);
                         spawnRuptureCast(world, owner, vent.stackReference, vent, rupture,
                                 movement.normalize(), false);
@@ -637,7 +637,7 @@ public final class MoltenEdgeAbilityManager {
             }
 
             if (world.getTime() % 3L == 0L) {
-                int maximum = vent.heatTuning.integer(Phase5AbilityTuning.Setting.MOLTEN_HEAT_MAX,
+                int maximum = vent.heatTuning.integer(FireForgeMasteryTuning.Setting.MOLTEN_HEAT_MAX,
                         MoltenHeatComponent.MAX_HEAT);
                 float fraction = shockwaveHeatFraction(effectiveHeat, maximum);
                 spawnVentingEffects(world, owner, fraction);
@@ -666,7 +666,7 @@ public final class MoltenEdgeAbilityManager {
                 return true;
             }
 
-            double maxRadius = shockwave.tuning.get(Phase5AbilityTuning.Setting.MOLTEN_SHOCKWAVE_RADIUS,
+            double maxRadius = shockwave.tuning.get(FireForgeMasteryTuning.Setting.MOLTEN_SHOCKWAVE_RADIUS,
                     Config.uniqueEffects.molten_edge.radius);
             double previousRadius = maxRadius * shockwave.step / totalTicks;
             shockwave.step++;
@@ -688,7 +688,7 @@ public final class MoltenEdgeAbilityManager {
         DamageSource source = world.getDamageSources().indirectMagic(owner, owner);
 
         int cap = Math.max(0, shockwave.tuning.integer(
-                Phase5AbilityTuning.Setting.MOLTEN_SHOCKWAVE_TARGET_CAP,
+                FireForgeMasteryTuning.Setting.MOLTEN_SHOCKWAVE_TARGET_CAP,
                 Config.uniqueEffects.molten_edge.shockwaveTargetCap));
         List<LivingEntity> candidates = world.getEntitiesByClass(LivingEntity.class, box, LivingEntity::isAlive)
                 .stream().sorted(Comparator.comparingDouble(target -> target.squaredDistanceTo(shockwave.origin)))
@@ -723,7 +723,7 @@ public final class MoltenEdgeAbilityManager {
             double strength = Math.max(0.0, Config.uniqueEffects.molten_edge.shockwaveKnockback)
                     * (0.5 + shockwave.heatFraction * 0.5)
                     * shockwave.tuning.get(
-                    Phase5AbilityTuning.Setting.MOLTEN_SHOCKWAVE_KNOCKBACK_MULTIPLIER, 1);
+                    FireForgeMasteryTuning.Setting.MOLTEN_SHOCKWAVE_KNOCKBACK_MULTIPLIER, 1);
             target.addVelocity(push.x * strength, 0.25, push.z * strength);
             target.velocityModified = true;
             target.velocityDirty = true;
@@ -764,15 +764,15 @@ public final class MoltenEdgeAbilityManager {
     }
 
     private static void damageRuptureTargets(ServerWorld world, LivingEntity owner, ActiveRupture rupture, Vec3d center, double segmentLength) {
-        Phase5AbilityTuning tuning = rupture.cast.snapshot.tuning();
-        double width = tuning.get(Phase5AbilityTuning.Setting.MOLTEN_RUPTURE_WIDTH,
+        FireForgeMasteryTuning tuning = rupture.cast.snapshot.tuning();
+        double width = tuning.get(FireForgeMasteryTuning.Setting.MOLTEN_RUPTURE_WIDTH,
                 Config.uniqueEffects.molten_edge.ruptureWidth);
         double xSize = Math.abs(rupture.forward.x) * segmentLength * 2.0 + Math.abs(rupture.right.x) * width + 2.0;
         double zSize = Math.abs(rupture.forward.z) * segmentLength * 2.0 + Math.abs(rupture.right.z) * width + 2.0;
         Box box = Box.of(center.add(0.0, 0.75, 0.0), xSize, 3.0, zSize);
         DamageSource source = world.getDamageSources().indirectMagic(owner, owner);
 
-        int cap = Math.max(0, tuning.integer(Phase5AbilityTuning.Setting.MOLTEN_RUPTURE_SEGMENT_TARGET_CAP,
+        int cap = Math.max(0, tuning.integer(FireForgeMasteryTuning.Setting.MOLTEN_RUPTURE_SEGMENT_TARGET_CAP,
                 Config.uniqueEffects.molten_edge.ruptureSegmentTargetCap));
         int affected = 0;
         List<LivingEntity> candidates = world.getEntitiesByClass(LivingEntity.class, box, LivingEntity::isAlive)
@@ -808,12 +808,12 @@ public final class MoltenEdgeAbilityManager {
                 rupture.refunded = true;
             }
             UniqueAbilityApi.emit(rupture.cast.snapshot.execution(), UniqueAbilityPhase.HIT,
-                    Phase5UniqueAbilities.HIT, target, 1, rawDamage);
+                    FireForgeMasteryAbilities.HIT, target, 1, rawDamage);
             target.setOnFireForTicks(Math.max(0, tuning.integer(
-                    Phase5AbilityTuning.Setting.MOLTEN_RUPTURE_FIRE_TICKS,
+                    FireForgeMasteryTuning.Setting.MOLTEN_RUPTURE_FIRE_TICKS,
                     Config.uniqueEffects.molten_edge.ruptureIgniteSeconds * 20)));
             target.addVelocity(rupture.forward.x * 0.18, tuning.get(
-                    Phase5AbilityTuning.Setting.MOLTEN_RUPTURE_KNOCK_UP,
+                    FireForgeMasteryTuning.Setting.MOLTEN_RUPTURE_KNOCK_UP,
                     Config.uniqueEffects.molten_edge.ruptureKnockUp), rupture.forward.z * 0.18);
             target.velocityModified = true;
             target.velocityDirty = true;
@@ -824,7 +824,7 @@ public final class MoltenEdgeAbilityManager {
 
     private static void spawnRuptureStepEffects(ServerWorld world, ActiveRupture rupture, Vec3d center) {
         double width = rupture.cast.snapshot.tuning().get(
-                Phase5AbilityTuning.Setting.MOLTEN_RUPTURE_WIDTH,
+                FireForgeMasteryTuning.Setting.MOLTEN_RUPTURE_WIDTH,
                 Config.uniqueEffects.molten_edge.ruptureWidth);
         double edgeOffset = width * 0.34;
         spawnRuptureVisual(world, center, 0.85F);
@@ -979,11 +979,11 @@ public final class MoltenEdgeAbilityManager {
     }
 
     private static boolean isAttackReady(ServerWorld world, LivingEntity user, ItemStack stack, ActiveVent vent,
-                                         Phase5AbilityTuning tuning) {
+                                         FireForgeMasteryTuning tuning) {
         long now = world.getTime();
         if (now < vent.nextSwingTick) return false;
         int base = (int) Math.ceil(getAttackReadyCooldownTicks(user) * tuning.get(
-                Phase5AbilityTuning.Setting.MOLTEN_RUPTURE_COOLDOWN_MULTIPLIER, 1));
+                FireForgeMasteryTuning.Setting.MOLTEN_RUPTURE_COOLDOWN_MULTIPLIER, 1));
         vent.nextSwingTick = now + SimplySwordsAPI.getEffectiveWeaponCooldownTicks(stack, user, base);
         return true;
     }
@@ -1014,7 +1014,7 @@ public final class MoltenEdgeAbilityManager {
     }
 
     private static int ventDrain(ActiveVent vent) {
-        return vent.tuning.integer(Phase5AbilityTuning.Setting.MOLTEN_VENT_DRAIN,
+        return vent.tuning.integer(FireForgeMasteryTuning.Setting.MOLTEN_VENT_DRAIN,
                 Config.uniqueEffects.molten_edge.ventDrainPerTick);
     }
 
@@ -1023,11 +1023,11 @@ public final class MoltenEdgeAbilityManager {
         return vents == null ? null : vents.get(ownerId);
     }
 
-    private static void refundRuptureCooldown(ServerWorld world, LivingEntity owner, Phase5AbilityTuning tuning) {
+    private static void refundRuptureCooldown(ServerWorld world, LivingEntity owner, FireForgeMasteryTuning tuning) {
         ActiveVent vent = activeVent(world, owner.getUuid());
         if (vent == null || !vent.tuning.flag(1 << 13)) return;
-        int refund = vent.tuning.integer(Phase5AbilityTuning.Setting.MOLTEN_RUPTURE_REFUND_TICKS, 1);
-        int minimum = vent.tuning.integer(Phase5AbilityTuning.Setting.MOLTEN_RUPTURE_MIN_COOLDOWN_TICKS, 3);
+        int refund = vent.tuning.integer(FireForgeMasteryTuning.Setting.MOLTEN_RUPTURE_REFUND_TICKS, 1);
+        int minimum = vent.tuning.integer(FireForgeMasteryTuning.Setting.MOLTEN_RUPTURE_MIN_COOLDOWN_TICKS, 3);
         vent.nextSwingTick = refundedDeadline(world.getTime(), vent.nextSwingTick, refund, minimum);
     }
 
@@ -1063,7 +1063,7 @@ public final class MoltenEdgeAbilityManager {
         if (vent == null) return;
         vent.hitTargets.add(target.getUuid());
         UniqueAbilityApi.emit(vent.snapshot.execution(), UniqueAbilityPhase.HIT,
-                Phase5UniqueAbilities.HIT, target, 1, damage);
+                FireForgeMasteryAbilities.HIT, target, 1, damage);
     }
 
     private static void cleanupVent(LivingEntity owner, ActiveVent vent, boolean normal, int retainedHeat) {
@@ -1072,25 +1072,25 @@ public final class MoltenEdgeAbilityManager {
         int resultHeat = Math.max(0, retainedHeat);
         if (normal && vent.tuning.flag(1 << 15)
                 && vent.hitTargets.size() >= vent.tuning.integer(
-                Phase5AbilityTuning.Setting.MOLTEN_RECLAIM_TARGET_COUNT, 3)) {
+                FireForgeMasteryTuning.Setting.MOLTEN_RECLAIM_TARGET_COUNT, 3)) {
             resultHeat = Math.max(resultHeat, vent.tuning.integer(
-                    Phase5AbilityTuning.Setting.MOLTEN_RECLAIM_HEAT, 15));
+                    FireForgeMasteryTuning.Setting.MOLTEN_RECLAIM_HEAT, 15));
         }
-        int maximum = vent.heatTuning.integer(Phase5AbilityTuning.Setting.MOLTEN_HEAT_MAX,
+        int maximum = vent.heatTuning.integer(FireForgeMasteryTuning.Setting.MOLTEN_HEAT_MAX,
                 MoltenHeatComponent.MAX_HEAT);
         vent.stackReference.set(ComponentTypeRegistry.MOLTEN_HEAT.get(),
                 new MoltenHeatComponent(Math.min(maximum, resultHeat), false));
-        if (normal) Phase5MoltenManager.finish(vent.ownerId, vent.hitTargets.size());
-        else Phase5MoltenManager.cancel(vent.ownerId);
+        if (normal) MoltenEdgeMasteryManager.finish(vent.ownerId, vent.hitTargets.size());
+        else MoltenEdgeMasteryManager.cancel(vent.ownerId);
     }
 
-    private static void applyVentMovement(LivingEntity owner, Phase5AbilityTuning tuning) {
+    private static void applyVentMovement(LivingEntity owner, FireForgeMasteryTuning tuning) {
         EntityAttributeInstance movement = owner.getAttributeInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED);
         if (movement == null) return;
         movement.removeModifier(VENT_SPEED_ID);
         double multiplier = tuning.flag(1 << 17) ? tuning.get(
-                Phase5AbilityTuning.Setting.MOLTEN_ROOT_SPEED_MULTIPLIER, 0)
-                : tuning.get(Phase5AbilityTuning.Setting.MOLTEN_VENT_SPEED_MULTIPLIER, 1);
+                FireForgeMasteryTuning.Setting.MOLTEN_ROOT_SPEED_MULTIPLIER, 0)
+                : tuning.get(FireForgeMasteryTuning.Setting.MOLTEN_VENT_SPEED_MULTIPLIER, 1);
         double adjustment = MathHelper.clamp(multiplier - 1, -.99, 15);
         if (adjustment != 0) movement.addTemporaryModifier(new EntityAttributeModifier(VENT_SPEED_ID,
                 adjustment, EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
@@ -1104,7 +1104,7 @@ public final class MoltenEdgeAbilityManager {
     private static void restoreResistance(LivingEntity owner, ActiveVent vent) {
         if (!vent.tuning.flag(1 << 17)) return;
         StatusEffectInstance current = owner.getStatusEffect(StatusEffects.RESISTANCE);
-        int managedAmplifier = vent.tuning.integer(Phase5AbilityTuning.Setting.MOLTEN_RESISTANCE_AMPLIFIER, 1);
+        int managedAmplifier = vent.tuning.integer(FireForgeMasteryTuning.Setting.MOLTEN_RESISTANCE_AMPLIFIER, 1);
         if (current != null && current.getAmplifier() == managedAmplifier && current.getDuration() <= 5) {
             owner.removeStatusEffect(StatusEffects.RESISTANCE);
             if (vent.previousResistance != null) {
@@ -1118,9 +1118,9 @@ public final class MoltenEdgeAbilityManager {
     }
 
     private static Vec3d seekDirection(ServerWorld world, LivingEntity owner, Vec3d requested,
-                                       Phase5AbilityTuning ventTuning) {
+                                       FireForgeMasteryTuning ventTuning) {
         if (!ventTuning.flag(1 << 14)) return requested.normalize();
-        double range = ventTuning.get(Phase5AbilityTuning.Setting.MOLTEN_RUPTURE_SEEK_RANGE, 5);
+        double range = ventTuning.get(FireForgeMasteryTuning.Setting.MOLTEN_RUPTURE_SEEK_RANGE, 5);
         LivingEntity target = world.getEntitiesByClass(LivingEntity.class,
                         owner.getBoundingBox().expand(range), candidate -> candidate.isAlive()
                                 && candidate != owner && HelperMethods.checkAbilityTarget(candidate, owner))
@@ -1129,7 +1129,7 @@ public final class MoltenEdgeAbilityManager {
         Vec3d desired = target.getPos().subtract(owner.getPos()).multiply(1, 0, 1);
         if (desired.lengthSquared() < .0001) return requested.normalize();
         return turnToward(requested, desired, ventTuning.get(
-                Phase5AbilityTuning.Setting.MOLTEN_RUPTURE_TURN_DEGREES, 20));
+                FireForgeMasteryTuning.Setting.MOLTEN_RUPTURE_TURN_DEGREES, 20));
     }
 
     static Vec3d turnToward(Vec3d current, Vec3d desired, double maximumDegrees) {
@@ -1150,13 +1150,13 @@ public final class MoltenEdgeAbilityManager {
     }
 
     private static float sequenceMultiplier(ServerWorld world, LivingEntity owner, LivingEntity target,
-                                            Phase5AbilityTuning tuning) {
+                                            FireForgeMasteryTuning tuning) {
         if (!tuning.flag(1 << 24)) return 1;
         SequenceState state = SEQUENCES.computeIfAbsent(world, ignored -> new HashMap<>())
                 .computeIfAbsent(owner.getUuid(), ignored -> new HashMap<>()).get(target.getUuid());
         if (state == null || state.expiresAt <= world.getTime()) return 1;
         return sequenceDamageMultiplier(state.stacks,
-                tuning.get(Phase5AbilityTuning.Setting.MOLTEN_SEQUENCE_PER_STACK_MULTIPLIER, .1));
+                tuning.get(FireForgeMasteryTuning.Setting.MOLTEN_SEQUENCE_PER_STACK_MULTIPLIER, .1));
     }
 
     static float sequenceDamageMultiplier(int stacks, double perStack) {
@@ -1164,16 +1164,16 @@ public final class MoltenEdgeAbilityManager {
     }
 
     private static void recordSequenceHit(ServerWorld world, LivingEntity owner, LivingEntity target,
-                                          Phase5AbilityTuning tuning) {
+                                          FireForgeMasteryTuning tuning) {
         if (!tuning.flag(1 << 24)) return;
         Map<UUID, SequenceState> states = SEQUENCES.computeIfAbsent(world, ignored -> new HashMap<>())
                 .computeIfAbsent(owner.getUuid(), ignored -> new HashMap<>());
         SequenceState state = states.computeIfAbsent(target.getUuid(), ignored -> new SequenceState());
         if (state.expiresAt <= world.getTime()) state.stacks = 0;
-        state.stacks = Math.min(tuning.integer(Phase5AbilityTuning.Setting.MOLTEN_SEQUENCE_STACK_CAP, 3),
+        state.stacks = Math.min(tuning.integer(FireForgeMasteryTuning.Setting.MOLTEN_SEQUENCE_STACK_CAP, 3),
                 state.stacks + 1);
         state.expiresAt = world.getTime() + tuning.integer(
-                Phase5AbilityTuning.Setting.MOLTEN_SEQUENCE_WINDOW_TICKS, 40);
+                FireForgeMasteryTuning.Setting.MOLTEN_SEQUENCE_WINDOW_TICKS, 40);
     }
 
     private static void pruneSequences(ServerWorld world) {
@@ -1213,8 +1213,8 @@ public final class MoltenEdgeAbilityManager {
     }
 
     private static void igniteAtMaximumHeat(LivingEntity wielder, MoltenHeatComponent heat,
-                                            Phase5AbilityTuning tuning) {
-        int maximum = tuning.integer(Phase5AbilityTuning.Setting.MOLTEN_HEAT_MAX,
+                                            FireForgeMasteryTuning tuning) {
+        int maximum = tuning.integer(FireForgeMasteryTuning.Setting.MOLTEN_HEAT_MAX,
                 MoltenHeatComponent.MAX_HEAT);
         if (heat.heat() >= maximum && !heat.venting() && !tuning.flag(1 << 8)) {
             wielder.setOnFireFor(2);
@@ -1261,17 +1261,17 @@ public final class MoltenEdgeAbilityManager {
     private static final class ActiveVent {
         private final UUID ownerId;
         private final ItemStack stackReference;
-        private final Phase5MoltenManager.Snapshot snapshot;
-        private final Phase5AbilityTuning tuning;
-        private final Phase5AbilityTuning heatTuning;
+        private final MoltenEdgeMasteryManager.Snapshot snapshot;
+        private final FireForgeMasteryTuning tuning;
+        private final FireForgeMasteryTuning heatTuning;
         private final long startedAt;
         private final StatusEffectInstance previousResistance;
         private final Set<UUID> hitTargets = new HashSet<>();
         private long nextSwingTick;
         private int swingCount;
 
-        private ActiveVent(UUID ownerId, ItemStack stackReference, Phase5MoltenManager.Snapshot snapshot,
-                           Phase5AbilityTuning tuning, Phase5AbilityTuning heatTuning, long startedAt,
+        private ActiveVent(UUID ownerId, ItemStack stackReference, MoltenEdgeMasteryManager.Snapshot snapshot,
+                           FireForgeMasteryTuning tuning, FireForgeMasteryTuning heatTuning, long startedAt,
                            StatusEffectInstance previousResistance) {
             this.ownerId = ownerId;
             this.stackReference = stackReference;
@@ -1289,12 +1289,12 @@ public final class MoltenEdgeAbilityManager {
         private final Vec3d origin;
         private final float heatFraction;
         private final float damage;
-        private final Phase5AbilityTuning tuning;
+        private final FireForgeMasteryTuning tuning;
         private int step;
         private final Set<UUID> hitTargets;
 
         private ActiveShockwave(UUID ownerId, ItemStack stack, Vec3d origin, float heatFraction, float damage,
-                                Phase5AbilityTuning tuning, int step, Set<UUID> hitTargets) {
+                                FireForgeMasteryTuning tuning, int step, Set<UUID> hitTargets) {
             this.ownerId = ownerId;
             this.stack = stack;
             this.origin = origin;
@@ -1341,12 +1341,12 @@ public final class MoltenEdgeAbilityManager {
     }
 
     private static final class RuptureCast {
-        private final Phase5MoltenManager.Snapshot snapshot;
+        private final MoltenEdgeMasteryManager.Snapshot snapshot;
         private final Set<UUID> hitTargets;
         private int lanesRemaining;
         private boolean terminal;
 
-        private RuptureCast(Phase5MoltenManager.Snapshot snapshot, int lanesRemaining, Set<UUID> hitTargets) {
+        private RuptureCast(MoltenEdgeMasteryManager.Snapshot snapshot, int lanesRemaining, Set<UUID> hitTargets) {
             this.snapshot = snapshot;
             this.lanesRemaining = lanesRemaining;
             this.hitTargets = hitTargets;
@@ -1355,13 +1355,13 @@ public final class MoltenEdgeAbilityManager {
         private void laneFinished() {
             if (terminal || --lanesRemaining > 0) return;
             terminal = true;
-            Phase5MoltenManager.finishRupture(snapshot, hitTargets.size());
+            MoltenEdgeMasteryManager.finishRupture(snapshot, hitTargets.size());
         }
 
         private void cancel() {
             if (terminal) return;
             terminal = true;
-            Phase5MoltenManager.cancelRupture(snapshot);
+            MoltenEdgeMasteryManager.cancelRupture(snapshot);
         }
     }
 

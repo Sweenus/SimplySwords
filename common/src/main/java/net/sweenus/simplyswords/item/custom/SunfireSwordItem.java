@@ -25,8 +25,8 @@ import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
-import net.sweenus.simplyswords.api.ability.Phase4AbilityTuning;
-import net.sweenus.simplyswords.api.ability.Phase4UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.LongPathFinalFormsMasteryTuning;
+import net.sweenus.simplyswords.api.ability.LongPathFinalFormsMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityContext;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
@@ -38,7 +38,7 @@ import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
-import net.sweenus.simplyswords.world.Phase4PassiveManager;
+import net.sweenus.simplyswords.world.LongPathFinalFormsMasteryCombatManager;
 
 import java.util.List;
 
@@ -54,7 +54,7 @@ public class SunfireSwordItem extends UniqueSwordItem implements UniqueWeaponAct
             return super.postHit(stack, target, attacker);
         }
         HelperMethods.playHitSounds(attacker, target);
-        if (!attacker.getWorld().isClient()) Phase4PassiveManager.sunfireMelee(stack, target, attacker);
+        if (!attacker.getWorld().isClient()) LongPathFinalFormsMasteryCombatManager.sunfireMelee(stack, target, attacker);
         return super.postHit(stack, target, attacker);
     }
 
@@ -82,14 +82,14 @@ public class SunfireSwordItem extends UniqueSwordItem implements UniqueWeaponAct
 
     @Override
     public boolean activate(WeaponAbilityContext context) {
-        UniqueAbilityExecution execution = UniqueAbilityApi.begin(Phase4UniqueAbilities.SUNFIRE_STANDARD,
+        UniqueAbilityExecution execution = UniqueAbilityApi.begin(LongPathFinalFormsMasteryAbilities.SUNFIRE_STANDARD,
                 UniqueAbilityContext.active(context), tuning -> tuning
-                        .set(Phase4UniqueAbilities.TUNING, Phase4AbilityTuning.EMPTY)
-                        .set(Phase4UniqueAbilities.COOLDOWN_TICKS, Config.uniqueEffects.sunfire.cooldown));
+                        .set(LongPathFinalFormsMasteryAbilities.TUNING, LongPathFinalFormsMasteryTuning.EMPTY)
+                        .set(LongPathFinalFormsMasteryAbilities.COOLDOWN_TICKS, Config.uniqueEffects.sunfire.cooldown));
         BattleStandardEntity standard = spawnSunfireStandard(context.world(), context.actor());
         if (standard == null) return false;
-        if (Phase4UniqueAbilities.tuning(execution).isEmpty()) UniqueAbilityApi.cancel(execution);
-        else standard.configurePhase4(execution, context.stack());
+        if (LongPathFinalFormsMasteryAbilities.tuning(execution).isEmpty()) UniqueAbilityApi.cancel(execution);
+        else standard.configureMastery(execution, context.stack());
         return true;
     }
 
@@ -127,7 +127,7 @@ public class SunfireSwordItem extends UniqueSwordItem implements UniqueWeaponAct
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
         if (!world.isClient() && selected && entity instanceof LivingEntity living) {
-            Phase4PassiveManager.tickHeld(stack, living);
+            LongPathFinalFormsMasteryCombatManager.tickHeld(stack, living);
         }
         HelperMethods.createFootfalls(entity, stack, world, ParticleTypes.MYCELIUM, ParticleTypes.MYCELIUM,
                 ParticleTypes.MYCELIUM, true);

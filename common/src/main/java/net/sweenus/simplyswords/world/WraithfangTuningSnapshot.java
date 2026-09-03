@@ -1,8 +1,8 @@
 package net.sweenus.simplyswords.world;
 
 import net.minecraft.nbt.NbtCompound;
-import net.sweenus.simplyswords.api.ability.Phase2AbilityTuning;
-import net.sweenus.simplyswords.api.ability.Phase2UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.AbyssalSpectralMasteryTuning;
+import net.sweenus.simplyswords.api.ability.AbyssalSpectralMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 
 public record WraithfangTuningSnapshot(
@@ -25,56 +25,56 @@ public record WraithfangTuningSnapshot(
     private static final String NBT_KEY = "wraithfang_tuning";
 
     public static WraithfangTuningSnapshot from(UniqueAbilityExecution execution) {
-        Phase2AbilityTuning t = execution == null ? Phase2AbilityTuning.EMPTY
-                : Phase2UniqueAbilities.tuning(execution);
+        AbyssalSpectralMasteryTuning t = execution == null ? AbyssalSpectralMasteryTuning.EMPTY
+                : AbyssalSpectralMasteryAbilities.tuning(execution);
         return fromTuning(t, execution == null ? 20 : execution.cooldownTicks(20));
     }
 
-    static WraithfangTuningSnapshot fromTuning(Phase2AbilityTuning t, int cooldownTicks) {
+    static WraithfangTuningSnapshot fromTuning(AbyssalSpectralMasteryTuning t, int cooldownTicks) {
         return new WraithfangTuningSnapshot(
-                t.get(Phase2AbilityTuning.Setting.PROJECTILE_DAMAGE_MULTIPLIER, 1),
-                t.get(Phase2AbilityTuning.Setting.FLIGHT_DAMAGE_PER_TICK, .5),
-                t.integer(Phase2AbilityTuning.Setting.FLIGHT_DAMAGE_CAP_TICKS, 1200),
-                t.integer(Phase2AbilityTuning.Setting.LOYALTY, 1),
-                t.integer(Phase2AbilityTuning.Setting.PIERCE_COUNT, 0),
-                t.get(Phase2AbilityTuning.Setting.PIERCE_DAMAGE_MULTIPLIER, 1),
-                t.integer(Phase2AbilityTuning.Setting.STATUS_DURATION_TICKS, 0),
-                t.integer(Phase2AbilityTuning.Setting.STATUS_AMPLIFIER, 0),
-                t.get(Phase2AbilityTuning.Setting.IMPACT_DAMAGE_MULTIPLIER, 0),
-                t.get(Phase2AbilityTuning.Setting.IMPACT_RADIUS, 0),
-                t.integer(Phase2AbilityTuning.Setting.IMPACT_TARGET_CAP, 0),
-                t.integer(Phase2AbilityTuning.Setting.BURST_LOCKOUT_TICKS, 0),
-                t.integer(Phase2AbilityTuning.Setting.RETURN_DELAY_TICKS, 0),
-                t.integer(Phase2AbilityTuning.Setting.MODE, 0),
+                t.get(AbyssalSpectralMasteryTuning.Setting.PROJECTILE_DAMAGE_MULTIPLIER, 1),
+                t.get(AbyssalSpectralMasteryTuning.Setting.FLIGHT_DAMAGE_PER_TICK, .5),
+                t.integer(AbyssalSpectralMasteryTuning.Setting.FLIGHT_DAMAGE_CAP_TICKS, 1200),
+                t.integer(AbyssalSpectralMasteryTuning.Setting.LOYALTY, 1),
+                t.integer(AbyssalSpectralMasteryTuning.Setting.PIERCE_COUNT, 0),
+                t.get(AbyssalSpectralMasteryTuning.Setting.PIERCE_DAMAGE_MULTIPLIER, 1),
+                t.integer(AbyssalSpectralMasteryTuning.Setting.STATUS_DURATION_TICKS, 0),
+                t.integer(AbyssalSpectralMasteryTuning.Setting.STATUS_AMPLIFIER, 0),
+                t.get(AbyssalSpectralMasteryTuning.Setting.IMPACT_DAMAGE_MULTIPLIER, 0),
+                t.get(AbyssalSpectralMasteryTuning.Setting.IMPACT_RADIUS, 0),
+                t.integer(AbyssalSpectralMasteryTuning.Setting.IMPACT_TARGET_CAP, 0),
+                t.integer(AbyssalSpectralMasteryTuning.Setting.BURST_LOCKOUT_TICKS, 0),
+                t.integer(AbyssalSpectralMasteryTuning.Setting.RETURN_DELAY_TICKS, 0),
+                t.integer(AbyssalSpectralMasteryTuning.Setting.MODE, 0),
                 cooldownTicks,
-                t.integer(Phase2AbilityTuning.Setting.PROJECTILE_LIFETIME, 80),
-                t.get(Phase2AbilityTuning.Setting.DASH_TARGET_RANGE, 14.4),
-                t.get(Phase2AbilityTuning.Setting.DASH_SPEED, 1.35),
-                t.integer(Phase2AbilityTuning.Setting.DASH_DURATION_TICKS, 10),
-                t.get(Phase2AbilityTuning.Setting.DASH_CONTACT_DAMAGE_MULTIPLIER, 0),
-                t.integer(Phase2AbilityTuning.Setting.DASH_CONTACT_TARGET_CAP, 0),
-                t.get(Phase2AbilityTuning.Setting.HOMING_TURN_DEGREES, 0),
-                t.integer(Phase2AbilityTuning.Setting.DASH_STEERING_TICKS, 0),
-                t.get(Phase2AbilityTuning.Setting.ARRIVAL_RANGE, 0),
-                t.get(Phase2AbilityTuning.Setting.ARRIVAL_DAMAGE_MULTIPLIER, 0),
-                t.integer(Phase2AbilityTuning.Setting.DASH_STATUS_DURATION_TICKS, 0),
-                t.integer(Phase2AbilityTuning.Setting.DASH_STATUS_AMPLIFIER, 0),
-                t.integer(Phase2AbilityTuning.Setting.HASTE_DURATION_TICKS, 80),
-                t.integer(Phase2AbilityTuning.Setting.HASTE_AMPLIFIER, 1),
-                t.get(Phase2AbilityTuning.Setting.MELEE_BONUS_PER_STACK, 0),
-                t.integer(Phase2AbilityTuning.Setting.PROJECTILE_GUARD_TICKS, 0),
-                t.get(Phase2AbilityTuning.Setting.PROJECTILE_DAMAGE_REDUCTION, 0),
-                t.integer(Phase2AbilityTuning.Setting.KILL_HASTE_DURATION_TICKS, 0),
-                t.integer(Phase2AbilityTuning.Setting.KILL_HASTE_AMPLIFIER, 0),
-                t.integer(Phase2AbilityTuning.Setting.KILL_COOLDOWN_REFUND_TICKS, 0),
-                t.integer(Phase2AbilityTuning.Setting.ALTERNATION_WINDOW_TICKS, 0),
-                t.get(Phase2AbilityTuning.Setting.ALTERNATION_BONUS_PER_STACK, 0),
-                t.get(Phase2AbilityTuning.Setting.ALTERNATION_BONUS_CAP, 0),
-                t.integer(Phase2AbilityTuning.Setting.COOLDOWN_REFUND_TICKS, 0),
-                t.integer(Phase2AbilityTuning.Setting.COOLDOWN_REFUND_CAP_TICKS, 0),
-                t.get(Phase2AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1),
-                t.integer(Phase2AbilityTuning.Setting.RETURN_MELEE_WINDOW_TICKS, 0),
-                t.get(Phase2AbilityTuning.Setting.RETURN_MELEE_DAMAGE_MULTIPLIER, 0));
+                t.integer(AbyssalSpectralMasteryTuning.Setting.PROJECTILE_LIFETIME, 80),
+                t.get(AbyssalSpectralMasteryTuning.Setting.DASH_TARGET_RANGE, 14.4),
+                t.get(AbyssalSpectralMasteryTuning.Setting.DASH_SPEED, 1.35),
+                t.integer(AbyssalSpectralMasteryTuning.Setting.DASH_DURATION_TICKS, 10),
+                t.get(AbyssalSpectralMasteryTuning.Setting.DASH_CONTACT_DAMAGE_MULTIPLIER, 0),
+                t.integer(AbyssalSpectralMasteryTuning.Setting.DASH_CONTACT_TARGET_CAP, 0),
+                t.get(AbyssalSpectralMasteryTuning.Setting.HOMING_TURN_DEGREES, 0),
+                t.integer(AbyssalSpectralMasteryTuning.Setting.DASH_STEERING_TICKS, 0),
+                t.get(AbyssalSpectralMasteryTuning.Setting.ARRIVAL_RANGE, 0),
+                t.get(AbyssalSpectralMasteryTuning.Setting.ARRIVAL_DAMAGE_MULTIPLIER, 0),
+                t.integer(AbyssalSpectralMasteryTuning.Setting.DASH_STATUS_DURATION_TICKS, 0),
+                t.integer(AbyssalSpectralMasteryTuning.Setting.DASH_STATUS_AMPLIFIER, 0),
+                t.integer(AbyssalSpectralMasteryTuning.Setting.HASTE_DURATION_TICKS, 80),
+                t.integer(AbyssalSpectralMasteryTuning.Setting.HASTE_AMPLIFIER, 1),
+                t.get(AbyssalSpectralMasteryTuning.Setting.MELEE_BONUS_PER_STACK, 0),
+                t.integer(AbyssalSpectralMasteryTuning.Setting.PROJECTILE_GUARD_TICKS, 0),
+                t.get(AbyssalSpectralMasteryTuning.Setting.PROJECTILE_DAMAGE_REDUCTION, 0),
+                t.integer(AbyssalSpectralMasteryTuning.Setting.KILL_HASTE_DURATION_TICKS, 0),
+                t.integer(AbyssalSpectralMasteryTuning.Setting.KILL_HASTE_AMPLIFIER, 0),
+                t.integer(AbyssalSpectralMasteryTuning.Setting.KILL_COOLDOWN_REFUND_TICKS, 0),
+                t.integer(AbyssalSpectralMasteryTuning.Setting.ALTERNATION_WINDOW_TICKS, 0),
+                t.get(AbyssalSpectralMasteryTuning.Setting.ALTERNATION_BONUS_PER_STACK, 0),
+                t.get(AbyssalSpectralMasteryTuning.Setting.ALTERNATION_BONUS_CAP, 0),
+                t.integer(AbyssalSpectralMasteryTuning.Setting.COOLDOWN_REFUND_TICKS, 0),
+                t.integer(AbyssalSpectralMasteryTuning.Setting.COOLDOWN_REFUND_CAP_TICKS, 0),
+                t.get(AbyssalSpectralMasteryTuning.Setting.DAMAGE_MULTIPLIER, 1),
+                t.integer(AbyssalSpectralMasteryTuning.Setting.RETURN_MELEE_WINDOW_TICKS, 0),
+                t.get(AbyssalSpectralMasteryTuning.Setting.RETURN_MELEE_DAMAGE_MULTIPLIER, 0));
     }
 
     public boolean hasMode(int bit) {

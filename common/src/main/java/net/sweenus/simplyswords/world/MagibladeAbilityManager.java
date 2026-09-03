@@ -21,8 +21,8 @@ import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
-import net.sweenus.simplyswords.api.ability.Phase9AbilityTuning;
-import net.sweenus.simplyswords.api.ability.Phase9UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.ArcaneCosmicMasteryTuning;
+import net.sweenus.simplyswords.api.ability.ArcaneCosmicMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.MagibladeWardenHeadVisualEntity;
@@ -82,57 +82,57 @@ public final class MagibladeAbilityManager {
             return 1.0F;
         }
         passive.countertoneTarget = null;
-        return (float) passive.tuning.get(Phase9AbilityTuning.Setting.OUTGOING_MULTIPLIER, 1.15);
+        return (float) passive.tuning.get(ArcaneCosmicMasteryTuning.Setting.OUTGOING_MULTIPLIER, 1.15);
     }
 
-    public static Phase9AbilityTuning repulsionBase(int frequency, int chance, double radius) {
-        return Phase9AbilityTuning.EMPTY
-                .with(Phase9AbilityTuning.Setting.INTERVAL_TICKS, frequency)
-                .with(Phase9AbilityTuning.Setting.CHANCE, chance)
-                .with(Phase9AbilityTuning.Setting.RADIUS, radius)
-                .with(Phase9AbilityTuning.Setting.KNOCKBACK, 1)
-                .with(Phase9AbilityTuning.Setting.DAMAGE_MULTIPLIER, .6);
+    public static ArcaneCosmicMasteryTuning repulsionBase(int frequency, int chance, double radius) {
+        return ArcaneCosmicMasteryTuning.EMPTY
+                .with(ArcaneCosmicMasteryTuning.Setting.INTERVAL_TICKS, frequency)
+                .with(ArcaneCosmicMasteryTuning.Setting.CHANCE, chance)
+                .with(ArcaneCosmicMasteryTuning.Setting.RADIUS, radius)
+                .with(ArcaneCosmicMasteryTuning.Setting.KNOCKBACK, 1)
+                .with(ArcaneCosmicMasteryTuning.Setting.DAMAGE_MULTIPLIER, .6);
     }
 
-    public static Phase9AbilityTuning wardenBase(int chargeDuration, int summonDuration,
+    public static ArcaneCosmicMasteryTuning wardenBase(int chargeDuration, int summonDuration,
                                                  double orbitRadius, double sonicRange) {
-        return Phase9AbilityTuning.EMPTY
-                .with(Phase9AbilityTuning.Setting.WINDUP_TICKS, chargeDuration)
-                .with(Phase9AbilityTuning.Setting.DURATION_TICKS, summonDuration)
-                .with(Phase9AbilityTuning.Setting.RADIUS, orbitRadius)
-                .with(Phase9AbilityTuning.Setting.RANGE, sonicRange)
-                .with(Phase9AbilityTuning.Setting.SPEED, 1)
-                .with(Phase9AbilityTuning.Setting.COUNT, 1)
-                .with(Phase9AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1);
+        return ArcaneCosmicMasteryTuning.EMPTY
+                .with(ArcaneCosmicMasteryTuning.Setting.WINDUP_TICKS, chargeDuration)
+                .with(ArcaneCosmicMasteryTuning.Setting.DURATION_TICKS, summonDuration)
+                .with(ArcaneCosmicMasteryTuning.Setting.RADIUS, orbitRadius)
+                .with(ArcaneCosmicMasteryTuning.Setting.RANGE, sonicRange)
+                .with(ArcaneCosmicMasteryTuning.Setting.SPEED, 1)
+                .with(ArcaneCosmicMasteryTuning.Setting.COUNT, 1)
+                .with(ArcaneCosmicMasteryTuning.Setting.DAMAGE_MULTIPLIER, 1);
     }
 
-    public static Phase9AbilityTuning judgmentBase(int sonicInterval, int sonicCharge, double beamWidth) {
-        return Phase9AbilityTuning.EMPTY
-                .with(Phase9AbilityTuning.Setting.INTERVAL_TICKS, sonicInterval)
-                .with(Phase9AbilityTuning.Setting.WINDUP_TICKS, sonicCharge)
-                .with(Phase9AbilityTuning.Setting.SECONDARY_INTERVAL_TICKS, sonicCharge)
-                .with(Phase9AbilityTuning.Setting.WIDTH, beamWidth)
-                .with(Phase9AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1);
+    public static ArcaneCosmicMasteryTuning judgmentBase(int sonicInterval, int sonicCharge, double beamWidth) {
+        return ArcaneCosmicMasteryTuning.EMPTY
+                .with(ArcaneCosmicMasteryTuning.Setting.INTERVAL_TICKS, sonicInterval)
+                .with(ArcaneCosmicMasteryTuning.Setting.WINDUP_TICKS, sonicCharge)
+                .with(ArcaneCosmicMasteryTuning.Setting.SECONDARY_INTERVAL_TICKS, sonicCharge)
+                .with(ArcaneCosmicMasteryTuning.Setting.WIDTH, beamWidth)
+                .with(ArcaneCosmicMasteryTuning.Setting.DAMAGE_MULTIPLIER, 1);
     }
 
-    private static Phase9AbilityTuning repulsionBase() {
+    private static ArcaneCosmicMasteryTuning repulsionBase() {
         return repulsionBase(Config.uniqueEffects.magiblade.repelFrequency, Config.uniqueEffects.magiblade.repelChance,
                 Config.uniqueEffects.magiblade.repelRadius);
     }
 
-    private static Phase9AbilityTuning wardenBase() {
+    private static ArcaneCosmicMasteryTuning wardenBase() {
         return wardenBase(chargeDuration(), summonDuration(), Config.uniqueEffects.magiblade.headOrbitRadius, sonicRange());
     }
 
-    private static Phase9AbilityTuning judgmentBase() {
+    private static ArcaneCosmicMasteryTuning judgmentBase() {
         return judgmentBase(sonicInterval(), sonicChargeDuration(), SONIC_BEAM_WIDTH);
     }
 
     public static void clear(ServerWorld world) {
         Map<UUID, ChargeState> charges = ACTIVE_CHARGES.remove(world);
-        if (charges != null) charges.values().forEach(charge -> Phase9CombatManager.finish(charge.execution, 0));
+        if (charges != null) charges.values().forEach(charge -> ArcaneCosmicMasteryCombatManager.finish(charge.execution, 0));
         Map<UUID, HeadState> heads = ACTIVE_HEADS.remove(world);
-        if (heads != null) heads.values().forEach(head -> Phase9CombatManager.finish(head.execution, head.affectedTargets));
+        if (heads != null) heads.values().forEach(head -> ArcaneCosmicMasteryCombatManager.finish(head.execution, head.affectedTargets));
         LAST_PASSIVE_TICKS.remove(world);
     }
 
@@ -141,19 +141,19 @@ public final class MagibladeAbilityManager {
         REPULSION_STATES.remove(actor.getUuid());
         ACTIVE_CHARGES.values().forEach(map -> {
             ChargeState charge = map.remove(actor.getUuid());
-            if (charge != null) Phase9CombatManager.finish(charge.execution, 0);
+            if (charge != null) ArcaneCosmicMasteryCombatManager.finish(charge.execution, 0);
         });
         ACTIVE_HEADS.values().forEach(map -> {
             HeadState head = map.remove(actor.getUuid());
-            if (head != null) Phase9CombatManager.finish(head.execution, head.affectedTargets);
+            if (head != null) ArcaneCosmicMasteryCombatManager.finish(head.execution, head.affectedTargets);
         });
     }
 
     public static void clearAll() {
         ACTIVE_CHARGES.values().forEach(map -> map.values().forEach(
-                charge -> Phase9CombatManager.finish(charge.execution, 0)));
+                charge -> ArcaneCosmicMasteryCombatManager.finish(charge.execution, 0)));
         ACTIVE_HEADS.values().forEach(map -> map.values().forEach(
-                head -> Phase9CombatManager.finish(head.execution, head.affectedTargets)));
+                head -> ArcaneCosmicMasteryCombatManager.finish(head.execution, head.affectedTargets)));
         ACTIVE_CHARGES.clear();
         ACTIVE_HEADS.clear();
         REPULSION_STATES.clear();
@@ -165,15 +165,15 @@ public final class MagibladeAbilityManager {
             return false;
         }
 
-        UniqueAbilityExecution execution = Phase9CombatManager.beginActive(
-                Phase9UniqueAbilities.MAGIBLADE_WARDEN, context, Config.uniqueEffects.magiblade.cooldown,
+        UniqueAbilityExecution execution = ArcaneCosmicMasteryCombatManager.beginActive(
+                ArcaneCosmicMasteryAbilities.MAGIBLADE_WARDEN, context, Config.uniqueEffects.magiblade.cooldown,
                 wardenBase());
-        Phase9AbilityTuning tuning = Phase9UniqueAbilities.tuning(execution);
-        UniqueAbilityExecution judgmentExecution = Phase9CombatManager.beginPassive(
-                Phase9UniqueAbilities.MAGIBLADE_JUDGMENT, context.world(), context.stack(),
+        ArcaneCosmicMasteryTuning tuning = ArcaneCosmicMasteryAbilities.tuning(execution);
+        UniqueAbilityExecution judgmentExecution = ArcaneCosmicMasteryCombatManager.beginPassive(
+                ArcaneCosmicMasteryAbilities.MAGIBLADE_JUDGMENT, context.world(), context.stack(),
                 context.actor(), null, judgmentBase());
-        Phase9AbilityTuning judgment = Phase9UniqueAbilities.tuning(judgmentExecution);
-        Phase9CombatManager.finish(judgmentExecution, 0);
+        ArcaneCosmicMasteryTuning judgment = ArcaneCosmicMasteryAbilities.tuning(judgmentExecution);
+        ArcaneCosmicMasteryCombatManager.finish(judgmentExecution, 0);
         LivingEntity actor = context.actor();
         Hand hand = context.hand() == null ? Hand.MAIN_HAND : context.hand();
         ChargeState charge = new ChargeState(
@@ -209,7 +209,7 @@ public final class MagibladeAbilityManager {
         if (clearCooldown) {
             clearCooldown(actor, removed.stack);
         }
-        Phase9CombatManager.finish(removed.execution, 0);
+        ArcaneCosmicMasteryCombatManager.finish(removed.execution, 0);
         spawnCancelledChargeEffects(world, actor);
     }
 
@@ -229,10 +229,10 @@ public final class MagibladeAbilityManager {
         RepulsionState passive = REPULSION_STATES.computeIfAbsent(actor.getUuid(), ignored -> new RepulsionState());
         if (now >= passive.refreshAt) {
             passive.refreshAt = now + 20;
-            UniqueAbilityExecution execution = Phase9CombatManager.beginPassive(
-                    Phase9UniqueAbilities.MAGIBLADE_REPULSION, world, stack, actor, null, repulsionBase());
-            passive.tuning = Phase9UniqueAbilities.tuning(execution);
-            Phase9CombatManager.finish(execution, 0);
+            UniqueAbilityExecution execution = ArcaneCosmicMasteryCombatManager.beginPassive(
+                    ArcaneCosmicMasteryAbilities.MAGIBLADE_REPULSION, world, stack, actor, null, repulsionBase());
+            passive.tuning = ArcaneCosmicMasteryAbilities.tuning(execution);
+            ArcaneCosmicMasteryCombatManager.finish(execution, 0);
         }
         Map<UUID, Long> lastTicks = LAST_PASSIVE_TICKS.computeIfAbsent(world, ignored -> new HashMap<>());
         if (lastTicks.getOrDefault(actor.getUuid(), Long.MIN_VALUE) == now) {
@@ -247,18 +247,18 @@ public final class MagibladeAbilityManager {
         }
 
         int frequency = Math.max(1, passive.tuning.integer(
-                Phase9AbilityTuning.Setting.INTERVAL_TICKS, Config.uniqueEffects.magiblade.repelFrequency));
+                ArcaneCosmicMasteryTuning.Setting.INTERVAL_TICKS, Config.uniqueEffects.magiblade.repelFrequency));
         if ((actor.age + actor.getId()) % frequency != 0) {
             return;
         }
         int chance = Math.clamp(passive.tuning.integer(
-                Phase9AbilityTuning.Setting.CHANCE, Config.uniqueEffects.magiblade.repelChance), 0, 100);
+                ArcaneCosmicMasteryTuning.Setting.CHANCE, Config.uniqueEffects.magiblade.repelChance), 0, 100);
         if (chance <= 0 || actor.getRandom().nextInt(100) >= chance) {
             return;
         }
 
         double radius = Math.max(0.5, passive.tuning.get(
-                Phase9AbilityTuning.Setting.RADIUS, Config.uniqueEffects.magiblade.repelRadius));
+                ArcaneCosmicMasteryTuning.Setting.RADIUS, Config.uniqueEffects.magiblade.repelRadius));
         Box searchBox = actor.getBoundingBox().expand(radius, Math.max(1.0, radius * 0.5), radius);
         LivingEntity closest = world.getEntitiesByClass(
                         LivingEntity.class,
@@ -271,7 +271,7 @@ public final class MagibladeAbilityManager {
             return;
         }
 
-        double knockback = .5 * passive.tuning.get(Phase9AbilityTuning.Setting.KNOCKBACK, 1);
+        double knockback = .5 * passive.tuning.get(ArcaneCosmicMasteryTuning.Setting.KNOCKBACK, 1);
         closest.setVelocity(
                 (closest.getX() - actor.getX()) * knockback,
                 closest.getVelocity().y,
@@ -279,23 +279,23 @@ public final class MagibladeAbilityManager {
         );
         if (passive.tuning.flag(1 << 4)) closest.addStatusEffect(new net.minecraft.entity.effect.StatusEffectInstance(
                 net.minecraft.entity.effect.StatusEffects.SLOWNESS,
-                passive.tuning.integer(Phase9AbilityTuning.Setting.STATUS_DURATION_TICKS, 30),
-                passive.tuning.integer(Phase9AbilityTuning.Setting.STATUS_AMPLIFIER, 1)), actor);
+                passive.tuning.integer(ArcaneCosmicMasteryTuning.Setting.STATUS_DURATION_TICKS, 30),
+                passive.tuning.integer(ArcaneCosmicMasteryTuning.Setting.STATUS_AMPLIFIER, 1)), actor);
         if (passive.tuning.flag(1 << 6)) actor.addStatusEffect(new net.minecraft.entity.effect.StatusEffectInstance(
                 net.minecraft.entity.effect.StatusEffects.RESISTANCE,
-                passive.tuning.integer(Phase9AbilityTuning.Setting.SECONDARY_DURATION_TICKS, 20), 0), actor);
+                passive.tuning.integer(ArcaneCosmicMasteryTuning.Setting.SECONDARY_DURATION_TICKS, 20), 0), actor);
         if (passive.tuning.flag(1 << 5)) {
             passive.countertoneTarget = closest.getUuid();
-            passive.countertoneUntil = now + passive.tuning.integer(Phase9AbilityTuning.Setting.DURATION_TICKS, 60);
+            passive.countertoneUntil = now + passive.tuning.integer(ArcaneCosmicMasteryTuning.Setting.DURATION_TICKS, 60);
         }
         if (passive.tuning.flag(1 << 8)) {
             float damage = HelperMethods.abilityScaledDamage("arcane", actor, stack,
                     Config.uniqueEffects.magiblade.damageScaling
-                            * (float) passive.tuning.get(Phase9AbilityTuning.Setting.DAMAGE_MULTIPLIER, .6),
+                            * (float) passive.tuning.get(ArcaneCosmicMasteryTuning.Setting.DAMAGE_MULTIPLIER, .6),
                     Config.uniqueEffects.magiblade.spellScaling);
             world.getEntitiesByClass(LivingEntity.class, searchBox,
                             target -> isValidEnemy(world, actor, null, target))
-                    .stream().limit(passive.tuning.integer(Phase9AbilityTuning.Setting.TARGET_CAP, 6))
+                    .stream().limit(passive.tuning.integer(ArcaneCosmicMasteryTuning.Setting.TARGET_CAP, 6))
                     .forEach(target -> target.damage(
                             world.getDamageSources().indirectMagic(actor, actor), damage));
         }
@@ -344,7 +344,7 @@ public final class MagibladeAbilityManager {
                     clearCooldown(actor, charge.stack);
                     spawnCancelledChargeEffects(world, actor);
                 }
-                Phase9CombatManager.finish(charge.execution, 0);
+                ArcaneCosmicMasteryCombatManager.finish(charge.execution, 0);
                 continue;
             }
 
@@ -386,7 +386,7 @@ public final class MagibladeAbilityManager {
                 if (visual != null) {
                     beginDismissal(world, actor, visual);
                 }
-                Phase9CombatManager.finish(head.execution, head.affectedTargets);
+                ArcaneCosmicMasteryCombatManager.finish(head.execution, head.affectedTargets);
                 iterator.remove();
                 continue;
             }
@@ -394,7 +394,7 @@ public final class MagibladeAbilityManager {
             if (visual == null) {
                 visual = spawnVisual(world, actor, head);
                 if (visual == null) {
-                    Phase9CombatManager.finish(head.execution, head.affectedTargets);
+                    ArcaneCosmicMasteryCombatManager.finish(head.execution, head.affectedTargets);
                     iterator.remove();
                     continue;
                 }
@@ -414,13 +414,13 @@ public final class MagibladeAbilityManager {
                                        ChargeState charge, long now) {
         float damage = HelperMethods.abilityScaledDamage("arcane", actor, charge.stack,
                 Config.uniqueEffects.magiblade.damageScaling * (float) charge.tuning.get(
-                        Phase9AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1)
-                        * (float) charge.judgment.get(Phase9AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1),
+                        ArcaneCosmicMasteryTuning.Setting.DAMAGE_MULTIPLIER, 1)
+                        * (float) charge.judgment.get(ArcaneCosmicMasteryTuning.Setting.DAMAGE_MULTIPLIER, 1),
                 Config.uniqueEffects.magiblade.spellScaling);
         Map<UUID, HeadState> heads = ACTIVE_HEADS.computeIfAbsent(world, ignored -> new HashMap<>());
         HeadState existing = heads.get(actor.getUuid());
         if (existing != null) {
-            Phase9CombatManager.finish(existing.execution, existing.affectedTargets);
+            ArcaneCosmicMasteryCombatManager.finish(existing.execution, existing.affectedTargets);
             existing.sourceOwnerId = sourceOwner == null ? null : sourceOwner.getUuid();
             existing.stack = charge.stack.copy();
             existing.damage = Math.max(0.0F, damage);
@@ -456,7 +456,7 @@ public final class MagibladeAbilityManager {
         head.judgment = charge.judgment;
         MagibladeWardenHeadVisualEntity visual = spawnVisual(world, actor, head);
         if (visual == null) {
-            Phase9CombatManager.finish(charge.execution, 0);
+            ArcaneCosmicMasteryCombatManager.finish(charge.execution, 0);
             return;
         }
         heads.put(actor.getUuid(), head);
@@ -493,10 +493,10 @@ public final class MagibladeAbilityManager {
     private static void tickBoundWarden(ServerWorld world, LivingEntity actor, HeadState head, long now) {
         if (!head.tuning.flag(1 << 15)) return;
         if (now < head.nextGuardAt) return;
-        head.nextGuardAt = now + Math.max(1, head.tuning.integer(Phase9AbilityTuning.Setting.INTERVAL_TICKS, 80));
-        Phase4AbsorptionTracker.grant(actor, (float) head.tuning.get(Phase9AbilityTuning.Setting.ABSORPTION, 4),
-                Math.max(1, head.tuning.integer(Phase9AbilityTuning.Setting.INTERVAL_TICKS, 80)),
-                (float) head.tuning.get(Phase9AbilityTuning.Setting.ABSORPTION, 4));
+        head.nextGuardAt = now + Math.max(1, head.tuning.integer(ArcaneCosmicMasteryTuning.Setting.INTERVAL_TICKS, 80));
+        MasteryAbsorptionTracker.grant(actor, (float) head.tuning.get(ArcaneCosmicMasteryTuning.Setting.ABSORPTION, 4),
+                Math.max(1, head.tuning.integer(ArcaneCosmicMasteryTuning.Setting.INTERVAL_TICKS, 80)),
+                (float) head.tuning.get(ArcaneCosmicMasteryTuning.Setting.ABSORPTION, 4));
         actor.addStatusEffect(new net.minecraft.entity.effect.StatusEffectInstance(
                 net.minecraft.entity.effect.StatusEffects.RESISTANCE, 20, 0, false, false, true), actor);
     }
@@ -505,9 +505,9 @@ public final class MagibladeAbilityManager {
         double elapsed = Math.max(0L, now - head.spawnedAt);
         double angle = head.orbitPhase + elapsed * Math.max(0.001,
                 Config.uniqueEffects.magiblade.headOrbitSpeed * head.tuning.get(
-                        Phase9AbilityTuning.Setting.SPEED, 1));
+                        ArcaneCosmicMasteryTuning.Setting.SPEED, 1));
         double radius = Math.max(0.0, head.tuning.get(
-                Phase9AbilityTuning.Setting.RADIUS, Config.uniqueEffects.magiblade.headOrbitRadius));
+                ArcaneCosmicMasteryTuning.Setting.RADIUS, Config.uniqueEffects.magiblade.headOrbitRadius));
         double bob = MathHelper.sin((float) (elapsed * ORBIT_BOB_SPEED + head.orbitPhase)) * ORBIT_BOB_HEIGHT;
         return new Vec3d(
                 actor.getX() + Math.cos(angle) * radius,
@@ -603,7 +603,7 @@ public final class MagibladeAbilityManager {
         float desiredYaw = (float) (MathHelper.atan2(direction.z, direction.x) * MathHelper.DEGREES_PER_RADIAN) - 90.0F;
         float desiredPitch = (float) (-(MathHelper.atan2(direction.y, horizontal) * MathHelper.DEGREES_PER_RADIAN));
         float turnSpeed = Math.max(0.1F, Config.uniqueEffects.magiblade.headTurnSpeedDegreesPerTick
-                * (float) head.tuning.get(Phase9AbilityTuning.Setting.SPEED, 1));
+                * (float) head.tuning.get(ArcaneCosmicMasteryTuning.Setting.SPEED, 1));
         visual.setTargetYaw(MathHelper.stepUnwrappedAngleTowards(visual.getTargetYaw(), desiredYaw, turnSpeed));
         visual.setTargetPitch(MathHelper.stepTowards(
                 visual.getTargetPitch(),
@@ -615,22 +615,22 @@ public final class MagibladeAbilityManager {
     private static void harmonicCollapse(ServerWorld world, LivingEntity actor, HeadState head,
                                          LivingEntity target) {
         if (!head.judgment.flag(1 << 24)) return;
-        int required = Math.max(1, head.judgment.integer(Phase9AbilityTuning.Setting.COUNT, 3));
+        int required = Math.max(1, head.judgment.integer(ArcaneCosmicMasteryTuning.Setting.COUNT, 3));
         if (head.sonicHits.merge(target.getUuid(), 1, Integer::sum) % required != 0) return;
-        double radius = head.judgment.get(Phase9AbilityTuning.Setting.SECONDARY_RADIUS, 2.5);
+        double radius = head.judgment.get(ArcaneCosmicMasteryTuning.Setting.SECONDARY_RADIUS, 2.5);
         float damage = head.damage * (float) head.judgment.get(
-                Phase9AbilityTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, .5);
+                ArcaneCosmicMasteryTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, .5);
         world.getEntitiesByClass(LivingEntity.class, target.getBoundingBox().expand(radius),
                         other -> isValidEnemy(world, actor, null, other))
-                .stream().limit(head.judgment.integer(Phase9AbilityTuning.Setting.TARGET_CAP, 5))
+                .stream().limit(head.judgment.integer(ArcaneCosmicMasteryTuning.Setting.TARGET_CAP, 5))
                 .forEach(other -> HelperMethods.damageThroughIframes(other,
                         world.getDamageSources().indirectMagic(actor, actor), damage));
     }
 
     private static boolean passesJudgmentFilter(HeadState head, LivingEntity target) {
-        if (!head.judgment.has(Phase9AbilityTuning.Setting.HEALTH_THRESHOLD)) return true;
+        if (!head.judgment.has(ArcaneCosmicMasteryTuning.Setting.HEALTH_THRESHOLD)) return true;
         return target.getHealth() <= target.getMaxHealth()
-                * head.judgment.get(Phase9AbilityTuning.Setting.HEALTH_THRESHOLD, .5);
+                * head.judgment.get(ArcaneCosmicMasteryTuning.Setting.HEALTH_THRESHOLD, .5);
     }
 
     private static void fireSonicWave(ServerWorld world, LivingEntity actor, LivingEntity sourceOwner,
@@ -654,12 +654,12 @@ public final class MagibladeAbilityManager {
 
         LivingEntity attributedOwner = sourceOwner == null ? actor : sourceOwner;
         DamageSource source = attributedOwner.getDamageSources().sonicBoom(attributedOwner);
-        double beamWidth = Math.max(head.judgment.get(Phase9AbilityTuning.Setting.WIDTH, SONIC_BEAM_WIDTH),
-                head.judgment.flag(1 << 25) ? head.judgment.get(Phase9AbilityTuning.Setting.WIDTH, 5) : 0);
+        double beamWidth = Math.max(head.judgment.get(ArcaneCosmicMasteryTuning.Setting.WIDTH, SONIC_BEAM_WIDTH),
+                head.judgment.flag(1 << 25) ? head.judgment.get(ArcaneCosmicMasteryTuning.Setting.WIDTH, 5) : 0);
         Box searchBox = new Box(start, end).expand(beamWidth);
         int hitIndex = 0;
         int beamCap = head.judgment.flag(1 << 25)
-                ? head.judgment.integer(Phase9AbilityTuning.Setting.TARGET_CAP, 10) : Integer.MAX_VALUE;
+                ? head.judgment.integer(ArcaneCosmicMasteryTuning.Setting.TARGET_CAP, 10) : Integer.MAX_VALUE;
         int struck = 0;
         for (LivingEntity target : world.getEntitiesByClass(
                 LivingEntity.class,
@@ -679,7 +679,7 @@ public final class MagibladeAbilityManager {
                     target,
                     source,
                     head.damage * (head.judgment.flag(1 << 23) && hitIndex < 3
-                            ? (float) head.judgment.get(Phase9AbilityTuning.Setting.OUTGOING_MULTIPLIER, 1.2) : 1)
+                            ? (float) head.judgment.get(ArcaneCosmicMasteryTuning.Setting.OUTGOING_MULTIPLIER, 1.2) : 1)
             );
             boolean[] damaged = {false};
             WeaponImplicitRegistry.runSuppressed(() -> damaged[0] = target.damage(source, damage));
@@ -689,8 +689,8 @@ public final class MagibladeAbilityManager {
                 if (head.judgment.flag(1 << 22)) target.addStatusEffect(
                         new net.minecraft.entity.effect.StatusEffectInstance(
                                 net.minecraft.entity.effect.StatusEffects.WEAKNESS,
-                                head.judgment.integer(Phase9AbilityTuning.Setting.STATUS_DURATION_TICKS, 50),
-                                head.judgment.integer(Phase9AbilityTuning.Setting.STATUS_AMPLIFIER, 0)), actor);
+                                head.judgment.integer(ArcaneCosmicMasteryTuning.Setting.STATUS_DURATION_TICKS, 50),
+                                head.judgment.integer(ArcaneCosmicMasteryTuning.Setting.STATUS_AMPLIFIER, 0)), actor);
                 harmonicCollapse(world, actor, head, target);
                 spawnSonicImpactEffects(world, target);
             }
@@ -941,27 +941,27 @@ public final class MagibladeAbilityManager {
         return Math.max(1, Config.uniqueEffects.magiblade.chargeDuration);
     }
 
-    private static int chargeDuration(Phase9AbilityTuning tuning) {
-        return Math.max(1, tuning.integer(Phase9AbilityTuning.Setting.WINDUP_TICKS, chargeDuration()));
+    private static int chargeDuration(ArcaneCosmicMasteryTuning tuning) {
+        return Math.max(1, tuning.integer(ArcaneCosmicMasteryTuning.Setting.WINDUP_TICKS, chargeDuration()));
     }
 
     private static int summonDuration() {
         return Math.max(1, Config.uniqueEffects.magiblade.summonDuration);
     }
 
-    private static int summonDuration(Phase9AbilityTuning tuning) {
-        return Math.max(1, tuning.integer(Phase9AbilityTuning.Setting.DURATION_TICKS, summonDuration()));
+    private static int summonDuration(ArcaneCosmicMasteryTuning tuning) {
+        return Math.max(1, tuning.integer(ArcaneCosmicMasteryTuning.Setting.DURATION_TICKS, summonDuration()));
     }
 
     private static int sonicInterval() {
         return Math.max(1, Config.uniqueEffects.magiblade.sonicInterval);
     }
 
-    private static int sonicInterval(Phase9AbilityTuning tuning) {
-        return Math.max(1, tuning.integer(Phase9AbilityTuning.Setting.INTERVAL_TICKS, sonicInterval()));
+    private static int sonicInterval(ArcaneCosmicMasteryTuning tuning) {
+        return Math.max(1, tuning.integer(ArcaneCosmicMasteryTuning.Setting.INTERVAL_TICKS, sonicInterval()));
     }
 
-    public static int sonicIntervalFor(Phase9AbilityTuning judgment) {
+    public static int sonicIntervalFor(ArcaneCosmicMasteryTuning judgment) {
         return sonicInterval(judgment);
     }
 
@@ -969,17 +969,17 @@ public final class MagibladeAbilityManager {
         return Math.max(1, Config.uniqueEffects.magiblade.sonicChargeDuration);
     }
 
-    private static int sonicChargeDuration(Phase9AbilityTuning tuning) {
-        return Math.max(1, tuning.integer(Phase9AbilityTuning.Setting.SECONDARY_INTERVAL_TICKS,
-                tuning.integer(Phase9AbilityTuning.Setting.WINDUP_TICKS, sonicChargeDuration())));
+    private static int sonicChargeDuration(ArcaneCosmicMasteryTuning tuning) {
+        return Math.max(1, tuning.integer(ArcaneCosmicMasteryTuning.Setting.SECONDARY_INTERVAL_TICKS,
+                tuning.integer(ArcaneCosmicMasteryTuning.Setting.WINDUP_TICKS, sonicChargeDuration())));
     }
 
     private static double sonicRange() {
         return Math.max(1.0, Config.uniqueEffects.magiblade.sonicDistance);
     }
 
-    private static double sonicRange(Phase9AbilityTuning tuning) {
-        return Math.max(1, tuning.get(Phase9AbilityTuning.Setting.RANGE, sonicRange()));
+    private static double sonicRange(ArcaneCosmicMasteryTuning tuning) {
+        return Math.max(1, tuning.get(ArcaneCosmicMasteryTuning.Setting.RANGE, sonicRange()));
     }
 
     private static final class ChargeState {
@@ -989,13 +989,13 @@ public final class MagibladeAbilityManager {
         private final ItemStack stack;
         private final Hand hand;
         private final long startedAt;
-        private final Phase9AbilityTuning tuning;
-        private final Phase9AbilityTuning judgment;
+        private final ArcaneCosmicMasteryTuning tuning;
+        private final ArcaneCosmicMasteryTuning judgment;
         private final UniqueAbilityExecution execution;
 
         private ChargeState(UUID actorId, UUID sourceOwnerId, UUID preferredTargetId,
                             ItemStack stack, Hand hand, long startedAt,
-                            Phase9AbilityTuning tuning, Phase9AbilityTuning judgment,
+                            ArcaneCosmicMasteryTuning tuning, ArcaneCosmicMasteryTuning judgment,
                             UniqueAbilityExecution execution) {
             this.actorId = actorId;
             this.sourceOwnerId = sourceOwnerId;
@@ -1021,19 +1021,19 @@ public final class MagibladeAbilityManager {
         private float damage;
         private final double orbitPhase;
         private UUID visualId;
-        private Phase9AbilityTuning tuning;
-        private Phase9AbilityTuning judgment = Phase9AbilityTuning.EMPTY;
+        private ArcaneCosmicMasteryTuning tuning;
+        private ArcaneCosmicMasteryTuning judgment = ArcaneCosmicMasteryTuning.EMPTY;
         private UniqueAbilityExecution execution;
         private int affectedTargets;
         private long nextGuardAt;
         private final Map<UUID, Integer> sonicHits = new HashMap<>();
         private static final HeadState EMPTY = new HeadState(null, null, null, ItemStack.EMPTY,
-                0, 0, 0, 0, 0, Phase9AbilityTuning.EMPTY, null);
+                0, 0, 0, 0, 0, ArcaneCosmicMasteryTuning.EMPTY, null);
 
         private HeadState(UUID actorId, UUID sourceOwnerId, UUID targetId,
                           ItemStack stack, long spawnedAt, long expiresAt,
                           long nextCycleAt, float damage, double orbitPhase,
-                          Phase9AbilityTuning tuning, UniqueAbilityExecution execution) {
+                          ArcaneCosmicMasteryTuning tuning, UniqueAbilityExecution execution) {
             this.actorId = actorId;
             this.sourceOwnerId = sourceOwnerId;
             this.targetId = targetId;
@@ -1050,7 +1050,7 @@ public final class MagibladeAbilityManager {
 
     private static final class RepulsionState {
         private long refreshAt;
-        private Phase9AbilityTuning tuning = Phase9AbilityTuning.EMPTY;
+        private ArcaneCosmicMasteryTuning tuning = ArcaneCosmicMasteryTuning.EMPTY;
         private UUID countertoneTarget;
         private long countertoneUntil;
     }

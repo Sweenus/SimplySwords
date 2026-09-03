@@ -1,18 +1,18 @@
 package net.sweenus.simplyswords.world;
 
-import net.sweenus.simplyswords.api.ability.Phase6AbilityTuning;
+import net.sweenus.simplyswords.api.ability.StormFrostWaterMasteryTuning;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 final class LivyatanAbilityManagerTest {
-    private static Phase6AbilityTuning.Setting s(String name) {
-        return Phase6AbilityTuning.Setting.valueOf(name);
+    private static StormFrostWaterMasteryTuning.Setting s(String name) {
+        return StormFrostWaterMasteryTuning.Setting.valueOf(name);
     }
 
     @Test
     void waveGeometryComposesAgainstConfiguredValues() {
-        Phase6AbilityTuning tuning = Phase6AbilityTuning.EMPTY
+        StormFrostWaterMasteryTuning tuning = StormFrostWaterMasteryTuning.EMPTY
                 .with(s("LIVYATAN_WAVE_WIDTH_BONUS"), 1)
                 .with(s("LIVYATAN_WALL_WIDTH_BONUS"), 2)
                 .with(s("LIVYATAN_WAVE_LENGTH_BONUS_STEPS"), 2)
@@ -25,7 +25,7 @@ final class LivyatanAbilityManagerTest {
 
     @Test
     void riptideLanceNarrowsAndExtendsTheComposedWave() {
-        Phase6AbilityTuning tuning = Phase6AbilityTuning.EMPTY
+        StormFrostWaterMasteryTuning tuning = StormFrostWaterMasteryTuning.EMPTY
                 .with(s("LIVYATAN_WAVE_WIDTH_BONUS"), 1)
                 .with(s("LIVYATAN_WAVE_LENGTH_BONUS_STEPS"), 2)
                 .with(s("LIVYATAN_LANCE_WIDTH"), 2)
@@ -38,7 +38,7 @@ final class LivyatanAbilityManagerTest {
 
     @Test
     void waveDamageBranchesComposeWithoutReachingThrowOrReturnSettings() {
-        Phase6AbilityTuning tuning = Phase6AbilityTuning.EMPTY
+        StormFrostWaterMasteryTuning tuning = StormFrostWaterMasteryTuning.EMPTY
                 .with(s("LIVYATAN_WAVE_DAMAGE_MULTIPLIER"), 1.1)
                 .with(s("LIVYATAN_WALL_DAMAGE_MULTIPLIER"), .6)
                 .with(s("LIVYATAN_UNBOUND_WAVE_DAMAGE_MULTIPLIER"), 1.3)
@@ -51,7 +51,7 @@ final class LivyatanAbilityManagerTest {
 
     @Test
     void unboundDoublesOnlyTheLiveSwingCooldown() {
-        Phase6AbilityTuning tuning = Phase6AbilityTuning.EMPTY
+        StormFrostWaterMasteryTuning tuning = StormFrostWaterMasteryTuning.EMPTY
                 .with(s("LIVYATAN_UNBOUND_COOLDOWN_MULTIPLIER"), 2);
         assertEquals(10, LivyatanWaveManager.swingCooldown(5, tuning));
         assertEquals(16, LivyatanWaveManager.swingCooldown(8, tuning));
@@ -60,7 +60,7 @@ final class LivyatanAbilityManagerTest {
 
     @Test
     void returnRadiusAndPullUseConfiguredBases() {
-        Phase6AbilityTuning tuning = Phase6AbilityTuning.EMPTY
+        StormFrostWaterMasteryTuning tuning = StormFrostWaterMasteryTuning.EMPTY
                 .with(s("LIVYATAN_RETURN_RADIUS_BONUS"), 1)
                 .with(s("LIVYATAN_RETURN_PULL_MULTIPLIER"), 1.25);
         assertEquals(10, LivyatanAbilityManager.returnRadius(9, tuning), 1.0E-6);
@@ -69,14 +69,14 @@ final class LivyatanAbilityManagerTest {
 
     @Test
     void returnCapstonesRetainChargedTideComposition() {
-        Phase6AbilityTuning thunderhead = Phase6AbilityTuning.EMPTY
+        StormFrostWaterMasteryTuning thunderhead = StormFrostWaterMasteryTuning.EMPTY
                 .with(s("LIVYATAN_RETURN_LIGHTNING_DAMAGE_MULTIPLIER"), 1.15)
                 .with(s("LIVYATAN_THUNDERHEAD_LIGHTNING_MULTIPLIER"), .8);
         assertEquals(.92, LivyatanAbilityManager.returnLightningMultiplier(thunderhead), 1.0E-6);
         assertEquals(100, LivyatanAbilityManager.returnLightningChance(20, thunderhead));
         assertEquals(0, LivyatanAbilityManager.returnPull(.42, thunderhead), 1.0E-6);
 
-        Phase6AbilityTuning maelstrom = Phase6AbilityTuning.EMPTY
+        StormFrostWaterMasteryTuning maelstrom = StormFrostWaterMasteryTuning.EMPTY
                 .with(s("LIVYATAN_MAELSTROM_ROTATIONS"), 2)
                 .with(s("LIVYATAN_MAELSTROM_PULL_MULTIPLIER"), 1.5);
         assertEquals(0, LivyatanAbilityManager.returnLightningChance(20, maelstrom));
@@ -85,7 +85,7 @@ final class LivyatanAbilityManagerTest {
 
     @Test
     void calmBeforeAddsToTheConfiguredActiveCooldown() {
-        Phase6AbilityTuning tuning = Phase6AbilityTuning.EMPTY
+        StormFrostWaterMasteryTuning tuning = StormFrostWaterMasteryTuning.EMPTY
                 .with(s("LIVYATAN_ACTIVE_COOLDOWN_BONUS_TICKS"), 20);
         assertEquals(85, LivyatanAbilityManager.activeCooldown(65, tuning));
         assertEquals(120, LivyatanAbilityManager.activeCooldown(100, tuning));

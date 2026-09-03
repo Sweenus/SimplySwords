@@ -22,8 +22,8 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
 import net.sweenus.simplyswords.api.SpellScalingProfile;
-import net.sweenus.simplyswords.api.ability.Phase2AbilityTuning;
-import net.sweenus.simplyswords.api.ability.Phase2UniqueAbilities;
+import net.sweenus.simplyswords.api.ability.AbyssalSpectralMasteryTuning;
+import net.sweenus.simplyswords.api.ability.AbyssalSpectralMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityContext;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
@@ -80,14 +80,14 @@ public class WraithfangSwordItem extends UniqueSwordItem implements UniqueWeapon
                     itemStack, user, target, hand, 1.5, 1, null);
             UniqueAbilityApi.takeStartedExecution();
             UniqueAbilityApi.start(execution);
-            Phase2AbilityTuning abilityTuning = Phase2UniqueAbilities.tuning(execution);
+            AbyssalSpectralMasteryTuning abilityTuning = AbyssalSpectralMasteryAbilities.tuning(execution);
             WraithfangTuningSnapshot tuning = WraithfangTuningSnapshot.from(execution);
             double alternationMultiplier = WraithfangAbilityManager.recordThrow(
                     (ServerWorld) world, user, itemStack, tuning);
             double[] damage = HelperMethods.getAttackFromSlot(user, itemStack, user.getActiveHand());
             WraithfangEntity wraithfangEntity = new WraithfangEntity(world, user, itemStack.copy() );
             wraithfangEntity.setVelocity(user, user.getPitch(), user.getYaw(), 0.0F,
-                    (float) abilityTuning.get(Phase2AbilityTuning.Setting.PROJECTILE_SPEED, 1.5), 1.0F);
+                    (float) abilityTuning.get(AbyssalSpectralMasteryTuning.Setting.PROJECTILE_SPEED, 1.5), 1.0F);
             wraithfangEntity.setYaw(user.getYaw());
             wraithfangEntity.setPitch(user.getPitch());
             wraithfangEntity.primaryBaseDamage = HelperMethods.abilityScaledDamageFromValue(
@@ -123,14 +123,14 @@ public class WraithfangSwordItem extends UniqueSwordItem implements UniqueWeapon
         LivingEntity actor = context.actor();
         UniqueAbilityExecution execution = beginThrow(context.world(), context.stack(), actor,
                 context.target(), context.hand(), 1.65, 0, context);
-        Phase2AbilityTuning abilityTuning = Phase2UniqueAbilities.tuning(execution);
+        AbyssalSpectralMasteryTuning abilityTuning = AbyssalSpectralMasteryAbilities.tuning(execution);
         WraithfangTuningSnapshot tuning = WraithfangTuningSnapshot.from(execution);
         double alternationMultiplier = WraithfangAbilityManager.recordThrow(
                 context.world(), actor, context.stack(), tuning);
         WraithfangEntity wraithfangEntity = new WraithfangEntity(context.world(), actor, context.stack().copy());
         Vec3d direction = LivingEntityAbilityMovementManager.getLobbedTargetDirection(actor, context.target());
         wraithfangEntity.setVelocity(direction.x, direction.y, direction.z,
-                (float) abilityTuning.get(Phase2AbilityTuning.Setting.PROJECTILE_SPEED, 1.65), 1.0F);
+                (float) abilityTuning.get(AbyssalSpectralMasteryTuning.Setting.PROJECTILE_SPEED, 1.65), 1.0F);
         wraithfangEntity.setYaw(actor.getYaw());
         wraithfangEntity.setPitch(actor.getPitch());
         float weaponDamage = (float) Math.max(1.0, HelperMethods.getAttackFromStack(
@@ -158,24 +158,24 @@ public class WraithfangSwordItem extends UniqueSwordItem implements UniqueWeapon
                                                       LivingEntity target, Hand hand,
                                                       double speed, int loyalty,
                                                       WeaponAbilityContext activeContext) {
-        return UniqueAbilityApi.begin(Phase2UniqueAbilities.WRAITHFANG_THROW,
+        return UniqueAbilityApi.begin(AbyssalSpectralMasteryAbilities.WRAITHFANG_THROW,
                 activeContext == null ? UniqueAbilityContext.passive(world, stack, actor, target, hand)
                         : UniqueAbilityContext.active(activeContext), builder -> builder
-                        .set(Phase2UniqueAbilities.COOLDOWN_TICKS, 20)
-                        .set(Phase2UniqueAbilities.TUNING, Phase2AbilityTuning.EMPTY
-                                .with(Phase2AbilityTuning.Setting.COOLDOWN_TICKS, 20)
-                                .with(Phase2AbilityTuning.Setting.PROJECTILE_SPEED, speed)
-                                .with(Phase2AbilityTuning.Setting.PROJECTILE_DAMAGE_MULTIPLIER, 1)
-                                .with(Phase2AbilityTuning.Setting.PROJECTILE_LIFETIME, 80)
-                                .with(Phase2AbilityTuning.Setting.LOYALTY, loyalty)
-                                .with(Phase2AbilityTuning.Setting.FLIGHT_DAMAGE_PER_TICK, .5)
-                                .with(Phase2AbilityTuning.Setting.FLIGHT_DAMAGE_CAP_TICKS, 1200)
-                                .with(Phase2AbilityTuning.Setting.DASH_TARGET_RANGE, 14.4)
-                                .with(Phase2AbilityTuning.Setting.DASH_SPEED, 1.35)
-                                .with(Phase2AbilityTuning.Setting.DASH_DURATION_TICKS, 10)
-                                .with(Phase2AbilityTuning.Setting.HASTE_DURATION_TICKS,
+                        .set(AbyssalSpectralMasteryAbilities.COOLDOWN_TICKS, 20)
+                        .set(AbyssalSpectralMasteryAbilities.TUNING, AbyssalSpectralMasteryTuning.EMPTY
+                                .with(AbyssalSpectralMasteryTuning.Setting.COOLDOWN_TICKS, 20)
+                                .with(AbyssalSpectralMasteryTuning.Setting.PROJECTILE_SPEED, speed)
+                                .with(AbyssalSpectralMasteryTuning.Setting.PROJECTILE_DAMAGE_MULTIPLIER, 1)
+                                .with(AbyssalSpectralMasteryTuning.Setting.PROJECTILE_LIFETIME, 80)
+                                .with(AbyssalSpectralMasteryTuning.Setting.LOYALTY, loyalty)
+                                .with(AbyssalSpectralMasteryTuning.Setting.FLIGHT_DAMAGE_PER_TICK, .5)
+                                .with(AbyssalSpectralMasteryTuning.Setting.FLIGHT_DAMAGE_CAP_TICKS, 1200)
+                                .with(AbyssalSpectralMasteryTuning.Setting.DASH_TARGET_RANGE, 14.4)
+                                .with(AbyssalSpectralMasteryTuning.Setting.DASH_SPEED, 1.35)
+                                .with(AbyssalSpectralMasteryTuning.Setting.DASH_DURATION_TICKS, 10)
+                                .with(AbyssalSpectralMasteryTuning.Setting.HASTE_DURATION_TICKS,
                                         Config.uniqueEffects.wraithfang.duration)
-                                .with(Phase2AbilityTuning.Setting.HASTE_AMPLIFIER,
+                                .with(AbyssalSpectralMasteryTuning.Setting.HASTE_AMPLIFIER,
                                         Config.uniqueEffects.wraithfang.hasteAmplifier)));
     }
 
