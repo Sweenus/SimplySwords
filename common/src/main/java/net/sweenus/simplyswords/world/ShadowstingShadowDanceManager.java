@@ -40,6 +40,7 @@ public final class ShadowstingShadowDanceManager {
     private static final Map<UUID, Integer> PASSIVE_PROCS = new HashMap<>();
     private static final Map<UUID, Long> PASSIVE_LOCKOUTS = new HashMap<>();
     private static final Map<UUID, Map<UUID, Long>> UMBRAL_MARKS = new HashMap<>();
+    private static final Set<UUID> VEILED_OWNERS = new HashSet<>();
     private static boolean initialized;
 
     private ShadowstingShadowDanceManager() {
@@ -51,6 +52,111 @@ public final class ShadowstingShadowDanceManager {
         }
         initialized = true;
         PlayerEvent.PLAYER_QUIT.register(ShadowstingShadowDanceManager::onPlayerQuit);
+    }
+
+    public static int cloneChance(int configured, Phase8AbilityTuning tuning) {
+        return Math.clamp(configured
+                + tuning.integer(Phase8AbilityTuning.Setting.SHADOW_CHANCE_BONUS, 0)
+                - tuning.integer(Phase8AbilityTuning.Setting.SHADOW_CHANCE_PENALTY, 0), 0, 100);
+    }
+
+    public static int cloneDelay(int configured, Phase8AbilityTuning tuning) {
+        return Math.max(1, configured
+                + tuning.integer(Phase8AbilityTuning.Setting.SHADOW_CLONE_DELAY_BONUS_TICKS, 0));
+    }
+
+    public static double cloneDamageMultiplier(Phase8AbilityTuning tuning) {
+        double multiplier = tuning.get(Phase8AbilityTuning.Setting.SHADOW_CLONE_DAMAGE_MULTIPLIER, 1);
+        if (tuning.flag(1 << 7)) multiplier *= tuning.get(
+                Phase8AbilityTuning.Setting.SHADOW_MIRROR_DAMAGE_MULTIPLIER, .45);
+        if (tuning.flag(1 << 8)) multiplier *= tuning.get(
+                Phase8AbilityTuning.Setting.SHADOW_FLAWLESS_DAMAGE_MULTIPLIER, 1.25);
+        return multiplier;
+    }
+
+    public static int cloneCount(Phase8AbilityTuning tuning) {
+        return tuning.flag(1 << 7)
+                ? Math.max(1, tuning.integer(Phase8AbilityTuning.Setting.SHADOW_MIRROR_COUNT, 3)) : 1;
+    }
+
+    public static int danceDuration(int configuredDuration, int configuredInterval,
+                                    Phase8AbilityTuning tuning) {
+        double duration = configuredDuration
+                + tuning.integer(Phase8AbilityTuning.Setting.SHADOW_DANCE_DURATION_BONUS_TICKS, 0);
+        duration *= tuning.get(Phase8AbilityTuning.Setting.SHADOW_DANCE_DURATION_MULTIPLIER, 1);
+        if (tuning.flag(1 << 26)) duration -= (double) strikeInterval(configuredInterval, tuning)
+                * tuning.integer(Phase8AbilityTuning.Setting.SHADOW_KILLING_SKIPPED_STRIKES, 2);
+        return Math.max(1, (int) Math.round(duration));
+    }
+
+    public static int strikeInterval(int configured, Phase8AbilityTuning tuning) {
+        int floor = tuning.integer(Phase8AbilityTuning.Setting.SHADOW_DANCE_INTERVAL_FLOOR,
+                Math.max(1, configured));
+        return Math.max(Math.max(1, floor), configured
+                + tuning.integer(Phase8AbilityTuning.Setting.SHADOW_DANCE_INTERVAL_BONUS, 0));
+    }
+
+    public static double danceRadius(double configured, Phase8AbilityTuning tuning) {
+        return Math.max(1, configured
+                + tuning.get(Phase8AbilityTuning.Setting.SHADOW_DANCE_RADIUS_BONUS, 0));
+    }
+
+    public static double danceStrikeMultiplier(Phase8AbilityTuning tuning) {
+        double multiplier = 1;
+        if (tuning.flag(1 << 16)) multiplier *= tuning.get(
+                Phase8AbilityTuning.Setting.SHADOW_MACABRE_DAMAGE_MULTIPLIER, .65);
+        if (tuning.flag(1 << 17)) multiplier *= tuning.get(
+                Phase8AbilityTuning.Setting.SHADOW_WALTZ_DAMAGE_MULTIPLIER, 1.5);
+        return multiplier;
+    }
+
+    public static double chainMultiplier(int chainSteps, Phase8AbilityTuning tuning) {
+        if (!tuning.flag(1 << 12)) return 1;
+        int cap = tuning.integer(Phase8AbilityTuning.Setting.SHADOW_CHAIN_STEP_CAP, 5);
+        return 1 + Math.min(Math.max(0, cap), chainSteps)
+                * tuning.get(Phase8AbilityTuning.Setting.SHADOW_CHAIN_DAMAGE_PER_STEP, .05);
+    }
+
+    public static double arrivalDistance(Phase8AbilityTuning tuning) {
+        return 1.35 + (tuning.flag(1 << 18)
+                ? tuning.get(Phase8AbilityTuning.Setting.SHADOW_ARRIVAL_DISTANCE_BONUS, 1) : 0);
+    }
+
+    public static int returnTicks(Phase8AbilityTuning tuning) {
+        return Math.max(1, FINISH_TRANSLATION_TICKS
+                + tuning.integer(Phase8AbilityTuning.Setting.SHADOW_RETURN_BONUS_TICKS, 0));
+    }
+
+    public static void clear(ServerWorld world) {
+        if (world == null) return;
+        PENDING_CLONE_STRIKES.remove(world);
+        String worldKey = world.getRegistryKey().getValue().toString();
+        ACTIVE_DANCES.entrySet().removeIf(entry -> entry.getValue().worldKey.equals(worldKey));
+    }
+
+    public static void clearActor(LivingEntity actor) {
+        if (actor == null) return;
+        UUID actorId = actor.getUuid();
+        ACTIVE_DANCES.remove(actorId);
+        PASSIVE_PROCS.remove(actorId);
+        PASSIVE_LOCKOUTS.remove(actorId);
+        UMBRAL_MARKS.remove(actorId);
+        VEILED_OWNERS.remove(actorId);
+        PENDING_CLONE_STRIKES.values().forEach(strikes ->
+                strikes.removeIf(strike -> strike.ownerId().equals(actorId)));
+        PENDING_CLONE_STRIKES.entrySet().removeIf(entry -> entry.getValue().isEmpty());
+        if (actor instanceof ServerPlayerEntity player) {
+            player.removeStatusEffect(EffectRegistry.getReference(EffectRegistry.SHADOW_DANCE));
+        }
+    }
+
+    public static void clearAll() {
+        ACTIVE_DANCES.clear();
+        PENDING_CLONE_STRIKES.clear();
+        PASSIVE_PROCS.clear();
+        PASSIVE_LOCKOUTS.clear();
+        UMBRAL_MARKS.clear();
+        VEILED_OWNERS.clear();
     }
 
     public static boolean start(ServerWorld world, ServerPlayerEntity player, ItemStack stack) {
@@ -73,8 +179,6 @@ public final class ShadowstingShadowDanceManager {
         }
 
         int activeDuration = getActiveDurationTicks(tuning);
-        if (tuning.flag(1 << 26)) activeDuration = Math.max(1,
-                activeDuration - getStrikeIntervalTicks(tuning) * 2);
         ActiveShadowDance dance = new ActiveShadowDance(
                 world.getRegistryKey().getValue().toString(),
                 world.getTime() + activeDuration,
@@ -87,21 +191,24 @@ public final class ShadowstingShadowDanceManager {
         dance.focusTarget = target.getUuid();
         player.addStatusEffect(new StatusEffectInstance(
                 EffectRegistry.getReference(EffectRegistry.SHADOW_DANCE),
-                getActiveDurationTicks(tuning) + FINISH_TRANSLATION_TICKS + 2,
-                Math.max(0, getActiveDurationTicks(tuning) - 1),
+                activeDuration + returnTicks(tuning) + 2,
+                Math.max(0, activeDuration - 1),
                 false,
                 false,
                 false
         ), player);
         if (tuning.flag(1 << 14)) player.addStatusEffect(new StatusEffectInstance(
-                StatusEffects.RESISTANCE, getActiveDurationTicks(tuning) + 10, 0), player);
+                StatusEffects.RESISTANCE, activeDuration + returnTicks(tuning) + 2,
+                tuning.integer(Phase8AbilityTuning.Setting.SHADOW_GUARD_AMPLIFIER, 0)), player);
         if (tuning.flag(1 << 20)) {
             world.getEntitiesByClass(LivingEntity.class, player.getBoundingBox().expand(
-                            tuning.get(Phase8AbilityTuning.Setting.SECONDARY_RADIUS, 3)),
+                            tuning.get(Phase8AbilityTuning.Setting.SHADOW_SNARE_RADIUS, 3)),
                             entity -> entity != player && HelperMethods.checkAbilityTarget(entity, player))
-                    .stream().limit(tuning.integer(Phase8AbilityTuning.Setting.SEARCH_CAP, 6))
+                    .stream().limit(tuning.integer(Phase8AbilityTuning.Setting.SHADOW_SNARE_TARGET_CAP, 6))
                     .forEach(entity -> entity.addStatusEffect(new StatusEffectInstance(
-                            StatusEffects.SLOWNESS, tuning.integer(Phase8AbilityTuning.Setting.LOCKOUT_TICKS, 40), 1), player));
+                            StatusEffects.SLOWNESS,
+                            tuning.integer(Phase8AbilityTuning.Setting.SHADOW_SNARE_DURATION_TICKS, 40),
+                            tuning.integer(Phase8AbilityTuning.Setting.SHADOW_SNARE_AMPLIFIER, 1)), player));
         }
 
         world.playSound(null, player.getX(), player.getY(), player.getZ(),
@@ -132,7 +239,7 @@ public final class ShadowstingShadowDanceManager {
             Vec3d strikePos = findStrikePosition(world, actor, target);
             Vec3d lookTarget = target.getPos().add(0.0, Math.max(0.35, target.getHeight() * 0.55), 0.0);
             spawnDepartureParticles(world, previousPos.add(0.0, actor.getHeight() * 0.5, 0.0));
-            performWeaponStrike(actor, target, stack, tuning);
+            performWeaponStrike(actor, target, stack, danceStrikeMultiplier(tuning));
             world.playSound(null, target.getX(), target.getY(), target.getZ(),
                     SoundRegistry.DARK_SWORD_WHOOSH_01.get(),
                     SoundCategory.PLAYERS, 0.45F, 1.45F + world.random.nextFloat() * 0.25F);
@@ -180,7 +287,7 @@ public final class ShadowstingShadowDanceManager {
             if (target != null) {
                 performStrike(world, player, dance, target);
             } else {
-                dance.nextStrikeTick = world.getTime() + getStrikeIntervalTicks();
+                dance.nextStrikeTick = world.getTime() + getStrikeIntervalTicks(dance.tuning);
                 spawnIdleParticles(world, player);
             }
         } else if (Config.general.enableModernFieldEffects && world.getTime() % 3L == 0L) {
@@ -239,17 +346,21 @@ public final class ShadowstingShadowDanceManager {
 
         List<PendingShadowCloneStrike> pending = PENDING_CLONE_STRIKES.computeIfAbsent(world,
                 ignored -> new java.util.ArrayList<>());
-        int count = tuning.flag(1 << 7) ? 3 : 1;
-        for (int i = 0; i < count; i++) pending.add(new PendingShadowCloneStrike(
-                        owner.getUuid(), target.getUuid(), world.getTime()
-                        + tuning.integer(Phase8AbilityTuning.Setting.DELAY_TICKS, PASSIVE_CLONE_DELAY_TICKS),
-                        chainDepth, tuning, tuning.flag(1 << 7) ? .45 : 1));
+        int delay = cloneDelay(PASSIVE_CLONE_DELAY_TICKS, tuning);
+        double multiplier = cloneDamageMultiplier(tuning);
+        for (int i = 0; i < cloneCount(tuning); i++) pending.add(new PendingShadowCloneStrike(
+                owner.getUuid(), target.getUuid(), world.getTime() + delay,
+                chainDepth, tuning, multiplier));
         int proc = PASSIVE_PROCS.merge(owner.getUuid(), 1, Integer::sum);
-        if (tuning.flag(1 << 5) && proc % 4 == 0) pending.add(new PendingShadowCloneStrike(
-                owner.getUuid(), target.getUuid(), world.getTime() + 5, chainDepth, tuning,
-                tuning.get(Phase8AbilityTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, .5)));
+        if (tuning.flag(1 << 5) && proc % Math.max(1, tuning.integer(
+                Phase8AbilityTuning.Setting.SHADOW_TWIN_INTERVAL, 4)) == 0) {
+            pending.add(new PendingShadowCloneStrike(owner.getUuid(), target.getUuid(),
+                    world.getTime() + tuning.integer(Phase8AbilityTuning.Setting.SHADOW_TWIN_DELAY_TICKS, 5),
+                    chainDepth, tuning, multiplier * tuning.get(
+                    Phase8AbilityTuning.Setting.SHADOW_TWIN_DAMAGE_MULTIPLIER, .5)));
+        }
         if (tuning.flag(1 << 8)) PASSIVE_LOCKOUTS.put(owner.getUuid(), world.getTime()
-                + tuning.integer(Phase8AbilityTuning.Setting.LOCKOUT_TICKS, 60));
+                + tuning.integer(Phase8AbilityTuning.Setting.SHADOW_FLAWLESS_LOCKOUT_TICKS, 60));
     }
 
     public static boolean canPassiveProc(ServerWorld world, ServerPlayerEntity owner, Phase8AbilityTuning tuning) {
@@ -260,9 +371,15 @@ public final class ShadowstingShadowDanceManager {
                                             Phase8AbilityTuning tuning) {
         if (!tuning.flag(1 << 3)) return;
         Map<UUID, Long> marks = UMBRAL_MARKS.get(owner.getUuid());
-        if (marks == null || marks.getOrDefault(target.getUuid(), 0L) <= world.getTime()) return;
+        if (marks == null) return;
+        marks.values().removeIf(expiry -> expiry <= world.getTime());
+        if (marks.isEmpty()) {
+            UMBRAL_MARKS.remove(owner.getUuid());
+            return;
+        }
+        if (marks.getOrDefault(target.getUuid(), 0L) <= world.getTime()) return;
         float bonus = (float) (HelperMethods.getEntityAttackDamage(owner)
-                * (tuning.get(Phase8AbilityTuning.Setting.OUTGOING_MULTIPLIER, 1.08) - 1));
+                * (tuning.get(Phase8AbilityTuning.Setting.SHADOW_MARK_OUTGOING_MULTIPLIER, 1.08) - 1));
         if (bonus > 0) target.damage(owner.getDamageSources().playerAttack(owner), bonus);
     }
 
@@ -274,11 +391,7 @@ public final class ShadowstingShadowDanceManager {
         if (player == null) {
             return;
         }
-        ACTIVE_DANCES.remove(player.getUuid());
-        PASSIVE_PROCS.remove(player.getUuid());
-        PASSIVE_LOCKOUTS.remove(player.getUuid());
-        UMBRAL_MARKS.remove(player.getUuid());
-        player.removeStatusEffect(EffectRegistry.getReference(EffectRegistry.SHADOW_DANCE));
+        clearActor(player);
     }
 
     private static void finishNow(ServerPlayerEntity player) {
@@ -298,17 +411,22 @@ public final class ShadowstingShadowDanceManager {
         }
 
         if (dance.tuning.flag(1 << 15) && !dance.tuning.flag(1 << 25)) {
+            float flourish = (float) dance.tuning.get(
+                    Phase8AbilityTuning.Setting.SHADOW_FLOURISH_DAMAGE_MULTIPLIER, .6);
             float damage = HelperMethods.abilityScaledDamage("soul", player, dance.stack,
-                    Config.uniqueEffects.shadowsting.damageScaling * .6F,
-                    Config.uniqueEffects.shadowsting.spellScaling * .6F);
-            world.getEntitiesByClass(LivingEntity.class, player.getBoundingBox().expand(3),
+                    Config.uniqueEffects.shadowsting.damageScaling * flourish,
+                    Config.uniqueEffects.shadowsting.spellScaling * flourish);
+            world.getEntitiesByClass(LivingEntity.class, player.getBoundingBox().expand(
+                            dance.tuning.get(Phase8AbilityTuning.Setting.SHADOW_FLOURISH_RADIUS, 3)),
                             target -> HelperMethods.checkAbilityTarget(target, player))
-                    .stream().limit(8).forEach(target -> target.damage(
+                    .stream().limit(dance.tuning.integer(
+                            Phase8AbilityTuning.Setting.SHADOW_FLOURISH_TARGET_CAP, 8))
+                    .forEach(target -> target.damage(
                             player.getDamageSources().playerAttack(player), damage));
         }
         if (dance.tuning.flag(1 << 25)) {
             player.addStatusEffect(new StatusEffectInstance(StatusEffects.INVISIBILITY,
-                    dance.tuning.integer(Phase8AbilityTuning.Setting.SECONDARY_DURATION_TICKS, 60), 0), player);
+                    dance.tuning.integer(Phase8AbilityTuning.Setting.SHADOW_NOCTURNE_DURATION_TICKS, 60), 0), player);
             finishNow(player);
             return;
         }
@@ -316,7 +434,8 @@ public final class ShadowstingShadowDanceManager {
             player.networkHandler.requestTeleport(dance.lastStrikePos.x, dance.lastStrikePos.y,
                     dance.lastStrikePos.z, player.getYaw(), player.getPitch());
             player.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE,
-                    dance.tuning.integer(Phase8AbilityTuning.Setting.STATUS_DURATION_TICKS, 30), 2), player);
+                    dance.tuning.integer(Phase8AbilityTuning.Setting.SHADOW_KILLING_RESISTANCE_TICKS, 30),
+                    dance.tuning.integer(Phase8AbilityTuning.Setting.SHADOW_KILLING_RESISTANCE_AMPLIFIER, 2)), player);
             applyArrivalEffects(world, player, dance);
             finishNow(player);
             return;
@@ -347,8 +466,7 @@ public final class ShadowstingShadowDanceManager {
             return;
         }
 
-        int translationTicks = Math.max(1, dance.tuning.integer(
-                Phase8AbilityTuning.Setting.SECONDARY_DURATION_TICKS, FINISH_TRANSLATION_TICKS));
+        int translationTicks = returnTicks(dance.tuning);
         float progress = MathHelper.clamp((float) (world.getTime() - dance.finishStartTick + 1L) / translationTicks, 0.0F, 1.0F);
         float eased = 1.0F - (1.0F - progress) * (1.0F - progress);
         Vec3d pos = dance.finishStartPos.lerp(dance.finishEndPos, eased);
@@ -377,15 +495,18 @@ public final class ShadowstingShadowDanceManager {
     private static void applyArrivalEffects(ServerWorld world, ServerPlayerEntity player, ActiveShadowDance dance) {
         if (dance.tuning.flag(1 << 19)) {
             world.getEntitiesByClass(LivingEntity.class, player.getBoundingBox().expand(
-                            dance.tuning.get(Phase8AbilityTuning.Setting.SECONDARY_RADIUS, 2.5)),
+                            dance.tuning.get(Phase8AbilityTuning.Setting.SHADOW_SMOKE_RADIUS, 2.5)),
                             target -> HelperMethods.checkAbilityTarget(target, player))
-                    .stream().limit(dance.tuning.integer(Phase8AbilityTuning.Setting.SEARCH_CAP, 6))
+                    .stream().limit(dance.tuning.integer(
+                            Phase8AbilityTuning.Setting.SHADOW_SMOKE_TARGET_CAP, 6))
                     .forEach(target -> target.addStatusEffect(new StatusEffectInstance(
-                            StatusEffects.BLINDNESS, 20, 0), player));
+                            StatusEffects.BLINDNESS, dance.tuning.integer(
+                            Phase8AbilityTuning.Setting.SHADOW_SMOKE_DURATION_TICKS, 20), 0), player));
         }
         if (dance.tuning.flag(1 << 23)) player.addStatusEffect(new StatusEffectInstance(
-                StatusEffects.SPEED, dance.tuning.integer(
-                Phase8AbilityTuning.Setting.SECONDARY_DURATION_TICKS, 40), 1), player);
+                StatusEffects.SPEED,
+                dance.tuning.integer(Phase8AbilityTuning.Setting.SHADOW_SPEED_DURATION_TICKS, 40),
+                dance.tuning.integer(Phase8AbilityTuning.Setting.SHADOW_SPEED_AMPLIFIER, 1)), player);
     }
 
     private static void performStrike(ServerWorld world, ServerPlayerEntity player, ActiveShadowDance dance, LivingEntity target) {
@@ -400,21 +521,26 @@ public final class ShadowstingShadowDanceManager {
         lockPlayer(player);
 
         if (dance.lastTarget != null && !dance.lastTarget.equals(target.getUuid())) {
-            dance.differentTargetChain = Math.min(5, dance.differentTargetChain + 1);
+            dance.differentTargetChain++;
         }
         dance.lastTarget = target.getUuid();
-        Phase8AbilityTuning strikeTuning = dance.tuning;
-        if (dance.tuning.flag(1 << 12)) strikeTuning = strikeTuning.multiply(
-                Phase8AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1 + dance.differentTargetChain * .05, 1);
-        performWeaponStrike(player, target, dance.stack, strikeTuning);
-        if (dance.tuning.flag(1 << 16)) performWeaponStrike(player, target, dance.stack, strikeTuning);
+        double multiplier = danceStrikeMultiplier(dance.tuning)
+                * chainMultiplier(dance.differentTargetChain, dance.tuning);
+        performWeaponStrike(player, target, dance.stack, multiplier);
+        if (dance.tuning.flag(1 << 16)) performWeaponStrike(player, target, dance.stack, multiplier);
         if (dance.tuning.flag(1 << 22)) target.addStatusEffect(new StatusEffectInstance(
-                StatusEffects.SLOWNESS, 25, 1), player);
+                StatusEffects.SLOWNESS,
+                dance.tuning.integer(Phase8AbilityTuning.Setting.SHADOW_DISORIENT_DURATION_TICKS, 25),
+                dance.tuning.integer(Phase8AbilityTuning.Setting.SHADOW_DISORIENT_AMPLIFIER, 1)), player);
+        int absorption = dance.tuning.integer(Phase8AbilityTuning.Setting.SHADOW_REPRIEVE_ABSORPTION, 4);
+        int absorptionCap = dance.tuning.integer(Phase8AbilityTuning.Setting.SHADOW_REPRIEVE_CAP, 12);
         if (dance.uniqueTargets.add(target.getUuid()) && dance.tuning.flag(1 << 24)
-                && dance.uniqueTargets.size() % 3 == 0 && dance.absorptionGranted < 12) {
-            dance.absorptionGranted += 4;
+                && dance.uniqueTargets.size() % Math.max(1, dance.tuning.integer(
+                        Phase8AbilityTuning.Setting.SHADOW_REPRIEVE_INTERVAL, 3)) == 0
+                && dance.absorptionGranted + absorption <= absorptionCap && absorption > 0) {
+            dance.absorptionGranted += absorption;
             player.addStatusEffect(new StatusEffectInstance(StatusEffects.ABSORPTION, 80,
-                    Math.max(0, dance.absorptionGranted / 4 - 1)), player);
+                    Math.max(0, dance.absorptionGranted / Math.max(1, absorption) - 1)), player);
         }
 
         world.playSound(null, target.getX(), target.getY(), target.getZ(),
@@ -430,22 +556,13 @@ public final class ShadowstingShadowDanceManager {
         dance.nextStrikeTick = world.getTime() + getStrikeIntervalTicks(dance.tuning);
     }
 
-    private static int getActiveDurationTicks() {
-        return getActiveDurationTicks(Phase8AbilityTuning.EMPTY);
-    }
-
-    private static int getStrikeIntervalTicks() {
-        return getStrikeIntervalTicks(Phase8AbilityTuning.EMPTY);
-    }
-
     private static int getActiveDurationTicks(Phase8AbilityTuning tuning) {
-        return Math.max(1, tuning.integer(Phase8AbilityTuning.Setting.DURATION_TICKS,
-                Config.uniqueEffects.shadowsting.duration / 2));
+        return danceDuration(Math.max(1, Config.uniqueEffects.shadowsting.duration / 2),
+                Math.max(1, Config.uniqueEffects.shadowsting.strikeInterval / 2), tuning);
     }
 
     private static int getStrikeIntervalTicks(Phase8AbilityTuning tuning) {
-        return Math.max(1, tuning.integer(Phase8AbilityTuning.Setting.INTERVAL_TICKS,
-                Config.uniqueEffects.shadowsting.strikeInterval / 2));
+        return strikeInterval(Math.max(1, Config.uniqueEffects.shadowsting.strikeInterval / 2), tuning);
     }
 
     private static void executePassiveCloneStrike(ServerWorld world, PendingShadowCloneStrike strike) {
@@ -470,33 +587,32 @@ public final class ShadowstingShadowDanceManager {
         int previousDepth = CURRENT_CLONE_DEPTH.get();
         CURRENT_CLONE_DEPTH.set(strike.chainDepth());
         try {
-            Phase8AbilityTuning strikeTuning = strike.tuning().multiply(
-                    Phase8AbilityTuning.Setting.DAMAGE_MULTIPLIER, strike.damageMultiplier(), 1);
-            performWeaponStrike(owner, target, owner.getMainHandStack(), strikeTuning);
+            performWeaponStrike(owner, target, owner.getMainHandStack(), strike.damageMultiplier());
         } finally {
             CURRENT_CLONE_DEPTH.set(previousDepth);
         }
         if (strike.tuning().flag(1 << 3)) {
             Map<UUID, Long> marks = UMBRAL_MARKS.computeIfAbsent(owner.getUuid(), ignored -> new HashMap<>());
+            marks.values().removeIf(expiry -> expiry <= world.getTime());
             marks.put(target.getUuid(), world.getTime() + strike.tuning().integer(
-                    Phase8AbilityTuning.Setting.DURATION_TICKS, 60));
+                    Phase8AbilityTuning.Setting.SHADOW_MARK_DURATION_TICKS, 60));
             if (marks.size() > 32) marks.entrySet().stream().min(Map.Entry.comparingByValue())
                     .ifPresent(entry -> marks.remove(entry.getKey()));
         }
-        if (strike.tuning().flag(1 << 4)) owner.addStatusEffect(new StatusEffectInstance(
-                StatusEffects.INVISIBILITY, 12, 0), owner);
+        if (strike.tuning().flag(1 << 4)) {
+            owner.addStatusEffect(new StatusEffectInstance(StatusEffects.INVISIBILITY,
+                    strike.tuning().integer(Phase8AbilityTuning.Setting.SHADOW_VEIL_DURATION_TICKS, 12),
+                    0), owner);
+            VEILED_OWNERS.add(owner.getUuid());
+        }
         if (!target.isAlive() && strike.tuning().flag(1 << 6)) {
             Phase8CombatManager.scheduleCooldownRefund(world, owner, owner.getMainHandStack(),
-                    strike.tuning().integer(Phase8AbilityTuning.Setting.REFUND_TICKS, 20));
+                    strike.tuning().integer(Phase8AbilityTuning.Setting.SHADOW_KILL_REFUND_TICKS, 20));
         }
     }
 
-    private static void performWeaponStrike(ServerPlayerEntity player, LivingEntity target, ItemStack stack) {
-        performWeaponStrike(player, target, stack, Phase8AbilityTuning.EMPTY);
-    }
-
     private static void performWeaponStrike(ServerPlayerEntity player, LivingEntity target, ItemStack stack,
-                                            Phase8AbilityTuning tuning) {
+                                            double multiplier) {
         if (player == null || target == null || !player.isAlive() || !target.isAlive()) {
             return;
         }
@@ -504,39 +620,37 @@ public final class ShadowstingShadowDanceManager {
         DamageSource damageSource = player.getDamageSources().playerAttack(player);
         target.timeUntilRegen = 0;
         float damage = HelperMethods.abilityScaledDamage("soul", player, stack,
-                Config.uniqueEffects.shadowsting.damageScaling * (float) tuning.get(
-                        Phase8AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1),
+                Config.uniqueEffects.shadowsting.damageScaling * (float) multiplier,
                 Config.uniqueEffects.shadowsting.spellScaling);
         if (target.damage(damageSource, damage) && !stack.isEmpty()) {
             stack.getItem().postHit(stack, target, player);
         }
     }
 
-    private static void performWeaponStrike(LivingEntity actor, LivingEntity target, ItemStack stack) {
-        performWeaponStrike(actor, target, stack, Phase8AbilityTuning.EMPTY);
-    }
-
     private static void performWeaponStrike(LivingEntity actor, LivingEntity target, ItemStack stack,
-                                            Phase8AbilityTuning tuning) {
+                                            double multiplier) {
         if (actor == null || target == null || !actor.isAlive() || !target.isAlive() || !HelperMethods.checkAbilityTarget(target, actor)) {
             return;
         }
         float damage = HelperMethods.abilityScaledDamage("soul", actor, stack,
-                Config.uniqueEffects.shadowsting.damageScaling * (float) tuning.get(
-                        Phase8AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1),
+                Config.uniqueEffects.shadowsting.damageScaling * (float) multiplier,
                 Config.uniqueEffects.shadowsting.spellScaling);
         damage = HelperMethods.applyNonPlayerAbilityDamageModifier(actor, damage);
         SimplySwordsAPI.applyEntityWeaponHit(stack, target, actor, damage);
     }
 
-    private static LivingEntity findRandomTarget(ServerWorld world, ServerPlayerEntity player) {
-        return findRandomTarget(world, player, Phase8AbilityTuning.EMPTY);
+    public static boolean consumeVeil(ServerPlayerEntity owner, Phase8AbilityTuning tuning) {
+        if (owner == null || !tuning.flag(1 << 4) || CURRENT_CLONE_DEPTH.get() > 0
+                || !VEILED_OWNERS.remove(owner.getUuid())) {
+            return false;
+        }
+        owner.removeStatusEffect(StatusEffects.INVISIBILITY);
+        return true;
     }
 
     private static LivingEntity findRandomTarget(ServerWorld world, ServerPlayerEntity player,
                                                  Phase8AbilityTuning tuning) {
-        double radius = tuning.get(Phase8AbilityTuning.Setting.RADIUS,
-                Config.uniqueEffects.shadowsting.strikeRadius);
+        double radius = danceRadius(Config.uniqueEffects.shadowsting.strikeRadius, tuning);
         Box box = new Box(player.getX() - radius, player.getY() - radius, player.getZ() - radius,
                 player.getX() + radius, player.getY() + radius, player.getZ() + radius);
         List<LivingEntity> targets = world.getEntitiesByClass(LivingEntity.class, box, entity ->
@@ -549,7 +663,7 @@ public final class ShadowstingShadowDanceManager {
             return null;
         }
         if (tuning.flag(1 << 13)) {
-            double threshold = tuning.get(Phase8AbilityTuning.Setting.HEALTH_THRESHOLD, .4);
+            double threshold = tuning.get(Phase8AbilityTuning.Setting.SHADOW_LOW_HEALTH_THRESHOLD, .4);
             List<LivingEntity> wounded = targets.stream()
                     .filter(target -> target.getHealth() / target.getMaxHealth() < threshold).toList();
             if (!wounded.isEmpty()) targets = new ArrayList<>(wounded);
@@ -563,8 +677,7 @@ public final class ShadowstingShadowDanceManager {
 
     private static Vec3d findStrikePosition(ServerWorld world, ServerPlayerEntity player, LivingEntity target,
                                             Phase8AbilityTuning tuning) {
-        double distance = 1.35 + (tuning.flag(1 << 18)
-                ? tuning.get(Phase8AbilityTuning.Setting.RANGE, 1) : 0);
+        double distance = arrivalDistance(tuning);
         double baseAngle = world.random.nextDouble() * Math.PI * 2.0;
         for (int i = 0; i < 12; i++) {
             double angle = baseAngle + (Math.PI * 2.0 * i / 12.0);

@@ -54,10 +54,11 @@ public class ShadowstingSwordItem extends UniqueSwordItem implements UniqueWeapo
             UniqueAbilityExecution execution = Phase8CombatManager.beginPassive(
                     Phase8UniqueAbilities.SHADOW_ECHO, serverWorld, stack, attacker, target);
             Phase8AbilityTuning tuning = Phase8UniqueAbilities.tuning(execution);
+            ShadowstingShadowDanceManager.consumeVeil(serverPlayer, tuning);
             ShadowstingShadowDanceManager.applyUmbralMarkBonus(serverWorld, serverPlayer, target, tuning);
             if (ShadowstingShadowDanceManager.canPassiveProc(serverWorld, serverPlayer, tuning)
-                    && attacker.getRandom().nextInt(100) < tuning.integer(
-                    Phase8AbilityTuning.Setting.CHANCE, Config.uniqueEffects.shadowsting.chance)) {
+                    && attacker.getRandom().nextInt(100) < ShadowstingShadowDanceManager.cloneChance(
+                    Config.uniqueEffects.shadowsting.chance, tuning)) {
                 ShadowstingShadowDanceManager.schedulePassiveCloneStrike(serverWorld, serverPlayer, target, tuning);
             }
             UniqueAbilityApi.finish(execution, Phase8UniqueAbilities.FINISH, 1);
@@ -100,7 +101,10 @@ public class ShadowstingSwordItem extends UniqueSwordItem implements UniqueWeapo
                     && ShadowstingShadowDanceManager.start(context.world(), context.actor(), context.target(), context.stack(), tuning);
         }
         if (started) Phase8CombatManager.scheduleFinish(context.world(), execution,
-                tuning.integer(Phase8AbilityTuning.Setting.DURATION_TICKS, 50) + 10, 1);
+                ShadowstingShadowDanceManager.danceDuration(
+                        Math.max(1, Config.uniqueEffects.shadowsting.duration / 2),
+                        Math.max(1, Config.uniqueEffects.shadowsting.strikeInterval / 2), tuning)
+                        + ShadowstingShadowDanceManager.returnTicks(tuning) + 2, 1);
         return started;
     }
 

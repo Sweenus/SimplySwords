@@ -24,6 +24,7 @@ import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
+import net.sweenus.simplyswords.item.interfaces.UniqueWeaponSecondaryAction;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.Styles;
 import net.sweenus.simplyswords.world.BloodwakeAbilityManager;
@@ -31,7 +32,8 @@ import net.sweenus.simplyswords.world.Phase8CombatManager;
 
 import java.util.List;
 
-public class BloodwakeSwordItem extends UniqueSwordItem implements UniqueWeaponActiveAbility {
+public class BloodwakeSwordItem extends UniqueSwordItem
+        implements UniqueWeaponActiveAbility, UniqueWeaponSecondaryAction {
     private static final String SELECTED_RITE = "simplyswords_bloodwake_selected_rite";
     public BloodwakeSwordItem(ToolMaterial material, Settings settings) {
         super(material, settings);
@@ -51,14 +53,28 @@ public class BloodwakeSwordItem extends UniqueSwordItem implements UniqueWeaponA
     }
 
     @Override
+    public TypedActionResult<ItemStack> startPlayerSecondaryAbility(World world,
+                                                                    net.minecraft.entity.player.PlayerEntity user,
+                                                                    Hand hand) {
+        ItemStack stack = user.getStackInHand(hand);
+        if (!user.isSneaking() || !(world instanceof ServerWorld) || !AwakeningApi.isAbilityUnlocked(stack)
+                || !BloodwakeAbilityManager.crimsonChoiceEnabled(stack, user)) {
+            return TypedActionResult.pass(stack);
+        }
+        NbtComponent.set(DataComponentTypes.CUSTOM_DATA, stack,
+                nbt -> nbt.putInt(SELECTED_RITE, selectedRite(stack) % 5 + 1));
+        user.swingHand(hand, true);
+        return TypedActionResult.success(stack, false);
+    }
+
+    @Override
     public boolean canActivate(WeaponAbilityContext context) {
         if (context == null || context.world() == null || context.actor() == null || !context.actor().isAlive()
                 || context.stack() == null || context.stack().isEmpty()
                 || context.stack().getDamage() >= context.stack().getMaxDamage() - 1) {
             return false;
         }
-        int tier = BloodwakeAbilityManager.getFrenzy(context.stack());
-        return tier > 0 || context.actor().isSneaking();
+        return BloodwakeAbilityManager.getFrenzy(context.stack()) > 0;
     }
 
     @Override
@@ -72,13 +88,6 @@ public class BloodwakeSwordItem extends UniqueSwordItem implements UniqueWeaponA
         Phase8AbilityTuning tuning = Phase8UniqueAbilities.tuning(execution);
         if (tuning.flag(1 << 17)) {
             int selected = selectedRite(context.stack());
-            if (context.actor().isSneaking()) {
-                int next = selected % 5 + 1;
-                NbtComponent.set(DataComponentTypes.CUSTOM_DATA, context.stack(), nbt -> nbt.putInt(SELECTED_RITE, next));
-                context.actor().swingHand(context.hand() == null ? Hand.MAIN_HAND : context.hand(), true);
-                Phase8CombatManager.scheduleFinish(context.world(), execution, 0);
-                return true;
-            }
             if (tier < selected) return false;
             tier = selected;
         }

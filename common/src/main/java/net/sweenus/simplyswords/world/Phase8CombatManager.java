@@ -197,6 +197,10 @@ public final class Phase8CombatManager {
         StealSwordItem.clearWorld(world);
         DeathKnellAbilityManager.clear(world);
         SoulkeeperLanternManager.clear(world);
+        TwistedBladeAbilityManager.clear(world);
+        ShadowstingShadowDanceManager.clear(world);
+        BloodwakeAbilityManager.clear(world);
+        BloodStainManager.clear(world);
     }
 
     public static void clearActor(LivingEntity actor) {
@@ -223,6 +227,10 @@ public final class Phase8CombatManager {
         StealSwordItem.clearActor(actor);
         DeathKnellAbilityManager.clearActor(actor);
         SoulkeeperLanternManager.clearActor(actor);
+        TwistedBladeAbilityManager.clearActor(actor);
+        ShadowstingShadowDanceManager.clearActor(actor);
+        BloodwakeAbilityManager.clearActor(actor);
+        BloodStainManager.clearActor(actor);
     }
 
     public static void clearAll() {
@@ -238,6 +246,10 @@ public final class Phase8CombatManager {
         StealSwordItem.clearAllState();
         DeathKnellAbilityManager.clearAll();
         SoulkeeperLanternManager.clearAll();
+        TwistedBladeAbilityManager.clearAll();
+        ShadowstingShadowDanceManager.clearAll();
+        BloodwakeAbilityManager.clearAll();
+        BloodStainManager.clearAll();
     }
 
     private record PendingShield(ServerWorld world, ItemStack stack, long at, int lockoutTicks) {

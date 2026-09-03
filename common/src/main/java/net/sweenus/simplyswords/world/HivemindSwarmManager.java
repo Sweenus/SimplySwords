@@ -92,6 +92,11 @@ public final class HivemindSwarmManager {
     }
 
     public static boolean activateBloodFlies(ServerWorld world, LivingEntity actor, int requestedCount) {
+        return activateBloodFlies(world, actor, requestedCount, 1.0);
+    }
+
+    public static boolean activateBloodFlies(ServerWorld world, LivingEntity actor, int requestedCount,
+                                             double damageMultiplier) {
         int flyCount = Math.clamp(requestedCount, 1, 12);
         int contacts = Math.max(1, Config.uniqueEffects.bloodwake.bloodFlyContacts);
         long now = world.getTime();
@@ -111,7 +116,8 @@ public final class HivemindSwarmManager {
             fly.setHivemindSwarmBee(true);
             fly.setBloodwakeFly(true);
             fly.setSwarmStingsRemaining(contacts);
-            fly.setSwarmStingDamage((float) Math.max(1.0, HelperMethods.getEntityAttackDamage(actor)));
+            fly.setSwarmStingDamage((float) Math.max(1.0,
+                    HelperMethods.getEntityAttackDamage(actor) * Math.max(0.0, damageMultiplier)));
             fly.setSwarmExpiryTick(expiry);
             fly.setSwarmNextStingTick(now + i % Math.max(1, Config.uniqueEffects.bloodwake.bloodFlyContactInterval));
             fly.setSwarmNextDiveTick(now + randomDiveDelay(world));

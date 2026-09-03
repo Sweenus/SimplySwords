@@ -63,14 +63,16 @@ public final class TwistedBladeAbilityManager {
             Map.Entry<UUID, WielderState> entry = iterator.next();
             Entity entity = world.getEntity(entry.getKey());
             if (!(entity instanceof LivingEntity actor) || !actor.isAlive() || actor.isRemoved()) {
+                cancelState(entry.getValue());
                 iterator.remove();
                 continue;
             }
 
             WielderState state = entry.getValue();
             if (state.armed != null && now >= state.armed.expiresAt) {
+                UniqueAbilityApi.finish(state.armed.execution, Phase8UniqueAbilities.FINISH,
+                        state.armed.affectedTargets);
                 state.armed = null;
-                actor.removeStatusEffect(EffectRegistry.getReference(EffectRegistry.FEROCITY));
                 state.hitCounter = 0;
             }
             state.pendingCrescendos.removeIf(pending -> {
@@ -80,33 +82,41 @@ public final class TwistedBladeAbilityManager {
                 if (targetEntity instanceof LivingEntity target && target.isAlive()) {
                     triggerCrescendo(world, pending.stack, actor,
                             ownerEntity instanceof LivingEntity owner ? owner : null, target, false,
-                            pending.stacks, state, pending.tuning.multiply(
-                                    Phase8AbilityTuning.Setting.DAMAGE_MULTIPLIER, .6, 1));
+                            true, pending.stacks, state, pending.tuning);
                 }
                 return true;
             });
             if (state.ferocityRefundAt > 0 && now >= state.ferocityRefundAt) {
-                int stacks = Math.max(getFerocityStacks(actor), state.ferocityRefundStacks);
-                actor.addStatusEffect(new StatusEffectInstance(
-                        EffectRegistry.getReference(EffectRegistry.FEROCITY),
-                        Math.max(1, Config.uniqueEffects.twisted_blade.duration), stacks - 1,
-                        false, false, true), actor);
+                int stacks = Math.min(maximumStacks(Config.uniqueEffects.twisted_blade.maxStacks,
+                                state.ferocityTuning),
+                        getFerocityStacks(actor) + state.ferocityRefundStacks);
+                setFerocityStacks(actor, stacks,
+                        ferocityDuration(Config.uniqueEffects.twisted_blade.duration, state.ferocityTuning),
+                        state.ferocityTuning);
                 state.ferocityRefundAt = 0;
                 state.ferocityRefundStacks = 0;
             }
             if (getFerocityStacks(actor) <= 0) {
                 state.hitCounter = 0;
                 state.bonusDuration = 0;
+                state.wounds.clear();
                 EntityAttributeInstance attackSpeed = actor.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_SPEED);
                 if (attackSpeed != null) attackSpeed.removeModifier(MASTERY_ATTACK_SPEED);
-            } else if (state.ferocityTuning.flag(1 << 7) && now - state.lastHitTick <= 40) {
+            } else if (state.ferocityTuning.flag(1 << 7) && now - state.lastHitTick <= state.ferocityTuning.integer(
+                    Phase8AbilityTuning.Setting.TWISTED_ENDLESS_HIT_WINDOW_TICKS, 40)) {
                 StatusEffectInstance current = actor.getStatusEffect(EffectRegistry.getReference(EffectRegistry.FEROCITY));
                 if (current != null && current.getDuration() < 3) {
                     actor.addStatusEffect(new StatusEffectInstance(
                             EffectRegistry.getReference(EffectRegistry.FEROCITY), 3,
-                            Math.min(9, current.getAmplifier()), false, false, true), actor);
+                            Math.min(maximumStacks(Config.uniqueEffects.twisted_blade.maxStacks,
+                                    state.ferocityTuning) - 1, current.getAmplifier()), false, false, true), actor);
                 }
             }
+            maintainFootwork(actor, state.ferocityTuning);
+            updateMasteryAttackSpeed(actor, getFerocityStacks(actor), state.ferocityTuning);
+            int woundWindow = state.crescendoTuning.integer(
+                    Phase8AbilityTuning.Setting.TWISTED_WOUND_WINDOW_TICKS, 60);
+            state.wounds.entrySet().removeIf(wound -> now - wound.getValue().lastHit > woundWindow);
             if (state.armed == null && state.hitCounter <= 0 && getFerocityStacks(actor) <= 0
                     && state.pendingCrescendos.isEmpty() && state.ferocityRefundAt <= 0) {
                 iterator.remove();
@@ -165,38 +175,37 @@ public final class TwistedBladeAbilityManager {
         LivingEntity actor = context.actor();
         int originalStacks = getFerocityStacks(actor);
         boolean sustained = finaleTuning.flag(1 << 26);
-        int consumedStacks = sustained ? Math.max(1, (originalStacks + 1) / 2) : originalStacks;
+        int consumedStacks = sustained
+                ? sustainedConsumption(originalStacks, finaleTuning.get(
+                Phase8AbilityTuning.Setting.TWISTED_SUSTAINED_CONSUME_RATIO, .5))
+                : originalStacks;
         if (consumedStacks <= 0) {
             return false;
         }
 
         WielderState state = state(context.world(), actor);
         state.hitCounter = 0;
-        StatusEffectInstance currentFerocity =
-                actor.getStatusEffect(EffectRegistry.getReference(EffectRegistry.FEROCITY));
-        int empoweredWindow = Math.max(1, finaleTuning.integer(Phase8AbilityTuning.Setting.DURATION_TICKS,
-                Config.uniqueEffects.twisted_blade.empoweredWindow));
-        actor.addStatusEffect(
-                new StatusEffectInstance(
-                        EffectRegistry.getReference(EffectRegistry.FEROCITY),
-                        Math.max(empoweredWindow, currentFerocity == null ? 0 : currentFerocity.getDuration()),
-                        (sustained ? originalStacks : consumedStacks) - 1,
-                        false,
-                        false,
-                        true
-                ),
-                actor
-        );
+        int empoweredWindow = finaleWindow(Config.uniqueEffects.twisted_blade.empoweredWindow, finaleTuning);
+        int retainedStacks = sustained ? originalStacks - consumedStacks : 0;
+        if (retainedStacks > 0) {
+            setFerocityStacks(actor, retainedStacks,
+                    ferocityDuration(Config.uniqueEffects.twisted_blade.duration, state.ferocityTuning),
+                    state.ferocityTuning);
+        } else {
+            actor.removeStatusEffect(EffectRegistry.getReference(EffectRegistry.FEROCITY));
+            updateMasteryAttackSpeed(actor, 0, state.ferocityTuning);
+        }
         state.armed = new ArmedCrescendo(
                 consumedStacks,
                 context.world().getTime() + empoweredWindow,
                 finaleTuning,
                 context.world().getTime(),
-                sustained ? 3 : 1,
-                sustained ? originalStacks - consumedStacks : 0
+                sustained ? finaleTuning.integer(
+                        Phase8AbilityTuning.Setting.TWISTED_SUSTAINED_HIT_COUNT, 3) : 1,
+                execution
         );
-        Phase8CombatManager.scheduleFinish(context.world(), execution, empoweredWindow, 1);
-        spawnActivationCue(context.world(), actor, consumedStacks);
+        spawnActivationCue(context.world(), actor, consumedStacks,
+                maximumStacks(Config.uniqueEffects.twisted_blade.maxStacks, state.ferocityTuning));
         return true;
     }
 
@@ -223,113 +232,117 @@ public final class TwistedBladeAbilityManager {
         UniqueAbilityExecution ferocityExecution = Phase8CombatManager.beginPassive(
                 Phase8UniqueAbilities.TWISTED_FEROCITY, world, stack, actor, target);
         existingState.ferocityTuning = Phase8UniqueAbilities.tuning(ferocityExecution);
-        UniqueAbilityApi.finish(ferocityExecution, Phase8UniqueAbilities.FINISH, 1);
         UniqueAbilityExecution crescendoExecution = Phase8CombatManager.beginPassive(
                 Phase8UniqueAbilities.TWISTED_CRESCENDO, world, stack, actor, target);
         existingState.crescendoTuning = Phase8UniqueAbilities.tuning(crescendoExecution);
-        UniqueAbilityApi.finish(crescendoExecution, Phase8UniqueAbilities.FINISH, 1);
-        ArmedCrescendo armed = existingState == null ? null : existingState.armed;
+        ArmedCrescendo armed = existingState.armed;
         boolean empowered = armed != null && world.getTime() < armed.expiresAt;
         if (empowered) {
             armed.remainingHits--;
-            triggerCrescendo(
+            CrescendoResult result = triggerCrescendo(
                     world,
                     stack,
                     actor,
                     sourceOwner,
                     target,
                     true,
+                    false,
                     armed.consumedStacks,
                     existingState,
                     armed.tuning
             );
-            if (!target.isAlive() && armed.tuning.flag(1 << 23)) {
+            armed.affectedTargets += result.affectedTargets;
+            if (result.affectedTargets > 0) UniqueAbilityApi.emit(armed.execution,
+                    net.sweenus.simplyswords.api.ability.UniqueAbilityPhase.HIT,
+                    Phase8UniqueAbilities.HIT, target, result.affectedTargets, result.damage);
+            if (result.kills > 0) UniqueAbilityApi.emit(armed.execution,
+                    net.sweenus.simplyswords.api.ability.UniqueAbilityPhase.HIT,
+                    Phase8UniqueAbilities.KILL, target, result.kills, result.damage);
+            if (result.kills > 0 && armed.tuning.flag(1 << 23)) {
                 existingState.ferocityRefundAt = world.getTime()
-                        + armed.tuning.integer(Phase8AbilityTuning.Setting.DELAY_TICKS, 20);
+                        + armed.tuning.integer(Phase8AbilityTuning.Setting.TWISTED_ENCORE_DELAY_TICKS, 20);
                 existingState.ferocityRefundStacks = armed.tuning.integer(
-                        Phase8AbilityTuning.Setting.COUNT, 4);
+                        Phase8AbilityTuning.Setting.TWISTED_ENCORE_REFUND_STACKS, 4);
             }
             if (armed.remainingHits <= 0) {
                 existingState.armed = null;
-                if (armed.retainedStacks > 0) actor.addStatusEffect(new StatusEffectInstance(
-                        EffectRegistry.getReference(EffectRegistry.FEROCITY),
-                        Math.max(1, Config.uniqueEffects.twisted_blade.duration), armed.retainedStacks - 1,
-                        false, false, true), actor);
-                else actor.removeStatusEffect(EffectRegistry.getReference(EffectRegistry.FEROCITY));
+                UniqueAbilityApi.finish(armed.execution, Phase8UniqueAbilities.FINISH, armed.affectedTargets);
             }
             existingState.hitCounter = 0;
         }
 
         existingState.lastHitTick = world.getTime();
+        int previousStacks = getFerocityStacks(actor);
         int stacks = tryGainFerocity(world, actor, existingState);
+        UniqueAbilityApi.finish(ferocityExecution, Phase8UniqueAbilities.FINISH,
+                stacks > previousStacks ? 1 : 0);
         if (empowered || stacks <= 0) {
+            UniqueAbilityApi.finish(crescendoExecution, Phase8UniqueAbilities.FINISH, 0);
             return;
         }
 
-        WielderState state = existingState == null ? state(world, actor) : existingState;
+        WielderState state = existingState;
         state.hitCounter++;
         int interval = getCrescendoInterval(stacks, state.crescendoTuning,
-                state.ferocityTuning.integer(Phase8AbilityTuning.Setting.STACK_CAP,
-                        Config.uniqueEffects.twisted_blade.maxStacks));
+                maximumStacks(Config.uniqueEffects.twisted_blade.maxStacks, state.ferocityTuning));
         if (state.hitCounter < interval) {
+            UniqueAbilityApi.finish(crescendoExecution, Phase8UniqueAbilities.FINISH, 0);
             return;
         }
 
         state.hitCounter = 0;
-        triggerCrescendo(world, stack, actor, sourceOwner, target, false, stacks, state,
+        CrescendoResult result = triggerCrescendo(world, stack, actor, sourceOwner, target, false,
+                false, stacks, state,
                 state.crescendoTuning);
+        if (result.affectedTargets > 0) UniqueAbilityApi.emit(crescendoExecution,
+                net.sweenus.simplyswords.api.ability.UniqueAbilityPhase.HIT,
+                Phase8UniqueAbilities.HIT, target, result.affectedTargets, result.damage);
+        if (result.kills > 0) UniqueAbilityApi.emit(crescendoExecution,
+                net.sweenus.simplyswords.api.ability.UniqueAbilityPhase.HIT,
+                Phase8UniqueAbilities.KILL, target, result.kills, result.damage);
+        UniqueAbilityApi.finish(crescendoExecution, Phase8UniqueAbilities.FINISH, result.affectedTargets);
         state.crescendoCounter++;
-        int maximumStacks = state.ferocityTuning.integer(Phase8AbilityTuning.Setting.STACK_CAP,
-                Config.uniqueEffects.twisted_blade.maxStacks);
+        int maximumStacks = maximumStacks(Config.uniqueEffects.twisted_blade.maxStacks,
+                state.ferocityTuning);
         if (state.crescendoTuning.flag(1 << 15) && stacks >= maximumStacks
-                && state.crescendoCounter % 3 == 0) {
+                && state.crescendoCounter % state.crescendoTuning.integer(
+                Phase8AbilityTuning.Setting.TWISTED_DOUBLE_INTERVAL, 3) == 0) {
             state.pendingCrescendos.add(new PendingCrescendo(target.getUuid(),
                     sourceOwner == null ? null : sourceOwner.getUuid(), stack.copy(), stacks,
                     world.getTime() + state.crescendoTuning.integer(
-                    Phase8AbilityTuning.Setting.DELAY_TICKS, 4), state.crescendoTuning));
+                    Phase8AbilityTuning.Setting.TWISTED_DOUBLE_DELAY_TICKS, 4), state.crescendoTuning));
         }
     }
 
     private static int tryGainFerocity(ServerWorld world, LivingEntity actor, WielderState state) {
         Phase8AbilityTuning tuning = state.ferocityTuning;
-        int chance = tuning.integer(Phase8AbilityTuning.Setting.CHANCE, Config.uniqueEffects.twisted_blade.chance);
+        int chance = ferocityChance(Config.uniqueEffects.twisted_blade.chance, tuning);
         int currentStacks = getFerocityStacks(actor);
         state.meleeCounter++;
-        boolean guaranteed = tuning.flag(1 << 3) && state.meleeCounter % 5 == 0;
+        boolean guaranteed = tuning.flag(1 << 3) && state.meleeCounter % tuning.integer(
+                Phase8AbilityTuning.Setting.TWISTED_GUARANTEED_HIT_INTERVAL, 5) == 0;
         if (!guaranteed && (chance <= 0 || actor.getRandom().nextInt(100) >= chance)) {
             return currentStacks;
         }
 
-        int maximumStacks = Math.max(1, tuning.integer(Phase8AbilityTuning.Setting.STACK_CAP,
-                Config.uniqueEffects.twisted_blade.maxStacks));
+        int maximumStacks = maximumStacks(Config.uniqueEffects.twisted_blade.maxStacks, tuning);
         int gain = tuning.flag(1 << 8) && actor.getHealth() / actor.getMaxHealth()
-                < tuning.get(Phase8AbilityTuning.Setting.HEALTH_THRESHOLD, .5) ? 2 : 1;
+                < tuning.get(Phase8AbilityTuning.Setting.TWISTED_FEVER_HEALTH_THRESHOLD, .5)
+                ? tuning.integer(Phase8AbilityTuning.Setting.TWISTED_FEVER_GAIN, 2) : 1;
         int newStacks = Math.min(maximumStacks, currentStacks + gain);
-        int duration = Math.max(1, tuning.integer(Phase8AbilityTuning.Setting.DURATION_TICKS,
-                Config.uniqueEffects.twisted_blade.duration));
-        if (tuning.flag(1 << 4) && currentStacks >= tuning.integer(Phase8AbilityTuning.Setting.STACK_CAP, 8)) {
-            int durationCap = tuning.has(Phase8AbilityTuning.Setting.DURATION_CAP_TICKS)
-                    ? tuning.integer(Phase8AbilityTuning.Setting.DURATION_CAP_TICKS, 120)
-                    : tuning.integer(Phase8AbilityTuning.Setting.TARGET_CAP, 120);
+        int duration = ferocityDuration(Config.uniqueEffects.twisted_blade.duration, tuning);
+        if (tuning.flag(1 << 4) && currentStacks >= tuning.integer(
+                Phase8AbilityTuning.Setting.TWISTED_CADENCE_THRESHOLD, 8)) {
+            int durationCap = tuning.integer(
+                    Phase8AbilityTuning.Setting.TWISTED_CADENCE_BONUS_CAP_TICKS, 120);
             state.bonusDuration = Math.min(durationCap,
-                    state.bonusDuration + 40);
+                    state.bonusDuration + tuning.integer(
+                            Phase8AbilityTuning.Setting.TWISTED_CADENCE_BONUS_TICKS, 40));
             duration += state.bonusDuration;
         }
-        actor.addStatusEffect(
-                new StatusEffectInstance(
-                        EffectRegistry.getReference(EffectRegistry.FEROCITY),
-                        duration,
-                        newStacks - 1,
-                        false,
-                        false,
-                        true
-                ),
-                actor
-        );
+        setFerocityStacks(actor, newStacks, duration, tuning);
         spawnStackGainCue(world, actor, newStacks, maximumStacks);
-        if (tuning.flag(1 << 5)) actor.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED,
-                duration, 0), actor);
-        updateMasteryAttackSpeed(actor, newStacks, tuning);
+        maintainFootwork(actor, tuning);
         return newStacks;
     }
 
@@ -337,9 +350,7 @@ public final class TwistedBladeAbilityManager {
         EntityAttributeInstance attackSpeed = actor.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_SPEED);
         if (attackSpeed == null) return;
         attackSpeed.removeModifier(MASTERY_ATTACK_SPEED);
-        double desired = tuning.get(Phase8AbilityTuning.Setting.PER_STACK_MULTIPLIER,
-                Config.uniqueEffects.twisted_blade.attackSpeedPerStack) * stacks;
-        if (tuning.flag(1 << 6) && stacks > 15) desired -= (stacks - 15) * .06;
+        double desired = attackSpeedBonus(stacks, Config.uniqueEffects.twisted_blade.attackSpeedPerStack, tuning);
         double baseline = Config.uniqueEffects.twisted_blade.attackSpeedPerStack * stacks;
         double correction = desired - baseline;
         if (Math.abs(correction) > .0001) attackSpeed.addTemporaryModifier(new EntityAttributeModifier(
@@ -350,8 +361,8 @@ public final class TwistedBladeAbilityManager {
         int tier = stacks >= maximumStacks
                 ? 3
                 : Math.min(3, Math.max(0, (Math.max(1, stacks) - 1) * 4 / maximumStacks));
-        int baseInterval = Math.max(1, tuning.integer(Phase8AbilityTuning.Setting.INTERVAL_TICKS,
-                Config.uniqueEffects.twisted_blade.crescendoBaseInterval));
+        int baseInterval = crescendoBaseInterval(
+                Config.uniqueEffects.twisted_blade.crescendoBaseInterval, tuning);
         int minimumInterval = Math.max(1, Math.min(
                 baseInterval,
                 Config.uniqueEffects.twisted_blade.crescendoMinimumInterval
@@ -359,55 +370,143 @@ public final class TwistedBladeAbilityManager {
         return Math.max(minimumInterval, Math.round(MathHelper.lerp(tier / 3.0F, baseInterval, minimumInterval)));
     }
 
-    private static void triggerCrescendo(ServerWorld world, ItemStack stack, LivingEntity actor,
-                                         LivingEntity sourceOwner, LivingEntity impactTarget,
-                                         boolean empowered, int stacks, WielderState state,
-                                         Phase8AbilityTuning tuning) {
-        int maximumStacks = Math.max(1, state.ferocityTuning.integer(Phase8AbilityTuning.Setting.STACK_CAP,
-                Config.uniqueEffects.twisted_blade.maxStacks));
+    static int ferocityChance(int configuredChance, Phase8AbilityTuning tuning) {
+        return Math.clamp(configuredChance + tuning.integer(
+                Phase8AbilityTuning.Setting.TWISTED_CHANCE_BONUS, 0), 0, 100);
+    }
+
+    static int maximumStacks(int configuredMaximum, Phase8AbilityTuning tuning) {
+        if (tuning.flag(1 << 7)) return tuning.integer(
+                Phase8AbilityTuning.Setting.TWISTED_ENDLESS_MAX_STACKS, 10);
+        if (tuning.flag(1 << 8)) return tuning.integer(
+                Phase8AbilityTuning.Setting.TWISTED_FEVER_MAX_STACKS, 20);
+        return Math.max(1, configuredMaximum + tuning.integer(
+                Phase8AbilityTuning.Setting.TWISTED_MAX_STACK_BONUS, 0));
+    }
+
+    static int ferocityDuration(int configuredDuration, Phase8AbilityTuning tuning) {
+        if (tuning.flag(1 << 8)) return tuning.integer(
+                Phase8AbilityTuning.Setting.TWISTED_FEVER_DURATION_TICKS, 80);
+        return Math.max(1, configuredDuration + tuning.integer(
+                Phase8AbilityTuning.Setting.TWISTED_DURATION_BONUS_TICKS, 0));
+    }
+
+    static double attackSpeedBonus(int stacks, double configuredPerStack, Phase8AbilityTuning tuning) {
+        double ordinary = configuredPerStack + tuning.get(
+                Phase8AbilityTuning.Setting.TWISTED_ATTACK_SPEED_PER_STACK_BONUS, 0);
+        if (!tuning.flag(1 << 6)) return Math.max(0, ordinary) * stacks;
+        int threshold = tuning.integer(Phase8AbilityTuning.Setting.TWISTED_OVERFLOW_THRESHOLD, 15);
+        double overflow = tuning.get(
+                Phase8AbilityTuning.Setting.TWISTED_OVERFLOW_ATTACK_SPEED_PER_STACK, .05);
+        return Math.max(0, ordinary) * Math.min(stacks, threshold)
+                + Math.max(0, overflow) * Math.max(0, stacks - threshold);
+    }
+
+    static double crescendoRadius(double configuredRadius, Phase8AbilityTuning tuning) {
+        double radius = Math.max(.1, configuredRadius) + tuning.get(
+                Phase8AbilityTuning.Setting.TWISTED_CRESCENDO_RADIUS_BONUS, 0);
+        if (tuning.flag(1 << 17)) radius *= tuning.get(
+                Phase8AbilityTuning.Setting.TWISTED_ORCHESTRA_RADIUS_MULTIPLIER, 1.75);
+        return Math.max(.1, radius);
+    }
+
+    static int crescendoBaseInterval(int configuredInterval, Phase8AbilityTuning tuning) {
+        return Math.max(1, configuredInterval + tuning.integer(
+                Phase8AbilityTuning.Setting.TWISTED_CRESCENDO_INTERVAL_BONUS, 0));
+    }
+
+    static float crescendoScaling(float configuredScaling, Phase8AbilityTuning tuning,
+                                   boolean secondary) {
+        float scaling = Math.max(0, configuredScaling) * (float) tuning.get(
+                Phase8AbilityTuning.Setting.TWISTED_CRESCENDO_DAMAGE_MULTIPLIER, 1);
+        if (tuning.flag(1 << 16)) scaling *= (float) tuning.get(
+                Phase8AbilityTuning.Setting.TWISTED_SOLO_DAMAGE_MULTIPLIER, 1.9);
+        if (tuning.flag(1 << 17)) scaling *= (float) tuning.get(
+                Phase8AbilityTuning.Setting.TWISTED_ORCHESTRA_DAMAGE_MULTIPLIER, .65);
+        if (secondary) scaling *= (float) tuning.get(
+                Phase8AbilityTuning.Setting.TWISTED_DOUBLE_DAMAGE_MULTIPLIER, .6);
+        return scaling;
+    }
+
+    static double crescendoKnockback(double configuredKnockback, Phase8AbilityTuning tuning) {
+        double knockback = Math.max(0, configuredKnockback) + tuning.get(
+                Phase8AbilityTuning.Setting.TWISTED_CRESCENDO_KNOCKBACK_BONUS, 0);
+        if (tuning.flag(1 << 17)) knockback *= tuning.get(
+                Phase8AbilityTuning.Setting.TWISTED_ORCHESTRA_KNOCKBACK_MULTIPLIER, 0);
+        return Math.max(0, knockback);
+    }
+
+    static int finaleWindow(int configuredWindow, Phase8AbilityTuning tuning) {
+        if (tuning.flag(1 << 25)) return tuning.integer(
+                Phase8AbilityTuning.Setting.TWISTED_SHATTER_WINDOW_TICKS, 40);
+        return Math.max(1, configuredWindow + tuning.integer(
+                Phase8AbilityTuning.Setting.TWISTED_FINALE_WINDOW_BONUS_TICKS, 0));
+    }
+
+    static int sustainedConsumption(int stacks, double ratio) {
+        return Math.min(stacks, Math.max(1, (int) Math.floor(stacks * Math.clamp(ratio, 0, 1))));
+    }
+
+    static float finaleDamageScaling(float fraction, float configuredMinimum, float configuredMaximum,
+                                     Phase8AbilityTuning tuning) {
+        float minimum = Math.max(0, configuredMinimum) * (float) tuning.get(
+                Phase8AbilityTuning.Setting.TWISTED_FINALE_MIN_DAMAGE_MULTIPLIER, 1);
+        float maximum = Math.max(0, configuredMaximum) * (float) tuning.get(
+                Phase8AbilityTuning.Setting.TWISTED_FINALE_MAX_DAMAGE_MULTIPLIER, 1);
+        float damage = MathHelper.lerp(MathHelper.clamp(fraction, 0, 1), minimum, maximum);
+        if (tuning.flag(1 << 26)) damage *= (float) tuning.get(
+                Phase8AbilityTuning.Setting.TWISTED_SUSTAINED_DAMAGE_MULTIPLIER, .55);
+        return damage;
+    }
+
+    static double finaleRadius(float fraction, double configuredMinimum, double configuredMaximum,
+                               Phase8AbilityTuning tuning) {
+        if (tuning.flag(1 << 25)) return tuning.get(
+                Phase8AbilityTuning.Setting.TWISTED_SHATTER_RADIUS, 5);
+        return Math.max(.1, MathHelper.lerp(MathHelper.clamp(fraction, 0, 1),
+                Math.max(.1, configuredMinimum), Math.max(.1, configuredMaximum))
+                + tuning.get(Phase8AbilityTuning.Setting.TWISTED_FINALE_RADIUS_BONUS, 0));
+    }
+
+    static double finaleKnockback(float fraction, double configuredMinimum, double configuredMaximum,
+                                  Phase8AbilityTuning tuning) {
+        return Math.max(0, MathHelper.lerp(MathHelper.clamp(fraction, 0, 1),
+                Math.max(0, configuredMinimum), Math.max(0, configuredMaximum))
+                + tuning.get(Phase8AbilityTuning.Setting.TWISTED_FINALE_KNOCKBACK_BONUS, 0));
+    }
+
+    private static CrescendoResult triggerCrescendo(ServerWorld world, ItemStack stack, LivingEntity actor,
+                                                    LivingEntity sourceOwner, LivingEntity impactTarget,
+                                                    boolean empowered, boolean secondary, int stacks,
+                                                    WielderState state, Phase8AbilityTuning tuning) {
+        int maximumStacks = maximumStacks(Config.uniqueEffects.twisted_blade.maxStacks,
+                state.ferocityTuning);
         float stackFraction = tuning.flag(1 << 25) ? 1 : MathHelper.clamp(
                 stacks / (float) maximumStacks, 0.0F, 1.0F);
         float damageScaling;
         if (empowered) {
-            float minimum = Math.max(0.0F, Config.uniqueEffects.twisted_blade.empoweredMinimumDamageScaling);
-            float maximum = Math.max(0.0F, Config.uniqueEffects.twisted_blade.empoweredMaximumDamageScaling);
-            if (tuning.flag(1 << 19)) minimum *= (float) tuning.get(
-                    Phase8AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1.15);
-            if (tuning.flag(1 << 20)) maximum *= (float) tuning.get(
-                    Phase8AbilityTuning.Setting.FINAL_DAMAGE_MULTIPLIER, 1.2);
-            damageScaling = MathHelper.lerp(stackFraction, minimum, maximum);
-            if (tuning.flag(1 << 26)) damageScaling *= (float) tuning.get(
-                    Phase8AbilityTuning.Setting.DAMAGE_MULTIPLIER, .55);
+            damageScaling = finaleDamageScaling(stackFraction,
+                    Config.uniqueEffects.twisted_blade.empoweredMinimumDamageScaling,
+                    Config.uniqueEffects.twisted_blade.empoweredMaximumDamageScaling, tuning);
         } else {
-            damageScaling = Math.max(0.0F, Config.uniqueEffects.twisted_blade.crescendoDamageScaling)
-                    * (float) tuning.get(Phase8AbilityTuning.Setting.DAMAGE_MULTIPLIER, 1);
+            damageScaling = crescendoScaling(
+                    Config.uniqueEffects.twisted_blade.crescendoDamageScaling, tuning, secondary);
         }
-        if (empowered && tuning.flag(1 << 24) && state.armed != null
-                && world.getTime() - state.armed.armedAt <= tuning.integer(
-                Phase8AbilityTuning.Setting.LOCKOUT_TICKS, 20)) damageScaling *= 1.2F;
         float spellScaling = empowered
-                ? MathHelper.lerp(
-                stackFraction,
-                Math.max(0.0F, Config.uniqueEffects.twisted_blade.empoweredMinimumSpellScaling),
-                Math.max(0.0F, Config.uniqueEffects.twisted_blade.empoweredMaximumSpellScaling)
-        )
-                : Math.max(0.0F, Config.uniqueEffects.twisted_blade.crescendoSpellScaling);
+                ? finaleDamageScaling(stackFraction,
+                Config.uniqueEffects.twisted_blade.empoweredMinimumSpellScaling,
+                Config.uniqueEffects.twisted_blade.empoweredMaximumSpellScaling, tuning)
+                : crescendoScaling(Config.uniqueEffects.twisted_blade.crescendoSpellScaling,
+                tuning, secondary);
         double radius = empowered
-                ? MathHelper.lerp(
-                stackFraction,
-                Math.max(0.1, Config.uniqueEffects.twisted_blade.empoweredMinimumRadius),
-                Math.max(0.1, Config.uniqueEffects.twisted_blade.empoweredMaximumRadius)
-        )
-                : Math.max(0.1, Config.uniqueEffects.twisted_blade.crescendoRadius);
-        radius = tuning.get(Phase8AbilityTuning.Setting.RADIUS, radius);
+                ? finaleRadius(stackFraction, Config.uniqueEffects.twisted_blade.empoweredMinimumRadius,
+                Config.uniqueEffects.twisted_blade.empoweredMaximumRadius, tuning)
+                : crescendoRadius(Config.uniqueEffects.twisted_blade.crescendoRadius, tuning);
         double knockback = empowered
-                ? MathHelper.lerp(
-                stackFraction,
-                Math.max(0.0, Config.uniqueEffects.twisted_blade.empoweredMinimumKnockback),
-                Math.max(0.0, Config.uniqueEffects.twisted_blade.empoweredMaximumKnockback)
-        )
-                : Math.max(0.0, Config.uniqueEffects.twisted_blade.crescendoKnockback);
-        knockback = tuning.get(Phase8AbilityTuning.Setting.KNOCKBACK, knockback);
+                ? finaleKnockback(stackFraction,
+                Config.uniqueEffects.twisted_blade.empoweredMinimumKnockback,
+                Config.uniqueEffects.twisted_blade.empoweredMaximumKnockback, tuning)
+                : crescendoKnockback(Config.uniqueEffects.twisted_blade.crescendoKnockback, tuning);
 
         Vec3d center = impactTarget.getPos().add(
                 0.0,
@@ -416,6 +515,12 @@ public final class TwistedBladeAbilityManager {
         );
         Vec3d facing = horizontalDirection(impactTarget.getPos().subtract(actor.getPos()), actor);
         float damage = HelperMethods.abilityScaledDamage("soul", actor, stack, damageScaling, spellScaling);
+        if (empowered && tuning.flag(1 << 24) && state.armed != null
+                && world.getTime() - state.armed.armedAt <= tuning.integer(
+                Phase8AbilityTuning.Setting.TWISTED_PERFECT_WINDOW_TICKS, 20)) {
+            damage *= (float) tuning.get(
+                    Phase8AbilityTuning.Setting.TWISTED_PERFECT_DAMAGE_MULTIPLIER, 1.2);
+        }
         Box area = new Box(
                 center.x - radius,
                 center.y - radius,
@@ -426,24 +531,49 @@ public final class TwistedBladeAbilityManager {
         );
         DamageSource source = SimplySwordsAPI.getWeaponDamageSource(actor);
 
-        int targetCap = tuning.has(Phase8AbilityTuning.Setting.TARGET_CAP)
-                ? tuning.integer(Phase8AbilityTuning.Setting.TARGET_CAP, 64) : Integer.MAX_VALUE;
+        int targetCap = empowered && tuning.flag(1 << 25)
+                ? tuning.integer(Phase8AbilityTuning.Setting.TWISTED_SHATTER_TARGET_CAP, 16)
+                : empowered && tuning.flag(1 << 26)
+                ? 1
+                : tuning.flag(1 << 16)
+                ? tuning.integer(Phase8AbilityTuning.Setting.TWISTED_SOLO_TARGET_CAP, 1)
+                : tuning.flag(1 << 17)
+                ? tuning.integer(Phase8AbilityTuning.Setting.TWISTED_ORCHESTRA_TARGET_CAP, 16)
+                : Integer.MAX_VALUE;
         int affected = 0;
-        java.util.List<LivingEntity> candidates = empowered && tuning.flag(1 << 26)
-                ? new java.util.ArrayList<>(java.util.List.of(impactTarget))
-                : world.getEntitiesByClass(LivingEntity.class, area,
-                candidate -> isValidTarget(world, actor, sourceOwner, candidate));
-        candidates.sort(java.util.Comparator.comparingDouble(candidate -> candidate.squaredDistanceTo(center)));
-        boolean syncopated = !empowered && tuning.flag(1 << 13) && state.nextMirrored;
-        if (syncopated) damage *= 1.15F;
+        int kills = 0;
+        java.util.List<LivingEntity> candidates;
+        if (empowered && tuning.flag(1 << 26)) {
+            candidates = new java.util.ArrayList<>(java.util.List.of(impactTarget));
+        } else if (!empowered && tuning.flag(1 << 16)) {
+            double range = tuning.get(Phase8AbilityTuning.Setting.TWISTED_SOLO_RANGE, 5);
+            Vec3d actorCenter = actor.getPos().add(0, actor.getHeight() * .5, 0);
+            Box soloArea = new Box(actorCenter.x - range, actorCenter.y - range, actorCenter.z - range,
+                    actorCenter.x + range, actorCenter.y + range, actorCenter.z + range);
+            candidates = world.getEntitiesByClass(LivingEntity.class, soloArea,
+                    candidate -> isValidTarget(world, actor, sourceOwner, candidate)
+                            && candidate.squaredDistanceTo(actor) <= range * range);
+            candidates.sort(java.util.Comparator.comparingDouble(candidate -> candidate.squaredDistanceTo(actor)));
+        } else {
+            candidates = world.getEntitiesByClass(LivingEntity.class, area,
+                    candidate -> isValidTarget(world, actor, sourceOwner, candidate));
+            candidates.sort(java.util.Comparator.comparingDouble(candidate -> candidate.squaredDistanceTo(center)));
+        }
+        boolean syncopated = !empowered && !secondary && tuning.flag(1 << 13)
+                && (state.crescendoCounter + 1) % tuning.integer(
+                Phase8AbilityTuning.Setting.TWISTED_SYNC_INTERVAL, 2) == 0;
+        if (syncopated) damage *= (float) tuning.get(
+                Phase8AbilityTuning.Setting.TWISTED_SYNC_DAMAGE_MULTIPLIER, 1.15);
         for (LivingEntity candidate : candidates) {
             if (affected >= targetCap) break;
             double woundMultiplier = 1;
             WoundState wound = state.wounds.get(candidate.getUuid());
             if (!empowered && tuning.flag(1 << 14) && wound != null
                     && world.getTime() - wound.lastHit <= tuning.integer(
-                    Phase8AbilityTuning.Setting.LOCKOUT_TICKS, 60) && wound.hits >= 2) {
-                woundMultiplier = tuning.get(Phase8AbilityTuning.Setting.OUTGOING_MULTIPLIER, 1.1);
+                    Phase8AbilityTuning.Setting.TWISTED_WOUND_WINDOW_TICKS, 60)
+                    && wound.hits >= tuning.integer(Phase8AbilityTuning.Setting.TWISTED_WOUND_HITS, 2)) {
+                woundMultiplier = tuning.get(
+                        Phase8AbilityTuning.Setting.TWISTED_WOUND_DAMAGE_MULTIPLIER, 1.1);
                 wound.hits = 0;
             }
             float enchantedDamage = HelperMethods.applyAbilityDamageEnchantments(
@@ -459,22 +589,22 @@ public final class TwistedBladeAbilityManager {
             );
             if (damaged[0]) {
                 affected++;
+                if (!candidate.isAlive()) kills++;
                 if (!empowered && tuning.flag(1 << 14)) {
-                    WoundState updated = state.wounds.computeIfAbsent(candidate.getUuid(), ignored -> new WoundState());
+                    WoundState updated = woundState(state, candidate.getUuid());
                     if (world.getTime() - updated.lastHit > tuning.integer(
-                            Phase8AbilityTuning.Setting.LOCKOUT_TICKS, 60)) updated.hits = 0;
+                            Phase8AbilityTuning.Setting.TWISTED_WOUND_WINDOW_TICKS, 60)) updated.hits = 0;
                     updated.hits++;
                     updated.lastHit = world.getTime();
                 }
                 if (syncopated) {
                     Vec3d pull = center.subtract(candidate.getPos()).multiply(1, 0, 1);
-                    if (pull.lengthSquared() > 0) candidate.addVelocity(pull.normalize().multiply(.2));
+                    if (pull.lengthSquared() > 0) candidate.addVelocity(pull.normalize().multiply(tuning.get(
+                            Phase8AbilityTuning.Setting.TWISTED_SYNC_PULL_STRENGTH, .2)));
                 } else knockAway(candidate, center, facing, knockback, empowered ? 0.16 : 0.08);
             }
         }
 
-        boolean mirrored = state.nextMirrored;
-        state.nextMirrored = !state.nextMirrored;
         spawnCrescendoEffects(
                 world,
                 actor,
@@ -483,8 +613,9 @@ public final class TwistedBladeAbilityManager {
                 facing,
                 radius,
                 empowered,
-                mirrored
+                syncopated
         );
+        return new CrescendoResult(affected, kills, damage);
     }
 
     private static boolean isValidTarget(ServerWorld world, LivingEntity actor,
@@ -497,6 +628,53 @@ public final class TwistedBladeAbilityManager {
                 && EntityPredicates.VALID_LIVING_ENTITY.test(target)
                 && HelperMethods.checkAbilityTarget(target, actor)
                 && (sourceOwner == null || HelperMethods.checkAbilityTarget(target, sourceOwner));
+    }
+
+    private static void setFerocityStacks(LivingEntity actor, int stacks, int duration,
+                                          Phase8AbilityTuning tuning) {
+        if (stacks <= 0) {
+            actor.removeStatusEffect(EffectRegistry.getReference(EffectRegistry.FEROCITY));
+            updateMasteryAttackSpeed(actor, 0, tuning);
+            return;
+        }
+        StatusEffectInstance current = actor.getStatusEffect(
+                EffectRegistry.getReference(EffectRegistry.FEROCITY));
+        if (current != null && current.getAmplifier() + 1 > stacks) {
+            actor.removeStatusEffect(EffectRegistry.getReference(EffectRegistry.FEROCITY));
+        }
+        actor.addStatusEffect(new StatusEffectInstance(
+                EffectRegistry.getReference(EffectRegistry.FEROCITY),
+                Math.max(1, duration), stacks - 1, false, false, true), actor);
+        updateMasteryAttackSpeed(actor, stacks, tuning);
+    }
+
+    private static void maintainFootwork(LivingEntity actor, Phase8AbilityTuning tuning) {
+        if (!tuning.flag(1 << 5) || getFerocityStacks(actor) < tuning.integer(
+                Phase8AbilityTuning.Setting.TWISTED_FOOTWORK_THRESHOLD, 8)) return;
+        StatusEffectInstance speed = actor.getStatusEffect(StatusEffects.SPEED);
+        if (speed == null || speed.getAmplifier() == 0 && speed.getDuration() < 3) {
+            actor.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, 3, 0,
+                    false, false, true), actor);
+        }
+    }
+
+    private static WoundState woundState(WielderState state, UUID targetId) {
+        WoundState existing = state.wounds.get(targetId);
+        if (existing != null) return existing;
+        if (state.wounds.size() >= 64) {
+            UUID oldest = null;
+            long oldestTick = Long.MAX_VALUE;
+            for (Map.Entry<UUID, WoundState> entry : state.wounds.entrySet()) {
+                if (entry.getValue().lastHit < oldestTick) {
+                    oldest = entry.getKey();
+                    oldestTick = entry.getValue().lastHit;
+                }
+            }
+            if (oldest != null) state.wounds.remove(oldest);
+        }
+        WoundState created = new WoundState();
+        state.wounds.put(targetId, created);
+        return created;
     }
 
     private static void knockAway(LivingEntity target, Vec3d center, Vec3d fallbackDirection,
@@ -541,8 +719,8 @@ public final class TwistedBladeAbilityManager {
         );
     }
 
-    private static void spawnActivationCue(ServerWorld world, LivingEntity actor, int stacks) {
-        int maximumStacks = Math.max(1, Config.uniqueEffects.twisted_blade.maxStacks);
+    private static void spawnActivationCue(ServerWorld world, LivingEntity actor, int stacks,
+                                           int maximumStacks) {
         float progress = MathHelper.clamp(stacks / (float) maximumStacks, 0.0F, 1.0F);
         Vec3d pos = actor.getPos().add(0.0, Math.max(0.4, actor.getHeight() * 0.5), 0.0);
         world.spawnParticles(ParticleTypes.REVERSE_PORTAL, pos.x, pos.y, pos.z,
@@ -652,12 +830,53 @@ public final class TwistedBladeAbilityManager {
                 .computeIfAbsent(actor.getUuid(), ignored -> new WielderState());
     }
 
+    public static void clear(ServerWorld world) {
+        if (world == null) return;
+        Map<UUID, WielderState> states = WIELDER_STATES.remove(world);
+        if (states == null) return;
+        states.forEach((actorId, state) -> {
+            cancelState(state);
+            if (world.getEntity(actorId) instanceof LivingEntity actor) {
+                EntityAttributeInstance attackSpeed = actor.getAttributeInstance(
+                        EntityAttributes.GENERIC_ATTACK_SPEED);
+                if (attackSpeed != null) attackSpeed.removeModifier(MASTERY_ATTACK_SPEED);
+            }
+        });
+    }
+
+    public static void clearActor(LivingEntity actor) {
+        if (actor == null) return;
+        UUID actorId = actor.getUuid();
+        WIELDER_STATES.values().forEach(states -> {
+            WielderState removed = states.remove(actorId);
+            if (removed != null) cancelState(removed);
+        });
+        WIELDER_STATES.entrySet().removeIf(entry -> entry.getValue().isEmpty());
+        EntityAttributeInstance attackSpeed = actor.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_SPEED);
+        if (attackSpeed != null) attackSpeed.removeModifier(MASTERY_ATTACK_SPEED);
+    }
+
+    public static void clearAll() {
+        WIELDER_STATES.forEach((world, states) -> states.forEach((actorId, state) -> {
+            cancelState(state);
+            if (world.getEntity(actorId) instanceof LivingEntity actor) {
+                EntityAttributeInstance attackSpeed = actor.getAttributeInstance(
+                        EntityAttributes.GENERIC_ATTACK_SPEED);
+                if (attackSpeed != null) attackSpeed.removeModifier(MASTERY_ATTACK_SPEED);
+            }
+        }));
+        WIELDER_STATES.clear();
+    }
+
+    private static void cancelState(WielderState state) {
+        if (state != null && state.armed != null) UniqueAbilityApi.cancel(state.armed.execution);
+    }
+
     private static final class WielderState {
         private int hitCounter;
         private int meleeCounter;
         private int bonusDuration;
         private long lastHitTick;
-        private boolean nextMirrored;
         private int crescendoCounter;
         private long ferocityRefundAt;
         private int ferocityRefundStacks;
@@ -674,16 +893,17 @@ public final class TwistedBladeAbilityManager {
         private final Phase8AbilityTuning tuning;
         private final long armedAt;
         private int remainingHits;
-        private final int retainedStacks;
+        private final UniqueAbilityExecution execution;
+        private int affectedTargets;
 
         private ArmedCrescendo(int consumedStacks, long expiresAt, Phase8AbilityTuning tuning,
-                              long armedAt, int remainingHits, int retainedStacks) {
+                              long armedAt, int remainingHits, UniqueAbilityExecution execution) {
             this.consumedStacks = consumedStacks;
             this.expiresAt = expiresAt;
             this.tuning = tuning;
             this.armedAt = armedAt;
             this.remainingHits = remainingHits;
-            this.retainedStacks = retainedStacks;
+            this.execution = execution;
         }
     }
 
@@ -694,5 +914,8 @@ public final class TwistedBladeAbilityManager {
     private static final class WoundState {
         private int hits;
         private long lastHit;
+    }
+
+    private record CrescendoResult(int affectedTargets, int kills, float damage) {
     }
 }
