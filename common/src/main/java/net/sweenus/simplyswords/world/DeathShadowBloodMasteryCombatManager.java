@@ -63,7 +63,7 @@ public final class DeathShadowBloodMasteryCombatManager {
         UniqueAbilityExecution execution = beginPassive(DeathShadowBloodMasteryAbilities.SOULSTEALER_DEBT,
                 world, stack, target, source.getAttacker() instanceof LivingEntity living ? living : null);
         DeathShadowBloodMasteryTuning tuning = DeathShadowBloodMasteryAbilities.tuning(execution);
-        int maximum = StealSwordItem.maximumDebt(tuning);
+        int maximum = StealSwordItem.synchronizeSoulDebtCapacity(stack, tuning);
         long now = world.getTime();
         ShieldLockout lockout = DEBT_SHIELD_LOCKOUTS.get(target.getUuid());
         if (tuning.flag(1 << 4) && debt >= maximum

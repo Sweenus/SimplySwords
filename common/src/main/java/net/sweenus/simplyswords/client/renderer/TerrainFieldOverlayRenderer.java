@@ -38,6 +38,7 @@ import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.client.render.IrisCompat;
 import net.sweenus.simplyswords.entity.BloodStainVisualEntity;
+import net.sweenus.simplyswords.entity.BrimstoneWakeVisualEntity;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -82,8 +83,11 @@ public final class TerrainFieldOverlayRenderer {
     private static final int[] NO_CONTRIBUTORS = new int[0];
     private static final Identifier WHITE_TEXTURE =
             Identifier.ofVanilla("textures/misc/white.png");
+    private static final Identifier MAGMA_TEXTURE = Identifier.ofVanilla("block/magma");
+    private static final Identifier LAVA_TEXTURE = Identifier.ofVanilla("block/lava_still");
     private static final Set<FaceKey> BLOOD_FACES_THIS_FRAME = new HashSet<>();
     private static final Set<UUID> BLOOD_COMPONENTS_THIS_FRAME = new HashSet<>();
+    private static final Set<UUID> MOLTEN_COMPONENTS_THIS_FRAME = new HashSet<>();
     private static long bloodFrame;
     private static boolean skipBloodRenderThisFrame;
     private static final List<Vec3d> GLOAM_EYES_THIS_FRAME = new ArrayList<>(GLOAM_EYE_LIMIT);
@@ -160,6 +164,18 @@ public final class TerrainFieldOverlayRenderer {
             0
     );
 
+    private static final Palette MOLTEN_WAKE = new Palette(
+            List.of(),
+            255, 255, 255,
+            0, 0, 0, 0,
+            10,
+            10,
+            3,
+            null,
+            true,
+            new BloodStyle(255, 255, 255, 0.16F)
+    );
+
     public static final Palette WHITE_MARBLE = new Palette(
             List.of(
                     new Variant(46,
@@ -191,12 +207,17 @@ public final class TerrainFieldOverlayRenderer {
     private final Map<UUID, TerrainCache> caches = new HashMap<>();
     private final Map<UUID, ShapeCache> bloodShapes = new HashMap<>();
     private final Map<UUID, BloodMaskCache> bloodMasks = new HashMap<>();
+    private final Map<UUID, BloodMaskCache> moltenWakeMasks = new HashMap<>();
     private final Map<UUID, DevourerGrowthState> devourerGrowth = new HashMap<>();
     private final Map<Integer, MergedStainState> mergedStainStates = new HashMap<>();
+    private final Map<UUID, MergedStainState> moltenWakeStates = new HashMap<>();
+    private long moltenPruneFrame = Long.MIN_VALUE;
+    private World moltenWorld;
 
     public static void beginWorldFrame() {
         BLOOD_FACES_THIS_FRAME.clear();
         BLOOD_COMPONENTS_THIS_FRAME.clear();
+        MOLTEN_COMPONENTS_THIS_FRAME.clear();
         bloodFrame++;
         GLOAM_EYES_THIS_FRAME.clear();
         skipBloodRenderThisFrame = IrisCompat.isRenderingShadowPass();
@@ -216,6 +237,14 @@ public final class TerrainFieldOverlayRenderer {
     public void clearBlood() {
         this.mergedStainStates.clear();
         this.bloodMasks.clear();
+    }
+
+    public void clearMoltenWakes() {
+        this.moltenWakeStates.clear();
+        this.moltenWakeMasks.clear();
+        this.caches.clear();
+        this.moltenWorld = null;
+        this.moltenPruneFrame = Long.MIN_VALUE;
     }
 
     public void render(World world, UUID id,
@@ -1049,6 +1078,117 @@ public final class TerrainFieldOverlayRenderer {
         }
     }
 
+    public void renderMergedMoltenWake(BrimstoneWakeVisualEntity trigger, float tickDelta,
+                                       MatrixStack.Entry matrices,
+                                       VertexConsumerProvider vertexConsumers) {
+        if (shouldSkipBloodRender()) {
+            return;
+        }
+        World world = trigger.getWorld();
+        UUID groupId = trigger.getGroupId();
+        if (groupId == null) {
+            return;
+        }
+        pruneMoltenWakeCaches(world);
+        MergedStainState state = this.moltenWakeStates.computeIfAbsent(
+                groupId, ignored -> new MergedStainState());
+        if (state.snapshotFrame != bloodFrame || state.snapshot.world != world) {
+            state.snapshot = buildMoltenWakeSnapshot(world, tickDelta, groupId, state);
+            state.snapshotFrame = bloodFrame;
+        }
+        BloodComponent component = state.snapshot.byMember.get(trigger.getUuid());
+        if (component == null || !MOLTEN_COMPONENTS_THIS_FRAME.add(component.id)) {
+            return;
+        }
+
+        double renderCenterX = MathHelper.lerp(tickDelta, trigger.prevX, trigger.getX());
+        double renderCenterY = MathHelper.lerp(tickDelta, trigger.prevY, trigger.getY());
+        double renderCenterZ = MathHelper.lerp(tickDelta, trigger.prevZ, trigger.getZ());
+        double gridSize = 1.0 / component.gridScale;
+        double minX = component.minGridX * gridSize;
+        double maxX = (component.maxGridX + 1) * gridSize;
+        double minZ = component.minGridZ * gridSize;
+        double maxZ = (component.maxGridZ + 1) * gridSize;
+        double cacheCenterX = (minX + maxX) * 0.5;
+        double cacheCenterY = (component.minY + component.maxY) * 0.5;
+        double cacheCenterZ = (minZ + maxZ) * 0.5;
+        double extentX = (maxX - minX) * 0.5;
+        double extentZ = (maxZ - minZ) * 0.5;
+        float verticalRange = (float) Math.max(2.0,
+                Math.max(cacheCenterY - component.minY,
+                        component.maxY - cacheCenterY));
+        TerrainCache terrain = getCache(
+                world, component.id, cacheCenterX, cacheCenterY, cacheCenterZ,
+                (float) Math.max(extentX, extentZ), verticalRange, MOLTEN_WAKE);
+        if (terrain.faces.isEmpty()) {
+            return;
+        }
+        BloodPreparedGeometry geometry = prepareBloodGeometry(
+                terrain, component, cacheCenterX, cacheCenterY, cacheCenterZ,
+                component.minY, component.maxY, MOLTEN_WAKE);
+        drawMoltenGeometry(renderCenterX, renderCenterY, renderCenterZ,
+                matrices, vertexConsumers, geometry,
+                state.snapshot.sourceOpacities, state.snapshot.allOpaque);
+    }
+
+    private BloodSnapshot buildMoltenWakeSnapshot(World world, float tickDelta,
+                                                   UUID groupId,
+                                                   MergedStainState renderState) {
+        List<BloodEntityState> states = new ArrayList<>();
+        for (BrimstoneWakeVisualEntity entity : moltenWakeEntities(world)) {
+            if (!groupId.equals(entity.getGroupId())) {
+                continue;
+            }
+            float opacity = moltenWakeOpacity(entity, tickDelta);
+            if (opacity <= 0.01F || entity.getRadius() <= 0.05F) {
+                continue;
+            }
+            double centerX = MathHelper.lerp(tickDelta, entity.prevX, entity.getX());
+            double centerY = MathHelper.lerp(tickDelta, entity.prevY, entity.getY());
+            double centerZ = MathHelper.lerp(tickDelta, entity.prevZ, entity.getZ());
+            long shapeKey = shapeKey(42, entity.getRadius(), 0.0F, 0.0F, 0);
+            long maskKey = maskKey(shapeKey, centerX, centerZ);
+            BloodMaskCache maskCache = this.moltenWakeMasks.get(entity.getUuid());
+            if (maskCache == null || maskCache.maskKey != maskKey) {
+                SplatterShape shape = SplatterShape.single(circleFootprint(entity.getRadius()));
+                maskCache = new BloodMaskCache(maskKey,
+                        rasterizeBloodShape(shape, centerX, centerZ, BLOOD_FINE_GRID_SCALE),
+                        null);
+                this.moltenWakeMasks.put(entity.getUuid(), maskCache);
+            }
+            if (!maskCache.fineCells.isEmpty()) {
+                states.add(new BloodEntityState(
+                        entity.getUuid(), maskKey, maskCache,
+                        centerY - entity.getVerticalRange(),
+                        centerY + entity.getVerticalRange(),
+                        opacity, entity.age));
+            }
+        }
+        return buildMergedSnapshot(world, states, renderState);
+    }
+
+    private void pruneMoltenWakeCaches(World world) {
+        if (this.moltenPruneFrame == bloodFrame && this.moltenWorld == world) {
+            return;
+        }
+        if (this.moltenWorld != world) {
+            clearMoltenWakes();
+            this.moltenWorld = world;
+        }
+        Set<UUID> loaded = new HashSet<>();
+        Set<UUID> groups = new HashSet<>();
+        for (BrimstoneWakeVisualEntity entity : moltenWakeEntities(world)) {
+            loaded.add(entity.getUuid());
+            if (entity.getGroupId() != null) {
+                groups.add(entity.getGroupId());
+            }
+        }
+        this.moltenWakeMasks.keySet().removeIf(id -> !loaded.contains(id));
+        this.moltenWakeStates.keySet().removeIf(id -> !groups.contains(id));
+        this.caches.keySet().removeIf(id -> !loaded.contains(id));
+        this.moltenPruneFrame = bloodFrame;
+    }
+
     private BloodSnapshot buildBloodSnapshot(World world, float tickDelta,
                                              int style, boolean standaloneDevourer,
                                              MergedStainState renderState) {
@@ -1107,6 +1247,12 @@ public final class TerrainFieldOverlayRenderer {
         this.bloodMasks.keySet().removeIf(id -> !loaded.contains(id));
         this.bloodShapes.keySet().removeIf(id ->
                 !loaded.contains(id) && !this.caches.containsKey(id));
+        return buildMergedSnapshot(world, states, renderState);
+    }
+
+    private static BloodSnapshot buildMergedSnapshot(
+            World world, List<BloodEntityState> states,
+            MergedStainState renderState) {
         if (states.isEmpty()) {
             renderState.componentsByMember = Map.of();
             renderState.topologyWorld = world;
@@ -1173,12 +1319,38 @@ public final class TerrainFieldOverlayRenderer {
         return result;
     }
 
+    private static Iterable<BrimstoneWakeVisualEntity> moltenWakeEntities(World world) {
+        List<BrimstoneWakeVisualEntity> result = new ArrayList<>();
+        if (!(world instanceof ClientWorld clientWorld)) {
+            return result;
+        }
+        for (net.minecraft.entity.Entity entity : clientWorld.getEntities()) {
+            if (entity instanceof BrimstoneWakeVisualEntity wake && wake.isAlive()) {
+                result.add(wake);
+            }
+        }
+        return result;
+    }
+
     private static float bloodOpacity(BloodStainVisualEntity entity, float tickDelta) {
         float age = entity.age + tickDelta;
         float remaining = entity.getLifetime() - age;
         float fadeOut = remaining >= entity.getFadeDuration()
                 ? 1.0F
                 : MathHelper.clamp(remaining / entity.getFadeDuration(), 0.0F, 1.0F);
+        int fadeInDuration = entity.getFadeInDuration();
+        float fadeIn = fadeInDuration <= 0
+                ? 1.0F
+                : MathHelper.clamp(age / fadeInDuration, 0.0F, 1.0F);
+        return fadeIn * fadeOut;
+    }
+
+    private static float moltenWakeOpacity(BrimstoneWakeVisualEntity entity, float tickDelta) {
+        float age = entity.age + tickDelta;
+        float remaining = entity.getLifetime() - age;
+        float fadeOut = remaining >= entity.getFadeOutDuration()
+                ? 1.0F
+                : MathHelper.clamp(remaining / entity.getFadeOutDuration(), 0.0F, 1.0F);
         int fadeInDuration = entity.getFadeInDuration();
         float fadeIn = fadeInDuration <= 0
                 ? 1.0F
@@ -1663,7 +1835,7 @@ public final class TerrainFieldOverlayRenderer {
                 double x1 = x0 + gridSize;
                 double z0 = face.z + localZ * gridSize;
                 double z1 = z0 + gridSize;
-                double width = Math.min(palette.bloodStyle.rimWidth, gridSize * 0.4);
+                double width = mergedBorderWidth(palette, gridSize);
 
                 if (north && west) {
                     addHorizontalBloodBorderPatch(
@@ -1698,7 +1870,7 @@ public final class TerrainFieldOverlayRenderer {
             BloodComponent component, double phase, Direction edge, Palette palette) {
         int scale = component.gridScale;
         double gridSize = 1.0 / scale;
-        double width = Math.min(palette.bloodStyle.rimWidth, gridSize * 0.4);
+        double width = mergedBorderWidth(palette, gridSize);
         int baseX = face.x * scale;
         int baseZ = face.z * scale;
         boolean variableX = edge.getAxis() == Direction.Axis.Z;
@@ -1791,6 +1963,11 @@ public final class TerrainFieldOverlayRenderer {
         return component.contributorsByCell.containsKey(packGridCell(gridX, gridZ))
                 && !hasBloodCell(component,
                 gridX + edge.getOffsetX(), gridZ + edge.getOffsetZ());
+    }
+
+    private static double mergedBorderWidth(Palette palette, double gridSize) {
+        double gridFraction = palette == MOLTEN_WAKE ? 0.5 : 0.4;
+        return Math.min(palette.bloodStyle.rimWidth, gridSize * gridFraction);
     }
 
     private static boolean hasBloodCell(
@@ -2148,6 +2325,138 @@ public final class TerrainFieldOverlayRenderer {
                         matrices, translucent, patch, opacity);
             }
         }
+    }
+
+    private static void drawMoltenGeometry(
+            double centerX, double centerY, double centerZ,
+            MatrixStack.Entry matrices,
+            VertexConsumerProvider vertexConsumers,
+            BloodPreparedGeometry geometry, float[] sourceOpacities,
+            boolean allOpaque) {
+        SpriteAtlasTexture atlas = MinecraftClient.getInstance()
+                .getBakedModelManager()
+                .getAtlas(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE);
+        Sprite magma = atlas.getSprite(MAGMA_TEXTURE);
+        Sprite lava = atlas.getSprite(LAVA_TEXTURE);
+        VertexConsumer opaque = vertexConsumers.getBuffer(RenderLayer.getCutout());
+        if (allOpaque) {
+            drawMoltenPatches(centerX, centerY, centerZ, matrices, opaque,
+                    geometry.fillPatches, magma, 1.0F, false);
+            drawMoltenPatches(centerX, centerY, centerZ, matrices, opaque,
+                    geometry.borderPatches, lava, 1.0F, true);
+            return;
+        }
+        for (BloodPreparedPatch patch : geometry.fillPatches) {
+            float opacity = bloodPatchOpacity(patch.contributors, sourceOpacities);
+            if (opacity >= 0.999F) {
+                drawMoltenPatch(centerX, centerY, centerZ,
+                        matrices, opaque, patch, magma, 1.0F, false);
+            }
+        }
+        for (BloodPreparedPatch patch : geometry.borderPatches) {
+            float opacity = bloodPatchOpacity(patch.contributors, sourceOpacities);
+            if (opacity >= 0.999F) {
+                drawMoltenPatch(centerX, centerY, centerZ,
+                        matrices, opaque, patch, lava, 1.0F, true);
+            }
+        }
+        VertexConsumer translucent = null;
+        for (BloodPreparedPatch patch : geometry.fillPatches) {
+            float opacity = bloodPatchOpacity(patch.contributors, sourceOpacities);
+            if (opacity > 0.01F && opacity < 0.999F) {
+                if (translucent == null) {
+                    translucent = vertexConsumers.getBuffer(
+                            RenderLayer.getEntityTranslucent(
+                                    SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE));
+                }
+                drawMoltenPatch(centerX, centerY, centerZ,
+                        matrices, translucent, patch, magma, opacity, false);
+            }
+        }
+        for (BloodPreparedPatch patch : geometry.borderPatches) {
+            float opacity = bloodPatchOpacity(patch.contributors, sourceOpacities);
+            if (opacity > 0.01F && opacity < 0.999F) {
+                if (translucent == null) {
+                    translucent = vertexConsumers.getBuffer(
+                            RenderLayer.getEntityTranslucent(
+                                    SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE));
+                }
+                drawMoltenPatch(centerX, centerY, centerZ,
+                        matrices, translucent, patch, lava, opacity, true);
+            }
+        }
+    }
+
+    private static void drawMoltenPatches(
+            double centerX, double centerY, double centerZ,
+            MatrixStack.Entry matrices, VertexConsumer vertices,
+            List<BloodPreparedPatch> patches, Sprite sprite,
+            float opacity, boolean emissive) {
+        for (BloodPreparedPatch patch : patches) {
+            drawMoltenPatch(centerX, centerY, centerZ,
+                    matrices, vertices, patch, sprite, opacity, emissive);
+        }
+    }
+
+    private static void drawMoltenPatch(
+            double centerX, double centerY, double centerZ,
+            MatrixStack.Entry matrices, VertexConsumer vertices,
+            BloodPreparedPatch patch, Sprite sprite,
+            float opacity, boolean emissive) {
+        float normalOffset = FACE_OFFSET + patch.surfaceOffset;
+        int light = emissive ? LightmapTextureManager.MAX_LIGHT_COORDINATE : patch.light;
+        putMoltenPatchVertex(centerX, centerY, centerZ,
+                matrices, vertices, patch.face, sprite,
+                patch.first, light, opacity, normalOffset);
+        putMoltenPatchVertex(centerX, centerY, centerZ,
+                matrices, vertices, patch.face, sprite,
+                patch.second, light, opacity, normalOffset);
+        putMoltenPatchVertex(centerX, centerY, centerZ,
+                matrices, vertices, patch.face, sprite,
+                patch.third, light, opacity, normalOffset);
+        putMoltenPatchVertex(centerX, centerY, centerZ,
+                matrices, vertices, patch.face, sprite,
+                patch.fourth, light, opacity, normalOffset);
+    }
+
+    private static void putMoltenPatchVertex(
+            double centerX, double centerY, double centerZ,
+            MatrixStack.Entry matrices, VertexConsumer vertices,
+            TerrainFace face, Sprite sprite, BloodPatchVertex point,
+            int light, float opacity, float normalOffset) {
+        TextureCoordinates uv;
+        if (face.direction.getAxis() == Direction.Axis.Y) {
+            uv = transformTopUv(
+                    MathHelper.clamp(point.x - face.x, 0.0, 1.0),
+                    MathHelper.clamp(point.z - face.z, 0.0, 1.0),
+                    face.uvTransform);
+        } else {
+            double u = face.direction.getAxis() == Direction.Axis.Z
+                    ? point.x - face.x
+                    : point.z - face.z;
+            if ((face.uvTransform & 4) != 0) {
+                u = 1.0 - u;
+            }
+            uv = new TextureCoordinates(
+                    MathHelper.clamp(u, 0.0, 1.0),
+                    MathHelper.clamp(1.0 - (point.y - face.y), 0.0, 1.0));
+        }
+        Direction direction = face.direction;
+        double localX = point.x - centerX + direction.getOffsetX() * normalOffset;
+        double localY = point.y - centerY + direction.getOffsetY() * normalOffset;
+        double localZ = point.z - centerZ + direction.getOffsetZ() * normalOffset;
+        var vertex = vertices.vertex(
+                        matrices, (float) localX, (float) localY, (float) localZ)
+                .color(255, 255, 255,
+                        MathHelper.clamp(Math.round(opacity * 255.0F), 0, 255))
+                .texture(sprite.getFrameU((float) uv.u),
+                        sprite.getFrameV((float) uv.v));
+        if (opacity < 0.999F) {
+            vertex.overlay(OverlayTexture.DEFAULT_UV);
+        }
+        vertex.light(light).normal(
+                matrices, direction.getOffsetX(),
+                direction.getOffsetY(), direction.getOffsetZ());
     }
 
     private static List<BloodPreparedPatch> selectBloodEyePatches(

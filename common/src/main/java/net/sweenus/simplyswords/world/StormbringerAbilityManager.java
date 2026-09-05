@@ -452,10 +452,14 @@ public final class StormbringerAbilityManager {
 
     private static ParryComponent normalizeCharges(ItemStack stack, int cap) {
         ParryComponent component = stack.getOrDefault(ComponentTypeRegistry.PARRY.get(), ParryComponent.DEFAULT);
-        if (component.stormCharges() <= cap) return component;
-        ParryComponent normalized = new ParryComponent(component.parried(), cap);
+        ParryComponent normalized = normalizedChargeState(component, cap);
+        if (normalized.equals(component)) return component;
         stack.set(ComponentTypeRegistry.PARRY.get(), normalized);
         return normalized;
+    }
+
+    static ParryComponent normalizedChargeState(ParryComponent component, int cap) {
+        return component.withStormChargeCapacity(cap);
     }
 
     private static int chargeCap(StormFrostWaterMasteryTuning tuning) {

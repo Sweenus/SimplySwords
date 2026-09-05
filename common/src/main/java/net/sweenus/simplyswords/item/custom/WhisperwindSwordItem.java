@@ -67,9 +67,12 @@ public class WhisperwindSwordItem extends UniqueSwordItem implements TwoHandedWe
             }
             int chance = WhisperwindRhythmManager.resolveChance(world, attacker, tuning,
                     tuning.integer(StormSoulMasteryTuning.Setting.CHANCE, Config.uniqueEffects.whisperwind.chance));
+            int resetRoll = attacker.getRandom().nextInt(100);
             boolean reset = !stillWind && (tuning.has(StormSoulMasteryTuning.Setting.CHANCE)
-                    ? chance >= 100 || chance > 0 && attacker.getRandom().nextInt(100) < chance
-                    : attacker.getRandom().nextInt(100) <= chance);
+                    ? chance >= 100 || chance > 0 && resetRoll < chance
+                    : resetRoll <= chance);
+            UniqueAbilityApi.reportRoll(attacker, StormSoulMasteryAbilities.WHISPERWIND_RESET.id(),
+                    "CHANCE", chance, resetRoll, reset);
             WhisperwindRhythmManager.recordRefreshResult(world, attacker, reset);
             if (reset && attacker instanceof PlayerEntity player) {
                 attacker.getWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),

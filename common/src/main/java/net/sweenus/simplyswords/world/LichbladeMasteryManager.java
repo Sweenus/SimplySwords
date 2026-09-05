@@ -367,8 +367,16 @@ public final class LichbladeMasteryManager {
     private static void heal(LivingEntity owner, ChannelState state, LongPathFinalFormsMasteryTuning tuning) {
         int chance = tuning.integer(s("CHANCE"), 9);
         boolean exact = tuning.has(s("CHANCE"));
-        boolean success = chance >= 100 || chance > 0 && (exact
-                ? owner.getRandom().nextInt(100) < chance : owner.getRandom().nextInt(100) <= chance - 1);
+        int roll = -1;
+        boolean success;
+        if (chance >= 100) success = true;
+        else if (chance <= 0) success = false;
+        else {
+            roll = owner.getRandom().nextInt(100);
+            success = exact ? roll < chance : roll <= chance - 1;
+        }
+        UniqueAbilityApi.reportRoll(owner, LongPathFinalFormsMasteryAbilities.LICHBLADE_CHANNEL.id(),
+                "CHANCE", chance, roll, success);
         if (!success) return;
         float amount = (float) tuning.get(s("HEAL_AMOUNT"), Config.uniqueEffects.lichblade.heal);
         float missing = Math.max(0, owner.getMaxHealth() - owner.getHealth());

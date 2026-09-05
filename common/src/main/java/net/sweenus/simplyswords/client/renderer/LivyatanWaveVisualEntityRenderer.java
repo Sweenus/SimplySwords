@@ -39,7 +39,7 @@ public class LivyatanWaveVisualEntityRenderer extends EntityRenderer<LivyatanWav
     @Override
     public boolean shouldRender(LivyatanWaveVisualEntity entity, Frustum frustum,
                                 double x, double y, double z) {
-        List<LivyatanWaveVisualEntity.WaveLane> lanes = entity.getBloodwakeLanes();
+        List<LivyatanWaveVisualEntity.WaveLane> lanes = entity.getWaveLanes();
         if (lanes.isEmpty()) {
             return super.shouldRender(entity, frustum, x, y, z);
         }
@@ -73,8 +73,8 @@ public class LivyatanWaveVisualEntityRenderer extends EntityRenderer<LivyatanWav
                 .getAtlas(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE)
                 .getSprite(WATER_STILL_SPRITE);
 
-        List<LivyatanWaveVisualEntity.WaveLane> lanes = entity.getBloodwakeLanes();
-        if (entity.isBloodwakeStyle() && !lanes.isEmpty()) {
+        List<LivyatanWaveVisualEntity.WaveLane> lanes = entity.getWaveLanes();
+        if (!lanes.isEmpty()) {
             for (int laneIndex = 0; laneIndex < lanes.size(); laneIndex++) {
                 LivyatanWaveVisualEntity.WaveLane lane = lanes.get(laneIndex);
                 renderLane(entity, matrices, vertexConsumers, sprite, light,

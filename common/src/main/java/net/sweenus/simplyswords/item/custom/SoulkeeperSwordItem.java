@@ -14,6 +14,7 @@ import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
@@ -24,6 +25,7 @@ import net.sweenus.simplyswords.config.settings.TooltipSettings;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.item.interfaces.TwoHandedWeapon;
 import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
+import net.sweenus.simplyswords.item.interfaces.UniqueWeaponSecondaryAction;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
@@ -31,7 +33,8 @@ import net.sweenus.simplyswords.world.SoulkeeperLanternManager;
 
 import java.util.List;
 
-public class SoulkeeperSwordItem extends UniqueSwordItem implements TwoHandedWeapon, UniqueWeaponActiveAbility {
+public class SoulkeeperSwordItem extends UniqueSwordItem
+        implements TwoHandedWeapon, UniqueWeaponActiveAbility, UniqueWeaponSecondaryAction {
     public SoulkeeperSwordItem(ToolMaterial toolMaterial, Settings settings) {
         super(toolMaterial, settings);
     }
@@ -56,6 +59,18 @@ public class SoulkeeperSwordItem extends UniqueSwordItem implements TwoHandedWea
     @Override
     public TypedActionResult<ItemStack> startPlayerAbility(World world, PlayerEntity user, Hand hand) {
         return UniqueWeaponActiveAbility.super.startPlayerAbility(world, user, hand);
+    }
+
+    @Override
+    public TypedActionResult<ItemStack> startPlayerSecondaryAbility(World world, PlayerEntity user, Hand hand) {
+        ItemStack stack = user.getStackInHand(hand);
+        if (world.isClient() || !(world instanceof ServerWorld serverWorld)
+                || stack.getDamage() >= stack.getMaxDamage() - 1
+                || !SoulkeeperLanternManager.tryDetonate(serverWorld, user, stack)) {
+            return TypedActionResult.pass(stack);
+        }
+        user.swingHand(hand, true);
+        return new TypedActionResult<>(ActionResult.SUCCESS, stack);
     }
 
     @Override

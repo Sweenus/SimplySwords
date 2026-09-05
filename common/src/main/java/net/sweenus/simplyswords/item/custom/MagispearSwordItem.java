@@ -1,5 +1,6 @@
 package net.sweenus.simplyswords.item.custom;
 
+import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedDouble;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedInt;
@@ -66,7 +67,11 @@ public class MagispearSwordItem extends UniqueSwordItem implements UniqueWeaponA
             int hits = MELEE_HITS.merge(attacker.getUuid(), 1, Integer::sum);
             boolean guaranteed = tuning.flag(1 << 7) && hits % 3 == 0;
             if (attacker.isSprinting() && tuning.flag(1 << 3)) hitChance = Math.min(100, hitChance + 12);
-            if (guaranteed || attacker.getRandom().nextInt(100) < hitChance) {
+            int hitRoll = attacker.getRandom().nextInt(100);
+            boolean hitProc = guaranteed || hitRoll < hitChance;
+            UniqueAbilityApi.reportRoll(attacker, ArcaneCosmicMasteryAbilities.MAGISPEAR_SPELLPOINT.id(),
+                    guaranteed ? "CHANCE (guaranteed)" : "CHANCE", hitChance, hitRoll, hitProc);
+            if (hitProc) {
                 float damage = HelperMethods.abilityScaledDamage("arcane", attacker, stack,
                         Config.uniqueEffects.magispear.magicDamageScaling * (float) tuning.get(
                                 ArcaneCosmicMasteryTuning.Setting.DAMAGE_MULTIPLIER, 1),

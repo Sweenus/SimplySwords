@@ -62,7 +62,12 @@ public class ThrownSwordEntity extends PersistentProjectileEntity {
 
     // Constructor for owner and item stack
     public ThrownSwordEntity(World world, LivingEntity owner, ItemStack stack) {
-        super(EntityRegistry.THROWNSWORDENTITY.get(), owner, world, stack, (ItemStack) null);
+        this(EntityRegistry.THROWNSWORDENTITY.get(), world, owner, stack);
+    }
+
+    protected ThrownSwordEntity(EntityType<? extends ThrownSwordEntity> entityType, World world,
+                                LivingEntity owner, ItemStack stack) {
+        super(entityType, owner, world, stack, (ItemStack) null);
         this.dataTracker.set(LOYALTY, getLoyalty());
         this.dataTracker.set(ENCHANTED, stack.hasEnchantments());
         this.dataTracker.set(ITEM_STACK, stack);

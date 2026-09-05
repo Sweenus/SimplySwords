@@ -79,7 +79,10 @@ public class SoulrenderSwordItem extends UniqueSwordItem implements TwoHandedWea
             }
             boolean guaranteed = !afflicted
                     && (tuning.integer(StormSoulMasteryTuning.Setting.MODE, 0) & MODE_PALLBEARER) != 0;
-            boolean mark = guaranteed || hitChance >= 0 && attacker.getRandom().nextInt(100) <= hitChance;
+            int markRoll = attacker.getRandom().nextInt(100);
+            boolean mark = guaranteed || hitChance >= 0 && markRoll <= hitChance;
+            UniqueAbilityApi.reportRoll(attacker, StormSoulMasteryAbilities.SOULRENDER_MARK.id(),
+                    guaranteed ? "CHANCE (guaranteed)" : "CHANCE", hitChance, markRoll, mark);
             if (mark) {
                 particleSelect  = ParticleTypes.SMOKE;
                 HelperMethods.spawnOrbitParticles(world, target.getPos(), particleSelect, 0.5f, particleCount);

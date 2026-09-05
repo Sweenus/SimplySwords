@@ -1,5 +1,6 @@
 package net.sweenus.simplyswords.world;
 
+import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
 
 import net.minecraft.entity.Entity;
@@ -253,7 +254,11 @@ public final class MagibladeAbilityManager {
         }
         int chance = Math.clamp(passive.tuning.integer(
                 ArcaneCosmicMasteryTuning.Setting.CHANCE, Config.uniqueEffects.magiblade.repelChance), 0, 100);
-        if (chance <= 0 || actor.getRandom().nextInt(100) >= chance) {
+        int roll = actor.getRandom().nextInt(100);
+        boolean passed = chance > 0 && roll < chance;
+        UniqueAbilityApi.reportRoll(actor, ArcaneCosmicMasteryAbilities.MAGIBLADE_REPULSION.id(),
+                "CHANCE", chance, roll, passed);
+        if (!passed) {
             return;
         }
 

@@ -31,6 +31,7 @@ public final class LivyatanAbilityManager {
     public static WavePlan prepareWave(ServerWorld world, LivingEntity actor, StormFrostWaterMasteryTuning tuning) {
         WorldState worldState = STATES.computeIfAbsent(world, ignored -> new WorldState());
         ActorState state = worldState.actors.computeIfAbsent(actor.getUuid(), ignored -> new ActorState());
+        long now = world.getTime();
         int required = tuning.integer(s("LIVYATAN_DOUBLE_SWING_COUNT"), 0);
         boolean secondary = false;
         if (required > 0) {
@@ -43,7 +44,11 @@ public final class LivyatanAbilityManager {
         boolean unbound = tuning.has(s("LIVYATAN_UNBOUND_WAVE_DAMAGE_MULTIPLIER"));
         boolean lightning = unbound && state.nextLightning;
         if (unbound) state.nextLightning = !state.nextLightning;
-        return new WavePlan(secondary, lightning);
+        int calmIdleTicks = tuning.integer(s("LIVYATAN_CALM_IDLE_TICKS"), 0);
+        boolean calmBreaker = calmIdleTicks > 0
+                && (state.lastCalmWaveTick == Long.MIN_VALUE || now - state.lastCalmWaveTick >= calmIdleTicks);
+        state.lastCalmWaveTick = calmIdleTicks > 0 ? now : Long.MIN_VALUE;
+        return new WavePlan(secondary, lightning, calmBreaker);
     }
 
     public static double waveDamageMultiplier(ServerWorld world, LivingEntity actor, LivingEntity target,
@@ -126,10 +131,6 @@ public final class LivyatanAbilityManager {
     public static double returnLightningMultiplier(StormFrostWaterMasteryTuning tuning) {
         return tuning.get(s("LIVYATAN_RETURN_LIGHTNING_DAMAGE_MULTIPLIER"), 1)
                 * tuning.get(s("LIVYATAN_THUNDERHEAD_LIGHTNING_MULTIPLIER"), 1);
-    }
-
-    public static int activeCooldown(int configured, StormFrostWaterMasteryTuning tuning) {
-        return Math.max(0, configured + tuning.integer(s("LIVYATAN_ACTIVE_COOLDOWN_BONUS_TICKS"), 0));
     }
 
     public static void strikeLightning(ServerWorld world, LivingEntity actor, ItemStack stack,
@@ -265,7 +266,7 @@ public final class LivyatanAbilityManager {
         return x * x + z * z;
     }
 
-    public record WavePlan(boolean secondary, boolean lightning) {
+    public record WavePlan(boolean secondary, boolean lightning, boolean calmBreaker) {
     }
 
     private static final class WorldState {
@@ -276,6 +277,7 @@ public final class LivyatanAbilityManager {
     private static final class ActorState {
         private int swingCount;
         private boolean nextLightning;
+        private long lastCalmWaveTick = Long.MIN_VALUE;
     }
 
     private static final class TargetState {

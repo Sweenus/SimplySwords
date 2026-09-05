@@ -1,24 +1,18 @@
 package net.sweenus.simplyswords.item.custom;
 
-import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.api.AwakeningApi;
 
 import me.fzzyhmstrs.fzzy_config.annotations.Translation;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.particle.ParticleTypes;
-import net.minecraft.particle.SimpleParticleType;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
@@ -45,10 +39,6 @@ public class EmberIreSwordItem extends UniqueSwordItem implements UniqueWeaponAc
     public EmberIreSwordItem(ToolMaterial toolMaterial, Settings settings) {
         super(toolMaterial, settings);
     }
-
-    private static SimpleParticleType particleWalk = ParticleTypes.FALLING_LAVA;
-    private static SimpleParticleType particleSprint = ParticleTypes.FALLING_LAVA;
-    private static SimpleParticleType particlePassive = ParticleTypes.SMOKE;
 
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
@@ -145,15 +135,14 @@ public class EmberIreSwordItem extends UniqueSwordItem implements UniqueWeaponAc
 
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
-        if ((entity instanceof PlayerEntity player)) {
-            if (!player.hasStatusEffect(StatusEffects.STRENGTH) && !player.isOnFire()) {
-                particlePassive = ParticleTypes.SMOKE;
-                particleWalk = ParticleTypes.FALLING_LAVA;
-                particleSprint = ParticleTypes.FALLING_LAVA;
-            }
-        }
-        int stepMod = 7 - (int)(world.getTime() % 7);
-        HelperMethods.createFootfalls(entity, stack, world, particleWalk, particleSprint, particlePassive, true);
+        boolean empowered = entity instanceof PlayerEntity player
+                && player.hasStatusEffect(StatusEffects.STRENGTH)
+                && player.hasStatusEffect(StatusEffects.HASTE)
+                && player.hasStatusEffect(StatusEffects.SPEED);
+        HelperMethods.createFootfalls(entity, stack, world,
+                empowered ? ParticleTypes.CAMPFIRE_COSY_SMOKE : ParticleTypes.FALLING_LAVA,
+                empowered ? ParticleTypes.CAMPFIRE_COSY_SMOKE : ParticleTypes.FALLING_LAVA,
+                empowered ? ParticleTypes.LAVA : ParticleTypes.SMOKE, true);
         super.inventoryTick(stack, world, entity, slot, selected);
     }
 

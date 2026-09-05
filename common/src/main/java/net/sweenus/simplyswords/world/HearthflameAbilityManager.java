@@ -811,7 +811,11 @@ public final class HearthflameAbilityManager {
     private static boolean rollBrand(LivingEntity actor, FireForgeMasteryTuning tuning) {
         int chance = tuning.integer(FireForgeMasteryTuning.Setting.CHANCE,
                 Math.clamp(Config.uniqueEffects.hearthflame.chance, 0, 100));
-        return chance > 0 && actor.getRandom().nextInt(100) < chance;
+        int roll = actor.getRandom().nextInt(100);
+        boolean passed = chance > 0 && roll < chance;
+        UniqueAbilityApi.reportRoll(actor, FireForgeMasteryAbilities.HEARTHFLAME_BRAND.id(),
+                "CHANCE", chance, roll, passed);
+        return passed;
     }
 
     private static void applyBrand(ServerWorld world, LivingEntity owner,

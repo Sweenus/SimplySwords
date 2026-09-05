@@ -1,5 +1,7 @@
 package net.sweenus.simplyswords.item.custom;
 
+import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
+import net.sweenus.simplyswords.api.ability.StormFrostWaterMasteryAbilities;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
 
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
@@ -52,7 +54,10 @@ public class ThunderbrandSwordItem extends UniqueSwordItem implements TwoHandedW
         HelperMethods.playHitSounds(attacker, target);
         if (!attacker.getWorld().isClient()) {
             int chargeChance = ThunderbrandAbilityManager.refreshChance(worldFor(attacker), stack, attacker, target);
-            if (attacker.getRandom().nextInt(100) <= chargeChance && (attacker instanceof PlayerEntity player) && player.getItemCooldownManager().getCooldownProgress(this, 1f) > 0) {
+            int chargeRoll = attacker.getRandom().nextInt(100);
+            UniqueAbilityApi.reportRoll(attacker, StormFrostWaterMasteryAbilities.THUNDERBRAND_REFRESH.id(),
+                    "CHANCE", chargeChance, chargeRoll, chargeRoll <= chargeChance);
+            if (chargeRoll <= chargeChance && (attacker instanceof PlayerEntity player) && player.getItemCooldownManager().getCooldownProgress(this, 1f) > 0) {
                 SimplySwordsAPI.setWeaponCooldown(player, stack, 0);
                 attacker.getWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_BLOCK_01.get(),
                         attacker.getSoundCategory(), 0.7f, 1f);
@@ -193,7 +198,7 @@ public class ThunderbrandSwordItem extends UniqueSwordItem implements TwoHandedW
         @ValidatedInt.Restrict(min = 1)
         public int chargeDuration = 40;
         @ValidatedInt.Restrict(min = 1)
-        public int dashDuration = 15;
+        public int dashDuration = 4;
         @ValidatedFloat.Restrict(min = 0.1f)
         public float dashSpeed = 4.0f;
         @ValidatedInt.Restrict(min = 1)

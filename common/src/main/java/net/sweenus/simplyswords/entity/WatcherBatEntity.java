@@ -124,6 +124,11 @@ public class WatcherBatEntity extends BatEntity {
     }
 
     @Override
+    public boolean canHit() {
+        return false;
+    }
+
+    @Override
     public boolean isPushable() {
         return false;
     }

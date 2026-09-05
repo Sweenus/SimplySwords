@@ -289,8 +289,13 @@ public final class RiftmaneAbilityManager {
             MartialCommandEldritchMasteryCombatManager.finish(execution, 0);
             return;
         }
-        if (owner.getRandom().nextInt(100) >= AwakeningApi.scaleChance(stack,
-                tuning.integer(MartialCommandEldritchMasteryTuning.Setting.CHANCE, settings.passiveChance))) {
+        int passiveChance = AwakeningApi.scaleChance(stack,
+                tuning.integer(MartialCommandEldritchMasteryTuning.Setting.CHANCE, settings.passiveChance));
+        int passiveRoll = owner.getRandom().nextInt(100);
+        boolean passiveProc = passiveRoll < passiveChance;
+        UniqueAbilityApi.reportRoll(owner, MartialCommandEldritchMasteryAbilities.RIFTMANE_HARRIER.id(),
+                "CHANCE", passiveChance, passiveRoll, passiveProc);
+        if (!passiveProc) {
             MartialCommandEldritchMasteryCombatManager.finish(execution, 0);
             return;
         }

@@ -1,9 +1,11 @@
 package net.sweenus.simplyswords.api.ability;
 
+import java.util.Collections;
 import java.util.EnumMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
-public final class AbyssalSpectralMasteryTuning {
+public final class AbyssalSpectralMasteryTuning implements MasteryTuningSnapshot {
     public enum Setting {
         COOLDOWN_TICKS(0, 72000), DURATION_TICKS(0, 72000), DAMAGE_MULTIPLIER(0, 10),
         PROJECTILE_DAMAGE_MULTIPLIER(0, 10), PROJECTILE_SPEED(0, 16), PROJECTILE_LIFETIME(0, 1200),
@@ -120,5 +122,12 @@ public final class AbyssalSpectralMasteryTuning {
 
     public AbyssalSpectralMasteryTuning multiply(Setting setting, double factor, double fallback) {
         return with(setting, get(setting, fallback) * factor);
+    }
+
+    @Override
+    public Map<String, Double> entries() {
+        Map<String, Double> entries = new LinkedHashMap<>();
+        values.forEach((setting, value) -> entries.put(setting.name(), value));
+        return Collections.unmodifiableMap(entries);
     }
 }

@@ -101,7 +101,10 @@ public class BrimstoneClaymoreItem extends UniqueSwordItem implements TwoHandedW
                                     (double) Config.uniqueEffects.brimstone_claymore.hitSpellScaling));
             UniqueAbilityApi.takeStartedExecution();
             int chance = execution.tuning().get(BuiltinUniqueAbilities.BRIMSTONE_PROC_CHANCE);
-            if (!passesEruptionRoll(chance, attacker.getRandom().nextInt(100))) {
+            int roll = attacker.getRandom().nextInt(100);
+            boolean passed = passesEruptionRoll(chance, roll);
+            UniqueAbilityApi.reportRoll(execution, BuiltinUniqueAbilities.BRIMSTONE_PROC_CHANCE, chance, roll, passed);
+            if (!passed) {
                 UniqueAbilityApi.cancel(execution);
             } else {
                 UniqueAbilityApi.start(execution);

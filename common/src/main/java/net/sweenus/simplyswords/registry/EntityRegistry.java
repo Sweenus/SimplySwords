@@ -86,7 +86,7 @@ public class EntityRegistry {
             () -> EntityType.Builder.<FrostfallEntity>create(FrostfallEntity::new, SpawnGroup.MISC)
                     .dimensions(0.5f, 0.5f)
                     .maxTrackingRange(8)
-                    .trackingTickInterval(10)
+                    .trackingTickInterval(1)
                     .build(Identifier.of(SimplySwords.MOD_ID, "frostfall_entity").toString())
     );
 
@@ -574,6 +574,15 @@ public class EntityRegistry {
                     .maxTrackingRange(128)
                     .trackingTickInterval(1)
                     .build(Identifier.of(SimplySwords.MOD_ID, "blood_stain_visual").toString())
+    );
+
+    public static final RegistrySupplier<EntityType<BrimstoneWakeVisualEntity>> BRIMSTONE_WAKE_VISUAL = ENTITIES.register(
+            "brimstone_wake_visual",
+            () -> EntityType.Builder.<BrimstoneWakeVisualEntity>create(BrimstoneWakeVisualEntity::new, SpawnGroup.MISC)
+                    .dimensions(0.35F, 0.35F)
+                    .maxTrackingRange(128)
+                    .trackingTickInterval(1)
+                    .build(Identifier.of(SimplySwords.MOD_ID, "brimstone_wake_visual").toString())
     );
 
     public static final RegistrySupplier<EntityType<MoltenRuptureVisualEntity>> MOLTEN_RUPTURE_VISUAL = ENTITIES.register(

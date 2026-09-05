@@ -350,7 +350,7 @@ public final class StormsEdgeAbilityManager {
                 .orElse(null);
         if (target == null) return;
         float damage = result.baseDamage * (float) multiplier;
-        if (damageTarget(world, actor, stormbreak.stack, target, damage)) {
+        if (ChainLightningVisualManager.damageBoltTarget(world, actor, stormbreak.stack, target, damage)) {
             Vec3d end = target.getPos().add(0.0, target.getHeight() * 0.55, 0.0);
             ChainLightningVisualManager.spawnBolt(world, end.add(0.0, 6.0, 0.0), end, TRAIL_SETTINGS);
             UniqueAbilityApi.emit(stormbreak.execution, UniqueAbilityPhase.HIT,
@@ -390,10 +390,10 @@ public final class StormsEdgeAbilityManager {
                 ACTIVE_THUNDERCLAPS.computeIfAbsent(world, ignored -> new ArrayList<>())
                         .add(new ThunderclapVisual(residual.center, residual.radius));
             }
-            if (residual.supercellDuration > 0 && residual.age <= residual.supercellDuration
-                    && residual.age % residual.supercellInterval == 0) {
+            if (shouldPulseStormCell(residual.age, residual.supercellDuration, residual.supercellInterval)) {
                 damageResidualArea(world, actor, residual, residual.supercellDamage,
                         residual.supercellPull, BuiltinUniqueAbilities.SUPERCELL_HIT);
+                spawnStormCellBolt(world, residual.center);
                 spawnResidualPulse(world, residual.center, residual.radius);
             }
             if (residual.age >= residual.maximumAge) {
@@ -458,6 +458,14 @@ public final class StormsEdgeAbilityManager {
                     center.x + Math.cos(angle) * radius, center.y + 0.15,
                     center.z + Math.sin(angle) * radius, 1, 0.02, 0.03, 0.02, 0.02);
         }
+    }
+
+    static boolean shouldPulseStormCell(int age, int duration, int interval) {
+        return duration > 0 && age > 0 && age <= duration && interval > 0 && age % interval == 0;
+    }
+
+    private static void spawnStormCellBolt(ServerWorld world, Vec3d center) {
+        ChainLightningVisualManager.spawnBolt(world, center.add(0.0, 6.0, 0.0), center, TRAIL_SETTINGS);
     }
 
     private static LivingEntity resolveFocusTarget(ServerWorld world, ActiveStormbreak stormbreak) {

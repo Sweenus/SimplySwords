@@ -28,7 +28,7 @@ final class ArcaneCosmicRepairTest {
     void additiveSettingsDoNotDisturbTheExistingSurface() {
         for (String added : List.of("SECONDARY_STATUS_DURATION_TICKS", "TERTIARY_DURATION_TICKS",
                 "TERTIARY_INTERVAL_TICKS", "TERTIARY_RADIUS", "TERTIARY_TARGET_CAP",
-                "TERTIARY_DAMAGE_MULTIPLIER")) {
+                "TERTIARY_DAMAGE_MULTIPLIER", "ARCANETHYST_LEVITATION_MELEE_DAMAGE_MULTIPLIER")) {
             assertNotEquals(null, ArcaneCosmicMasteryTuning.Setting.valueOf(added));
         }
         for (String existing : List.of("COOLDOWN_TICKS", "DURATION_TICKS", "RADIUS", "COUNT", "STACK_CAP",
@@ -66,9 +66,10 @@ final class ArcaneCosmicRepairTest {
         assertEquals(0.65F, ArcanethystAssaultManager.sparkDamage(
                 spark.multiply(s("DAMAGE_MULTIPLIER"), .65, 1), 1.0F), 1.0E-5,
                 "Unstable Gem's damage penalty now reaches a consumer");
-        assertEquals(1.1F * 1.12F, ArcanethystAssaultManager.sparkDamage(
-                spark.multiply(s("DAMAGE_MULTIPLIER"), 1.1, 1).multiply(s("SPELL_MULTIPLIER"), 1.12, 1),
-                1.0F), 1.0E-5);
+        assertEquals(1.1F, ArcanethystAssaultManager.sparkDamage(
+                spark.multiply(s("DAMAGE_MULTIPLIER"), 1.1, 1), 1.0F), 1.0E-5);
+        assertEquals(1.12, spark.with(s("ARCANETHYST_LEVITATION_MELEE_DAMAGE_MULTIPLIER"), 1.12)
+                .get(s("ARCANETHYST_LEVITATION_MELEE_DAMAGE_MULTIPLIER"), 0), 1.0E-6);
     }
 
     @Test

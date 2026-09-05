@@ -1,9 +1,11 @@
 package net.sweenus.simplyswords.api.ability;
 
+import java.util.Collections;
 import java.util.EnumMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
-public final class DeathShadowBloodMasteryTuning {
+public final class DeathShadowBloodMasteryTuning implements MasteryTuningSnapshot {
     public enum Setting {
         COOLDOWN_TICKS(0, 72000), DURATION_TICKS(0, 72000), DURATION_CAP_TICKS(0, 72000),
         SECONDARY_DURATION_TICKS(0, 72000),
@@ -124,6 +126,8 @@ public final class DeathShadowBloodMasteryTuning {
         SOULSTEALER_TARGET_ANGLE_BONUS(0, 180),
         SOULSTEALER_SEARCH_MULTIPLIER(0, 10),
         SOULSTEALER_SEARCH_CAP(4, 64),
+        SOULSTEALER_WEAKNESS_DURATION_TICKS(0, 72000),
+        SOULSTEALER_WEAKNESS_AMPLIFIER(0, 10),
         SOULSTEALER_VEIL_DURATION_TICKS(0, 72000),
         SOULSTEALER_HAMSTRING_DURATION_TICKS(0, 72000),
         SOULSTEALER_HAMSTRING_AMPLIFIER(0, 10),
@@ -137,6 +141,8 @@ public final class DeathShadowBloodMasteryTuning {
         SOULSTEALER_ESCAPE_DAMAGE_MULTIPLIER(0, 10),
         SOULSTEALER_DAMAGE_PER_DEBT_BONUS(0, 10),
         SOULSTEALER_SPELL_MULTIPLIER(0, 10),
+        SOULSTEALER_LIFE_LEVY_DEBT_PER_HEALTH(1, 64),
+        SOULSTEALER_LIFE_LEVY_MAX_HEAL(0, 40),
         SOULSTEALER_ARMOR_IGNORE_RATIO(0, 1),
         SOULSTEALER_WITHER_DURATION_TICKS(0, 72000),
         SOULSTEALER_WITHER_AMPLIFIER(0, 10),
@@ -348,5 +354,12 @@ public final class DeathShadowBloodMasteryTuning {
 
     public DeathShadowBloodMasteryTuning multiply(Setting setting, double factor, double fallback) {
         return with(setting, get(setting, fallback) * factor);
+    }
+
+    @Override
+    public Map<String, Double> entries() {
+        Map<String, Double> entries = new LinkedHashMap<>();
+        values.forEach((setting, value) -> entries.put(setting.name(), value));
+        return Collections.unmodifiableMap(entries);
     }
 }

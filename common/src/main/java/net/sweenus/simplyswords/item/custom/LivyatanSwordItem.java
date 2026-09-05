@@ -133,12 +133,10 @@ public class LivyatanSwordItem extends UniqueSwordItem implements UniqueWeaponAc
         LivyatanEntity entity = new LivyatanEntity(world, actor, stack);
         entity.primaryBaseDamage = HelperMethods.abilityScaledDamage("frost", actor, stack,
                 Config.uniqueEffects.livyatan.damageScaling, Config.uniqueEffects.livyatan.spellScaling)
-                * (float) tuning.get(s("LIVYATAN_THROW_DAMAGE_MULTIPLIER"), 1)
-                * (float) tuning.get(s("LIVYATAN_CALM_DAMAGE_MULTIPLIER"), 1);
+                * (float) tuning.get(s("LIVYATAN_THROW_DAMAGE_MULTIPLIER"), 1);
         entity.slownessDuration = Config.uniqueEffects.livyatan.duration;
         entity.primaryReturnDamage = HelperMethods.abilityScaledDamage("frost", actor, stack,
-                Config.uniqueEffects.livyatan.returnDamageScaling, Config.uniqueEffects.livyatan.returnSpellScaling)
-                * (float) returnTuning.get(s("LIVYATAN_CALM_DAMAGE_MULTIPLIER"), 1);
+                Config.uniqueEffects.livyatan.returnDamageScaling, Config.uniqueEffects.livyatan.returnSpellScaling);
         entity.primaryReturnDamageRadius = LivyatanAbilityManager.returnRadius(
                 Config.uniqueEffects.livyatan.radius, returnTuning);
         entity.setMastery(tuning, execution, returnTuning, returnExecution, cooldown);

@@ -81,6 +81,7 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
             UniqueAbilityExecution execution = DeathShadowBloodMasteryCombatManager.beginPassive(
                     DeathShadowBloodMasteryAbilities.SOULSTEALER_DEBT, sworld, stack, attacker, target);
             DeathShadowBloodMasteryTuning tuning = DeathShadowBloodMasteryAbilities.tuning(execution);
+            synchronizeSoulDebtCapacity(stack, tuning);
 
             int chance = soulDebtChance(Config.uniqueEffects.soulstealer.chance, tuning);
             Map<UUID, MarkedAsset> assets = MARKED_ASSETS.computeIfAbsent(attacker.getUuid(), ignored -> new HashMap<>());
@@ -99,7 +100,11 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
                     .min(Map.Entry.comparingByValue(java.util.Comparator.comparingLong(MarkedAsset::expiry)))
                     .ifPresent(entry -> assets.remove(entry.getKey()));
             if (assets.isEmpty()) MARKED_ASSETS.remove(attacker.getUuid());
-            if (attacker.getRandom().nextInt(100) < chance) {
+            int debtRoll = attacker.getRandom().nextInt(100);
+            boolean debtProc = debtRoll < chance;
+            UniqueAbilityApi.reportRoll(attacker, DeathShadowBloodMasteryAbilities.SOULSTEALER_DEBT.id(),
+                    "SOULSTEALER_CHANCE", chance, debtRoll, debtProc);
+            if (debtProc) {
                 int hitDebt = tuning.has(s("SOULSTEALER_HIT_DEBT_OVERRIDE"))
                         ? tuning.integer(s("SOULSTEALER_HIT_DEBT_OVERRIDE"), 1)
                         : Config.uniqueEffects.soulstealer.hitStacks;
@@ -145,10 +150,13 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
 
     @Override
     public boolean canActivate(WeaponAbilityContext context) {
-        if (context == null || !UniqueWeaponActiveAbility.super.canActivate(context)) {
-            return false;
-        }
-        return getSoulDebt(context.stack()) > 0;
+        return context != null && context.world() != null
+                && context.actor() != null && context.actor().isAlive()
+                && context.stack() != null && !context.stack().isEmpty()
+                && context.stack().isOf(ItemsRegistry.SOULSTEALER.get())
+                && net.sweenus.simplyswords.api.AwakeningApi.isAbilityUnlocked(context.stack())
+                && context.stack().getDamage() < context.stack().getMaxDamage() - 1
+                && getSoulDebt(context.stack()) > 0;
     }
 
     @Override
@@ -177,9 +185,11 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
         UniqueAbilityExecution reap = DeathShadowBloodMasteryCombatManager.beginActive(
                 DeathShadowBloodMasteryAbilities.SOULSTEALER_REAP, resolved, Config.uniqueEffects.soulstealer.cooldown);
         DeathShadowBloodMasteryTuning reapTuning = DeathShadowBloodMasteryAbilities.tuning(reap);
+        synchronizeSoulDebtCapacity(context.stack(), reapTuning);
         if (approachTuning.flag(1 << 12)) grantVeil(context.actor(), context.world(), approachTuning);
         Vec3d targetOrigin = target.getPos();
-        Runnable action = () -> completeSoulReap(context.world(), context.actor(), context.stack(), target,
+        LivingEntity beneficiary = context.sourcePlayer() != null ? context.sourcePlayer() : context.actor();
+        Runnable action = () -> completeSoulReap(context.world(), context.actor(), beneficiary, context.stack(), target,
                 strikePos, targetOrigin, stacks, approachTuning, reapTuning, approach, reap);
         if (approachTuning.flag(1 << 14)) {
             DeathShadowBloodMasteryCombatManager.scheduleAction(context.world(), context.actor(), 1, action, () -> {
@@ -197,7 +207,7 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
         return Config.uniqueEffects.soulstealer.cooldown;
     }
 
-    private static void completeSoulReap(ServerWorld world, LivingEntity actor, ItemStack stack,
+    private static void completeSoulReap(ServerWorld world, LivingEntity actor, LivingEntity beneficiary, ItemStack stack,
                                          LivingEntity target, Vec3d strikePos, Vec3d targetOrigin, int stacks,
                                          DeathShadowBloodMasteryTuning approachTuning, DeathShadowBloodMasteryTuning reapTuning,
                                          UniqueAbilityExecution approach, UniqueAbilityExecution reap) {
@@ -225,7 +235,7 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
             return;
         }
         Vec3d departure = actor.getPos();
-        boolean damaged = performSoulReap(world, actor, stack, target, resolvedStrike, stacks,
+        boolean damaged = performSoulReap(world, actor, beneficiary, stack, target, resolvedStrike, stacks,
                 approachTuning, reapTuning, reap);
         if (approachTuning.flag(1 << 17)) {
             DeathShadowBloodMasteryCombatManager.scheduleReturn(world, actor, departure,
@@ -237,7 +247,7 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
         DeathShadowBloodMasteryCombatManager.scheduleFinish(world, reap, 1, damaged ? 1 : 0);
     }
 
-    private static boolean performSoulReap(ServerWorld world, LivingEntity actor, ItemStack stack,
+    private static boolean performSoulReap(ServerWorld world, LivingEntity actor, LivingEntity beneficiary, ItemStack stack,
                                            LivingEntity target, Vec3d strikePos, int stacks,
                                            DeathShadowBloodMasteryTuning approachTuning,
                                            DeathShadowBloodMasteryTuning reapTuning,
@@ -263,8 +273,7 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
         int consumed = profile.consumed;
         float multiplier = profile.multiplier;
         float damage = HelperMethods.abilityScaledDamage("soul", actor, stack,
-                multiplier, multiplier * Config.uniqueEffects.soulstealer.spellScalingPerMultiplier
-                        * (float) reapTuning.get(s("SOULSTEALER_SPELL_MULTIPLIER"), 1));
+                multiplier, multiplier * Config.uniqueEffects.soulstealer.spellScalingPerMultiplier);
         if (reapTuning.has(s("SOULSTEALER_ARMOR_IGNORE_RATIO"))) {
             float toughness = target.getAttributeValue(EntityAttributes.GENERIC_ARMOR_TOUGHNESS) > 0
                     ? (float) target.getAttributeValue(EntityAttributes.GENERIC_ARMOR_TOUGHNESS) : 0;
@@ -277,6 +286,10 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
         target.timeUntilRegen = 0;
         boolean damaged = target.damage(damageSource, damage);
         if (damaged) {
+            int healing = lifeLevyHealing(consumed, reapTuning);
+            if (healing > 0 && beneficiary.isAlive() && beneficiary.getWorld() == world) {
+                beneficiary.heal(healing);
+            }
             setSoulDebt(stack, Math.max(0, stacks - consumed));
             SUPPRESS_SOUL_DEBT_GAIN.set(true);
             try {
@@ -309,6 +322,11 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
                         approachTuning.integer(s("SOULSTEALER_HAMSTRING_DURATION_TICKS"), 30),
                         approachTuning.integer(s("SOULSTEALER_HAMSTRING_AMPLIFIER"), 2)), actor);
             }
+            if (target.isAlive() && approachTuning.flag(1 << 11)) {
+                target.addStatusEffect(new StatusEffectInstance(StatusEffects.WEAKNESS,
+                        approachTuning.integer(s("SOULSTEALER_WEAKNESS_DURATION_TICKS"), 80),
+                        approachTuning.integer(s("SOULSTEALER_WEAKNESS_AMPLIFIER"), 0)), actor);
+            }
             if (reapTuning.flag(1 << 23)) {
                 addSoulDebt(stack, reapTuning.integer(s("SOULSTEALER_RESIDUAL_DEBT"), 1),
                         reapTuning, actor);
@@ -338,9 +356,12 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
                                    DeathShadowBloodMasteryTuning reapTuning, int configuredMaximum,
                                    float minimumMultiplier, float maximumMultiplier) {
         int maximum = maximumDebt(configuredMaximum, reapTuning);
+        int baseMaximum = Math.max(1, configuredMaximum);
         int consumed = reapTuning.flag(1 << 26)
                 ? Math.min(stacks, reapTuning.integer(s("SOULSTEALER_INSTALLMENT_MAX_SPEND"), 3)) : stacks;
-        float multiplier = getBackstabMultiplier(consumed, maximum, minimumMultiplier, maximumMultiplier);
+        float multiplier = getBackstabMultiplier(consumed, baseMaximum, minimumMultiplier, maximumMultiplier);
+        int overflow = Math.max(0, consumed - baseMaximum);
+        multiplier *= 1.0F + overflow * Config.uniqueEffects.soulstealer.overflowBackstabDamagePerDebt;
         double debtBonus = reapTuning.get(s("SOULSTEALER_DAMAGE_PER_DEBT_BONUS"), 0) * consumed;
         if (reapTuning.flag(1 << 25)) {
             int foreclosureCap = reapTuning.integer(s("SOULSTEALER_FORECLOSURE_STACK_CAP"), 12);
@@ -362,6 +383,15 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
             multiplier *= approachTuning.get(s("SOULSTEALER_ESCAPE_DAMAGE_MULTIPLIER"), .75);
         }
         return new ReapProfile(consumed, multiplier);
+    }
+
+    static int lifeLevyHealing(int consumed, DeathShadowBloodMasteryTuning tuning) {
+        if (!tuning.has(s("SOULSTEALER_LIFE_LEVY_DEBT_PER_HEALTH"))) {
+            return 0;
+        }
+        int debtPerHealth = tuning.integer(s("SOULSTEALER_LIFE_LEVY_DEBT_PER_HEALTH"), 2);
+        int maximumHealing = tuning.integer(s("SOULSTEALER_LIFE_LEVY_MAX_HEAL"), 6);
+        return Math.min(maximumHealing, Math.max(0, consumed) / Math.max(1, debtPerHealth));
     }
 
     private static void applyFailedReapCost(ItemStack stack, int stacks, DeathShadowBloodMasteryTuning tuning) {
@@ -546,6 +576,19 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
         return maximumDebt(Config.uniqueEffects.soulstealer.maxStacks, tuning);
     }
 
+    public static int synchronizeSoulDebtCapacity(ItemStack stack, DeathShadowBloodMasteryTuning tuning) {
+        int maximum = maximumDebt(tuning);
+        int storedMaximum = stack.getOrDefault(ComponentTypeRegistry.SOUL_DEBT_CAPACITY.get(), 0);
+        if (storedMaximum != maximum) {
+            stack.set(ComponentTypeRegistry.SOUL_DEBT_CAPACITY.get(), maximum);
+        }
+        int debt = getSoulDebt(stack);
+        if (debt > maximum) {
+            setSoulDebt(stack, maximum);
+        }
+        return maximum;
+    }
+
     static int maximumDebt(int configuredMaximum, DeathShadowBloodMasteryTuning tuning) {
         return Math.max(1, configuredMaximum
                 + tuning.integer(s("SOULSTEALER_MAX_DEBT_BONUS"), 0));
@@ -709,6 +752,14 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
 
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
+        if (!world.isClient() && selected && entity instanceof LivingEntity holder
+                && world instanceof ServerWorld serverWorld && entity.age % 20 == 0
+                && net.sweenus.simplyswords.api.AwakeningApi.isAbilityUnlocked(stack)) {
+            UniqueAbilityExecution execution = DeathShadowBloodMasteryCombatManager.beginPassive(
+                    DeathShadowBloodMasteryAbilities.SOULSTEALER_DEBT, serverWorld, stack, holder, null);
+            synchronizeSoulDebtCapacity(stack, DeathShadowBloodMasteryAbilities.tuning(execution));
+            UniqueAbilityApi.finish(execution, DeathShadowBloodMasteryAbilities.FINISH, 0);
+        }
         HelperMethods.createFootfalls(entity, stack, world, ParticleTypes.NAUTILUS, ParticleTypes.NAUTILUS,
                 ParticleTypes.MYCELIUM, true);
         super.inventoryTick(stack, world, entity, slot, selected);
@@ -750,6 +801,8 @@ public class StealSwordItem extends UniqueSwordItem implements UniqueWeaponActiv
         public float minBackstabMultiplier = 2.0f;
         @ValidatedFloat.Restrict(min = 0f)
         public float maxBackstabMultiplier = 5.0f;
+        @ValidatedFloat.Restrict(min = 0f)
+        public float overflowBackstabDamagePerDebt = 0.08f;
         @ValidatedFloat.Restrict(min = 0f)
         public float spellScalingPerMultiplier = 3.098f;
     }

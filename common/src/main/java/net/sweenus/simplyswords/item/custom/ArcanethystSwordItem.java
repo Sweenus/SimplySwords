@@ -1,5 +1,6 @@
 package net.sweenus.simplyswords.item.custom;
 
+import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
 
 import me.fzzyhmstrs.fzzy_config.validation.number.ValidatedFloat;
@@ -61,7 +62,11 @@ public class ArcanethystSwordItem extends UniqueSwordItem implements TwoHandedWe
             ArcanethystAssaultManager.markTarget(serverWorld, attacker, target, tuning);
             int chance = tuning.integer(ArcaneCosmicMasteryTuning.Setting.CHANCE,
                     Config.uniqueEffects.arcanethyst.chance);
-            if (attacker.getRandom().nextInt(100) < chance) {
+            int sparkRoll = attacker.getRandom().nextInt(100);
+            boolean sparkProc = sparkRoll < chance;
+            UniqueAbilityApi.reportRoll(attacker, ArcaneCosmicMasteryAbilities.ARCANETHYST_SPARK.id(),
+                    "CHANCE", chance, sparkRoll, sparkProc);
+            if (sparkProc) {
                 int duration = tuning.integer(ArcaneCosmicMasteryTuning.Setting.STATUS_DURATION_TICKS, 60);
                 int amplifier = tuning.integer(ArcaneCosmicMasteryTuning.Setting.STATUS_AMPLIFIER, 1);
                 target.addStatusEffect(new StatusEffectInstance(StatusEffects.LEVITATION, duration, amplifier), attacker);

@@ -2,9 +2,15 @@ package net.sweenus.simplyswords.world;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.attribute.EntityAttributeInstance;
+import net.minecraft.entity.attribute.EntityAttributeModifier;
+import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
+import net.sweenus.simplyswords.SimplySwords;
+import net.sweenus.simplyswords.config.Config;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -14,6 +20,8 @@ import java.util.UUID;
 // Absorption granted for a stated duration, tracked so it can be taken back when that duration ends.
 public final class MasteryAbsorptionTracker {
     private static final Map<UUID, Grant> GRANTS = new HashMap<>();
+    private static final Identifier ABILITY_ABSORPTION_CAPACITY =
+            Identifier.of(SimplySwords.MOD_ID, "ability_absorption_capacity");
 
     private MasteryAbsorptionTracker() {
     }
@@ -32,14 +40,34 @@ public final class MasteryAbsorptionTracker {
         float room = cap > 0 ? cap - already : amount;
         float wanted = Math.min(amount, Math.max(0, room));
         if (wanted <= 0) return;
-        float before = owner.getAbsorptionAmount();
-        owner.setAbsorptionAmount(before + wanted);
-        float applied = owner.getAbsorptionAmount() - before;
+        float applied = grantCapped(owner, wanted, Config.uniqueEffects.abilityAbsorptionCap);
         if (applied <= 0) return;
         Grant record = existing != null ? existing
                 : GRANTS.computeIfAbsent(owner.getUuid(), ignored -> new Grant(world.getRegistryKey()));
         record.amount += applied;
         record.expiresAt = world.getTime() + ticks;
+    }
+
+    static float grantCapped(LivingEntity owner, float amount, float cap) {
+        if (owner == null || amount <= 0.0F || cap <= 0.0F) return 0.0F;
+        float effectiveCap = Math.min(Math.max(0.0F, cap),
+                Math.max(0.0F, Config.uniqueEffects.abilityAbsorptionCap));
+        float before = owner.getAbsorptionAmount();
+        if (before >= effectiveCap) return 0.0F;
+        EntityAttributeInstance capacity = owner.getAttributeInstance(EntityAttributes.GENERIC_MAX_ABSORPTION);
+        if (capacity == null) return 0.0F;
+        capacity.removeModifier(ABILITY_ABSORPTION_CAPACITY);
+        double needed = requiredCapacity(capacity.getValue(), effectiveCap);
+        if (needed > 0.0) {
+            capacity.addPersistentModifier(new EntityAttributeModifier(ABILITY_ABSORPTION_CAPACITY,
+                    needed, EntityAttributeModifier.Operation.ADD_VALUE));
+        }
+        owner.setAbsorptionAmount(Math.min(effectiveCap, before + amount));
+        return Math.max(0.0F, owner.getAbsorptionAmount() - before);
+    }
+
+    static double requiredCapacity(double currentMaximum, float abilityCap) {
+        return Math.max(0.0, Math.max(0.0F, abilityCap) - Math.max(0.0, currentMaximum));
     }
 
     public static void tick(LivingEntity owner) {

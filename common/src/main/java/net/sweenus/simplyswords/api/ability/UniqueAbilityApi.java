@@ -6,6 +6,7 @@ import net.sweenus.simplyswords.SimplySwords;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -20,8 +21,17 @@ public final class UniqueAbilityApi {
     private static final Map<Identifier, UniqueAbilityDefinition> DEFINITIONS = new LinkedHashMap<>();
     private static final Map<Identifier, ModifierEntry> MODIFIERS = new LinkedHashMap<>();
     private static final ThreadLocal<UniqueAbilityExecution> STARTED_EXECUTION = new ThreadLocal<>();
+    private static volatile UniqueAbilityDiagnostics diagnostics = UniqueAbilityDiagnostics.NONE;
 
     private UniqueAbilityApi() {
+    }
+
+    public static void setDiagnostics(@Nullable UniqueAbilityDiagnostics sink) {
+        diagnostics = sink == null ? UniqueAbilityDiagnostics.NONE : sink;
+    }
+
+    public static UniqueAbilityDiagnostics diagnostics() {
+        return diagnostics;
     }
 
     public static synchronized void registerDefinition(UniqueAbilityDefinition definition) {
@@ -60,6 +70,14 @@ public final class UniqueAbilityApi {
         Objects.requireNonNull(baseTuning);
         UniqueAbilityTuning.Builder tuning = new UniqueAbilityTuning.Builder(definition);
         baseTuning.accept(tuning);
+        UniqueAbilityDiagnostics sink = diagnostics;
+        Map<UniqueAbilityKey<?>, Object> base = null;
+        if (sink != UniqueAbilityDiagnostics.NONE && isActive(sink, context.actor())) {
+            base = new LinkedHashMap<>();
+            for (UniqueAbilityKey<?> key : definition.keys()) {
+                base.put(key, tuning.get(key));
+            }
+        }
         List<UniqueAbilityObserver> observers = new ArrayList<>();
         for (ModifierEntry entry : modifierSnapshot()) {
             try {
@@ -74,6 +92,13 @@ public final class UniqueAbilityApi {
         UniqueAbilityExecution execution = new UniqueAbilityExecution(
                 NEXT_EXECUTION_ID.incrementAndGet(), definition, context, tuning.build(), observers);
         STARTED_EXECUTION.set(execution);
+        if (base != null) {
+            try {
+                sink.onComposed(execution, Collections.unmodifiableMap(base));
+            } catch (RuntimeException exception) {
+                SimplySwords.LOGGER.error("Unique ability diagnostics failed for {}", definition.id(), exception);
+            }
+        }
         emit(execution, UniqueAbilityPhase.ATTEMPT, definition.id(), null, 0, 0.0);
         return execution;
     }
@@ -84,6 +109,41 @@ public final class UniqueAbilityApi {
         }
         execution.markStarted();
         emit(execution, UniqueAbilityPhase.START, execution.definition().id(), null, 0, 0.0);
+    }
+
+    public static void reportRoll(UniqueAbilityExecution execution, UniqueAbilityKey<?> key,
+                                  double chance, double roll, boolean passed) {
+        if (execution == null || key == null) {
+            return;
+        }
+        reportRoll(execution.context().actor(), execution.definition().id(), key.id().getPath(),
+                chance, roll, passed);
+    }
+
+    public static void reportRoll(@Nullable LivingEntity actor, Identifier abilityId, String label,
+                                  double chance, double roll, boolean passed) {
+        UniqueAbilityDiagnostics sink = diagnostics;
+        if (actor == null || abilityId == null || sink == UniqueAbilityDiagnostics.NONE
+                || !isActive(sink, actor)) {
+            return;
+        }
+        try {
+            sink.onRoll(actor, abilityId, label, chance, roll, passed);
+        } catch (RuntimeException exception) {
+            SimplySwords.LOGGER.error("Unique ability diagnostics failed for {}", abilityId, exception);
+        }
+    }
+
+    private static boolean isActive(UniqueAbilityDiagnostics sink, @Nullable LivingEntity actor) {
+        if (actor == null) {
+            return false;
+        }
+        try {
+            return sink.isActive(actor);
+        } catch (RuntimeException exception) {
+            SimplySwords.LOGGER.error("Unique ability diagnostics failed", exception);
+            return false;
+        }
     }
 
     public static void emit(UniqueAbilityExecution execution, UniqueAbilityPhase phase, Identifier eventId,

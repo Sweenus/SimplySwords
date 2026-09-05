@@ -25,6 +25,7 @@ public class SoulkeeperLanternVisualEntityRenderer extends EntityRenderer<Soulke
     private static final double BOB_AMPLITUDE = 0.08;
     private static final double BOB_SPEED = 0.13;
     private static final float LANTERN_RENDER_SCALE = 1.0F;
+    private static final int MAX_LANTERN_COUNT = 6;
     private static final Map<Integer, RenderOrbitState> RENDER_STATES = new HashMap<>();
 
     public SoulkeeperLanternVisualEntityRenderer(EntityRendererFactory.Context context) {
@@ -38,7 +39,7 @@ public class SoulkeeperLanternVisualEntityRenderer extends EntityRenderer<Soulke
 
     @Override
     public void render(SoulkeeperLanternVisualEntity entity, float yaw, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light) {
-        int count = MathHelper.clamp(entity.getLanternCount(), 0, 4);
+        int count = MathHelper.clamp(entity.getLanternCount(), 0, MAX_LANTERN_COUNT);
         if (count <= 0) {
             return;
         }

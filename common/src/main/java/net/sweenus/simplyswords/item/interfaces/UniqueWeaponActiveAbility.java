@@ -32,6 +32,9 @@ public interface UniqueWeaponActiveAbility {
                 return secondary;
             }
         }
+        if (user.getItemCooldownManager().isCoolingDown(stack.getItem())) {
+            return TypedActionResult.pass(stack);
+        }
         if (!WeaponManaCost.canAfford(user, stack)) {
             return TypedActionResult.fail(stack);
         }

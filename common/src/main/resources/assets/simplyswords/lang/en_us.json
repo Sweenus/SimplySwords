@@ -1347,6 +1347,7 @@
   "simplyswords.unique_effects.soulstealer.killStacks": "Soul Debt stacks on kill",
   "simplyswords.unique_effects.soulstealer.minBackstabMultiplier": "Soul Reap minimum damage multiplier",
   "simplyswords.unique_effects.soulstealer.maxBackstabMultiplier": "Soul Reap maximum damage multiplier",
+  "simplyswords.unique_effects.soulstealer.overflowBackstabDamagePerDebt": "Soul Reap overflow damage per debt",
   "simplyswords.unique_effects.soulkeeper": "§6[Soulkeeper]§7",
   "simplyswords.unique_effects.soulkeeper.cooldown": "Lantern summon cooldown",
   "simplyswords.unique_effects.soulkeeper.activeExtraLanternDuration": "Extra lantern duration",

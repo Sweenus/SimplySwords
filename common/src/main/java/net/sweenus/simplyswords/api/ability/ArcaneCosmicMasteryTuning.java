@@ -1,9 +1,11 @@
 package net.sweenus.simplyswords.api.ability;
 
+import java.util.Collections;
 import java.util.EnumMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
-public final class ArcaneCosmicMasteryTuning {
+public final class ArcaneCosmicMasteryTuning implements MasteryTuningSnapshot {
     public enum Setting {
         COOLDOWN_TICKS(0, 72000), DURATION_TICKS(0, 72000), SECONDARY_DURATION_TICKS(0, 72000),
         INTERVAL_TICKS(1, 72000), SECONDARY_INTERVAL_TICKS(1, 72000), LOCKOUT_TICKS(0, 72000),
@@ -21,6 +23,7 @@ public final class ArcaneCosmicMasteryTuning {
         TERTIARY_DAMAGE_MULTIPLIER(0, 10), TERTIARY_STATUS_DURATION_TICKS(0, 72000),
         SECONDARY_COUNT(0, 64), SECONDARY_TARGET_CAP(0, 64),
         SECONDARY_REFUND_TICKS(0, 72000), TERTIARY_REFUND_TICKS(0, 72000),
+        ARCANETHYST_LEVITATION_MELEE_DAMAGE_MULTIPLIER(0, 10),
         MODE(0, Integer.MAX_VALUE);
 
         private final double minimum;
@@ -72,5 +75,12 @@ public final class ArcaneCosmicMasteryTuning {
 
     public ArcaneCosmicMasteryTuning multiply(Setting setting, double factor, double fallback) {
         return with(setting, get(setting, fallback) * factor);
+    }
+
+    @Override
+    public Map<String, Double> entries() {
+        Map<String, Double> entries = new LinkedHashMap<>();
+        values.forEach((setting, value) -> entries.put(setting.name(), value));
+        return Collections.unmodifiableMap(entries);
     }
 }

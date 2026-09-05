@@ -72,7 +72,11 @@ public final class SoulrenderAbilityManager {
         OwnerState state = owner(world, attacker.getUuid());
         long now = world.getTime();
         if (now < state.echoReady) return;
-        if (attacker.getRandom().nextInt(100) >= chance) return;
+        int roll = attacker.getRandom().nextInt(100);
+        boolean passed = roll < chance;
+        UniqueAbilityApi.reportRoll(attacker, StormSoulMasteryAbilities.SOULRENDER_MARK.id(),
+                "ECHO_CHANCE", chance, roll, passed);
+        if (!passed) return;
         state.echoReady = now + Math.max(1, tuning.integer(StormSoulMasteryTuning.Setting.ECHO_LOCKOUT_TICKS, 20));
 
         int cap = Math.max(1, tuning.integer(StormSoulMasteryTuning.Setting.ECHO_TARGET_CAP, 1));

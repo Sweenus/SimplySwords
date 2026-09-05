@@ -41,9 +41,16 @@ public final class LongPathFinalFormsMasteryCombatManager {
         LongPathFinalFormsMasteryTuning tuning = LongPathFinalFormsMasteryAbilities.tuning(execution);
         int chance = tuning.integer(s("CHANCE"), Config.uniqueEffects.sunfire.chance);
         boolean exact = tuning.has(s("CHANCE"));
-        boolean proc = chance >= 100 || chance > 0 && (exact
-                ? attacker.getRandom().nextInt(100) < chance
-                : attacker.getRandom().nextInt(100) <= chance);
+        int roll = -1;
+        boolean proc;
+        if (chance >= 100) proc = true;
+        else if (chance <= 0) proc = false;
+        else {
+            roll = attacker.getRandom().nextInt(100);
+            proc = exact ? roll < chance : roll <= chance;
+        }
+        UniqueAbilityApi.reportRoll(attacker, LongPathFinalFormsMasteryAbilities.SUNFIRE_REGEN.id(),
+                "CHANCE", chance, roll, proc);
         PassiveState state = state(attacker, world.getTime());
         state.sunfireTuning = tuning;
         if (tuning.flag(131072)) {
@@ -86,9 +93,16 @@ public final class LongPathFinalFormsMasteryCombatManager {
         PassiveState state = state(attacker, world.getTime());
         int chance = tuning.integer(s("CHANCE"), Config.uniqueEffects.harbinger.chance);
         boolean exact = tuning.has(s("CHANCE"));
-        boolean proc = chance >= 100 || chance > 0 && (exact
-                ? attacker.getRandom().nextInt(100) < chance
-                : attacker.getRandom().nextInt(100) <= chance);
+        int roll = -1;
+        boolean proc;
+        if (chance >= 100) proc = true;
+        else if (chance <= 0) proc = false;
+        else {
+            roll = attacker.getRandom().nextInt(100);
+            proc = exact ? roll < chance : roll <= chance;
+        }
+        UniqueAbilityApi.reportRoll(attacker, LongPathFinalFormsMasteryAbilities.HARBINGER_OMEN.id(),
+                "CHANCE", chance, roll, proc);
         if (proc) {
             world.playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
                     attacker.getSoundCategory(), .3F, 1.6F);

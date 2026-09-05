@@ -176,12 +176,16 @@ public abstract class InGameHudMixin {
         }
         if (stack.isOf(ItemsRegistry.SOULSTEALER.get())) {
             int stacks = stack.getOrDefault(ComponentTypeRegistry.STORED_CHARGE.get(), StoredChargeComponent.DEFAULT).charge();
-            renderChargePips(context, client, stacks, Math.max(1, Config.uniqueEffects.soulstealer.maxStacks), SOUL_DEBT_COLOR, SOUL_DEBT_EMPTY_COLOR, SOUL_DEBT_BORDER_COLOR);
+            int maximum = Math.max(1, stack.getOrDefault(ComponentTypeRegistry.SOUL_DEBT_CAPACITY.get(),
+                    Config.uniqueEffects.soulstealer.maxStacks));
+            renderChargePips(context, client, stacks, maximum, SOUL_DEBT_COLOR, SOUL_DEBT_EMPTY_COLOR, SOUL_DEBT_BORDER_COLOR);
             return;
         }
         if (stack.isOf(ItemsRegistry.STORMBRINGER.get())) {
-            int charges = stack.getOrDefault(ComponentTypeRegistry.PARRY.get(), ParryComponent.DEFAULT).stormCharges();
-            renderChargePips(context, client, charges, Math.max(1, Config.uniqueEffects.stormbringer.maxStormCharges), STORM_CHARGE_COLOR, STORM_CHARGE_EMPTY_COLOR, STORM_CHARGE_BORDER_COLOR);
+            ParryComponent stormCharge = stack.getOrDefault(ComponentTypeRegistry.PARRY.get(), ParryComponent.DEFAULT);
+            int charges = stormCharge.stormCharges();
+            int maximum = stormCharge.effectiveStormChargeCapacity(Config.uniqueEffects.stormbringer.maxStormCharges);
+            renderChargePips(context, client, charges, maximum, STORM_CHARGE_COLOR, STORM_CHARGE_EMPTY_COLOR, STORM_CHARGE_BORDER_COLOR);
             return;
         }
     }

@@ -25,6 +25,7 @@ import net.sweenus.simplyswords.api.ability.UniqueAbilityPhase;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
+import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 
 import java.util.ArrayList;
@@ -146,6 +147,8 @@ public final class EmberlashAbilityManager {
         OwnerState owner = worldState.owners.computeIfAbsent(actor.getUuid(), ignored -> new OwnerState());
         long now = world.getTime();
         prune(world, worldState, now);
+        world.playSound(null, actor.getBlockPos(), SoundRegistry.SPELL_FIRE.get(),
+                actor.getSoundCategory(), .5F, 1F);
 
         double distance = tuning.flag(SURGEONS_FLAME) ? 0
                 : 1.5 * tuned(tuning, s("EMBERLASH_EVADE_DISTANCE_MULTIPLIER"), s("SPEED"), 1);

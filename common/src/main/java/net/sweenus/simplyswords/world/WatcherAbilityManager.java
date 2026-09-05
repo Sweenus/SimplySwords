@@ -288,6 +288,7 @@ public final class WatcherAbilityManager {
             mark = new DreadMark(key, world.getTime());
             mark.expiryTick = source.expiryTick;
             mark.legacyRadius = source.legacyRadius;
+            mark.maxDread = source.maxDread;
             marks.put(key, mark);
         }
         mark.dread = Math.min(source.maxDread, mark.dread + Math.max(1, source.dread / 2));
@@ -386,6 +387,7 @@ public final class WatcherAbilityManager {
             return;
         }
 
+        List<PendingDreadInheritance> pendingInheritances = new ArrayList<>();
         Iterator<Map.Entry<MarkKey, DreadMark>> iterator = marks.entrySet().iterator();
         while (iterator.hasNext()) {
             Map.Entry<MarkKey, DreadMark> entry = iterator.next();
@@ -397,7 +399,7 @@ public final class WatcherAbilityManager {
                 if (actor != null && actor.isAlive() && target != null && !target.isAlive()
                         && mark.key.type == WatcherWeaponType.WARGLAIVE && mark.legacyRadius > 0
                         && mark.dread > 1) {
-                    inheritDread(world, actor, target, marks, mark);
+                    pendingInheritances.add(new PendingDreadInheritance(actor, target, mark));
                 }
                 discardBats(world, mark.batIds);
                 iterator.remove();
@@ -435,6 +437,10 @@ public final class WatcherAbilityManager {
                     spawnBatAura(world, bat.getPos());
                 }
             }
+        }
+
+        for (PendingDreadInheritance inheritance : pendingInheritances) {
+            inheritDread(world, inheritance.actor, inheritance.target, marks, inheritance.source);
         }
 
         if (marks.isEmpty()) {
@@ -958,6 +964,14 @@ public final class WatcherAbilityManager {
             }
 
             tickOmenSwoops(world, actor, target, omen);
+            if (omen.swoopKilledTarget) {
+                settleOmenAbsorption(world, actor, target, omen, 0.0F, false, false);
+                recordOwnerState(world, actor, tuning);
+                UniqueAbilityApi.finish(omen.execution, omen.execution.definition().id(), 1);
+                discardBats(world, omen.batIds);
+                iterator.remove();
+                continue;
+            }
             if (world.getTime() >= omen.impactTick) {
                 resolveFinalOmen(world, actor, target, omen);
                 discardBats(world, omen.batIds);
@@ -1062,15 +1076,27 @@ public final class WatcherAbilityManager {
 
     private static void applyOmenSwoopStrike(ServerWorld world, LivingEntity actor,
                                               LivingEntity target, ActiveOmen omen) {
-        if (!damageTargetWithoutKnockback(world, actor, omen.stack, target, omen.swoopDamage)) {
+        AbyssalSpectralMasteryTuning tuning = AbyssalSpectralMasteryAbilities.tuning(omen.execution);
+        int mode = tuning.integer(AbyssalSpectralMasteryTuning.Setting.MODE, 0);
+        int maxDread = Math.max(1, tuning.integer(AbyssalSpectralMasteryTuning.Setting.STACK_CAP,
+                Config.uniqueEffects.watcher.maxDread));
+        float minimumVitality = 0.0F;
+        if ((mode & 8192) != 0 && omen.dread >= maxDread && !isExecutionImmune(target)) {
+            minimumVitality = Math.max(1.0F,
+                    (float) tuning.get(AbyssalSpectralMasteryTuning.Setting.EXECUTE_THRESHOLD,
+                            Config.uniqueEffects.watcher.omenInstantKillThreshold) * target.getMaxHealth());
+        }
+        float vitalityBefore = vitality(target);
+        if (!damageTargetWithoutKnockback(world, actor, omen.stack, target, omen.swoopDamage,
+                minimumVitality)) {
             return;
         }
+        omen.removedVitality += removedVitality(vitalityBefore, target);
         omen.successfulSwoops++;
         UniqueAbilityApi.emit(omen.execution, net.sweenus.simplyswords.api.ability.UniqueAbilityPhase.HIT,
                 AbyssalSpectralMasteryAbilities.HIT, target, 1, omen.swoopDamage);
         if (!target.isAlive()) {
-            int mode = AbyssalSpectralMasteryAbilities.tuning(omen.execution).integer(
-                    AbyssalSpectralMasteryTuning.Setting.MODE, 0);
+            omen.swoopKilledTarget = true;
             if ((mode & 8192) == 0) resetClaymoreCooldown(actor, omen.stack);
             if ((mode & 512) != 0) {
                 actor.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE,
@@ -1105,7 +1131,7 @@ public final class WatcherAbilityManager {
                 Config.uniqueEffects.watcher.claymoreMissingHealthBonus);
         float gathered = Math.min((float) tuning.get(AbyssalSpectralMasteryTuning.Setting.BONUS_CAP, 0),
                 omen.successfulSwoops * (float) tuning.get(AbyssalSpectralMasteryTuning.Setting.BONUS_PER_TRIGGER, 0));
-        float vitalityBefore = target.getHealth() + target.getAbsorptionAmount();
+        float resolutionVitalityBefore = vitality(target);
         int maxDread = Math.max(1, tuning.integer(AbyssalSpectralMasteryTuning.Setting.STACK_CAP,
                 Config.uniqueEffects.watcher.maxDread));
         float threshold = (float) tuning.get(AbyssalSpectralMasteryTuning.Setting.EXECUTE_THRESHOLD,
@@ -1114,6 +1140,7 @@ public final class WatcherAbilityManager {
         int mode = tuning.integer(AbyssalSpectralMasteryTuning.Setting.MODE, 0);
         boolean immune = isExecutionImmune(target);
         boolean mercy = (mode & 8192) != 0 && !immune;
+        boolean mercyReady = mercy && omen.dread >= maxDread;
         boolean absolute = (mode & 16384) != 0;
         boolean absoluteReady = absoluteReady(absolute, omen.dread,
                 tuning.integer(AbyssalSpectralMasteryTuning.Setting.EXECUTE_DREAD_THRESHOLD, 6), maxDread);
@@ -1124,10 +1151,8 @@ public final class WatcherAbilityManager {
         if (absolute && (!absoluteReady || target.getHealth() > threshold)) {
             finalDamage *= (float) tuning.get(AbyssalSpectralMasteryTuning.Setting.DAMAGE_MULTIPLIER, .7);
         }
-        if (mercy && omen.dread >= maxDread && target.getHealth() <= threshold) {
-            finalDamage = Math.min(finalDamage, Math.max(0, vitalityBefore - 1));
-        }
-        boolean damaged = damageTarget(world, actor, omen.stack, target, finalDamage);
+        boolean damaged = damageTarget(world, actor, omen.stack, target, finalDamage,
+                mercyReady ? 1.0F : 0.0F);
 
         boolean executed = false;
         if (!mercy && !immune && absoluteReady && damaged && omen.dread >= maxDread
@@ -1140,26 +1165,17 @@ public final class WatcherAbilityManager {
             }
         }
 
-        if (mercy && damaged && omen.dread >= maxDread && target.isAlive() && target.getHealth() <= threshold) {
-            target.setHealth(Math.max(1, target.getHealth()));
+        boolean mercyResolved = mercyReady && target.isAlive() && target.getHealth() <= threshold;
+        if (mercyResolved) {
+            target.setHealth(1.0F);
             target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS,
                     tuning.integer(AbyssalSpectralMasteryTuning.Setting.EMBEDDED_DURATION_TICKS, 60),
                     9, false, false, true), actor);
-            grantOmenAbsorption(world, actor, tuning, Math.max(0.0F,
-                    vitalityBefore - (target.getHealth() + target.getAbsorptionAmount())));
         }
 
-        if (executed) {
-            grantOmenAbsorption(world, actor, tuning, Math.max(0.0F,
-                    vitalityBefore - (target.getHealth() + target.getAbsorptionAmount())));
-        } else if (damaged && (mode & 256) != 0 && target.isAlive()) {
-            float removed = Math.max(0, vitalityBefore - target.getHealth() - target.getAbsorptionAmount());
-            float reserve = (float) Math.min(tuning.get(AbyssalSpectralMasteryTuning.Setting.REVIVE_ABSORPTION, 4),
-                    Math.floor(removed / Math.max(1, target.getMaxHealth() * .1F)));
-            float gained = Math.max(0.0F, reserve - actor.getAbsorptionAmount());
-            actor.setAbsorptionAmount(Math.max(actor.getAbsorptionAmount(), reserve));
-            recordClaim(world, actor, tuning, gained);
-        }
+        float resolutionRemoved = removedVitality(resolutionVitalityBefore, target);
+        omen.removedVitality += resolutionRemoved;
+        settleOmenAbsorption(world, actor, target, omen, resolutionRemoved, executed, mercyResolved);
 
         recordOwnerState(world, actor, tuning);
         if (!target.isAlive()) {
@@ -1205,6 +1221,40 @@ public final class WatcherAbilityManager {
         return (float) Math.min(cap, points * perPoint);
     }
 
+    static float capDamageToVitalityFloor(float damage, float currentVitality, float minimumVitality) {
+        return Math.max(0.0F, Math.min(damage,
+                Math.max(0.0F, currentVitality - Math.max(0.0F, minimumVitality))));
+    }
+
+    static float darkReserveAbsorption(float removed, float maximumHealth, float cap) {
+        if (removed <= 0.0F || maximumHealth <= 0.0F || cap <= 0.0F) return 0.0F;
+        return (float) Math.min(cap, Math.floor(removed / Math.max(1.0F, maximumHealth * 0.1F)));
+    }
+
+    static float omenAbsorptionRequest(int mode, boolean executed, boolean mercyResolved,
+                                       float removed, float resolutionRemoved, float maximumHealth,
+                                       float absorptionMultiplier, float reserveCap) {
+        if ((mode & 16384) != 0 && executed) return 0.0F;
+        float requested = executed ? Math.max(0.0F, resolutionRemoved) * absorptionMultiplier
+                : mercyResolved ? Math.max(0.0F, removed) * absorptionMultiplier : 0.0F;
+        if ((mode & 256) != 0) {
+            requested += darkReserveAbsorption(removed, maximumHealth, reserveCap);
+        }
+        return Math.max(0.0F, requested);
+    }
+
+    static float cappedAbsorption(float current, float requested, float omenCap, float abilityCap) {
+        float cap = Math.min(Math.max(0.0F, omenCap), Math.max(0.0F, abilityCap));
+        float existing = Math.max(0.0F, current);
+        if (existing >= cap) return existing;
+        return Math.min(cap, existing + Math.max(0.0F, requested));
+    }
+
+    static float omenAbsorptionCap(float maximumHealth, float omenCap, float abilityCap) {
+        return Math.min(Math.max(0.0F, maximumHealth) * 0.5F,
+                Math.min(Math.max(0.0F, omenCap), Math.max(0.0F, abilityCap)));
+    }
+
     static boolean isExecutionImmune(LivingEntity target) {
         return target.getType().isIn(EXECUTION_IMMUNE);
     }
@@ -1214,16 +1264,30 @@ public final class WatcherAbilityManager {
         return (float) tuning.get(AbyssalSpectralMasteryTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, 1);
     }
 
-    private static void grantOmenAbsorption(ServerWorld world, LivingEntity actor,
-                                            AbyssalSpectralMasteryTuning tuning, float removed) {
-        float cap = Math.min(Math.max(0.0F, Config.uniqueEffects.watcher.omenAbsorptionCap),
-                Math.max(0.0F, Config.uniqueEffects.abilityAbsorptionCap));
-        if (actor.getAbsorptionAmount() >= cap) return;
-        float updated = Math.min(cap, actor.getAbsorptionAmount() + removed
-                * (float) tuning.get(AbyssalSpectralMasteryTuning.Setting.ABSORPTION_MULTIPLIER, 1));
-        float gained = Math.max(0.0F, updated - actor.getAbsorptionAmount());
-        actor.setAbsorptionAmount(updated);
+    private static void settleOmenAbsorption(ServerWorld world, LivingEntity actor, LivingEntity target,
+                                             ActiveOmen omen, float resolutionRemoved,
+                                             boolean executed, boolean mercyResolved) {
+        if (omen.absorptionSettled) return;
+        omen.absorptionSettled = true;
+        AbyssalSpectralMasteryTuning tuning = AbyssalSpectralMasteryAbilities.tuning(omen.execution);
+        float requested = omenAbsorptionRequest(
+                tuning.integer(AbyssalSpectralMasteryTuning.Setting.MODE, 0),
+                executed,
+                mercyResolved,
+                omen.removedVitality,
+                resolutionRemoved,
+                target.getMaxHealth(),
+                (float) tuning.get(AbyssalSpectralMasteryTuning.Setting.ABSORPTION_MULTIPLIER, 1),
+                (float) tuning.get(AbyssalSpectralMasteryTuning.Setting.REVIVE_ABSORPTION, 4));
+        float gained = grantOmenAbsorption(actor, requested);
         recordClaim(world, actor, tuning, gained);
+    }
+
+    private static float grantOmenAbsorption(LivingEntity actor, float requested) {
+        return MasteryAbsorptionTracker.grantCapped(actor, requested,
+                omenAbsorptionCap(actor.getMaxHealth(),
+                        Config.uniqueEffects.watcher.omenAbsorptionCap,
+                        Config.uniqueEffects.abilityAbsorptionCap));
     }
 
     private static void recordClaim(ServerWorld world, LivingEntity actor,
@@ -1372,6 +1436,12 @@ public final class WatcherAbilityManager {
                 actor.getDamageSources().indirectMagic(actor, actor), baseDamage);
     }
 
+    private static boolean damageTarget(ServerWorld world, LivingEntity actor, ItemStack stack,
+                                        LivingEntity target, float baseDamage, float minimumVitality) {
+        return damageTarget(world, stack, target,
+                actor.getDamageSources().indirectMagic(actor, actor), baseDamage, minimumVitality);
+    }
+
     private static boolean damageTargetWithoutKnockback(ServerWorld world, LivingEntity actor,
                                                         ItemStack stack, LivingEntity target,
                                                         float baseDamage) {
@@ -1381,18 +1451,47 @@ public final class WatcherAbilityManager {
         return damageTarget(world, stack, target, attributedMagic, baseDamage);
     }
 
+    private static boolean damageTargetWithoutKnockback(ServerWorld world, LivingEntity actor,
+                                                        ItemStack stack, LivingEntity target,
+                                                        float baseDamage, float minimumVitality) {
+        DamageSource magic = actor.getDamageSources().magic();
+        DamageSource attributedMagic =
+                new DamageSource(magic.getTypeRegistryEntry(), actor, actor);
+        return damageTarget(world, stack, target, attributedMagic, baseDamage, minimumVitality);
+    }
+
     private static boolean damageTarget(ServerWorld world, ItemStack stack, LivingEntity target,
                                         DamageSource source, float baseDamage) {
+        return damageTarget(world, stack, target, source, baseDamage, 0.0F);
+    }
+
+    private static boolean damageTarget(ServerWorld world, ItemStack stack, LivingEntity target,
+                                        DamageSource source, float baseDamage, float minimumVitality) {
         if (baseDamage <= 0.0F || !target.isAlive()) {
             return false;
         }
         float damage = HelperMethods.applyAbilityDamageEnchantments(
                 world, stack, target, source, baseDamage);
+        if (minimumVitality > 0.0F) {
+            damage = capDamageToVitalityFloor(damage, vitality(target), minimumVitality);
+        }
+        if (damage <= 0.0F) {
+            return false;
+        }
         boolean[] damaged = {false};
+        float resolvedDamage = damage;
         WeaponImplicitRegistry.runSuppressed(
-                () -> damaged[0] = HelperMethods.damageThroughIframes(target, source, damage)
+                () -> damaged[0] = HelperMethods.damageThroughIframes(target, source, resolvedDamage)
         );
         return damaged[0];
+    }
+
+    private static float vitality(LivingEntity target) {
+        return target.getHealth() + target.getAbsorptionAmount();
+    }
+
+    private static float removedVitality(float before, LivingEntity target) {
+        return Math.max(0.0F, before - vitality(target));
     }
 
     private static void resetClaymoreCooldown(LivingEntity actor, ItemStack stack) {
@@ -1633,6 +1732,9 @@ public final class WatcherAbilityManager {
     private record MarkKey(UUID ownerId, UUID targetId, WatcherWeaponType type) {
     }
 
+    private record PendingDreadInheritance(LivingEntity actor, LivingEntity target, DreadMark source) {
+    }
+
     private static final class DreadMark {
         private final MarkKey key;
         private final long createdTick;
@@ -1727,7 +1829,10 @@ public final class WatcherAbilityManager {
         private final UniqueAbilityExecution execution;
         private int spawnedSwoops;
         private int successfulSwoops;
+        private float removedVitality;
         private boolean noEscapeTriggered;
+        private boolean swoopKilledTarget;
+        private boolean absorptionSettled;
 
         private ActiveOmen(UUID actorId, UUID sourcePlayerId, UUID targetId, ItemStack stack,
                            Hand hand, int dread, long startedTick, long impactTick, int durationTicks,

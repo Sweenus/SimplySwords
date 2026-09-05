@@ -1,5 +1,7 @@
 package net.sweenus.simplyswords.world;
 
+import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
+import net.sweenus.simplyswords.api.ability.ArcaneCosmicMasteryAbilities;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
@@ -114,7 +116,11 @@ public final class CaelestisBreachManager {
         breach.recallUsed = true;
         double range = breach.tuning.get(ArcaneCosmicMasteryTuning.Setting.RANGE, 20);
         int chance = breach.tuning.integer(ArcaneCosmicMasteryTuning.Setting.PITY_CHANCE, 50);
-        if (world.random.nextInt(100) >= chance) return true;
+        int roll = world.random.nextInt(100);
+        boolean passed = roll < chance;
+        UniqueAbilityApi.reportRoll(actor, ArcaneCosmicMasteryAbilities.CAELESTIS_HOST.id(),
+                "PITY_CHANCE", chance, roll, passed);
+        if (!passed) return true;
         breach.creatureIds.stream().map(world::getEntity)
                 .filter(entity -> entity instanceof CaelestisBreachCreature creature && creature.isUnbound())
                 .filter(entity -> entity.squaredDistanceTo(actor) <= range * range)

@@ -14,6 +14,7 @@ import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Box;
@@ -43,6 +44,7 @@ import java.util.UUID;
 public final class EmberbladeAbilityManager {
     private static final int CHANNEL_SLOW_GRACE_TICKS = 20;
     private static final int BASE_CHANNEL_TICKS = 80;
+    private static final int EXTRA_SHRAPNEL_WINDOW_TICKS = 20;
     private static final Map<ServerWorld, Map<UUID, State>> STATES = new HashMap<>();
 
     private EmberbladeAbilityManager() {
@@ -110,9 +112,12 @@ public final class EmberbladeAbilityManager {
         state.interruptedBank = 0;
         state.flameBank = 0;
         WeaponManaCost.spend(actor, stack);
+        boolean extraShrapnel = inFullChargeWindow(elapsed, channel.channelTicks,
+                EXTRA_SHRAPNEL_WINDOW_TICKS);
         boolean released = release(channel.execution, world, stack, actor, target, charge, elapsed,
                 inFullChargeWindow(elapsed, channel.channelTicks,
-                        channel.tuning.integer(s("EMBERBLADE_FULL_CHARGE_WINDOW_TICKS"), 0)));
+                        channel.tuning.integer(s("EMBERBLADE_FULL_CHARGE_WINDOW_TICKS"), 0)),
+                extraShrapnel);
         if (released) {
             SimplySwordsAPI.setWeaponCooldown(actor, stack,
                     channel.execution.cooldownTicks(Config.uniqueEffects.emberblade.cooldown));
@@ -135,7 +140,7 @@ public final class EmberbladeAbilityManager {
                 FireForgeMasteryAbilities.EMBERBLADE_SHRAPNEL, context, Config.uniqueEffects.emberblade.cooldown);
         UniqueAbilityApi.start(execution);
         boolean released = release(execution, context.world(), context.stack(), context.actor(), context.target(),
-                1, BASE_CHANNEL_TICKS, true);
+                1, BASE_CHANNEL_TICKS, true, true);
         UniqueAbilityApi.publishStartedExecution(execution);
         return released;
     }
@@ -257,7 +262,7 @@ public final class EmberbladeAbilityManager {
 
     private static boolean release(UniqueAbilityExecution execution, ServerWorld world, ItemStack stack,
                                    LivingEntity actor, LivingEntity target, float charge, int elapsed,
-                                   boolean finalWindow) {
+                                   boolean finalWindow, boolean extraShrapnel) {
         if (!validTarget(actor, target)) {
             UniqueAbilityApi.cancel(execution);
             return false;
@@ -282,8 +287,11 @@ public final class EmberbladeAbilityManager {
         }
 
         int affected = 0;
-        boolean primaryHit = dealAndRecord(execution, world, actor, stack, target, damage, tuning);
+        boolean primaryHit = fireShrapnel(execution, world, actor, stack, target, damage, tuning);
         if (primaryHit) affected++;
+        if (extraShrapnel && target.isAlive()) {
+            if (fireShrapnel(execution, world, actor, stack, target, damage, tuning)) affected++;
+        }
         int fireTicks = tuning.integer(s("FIRE_TICKS"), 0);
         if (finalWindow && tuning.flag(1 << 6)) {
             fireTicks = Math.max(fireTicks,
@@ -318,9 +326,23 @@ public final class EmberbladeAbilityManager {
         UniqueAbilityApi.emit(execution, UniqueAbilityPhase.HIT, FireForgeMasteryAbilities.HIT,
                 target, affected, damage);
         UniqueAbilityApi.finish(execution, FireForgeMasteryAbilities.FINISH, affected);
-        world.spawnParticles(ParticleTypes.LAVA, target.getX(), target.getBodyY(.5), target.getZ(),
-                12, .35, .35, .35, .04);
         return true;
+    }
+
+    private static boolean fireShrapnel(UniqueAbilityExecution execution, ServerWorld world, LivingEntity actor,
+                                        ItemStack stack, LivingEntity target, float damage,
+                                        FireForgeMasteryTuning tuning) {
+        HelperMethods.spawnWaistHeightParticles(world, ParticleTypes.SMOKE, actor, target, 20);
+        HelperMethods.spawnWaistHeightParticles(world, ParticleTypes.POOF, actor, target, 20);
+        HelperMethods.spawnWaistHeightParticles(world, ParticleTypes.ASH, actor, target, 20);
+        world.playSound(null, actor.getBlockPos(), SoundRegistry.ELEMENTAL_BOW_FIRE_SHOOT_IMPACT_03.get(),
+                actor.getSoundCategory(), .4F, 1.5F);
+        boolean hit = dealAndRecord(execution, world, actor, stack, target, damage, tuning);
+        world.playSound(null, target.getBlockPos(), SoundEvents.ENTITY_GENERIC_EXPLODE.value(),
+                actor.getSoundCategory(), .4F, 1.1F);
+        HelperMethods.spawnOrbitParticles(world, target.getPos(), ParticleTypes.EXPLOSION, 1, 1);
+        HelperMethods.spawnOrbitParticles(world, target.getPos(), ParticleTypes.POOF, 1, 20);
+        return hit;
     }
 
     private static int fragments(UniqueAbilityExecution execution, ServerWorld world, LivingEntity actor,
@@ -376,8 +398,11 @@ public final class EmberbladeAbilityManager {
                         Config.uniqueEffects.emberblade.duration),
                 tuning.integer(s("EMBERBLADE_IRE_DURATION_BONUS_TICKS"), 0));
         double bonusPoints = tuning.flag(1 << 18) ? tuning.get(s("CHANCE"), 10) : 0;
-        boolean proc = actor.getRandom().nextFloat() < ireChance(charge,
-                Config.uniqueEffects.emberblade.chance, bonusPoints);
+        double ireChance = ireChance(charge, Config.uniqueEffects.emberblade.chance, bonusPoints);
+        float ireRoll = actor.getRandom().nextFloat();
+        boolean proc = ireRoll < ireChance;
+        UniqueAbilityApi.reportRoll(actor, FireForgeMasteryAbilities.EMBERBLADE_SHRAPNEL.id(),
+                "EMBER_IRE_CHANCE", ireChance * 100, ireRoll * 100, proc);
         if (proc) {
             actor.addStatusEffect(new StatusEffectInstance(StatusEffects.STRENGTH, duration, 0), actor);
             actor.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, duration, 0), actor);

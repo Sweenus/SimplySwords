@@ -249,7 +249,11 @@ public final class SoulstalkerAbilityManager {
         }
         int chance = Math.clamp(tuning.integer(StormSoulMasteryTuning.Setting.CHANCE,
                 Config.uniqueEffects.soulstalker.passiveChance), 0, 100);
-        if (chance <= 0 || owner.getRandom().nextInt(100) >= chance) {
+        int roll = owner.getRandom().nextInt(100);
+        boolean passed = chance > 0 && roll < chance;
+        UniqueAbilityApi.reportRoll(owner, StormSoulMasteryAbilities.SOULSTALKER_TENDRIL.id(),
+                "CHANCE", chance, roll, passed);
+        if (!passed) {
             UniqueAbilityApi.cancel(execution);
             return;
         }

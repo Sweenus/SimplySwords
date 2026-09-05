@@ -27,6 +27,8 @@ final class SoulstealerRepairTest {
                 .with(setting("SOULSTEALER_KILL_DEBT_BONUS"), 1);
         assertEquals(12, StealSwordItem.maximumDebt(5, tuning));
         assertEquals(4, StealSwordItem.killDebt(2, tuning));
+        assertEquals(7.8F, StealSwordItem.reapProfile(12,
+                DeathShadowBloodMasteryTuning.EMPTY, tuning, 5, 2, 5).multiplier(), 1.0E-5);
     }
 
     @Test
@@ -46,6 +48,14 @@ final class SoulstealerRepairTest {
                 DeathShadowBloodMasteryTuning.EMPTY, installment, 5, 2, 5);
         assertEquals(3, installmentProfile.consumed());
         assertEquals(base * 1.24F * .8F, installmentProfile.multiplier(), 1.0E-5);
+
+        DeathShadowBloodMasteryTuning lifeLevy = DeathShadowBloodMasteryTuning.EMPTY
+                .with(setting("MODE"), 1 << 19)
+                .with(setting("SOULSTEALER_LIFE_LEVY_DEBT_PER_HEALTH"), 2)
+                .with(setting("SOULSTEALER_LIFE_LEVY_MAX_HEAL"), 6);
+        assertEquals(0, StealSwordItem.lifeLevyHealing(1, lifeLevy));
+        assertEquals(2, StealSwordItem.lifeLevyHealing(5, lifeLevy));
+        assertEquals(6, StealSwordItem.lifeLevyHealing(12, lifeLevy));
     }
 
     @Test
@@ -57,7 +67,7 @@ final class SoulstealerRepairTest {
         StealSwordItem.ReapProfile uncapped = StealSwordItem.reapProfile(20,
                 DeathShadowBloodMasteryTuning.EMPTY, foreclosure, 5, 2, 5);
         float base = StealSwordItem.getBackstabMultiplier(20, 5, 2, 5);
-        assertEquals(base * 3.4F, uncapped.multiplier(), 1.0E-5);
+        assertEquals(base * 2.2F * 3.4F, uncapped.multiplier(), 1.0E-5);
 
         DeathShadowBloodMasteryTuning approach = DeathShadowBloodMasteryTuning.EMPTY
                 .with(setting("MODE"), (1 << 16) | (1 << 17))

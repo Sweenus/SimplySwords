@@ -225,7 +225,11 @@ public final class DeathKnellAbilityManager {
                                                            LivingEntity target, long now,
                                                            DeathShadowBloodMasteryTuning tuning) {
         int chance = conversionChance(Config.uniqueEffects.toxic_longsword.chance, tuning);
-        if (chance <= 0 || actor.getRandom().nextInt(100) >= chance) {
+        int roll = actor.getRandom().nextInt(100);
+        boolean passed = chance > 0 && roll < chance;
+        UniqueAbilityApi.reportRoll(actor, DeathShadowBloodMasteryAbilities.PLAGUE_DEATH_KNELL.id(),
+                "PLAGUE_CONVERSION_CHANCE", chance, roll, passed);
+        if (!passed) {
             return List.of();
         }
 

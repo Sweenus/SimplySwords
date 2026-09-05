@@ -36,6 +36,42 @@ final class BrimstoneClaymoreAbilityManagerTest {
     }
 
     @Test
+    void wakeIsCreatedImmediatelyWhenNoCurrentFieldExists() {
+        Vec3d anchor = new Vec3d(0.0, 64.0, 0.0);
+
+        assertEquals(BrimstoneClaymoreAbilityManager.WakeUpdate.CREATE,
+                BrimstoneClaymoreAbilityManager.wakeUpdate(false, anchor, anchor, 1.5, 100, 120));
+    }
+
+    @Test
+    void stationaryWakeRefreshesOnItsIntervalWithoutBeingRecreated() {
+        Vec3d anchor = new Vec3d(0.0, 64.0, 0.0);
+
+        assertEquals(BrimstoneClaymoreAbilityManager.WakeUpdate.NONE,
+                BrimstoneClaymoreAbilityManager.wakeUpdate(true, anchor, anchor, 1.5, 119, 120));
+        assertEquals(BrimstoneClaymoreAbilityManager.WakeUpdate.REFRESH,
+                BrimstoneClaymoreAbilityManager.wakeUpdate(true, anchor, anchor, 1.5, 120, 120));
+        assertEquals(BrimstoneClaymoreAbilityManager.WakeUpdate.REFRESH,
+                BrimstoneClaymoreAbilityManager.wakeUpdate(true, anchor,
+                        new Vec3d(1.4, 64.0, 0.0), 1.5, 120, 120));
+    }
+
+    @Test
+    void movementThresholdCreatesANewWakeBeforeRefreshIsDue() {
+        Vec3d anchor = new Vec3d(0.0, 64.0, 0.0);
+
+        assertEquals(BrimstoneClaymoreAbilityManager.WakeUpdate.CREATE,
+                BrimstoneClaymoreAbilityManager.wakeUpdate(true, anchor,
+                        new Vec3d(1.5, 64.0, 0.0), 1.5, 105, 120));
+    }
+
+    @Test
+    void visualLifetimeIncludesTheFinalActiveTickAndClampsExpiredFields() {
+        assertEquals(41, BrimstoneClaymoreAbilityManager.visualLifetime(100, 140));
+        assertEquals(1, BrimstoneClaymoreAbilityManager.visualLifetime(141, 140));
+    }
+
+    @Test
     void perpetualPulseMultiplierReachesItsCapWithinACast() {
         assertEquals(1.5F, peak(0.75F, 0.10F, 1.5F, 10), 1.0E-4F);
         assertEquals(1.2F, peak(0.75F, 0.05F, 1.5F, 10), 1.0E-4F);

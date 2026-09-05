@@ -33,7 +33,7 @@ public final class MinionTargeting {
     }
 
     public static void recordLastAttack(LivingEntity player, LivingEntity target) {
-        if (player == null || target == null) {
+        if (player == null || target == null || IgnoredEntities.isIgnored(target)) {
             return;
         }
         LAST_ATTACK.put(player.getUuid(), new LastAttack(target.getUuid(), player.getWorld().getTime()));
@@ -52,7 +52,8 @@ public final class MinionTargeting {
             return false;
         }
         Entity entity = world.getEntity(target.getUuid());
-        if (!(entity instanceof LivingEntity living) || !living.isAlive()) {
+        if (!(entity instanceof LivingEntity living) || !living.isAlive()
+                || IgnoredEntities.isIgnored(living)) {
             marked.remove(target.getUuid());
             if (marked.isEmpty()) {
                 MARKED_TARGETS.remove(owner.getUuid());
@@ -74,7 +75,8 @@ public final class MinionTargeting {
         while (it.hasNext()) {
             UUID uuid = it.next();
             Entity entity = world.getEntity(uuid);
-            if (!(entity instanceof LivingEntity living) || !living.isAlive()) {
+            if (!(entity instanceof LivingEntity living) || !living.isAlive()
+                    || IgnoredEntities.isIgnored(living)) {
                 it.remove();
             }
         }
@@ -95,9 +97,11 @@ public final class MinionTargeting {
             return null;
         }
         Entity entity = world.getEntity(record.targetUuid());
-        if (entity instanceof LivingEntity living && living.isAlive()) {
+        if (entity instanceof LivingEntity living && living.isAlive()
+                && !IgnoredEntities.isIgnored(living)) {
             return living;
         }
+        LAST_ATTACK.remove(owner.getUuid(), record);
         return null;
     }
 
@@ -108,7 +112,7 @@ public final class MinionTargeting {
         Box box = minion.getBoundingBox().expand(TAUNT_RADIUS);
         List<MobEntity> eligible = new ArrayList<>();
         for (Entity entity : world.getOtherEntities(minion, box, EntityPredicates.VALID_LIVING_ENTITY)) {
-            if (!(entity instanceof MobEntity mob)) {
+            if (!(entity instanceof MobEntity mob) || IgnoredEntities.isIgnored(mob)) {
                 continue;
             }
             LivingEntity current = mob.getTarget();
@@ -138,6 +142,7 @@ public final class MinionTargeting {
         return world.getOtherEntities(owner, box, EntityPredicates.VALID_LIVING_ENTITY).stream()
                 .filter(entity -> entity instanceof LivingEntity)
                 .map(entity -> (LivingEntity) entity)
+                .filter(entity -> !IgnoredEntities.isIgnored(entity))
                 .filter(validEnemy)
                 .min(Comparator.comparingDouble(entity -> entity.squaredDistanceTo(owner)))
                 .orElse(null);
@@ -147,7 +152,7 @@ public final class MinionTargeting {
         if (owner == null) return null;
         if (owner instanceof MobEntity mob) {
             LivingEntity target = mob.getTarget();
-            if (target != null && target.isAlive()) return target;
+            if (target != null && target.isAlive() && !IgnoredEntities.isIgnored(target)) return target;
         }
         return getRecentAttackTarget(world, owner);
     }

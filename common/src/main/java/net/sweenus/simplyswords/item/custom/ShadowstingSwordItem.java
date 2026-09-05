@@ -56,9 +56,14 @@ public class ShadowstingSwordItem extends UniqueSwordItem implements UniqueWeapo
             DeathShadowBloodMasteryTuning tuning = DeathShadowBloodMasteryAbilities.tuning(execution);
             ShadowstingShadowDanceManager.consumeVeil(serverPlayer, tuning);
             ShadowstingShadowDanceManager.applyUmbralMarkBonus(serverWorld, serverPlayer, target, tuning);
-            if (ShadowstingShadowDanceManager.canPassiveProc(serverWorld, serverPlayer, tuning)
-                    && attacker.getRandom().nextInt(100) < ShadowstingShadowDanceManager.cloneChance(
-                    Config.uniqueEffects.shadowsting.chance, tuning)) {
+            int cloneChance = ShadowstingShadowDanceManager.cloneChance(
+                    Config.uniqueEffects.shadowsting.chance, tuning);
+            int cloneRoll = attacker.getRandom().nextInt(100);
+            boolean cloneProc = ShadowstingShadowDanceManager.canPassiveProc(serverWorld, serverPlayer, tuning)
+                    && cloneRoll < cloneChance;
+            UniqueAbilityApi.reportRoll(attacker, DeathShadowBloodMasteryAbilities.SHADOW_ECHO.id(),
+                    "SHADOW_CHANCE", cloneChance, cloneRoll, cloneProc);
+            if (cloneProc) {
                 ShadowstingShadowDanceManager.schedulePassiveCloneStrike(serverWorld, serverPlayer, target, tuning);
             }
             UniqueAbilityApi.finish(execution, DeathShadowBloodMasteryAbilities.FINISH, 1);

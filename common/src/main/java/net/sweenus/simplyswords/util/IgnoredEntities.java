@@ -17,6 +17,7 @@ import net.minecraft.registry.tag.TagKey;
 import net.minecraft.util.Identifier;
 import net.sweenus.simplyswords.SimplySwords;
 import net.sweenus.simplyswords.config.Config;
+import net.sweenus.simplyswords.entity.WatcherBatEntity;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -99,6 +100,9 @@ public final class IgnoredEntities {
         if (entity == null) {
             return false;
         }
+        if (isAlwaysIgnoredEntityClass(entity.getClass())) {
+            return true;
+        }
         Snapshot current = current();
         if (current.isEmpty()) {
             return false;
@@ -120,6 +124,10 @@ public final class IgnoredEntities {
             }
         }
         return false;
+    }
+
+    static boolean isAlwaysIgnoredEntityClass(Class<?> entityClass) {
+        return entityClass != null && WatcherBatEntity.class.isAssignableFrom(entityClass);
     }
 
     //

@@ -210,7 +210,7 @@ public final class DreadwhisperAbilityManager {
                 ? amount
                 : amount * Math.max(1.0F, Config.uniqueEffects.dreadwhisper.criticalMultiplier) * (float) bonus;
         splinterPain(world, attacker, target, stack, tuning, result - amount);
-        reopenWound(world, target, tuning);
+        reopenWound(world, attacker, target, tuning);
         UniqueAbilityApi.emit(execution, UniqueAbilityPhase.HIT, StormSoulMasteryAbilities.HIT, target, 1, result);
         UniqueAbilityApi.finish(execution, StormSoulMasteryAbilities.FINISH, 1);
         return result;
@@ -280,14 +280,19 @@ public final class DreadwhisperAbilityManager {
     }
 
     // Reopen: consuming a wound can leave a fresh, shorter one behind.
-    private static void reopenWound(ServerWorld world, LivingEntity target, StormSoulMasteryTuning tuning) {
+    private static void reopenWound(ServerWorld world, LivingEntity attacker, LivingEntity target,
+                                    StormSoulMasteryTuning tuning) {
         int chance = tuning.integer(StormSoulMasteryTuning.Setting.REOPEN_CHANCE, 0);
         int duration = tuning.integer(StormSoulMasteryTuning.Setting.REOPEN_DURATION_TICKS, 0);
         if (chance <= 0 || duration <= 0) return;
         long now = world.getTime();
         Long ready = REOPEN_LOCKOUT.computeIfAbsent(world, ignored -> new HashMap<>()).get(target.getUuid());
         if (ready != null && now < ready) return;
-        if (world.random.nextInt(100) >= chance) return;
+        int roll = world.random.nextInt(100);
+        boolean passed = roll < chance;
+        UniqueAbilityApi.reportRoll(attacker, StormSoulMasteryAbilities.DREADWHISPER_WOUND.id(),
+                "REOPEN_CHANCE", chance, roll, passed);
+        if (!passed) return;
         REOPEN_LOCKOUT.get(world).put(target.getUuid(), now + Math.max(1,
                 tuning.integer(StormSoulMasteryTuning.Setting.REOPEN_LOCKOUT_TICKS, 120)));
         target.addStatusEffect(new StatusEffectInstance(

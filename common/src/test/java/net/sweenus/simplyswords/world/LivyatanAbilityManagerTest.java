@@ -43,10 +43,10 @@ final class LivyatanAbilityManagerTest {
                 .with(s("LIVYATAN_WALL_DAMAGE_MULTIPLIER"), .6)
                 .with(s("LIVYATAN_UNBOUND_WAVE_DAMAGE_MULTIPLIER"), 1.3)
                 .with(s("LIVYATAN_THROW_DAMAGE_MULTIPLIER"), 1.12)
-                .with(s("LIVYATAN_CALM_DAMAGE_MULTIPLIER"), 1.5);
+                .with(s("LIVYATAN_CALM_DAMAGE_MULTIPLIER"), 2);
         assertEquals(.858, LivyatanWaveManager.waveDamageMultiplier(tuning), 1.0E-6);
         assertEquals(1.12, tuning.get(s("LIVYATAN_THROW_DAMAGE_MULTIPLIER"), 1), 1.0E-6);
-        assertEquals(1.5, tuning.get(s("LIVYATAN_CALM_DAMAGE_MULTIPLIER"), 1), 1.0E-6);
+        assertEquals(2, tuning.get(s("LIVYATAN_CALM_DAMAGE_MULTIPLIER"), 1), 1.0E-6);
     }
 
     @Test
@@ -55,7 +55,6 @@ final class LivyatanAbilityManagerTest {
                 .with(s("LIVYATAN_UNBOUND_COOLDOWN_MULTIPLIER"), 2);
         assertEquals(10, LivyatanWaveManager.swingCooldown(5, tuning));
         assertEquals(16, LivyatanWaveManager.swingCooldown(8, tuning));
-        assertEquals(65, LivyatanAbilityManager.activeCooldown(65, tuning));
     }
 
     @Test
@@ -84,10 +83,11 @@ final class LivyatanAbilityManagerTest {
     }
 
     @Test
-    void calmBeforeAddsToTheConfiguredActiveCooldown() {
+    void legacyCalmSettingsRemainReadable() {
         StormFrostWaterMasteryTuning tuning = StormFrostWaterMasteryTuning.EMPTY
-                .with(s("LIVYATAN_ACTIVE_COOLDOWN_BONUS_TICKS"), 20);
-        assertEquals(85, LivyatanAbilityManager.activeCooldown(65, tuning));
-        assertEquals(120, LivyatanAbilityManager.activeCooldown(100, tuning));
+                .with(s("LIVYATAN_ACTIVE_COOLDOWN_BONUS_TICKS"), 20)
+                .with(s("LIVYATAN_SUPPRESS_WAVES"), 1);
+        assertEquals(20, tuning.integer(s("LIVYATAN_ACTIVE_COOLDOWN_BONUS_TICKS"), 0));
+        assertEquals(1, tuning.integer(s("LIVYATAN_SUPPRESS_WAVES"), 0));
     }
 }

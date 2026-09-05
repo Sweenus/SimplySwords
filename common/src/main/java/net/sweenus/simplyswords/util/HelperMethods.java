@@ -76,7 +76,8 @@ public class HelperMethods {
         Vec3d rayCastEnd = rayCastOrigin.add(userView);
         Box searchBox = user.getBoundingBox().expand(range, range, range);
         EntityHitResult hitResult = ProjectileUtil.raycast(user, rayCastOrigin, rayCastEnd, searchBox,
-                (target) -> !target.isSpectator() && target.canHit() && target instanceof LivingEntity, range * range);
+                (target) -> !target.isSpectator() && target.canHit() && target instanceof LivingEntity
+                        && !IgnoredEntities.isIgnored(target), range * range);
         if (hitResult != null) {
             return hitResult.getEntity();
         }
@@ -716,7 +717,8 @@ public class HelperMethods {
         );
 
         // Find living entities within the search box, excluding the player
-        List<LivingEntity> entities = world.getEntitiesByClass(LivingEntity.class, searchBox, e -> e != livingEntity);
+        List<LivingEntity> entities = world.getEntitiesByClass(LivingEntity.class, searchBox,
+                e -> e != livingEntity && !IgnoredEntities.isIgnored(e));
 
         // Find the closest living entity to the player
         return entities.stream()
@@ -726,7 +728,8 @@ public class HelperMethods {
     public static List<LivingEntity> getNearbyLivingEntities(World world, Vec3d position, double radius) {
         Box searchBox = new Box(position.x - radius, position.y - radius, position.z - radius,
                 position.x + radius, position.y + radius, position.z + radius);
-        return world.getEntitiesByClass(LivingEntity.class, searchBox, entity -> true);
+        return world.getEntitiesByClass(LivingEntity.class, searchBox,
+                entity -> !IgnoredEntities.isIgnored(entity));
     }
 
     //Get entity attack damage

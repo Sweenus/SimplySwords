@@ -3,12 +3,15 @@ package net.sweenus.simplyswords.world;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.ItemStack;
 import net.minecraft.particle.BlockStateParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
+import net.minecraft.registry.tag.DamageTypeTags;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
@@ -16,9 +19,11 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.config.Config;
+import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.api.ability.ArcaneCosmicMasteryTuning;
 import net.sweenus.simplyswords.api.ability.ArcaneCosmicMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
+import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 
@@ -297,6 +302,27 @@ public final class ArcanethystAssaultManager {
     public static float sparkDamage(ArcaneCosmicMasteryTuning tuning, float base) {
         return base * (float) tuning.get(ArcaneCosmicMasteryTuning.Setting.DAMAGE_MULTIPLIER, 1)
                 * (float) tuning.get(ArcaneCosmicMasteryTuning.Setting.SPELL_MULTIPLIER, 1);
+    }
+
+    public static float modifyOutgoingMeleeDamage(LivingEntity target, DamageSource source, float amount) {
+        if (target == null || source == null || amount <= 0 || !target.hasStatusEffect(StatusEffects.LEVITATION)
+                || !source.isIn(DamageTypeTags.IS_PLAYER_ATTACK)
+                || !(source.getAttacker() instanceof ServerPlayerEntity player)
+                || source.getSource() != player) return amount;
+        ItemStack stack = source.getWeaponStack();
+        if (stack == null || !stack.isOf(ItemsRegistry.ARCANETHYST.get())) stack = player.getMainHandStack();
+        if (!stack.isOf(ItemsRegistry.ARCANETHYST.get()) || !AwakeningApi.isAbilityUnlocked(stack)) return amount;
+        UniqueAbilityExecution execution = ArcaneCosmicMasteryCombatManager.beginPassive(
+                ArcaneCosmicMasteryAbilities.ARCANETHYST_SPARK, player.getServerWorld(), stack, player, target,
+                sparkBase());
+        ArcaneCosmicMasteryTuning tuning = ArcaneCosmicMasteryAbilities.tuning(execution);
+        try {
+            if (!tuning.flag(1 << 2)) return amount;
+            return amount * (float) tuning.get(
+                    ArcaneCosmicMasteryTuning.Setting.ARCANETHYST_LEVITATION_MELEE_DAMAGE_MULTIPLIER, 1.12);
+        } finally {
+            ArcaneCosmicMasteryCombatManager.finish(execution, 0);
+        }
     }
 
     public static void onPassiveProc(ServerWorld world, LivingEntity owner, LivingEntity target, ItemStack stack,

@@ -11,6 +11,7 @@ import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
@@ -157,35 +158,49 @@ public final class SoulkeeperLanternManager {
     }
 
     public static void activate(WeaponAbilityContext context) {
+        if (tryDetonate(context.world(), context.actor(), context.stack())) {
+            return;
+        }
         UniqueAbilityExecution execution = DeathShadowBloodMasteryCombatManager.beginActive(
                 DeathShadowBloodMasteryAbilities.SOULKEEPER_CONCLAVE, context, Config.uniqueEffects.soulkeeper.cooldown);
         ActiveLanterns active = activeFor(context.world(), context.actor().getUuid());
         active.conclaveTuning = DeathShadowBloodMasteryAbilities.tuning(execution);
-        if (context.actor().isSneaking() && active.velocityTuning.flag(1 << 17)
-                && active.speedMultiplier > 1 && context.actor().getWorld() instanceof ServerWorld world) {
-            float consumed = active.speedMultiplier - 1;
-            float damage = HelperMethods.abilityScaledDamage("soul", context.actor(), context.stack(),
-                    consumed * (float) active.velocityTuning.get(
-                            DeathShadowBloodMasteryTuning.Setting.SOUL_DETONATION_DAMAGE_PER_SPEED, .18), 0);
-            double radius = active.velocityTuning.get(
-                    DeathShadowBloodMasteryTuning.Setting.SOUL_DETONATION_RADIUS, 4);
-            world.getEntitiesByClass(LivingEntity.class, context.actor().getBoundingBox().expand(radius),
-                            target -> HelperMethods.checkAbilityTarget(target, context.actor())
-                                    && target.getPos().add(0, target.getHeight() * .5, 0)
-                                    .squaredDistanceTo(context.actor().getPos().add(0,
-                                            context.actor().getHeight() * .5, 0)) <= radius * radius)
-                    .forEach(target -> damageTarget(world, context.actor(), target, damage));
-            active.speedMultiplier = 1;
-            active.extraLanternsUntilTick = 0;
-            active.fifthLanternUntilTick = 0;
-            DeathShadowBloodMasteryCombatManager.scheduleFinish(world, execution, 1);
-            return;
-        }
         activate(context.actor(), context.stack());
         UniqueAbilityApi.emit(execution, net.sweenus.simplyswords.api.ability.UniqueAbilityPhase.HIT,
                 DeathShadowBloodMasteryAbilities.HIT, null, 0, 0);
         DeathShadowBloodMasteryCombatManager.scheduleFinish(context.world(), execution,
                 Math.max(1, (int) (active.extraLanternsUntilTick - context.world().getTime())), 0);
+    }
+
+    public static boolean tryDetonate(ServerWorld world, LivingEntity actor, ItemStack stack) {
+        if (world == null || actor == null || !actor.isAlive() || stack == null || stack.isEmpty()
+                || !stack.isOf(ItemsRegistry.SOULKEEPER.get()) || !AwakeningApi.isAbilityUnlocked(stack)
+                || !actor.isSneaking() || !isHoldingSoulkeeper(actor)) {
+            return false;
+        }
+        ActiveLanterns active = activeFor(world, actor.getUuid());
+        refreshTunings(world, actor, stack, active, true);
+        if (!active.velocityTuning.flag(1 << 17) || active.speedMultiplier <= 1) {
+            return false;
+        }
+
+        float consumed = active.speedMultiplier - 1;
+        float damage = HelperMethods.abilityScaledDamage("soul", actor, stack,
+                consumed * (float) active.velocityTuning.get(
+                        DeathShadowBloodMasteryTuning.Setting.SOUL_DETONATION_DAMAGE_PER_SPEED, .18), 0);
+        double radius = active.velocityTuning.get(
+                DeathShadowBloodMasteryTuning.Setting.SOUL_DETONATION_RADIUS, 4);
+        Vec3d center = actor.getPos().add(0, actor.getHeight() * .5, 0);
+        world.getEntitiesByClass(LivingEntity.class, actor.getBoundingBox().expand(radius),
+                        target -> HelperMethods.checkAbilityTarget(target, actor)
+                                && target.getPos().add(0, target.getHeight() * .5, 0)
+                                .squaredDistanceTo(center) <= radius * radius)
+                .forEach(target -> damageTarget(world, actor, target, damage));
+        active.speedMultiplier = 1;
+        active.extraLanternsUntilTick = 0;
+        active.fifthLanternUntilTick = 0;
+        spawnSoulDetonationEffects(world, actor, radius);
+        return true;
     }
 
     private static void tickActivePlayer(ServerPlayerEntity player, ItemStack stack) {
@@ -496,7 +511,12 @@ public final class SoulkeeperLanternManager {
     }
 
     private static void refreshTunings(ServerWorld world, LivingEntity owner, ItemStack stack, ActiveLanterns active) {
-        if (world.getTime() < active.refreshAt) return;
+        refreshTunings(world, owner, stack, active, false);
+    }
+
+    private static void refreshTunings(ServerWorld world, LivingEntity owner, ItemStack stack,
+                                       ActiveLanterns active, boolean force) {
+        if (!force && world.getTime() < active.refreshAt) return;
         active.refreshAt = world.getTime() + 20;
         active.owner = owner;
         UniqueAbilityExecution lanterns = DeathShadowBloodMasteryCombatManager.beginPassive(
@@ -507,6 +527,25 @@ public final class SoulkeeperLanternManager {
                 DeathShadowBloodMasteryAbilities.SOULKEEPER_VELOCITY, world, stack, owner, null);
         active.velocityTuning = DeathShadowBloodMasteryAbilities.tuning(velocity);
         UniqueAbilityApi.finish(velocity, DeathShadowBloodMasteryAbilities.FINISH, 0);
+    }
+
+    private static void spawnSoulDetonationEffects(ServerWorld world, LivingEntity actor, double radius) {
+        Vec3d ringCenter = actor.getPos().add(0, 0.15, 0);
+        double effectRadius = Math.max(0.5, radius);
+        for (int point = 0; point < 32; point++) {
+            double angle = Math.PI * 2 * point / 32;
+            world.spawnParticles(ParticleTypes.SOUL_FIRE_FLAME,
+                    ringCenter.x + Math.cos(angle) * effectRadius,
+                    ringCenter.y,
+                    ringCenter.z + Math.sin(angle) * effectRadius,
+                    1, 0.03, 0.06, 0.03, 0.005);
+        }
+        world.spawnParticles(ParticleTypes.SCULK_SOUL, actor.getX(), actor.getBodyY(0.5), actor.getZ(),
+                18, 0.45, 0.55, 0.45, 0.04);
+        world.playSound(null, actor.getBlockPos(), SoundRegistry.DARK_SWORD_SPELL.get(),
+                SoundCategory.PLAYERS, 0.9F, 0.7F);
+        world.playSound(null, actor.getX(), actor.getY(), actor.getZ(), SoundEvents.PARTICLE_SOUL_ESCAPE,
+                SoundCategory.PLAYERS, 0.8F, 0.65F);
     }
 
     private static void spawnLanternHitEffects(ServerWorld world, LivingEntity target) {

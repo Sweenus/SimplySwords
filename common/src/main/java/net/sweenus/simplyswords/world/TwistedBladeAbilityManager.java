@@ -321,7 +321,11 @@ public final class TwistedBladeAbilityManager {
         state.meleeCounter++;
         boolean guaranteed = tuning.flag(1 << 3) && state.meleeCounter % tuning.integer(
                 DeathShadowBloodMasteryTuning.Setting.TWISTED_GUARANTEED_HIT_INTERVAL, 5) == 0;
-        if (!guaranteed && (chance <= 0 || actor.getRandom().nextInt(100) >= chance)) {
+        int roll = actor.getRandom().nextInt(100);
+        boolean passed = guaranteed || chance > 0 && roll < chance;
+        UniqueAbilityApi.reportRoll(actor, DeathShadowBloodMasteryAbilities.TWISTED_FEROCITY.id(),
+                guaranteed ? "TWISTED_CHANCE (guaranteed)" : "TWISTED_CHANCE", chance, roll, passed);
+        if (!passed) {
             return currentStacks;
         }
 

@@ -1,9 +1,11 @@
 package net.sweenus.simplyswords.api.ability;
 
+import java.util.Collections;
 import java.util.EnumMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
-public final class StormSoulMasteryTuning {
+public final class StormSoulMasteryTuning implements MasteryTuningSnapshot {
     public enum Setting {
         COOLDOWN_TICKS(0, 72000), DURATION_TICKS(0, 72000), CHANCE(0, 100), RANGE(0, 128),
         RADIUS(0, 64), WIDTH(0, 64), HEIGHT(0, 64), DAMAGE_MULTIPLIER(0, 10), SPEED(0, 16),
@@ -177,5 +179,12 @@ public final class StormSoulMasteryTuning {
 
     public StormSoulMasteryTuning multiply(Setting setting, double factor, double fallback) {
         return with(setting, get(setting, fallback) * factor);
+    }
+
+    @Override
+    public Map<String, Double> entries() {
+        Map<String, Double> entries = new LinkedHashMap<>();
+        values.forEach((setting, value) -> entries.put(setting.name(), value));
+        return Collections.unmodifiableMap(entries);
     }
 }

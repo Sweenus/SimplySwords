@@ -46,4 +46,52 @@ final class WatcherAbilityManagerTest {
         assertEquals(0.4F, WatcherAbilityManager.claimBonus(12, .05, .4), 1.0E-4F);
         assertEquals(0.0F, WatcherAbilityManager.claimBonus(0, .05, .4), 1.0E-4F);
     }
+
+    @Test
+    void mercyDamageIsCappedAfterScalingToPreserveTheVitalityFloor() {
+        assertEquals(9.0F, WatcherAbilityManager.capDamageToVitalityFloor(20.0F, 10.0F, 1.0F), 1.0E-4F);
+        assertEquals(0.0F, WatcherAbilityManager.capDamageToVitalityFloor(20.0F, 1.0F, 1.0F), 1.0E-4F);
+        assertEquals(6.0F, WatcherAbilityManager.capDamageToVitalityFloor(6.0F, 10.0F, 1.0F), 1.0E-4F);
+    }
+
+    @Test
+    void darkReserveCountsWholeOmenDamageInTenPercentSteps() {
+        assertEquals(0.0F, WatcherAbilityManager.darkReserveAbsorption(3.9F, 40.0F, 4.0F), 1.0E-4F);
+        assertEquals(3.0F, WatcherAbilityManager.darkReserveAbsorption(12.0F, 40.0F, 4.0F), 1.0E-4F);
+        assertEquals(4.0F, WatcherAbilityManager.darkReserveAbsorption(40.0F, 40.0F, 4.0F), 1.0E-4F);
+    }
+
+    @Test
+    void darkReserveRewardsBothLethalAndNonlethalOmens() {
+        assertEquals(1.0F, WatcherAbilityManager.omenAbsorptionRequest(
+                256, false, false, 2.0F, 2.0F, 20.0F, 1.0F, 4.0F), 1.0E-4F);
+        assertEquals(4.0F, WatcherAbilityManager.omenAbsorptionRequest(
+                256, false, false, 20.0F, 20.0F, 20.0F, 1.0F, 4.0F), 1.0E-4F);
+    }
+
+    @Test
+    void darkReserveComposesWithExecutionAndMercyRewards() {
+        assertEquals(8.6F, WatcherAbilityManager.omenAbsorptionRequest(
+                256, true, false, 10.0F, 4.0F, 20.0F, 1.15F, 4.0F), 1.0E-4F);
+        assertEquals(19.0F, WatcherAbilityManager.omenAbsorptionRequest(
+                256 | 8192, false, true, 10.0F, 4.0F, 20.0F, 1.5F, 4.0F), 1.0E-4F);
+        assertEquals(0.0F, WatcherAbilityManager.omenAbsorptionRequest(
+                256 | 16384, true, false, 10.0F, 4.0F, 20.0F, 0.0F, 4.0F), 1.0E-4F);
+    }
+
+    @Test
+    void omenAbsorptionAddsRewardsAndRespectsBothCaps() {
+        assertEquals(10.0F, WatcherAbilityManager.cappedAbsorption(4.0F, 6.0F, 20.0F, 20.0F), 1.0E-4F);
+        assertEquals(12.0F, WatcherAbilityManager.cappedAbsorption(10.0F, 8.0F, 12.0F, 20.0F), 1.0E-4F);
+        assertEquals(9.0F, WatcherAbilityManager.cappedAbsorption(8.0F, 8.0F, 20.0F, 9.0F), 1.0E-4F);
+        assertEquals(14.0F, WatcherAbilityManager.cappedAbsorption(14.0F, 8.0F, 12.0F, 20.0F), 1.0E-4F);
+    }
+
+    @Test
+    void omenAbsorptionCannotExceedHalfTheOwnersMaximumHealth() {
+        assertEquals(10.0F, WatcherAbilityManager.omenAbsorptionCap(20.0F, 20.0F, 20.0F), 1.0E-4F);
+        assertEquals(20.0F, WatcherAbilityManager.omenAbsorptionCap(80.0F, 20.0F, 20.0F), 1.0E-4F);
+        assertEquals(6.0F, WatcherAbilityManager.omenAbsorptionCap(40.0F, 6.0F, 20.0F), 1.0E-4F);
+        assertEquals(0.0F, WatcherAbilityManager.omenAbsorptionCap(-20.0F, 20.0F, 20.0F), 1.0E-4F);
+    }
 }

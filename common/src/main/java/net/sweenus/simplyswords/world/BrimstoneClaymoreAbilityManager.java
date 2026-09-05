@@ -30,6 +30,7 @@ import net.sweenus.simplyswords.api.ability.UniqueAbilityKey;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityPhase;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.BrimstoneClaymoreVisualEntity;
+import net.sweenus.simplyswords.entity.BrimstoneWakeVisualEntity;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 
@@ -48,6 +49,10 @@ public final class BrimstoneClaymoreAbilityManager {
     private static final int MAX_AREA_TARGETS = 64;
     private static final int MAX_WAKES = 16;
     private static final String VISUAL_TAG = "simplyswords_brimstone_claymore_visual";
+    private static final String WAKE_VISUAL_TAG = "simplyswords_brimstone_wake_visual";
+    private static final float WAKE_VERTICAL_RANGE = 6.0F;
+    private static final int WAKE_FADE_IN_TICKS = 3;
+    private static final int WAKE_FADE_OUT_TICKS = 6;
     private static final Map<ServerWorld, List<ActiveBrimstoneClaymore>> ACTIVE = new HashMap<>();
 
     private BrimstoneClaymoreAbilityManager() {
@@ -109,11 +114,13 @@ public final class BrimstoneClaymoreAbilityManager {
                 value(execution, BuiltinUniqueAbilities.BRIMSTONE_RITE_DAMAGE_SCALING).floatValue(),
                 value(execution, BuiltinUniqueAbilities.BRIMSTONE_RITE_SPELL_SCALING).floatValue());
         double healthRatio = owner.getHealth() / Math.max(1.0F, owner.getMaxHealth());
-        ACTIVE.computeIfAbsent(world, ignored -> new ArrayList<>()).add(new ActiveBrimstoneClaymore(
+        ActiveBrimstoneClaymore instance = new ActiveBrimstoneClaymore(
                 owner.getUuid(), target.getUuid(), visualId, groundPos,
                 now + value(execution, BuiltinUniqueAbilities.BRIMSTONE_RITE_DURATION_TICKS),
                 now + value(execution, BuiltinUniqueAbilities.BRIMSTONE_RITE_PULSE_INTERVAL_TICKS),
-                baseRadius, context.stack().copy(), weaponDamage, execution, healthRatio));
+                baseRadius, context.stack().copy(), weaponDamage, execution, healthRatio);
+        ACTIVE.computeIfAbsent(world, ignored -> new ArrayList<>()).add(instance);
+        createInitialWake(world, instance);
         spawnStartEffects(world, groundPos);
         return true;
     }
@@ -135,6 +142,7 @@ public final class BrimstoneClaymoreAbilityManager {
         Entity ownerEntity = world.getEntity(instance.ownerId);
         if (!(ownerEntity instanceof LivingEntity owner) || !owner.isAlive()) {
             removeVisual(world, instance.visualId);
+            removeWakeVisuals(world, instance);
             UniqueAbilityApi.cancel(instance.execution);
             return true;
         }
@@ -159,14 +167,13 @@ public final class BrimstoneClaymoreAbilityManager {
             return false;
         }
         if (triggerEmergencyPlunge(world, owner, instance)) return false;
-        Vec3d previous = instance.pos;
         if (BuiltinUniqueAbilities.BRIMSTONE_GUARD_WALKING.equals(
                 value(instance.execution, BuiltinUniqueAbilities.BRIMSTONE_GUARD_MODE))) {
             instance.pos = getGroundPos(world, owner.getPos());
         } else {
             updateTarget(world, owner, instance);
         }
-        createWake(world, previous, instance);
+        updateWake(world, instance);
         updateVisual(world, instance);
         if (world.getTime() >= instance.nextPulseTick) {
             pulse(world, owner, instance);
@@ -243,6 +250,7 @@ public final class BrimstoneClaymoreAbilityManager {
             float maxRadius = value(instance.execution, BuiltinUniqueAbilities.BRIMSTONE_RITE_MAX_RADIUS).floatValue();
             float growth = value(instance.execution, BuiltinUniqueAbilities.BRIMSTONE_RITE_RADIUS_GROWTH_PER_HIT).floatValue() * damaged;
             instance.radius = MathHelper.clamp(instance.radius + growth, instance.radius, maxRadius);
+            syncWakeVisuals(world, instance);
             instance.overpressure = Math.min(value(instance.execution, BuiltinUniqueAbilities.BRIMSTONE_OVERPRESSURE_CAP).floatValue(),
                     instance.overpressure + value(instance.execution, BuiltinUniqueAbilities.BRIMSTONE_OVERPRESSURE_PER_PULSE).floatValue());
             if (BuiltinUniqueAbilities.BRIMSTONE_RITE_PERPETUAL.equals(
@@ -342,19 +350,55 @@ public final class BrimstoneClaymoreAbilityManager {
                 false, true, true), instance.execution.context().actor());
     }
 
-    private static void createWake(ServerWorld world, Vec3d previous, ActiveBrimstoneClaymore instance) {
+    private static void createInitialWake(ServerWorld world, ActiveBrimstoneClaymore instance) {
+        int duration = value(instance.execution, BuiltinUniqueAbilities.BRIMSTONE_WAKE_DURATION_TICKS);
+        double damage = value(instance.execution, BuiltinUniqueAbilities.BRIMSTONE_WAKE_DAMAGE_MULTIPLIER);
+        if (duration <= 0 || damage <= 0.0) return;
+        addWake(world, instance, instance.pos, duration);
+    }
+
+    private static void updateWake(ServerWorld world, ActiveBrimstoneClaymore instance) {
         int duration = value(instance.execution, BuiltinUniqueAbilities.BRIMSTONE_WAKE_DURATION_TICKS);
         double damage = value(instance.execution, BuiltinUniqueAbilities.BRIMSTONE_WAKE_DAMAGE_MULTIPLIER);
         double minimum = value(instance.execution, BuiltinUniqueAbilities.BRIMSTONE_WAKE_MIN_MOVE);
         if (duration <= 0 || damage <= 0.0) return;
-        if (!shouldCreateWake(instance.lastWakePos, instance.pos, minimum)) return;
-        instance.lastWakePos = instance.pos;
-        if (instance.wakes.size() >= MAX_WAKES) instance.wakes.remove(0);
-        instance.wakes.add(new Wake(previous, world.getTime() + duration, world.getTime()));
+        WakeUpdate update = wakeUpdate(instance.currentWake != null, instance.lastWakePos, instance.pos,
+                minimum, world.getTime(), instance.nextWakeRefreshTick);
+        if (update == WakeUpdate.NONE) return;
+        if (update == WakeUpdate.REFRESH) {
+            instance.currentWake.expiryTick = world.getTime() + duration;
+            refreshWakeVisual(world, instance.currentWake, instance.radius);
+            instance.nextWakeRefreshTick = world.getTime()
+                    + value(instance.execution, BuiltinUniqueAbilities.BRIMSTONE_WAKE_INTERVAL_TICKS);
+            return;
+        }
+        addWake(world, instance, instance.pos, duration);
+    }
+
+    private static void addWake(ServerWorld world, ActiveBrimstoneClaymore instance, Vec3d pos, int duration) {
+        instance.lastWakePos = pos;
+        if (instance.wakes.size() >= MAX_WAKES) {
+            Wake removed = instance.wakes.remove(0);
+            removeVisual(world, removed.visualId);
+            if (removed == instance.currentWake) instance.currentWake = null;
+        }
+        UUID wakeVisualId = spawnWakeVisual(
+                world, instance.wakeGroupId, pos, instance.radius, duration);
+        Wake wake = new Wake(pos, world.getTime() + duration, world.getTime(), wakeVisualId);
+        instance.wakes.add(wake);
+        instance.currentWake = wake;
+        instance.nextWakeRefreshTick = world.getTime()
+                + value(instance.execution, BuiltinUniqueAbilities.BRIMSTONE_WAKE_INTERVAL_TICKS);
     }
 
     static boolean shouldCreateWake(Vec3d lastWake, Vec3d current, double minimum) {
         return lastWake == null || lastWake.squaredDistanceTo(current) >= minimum * minimum;
+    }
+
+    static WakeUpdate wakeUpdate(boolean hasCurrentWake, Vec3d lastWake, Vec3d current,
+                                 double minimum, long now, long nextRefreshTick) {
+        if (!hasCurrentWake || shouldCreateWake(lastWake, current, minimum)) return WakeUpdate.CREATE;
+        return now >= nextRefreshTick ? WakeUpdate.REFRESH : WakeUpdate.NONE;
     }
 
     static float grownPulseMultiplier(float current, float perPulse, float cap) {
@@ -366,6 +410,8 @@ public final class BrimstoneClaymoreAbilityManager {
         while (iterator.hasNext()) {
             Wake wake = iterator.next();
             if (world.getTime() > wake.expiryTick) {
+                if (wake == instance.currentWake) instance.currentWake = null;
+                removeVisual(world, wake.visualId);
                 iterator.remove();
                 continue;
             }
@@ -398,6 +444,41 @@ public final class BrimstoneClaymoreAbilityManager {
         return visual.getUuid();
     }
 
+    private static UUID spawnWakeVisual(ServerWorld world, UUID groupId, Vec3d pos,
+                                        float radius, int duration) {
+        if (!Config.general.enableModernFieldEffects) return null;
+        BrimstoneWakeVisualEntity visual = new BrimstoneWakeVisualEntity(
+                world, groupId, pos.x, pos.y, pos.z, radius,
+                WAKE_VERTICAL_RANGE, duration + 1, world.random.nextInt());
+        visual.setFadeInDuration(WAKE_FADE_IN_TICKS);
+        visual.setFadeOutDuration(WAKE_FADE_OUT_TICKS);
+        visual.addCommandTag(WAKE_VISUAL_TAG);
+        world.spawnEntity(visual);
+        return visual.getUuid();
+    }
+
+    private static void refreshWakeVisual(ServerWorld world, Wake wake, float radius) {
+        Entity entity = wake.visualId == null ? null : world.getEntity(wake.visualId);
+        if (entity instanceof BrimstoneWakeVisualEntity visual) {
+            visual.setRadius(radius);
+            visual.setLifetime(visual.age + visualLifetime(world.getTime(), wake.expiryTick));
+        }
+    }
+
+    private static void syncWakeVisuals(ServerWorld world, ActiveBrimstoneClaymore instance) {
+        for (Wake wake : instance.wakes) {
+            Entity entity = wake.visualId == null ? null : world.getEntity(wake.visualId);
+            if (entity instanceof BrimstoneWakeVisualEntity visual) {
+                visual.setRadius(instance.radius);
+            }
+        }
+    }
+
+    static int visualLifetime(long now, long expiryTick) {
+        return Math.toIntExact(Math.max(1L,
+                Math.min(Integer.MAX_VALUE, expiryTick - now + 1L)));
+    }
+
     private static float getScale(UniqueAbilityExecution execution, float radius) {
         float base = value(execution, BuiltinUniqueAbilities.BRIMSTONE_RITE_BASE_RADIUS).floatValue();
         float maximum = Math.max(base, value(execution, BuiltinUniqueAbilities.BRIMSTONE_RITE_MAX_RADIUS).floatValue());
@@ -427,9 +508,22 @@ public final class BrimstoneClaymoreAbilityManager {
         if (visual != null) visual.discard();
     }
 
+    private static void removeWakeVisuals(ServerWorld world, ActiveBrimstoneClaymore instance) {
+        for (Wake wake : instance.wakes) {
+            removeVisual(world, wake.visualId);
+        }
+        instance.wakes.clear();
+        instance.currentWake = null;
+    }
+
     private static void purgeOrphans(ServerWorld world) {
         for (Entity entity : world.iterateEntities()) {
-            if (entity instanceof BrimstoneClaymoreVisualEntity && entity.getCommandTags().contains(VISUAL_TAG)) entity.discard();
+            if ((entity instanceof BrimstoneClaymoreVisualEntity
+                    && entity.getCommandTags().contains(VISUAL_TAG))
+                    || (entity instanceof BrimstoneWakeVisualEntity
+                    && entity.getCommandTags().contains(WAKE_VISUAL_TAG))) {
+                entity.discard();
+            }
         }
     }
 
@@ -492,7 +586,10 @@ public final class BrimstoneClaymoreAbilityManager {
         private final float weaponDamage;
         private final UniqueAbilityExecution execution;
         private final List<Wake> wakes = new ArrayList<>();
+        private final UUID wakeGroupId = UUID.randomUUID();
+        private Wake currentWake;
         private Vec3d lastWakePos;
+        private long nextWakeRefreshTick;
         private float overpressure;
         private float pulseMultiplier;
         private double previousHealthRatio;
@@ -523,13 +620,21 @@ public final class BrimstoneClaymoreAbilityManager {
 
     private static final class Wake {
         private final Vec3d pos;
-        private final long expiryTick;
+        private final UUID visualId;
+        private long expiryTick;
         private long nextPulseTick;
 
-        private Wake(Vec3d pos, long expiryTick, long nextPulseTick) {
+        private Wake(Vec3d pos, long expiryTick, long nextPulseTick, UUID visualId) {
             this.pos = pos;
             this.expiryTick = expiryTick;
             this.nextPulseTick = nextPulseTick;
+            this.visualId = visualId;
         }
+    }
+
+    enum WakeUpdate {
+        NONE,
+        CREATE,
+        REFRESH
     }
 }

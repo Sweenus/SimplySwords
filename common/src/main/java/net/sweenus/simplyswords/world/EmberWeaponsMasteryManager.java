@@ -328,7 +328,17 @@ public final class EmberWeaponsMasteryManager {
     }
 
     private static boolean exactRoll(LivingEntity actor, int chance) {
-        return chance >= 100 || chance > 0 && actor.getRandom().nextInt(100) < chance;
+        int roll = -1;
+        boolean passed;
+        if (chance >= 100) passed = true;
+        else if (chance <= 0) passed = false;
+        else {
+            roll = actor.getRandom().nextInt(100);
+            passed = roll < chance;
+        }
+        UniqueAbilityApi.reportRoll(actor, FireForgeMasteryAbilities.EMBERBLADE_SHRAPNEL.id(),
+                "CHANCE", chance, roll, passed);
+        return passed;
     }
 
     private static ItemStack held(LivingEntity entity, net.minecraft.item.Item item) {

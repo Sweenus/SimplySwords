@@ -69,6 +69,10 @@ public class LivyatanWaveVisualEntity extends Entity {
     }
 
     public void setBloodwakeLanes(List<WaveLane> lanes) {
+        setWaveLanes(lanes);
+    }
+
+    public void setWaveLanes(List<WaveLane> lanes) {
         NbtCompound data = new NbtCompound();
         int count = Math.min(MAX_TRACKED_LANES, lanes == null ? 0 : lanes.size());
         data.putInt("count", count);
@@ -84,6 +88,10 @@ public class LivyatanWaveVisualEntity extends Entity {
     }
 
     public List<WaveLane> getBloodwakeLanes() {
+        return getWaveLanes();
+    }
+
+    public List<WaveLane> getWaveLanes() {
         NbtCompound data = this.dataTracker.get(BLOODWAKE_LANES);
         if (data == this.cachedLaneData) {
             return this.cachedLanes;

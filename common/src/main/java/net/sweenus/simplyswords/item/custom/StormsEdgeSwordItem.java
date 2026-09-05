@@ -75,7 +75,11 @@ public class StormsEdgeSwordItem extends UniqueSwordItem implements UniqueWeapon
                 });
         UniqueAbilityApi.takeStartedExecution();
         int refreshChance = execution.tuning().get(BuiltinUniqueAbilities.REFRESH_CHANCE);
-        if (refreshChance <= 0 || attacker.getRandom().nextInt(100) >= refreshChance) {
+        int refreshRoll = attacker.getRandom().nextInt(100);
+        boolean refreshPassed = refreshChance > 0 && refreshRoll < refreshChance;
+        UniqueAbilityApi.reportRoll(execution, BuiltinUniqueAbilities.REFRESH_CHANCE,
+                refreshChance, refreshRoll, refreshPassed);
+        if (!refreshPassed) {
             UniqueAbilityApi.cancel(execution);
             return super.postHit(stack, target, attacker);
         }

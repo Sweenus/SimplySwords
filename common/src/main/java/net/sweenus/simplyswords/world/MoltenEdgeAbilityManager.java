@@ -292,7 +292,7 @@ public final class MoltenEdgeAbilityManager {
         MoltenHeatComponent ventingHeat = new MoltenHeatComponent(currentHeat, false).startVenting(now);
         heldStack.set(ComponentTypeRegistry.MOLTEN_HEAT.get(), ventingHeat);
         StatusEffectInstance resistance = actor.getStatusEffect(StatusEffects.RESISTANCE);
-        ActiveVent vent = new ActiveVent(actor.getUuid(), heldStack, mastery, tuning, heatTuning, now,
+        ActiveVent vent = new ActiveVent(actor.getUuid(), heldStack, mastery, tuning, heatTuning, actor.getPos(), now,
                 resistance == null ? null : new StatusEffectInstance(resistance));
         vents.put(actor.getUuid(), vent);
         applyVentMovement(actor, tuning);
@@ -626,7 +626,9 @@ public final class MoltenEdgeAbilityManager {
                 int interval = vent.tuning.integer(
                         FireForgeMasteryTuning.Setting.MOLTEN_AUTO_RUPTURE_INTERVAL_TICKS, 8);
                 if ((world.getTime() - vent.startedAt) % Math.max(1, interval) == 0) {
-                    Vec3d movement = owner.getVelocity().multiply(1, 0, 1);
+                    Vec3d currentPosition = owner.getPos();
+                    Vec3d movement = currentPosition.subtract(vent.previousAutoRupturePosition).multiply(1, 0, 1);
+                    vent.previousAutoRupturePosition = currentPosition;
                     if (movement.lengthSquared() > .0025) {
                         MoltenEdgeMasteryManager.Snapshot rupture = MoltenEdgeMasteryManager.beginRupture(
                                 world, vent.stackReference, owner);
@@ -1264,6 +1266,7 @@ public final class MoltenEdgeAbilityManager {
         private final MoltenEdgeMasteryManager.Snapshot snapshot;
         private final FireForgeMasteryTuning tuning;
         private final FireForgeMasteryTuning heatTuning;
+        private Vec3d previousAutoRupturePosition;
         private final long startedAt;
         private final StatusEffectInstance previousResistance;
         private final Set<UUID> hitTargets = new HashSet<>();
@@ -1271,13 +1274,14 @@ public final class MoltenEdgeAbilityManager {
         private int swingCount;
 
         private ActiveVent(UUID ownerId, ItemStack stackReference, MoltenEdgeMasteryManager.Snapshot snapshot,
-                           FireForgeMasteryTuning tuning, FireForgeMasteryTuning heatTuning, long startedAt,
-                           StatusEffectInstance previousResistance) {
+                           FireForgeMasteryTuning tuning, FireForgeMasteryTuning heatTuning,
+                           Vec3d previousAutoRupturePosition, long startedAt, StatusEffectInstance previousResistance) {
             this.ownerId = ownerId;
             this.stackReference = stackReference;
             this.snapshot = snapshot;
             this.tuning = tuning;
             this.heatTuning = heatTuning;
+            this.previousAutoRupturePosition = previousAutoRupturePosition;
             this.startedAt = startedAt;
             this.previousResistance = previousResistance;
         }

@@ -461,7 +461,11 @@ public final class DawnquiverAbilityManager {
         if (tuning.flag(1 << 10) && current > 0) chance = baseChance;
         chance += Math.max(0, lesser.get(MartialCommandEldritchMasteryTuning.Setting.CHANCE, baseChance) - baseChance);
         if (fullImpact) chance += tuning.get(MartialCommandEldritchMasteryTuning.Setting.PITY_CHANCE, 0);
-        if (world.random.nextDouble() >= MathHelper.clamp(chance / 100, 0.0, 1.0)) {
+        double chorusRoll = world.random.nextDouble();
+        boolean chorusProc = chorusRoll < MathHelper.clamp(chance / 100, 0.0, 1.0);
+        UniqueAbilityApi.reportRoll(owner, MartialCommandEldritchMasteryAbilities.DAWN_CHORUS.id(),
+                "CHANCE", chance, chorusRoll * 100, chorusProc);
+        if (!chorusProc) {
             MartialCommandEldritchMasteryCombatManager.finish(execution, 0);
             return;
         }

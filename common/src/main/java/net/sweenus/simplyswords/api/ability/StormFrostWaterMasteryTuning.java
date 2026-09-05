@@ -2,10 +2,12 @@ package net.sweenus.simplyswords.api.ability;
 
 import net.minecraft.nbt.NbtCompound;
 
+import java.util.Collections;
 import java.util.EnumMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
-public final class StormFrostWaterMasteryTuning {
+public final class StormFrostWaterMasteryTuning implements MasteryTuningSnapshot {
     public enum Setting {
         COOLDOWN_TICKS(0, 72000), DURATION_TICKS(0, 72000), INTERVAL_TICKS(1, 72000),
         LOCKOUT_TICKS(0, 72000), REFUND_TICKS(0, 72000), CHANCE(0, 100),
@@ -198,7 +200,9 @@ public final class StormFrostWaterMasteryTuning {
         LIVYATAN_PERFECT_STORM_WINDOW_TICKS(0, 72000), LIVYATAN_PERFECT_STORM_RADIUS(0, 64),
         LIVYATAN_PERFECT_STORM_DAMAGE_MULTIPLIER(0, 10), LIVYATAN_PERFECT_STORM_TARGET_CAP(0, 64),
         LIVYATAN_UNBOUND_WAVE_DAMAGE_MULTIPLIER(0, 10), LIVYATAN_UNBOUND_COOLDOWN_MULTIPLIER(0, 10),
-        LIVYATAN_CALM_DAMAGE_MULTIPLIER(0, 10), LIVYATAN_ACTIVE_COOLDOWN_BONUS_TICKS(0, 72000),
+        LIVYATAN_CALM_IDLE_TICKS(0, 72000), LIVYATAN_CALM_RADIUS(0, 64),
+        LIVYATAN_CALM_DURATION_TICKS(0, 72000), LIVYATAN_CALM_DAMAGE_MULTIPLIER(0, 10),
+        LIVYATAN_CALM_TARGET_CAP(0, 64), LIVYATAN_ACTIVE_COOLDOWN_BONUS_TICKS(0, 72000),
         LIVYATAN_SUPPRESS_WAVES(0, 1);
 
         private final double minimum;
@@ -265,5 +269,12 @@ public final class StormFrostWaterMasteryTuning {
             if (nbt.contains(setting.name())) tuning = tuning.with(setting, nbt.getDouble(setting.name()));
         }
         return tuning;
+    }
+
+    @Override
+    public Map<String, Double> entries() {
+        Map<String, Double> entries = new LinkedHashMap<>();
+        values.forEach((setting, value) -> entries.put(setting.name(), value));
+        return Collections.unmodifiableMap(entries);
     }
 }

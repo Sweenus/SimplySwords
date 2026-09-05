@@ -26,6 +26,7 @@ import net.sweenus.simplyswords.item.interfaces.RevivalWeapon;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
+import net.sweenus.simplyswords.world.ArcanethystAssaultManager;
 import net.sweenus.simplyswords.world.RunicSlashManager;
 import net.sweenus.simplyswords.world.WatcherAbilityManager;
 import net.sweenus.simplyswords.world.BramblethornAbilityManager;
@@ -197,6 +198,7 @@ public abstract class LivingEntityMixin {
             amount = StormbringerAbilityManager.modifyOutgoingMeleeDamage(livingEntity, source, amount);
             amount = net.sweenus.simplyswords.world.FrostfallAbilityManager.modifyOutgoingMeleeDamage(
                     livingEntity, source, amount);
+            amount = ArcanethystAssaultManager.modifyOutgoingMeleeDamage(livingEntity, source, amount);
             StatusEffectInstance voidcloakEffect = livingEntity.getStatusEffect(EffectRegistry.getReference(EffectRegistry.VOIDCLOAK));
             StatusEffectInstance ribbonwrathEffect = livingEntity.getStatusEffect(EffectRegistry.getReference(EffectRegistry.RIBBONWRATH));
             StatusEffectInstance soulTetherEffect = livingEntity.getStatusEffect(EffectRegistry.getReference(EffectRegistry.SOULTETHER));

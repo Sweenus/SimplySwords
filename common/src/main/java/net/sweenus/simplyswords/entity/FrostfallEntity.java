@@ -1,5 +1,6 @@
 package net.sweenus.simplyswords.entity;
 
+import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -9,9 +10,12 @@ import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.particle.BlockStateParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.math.Box;
@@ -24,6 +28,7 @@ import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityPhase;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
+import net.sweenus.simplyswords.registry.EntityRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.api.WeaponImplicitRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -79,7 +84,7 @@ public class FrostfallEntity extends ThrownSwordEntity {
     }
 
     public FrostfallEntity(World world, LivingEntity owner, ItemStack stack) {
-        super(world, owner, stack);
+        super(EntityRegistry.FROSTFALLENTITY.get(), world, owner, stack);
         this.stack = stack;
     }
 
@@ -144,11 +149,12 @@ public class FrostfallEntity extends ThrownSwordEntity {
         nonReturning = false;
         super.onEntityHit(hitResult);
         nonReturning = wasNonReturning;
+        if (!(getWorld() instanceof ServerWorld world)) return;
         if (entity instanceof LivingEntity target && getOwner() instanceof LivingEntity owner) {
             directHit = true;
             outboundHits.add(target.getUuid());
             applyDirectEffects(owner, target);
-            splinter((ServerWorld) getWorld(), owner, target);
+            splinter(world, owner, target);
             if (throwExecution != null) UniqueAbilityApi.emit(throwExecution, UniqueAbilityPhase.HIT,
                     StormFrostWaterMasteryAbilities.HIT, target, 1, primaryBaseDamage);
         }
@@ -314,6 +320,11 @@ public class FrostfallEntity extends ThrownSwordEntity {
             orbitAge = 0;
             inGround = false;
             setNoClip(true);
+            setVelocity(Vec3d.ZERO);
+            double radius = throwTuning.get(s("FROSTFALL_ORBIT_RADIUS"), 5);
+            setPos(impactPosition.x + radius, impactPosition.y + 1, impactPosition.z);
+            FrostfallIceSpikeFieldManager.createPulse((ServerWorld) getWorld(), impactPosition, radius,
+                    pulseCount + 1);
         } else {
             returnToPlayer = true;
             inGround = false;
@@ -322,23 +333,64 @@ public class FrostfallEntity extends ThrownSwordEntity {
 
     private void tickOrbit(ServerWorld world, LivingEntity owner) {
         int durationTicks = Math.max(1, throwTuning.integer(s("FROSTFALL_ORBIT_DURATION_TICKS"), 20));
-        double radius = throwTuning.get(s("FROSTFALL_ORBIT_RADIUS"), 5);
-        double angle = Math.PI * 2 * orbitAge / durationTicks;
-        setPos(impactPosition.x + Math.cos(angle) * radius, impactPosition.y + 1,
-                impactPosition.z + Math.sin(angle) * radius);
+        double maximumRadius = throwTuning.get(s("FROSTFALL_ORBIT_RADIUS"), 5);
+        double previousProgress = (double) orbitAge / durationTicks;
+        double progress = (double) (orbitAge + 1) / durationTicks;
+        double previousRadius = maximumRadius * (1 - previousProgress);
+        double currentRadius = maximumRadius * (1 - progress);
+        double angle = Math.PI * 4 * progress;
+        setVelocity(Vec3d.ZERO);
+        setPos(impactPosition.x + Math.cos(angle) * currentRadius, impactPosition.y + 1,
+                impactPosition.z + Math.sin(angle) * currentRadius);
+        spawnClosingBlizzardTrail(world, currentRadius);
         double multiplier = throwTuning.get(s("FROSTFALL_ORBIT_DAMAGE_MULTIPLIER"), 0);
         if (multiplier > 0) {
             DamageSource source = getDamageSources().trident(this, owner);
-            for (LivingEntity target : targets(world, getPos(), 1.25, owner, 16, orbitHits)) {
+            for (LivingEntity target : closingBlizzardTargets(world, owner, previousRadius, currentRadius)) {
                 orbitHits.add(target.getUuid());
-                damage(target, source, baseImpactDamage() * (float) multiplier);
+                if (damage(target, source, baseImpactDamage() * (float) multiplier)) {
+                    FrostfallIceSpikeFieldManager.createTargetBurst(world, target.getPos(), 1, 1.25F);
+                }
             }
         }
         orbitAge++;
         if (orbitAge >= durationTicks) {
             orbitAge = -1;
+            FrostfallIceSpikeFieldManager.createTargetBurst(world, impactPosition, 6, 1.5F);
+            world.playSound(null, impactPosition.x, impactPosition.y, impactPosition.z,
+                    SoundEvents.BLOCK_GLASS_BREAK, SoundCategory.PLAYERS, .7F,
+                    .7F + world.random.nextFloat() * .15F);
             returnToPlayer = true;
         }
+    }
+
+    private List<LivingEntity> closingBlizzardTargets(ServerWorld world, LivingEntity owner,
+                                                       double previousRadius, double currentRadius) {
+        double innerRadius = Math.max(0, Math.min(previousRadius, currentRadius) - .65);
+        double outerRadius = Math.max(previousRadius, currentRadius) + .65;
+        Box box = new Box(impactPosition.subtract(outerRadius, 2.5, outerRadius),
+                impactPosition.add(outerRadius, 2.5, outerRadius));
+        return world.getOtherEntities(this, box, EntityPredicates.VALID_LIVING_ENTITY).stream()
+                .filter(LivingEntity.class::isInstance)
+                .map(LivingEntity.class::cast)
+                .filter(target -> !orbitHits.contains(target.getUuid())
+                        && HelperMethods.checkAbilityTarget(target, owner))
+                .filter(target -> {
+                    double x = target.getX() - impactPosition.x;
+                    double z = target.getZ() - impactPosition.z;
+                    double distanceSquared = x * x + z * z;
+                    return distanceSquared >= innerRadius * innerRadius
+                            && distanceSquared <= outerRadius * outerRadius;
+                })
+                .toList();
+    }
+
+    private void spawnClosingBlizzardTrail(ServerWorld world, double radius) {
+        world.spawnParticles(ParticleTypes.SNOWFLAKE, getX(), getY(), getZ(), 5, .18, .12, .18, .025);
+        world.spawnParticles(new BlockStateParticleEffect(ParticleTypes.BLOCK, Blocks.BLUE_ICE.getDefaultState()),
+                getX(), getY(), getZ(), 3, .12, .08, .12, .015);
+        HelperMethods.spawnOrbitParticles(world, impactPosition.add(0, .15, 0), ParticleTypes.SNOWFLAKE,
+                radius, Math.max(6, (int) Math.ceil(radius * 3)));
     }
 
     private void recall(ServerWorld world, LivingEntity owner) {

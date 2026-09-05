@@ -1,5 +1,6 @@
 package net.sweenus.simplyswords.world;
 
+import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
@@ -237,7 +238,11 @@ public final class MagiscytheMasteryManager {
 
     private static void attemptRefresh(ServerWorld world, LivingEntity owner, StormState state) {
         int chance = state.tuning.integer(ArcaneCosmicMasteryTuning.Setting.CHANCE, 5);
-        if (chance <= 0 || owner.getRandom().nextInt(100) >= chance) return;
+        int roll = owner.getRandom().nextInt(100);
+        boolean passed = chance > 0 && roll < chance;
+        UniqueAbilityApi.reportRoll(owner, ArcaneCosmicMasteryAbilities.MAGISCYTHE_STORM.id(),
+                "CHANCE", chance, roll, passed);
+        if (!passed) return;
         int cap = state.tuning.integer(ArcaneCosmicMasteryTuning.Setting.STACK_CAP, 5);
         state.refreshes = Math.min(cap, state.refreshes + 1);
         int restored = state.tuning.flag(1 << 7)
@@ -258,7 +263,11 @@ public final class MagiscytheMasteryManager {
         float chance = (float) tuning.get(ArcaneCosmicMasteryTuning.Setting.CHANCE,
                 Config.uniqueEffects.magiscythe.repairChance * 100)
                 + (tuning.flag(1 << 22) ? state.pity : 0);
-        if (!guaranteed && owner.getRandom().nextFloat() * 100 >= chance) {
+        float repairRoll = owner.getRandom().nextFloat() * 100;
+        boolean repairProc = guaranteed || repairRoll < chance;
+        UniqueAbilityApi.reportRoll(owner, ArcaneCosmicMasteryAbilities.MAGISCYTHE_MAGEWRIGHT.id(),
+                guaranteed ? "CHANCE (guaranteed)" : "CHANCE", chance, repairRoll, repairProc);
+        if (!repairProc) {
             if (tuning.flag(1 << 22)) state.pity = Math.min(
                     tuning.integer(ArcaneCosmicMasteryTuning.Setting.STACK_CAP, 40),
                     state.pity + tuning.integer(ArcaneCosmicMasteryTuning.Setting.PITY_CHANCE, 10));

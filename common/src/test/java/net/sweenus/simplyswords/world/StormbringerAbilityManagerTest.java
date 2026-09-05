@@ -1,5 +1,6 @@
 package net.sweenus.simplyswords.world;
 
+import net.sweenus.simplyswords.item.component.ParryComponent;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -55,5 +56,16 @@ final class StormbringerAbilityManagerTest {
         assertEquals(false, StormbringerAbilityManager.shouldDecay(100, 40, 100));
         assertEquals(true, StormbringerAbilityManager.shouldDecay(141, 40, 100));
         assertEquals(true, StormbringerAbilityManager.shouldDecay(40, Long.MIN_VALUE, 100));
+    }
+
+    @Test
+    void masteryChargeCapsSynchronizeAndClampStoredState() {
+        ParryComponent charged = new ParryComponent(false, 10, 10);
+
+        assertEquals(12, StormbringerAbilityManager.normalizedChargeState(charged, 12).stormChargeCapacity());
+        assertEquals(15, StormbringerAbilityManager.normalizedChargeState(charged, 15).stormChargeCapacity());
+        ParryComponent shortCircuit = StormbringerAbilityManager.normalizedChargeState(charged, 6);
+        assertEquals(6, shortCircuit.stormChargeCapacity());
+        assertEquals(6, shortCircuit.stormCharges());
     }
 }

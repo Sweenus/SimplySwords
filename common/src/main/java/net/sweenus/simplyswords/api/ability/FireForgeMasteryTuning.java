@@ -1,9 +1,11 @@
 package net.sweenus.simplyswords.api.ability;
 
+import java.util.Collections;
 import java.util.EnumMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
-public final class FireForgeMasteryTuning {
+public final class FireForgeMasteryTuning implements MasteryTuningSnapshot {
     public enum Setting {
         COOLDOWN_TICKS(0, 72000), DURATION_TICKS(0, 72000), COLLAPSE_DURATION_TICKS(0, 72000),
         INTERVAL_TICKS(1, 72000), LOCKOUT_TICKS(0, 72000), REFUND_TICKS(0, 72000),
@@ -218,5 +220,12 @@ public final class FireForgeMasteryTuning {
 
     public FireForgeMasteryTuning multiply(Setting setting, double factor, double fallback) {
         return with(setting, get(setting, fallback) * factor);
+    }
+
+    @Override
+    public Map<String, Double> entries() {
+        Map<String, Double> entries = new LinkedHashMap<>();
+        values.forEach((setting, value) -> entries.put(setting.name(), value));
+        return Collections.unmodifiableMap(entries);
     }
 }
