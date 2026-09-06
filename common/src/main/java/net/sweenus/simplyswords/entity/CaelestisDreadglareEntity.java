@@ -33,6 +33,14 @@ public class CaelestisDreadglareEntity extends VexEntity implements CaelestisBre
             DataTracker.registerData(CaelestisDreadglareEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
     private static final TrackedData<Integer> CORRUPTION_SEED =
             DataTracker.registerData(CaelestisDreadglareEntity.class, TrackedDataHandlerRegistry.INTEGER);
+    private static final TrackedData<Boolean> OPEN_INVITATION_UNBOUND =
+            DataTracker.registerData(CaelestisDreadglareEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+    private static final TrackedData<Long> OWNER_MARK_UNTIL =
+            DataTracker.registerData(CaelestisDreadglareEntity.class, TrackedDataHandlerRegistry.LONG);
+    private static final TrackedData<Integer> UNBOUND_REFUND_TICKS =
+            DataTracker.registerData(CaelestisDreadglareEntity.class, TrackedDataHandlerRegistry.INTEGER);
+    private static final TrackedData<Float> UNBOUND_ATTACK_DAMAGE =
+            DataTracker.registerData(CaelestisDreadglareEntity.class, TrackedDataHandlerRegistry.FLOAT);
     private static final TrackedData<Integer> FLIGHT_STATE =
             DataTracker.registerData(CaelestisDreadglareEntity.class, TrackedDataHandlerRegistry.INTEGER);
 
@@ -69,6 +77,10 @@ public class CaelestisDreadglareEntity extends VexEntity implements CaelestisBre
         super.initDataTracker(builder);
         builder.add(UNBOUND, false);
         builder.add(CORRUPTION_SEED, 0);
+        builder.add(OPEN_INVITATION_UNBOUND, false);
+        builder.add(OWNER_MARK_UNTIL, 0L);
+        builder.add(UNBOUND_REFUND_TICKS, 0);
+        builder.add(UNBOUND_ATTACK_DAMAGE, 0.0F);
         builder.add(FLIGHT_STATE, STATE_ORBIT);
     }
 
@@ -216,7 +228,7 @@ public class CaelestisDreadglareEntity extends VexEntity implements CaelestisBre
         if (CaelestisBreachManager.shouldIgnoreCreatureDamage(this, this, source)) {
             return false;
         }
-        boolean damaged = super.damage(source, amount);
+        boolean damaged = super.damage(source, CaelestisBreachManager.modifyUnboundDamage(this, this, source, amount));
         if (damaged && this.getWorld() instanceof ServerWorld world) {
             world.playSound(null, this.getBlockPos(), SoundRegistry.CAELESTIS_CREATURE_HURT.get(),
                     SoundCategory.HOSTILE, this.isUnbound() ? 0.5F : 0.28F,
@@ -227,7 +239,7 @@ public class CaelestisDreadglareEntity extends VexEntity implements CaelestisBre
 
     @Override
     public void onDeath(DamageSource source) {
-        CaelestisBreachManager.handleCreatureDeath(this, this);
+        CaelestisBreachManager.handleCreatureDeath(this, this, source);
         super.onDeath(source);
     }
 
@@ -311,6 +323,30 @@ public class CaelestisDreadglareEntity extends VexEntity implements CaelestisBre
     }
 
     @Override
+    public boolean isOpenInvitationUnbound() { return this.dataTracker.get(OPEN_INVITATION_UNBOUND); }
+
+    @Override
+    public void setOpenInvitationUnbound(boolean value) { this.dataTracker.set(OPEN_INVITATION_UNBOUND, value); }
+
+    @Override
+    public long getOwnerMarkUntil() { return this.dataTracker.get(OWNER_MARK_UNTIL); }
+
+    @Override
+    public void setOwnerMarkUntil(long value) { this.dataTracker.set(OWNER_MARK_UNTIL, value); }
+
+    @Override
+    public int getUnboundRefundTicks() { return this.dataTracker.get(UNBOUND_REFUND_TICKS); }
+
+    @Override
+    public void setUnboundRefundTicks(int value) { this.dataTracker.set(UNBOUND_REFUND_TICKS, value); }
+
+    @Override
+    public float getUnboundAttackDamage() { return this.dataTracker.get(UNBOUND_ATTACK_DAMAGE); }
+
+    @Override
+    public void setUnboundAttackDamage(float value) { this.dataTracker.set(UNBOUND_ATTACK_DAMAGE, value); }
+
+    @Override
     public void configureBreachCreature(UUID breachId, UUID actorId, UUID principalId,
                                         boolean unbound, int corruptionSeed) {
         this.breachId = breachId;
@@ -333,6 +369,10 @@ public class CaelestisDreadglareEntity extends VexEntity implements CaelestisBre
         this.breachPrincipalId = nbt.containsUuid("breach_principal_id") ? nbt.getUuid("breach_principal_id") : null;
         this.dataTracker.set(UNBOUND, nbt.getBoolean("unbound"));
         this.dataTracker.set(CORRUPTION_SEED, nbt.getInt("corruption_seed"));
+        this.setOpenInvitationUnbound(nbt.getBoolean("open_invitation_unbound"));
+        this.setOwnerMarkUntil(nbt.getLong("owner_mark_until"));
+        this.setUnboundRefundTicks(nbt.getInt("unbound_refund_ticks"));
+        this.setUnboundAttackDamage(nbt.getFloat("unbound_attack_damage"));
         this.setFlightState(nbt.getInt("flight_state"));
         this.stateTicks = nbt.getInt("flight_state_ticks");
         this.orbitTicks = nbt.getInt("orbit_ticks");
@@ -347,6 +387,10 @@ public class CaelestisDreadglareEntity extends VexEntity implements CaelestisBre
         if (this.breachPrincipalId != null) nbt.putUuid("breach_principal_id", this.breachPrincipalId);
         nbt.putBoolean("unbound", this.isUnbound());
         nbt.putInt("corruption_seed", this.getCorruptionSeed());
+        nbt.putBoolean("open_invitation_unbound", this.isOpenInvitationUnbound());
+        nbt.putLong("owner_mark_until", this.getOwnerMarkUntil());
+        nbt.putInt("unbound_refund_ticks", this.getUnboundRefundTicks());
+        nbt.putFloat("unbound_attack_damage", this.getUnboundAttackDamage());
         nbt.putInt("flight_state", this.getFlightState());
         nbt.putInt("flight_state_ticks", this.stateTicks);
         nbt.putInt("orbit_ticks", this.orbitTicks);

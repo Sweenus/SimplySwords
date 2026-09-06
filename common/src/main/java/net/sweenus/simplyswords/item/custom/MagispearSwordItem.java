@@ -44,6 +44,7 @@ import java.util.UUID;
 
 public class MagispearSwordItem extends UniqueSwordItem implements UniqueWeaponActiveAbility {
     private static final Map<UUID, Integer> MELEE_HITS = new HashMap<>();
+    private static final Map<UUID, Integer> PROC_COUNTS = new HashMap<>();
     private static final Map<UUID, Long> PIN_LOCKOUTS = new HashMap<>();
     public MagispearSwordItem(ToolMaterial toolMaterial, Settings settings) {
         super(toolMaterial, settings);
@@ -66,7 +67,8 @@ public class MagispearSwordItem extends UniqueSwordItem implements UniqueWeaponA
                     Config.uniqueEffects.magispear.magicChance);
             int hits = MELEE_HITS.merge(attacker.getUuid(), 1, Integer::sum);
             boolean guaranteed = tuning.flag(1 << 7) && hits % 3 == 0;
-            if (attacker.isSprinting() && tuning.flag(1 << 3)) hitChance = Math.min(100, hitChance + 12);
+            if (attacker.isSprinting() && tuning.flag(1 << 3)) hitChance = Math.min(100, hitChance
+                    + tuning.integer(ArcaneCosmicMasteryTuning.Setting.PITY_CHANCE, 12));
             int hitRoll = attacker.getRandom().nextInt(100);
             boolean hitProc = guaranteed || hitRoll < hitChance;
             UniqueAbilityApi.reportRoll(attacker, ArcaneCosmicMasteryAbilities.MAGISPEAR_SPELLPOINT.id(),
@@ -82,21 +84,39 @@ public class MagispearSwordItem extends UniqueSwordItem implements UniqueWeaponA
                 DamageSource damageSource = attacker.getDamageSources().indirectMagic(attacker, attacker);
                 target.timeUntilRegen = 0;
                 if (tuning.flag(1 << 4)) target.addStatusEffect(new net.minecraft.entity.effect.StatusEffectInstance(
-                        net.minecraft.entity.effect.StatusEffects.GLOWING, 50, 0), attacker);
+                        net.minecraft.entity.effect.StatusEffects.GLOWING, tuning.integer(
+                                ArcaneCosmicMasteryTuning.Setting.STATUS_DURATION_TICKS, 50), 0), attacker);
                 if (tuning.flag(1 << 6) && PIN_LOCKOUTS.getOrDefault(target.getUuid(), 0L) <= world.getTime()) {
                     target.addStatusEffect(new net.minecraft.entity.effect.StatusEffectInstance(
-                            net.minecraft.entity.effect.StatusEffects.SLOWNESS, 25, 1), attacker);
-                    PIN_LOCKOUTS.put(target.getUuid(), world.getTime() + 40);
+                            net.minecraft.entity.effect.StatusEffects.SLOWNESS,
+                            tuning.integer(ArcaneCosmicMasteryTuning.Setting.SECONDARY_STATUS_DURATION_TICKS, 25),
+                            tuning.integer(ArcaneCosmicMasteryTuning.Setting.STATUS_AMPLIFIER, 1)), attacker);
+                    PIN_LOCKOUTS.put(target.getUuid(), world.getTime() + Math.max(1,
+                            tuning.integer(ArcaneCosmicMasteryTuning.Setting.LOCKOUT_TICKS, 40)));
                 }
                 if (tuning.flag(1 << 8)) target.addStatusEffect(new net.minecraft.entity.effect.StatusEffectInstance(
-                        net.minecraft.entity.effect.StatusEffects.LEVITATION, 12, 0), attacker);
-                target.damage(damageSource, HelperMethods.applyAbilityDamageEnchantments(world, stack, target, damageSource, damage));
+                        net.minecraft.entity.effect.StatusEffects.LEVITATION, tuning.integer(
+                                ArcaneCosmicMasteryTuning.Setting.SECONDARY_DURATION_TICKS, 12), 0), attacker);
+                float dealt = HelperMethods.applyAbilityDamageEnchantments(
+                        world, stack, target, damageSource, damage);
+                target.damage(damageSource, dealt);
                 target.timeUntilRegen = 0;
+                if (tuning.flag(1 << 5)) {
+                    int procs = PROC_COUNTS.merge(attacker.getUuid(), 1, Integer::sum);
+                    if (procs % Math.max(1, tuning.integer(
+                            ArcaneCosmicMasteryTuning.Setting.COUNT, 5)) == 0) {
+                        MagispearAbilityManager.scheduleEcho(world, attacker, target, stack,
+                                dealt * (float) tuning.get(
+                                        ArcaneCosmicMasteryTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, .55),
+                                tuning.integer(ArcaneCosmicMasteryTuning.Setting.DELAY_TICKS, 5));
+                    }
+                }
                 world.playSound(null, attacker.getBlockPos(), SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
                         attacker.getSoundCategory(), 0.2f, 1.1f);
             }
             ArcaneCosmicMasteryCombatManager.finish(execution, 1);
             if (MELEE_HITS.size() > 64) MELEE_HITS.clear();
+            if (PROC_COUNTS.size() > 64) PROC_COUNTS.clear();
             PIN_LOCKOUTS.entrySet().removeIf(entry -> entry.getValue() <= world.getTime());
         }
         return super.postHit(stack, target, attacker);

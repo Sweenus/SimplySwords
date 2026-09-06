@@ -72,7 +72,7 @@ public class MagibladeSwordItem extends UniqueSwordItem implements UniqueWeaponA
 
     @Override
     public int getMaxUseTime(ItemStack stack, LivingEntity user) {
-        return Math.max(1, Config.uniqueEffects.magiblade.chargeDuration) + 5;
+        return 72005;
     }
 
     @Override

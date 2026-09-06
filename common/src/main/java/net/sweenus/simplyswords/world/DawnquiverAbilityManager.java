@@ -185,9 +185,14 @@ public final class DawnquiverAbilityManager {
                         StoredChargeComponent.DEFAULT).charge()));
     }
 
+    public static float minimumDrawProgress(ItemStack stack) {
+        return MathHelper.clamp(stack.getOrDefault(ComponentTypeRegistry.DAWN_MINIMUM_DRAW.get(),
+                (float) Config.uniqueEffects.dawnquiver.minimumDraw), 0.0F, 1.0F);
+    }
+
     public static float maximumDrawProgress(ItemStack stack) {
         DawnquiverSwordItem.EffectSettings settings = Config.uniqueEffects.dawnquiver;
-        float minimum = MathHelper.clamp((float) settings.minimumDraw, 0.0F, 1.0F);
+        float minimum = minimumDrawProgress(stack);
         float piercing = MathHelper.clamp((float) settings.piercingThreshold, minimum, 1.0F);
         float full = MathHelper.clamp((float) settings.fullDrawThreshold, piercing, 1.0F);
         int chorus = getChorus(stack);
@@ -228,6 +233,7 @@ public final class DawnquiverAbilityManager {
                 drawBase(settings, stack));
         MartialCommandEldritchMasteryTuning tuning = MartialCommandEldritchMasteryAbilities.tuning(execution);
         DRAW_TUNING.put(owner.getUuid(), tuning);
+        synchronizeMinimumDraw(stack, tuning);
 
         int seed = owner.getRandom().nextInt(4096);
         int lifetime = Math.max(20, tuning.integer(MartialCommandEldritchMasteryTuning.Setting.WINDUP_TICKS,
@@ -320,17 +326,12 @@ public final class DawnquiverAbilityManager {
             return Math.max(1, settings.cooldown / 4);
         }
 
-        int tier = affordableDrawTier(stack, chargeRatio);
         int chorus = getChorus(stack);
+        int tier = Math.min(drawTier(chargeRatio, minimumDraw, settings), Math.min(2, chorus - 1));
         MartialCommandEldritchMasteryTuning chorusTuning = CHORUS_TUNING.getOrDefault(stack, MartialCommandEldritchMasteryTuning.EMPTY);
-        boolean heaven = tuning.flag(1 << 25);
+        boolean heaven = tuning.flag(1 << 25) && chorus >= 2;
         int stackCost = heaven ? chorus : Math.max(0, tier + 1);
-        boolean empowered = heaven ? chorus >= 2 : tier >= 0 && chorus >= stackCost;
-        if (heaven && !empowered) {
-            if (bow != null) bow.discard();
-            if (drawState != null) MartialCommandEldritchMasteryCombatManager.finish(drawState.execution, 0);
-            return Math.max(1, settings.cooldown / 4);
-        }
+        boolean empowered = heaven || tier >= 0 && chorus >= stackCost;
         Vec3d direction = target != null ? aimPoint(target).subtract(origin).normalize() : aimDirection;
         float damage = HelperMethods.abilityScaledDamage(SpellScalingProfile.HEALING, owner, stack,
                 (float) MathHelper.lerp(chargeRatio, (float) settings.initialDamageScaling,
@@ -339,8 +340,11 @@ public final class DawnquiverAbilityManager {
                         (float) settings.maxChargeSpellScaling));
         float lesserDamage = HelperMethods.abilityScaledDamage(SpellScalingProfile.HEALING, owner, stack,
                 (float) settings.passiveDamageScaling, (float) settings.passiveSpellScaling);
-        damage *= (float) tuning.get(tier >= 2 ? MartialCommandEldritchMasteryTuning.Setting.FINAL_DAMAGE_MULTIPLIER
-                : MartialCommandEldritchMasteryTuning.Setting.DAMAGE_MULTIPLIER, 1);
+        damage *= (float) tuning.get(MartialCommandEldritchMasteryTuning.Setting.DAMAGE_MULTIPLIER, 1);
+        if (tier >= 2) damage *= (float) tuning.get(
+                MartialCommandEldritchMasteryTuning.Setting.FINAL_DAMAGE_MULTIPLIER, 1);
+        if (heaven) damage *= (float) tuning.get(
+                MartialCommandEldritchMasteryTuning.Setting.SPELL_MULTIPLIER, 1);
         damage *= (float) chorusTuning.get(MartialCommandEldritchMasteryTuning.Setting.DAMAGE_MULTIPLIER, 1);
         if (chorusTuning.flag(1 << 17) && stackCost >= chorusTuning.integer(
                 MartialCommandEldritchMasteryTuning.Setting.STACK_CAP, 6))
@@ -447,9 +451,7 @@ public final class DawnquiverAbilityManager {
                 MartialCommandEldritchMasteryAbilities.DAWN_CHORUS, world, stack, owner, null, chorusBase());
         MartialCommandEldritchMasteryTuning tuning = MartialCommandEldritchMasteryAbilities.tuning(execution);
         CHORUS_TUNING.put(stack, tuning);
-        int maximum = Math.max(1, tuning.integer(MartialCommandEldritchMasteryTuning.Setting.STACK_CAP,
-                Config.uniqueEffects.dawnquiver.maxChorus));
-        CHORUS_CAP.put(stack, maximum);
+        int maximum = synchronizeChorusCapacity(stack, tuning);
         int current = getChorus(stack);
         if (current >= maximum) {
             MartialCommandEldritchMasteryCombatManager.finish(execution, 0);
@@ -560,6 +562,20 @@ public final class DawnquiverAbilityManager {
             return;
         }
         lastTicks.put(owner.getUuid(), now);
+        if (now % 20L == 0L) {
+            UniqueAbilityExecution capacityExecution = MartialCommandEldritchMasteryCombatManager.beginPassive(
+                    MartialCommandEldritchMasteryAbilities.DAWN_CHORUS, world, stack, owner, null, chorusBase());
+            MartialCommandEldritchMasteryTuning capacityTuning =
+                    MartialCommandEldritchMasteryAbilities.tuning(capacityExecution);
+            CHORUS_TUNING.put(stack, capacityTuning);
+            synchronizeChorusCapacity(stack, capacityTuning);
+            MartialCommandEldritchMasteryCombatManager.finish(capacityExecution, 0);
+            UniqueAbilityExecution drawExecution = MartialCommandEldritchMasteryCombatManager.beginPassive(
+                    MartialCommandEldritchMasteryAbilities.DAWN_DRAW, world, stack, owner, null,
+                    drawBase(Config.uniqueEffects.dawnquiver, stack));
+            synchronizeMinimumDraw(stack, MartialCommandEldritchMasteryAbilities.tuning(drawExecution));
+            MartialCommandEldritchMasteryCombatManager.finish(drawExecution, 0);
+        }
 
         DawnquiverSwordItem.EffectSettings settings = Config.uniqueEffects.dawnquiver;
         UniqueAbilityExecution execution = MartialCommandEldritchMasteryCombatManager.beginPassive(
@@ -606,27 +622,13 @@ public final class DawnquiverAbilityManager {
         damage *= (float) tuning.get(MartialCommandEldritchMasteryTuning.Setting.DAMAGE_MULTIPLIER, 1)
                 * (1 + getChorus(stack) * (float) chorusTuning.get(
                 MartialCommandEldritchMasteryTuning.Setting.PER_STACK_MULTIPLIER, 0));
-        Vec3d direction = aimPoint(target).subtract(anchor).normalize();
-        DawnquiverArrowEntity arrow = new DawnquiverArrowEntity(world, owner, stack, hand,
-                anchor, direction, target, damage, 0.0F,
-                settings.arrowSpeed * 0.85, settings.homingStrength,
-                settings.passiveArrowScale, 0.0, settings.passiveRange * 2.0,
-                DawnquiverArrowEntity.MODE_PASSIVE, 1, 1.0);
-        world.spawnEntity(arrow);
-        if (tuning.has(MartialCommandEldritchMasteryTuning.Setting.STATUS_DURATION_TICKS))
-            target.addStatusEffect(new net.minecraft.entity.effect.StatusEffectInstance(
-                    net.minecraft.entity.effect.StatusEffects.GLOWING,
-                    tuning.integer(MartialCommandEldritchMasteryTuning.Setting.STATUS_DURATION_TICKS, 60), 0), owner);
+        fireLesserArrow(world, owner, stack, hand, anchor, target, damage, tuning, settings,
+                DawnquiverArrowEntity.MODE_PASSIVE);
 
         int extraBows = Math.max(0, tuning.integer(MartialCommandEldritchMasteryTuning.Setting.COUNT, 1) - 1);
         for (LivingEntity extra : additionalLesserTargets(world, owner, target, range, extraBows)) {
-            Vec3d extraDirection = aimPoint(extra).subtract(anchor).normalize();
-            DawnquiverArrowEntity extraArrow = new DawnquiverArrowEntity(world, owner, stack, hand,
-                    anchor, extraDirection, extra, damage, 0.0F,
-                    settings.arrowSpeed * 0.85, settings.homingStrength,
-                    settings.passiveArrowScale, 0.0, settings.passiveRange * 2.0,
-                    DawnquiverArrowEntity.MODE_PASSIVE, 1, 1.0);
-            world.spawnEntity(extraArrow);
+            fireLesserArrow(world, owner, stack, hand, anchor, extra, damage, tuning, settings,
+                    DawnquiverArrowEntity.MODE_QUICK_CHORUS);
         }
         int twinInterval = tuning.integer(MartialCommandEldritchMasteryTuning.Setting.SEARCH_CAP, 0);
         int shot = LESSER_SHOTS.merge(owner.getUuid(), 1, Integer::sum);
@@ -795,6 +797,27 @@ public final class DawnquiverAbilityManager {
         }
     }
 
+    private static void fireLesserArrow(ServerWorld world, LivingEntity owner, ItemStack stack, Hand hand,
+                                        Vec3d anchor, LivingEntity target, float damage,
+                                        MartialCommandEldritchMasteryTuning tuning,
+                                        DawnquiverSwordItem.EffectSettings settings, int mode) {
+        boolean marks = tuning.has(MartialCommandEldritchMasteryTuning.Setting.STATUS_DURATION_TICKS);
+        float scaled = marks && target.hasStatusEffect(net.minecraft.entity.effect.StatusEffects.GLOWING)
+                ? damage * (float) tuning.get(
+                        MartialCommandEldritchMasteryTuning.Setting.OUTGOING_MULTIPLIER, 1)
+                : damage;
+        Vec3d direction = aimPoint(target).subtract(anchor).normalize();
+        DawnquiverArrowEntity arrow = new DawnquiverArrowEntity(world, owner, stack, hand,
+                anchor, direction, target, scaled, 0.0F,
+                settings.arrowSpeed * 0.85, settings.homingStrength,
+                settings.passiveArrowScale, 0.0, settings.passiveRange * 2.0,
+                mode, 1, 1.0);
+        world.spawnEntity(arrow);
+        if (marks) target.addStatusEffect(new net.minecraft.entity.effect.StatusEffectInstance(
+                net.minecraft.entity.effect.StatusEffects.GLOWING,
+                tuning.integer(MartialCommandEldritchMasteryTuning.Setting.STATUS_DURATION_TICKS, 60), 0), owner);
+    }
+
     private static List<LivingEntity> additionalLesserTargets(ServerWorld world, LivingEntity owner,
                                                               LivingEntity primary, double range, int count) {
         if (count <= 0) return List.of();
@@ -856,6 +879,28 @@ public final class DawnquiverAbilityManager {
                         world.getTime() + 3L, DawnquiverArrowEntity.MODE_QUICK_CHORUS, false));
     }
 
+    public static void synchronizeMinimumDraw(ItemStack stack, MartialCommandEldritchMasteryTuning tuning) {
+        float minimum = MathHelper.clamp((float) tuning.get(
+                MartialCommandEldritchMasteryTuning.Setting.HEALTH_THRESHOLD,
+                Config.uniqueEffects.dawnquiver.minimumDraw), 0.0F, 1.0F);
+        if (stack.getOrDefault(ComponentTypeRegistry.DAWN_MINIMUM_DRAW.get(), -1.0F) != minimum) {
+            stack.set(ComponentTypeRegistry.DAWN_MINIMUM_DRAW.get(), minimum);
+        }
+    }
+
+    public static int synchronizeChorusCapacity(ItemStack stack, MartialCommandEldritchMasteryTuning tuning) {
+        int maximum = Math.max(1, tuning.integer(MartialCommandEldritchMasteryTuning.Setting.STACK_CAP,
+                Config.uniqueEffects.dawnquiver.maxChorus));
+        CHORUS_CAP.put(stack, maximum);
+        if (stack.getOrDefault(ComponentTypeRegistry.DAWN_CHORUS_CAPACITY.get(), 0) != maximum) {
+            stack.set(ComponentTypeRegistry.DAWN_CHORUS_CAPACITY.get(), maximum);
+        }
+        if (getChorus(stack) > maximum) {
+            setChorus(stack, maximum, maximum);
+        }
+        return maximum;
+    }
+
     private static void setChorus(ItemStack stack, int chorus) {
         setChorus(stack, chorus, CHORUS_CAP.getOrDefault(stack,
                 Math.max(1, Config.uniqueEffects.dawnquiver.maxChorus)));
@@ -867,7 +912,12 @@ public final class DawnquiverAbilityManager {
     }
 
     private static int drawTier(float progress, DawnquiverSwordItem.EffectSettings settings) {
-        float minimum = MathHelper.clamp((float) settings.minimumDraw, 0.0F, 1.0F);
+        return drawTier(progress, (float) settings.minimumDraw, settings);
+    }
+
+    private static int drawTier(float progress, float minimumDraw,
+                                DawnquiverSwordItem.EffectSettings settings) {
+        float minimum = MathHelper.clamp(minimumDraw, 0.0F, 1.0F);
         if (progress < minimum) {
             return -1;
         }

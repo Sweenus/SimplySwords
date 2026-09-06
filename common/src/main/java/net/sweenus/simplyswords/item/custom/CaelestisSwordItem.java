@@ -22,6 +22,7 @@ import net.sweenus.simplyswords.config.settings.ItemStackTooltipAppender;
 import net.sweenus.simplyswords.config.settings.TooltipSettings;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
+import net.sweenus.simplyswords.item.interfaces.UniqueWeaponSecondaryAction;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
@@ -30,7 +31,7 @@ import net.sweenus.simplyswords.world.ArcaneCosmicMasteryCombatManager;
 
 import java.util.List;
 
-public class CaelestisSwordItem extends UniqueSwordItem implements UniqueWeaponActiveAbility {
+public class CaelestisSwordItem extends UniqueSwordItem implements UniqueWeaponActiveAbility, UniqueWeaponSecondaryAction {
     public CaelestisSwordItem(ToolMaterial toolMaterial, Settings settings) {
         super(toolMaterial, settings);
     }
@@ -69,16 +70,37 @@ public class CaelestisSwordItem extends UniqueSwordItem implements UniqueWeaponA
 
     @Override
     public boolean activate(WeaponAbilityContext context) {
-        if (context != null && context.actor() != null && context.actor().isSneaking()
-                && context.world() != null
-                && CaelestisBreachManager.tryForcedRecall(context.world(), context.actor())) {
-            return false;
-        }
         if (!canActivate(context)) return false;
         UniqueAbilityExecution execution = ArcaneCosmicMasteryCombatManager.beginActive(
                 ArcaneCosmicMasteryAbilities.CAELESTIS_HOST, context,
-                Math.max(1, Config.uniqueEffects.caelestis.cooldown));
+                Math.max(1, Config.uniqueEffects.caelestis.cooldown), baseTuning());
         return CaelestisBreachManager.start(context, ArcaneCosmicMasteryAbilities.tuning(execution), execution);
+    }
+
+    @Override
+    public TypedActionResult<ItemStack> startPlayerSecondaryAbility(World world, PlayerEntity user, Hand hand) {
+        ItemStack stack = user.getStackInHand(hand);
+        if (world.isClient() || !user.isSneaking() || !(world instanceof net.minecraft.server.world.ServerWorld serverWorld)
+                || !net.sweenus.simplyswords.api.AwakeningApi.isAbilityUnlocked(stack)
+                || !CaelestisBreachManager.tryForcedRecall(serverWorld, user)) {
+            return TypedActionResult.pass(stack);
+        }
+        user.swingHand(hand, true);
+        return TypedActionResult.success(stack, false);
+    }
+
+    private static ArcaneCosmicMasteryTuning baseTuning() {
+        EffectSettings settings = Config.uniqueEffects.caelestis;
+        return ArcaneCosmicMasteryTuning.EMPTY
+                .with(ArcaneCosmicMasteryTuning.Setting.DURATION_TICKS, settings.duration)
+                .with(ArcaneCosmicMasteryTuning.Setting.SECONDARY_DURATION_TICKS, settings.collapseDuration)
+                .with(ArcaneCosmicMasteryTuning.Setting.WINDUP_TICKS, settings.expansionDuration)
+                .with(ArcaneCosmicMasteryTuning.Setting.RADIUS, settings.maxRadius)
+                .with(ArcaneCosmicMasteryTuning.Setting.INTERVAL_TICKS, settings.spawnInterval)
+                .with(ArcaneCosmicMasteryTuning.Setting.TARGET_CAP, settings.maxMinions)
+                .with(ArcaneCosmicMasteryTuning.Setting.SECONDARY_COUNT, settings.maxTentacles)
+                .with(ArcaneCosmicMasteryTuning.Setting.SECONDARY_INTERVAL_TICKS, settings.tentacleSpawnInterval)
+                .with(ArcaneCosmicMasteryTuning.Setting.CHANCE, settings.betrayalChance);
     }
 
     @Override

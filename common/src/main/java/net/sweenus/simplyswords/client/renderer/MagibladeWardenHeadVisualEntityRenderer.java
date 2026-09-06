@@ -19,7 +19,6 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
-import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.MagibladeWardenHeadVisualEntity;
 
 public class MagibladeWardenHeadVisualEntityRenderer
@@ -29,8 +28,6 @@ public class MagibladeWardenHeadVisualEntityRenderer
             Identifier.ofVanilla("textures/entity/warden/warden.png");
     private static final Identifier BIOLUMINESCENT_TEXTURE =
             Identifier.ofVanilla("textures/entity/warden/warden_bioluminescent_layer.png");
-    private static final double ORBIT_BOB_HEIGHT = 0.1;
-    private static final double ORBIT_BOB_SPEED = 0.16;
 
     private final ModelPart head;
     private final ModelPart rightTendril;
@@ -122,21 +119,10 @@ public class MagibladeWardenHeadVisualEntityRenderer
     }
 
     private static Vec3d getRenderAnchor(MagibladeWardenHeadVisualEntity entity, float tickDelta) {
-        if (entity.getOwner() instanceof LivingEntity owner) {
-            float age = entity.age + tickDelta;
-            double angle = entity.getOrbitPhase()
-                    + age * Math.max(0.001, Config.uniqueEffects.magiblade.headOrbitSpeed);
-            double radius = Math.max(0.0, Config.uniqueEffects.magiblade.headOrbitRadius);
-            double bob = MathHelper.sin((float) (age * ORBIT_BOB_SPEED + entity.getOrbitPhase()))
-                    * ORBIT_BOB_HEIGHT;
-            return new Vec3d(
-                    MathHelper.lerp(tickDelta, owner.prevX, owner.getX()) + Math.cos(angle) * radius,
-                    MathHelper.lerp(tickDelta, owner.prevY, owner.getY())
-                            + owner.getEyeHeight(owner.getPose())
-                            + Config.uniqueEffects.magiblade.headVerticalOffset
-                            + bob,
-                    MathHelper.lerp(tickDelta, owner.prevZ, owner.getZ()) + Math.sin(angle) * radius
-            );
+        if (!entity.isAnchored() && !entity.isDismissing() && entity.getOwner() instanceof LivingEntity owner) {
+            Vec3d ownerEyePosition = interpolatedPosition(owner, tickDelta)
+                    .add(0.0, owner.getEyeHeight(owner.getPose()), 0.0);
+            return entity.orbitPosition(ownerEyePosition, tickDelta);
         }
         return interpolatedPosition(entity, tickDelta);
     }
@@ -173,6 +159,7 @@ public class MagibladeWardenHeadVisualEntityRenderer
             return false;
         }
         Entity owner = entity.getOwner();
-        return owner == client.player && client.options.getPerspective() == Perspective.FIRST_PERSON;
+        return !entity.isAnchored() && owner == client.player
+                && client.options.getPerspective() == Perspective.FIRST_PERSON;
     }
 }

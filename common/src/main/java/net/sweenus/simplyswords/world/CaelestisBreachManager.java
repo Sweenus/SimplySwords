@@ -66,6 +66,8 @@ public final class CaelestisBreachManager {
     private static final String VISUAL_TAG = "simplyswords_caelestis_breach_visual";
     private static final String UNBOUND_REWARD_ROLLED_TAG =
             "simplyswords_caelestis_unbound_reward_rolled";
+    private static final String OPEN_INVITATION_UNBOUND_TAG =
+            "simplyswords_caelestis_open_invitation_unbound";
     private static final Map<ServerWorld, Map<UUID, ActiveBreach>> ACTIVE = new HashMap<>();
 
     private CaelestisBreachManager() {
@@ -111,20 +113,25 @@ public final class CaelestisBreachManager {
     public static boolean tryForcedRecall(ServerWorld world, LivingEntity actor) {
         Map<UUID, ActiveBreach> breaches = ACTIVE.get(world);
         if (breaches == null) return false;
-        ActiveBreach breach = breaches.get(actor.getUuid());
+        ActiveBreach breach = breaches.values().stream()
+                .filter(candidate -> candidate.actorId.equals(actor.getUuid()))
+                .findFirst().orElse(null);
         if (breach == null || !breach.tuning.flag(1 << 24) || breach.recallUsed) return false;
-        breach.recallUsed = true;
         double range = breach.tuning.get(ArcaneCosmicMasteryTuning.Setting.RANGE, 20);
+        Entity candidate = breach.creatureIds.stream().map(world::getEntity)
+                .filter(entity -> entity instanceof CaelestisBreachCreature creature && creature.isUnbound()
+                        && !isProtectedUnbound(entity))
+                .filter(entity -> entity.squaredDistanceTo(actor) <= range * range)
+                .min(Comparator.comparingDouble(entity -> entity.squaredDistanceTo(actor))).orElse(null);
+        if (candidate == null) return false;
+        breach.recallUsed = true;
         int chance = breach.tuning.integer(ArcaneCosmicMasteryTuning.Setting.PITY_CHANCE, 50);
         int roll = world.random.nextInt(100);
         boolean passed = roll < chance;
         UniqueAbilityApi.reportRoll(actor, ArcaneCosmicMasteryAbilities.CAELESTIS_HOST.id(),
                 "PITY_CHANCE", chance, roll, passed);
         if (!passed) return true;
-        breach.creatureIds.stream().map(world::getEntity)
-                .filter(entity -> entity instanceof CaelestisBreachCreature creature && creature.isUnbound())
-                .filter(entity -> entity.squaredDistanceTo(actor) <= range * range)
-                .findFirst().ifPresent(net.minecraft.entity.Entity::discard);
+        candidate.discard();
         return true;
     }
 
@@ -150,18 +157,19 @@ public final class CaelestisBreachManager {
         ArcaneCosmicMasteryTuning resolvedTuning = tuning == null ? ArcaneCosmicMasteryTuning.EMPTY : tuning;
         BreachProfile profile = BreachProfile.capture(actor instanceof PlayerEntity, resolvedTuning);
         int duration = profile.duration;
-        boolean betrayalPending = world.random.nextInt(100)
-                < betrayalChance(resolvedTuning);
-        long betrayalTick = now + getBetrayalDelay(world, profile)
+        boolean openInvitation = resolvedTuning.flag(1 << 25);
+        boolean betrayalPending = openInvitation || world.random.nextInt(100) < betrayalChance(resolvedTuning);
+        long betrayalTick = openInvitation ? now + profile.preCollapseTicks()
+                : Math.min(now + profile.preCollapseTicks() - 1, now + getBetrayalDelay(world, profile)
                 + (resolvedTuning.flag(1 << 19)
-                        ? resolvedTuning.integer(ArcaneCosmicMasteryTuning.Setting.DELAY_TICKS, 100) - 40 : 0);
+                        ? resolvedTuning.integer(ArcaneCosmicMasteryTuning.Setting.DELAY_TICKS, 60) : 0));
         float baseDamage = HelperMethods.abilityScaledDamage(
                 "eldritch",
                 actor,
                 context.stack(),
                 Config.uniqueEffects.caelestis.minionDamageScaling,
                 Config.uniqueEffects.caelestis.minionSpellScaling
-        ) * profile.damageMultiplier;
+        );
         float ownerAttackValue = HelperMethods.attackScaledDamage(
                 actor, context.stack(), 1.0F);
 
@@ -252,7 +260,8 @@ public final class CaelestisBreachManager {
         cleanCreatureIds(world, breach);
         cleanTentacleIds(world, breach);
 
-        if (phase != CaelestisBreachVisualEntity.PHASE_COLLAPSING
+        boolean spawning = phase != CaelestisBreachVisualEntity.PHASE_COLLAPSING && !breach.profile.stableGate;
+        if (spawning
                 && now >= breach.nextSpawnTick) {
             spawnWave(world, breach);
             int spawnInterval = Config.uniqueEffects.caelestis.spawnInterval;
@@ -261,7 +270,7 @@ public final class CaelestisBreachManager {
                         Config.uniqueEffects.caelestis.spawnInterval));
             breach.nextSpawnTick = now + spawnInterval;
         }
-        if (phase != CaelestisBreachVisualEntity.PHASE_COLLAPSING
+        if (spawning
                 && now >= breach.nextTentacleSpawnTick) {
             spawnTentacle(world, breach, radius);
             int interval = breach.tuning.flag(1 << 12)
@@ -271,7 +280,7 @@ public final class CaelestisBreachManager {
             breach.nextTentacleSpawnTick = now + Math.max(1, interval);
         }
         if (breach.betrayalPending && !breach.betrayalSpawned
-                && phase != CaelestisBreachVisualEntity.PHASE_COLLAPSING
+                && (breach.tuning.flag(1 << 25) || phase != CaelestisBreachVisualEntity.PHASE_COLLAPSING)
                 && now >= breach.betrayalTick) {
             breach.betrayalSpawned = spawnUnbound(world, breach);
         }
@@ -286,7 +295,11 @@ public final class CaelestisBreachManager {
             redirectAggroToBoundMinions(world, breach);
         }
 
-        if (phase == CaelestisBreachVisualEntity.PHASE_COLLAPSING) {
+        if (phase == CaelestisBreachVisualEntity.PHASE_COLLAPSING && !breach.profile.stableGate) {
+            if (breach.tuning.flag(1 << 16) && !breach.collapseDissolved) {
+                dissolveBoundCreatures(world, breach);
+                breach.collapseDissolved = true;
+            }
             sweepCollapsingPerimeter(world, breach, radius);
             sweepCollapsingTentacles(world, breach, radius);
             tickCollapseRim(world, breach, actor, radius, now);
@@ -320,8 +333,7 @@ public final class CaelestisBreachManager {
         int min = breach.profile.minSpawnPerWave;
         int max = breach.profile.maxSpawnPerWave;
         int count = min + world.random.nextInt(max - min + 1);
-        if (breach.tuning.flag(1 << 7)) count += Math.max(0,
-                breach.tuning.integer(ArcaneCosmicMasteryTuning.Setting.COUNT, 1));
+        if (breach.tuning.flag(1 << 7)) count++;
         if (breach.tuning.flag(1 << 8)) count = Math.max(1,
                 breach.tuning.integer(ArcaneCosmicMasteryTuning.Setting.COUNT, 1));
         count = Math.min(count, cap - friendlyCount);
@@ -348,31 +360,29 @@ public final class CaelestisBreachManager {
         double pull = breach.tuning.get(ArcaneCosmicMasteryTuning.Setting.PULL_STRENGTH, 0);
         double damageFraction = breach.tuning.get(ArcaneCosmicMasteryTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, 0);
         if (pull <= 0 && damageFraction <= 0) return;
-        int cap = breach.tuning.integer(ArcaneCosmicMasteryTuning.Setting.SEARCH_CAP, 12);
-        if (cap <= 0) return;
+        int pullCap = breach.tuning.integer(ArcaneCosmicMasteryTuning.Setting.SEARCH_CAP, 16);
+        int damageCap = breach.tuning.integer(ArcaneCosmicMasteryTuning.Setting.CAELESTIS_RIM_DAMAGE_TARGET_CAP, 12);
         int pullInterval = Math.max(1, breach.tuning.integer(ArcaneCosmicMasteryTuning.Setting.TERTIARY_INTERVAL_TICKS, 10));
         int damageInterval = Math.max(1, breach.tuning.integer(ArcaneCosmicMasteryTuning.Setting.LOCKOUT_TICKS, 20));
         boolean doPull = pull > 0 && now % pullInterval == 0;
         boolean doDamage = damageFraction > 0 && now % damageInterval == 0;
         if (!doPull && !doDamage) return;
         double outer = radius * 0.75;
-        float damage = (float) (breach.profile.damageMultiplier * damageFraction
-                * Config.uniqueEffects.caelestis.minionHealthScaling * 100.0);
-        int affected = 0;
+        float damage = breach.baseDamage * (float) damageFraction;
+        int pulled = 0;
+        int damaged = 0;
         for (LivingEntity target : world.getEntitiesByClass(LivingEntity.class,
                 new net.minecraft.util.math.Box(breach.center, breach.center).expand(radius),
                 candidate -> candidate != actor && HelperMethods.checkAbilityTarget(candidate, actor))) {
-            if (affected >= cap) break;
             double distance = Math.sqrt(target.squaredDistanceTo(breach.center));
-            if (distance < outer) continue;
-            affected++;
-            if (doPull) {
+            if (distance < outer || distance > radius || Math.abs(target.getY() - breach.center.y) > breach.profile.verticalRange) continue;
+            if (doPull && pulled++ < pullCap) {
                 net.minecraft.util.math.Vec3d toCenter = breach.center.subtract(target.getPos());
                 if (toCenter.lengthSquared() > 1.0E-4) target.addVelocity(
                         toCenter.normalize().multiply(pull));
                 target.velocityModified = true;
             }
-            if (doDamage && damage > 0) HelperMethods.damageThroughIframes(target,
+            if (doDamage && damaged++ < damageCap && damage > 0) HelperMethods.damageThroughIframes(target,
                     world.getDamageSources().indirectMagic(actor, actor), damage);
         }
     }
@@ -381,17 +391,29 @@ public final class CaelestisBreachManager {
         float radius = radiusAt(world.getTime(), breach);
         int archetype = world.random.nextBoolean() ? 1 : 2;
         boolean spawned = spawnCreature(world, breach, radius, archetype, true);
-        if (spawned && breach.tuning.flag(1 << 22)) {
-            breach.creatureIds.stream().map(world::getEntity)
-                    .filter(entity -> entity instanceof LivingEntity
-                            && entity instanceof CaelestisBreachCreature creature && creature.isUnbound())
-                    .map(LivingEntity.class::cast).findFirst().ifPresent(living -> living.addStatusEffect(
-                            new StatusEffectInstance(StatusEffects.GLOWING,
-                                    breach.tuning.integer(
-                                            ArcaneCosmicMasteryTuning.Setting.SECONDARY_STATUS_DURATION_TICKS, 120), 0),
-                            getLiving(world, breach.actorId)));
+        if (!spawned) {
+            return false;
         }
-        return spawned;
+        List<Entity> unbound = breach.creatureIds.stream().map(world::getEntity)
+                .filter(entity -> entity instanceof CaelestisBreachCreature creature && creature.isUnbound())
+                .toList();
+        if (breach.tuning.flag(1 << 22)) {
+            unbound.stream().map(entity -> (CaelestisBreachCreature) entity).findFirst().ifPresent(creature -> {
+                int duration = breach.tuning.integer(
+                        ArcaneCosmicMasteryTuning.Setting.SECONDARY_STATUS_DURATION_TICKS, 120);
+                creature.setOwnerMarkUntil(world.getTime() + duration);
+                ((LivingEntity) creature).addStatusEffect(new StatusEffectInstance(
+                        StatusEffects.GLOWING, duration, 0), getLiving(world, breach.actorId));
+            });
+        }
+        if (breach.tuning.flag(1 << 25)) {
+            for (Entity entity : unbound) {
+                entity.addCommandTag(OPEN_INVITATION_UNBOUND_TAG);
+                ((CaelestisBreachCreature) entity).setOpenInvitationUnbound(true);
+                breach.creatureIds.remove(entity.getUuid());
+            }
+        }
+        return true;
     }
 
     private static int chooseArchetype(ServerWorld world) {
@@ -427,7 +449,12 @@ public final class CaelestisBreachManager {
         }
         creature.configureBreachCreature(
                 breach.id, breach.actorId, breach.principalId, unbound, world.random.nextInt());
-        applyScaledCreatureHealth(mob, breach.ownerAttackValue, breach.profile.healthMultiplier);
+        if (unbound) {
+            creature.setUnboundRefundTicks(unboundRefundTicks(breach.tuning));
+            creature.setUnboundAttackDamage(breach.baseDamage);
+        }
+        float healthMultiplier = unbound ? unboundHealthMultiplier(breach.tuning) : breach.profile.healthMultiplier;
+        applyScaledCreatureHealth(mob, breach.ownerAttackValue, healthMultiplier);
         mob.setPersistent();
         if (!world.spawnEntity(mob)) {
             return false;
@@ -610,6 +637,14 @@ public final class CaelestisBreachManager {
             return false;
         }
         ActiveBreach breach = get(world, creature.getBreachId());
+        if (creature.isOpenInvitationUnbound()) {
+            LivingEntity owner = getLiving(world, creature.getBreachActorId());
+            if (owner != null && mob.age % CREATURE_TARGET_INTERVAL == Math.floorMod(mob.getId(), CREATURE_TARGET_INTERVAL)) {
+                LivingEntity target = MinionTargeting.getRecentAttackTarget(world, owner);
+                mob.setTarget(target != null && target.isAlive() && HelperMethods.checkAbilityTarget(target, owner) ? target : owner);
+            }
+            return true;
+        }
         if (breach == null || breach.forcedCollapse
                 || world.getTime() >= breach.endTick) {
             dissolveCreature(world, mob, creature.isUnbound());
@@ -703,6 +738,10 @@ public final class CaelestisBreachManager {
         LivingEntity actor = getLiving(world, breach.actorId);
         LivingEntity principal = getLiving(world, breach.principalId);
         LivingEntity source = principal == null ? actor : principal;
+        long now = world.getTime();
+        breach.tentacleContacts.entrySet().removeIf(entry -> entry.getValue() <= now);
+        int cap = Math.max(1, breach.tuning.integer(
+                ArcaneCosmicMasteryTuning.Setting.TERTIARY_TARGET_CAP, 16));
         boolean touched = false;
         for (LivingEntity target : world.getEntitiesByClass(
                 LivingEntity.class,
@@ -710,6 +749,8 @@ public final class CaelestisBreachManager {
                 candidate -> candidate.isAlive()
                         && candidate.getBoundingBox().intersects(contactBox)
                         && isTentacleHostile(world, breach, candidate))) {
+            if (!breach.tentacleContacts.containsKey(target.getUuid())
+                    && breach.tentacleContacts.size() >= cap) continue;
             int duration = Math.max(1, breach.tuning.integer(
                     ArcaneCosmicMasteryTuning.Setting.STATUS_DURATION_TICKS,
                     Config.uniqueEffects.caelestis.tentacleSlowDuration));
@@ -720,6 +761,7 @@ public final class CaelestisBreachManager {
                             StatusEffects.SLOWNESS, duration, amplifier, false, false, true),
                     source
             );
+            breach.tentacleContacts.put(target.getUuid(), now + duration);
             touched = true;
         }
 
@@ -826,6 +868,23 @@ public final class CaelestisBreachManager {
                 || MinionTargeting.isMarkedTarget(world, allegiance, target);
     }
 
+    private static boolean attackAsFreeUnbound(ServerWorld world, MobEntity mob,
+                                               CaelestisBreachCreature creature, LivingEntity target) {
+        if (!target.isAlive() || target instanceof CaelestisBreachCreature
+                || !(target.getUuid().equals(creature.getBreachActorId())
+                || HelperMethods.checkAbilityTarget(target, mob))) {
+            return false;
+        }
+        float multiplier = archetypeDamageMultiplier(mob)
+                * Math.max(0.0F, Config.uniqueEffects.caelestis.unboundDamageMultiplier) * 1.35F;
+        boolean damaged = target.damage(world.getDamageSources().mobAttack(mob),
+                Math.max(0.0F, creature.getUnboundAttackDamage() * multiplier));
+        if (damaged) {
+            playCreatureAttack(world, mob, true);
+        }
+        return damaged;
+    }
+
     public static boolean tryCreatureAttack(MobEntity mob, Entity targetEntity) {
         if (!(mob instanceof CaelestisBreachCreature creature)
                 || !(targetEntity instanceof LivingEntity target)
@@ -833,6 +892,9 @@ public final class CaelestisBreachManager {
             return false;
         }
         ActiveBreach breach = get(world, creature.getBreachId());
+        if (creature.isOpenInvitationUnbound() && (breach == null || breach.forcedCollapse)) {
+            return attackAsFreeUnbound(world, mob, creature, target);
+        }
         if (breach == null || breach.forcedCollapse
                 || !isValidCreatureTarget(world, breach, creature, target)) {
             return false;
@@ -841,6 +903,7 @@ public final class CaelestisBreachManager {
         float multiplier = archetypeDamageMultiplier(mob);
         if (creature.isUnbound()) {
             multiplier *= Math.max(0.0F, Config.uniqueEffects.caelestis.unboundDamageMultiplier);
+            if (creature.isOpenInvitationUnbound()) multiplier *= 1.35F;
             boolean damaged = target.damage(world.getDamageSources().mobAttack(mob),
                     Math.max(0.0F, breach.baseDamage * multiplier));
             if (damaged) {
@@ -857,7 +920,7 @@ public final class CaelestisBreachManager {
         }
         DamageSource source = world.getDamageSources().indirectMagic(mob, attacker);
         float damage = HelperMethods.applyAbilityDamageEnchantments(
-                world, breach.stack, target, source, breach.baseDamage * multiplier);
+                world, breach.stack, target, source, breach.baseDamage * breach.profile.damageMultiplier * multiplier);
         boolean[] damaged = {false};
         WeaponImplicitRegistry.runSuppressed(
                 () -> damaged[0] = HelperMethods.damageThroughIframes(target, source, damage));
@@ -922,7 +985,7 @@ public final class CaelestisBreachManager {
             double dx = mob.getX() - breach.center.x;
             double dz = mob.getZ() - breach.center.z;
             double edgeDistance = Math.sqrt(dx * dx + dz * dz) + Math.max(0.2, mob.getWidth() * 0.5);
-            if (edgeDistance >= radius) {
+            if (edgeDistance >= radius && !creature.isOpenInvitationUnbound()) {
                 dissolveCreature(world, mob, creature.isUnbound());
             }
         }
@@ -1056,7 +1119,9 @@ public final class CaelestisBreachManager {
             Entity entity = world.getEntity(creatureId);
             if (entity instanceof MobEntity mob
                     && entity instanceof CaelestisBreachCreature creature) {
-                dissolveCreature(world, mob, creature.isUnbound());
+                if (!creature.isOpenInvitationUnbound()) {
+                    dissolveCreature(world, mob, creature.isUnbound());
+                }
             }
         }
         breach.creatureIds.clear();
@@ -1072,7 +1137,8 @@ public final class CaelestisBreachManager {
     private static void close(ServerWorld world, ActiveBreach breach) {
         for (UUID creatureId : List.copyOf(breach.creatureIds)) {
             Entity entity = world.getEntity(creatureId);
-            if (entity instanceof MobEntity mob && entity instanceof CaelestisBreachCreature creature) {
+            if (entity instanceof MobEntity mob && entity instanceof CaelestisBreachCreature creature
+                    && !creature.isOpenInvitationUnbound()) {
                 dissolveCreature(world, mob, creature.isUnbound());
             }
         }
@@ -1103,27 +1169,67 @@ public final class CaelestisBreachManager {
     }
 
     public static void handleCreatureDeath(MobEntity mob, CaelestisBreachCreature creature) {
+        handleCreatureDeath(mob, creature, null);
+    }
+
+    public static void handleCreatureDeath(MobEntity mob, CaelestisBreachCreature creature,
+                                           DamageSource source) {
         if (!(mob.getWorld() instanceof ServerWorld world) || !creature.isUnbound()
                 || mob.getCommandTags().contains(UNBOUND_REWARD_ROLLED_TAG)) {
             return;
         }
-        mob.addCommandTag(UNBOUND_REWARD_ROLLED_TAG);
         ActiveBreach breach = get(world, creature.getBreachId());
-        if (breach != null) {
-            int refund = 0;
-            if (breach.tuning.flag(1 << 20)) refund += breach.tuning.integer(ArcaneCosmicMasteryTuning.Setting.REFUND_TICKS, 60);
-            if (breach.tuning.flag(1 << 23)) refund += breach.tuning.integer(
-                    ArcaneCosmicMasteryTuning.Setting.SECONDARY_REFUND_TICKS, 120);
-            if (breach.tuning.flag(1 << 25)) refund = Math.max(refund,
-                    breach.tuning.integer(ArcaneCosmicMasteryTuning.Setting.TERTIARY_REFUND_TICKS, 180));
-            LivingEntity actor = getLiving(world, breach.actorId);
-            if (actor != null && refund > 0) SimplySwordsAPI.setWeaponCooldown(actor, breach.stack,
-                    Math.max(0, Config.uniqueEffects.caelestis.cooldown - refund));
-        }
+        LivingEntity actor = getLiving(world, creature.getBreachActorId());
+        if (actor == null || source == null || source.getAttacker() != actor) return;
+        mob.addCommandTag(UNBOUND_REWARD_ROLLED_TAG);
+        int refund = creature.getUnboundRefundTicks();
+        if (refund > 0) SimplySwordsAPI.reduceWeaponCooldown(actor,
+                breach == null ? new ItemStack(ItemsRegistry.CAELESTIS.get()) : breach.stack,
+                Config.uniqueEffects.caelestis.cooldown, refund);
         int chance = Math.clamp(Config.uniqueEffects.caelestis.unboundTabletDropChance, 0, 100);
         if (chance > 0 && world.random.nextInt(100) < chance) {
             mob.dropStack(new ItemStack(ItemsRegistry.RUNIC_TABLET.get()), mob.getHeight() * 0.5F);
         }
+    }
+
+    private static float unboundHealthMultiplier(ArcaneCosmicMasteryTuning tuning) {
+        return tuning.flag(1 << 20)
+                ? (float) tuning.get(ArcaneCosmicMasteryTuning.Setting.HEAL_MULTIPLIER, 1) : 1.0F;
+    }
+
+    private static int unboundRefundTicks(ArcaneCosmicMasteryTuning tuning) {
+        int refund = tuning.flag(1 << 25)
+                ? tuning.integer(ArcaneCosmicMasteryTuning.Setting.TERTIARY_REFUND_TICKS, 180)
+                : tuning.flag(1 << 23)
+                        ? tuning.integer(ArcaneCosmicMasteryTuning.Setting.SECONDARY_REFUND_TICKS, 120)
+                        : 0;
+        return refund + (tuning.flag(1 << 20)
+                ? tuning.integer(ArcaneCosmicMasteryTuning.Setting.REFUND_TICKS, 60) : 0);
+    }
+
+    public static float modifyUnboundDamage(MobEntity mob, CaelestisBreachCreature creature,
+                                             DamageSource source, float amount) {
+        if (!creature.isUnbound() || !(mob.getWorld() instanceof ServerWorld world)
+                || world.getTime() > creature.getOwnerMarkUntil()) return amount;
+        Entity attacker = source.getAttacker();
+        return attacker != null && attacker.getUuid().equals(creature.getBreachActorId())
+                ? amount * 1.15F : amount;
+    }
+
+    private static boolean isProtectedUnbound(Entity entity) {
+        return entity instanceof CaelestisBreachCreature creature && creature.isOpenInvitationUnbound();
+    }
+
+    private static void dissolveBoundCreatures(ServerWorld world, ActiveBreach breach) {
+        for (UUID creatureId : List.copyOf(breach.creatureIds)) {
+            Entity entity = world.getEntity(creatureId);
+            if (entity instanceof MobEntity mob && entity instanceof CaelestisBreachCreature creature
+                    && !creature.isUnbound()) dissolveCreature(world, mob, false);
+        }
+        breach.creatureIds.removeIf(uuid -> {
+            Entity entity = world.getEntity(uuid);
+            return !(entity instanceof CaelestisBreachCreature creature) || !creature.isUnbound();
+        });
     }
 
     private static void spawnOpeningEffects(ServerWorld world, Vec3d center) {
@@ -1241,14 +1347,17 @@ public final class CaelestisBreachManager {
         int preCollapse = profile.preCollapseTicks();
         float maxRadius = profile.maxRadius;
         if (age >= preCollapse) {
+            if (profile.stableGate) return maxRadius;
             float progress = MathHelper.clamp((age - preCollapse) / (float) collapse, 0.0F, 1.0F);
             float eased = progress * progress;
             return MathHelper.lerp(eased, maxRadius, 0.0F);
         }
 
-        float progress = MathHelper.clamp(age / (float) preCollapse, 0.0F, 1.0F);
+        int fullAt = Math.max(1, preCollapse - profile.eagerRiftTicks);
+        if (age >= fullAt) return maxRadius;
+        float progress = MathHelper.clamp(age / (float) fullAt, 0.0F, 1.0F);
         float curve = MathHelper.clamp(
-                preCollapse / (float) profile.expansionTimeScale, 0.25F, 12.0F);
+                fullAt / (float) profile.expansionTimeScale, 0.25F, 12.0F);
         float exponential = (float) ((1.0 - Math.exp(-curve * progress))
                 / (1.0 - Math.exp(-curve)));
         float continuousEaseOut = 0.12F * progress + 0.88F * exponential;
@@ -1256,7 +1365,7 @@ public final class CaelestisBreachManager {
     }
 
     private static int phaseAt(long age, BreachProfile profile) {
-        return age >= profile.preCollapseTicks()
+        return !profile.stableGate && age >= profile.preCollapseTicks()
                 ? CaelestisBreachVisualEntity.PHASE_COLLAPSING
                 : CaelestisBreachVisualEntity.PHASE_EXPANDING;
     }
@@ -1371,10 +1480,12 @@ public final class CaelestisBreachManager {
         private final UniqueAbilityExecution execution;
         private final Set<UUID> creatureIds;
         private final Set<UUID> tentacleIds;
+        private final Map<UUID, Long> tentacleContacts = new HashMap<>();
         private boolean forcedCollapse;
         private long forcedCollapseStartTick;
         private long forcedCollapseEndTick;
         private float forcedCollapseStartRadius;
+        private boolean collapseDissolved;
 
         private ActiveBreach(UUID id, UUID actorId, UUID principalId, ItemStack stack, Vec3d center,
                              long startTick, long endTick, long nextSpawnTick,
@@ -1421,11 +1532,14 @@ public final class CaelestisBreachManager {
         private final int maxTentacles;
         private final float damageMultiplier;
         private final float healthMultiplier;
+        private final boolean stableGate;
+        private final int eagerRiftTicks;
 
         private BreachProfile(boolean reduced, int duration, int expansionTimeScale,
                               int collapseTicks, float maxRadius, float verticalRange,
                               int minSpawnPerWave, int maxSpawnPerWave, int maxMinions,
-                              int maxTentacles, float damageMultiplier, float healthMultiplier) {
+                              int maxTentacles, float damageMultiplier, float healthMultiplier,
+                              boolean stableGate, int eagerRiftTicks) {
             this.reduced = reduced;
             this.duration = duration;
             this.expansionTimeScale = expansionTimeScale;
@@ -1438,6 +1552,8 @@ public final class CaelestisBreachManager {
             this.maxTentacles = maxTentacles;
             this.damageMultiplier = damageMultiplier;
             this.healthMultiplier = healthMultiplier;
+            this.stableGate = stableGate;
+            this.eagerRiftTicks = eagerRiftTicks;
         }
 
         private static BreachProfile capture(boolean playerCast, ArcaneCosmicMasteryTuning tuning) {
@@ -1446,10 +1562,13 @@ public final class CaelestisBreachManager {
             int tunedDuration = tuning.integer(ArcaneCosmicMasteryTuning.Setting.DURATION_TICKS,
                     Config.uniqueEffects.caelestis.duration);
             int duration = Math.max(2, Math.round(Math.max(2, tunedDuration) * scale));
+            boolean stableGate = tuning.flag(1 << 17);
             int collapse = Math.clamp(Math.max(1, Math.round(
                             tuning.integer(ArcaneCosmicMasteryTuning.Setting.SECONDARY_DURATION_TICKS,
                                     Config.uniqueEffects.caelestis.collapseDuration) * scale)),
                     1, duration - 1);
+            if (stableGate) duration = Math.max(2, duration - Math.round(120 * scale));
+            if (tuning.flag(1 << 16)) collapse = Math.min(duration - 1, collapse + Math.round(60 * scale));
             int preCollapse = Math.max(1, duration - collapse);
             int expansion = Math.clamp(Math.max(1, Math.round(
                             tuning.integer(ArcaneCosmicMasteryTuning.Setting.WINDUP_TICKS,
@@ -1474,7 +1593,8 @@ public final class CaelestisBreachManager {
                             tuning.integer(ArcaneCosmicMasteryTuning.Setting.SECONDARY_COUNT,
                                     Config.uniqueEffects.caelestis.maxTentacles), 0, MAX_TENTACLES), scale),
                     scale * (float) tuning.get(ArcaneCosmicMasteryTuning.Setting.DAMAGE_MULTIPLIER, 1),
-                    (float) tuning.get(ArcaneCosmicMasteryTuning.Setting.INCOMING_MULTIPLIER, 1)
+                    (float) tuning.get(ArcaneCosmicMasteryTuning.Setting.INCOMING_MULTIPLIER, 1),
+                    stableGate, tuning.integer(ArcaneCosmicMasteryTuning.Setting.CAELESTIS_EAGER_RIFT_TICKS, 0)
             );
         }
 

@@ -9,6 +9,7 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.mob.HostileEntity;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
@@ -17,6 +18,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.Box;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.api.AwakeningApi;
@@ -30,6 +32,8 @@ import net.sweenus.simplyswords.entity.MagibladeWardenHeadVisualEntity;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -43,12 +47,10 @@ public final class MagibladeAbilityManager {
     private static final String VISUAL_TAG = "simplyswords_magiblade_warden_head";
     private static final int TARGET_RETRY_TICKS = 5;
     private static final int SHOT_PULSE_TICKS = 8;
-    private static final double ORBIT_BOB_HEIGHT = 0.1;
-    private static final double ORBIT_BOB_SPEED = 0.16;
     private static final double SONIC_BEAM_WIDTH = 0.55;
 
     private static final Map<ServerWorld, Map<UUID, ChargeState>> ACTIVE_CHARGES = new HashMap<>();
-    private static final Map<ServerWorld, Map<UUID, HeadState>> ACTIVE_HEADS = new HashMap<>();
+    private static final Map<ServerWorld, Map<UUID, SummonState>> ACTIVE_HEADS = new HashMap<>();
     private static final Map<ServerWorld, Map<UUID, Long>> LAST_PASSIVE_TICKS = new HashMap<>();
     private static final Map<UUID, RepulsionState> REPULSION_STATES = new HashMap<>();
 
@@ -104,6 +106,7 @@ public final class MagibladeAbilityManager {
                 .with(ArcaneCosmicMasteryTuning.Setting.RANGE, sonicRange)
                 .with(ArcaneCosmicMasteryTuning.Setting.SPEED, 1)
                 .with(ArcaneCosmicMasteryTuning.Setting.COUNT, 1)
+                .with(ArcaneCosmicMasteryTuning.Setting.SECONDARY_COUNT, 1)
                 .with(ArcaneCosmicMasteryTuning.Setting.DAMAGE_MULTIPLIER, 1);
     }
 
@@ -132,8 +135,8 @@ public final class MagibladeAbilityManager {
     public static void clear(ServerWorld world) {
         Map<UUID, ChargeState> charges = ACTIVE_CHARGES.remove(world);
         if (charges != null) charges.values().forEach(charge -> ArcaneCosmicMasteryCombatManager.finish(charge.execution, 0));
-        Map<UUID, HeadState> heads = ACTIVE_HEADS.remove(world);
-        if (heads != null) heads.values().forEach(head -> ArcaneCosmicMasteryCombatManager.finish(head.execution, head.affectedTargets));
+        Map<UUID, SummonState> heads = ACTIVE_HEADS.remove(world);
+        if (heads != null) heads.values().forEach(summon -> dismissSummon(world, summon));
         LAST_PASSIVE_TICKS.remove(world);
     }
 
@@ -144,17 +147,16 @@ public final class MagibladeAbilityManager {
             ChargeState charge = map.remove(actor.getUuid());
             if (charge != null) ArcaneCosmicMasteryCombatManager.finish(charge.execution, 0);
         });
-        ACTIVE_HEADS.values().forEach(map -> {
-            HeadState head = map.remove(actor.getUuid());
-            if (head != null) ArcaneCosmicMasteryCombatManager.finish(head.execution, head.affectedTargets);
+        ACTIVE_HEADS.forEach((world, map) -> {
+            SummonState summon = map.remove(actor.getUuid());
+            if (summon != null) dismissSummon(world, summon);
         });
     }
 
     public static void clearAll() {
         ACTIVE_CHARGES.values().forEach(map -> map.values().forEach(
                 charge -> ArcaneCosmicMasteryCombatManager.finish(charge.execution, 0)));
-        ACTIVE_HEADS.values().forEach(map -> map.values().forEach(
-                head -> ArcaneCosmicMasteryCombatManager.finish(head.execution, head.affectedTargets)));
+        ACTIVE_HEADS.forEach((world, map) -> map.values().forEach(summon -> dismissSummon(world, summon)));
         ACTIVE_CHARGES.clear();
         ACTIVE_HEADS.clear();
         REPULSION_STATES.clear();
@@ -247,6 +249,13 @@ public final class MagibladeAbilityManager {
             }
         }
 
+        boolean bulwark = passive.tuning.flag(1 << 7);
+        double radius = Math.max(0.5, passive.tuning.get(
+                ArcaneCosmicMasteryTuning.Setting.RADIUS, Config.uniqueEffects.magiblade.repelRadius));
+        if (bulwark && now >= passive.nextProjectileBlockAt) {
+            blockIncomingProjectile(world, actor, passive, radius, now);
+        }
+
         int frequency = Math.max(1, passive.tuning.integer(
                 ArcaneCosmicMasteryTuning.Setting.INTERVAL_TICKS, Config.uniqueEffects.magiblade.repelFrequency));
         if ((actor.age + actor.getId()) % frequency != 0) {
@@ -254,16 +263,14 @@ public final class MagibladeAbilityManager {
         }
         int chance = Math.clamp(passive.tuning.integer(
                 ArcaneCosmicMasteryTuning.Setting.CHANCE, Config.uniqueEffects.magiblade.repelChance), 0, 100);
-        int roll = actor.getRandom().nextInt(100);
-        boolean passed = chance > 0 && roll < chance;
-        UniqueAbilityApi.reportRoll(actor, ArcaneCosmicMasteryAbilities.MAGIBLADE_REPULSION.id(),
-                "CHANCE", chance, roll, passed);
-        if (!passed) {
-            return;
+        if (!bulwark) {
+            int roll = actor.getRandom().nextInt(100);
+            boolean passed = chance > 0 && roll < chance;
+            UniqueAbilityApi.reportRoll(actor, ArcaneCosmicMasteryAbilities.MAGIBLADE_REPULSION.id(),
+                    "CHANCE", chance, roll, passed);
+            if (!passed) return;
         }
 
-        double radius = Math.max(0.5, passive.tuning.get(
-                ArcaneCosmicMasteryTuning.Setting.RADIUS, Config.uniqueEffects.magiblade.repelRadius));
         Box searchBox = actor.getBoundingBox().expand(radius, Math.max(1.0, radius * 0.5), radius);
         LivingEntity closest = world.getEntitiesByClass(
                         LivingEntity.class,
@@ -313,9 +320,37 @@ public final class MagibladeAbilityManager {
                 ParticleTypes.SCULK_CHARGE_POP, 0.5, 6);
     }
 
+    private static void blockIncomingProjectile(ServerWorld world, LivingEntity actor,
+                                                RepulsionState passive, double radius, long now) {
+        Vec3d center = actor.getBoundingBox().getCenter();
+        ProjectileEntity closest = world.getEntitiesByClass(ProjectileEntity.class,
+                        actor.getBoundingBox().expand(radius), projectile -> {
+                            Entity owner = projectile.getOwner();
+                            return projectile.isAlive() && owner != actor
+                                    && (!(owner instanceof LivingEntity living)
+                                    || HelperMethods.checkAbilityTarget(living, actor))
+                                    && projectile.getVelocity().lengthSquared() > 1.0E-5
+                                    && (projectile.age == 0 || projectile.squaredDistanceTo(
+                                    projectile.prevX, projectile.prevY, projectile.prevZ) > 1.0E-5)
+                                    && projectile.getVelocity().dotProduct(center.subtract(projectile.getPos())) > 0
+                                    && projectile.getPos().squaredDistanceTo(center) <= radius * radius;
+                        }).stream()
+                .min(Comparator.comparingDouble(projectile -> projectile.getPos().squaredDistanceTo(center)))
+                .orElse(null);
+        if (closest == null) return;
+        Vec3d position = closest.getPos();
+        closest.discard();
+        passive.nextProjectileBlockAt = now + Math.max(1, passive.tuning.integer(
+                ArcaneCosmicMasteryTuning.Setting.LOCKOUT_TICKS, 40));
+        world.spawnParticles(ParticleTypes.SCULK_CHARGE_POP,
+                position.x, position.y, position.z, 8, .15, .15, .15, .02);
+        world.playSound(null, position.x, position.y, position.z, SoundEvents.BLOCK_SCULK_SENSOR_CLICKING,
+                actor.getSoundCategory(), .8F, 1.2F);
+    }
+
     public static boolean hasActive(ServerWorld world) {
         Map<UUID, ChargeState> charges = ACTIVE_CHARGES.get(world);
-        Map<UUID, HeadState> heads = ACTIVE_HEADS.get(world);
+        Map<UUID, SummonState> heads = ACTIVE_HEADS.get(world);
         return charges != null && !charges.isEmpty()
                 || heads != null && !heads.isEmpty()
                 || world.getTime() % 40L == 0L;
@@ -372,100 +407,126 @@ public final class MagibladeAbilityManager {
     }
 
     private static void tickHeads(ServerWorld world) {
-        Map<UUID, HeadState> heads = ACTIVE_HEADS.get(world);
-        if (heads == null || heads.isEmpty()) {
-            return;
-        }
-
+        Map<UUID, SummonState> summons = ACTIVE_HEADS.get(world);
+        if (summons == null || summons.isEmpty()) return;
         long now = world.getTime();
-        Iterator<HeadState> iterator = heads.values().iterator();
+        Iterator<SummonState> iterator = summons.values().iterator();
         while (iterator.hasNext()) {
-            HeadState head = iterator.next();
-            LivingEntity actor = resolveLiving(world, head.actorId);
-            LivingEntity sourceOwner = resolveLiving(world, head.sourceOwnerId);
-            MagibladeWardenHeadVisualEntity visual = resolveVisual(world, head.visualId);
-            if (actor == null
-                    || head.sourceOwnerId != null && sourceOwner == null
-                    || !isStillWieldingMagiblade(actor)
-                    || now >= head.expiresAt) {
-                if (visual != null) {
-                    beginDismissal(world, actor, visual);
-                }
-                ArcaneCosmicMasteryCombatManager.finish(head.execution, head.affectedTargets);
+            SummonState summon = iterator.next();
+            HeadState primary = summon.heads.getFirst();
+            LivingEntity actor = resolveLiving(world, primary.actorId);
+            LivingEntity sourceOwner = resolveLiving(world, primary.sourceOwnerId);
+            if (actor == null || primary.sourceOwnerId != null && sourceOwner == null
+                    || !isStillWieldingMagiblade(actor) || now >= primary.expiresAt
+                    || primary.anchor != null && !world.isChunkLoaded(BlockPos.ofFloored(primary.anchor))) {
+                dismissSummon(world, summon);
                 iterator.remove();
                 continue;
             }
 
-            if (visual == null) {
-                visual = spawnVisual(world, actor, head);
+            boolean failed = false;
+            for (HeadState head : summon.heads) {
+                MagibladeWardenHeadVisualEntity visual = resolveVisual(world, head.visualId);
+                if (visual == null) visual = spawnVisual(world, actor, head);
                 if (visual == null) {
-                    ArcaneCosmicMasteryCombatManager.finish(head.execution, head.affectedTargets);
-                    iterator.remove();
-                    continue;
+                    failed = true;
+                    break;
                 }
+                updateOrbit(world, actor, visual, head, now);
+                tickHeadTargeting(world, actor, sourceOwner, visual, head, now);
+                spawnAmbientEffects(world, actor, visual, now);
             }
-
-            updateOrbit(world, actor, visual, head, now);
-            tickHeadTargeting(world, actor, sourceOwner, visual, head, now);
-            spawnAmbientEffects(world, actor, visual, now);
+            if (failed) {
+                dismissSummon(world, summon);
+                iterator.remove();
+            } else {
+                tickBoundWarden(world, actor, primary, now);
+            }
         }
+        if (summons.isEmpty()) ACTIVE_HEADS.remove(world);
+    }
 
-        if (heads.isEmpty()) {
-            ACTIVE_HEADS.remove(world);
+    private static void finishSummon(SummonState summon) {
+        int affected = summon.heads.stream().mapToInt(head -> head.affectedTargets).sum();
+        ArcaneCosmicMasteryCombatManager.finish(summon.heads.getFirst().execution, affected);
+    }
+
+    private static void dismissSummon(ServerWorld world, SummonState summon) {
+        for (HeadState head : summon.heads) {
+            MagibladeWardenHeadVisualEntity visual = resolveVisual(world, head.visualId);
+            if (visual != null) beginDismissal(world, resolveLiving(world, head.actorId), visual);
         }
+        finishSummon(summon);
     }
 
     private static void completeCharge(ServerWorld world, LivingEntity actor, LivingEntity sourceOwner,
                                        ChargeState charge, long now) {
         float damage = HelperMethods.abilityScaledDamage("arcane", actor, charge.stack,
-                Config.uniqueEffects.magiblade.damageScaling * (float) charge.tuning.get(
-                        ArcaneCosmicMasteryTuning.Setting.DAMAGE_MULTIPLIER, 1)
+                Config.uniqueEffects.magiblade.damageScaling
                         * (float) charge.judgment.get(ArcaneCosmicMasteryTuning.Setting.DAMAGE_MULTIPLIER, 1),
-                Config.uniqueEffects.magiblade.spellScaling);
-        Map<UUID, HeadState> heads = ACTIVE_HEADS.computeIfAbsent(world, ignored -> new HashMap<>());
-        HeadState existing = heads.get(actor.getUuid());
-        if (existing != null) {
-            ArcaneCosmicMasteryCombatManager.finish(existing.execution, existing.affectedTargets);
-            existing.sourceOwnerId = sourceOwner == null ? null : sourceOwner.getUuid();
-            existing.stack = charge.stack.copy();
-            existing.damage = Math.max(0.0F, damage);
-            existing.expiresAt = now + summonDuration(charge.tuning);
-            existing.tuning = charge.tuning;
-            existing.judgment = charge.judgment;
-            existing.execution = charge.execution;
-            if (existing.targetId == null && charge.preferredTargetId != null) {
-                existing.targetId = charge.preferredTargetId;
+                Config.uniqueEffects.magiblade.spellScaling)
+                * (float) charge.tuning.get(ArcaneCosmicMasteryTuning.Setting.DAMAGE_MULTIPLIER, 1);
+        Map<UUID, SummonState> summons = ACTIVE_HEADS.computeIfAbsent(world, ignored -> new HashMap<>());
+        SummonState existing = summons.get(actor.getUuid());
+        int count = Math.clamp(charge.tuning.integer(ArcaneCosmicMasteryTuning.Setting.SECONDARY_COUNT, 1), 1, 2);
+        boolean anchored = charge.tuning.flag(1 << 17);
+        Vec3d anchor = anchored ? new Vec3d(actor.getX(),
+                actor.getEyeY() + Config.uniqueEffects.magiblade.headVerticalOffset, actor.getZ()) : null;
+        if (existing != null && existing.heads.size() == count
+                && (existing.heads.getFirst().anchor != null) == anchored) {
+            finishSummon(existing);
+            for (HeadState head : existing.heads) {
+                head.sourceOwnerId = sourceOwner == null ? null : sourceOwner.getUuid();
+                head.stack = charge.stack.copy();
+                head.damage = Math.max(0.0F, damage);
+                head.expiresAt = now + summonDuration(charge.tuning)
+                        + (charge.tuning.flag(1 << 14) ? Math.max(0, charge.tuning.integer(
+                        ArcaneCosmicMasteryTuning.Setting.SECONDARY_DURATION_TICKS, 80)) : 0);
+                head.tuning = charge.tuning;
+                head.judgment = charge.judgment;
+                head.execution = charge.execution;
+                head.affectedTargets = 0;
+                head.anchor = anchor;
+                if (anchored) {
+                    head.targetId = charge.preferredTargetId;
+                    head.fireAt = -1;
+                    head.nextCycleAt = now;
+                } else if (head.targetId == null) {
+                    head.targetId = charge.preferredTargetId;
+                }
+                MagibladeWardenHeadVisualEntity visual = resolveVisual(world, head.visualId);
+                if (visual != null) updateOrbit(world, actor, visual, head, now);
+                spawnRefreshEffects(world, actor, visual);
             }
-            MagibladeWardenHeadVisualEntity visual = resolveVisual(world, existing.visualId);
-            if (visual != null) {
-                visual.setScale(Math.max(0.1F, Config.uniqueEffects.magiblade.headScale));
-                visual.setOwnerEntityId(actor.getId());
-            }
-            spawnRefreshEffects(world, actor, visual);
             return;
+        }
+        if (existing != null) {
+            dismissSummon(world, existing);
+            summons.remove(actor.getUuid());
         }
 
-        HeadState head = new HeadState(
-                actor.getUuid(),
-                sourceOwner == null ? null : sourceOwner.getUuid(),
-                charge.preferredTargetId,
-                charge.stack.copy(),
-                now,
-                now + summonDuration(charge.tuning),
-                now,
-                Math.max(0.0F, damage),
-                Math.floorMod(actor.getUuid().hashCode(), 360) * MathHelper.RADIANS_PER_DEGREE,
-                charge.tuning,
-                charge.execution
-        );
-        head.judgment = charge.judgment;
-        MagibladeWardenHeadVisualEntity visual = spawnVisual(world, actor, head);
-        if (visual == null) {
-            ArcaneCosmicMasteryCombatManager.finish(charge.execution, 0);
-            return;
+        SummonState summon = new SummonState();
+        for (int index = 0; index < count; index++) {
+            HeadState head = new HeadState(actor.getUuid(),
+                    sourceOwner == null ? null : sourceOwner.getUuid(), charge.preferredTargetId,
+                    charge.stack.copy(), now, now + summonDuration(charge.tuning), now,
+                    Math.max(0.0F, damage),
+                    Math.floorMod(actor.getUuid().hashCode(), 360) * MathHelper.RADIANS_PER_DEGREE
+                            + index * Math.PI * 2 / count,
+                    charge.tuning, charge.execution);
+            head.judgment = charge.judgment;
+            head.index = index;
+            head.anchor = anchor;
+            head.nextCycleAt = nextCycleAt(head, now);
+            summon.heads.add(head);
+            MagibladeWardenHeadVisualEntity visual = spawnVisual(world, actor, head);
+            if (visual == null) {
+                dismissSummon(world, summon);
+                return;
+            }
+            spawnSummonEffects(world, actor, visual);
         }
-        heads.put(actor.getUuid(), head);
-        spawnSummonEffects(world, actor, visual);
+        summons.put(actor.getUuid(), summon);
     }
 
     private static MagibladeWardenHeadVisualEntity spawnVisual(ServerWorld world, LivingEntity actor, HeadState head) {
@@ -479,6 +540,7 @@ public final class MagibladeAbilityManager {
                 Math.max(0.1F, Config.uniqueEffects.magiblade.headScale),
                 (float) head.orbitPhase
         );
+        updateOrbit(world, actor, visual, head, world.getTime());
         visual.addCommandTag(VISUAL_TAG);
         if (!world.spawnEntity(visual)) {
             return null;
@@ -493,6 +555,10 @@ public final class MagibladeAbilityManager {
         visual.setPosition(position);
         visual.setOwnerEntityId(actor.getId());
         visual.setScale(Math.max(0.1F, Config.uniqueEffects.magiblade.headScale));
+        visual.setOrbitParameters(head.anchor != null, head.spawnedAt, (float) head.orbitPhase,
+                (float) head.tuning.get(ArcaneCosmicMasteryTuning.Setting.RADIUS,
+                        Config.uniqueEffects.magiblade.headOrbitRadius),
+                Config.uniqueEffects.magiblade.headOrbitSpeed, Config.uniqueEffects.magiblade.headVerticalOffset);
     }
 
     private static void tickBoundWarden(ServerWorld world, LivingEntity actor, HeadState head, long now) {
@@ -503,34 +569,50 @@ public final class MagibladeAbilityManager {
                 Math.max(1, head.tuning.integer(ArcaneCosmicMasteryTuning.Setting.INTERVAL_TICKS, 80)),
                 (float) head.tuning.get(ArcaneCosmicMasteryTuning.Setting.ABSORPTION, 4));
         actor.addStatusEffect(new net.minecraft.entity.effect.StatusEffectInstance(
-                net.minecraft.entity.effect.StatusEffects.RESISTANCE, 20, 0, false, false, true), actor);
+                net.minecraft.entity.effect.StatusEffects.RESISTANCE,
+                Math.max(1, head.tuning.integer(
+                        ArcaneCosmicMasteryTuning.Setting.STATUS_DURATION_TICKS, 20)),
+                0, false, false, true), actor);
     }
 
     private static Vec3d orbitPosition(LivingEntity actor, HeadState head, long now) {
-        double elapsed = Math.max(0L, now - head.spawnedAt);
-        double angle = head.orbitPhase + elapsed * Math.max(0.001,
-                Config.uniqueEffects.magiblade.headOrbitSpeed * head.tuning.get(
-                        ArcaneCosmicMasteryTuning.Setting.SPEED, 1));
-        double radius = Math.max(0.0, head.tuning.get(
-                ArcaneCosmicMasteryTuning.Setting.RADIUS, Config.uniqueEffects.magiblade.headOrbitRadius));
-        double bob = MathHelper.sin((float) (elapsed * ORBIT_BOB_SPEED + head.orbitPhase)) * ORBIT_BOB_HEIGHT;
-        return new Vec3d(
-                actor.getX() + Math.cos(angle) * radius,
-                actor.getEyeY() + Config.uniqueEffects.magiblade.headVerticalOffset + bob,
-                actor.getZ() + Math.sin(angle) * radius
-        );
+        if (head.anchor != null) return head.anchor;
+        return MagibladeWardenHeadVisualEntity.orbitPosition(
+                new Vec3d(actor.getX(), actor.getEyeY(), actor.getZ()), Math.max(0L, now - head.spawnedAt),
+                (float) head.orbitPhase, (float) head.tuning.get(ArcaneCosmicMasteryTuning.Setting.RADIUS,
+                        Config.uniqueEffects.magiblade.headOrbitRadius),
+                Config.uniqueEffects.magiblade.headOrbitSpeed, Config.uniqueEffects.magiblade.headVerticalOffset);
+    }
+
+    private static long nextCycleAt(HeadState head, long earliest) {
+        int count = Math.clamp(head.tuning.integer(ArcaneCosmicMasteryTuning.Setting.SECONDARY_COUNT, 1), 1, 2);
+        if (count == 1) return earliest;
+        int interval = Math.max(sonicInterval(head.judgment), sonicChargeDuration(head.judgment) + 1);
+        long phase = head.spawnedAt + (long) head.index * interval / count;
+        return earliest + Math.floorMod(phase - earliest, interval);
     }
 
     private static void tickHeadTargeting(ServerWorld world, LivingEntity actor, LivingEntity sourceOwner,
                                           MagibladeWardenHeadVisualEntity visual, HeadState head, long now) {
-        tickBoundWarden(world, actor, head, now);
         LivingEntity target = resolveLiving(world, head.targetId);
-        if (!isValidEnemyInRange(world, actor, sourceOwner, target)) {
+        if (!isValidEnemyInRange(world, actor, sourceOwner, target, head)) {
             target = null;
             head.targetId = null;
             if (head.fireAt >= 0L) {
                 head.fireAt = -1L;
-                head.nextCycleAt = Math.min(head.nextCycleAt, now + TARGET_RETRY_TICKS);
+                head.nextCycleAt = nextCycleAt(head, Math.min(head.nextCycleAt, now + TARGET_RETRY_TICKS));
+            }
+        }
+
+        if (head.echoAt >= 0L && now >= head.echoAt) {
+            head.echoAt = -1L;
+            LivingEntity echoTarget = resolveLiving(world, head.echoTargetId);
+            head.echoTargetId = null;
+            if (isValidEnemyInRange(world, actor, sourceOwner, echoTarget, head)
+                    && passesJudgmentFilter(head, echoTarget)) {
+                fireSonicWave(world, actor, sourceOwner, visual, head, echoTarget,
+                        head.damage * (float) head.tuning.get(
+                                ArcaneCosmicMasteryTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, .55));
             }
         }
 
@@ -539,17 +621,17 @@ public final class MagibladeAbilityManager {
             if (target != null && !passesJudgmentFilter(head, target)) target = null;
             if (target == null) {
                 head.targetId = null;
-                head.nextCycleAt = now + TARGET_RETRY_TICKS;
+                head.nextCycleAt = nextCycleAt(head, now + TARGET_RETRY_TICKS);
             } else {
                 head.targetId = target.getUuid();
                 head.fireAt = now + sonicChargeDuration(head.judgment);
-                head.nextCycleAt = now + sonicInterval(head.judgment);
+                head.nextCycleAt = nextCycleAt(head, now + sonicInterval(head.judgment));
                 beginSonicCharge(world, actor, visual);
             }
         }
 
         target = resolveLiving(world, head.targetId);
-        if (!isValidEnemyInRange(world, actor, sourceOwner, target)) {
+        if (!isValidEnemyInRange(world, actor, sourceOwner, target, head)) {
             target = null;
         }
         updateHeadRotation(actor, visual, target, head, now);
@@ -557,7 +639,13 @@ public final class MagibladeAbilityManager {
         visual.setAiming(head.fireAt >= 0L && target != null);
 
         if (target != null && head.fireAt >= 0L && now >= head.fireAt) {
-            fireSonicWave(world, actor, sourceOwner, visual, head, target);
+            fireSonicWave(world, actor, sourceOwner, visual, head, target, head.damage);
+            if (head.tuning.flag(1 << 12) && ++head.wavesFired % Math.max(1, head.tuning.integer(
+                    ArcaneCosmicMasteryTuning.Setting.COUNT, 3)) == 0) {
+                head.echoAt = now + Math.max(1, head.tuning.integer(
+                        ArcaneCosmicMasteryTuning.Setting.DELAY_TICKS, 8));
+                head.echoTargetId = target.getUuid();
+            }
             head.fireAt = -1L;
             visual.setAiming(false);
             visual.setShotPulseTicks(SHOT_PULSE_TICKS);
@@ -567,22 +655,28 @@ public final class MagibladeAbilityManager {
     private static LivingEntity findTarget(ServerWorld world, LivingEntity actor,
                                            LivingEntity sourceOwner, LivingEntity currentTarget,
                                            HeadState head) {
-        if (isValidEnemyInRange(world, actor, sourceOwner, currentTarget)) {
+        if (isValidEnemyInRange(world, actor, sourceOwner, currentTarget, head)
+                && passesJudgmentFilter(head, currentTarget)) {
             return currentTarget;
         }
         if (actor instanceof MobEntity mob
-                && isValidEnemyInRange(world, actor, sourceOwner, mob.getTarget())) {
+                && isValidEnemyInRange(world, actor, sourceOwner, mob.getTarget(), head)
+                && passesJudgmentFilter(head, mob.getTarget())) {
             return mob.getTarget();
         }
 
         double range = sonicRange(head.tuning);
-        Box searchBox = actor.getBoundingBox().expand(range, Math.max(2.0, range * 0.5), range);
+        Vec3d center = head.anchor == null ? actor.getPos() : head.anchor;
+        Box searchBox = head.anchor == null
+                ? actor.getBoundingBox().expand(range, Math.max(2.0, range * 0.5), range)
+                : new Box(center, center).expand(range);
         return world.getEntitiesByClass(
                         LivingEntity.class,
                         searchBox,
-                        target -> isValidEnemyInRange(world, actor, sourceOwner, target)
+                        target -> isValidEnemyInRange(world, actor, sourceOwner, target, head)
+                                && passesJudgmentFilter(head, target)
                 ).stream()
-                .min(Comparator.comparingDouble(actor::squaredDistanceTo))
+                .min(Comparator.comparingDouble(target -> target.getPos().squaredDistanceTo(center)))
                 .orElse(null);
     }
 
@@ -618,16 +712,17 @@ public final class MagibladeAbilityManager {
     }
 
     private static void harmonicCollapse(ServerWorld world, LivingEntity actor, HeadState head,
-                                         LivingEntity target) {
+                                         LivingEntity target, float waveDamage) {
         if (!head.judgment.flag(1 << 24)) return;
         int required = Math.max(1, head.judgment.integer(ArcaneCosmicMasteryTuning.Setting.COUNT, 3));
         if (head.sonicHits.merge(target.getUuid(), 1, Integer::sum) % required != 0) return;
         double radius = head.judgment.get(ArcaneCosmicMasteryTuning.Setting.SECONDARY_RADIUS, 2.5);
-        float damage = head.damage * (float) head.judgment.get(
+        float damage = waveDamage * (float) head.judgment.get(
                 ArcaneCosmicMasteryTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, .5);
         world.getEntitiesByClass(LivingEntity.class, target.getBoundingBox().expand(radius),
                         other -> isValidEnemy(world, actor, null, other))
-                .stream().limit(head.judgment.integer(ArcaneCosmicMasteryTuning.Setting.TARGET_CAP, 5))
+                .stream().limit(head.judgment.integer(
+                        ArcaneCosmicMasteryTuning.Setting.TERTIARY_TARGET_CAP, 5))
                 .forEach(other -> HelperMethods.damageThroughIframes(other,
                         world.getDamageSources().indirectMagic(actor, actor), damage));
     }
@@ -640,7 +735,7 @@ public final class MagibladeAbilityManager {
 
     private static void fireSonicWave(ServerWorld world, LivingEntity actor, LivingEntity sourceOwner,
                                       MagibladeWardenHeadVisualEntity visual, HeadState head,
-                                      LivingEntity selectedTarget) {
+                                      LivingEntity selectedTarget, float waveDamage) {
         Vec3d start = getMouthPosition(visual);
         Vec3d end = selectedTarget.getPos().add(0.0, selectedTarget.getHeight() * 0.55, 0.0);
         Vec3d delta = end.subtract(start);
@@ -659,8 +754,7 @@ public final class MagibladeAbilityManager {
 
         LivingEntity attributedOwner = sourceOwner == null ? actor : sourceOwner;
         DamageSource source = attributedOwner.getDamageSources().sonicBoom(attributedOwner);
-        double beamWidth = Math.max(head.judgment.get(ArcaneCosmicMasteryTuning.Setting.WIDTH, SONIC_BEAM_WIDTH),
-                head.judgment.flag(1 << 25) ? head.judgment.get(ArcaneCosmicMasteryTuning.Setting.WIDTH, 5) : 0);
+        double beamWidth = head.judgment.get(ArcaneCosmicMasteryTuning.Setting.WIDTH, SONIC_BEAM_WIDTH);
         Box searchBox = new Box(start, end).expand(beamWidth);
         int hitIndex = 0;
         int beamCap = head.judgment.flag(1 << 25)
@@ -671,19 +765,20 @@ public final class MagibladeAbilityManager {
                 searchBox,
                 candidate -> isValidEnemy(world, actor, sourceOwner, candidate)
         )) {
-            if (struck >= beamCap) break;
-            struck++;
             Box hitbox = target.getBoundingBox().expand(beamWidth);
             if (!hitbox.contains(start) && hitbox.raycast(start, end).isEmpty()) {
                 continue;
             }
+            if (struck >= beamCap) break;
+            struck++;
 
             float damage = HelperMethods.applyAbilityDamageEnchantments(
                     world,
                     head.stack,
                     target,
                     source,
-                    head.damage * (head.judgment.flag(1 << 23) && hitIndex < 3
+                    waveDamage * (head.judgment.flag(1 << 23) && hitIndex < head.judgment.integer(
+                            ArcaneCosmicMasteryTuning.Setting.SECONDARY_TARGET_CAP, 3)
                             ? (float) head.judgment.get(ArcaneCosmicMasteryTuning.Setting.OUTGOING_MULTIPLIER, 1.2) : 1)
             );
             boolean[] damaged = {false};
@@ -696,7 +791,7 @@ public final class MagibladeAbilityManager {
                                 net.minecraft.entity.effect.StatusEffects.WEAKNESS,
                                 head.judgment.integer(ArcaneCosmicMasteryTuning.Setting.STATUS_DURATION_TICKS, 50),
                                 head.judgment.integer(ArcaneCosmicMasteryTuning.Setting.STATUS_AMPLIFIER, 0)), actor);
-                harmonicCollapse(world, actor, head, target);
+                harmonicCollapse(world, actor, head, target, waveDamage);
                 spawnSonicImpactEffects(world, target);
             }
         }
@@ -814,10 +909,11 @@ public final class MagibladeAbilityManager {
     }
 
     private static boolean isValidEnemyInRange(ServerWorld world, LivingEntity actor,
-                                               LivingEntity sourceOwner, LivingEntity target) {
-        double range = sonicRange();
+                                               LivingEntity sourceOwner, LivingEntity target, HeadState head) {
+        double range = sonicRange(head.tuning);
+        Vec3d center = head.anchor == null ? actor.getPos() : head.anchor;
         return isValidEnemy(world, actor, sourceOwner, target)
-                && target.squaredDistanceTo(actor) <= range * range;
+                && target.getPos().squaredDistanceTo(center) <= range * range;
     }
 
     private static boolean isValidEnemy(ServerWorld world, LivingEntity actor,
@@ -923,11 +1019,11 @@ public final class MagibladeAbilityManager {
 
     private static void purgeOrphanVisuals(ServerWorld world) {
         Set<UUID> activeVisualIds = new HashSet<>();
-        Map<UUID, HeadState> heads = ACTIVE_HEADS.get(world);
+        Map<UUID, SummonState> heads = ACTIVE_HEADS.get(world);
         if (heads != null) {
-            for (HeadState head : heads.values()) {
-                if (head.visualId != null) {
-                    activeVisualIds.add(head.visualId);
+            for (SummonState summon : heads.values()) {
+                for (HeadState head : summon.heads) {
+                    if (head.visualId != null) activeVisualIds.add(head.visualId);
                 }
             }
         }
@@ -1014,6 +1110,10 @@ public final class MagibladeAbilityManager {
         }
     }
 
+    private static final class SummonState {
+        private final List<HeadState> heads = new ArrayList<>();
+    }
+
     private static final class HeadState {
         private final UUID actorId;
         private UUID sourceOwnerId;
@@ -1025,15 +1125,18 @@ public final class MagibladeAbilityManager {
         private long fireAt = -1L;
         private float damage;
         private final double orbitPhase;
+        private int index;
+        private Vec3d anchor;
         private UUID visualId;
         private ArcaneCosmicMasteryTuning tuning;
         private ArcaneCosmicMasteryTuning judgment = ArcaneCosmicMasteryTuning.EMPTY;
         private UniqueAbilityExecution execution;
         private int affectedTargets;
         private long nextGuardAt;
+        private int wavesFired;
+        private long echoAt = -1L;
+        private UUID echoTargetId;
         private final Map<UUID, Integer> sonicHits = new HashMap<>();
-        private static final HeadState EMPTY = new HeadState(null, null, null, ItemStack.EMPTY,
-                0, 0, 0, 0, 0, ArcaneCosmicMasteryTuning.EMPTY, null);
 
         private HeadState(UUID actorId, UUID sourceOwnerId, UUID targetId,
                           ItemStack stack, long spawnedAt, long expiresAt,
@@ -1055,6 +1158,7 @@ public final class MagibladeAbilityManager {
 
     private static final class RepulsionState {
         private long refreshAt;
+        private long nextProjectileBlockAt;
         private ArcaneCosmicMasteryTuning tuning = ArcaneCosmicMasteryTuning.EMPTY;
         private UUID countertoneTarget;
         private long countertoneUntil;

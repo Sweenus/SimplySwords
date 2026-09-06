@@ -44,8 +44,10 @@ public final class MagispearAbilityManager {
     private static final int RAIN_SPAWN_SPAN = 12;
     private static final int RAIN_FALL_TICKS = 5;
     private static final int LEAP_START_TICK = 20;
-    private static final int PLUNGE_START_TICK = 28;
-    private static final int IMPACT_TICK = 36;
+    private static final int AIRBORNE_TICKS = 16;
+    private static final int BASE_SPEARS_PER_WAVE = 2;
+    private static final int MAX_SPEARS_PER_WAVE = 12;
+    private static final int ECHO_TARGET_CAP = 64;
     private static final int FIELD_VISUAL_LIFETIME = 46;
     private static final double SKY_HEIGHT = 12.0;
     private static final int GROUND_SCAN_UP = 8;
@@ -54,6 +56,7 @@ public final class MagispearAbilityManager {
     private static final String SPEAR_VISUAL_TAG = "simplyswords_magispear_spear_visual";
 
     private static final Map<ServerWorld, Map<UUID, ActiveMagislam>> ACTIVE = new HashMap<>();
+    private static final Map<ServerWorld, List<PendingEcho>> ECHOES = new HashMap<>();
 
     public static ArcaneCosmicMasteryTuning spellpointBase(int chance) {
         return ArcaneCosmicMasteryTuning.EMPTY
@@ -79,16 +82,25 @@ public final class MagispearAbilityManager {
 
     private static ArcaneCosmicMasteryTuning rainBase() {
         return rainBase(Config.uniqueEffects.magispear.rainWaveCount, Config.uniqueEffects.magispear.radius,
-                Config.uniqueEffects.magispear.inwardPushStrength);
+                Config.uniqueEffects.magispear.inwardPushStrength)
+                .with(ArcaneCosmicMasteryTuning.Setting.WINDUP_TICKS, RAIN_START_TICK)
+                .with(ArcaneCosmicMasteryTuning.Setting.DURATION_TICKS, RAIN_SPAWN_SPAN)
+                .with(ArcaneCosmicMasteryTuning.Setting.TARGET_CAP, BASE_SPEARS_PER_WAVE)
+                .with(ArcaneCosmicMasteryTuning.Setting.COUNT, 2);
     }
 
     private static ArcaneCosmicMasteryTuning slamBase() {
-        return slamBase(Config.uniqueEffects.magispear.radius, Config.uniqueEffects.magispear.diveHeight);
+        return slamBase(Config.uniqueEffects.magispear.radius, Config.uniqueEffects.magispear.diveHeight)
+                .with(ArcaneCosmicMasteryTuning.Setting.COOLDOWN_TICKS,
+                        Config.uniqueEffects.magispear.cooldown)
+                .with(ArcaneCosmicMasteryTuning.Setting.DURATION_TICKS, AIRBORNE_TICKS)
+                .with(ArcaneCosmicMasteryTuning.Setting.KNOCKBACK, 1);
     }
 
     public static void clear(ServerWorld world) {
         Map<UUID, ActiveMagislam> active = ACTIVE.remove(world);
         if (active != null) active.values().forEach(m -> ArcaneCosmicMasteryCombatManager.finish(m.execution, 0));
+        ECHOES.remove(world);
     }
 
     public static void clearActor(LivingEntity actor) {
@@ -97,12 +109,48 @@ public final class MagispearAbilityManager {
             ActiveMagislam m = map.remove(actor.getUuid());
             if (m != null) ArcaneCosmicMasteryCombatManager.finish(m.execution, 0);
         });
+        ECHOES.values().forEach(list -> list.removeIf(echo -> echo.ownerId.equals(actor.getUuid())));
     }
 
     public static void clearAll() {
         ACTIVE.values().forEach(map -> map.values().forEach(
                 m -> ArcaneCosmicMasteryCombatManager.finish(m.execution, 0)));
         ACTIVE.clear();
+        ECHOES.clear();
+    }
+
+    public static void scheduleEcho(ServerWorld world, LivingEntity owner, LivingEntity target,
+                                    net.minecraft.item.ItemStack stack, float damage, int delay) {
+        if (world == null || owner == null || target == null || stack == null || damage <= 0) {
+            return;
+        }
+        List<PendingEcho> echoes = ECHOES.computeIfAbsent(world, ignored -> new ArrayList<>());
+        if (echoes.size() >= ECHO_TARGET_CAP) {
+            return;
+        }
+        echoes.add(new PendingEcho(owner.getUuid(), target.getUuid(), stack.copy(), damage,
+                world.getTime() + Math.max(1, delay)));
+    }
+
+    private static void tickEchoes(ServerWorld world) {
+        List<PendingEcho> echoes = ECHOES.get(world);
+        if (echoes == null) {
+            return;
+        }
+        echoes.removeIf(echo -> {
+            if (world.getTime() < echo.at) {
+                return false;
+            }
+            if (world.getEntity(echo.ownerId) instanceof LivingEntity owner
+                    && world.getEntity(echo.targetId) instanceof LivingEntity target
+                    && owner.isAlive() && target.isAlive()) {
+                damageTarget(world, owner, echo.stack, target, echo.damage);
+            }
+            return true;
+        });
+        if (echoes.isEmpty()) {
+            ECHOES.remove(world);
+        }
     }
 
     private MagispearAbilityManager() {
@@ -133,14 +181,16 @@ public final class MagispearAbilityManager {
             return false;
         }
 
-        UniqueAbilityExecution execution = ArcaneCosmicMasteryCombatManager.beginActive(
-                ArcaneCosmicMasteryAbilities.MAGISPEAR_RAIN, context, Config.uniqueEffects.magispear.cooldown,
-                rainBase());
-        ArcaneCosmicMasteryTuning tuning = ArcaneCosmicMasteryAbilities.tuning(execution);
         UniqueAbilityExecution slamExecution = ArcaneCosmicMasteryCombatManager.beginPassive(
-                ArcaneCosmicMasteryAbilities.MAGISPEAR_SLAM, world, context.stack(), actor, null, slamBase());
+                ArcaneCosmicMasteryAbilities.MAGISPEAR_SLAM, world, context.stack(), actor, context.target(),
+                slamBase());
         ArcaneCosmicMasteryTuning slam = ArcaneCosmicMasteryAbilities.tuning(slamExecution);
         ArcaneCosmicMasteryCombatManager.finish(slamExecution, 0);
+        int cooldown = Math.max(0, slam.integer(ArcaneCosmicMasteryTuning.Setting.COOLDOWN_TICKS,
+                Config.uniqueEffects.magispear.cooldown));
+        UniqueAbilityExecution execution = ArcaneCosmicMasteryCombatManager.beginActive(
+                ArcaneCosmicMasteryAbilities.MAGISPEAR_RAIN, context, cooldown, rainBase());
+        ArcaneCosmicMasteryTuning tuning = ArcaneCosmicMasteryAbilities.tuning(execution);
         int waveCount = MathHelper.clamp(tuning.integer(ArcaneCosmicMasteryTuning.Setting.STACK_CAP,
                 Config.uniqueEffects.magispear.rainWaveCount), 1, 12);
         float radius = (float) Math.max(1.0, tuning.get(
@@ -150,6 +200,13 @@ public final class MagispearAbilityManager {
                 new boolean[waveCount], new boolean[waveCount], tuning, execution
         );
         magislam.slam = slam;
+        int airborne = MathHelper.clamp(slam.integer(
+                ArcaneCosmicMasteryTuning.Setting.DURATION_TICKS, AIRBORNE_TICKS), 4, 120);
+        magislam.plungeStartTick = LEAP_START_TICK + airborne / 2;
+        magislam.impactTick = LEAP_START_TICK + airborne;
+        magislam.rooted = tuning.flag(1 << 16);
+        LivingEntity followed = context.target();
+        magislam.targetId = followed == null ? null : followed.getUuid();
 
         if (Config.general.enableModernFieldEffects) {
             MagispearFirmamentVisualEntity field = new MagispearFirmamentVisualEntity(
@@ -194,10 +251,15 @@ public final class MagispearAbilityManager {
             return false;
         }
         long age = world.getTime() - magislam.startedAt;
-        return age >= LEAP_START_TICK && age <= IMPACT_TICK;
+        return !magislam.rooted && age >= LEAP_START_TICK && age <= magislam.impactTick;
+    }
+
+    public static boolean hasWork(ServerWorld world) {
+        return hasActive(world) || !ECHOES.getOrDefault(world, List.of()).isEmpty();
     }
 
     public static void tick(ServerWorld world) {
+        tickEchoes(world);
         Map<UUID, ActiveMagislam> active = ACTIVE.get(world);
         if (active == null || active.isEmpty()) {
             return;
@@ -225,53 +287,105 @@ public final class MagispearAbilityManager {
     }
 
     private static boolean tickMagislam(ServerWorld world, LivingEntity owner, ActiveMagislam magislam) {
+        if (magislam.craterPulseAt > 0) {
+            if (world.getTime() < magislam.craterPulseAt) {
+                return false;
+            }
+            craterPulse(world, owner, magislam);
+            return true;
+        }
+
         long age = world.getTime() - magislam.startedAt;
         tickRainWaves(world, owner, magislam, age);
 
-        if (age >= LEAP_START_TICK && age < PLUNGE_START_TICK) {
-            guideOwner(owner, magislam.center.add(0.0,
+        if (magislam.rooted) {
+            return allWavesImpacted(magislam);
+        }
+
+        if (age >= LEAP_START_TICK && age < magislam.plungeStartTick) {
+            guideOwner(owner, followedCenter(world, magislam).add(0.0,
                     Math.max(1.0, magislam.slam.get(ArcaneCosmicMasteryTuning.Setting.HEIGHT,
                             Config.uniqueEffects.magispear.diveHeight)), 0.0),
-                    (int) Math.max(1L, PLUNGE_START_TICK - age));
+                    (int) Math.max(1L, magislam.plungeStartTick - age));
             magislam.movementObstructed |= owner.horizontalCollision;
-        } else if (age >= PLUNGE_START_TICK && age < IMPACT_TICK) {
+        } else if (age >= magislam.plungeStartTick && age < magislam.impactTick) {
+            Vec3d aim = followedCenter(world, magislam);
             if (!magislam.finalSpearSpawned) {
                 magislam.finalSpearSpawned = true;
                 if (Config.general.enableModernFieldEffects) {
-                    Vec3d start = magislam.center.add(0.0, SKY_HEIGHT + 2.0, 0.0);
-                    spawnSpearVisual(world, magislam, start, magislam.center,
-                            IMPACT_TICK - PLUNGE_START_TICK,
+                    Vec3d start = aim.add(0.0, SKY_HEIGHT + 2.0, 0.0);
+                    spawnSpearVisual(world, magislam, start, aim,
+                            magislam.impactTick - magislam.plungeStartTick,
                             MagispearFallingSpearVisualEntity.MODE_FINAL, 1.0F);
                 }
-                world.playSound(null, magislam.center.x, magislam.center.y + 4.0, magislam.center.z,
+                world.playSound(null, aim.x, aim.y + 4.0, aim.z,
                         SoundRegistry.MAGIC_SHAMANIC_NORDIC_27.get(), SoundCategory.PLAYERS, 0.75F, 0.55F);
             }
 
-            guideOwner(owner, magislam.center.add(0.0, 0.08, 0.0),
-                    (int) Math.max(1L, IMPACT_TICK - age));
+            guideOwner(owner, aim.add(0.0, 0.08, 0.0),
+                    (int) Math.max(1L, magislam.impactTick - age));
             magislam.movementObstructed |= owner.horizontalCollision;
-            if (age > PLUNGE_START_TICK + 1L && (owner.horizontalCollision || owner.isOnGround())) {
+            if (age > magislam.plungeStartTick + 1L && (owner.horizontalCollision || owner.isOnGround())) {
                 Vec3d impact = getGroundPosition(world, owner.getPos());
+                flushPendingWaves(world, owner, magislam);
                 finish(world, owner, magislam, impact);
-                return true;
+                return magislam.craterPulseAt <= 0;
             }
         }
 
-        if (age >= IMPACT_TICK) {
+        if (age >= magislam.impactTick) {
+            Vec3d aim = followedCenter(world, magislam);
             Vec3d impact = magislam.movementObstructed
-                    || owner.getPos().squaredDistanceTo(magislam.center) > 9.0
+                    || owner.getPos().squaredDistanceTo(aim) > 9.0
                     ? getGroundPosition(world, owner.getPos())
-                    : magislam.center;
+                    : aim;
+            flushPendingWaves(world, owner, magislam);
             finish(world, owner, magislam, impact);
-            return true;
+            return magislam.craterPulseAt <= 0;
         }
         return false;
+    }
+
+    private static void flushPendingWaves(ServerWorld world, LivingEntity owner, ActiveMagislam magislam) {
+        for (int wave = 0; wave < magislam.waveCount; wave++) {
+            if (!magislam.waveImpacted[wave]) {
+                magislam.waveSpawned[wave] = true;
+                magislam.waveImpacted[wave] = true;
+                impactRainWave(world, owner, magislam, wave);
+            }
+        }
+    }
+
+    private static boolean allWavesImpacted(ActiveMagislam magislam) {
+        for (boolean impacted : magislam.waveImpacted) {
+            if (!impacted) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static Vec3d followedCenter(ServerWorld world, ActiveMagislam magislam) {
+        double leash = magislam.slam.get(ArcaneCosmicMasteryTuning.Setting.RANGE, 0);
+        if (leash <= 0.0 || magislam.targetId == null) {
+            return magislam.center;
+        }
+        if (!(world.getEntity(magislam.targetId) instanceof LivingEntity target) || !target.isAlive()) {
+            return magislam.center;
+        }
+        Vec3d offset = new Vec3d(target.getX() - magislam.origin.x, 0.0, target.getZ() - magislam.origin.z);
+        double distance = offset.length();
+        if (distance > leash) {
+            offset = offset.multiply(leash / distance);
+        }
+        magislam.center = getGroundPosition(world, magislam.origin.add(offset));
+        return magislam.center;
     }
 
     private static void tickRainWaves(ServerWorld world, LivingEntity owner,
                                       ActiveMagislam magislam, long age) {
         for (int wave = 0; wave < magislam.waveCount; wave++) {
-            int spawnTick = getWaveSpawnTick(wave, magislam.waveCount);
+            int spawnTick = getWaveSpawnTick(magislam, wave);
             if (age >= spawnTick && !magislam.waveSpawned[wave]) {
                 magislam.waveSpawned[wave] = true;
                 spawnRainWave(world, magislam, wave);
@@ -283,32 +397,58 @@ public final class MagispearAbilityManager {
         }
     }
 
-    private static int getWaveSpawnTick(int wave, int waveCount) {
-        if (waveCount <= 1) {
-            return RAIN_START_TICK + RAIN_SPAWN_SPAN / 2;
+    private static int getWaveSpawnTick(ActiveMagislam magislam, int wave) {
+        int start = Math.max(0, magislam.tuning.integer(
+                ArcaneCosmicMasteryTuning.Setting.WINDUP_TICKS, RAIN_START_TICK));
+        int span = Math.max(0, magislam.tuning.integer(
+                ArcaneCosmicMasteryTuning.Setting.DURATION_TICKS, RAIN_SPAWN_SPAN));
+        if (magislam.waveCount <= 1) {
+            return clampWaveSpawnTick(magislam, start + span / 2);
         }
-        return RAIN_START_TICK + Math.round((float) wave * RAIN_SPAWN_SPAN / (waveCount - 1));
+        if (magislam.rooted) {
+            return start + Math.round((float) wave * span / (magislam.waveCount - 1));
+        }
+        int latest = latestWaveSpawnTick(magislam);
+        if (start > latest) {
+            start = latest;
+            span = 0;
+        } else if (start + span > latest) {
+            span = latest - start;
+        }
+        return start + Math.round((float) wave * span / (magislam.waveCount - 1));
+    }
+
+    private static int latestWaveSpawnTick(ActiveMagislam magislam) {
+        return Math.max(0, magislam.impactTick - RAIN_FALL_TICKS);
+    }
+
+    private static int clampWaveSpawnTick(ActiveMagislam magislam, int spawnTick) {
+        return magislam.rooted ? spawnTick : Math.min(spawnTick, latestWaveSpawnTick(magislam));
+    }
+
+    private static int getSpearsPerWave(ActiveMagislam magislam) {
+        return MathHelper.clamp(magislam.tuning.integer(
+                ArcaneCosmicMasteryTuning.Setting.TARGET_CAP, BASE_SPEARS_PER_WAVE),
+                1, MAX_SPEARS_PER_WAVE);
     }
 
     private static void spawnRainWave(ServerWorld world, ActiveMagislam magislam, int wave) {
-        Vec3d first = getStrikePosition(world, magislam, wave, false);
-        Vec3d opposite = getStrikePosition(world, magislam, wave, true);
-        if (Config.general.enableModernFieldEffects) {
-            spawnSpearVisual(world, magislam, first.add(0.0, SKY_HEIGHT, 0.0), first,
-                    RAIN_FALL_TICKS, MagispearFallingSpearVisualEntity.MODE_RAIN, 1.0F);
-            spawnSpearVisual(world, magislam, opposite.add(0.0, SKY_HEIGHT, 0.0), opposite,
-                    RAIN_FALL_TICKS, MagispearFallingSpearVisualEntity.MODE_RAIN, 1.0F);
+        int spears = getSpearsPerWave(magislam);
+        for (int index = 0; index < spears; index++) {
+            Vec3d strike = getStrikePosition(world, magislam, wave, index, spears);
+            if (Config.general.enableModernFieldEffects) {
+                spawnSpearVisual(world, magislam, strike.add(0.0, SKY_HEIGHT, 0.0), strike,
+                        RAIN_FALL_TICKS, MagispearFallingSpearVisualEntity.MODE_RAIN, 1.0F);
+            }
+            spawnTelegraphParticles(world, strike);
         }
-        spawnTelegraphParticles(world, first);
-        spawnTelegraphParticles(world, opposite);
         world.playSound(null, magislam.center.x, magislam.center.y + 6.0, magislam.center.z,
                 SoundEvents.ENTITY_ILLUSIONER_CAST_SPELL, SoundCategory.PLAYERS, 0.35F, 1.35F + wave * 0.08F);
     }
 
     private static void impactRainWave(ServerWorld world, LivingEntity owner,
                                        ActiveMagislam magislam, int wave) {
-        Vec3d first = getStrikePosition(world, magislam, wave, false);
-        Vec3d opposite = getStrikePosition(world, magislam, wave, true);
+        int spears = getSpearsPerWave(magislam);
         double splashRadius = Math.max(0.25, Config.uniqueEffects.magispear.rainSplashRadius);
         Set<UUID> hitThisWave = new HashSet<>();
         float waveScaling = Config.uniqueEffects.magispear.throwDamageScaling / Math.max(1, magislam.waveCount);
@@ -316,10 +456,11 @@ public final class MagispearAbilityManager {
         float baseDamage = HelperMethods.abilityScaledDamage("arcane", owner, magislam.stack,
                 waveScaling * (float) magislam.tuning.get(ArcaneCosmicMasteryTuning.Setting.DAMAGE_MULTIPLIER, 1),
                 waveSpellScaling);
-        damageRainArea(world, owner, magislam, first, splashRadius, baseDamage, hitThisWave);
-        damageRainArea(world, owner, magislam, opposite, splashRadius, baseDamage, hitThisWave);
-        spawnRainImpactEffects(world, first);
-        spawnRainImpactEffects(world, opposite);
+        for (int index = 0; index < spears; index++) {
+            Vec3d strike = getStrikePosition(world, magislam, wave, index, spears);
+            damageRainArea(world, owner, magislam, strike, splashRadius, baseDamage, hitThisWave);
+            spawnRainImpactEffects(world, strike);
+        }
     }
 
     private static void damageRainArea(ServerWorld world, LivingEntity owner, ActiveMagislam magislam,
@@ -342,7 +483,8 @@ public final class MagispearAbilityManager {
                         Math.max(0.0, magislam.tuning.get(ArcaneCosmicMasteryTuning.Setting.PULL_STRENGTH,
                                 Config.uniqueEffects.magispear.inwardPushStrength)));
                 int hits = magislam.waveHits.merge(target.getUuid(), 1, Integer::sum);
-                if (hits >= 2 && magislam.tuning.flag(1 << 15)) magislam.marked.add(target.getUuid());
+                if (magislam.tuning.flag(1 << 15) && hits >= Math.max(1, magislam.tuning.integer(
+                        ArcaneCosmicMasteryTuning.Setting.COUNT, 2))) magislam.marked.add(target.getUuid());
             }
         }
     }
@@ -354,6 +496,7 @@ public final class MagispearAbilityManager {
         owner.setVelocity(0.0, 0.12, 0.0);
         owner.velocityModified = true;
         owner.fallDistance = 0.0F;
+        applyLandingBuffs(world, owner, magislam, impact);
 
         double radius = Math.max(1.0, magislam.slam.get(
                 ArcaneCosmicMasteryTuning.Setting.SECONDARY_RADIUS, Config.uniqueEffects.magispear.radius));
@@ -368,25 +511,88 @@ public final class MagispearAbilityManager {
             spawnFinalImpactEffects(world, impact, radius);
             return;
         }
+        double knockback = magislam.slam.get(ArcaneCosmicMasteryTuning.Setting.KNOCKBACK, 1);
+        int quakeCap = magislam.slam.flag(1 << 24)
+                ? magislam.slam.integer(ArcaneCosmicMasteryTuning.Setting.TARGET_CAP, 10) : 0;
+        int quaked = 0;
+        for (LivingEntity target : slamTargets(world, owner, impact, radius)) {
+            if (damageTarget(world, owner, magislam.stack, target, baseDamage)) {
+                magislam.hitTargets.add(target.getUuid());
+                knockFromImpact(target, impact, knockback);
+                if (quaked < quakeCap) {
+                    quaked++;
+                    target.addStatusEffect(new net.minecraft.entity.effect.StatusEffectInstance(
+                            net.minecraft.entity.effect.StatusEffects.SLOWNESS,
+                            magislam.slam.integer(ArcaneCosmicMasteryTuning.Setting.SECONDARY_DURATION_TICKS, 50),
+                            magislam.slam.integer(ArcaneCosmicMasteryTuning.Setting.STATUS_AMPLIFIER, 1)), owner);
+                }
+            }
+        }
+        spawnFinalImpactEffects(world, impact, radius);
+        if (magislam.slam.flag(1 << 23)) {
+            magislam.craterPulseAt = world.getTime() + Math.max(1,
+                    magislam.slam.integer(ArcaneCosmicMasteryTuning.Setting.DELAY_TICKS, 10));
+            magislam.craterPulseDamage = baseDamage * (float) magislam.slam.get(
+                    ArcaneCosmicMasteryTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, .35);
+            magislam.craterPulseRadius = radius;
+        }
+    }
+
+    private static List<LivingEntity> slamTargets(ServerWorld world, LivingEntity owner,
+                                                  Vec3d impact, double radius) {
         Box box = new Box(impact.x - radius, impact.y - 2.0, impact.z - radius,
                 impact.x + radius, impact.y + radius, impact.z + radius);
-        for (LivingEntity target : world.getEntitiesByClass(LivingEntity.class, box,
+        return world.getEntitiesByClass(LivingEntity.class, box,
                 entity -> entity != owner
                         && entity.isAlive()
                         && EntityPredicates.VALID_LIVING_ENTITY.test(entity)
                         && HelperMethods.checkAbilityTarget(entity, owner)
-                        && horizontalSquaredDistance(entity.getPos(), impact) <= radius * radius)) {
-            if (damageTarget(world, owner, magislam.stack, target, baseDamage)) {
+                        && horizontalSquaredDistance(entity.getPos(), impact) <= radius * radius);
+    }
+
+    private static void applyLandingBuffs(ServerWorld world, LivingEntity owner,
+                                          ActiveMagislam magislam, Vec3d impact) {
+        if (magislam.slam.flag(1 << 22)) {
+            owner.addStatusEffect(new net.minecraft.entity.effect.StatusEffectInstance(
+                    net.minecraft.entity.effect.StatusEffects.RESISTANCE,
+                    Math.max(1, magislam.slam.integer(
+                            ArcaneCosmicMasteryTuning.Setting.TERTIARY_STATUS_DURATION_TICKS, 8)), 2));
+        }
+        if (!magislam.slam.flag(1 << 26)) {
+            return;
+        }
+        double allyRadius = Math.max(1.0, magislam.slam.get(
+                ArcaneCosmicMasteryTuning.Setting.TERTIARY_RADIUS, 5));
+        float absorption = (float) magislam.slam.get(ArcaneCosmicMasteryTuning.Setting.ABSORPTION, 8);
+        int duration = Math.max(1, magislam.slam.integer(
+                ArcaneCosmicMasteryTuning.Setting.STATUS_DURATION_TICKS, 100));
+        for (LivingEntity ally : world.getEntitiesByClass(LivingEntity.class,
+                new Box(impact.x - allyRadius, impact.y - 2.0, impact.z - allyRadius,
+                        impact.x + allyRadius, impact.y + allyRadius, impact.z + allyRadius),
+                entity -> entity != owner
+                        && entity.isAlive()
+                        && EntityPredicates.VALID_LIVING_ENTITY.test(entity)
+                        && !HelperMethods.checkAbilityTarget(entity, owner)
+                        && horizontalSquaredDistance(entity.getPos(), impact)
+                        <= allyRadius * allyRadius)) {
+            MasteryAbsorptionTracker.grant(ally, absorption, duration, absorption);
+        }
+    }
+
+    private static void craterPulse(ServerWorld world, LivingEntity owner, ActiveMagislam magislam) {
+        Vec3d impact = magislam.center;
+        double radius = magislam.craterPulseRadius;
+        for (LivingEntity target : slamTargets(world, owner, impact, radius)) {
+            if (damageTarget(world, owner, magislam.stack, target, magislam.craterPulseDamage)) {
                 magislam.hitTargets.add(target.getUuid());
-                knockFromImpact(target, impact);
-                if (magislam.slam.flag(1 << 24)) target.addStatusEffect(
-                        new net.minecraft.entity.effect.StatusEffectInstance(
-                                net.minecraft.entity.effect.StatusEffects.SLOWNESS,
-                                magislam.slam.integer(ArcaneCosmicMasteryTuning.Setting.SECONDARY_DURATION_TICKS, 50),
-                                magislam.slam.integer(ArcaneCosmicMasteryTuning.Setting.STATUS_AMPLIFIER, 1)), owner);
             }
         }
-        spawnFinalImpactEffects(world, impact, radius);
+        world.spawnParticles(ParticleTypes.ENCHANTED_HIT, impact.x, impact.y + 0.35, impact.z,
+                18, radius * 0.42, 0.25, radius * 0.42, 0.12);
+        world.spawnParticles(ParticleTypes.REVERSE_PORTAL, impact.x, impact.y + 0.25, impact.z,
+                20, radius * 0.45, 0.18, radius * 0.45, 0.08);
+        world.playSound(null, impact.x, impact.y, impact.z, SoundEvents.ENTITY_GENERIC_EXPLODE,
+                SoundCategory.PLAYERS, 0.55F, 0.95F);
     }
 
     private static boolean damageTarget(ServerWorld world, LivingEntity owner, net.minecraft.item.ItemStack stack,
@@ -410,13 +616,14 @@ public final class MagispearAbilityManager {
         target.velocityModified = true;
     }
 
-    private static void knockFromImpact(LivingEntity target, Vec3d impact) {
+    private static void knockFromImpact(LivingEntity target, Vec3d impact, double knockback) {
         Vec3d direction = new Vec3d(target.getX() - impact.x, 0.0, target.getZ() - impact.z);
         if (direction.lengthSquared() < 0.001) {
             direction = new Vec3d(0.0, 0.0, 1.0);
         }
-        Vec3d knockback = direction.normalize().multiply(0.55);
-        target.setVelocity(knockback.x, Math.max(target.getVelocity().y, 0.32), knockback.z);
+        Vec3d push = direction.normalize().multiply(0.55);
+        target.setVelocity(push.x, Math.max(target.getVelocity().y, 0.32 * Math.max(0.0, knockback)),
+                push.z);
         target.velocityModified = true;
     }
 
@@ -433,11 +640,11 @@ public final class MagispearAbilityManager {
     }
 
     private static Vec3d getStrikePosition(ServerWorld world, ActiveMagislam magislam,
-                                           int wave, boolean opposite) {
+                                           int wave, int index, int spears) {
         double radius = Math.max(1.0, magislam.tuning.get(
                 ArcaneCosmicMasteryTuning.Setting.RADIUS, Config.uniqueEffects.magispear.radius)) * 0.78;
         double angle = MathHelper.TAU * wave / (magislam.waveCount * 2.0)
-                + (opposite ? Math.PI : 0.0);
+                + MathHelper.TAU * index / Math.max(1, spears);
         Vec3d rough = magislam.center.add(Math.cos(angle) * radius, 0.0, Math.sin(angle) * radius);
         return getGroundPosition(world, rough);
     }
@@ -570,11 +777,23 @@ public final class MagispearAbilityManager {
         return x * x + z * z;
     }
 
+    private record PendingEcho(UUID ownerId, UUID targetId, net.minecraft.item.ItemStack stack,
+                               float damage, long at) {
+    }
+
     private static final class ActiveMagislam {
         private ArcaneCosmicMasteryTuning slam = ArcaneCosmicMasteryTuning.EMPTY;
         private final UUID ownerId;
         private final net.minecraft.item.ItemStack stack;
         private Vec3d center;
+        private final Vec3d origin;
+        private UUID targetId;
+        private int plungeStartTick;
+        private int impactTick;
+        private boolean rooted;
+        private long craterPulseAt;
+        private float craterPulseDamage;
+        private double craterPulseRadius;
         private final long startedAt;
         private final int waveCount;
         private final boolean[] waveSpawned;
@@ -596,6 +815,7 @@ public final class MagispearAbilityManager {
             this.ownerId = ownerId;
             this.stack = stack;
             this.center = center;
+            this.origin = center;
             this.startedAt = startedAt;
             this.waveCount = waveCount;
             this.waveSpawned = waveSpawned;

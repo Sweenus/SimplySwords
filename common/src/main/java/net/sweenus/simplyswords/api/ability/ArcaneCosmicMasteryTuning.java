@@ -24,6 +24,7 @@ public final class ArcaneCosmicMasteryTuning implements MasteryTuningSnapshot {
         SECONDARY_COUNT(0, 64), SECONDARY_TARGET_CAP(0, 64),
         SECONDARY_REFUND_TICKS(0, 72000), TERTIARY_REFUND_TICKS(0, 72000),
         ARCANETHYST_LEVITATION_MELEE_DAMAGE_MULTIPLIER(0, 10),
+        CAELESTIS_EAGER_RIFT_TICKS(0, 72000), CAELESTIS_RIM_DAMAGE_TARGET_CAP(0, 64),
         MODE(0, Integer.MAX_VALUE);
 
         private final double minimum;

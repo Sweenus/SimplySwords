@@ -170,7 +170,9 @@ public abstract class InGameHudMixin {
         if (!dawnquiver.isEmpty()) {
             int stacks = dawnquiver.getOrDefault(ComponentTypeRegistry.STORED_CHARGE.get(),
                     StoredChargeComponent.DEFAULT).charge();
-            int maximum = Math.max(1, Config.uniqueEffects.dawnquiver.maxChorus);
+            int maximum = Math.max(1, dawnquiver.getOrDefault(
+                    ComponentTypeRegistry.DAWN_CHORUS_CAPACITY.get(),
+                    Config.uniqueEffects.dawnquiver.maxChorus));
             renderDawnquiverHud(context, client, tickCounter, dawnquiver, stacks, maximum);
             return;
         }

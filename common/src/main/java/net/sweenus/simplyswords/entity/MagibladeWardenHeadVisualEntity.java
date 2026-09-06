@@ -6,6 +6,8 @@ import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.registry.EntityRegistry;
 
@@ -24,6 +26,16 @@ public class MagibladeWardenHeadVisualEntity extends Entity {
     private static final TrackedData<Float> SCALE =
             DataTracker.registerData(MagibladeWardenHeadVisualEntity.class, TrackedDataHandlerRegistry.FLOAT);
     private static final TrackedData<Float> ORBIT_PHASE =
+            DataTracker.registerData(MagibladeWardenHeadVisualEntity.class, TrackedDataHandlerRegistry.FLOAT);
+    private static final TrackedData<Boolean> ANCHORED =
+            DataTracker.registerData(MagibladeWardenHeadVisualEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+    private static final TrackedData<Long> ORBIT_STARTED_AT =
+            DataTracker.registerData(MagibladeWardenHeadVisualEntity.class, TrackedDataHandlerRegistry.LONG);
+    private static final TrackedData<Float> ORBIT_RADIUS =
+            DataTracker.registerData(MagibladeWardenHeadVisualEntity.class, TrackedDataHandlerRegistry.FLOAT);
+    private static final TrackedData<Float> ORBIT_SPEED =
+            DataTracker.registerData(MagibladeWardenHeadVisualEntity.class, TrackedDataHandlerRegistry.FLOAT);
+    private static final TrackedData<Float> VERTICAL_OFFSET =
             DataTracker.registerData(MagibladeWardenHeadVisualEntity.class, TrackedDataHandlerRegistry.FLOAT);
     private static final TrackedData<Boolean> AIMING =
             DataTracker.registerData(MagibladeWardenHeadVisualEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
@@ -60,6 +72,11 @@ public class MagibladeWardenHeadVisualEntity extends Entity {
         builder.add(TARGET_PITCH, 0.0F);
         builder.add(SCALE, 0.65F);
         builder.add(ORBIT_PHASE, 0.0F);
+        builder.add(ANCHORED, false);
+        builder.add(ORBIT_STARTED_AT, 0L);
+        builder.add(ORBIT_RADIUS, 0.9F);
+        builder.add(ORBIT_SPEED, 0.075F);
+        builder.add(VERTICAL_OFFSET, 0.9F);
         builder.add(AIMING, false);
         builder.add(SHOT_PULSE_TICKS, 0);
         builder.add(DISMISSING, false);
@@ -155,6 +172,34 @@ public class MagibladeWardenHeadVisualEntity extends Entity {
         return this.dataTracker.get(ORBIT_PHASE);
     }
 
+    public void setOrbitParameters(boolean anchored, long startedAt, float phase,
+                                   float radius, float speed, float verticalOffset) {
+        this.dataTracker.set(ANCHORED, anchored);
+        this.dataTracker.set(ORBIT_STARTED_AT, startedAt);
+        this.setOrbitPhase(phase);
+        this.dataTracker.set(ORBIT_RADIUS, Math.max(0.0F, radius));
+        this.dataTracker.set(ORBIT_SPEED, Math.max(0.0F, speed));
+        this.dataTracker.set(VERTICAL_OFFSET, verticalOffset);
+    }
+
+    public boolean isAnchored() {
+        return this.dataTracker.get(ANCHORED);
+    }
+
+    public Vec3d orbitPosition(Vec3d ownerEyePosition, float tickDelta) {
+        double elapsed = Math.max(0.0, this.getWorld().getTime() - this.dataTracker.get(ORBIT_STARTED_AT) + tickDelta);
+        return orbitPosition(ownerEyePosition, elapsed, this.getOrbitPhase(),
+                this.dataTracker.get(ORBIT_RADIUS), this.dataTracker.get(ORBIT_SPEED),
+                this.dataTracker.get(VERTICAL_OFFSET));
+    }
+
+    public static Vec3d orbitPosition(Vec3d ownerEyePosition, double elapsed, float phase,
+                                      float radius, float speed, float verticalOffset) {
+        double angle = phase + elapsed * speed;
+        double bob = MathHelper.sin((float) (elapsed * 0.16 + phase)) * 0.1;
+        return ownerEyePosition.add(Math.cos(angle) * radius, verticalOffset + bob, Math.sin(angle) * radius);
+    }
+
     public void setAiming(boolean aiming) {
         this.dataTracker.set(AIMING, aiming);
     }
@@ -200,6 +245,11 @@ public class MagibladeWardenHeadVisualEntity extends Entity {
         this.setTargetPitch(nbt.getFloat("target_pitch"));
         this.setScale(nbt.getFloat("scale"));
         this.setOrbitPhase(nbt.getFloat("orbit_phase"));
+        if (nbt.contains("orbit_started_at")) {
+            this.setOrbitParameters(nbt.getBoolean("anchored"), nbt.getLong("orbit_started_at"),
+                    nbt.getFloat("orbit_phase"), nbt.getFloat("orbit_radius"), nbt.getFloat("orbit_speed"),
+                    nbt.getFloat("vertical_offset"));
+        }
         this.setAiming(nbt.getBoolean("aiming"));
         this.setShotPulseTicks(nbt.getInt("shot_pulse_ticks"));
         this.setDismissing(nbt.getBoolean("dismissing"));
@@ -214,6 +264,11 @@ public class MagibladeWardenHeadVisualEntity extends Entity {
         nbt.putFloat("target_pitch", this.getTargetPitch());
         nbt.putFloat("scale", this.getScale());
         nbt.putFloat("orbit_phase", this.getOrbitPhase());
+        nbt.putBoolean("anchored", this.isAnchored());
+        nbt.putLong("orbit_started_at", this.dataTracker.get(ORBIT_STARTED_AT));
+        nbt.putFloat("orbit_radius", this.dataTracker.get(ORBIT_RADIUS));
+        nbt.putFloat("orbit_speed", this.dataTracker.get(ORBIT_SPEED));
+        nbt.putFloat("vertical_offset", this.dataTracker.get(VERTICAL_OFFSET));
         nbt.putBoolean("aiming", this.isAiming());
         nbt.putInt("shot_pulse_ticks", this.getShotPulseTicks());
         nbt.putBoolean("dismissing", this.isDismissing());
