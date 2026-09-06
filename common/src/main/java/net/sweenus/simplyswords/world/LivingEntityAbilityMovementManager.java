@@ -53,6 +53,18 @@ public final class LivingEntityAbilityMovementManager {
         dash(world, actor, direction, speed, stopTicks);
     }
 
+    public static void leapInDirection(ServerWorld world, LivingEntity actor, Vec3d direction, double speed,
+                                      double verticalVelocity, int stopTicks) {
+        if (world == null || actor == null || direction == null
+                || direction.horizontalLengthSquared() < 0.0001 || speed <= 0.0) {
+            return;
+        }
+        Vec3d horizontal = new Vec3d(direction.x, 0.0, direction.z).normalize().multiply(speed);
+        actor.setVelocity(horizontal.x, verticalVelocity, horizontal.z);
+        actor.velocityModified = true;
+        scheduleStop(world, actor, stopTicks);
+    }
+
     private static void dash(ServerWorld world, LivingEntity actor, Vec3d direction, double speed, int stopTicks) {
         if (world == null || actor == null || direction.horizontalLengthSquared() < 0.0001 || speed <= 0.0) {
             return;

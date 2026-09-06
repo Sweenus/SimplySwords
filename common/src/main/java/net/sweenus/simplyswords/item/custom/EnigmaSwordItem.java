@@ -35,6 +35,7 @@ import net.sweenus.simplyswords.effect.instance.SimplySwordsStatusEffectInstance
 import net.sweenus.simplyswords.entity.BattleStandardDarkEntity;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
+import net.sweenus.simplyswords.item.interfaces.UniqueWeaponSecondaryAction;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.EntityRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
@@ -45,7 +46,7 @@ import net.sweenus.simplyswords.world.ArcaneCosmicMasteryCombatManager;
 
 import java.util.List;
 
-public class EnigmaSwordItem extends UniqueSwordItem implements UniqueWeaponActiveAbility {
+public class EnigmaSwordItem extends UniqueSwordItem implements UniqueWeaponActiveAbility, UniqueWeaponSecondaryAction {
     public EnigmaSwordItem(ToolMaterial toolMaterial, Settings settings) {
         super(toolMaterial, settings);
     }
@@ -71,6 +72,19 @@ public class EnigmaSwordItem extends UniqueSwordItem implements UniqueWeaponActi
     @Override
     public TypedActionResult<ItemStack> startPlayerAbility(World world, PlayerEntity user, Hand hand) {
         return UniqueWeaponActiveAbility.super.startPlayerAbility(world, user, hand);
+    }
+
+    @Override
+    public TypedActionResult<ItemStack> startPlayerSecondaryAbility(World world, PlayerEntity user, Hand hand) {
+        ItemStack stack = user.getStackInHand(hand);
+        if (world.isClient() || !(world instanceof ServerWorld serverWorld)
+                || !net.sweenus.simplyswords.api.AwakeningApi.isAbilityUnlocked(stack)
+                || stack.getDamage() >= stack.getMaxDamage() - 1
+                || !BattleStandardDarkEntity.tryRideTheGale(serverWorld, user, stack)) {
+            return TypedActionResult.pass(stack);
+        }
+        user.swingHand(hand, true);
+        return new TypedActionResult<>(net.minecraft.util.ActionResult.SUCCESS, stack);
     }
 
     @Override

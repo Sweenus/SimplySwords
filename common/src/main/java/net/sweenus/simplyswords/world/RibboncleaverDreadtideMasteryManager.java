@@ -13,6 +13,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.Identifier;
+import net.sweenus.simplyswords.api.PlayerMovementIntent;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.api.ability.*;
 import net.sweenus.simplyswords.config.Config;
@@ -34,7 +35,12 @@ public final class RibboncleaverDreadtideMasteryManager {
     private static final int ASSAULT_COOLDOWN = 20;
     private static final double MOVING_STEP = 0.01;
     private static final double FLOWING_STEP = 0.15;
+    private static final double STEP_CAP = 2.0;
+    private static final double SPRINT_BOOST = 0.3;
+    private static final int FLOWING_GRACE = 3;
+    private static final int STILL_GRACE = 3;
     private static final double RUSH_SPEED = 1.7;
+    private static final double RUSH_LEAP_VELOCITY = 0.3;
     private static final int RUSH_TICKS = 8;
     private static final int RIBBONCLEAVE_TICKS = 60;
     private static final Map<UUID, HeldState> RIBBON = new HashMap<>();
@@ -61,6 +67,7 @@ public final class RibboncleaverDreadtideMasteryManager {
         HeldState state = refresh(RIBBON, MartialCommandEldritchMasteryAbilities.RIBBON_HEAVY, world, actor, stack,
                 ribbonHeavyBase());
         MartialCommandEldritchMasteryTuning tuning = state.tuning;
+        boolean sampled = sampleStep(world, actor, state);
         double speedFactor = tuning.get(MartialCommandEldritchMasteryTuning.Setting.SPEED, .95);
         if (tuning.flag(1 << 5) && actor.getHealth() <= actor.getMaxHealth()
                 * tuning.get(MartialCommandEldritchMasteryTuning.Setting.HEALTH_THRESHOLD, .35)) {
@@ -70,6 +77,7 @@ public final class RibboncleaverDreadtideMasteryManager {
         if (speed != null) {
             speed.removeModifier(RIBBON_SPEED);
             double correction = speedFactor - .95;
+            if (tuning.flag(1 << 7) && actor.isSprinting()) correction -= SPRINT_BOOST;
             if (Math.abs(correction) > .0001) speed.addTemporaryModifier(new EntityAttributeModifier(
                     RIBBON_SPEED, correction, EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
         }
@@ -81,13 +89,23 @@ public final class RibboncleaverDreadtideMasteryManager {
                             tuning.get(MartialCommandEldritchMasteryTuning.Setting.KNOCKBACK, .15),
                             EntityAttributeModifier.Operation.ADD_VALUE));
         }
-        if (tuning.flag(1 << 3) && horizontalStep(actor) > MOVING_STEP) state.movingTicks++;
-        else state.movingTicks = 0;
+        if (!tuning.flag(1 << 3)) {
+            state.movingTicks = 0;
+            state.stillTicks = 0;
+        } else if (sampled) {
+            if (state.lastStep > MOVING_STEP) {
+                state.stillTicks = 0;
+                state.movingTicks++;
+            } else {
+                if (state.stillTicks < STILL_GRACE) state.stillTicks++;
+                if (state.stillTicks >= STILL_GRACE) state.movingTicks = 0;
+            }
+        }
         if (tuning.flag(1 << 3)
                 && state.movingTicks >= Math.max(1, tuning.integer(MartialCommandEldritchMasteryTuning.Setting.DURATION_TICKS, 40)))
             actor.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE,
-                    Math.max(1, tuning.integer(MartialCommandEldritchMasteryTuning.Setting.STATUS_DURATION_TICKS, 20)), 0), actor);
-        if (tuning.flag(1 << 7) && actor.isSprinting()) actor.setSprinting(false);
+                    Math.max(1, tuning.integer(MartialCommandEldritchMasteryTuning.Setting.STATUS_DURATION_TICKS, 20)),
+                    0, false, false, true), actor);
         tickRush(world, actor, state);
     }
 
@@ -149,10 +167,15 @@ public final class RibboncleaverDreadtideMasteryManager {
                 .multiply(current.length());
     }
 
-    private static double horizontalStep(LivingEntity actor) {
-        double dx = actor.getX() - actor.prevX;
-        double dz = actor.getZ() - actor.prevZ;
-        return Math.sqrt(dx * dx + dz * dz);
+    private static boolean sampleStep(ServerWorld world, LivingEntity actor, HeldState state) {
+        long now = world.getTime();
+        if (state.stepTick == now) return false;
+        Vec3d current = new Vec3d(actor.getX(), 0, actor.getZ());
+        state.lastStep = state.lastPos == null ? 0 : Math.min(STEP_CAP, current.distanceTo(state.lastPos));
+        state.lastPos = current;
+        state.stepTick = now;
+        if (state.lastStep >= FLOWING_STEP) state.flowingUntil = now + FLOWING_GRACE;
+        return true;
     }
 
     public static float promiseBonusDamage(MartialCommandEldritchMasteryTuning tuning, float weaponDamage, double base) {
@@ -340,7 +363,7 @@ public final class RibboncleaverDreadtideMasteryManager {
                 MartialCommandEldritchMasteryTuning tuning = state.tuning;
                 long now = actor.getWorld().getTime();
                 double desired = tuning.get(MartialCommandEldritchMasteryTuning.Setting.INCOMING_MULTIPLIER, .85);
-                if (tuning.flag(1 << 8) && horizontalStep(actor) >= FLOWING_STEP)
+                if (tuning.flag(1 << 8) && now <= state.flowingUntil)
                     desired = tuning.get(MartialCommandEldritchMasteryTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, .88);
                 if (tuning.flag(1 << 4) && source.getAttacker() instanceof LivingEntity
                         && now >= state.retortReadyAt) {
@@ -459,9 +482,15 @@ public final class RibboncleaverDreadtideMasteryManager {
         double speed = tuning.get(MartialCommandEldritchMasteryTuning.Setting.SPEED, RUSH_SPEED);
         int travelTicks = rushTravelTicks(tuning);
         state.rushUntil = world.getTime() + travelTicks;
+        PlayerMovementIntent intent = actor instanceof net.minecraft.server.network.ServerPlayerEntity rusher
+                ? SimplySwordsAPI.getPlayerMovementIntent(rusher) : PlayerMovementIntent.NONE;
+        Vec3d leap = intent.isNeutral() ? null : intent.toDirection(actor.getYaw());
         if (blink) {
-            blinkForward(world, actor, tuning.get(MartialCommandEldritchMasteryTuning.Setting.SECONDARY_RADIUS, 5));
+            blinkForward(world, actor, leap, tuning.get(MartialCommandEldritchMasteryTuning.Setting.SECONDARY_RADIUS, 5));
             state.rushUntil = world.getTime();
+        } else if (leap != null) {
+            LivingEntityAbilityMovementManager.leapInDirection(world, actor, leap, speed,
+                    RUSH_LEAP_VELOCITY, travelTicks);
         } else if (target != null) {
             LivingEntityAbilityMovementManager.dashTowardTarget(world, actor, target, speed, travelTicks);
             if (tuning.has(MartialCommandEldritchMasteryTuning.Setting.ANGLE) && tuning.get(MartialCommandEldritchMasteryTuning.Setting.ANGLE, 0) > 0) {
@@ -486,8 +515,8 @@ public final class RibboncleaverDreadtideMasteryManager {
         return tuning;
     }
 
-    private static void blinkForward(ServerWorld world, LivingEntity actor, double distance) {
-        Vec3d look = actor.getRotationVector();
+    private static void blinkForward(ServerWorld world, LivingEntity actor, Vec3d preferred, double distance) {
+        Vec3d look = preferred == null ? actor.getRotationVector() : preferred;
         Vec3d flat = new Vec3d(look.x, 0, look.z);
         if (flat.lengthSquared() < 1.0E-4) return;
         Vec3d direction = flat.normalize();
@@ -744,7 +773,12 @@ public final class RibboncleaverDreadtideMasteryManager {
         private long cloakDisabledUntil;
         private long emergencyReady;
         private long activatedAt;
+        private Vec3d lastPos;
+        private long stepTick = -1;
+        private double lastStep;
+        private long flowingUntil;
         private int movingTicks;
+        private int stillTicks;
         private int absorbedHits;
     }
 

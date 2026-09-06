@@ -7,8 +7,10 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.ItemStack;
+import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.SoundCategory;
 import net.minecraft.util.math.Box;
 import net.sweenus.simplyswords.api.ability.ArcaneCosmicMasteryTuning;
 import net.sweenus.simplyswords.api.ability.ArcaneCosmicMasteryAbilities;
@@ -16,6 +18,7 @@ import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.compat.SpellScalingComponents;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.registry.EffectRegistry;
+import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 
 import java.util.ArrayList;
@@ -28,6 +31,7 @@ import java.util.UUID;
 public final class MagiscytheMasteryManager {
     private static final int BASE_STRIKE_INTERVAL = 10;
     private static final int BASE_REFRESH_CHANCE = 5;
+    private static final double STRIKE_HEIGHT = 4.0;
 
     private static final Map<UUID, StormState> STORMS = new HashMap<>();
     private static final Map<ServerWorld, Map<UUID, Map<UUID, Long>>> MARKS = new HashMap<>();
@@ -164,6 +168,8 @@ public final class MagiscytheMasteryManager {
                 state.repeatStrikes) * (float) strikes.get(ArcaneCosmicMasteryTuning.Setting.PER_STACK_MULTIPLIER, .05);
         if (strikes.flag(1 << 16)) damage *= .8F;
         damageTarget(world, owner, stack, primary, damage);
+        world.playSoundFromEntity(null, owner, SoundRegistry.ELEMENTAL_BOW_HOLY_SHOOT_IMPACT_03.get(),
+                SoundCategory.PLAYERS, 0.1f, 1.0f + owner.getRandom().nextFloat());
         if (!primary.isAlive() && wright.flag(1 << 21)
                 && world.getTime() >= state.salvageReadyAt) {
             state.salvageReadyAt = world.getTime() + wright.integer(ArcaneCosmicMasteryTuning.Setting.LOCKOUT_TICKS, 40);
@@ -227,6 +233,8 @@ public final class MagiscytheMasteryManager {
 
     public static void onWeaponHit(ServerWorld world, LivingEntity owner, ItemStack stack, LivingEntity target) {
         if (!owner.hasStatusEffect(EffectRegistry.getReference(EffectRegistry.MAGISTORM))) return;
+        world.playSound(null, owner.getBlockPos(), SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_IMPACT_03.get(),
+                owner.getSoundCategory(), 0.1f, 1.9f);
         UniqueAbilityExecution strikeExecution = ArcaneCosmicMasteryCombatManager.beginPassive(
                 ArcaneCosmicMasteryAbilities.MAGISCYTHE_STRIKES, world, stack, owner, target, strikesBase());
         ArcaneCosmicMasteryTuning strikes = ArcaneCosmicMasteryAbilities.tuning(strikeExecution);
@@ -310,8 +318,13 @@ public final class MagiscytheMasteryManager {
     private static void damageTarget(ServerWorld world, LivingEntity owner, ItemStack stack,
                                      LivingEntity target, float damage) {
         var source = world.getDamageSources().indirectMagic(owner, owner);
+        target.timeUntilRegen = 0;
         HelperMethods.applyDamageWithoutKnockback(target, source,
                 HelperMethods.applyAbilityDamageEnchantments(world, stack, target, source, damage));
+        target.timeUntilRegen = 0;
+        HelperMethods.spawnRainingParticles(world, ParticleTypes.ENCHANT, target, 20, STRIKE_HEIGHT);
+        HelperMethods.spawnRainingParticles(world, ParticleTypes.GLOW, target, 4, STRIKE_HEIGHT);
+        HelperMethods.spawnOrbitParticles(world, target.getPos(), ParticleTypes.GLOW, 0.5, 6);
     }
 
     private static void pulse(ServerWorld world, LivingEntity owner, ItemStack stack, LivingEntity center,
