@@ -32,6 +32,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
+import net.sweenus.simplyswords.api.ability.MartialCommandEldritchMasteryTuning;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.world.RiftmaneAbilityManager;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -39,6 +40,7 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 
 import java.util.HashSet;
+import java.util.Comparator;
 import java.util.Set;
 import java.util.UUID;
 
@@ -51,6 +53,8 @@ public class RiftmaneChargerEntity extends HorseEntity implements SimplySwordsMi
     private static final TrackedData<Integer> SEED =
             DataTracker.registerData(RiftmaneChargerEntity.class, TrackedDataHandlerRegistry.INTEGER);
     private static final TrackedData<Boolean> WATER_WALK =
+            DataTracker.registerData(RiftmaneChargerEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+    private static final TrackedData<Boolean> PHASING =
             DataTracker.registerData(RiftmaneChargerEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
 
     private static final float REAR_RISE_FRACTION = 0.45F;
@@ -71,7 +75,12 @@ public class RiftmaneChargerEntity extends HorseEntity implements SimplySwordsMi
     private double knockbackStrength;
     private double chargeSpeed;
     private double hitRadius = 1.1;
-    private boolean phasing;
+    private double remainingDistance = Double.POSITIVE_INFINITY;
+    private UUID restrictedTargetUuid;
+    private int successfulHits;
+    private Vec3d lastSafeRiderPosition;
+    private Vec3d mountingPosition;
+    private MartialCommandEldritchMasteryTuning followUpTuning = MartialCommandEldritchMasteryTuning.EMPTY;
     private int riderGuardAmplifier = -1;
     private int riderGuardTrailingTicks;
     private double firstHitMultiplier = 1.0;
@@ -104,6 +113,7 @@ public class RiftmaneChargerEntity extends HorseEntity implements SimplySwordsMi
         builder.add(REAR_TICKS, 0);
         builder.add(SEED, 0);
         builder.add(WATER_WALK, false);
+        builder.add(PHASING, false);
     }
 
     public void setAudioLead(boolean audioLead) {
@@ -111,7 +121,23 @@ public class RiftmaneChargerEntity extends HorseEntity implements SimplySwordsMi
     }
 
     public void setPhasing(boolean phasing) {
-        this.phasing = phasing;
+        this.dataTracker.set(PHASING, phasing);
+    }
+
+    public boolean isPhasing() {
+        return this.dataTracker.get(PHASING);
+    }
+
+    public boolean suppressesCollisionKnockback() {
+        return this.knockbackStrength <= 0;
+    }
+
+    public void setChargeDistance(double distance) {
+        this.remainingDistance = Math.max(0.0, distance);
+    }
+
+    public void setTargetRestriction(@Nullable UUID targetId) {
+        this.restrictedTargetUuid = targetId;
     }
 
     public void setRiderGuard(int amplifier, int trailingTicks) {
@@ -129,6 +155,12 @@ public class RiftmaneChargerEntity extends HorseEntity implements SimplySwordsMi
         this.killFollowUpRadius = Math.max(0.0, radius);
         this.killFollowUpMultiplier = Math.max(0.0, damageMultiplier);
         this.killRefundTicks = Math.max(0, refundTicks);
+    }
+
+    public void setKillFollowUp(double radius, double damageMultiplier, int refundTicks,
+                               MartialCommandEldritchMasteryTuning tuning) {
+        setKillFollowUp(radius, damageMultiplier, refundTicks);
+        this.followUpTuning = tuning;
     }
 
     public boolean getWaterWalk() {
@@ -158,6 +190,62 @@ public class RiftmaneChargerEntity extends HorseEntity implements SimplySwordsMi
     protected boolean canAddPassenger(Entity passenger) {
         return !this.hasPassengers() && this.ownerUuid != null
                 && this.ownerUuid.equals(passenger.getUuid());
+    }
+
+    @Override
+    protected void addPassenger(Entity passenger) {
+        super.addPassenger(passenger);
+        if (!this.getWorld().isClient()) {
+            this.mountingPosition = passenger.getPos();
+            if (this.getWorld().isSpaceEmpty(passenger, passenger.getBoundingBox())) {
+                this.lastSafeRiderPosition = this.mountingPosition;
+            }
+            if (passenger instanceof LivingEntity rider && this.riderGuardAmplifier >= 0) {
+                rider.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE,
+                        10, this.riderGuardAmplifier, false, false, true), this);
+            }
+        }
+    }
+
+    @Override
+    protected void removePassenger(Entity passenger) {
+        super.removePassenger(passenger);
+        if (this.getWorld() instanceof ServerWorld world && passenger instanceof LivingEntity rider) {
+            rider.fallDistance = 0.0F;
+            rider.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOW_FALLING,
+                    40, 0, false, false, false), rider);
+            if (this.riderGuardAmplifier >= 0 && this.riderGuardTrailingTicks > 0) {
+                rider.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE,
+                        this.riderGuardTrailingTicks, this.riderGuardAmplifier, false, false, true), rider);
+            }
+            world.playSound(null, rider.getBlockPos(), SoundRegistry.DARK_ACTIVATION_DISTORTED.get(),
+                    SoundCategory.PLAYERS, 0.5F, 1.35F);
+        }
+    }
+
+    @Override
+    public Vec3d updatePassengerForDismount(LivingEntity passenger) {
+        Vec3d release = super.updatePassengerForDismount(passenger);
+        if (!this.isPhasing() || isClearDismount(passenger, release)) return release;
+        if (isClearDismount(passenger, this.lastSafeRiderPosition)) return this.lastSafeRiderPosition;
+        if (isClearDismount(passenger, this.mountingPosition)) return this.mountingPosition;
+        Vec3d origin = this.lastSafeRiderPosition == null ? this.getPos() : this.lastSafeRiderPosition;
+        for (int radius = 1; radius <= 4; radius++) {
+            for (int y = -radius; y <= radius; y++) {
+                for (int x = -radius; x <= radius; x++) {
+                    for (int z = -radius; z <= radius; z++) {
+                        Vec3d candidate = origin.add(x, y, z);
+                        if (isClearDismount(passenger, candidate)) return candidate;
+                    }
+                }
+            }
+        }
+        return release;
+    }
+
+    private boolean isClearDismount(Entity passenger, @Nullable Vec3d position) {
+        return position != null && this.getWorld().isSpaceEmpty(passenger,
+                passenger.getBoundingBox().offset(position.subtract(passenger.getPos())));
     }
 
     @Override
@@ -262,6 +350,8 @@ public class RiftmaneChargerEntity extends HorseEntity implements SimplySwordsMi
         this.fallDistance = 0.0F;
         for (Entity passenger : this.getPassengerList()) {
             passenger.fallDistance = 0.0F;
+            Vec3d position = this.getPassengerRidingPos(passenger);
+            if (isClearDismount(passenger, position)) this.lastSafeRiderPosition = position;
         }
 
         if (this.riderGuardAmplifier >= 0) {
@@ -285,27 +375,55 @@ public class RiftmaneChargerEntity extends HorseEntity implements SimplySwordsMi
             return;
         }
 
-        Vec3d velocity = new Vec3d(this.direction.x * this.chargeSpeed, this.getVelocity().y,
-                this.direction.z * this.chargeSpeed);
+        if (this.remainingDistance <= 1.0E-6) {
+            expire(false);
+            return;
+        }
+        double speed = Math.min(this.chargeSpeed, this.remainingDistance);
+        Vec3d previousPosition = this.getPos();
+        Box previousBox = this.getBoundingBox();
+        Vec3d velocity = new Vec3d(this.direction.x * speed, this.getVelocity().y,
+                this.direction.z * speed);
         this.setVelocity(velocity);
         this.velocityModified = true;
         this.move(MovementType.SELF, velocity);
+        if (this.isPhasing()) {
+            this.setPosition(previousPosition.x + velocity.x, this.getY(), previousPosition.z + velocity.z);
+        }
+        this.remainingDistance = Math.max(0.0, this.remainingDistance
+                - this.getPos().subtract(previousPosition).horizontalLength());
 
+        if (!this.isPhasing() && this.damage > 0) {
+            hitAlongPath(world, previousBox);
+        }
+        spawnTrail(world);
+    }
+
+    private void hitAlongPath(ServerWorld world, Box previousBox) {
         LivingEntity owner = getOwner(world);
-        Box searchBox = this.getBoundingBox().expand(this.hitRadius);
-        for (LivingEntity target : world.getEntitiesByClass(LivingEntity.class, searchBox, this::isValidTarget)) {
+        Box searchBox = this.getBoundingBox().union(previousBox).expand(this.hitRadius);
+        Vec3d from = previousBox.getCenter();
+        Vec3d to = this.getBoundingBox().getCenter();
+        for (LivingEntity target : world.getEntitiesByClass(LivingEntity.class, searchBox, this::isValidTarget)
+                .stream().filter(target -> {
+                    Box contact = target.getBoundingBox().expand(this.hitRadius + this.getWidth() * 0.5,
+                            this.hitRadius + this.getHeight() * 0.5, this.hitRadius + this.getWidth() * 0.5);
+                    return contact.contains(from) || contact.contains(to) || contact.raycast(from, to).isPresent();
+                }).sorted(Comparator.comparingDouble(target -> target.squaredDistanceTo(from))).toList()) {
             if (!this.hitTargets.add(target.getUuid())) {
                 continue;
             }
             float applied = this.damage;
-            if (this.hitTargets.size() == 1) applied *= (float) this.firstHitMultiplier;
-            else if (this.hitTargets.size() <= this.trampleTargets) applied *= (float) this.trampleMultiplier;
+            if (this.successfulHits == 0) applied *= (float) this.firstHitMultiplier;
+            if (this.successfulHits < this.trampleTargets) applied *= (float) this.trampleMultiplier;
             boolean damaged = owner != null
                     && SimplySwordsAPI.applyDelegatedWeaponHit(this.sourceStack, target, owner, this, applied);
             if (damaged) {
-                if (!target.isAlive() && this.killFollowUpRadius > 0) {
+                this.successfulHits++;
+                if (!target.isAlive() && (this.killFollowUpRadius > 0 || this.killRefundTicks > 0)) {
                     RiftmaneAbilityManager.onChargerKill(world, owner, this.sourceStack, target,
-                            this.killFollowUpRadius, this.killFollowUpMultiplier, this.killRefundTicks);
+                            this.killFollowUpRadius, this.killFollowUpMultiplier, this.killRefundTicks,
+                            this.damage, this.followUpTuning);
                 }
                 target.takeKnockback(this.knockbackStrength, this.getX() - target.getX(), this.getZ() - target.getZ());
                 Vec3d hitPos = target.getPos().add(0.0, Math.max(0.35, target.getHeight() * 0.55), 0.0);
@@ -319,7 +437,6 @@ public class RiftmaneChargerEntity extends HorseEntity implements SimplySwordsMi
             }
         }
 
-        spawnTrail(world);
     }
 
     private void tickRear(ServerWorld world, int rearTicks) {
@@ -383,7 +500,7 @@ public class RiftmaneChargerEntity extends HorseEntity implements SimplySwordsMi
     }
 
     private boolean blockedByWall(Vec3d travel) {
-        if (this.phasing) {
+        if (this.isPhasing()) {
             return false;
         }
         double stepHeight = Math.max(0.0, this.getStepHeight());
@@ -424,6 +541,9 @@ public class RiftmaneChargerEntity extends HorseEntity implements SimplySwordsMi
         if (target instanceof RiftmaneChargerEntity || this.hasPassenger(target)) {
             return false;
         }
+        if (this.restrictedTargetUuid != null && !this.restrictedTargetUuid.equals(target.getUuid())) {
+            return false;
+        }
         if (!(this.getWorld() instanceof ServerWorld world)) {
             return false;
         }
@@ -448,32 +568,9 @@ public class RiftmaneChargerEntity extends HorseEntity implements SimplySwordsMi
         return entity instanceof LivingEntity living ? living : null;
     }
 
-    private void releaseRiders(ServerWorld world) {
-        Vec3d release = this.getPos().add(0.0, 0.1, 0.0);
-        for (Entity passenger : this.getPassengerList()) {
-            if (!(passenger instanceof LivingEntity rider)) {
-                continue;
-            }
-            rider.stopRiding();
-            Box targetBox = rider.getBoundingBox().offset(release.subtract(rider.getPos()));
-            if (world.isSpaceEmpty(rider, targetBox)) {
-                rider.refreshPositionAfterTeleport(release);
-            }
-            rider.fallDistance = 0.0F;
-            rider.addStatusEffect(new StatusEffectInstance(
-                    StatusEffects.SLOW_FALLING, 40, 0, false, false, false), rider);
-            if (this.riderGuardAmplifier >= 0 && this.riderGuardTrailingTicks > 0)
-                rider.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE,
-                        this.riderGuardTrailingTicks, this.riderGuardAmplifier, false, false, true), rider);
-            world.playSound(null, rider.getBlockPos(), SoundRegistry.DARK_ACTIVATION_DISTORTED.get(),
-                    SoundCategory.PLAYERS, 0.5F, 1.35F);
-        }
-        this.removeAllPassengers();
-    }
-
     private void expire(boolean impact) {
         if (this.getWorld() instanceof ServerWorld world) {
-            releaseRiders(world);
+            this.removeAllPassengers();
             world.spawnParticles(ParticleTypes.POOF, this.getX(), this.getBodyY(0.5), this.getZ(),
                     impact ? 18 : 10, 0.35, 0.35, 0.35, 0.05);
             world.spawnParticles(RIFT_DUST, this.getX(), this.getBodyY(0.6), this.getZ(),

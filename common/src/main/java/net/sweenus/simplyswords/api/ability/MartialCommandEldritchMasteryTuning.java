@@ -19,7 +19,7 @@ public final class MartialCommandEldritchMasteryTuning implements MasteryTuningS
         STATUS_DURATION_TICKS(0, 72000), STATUS_AMPLIFIER(0, 10), ABSORPTION(0, 40),
         HEALTH_THRESHOLD(0, 1), ARMOR_IGNORE(0, 1), CORRUPTION(0, 100),
         SEARCH_RANGE(0, 128), SEARCH_RADIUS(0, 64), SECONDARY_CORRUPTION(0, 100),
-        FINAL_CORRUPTION(0, 100), MODE(0, Integer.MAX_VALUE);
+        FINAL_CORRUPTION(0, 100), MODE(0, Integer.MAX_VALUE), TRAVEL_DISTANCE_MULTIPLIER(0, 10);
 
         private final double minimum;
         private final double maximum;

@@ -101,11 +101,12 @@ public final class RiftmaneAbilityManager {
         int mountIndex = rider == null ? -1 : count / 2;
         UniqueAbilityExecution riderExecution = rider == null ? null
                 : MartialCommandEldritchMasteryCombatManager.beginPassive(MartialCommandEldritchMasteryAbilities.RIFTMANE_RIDER, world,
-                        context.stack(), owner, null, riderBase(settings, context.stack()));
+                        context.stack(), owner, null, riderBase(tuning, settings.mountedDistanceMultiplier));
         MartialCommandEldritchMasteryTuning riderTuning = riderExecution == null
                 ? MartialCommandEldritchMasteryTuning.EMPTY : MartialCommandEldritchMasteryAbilities.tuning(riderExecution);
 
         int spawned = 0;
+        boolean mountedSuccessfully = false;
         for (int index = 0; index < count; index++) {
             boolean mounted = index == mountIndex;
             MartialCommandEldritchMasteryTuning applied = mounted ? riderTuning : tuning;
@@ -115,24 +116,31 @@ public final class RiftmaneAbilityManager {
             double distanceMultiplier = mounted
                     ? Math.max(1.0, riderTuning.get(MartialCommandEldritchMasteryTuning.Setting.SECONDARY_RADIUS,
                     settings.mountedDistanceMultiplier)) : 1.0;
-            float applance = mounted
+            float chargerDamage = mounted
                     ? damage * (float) riderTuning.get(MartialCommandEldritchMasteryTuning.Setting.DAMAGE_MULTIPLIER, 1)
                     : rankDamage;
             boolean audioLead = spawned == 0;
             RiftmaneChargerEntity charger = summon(world, owner, context.stack(), ahead, forward,
-                    applance, settings, waterWalk, distanceMultiplier, audioLead, applied);
+                    chargerDamage, settings, waterWalk, distanceMultiplier, audioLead, applied);
             if (charger == null) {
                 charger = summon(world, owner, context.stack(), lane, forward,
-                        applance, settings, waterWalk, distanceMultiplier, audioLead, applied);
+                        chargerDamage, settings, waterWalk, distanceMultiplier, audioLead, applied);
             }
             if (charger == null) {
                 continue;
             }
-            spawned++;
             if (mounted) {
                 configureRider(charger, riderTuning);
-                rider.startRiding(charger, true);
+                mountedSuccessfully = rider.startRiding(charger, true);
+                if (!mountedSuccessfully) {
+                    Vec3d position = charger.getPos();
+                    charger.discard();
+                    charger = summon(world, owner, context.stack(), position, forward,
+                            rankDamage, settings, waterWalk, 1.0, false, tuning);
+                    if (charger == null) continue;
+                }
             }
+            spawned++;
         }
         if (spawned == 0) {
             if (riderExecution != null) MartialCommandEldritchMasteryCombatManager.finish(riderExecution, 0);
@@ -140,22 +148,17 @@ public final class RiftmaneAbilityManager {
             return false;
         }
 
-        if (rider != null && riderTuning.has(MartialCommandEldritchMasteryTuning.Setting.STATUS_AMPLIFIER))
-            rider.addStatusEffect(new net.minecraft.entity.effect.StatusEffectInstance(
-                    net.minecraft.entity.effect.StatusEffects.RESISTANCE,
-                    Math.max(20, settings.rearDuration + 20),
-                    riderTuning.integer(MartialCommandEldritchMasteryTuning.Setting.STATUS_AMPLIFIER, 1)), owner);
         if (tuning.has(MartialCommandEldritchMasteryTuning.Setting.DELAY_TICKS)) {
             PENDING_RANKS.computeIfAbsent(world, ignored -> new ArrayList<>()).add(new PendingRank(
                     owner.getUuid(), context.stack().copy(), forward,
                     world.getTime() + Math.max(1, tuning.integer(MartialCommandEldritchMasteryTuning.Setting.DELAY_TICKS, 10)),
-                    Math.clamp(tuning.integer(MartialCommandEldritchMasteryTuning.Setting.TARGET_CAP, 3), 1, MAX_RANK),
-                    damage * (float) tuning.get(MartialCommandEldritchMasteryTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, .55),
+                    Math.clamp(tuning.integer(MartialCommandEldritchMasteryTuning.Setting.TARGET_CAP, 3), 1, Math.min(3, count)),
+                    rankDamage * (float) tuning.get(MartialCommandEldritchMasteryTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, .55),
                     spacing, tuning));
         }
 
         spawnActivationEffects(world, owner, forward);
-        if (riderExecution != null) MartialCommandEldritchMasteryCombatManager.finish(riderExecution, 1);
+        if (riderExecution != null) MartialCommandEldritchMasteryCombatManager.finish(riderExecution, mountedSuccessfully ? 1 : 0);
         MartialCommandEldritchMasteryCombatManager.finish(execution, spawned);
         return true;
     }
@@ -188,8 +191,11 @@ public final class RiftmaneAbilityManager {
                 double lateral = (index - (rank.count - 1) * 0.5) * Math.max(0.5, rank.spacing);
                 Vec3d lane = owner.getPos().add(side.multiply(lateral));
                 Vec3d ahead = lane.add(rank.forward.multiply(Math.max(0.0, settings.spawnOffset)));
-                summon(world, owner, rank.stack, ahead, rank.forward, rank.damage, settings,
-                        waterWalk, 1.0, index == 0, rank.tuning);
+                if (summon(world, owner, rank.stack, ahead, rank.forward, rank.damage, settings,
+                        waterWalk, 1.0, index == 0, rank.tuning) == null) {
+                    summon(world, owner, rank.stack, lane, rank.forward, rank.damage, settings,
+                            waterWalk, 1.0, index == 0, rank.tuning);
+                }
             }
         }
         if (pending.isEmpty()) PENDING_RANKS.remove(world);
@@ -197,6 +203,17 @@ public final class RiftmaneAbilityManager {
 
     public static void onChargerKill(ServerWorld world, LivingEntity owner, ItemStack stack, LivingEntity victim,
                                      double radius, double damageMultiplier, int refundTicks) {
+        if (owner == null || stack == null || stack.isEmpty()) return;
+        RiftmaneSwordItem.EffectSettings settings = Config.uniqueEffects.riftmane;
+        float damage = HelperMethods.abilityScaledDamage(SpellScalingProfile.ARCANE, owner, stack,
+                (float) settings.damageScaling, (float) settings.spellScaling);
+        onChargerKill(world, owner, stack, victim, radius, damageMultiplier, refundTicks,
+                damage, harrierBase(settings, stack));
+    }
+
+    public static void onChargerKill(ServerWorld world, LivingEntity owner, ItemStack stack, LivingEntity victim,
+                                     double radius, double damageMultiplier, int refundTicks,
+                                     float damage, MartialCommandEldritchMasteryTuning tuning) {
         if (owner == null || !owner.isAlive() || stack == null || stack.isEmpty()) {
             return;
         }
@@ -211,16 +228,18 @@ public final class RiftmaneAbilityManager {
         LivingEntity next = world.getEntitiesByClass(LivingEntity.class,
                         victim.getBoundingBox().expand(radius),
                         candidate -> candidate != victim && candidate.isAlive()
+                                && candidate.squaredDistanceTo(victim) <= radius * radius
+                                && victim.canSee(candidate)
                                 && HelperMethods.checkAbilityTarget(candidate, owner))
                 .stream().min(Comparator.comparingDouble(victim::squaredDistanceTo)).orElse(null);
         if (next == null) return;
-        Vec3d forward = horizontal(next.getPos().subtract(owner.getPos()), owner.getYaw());
-        Vec3d position = owner.getPos().add(forward.multiply(Math.max(0.0, settings.spawnOffset)));
-        float damage = HelperMethods.abilityScaledDamage(SpellScalingProfile.ARCANE, owner, stack,
-                (float) settings.damageScaling, (float) settings.spellScaling);
+        Vec3d forward = horizontal(next.getPos().subtract(victim.getPos()), owner.getYaw());
+        Vec3d position = victim.getPos();
         summon(world, owner, stack, position, forward, damage * (float) damageMultiplier, settings,
                 settings.waterWalking && !owner.isSubmergedInWater(), 1.0, true,
-                harrierBase(settings, stack).with(MartialCommandEldritchMasteryTuning.Setting.SEARCH_RADIUS, 0));
+                tuning.with(MartialCommandEldritchMasteryTuning.Setting.SEARCH_RADIUS, 0)
+                        .with(MartialCommandEldritchMasteryTuning.Setting.REFUND_TICKS, 0),
+                next.getUuid(), victim.getY() + 1.0);
     }
 
     public static MartialCommandEldritchMasteryTuning chargerBase(double chargeDistance, double knockback, double hitRadius,
@@ -251,7 +270,19 @@ public final class RiftmaneAbilityManager {
     }
 
     public static MartialCommandEldritchMasteryTuning riderBase(MartialCommandEldritchMasteryTuning charger, double mountedMultiplier) {
-        return charger.with(MartialCommandEldritchMasteryTuning.Setting.SECONDARY_RADIUS, mountedMultiplier);
+        MartialCommandEldritchMasteryTuning rider = MartialCommandEldritchMasteryTuning.EMPTY;
+        for (MartialCommandEldritchMasteryTuning.Setting setting : List.of(
+                MartialCommandEldritchMasteryTuning.Setting.RANGE,
+                MartialCommandEldritchMasteryTuning.Setting.SPEED,
+                MartialCommandEldritchMasteryTuning.Setting.DAMAGE_MULTIPLIER,
+                MartialCommandEldritchMasteryTuning.Setting.KNOCKBACK,
+                MartialCommandEldritchMasteryTuning.Setting.RADIUS,
+                MartialCommandEldritchMasteryTuning.Setting.HEIGHT,
+                MartialCommandEldritchMasteryTuning.Setting.WINDUP_TICKS,
+                MartialCommandEldritchMasteryTuning.Setting.TRAVEL_DISTANCE_MULTIPLIER)) {
+            if (charger.has(setting)) rider = rider.with(setting, charger.get(setting, 0));
+        }
+        return rider.with(MartialCommandEldritchMasteryTuning.Setting.SECONDARY_RADIUS, mountedMultiplier);
     }
 
     private static MartialCommandEldritchMasteryTuning chargerBase(RiftmaneSwordItem.EffectSettings settings, ItemStack stack) {
@@ -317,7 +348,8 @@ public final class RiftmaneAbilityManager {
         for (int i = 0; i < count; i++) {
             Vec3d offset = position.add(side.multiply((i - (count - 1) * .5) * .8));
             if (summon(world, owner, stack, offset, forward, damage, settings, waterWalk, 1.0,
-                    spawned == 0, tuning) != null) spawned++;
+                    spawned == 0, tuning, tuning.flag(1 << 8) ? target.getUuid() : null,
+                    owner.getY() + 1.0) != null) spawned++;
         }
         if (spawned == 0) {
             MartialCommandEldritchMasteryCombatManager.finish(execution, 0);
@@ -393,14 +425,26 @@ public final class RiftmaneAbilityManager {
                                                 RiftmaneSwordItem.EffectSettings settings,
                                                 boolean waterWalk, double distanceMultiplier,
                                                 boolean audioLead, MartialCommandEldritchMasteryTuning tuning) {
+        return summon(world, owner, stack, position, forward, damage, settings, waterWalk,
+                distanceMultiplier, audioLead, tuning, null, owner.getY() + 1.0);
+    }
+
+    @Nullable
+    private static RiftmaneChargerEntity summon(ServerWorld world, LivingEntity owner, ItemStack stack,
+                                                Vec3d position, Vec3d forward, float damage,
+                                                RiftmaneSwordItem.EffectSettings settings,
+                                                boolean waterWalk, double distanceMultiplier,
+                                                boolean audioLead, MartialCommandEldritchMasteryTuning tuning,
+                                                @Nullable UUID targetId, double supportY) {
         double speed = Math.max(0.05, settings.chargeSpeed
                 * tuning.get(MartialCommandEldritchMasteryTuning.Setting.SPEED, 1));
         double distance = Math.max(1.0, tuning.get(MartialCommandEldritchMasteryTuning.Setting.RANGE,
-                settings.chargeDistance)) * Math.max(1.0, distanceMultiplier);
+                settings.chargeDistance)) * Math.max(1.0, distanceMultiplier)
+                * tuning.get(MartialCommandEldritchMasteryTuning.Setting.TRAVEL_DISTANCE_MULTIPLIER, 1);
         int rearTicks = Math.max(0, tuning.integer(MartialCommandEldritchMasteryTuning.Setting.WINDUP_TICKS,
                 settings.rearDuration));
         int lifetime = rearTicks + (int) Math.ceil(distance / speed) + LIFETIME_MARGIN;
-        double groundY = findSupportTopY(world, position.x, position.z, owner.getY() + 1.0, waterWalk);
+        double groundY = findSupportTopY(world, position.x, position.z, supportY, waterWalk);
         int seed = owner.getRandom().nextInt(4096);
 
         RiftmaneChargerEntity charger = new RiftmaneChargerEntity(EntityRegistry.RIFTMANE_CHARGER.get(), world);
@@ -417,9 +461,11 @@ public final class RiftmaneAbilityManager {
                         AwakeningApi.scaleEffect(stack, settings.knockbackStrength)),
                 speed, tuning.get(MartialCommandEldritchMasteryTuning.Setting.RADIUS, settings.hitRadius),
                 tuning.get(MartialCommandEldritchMasteryTuning.Setting.HEIGHT, settings.stepHeight));
+        charger.setChargeDistance(distance);
+        charger.setTargetRestriction(targetId);
         charger.setKillFollowUp(tuning.get(MartialCommandEldritchMasteryTuning.Setting.SEARCH_RADIUS, 0),
                 tuning.get(MartialCommandEldritchMasteryTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, .5),
-                tuning.integer(MartialCommandEldritchMasteryTuning.Setting.REFUND_TICKS, 0));
+                tuning.integer(MartialCommandEldritchMasteryTuning.Setting.REFUND_TICKS, 0), tuning);
         if (!world.spawnEntity(charger)) {
             charger.discard();
             return null;

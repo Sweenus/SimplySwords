@@ -58,6 +58,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -65,6 +66,17 @@ import static net.sweenus.simplyswords.SimplySwords.minimumEldritchEndVersion;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin {
+
+    @ModifyArg(method = "damage", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/entity/LivingEntity;takeKnockback(DDD)V"), index = 0)
+    private double simplyswords$applyRiftmaneKnockbackPolicy(double strength) {
+        var context = SimplySwordsAPI.getDelegatedWeaponHitContext();
+        if (context != null && context.actor() instanceof net.sweenus.simplyswords.entity.RiftmaneChargerEntity charger
+                && charger.suppressesCollisionKnockback()) {
+            return 0.0;
+        }
+        return strength;
+    }
 
     @Shadow protected boolean jumping;
 
