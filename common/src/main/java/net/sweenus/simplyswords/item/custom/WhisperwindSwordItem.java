@@ -63,26 +63,38 @@ public class WhisperwindSwordItem extends UniqueSwordItem implements TwoHandedWe
             StormSoulMasteryTuning tuning = StormSoulMasteryAbilities.tuning(execution);
             boolean stillWind = tuning.integer(StormSoulMasteryTuning.Setting.STILL_WIND_THRESHOLD, 0) > 0;
             if (stillWind) {
-                WhisperwindRhythmManager.primeStillWind(world, attacker, tuning);
-            }
-            int chance = WhisperwindRhythmManager.resolveChance(world, attacker, tuning,
-                    tuning.integer(StormSoulMasteryTuning.Setting.CHANCE, Config.uniqueEffects.whisperwind.chance));
-            int resetRoll = attacker.getRandom().nextInt(100);
-            boolean reset = !stillWind && (tuning.has(StormSoulMasteryTuning.Setting.CHANCE)
-                    ? chance >= 100 || chance > 0 && resetRoll < chance
-                    : resetRoll <= chance);
-            UniqueAbilityApi.reportRoll(attacker, StormSoulMasteryAbilities.WHISPERWIND_RESET.id(),
-                    "CHANCE", chance, resetRoll, reset);
-            WhisperwindRhythmManager.recordRefreshResult(world, attacker, reset);
-            if (reset && attacker instanceof PlayerEntity player) {
-                attacker.getWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
-                        attacker.getSoundCategory(), 0.3f, 1.8f);
-                if (!WhisperwindRhythmManager.tryPartialRefresh(world, player, stack, tuning,
-                        Config.uniqueEffects.whisperwind.cooldown)) {
-                    SimplySwordsAPI.setWeaponCooldown(player, stack, 0);
+                if (WhisperwindRhythmManager.recordStillWindAttack(world, attacker, tuning)
+                        && target.isAlive() && HelperMethods.checkAbilityTarget(target, attacker)) {
+                    UniqueAbilityExecution stillWindExecution = UniqueAbilityApi.begin(
+                            StormSoulMasteryAbilities.WHISPERWIND_STILL_WIND,
+                            UniqueAbilityContext.passive(world, stack, attacker, target, null), builder -> builder
+                                    .set(StormSoulMasteryAbilities.TUNING, StormSoulMasteryTuning.EMPTY));
+                    UniqueAbilityApi.takeStartedExecution();
+                    UniqueAbilityApi.start(stillWindExecution);
+                    WhisperwindVisualManager.scheduleStillWindStrike(world, attacker, target, stack,
+                            stillWindExecution, StormSoulMasteryAbilities.tuning(stillWindExecution));
                 }
-                WhisperwindRhythmManager.recordRefresh(world, player);
-                UniqueAbilityApi.emit(execution, UniqueAbilityPhase.HIT, StormSoulMasteryAbilities.HIT, target, 1, chance);
+            } else {
+                int chance = WhisperwindRhythmManager.resolveChance(world, attacker, tuning,
+                        tuning.integer(StormSoulMasteryTuning.Setting.CHANCE, Config.uniqueEffects.whisperwind.chance));
+                int resetRoll = attacker.getRandom().nextInt(100);
+                boolean reset = tuning.has(StormSoulMasteryTuning.Setting.CHANCE)
+                        ? chance >= 100 || chance > 0 && resetRoll < chance
+                        : resetRoll <= chance;
+                UniqueAbilityApi.reportRoll(attacker, StormSoulMasteryAbilities.WHISPERWIND_RESET.id(),
+                        "CHANCE", chance, resetRoll, reset);
+                WhisperwindRhythmManager.recordRefreshResult(world, attacker, reset);
+                if (reset && attacker instanceof PlayerEntity player) {
+                    attacker.getWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
+                            attacker.getSoundCategory(), 0.3f, 1.8f);
+                    if (!WhisperwindRhythmManager.tryPartialRefresh(world, player, stack, tuning,
+                            Config.uniqueEffects.whisperwind.cooldown)) {
+                        SimplySwordsAPI.setWeaponCooldown(player, stack, 0);
+                    }
+                    WhisperwindRhythmManager.recordRefresh(world, player);
+                    UniqueAbilityApi.emit(execution, UniqueAbilityPhase.HIT, StormSoulMasteryAbilities.HIT,
+                            target, 1, chance);
+                }
             }
             UniqueAbilityApi.finish(execution, StormSoulMasteryAbilities.FINISH, 1);
         }

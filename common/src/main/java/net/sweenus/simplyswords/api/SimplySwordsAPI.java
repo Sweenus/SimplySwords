@@ -43,6 +43,8 @@ import net.sweenus.simplyswords.item.custom.GloampiercerSwordItem;
 import net.sweenus.simplyswords.item.custom.SoulstalkerSwordItem;
 import net.sweenus.simplyswords.item.custom.RiftmaneSwordItem;
 import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
+import net.sweenus.simplyswords.mixin.ItemCooldownEntryAccessor;
+import net.sweenus.simplyswords.mixin.ItemCooldownManagerAccessor;
 import net.sweenus.simplyswords.power.powers.NecromanticArsenalPower;
 import net.sweenus.simplyswords.item.ContainedRemnantItem;
 import net.sweenus.simplyswords.power.GemPowerComponent;
@@ -319,9 +321,12 @@ public class SimplySwordsAPI {
             return;
         }
         if (actor instanceof PlayerEntity player) {
-            int total = getEffectiveWeaponCooldownTicks(stack, actor, totalCooldownTicks);
-            int remaining = Math.round(player.getItemCooldownManager()
-                    .getCooldownProgress(stack.getItem(), 0.0F) * total);
+            ItemCooldownManagerAccessor cooldownManager =
+                    (ItemCooldownManagerAccessor) player.getItemCooldownManager();
+            Object entry = cooldownManager.simplyswords$getEntries().get(stack.getItem());
+            int remaining = entry instanceof ItemCooldownEntryAccessor cooldownEntry
+                    ? Math.max(0, cooldownEntry.simplyswords$getEndTick() - cooldownManager.simplyswords$getTick())
+                    : 0;
             if (remaining <= 0) {
                 return;
             }

@@ -19,6 +19,7 @@ import net.sweenus.simplyswords.api.ability.StormFrostWaterMasteryTuning;
 import net.sweenus.simplyswords.api.ability.StormFrostWaterMasteryAbilities;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
 import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
+import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 
@@ -201,6 +202,13 @@ public final class TempestAbilityManager {
     public static boolean hasManagedVortex(LivingEntity owner) {
         return owner.getWorld() instanceof ServerWorld world && STATES.containsKey(world)
                 && STATES.get(world).vortices.containsKey(owner.getUuid());
+    }
+
+    public static Vec3d managedVortexCenter(LivingEntity owner) {
+        if (!(owner.getWorld() instanceof ServerWorld world)) return null;
+        WorldState state = STATES.get(world);
+        Vortex vortex = state == null ? null : state.vortices.get(owner.getUuid());
+        return vortex == null ? null : vortex.center(owner);
     }
 
     public static void clearActor(LivingEntity actor) {
@@ -432,7 +440,9 @@ public final class TempestAbilityManager {
         facing = facing.normalize();
         for (int index = 0; index < count; index++) {
             float angle = count == 1 ? 0 : (float) ((index - (count - 1) / 2.0) * .36);
-            vortex.waves.add(new Wave(owner.getPos(), facing.rotateY(angle), index % 2 == 0));
+            Wave wave = new Wave(owner.getPos(), facing.rotateY(angle), index % 2 == 0);
+            vortex.waves.add(wave);
+            if (owner.getWorld() instanceof ServerWorld world) spawnWaveLaunch(world, wave);
         }
     }
 
@@ -450,10 +460,67 @@ public final class TempestAbilityManager {
                         * vortex.tuning.get(s("TEMPEST_WAVE_DAMAGE_MULTIPLIER"), .75));
                 if (wave.fire) target.setOnFireForTicks(40);
                 else target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 40, 0), owner);
+                spawnWaveHit(world, target, wave.fire);
             }
+            spawnWaveCrest(world, wave, width);
+            if (wave.travelled >= 12 || wave.hit.size() >= cap) {
+                spawnWaveDissipation(world, wave, width);
+                iterator.remove();
+            }
+        }
+    }
+
+    private static void spawnWaveLaunch(ServerWorld world, Wave wave) {
+        Vec3d center = wave.center.add(wave.direction.multiply(.35)).add(0, .55, 0);
+        int count = Config.general.enableModernFieldEffects ? 10 : 6;
+        world.spawnParticles(wave.fire ? ParticleTypes.FLAME : ParticleTypes.SNOWFLAKE,
+                center.x, center.y, center.z, count, .22, .28, .22, .035);
+        if (Config.general.enableModernFieldEffects) {
+            world.spawnParticles(wave.fire ? ParticleTypes.SMALL_FLAME : ParticleTypes.ITEM_SNOWBALL,
+                    center.x, center.y, center.z, 5, .16, .2, .16, .025);
+        }
+    }
+
+    private static void spawnWaveCrest(ServerWorld world, Wave wave, double halfWidth) {
+        Vec3d lateral = new Vec3d(-wave.direction.z, 0, wave.direction.x);
+        int points = Config.general.enableModernFieldEffects ? 9 : 5;
+        for (int index = 0; index < points; index++) {
+            double offset = points == 1 ? 0 : index * 2.0 / (points - 1) - 1;
+            double height = .18 + (1 - Math.abs(offset)) * .65;
+            Vec3d crest = wave.center.add(lateral.multiply(offset * halfWidth)).add(0, height, 0);
             world.spawnParticles(wave.fire ? ParticleTypes.FLAME : ParticleTypes.SNOWFLAKE,
-                    wave.center.x, wave.center.y + .6, wave.center.z, 5, width / 2, .25, width / 2, .02);
-            if (wave.travelled >= 12 || wave.hit.size() >= cap) iterator.remove();
+                    crest.x, crest.y, crest.z, 1, .025, .035, .025, .006);
+            if (Config.general.enableModernFieldEffects && index % 2 == 0) {
+                Vec3d trail = crest.subtract(wave.direction.multiply(.4)).add(0, -.08, 0);
+                world.spawnParticles(wave.fire ? ParticleTypes.SMALL_FLAME : ParticleTypes.ITEM_SNOWBALL,
+                        trail.x, trail.y, trail.z, 1, .035, .035, .035, .008);
+            }
+        }
+        if (Config.general.enableModernFieldEffects) {
+            Vec3d wake = wave.center.subtract(wave.direction.multiply(.25)).add(0, .38, 0);
+            world.spawnParticles(wave.fire ? ParticleTypes.SMOKE : ParticleTypes.CLOUD,
+                    wake.x, wake.y, wake.z, 3, halfWidth * .45, .16, halfWidth * .45, .012);
+        }
+    }
+
+    private static void spawnWaveHit(ServerWorld world, LivingEntity target, boolean fire) {
+        int count = Config.general.enableModernFieldEffects ? 9 : 5;
+        world.spawnParticles(fire ? ParticleTypes.FLAME : ParticleTypes.SNOWFLAKE,
+                target.getX(), target.getBodyY(.5), target.getZ(), count, .28, .35, .28, .045);
+        if (Config.general.enableModernFieldEffects) {
+            world.spawnParticles(fire ? ParticleTypes.SMOKE : ParticleTypes.ITEM_SNOWBALL,
+                    target.getX(), target.getBodyY(.45), target.getZ(), 4, .2, .25, .2, .025);
+        }
+    }
+
+    private static void spawnWaveDissipation(ServerWorld world, Wave wave, double halfWidth) {
+        Vec3d center = wave.center.add(0, .45, 0);
+        int count = Config.general.enableModernFieldEffects ? 12 : 7;
+        world.spawnParticles(wave.fire ? ParticleTypes.FLAME : ParticleTypes.SNOWFLAKE,
+                center.x, center.y, center.z, count, halfWidth * .55, .28, halfWidth * .55, .035);
+        if (Config.general.enableModernFieldEffects) {
+            world.spawnParticles(wave.fire ? ParticleTypes.SMOKE : ParticleTypes.CLOUD,
+                    center.x, center.y, center.z, 6, halfWidth * .4, .2, halfWidth * .4, .02);
         }
     }
 

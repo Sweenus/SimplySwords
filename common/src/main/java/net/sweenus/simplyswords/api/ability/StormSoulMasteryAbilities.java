@@ -15,6 +15,7 @@ public final class StormSoulMasteryAbilities {
     public static final Identifier SOULSTALKER_STRIDE_ID = id("soulstalker/gloam_stride");
     public static final Identifier WHISPERWIND_DASH_ID = id("whisperwind/petal_step");
     public static final Identifier WHISPERWIND_RESET_ID = id("whisperwind/zephyr_rhythm");
+    public static final Identifier WHISPERWIND_STILL_WIND_ID = id("whisperwind/still_wind");
     public static final Identifier DREADWHISPER_REAVE_ID = id("dreadwhisper/reaving_front");
     public static final Identifier DREADWHISPER_WOUND_ID = id("dreadwhisper/corrupted_wound");
     public static final Identifier HIT = id("mastery/storm_soul/hit");
@@ -37,6 +38,7 @@ public final class StormSoulMasteryAbilities {
     public static final UniqueAbilityDefinition SOULSTALKER_STRIDE = active(SOULSTALKER_STRIDE_ID);
     public static final UniqueAbilityDefinition WHISPERWIND_DASH = active(WHISPERWIND_DASH_ID);
     public static final UniqueAbilityDefinition WHISPERWIND_RESET = passive(WHISPERWIND_RESET_ID);
+    public static final UniqueAbilityDefinition WHISPERWIND_STILL_WIND = passive(WHISPERWIND_STILL_WIND_ID);
     public static final UniqueAbilityDefinition DREADWHISPER_REAVE = active(DREADWHISPER_REAVE_ID);
     public static final UniqueAbilityDefinition DREADWHISPER_WOUND = passive(DREADWHISPER_WOUND_ID);
 
@@ -55,6 +57,7 @@ public final class StormSoulMasteryAbilities {
         UniqueAbilityApi.registerDefinition(SOULSTALKER_STRIDE);
         UniqueAbilityApi.registerDefinition(WHISPERWIND_DASH);
         UniqueAbilityApi.registerDefinition(WHISPERWIND_RESET);
+        UniqueAbilityApi.registerDefinition(WHISPERWIND_STILL_WIND);
         UniqueAbilityApi.registerDefinition(DREADWHISPER_REAVE);
         UniqueAbilityApi.registerDefinition(DREADWHISPER_WOUND);
     }

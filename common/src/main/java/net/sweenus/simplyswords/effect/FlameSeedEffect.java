@@ -55,78 +55,75 @@ public class FlameSeedEffect extends OrbitingEffect {
     public boolean applyUpdateEffect(LivingEntity livingEntity, int amplifier) {
         if (!livingEntity.getWorld().isClient()) {
             ServerWorld serverWorld = (ServerWorld) livingEntity.getWorld();
-            float abilityDamage = 0f;
-            float volume = 0.3f;
-            float pitch = 1.3f;
-            int frequency = 20;
-            SoundEvent soundEvent = SoundEvents.ENTITY_GENERIC_BURN;
             StatusEffectInstance currentEffect = livingEntity.getStatusEffect(EffectRegistry.getReference(EffectRegistry.FLAMESEED));
             int duration = currentEffect == null ? 0 : currentEffect.getDuration();
             if (currentEffect instanceof SimplySwordsStatusEffectInstance statusEffect) {
                 this.sourceEntity = statusEffect.getSourceEntity();
                 this.additionalData = statusEffect.getAdditionalData();
             }
-            if (this.sourceEntity != null) {
-                abilityDamage = HelperMethods.abilityScaledDamage(SpellScalingComponents.id("flamewind"), this.sourceEntity, this.sourceEntity.getMainHandStack(),
-                        Config.uniqueEffects.flamewind.damageScaling, Config.uniqueEffects.flamewind.spellScaling);
-            }
             FlamewindMasteryManager.SeedSnapshot snapshot = FlamewindMasteryManager.snapshot(livingEntity);
             FireForgeMasteryTuning tuning = snapshot == null ? FireForgeMasteryTuning.EMPTY : snapshot.tuning();
-            abilityDamage *= (float) tuning.get(FireForgeMasteryTuning.Setting.PERIODIC_DAMAGE_MULTIPLIER, 1);
-            frequency = tuning.integer(FireForgeMasteryTuning.Setting.INTERVAL_TICKS, frequency);
             FlamewindVisualManager.refreshSeed(serverWorld, livingEntity);
             if (this.sourceEntity != null && livingEntity.age % 20 == 0) {
                 FlamewindMasteryManager.refreshDraft(serverWorld, this.sourceEntity, tuning);
             }
 
-            if (livingEntity.age % frequency == 0 && this.additionalData != 0) {
-                DamageSource damageSource = livingEntity.getDamageSources().magic();
-                livingEntity.timeUntilRegen = 0;
-
-                boolean expiryDetonation = false;
-                if (duration < 20  && this.sourceEntity != null) {
-                    triggerDetonation(serverWorld, livingEntity, this.sourceEntity, this.additionalData);
-                    livingEntity.removeStatusEffect(EffectRegistry.getReference(EffectRegistry.FLAMESEED));
-                    expiryDetonation = true;
-                    abilityDamage = HelperMethods.abilityScaledDamage(SpellScalingComponents.id("flamewind"), this.sourceEntity,
-                            this.sourceEntity == null ? null : this.sourceEntity.getMainHandStack(),
-                            Config.uniqueEffects.flamewind.detonationDamageScaling,
-                            Config.uniqueEffects.flamewind.detonationSpellScaling);
-                    abilityDamage *= (float) tuning.get(FireForgeMasteryTuning.Setting.FINAL_DAMAGE_MULTIPLIER, 1)
-                            * (float) tuning.get(
-                                    FireForgeMasteryTuning.Setting.FLAMEWIND_DEATH_DAMAGE_MULTIPLIER, 1);
-                    volume = 0.6f;
-                    pitch = 1.0f;
-                    soundEvent = SoundRegistry.SPELL_FIRE.get();
+            if (this.sourceEntity != null && duration <= 1) {
+                triggerDetonation(serverWorld, livingEntity, this.sourceEntity, this.additionalData);
+                livingEntity.removeStatusEffect(EffectRegistry.getReference(EffectRegistry.FLAMESEED));
+                float damage = baseDetonationDamage(this.sourceEntity)
+                        * (float) tuning.get(FireForgeMasteryTuning.Setting.FINAL_DAMAGE_MULTIPLIER, 1)
+                        * (float) tuning.get(FireForgeMasteryTuning.Setting.FLAMEWIND_DEATH_DAMAGE_MULTIPLIER, 1);
+                damageSeedHost(serverWorld, livingEntity, this.sourceEntity, damage, true);
+            } else {
+                int frequency = tuning.integer(FireForgeMasteryTuning.Setting.INTERVAL_TICKS, 20);
+                double periodicMultiplier = tuning.get(FireForgeMasteryTuning.Setting.PERIODIC_DAMAGE_MULTIPLIER, 1);
+                if (this.sourceEntity != null && periodicMultiplier > 0 && livingEntity.age % frequency == 0) {
+                    double detonationMultiplier = tuning.get(
+                            FireForgeMasteryTuning.Setting.FLAMEWIND_PERIODIC_DETONATION_MULTIPLIER, 0);
+                    float damage = detonationMultiplier > 0
+                            ? baseDetonationDamage(this.sourceEntity) * (float) detonationMultiplier
+                            : basePeriodicDamage(this.sourceEntity);
+                    damageSeedHost(serverWorld, livingEntity, this.sourceEntity,
+                            damage * (float) periodicMultiplier, false);
                 }
-
-                if (this.sourceEntity != null) {
-                    damageSource = livingEntity.getDamageSources().indirectMagic(livingEntity, this.sourceEntity);
-                }
-
-                if (livingEntity instanceof PlayerEntity && this.sourceEntity !=null && this.sourceEntity instanceof  PlayerEntity playerSourceEntity)
-                    damageSource = livingEntity.getDamageSources().playerAttack(playerSourceEntity);
-
-                if (expiryDetonation) {
-                    DETONATING_TARGETS.add(livingEntity.getUuid());
-                }
-                float damage = this.additionalData + ((float) amplifier / 4) + abilityDamage;
-                if (this.sourceEntity != null) {
-                    damage = HelperMethods.applyAbilityDamageEnchantments(serverWorld, this.sourceEntity.getMainHandStack(), livingEntity, damageSource, damage);
-                }
-                livingEntity.damage(damageSource, damage);
-                if (expiryDetonation) {
-                    DETONATING_TARGETS.remove(livingEntity.getUuid());
-                }
-                serverWorld.playSound(null, livingEntity.getBlockPos(), soundEvent,
-                        livingEntity.getSoundCategory(), volume, pitch);
-                HelperMethods.spawnOrbitParticles(serverWorld, livingEntity.getPos(), ParticleTypes.LAVA, 1, 4);
-                HelperMethods.spawnOrbitParticles(serverWorld, livingEntity.getPos(), ParticleTypes.ASH, 1, 6);
-                HelperMethods.spawnOrbitParticles(serverWorld, livingEntity.getPos(), ParticleTypes.SMOKE, 1, 6);
             }
         }
         super.applyUpdateEffect(livingEntity, amplifier);
         return true;
+    }
+
+    private static float basePeriodicDamage(LivingEntity sourceEntity) {
+        return HelperMethods.abilityScaledDamage(SpellScalingComponents.id("flamewind"), sourceEntity,
+                sourceEntity.getMainHandStack(), Config.uniqueEffects.flamewind.damageScaling,
+                Config.uniqueEffects.flamewind.spellScaling);
+    }
+
+    private static float baseDetonationDamage(LivingEntity sourceEntity) {
+        return HelperMethods.abilityScaledDamage(SpellScalingComponents.id("flamewind"), sourceEntity,
+                sourceEntity.getMainHandStack(), Config.uniqueEffects.flamewind.detonationDamageScaling,
+                Config.uniqueEffects.flamewind.detonationSpellScaling);
+    }
+
+    private static void damageSeedHost(ServerWorld world, LivingEntity target, LivingEntity sourceEntity,
+                                       float damage, boolean detonation) {
+        if (damage <= 0) return;
+        DamageSource damageSource = target.getDamageSources().indirectMagic(target, sourceEntity);
+        if (target instanceof PlayerEntity && sourceEntity instanceof PlayerEntity playerSourceEntity) {
+            damageSource = target.getDamageSources().playerAttack(playerSourceEntity);
+        }
+        target.timeUntilRegen = 0;
+        if (detonation) DETONATING_TARGETS.add(target.getUuid());
+        damage = HelperMethods.applyAbilityDamageEnchantments(world, sourceEntity.getMainHandStack(), target,
+                damageSource, damage);
+        target.damage(damageSource, damage);
+        if (detonation) DETONATING_TARGETS.remove(target.getUuid());
+        SoundEvent soundEvent = detonation ? SoundRegistry.SPELL_FIRE.get() : SoundEvents.ENTITY_GENERIC_BURN;
+        world.playSound(null, target.getBlockPos(), soundEvent, target.getSoundCategory(),
+                detonation ? .6f : .3f, detonation ? 1f : 1.3f);
+        HelperMethods.spawnOrbitParticles(world, target.getPos(), ParticleTypes.LAVA, 1, 4);
+        HelperMethods.spawnOrbitParticles(world, target.getPos(), ParticleTypes.ASH, 1, 6);
+        HelperMethods.spawnOrbitParticles(world, target.getPos(), ParticleTypes.SMOKE, 1, 6);
     }
 
     public static boolean hasPendingDeathDetonations(ServerWorld world) {
@@ -167,7 +164,7 @@ public class FlameSeedEffect extends OrbitingEffect {
 
         LivingEntity sourceEntity = statusEffect.getSourceEntity();
         int additionalData = statusEffect.getAdditionalData();
-        if (sourceEntity == null || additionalData == 0 || !(livingEntity.getWorld() instanceof ServerWorld serverWorld)) {
+        if (sourceEntity == null || !(livingEntity.getWorld() instanceof ServerWorld serverWorld)) {
             return;
         }
 
@@ -196,7 +193,7 @@ public class FlameSeedEffect extends OrbitingEffect {
 
         LivingEntity sourceEntity = statusEffect.getSourceEntity();
         int additionalData = statusEffect.getAdditionalData();
-        if (sourceEntity == null || additionalData == 0 || !(livingEntity.getWorld() instanceof ServerWorld serverWorld)) {
+        if (sourceEntity == null || !(livingEntity.getWorld() instanceof ServerWorld serverWorld)) {
             DETONATING_TARGETS.remove(targetId);
             return;
         }

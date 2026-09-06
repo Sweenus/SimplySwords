@@ -9,6 +9,7 @@ import net.minecraft.particle.ParticleTypes;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.effect.instance.SimplySwordsStatusEffectInstance;
 import net.sweenus.simplyswords.registry.EffectRegistry;
@@ -37,18 +38,21 @@ public class ElementalVortexEffect extends OrbitingEffect {
     public boolean applyUpdateEffect(LivingEntity livingEntity, int amplifier) {
         if (!livingEntity.getWorld().isClient()) {
             ServerWorld serverWorld = (ServerWorld) livingEntity.getWorld();
-			SoundHelper.loopSound(livingEntity, SoundRegistry.AMBIENCE_WIND_LOOP.getId(), 6, 20);
-
-            if (TempestAbilityManager.hasManagedVortex(livingEntity)) {
+            Vec3d managedCenter = TempestAbilityManager.managedVortexCenter(livingEntity);
+            if (managedCenter != null) {
+                SoundHelper.loopSound(livingEntity, SoundRegistry.AMBIENCE_WIND_LOOP.getId(), 6, 20,
+                        managedCenter);
                 if (livingEntity.age % 40 == 0) {
-                    HelperMethods.spawnOrbitParticles(serverWorld, livingEntity.getPos().add(0,
+                    HelperMethods.spawnOrbitParticles(serverWorld, managedCenter.add(0,
                             livingEntity.getHeight() / 3, 0), ParticleTypes.LAVA, .5, 4);
-                    HelperMethods.spawnOrbitParticles(serverWorld, livingEntity.getPos().add(0,
+                    HelperMethods.spawnOrbitParticles(serverWorld, managedCenter.add(0,
                             livingEntity.getHeight() / 2, 0), ParticleTypes.SNOWFLAKE, 1, 6);
                 }
                 super.applyUpdateEffect(livingEntity, amplifier);
                 return true;
             }
+
+			SoundHelper.loopSound(livingEntity, SoundRegistry.AMBIENCE_WIND_LOOP.getId(), 6, 20);
 
             if (livingEntity.getStatusEffect(EffectRegistry.getReference(EffectRegistry.ELEMENTAL_VORTEX)) instanceof SimplySwordsStatusEffectInstance statusEffect) {
                 sourceEntity = statusEffect.getSourceEntity();
@@ -101,6 +105,12 @@ public class ElementalVortexEffect extends OrbitingEffect {
         LivingEntity entity = getEntityFromAttributeContainer(attributes);
         SoundHelper.stopLoopingSound(entity, SoundRegistry.AMBIENCE_WIND_LOOP.getId());
         super.onRemoved(attributes);
+    }
+
+    @Override
+    protected Vec3d getOrbitBasePosition(LivingEntity livingEntity) {
+        Vec3d managedCenter = TempestAbilityManager.managedVortexCenter(livingEntity);
+        return managedCenter == null ? livingEntity.getPos() : managedCenter;
     }
 
     @Override

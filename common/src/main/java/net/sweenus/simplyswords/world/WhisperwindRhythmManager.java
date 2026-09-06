@@ -49,8 +49,8 @@ public final class WhisperwindRhythmManager {
         }
     }
 
-    // Still Wind: every third attack in the window primes a single-target strike.
-    public static boolean primeStillWind(ServerWorld world, LivingEntity owner, StormSoulMasteryTuning tuning) {
+    public static boolean recordStillWindAttack(ServerWorld world, LivingEntity owner,
+                                                StormSoulMasteryTuning tuning) {
         int threshold = tuning.integer(StormSoulMasteryTuning.Setting.STILL_WIND_THRESHOLD, 0);
         if (threshold <= 0) return false;
         RhythmState state = state(world, owner.getUuid());
@@ -61,15 +61,7 @@ public final class WhisperwindRhythmManager {
         state.attacks++;
         if (state.attacks < threshold) return false;
         state.attacks = 0;
-        state.stillWindPrimed = true;
         return true;
-    }
-
-    public static boolean consumeStillWind(ServerWorld world, LivingEntity owner) {
-        RhythmState state = state(world, owner.getUuid());
-        boolean primed = state.stillWindPrimed;
-        state.stillWindPrimed = false;
-        return primed;
     }
 
     // Dancing Gale: a refresh shortens the cooldown instead of clearing it.
@@ -210,7 +202,6 @@ public final class WhisperwindRhythmManager {
         private long failuresExpire = Long.MIN_VALUE;
         private int attacks;
         private long attacksExpire = Long.MIN_VALUE;
-        private boolean stillWindPrimed;
         private long refreshReady = Long.MIN_VALUE;
         private long lastRefresh = Long.MIN_VALUE;
         private long repriseUntil = Long.MIN_VALUE;

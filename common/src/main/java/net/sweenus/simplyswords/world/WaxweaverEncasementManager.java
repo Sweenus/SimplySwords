@@ -504,10 +504,7 @@ public final class WaxweaverEncasementManager {
                 NatureSwarmMasteryTuning.Setting.WAX_REFUND_WINDOW_TICKS, 80) ? 0 : window.used;
         int applied = Math.min(refund, Math.max(0, limit - used));
         if (applied <= 0) return;
-        int total = SimplySwordsAPI.getEffectiveWeaponCooldownTicks(stack, actor,
-                Config.uniqueEffects.waxweaver.activeCooldown);
-        int remaining = Math.round(player.getItemCooldownManager().getCooldownProgress(stack.getItem(), 0) * total);
-        player.getItemCooldownManager().set(stack.getItem(), Math.max(0, remaining - applied));
+        SimplySwordsAPI.reduceWeaponCooldown(actor, stack, Config.uniqueEffects.waxweaver.activeCooldown, applied);
         windows.put(actor.getUuid(), new RefundWindow(used == 0 ? now : window.startedAt, used + applied));
     }
 

@@ -121,7 +121,7 @@ public final class WhisperwindVisualManager {
             long triggerTick = world.getTime() + delay;
             PENDING_STRIKES.computeIfAbsent(world, ignored -> new HashSet<>())
                     .add(new PendingStrike(user.getUuid(), dash.stack.copy(), dash.start, dash.end,
-                            new HashSet<>(dash.targets), triggerTick, dash.execution, dash.tuning));
+                            new HashSet<>(dash.targets), triggerTick, dash.execution, dash.tuning, false));
         } else if (dash.execution != null) {
             UniqueAbilityApi.finish(dash.execution, StormSoulMasteryAbilities.FINISH, 0);
         }
@@ -147,7 +147,22 @@ public final class WhisperwindVisualManager {
         PENDING_STRIKES.computeIfAbsent(world, ignored -> new HashSet<>())
                 .add(new PendingStrike(user.getUuid(), stack.copy(), start, end, targets,
                         world.getTime() + tuning.integer(StormSoulMasteryTuning.Setting.DELAY_TICKS,
-                                Config.uniqueEffects.whisperwind.delayedDamageDelay), execution, tuning));
+                                Config.uniqueEffects.whisperwind.delayedDamageDelay), execution, tuning, false));
+        world.playSound(null, start.x, start.y, start.z, SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_IMPACT_01.get(),
+                SoundCategory.PLAYERS, 0.6F, 1.0F);
+    }
+
+    public static void scheduleStillWindStrike(ServerWorld world, LivingEntity user, LivingEntity target,
+                                               ItemStack stack, UniqueAbilityExecution execution,
+                                               StormSoulMasteryTuning tuning) {
+        Vec3d start = user.getPos();
+        Vec3d end = target.getPos();
+        Set<UUID> targets = new HashSet<>();
+        targets.add(target.getUuid());
+        PENDING_STRIKES.computeIfAbsent(world, ignored -> new HashSet<>())
+                .add(new PendingStrike(user.getUuid(), stack.copy(), start, end, targets,
+                        world.getTime() + tuning.integer(StormSoulMasteryTuning.Setting.DELAY_TICKS,
+                                Config.uniqueEffects.whisperwind.delayedDamageDelay), execution, tuning, true));
         world.playSound(null, start.x, start.y, start.z, SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_IMPACT_01.get(),
                 SoundCategory.PLAYERS, 0.6F, 1.0F);
     }
@@ -182,8 +197,7 @@ public final class WhisperwindVisualManager {
             return;
         }
 
-        boolean stillWind = strike.tuning.integer(StormSoulMasteryTuning.Setting.STILL_WIND_THRESHOLD, 0) > 0
-                && WhisperwindRhythmManager.consumeStillWind(world, source);
+        boolean stillWind = strike.stillWind;
         boolean nearestOnly = strike.tuning.get(StormSoulMasteryTuning.Setting.STRIKE_NEAREST_ONLY, 0) >= 1;
         int targetCap = strike.tuning.has(StormSoulMasteryTuning.Setting.STRIKE_TARGET_CAP)
                 ? strike.tuning.integer(StormSoulMasteryTuning.Setting.STRIKE_TARGET_CAP, 64) : Integer.MAX_VALUE;
@@ -202,11 +216,10 @@ public final class WhisperwindVisualManager {
         if (stillWind) {
             multiplier *= (float) strike.tuning.get(StormSoulMasteryTuning.Setting.STILL_WIND_MULTIPLIER, 1);
         }
-        multiplier *= (float) (1.0 + arrangementBonus(strike, targets.size(), stillWind));
+        multiplier *= (float) (1.0 + arrangementBonus(strike, targets.size()));
         multiplier *= (float) (1.0 + WhisperwindRhythmManager.tempoBonus(world, source, strike.tuning));
 
-        double perTargetBonus = stillWind ? 0
-                : strike.tuning.get(StormSoulMasteryTuning.Setting.BOUQUET_PER_TARGET_BONUS, 0);
+        double perTargetBonus = strike.tuning.get(StormSoulMasteryTuning.Setting.BOUQUET_PER_TARGET_BONUS, 0);
         int bouquetCap = strike.tuning.integer(StormSoulMasteryTuning.Setting.BOUQUET_TARGET_CAP, 64);
         int scalingTargets = Math.min(targets.size(), bouquetCap);
         float damage = HelperMethods.abilityScaledDamage("evocation", source, strike.stack,
@@ -260,8 +273,7 @@ public final class WhisperwindVisualManager {
 
 
     // Perfect Arrangement: a lone target or a crowd both sharpen the strike.
-    private static double arrangementBonus(PendingStrike strike, int targets, boolean stillWind) {
-        if (stillWind) return 0;
+    private static double arrangementBonus(PendingStrike strike, int targets) {
         if (targets <= 1) return strike.tuning.get(StormSoulMasteryTuning.Setting.SOLO_DAMAGE_BONUS, 0);
         int threshold = strike.tuning.integer(StormSoulMasteryTuning.Setting.CROWD_THRESHOLD, 0);
         return threshold > 0 && targets >= threshold
@@ -417,6 +429,7 @@ public final class WhisperwindVisualManager {
     }
 
     private record PendingStrike(UUID sourceId, ItemStack stack, Vec3d start, Vec3d end, Set<UUID> targetIds,
-                                 long triggerTick, UniqueAbilityExecution execution, StormSoulMasteryTuning tuning) {
+                                 long triggerTick, UniqueAbilityExecution execution, StormSoulMasteryTuning tuning,
+                                 boolean stillWind) {
     }
 }

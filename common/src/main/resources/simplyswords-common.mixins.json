@@ -23,6 +23,8 @@
   "mixins": [
     "EntityMixin",
     "ExperienceOrbEntityMixin",
+    "ItemCooldownEntryAccessor",
+    "ItemCooldownManagerAccessor",
     "ItemEntityMixin",
     "ItemStackMixin",
     "LivingEntityMixin",

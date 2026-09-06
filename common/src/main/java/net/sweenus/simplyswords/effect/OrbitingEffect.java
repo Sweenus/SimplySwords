@@ -27,7 +27,8 @@ public abstract class OrbitingEffect extends StatusEffect {
     public boolean applyUpdateEffect(LivingEntity livingEntity, int amplifier) {
         if (!livingEntity.getWorld().isClient) {
             ServerWorld serverWorld = (ServerWorld) livingEntity.getWorld();
-            Vec3d center = livingEntity.getPos().add(0, livingEntity.getHeight() / 2.0, 0); // Center around the entity's waist
+            Vec3d basePosition = getOrbitBasePosition(livingEntity);
+            Vec3d center = basePosition.add(0, livingEntity.getHeight() / 2.0, 0); // Center around the entity's waist
             double baseRadius = 1.0; // base radius for the first orbit
             double speed = Math.PI / 8; // Control the speed of the orbit
 
@@ -38,7 +39,7 @@ public abstract class OrbitingEffect extends StatusEffect {
                 double angleOffset = i * (Math.PI / 4);
                 double verticalOffset = center.y;
                 if (amplifier > 2)
-                    verticalOffset = livingEntity.getPos().y + Math.min(i * 0.4, 3);
+                    verticalOffset = basePosition.y + Math.min(i * 0.4, 3);
                 if (amplifier > 2)
                     radius = 0.3 + (i * 0.1);
                 // Calculate the x and z coordinates on the orbit with the angle offset
@@ -57,6 +58,10 @@ public abstract class OrbitingEffect extends StatusEffect {
             }
         }
         return true;
+    }
+
+    protected Vec3d getOrbitBasePosition(LivingEntity livingEntity) {
+        return livingEntity.getPos();
     }
 
     // Protected method to set the particle type
