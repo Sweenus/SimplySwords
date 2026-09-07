@@ -164,7 +164,6 @@ public final class RiftmaneAbilityManager {
     }
 
     private static void configureRider(RiftmaneChargerEntity charger, MartialCommandEldritchMasteryTuning tuning) {
-        charger.setPhasing(tuning.flag(1 << 25));
         charger.setRiderGuard(tuning.has(MartialCommandEldritchMasteryTuning.Setting.STATUS_AMPLIFIER)
                         ? tuning.integer(MartialCommandEldritchMasteryTuning.Setting.STATUS_AMPLIFIER, 1) : -1,
                 tuning.integer(MartialCommandEldritchMasteryTuning.Setting.STATUS_DURATION_TICKS, 20));

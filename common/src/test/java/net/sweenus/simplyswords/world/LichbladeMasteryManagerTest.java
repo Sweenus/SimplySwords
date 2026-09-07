@@ -49,11 +49,17 @@ final class LichbladeMasteryManagerTest {
 
     @Test
     void overflowingSpiritOnlyPaysOnChargeBeyondACappedAbsorptionGrant() {
-        assertEquals(0, LichbladeMasteryManager.overflowResistanceTicks(10, 6, 40, 4, 40, 120));
-        assertEquals(0, LichbladeMasteryManager.overflowResistanceTicks(10, 10, 20, 4, 40, 120));
-        assertEquals(40, LichbladeMasteryManager.overflowResistanceTicks(10, 10, 24, 4, 40, 120));
-        assertEquals(120, LichbladeMasteryManager.overflowResistanceTicks(10, 10, 40, 4, 40, 120));
-        assertEquals(120, LichbladeMasteryManager.overflowResistanceTicks(10, 10, 200, 4, 40, 120));
+        assertEquals(0, LichbladeMasteryManager.overflowResistanceTicks(10, 6, 40, 4, 40, 120, 2, 1));
+        assertEquals(0, LichbladeMasteryManager.overflowResistanceTicks(10, 10, 20, 4, 40, 120, 2, 1));
+        assertEquals(40, LichbladeMasteryManager.overflowResistanceTicks(10, 10, 24, 4, 40, 120, 2, 1));
+        assertEquals(120, LichbladeMasteryManager.overflowResistanceTicks(10, 10, 40, 4, 40, 120, 2, 1));
+        assertEquals(120, LichbladeMasteryManager.overflowResistanceTicks(10, 10, 200, 4, 40, 120, 2, 1));
+    }
+
+    @Test
+    void overflowingSpiritCountsFromTheRealCapPointUnderGraveInterestAndSoulBastion() {
+        assertEquals(80, LichbladeMasteryManager.overflowResistanceTicks(10, 10, 24, 4, 40, 120, 2, 1.4));
+        assertEquals(80, LichbladeMasteryManager.overflowResistanceTicks(16, 16, 40, 4, 40, 120, 2, 1));
     }
 
     @Test

@@ -23,6 +23,23 @@ public record WraithfangTuningSnapshot(
         double hasteDamageMultiplier, int returnMeleeWindowTicks, double returnMeleeDamageMultiplier
 ) {
     private static final String NBT_KEY = "wraithfang_tuning";
+    public static final int BANSHEE = 1;
+    public static final int HARPOON = 2;
+    public static final int PASSAGE = 4;
+    public static final int SAFE_LANDING = 8;
+    public static final int ARRIVAL = 16;
+    public static final int RIDE = 32;
+    public static final int POSSESSION = 64;
+    public static final int RETURN_BEAT = 128;
+    public static final int DESTINATION = 256;
+    public static final int RAPID = 512;
+    public static final int CADENCE = 1024;
+    public static final int RESTLESS = 2048;
+    public static final int FLURRY = 4096;
+    public static final int ENDLESS = 8192;
+    public static final int HAUNTED = 16384;
+    public static final int RELENTLESS = 32768;
+    public static final int READIED = 65536;
 
     public static WraithfangTuningSnapshot from(UniqueAbilityExecution execution) {
         AbyssalSpectralMasteryTuning t = execution == null ? AbyssalSpectralMasteryTuning.EMPTY
@@ -48,9 +65,9 @@ public record WraithfangTuningSnapshot(
                 t.integer(AbyssalSpectralMasteryTuning.Setting.MODE, 0),
                 cooldownTicks,
                 t.integer(AbyssalSpectralMasteryTuning.Setting.PROJECTILE_LIFETIME, 80),
-                t.get(AbyssalSpectralMasteryTuning.Setting.DASH_TARGET_RANGE, 14.4),
+                t.get(AbyssalSpectralMasteryTuning.Setting.DASH_TARGET_RANGE, 32),
                 t.get(AbyssalSpectralMasteryTuning.Setting.DASH_SPEED, 1.35),
-                t.integer(AbyssalSpectralMasteryTuning.Setting.DASH_DURATION_TICKS, 10),
+                t.integer(AbyssalSpectralMasteryTuning.Setting.DASH_DURATION_TICKS, 100),
                 t.get(AbyssalSpectralMasteryTuning.Setting.DASH_CONTACT_DAMAGE_MULTIPLIER, 0),
                 t.integer(AbyssalSpectralMasteryTuning.Setting.DASH_CONTACT_TARGET_CAP, 0),
                 t.get(AbyssalSpectralMasteryTuning.Setting.HOMING_TURN_DEGREES, 0),

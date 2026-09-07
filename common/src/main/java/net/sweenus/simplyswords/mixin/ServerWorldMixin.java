@@ -13,6 +13,11 @@ import java.util.function.BooleanSupplier;
 @Mixin(ServerWorld.class)
 public abstract class ServerWorldMixin {
 
+    @Inject(method = "tick(Ljava/util/function/BooleanSupplier;)V", at = @At("TAIL"))
+    private void simplyswords$syncEmberReserve(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
+        LongPathFinalFormsMasteryCombatManager.tickReserveHud((ServerWorld) (Object) this);
+    }
+
     @Inject(method = "tick(Ljava/util/function/BooleanSupplier;)V", at = @At("HEAD"))
     private void simplyswords$tickFieldManagers(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
         ServerWorld world = (ServerWorld) (Object) this;

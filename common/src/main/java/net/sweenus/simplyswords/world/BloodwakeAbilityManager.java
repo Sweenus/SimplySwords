@@ -951,8 +951,14 @@ public final class BloodwakeAbilityManager {
     private static void tickChainBursts(ServerWorld world) {
         List<ChainBurst> chains = CHAIN_BURSTS.get(world);
         if (chains == null) return;
-        chains.removeIf(chain -> {
-            if (world.getTime() < chain.at) return false;
+        List<ChainBurst> due = new ArrayList<>();
+        for (ChainBurst chain : chains) {
+            if (world.getTime() >= chain.at) due.add(chain);
+        }
+        // Detonations are resolved outside the iteration: triggerBloodBurst can queue
+        // follow-up chains into this same list, and the entries stay in place until the
+        // end so they keep counting against BLOOD_CHAIN_CAP while they resolve.
+        for (ChainBurst chain : due) {
             LivingEntity actor = resolveLiving(world, chain.actorId);
             LivingEntity target = resolveLiving(world, chain.targetId);
             if (actor != null && target != null) {
@@ -962,9 +968,16 @@ public final class BloodwakeAbilityManager {
                 BleedHelper.clear(target);
                 triggerBloodBurst(world, chain.stack, actor, target, tuning);
             }
-            return true;
-        });
+        }
+        chains.removeIf(chain -> containsIdentity(due, chain));
         if (chains.isEmpty()) CHAIN_BURSTS.remove(world);
+    }
+
+    private static boolean containsIdentity(List<ChainBurst> chains, ChainBurst chain) {
+        for (ChainBurst candidate : chains) {
+            if (candidate == chain) return true;
+        }
+        return false;
     }
 
     private static void spawnCrimsonTrail(ServerWorld world, Vec3d from, Vec3d to, int points) {

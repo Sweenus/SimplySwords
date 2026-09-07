@@ -126,7 +126,8 @@ public class SunfireSwordItem extends UniqueSwordItem implements UniqueWeaponAct
 
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
-        if (!world.isClient() && selected && entity instanceof LivingEntity living) {
+        if (!world.isClient() && entity instanceof LivingEntity living
+                && (living.getMainHandStack() == stack || living.getOffHandStack() == stack)) {
             LongPathFinalFormsMasteryCombatManager.tickHeld(stack, living);
         }
         HelperMethods.createFootfalls(entity, stack, world, ParticleTypes.MYCELIUM, ParticleTypes.MYCELIUM,

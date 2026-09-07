@@ -20,6 +20,8 @@ public final class SimplySwordsNetwork {
 
     public static void init() {
         if (Platform.getEnvironment() == Env.SERVER) {
+            NetworkManager.registerS2CPayloadType(EmberReservePacket.ID, EmberReservePacket.CODEC);
+            NetworkManager.registerS2CPayloadType(PhoenixStandardPacket.ID, PhoenixStandardPacket.CODEC);
             NetworkManager.registerS2CPayloadType(
                     ObserverStatusEffectsPacket.ID,
                     ObserverStatusEffectsPacket.CODEC);

@@ -75,7 +75,12 @@ public class ThrownSpearEntity extends PersistentProjectileEntity {
 
     // Constructor for owner and item stack
     public ThrownSpearEntity(World world, LivingEntity owner, ItemStack stack) {
-        super(EntityRegistry.SPEAR.get(), owner, world, stack, (ItemStack) null);
+        this(EntityRegistry.SPEAR.get(), world, owner, stack);
+    }
+
+    protected ThrownSpearEntity(EntityType<? extends ThrownSpearEntity> type, World world,
+                                LivingEntity owner, ItemStack stack) {
+        super(type, owner, world, stack, (ItemStack) null);
         this.dataTracker.set(LOYALTY, getLoyalty());
         this.dataTracker.set(ENCHANTED, stack.hasEnchantments());
         this.dataTracker.set(ITEM_STACK, stack);
@@ -364,12 +369,13 @@ public class ThrownSpearEntity extends PersistentProjectileEntity {
         super.readCustomDataFromNbt(nbt);
         this.dealtDamage = nbt.getBoolean("DealtDamage");
         this.dataTracker.set(LOYALTY, this.getLoyalty());
-        if (nbt.contains("Stack")) {
-            this.dataTracker.set(ITEM_STACK, this.stack);
+        if (nbt.contains("item")) {
             this.stack = ItemStack.fromNbt(this.getRegistryManager(), nbt.getCompound("item")).orElse(this.getDefaultItemStack());
         } else {
             this.stack = ItemStack.EMPTY;
         }
+        this.dataTracker.set(ITEM_STACK, this.stack);
+        this.dataTracker.set(ENCHANTED, this.stack.hasEnchantments());
 
     }
 

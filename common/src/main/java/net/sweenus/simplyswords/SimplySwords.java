@@ -271,6 +271,7 @@ public class SimplySwords {
             RibboncleaverDreadtideMasteryManager.clearAll();
         });
         PlayerEvent.PLAYER_QUIT.register(player -> {
+            LongPathFinalFormsMasteryCombatManager.clearSunfireOwner(player);
             SoulPyreAbilityManager.clear(player.getServerWorld(), player);
             StormbringerAbilityManager.clearActor(player);
             StormbringerParryManager.clearActor(player);
@@ -380,6 +381,7 @@ public class SimplySwords {
             CaelestisBreachAmbience.init();
             DevourerMassVoiceClientState.init();
             ObserverStatusEffectClientApi.init();
+            net.sweenus.simplyswords.client.SunfireFeedbackClient.init();
             LocalStormVisualManager.init();
             IonboundBeamClientState.init();
             SoulstalkerVoiceClientState.init();
@@ -403,6 +405,7 @@ public class SimplySwords {
             EntityRendererRegistry.register(EntityRegistry.FROSTFALLENTITY, ThrownSwordEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.LIVYATANENTITY, ThrownSwordEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.SPEAR, ThrownSpearEntityRenderer::new);
+            EntityRendererRegistry.register(EntityRegistry.WRAITHFANG, ThrownSpearEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.THROWNRUNICENTITY, ThrownSwordEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.DANCING_BLADE_VISUAL, DancingBladeVisualEntityRenderer::new);
             EntityRendererRegistry.register(EntityRegistry.FROSTFALL_ICE_SPIKE_VISUAL, FrostfallIceSpikeVisualEntityRenderer::new);

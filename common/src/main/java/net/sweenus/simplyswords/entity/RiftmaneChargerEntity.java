@@ -54,8 +54,6 @@ public class RiftmaneChargerEntity extends HorseEntity implements SimplySwordsMi
             DataTracker.registerData(RiftmaneChargerEntity.class, TrackedDataHandlerRegistry.INTEGER);
     private static final TrackedData<Boolean> WATER_WALK =
             DataTracker.registerData(RiftmaneChargerEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
-    private static final TrackedData<Boolean> PHASING =
-            DataTracker.registerData(RiftmaneChargerEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
 
     private static final float REAR_RISE_FRACTION = 0.45F;
     private static final float REAR_DROP_TICKS = 4.0F;
@@ -78,8 +76,6 @@ public class RiftmaneChargerEntity extends HorseEntity implements SimplySwordsMi
     private double remainingDistance = Double.POSITIVE_INFINITY;
     private UUID restrictedTargetUuid;
     private int successfulHits;
-    private Vec3d lastSafeRiderPosition;
-    private Vec3d mountingPosition;
     private MartialCommandEldritchMasteryTuning followUpTuning = MartialCommandEldritchMasteryTuning.EMPTY;
     private int riderGuardAmplifier = -1;
     private int riderGuardTrailingTicks;
@@ -113,19 +109,10 @@ public class RiftmaneChargerEntity extends HorseEntity implements SimplySwordsMi
         builder.add(REAR_TICKS, 0);
         builder.add(SEED, 0);
         builder.add(WATER_WALK, false);
-        builder.add(PHASING, false);
     }
 
     public void setAudioLead(boolean audioLead) {
         this.audioLead = audioLead;
-    }
-
-    public void setPhasing(boolean phasing) {
-        this.dataTracker.set(PHASING, phasing);
-    }
-
-    public boolean isPhasing() {
-        return this.dataTracker.get(PHASING);
     }
 
     public boolean suppressesCollisionKnockback() {
@@ -196,10 +183,6 @@ public class RiftmaneChargerEntity extends HorseEntity implements SimplySwordsMi
     protected void addPassenger(Entity passenger) {
         super.addPassenger(passenger);
         if (!this.getWorld().isClient()) {
-            this.mountingPosition = passenger.getPos();
-            if (this.getWorld().isSpaceEmpty(passenger, passenger.getBoundingBox())) {
-                this.lastSafeRiderPosition = this.mountingPosition;
-            }
             if (passenger instanceof LivingEntity rider && this.riderGuardAmplifier >= 0) {
                 rider.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE,
                         10, this.riderGuardAmplifier, false, false, true), this);
@@ -221,31 +204,6 @@ public class RiftmaneChargerEntity extends HorseEntity implements SimplySwordsMi
             world.playSound(null, rider.getBlockPos(), SoundRegistry.DARK_ACTIVATION_DISTORTED.get(),
                     SoundCategory.PLAYERS, 0.5F, 1.35F);
         }
-    }
-
-    @Override
-    public Vec3d updatePassengerForDismount(LivingEntity passenger) {
-        Vec3d release = super.updatePassengerForDismount(passenger);
-        if (!this.isPhasing() || isClearDismount(passenger, release)) return release;
-        if (isClearDismount(passenger, this.lastSafeRiderPosition)) return this.lastSafeRiderPosition;
-        if (isClearDismount(passenger, this.mountingPosition)) return this.mountingPosition;
-        Vec3d origin = this.lastSafeRiderPosition == null ? this.getPos() : this.lastSafeRiderPosition;
-        for (int radius = 1; radius <= 4; radius++) {
-            for (int y = -radius; y <= radius; y++) {
-                for (int x = -radius; x <= radius; x++) {
-                    for (int z = -radius; z <= radius; z++) {
-                        Vec3d candidate = origin.add(x, y, z);
-                        if (isClearDismount(passenger, candidate)) return candidate;
-                    }
-                }
-            }
-        }
-        return release;
-    }
-
-    private boolean isClearDismount(Entity passenger, @Nullable Vec3d position) {
-        return position != null && this.getWorld().isSpaceEmpty(passenger,
-                passenger.getBoundingBox().offset(position.subtract(passenger.getPos())));
     }
 
     @Override
@@ -350,8 +308,6 @@ public class RiftmaneChargerEntity extends HorseEntity implements SimplySwordsMi
         this.fallDistance = 0.0F;
         for (Entity passenger : this.getPassengerList()) {
             passenger.fallDistance = 0.0F;
-            Vec3d position = this.getPassengerRidingPos(passenger);
-            if (isClearDismount(passenger, position)) this.lastSafeRiderPosition = position;
         }
 
         if (this.riderGuardAmplifier >= 0) {
@@ -387,13 +343,10 @@ public class RiftmaneChargerEntity extends HorseEntity implements SimplySwordsMi
         this.setVelocity(velocity);
         this.velocityModified = true;
         this.move(MovementType.SELF, velocity);
-        if (this.isPhasing()) {
-            this.setPosition(previousPosition.x + velocity.x, this.getY(), previousPosition.z + velocity.z);
-        }
         this.remainingDistance = Math.max(0.0, this.remainingDistance
                 - this.getPos().subtract(previousPosition).horizontalLength());
 
-        if (!this.isPhasing() && this.damage > 0) {
+        if (this.damage > 0) {
             hitAlongPath(world, previousBox);
         }
         spawnTrail(world);
@@ -500,9 +453,6 @@ public class RiftmaneChargerEntity extends HorseEntity implements SimplySwordsMi
     }
 
     private boolean blockedByWall(Vec3d travel) {
-        if (this.isPhasing()) {
-            return false;
-        }
         double stepHeight = Math.max(0.0, this.getStepHeight());
         double clearance = this.getY() + stepHeight + 0.08;
         double ceiling = this.getY() + WALL_HEIGHT;

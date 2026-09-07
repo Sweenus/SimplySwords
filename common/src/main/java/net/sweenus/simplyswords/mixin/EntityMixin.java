@@ -5,7 +5,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.BlockPos;
-import net.sweenus.simplyswords.entity.RiftmaneChargerEntity;
 import net.sweenus.simplyswords.world.GloamStainManager;
 import net.sweenus.simplyswords.world.SoulPyreAbilityManager;
 import net.sweenus.simplyswords.world.ObserverStatusEffectSyncManager;
@@ -17,13 +16,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(Entity.class)
 public abstract class EntityMixin {
-
-    @Inject(method = "isInsideWall", at = @At("HEAD"), cancellable = true)
-    private void simplyswords$protectPhasingRiftmaneRider(CallbackInfoReturnable<Boolean> cir) {
-        if (((Entity) (Object) this).getVehicle() instanceof RiftmaneChargerEntity charger && charger.isPhasing()) {
-            cir.setReturnValue(false);
-        }
-    }
 
     @Inject(method = "remove", at = @At("HEAD"))
     private void simplyswords$removeObserverStatusEffects(Entity.RemovalReason reason, CallbackInfo ci) {

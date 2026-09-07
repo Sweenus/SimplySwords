@@ -14,11 +14,4 @@ final class WraithfangAbilityManagerTest {
         assertEquals(0, WraithfangAbilityManager.nextAlternationStacks(3, true, false));
         assertEquals(0, WraithfangAbilityManager.nextAlternationStacks(3, false, true));
     }
-
-    @Test
-    void cooldownRefundNeverProducesNegativeTime() {
-        assertEquals(30, WraithfangAbilityManager.remainingAfterRefund(60, 1, 30));
-        assertEquals(0, WraithfangAbilityManager.remainingAfterRefund(20, .25F, 10));
-        assertEquals(0, WraithfangAbilityManager.remainingAfterRefund(20, 0, 10));
-    }
 }

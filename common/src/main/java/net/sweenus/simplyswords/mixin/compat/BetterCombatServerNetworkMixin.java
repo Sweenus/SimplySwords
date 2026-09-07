@@ -17,6 +17,22 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(targets = "net.bettercombat.network.ServerNetwork", remap = false)
 public abstract class BetterCombatServerNetworkMixin {
 
+    @com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation(method = "handleAttackRequest", remap = false,
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;executeSync(Ljava/lang/Runnable;)V", remap = true))
+    private static void simplyswords$wraithfangAttack(MinecraftServer server, Runnable action,
+            com.llamalad7.mixinextras.injector.wrapoperation.Operation<Void> original,
+            @com.llamalad7.mixinextras.sugar.Local(argsOnly = true) ServerPlayerEntity player) {
+        original.call(server, (Runnable) () -> {
+            net.sweenus.simplyswords.world.WraithfangAbilityManager.beginAttack(player);
+            net.sweenus.simplyswords.world.LongPathFinalFormsMasteryCombatManager.beginAttack(player);
+            try { action.run(); }
+            finally {
+                net.sweenus.simplyswords.world.LongPathFinalFormsMasteryCombatManager.endAttack();
+                net.sweenus.simplyswords.world.WraithfangAbilityManager.endAttack();
+            }
+        });
+    }
+
     @Inject(method = "handleAttackRequest", at = @At("HEAD"), remap = false, cancellable = true)
     private static void simplyswords$triggerRunicSlashFromBetterCombat(
             @Coerce Object request,

@@ -55,6 +55,9 @@ public abstract class InGameHudMixin {
     private static final int HEAT_BORDER_COLOR = 0xE06B1D08;
     private static final float HEAT_SMOOTHING_RATE = 0.43F;
     private static final int WEAPON_HUD_BOTTOM_OFFSET = 68;
+    private static final int EMBER_RESERVE_COLOR = 0xFFFFAD32;
+    private static final int EMBER_RESERVE_EMPTY_COLOR = 0x663D240B;
+    private static final int EMBER_RESERVE_BORDER_COLOR = 0xCC6B3A08;
 
     @Unique
     private float simplyswords$displayedHeat;
@@ -189,6 +192,14 @@ public abstract class InGameHudMixin {
             int maximum = stormCharge.effectiveStormChargeCapacity(Config.uniqueEffects.stormbringer.maxStormCharges);
             renderChargePips(context, client, charges, maximum, STORM_CHARGE_COLOR, STORM_CHARGE_EMPTY_COLOR, STORM_CHARGE_BORDER_COLOR);
             return;
+        }
+        var reserve = net.sweenus.simplyswords.client.SunfireFeedbackClient.reserve();
+        ItemStack sunfire = net.sweenus.simplyswords.world.LongPathFinalFormsMasteryCombatManager.heldSunfire(client.player);
+        if (reserve != null && reserve.charges() > 0 && !sunfire.isEmpty()
+                && net.sweenus.simplyswords.api.AwakeningApi.isAbilityUnlocked(sunfire)) {
+            renderChargePips(context, client, reserve.charges(), reserve.capacity(), EMBER_RESERVE_COLOR,
+                    EMBER_RESERVE_EMPTY_COLOR, EMBER_RESERVE_BORDER_COLOR,
+                    Text.translatable("hud.simplyswords.ember_reserve", reserve.charges(), reserve.capacity()).getString());
         }
     }
 

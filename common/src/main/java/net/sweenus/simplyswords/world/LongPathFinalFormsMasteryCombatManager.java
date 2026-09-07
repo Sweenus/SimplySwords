@@ -29,6 +29,85 @@ import java.util.UUID;
 public final class LongPathFinalFormsMasteryCombatManager {
     private static final int HELD_RESOLVE_INTERVAL = 5;
     private static final Map<UUID, PassiveState> STATES = new HashMap<>();
+    private static final Map<ServerWorld, Map<UUID, PassiveState>> SUNFIRE_STATES = new HashMap<>();
+    private static final Map<ServerWorld, Map<UUID, AllyCharge>> SUNFIRE_CHARGES = new HashMap<>();
+    private static final Map<UUID, ReserveHudState> RESERVE_HUD = new HashMap<>();
+    private static final ThreadLocal<AttackAction> ATTACK_ACTION = new ThreadLocal<>();
+
+    public static void beginAttack(LivingEntity owner) {
+        AttackAction action = ATTACK_ACTION.get();
+        if (action == null) ATTACK_ACTION.set(new AttackAction(owner));
+        else action.depth++;
+    }
+
+    public static void endAttack() {
+        AttackAction action = ATTACK_ACTION.get();
+        if (action != null && --action.depth == 0) ATTACK_ACTION.remove();
+    }
+
+    public static boolean isSunfire(ItemStack stack) {
+        return stack.getItem() instanceof net.sweenus.simplyswords.item.custom.SunfireSwordItem
+                || stack.getItem() instanceof net.sweenus.simplyswords.item.custom.DormantRelicSwordItem
+                && net.sweenus.simplyswords.api.AwakeningApi.getFormId(stack)
+                .filter(id -> id.equals(net.minecraft.util.Identifier.of("simplyswords", "sunfire"))).isPresent();
+    }
+
+    public static ItemStack heldSunfire(LivingEntity owner) {
+        if (isSunfire(owner.getMainHandStack()))
+            return owner.getMainHandStack();
+        if (isSunfire(owner.getOffHandStack()))
+            return owner.getOffHandStack();
+        return ItemStack.EMPTY;
+    }
+
+    private static PassiveState sunfireState(LivingEntity owner) {
+        ServerWorld world = (ServerWorld) owner.getWorld();
+        SUNFIRE_STATES.forEach((otherWorld, values) -> {
+            if (otherWorld != world) values.remove(owner.getUuid());
+        });
+        Map<UUID, PassiveState> states = SUNFIRE_STATES.computeIfAbsent(world, ignored -> new HashMap<>());
+        states.entrySet().removeIf(entry -> entry.getValue().expiresAt <= world.getTime()
+                || !(world.getEntity(entry.getKey()) instanceof LivingEntity living) || !living.isAlive()
+                || living.getWorld() != world);
+        PassiveState state = states.compute(owner.getUuid(), (ignored, previous) -> {
+            if (previous != null && previous.sunfireOwner == owner) return previous;
+            PassiveState created = new PassiveState();
+            created.sunfireOwner = owner;
+            return created;
+        });
+        state.expiresAt = world.getTime() + 2400;
+        return state;
+    }
+
+    public static void grantSunfireRegeneration(LivingEntity owner, int duration, int amplifier) {
+        if (!(owner.getWorld() instanceof ServerWorld world)) return;
+        if (owner.addStatusEffect(new StatusEffectInstance(StatusEffects.REGENERATION, duration, amplifier), owner)) {
+            PassiveState state = sunfireState(owner);
+            state.regenUntil = Math.max(state.regenUntil, world.getTime() + duration);
+        }
+    }
+
+    public static void onStatusEffectRemoved(LivingEntity owner, StatusEffectInstance effect) {
+        if (effect.getEffectType().equals(StatusEffects.REGENERATION)
+                && owner.getWorld() instanceof ServerWorld world) {
+            PassiveState state = SUNFIRE_STATES.getOrDefault(world, Map.of()).get(owner.getUuid());
+            if (state != null) state.regenUntil = 0;
+        }
+    }
+
+    private static boolean directAttack(DamageSource source) {
+        return source.isIn(net.minecraft.registry.tag.DamageTypeTags.IS_PROJECTILE)
+                || source.isOf(net.minecraft.entity.damage.DamageTypes.PLAYER_ATTACK)
+                || source.isOf(net.minecraft.entity.damage.DamageTypes.MOB_ATTACK)
+                || source.isOf(net.minecraft.entity.damage.DamageTypes.MOB_ATTACK_NO_AGGRO);
+    }
+
+    private static final class AttackAction {
+        private final LivingEntity owner;
+        private int depth = 1;
+        private boolean consumed;
+        private AttackAction(LivingEntity owner) { this.owner = owner; }
+    }
     private static final Map<UUID, AllyCharge> ALLY_CHARGES = new HashMap<>();
     private static final Map<UUID, OwnerBonus> OWNER_BONUSES = new HashMap<>();
 
@@ -51,28 +130,36 @@ public final class LongPathFinalFormsMasteryCombatManager {
         }
         UniqueAbilityApi.reportRoll(attacker, LongPathFinalFormsMasteryAbilities.SUNFIRE_REGEN.id(),
                 "CHANCE", chance, roll, proc);
-        PassiveState state = state(attacker, world.getTime());
+        PassiveState state = sunfireState(attacker);
         state.sunfireTuning = tuning;
+        if (!tuning.flag(4096) || tuning.flag(131072)) state.reserve = 0;
+        if (!tuning.flag(131072)) state.comboHits.clear();
         if (tuning.flag(131072)) {
-            if (world.getTime() > state.comboDeadline) state.combo = 0;
-            state.combo++;
-            state.comboDeadline = world.getTime() + tuning.integer(s("COMBO_WINDOW_TICKS"), 80);
-            if (state.combo >= Math.max(1, tuning.integer(s("COMBO_COUNT"), 3))
-                    && world.getTime() >= state.flareReadyAt) {
-                state.combo = 0;
-                state.flareReadyAt = world.getTime() + tuning.integer(s("FLARE_LOCKOUT_TICKS"), 40);
-                flare(world, stack, attacker, target.getPos(), tuning);
-                attacker.heal((float) tuning.get(s("HEAL_AMOUNT"), 1));
-                UniqueAbilityApi.start(execution);
-                UniqueAbilityApi.emit(execution, UniqueAbilityPhase.HIT, LongPathFinalFormsMasteryAbilities.PULSE,
-                        target, 1, tuning.get(s("FLARE_DAMAGE_MULTIPLIER"), .7));
+            state.reserve = 0;
+            AttackAction action = ATTACK_ACTION.get();
+            if (action != null && action.owner == attacker && action.consumed) {
+                UniqueAbilityApi.cancel(execution);
+                return;
+            }
+            if (action != null && action.owner == attacker) action.consumed = true;
+            long now = world.getTime();
+            state.comboHits.removeIf(tick -> now - tick > tuning.integer(s("COMBO_WINDOW_TICKS"), 80));
+            state.comboHits.addLast(now);
+            if (state.comboHits.size() >= Math.max(1, tuning.integer(s("COMBO_COUNT"), 3))) {
+                state.comboHits.clear();
+                if (now >= state.flareReadyAt) {
+                    state.flareReadyAt = now + tuning.integer(s("FLARE_LOCKOUT_TICKS"), 40);
+                    flare(world, stack, attacker, target.getPos(), tuning);
+                    attacker.heal((float) tuning.get(s("HEAL_AMOUNT"), 1));
+                    UniqueAbilityApi.start(execution);
+                    UniqueAbilityApi.emit(execution, UniqueAbilityPhase.HIT, LongPathFinalFormsMasteryAbilities.PULSE,
+                            target, 1, tuning.get(s("FLARE_DAMAGE_MULTIPLIER"), .7));
+                }
             }
         } else if (proc) {
             world.playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
                     attacker.getSoundCategory(), .3F, 1.7F);
-            attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.REGENERATION,
-                    tuning.integer(s("STATUS_DURATION_TICKS"), 40), 1), attacker);
-            state.regenUntil = world.getTime() + tuning.integer(s("STATUS_DURATION_TICKS"), 40);
+            grantSunfireRegeneration(attacker, tuning.integer(s("STATUS_DURATION_TICKS"), 40), 1);
             if (tuning.flag(4096) && attacker.getHealth() >= attacker.getMaxHealth()) {
                 state.reserve = Math.min(tuning.integer(s("RESERVE_CAP"), 4), state.reserve + 1);
             }
@@ -153,24 +240,33 @@ public final class LongPathFinalFormsMasteryCombatManager {
     public static void tickHeld(ItemStack stack, LivingEntity owner) {
         if (!(owner.getWorld() instanceof ServerWorld world)) return;
         MasteryAbsorptionTracker.tick(owner);
-        PassiveState state = state(owner, world.getTime());
+        stack = heldSunfire(owner);
+        if (stack.isEmpty() || !net.sweenus.simplyswords.api.AwakeningApi.isAbilityUnlocked(stack)) return;
+        PassiveState state = sunfireState(owner);
+        if (state.lastHeldTick == world.getTime()) return;
+        state.lastHeldTick = world.getTime();
         if (owner.age % HELD_RESOLVE_INTERVAL != 0) return;
         UniqueAbilityExecution execution = begin(LongPathFinalFormsMasteryAbilities.SUNFIRE_REGEN, world, stack, owner, null);
         LongPathFinalFormsMasteryTuning tuning = LongPathFinalFormsMasteryAbilities.tuning(execution);
         state.sunfireTuning = tuning;
-        if (tuning.flag(4096) && state.reserve > 0
+        if (!tuning.flag(4096) || tuning.flag(131072)) state.reserve = 0;
+        if (!tuning.flag(131072)) state.comboHits.clear();
+        if (tuning.flag(4096) && !tuning.flag(131072) && state.reserve > 0
                 && owner.getHealth() / owner.getMaxHealth() < tuning.get(s("RESERVE_THRESHOLD"), .5)) {
+            float before = owner.getAbsorptionAmount();
             MasteryAbsorptionTracker.grant(owner, state.reserve,
                     tuning.integer(s("RESERVE_ABSORPTION_TICKS"), 100), state.reserve);
-            state.reserve = 0;
-            UniqueAbilityApi.start(execution);
+            if (owner.getAbsorptionAmount() > before) {
+                state.reserve = 0;
+                UniqueAbilityApi.start(execution);
+            }
         }
         if (tuning.flag(32768)
                 && owner.getHealth() / owner.getMaxHealth() < tuning.get(s("REKINDLE_THRESHOLD"), .3)
                 && world.getTime() >= state.rekindleReadyAt) {
             state.rekindleReadyAt = world.getTime() + tuning.integer(s("REKINDLE_LOCKOUT_TICKS"), 600);
             int duration = tuning.integer(s("REKINDLE_DURATION_TICKS"), 100);
-            owner.addStatusEffect(new StatusEffectInstance(StatusEffects.REGENERATION, duration, 1), owner);
+            grantSunfireRegeneration(owner, duration, 1);
             MasteryAbsorptionTracker.grant(owner, (float) tuning.get(s("REKINDLE_ABSORPTION"), 4), duration,
                     (float) tuning.get(s("REKINDLE_ABSORPTION"), 4));
             UniqueAbilityApi.start(execution);
@@ -216,25 +312,33 @@ public final class LongPathFinalFormsMasteryCombatManager {
         return amount;
     }
 
-    public static float modifyIncomingDamage(LivingEntity target, DamageSource source, float amount) {
-        PassiveState state = STATES.get(target.getUuid());
-        if (state == null || state.sunfireTuning == null || !(target.getWorld() instanceof ServerWorld world)) {
-            return amount;
-        }
-        if (state.sunfireTuning.flag(8192) && world.getTime() < state.regenUntil
-                && source.getAttacker() instanceof LivingEntity attacker
-                && source.getSource() == attacker
-                && state.attackerLocks.getOrDefault(attacker.getUuid(), 0L) <= world.getTime()) {
-            attacker.setOnFireFor(Math.max(1, state.sunfireTuning.integer(s("REPRISAL_FIRE_TICKS"), 40) / 20));
-            state.attackerLocks.put(attacker.getUuid(), world.getTime()
-                    + state.sunfireTuning.integer(s("REPRISAL_LOCKOUT_TICKS"), 40));
-            state.attackerLocks.entrySet().removeIf(entry -> entry.getValue() <= world.getTime());
-        }
-        return amount;
-    }
-
     public static void onDamageApplied(LivingEntity target, DamageSource source) {
         if (!(source.getAttacker() instanceof LivingEntity attacker)) return;
+        if (target.getWorld() instanceof ServerWorld world) {
+            if (directAttack(source)) {
+                Map<UUID, AllyCharge> charges = SUNFIRE_CHARGES.get(world);
+                AllyCharge sunfireCharge = charges == null ? null : charges.get(attacker.getUuid());
+                if (sunfireCharge != null) {
+                    if (sunfireCharge.expiresAt <= world.getTime()) charges.remove(attacker.getUuid());
+                    else if (HelperMethods.checkAbilityTarget(target, attacker)) {
+                        charges.remove(attacker.getUuid());
+                        target.setOnFireFor(Math.max(1, sunfireCharge.fireTicks / 20));
+                    }
+                }
+            }
+            PassiveState defender = SUNFIRE_STATES.getOrDefault(world, Map.of()).get(target.getUuid());
+            ItemStack held = heldSunfire(target);
+            if (defender != null && world.getTime() < defender.regenUntil
+                    && target.hasStatusEffect(StatusEffects.REGENERATION) && source.getSource() == attacker
+                    && directAttack(source) && !source.isIn(net.minecraft.registry.tag.DamageTypeTags.IS_PROJECTILE)
+                    && !held.isEmpty() && net.sweenus.simplyswords.api.AwakeningApi.isAbilityUnlocked(held)
+                    && HelperMethods.checkAbilityTarget(attacker, target)) {
+                UniqueAbilityExecution execution = begin(LongPathFinalFormsMasteryAbilities.SUNFIRE_REGEN, world, held, target, attacker);
+                LongPathFinalFormsMasteryTuning tuning = LongPathFinalFormsMasteryAbilities.tuning(execution);
+                if (tuning.flag(8192)) attacker.setOnFireFor(Math.max(1, tuning.integer(s("REPRISAL_FIRE_TICKS"), 40) / 20));
+                UniqueAbilityApi.cancel(execution);
+            }
+        }
         AllyCharge charge = ALLY_CHARGES.get(attacker.getUuid());
         if (charge != null && charge.pendingWeakness) {
             target.addStatusEffect(new StatusEffectInstance(StatusEffects.WEAKNESS,
@@ -267,8 +371,10 @@ public final class LongPathFinalFormsMasteryCombatManager {
     }
 
     public static void supportSunfireAlly(LivingEntity ally, int duration, int fireTicks, long tick) {
-        ALLY_CHARGES.put(ally.getUuid(), new AllyCharge(tick + duration, false, 0, true, fireTicks));
-        trim(ALLY_CHARGES, 32);
+        if (!(ally.getWorld() instanceof ServerWorld world)) return;
+        Map<UUID, AllyCharge> charges = SUNFIRE_CHARGES.computeIfAbsent(world, ignored -> new HashMap<>());
+        charges.entrySet().removeIf(entry -> entry.getValue().expiresAt <= tick || world.getEntity(entry.getKey()) == null);
+        charges.put(ally.getUuid(), new AllyCharge(tick + duration, false, 0, true, fireTicks));
     }
 
     public static void setHarbingerOwnerBonus(LivingEntity owner, float bonus, long expiresAt) {
@@ -279,6 +385,7 @@ public final class LongPathFinalFormsMasteryCombatManager {
 
     private static UniqueAbilityExecution begin(UniqueAbilityDefinition definition, ServerWorld world,
                                                 ItemStack stack, LivingEntity actor, LivingEntity target) {
+        UniqueAbilityExecution previous = UniqueAbilityApi.takeStartedExecution();
         UniqueAbilityExecution execution = UniqueAbilityApi.begin(definition,
                 UniqueAbilityContext.passive(world, stack, actor, target, null), tuning -> {
                     tuning.set(LongPathFinalFormsMasteryAbilities.TUNING, LongPathFinalFormsMasteryTuning.EMPTY);
@@ -287,6 +394,7 @@ public final class LongPathFinalFormsMasteryCombatManager {
                                     ? Config.uniqueEffects.sunfire.cooldown : Config.uniqueEffects.harbinger.cooldown);
                 });
         UniqueAbilityApi.takeStartedExecution();
+        if (previous != null) UniqueAbilityApi.publishStartedExecution(previous);
         return execution;
     }
 
@@ -296,16 +404,17 @@ public final class LongPathFinalFormsMasteryCombatManager {
         int cap = tuning.integer(s("TARGET_CAP"), 8);
         Box box = new Box(center.x + radius, center.y + radius, center.z + radius,
                 center.x - radius, center.y - radius, center.z - radius);
-        float base = HelperMethods.abilityScaledDamage("healing_fire", owner, stack,
+        float base = HelperMethods.abilityScaledDamage(net.sweenus.simplyswords.compat.SpellScalingComponents.component("sunfire", "damage"), owner, stack,
                 Config.uniqueEffects.sunfire.damageScaling, Config.uniqueEffects.sunfire.spellScaling)
                 * (float) tuning.get(s("FLARE_DAMAGE_MULTIPLIER"), .7);
         world.getOtherEntities(owner, box).stream().filter(LivingEntity.class::isInstance)
-                .map(LivingEntity.class::cast).filter(target -> HelperMethods.checkAbilityTarget(target, owner))
+                .map(LivingEntity.class::cast).filter(target -> target.isAlive() && HelperMethods.checkAbilityTarget(target, owner))
+                .filter(target -> target.getPos().squaredDistanceTo(center) <= radius * radius)
                 .sorted(Comparator.comparingDouble((LivingEntity target) -> target.getPos().squaredDistanceTo(center))
                         .thenComparing(target -> target.getUuid().toString()))
                 .limit(Math.clamp(cap, 0, 64)).forEach(target -> {
                     DamageSource source = owner.getDamageSources().indirectMagic(owner, owner);
-                    target.damage(source, HelperMethods.applyAbilityDamageEnchantments(world, stack, target, source, base));
+                    HelperMethods.damageThroughIframes(target, source, HelperMethods.applyAbilityDamageEnchantments(world, stack, target, source, base));
                 });
     }
 
@@ -331,15 +440,58 @@ public final class LongPathFinalFormsMasteryCombatManager {
                 .toList().forEach(map::remove);
     }
 
+    public static void tickReserveHud(ServerWorld world) {
+        Map<UUID, PassiveState> states = SUNFIRE_STATES.get(world);
+        if (states != null) {
+            states.entrySet().removeIf(entry -> entry.getValue().expiresAt <= world.getTime()
+                    || !(world.getEntity(entry.getKey()) instanceof LivingEntity living)
+                    || !living.isAlive() || living.getWorld() != world
+                    || living != entry.getValue().sunfireOwner);
+        }
+        for (net.minecraft.server.network.ServerPlayerEntity player : world.getPlayers()) {
+            PassiveState state = states == null ? null : states.get(player.getUuid());
+            ItemStack held = heldSunfire(player);
+            int charges = 0;
+            int capacity = 4;
+            if (player.isAlive() && state != null && state.sunfireTuning != null && !held.isEmpty()
+                    && net.sweenus.simplyswords.api.AwakeningApi.isAbilityUnlocked(held)
+                    && state.sunfireTuning.flag(4096) && !state.sunfireTuning.flag(131072)) {
+                capacity = state.sunfireTuning.integer(s("RESERVE_CAP"), 4);
+                charges = Math.clamp(state.reserve, 0, capacity);
+            }
+            ReserveHudState snapshot = new ReserveHudState(world, player, charges, capacity);
+            if (!snapshot.equals(RESERVE_HUD.put(player.getUuid(), snapshot))) {
+                dev.architectury.networking.NetworkManager.sendToPlayer(player,
+                        new net.sweenus.simplyswords.network.EmberReservePacket(
+                                world.getRegistryKey().getValue(), charges, capacity));
+            }
+        }
+    }
+
+    public static void clearSunfireOwner(LivingEntity owner) {
+        SUNFIRE_STATES.values().forEach(states -> states.remove(owner.getUuid()));
+        RESERVE_HUD.remove(owner.getUuid());
+    }
+
+    private record ReserveHudState(ServerWorld world, LivingEntity owner, int charges, int capacity) {
+    }
+
     public static void clear(ServerWorld world) {
         if (world == null) return;
+        RESERVE_HUD.entrySet().removeIf(entry -> entry.getValue().world == world);
+        SUNFIRE_STATES.remove(world);
+        SUNFIRE_CHARGES.remove(world);
         STATES.keySet().removeIf(uuid -> world.getEntity(uuid) != null);
         ALLY_CHARGES.keySet().removeIf(uuid -> world.getEntity(uuid) != null);
         OWNER_BONUSES.keySet().removeIf(uuid -> world.getEntity(uuid) != null);
     }
 
     public static void clearAll() {
+        RESERVE_HUD.clear();
         STATES.clear();
+        SUNFIRE_STATES.clear();
+        SUNFIRE_CHARGES.clear();
+        ATTACK_ACTION.remove();
         ALLY_CHARGES.clear();
         OWNER_BONUSES.clear();
     }
@@ -349,8 +501,11 @@ public final class LongPathFinalFormsMasteryCombatManager {
     }
 
     private static final class PassiveState {
+        private LivingEntity sunfireOwner;
         private long expiresAt;
         private long regenUntil;
+        private long lastHeldTick = Long.MIN_VALUE;
+        private final java.util.ArrayDeque<Long> comboHits = new java.util.ArrayDeque<>();
         private long comboDeadline;
         private long flareReadyAt;
         private long rekindleReadyAt;

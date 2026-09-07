@@ -117,6 +117,7 @@ public abstract class LivingEntityMixin {
     @Inject(method = "onStatusEffectRemoved", at = @At("TAIL"))
     private void simplyswords$syncObserverEffectRemoved(StatusEffectInstance effect, CallbackInfo ci) {
         ObserverStatusEffectSyncManager.syncRemoved((LivingEntity) (Object) this, effect);
+        LongPathFinalFormsMasteryCombatManager.onStatusEffectRemoved((LivingEntity) (Object) this, effect);
     }
 
     @Inject(at = @At("HEAD"), method = "tryUseTotem", cancellable = true)
@@ -129,6 +130,10 @@ public abstract class LivingEntityMixin {
                 return;
             }
             if (net.sweenus.simplyswords.world.SoulrenderAbilityManager.tryUnbrokenReaper(livingEntity, source)) {
+                cir.setReturnValue(true);
+                return;
+            }
+            if (BattleStandardMasteryManager.tryPhoenixStandard(livingEntity, source)) {
                 cir.setReturnValue(true);
                 return;
             }
@@ -242,7 +247,6 @@ public abstract class LivingEntityMixin {
             amount = WraithfangAbilityManager.modifyIncomingDamage(livingEntity, source, amount);
             amount = WraithfangAbilityManager.modifyOutgoingDamage(livingEntity, source, amount);
             amount = BattleStandardMasteryManager.modifyIncomingDamage(livingEntity, source, amount);
-            amount = LongPathFinalFormsMasteryCombatManager.modifyIncomingDamage(livingEntity, source, amount);
             amount = HearthflameAbilityManager.modifyIncomingDamage(livingEntity, source, amount);
             amount = EmberbladeAbilityManager.modifyIncomingDamage(livingEntity, source, amount);
             amount = EmberlashAbilityManager.modifyIncomingDamage(livingEntity, source, amount);

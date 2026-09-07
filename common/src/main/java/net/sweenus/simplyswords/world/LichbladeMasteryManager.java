@@ -7,6 +7,7 @@ import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
@@ -98,13 +99,14 @@ public final class LichbladeMasteryManager {
         LivingEntity target = entity(world, state.targetId);
         if (tuning.flag(32) && !valid(target, owner)) {
             finish(owner, stack, true);
-            owner.stopUsingItem();
+            stopChannelUse(owner, stack);
             return true;
         }
-        if (!valid(target, owner)) target = retargetOrReturn(world, owner, state, tuning, elapsed);
+        if (valid(target, owner)) state.lastTargetPos = target.getPos();
+        else target = retargetOrReturn(world, owner, state, tuning, elapsed);
         if (target == null) {
             finish(owner, stack, true);
-            owner.stopUsingItem();
+            stopChannelUse(owner, stack);
             return true;
         }
         int moveInterval = Math.max(1, tuning.integer(s("CLOUD_MOVE_INTERVAL_TICKS"), 5));
@@ -124,13 +126,21 @@ public final class LichbladeMasteryManager {
         if (state.returning && state.cloud.squaredDistanceTo(owner.getPos())
                 <= Math.pow(tuning.get(s("RADIUS"), Config.uniqueEffects.lichblade.radius), 2)) {
             finish(owner, stack, true);
-            owner.stopUsingItem();
+            stopChannelUse(owner, stack);
         }
         return true;
     }
 
     static int pulseInterval(boolean unceasing, long elapsed, int after, int fastInterval) {
         return unceasing && elapsed >= after ? Math.max(1, fastInterval) : 5;
+    }
+
+    private static void stopChannelUse(LivingEntity owner, ItemStack stack) {
+        if (owner instanceof ServerPlayerEntity serverPlayer
+                && PlayerWeaponAbilityChannelManager.finishEarly(serverPlayer, stack)) {
+            return;
+        }
+        owner.stopUsingItem();
     }
 
     // Recalls the souls when Soul Recall is owned and the channel is released before it would end.
@@ -141,6 +151,7 @@ public final class LichbladeMasteryManager {
         if (tuning.flag(65536) && !state.returning && owner.getWorld() instanceof ServerWorld world) {
             state.recalled = true;
             recallBurst(world, owner, state, tuning);
+            state.returning = true;
         }
         return finish(owner, stack, true);
     }
@@ -258,10 +269,10 @@ public final class LichbladeMasteryManager {
     private static void pulse(ServerWorld world, LivingEntity owner, ChannelState state,
                               LongPathFinalFormsMasteryTuning tuning, LivingEntity primary, boolean siphon) {
         double radius = tuning.get(s("RADIUS"), Config.uniqueEffects.lichblade.radius);
-        int cap = tuning.integer(s("TARGET_CAP"), tuning.flag(16) ? 32 : 24);
+        int cap = tuning.integer(s("TARGET_CAP"), 24);
         List<LivingEntity> targets;
         if (tuning.flag(32)) {
-            targets = valid(primary, owner) ? List.of(primary) : List.of();
+            targets = primary != owner && valid(primary, owner) ? List.of(primary) : List.of();
         } else {
             targets = nearest(world, owner, state.cloud, radius, Math.clamp(cap, 0, 64));
         }
@@ -317,15 +328,26 @@ public final class LichbladeMasteryManager {
                 .limit(Math.max(0, limit)).toList();
     }
 
+    private static List<LivingEntity> recallTargets(ServerWorld world, LivingEntity owner, ChannelState state,
+                                                    LongPathFinalFormsMasteryTuning tuning, double radius) {
+        if (!tuning.flag(32)) {
+            return nearest(world, owner, state.cloud, radius,
+                    Math.clamp(tuning.integer(s("TARGET_CAP"), 24), 0, 64));
+        }
+        LivingEntity locked = entity(world, state.targetId);
+        return locked != null && locked != owner && valid(locked, owner) ? List.of(locked) : List.of();
+    }
+
     private static void recallBurst(ServerWorld world, LivingEntity owner, ChannelState state,
                                     LongPathFinalFormsMasteryTuning tuning) {
+        state.cloud = owner.getPos();
         double radius = tuning.get(s("RECALL_RADIUS"), 4);
         double multiplier = tuning.get(s("DAMAGE_MULTIPLIER"), 1)
                 * tuning.get(s("RECALL_DAMAGE_MULTIPLIER"), 1.25) * retargetPenalty(state, tuning);
         float base = HelperMethods.abilityScaledDamage("soul", owner, state.stack,
                 Config.uniqueEffects.lichblade.damageScaling, Config.uniqueEffects.lichblade.spellScaling)
                 * (float) multiplier;
-        for (LivingEntity target : nearest(world, owner, state.cloud, radius, 24)) {
+        for (LivingEntity target : recallTargets(world, owner, state, tuning, radius)) {
             DamageSource source = owner.getDamageSources().indirectMagic(owner, owner);
             if (target.damage(source, HelperMethods.applyAbilityDamageEnchantments(world, state.stack,
                     target, source, base))) {
@@ -381,7 +403,7 @@ public final class LichbladeMasteryManager {
         float amount = (float) tuning.get(s("HEAL_AMOUNT"), Config.uniqueEffects.lichblade.heal);
         float missing = Math.max(0, owner.getMaxHealth() - owner.getHealth());
         owner.heal(amount);
-        if (tuning.flag(256) && amount > missing) {
+        if (tuning.flag(256) && !absorptionSuppressed(tuning) && amount > missing) {
             float granted = overhealGrant(amount, missing, (float) tuning.get(s("HEAL_MULTIPLIER"), .5),
                     (float) tuning.get(s("TEMP_ABSORPTION_CAP"), 4), state.overhealAbsorption);
             if (granted > 0) {
@@ -393,40 +415,46 @@ public final class LichbladeMasteryManager {
         state.successfulHeals++;
     }
 
+    private static boolean absorptionSuppressed(LongPathFinalFormsMasteryTuning tuning) {
+        return tuning.flag(2048) || tuning.flag(32768);
+    }
+
     private static void resolveAbsorption(LivingEntity owner, ChannelState state, LongPathFinalFormsMasteryTuning tuning) {
-        if (tuning.flag(2048)) return;
+        if (absorptionSuppressed(tuning)) return;
         float cap = (float) tuning.get(s("ABSORPTION_CAP"), Config.uniqueEffects.lichblade.absorptionCap);
-        if (tuning.flag(1024)) {
-            float conversion = Math.min(cap,
-                    state.charge / (float) Math.max(1, tuning.integer(s("BASTION_CHARGE_PER_ABSORPTION"), 2)));
-            grantTemporaryAbsorption(owner, conversion, tuning.integer(s("BASTION_ABSORPTION_TICKS"), 160));
-            return;
-        }
         double interest = tuning.flag(512) ? interestMultiplier(state.charge,
                 tuning.integer(s("INTEREST_CHARGE_STEP"), 10), tuning.get(s("INTEREST_PER_STEP"), .1),
                 tuning.get(s("INTEREST_CAP"), .4)) : 1;
-        float conversion = state.charge / 2F * (float) interest;
-        float granted = Math.min(conversion, cap);
-        owner.setAbsorptionAmount(Math.min(Config.uniqueEffects.abilityAbsorptionCap,
-                owner.getAbsorptionAmount() + granted));
-        if (tuning.flag(128)) applyOverflowResistance(owner, state, tuning, cap, granted);
+        float perAbsorption = tuning.flag(1024)
+                ? Math.max(1, tuning.integer(s("BASTION_CHARGE_PER_ABSORPTION"), 2))
+                : 2F;
+        float granted = Math.min(state.charge / perAbsorption * (float) interest, cap);
+        if (tuning.flag(1024)) {
+            grantTemporaryAbsorption(owner, granted, tuning.integer(s("BASTION_ABSORPTION_TICKS"), 160));
+        } else {
+            owner.setAbsorptionAmount(Math.min(Config.uniqueEffects.abilityAbsorptionCap,
+                    owner.getAbsorptionAmount() + granted));
+        }
+        if (tuning.flag(128)) applyOverflowResistance(owner, state, tuning, cap, granted, perAbsorption, interest);
     }
 
     // Overflowing Spirit only pays out once the absorption grant is capped, on the charge beyond it.
     private static void applyOverflowResistance(LivingEntity owner, ChannelState state,
-                                                LongPathFinalFormsMasteryTuning tuning, float cap, float granted) {
+                                                LongPathFinalFormsMasteryTuning tuning, float cap, float granted,
+                                                float perAbsorption, double interest) {
         int duration = overflowResistanceTicks(cap, granted, state.charge,
                 tuning.integer(s("RESISTANCE_CHARGE_STEP"), 4),
                 tuning.integer(s("RESISTANCE_STEP_TICKS"), 40),
-                tuning.integer(s("RESISTANCE_DURATION_CAP_TICKS"), 120));
+                tuning.integer(s("RESISTANCE_DURATION_CAP_TICKS"), 120), perAbsorption, interest);
         if (duration <= 0) return;
         owner.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, duration, 0), owner);
     }
 
     static int overflowResistanceTicks(float cap, float granted, int charge, int step,
-                                       int stepTicks, int durationCap) {
+                                       int stepTicks, int durationCap, float perAbsorption, double interest) {
         if (cap <= 0 || granted < cap) return 0;
-        int additional = Math.max(0, charge - (int) Math.ceil(cap * 2));
+        double chargeAtCap = cap * Math.max(1, perAbsorption) / Math.max(1, interest);
+        int additional = Math.max(0, charge - (int) Math.ceil(chargeAtCap));
         int steps = additional / Math.max(1, step);
         if (steps <= 0) return 0;
         return Math.max(0, Math.min(durationCap, steps * stepTicks));
@@ -471,18 +499,20 @@ public final class LichbladeMasteryManager {
                                                   LongPathFinalFormsMasteryTuning tuning, long elapsed) {
         int maximum = retargetMaximum(tuning.flag(32768), tuning.flag(16384), elapsed,
                 tuning.integer(s("RETARGET_WINDOW_TICKS"), 80),
-                tuning.integer(s("RETARGET_CAP"), 4), tuning.integer(s("RETARGET_CAP"), 1));
+                tuning.integer(s("RETARGET_CAP"), 4), tuning.integer(s("SELECTION_RETARGET_CAP"), 1));
         if (state.retargets < maximum) {
             double range = tuning.get(s("RETARGET_RANGE"), 8);
-            Box box = new Box(state.cloud.x + range, state.cloud.y + range, state.cloud.z + range,
-                    state.cloud.x - range, state.cloud.y - range, state.cloud.z - range);
+            Vec3d centre = state.lastTargetPos != null ? state.lastTargetPos : state.cloud;
+            Box box = new Box(centre.x + range, centre.y + range, centre.z + range,
+                    centre.x - range, centre.y - range, centre.z - range);
             LivingEntity target = world.getOtherEntities(owner, box, EntityPredicates.VALID_LIVING_ENTITY).stream()
                     .filter(LivingEntity.class::isInstance).map(LivingEntity.class::cast)
                     .filter(entity -> valid(entity, owner))
-                    .sorted(Comparator.comparingDouble((LivingEntity entity) -> entity.getPos().squaredDistanceTo(state.cloud))
+                    .sorted(Comparator.comparingDouble((LivingEntity entity) -> entity.getPos().squaredDistanceTo(centre))
                             .thenComparing(entity -> entity.getUuid().toString())).findFirst().orElse(null);
             if (target != null) {
                 state.targetId = target.getUuid();
+                state.lastTargetPos = target.getPos();
                 state.retargets++;
                 return target;
             }
@@ -620,6 +650,7 @@ public final class LichbladeMasteryManager {
         private final Map<UUID, Long> chargeLocks = new HashMap<>();
         private UUID targetId;
         private Vec3d cloud;
+        private Vec3d lastTargetPos;
         private boolean returning;
         private boolean returnedFromDeath;
         private boolean interruptIgnored;
@@ -638,6 +669,7 @@ public final class LichbladeMasteryManager {
             this.world = world;
             this.targetId = target.getUuid();
             this.cloud = target.getPos();
+            this.lastTargetPos = target.getPos();
         }
     }
 

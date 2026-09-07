@@ -21,6 +21,11 @@ import net.minecraft.world.World;
 import net.sweenus.simplyswords.api.AwakeningApi;
 import net.sweenus.simplyswords.api.AwakeningFormRegistry;
 import net.sweenus.simplyswords.api.WeaponAbilityContext;
+import net.sweenus.simplyswords.api.ability.LongPathFinalFormsMasteryAbilities;
+import net.sweenus.simplyswords.api.ability.LongPathFinalFormsMasteryTuning;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityApi;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityContext;
+import net.sweenus.simplyswords.api.ability.UniqueAbilityExecution;
 import net.sweenus.simplyswords.client.util.TooltipUtils;
 import net.sweenus.simplyswords.config.Config;
 import net.sweenus.simplyswords.entity.BattleStandardDarkEntity;
@@ -48,7 +53,9 @@ public class DormantRelicSwordItem extends UniqueSwordItem implements UniqueWeap
         }
         HelperMethods.playHitSounds(attacker, target);
         if (!attacker.getWorld().isClient() && AwakeningApi.isAbilityUnlocked(stack)) {
-            if (isSunForm(stack)
+            if (net.sweenus.simplyswords.world.LongPathFinalFormsMasteryCombatManager.isSunfire(stack)) {
+                net.sweenus.simplyswords.world.LongPathFinalFormsMasteryCombatManager.sunfireMelee(stack, target, attacker);
+            } else if (isSunForm(stack)
                     && attacker.getRandom().nextInt(100) < AwakeningApi.scaleChance(stack, Config.uniqueEffects.sunfire.chance)) {
                 attacker.getWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
                         attacker.getSoundCategory(), 0.3f, 1.7f);
@@ -87,12 +94,19 @@ public class DormantRelicSwordItem extends UniqueSwordItem implements UniqueWeap
             return false;
         }
         if (isSunForm(context.stack())) {
+            UniqueAbilityExecution execution = UniqueAbilityApi.begin(LongPathFinalFormsMasteryAbilities.SUNFIRE_STANDARD,
+                    UniqueAbilityContext.active(context), tuning -> tuning
+                            .set(LongPathFinalFormsMasteryAbilities.TUNING, LongPathFinalFormsMasteryTuning.EMPTY)
+                            .set(LongPathFinalFormsMasteryAbilities.COOLDOWN_TICKS, Config.uniqueEffects.sunfire.cooldown));
             context.world().playSoundFromEntity(null, context.actor(),
                     SoundRegistry.ELEMENTAL_SWORD_EARTH_ATTACK_01.get(),
                     context.actor().getSoundCategory(), 0.4f, 0.8f);
             BattleStandardEntity standard = EntityRegistry.BATTLESTANDARD.get().spawn(
                     context.world(), pos, SpawnReason.MOB_SUMMONED);
-            if (standard == null) return false;
+            if (standard == null) {
+                UniqueAbilityApi.cancel(execution);
+                return false;
+            }
             standard.setVelocity(0, -1, 0);
             standard.ownerEntity = context.actor();
             standard.decayRate = 3;
@@ -102,6 +116,8 @@ public class DormantRelicSwordItem extends UniqueSwordItem implements UniqueWeap
                     .orElse("sunfire");
             standard.setCustomName(Text.translatable("entity.simplyswords.battlestandard.name",
                     context.actor().getName()));
+            if (LongPathFinalFormsMasteryAbilities.tuning(execution).isEmpty()) UniqueAbilityApi.cancel(execution);
+            else standard.configureMastery(execution, context.stack());
             return true;
         }
         if (isHarbingerForm(context.stack())) {
@@ -135,6 +151,11 @@ public class DormantRelicSwordItem extends UniqueSwordItem implements UniqueWeap
 
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
+        if (!world.isClient() && entity instanceof LivingEntity living
+                && net.sweenus.simplyswords.world.LongPathFinalFormsMasteryCombatManager.isSunfire(stack)
+                && (living.getMainHandStack() == stack || living.getOffHandStack() == stack)) {
+            net.sweenus.simplyswords.world.LongPathFinalFormsMasteryCombatManager.tickHeld(stack, living);
+        }
         HelperMethods.createFootfalls(entity, stack, world, ParticleTypes.MYCELIUM, ParticleTypes.MYCELIUM,
                 ParticleTypes.MYCELIUM, true);
         super.inventoryTick(stack, world, entity, slot, selected);

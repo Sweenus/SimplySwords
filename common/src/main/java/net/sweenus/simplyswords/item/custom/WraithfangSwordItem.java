@@ -43,7 +43,7 @@ import net.sweenus.simplyswords.world.WraithfangTuningSnapshot;
 
 import java.util.List;
 
-public class WraithfangSwordItem extends UniqueSwordItem implements UniqueWeaponActiveAbility {
+public class WraithfangSwordItem extends UniqueSwordItem implements UniqueWeaponActiveAbility, net.sweenus.simplyswords.item.interfaces.UniqueWeaponSecondaryAction {
     public WraithfangSwordItem(ToolMaterial toolMaterial, Settings settings) {
         super(toolMaterial, settings);
     }
@@ -65,8 +65,22 @@ public class WraithfangSwordItem extends UniqueSwordItem implements UniqueWeapon
     }
 
     @Override
+    public boolean chargesManaOnRelease() {
+        return true;
+    }
+
+    @Override
     public TypedActionResult<ItemStack> startPlayerAbility(World world, PlayerEntity user, Hand hand) {
         ItemStack itemStack = user.getStackInHand(hand);
+        if (!itemStack.isOf(ItemsRegistry.WRAITHFANG.get())
+                || !net.sweenus.simplyswords.api.AwakeningApi.isAbilityUnlocked(itemStack)
+                || itemStack.getDamage() >= itemStack.getMaxDamage() - 1
+                || net.sweenus.simplyswords.api.IncapacitatingStatusEffectRegistry.isIncapacitated(user))
+            return TypedActionResult.fail(itemStack);
+        if (world instanceof ServerWorld serverWorld && (WraithfangAbilityManager.hasActiveThrow(serverWorld, user)
+                || user.getItemCooldownManager().isCoolingDown(itemStack.getItem())
+                && !WraithfangAbilityManager.canFollowUp(serverWorld, user, itemStack)
+                || !net.sweenus.simplyswords.util.WeaponManaCost.canAfford(user, itemStack))) return TypedActionResult.fail(itemStack);
         if (!world.isClient) {
             itemStack = user.getStackInHand(hand);
             LivingEntity target = null;
@@ -82,9 +96,8 @@ public class WraithfangSwordItem extends UniqueSwordItem implements UniqueWeapon
             UniqueAbilityApi.start(execution);
             AbyssalSpectralMasteryTuning abilityTuning = AbyssalSpectralMasteryAbilities.tuning(execution);
             WraithfangTuningSnapshot tuning = WraithfangTuningSnapshot.from(execution);
-            double alternationMultiplier = WraithfangAbilityManager.recordThrow(
-                    (ServerWorld) world, user, itemStack, tuning);
-            double[] damage = HelperMethods.getAttackFromSlot(user, itemStack, user.getActiveHand());
+            WraithfangAbilityManager.weaponId(itemStack);
+            double[] damage = HelperMethods.getAttackFromSlot(user, itemStack, hand);
             WraithfangEntity wraithfangEntity = new WraithfangEntity(world, user, itemStack.copy() );
             wraithfangEntity.setVelocity(user, user.getPitch(), user.getYaw(), 0.0F,
                     (float) abilityTuning.get(AbyssalSpectralMasteryTuning.Setting.PROJECTILE_SPEED, 1.5), 1.0F);
@@ -92,15 +105,21 @@ public class WraithfangSwordItem extends UniqueSwordItem implements UniqueWeapon
             wraithfangEntity.setPitch(user.getPitch());
             wraithfangEntity.primaryBaseDamage = HelperMethods.abilityScaledDamageFromValue(
                     SpellScalingProfile.SOUL, user, itemStack, (float) damage[0],
-                    Config.uniqueEffects.wraithfang.spellScaling)
-                    * (float) tuning.projectileDamageMultiplier();
+                    Config.uniqueEffects.wraithfang.spellScaling);
             wraithfangEntity.setAbilityExecution(execution);
-            wraithfangEntity.configureMastery(target, alternationMultiplier, false);
+            wraithfangEntity.configureMastery(target, 1, false);
             if (hand == Hand.OFF_HAND)
                 wraithfangEntity.offhandThrow = true;
             wraithfangEntity.setPos(user.getX(), user.getEyeY() - 0.5, user.getZ());
-            world.spawnEntity(wraithfangEntity);
+            if (!world.spawnEntity(wraithfangEntity)) {
+                UniqueAbilityApi.cancel(execution);
+                return TypedActionResult.fail(itemStack);
+            }
+            double alternationMultiplier = WraithfangAbilityManager.recordThrow((ServerWorld) world, user, itemStack, tuning);
+            wraithfangEntity.configureMastery(target, alternationMultiplier, false);
+            WraithfangAbilityManager.launched((ServerWorld) world, user, wraithfangEntity);
             SimplySwordsAPI.setWeaponCooldown(user, itemStack, tuning.cooldownTicks());
+            net.sweenus.simplyswords.util.WeaponManaCost.spend(user, itemStack);
 
             if (!user.getAbilities().creativeMode) {
                 user.setStackInHand(hand, ItemStack.EMPTY);
@@ -125,8 +144,7 @@ public class WraithfangSwordItem extends UniqueSwordItem implements UniqueWeapon
                 context.target(), context.hand(), 1.65, 0, context);
         AbyssalSpectralMasteryTuning abilityTuning = AbyssalSpectralMasteryAbilities.tuning(execution);
         WraithfangTuningSnapshot tuning = WraithfangTuningSnapshot.from(execution);
-        double alternationMultiplier = WraithfangAbilityManager.recordThrow(
-                context.world(), actor, context.stack(), tuning);
+        WraithfangAbilityManager.weaponId(context.stack());
         WraithfangEntity wraithfangEntity = new WraithfangEntity(context.world(), actor, context.stack().copy());
         Vec3d direction = LivingEntityAbilityMovementManager.getLobbedTargetDirection(actor, context.target());
         wraithfangEntity.setVelocity(direction.x, direction.y, direction.z,
@@ -137,13 +155,15 @@ public class WraithfangSwordItem extends UniqueSwordItem implements UniqueWeapon
                 context.stack(), net.minecraft.component.type.AttributeModifierSlot.MAINHAND));
         wraithfangEntity.primaryBaseDamage = HelperMethods.abilityScaledDamageFromValue(
                 SpellScalingProfile.SOUL, actor, context.stack(), weaponDamage,
-                Config.uniqueEffects.wraithfang.spellScaling)
-                * (float) tuning.projectileDamageMultiplier();
+                Config.uniqueEffects.wraithfang.spellScaling);
         wraithfangEntity.setAbilityExecution(execution);
-        wraithfangEntity.configureMastery(context.target(), alternationMultiplier, true);
+        wraithfangEntity.configureMastery(context.target(), 1, true);
         wraithfangEntity.setPos(actor.getX(), actor.getEyeY() - 0.5, actor.getZ());
         wraithfangEntity.markNonReturning(tuning.projectileLifetimeTicks());
-        context.world().spawnEntity(wraithfangEntity);
+        if (!context.world().spawnEntity(wraithfangEntity)) return false;
+        double alternationMultiplier = WraithfangAbilityManager.recordThrow(context.world(), actor, context.stack(), tuning);
+        wraithfangEntity.configureMastery(context.target(), alternationMultiplier, true);
+        WraithfangAbilityManager.launched(context.world(), actor, wraithfangEntity);
         context.world().playSound(wraithfangEntity, actor.getBlockPos(), SoundRegistry.DARK_SWORD_SPELL.get(), actor.getSoundCategory(), 0.1f, 1.0f);
         return true;
     }
@@ -162,7 +182,11 @@ public class WraithfangSwordItem extends UniqueSwordItem implements UniqueWeapon
                 activeContext == null ? UniqueAbilityContext.passive(world, stack, actor, target, hand)
                         : UniqueAbilityContext.active(activeContext), builder -> builder
                         .set(AbyssalSpectralMasteryAbilities.COOLDOWN_TICKS, 20)
-                        .set(AbyssalSpectralMasteryAbilities.TUNING, AbyssalSpectralMasteryTuning.EMPTY
+                        .set(AbyssalSpectralMasteryAbilities.TUNING, baseTuning(actor, speed, loyalty)));
+    }
+
+    public static AbyssalSpectralMasteryTuning baseTuning(LivingEntity actor, double speed, int loyalty) {
+        return AbyssalSpectralMasteryTuning.EMPTY
                                 .with(AbyssalSpectralMasteryTuning.Setting.COOLDOWN_TICKS, 20)
                                 .with(AbyssalSpectralMasteryTuning.Setting.PROJECTILE_SPEED, speed)
                                 .with(AbyssalSpectralMasteryTuning.Setting.PROJECTILE_DAMAGE_MULTIPLIER, 1)
@@ -170,13 +194,23 @@ public class WraithfangSwordItem extends UniqueSwordItem implements UniqueWeapon
                                 .with(AbyssalSpectralMasteryTuning.Setting.LOYALTY, loyalty)
                                 .with(AbyssalSpectralMasteryTuning.Setting.FLIGHT_DAMAGE_PER_TICK, .5)
                                 .with(AbyssalSpectralMasteryTuning.Setting.FLIGHT_DAMAGE_CAP_TICKS, 1200)
-                                .with(AbyssalSpectralMasteryTuning.Setting.DASH_TARGET_RANGE, 14.4)
+                                .with(AbyssalSpectralMasteryTuning.Setting.DASH_TARGET_RANGE, 32)
                                 .with(AbyssalSpectralMasteryTuning.Setting.DASH_SPEED, 1.35)
-                                .with(AbyssalSpectralMasteryTuning.Setting.DASH_DURATION_TICKS, 10)
+                                .with(AbyssalSpectralMasteryTuning.Setting.DASH_DURATION_TICKS,
+                                        actor instanceof PlayerEntity ? 100 : 10)
                                 .with(AbyssalSpectralMasteryTuning.Setting.HASTE_DURATION_TICKS,
                                         Config.uniqueEffects.wraithfang.duration)
                                 .with(AbyssalSpectralMasteryTuning.Setting.HASTE_AMPLIFIER,
-                                        Config.uniqueEffects.wraithfang.hasteAmplifier)));
+                                        Config.uniqueEffects.wraithfang.hasteAmplifier);
+    }
+
+    @Override
+    public TypedActionResult<ItemStack> startPlayerSecondaryAbility(World world, PlayerEntity user, Hand hand) {
+        ItemStack stack = user.getStackInHand(hand);
+        if (!(world instanceof ServerWorld serverWorld) || !WraithfangAbilityManager.canFollowUp(serverWorld, user, stack))
+            return TypedActionResult.pass(stack);
+        if (!net.sweenus.simplyswords.util.WeaponManaCost.canAfford(user, stack)) return TypedActionResult.fail(stack);
+        return startPlayerAbility(world, user, hand);
     }
 
     @Override

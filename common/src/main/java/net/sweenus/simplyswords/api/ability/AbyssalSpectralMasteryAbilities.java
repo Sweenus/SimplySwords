@@ -34,6 +34,7 @@ public final class AbyssalSpectralMasteryAbilities {
     public static final UniqueAbilityDefinition GLOAMPIERCER_AMBUSH = passive(GLOAMPIERCER_AMBUSH_ID);
     public static final UniqueAbilityDefinition GLOAMPIERCER_BARRAGE = active(GLOAMPIERCER_BARRAGE_ID);
     public static final UniqueAbilityDefinition WRAITHFANG_THROW = active(WRAITHFANG_THROW_ID);
+    public static final UniqueAbilityDefinition WRAITHFANG_MELEE = passive(id("wraithfang/melee"));
     public static final UniqueAbilityDefinition WRAITHMAW_MUSTER = active(WRAITHMAW_MUSTER_ID);
 
     private AbyssalSpectralMasteryAbilities() {
@@ -49,6 +50,7 @@ public final class AbyssalSpectralMasteryAbilities {
         UniqueAbilityApi.registerDefinition(GLOAMPIERCER_AMBUSH);
         UniqueAbilityApi.registerDefinition(GLOAMPIERCER_BARRAGE);
         UniqueAbilityApi.registerDefinition(WRAITHFANG_THROW);
+        UniqueAbilityApi.registerDefinition(WRAITHFANG_MELEE);
         UniqueAbilityApi.registerDefinition(WRAITHMAW_MUSTER);
     }
 

@@ -19,6 +19,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
 import net.sweenus.simplyswords.entity.ThrownSpearEntity;
+import net.sweenus.simplyswords.entity.WraithfangEntity;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.world.WickpiercerThrowMath;
 import org.joml.Matrix4f;
@@ -58,6 +59,9 @@ public class ThrownSpearEntityRenderer extends EntityRenderer<ThrownSpearEntity>
                 float flightPitch = (float) Math.toDegrees(Math.atan2(direction.y, horizontal)) - 45.0F;
                 matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(flightYaw));
                 matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(flightPitch));
+            } else if (entity instanceof WraithfangEntity fang && fang.hasWraithridePresentation()) {
+                matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(fang.flightYaw(tickDelta)));
+                matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(fang.flightPitch(tickDelta)));
             } else {
                 matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(-entity.getYaw()));
                 matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(-entity.getPitch()));

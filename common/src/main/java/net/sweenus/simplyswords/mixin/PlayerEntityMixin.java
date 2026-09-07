@@ -27,6 +27,17 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(PlayerEntity.class)
 public abstract class PlayerEntityMixin {
 
+    @com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod(method = "attack")
+    private void simplyswords$wraithfangAttack(Entity target, com.llamalad7.mixinextras.injector.wrapoperation.Operation<Void> original) {
+        net.sweenus.simplyswords.world.WraithfangAbilityManager.beginAttack((PlayerEntity) (Object) this);
+        net.sweenus.simplyswords.world.LongPathFinalFormsMasteryCombatManager.beginAttack((PlayerEntity) (Object) this);
+        try { original.call(target); }
+        finally {
+            net.sweenus.simplyswords.world.LongPathFinalFormsMasteryCombatManager.endAttack();
+            net.sweenus.simplyswords.world.WraithfangAbilityManager.endAttack();
+        }
+    }
+
     @Inject(at = @At("HEAD"), method = "attack", cancellable = true)
     private void simplyswords$preventWaxEncasedAttack(Entity target, CallbackInfo ci) {
         PlayerEntity player = (PlayerEntity) (Object) this;

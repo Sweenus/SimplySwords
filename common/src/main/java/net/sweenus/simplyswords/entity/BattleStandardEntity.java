@@ -40,6 +40,7 @@ public class BattleStandardEntity extends PathAwareEntity {
     public static final Supplier<EntityType<BattleStandardEntity>> TYPE = Suppliers.memoize(() ->
             EntityType.Builder.create(BattleStandardEntity::new, SpawnGroup.MISC).build("battlestandard"));
     private static final TrackedData<String> TRACKED_STANDARD_TYPE = DataTracker.registerData(BattleStandardEntity.class, TrackedDataHandlerRegistry.STRING);
+    private static final TrackedData<Boolean> MOBILE_STANDARD = DataTracker.registerData(BattleStandardEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
     public LivingEntity ownerEntity;
     public String standardType;
     public String spellScalingOwner = "sunfire";
@@ -71,6 +72,21 @@ public class BattleStandardEntity extends PathAwareEntity {
     protected void initDataTracker(DataTracker.Builder builder) {
         super.initDataTracker(builder);
         builder.add(TRACKED_STANDARD_TYPE, "");
+        builder.add(MOBILE_STANDARD, false);
+    }
+
+    public void setMobileStandard(boolean mobile) {
+        dataTracker.set(MOBILE_STANDARD, mobile);
+        setNoGravity(mobile);
+    }
+
+    @Override
+    public void travel(net.minecraft.util.math.Vec3d input) {
+        if (dataTracker.get(MOBILE_STANDARD)) {
+            setVelocity(net.minecraft.util.math.Vec3d.ZERO);
+            return;
+        }
+        super.travel(input);
     }
 
     public String getStandardType() {
@@ -81,6 +97,7 @@ public class BattleStandardEntity extends PathAwareEntity {
     public void configureMastery(UniqueAbilityExecution execution, ItemStack stack) {
         this.masteryExecution = execution;
         this.masteryStack = stack.copy();
+        if ("sunfire".equals(standardType)) BattleStandardMasteryManager.registerSunfire(this, execution, stack);
     }
 
     private static void errorCatch(String identifier) {
