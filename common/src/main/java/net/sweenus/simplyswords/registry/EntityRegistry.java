@@ -69,6 +69,8 @@ public class EntityRegistry {
     public static final RegistrySupplier<EntityType<SimplySwordsAxolotlEntity>> SIMPLYAXOLOTLENTITY = ENTITIES.register(
             "simplyaxolotlentity",
             () -> EntityType.Builder.create(SimplySwordsAxolotlEntity::new, SpawnGroup.CREATURE)
+                    .dimensions(0.75f, 0.42f)
+                    .eyeHeight(0.2751f)
                     .build(Identifier.of(SimplySwords.MOD_ID, "simplyaxolotlentity").toString())
     );
 

@@ -82,14 +82,20 @@ public class HarbingerSwordItem extends UniqueSwordItem implements UniqueWeaponA
 
     @Override
     public boolean activate(WeaponAbilityContext context) {
+        return activateStandard(context);
+    }
+
+    public static boolean activateStandard(WeaponAbilityContext context) {
         UniqueAbilityExecution execution = UniqueAbilityApi.begin(LongPathFinalFormsMasteryAbilities.HARBINGER_STANDARD,
                 UniqueAbilityContext.active(context), tuning -> tuning
                         .set(LongPathFinalFormsMasteryAbilities.TUNING, LongPathFinalFormsMasteryTuning.EMPTY)
                         .set(LongPathFinalFormsMasteryAbilities.COOLDOWN_TICKS, Config.uniqueEffects.harbinger.cooldown));
         BattleStandardDarkEntity standard = spawnHarbingerStandard(context.world(), context.actor());
-        if (standard == null) return false;
-        if (LongPathFinalFormsMasteryAbilities.tuning(execution).isEmpty()) UniqueAbilityApi.cancel(execution);
-        else standard.configureMastery(execution, context.stack());
+        if (standard == null) {
+            UniqueAbilityApi.cancel(execution);
+            return false;
+        }
+        standard.configureMastery(execution, context.stack());
         return true;
     }
 
@@ -98,11 +104,11 @@ public class HarbingerSwordItem extends UniqueSwordItem implements UniqueWeaponA
         return Config.uniqueEffects.harbinger.cooldown;
     }
 
-    private BlockPos getStandardPosition(LivingEntity user) {
+    private static BlockPos getStandardPosition(LivingEntity user) {
         return user.getBlockPos().up(4).offset(user.getMovementDirection(), 3);
     }
 
-    private BattleStandardDarkEntity spawnHarbingerStandard(ServerWorld world, LivingEntity user) {
+    private static BattleStandardDarkEntity spawnHarbingerStandard(ServerWorld world, LivingEntity user) {
         BlockPos pos = getStandardPosition(user);
         if (!world.getBlockState(pos).isAir()) {
             return null;

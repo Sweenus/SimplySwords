@@ -34,7 +34,7 @@ import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import net.sweenus.simplyswords.util.Styles;
-import net.sweenus.simplyswords.world.WeaponAbilityCooldownManager;
+import net.sweenus.simplyswords.world.ChompolotlMasteryManager;
 import net.sweenus.simplyswords.world.NatureSwarmMasteryCombatManager;
 
 import java.util.List;
@@ -58,21 +58,22 @@ public class ChompolotlSwordItem extends UniqueSwordItem implements UniqueWeapon
             float skillDamage = Config.uniqueEffects.chompolotl.damageScaling;
             HelperMethods.playHitSounds(attacker, target);
 
-            boolean coolingDown = attacker instanceof PlayerEntity player
-                    ? player.getItemCooldownManager().isCoolingDown(stack.getItem())
-                    : WeaponAbilityCooldownManager.isCoolingDown(serverWorld, attacker, stack);
-            if (!coolingDown && target != null && HelperMethods.checkAbilityTarget(target, attacker)) {
-                int count = passiveSummonCount(tuning);
-                boolean spawned = false;
-                for (int i = 0; i < count; i++) {
-                    spawned |= spawnAxolotl(serverWorld, attacker, target, stack, skillDamage,
-                            false, tuning) != null;
-                }
-                if (spawned) {
-                    SimplySwordsAPI.setWeaponCooldown(attacker, stack, skillCooldown);
-                }
+            if (!ChompolotlMasteryManager.procReady(attacker) || target == null
+                    || !HelperMethods.checkAbilityTarget(target, attacker)) {
+                UniqueAbilityApi.cancel(execution);
+                return super.postHit(stack, target, attacker);
             }
-            UniqueAbilityApi.finish(execution, NatureSwarmMasteryAbilities.FINISH, 0);
+            var existing = ChompolotlMasteryManager.owned(attacker);
+            int spawned = 0;
+            for (int i = 0; i < passiveSummonCount(tuning); i++) {
+                if (spawnAxolotl(serverWorld, attacker, target, stack, skillDamage, false, tuning,
+                        Config.uniqueEffects.chompolotl.cooldown * 10) != null) spawned++;
+            }
+            if (spawned > 0) {
+                ChompolotlMasteryManager.setProcCooldown(attacker, skillCooldown);
+                rallyExisting(existing, tuning);
+                UniqueAbilityApi.finish(execution, NatureSwarmMasteryAbilities.FINISH, spawned);
+            } else UniqueAbilityApi.cancel(execution);
         }
         return super.postHit(stack, target, attacker);
     }
@@ -103,31 +104,33 @@ public class ChompolotlSwordItem extends UniqueSwordItem implements UniqueWeapon
         UniqueAbilityExecution execution = NatureSwarmMasteryCombatManager.beginActive(
                 NatureSwarmMasteryAbilities.CHOMPOLOTL_RALLY, context, Config.uniqueEffects.chompolotl.cooldown * 10);
         NatureSwarmMasteryTuning tuning = NatureSwarmMasteryAbilities.tuning(execution);
-        if (tuning.flag(1 << 10)) {
-            for (net.minecraft.entity.Entity entity : context.world().iterateEntities()) {
-                if (entity instanceof SimplySwordsAxolotlEntity axolotl
-                        && context.actor().getUuid().equals(axolotl.getOwnerUuid())) {
-                    axolotl.addStatusEffect(new net.minecraft.entity.effect.StatusEffectInstance(
-                            net.minecraft.entity.effect.StatusEffects.SPEED,
-                            tuning.integer(NatureSwarmMasteryTuning.Setting.CHOMP_RALLY_SPEED_DURATION_TICKS, 100),
-                            tuning.integer(NatureSwarmMasteryTuning.Setting.CHOMP_RALLY_SPEED_AMPLIFIER, 1),
-                            false, true, true));
-                }
-            }
-        }
+        var existing = ChompolotlMasteryManager.owned(context.actor());
         int count = activeSummonCount(tuning);
-        boolean spawned = false;
+        int spawned = 0;
         for (int i = 0; i < count; i++) {
-            spawned |= spawnAxolotl(context.world(), context.actor(), summonTarget, context.stack(),
-                    Config.uniqueEffects.chompolotl.damageScaling, true, tuning) != null;
+            if (spawnAxolotl(context.world(), context.actor(), summonTarget, context.stack(),
+                    Config.uniqueEffects.chompolotl.damageScaling, true, tuning,
+                    execution.cooldownTicks(Config.uniqueEffects.chompolotl.cooldown * 10)) != null) spawned++;
         }
-        if (spawned) {
+        if (spawned > 0) {
+            rallyExisting(existing, tuning);
+            if (tuning.flag(1 << 22) && !tuning.flag(1 << 26)) NatureSwarmMasteryCombatManager.cleanse(context.actor(),
+                    tuning.integer(NatureSwarmMasteryTuning.Setting.CHOMP_CLEANSE_EFFECT_COUNT, 1),
+                    tuning.integer(NatureSwarmMasteryTuning.Setting.CHOMP_CLEANSE_LOCKOUT_TICKS, 400));
             UniqueAbilityApi.start(execution);
-            UniqueAbilityApi.finish(execution, NatureSwarmMasteryAbilities.FINISH, count);
-        } else {
-            UniqueAbilityApi.cancel(execution);
+            UniqueAbilityApi.finish(execution, NatureSwarmMasteryAbilities.FINISH, spawned);
+        } else UniqueAbilityApi.cancel(execution);
+        return spawned > 0;
+    }
+
+    private static void rallyExisting(List<SimplySwordsAxolotlEntity> existing, NatureSwarmMasteryTuning tuning) {
+        if (!tuning.flag(1 << 10)) return;
+        for (SimplySwordsAxolotlEntity axolotl : existing) {
+            if (axolotl.isAlive() && !axolotl.isRemoved()) axolotl.addStatusEffect(new net.minecraft.entity.effect.StatusEffectInstance(
+                    net.minecraft.entity.effect.StatusEffects.SPEED,
+                    tuning.integer(NatureSwarmMasteryTuning.Setting.CHOMP_RALLY_SPEED_DURATION_TICKS, 100),
+                    tuning.integer(NatureSwarmMasteryTuning.Setting.CHOMP_RALLY_SPEED_AMPLIFIER, 1)));
         }
-        return spawned;
     }
 
     @Override
@@ -137,7 +140,7 @@ public class ChompolotlSwordItem extends UniqueSwordItem implements UniqueWeapon
 
     private static SimplySwordsAxolotlEntity spawnAxolotl(ServerWorld serverWorld, LivingEntity owner,
                                                           LivingEntity target, ItemStack stack, float skillDamage,
-                                                          boolean activeSummon, NatureSwarmMasteryTuning tuning) {
+                                                          boolean activeSummon, NatureSwarmMasteryTuning tuning, int activeCooldown) {
         SimplySwordsAxolotlEntity axolotlEntity = EntityRegistry.SIMPLYAXOLOTLENTITY.get().spawn(
                 serverWorld,
                 owner.getBlockPos().up(2).offset(owner.getMovementDirection(), 3),
@@ -170,11 +173,9 @@ public class ChompolotlSwordItem extends UniqueSwordItem implements UniqueWeapon
                     owner.getSoundCategory(), 0.4f, 1f);
         }
         int duration = summonDuration(Config.uniqueEffects.chompolotl.duration, activeSummon, tuning);
-        boolean canPerch = !(tuning.flag(1 << 8) || tuning.flag(1 << 17) || tuning.flag(1 << 26));
+        boolean canPerch = !(tuning.flag(1 << 8) || tuning.flag(1 << 17) || tuning.flag(1 << 26) || tuning.flag(1 << 25));
         boolean canAttack = !(tuning.flag(1 << 16) || tuning.flag(1 << 25));
-        double auraRadius = tuning.flag(1 << 25)
-                ? tuning.get(NatureSwarmMasteryTuning.Setting.CHOMP_ETERNAL_AURA_RADIUS, 6) : 16;
-        if (tuning.flag(1 << 26)) auraRadius = 0;
+        double auraRadius = tuning.flag(1 << 25) ? 0 : 16;
         int graceDuration = 200 + tuning.integer(
                 NatureSwarmMasteryTuning.Setting.CHOMP_GRACE_DURATION_BONUS_TICKS, 0);
         double shoulderAuraRadius = shoulderAuraRadius(tuning);
@@ -216,19 +217,17 @@ public class ChompolotlSwordItem extends UniqueSwordItem implements UniqueWeapon
                 tuning.flag(1 << 14) ? tuning.get(NatureSwarmMasteryTuning.Setting.CHOMP_POUNCE_RANGE, 4) : 0,
                 tuning.flag(1 << 14) ? tuning.integer(
                         NatureSwarmMasteryTuning.Setting.CHOMP_POUNCE_INTERVAL_TICKS, 40) : 0);
-        if (activeSummon && tuning.flag(1 << 22) && !tuning.flag(1 << 26)) {
-            NatureSwarmMasteryCombatManager.cleanse(owner,
-                    tuning.integer(NatureSwarmMasteryTuning.Setting.CHOMP_CLEANSE_EFFECT_COUNT, 1),
-                    tuning.integer(NatureSwarmMasteryTuning.Setting.CHOMP_CLEANSE_LOCKOUT_TICKS, 400));
-        }
+        axolotlEntity.configureSummon(stack, activeCooldown, tuning, activeSummon);
+        ChompolotlMasteryManager.register(axolotlEntity, true);
         return axolotlEntity;
     }
 
     static int procCooldown(int configuredCooldown, NatureSwarmMasteryTuning tuning) {
         int cooldown = Math.max(0, configuredCooldown + tuning.integer(
                 NatureSwarmMasteryTuning.Setting.CHOMP_PROC_COOLDOWN_BONUS_TICKS, 0));
-        return tuning.flag(1 << 7) ? (int) Math.round(cooldown * tuning.get(
-                NatureSwarmMasteryTuning.Setting.CHOMP_COLOSSAL_COOLDOWN_MULTIPLIER, 1)) : cooldown;
+        return tuning.flag(1 << 7) ? Math.max(tuning.integer(NatureSwarmMasteryTuning.Setting.CHOMP_COLOSSAL_MINIMUM_TICKS, 600),
+                (int) Math.round(cooldown * tuning.get(
+                NatureSwarmMasteryTuning.Setting.CHOMP_COLOSSAL_COOLDOWN_MULTIPLIER, 3))) : cooldown;
     }
 
     static int passiveSummonCount(NatureSwarmMasteryTuning tuning) {
@@ -238,6 +237,7 @@ public class ChompolotlSwordItem extends UniqueSwordItem implements UniqueWeapon
     }
 
     static int activeSummonCount(NatureSwarmMasteryTuning tuning) {
+        if (tuning.flag(1 << 25)) return 1;
         if (tuning.flag(1 << 17)) return Math.max(1, tuning.integer(
                 NatureSwarmMasteryTuning.Setting.CHOMP_HUNTER_COUNT, 3));
         if (tuning.flag(1 << 16)) return Math.max(1, tuning.integer(
@@ -260,8 +260,8 @@ public class ChompolotlSwordItem extends UniqueSwordItem implements UniqueWeapon
     }
 
     static int summonDuration(int configuredDuration, boolean active, NatureSwarmMasteryTuning tuning) {
-        int bonus = active ? tuning.integer(NatureSwarmMasteryTuning.Setting.CHOMP_BLUE_LIFESPAN_BONUS_TICKS, 0)
-                : tuning.integer(NatureSwarmMasteryTuning.Setting.CHOMP_LIFESPAN_BONUS_TICKS, 0);
+        int bonus = tuning.integer(NatureSwarmMasteryTuning.Setting.CHOMP_LIFESPAN_BONUS_TICKS, 0)
+                + (active ? tuning.integer(NatureSwarmMasteryTuning.Setting.CHOMP_BLUE_LIFESPAN_BONUS_TICKS, 0) : 0);
         int duration = configuredDuration + bonus;
         if (!active && tuning.flag(1 << 8)) duration = tuning.integer(
                 NatureSwarmMasteryTuning.Setting.CHOMP_RELEASE_LIFESPAN_TICKS, duration);
@@ -269,6 +269,8 @@ public class ChompolotlSwordItem extends UniqueSwordItem implements UniqueWeapon
                 NatureSwarmMasteryTuning.Setting.CHOMP_HUNTER_LIFESPAN_TICKS, duration) + bonus;
         if (active && tuning.flag(1 << 25)) duration = tuning.integer(
                 NatureSwarmMasteryTuning.Setting.CHOMP_ETERNAL_LIFESPAN_TICKS, duration);
+        if (active && tuning.flag(1 << 26)) duration = tuning.integer(
+                NatureSwarmMasteryTuning.Setting.CHOMP_RAVAGER_LIFESPAN_TICKS, duration);
         return Math.max(20, duration);
     }
 
@@ -293,8 +295,7 @@ public class ChompolotlSwordItem extends UniqueSwordItem implements UniqueWeapon
         double radius = 5 + tuning.get(NatureSwarmMasteryTuning.Setting.CHOMP_SHOULDER_AURA_BONUS, 0);
         if (tuning.flag(1 << 16)) radius *= tuning.get(
                 NatureSwarmMasteryTuning.Setting.CHOMP_BRIGADE_AURA_MULTIPLIER, 1);
-        if (tuning.flag(1 << 25)) radius = tuning.get(
-                NatureSwarmMasteryTuning.Setting.CHOMP_ETERNAL_AURA_RADIUS, radius);
+        if (tuning.flag(1 << 25)) radius = 0;
         return radius;
     }
 

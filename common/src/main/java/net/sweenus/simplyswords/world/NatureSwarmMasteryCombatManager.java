@@ -64,22 +64,18 @@ public final class NatureSwarmMasteryCombatManager {
         if (target instanceof net.minecraft.server.network.ServerPlayerEntity player) {
             for (net.minecraft.nbt.NbtCompound shoulder : List.of(
                     player.getShoulderEntityLeft(), player.getShoulderEntityRight())) {
-                if ("simplyswords:simplyaxolotlentity".equals(shoulder.getString("id"))
+                if (ChompolotlMasteryManager.validShoulder(shoulder, world)
                         && shoulder.getDouble("MasteryGuardRadius") > 0) {
                     return amount * (shoulder.contains("MasteryGuardMultiplier")
                             ? shoulder.getFloat("MasteryGuardMultiplier") : .85F);
                 }
             }
         }
-        for (net.minecraft.entity.Entity entity : world.iterateEntities()) {
-                if (entity instanceof SimplySwordsAxolotlEntity axolotl
-                    && target.getUuid().equals(axolotl.getOwnerUuid())
-                    && axolotl.getMasteryGuardRadius() > 0
-                    && axolotl.squaredDistanceTo(target) <= axolotl.getMasteryGuardRadius()
-                    * axolotl.getMasteryGuardRadius()) {
-                return amount * axolotl.getMasteryGuardMultiplier();
-            }
-        }
+        double multiplier = ChompolotlMasteryManager.owned(target).stream()
+                .filter(axolotl -> axolotl.getMasteryGuardRadius() > 0
+                        && axolotl.squaredDistanceTo(target) <= axolotl.getMasteryGuardRadius() * axolotl.getMasteryGuardRadius())
+                .mapToDouble(SimplySwordsAxolotlEntity::getMasteryGuardMultiplier).min().orElse(1);
+        amount *= (float) multiplier;
         return amount;
     }
 
@@ -104,8 +100,11 @@ public final class NatureSwarmMasteryCombatManager {
 
     public static void onDamageApplied(LivingEntity owner, DamageSource source) {
         triggerShoulderRescue(owner);
-        triggerHelpfulFriend(owner);
-        if (source.getAttacker() instanceof LivingEntity attacker) triggerHelpfulFriend(attacker);
+        if (source.getAttacker() instanceof LivingEntity hostile
+                && net.sweenus.simplyswords.util.HelperMethods.checkAbilityTarget(hostile, owner)) {
+            triggerHelpfulFriend(owner);
+            triggerHelpfulFriend(hostile);
+        }
         if (!(owner.getWorld() instanceof ServerWorld world)
                 || !(source.getAttacker() instanceof LivingEntity attacker)) return;
         ItemStack stack = owner.getMainHandStack();
@@ -143,7 +142,7 @@ public final class NatureSwarmMasteryCombatManager {
         int lockout = 0;
         for (net.minecraft.nbt.NbtCompound shoulder : List.of(
                 player.getShoulderEntityLeft(), player.getShoulderEntityRight())) {
-            if (!"simplyswords:simplyaxolotlentity".equals(shoulder.getString("id"))) continue;
+            if (!ChompolotlMasteryManager.validShoulder(shoulder, world)) continue;
             absorption = Math.max(absorption, shoulder.getInt("MasteryHelpfulAbsorption"));
             duration = Math.max(duration, shoulder.getInt("MasteryHelpfulDuration"));
             lockout = Math.max(lockout, shoulder.getInt("MasteryHelpfulLockout"));
@@ -157,7 +156,7 @@ public final class NatureSwarmMasteryCombatManager {
         if (!(actor instanceof net.minecraft.server.network.ServerPlayerEntity player)) return;
         for (net.minecraft.nbt.NbtCompound shoulder : List.of(
                 player.getShoulderEntityLeft(), player.getShoulderEntityRight())) {
-            if (!"simplyswords:simplyaxolotlentity".equals(shoulder.getString("id"))
+            if (!ChompolotlMasteryManager.validShoulder(shoulder, player.getServerWorld())
                     || !shoulder.getBoolean("MasteryRescue")) continue;
             double threshold = shoulder.getDouble("MasteryRescueThreshold");
             if (threshold <= 0 || player.getHealth() / player.getMaxHealth() >= threshold) continue;
@@ -274,6 +273,7 @@ public final class NatureSwarmMasteryCombatManager {
     }
 
     public static void clear(ServerWorld world) {
+        ChompolotlMasteryManager.clear(world);
         if (world == null) return;
         SECOND_SKINS.remove(world);
         HIVE_REFUNDS.remove(world);
@@ -287,6 +287,7 @@ public final class NatureSwarmMasteryCombatManager {
     }
 
     public static void clearAll() {
+        ChompolotlMasteryManager.clearAll();
         List<ServerWorld> worlds = new ArrayList<>(SECOND_SKINS.keySet());
         for (ServerWorld world : ATTRIBUTES.keySet()) if (!worlds.contains(world)) worlds.add(world);
         for (ServerWorld world : worlds) clear(world);
@@ -299,6 +300,7 @@ public final class NatureSwarmMasteryCombatManager {
     }
 
     public static void clearActor(LivingEntity actor) {
+        if (actor != null) ChompolotlMasteryManager.clearOwner(actor);
         if (actor == null) return;
         UUID actorId = actor.getUuid();
         SECOND_SKINS.values().forEach(skins -> skins.removeIf(skin -> skin.ownerId.equals(actorId)));

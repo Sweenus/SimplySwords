@@ -97,6 +97,7 @@ public class BattleStandardDarkEntity extends PathAwareEntity {
     public void configureMastery(UniqueAbilityExecution execution, ItemStack stack) {
         this.masteryExecution = execution;
         this.abilityStack = stack.copy();
+        BattleStandardMasteryManager.registerHarbinger(this, execution, stack);
     }
 
     public void configureEnigmaMastery(ArcaneCosmicMasteryTuning tuning) {
@@ -142,7 +143,7 @@ public class BattleStandardDarkEntity extends PathAwareEntity {
                 if (ownerEntity == null)
                     this.setHealth(this.getHealth() - 1000);
                 HelperMethods.spawnOrbitParticles((ServerWorld) this.getWorld(), this.getPos(), ParticleTypes.CAMPFIRE_COSY_SMOKE, 0.5, 6);
-                if (ownerEntity != null && this.distanceTo(ownerEntity) < 3)
+                if (masteryExecution == null && ownerEntity != null && this.distanceTo(ownerEntity) < 3)
                     HelperMethods.incrementStatusEffect(ownerEntity, StatusEffects.HASTE, 60, 1, 7);
                 if (ownerEntity != null && standardType != null && standardType.equals("enigma")) {
                     double proximity = enigmaRadius();

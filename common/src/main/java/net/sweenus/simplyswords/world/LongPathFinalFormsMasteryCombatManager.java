@@ -52,6 +52,19 @@ public final class LongPathFinalFormsMasteryCombatManager {
                 .filter(id -> id.equals(net.minecraft.util.Identifier.of("simplyswords", "sunfire"))).isPresent();
     }
 
+    public static boolean isHarbinger(ItemStack stack) {
+        return stack.getItem() instanceof HarbingerSwordItem
+                || stack.getItem() instanceof net.sweenus.simplyswords.item.custom.DormantRelicSwordItem
+                && net.sweenus.simplyswords.api.AwakeningApi.getFormId(stack)
+                .filter(id -> id.equals(net.minecraft.util.Identifier.of("simplyswords", "harbinger"))).isPresent();
+    }
+
+    public static boolean melee(DamageSource source) {
+        return source.getSource() == source.getAttacker()
+                && !source.isIn(net.minecraft.registry.tag.DamageTypeTags.IS_PROJECTILE)
+                && directAttack(source);
+    }
+
     public static ItemStack heldSunfire(LivingEntity owner) {
         if (isSunfire(owner.getMainHandStack()))
             return owner.getMainHandStack();
@@ -108,8 +121,7 @@ public final class LongPathFinalFormsMasteryCombatManager {
         private boolean consumed;
         private AttackAction(LivingEntity owner) { this.owner = owner; }
     }
-    private static final Map<UUID, AllyCharge> ALLY_CHARGES = new HashMap<>();
-    private static final Map<UUID, OwnerBonus> OWNER_BONUSES = new HashMap<>();
+    private static final java.util.Set<LivingEntity> HARBINGER_DEATHS = java.util.Collections.newSetFromMap(new java.util.WeakHashMap<>());
 
     private LongPathFinalFormsMasteryCombatManager() {
     }
@@ -174,7 +186,8 @@ public final class LongPathFinalFormsMasteryCombatManager {
     }
 
     public static void harbingerMelee(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        if (!(attacker.getWorld() instanceof ServerWorld world)) return;
+        if (!(attacker.getWorld() instanceof ServerWorld world)
+                || !HelperMethods.checkAbilityTarget(target, attacker)) return;
         UniqueAbilityExecution execution = begin(LongPathFinalFormsMasteryAbilities.HARBINGER_OMEN, world, stack, attacker, target);
         LongPathFinalFormsMasteryTuning tuning = LongPathFinalFormsMasteryAbilities.tuning(execution);
         PassiveState state = state(attacker, world.getTime());
@@ -190,34 +203,24 @@ public final class LongPathFinalFormsMasteryCombatManager {
         }
         UniqueAbilityApi.reportRoll(attacker, LongPathFinalFormsMasteryAbilities.HARBINGER_OMEN.id(),
                 "CHANCE", chance, roll, proc);
-        if (proc) {
+        if (proc && target.isAlive() && target.canHaveStatusEffect(new StatusEffectInstance(StatusEffects.WEAKNESS))) {
             world.playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
                     attacker.getSoundCategory(), .3F, 1.6F);
-            if (tuning.flag(131072) && state.omenTarget != null && !state.omenTarget.equals(target.getUuid())) {
-                if (world.getEntity(state.omenTarget) instanceof LivingEntity previous) {
-                    previous.removeStatusEffect(StatusEffects.WEAKNESS);
-                }
-            }
-            state.omenTarget = tuning.flag(131072) ? target.getUuid() : null;
             int amplifier = 0;
             if (tuning.flag(4096)) {
-                if (world.getTime() > state.omenCounterDeadline || !target.getUuid().equals(state.counterTarget)) {
-                    state.omenCounter = 0;
-                }
-                state.counterTarget = target.getUuid();
-                state.omenCounter++;
-                state.omenCounterDeadline = world.getTime() + tuning.integer(s("OMEN_WINDOW_TICKS"), 200);
-                if (state.omenCounter % Math.max(1, tuning.integer(s("OMEN_UPGRADE_COUNT"), 3)) == 0) amplifier = 1;
+                int count = state.omenCounts.merge(target.getUuid(), 1, Integer::sum);
+                if (count % Math.max(1, tuning.integer(s("OMEN_UPGRADE_COUNT"), 3)) == 0) amplifier = 1;
             }
-            target.addStatusEffect(new StatusEffectInstance(StatusEffects.WEAKNESS,
-                    amplifier == 1 ? tuning.integer(s("OMEN_UPGRADE_TICKS"), 80)
-                            : tuning.integer(s("STATUS_DURATION_TICKS"), 160), amplifier), attacker);
+            int duration = tuning.flag(65536) ? tuning.integer(s("PLAGUE_WEAKNESS_TICKS"), 120)
+                    : amplifier == 1 ? tuning.integer(s("OMEN_UPGRADE_TICKS"), 80)
+                    : tuning.integer(s("STATUS_DURATION_TICKS"), 160);
+            HarbingerMasteryState.applyWeakness(attacker, target, duration, amplifier, tuning.flag(131072), true);
             UniqueAbilityApi.start(execution);
             UniqueAbilityApi.emit(execution, UniqueAbilityPhase.HIT, LongPathFinalFormsMasteryAbilities.HIT,
                     target, 1, chance);
         }
         if (tuning.flag(8192) && target.hasStatusEffect(StatusEffects.WEAKNESS)) {
-            Vec3d standard = BattleStandardMasteryManager.standardPosition(attacker.getUuid(), false);
+            Vec3d standard = BattleStandardMasteryManager.standardPosition(attacker, target.getPos());
             double range = tuning.get(s("DOOM_PULL_RANGE"), 10);
             if (standard != null && target.getPos().squaredDistanceTo(standard) <= range * range
                     && state.pullLocks.getOrDefault(target.getUuid(), 0L) <= world.getTime()) {
@@ -226,12 +229,6 @@ public final class LongPathFinalFormsMasteryCombatManager {
                 state.pullLocks.entrySet().removeIf(entry -> entry.getValue() <= world.getTime());
                 pull(target, standard, tuning.get(s("PULL_STRENGTH"), .75));
             }
-        }
-        if (target.isDead() && target.hasStatusEffect(StatusEffects.WEAKNESS) && tuning.flag(16384)) {
-            BattleStandardMasteryManager.reduceCooldown(attacker.getUuid(), false,
-                    tuning.integer(s("REFUND_TICKS"), 20),
-                    tuning.integer(s("PROPHECY_REFUND_CAP_TICKS"), 100));
-            UniqueAbilityApi.emit(execution, UniqueAbilityPhase.HIT, LongPathFinalFormsMasteryAbilities.KILL, target, 1, 0);
         }
         if (execution.isStarted()) UniqueAbilityApi.finish(execution, LongPathFinalFormsMasteryAbilities.FINISH, 1);
         else UniqueAbilityApi.cancel(execution);
@@ -277,9 +274,9 @@ public final class LongPathFinalFormsMasteryCombatManager {
 
     public static float modifyOutgoingDamage(LivingEntity target, DamageSource source, float amount) {
         if (!(source.getAttacker() instanceof LivingEntity attacker)) return amount;
-        long tick = attacker.getWorld().getTime();
         ItemStack weapon = source.getWeaponStack();
-        if (weapon != null && !weapon.isEmpty() && weapon.getItem() instanceof HarbingerSwordItem
+        if (weapon != null && !weapon.isEmpty() && isHarbinger(weapon) && melee(source)
+                && net.sweenus.simplyswords.api.AwakeningApi.isAbilityUnlocked(weapon)
                 && target.hasStatusEffect(StatusEffects.WEAKNESS)
                 && attacker.getWorld() instanceof ServerWorld world) {
             UniqueAbilityExecution execution = begin(LongPathFinalFormsMasteryAbilities.HARBINGER_OMEN,
@@ -293,21 +290,8 @@ public final class LongPathFinalFormsMasteryCombatManager {
             amount *= (float) multiplier;
             UniqueAbilityApi.cancel(execution);
         }
-        OwnerBonus bonus = OWNER_BONUSES.get(attacker.getUuid());
-        if (bonus != null) {
-            if (bonus.expiresAt <= tick) OWNER_BONUSES.remove(attacker.getUuid());
-            else amount *= 1 + bonus.bonus;
-        }
-        AllyCharge charge = ALLY_CHARGES.get(attacker.getUuid());
-        if (charge != null) {
-            if (charge.expiresAt <= tick) ALLY_CHARGES.remove(attacker.getUuid());
-            else if (source.getSource() == attacker) {
-                if (charge.weakness) {
-                    charge.pendingWeakness = true;
-                }
-                if (charge.fireTicks > 0) charge.pendingFireTicks = charge.fireTicks;
-                amount *= 1 + charge.damageBonus;
-            }
+        if (melee(source) && HelperMethods.checkAbilityTarget(target, attacker)) {
+            amount *= 1 + HarbingerMasteryState.damageBonus(attacker);
         }
         return amount;
     }
@@ -339,48 +323,35 @@ public final class LongPathFinalFormsMasteryCombatManager {
                 UniqueAbilityApi.cancel(execution);
             }
         }
-        AllyCharge charge = ALLY_CHARGES.get(attacker.getUuid());
-        if (charge != null && charge.pendingWeakness) {
-            target.addStatusEffect(new StatusEffectInstance(StatusEffects.WEAKNESS,
-                    Math.max(1, charge.weaknessTicks), 0), attacker);
-            charge.pendingWeakness = false;
-        }
-        if (charge != null && charge.pendingFireTicks > 0) {
-            target.setOnFireFor(Math.max(1, charge.pendingFireTicks / 20));
-            charge.pendingFireTicks = 0;
-        }
-        if (charge != null && charge.singleUse) ALLY_CHARGES.remove(attacker.getUuid());
+        HarbingerMasteryState.onDamageApplied(target, source);
     }
 
     public static boolean isExecutionOmen(LivingEntity owner, LivingEntity target) {
-        PassiveState state = STATES.get(owner.getUuid());
-        return state != null && target.getUuid().equals(state.omenTarget);
+        return HarbingerMasteryState.isMarked(owner, target);
     }
 
-    public static void supportHarbingerAlly(LivingEntity owner, LivingEntity ally,
-                                            LongPathFinalFormsMasteryTuning tuning, long tick) {
-        boolean weakness = tuning.flag(128);
-        float bonus = tuning.flag(1024) && ally != owner
-                ? (float) tuning.get(s("SUPPORT_DAMAGE_BONUS"), .15)
-                : tuning.flag(512) ? (float) tuning.get(s("SUPPORT_DAMAGE_BONUS"), .1) : 0;
-        if (weakness || bonus > 0) {
-            ALLY_CHARGES.put(ally.getUuid(), new AllyCharge(tick + tuning.integer(s("ALLY_CHARGE_TICKS"), 80),
-                    weakness, bonus, weakness, 0, tuning.integer(s("ALLY_WEAKNESS_TICKS"), 60)));
-            trim(ALLY_CHARGES, 32);
+    public static void onHarbingerDeath(LivingEntity target, DamageSource source) {
+        if (!HARBINGER_DEATHS.add(target)) return;
+        if (source.getAttacker() instanceof LivingEntity owner && target.hasStatusEffect(StatusEffects.WEAKNESS)) {
+            ItemStack stack = BattleStandardMasteryManager.harbingerStack(owner);
+            if (!stack.isEmpty() && owner.getWorld() instanceof ServerWorld world) {
+                UniqueAbilityExecution execution = begin(LongPathFinalFormsMasteryAbilities.HARBINGER_OMEN,
+                        world, stack, owner, target);
+                LongPathFinalFormsMasteryTuning tuning = LongPathFinalFormsMasteryAbilities.tuning(execution);
+                if (tuning.flag(16384)) BattleStandardMasteryManager.refundProphecy(owner,
+                        tuning.integer(s("REFUND_TICKS"), 20), tuning.integer(s("PROPHECY_REFUND_CAP_TICKS"), 100));
+                UniqueAbilityApi.cancel(execution);
+            }
         }
+        STATES.remove(target.getUuid());
+        HarbingerMasteryState.clearOwner(target);
     }
 
     public static void supportSunfireAlly(LivingEntity ally, int duration, int fireTicks, long tick) {
         if (!(ally.getWorld() instanceof ServerWorld world)) return;
         Map<UUID, AllyCharge> charges = SUNFIRE_CHARGES.computeIfAbsent(world, ignored -> new HashMap<>());
         charges.entrySet().removeIf(entry -> entry.getValue().expiresAt <= tick || world.getEntity(entry.getKey()) == null);
-        charges.put(ally.getUuid(), new AllyCharge(tick + duration, false, 0, true, fireTicks));
-    }
-
-    public static void setHarbingerOwnerBonus(LivingEntity owner, float bonus, long expiresAt) {
-        if (bonus <= 0) return;
-        OWNER_BONUSES.put(owner.getUuid(), new OwnerBonus(expiresAt, bonus));
-        trim(OWNER_BONUSES, 32);
+        charges.put(ally.getUuid(), new AllyCharge(tick + duration, fireTicks));
     }
 
     private static UniqueAbilityExecution begin(UniqueAbilityDefinition definition, ServerWorld world,
@@ -427,20 +398,23 @@ public final class LongPathFinalFormsMasteryCombatManager {
     }
 
     private static PassiveState state(LivingEntity owner, long tick) {
-        STATES.entrySet().removeIf(entry -> entry.getValue().expiresAt <= tick);
+        STATES.entrySet().removeIf(entry -> entry.getValue().sunfireOwner == null
+                || !entry.getValue().sunfireOwner.isAlive() || entry.getValue().sunfireOwner.isRemoved()
+                || entry.getValue().harbingerWorld != entry.getValue().sunfireOwner.getWorld());
         PassiveState state = STATES.computeIfAbsent(owner.getUuid(), ignored -> new PassiveState());
         state.expiresAt = tick + 2400;
-        trim(STATES, 32);
+        state.sunfireOwner = owner;
+        state.harbingerWorld = owner.getWorld();
         return state;
     }
 
-    private static <T> void trim(Map<UUID, T> map, int cap) {
-        if (map.size() <= cap) return;
-        map.keySet().stream().sorted(Comparator.comparing(UUID::toString)).limit(map.size() - cap)
-                .toList().forEach(map::remove);
-    }
-
     public static void tickReserveHud(ServerWorld world) {
+        HarbingerMasteryState.tick(world);
+        STATES.values().stream().filter(state -> state.harbingerWorld == world).forEach(state ->
+                state.omenCounts.keySet().removeIf(uuid -> !(world.getEntity(uuid) instanceof LivingEntity target) || !target.isAlive()));
+        STATES.entrySet().removeIf(entry -> entry.getValue().sunfireOwner == null
+                || !entry.getValue().sunfireOwner.isAlive() || entry.getValue().sunfireOwner.isRemoved()
+                || entry.getValue().harbingerWorld != entry.getValue().sunfireOwner.getWorld());
         Map<UUID, PassiveState> states = SUNFIRE_STATES.get(world);
         if (states != null) {
             states.entrySet().removeIf(entry -> entry.getValue().expiresAt <= world.getTime()
@@ -469,6 +443,8 @@ public final class LongPathFinalFormsMasteryCombatManager {
     }
 
     public static void clearSunfireOwner(LivingEntity owner) {
+        STATES.remove(owner.getUuid());
+        HarbingerMasteryState.clearOwner(owner);
         SUNFIRE_STATES.values().forEach(states -> states.remove(owner.getUuid()));
         RESERVE_HUD.remove(owner.getUuid());
     }
@@ -478,22 +454,22 @@ public final class LongPathFinalFormsMasteryCombatManager {
 
     public static void clear(ServerWorld world) {
         if (world == null) return;
+        HarbingerMasteryState.clear(world);
         RESERVE_HUD.entrySet().removeIf(entry -> entry.getValue().world == world);
         SUNFIRE_STATES.remove(world);
         SUNFIRE_CHARGES.remove(world);
         STATES.keySet().removeIf(uuid -> world.getEntity(uuid) != null);
-        ALLY_CHARGES.keySet().removeIf(uuid -> world.getEntity(uuid) != null);
-        OWNER_BONUSES.keySet().removeIf(uuid -> world.getEntity(uuid) != null);
+        HARBINGER_DEATHS.removeIf(entity -> entity.getWorld() == world);
     }
 
     public static void clearAll() {
+        HarbingerMasteryState.clearAll();
         RESERVE_HUD.clear();
         STATES.clear();
         SUNFIRE_STATES.clear();
         SUNFIRE_CHARGES.clear();
         ATTACK_ACTION.remove();
-        ALLY_CHARGES.clear();
-        OWNER_BONUSES.clear();
+        HARBINGER_DEATHS.clear();
     }
 
     private static LongPathFinalFormsMasteryTuning.Setting s(String name) {
@@ -502,6 +478,8 @@ public final class LongPathFinalFormsMasteryCombatManager {
 
     private static final class PassiveState {
         private LivingEntity sunfireOwner;
+        private net.minecraft.world.World harbingerWorld;
+        private final Map<UUID, Integer> omenCounts = new HashMap<>();
         private long expiresAt;
         private long regenUntil;
         private long lastHeldTick = Long.MIN_VALUE;
@@ -509,42 +487,14 @@ public final class LongPathFinalFormsMasteryCombatManager {
         private long comboDeadline;
         private long flareReadyAt;
         private long rekindleReadyAt;
-        private long omenCounterDeadline;
         private final Map<UUID, Long> pullLocks = new HashMap<>();
         private int reserve;
         private int combo;
-        private int omenCounter;
-        private UUID counterTarget;
-        private UUID omenTarget;
         private LongPathFinalFormsMasteryTuning sunfireTuning;
         private final Map<UUID, Long> attackerLocks = new HashMap<>();
     }
 
-    private static final class AllyCharge {
-        private final long expiresAt;
-        private final boolean weakness;
-        private final float damageBonus;
-        private final boolean singleUse;
-        private final int fireTicks;
-        private final int weaknessTicks;
-        private boolean pendingWeakness;
-        private int pendingFireTicks;
-
-        private AllyCharge(long expiresAt, boolean weakness, float damageBonus, boolean singleUse, int fireTicks) {
-            this(expiresAt, weakness, damageBonus, singleUse, fireTicks, 60);
-        }
-
-        private AllyCharge(long expiresAt, boolean weakness, float damageBonus, boolean singleUse,
-                           int fireTicks, int weaknessTicks) {
-            this.expiresAt = expiresAt;
-            this.weakness = weakness;
-            this.damageBonus = damageBonus;
-            this.singleUse = singleUse;
-            this.fireTicks = fireTicks;
-            this.weaknessTicks = weaknessTicks;
-        }
+    private record AllyCharge(long expiresAt, int fireTicks) {
     }
 
-    private record OwnerBonus(long expiresAt, float bonus) {
-    }
 }

@@ -96,6 +96,10 @@ public final class DevourerTendrilVisualEntity extends Entity {
 
     public int getMassId() { return dataTracker.get(MASS_ID); }
     public int getTargetId() { return dataTracker.get(TARGET_ID); }
+    public void extendLifetime(int ticks) {
+        if (ticks > 0) dataTracker.set(LIFETIME, getLifetime() + ticks);
+    }
+
     public int getLifetime() { return dataTracker.get(LIFETIME); }
     public int getSeed() { return dataTracker.get(SEED); }
     public int getPulseAge() { return dataTracker.get(PULSE_AGE); }

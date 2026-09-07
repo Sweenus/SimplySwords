@@ -16,6 +16,7 @@ public abstract class ServerWorldMixin {
     @Inject(method = "tick(Ljava/util/function/BooleanSupplier;)V", at = @At("TAIL"))
     private void simplyswords$syncEmberReserve(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
         LongPathFinalFormsMasteryCombatManager.tickReserveHud((ServerWorld) (Object) this);
+        ChompolotlMasteryManager.tick((ServerWorld) (Object) this);
     }
 
     @Inject(method = "tick(Ljava/util/function/BooleanSupplier;)V", at = @At("HEAD"))

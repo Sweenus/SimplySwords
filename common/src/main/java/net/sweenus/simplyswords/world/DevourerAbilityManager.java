@@ -4,6 +4,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.ExperienceOrbEntity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.MovementType;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.projectile.ProjectileUtil;
@@ -116,8 +117,10 @@ public final class DevourerAbilityManager {
             return null;
         }
         long now = world.getTime();
-        double radius = Math.max(Math.max(1.0, Config.uniqueEffects.devourer.targetingRadius), dragRange);
+        double radius = Math.max(Math.max(1.0, AbyssalSpectralMasteryAbilities.tuning(mass.execution)
+                .get(AbyssalSpectralMasteryTuning.Setting.SCAN_RADIUS, Config.uniqueEffects.devourer.targetingRadius)), dragRange);
         double vertical = Math.max(Math.max(1.0, Config.uniqueEffects.devourer.verticalRange), dragRange);
+        if (dragRange > 0 && origin.squaredDistanceTo(mass.center) > dragRange * dragRange) return null;
         if (now < mass.activeStartTick || now >= mass.activeEndTick
                 || horizontalDistanceSquared(origin, mass.center) > radius * radius
                 || Math.abs(origin.y - mass.center.y) > vertical) {
@@ -135,7 +138,14 @@ public final class DevourerAbilityManager {
         spawnFeedingEffects(world, primaryTarget, mass.center);
         world.playSound(null, mass.center.x, mass.center.y, mass.center.z,
                 SoundEvents.ENTITY_WARDEN_HEARTBEAT, SoundCategory.PLAYERS, 0.72F, 0.82F);
-        return new ReprisalRedirect(mass.center, tendril.getUuid());
+        return new ReprisalRedirect(mass.center, tendril.getUuid(), mass.visualId);
+    }
+
+    public static Vec3d activeCenter(ServerWorld world, UUID actorId, UUID visualId) {
+        ActiveMass mass = ACTIVE.getOrDefault(world, Map.of()).get(actorId);
+        if (mass == null || !mass.visualId.equals(visualId) || world.getTime() < mass.activeStartTick
+                || world.getTime() >= mass.activeEndTick || resolveMassVisual(world, visualId) == null) return null;
+        return mass.center;
     }
 
     public static boolean canActivate(WeaponAbilityContext context) {
@@ -207,7 +217,9 @@ public final class DevourerAbilityManager {
                 visual.getUuid(), execution);
         mass.nextVoiceTick = mass.activeStartTick + voiceInitialDelay(world);
         ACTIVE.computeIfAbsent(world, ignored -> new HashMap<>()).put(actor.getUuid(), mass);
-        if ((tuning.integer(AbyssalSpectralMasteryTuning.Setting.MODE, 0) & 64) == 0) {
+        boolean spreadsGloam = (tuning.integer(AbyssalSpectralMasteryTuning.Setting.MODE, 0) & 64) == 0;
+        visual.setSpreadsGloam(spreadsGloam);
+        if (spreadsGloam) {
             DevourerStainManager.begin(world, actor.getUuid(), mass.sourcePlayerId,
                     visual.getUuid(), center, mass.seedArrivalTick, mass.activeEndTick, mass.collapseEndTick,
                     tuning.integer(AbyssalSpectralMasteryTuning.Setting.STAIN_TARGET_CAP,
@@ -510,16 +522,17 @@ public final class DevourerAbilityManager {
         double configured = Math.max(0.0, AbyssalSpectralMasteryAbilities.tuning(mass.execution).get(
                 AbyssalSpectralMasteryTuning.Setting.LAUNCH_SPEED, Config.uniqueEffects.devourer.loosePullStrength));
         double speedScale = inbound ? LOOSE_PULL_SPEED_SCALE : 1.0;
+        double speedMultiplier = configured / Math.max(0.0001, Config.uniqueEffects.devourer.loosePullStrength);
         Vec3d current = target.getVelocity();
         Vec3d velocity;
         if (distance <= 0.16) {
             velocity = current.multiply(0.22).add(offset.multiply(0.38 * speedScale));
         } else {
-            double strength = Math.min(0.52 * speedScale,
+            double strength = Math.min(0.52 * speedScale * speedMultiplier,
                     configured * speedScale * Math.min(1.45, 0.78 + distance * 0.12));
             velocity = current.multiply(0.4).add(offset.normalize().multiply(strength));
         }
-        double maximumSpeed = 0.62 * speedScale;
+        double maximumSpeed = 0.62 * speedScale * speedMultiplier;
         double speed = velocity.length();
         if (speed > maximumSpeed) {
             velocity = velocity.multiply(maximumSpeed / speed);
@@ -573,65 +586,81 @@ public final class DevourerAbilityManager {
             CapturedTarget captured = iterator.next();
             LivingEntity target = resolveLiving(world, captured.targetId);
             DevourerTendrilVisualEntity tendril = resolveTendrilVisual(world, captured.tendrilId);
-            double releaseRadius = Math.max(1.0, Config.uniqueEffects.devourer.targetingRadius) + RELEASE_BUFFER;
+            double releaseRadius = Math.max(1.0, tuning.get(
+                    AbyssalSpectralMasteryTuning.Setting.SCAN_RADIUS,
+                    Config.uniqueEffects.devourer.targetingRadius)) + RELEASE_BUFFER;
             if (target == null || !captured.ingested && tendril == null
                     || !isValidTarget(world, actor, mass.sourcePlayerId, target)
                     || horizontalDistanceSquared(target.getPos(), mass.center) > releaseRadius * releaseRadius) {
                 releaseTarget(tendril, target == null ? captured.lastPosition : target.getPos());
+                mass.routedTargets.remove(captured.targetId);
                 iterator.remove();
                 continue;
             }
             captured.lastPosition = target.getPos();
-            if (!captured.ingested && !hasLineOfSight(world, mass.center, target)) {
-                captured.blockedTicks++;
-                if (captured.blockedTicks >= LOST_SIGHT_GRACE) {
+            if (!captured.held && !hasLineOfSight(world, mass.center, target)) {
+                if (++captured.blockedTicks >= LOST_SIGHT_GRACE) {
                     releaseTarget(tendril, target.getPos());
+                    mass.routedTargets.remove(captured.targetId);
                     iterator.remove();
                     continue;
                 }
-            } else if (!captured.ingested) {
+            } else {
                 captured.blockedTicks = 0;
             }
-
+            boolean wasHeld = captured.held;
             Vec3d slot = holdingSlot(mass.center, visual.getCurrentRadius(0.0F), captured, target);
-            boolean held = pullTowardSlot(target, slot, mass);
-            if (held && !captured.ingested) {
+            captured.held = pullTowardSlot(target, slot, mass);
+            captured.heldTicks = captured.held ? (wasHeld ? captured.heldTicks + 1 : 0) : 0;
+            if (captured.held && !captured.ingested) {
                 captured.ingested = true;
-                captured.ingestedAt = now;
                 captured.nextDamageTick = now;
-                if (tendril != null) {
-                    tendril.discard();
-                }
+                if (tendril != null) tendril.discard();
                 captured.tendrilId = null;
             }
-            int pulseInterval = pulseInterval(
+            RoutedTarget routed = mass.routedTargets.get(captured.targetId);
+            if (routed != null) {
+                if (now > routed.deadline()) mass.routedTargets.remove(captured.targetId);
+                else if (captured.held && !routed.arrived()) {
+                    mass.routedTargets.put(captured.targetId,
+                            new RoutedTarget(routed.bonus(), Long.MAX_VALUE, true));
+                }
+            }
+        }
+        mass.heldCount = (int) mass.targets.values().stream().filter(target -> target.held).count();
+        float compressedDamage = mass.damage * compressionMultiplier(mass, tuning);
+        for (CapturedTarget captured : mass.targets.values()) {
+            LivingEntity target = resolveLiving(world, captured.targetId);
+            if (target == null || !captured.held) continue;
+            int interval = pulseInterval(
                     tuning.integer(AbyssalSpectralMasteryTuning.Setting.ACCELERATE_THRESHOLD_TICKS, 0),
-                    now - captured.ingestedAt,
+                    captured.heldTicks,
                     tuning.integer(AbyssalSpectralMasteryTuning.Setting.ACCELERATED_INTERVAL_TICKS, 16),
                     tuning.integer(AbyssalSpectralMasteryTuning.Setting.PULSE_INTERVAL_TICKS,
                             Config.uniqueEffects.devourer.damageInterval));
-            float compression = 1 + (float) Math.min(
-                    tuning.get(AbyssalSpectralMasteryTuning.Setting.BONUS_CAP, 0),
-                    Math.max(0, mass.targets.size() - 1)
-                            * tuning.get(AbyssalSpectralMasteryTuning.Setting.BONUS_PER_TRIGGER, 0));
-            float pulseDamage = mass.damage * compression * routedBonus(mass, captured.targetId, now,
-                    tuning.get(AbyssalSpectralMasteryTuning.Setting.ROUTED_DAMAGE_BONUS, 0));
-            boolean pulse = held && now >= captured.nextDamageTick;
-            if (pulse) captured.nextDamageTick = now + Math.max(1, pulseInterval);
-            if (pulse && damageTarget(world, actor, mass.stackSnapshot, target, pulseDamage)) {
-                fed = true;
-                UniqueAbilityApi.emit(mass.execution, net.sweenus.simplyswords.api.ability.UniqueAbilityPhase.HIT,
-                        AbyssalSpectralMasteryAbilities.PULSE, target, 1, pulseDamage);
-                spawnFeedingEffects(world, target, mass.center);
-                pullTowardSlot(target, slot, mass);
-                if (!target.isAlive()) onMassKill(world, actor, mass, target, tuning, now);
+            if (now >= captured.nextDamageTick) {
+                captured.nextDamageTick = now + interval;
+                float pulseDamage = compressedDamage * routedBonus(mass, captured.targetId, now);
+                if (damageTarget(world, actor, mass.stackSnapshot, target, pulseDamage)) {
+                    mass.routedTargets.remove(captured.targetId);
+                    fed = true;
+                    UniqueAbilityApi.emit(mass.execution, net.sweenus.simplyswords.api.ability.UniqueAbilityPhase.HIT,
+                            AbyssalSpectralMasteryAbilities.PULSE, target, 1, pulseDamage);
+                    spawnFeedingEffects(world, target, mass.center);
+                }
             }
             int ruptureAfter = tuning.integer(AbyssalSpectralMasteryTuning.Setting.RUPTURE_THRESHOLD_TICKS, 0);
-            if (held && !captured.ruptured && ruptureAfter > 0
-                    && now - captured.ingestedAt >= ruptureAfter) {
-                captured.ruptured = true;
-                damageTarget(world, actor, mass.stackSnapshot, target, pulseDamage * (float) tuning.get(
-                        AbyssalSpectralMasteryTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, .75));
+            if (target.isAlive() && ruptureAfter > 0 && captured.heldTicks >= ruptureAfter
+                    && !mass.rupturedTargets.contains(captured.targetId)) {
+                float amount = compressedDamage * (float) tuning.get(
+                        AbyssalSpectralMasteryTuning.Setting.SECONDARY_DAMAGE_MULTIPLIER, .75);
+                mass.rupturedTargets.add(captured.targetId);
+                if (damageTarget(world, actor, mass.stackSnapshot, target, amount)) {
+                    UniqueAbilityApi.emit(mass.execution, net.sweenus.simplyswords.api.ability.UniqueAbilityPhase.HIT,
+                            AbyssalSpectralMasteryAbilities.HIT, target, 1, amount);
+                    spawnFeedingEffects(world, target, mass.center);
+                    fed = true;
+                }
             }
         }
         if (fed) {
@@ -639,6 +668,11 @@ public final class DevourerAbilityManager {
             world.playSound(null, mass.center.x, mass.center.y, mass.center.z,
                     SoundEvents.ENTITY_WARDEN_HEARTBEAT, SoundCategory.PLAYERS, 0.55F, 1.15F);
         }
+    }
+
+    private static float compressionMultiplier(ActiveMass mass, AbyssalSpectralMasteryTuning tuning) {
+        return 1 + (float) Math.min(tuning.get(AbyssalSpectralMasteryTuning.Setting.BONUS_CAP, 0),
+                mass.heldCount * tuning.get(AbyssalSpectralMasteryTuning.Setting.BONUS_PER_TRIGGER, 0));
     }
 
     private static Vec3d holdingSlot(Vec3d center, float radius,
@@ -684,7 +718,7 @@ public final class DevourerAbilityManager {
     static int pulseInterval(int accelerateThreshold, long heldTicks, int acceleratedInterval, int baseInterval) {
         int base = Math.max(1, baseInterval);
         if (accelerateThreshold <= 0 || heldTicks < accelerateThreshold) return base;
-        return Math.max(1, acceleratedInterval);
+        return Math.max(1, (int) Math.round(base * (acceleratedInterval / 20.0)));
     }
 
     static long extendedEnd(long currentEnd, long baseEnd, int bonusTicks, int capTicks) {
@@ -696,12 +730,31 @@ public final class DevourerAbilityManager {
         return (int) Math.max(0L, cooldownTicks - elapsedTicks - Math.max(0, refundTicks));
     }
 
-    private static float routedBonus(ActiveMass mass, UUID targetId, long now, double bonus) {
-        if (bonus <= 0.0) return 1.0F;
-        Long deadline = mass.routedTargets.get(targetId);
-        if (deadline == null) return 1.0F;
-        mass.routedTargets.remove(targetId);
-        return now <= deadline ? 1.0F + (float) bonus : 1.0F;
+    private static float routedBonus(ActiveMass mass, UUID targetId, long now) {
+        RoutedTarget routed = mass.routedTargets.get(targetId);
+        return routed != null && routed.arrived() && now <= routed.deadline()
+                ? 1 + (float) routed.bonus() : 1;
+    }
+
+    public static void onTargetDeath(LivingEntity target, DamageSource source) {
+        if (!(target.getWorld() instanceof ServerWorld world) || source.getAttacker() == null) return;
+        UUID killerId = source.getAttacker().getUuid();
+        long now = world.getTime();
+        for (ActiveMass mass : ACTIVE.getOrDefault(world, Map.of()).values()) {
+            if (!killerId.equals(mass.actorId) && !killerId.equals(mass.sourcePlayerId)) continue;
+            LivingEntity actor = resolveLiving(world, mass.actorId);
+            CapturedTarget captured = mass.targets.get(target.getUuid());
+            DevourerMassVisualEntity visual = resolveMassVisual(world, mass.visualId);
+            if (actor == null || captured == null || visual == null || mass.collapsing
+                    || now < mass.activeStartTick || now >= mass.activeEndTick
+                    || actor.getStackInHand(mass.hand) != mass.stackReference) continue;
+            Vec3d slot = holdingSlot(mass.center, visual.getCurrentRadius(0), captured, target)
+                    .subtract(0, target.getHeight() * 0.5, 0);
+            double tolerance = 0.34 + target.getWidth() * 0.18;
+            if (target.squaredDistanceTo(slot) > tolerance * tolerance
+                    || !mass.creditedKills.add(target.getUuid())) continue;
+            onMassKill(world, actor, mass, target, AbyssalSpectralMasteryAbilities.tuning(mass.execution), now);
+        }
     }
 
     private static void onMassKill(ServerWorld world, LivingEntity actor, ActiveMass mass,
@@ -712,17 +765,29 @@ public final class DevourerAbilityManager {
                 tuning.integer(AbyssalSpectralMasteryTuning.Setting.DURATION_BONUS_TICKS, 0),
                 tuning.integer(AbyssalSpectralMasteryTuning.Setting.EXTRA_DURATION_CAP, 0));
         if (extended != mass.activeEndTick) {
-            mass.collapseEndTick += extended - mass.activeEndTick;
+            int extension = (int) (extended - mass.activeEndTick);
+            DevourerMassVisualEntity visual = resolveMassVisual(world, mass.visualId);
+            if (visual != null) visual.extendActiveTicks(extension);
+            for (CapturedTarget captured : mass.targets.values()) {
+                DevourerTendrilVisualEntity tendril = resolveTendrilVisual(world, captured.tendrilId);
+                if (tendril != null) tendril.extendLifetime(extension);
+            }
+            for (CapturedLoot captured : mass.looseTargets.values()) {
+                DevourerTendrilVisualEntity tendril = resolveTendrilVisual(world, captured.tendrilId);
+                if (tendril != null) tendril.extendLifetime(extension);
+            }
+            DevourerStainManager.extendField(world, mass.visualId, extension);
+            mass.collapseEndTick += extension;
             mass.activeEndTick = extended;
         }
         int refundPerKill = tuning.integer(AbyssalSpectralMasteryTuning.Setting.COOLDOWN_REFUND_TICKS, 0);
         int refundCap = tuning.integer(AbyssalSpectralMasteryTuning.Setting.COOLDOWN_REFUND_CAP_TICKS, 0);
         if (refundPerKill <= 0 || refundCap <= 0) return;
-        mass.cooldownRefund = Math.min(refundCap, mass.cooldownRefund + refundPerKill);
-        SimplySwordsAPI.setWeaponCooldown(actor, mass.stackReference, refundedCooldown(
+        int refund = Math.min(refundPerKill, Math.max(0, refundCap - mass.cooldownRefund));
+        mass.cooldownRefund += refund;
+        SimplySwordsAPI.reduceWeaponCooldown(actor, mass.stackReference,
                 tuning.integer(AbyssalSpectralMasteryTuning.Setting.COOLDOWN_TICKS,
-                        Config.uniqueEffects.devourer.cooldown),
-                now - mass.castTick, mass.cooldownRefund));
+                        Config.uniqueEffects.devourer.cooldown), refund);
     }
 
     private static void tickFollow(ServerWorld world, LivingEntity actor, ActiveMass mass,
@@ -735,6 +800,8 @@ public final class DevourerAbilityManager {
         Box search = new Box(mass.center, mass.center).expand(range);
         LivingEntity nearest = world.getEntitiesByClass(LivingEntity.class, search,
                         candidate -> isValidTarget(world, actor, mass.sourcePlayerId, candidate)
+                                && !mass.targets.containsKey(candidate.getUuid())
+                                && hasLineOfSight(world, mass.center, candidate)
                                 && candidate.squaredDistanceTo(mass.center) <= range * range).stream()
                 .min(Comparator.comparingDouble(candidate -> candidate.squaredDistanceTo(mass.center)))
                 .orElse(null);
@@ -743,17 +810,30 @@ public final class DevourerAbilityManager {
         Vec3d offset = desired.subtract(mass.center);
         double distance = offset.length();
         if (distance < 0.05) return;
-        mass.center = mass.center.add(offset.normalize().multiply(Math.min(speed, distance)));
-        visual.setPos(mass.center.x, mass.center.y, mass.center.z);
+        visual.noClip = false;
+        try {
+            visual.move(MovementType.SELF, offset.normalize().multiply(Math.min(speed, distance)));
+        } finally {
+            visual.noClip = true;
+        }
+        mass.center = visual.getPos();
         DevourerStainManager.moveField(world, mass.visualId, mass.center);
     }
 
     public static void markRouted(ServerWorld world, UUID actorId, UUID targetId, int windowTicks) {
-        Map<UUID, ActiveMass> active = ACTIVE.get(world);
-        ActiveMass mass = active == null ? null : active.get(actorId);
-        if (mass == null || targetId == null || windowTicks <= 0) return;
-        if (mass.routedTargets.size() >= MAX_ROUTED_TARGETS) mass.routedTargets.clear();
-        mass.routedTargets.put(targetId, world.getTime() + windowTicks);
+        ActiveMass mass = ACTIVE.getOrDefault(world, Map.of()).get(actorId);
+        if (mass == null) return;
+        markRouted(world, actorId, targetId, windowTicks, AbyssalSpectralMasteryAbilities.tuning(mass.execution)
+                .get(AbyssalSpectralMasteryTuning.Setting.ROUTED_DAMAGE_BONUS, 0));
+    }
+
+    public static void markRouted(ServerWorld world, UUID actorId, UUID targetId, int windowTicks, double bonus) {
+        ActiveMass mass = ACTIVE.getOrDefault(world, Map.of()).get(actorId);
+        if (mass == null || targetId == null || windowTicks <= 0 || bonus <= 0) return;
+        long now = world.getTime();
+        mass.routedTargets.values().removeIf(routed -> now > routed.deadline());
+        if (mass.routedTargets.size() >= MAX_ROUTED_TARGETS && !mass.routedTargets.containsKey(targetId)) return;
+        mass.routedTargets.put(targetId, new RoutedTarget(bonus, now + windowTicks, false));
     }
 
     private static boolean damageTarget(ServerWorld world, LivingEntity actor, ItemStack stack,
@@ -774,7 +854,8 @@ public final class DevourerAbilityManager {
         AbyssalSpectralMasteryTuning tuning = AbyssalSpectralMasteryAbilities.tuning(mass.execution);
         double radius = tuning.get(AbyssalSpectralMasteryTuning.Setting.IMPACT_RADIUS, 0);
         int cap = tuning.integer(AbyssalSpectralMasteryTuning.Setting.IMPACT_TARGET_CAP, 0);
-        float damage = mass.damage * (float) tuning.get(AbyssalSpectralMasteryTuning.Setting.IMPACT_DAMAGE_MULTIPLIER, 0);
+        float damage = mass.damage * compressionMultiplier(mass, tuning)
+                * (float) tuning.get(AbyssalSpectralMasteryTuning.Setting.IMPACT_DAMAGE_MULTIPLIER, 0);
         if (radius <= 0 || cap <= 0 || damage <= 0) return;
         List<LivingEntity> targets = world.getEntitiesByClass(LivingEntity.class,
                 new Box(mass.center, mass.center).expand(radius), target -> target != actor && target.isAlive()
@@ -782,7 +863,11 @@ public final class DevourerAbilityManager {
                         && HelperMethods.checkAbilityTarget(target, actor));
         targets.sort(Comparator.comparingDouble(target -> target.squaredDistanceTo(mass.center)));
         for (int index = 0; index < Math.min(cap, targets.size()); index++) {
-            damageTarget(world, actor, mass.stackSnapshot, targets.get(index), damage);
+            LivingEntity target = targets.get(index);
+            if (damageTarget(world, actor, mass.stackSnapshot, target, damage)) {
+                UniqueAbilityApi.emit(mass.execution, net.sweenus.simplyswords.api.ability.UniqueAbilityPhase.HIT,
+                        AbyssalSpectralMasteryAbilities.HIT, target, 1, damage);
+            }
         }
     }
 
@@ -913,6 +998,24 @@ public final class DevourerAbilityManager {
         if (tendril != null) {
             tendril.beginRetraction(endpoint);
         }
+    }
+
+    public static void clear(ServerWorld world) {
+        if (world == null) return;
+        Map<UUID, ActiveMass> active = ACTIVE.remove(world);
+        if (active != null) {
+            for (ActiveMass mass : new ArrayList<>(active.values())) {
+                UniqueAbilityApi.cancel(mass.execution);
+                cancel(world, mass, resolveMassVisual(world, mass.visualId));
+            }
+        }
+        CAPTURED_LOOT.remove(world);
+    }
+
+    public static void clearAll() {
+        new ArrayList<>(ACTIVE.keySet()).forEach(DevourerAbilityManager::clear);
+        ACTIVE.clear();
+        CAPTURED_LOOT.clear();
     }
 
     private static void cancel(ServerWorld world, ActiveMass mass, DevourerMassVisualEntity visual) {
@@ -1088,6 +1191,9 @@ public final class DevourerAbilityManager {
                 30, 0.75, 0.75, 0.75, 0.07);
     }
 
+    private record RoutedTarget(double bonus, long deadline, boolean arrived) {
+    }
+
     private static final class ActiveMass {
         private final UUID actorId;
         private final UUID sourcePlayerId;
@@ -1106,7 +1212,10 @@ public final class DevourerAbilityManager {
         private final UniqueAbilityExecution execution;
         private final Map<UUID, CapturedTarget> targets = new HashMap<>();
         private final Map<UUID, CapturedLoot> looseTargets = new HashMap<>();
-        private final Map<UUID, Long> routedTargets = new HashMap<>();
+        private final Map<UUID, RoutedTarget> routedTargets = new HashMap<>();
+        private final Set<UUID> rupturedTargets = new HashSet<>();
+        private final Set<UUID> creditedKills = new HashSet<>();
+        private int heldCount;
         private int cooldownRefund;
         private long nextLooseLaunchTick;
         private long nextVoiceTick;
@@ -1144,8 +1253,8 @@ public final class DevourerAbilityManager {
         private Vec3d lastPosition;
         private int blockedTicks;
         private boolean ingested;
-        private boolean ruptured;
-        private long ingestedAt;
+        private boolean held;
+        private long heldTicks;
         private long nextDamageTick;
 
         private CapturedTarget(UUID targetId, UUID tendrilId, Vec3d lastPosition) {
@@ -1181,6 +1290,9 @@ public final class DevourerAbilityManager {
         }
     }
 
-    public record ReprisalRedirect(Vec3d destination, UUID tendrilId) {
+    public record ReprisalRedirect(Vec3d destination, UUID tendrilId, UUID massVisualId) {
+        public ReprisalRedirect(Vec3d destination, UUID tendrilId) {
+            this(destination, tendrilId, null);
+        }
     }
 }

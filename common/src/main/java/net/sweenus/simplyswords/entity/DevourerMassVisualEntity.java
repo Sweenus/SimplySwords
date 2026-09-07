@@ -20,6 +20,7 @@ public final class DevourerMassVisualEntity extends Entity {
     private static final TrackedData<Integer> TRAVEL_TICKS = DataTracker.registerData(DevourerMassVisualEntity.class, TrackedDataHandlerRegistry.INTEGER);
     private static final TrackedData<Integer> BLOOM_TICKS = DataTracker.registerData(DevourerMassVisualEntity.class, TrackedDataHandlerRegistry.INTEGER);
     private static final TrackedData<Integer> ACTIVE_TICKS = DataTracker.registerData(DevourerMassVisualEntity.class, TrackedDataHandlerRegistry.INTEGER);
+    private static final TrackedData<Integer> GROWTH_TICKS = DataTracker.registerData(DevourerMassVisualEntity.class, TrackedDataHandlerRegistry.INTEGER);
     private static final TrackedData<Integer> COLLAPSE_TICKS = DataTracker.registerData(DevourerMassVisualEntity.class, TrackedDataHandlerRegistry.INTEGER);
     private static final TrackedData<Float> START_RADIUS = DataTracker.registerData(DevourerMassVisualEntity.class, TrackedDataHandlerRegistry.FLOAT);
     private static final TrackedData<Float> MAX_RADIUS = DataTracker.registerData(DevourerMassVisualEntity.class, TrackedDataHandlerRegistry.FLOAT);
@@ -28,6 +29,7 @@ public final class DevourerMassVisualEntity extends Entity {
     private static final TrackedData<Integer> SEED = DataTracker.registerData(DevourerMassVisualEntity.class, TrackedDataHandlerRegistry.INTEGER);
     private static final TrackedData<Integer> VOICE_INDEX = DataTracker.registerData(DevourerMassVisualEntity.class, TrackedDataHandlerRegistry.INTEGER);
     private static final TrackedData<Integer> VOICE_SEQUENCE = DataTracker.registerData(DevourerMassVisualEntity.class, TrackedDataHandlerRegistry.INTEGER);
+    private static final TrackedData<Boolean> SPREADS_GLOAM = DataTracker.registerData(DevourerMassVisualEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
 
     public DevourerMassVisualEntity(EntityType<? extends DevourerMassVisualEntity> type, World world) {
         super(type, world);
@@ -46,6 +48,7 @@ public final class DevourerMassVisualEntity extends Entity {
         dataTracker.set(TRAVEL_TICKS, Math.max(1, travelTicks));
         dataTracker.set(BLOOM_TICKS, Math.max(1, bloomTicks));
         dataTracker.set(ACTIVE_TICKS, Math.max(1, activeTicks));
+        dataTracker.set(GROWTH_TICKS, Math.max(1, activeTicks));
         dataTracker.set(COLLAPSE_TICKS, Math.max(1, collapseTicks));
         dataTracker.set(START_RADIUS, Math.max(0.2F, startRadius));
         dataTracker.set(MAX_RADIUS, Math.max(startRadius, maxRadius));
@@ -60,6 +63,7 @@ public final class DevourerMassVisualEntity extends Entity {
         builder.add(TRAVEL_TICKS, 8);
         builder.add(BLOOM_TICKS, 10);
         builder.add(ACTIVE_TICKS, 100);
+        builder.add(GROWTH_TICKS, 100);
         builder.add(COLLAPSE_TICKS, 8);
         builder.add(START_RADIUS, 0.7F);
         builder.add(MAX_RADIUS, 1.9F);
@@ -68,6 +72,7 @@ public final class DevourerMassVisualEntity extends Entity {
         builder.add(SEED, 0);
         builder.add(VOICE_INDEX, -1);
         builder.add(VOICE_SEQUENCE, 0);
+        builder.add(SPREADS_GLOAM, true);
     }
 
     @Override
@@ -105,7 +110,7 @@ public final class DevourerMassVisualEntity extends Entity {
         float maximumRadius = getMaximumRadius();
         float activeAge = Math.max(0.0F, visualAge - getTravelTicks() - getBloomTicks());
         float timeGrowth = (maximumRadius - startRadius) * 0.42F
-                * MathHelper.clamp(activeAge / Math.max(1.0F, getActiveTicks()), 0.0F, 1.0F);
+                * MathHelper.clamp(activeAge / Math.max(1.0F, dataTracker.get(GROWTH_TICKS)), 0.0F, 1.0F);
         float feedGrowth = Math.min((maximumRadius - startRadius) * 0.58F, getFeedCount() * 0.075F);
         float radius = MathHelper.lerp(bloom, 0.18F, startRadius + timeGrowth + feedGrowth);
         float pulseAge = visualAge - getLastFeedAge();
@@ -129,8 +134,13 @@ public final class DevourerMassVisualEntity extends Entity {
         return age >= getTravelTicks() + getBloomTicks() + getActiveTicks();
     }
 
+    public void extendActiveTicks(int ticks) {
+        if (ticks > 0) dataTracker.set(ACTIVE_TICKS, getActiveTicks() + ticks);
+    }
+
     public void feed() {
-        dataTracker.set(FEED_COUNT, Math.min(24, getFeedCount() + 1));
+        dataTracker.set(FEED_COUNT, Math.min(Math.max(24, (int) Math.ceil((getMaximumRadius() - getStartingRadius()) * 0.58 / 0.075)),
+                getFeedCount() + 1));
         dataTracker.set(LAST_FEED_AGE, age);
     }
 
@@ -145,6 +155,8 @@ public final class DevourerMassVisualEntity extends Entity {
     public int getCollapseTicks() { return dataTracker.get(COLLAPSE_TICKS); }
     public float getStartingRadius() { return dataTracker.get(START_RADIUS); }
     public float getMaximumRadius() { return dataTracker.get(MAX_RADIUS); }
+    public boolean spreadsGloam() { return dataTracker.get(SPREADS_GLOAM); }
+    public void setSpreadsGloam(boolean spreads) { dataTracker.set(SPREADS_GLOAM, spreads); }
     public int getFeedCount() { return dataTracker.get(FEED_COUNT); }
     public int getLastFeedAge() { return dataTracker.get(LAST_FEED_AGE); }
     public int getSeed() { return dataTracker.get(SEED); }
@@ -182,6 +194,7 @@ public final class DevourerMassVisualEntity extends Entity {
         dataTracker.set(TRAVEL_TICKS, nbt.getInt("travel_ticks"));
         dataTracker.set(BLOOM_TICKS, nbt.getInt("bloom_ticks"));
         dataTracker.set(ACTIVE_TICKS, nbt.getInt("active_ticks"));
+        dataTracker.set(GROWTH_TICKS, nbt.contains("growth_ticks") ? nbt.getInt("growth_ticks") : nbt.getInt("active_ticks"));
         dataTracker.set(COLLAPSE_TICKS, nbt.getInt("collapse_ticks"));
         dataTracker.set(START_RADIUS, nbt.getFloat("start_radius"));
         dataTracker.set(MAX_RADIUS, nbt.getFloat("max_radius"));
@@ -190,6 +203,7 @@ public final class DevourerMassVisualEntity extends Entity {
         dataTracker.set(SEED, nbt.getInt("seed"));
         dataTracker.set(VOICE_INDEX, nbt.getInt("voice_index"));
         dataTracker.set(VOICE_SEQUENCE, nbt.getInt("voice_sequence"));
+        dataTracker.set(SPREADS_GLOAM, !nbt.contains("spreads_gloam") || nbt.getBoolean("spreads_gloam"));
     }
 
     @Override
@@ -200,6 +214,7 @@ public final class DevourerMassVisualEntity extends Entity {
         nbt.putInt("travel_ticks", getTravelTicks());
         nbt.putInt("bloom_ticks", getBloomTicks());
         nbt.putInt("active_ticks", getActiveTicks());
+        nbt.putInt("growth_ticks", dataTracker.get(GROWTH_TICKS));
         nbt.putInt("collapse_ticks", getCollapseTicks());
         nbt.putFloat("start_radius", getStartingRadius());
         nbt.putFloat("max_radius", getMaximumRadius());
@@ -208,6 +223,7 @@ public final class DevourerMassVisualEntity extends Entity {
         nbt.putInt("seed", getSeed());
         nbt.putInt("voice_index", getVoiceIndex());
         nbt.putInt("voice_sequence", getVoiceSequence());
+        nbt.putBoolean("spreads_gloam", spreadsGloam());
     }
 
     private static float ease(float value) {

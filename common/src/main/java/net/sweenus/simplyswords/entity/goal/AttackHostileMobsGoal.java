@@ -13,7 +13,6 @@ import java.util.EnumSet;
 
 public class AttackHostileMobsGoal extends Goal {
     private final PathAwareEntity entity;
-    private LivingEntity targetMob;
     private LivingEntity owner;
     private final double attackRange;
     private final double playerCheckRange;
@@ -29,66 +28,51 @@ public class AttackHostileMobsGoal extends Goal {
 
     @Override
     public boolean canStart() {
-        if (!(entity.getWorld() instanceof ServerWorld serverWorld)) return false;
-
-        owner = entity instanceof SimplySwordsAxolotlEntity axolotl ? axolotl.getOwner() : null;
+        if (!(entity instanceof SimplySwordsAxolotlEntity axolotl) || !axolotl.canMasteryAttack()
+                || axolotl.hasPassengers() || !(entity.getWorld() instanceof ServerWorld world)) return false;
+        owner = axolotl.getOwner();
         if (owner == null || !owner.isAlive() || entity.squaredDistanceTo(owner) > playerCheckRange * playerCheckRange) return false;
+        return selectTarget(world, axolotl) != null;
+    }
 
-        if (owner instanceof net.minecraft.entity.mob.MobEntity mobOwner
-                && mobOwner.getTarget() != null
-                && mobOwner.getTarget().isAlive()
-                && HelperMethods.checkAbilityTarget(mobOwner.getTarget(), owner)) {
-            targetMob = mobOwner.getTarget();
-            return true;
+    private boolean valid(LivingEntity target, double range) {
+        return target != null && target.isAlive() && !target.isRemoved() && target != owner && target != entity
+                && target.getWorld() == entity.getWorld() && entity.squaredDistanceTo(target) <= range * range
+                && HelperMethods.checkAbilityTarget(target, owner);
+    }
+
+    private LivingEntity selectTarget(ServerWorld world, SimplySwordsAxolotlEntity axolotl) {
+        double range = axolotl.getMasteryTargetRange(attackRange);
+        LivingEntity preferred = axolotl.hasCoordinatedBite()
+                ? net.sweenus.simplyswords.world.ChompolotlMasteryManager.currentTarget(owner) : null;
+        if (valid(preferred, range)) axolotl.setTarget(preferred);
+        else if (!valid(axolotl.getTarget(), range)) {
+            axolotl.setTarget(world.getEntitiesByClass(HostileEntity.class, entity.getBoundingBox().expand(range),
+                    target -> valid(target, range)).stream()
+                    .sorted(java.util.Comparator.comparingDouble((HostileEntity target) -> entity.squaredDistanceTo(target))
+                            .thenComparing(target -> target.getUuid().toString()))
+                    .limit(Math.max(1, axolotl.getMasteryTargetSearchCap())).findFirst().orElse(null));
         }
-
-        double range = entity instanceof SimplySwordsAxolotlEntity axolotl
-                ? axolotl.getMasteryTargetRange(attackRange) : attackRange;
-        int cap = entity instanceof SimplySwordsAxolotlEntity axolotl
-                ? axolotl.getMasteryTargetSearchCap() : 0;
-        TargetPredicate predicate = TargetPredicate.createAttackable().setBaseMaxDistance(range);
-        var targets = serverWorld.getEntitiesByClass(HostileEntity.class, entity.getBoundingBox().expand(range),
-                        hostile -> predicate.test(entity, hostile)
-                                && HelperMethods.checkAbilityTarget(hostile, owner))
-                .stream();
-        if (cap > 0) targets = targets.limit(cap);
-        targetMob = targets
-                .min((first, second) -> Double.compare(first.squaredDistanceTo(entity), second.squaredDistanceTo(entity)))
-                .orElse(null);
-        return targetMob != null;
+        return axolotl.getTarget();
     }
 
     @Override
-    public boolean shouldContinue() {
-        return targetMob != null
-                && targetMob.isAlive()
-                && owner != null
-                && owner.isAlive()
-                && entity.squaredDistanceTo(owner) <= (playerCheckRange * playerCheckRange)
-                && HelperMethods.checkAbilityTarget(targetMob, owner);
-    }
+    public boolean shouldContinue() { return canStart(); }
 
     @Override
     public void stop() {
-        targetMob = null;
         owner = null;
         entity.getNavigation().stop();
     }
 
     @Override
     public void tick() {
-        if (targetMob != null) {
-            // Navigate to the hostile mob
-            entity.getNavigation().startMovingTo(targetMob.getX(), targetMob.getY(), targetMob.getZ(), speed);
-
-            // Look at the hostile mob
-            entity.getLookControl().lookAt(targetMob, 30.0F, 30.0F);
-
-            // Attack the hostile mob
-            if (entity.squaredDistanceTo(targetMob) <= 2.0 * 2.0 && targetMob.timeUntilRegen < 10
-                    && owner != null && HelperMethods.checkAbilityTarget(targetMob, owner)) {
-                entity.tryAttack(targetMob);
-            }
-        }
+        if (!(entity instanceof SimplySwordsAxolotlEntity axolotl) || axolotl.hasPassengers()
+                || !(entity.getWorld() instanceof ServerWorld world) || owner == null) return;
+        LivingEntity target = selectTarget(world, axolotl);
+        if (target == null) return;
+        entity.getNavigation().startMovingTo(target, speed);
+        entity.getLookControl().lookAt(target, 30, 30);
+        if (entity.squaredDistanceTo(target) <= 4) entity.tryAttack(target);
     }
 }

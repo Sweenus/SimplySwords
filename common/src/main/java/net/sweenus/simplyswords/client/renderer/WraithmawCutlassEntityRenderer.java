@@ -23,6 +23,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.sweenus.simplyswords.entity.WraithmawCutlassEntity;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
+import net.sweenus.simplyswords.world.WraithmawAbilityManager;
 import org.joml.Matrix4f;
 
 import java.util.HashMap;
@@ -33,16 +34,6 @@ public final class WraithmawCutlassEntityRenderer extends EntityRenderer<Wraithm
     private static final double POSITION_RESPONSE = 0.6;
     private static final double DIRECTION_RESPONSE = 0.6;
     private static final Map<Integer, RenderState> RENDER_STATES = new HashMap<>();
-    private static final double[][] ORBIT_SLOTS = {
-            {-0.62, 1.55, 0.12},
-            {0.62, 1.55, 0.12},
-            {-0.92, 2.02, 0.10},
-            {-0.31, 2.24, 0.14},
-            {0.31, 2.24, 0.14},
-            {0.92, 2.02, 0.10},
-            {-0.52, 2.62, 0.18},
-            {0.52, 2.62, 0.18}
-    };
     private final ItemRenderer itemRenderer;
 
     public WraithmawCutlassEntityRenderer(EntityRendererFactory.Context context) {
@@ -196,19 +187,13 @@ public final class WraithmawCutlassEntityRenderer extends EntityRenderer<Wraithm
     }
 
     private Vec3d orbitPosition(WraithmawCutlassEntity entity, LivingEntity owner, float tickDelta) {
-        int slot = Math.floorMod(entity.getOrbitSlot(), ORBIT_SLOTS.length);
-        double localX = ORBIT_SLOTS[slot][0];
-        double localY = ORBIT_SLOTS[slot][1]
-                + Math.sin((entity.age + tickDelta) * 0.11 + slot * 1.7) * 0.08;
-        double localZ = ORBIT_SLOTS[slot][2];
-        double ownerX = MathHelper.lerp(tickDelta, owner.prevX, owner.getX());
-        double ownerY = MathHelper.lerp(tickDelta, owner.prevY, owner.getY());
-        double ownerZ = MathHelper.lerp(tickDelta, owner.prevZ, owner.getZ());
-        double ownerYaw = Math.toRadians(MathHelper.lerpAngleDegrees(tickDelta, owner.prevYaw, owner.getYaw()));
-        Vec3d right = new Vec3d(Math.cos(ownerYaw), 0.0, Math.sin(ownerYaw));
-        Vec3d forward = new Vec3d(-Math.sin(ownerYaw), 0.0, Math.cos(ownerYaw));
-        return new Vec3d(ownerX, ownerY, ownerZ)
-                .add(right.multiply(localX)).add(forward.multiply(localZ)).add(0.0, localY, 0.0);
+        Vec3d ownerPosition = new Vec3d(
+                MathHelper.lerp(tickDelta, owner.prevX, owner.getX()),
+                MathHelper.lerp(tickDelta, owner.prevY, owner.getY()),
+                MathHelper.lerp(tickDelta, owner.prevZ, owner.getZ()));
+        float ownerYaw = MathHelper.lerpAngleDegrees(tickDelta, owner.prevYaw, owner.getYaw());
+        return WraithmawAbilityManager.orbitPosition(ownerPosition, ownerYaw, entity.getOrbitSlot(),
+                entity.getWorld().getTime() + tickDelta);
     }
 
     private static Vec3d normalizedDirection(Vec3d direction) {

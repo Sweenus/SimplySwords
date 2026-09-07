@@ -27,6 +27,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(PlayerEntity.class)
 public abstract class PlayerEntityMixin {
 
+    @com.llamalad7.mixinextras.injector.ModifyExpressionValue(method = "applyDamage",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;modifyAppliedDamage(Lnet/minecraft/entity/damage/DamageSource;F)F"))
+    private float simplyswords$interceptPlayerGuardianDamage(float amount, net.minecraft.entity.damage.DamageSource source, float incoming) {
+        return net.sweenus.simplyswords.world.ChompolotlMasteryManager.intercept((PlayerEntity) (Object) this, source, amount);
+    }
+
     @com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod(method = "attack")
     private void simplyswords$wraithfangAttack(Entity target, com.llamalad7.mixinextras.injector.wrapoperation.Operation<Void> original) {
         net.sweenus.simplyswords.world.WraithfangAbilityManager.beginAttack((PlayerEntity) (Object) this);
@@ -110,6 +116,26 @@ public abstract class PlayerEntityMixin {
     @Inject(at = @At("HEAD"), method = "tick")
     public void simplyswords$tick(CallbackInfo ci) {
         PlayerEntity player = (PlayerEntity) (Object) this;
+        if (player.getWorld() instanceof net.minecraft.server.world.ServerWorld world) {
+            NbtCompound left = player.getShoulderEntityLeft().copy();
+            NbtCompound right = player.getShoulderEntityRight().copy();
+            if (simplyswords$isSimplyAxolotl(left)) {
+                if (!net.sweenus.simplyswords.world.ChompolotlMasteryManager.validShoulder(left, world)) left = new NbtCompound();
+                else if (left.getBoolean("MasteryEternalAura")) {
+                    simplyswords$dropShoulderEntity(left);
+                    left = new NbtCompound();
+                }
+                if (!left.equals(player.getShoulderEntityLeft())) setShoulderEntityLeft(left);
+            }
+            if (simplyswords$isSimplyAxolotl(right)) {
+                if (!net.sweenus.simplyswords.world.ChompolotlMasteryManager.validShoulder(right, world)) right = new NbtCompound();
+                else if (right.getBoolean("MasteryEternalAura")) {
+                    simplyswords$dropShoulderEntity(right);
+                    right = new NbtCompound();
+                }
+                if (!right.equals(player.getShoulderEntityRight())) setShoulderEntityRight(right);
+            }
+        }
         if (player.age % 40 == 0) {
             // Drop axolotls if Chompolotl item not present
             if (!HelperMethods.hasItemInInventory(player, ItemsRegistry.CHOMPOLOTL.get())) {

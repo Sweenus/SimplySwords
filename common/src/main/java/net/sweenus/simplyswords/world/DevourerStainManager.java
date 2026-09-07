@@ -79,10 +79,39 @@ public final class DevourerStainManager {
         ACTIVE.computeIfAbsent(world, ignored -> new HashMap<>()).put(massVisualId, field);
     }
 
+    public static void extendField(ServerWorld world, UUID massVisualId, int ticks) {
+        ActiveField field = ACTIVE.getOrDefault(world, Map.of()).get(massVisualId);
+        if (field == null || ticks <= 0) return;
+        field.activeEndTick += ticks;
+        field.collapseEndTick += ticks;
+        for (StainSegment segment : field.segments) {
+            Entity entity = world.getEntity(segment.visualId);
+            if (entity instanceof BloodStainVisualEntity visual) {
+                visual.setLifetime(visual.getLifetime() + ticks);
+            }
+        }
+    }
+
     public static void moveField(ServerWorld world, UUID massVisualId, Vec3d center) {
         Map<UUID, ActiveField> fields = ACTIVE.get(world);
         ActiveField field = fields == null ? null : fields.get(massVisualId);
         if (field != null) field.center = center;
+    }
+
+    public static void clear(ServerWorld world) {
+        if (world == null) return;
+        Map<UUID, ActiveField> fields = ACTIVE.get(world);
+        if (fields != null) {
+            for (UUID massVisualId : new ArrayList<>(fields.keySet())) {
+                cancel(world, massVisualId);
+            }
+        }
+        ACTIVE.remove(world);
+    }
+
+    public static void clearAll() {
+        new ArrayList<>(ACTIVE.keySet()).forEach(DevourerStainManager::clear);
+        ACTIVE.clear();
     }
 
     public static void cancel(ServerWorld world, UUID massVisualId) {
@@ -434,8 +463,8 @@ public final class DevourerStainManager {
         private final UUID massVisualId;
         private Vec3d center;
         private final long activeStartTick;
-        private final long activeEndTick;
-        private final long collapseEndTick;
+        private long activeEndTick;
+        private long collapseEndTick;
         private final int carrierCap;
         private final double trailWidth;
         private final int spreadDuration;

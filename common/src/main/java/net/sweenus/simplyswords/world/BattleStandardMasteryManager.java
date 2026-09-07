@@ -41,7 +41,6 @@ import java.util.UUID;
 
 public final class BattleStandardMasteryManager {
     private static final Identifier STANDARD_GUARD_ID = Identifier.of("simplyswords", "sunfire_standard_guard");
-    private static final Identifier ALLY_GUARD_ID = Identifier.of("simplyswords", "harbinger_formation_guard");
     private static final Map<UUID, StandardState> ACTIVE = new HashMap<>();
     private static final Map<ServerWorld, Map<UUID, Long>> SUNFIRE_CLEANSE = new HashMap<>();
     private static final Map<ServerWorld, Map<UUID, Long>> SUNFIRE_GUARDIAN = new HashMap<>();
@@ -52,6 +51,50 @@ public final class BattleStandardMasteryManager {
     public static void registerSunfire(BattleStandardEntity standard, UniqueAbilityExecution execution, ItemStack stack) {
         if (standard.ownerEntity != null) ACTIVE.put(standard.getUuid(), new StandardState(
                 standard.ownerEntity.getUuid(), standard.getUuid(), true, execution, stack));
+    }
+
+    public static void registerHarbinger(BattleStandardDarkEntity standard, UniqueAbilityExecution execution, ItemStack stack) {
+        if (standard.ownerEntity != null) ACTIVE.put(standard.getUuid(), new StandardState(
+                standard.ownerEntity.getUuid(), standard.getUuid(), false, execution, stack));
+    }
+
+    private static StandardState nearestHarbinger(LivingEntity owner, Vec3d position) {
+        return ACTIVE.values().stream().filter(state -> !state.sunfire && state.ownerId.equals(owner.getUuid())
+                && !state.execution.isTerminal() && state.execution.context().world() == owner.getWorld()
+                && state.execution.context().world().getEntity(state.entityId) instanceof BattleStandardDarkEntity banner
+                && banner.isAlive() && !banner.isRemoved() && banner.ownerEntity == owner && owner.isAlive())
+                .min(Comparator.comparingDouble((StandardState state) -> state.execution.context().world()
+                        .getEntity(state.entityId).getPos().squaredDistanceTo(position))
+                        .thenComparing(state -> state.entityId.toString())).orElse(null);
+    }
+
+    public static Vec3d standardPosition(LivingEntity owner, Vec3d position) {
+        StandardState state = nearestHarbinger(owner, position);
+        return state == null ? null : state.execution.context().world().getEntity(state.entityId).getPos();
+    }
+
+    public static ItemStack harbingerStack(LivingEntity owner) {
+        StandardState state = nearestHarbinger(owner, owner.getPos());
+        return state == null ? ItemStack.EMPTY : state.stack;
+    }
+
+    public static void refundProphecy(LivingEntity owner, int ticks, int cap) {
+        StandardState state = nearestHarbinger(owner, owner.getPos());
+        if (state == null) return;
+        int applied = refundTicks(state.refunded, ticks, cap);
+        state.refunded += applied;
+        SimplySwordsAPI.reduceWeaponCooldown(owner, state.stack,
+                state.execution.cooldownTicks(Config.uniqueEffects.harbinger.cooldown), applied);
+    }
+
+    public static float solitaryBonus(LivingEntity owner) {
+        return ACTIVE.values().stream().filter(state -> !state.sunfire && state.ownerId.equals(owner.getUuid())
+                && !state.execution.isTerminal() && state.execution.context().world() == owner.getWorld()
+                && LongPathFinalFormsMasteryAbilities.tuning(state.execution).flag(2048)
+                && !LongPathFinalFormsMasteryAbilities.tuning(state.execution).flag(1024)
+                && state.execution.context().world().getEntity(state.entityId) instanceof BattleStandardDarkEntity banner
+                && banner.isAlive() && !banner.isRemoved() && owner.squaredDistanceTo(banner) <= 36)
+                .findAny().isPresent() ? .25F : 0;
     }
 
     public static boolean tickSunfire(BattleStandardEntity standard, UniqueAbilityExecution execution,
@@ -89,9 +132,11 @@ public final class BattleStandardMasteryManager {
     public static boolean tickHarbinger(BattleStandardDarkEntity standard, UniqueAbilityExecution execution,
                                         ItemStack stack) {
         if (execution == null || execution.isTerminal() || !(standard.getWorld() instanceof ServerWorld world)
-                || standard.ownerEntity == null || !standard.ownerEntity.isAlive()) {
+                || standard.ownerEntity == null || !standard.ownerEntity.isAlive() || standard.ownerEntity.isRemoved()
+                || standard.ownerEntity.getWorld() != standard.getWorld()) {
             terminate(execution, false, 0);
-            return false;
+            standard.discard();
+            return true;
         }
         LongPathFinalFormsMasteryTuning tuning = LongPathFinalFormsMasteryAbilities.tuning(execution);
         StandardState state = ACTIVE.computeIfAbsent(standard.getUuid(), ignored ->
@@ -100,7 +145,6 @@ public final class BattleStandardMasteryManager {
         int life = standardLifetime(tuning.get(s("LIFETIME_MULTIPLIER"), 1));
         if (standard.age >= life) {
             terminate(execution, true, state.hits);
-            ACTIVE.remove(standard.getUuid());
             standard.discard();
             return true;
         }
@@ -179,32 +223,6 @@ public final class BattleStandardMasteryManager {
                 && standard.isAlive() && !standard.isRemoved()).toList();
     }
 
-    public static Vec3d standardPosition(UUID ownerId, boolean sunfire) {
-        StandardState state = ownerState(ownerId, sunfire);
-        if (state == null) return null;
-        if (!(state.execution.context().world().getEntity(state.entityId) instanceof LivingEntity standard)
-                || !standard.isAlive()) return null;
-        return standard.getPos();
-    }
-
-    public static void reduceCooldown(UUID ownerId, boolean sunfire, int ticks) {
-        reduceCooldown(ownerId, sunfire, ticks, 100);
-    }
-
-    public static void reduceCooldown(UUID ownerId, boolean sunfire, int ticks, int cap) {
-        StandardState state = ownerState(ownerId, sunfire);
-        if (state == null) return;
-        int applied = refundTicks(state.refunded, ticks, cap);
-        if (applied <= 0) return;
-        state.refunded += applied;
-        Entity entity = state.execution.context().world().getEntity(state.ownerId);
-        if (entity instanceof LivingEntity owner) {
-            int base = state.execution.cooldownTicks(state.sunfire
-                    ? Config.uniqueEffects.sunfire.cooldown : Config.uniqueEffects.harbinger.cooldown);
-            SimplySwordsAPI.reduceWeaponCooldown(owner, state.stack, base, applied);
-        }
-    }
-
     private static int sunfireHostilePulse(ServerWorld world, BattleStandardEntity standard,
                                             StandardState state, LongPathFinalFormsMasteryTuning tuning) {
         if (tuning.flag(512)) return 0;
@@ -246,7 +264,6 @@ public final class BattleStandardMasteryManager {
             }
         }
         spawnAuraParticles(world, standard);
-        state.pulseWindows.entrySet().removeIf(entry -> now - entry.getValue().lastTick > Math.max(window, 200));
         state.sunfirePulses.entrySet().removeIf(entry -> entry.getValue().isEmpty()
                 || now - entry.getValue().getLast() > window);
         return affected;
@@ -333,7 +350,7 @@ public final class BattleStandardMasteryManager {
     private static int harbingerHostilePulse(ServerWorld world, BattleStandardDarkEntity standard,
                                               StandardState state, LongPathFinalFormsMasteryTuning tuning) {
         if (tuning.flag(1024)) return 0;
-        double radius = tuning.get(s("RADIUS"), 6);
+        double radius = tuning.flag(8) ? 4 : tuning.flag(2048) ? 5 : tuning.get(s("RADIUS"), 6);
         List<LivingEntity> targets = targets(world, standard, standard.ownerEntity, radius,
                 tuning.integer(s("TARGET_CAP"), 32), true);
         float base = HelperMethods.abilityScaledDamage(SpellScalingComponents.id("harbinger"),
@@ -348,29 +365,27 @@ public final class BattleStandardMasteryManager {
         double core = tuning.get(s("CORE_RANGE"), 2);
         int affected = 0;
         for (LivingEntity target : targets) {
-            int count = recordPulse(state, target.getUuid(), now, window);
             double multiplier = tuning.get(s("DAMAGE_MULTIPLIER"), 1);
             if (tuning.flag(2) && target.squaredDistanceTo(standard) <= core * core) {
                 multiplier *= tuning.get(s("NEAR_DAMAGE_MULTIPLIER"), 1.2);
             }
             if (cycle) multiplier *= tuning.get(s("CYCLE_DAMAGE_MULTIPLIER"), 1.4);
-            multiplier *= finalOmenMultiplier(tuning, target);
-            if (tuning.flag(131072) && LongPathFinalFormsMasteryCombatManager.isExecutionOmen(standard.ownerEntity, target)) {
-                multiplier *= tuning.get(s("EXECUTION_DAMAGE_MULTIPLIER"), 1.4);
-            }
-            if (tuning.flag(65536) && target.hasStatusEffect(StatusEffects.WEAKNESS)) {
-                multiplier *= tuning.get(s("PLAGUE_DAMAGE_MULTIPLIER"), .8);
-            }
+            multiplier *= harbingerConditionalMultiplier(tuning, standard.ownerEntity, target);
             float damage = base * (float) multiplier;
             target.timeUntilRegen = 0;
             boolean landed = deal(world, standard.ownerEntity, state.stack, target, damage);
             target.timeUntilRegen = 0;
             if (landed) {
                 affected++;
-                if (tuning.flag(1) && count >= required) target.addStatusEffect(new StatusEffectInstance(
-                        StatusEffects.WEAKNESS, tuning.integer(s("WEAKNESS_DURATION_TICKS"), 80), 0), standard);
-                if (tuning.flag(65536)) target.addStatusEffect(new StatusEffectInstance(
-                        StatusEffects.WEAKNESS, tuning.integer(s("PLAGUE_WEAKNESS_TICKS"), 120), 0), standard);
+                var history = state.sunfirePulses.computeIfAbsent(target.getUuid(), ignored -> new java.util.ArrayDeque<Long>());
+                history.removeIf(tick -> now - tick > window);
+                history.addLast(now);
+                while (history.size() > required) history.removeFirst();
+                int count = history.size();
+                if (tuning.flag(1) && count >= required) HarbingerMasteryState.applyWeakness(standard.ownerEntity, target,
+                        tuning.integer(s("WEAKNESS_DURATION_TICKS"), 80), 0, tuning.flag(131072), false);
+                if (tuning.flag(65536)) HarbingerMasteryState.applyWeakness(standard.ownerEntity, target,
+                        tuning.integer(s("PLAGUE_WEAKNESS_TICKS"), 120), 0, tuning.flag(131072), false);
                 target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 120, 0), standard);
                 applyHarbingerPull(target, standard, tuning, radius, cycle);
                 UniqueAbilityApi.emit(state.execution, UniqueAbilityPhase.HIT, LongPathFinalFormsMasteryAbilities.PULSE,
@@ -379,7 +394,8 @@ public final class BattleStandardMasteryManager {
         }
         HelperMethods.spawnParticle(world, ParticleTypes.SCULK_SOUL,
                 standard.getX(), standard.getY(), standard.getZ(), 0, 0, 0);
-        state.pulseWindows.entrySet().removeIf(entry -> now - entry.getValue().lastTick > Math.max(window, 200));
+        state.sunfirePulses.entrySet().removeIf(entry -> entry.getValue().isEmpty()
+                || now - entry.getValue().getLast() > window);
         return affected;
     }
 
@@ -398,7 +414,9 @@ public final class BattleStandardMasteryManager {
         int affected = 0;
         for (LivingEntity target : targets(world, standard, standard.ownerEntity, radius, cap, true)) {
             if (deal(world, standard.ownerEntity, state.stack, target,
-                    base * (float) tuning.get(s("LANDING_DAMAGE_MULTIPLIER"), 3))) {
+                    base * (float) (tuning.get(s("LANDING_DAMAGE_MULTIPLIER"), 3)
+                            * tuning.get(s("DAMAGE_MULTIPLIER"), 1)
+                            * harbingerConditionalMultiplier(tuning, standard.ownerEntity, target)))) {
                 target.setVelocity((target.getX() - standard.getX()) / 4, .5, (target.getZ() - standard.getZ()) / 4);
                 target.velocityModified = true;
                 affected++;
@@ -409,34 +427,31 @@ public final class BattleStandardMasteryManager {
 
     private static void harbingerSupportPulse(ServerWorld world, BattleStandardDarkEntity standard,
                                                StandardState state, LongPathFinalFormsMasteryTuning tuning) {
-        if (tuning.flag(8) || tuning.flag(2048)) return;
+        if (tuning.flag(2048)) return;
         List<LivingEntity> allies = targets(world, standard, standard.ownerEntity,
                 tuning.get(s("SUPPORT_RADIUS"), 6), tuning.integer(s("SUPPORT_TARGET_CAP"), 16), false);
         int affected = 0;
-        java.util.Set<UUID> supported = new java.util.HashSet<>();
         for (LivingEntity ally : allies) {
             int amplifier = tuning.flag(1024)
                     ? (ally == standard.ownerEntity ? tuning.integer(s("OWNER_HASTE_AMPLIFIER"), 1)
                             : tuning.integer(s("STATUS_AMPLIFIER"), 3))
                     : 2;
-            ally.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE,
+            if (!tuning.flag(8) || ally == standard.ownerEntity) ally.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE,
                     tuning.integer(s("HASTE_DURATION_TICKS"), 90), amplifier), standard);
+            affected++;
+            if (tuning.flag(1024) && ally == standard.ownerEntity) continue;
             if (tuning.flag(64) || tuning.flag(1024)) ally.addStatusEffect(new StatusEffectInstance(
                     StatusEffects.SPEED, tuning.integer(s("ALLY_SPEED_TICKS"), 80),
                     tuning.flag(1024) ? 1 : 0), standard);
-            applyAllyGuard(ally, tuning);
-            supported.add(ally.getUuid());
-            LongPathFinalFormsMasteryCombatManager.supportHarbingerAlly(standard.ownerEntity, ally, tuning, world.getTime());
-            affected++;
+            HarbingerMasteryState.support(standard, ally, tuning);
         }
-        releaseAllyGuards(world, state, supported);
-        state.guardedAllies.addAll(supported);
         world.playSoundFromEntity(null, standard, SoundRegistry.DARK_SWORD_WHOOSH_01.get(),
                 standard.getSoundCategory(), .1F, .6F);
         if (rallyTriggers(tuning.flag(256), affected, tuning.integer(s("RALLY_ALLY_COUNT"), 3),
                 state.supportRefunded)) {
             state.supportRefunded = true;
-            reduceCooldown(state.ownerId, false, tuning.integer(s("RALLY_REFUND_TICKS"), 40));
+            SimplySwordsAPI.reduceWeaponCooldown(standard.ownerEntity, state.stack,
+                    state.execution.cooldownTicks(Config.uniqueEffects.harbinger.cooldown), tuning.integer(s("RALLY_REFUND_TICKS"), 40));
         }
         UniqueAbilityApi.emit(state.execution, UniqueAbilityPhase.HIT, LongPathFinalFormsMasteryAbilities.SUPPORT,
                 null, affected, 0);
@@ -446,10 +461,8 @@ public final class BattleStandardMasteryManager {
         double range = tuning.flag(2048) ? 6 : tuning.flag(32) ? tuning.get(s("OWNER_AURA_RANGE"), 7) : 3;
         if (standard.ownerEntity.squaredDistanceTo(standard) <= range * range && standard.age % 20 == 0) {
             int ticks = tuning.integer(s("OWNER_HASTE_TICKS"), 30);
-            int amplifier = tuning.flag(2048) ? tuning.integer(s("OWNER_HASTE_AMPLIFIER"), 2) : 0;
+            int amplifier = tuning.flag(1024) ? 1 : tuning.flag(2048) ? 2 : 0;
             standard.ownerEntity.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, ticks, amplifier), standard);
-            LongPathFinalFormsMasteryCombatManager.setHarbingerOwnerBonus(standard.ownerEntity, tuning.flag(2048) ? .25F : 0,
-                    standard.getWorld().getTime() + ticks);
         }
     }
 
@@ -475,9 +488,16 @@ public final class BattleStandardMasteryManager {
     private static void moveHarbinger(ServerWorld world, BattleStandardDarkEntity standard,
                                        LongPathFinalFormsMasteryTuning tuning) {
         if (!tuning.flag(8) || !standard.isOnGround()) return;
-        List<LivingEntity> targets = targets(world, standard, standard.ownerEntity,
-                tuning.get(s("PURSUIT_RANGE"), 12), 1, true);
+        double range = tuning.get(s("PURSUIT_RANGE"), 12);
+        List<LivingEntity> targets = world.getEntitiesByClass(LivingEntity.class, standard.getBoundingBox().expand(range),
+                target -> target.isAlive() && target != standard.ownerEntity
+                        && !(target instanceof BattleStandardEntity) && !(target instanceof BattleStandardDarkEntity)
+                        && target.squaredDistanceTo(standard) <= range * range
+                        && HelperMethods.checkAbilityTarget(target, standard.ownerEntity)).stream()
+                .sorted(Comparator.comparingDouble((LivingEntity target) -> target.squaredDistanceTo(standard))
+                        .thenComparing(target -> target.getUuid().toString())).limit(1).toList();
         if (!targets.isEmpty()) moveToward(standard, targets.getFirst().getPos(), tuning.get(s("MOVEMENT_SPEED"), .3));
+        else standard.setVelocity(0, standard.getVelocity().y, 0);
     }
 
     private static void moveToward(LivingEntity entity, Vec3d target, double speed) {
@@ -487,7 +507,7 @@ public final class BattleStandardMasteryManager {
             Vec3d velocity = horizontal.normalize().multiply(speed);
             entity.setVelocity(velocity.x, entity.getVelocity().y, velocity.z);
             entity.velocityModified = true;
-        }
+        } else entity.setVelocity(0, entity.getVelocity().y, 0);
     }
 
     private static List<LivingEntity> targets(ServerWorld world, LivingEntity origin, LivingEntity owner,
@@ -500,8 +520,7 @@ public final class BattleStandardMasteryManager {
                         && !(entity instanceof BattleStandardDarkEntity))
                 .filter(entity -> hostile ? HelperMethods.checkAbilityTarget(entity, owner)
                         : !HelperMethods.checkFriendlyFire(entity, owner))
-                .filter(entity -> !(origin instanceof BattleStandardEntity banner) || !"sunfire".equals(banner.standardType)
-                        || entity.getPos().subtract(origin.getPos()).horizontalLengthSquared() <= radius * radius)
+                .filter(entity -> entity.getPos().subtract(origin.getPos()).horizontalLengthSquared() <= radius * radius)
                 .sorted(Comparator.comparingDouble((LivingEntity entity) -> entity.squaredDistanceTo(origin))
                         .thenComparing(entity -> entity.getUuid().toString()))
                 .limit(Math.clamp(cap, 0, 64)).toList();
@@ -531,22 +550,10 @@ public final class BattleStandardMasteryManager {
         return false;
     }
 
-    private static StandardState ownerState(UUID ownerId, boolean sunfire) {
-        return ACTIVE.values().stream().filter(state -> state.ownerId.equals(ownerId) && state.sunfire == sunfire
-                        && !state.execution.isTerminal())
-                .min(Comparator.comparing(state -> state.entityId.toString())).orElse(null);
-    }
-
     private static void terminate(UniqueAbilityExecution execution, boolean finish, int hits) {
         if (execution == null || execution.isTerminal()) return;
         if (finish) UniqueAbilityApi.finish(execution, LongPathFinalFormsMasteryAbilities.FINISH, hits);
         else UniqueAbilityApi.cancel(execution);
-    }
-
-    private static <T> void trim(Map<UUID, T> map, int cap) {
-        if (map.size() <= cap) return;
-        map.keySet().stream().sorted(Comparator.comparing(UUID::toString)).limit(map.size() - cap)
-                .toList().forEach(map::remove);
     }
 
     private static void applyStandardGuard(BattleStandardEntity standard, LivingEntity owner,
@@ -568,14 +575,6 @@ public final class BattleStandardMasteryManager {
     private static void removeStandardGuard(LivingEntity owner) {
         EntityAttributeInstance attribute = owner.getAttributeInstance(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE);
         if (attribute != null) attribute.removeModifier(STANDARD_GUARD_ID);
-    }
-
-    // Counts pulses that land inside the tuned window; a longer gap starts the count again.
-    private static int recordPulse(StandardState state, UUID target, long now, int window) {
-        PulseWindow record = state.pulseWindows.computeIfAbsent(target, ignored -> new PulseWindow());
-        record.count = nextPulseCount(record.count, record.lastTick, now, window);
-        record.lastTick = now;
-        return record.count;
     }
 
     static int nextPulseCount(int previous, long lastTick, long now, int window) {
@@ -609,11 +608,11 @@ public final class BattleStandardMasteryManager {
 
     // Ends the execution for a standard that died by decay or removal rather than by its own lifetime.
     public static void onStandardRemoved(UUID entityId) {
+        HarbingerMasteryState.removeBanner(entityId);
         StandardState state = ACTIVE.remove(entityId);
         if (state == null) return;
         Entity owner = state.execution.context().world().getEntity(state.ownerId);
         if (owner instanceof LivingEntity living) applyStandardGuard(null, living, LongPathFinalFormsMasteryTuning.EMPTY);
-        if (state.execution.context().world() instanceof ServerWorld world) releaseAllAllyGuards(world, state);
         terminate(state.execution, true, state.hits);
     }
 
@@ -624,7 +623,6 @@ public final class BattleStandardMasteryManager {
             if (state.execution.context().world() != world) return false;
             Entity owner = world.getEntity(state.ownerId);
             if (owner instanceof LivingEntity living) removeStandardGuard(living);
-            releaseAllAllyGuards(world, state);
             terminate(state.execution, false, 0);
             return true;
         });
@@ -641,9 +639,9 @@ public final class BattleStandardMasteryManager {
         MasteryAbsorptionTracker.clearAll();
     }
 
-    // Final Omen: a boss pays its own reduced rate; anyone else must be weakened and near death.
     static double finalOmenMultiplier(LongPathFinalFormsMasteryTuning tuning, LivingEntity target) {
-        if (!tuning.flag(32768) || !target.hasStatusEffect(StatusEffects.WEAKNESS)) return 1;
+        if (!tuning.flag(32768) || !target.hasStatusEffect(StatusEffects.WEAKNESS)
+                || target.getHealth() / target.getMaxHealth() >= tuning.get(s("LOW_HEALTH_THRESHOLD"), .25)) return 1;
         if (WatcherAbilityManager.isExecutionImmune(target)) {
             return tuning.get(s("BOSS_DAMAGE_MULTIPLIER"), 1.1);
         }
@@ -651,7 +649,16 @@ public final class BattleStandardMasteryManager {
                 ? tuning.get(s("LOW_HEALTH_DAMAGE_MULTIPLIER"), 1.2) : 1;
     }
 
-    // The base aura drags with a distance-proportional force; only the tuned cases override it.
+    private static double harbingerConditionalMultiplier(LongPathFinalFormsMasteryTuning tuning,
+                                                         LivingEntity owner, LivingEntity target) {
+        double multiplier = finalOmenMultiplier(tuning, target);
+        if (tuning.flag(131072) && LongPathFinalFormsMasteryCombatManager.isExecutionOmen(owner, target))
+            multiplier *= tuning.get(s("EXECUTION_DAMAGE_MULTIPLIER"), 1.4);
+        if (tuning.flag(65536) && target.hasStatusEffect(StatusEffects.WEAKNESS))
+            multiplier *= tuning.get(s("PLAGUE_DAMAGE_MULTIPLIER"), .8);
+        return multiplier;
+    }
+
     private static void applyHarbingerPull(LivingEntity target, LivingEntity standard,
                                            LongPathFinalFormsMasteryTuning tuning, double radius, boolean cycle) {
         if (cycle) {
@@ -670,43 +677,8 @@ public final class BattleStandardMasteryManager {
         target.velocityModified = true;
     }
 
-    private static void applyAllyGuard(LivingEntity ally, LongPathFinalFormsMasteryTuning tuning) {
-        double resistance = tuning.get(s("KNOCKBACK_RESISTANCE"), 0);
-        if (!tuning.flag(512) || resistance <= 0) return;
-        EntityAttributeInstance attribute = ally.getAttributeInstance(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE);
-        if (attribute == null) return;
-        EntityAttributeModifier current = attribute.getModifier(ALLY_GUARD_ID);
-        if (current != null && current.value() == resistance) return;
-        attribute.removeModifier(ALLY_GUARD_ID);
-        attribute.addTemporaryModifier(new EntityAttributeModifier(ALLY_GUARD_ID, resistance,
-                EntityAttributeModifier.Operation.ADD_VALUE));
-    }
-
-    private static void removeAllyGuard(LivingEntity ally) {
-        EntityAttributeInstance attribute = ally.getAttributeInstance(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE);
-        if (attribute != null) attribute.removeModifier(ALLY_GUARD_ID);
-    }
-
-    // Allies the last pulse no longer reaches lose the formation bonus.
-    private static void releaseAllyGuards(ServerWorld world, StandardState state, java.util.Set<UUID> keep) {
-        state.guardedAllies.removeIf(uuid -> {
-            if (keep.contains(uuid)) return false;
-            if (world.getEntity(uuid) instanceof LivingEntity ally) removeAllyGuard(ally);
-            return true;
-        });
-    }
-
-    private static void releaseAllAllyGuards(ServerWorld world, StandardState state) {
-        releaseAllyGuards(world, state, java.util.Set.of());
-    }
-
     private static LongPathFinalFormsMasteryTuning.Setting s(String name) {
         return LongPathFinalFormsMasteryTuning.Setting.valueOf(name);
-    }
-
-    private static final class PulseWindow {
-        private long lastTick;
-        private int count;
     }
 
     private static final class StandardState {
@@ -715,9 +687,7 @@ public final class BattleStandardMasteryManager {
         private final boolean sunfire;
         private final UniqueAbilityExecution execution;
         private final ItemStack stack;
-        private final Map<UUID, PulseWindow> pulseWindows = new HashMap<>();
         private final Map<UUID, java.util.ArrayDeque<Long>> sunfirePulses = new HashMap<>();
-        private final java.util.Set<UUID> guardedAllies = new java.util.HashSet<>();
         private final Map<UUID, Long> allyLocks = new HashMap<>();
         private final Map<UUID, Long> cleanseLocks = new HashMap<>();
         private boolean landed;

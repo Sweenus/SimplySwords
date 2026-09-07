@@ -103,6 +103,11 @@ public abstract class LivingEntityMixin {
         living.velocityModified = true;
     }
 
+    @Inject(method = "addStatusEffect(Lnet/minecraft/entity/effect/StatusEffectInstance;Lnet/minecraft/entity/Entity;)Z", at = @At("HEAD"))
+    private void simplyswords$trackHarbingerWeakness(StatusEffectInstance effect, Entity source, CallbackInfoReturnable<Boolean> cir) {
+        net.sweenus.simplyswords.world.HarbingerMasteryState.externalWeakness((LivingEntity) (Object) this, effect);
+    }
+
     @Inject(method = "onStatusEffectApplied", at = @At("TAIL"))
     private void simplyswords$syncObserverEffectApplied(StatusEffectInstance effect, Entity source, CallbackInfo ci) {
         ObserverStatusEffectSyncManager.syncApplied((LivingEntity) (Object) this, effect);
@@ -118,6 +123,7 @@ public abstract class LivingEntityMixin {
     private void simplyswords$syncObserverEffectRemoved(StatusEffectInstance effect, CallbackInfo ci) {
         ObserverStatusEffectSyncManager.syncRemoved((LivingEntity) (Object) this, effect);
         LongPathFinalFormsMasteryCombatManager.onStatusEffectRemoved((LivingEntity) (Object) this, effect);
+        net.sweenus.simplyswords.world.HarbingerMasteryState.weaknessRemoved((LivingEntity) (Object) this, effect);
     }
 
     @Inject(at = @At("HEAD"), method = "tryUseTotem", cancellable = true)
@@ -199,6 +205,12 @@ public abstract class LivingEntityMixin {
         }
     }
 
+    @com.llamalad7.mixinextras.injector.ModifyExpressionValue(method = "applyDamage",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;modifyAppliedDamage(Lnet/minecraft/entity/damage/DamageSource;F)F"))
+    private float simplyswords$interceptGuardianDamage(float amount, DamageSource source, float incoming) {
+        return net.sweenus.simplyswords.world.ChompolotlMasteryManager.intercept((LivingEntity) (Object) this, source, amount);
+    }
+
     @ModifyVariable(method = "modifyAppliedDamage", at = @At("HEAD"), ordinal = 0, argsOnly = true)
     private float simplyswords$modifyDamageAmount(float amount, DamageSource source) {
         LivingEntity livingEntity = (LivingEntity) (Object) this;
@@ -275,6 +287,7 @@ public abstract class LivingEntityMixin {
             WeaponImplicitRegistry.onDamageApplied(livingEntity, source, amount);
             BloodwakeAbilityManager.onTargetDamaged(livingEntity, source);
             LongPathFinalFormsMasteryCombatManager.onDamageApplied(livingEntity, source);
+            net.sweenus.simplyswords.world.ChompolotlMasteryManager.onDamageApplied(livingEntity, source);
             LichbladeMasteryManager.onOwnerDamaged(livingEntity);
             HearthflameAbilityManager.onDamageApplied(livingEntity, source);
             EmberbladeAbilityManager.onDamageTaken((ServerWorld) livingEntity.getWorld(), livingEntity);
@@ -310,8 +323,11 @@ public abstract class LivingEntityMixin {
     @Inject(at = @At("HEAD"), method = "onDeath")
     public void simplyswords$triggerFlameSeedOnDeath(DamageSource damageSource, CallbackInfo ci) {
         LivingEntity livingEntity = (LivingEntity) (Object) this;
+        LongPathFinalFormsMasteryCombatManager.onHarbingerDeath(livingEntity, damageSource);
+        net.sweenus.simplyswords.world.ChompolotlMasteryManager.onDeath(livingEntity, damageSource);
         WaxweaverEncasementManager.onTargetDeath(livingEntity);
         MoltenEdgeAbilityManager.resetWielder(livingEntity);
+        net.sweenus.simplyswords.world.DevourerAbilityManager.onTargetDeath(livingEntity, damageSource);
         SoulPyreAbilityManager.onDeath(livingEntity, damageSource);
         EmberlashAbilityManager.onKill(livingEntity, damageSource);
         FlameSeedEffect.triggerDeathDetonation(livingEntity);

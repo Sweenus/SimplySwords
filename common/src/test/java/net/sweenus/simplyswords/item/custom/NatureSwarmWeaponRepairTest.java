@@ -24,7 +24,7 @@ final class NatureSwarmWeaponRepairTest {
                 .with(s("CHOMP_COLOSSAL_SPLASH_MULTIPLIER"), 1)
                 .with(s("CHOMP_COLOSSAL_SPLASH_RADIUS"), 3)
                 .with(s("CHOMP_COLOSSAL_COOLDOWN_MULTIPLIER"), 3);
-        assertEquals(180, ChompolotlSwordItem.procCooldown(60, colossal));
+        assertEquals(600, ChompolotlSwordItem.procCooldown(60, colossal));
         assertEquals(2.8, ChompolotlSwordItem.summonDamageMultiplier(false, colossal), 1.0E-6);
         assertEquals(1, ChompolotlSwordItem.splashMultiplier(colossal), 1.0E-6);
         assertEquals(3, ChompolotlSwordItem.splashRadius(colossal), 1.0E-6);
@@ -53,7 +53,7 @@ final class NatureSwarmWeaponRepairTest {
         NatureSwarmMasteryTuning eternal = tuning
                 .with(s("MODE"), 1 << 25)
                 .with(s("CHOMP_ETERNAL_AURA_RADIUS"), 6);
-        assertEquals(6, ChompolotlSwordItem.shoulderAuraRadius(eternal), 1.0E-6);
+        assertEquals(0, ChompolotlSwordItem.shoulderAuraRadius(eternal), 1.0E-6);
     }
 
     private static NatureSwarmMasteryTuning.Setting s(String name) {

@@ -48,6 +48,7 @@ public final class WraithmawSwordItem extends UniqueSwordItem
                 || !WraithmawAbilityManager.tryDetonate(serverWorld, user)) {
             return TypedActionResult.pass(stack);
         }
+        WraithmawAbilityManager.suppressNextSwing(serverWorld, user);
         user.swingHand(hand, true);
         return new TypedActionResult<>(ActionResult.SUCCESS, stack);
     }

@@ -100,7 +100,8 @@ public final class GloamStainManager {
             }
         }
         for (DevourerMassVisualEntity mass : world.getEntitiesByClass(
-                DevourerMassVisualEntity.class, search, Entity::isAlive)) {
+                DevourerMassVisualEntity.class, search,
+                candidate -> candidate.isAlive() && candidate.spreadsGloam())) {
             if (containsClientMass(mass, position)) {
                 return true;
             }
@@ -174,6 +175,11 @@ public final class GloamStainManager {
 
     public static void createGrowthPatch(ServerWorld world, UUID ownerId,
                                          Vec3d position, int slowAmplifier) {
+        createGrowthPatch(world, ownerId, position, slowAmplifier, true);
+    }
+
+    public static void createGrowthPatch(ServerWorld world, UUID ownerId,
+                                         Vec3d position, int slowAmplifier, boolean appliesSlowness) {
         if (world == null || ownerId == null || position == null) {
             return;
         }
@@ -184,7 +190,8 @@ public final class GloamStainManager {
         int fade = Math.clamp(Config.uniqueEffects.gloam.growthFadeDuration, 1, duration);
         createCircle(world, ownerId, center,
                 Math.max(0.25, Config.uniqueEffects.gloam.growthRadius),
-                duration, fade, slowAmplifier, true, 8, PatchBehavior.NONE);
+                duration, fade, slowAmplifier, true, 8,
+                new PatchBehavior(ItemStack.EMPTY, 0, 11, appliesSlowness, 0, 0, 0, 0, 0));
         world.spawnParticles(GLOAM_DUST, center.x, center.y + 0.08, center.z,
                 16, 0.55, 0.05, 0.55, 0.035);
         world.spawnParticles(ParticleTypes.REVERSE_PORTAL, center.x, center.y + 0.12, center.z,
@@ -207,16 +214,20 @@ public final class GloamStainManager {
             ActivePatch nearby = patches.stream()
                     .filter(patch -> patch.shape == BloodStainVisualEntity.SHAPE_CIRCLE)
                     .filter(patch -> patch.ownerId.equals(ownerId))
+                    .filter(patch -> patch.appliesSlowness
+                            == (behavior == null || behavior.appliesSlowness()))
                     .filter(patch -> patch.center.squaredDistanceTo(center)
                             <= Math.pow(Math.min(patch.radius, patchRadius) * 0.45, 2.0))
                     .min(Comparator.comparingDouble(patch -> patch.center.squaredDistanceTo(center)))
                     .orElse(null);
             if (nearby != null) {
                 nearby.expiryTick = expiry;
+                nearby.radius = Math.max(nearby.radius, patchRadius);
                 nearby.slowAmplifier = Math.max(nearby.slowAmplifier, amplifier);
                 nearby.mergeBehavior(behavior);
                 Entity entity = world.getEntity(nearby.visualId);
                 if (entity instanceof BloodStainVisualEntity visual) {
+                    visual.setRadius(nearby.radius);
                     visual.setLifetime(visual.age + duration);
                     visual.setFadeDuration(fade);
                 }
@@ -534,7 +545,7 @@ public final class GloamStainManager {
         private final int shape;
         private final Vec3d start;
         private final Vec3d direction;
-        private final float radius;
+        private float radius;
         private final int durationTicks;
         private final int fadeTicks;
         private final boolean growth;

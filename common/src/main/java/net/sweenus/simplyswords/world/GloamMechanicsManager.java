@@ -166,7 +166,7 @@ public final class GloamMechanicsManager {
         LivingEntity owner = resolveLiving(world, state.ownerId);
         if (owner != null) {
             GloamStainManager.createGrowthPatch(
-                    world, owner.getUuid(), target.getPos(), state.baseSlowAmplifier);
+                    world, owner.getUuid(), target.getPos(), state.baseSlowAmplifier, state.appliesSlowness);
         }
         if (states.isEmpty()) {
             ACTIVE.remove(world);

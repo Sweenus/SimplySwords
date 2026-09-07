@@ -35,6 +35,21 @@ import java.util.Map;
 import java.util.UUID;
 
 public final class WraithmawAbilityManager {
+    private static final double[][] ORBIT_SLOTS = {
+            {-0.62, 1.55, 0.12},
+            {0.62, 1.55, 0.12},
+            {-0.92, 2.02, 0.10},
+            {-0.31, 2.24, 0.14},
+            {0.31, 2.24, 0.14},
+            {0.92, 2.02, 0.10},
+            {-0.52, 2.62, 0.18},
+            {0.52, 2.62, 0.18},
+            {-1.08, 1.72, -0.16},
+            {1.08, 1.72, -0.16},
+            {-0.78, 2.92, -0.12},
+            {0.78, 2.92, -0.12}
+    };
+
     private static final double GOLDEN_ANGLE = 2.399963229728653;
     private static final int MAX_ACTIVE_CASTS_PER_WORLD = 32;
     private static final DustColorTransitionParticleEffect SPECTRAL_DUST =
@@ -93,6 +108,9 @@ public final class WraithmawAbilityManager {
         AbyssalSpectralMasteryTuning tuning = AbyssalSpectralMasteryAbilities.tuning(execution);
         WraithmawTuningSnapshot castTuning = WraithmawTuningSnapshot.from(execution);
         boolean singleTarget = castTuning.hasMode(WraithmawTuningSnapshot.MODE_SINGLE_TARGET);
+        if (singleTarget && !isValidGuillotineTarget(world, actor, context.target())) {
+            return false;
+        }
         Vec3d origin = actor.getPos();
         int count = Math.clamp(tuning.integer(AbyssalSpectralMasteryTuning.Setting.SPEAR_COUNT,
                 Config.uniqueEffects.wraithmaw.cutlassCount), 1, 32);
@@ -101,8 +119,7 @@ public final class WraithmawAbilityManager {
         ItemStack snapshot = context.stack().copy();
         float damage = Math.max(1.0F, HelperMethods.abilityScaledDamage(SpellScalingProfile.SOUL, actor, snapshot,
                 Config.uniqueEffects.wraithmaw.cutlassDamageScaling,
-                Config.uniqueEffects.wraithmaw.cutlassSpellScaling))
-                * (float) tuning.get(AbyssalSpectralMasteryTuning.Setting.DAMAGE_MULTIPLIER, 1);
+                Config.uniqueEffects.wraithmaw.cutlassSpellScaling));
         for (int index = 0; index < count; index++) {
             double fraction = Math.sqrt((index + 0.5) / count);
             double angle = index * GOLDEN_ANGLE + actor.getRandom().nextDouble() * 0.28;
@@ -114,6 +131,7 @@ public final class WraithmawAbilityManager {
             Vec3d landing = new Vec3d(x, y, z);
             WraithmawCutlassEntity cutlass = new WraithmawCutlassEntity(
                     world, actor, snapshot, origin, landing, index, damage, execution);
+            if (singleTarget) cutlass.setGuillotineTarget(context.target());
             world.spawnEntity(cutlass);
         }
         spawnActivation(world, actor, center, count);
@@ -127,6 +145,11 @@ public final class WraithmawAbilityManager {
                     .put(actor.getUuid(), world.getTime());
         }
         return true;
+    }
+
+    public static void suppressNextSwing(ServerWorld world, LivingEntity actor) {
+        SUPPRESSED_SWINGS.computeIfAbsent(world, ignored -> new HashMap<>())
+                .put(actor.getUuid(), world.getTime());
     }
 
     public static void onSwing(ItemStack stack, ServerWorld world, LivingEntity actor) {
@@ -223,6 +246,8 @@ public final class WraithmawAbilityManager {
         }
         List<WraithmawCutlassEntity> embedded = ownedCutlasses(world, owner).stream()
                 .filter(entity -> entity.getState() == WraithmawCutlassEntity.STATE_EMBEDDED)
+                .filter(entity -> entity.getExpiresAtTick() > world.getTime()
+                        && entity.getTuning().detonatesEmbedded())
                 .filter(entity -> entity.squaredDistanceTo(owner)
                         <= tuning.burstRange() * tuning.burstRange())
                 .sorted(Comparator.comparingDouble(entity -> entity.squaredDistanceTo(owner)))
@@ -261,28 +286,18 @@ public final class WraithmawAbilityManager {
     }
 
     public static Vec3d orbitPosition(LivingEntity owner, int slot, long time) {
-        double[][] slots = {
-                {-0.62, 1.55, 0.12},
-                {0.62, 1.55, 0.12},
-                {-0.92, 2.02, 0.10},
-                {-0.31, 2.24, 0.14},
-                {0.31, 2.24, 0.14},
-                {0.92, 2.02, 0.10},
-                {-0.52, 2.62, 0.18},
-                {0.52, 2.62, 0.18},
-                {-1.08, 1.72, -0.16},
-                {1.08, 1.72, -0.16},
-                {-0.78, 2.92, -0.12},
-                {0.78, 2.92, -0.12}
-        };
-        int index = Math.floorMod(slot, slots.length);
-        double localX = slots[index][0];
-        double localY = slots[index][1] + Math.sin(time * 0.11 + index * 1.7) * 0.08;
-        double localZ = slots[index][2];
-        double yaw = Math.toRadians(owner.getYaw());
+        return orbitPosition(owner.getPos(), owner.getYaw(), slot, time);
+    }
+
+    public static Vec3d orbitPosition(Vec3d ownerPosition, float ownerYaw, int slot, double time) {
+        int index = Math.floorMod(slot, ORBIT_SLOTS.length);
+        double localX = ORBIT_SLOTS[index][0];
+        double localY = ORBIT_SLOTS[index][1] + Math.sin(time * 0.11 + index * 1.7) * 0.08;
+        double localZ = ORBIT_SLOTS[index][2];
+        double yaw = Math.toRadians(ownerYaw);
         Vec3d right = new Vec3d(Math.cos(yaw), 0.0, Math.sin(yaw));
         Vec3d forward = new Vec3d(-Math.sin(yaw), 0.0, Math.cos(yaw));
-        return owner.getPos().add(right.multiply(localX)).add(forward.multiply(localZ)).add(0.0, localY, 0.0);
+        return ownerPosition.add(right.multiply(localX)).add(forward.multiply(localZ)).add(0.0, localY, 0.0);
     }
 
     public static boolean hasActive(ServerWorld world) {
@@ -363,6 +378,13 @@ public final class WraithmawAbilityManager {
         Box search = owner.getBoundingBox().expand(32.0, 16.0, 32.0);
         return world.getEntitiesByClass(WraithmawCutlassEntity.class, search,
                 entity -> owner.getUuid().equals(entity.getOwnerUuid()) && entity.isAlive());
+    }
+
+    public static boolean isValidGuillotineTarget(ServerWorld world, LivingEntity owner, LivingEntity target) {
+        double range = Math.max(1, Config.uniqueEffects.wraithmaw.castRange);
+        return target != null && target.getWorld() == world && target.isAlive() && !target.isRemoved()
+                && owner.squaredDistanceTo(target) <= range * range
+                && HelperMethods.checkAbilityTarget(target, owner) && owner.canSee(target);
     }
 
     private static Vec3d resolveCenter(WeaponAbilityContext context) {

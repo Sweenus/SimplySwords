@@ -28,13 +28,20 @@ import net.sweenus.simplyswords.entity.goal.AttackHostileMobsGoal;
 import net.sweenus.simplyswords.entity.goal.FollowNearestPlayerGoal;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
-import net.sweenus.simplyswords.util.MinionTargeting;
+import net.sweenus.simplyswords.world.ChompolotlMasteryManager;
+import net.sweenus.simplyswords.world.LivyatanWaveManager;
+import net.sweenus.simplyswords.api.ability.NatureSwarmMasteryTuning;
+import net.sweenus.simplyswords.api.SimplySwordsAPI;
+import net.minecraft.item.ItemStack;
+import net.minecraft.entity.data.DataTracker;
+import net.minecraft.entity.data.TrackedData;
+import net.minecraft.entity.data.TrackedDataHandlerRegistry;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.UUID;
 
-public class SimplySwordsAxolotlEntity extends AxolotlEntity implements Tameable {
+public class SimplySwordsAxolotlEntity extends AxolotlEntity implements Tameable, net.minecraft.entity.JumpingMount {
     private UUID ownerUuid;
     public static int lifespan = Config.uniqueEffects.chompolotl.duration;
     private static final int READY_TO_SIT_COOLDOWN = 20;
@@ -75,6 +82,242 @@ public class SimplySwordsAxolotlEntity extends AxolotlEntity implements Tameable
     private int masteryHelpfulDuration;
     private int masteryHelpfulLockout;
     private boolean masteryEternalAura;
+    private static final TrackedData<Boolean> RAVAGER = DataTracker.registerData(SimplySwordsAxolotlEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+    private static final TrackedData<Integer> CHARGE_TICKS = DataTracker.registerData(SimplySwordsAxolotlEntity.class, TrackedDataHandlerRegistry.INTEGER);
+    private static final TrackedData<Boolean> WAVE_SPENT = DataTracker.registerData(SimplySwordsAxolotlEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+    private ItemStack castingStack = ItemStack.EMPTY;
+    private int activeCooldown;
+    private long expiresAt;
+    private String summonWorld = "";
+    private float waveDamage;
+    private long chargingSince = -1;
+    private UUID chargingRider;
+    private double interception = .5;
+    private double interceptionRange = 6;
+    private long nextBite;
+    private long nextLeap;
+    private boolean wasInWater = true;
+    private boolean diving;
+    private boolean leaping;
+    private int leapTicks;
+    private static final double RIDER_HEIGHT = .42;
+    private static final int DEFAULT_WAVE_CHARGE_TICKS = 10;
+    private static final int LEAP_COOLDOWN_TICKS = 30;
+    private static final int LEAP_MIN_AIR_TICKS = 3;
+    private static final double LEAP_HORIZONTAL_VELOCITY = .55;
+    private static final double LEAP_VERTICAL_VELOCITY = .6;
+    private static final double SWIM_FLUID_HEIGHT = .2;
+    private static final double DIVE_LAUNCH_VELOCITY = .42;
+
+    @Override
+    protected void initDataTracker(DataTracker.Builder builder) {
+        super.initDataTracker(builder);
+        builder.add(RAVAGER, false);
+        builder.add(CHARGE_TICKS, DEFAULT_WAVE_CHARGE_TICKS);
+        builder.add(WAVE_SPENT, false);
+    }
+
+    public boolean isRavager() { return dataTracker.get(RAVAGER); }
+    public boolean isEternalGuardian() { return masteryEternalAura; }
+    public boolean canMasteryAttack() { return masteryCanAttack; }
+    public boolean hasCoordinatedBite() { return masteryCoordinatedBonus > 0; }
+    public int getWaveChargeTicks() { return dataTracker.get(CHARGE_TICKS); }
+    public double getInterceptionRange() { return interceptionRange; }
+    public ItemStack getCastingStack() { return castingStack; }
+    public int getActiveCooldown() { return activeCooldown; }
+    public boolean isExpired() { return expiresAt > 0 && getWorld().getTime() >= expiresAt; }
+
+    public void configureSummon(ItemStack stack, int cooldown, NatureSwarmMasteryTuning tuning, boolean active) {
+        castingStack = stack.copy();
+        activeCooldown = SimplySwordsAPI.getEffectiveWeaponCooldownTicks(stack, getOwner(), cooldown);
+        expiresAt = getWorld().getTime() + masteryLifespan;
+        summonWorld = getWorld().getRegistryKey().getValue().toString();
+        dataTracker.set(RAVAGER, active && tuning.flag(1 << 26));
+        dataTracker.set(CHARGE_TICKS, tuning.integer(NatureSwarmMasteryTuning.Setting.CHOMP_WAVE_CHARGE_TICKS,
+                DEFAULT_WAVE_CHARGE_TICKS));
+        waveDamage = (float) getAttributeValue(EntityAttributes.GENERIC_ATTACK_DAMAGE);
+        if (isRavager()) {
+            waveDamage /= (float) tuning.get(NatureSwarmMasteryTuning.Setting.CHOMP_RAVAGER_DAMAGE_MULTIPLIER, 1.25);
+            getAttributeInstance(EntityAttributes.GENERIC_SCALE).setBaseValue(
+                    tuning.get(NatureSwarmMasteryTuning.Setting.CHOMP_RAVAGER_SCALE, 2));
+        }
+        if (masteryEternalAura) {
+            double health = tuning.get(NatureSwarmMasteryTuning.Setting.CHOMP_ETERNAL_HEALTH, 70);
+            getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH).setBaseValue(health);
+            setHealth((float) health);
+            interception = tuning.get(NatureSwarmMasteryTuning.Setting.CHOMP_ETERNAL_INTERCEPTION, .5);
+            interceptionRange = tuning.get(NatureSwarmMasteryTuning.Setting.CHOMP_ETERNAL_AURA_RADIUS, 6);
+        }
+    }
+
+    public float interceptDamage(DamageSource source, float amount) {
+        float transferred = Math.min(getHealth(), amount * (float) interception);
+        if (transferred <= 0) return 0;
+        setHealth(getHealth() - transferred);
+        if (getHealth() <= 0) {
+            onDeath(source);
+            discard();
+        }
+        return transferred;
+    }
+
+    public void handleWaveCharge(ServerPlayerEntity rider, int action) {
+        LivingEntity owner = getOwner();
+        if (owner == null || !owner.isAlive() || isExpired()) return;
+        if (action == 0) {
+            if (chargingSince < 0) {
+                chargingSince = getWorld().getTime();
+                chargingRider = rider.getUuid();
+                playChargeTick(0);
+            }
+            return;
+        }
+        chargingSince = -1;
+        chargingRider = null;
+        dataTracker.set(WAVE_SPENT, false);
+    }
+
+    private void playChargeTick(long held) {
+        float progress = Math.min(1, (float) held / Math.max(1, getWaveChargeTicks()));
+        getWorld().playSound(null, getX(), getY(), getZ(), SoundEvents.BLOCK_BUBBLE_COLUMN_BUBBLE_POP,
+                getSoundCategory(), .6F, .8F + progress * .8F);
+    }
+
+    private void tickDiveEffects(ServerWorld world) {
+        boolean inWater = isSwimming(this);
+        if (inWater == wasInWater) return;
+        if (inWater) {
+            world.playSound(null, getBlockPos(), SoundEvents.ENTITY_DOLPHIN_SPLASH, getSoundCategory(), .7F, 1.1F);
+        } else {
+            world.playSound(null, getBlockPos(), SoundEvents.ENTITY_DOLPHIN_JUMP, getSoundCategory(), .8F, 1F);
+        }
+        world.spawnParticles(ParticleTypes.SPLASH, getX(), getY() + .2, getZ(), 24, .5, .1, .5, .1);
+        wasInWater = inWater;
+    }
+
+    private void fireChargedWave(LivingEntity rider) {
+        LivingEntity owner = getOwner();
+        chargingSince = -1;
+        chargingRider = null;
+        dataTracker.set(WAVE_SPENT, true);
+        if (owner == null) return;
+        LivyatanWaveManager.fireAxolotlWave((ServerWorld) getWorld(), this, owner, rider, castingStack, waveDamage);
+    }
+
+    public void tryMountLeap(ServerPlayerEntity rider) {
+        if (!isRavager() || isExpired() || !(getWorld() instanceof ServerWorld world)
+                || world.getTime() < nextLeap) return;
+        nextLeap = world.getTime() + LEAP_COOLDOWN_TICKS;
+        net.sweenus.simplyswords.api.PlayerMovementIntent intent = SimplySwordsAPI.getPlayerMovementIntent(rider);
+        Vec3d direction = intent.isNeutral() ? Vec3d.fromPolar(0, rider.getYaw())
+                : intent.toDirection(rider.getYaw());
+        Vec3d launch = direction.multiply(LEAP_HORIZONTAL_VELOCITY).add(0, LEAP_VERTICAL_VELOCITY, 0);
+        new net.sweenus.simplyswords.network.ChompolotlMountLaunchPacket(getId(), launch).sendTo(rider);
+        world.playSound(null, getBlockPos(), SoundEvents.ENTITY_AXOLOTL_SPLASH, getSoundCategory(), .6F, 1.2F);
+        world.playSound(null, getBlockPos(), SoundEvents.ENTITY_AXOLOTL_IDLE_WATER, getSoundCategory(), .7F, 1.4F);
+        world.spawnParticles(ParticleTypes.SPLASH, getX(), getY() + .15, getZ(), 12, .55, .08, .55, .03);
+    }
+
+    public void applyMountLeap(Vec3d launch) {
+        if (!getWorld().isClient() || !isRavager() || !Double.isFinite(launch.x)
+                || !Double.isFinite(launch.y) || !Double.isFinite(launch.z)) return;
+        setVelocity(launch);
+        leaping = true;
+        leapTicks = LEAP_MIN_AIR_TICKS;
+        diving = false;
+    }
+
+    @Override
+    public void remove(RemovalReason reason) {
+        chargingSince = -1;
+        chargingRider = null;
+        if (!getWorld().isClient()) dataTracker.set(WAVE_SPENT, false);
+        if (!getWorld().isClient()) ChompolotlMasteryManager.remove(this);
+        removeAllPassengers();
+        super.remove(reason);
+    }
+
+    @Override
+    public LivingEntity getControllingPassenger() {
+        return isRavager() && getFirstPassenger() instanceof PlayerEntity player ? player : null;
+    }
+
+    @Override
+    protected boolean canAddPassenger(Entity passenger) {
+        LivingEntity owner = getOwner();
+        return isRavager() && !hasPassengers() && passenger instanceof PlayerEntity player
+                && owner != null && (owner == player || !HelperMethods.checkFriendlyFire(player, owner));
+    }
+
+    @Override
+    public Vec3d getPassengerRidingPos(Entity passenger) {
+        return getPos().add(0, RIDER_HEIGHT * getScale(), 0);
+    }
+
+    @Override
+    protected Vec3d getControlledMovementInput(PlayerEntity player, Vec3d input) {
+        double forward = player.forwardSpeed < 0 ? player.forwardSpeed * .5 : player.forwardSpeed;
+        return new Vec3d(player.sidewaysSpeed * .75, 0, forward);
+    }
+
+    @Override
+    protected float getSaddledSpeed(PlayerEntity player) { return isSwimming(this) ? .4F : .1F; }
+
+    @Override
+    protected void tickControlled(PlayerEntity player, Vec3d input) {
+        setYaw(player.getYaw());
+        prevYaw = getYaw();
+        bodyYaw = getYaw();
+        headYaw = getYaw();
+        setMovementSpeed(getSaddledSpeed(player));
+        super.tickControlled(player, input);
+    }
+
+    @Override
+    public void travel(Vec3d input) {
+        if (getControllingPassenger() instanceof PlayerEntity rider && isLogicalSideForUpdatingMovement()) {
+            boolean inWater = isSwimming(this);
+            if (leapTicks > 0) leapTicks--;
+            if (leaping && leapTicks <= 0 && (inWater || isOnGround())) leaping = false;
+            if (inWater || isOnGround()) diving = false;
+            else if (wasInWater && getVelocity().y > 0) {
+                diving = true;
+                setVelocity(getVelocity().x, Math.max(getVelocity().y, DIVE_LAUNCH_VELOCITY), getVelocity().z);
+            }
+            wasInWater = inWater;
+            if (leaping || diving) {
+                Vec3d velocity = getVelocity();
+                setVelocity(velocity.x * .98, velocity.y - .08, velocity.z * .98);
+                move(net.minecraft.entity.MovementType.SELF, getVelocity());
+            } else {
+                Vec3d movement = input.lengthSquared() > 1 ? input.normalize() : input;
+                Vec3d forward = Vec3d.fromPolar(0, rider.getYaw());
+                Vec3d right = new Vec3d(forward.z, 0, -forward.x);
+                double speed = getSaddledSpeed(rider);
+                Vec3d horizontal = forward.multiply(movement.z * speed).add(right.multiply(movement.x * speed));
+                double vertical = inWater ? -Math.sin(Math.toRadians(rider.getPitch())) * movement.z * speed
+                        : getVelocity().y - .08;
+                setVelocity(horizontal.x, vertical, horizontal.z);
+                move(net.minecraft.entity.MovementType.SELF, getVelocity());
+                setVelocity(getVelocity().multiply(.8));
+            }
+            updateLimbs(false);
+        } else super.travel(input);
+    }
+
+    private static boolean isSwimming(SimplySwordsAxolotlEntity axolotl) {
+        return axolotl.getFluidHeight(net.minecraft.registry.tag.FluidTags.WATER) > SWIM_FLUID_HEIGHT;
+    }
+
+    @Override
+    public boolean canJump() { return isRavager() && !dataTracker.get(WAVE_SPENT); }
+    @Override
+    public void setJumpStrength(int strength) { }
+    @Override
+    public void startJumping(int height) { }
+    @Override
+    public void stopJumping() { }
+
     public SimplySwordsAxolotlEntity(EntityType<? extends AxolotlEntity> entityType, World world) {
         super(entityType, world);
     }
@@ -107,12 +350,53 @@ public class SimplySwordsAxolotlEntity extends AxolotlEntity implements Tameable
         }
 
         this.setInvulnerable(true);
-        if (this.age > (masteryLifespan > 0 ? masteryLifespan : lifespan))
-            this.discard();
+        if (!getWorld().isClient()) {
+            LivingEntity owner = getOwner();
+            if (expiresAt == 0) expiresAt = getWorld().getTime() + Math.max(1, masteryLifespan > 0 ? masteryLifespan : lifespan);
+            if (summonWorld.isEmpty()) summonWorld = getWorld().getRegistryKey().getValue().toString();
+            if (owner == null || !owner.isAlive() || owner.isRemoved() || isExpired()
+                    || !summonWorld.equals(getWorld().getRegistryKey().getValue().toString())) {
+                discard();
+                return;
+            }
+            ChompolotlMasteryManager.register(this, false);
+            LivingEntity rider = getControllingPassenger();
+            if (rider != null && (rider.isRemoved() || !rider.isAlive()
+                    || rider != owner && HelperMethods.checkFriendlyFire(rider, owner))) {
+                removeAllPassengers();
+                rider = null;
+            }
+            if (chargingRider != null && (rider == null || !chargingRider.equals(rider.getUuid())
+                    || net.sweenus.simplyswords.api.IncapacitatingStatusEffectRegistry.isIncapacitated(rider))) {
+                chargingSince = -1;
+                chargingRider = null;
+            }
+            LivingEntity mounted = rider;
+            if (mounted != null) tickDiveEffects((ServerWorld) getWorld());
+            else {
+                wasInWater = isSwimming(this);
+                if (dataTracker.get(WAVE_SPENT)) dataTracker.set(WAVE_SPENT, false);
+            }
+            if (chargingSince >= 0 && mounted != null) {
+                long held = getWorld().getTime() - chargingSince;
+                if (held >= getWaveChargeTicks()) fireChargedWave(mounted);
+                else if (held > 0 && held % 3 == 0) playChargeTick(held);
+            }
+            if (mounted != null) {
+                getNavigation().stop();
+                if (masteryCanAttack && getWorld().getTime() >= nextBite) {
+                    ((ServerWorld) getWorld()).getEntitiesByClass(LivingEntity.class, getBoundingBox().expand(2),
+                            target -> target.isAlive() && target != mounted && target != this && target != owner
+                                    && squaredDistanceTo(target) <= 4 && HelperMethods.checkAbilityTarget(target, owner)).stream()
+                            .min(java.util.Comparator.comparingDouble((LivingEntity target) -> squaredDistanceTo(target))
+                                    .thenComparing(target -> target.getUuid().toString())).ifPresent(this::tryAttack);
+                }
+            }
+        }
 
         super.tick();
 
-        if (!getWorld().isClient() && masteryPounceRange > 0 && masteryPounceInterval > 0
+        if (!getWorld().isClient() && !hasPassengers() && masteryCanAttack && masteryPounceRange > 0 && masteryPounceInterval > 0
                 && age % masteryPounceInterval == 0 && getTarget() != null && getTarget().isAlive()) {
             Vec3d direction = getTarget().getPos().subtract(getPos());
             if (direction.lengthSquared() <= masteryPounceRange * masteryPounceRange
@@ -136,7 +420,7 @@ public class SimplySwordsAxolotlEntity extends AxolotlEntity implements Tameable
                         0.1,
                         0.2
                 );
-                if (masteryAuraRadius > 0 && this.isTouchingWater()
+                if (masteryAuraRadius > 0 && (!isRavager() || hasPassengers()) && this.isTouchingWater()
                         && Config.uniqueEffects.chompolotl.dolphinsGrace && this.age % 20 == 0) {
 
                     double radius = masteryAuraRadius;
@@ -148,7 +432,8 @@ public class SimplySwordsAxolotlEntity extends AxolotlEntity implements Tameable
                     List<PlayerEntity> nearbyPlayers = serverWorld.getEntitiesByClass(
                             PlayerEntity.class,
                             box,
-                            player -> true
+                            player -> getOwner() != null && player.squaredDistanceTo(this) <= radius * radius
+                                    && (player == getOwner() || !HelperMethods.checkFriendlyFire(player, getOwner()))
                     );
 
                     for (PlayerEntity player : nearbyPlayers) {
@@ -162,14 +447,10 @@ public class SimplySwordsAxolotlEntity extends AxolotlEntity implements Tameable
                     owner.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE,
                             masteryRescueDuration, masteryRescueAmplifier,
                             false, true, true));
-                    discard();
-                } else if (masteryEternalAura && masteryAuraRadius > 0 && age % 20 == 0) {
-                    Box aura = getBoundingBox().expand(masteryAuraRadius);
-                    for (PlayerEntity player : serverWorld.getEntitiesByClass(
-                            PlayerEntity.class, aura, player -> true)) {
-                        player.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, 30, 0,
-                                false, false, true));
-                    }
+                    masteryRescue = false;
+                    getNavigation().stop();
+                    setTarget(null);
+                    refreshPositionAndAngles(owner.getX(), owner.getY(), owner.getZ(), getYaw(), getPitch());
                 }
             }
         }
@@ -184,6 +465,10 @@ public class SimplySwordsAxolotlEntity extends AxolotlEntity implements Tameable
 
     @Override
     public ActionResult interactMob(PlayerEntity player, Hand hand) {
+        if (isRavager()) {
+            if (getWorld().isClient()) return ActionResult.SUCCESS;
+            return canAddPassenger(player) && player.startRiding(this) ? ActionResult.SUCCESS : ActionResult.FAIL;
+        }
         if (!this.getWorld().isClient && player instanceof ServerPlayerEntity serverPlayer) {
             UUID ownerUuid = this.getOwnerUuid();
             if (ownerUuid == null || !ownerUuid.equals(serverPlayer.getUuid())) {
@@ -205,71 +490,62 @@ public class SimplySwordsAxolotlEntity extends AxolotlEntity implements Tameable
 
     @Override
     public boolean tryAttack(Entity target) {
-        if (!masteryCanAttack) return false;
-        target.timeUntilRegen = 0;
-        EntityAttributeInstance attackDamage = getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE);
-        double baseDamage = attackDamage == null ? 0 : attackDamage.getBaseValue();
-        double multiplier = 1;
         LivingEntity owner = getOwner();
-        if (target instanceof LivingEntity living && masteryLowHealthBonus > 0
-                && living.getHealth() / living.getMaxHealth() < masteryLowHealthThreshold) {
+        if (!masteryCanAttack || owner == null || !(getWorld() instanceof ServerWorld world)
+                || !(target instanceof LivingEntity living) || !living.isAlive() || target == owner
+                || hasPassenger(target) || !HelperMethods.checkAbilityTarget(living, owner)
+                || world.getTime() < nextBite) return false;
+        nextBite = world.getTime() + 10;
+        double multiplier = 1;
+        if (masteryLowHealthBonus > 0 && living.getHealth() / living.getMaxHealth() < masteryLowHealthThreshold)
             multiplier *= 1 + masteryLowHealthBonus;
+        if (target == ChompolotlMasteryManager.currentTarget(owner)) multiplier *= 1 + masteryCoordinatedBonus;
+        if (masteryPackBonus > 0 && masteryPackRange > 0) {
+            long allies = ChompolotlMasteryManager.owned(owner).stream().filter(other -> other != this
+                    && squaredDistanceTo(other) <= masteryPackRange * masteryPackRange).limit(masteryPackCap).count();
+            multiplier *= 1 + masteryPackBonus * allies;
         }
-        if (owner != null && getWorld() instanceof ServerWorld serverWorld
-                && target == MinionTargeting.getOwnerCurrentTarget(serverWorld, owner)) {
-            multiplier *= 1 + masteryCoordinatedBonus;
+        float strikeDamage = (float) (getAttributeValue(EntityAttributes.GENERIC_ATTACK_DAMAGE) * multiplier);
+        DamageSource source = getDamageSources().mobAttack(this);
+        boolean attacked = HelperMethods.damageThroughIframes(living, source,
+                HelperMethods.applyAbilityDamageEnchantments(world, castingStack, living, source, strikeDamage));
+        if (!attacked) return false;
+        if (masteryCooldownRefundPercent > 0) {
+            int percent = masteryCooldownRefundPercent;
+            masteryCooldownRefundPercent = 0;
+            ChompolotlMasteryManager.firstBite(this, percent);
         }
-        double strikeDamage = baseDamage * multiplier;
-        if (attackDamage != null) attackDamage.setBaseValue(strikeDamage);
-        boolean attacked = super.tryAttack(target);
-        if (attackDamage != null) attackDamage.setBaseValue(baseDamage);
-        if (attacked && target instanceof LivingEntity living && getWorld() instanceof ServerWorld world) {
-            if (owner != null && masteryPackBonus > 0 && masteryPackRange > 0) {
-                long allies = world.getEntitiesByClass(SimplySwordsAxolotlEntity.class,
-                                getBoundingBox().expand(masteryPackRange), other -> other != this
-                                        && owner.getUuid().equals(other.getOwnerUuid()))
-                        .stream().limit(masteryPackCap).count();
-                if (allies > 0) {
-                        living.timeUntilRegen = 0;
-                    living.damage(world.getDamageSources().indirectMagic(this, owner),
-                            (float) strikeDamage * masteryPackBonus * allies);
-                }
-            }
-            if (owner != null && masterySplashMultiplier > 0 && masterySplashRadius > 0) {
-                world.getEntitiesByClass(LivingEntity.class, living.getBoundingBox().expand(masterySplashRadius),
-                                other -> other != living && other != owner && HelperMethods.checkAbilityTarget(other, owner))
-                        .stream().limit(masterySplashCap).forEach(other -> {
-                            other.timeUntilRegen = 0;
-                            other.damage(world.getDamageSources().indirectMagic(this, owner),
-                                    (float) strikeDamage * masterySplashMultiplier);
-                        });
-            }
-            if (owner != null && !living.isAlive() && !masteryChainUsed && masteryChainRange > 0) {
-                world.getEntitiesByClass(LivingEntity.class, living.getBoundingBox().expand(masteryChainRange),
-                                other -> other.isAlive() && HelperMethods.checkAbilityTarget(other, owner))
-                        .stream().min(java.util.Comparator.comparingDouble(this::squaredDistanceTo))
-                        .ifPresent(next -> {
-                            masteryChainUsed = true;
-                            setTarget(next);
-                            masteryLifespan += masteryChainExtension;
-                        });
-            }
-            if (owner != null && !living.isAlive() && masteryVictoryRequired > 0) {
-                net.sweenus.simplyswords.world.NatureSwarmMasteryCombatManager.onAxolotlKill(world, owner,
-                        masteryVictoryRequired, masteryVictoryWindow, masteryVictoryRefund);
-            }
-            if (owner instanceof PlayerEntity player && masteryCooldownRefundPercent > 0) {
-                int total = net.sweenus.simplyswords.api.SimplySwordsAPI.getEffectiveWeaponCooldownTicks(
-                        new net.minecraft.item.ItemStack(ItemsRegistry.CHOMPOLOTL.get()), owner,
-                        Config.uniqueEffects.chompolotl.cooldown * 10);
-                net.sweenus.simplyswords.api.SimplySwordsAPI.reduceWeaponCooldown(player,
-                        new net.minecraft.item.ItemStack(ItemsRegistry.CHOMPOLOTL.get()),
-                        Config.uniqueEffects.chompolotl.cooldown * 10,
-                        total * masteryCooldownRefundPercent / 100);
-                masteryCooldownRefundPercent = 0;
-            }
+        if (masterySplashMultiplier > 0 && masterySplashRadius > 0) {
+            world.getEntitiesByClass(LivingEntity.class, living.getBoundingBox().expand(masterySplashRadius),
+                    other -> other != living && other != owner && other != this && !hasPassenger(other) && other.isAlive()
+                            && other.squaredDistanceTo(living) <= masterySplashRadius * masterySplashRadius
+                            && HelperMethods.checkAbilityTarget(other, owner)).stream()
+                    .sorted(java.util.Comparator.comparingDouble((LivingEntity other) -> other.squaredDistanceTo(living))
+                            .thenComparing(other -> other.getUuid().toString())).limit(masterySplashCap).forEach(other -> {
+                        DamageSource splash = getDamageSources().indirectMagic(this, owner);
+                        HelperMethods.damageThroughIframes(other, splash, HelperMethods.applyAbilityDamageEnchantments(
+                                world, castingStack, other, splash, strikeDamage * masterySplashMultiplier));
+                    });
         }
-        return attacked;
+        return true;
+    }
+
+    public void onMasteryKill(LivingEntity victim) {
+        LivingEntity owner = getOwner();
+        if (owner == null || !(getWorld() instanceof ServerWorld world)) return;
+        if (!masteryChainUsed && masteryChainRange > 0) {
+            world.getEntitiesByClass(LivingEntity.class, victim.getBoundingBox().expand(masteryChainRange),
+                    other -> other != victim && other != this && other.isAlive()
+                            && other.squaredDistanceTo(victim) <= masteryChainRange * masteryChainRange
+                            && HelperMethods.checkAbilityTarget(other, owner)).stream()
+                    .min(java.util.Comparator.comparingDouble((LivingEntity other) -> other.squaredDistanceTo(victim))
+                            .thenComparing(other -> other.getUuid().toString())).ifPresent(next -> {
+                        masteryChainUsed = true;
+                        setTarget(next);
+                        expiresAt += masteryChainExtension;
+                    });
+        }
+        ChompolotlMasteryManager.victory(this, masteryVictoryRequired, masteryVictoryWindow, masteryVictoryRefund);
     }
 
     public boolean mountOnto(ServerPlayerEntity player) {
@@ -304,14 +580,7 @@ public class SimplySwordsAxolotlEntity extends AxolotlEntity implements Tameable
         if (this.ownerUuid == null) {
             return null;
         }
-        try {
-            Entity entity = ((ServerWorld) this.getWorld()).getEntity(this.ownerUuid);
-            if (entity instanceof LivingEntity) {
-                return (LivingEntity) entity;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        if (getWorld() instanceof ServerWorld world && world.getEntity(ownerUuid) instanceof LivingEntity owner) return owner;
         return null;
     }
 
@@ -428,6 +697,16 @@ public class SimplySwordsAxolotlEntity extends AxolotlEntity implements Tameable
         nbt.putInt("MasteryHelpfulDuration", masteryHelpfulDuration);
         nbt.putInt("MasteryHelpfulLockout", masteryHelpfulLockout);
         nbt.putBoolean("MasteryEternalAura", masteryEternalAura);
+        nbt.putLong("ChompExpiresAt", expiresAt);
+        nbt.putString("ChompWorld", summonWorld);
+        nbt.putInt("ChompActiveCooldown", activeCooldown);
+        if (!castingStack.isEmpty()) nbt.put("ChompStack", castingStack.encode(getRegistryManager()));
+        nbt.putBoolean("ChompRavager", isRavager());
+        nbt.putFloat("ChompWaveDamage", waveDamage);
+        nbt.putInt("ChompChargeTicks", getWaveChargeTicks());
+        nbt.putDouble("ChompInterception", interception);
+        nbt.putDouble("ChompInterceptionRange", interceptionRange);
+        nbt.putBoolean("ChompGuardianVersion", true);
         return nbt;
     }
 
@@ -473,6 +752,27 @@ public class SimplySwordsAxolotlEntity extends AxolotlEntity implements Tameable
         masteryHelpfulDuration = nbt.getInt("MasteryHelpfulDuration");
         masteryHelpfulLockout = nbt.getInt("MasteryHelpfulLockout");
         masteryEternalAura = nbt.getBoolean("MasteryEternalAura");
+        expiresAt = nbt.getLong("ChompExpiresAt");
+        summonWorld = nbt.getString("ChompWorld");
+        activeCooldown = nbt.contains("ChompActiveCooldown") ? nbt.getInt("ChompActiveCooldown") : Config.uniqueEffects.chompolotl.cooldown * 10;
+        castingStack = ItemStack.fromNbt(getRegistryManager(), nbt.getCompound("ChompStack")).orElseGet(() -> new ItemStack(ItemsRegistry.CHOMPOLOTL.get()));
+        dataTracker.set(RAVAGER, nbt.getBoolean("ChompRavager"));
+        dataTracker.set(CHARGE_TICKS, Math.max(1, nbt.contains("ChompChargeTicks")
+                ? nbt.getInt("ChompChargeTicks") : DEFAULT_WAVE_CHARGE_TICKS));
+        waveDamage = nbt.getFloat("ChompWaveDamage");
+        if (nbt.contains("ChompInterception")) interception = Math.clamp(nbt.getDouble("ChompInterception"), 0, 1);
+        if (nbt.contains("ChompInterceptionRange")) interceptionRange = Math.max(0, nbt.getDouble("ChompInterceptionRange"));
+        if (masteryEternalAura) {
+            masteryCanAttack = false;
+            masteryCanPerch = false;
+            masteryAuraRadius = 0;
+            masteryShoulderAuraRadius = 0;
+            if (!nbt.contains("ChompGuardianVersion")) {
+                getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH).setBaseValue(70);
+                setHealth(70);
+                masteryLifespan = 600;
+            }
+        }
     }
 
 

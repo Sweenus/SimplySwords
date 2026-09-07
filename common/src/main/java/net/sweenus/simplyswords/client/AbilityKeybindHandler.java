@@ -13,6 +13,9 @@ import net.sweenus.simplyswords.item.interfaces.UniqueWeaponActiveAbility;
 import net.sweenus.simplyswords.network.UseWeaponAbilityPacket;
 import net.sweenus.simplyswords.network.WeaponAbilityKeybindStatePacket;
 import net.sweenus.simplyswords.network.PlayerMovementIntentPacket;
+import net.sweenus.simplyswords.network.ChompolotlWaveChargePacket;
+import net.sweenus.simplyswords.network.ChompolotlMountLeapPacket;
+import net.sweenus.simplyswords.entity.SimplySwordsAxolotlEntity;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.world.PlayerWeaponAbilityKeybindState;
 import org.lwjgl.glfw.GLFW;
@@ -44,6 +47,9 @@ public final class AbilityKeybindHandler {
     private static int lastMovementStrafe;
     private static int lastMovementSentAt = Integer.MIN_VALUE;
     private static boolean sentMovementIntent;
+    private static boolean waveCharging;
+    private static int waveChargeMountId = -1;
+    private static boolean leapPressed;
 
     private AbilityKeybindHandler() {
     }
@@ -75,6 +81,8 @@ public final class AbilityKeybindHandler {
 
     private static void tick(MinecraftClient client) {
         syncMovementIntent(client, client != null && client.currentScreen == null);
+        syncWaveCharge(client, client != null && client.currentScreen == null);
+        syncMountLeap(client, client != null && client.currentScreen == null);
         if (client == null || client.player == null || client.world == null || client.currentScreen != null) {
             releaseIfNeeded(Hand.MAIN_HAND);
             releaseIfNeeded(Hand.OFF_HAND);
@@ -113,6 +121,41 @@ public final class AbilityKeybindHandler {
             lastMovementSentAt = age;
             sentMovementIntent = true;
         }
+    }
+
+    private static void syncWaveCharge(MinecraftClient client, boolean allowInput) {
+        int mountId = ravagerMountId(client);
+        if (waveCharging && waveChargeMountId != mountId) {
+            waveCharging = false;
+            waveChargeMountId = -1;
+        }
+        boolean pressed = mountId != -1 && allowInput && client.options.jumpKey.isPressed();
+        if (pressed && !waveCharging) {
+            new ChompolotlWaveChargePacket(mountId, ChompolotlWaveChargePacket.START).sendToServer();
+            waveCharging = true;
+            waveChargeMountId = mountId;
+        } else if (!pressed && waveCharging) {
+            if (mountId != -1) {
+                new ChompolotlWaveChargePacket(mountId, allowInput
+                        ? ChompolotlWaveChargePacket.RELEASE : ChompolotlWaveChargePacket.CANCEL).sendToServer();
+            }
+            waveCharging = false;
+            waveChargeMountId = -1;
+        }
+    }
+
+    private static void syncMountLeap(MinecraftClient client, boolean allowInput) {
+        int mountId = ravagerMountId(client);
+        boolean pressed = mountId != -1 && allowInput && client.options.sprintKey.isPressed();
+        if (pressed && !leapPressed) new ChompolotlMountLeapPacket(mountId).sendToServer();
+        leapPressed = pressed;
+    }
+
+    private static int ravagerMountId(MinecraftClient client) {
+        return client != null && client.player != null && client.world != null
+                && client.player.getVehicle() instanceof SimplySwordsAxolotlEntity mount
+                && mount.isRavager() && mount.getControllingPassenger() == client.player
+                ? mount.getId() : -1;
     }
 
     private static void tickHand(Hand hand, KeyBinding keyBinding) {

@@ -13,6 +13,9 @@ public final class SimplySwordsNetwork {
     public static final MessageType USE_WEAPON_ABILITY = NETWORK.registerC2S("use_weapon_ability", UseWeaponAbilityPacket::new);
     public static final MessageType WEAPON_ABILITY_KEYBIND_STATE = NETWORK.registerC2S("weapon_ability_keybind_state", WeaponAbilityKeybindStatePacket::new);
     public static final MessageType PLAYER_MOVEMENT_INTENT = NETWORK.registerC2S("player_movement_intent", PlayerMovementIntentPacket::new);
+    public static final MessageType CHOMPOLOTL_WAVE_CHARGE = NETWORK.registerC2S("chompolotl_wave_charge", ChompolotlWaveChargePacket::new);
+    public static final MessageType CHOMPOLOTL_MOUNT_LEAP = NETWORK.registerC2S("chompolotl_mount_leap", ChompolotlMountLeapPacket::new);
+    public static final MessageType CHOMPOLOTL_MOUNT_LAUNCH = NETWORK.registerS2C("chompolotl_mount_launch", ChompolotlMountLaunchPacket::new);
     public static final MessageType SOULSTALKER_LEAP_LAUNCH = NETWORK.registerS2C("soulstalker_leap_launch", SoulstalkerLeapLaunchPacket::new);
 
     private SimplySwordsNetwork() {

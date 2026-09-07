@@ -68,7 +68,7 @@ public final class DevourerMassVisualEntityRenderer extends EntityRenderer<Devou
         }
         float age = entity.age + tickDelta;
         float radius = entity.getCurrentRadius(tickDelta);
-        renderTerrainStain(entity, age, tickDelta, matrices, consumers);
+        if (entity.spreadsGloam()) renderTerrainStain(entity, age, tickDelta, matrices, consumers);
         if (radius <= 0.01F) {
             return;
         }

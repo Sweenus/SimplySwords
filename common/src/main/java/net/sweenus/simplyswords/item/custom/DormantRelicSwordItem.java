@@ -55,6 +55,8 @@ public class DormantRelicSwordItem extends UniqueSwordItem implements UniqueWeap
         if (!attacker.getWorld().isClient() && AwakeningApi.isAbilityUnlocked(stack)) {
             if (net.sweenus.simplyswords.world.LongPathFinalFormsMasteryCombatManager.isSunfire(stack)) {
                 net.sweenus.simplyswords.world.LongPathFinalFormsMasteryCombatManager.sunfireMelee(stack, target, attacker);
+            } else if (net.sweenus.simplyswords.world.LongPathFinalFormsMasteryCombatManager.isHarbinger(stack)) {
+                net.sweenus.simplyswords.world.LongPathFinalFormsMasteryCombatManager.harbingerMelee(stack, target, attacker);
             } else if (isSunForm(stack)
                     && attacker.getRandom().nextInt(100) < AwakeningApi.scaleChance(stack, Config.uniqueEffects.sunfire.chance)) {
                 attacker.getWorld().playSoundFromEntity(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(),
@@ -119,6 +121,9 @@ public class DormantRelicSwordItem extends UniqueSwordItem implements UniqueWeap
             if (LongPathFinalFormsMasteryAbilities.tuning(execution).isEmpty()) UniqueAbilityApi.cancel(execution);
             else standard.configureMastery(execution, context.stack());
             return true;
+        }
+        if (net.sweenus.simplyswords.world.LongPathFinalFormsMasteryCombatManager.isHarbinger(context.stack())) {
+            return HarbingerSwordItem.activateStandard(context);
         }
         if (isHarbingerForm(context.stack())) {
             context.world().playSoundFromEntity(null, context.actor(),

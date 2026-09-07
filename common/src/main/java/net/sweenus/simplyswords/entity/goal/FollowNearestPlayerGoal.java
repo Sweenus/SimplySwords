@@ -26,7 +26,7 @@ public class FollowNearestPlayerGoal extends Goal {
 
     @Override
     public boolean canStart() {
-        if (axolotl.getWorld() instanceof ServerWorld) {
+        if (!axolotl.hasPassengers() && axolotl.getWorld() instanceof ServerWorld) {
             LivingEntity owner = axolotl.getOwner();
             if (owner != null && owner.isAlive() && axolotl.squaredDistanceTo(owner) <= searchRadius * searchRadius) {
                 this.owner = owner;
@@ -38,7 +38,7 @@ public class FollowNearestPlayerGoal extends Goal {
 
     @Override
     public boolean shouldContinue() {
-        return this.owner != null
+        return !axolotl.hasPassengers() && this.owner != null
                 && this.owner.isAlive()
                 && this.axolotl.squaredDistanceTo(this.owner) > (stopDistance * stopDistance);
     }
